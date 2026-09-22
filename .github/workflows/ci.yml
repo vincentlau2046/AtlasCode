@@ -1,0 +1,37 @@
+# AtlasCode CI 管道（B-fix 收 H1：四件套从手工纪律落管道）。
+# 仓库当前无 remote —— 本文件是前置落盘，remote 建立后即刻生效。
+# 门 = 四件套 + 防腐门（tests/ci/anti-stub + capability-matrix，随 bun test 自动跑）。
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # 四件套（typecheck / lint / test（含 tests/ci 防腐门）/ build）
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Test (unit + ci gates)
+        run: bun test --isolate tests/
+
+      - name: Build
+        run: bun run build
