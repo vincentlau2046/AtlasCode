@@ -12,13 +12,22 @@
 import * as fs from 'fs'
 import {
   mkdir as mkdirPromise,
+  open as openPromise,
   readdir as readdirPromise,
   readFile as readFilePromise,
   stat as statPromise,
+  type FileHandle,
 } from 'fs/promises'
 
 /**
  * 最小 FS 操作集（跨域共享，C-Deep 按需加法扩展）。
+ *
+ * C-Deep 切片 1 加法（executor Shell.ts 消费；防腐口径不变：fs 抽象单一
+ * 事实源在 shared，executor 不直连 node:fs）：
+ * - mkdir 加 mode 参数（沙箱临时目录 0o700；recursive + EEXIST 容错语义不变）
+ * - realpathSync（setCwd 符号链接解析 + cwd 消失恢复，旧仓 fsOperations 同名原语）
+ * - open（file 模式 spawn fd：O_WRONLY|O_CREAT|O_APPEND|O_NOFOLLOW）
+ * - unlinkSync（cwd 跟踪临时文件清理，ENOENT 容错在调用方）
  */
 export type FsOperations = {
   cwd(): string
@@ -28,10 +37,13 @@ export type FsOperations = {
     path: string,
     options?: { recursive?: boolean },
   ): Promise<fs.Dirent[]>
-  mkdir(path: string): Promise<void>
+  mkdir(path: string, options?: { mode?: number }): Promise<void>
   readFile(path: string, options: { encoding: BufferEncoding }): Promise<string>
   readFileSync(path: string, options: { encoding: BufferEncoding }): string
   statSync(path: string): fs.Stats
+  realpathSync(path: string): string
+  open(path: string, flags: number): Promise<FileHandle>
+  unlinkSync(path: string): void
 }
 
 export const NodeFsOperations: FsOperations = {
@@ -51,9 +63,9 @@ export const NodeFsOperations: FsOperations = {
     return readdirPromise(fsPath, { withFileTypes: true, ...options })
   },
 
-  async mkdir(dirPath) {
+  async mkdir(dirPath, options) {
     try {
-      await mkdirPromise(dirPath, { recursive: true })
+      await mkdirPromise(dirPath, { recursive: true, mode: options?.mode })
     } catch (e) {
       // Bun/Windows: recursive:true 在带 FILE_ATTRIBUTE_READONLY 位的目录上
       // 抛 EEXIST（Bun directoryExistsAt 误判 DIRECTORY+READONLY 非目录）。
@@ -72,6 +84,18 @@ export const NodeFsOperations: FsOperations = {
 
   statSync(fsPath) {
     return fs.statSync(fsPath)
+  },
+
+  realpathSync(fsPath) {
+    return fs.realpathSync(fsPath)
+  },
+
+  async open(fsPath, flags) {
+    return openPromise(fsPath, flags)
+  },
+
+  unlinkSync(fsPath) {
+    fs.unlinkSync(fsPath)
   },
 }
 

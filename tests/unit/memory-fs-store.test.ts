@@ -23,6 +23,10 @@ function makeMock(overrides: Partial<FsOperations> = {}): FsOperations {
     readFile: async () => "",
     readFileSync: () => "",
     statSync: () => ({ mtimeMs: 0 } as never),
+    // C-Deep 切片 1 加法原语（memory 域不消费，mock 恒等/空实现）
+    realpathSync: (p) => p,
+    open: async () => ({} as never),
+    unlinkSync: () => {},
     ...overrides,
   }
 }
