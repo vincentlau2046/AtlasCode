@@ -4,7 +4,7 @@
  * charter L630: test gate = 测试框架 smoke 绿 + shared 纯函数测试（若有）。
  * A 波唯一实装代码 = shared/feature.ts，此处验其语义 + import 走门面（STR-1）。
  */
-import { describe, test, expect, beforeEach, afterEach } from "bun:test"
+import { describe, test, expect, afterEach } from "bun:test"
 import { feature, FEATURE_ON_BY_DEFAULT } from "../src/shared"
 
 describe("smoke: 测试框架加载", () => {
