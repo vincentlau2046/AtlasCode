@@ -586,3 +586,27 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 **门同步（同提交，不留无门窗口）**：4 新域目录 mkdir 即触发 anti-stub CDEEP_DOMAINS 自动纳扫 → 各域骨架文件（<5 实质行）须同提交登记 STUB_REGISTRY（注明解锁波次=本切片填实即销）；capability-matrix 加 4 域行（task 真核心 done 指向 func / bootstrap 适配器 done / permissions 薄骨架 done / hooks 薄骨架+斩断 done，proof 随 T7 测试文件定）。
 
 **切片 3 实施任务清单**：T1 task 域骨架 + Task.ts 随迁（seed）→ T2 TaskOutput 真核心（spill/clear/delete）→ T3 diskOutput（getProjectTempDir 注入 + 5GB cap + executor 残余接回 L280/L324）→ T4 bootstrap 域（state 真子集 + cwd）→ T5 permissions 薄骨架（PermissionRule + filesystem 最小面 + no-op-allow）→ T6 hooks 薄骨架（runHooks + 斩断 2 边 + fileChangedWatcher 注入）→ T7 测试（unit 零磁盘 + func 真盘按上 H6 清单）→ T8 门同步（STUB_REGISTRY + 矩阵 4 行 + docs + memory）。
+
+### 8.15 C-Deep 切片 3 执行记录 + 偏差修订（T1–T3 完成 2026-09-22，T5–T8 进行中）
+
+执行序实际落地（T4 bootstrap 折入 T1 同批两提交）：T1 task 种子 + bootstrap 域（`2881af4` task / `4aa7190` bootstrap）→ T2 TaskOutput 真核心（`439045b`）→ T3 diskOutput 填实 + executor watchdog 接回（`fc94f5b` task 含 shared/constants.ts / `5d9bc65` executor）。
+
+**偏差登记（复审勿当遗漏重提）：**
+
+- **D11（T1，anti-stub 门① STR-1 门面豁免）**：实质内容全为跨模块 re-export 语句（`export * from` / `export {…} from`）的 <5 实质行文件 = STR-1 域门面，不判 hollow（委托即门面职责，空洞只会活在 re-export 目标模块，同扫描范围）；mutation 验证（植入空 `export {}` 文件 + 非 re-export 薄文件 → 门红，移除 → 绿）。
+- **STUB_REGISTRY T1 加/T2 除（漂移处理先例）**：T1 登记 diskOutput.ts（3 实质行 fail-fast stub，门① 空壳与登记同提交）；T2 扩为 ≥5 实质行 fail-fast 面（getTaskOutputPath + DiskTaskOutput 4 方法全抛错）→ 条目移除。口径：**fail-fast 抛错面 ≠ hollow 向量（loud ≠ hollow，同 port 注入窗口 idiom）**，真实现跟踪 = 文件头注 + 任务清单 T3 + T7 H6 ②③ + 门③ wave-c tag 清零兜底。注册表现 = 清零。
+- **D12（T3，cap 覆写 seam）**：DiskTaskOutput ctor 新增可选 `maxBytes`（默认 = shared MAX_TASK_OUTPUT_BYTES 5GB，默认行为 == 旧仓）——T7 H6③ 同构边界 func 测试需小值触发路径，不实际写 5GB（Review peer 口径：有覆写路径则双向断言——小值触发 / 未设 → 默认 5GB 语义）；TaskOutput ctor maxMemory 先例同 idiom。
+- **D13（T3，显示串推导）**：旧仓 MAX_TASK_OUTPUT_BYTES_DISPLAY 硬编码 '5GB' 字面删除，两消费点（diskOutput 截断标记 / executor killedForSize stderr 前缀）改经 shared formatFileSize(maxBytes) 推导（默认 → '5GB' 与旧仓字面一致；自定义值随值缩放，优于旧仓硬编码）。
+- **logError 映射（T3）**：旧仓 logError（utils/log.ts，不随迁——telemetry/logging 归 engine 波）7 调用点 → shared logForDebugging(String(e), {level:'error'})（logging port 未定案前 no-op，C-4 口径，定案后零调用点改动）。
+- **常量单一事实源拆分（T3）**：旧仓 cap 常量在 task/diskOutput.ts、轮询间隔在 executor/ShellCommand.ts → 新仓 cap 落 `shared/constants.ts`（task cap + executor watchdog 跨域共线，L3 四域互不 import）；SIZE_WATCHDOG_INTERVAL_MS 单消费者（executor）留域内不随下沉。
+- **域归属复认（T2，切片 1 已裁定）**：outputLimits = task 域策略（ShellCommand 头注 16）；fsRange 域内随迁（memory 域 readFileInRange 是另一套 FileTooLargeError 语义族，勿混；第二域需 → 升 shared，C1 R1 裁定）。
+- **TaskOutput clear() 注释勘误（T2）**：executor 端口 Handle clear() 注释"清缓冲 + 删文件"不准——旧仓语义 = 清缓冲 + cancel 磁盘 + 注销 registry，**不** unlink（删文件走 deleteOutputFile）；以实现为准。
+- **executor ctor 参位（T3）**：旧仓 6 参 ctor 位 6 maxOutputBytes → 新仓 5 参（shouldAutoBackground/onTimeout 归 engine 波未随迁）；wrapSpawn 同步可选透传。
+
+**后续步骤审视（T5–T8 无偏差，3 补注）：**
+
+1. T5 permissions 不变——filesystem 最小面已含 getProjectTempDir（diskOutput 注入窗口的消费方）；组合根接线归 B6-func 波。
+2. T7 H6③ 落地路径确认：`new DiskTaskOutput(taskId, smallMaxBytes)`（task 侧 seam）+ executor ctor `maxOutputBytes` 参数（watchdog 侧 seam）双覆写路径就位；func 测试先 `setDiskOutputEnv({ getProjectTempDir: () => tmpdir, getSessionId: () => 'test' })`，teardown `resetDiskOutputEnv()` + `_clearOutputsForTest()`（后者须先于 rmSync，防 async-ENOENT flake，旧仓同口径）。
+3. **B6-func 前置清单补 1 项**：组合根须调 `setDiskOutputEnv`（task 磁盘层跨域边；pipe 模式 TaskOutput ctor 无条件调 getTaskOutputPath，hooks createHookOutput 工厂同受影响）——在 D10 的 4+5 之上补注，T8 门同步时与 test-strategy §6 前置清单一并落。
+
+**T3 验收**：四件套 tsc 0 / lint 0 / build ✓ / 409 pass 0 fail 33 文件 741 expect（含 anti-stub 门，基线零变动）；diskOutput 实质行 diff 对旧仓 451L = 仅 D12/D13/logError 映射/注入窗/常量迁移五类偏差，零未登记漂移；executor 三处残余标记（头注/L280/L324）全部接回。
