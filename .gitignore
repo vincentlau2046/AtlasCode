@@ -1,0 +1,19 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# AtlasCode runtime state (not the repo's; the product's ~/.atlas)
+.atlas/
+
+# Test / build artifacts
+coverage/
+.bun-test-cache/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Job-local scratch (never committed)
+.scratch/

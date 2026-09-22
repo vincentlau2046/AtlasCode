@@ -1,0 +1,7 @@
+# Bun loader config. Force the `text` loader so `.md` / `.py` imports inline
+# as raw strings (Bun's default transpile mangles markdown: `## Goal` → `<h2>`,
+# frontmatter `---` → `<hr />`). Applies to dev/test/build uniformly.
+# Consumers: skill files (ascend 知识层 + 运行时 skill) import .md/.py as raw text.
+[loader]
+".md" = "text"
+".py" = "text"
