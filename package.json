@@ -13,7 +13,7 @@
   "scripts": {
     "check": "bun run --check src/atlascode/cli.ts",
     "test": "bun test --isolate tests/",
-    "build": "bun build src/atlascode/ui/main.tsx --outdir dist --target node",
+    "build": "bun build src/atlascode/cli.ts --outfile dist/cli.js --target node",
     "dev": "bun run --watch src/atlascode/launcher.ts",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
