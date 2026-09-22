@@ -11,6 +11,9 @@
 // A 波：feature flag
 export { feature, FEATURE_ON_BY_DEFAULT } from "./feature"
 
+// B 波 S1：env 解析纯函数（四域 config.ts 共用）
+export { parseBoolEnv, parseBoundedIntEnv } from "./env"
+
 // B 波契约冻结：纯类型骨架（atlas/message/SystemPrompt/ThinkingConfig/Effort/Tool）
 export type * from "./types"
 
