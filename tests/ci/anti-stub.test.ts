@@ -51,14 +51,12 @@ const STUB_REGISTRY: ReadonlyArray<{
   // C-Deep 切片 1（executor 纵切）销 4 条；切片 2（sandbox 纵切）销最后 2 条
   // （createSandboxManager 工厂 + ripgrep 搜索后端，裁剪版填实）→ 注册表清零。
   // 裁剪残余清单见各文件头注释（非"空壳"，不登记）。
-  // 切片 3 T1（task 种子）重添 1 条：diskOutput fail-fast stub，T3 填实即销
-  // （门① 要求空壳文件与登记同提交，不留无门窗口）。
-  {
-    file: 'src/task/diskOutput.ts',
-    reason:
-      'C-Deep 切片 3 T1 种子：getTaskOutputPath fail-fast stub（task.ts createTaskStateBase 的 outputFile 消费）；T3 填实 diskOutput（getProjectTempDir 注入 + 5GB cap + executor 残余接回 L280/L324）',
-    unlock: 'C-Deep 切片 3 T3',
-  },
+  // 切片 3 T1（task 种子）曾登记 src/task/diskOutput.ts（3 实质行 fail-fast
+  // stub，门① 要求空壳与登记同提交）；T2 起扩为 fail-fast 面（getTaskOutputPath
+  // + DiskTaskOutput 4 方法全抛错，实质行 ≥5 非空壳）→ 本条目 T2 移除。
+  // 口径：fail-fast 抛错面 ≠ 空壳向量（loud ≠ hollow，同 port 注入窗口
+  // fail-fast idiom）；T3 真实现跟踪 = 文件头注 + 任务清单 T3 + T7 H6 断言
+  // ②③ + 门③ wave-c tag 清零兜底。
 ]
 
 /** 剥掉注释/空行后的实质内容行（substantiveLines 与门面豁免共用） */
