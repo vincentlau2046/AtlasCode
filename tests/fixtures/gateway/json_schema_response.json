@@ -1,0 +1,26 @@
+{
+  "id": "as-hce46z39ga",
+  "object": "chat.completion",
+  "created": 1790063880,
+  "model": "deepseek-v4-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"name\":\"ascend-gelu-operator\"}",
+        "reasoning_content": "我们根据对话主题生成一个短横线命名，例如\"ascend-gelu-operator\""
+      },
+      "finish_reason": "stop",
+      "flag": 0
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 213,
+    "completion_tokens": 32,
+    "total_tokens": 245,
+    "completion_tokens_details": {
+      "reasoning_tokens": 20
+    }
+  }
+}

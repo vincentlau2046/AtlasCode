@@ -1,0 +1,2038 @@
+[
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "",
+          "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": "The"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " user said"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " \"你好\" which is"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " \"Hello\" in Chinese"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": ". They"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": "'re greeting me."
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " I should respond in"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " Chinese since they"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " initiated in Chinese, and"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " introduce myself as Atlas,"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " the coding agent for Huawei"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " Ascend NPU operator"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " development. I should"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " keep"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " it friendly and offer"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": " my capabilities"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "reasoning_content": ".\n"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "你好"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "！我是 **Atlas**"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "，专注于华为昇"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "腾 NPU（"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "C"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "ANN 8.x）"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "算子开发的"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "编码"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "代理"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "，面向"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "一线"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "交付工程师（FDE"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "）。"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n\n我可以"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "帮你完成"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "以下工作：\n\n|"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " 类别"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " | 能力 |\n"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "|------|------|"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n| **算"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "子设计"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "** | 解析算"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "子 Spec"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、规划"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " Tiling 策略"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "生成 T"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "iling +"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " Kernel"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " 代码 |\n|"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " **编译调试"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "** | 调用"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " CANN 工具"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "链编译、收集"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "编译"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "/"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "运行时"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "错误并"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "分类 |"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n| **验证"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "测试** | 构造"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " Golden 用例"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、在"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "真实硬件上跑精度"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "比对"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " |"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n| **性能调"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "优** | 运行"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " Benchmark"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、解析"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " Profiling"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " 数据"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、给出"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "优化建议 |\n|"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " **模型转换** |"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " ONNX →"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " "
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "昇腾模型"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "转换、图"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "优化 |"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n| **数据准备"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "** | 生成"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "测试"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "数据集"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、预处理"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "校验"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " |\n\n你可以"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "直接告诉我：\n\n"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "- 要"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "开发"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "/调试"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "的"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "算"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "子名称（如"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": " `Mat"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "Mul`、`Soft"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "max`、自定义"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "算子等"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "）\n- 当前"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "遇到的问题"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "（编译"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "报错、精度"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "不对"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "、性能"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "不达标……"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "）\n- 或者"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "丢"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "一份"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "算"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "子 Spec / 代码"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "片段给我"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "，我来"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "分析"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "\n\n"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "请问"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "今天"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "需要"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "处理"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {
+          "content": "什么？"
+        },
+        "finish_reason": null,
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [
+      {
+        "delta": {},
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "usage": null
+  },
+  {
+    "choices": [],
+    "created": 1790063878,
+    "id": "chatcmpl-bf8e6017e2fdeb6a",
+    "model": "Qwen38-27B-TXT",
+    "object": "chat.completion.chunk",
+    "timings": {
+      "cache_n": 0,
+      "draft_n": 456,
+      "draft_n_accepted": 207,
+      "predicted_ms": 2083.7630489999997,
+      "predicted_n": 320,
+      "predicted_per_second": 153.08842344290943,
+      "predicted_per_token_ms": 6.532172567398118,
+      "prompt_ms": 67.343,
+      "prompt_n": 145,
+      "prompt_per_second": 2153.1562300461815,
+      "prompt_per_token_ms": 0.4644344827586207
+    },
+    "usage": {
+      "completion_tokens": 320,
+      "completion_tokens_details": {
+        "reasoning_tokens": 60
+      },
+      "prompt_tokens": 145,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "total_tokens": 465
+    }
+  }
+]

@@ -1,0 +1,5 @@
+[
+  { "id": "chatcmpl-a", "choices": [ { "delta": { "content": "Hel" } } ] },
+  { "id": "chatcmpl-a", "choices": [ { "delta": { "content": "lo" } } ] },
+  { "id": "chatcmpl-a", "choices": [ { "delta": {}, "finish_reason": "stop" } ], "usage": { "prompt_tokens": 5, "completion_tokens": 3 } }
+]

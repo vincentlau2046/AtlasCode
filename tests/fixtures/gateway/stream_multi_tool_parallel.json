@@ -1,0 +1,42 @@
+[
+  {
+    "id": "m",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_a",
+              "function": {
+                "name": "Bash",
+                "arguments": "{\"command\": \"git status\"}"
+              }
+            },
+            {
+              "index": 1,
+              "id": "call_b",
+              "function": {
+                "name": "Glob",
+                "arguments": "{\"pattern\": \"*.ts\"}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "m",
+    "choices": [
+      {
+        "delta": {},
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 10,
+      "completion_tokens": 5
+    }
+  }
+]

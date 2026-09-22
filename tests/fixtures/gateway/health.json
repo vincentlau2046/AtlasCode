@@ -1,0 +1,5 @@
+{
+  "id": "chatcmpl-h", "model": "iff-small",
+  "choices": [ { "message": { "role": "assistant", "content": "pong" }, "finish_reason": "stop" } ],
+  "usage": { "prompt_tokens": 2, "completion_tokens": 1 }
+}

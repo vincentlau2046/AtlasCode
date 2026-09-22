@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "name": "stream_split_boundary",
+    "fixture": "stream_split_boundary.json",
+    "source": "旧仓 a8af45b gateway.test.ts",
+    "capturedAt": "2026-09-22T07:36:05.561Z",
+    "description": "黄金参照：callModel() 完整产出（A 波留档三件套, C 波 B9 双跑 diff 对照端）"
+  },
+  "results": [
+    {
+      "type": "assistant",
+      "uuid": "99efdaec-2867-48dc-a714-8c811f8b26d5",
+      "timestamp": "2026-09-22T07:36:05.561Z",
+      "message": {
+        "id": "50c9a3f1-eb76-4c02-900f-4258abeb575f",
+        "container": null,
+        "model": "iff-small",
+        "role": "assistant",
+        "stop_reason": "tool_use",
+        "stop_sequence": "",
+        "type": "message",
+        "usage": {
+          "input_tokens": 7,
+          "output_tokens": 5,
+          "cache_read_input_tokens": 0,
+          "cache_creation_input_tokens": 0
+        },
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "c1",
+            "name": "Bash",
+            "input": {
+              "command": "ls -la"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

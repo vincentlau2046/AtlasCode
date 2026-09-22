@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "name": "non_streaming_tool",
+    "fixture": "non_streaming_tool.json",
+    "source": "旧仓 a8af45b gateway.test.ts",
+    "capturedAt": "2026-09-22T07:36:05.562Z",
+    "description": "黄金参照：callModel() 完整产出（A 波留档三件套, C 波 B9 双跑 diff 对照端）"
+  },
+  "results": {
+    "type": "assistant",
+    "uuid": "3095cac2-1b3e-4a89-ad8f-5276a96fc53e",
+    "timestamp": "2026-09-22T07:36:05.562Z",
+    "message": {
+      "id": "68a24987-a307-4c09-8f0f-87c11d9e68d7",
+      "container": null,
+      "model": "iff-small",
+      "role": "assistant",
+      "stop_sequence": "",
+      "type": "message",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_n",
+          "name": "Edit",
+          "input": {
+            "file_path": "f.ts"
+          }
+        }
+      ],
+      "stop_reason": "tool_use",
+      "usage": {
+        "input_tokens": 3,
+        "output_tokens": 2,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0
+      }
+    }
+  }
+}

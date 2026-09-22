@@ -1,0 +1,70 @@
+[
+  {
+    "id": "i",
+    "choices": [
+      {
+        "delta": {
+          "content": "Let me "
+        }
+      }
+    ]
+  },
+  {
+    "id": "i",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_9",
+              "function": {
+                "name": "Grep"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "i",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "function": {
+                "arguments": "{\"pattern\": \"foo\"}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "i",
+    "choices": [
+      {
+        "delta": {
+          "content": " check."
+        }
+      }
+    ]
+  },
+  {
+    "id": "i",
+    "choices": [
+      {
+        "delta": {},
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 8,
+      "completion_tokens": 6
+    }
+  }
+]

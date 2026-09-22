@@ -1,0 +1,26 @@
+{
+  "id": "chatcmpl-nt2",
+  "model": "iff-small",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_n",
+            "function": {
+              "name": "Edit",
+              "arguments": "{\"file_path\": \"f.ts\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 3,
+    "completion_tokens": 2
+  }
+}

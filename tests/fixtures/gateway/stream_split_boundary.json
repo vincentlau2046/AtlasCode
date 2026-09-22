@@ -1,0 +1,67 @@
+[
+  {
+    "id": "b",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "c1",
+              "function": {
+                "name": "Bash"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "b",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "function": {
+                "arguments": "{\"command\":"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "b",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "function": {
+                "arguments": "\"ls -la\"}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "b",
+    "choices": [
+      {
+        "delta": {},
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 7,
+      "completion_tokens": 5
+    }
+  }
+]

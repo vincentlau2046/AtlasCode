@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "name": "json_schema_response",
+    "fixture": "json_schema_response.json",
+    "source": "旧仓 a8af45b agent-loop.test.ts / gateway-json-schema.test.ts（live gateway 录制）",
+    "capturedAt": "2026-09-22T07:59:38.028Z",
+    "description": "黄金参照：callModel()/modelProvider.chat() 完整产出（A 波留档三件套, C 波 B9 双跑 diff 对照端）"
+  },
+  "results": {
+    "type": "assistant",
+    "uuid": "073c3c9e-a16e-4da9-9d89-00d9c01e7382",
+    "timestamp": "2026-09-22T07:59:38.027Z",
+    "message": {
+      "id": "8b36cc71-c033-4740-9549-4bb9fb7bdfe9",
+      "container": null,
+      "model": "iff-small",
+      "role": "assistant",
+      "stop_sequence": "",
+      "type": "message",
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "我们根据对话主题生成一个短横线命名，例如\"ascend-gelu-operator\"",
+          "signature": "iff-gateway"
+        },
+        {
+          "type": "text",
+          "text": "{\"name\":\"ascend-gelu-operator\"}"
+        }
+      ],
+      "stop_reason": "end_turn",
+      "usage": {
+        "input_tokens": 213,
+        "output_tokens": 32,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0
+      }
+    }
+  }
+}

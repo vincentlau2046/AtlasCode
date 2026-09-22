@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "health_check",
+    "fixture": "health.json",
+    "source": "旧仓 a8af45b gateway.test.ts",
+    "capturedAt": "2026-09-22T07:36:05.562Z",
+    "description": "黄金参照：callModel() 完整产出（A 波留档三件套, C 波 B9 双跑 diff 对照端）"
+  },
+  "results": {
+    "ok": true,
+    "model": "iff-small",
+    "latencyMs": 0
+  }
+}

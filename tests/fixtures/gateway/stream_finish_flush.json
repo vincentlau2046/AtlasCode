@@ -1,0 +1,5 @@
+[
+  { "id": "chatcmpl-f", "choices": [ { "delta": { "content": "part1 " } } ] },
+  { "id": "chatcmpl-f", "choices": [ { "delta": { "content": "part2" } } ] },
+  { "id": "chatcmpl-f", "choices": [ { "delta": {}, "finish_reason": "stop" } ], "usage": { "prompt_tokens": 4, "completion_tokens": 2 } }
+]

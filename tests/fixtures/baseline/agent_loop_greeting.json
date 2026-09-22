@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "name": "agent_loop_greeting",
+    "fixture": "agent_loop_greeting.json",
+    "source": "旧仓 a8af45b agent-loop.test.ts / gateway-json-schema.test.ts（live gateway 录制）",
+    "capturedAt": "2026-09-22T07:59:38.027Z",
+    "description": "黄金参照：callModel()/modelProvider.chat() 完整产出（A 波留档三件套, C 波 B9 双跑 diff 对照端）"
+  },
+  "results": [
+    {
+      "type": "assistant",
+      "uuid": "eb727312-261c-4b38-8ef0-c8d5eced330b",
+      "timestamp": "2026-09-22T07:59:38.027Z",
+      "message": {
+        "id": "baae0108-a18d-42ac-a1b9-af20eb2325ac",
+        "container": null,
+        "model": "iff-small",
+        "role": "assistant",
+        "stop_reason": "end_turn",
+        "stop_sequence": "",
+        "type": "message",
+        "usage": {
+          "input_tokens": 145,
+          "output_tokens": 320,
+          "cache_read_input_tokens": 0,
+          "cache_creation_input_tokens": 0
+        },
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "The user said \"你好\" which is \"Hello\" in Chinese. They're greeting me. I should respond in Chinese since they initiated in Chinese, and introduce myself as Atlas, the coding agent for Huawei Ascend NPU operator development. I should keep it friendly and offer my capabilities.\n",
+            "signature": "iff-gateway"
+          },
+          {
+            "type": "text",
+            "text": "你好！我是 **Atlas**，专注于华为昇腾 NPU（CANN 8.x）算子开发的编码代理，面向一线交付工程师（FDE）。\n\n我可以帮你完成以下工作：\n\n| 类别 | 能力 |\n|------|------|\n| **算子设计** | 解析算子 Spec、规划 Tiling 策略、生成 Tiling + Kernel 代码 |\n| **编译调试** | 调用 CANN 工具链编译、收集编译/运行时错误并分类 |\n| **验证测试** | 构造 Golden 用例、在真实硬件上跑精度比对 |\n| **性能调优** | 运行 Benchmark、解析 Profiling 数据、给出优化建议 |\n| **模型转换** | ONNX → 昇腾模型转换、图优化 |\n| **数据准备** | 生成测试数据集、预处理校验 |\n\n你可以直接告诉我：\n\n- 要开发/调试的算子名称（如 `MatMul`、`Softmax`、自定义算子等）\n- 当前遇到的问题（编译报错、精度不对、性能不达标……）\n- 或者丢一份算子 Spec / 代码片段给我，我来分析\n\n请问今天需要处理什么？"
+          }
+        ]
+      }
+    }
+  ]
+}

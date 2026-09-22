@@ -1,0 +1,34 @@
+[
+  {
+    "id": "s",
+    "choices": [
+      {
+        "delta": {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_1",
+              "function": {
+                "name": "Read",
+                "arguments": "{\"file_path\": \"/x\"}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "s",
+    "choices": [
+      {
+        "delta": {},
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 10,
+      "completion_tokens": 4
+    }
+  }
+]
