@@ -58,6 +58,15 @@ export default tseslint.config(
       },
     },
     rules: {
+      // Claude Code fork 风格：tsconfig noImplicitAny=false, 全仓 SDK option 类型
+      // 广用 any（旧仓 879 调用点）。no-explicit-any 与基座风格冲突, 关闭。
+      // 边界/门面/副作用规则仍全 error（这些是 AtlasCode 架构核心）。
+      "@typescript-eslint/no-explicit-any": "off",
+      // _ 前缀 = 故意未用（TS 标准约定，no-op stub / API 兼容保留参数）
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
       // ── DEP · 依赖方向（lint 桶, A 波全 error）──
       "boundaries/element-types": [
         "error",
