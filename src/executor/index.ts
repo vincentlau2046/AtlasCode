@@ -7,9 +7,11 @@
  * re-export: types（ExecResult/Executor/ExecError/AscendConfig 等）/
  *           toolchain（NpuToolchain + applyToolchainPlaceholders）/
  *           config（createShellExecutorConfig + ShellExecutorConfig）/
- *           C2 三 port（TaskOutput/bootstrapState/ExecutorSandbox + 注入窗口）。
+ *           C2 三 port（TaskOutput/bootstrapState/ExecutorSandbox + 注入窗口）/
+ *           C-Deep 切片 1（ShellExecutor + shell 执行核心 + bash provider）。
  *
- * ShellExecutor 实现待 Shell.ts 内部迁移完成（见 B 波 S1 报告）。
+ * 命名消歧：types.ExecResult（Executor 统一结果）vs shell 执行链的
+ * ShellExecResult（ShellCommand.result，code/interrupted 口径）——门面别名导出。
  * AscendExecutor 属 ascend 域包，不在此门面。
  */
 export {
@@ -46,3 +48,23 @@ export {
   getExecutorSandboxPort,
   resetExecutorSandboxPort,
 } from "./ports/sandbox"
+
+// C-Deep 切片 1：shell 执行核心（bash-only 裁剪版）+ ShellExecutor 统一接口实现
+export { ShellExecutor } from "./ShellExecutor"
+export {
+  exec as execShell,
+  setCwd,
+  findSuitableShell,
+  type ExecOptions as ShellExecOptions,
+  type ExecResult as ShellExecResult,
+  type ShellCommand,
+} from "./shell/Shell"
+export {
+  createBashShellProvider,
+  DEFAULT_HOOK_SHELL,
+  SHELL_TYPES,
+  type BuildExecCommandOptions,
+  type ExecCommandBuild,
+  type ShellProvider,
+  type ShellType,
+} from "./shell/shellProvider"
