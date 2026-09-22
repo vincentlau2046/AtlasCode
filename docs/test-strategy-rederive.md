@@ -65,11 +65,12 @@
 顺序（功能纵切优先，见 execution-strategy §8）：
 1. C1 叶子下沉 → 每叶子带单测（移植旧仓 unit 覆盖）。
 2. C2-executor-ports（TaskOutput/bootstrap-state/sandbox 注入 3 port）→ 每 port 一个 fake + **port 契约测试**。✅ 2026-09-22 完成（6343d4a：3 port + tests/fixtures/executor-port-fakes.ts 三 fake + 3 契约测试文件 15 断言）。
-3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。2026-09-22 修订（execution-strategy §8.9，C2-复审后）：切 **3 纵切片**（切片 1 executor 裁剪版 bash-only / 切片 2 sandbox / 切片 3 4 新域骨架+真端口适配器同提交登记）；B6-func 加 3 端口注入前置清单（fail-fast 运行时后果）；hooks 域跨域边（经 ShellCommand.taskOutput 穿透）建骨架时斩断。
+3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。2026-09-22 修订（execution-strategy §8.9，C2-复审后）：切 **3 纵切片**（切片 1 executor 裁剪版 bash-only / 切片 2 sandbox / 切片 3 4 新域骨架+真端口适配器同提交登记）；B6-func 加 3 端口注入前置清单（fail-fast 运行时后果）；hooks 域跨域边（经 ShellCommand.taskOutput 穿透）建骨架时斩断。**切片 1 已完成（cf7d17c..c1cabc2，执行记录见 execution-strategy §8.10）**：17 unit（shellProvider 6 + ShellCommand 11，fake ChildProcess + FileTaskOutputFake 纯内存，unit 纪律不破）+ 5 func（真 spawn + 真磁盘 tmpdir）；门同步（STUB_REGISTRY 6→2 + 矩阵 executor 行翻 done）。偏差修订 6 项（D1-D6 落 §8.10）：切片 2 同式裁剪裁定（bwrap 主路径）/ 切片 3 task 域改"裁剪版真核心"（旧 task 面 1223L 基建，非薄骨架）/ **tests/func 正式层化**（真 I/O 层：unit 零磁盘纪律之上的第二层，CI `bun test --isolate tests/` 递归自动跑，已验）。
 4. **★ B6-func 功能门**：真实跑一条 shell 命令 + 建一个 sandbox manager（mock 后端）+ mock 一次 completion + 写读 memory —— **证明迁移链真能跑，先于 engine**。
 5. 再 C1/C2 engine 212 叶子 + port → **B9 双跑**（此时建在**已验证地基**上，等价非空真）。
 6. B9 + B14 package gate → wave-c。
-  - ✅ 展开（2026-09-22）：3 port 的 fake + 契约测试用例已落（tests/fixtures/executor-port-fakes.ts + 3 契约测试文件）。⏳ 余：4 域骨架的能力测试（C-Deep）；B6-func 具体断言（B6-func 时展开）。
+  - ✅ 展开（2026-09-22）：3 port 的 fake + 契约测试用例已落（tests/fixtures/executor-port-fakes.ts + 3 契约测试文件）。
+  - ✅ 展开（2026-09-22）：C-Deep 切片 1（executor 纵切）测试已落（17 unit + 5 func，cf7d17c..c1cabc2）。⏳ 余：切片 2 sandbox 纵切 smoke（建 manager + ripgrep 查询，rg 缺失 skip 不红）+ 切片 3 4 新域能力测试（task 裁剪版真核心 / bootstrap 真适配器 / permissions+hooks 薄骨架，§8.10 D4）；B6-func 具体断言 + 前置清单 4+3 项（§8.10 D6，B6-func 时展开）。
 
 ### Wave E（ascend）
 - gelu L1 活体（调全 16 工具）+ 既有 L4 evals。
@@ -120,7 +121,7 @@
 
 1. ✅ **已完成（2026-09-22，B-fix 独立项，C 波前置）**：`tests/ci/anti-stub.test.ts` + `tests/ci/capability-matrix.test.ts` + `.github/workflows/ci.yml`（收 H1+H4），让 6 空 stub 从此**过不了门**（未登记空壳 = 红 / 注册表漂移 = 红 / wave-c tag 时注册表清零）。门经变异验真（临时造未登记空壳 → 门①红，还原 → 绿）。**归类裁定：B-fix（B 波缺陷纠偏），非 C 波范围，C-Deep 前置件**——盲区是 B 交付留下的，纠偏记 B 账；但 C-Deep 填 stub 前门必须就位。已记入 execution-strategy §7/§8.3。
 2. ✅ **C1 叶子单测已展开（2026-09-22，438a93b + b3c2fe1）**：4 个新叶子测试文件（`shared-string-utils` / `shared-circular-buffer` / `shared-errors` / `shared-format`，行为断言移植旧仓口径，含边界：safeJoinLines 部分容纳/无剩余空间、EndTruncatingAccumulator 截断+标记+totalBytes 全量、CircularBuffer 回绕 getRecent、shortErrorStack 帧数裁切）+ `shared-env` 扩展（parseBoundedIntEnv min 参数 / isEnvTruthy·isEnvDefinedFalsy 全集合）。**教训回写**：首版 4 个用例期望算错（标记串 14 非 13 字符 / addAll 保留满容量窗 / 9999999 才触 cap）——叶子移植必须逐边界实跑验证，不能凭读码推期望。
-3. **C-Deep 时**：展开 4 域骨架能力测试 + B6-func 断言；填一个 stub 销一个 STUB_REGISTRY 条目（门②强制）。
+3. ✅ **C-Deep 切片 1 测试已落（2026-09-22，cf7d17c..c1cabc2）**：17 unit（`executor-shell-provider` 6 + `executor-shell-command` 11：fake ChildProcess（EventEmitter + 可选 pid）+ FileTaskOutputFake 纯内存，覆盖 exit 映射 145/126/144/1/143/137 全口径 + 进程组 kill + 状态机 + taskId 格式）+ 5 func（`tests/func/executor-shell-smoke.test.ts` 真 spawn：echo hi 真落盘读回 / pipe 回调 / 非零码 ExecError / cd 后 cwd 跟踪 / sandbox 禁用零调用）。**层裁定（D3）**：tests/func = 真 I/O 层（真 spawn / 真磁盘 tmpdir），unit 零磁盘纪律之上的第二层；CI `bun test --isolate tests/` 递归覆盖（已验，四件套自动跑）。**教训回写**：Executor.exec 的 argv join 语义（`exec('bash', ['-c','exit 3'])` 拼成 "bash -c exit 3"，"3" 沦为 $0）——功能 smoke 断言非零路径须用 `exec('exit 3', [])` 单串形式（已踩坑回写测试注释）。⏳ 余：切片 2/3 + B6-func（见 Wave C 项 3 更新 + execution-strategy §8.10 D1-D6）。
 4. ✅ **C1 复审（2026-09-22）已落 3 项防腐前置**（execution-strategy §8.6 复审表 + §8.7）：
    - 防腐门预覆盖 C-Deep 四域（task/bootstrap/permissions/hooks 目录存在即纳扫，变异验真：造空壳→门①红）；
    - fs 抽象 / debug no-op 单一事实源下沉 shared（防 C-Deep 域内复制腐化）；

@@ -484,3 +484,24 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 4. **已知跨域边（hooks 域，不阻塞 C2，C-Deep hooks 切片时斩断）**：旧仓 hooks.ts:219 经 `shellCommand.taskOutput.getStdout()` 消费 TaskOutput 面（hooks 域 → executor 域 → task 域穿透）。hooks 域骨架建立时须经注入/端口斩断（hooks 域不直接 import executor），登记为 hooks 切片残余。
 
 **修订后 C-Deep 全序**：切片 1 executor 纵切 → 切片 2 sandbox 纵切 → 切片 3 四新域骨架+真适配器 → ★B6-func（含端口注入前置清单）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
+
+### 8.10 C-Deep 切片 1 执行记录 + 偏差修订（2026-09-22 完成，cf7d17c..c1cabc2）
+
+**落地（6 提交）**：cf7d17c shellProvider → 5ae8e49 ShellCommand → a58339a Shell（+shared FsOperations 加法扩展）→ c23fc89 ShellExecutor + 门面 → 428ff6e tests/func/ 真 spawn smoke → 9427926 门同步（STUB_REGISTRY 6→2 + 矩阵 executor 行翻 done）。c1cabc2 收尾 lint（未用导入）。
+
+**验收**：tsc 0 / lint 0 / build ✓ / **387 pass 0 fail（29 文件，含新 17 unit + 5 func）**。
+
+**落地口径**：4 stub 全填（裁剪版 bash-only），裁剪残余全部落各文件头注释清单（shellProvider 7 项 / ShellCommand 5 项 / Shell 8 项 / ShellExecutor 2 项），防"以为已全"。门面（index.ts）导出 shell 执行核心 + provider，`ShellExecResult` 别名消歧 types.ExecResult。
+
+**偏差审视（落地实况 vs §8.9 计划，6 项，均修订落盘）**：
+
+| # | 偏差 | 处置 |
+|---|---|---|
+| D1 | **exec 签名变化**：旧仓 4 参 `exec(command, abortSignal, shellType, options?)` → 裁剪版 3 参（`shellType` 删除，bash provider 经 findSuitableShell 内部决议）。PowerShell provider 归残余⑥，参数位随之裁 | 已裁定为裁剪版签名（非遗漏）；后续 PowerShell 纵切时再扩参，不提前留位 |
+| D2 | **shared FsOperations 加法扩展 4 方法**（mkdir(mode)/realpathSync/open(FileHandle)/unlinkSync）超出 §8.6 "最小集" | C1-R1 先例（fs 抽象单一事实源）执行：加法扩展、不建第二抽象；扩展面固化于此，memory 本地副本零 |
+| D3 | **tests/func/ 层正式化**（新层，原计划仅 §8.7 提"smoke 落 tests/func/"未入测试层表） | 裁定为正式层：**func = 真 I/O 层（真 spawn / 真磁盘 tmpdir），unit 纪律（零网络/零磁盘/零 PTY）之上的第二层**；CI `bun test --isolate tests/` 递归覆盖（已验），随四件套自动跑 |
+| D4 | **切片 3 task 域规模重估**："真端口适配器" ≠ 薄骨架——旧仓 task 面 = Task.ts 125L + task/ 基建 1223L（TaskOutput 390 / diskOutput 451 / framework 308），且切片 1 残余清单已把 watchdog（MAX_TASK_OUTPUT_BYTES 5GB）与 canonical generateTaskId 表挂到 task 域 | 修订切片 3 task 域 = **裁剪版真核心**（TaskOutput 真实现 + diskOutput + canonical TaskId 表 + watchdog 接回 executor 残余）；残余（任务列表 / kill / reaper / 后台任务管理）→ engine 波。bootstrap 域 = 真适配器（旧 bootstrap/state.ts + utils/cwd.ts，小，不变）；permissions/hooks 薄骨架不变 |
+| D5 | **切片 2 规模重估 + 裁剪版裁定**：STUB_REGISTRY "闭包 30+ 文件" 为旧仓依赖闭包口径（高估）；旧仓 core/sandbox 实际 8 个 .ts 共 1394L（backend 302 / compat 108 / events 114 / types 115 / violationText 38 / createSandboxManager + pathResolve + index），新仓已迁 5/8（余 createSandboxManager + ripgrep 2 stub） | 修订切片 2 = 填 2 stub（~1394L 旧仓基准，单切片可承载）+ **同切片 1 式裁剪裁定**（国内目标 = bwrap/Linux 主路径；macOS seatbelt / Windows no-sandbox 回退归残余清单）；smoke 不变（建 manager + 一次 ripgrep 查询，rg 缺失按 unit 纪律 skip 不红） |
+| D6 | **B6-func 前置清单细化（3 条执行级补强）**：① §8.8 裁定 3 说"SandboxManager→Port 适配器归组合根"但未说组合根谁建——B6-func 须建 **atlascode/compose.ts 最小组合根**（3 端口注入 + 输出目录就绪）；② 注入序约束：ShellExecutor 在 exec 时才读 `isSandboxingEnabled()`（ShellExecutor.ts:49），三端口须**先于第一次 exec 全部注册**（fail-fast 是运行时抛错，非构建期错误）；③ task 真适配器来自切片 3（顺序依赖已在 §8.9 全序中，此处明示） | 并入 §8.9 项 3 清单（B6-func 开工时按此 4+3 项执行） |
+
+**修订后 C-Deep 全序（替换 §8.9 末行）**：切片 1 executor 纵切 ✅ → 切片 2 sandbox 纵切（裁剪版 bwrap 主路径，D5）→ 切片 3 四新域（task 裁剪版真核心 D4 / bootstrap 真适配器 / permissions+hooks 薄骨架 + 残余斩断 §8.9 项 4）→ ★B6-func（compose.ts 最小组合根 + 4+3 前置清单 D6）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
