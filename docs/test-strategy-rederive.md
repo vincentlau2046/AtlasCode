@@ -65,7 +65,7 @@
 顺序（功能纵切优先，见 execution-strategy §8）：
 1. C1 叶子下沉 → 每叶子带单测（移植旧仓 unit 覆盖）。
 2. C2-executor-ports（TaskOutput/bootstrap-state/sandbox 注入 3 port）→ 每 port 一个 fake + **port 契约测试**。✅ 2026-09-22 完成（6343d4a：3 port + tests/fixtures/executor-port-fakes.ts 三 fake + 3 契约测试文件 15 断言）。
-3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。
+3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。2026-09-22 修订（execution-strategy §8.9，C2-复审后）：切 **3 纵切片**（切片 1 executor 裁剪版 bash-only / 切片 2 sandbox / 切片 3 4 新域骨架+真端口适配器同提交登记）；B6-func 加 3 端口注入前置清单（fail-fast 运行时后果）；hooks 域跨域边（经 ShellCommand.taskOutput 穿透）建骨架时斩断。
 4. **★ B6-func 功能门**：真实跑一条 shell 命令 + 建一个 sandbox manager（mock 后端）+ mock 一次 completion + 写读 memory —— **证明迁移链真能跑，先于 engine**。
 5. 再 C1/C2 engine 212 叶子 + port → **B9 双跑**（此时建在**已验证地基**上，等价非空真）。
 6. B9 + B14 package gate → wave-c。
@@ -125,6 +125,6 @@
    - 防腐门预覆盖 C-Deep 四域（task/bootstrap/permissions/hooks 目录存在即纳扫，变异验真：造空壳→门①红）；
    - fs 抽象 / debug no-op 单一事实源下沉 shared（防 C-Deep 域内复制腐化）；
    - **C-Deep 切 2 纵切片 + 每片功能 smoke**（tests/func/，port 之下全真）——把 H6 空洞等价的暴露窗口从"整个 C-Deep"缩到单切片；4 新域骨架须与 STUB_REGISTRY/capability-matrix 同提交登记（不留无门窗口）；mock-completion 由 B6-func 承载执行（不等 B9）。
-5. ✅ **C2 3 port 契约测试已落（2026-09-22，6343d4a）**：executor 域 3 port（TaskOutput/bootstrapState/ExecutorSandbox，窄面依据旧仓 Shell.ts/ShellExecutor 真实消费面）+ `tests/fixtures/executor-port-fakes.ts` 三 fake（确定性+可观测，**不模拟真实域语义**——真语义归 C-Deep 域实现）+ 3 契约测试文件 15 断言（结构可赋值/fail-fast 未注入抛错/reset/行为可观测）。fail-fast 裁定：静默 no-op 兜底 = H6 空洞等价向量，故未注入 get = 抛错。capability-matrix 加 "3 port 契约" done 行。
+5. ✅ **C2 3 port 契约测试已落（2026-09-22，6343d4a + C2-复审 f8c6719）**：executor 域 3 port（窄面依据旧仓真实消费面）+ `tests/fixtures/executor-port-fakes.ts` 三 fake（确定性+可观测，**不模拟真实域语义**——真语义归 C-Deep 域实现）+ 3 契约测试文件 16 断言（结构可赋值/fail-fast 未注入抛错/reset/行为可观测）。fail-fast 裁定：静默 no-op 兜底 = H6 空洞等价向量，故未注入 get = 抛错。capability-matrix 加 "3 port 契约" done 行。**C2-复审 3 发现（f8c6719）**：F1 TaskOutput 窄面漏 ShellCommand.ts 9 点消费→Handle 扩 12 成员；F2 fake 路径须真文件（真 spawn `open(O_CREAT)` 落 fd）→FileTaskOutputFake tmpdir 惰性 I/O（unit 层零磁盘纪律不破，func 层真 I/O 预验全绿）；F3 bootstrap 端口缺 pwd() 初值→加 getCwd()（ALS 覆盖层归 engine 不进门面）。**教训回写：port 面调研必须枚举"该 port 的全部消费文件"（初版只查了 Shell.ts，漏了 ShellCommand.ts）——消费面 grep 按符号全仓搜，非按单文件**。
 
 每步展开后回写本文对应 ⏳ 节，保持活文档。

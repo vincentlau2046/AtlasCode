@@ -376,12 +376,16 @@ C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）✅ 2026-09-22 
 C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）
   ✅ 2026-09-22 完成（6343d4a，§8.8：3 port + 3 fake + 15 契约测试）
   ↓
-C-Deep（填 6 stub，建 4 域骨架）— 2026-09-22 复审切 2 纵切片（§8.7）：
-  切片 1 executor 4 stub + 纵切 smoke（真 spawn echo hi）
+C-Deep（填 6 stub，建 4 域骨架）— 2026-09-22 复审切 2 纵切片（§8.7）+ C2-复审后
+  修订为 3 切片（§8.9：4 新域骨架显式归切片 3 + Shell 裁剪版 + B6-func 注入清单）：
+  切片 1 executor 4 stub（裁剪版 bash-only）+ 纵切 smoke（真 spawn echo hi，fake 注入）
   切片 2 sandbox 2 stub + 纵切 smoke（建 manager + ripgrep 查询）
+  切片 3 task/bootstrap/permissions/hooks 4 新域骨架 + task/bootstrap 真端口适配器
+  （+ STUB_REGISTRY/capability-matrix 同提交登记）
   每片完成即跑对应 smoke（tests/func/，port 之下全真）
   ↓
-★ B6-func 功能 gate（全量终局 gate：shell 真跑 + 建 sandbox + mock completion + 写读 memory）
+★ B6-func 功能 gate（全量终局 gate：shell 真跑 + 建 sandbox + mock completion + 写读 memory；
+  前置 = 3 端口注入 + 输出目录就绪，§8.9 清单 3）
   ↓
 C1-engine 212 叶子 + C2-engine 49 结构 + 剩余 port
   ↓
@@ -440,14 +444,16 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 3. **mock-completion 归属澄清**：matrix 行 `by: C` 口径 = **B6-func 承载执行**（"mock 一次 completion"），不等 B9；clients.ts 现无 transport 注入面，B6-func 时按"可注入 fake transport 或 in-process mock"二选一定案（不提前重构）。
 4. 终局 B6-func（全量：shell 真跑 + sandbox 建 manager + mock completion + memory 写读）仍作为 engine 迁移前的最后功能 gate，纵切 smoke 是其前置证据而非替代。
 
-### 8.8 C2-executor-ports 执行记录（2026-09-22 完成，6343d4a）
+> **2026-09-22 修订**：C2-复审（f8c6719）后 C-Deep 由 2 纵切片扩为 **3 切片**（4 新域骨架显式归切片 3）+ Shell 裁剪版 + B6-func 端口注入前置清单 + hooks 跨域边登记——详见 §8.9。
 
-**port 面调研（旧仓为 source of truth，斩断跨域 import 的窄面依据）**：
+### 8.8 C2-executor-ports 执行记录（2026-09-22 完成，6343d4a + C2-复审 f8c6719）
+
+**port 面调研（旧仓为 source of truth，斩断跨域 import 的窄面依据；C2-复审修订后口径）**：
 
 | port | 旧仓真实消费面 | 新仓窄面裁定 |
 |---|---|---|
-| TaskOutput | Shell.ts 3 点：`new TaskOutput(taskId, onProgress, !usePipeMode)` + `.path`（file 模式 stdout 直落 fd）+ `.clear()` | `TaskOutputPort{createTaskOutput}` + `Handle{path,clear}` + 5 参进度回调（签名忠实保留） |
-| bootstrap-state | Shell.ts 2 点：`getOriginalCwd()`（cwd 被删回退）+ `setCwdState(physicalPath)` | 2 方法窄面；`_originalCwd`/`_cwdState` 两状态分离语义明示（回退目标恒为启动 cwd） |
+| TaskOutput | **Shell.ts + ShellCommand.ts 双消费者**（复审 F1 补齐）：Shell.ts `new TaskOutput(taskId, onProgress, !usePipeMode)` + `.path`（file 模式 spawn 经 `open(path, O_WRONLY\|O_CREAT\|O_APPEND\|O_NOFOLLOW)` 直落 fd，父目录须先 mkdir）+ `.clear()`；ShellCommand.ts（StreamWrapper + result 组装）`.taskId`/`.writeStdout`/`.writeStderr`（pipe 喂缓冲）/`.getStdout()`/`.getStderr()`/`.stdoutToFile`/`.outputFileRedundant`/`.outputFileSize`/`.deleteOutputFile()`/`.spillToDisk()` | `TaskOutputPort{createTaskOutput}` + **12 成员 Handle**（上列 1:1）+ 5 参进度回调。残余项注明：static startPolling/stopPolling = React 进度组件消费（engine/D 波）；maxMemory = task 域策略（域内定值 8MB，旧仓 DEFAULT_MAX_MEMORY） |
+| bootstrap-state | Shell.ts 3 点（复审 F3 补齐）：`pwd()`（cwd 初值，Shell.ts:216；旧仓 = ALS 覆盖 ?? `_cwdState`）+ `getOriginalCwd()`（cwd 被删回退）+ `setCwdState(physicalPath)` | 3 方法窄面；**ALS 并发覆盖层不进门面**（多 agent 并发能力归 engine 域，executor 只见 `getCwd()` 无覆盖路径）；`_originalCwd`/`_cwdState` 两状态分离语义明示（回退目标恒为启动 cwd） |
 | sandbox 注入 | ShellExecutor `isSandboxingEnabled()` + Shell.ts `wrapWithSandbox(cmd, binShell, undefined, signal)` + `cleanupAfterCommand()` | 3 方法窄面；**omit customConfig**（旧仓 Shell.ts 恒传 undefined，窄面防 sandbox 内部类型 SandboxRuntimeConfig 渗入） |
 
 **三项裁定**：
@@ -457,6 +463,24 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 
 **fake 行为断言原则**：确定性 + 可观测（taskId 派生路径 / clear 计数 / wrap 非透传带标记 / 调用与 signal 记录），**不模拟真实域语义**——真语义归 C-Deep 各域实现，fake 绝不假装（对齐 test-strategy "绝不写假装通过的测试"）。
 
-**验收**：tsc 0 / lint 0 / build ✓ / 364 pass 0 fail（+15，26 文件）；capability-matrix 加 "3 port 契约" done 行（proof 三契约测试之一）；STUB_REGISTRY 6 条未动（C2 不填 stub，填 stub 是 C-Deep 的事，门② 符合）。
+**C2-复审整改（同日，用户"先审视这轮修改"触发，f8c6719，3 发现全实证坐实）**：
+| # | 发现 | 实证 | 处置 |
+|---|---|---|---|
+| F1 | **TaskOutput 窄面遗漏**：初版只列 Shell.ts 3 点，漏了 ShellCommand.ts（同为切片 1 的 4 stub）的 9 点消费——C-Deep 填 ShellCommand stub 时端口无面可走，被迫 import task 域破 L3 | 旧仓 ShellCommand.ts:73/86-88/241/297-314/354-371 逐行核实 | Handle 扩 12 成员（taskId/path/stdoutToFile/write×2/get×2/冗余+大小 getters/deleteOutputFile/spillToDisk/clear），残余项（static 轮询/maxMemory）注明归属 |
+| F2 | **fake 路径必须真文件**：file 模式 spawn `open(taskOutput.path, O_CREAT)` 落 fd，初版 `/fake/...` 父目录不存在 → C-Deep 真 spawn 必 ENOENT | 旧仓 Shell.ts:301-310 open 标志位核实 | fake 改 `FileTaskOutputFake`（tmpdir 惰性 I/O：构造/createTaskOutput 零 I/O 保 unit 层零磁盘纪律；file 模式 getStdout 真读、clear/delete 真删 ENOENT 容错）；func 层真 I/O 预验全绿（写 hi→读回/size 3/delete 真删） |
+| F3 | **bootstrap 端口缺 pwd() 初值**：Shell.ts:216 `let cwd = pwd()` 无处消费 | 旧仓 cwd.ts（ALS 覆盖 ?? getCwdState）核实 | 端口加 `getCwd(): string`（真实现 = 旧 pwd() 无覆盖路径）；ALS 并发覆盖层属 engine 域能力不进门面（窄面防 engine 概念渗入） |
+
+**验收（复审后）**：tsc 0 / lint 0 / build ✓ / **365 pass 0 fail**；capability-matrix "3 port 契约" done 行；STUB_REGISTRY 6 条未动（C2 不填 stub）。
 
 **下一步 = C-Deep 切片 1（executor 纵切）**：填 4 stub（Shell/ShellCommand/ShellExecutor/shellProvider，消费上述 3 port + shared fs-operations/debug）+ `tests/func/` 真 spawn `echo hi` smoke（§8.7）；STUB_REGISTRY 对应 4 条销账随填随销（门② 强制）。
+
+### 8.9 C-Deep 方案修订（C2-复审 + 完成度审视后，2026-09-22）
+
+基于 C2 复审结论（端口面已定全 + fake 可真跑）与 C2 完成情况，原 C-Deep 计划（§8.7 的 2 纵切片）有 4 处需修订：
+
+1. **Shell.ts 移植定"裁剪版"，防纵切变全量**：旧仓 Shell.ts = 463 行 / 31 imports（bootstrap/Task/cwd/hooks watcher/permissions/platform/sessionEnvironment/双 shell provider/subprocessEnv/windowsPaths…）。"填 4 stub"若按旧文件全量移植 = 把 PowerShell/Windows/hooks 路径全搬进来，纵切变横切。裁定：**切片 1 移植裁剪版 bash-only 真核心**——spawn + 输出限制 + cwd 恢复（经 bootstrap 端口）+ 沙箱包装（经 sandbox 端口）+ TaskOutput（经 task 端口）+ bash provider；**残余清单**（不裁入切片 1）：PowerShell provider 路径 / windows 路径转换 / hooks fileChangedWatcher / subprocessEnv 全量 env 构建 / 多 provider 探测——标注归属（后续纵切或 engine 波次），裁剪版头部注释留残余清单防"以为已全"。
+2. **4 新域骨架显式归切片 3（原 2 切片未覆盖）**：task/bootstrap/permissions/hooks 四骨架不在 executor/sandbox 两纵切片内，原计划"填 6 stub + 建 4 骨架"一句带过后未落位。裁定：**切片 1（executor 4 stub + fake 注入 smoke）→ 切片 2（sandbox 2 stub + smoke）→ 切片 3（4 新域骨架 + task/bootstrap 真端口适配器 + STUB_REGISTRY/capability-matrix 同提交登记，§8.7 规则 2）**；permissions/hooks 允许薄骨架（能力解锁 B6-func/engine，矩阵行标 missing+by）。
+3. **B6-func 加"端口注入前置清单"（fail-fast 的运行时后果）**：3 端口未注入即抛错（C2 裁定 2），B6-func 真跑 shell 前必须完成：`setTaskOutputPort(task 域真适配器)` + `setBootstrapStatePort(bootstrap 域真适配器)` + `setExecutorSandboxPort(SandboxManager 适配器)` + `fake.ensureOutputDir()` 等价目录就绪。无清单 = B6-func 首跑即崩，返工。
+4. **已知跨域边（hooks 域，不阻塞 C2，C-Deep hooks 切片时斩断）**：旧仓 hooks.ts:219 经 `shellCommand.taskOutput.getStdout()` 消费 TaskOutput 面（hooks 域 → executor 域 → task 域穿透）。hooks 域骨架建立时须经注入/端口斩断（hooks 域不直接 import executor），登记为 hooks 切片残余。
+
+**修订后 C-Deep 全序**：切片 1 executor 纵切 → 切片 2 sandbox 纵切 → 切片 3 四新域骨架+真适配器 → ★B6-func（含端口注入前置清单）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
