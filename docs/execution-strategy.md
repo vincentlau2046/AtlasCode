@@ -535,3 +535,16 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 - **engine 波**：backfill manager 残余 6 项 + ripgrep 残余 5 项（含 settings 5 层 convert 全量 + pathResolve + glob warnings）。
 
 **修订后 C-Deep 全序（替换 §8.10 末行）**：切片 1 executor 纵切 ✅ → 切片 2 sandbox 纵切 ✅（D7-D9）→ 切片 3 四新域（task 裁剪版真核心 D4 / bootstrap 真适配器 / permissions+hooks 薄骨架 + hooks 跨域边斩断）→ ★B6-func（compose.ts 最小组合根 + 4+4 前置清单 D9）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
+
+### 8.12 跨会话独立审视修复记录（memory 真磁盘证据，2026-09-22，ee96206）
+
+另一会话（AtlasCode 架构实施梳理）的**只读独立测试充分性审视**（锚 c1cabc2，隔离 worktree 跑测）产出 3+1 发现。本会话核验时效性：切片 2（c4a3ef5..6e06673）未触碰 memory 区与矩阵 memory 行 → 发现全部有效，采纳并落盘：
+
+| # | 发现 | 严重度 | 处置 |
+|---|---|---|---|
+| F1 | FS 适配器 `FileSystemMemoryStore` 只有 mock-fs 委托单测，矩阵 "memory 写+读" done 行 proof 指向 `memory-store.test.ts`（InMemoryStore）→ 真 FS 适配器**零行为证据**（H6 空洞同类；溯源：B 波 2b32024 迁移只带 mock-fs 版测试） | 中·真缺口 | 已修：新 `tests/func/memory-real-fs.test.ts`（7 用例：真 tmpdir 默认 node:fs 透传读 / ENOENT 真透传 / mkdir 幂等 / readFileInRange 行范围+mtime+FileTooLargeError 两态 + memoryAge 真盘分档含 utimesSync 回退 last week 档） |
+| F2 | 矩阵无 FS store 行 | 低 | 已修：capability-matrix 加行 "FS store 真磁盘读（FileSystemMemoryStore，默认 node:fs 透传）" → 上文件 |
+| F3 | `unit/memory-types-age.test.ts` 3 用例 writeFileSync 真盘 I/O，违反 D3 "unit 零磁盘" | 层纪律 | 已修：移 func 层，**严格超集裁定 3→5**（缺失文件 2 用例的 statSync 同属真盘 syscall，随迁）；unit 只留纯函数（memoryFreshnessText 分档边界 + memoryTypes 常量族） |
+| （可选项） | `shared/fs-operations.ts` 默认 node:fs 透传腿（含切片 1 加法 4 原语）只测了"注入 mock"一条腿 | 低 | 已修：新 `tests/func/shared-fs-passthrough.test.ts`（默认 NodeFsOperations 真 tmpdir 直跑：existsSync/stat/statSync/realpathSync/mkdir(mode 0o700 真断言 + EEXIST 幂等)/open 真写/readFile 回读/unlinkSync ENOENT 真抛） |
+
+**后续步骤影响审视**：B6-func 前置件 "写读一次 memory" 的真盘证据已就位（FS 适配器 + 默认透传腿双证）；切片 3 四新域不受影响（memory 区修复不触碰 task/bootstrap/permissions/hooks）；D3 层纪律口径补强为**严格口径**（缺失文件 statSync 亦算真盘 syscall → func 层），后续用例分层按此执行。

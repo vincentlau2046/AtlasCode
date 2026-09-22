@@ -65,7 +65,7 @@
 顺序（功能纵切优先，见 execution-strategy §8）：
 1. C1 叶子下沉 → 每叶子带单测（移植旧仓 unit 覆盖）。
 2. C2-executor-ports（TaskOutput/bootstrap-state/sandbox 注入 3 port）→ 每 port 一个 fake + **port 契约测试**。✅ 2026-09-22 完成（6343d4a：3 port + tests/fixtures/executor-port-fakes.ts 三 fake + 3 契约测试文件 15 断言）。
-3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。2026-09-22 修订（execution-strategy §8.9，C2-复审后）：切 **3 纵切片**（切片 1 executor 裁剪版 bash-only / 切片 2 sandbox / 切片 3 4 新域骨架+真端口适配器同提交登记）；B6-func 加 3 端口注入前置清单（fail-fast 运行时后果）；hooks 域跨域边（经 ShellCommand.taskOutput 穿透）建骨架时斩断。**切片 1 已完成（cf7d17c..c1cabc2，执行记录见 execution-strategy §8.10）**：17 unit（shellProvider 6 + ShellCommand 11，fake ChildProcess + FileTaskOutputFake 纯内存，unit 纪律不破）+ 5 func（真 spawn + 真磁盘 tmpdir）；门同步（STUB_REGISTRY 6→2 + 矩阵 executor 行翻 done）。偏差修订 6 项（D1-D6 落 §8.10）：切片 2 同式裁剪裁定（bwrap 主路径）/ 切片 3 task 域改"裁剪版真核心"（旧 task 面 1223L 基建，非薄骨架）/ **tests/func 正式层化**（真 I/O 层：unit 零磁盘纪律之上的第二层，CI `bun test --isolate tests/` 递归自动跑，已验）。 **切片 2 已完成（c4a3ef5..295f20f，执行记录 §8.11）**：10 unit + 4 func（真建 manager 32 方法 + 真 ripgrep 查询）；STUB_REGISTRY 2→0 清零；偏差修订 3 项（D7-D9 落 §8.11）：runtime 注入窗口引入（真 bwrap 行为在外部包非仓内）/ SettingsJson opaque → 域内 typed cast 视图 / B6-func 前置清单 4+3→4+4（sandbox runtime 注入项）。
+3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。2026-09-22 修订（execution-strategy §8.9，C2-复审后）：切 **3 纵切片**（切片 1 executor 裁剪版 bash-only / 切片 2 sandbox / 切片 3 4 新域骨架+真端口适配器同提交登记）；B6-func 加 3 端口注入前置清单（fail-fast 运行时后果）；hooks 域跨域边（经 ShellCommand.taskOutput 穿透）建骨架时斩断。**切片 1 已完成（cf7d17c..c1cabc2，执行记录见 execution-strategy §8.10）**：17 unit（shellProvider 6 + ShellCommand 11，fake ChildProcess + FileTaskOutputFake 纯内存，unit 纪律不破）+ 5 func（真 spawn + 真磁盘 tmpdir）；门同步（STUB_REGISTRY 6→2 + 矩阵 executor 行翻 done）。偏差修订 6 项（D1-D6 落 §8.10）：切片 2 同式裁剪裁定（bwrap 主路径）/ 切片 3 task 域改"裁剪版真核心"（旧 task 面 1223L 基建，非薄骨架）/ **tests/func 正式层化**（真 I/O 层：unit 零磁盘纪律之上的第二层，CI `bun test --isolate tests/` 递归自动跑，已验）。 **切片 2 已完成（c4a3ef5..295f20f，执行记录 §8.11）**：10 unit + 4 func（真建 manager 32 方法 + 真 ripgrep 查询）；STUB_REGISTRY 2→0 清零；偏差修订 3 项（D7-D9 落 §8.11）：runtime 注入窗口引入（真 bwrap 行为在外部包非仓内）/ SettingsJson opaque → 域内 typed cast 视图 / B6-func 前置清单 4+3→4+4（sandbox runtime 注入项）。**跨会话独立审视修复（2026-09-22，§8.12）**：memory 真盘 func 证据 + 默认 node:fs 透传腿补齐 → B6-func "写读一次 memory" 前置件就位（记录见 §6 item 6）。
 4. **★ B6-func 功能门**：真实跑一条 shell 命令 + 建一个 sandbox manager（mock 后端）+ mock 一次 completion + 写读 memory —— **证明迁移链真能跑，先于 engine**。
 5. 再 C1/C2 engine 212 叶子 + port → **B9 双跑**（此时建在**已验证地基**上，等价非空真）。
 6. B9 + B14 package gate → wave-c。
@@ -104,6 +104,7 @@
 | 域 | 能力 | 证明测试文件 | 状态 |
 |---|---|---|---|
 | memory | 写+读 memory | `tests/unit/memory-store.test.ts`（已） | ✅ |
+| memory | FS store 真磁盘读（默认 node:fs 透传） | `tests/func/memory-real-fs.test.ts`（已，跨会话审视修复 2026-09-22） | ✅ |
 | memory | 路径解析/校验 | `tests/unit/memory-paths.test.ts`（已） | ✅ |
 | modelprovider | mock 出 completion | ⏳ 待建 | ⏳ |
 | modelprovider | 角色 fallback | `tests/unit/model-roles.test.ts`（已） | ✅ |
@@ -128,5 +129,7 @@
    - fs 抽象 / debug no-op 单一事实源下沉 shared（防 C-Deep 域内复制腐化）；
    - **C-Deep 切 2 纵切片 + 每片功能 smoke**（tests/func/，port 之下全真）——把 H6 空洞等价的暴露窗口从"整个 C-Deep"缩到单切片；4 新域骨架须与 STUB_REGISTRY/capability-matrix 同提交登记（不留无门窗口）；mock-completion 由 B6-func 承载执行（不等 B9）。
 5. ✅ **C2 3 port 契约测试已落（2026-09-22，6343d4a + C2-复审 f8c6719）**：executor 域 3 port（窄面依据旧仓真实消费面）+ `tests/fixtures/executor-port-fakes.ts` 三 fake（确定性+可观测，**不模拟真实域语义**——真语义归 C-Deep 域实现）+ 3 契约测试文件 16 断言（结构可赋值/fail-fast 未注入抛错/reset/行为可观测）。fail-fast 裁定：静默 no-op 兜底 = H6 空洞等价向量，故未注入 get = 抛错。capability-matrix 加 "3 port 契约" done 行。**C2-复审 3 发现（f8c6719）**：F1 TaskOutput 窄面漏 ShellCommand.ts 9 点消费→Handle 扩 12 成员；F2 fake 路径须真文件（真 spawn `open(O_CREAT)` 落 fd）→FileTaskOutputFake tmpdir 惰性 I/O（unit 层零磁盘纪律不破，func 层真 I/O 预验全绿）；F3 bootstrap 端口缺 pwd() 初值→加 getCwd()（ALS 覆盖层归 engine 不进门面）。**教训回写：port 面调研必须枚举"该 port 的全部消费文件"（初版只查了 Shell.ts，漏了 ShellCommand.ts）——消费面 grep 按符号全仓搜，非按单文件**。
+
+6. ✅ **跨会话独立审视修复已落（2026-09-22，ee96206 + shared-fs-passthrough 提交）**：独立会话只读审视（锚 c1cabc2）3+1 发现全采纳——F1 memory FS 适配器零真盘证据（矩阵 done 行 proof 指向 InMemoryStore，H6 空洞同类）→ 新 `tests/func/memory-real-fs.test.ts`（7 用例，默认 node:fs 透传腿真 tmpdir）；F2 矩阵缺 FS store 行 → capability-matrix + 本文 §5 加行；F3 unit 层真盘用例违 D3 → 移 func（**严格口径裁定：缺失文件 statSync 亦算真盘 syscall，3→5 用例超集**）；低危 shared 默认透传单腿 → 新 `tests/func/shared-fs-passthrough.test.ts`（6 用例，含 mkdir mode 0o700 真断言 / open 真写 / unlinkSync ENOENT 真抛）。详见 execution-strategy §8.12。
 
 每步展开后回写本文对应 ⏳ 节，保持活文档。

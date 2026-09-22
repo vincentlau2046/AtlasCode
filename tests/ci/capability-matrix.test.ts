@@ -33,10 +33,20 @@ type MatrixRow = {
  * sandbox 纵切已填（2 空 stub → 裁剪版工厂 + runtime 注入窗口 +
  * system-rg 单模式后端，真建 manager + 真 ripgrep 功能 smoke，
  * STUB_REGISTRY 随之清零）。
+ *
+ * 跨会话独立审视修复（2026-09-22，ee96206，记录见 execution-strategy §8.12）：
+ * FS 适配器原本只有 mock-fs 委托单测（"写+读" proof 指向 InMemoryStore，
+ * 真 FS 零证据，H6 空洞同类）→ 新增 memory FS store 真磁盘 func 证据行。
  */
 const MATRIX: readonly MatrixRow[] = [
   { domain: 'memory', capability: '写+读 memory（store 语义）', status: 'done', proof: 'tests/unit/memory-store.test.ts' },
+  // 跨会话审视修复（F1/F2）：FS 适配器真磁盘证据（默认 node:fs 透传腿，
+  // 真 tmpdir 读写 + readFileInRange 两态 + mtime 分档）——"写+读" 能力在
+  // 真 FS 实现上的行为证明，非仅 InMemoryStore
+  { domain: 'memory', capability: 'FS store 真磁盘读（FileSystemMemoryStore，默认 node:fs 透传）', status: 'done', proof: 'tests/func/memory-real-fs.test.ts' },
   { domain: 'memory', capability: '路径解析/校验（paths）', status: 'done', proof: 'tests/unit/memory-paths.test.ts' },
+  // memoryAge 真盘分档（utimesSync 回退）随审视修复移 func 层；
+  // unit 文件证纯函数分档边界，func 文件证真盘 mtime 档
   { domain: 'memory', capability: '记忆新鲜度分档（memoryAge）', status: 'done', proof: 'tests/unit/memory-types-age.test.ts' },
   { domain: 'modelprovider', capability: '角色 fallback 解析', status: 'done', proof: 'tests/unit/model-roles.test.ts' },
   { domain: 'modelprovider', capability: '错误消息/错误码映射', status: 'done', proof: 'tests/unit/errorMessaging.test.ts' },
