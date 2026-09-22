@@ -40,7 +40,6 @@ import {
   createFailedCommand,
   generateLocalTaskId,
   wrapSpawn,
-  type ExecResult,
   type ShellCommand,
 } from './ShellCommand'
 import { createBashShellProvider } from './shellProvider'
