@@ -44,6 +44,26 @@ export { formatFileSize } from "./format"
 // C-Deep 切片 3 T3：task 输出磁盘上限（task diskOutput cap + executor
 // ShellCommand size watchdog 跨域共线，单一事实源）
 export { MAX_TASK_OUTPUT_BYTES } from "./constants"
+// C-Deep 切片 3 T5：permissions 薄骨架跨域纯叶子（permissions + sandbox +
+// shell 共线，L3 四域互不 import → shared 唯一跨域叶子汇）
+export { getConfigDirName } from "./configDir"
+// C-Deep 切片 3 T5：用户专属 Atlas 临时目录名（跨域纯叶子，permissions +
+// executor Shell 共线；§8.16 偏差：由 permissions 最小面提升 shared）
+export { getAtlasTempDirName } from "./tempDir"
+export {
+  getPlatform,
+  SUPPORTED_PLATFORMS,
+  type Platform,
+} from "./platform"
+export {
+  expandPath,
+  containsPathTraversal,
+  sanitizePath,
+  MAX_SANITIZED_LENGTH,
+} from "./path"
+export { containsVulnerableUncPath } from "./unc"
+export { djb2Hash } from "./hash"
+export { lazySchema } from "./lazySchema"
 export { logForDebugging, type DebugLogLevel } from "./debug"
 export {
   NodeFsOperations,

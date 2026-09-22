@@ -14,7 +14,8 @@
  * - subprocessEnv 安全 scrub（GHA 密钥剥离 / CCR 代理注入）→ 残余（env 直用 process.env）
  * - ShellSnapshot / session env / tmux 隔离 / hooks cwd-changed watcher /
  *   invalidateSessionEnvCache → 残余（hooks 域切片 3）
- * - getAtlasTempDirName（permissions 域切片 3）→ 临时用 tmpdir()/atlas-sandbox-<uid>
+ * - getAtlasTempDirName → 接回 shared 单一事实源（§8.16 偏差：由 permissions
+ *   最小面提升 shared 纯叶子），sandboxTmpDir = ATLAS_TMPDIR||'/tmp' + 该名
  * - memoize getShellConfig → 每次 exec 现查（accessSync 廉价；memoize 归残余）
  * - pwd() 初值（旧仓 ALS 覆盖 ?? _cwdState）→ bootstrap port getCwd()
  *   （ALS 并发覆盖层归 engine 域，不进端口，C2-F3 裁定）
@@ -23,11 +24,11 @@
 import { execFileSync, spawn } from 'child_process'
 import type { FileHandle } from 'fs/promises'
 import { accessSync, constants as fsConstants } from 'fs'
-import { tmpdir } from 'os'
 import { dirname, isAbsolute, join, resolve } from 'path'
 
 import {
   errorMessage,
+  getAtlasTempDirName,
   getFsImplementation,
   isENOENT,
   logForDebugging,
@@ -141,10 +142,11 @@ export async function exec(
     .padStart(4, '0')
   const useSandbox = shouldUseSandbox === true && sandboxPort.isSandboxingEnabled()
 
-  // 沙箱临时目录（残余：getAtlasTempDirName per-user 目录属 permissions 域切片 3，
-  // 此处按 uid 命名防多用户权限冲突）
+  // 沙箱临时目录（接回 shared 单一事实源 getAtlasTempDirName，per-user 目录
+  // 防多用户共享 /tmp 权限冲突；§8.16 偏差：由 permissions 域切片 3 提升 shared，
+  // 保 executor 域零 C-Deep 域 import）
   const sandboxTmpDir = useSandbox
-    ? join(process.env.ATLAS_TMPDIR || tmpdir(), `atlas-sandbox-${process.getuid?.() ?? 'agent'}`)
+    ? join(process.env.ATLAS_TMPDIR || '/tmp', getAtlasTempDirName())
     : undefined
 
   const { commandString: builtCommand, cwdFilePath } =

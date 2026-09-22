@@ -610,3 +610,28 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 3. **B6-func 前置清单补 1 项**：组合根须调 `setDiskOutputEnv`（task 磁盘层跨域边；pipe 模式 TaskOutput ctor 无条件调 getTaskOutputPath，hooks createHookOutput 工厂同受影响）——在 D10 的 4+5 之上补注，T8 门同步时与 test-strategy §6 前置清单一并落。
 
 **T3 验收**：四件套 tsc 0 / lint 0 / build ✓ / 409 pass 0 fail 33 文件 741 expect（含 anti-stub 门，基线零变动）；diskOutput 实质行 diff 对旧仓 451L = 仅 D12/D13/logError 映射/注入窗/常量迁移五类偏差，零未登记漂移；executor 三处残余标记（头注/L280/L324）全部接回。
+
+### 8.16 C-Deep 切片 3 执行记录 + 偏差修订（T5 permissions 薄骨架 完成 2026-09-23）
+
+执行序：T5 permissions 薄骨架（本批次单提交：`src/permissions/` 4 文件 + `shared/` 7 叶子 + `shared/types-session` 决策类型 + `shared/index` 门面 + executor Shell rewire）。
+
+**T5 落地面（§8.14 薄骨架，逐文件）：**
+- `src/permissions/PermissionRule.ts`：40L 随迁（规则类型 re-export + 两 zod schema 经 shared lazySchema；旧仓 `zod/v4` → 新仓 `zod` 主入口即 v4）。
+- `src/permissions/filesystem.ts`：最小面（getProjectTempDir / getAtlasTempDir / checkRead·WritePermissionForTool / pathInAllowedWorkingPath / DANGEROUS_FILES·DIRECTORIES + 域内纯助手 isDangerousFilePathToAutoEdit / hasSuspiciousWindowsPathPattern / checkPathSafetyForAutoEdit / allWorkingDirectories / pathInWorkingPath / 轻量 getPathsForPermissionCheck）。
+- `src/permissions/permissions.ts`：hasPermissionsToUseTool no-op-allow 起步（forceDecision 非空优先，否则恒 allow / default 模式）；CanUseToolFn 窄视图（全量 Tool/ToolUseContext/AssistantMessage 归 engine）。
+- `src/permissions/bootstrap-env.ts`：跨域注入窗口（setPermissionsBootstrapEnv/get/reset，未注入 fail-fast；面收窄 getOriginalCwd + getCwd 两函数，getSessionId 消费方 scratchpad/session-memory 已砍）。
+- `src/permissions/index.ts`：STR-1 门面（export * 四文件）。
+- `shared/` 新增叶子：configDir / hash / platform / path / unc / lazySchema / tempDir（getAtlasTempDirName，见 D14）。
+
+**偏差登记（复审勿当遗漏重提）：**
+- **D14（T5，getAtlasTempDirName 提升 shared）**：§8.14 定 getAtlasTempDirName 属 permissions 最小面 +「Shell cwd 文件链消费」。落地审视：executor 域现行零 C-Deep 域 import（端口模式 bootstrapState/sandbox/taskOutput），直接引 permissions 破隔离；getAtlasTempDirName 全输入来自 shared（getPlatform + getConfigDirName）+ process.getuid = 纯叶子 → 提升 `shared/tempDir.ts` 单一事实源。getAtlasTempDir（有状态 realpath 缓存，权限 temp dir 消费）留 permissions 消费 shared。executor Shell sandboxTmpDir 接回 `ATLAS_TMPDIR||'/tmp' + getAtlasTempDirName()`（弃切片 1 临时 `tmpdir()/atlas-sandbox-<uid>` 占位，保 executor 零 C-Deep 域 import）。§8.15 补注 1「T5 permissions 不变」据此微调（getProjectTempDir 仍留 permissions）。
+- **D15（T5，isAtlasSettingsPath 字面串勘误）**：旧仓 de-Anthropic 全局替换误伤——`endsWith(\`${sep}getConfigDirName()${sep}settings.json\`)` 里函数名被替换成**字面串**，endsWith 恒不命中（安全检查形同虚设）。新仓改回真调用插值 `getConfigDirName()`（= `.atlas` 或 `ATLAS_CONFIG_DIR_NAME` 覆盖），`{configDir}/settings.json` 语义恢复。
+- **D16（T5，safety 分支窄化用显式比较）**：checkWrite 1.7 旧仓 `(safetyCheck as any).message` 规避窄化。本仓不引 any，改显式 `safetyCheck.safe === false`——实测本仓 `strict:false` 下真值否定 `!x.literal` **不**收窄判别联合，显式 `=== false` 才收窄（standalone `--strict` 两形皆可，差异仅在 strict 关闭）。
+- **薄骨架桩（§8.14 已定，T5 落桩，非遗漏）**：matchingRuleForInput（规则求值树：ignore 库 + 工具名常量 + settings roots + pattern 树 → engine）恒 null / checkReadable·EditableInternalPath（session-memory/plans/tool-results/scratchpad → engine）恒 passthrough / generateSuggestions（PermissionUpdate 真生成 createReadRuleSuggestion → engine）恒 [] / getPathsForPermissionCheck 取轻量版（tilde→homedir + UNC 早退 + 单级 realpath；40 层符号链接链遍历 lstat/readlink + 悬空链接祖先解析归 engine，且 FsOperations 未扩 lstatSync/readlinkSync 面）。checkWrite 1.6 config-folder session allow 规则 + 1.7 skill-scope 建议（ATLAS_FOLDER_PERMISSION_PATTERN + getClaudeSkillScope）归 engine，薄骨架 safety 建议退化桩空数组。
+
+**后续步骤审视（T6–T8）：**
+- T6 hooks 薄骨架：hooks→permissions 反向边（旧 permissions.ts L72 executePermissionRequestHooks）在 §8.14 注入序里 permissions 先落（T5 本批次），hooks（T6）落地时接回；当前 permissions.ts no-op-allow 未含 hook 执行（无边）。
+- T7：permissions 薄骨架 checkRead/checkWrite 决策主面单测走 mock-fs + 注入 bootstrap env（unit 零磁盘）；func 真盘验 getProjectTempDir / getAtlasTempDir realpath 链 + 轻量 getPathsForPermissionCheck 单级 realpath。
+- T8 门同步：capability-matrix 加 permissions 域行（薄骨架 done，proof 随 T7）；anti-stub 已自动纳扫 `src/permissions`（CDEEP_DOMAINS 项），T5 落地后四文件实质行 561/32/23/19 全 ≥5，非空壳，**无需 STUB_REGISTRY 登记**（仅 hooks 域若落 <5 实质行骨架需登记——T6 核）。
+
+**T5 验收**：tsc 0 / 409 pass 0 fail 33 文件 741 expect（基线零变动，含 anti-stub 门）；filesystem 最小面 checkRead/checkWrite 12 步 + 6 助手对旧仓实质行 diff = 仅 D14/D15/D16 + 薄骨架桩四类偏差，零未登记漂移；executor Shell 残余标记（头注 + sandboxTmpDir）接回 shared 单一事实源。

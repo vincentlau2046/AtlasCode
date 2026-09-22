@@ -91,6 +91,163 @@ export type ToolPermissionContext = {
 }
 
 // ════════════════════════════════════════════════════════════════
+// Permission 决策 / 更新类型（旧仓 src/types/permissions.ts，C-Deep 切片 3 T5）
+//
+// 薄骨架裁量（复审勿当遗漏重提）：
+//  - PermissionDecisionReason 只留薄骨架 checkRead/checkWrite 实际产出的
+//    变体（rule/mode/workingDir/safetyCheck/other）；classifier/hook/
+//    asyncAgent/sandboxOverride/subcommandResults/permissionPromptTool
+//    变体归 engine 波（随 yoloClassifier/permissionSetup 真求值）。
+//  - contentBlocks（ContentBlockParam）/ pendingClassifierCheck /
+//    isBashSecurityCheckForMisparsing 字段不随迁（classifier + bash 工具面
+//    归 engine）——薄骨架 ask 决策不携内容块/异步分类器。
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * 权限元数据挂的命令最小形（旧仓刻意用 Command 子集避免 import 环）。
+ */
+export type PermissionCommandMetadata = {
+  name: string
+  description?: string
+  // 前向兼容留额外字段
+  [key: string]: unknown
+}
+
+/** 权限决策附带的元数据。 */
+export type PermissionMetadata =
+  | { command: PermissionCommandMetadata }
+  | undefined
+
+/**
+ * 权限决策原因（薄骨架裁剪版）。
+ */
+export type PermissionDecisionReason =
+  | {
+      type: "rule"
+      rule: PermissionRule
+    }
+  | {
+      type: "mode"
+      mode: PermissionMode
+    }
+  | {
+      type: "workingDir"
+      reason: string
+    }
+  | {
+      type: "safetyCheck"
+      reason: string
+      /**
+       * 为 true 时自动模式让分类器代判而非强制弹框（敏感文件路径
+       * .atlas/、.git/、shell 配置）；为 false 是 Windows 路径绕过尝试等
+       * 不可代判情形。薄骨架恒按静态判定，分类器代判归 engine。
+       */
+      classifierApprovable: boolean
+    }
+  | {
+      type: "other"
+      reason: string
+    }
+
+/** 权限授予时的结果。 */
+export type PermissionAllowDecision<
+  Input extends { [key: string]: unknown } = { [key: string]: unknown },
+> = {
+  behavior: "allow"
+  updatedInput?: Input
+  userModified?: boolean
+  decisionReason?: PermissionDecisionReason
+  toolUseID?: string
+  acceptFeedback?: string
+}
+
+/** 需弹框询问时的结果。 */
+export type PermissionAskDecision<
+  Input extends { [key: string]: unknown } = { [key: string]: unknown },
+> = {
+  behavior: "ask"
+  message: string
+  updatedInput?: Input
+  decisionReason?: PermissionDecisionReason
+  suggestions?: PermissionUpdate[]
+  blockedPath?: string
+  metadata?: PermissionMetadata
+}
+
+/** 权限拒绝时的结果。 */
+export type PermissionDenyDecision = {
+  behavior: "deny"
+  message: string
+  decisionReason: PermissionDecisionReason
+  toolUseID?: string
+}
+
+/** 权限决策——allow / ask / deny 三态。 */
+export type PermissionDecision<
+  Input extends { [key: string]: unknown } = { [key: string]: unknown },
+> =
+  | PermissionAllowDecision<Input>
+  | PermissionAskDecision<Input>
+  | PermissionDenyDecision
+
+/** 带 passthrough（内部路径检查续查）的权限结果。 */
+export type PermissionResult<
+  Input extends { [key: string]: unknown } = { [key: string]: unknown },
+> =
+  | PermissionDecision<Input>
+  | {
+      behavior: "passthrough"
+      message: string
+      decisionReason?: PermissionDecision<Input>["decisionReason"]
+      suggestions?: PermissionUpdate[]
+      blockedPath?: string
+    }
+
+/** 权限更新应持久化的落点。 */
+export type PermissionUpdateDestination =
+  | "userSettings"
+  | "projectSettings"
+  | "localSettings"
+  | "session"
+  | "cliArg"
+
+/** 权限配置的更新操作。 */
+export type PermissionUpdate =
+  | {
+      type: "addRules"
+      destination: PermissionUpdateDestination
+      rules: PermissionRuleValue[]
+      behavior: PermissionBehavior
+    }
+  | {
+      type: "replaceRules"
+      destination: PermissionUpdateDestination
+      rules: PermissionRuleValue[]
+      behavior: PermissionBehavior
+    }
+  | {
+      type: "removeRules"
+      destination: PermissionUpdateDestination
+      rules: PermissionRuleValue[]
+      behavior: PermissionBehavior
+    }
+  | {
+      type: "setMode"
+      destination: PermissionUpdateDestination
+      mode: ExternalPermissionMode
+    }
+  | {
+      type: "addDirectories"
+      destination: PermissionUpdateDestination
+      directories: string[]
+    }
+  | {
+      type: "removeDirectories"
+      destination: PermissionUpdateDestination
+      directories: string[]
+    }
+
+// ════════════════════════════════════════════════════════════════
 // MCPServerConnection（旧仓 src/services/mcp/types.ts:180-226）
 // ════════════════════════════════════════════════════════════════
 
