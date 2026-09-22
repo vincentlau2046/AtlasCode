@@ -144,5 +144,7 @@ export type {
 } from "./runtime-types"
 
 // 旧仓还 re-export 两个 runtime 值（SandboxViolationStore / SandboxRuntimeConfigSchema）。
-// 这是运行时后端加载器，仅 createSandboxManager 实现消费；该实现迁移时一并落
-// runtime 值加载器（src/sandbox/runtime.ts），此处暂不导出值。
+// SandboxViolationStore 为类型（上列已导出）；runtime 值加载器已落
+// ./runtime.ts（C-Deep 切片 2，placeholder + 注入窗口，经门面 index.ts 导出
+// set/get/resetSandboxRuntimeModule）；SandboxRuntimeConfigSchema（zod 校验）
+// 随真 runtime 包提供（B6-func/D 波，见 runtime.ts 残余清单）。
