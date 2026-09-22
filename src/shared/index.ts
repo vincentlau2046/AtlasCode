@@ -11,8 +11,40 @@
 // A 波：feature flag
 export { feature, FEATURE_ON_BY_DEFAULT } from "./feature"
 
-// B 波 S1：env 解析纯函数（四域 config.ts 共用）
-export { parseBoolEnv, parseBoundedIntEnv } from "./env"
+// B 波 S1 + C1：env 解析纯函数（四域 config.ts 共用）
+// C1 统一裁定：isEnvTruthy/isEnvDefinedFalsy = 布尔 env 单一事实源（parseBoolEnv C1b 删除）
+export {
+  parseBoolEnv,
+  parseBoundedIntEnv,
+  isEnvTruthy,
+  isEnvDefinedFalsy,
+} from "./env"
+
+// C1 叶子下沉：零依赖纯工具（旧仓 utils 叶子，跨 ≥2 域或为 C-Deep 地基）
+export {
+  escapeRegExp,
+  capitalize,
+  plural,
+  firstLineOf,
+  countCharInString,
+  normalizeFullWidthDigits,
+  normalizeFullWidthSpace,
+  safeJoinLines,
+  EndTruncatingAccumulator,
+  truncateToLines,
+} from "./stringUtils"
+export { CircularBuffer } from "./circular-buffer"
+export {
+  hasExactErrorMessage,
+  toError,
+  errorMessage,
+  getErrnoCode,
+  isENOENT,
+  getErrnoPath,
+  shortErrorStack,
+  isFsInaccessible,
+} from "./errors"
+export { formatFileSize } from "./format"
 
 // B 波契约冻结：纯类型骨架（atlas/message/SystemPrompt/ThinkingConfig/Effort/Tool）
 export type * from "./types"

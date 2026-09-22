@@ -4,7 +4,12 @@
  * unit 层纪律：无网络/无真实磁盘/无 PTY。纯函数 env 解析。
  */
 import { describe, test, expect } from "bun:test"
-import { parseBoolEnv, parseBoundedIntEnv } from "../../src/shared"
+import {
+  parseBoolEnv,
+  parseBoundedIntEnv,
+  isEnvTruthy,
+  isEnvDefinedFalsy,
+} from "../../src/shared"
 
 describe("parseBoolEnv", () => {
   test("undefined → false", () => {
@@ -66,5 +71,56 @@ describe("parseBoundedIntEnv", () => {
       effective: 0,
       status: "valid",
     })
+  })
+  test("min=1：0/负值 → invalid（timeout 类 env 语义，对齐旧仓 validateBoundedIntEnvVar）", () => {
+    expect(parseBoundedIntEnv("X", "0", 120_000, 1_800_000, 1)).toEqual({
+      effective: 120_000,
+      status: "invalid",
+    })
+    expect(parseBoundedIntEnv("X", "-5", 120_000, 1_800_000, 1)).toEqual({
+      effective: 120_000,
+      status: "invalid",
+    })
+  })
+  test("min=1 时合法正值与 cap 行为不变", () => {
+    expect(parseBoundedIntEnv("X", "300", 120_000, 1_800_000, 1)).toEqual({
+      effective: 300,
+      status: "valid",
+    })
+    expect(parseBoundedIntEnv("X", "9999999", 120_000, 1_800_000, 1)).toEqual({
+      effective: 1_800_000,
+      status: "capped",
+    })
+  })
+})
+
+describe("isEnvTruthy（C1 布尔 env 单一事实源）", () => {
+  test("真值集合", () => {
+    for (const v of ["1", "true", "TRUE", "True", "yes", "YES", "on", " On "]) {
+      expect(isEnvTruthy(v)).toBe(true)
+    }
+    expect(isEnvTruthy(true)).toBe(true)
+  })
+  test("假值/空/未设", () => {
+    for (const v of ["0", "false", "no", "off", "", "random", undefined]) {
+      expect(isEnvTruthy(v)).toBe(false)
+    }
+    expect(isEnvTruthy(false)).toBe(false)
+  })
+})
+
+describe("isEnvDefinedFalsy（显式假值）", () => {
+  test("显式假值集合", () => {
+    for (const v of ["0", "false", "no", "off", "OFF"]) {
+      expect(isEnvDefinedFalsy(v)).toBe(true)
+    }
+    expect(isEnvDefinedFalsy(false)).toBe(true)
+  })
+  test("未设/真值 → false（未设不算显式假）", () => {
+    expect(isEnvDefinedFalsy(undefined)).toBe(false)
+    for (const v of ["1", "true", "yes", "on"]) {
+      expect(isEnvDefinedFalsy(v)).toBe(false)
+    }
+    expect(isEnvDefinedFalsy(true)).toBe(false)
   })
 })
