@@ -17,13 +17,8 @@ import { randomUUID } from 'crypto'
 import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
-import type { Message, SystemPrompt } from '../shared'
+import { asSystemPrompt, type Message, type SystemPrompt } from '../shared'
 import { logForDebugging } from './debug'
-
-// TODO: PR to shared — asSystemPrompt 值未入 shared/index.ts 门面（仅 export type *）
-function asSystemPrompt(value: readonly string[]): SystemPrompt {
-  return value as SystemPrompt
-}
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 

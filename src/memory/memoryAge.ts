@@ -11,7 +11,9 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export function memoryAgeDays(filePath: string): number | undefined {
   try {
     const stat = statSync(filePath)
-    return (Date.now() - stat.mtimeMs) / DAY_MS
+    // Clamp to 0: filesystem mtime precision can exceed Date.now() resolution,
+    // yielding a tiny negative delta for just-created files (age can't be < 0).
+    return Math.max(0, Date.now() - stat.mtimeMs) / DAY_MS
   } catch {
     return undefined
   }

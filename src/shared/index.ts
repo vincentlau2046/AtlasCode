@@ -17,5 +17,8 @@ export { parseBoolEnv, parseBoundedIntEnv } from "./env"
 // B 波契约冻结：纯类型骨架（atlas/message/SystemPrompt/ThinkingConfig/Effort/Tool）
 export type * from "./types"
 
+// B 波合并：值导出（export type * 不带值，S2 域消费 EFFORT_LEVELS + asSystemPrompt）
+export { EFFORT_LEVELS, asSystemPrompt } from "./types"
+
 // B 波契约冻结：会话级类型（Permission/MCP/Task）
 export type * from "./types-session"

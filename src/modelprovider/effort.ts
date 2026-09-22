@@ -8,24 +8,16 @@
  *  - isUltrathinkEnabled 旧仓 = feature('ULTRATHINK') + growthbook；
  *    growthbook 斩断（Port 8），feature('ULTRATHINK') 默认 false → stub false
  *  - settings 依赖（getEffortByModel 等）不被这 3 函数消费，不迁
- *  - EffortLevel/EffortValue 从 shared import（契约冻结）
- *
- *  ⚠ shared/index.ts 仅 `export type * from "./types"`，不导出值（EFFORT_LEVELS）。
- *    域内本地定义，TODO: PR to shared（值导出补入门面）。
+ *  - EffortLevel/EffortValue/EFFORT_LEVELS 从 shared import（契约冻结 + B 波合并值导出）
  *
  * C 波再下沉 shared（effort 全量函数 + settings port）。
  */
 
+import { EFFORT_LEVELS } from '../shared'
 import type { EffortLevel, EffortValue } from '../shared'
 
-// TODO: PR to shared — shared/index.ts 仅 export type *，EFFORT_LEVELS 值未入门面
-export const EFFORT_LEVELS = [
-  'low',
-  'medium',
-  'high',
-  'xhigh',
-  'max',
-] as const satisfies readonly EffortLevel[]
+// Re-export for domain consumers/tests (值定义在 shared，域内透传)
+export { EFFORT_LEVELS }
 
 /** 旧仓 utils/envUtils.ts isEnvTruthy — 域内本地副本（utils 斩断）。 */
 function isEnvTruthy(value: string | undefined): boolean {
