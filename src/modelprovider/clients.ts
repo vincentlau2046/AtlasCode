@@ -1,0 +1,33 @@
+/**
+ * OpenAI-protocol 客户端工厂 — 从旧仓 modelprovider/clients.ts 迁入
+ *
+ * 按 (provider|baseURL|apiKey) 缓存客户端；maxRetries: 0（重试在 Provider 层）。
+ */
+
+import OpenAI from 'openai'
+import type { ResolvedModel } from './roles'
+
+type OpenAIClient = InstanceType<typeof OpenAI>
+
+const clientCache = new Map<string, OpenAIClient>()
+
+function clientCacheKey(provider: string, baseURL: string | undefined, apiKey: string | undefined): string {
+  return provider + '|' + (baseURL || '') + '|' + (apiKey || '')
+}
+
+/** Get (or lazily create and cache) a per-model OpenAI client. */
+export function getClientForEntry(entry: ResolvedModel): OpenAIClient {
+  const key = clientCacheKey(entry.provider, entry.baseURL, entry.apiKey)
+  let client = clientCache.get(key)
+  if (client) {
+    return client
+  }
+  client = new OpenAI({
+    baseURL: entry.baseURL,
+    apiKey: entry.apiKey,
+    maxRetries: 0,
+    timeout: 120_000,
+  })
+  clientCache.set(key, client)
+  return client
+}

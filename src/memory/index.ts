@@ -1,9 +1,56 @@
 /**
  * memory 模块唯一公共出口（STR-1 门面规则）。
  *
- * 将 re-export: types/FileSystemMemoryStore/RootedMemoryStore/paths/config
+ * 外部模块只许 `import { ... } from "../memory"`（或 "src/memory"）,
+ * 不许 reach 内部文件（entry-point lint 拦截）。
  *
- * 实现波次: B 波
- * 状态: A 波骨架占位
+ * re-export: types / FileSystemMemoryStore / RootedMemoryStore /
+ *            InMemoryStore / CompositeMemoryStore / paths / config /
+ *            memoryTypes / memoryAge
  */
-export {}
+
+// 接口 + 实现类
+export type { MemoryStore, StoreDirent, FileReadResult } from './types'
+export { FileSystemMemoryStore } from './FileSystemMemoryStore'
+export { InMemoryStore } from './InMemoryStore'
+export { CompositeMemoryStore } from './CompositeMemoryStore'
+export { RootedMemoryStore } from './RootedMemoryStore'
+
+// 路径解析（memdir/paths 收进域内）
+export {
+  isAutoMemoryEnabled,
+  isExtractModeActive,
+  getMemoryBaseDir,
+  validateMemoryPath,
+  getCoworkMemoryPathOverride,
+  hasAutoMemPathOverride,
+  getAutoMemPath,
+  getAutoMemEntrypoint,
+  isAutoMemPath,
+} from './paths'
+
+// 配置
+export { createMemoryConfig, autoMemoryEnabledFromEnv } from './config'
+export type { MemoryConfig } from './config'
+
+// 记忆类型分类 + prompt 段落常量
+export {
+  MEMORY_TYPES,
+  parseMemoryType,
+  TYPES_SECTION_COMBINED,
+  TYPES_SECTION_INDIVIDUAL,
+  WHAT_NOT_TO_SAVE_SECTION,
+  MEMORY_DRIFT_CAVEAT,
+  WHEN_TO_ACCESS_SECTION,
+  TRUSTING_RECALL_SECTION,
+  MEMORY_FRONTMATTER_EXAMPLE,
+} from './memoryTypes'
+export type { MemoryType } from './memoryTypes'
+
+// 记忆年龄
+export {
+  memoryAgeDays,
+  memoryAge,
+  memoryFreshnessText,
+  memoryFreshnessNote,
+} from './memoryAge'
