@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | A 骨架 | git init + 目录 + feature.ts 双形态规则 + 边界 lint + 留档三件套 JSON | 2-3 天 | 低 | 串行 |
 | B 四域 | 4 域 config.ts + create() + 域单测（B6）+ shared 类型下沉 | 5-8 天（并行 3-5） | 中 | **可并行** |
-| **C 咽喉** | C1 叶子下沉（engine 212 主体 + 四域 41 前移 B 波）+ C2 端口化（engine 49 结构性 + 8 port + GrowthBook 150→Port 8） | **8-12 天** ⏳ | **中**（v0.11 实测收窄，原 10-20） | 纯串行 |
+| **C 咽喉** | C1 叶子下沉 + C-Deep（executor/sandbox 深实现回流，见 §8）+ C2 端口化（engine 49 结构性 + 8 port + GrowthBook 150→Port 8） | **12-18 天** ⏳ | **中高**（§8 复盘：吸收 C-Deep 整波 + 功能纵切优先重排序） | 纯串行 |
 | E ascend | 16 工具 + 5 skill + executor 平移 + gelu 直调 | 3-5 天 | 低（资产已成型） | 串行 |
 | D 壳 | UI/CLI/AppState/mount/compose + .tsx 主战场 | 8-15 天 | 中高 | 串行 |
 | F 清尾 | 删 shim + 死代码 + 75 flag + 品牌串 + ENV T2 | 3-5 天 | 低 | 串行 |
@@ -316,7 +316,7 @@ B 波（3-5 天，2 session 并行）：四域 config.ts + 域单测 → B6 绿 
    ↓
 [已完成] C 波 spike（2026-09-22，4 步全绿）：①分类校准（memory 3→21，总量 +7% 可信）②端口化原型 15/15 绿（单域<1天偏保守）③并发原型 9/9 绿 ④双跑 6/6 绿 → **决策：开 C 波**
    ↓
-C 波（8-12 天，纯串行）：C1-四域（B 波前移）→ C1-engine 叶子下沉 → C2-engine 端口化 → B9 → B14 → wave-c tag
+C 波（12-18 天，纯串行，功能纵切优先 §8）：C1 叶子下沉 → C2-executor-ports（3 port）→ C-Deep（填 6 stub + 建 4 域骨架）→ **B6-func 功能 gate（真实跑命令）** → C1-engine 212 叶子 + C2-engine → B9 → B14 → wave-c tag
    ↓ >20 天触发超阈值评估（2x 估算 = 明显失控）
    ↓
 E 波（3-5 天，串行）：ascend 块直调 → gelu L1 → wave-e tag
@@ -327,3 +327,64 @@ F 波（3-5 天，串行）：清尾 → B13 → wave-f tag → 旧仓 archive
 ```
 
 **关键决策点**：~~C 波 spike 跑完的那一刻~~ **spike 已跑完（2026-09-22，4/4 绿），决策=开 C 波**。整个迁移"该不该全量走"的最终判断点已通过——4 项验证全绿（分类口径已定位 + 单域耗时偏保守 + 并发模型成立 + 双跑可跑），唯一修正项（memory 3→21）不阻塞。下一步：开 A 波（骨架，2-3 天，低风险）。
+
+---
+
+## 8. B 波复盘 + C 波重规划（功能纵切优先，2026-09-22）
+
+> B 波（tag wave-b）完结后深度复盘，修正"两域已完结"的误判 + 重排 C 波。
+
+### 8.1 B 波真实交付度（非对称）
+
+| 域 | 行为完成度 | 说明 |
+|---|---|---|
+| memory | ✅ 行为完整 | 14 文件全真码（5 stores + paths + config） |
+| modelprovider | ✅ 行为完整 | 22 文件全真码（provider + ports + errorHandling） |
+| **executor** | ⚠️ 仅骨架 | Shell/ShellCommand/ShellExecutor/shellProvider **4 文件 = 空 `export {}`** |
+| **sandbox** | ⚠️ 仅骨架 | createSandboxManager/ripgrep **2 文件 = 空 `export {}`** |
+
+**"B6 全绿" = 编译+单测绿，非行为绿**。当前跑新仓：memory/modelprovider 可工作，但执行一条 shell 命令、建一个 sandbox manager 都做不了（那是空 stub）。**6 空 stub 通过 tsc/lint/test 但什么都不做**——strangler 中间段腐烂风险：仓库看着绿、核心域（coding agent 离不开 shell）是空的。
+
+### 8.2 深实现回流 = C-Deep（新显式子波，非 C1/C2 附属）
+
+S1"深迁移归 C 波 port 化后机械适配"判定**方向对但低估量级**。实测 Shell.ts 传递闭包跨 5 域，其中 4 域新仓**根本不存在**：
+
+| 依赖 | 规模 | 新仓落点 |
+|---|---|---|
+| task 域（TaskOutput 390 + diskOutput 451 + Task 125） | 965 行 | ❌ `src/task` 缺失 |
+| bootstrap 域（state.ts） | 373 行 | ❌ `src/bootstrap` 缺失 |
+| permissions 域（filesystem） | 触及 | ❌ `src/permissions` 缺失 |
+| hooks 域（fileChangedWatcher） | 触及 | ❌ `src/hooks` 缺失 |
+| 12 个 utils 叶子（debug/errors/fsOperations/CircularBuffer…） | — | 未下沉 shared |
+
+**C-Deep 实际 = 新建 4 域骨架 + 下沉 12 shared 叶子 + 填 6 实现文件，是整波量级**，原 C 波 8-12 天估算未含（它误以为四域叶子已前移进 B 波减负 15%——实际 B 波是各域本地复制 utils 非下沉 shared，去重债仍在 C 波）。
+
+### 8.3 C 波重排序（功能纵切优先，用户 2026-09-22 裁定）
+
+**原序**（charter）：C1 叶子下沉 → C2 8 port → C1-engine 212 → C2-engine → B9 → B14（优化 engine 体量，功能验证推到最后）。
+
+**新序**（功能纵切优先，先除风险）：
+```
+C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）
+  ↓
+C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）
+  ↓
+C-Deep（填 6 stub，建 task/bootstrap/permissions/hooks 4 域骨架）
+  ↓
+★ B6-func 功能 gate（新 gate：真实跑一条 shell 命令 + 建一个 sandbox，证明迁移链能跑通）
+  ↓
+C1-engine 212 叶子 + C2-engine 49 结构 + 剩余 port
+  ↓
+B9 双跑 diff → B14 package gate → wave-c tag
+```
+
+**收益**：2-3 天拿到能真实执行命令的 executor，先验证整条迁移链可运行，再投 engine 212 处体量迁移。
+
+### 8.4 估算修正
+
+C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶子去重）。§1 总区间 29-48 天需相应上调。
+
+### 8.5 C-Deep 前置须定的设计决策
+
+1. **TaskOutput 归属**：shell 前台 stdout 是否从 task 域后台输出捕获中解耦？**倾向解耦**——port 只暴露输出捕获接口，不把 965 行 task infra 拉进 executor。
+2. **Shell → sandbox/compat 反向依赖**（L3 违规）：改 SandboxDependencies 注入（类型已有），消除 Shell 直连 core/sandbox。
