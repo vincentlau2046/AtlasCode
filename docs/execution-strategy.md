@@ -559,3 +559,30 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 | L-2 | modelprovider **非流式** completion 未验（双跑验真只走流式 12/14；矩阵 "(mock) 出一段 completion" missing 行已注 C 波） | B6-func "mock 一次 completion" 验收须含**非流式**路径断言（流式/非流式双腿都过） |
 
 **不影响切片 3**（两项均在 B6-func 断言展开面，test-strategy §6 "B6-func 具体断言 + 前置清单" 展开时一并落）。
+
+### 8.14 C-Deep 切片 3 裁剪定稿（四新域，2026-09-22 调研 agent + 独立抽查核验）
+
+调研范围：旧仓（a8af45b）task 面 5 文件（125+390+451+308+74L）/ bootstrap 2 文件（373+33L）/ permissions 20+ 文件 / hooks 2 文件（4979+191L）。关键事实经独立抽查逐条核验（行数/hook 边行号/死代码判定全命中）。
+
+**逐域裁定（随迁/薄骨架/残余归 engine/砍）：**
+
+| 域 | 裁定 | 说明 |
+|---|---|---|
+| **task 域 = 裁剪版真核心** | Task.ts 125L 随迁（TaskType/TaskStatus/generateTaskId/TASK_ID_PREFIXES canonical TaskId——无独立表文件，映射存 AppState.tasks/diskOutput 模块 Map/TaskOutput 静态 #registry 三处）；TaskOutput.ts 390L 随迁（ctor 4 参 maxMemory=8MB 默认 / spill 8MB 触发落盘 stderr 加 `[stderr]` 前缀 / clear 全清 + registry 删 / deleteOutputFile ENOENT 容错 / **static startPolling·stopPolling 保留 API 但零消费者**（旧仓唯一调用方 PowerShellTool.tsx L819/948 = React 层未移植归 engine））；diskOutput.ts 451L 随迁（**getProjectTempDir 跨域边→permissions 薄骨架注入**；MAX_TASK_OUTPUT_BYTES=5GB 常量 + getTaskOutputPath 接回 executor ShellCommand 残余 L280/L324；DiskTaskOutput.append 5GB cap 语义照抄）；framework.ts 308L **残余归 engine**（消费方全在 attachments/tasks impls/swarm；**pollTasks 全仓零外部调用 = 死导出，砍**）；outputFormatting/sdkProgress 74L 归 engine 按需 | 接回 executor 残余 = ShellCommand L12 头注/L280 killedForSize/L324 MAX_TASK_OUTPUT_BYTES 三处标记 |
+| **bootstrap 域 = 真适配器** | state.ts 373L（旧仓为**重建 stub**，头注明示 "stub exports"）取**真实现子集**：{getOriginalCwd/setOriginalCwd、getCwdState/setCwdState、getSessionId/switchSession、getIsNonInteractiveSession/setIsInteractive、cost state 累加器族}；~250 个 stub 导出整砍（勿把 `: any` stub 签名当真行为）；cwd.ts 33L 随迁（ALS 覆盖层 runWithCwdOverride + pwd() store ?? getCwdState + getCwd 异常回落 getOriginalCwd） | Shell.ts 已移植方消费面：setCwd realpathSync 解析 / pwd -P 文件链 / 目录消失恢复（realpath 失败→originalCwd 回落→createFailedCommand） |
+| **permissions 域 = 薄骨架** | PermissionRule.ts 40L 随迁（sandbox manager type 消费面，零深依赖）；filesystem.ts 1781L 取最小面：getProjectTempDir（diskOutput 消费）/ getAtlasTempDirName + getAtlasTempDir（Shell cwd 文件链消费）/ checkRead·WritePermissionForTool / pathInAllowedWorkingPath / DANGEROUS_FILES·DIRECTORIES，余砍；permissions.ts 1326L 取 hasPermissionsToUseTool **no-op-allow 起步**（规则求值/yoloClassifier 1332L/permissionSetup 1508L 归 engine） | ⚠️ hooks→permissions 反向边（旧 permissions.ts L72 executePermissionRequestHooks）：薄骨架若先落 permissions 后落 hooks，临时 no-op |
+| **hooks 域 = 薄骨架 + 跨域边斩断** | hooks.ts 4979L 取最小面：HOOK_EVENTS 27 事件 + getMatchingHooks + runHooks（折叠 18 个 execute* 事件参数化，先实 PreToolUse/PostToolUse/SessionStart/Stop/SessionEnd 五高频）+ shouldSkipHookDueToTrust + createBaseHookInput；**斩断 2 条 task 边**：① L219-221 asyncRewake 分支 `shellCommand.taskOutput.getStdout()/getStderr()/cleanup()` → **HookOutputCapture 注入端口** `{getStdout(): Promise<string>, getStderr(): string, cleanup(): void}`（TaskOutput 12 成员窄面的钩子子集，组合根注入 task 域实现）② L989 `new TaskOutput('hook_<pid>')` 直构 → 构造注入 `createHookOutput(taskId)` 工厂；telemetry/plugin 选项/MCP elicitation/agentSdk 类型面/attachments·messageQueue 直调全砍或改 engine 注入回调 | fileChangedWatcher.ts 191L = **hooks↔executor 第二跨域边**（Shell L30 import onCwdChangedForHooks），随骨架注入（no-op 起步） |
+
+**注入序约束**（防首跑 fail-fast 崩）：permissions 薄骨架（暴露 getProjectTempDir）→ task 域（diskOutput 消费）→ hooks（HookOutputCapture/createHookOutput 由组合根注入 task 域实现）。B6-func 前置清单 4+4 → **4+5**（加 hooks capture 注入项，D10）。
+
+**H6 断言清单（防 B 波"空壳骗过四件套"复现，func 层真盘证据）**：
+1. TaskOutput spill：pipe 模式 >8MB 触发真落盘（磁盘文件含 `[stderr] ` 前缀 + 触发 chunk；getStdout 返回 5 行尾 + 提示文案）/ ctor maxMemory 覆写边界
+2. deleteOutputFile 真删 + ENOENT 容错（二次删不抛）
+3. diskOutput 5GB cap 边界：**func 层以可覆写常量模拟**（真写 5GB 不可行——cap 语义 = bytesWritten 超限后队列只追加截断标记 + chunk 丢弃，用小 maxBytes 断言语义同构）；appendTaskOutput/getTaskOutput tail 8MB + 截断前缀/getTaskOutputDelta 偏移读/cleanupTaskOutput 真删
+4. generateTaskId 前缀族（b/a/r/t/w/m/d + 未知回落 x）+ hook_<pid> 字面量 taskId 两口径
+5. bootstrap cwd 两状态分离（originalCwd 不可变语义 vs cwdState 可变）+ 目录消失恢复路径
+6. hooks 斩断验证：HookOutputCapture 未注入 = fail-fast 抛错（非静默透传）；注入 task 域实现后 pipe 模式真 stdout/stderr 捕获
+
+**门同步（同提交，不留无门窗口）**：4 新域目录 mkdir 即触发 anti-stub CDEEP_DOMAINS 自动纳扫 → 各域骨架文件（<5 实质行）须同提交登记 STUB_REGISTRY（注明解锁波次=本切片填实即销）；capability-matrix 加 4 域行（task 真核心 done 指向 func / bootstrap 适配器 done / permissions 薄骨架 done / hooks 薄骨架+斩断 done，proof 随 T7 测试文件定）。
+
+**切片 3 实施任务清单**：T1 task 域骨架 + Task.ts 随迁（seed）→ T2 TaskOutput 真核心（spill/clear/delete）→ T3 diskOutput（getProjectTempDir 注入 + 5GB cap + executor 残余接回 L280/L324）→ T4 bootstrap 域（state 真子集 + cwd）→ T5 permissions 薄骨架（PermissionRule + filesystem 最小面 + no-op-allow）→ T6 hooks 薄骨架（runHooks + 斩断 2 边 + fileChangedWatcher 注入）→ T7 测试（unit 零磁盘 + func 真盘按上 H6 清单）→ T8 门同步（STUB_REGISTRY + 矩阵 4 行 + docs + memory）。
