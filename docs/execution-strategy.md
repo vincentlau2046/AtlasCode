@@ -371,7 +371,7 @@ B-fix 防腐门（0.5 天，独立项，C 波前置，2026-09-22 已完成）
   anti-stub + capability-matrix 机器门 + .github/workflows/ci.yml
   （归类：B 波缺陷纠偏，非 C 波范围；C-Deep 填 6 stub 前必须就位）
   ↓
-C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）
+C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）✅ 2026-09-22 完成（438a93b + b3c2fe1，§8.6）
   ↓
 C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）
   ↓
@@ -394,3 +394,24 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 
 1. **TaskOutput 归属**：shell 前台 stdout 是否从 task 域后台输出捕获中解耦？**倾向解耦**——port 只暴露输出捕获接口，不把 965 行 task infra 拉进 executor。
 2. **Shell → sandbox/compat 反向依赖**（L3 违规）：改 SandboxDependencies 注入（类型已有），消除 Shell 直连 core/sandbox。
+
+### 8.6 C1 叶子下沉执行记录（2026-09-22 完成，438a93b + b3c2fe1）
+
+**下沉 shared（C1a，纯增量）**：
+- `shared/stringUtils.ts`（整文件 235L）/ `circular-buffer.ts`（84L）/ `errors.ts`（8 纯助手）/ `format.ts`（formatFileSize）
+- `shared/env.ts` 扩展：`isEnvTruthy`/`isEnvDefinedFalsy`（旧仓 envUtils T3 语义）+ `parseBoundedIntEnv` 加 `min` 参数
+- 单测：4 个新叶子测试文件 + shared-env 扩展（min 参数 / 布尔原语全集合断言）
+
+**去重收口（C1b，删 5 份本地副本，-204 行）**：
+| 裁定 | 内容 |
+|---|---|
+| 布尔 env 单一事实源 | `isEnvTruthy`（T3 集合 1/true/yes/on）。B 波 `parseBoolEnv`（窄集合）删除；executor/sandbox config 切 isEnvTruthy（"yes"/"on" 现在判真，对齐旧仓）；memory/envUtils 只留 getAtlasConfigHomeDir；effort.ts 本地副本删 |
+| 有界整数单一事实源 | `parseBoundedIntEnv(…, min)`。modelprovider `envValidation.ts` 整删，index/config 切 `min=1`（保留"0 无效回落默认"，timeout 类 0 无意义）；executor/sandbox 默认 `min=0`（GLOB_TIMEOUT 0=不限时） |
+| formatFileSize 口径 | shared 版（旧仓 "N bytes"）。memory 本地 "512B" 变体是 B 波本地化偏差，去重时回归旧仓基准（FileTooLargeError 文案随统一） |
+
+**未下沉（有裁定，非遗漏）**：
+- `outputLimits`（BASH_MAX_OUTPUT_* + getMaxOutputLength）= executor 域策略常量，仅 shell 消费 → C-Deep 随 ShellCommand 落 executor 域内
+- `debug.ts`（logForDebugging no-op）按 C-4 裁定保持 no-op 占位，logging port 定案前不下沉
+- `fsOperations`/`readFileInRange` 纯部分 = memory 域专属（DEP-3 域内收拢），留域
+
+**验收**：tsc 0 / lint 0 / build ✓ / 349 pass 0 fail（含 tests/ci 防腐门；STUB_REGISTRY 未动——C1 不填 stub，符合门②口径）。
