@@ -27,10 +27,12 @@ type MatrixRow = {
 }
 
 /**
- * 能力矩阵（单一事实源）。C-Deep 切片 1 现状（2026-09-22）：
+ * 能力矩阵（单一事实源）。C-Deep 切片 2 现状（2026-09-22）：
  * memory/modelprovider 行为完整（B 交付真码）；executor 纵切已填
  * （4 空 stub → 裁剪版 bash-only 真核心 + 真 spawn 功能 smoke）；
- * sandbox 2 空 stub 待 C-Deep 切片 2。
+ * sandbox 纵切已填（2 空 stub → 裁剪版工厂 + runtime 注入窗口 +
+ * system-rg 单模式后端，真建 manager + 真 ripgrep 功能 smoke，
+ * STUB_REGISTRY 随之清零）。
  */
 const MATRIX: readonly MatrixRow[] = [
   { domain: 'memory', capability: '写+读 memory（store 语义）', status: 'done', proof: 'tests/unit/memory-store.test.ts' },
@@ -46,7 +48,11 @@ const MATRIX: readonly MatrixRow[] = [
   // C2：3 port 契约（TaskOutput/bootstrapState/ExecutorSandbox 注入面，§8.8）
   // proof 取三契约测试之一（另两件同族：executor-port-bootstrap-state / executor-port-sandbox）
   { domain: 'executor', capability: '3 port 契约（task/bootstrap/sandbox 注入面）', status: 'done', proof: 'tests/unit/executor-port-task-output.test.ts' },
-  { domain: 'sandbox', capability: '创建 sandbox manager', status: 'missing', by: 'C-Deep' },
+  // C-Deep 切片 2（sandbox 纵切）：真建 manager（工厂闭包 + backend +
+  // runtime 注入窗口全链）+ 真 ripgrep 查询（§8.7 port 之下全真；
+  // rg 缺失 skip 不红）。同族契约测试：sandbox-manager（unit 层）
+  { domain: 'sandbox', capability: '创建 sandbox manager（裁剪版工厂 + runtime 注入窗口）', status: 'done', proof: 'tests/func/sandbox-smoke.test.ts' },
+  { domain: 'sandbox', capability: 'ripgrep 搜索后端（system-rg 单模式真查询）', status: 'done', proof: 'tests/func/sandbox-smoke.test.ts' },
   { domain: 'sandbox', capability: '违规文本处理', status: 'done', proof: 'tests/unit/sandbox-violation-text.test.ts' },
 ]
 

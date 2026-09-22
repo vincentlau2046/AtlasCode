@@ -43,10 +43,9 @@ const STUB_REGISTRY: ReadonlyArray<{
   reason: string
   unlock: string
 }> = [
-  // C-Deep 切片 1（executor 纵切）已填 4 stub → 销 4 条（门② 防漂移）；
-  // 裁剪残余（PowerShell/windows/watchdog/autoBg 等）见各文件头注释清单
-  { file: 'src/sandbox/createSandboxManager.ts', reason: 'sandbox 工厂（闭包 30+ 文件）', unlock: 'C-Deep' },
-  { file: 'src/sandbox/ripgrep.ts', reason: 'ripgrep 搜索后端（闭包 8 子依赖）', unlock: 'C-Deep' },
+  // C-Deep 切片 1（executor 纵切）销 4 条；切片 2（sandbox 纵切）销最后 2 条
+  // （createSandboxManager 工厂 + ripgrep 搜索后端，裁剪版填实）→ 注册表清零。
+  // 裁剪残余清单见各文件头注释（非"空壳"，不登记）。
 ]
 
 /** 剥掉注释/空行后的实质行数 */
