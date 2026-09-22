@@ -10,7 +10,6 @@ import {
   normalizeModelStringForAPI,
   modelToRole,
   MODEL_ROLES,
-  type ModelRole,
 } from "../../src/modelprovider/roles"
 
 describe("MODEL_ROLES", () => {
