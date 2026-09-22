@@ -6,7 +6,7 @@
  * 域×能力→证明测试文件→状态 锁成单一事实源：
  *   - done 行的证明文件必须存在且含真实测试
  *   - missing 行必须注明解锁波次（不许无声失踪）
- *   - 四域每域 ≥1 行（不许有域无能力规约）
+ *   - 八域每域 ≥1 行（不许有域无能力规约）
  *
  * 纪律：绝不写假装通过的能力测试 —— 未实现的能力标 missing + 解锁波次。
  */
@@ -17,19 +17,28 @@ import { join } from 'path'
 const REPO_ROOT = new URL('../../', import.meta.url).pathname
 
 type MatrixRow = {
-  domain: 'executor' | 'sandbox' | 'memory' | 'modelprovider'
+  domain:
+    | 'executor'
+    | 'sandbox'
+    | 'memory'
+    | 'modelprovider'
+    | 'task'
+    | 'bootstrap'
+    | 'permissions'
+    | 'hooks'
   capability: string
   status: 'done' | 'missing'
   /** done：证明测试文件（仓内相对路径） */
   proof?: string
-  /** missing：解锁波次（C-Deep / C / D / E / F） */
+  /** missing：解锁波次（C-Deep / C / D / E / F / engine） */
   by?: string
 }
 
 /**
- * 能力矩阵（单一事实源）。C-Deep 切片 2 现状（2026-09-22）：
- * memory/modelprovider 行为完整（B 交付真码）；executor 纵切已填
- * （4 空 stub → 裁剪版 bash-only 真核心 + 真 spawn 功能 smoke）；
+ * 能力矩阵（单一事实源）。
+ *
+ * C-Deep 切片 2（2026-09-22）：memory/modelprovider 行为完整（B 交付真码）；
+ * executor 纵切已填（4 空 stub → 裁剪版 bash-only 真核心 + 真 spawn 功能 smoke）；
  * sandbox 纵切已填（2 空 stub → 裁剪版工厂 + runtime 注入窗口 +
  * system-rg 单模式后端，真建 manager + 真 ripgrep 功能 smoke，
  * STUB_REGISTRY 随之清零）。
@@ -37,6 +46,13 @@ type MatrixRow = {
  * 跨会话独立审视修复（2026-09-22，ee96206，记录见 execution-strategy §8.12）：
  * FS 适配器原本只有 mock-fs 委托单测（"写+读" proof 指向 InMemoryStore，
  * 真 FS 零证据，H6 空洞同类）→ 新增 memory FS store 真磁盘 func 证据行。
+ *
+ * C-Deep 切片 3（2026-09-23，§8.16）：四新域 task/bootstrap/permissions/hooks
+ * 薄骨架纵切 —— task 输出磁盘层（spill/delete/5GB cap/TaskId）真盘 func 证据；
+ * bootstrap cwd 两状态分离 + ALS 覆盖层归 unit（纯状态无 fs）；permissions
+ * 薄骨架决策主面（unit 零磁盘 + func 真盘 realpath 链）；hooks 薄骨架 5 高频
+ * 执行器聚合面 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）。
+ * hooks 流式/attachment 渲染（AsyncGenerator）随 §8.16 裁剪归 engine 波（missing）。
  */
 const MATRIX: readonly MatrixRow[] = [
   { domain: 'memory', capability: '写+读 memory（store 语义）', status: 'done', proof: 'tests/unit/memory-store.test.ts' },
@@ -64,9 +80,35 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'sandbox', capability: '创建 sandbox manager（裁剪版工厂 + runtime 注入窗口）', status: 'done', proof: 'tests/func/sandbox-smoke.test.ts' },
   { domain: 'sandbox', capability: 'ripgrep 搜索后端（system-rg 单模式真查询）', status: 'done', proof: 'tests/func/sandbox-smoke.test.ts' },
   { domain: 'sandbox', capability: '违规文本处理', status: 'done', proof: 'tests/unit/sandbox-violation-text.test.ts' },
+  // C-Deep 切片 3（四新域薄骨架纵切，§8.16）：task 输出磁盘层真盘证据（H6①–④）
+  { domain: 'task', capability: 'TaskOutput spill 溢写 + stderr 前缀（真盘 I/O）', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
+  { domain: 'task', capability: 'deleteOutputFile 真删 + ENOENT 吞错', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
+  { domain: 'task', capability: '5GB cap 同构边界（MAX_TASK_OUTPUT_BYTES 单一事实源）', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
+  { domain: 'task', capability: 'TaskId 双口径（type→前缀 + 字符集/长度）', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
+  // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
+  { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
+  { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
+  // permissions 薄骨架决策主面（unit 零磁盘）+ realpath 链真盘（func）
+  { domain: 'permissions', capability: 'checkRead/checkWrite 决策主面（零磁盘）', status: 'done', proof: 'tests/unit/permissions.test.ts' },
+  { domain: 'permissions', capability: 'getAtlasTempDir/getProjectTempDir realpath 链（真盘）', status: 'done', proof: 'tests/func/permissions-real-fs.test.ts' },
+  // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
+  { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
+  { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
+  { domain: 'hooks', capability: '跨域斩断 fail-fast（shell/task 边未注入抛错）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
+  // §8.16 裁剪：hooks 流式/attachment 渲染（AsyncGenerator）归 engine 波
+  { domain: 'hooks', capability: 'hooks 流式执行 / attachment 渲染（AsyncGenerator）', status: 'missing', by: 'engine（流式执行/attachment 渲染归 engine 波）' },
 ]
 
-const DOMAINS = new Set<MatrixRow['domain']>(['executor', 'sandbox', 'memory', 'modelprovider'])
+const DOMAINS = new Set<MatrixRow['domain']>([
+  'executor',
+  'sandbox',
+  'memory',
+  'modelprovider',
+  'task',
+  'bootstrap',
+  'permissions',
+  'hooks',
+])
 
 describe('能力矩阵门', () => {
   test('① done 行的证明测试文件必须存在且含真实测试', () => {
@@ -88,7 +130,7 @@ describe('能力矩阵门', () => {
     expect(bad).toEqual([])
   })
 
-  test('③ 四域每域至少 1 行能力规约（不许有域无规约）', () => {
+  test('③ 八域每域至少 1 行能力规约（不许有域无规约）', () => {
     const covered = new Set(MATRIX.map((r) => r.domain))
     const missing = [...DOMAINS].filter((d) => !covered.has(d))
     expect(missing).toEqual([])

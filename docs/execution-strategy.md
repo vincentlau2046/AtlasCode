@@ -665,3 +665,30 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 - **B6-func 前置清单最终口径 4+6**：4（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11/§8.15 补注 3）+ ②setHookShellPort（D17，本批次）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。
 
 **T6 验收**：tsc 0 / 409 pass 0 fail 33 文件 741 expect（基线零变动，含 anti-stub 门 3/3 绿）；hooks 域零 C-Deep 域 import、零 shared import（全经注入端口，L3 隔离成立）；12 文件对旧仓实质行 diff = 仅 D17 + BaseHookInput 勘误 + Promise 折叠 + engine 裁剪四类，零未登记漂移；STR-1 门面 + 5 高频执行器 + 信任门 + 2 task 边斩断 + D17 shell 边切端口全就位。
+
+---
+
+**T7 测试层落地面（§8.16 T7 口径，H6 清单 6 条 + 分层纪律，逐文件）：**
+
+H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill 真落盘 + `[stderr] ` 前缀 / ② deleteOutputFile 真删 + ENOENT 吞错 / ③ 5GB cap 同构边界（MAX_TASK_OUTPUT_BYTES 单一事实源 = 5GB + DiskTaskOutput maxBytes 覆写 seam 触发截断标记，**不真写 5GB**）/ ④ TaskId 双口径（type→前缀 + 长度 9 / 字符集）/ ⑤ bootstrap cwd 两状态分离 + ALS 覆盖层 / ⑥ hooks 斩断 fail-fast（shell/task 边未注入抛错）。
+
+- `tests/unit/hooks.test.ts`（318L，17 例，零磁盘）：`FakeHookShell`（enqueue canned {stdout,stderr,code}，纯内存不 spawn）+ 注入 config-provider（固定 matcher 集）+ 注入 bootstrap-env（固定 isNonInteractive/hasTrustAccepted）。覆盖：信任门（非交互执行 / 交互缺信任全跳过不触 port / 交互有信任执行）、匹配（tool_name matchQuery 命中/不命中 / 未注入 provider 空结果）、JSON 解释（decision:block→deny / hookSpecificOutput deny+reason / additionalContext 多钩子 `\n` 聚合 / 最严权限 deny 胜 / exit-2 阻塞 / continue:false+stopReason）、5 执行器事件映射 + SessionEnd 短超时档、H6⑥ fail-fast（getHookShellPort/getHookOutputCapture/createHookOutput 未注入抛错 + 注入后闭环 + 配钩子未注 shell 端口 runHooks rejects）。
+- `tests/unit/permissions.test.ts`（140L，9 例，零磁盘）：`makeContext()` 建 ToolPermissionContext；readTool/writeTool 有 getPath、noPathTool 无。覆盖：no-op-allow（behavior allow + decisionReason {type:'mode',mode:'default'}）、forceDecision 透传（返回强制对象本身）、DANGEROUS_FILES/DIRECTORIES 含检查、checkRead（无 getPath→ask / UNC→ask）、checkWrite（无 getPath→ask / .gitconfig→ask via safetyCheck / UNC→ask）。
+- `tests/unit/bootstrap.test.ts`（45L，2 例，纯状态无 fs 归 unit）：cwd 两状态分离（setOriginalCwd vs setCwdState 独立）+ ALS 覆盖层（runWithCwdOverride 内 pwd() 见覆盖值、出作用域回落 cwdState）。**T8 从 `tests/func/task-real-fs.test.ts` 迁出**（该块无真盘 I/O，归 unit 层；能力矩阵 bootstrap 域行需 domain↔proof 对应，故单列本文件）。
+- `tests/func/task-real-fs.test.ts`（137L，6 例，真盘）：`setDiskOutputEnv({ getProjectTempDir: ()=>taskTmp, getSessionId })` 注入真 tmpdir（§8.14 注入序 permissions→task，func 层以真 getProjectTempDir 替身注入）。H6①–④ 全落真盘（spill 小 maxMemory=200 触发非真写 8MB / deleteOutputFile 真删 / 5GB cap 断言 + maxBytes 覆写 seam / TaskId 双口径）。
+- `tests/func/permissions-real-fs.test.ts`（94L，3 例，真盘）：顶层 mkdtemp + 先于 getAtlasTempDir 首调设 `process.env.ATLAS_TMPDIR`（模块级 memoize）。getAtlasTempDir realpath 链（带尾分隔符 / 含 atlasTempDirName / startsWith realpathSync(realTmp)）+ getProjectTempDir 真目录可建 + checkRead 工作目录内真文件→allow（经 getPathsForPermissionCheck 单级 realpath）。
+
+**T7 验收**：tsc 0 / 446 pass 0 fail 38 文件 814 expect（基线 409→446 为四新域 37 新增测试：hooks 17 + permissions 9 + bootstrap 2 + task func 6 + permissions func 3 = 37；含 anti-stub / capability-matrix 门全绿）。分层纪律守成：unit 全零磁盘（假 port 纯内存 canned / 假 tool.getPath 不触 fs），func 全真盘（mkdtemp / 真 spill 落盘 / 真删 / 真读 / realpath），5GB cap + 8MB spill 均经覆写 seam 触发不真写容量（绝不写满盘）。
+
+---
+
+**T8 门同步落地面（切片 3 收尾，§8.16 T8 口径）：**
+
+- **① capability-matrix 扩 8 域**：`MatrixRow.domain` 联合 + `DOMAINS` set 从 4 域（executor/sandbox/memory/modelprovider）扩 8 域（+ task/bootstrap/permissions/hooks）；新增 11 行——task 4 行（spill+stderr 前缀 / deleteOutputFile / 5GB cap / TaskId 双口径，proof 均 `tests/func/task-real-fs.test.ts`）+ bootstrap 2 行（cwd 两状态 / ALS 覆盖层，proof `tests/unit/bootstrap.test.ts`）+ permissions 2 行（checkRead/checkWrite 决策主面 proof `tests/unit/permissions.test.ts` / realpath 链真盘 proof `tests/func/permissions-real-fs.test.ts`）+ hooks 3 done 行（信任门+5 执行器聚合面 / getMatchingHooks 匹配 / 跨域斩断 fail-fast，proof 均 `tests/unit/hooks.test.ts`）+ **1 missing 行**（hooks 流式执行 / attachment 渲染 AsyncGenerator，by=engine 波，§8.16 裁剪归 engine）。门 ③ 标签「四域」→「八域」全核销。
+- **② STUB_REGISTRY 无需登记**：anti-stub 自动纳扫四 C-Deep 域（`CDEEP_DOMAINS` 项，目录存在即纳扫），T5/T6 落地后全部文件实质行 ≥5（permissions 4 文件 561/32/23/19、hooks 12 文件最薄 shouldSkipHookDueToTrust 8 实质行）/ 纯 re-export 门面豁免 → **无未登记空壳，STUB_REGISTRY 保持清零**。门①/③ 绿。
+- **③ bootstrap 测试分层归位**：H6⑤ 从 `tests/func/task-real-fs.test.ts` 迁 `tests/unit/bootstrap.test.ts`（纯状态无 fs → unit 层；能力矩阵 bootstrap 域行 domain↔proof 对应需 bootstrap 域单列文件）。task func 文件同步删 bootstrap import + beforeEach（不再需要）。
+- **④ B6-func 前置清单最终口径 4+6 落定**：4 基项（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11）+ ②setHookShellPort（D17）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。test-strategy-rederive §6 item 7 + §3 Wave C 两处「⏳ 余」同步从 4+4 刷新至 4+6（D11+D17）。
+
+**T8 验收（验收四件套）**：① `npx tsc --noEmit` = 0 ② `bun test --isolate tests/` = 446 pass 0 fail 38 文件 814 expect ③ anti-stub 门 3/3 绿 ④ capability-matrix 门 3/3 绿（八域全核销 + 1 missing 注解锁波次）。切片 3 四新域薄骨架纵切全闭环（T1–T8）。
+
+**切片 3 收官 → 后续**：★B6-func（compose.ts 最小组合根 + 4+6 前置清单落地，先于 engine）→ engine 波（hooks 流式/attachment 渲染 + permissions 规则求值树 + executor 全 shell + 真 bwrap）。

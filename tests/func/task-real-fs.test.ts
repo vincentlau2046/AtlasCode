@@ -9,12 +9,12 @@
  *  ③ 5GB cap 同构边界（DiskTaskOutput maxBytes 覆写小值触发截断标记，不真写 5GB；
  *     另断言 MAX_TASK_OUTPUT_BYTES 单一事实源 = 5GB）
  *  ④ TaskId 双口径（type→前缀映射 + 长度/字符集 [prefix][8 小写数字字母]）
- *  ⑤ bootstrap cwd 两状态分离（originalCwd 不可变 vs cwdState 可变 + ALS 覆盖层）
+ *  ⑤ bootstrap cwd 两状态分离 → 已迁 tests/unit/bootstrap.test.ts（纯状态无 fs，归 unit）
  *
  * 分层纪律：func 层真 fs（mkdtemp / 真 spill 落盘 / 真删 / 真读），diskOutput env
  * 注入真 tmpdir（§8.14 注入序 permissions→task，本层以真 getProjectTempDir 替身注入）。
  */
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import {
   existsSync,
   mkdtempSync,
@@ -34,15 +34,6 @@ import {
   generateTaskId,
 } from '../../src/task'
 import { MAX_TASK_OUTPUT_BYTES } from '../../src/shared'
-import {
-  setOriginalCwd,
-  getOriginalCwd,
-  setCwdState,
-  getCwdState,
-  runWithCwdOverride,
-  pwd,
-  resetStateForTests,
-} from '../../src/bootstrap'
 
 // ── 真盘 fixture（task 输出目录 = 注入 getProjectTempDir 替身）────────────
 const taskTmp = mkdtempSync(join(tmpdir(), 'atlas-task-func-'))
@@ -127,30 +118,5 @@ describe('H6④ TaskId 双口径（前缀 + 长度/字符集）', () => {
     const id = generateTaskId('local_bash')
     expect(id).toMatch(/^b[0-9a-z]{8}$/)
     expect(id.length).toBe(9)
-  })
-})
-
-describe('H6⑤ bootstrap cwd 两状态分离', () => {
-  beforeEach(() => {
-    resetStateForTests()
-  })
-
-  test('originalCwd（不可变语义）与 cwdState（可变）两状态独立', () => {
-    setOriginalCwd('/orig')
-    setCwdState('/cur')
-    expect(getOriginalCwd()).toBe('/orig')
-    expect(getCwdState()).toBe('/cur')
-    // 变 cwdState 不影响 originalCwd（两状态分离）
-    setCwdState('/cur2')
-    expect(getOriginalCwd()).toBe('/orig')
-    expect(getCwdState()).toBe('/cur2')
-  })
-
-  test('ALS 覆盖层：runWithCwdOverride 内 pwd() 见覆盖值，出作用域回落 cwdState', () => {
-    setCwdState('/base')
-    expect(pwd()).toBe('/base')
-    const seen = runWithCwdOverride('/override', () => pwd())
-    expect(seen).toBe('/override')
-    expect(pwd()).toBe('/base') // 出作用域回落
   })
 })
