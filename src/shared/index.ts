@@ -41,6 +41,9 @@ export {
   isFsInaccessible,
 } from "./errors"
 export { formatFileSize } from "./format"
+// C-Deep 切片 3 T3：task 输出磁盘上限（task diskOutput cap + executor
+// ShellCommand size watchdog 跨域共线，单一事实源）
+export { MAX_TASK_OUTPUT_BYTES } from "./constants"
 export { logForDebugging, type DebugLogLevel } from "./debug"
 export {
   NodeFsOperations,

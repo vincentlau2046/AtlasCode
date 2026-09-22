@@ -22,8 +22,9 @@
  * ① static 轮询（startPolling/stopPolling/#tick/#registry/#activePolling）
  *   保留 API 零消费者（旧仓唯一调用方 PowerShellTool.tsx React 进度组件未
  *   移植，归 engine 波）
- * ② getTaskOutputPath/DiskTaskOutput = ./diskOutput（T3 填实；T2 态 ctor
- *   调 getTaskOutputPath 即 fail-fast 抛错，T7 func 真盘测试在 T3 后跑）
+ * ② getTaskOutputPath/DiskTaskOutput = ./diskOutput（T3 已填实：跨域边经
+ *   setDiskOutputEnv 注入窗口，未注入时 ctor 调 getTaskOutputPath 才
+ *   fail-fast 抛错；T7 func 真盘测试注入 tmpdir 后跑）
  * ③ getMaxOutputLength = ./outputLimits（切片 1 裁定 outputLimits 归 task
  *   域策略；env 语义走 shared parseBoundedIntEnv 单一事实源）
  * ④ readFileRange/tailFile = ./fsRange（域内随迁；memory 域
