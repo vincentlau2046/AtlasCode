@@ -35,9 +35,80 @@ export interface ModelProviderConfig {
 /**
  * 读 env 生成 ModelProviderConfig。B 波 S2 实现。
  * settings providers/roleModels 走 EndpointConfigSource port（已有模式）。
+ *
+ * fallback 值来源（旧仓实证）：
+ *  - llmTimeoutMs：modelprovider.ts:183 constructor default = 120_000，cap 1_800_000
+ *  - maxOutputTokens：roles.ts:127 HARD_DEFAULT_MAX_TOKENS = 32768
+ *  - maxRetries：modelprovider.ts:183 constructor default = 3
+ *
  * @returns modelprovider 域 env 配置
  */
 export function createModelProviderConfig(): ModelProviderConfig {
-  // B 波 S2 实现：读 process.env + env-defaults-decision fallback
-  throw new Error("B 波 S2 实现：createModelProviderConfig()")
+  return {
+    apiBaseUrl: process.env.ATLAS_API_BASE_URL,
+    llmTimeoutMs: resolveBoundedInt('ATLAS_LLM_TIMEOUT', 120_000, 1_800_000),
+    maxOutputTokens: resolveBoundedInt('ATLAS_MAX_OUTPUT_TOKENS', 32_768, 2_000_000),
+    maxRetries: resolveBoundedInt('ATLAS_MAX_RETRIES', 3, 20),
+    extraBody: parseJsonEnv('ATLAS_EXTRA_BODY'),
+    extraMetadata: parseJsonEnv('ATLAS_EXTRA_METADATA'),
+    customHeaders: parseHeadersEnv('ATLAS_CUSTOM_HEADERS'),
+  }
+}
+
+/** 有界整数 env 解析（fallback + cap，对齐旧仓 validateBoundedIntEnvVar 语义）。 */
+function resolveBoundedInt(
+  name: string,
+  defaultValue: number,
+  upperLimit: number,
+): number {
+  const value = process.env[name]
+  if (!value) return defaultValue
+  const parsed = parseInt(value, 10)
+  if (isNaN(parsed) || parsed <= 0) return defaultValue
+  if (parsed > upperLimit) return upperLimit
+  return parsed
+}
+
+/** JSON 对象 env（ATLAS_EXTRA_BODY / ATLAS_EXTRA_METADATA）。 */
+function parseJsonEnv(name: string): Record<string, unknown> | undefined {
+  const raw = process.env[name]
+  if (!raw) return undefined
+  try {
+    const parsed = JSON.parse(raw)
+    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+      ? parsed
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Headers env（ATLAS_CUSTOM_HEADERS，"Key: Value\nKey2: Value2" 或 JSON）。 */
+function parseHeadersEnv(
+  name: string,
+): Record<string, string> | undefined {
+  const raw = process.env[name]
+  if (!raw) return undefined
+  // JSON 形式优先
+  if (raw.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw)
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        return parsed as Record<string, string>
+      }
+    } catch {
+      // fall through to line parse
+    }
+  }
+  // "Key: Value" 逐行
+  const out: Record<string, string> = {}
+  for (const line of raw.split('\n')) {
+    const idx = line.indexOf(':')
+    if (idx > 0) {
+      const key = line.slice(0, idx).trim()
+      const val = line.slice(idx + 1).trim()
+      if (key) out[key] = val
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
 }
