@@ -4,7 +4,9 @@
  * 契约断言：① fake 可结构赋值给端口 + 注入窗口 set/get 往返
  * ② 未注入 get = fail-fast 抛错（静默 no-op 的 setCwdState 会让 cwd 追踪无声失效）
  * ③ reset 复位未注入态。
- * fake 行为断言：④ originalCwd 固定 vs cwdState 可变（旧仓两状态分离语义）⑤ setCwdState 生效。
+ * fake 行为断言：④ originalCwd 固定 vs cwdState 可变（旧仓两状态分离语义）
+ * ⑤ setCwdState 生效 + getCwd 反映当前 cwdState（旧仓 pwd() 无覆盖路径；
+ * ALS 并发覆盖层归 engine 域，不进本端口）。
  * 无网络/无真实磁盘/无 PTY。
  */
 import { describe, test, expect, beforeEach } from 'bun:test'
@@ -48,11 +50,14 @@ describe('BootstrapStatePort 契约', () => {
     expect(fake.getCwdState()).toBe('/fake/new')
   })
 
-  test('⑤ setCwdState 多次调用 = 最后写入生效', () => {
+  test('⑤ setCwdState 多次调用 = 最后写入生效 + getCwd 反映当前 cwdState', () => {
     const fake = createFakeBootstrapState('/fake/orig')
     setBootstrapStatePort(fake.port)
+    // getCwd 初值 = 初始 cwdState（旧仓 pwd() 无覆盖路径）
+    expect(getBootstrapStatePort().getCwd()).toBe('/fake/orig')
     getBootstrapStatePort().setCwdState('/a')
     getBootstrapStatePort().setCwdState('/b')
     expect(fake.getCwdState()).toBe('/b')
+    expect(getBootstrapStatePort().getCwd()).toBe('/b')
   })
 })
