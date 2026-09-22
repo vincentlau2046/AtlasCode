@@ -548,3 +548,14 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 | （可选项） | `shared/fs-operations.ts` 默认 node:fs 透传腿（含切片 1 加法 4 原语）只测了"注入 mock"一条腿 | 低 | 已修：新 `tests/func/shared-fs-passthrough.test.ts`（默认 NodeFsOperations 真 tmpdir 直跑：existsSync/stat/statSync/realpathSync/mkdir(mode 0o700 真断言 + EEXIST 幂等)/open 真写/readFile 回读/unlinkSync ENOENT 真抛） |
 
 **后续步骤影响审视**：B6-func 前置件 "写读一次 memory" 的真盘证据已就位（FS 适配器 + 默认透传腿双证）；切片 3 四新域不受影响（memory 区修复不触碰 task/bootstrap/permissions/hooks）；D3 层纪律口径补强为**严格口径**（缺失文件 statSync 亦算真盘 syscall → func 层），后续用例分层按此执行。
+
+### 8.13 B 层（测试充分性）复审记录 + 低危项 B6-func 登记（2026-09-22）
+
+peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 前状态）。结论：无新阻塞级缺口；§8.12 落盘项全部命中（F1-F3 + shared 默认透传）；**2 条新发现低危项按"开口须注明解锁波次"纪律登记为 B6-func 项**：
+
+| 项 | 内容 | 登记 |
+|---|---|---|
+| L-1 | memory store **写路径**未验（既有测试只 mock 读；store 接口为只读面，"写路径"= B6-func compose 链的写后读 e2e 断言，非域内原语） | B6-func "写读一次 memory" 验收须含：经 compose 真实写一个 memory 文件 → store 读回断言（真盘 func 证据已在 §8.12 就位，缺的是 e2e 写侧闭环） |
+| L-2 | modelprovider **非流式** completion 未验（双跑验真只走流式 12/14；矩阵 "(mock) 出一段 completion" missing 行已注 C 波） | B6-func "mock 一次 completion" 验收须含**非流式**路径断言（流式/非流式双腿都过） |
+
+**不影响切片 3**（两项均在 B6-func 断言展开面，test-strategy §6 "B6-func 具体断言 + 前置清单" 展开时一并落）。
