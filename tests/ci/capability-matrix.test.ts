@@ -40,6 +40,9 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'modelprovider', capability: '（mock）出一段 completion', status: 'missing', by: 'C（B9 双跑 fixture + 独立 mock 测试）' },
   { domain: 'executor', capability: '执行一条 shell 命令', status: 'missing', by: 'C-Deep' },
   { domain: 'executor', capability: '工具链占位替换（NPU toolchain）', status: 'done', proof: 'tests/unit/executor-toolchain.test.ts' },
+  // C2：3 port 契约（TaskOutput/bootstrapState/ExecutorSandbox 注入面，§8.8）
+  // proof 取三契约测试之一（另两件同族：executor-port-bootstrap-state / executor-port-sandbox）
+  { domain: 'executor', capability: '3 port 契约（task/bootstrap/sandbox 注入面）', status: 'done', proof: 'tests/unit/executor-port-task-output.test.ts' },
   { domain: 'sandbox', capability: '创建 sandbox manager', status: 'missing', by: 'C-Deep' },
   { domain: 'sandbox', capability: '违规文本处理', status: 'done', proof: 'tests/unit/sandbox-violation-text.test.ts' },
 ]
