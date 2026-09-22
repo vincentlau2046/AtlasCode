@@ -374,6 +374,7 @@ B-fix 防腐门（0.5 天，独立项，C 波前置，2026-09-22 已完成）
 C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）✅ 2026-09-22 完成（438a93b + b3c2fe1，§8.6）
   ↓
 C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）
+  ✅ 2026-09-22 完成（6343d4a，§8.8：3 port + 3 fake + 15 契约测试）
   ↓
 C-Deep（填 6 stub，建 4 域骨架）— 2026-09-22 复审切 2 纵切片（§8.7）：
   切片 1 executor 4 stub + 纵切 smoke（真 spawn echo hi）
@@ -438,3 +439,24 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 2. **4 新域骨架与 STUB_REGISTRY 同提交登记**（门①强制）+ capability-matrix 加 4 域能力行（rule ③ 随之覆盖）；骨架建立时即有门，不留无门窗口（R3 已预铺）。
 3. **mock-completion 归属澄清**：matrix 行 `by: C` 口径 = **B6-func 承载执行**（"mock 一次 completion"），不等 B9；clients.ts 现无 transport 注入面，B6-func 时按"可注入 fake transport 或 in-process mock"二选一定案（不提前重构）。
 4. 终局 B6-func（全量：shell 真跑 + sandbox 建 manager + mock completion + memory 写读）仍作为 engine 迁移前的最后功能 gate，纵切 smoke 是其前置证据而非替代。
+
+### 8.8 C2-executor-ports 执行记录（2026-09-22 完成，6343d4a）
+
+**port 面调研（旧仓为 source of truth，斩断跨域 import 的窄面依据）**：
+
+| port | 旧仓真实消费面 | 新仓窄面裁定 |
+|---|---|---|
+| TaskOutput | Shell.ts 3 点：`new TaskOutput(taskId, onProgress, !usePipeMode)` + `.path`（file 模式 stdout 直落 fd）+ `.clear()` | `TaskOutputPort{createTaskOutput}` + `Handle{path,clear}` + 5 参进度回调（签名忠实保留） |
+| bootstrap-state | Shell.ts 2 点：`getOriginalCwd()`（cwd 被删回退）+ `setCwdState(physicalPath)` | 2 方法窄面；`_originalCwd`/`_cwdState` 两状态分离语义明示（回退目标恒为启动 cwd） |
+| sandbox 注入 | ShellExecutor `isSandboxingEnabled()` + Shell.ts `wrapWithSandbox(cmd, binShell, undefined, signal)` + `cleanupAfterCommand()` | 3 方法窄面；**omit customConfig**（旧仓 Shell.ts 恒传 undefined，窄面防 sandbox 内部类型 SandboxRuntimeConfig 渗入） |
+
+**三项裁定**：
+1. **L3 自治**：executor 域禁 import task/bootstrap/sandbox 域——域内只面向端口编程；真实现/适配器由组合根（atlascode/compose.ts，D 波）注入。fake 落 `tests/fixtures/`（src 零测试双），C-Deep 纵切 smoke / B6-func 直接复用（§8.7 port 边界规则落点）。
+2. **未注入 = fail-fast 抛错**（非静默 no-op 兜底）：静默空输出汇 = 命令输出无声丢失、静默沙箱降级 = 安全语义无声改变——两者皆 H6 空洞等价腐化向量。对照：modelprovider 空配置默认合法（空配置语义安全），executor 三 port 不行，故 fail-fast。
+3. **SandboxManager → ExecutorSandboxPort 适配器归组合根**（不进任一域）：两域互不 import，adapter 是组合根专属活；C2 只定端口面，adapter 随 C-Deep/B6-func 组合根落。
+
+**fake 行为断言原则**：确定性 + 可观测（taskId 派生路径 / clear 计数 / wrap 非透传带标记 / 调用与 signal 记录），**不模拟真实域语义**——真语义归 C-Deep 各域实现，fake 绝不假装（对齐 test-strategy "绝不写假装通过的测试"）。
+
+**验收**：tsc 0 / lint 0 / build ✓ / 364 pass 0 fail（+15，26 文件）；capability-matrix 加 "3 port 契约" done 行（proof 三契约测试之一）；STUB_REGISTRY 6 条未动（C2 不填 stub，填 stub 是 C-Deep 的事，门② 符合）。
+
+**下一步 = C-Deep 切片 1（executor 纵切）**：填 4 stub（Shell/ShellCommand/ShellExecutor/shellProvider，消费上述 3 port + shared fs-operations/debug）+ `tests/func/` 真 spawn `echo hi` smoke（§8.7）；STUB_REGISTRY 对应 4 条销账随填随销（门② 强制）。

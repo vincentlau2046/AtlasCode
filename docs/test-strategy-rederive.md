@@ -64,12 +64,12 @@
 ### Wave C（即将 · 前置重排）
 顺序（功能纵切优先，见 execution-strategy §8）：
 1. C1 叶子下沉 → 每叶子带单测（移植旧仓 unit 覆盖）。
-2. C2-executor-ports（TaskOutput/bootstrap-state/sandbox 注入 3 port）→ 每 port 一个 fake + **port 契约测试**。
+2. C2-executor-ports（TaskOutput/bootstrap-state/sandbox 注入 3 port）→ 每 port 一个 fake + **port 契约测试**。✅ 2026-09-22 完成（6343d4a：3 port + tests/fixtures/executor-port-fakes.ts 三 fake + 3 契约测试文件 15 断言）。
 3. C-Deep（填 6 stub + 建 task/bootstrap/permissions/hooks 4 域骨架）→ **每填的 stub 配行为测试** + 4 新域各自能力测试。
 4. **★ B6-func 功能门**：真实跑一条 shell 命令 + 建一个 sandbox manager（mock 后端）+ mock 一次 completion + 写读 memory —— **证明迁移链真能跑，先于 engine**。
 5. 再 C1/C2 engine 212 叶子 + port → **B9 双跑**（此时建在**已验证地基**上，等价非空真）。
 6. B9 + B14 package gate → wave-c。
-  - ⏳ 展开：3 port 的 fake + 契约测试用例；4 域骨架的能力测试；B6-func 具体断言。
+  - ✅ 展开（2026-09-22）：3 port 的 fake + 契约测试用例已落（tests/fixtures/executor-port-fakes.ts + 3 契约测试文件）。⏳ 余：4 域骨架的能力测试（C-Deep）；B6-func 具体断言（B6-func 时展开）。
 
 ### Wave E（ascend）
 - gelu L1 活体（调全 16 工具）+ 既有 L4 evals。
@@ -119,11 +119,12 @@
 ## 6. 下一步（展开顺序）
 
 1. ✅ **已完成（2026-09-22，B-fix 独立项，C 波前置）**：`tests/ci/anti-stub.test.ts` + `tests/ci/capability-matrix.test.ts` + `.github/workflows/ci.yml`（收 H1+H4），让 6 空 stub 从此**过不了门**（未登记空壳 = 红 / 注册表漂移 = 红 / wave-c tag 时注册表清零）。门经变异验真（临时造未登记空壳 → 门①红，还原 → 绿）。**归类裁定：B-fix（B 波缺陷纠偏），非 C 波范围，C-Deep 前置件**——盲区是 B 交付留下的，纠偏记 B 账；但 C-Deep 填 stub 前门必须就位。已记入 execution-strategy §7/§8.3。
-2. ✅ **C1 叶子单测已展开（2026-09-22，438a93b + b3c2fe1）**：4 个新叶子测试文件（`shared-string-utils` / `shared-circular-buffer` / `shared-errors` / `shared-format`，行为断言移植旧仓口径，含边界：safeJoinLines 部分容纳/无剩余空间、EndTruncatingAccumulator 截断+标记+totalBytes 全量、CircularBuffer 回绕 getRecent、shortErrorStack 帧数裁切）+ `shared-env` 扩展（parseBoundedIntEnv min 参数 / isEnvTruthy·isEnvDefinedFalsy 全集合）。**教训回写**：首版 4 个用例期望算错（标记串 14 非 13 字符 / addAll 保留满容量窗 / 9999999 才触 cap）——叶子移植必须逐边界实跑验证，不能凭读码推期望。3 port 契约测试仍 ⏳（C2 展开）。
+2. ✅ **C1 叶子单测已展开（2026-09-22，438a93b + b3c2fe1）**：4 个新叶子测试文件（`shared-string-utils` / `shared-circular-buffer` / `shared-errors` / `shared-format`，行为断言移植旧仓口径，含边界：safeJoinLines 部分容纳/无剩余空间、EndTruncatingAccumulator 截断+标记+totalBytes 全量、CircularBuffer 回绕 getRecent、shortErrorStack 帧数裁切）+ `shared-env` 扩展（parseBoundedIntEnv min 参数 / isEnvTruthy·isEnvDefinedFalsy 全集合）。**教训回写**：首版 4 个用例期望算错（标记串 14 非 13 字符 / addAll 保留满容量窗 / 9999999 才触 cap）——叶子移植必须逐边界实跑验证，不能凭读码推期望。
 3. **C-Deep 时**：展开 4 域骨架能力测试 + B6-func 断言；填一个 stub 销一个 STUB_REGISTRY 条目（门②强制）。
 4. ✅ **C1 复审（2026-09-22）已落 3 项防腐前置**（execution-strategy §8.6 复审表 + §8.7）：
    - 防腐门预覆盖 C-Deep 四域（task/bootstrap/permissions/hooks 目录存在即纳扫，变异验真：造空壳→门①红）；
    - fs 抽象 / debug no-op 单一事实源下沉 shared（防 C-Deep 域内复制腐化）；
    - **C-Deep 切 2 纵切片 + 每片功能 smoke**（tests/func/，port 之下全真）——把 H6 空洞等价的暴露窗口从"整个 C-Deep"缩到单切片；4 新域骨架须与 STUB_REGISTRY/capability-matrix 同提交登记（不留无门窗口）；mock-completion 由 B6-func 承载执行（不等 B9）。
+5. ✅ **C2 3 port 契约测试已落（2026-09-22，6343d4a）**：executor 域 3 port（TaskOutput/bootstrapState/ExecutorSandbox，窄面依据旧仓 Shell.ts/ShellExecutor 真实消费面）+ `tests/fixtures/executor-port-fakes.ts` 三 fake（确定性+可观测，**不模拟真实域语义**——真语义归 C-Deep 域实现）+ 3 契约测试文件 15 断言（结构可赋值/fail-fast 未注入抛错/reset/行为可观测）。fail-fast 裁定：静默 no-op 兜底 = H6 空洞等价向量，故未注入 get = 抛错。capability-matrix 加 "3 port 契约" done 行。
 
 每步展开后回写本文对应 ⏳ 节，保持活文档。
