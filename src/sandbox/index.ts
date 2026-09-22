@@ -7,10 +7,13 @@
  * re-export: types（SandboxManager/SandboxDependencies + runtime 结构类型）/
  *           config（createSandboxConfig + SandboxConfig）/
  *           violationText（removeSandboxViolationTags + extractSandboxViolationsBlock）/
- *           sandbox-events（SandboxEventBus + DefaultSandboxEventBus + ViolationEvent）。
+ *           sandbox-events（SandboxEventBus + DefaultSandboxEventBus + ViolationEvent）/
+ *           ripgrep（ripgrepCommand + ripGrep + checkRipgrep + RipgrepTimeoutError，
+ *           裁剪版 system-rg 单模式，C-Deep 切片 2）。
  *
- * createSandboxManager 工厂实现待 sandbox-backend 迁移完成
- * （见 B 波 S1 报告：深迁移 blocked on C 波 port 基础设施）。
+ * createSandboxManager 工厂 / runtime 注入窗口 / backend 注册表
+ * 随切片 2 同批落（见本目录 createSandboxManager.ts / runtime.ts /
+ * sandbox-backend.ts 头注释）。
  */
 export type {
   SandboxManager,
@@ -41,3 +44,9 @@ export {
   type ViolationEvent,
   type ViolationCategory,
 } from "./sandbox-events"
+export {
+  ripGrep,
+  ripgrepCommand,
+  checkRipgrep,
+  RipgrepTimeoutError,
+} from "./ripgrep"
