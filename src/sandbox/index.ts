@@ -9,11 +9,10 @@
  *           violationText（removeSandboxViolationTags + extractSandboxViolationsBlock）/
  *           sandbox-events（SandboxEventBus + DefaultSandboxEventBus + ViolationEvent）/
  *           ripgrep（ripgrepCommand + ripGrep + checkRipgrep + RipgrepTimeoutError，
- *           裁剪版 system-rg 单模式，C-Deep 切片 2）。
- *
- * createSandboxManager 工厂 / runtime 注入窗口 / backend 注册表
- * 随切片 2 同批落（见本目录 createSandboxManager.ts / runtime.ts /
- * sandbox-backend.ts 头注释）。
+ *           裁剪版 system-rg 单模式，C-Deep 切片 2）/
+ *           createSandboxManager 工厂 + backend 注册表 + runtime 注入窗口
+ *           （C-Deep 切片 2，真 bwrap runtime 包待 B6-func/D 波经
+ *           setSandboxRuntimeModule 单点注入）。
  */
 export type {
   SandboxManager,
@@ -50,3 +49,16 @@ export {
   checkRipgrep,
   RipgrepTimeoutError,
 } from "./ripgrep"
+export { createSandboxManager } from "./createSandboxManager"
+export {
+  AtlasSandboxBackend,
+  createSandboxBackend,
+  registerSandboxBackend,
+  type SandboxBackend,
+  type SandboxBackendConfig,
+} from "./sandbox-backend"
+export {
+  setSandboxRuntimeModule,
+  getSandboxRuntimeModule,
+  resetSandboxRuntimeModule,
+} from "./runtime"
