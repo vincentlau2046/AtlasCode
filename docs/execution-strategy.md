@@ -505,3 +505,33 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 | D6 | **B6-func 前置清单细化（3 条执行级补强）**：① §8.8 裁定 3 说"SandboxManager→Port 适配器归组合根"但未说组合根谁建——B6-func 须建 **atlascode/compose.ts 最小组合根**（3 端口注入 + 输出目录就绪）；② 注入序约束：ShellExecutor 在 exec 时才读 `isSandboxingEnabled()`（ShellExecutor.ts:49），三端口须**先于第一次 exec 全部注册**（fail-fast 是运行时抛错，非构建期错误）；③ task 真适配器来自切片 3（顺序依赖已在 §8.9 全序中，此处明示） | 并入 §8.9 项 3 清单（B6-func 开工时按此 4+3 项执行） |
 
 **修订后 C-Deep 全序（替换 §8.9 末行）**：切片 1 executor 纵切 ✅ → 切片 2 sandbox 纵切（裁剪版 bwrap 主路径，D5）→ 切片 3 四新域（task 裁剪版真核心 D4 / bootstrap 真适配器 / permissions+hooks 薄骨架 + 残余斩断 §8.9 项 4）→ ★B6-func（compose.ts 最小组合根 + 4+3 前置清单 D6）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
+
+### 8.11 C-Deep 切片 2 执行记录 + 偏差修订（2026-09-22 完成，c4a3ef5..295f20f）
+
+**落地（4 提交）**：c4a3ef5 ripgrep 填充（system-rg 单模式裁剪版 + 门面导出面）→ 9f8660c createSandboxManager 工厂 + runtime 注入窗口 + backend（新 runtime.ts / sandbox-backend.ts + 填 stub + 门面）→ 38b7cda 测试（fixtures/sandbox-runtime-fake + 4 func + 10 unit）→ 295f20f 门同步（STUB_REGISTRY 2→0 清零 + 矩阵 sandbox 2 行翻 done + 新增 ripgrep 行）。
+
+**验收**：tsc 0 / lint 0 / build ✓ / **401 pass 0 fail（31 文件，716 expect 调用）**。
+
+**落地口径（D5 裁剪版）**：
+- **runtime.ts（新，97L）**：placeholder runtime（禁用态 3 方法语义照旧仓 fallback：isSupportedPlatform=false / 依赖错误非空；18 个真行为方法 fail-fast 抛错，防"沙箱以为开着"的空洞等价）+ `set/get/resetSandboxRuntimeModule` 注入窗口（调用时查找，executor 三 port 同款 idiom）。
+- **sandbox-backend.ts（新，289L）**：SandboxBackend 接口 20 方法（冻结）+ AtlasSandboxBackend（violation store 100 上限 + 事件总线标准化照抄；全方法转发调用时查找的注入 runtime，替代旧仓静态 `#atlas-sandbox-runtime` import）+ `createSandboxBackend`/`registerSandboxBackend` 注册表扩展点。
+- **createSandboxManager.ts（填 stub，515L）**：工厂闭包（SandboxDependencies + 可选 backend）+ 32 方法面全保留；最小 runtime config 构造（cwd/配置目录 denyWrite 族 / getAtlasTempDir + additionalDirs / bare-git-repo scrub / worktree 检测 / settings.sandbox.* 开关族 typed cast / ripgrep 命令）；lodash memoize → 本地闭包缓存 memoizeNoArg（reset 失效）。残余 6 项清单落头注释（①permissions 规则解析 + policySettings managed 分支 ②makePathResolvers ③glob warnings 恒空 ④WSL·Windows·seatbelt 分支 ⑤compat 归组合根 ⑥zod schema 随真 runtime 包）。
+- **ripgrep.ts（填 stub，245L）**：system-rg 单模式 + ripGrep 核心（execFile + SIGKILL killSignal + 20MB cap + ATLAS_GLOB_TIMEOUT_SECONDS 默认 20s + EAGAIN -j1 单重试 + 部分结果回收 + RipgrepTimeoutError）+ `checkRipgrep()` --version 探测（func 据此真查 or skip 不红）。残余 5 项清单落头注释（stream / fileCount 遥测已删 / codesign / firstUseTest / builtin·embedded + USE_BUILTIN_RIPGREP 全裁）。
+- 门面 index.ts：工厂 + backend 注册表 + runtime 注入窗口 + ripgrep 导出面（STR-1）。
+
+**偏差审视（落地实况 vs D5 计划，3 项修订 + 小裁定，均落盘）**：
+
+| # | 偏差 | 处置 |
+|---|---|---|
+| D7 | **真 bwrap 行为不在仓内**：旧仓 `#atlas-sandbox-runtime` alias 指向外部未发布包 @anthropic-ai/sandbox-runtime（仅 CI 安装，本地 fallback = placeholder 禁用态）；新仓 deps = openai + zod，不 vendor 该包 | 裁定：裁剪版引入 **runtime 注入窗口**（新 runtime.ts placeholder + 注入窗口，超出原"填 2 stub"裁定的架构增量）——与 C2 三 port 同款 fail-fast 语义（未注入时调真行为方法抛错，非静默透传命令）；真 bwrap runtime 包（国内工具链或等价）= B6-func/D 波单点换入面 |
+| D8 | **SettingsJson opaque**：新仓 settings 体系未落地，SettingsJson = Record<string,unknown>（B 波裁定），旧仓 convert 消费真实 settings schema（5 层 permissions 规则解析） | 裁定：域内本地 `SandboxSettingsView` typed cast 视图（settings.sandbox.* 开关族）；5 层 convert 全量（WebFetch `domain:` 规则 / Edit·Read 规则路径族 / policySettings managed 分支）+ makePathResolvers + glob warnings 归 engine 波 settings 体系（manager 头残余 ①②③）；engine 波落地 settings 后以真实 schema 替换视图 |
+| D9 | **B6-func 前置清单 +1（4+3 → 4+4）**：sandbox enabled 态 initialize/wrap 须 runtime 已注入（D7 注入窗口） | B6-func compose.ts 在首次 enabled 态 initialize 前完成 `setSandboxRuntimeModule`（或 `registerSandboxBackend` 替代后端）；D6 清单"mock backend"一条经此双扩展点落地 |
+
+**小裁定（头注释注明，不计偏差）**：lodash memoize → 本地 memoizeNoArg（新仓无 lodash）/ ripgrep WSL 60s 特例 → 统一 20s（国内目标非 WSL）/ findExecutable → checkRipgrep --version 试跑（旧依赖不在新仓）/ 三模式裁单（builtin·embedded·USE_BUILTIN_RIPGREP 全裁）。
+
+**后续步骤影响审视**：
+- **切片 3（四新域）**：不受切片 2 影响（task 裁剪版真核心 D4 / bootstrap 真适配器 / permissions+hooks 薄骨架按 §8.10 执行；hooks 跨域边斩断 §8.9 项 4 不变）。
+- **B6-func**：compose.ts 最小组合根（D6）+ sandbox runtime 注入（D9）+ task 真适配器（切片 3）；"建一个 sandbox manager（mock 后端）"验收项经 createSandboxBackend 注册表 + setSandboxRuntimeModule 双扩展点落地。
+- **engine 波**：backfill manager 残余 6 项 + ripgrep 残余 5 项（含 settings 5 层 convert 全量 + pathResolve + glob warnings）。
+
+**修订后 C-Deep 全序（替换 §8.10 末行）**：切片 1 executor 纵切 ✅ → 切片 2 sandbox 纵切 ✅（D7-D9）→ 切片 3 四新域（task 裁剪版真核心 D4 / bootstrap 真适配器 / permissions+hooks 薄骨架 + hooks 跨域边斩断）→ ★B6-func（compose.ts 最小组合根 + 4+4 前置清单 D9）→ engine。每片 smoke 规则不变（§8.7：port 之上可 fake，port 之下全真）。
