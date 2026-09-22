@@ -23,7 +23,8 @@
 import { homedir } from 'os'
 import { isAbsolute, join, normalize, sep } from 'path'
 
-import { getAtlasConfigHomeDir, isEnvDefinedFalsy, isEnvTruthy } from './envUtils'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../shared'
+import { getAtlasConfigHomeDir } from './envUtils'
 import { sanitizePath } from './pathUtils'
 
 const AUTO_MEM_DIRNAME = 'memory'

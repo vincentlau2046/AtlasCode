@@ -12,13 +12,9 @@
 export { feature, FEATURE_ON_BY_DEFAULT } from "./feature"
 
 // B 波 S1 + C1：env 解析纯函数（四域 config.ts 共用）
-// C1 统一裁定：isEnvTruthy/isEnvDefinedFalsy = 布尔 env 单一事实源（parseBoolEnv C1b 删除）
-export {
-  parseBoolEnv,
-  parseBoundedIntEnv,
-  isEnvTruthy,
-  isEnvDefinedFalsy,
-} from "./env"
+// C1 统一裁定：isEnvTruthy/isEnvDefinedFalsy = 布尔 env 单一事实源
+// （B 波 parseBoolEnv 窄集合已被取代，C1b 删除）
+export { parseBoundedIntEnv, isEnvTruthy, isEnvDefinedFalsy } from "./env"
 
 // C1 叶子下沉：零依赖纯工具（旧仓 utils 叶子，跨 ≥2 域或为 C-Deep 地基）
 export {

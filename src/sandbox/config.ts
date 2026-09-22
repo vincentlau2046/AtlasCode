@@ -5,11 +5,11 @@
  * ripgrep/permissions 收进域内；config.ts 读 env → SandboxConfig。
  *
  * env 来源：env-defaults-decision.md（ATLAS_GLOB_* 三项）。
- * 布尔 env 走 shared parseBoolEnv；整数 env 走 shared parseBoundedIntEnv。
+ * 布尔 env 走 shared isEnvTruthy（T3 约定）；整数 env 走 shared parseBoundedIntEnv。
  * settings 部分走 SandboxDependencies 注入（不在 env config 内）。
  */
 
-import { parseBoolEnv, parseBoundedIntEnv } from "../shared"
+import { isEnvTruthy, parseBoundedIntEnv } from "../shared"
 
 /** sandbox 域从 env 读取的配置（settings 部分走 SandboxDependencies 注入，不在此） */
 export interface SandboxConfig {
@@ -36,8 +36,8 @@ export function createSandboxConfig(): SandboxConfig {
   return {
     globTimeoutSeconds: timeout.effective,
     // ③ 保持关（未设置 = false）
-    globHidden: parseBoolEnv(process.env.ATLAS_GLOB_HIDDEN),
+    globHidden: isEnvTruthy(process.env.ATLAS_GLOB_HIDDEN),
     // ③ 保持关（未设置 = false）
-    globNoIgnore: parseBoolEnv(process.env.ATLAS_GLOB_NO_IGNORE),
+    globNoIgnore: isEnvTruthy(process.env.ATLAS_GLOB_NO_IGNORE),
   }
 }

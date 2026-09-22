@@ -5,31 +5,10 @@
  */
 import { describe, test, expect } from "bun:test"
 import {
-  parseBoolEnv,
   parseBoundedIntEnv,
   isEnvTruthy,
   isEnvDefinedFalsy,
 } from "../../src/shared"
-
-describe("parseBoolEnv", () => {
-  test("undefined → false", () => {
-    expect(parseBoolEnv(undefined)).toBe(false)
-  })
-  test('"1" → true', () => {
-    expect(parseBoolEnv("1")).toBe(true)
-  })
-  test('"true" 大小写不敏感 → true', () => {
-    expect(parseBoolEnv("true")).toBe(true)
-    expect(parseBoolEnv("TRUE")).toBe(true)
-    expect(parseBoolEnv("True")).toBe(true)
-  })
-  test("非真值 → false", () => {
-    expect(parseBoolEnv("0")).toBe(false)
-    expect(parseBoolEnv("false")).toBe(false)
-    expect(parseBoolEnv("")).toBe(false)
-    expect(parseBoolEnv("random")).toBe(false)
-  })
-})
 
 describe("parseBoundedIntEnv", () => {
   test("undefined → defaultValue, status valid", () => {

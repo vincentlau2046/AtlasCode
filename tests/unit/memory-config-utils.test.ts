@@ -1,7 +1,9 @@
 /**
- * memory 域 config + envUtils + pathUtils 单测
+ * memory 域 config + config-dir + pathUtils 单测
  *
  * 纯函数测试：env 读取/解析 + 路径安全化 + 哈希。
+ * C1b：布尔 env 原语 isEnvTruthy/isEnvDefinedFalsy 归 shared（单测在
+ * shared-env.test.ts）；本文件只测 memory 域专属逻辑。
  * 无网络/无真实磁盘/无 PTY。
  */
 import { describe, test, expect, afterEach } from "bun:test"
@@ -9,11 +11,7 @@ import {
   createMemoryConfig,
   autoMemoryEnabledFromEnv,
 } from "../../src/memory"
-import {
-  isEnvTruthy,
-  isEnvDefinedFalsy,
-  getAtlasConfigHomeDir,
-} from "../../src/memory/envUtils"
+import { getAtlasConfigHomeDir } from "../../src/memory/envUtils"
 import { sanitizePath, djb2Hash } from "../../src/memory/pathUtils"
 
 const ENV_KEYS = [
@@ -30,39 +28,7 @@ afterEach(() => {
   for (const k of ENV_KEYS) delete process.env[k]
 })
 
-describe("envUtils", () => {
-  test("isEnvTruthy — 真值集合", () => {
-    expect(isEnvTruthy("1")).toBe(true)
-    expect(isEnvTruthy("true")).toBe(true)
-    expect(isEnvTruthy("TRUE")).toBe(true)
-    expect(isEnvTruthy("yes")).toBe(true)
-    expect(isEnvTruthy("on")).toBe(true)
-    expect(isEnvTruthy(true)).toBe(true)
-  })
-
-  test("isEnvTruthy — 假值/空", () => {
-    expect(isEnvTruthy("0")).toBe(false)
-    expect(isEnvTruthy("false")).toBe(false)
-    expect(isEnvTruthy("")).toBe(false)
-    expect(isEnvTruthy(undefined)).toBe(false)
-    expect(isEnvTruthy(false)).toBe(false)
-  })
-
-  test("isEnvDefinedFalsy — 假值集合", () => {
-    expect(isEnvDefinedFalsy("0")).toBe(true)
-    expect(isEnvDefinedFalsy("false")).toBe(true)
-    expect(isEnvDefinedFalsy("no")).toBe(true)
-    expect(isEnvDefinedFalsy("off")).toBe(true)
-    expect(isEnvDefinedFalsy(false)).toBe(true)
-  })
-
-  test("isEnvDefinedFalsy — 未设/真值返回 false", () => {
-    expect(isEnvDefinedFalsy(undefined)).toBe(false)
-    expect(isEnvDefinedFalsy("1")).toBe(false)
-    expect(isEnvDefinedFalsy("true")).toBe(false)
-    expect(isEnvDefinedFalsy(true)).toBe(false)
-  })
-
+describe("envUtils（config-dir）", () => {
   test("getAtlasConfigHomeDir — ATLAS_CONFIG_DIR 覆盖", () => {
     process.env.ATLAS_CONFIG_DIR = "/custom/atlas"
     expect(getAtlasConfigHomeDir()).toBe("/custom/atlas")

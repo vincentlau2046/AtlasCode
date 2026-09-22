@@ -7,15 +7,6 @@
  */
 
 /**
- * 解析布尔 env：`"1"` / `"true"`（大小写不敏感）→ true，其余 → false。
- * 语义对齐旧仓 T3 布尔 env 约定（未设置 / 任意非真值 = 关）。
- */
-export function parseBoolEnv(value: string | undefined): boolean {
-  if (value === undefined) return false
-  return value === "1" || value.toLowerCase() === "true"
-}
-
-/**
  * 解析有界整数 env：缺失/无效 → defaultValue；parsed > upperLimit → cap 到 upperLimit。
  * 语义对齐旧仓 validateBoundedIntEnvVar（剥掉 logForDebugging 依赖，
  * message 字段随之删除——旧仓 message 仅 logForDebugging 消费）。

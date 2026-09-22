@@ -14,20 +14,15 @@
 //   false（默认）：FILE 大小/流总字节超 maxBytes 抛 FileTooLargeError。
 //   true：SELECTED OUTPUT 截到 maxBytes，在最后一个完整行停；设 truncatedByBytes。永不抛。
 //
-// 域本地化：formatFileSize 依赖（旧仓 ./format.js）内联为本地辅助。
+// C1b：formatFileSize 切 shared 单一事实源（旧仓 "N bytes / 1.5KB" 口径；
+// B 波本地 "512B" 变体是本地化偏差，去重时回归旧仓基准）。
 // ---------------------------------------------------------------------------
 
 import { createReadStream, fstat } from 'fs'
 import { stat as fsStat, readFile } from 'fs/promises'
+import { formatFileSize } from '../shared'
 
 const FAST_PATH_MAX_SIZE = 10 * 1024 * 1024 // 10 MB
-
-/** 域本地：字节大小人类可读化（替代旧仓 utils/format.ts formatFileSize）。 */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`
-}
 
 export type ReadFileRangeResult = {
   content: string

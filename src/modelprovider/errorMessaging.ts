@@ -10,7 +10,7 @@
  *  - SDKAssistantMessageError → 域内 types.ts（any stub）
  *  - modelErrors 常量 → 域内 modelErrors.ts
  *  - apiLimits/betas 常量 → 域内 constants.ts
- *  - formatFileSize → 域内 format.ts
+ *  - formatFileSize → shared（C1 下沉）
  *  - formatAPIError → 域内 errorUtils.ts
  *  - 端口类型 → 域内 ports/errorMessaging.ts
  */
@@ -34,8 +34,8 @@ import {
   PROMPT_TOO_LONG_ERROR_MESSAGE,
 } from './modelErrors'
 import { API_PDF_MAX_PAGES, PDF_TARGET_RAW_SIZE } from './constants'
-import { formatFileSize } from './format'
 import { AFK_MODE_BETA_HEADER } from './constants'
+import { formatFileSize } from '../shared'
 import { formatAPIError } from './errorUtils'
 import type { ErrorMessagingPorts } from './ports/errorMessaging'
 

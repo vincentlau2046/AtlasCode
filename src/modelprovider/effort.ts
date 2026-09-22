@@ -13,17 +13,11 @@
  * C 波再下沉 shared（effort 全量函数 + settings port）。
  */
 
-import { EFFORT_LEVELS } from '../shared'
+import { EFFORT_LEVELS, isEnvTruthy } from '../shared'
 import type { EffortLevel, EffortValue } from '../shared'
 
 // Re-export for domain consumers/tests (值定义在 shared，域内透传)
 export { EFFORT_LEVELS }
-
-/** 旧仓 utils/envUtils.ts isEnvTruthy — 域内本地副本（utils 斩断）。 */
-function isEnvTruthy(value: string | undefined): boolean {
-  if (!value) return false
-  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
-}
 
 export function isEffortLevel(value: string): value is EffortLevel {
   return (EFFORT_LEVELS as readonly string[]).includes(value)

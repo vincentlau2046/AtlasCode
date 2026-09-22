@@ -9,7 +9,7 @@
 // STR-1 门面规则：外域只经此门面 import，不深导入内部文件。
 
 import { OpenAIProvider, ProviderLifecycle, type ModelProvider } from './modelprovider'
-import { validateBoundedIntEnvVar } from './envValidation'
+import { parseBoundedIntEnv } from '../shared'
 
 export { OpenAIProvider, ProviderLifecycle, type ModelProvider, type ProviderStreamEvent } from './modelprovider'
 export type { ProviderLifecycleOptions } from './modelprovider'
@@ -28,15 +28,16 @@ export function getModelProvider(): ModelProvider {
  * F3: LLM request timeout (ms), configurable via ATLAS_LLM_TIMEOUT.
  * Default 120_000 equals the previous hardcoded value, so an unset env var means
  * zero behavior change. Capped at 30 min so a stuck/queued gateway can't silently
- * hang a whole session past any sane bound. `validateBoundedIntEnvVar` logs the
- * invalid/capped case via logForDebugging.
+ * hang a whole session past any sane bound.
+ * C1b：解析切 shared parseBoundedIntEnv（min=1 保留旧仓"0 无效"语义）。
  */
 function resolveLlmTimeoutMs(): number {
-  return validateBoundedIntEnvVar(
+  return parseBoundedIntEnv(
     'ATLAS_LLM_TIMEOUT',
     process.env.ATLAS_LLM_TIMEOUT,
     120_000,
     1_800_000,
+    1,
   ).effective
 }
 

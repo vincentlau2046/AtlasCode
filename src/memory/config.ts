@@ -14,7 +14,7 @@
  * growthbook 远程实验配置经 Port 8 注入（isExtractModeActive 等不在此）。
  */
 import { isAutoMemoryEnabled } from './paths'
-import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../shared'
 
 /** memory 域从 env 读取的配置（growthbook 实验配置走 Port 8 注入，不在此） */
 export interface MemoryConfig {

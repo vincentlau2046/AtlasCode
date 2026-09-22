@@ -7,10 +7,10 @@
  *
  * env 来源：env-defaults-decision.md（ATLAS_SHELL / ATLAS_SHELL_PREFIX /
  * ATLAS_BASH_MAINTAIN_PROJECT_WORKING_DIR）。
- * 布尔 env 走 shared parseBoolEnv（"1"/"true" → true，其余 false）。
+ * 布尔 env 走 shared isEnvTruthy（"1"/"true"/"yes"/"on" → true，T3 约定）。
  */
 
-import { parseBoolEnv } from "../shared"
+import { isEnvTruthy } from "../shared"
 
 /** executor 域从 env 读取的 shell 配置 */
 export interface ShellExecutorConfig {
@@ -33,7 +33,7 @@ export function createShellExecutorConfig(): ShellExecutorConfig {
     // ② 值默认 = env 原值（bashProvider.ts 直接读 process.env.ATLAS_SHELL_PREFIX）
     shellPrefix: process.env.ATLAS_SHELL_PREFIX || undefined,
     // ③ 保持关（未设置 = false）
-    maintainProjectWorkingDir: parseBoolEnv(
+    maintainProjectWorkingDir: isEnvTruthy(
       process.env.ATLAS_BASH_MAINTAIN_PROJECT_WORKING_DIR,
     ),
   }

@@ -11,6 +11,8 @@
  * EndpointConfigSource（读 settings providers/roles）是已有 port 模式，B 波迁入。
  */
 
+import { parseBoundedIntEnv } from '../shared'
+
 /**
  * modelprovider 域从 env 读取的 LLM 调用配置。
  * settings 部分（providers/roleModels）走 EndpointConfigSource port，不在此。
@@ -55,18 +57,14 @@ export function createModelProviderConfig(): ModelProviderConfig {
   }
 }
 
-/** 有界整数 env 解析（fallback + cap，对齐旧仓 validateBoundedIntEnvVar 语义）。 */
+/** 有界整数 env 解析 — C1b 切 shared 单一事实源（min=1 保留"0 无效回落默认"语义）。 */
 function resolveBoundedInt(
   name: string,
   defaultValue: number,
   upperLimit: number,
 ): number {
-  const value = process.env[name]
-  if (!value) return defaultValue
-  const parsed = parseInt(value, 10)
-  if (isNaN(parsed) || parsed <= 0) return defaultValue
-  if (parsed > upperLimit) return upperLimit
-  return parsed
+  return parseBoundedIntEnv(name, process.env[name], defaultValue, upperLimit, 1)
+    .effective
 }
 
 /** JSON 对象 env（ATLAS_EXTRA_BODY / ATLAS_EXTRA_METADATA）。 */
