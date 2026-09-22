@@ -6,12 +6,12 @@
  */
 import { describe, test, expect, afterEach } from "bun:test"
 import { FileSystemMemoryStore } from "../../src/memory"
-// setFsImplementation 是域内内部函数（门面不暴露），测试直接从域内文件导入
+// C1 下沉后 fs 抽象在 shared（跨域），测试经 shared 门面导入
 import {
   setFsImplementation as setFs,
   setOriginalFsImplementation as resetFs,
   type FsOperations,
-} from "../../src/memory/fsOperations"
+} from "../../src/shared"
 
 function makeMock(overrides: Partial<FsOperations> = {}): FsOperations {
   return {

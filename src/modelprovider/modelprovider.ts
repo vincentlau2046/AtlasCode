@@ -6,7 +6,7 @@
  *
  * import 适配：
  *  - Message/SystemPrompt → shared（契约冻结）
- *  - logForDebugging → 域内 debug.ts（no-op stub，C 波 logging port）
+ *  - logForDebugging → shared（C1 单一 no-op 占位，logging port 定案后整文件替换）
  *  - StreamEvent/LLMErrorCode → 域内 types.ts
  *  - buildOpenAIParams → 域内 params.ts
  *  - getClientForEntry → 域内 clients.ts
@@ -18,7 +18,7 @@ import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
 import { asSystemPrompt, type Message, type SystemPrompt } from '../shared'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 

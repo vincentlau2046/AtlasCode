@@ -1,11 +1,12 @@
 /**
- * fsOperations — 域本地文件系统抽象（从旧仓 utils/fsOperations.ts 裁剪收进）
+ * 文件系统抽象（C1 下沉，跨 ≥2 域：memory FileSystemMemoryStore +
+ * C-Deep executor Shell.ts 移植（旧仓 utils/fsOperations.ts 消费方含 Shell.ts/debug.ts 等 10+ 文件））。
  *
- * charter DEP-3：utils 依赖收进域内。memory 域的 FileSystemMemoryStore 只需
- * readFile/readFileSync/readdir(recursive)/mkdir/statSync 这几个原语，
- * 故裁剪到最小集（旧仓 FsOperations 60+ 方法全量 YAGNI）。
+ * 从 memory/fsOperations.ts 的 B 波裁剪版上移：最小集（旧仓 60+ 方法全量 YAGNI）。
+ * C-Deep 时 executor 若需更多原语（writeFile/appendFile/rm…）→ 接口**加法式**扩展，
+ * 不另开第二份抽象（防腐：fs 抽象单一事实源在 shared）。
  *
- * slowOperations 计时 / errors.getErrnoCode 依赖已断开（memory 域不需要）。
+ * slowOperations 计时 / errors.getErrnoCode 依赖已断开。
  * mkdir 的 EEXIST 容错保留（Bun/Windows 只读目录位误判，旧仓 issue 30924）。
  */
 import * as fs from 'fs'
@@ -17,7 +18,7 @@ import {
 } from 'fs/promises'
 
 /**
- * memory 域所需的最小 FS 操作集。
+ * 最小 FS 操作集（跨域共享，C-Deep 按需加法扩展）。
  */
 export type FsOperations = {
   cwd(): string

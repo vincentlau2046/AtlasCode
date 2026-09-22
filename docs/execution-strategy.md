@@ -375,9 +375,12 @@ C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）✅ 2026-09-22 
   ↓
 C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）
   ↓
-C-Deep（填 6 stub，建 task/bootstrap/permissions/hooks 4 域骨架）
+C-Deep（填 6 stub，建 4 域骨架）— 2026-09-22 复审切 2 纵切片（§8.7）：
+  切片 1 executor 4 stub + 纵切 smoke（真 spawn echo hi）
+  切片 2 sandbox 2 stub + 纵切 smoke（建 manager + ripgrep 查询）
+  每片完成即跑对应 smoke（tests/func/，port 之下全真）
   ↓
-★ B6-func 功能 gate（新 gate：真实跑一条 shell 命令 + 建一个 sandbox，证明迁移链能跑通）
+★ B6-func 功能 gate（全量终局 gate：shell 真跑 + 建 sandbox + mock completion + 写读 memory）
   ↓
 C1-engine 212 叶子 + C2-engine 49 结构 + 剩余 port
   ↓
@@ -415,3 +418,23 @@ C 波 8-12 天 → **12-18 天**（吸收 C-Deep 整波 + 未真正前移的叶�
 - `fsOperations`/`readFileInRange` 纯部分 = memory 域专属（DEP-3 域内收拢），留域
 
 **验收**：tsc 0 / lint 0 / build ✓ / 349 pass 0 fail（含 tests/ci 防腐门；STUB_REGISTRY 未动——C1 不填 stub，符合门②口径）。
+
+**C1 复审整改（同日，用户"审视是否有问题"触发）**：
+| # | 发现 | 处置 |
+|---|---|---|
+| R1 | §8.6 "fsOperations 留 memory 域" 裁定**前瞻错误**：旧仓 fsOperations 消费方含 Shell.ts/debug.ts 等 10+ 文件，C-Deep 移植 Shell.ts 必需要 → 域内留 = 埋 C-Deep 第二份 fs 抽象 | 已下沉 `shared/fs-operations.ts`（最小集，C-Deep 加法扩展）；memory 本地副本删，消费方切 shared |
+| R2 | debug no-op 域内复制风险：modelprovider/debug.ts 是 B 波先例，C-Deep 4 域各复制一份 = 腐化 | 已下沉 `shared/debug.ts`（单一 no-op 占位，C-4 裁定不变：logging port 定案后整文件替换）；modelprovider 副本删 |
+| R3 | **防腐门盲区**：anti-stub 只扫 B 波四域，C-Deep 新建 task/bootstrap/permissions/hooks 骨架可逃过门（H4 腐化向量复活） | 门已预覆盖：四域目录存在即自动纳扫（C1 落），空壳须登记 STUB_REGISTRY；变异验真通过（造 src/task 空壳→门①红，删→绿） |
+| R4 | 口径核验（无误）：512B 回归无测试残留断言；isEnvTruthy trim 行为与旧仓 envUtils 逐行一致；effort 本地副本（无 trim）偏差随统一修复 | — |
+
+### 8.7 C-Deep 执行合理化（C1 复审后修订，"更真正"）
+
+原计划隐患：C-Deep = 填 6 stub + 建 4 域骨架**一次性做完**，功能验证（B6-func）放在整个 C-Deep 之后——空洞等价（H6）暴露窗口最长，且与"功能纵切优先"裁定相悖（C-Deep 内部实际是横切）。修订：
+
+1. **C-Deep 切 2 纵切片，每片自带功能 smoke（tests/func/，CI 自动跑）**：
+   - **切片 1 = executor 纵切**（填 4 stub：Shell/ShellCommand/ShellExecutor/shellProvider + 所需 port 实现）→ smoke：经 ShellExecutor **真实 spawn 跑 `echo hi`**，断言 stdout 捕获。
+   - **切片 2 = sandbox 纵切**（填 createSandboxManager/ripgrep 2 stub）→ smoke：**建 manager + 一次 ripgrep 查询**（rg 存在则真查，缺失按 unit 纪律 skip 不红）。
+   - **port 边界规则（B6-func 核心）**：port 之上可 fake（TaskOutput 可用内存 fake），**port 之下必须全真**（spawn/fs/ripgrep 真跑）——smoke 防"fake 到底"。
+2. **4 新域骨架与 STUB_REGISTRY 同提交登记**（门①强制）+ capability-matrix 加 4 域能力行（rule ③ 随之覆盖）；骨架建立时即有门，不留无门窗口（R3 已预铺）。
+3. **mock-completion 归属澄清**：matrix 行 `by: C` 口径 = **B6-func 承载执行**（"mock 一次 completion"），不等 B9；clients.ts 现无 transport 注入面，B6-func 时按"可注入 fake transport 或 in-process mock"二选一定案（不提前重构）。
+4. 终局 B6-func（全量：shell 真跑 + sandbox 建 manager + mock completion + memory 写读）仍作为 engine 迁移前的最后功能 gate，纵切 smoke 是其前置证据而非替代。

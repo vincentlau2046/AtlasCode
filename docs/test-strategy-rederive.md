@@ -121,5 +121,9 @@
 1. ✅ **已完成（2026-09-22，B-fix 独立项，C 波前置）**：`tests/ci/anti-stub.test.ts` + `tests/ci/capability-matrix.test.ts` + `.github/workflows/ci.yml`（收 H1+H4），让 6 空 stub 从此**过不了门**（未登记空壳 = 红 / 注册表漂移 = 红 / wave-c tag 时注册表清零）。门经变异验真（临时造未登记空壳 → 门①红，还原 → 绿）。**归类裁定：B-fix（B 波缺陷纠偏），非 C 波范围，C-Deep 前置件**——盲区是 B 交付留下的，纠偏记 B 账；但 C-Deep 填 stub 前门必须就位。已记入 execution-strategy §7/§8.3。
 2. ✅ **C1 叶子单测已展开（2026-09-22，438a93b + b3c2fe1）**：4 个新叶子测试文件（`shared-string-utils` / `shared-circular-buffer` / `shared-errors` / `shared-format`，行为断言移植旧仓口径，含边界：safeJoinLines 部分容纳/无剩余空间、EndTruncatingAccumulator 截断+标记+totalBytes 全量、CircularBuffer 回绕 getRecent、shortErrorStack 帧数裁切）+ `shared-env` 扩展（parseBoundedIntEnv min 参数 / isEnvTruthy·isEnvDefinedFalsy 全集合）。**教训回写**：首版 4 个用例期望算错（标记串 14 非 13 字符 / addAll 保留满容量窗 / 9999999 才触 cap）——叶子移植必须逐边界实跑验证，不能凭读码推期望。3 port 契约测试仍 ⏳（C2 展开）。
 3. **C-Deep 时**：展开 4 域骨架能力测试 + B6-func 断言；填一个 stub 销一个 STUB_REGISTRY 条目（门②强制）。
+4. ✅ **C1 复审（2026-09-22）已落 3 项防腐前置**（execution-strategy §8.6 复审表 + §8.7）：
+   - 防腐门预覆盖 C-Deep 四域（task/bootstrap/permissions/hooks 目录存在即纳扫，变异验真：造空壳→门①红）；
+   - fs 抽象 / debug no-op 单一事实源下沉 shared（防 C-Deep 域内复制腐化）；
+   - **C-Deep 切 2 纵切片 + 每片功能 smoke**（tests/func/，port 之下全真）——把 H6 空洞等价的暴露窗口从"整个 C-Deep"缩到单切片；4 新域骨架须与 STUB_REGISTRY/capability-matrix 同提交登记（不留无门窗口）；mock-completion 由 B6-func 承载执行（不等 B9）。
 
 每步展开后回写本文对应 ⏳ 节，保持活文档。

@@ -13,15 +13,23 @@
  * engine/ascend 域骨架在 C/E 波各自建门（分层不变量，test-strategy §4）。
  */
 import { describe, test, expect } from 'bun:test'
-import { readFileSync, readdirSync, statSync } from 'fs'
+import { readFileSync, readdirSync, statSync, existsSync } from 'fs'
 import { join } from 'path'
 import { execFileSync } from 'child_process'
 
 /** URL pathname 对目录 URL 保留尾斜杠 → 归一化去掉，保证 slice(offset) 口径一致 */
 const REPO_ROOT = new URL('../../', import.meta.url).pathname.replace(/\/$/, '')
 
-/** B 波认领的四域（其余顶层目录由后续波次各自建门） */
+/** B 波认领的四域 */
 const DOMAINS = ['executor', 'sandbox', 'memory', 'modelprovider'] as const
+
+/**
+ * C-Deep 将新建的四域（execution-strategy §8.2：task/bootstrap/permissions/hooks）。
+ * 目录存在即纳入扫描（C1 防腐前置：C-Deep 建骨架时门自动生效，
+ * 新空壳须登记 STUB_REGISTRY，否则门①红——防"新域骨架逃过门"的腐化向量）。
+ * 目录尚不存在时跳过（mkdir 前无文件可扫）。
+ */
+const CDEEP_DOMAINS = ['task', 'bootstrap', 'permissions', 'hooks'] as const
 
 /** 实质内容 < 5 行的文件视为空壳 stub */
 const STUB_LINE_THRESHOLD = 5
@@ -59,6 +67,7 @@ function substantiveLines(file: string): number {
 
 function listDomainFiles(domain: string): string[] {
   const dir = join(REPO_ROOT, 'src', domain)
+  if (!existsSync(dir)) return [] // C-Deep 域目录未建 → 无文件可扫
   const out: string[] = []
   const walk = (d: string) => {
     for (const name of readdirSync(d)) {
@@ -71,8 +80,12 @@ function listDomainFiles(domain: string): string[] {
   return out
 }
 
+const allDomains = (): readonly string[] =>
+  // B 波四域恒扫；C-Deep 四域目录存在才扫
+  [...DOMAINS, ...CDEEP_DOMAINS.filter((d) => existsSync(join(REPO_ROOT, 'src', d)))]
+
 const detectedStubs = () =>
-  DOMAINS.flatMap((d) =>
+  allDomains().flatMap((d) =>
     listDomainFiles(d)
       .filter((f) => substantiveLines(f) < STUB_LINE_THRESHOLD)
       .map((f) => f.slice(REPO_ROOT.length + 1)),

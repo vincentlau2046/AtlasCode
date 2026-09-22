@@ -41,6 +41,14 @@ export {
   isFsInaccessible,
 } from "./errors"
 export { formatFileSize } from "./format"
+export { logForDebugging, type DebugLogLevel } from "./debug"
+export {
+  NodeFsOperations,
+  setFsImplementation,
+  getFsImplementation,
+  setOriginalFsImplementation,
+  type FsOperations,
+} from "./fs-operations"
 
 // B 波契约冻结：纯类型骨架（atlas/message/SystemPrompt/ThinkingConfig/Effort/Tool）
 export type * from "./types"

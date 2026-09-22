@@ -2,14 +2,14 @@
  * FileSystemMemoryStore — 具体文件系统 MemoryStore 实现
  *
  * 从旧仓 core/memory/FileSystemMemoryStore.ts 迁入。
- * 包 getFsImplementation()（域本地 fsOperations.ts）+ readFileInRange()（域本地）。
+ * 包 getFsImplementation()（shared，C1 下沉跨域 fs 抽象）+ readFileInRange()（域本地）。
  * 纯薄适配器——不新增 FS 原语。
  *
- * charter DEP-3：utils 依赖（fsOperations/readFileInRange）已收进域内。
+ * charter DEP-3：readFileInRange 收进域内；fsOperations C1 已下沉 shared（跨域）。
  */
 import type { MemoryStore, StoreDirent } from './types'
 
-import { getFsImplementation } from './fsOperations'
+import { getFsImplementation } from '../shared'
 import { readFileInRange } from './readFileInRange'
 
 export class FileSystemMemoryStore implements MemoryStore {
