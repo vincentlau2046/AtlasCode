@@ -5,6 +5,11 @@
  * < 5 行的 .ts 文件（如 `export {}` 空模块）必须登记在 STUB_REGISTRY
  * （注明解锁波次）；已填实现的文件必须从注册表移除（防注册表漂移）。
  *
+ * 豁免：实质内容全为跨模块 re-export（`export * from` / `export {…} from` /
+ * `export type * from`）的文件 = STR-1 域门面，不判 stub——门面职责是委托
+ * （外部消费者只 import 域根 index），导出面薄是域早期合法态；空洞只会
+ * 活在 re-export 的目标模块里，而目标模块在同域同扫描范围（切片 3 T1 加）。
+ *
  * 触发背景：B 波 6 个空 stub（executor/sandbox 核心行为）骗过
  * tsc/lint/test/build 四件套 —— 它们结构合法所以顺过所有门。
  * 本门让"空壳"从结构合法变为显式登记项，C 波 wave-c tag 时注册表须清零。
@@ -46,10 +51,18 @@ const STUB_REGISTRY: ReadonlyArray<{
   // C-Deep 切片 1（executor 纵切）销 4 条；切片 2（sandbox 纵切）销最后 2 条
   // （createSandboxManager 工厂 + ripgrep 搜索后端，裁剪版填实）→ 注册表清零。
   // 裁剪残余清单见各文件头注释（非"空壳"，不登记）。
+  // 切片 3 T1（task 种子）重添 1 条：diskOutput fail-fast stub，T3 填实即销
+  // （门① 要求空壳文件与登记同提交，不留无门窗口）。
+  {
+    file: 'src/task/diskOutput.ts',
+    reason:
+      'C-Deep 切片 3 T1 种子：getTaskOutputPath fail-fast stub（task.ts createTaskStateBase 的 outputFile 消费）；T3 填实 diskOutput（getProjectTempDir 注入 + 5GB cap + executor 残余接回 L280/L324）',
+    unlock: 'C-Deep 切片 3 T3',
+  },
 ]
 
-/** 剥掉注释/空行后的实质行数 */
-function substantiveLines(file: string): number {
+/** 剥掉注释/空行后的实质内容行（substantiveLines 与门面豁免共用） */
+function substantiveContent(file: string): string[] {
   return readFileSync(file, 'utf8')
     .split('\n')
     .filter(
@@ -59,7 +72,21 @@ function substantiveLines(file: string): number {
         !l.trimStart().startsWith('/*') &&
         !l.trimStart().startsWith('*') &&
         l.trim() !== '*/',
-    ).length
+    )
+}
+
+/** 剥掉注释/空行后的实质行数 */
+function substantiveLines(file: string): number {
+  return substantiveContent(file).length
+}
+
+/** STR-1 门面豁免判定：全部实质行均为跨模块 re-export 语句（0 re-export 行不豁免）。 */
+function isPureReexportFacade(file: string): boolean {
+  const lines = substantiveContent(file)
+  if (lines.length === 0) return false
+  return lines.every((l) =>
+    /^\s*export\s+(type\s+)?(\*|\{[^}]*\})\s+from\s+['"]/.test(l),
+  )
 }
 
 function listDomainFiles(domain: string): string[] {
@@ -84,7 +111,11 @@ const allDomains = (): readonly string[] =>
 const detectedStubs = () =>
   allDomains().flatMap((d) =>
     listDomainFiles(d)
-      .filter((f) => substantiveLines(f) < STUB_LINE_THRESHOLD)
+      .filter(
+        (f) =>
+          substantiveLines(f) < STUB_LINE_THRESHOLD &&
+          !isPureReexportFacade(f),
+      )
       .map((f) => f.slice(REPO_ROOT.length + 1)),
   )
 
