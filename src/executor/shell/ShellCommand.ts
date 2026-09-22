@@ -9,8 +9,11 @@
  * 裁剪裁定（2026-09-22 调研定稿，复审勿当遗漏重提）：
  * - tree-kill 依赖 → POSIX 进程组 kill（spawn detached → 进程组组长，
  *   process.kill(-pid, 'SIGKILL')）；Windows taskkill 回退归残余
- * - size watchdog（5s 轮询 stat + MAX_TASK_OUTPUT_BYTES 5GB 上限）归 task 域
- *   （常量在旧 utils/task/diskOutput.ts，task 域 C-Deep 切片 3 落地后接回）
+ * - size watchdog 切片 3 T3 已接回：file 模式 background() 启 5s 轮询 stat，
+ *   超上限 kill 后台任务（#killedForSize → result.stderr 前缀）；上限
+ *   MAX_TASK_OUTPUT_BYTES = shared 单一事实源（task 域 diskOutput pipe 模式
+ *   丢弃线共线，见 shared/constants.ts 头注），ctor/wrapSpawn 可选
+ *   maxOutputBytes 参数透传（旧仓 6 参 ctor 位，测试小值覆写 seam）
  * - shouldAutoBackground / onTimeout 回调 / backgroundedByUser /
  *   assistantAutoBackgrounded = assistant 自动后台化语义，归 engine 波
  * - StreamWrapper 不做 maxOutputLength 截断（outputLimits 归 task 域策略）
@@ -19,7 +22,9 @@
  */
 import type { ChildProcess } from 'child_process'
 import { randomBytes } from 'crypto'
+import { stat } from 'fs/promises'
 import type { Readable } from 'stream'
+import { formatFileSize, MAX_TASK_OUTPUT_BYTES } from '../../shared'
 import { getTaskOutputPort, type TaskOutputHandle } from '../ports/taskOutput'
 
 export type ExecResult = {
@@ -54,6 +59,12 @@ export type ShellCommand = {
 
 const SIGKILL = 137
 const SIGTERM = 143
+
+// 后台任务 stdout/stderr 直写文件 fd（JS 零参与），stuck append 循环可填满
+// 磁盘（768GB 事件）。每 5s 轮询文件尺寸，超上限 kill。
+// 上限 MAX_TASK_OUTPUT_BYTES = shared 单一事实源（task 域 diskOutput pipe
+// 模式丢弃线共线）；轮询间隔单消费者（本域）→ 不随下沉，留域内。
+const SIZE_WATCHDOG_INTERVAL_MS = 5_000
 
 /**
  * 'local_bash' → 'b'（旧仓 Task.ts TASK_ID_PREFIXES 同值；
@@ -139,6 +150,9 @@ class ShellCommandImpl implements ShellCommand {
   #stderrWrapper: StreamWrapper | null
   #childProcess: ChildProcess
   #timeoutId: NodeJS.Timeout | null = null
+  #sizeWatchdog: NodeJS.Timeout | null = null
+  #killedForSize = false
+  #maxOutputBytes: number
   #abortSignal: AbortSignal
   #timeout: number
   #resultResolver: ((result: ExecResult) => void) | null = null
@@ -158,10 +172,12 @@ class ShellCommandImpl implements ShellCommand {
     abortSignal: AbortSignal,
     timeout: number,
     taskOutput: TaskOutputHandle,
+    maxOutputBytes: number = MAX_TASK_OUTPUT_BYTES,
   ) {
     this.#childProcess = childProcess
     this.#abortSignal = abortSignal
     this.#timeout = timeout
+    this.#maxOutputBytes = maxOutputBytes
     this.taskOutput = taskOutput
 
     // file 模式两 fd 直写文件 → childProcess.stdout/.stderr 均为 null
@@ -211,6 +227,7 @@ class ShellCommandImpl implements ShellCommand {
 
   // 注意：exit/error 监听不在这里移除——result promise 依赖它们。
   #cleanupListeners(): void {
+    this.#clearSizeWatchdog()
     const timeoutId = this.#timeoutId
     if (timeoutId) {
       clearTimeout(timeoutId)
@@ -221,6 +238,37 @@ class ShellCommandImpl implements ShellCommand {
       this.#abortSignal.removeEventListener('abort', boundAbortHandler)
       this.#boundAbortHandler = null
     }
+  }
+
+  #clearSizeWatchdog(): void {
+    if (this.#sizeWatchdog) {
+      clearInterval(this.#sizeWatchdog)
+      this.#sizeWatchdog = null
+    }
+  }
+
+  #startSizeWatchdog(): void {
+    this.#sizeWatchdog = setInterval(() => {
+      void stat(this.taskOutput.path).then(
+        s => {
+          // stat 在途时 watchdog 已被清（进程自行退出）→ 跳过，
+          // 否则误标 stderr
+          if (
+            s.size > this.#maxOutputBytes &&
+            this.#status === 'backgrounded' &&
+            this.#sizeWatchdog !== null
+          ) {
+            this.#killedForSize = true
+            this.#clearSizeWatchdog()
+            this.#doKill(SIGKILL)
+          }
+        },
+        () => {
+          // 首次写入前 ENOENT，或运行中被 unlink——跳过本轮
+        },
+      )
+    }, SIZE_WATCHDOG_INTERVAL_MS)
+    this.#sizeWatchdog.unref()
   }
 
   #createResultPromise(): Promise<ExecResult> {
@@ -277,8 +325,12 @@ class ShellCommandImpl implements ShellCommand {
       }
     }
 
-    // killedForSize 分支随 size watchdog 归残余（task 域接回时补）
-    if (code === SIGTERM) {
+    if (this.#killedForSize) {
+      result.stderr = prependStderr(
+        `Background command killed: output file exceeded ${formatFileSize(this.#maxOutputBytes)}`,
+        result.stderr,
+      )
+    } else if (code === SIGTERM) {
       result.stderr = prependStderr(
         `Command timed out after ${formatDurationMs(this.#timeout)}`,
         result.stderr,
@@ -316,12 +368,14 @@ class ShellCommandImpl implements ShellCommand {
       this.#backgroundTaskId = taskId
       this.#status = 'backgrounded'
       this.#cleanupListeners()
-      if (!this.taskOutput.stdoutToFile) {
+      if (this.taskOutput.stdoutToFile) {
+        // file 模式：子进程直写 fd，JS 零参与。前台超时已移除，
+        // 轮询文件尺寸防 stuck append 循环填满磁盘（768GB 事件防线）
+        this.#startSizeWatchdog()
+      } else {
         // pipe 模式：把内存缓冲溢写到盘，读者可从磁盘找到
         this.taskOutput.spillToDisk()
       }
-      // file 模式旧仓此处启 size watchdog（768GB 事件防线）——
-      // 归残余：task 域 MAX_TASK_OUTPUT_BYTES 落地后接回
       return true
     }
     return false
@@ -349,8 +403,15 @@ export function wrapSpawn(
   abortSignal: AbortSignal,
   timeout: number,
   taskOutput: TaskOutputHandle,
+  maxOutputBytes: number = MAX_TASK_OUTPUT_BYTES,
 ): ShellCommand {
-  return new ShellCommandImpl(childProcess, abortSignal, timeout, taskOutput)
+  return new ShellCommandImpl(
+    childProcess,
+    abortSignal,
+    timeout,
+    taskOutput,
+    maxOutputBytes,
+  )
 }
 
 /**
