@@ -27,9 +27,10 @@ type MatrixRow = {
 }
 
 /**
- * 能力矩阵（单一事实源）。B 波现状：
- * memory/modelprovider 行为完整（B 交付真码），executor/sandbox 仅骨架
- * （核心行为 6 空 stub，C-Deep 解锁）。
+ * 能力矩阵（单一事实源）。C-Deep 切片 1 现状（2026-09-22）：
+ * memory/modelprovider 行为完整（B 交付真码）；executor 纵切已填
+ * （4 空 stub → 裁剪版 bash-only 真核心 + 真 spawn 功能 smoke）；
+ * sandbox 2 空 stub 待 C-Deep 切片 2。
  */
 const MATRIX: readonly MatrixRow[] = [
   { domain: 'memory', capability: '写+读 memory（store 语义）', status: 'done', proof: 'tests/unit/memory-store.test.ts' },
@@ -38,7 +39,9 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'modelprovider', capability: '角色 fallback 解析', status: 'done', proof: 'tests/unit/model-roles.test.ts' },
   { domain: 'modelprovider', capability: '错误消息/错误码映射', status: 'done', proof: 'tests/unit/errorMessaging.test.ts' },
   { domain: 'modelprovider', capability: '（mock）出一段 completion', status: 'missing', by: 'C（B9 双跑 fixture + 独立 mock 测试）' },
-  { domain: 'executor', capability: '执行一条 shell 命令', status: 'missing', by: 'C-Deep' },
+  // C-Deep 切片 1（executor 纵切）：真 spawn 功能 smoke（§8.7 port 之下全真）；
+  // 同族契约测试：executor-shell-provider / executor-shell-command（unit 层）
+  { domain: 'executor', capability: '执行一条 shell 命令（裁剪版 bash-only 纵切）', status: 'done', proof: 'tests/func/executor-shell-smoke.test.ts' },
   { domain: 'executor', capability: '工具链占位替换（NPU toolchain）', status: 'done', proof: 'tests/unit/executor-toolchain.test.ts' },
   // C2：3 port 契约（TaskOutput/bootstrapState/ExecutorSandbox 注入面，§8.8）
   // proof 取三契约测试之一（另两件同族：executor-port-bootstrap-state / executor-port-sandbox）

@@ -43,10 +43,8 @@ const STUB_REGISTRY: ReadonlyArray<{
   reason: string
   unlock: string
 }> = [
-  { file: 'src/executor/ShellExecutor.ts', reason: 'executor 执行行为（空 export {}）', unlock: 'C-Deep' },
-  { file: 'src/executor/shell/Shell.ts', reason: 'shell 执行核心（闭包跨 task/bootstrap 域）', unlock: 'C-Deep' },
-  { file: 'src/executor/shell/ShellCommand.ts', reason: 'ShellCommand（依赖 TaskOutput 域）', unlock: 'C-Deep' },
-  { file: 'src/executor/shell/shellProvider.ts', reason: 'shell provider（依赖 Shell）', unlock: 'C-Deep' },
+  // C-Deep 切片 1（executor 纵切）已填 4 stub → 销 4 条（门② 防漂移）；
+  // 裁剪残余（PowerShell/windows/watchdog/autoBg 等）见各文件头注释清单
   { file: 'src/sandbox/createSandboxManager.ts', reason: 'sandbox 工厂（闭包 30+ 文件）', unlock: 'C-Deep' },
   { file: 'src/sandbox/ripgrep.ts', reason: 'ripgrep 搜索后端（闭包 8 子依赖）', unlock: 'C-Deep' },
 ]
