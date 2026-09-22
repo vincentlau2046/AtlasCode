@@ -611,9 +611,9 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 
 **T3 验收**：四件套 tsc 0 / lint 0 / build ✓ / 409 pass 0 fail 33 文件 741 expect（含 anti-stub 门，基线零变动）；diskOutput 实质行 diff 对旧仓 451L = 仅 D12/D13/logError 映射/注入窗/常量迁移五类偏差，零未登记漂移；executor 三处残余标记（头注/L280/L324）全部接回。
 
-### 8.16 C-Deep 切片 3 执行记录 + 偏差修订（T5 permissions 薄骨架 完成 2026-09-23）
+### 8.16 C-Deep 切片 3 执行记录 + 偏差修订（T5 permissions + T6 hooks 薄骨架 完成 2026-09-23）
 
-执行序：T5 permissions 薄骨架（本批次单提交：`src/permissions/` 4 文件 + `shared/` 7 叶子 + `shared/types-session` 决策类型 + `shared/index` 门面 + executor Shell rewire）。
+执行序：T5 permissions 薄骨架（`src/permissions/` 4 文件 + `shared/` 7 叶子 + `shared/types-session` 决策类型 + `shared/index` 门面 + executor Shell rewire）→ T6 hooks 薄骨架（`src/hooks/` 12 文件，零 C-Deep 域 import、零 shared import，全靠注入端口）。
 
 **T5 落地面（§8.14 薄骨架，逐文件）：**
 - `src/permissions/PermissionRule.ts`：40L 随迁（规则类型 re-export + 两 zod schema 经 shared lazySchema；旧仓 `zod/v4` → 新仓 `zod` 主入口即 v4）。
@@ -635,3 +635,33 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 - T8 门同步：capability-matrix 加 permissions 域行（薄骨架 done，proof 随 T7）；anti-stub 已自动纳扫 `src/permissions`（CDEEP_DOMAINS 项），T5 落地后四文件实质行 561/32/23/19 全 ≥5，非空壳，**无需 STUB_REGISTRY 登记**（仅 hooks 域若落 <5 实质行骨架需登记——T6 核）。
 
 **T5 验收**：tsc 0 / 409 pass 0 fail 33 文件 741 expect（基线零变动，含 anti-stub 门）；filesystem 最小面 checkRead/checkWrite 12 步 + 6 助手对旧仓实质行 diff = 仅 D14/D15/D16 + 薄骨架桩四类偏差，零未登记漂移；executor Shell 残余标记（头注 + sandboxTmpDir）接回 shared 单一事实源。
+
+---
+
+**T6 hooks 薄骨架落地面（§8.14「runHooks 折叠 18 execute* 参数化，先实 5 高频」，逐文件）：**
+- `src/hooks/hookEvents.ts`：HOOK_EVENTS 27 事件常量 + `HookEvent` 类型（单一事实源，零依赖全量随迁；跨 ≥2 域消费）。
+- `src/hooks/types.ts`：类型面（`BaseHookInput` + `HookInput` = base & {hook_event_name, [k:string]:unknown}；`HookCommand`（command 型主路径，callback/function 归 engine）/ `HookPayload` / `HookMatcher` / `MatchedHook` / `HookJSONOutput` / `HookBlockingError` / `HookResult` / `AggregatedHookResult`）。
+- `src/hooks/bootstrap-env.ts`：跨域注入窗口（`HooksBootstrapEnv` 6 函数 getSessionId/getCwd/getTranscriptPath/getMainThreadAgentType/isNonInteractive/hasTrustAccepted；set/get fail-fast / reset）——消费方 createBaseHookInput + shouldSkipHookDueToTrust。
+- `src/hooks/config-provider.ts`：钩子配置源注入端口（`getHookMatchersForEvent(event)`；未注入返回 null = 无钩子配置是常态，非 fail-fast；配置加载体系三源合并 + managed-only 归 engine）。
+- `src/hooks/task-edges.ts`：2 条 task 边斩断注入端口（① `HookOutputCapture` getStdout/getStderr/cleanup 异步唤醒窄面 ② `createHookOutput(taskId)` 工厂；未注入 fail-fast）。
+- `src/hooks/shell-port.ts`：**D17 新增**命令钩子执行跨域端口 `HookShellPort.runCommand(cmd, env, signal, timeoutMs?) → {stdout,stderr,code,aborted?}`（组合根接 executor 真 Shell；未注入 fail-fast，但无钩子配置时不被调用不误伤）。
+- `src/hooks/fileChangedWatcher.ts`：hooks↔executor 第二边 no-op 起步（`setEnvHookNotifier`/`initializeFileChangedWatcher`/`updateWatchPaths`/`onCwdChangedForHooks`/`resetFileChangedWatcherForTesting` 真签名空体；真 chokidar 监听 + CwdChanged/FileChanged 钩子执行归 engine）。
+- `src/hooks/createBaseHookInput.ts`：造公共基础输入（session/transcript/cwd/permission/agent，经 bootstrap-env 斩断；返回 `BaseHookInput`）。
+- `src/hooks/shouldSkipHookDueToTrust.ts`：信任门（非交互恒执行；交互缺信任全跳过——防信任对话框前误执行 SessionEnd/SubagentStop 历史漏洞）。
+- `src/hooks/getMatchingHooks.ts`：匹配核心（27 事件 matchQuery 提取 switch 全保留 + matchesPattern simple/pipe/regex 三态 + command 钩子 shell\0command\0if 去重；matcher 源经 config-provider 注入）。
+- `src/hooks/runHooks.ts`：参数化分发核心 `runHooks(event, hookInput, opts)` + 5 高频执行器（PreToolUse/PostToolUse/SessionStart/Stop/SessionEnd）；信任门 → 匹配 → 命令钩子经 HookShellPort 逐条执行 → JSON 解释（continue/decision/systemMessage/hookSpecificOutput.permissionDecision/additionalContext/updatedInput/suppressOutput）+ exit-2 阻塞约定 → 聚合（首阻塞/任续停/最严权限 deny>ask>allow）。
+- `src/hooks/index.ts`：STR-1 门面（全量 re-export，外部只 import 域根）。
+
+**T6 偏差登记（复审勿当遗漏重提）：**
+- **D17（T6，hooks→executor shell-exec 端口，§8.14 未列）**：§8.14 只登记 2 条 task 边（HookOutputCapture/createHookOutput），漏登命令钩子经 executor Shell（ShellCommand）spawn 这条边。薄骨架把它收敛为注入端口 `HookShellPort`（hooks 域不 import executor 域，L3）。**B6-func 前置清单 4+5 → 4+6**（组合根须 `setHookShellPort(executor 真 Shell 适配)`，在首次配了命令钩子并 runHooks 前注册；无命令钩子时该端口不被触碰，故 fail-fast 不误伤常态）。
+- **BaseHookInput 独立类型（T6，非偏差，勘误）**：`HookInput` 带 `[key:string]:unknown` 索引签名，`Omit<HookInput,'hook_event_name'>` 会把 keyof 解到索引签名、抹掉具名字段（session_id/cwd 全丢）。故拆出显式 `BaseHookInput`（createBaseHookInput 返回型），5 高频执行器 `{...base, hook_event_name, ...}` 叠成 HookInput。
+- **runHooks 返回 Promise 非 AsyncGenerator（T6，§8.14 裁定落地）**：旧仓 18 execute* 均 `async function*` yield 进度消息 + 阻塞错误（接 message pipeline / attachment 消息流）。薄骨架折叠为单一参数化 `runHooks` 返回 `Promise<AggregatedHookResult>`（无 streaming yield 面——streaming/attachment/messageQueue 归 engine）。
+- **裁剪归 engine（T6，§8.14 已定，落桩非遗漏）**：prompt/agent/http/callback/function 型钩子执行、插件变量插值、异步唤醒钩子（registerPendingAsyncHook + 消费 task-edges ①②）、MCP elicitation、`if` 条件 matcher（prepareIfConditionMatcher 依赖 Tools 域）、legacy 工具名映射（AtlasCode 无）、未知 decision/hookEventName 不匹配的抛错（薄骨架宽容仅记结果）全归 engine 波。
+- **DEFAULT_HOOK_SHELL 固定 'bash' + FileChanged basenameOf 本地实现（T6）**：旧仓 shellProvider 动态默认 shell + node:path basename 均属 executor/依赖面，薄骨架本地最小实现（`DEFAULT_HOOK_SHELL='bash'` + `basenameOf` 纯函数），免拉 executor/依赖。
+
+**后续步骤审视（T7/T8/B6-func，据 T6 实际落地修订）：**
+- T7 hooks 单测：unit 零磁盘走注入假 port（假 HookShellPort 返 canned {stdout,stderr,code}）+ 注入 config-provider（固定 matcher 集）+ 注入 bootstrap-env（固定 isNonInteractive/hasTrustAccepted）断言 5 高频执行器聚合面（trust 跳过 / 匹配 / JSON 解释 / exit-2 阻塞 / 最严权限 / additionalContext 聚合）；func 真盘面 = 无（hooks 薄骨架无真盘消费，真 chokidar/真 shell 归 engine，func 层不验）。
+- T8 门同步：capability-matrix 加 hooks 域行（薄骨架 done，proof 随 T7）+ 补 D17 使 B6-func 前置清单口径 4+5→4+6（test-strategy §6 前置清单一并落）；anti-stub 已自动纳扫 `src/hooks`（CDEEP_DOMAINS 项），T6 落地 12 文件实质行全 ≥5（最薄 shouldSkipHookDueToTrust 8 实质行 / index 门面豁免），**无需 STUB_REGISTRY 登记**（§8.15 补注 3「仅 hooks 域若落 <5 实质行骨架需登记」经核不成立，撤销该预警）。
+- **B6-func 前置清单最终口径 4+6**：4（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11/§8.15 补注 3）+ ②setHookShellPort（D17，本批次）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。
+
+**T6 验收**：tsc 0 / 409 pass 0 fail 33 文件 741 expect（基线零变动，含 anti-stub 门 3/3 绿）；hooks 域零 C-Deep 域 import、零 shared import（全经注入端口，L3 隔离成立）；12 文件对旧仓实质行 diff = 仅 D17 + BaseHookInput 勘误 + Promise 折叠 + engine 裁剪四类，零未登记漂移；STR-1 门面 + 5 高频执行器 + 信任门 + 2 task 边斩断 + D17 shell 边切端口全就位。
