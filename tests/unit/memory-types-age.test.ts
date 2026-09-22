@@ -2,12 +2,14 @@
  * memory 域 memoryTypes + memoryAge 单测
  *
  * memoryTypes：纯常量/函数（无外部依赖）。
- * memoryAge：memoryFreshnessText 纯函数 + memoryAgeDays 真实临时文件（轻量 fs）。
+ * memoryAge：memoryFreshnessText 纯函数（分档边界全断言）。
+ *
+ * D3 层纪律（跨会话审视修复 2026-09-22）：原 5 个 fs-touching 用例
+ * （memoryAgeDays/memoryAge/memoryFreshnessNote 真盘分档 + 缺失文件真
+ * statSync）已移 tests/func/memory-real-fs.test.ts——unit 层零磁盘，
+ * 真盘证据（含 utimesSync mtime 回退分档）归 func 层。
  */
 import { describe, test, expect } from "bun:test"
-import { writeFileSync, rmSync } from "fs"
-import { tmpdir } from "os"
-import { join } from "path"
 import {
   MEMORY_TYPES,
   parseMemoryType,
@@ -19,12 +21,7 @@ import {
   TRUSTING_RECALL_SECTION,
   MEMORY_FRONTMATTER_EXAMPLE,
 } from "../../src/memory"
-import {
-  memoryFreshnessText,
-  memoryAgeDays,
-  memoryAge,
-  memoryFreshnessNote,
-} from "../../src/memory"
+import { memoryFreshnessText } from "../../src/memory"
 
 describe("memoryTypes", () => {
   test("MEMORY_TYPES — 四类型", () => {
@@ -107,49 +104,4 @@ describe("memoryAge", () => {
     expect(memoryFreshnessText(400)).toBe("1 years ago")
   })
 
-  test("memoryAgeDays — 缺失文件返回 undefined", () => {
-    expect(memoryAgeDays("/nonexistent-file-xyz.md")).toBeUndefined()
-  })
-
-  test("memoryAgeDays — 真实文件返回非负天数", () => {
-    const f = join(tmpdir(), `mem-age-test-${Date.now()}.md`)
-    writeFileSync(f, "test")
-    try {
-      const days = memoryAgeDays(f)
-      expect(days).toBeDefined()
-      expect(days!).toBeGreaterThanOrEqual(0)
-      expect(days!).toBeLessThan(1) // 刚创建，不到 1 天
-    } finally {
-      rmSync(f, { force: true })
-    }
-  })
-
-  test("memoryAge — 真实文件返回 days + text", () => {
-    const f = join(tmpdir(), `mem-age-test2-${Date.now()}.md`)
-    writeFileSync(f, "test")
-    try {
-      const age = memoryAge(f)
-      expect(age).toBeDefined()
-      expect(Math.abs(age!.days)).toBeLessThan(1)
-      expect(age!.text).toBe("today")
-    } finally {
-      rmSync(f, { force: true })
-    }
-  })
-
-  test("memoryFreshnessNote — 缺失文件返回空串", () => {
-    expect(memoryFreshnessNote("/nonexistent-xyz.md")).toBe("")
-  })
-
-  test("memoryFreshnessNote — 真实文件含 updated", () => {
-    const f = join(tmpdir(), `mem-age-note-${Date.now()}.md`)
-    writeFileSync(f, "test")
-    try {
-      const note = memoryFreshnessNote(f)
-      expect(note).toContain("updated")
-      expect(note).toContain("today")
-    } finally {
-      rmSync(f, { force: true })
-    }
-  })
 })
