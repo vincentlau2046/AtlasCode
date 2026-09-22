@@ -24,7 +24,6 @@ import {
   setCreateHookOutput,
   createHookOutput,
   resetTaskEdges,
-  runHooks,
   runPreToolUseHooks,
   runPostToolUseHooks,
   runSessionStartHooks,

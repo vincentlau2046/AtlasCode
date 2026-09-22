@@ -16,7 +16,7 @@
  */
 import { getHookConfigProvider } from './config-provider'
 import type { HookEvent } from './hookEvents'
-import type { HookCommand, HookInput, MatchedHook } from './types'
+import type { HookInput, MatchedHook } from './types'
 
 /** 旧仓 shell/shellProvider DEFAULT_HOOK_SHELL（薄骨架固定 bash）。 */
 const DEFAULT_HOOK_SHELL = 'bash'

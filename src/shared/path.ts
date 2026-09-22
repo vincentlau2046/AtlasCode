@@ -17,7 +17,6 @@
  */
 import { homedir } from 'os'
 import { isAbsolute, resolve } from 'path'
-import { getPlatform } from './platform'
 import { djb2Hash } from './hash'
 
 /**

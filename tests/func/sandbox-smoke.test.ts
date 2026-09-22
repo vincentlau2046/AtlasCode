@@ -25,8 +25,6 @@ import {
   resetSandboxRuntimeModule,
   ripGrep,
   setSandboxRuntimeModule,
-  type SandboxDependencies,
-  type SandboxManager,
 } from "../../src/sandbox"
 import {
   createFakeSandboxDeps,
