@@ -314,6 +314,8 @@ A 波（2-3 天，串行）：骨架 + feature.ts + lint + 14 集 JSON
    ↓
 B 波（3-5 天，2 session 并行）：四域 config.ts + 域单测 → B6 绿 → wave-b tag
    ↓
+[已完成] B-fix 防腐门（0.5 天，独立项 2026-09-22，C 波前置）：anti-stub + capability-matrix + CI 管道——归类=B 波缺陷纠偏（盲区是 B 交付时留下的），非 C 波范围；C-Deep 填 6 stub 前必须就位（test-strategy-rederive §4/§6）
+   ↓
 [已完成] C 波 spike（2026-09-22，4 步全绿）：①分类校准（memory 3→21，总量 +7% 可信）②端口化原型 15/15 绿（单域<1天偏保守）③并发原型 9/9 绿 ④双跑 6/6 绿 → **决策：开 C 波**
    ↓
 C 波（12-18 天，纯串行，功能纵切优先 §8）：C1 叶子下沉 → C2-executor-ports（3 port）→ C-Deep（填 6 stub + 建 4 域骨架）→ **B6-func 功能 gate（真实跑命令）** → C1-engine 212 叶子 + C2-engine → B9 → B14 → wave-c tag
@@ -365,6 +367,10 @@ S1"深迁移归 C 波 port 化后机械适配"判定**方向对但低估量级**
 
 **新序**（功能纵切优先，先除风险）：
 ```
+B-fix 防腐门（0.5 天，独立项，C 波前置，2026-09-22 已完成）
+  anti-stub + capability-matrix 机器门 + .github/workflows/ci.yml
+  （归类：B 波缺陷纠偏，非 C 波范围；C-Deep 填 6 stub 前必须就位）
+  ↓
 C1 叶子下沉（shared 12 叶子 + 四域本地 utils 去重）
   ↓
 C2-executor-ports（TaskOutput port + bootstrap-state port + sandbox 注入，3 port 先行）

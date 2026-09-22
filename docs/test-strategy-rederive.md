@@ -87,15 +87,14 @@
 
 ## 4. 防腐不变量（机器门，落 tests/ci/）
 
-| 门 | 文件 | 拦截什么 | 波次 |
-|---|---|---|---|
-| 防腐 anti-stub | `tests/ci/anti-stub.ts` | 域完成波内出现空 `export {}` / 低于实现下限 | A 补起，B 起生效 |
-| 契约符合 | `tests/ci/contract-conformance.ts` | 域门面须 re-export ≥1 具体实现；factory 用 fake deps 实例化非 throw | B 起 |
-| 能力覆盖 | `tests/ci/capability-coverage.ts` | 每域 ≥1 行为测试（非仅 config）；读能力矩阵，标 DONE 的行缺证明测试即红 | B 起 |
-| 分层不变量 | `tests/ci/layered-invariant.ts` | 层 N 能力门 JSON stamp 为前置件，层 N+1 门检查它 | C 起 |
-| 能力矩阵 | `tests/ci/capability-matrix.ts` | 域×能力→证明文件→状态 的单一事实源 | A 补起 |
+| 门 | 文件 | 拦截什么 | 波次 | 状态 |
+|---|---|---|---|---|
+| 防腐 anti-stub | `tests/ci/anti-stub.test.ts` | 空 `export {}` / 低于实现下限未登记 = 红；注册表漂移 = 红；wave-c 时注册表清零 | B-fix | ✅ 2026-09-22 |
+| 能力覆盖（矩阵） | `tests/ci/capability-matrix.test.ts` | done 行缺证明测试 = 红；missing 行无解锁波次 = 红；四域须各有规约 | B-fix | ✅ 2026-09-22 |
+| 契约符合 | `tests/ci/contract-conformance.ts` | 域门面须 re-export ≥1 具体实现；factory 用 fake deps 实例化非 throw | C 起 | ⏳ |
+| 分层不变量 | `tests/ci/layered-invariant.ts` | 层 N 能力门 JSON stamp 为前置件，层 N+1 门检查它 | C 起 | ⏳ |
 
-**H1 收口**：以上门全部进 `.github/workflows/ci.yml`，机器自动跑，非手工纪律。
+**H1 收口**：✅ `.github/workflows/ci.yml` 已落（四件套 + tests/ci 防腐门全管道化，机器自动跑非手工纪律；仓库暂无 remote，建 remote 后即刻生效）。
 
 ---
 
@@ -119,8 +118,8 @@
 
 ## 6. 下一步（展开顺序）
 
-1. **现在做**：落 `tests/ci/anti-stub.ts` + `capability-matrix.ts` 骨架 + `.github/workflows/ci.yml`（收 H1+H4），让 6 空 stub 从此**过不了门**——这是"怕再被骗"的第一道锁。
+1. ✅ **已完成（2026-09-22，B-fix 独立项，C 波前置）**：`tests/ci/anti-stub.test.ts` + `tests/ci/capability-matrix.test.ts` + `.github/workflows/ci.yml`（收 H1+H4），让 6 空 stub 从此**过不了门**（未登记空壳 = 红 / 注册表漂移 = 红 / wave-c tag 时注册表清零）。门经变异验真（临时造未登记空壳 → 门①红，还原 → 绿）。**归类裁定：B-fix（B 波缺陷纠偏），非 C 波范围，C-Deep 前置件**——盲区是 B 交付留下的，纠偏记 B 账；但 C-Deep 填 stub 前门必须就位。已记入 execution-strategy §7/§8.3。
 2. **C 波开第一步时**：展开 C1 叶子单测 + 3 port 契约测试的具体用例。
-3. **C-Deep 时**：展开 4 域骨架能力测试 + B6-func 断言。
+3. **C-Deep 时**：展开 4 域骨架能力测试 + B6-func 断言；填一个 stub 销一个 STUB_REGISTRY 条目（门②强制）。
 
 每步展开后回写本文对应 ⏳ 节，保持活文档。
