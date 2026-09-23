@@ -60,10 +60,21 @@ import { getSettingsPaths } from './settingsPaths'
  * 权限检查消费的 Tool 窄视图（旧仓全量 Tool 的 name + getPath 子集）。
  * getPath 鸭子类型（可选）——无 getPath 的工具在 check* 顶部短路 ask。
  * 完整 Tool.getPath 契约（含 input JSON schema 泛型）归 engine 波。
+ *
+ * E-4 S-4b 扩两可选字段（既有消费者零影响——全可选）：
+ *   - mcpInfo —— 镜像 shared Tool.mcpInfo（规则匹配按全名 mcp__server__tool，
+ *     防 builtin 同名规则误伤 MCP 替代；ruleMatching.toolMatchesRule 消费）。
+ *   - checkPermissions —— 鸭子可选分发（残留守① 工具面半；实现归 E-6，
+ *     checkRuleBasedPermissions 1c 存在才调；shared Tool 方法签名结构兼容）。
  */
 export type PermissionTool = {
   name: string
   getPath?(input: Record<string, unknown>): string
+  mcpInfo?: { serverName: string; toolName: string }
+  checkPermissions?(
+    input: Record<string, unknown>,
+    context: unknown,
+  ): Promise<PermissionResult>
 }
 
 /** expandPath 缺省基准 = 注入的 bootstrap cwd（shared 叶子不隐式取 cwd）。 */
