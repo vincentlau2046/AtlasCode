@@ -60,7 +60,9 @@ export type RuleTool = Pick<PermissionTool, 'name' | 'mcpInfo' | 'checkPermissio
 
 /**
  * 全部权限规则源（旧仓 [...SETTING_SOURCES, 'cliArg', 'command', 'session']）。
- * 顺序有意义——后源覆盖前源（旧仓 settings/constants.ts 头注逐字）。
+ * 匹配面 = flatMap + find 首命中优先（源序靠前者先列，命中即止）；旧仓
+ * settings/constants.ts「后源覆盖前源」指 settings 合并序，不用于规则匹配
+ * （E-4 审视 F3 订正——原注释系自合并语境照抄）。
  * 域内自持 8 值字面元组（SETTING_SOURCES 在 engine 侧 settings constants，
  * L3 不可 import；shared 类型约束 satisfies，值漂移 = tsc 红，§8.33 矛盾 ③）。
  */

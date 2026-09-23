@@ -22,7 +22,8 @@
  *     47 本体残留守不变，名单随 deps 注入增长）。
  *   - **E-4 S-4d ② 已落**：filterToolsByDenyRules（旧 tools.ts:271-278 逐字，
  *     域 getDenyRuleForTool 消费——MCP server 级 deny `mcp__server` 剥整 server，
- *     与运行时 1a 同匹配器）+ getTools(context, deps) = deny 过滤后工具池。
+ *     与运行时 1a 同匹配器）+ getTools(context, deps) = deny 过滤 + isEnabled
+ *     过滤（旧 getTools 尾行，§8.37 审视 F2 回填）后工具池。
  *     裁出登记（复审勿当遗漏）：ATLAS_SIMPLE 三分支 / REPL 支 / specialTools
  *     剔除（新仓无 REPL/special 工具本体）/ getMergedTools（getAllBaseTools
  *     (deps.mcpTools) 已覆盖去重合并语义）→ 残留守。
@@ -125,14 +126,19 @@ export function filterToolsByDenyRules<
 
 /**
  * 权限上下文下的模型可见工具池（E-4 S-4d ②，旧仓 getTools 裁剪版）：
- * getAllBaseTools(deps) 经 deny 规则过滤。模式过滤支（ATLAS_SIMPLE/REPL/
- * specialTools）裁出，见头注残留守。
+ * getAllBaseTools(deps) 经 deny 规则过滤，末行 isEnabled 过滤（旧仓
+ * getTools 尾 `_.isEnabled ? _.isEnabled() : false` 逐字等价——shared Tool
+ * isEnabled 为必选方法，禁用的 feature 门控工具不进模型可见池，与
+ * getToolsForDefaultPreset 的 isEnabled 名单同口径，§8.37 审视 F2 回填）。
+ * 模式过滤支（ATLAS_SIMPLE/REPL/specialTools）裁出，见头注残留守。
  */
 export function getTools(
   permissionContext: ToolPermissionContext,
   deps: ToolRegistryDeps = {},
 ): Tools {
-  return filterToolsByDenyRules(getAllBaseTools(deps), permissionContext)
+  return filterToolsByDenyRules(getAllBaseTools(deps), permissionContext).filter(
+    t => t.isEnabled(),
+  )
 }
 
 /** 预定义工具预设（旧仓 tools.ts TOOL_PRESETS 逐字：当前仅 'default'）。 */

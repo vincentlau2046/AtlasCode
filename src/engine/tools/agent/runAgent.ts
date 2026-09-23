@@ -34,6 +34,13 @@
  *     实际以 user 角色进 API；正解需 modelprovider 支持 `role:'system'`（E-wave-end /
  *     modelprovider 面），登记为已知残留守。
  *   - filterIncompleteToolCalls（fork 上下文孤儿 tool_use 过滤）→ 残留守（fork 纵切 T-5c）。
+ *   - 权限门透传（E-4 S-4d 后审视 F1，§8.37）：runAgent 的 queryAgentLoop 调用点
+ *     不带 checkPermission / ToolPermissionContext——旧仓子代理经
+ *     checkRuleBasedPermissions 的全局 appState.toolPermissionContext 天然共享
+ *     同一规则树，新仓门为组合根注入（createPermissionGate）→ 子代理门 /
+ *     上下文透传归 E-wave-end compose 装配（前向接缝登记；当前 pipeline 面
+ *     ctx.tools 为空暂无活洞，属行为回归开口——deny/ask 规则经 spawn 绕过
+ *     子代理执行）。
  */
 import type { Message, Tools } from '../../../shared'
 import type { ModelProvider, ModelRole } from '../../../modelprovider'

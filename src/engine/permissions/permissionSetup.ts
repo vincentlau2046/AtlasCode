@@ -301,7 +301,12 @@ export async function initializeToolPermissionContext({
    * (permissions.ts headless branch) instead of awaiting an unanswerable prompt.
    */
   shouldAvoidPermissionPrompts?: boolean
-  /** 工具注册表注入（preset 工具名池 + baseTools 补拒池；S-4d ② 余 getTools 族）。 */
+  /**
+   * 工具注册表注入（preset 工具名池 + baseTools 补拒池）。本函数 deps 消费点
+   * 仅 getToolsForDefaultPreset / parseBaseToolsFromCLI 两支；getTools /
+   * filterToolsByDenyRules 族 E-4 S-4d ② 已落 toolRegistry 机制层（模型可见
+   * 池装配面），不经本函数。
+   */
   deps?: ToolRegistryDeps
 }): Promise<{
   toolPermissionContext: ToolPermissionContext

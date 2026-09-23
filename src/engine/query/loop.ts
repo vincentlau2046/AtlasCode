@@ -131,7 +131,9 @@ export async function queryOneRound(
   const outcomes = await runToolBatch(toolUses, assistantMsg, {
     tools,
     signal: deps.signal,
-    // E-4 S-4d：权限门透传（queryAgentLoop 逐轮委托本函数，唯一点）
+    // E-4 S-4d：权限门透传（queryOneRound→runToolBatch 唯一点；queryAgentLoop 的
+    // 第二调用点 runAgent.ts 子代理面不带门——前向接缝登记于 runAgent 头注，
+    // E-wave-end 装配透传，§8.37 审视 F1）
     checkPermission: deps.checkPermission,
   })
   const toolResults = outcomes.map((o) => ({
