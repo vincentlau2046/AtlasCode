@@ -4,7 +4,18 @@
  * E-1 窄 spine（§8.21）落 query + pipeline + state 纵切后 re-export。ports/
  * context/coordinator/tools 随各自纵切（E-1b/E-2/E-3…）落地后在此追加 re-export。
  */
-export { queryOneRound, ask, type AgentLoopDeps, type AgentRoundResult, type AskArgs } from './query'
+export {
+  queryOneRound,
+  queryAgentLoop,
+  DEFAULT_AGENT_LOOP_MAX_TURNS,
+  ask,
+  type AgentLoopDeps,
+  type AgentRoundResult,
+  type AgentLoopContextConfig,
+  type AgentLoopArgs,
+  type AgentLoopResult,
+  type AskArgs,
+} from './query'
 export {
   executeToolUse,
   findTool,
