@@ -824,3 +824,25 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **验收四件套口径**：tsc 0 / lint 0（engine 域 DEP-4 已预铺）/ build 0 / test 全绿（+ agent-loop fixture replay + EngineState 并发新测，基线 450 pass）。**绝不写假装通过的能力测试**——未实现的 loop 能力标 missing + 解锁波次。
 
 **残余（E-1 定稿前须补 / 后续纵切）**：① 第 8 port 确认（Glob 仅见 7，T-3 核验）② 旧仓 36 文件/11975L 口径 vs 实测 33 文件/12203L（含 README，微漂移，以实测为准）③ settings→modelprovider 角色池耦合（E-3 注入面，旧仓 aab5944 动态解析 `modelRoles.small` 池头，新仓未验证）④ bwrap 真包就绪度（E-4 外部依赖，未就绪则只验 `registerSandboxBackend` 等价后端路径）。
+
+### §8.22 E-1 窄 spine 纵切 T-2/T-3 执行记录 + T-4 偏差 + T-5 门裁定（2026-09-23，186efcc/36e388f）
+
+**E-1 窄 spine 落盘态（T-1..T-3 全绿）**：
+- **T-1 query loop**（`011829c`）：`engine/query/loop.ts` `queryOneRound` 单轮（LLM→tool→result）+ `QueryEngine.ts` `ask()`；4 fixture 测（echo tool 真调 / 未知 tool is_error / 纯文本 / 直接调用等价）。
+- **T-3 state**（`186efcc`）：`engine/state/EngineState.ts` 泛型 set(f) 串行 apply 队列原语（R3a 并发模型，M3a.3 原型 9/9 绿转正）+ `state/index.ts` 子门面 + 6 co-located 单测（100 并发零丢失 / 并行 Edit 可交换 / 不批处理合并 / 反例 read-compute-write 丢更新守卫 / rewind 串行化）。
+- **T-2 pipeline**（`36e388f`）：`engine/pipeline/` 4 文件（toolExecution 单 tool_use 链 + toolOrchestration 分区+串行批量 + errorClassification 小件 + index 门面）+ loop.ts 内联工具执行委托 pipeline（单一事实源，T-1 对外契约不变）；**4 接缝留位且真接线**（权限 `checkPermission`=E-4 规则树注入点·窄 spine 默认放行 / 钩子 `hooks`=E-5 toolHooks 注入点·窄 spine 无操作 / `mcpClients`=E-2 路由注入点·窄 spine 未注入→MCP tool unknown / 并发=E-1b 并发池替换点·窄 spine 串行）；12 契约测。
+
+**T-4 偏差（后续步骤偏差审视 → 范围纠正）**：§8.21 原 T-4 列「agent-loop fixture replay **多轮**调度等价」——但 E-1 是**窄 spine（单轮）**，多轮 while(true) 已明确归 E-1b → **T-4「多轮 fixture replay」一项移 E-1b**（旧仓 tag 录制真 LLM 序列 + mock.module + activeStreamChunks + loadFixture，断言多轮调度/解析/状态转换/工具分发，非 tautology，全部落 E-1b）。E-1 测试层已满足：EngineState 100 并发零丢失+反例守卫（T-3）+ loop 单轮调度（T-1/T-2，非 tautology：断言 loop 的 find/解析/追加 + 4 接缝真消费 + 分区行为，非 fake 自证）全绿。**H6 防空洞满足**。
+
+**T-5 门裁定（engine 不入 8 域门扫描集，E-1 无 gate 改动）**：
+- anti-stub 门 `DOMAINS`（executor/sandbox/memory/modelprovider/shared）+ `CDEEP_DOMAINS`（task/bootstrap/permissions/hooks）**均不含 engine**（门头注明「engine/ascend 域骨架在 C/E 波各自建门（分层不变量，test-strategy §4）」。
+- capability-matrix 门 `domain` union = 8 顶层域，**engine 非顶层域**（14 子模块应用层），engine 能力经矩阵 `by`（解锁波次）引用、不作 domain 行。
+- → **E-1 不触发 anti-stub/capability-matrix 改动**（按设计）。**engine 自身 anti-stub 门 = wave 级任务**（engine 波 14 子模块骨架全登记后加 `engine` 入门扫描集 + STUB_REGISTRY 登记 + wave tag 清零），归 engine 波残余（非阻塞，解锁波次 = engine 波门子任务）。
+
+**残余 ① 第 8 port 闭环**：charter 行 78「8 port」是**跨域总量**（engine 7 + modelprovider errorMessaging=Port 2）；`engine/ports/` 恰 7 个（domainMount/featureConfig/lspStatus/mcpClient/promptSuggestion/sessionContext/sessionMemory）= **完整**，无需第 8 engine port；errorMessaging 已落 `src/modelprovider/ports/errorMessaging.ts`。
+
+**新增残余**：⑤ `buildSchemaNotSentHint`（旧仓 toolExecution 小件）依赖 ToolSearch 特性族（新仓未移植），现搬造假依赖 → 留接缝归 **E-1b/工具面**（随 inputSchema JSON schema 校验 + 旧仓 zod safeParse 替身）⑥ **engine anti-stub 门建设**（T-5 裁定，wave 级任务）⑦ E-1 `compose.ts` engine 装配（QueryEngine 构造 + ask 入口）未接线（DEP-5 组合根 allow 已预铺，E-1 非组合根接线波，归 E 波组合根子任务）。
+
+**四件套基线更新**：tsc 0 / lint 0 / build 0 / **472 pass 0 fail（42 文件 875 expect）**（E-1 开波基线 450/39/824 → T-1 454/40/840 → T-3 460/41/851 → T-2 472/42/875）。
+
+**下一步 = E-1b context 压缩层**（compact/microCompact/sessionMemory ~4700L）+ 移入的 T-4 多轮 fixture replay。
