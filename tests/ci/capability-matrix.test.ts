@@ -66,7 +66,10 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'memory', capability: '记忆新鲜度分档（memoryAge）', status: 'done', proof: 'tests/unit/memory-types-age.test.ts' },
   { domain: 'modelprovider', capability: '角色 fallback 解析', status: 'done', proof: 'tests/unit/model-roles.test.ts' },
   { domain: 'modelprovider', capability: '错误消息/错误码映射', status: 'done', proof: 'tests/unit/errorMessaging.test.ts' },
-  { domain: 'modelprovider', capability: '（mock）出一段 completion', status: 'missing', by: 'C（B9 双跑 fixture + 独立 mock 测试）' },
+  // B6-func（§8.13 L-2 收口）：mock completion 双腿（非流式 + 流式）经组合根真链，
+  // fake 经 setModelProviderForTesting 注入（非 mock transport）——原 "missing by C/B9"
+  // 由 B6-func 提前闭环
+  { domain: 'modelprovider', capability: '（mock）出一段 completion（流式 + 非流式双腿）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
   // C-Deep 切片 1（executor 纵切）：真 spawn 功能 smoke（§8.7 port 之下全真）；
   // 同族契约测试：executor-shell-provider / executor-shell-command（unit 层）
   { domain: 'executor', capability: '执行一条 shell 命令（裁剪版 bash-only 纵切）', status: 'done', proof: 'tests/func/executor-shell-smoke.test.ts' },
@@ -97,6 +100,12 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'hooks', capability: '跨域斩断 fail-fast（shell/task 边未注入抛错）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   // §8.16 裁剪：hooks 流式/attachment 渲染（AsyncGenerator）归 engine 波
   { domain: 'hooks', capability: 'hooks 流式执行 / attachment 渲染（AsyncGenerator）', status: 'missing', by: 'engine（流式执行/attachment 渲染归 engine 波）' },
+  // ── B6-func 最小组合根（compose.ts 装配真链，§8.16/§8.17 4+7 前置清单 + 6 适配器）──
+  // 与上列各域"孤立面"行区别：这些行证能力"经 getCoreDependencies 装配后"的真链
+  // （port 之下全真，仅 modelprovider 注入 fake），B6-func 先于 engine 波落地
+  { domain: 'executor', capability: '组合根装配链执行命令（getCoreDependencies 注入后真 spawn + 真盘读回）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
+  { domain: 'sandbox', capability: '组合根构造 sandbox manager（placeholder runtime 禁用态 + port 链）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
+  { domain: 'memory', capability: '组合根写后读 memory（真 fs 写 + 只读 store 读，§8.13 L-1）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
 ]
 
 const DOMAINS = new Set<MatrixRow['domain']>([
