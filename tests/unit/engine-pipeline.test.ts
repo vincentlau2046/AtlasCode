@@ -154,6 +154,55 @@ describe('engine/pipeline 批次编排（分区 + 串行）', () => {
   })
 })
 
+describe('engine/pipeline 执行链顺序（review I-3 回归：schema→validateInput→pre-hook→permission→call）', () => {
+  test('① schema 校验失败先于权限门（门不被调，旧仓序 safeParse 最先）', async () => {
+    const tool = makeTool('echo') as Tool & { inputSchema?: unknown }
+    tool.inputSchema = {
+      type: 'object',
+      properties: { msg: { type: 'string' } },
+      required: ['msg'],
+    }
+    let gateCalled = false
+    const r = await executeToolUse(tu('t7', 'echo'), ASSISTANT, {
+      tools: [tool],
+      checkPermission: async () => {
+        gateCalled = true
+        return { allowed: false, reason: 'denied' }
+      },
+    })
+    // input {} 缺 required msg → schema 失败先短路；重排前（权限门在前）gate 会被调
+    expect(r.isError).toBe(true)
+    expect(String(r.block.content)).toContain('InputValidationError')
+    expect(gateCalled).toBe(false)
+  })
+
+  test('② pre-hook 先于权限门、权限门紧贴 call 前（pre→gate→call）', async () => {
+    const order: string[] = []
+    const r = await executeToolUse(tu('t8', 'echo'), ASSISTANT, {
+      tools: [
+        {
+          ...makeTool('echo'),
+          call: async () => {
+            order.push('call')
+            return { data: 'ok' }
+          },
+        },
+      ],
+      checkPermission: async () => {
+        order.push('gate')
+        return { allowed: true }
+      },
+      hooks: {
+        preToolUse: () => {
+          order.push('pre')
+        },
+      },
+    })
+    expect(r.isError).toBe(false)
+    expect(order).toEqual(['pre', 'gate', 'call'])
+  })
+})
+
 describe('engine/pipeline classifyToolError（错误分类小件）', () => {
   test('⑩ errno.code 优先（ENOENT → Error:ENOENT）', () => {
     const e = new Error('x')

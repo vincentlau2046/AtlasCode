@@ -90,7 +90,7 @@ describe('engine/pipeline validateInputBySchema（浅 JSON-schema）', () => {
   test('⑥ 无 schema（undefined）→ 恒通过', () => {
     expect(validateInputBySchema({ anything: true }, undefined)).toEqual({ valid: true })
   })
-  test('⑦ array 类型 + integer 区分', () => {
+  test('⑦ array 类型 + integer 区分 + 非有限数文案（N-2：不出现 "got number" 自相矛盾串）', () => {
     const s: ToolInputJSONSchema = {
       type: 'object',
       properties: { arr: { type: 'array' }, n: { type: 'integer' } },
@@ -99,7 +99,13 @@ describe('engine/pipeline validateInputBySchema（浅 JSON-schema）', () => {
     const r = validateInputBySchema({ arr: 'no', n: 3.5 }, s)
     expect(r.valid).toBe(false)
     expect(r.valid === false && r.message).toContain('expected array, got string')
-    expect(r.valid === false && r.message).toContain('expected integer, got number')
+    expect(r.valid === false && r.message).toContain('expected integer, got non-integer number')
+    // 非有限数（NaN/±Infinity）：typeof 是 number 但校验拒，文案点明 non-finite
+    const nf = validateInputBySchema({ count: Number.NaN }, SCHEMA)
+    expect(nf.valid).toBe(false)
+    expect(nf.valid === false && nf.message).toContain('expected number, got non-finite number')
+    const inf = validateInputBySchema({ count: Number.NEGATIVE_INFINITY }, SCHEMA)
+    expect(inf.valid === false && inf.message).toContain('non-finite number')
   })
 })
 
