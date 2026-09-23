@@ -11,6 +11,9 @@
  * T-5d（§8.25 E-2）已落工具名常量 seed（toolNames：ASYNC/INTERNAL 集 + 单工具名）。
  * T-5e（§8.25 E-2）已落注册表机制 toolRegistry（getAllBaseTools(deps) deps 注入 +
  *   ASCEND 门控 + 按名去重）+ toolNames 全量常量集（4 工具名集 + 14 单工具名）。
+ * E-4 S-4a（§8.31/§8.32）已落 LEGACY 工具名 alias 表 legacyToolNameAliases
+ *   （4 项 legacy → 正规名，正规名引用 toolNames/agent 常量；模块加载注册
+ *   进 permissions 域解析函数组，re-export 触发 side-effect import）。
  */
 export {
   createMcpTools,
@@ -70,6 +73,7 @@ export {
   TASK_STOP_TOOL_NAME,
   SHELL_TOOL_NAMES,
 } from './toolNames'
+export { LEGACY_TOOL_NAME_ALIASES } from './legacyToolNameAliases'
 export {
   AgentTool,
   runAgent,

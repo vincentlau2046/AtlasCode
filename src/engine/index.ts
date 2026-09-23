@@ -86,6 +86,7 @@ export {
   SEND_MESSAGE_TOOL_NAME,
   TASK_STOP_TOOL_NAME,
   SHELL_TOOL_NAMES,
+  LEGACY_TOOL_NAME_ALIASES,
 } from './tools'
 export type {
   McpToolResult,

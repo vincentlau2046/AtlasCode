@@ -1112,3 +1112,30 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **基线**：766 pass / 0 fail / 1535 expect / 57 文件（E-3 review 766）+ gate 6 pass / 0 fail / 2 files（engine 非扫描集，本波新 engine 文件无 gate 影响）。
 
 **下一步**：S-4a 执行（执行前分析 + 方案按 E-3 §8.28/§8.29 模式，执行前落纸一节）。
+
+### §8.32 E-4 S-4a 执行前分析 + 方案（2026-09-24）
+
+**执行前分析**（旧仓 ground truth + 新仓落位面核实）：
+- 旧仓 permissionRuleParser.ts 183L 结构：**LEGACY_TOOL_NAME_ALIASES 4 项**（Task→AGENT_TOOL_NAME / KillShell→TASK_STOP_TOOL_NAME / AgentOutputTool→TASK_OUTPUT_TOOL_NAME / BashOutputTool→TASK_OUTPUT_TOOL_NAME）+ 2 alias 函数（normalizeLegacyToolName / getLegacyToolNames，Object.entries 插入序）+ 纯字符串函数组（escapeRuleContent / unescapeRuleContent / permissionRuleValueFromString / permissionRuleValueToString + 私有助手 findFirst/LastUnescapedChar 奇偶反斜杠判转义）。
+- **驱动落位设计的关键矛盾**：`permissionRuleValueFromString` 在 parse 时调 `normalizeLegacyToolName`（旧仓设计抉择 = parse 时归一，规则匹配面永不见 legacy 名）；但 L3 域边界 = permissions 纯叶域（只 import shared + 注入窗口，不 import 其他域），而 4 项 alias 的正规名单一事实源在 engine 侧 toolNames（T-5e）→ **alias 表只能经 engine 侧注入窗口进入 permissions 域，不可向上 import**。
+- 新仓落位面核实（主 session 直验）：toolNames.ts 三正规名常量齐备（AGENT_TOOL_NAME 经 agent/constants re-export / TASK_STOP_TOOL_NAME='TaskStop' / TASK_OUTPUT_TOOL_NAME='TaskOutput'，全在 engine/tools/index.ts + engine/index.ts 门面导出链上）→ 4 项 alias 表全可表达，零缺。
+- **注入窗口先例选定**：settingsPaths.ts（S-3c，未注入 = 空数组降级，非 fail-fast）同型 → alias 窗口未注入 = 空 map → normalize = identity（安全降级：legacy 名不归一但不崩；区别于 bootstrap-env fail-fast，本面是数据面非启动依赖面）。
+- **模块加载注册先例**：ascendMarketplace 叠加层模块加载时注册（CLAUDE.md 市场契约）→ engine 侧 alias 文件模块加载自注册，tools 门面 re-export 触发 side-effect import；仅用 permissions 域的入口（未注入）= identity 降级，compose 根无需额外接线（注册 = 模块 side effect 实消费点，非 H6 预声明死接缝）。
+
+**方案**（2 新 src + 3 门面改 + 2 新测试，单提交）：
+1. `src/permissions/permissionRuleParser.ts`（permissions 域新文件 ~200L）：4 纯字符串函数 + 2 alias 函数（基于注入 map）逐字移植 + 注入窗口 set/get/resetLegacyToolNameAliases（默认空 map = identity）；旧仓语义逐支保留（escape 先反斜杠后括号 / unescape 逆序 / 奇偶反斜杠判转义 / `Bash()` 与 `Bash(*)` → tool-wide / 无匹配右括号·尾内容·空工具名 → 整体当工具名）。
+2. `src/engine/tools/legacyToolNameAliases.ts`（engine 侧 toolNames 同目录新文件 ~40L）：LEGACY_TOOL_NAME_ALIASES 4 项（值引用 toolNames/agent 常量，**不持字面量**）+ 模块加载注册 + 头注（漂移防 = 同步钉单测）。
+3. 门面 3 处：permissions/index.ts + `export * from './permissionRuleParser'`（头注当前面更新）/ engine/tools/index.ts + alias 导出块（re-export 触发注册，头注波次注）/ engine/index.ts 第一 tools 值块 + `LEGACY_TOOL_NAME_ALIASES`（同步钉测试经 engine 根门面 import）。
+4. `tests/unit/permission-rule-parser.test.ts`（unit，L3 只 import permissions 根门面；beforeEach reset 隔离模块态）：escape/unescape 顺序契约（旧仓 doc 例 + 往返对称）/ parse 三态 + 5 边缘态 / toString 往返 / alias 窗口（未注入 identity / 注入生效 / 插入序）。
+5. `tests/unit/engine-tools-legacy-aliases.test.ts`（unit，engine + permissions 双根门面）：**同步钉**（4 项值 === toolNames 常量逐一 + 值集全在常量集防字面量漂移）+ 注册生效（'Task' → 'Agent' / 'Task(npm i)' → {toolName:'Agent', ruleContent:'npm i'} / getLegacyToolNames 插入序）；beforeAll 显式重注册（幂等）+ 头注运行口径（标准 --isolate 跑法 = 模块加载注册天然生效，显式注册仅单进程 ad-hoc 连跑防污染，同 §8.30 T-6 口径）。
+- **门/矩阵**：permissions 在 CDEEP_DOMAINS 扫描集（新实质文件零 STUB_REGISTRY 登记）；engine 不在扫描集（M-3 延 E-wave-end，本文件 ~40L 实质 >5 行无须占位登记）；matrix 本切片无新增行（parser 为支撑面，能力行「规则求值树匹配」落 S-4b、「deny 规则工具面过滤」落 S-4d）。
+- **判别信号（变异探针验真，防 tautology）**：① 转义顺序破坏（括号先于反斜杠）→ 往返/顺序测须红 ② alias 值漂移（KillShell 指向 TASK_OUTPUT）→ 同步钉测须红。
+
+**实施记录**：
+- 落点 5 项全落（parser 双落位 + alias 注入窗口 + 模块加载注册 + 门面 3 处 + 双测试文件）；`import type { PermissionRuleValue } from '../shared'`（类型走 shared 单一事实源，对齐 permissions.ts 既有 import 面，非域内 PermissionRule.ts 回引——避免同域文件间依赖，与薄骨架先例一致）。
+- 实施期勘误 1 处：初版 engine/tools/index.ts 导出块初拟 `export * from './legacyToolNameAliases'`，改显式具名 `export { LEGACY_TOOL_NAME_ALIASES }`（对齐本门面既有全具名块风格，防 `export *` 意外泄漏 side-effect 模块未来新增导出）。
+- 残留守登记：无新增残留守（本切片为纯新增支撑面，无裁剪）；注入窗口核销状态 = **已消费**（engine 侧模块加载注册实挂，非预声明）。
+
+**验真（四件套 + gate + 探针）**：tsc 0 / eslint 0（2 新 + 3 改 src + 2 新 tests）/ build 0 KB / **790 pass 0 fail**（1577 expect，59 文件；766 + 24 新增测）+ gate 6 pass / 0 fail / 2 files。变异探针双红确认（① 转义序破坏 → parser 测 4 fail ② alias 漂移 → 同步钉 3 fail；还原后 24 pass 复绿）。
+
+**下一步**：S-4b（规则求值树主体，∥ S-4c1 理论并行，实际串行执行）。
