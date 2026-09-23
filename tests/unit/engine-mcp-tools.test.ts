@@ -148,6 +148,26 @@ describe('createMcpTools（连接 → 一等 Tool）', () => {
       'mcp__s2__c',
     ])
   })
+
+  test('⑦ 描述符 hint → Tool 语义（readOnlyHint→isReadOnly/isConcurrencySafe，destructiveHint→isDestructive）', () => {
+    const ro = makeConnection('srv', [{ name: 'read', readOnlyHint: true }])
+    const [tRo] = createMcpTools([ro.conn])
+    expect(tRo!.isReadOnly()).toBe(true)
+    expect(tRo!.isConcurrencySafe()).toBe(true) // 只读工具并发安全
+    expect(tRo!.isDestructive()).toBe(false)
+
+    const de = makeConnection('srv', [{ name: 'rm', readOnlyHint: false, destructiveHint: true }])
+    const [tDe] = createMcpTools([de.conn])
+    expect(tDe!.isReadOnly()).toBe(false)
+    expect(tDe!.isDestructive()).toBe(true)
+
+    // 无 hint 描述符 → 全 false（?? false 兜底）
+    const none = makeConnection('srv', [{ name: 'x' }])
+    const [tNone] = createMcpTools([none.conn])
+    expect(tNone!.isReadOnly()).toBe(false)
+    expect(tNone!.isDestructive()).toBe(false)
+    expect(tNone!.isConcurrencySafe()).toBe(false)
+  })
 })
 
 describe('findMcpServerConnection（两侧归一比对，E-4 scope 查找）', () => {

@@ -234,7 +234,7 @@ describe('countToolUses + finalizeAgentTool（终态收集）', () => {
     expect(countToolUses(msgs)).toBe(1)
   })
   test('② finalizeAgentTool：末位文本 + tool_use 计数 + token 求和', () => {
-    const r = finalizeAgentTool(msgs, 'a-1', { prompt: 'p', agentType: 'general-purpose', startTime: Date.now(), isAsync: false })
+    const r = finalizeAgentTool(msgs, 'a-1', { agentType: 'general-purpose', startTime: Date.now() })
     expect(r.content).toEqual([{ type: 'text', text: 'done: fixed' }])
     expect(r.totalToolUseCount).toBe(1)
     expect(r.totalTokens).toBe(8) // 5 + 3
@@ -244,7 +244,7 @@ describe('countToolUses + finalizeAgentTool（终态收集）', () => {
       asMsg('assistant', [{ type: 'text', text: 'partial answer' }]),
       asMsg('assistant', [{ type: 'tool_use', id: 't9', name: 'Edit', input: {} }]),
     ]
-    const r = finalizeAgentTool(msgs2, 'a-2', { prompt: 'p', startTime: Date.now(), isAsync: false })
+    const r = finalizeAgentTool(msgs2, 'a-2', { startTime: Date.now() })
     expect(r.content).toEqual([{ type: 'text', text: 'partial answer' }])
   })
 })
@@ -299,6 +299,27 @@ describe('runAgent（复用 queryAgentLoop 到终态）', () => {
     })
     expect(roles).toEqual(['premium'])
   })
+
+  test('④ 模型 override 中层：agentDef.model=premium > parentRole（无 input.model override）', async () => {
+    const { provider, roles } = fakeProvider([{ content: [{ type: 'text', text: 'ok' }] }])
+    const def: AgentDefinition = {
+      agentType: 'premium-agent',
+      source: 'built-in',
+      whenToUse: 'custom premium agent',
+      model: 'premium',
+      getSystemPrompt: async () => 'you are a premium agent',
+    }
+    await runAgent({
+      agentDefinition: def,
+      prompt: 'x',
+      tools: [],
+      modelProvider: provider,
+      parentRole: 'small',
+      agentId: 'a-run4',
+    })
+    // resolveRole = overrideRole(undefined) ?? agentDef.model('premium') ?? parentRole('small') → 'premium'
+    expect(roles).toEqual(['premium'])
+  })
 })
 
 describe('AgentTool.call（同步路径全链）', () => {
@@ -342,5 +363,77 @@ describe('AgentTool.call（同步路径全链）', () => {
       undefined,
     )
     expect(roles).toEqual(['fast'])
+  })
+})
+
+describe('AgentTool.mapToolResultToToolResultBlockParam（终态 block 映射，零覆盖补测）', () => {
+  test('① status=completed → "[agent completed]\\n" + 文本块 join', () => {
+    const b = AgentTool.mapToolResultToToolResultBlockParam(
+      { status: 'completed', content: [{ text: 'a' }, { text: 'b' }] },
+      'tu-1',
+    )
+    expect(b.type).toBe('tool_result')
+    expect(b.tool_use_id).toBe('tu-1')
+    expect(b.content).toBe('[agent completed]\na\nb')
+  })
+
+  test('② 非 completed → JSON.stringify(content)', () => {
+    const b = AgentTool.mapToolResultToToolResultBlockParam(
+      { status: 'failed', err: 'x' },
+      'tu-2',
+    )
+    expect(b.type).toBe('tool_result')
+    expect(b.content).toBe(JSON.stringify({ status: 'failed', err: 'x' }))
+  })
+
+  test('③ content 缺失（null）→ "null"', () => {
+    const b = AgentTool.mapToolResultToToolResultBlockParam(null, 'tu-3')
+    expect(b.content).toBe('null')
+  })
+})
+
+describe('AgentTool.call fan-out call-site（coordinator 门 + ctx.tools 含 Agent 深度门可观察）', () => {
+  test('④ 深度 0（主线程）：coordinator on + 池含 Agent → 子代理池含 Agent（fake 真调）', async () => {
+    const agentCalls: string[] = []
+    const agentFake = makeFakeTool('Agent', agentCalls)
+    const readFake = makeFakeTool('Read', [])
+    const { provider } = fakeProvider([
+      {
+        content: [
+          { type: 'tool_use', id: 't1', name: 'Agent', input: { description: 'd', prompt: 'p' } },
+        ],
+        stopReason: 'tool_calls',
+      },
+      { content: [{ type: 'text', text: 'done' }] },
+    ])
+    process.env.ATLAS_COORDINATOR_MODE = '1'
+    await AgentTool.call(
+      { description: 'd', prompt: 'p' },
+      { modelProvider: provider, parentRole: 'small', tools: [agentFake, readFake], spawnDepth: 0 },
+      undefined,
+      undefined,
+    )
+    // childSpawnDepth = 0+1 = 1 < MAX(2) → allowFanOut 真 → Agent 进子代理池 → 子代理真调 Agent（fake 记录）
+    expect(agentCalls).toEqual(['Agent'])
+  })
+
+  test('⑤ 深度 1：childSpawnDepth 2 = MAX → allowFanOut 假 → Agent 被剔（子代理调 Agent 落 unknown-tool，fake 不被调）', async () => {
+    const agentCalls: string[] = []
+    const agentFake = makeFakeTool('Agent', agentCalls)
+    const readFake = makeFakeTool('Read', [])
+    const { provider } = fakeProvider([
+      { content: [{ type: 'tool_use', id: 't1', name: 'Agent', input: {} }], stopReason: 'tool_calls' },
+      { content: [{ type: 'text', text: 'done' }] },
+    ])
+    process.env.ATLAS_COORDINATOR_MODE = '1'
+    await AgentTool.call(
+      { description: 'd', prompt: 'p' },
+      { modelProvider: provider, parentRole: 'small', tools: [agentFake, readFake], spawnDepth: 1 },
+      undefined,
+      undefined,
+    )
+    // childSpawnDepth = 1+1 = 2 = MAX(2) → allowFanOut 假 → Agent 命中 ALL_AGENT_DISALLOWED 被剔
+    // → 子代理的 Agent tool_use 落 unknown-tool is_error（fake 未被调）
+    expect(agentCalls).toEqual([])
   })
 })
