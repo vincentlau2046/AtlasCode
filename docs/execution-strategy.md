@@ -1291,3 +1291,28 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 - 新测 `tests/unit/permission-gate-wiring.test.ts` 8 测 18 expect（① 组 4：无门对照 / 门+deny `permission denied` / 门+ask fail-closed 确认标记 / loop 透传 block.is_error；② 组 2：blanket deny 池剔除 / MCP server 级剥整 server；④ 组 2：spec ruleContent 保留 validTools / disallowedTools `Bash(*)` 工具级剔除）
 - 四件套：tsc 0 / eslint 10 变更文件 0 / build 0 KB / 全量 **938 pass / 0 fail / 1859 expect / 66 文件**（基线 930/1841/65 + 8/18/1 恰合）
 - gate：`tests/ci/` 6 pass / 2 文件（matrix +1 行：permissions 域 engine 接线行，proof 指新测文件）
+
+### §8.37 E-4 权限规则树整波审视记录（双只读子代理，2026-09-24）
+
+**审视范围**：E-4 全切片 S-4a `efc3896` / S-4b `3814881` / S-4c1 `8241543` / S-4c2 `965ca31` / S-4d `6c06396`（git range `ad9030b..6c06396`；ad9030b = 勘察 docs 提交）。
+
+**派发模式**：§8.26/§8.30 三视角模式，双只读子代理（限额 ≤2，环境整体限流约束）并行——A 路 = 代码正确性 + 安全语义（旧仓逐字对照 + ask/deny fail-closed + 桥接 cast + 静默洞专项）；B 路 = 测试质量 + 架构边界（L3/STR-1 边界 + 死接缝 + 判别信号 + mock 泄漏 + 导出面）。
+
+**发现 + 处置**（A 路 1 MED + 1 LOW + 1 注释 + 1 已登记裁出；B 路五面核验零缺陷）：
+
+| # | 级别 | 位置 | 缺陷 | 处置 |
+|---|---|---|---|---|
+| F1 | MED | runAgent.ts:111 | queryAgentLoop 第二调用点不带 checkPermission/ToolPermissionContext——子代理工具执行不受规则树约束（旧仓子代理经 checkRuleBasedPermissions 全局 appState.toolPermissionContext 天然共享同一规则树，新仓无门 = 默认放行 = 行为回归开口）；loop.ts:134「唯一点」头注失实 | 前向接缝登记（runAgent 头注补权限门透传残留守项 + loop 头注订正）；门/上下文透传归 E-wave-end compose 装配。当前 pipeline 面 ctx.tools 为空暂无活洞，无代码修复 |
+| F2 | LOW | toolRegistry getTools | 旧 getTools 尾行 `isEnabled` 过滤漏迁（feature 门控禁用工具进模型可见池，与同文件 getToolsForDefaultPreset 的 isEnabled 名单矛盾；裁出登记未含此项 = 标落漏迁） | **修复**（getTools + `.filter(t => t.isEnabled())`，旧 tools.ts 尾行逐字等价）+ 回归测 ②c |
+| F3 | 注释 | ruleMatching.ts:63 | 头注「顺序有意义——后源覆盖前源（旧 settings/constants.ts 头注逐字）」系自 settings 合并语境照抄；规则匹配面实为 flatMap+find 首命中优先（旧仓 getDeny/Allow/AskRules 同构），注释易误导 | 注释订正（零代码变更） |
+| F4 | 已登记 | ruleMatching 1c catch | 1c catch 吞掉含 AbortError/APIUserAbortError 的全部异常（旧仓重抛这两类）→ checkPermissions 内 abort 落 passthrough→allow | 头注 :18 已登记（L3 域不 import engine 类型）+ 仅 E-6 工具面回填带 abort 的 checkPermissions 后可达 → 不处置（不重报） |
+| I-1 | 知会 | permissions.ts:68 | 域旗舰 hasPermissionsToUseTool（+7 测）S-4d 门未消费（门直调 checkRuleBasedPermissions）→ 两决策面漂移风险 | 头注前向声明「E-6/E-wave-end 换回」已覆盖 → **E-wave-end 审计登记**（见 E-wave-end 任务清单） |
+
+B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine import；engine→域全走域根门面且每处头注登记；测试 import 面 = 根门面 only）② 判别信号测无 tautology/自证（8 个 E-4 测文件 mutation-probe 背书；persist 门控判别点选 `getCachedSettingsForSource('session')` undefined vs null 精准）③ 死接缝 100% 头注登记（permissionUpdateSchema/createReadRuleSuggestion/hasSkipDangerousModePermissionPrompt/alias 窗/mcpRuleNames 双份）④ 导出面 §8.34–§8.36 逐条对账无漏导 ⑤ 零 mock.module 泄漏（setFsImplementation afterEach 自包含 / alias 窗双侧清 / ATLAS_CONFIG_DIR 仅 loader 测试）。
+
+**验真（2026-09-24 实测）**：
+- F2 突变探针：删 getTools isEnabled 过滤 → ②c 红（`Disabled` 进池 `[Agent, Disabled, Enabled]`）→ cp 备份逐字还原（diff 核验）绿。注意：首跑探针被 ②c 测试自身 bug 污染（`makeTool('Disabled')` 忘传 `enabled: false`，fake 默认 true → 红因错误）→ 修测试后重跑才是干净红→绿（探针纪律：先保证对照测自身正确）
+- 修复面：src 5 文件（toolRegistry getTools +isEnabled / runAgent 头注接缝登记 / loop 头注订正 / ruleMatching 注释订正 / permissionSetup 陈旧注释订正）+ tests 1 文件（makeTool +isEnabled 字段 + ②c 回归）
+- 四件套：tsc 0 / eslint 6 变更文件 0 / build 0 KB / 全量 **939 pass / 0 fail / 1861 expect / 66 文件**（基线 938/1859/66 + ②c 1 测 2 expect）
+- gate：`tests/ci/` 6 pass / 2 文件
+- E-wave-end 审计登记（本波遗留前向面）：① 子代理门/上下文透传（F1）② hasPermissionsToUseTool 换回门消费点（I-1）③ 1c abort 重抛（F4，随 E-6 工具面）④ compose.ts getTools 组合根接线
