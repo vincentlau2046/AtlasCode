@@ -70,6 +70,7 @@ export {
   setFsImplementation,
   getFsImplementation,
   setOriginalFsImplementation,
+  safeResolvePath,
   type FsOperations,
 } from "./fs-operations"
 

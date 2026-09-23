@@ -16,6 +16,9 @@
  * - permissions.ts：hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新：
  *   forceDecision → deny → ask → allow tool-wide → 空规则集 = allow 默认兼容；
  *   分类器 / dontAsk / denial 跟踪 / hooks 反向边 / sandbox 自动放行残留守）
+ * - permissionMode.ts：PermissionMode 常量族 + permissionModeFromString
+ *   （E-4 S-4c1，旧仓 types/permissions 常量 + PermissionMode.ts fromString；
+ *   auto 支裁登记，UI 配置面随 S-4b 裁剪口径）
  * - permissionRuleParser.ts：规则串 parse/serialize 纯字符串函数组（E-4 S-4a，
  *   escape/unescape/parse/toString 逐字 + LEGACY alias 注入窗口
  *   set/get/resetLegacyToolNameAliases——engine 侧模块加载注册，未注入 =
@@ -42,6 +45,7 @@
 export * from './PermissionRule'
 export * from './filesystem'
 export * from './permissions'
+export * from './permissionMode'
 export * from './permissionRuleParser'
 export * from './ruleMatching'
 export * from './mcpRuleNames'

@@ -42,10 +42,10 @@
  *   - 不随迁整函数（消费面未落/死代码，登记防「以为已全」）：
  *     getSettingsWithSources（/status 逐源呈现）/ getSettings_DEPRECATED /
  *     getManagedFileSettingsPresence（UI）/ getManagedSettingsKeysForLogging
- *     （日志展开面）/ rawSettingsContainsKey / hasSkipDangerousModePermission
- *     Prompt（trusted 源读面 → E-4 权限波次）/ hasAutoModeOptIn /
+ *     （日志展开面）/ rawSettingsContainsKey / hasAutoModeOptIn /
  *     getUseAutoModeDuringPlan / getAutoModeConfig（auto-mode 三函数，
- *     TRANSCRIPT_CLASSIFIER 面未落）。
+ *     TRANSCRIPT_CLASSIFIER 面未落）。hasSkipDangerousModePermissionPrompt
+ *     **E-4 S-4c1 已落**（本文件，接缝⑥；trusted 4 源读 + RCE 排除注释逐字）。
  *   - 错误日志：旧仓 logError/logForDiagnosticsNoPII/profileCheckpoint →
  *     新仓 logForDebugging no-op 门面（charter C-4 logging port 定案前）。
  *
@@ -53,8 +53,11 @@
  * 落地，登记防「以为已全」亦防误删）：
  *   - getPolicySettingsOrigin（'file' | null）：消费面 = 诊断/组合根纵切
  *     （/status 呈现 = 残留守 UI 面）
- *   - updateSettingsForSource：消费面 = E-4 权限规则树波次（旧仓
- *     permissionsLoader 写回路径同型）
+ *   - updateSettingsForSource：S-4c1 消费实挂（engine/permissions/
+ *     permissionRulesLoader addPermissionRulesToSettings /
+ *     deletePermissionRuleFromSettings 写回路径）
+ *   - hasSkipDangerousModePermissionPrompt：消费面 = bypass 模式确认 UI
+ *     （残留守 UI 面，本版无消费点）
  *   - getSettingsWithErrors：S-3c 已消费（hooksConfig 门控链 + managedEnv
  *     apply 两面按源直读）；S-3d settings-adapter 经 getInitialSettings
  *     间接消费（本函数为其实现基座）
@@ -354,6 +357,30 @@ function getSettingsForSourceUncached(
 export function getPolicySettingsOrigin(): 'file' | null {
   const { settings } = loadManagedFileSettings()
   return settings ? 'file' : null
+}
+
+/**
+ * 任一 trusted 源（user/local/flag/policy）接受过 dangerous 模式确认弹窗
+ * （E-4 S-4c1 接缝⑥，§8.34 裁定 ⑨；旧仓 settings.ts:880 逐字）。
+ *
+ * projectSettings 刻意排除（旧仓 RCE 注释逐字）：恶意项目可借仓库内
+ * settings 自授 dangerous 模式确认，绕过弹窗。
+ *
+ * 类型契约：skipDangerousModePermissionPrompt 未入 SettingsSchema
+ * （passthrough 透传不丢数据）→ Record 断言读（值 = boolean | undefined）。
+ *
+ * H6 预声明消费接缝：消费面 = bypass 模式确认 UI（残留守 UI 面，本版无
+ * 消费点——登记防「以为已全」亦防误删）。
+ */
+export function hasSkipDangerousModePermissionPrompt(): boolean {
+  const read = (source: SettingSource): unknown =>
+    (getSettingsForSource(source) ?? {}) as Record<string, unknown>
+  return !!(
+    read('userSettings')['skipDangerousModePermissionPrompt'] ||
+    read('localSettings')['skipDangerousModePermissionPrompt'] ||
+    read('flagSettings')['skipDangerousModePermissionPrompt'] ||
+    read('policySettings')['skipDangerousModePermissionPrompt']
+  )
 }
 
 /**

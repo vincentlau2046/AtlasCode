@@ -35,6 +35,10 @@ import {
  * - writeFileSync（settings 写回，UTF-8 字符串；旧仓 writeFileSyncAndFlush 的
  *   fsync 段为 durability 优化，新仓裁剪——settings 非 durability 敏感数据）
  * - mkdirSync（写回前建目录，recursive + EEXIST 容错，同 async mkdir 语义）
+ *
+ * E-4 S-4c1 加法（engine/permissions 规则磁盘加载/写回消费）：
+ * - lstatSync（safeResolvePath 特殊文件守卫）
+ * - safeResolvePath 助手（接口外纯函数，旧仓 utils/fsOperations.ts:138 逐字）
  */
 export type FsOperations = {
   cwd(): string
@@ -55,6 +59,8 @@ export type FsOperations = {
   readdirSync(path: string): fs.Dirent[]
   writeFileSync(path: string, data: string): void
   mkdirSync(path: string): void
+  // E-4 S-4c1 加法（safeResolvePath 特殊文件守卫消费，见下）
+  lstatSync(path: string): fs.Stats
 }
 
 export const NodeFsOperations: FsOperations = {
@@ -125,6 +131,10 @@ export const NodeFsOperations: FsOperations = {
       if ((e as NodeJS.ErrnoException)?.code !== 'EEXIST') throw e
     }
   },
+
+  lstatSync(fsPath) {
+    return fs.lstatSync(fsPath)
+  },
 }
 
 let activeFs: FsOperations = NodeFsOperations
@@ -142,4 +152,48 @@ export function getFsImplementation(): FsOperations {
 /** 重置为 Node 默认实现。 */
 export function setOriginalFsImplementation(): void {
   activeFs = NodeFsOperations
+}
+
+/**
+ * 安全解析路径（E-4 S-4c1 加法，旧仓 utils/fsOperations.ts:138 逐字）：
+ * realpath 解析 + 符号链接判定，失败回落原路径（不抛）。
+ *
+ * 语义（旧仓逐字）：
+ * - UNC 路径（// 或 \\ 开头）在任何 fs 访问前阻塞（Windows DNS/SMB 防网络请求）
+ * - 特殊文件（FIFO/socket/字符/块设备）不 realpath（realpathSync 会阻塞等写入者）
+ * - 文件不存在 / 符号链接断裂 / EACCES / ELOOP → 回落原路径（允许文件创建场景）
+ * - isCanonical = realpath 成功（全路径分量符号链接已解，调用方可跳过再解析）
+ *
+ * 消费点：engine/permissions permissionRulesLoader lenient reader +
+ * permissionSetup isSymlinkTo（H6 实挂）。
+ */
+export function safeResolvePath(
+  fs: FsOperations,
+  filePath: string,
+): { resolvedPath: string; isSymlink: boolean; isCanonical: boolean } {
+  if (filePath.startsWith('//') || filePath.startsWith('\\\\')) {
+    return { resolvedPath: filePath, isSymlink: false, isCanonical: false }
+  }
+
+  try {
+    const stats = fs.lstatSync(filePath)
+    if (
+      stats.isFIFO() ||
+      stats.isSocket() ||
+      stats.isCharacterDevice() ||
+      stats.isBlockDevice()
+    ) {
+      return { resolvedPath: filePath, isSymlink: false, isCanonical: false }
+    }
+
+    const resolvedPath = fs.realpathSync(filePath)
+    return {
+      resolvedPath,
+      isSymlink: resolvedPath !== filePath,
+      isCanonical: true,
+    }
+  } catch (_error) {
+    // lstat/realpath 任意失败（ENOENT / 断链 / EACCES / ELOOP）→ 原路径继续
+    return { resolvedPath: filePath, isSymlink: false, isCanonical: false }
+  }
 }

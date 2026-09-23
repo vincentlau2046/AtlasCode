@@ -41,6 +41,7 @@ export {
   mcpInfoFromString,
   normalizeNameForMCP,
   getAllBaseTools,
+  getToolsForDefaultPreset,
   isAscendToolsEnabled,
   TOOL_PRESETS,
   parseToolPreset,
@@ -206,6 +207,28 @@ export {
   getInitialSettings,
   getSettingsWithErrors,
 } from './config'
+// E-4 S-4c1（§8.34）：permissions L3 连接器层（规则磁盘加载/写回 + 初始上下文装配）
+export {
+  shouldAllowManagedPermissionRulesOnly,
+  loadAllPermissionRulesFromDisk,
+  getPermissionRulesForSource,
+  deletePermissionRuleFromSettings,
+  addPermissionRulesToSettings,
+  deletePermissionRule,
+  syncPermissionRulesFromDisk,
+  type PermissionRuleFromEditableSettings,
+} from './permissions'
+export {
+  parseBaseToolsFromCLI,
+  parseToolListFromCLI,
+  initialPermissionModeFromCLI,
+  initializeToolPermissionContext,
+  shouldDisableBypassPermissions,
+  isBypassPermissionsModeDisabled,
+  createDisabledBypassPermissionsContext,
+  prepareContextForPlanMode,
+  type DangerousPermissionInfo,
+} from './permissions'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,

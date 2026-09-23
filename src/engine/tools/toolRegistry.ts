@@ -18,10 +18,11 @@
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - 47 工具本体（Read/Edit/Bash/Glob/Grep/… + Ascend 16）→ 残留守（deps 注入位已铺；
  *     各本体纵切落地时填 deps，本机制不改）。
- *   - getToolsForDefaultPreset（依赖 47 本体 + isEnabled 面）/ getTools 模式过滤
- *     （ATLAS_SIMPLE 三分支 + REPL 分支 + 权限 deny 规则 filterToolsByDenyRules → E-4）/
+ *   - getToolsForDefaultPreset **E-4 S-4c1 已落**（机制面 deps 版，§8.34 裁定 ⑤；
+ *     47 本体残留守不变，名单随 deps 注入增长）；余 getTools 模式过滤
+ *     （ATLAS_SIMPLE 三分支 + REPL 分支 + 权限 deny 规则 filterToolsByDenyRules → S-4d）/
  *     getMergedTools（无去重 concat，getAllBaseTools(deps.mcpTools) 已覆盖去重合并语义）
- *     → 残留守（工具面全量 / E-4 权限规则树落时补）。
+ *     → 残留守（S-4d ② 补 getTools / filterToolsByDenyRules）。
  *   - 旧仓 assembleToolPool 的分区按名排序（1P-REST claude_code_system_cache_policy 缓存断点
  *     稳定性）→ 残留守（新仓 auth 车道 = OpenAI 协议静态键，无服务端工具级缓存断点；
  *     去重仅按名先入为主，不排序）。
@@ -85,6 +86,22 @@ function uniqByName(tools: readonly Tool[]): Tools {
     out.push(t)
   }
   return out
+}
+
+/**
+ * 默认预设工具名列表（E-4 S-4c1 自 S-4d ② 提前，§8.34 裁定 ⑤：
+ * permissionSetup parseBaseToolsFromCLI / initializeToolPermissionContext
+ * baseTools 补拒支消费）：getAllBaseTools(deps) 中 isEnabled() 工具名。
+ * 旧仓 getToolsForDefaultPreset 逐字语义（`tool.isEnabled ? tool.isEnabled() : false`
+ * → 新 shared Tool.isEnabled 必选方法，等价 `.filter(t => t.isEnabled())`）。
+ * 47 工具本体残留守不变（机制面：本体经 deps 注入时名单随之增长）。
+ */
+export function getToolsForDefaultPreset(
+  deps: ToolRegistryDeps = {},
+): string[] {
+  return getAllBaseTools(deps)
+    .filter(t => t.isEnabled())
+    .map(t => t.name)
 }
 
 /** 预定义工具预设（旧仓 tools.ts TOOL_PRESETS 逐字：当前仅 'default'）。 */

@@ -99,6 +99,11 @@ const MATRIX: readonly MatrixRow[] = [
   // tests/unit/permissions.test.ts 规则支决策面同提交）
   { domain: 'permissions', capability: '规则求值树匹配（deny/ask/allow 规则命中 + mcp 前缀 + 空规则集=allow）', status: 'done', proof: 'tests/unit/permission-rule-matching.test.ts' },
   { domain: 'permissions', capability: 'shell 工具规则三态匹配（exact/`:*` 前缀/wildcard + 通配转义 + suggestion）', status: 'done', proof: 'tests/unit/shell-rule-matching.test.ts' },
+  // E-4 S-4c1（§8.34）：旧 permissionsLoader 296L 全迁（engine/permissions L3 连接器层）+
+  // deletePermissionRule ⑩ 签名 + 接缝⑤ sync 核销（unit 零磁盘：
+  // tests/unit/permission-rules-loader.test.ts 短路族/写回族）；func 行证真盘 round-trip
+  { domain: 'permissions', capability: '规则磁盘加载/写回 round-trip（add → 重载出现 / delete 消失，真盘）', status: 'done', proof: 'tests/func/permission-rules-roundtrip.test.ts' },
+  { domain: 'permissions', capability: 'CLI 工具规则解析 + 初始权限上下文装配（auto/GB/校验支裁剪版 9 函数保留面）', status: 'done', proof: 'tests/unit/permission-setup.test.ts' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },

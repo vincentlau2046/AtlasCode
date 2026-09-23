@@ -59,6 +59,7 @@ export {
   getSettingsForSource,
   getPolicySettingsOrigin,
   updateSettingsForSource,
+  hasSkipDangerousModePermissionPrompt,
   getInitialSettings,
   getSettingsWithErrors,
 } from './settings'

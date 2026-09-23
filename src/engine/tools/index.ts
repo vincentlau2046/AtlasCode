@@ -14,6 +14,8 @@
  * E-4 S-4a（§8.31/§8.32）已落 LEGACY 工具名 alias 表 legacyToolNameAliases
  *   （4 项 legacy → 正规名，正规名引用 toolNames/agent 常量；模块加载注册
  *   进 permissions 域解析函数组，re-export 触发 side-effect import）。
+ * E-4 S-4c1（§8.34 裁定 ⑤）已落 getToolsForDefaultPreset(deps)（机制面默认
+ *   预设工具名，engine/permissions permissionSetup 传递依赖提前；本体残留守不变）。
  */
 export {
   createMcpTools,
@@ -25,6 +27,7 @@ export {
 } from './mcp'
 export {
   getAllBaseTools,
+  getToolsForDefaultPreset,
   isAscendToolsEnabled,
   TOOL_PRESETS,
   parseToolPreset,

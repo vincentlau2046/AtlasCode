@@ -198,9 +198,13 @@ export function applyPermissionUpdates(
 
 /**
  * Helper to convert PermissionRule array to PermissionUpdate array
- * （旧仓 permissions.ts:1215 逐字；私有助手，随 apply 核心落本文件。）
+ * （旧仓 permissions.ts:1215 逐字）。
+ *
+ * E-4 S-4c1 导出：engine/permissions/permissionRulesLoader.syncPermissionRulesFromDisk
+ * （'replaceRules' 替换面）消费——addRules 面经 applyPermissionRulesToPermissionContext
+ * 间接消费（本文件内），replaceRules 面需直接调用 → 出域门面（单一事实源不复制）。
  */
-function convertRulesToUpdates(
+export function convertRulesToUpdates(
   rules: PermissionRule[],
   updateType: 'addRules' | 'replaceRules',
 ): PermissionUpdate[] {
