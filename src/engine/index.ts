@@ -40,6 +40,28 @@ export {
   getMcpPrefix,
   mcpInfoFromString,
   normalizeNameForMCP,
+  ASYNC_AGENT_ALLOWED_TOOLS,
+  INTERNAL_WORKER_TOOLS,
+  BASH_TOOL_NAME,
+  FILE_READ_TOOL_NAME,
+  FILE_EDIT_TOOL_NAME,
+  FILE_WRITE_TOOL_NAME,
+  GREP_TOOL_NAME,
+  GLOB_TOOL_NAME,
+  WEB_SEARCH_TOOL_NAME,
+  WEB_FETCH_TOOL_NAME,
+  TODO_WRITE_TOOL_NAME,
+  NOTEBOOK_EDIT_TOOL_NAME,
+  SKILL_TOOL_NAME,
+  SYNTHETIC_OUTPUT_TOOL_NAME,
+  TOOL_SEARCH_TOOL_NAME,
+  ENTER_WORKTREE_TOOL_NAME,
+  EXIT_WORKTREE_TOOL_NAME,
+  TEAM_CREATE_TOOL_NAME,
+  TEAM_DELETE_TOOL_NAME,
+  SEND_MESSAGE_TOOL_NAME,
+  TASK_STOP_TOOL_NAME,
+  SHELL_TOOL_NAMES,
 } from './tools'
 export type {
   McpToolResult,
@@ -82,7 +104,15 @@ export {
   type ResolvedAgentTools,
   type InjectedAgentFile,
 } from './tools'
-export { isCoordinatorMode } from './coordinator'
+export {
+  isCoordinatorMode,
+  matchSessionMode,
+  getCoordinatorUserContext,
+  getCoordinatorSystemPrompt,
+  getCoordinatorWorkerSystemPrompt,
+  getCoordinatorAgents,
+  WORKER_AGENT,
+} from './coordinator'
 export {
   getAutoCompactThreshold,
   shouldAutoCompact,
