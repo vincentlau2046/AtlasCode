@@ -112,6 +112,12 @@ export type ExecOptions = {
   shouldUseSandbox?: boolean
   /** 提供时 stdout 走 pipe（不落文件），每个 data chunk 触发此回调 */
   onStdout?: (data: string) => void
+  /**
+   * 调用方提供的子进程 env（hooks 域经 HookShellPort 注入，§8.17 D17）。
+   * 优先级：process.env < env < harness 标记(SHELL/GIT_EDITOR/ATLAS_CODE) <
+   * provider envOverrides——调用方 env 不覆盖 harness 契约标记。
+   */
+  env?: Record<string, string>
 }
 
 /**
@@ -129,6 +135,7 @@ export async function exec(
     preventCwdChanges,
     shouldUseSandbox,
     onStdout,
+    env,
   } = options ?? {}
   const commandTimeout = timeout || DEFAULT_TIMEOUT
 
@@ -233,6 +240,7 @@ export async function exec(
       env: {
         // 残余：subprocessEnv 安全 scrub（GHA 密钥剥离 / CCR 代理注入）
         ...process.env,
+        ...env,
         SHELL: binShell,
         GIT_EDITOR: 'true',
         ATLAS_CODE: '1',
