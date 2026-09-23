@@ -19,6 +19,8 @@
  *   + S-3c（§8.28）setSettingsPathsProvider（permissions ← engine/config settings
  *     路径面）+ setHookConfigProvider + captureHooksConfigSnapshot（hooks ←
  *     engine/config settings.hooks 配置面，启动捕获一次）
+ *   + E-5 S-5a（§8.39）setHooksBootstrapEnv（hooks ← bootstrap ⑤ 3 成员面，
+ *     三层断补齐之第三断；先于首次带命令钩子 runHooks，未注入 fail-fast）
  *   + S-3d（§8.29）applySafeConfigEnvironmentVariables（engine/config managedEnv，
  *     旧仓启动序信任前位——trusted 源 env 先入 process.env，后 roles lane env 读）
  *
@@ -40,14 +42,22 @@ import {
 } from '../executor'
 import { setPermissionsBootstrapEnv, setSettingsPathsProvider } from '../permissions'
 import { setDiskOutputEnv } from '../task'
-import { setHookConfigProvider, setHookShellPort } from '../hooks'
+import { setHookConfigProvider, setHooksBootstrapEnv, setHookShellPort } from '../hooks'
 import {
   applySafeConfigEnvironmentVariables,
   captureHooksConfigSnapshot,
   createHooksConfigProvider,
   getSettingsPaths,
 } from '../engine'
-import { getCwdState, getOriginalCwd } from '../bootstrap'
+import {
+  getIsNonInteractiveSession,
+  getMainThreadAgentType,
+  getCwdState,
+  getSessionId,
+  getOriginalCwd,
+  getTranscriptPathForSession,
+  hasTrustAccepted,
+} from '../bootstrap'
 
 import { adaptSandboxToExecutorPort } from './adapters/sandboxAdapter'
 import { adaptBootstrapToExecutorPort } from './adapters/bootstrapAdapter'
@@ -92,8 +102,21 @@ export function createCoreDependencies(): CoreDependencies {
   // ④ task ← permissions+bootstrap（D11，permissions 之后）
   setDiskOutputEnv(createDiskOutputEnv())
 
-  // ⑤ hooks ← executor（D17，注入序末步；先于首次带命令钩子 runHooks）+
-  //    hooks ← engine/config（S-3c settings.hooks 配置面，启动捕获一次快照）
+  // ⑤ hooks ← bootstrap（E-5 S-5a 三层断补齐，§8.38 C-5 第三断：本接线缺失前
+  //    生产路径 runHooks 必 fail-fast 抛「hooks bootstrap 未注入」）+
+  //    hooks ← executor（D17，注入序末步；先于首次带命令钩子 runHooks）+
+  //    hooks ← engine/config（S-3c settings.hooks 配置面，启动捕获一次快照）。
+  //    注入序遵 hooks 域门面头注：setHooksBootstrapEnv → setHookConfigProvider →
+  //    setHookShellPort。3 成员源 = bootstrap 域 ⑤ 族（transcript path 窄适配 /
+  //    agent type 缺省 undefined=CLI 面残留守 / trust 缺省 true=headless 信任隐式）。
+  setHooksBootstrapEnv({
+    getSessionId,
+    getCwd: getCwdState,
+    getTranscriptPath: getTranscriptPathForSession,
+    getMainThreadAgentType,
+    isNonInteractive: getIsNonInteractiveSession,
+    hasTrustAccepted,
+  })
   setHookShellPort(adaptExecutorToHookShellPort())
   setHookConfigProvider(createHooksConfigProvider())
   captureHooksConfigSnapshot()

@@ -17,6 +17,13 @@ import {
   runWithCwdOverride,
   pwd,
   resetStateForTests,
+  setTranscriptDir,
+  getTranscriptPathForSession,
+  setMainThreadAgentType,
+  getMainThreadAgentType,
+  setTrustAccepted,
+  hasTrustAccepted,
+  resetHooksBootstrapMembersForTests,
 } from '../../src/bootstrap'
 
 describe('H6⑤ bootstrap cwd 两状态分离', () => {
@@ -41,5 +48,53 @@ describe('H6⑤ bootstrap cwd 两状态分离', () => {
     const seen = runWithCwdOverride('/override', () => pwd())
     expect(seen).toBe('/override')
     expect(pwd()).toBe('/base') // 出作用域回落
+  })
+})
+
+/**
+ * ⑤ hooks bootstrap 3 成员（E-5 S-5a，§8.38 C-5 三层断补齐）：
+ * transcript path 窄适配（只产路径零 I/O）/ agent type 缺省 undefined /
+ * trust 缺省 true（headless 信任隐式）。前向接缝登记见 state.ts 头注 ⑤。
+ */
+describe('⑤ hooks bootstrap 3 成员（E-5 S-5a）', () => {
+  beforeEach(() => {
+    resetHooksBootstrapMembersForTests()
+  })
+
+  test('getTranscriptPathForSession：setTranscriptDir 覆写 → <dir>/<id>.jsonl', () => {
+    setTranscriptDir('/tmp/sessions')
+    expect(getTranscriptPathForSession('sess-1')).toBe('/tmp/sessions/sess-1.jsonl')
+  })
+
+  test('getTranscriptPathForSession：缺省 = ATLAS_CONFIG_DIR（configRoot 两级序第 1 级）', () => {
+    const old = process.env.ATLAS_CONFIG_DIR
+    process.env.ATLAS_CONFIG_DIR = '/custom-config-root'
+    try {
+      expect(getTranscriptPathForSession('sess-2')).toBe('/custom-config-root/sessions/sess-2.jsonl')
+    } finally {
+      if (old === undefined) delete process.env.ATLAS_CONFIG_DIR
+      else process.env.ATLAS_CONFIG_DIR = old
+    }
+  })
+
+  test('getTranscriptPathForSession：覆写优先于 env（两级序 = 接缝优先）', () => {
+    process.env.ATLAS_CONFIG_DIR = '/custom-config-root'
+    setTranscriptDir('/override-dir')
+    expect(getTranscriptPathForSession('sess-3')).toBe('/override-dir/sess-3.jsonl')
+    delete process.env.ATLAS_CONFIG_DIR
+  })
+
+  test('getMainThreadAgentType：缺省 undefined（--agent 标志 = CLI 面残留守）', () => {
+    expect(getMainThreadAgentType()).toBeUndefined()
+    setMainThreadAgentType('ascend-fde')
+    expect(getMainThreadAgentType()).toBe('ascend-fde')
+    setMainThreadAgentType(undefined)
+    expect(getMainThreadAgentType()).toBeUndefined()
+  })
+
+  test('hasTrustAccepted：缺省 true（headless 信任隐式）+ setter', () => {
+    expect(hasTrustAccepted()).toBe(true)
+    setTrustAccepted(false)
+    expect(hasTrustAccepted()).toBe(false)
   })
 })

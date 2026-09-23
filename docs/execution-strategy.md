@@ -1354,3 +1354,25 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **基线**：939 pass / 0 fail / 1861 expect / 66 文件（E-4 review 939）+ gate 6 pass / 0 fail / 2 文件（engine 非扫描集，本波新 engine/hooks 文件无 gate 影响）。
 
 **下一步**：S-5a 执行（执行前分析 + 方案按 E-3 §8.28/§8.29 模式，执行前落纸一节）。
+### §8.39 E-5 S-5a 执行前分析 + 方案（2026-09-24）
+
+**范围**（§8.38 S-5a）：三层断补齐 + engine/hooks L3 连接器（ToolHooks 适配器消费 AggregatedHookResult + loop stop hooks + compose 接线 + bootstrap 3 成员）。两提交：
+- **S-5a-① 三层断（bootstrap-env 注入）**：bootstrap 域 3 成员扩面 + compose `setHooksBootstrapEnv`。
+- **S-5a-② engine/hooks 连接器**：ToolHooks 适配器（消费返回值）+ pipeline 消费支 + loop stop hooks 消费点。
+
+**执行前分析（关键契约 + 裁定点）**：
+1. **hooks 域执行器契约**（实测 runHooks.ts:228-313）：runPreToolUseHooks(toolName, toolInput, toolUseID, opts) / runPostToolUseHooks(toolName, toolInput, toolResponse, toolUseID, opts) / runStopHooks(opts) → `Promise<AggregatedHookResult>`；`AggregatedHookResult = { blockingError?, preventContinuation?, stopReason?, additionalContext?, updatedInput?, permissionBehavior?('ask'|'deny'|'allow'|'passthrough'), results }`；`HookRunOptions = { signal?, timeoutMs?, toolUseID?, permissionMode?, sessionId?, agentInfo?, env? }`。
+2. **bootstrap 3 成员源（C-5 裁定）**：HooksBootstrapEnv 需 6 成员，bootstrap/state.ts 现仅 4 族（cwd/session/interactive/cost），缺 getTranscriptPath/getMainThreadAgentType/hasTrustAccepted。裁定 = 窄适配 + 头注前向接缝登记（**不**假「真行为」声明）：`getTranscriptPathForSession(sessionId)` = `<sessionDir>/<sessionId>.jsonl`（transcript 持久化 = E-7 session 波残留守）/ `getMainThreadAgentType()` = undefined（--agent 标志 = CLI 面残留守）/ `hasTrustAccepted()` = true（headless 信任隐式，同 shouldSkipHookDueToTrust isNonInteractive 短路语义；信任对话框面 = UI 波残留守）。
+3. **ToolHooks 返回值消费（C-6 裁定）**：pipeline toolExecution.ts:54-63 ToolHooks 现返回 unknown + L145/L189 fire-and-forget（= H6 死接缝）。裁定 = 改类型化返回 `PreToolUseHookOutcome`/`PostToolUseHookOutcome`，executeToolUse 消费：
+   - **preToolUse** → `blockingError`→tool_result is_error（阻塞）/ `updatedInput`→effective 入参 / `hookBehavior`（= permissionBehavior）→ 合 E-4 权限门（**不变量**：hook 'allow' 不绕过 settings deny/ask，旧仓 toolHooks.ts:270 resolveHookPermissionDecision 逐字）。
+   - **postToolUse** → `additionalContext`→上下文回灌（消息面残留守，前向接缝登记，不硬填）。
+   - **mergeHookPermission(hookBehavior, gateVerdict)**（纯函数，落 pipeline，防 engine/hooks↔pipeline 循环 import）：allow→gate 在 effectiveInput 上重判（deny 规则 override / ask 规则确认 / null=放行，hook allow 成立）/ deny→hook 拒 / ask→fail-closed 确认标记（prompt 面残留守，同 E-4）/ passthrough→gate 原判。顺序同 E-1b 裁定 safeParse→validateInput→**pre-hooks**→**permission**→call（pre-hook 在 gate 前，gate 在 hook-updated input 上重判）。
+4. **loop stop hooks 消费点（C-4 裁定）**：queryAgentLoop terminal 支（L211 lastRound.toolResults 空 = 无 tool_use）→ `deps.hooks?.stopHooks` → runStopHooks；`preventContinuation=true`→不 break 续跑（阻止停止）；blockingErrors/additionalContext→消息面残留守（前向接缝）。`AgentLoopDeps + hooks?: LoopHooks { toolHooks?, stopHooks? }`（未注入 = 窄 spine 无操作）；queryOneRound 透传 `deps.hooks?.toolHooks` 给 runToolBatch（唯一点，同 E-4 checkPermission 透传位）。
+5. **L3 边界（C-1 裁定）**：新建 `src/engine/hooks/`（L3 连接器层，镜像 engine/permissions index 先例：import shared/bootstrap/engine·tools/hooks 域，L3 头注 + 测试直 import 位）。`toolHooks.ts` = `createToolHooks(opts)→ToolHooks` + `createLoopHooks(opts)→LoopHooks`；头注登记前向接缝（post-hook additionalContext 回灌 / 流式 runner 消费面 / attachment 渲染 → message/REPL 波）。
+6. **H6 防空洞**：新接缝全有消费点或前向接缝登记（ToolHooks 返回值 = executeToolUse 消费 / stopHooks = queryAgentLoop terminal 消费 / post additionalContext 回灌 = 登记 / bootstrap 3 成员 = hooks 域 bootstrap-env 消费）。
+
+**判别信号（测试）**：
+- S-5a-①：bootstrap 3 成员（unit：getTranscriptPathForSession 形如 `<dir>/<id>.jsonl` / getMainThreadAgentType undefined / hasTrustAccepted true）+ compose 接线（integration/func：setHooksBootstrapEnv 注入后 runHooks 不 fail-fast——对照 = 未注入时 getHooksBootstrapEnv 抛错）。
+- S-5a-②：pre-hook blockingError→tool_result is_error / hook allow 但 settings deny→拒（不变量）/ hook allow + settings 无规则→放行 / updatedInput 回写（tool.call 收到 updatedInput 非原入参）/ stop hooks preventContinuation→续跑（loop 不 terminated，turns>1）/ 未注入 hooks = 窄 spine 不变（回归）。
+
+**四件套 + gate**：tsc 0 / eslint 变更文件 0 / build 0 KB / 全量 + 新测；gate 6 pass（engine 非扫描集，新 engine/hooks 文件无 gate 影响）。

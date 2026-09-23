@@ -12,6 +12,11 @@
  *    headless 分支仍挂 Ink TUI → stdout 污染）
  * ④ cost state 累加器族 — 会话用量累加（/cost 显示 & 退出汇总；token 总量
  *    读时从 per-model usage 派生，单一事实源）
+ * ⑤ hooks bootstrap 3 成员（E-5 S-5a，§8.38 C-5 三层断补齐）— hooks 域
+ *    bootstrap-env 6 成员中本域缺的 3 源（getTranscriptPath/getMainThreadAgentType/
+ *    hasTrustAccepted）。三者均**窄适配 + 前向接缝登记**（防假「真行为」声明）：
+ *    transcript 持久化读写 = E-7 session 波 / --agent 标志 = CLI 面 / 信任对话框 =
+ *    UI 波（各消费点见组合根 compose.ts setHooksBootstrapEnv 接线头注）。
  *
  * 砍除残余（归 engine/modelprovider 波，复审勿当遗漏重提）：turn 级累加器
  * （_turnHook/_turnTool/_turnClassifier，REPL 逐 query turn 重置）/
@@ -19,6 +24,9 @@
  * remoteMode / projectRoot / sessionPersistence / spSectionCache 等 engine 面状态。
  */
 import { randomUUID } from 'crypto'
+import { homedir } from 'os'
+import { join } from 'path'
+import { getConfigDirName } from '../shared'
 
 // ── ① cwd 两状态 ────────────────────────────────────────────────────────────
 // originalCwd = 进程启动 cwd（不可变语义：当前 cwd 被命令删除时的回退目标）。
@@ -225,4 +233,61 @@ export function resetCostState(): void {
 /** 测试复位（与 resetCostState 同语义，保留旧仓名）。 */
 export function resetStateForTests(): void {
   _costState = freshCostState()
+}
+
+// ── ⑤ hooks bootstrap 3 成员（E-5 S-5a，§8.38 C-5；前向接缝登记见头注 ⑤）──
+// transcript 目录解析（同 engine/config configRoot 两级序，叶域本地实现不跨域 import）：
+// 1. ATLAS_CONFIG_DIR env —— 显式覆盖整个 ~/.atlas 根（目录级 env）。
+// 2. homedir() / getConfigDirName()（shared/configDir 单一事实源 .atlas）。
+// 本函数**只产路径不做 I/O**——transcript 持久化（读写）= E-7 session 波残留守，
+// 届时经 setTranscriptDir 整换（测试面亦用此接缝）。
+function defaultTranscriptDir(): string {
+  const root = process.env.ATLAS_CONFIG_DIR ?? join(homedir(), getConfigDirName())
+  return join(root, 'sessions')
+}
+
+let _transcriptDir: string | undefined
+
+/** 覆写 transcript 目录（测试 / E-7 session 波整换；未覆写走 defaultTranscriptDir）。 */
+export function setTranscriptDir(dir: string): void {
+  _transcriptDir = dir
+}
+
+/** 会话转录文件路径（窄适配：<dir>/<sessionId>.jsonl；持久化残留守见上）。 */
+export function getTranscriptPathForSession(sessionId: string): string {
+  const dir = _transcriptDir ?? defaultTranscriptDir()
+  return join(dir, `${sessionId}.jsonl`)
+}
+
+// --agent 标志的主线程代理类型：缺省 undefined（CLI 面残留守，启动装配时
+// 经 setMainThreadAgentType 接线；hooks 域 createBaseHookInput 消费，子代理
+// agentInfo.agentType 优先于本缺省值，域内语义不变）。
+let _mainThreadAgentType: string | undefined
+
+export function setMainThreadAgentType(agentType: string | undefined): void {
+  _mainThreadAgentType = agentType
+}
+
+export function getMainThreadAgentType(): string | undefined {
+  return _mainThreadAgentType
+}
+
+// 工作区信任接受：缺省 true = headless 信任隐式（同 hooks 域 shouldSkipHookDueToTrust
+// isNonInteractive 短路语义——非交互恒执行，本缺省仅在交互式路径生效）；
+// 信任对话框 = UI 波残留守，届时经 setTrustAccepted 接线。
+let _trustAccepted = true
+
+export function setTrustAccepted(accepted: boolean): void {
+  _trustAccepted = accepted
+}
+
+export function hasTrustAccepted(): boolean {
+  return _trustAccepted
+}
+
+/** 测试复位（⑤ 族 3 成员恢复缺省：transcript 目录覆写清 / agent type undefined / trust true）。 */
+export function resetHooksBootstrapMembersForTests(): void {
+  _transcriptDir = undefined
+  _mainThreadAgentType = undefined
+  _trustAccepted = true
 }
