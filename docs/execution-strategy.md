@@ -891,3 +891,27 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 - **四件套全绿**：tsc 0 / eslint 0 / build 0 / **511 pass 0 fail**（E-1 基线 473 → E-1b +38）。
 
 **下一步**：E-1b 闭环。engine 波后续纵切 = E-2（MCP 路由 + 工具面 getAllBaseTools）/ E-4（权限规则求值树）/ E-5（hooks 注入 + 流式/attachment 渲染 + stop hooks）/ E-wave-end（compose.ts engine 装配接线，残留守 ⑦）。
+
+### §8.24 E-1b 实施/测试双 review 处置记录 + 修复闭环（2026-09-23）
+
+**背景**：E-1b 五切片（`900f066..0668533`）落 master 后，按 per-slice 纪律做实施 review（code-reviewer，只读 worktree）+ 测试 review（test-analyzer，只读）双审。**双审判定：E-1b 不能按现状闭环**——1 阻塞项（C-1）+ 3 须处置项（I-1/I-2/I-3，「声称完成但简化未登记」纪律违规）+ 6 MINOR + 测试面 5 缺口（I-1..I-5）。本节 = 处置记录 + 修复闭环。
+
+**阻塞项 C-1（熔断在唯一生产消费方是死的）— 已修**：
+- 现象：`queryAgentLoop` 只消费 `autoCompactIfNeeded` 的成功路径 `oc.tracking`，失败路径 `consecutiveFailures` 被丢弃 → 连续 3 次失败熔断器（`MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES`）在 loop 里永不跳闸 → 超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用（旧仓 loop.ts:504-511 回灌语义在移植时丢失，属移植丢语义非裁剪）。
+- 修复（loop.ts）：`else if (oc.consecutiveFailures !== undefined) tracking = { ...tracking, consecutiveFailures: oc.consecutiveFailures }`（失败回灌，旧仓同语义）。
+- 回归测：doomed autoCompact（每轮必失败）跑 maxTurns=4 → compact 恰 3 次（第 4 轮熔断短路，回灌前会是 4 次）+ `r.tracking.consecutiveFailures === 3` + 重入测（初始 tracking 带 3 → 首轮即短路零调用 + 计数保留）。
+
+**须处置项（fix-or-register 纪律）— 全修/登记**：
+- **I-1 getCompactPrompt 假「照抄」声明 — 已修**：T-4b 落的是简化重写（仅 9 段名 + 一句结构提示）却头注声称「照抄非重写」。处置 = 恢复旧仓 prompt.ts 全文（NO_TOOLS_PREAMBLE + DETAILED_ANALYSIS_INSTRUCTION_BASE + BASE_COMPACT_PROMPT（9 段段体 + `<example>` 模板 + 自定义指令示例段）+ NO_TOOLS_TRAILER，纯静态串零依赖）+ 头注订正 + 残留守登记（partialCompact 三 prompt 变体 / transcriptPath·recentMessagesPreserved 两参 / 摘要调用 abort 短路）。回归测 = 全文锁定（preamble 置首 / 段体 / `<example>` / trailer 收尾 / customInstructions 插位，各断言在旧简化版下均不成立）。
+- **I-2 阈值 −20k 摘要预留丢失 — 已修**：`getAutoCompactThreshold` 原 = contextWindow − 13_000，丢旧仓 getEffectiveContextWindowSize 的摘要输出预留（min(getMaxOutputTokensForModel, 20k)）。修复 = `(contextWindow − min(maxOutputTokens ?? COMPACT_MAX_OUTPUT_TOKENS, COMPACT_MAX_OUTPUT_TOKENS)) − AUTOCOMPACT_BUFFER_TOKENS`；`maxOutputTokens` 经 AutoCompactDeps 注入接缝（modelprovider 配置面提供方，未注入按满额 20k 预留 = 旧仓大输出模型行为等价）；`COMPACT_MAX_OUTPUT_TOKENS` 由死导出变被消费。
+- **I-3 执行链顺序反于旧仓 — 已修**：executeToolUse 原序 = find→权限门→schema 校验→validateInput→pre-hook→call；旧仓 checkPermissionsAndCallTool 序 = safeParse→validateInput→pre-hooks→permission→call（hook 可携带权限裁定，权限门必须最后）。重排后 E-4 规则树注入不继承错误顺序。回归测 = schema 失败时权限门不被调 + pre→gate→call 顺序钉。
+- **M-4（toolExecution 无 abort CANCEL 短路）— 登记**：残留守入头注（旧仓 abort 语义在 loop 层收口，toolExecution 层短路行为未移植，E-1b-full 裁定，不造行为）。
+
+**MINOR 全修**：M-1 tracking 语义订正（turnCounter = 距上次 compact 轮数：compact 成功重置 0 + loop 继续轮末自增（仅 compacted 会话），turnId = randomUUID 重置；旧仓 loop.ts:485-494/1458-1460 对齐）/ M-2 microCompact 数组内容 token 估值类型分档（text→chars/4、image/document→固定 2000、其他→0，旧仓 calculateToolResultTokens 等价，原 `JSON.stringify` 一刀切已订正）/ N-1（lastTs 缺失/epoch→+∞→不触发 保守注释）/ N-2（schema 非有限数文案 `got non-finite number`，原「got number」自相矛盾）/ N-3（COMPACTABLE_TOOLS 白名单注释订正：旧仓含 FileEdit/FileWrite 写类 8 项，非「只读」）/ N-4（engine 门面补 `AUTOCOMPACT_BUFFER_TOKENS`/`MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES`/`COMPACT_MAX_OUTPUT_TOKENS` + compact 四函数 re-export）/ N-5（QueryEngine.ask 注释「多轮 = 上层循环调用 ask」已过时 → 订正指 queryAgentLoop）。
+
+**测试面 5 缺口（test-analyzer I-1..I-5）— 全补**：
+- I-1 keepRecent 方向（slice(-N) 改 slice(0,N) 全绿 → 补内容方向断言 m3/m4）/ I-2 DEFAULT_AGENT_LOOP_MAX_TURNS=20 零引用（默认值改 3 全绿 → 补 21 步脚本无显式 maxTurns 截断于 20）/ I-3 低于阈值不触发反例（M-1 非 compacted 会话测覆盖：无 boundary marker + tracking 原样）/ I-4 熔断态续跑（C-1 重入测覆盖：consecutiveFailures:3 穿透不重置）/ I-5 signal loop→runToolBatch 跳（补 tool.call context.signal === deps.signal 实例断言）。MINOR 补：microCompact no-op 原引用（`toBe`）+ 入参不可变 + estimateMessageTokens 精确值（34）+ session_memory 递归守卫。历史 commit 消息「24+14」实为 23+15 —— 不改写历史，本记录订正口径。
+
+**四件套全绿**：tsc 0 / eslint 0 / build 0 / **522 pass 0 fail**（44 文件 1008 expect；E-1b 基线 511/960 → +11 测 / +48 expect）。
+
+**闭环判定**：C-1 阻塞项修复 + loop 级回归测 + I-1/I-2/I-3 全修/登记 + 测试面全补 → **E-1b 闭环成立**。engine 波后续纵切不变：E-2（MCP 路由 + 工具面）/ E-4（权限规则求值树，执行链顺序已就绪）/ E-5（hooks 流式 + stop hooks）/ E-wave-end（compose.ts 装配，残留守 ⑦）。残余登记：engine anti-stub 门 wave 级 / 复合 schema 校验（E-2）/ 压缩面 partialCompact·PTL·重建面（后续纵切）/ modelprovider resetEndpointConfigSource（E-3 按需 3 行）。
