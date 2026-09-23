@@ -5,6 +5,11 @@
  * < 5 行的 .ts 文件（如 `export {}` 空模块）必须登记在 STUB_REGISTRY
  * （注明解锁波次）；已填实现的文件必须从注册表移除（防注册表漂移）。
  *
+ * 空壳判定（v0.12 收窄）：< 5 实质行 **且** 无实质导出符号
+ * （export const/let/var/function/class/interface/type/enum 或 re-export from）。
+ * 单行 `export const X = …` 是实质常量（非空壳），`export {}` 空模块才是空壳。
+ * 收窄消除 constants.ts 等单行实质常量文件的误判。
+ *
  * 豁免：实质内容全为跨模块 re-export（`export * from` / `export {…} from` /
  * `export type * from`）的文件 = STR-1 域门面，不判 stub——门面职责是委托
  * （外部消费者只 import 域根 index），导出面薄是域早期合法态；空洞只会
@@ -12,9 +17,10 @@
  *
  * 触发背景：B 波 6 个空 stub（executor/sandbox 核心行为）骗过
  * tsc/lint/test/build 四件套 —— 它们结构合法所以顺过所有门。
- * 本门让"空壳"从结构合法变为显式登记项，C 波 wave-c tag 时注册表须清零。
+ * 本门让"空壳"从结构合法变为显式登记项，C 波 wave-c tag 时 C-Deep 域条目须清零。
  *
- * 范围：B 波认领完成的四域（executor/sandbox/memory/modelprovider）。
+ * 范围：B 波认领完成的四域（executor/sandbox/memory/modelprovider）
+ * + shared 纯叶子（v0.12 纳扫：shared 占位 `export {}` 须登记，防叶子空模块逃门）。
  * engine/ascend 域骨架在 C/E 波各自建门（分层不变量，test-strategy §4）。
  */
 import { describe, test, expect } from 'bun:test'
@@ -25,8 +31,8 @@ import { execFileSync } from 'child_process'
 /** URL pathname 对目录 URL 保留尾斜杠 → 归一化去掉，保证 slice(offset) 口径一致 */
 const REPO_ROOT = new URL('../../', import.meta.url).pathname.replace(/\/$/, '')
 
-/** B 波认领的四域 */
-const DOMAINS = ['executor', 'sandbox', 'memory', 'modelprovider'] as const
+/** B 波认领的四域 + shared 纯叶子（v0.12 纳扫） */
+const DOMAINS = ['executor', 'sandbox', 'memory', 'modelprovider', 'shared'] as const
 
 /**
  * C-Deep 将新建的四域（execution-strategy §8.2：task/bootstrap/permissions/hooks）。
@@ -36,12 +42,16 @@ const DOMAINS = ['executor', 'sandbox', 'memory', 'modelprovider'] as const
  */
 const CDEEP_DOMAINS = ['task', 'bootstrap', 'permissions', 'hooks'] as const
 
-/** 实质内容 < 5 行的文件视为空壳 stub */
+/** 实质内容 < 5 行的文件视为空壳 stub（须叠加 hasSubstantiveExport 判定） */
 const STUB_LINE_THRESHOLD = 5
 
 /**
  * 已知空壳登记（单一事实源，B-fix 建，C-Deep 填一个销一个）。
  * 条目文件一旦填成实质实现，anti-stub 门 ② 强制移除该条目（防漂移）。
+ *
+ * v0.12 纳扫 shared：3 个 A 波骨架占位 `export {}` 空模块登记在此。
+ * 门③ wave-c 清零只约束 C-Deep 域条目（shared A 波占位随 A/C 波实现移除，
+ * 门②兜底；A 波未开 identity 仍占位是合法待实现态）。
  */
 const STUB_REGISTRY: ReadonlyArray<{
   file: string
@@ -57,6 +67,25 @@ const STUB_REGISTRY: ReadonlyArray<{
   // 口径：fail-fast 抛错面 ≠ 空壳向量（loud ≠ hollow，同 port 注入窗口
   // fail-fast idiom）；T3 真实现跟踪 = 文件头注 + 任务清单 T3 + T7 H6 断言
   // ②③ + 门③ wave-c tag 清零兜底。
+
+  // v0.12 shared 纳扫：3 个 A 波骨架占位 `export {}` 空模块（无实质导出符号）。
+  // identity 待 A 波 A-2（--define 注入）；tokenEstimation/sanitizeToolName 待 C 波。
+  // wave-c tag 时门③只清 C-Deep 域条目，shared 占位保留至 A/C 波实现（门②兜底）。
+  {
+    file: 'src/shared/identity.ts',
+    reason: 'A 波骨架占位 `export {}`（VERSION/PRODUCT_NAME 等 --define 注入面待 A-2）',
+    unlock: 'A 波 (A-2)',
+  },
+  {
+    file: 'src/shared/tokenEstimation.ts',
+    reason: 'A 波骨架占位 `export {}`（纯函数 services 分流待 C 波）',
+    unlock: 'C 波',
+  },
+  {
+    file: 'src/shared/sanitizeToolName.ts',
+    reason: 'A 波骨架占位 `export {}`（analytics/metadata.ts 下沉纯函数待 C 波）',
+    unlock: 'C 波',
+  },
 ]
 
 /** 剥掉注释/空行后的实质内容行（substantiveLines 与门面豁免共用） */
@@ -87,6 +116,21 @@ function isPureReexportFacade(file: string): boolean {
   )
 }
 
+/**
+ * 实质导出符号判定（v0.12 收窄）：文件含 export const/let/var/function/class/
+ * interface/type/enum/async 或 re-export from 即有实质导出，非空壳。
+ * `export {}` 空模块（无导出符号）返回 false → 仍判空壳。
+ * 收窄消除单行 `export const X = …` 实质常量文件的误判（如 shared/constants.ts）。
+ */
+function hasSubstantiveExport(file: string): boolean {
+  const content = readFileSync(file, 'utf8')
+  return (
+    /^\s*export\s+(const|let|var|function|class|interface|type|enum|async)\b/m.test(content) ||
+    /^\s*export\s+\{[^}]*\}\s+from\s+['"]/m.test(content) ||
+    /^\s*export\s+\*\s+from\s+['"]/m.test(content)
+  )
+}
+
 function listDomainFiles(domain: string): string[] {
   const dir = join(REPO_ROOT, 'src', domain)
   if (!existsSync(dir)) return [] // C-Deep 域目录未建 → 无文件可扫
@@ -103,7 +147,7 @@ function listDomainFiles(domain: string): string[] {
 }
 
 const allDomains = (): readonly string[] =>
-  // B 波四域恒扫；C-Deep 四域目录存在才扫
+  // B 波四域+shared 恒扫；C-Deep 四域目录存在才扫
   [...DOMAINS, ...CDEEP_DOMAINS.filter((d) => existsSync(join(REPO_ROOT, 'src', d)))]
 
 const detectedStubs = () =>
@@ -112,7 +156,8 @@ const detectedStubs = () =>
       .filter(
         (f) =>
           substantiveLines(f) < STUB_LINE_THRESHOLD &&
-          !isPureReexportFacade(f),
+          !isPureReexportFacade(f) &&
+          !hasSubstantiveExport(f),
       )
       .map((f) => f.slice(REPO_ROOT.length + 1)),
   )
@@ -126,11 +171,15 @@ describe("anti-stub 防腐门", () => {
   })
 
   test("② 注册表无漂移：登记条目若已填成实质实现，必须移除", () => {
-    const stale = STUB_REGISTRY.filter((e) => substantiveLines(join(REPO_ROOT, e.file)) >= STUB_LINE_THRESHOLD)
+    const stale = STUB_REGISTRY.filter((e) => {
+      const f = join(REPO_ROOT, e.file)
+      // 有实质导出符号 或 实质行 ≥5 = 已填实（非空壳）→ 须移除
+      return hasSubstantiveExport(f) || substantiveLines(f) >= STUB_LINE_THRESHOLD
+    })
     expect(stale.map((e) => e.file)).toEqual([])
   })
 
-  test("③ wave-c tag 存在时 STUB_REGISTRY 必须清零（C-Deep 全销）", () => {
+  test("③ wave-c tag 存在时 C-Deep 域 stub 必须清零（shared A 波占位保留）", () => {
     let hasWaveC = false
     try {
       const tags = execFileSync('git', ['tag', '-l'], { cwd: REPO_ROOT })
@@ -142,7 +191,11 @@ describe("anti-stub 防腐门", () => {
       hasWaveC = false // 非 git 环境（如打包测试）不强制
     }
     if (hasWaveC) {
-      expect(STUB_REGISTRY).toEqual([])
+      // 只清 C-Deep 域条目（8 域地基）；shared A 波占位随 A/C 波实现移除（门②兜底）
+      const cdeepStubs = STUB_REGISTRY.filter((e) =>
+        /^src\/(executor|sandbox|memory|modelprovider|task|bootstrap|permissions|hooks)\//.test(e.file),
+      )
+      expect(cdeepStubs).toEqual([])
     }
   })
 })
