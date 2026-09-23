@@ -21,6 +21,16 @@ export function setEndpointConfigSource(source: EndpointConfigSource): void {
   sourceOverridden = true
 }
 
+/**
+ * 测试复位（teardown 用，§8.29 S-3d）：清掉注入源，恢复未注入空 stub 态。
+ * 镜像 resetModelProviderForTesting（跨 case 场景：settings 面注入后回归裸态
+ * 断言——无 reset 则模块态 activeSource 泄漏跨 case）。
+ */
+export function resetEndpointConfigSource(): void {
+  activeSource = undefined
+  sourceOverridden = false
+}
+
 /** 供 capabilities.ts 读取当前 EndpointConfigSource。 */
 export function getEndpointConfigSource(): EndpointConfigSource {
   if (!sourceOverridden) {

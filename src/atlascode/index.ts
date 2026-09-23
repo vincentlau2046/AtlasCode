@@ -12,3 +12,4 @@ export {
   resetCoreDependencies,
   type CoreDependencies,
 } from './compose'
+export { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'

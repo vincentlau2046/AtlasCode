@@ -126,6 +126,7 @@ export {
   resolveModel,
   MODEL_ROLES,
   setEndpointConfigSource,
+  resetEndpointConfigSource,
   type ModelRole,
 } from './roles'
 export {

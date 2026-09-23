@@ -1023,3 +1023,41 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 - 实施期偏差 2 处闭环：① 态④ 期望误写「policy 逐事件压 user」→ 实为 per-event matcher 数组 uniq 拼接（S-3b settingsMergeCustomizer 语义，user 序在前）——测试断言已订正为双 matcher 并存（级联合并面行为实证）；② eslint `boundaries/entry-point` 抓出 engine/config 深入 hooks 域内文件（hookEvents/config-provider/types 三 import）→ 全改走 `../../hooks` 域根门面（L3 规则）。
 - 验真（四件套 + gate）：tsc 0 / eslint 0（14 改+新文件）/ build 0 KB / **741 pass 0 fail**（1483 expect，55 文件；710 + 31 新增）+ gate 6 pass / 0 fail / 2 files（engine 非扫描集，无 gate 改动）。
 - 残留守登记全落头注（hooksSchema 变体全字段面 / 事件名集校验 → E-5；hooksConfig pluginOnly/session hooks/display 字符串 → 各残留守；managedEnv 三过滤器 + 全局配置 + 缓存清除 + DANGEROUS_SHELL_SETTINGS → 登记；getSettingsPaths 未注入降级态 → compose 已接线，仅 unit 裸态可达；managedEnv 两 apply 函数无生产调用点 = 预声明消费接缝 → S-3d 组合根启动链）。
+
+### §8.29 E-3 S-3d 执行前分析 + 方案（2026-09-24）
+
+**范围**（§8.27 S-3d 条目）：settings-adapter（EndpointConfigSource settings 面）替换 compose.ts env-only 适配器 + autoCompact env 覆写收拢（ATLAS_AUTOCOMPACT_PCT_OVERRIDE / ATLAS_AUTO_COMPACT_WINDOW / DISABLE_COMPACT → config 面）+ resetEndpointConfigSource 3 行（若本切片测试出现跨 case 需重设 endpoint source 场景就地补，镜像 resetModelProviderForTesting）+ 组合根接线。
+
+**勘察定稿（旧仓 ground truth 全抽查）**：
+- 旧仓 `src/config/settings-adapter.ts`（37L，adapter 层唯一允许碰 utils/settings+utils/auth 的文件）：getRoleSetting = `getSettings_DEPRECATED().modelRoles?.[role] || {}` / getProviders = `settings.providers || {}` / getGlobalApiKey = `getApiKeyFromConfigOrMacOSKeychain()?.key`（try/catch 吞 early-bootstrap throw 返 undefined——R3 memoized getter 稍后重跑语义）。
+- 新仓 types.ts 已声明 `modelRoles: z.record(z.string(), z.any())` + `providers: z.record(z.string(), z.any())`（S-3b 数据契约先行，头注「S-3d 消费不靠 any」）→ 本切片即消费面，**无 schema 改动**。
+- 旧仓 autoCompact env 覆写 3 处（autoCompact.ts:40/79/148）：ATLAS_AUTO_COMPACT_WINDOW（窗口 cap：contextWindow = min(contextWindow, parseInt>0)）/ ATLAS_AUTOCOMPACT_PCT_OVERRIDE（阈值 = min(floor(effectiveContextWindow × pct/100), threshold)，有效域 (0,100]）/ DISABLE_COMPACT（isEnvTruthy → isAutoCompactEnabled=false；新仓已收拢为 deps.enabled 判定面）。旧仓另有 DISABLE_AUTO_COMPACT + ATLAS_BLOCKING_LIMIT_OVERRIDE（TUI warning 态面）——均不在 §8.27 三变量清单 → 残留守。
+- 旧仓启动序：applySafeConfigEnvironmentVariables（信任前）→ 信任对话框 → applyConfigEnvironmentVariables（信任后全量 env）。§8.28 预声明接缝「managedEnv 两 apply 函数消费面 = S-3d 组合根启动链」→ 新仓无信任对话框，compose 只接 applySafe（信任前位）；applyConfig = 信任对话框面残留守（重登记，H6 防空洞）。
+- keychain 面（getApiKeyFromConfigOrMacOSKeychain）新仓不存在（auth lane 裁定 = OpenAI 静态键 OPENAI_AUTH_TOKEN / OPENAI_API_KEY，CLAUDE.md 命名规范）→ getGlobalApiKey 保留 env 静态键回落，keychain 面残留守。
+- roles.ts 消费面（池头解析链）：getRoleModel(role) = env 直读 ?? roleSetting.model（adapter getRoleSetting）?? 池头 = getRoleModels 首 ref 经 resolveModel（provider 查表经 adapter getProviders）→ modelId。env-only 适配器下 pool 恒空 → 池头解析恒 undefined；settings 面接上后池头解析生效（旧仓 e2e banner 动态断言「ATLAS_SMALL_MODEL → modelRoles.small 池头，provider 前缀剥离」的 modelprovider 侧；前缀剥离 = TUI 展示面，新仓无 TUI，残留守）。**勘误（旧仓 ground truth 可验真，roles.ts:167-173 逐字）**：getRoleModels 的池 bare ref 不经 normalizeRef（仅 sessionModel/envModel 支归一化）→ 池头须为全 ref（'provider/model-id'）才经 providers 解析；池 bare id 在旧仓同样不可解析（不假完成）。
+- 现有测试对 setEndpointConfigSource 零引用（grep 验真）；createCoreDependencies 亦无既有测试 → S-3d 是首个 compose 装配测试。
+
+**方案落点**：
+1. `src/atlascode/adapters/endpointConfigSourceAdapter.ts` 就地升级（B6-func env-only → S-3d settings 面）：getRoleSetting = `getSettingsWithErrors().settings.modelRoles?.[role] ?? {}` / getProviders = `settings.providers ?? {}`（getSettingsWithErrors 惰性 getter 语义：调用时读 settings 缓存，外部编辑后 resetSettingsCache 读盘 = 旧仓 R3 memoized 重跑等价）/ getGlobalApiKey 保留 `process.env.OPENAI_AUTH_TOKEN ?? process.env.OPENAI_API_KEY`。
+2. `src/engine/config/autoCompactOverrides.ts`（新）：`getAutoCompactEnvOverrides(): { pctOverride?: number; windowOverride?: number; disabled?: boolean }`——env 解析语义旧仓逐字（pct parseFloat 有效 (0,100] / window parseInt >0 / DISABLE_COMPACT isEnvTruthy，shared 单一事实源），config 面拥有 → 可 unit 隔离测。
+3. `src/engine/context/autoCompact.ts`：AutoCompactDeps 加 `pctOverride?` / `windowOverride?`；`getAutoCompactThreshold(contextWindow, maxOutputTokens?, pctOverride?, windowOverride?)` 加两可选参（旧仓范围 guard 逐字：pct 0<x≤100、window >0——向后兼容，既有 2 参调用不变）；shouldAutoCompact 透传 deps。残留守③ 核销（头注「env 覆写 → 残留守」改「S-3d config 面收拢」）。
+4. `src/modelprovider/roles.ts` + `index.ts`：`resetEndpointConfigSource()` 3 行（activeSource=undefined + sourceOverridden=false，镜像 resetModelProviderForTesting）——§8.27 条件子句就地补：本切片测试「compose 注入后 settings 生效」出现首个跨 case 场景（注入 settings 面 → reset → 裸空 stub 回归断言，无 reset 则模块态泄漏跨 case 失败）。
+5. `src/atlascode/compose.ts` 接线：⑥ modelprovider 步前加 `applySafeConfigEnvironmentVariables()`（旧仓启动序信任前位——trusted 源 env（ATLAS_SMALL_MODEL 等）先入 process.env，后 roles lane env 读；import 自 `../engine`）；头注登记 applyConfig = 信任对话框面残留守。
+6. 导出面：engine/config/index.ts（getAutoCompactEnvOverrides + AutoCompactEnvOverrides 类型）/ engine/index.ts 同名 re-export / modelprovider/index.ts（resetEndpointConfigSource）。
+
+**残留守登记（各文件头注）**：
+- adapter：旧仓 keychain 面（getApiKeyFromConfigOrMacOSKeychain）→ 残留守（新仓 auth lane = OpenAI 静态键，keychain 未落）。
+- autoCompact：deps 两 override 字段 + disabled 判定（DISABLE_COMPACT → enabled）无生产调用点 = 预声明消费接缝（消费方 = E-wave-end 组合根 loop deps 装配 / 当前仅测试消费）；DISABLE_AUTO_COMPACT + ATLAS_BLOCKING_LIMIT_OVERRIDE（TUI warning 态面）→ 残留守（不在 §8.27 三变量清单）。
+- compose：applyConfigEnvironmentVariables（信任后全量 env）→ 信任对话框面残留守（§8.28 预声明接缝此处重登记，旧仓启动序 applySafe → 信任对话框 → applyConfig）。
+
+**测试面**：
+- `tests/unit/engine-config-endpoint-adapter.test.ts`（新）：adapter 三方法（getRoleSetting modelRoles 命中/缺省 {} / getProviders 命中/缺省 {} / getGlobalApiKey 两键优先级 + 双缺 undefined）+ compose 注入后 settings 生效（mock fs 下 createCoreDependencies → getRoleModel('small') 池头）+ 池头解析（裸 id 经 providers normalizeRef 'iff/gelu' → modelId / 全 ref 直通）+ resetEndpointConfigSource 回归（reset 后裸空 stub：池头不可解析 → undefined）+ applySafe 接线判别（compose 装配后 trusted 源 env 已入 process.env）。
+- `tests/unit/engine-config-auto-compact-env.test.ts`（新）：getAutoCompactEnvOverrides 三变量解析 + 有效域（pct '25'→25 / '0'→undefined / '101'→undefined / 'abc'→undefined；window '50000'→50000 / '-3'→undefined；DISABLE_COMPACT '1'→true / 'false'→false / 未设→undefined）+ getAutoCompactThreshold 双 override 语义（window cap / pct floor + min 取小）+ shouldAutoCompact override 提前触发 + 无 override 回归（既有 autoCompact 测试面不变）。
+
+**基线**：741 pass / 0 fail / 1483 expect / 55 文件（S-3c 闭环）；gate 6 pass / 0 fail / 2 files（engine 非扫描集，本切片无 gate 改动）。
+
+**S-3d 闭环记录（实施后，同提交）**：
+- 落点 6 项全落：① adapter 就地升级（settings 面 getRoleSetting/getProviders + env 静态键全局 key 回落；keychain 面残留守登记头注）② autoCompactOverrides.ts（三变量读侧，旧仓解析 guard 逐字：pct (0,100] / window >0 / DISABLE_COMPACT isEnvTruthy）③ autoCompact deps 双 override 字段 + getAutoCompactThreshold 双参（向后兼容，越界 guard 双处保留）+ shouldAutoCompact 透传 + 残留守③ 核销头注 ④ resetEndpointConfigSource 3 行（§8.27 条件子句就地补——本切片测试出现首个跨 case 场景：注入 settings 面 → reset → 裸空 stub 回归断言，镜像 resetModelProviderForTesting）⑤ compose 接线（⑥ applySafe 信任前位 + ⑦ settings 面 endpoint source；applyConfig 信任对话框面残留守头注重登记）⑥ 导出面（engine/config + engine + modelprovider + atlascode 四门面；createEndpointConfigSource 入门面供 STR-1 测试 import）。
+- 实施期偏差 3 处闭环：① **池头 bare-id fixture 误写**（测试 3 fail 抓出）：池 bare ref 不经 normalizeRef（仅 env/sessionModel 支归一化，旧仓 roles.ts:167-173 逐字可验真——移植忠实，非 bug）→ fixture 改全 ref 'iff/gelu' + 测试头注语义注 + 本勘误 ② getProviders 测试中切 mock fs 命中 settings 三层缓存（同路径解析缓存）→ 切 fs 后 resetSettingsCache（测试语义修）③ **adapter 改用 getInitialSettings**（原用 getSettingsWithErrors）：getInitialSettings = 旧仓 getSettings_DEPRECATED() || {} 逐字等价面，且 S-3b 预声明接缝登记「getInitialSettings：消费面 = S-3d settings-adapter」→ 按登记消费，settings.ts 预声明块同步核销（getInitialSettings S-3d 已消费 / getSettingsWithErrors 经其间接消费）。
+- 残留守登记全落头注（adapter keychain 面 / autoCompact deps override 预声明消费接缝 = E-wave-end 组合根 loop deps 装配 + DISABLE_AUTO_COMPACT·ATLAS_BLOCKING_LIMIT_OVERRIDE 残留守 / compose applyConfig 信任对话框面重登记 / settings.ts 预声明块核销）。
+- 验真（四件套 + gate）：tsc 0 / eslint 0（12 改+新文件）/ build 0 KB / **762 pass 0 fail**（1527 expect，57 文件；741 + 21 新增）+ gate 6 pass / 0 fail / 2 files（engine 非扫描集，无 gate 改动）。

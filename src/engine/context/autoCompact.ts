@@ -14,8 +14,13 @@
  *   - 旧仓 autoCompactIfNeeded 的 session memory 压缩实验分支（trySessionMemoryCompaction）
  *     + promptCacheBreakDetection + markPostCompaction + PostCompactCleanup → 残留守
  *     （sessionMemoryCompact 归后续纵切；cache 面归 modelprovider 域）。
- *   - env 覆写（ATLAS_AUTOCOMPACT_PCT_OVERRIDE / ATLAS_AUTO_COMPACT_WINDOW / DISABLE_COMPACT）
- *     → 残留守（config 面 E-3 settings 回填时统一收拢）。
+ *   - env 覆写（ATLAS_AUTOCOMPACT_PCT_OVERRIDE / ATLAS_AUTO_COMPACT_WINDOW /
+ *     DISABLE_COMPACT）→ S-3d config 面收拢（§8.29，残留守③ 核销）：读侧 =
+ *     engine/config getAutoCompactEnvOverrides（解析 guard 旧仓逐字），本模块经
+ *     deps.pctOverride / windowOverride / enabled 消费（H6 预声明消费接缝：无生产
+ *     调用点，消费方 = E-wave-end 组合根 loop deps 装配，当前仅测试消费）。
+ *   - 旧仓 DISABLE_AUTO_COMPACT（细粒度开关）+ ATLAS_BLOCKING_LIMIT_OVERRIDE
+ *     （TUI warning 态面）未收拢 → 残留守（caller enabled 判定面 / TUI 面）。
  *   - token 计数/ contextWindow / compact 体均为注入 deps（port 之下全真，非 fake 自证）；
  *     未注入 countTokens 时 fail-safe 返回 false（不压缩，不误判）。
  *
@@ -67,8 +72,18 @@ export interface AutoCompactDeps {
   compact: (messages: Message[]) => Promise<CompactionResult>
   /** 递归守卫：压缩 fork 自身（compact/session_memory）不触发再压缩（旧仓 querySource 语义）。 */
   querySource?: string
-  /** 总开关（旧仓 isAutoCompactEnabled 裁剪；默认开）。 */
+  /** 总开关（旧仓 isAutoCompactEnabled 裁剪；默认开）。config 面收拢（§8.29）：
+   * DISABLE_COMPACT 经 getAutoCompactEnvOverrides().disabled 映射本字段。 */
   enabled?: boolean
+  /**
+   * ATLAS_AUTOCOMPACT_PCT_OVERRIDE（旧仓 autoCompact.ts:79 语义，有效域 (0,100]）：
+   * 阈值 = min(floor(有效窗口 × pct/100), 基础阈值)。config 面读侧
+   * getAutoCompactEnvOverrides（§8.29）。
+   */
+  pctOverride?: number
+  /** ATLAS_AUTO_COMPACT_WINDOW（旧仓 autoCompact.ts:40 语义）：有效窗口 cap
+   * （contextWindow = min(contextWindow, 本值)）。config 面读侧同上。 */
+  windowOverride?: number
 }
 
 export interface AutoCompactOutcome {
@@ -82,20 +97,41 @@ export interface AutoCompactOutcome {
 }
 
 /**
- * 有效窗口 − 缓冲 = 触发阈值（旧仓 getAutoCompactThreshold 裁剪，去 env 覆写残留守）。
+ * 有效窗口 − 缓冲 = 触发阈值（旧仓 getAutoCompactThreshold + env 覆写面）。
  * 有效窗口 = contextWindow − 摘要输出预留（旧仓 getEffectiveContextWindowSize 语义：
  * min(getMaxOutputTokensForModel, COMPACT_MAX_OUTPUT_TOKENS)——新仓经 deps.maxOutputTokens
  * 注入接缝；未注入按满额 20k 预留，与旧仓大输出模型 min(maxOut, 20k) 行为等价）。
+ *
+ * 双覆写（S-3d config 面收拢 §8.29，旧仓解析 guard 逐字——越界值忽略不生效，
+ * 既有 2 参调用向后兼容）：
+ *   - windowOverride（ATLAS_AUTO_COMPACT_WINDOW，>0 有效）：窗口 cap，
+ *     contextWindow = min(contextWindow, windowOverride)（旧仓 :40-46）。
+ *   - pctOverride（ATLAS_AUTOCOMPACT_PCT_OVERRIDE，(0,100] 有效）：
+ *     阈值 = min(floor(有效窗口 × pct/100), 基础阈值)（旧仓 :79-88）。
  */
 export function getAutoCompactThreshold(
   contextWindow: number,
   maxOutputTokens?: number,
+  pctOverride?: number,
+  windowOverride?: number,
 ): number {
+  const window =
+    windowOverride !== undefined && windowOverride > 0
+      ? Math.min(contextWindow, windowOverride)
+      : contextWindow
   const reservedForSummary = Math.min(
     maxOutputTokens ?? COMPACT_MAX_OUTPUT_TOKENS,
     COMPACT_MAX_OUTPUT_TOKENS,
   )
-  return contextWindow - reservedForSummary - AUTOCOMPACT_BUFFER_TOKENS
+  const effectiveContextWindow = window - reservedForSummary
+  let threshold = effectiveContextWindow - AUTOCOMPACT_BUFFER_TOKENS
+  if (pctOverride !== undefined && pctOverride > 0 && pctOverride <= 100) {
+    threshold = Math.min(
+      Math.floor(effectiveContextWindow * (pctOverride / 100)),
+      threshold,
+    )
+  }
+  return threshold
 }
 
 /**
@@ -120,7 +156,12 @@ export async function shouldAutoCompact(
   if (!Number.isFinite(tokenCount)) {
     return false
   }
-  return tokenCount >= getAutoCompactThreshold(deps.contextWindow, deps.maxOutputTokens)
+  return tokenCount >= getAutoCompactThreshold(
+    deps.contextWindow,
+    deps.maxOutputTokens,
+    deps.pctOverride,
+    deps.windowOverride,
+  )
 }
 
 /**

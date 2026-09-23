@@ -1,31 +1,36 @@
 /**
- * atlascode 组合根适配器 — env OpenAI 静态键车道 → modelprovider EndpointConfigSource
- * （§8.17 D18：8 域唯一非 fail-fast 注入窗口，空配置语义安全）
+ * atlascode 组合根适配器 — settings 面 + env 静态键车道 →
+ * modelprovider EndpointConfigSource（§8.29 E-3 S-3d，替换 B6-func env-only 版）
  *
- * modelprovider 域只经 EndpointConfigSource 端口读端点/模型配置（六边形细节依赖
- * 抽象）。settings 文件面归 engine 波（settings 体系移植）；B6-func 最小组合根
- * 只铺 env 车道（CLAUDE.md 命名规范：OpenAI-protocol 静态键
- * OPENAI_AUTH_TOKEN / OPENAI_API_KEY / per-role ATLAS_{ROLE}_*）：
+ * 旧仓 settings-adapter（src/config/settings-adapter.ts）真核心（settings 面逐字）：
+ *   - getRoleSetting = settings.modelRoles?.[role] || {}（roles.ts getRoleConfig
+ *     的 per-role 配置面；getRoleModel 池头解析经本方法读 modelRoles.<role>.models）。
+ *     settings 经 getInitialSettings()（旧仓 getSettings_DEPRECATED() || {} 逐字
+ *     等价，S-3b 预声明接缝消费面）
+ *   - getProviders = settings.providers || {}（P4 池 normalizeRef / resolveModel
+ *     数据源，roles.ts:123/146）
+ *   - getGlobalApiKey = env OpenAI 静态键车道（AUTH_TOKEN 优先 API_KEY）——旧仓
+ *     keychain 面（getApiKeyFromConfigOrMacOSKeychain）→ 残留守（新仓 auth lane
+ *     裁定 = OpenAI 静态键，keychain 未落；旧仓 R3 early-bootstrap swallow 语义
+ *     由 env 读取天然满足——不抛错）。
  *
- *   - getRoleSetting / getProviders 返空：per-role env（ATLAS_{ROLE}_MODEL 等）
- *     由 roles.ts getRoleConfig 直接读（非经端口），settings 文件面 B6-func 尚无。
- *   - getGlobalApiKey 提供全局回退：roles.ts getRoleConfig 在 env/role apiKey
- *     均缺时兜底调用，落 OpenAI 静态键（AUTH_TOKEN 优先）。
- *
- * 空 roleSetting/providers 语义安全（角色解析回落默认 provider + model undefined
- * 不假完成），异于 sandbox 禁用态须 fail-fast（防 fake 到底）。
+ * 惰性 getter 语义（等价旧仓 R3 memoized 重跑）：getInitialSettings 调用时
+ * 读 settings 会话缓存（S-3a 三层缓存）；外部编辑 settings.json 后
+ * resetSettingsCache 读盘（UI 写回面残留守 E-4 / E-wave-end）。per-role env
+ * （ATLAS_{ROLE}_MODEL 等）仍由 roles.ts getRoleConfig 直读（非经端口，§8.17
+ * D18 语义不变）。
  */
-import type { EndpointConfigSource } from '../../modelprovider'
-import type { ModelRole } from '../../modelprovider'
+import { getInitialSettings } from '../../engine'
+import type { EndpointConfigSource, ModelRole } from '../../modelprovider'
 
-/** env OpenAI 静态键车道 → modelprovider EndpointConfigSource 适配器。 */
+/** settings 面 + env 静态键车道 → modelprovider EndpointConfigSource 适配器。 */
 export function createEndpointConfigSource(): EndpointConfigSource {
   return {
-    // settings 文件面（settings.modelRoles[role] / settings.providers）归 engine 波；
-    // per-role env 由 roles.ts 直读，此处返空不重复。
-    getRoleSetting: (_role: ModelRole) => ({}),
-    getProviders: () => ({}),
-    // 全局 API key 回退：OpenAI 静态键车道（AUTH_TOKEN 优先 API_KEY）。
+    getRoleSetting: (role: ModelRole) =>
+      getInitialSettings().modelRoles?.[role] ?? {},
+    getProviders: () => getInitialSettings().providers ?? {},
+    // 全局 API key 回落：OpenAI 静态键车道（AUTH_TOKEN 优先 API_KEY）；
+    // 旧仓 keychain 面残留守（见头注）。
     getGlobalApiKey: () =>
       process.env.OPENAI_AUTH_TOKEN ?? process.env.OPENAI_API_KEY,
   }

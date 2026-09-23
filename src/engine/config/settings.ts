@@ -56,8 +56,11 @@
  *   - updateSettingsForSource：消费面 = E-4 权限规则树波次（旧仓
  *     permissionsLoader 写回路径同型）
  *   - getSettingsWithErrors：S-3c 已消费（hooksConfig 门控链 + managedEnv
- *     apply 两面按源直读）；残余消费面 = S-3d settings-adapter
- *   - getInitialSettings：消费面 = S-3d settings-adapter
+ *     apply 两面按源直读）；S-3d settings-adapter 经 getInitialSettings
+ *     间接消费（本函数为其实现基座）
+ *   - getInitialSettings：S-3d 已消费（atlascode settings-adapter
+ *     getRoleSetting/getProviders 两方法，旧仓 getSettings_DEPRECATED 逐字
+ *     等价面）
  */
 import { dirname, join, resolve } from 'path'
 import {

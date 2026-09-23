@@ -6,7 +6,8 @@
  * configRoot。S-3b 落：加载/合并/写回核心（settings.ts + merge.ts +
  * validation.ts）。S-3c 落：hooks 字段族（hooksSchema 四类判别联合 +
  * hooksConfig snapshot/provider）+ managedEnv（两 apply 函数 + SAFE_ENV_VARS）
- * + getSettingsPaths（permissions 域桩① 真实现）。
+ * + getSettingsPaths（permissions 域桩① 真实现）。S-3d 落：autoCompact env
+ * 覆写读侧（autoCompactOverrides，旧仓三变量收拢 config 面）。
  */
 export {
   SettingsSchema,
@@ -88,3 +89,7 @@ export {
   applyConfigEnvironmentVariables,
   SAFE_ENV_VARS,
 } from './managedEnv'
+export {
+  getAutoCompactEnvOverrides,
+  type AutoCompactEnvOverrides,
+} from './autoCompactOverrides'

@@ -227,4 +227,7 @@ export {
   applySafeConfigEnvironmentVariables,
   applyConfigEnvironmentVariables,
   SAFE_ENV_VARS,
+  // E-3 S-3d（§8.29）：autoCompact env 覆写读侧（config 面收拢）
+  getAutoCompactEnvOverrides,
+  type AutoCompactEnvOverrides,
 } from './config'

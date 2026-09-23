@@ -13,11 +13,18 @@
  *   基项  setTaskOutputPort / setBootstrapStatePort / setExecutorSandboxPort
  *   D11   setDiskOutputEnv（task ← permissions getProjectTempDir + bootstrap getSessionId）
  *   D17   setHookShellPort（hooks ← executor 真 Shell）
- *   D18   setEndpointConfigSource（modelprovider ← env OpenAI 静态键车道）
+ *   D18   setEndpointConfigSource（modelprovider ← engine/config settings 面 +
+ *          env OpenAI 静态键车道，S-3d §8.29 替换 B6-func env-only 版）
  *   + setPermissionsBootstrapEnv（§8.14 注入序首步，permissions ← bootstrap 两 cwd 态）
  *   + S-3c（§8.28）setSettingsPathsProvider（permissions ← engine/config settings
  *     路径面）+ setHookConfigProvider + captureHooksConfigSnapshot（hooks ←
  *     engine/config settings.hooks 配置面，启动捕获一次）
+ *   + S-3d（§8.29）applySafeConfigEnvironmentVariables（engine/config managedEnv，
+ *     旧仓启动序信任前位——trusted 源 env 先入 process.env，后 roles lane env 读）
+ *
+ * 残留守（§8.29）：applyConfigEnvironmentVariables（信任后全量 env）→ 信任
+ * 对话框面（新仓未落；§8.28 预声明消费接缝此处重登记，旧仓启动序
+ * applySafe → 信任对话框 → applyConfig）。
  */
 import { createSandboxManager, type SandboxManager } from '../sandbox'
 import {
@@ -35,6 +42,7 @@ import { setPermissionsBootstrapEnv, setSettingsPathsProvider } from '../permiss
 import { setDiskOutputEnv } from '../task'
 import { setHookConfigProvider, setHookShellPort } from '../hooks'
 import {
+  applySafeConfigEnvironmentVariables,
   captureHooksConfigSnapshot,
   createHooksConfigProvider,
   getSettingsPaths,
@@ -90,7 +98,13 @@ export function createCoreDependencies(): CoreDependencies {
   setHookConfigProvider(createHooksConfigProvider())
   captureHooksConfigSnapshot()
 
-  // ⑥ modelprovider ← atlascode env 车道（D18）
+  // ⑥ managedEnv ← engine/config（S-3d §8.29，旧仓启动序信任前位）：trusted 源
+  //    （user/flag/policy）env → process.env（roles lane env 读之前生效）；
+  //    applyConfig（信任后全量 env）= 信任对话框面残留守（见头注）。
+  applySafeConfigEnvironmentVariables()
+
+  // ⑦ modelprovider ← engine/config settings 面 + env 静态键车道（S-3d §8.29，
+  //    替换 B6-func D18 env-only 版）
   setEndpointConfigSource(createEndpointConfigSource())
 
   return {
