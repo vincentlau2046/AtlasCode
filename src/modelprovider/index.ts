@@ -25,6 +25,21 @@ export function getModelProvider(): ModelProvider {
 }
 
 /**
+ * 测试 seam：注入 fake ModelProvider 替代 lazy `new OpenAIProvider(...)`
+ * （B6-func 非流式/流式 completion 双腿断言用，§8.13 L-2）。fake 实现
+ * ModelProvider 接口返固定 completion（非 fake transport，不 mock openai 客户端）。
+ * getModelProvider()/modelProvider lazy proxy / getProviderLifecycle 均读此 seam。
+ */
+export function setModelProviderForTesting(provider: ModelProvider): void {
+  _provider = provider
+}
+
+/** 测试复位（teardown 用）：清掉注入，恢复 lazy 构造语义。 */
+export function resetModelProviderForTesting(): void {
+  _provider = undefined
+}
+
+/**
  * F3: LLM request timeout (ms), configurable via ATLAS_LLM_TIMEOUT.
  * Default 120_000 equals the previous hardcoded value, so an unset env var means
  * zero behavior change. Capped at 30 min so a stuck/queued gateway can't silently
