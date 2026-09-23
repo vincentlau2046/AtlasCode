@@ -1,5 +1,5 @@
 /**
- * memory 域 config + config-dir + pathUtils 单测
+ * memory 域 config + config-dir 单测（sanitizePath/djb2Hash 走 shared 叶子，T5 下沉效应收口）
  *
  * 纯函数测试：env 读取/解析 + 路径安全化 + 哈希。
  * C1b：布尔 env 原语 isEnvTruthy/isEnvDefinedFalsy 归 shared（单测在
@@ -12,7 +12,7 @@ import {
   autoMemoryEnabledFromEnv,
 } from "../../src/memory"
 import { getAtlasConfigHomeDir } from "../../src/memory/envUtils"
-import { sanitizePath, djb2Hash } from "../../src/memory/pathUtils"
+import { sanitizePath, djb2Hash } from "../../src/shared"
 
 const ENV_KEYS = [
   "ATLAS_DISABLE_AUTO_MEMORY",

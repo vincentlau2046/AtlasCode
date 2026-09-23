@@ -711,3 +711,9 @@ H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill �
 **AtlasHarness 教训不适用**：源项目曾裁定「setEndpointConfigSource 不入门面避 mock 全导出面坑」（orchestrator-t5 三性收尾，mock.module 全局泄漏），但 AtlasCode 测试用真实注入 + fake 非 mock.module 门面，且 executor/task/hooks 三域已确立 set 经门面导出模式 → AtlasCode 模式优先。
 
 **遗留（不阻塞 B6-func，按需补）**：modelprovider 缺 `resetEndpointConfigSource`（其余 3 域均有 set/get/reset 三元组，modelprovider 仅 set/get）。Bun `--isolate` 按文件隔离进程，跨文件不泄漏；B6-func 单文件多 case 需 reset 时再补。
+
+### §8.18 切片 3 复审补登：T5 下沉效应收口 + L-1 误判核实
+
+**#3 memory 本地副本漂移收口（Plan agent ③ 发现 (b)，2026-09-23 落地）**：T5 下沉 shared/hash·path·configDir 为单一事实源后，memory 域本地副本未删——`src/memory/pathUtils.ts`（djb2Hash/sanitizePath/MAX_SANITIZED_LENGTH/simpleHash，与 shared/hash.ts·path.ts **逐行一致**）+ `src/memory/envUtils.ts`（getConfigDirName，与 shared/configDir.ts 一致）。收口：pathUtils.ts **整删**（-37 行），envUtils.ts 删 getConfigDirName 副本改 `import { getConfigDirName } from '../shared'`，paths.ts sanitizePath 改 import shared，memory-config-utils.test.ts 深 import pathUtils 改 import shared（#2 门治理时统一处理 envUtils 深 import）。验收 tsc 0 / lint 0 / 446 pass 0 fail（行为零差异，shared 实现逐行一致已验）。
+
+**#4 L-1 误判核实（Review 会话 L-1，2026-09-23 核实）**：Review 会话 L-1 称"H6④ TaskId 双口径只落 canonical 半，hook_<pid> 字面量零实现零登记，矩阵行 87 标签超称"。经核实：旧仓 Task.ts 全文 + 旧仓全 src grep `hook_` 只命中 message 类型（hook_result/hook_cancelled/hook_progress 等），**不存在 hook_<pid> task id 形式**；新仓 task/hooks 域 grep 零命中。§8.16 H6④ 定义的"双口径"= type→前缀 + 长度/字符集（非 canonical + hook_<pid>），测试 H6④ 全覆盖（前缀映射 b/a/r + 格式 [prefix][8 小写数字字母]）。**矩阵行 87 不超称，L-1 为误判，无需改文案。**
