@@ -966,3 +966,23 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **验真（四件套 + gate）**：tsc 0 / eslint 0（11 改文件）/ build 0（cli.ts D 波 `export {}` 占位，产物 0 KB 符合预期）/ **661 pass 0 fail**（1296 expect，50 文件；654 + 7 新增测，谱系 522→539→562→610→635→654→661）+ gate 6 pass / 0 fail / 2 files。
 
 **闭环判定**：E-2 整波审视 12 项全处置（5 功能 fix-now + 4 测试补 + 2 残留守登记 + 1 裁定 defer），无 BLOCKER；「以为已全」防漏项（mcpMeta 输出接缝 / 零消费者导出 / 陈旧头注）全部头注登记，单源违规 + 隐性类型漂移 + 测试盲区全部闭环。**下一步不变**（engine 波纵切顺序）：E-3 config/settings → E-4/E-5/E-6/E-7 → E-wave-end（compose.ts 装配 ⑦ + engine anti-stub 门 ⑥，M-3 defer 亦收口于此）。
+
+### §8.27 E-3 config/settings 体系勘察定稿 + task 清单（2026-09-23，双只读勘察 agent + 锚点抽查验真）
+
+**勘察素材**：2 个只读勘察 agent（≤2 限额内）——A 旧仓 `src/utils/settings/` 面（加载核心 settings.ts 1011L 高度集中，最小 port 面 ≈1300L）+ B 新仓落点（`src/engine/config/` 未存在；permissions/hooks 薄骨架的 E-4/E-5 消费接缝已真接线；`resetEndpointConfigSource` 不存在=3 行按需补裁定在案）。关键锚点全部抽查验真：旧仓 8 核心文件行数逐一吻合 / `getAllowedSettingSources` 桩恒 `['userSettings']` / 新仓 hooks `HOOK_EVENTS` 27 事件全量（A 报告「29 项」为误计，两路 diff 逐一对齐）/ 新仓 roles 注入窗口确无 reset / `getManagedSettingsDropInDir` 占位已在 `sandboxDeps.ts:61` + `sandbox/types.ts:75` 接口。
+
+**落点裁定**：`src/engine/config/`（§8.21 14 子模块之一，engine 非顶层域 → **无 gate 改动**，同 §8.22 T-5 / §8.25 裁定；新增 engine 文件 <5 实质行须头注登记占位，M-3 纪律）。
+
+**真核心 port 面**（4 切片）：
+- **S-3a 类型面 + 源层 + 缓存**：types.ts schema 裁剪（permissions/hooks/sandbox/modelRoles/**providers 补声明**/env/mcpServers 族 + `.passthrough()`；删 UI/登录/遥测/公告族）+ constants（SETTING_SOURCES 5 层 userSettings→projectSettings→localSettings→flagSettings→policySettings，后源压前源；**flag 源裁剪**——新仓无 --settings CLI 面，桩保留登记残留守）+ settingsCache 三层（session/perSource/parseFile + reset）+ managedPath（**Linux 单支 /etc/atlas**，mac/win 旧 ClaudeCode 路径不随迁）+ shared configDir/env 复用。单测：schema 解析 / 5 层合并优先级 / per-source 缓存 + reset。
+- **S-3b 加载/合并/写回核心**：settings.ts 裁剪（parseSettingsFile 路径级缓存 + filterInvalidPermissionRules 坏规则过滤 / getSettingsFilePathForSource / getSettingsForSource policy first-source-wins（remote 死通道 + MDM no-op 桩 → 文件单支）/ loadSettingsFromDisk 合并级联（pluginSettingsBase → 遍历启用源）/ updateSettingsForSource（undefined 删键 + 数组合并整替 + mergeArrays concat 去重）/ getInitialSettings / getSettingsWithErrors）+ validation 裁剪（filterInvalidPermissionRules + formatZodError）。**砍**：getSettingsWithSources/rawSettingsContainsKey/auto-mode 三函数（TRANSCRIPT_CLASSIFIER 门控，非 engine 面）/ cowork 模式文件 / DEPRECATED 别名（新仓无消费）。单测：级联合并 / managed drop-in 字母序叠加 / 写回语义 / 坏规则过滤不毒化。
+- **S-3c permissions/hooks 字段族 + hooks 配置面**：schemas/hooks（HookCommandSchema 判别联合 command/prompt/agent/http 四类 + HookMatcherSchema + HooksSchema partialRecord——**HOOK_EVENTS 复用新仓 hooks 域 27 事件单一事实源，不复制**，engine/config import hooks/hookEvents）+ hooksConfigSnapshot（policySettings allowManagedHooksOnly/disableAllHooks + 合并 hooks，E-5 运行时真源）+ hooksSettings 裁剪（getAllHooks 跨 user/project/local 源 + session hooks，砍显示字符串）+ managedEnv 裁剪（apply 两函数 + SAFE_ENV_VARS 白名单；去 CCD/SSH-tunnel 两过滤器 + host-managed provider 变量面）+ **消费点接线**（permissions/filesystem 桩① settings roots + `getSettingsPaths()` 桩接真 + hooks 域 `setHookConfigProvider` 注入 settings.hooks）。单测：hooks schema 校验 / snapshot 合并 / managedEnv 白名单 / 桩①消费。
+- **S-3d settings-adapter + 组合根接线**：settings-adapter（EndpointConfigSource settings 面：getRoleSetting=settings.modelRoles[role] / getProviders=settings.providers / getGlobalApiKey=env OpenAI 静态键回落，旧仓 keychain 面残留守）替换 compose.ts env-only 适配器 + autoCompact env 覆写收拢（ATLAS_AUTOCOMPACT_PCT_OVERRIDE/ATLAS_AUTO_COMPACT_WINDOW/DISABLE_COMPACT → config 面，残留守 ③ 核销：roles 池头动态解析 modelRoles.small）+ `resetEndpointConfigSource` 3 行（**若本切片测试出现首个跨 case 需重设 endpoint source 的场景就地补**，镜像 resetModelProviderForTesting；无调用点则不加，残留守 ③ 登记维持）。单测：adapter 三方法 / compose 注入后 settings 生效 / 池头解析。
+
+**残留守登记**（防「以为已全」）：mdm/（rawRead no-op 桩，Linux 文件通道保留，MDM registry/plist 不随迁）/ settingsSync 远程同步 / changeDetector+applySettingsChange+internalWrites（TUI 热更面）/ remoteSettings 死通道 + remoteManagedSettings 死代码（**不 port**）/ validationTips/schemaOutput/allErrors/toolValidationConfig（校验 UX/MCP 聚合）/ UI 面 components/Settings / 低消费 schema 字段族（grove_*/xaaIdp/attribution/autoUpdatesChannel/companyAnnouncements/forceLogin*/remote/voice*/cleanupPeriodDays/httpHook* 不入 schema，passthrough 兜）/ agent source 6 组细分门控（loadAgentsDir 折叠 3 组，细分归 E-4）。
+
+**E-3 解锁消费面清单**（各波消费点 → E-3 供给）：permissions 桩① settings roots + getSettingsPaths（E-4 规则树 5 源合并前置）/ hooks HookConfigProvider（E-5 配置注入）/ EndpointConfigSource settings-adapter（替换 compose env-only）/ autoCompact config 面 / sandbox deps getManagedSettingsDropInDir 真实现 / roles 池头动态解析（残留守 ③）。
+
+**审视安排（大颗粒，按 task 清单）**：每切片闭环自验（四件套 + 切片 review），**波末按本 task 清单做大颗粒整体审视**（三视角：功能跨切片接缝 / 测试盲区 / 残留守登记，同 §8.26 模式——上次正是大颗粒抓出 mcpMeta 未登记接缝 + 单源违规）→ 审视记录 §8.2x + memory 同步。
+
+**基线**：661 pass / 0 fail / 1296 expect / 50 文件；gate 6 pass / 0 fail / 2 files（engine 不在扫描集，E-3 无 gate 改动）。
