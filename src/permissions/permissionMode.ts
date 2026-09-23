@@ -4,7 +4,10 @@
  * 旧仓来源（a8af45b）: src/types/permissions.ts:16-29 常量族 +
  * src/utils/permissions/PermissionMode.ts:115 permissionModeFromString。
  * 新仓 PermissionMode 类型在 shared/types-session.ts（B 波契约冻结下沉）；
- * 本文件 = 域内常量单一事实源（值旧仓逐字）+ fromString 纯函数。
+ * 本文件 = 域内常量单一事实源（值旧仓逐字）+ fromString 纯函数 +
+ * externalPermissionModeSchema（E-4 S-4c2 加，旧 PermissionMode.ts
+ * externalPermissionModeSchema 逐字：z.enum 外部 5 值，值经 EXTERNAL 常量
+ * 单一事实源不复制）。
  *
  * 裁剪登记（复审勿当遗漏重提）：
  * - 旧 INTERNAL_PERMISSION_MODES 的 'auto' 成员 = feature('TRANSCRIPT_CLASSIFIER')
@@ -18,8 +21,12 @@
  *   TUI 符号/色面 = 残留守。
  *
  * 消费点（H6 实挂）：engine/permissions/permissionSetup.ts
- * initialPermissionModeFromCLI（CLI 模式串 → PermissionMode 解析）。
+ * initialPermissionModeFromCLI（CLI 模式串 → PermissionMode 解析）；
+ * externalPermissionModeSchema（E-4 S-4c2 加）消费点 = 域
+ * permissionUpdateSchema setMode 变体（H6 预声明接缝随 schema 头注登记）。
  */
+import { z } from 'zod'
+import { lazySchema } from '../shared'
 import type {
   ExternalPermissionMode,
   InternalPermissionMode,
@@ -50,3 +57,11 @@ export function permissionModeFromString(str: string): PermissionMode {
     ? (str as PermissionMode)
     : 'default'
 }
+
+/**
+ * 外部（用户可寻址）模式 zod enum（旧 PermissionMode.ts 逐字语义；
+ * 值 = EXTERNAL_PERMISSION_MODES 常量单一事实源）。
+ */
+export const externalPermissionModeSchema = lazySchema(() =>
+  z.enum([...EXTERNAL_PERMISSION_MODES]),
+)

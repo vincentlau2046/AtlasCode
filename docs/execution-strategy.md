@@ -1218,3 +1218,42 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 
 **验真（四件套 + gate）**：tsc 0 / eslint 0（12 新+改文件）/ build 0 KB（cli.js entry 0 KB 符合 D 波占位预期）/ **905 pass 0 fail**（1776 expect，64 文件；849 + 56 新增测试 3 文件：unit loader 19 + unit setup 29 + func round-trip 8）+ gate 6 pass / 0 fail / 2 files（engine 非扫描集，无 gate 改动）。
 - 单提交（§8.34 记录随本提交；SHA 于 §8.3x 审视记录回填）。
+
+### §8.35 E-4 S-4c2 执行前分析 + 方案（2026-09-24）
+
+**执行前分析**（旧仓 ground truth 全量核实 + 新仓落位面直验）：
+
+- 旧仓 `src/utils/permissions/PermissionUpdate.ts` 389L 面清点：applyPermissionUpdate / applyPermissionUpdates（**S-4b 已落**新仓 permissionUpdate.ts）/ supportsPersistence（3 可写源判定）/ persistPermissionUpdate + persistPermissionUpdates（addRules→loader add / addDirectories 去重 / removeRules 归一过滤 / removeDirectories / setMode defaultMode / replaceRules 六型写回）/ createReadRuleSuggestion（绝对路径 `//path/**`、相对 `path/**`、根目录 undefined）/ extractRules + hasRules（suggestions 规则抽取）。
+- 旧仓 `PermissionUpdateSchema.ts` 78L：permissionUpdateDestinationSchema（5 值 enum：user/project/local/session/cliArg，无 command/policy/flag）+ permissionUpdateSchema（6 变体 discriminatedUnion，复用 PermissionRule 两 schema + externalPermissionModeSchema）。
+- 旧仓 `src/utils/settings/permissionValidation.ts` 262L validatePermissionRule 分两层：**语法核心 5 检**（空规则 / 括号配平（unescaped 计数）/ 空括号 `()` escape-aware / MCP 规则禁括号（mcpInfoFromString）/ 工具名首字母大写 + capitalize suggestion）**+ 语义支 3 块**（customValidation = toolValidationConfig 工具注册表 / Bash `:*` 两检 / File 工具 `:*` + 通配位置启发）+ PermissionRuleSchema（zod superRefine 包装）。
+- **消费点核销（H6 判别）**：persist 族旧消费 = hooks/toolPermission 对话框 / swarm permissionSync / structuredIO / bridge——新仓全未落（UI/SDK 残留守）→ 预声明接缝；createReadRuleSuggestion 旧消费 = BashTool/PowerShellTool pathValidation 487L（E-6）+ permissions/filesystem.ts:1437（新仓 filesystem 未落该面）→ 残留守；extractRules 旧消费 = UI hooks + bashPermissions（E-6/UI 未落）；hasRules 全仓零消费 → **不迁**。
+- **新仓落位面直验**：shared/types-session 已有 PermissionUpdate 6 变体 union + PermissionUpdateDestination（B 波契约冻结）；permissions/PermissionRule.ts 已有 permissionBehaviorSchema / permissionRuleValueSchema（S-4a 落，lazySchema 经 shared）；permissionMode.ts 已有 EXTERNAL_PERMISSION_MODES 5 值常量（无 zod schema 面）；shared/lazySchema 在；zod ^4.5.4；**toPosixPath 未迁**（filesystem.ts 头注「国内目标 POSIX」）；engine/config/validation.ts filterInvalidPermissionRules = 仅非字符串过滤（S-3b 头注已预声明接缝③「语法过滤支 E-4 补」）；persist 族依赖 addPermissionRulesToSettings / getSettingsForSource / updateSettingsForSource 全在 engine 侧（domain 纯叶约束 → persist 必落 engine 侧 L3）。
+
+**落位裁定**：
+① **三落位**：域 `src/permissions/permissionValidation.ts`（validatePermissionRule 语法核心，纯叶：域 parser + mcpRuleNames + 本地 capitalize）+ 域 `src/permissions/permissionUpdateSchema.ts`（78L 逐字，复用域内 PermissionRule 两 schema）+ engine 侧 `src/engine/permissions/permissionPersist.ts`（persist 族 + createReadRuleSuggestion，L3：消费同目录 loader + engine/config settings + 域 parser）。externalPermissionModeSchema 落 permissionMode.ts（值 = EXTERNAL_PERMISSION_MODES 常量，单一事实源不复制）。
+② **语义支 3 块裁 E-6**：customValidation（toolValidationConfig 依赖工具注册表，新仓未落）/ Bash `:*` 两检 / File `:*` + 通配位置启发 → 不随迁（接缝③ 谓词 = 语法核心 5 检，message 面 = error + suggestion 后缀，旧仓库字；examples 字段裁——提示面残留守同 S-3b getValidationTip 口径）；PermissionRuleSchema zod superRefine 无消费点 → 不落（H6 死接缝禁）。
+③ **extractRules / hasRules 不迁**（新仓零消费点，H6；E-6 suggestions 面落时随消费点补，头注登记）。
+④ **toPosixPath 裁**（POSIX 单平台，filesystem.ts 头注既有裁定）：createReadRuleSuggestion 路径逻辑 = 原串直用（`posix.isAbsolute` 判定 + `/**` 后缀逐字），Windows 转换支不随迁（头注登记）。
+⑤ **接缝③ 回填**：engine/config/validation.ts filterInvalidPermissionRules 谓词扩「非字符串 OR 语法校验失败」（string 项经域 validatePermissionRule，invalid → 滤 + warning，message 旧仓逐字 `Invalid permission rule "${rule}" was skipped[: error][. suggestion]`）；validation.ts 头注接缝③ 预声明块核销为「S-4c2 实挂」。
+⑥ **persist 族 H6 预声明登记**：消费面 = 权限对话框持久化 / E-6 pathValidation suggestion / 组合根（本版零消费点，头注登记防死接缝误判）。
+⑦ **测试**：`tests/unit/permission-persist-validation.test.ts`（validatePermissionRule 语法核心 6 支（空/括号失衡/空括号/MCP 禁括号/小写工具名/合法）+ filter 语法支判别信号（`Bash(unbalanced` 滤 + warning / 合法规则保留 / 非字符串旧支回归）+ persist 六型 × supportsPersistence 门（session/cliArg no-op 不写盘）+ createReadRuleSuggestion 三分支（绝对 //xx/** / 相对 xx/** / 根 undefined）——mock fs + ATLAS_CONFIG_DIR=/mock-home 同 S-4c1 口径）。
+⑧ **matrix 1 新行** + **变异探针 2 项**（① filter 语法支删 → `Bash(unbalanced` 未滤红 ② persist supportsPersistence 门删 → session 型 update 写盘红）+ 四件套 + gate + 单提交。
+
+**S-4c2 实施记录（2026-09-24）**：
+
+落位实施（裁定 ①–⑥ 全核销）：
+- 域 `src/permissions/permissionValidation.ts` 155L 新：validatePermissionRule 语法核心 5 检（旧 262L 语义支 3 块裁 E-6 头注登记；examples 字段裁；PermissionRuleSchema superRefine 不落）
+- 域 `src/permissions/permissionUpdateSchema.ts` 78L 新：destination 5 值 enum + 6 变体 discriminatedUnion（旧仓逐字；zod 主入口 v4；H6 预声明接缝头注登记）
+- 域 `src/permissions/permissionMode.ts` +externalPermissionModeSchema（lazySchema 包裹，值 = EXTERNAL_PERMISSION_MODES 常量单一事实源）；域 index +2 export
+- engine 侧 `src/engine/permissions/permissionPersist.ts` 225L 新：supportsPersistence / persistPermissionUpdate(s) 六型写回 / createReadRuleSuggestion 3 支（toPosixPath 裁 POSIX）；engine/permissions/index +1 export；engine/index +S-4c2 导出块（persist 族 4 符号）
+- `src/engine/config/validation.ts` 接缝③ 回填：filterInvalidPermissionRules 谓词扩「非字符串 OR 语法校验失败」（import 域门面 validatePermissionRule，message 旧仓逐字；头注接缝③ 核销块）
+
+实施中两处分歧（方案 → 实施修正，均非方案错误）：
+1. **测试期望两处按旧仓逐字收紧**（非源码偏差）：小写工具名 suggestion 旧仓仅给工具名 `Use "Bash"`（`capitalize(parsed.toolName)`，不带内容）；filter warning message 中 rule 为**原文**（`"Bash(unbalanced"` 不补括号）。
+2. **探针 ② 判别信号修正（重要）**：方案 ⑧ 原写「门删 → session 型 update 写盘红」——实测**下层管路同 no-op**（getSettingsFilePathForSource 对非可编辑源 → undefined 短路，无门也不写盘），写盘断言不具判别力。修正：判别信号改 **settings 缓存零触达**——无门时 addRules 支经 addPermissionRulesToSettings → getSettingsForSource('session') 种 null 缓存项，`getCachedSettingsForSource('session')` 由 undefined → null；测试断言 + 头注登记判别逻辑。探针 ② 重跑红（1 fail）→ 逐字还原绿。
+
+验真（2026-09-24 实测）：
+- 变异探针 2/2：① filter 语法支删 → 2 红（`Bash(unbalanced` 未滤 + 混合支）→ 还原绿；② 门删 → 1 红（缓存判别支）→ 还原绿（cp 备份逐字还原 + diff 核验）
+- 新测 `tests/unit/permission-persist-validation.test.ts` 25 测 65 expect（validatePermissionRule 6 支 / filter ③ 4 支 / supportsPersistence 5 值 / persist 六型写回 6 支 + 门控 2 支 / createReadRuleSuggestion 3 支 / update schema 形状 3 支）
+- 四件套：tsc 0 / eslint 10 变更文件 0 / build 0 KB / 全量 **930 pass / 0 fail / 1841 expect / 65 文件**（基线 905/1776/64 + 25/65/1 恰合）
+- gate：`tests/ci/` 6 pass / 2 文件（matrix +1 行：permissions 域 persist 族 + 语法校验 ③ 回填行，proof 指新测文件）

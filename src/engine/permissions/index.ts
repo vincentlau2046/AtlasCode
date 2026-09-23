@@ -12,6 +12,10 @@
  * L3 定位：本层 = 跨域连接器（import shared / bootstrap / engine·config /
  * engine·tools / permissions 域）；permissions 纯叶域约束不变（叶域不 import
  * engine），测试只 import 域根 / engine 根门面（口径不变）。
+ *
+ * E-4 S-4c2（§8.35）落 permissionPersist：persist 族 + createReadRuleSuggestion
+ * （域叶约束不可 import engine settings/loader 面 → persist 必落本层）。
  */
 export * from './permissionRulesLoader'
 export * from './permissionSetup'
+export * from './permissionPersist'

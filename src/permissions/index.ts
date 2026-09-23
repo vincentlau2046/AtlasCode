@@ -35,8 +35,16 @@
  *   parsePermissionRule exact/`:*` 前缀/wildcard + matchWildcardPattern +
  *   suggestion 两函数）
  * - permissionUpdate.ts：权限更新纯应用核心（E-4 S-4b 传递依赖提前，
- *   applyPermissionUpdate(s) + applyPermissionRulesToPermissionContext；
- *   persist 族归 S-4c1/c2）
+ *   applyPermissionUpdate(s) + convertRulesToUpdates +
+ *   applyPermissionRulesToPermissionContext；persist 族落 engine 侧
+ *   engine/permissions/permissionPersist.ts（S-4c2，域叶约束不可 import
+ *   engine settings/loader 面））
+ * - permissionValidation.ts：规则语法校验核心 5 检（E-4 S-4c2，旧
+ *   settings/permissionValidation.ts 262L 语义支 3 块裁 E-6；消费点 =
+ *   engine/config filterInvalidPermissionRules 接缝③ 语法过滤支）
+ * - permissionUpdateSchema.ts：update 6 变体 zod discriminatedUnion +
+ *   destination 5 值 enum（E-4 S-4c2 旧 78L 逐字；H6 预声明接缝，
+ *   消费面 = E-5 hooks-runner / SDK controlSchema / 组合根残留守）
  * - bootstrap-env.ts：bootstrap 状态跨域注入窗口（setPermissionsBootstrapEnv /
  *   get / reset，未注入 fail-fast）
  * - settingsPaths.ts：settings 路径跨域注入窗口（S-3c，setSettingsPathsProvider /
@@ -51,5 +59,7 @@ export * from './ruleMatching'
 export * from './mcpRuleNames'
 export * from './shellRuleMatching'
 export * from './permissionUpdate'
+export * from './permissionValidation'
+export * from './permissionUpdateSchema'
 export * from './bootstrap-env'
 export * from './settingsPaths'

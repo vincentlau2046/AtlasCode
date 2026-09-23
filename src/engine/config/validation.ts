@@ -7,12 +7,14 @@
  *   - filterInvalidPermissionRules：permissions.allow/deny/ask 非字符串项
  *     过滤 + 警告（防单条坏规则毒化整个 settings 文件）
  *
+ * E-4 S-4c2（§8.35）接缝③ 核销：
+ *   - validatePermissionRule 规则**语法**校验已落域
+ *     permissions/permissionValidation.ts（旧仓 settings/permissionValidation.ts
+ *     262L 语法核心 5 检；语义支 3 块裁 E-6）→ filterInvalidPermissionRules
+ *     谓词扩「非字符串 OR 语法校验失败」（本文件 import 域门面，L3 连接器
+ *     口径；判别信号 `Bash(unbalanced` 滤 + warning，合法规则保留）。
+ *
  * 裁剪 + 残留守头注释（防「以为已全」）：
- *   - validatePermissionRule 规则**语法**校验（旧仓 permissionValidation.ts
- *     262L + permissionRuleParser 依赖链）→ E-4 权限规则树波次落（届时
- *     filterInvalidPermissionRules 补语法过滤支）。新仓 schema
- *     permissions=z.any() 透传，E-4 消费面自带规则校验，本切片仅做
- *     非字符串项兜底过滤（数据面防御，不做决策）。
  *   - getValidationTip 提示面（旧仓 validationTips.ts，UI 修复建议/文档链接）
  *     不随迁 → suggestion/docLink 恒 undefined（提示面残留守）。
  *   - unrecognized_keys issue 分支不随迁：新仓 SettingsSchema 为
@@ -22,6 +24,7 @@
  *     S-3a 类型面已裁（新仓 MCP 配置面 E-2 已闭环，错误聚合面未落）。
  */
 import type { ZodError, ZodIssue } from 'zod'
+import { validatePermissionRule } from '../../permissions'
 import type { ValidationError } from './types'
 
 /**
@@ -130,7 +133,8 @@ export function formatZodError(
  * validation. This prevents one bad entry from poisoning the entire
  * settings file. Returns warnings for each filtered entry.
  *
- * 裁剪：仅非字符串项过滤（数据面兜底）；规则语法校验残留守 E-4（见头注）。
+ * E-4 S-4c2 接缝③ 回填：谓词 = 非字符串 OR 语法校验失败（域
+ * validatePermissionRule 语法核心 5 检，message 旧仓逐字）。
  * 注意：mutate 入参 data 的 permissions 数组（旧仓同语义——过滤后的
  * 数组被后续 schema 解析消费）。
  */
@@ -154,6 +158,20 @@ export function filterInvalidPermissionRules(
           file: filePath,
           path: `permissions.${key}`,
           message: `Non-string value in ${key} array was removed`,
+          invalidValue: rule,
+        })
+        return false
+      }
+      // E-4 S-4c2 接缝③：语法校验支（旧仓 validation.ts 逐字）
+      const result = validatePermissionRule(rule)
+      if (!result.valid) {
+        let message = `Invalid permission rule "${rule}" was skipped`
+        if (result.error) message += `: ${result.error}`
+        if (result.suggestion) message += `. ${result.suggestion}`
+        warnings.push({
+          file: filePath,
+          path: `permissions.${key}`,
+          message,
           invalidValue: rule,
         })
         return false

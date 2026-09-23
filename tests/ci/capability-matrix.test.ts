@@ -104,6 +104,10 @@ const MATRIX: readonly MatrixRow[] = [
   // tests/unit/permission-rules-loader.test.ts 短路族/写回族）；func 行证真盘 round-trip
   { domain: 'permissions', capability: '规则磁盘加载/写回 round-trip（add → 重载出现 / delete 消失，真盘）', status: 'done', proof: 'tests/func/permission-rules-roundtrip.test.ts' },
   { domain: 'permissions', capability: 'CLI 工具规则解析 + 初始权限上下文装配（auto/GB/校验支裁剪版 9 函数保留面）', status: 'done', proof: 'tests/unit/permission-setup.test.ts' },
+  // E-4 S-4c2（§8.35）：persist 族 6 型写回 × supportsPersistence 门（session/cliArg
+  // no-op）+ createReadRuleSuggestion 3 支 + 规则语法校验 5 检（接缝③ 语法过滤支
+  // 回填消费）+ permissionUpdateSchema 6 变体/direction enum 形状核验
+  { domain: 'permissions', capability: '权限更新持久化（6 型写回 × 3 可编辑源门控）+ 规则语法校验（5 检 + settings 过滤接缝③回填）', status: 'done', proof: 'tests/unit/permission-persist-validation.test.ts' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },

@@ -229,6 +229,13 @@ export {
   prepareContextForPlanMode,
   type DangerousPermissionInfo,
 } from './permissions'
+// E-4 S-4c2（§8.35）：persist 族 + createReadRuleSuggestion（域叶约束 → L3 层）
+export {
+  supportsPersistence,
+  persistPermissionUpdate,
+  persistPermissionUpdates,
+  createReadRuleSuggestion,
+} from './permissions'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,
