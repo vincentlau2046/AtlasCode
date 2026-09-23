@@ -30,6 +30,10 @@
  *   - 执行器契约过滤：新仓 hooks 域 runHooks 仅消费 command 变体（.command），
  *     prompt/agent/http 执行面归 E-5 hooks-runner → provider 过滤非 command
  *     变体（配置面数据契约仍保四类全量，hooksSchema.ts），过滤后空 matcher 剔除。
+ *   - 畸形 matcher 加固（§8.30 T-1）：settings 面 hooks 经 z.any() 透传，
+ *     用户配置缺 hooks 键/非数组时旧仓 matcher.hooks.filter 抛 TypeError
+ *     崩钩子面（getMatchingHooks 无守卫）；provider 加 Array 守卫防用户
+ *     配置崩 loop（加固登记，非逐字移植偏离）。
  */
 // L3 域边界：hooks 域类型经域根门面 import（不深入域内文件，eslint
 // boundaries/entry-point）
@@ -144,7 +148,11 @@ export function createHooksConfigProvider(): HookConfigProvider {
       const matchers = getHooksConfigFromSnapshot()[event] ?? []
       const result: HookMatcher[] = []
       for (const matcher of matchers) {
-        const hooks = matcher.hooks.filter(
+        // 畸形配置加固（§8.30 T-1）：hooks 字段 z.any() 透传（S-3a 裁定），
+        // 用户配置缺 hooks 键/非数组时旧仓同风险崩溃（matcher.hooks.filter
+        // 抛 TypeError 经 getMatchingHooks 无守卫传播崩 loop）；本版 Array
+        // 守卫防用户配置崩钩子面（加固登记，非逐字移植偏离）
+        const hooks = (Array.isArray(matcher.hooks) ? matcher.hooks : []).filter(
           (hook): hook is CommandHookCommand =>
             hook.type === 'command' && typeof hook.command === 'string',
         )

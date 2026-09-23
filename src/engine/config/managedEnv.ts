@@ -24,9 +24,11 @@
  *     user+policy+flag，攻击面收敛更严）。
  *   - DANGEROUS_SHELL_SETTINGS（旧仓 6 项，trust-dialog UI 消费）不随迁——UI 面残留守。
  *
- * 预声明消费接缝登记（H6 防空洞）：两 apply 函数本切片无生产调用点——
- * 消费面 = S-3d settings-adapter / 组合根启动链（旧仓启动序：applySafe →
- * 信任对话框 → applyConfig）。
+ * 消费接缝登记（H6 防空洞）：
+ *   - applySafeConfigEnvironmentVariables：S-3d 已消费（compose.ts ⑥ 组合根
+ *     启动链信任前位，旧仓启动序 applySafe → 信任对话框 → applyConfig）
+ *   - applyConfigEnvironmentVariables：信任对话框面残留守（新仓无信任对话框，
+ *     compose.ts 头注重登记，§8.29）——信任后全量 env 随 UI/信任面纵切消费
  */
 import { isSettingSourceEnabled } from './constants'
 import { getSettingsForSource, getSettingsWithErrors } from './settings'

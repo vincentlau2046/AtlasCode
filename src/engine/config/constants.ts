@@ -17,7 +17,8 @@
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - flagSettings 源保留但为死源：新仓无 --settings CLI 面（残留守），
- *     getSettingsFilePathForSource('flagSettings') 返回桩路径 → 文件不存在 → null。
+ *     getSettingsFilePathForSource('flagSettings') 返 undefined → 加载短路
+ *     得 null（settings.ts 死源支，非桩路径）。
  *   - 显示名族（getSettingSourceName/getSourceDisplayName/Lowercase/Capitalized）
  *     + SOURCES（权限规则保存 UI 显示序）+ ATLAS_SETTINGS_SCHEMA_URL → 裁剪
  *     （UI/JSON-schema 面；E-4 权限规则源显示名落规则树时按需回填）。
