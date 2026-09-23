@@ -11,10 +11,15 @@
  *   - 工具名集（ALL_AGENT_DISALLOWED / CUSTOM）T-5e 起经 toolNames 单一事实源消费
  *     （完整 6 项 ALL 集；feature('WORKFLOW_SCRIPTS') 条件项 Workflow 不入静态集，
  *     登记于 toolNames 头注）。T-5b 的本地裁剪集（仅 {Agent}）已撤。
- *   - filterToolsForAgent 的 in-process teammate（isAgentSwarmsEnabled + isInProcessTeammate）
- *     carve-out + ExitPlanModeV2 plan 门 → 残留守（依赖 teammate / plan 面，未落）。
- *   - resolveAgentTools 的 allowedAgentTypes 解析（Agent 工具 spec 携带 agent 类型元数据）
- *     + permissionRuleValueFromString 的 ruleContent 解析 → 残留守（E-4 权限规则面）。
+ *   - filterToolsForAgent 的 in-process teammate carve-out + ExitPlanModeV2 plan 门
+ *     → E-4 S-4d 裁定（§8.36）：plan 门只重登记不硬填（新仓无 isAsync 机制 /
+ *     teammate 状态窗口；IN_PROCESS_TEAMMATE_ALLOWED_TOOLS 已 toolNames 单一事实源，
+ *     其 5 工具不在 ALL_AGENT_DISALLOWED 集 → carve-out 支在新仓集合下为空，
+ *     teammate 面随 swarm 波；前向接缝头注重登记防「以为已全」）。
+ *   - resolveAgentTools 的 spec / disallowedTools 解析 → E-4 S-4d 已落域
+ *     permissionRuleValueFromString（旧仓逐字，替 S-2 split(':') 截断）；
+ *     allowedAgentTypes 解析（Agent 工具 spec 携带 agent 类型元数据）仍残留守
+ *     （swarm 面，Agent(agentTypes) 语法随 getDenyRuleForAgent 消费点落）。
  *   - ResolvedAgentTools.validTools / invalidTools 仅测试消费，src 无生产消费点
  *     （AgentTool.call 只读 .resolvedTools）→ 残留守（validateAgent 校验面，D 波；
  *     本版保留字段供测试断言，头注登记防「以为已全」）。
@@ -40,6 +45,7 @@ import {
   ALL_AGENT_DISALLOWED_TOOLS,
   CUSTOM_AGENT_DISALLOWED_TOOLS,
 } from '../toolNames'
+import { permissionRuleValueFromString } from '../../../permissions'
 
 export interface ResolvedAgentTools {
   hasWildcard: boolean
@@ -104,7 +110,11 @@ export function resolveAgentTools(
     allowFanOut,
   })
 
-  const disallowed = new Set<string>(disallowedTools ?? [])
+  // E-4 S-4d：disallowedTools spec 经 S-4a parser 取 toolName（旧仓 verbatim——
+  // spec `Bash(*)` 剔除整个 Bash 工具，非字面名匹配）
+  const disallowed = new Set(
+    (disallowedTools ?? []).map(spec => permissionRuleValueFromString(spec).toolName),
+  )
   const allowed = filtered.filter((tool) => !disallowed.has(tool.name))
 
   // 通配（undefined 或 ['*']）→ 全量（剔禁用后）
@@ -123,8 +133,11 @@ export function resolveAgentTools(
   const resolved: Tool[] = []
   const seen = new Set<Tool>()
   for (const spec of agentTools) {
-    const name = spec.split(':')[0] // 裁剪：ruleContent（权限规则模式）解析归 E-4（残留守）
-    const tool = byName.get(name)
+    // E-4 S-4d：spec 经 S-4a parser 解析（旧仓 verbatim）——`Bash(npm install)`
+    // → toolName 'Bash'（ruleContent 保留在 validTools spec 串中）；替 S-2
+    // split(':') 截断（固有误判：带括号 spec 整体查表落 invalidTools）
+    const { toolName } = permissionRuleValueFromString(spec)
+    const tool = byName.get(toolName)
     if (tool) {
       validTools.push(spec)
       if (!seen.has(tool)) {

@@ -1257,3 +1257,37 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 - 新测 `tests/unit/permission-persist-validation.test.ts` 25 测 65 expect（validatePermissionRule 6 支 / filter ③ 4 支 / supportsPersistence 5 值 / persist 六型写回 6 支 + 门控 2 支 / createReadRuleSuggestion 3 支 / update schema 形状 3 支）
 - 四件套：tsc 0 / eslint 10 变更文件 0 / build 0 KB / 全量 **930 pass / 0 fail / 1841 expect / 65 文件**（基线 905/1776/64 + 25/65/1 恰合）
 - gate：`tests/ci/` 6 pass / 2 文件（matrix +1 行：permissions 域 persist 族 + 语法校验 ③ 回填行，proof 指新测文件）
+
+### §8.36 E-4 S-4d 执行前分析 + 方案（2026-09-24）
+
+**执行前分析**（旧仓 ground truth + 新仓接位面直验）：
+
+- ① 门接位：新仓 `PermissionGate` 已存在窄 spine 型（toolExecution.ts:41-44，2 值 `{allowed, reason?}`；未注入 = 默认放行，executeToolUse :141-154 单映射支）；域 `checkRuleBasedPermissions`（S-4b，规则支 1a-1g）返回 `Promise<PermissionAskDecision | PermissionDenyDecision | null>`（null = 无规则反对 = allow；1c 鸭子分发 tool.checkPermissions?）；loop 侧 `AgentLoopDeps` 无 checkPermission 字段，runToolBatch 调用点唯一 = queryOneRound（loop.ts:129；queryAgentLoop 逐轮委托，无第二站点）。
+- ② 注册表面：新仓 toolRegistry 已有 getAllBaseTools（deps 注入）+ getToolsForDefaultPreset（S-4c1）；旧仓 `filterToolsByDenyRules`（tools.ts:271-278 = `tools.filter(t => !getDenyRuleForTool(ctx, t))`，MCP server 级规则 `mcp__server` 整 server 剥离）+ `getTools`（tools.ts:280-330：ATLAS_SIMPLE 三分支 + REPL 支 + specialTools 剔除 + deny 过滤）——新仓无 REPL/special 工具本体 → 只落「deny 过滤 + getAllBaseTools(deps)」核心，模式过滤支裁出。
+- ④ agentToolUtils：新仓 :126 `spec.split(':')[0]`（残留守）；**旧仓 verbatim = `permissionRuleValueFromString(toolSpec).toolName`**（resolveAgentTools :196 + disallowedToolSet :167-171 **同函数两 spec 列表均经 parser**——S-4d 同函数一并替换，防解析口径分裂）。旧仓 :66-75 plan 门（ExitPlanModeV2 + permissionMode==='plan'）+ teammate carve-out（isAgentSwarmsEnabled && isInProcessTeammate + IN_PROCESS_TEAMMATE_ALLOWED_TOOLS）：新仓无 isAsync 机制 / 无 teammate 状态窗口，IN_PROCESS_TEAMMATE_ALLOWED_TOOLS 已在 toolNames 单一事实源（E-2/S-4c1 落），其 5 工具（Task 四件套 + SendMessage）**不在** ALL_AGENT_DISALLOWED 集 → carve-out 支在新仓集合下为空 → **plan 门只重登记不硬填**（头注前向接缝重登记，teammate 面随 swarm 波）。
+- **3 值 verdict 裁定**（spec ①）：`{ allowed, reason?, ask? }`——ask 语义 = 需用户确认（旧仓 TUI 弹窗）；新仓无 prompt 面（残留守）→ **fail-closed**：ask → is_error + ask 标记（静默执行 = 安全洞，静默 deny = 丢失区分）；`ask` 字段的消费点 = pipeline 映射支 message 分叉（H6 非死接缝，E-5/UI prompt 面落时消费）。
+- **桥接 cast**：shared Tool.checkPermissions 返回 `Promise<unknown>`（窄 spine 契约），域 RuleTool 窄视图要求 `Promise<PermissionResult>` → 结构不可赋值 → gate 工厂 L3 桥接 cast 一处（`tool as RuleTool`，头注登记：运行时实现随旧仓工具契约返 PermissionResult 形状；E-2 setup 测 mkTool 返 null = 1c 鸭子支 passthrough-safe）。
+
+**落位裁定**：
+① 新文件 `src/engine/permissions/permissionGate.ts`（L3：域 ruleMatching + pipeline 型）：`createPermissionGate(context: ToolPermissionContext): PermissionGate`（null→`{allowed:true}` / deny→`{allowed:false, reason:decision.message}` / ask→`{allowed:false, ask:true, reason:decision.message}`）；toolExecution.ts:41-44 型扩 3 值 + :144-154 映射支 ask 分叉（deny message 逐字不变——engine-pipeline.test.ts:83 既有断言不破；ask message = `permission confirmation required: ...` + 残留守注）；loop.ts +`checkPermission?: PermissionGate` 字段 + runToolBatch 透传 1 行（共 ~3 行）。
+② toolRegistry.ts +filterToolsByDenyRules（旧 271-278 逐字，泛型 T 窄视图 name+mcpInfo）+ getTools(context, deps = {})（ATLAS_SIMPLE/REPL/specialTools/getMergedTools 裁出，头注登记，S-4c1 头注「S-4d ② 补 getTools / filterToolsByDenyRules」核销）。
+④ agentToolUtils.ts：agentTools spec 循环 + disallowedTools 集 → 域 permissionRuleValueFromString（旧仓逐字）；头注残留守块更新（plan 门重登记 / teammate 集单一事实源 / ruleContent 解析已落 / allowedAgentTypes 仍残留守 swarm 面）。
+⑤ 导出面：engine/permissions/index +permissionGate；engine/index +createPermissionGate（L3 块）+ filterToolsByDenyRules / getTools（tools 块）。
+⑥ 测试 `tests/unit/permission-gate-wiring.test.ts`（判别信号三组）：① 无 gate 成功 / gate+deny → is_error `permission denied` / gate+ask → is_error + ask 标记（gate 工厂 × executeToolUse + loop 透传断言）② blanket deny `Bash` → getTools 池排除 Bash + MCP server 级 deny `mcp__srv` 剥整 server（判别信号）④ spec `Bash(npm install)` → resolveAgentTools validTools 保留 ruleContent（**red-green 复演**：旧 split(':') 下该测红——固有误判，非新引入）+ disallowedTools `Bash(*)` → Bash 整工具剔除。
+⑦ 变异探针 ×2：① gate 工厂 deny 支删（恒 allowed）→ gate+deny 测红 ② filterToolsByDenyRules 删过滤（return tools）→ blanket deny 测红。
+⑧ matrix 1 新行（permissions 域「deny 规则工具面过滤 + 权限门接线」，proof = 新测文件）+ 四件套（基线 930/1841/65）+ gate + 单提交。
+
+实施记录（2026-09-24）：
+- ① `src/engine/permissions/permissionGate.ts`（新，L3 连接器层）：createPermissionGate 3 值 verdict（null→allow / deny→`{allowed:false, reason}` / ask→`{allowed:false, ask:true, reason}` fail-closed）；头注登记 L3 桥接 cast 一处（`tool as RuleTool`，shared Tool.checkPermissions `Promise<unknown>` vs 域 RuleTool 窄视图 `Promise<PermissionResult>` 结构不可赋值）+ 消费面（loop 透传 + E-wave-end compose 接线位）。toolExecution.ts：PermissionGate 型扩 3 值 + 映射支 ask 分叉（deny message 逐字不变，engine-pipeline.test.ts:83 既有断言绿）；loop.ts：AgentLoopDeps +`checkPermission?: PermissionGate` + queryOneRound 的 runToolBatch 调用点透传（唯一点，queryAgentLoop 逐轮委托）。
+- ② toolRegistry.ts +filterToolsByDenyRules（旧 tools.ts:271-278 逐字，泛型 T 窄视图）+ getTools（deny 过滤后池）；ATLAS_SIMPLE/REPL/specialTools/getMergedTools 裁出头注登记。
+- ④ agentToolUtils.ts：agentTools spec 循环 + disallowedTools 集双处 → 域 permissionRuleValueFromString（旧仓 verbatim，替 S-2 split(':') 截断）；头注残留守块更新（plan 门/teammate carve-out 重登记不硬填，allowedAgentTypes 仍残留守 swarm 面）。
+- ⑤ 导出面：engine/tools/index +filterToolsByDenyRules/getTools；engine/permissions/index +permissionGate；engine/index 同步（tools 块 + L3 权限块 +createPermissionGate）。
+- 实施偏离 2 处（预期外，均已修正）：
+  (a) 测试 ①d 首版断言 `r.toolResults[0].isError` —— loop AgentRoundResult.toolResults 项仅 `{toolUseId, name, block}`（无 isError 字段，E-1 既有设计）→ 判别信号改 `block.is_error`（pipeline 映射支产物，语义不变）。
+  (b) permissionGate.ts 首版 `import type { Tool, ToolPermissionContext }` 中 Tool 未用（闭包参数型由返回型 PermissionGate 带出）→ eslint 捕获，删 Tool。
+
+验真（2026-09-24 实测）：
+- 变异探针 2/2：① gate 工厂 deny 支恒放行 → ①b+①d 2 红 → cp 备份逐字还原（diff 核验）绿；② filterToolsByDenyRules 不过滤（return [...tools]）→ ②a+②b 2 红 → 逐字还原绿
+- 新测 `tests/unit/permission-gate-wiring.test.ts` 8 测 18 expect（① 组 4：无门对照 / 门+deny `permission denied` / 门+ask fail-closed 确认标记 / loop 透传 block.is_error；② 组 2：blanket deny 池剔除 / MCP server 级剥整 server；④ 组 2：spec ruleContent 保留 validTools / disallowedTools `Bash(*)` 工具级剔除）
+- 四件套：tsc 0 / eslint 10 变更文件 0 / build 0 KB / 全量 **938 pass / 0 fail / 1859 expect / 66 文件**（基线 930/1841/65 + 8/18/1 恰合）
+- gate：`tests/ci/` 6 pass / 2 文件（matrix +1 行：permissions 域 engine 接线行，proof 指新测文件）

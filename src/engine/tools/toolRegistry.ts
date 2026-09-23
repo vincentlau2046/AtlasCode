@@ -19,10 +19,13 @@
  *   - 47 工具本体（Read/Edit/Bash/Glob/Grep/… + Ascend 16）→ 残留守（deps 注入位已铺；
  *     各本体纵切落地时填 deps，本机制不改）。
  *   - getToolsForDefaultPreset **E-4 S-4c1 已落**（机制面 deps 版，§8.34 裁定 ⑤；
- *     47 本体残留守不变，名单随 deps 注入增长）；余 getTools 模式过滤
- *     （ATLAS_SIMPLE 三分支 + REPL 分支 + 权限 deny 规则 filterToolsByDenyRules → S-4d）/
- *     getMergedTools（无去重 concat，getAllBaseTools(deps.mcpTools) 已覆盖去重合并语义）
- *     → 残留守（S-4d ② 补 getTools / filterToolsByDenyRules）。
+ *     47 本体残留守不变，名单随 deps 注入增长）。
+ *   - **E-4 S-4d ② 已落**：filterToolsByDenyRules（旧 tools.ts:271-278 逐字，
+ *     域 getDenyRuleForTool 消费——MCP server 级 deny `mcp__server` 剥整 server，
+ *     与运行时 1a 同匹配器）+ getTools(context, deps) = deny 过滤后工具池。
+ *     裁出登记（复审勿当遗漏）：ATLAS_SIMPLE 三分支 / REPL 支 / specialTools
+ *     剔除（新仓无 REPL/special 工具本体）/ getMergedTools（getAllBaseTools
+ *     (deps.mcpTools) 已覆盖去重合并语义）→ 残留守。
  *   - 旧仓 assembleToolPool 的分区按名排序（1P-REST claude_code_system_cache_policy 缓存断点
  *     稳定性）→ 残留守（新仓 auth 车道 = OpenAI 协议静态键，无服务端工具级缓存断点；
  *     去重仅按名先入为主，不排序）。
@@ -40,7 +43,8 @@
  *     ⑳ PowerShell enabled（PowerShell）。
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
-import type { Tool, Tools } from '../../shared'
+import type { Tool, Tools, ToolPermissionContext } from '../../shared'
+import { getDenyRuleForTool } from '../../permissions'
 import { AgentTool } from './agent/AgentTool'
 
 /** 注册表注入面（H6：每个字段均有消费点，无死接缝）。 */
@@ -102,6 +106,33 @@ export function getToolsForDefaultPreset(
   return getAllBaseTools(deps)
     .filter(t => t.isEnabled())
     .map(t => t.name)
+}
+
+/**
+ * 过滤被权限上下文 blanket-deny 的工具（旧仓 tools.ts:271-278 逐字）：
+ * 工具名（或 MCP server 前缀 `mcp__server`）命中无 ruleContent 的 deny 规则
+ * 即剔除——模型可见池在调用前剥离，与运行时 checkPermission 1a 同一匹配器
+ * （域 getDenyRuleForTool，S-4b）。
+ */
+export function filterToolsByDenyRules<
+  T extends {
+    name: string
+    mcpInfo?: { serverName: string; toolName: string }
+  },
+>(tools: readonly T[], permissionContext: ToolPermissionContext): T[] {
+  return tools.filter(tool => !getDenyRuleForTool(permissionContext, tool))
+}
+
+/**
+ * 权限上下文下的模型可见工具池（E-4 S-4d ②，旧仓 getTools 裁剪版）：
+ * getAllBaseTools(deps) 经 deny 规则过滤。模式过滤支（ATLAS_SIMPLE/REPL/
+ * specialTools）裁出，见头注残留守。
+ */
+export function getTools(
+  permissionContext: ToolPermissionContext,
+  deps: ToolRegistryDeps = {},
+): Tools {
+  return filterToolsByDenyRules(getAllBaseTools(deps), permissionContext)
 }
 
 /** 预定义工具预设（旧仓 tools.ts TOOL_PRESETS 逐字：当前仅 'default'）。 */

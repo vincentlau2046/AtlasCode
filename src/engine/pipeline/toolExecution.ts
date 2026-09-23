@@ -37,11 +37,19 @@ import type {
 import { classifyToolError } from './errorClassification'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
 
-/** E-4 接缝：权限门。窄 spine 默认放行；E-4 注入规则求值树后在此做 allow/deny 裁定。 */
+/**
+ * E-4 接缝：权限门。窄 spine 默认放行；E-4 注入规则求值树后在此做
+ * allow/deny/ask 裁定（S-4d 3 值 verdict，§8.36）：
+ *   - allowed=true → 执行
+ *   - allowed=false（无 ask）→ 硬 deny → is_error `permission denied`
+ *   - ask=true → 需用户确认（旧仓 TUI 弹窗面，新仓残留守）→ **fail-closed**
+ *     is_error + 确认标记（静默执行 = 安全洞；映射支 message 分叉 = ask 字段
+ *     消费点，E-5/UI prompt 面落时区分硬拒与待确认）。
+ */
 export type PermissionGate = (
   tool: Tool,
   input: unknown,
-) => Promise<{ allowed: boolean; reason?: string }>
+) => Promise<{ allowed: boolean; reason?: string; ask?: boolean }>
 
 /** E-5 接缝：工具钩子。窄 spine 无操作；E-5 注入 toolHooks（pre/post 生命周期）。 */
 export interface ToolHooks {
@@ -142,11 +150,16 @@ export async function executeToolUse(
     ? await deps.checkPermission(tool, tu.input)
     : { allowed: true }
   if (!verdict.allowed) {
+    // S-4d：ask 支 fail-closed（prompt 面残留守登记，§8.36）；deny 支 message 逐字
+    // 不变（engine-pipeline.test.ts 既有断言兼容）
+    const content = verdict.ask
+      ? `<tool_use_error>permission confirmation required (prompt 面残留守): ${verdict.reason ?? tu.name}</tool_use_error>`
+      : `<tool_use_error>permission denied: ${verdict.reason ?? tu.name}</tool_use_error>`
     return {
       block: {
         type: 'tool_result',
         tool_use_id: tu.id,
-        content: `<tool_use_error>permission denied: ${verdict.reason ?? tu.name}</tool_use_error>`,
+        content,
         is_error: true,
       },
       isError: true,

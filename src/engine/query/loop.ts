@@ -30,7 +30,7 @@ import type {
   Tools,
 } from '../../shared'
 import type { ModelProvider, ModelRole } from '../../modelprovider'
-import { runToolBatch } from '../pipeline'
+import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
   buildPostCompactMessages,
@@ -42,6 +42,8 @@ export interface AgentLoopDeps {
   modelProvider: ModelProvider
   role: ModelRole
   signal?: AbortSignal
+  /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
+  checkPermission?: PermissionGate
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -129,6 +131,8 @@ export async function queryOneRound(
   const outcomes = await runToolBatch(toolUses, assistantMsg, {
     tools,
     signal: deps.signal,
+    // E-4 S-4d：权限门透传（queryAgentLoop 逐轮委托本函数，唯一点）
+    checkPermission: deps.checkPermission,
   })
   const toolResults = outcomes.map((o) => ({
     toolUseId: o.toolUseId,

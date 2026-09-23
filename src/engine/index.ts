@@ -42,6 +42,8 @@ export {
   normalizeNameForMCP,
   getAllBaseTools,
   getToolsForDefaultPreset,
+  filterToolsByDenyRules,
+  getTools,
   isAscendToolsEnabled,
   TOOL_PRESETS,
   parseToolPreset,
@@ -236,6 +238,8 @@ export {
   persistPermissionUpdates,
   createReadRuleSuggestion,
 } from './permissions'
+// E-4 S-4d（§8.36）：权限门工厂（域规则求值树 → pipeline PermissionGate 3 值 verdict）
+export { createPermissionGate } from './permissions'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,

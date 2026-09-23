@@ -108,6 +108,10 @@ const MATRIX: readonly MatrixRow[] = [
   // no-op）+ createReadRuleSuggestion 3 支 + 规则语法校验 5 检（接缝③ 语法过滤支
   // 回填消费）+ permissionUpdateSchema 6 变体/direction enum 形状核验
   { domain: 'permissions', capability: '权限更新持久化（6 型写回 × 3 可编辑源门控）+ 规则语法校验（5 检 + settings 过滤接缝③回填）', status: 'done', proof: 'tests/unit/permission-persist-validation.test.ts' },
+  // E-4 S-4d（§8.36）：门工厂 3 值 verdict（deny/ask fail-closed）× 执行链映射支
+  // × loop deps 透传 + deny 规则工具面过滤（blanket 名 + MCP server 级剥整 server）
+  // + agent spec/disallowedTools 域 parser 解析（替 split(':') 截断）
+  { domain: 'permissions', capability: 'engine 接线（门工厂 3 值 verdict × 执行链映射 × loop 透传 + deny 工具面过滤 + agent spec 域 parser）', status: 'done', proof: 'tests/unit/permission-gate-wiring.test.ts' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },

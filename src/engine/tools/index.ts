@@ -16,6 +16,8 @@
  *   进 permissions 域解析函数组，re-export 触发 side-effect import）。
  * E-4 S-4c1（§8.34 裁定 ⑤）已落 getToolsForDefaultPreset(deps)（机制面默认
  *   预设工具名，engine/permissions permissionSetup 传递依赖提前；本体残留守不变）。
+ * E-4 S-4d（§8.36）已落 filterToolsByDenyRules + getTools（deny 规则工具面
+ *   过滤，域 getDenyRuleForTool 消费；模式过滤支裁出见 toolRegistry 头注）。
  */
 export {
   createMcpTools,
@@ -28,6 +30,8 @@ export {
 export {
   getAllBaseTools,
   getToolsForDefaultPreset,
+  filterToolsByDenyRules,
+  getTools,
   isAscendToolsEnabled,
   TOOL_PRESETS,
   parseToolPreset,
