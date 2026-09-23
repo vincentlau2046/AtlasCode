@@ -731,3 +731,26 @@ H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill �
 **验收**：四件套全绿 tsc 0 / lint 0 / build 0 / test 446 pass 0 fail（38 文件 814 expect）；anti-stub + capability-matrix 门 6 pass 0 fail。
 
 **4 架构裁定全收口**：域终态（#56 `2ef4da9` charter v0.12）+ 命名（charter L4.8 登记，engine 波落地）+ 子模块（charter L4.8 登记，engine 波落目录树）+ 缺口修复（`a10ebe5` #2 + `4e19e1b` #1）。下一步= **★B6-func（compose.ts 最小组合根 + 4+7 前置清单落地，先于 engine）**。
+
+### §8.20 B6-func 最小组合根执行记录 + 偏差修订（2026-09-23 完成，81b3c26..0304dea）
+
+**交付（charter L4.7 组合根唯一装配点填实，原 `export{}` 占位）**：`src/atlascode/compose.ts` = `createCoreDependencies()` + `CoreDependencies{sandboxManager, modelProvider, memoryStore}` + lazy `getCoreDependencies()` + `resetCoreDependencies()`（旧仓 factory.ts 同款 idiom）。**6 适配器**（`src/atlascode/adapters/`，域间边切端口收敛）：sandboxAdapter（SandboxManager→ExecutorSandboxPort，omit customConfig）/ bootstrapAdapter（cwd 态→BootstrapStatePort）/ taskOutputAdapter（task TaskOutput→TaskOutputPort）/ hookShellAdapter（executor 真 Shell→hooks HookShellPort，`interrupted→aborted` + env 经 ExecOptions.env 透传）/ diskOutputEnvAdapter（permissions getProjectTempDir + bootstrap getSessionId→task setDiskOutputEnv，D11）/ endpointConfigSourceAdapter（env OpenAI 静态键→modelprovider EndpointConfigSource，getGlobalApiKey=OPENAI_AUTH_TOKEN??OPENAI_API_KEY，D18）。
+
+**注入序（§8.14 permissions→task→hooks）落地**：executor 三 port（先于首次 exec）→ setPermissionsBootstrapEnv（§8.14 首步，permissions←bootstrap 两 cwd 态）→ setDiskOutputEnv（D11，permissions 后）→ setHookShellPort（D17，末步）→ setEndpointConfigSource（D18）。**4+7 前置清单终稿**：4 基项（三 port + setPermissionsBootstrapEnv）+ D11/D17/D18。
+
+**偏差修订（3 项，实施中发现，后续波次别当遗漏重提）**：
+- **D19（新增）Shell ExecOptions 加 env 透传**：D17 的 HookShellPort 契约 `runCommand(command, env, signal, timeoutMs)` 须把 buildHookEnv 产物落到子进程 env；但切片 1 裁剪版 `exec` 未 plumb env（真语义缺口）。ExecOptions 加 `env?: Record<string,string>`，spawn 合并优先级 `process.env < env < harness 标记(SHELL/GIT_EDITOR/ATLAS_CODE) < provider envOverrides`（调用方 env 不覆盖 harness 契约标记）。executor 域小增量（8 行），B6-func 前置。
+- **setPermissionsBootstrapEnv 归"基项"**：§8.14 注入序首步，getProjectTempDir 内部读 getPermissionsBootstrapEnv().getOriginalCwd()，须先于 setDiskOutputEnv（虽函数引用惰性、调用时依赖已满足，但按 §8.14 显式序落地）。4+7 的"4 基项"实含此项（原 4 基项口径偏窄）。
+- **sandboxDeps.ts（第 7 支撑文件）**：createSandboxManager 须 15 方法 SandboxDependencies（settings 体系/真平台探测归 engine 波）。最小组合根给 `createInMemorySandboxDeps()` 占位默认（placeholder runtime 禁用态），非"6 适配器"计数内（deps provider 非 port 适配器），engine 波 settings 体系回填真 deps。
+
+**4 功能 smoke（`tests/func/b6-func-smoke.test.ts`，func 层真 I/O，--isolate 独立进程）**：经 getCoreDependencies 装配真链，port 之下全真，仅 modelprovider 注入 fake。① echo hi 真 spawn + 真盘读回（result.stdout 即磁盘往返；getStdout 后 task 域删文件故不查存在，path.startsWith(ATLAS_TMPDIR) 证落点）② 组合根构造 sandbox manager（placeholder 禁用态 + getExecutorSandboxPort 忠实转发证 port 链）③ mock completion 双腿（非流式 + 流式，§8.13 L-2 收口；fake 经 setModelProviderForTesting 注入，非 mock transport）④ memory 写后读（真 fs 写 + 只读 store 读，§8.13 L-1 收口）。
+
+**门同步**：capability-matrix 加 3 组合根链行（executor/sandbox/memory）+ modelprovider「mock completion」由 missing(by C/B9) 翻 done（proof=b6-func-smoke，L-2 提前闭环）。anti-stub 无需改（atlascode 不在 8 能力域+shared 扫描集，compose.ts 填实 no-op，无登记条目可销）。atlascode/index.ts 门面填实首块（导出 compose 公共 API，tests STR-1 经门面消费）。
+
+**验收四件套**：tsc 0 / lint 0（src+tests）/ build 0 / **450 pass 0 fail 39 文件 824 expect**（基线 446/38/814 + 4 smoke + 1 文件 + 10 expect）。
+
+**提交序列**：81b3c26(executor env D19) → d02bdd2(atlascode compose+6 适配器+sandboxDeps) → 1f3f488(modelprovider mock seam) → ef6d41a(atlascode 门面导出) → 6158e0f(4 smoke) → 0304dea(ci 矩阵行同步)。
+
+**遗留（不阻塞，engine 波按需）**：modelprovider 缺 `resetEndpointConfigSource`（其余 3 域 set/get/reset 三元组，modelprovider 仅 set/get；Bun --isolate 跨文件不泄漏，单文件多 case 需 reset 再补）。
+
+**下一步= engine 波**（hooks 流式/attachment 渲染 + permissions 规则求值树 + executor 全 shell + 真 bwrap runtime 包经 setSandboxRuntimeModule 单点换入 + settings 体系回填 sandboxDeps 真 deps + engine ~14 子模块落目录树，charter L4.8）。
