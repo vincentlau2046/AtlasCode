@@ -1,20 +1,21 @@
 /**
- * engine/query — Agent 主循环最小纵切（§8.21 E-1 窄 spine T-1）
+ * engine/query — Agent 主循环最小纵切（§8.21 E-1 窄 spine T-1 + T-2 工具执行抽离）
  *
  * 跑通 LLM→tool→result 单轮：
  *   取 messages → modelprovider.chat（经 modelprovider 域门面，非直接 new OpenAIProvider）
  *   → 解析 assistant content 里的 tool_use 块
- *   → 经 tools 注册表 find + Tool.call（shared/types.ts 下沉契约）
+ *   → 委托 engine/pipeline 执行本轮工具（T-2 runToolBatch，4 接缝）
  *   → 追加 tool_result 消息 → 返回
  *
  * 裁剪版真核心（C-Deep 纵切纪律，残留守头注释防「以为已全」）：
  *   - 本版 = 单轮（一次 LLM + 一批 tool_use）。多轮 while(true) 续跑归 E-1b。
+ *   - 工具执行已抽到 engine/pipeline（T-2）：本文件只管 LLM + 消息装配，工具链单一事实源在 pipeline。
  *   - 残留守（后续纵切）：流式 chatStream（E-1b）/ 上下文压缩 compact（E-1b）/
  *     错误恢复 + stop hooks（E-1b）/ MCP 路由（E-2）/ 附件注入（E-5）/
- *     tokenBudget continuation（E-1b）/ 未知 tool 完整处理（E-2 工具面，本版 is_error 兜底）。
+ *     tokenBudget continuation（E-1b）/ 工具执行接缝（权限 E-4 / 钩子 E-5 / 并发 E-1b，见 pipeline 残留守）。
  *
  * port 之下全真：LLM 经 modelprovider 域门面 + Tool.call 契约（shared/types.ts）——
- * 防 H6 空洞等价。engine 消费面：modelprovider（DEP-4 allow）+ shared（门面）。
+ * 防 H6 空洞等价。engine 消费面：modelprovider（DEP-4 allow）+ shared（门面）+ pipeline（域内）。
  */
 import type {
   AssistantMessage,
@@ -24,6 +25,7 @@ import type {
   Tools,
 } from '../../shared'
 import type { ModelProvider, ModelRole } from '../../modelprovider'
+import { runToolBatch } from '../pipeline'
 
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
@@ -42,11 +44,12 @@ export interface AgentRoundResult {
 }
 
 /**
- * 单轮 agent loop：LLM → tool 调度 → tool_result 追加。
+ * 单轮 agent loop：LLM → tool 调度（委托 pipeline）→ tool_result 追加。
  *
  * 入参 tools 是注册表（E-2 工具面填 getAllBaseTools）；本纵切不造全局注册表，
- * 由调用方注入（测试用 fake tool，非 tautology——loop 的 find/call/mapResult/append
- * 即被测能力）。
+ * 由调用方注入（测试用 fake tool，非 tautology——loop 的 LLM 调用 / 解析 / 追加即被测能力）。
+ * 工具执行接缝（权限 E-4 / 钩子 E-5 / MCP E-2 / 并发 E-1b）在 pipeline 内；
+ * spine 走薄语义（放行 / 无操作 / 未注册），需注入接缝者直接调 pipeline 的 executeToolUse/runToolBatch。
  */
 export async function queryOneRound(
   deps: AgentLoopDeps,
@@ -72,30 +75,22 @@ export async function queryOneRound(
     (c): c is ToolUseBlock => !!c && (c as { type?: string }).type === 'tool_use',
   )
 
-  const toolResults: AgentRoundResult['toolResults'] = []
-  const resultMessages: Message[] = []
-  for (const tu of toolUses) {
-    const tool = tools.find(
-      (t) => t.name === tu.name || (t.aliases?.includes(tu.name) ?? false),
-    )
-    if (!tool) {
-      // 残留守：未知 tool 完整处理（E-2 工具面）。最小纵切以 is_error tool_result 兜底，
-      // 保证 LLM 仍能收到该 tool_use 的回应（不静默丢弃）。
-      const block: ToolResultBlockParam = {
-        type: 'tool_result',
-        tool_use_id: tu.id,
-        content: `unknown tool: ${tu.name}`,
-        is_error: true,
-      }
-      toolResults.push({ toolUseId: tu.id, name: tu.name, block })
-      resultMessages.push({ type: 'user', role: 'user', message: { role: 'user', content: [block] } })
-      continue
-    }
-    const res = await tool.call(tu.input, undefined, undefined, assistantMsg as AssistantMessage)
-    const block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
-    toolResults.push({ toolUseId: tu.id, name: tu.name, block })
-    resultMessages.push({ type: 'user', role: 'user', message: { role: 'user', content: [block] } })
-  }
+  // loop 内工具执行委托 pipeline（T-2）：find→权限门→validate→hooks→call→mapResult→result 追加
+  const outcomes = await runToolBatch(
+    toolUses,
+    assistantMsg as AssistantMessage,
+    { tools },
+  )
+  const toolResults = outcomes.map((o) => ({
+    toolUseId: o.toolUseId,
+    name: o.name,
+    block: o.block,
+  }))
+  const resultMessages = outcomes.map((o) => ({
+    type: 'user',
+    role: 'user',
+    message: { role: 'user', content: [o.block] },
+  }))
 
   return {
     messages: [...messages, assistantMsg, ...resultMessages],
