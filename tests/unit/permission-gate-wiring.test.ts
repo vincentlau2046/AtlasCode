@@ -41,15 +41,19 @@ function ctx(deny: string[] = [], ask: string[] = []): ToolPermissionContext {
   }
 }
 
-/** 最小 fake tool（shared Tool 契约消费字段：name/call/mapResult）。 */
+/** 最小 fake tool（shared Tool 契约消费字段：name/isEnabled/call/mapResult）。 */
 function makeTool(
   name: string,
-  mcpInfo?: { serverName: string; toolName: string },
+  opts?: {
+    mcpInfo?: { serverName: string; toolName: string }
+    enabled?: boolean
+  },
 ): Tool {
   return {
     name,
-    ...(mcpInfo ? { mcpInfo } : {}),
+    ...(opts?.mcpInfo ? { mcpInfo: opts.mcpInfo } : {}),
     isConcurrencySafe: () => false,
+    isEnabled: () => opts?.enabled ?? true,
     call: async () => ({ data: `ok:${name}` }),
     mapToolResultToToolResultBlockParam: (c: unknown, id: string) => ({
       type: 'tool_result',
@@ -178,6 +182,15 @@ describe('② deny 规则工具面过滤（getTools 池 + MCP server 级）', ()
     const names = pool.map(t => t.name)
     expect(names).not.toContain('mcp__srv__fetch')
     expect(names).toContain('mcp__other__x')
+  })
+
+  test('②c 禁用工具（isEnabled false）不进池（旧 getTools 尾行过滤，§8.37 F2 回归）', () => {
+    const pool = getTools(ctx(), {
+      baseTools: [makeTool('Disabled', { enabled: false }), makeTool('Enabled')],
+    })
+    const names = pool.map(t => t.name)
+    expect(names).not.toContain('Disabled')
+    expect(names).toContain('Enabled')
   })
 })
 
