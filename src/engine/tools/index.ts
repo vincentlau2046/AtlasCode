@@ -1,14 +1,16 @@
 /**
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
- * 实现波次: C 波（基础工具 + AgentTool 本体）；注册表机制 getAllBaseTools 归
- *   E-2 T-5e（§8.25）。
- * 状态: A 波骨架占位（基础工具/注册表待后续纵切）。
+ * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
+ *   getAllBaseTools(deps)（T-5e）；47 基础工具本体 = 残留守（各本体纵切经 deps 注入）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归
  *   ports/mcpClient，经 engine 门面（engine/index.ts）单独 re-export。
  * T-5b（§8.25 E-2）已落 AgentTool 核心面 → 在此 re-export（agent/ 子门面）。
+ * T-5d（§8.25 E-2）已落工具名常量 seed（toolNames：ASYNC/INTERNAL 集 + 单工具名）。
+ * T-5e（§8.25 E-2）已落注册表机制 toolRegistry（getAllBaseTools(deps) deps 注入 +
+ *   ASCEND 门控 + 按名去重）+ toolNames 全量常量集（4 工具名集 + 14 单工具名）。
  */
 export {
   createMcpTools,
@@ -19,8 +21,34 @@ export {
   normalizeNameForMCP,
 } from './mcp'
 export {
+  getAllBaseTools,
+  isAscendToolsEnabled,
+  TOOL_PRESETS,
+  parseToolPreset,
+  type ToolRegistryDeps,
+  type ToolPreset,
+} from './toolRegistry'
+export {
   ASYNC_AGENT_ALLOWED_TOOLS,
   INTERNAL_WORKER_TOOLS,
+  ALL_AGENT_DISALLOWED_TOOLS,
+  CUSTOM_AGENT_DISALLOWED_TOOLS,
+  IN_PROCESS_TEAMMATE_ALLOWED_TOOLS,
+  COORDINATOR_MODE_ALLOWED_TOOLS,
+  TASK_OUTPUT_TOOL_NAME,
+  ENTER_PLAN_MODE_TOOL_NAME,
+  EXIT_PLAN_MODE_V2_TOOL_NAME,
+  ASK_USER_QUESTION_TOOL_NAME,
+  TASK_CREATE_TOOL_NAME,
+  TASK_GET_TOOL_NAME,
+  TASK_LIST_TOOL_NAME,
+  TASK_UPDATE_TOOL_NAME,
+  CRON_CREATE_TOOL_NAME,
+  CRON_DELETE_TOOL_NAME,
+  CRON_LIST_TOOL_NAME,
+  CONFIG_TOOL_NAME,
+  WORKFLOW_TOOL_NAME,
+  REPL_TOOL_NAME,
   BASH_TOOL_NAME,
   FILE_READ_TOOL_NAME,
   FILE_EDIT_TOOL_NAME,

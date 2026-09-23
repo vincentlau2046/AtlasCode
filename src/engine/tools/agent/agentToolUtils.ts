@@ -8,9 +8,9 @@
  *   - countToolUses / finalizeAgentTool（终态收集：末位 assistant 文本 + tool_use 计数）
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
- *   - 工具名集（ALL_AGENT_DISALLOWED / CUSTOM / ASYNC / IN_PROCESS_TEAMMATE）此处仅落
- *     spawn/fan-out 门消费的核心集（Agent 工具全子 agent 禁用）；完整 15 项 ASYNC 集 +
- *     TaskStop/AskUserQuestion/WORKFLOW-feature 条件集 → T-5e 注册表常量（单一事实源）。
+ *   - 工具名集（ALL_AGENT_DISALLOWED / CUSTOM）T-5e 起经 toolNames 单一事实源消费
+ *     （完整 6 项 ALL 集；feature('WORKFLOW_SCRIPTS') 条件项 Workflow 不入静态集，
+ *     登记于 toolNames 头注）。T-5b 的本地裁剪集（仅 {Agent}）已撤。
  *   - filterToolsForAgent 的 in-process teammate（isAgentSwarmsEnabled + isInProcessTeammate）
  *     carve-out + ExitPlanModeV2 plan 门 → 残留守（依赖 teammate / plan 面，未落）。
  *   - resolveAgentTools 的 allowedAgentTypes 解析（Agent 工具 spec 携带 agent 类型元数据）
@@ -19,6 +19,8 @@
  *     不引 zod；schema 校验面归 E-2 复合 schema 校验纵切）。
  *   - emitTaskProgress / classifyHandoffIfNeeded / runAsyncAgentLifecycle / extractPartialResult
  *     （异步 agent 生命周期 + transcript 分类器 handoff 门）→ 残留守（异步 agent + 遥测面）。
+ *     finalizeAgentTool 的 metadata 随之仅保留消费字段（agentType/startTime）；旧仓
+ *     prompt/isAsync 两 metadata 字段随异步生命周期切片回填（本版无消费点，不留死接缝）。
  */
 import type { Message, Tool, Tools } from '../../../shared'
 
@@ -31,15 +33,10 @@ type UsageFields = {
 }
 import { AGENT_TOOL_NAME } from './constants'
 import type { AgentDefinition } from './agentDefinition'
-
-/**
- * 对所有子 agent 禁用的工具（旧仓 ALL_AGENT_DISALLOWED_TOOLS 裁剪）。
- * 核心：Agent 工具（防递归 + fan-out carve-out 前提）。完整集归 T-5e 常量。
- */
-const ALL_AGENT_DISALLOWED_TOOLS = new Set<string>([AGENT_TOOL_NAME])
-
-/** 自定义（非内建）agent 额外禁用集（旧仓 CUSTOM = ALL，此处裁剪同源）。 */
-const CUSTOM_AGENT_DISALLOWED_TOOLS = new Set<string>(ALL_AGENT_DISALLOWED_TOOLS)
+import {
+  ALL_AGENT_DISALLOWED_TOOLS,
+  CUSTOM_AGENT_DISALLOWED_TOOLS,
+} from '../toolNames'
 
 export interface ResolvedAgentTools {
   hasWildcard: boolean
@@ -68,8 +65,9 @@ export function filterToolsForAgent({
     if (tool.name === AGENT_TOOL_NAME && allowFanOut) return true
     if (ALL_AGENT_DISALLOWED_TOOLS.has(tool.name)) return false
     if (!isBuiltIn && CUSTOM_AGENT_DISALLOWED_TOOLS.has(tool.name)) return false
-    // 异步白名单门裁剪：本版核心跑同步 agent（异步路径残留守），isAsync 白名单 15 项集
-    // 归 T-5e 常量面（无消费点，本版不声明 isAsync 接缝，防死接缝）。
+    // 异步白名单门裁剪：本版核心跑同步 agent（异步路径残留守）；isAsync 白名单集
+    // （ASYNC_AGENT_ALLOWED_TOOLS，T-5e 已落 toolNames 单一事实源）随 isAsync 分支机制
+    // 回填时消费（本版不声明 isAsync 接缝，防死接缝）。
     return true
   })
 }
@@ -214,14 +212,11 @@ export function finalizeAgentTool(
   agentMessages: readonly Message[],
   agentId: string,
   metadata: {
-    prompt: string
     agentType?: string
     startTime: number
-    isAsync: boolean
   },
 ): AgentToolResult {
-  const { agentType, startTime, isAsync } = metadata
-  void isAsync
+  const { agentType, startTime } = metadata
   const lastAssistant = [...agentMessages].reverse().find((m) => m.type === 'assistant')
   const usage = (lastAssistant?.message as { usage?: unknown } | undefined)?.usage
   return {

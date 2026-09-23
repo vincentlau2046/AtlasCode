@@ -114,10 +114,8 @@ export async function runAgent(args: RunAgentArgs): Promise<RunAgentResult> {
   )
 
   const result = finalizeAgentTool(loopResult.messages, agentId, {
-    prompt,
     agentType: agentDefinition.agentType,
     startTime,
-    isAsync: false,
   })
 
   return {
