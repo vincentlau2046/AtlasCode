@@ -15,7 +15,7 @@ import {
   DEFAULT_HOOK_SHELL,
   SHELL_TYPES,
   type ShellProvider,
-} from '../../src/executor/shell/shellProvider'
+} from '../../src/executor'
 
 const provider: ShellProvider = createBashShellProvider('/bin/bash')
 

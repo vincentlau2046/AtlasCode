@@ -33,6 +33,9 @@ export {
 export { createMemoryConfig, autoMemoryEnabledFromEnv } from './config'
 export type { MemoryConfig } from './config'
 
+// envUtils: Atlas 配置主目录（ATLAS_CONFIG_DIR 覆盖，NFC 归一化）
+export { getAtlasConfigHomeDir } from './envUtils'
+
 // 记忆类型分类 + prompt 段落常量
 export {
   MEMORY_TYPES,

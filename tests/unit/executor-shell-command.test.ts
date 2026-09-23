@@ -20,8 +20,6 @@ import {
   generateLocalTaskId,
   wrapSpawn,
   type ShellCommand,
-} from '../../src/executor/shell/ShellCommand'
-import {
   getTaskOutputPort,
   resetTaskOutputPort,
   setTaskOutputPort,

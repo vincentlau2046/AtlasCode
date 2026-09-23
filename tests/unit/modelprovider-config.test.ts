@@ -5,7 +5,7 @@
  * 无网络/无磁盘/无 PTY。
  */
 import { describe, test, expect, afterEach } from "bun:test"
-import { createModelProviderConfig } from "../../src/modelprovider/config"
+import { createModelProviderConfig } from "../../src/modelprovider"
 
 const KEYS = [
   "ATLAS_API_BASE_URL",

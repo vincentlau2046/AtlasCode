@@ -14,7 +14,7 @@ import {
   getEffortEnvOverride,
   getDefaultEffortForModel,
   resolveAppliedEffort,
-} from "../../src/modelprovider/effort"
+} from "../../src/modelprovider"
 
 const ENV_KEY = "ATLAS_EFFORT_LEVEL"
 const ALWAYS_ENABLE = "ATLAS_ALWAYS_ENABLE_EFFORT"

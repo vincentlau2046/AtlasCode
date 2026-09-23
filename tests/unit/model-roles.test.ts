@@ -10,7 +10,7 @@ import {
   normalizeModelStringForAPI,
   modelToRole,
   MODEL_ROLES,
-} from "../../src/modelprovider/roles"
+} from "../../src/modelprovider"
 
 describe("MODEL_ROLES", () => {
   test("含 premium/fast/small 三角色", () => {

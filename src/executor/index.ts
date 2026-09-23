@@ -68,3 +68,10 @@ export {
   type ShellProvider,
   type ShellType,
 } from "./shell/shellProvider"
+// ShellCommand 工厂函数（Shell.ts 只 re-export type；value 工厂直导门面）
+export {
+  createAbortedCommand,
+  createFailedCommand,
+  generateLocalTaskId,
+  wrapSpawn,
+} from "./shell/ShellCommand"

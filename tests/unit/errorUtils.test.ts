@@ -5,13 +5,14 @@
  * 无网络/无磁盘/无 PTY。
  */
 import { describe, test, expect } from "bun:test"
-import { APIError, APIConnectionError } from "../../src/modelprovider/types"
 import {
+  APIError,
+  APIConnectionError,
   extractConnectionErrorDetails,
   formatAPIError,
   getSSLErrorHint,
   sanitizeAPIError,
-} from "../../src/modelprovider/errorUtils"
+} from "../../src/modelprovider"
 
 describe("extractConnectionErrorDetails", () => {
   test("null → null", () => {

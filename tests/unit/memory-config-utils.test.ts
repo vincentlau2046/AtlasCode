@@ -10,8 +10,8 @@ import { describe, test, expect, afterEach } from "bun:test"
 import {
   createMemoryConfig,
   autoMemoryEnabledFromEnv,
+  getAtlasConfigHomeDir,
 } from "../../src/memory"
-import { getAtlasConfigHomeDir } from "../../src/memory/envUtils"
 import { sanitizePath, djb2Hash } from "../../src/shared"
 
 const ENV_KEYS = [

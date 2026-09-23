@@ -73,11 +73,15 @@ export function getProviderLifecycle(): ProviderLifecycle {
 export const providerLifecycle: ProviderLifecycle = lazyProxy(getProviderLifecycle)
 
 // ── 窄面门面导出（仅被外部域实际 import 的符号）──
+// types: APIError 类族（modelErrors/errorUtils 基类 + 错误分类测试构造）
+export { APIError, APIConnectionError, APIConnectionTimeoutError } from './types'
 export {
   API_ERROR_MESSAGE_PREFIX,
   PROMPT_TOO_LONG_ERROR_MESSAGE,
   startsWithApiErrorPrefix,
   categorizeRetryableAPIError,
+  classifyAPIError,
+  isValidAPIMessage,
   getAssistantMessageFromError,
   getErrorMessageIfRefusal,
 } from './modelErrors'
@@ -86,7 +90,18 @@ export { modelToRole, normalizeModelStringForAPI } from './roles'
 export { streamAssistant } from './streamAssistant'
 export type { CallModelOptions } from './streamAssistant'
 
-export { extractConnectionErrorDetails, formatAPIError, getSSLErrorHint } from './errorUtils'
+export { extractConnectionErrorDetails, formatAPIError, getSSLErrorHint, sanitizeAPIError } from './errorUtils'
+export { createModelProviderConfig } from './config'
+export {
+  EFFORT_LEVELS,
+  isEffortLevel,
+  parseEffortValue,
+  convertEffortValueToLevel,
+  modelSupportsEffort,
+  getEffortEnvOverride,
+  getDefaultEffortForModel,
+  resolveAppliedEffort,
+} from './effort'
 
 export { toResponseFormat } from './params'
 export {

@@ -9,15 +9,13 @@ import {
   APIError,
   APIConnectionError,
   APIConnectionTimeoutError,
-} from "../../src/modelprovider/types"
-import {
   classifyAPIError,
   categorizeRetryableAPIError,
   startsWithApiErrorPrefix,
   isValidAPIMessage,
   API_ERROR_MESSAGE_PREFIX,
   REPEATED_529_ERROR_MESSAGE,
-} from "../../src/modelprovider/modelErrors"
+} from "../../src/modelprovider"
 
 describe("classifyAPIError", () => {
   test("aborted — Request was aborted.", () => {
