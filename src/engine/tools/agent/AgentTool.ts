@@ -16,10 +16,17 @@
  *   - 异步 agent（run_in_background → runAsyncAgentLifecycle / 后台摘要 / 通知队列）
  *     → 残留守（后台任务面未落）；本版仅同步路径，input schema 相应去掉 run_in_background
  *     / name / team_name 字段（不造假能力）。
- *   - fork 子代理路径（isForkSubagentEnabled + buildForkedMessages + useExactTools 字节级
- *     前缀命中 prompt cache）→ T-5c（forkSubagent）。
- *   - 内建 agent 注册表（getBuiltInAgents 遍历）→ T-5c；本版 call/description 用兜底
- *     GENERAL_PURPOSE_AGENT（单一内建）。
+ *   - 内建 agent 注册表已接线（T-5c）：call/description 遍历 getBuiltInAgents()（本版
+ *     仅 GENERAL_PURPOSE_AGENT；statusline/explore/plan/guide/verification 内建体 +
+ *     coordinator 分支 → T-5d 及后续纵切残留守）。
+ *   - user/plugin 自定义 agent（loadAgentDefinitions 注入面，parseAgentFromMarkdown 解析
+ *     产物）当前无 src 消费点，call/description 仅见内建表 → 残留守：自定义 agent 的
+ *     注册表装配归组合根（E-wave-end，getAllBaseTools 同批）；旧仓 call 传全量 override
+ *     列表（getAgentDefinitionsWithOverrides），本版未接线。
+ *   - fork 子代理机制已 port（T-5c forkSubagent：isForkSubagentEnabled + FORK_AGENT +
+ *     buildForkedMessages + buildChildMessage + isInForkChild）；但 AgentTool.call 的
+ *     fork 路径接线（!subagent_type 触发 + useExactTools 字节级命中 + 父消息/系统提示词
+ *     threading + 全异步 spawn）→ 残留守（需父消息 threading，未落）。
  *   - 权限规则求值（checkPermissions 具体 deny/allow 规则）→ E-4；本版 passthrough。
  *   - renderToolUseMessage / UI（React 进度渲染）→ 残留守（TUI 面，非 TUI 不消费）。
  */
@@ -32,6 +39,7 @@ import type {
 } from '../../../shared'
 import { getModelProvider, type ModelProvider, type ModelRole } from '../../../modelprovider'
 import { GENERAL_PURPOSE_AGENT, type AgentDefinition } from './agentDefinition'
+import { getBuiltInAgents } from './builtInAgents'
 import {
   computeChildSpawnDepth,
   resolveAgentTools,
@@ -89,7 +97,7 @@ interface AgentToolCallContext {
   spawnDepth?: number
 }
 
-/** 未知 type 回落 general-purpose（旧仓 resolveAgentDefinition 同义，保留请求 type 名）。 */
+/** 未知 type 回落 general-purpose 语义但保留请求 type 名 + 自定义 whenToUse（旧仓 resolveAgentDefinition 同义）。 */
 function resolveAgentDefinition(
   subagentType: string | undefined,
   agents: readonly AgentDefinition[],
@@ -97,7 +105,11 @@ function resolveAgentDefinition(
   if (!subagentType) return GENERAL_PURPOSE_AGENT
   const found = agents.find((a) => a.agentType === subagentType)
   if (found) return found
-  return { ...GENERAL_PURPOSE_AGENT, agentType: subagentType }
+  return {
+    ...GENERAL_PURPOSE_AGENT,
+    agentType: subagentType,
+    whenToUse: 'Custom agent type: ' + subagentType,
+  }
 }
 
 export const AgentTool: Tool = {
@@ -115,7 +127,7 @@ export const AgentTool: Tool = {
     message: 'Agent tool requires permission.',
   }),
   toAutoClassifierInput: (input: unknown) => input,
-  description: async () => getPrompt([GENERAL_PURPOSE_AGENT]),
+  description: async () => getPrompt(getBuiltInAgents()),
   userFacingName: (input: unknown) => {
     const desc = (input as AgentToolInput | undefined)?.description
     return desc ? `${desc} (Agent)` : 'Agent'
@@ -149,10 +161,11 @@ export const AgentTool: Tool = {
     const parentRole: ModelRole = ctx.parentRole ?? 'small'
     const modelProvider: ModelProvider = ctx.modelProvider ?? getModelProvider()
 
-    // T-5b 兜底单一内建；T-5c 补 getBuiltInAgents() 遍历（残留守）。
-    const agentDefinition = resolveAgentDefinition(input.subagent_type, [
-      GENERAL_PURPOSE_AGENT,
-    ])
+    // 内建注册表遍历（T-5c）：未知 type 回落 general-purpose（保留请求 type 名）。
+    const agentDefinition = resolveAgentDefinition(
+      input.subagent_type,
+      getBuiltInAgents(),
+    )
     const availableTools = ctx.tools ?? []
     const childSpawnDepth = computeChildSpawnDepth({ spawnDepth: ctx.spawnDepth })
     const allowFanOut = isCoordinatorMode() && childSpawnDepth < MAX_WORKER_SPAWN_DEPTH

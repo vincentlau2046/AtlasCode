@@ -10,8 +10,27 @@ export { runAgent, type RunAgentArgs, type RunAgentResult } from './runAgent'
 export {
   GENERAL_PURPOSE_AGENT,
   isBuiltInAgent,
+  isCustomAgent,
   type AgentDefinition,
 } from './agentDefinition'
+export { getBuiltInAgents } from './builtInAgents'
+export {
+  parseAgentFromMarkdown,
+  getActiveAgentsFromList,
+  loadAgentDefinitions,
+  type InjectedAgentFile,
+} from './loadAgentsDir'
+export {
+  isForkSubagentEnabled,
+  FORK_AGENT,
+  buildForkedMessages,
+  buildChildMessage,
+  isInForkChild,
+  buildWorktreeNotice,
+  FORK_SUBAGENT_TYPE,
+  FORK_BOILERPLATE_TAG,
+  FORK_DIRECTIVE_PREFIX,
+} from './forkSubagent'
 export {
   computeChildSpawnDepth,
   filterToolsForAgent,
@@ -22,4 +41,4 @@ export {
   type ResolvedAgentTools,
 } from './agentToolUtils'
 export { AGENT_TOOL_NAME, MAX_WORKER_SPAWN_DEPTH } from './constants'
-export { getPrompt } from './prompt'
+export { getPrompt, formatAgentLine } from './prompt'
