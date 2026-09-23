@@ -48,6 +48,26 @@ export type {
   MCPServerConnection,
 } from './ports/mcpClient'
 export {
+  AgentTool,
+  runAgent,
+  GENERAL_PURPOSE_AGENT,
+  isBuiltInAgent,
+  computeChildSpawnDepth,
+  filterToolsForAgent,
+  resolveAgentTools,
+  countToolUses,
+  finalizeAgentTool,
+  AGENT_TOOL_NAME,
+  MAX_WORKER_SPAWN_DEPTH,
+  getPrompt,
+  type RunAgentArgs,
+  type RunAgentResult,
+  type AgentDefinition,
+  type AgentToolResult,
+  type ResolvedAgentTools,
+} from './tools'
+export { isCoordinatorMode } from './coordinator'
+export {
   getAutoCompactThreshold,
   shouldAutoCompact,
   autoCompactIfNeeded,
