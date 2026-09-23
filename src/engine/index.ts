@@ -34,6 +34,20 @@ export {
 } from './pipeline'
 export { EngineState, type StateUpdater } from './state'
 export {
+  createMcpTools,
+  findMcpServerConnection,
+  buildMcpToolName,
+  getMcpPrefix,
+  mcpInfoFromString,
+  normalizeNameForMCP,
+} from './tools'
+export type {
+  McpToolResult,
+  McpToolClient,
+  McpToolDescriptor,
+  MCPServerConnection,
+} from './ports/mcpClient'
+export {
   getAutoCompactThreshold,
   shouldAutoCompact,
   autoCompactIfNeeded,
