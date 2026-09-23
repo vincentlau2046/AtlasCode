@@ -30,11 +30,11 @@ import {
   getSettingsForSource,
   resetSettingsCache,
   type HooksSettings,
-  type FsOperations,
 } from '../../src/engine'
 import {
   setFsImplementation,
   setOriginalFsImplementation,
+  type FsOperations,
 } from '../../src/shared'
 
 // ── mock FsOperations（同 S-3b 模式）────────────────────────────────────
@@ -218,6 +218,22 @@ describe('engine/config snapshot 门控链（§8.28 四态）', () => {
     expect(shouldDisableAllHooksIncludingManaged()).toBe(true)
   })
 
+  test('态①边界：policy + 合并 disableAllHooks 双真 → managed-only false / 禁全 true（§8.30 T-7②）', () => {
+    const m = makeMockFs({
+      [USER_SETTINGS]: JSON.stringify({
+        disableAllHooks: true,
+        hooks: USER_HOOKS,
+      }),
+      [MANAGED_BASE]: JSON.stringify({ disableAllHooks: true, hooks: MANAGED_HOOKS }),
+    })
+    setFsImplementation(m.ops)
+    // shouldAllowManagedHooksOnly 守卫支 policy.disableAllHooks !== true 在态①
+    // 不成立 → false（态① 原测只断言了 disable-all 面，守卫支无覆盖）
+    expect(shouldAllowManagedHooksOnly()).toBe(false)
+    expect(shouldDisableAllHooksIncludingManaged()).toBe(true)
+    expect(getHooksConfigFromSnapshot()).toEqual({})
+  })
+
   test('态②：policy allowManagedHooksOnly → 仅 managed hooks', () => {
     const m = makeMockFs({
       [USER_SETTINGS]: hooksJson(USER_HOOKS),
@@ -372,6 +388,20 @@ describe('engine/config createHooksConfigProvider（§8.28 过滤面）', () => 
     setFsImplementation(m.ops)
     const provider = createHooksConfigProvider()
     expect(provider.getHookMatchersForEvent('Stop')).toEqual([])
+  })
+
+  test('畸形 matcher（缺 hooks 键，z.any() 放行）→ 守卫剔除不崩（§8.30 T-1）', () => {
+    const m = makeMockFs({
+      [USER_SETTINGS]: JSON.stringify({
+        hooks: { PreToolUse: [{ matcher: 'Bash(npm *)' }] },
+      }),
+    })
+    setFsImplementation(m.ops)
+    const provider = createHooksConfigProvider()
+    // settings 面 hooks 经 z.any() 透传（S-3a 裁定）：用户配置缺 hooks 键时
+    // 旧仓 matcher.hooks.filter 抛 TypeError 崩钩子面（getMatchingHooks 无
+    // 守卫）；本版 Array 守卫剔除 → 空结果（回归锁定 T-1 加固）
+    expect(provider.getHookMatchersForEvent('PreToolUse')).toEqual([])
   })
 })
 

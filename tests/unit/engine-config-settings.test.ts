@@ -4,12 +4,12 @@
  * 被测能力（S-3b 全表面）：
  *   - mergeWith（lodash 语义子集）：深合并 / 数组拼接去重 / null 覆盖 /
  *     undefined 源值不写入
- *   - parseSettingsFile：合法/空文件/坏 JSON 三态 + 非字符串权限规则过滤 +
- *     路径级缓存 + structuredClone 隔离
+ *   - parseSettingsFile：合法/空文件/坏 JSON 三态 + BOM 前缀剥离（§8.30 T-2）
+ *     + 非字符串权限规则过滤 + 路径级缓存 + structuredClone 隔离
  *   - loadManagedFileSettings：基座 + drop-in 字母序后文件赢 / 目录缺失 ENOENT 静默
  *   - 级联优先级（user < policy）+ 错误去重 + perSource/session 缓存失效
  *   - updateSettingsForSource：新建 / 合并 / 数组整替 / 删键(undefined) /
- *     坏 JSON 守卫 / policy 只读 no-op
+ *     坏 JSON 守卫 / 校验失败 raw 合并基座（§8.30 T-3）/ policy 只读 no-op
  * I/O-free（mock FsOperations 注入，无真实磁盘/网络/PTY）→ unit 层。
  * 用户路径经 ATLAS_CONFIG_DIR 指向 mock 命名空间（/mock-home）。
  */
@@ -29,11 +29,11 @@ import {
   getSettingsWithErrors,
   resetSettingsCache,
   type EditableSettingSource,
-  type FsOperations,
 } from '../../src/engine'
 import {
   setFsImplementation,
   setOriginalFsImplementation,
+  type FsOperations,
 } from '../../src/shared'
 
 // ── mock FsOperations：文件 map + drop-in 目录 map，I/O-free ─────────────
@@ -161,6 +161,16 @@ describe('engine/config parseSettingsFile（§8.27 S-3b）', () => {
     const m = makeMockFs({ '/x.json': '   \n' })
     setFsImplementation(m.ops)
     expect(parseSettingsFile('/x.json').settings).toEqual({})
+  })
+
+  test('BOM 前缀剥离（PowerShell 5.x 写 UTF-8 带 BOM，§8.30 T-2 回归守卫）', () => {
+    // parseJson 的 BOM 剥离是登记过来源的行为契约；删掉该行 replace 后
+    // BOM 前缀文件静默变「Invalid or malformed JSON」且本测变红
+    const m = makeMockFs({ '/x.json': '\uFEFF' + JSON.stringify({ model: 'bom' }) })
+    setFsImplementation(m.ops)
+    const { settings, errors } = parseSettingsFile('/x.json')
+    expect(errors).toEqual([])
+    expect(settings?.model).toBe('bom')
   })
 
   test('坏 JSON → settings null + "Invalid or malformed JSON" 呈现', () => {
@@ -350,9 +360,11 @@ describe('engine/config 级联与缓存（§8.27 S-3b）', () => {
     expect(m.reads).toBe(readsAfterReset) // 新一轮 session 缓存命中
   })
 
-  test('级联错误去重（同文件经 seenFiles 只计一次）', () => {
-    // user 与 policy 路径不同时，坏 user 文件错误进级联 errors；
-    // 同一坏文件不重复（seenFiles 按 resolvedPath 去重）
+  test('单源坏文件错误只出现一次（seenFiles 去重支为防御性不可达，§8.30 T-5）', () => {
+    // 坏 user 文件错误进级联 errors 且仅一次。seenFiles 按 resolvedPath 去重支
+    // （settings.ts 级联循环）在新仓布局下防御性不可达：user 路径
+    // （{configDir}/settings.json）与 policy 路径（managed 目录）不可能同路径，
+    // flag 死源短路 → 无两源同路径场景（原测名「级联错误去重」过 claim，订正）
     const m = makeMockFs({ [USER_SETTINGS]: '{ bad json' })
     setFsImplementation(m.ops)
     const { settings, errors } = getSettingsWithErrors()
@@ -428,6 +440,21 @@ describe('engine/config updateSettingsForSource（§8.27 S-3b 写回）', () => 
     const { error } = updateSettingsForSource('userSettings', { model: 'x' })
     expect(error?.message).toContain('Invalid JSON syntax in settings file')
     expect(m.files.get(USER_SETTINGS)).toBe('{ broken') // 未被覆写
+  })
+
+  test('校验失败（合法 JSON 过不了 schema）→ raw 数据为合并基座，坏字段无损保留（§8.30 T-3）', () => {
+    // env.A 非字符串 → schema 校验失败 → getSettingsForSourceUncached 返 null
+    // → 守卫支读原文 parseJson 成功 → raw 为合并基座。回归改该支为「merge
+    // 进 {}」将静默丢用户坏字段数据且全测绿（现有写回测全用良形 JSON）
+    const m = makeMockFs({
+      [USER_SETTINGS]: JSON.stringify({ model: 'a', env: { A: 1 } }),
+    })
+    setFsImplementation(m.ops)
+    const { error } = updateSettingsForSource('userSettings', { model: 'b' })
+    expect(error).toBeNull()
+    expect(m.files.get(USER_SETTINGS)).toBe(
+      JSON.stringify({ model: 'b', env: { A: 1 } }, null, 2) + '\n',
+    )
   })
 
   test('写回后 resetSettingsCache（session 缓存失效重载）', () => {

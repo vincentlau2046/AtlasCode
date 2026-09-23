@@ -20,6 +20,14 @@
  *   - resetEndpointConfigSource 跨 case 回归（注入 settings 面后 reset →
  *     裸空 stub：池头不可解析 → undefined；无 reset 则模块态泄漏跨 case）
  * mock fs + ATLAS_CONFIG_DIR 指向 /mock-home（unit 层无真实磁盘）。
+ *
+ * 运行口径注（§8.30 T-6）：compose 装配测试经 createCoreDependencies 注入
+ * 7 组模块态窗口（hooks 快照+provider / permissions settingsPaths /
+ * executor 三 port / task port / bootstrap env）；本文件 afterEach 仅复位
+ * endpoint source + settings cache（其余窗口由各自域测试的 reset 助手负责）。
+ * 标准跑法 `bun test --isolate` 每文件独立进程，无跨文件泄漏；单进程 ad-hoc
+ * 多文件连跑时本文件注入的窗口可波及后续文件（如 hooks 域 fail-fast 断言
+ * 会见到已注入态）——此类跑法须本文件排前或逐文件 isolate。
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { join } from 'path'
@@ -28,13 +36,11 @@ import {
   createCoreDependencies,
 } from '../../src/atlascode'
 import { getRoleModel, resetEndpointConfigSource } from '../../src/modelprovider'
-import {
-  resetSettingsCache,
-  type FsOperations,
-} from '../../src/engine'
+import { resetSettingsCache } from '../../src/engine'
 import {
   setFsImplementation,
   setOriginalFsImplementation,
+  type FsOperations,
 } from '../../src/shared'
 
 function enoent(path: string): NodeJS.ErrnoException {

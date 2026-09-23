@@ -21,11 +21,11 @@ import {
   applyConfigEnvironmentVariables,
   SAFE_ENV_VARS,
   resetSettingsCache,
-  type FsOperations,
 } from '../../src/engine'
 import {
   setFsImplementation,
   setOriginalFsImplementation,
+  type FsOperations,
 } from '../../src/shared'
 
 function enoent(path: string): NodeJS.ErrnoException {
