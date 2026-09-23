@@ -63,8 +63,9 @@ export async function queryOneRound(
   })
 
   const assistantContent: unknown[] = resp.message.content ?? []
-  const assistantMsg: Message = {
+  const assistantMsg: AssistantMessage = {
     type: 'assistant',
+    role: 'assistant',
     uuid: resp.uuid,
     timestamp: resp.timestamp,
     stop_reason: resp.message.stop_reason,
@@ -76,11 +77,7 @@ export async function queryOneRound(
   )
 
   // loop 内工具执行委托 pipeline（T-2）：find→权限门→validate→hooks→call→mapResult→result 追加
-  const outcomes = await runToolBatch(
-    toolUses,
-    assistantMsg as AssistantMessage,
-    { tools },
-  )
+  const outcomes = await runToolBatch(toolUses, assistantMsg, { tools })
   const toolResults = outcomes.map((o) => ({
     toolUseId: o.toolUseId,
     name: o.name,

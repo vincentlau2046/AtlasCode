@@ -841,7 +841,14 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 
 **残余 ① 第 8 port 闭环**：charter 行 78「8 port」是**跨域总量**（engine 7 + modelprovider errorMessaging=Port 2）；`engine/ports/` 恰 7 个（domainMount/featureConfig/lspStatus/mcpClient/promptSuggestion/sessionContext/sessionMemory）= **完整**，无需第 8 engine port；errorMessaging 已落 `src/modelprovider/ports/errorMessaging.ts`。
 
-**新增残余**：⑤ `buildSchemaNotSentHint`（旧仓 toolExecution 小件）依赖 ToolSearch 特性族（新仓未移植），现搬造假依赖 → 留接缝归 **E-1b/工具面**（随 inputSchema JSON schema 校验 + 旧仓 zod safeParse 替身）⑥ **engine anti-stub 门建设**（T-5 裁定，wave 级任务）⑦ E-1 `compose.ts` engine 装配（QueryEngine 构造 + ask 入口）未接线（DEP-5 组合根 allow 已预铺，E-1 非组合根接线波，归 E 波组合根子任务）。
+**新增残余**：⑤ `buildSchemaNotSentHint`（旧仓 toolExecution 小件）依赖 ToolSearch 特性族（新仓未移植），现搬造假依赖 → 留接缝归 **E-1b/工具面**（随 inputSchema JSON schema 校验 + 旧仓 zod safeParse 替身）⑥ **engine anti-stub 门建设**（T-5 裁定，wave 级任务）⑦ E-1 `compose.ts` engine 装配（QueryEngine 构造 + ask 入口）未接线（DEP-5 组合根 allow 已预铺，E-1 非组合根接线波，归 E 波组合根子任务）⑧ **`PipelineDeps.mcpClients` 死接缝已删**（独立 review 2026-09-23 判定：字段声明但零消费点，窄 spine 下 MCP tool 未注册 → unknown-tool is_error 已覆盖；按「无调用点=不加接缝」纪律删除，E-2 路由落地时连同 mcp 分支加回）。
+
+**独立 review 处置（code-review 子代理对抗性审 25a5d4b..219518a，2026-09-23）**：
+- **CRITICAL 已修**：`EngineState.set` 原只捕 `resolve`——updater 抛错时调用方 promise 永久挂起 + `void this.process()` unhandled rejection。修：捕 `reject` + updater 抛错 try/catch（reject 该调用方、state 不变、队列继续 drain，单坏 updater 不卡死整队列，异于 React error boundary 已在头注释说明）+ 新 ⑤b 守卫测（throwing updater reject + 后续 set 照常 drain + state 不变）。
+- **IMPORTANT 已处置**：`mcpClients` 死接缝 → 删（残余 ⑧）。其余 3 接缝（checkPermission/hooks/并发）review 验证真接线非死代码 ✓。
+- **minor 已修**：`assistantMsg` 补顶层 `role: 'assistant'`（AssistantMessage 契约字段，原 `as AssistantMessage` cast 是低风险类型谎言）→ 现直接类型标注无 cast。
+- **minor 登记不修**：① engine-state 测 ⑤ 反例守卫测的是朴素 read-compute-write（非 SUT），作「为何队列+函数式是安全来源」文档测保留（头注已说明，非 EngineState 覆盖断言）② `deps.signal` 未传入 tool 执行（Tool.call 无 signal 参）= 已登记 E-1b 裁剪项（非 bug）。
+- **H6 空洞核查**：3 个新测试文件无 hollow test（loop 测断言真 dispatch/parse/call/map/append 路径，pipeline 测断言各接缝真被消费）。
 
 **四件套基线更新**：tsc 0 / lint 0 / build 0 / **472 pass 0 fail（42 文件 875 expect）**（E-1 开波基线 450/39/824 → T-1 454/40/840 → T-3 460/41/851 → T-2 472/42/875）。
 

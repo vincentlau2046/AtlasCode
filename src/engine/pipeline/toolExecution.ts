@@ -9,7 +9,9 @@
  *   - 旧仓单体把 permission 规则树 + MCP 路由 + OTel 遥测 + tool.call + result map 混一处。
  *     本版只留最小执行链，其余按 §8.21 归后续纵切：
  *     · 权限门 → deps.checkPermission 接缝（E-4 规则求值树注入；窄 spine 默认放行）
- *     · MCP 路由 → deps.mcpClients 接缝（E-2；窄 spine 未注入 → MCP tool 未注册 → unknown-tool is_error）
+ *     · MCP 路由 → E-2（路由落地时加 mcp 分支 + PipelineDeps 字段；窄 spine 下 MCP tool 未注册
+ *       → unknown-tool is_error 兜底已覆盖。不预造无消费点的接缝字段——review 2026-09-23 裁定，
+ *       登记 §8.22 残余 ⑧）
  *     · 钩子 → deps.hooks 接缝（E-5 toolHooks 注入；窄 spine 无操作）
  *     · OTel 遥测 → 旧仓已删（879 logEvent 点清零），无对应物
  *     · 旧仓 zod `inputSchema.safeParse` + buildSchemaNotSentHint（ToolSearch 特性族）→ E-1b/工具面
@@ -44,8 +46,6 @@ export interface ToolHooks {
 
 export interface PipelineDeps {
   tools: Tools
-  /** E-2 接缝：MCP 客户端注册表。窄 spine 为 undefined（MCP tool 未注册）；E-2 注入路由。 */
-  mcpClients?: unknown
   checkPermission?: PermissionGate
   hooks?: ToolHooks
 }

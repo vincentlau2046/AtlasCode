@@ -23,7 +23,11 @@ export type StateUpdater<S> = (prev: S) => S
 
 export class EngineState<S> {
   private state: S
-  private queue: Array<{ f: StateUpdater<S>; resolve: () => void }> = []
+  private queue: Array<{
+    f: StateUpdater<S>
+    resolve: () => void
+    reject: (e: unknown) => void
+  }> = []
   private processing = false
 
   constructor(initial: S) {
@@ -33,10 +37,14 @@ export class EngineState<S> {
   /**
    * 串行 apply：f 始终看最新 committed prev；每次 apply 即提交（不批处理合并）。
    * 并发 set 入同一队列串行 drain，非函数式/无队列的 read-compute-write 会丢更新。
+   *
+   * updater 抛错语义（review 2026-09-23 修）：reject 该调用方（不挂起）+ state 不变 +
+   * 队列继续 drain（单个坏 updater 不卡死整队列）。异于 React error boundary（React
+   * updater 返 void 无 awaitable、抛错走 boundary）——本版 awaitable 契约下 fail-fast 到调用方。
    */
   set(f: StateUpdater<S>): Promise<void> {
-    return new Promise<void>((resolve) => {
-      this.queue.push({ f, resolve })
+    return new Promise<void>((resolve, reject) => {
+      this.queue.push({ f, resolve, reject })
       void this.process()
     })
   }
@@ -49,8 +57,13 @@ export class EngineState<S> {
         const item = this.queue.shift()!
         // 微任务边界：每次 apply 是独立 async 提交（不合并，与 React 批处理差异）。
         await Promise.resolve()
-        this.state = item.f(this.state) // f 看最新 committed state
-        item.resolve()
+        try {
+          this.state = item.f(this.state) // f 看最新 committed state
+          item.resolve()
+        } catch (e) {
+          // updater 抛错：只 reject 该调用方（state 不变），队列继续 drain 后续 updater。
+          item.reject(e)
+        }
       }
     } finally {
       this.processing = false

@@ -68,6 +68,28 @@ describe('engine/state EngineState set(f) 串行 apply 队列', () => {
     expect(naiveCount).toBeLessThan(100)
   })
 
+  test('⑤b updater 抛错：reject 调用方（不挂起）+ state 不变 + 后续 set 照常 drain（队列不卡死）', async () => {
+    const es = new EngineState<{ count: number }>({ count: 0 })
+    const rejected: unknown[] = []
+    const throwing = es.set(() => {
+      throw new Error('boom')
+    })
+    const guard = throwing.then(
+      () => {
+        throw new Error('throwing updater should reject')
+      },
+      (e: unknown) => {
+        rejected.push(e)
+      },
+    )
+    // 抛错 updater 之后入队的 set 照常提交（串行 drain 不被卡死）
+    await es.set((prev) => ({ count: prev.count + 1 }))
+    await guard
+    expect(rejected[0]).toBeInstanceOf(Error)
+    expect((rejected[0] as Error).message).toBe('boom')
+    expect(es.get().count).toBe(1) // 抛错未改 state，后续 +1 已 apply
+  })
+
   test('⑥ rewind(undo) 与 Edit 并发 → 串行化，两顺序均合法（非数据损坏）', async () => {
     type State = { log: string[] }
     const es = new EngineState<State>({ log: ['init'] })
