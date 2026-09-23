@@ -717,3 +717,17 @@ H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill �
 **#3 memory 本地副本漂移收口（Plan agent ③ 发现 (b)，2026-09-23 落地）**：T5 下沉 shared/hash·path·configDir 为单一事实源后，memory 域本地副本未删——`src/memory/pathUtils.ts`（djb2Hash/sanitizePath/MAX_SANITIZED_LENGTH/simpleHash，与 shared/hash.ts·path.ts **逐行一致**）+ `src/memory/envUtils.ts`（getConfigDirName，与 shared/configDir.ts 一致）。收口：pathUtils.ts **整删**（-37 行），envUtils.ts 删 getConfigDirName 副本改 `import { getConfigDirName } from '../shared'`，paths.ts sanitizePath 改 import shared，memory-config-utils.test.ts 深 import pathUtils 改 import shared（#2 门治理时统一处理 envUtils 深 import）。验收 tsc 0 / lint 0 / 446 pass 0 fail（行为零差异，shared 实现逐行一致已验）。
 
 **#4 L-1 误判核实（Review 会话 L-1，2026-09-23 核实）**：Review 会话 L-1 称"H6④ TaskId 双口径只落 canonical 半，hook_<pid> 字面量零实现零登记，矩阵行 87 标签超称"。经核实：旧仓 Task.ts 全文 + 旧仓全 src grep `hook_` 只命中 message 类型（hook_result/hook_cancelled/hook_progress 等），**不存在 hook_<pid> task id 形式**；新仓 task/hooks 域 grep 零命中。§8.16 H6④ 定义的"双口径"= type→前缀 + 长度/字符集（非 canonical + hook_<pid>），测试 H6④ 全覆盖（前缀映射 b/a/r + 格式 [prefix][8 小写数字字母]）。**矩阵行 87 不超称，L-1 为误判，无需改文案。**
+
+### §8.19 门治理批次落地（#1/#2 缺口修复 + eslint 八域扩展，2026-09-23）
+
+**裁定背景**：切片 3 复审 4 架构裁定（域终态/命名/子模块/缺口修复）。域终态= #56 charter v0.12 认 12 域（commit `2ef4da9`，§8.17 D18 + §8.18 #3/#4 已落）；命名= TaskCreate 系列用 `engine/coordinator/tasks/` 避撞 `src/task/`（charter L4.8 登记，engine 波创建时落地）；子模块= engine ~14 子模块登记（charter L4.8，engine 波规划时落目录树）。本节收口**缺口修复 #1/#2 + eslint 门治理**（用户裁定"#1/#2 随门治理"）。
+
+**eslint 八域扩展（commit `a10ebe5`）**：C-Deep 切片 3 四域纳入 lint——`boundaries/elements` 加 task/bootstrap/permissions/hooks 4 element；DEP-2/3 八域零向上 `allow=[shared]` only。**port 解耦验证**：executor 经域内 `ports/taskOutput.ts` 消费 TaskOutput port（不 import task 域）；hooks 不 import executor（HookShellPort 注入）；permissions 不 import sandbox（注入端口斩断）→ 四新域零跨域 import，allow=[shared] only 成立。DEP-4 engine allow 加四新域（engine 波接线 hooks-runner/permissions-engine/task 消费）；DEP-5 atlascode/mount allow 加四新域（壳组合根 compose.ts 注入八域）。
+
+**#2 tests 门面收口（commit `a10ebe5`）**：tests/ 纳入 STR-1 entry-point（`boundaries/entry-point` 覆盖 tests/**：import src 域时 target 必须是 index.ts，不得 reach 内部文件；tests 内部 import fixtures/helpers 不受约束，element-types/no-unknown 对 tests 关闭）。10 处 tests 深入 import 改走门面（modelErrors/errorUtils/modelprovider-config/effort/model-roles/executor-shell-command/executor-shell-provider/memory-config-utils）。**补 3 域门面导出支撑**：modelprovider（types APIError 类族 + modelErrors 补 classifyAPIError/isValidAPIMessage + errorUtils 补 sanitizeAPIError + config createModelProviderConfig + effort 8 符号）+ executor（ShellCommand 4 工厂函数 createAbortedCommand/createFailedCommand/generateLocalTaskId/wrapSpawn，Shell.ts 只 re-export type）+ memory（envUtils getAtlasConfigHomeDir）。
+
+**#1 shared anti-stub 纳扫（commit `4e19e1b`）**：shared 纳入 anti-stub 扫描范围（DOMAINS 加 'shared'，防叶子空模块逃门）。3 个 A 波骨架占位 `export {}` 空模块登记 STUB_REGISTRY：identity（待 A-2 --define 注入）/ tokenEstimation（待 C 波）/ sanitizeToolName（待 C 波）。**空壳判定收窄**：加 `hasSubstantiveExport`（有 export const/let/var/function/class 或 re-export from = 实质导出，非空壳）——消除 constants.ts 等单行 `export const` 实质常量文件误判（`export {}` 空模块无导出符号才判空壳）。**门③ wave-c 清零逻辑调整**：只清 C-Deep 域条目（8 域地基），shared A 波占位保留至 A/C 波实现（门②兜底移除）。
+
+**验收**：四件套全绿 tsc 0 / lint 0 / build 0 / test 446 pass 0 fail（38 文件 814 expect）；anti-stub + capability-matrix 门 6 pass 0 fail。
+
+**4 架构裁定全收口**：域终态（#56 `2ef4da9` charter v0.12）+ 命名（charter L4.8 登记，engine 波落地）+ 子模块（charter L4.8 登记，engine 波落目录树）+ 缺口修复（`a10ebe5` #2 + `4e19e1b` #1）。下一步= **★B6-func（compose.ts 最小组合根 + 4+7 前置清单落地，先于 engine）**。
