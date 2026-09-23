@@ -4,7 +4,9 @@
  * S-3a 落：settings 类型面（SettingsSchema/SettingsJson/ValidationError）+ 源层
  * 常量（SETTING_SOURCES/getEnabledSettingSources）+ 三层缓存 + managedPath +
  * configRoot。S-3b 落：加载/合并/写回核心（settings.ts + merge.ts +
- * validation.ts）。
+ * validation.ts）。S-3c 落：hooks 字段族（hooksSchema 四类判别联合 +
+ * hooksConfig snapshot/provider）+ managedEnv（两 apply 函数 + SAFE_ENV_VARS）
+ * + getSettingsPaths（permissions 域桩① 真实现）。
  */
 export {
   SettingsSchema,
@@ -51,6 +53,7 @@ export {
   parseSettingsFile,
   getSettingsRootPathForSource,
   getSettingsFilePathForSource,
+  getSettingsPaths,
   getRelativeSettingsFilePathForSource,
   getSettingsForSource,
   getPolicySettingsOrigin,
@@ -58,3 +61,30 @@ export {
   getInitialSettings,
   getSettingsWithErrors,
 } from './settings'
+// S-3c：hooks 字段族数据契约 + snapshot/provider + managedEnv
+export {
+  HookCommandSchema,
+  HookMatcherSchema,
+  HooksSchema,
+  type CommandHookCommand,
+  type PromptHookCommand,
+  type AgentHookCommand,
+  type HttpHookCommand,
+  type ConfigHookCommand,
+  type ConfigHookMatcher,
+  type HooksSettings,
+} from './hooksSchema'
+export {
+  captureHooksConfigSnapshot,
+  updateHooksConfigSnapshot,
+  getHooksConfigFromSnapshot,
+  resetHooksConfigSnapshot,
+  shouldAllowManagedHooksOnly,
+  shouldDisableAllHooksIncludingManaged,
+  createHooksConfigProvider,
+} from './hooksConfig'
+export {
+  applySafeConfigEnvironmentVariables,
+  applyConfigEnvironmentVariables,
+  SAFE_ENV_VARS,
+} from './managedEnv'

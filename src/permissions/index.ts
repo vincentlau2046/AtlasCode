@@ -16,8 +16,11 @@
  *   yoloClassifier / permissionSetup 归 engine）
  * - bootstrap-env.ts：bootstrap 状态跨域注入窗口（setPermissionsBootstrapEnv /
  *   get / reset，未注入 fail-fast）
+ * - settingsPaths.ts：settings 路径跨域注入窗口（S-3c，setSettingsPathsProvider /
+ *   get / reset，未注入 = 空数组降级——区别于 bootstrap 窗 fail-fast）
  */
 export * from './PermissionRule'
 export * from './filesystem'
 export * from './permissions'
 export * from './bootstrap-env'
+export * from './settingsPaths'

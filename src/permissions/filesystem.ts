@@ -17,7 +17,9 @@
  * 薄骨架桩（§8.14「规则求值 归 engine」，复审勿当遗漏重提）：
  *   ① matchingRuleForInput —— 规则求值树（ignore 库 + 工具名常量 +
  *      settings roots + pattern 树）归 engine；桩恒返回 null（无匹配规则），
- *      checkRead/checkWrite 的规则命中步降级直通。
+ *      checkRead/checkWrite 的规则命中步降级直通。settings roots 数据面
+ *      （getSettingsPaths）S-3c 已经 ./settingsPaths 注入窗口接真，规则树
+ *      本体仍归 E-4。
  *   ② checkReadableInternalPath / checkEditableInternalPath —— session-memory /
  *      plans / tool-results / scratchpad 内部路径判定归 engine；桩恒 passthrough 续查。
  *   ③ generateSuggestions —— PermissionUpdate 真生成（createReadRuleSuggestion）
@@ -52,6 +54,7 @@ import type {
   ToolPermissionContext,
 } from '../shared'
 import { getPermissionsBootstrapEnv } from './bootstrap-env'
+import { getSettingsPaths } from './settingsPaths'
 
 /**
  * 权限检查消费的 Tool 窄视图（旧仓全量 Tool 的 name + getPath 子集）。
@@ -117,16 +120,12 @@ export function relativePath(from: string, to: string): string {
 }
 
 /**
- * 项目 settings 文件路径列表（薄骨架桩）。
- * 旧仓 getSettingsPaths = SETTING_SOURCES.map(getSettingsFilePathForSource)——
- * 依赖完整 settings 加载体系（settings 域，engine 波）；薄骨架 settings 体系
- * 未落地，桩返回空数组。isAtlasSettingsPath 仍靠 endsWith 捕获全局
- * `{configDir}/settings.json`，项目 settings 匹配归 engine。
+ * 项目 settings 文件路径列表（E-3 S-3c 接真）。
+ * 经 ./settingsPaths 注入窗口读取（L3 斩断：permissions 域不 import
+ * engine/config）；组合根注入 engine/config getSettingsPaths 真实现。未注入
+ * = 空数组（isAtlasSettingsPath 仍靠 endsWith 捕获全局 {configDir}/settings.json，
+ * 项目 settings 匹配降级不命中，见 settingsPaths.ts 头注降级语义）。
  */
-function getSettingsPaths(): string[] {
-  return []
-}
-
 export function isAtlasSettingsPath(filePath: string): boolean {
   // SECURITY: 先归一路径结构，防 `./getConfigDirName()/./settings.json` 类冗余
   // ./ 序列绕过 endsWith() 检查

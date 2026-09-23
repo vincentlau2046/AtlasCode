@@ -63,9 +63,11 @@ export const SettingsSchema = () => z.object({
   // --- 沙箱 / 权限（sandbox 域 + E-4 规则树消费）
   sandbox: z.any().optional(),
   permissions: z.any().optional(),
-  // --- 钩子（E-5 hooks-runner 消费；结构细化 = engine/config/hooksSchema（S-3c））
+  // --- 钩子（E-5 hooks-runner 消费；数据契约 = engine/config/hooksSchema（S-3c 已落），
+  //     SettingsSchema 维持 z.any() 透传——旧仓无 hooks 校验面逐字一致，收紧归 E-5）
   hooks: z.any().optional(),
   disableAllHooks: z.boolean().optional(),
+  allowManagedHooksOnly: z.boolean().optional(),
   // --- 记忆 / git（memory 域消费）
   autoMemoryEnabled: z.boolean().optional(),
   autoMemoryDirectory: z.string().optional(),

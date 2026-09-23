@@ -53,10 +53,11 @@
  * 落地，登记防「以为已全」亦防误删）：
  *   - getPolicySettingsOrigin（'file' | null）：消费面 = 诊断/组合根纵切
  *     （/status 呈现 = 残留守 UI 面）
- *   - updateSettingsForSource：消费面 = S-3c 权限/hooks 配置面写回 +
- *     E-4 权限规则树波次（旧仓 permissionsLoader 写回路径同型）
- *   - getInitialSettings/getSettingsWithErrors：消费面 = S-3d
- *     settings-adapter（EndpointConfigSource）+ S-3c 按源直读
+ *   - updateSettingsForSource：消费面 = E-4 权限规则树波次（旧仓
+ *     permissionsLoader 写回路径同型）
+ *   - getSettingsWithErrors：S-3c 已消费（hooksConfig 门控链 + managedEnv
+ *     apply 两面按源直读）；残余消费面 = S-3d settings-adapter
+ *   - getInitialSettings：消费面 = S-3d settings-adapter
  */
 import { dirname, join, resolve } from 'path'
 import {
@@ -68,7 +69,12 @@ import {
   getConfigDirName,
 } from '../../shared'
 import { getAtlasConfigHomeDir } from './configRoot'
-import { getEnabledSettingSources, type EditableSettingSource, type SettingSource } from './constants'
+import {
+  getEnabledSettingSources,
+  SETTING_SOURCES,
+  type EditableSettingSource,
+  type SettingSource,
+} from './constants'
 import { mergeWith, settingsMergeCustomizer } from './merge'
 import { getManagedSettingsDropInDir, getManagedSettingsDir } from './managedPath'
 import {
@@ -284,6 +290,17 @@ export function getSettingsFilePathForSource(
     case 'flagSettings':
       return undefined
   }
+}
+
+/**
+ * 全源 settings 文件路径列表（旧仓 getSettingsPaths 逐字：SETTING_SOURCES.map
+ * + 死源 flagSettings undefined 过滤）。permissions 域桩① 真实现（S-3c 消费
+ * 点接线，经 L3 注入窗口 permissions/settingsPaths.ts 供 compose.ts 装配）。
+ */
+export function getSettingsPaths(): string[] {
+  return SETTING_SOURCES.map(getSettingsFilePathForSource).filter(
+    (path): path is string => path !== undefined,
+  )
 }
 
 export function getRelativeSettingsFilePathForSource(

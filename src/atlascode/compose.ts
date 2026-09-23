@@ -15,6 +15,9 @@
  *   D17   setHookShellPort（hooks ← executor 真 Shell）
  *   D18   setEndpointConfigSource（modelprovider ← env OpenAI 静态键车道）
  *   + setPermissionsBootstrapEnv（§8.14 注入序首步，permissions ← bootstrap 两 cwd 态）
+ *   + S-3c（§8.28）setSettingsPathsProvider（permissions ← engine/config settings
+ *     路径面）+ setHookConfigProvider + captureHooksConfigSnapshot（hooks ←
+ *     engine/config settings.hooks 配置面，启动捕获一次）
  */
 import { createSandboxManager, type SandboxManager } from '../sandbox'
 import {
@@ -28,9 +31,14 @@ import {
   setBootstrapStatePort,
   setExecutorSandboxPort,
 } from '../executor'
-import { setPermissionsBootstrapEnv } from '../permissions'
+import { setPermissionsBootstrapEnv, setSettingsPathsProvider } from '../permissions'
 import { setDiskOutputEnv } from '../task'
-import { setHookShellPort } from '../hooks'
+import { setHookConfigProvider, setHookShellPort } from '../hooks'
+import {
+  captureHooksConfigSnapshot,
+  createHooksConfigProvider,
+  getSettingsPaths,
+} from '../engine'
 import { getCwdState, getOriginalCwd } from '../bootstrap'
 
 import { adaptSandboxToExecutorPort } from './adapters/sandboxAdapter'
@@ -65,17 +73,22 @@ export function createCoreDependencies(): CoreDependencies {
   setBootstrapStatePort(adaptBootstrapToExecutorPort())
   setExecutorSandboxPort(adaptSandboxToExecutorPort(sandboxManager))
 
-  // ③ permissions ← bootstrap（§8.14 注入序首步：两 cwd 态）
+  // ③ permissions ← bootstrap（§8.14 注入序首步：两 cwd 态）+
+  //    permissions ← engine/config（S-3c settings 路径面，桩① 接真）
   setPermissionsBootstrapEnv({
     getOriginalCwd,
     getCwd: getCwdState,
   })
+  setSettingsPathsProvider(getSettingsPaths)
 
   // ④ task ← permissions+bootstrap（D11，permissions 之后）
   setDiskOutputEnv(createDiskOutputEnv())
 
-  // ⑤ hooks ← executor（D17，注入序末步；先于首次带命令钩子 runHooks）
+  // ⑤ hooks ← executor（D17，注入序末步；先于首次带命令钩子 runHooks）+
+  //    hooks ← engine/config（S-3c settings.hooks 配置面，启动捕获一次快照）
   setHookShellPort(adaptExecutorToHookShellPort())
+  setHookConfigProvider(createHooksConfigProvider())
+  captureHooksConfigSnapshot()
 
   // ⑥ modelprovider ← atlascode env 车道（D18）
   setEndpointConfigSource(createEndpointConfigSource())

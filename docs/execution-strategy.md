@@ -986,3 +986,40 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **审视安排（大颗粒，按 task 清单）**：每切片闭环自验（四件套 + 切片 review），**波末按本 task 清单做大颗粒整体审视**（三视角：功能跨切片接缝 / 测试盲区 / 残留守登记，同 §8.26 模式——上次正是大颗粒抓出 mcpMeta 未登记接缝 + 单源违规）→ 审视记录 §8.2x + memory 同步。
 
 **基线**：661 pass / 0 fail / 1296 expect / 50 文件；gate 6 pass / 0 fail / 2 files（engine 不在扫描集，E-3 无 gate 改动）。
+
+### §8.28 E-3 S-3c 执行前分析 + 方案（2026-09-24）
+
+**范围**（§8.27 S-3c 条目）：schemas/hooks（HookCommand 四类判别联合 + HooksSchema，HOOK_EVENTS 复用 hooks 域 27 事件单一事实源）+ hooksConfigSnapshot 裁剪 + hooksSettings 裁剪 + managedEnv 裁剪 + 消费点接线（permissions 桩① getSettingsPaths 接真 + setHookConfigProvider 注入）。
+
+**勘察定稿（旧仓 ground truth 全抽查）**：
+- 旧仓 `HookCommand`/`HooksSettings` 均 = `any`（settings/types.ts:108/115）——无权威类型面。四类变体字段形状取自旧仓 `isHookEqual` switch 比较面（可验真）：command{command, shell?, timeoutMs?, if?}（shell 默认 'bash' 为身份字段）/ prompt{prompt, if?} / agent{prompt, if?} / http{url, if?}；`if` 条件字段为四类共享身份字段；第五类 function/callback = 进程内、不可 JSON 表达 → 不入配置面（§8.27 四类裁定）。
+- hooksConfigSnapshot 门控链（policy disableAllHooks → {} / policy allowManagedHooksOnly → 仅 policy hooks / 合并 disableAllHooks → 仅 policy hooks / 否则合并 hooks）+ snapshot 四函数逐字可 port；`isRestrictedToPluginOnly`（plugin-only 策略）+ `resetSdkInitState`（bootstrap 状态）+ `getSettings_DEPRECATED` 三处裁剪。
+- managedEnv：`filterSettingsEnv` = 三过滤器合成（withoutSSHTunnelVars ATLAS_UNIX_SOCKET / withoutCcdSpawnEnvKeys ATLAS_ENTRYPOINT=claude-desktop / withoutHostManagedProviderVars ATLAS_PROVIDER_MANAGED_BY_HOST+PROVIDER_MANAGED_ENV_VARS 11 项）。新仓三面引用全 0（grep 验真）→ 三过滤器全裁；`getGlobalConfig`（~/.atlas.json 全局配置面）新仓不存在 → 裁；applyConfig 的 caCerts/mtls/proxy 缓存清除 + configureGlobalAgents（新仓无对应模块）→ 裁。
+- 新仓 hooks 域 runHooks 只消费 `.command`（L82/103/121/203 等）→ provider 面向执行器契约**过滤 command 变体**；prompt/agent/http 执行面归 E-5（hooks-runner 波）。
+
+**方案落点（`src/engine/config/` + 接线）**：
+1. `hooksSchema.ts`（新）：四类判别联合 zod（command/prompt/agent/http，各 `.passthrough()` 通配字段）+ ConfigHookMatcher + `HooksSettings = Partial<Record<HookEvent, ConfigHookMatcher[]>>`（HookEvent 经 `../../hooks/hookEvents` import，不复制 27 事件）+ HooksSchema record 面。
+2. `hooksConfig.ts`（新）：snapshot 门控链裁剪版（真核心逐字 + 三处裁剪登记）+ `createHooksConfigProvider()`（HookConfigProvider 实现：snapshot 直读 + command 变体过滤 + 空 matcher 剔除）。
+3. `managedEnv.ts`（新）：`applySafeConfigEnvironmentVariables`（trusted 源全量 env + policy 最后 + 合并面仅 SAFE_ENV_VARS 白名单）+ `applyConfigEnvironmentVariables`（信任后全量合并 env）+ SAFE_ENV_VARS ~60 项白名单逐字 port + TRUSTED_SETTING_SOURCES 三源。
+4. `settings.ts` 加 `getSettingsPaths()`（SETTING_SOURCES.map(getSettingsFilePathForSource).filter 非 undefined）——permissions 桩① 真实现。
+5. `types.ts` 补 `allowManagedHooksOnly: z.boolean().optional()`（S-3c 消费的数据契约先落；disableAllHooks S-3a 已声明）。
+6. `src/permissions/settingsPaths.ts`（新，L3 斩断注入窗口）+ `filesystem.ts` 桩① 接窗口 + `permissions/index.ts` 导出；未注入 = 空数组（isAtlasSettingsPath 全局 endsWith 兜底降级态，非 fail-fast——permissions 域单测不经组合根）。
+7. `compose.ts` 接线：③ permissions 步加 `setSettingsPathsProvider(() => getSettingsPaths())`；⑤ hooks 步加 `setHookConfigProvider(createHooksConfigProvider())` + `captureHooksConfigSnapshot()`（旧仓启动语义：启动捕一次）。
+
+**残留守登记**（各文件头注）：
+- 四类变体 per-variant 全字段面（http headers/method/timeoutMs 等）→ E-5（旧仓 HookCommand=any 无可验真权威面，本切片仅落 isHookEqual 比较面字段）。
+- SettingsSchema hooks 字段收紧（z.lazy(HooksSchema)）→ E-5 严格编辑面（本切片维持 hooks: z.any() 透传，与旧仓无 hooks 校验面逐字一致，无行为变更）。
+- HooksSchema record key ∈ HOOK_EVENTS 27 事件名集校验 → E-5（旧仓无事件名校验面）。
+- pluginOnly 策略门（isRestrictedToPluginOnly）/ session hooks（appState 会话钩子存储）/ display 字符串 + isHookEqual + sortMatchersByPriority（/hooks UI 面）/ resetSdkInitState → 各残留守（plugin 域 / TUI 会话面 / UI 面 / bootstrap 未落）。
+- updateHooksConfigSnapshot 调用面（旧仓 /hooks 设置 UI）→ 无调用点 = 组合根 / E-wave-end /hooks UI 面登记。
+- managedEnv：三过滤器（ssh-tunnel / ccd spawn-env / host-managed provider 变量面 11 项）+ 全局配置面（~/.atlas.json）+ caCerts/mtls/proxy 缓存清除 + DANGEROUS_SHELL_SETTINGS（trust-dialog UI 消费，新仓无）→ 全残留守（旧仓 managedEnvConstants 为源）。
+- 旧仓合并面含 project/local 的 SAFE 过滤支 → 被 S-3a「project/local 不在级联」裁定结构性覆盖（project env 永不入级联，攻击面收敛；新仓合并面 = user+policy+flag）。
+- getSettingsPaths 注入窗口未注入态 = 空数组降级（compose.ts S-3c 已接线，仅 unit 层裸态可达）。
+
+**测试面**：engine-config-hooks.test.ts（四类联合解析/拒识 + 门控链四态 + snapshot 三函数 + provider 过滤/空事件）+ engine-config-managed-env.test.ts（applySafe trusted 全量 + policy 最后 + SAFE 白名单 / applyConfig 全量 + process.env 存还）+ permissions-settings-paths.test.ts（未注入空 / 注入真值 / reset / isAtlasSettingsPath 两态）。
+
+**S-3c 闭环记录（实施后，同提交）**：
+- 落点 7 项全落：hooksSchema（四类联合 zod 验真 = discriminatedUnion+passthrough 于 zod ^4.5.4 可用，`bun -e` 预验真）/ hooksConfig（门控链四态 + snapshot 四函数 + provider 过滤面）/ managedEnv（两 apply + 63 项白名单程序化提取逐字）/ settings getSettingsPaths / types allowManagedHooksOnly / permissions settingsPaths 注入窗口 + 桩①接真 / compose 三接线（setSettingsPathsProvider + setHookConfigProvider + captureHooksConfigSnapshot 启动捕获）。
+- 实施期偏差 2 处闭环：① 态④ 期望误写「policy 逐事件压 user」→ 实为 per-event matcher 数组 uniq 拼接（S-3b settingsMergeCustomizer 语义，user 序在前）——测试断言已订正为双 matcher 并存（级联合并面行为实证）；② eslint `boundaries/entry-point` 抓出 engine/config 深入 hooks 域内文件（hookEvents/config-provider/types 三 import）→ 全改走 `../../hooks` 域根门面（L3 规则）。
+- 验真（四件套 + gate）：tsc 0 / eslint 0（14 改+新文件）/ build 0 KB / **741 pass 0 fail**（1483 expect，55 文件；710 + 31 新增）+ gate 6 pass / 0 fail / 2 files（engine 非扫描集，无 gate 改动）。
+- 残留守登记全落头注（hooksSchema 变体全字段面 / 事件名集校验 → E-5；hooksConfig pluginOnly/session hooks/display 字符串 → 各残留守；managedEnv 三过滤器 + 全局配置 + 缓存清除 + DANGEROUS_SHELL_SETTINGS → 登记；getSettingsPaths 未注入降级态 → compose 已接线，仅 unit 裸态可达；managedEnv 两 apply 函数无生产调用点 = 预声明消费接缝 → S-3d 组合根启动链）。
