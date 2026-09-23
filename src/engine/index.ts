@@ -22,12 +22,15 @@ export {
   runToolBatch,
   partitionToolCalls,
   classifyToolError,
+  validateInputBySchema,
+  buildSchemaNotSentHint,
   type PipelineDeps,
   type PermissionGate,
   type ToolHooks,
   type ToolExecutionOutcome,
   type ToolBatch,
   type ToolBatchOutcome,
+  type SchemaValidationResult,
 } from './pipeline'
 export { EngineState, type StateUpdater } from './state'
 export {

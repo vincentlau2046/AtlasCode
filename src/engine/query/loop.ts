@@ -124,7 +124,11 @@ export async function queryOneRound(
   )
 
   // loop 内工具执行委托 pipeline（T-2）：find→权限门→validate→hooks→call→mapResult→result 追加
-  const outcomes = await runToolBatch(toolUses, assistantMsg, { tools })
+  // signal 透传（T-4c）：经 PipelineDeps.signal → tool.call 第 2 参 context。
+  const outcomes = await runToolBatch(toolUses, assistantMsg, {
+    tools,
+    signal: deps.signal,
+  })
   const toolResults = outcomes.map((o) => ({
     toolUseId: o.toolUseId,
     name: o.name,

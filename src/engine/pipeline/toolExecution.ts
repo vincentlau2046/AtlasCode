@@ -14,9 +14,10 @@
  *       登记 §8.22 残余 ⑧）
  *     · 钩子 → deps.hooks 接缝（E-5 toolHooks 注入；窄 spine 无操作）
  *     · OTel 遥测 → 旧仓已删（879 logEvent 点清零），无对应物
- *     · 旧仓 zod `inputSchema.safeParse` + buildSchemaNotSentHint（ToolSearch 特性族）→ E-1b/工具面
- *       （新仓 inputSchema 是 JSON schema 非 zod，ToolSearch 未移植，现搬会造假依赖，故留接缝不预造）
- *   - 残留守：并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/ MCP 路由（E-2）。
+ *     · 旧仓 zod `inputSchema.safeParse` → E-1b T-4c 落 JSON-schema 浅校验替身
+ *       （schemaValidation.validateInputBySchema + buildSchemaNotSentHint 纯函数）
+ *   - 残留守：复合 schema 校验（anyOf/嵌套/enum/区间，见 schemaValidation 头注）/
+ *     并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/ MCP 路由（E-2）。
  */
 import type {
   AssistantMessage,
@@ -26,6 +27,7 @@ import type {
   Tools,
 } from '../../shared'
 import { classifyToolError } from './errorClassification'
+import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
 
 /** E-4 接缝：权限门。窄 spine 默认放行；E-4 注入规则求值树后在此做 allow/deny 裁定。 */
 export type PermissionGate = (
@@ -48,6 +50,14 @@ export interface PipelineDeps {
   tools: Tools
   checkPermission?: PermissionGate
   hooks?: ToolHooks
+  /** 中止信号（T-4c）：透传给 tool.call 第 2 参 context = { signal }（不改 shared Tool.call 契约）。 */
+  signal?: AbortSignal
+  /**
+   * schema 实际下发给模型的工具名集合（T-4c）：未注入 = 全注册工具均下发（窄 spine 语义，
+   * buildSchemaNotSentHint 恒 null）；ToolSearch/deferred-tools 层注入真实 discovered 集后，
+   * deferred 工具 schema 未下发时 schema 校验失败会回 not-sent 提示。
+   */
+  discoveredToolNames?: ReadonlySet<string>
 }
 
 export interface ToolExecutionOutcome {
@@ -98,8 +108,27 @@ export async function executeToolUse(
     }
   }
 
-  // 输入校验接缝：tool 自带 validateInput（真契约钩子）；旧仓 zod schema safeParse 归 E-1b
-  const validation = await tool.validateInput?.(tu.input, undefined)
+  // 输入校验 ①：浅 JSON-schema 校验（T-4c，旧仓 zod safeParse 替身）+ schema-not-sent 提示
+  const schemaResult = validateInputBySchema(tu.input, tool.inputSchema)
+  if (schemaResult.valid === false) {
+    const discovered =
+      deps.discoveredToolNames ?? new Set(deps.tools.map((t) => t.name))
+    const schemaHint = buildSchemaNotSentHint(tool, discovered)
+    const errorContent = schemaHint
+      ? `${schemaResult.message}${schemaHint}`
+      : schemaResult.message
+    return {
+      block: {
+        type: 'tool_result',
+        tool_use_id: tu.id,
+        content: `<tool_use_error>InputValidationError: ${errorContent}</tool_use_error>`,
+        is_error: true,
+      },
+      isError: true,
+    }
+  }
+  // 输入校验 ②：tool 自带 validateInput（真契约钩子，可选）；signal 经 context 透传
+  const validation = await tool.validateInput?.(tu.input, { signal: deps.signal })
   if (validation && validation.result === false) {
     return {
       block: {
@@ -118,7 +147,9 @@ export async function executeToolUse(
   let block: ToolResultBlockParam
   let isError = false
   try {
-    const res = await tool.call(tu.input, undefined, undefined, assistantMsg)
+    // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
+    // 传最小 context 对象 { signal }，工具实现按需取用）。
+    const res = await tool.call(tu.input, { signal: deps.signal }, undefined, assistantMsg)
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
   } catch (error) {
     block = {

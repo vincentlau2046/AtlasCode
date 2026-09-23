@@ -22,3 +22,8 @@ export {
   type ToolBatchOutcome,
 } from './toolOrchestration'
 export { classifyToolError } from './errorClassification'
+export {
+  validateInputBySchema,
+  buildSchemaNotSentHint,
+  type SchemaValidationResult,
+} from './schemaValidation'
