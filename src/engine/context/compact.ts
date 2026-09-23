@@ -14,8 +14,17 @@
  *     MCP-instructions 重宣告 + SessionStart hooks + PostCompactCleanup + readFileState 清空）
  *     → 残留守（attachments/hooks 归 E-5/E-2；CompactionResult 的 attachments/hookResults
  *     字段随之裁掉，buildPostCompactMessages ordering 残留守）。
- *   - getCompactPrompt 文案 = 旧仓 9 段结构真核心（摘要质量关键资产，照抄非重写）；
- *     NO_TOOLS preamble 以一句「不要调用工具」内联（旧仓独立常量残留守）。
+ *   - getCompactPrompt 文案 = 旧仓 prompt.ts 全文照抄（NO_TOOLS_PREAMBLE +
+ *     BASE_COMPACT_PROMPT（含 DETAILED_ANALYSIS_INSTRUCTION_BASE + 9 段结构 + <example>
+ *     模板 + 自定义指令示例段）+ NO_TOOLS_TRAILER，摘要质量关键资产，review 2026-09-23
+ *     I-1 恢复全文——此前仅存 9 段名 + 一句结构提示的简化重写，已订正）。
+ *   - partialCompact 三 prompt 变体（DETAILED_ANALYSIS_INSTRUCTION_PARTIAL /
+ *     PARTIAL_COMPACT_PROMPT / PARTIAL_COMPACT_UP_TO_PROMPT + getPartialCompactPrompt）
+ *     → 残留守（随 partialCompact 面后续纵切回填）。
+ *   - getCompactUserSummaryMessage 旧仓 transcriptPath / recentMessagesPreserved 两参
+ *     → 残留守（transcript 文件面 + partial keep 面归后续纵切；本版签名仅
+ *     (summary, suppressFollowUpQuestions?)，调用点固定 true）。
+ *   - 摘要调用无 abort CANCEL 短路（signal 未接）→ 残留守（E-1b-full 工具/流式面）。
  */
 import { randomUUID } from 'crypto'
 import type { Message } from '../../shared'
@@ -46,33 +55,137 @@ export interface CompactDeps {
   keepRecent?: number
 }
 
+// 旧仓 prompt.ts 常量全文照抄（摘要质量关键资产；模块私有，同旧仓）。
+// NO_TOOLS_PREAMBLE 置首且明示拒绝后果：缓存共享 fork 路径继承父工具集，
+// 模型偶发在弱 trailer 约束下仍试工具调用，置首 + 明示 = 防浪费唯一轮次。
+const NO_TOOLS_PREAMBLE = `CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.
+
+- Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.
+- You already have all the context you need in the conversation above.
+- Tool calls will be REJECTED and will waste your only turn — you will fail the task.
+- Your entire response must be plain text: an <analysis> block followed by a <summary> block.
+
+`
+
+// <analysis> 块是草稿便签，formatCompactSummary() 在摘要入上下文前剥掉。
+const DETAILED_ANALYSIS_INSTRUCTION_BASE = `Before providing your final summary, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points. In your analysis process:
+
+1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
+   - The user's explicit requests and intents
+   - Your approach to addressing the user's requests
+   - Key decisions, technical concepts and code patterns
+   - Specific details like:
+     - file names
+     - full code snippets
+     - function signatures
+     - file edits
+   - Errors that you ran into and how you fixed them
+   - Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+2. Double-check for technical accuracy and completeness, addressing each required element thoroughly.`
+
+const BASE_COMPACT_PROMPT = `Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
+This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
+
+${DETAILED_ANALYSIS_INSTRUCTION_BASE}
+
+Your summary should include the following sections:
+
+1. Primary Request and Intent: Capture all of the user's explicit requests and intents in detail
+2. Key Technical Concepts: List all important technical concepts, technologies, and frameworks discussed.
+3. Files and Code Sections: Enumerate specific files and code sections examined, modified, or created. Pay special attention to the most recent messages and include full code snippets where applicable and include a summary of why this file read or edit is important.
+4. Errors and fixes: List all errors that you ran into, and how you fixed them. Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+5. Problem Solving: Document problems solved and any ongoing troubleshooting efforts.
+6. All user messages: List ALL user messages that are not tool results. These are critical for understanding the users' feedback and changing intent.
+7. Pending Tasks: Outline any pending tasks that you have explicitly been asked to work on.
+8. Current Work: Describe in detail precisely what was being worked on immediately before this summary request, paying special attention to the most recent messages from both user and assistant. Include file names and code snippets where applicable.
+9. Optional Next Step: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure that this step is DIRECTLY in line with the user's most recent explicit requests, and the task you were working on immediately before this summary request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests or really old requests that were already completed without confirming with the user first.
+                       If there is a next step, include direct quotes from the most recent conversation showing exactly what task you were working on and where you left off. This should be verbatim to ensure there's no drift in task interpretation.
+
+Here's an example of how your output should be structured:
+
+<example>
+<analysis>
+[Your thought process, ensuring all points are covered thoroughly and accurately]
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   [Detailed description]
+
+2. Key Technical Concepts:
+   - [Concept 1]
+   - [Concept 2]
+   - [...]
+
+3. Files and Code Sections:
+   - [File Name 1]
+      - [Summary of why this file is important]
+      - [Summary of the changes made to this file, if any]
+      - [Important Code Snippet]
+   - [File Name 2]
+      - [Important Code Snippet]
+   - [...]
+
+4. Errors and fixes:
+    - [Detailed description of error 1]:
+      - [How you fixed the error]
+      - [User feedback on the error if any]
+    - [...]
+
+5. Problem Solving:
+   [Description of solved problems and ongoing troubleshooting]
+
+6. All user messages:
+    - [Detailed non tool use user message]
+    - [...]
+
+7. Pending Tasks:
+   - [Task 1]
+   - [Task 2]
+   - [...]
+
+8. Current Work:
+   [Precise description of current work]
+
+9. Optional Next Step:
+   [Optional Next step to take]
+
+</summary>
+</example>
+
+Please provide your summary based on the conversation so far, following this structure and ensuring precision and thoroughness in your response.
+
+There may be additional summarization instructions provided in the included context. If so, remember to follow these instructions when creating the above summary. Examples of instructions include:
+<example>
+## Compact Instructions
+When summarizing the conversation focus on typescript code changes and also remember the mistakes you made and how you fixed them.
+</example>
+
+<example>
+# Summary instructions
+When you are using compact - please focus on test output and code changes. Include file reads verbatim.
+</example>
+`
+
+const NO_TOOLS_TRAILER =
+  '\n\nREMINDER: Do NOT call any tools. Respond with plain text only — ' +
+  'an <analysis> block followed by a <summary> block. ' +
+  'Tool calls will be rejected and you will fail the task.'
+
 /**
- * 压缩摘要 prompt（旧仓 prompt.ts getCompactPrompt 真核心：9 段摘要结构照抄——
- * 摘要质量关键资产，非重写）。customInstructions 追加在结构后（旧仓 mergeHookInstructions
- * 语义：用户指令优先，本版无 hook 指令来源 → 残留守）。
+ * 压缩摘要 prompt（旧仓 prompt.ts getCompactPrompt 全文照抄：NO_TOOLS_PREAMBLE +
+ * BASE_COMPACT_PROMPT + NO_TOOLS_TRAILER；customInstructions 插于结构后、trailer 前
+ * （旧仓 mergeHookInstructions 语义：用户指令优先，本版无 hook 指令来源 → 残留守））。
  */
 export function getCompactPrompt(customInstructions?: string): string {
-  let prompt =
-    `You must not call any tools in your response. ` +
-    `Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions. ` +
-    `This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.\n\n` +
-    `Your summary should include the following sections:\n\n` +
-    `1. Primary Request and Intent\n` +
-    `2. Key Technical Concepts\n` +
-    `3. Files and Code Sections\n` +
-    `4. Errors and fixes\n` +
-    `5. Problem Solving\n` +
-    `6. All user messages\n` +
-    `7. Pending Tasks\n` +
-    `8. Current Work\n` +
-    `9. Optional Next Step\n\n` +
-    `Structure your output as:\n` +
-    `<analysis>\n[Your thought process, ensuring all points are covered thoroughly and accurately]\n</analysis>\n\n` +
-    `<summary>\n[The numbered sections above]\n</summary>`
+  let prompt = NO_TOOLS_PREAMBLE + BASE_COMPACT_PROMPT
 
   if (customInstructions && customInstructions.trim() !== '') {
     prompt += `\n\nAdditional Instructions:\n${customInstructions}`
   }
+
+  prompt += NO_TOOLS_TRAILER
+
   return prompt
 }
 
@@ -98,7 +211,11 @@ export function formatCompactSummary(summary: string): string {
   return formattedSummary.trim()
 }
 
-/** 摘要回注文案（旧仓 getCompactUserSummaryMessage 真核心照抄）。 */
+/**
+ * 摘要回注文案（旧仓 getCompactUserSummaryMessage 裁剪版：base 文案 +
+ * suppressFollowUpQuestions 续跑段照抄；旧仓 transcriptPath / recentMessagesPreserved
+ * 两参残留守——transcript 文件面 / partial keep 面归后续纵切，见头注）。
+ */
 export function getCompactUserSummaryMessage(
   summary: string,
   suppressFollowUpQuestions?: boolean,

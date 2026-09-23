@@ -1,8 +1,11 @@
 /**
  * engine/pipeline — 单 tool_use 执行链（§8.21 E-1 窄 spine T-2，旧仓 toolExecution 裁剪版真核心）
  *
- * 链路：find（注册表 + aliases）→ 权限门接缝 → validateInput 接缝 → pre-hook 接缝
- *   → Tool.call → mapToolResultToToolResultBlockParam → post-hook 接缝。
+ * 链路：find（注册表 + aliases）→ schema 浅校验 → validateInput 接缝 → pre-hook 接缝
+ *   → 权限门接缝 → Tool.call → mapToolResultToToolResultBlockParam → post-hook 接缝
+ *   （顺序 = 旧仓 checkPermissionsAndCallTool：safeParse→validateInput→pre-hooks→
+ *     permission→call，review 2026-09-23 I-3 订正——pre-hook 可携带 hook 权限裁定，
+ *     权限门必须最后、紧贴 call 前）。
  * 未知 tool → is_error block（不静默丢弃，LLM 仍收到该 tool_use 的回应）。
  *
  * 裁剪（旧仓 checkPermissionsAndCallTool 1511L 单体）+ 残留守头注释（防「以为已全」）：
@@ -17,7 +20,10 @@
  *     · 旧仓 zod `inputSchema.safeParse` → E-1b T-4c 落 JSON-schema 浅校验替身
  *       （schemaValidation.validateInputBySchema + buildSchemaNotSentHint 纯函数）
  *   - 残留守：复合 schema 校验（anyOf/嵌套/enum/区间，见 schemaValidation 头注）/
- *     并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/ MCP 路由（E-2）。
+ *     并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/ MCP 路由（E-2）/
+ *     abort CANCEL 短路（deps.signal.aborted → 不调 tool.call 直返 cancel 结果；旧仓
+ *     abort 语义在 loop 层收口，toolExecution 层短路行为未移植，E-1b-full 裁定，
+ *     review 2026-09-23 M-4 登记）。
  */
 import type {
   AssistantMessage,
@@ -92,22 +98,6 @@ export async function executeToolUse(
     }
   }
 
-  // E-4 接缝：权限门（窄 spine 默认放行）
-  const verdict = deps.checkPermission
-    ? await deps.checkPermission(tool, tu.input)
-    : { allowed: true }
-  if (!verdict.allowed) {
-    return {
-      block: {
-        type: 'tool_result',
-        tool_use_id: tu.id,
-        content: `<tool_use_error>permission denied: ${verdict.reason ?? tu.name}</tool_use_error>`,
-        is_error: true,
-      },
-      isError: true,
-    }
-  }
-
   // 输入校验 ①：浅 JSON-schema 校验（T-4c，旧仓 zod safeParse 替身）+ schema-not-sent 提示
   const schemaResult = validateInputBySchema(tu.input, tool.inputSchema)
   if (schemaResult.valid === false) {
@@ -143,6 +133,23 @@ export async function executeToolUse(
 
   // E-5 接缝：pre-hook
   await deps.hooks?.preToolUse?.(tool, tu.input, tu.id)
+
+  // E-4 接缝：权限门（旧仓序：pre-hook 后、call 前——hook 权限裁定在此合流；
+  // 窄 spine 默认放行）
+  const verdict = deps.checkPermission
+    ? await deps.checkPermission(tool, tu.input)
+    : { allowed: true }
+  if (!verdict.allowed) {
+    return {
+      block: {
+        type: 'tool_result',
+        tool_use_id: tu.id,
+        content: `<tool_use_error>permission denied: ${verdict.reason ?? tu.name}</tool_use_error>`,
+        is_error: true,
+      },
+      isError: true,
+    }
+  }
 
   let block: ToolResultBlockParam
   let isError = false

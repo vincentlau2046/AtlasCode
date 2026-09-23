@@ -154,13 +154,17 @@ export async function queryOneRound(
  *
  * 每轮：
  *   1. pre-turn：autoCompactIfNeeded（超阈值 → buildPostCompactMessages 重建序列；
- *      tracking 熔断态回填，连续失败停试不阻塞循环）
+ *      成功 → tracking 重置；失败 → consecutiveFailures 回灌 tracking（旧仓 L504-511），
+ *      连续 3 次失败熔断跳闸后 pre-turn 短路不再 hammer  doomed 摘要调用）
  *   2. queryOneRound（LLM→tool→result 单轮，工具链委托 pipeline）
  *   3. terminal 判定：lastRound.toolResults 为空（assistant 未调工具）→ 终止；否则续跑
- *   4. maxTurns 截断（terminated=false，防不可终止会话）
+ *   4. 继续轮末 turnCounter 自增（旧仓 L1458-1460，仅 compacted 会话）
+ *   5. maxTurns 截断（terminated=false，防不可终止会话）
  *
  * 裁剪版真核心：无 error recovery / stop hooks / tokenBudget continuation（残留守，见头注）。
  * 未注入 context = 纯多轮（不压缩），窄 spine 语义。
+ * 残留守：pre-turn microcompact 未接线（旧仓 pre-turn 序 budget→snip→microcompact→
+ * collapse→autocompact，本版只接 autocompact；microcompact 归 E-1b-full）。
  */
 export async function queryAgentLoop(
   deps: AgentLoopDeps,
@@ -185,9 +189,14 @@ export async function queryAgentLoop(
       const oc = await autoCompactIfNeeded(messages, tracking, args.context.autoCompact)
       if (oc.wasCompacted && oc.compactionResult) {
         messages = buildPostCompactMessages(oc.compactionResult)
-      }
-      if (oc.tracking) {
-        tracking = oc.tracking
+        if (oc.tracking) {
+          // 成功：重置 tracking（turnCounter 0 + 新 turnId + 失败计数清零，旧仓 L485-494）
+          tracking = oc.tracking
+        }
+      } else if (oc.consecutiveFailures !== undefined) {
+        // 失败：回灌熔断计数（旧仓 loop.ts:504-511 语义）。不回灌则熔断器在 loop 里
+        // 永不跳闸——超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用。
+        tracking = { ...tracking, consecutiveFailures: oc.consecutiveFailures }
       }
     }
     lastRound = await queryOneRound(deps, tools, messages)
@@ -195,6 +204,11 @@ export async function queryAgentLoop(
     if (lastRound.toolResults.length === 0) {
       terminated = true
       break
+    }
+    // 继续轮末：距上次 compact 的轮数自增（旧仓 loop.ts:1458-1460：仅 tracking.compacted
+    // 会话、仅继续轮——terminal 轮不增，语义 = 「距上次 compact 几轮」）。
+    if (tracking.compacted) {
+      tracking = { ...tracking, turnCounter: tracking.turnCounter + 1 }
     }
   }
 

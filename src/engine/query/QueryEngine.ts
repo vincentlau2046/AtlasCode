@@ -20,7 +20,9 @@ export interface AskArgs {
 }
 
 /**
- * 单轮 agent loop 入口（最小纵切）。多轮续跑 = 上层循环调用 ask（E-1b 落 while(true)）。
+ * 单轮 agent loop 入口（最小纵切）。多轮续跑 = queryAgentLoop（E-1b T-4a 已落
+ * loop.ts：while + maxTurns + pre-turn autoCompact + terminal）；本 ask 仅保留
+ * 单轮面（review 2026-09-23 N-5 订正：旧注「上层循环调用 ask」已过时）。
  */
 export async function ask(
   modelProvider: ModelProvider,

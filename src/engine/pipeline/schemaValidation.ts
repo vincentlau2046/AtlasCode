@@ -27,13 +27,17 @@ function checkBasicType(value: unknown, type: string): string | null {
     case 'string':
       return typeof value === 'string' ? null : `expected string, got ${typeName(value)}`
     case 'number':
-      return typeof value === 'number' && Number.isFinite(value)
-        ? null
-        : `expected number, got ${typeName(value)}`
+      // 非有限数（NaN/±Infinity）单列文案——typeName(NaN)='number' 会打出
+      // 「expected number, got number」自相矛盾串（review 2026-09-23 N-2）。
+      if (typeof value === 'number') {
+        return Number.isFinite(value) ? null : 'expected number, got non-finite number'
+      }
+      return `expected number, got ${typeName(value)}`
     case 'integer':
-      return typeof value === 'number' && Number.isInteger(value)
-        ? null
-        : `expected integer, got ${typeName(value)}`
+      if (typeof value === 'number') {
+        return Number.isInteger(value) ? null : 'expected integer, got non-integer number'
+      }
+      return `expected integer, got ${typeName(value)}`
     case 'boolean':
       return typeof value === 'boolean' ? null : `expected boolean, got ${typeName(value)}`
     case 'array':

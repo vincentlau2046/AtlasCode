@@ -3,8 +3,9 @@
  *
  * 语义：距上次 assistant 消息的 gap 超阈值（服务端 prompt cache 大概率过期）时，
  * 把最旧的可压缩 tool_result 内容清空（保留最近 keepRecent 个）→ 缩小下次全量重写的 prefix。
- * 白名单 = COMPACTABLE_TOOLS（旧仓：FileRead/Shell/Grep/Glob/WebFetch/WebSearch 类只读工具，
- * 其 tool_result 体量大且可再取——clear 后模型可重调工具恢复）。
+ * 白名单 = COMPACTABLE_TOOLS（旧仓 8 项：FileRead/Shell 家族/Grep/Glob/WebFetch/
+ * WebSearch/FileEdit/FileWrite——review 2026-09-23 N-3 订正：含写类工具，非「只读」；
+ * 共性 = tool_result 体量大且可再取——clear 后模型可重调工具恢复）。
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - cached microcompact 路径（cache_edits API 层 + GrowthBook 计数配置 + forked-agent
@@ -43,12 +44,22 @@ function roughTokens(s: unknown): number {
   return Math.ceil(String(s ?? '').length / 4)
 }
 
-/** tool_result 块 token 估值（旧仓 calculateToolResultTokens 等价）。 */
+/**
+ * tool_result 块 token 估值（旧仓 calculateToolResultTokens 等价，review 2026-09-23
+ * M-2 订正为类型分档）：string → chars/4；数组按元素类型分档——text → chars/4、
+ * image/document → 固定 2000（格式无关的近似）、其他 → 0（不计）。
+ */
 function toolResultTokens(block: ToolResultBlockParam): number {
   const content = block.content
+  if (!content) return 0
   if (typeof content === 'string') return roughTokens(content)
   if (Array.isArray(content)) {
-    return content.reduce((sum, b) => sum + roughTokens(JSON.stringify(b)), 0)
+    return content.reduce((sum, item) => {
+      const t = (item as { type?: string }).type
+      if (t === 'text') return sum + roughTokens((item as { text?: unknown }).text)
+      if (t === 'image' || t === 'document') return sum + IMAGE_MAX_TOKEN_SIZE
+      return sum
+    }, 0)
   }
   return 0
 }
@@ -131,6 +142,9 @@ export function evaluateTimeBasedTrigger(
     return null
   }
   const lastTs = new Date(String(lastAssistant.timestamp)).getTime()
+  // timestamp 缺失/非法（NaN）或 epoch 0 均归 0 → gap = +∞ → 被下方 !Number.isFinite
+  // 拦截 = 不触发（review 2026-09-23 N-1 注释：时间戳不可判定时宁不清空——
+  // 清空是不可逆的上下文削减，缺判定依据时保守放行）。
   const gapMinutes = (Number.isFinite(lastTs) ? lastTs : 0) === 0
     ? Number.POSITIVE_INFINITY
     : ((deps.now ?? Date.now()) - lastTs) / 60_000
