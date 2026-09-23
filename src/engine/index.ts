@@ -19,6 +19,7 @@ export {
 export {
   executeToolUse,
   findTool,
+  mergeHookPermission,
   runToolBatch,
   partitionToolCalls,
   classifyToolError,
@@ -27,6 +28,10 @@ export {
   type PipelineDeps,
   type PermissionGate,
   type ToolHooks,
+  type PreToolUseHookOutcome,
+  type PostToolUseHookOutcome,
+  type HookPermissionBehavior,
+  type GateVerdict,
   type ToolExecutionOutcome,
   type ToolBatch,
   type ToolBatchOutcome,
@@ -240,6 +245,13 @@ export {
 } from './permissions'
 // E-4 S-4d（§8.36）：权限门工厂（域规则求值树 → pipeline PermissionGate 3 值 verdict）
 export { createPermissionGate } from './permissions'
+// E-5 S-5a（§8.39）：hooks L3 连接器层（ToolHooks 适配器 C-6 消费支 + loop stop hooks 消费面 C-4）
+export {
+  createToolHooks,
+  createLoopHooks,
+  type LoopHooks,
+  type ToolHooksAdapterOptions,
+} from './hooks'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,

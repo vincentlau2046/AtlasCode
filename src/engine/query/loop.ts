@@ -12,10 +12,11 @@
  *     maxTurns 守卫 + pre-turn autoCompactIfNeeded + terminal=无 tool_use）。
  *   - 工具执行已抽到 engine/pipeline（T-2）：本文件只管 LLM + 消息装配 + 轮次调度，
  *     工具链单一事实源在 pipeline。
- *   - 残留守（后续纵切）：流式 chatStream（E-1b-full）/ 错误恢复 + stop hooks（E-1b）/
+ *   - 残留守（后续纵切）：流式 chatStream（E-1b-full）/ 错误恢复（E-1b-full）/
  *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
- *     附件注入（E-5）/ tokenBudget continuation（max_tokens 截断续跑，E-1b）/
- *     工具执行接缝（权限 E-4 / 钩子 E-5 / 并发 E-1b，见 pipeline 残留守）。
+ *     附件渲染 + 钩子输出上下文回灌（消息/REPL 波残留守，§8.38 C-3/C-6）/
+ *     tokenBudget continuation（max_tokens 截断续跑，E-1b）/
+ *     工具执行接缝（权限 E-4 已落 / 钩子 E-5 S-5a 已落 / 并发 E-1b，见 pipeline 残留守）。
  *   - terminal 语义：assistant 无 tool_use 块 = 本轮终止（纯文本回答）。max_tokens 截断的
  *     续跑（tokenBudget continuation）归残留守——本版无 tool_use 即终止，不误续。
  *
@@ -30,6 +31,7 @@ import type {
   Tools,
 } from '../../shared'
 import type { ModelProvider, ModelRole } from '../../modelprovider'
+import type { LoopHooks } from '../hooks'
 import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
@@ -44,6 +46,8 @@ export interface AgentLoopDeps {
   signal?: AbortSignal
   /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
   checkPermission?: PermissionGate
+  /** E-5 S-5a：钩子消费面（engine/hooks createLoopHooks 产物；未注入 = 窄 spine 无操作）。 */
+  hooks?: LoopHooks
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -135,6 +139,8 @@ export async function queryOneRound(
     // 第二调用点 runAgent.ts 子代理面不带门——前向接缝登记于 runAgent 头注，
     // E-wave-end 装配透传，§8.37 审视 F1）
     checkPermission: deps.checkPermission,
+    // E-5 S-5a：工具钩子透传（同上唯一点；未注入 = 窄 spine 无操作）
+    hooks: deps.hooks?.toolHooks,
   })
   const toolResults = outcomes.map((o) => ({
     toolUseId: o.toolUseId,
@@ -164,11 +170,14 @@ export async function queryOneRound(
  *      成功 → tracking 重置；失败 → consecutiveFailures 回灌 tracking（旧仓 L504-511），
  *      连续 3 次失败熔断跳闸后 pre-turn 短路不再 hammer  doomed 摘要调用）
  *   2. queryOneRound（LLM→tool→result 单轮，工具链委托 pipeline）
- *   3. terminal 判定：lastRound.toolResults 为空（assistant 未调工具）→ 终止；否则续跑
+ *   3. terminal 判定：lastRound.toolResults 为空（assistant 未调工具）→
+ *      E-5 S-5a stop hooks 消费点（deps.hooks?.stopHooks，preventContinuation=true
+ *      → 阻止停止续跑）；未防停 → 终止；否则续跑
  *   4. 继续轮末 turnCounter 自增（旧仓 L1458-1460，仅 compacted 会话）
- *   5. maxTurns 截断（terminated=false，防不可终止会话）
+ *   5. maxTurns 截断（terminated=false，防不可终止会话；stop-hooks 防停亦受此兜底）
  *
- * 裁剪版真核心：无 error recovery / stop hooks / tokenBudget continuation（残留守，见头注）。
+ * 裁剪版真核心：无 error recovery / tokenBudget continuation（残留守，见头注）；
+ * stop hooks 已落 E-5 S-5a（terminal 支消费点，C-4 归属订正）。
  * 未注入 context = 纯多轮（不压缩），窄 spine 语义。
  * 残留守：pre-turn microcompact 未接线（旧仓 pre-turn 序 budget→snip→microcompact→
  * collapse→autocompact，本版只接 autocompact；microcompact 归 E-1b-full）。
@@ -209,8 +218,17 @@ export async function queryAgentLoop(
     lastRound = await queryOneRound(deps, tools, messages)
     messages = lastRound.messages
     if (lastRound.toolResults.length === 0) {
-      terminated = true
-      break
+      // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
+      // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
+      // 阻止停止续跑（maxTurns 守卫仍为终止兜底）；blockingErrors/additionalContext
+      // 回灌 = 消息/REPL 波前向接缝（engine/hooks 头注登记）。
+      const stop = deps.hooks?.stopHooks
+      const preventStop = stop ? (await stop(deps.signal)).preventContinuation : false
+      if (!preventStop) {
+        terminated = true
+        break
+      }
+      // preventStop=true → 落继续轮末 turnCounter 续跑（不终止，防停）
     }
     // 继续轮末：距上次 compact 的轮数自增（旧仓 loop.ts:1458-1460：仅 tracking.compacted
     // 会话、仅继续轮——terminal 轮不增，语义 = 「距上次 compact 几轮」）。

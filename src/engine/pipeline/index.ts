@@ -11,9 +11,14 @@
 export {
   executeToolUse,
   findTool,
+  mergeHookPermission,
   type PipelineDeps,
   type PermissionGate,
   type ToolHooks,
+  type PreToolUseHookOutcome,
+  type PostToolUseHookOutcome,
+  type HookPermissionBehavior,
+  type GateVerdict,
   type ToolExecutionOutcome,
 } from './toolExecution'
 export {
