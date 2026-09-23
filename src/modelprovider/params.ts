@@ -53,7 +53,11 @@ export function toOpenAIMessages(messages: any[]): any[] {
       continue
     }
     if (m?.type === 'user') {
-      const content = m.message?.content
+      // 加固（T-5c F-1）：嵌套（m.message.content）与顶层（m.content）双形态。
+      // runAgent/fork 以两种形态构造 user 消息，旧版仅读嵌套形态会静默丢弃顶层
+      // user 消息（子代理任务 prompt 在真 provider 路径下被整个丢掉，假 provider
+      // 从不序列化故测试不可见）。
+      const content = m.message?.content ?? m.content
       if (typeof content === 'string') {
         out.push({ role: 'user', content })
       } else if (Array.isArray(content)) {
@@ -106,8 +110,11 @@ export function toOpenAIMessages(messages: any[]): any[] {
         content: text || null,
         ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
       })
-    } else if (m?.type === 'system' && typeof (m as any).content === 'string') {
-      out.push({ role: 'user', content: (m as any).content })
+    } else if (m?.type === 'system') {
+      // 双形态同 user 分支（T-5c F-1）；仅字符串 system content 进 API（降级为 user
+      // role，既有行为——正解需 provider 支持 role:'system'，残留守见 runAgent 头注）。
+      const content = (m as any).message?.content ?? (m as any).content
+      if (typeof content === 'string') out.push({ role: 'user', content })
     }
   }
   return out
