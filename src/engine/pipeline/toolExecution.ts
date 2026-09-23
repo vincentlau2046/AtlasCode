@@ -12,15 +12,17 @@
  *   - 旧仓单体把 permission 规则树 + MCP 路由 + OTel 遥测 + tool.call + result map 混一处。
  *     本版只留最小执行链，其余按 §8.21 归后续纵切：
  *     · 权限门 → deps.checkPermission 接缝（E-4 规则求值树注入；窄 spine 默认放行）
- *     · MCP 路由 → E-2（路由落地时加 mcp 分支 + PipelineDeps 字段；窄 spine 下 MCP tool 未注册
- *       → unknown-tool is_error 兜底已覆盖。不预造无消费点的接缝字段——review 2026-09-23 裁定，
- *       登记 §8.22 残余 ⑧）
+ *     · MCP 路由 → 已按 E-2 裁定以注册表构建形态闭环（createMcpTools 预构建时把连接绑进
+ *       call 闭包，MCP tool 经 getAllBaseTools 并入注册表，pipeline 当普通 Tool 执行，
+ *       **无** pipeline 分支 / 无 PipelineDeps 字段；不预造无消费点接缝，登记 §8.22 残余 ⑧）。
+ *       MCP 连接生命周期（connect/reconnect/cache）仍残留守（归连接层纵切，见 mcp.ts 头注）。
  *     · 钩子 → deps.hooks 接缝（E-5 toolHooks 注入；窄 spine 无操作）
  *     · OTel 遥测 → 旧仓已删（879 logEvent 点清零），无对应物
  *     · 旧仓 zod `inputSchema.safeParse` → E-1b T-4c 落 JSON-schema 浅校验替身
  *       （schemaValidation.validateInputBySchema + buildSchemaNotSentHint 纯函数）
  *   - 残留守：复合 schema 校验（anyOf/嵌套/enum/区间，见 schemaValidation 头注）/
- *     并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/ MCP 路由（E-2）/
+ *     并发（E-1b，见 toolOrchestration）/ streaming executor（E-1b）/
+ *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 路由本身已闭环）/
  *     abort CANCEL 短路（deps.signal.aborted → 不调 tool.call 直返 cancel 结果；旧仓
  *     abort 语义在 loop 层收口，toolExecution 层短路行为未移植，E-1b-full 裁定，
  *     review 2026-09-23 M-4 登记）。

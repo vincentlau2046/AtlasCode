@@ -5,6 +5,16 @@
  * T-5d 补 worker 两源提示词（getCoordinatorWorkerSystemPrompt / WORKER_AGENT /
  * getCoordinatorAgents）+ coordinator 主提示词（getCoordinatorSystemPrompt）+
  * user context（getCoordinatorUserContext）+ 会话模式对齐（matchSessionMode）。
+ *
+ * 裁剪 + 残留守头注释（防「以为已全」）：
+ *   - src 内已消费：isCoordinatorMode（builtInAgents coordinator 分支 + AgentTool call
+ *     深度门）/ getCoordinatorAgents（builtInAgents.coordinator 分支）。
+ *   - 组合根（compose.ts，E-wave-end，残留守⑦）forward-declared 导出，src 暂无生产
+ *     消费点，经 engine/index.ts 门面 re-export 等待装配：matchSessionMode /
+ *     getCoordinatorUserContext / getCoordinatorSystemPrompt / getCoordinatorWorkerSystemPrompt。
+ *   - WORKER_AGENT：getCoordinatorAgents 内部已消费（L78 return [WORKER_AGENT]）；standalone
+ *     `export { WORKER_AGENT }` + engine/index.ts 门面 re-export 无 src 直接消费点 → 残留守
+ *     （D 波若需按名引用 worker 定义再留，否则随组合根 ⑦ 一并收）。
  */
 export {
   isCoordinatorMode,

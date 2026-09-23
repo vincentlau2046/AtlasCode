@@ -4,8 +4,9 @@
  * 旧仓 core/orchestrator/QueryEngine.ts（1241L）的 ask() 最小纵切：把单轮
  * queryOneRound 包成对外入口 ask(modelProvider, { messages, tools, role, signal })。
  *
- * 残留守：旧仓 ask() 的完整面（session 持久化 / coordinator 用户上下文 / MCP 连接 /
- * 附件注入 / fileHistory 快照 / 结构化输出强制 / 压缩编排）归 E-1b/E-2，本纵切只保留
+ * 残留守：旧仓 ask() 的完整面（session 持久化 / coordinator 用户上下文 / MCP 连接
+ * 生命周期（连接层纵切；MCP 工具路由本身已按 E-2 闭环，见 mcp.ts）/ 附件注入 /
+ * fileHistory 快照 / 结构化输出强制 / 压缩编排）归 E-1b 及后续纵切，本纵切只保留
  * 「一次 LLM→tool→result 单轮」的最小可跑面。
  */
 import type { Message, Tools } from '../../shared'

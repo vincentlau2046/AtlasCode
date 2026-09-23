@@ -17,6 +17,9 @@
  *     为避免死接缝删除 scratchpadDir 参数；scratchpad 特性纵切时补）。
  *   - INTERNAL_WORKER_TOOLS 过滤（TeamCreate/TeamDelete/SendMessage/StructuredOutput 从
  *     worker user-context 剔除）→ 本版已 port（getCoordinatorUserContext 消费）。
+ *   - matchSessionMode / getCoordinatorUserContext / getCoordinatorSystemPrompt 无 src
+ *     生产消费点（coordinator/index.ts 门面 re-export 等待组合根 compose.ts，E-wave-end
+ *     残留守⑦）→ 组合根消费（本版无 compose 装配，头注登记防「以为已全」）。
  */
 import { isEnvTruthy } from '../../shared'
 import { AGENT_TOOL_NAME } from '../tools/agent/constants'

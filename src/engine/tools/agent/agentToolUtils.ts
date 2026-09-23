@@ -15,6 +15,9 @@
  *     carve-out + ExitPlanModeV2 plan 门 → 残留守（依赖 teammate / plan 面，未落）。
  *   - resolveAgentTools 的 allowedAgentTypes 解析（Agent 工具 spec 携带 agent 类型元数据）
  *     + permissionRuleValueFromString 的 ruleContent 解析 → 残留守（E-4 权限规则面）。
+ *   - ResolvedAgentTools.validTools / invalidTools 仅测试消费，src 无生产消费点
+ *     （AgentTool.call 只读 .resolvedTools）→ 残留守（validateAgent 校验面，D 波；
+ *     本版保留字段供测试断言，头注登记防「以为已全」）。
  *   - agentToolResultSchema（旧仓 zod）→ 此处用纯 TS 接口 AgentToolResult 替代（新仓工具面
  *     不引 zod；schema 校验面归 E-2 复合 schema 校验纵切）。
  *   - emitTaskProgress / classifyHandoffIfNeeded / runAsyncAgentLifecycle / extractPartialResult

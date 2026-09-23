@@ -35,6 +35,12 @@
  *   - call 内 meta `claudecode/toolUseId` 透传（旧仓经 _meta 带给 MCP 服务器）+
  *     userFacingName 的 annotations.title 优先（无 title 回落 d.name）→ 残留守
  *     （port callTool 无 meta 参 / McpToolDescriptor 无 title 字段，连接层落时补）。
+ *   - 输出 `mcpMeta`（structuredContent/_meta）无生产消费点：buildMcpTool.call 在
+ *     res._meta/res.structuredContent 存在时挂 `mcpMeta` 字段，但 pipeline 执行链
+ *     （toolExecution.ts）仅读 `res.data` 走 mapToolResultToToolResultBlockParam，
+ *     mcpMeta 在 pipeline 层被丢弃（旧仓 toolExecution 在消息层经 createUserMessage.mcpMeta
+ *     透传，非 subagent 上下文；本版无消息层）。消费面 = 消息层/TUI 波（残留守；本版
+ *     产出即弃，头注登记防「以为已全」）。
  *   - 旧仓 fetchToolsForClient/MCPTool 基类的 prompt()（MAX_MCP_DESCRIPTION_LENGTH 截断）/
  *     isOpenWorld(openWorldHint) / isSearchOrReadCommand(classifyMcpToolForCollapse) /
  *     outputSchema / isResultTruncated → 新 shared Tool 契约无此字段（C/D 波合同面），

@@ -5,7 +5,8 @@
  * stopHooks / tokenBudget）+ QueryEngine ask() 的最小纵切落此。
  * E-1b T-4a：queryAgentLoop 多轮（pre-turn autoCompact + maxTurns + terminal）已落。
  * 残留守（后续纵切）：流式 chatStream / 错误恢复 + stop hooks / tokenBudget continuation
- * （max_tokens 截断续跑）/ MCP 路由（E-2）/ 附件注入（E-5）。
+ * （max_tokens 截断续跑）/ MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身
+ * 已按 E-2 闭环）/ 附件注入（E-5）。
  */
 export {
   queryOneRound,

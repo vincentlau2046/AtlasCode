@@ -8,7 +8,9 @@
  *   - LEGACY_AGENT_TOOL_NAME='Task'（旧名兼容：权限规则 / 钩子 / 恢复会话）→ 残留守
  *     （新仓无旧会话/权限规则回放，de-Claude 硬切不留 legacy 探测，见 plugin-manifest-legacy-probe 同义）。
  *   - VERIFICATION_AGENT_TYPE / ONE_SHOT_BUILTIN_AGENT_TYPES（Explore/Plan 一次性内建
- *     agent 跳过 usage trailer 的优化）→ T-5c 内建 agent 注册表落时一并补。
+ *     agent 跳过 usage trailer 的优化）→ 残留守（T-5c 内建注册表已落 builtInAgents.ts，
+ *     但这两个常量 + usage-trailer 跳过优化本版未加；Explore/Plan 内建体本身残留守，
+ *     见 builtInAgents.ts 头注「STATUSLINE/EXPLORE/… 内建体」项）。
  */
 export const AGENT_TOOL_NAME = 'Agent'
 

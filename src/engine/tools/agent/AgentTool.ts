@@ -16,9 +16,9 @@
  *   - 异步 agent（run_in_background → runAsyncAgentLifecycle / 后台摘要 / 通知队列）
  *     → 残留守（后台任务面未落）；本版仅同步路径，input schema 相应去掉 run_in_background
  *     / name / team_name 字段（不造假能力）。
- *   - 内建 agent 注册表已接线（T-5c）：call/description 遍历 getBuiltInAgents()（本版
- *     仅 GENERAL_PURPOSE_AGENT；statusline/explore/plan/guide/verification 内建体 +
- *     coordinator 分支 → T-5d 及后续纵切残留守）。
+ *   - 内建 agent 注册表已接线（T-5c）：call/description 遍历 getBuiltInAgents()（含
+ *     coordinator 分支 T-5d：isCoordinatorMode 真 → 仅内建 worker，见 builtInAgents）；
+ *     statusline/explore/plan/guide/verification 内建体 → 残留守（builtInAgents 头注登记）。
  *   - user/plugin 自定义 agent（loadAgentDefinitions 注入面，parseAgentFromMarkdown 解析
  *     产物）当前无 src 消费点，call/description 仅见内建表 → 残留守：自定义 agent 的
  *     注册表装配归组合根（E-wave-end，getAllBaseTools 同批）；旧仓 call 传全量 override
@@ -44,12 +44,10 @@ import {
   computeChildSpawnDepth,
   resolveAgentTools,
 } from './agentToolUtils'
-import { MAX_WORKER_SPAWN_DEPTH } from './constants'
+import { AGENT_TOOL_NAME, MAX_WORKER_SPAWN_DEPTH } from './constants'
 import { getPrompt } from './prompt'
 import { runAgent } from './runAgent'
 import { isCoordinatorMode } from '../../coordinator'
-
-const AGENT_TOOL_NAME = 'Agent'
 
 /** 输入 JSON schema（旧仓 zod inputSchema 裁剪；去 run_in_background/name/team_name）。 */
 const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {

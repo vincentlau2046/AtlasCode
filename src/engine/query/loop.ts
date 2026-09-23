@@ -13,7 +13,8 @@
  *   - 工具执行已抽到 engine/pipeline（T-2）：本文件只管 LLM + 消息装配 + 轮次调度，
  *     工具链单一事实源在 pipeline。
  *   - 残留守（后续纵切）：流式 chatStream（E-1b-full）/ 错误恢复 + stop hooks（E-1b）/
- *     MCP 路由（E-2）/ 附件注入（E-5）/ tokenBudget continuation（max_tokens 截断续跑，E-1b）/
+ *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
+ *     附件注入（E-5）/ tokenBudget continuation（max_tokens 截断续跑，E-1b）/
  *     工具执行接缝（权限 E-4 / 钩子 E-5 / 并发 E-1b，见 pipeline 残留守）。
  *   - terminal 语义：assistant 无 tool_use 块 = 本轮终止（纯文本回答）。max_tokens 截断的
  *     续跑（tokenBudget continuation）归残留守——本版无 tool_use 即终止，不误续。
