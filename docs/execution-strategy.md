@@ -662,7 +662,7 @@ peer 会话对 §8.12 修复后的全树做 6 层复审（只读，锚 0ee05e3 �
 **后续步骤审视（T7/T8/B6-func，据 T6 实际落地修订）：**
 - T7 hooks 单测：unit 零磁盘走注入假 port（假 HookShellPort 返 canned {stdout,stderr,code}）+ 注入 config-provider（固定 matcher 集）+ 注入 bootstrap-env（固定 isNonInteractive/hasTrustAccepted）断言 5 高频执行器聚合面（trust 跳过 / 匹配 / JSON 解释 / exit-2 阻塞 / 最严权限 / additionalContext 聚合）；func 真盘面 = 无（hooks 薄骨架无真盘消费，真 chokidar/真 shell 归 engine，func 层不验）。
 - T8 门同步：capability-matrix 加 hooks 域行（薄骨架 done，proof 随 T7）+ 补 D17 使 B6-func 前置清单口径 4+5→4+6（test-strategy §6 前置清单一并落）；anti-stub 已自动纳扫 `src/hooks`（CDEEP_DOMAINS 项），T6 落地 12 文件实质行全 ≥5（最薄 shouldSkipHookDueToTrust 8 实质行 / index 门面豁免），**无需 STUB_REGISTRY 登记**（§8.15 补注 3「仅 hooks 域若落 <5 实质行骨架需登记」经核不成立，撤销该预警）。
-- **B6-func 前置清单最终口径 4+6**：4（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11/§8.15 补注 3）+ ②setHookShellPort（D17，本批次）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。
+- **B6-func 前置清单最终口径 4+6**：4（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11/§8.15 补注 3）+ ②setHookShellPort（D17，本批次）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。**§8.17 D18 补登 → 4+7（+setEndpointConfigSource）**。
 
 **T6 验收**：tsc 0 / 409 pass 0 fail 33 文件 741 expect（基线零变动，含 anti-stub 门 3/3 绿）；hooks 域零 C-Deep 域 import、零 shared import（全经注入端口，L3 隔离成立）；12 文件对旧仓实质行 diff = 仅 D17 + BaseHookInput 勘误 + Promise 折叠 + engine 裁剪四类，零未登记漂移；STR-1 门面 + 5 高频执行器 + 信任门 + 2 task 边斩断 + D17 shell 边切端口全就位。
 
@@ -687,8 +687,27 @@ H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill �
 - **① capability-matrix 扩 8 域**：`MatrixRow.domain` 联合 + `DOMAINS` set 从 4 域（executor/sandbox/memory/modelprovider）扩 8 域（+ task/bootstrap/permissions/hooks）；新增 11 行——task 4 行（spill+stderr 前缀 / deleteOutputFile / 5GB cap / TaskId 双口径，proof 均 `tests/func/task-real-fs.test.ts`）+ bootstrap 2 行（cwd 两状态 / ALS 覆盖层，proof `tests/unit/bootstrap.test.ts`）+ permissions 2 行（checkRead/checkWrite 决策主面 proof `tests/unit/permissions.test.ts` / realpath 链真盘 proof `tests/func/permissions-real-fs.test.ts`）+ hooks 3 done 行（信任门+5 执行器聚合面 / getMatchingHooks 匹配 / 跨域斩断 fail-fast，proof 均 `tests/unit/hooks.test.ts`）+ **1 missing 行**（hooks 流式执行 / attachment 渲染 AsyncGenerator，by=engine 波，§8.16 裁剪归 engine）。门 ③ 标签「四域」→「八域」全核销。
 - **② STUB_REGISTRY 无需登记**：anti-stub 自动纳扫四 C-Deep 域（`CDEEP_DOMAINS` 项，目录存在即纳扫），T5/T6 落地后全部文件实质行 ≥5（permissions 4 文件 561/32/23/19、hooks 12 文件最薄 shouldSkipHookDueToTrust 8 实质行）/ 纯 re-export 门面豁免 → **无未登记空壳，STUB_REGISTRY 保持清零**。门①/③ 绿。
 - **③ bootstrap 测试分层归位**：H6⑤ 从 `tests/func/task-real-fs.test.ts` 迁 `tests/unit/bootstrap.test.ts`（纯状态无 fs → unit 层；能力矩阵 bootstrap 域行 domain↔proof 对应需 bootstrap 域单列文件）。task func 文件同步删 bootstrap import + beforeEach（不再需要）。
-- **④ B6-func 前置清单最终口径 4+6 落定**：4 基项（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11）+ ②setHookShellPort（D17）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。test-strategy-rederive §6 item 7 + §3 Wave C 两处「⏳ 余」同步从 4+4 刷新至 4+6（D11+D17）。
+- **④ B6-func 前置清单最终口径 4+6 落定**：4 基项（setTaskOutputPort + setBootstrapStatePort + setExecutorSandboxPort + 目录就绪）+ ①setDiskOutputEnv（D11）+ ②setHookShellPort（D17）= 4+6；注入序 permissions→task→hooks 末步 + shell-port 先于首次带命令钩子的 runHooks。test-strategy-rederive §6 item 7 + §3 Wave C 两处「⏳ 余」同步从 4+4 刷新至 4+6（D11+D17）。**§8.17 D18 补登：4+6→4+7（+setEndpointConfigSource）**。
 
-**T8 验收（验收四件套）**：① `npx tsc --noEmit` = 0 ② `bun test --isolate tests/` = 446 pass 0 fail 38 文件 814 expect ③ anti-stub 门 3/3 绿 ④ capability-matrix 门 3/3 绿（八域全核销 + 1 missing 注解锁波次）。切片 3 四新域薄骨架纵切全闭环（T1–T8）。
+**T8 验收（验收四件套）**：① `npx tsc --noEmit` = 0 ② `bun test --isolate tests/` = 446 pass 0 fail 38 文件 814 expect ③ anti-stub 门 3/3 绿 ④ capability-matrix 门 3/3 绿（八域全核销 + 1 missing 注解锁波次）。**M-1 修复（`03e0942`）：T5–T8 验收口径原收窄漏 lint，潜伏 5 处死 import（src 2 + tests 3）；已删 + 恢复完整四件套口径（tsc 0 / lint 0 / build 0 / 446 pass 0 fail）**。切片 3 四新域薄骨架纵切全闭环（T1–T8）。
 
-**切片 3 收官 → 后续**：★B6-func（compose.ts 最小组合根 + 4+6 前置清单落地，先于 engine）→ engine 波（hooks 流式/attachment 渲染 + permissions 规则求值树 + executor 全 shell + 真 bwrap）。
+**切片 3 收官 → 后续**：★B6-func（compose.ts 最小组合根 + 4+7 前置清单落地，先于 engine）→ engine 波（hooks 流式/attachment 渲染 + permissions 规则求值树 + executor 全 shell + 真 bwrap）。
+
+### §8.17 切片 3 复审补登 D18（modelprovider 端点静默兜底偏差）
+
+**发现来源**：Plan agent 四判据复审（锚 de65625，只读，2026-09-23）—— import 方向面 / STR-1 门面 / 裁剪登记完整性 / 注入窗口 fail-fast 一致性逐域核验，modelprovider 域 ④ 注入窗口判据命中。
+
+**事实**：`src/modelprovider/roles.ts:25-37` `getEndpointConfigSource()` 未注入时 `activeSource ??= emptyEndpointConfigSource`（L28）静默回落空配置——`emptyEndpointConfigSource`（L34-38）三方法全返空（`getRoleSetting: ()=>({})` / `getProviders: ()=>({})` / `getGlobalApiKey: ()=>undefined`）。后果：组合根忘注入时 `getRoleConfig` 仍返回合法对象（`provider='openai'` 默认 + `model=undefined` + `apiKey` 走 env 凭据），providers 空 map → `resolveModel` 返 undefined → `getRoleModel` 返 undefined → `modelToRole` 回落 'small'。
+
+**定性**：**8 域唯一非 fail-fast 注入窗口**。其余 7 域注入窗口全 throw（executor 3 port / sandbox runtime 18 真行为方法 / task diskOutput / permissions bootstrap-env / hooks 4 窗口），modelprovider endpoint 独此静默兜底。
+
+**H6 边界裁定（为何不判为空洞等价向量）**：空配置语义安全——env 凭据（`ATLAS_{ROLE}_API_KEY`）仍可用 + providers 空 → 默认 provider 'openai' + model undefined，**不产生"假完成"**（model undefined 时 completion 调用会因缺 model 而非静默成功）。异于 H6 空洞等价原型（sandbox 禁用态 wrap 直调须 throw 防"沙箱降级静默透传 = fake 到底"）。对照：modelprovider 空配置 = 合法占位（测试/组合根注入前），sandbox 禁用态 = 须 fail-fast（静默 no-op 会假绿）。**裁定 (a)：登记为合法态，不改 fail-fast，保留 `model-roles.test.ts:47-61` 空 stub 路径测试现状。**
+
+**落地（3 项）**：
+1. **门面导出**：`setEndpointConfigSource` 加入 `src/modelprovider/index.ts` roles 导出块（与 executor/task/hooks 三域 set 经门面模式一致；compose.ts 组合根经门面注入，不深导入 roles.ts）。`getEndpointConfigSource` 不导出门面（域内 capabilities.ts 深导入是域内消费，compose.ts 只需 set）。
+2. **B6-func 前置清单 4+6→4+7**：加 `setEndpointConfigSource`（D18）；注入序——modelprovider endpoint 注入在 completion 调用前（组合根最早步，与 sandbox runtime 并列先于 executor/permissions/task/hooks 序）。
+3. **B6-func 断言要求**：「mock 一次 completion」断言须含——注入 `setEndpointConfigSource(真实源)` 后，`getRoleConfig` 返回注入的 providers/model（行为断言：非空 stub 的 undefined/默认值）。不导出 `emptyEndpointConfigSource` 内部（行为断言非身份比较）。
+
+**AtlasHarness 教训不适用**：源项目曾裁定「setEndpointConfigSource 不入门面避 mock 全导出面坑」（orchestrator-t5 三性收尾，mock.module 全局泄漏），但 AtlasCode 测试用真实注入 + fake 非 mock.module 门面，且 executor/task/hooks 三域已确立 set 经门面导出模式 → AtlasCode 模式优先。
+
+**遗留（不阻塞 B6-func，按需补）**：modelprovider 缺 `resetEndpointConfigSource`（其余 3 域均有 set/get/reset 三元组，modelprovider 仅 set/get）。Bun `--isolate` 按文件隔离进程，跨文件不泄漏；B6-func 单文件多 case 需 reset 时再补。
