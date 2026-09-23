@@ -868,3 +868,26 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **依赖面（防 H6 空洞）**：context 经 modelprovider 门面消费 countTokens + chat（摘要调用）；loop 经 pipeline（T-2 已落）+ context（T-4b）；token 计数/ contextWindow 为注入 seam（deps），port 之下全真。
 
 **顺序**：T-4b（context 不依赖 loop）→ T-4a（loop 接 context）→ T-4c（pipeline 小件）→ T-4d（测）→ T-4e（记录）。
+
+### §8.23 E-1b 执行记录（2026-09-23，全闭环）
+
+**实施**（每 T 独立提交，master 直接落，无 remote 不 push）：
+- **T-4b context 最小链**（`900f066`）：`autoCompact.ts`（shouldAutoCompact 判定 + autoCompactIfNeeded 连续 3 次失败熔断，countTokens/compact 注入 seam）+ `compact.ts`（compactConversation 核心 + getCompactPrompt 9 段照抄 + buildPostCompactMessages ordering）+ `microCompact.ts`（时间触发 content-clear + estimateMessageTokens）；context/index.ts 门面 + engine/index.ts 追加。
+- **T-4a 多轮 loop**（`91a8093`）：`queryAgentLoop`（while + maxTurns 守卫 DEFAULT_AGENT_LOOP_MAX_TURNS=20 + pre-turn autoCompactIfNeeded + terminal=无 tool_use）；未注入 context = 纯多轮不压缩。
+- **T-4c pipeline ⑤ + signal**（`84348bb`）：`schemaValidation.validateInputBySchema`（required + 基础类型浅校验）+ `buildSchemaNotSentHint` 纯函数（discovered 集 + shouldDefer，不依赖 ToolSearch 特性族）；接进 executeToolUse 校验路径；signal 经 tool.call 第 2 参 context={signal} 透传 + PipelineDeps 加 signal?/discoveredToolNames?；loop.queryOneRound 透传 signal。
+- **T-4d 契约测**（`539ee7a`）：`engine-multi-round.test.ts`（24 测：多轮 fixture 回放 + autoCompact/compact/microCompact）+ `engine-schema-validation.test.ts`（14 测：浅校验 + not-sent 提示 + signal 透传）；**非 tautology**（脚本化 LLM 按轮返不同 completion 断言调度/压缩/校验行为，非 fake 自证）。
+- **T-4e gate 核验**（本记录）：8 域门扫描集 = {executor/sandbox/memory/modelprovider/task/bootstrap/permissions/hooks}，**engine 不在内**（同 §8.22 T-5 裁定）→ **无 gate 改动**；capability-matrix hooks 行 `by: engine` 不变（E-1b 未做 hooks 流式/attachment 渲染，归后续纵切）。gate 测 3 pass 0 fail。
+
+**偏差闭环**：
+- ① `buildSchemaNotSentHint` 纠正动作（旧仓「先调 ToolSearch 加载工具」）因 ToolSearch 特性族未移植而**退化为「重发正确类型参数」**（残留守，ToolSearch/deferred-tools 落地时回填加载动作）——非造假依赖（不引用不存在的 TOOL_SEARCH_TOOL_NAME）。
+- ② `discoveredToolNames` 默认 = **全注册工具均下发**（窄 spine 语义），故 `buildSchemaNotSentHint` 在未注入时恒 null（不误报「schema 未下发」）；ToolSearch 层注入真实 discovered 集后方能触发。接缝真被消费（executeToolUse 校验路径读该字段），非死代码。
+- ③ microCompact 本版 content-clear 路径**同步返回**（无 I/O）；旧仓 async 签名因 cache 路径保留，残留守 cache 路径（归 modelprovider 域）落时恢复 async。
+
+**残留守登记（E-1b 未做，防「以为已全」）**：
+- 复合 schema 校验（anyOf/oneOf/allOf/嵌套/enum/区间）→ 工具面 E-2/纵切（schemaValidation 头注）。
+- 上下文压缩面：partialCompact（direction）/ PTL 重试 + 流式重试 / 压缩后重建面（attachments/plan/skill/deferred-tools/MCP 重宣告）/ sessionMemoryCompact / reactiveCompact / apiMicrocompact / cachedMC / snipCompact → 后续纵切 / E-5（各件头注登记）。
+- 多轮 loop：流式 chatStream / 错误恢复 model_fallback + max_output_tokens / stop hooks / tokenBudget continuation → E-1b-full / E-5（loop.ts 头注）。
+- 并发池（safe 批 StreamingToolExecutor + ATLAS_MAX_TOOL_USE_CONCURRENCY）→ E-1b-full（toolOrchestration 头注）。
+- **四件套全绿**：tsc 0 / eslint 0 / build 0 / **511 pass 0 fail**（E-1 基线 473 → E-1b +38）。
+
+**下一步**：E-1b 闭环。engine 波后续纵切 = E-2（MCP 路由 + 工具面 getAllBaseTools）/ E-4（权限规则求值树）/ E-5（hooks 注入 + 流式/attachment 渲染 + stop hooks）/ E-wave-end（compose.ts engine 装配接线，残留守 ⑦）。
