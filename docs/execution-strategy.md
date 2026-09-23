@@ -853,3 +853,18 @@ remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
 **四件套基线更新**：tsc 0 / lint 0 / build 0 / **472 pass 0 fail（42 文件 875 expect）**（E-1 开波基线 450/39/824 → T-1 454/40/840 → T-3 460/41/851 → T-2 472/42/875）。
 
 **下一步 = E-1b context 压缩层**（compact/microCompact/sessionMemory ~4700L）+ 移入的 T-4 多轮 fixture replay。
+
+### §8.23 E-1b（context 压缩层 + 多轮 loop）task 清单定稿（2026-09-23）
+
+**实测范围修正**（绝不写以为已全）：旧仓 `context/` = **19 文件/4438L**（非 §8.21 估 ~4700L；compact 1522 / sessionMemoryCompact 614 / microCompact 507 / autoCompact 360 / prompt 356 / snipCompact 265 / reactiveCompact 200 / apiMicrocompact 154 / defaultManager 107 / postCompactCleanup 77 / manager 63 / grouping 63 / snipProjection 57 / timeBasedMCConfig 43 / 4 小件）；旧仓 `query/` = 8 文件/2403L（loop 1641 / stopHooks 454 / tokenBudget 93 / transitions 70 / deps 57 / continue-site-audit 47 / config 41）。
+
+**E-1b 裁剪版真核心 + 残留守（窄 spine 纪律延续 E-1）**：
+- **T-4b context 最小链**（`engine/context/`）：① `autoCompact.ts` 裁剪（`getAutoCompactThreshold` + `shouldAutoCompact` + `autoCompactIfNeeded`；token 计数经 modelprovider 门面 `countTokens` 注入 seam，contextWindow 经新仓 modelprovider 配置面 roles/capabilities，非旧仓 getContextWindowForModel）② `compact.ts` 裁剪（`compactConversation` 核心：旧消息→modelprovider chat 摘要→`CompactionResult`+`buildPostCompactMessages` 拼接；**裁**：partialCompact/attachments/plan/skill 重建/PTL retry/streaming retry/createCompactCanUseTool→残留守）③ `microCompact.ts` 裁剪（`microcompactMessages` COMPACTABLE_TOOLS 白名单旧 tool_result→`TIME_BASED_MC_CLEARED_MESSAGE` 占位 + `estimateMessageTokens`；**裁**：time-based trigger/cache pinning→残留守）。**残留守**：sessionMemoryCompact/reactiveCompact/apiMicrocompact/cachedMC/snipCompact/prompt/manager/grouping（后续纵切，头注登记）。
+- **T-4a 多轮 loop**（`engine/query/`）：`queryAgentLoop`（while 多轮：复用 queryOneRound 单轮 + maxTurns guard + 轮前 autoCompactIfNeeded 接线 + terminal = end_turn）。**裁/残留守**：旧仓 1641L 的 7 continue sites 状态机（transitions.ts LoopPhase/LoopTransition，recovery/collapse_drain/reactive 等）→ 残留守（错误恢复 model_fallback/max_output_tokens + stop hooks 归 E-5/E-1b-full）；tokenBudget continuation → maxTurns 简化 seam。
+- **T-4c pipeline ⑤ + signal**（`engine/pipeline/`）：① `validateInputBySchema`（JSON schema 浅校验：required + properties 基础类型；新仓 `ToolInputJSONSchema` 是 plain JSON schema object 非 zod，无外部依赖）② `buildSchemaNotSentHint` 纯函数化（入参 = discovered 集合 + tool.shouldDefer，不依赖 ToolSearch 特性族 feature gate；wire 进 toolExecution schema 校验路径）③ signal 透传：`tool.call(input, { signal }, …)` 经 call 第 2 参 context（新仓 Tool.call 契约 context: unknown，**不改 shared 契约**，传最小 context 对象）+ loop/pipeline deps 加 `signal?`。
+- **T-4d fixture replay 测**（移入的 E-1 T-4 多轮部分）：多轮 LLM 序列 fixture（fake provider 队列回放：round1 tool_use→round2 tool_use→round3 end_turn，**记录真 LLM 序列形态**）+ 断言多轮调度/消息序列/turnCount/terminal；compaction 触发测（超阈值→autoCompactIfNeeded 真压缩+消息序列拼接，非 tautology）。
+- **T-4e 记录 + gate 核验**：§8.23 落盘 + memory + gate 核验（engine 不在 8 域门扫描集→无 gate 改动，同 §8.22 T-5 裁定；capability-matrix hooks 行 `by: engine` 不变）。
+
+**依赖面（防 H6 空洞）**：context 经 modelprovider 门面消费 countTokens + chat（摘要调用）；loop 经 pipeline（T-2 已落）+ context（T-4b）；token 计数/ contextWindow 为注入 seam（deps），port 之下全真。
+
+**顺序**：T-4b（context 不依赖 loop）→ T-4a（loop 接 context）→ T-4c（pipeline 小件）→ T-4d（测）→ T-4e（记录）。

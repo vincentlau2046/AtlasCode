@@ -19,3 +19,19 @@ export {
   type ToolBatchOutcome,
 } from './pipeline'
 export { EngineState, type StateUpdater } from './state'
+export {
+  getAutoCompactThreshold,
+  shouldAutoCompact,
+  autoCompactIfNeeded,
+  compactConversation,
+  microcompactMessages,
+  buildPostCompactMessages,
+  estimateMessageTokens,
+  type AutoCompactDeps,
+  type AutoCompactTrackingState,
+  type AutoCompactOutcome,
+  type CompactionResult,
+  type CompactDeps,
+  type MicrocompactDeps,
+  type MicrocompactOutcome,
+} from './context'
