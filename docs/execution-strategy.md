@@ -754,3 +754,73 @@ H6 六条真盘面映射（绝不写假装通过的能力测试）：① spill �
 **遗留（不阻塞，engine 波按需）**：modelprovider 缺 `resetEndpointConfigSource`（其余 3 域 set/get/reset 三元组，modelprovider 仅 set/get；Bun --isolate 跨文件不泄漏，单文件多 case 需 reset 再补）。
 
 **下一步= engine 波**（hooks 流式/attachment 渲染 + permissions 规则求值树 + executor 全 shell + 真 bwrap runtime 包经 setSandboxRuntimeModule 单点换入 + settings 体系回填 sandboxDeps 真 deps + engine ~14 子模块落目录树，charter L4.8）。
+
+### §8.21 engine 波勘察定稿 + 首纵切 E-1（窄 spine）方案（2026-09-23，勘察 agent 路径修正）
+
+**勘察置信**：后台勘察 agent（feature-dev:code-explorer）给出框架 + 纵切顺序，但其工具预算耗尽被强制 handback，报告里多个旧仓路径是从 CLAUDE.md 架构描述抄的、未实测。主 session 逐个 grep/wc 实测修正（「绝不写以为已全」）：
+
+| 勘察 agent 报告（错） | 实测修正 |
+|---|---|
+| engine = `src/query.ts` + `src/QueryEngine.ts` | ❌ 该路径不存在。真身 = `src/core/orchestrator/`（33 文件/12203 行，旧仓已 Phase A 分解为 query/tools/context/llm 子目录）|
+| `src/hooks/hooks.ts`(4979L) | ❌ 真身 = `src/utils/hooks.ts`(4979L)（`src/hooks/` 全是 React hooks）|
+| `src/permissions/{permissions,yoloClassifier,permissionSetup}.ts` | ❌ 真身 = `src/utils/permissions/`（28 文件）+ `src/utils/settings/`（17 文件）|
+| `src/tasks/framework.ts`(308L) | ❌ 不存在。真身 = `src/Task.ts`(125L) + `src/tasks/`（LocalAgentTask 等追踪层）|
+| worktree ~2056L | 实测 `src/utils/worktree.ts` = **1451L** |
+
+**engine 真身自述**（旧仓 `src/core/orchestrator/README.md`，Phase A 接口骨架 + 逐文件职责表）：域内 35 文件/约 12000 行，承担 Agent 主循环（LLM 流式 + 工具调度 + 错误恢复）/上下文压缩/工具执行管道/查询引擎封装。旧仓已分解：
+- `query/`（loop.ts 1641 主循环 while(true) / transitions 70 / config 41 / deps 57 / stopHooks 454 / tokenBudget 93）
+- `tools/`（toolExecution 1511 `checkPermissionsAndCallTool` 单体 / StreamingToolExecutor 530 / toolHooks 558 / toolOrchestration 193 / pipeline 65 + defaultPipeline 117）
+- `context/`（compact 1522 / sessionMemoryCompact 614 / microCompact 507 / snipCompact 265 / prompt 356… 共 ~4700L）
+- `llm/query.ts`（601，callModel 实现 = OpenAI 兼容流式 + cache + thinking）
+- 根级（index.ts 121 门面 / api.ts 76 Orchestration 三接口 / QueryEngine.ts 1241 `ask()` 封装）
+
+**关键洞察**：engine 波**不是**「原样搬 core/orchestrator」，而是把旧仓 `core/orchestrator/**` + `coordinator/` + `tools/AgentTool/` + `utils/hooks.ts` + `utils/permissions/` + `utils/settings/` **重组进新仓 14 子模块布局**。新仓 `src/engine/` 现状 = **22 文件/160 行纯骨架**（query/pipeline/context/coordinator/tools 均 `export {}` 占位，ports 7 个 stub，state 已部分填 fileHistory + attribution，EngineState 占位）。旧仓 `tools/` 子目录在新仓改名 `pipeline/`（避撞 tools 域概念，见新仓 pipeline/index.ts 注释）。
+
+**14 子模块 → 旧仓真实落点（实测，可 grep 复现）**：
+| 新仓 engine/ 子模块 | 旧仓真实落点 | 备注 |
+|---|---|---|
+| query/ | `core/orchestrator/{query/**, QueryEngine.ts, api.ts, index.ts, llm/query.ts}` | ★spine，loop.ts 1641 |
+| pipeline/ | `core/orchestrator/tools/**`（改名避撞）| loop 内工具执行 |
+| context/ | `core/orchestrator/context/**`（~4700L 压缩）| E-1b 子纵切（本轮拆出）|
+| state/ | 新仓已部分落（fileHistory/attribution）+ `QueryEngine` 4 成员 + 旧 `src/state/` AppState 族（6 文件）| EngineState set(f) 队列 |
+| ports/ | 新仓原生（7 落：domainMount/featureConfig/lspStatus/mcpClient/promptSuggestion/sessionContext/sessionMemory）| 第 8 个 T-3 核验 |
+| coordinator/ | `src/coordinator/{coordinatorMode,workerAgent}` | 已部分移植（73631df 默认 ON）|
+| tools/AgentTool/ | `src/tools/AgentTool/`（16 文件：AgentTool/runAgent/forkSubagent/loadAgentsDir/builtInAgents…）| E-2 |
+| hooks-runner/ | `src/utils/hooks.ts`（4979L 流式/attachment）| E-5 |
+| permissions-engine/ | `src/utils/permissions/`（28 文件）| E-4，依赖 config/ |
+| config/(settings) | `src/utils/settings/`（17 文件：settings/validation/permissionValidation/mdm/managedPath…）| E-3，解锁 E-4 |
+| tasks/（追踪层）| `src/Task.ts`(125L) + `src/tasks/`（LocalAgentTask/LocalShellTask…）| E-7；命名 `engine/coordinator/tasks/` 避撞 `src/task/` |
+| scheduler/ | `src/utils/cron{,Scheduler,Tasks,TasksLock,JitterConfig}.ts` | E-7 |
+| worktree/ | `src/utils/worktree.ts`(1451L) | E-7 |
+| messaging/ | `src/utils/{teamDiscovery,agentSwarmsEnabled,teammateMailbox,standaloneAgent}.ts` + `utils/swarm/` | E-7，跨会话 |
+| session/ | `src/utils/{sessionRestore,transcriptSearch,sessionStorage}.ts` | E-7 |
+（config/ 与 permissions-engine/ 共享 `src/utils/settings/` → 依赖序 E-3 先于 E-4）
+
+**纵切顺序（依赖序修正后）**：
+```
+E-0 目录树 + 命名（14 子模块落位，TaskCreate→engine/coordinator/tasks/ 避撞 src/task/）
+E-1 ★spine 窄：query+pipeline+state+ports（最小可跑 agent loop：LLM→tool→result 一轮）
+E-1b context 压缩层（compact/microCompact/sessionMemory ~4700L）—— 拆出，下一子纵切
+E-2 工具面：tools/AgentTool + coordinator（73631df 默认 ON 门控）
+E-3 config/ settings 体系（解锁 E-4；resetEndpointConfigSource 在此切片按需补）
+E-4 permissions-engine（规则求值树，依赖 E-3）+ 真 bwrap 单点换入（setSandboxRuntimeModule，可并行）
+E-5 hooks-runner（流式/attachment，utils/hooks.ts 4979L）+ hooks 域裁剪残余回填
+E-6 executor 全 shell 回填（独立可并行 E-4/E-5）
+E-7 leaves：tasks(追踪层)→scheduler(cron)→worktree→session→messaging
+```
+remote/后台会话 defer + 预留 Port 9（charter L4.9，不动）。
+
+**`resetEndpointConfigSource` 落点**：在 **E-3 settings 体系回填** 切片——出现第一个需跨 case 重设 endpoint source 的单文件多 case 测试时就地补 3 行（镜像 `src/modelprovider/index.ts` 的 `resetModelProviderForTesting`：清 `activeSource` + `sourceOverridden=false` 回空 stub 惰性语义）。无调用点的 reset = 死代码，故现在不加，随 E-3 首个消费它的测试补，届时核销本登记（§8.20 遗留）。
+
+**E-1 窄 spine 拆 T（对齐 C-Deep T5-T8 节奏，裁剪版真核心，残留守头注释防以为已全）**：
+- **T-1 query loop 骨架**：`loop.ts`（裁剪，跑通一轮 LLM→tool→result）+ `QueryEngine.ts` `ask()` + `llm/query.ts` `callModel`（经 modelprovider 域门面 + D18 endpointConfigSource），落 `engine/query/`
+- **T-2 loop 内工具执行**：`toolExecution` `checkPermissionsAndCallTool`（裁剪）+ `StreamingToolExecutor` + `toolOrchestration`，落 `engine/pipeline/`（旧 tools/ 改名）
+- **T-3 state 补齐 + ports 核验**：EngineState set(f) 队列（R3a 9/9 原型转正 co-located 单测）+ fileHistory/attribution 核验 + 第 8 port 确认
+- **T-4 测试层**：agent-loop fixture replay 多轮调度等价（R2 `gateway.test.ts` 12 测范本 mock.module + activeStreamChunks + loadFixture；等价边界 = engine 调度/解析/状态转换/工具分发，**非 LLM 行为**）+ EngineState 100 并发 set 零丢失 + 反例 read-compute-write 丢更新守卫；**H6 防空洞**（fixture = 旧仓 tag 录制的真 LLM 序列，断言调度行为，非 tautology）
+- **T-5 gate 同步 + §8.21 落盘**：capability-matrix 加 engine 行（若 engine 入扫描集）+ anti-stub（若涉及 engine 域）
+
+**E-1 依赖面（注入，防 H6 空洞）**：engine 经门面消费 modelprovider（completion/stream，D18 已接）+ executor（Shell 工具）+ hooks（runHooks 5 高频薄骨架已落）；8 port 已落（无新 8 域 port）；compose.ts 或需新增 engine 装配（QueryEngine 构造 + ask 入口），经 DEP-5 组合根 allow 已预铺。
+
+**验收四件套口径**：tsc 0 / lint 0（engine 域 DEP-4 已预铺）/ build 0 / test 全绿（+ agent-loop fixture replay + EngineState 并发新测，基线 450 pass）。**绝不写假装通过的能力测试**——未实现的 loop 能力标 missing + 解锁波次。
+
+**残余（E-1 定稿前须补 / 后续纵切）**：① 第 8 port 确认（Glob 仅见 7，T-3 核验）② 旧仓 36 文件/11975L 口径 vs 实测 33 文件/12203L（含 README，微漂移，以实测为准）③ settings→modelprovider 角色池耦合（E-3 注入面，旧仓 aab5944 动态解析 `modelRoles.small` 池头，新仓未验证）④ bwrap 真包就绪度（E-4 外部依赖，未就绪则只验 `registerSandboxBackend` 等价后端路径）。
