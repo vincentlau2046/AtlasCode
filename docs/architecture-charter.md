@@ -1,9 +1,19 @@
-# AtlasCode 顶层架构纲领 v0.11（草案）
+# AtlasCode 顶层架构纲领 v0.12（草案）
 
 > **状态：草案，架构层定稿（L0–L6）+ 全部 open question 裁定完毕（含 Tier 2 双跑/测试迁移），未实施。**
 > 本文件记录截至 2026-09-21 的架构讨论结论（v0.7）。在细节讨论完成、用户明确点头前，**不 init git、不写任何代码**。
 > 后续深化直接在本文件修订，版本号递增。
 > 讨论源：AtlasHarness session（产品拆分规划，含 pi/openwork 理念对照、核心边界探查、壳可替换性评估、engine 独立与平铺推导、ascend 域包定义、identity/feature/lint/旧仓处置/modelprovider/analytics 六项 open question 裁定、执行器/注册机制深度推导 + 业界调研、四域自治模型推导、双跑等价机制 + 测试迁移策略 Tier 2 深化）。
+
+> **v0.12 变更摘要（2026-09-23，C-Deep 切片 3 复审裁定——4 C-Deep 域认 12 顶层域，L525 修订）**：
+> C-Deep §8.9（execution-strategy）把 task/bootstrap/permissions/hooks 提成顶层域，charter v0.11（C 波 spike 阶段）未覆盖。四方复审（Explore 源项目深挖 + test-analyzer + Review + Plan agent）后用户裁定 (β)：认 12 顶层域，回写 charter。
+> 1. **12 顶层目录**：shared（纯叶子）+ **八域地基**（sandbox/memory/executor/modelprovider + task/bootstrap/permissions/hooks）+ engine（应用层）+ ascend（域包）+ atlascode（壳）。L107/L139/L4.7 "四域"→"八域"措辞。
+> 2. **裁定理由（port 解耦非物理层级）**：C-Deep 用注入端口斩断跨域耦合——executor 经 TaskOutput port 消费 task（不直接 import）、hooks 经 HookShellPort 消费 executor、permissions 经注入端口斩断 sandbox 耦合。4 域独立顶层**不破坏** DEP 依赖方向（横向消费变注入边）。L525"权限收进 sandbox"前提（permissions 耦合 sandbox 内）已不成立 → **L525 修订**：permissions 独立顶层域（PermissionRule 类型仍下沉 shared，权限决策逻辑在 permissions 域）。
+> 3. **不选 (α) 折叠**：4 域已建完 3278L + 37 测试 + 矩阵 8 域行 + anti-stub 纳扫；port 解耦已实质自治，折叠返工成本极高且无架构收益（只换"符合 charter 字面"形式）。
+> 4. **eslint 扩 4 element**：task/bootstrap/permissions/hooks 加入 boundaries/elements + DEP-2 八域 allow=[shared] only（L3 纪律从约定变机器门，门治理批次落）。
+> 5. **TaskCreate 命名（张力 B 收口）**：`src/task/` = TaskOutput/diskOutput（shell 命令输出溢出，executor 消费）；源项目 TaskCreate/Update/List/Get/Stop（多步工作清单，coordinator 消费）迁入用 `engine/coordinator/tasks/`（L4.8 `engine/coordinator/` 已规划，加 `tasks/` 子模块避碰）。
+> 6. **engine 子模块登记**：L4.8 已规划 coordinator/tools/AgentTool/。Explore 源项目深挖发现 engine 需 ~14 子模块（agent 平台共性能力）：coordinator/（multi-agent/spawn）/ tools/AgentTool/ / scheduler/（cron ~2179L）/ tasks/（task-tracking ~2322L）/ messaging/（跨会话通信 ~3550L）/ worktree/（~2056L）/ state/ / pipeline/ / query/ / ports/ / hooks-runner/（hooks 流式/attachment 渲染，§8.16 归 engine）/ permissions-engine/（规则求值树）/ session/ / config/。engine 波规划时正式登记目录树。**multi-agent/spawn ✅ charter 已覆盖；cron/remote/task-tracking/跨会话通信/worktree ❌ 规划盲区 → engine 波补（各为 engine 子模块，非新顶层域——全是 engine 自消费内部机制，不满足 L3"被≥2域消费"判据）；remote/后台会话 defer + 预留 Port 9（依赖云基础设施）**。
+> 7. **4 ungoverned 目录门治理（Plan agent 发现）**：shared（22 文件真叶子，补 anti-stub 纳扫+矩阵行组，不升域保持叶子层 STR-4）/ engine（22 占位 export{}，engine 波实现时登记）/ ascend（9 占位，E 波）/ atlascode（14 占位，compose.ts 由 B6-func 填实非新建）。
 
 > **v0.9 变更摘要（2026-09-21，C 层 8 项架构议题闭环——L4.9 新节）**：
 > 1. **C-1 feature() 换前验真**：「零语义变化」押在仓内 F5 断言（生产 bundle 的 `bun:bundle` 经 imports 重映射到 env 桩）——断言未实证（A 层教训：6 个数字复现不了）。**A 波换前一次性验真**（`bun build` 产物 grep `FEATURE_`）：= 桩 env 语义 → 零变化；= 构建期常量 → 换后对齐 73631df/81521d0 ON_BY_DEFAULT 裁定本意（记语义差异非回归）。fixture env 固定：E 层2 fixture 清单加 `env:` 字段显式 pin 涉及 `FEATURE_*`。
@@ -104,7 +114,9 @@ AtlasHarness 本质**首先是 coding agent**，通用能力是基座恒定项�
 
 ## L2 · 模块边界与依赖 DAG
 
-### 顶层模块（扁平，8 目录 = 6 兄弟 + shared 纯叶子 + atlascode 壳）
+### 顶层模块（扁平，v0.12：12 目录 = 8 域地基 + shared 纯叶子 + engine + ascend + atlascode 壳）
+
+> **v0.12 修订**：v0.11 原"8 目录 = 6 兄弟 + shared + atlascode 壳"扩展为 12 目录——C-Deep §8.9 把 task/bootstrap/permissions/hooks 提成顶层域（port 解耦使 L3 自治成立，详见 v0.12 变更摘要）。DAG 图四域节点扩展为八域（port 解耦边替代物理层级边：executor --TaskOutput port--> task、hooks --HookShellPort--> executor、permissions --注入端口--> sandbox 耦合已斩断）。
 
 engine 从 core 独立 + 四域平铺 + core 容器层取消：
 
@@ -136,7 +148,7 @@ engine 从 core 独立 + 四域平铺 + core 容器层取消：
 
 > **v0.8：规则统一入 L8 单一权威清单**（15 条 / 5 类 DEP/STR/AUT/PRT/IDN，每条带「判定桶 + CI 门 + 承重标记」三标注，见 L8）。映射：依赖方向细则 = **DEP-1…5**（旧 1-5 条），状态/配置自治 = **AUT-1/AUT-2**（旧 7/8 条），组合根 = **STR-3**（旧 6 条）。此处不再单列条文（旧 L8 规则 1 已吸收依赖 1/2/4/5，L4.7 三柱实证化现挂 L8 DEP-3/AUT-1/AUT-2/PRT-1）——**单一事实源 = L8，避免两套编号撞号**。
 
-### 为什么 engine 独立 + 四域平铺
+### 为什么 engine 独立 + 八域平铺（v0.12：四域→八域，task/bootstrap/permissions/hooks 经 port 解耦独立顶层）
 
 - core→services 反向依赖 **100% 集中在 `core/orchestrator/`**（12 文件），四域+factory 仅 memory→growthbook 一处反向（L4.7 已诊断→C 波 Port 8 斩断），其余零反向。engine 和四域是两类东西（应用层 vs 库级），硬塞一起就是 v0.2 的"混装"。
 - 四域是兄弟关系非父子（仅 executor→sandbox 一条 type 边，清掉 sandbox→factory 反向边后无环）。`core/` 容器层只担"混装"历史语义，取消后依赖关系显式反映。
@@ -430,7 +442,7 @@ modelprovider（归域）:
   notifier, preventSleep, voice*, vcr, awaySummary, diagnosticTracking  ← 宿主能力
 ```
 
-## L4.7 · 四域自治模型（v0.6 核心——地基可插拔）
+## L4.7 · 八域自治模型（v0.6 核心——地基可插拔；v0.12：四域→八域，task/bootstrap/permissions/hooks 加入，port 解耦使 L3 自治成立）
 
 ### 缘起：从"域包可插拔"到"地基可插拔"
 
@@ -522,7 +534,7 @@ engine/state/attribution/{types,attribution,config,index}.ts
 **自治目标**：
 - settings 类型下沉 shared + 实现走 SandboxDependencies 注入（**已有模式**——createSandboxManager 已用 `deps.getSettingsForSource`，仅 `compat.ts:12` 残留直连 `getSettingsForSource` 待清）
 - ripgrep 收进 sandbox 域内（`sandbox/ripgrep.ts`，搜索后端是 sandbox 专属）
-- permissions/PermissionRule 类型下沉 shared，权限逻辑收进 sandbox
+- ~~permissions/PermissionRule 类型下沉 shared，权限逻辑收进 sandbox~~ → **v0.12 修订**：permissions 独立顶层域（C-Deep port 解耦斩断 sandbox↔permissions 耦合，L525 前提"permissions 耦合 sandbox 内"不成立；PermissionRule 类型仍下沉 shared，权限决策逻辑在 permissions 域）
 - platform 纯函数下沉 shared
 - 状态自管（规则缓存不寄生，已在域内）
 
@@ -573,6 +585,12 @@ shared 不成新耦合点：它只有纯叶子，任何域替换不影响 shared
 3. **spawnDepth/allowFanOut**（runAgent + AgentTool 的 harness 侧深度追踪穿透）→ engine 状态 / 工具参数链（EngineState 或 per-call 参数），**不进壳 AppState**（AUT-1：域/引擎状态不寄生壳）。
 4. **3 门控测试文件**（agent-tool-depth / agent-tool-fanout / coordinator-worker-agent）→ unit co-located 随 engine/ 迁（F 裁定），C 波 unit 迁移批次；门控语义不变——feature.ts 为普通模块（v0.8 B 层②），feature() 门控依旧可控，测试随模块走即可。
 5. **ON_BY_DEFAULT 继承**：`COORDINATOR_MODE` 默认开（env 门控 + kill-switch 保留）语义在新仓原样继承，不回退、不另裁。
+
+**v0.12 补充（TaskCreate 命名 + engine 子模块登记）**：
+
+6. **TaskCreate 系命名（张力 B 收口）**：`src/task/` 已被 TaskOutput/diskOutput 占用（C-Deep 切片 3，executor 消费的 shell 命令输出溢出管理）。源项目 TaskCreate/Update/List/Get/Stop（多步工作清单，coordinator 消费）迁入时用 `engine/coordinator/tasks/`（本节第 1 条 `engine/coordinator/` 已规划，加 `tasks/` 子模块避命名碰撞）。**勿用 task 域名**——两事物完全不同（TaskOutput = shell 输出溢出；TaskCreate = 多步工作清单）。
+
+7. **engine 子模块清单（v0.12 登记，engine 波规划时正式落目录树）**：Explore agent 源项目深挖发现 engine 需 ~14 子模块（agent 平台共性能力）：`coordinator/`（multi-agent/spawn ✅ 已规划）/ `tools/AgentTool/`（✅ 已规划）/ `scheduler/`（cron ❌ 盲区 ~2179L）/ `tasks/`（task-tracking ❌ 盲区 ~2322L）/ `messaging/`（跨会话通信 ❌ 盲区 ~3550L）/ `worktree/`（❌ 盲区 ~2056L）/ `state/` / `pipeline/` / `query/` / `ports/` / `hooks-runner/`（hooks 流式/attachment 渲染，§8.16 归 engine）/ `permissions-engine/`（规则求值树）/ `session/` / `config/`。全为 engine 自消费内部机制（不满足 L3"被≥2域消费"判据 → 非新顶层域）。remote/后台会话 defer + 预留 Port 9（依赖云基础设施）。
 
 ## L4.9 · C 层架构裁定（v0.9，8 项）
 
@@ -849,17 +867,17 @@ L5 三层无损定义里，"行为级 = 测试墙 all-pass"细化为：
 > - **② grep / CI 脚本桶**：自定义 grep / 目录深度脚本（v0.6 三柱实证裁定；**域文件 A 波尚不存在，本桶门 B6 起才 CI 化**——B6 = 域绿门，三柱 grep 门必须此时进门，否则 B14 验收时三柱无机器判定）。
 > - **③ review 桶**：人工 checklist（D/F 波 review；不造伪机器门）。
 >
-> **承重规则**（支撑 B14「可独立 package」验收，5 条须全绿）：**DEP-2、DEP-3、AUT-1、AUT-2、PRT-1**——四域全自治后"可独立 package"成立（modelprovider 可替换 = 接口对接 + config.ts 改数据源）。
+> **承重规则**（支撑 B14「可独立 package」验收，5 条须全绿）：**DEP-2、DEP-3、AUT-1、AUT-2、PRT-1**——八域全自治后"可独立 package"成立（modelprovider 可替换 = 接口对接 + config.ts 改数据源）。v0.12：四域→八域，task/bootstrap/permissions/hooks 加入承重（每域零向上 + port 解耦，独立编译验证同成立）。
 
 ### DEP · 依赖方向（lint 桶）
 
 **DEP-1 · 单向无环**
-`shared ← {sandbox, memory, executor, modelprovider, engine, ascend}`，shared 是唯一叶子（不 import 任何东西）。**engine 依赖四域（modelprovider/sandbox/memory/executor）向下合法**——engine 是应用层，四域是库级地基，engine→四域天经地义（v0.5 问题1c 裁定）。反向一次，lint 拦 + CI 红。
-> 物理平铺（8 顶层目录：6 兄弟 sandbox/memory/executor/modelprovider/engine/ascend + shared 纯叶子 + atlascode 壳）+ 逻辑分层（engine 在四域之上）：物理结构反映"无父子容器"，逻辑依赖方向反映"应用层依赖库级"。两者不矛盾——平铺是目录组织，分层是依赖方向。
+`shared ← {sandbox, memory, executor, modelprovider, task, bootstrap, permissions, hooks, engine, ascend}`，shared 是唯一叶子（不 import 任何东西）。**engine 依赖八域（modelprovider/sandbox/memory/executor/task/bootstrap/permissions/hooks）向下合法**——engine 是应用层，八域是库级地基，engine→八域天经地义（v0.5 问题1c 裁定；v0.12 四域→八域）。反向一次，lint 拦 + CI 红。
+> 物理平铺（v0.12：12 顶层目录 = 8 域地基 sandbox/memory/executor/modelprovider/task/bootstrap/permissions/hooks + engine + ascend + shared 纯叶子 + atlascode 壳）+ 逻辑分层（engine 在八域之上）：物理结构反映"无父子容器"，逻辑依赖方向反映"应用层依赖库级"。两者不矛盾——平铺是目录组织，分层是依赖方向。
 > 判定：lint 桶（`element-types`）· CI 门：A 波
 
-**DEP-2 · 四域零向上**
-四域（sandbox/memory/executor/modelprovider）**永不** import engine/ascend/atlascode（向上非法 → 地基零反向，每域可独立编译验证）。
+**DEP-2 · 八域零向上（v0.12：四域→八域）**
+八域（sandbox/memory/executor/modelprovider/task/bootstrap/permissions/hooks）**永不** import engine/ascend/atlascode（向上非法 → 地基零反向，每域可独立编译验证）。v0.12 新增四域（task/bootstrap/permissions/hooks）经 port 解耦达成零向上：task 只被 executor 经 TaskOutput port 消费、hooks 经 HookShellPort 消费 executor、permissions 经注入端口与 sandbox 解耦、bootstrap 经 set/get 注入窗口读写。
 > 判定：lint 桶 · CI 门：A 波 · **承重**
 
 **DEP-3 · 域依赖洁净（三柱①依赖洁净）**
