@@ -3,8 +3,8 @@
  *
  * S-3a 落：settings 类型面（SettingsSchema/SettingsJson/ValidationError）+ 源层
  * 常量（SETTING_SOURCES/getEnabledSettingSources）+ 三层缓存 + managedPath +
- * configRoot。S-3b 追加加载/合并/写回核心（settings.ts + validation）随切片
- * 在此追加 re-export。
+ * configRoot。S-3b 落：加载/合并/写回核心（settings.ts + merge.ts +
+ * validation.ts）。
  */
 export {
   SettingsSchema,
@@ -37,3 +37,24 @@ export {
   getManagedSettingsDropInDir,
 } from './managedPath'
 export { getAtlasConfigHomeDir } from './configRoot'
+export {
+  mergeWith,
+  settingsMergeCustomizer,
+  type MergeCustomizer,
+} from './merge'
+export {
+  formatZodError,
+  filterInvalidPermissionRules,
+} from './validation'
+export {
+  loadManagedFileSettings,
+  parseSettingsFile,
+  getSettingsRootPathForSource,
+  getSettingsFilePathForSource,
+  getRelativeSettingsFilePathForSource,
+  getSettingsForSource,
+  getPolicySettingsOrigin,
+  updateSettingsForSource,
+  getInitialSettings,
+  getSettingsWithErrors,
+} from './settings'

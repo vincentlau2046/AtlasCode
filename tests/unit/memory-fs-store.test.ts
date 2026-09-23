@@ -27,6 +27,10 @@ function makeMock(overrides: Partial<FsOperations> = {}): FsOperations {
     realpathSync: (p) => p,
     open: async () => ({} as never),
     unlinkSync: () => {},
+    // E-3 S-3b 加法原语（memory 域不消费，mock 空实现）
+    readdirSync: () => [],
+    writeFileSync: () => {},
+    mkdirSync: () => {},
     ...overrides,
   }
 }
