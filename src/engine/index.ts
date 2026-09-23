@@ -41,6 +41,9 @@ export {
   microcompactMessages,
   buildPostCompactMessages,
   estimateMessageTokens,
+  evaluateTimeBasedTrigger,
+  TIME_BASED_MC_CLEARED_MESSAGE,
+  TIME_BASED_MC_CONFIG_DEFAULTS,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
   type AutoCompactOutcome,
@@ -48,4 +51,5 @@ export {
   type CompactDeps,
   type MicrocompactDeps,
   type MicrocompactOutcome,
+  type TimeBasedMCConfig,
 } from './context'
