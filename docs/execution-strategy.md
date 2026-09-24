@@ -1772,3 +1772,83 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **四件套终验**：tsc 0 / eslint 0 / build 0KB entry / 1210 pass（+1 新 func 探针）/ gate 6，零回归。
 
 **闭环判定**：S-7c worktree（agent 隔离 + git 执行层）全闭环（主体 git.ts 773L + worktree.ts 685L + 门面 + engine 门面 + unit 37 + func 13 + 3 探针 + MAJOR-1 回归探针 + 单只读审视 1 MAJOR/1 MINOR/3 NOTE 全处置 + 四件套终验），无 BLOCKER。**下一步 = S-7d session（§8.49）。**
+
+## §8.49 S-7d session 执行前分析（d1/d2 详案，2026-09-24）
+
+**落位**：`src/engine/session/`（新域，engine 顶层，coordinator 不涉）+ 填 `src/engine/ports/sessionMemory.ts`（d1）/ `sessionContext.ts`（d2）两 `export {}` port 占位（charter L4 Port 5 / Port 1 真契约）+ `src/engine/index.ts` STR-1 显式名 re-export 块（worktree 块先例）。
+
+**旧仓来源盘点（a8af45b 实测）**：`sessionStorage.ts` 5080L / 94 export（公共 API 大半是 `Project` 类（L528）单例 `getProject()` 的薄包装；真持久化核心全在 Project 类内）+ `sessionRestore.ts` 551L / 9 export + `transcriptSearch.ts` 202L / 3 export + `services/SessionMemory/` 995L（状态机 sessionMemoryUtils 203L + 主服务 468L + prompts 324L）+ `sessionStoragePortable.ts` 793L（load 必需子集随迁、余裁）。**关键发现（解耦判据）**：旧 `bootstrap/state.ts` 的 `getSessionProjectDir`（`: any` = 恒 null）/ `getPromptId`（`({}) as any`）/ `getPlanSlugCache`（per-call fresh Map → `.get` 恒 undefined）/ `isSessionPersistenceDisabled` 皆为 **`: any` 退化 stub**——sessionProjectDir（CC-34 原子对）/ promptId / slug 面在旧仓即死代码，新仓裁除零行为 delta。`checkResumeConsistency`（L2220）体 = 遥测 879 点删除后纯 no-op 残余（walk turn_duration 算 `actual` 即 `return`，零输出）→ **裁 + 登记**（H6 不迁空洞函数）。
+
+### d1（JSONL 持久层核心 + sessionMemory port）
+
+**文件清单 + 裁剪裁定**（94 export → engine 消费子集 ~30 export，逐文件核）：
+
+1. **types.ts** ← 旧 `types/logs.ts` 330L 裁 + TranscriptMessage 形状（旧 `types/message.ts` 薄 + insertMessageChain L1050-1070 逐字注释块钉死 session-stamp 字段序）：
+   - 留：TranscriptMessage/SerializedMessage / Summary / CustomTitle / AiTitle / LastPrompt / TaskSummary / Tag / AgentName / AgentColor / AgentSetting / PRLink / Mode / WorktreeState（PersistedWorktreeSession）/ ContentReplacementEntry + ContentReplacementRecord（旧 toolResultStorage:539 三字段逐字）/ Entry 并集（按留面缩）。
+   - 裁 + 登记：FileHistorySnapshotMessage / AttributionSnapshotMessage / QueueOperationMessage / SpeculationAcceptMessage / ContextCollapse 两件套（grep 零外部消费者）——**loader 侧对已裁 entry type 走「未知 type 跳过」容错**（旧 AtlasHarness 磁盘 JSONL 含这些 entry；跳过非报错；头注登记，shell 域波补全时收紧）。
+2. **env.ts（域内注入口，scheduler cronEnv §8.47 先例，域自包含不跨 import bootstrap）**：`SessionEnv { getSessionId / switchSession / getOriginalCwd / getProjectsDir / registerCleanup }`，缺省全自包含（randomUUID 捕获 + 域内 session id 持有 + `process.cwd()` + `ATLAS_CONFIG_DIR ?? join(homedir(), getConfigDirName())` + 'projects'（bootstrap defaultTranscriptDir 先例，免跨域 import configRoot）+ registerCleanup 缺省 no-op）。组合根接线时注真 bootstrap 值（E-wave-end，前向接缝登记）。
+3. **paths.ts** ← 旧 L191-260：getProjectsDir / getTranscriptPath / getTranscriptPathForSession（CC-34 注释逐字裁 sessionProjectDir 支后形 = `join(getProjectDir(getOriginalCwd()), ${id}.jsonl)`）/ getAgentTranscriptPath + setAgentTranscriptSubdir / clearAgentTranscriptSubdir / MAX_TRANSCRIPT_READ_BYTES（50MB）/ getProjectDir（memoize `join(getProjectsDir(), sanitizePath(cwd))` 逐字；sanitizePath ← 新仓 `shared/path.ts`（头注核验：与旧 portable 版同 Bun.hash 优先 + djb2 兜底哈希线，目录名跨升级稳定））。
+   - **裁 + 登记**：sessionProjectDir 机制（旧 getSessionProjectDir stub 恒 null，CC-34 原子对退化；switchSession 单参，与新 bootstrap 第二参 stub 一致）/ promptId / slug stamp（旧 getPromptId/getPlanSlugCache stub 退化；TranscriptMessage stamp 只留存活 session 字段 userType/entrypoint/cwd/sessionId/version/gitBranch）/ isSessionPersistenceDisabled（持久化 kill-switch 面归 CLI 波）。
+   - stamp 解耦：userType = 旧 getUserType（sessionStorage:415 域内，逐字）/ entrypoint = `process.env.ATLAS_ENTRYPOINT ?? 'cli'`（旧 getEntrypoint env 面）/ gitBranch = 域内小工具 `getGitBranch()`（execFile `git rev-parse --abbrev-ref HEAD`，旧 utils/git.ts getBranch 语义逐字；域自包含，不跨域 import worktree exec 层——与 scheduler「域内小工具」先例一致）/ VERSION = 新仓 package.json version 读（'unknown' 回落；旧 MACRO.VERSION define 面新仓无，头注登记）。
+4. **project.ts** ← 旧 `Project` 类持久核心：
+   - 留：currentSession* 元数据缓存字段族（tag/title/agentName/agentColor/lastPrompt/agentSetting/mode/worktree 三态/prNumber/prUrl/prRepository）/ sessionFile + pendingEntries 缓冲 + materializeSessionFile（首条 user/assistant 才物化，防 metadata-only 空文件）/ **insertMessageChain（L994 逐字：tool_result sourceToolAssistantUUID 覆写 + isCompactBoundary parentUuid=null / logicalParentUuid + chain-participant parent 推进 + lastPrompt 200 字截断缓存 + METADATA_REWRITE_INTERVAL=20 元数据重写）** / appendEntry（L1141 per-file 写队列 + flushResolvers）/ insertContentReplacement（L1126）/ reAppendSessionMetadata（L722，尾部 64KB 窗口语义）/ flush（L842）/ trackWrite / resetSessionFile（L689）/ _resetFlushState（L574）/ getSessionMessages memoize 缓存（L3812，lodash memoize 逐字语义域内化）。
+   - 裁 + 登记（6 裁面 H6 头注）：insertFileHistorySnapshot / insertAttributionSnapshot / insertQueueOperation（shell 域 fileHistory/attribution/UI 队列）/ removeMessageByUuid（REPL tombstone，engine 零消费者 grep 确证）/ setRemoteIngressUrl + CCR v2 internalEvent writer/reader + REMOTE_FLUSH_INTERVAL_MS（远程/teleport 波）/ 旧 registerCleanup（coordinator/tasks cleanupRegistry 跨域 → env.registerCleanup 注入口，scheduler 先例）。
+5. **record.ts** ← 公共记录面：recordTranscript（L1419 逐字：cleanMessagesForLogging + 已录去重 + **prefix-tracked skip 逻辑**（仅前缀型已录消息推进 parent，compaction 非前缀支 CB parentUuid=null 截断）+ startingParentUuidHint + 返回 last chain-participant uuid）/ recordSidechainTranscript（L1467）/ recordContentReplacement（L1505，旧 loop.ts:92 + sessionRestore 消费面）/ flushSessionStorage（L1594）/ resetSessionFilePointer / adoptResumedSessionFile（L1531 CC-34 注释逐字）/ restoreSessionMetadata + saveMode（sessionRestore 依赖面）/ cleanMessagesForLogging / isChainParticipant / isTranscriptMessage / isEphemeralToolProgress / getFirstMeaningfulUserMessageTextContent + SKIP_FIRST_PROMPT_PATTERN（helper 逐字）。saveWorktreeState 随 worktree 状态面裁（登记）。
+   - **消费面**：新仓 QueryEngine/loop 当前零调用点 → **前向登记**（E-wave-end compose.ts 接线：QueryEngine 8 recordTranscript 点 + loop recordContentReplacement；头注 + matrix 行登记，H6 防空洞口径）。
+6. **scanner.ts** ← 旧 portable L473-800 逐字块（TRANSCRIPT_READ_CHUNK_SIZE 1MB / SKIP_PRECOMPACT_THRESHOLD 5MB / LITE_READ_BUF_SIZE 64KB / compactBoundaryMarker / LoadState / processStraddle / scanChunkLines / captureSnap / captureCarry / finalizeOutput / **readTranscriptForLoad**）——pre-compact 大文件 fd 级 attr-snap strip + in-stream compact boundary 截断（151MB session 32MB alloc 优化逐字，mimalloc RSS 注释保留）。
+7. **load.ts** ← loadTranscriptFile（L3443：ATLAS_DISABLE_PRECOMPACT_SKIP kill-switch + walkChainBeforeParse 预解析跳过（L3277 逐字）+ scanPreBoundaryMetadata 前界元数据恢复（L3128 逐字）+ 双格式 .json/.jsonl 逐字）/ loadTranscriptFromFile（L2283）/ buildConversationChain（L2069：cycle 检测 partial 返回 + **recoverOrphanedParallelToolResults**（L2136：sibling assistant 同 message.id 组 + 平行 tool_result DAG 孤儿恢复，anchor 后 splice 时序逐字））/ findLatestMessage / convertToLogOption / applyPreservedSegmentRelinks（L1850）/ applySnipRemovals（L1986）/ 域内小工具 parseJSONL / jsonParse / jsonStringify（旧 json/slowOperations 语义逐字，计时面裁）。
+   - **裁 + 登记**：checkResumeConsistency（旧体纯 no-op 遥测残余，H6 不迁空洞；resume 一致性监控面归遥测波）/ buildFileHistorySnapshotChain / buildAttributionSnapshotChain（对应 entry 裁）/ LogOption 全字段（teamName/agentName/isTeammate/pr* 等 CLI list 面）裁至 engine resume 消费子集（listSessions 面 = 相邻 8 项 CLI 波残留守）。
+8. **sessionMemory.ts** ← 旧 `sessionMemoryUtils.ts` 203L 状态机逐字（SessionMemoryConfig + DEFAULT {init 10000 / update 5000 / toolCalls 3} + lastSummarizedMessageId / extractionStartedAt / tokensAtLastExtraction / initialized + hasMet*Threshold + getToolCallsBetweenUpdates + waitForSessionMemoryExtraction（15s 超时 / 60s stale）+ resetSessionMemoryState）：
+   - 解耦：getSessionMemoryContent（旧 = getSessionMemoryPath + fs.readFile + isFsInaccessible 容错）→ **I/O 走 SessionMemoryPort**（isFsInaccessible 语义域内小工具，errno EACCES/EPERM/ENOTDIR 判别逐字；sleep 1s 轮询域内）；旧主服务 468L（forked subagent 后台抽取 + prompts 324L）裁 + 登记（forkedAgent 面新仓无，autoDream/抽取波）。
+9. **ports/sessionMemory.ts 真契约**（替 `export {}`，charter Port 5：会话记忆存储在壳，对齐 MemoryStore 模式）：
+   ```ts
+   export interface SessionMemoryPort {
+     /** 读会话记忆内容（无/不可读 → null）。 */
+     load(): Promise<string | null>
+     /** 写会话记忆内容（壳侧落盘，MemoryStore 模式）。 */
+     save(content: string): Promise<void>
+   }
+   ```
+   接口归 engine（消费方），实现归 atlascode（壳），组合根注入；当前零消费 = 前向登记（prompt 注入面 E-wave-end / 抽取触发壳波）。
+10. **index.ts** 域门面 + **engine/index.ts** STR-1 显式名 re-export 块（worktree 块后追加）。
+
+**d1 测试面**（真判别零 tautology；unit 零磁盘 + func 真盘 JSONL 两层，S-7a/b/c 分层先例）：
+- `tests/unit/engine-session.test.ts`：buildConversationChain（内存 Map：正常链 / cycle 检测 partial 返回 / **平行 TR 恢复**（sibling assistant 同 id 组 + 孤儿 TR 组 anchor 后 splice，时序断言）/ compact boundary parentUuid=null + logicalParent）+ isTranscriptMessage/isChainParticipant/isEphemeralToolProgress + scanner 纯逻辑支（scanChunkLines/captureSnap/captureCarry/finalizeOutput 对内存 Buffer：boundary 截断 / attr-snap skip / straddle 跨块 / preservedSegment 不截断，纯函数支 unit 化）+ sessionMemory 状态机（init 10000 阈值 / update 5000 增长 / toolCalls 3 / stale 60s 不等待 / reset 全复位）+ SessionMemoryPort 假适配器（load null / save 捕获）+ paths（sanitizePath 长路径哈希稳定 / getTranscriptPath 布局断言 / agent transcript subdir 支）。
+- `tests/func/engine-session-fs.test.ts`（真盘 JSONL，域 env 注入 `setSessionEnv` 覆写 getProjectsDir → tmpdir；git 门控先例不适用——纯 fs）：recordTranscript → loadTranscriptFile **round-trip**（chain 重建逐条匹配 + last chain-participant 返回 uuid）+ recordTranscript prefix-skip（compaction 形：CB+summary 先、已录 toKeep 后 → CB parentUuid=null 断言）+ recordContentReplacement round-trip（sessionId keyed lookup 命中）+ recordSidechainTranscript（subagents/agent-<id>.jsonl 子目录真盘）+ flush 幂等 + 大文件 path（>5MB 构造：pre-boundary attr-snap + compact boundary → readTranscriptForLoad postBoundaryBuf 截断 + scanPreBoundaryMetadata 恢复 + walkChainBeforeParse 跳过死分支，ATLAS_DISABLE_PRECOMPACT_SKIP 两态）。
+- **突变探针**（备份→突变→恰 1 红→逐字恢复 diff 验净）：P-S1（recordTranscript prefix-tracked 守卫 `!seenNewMessage` 删 → func prefix-skip 测恰 1 红）/ P-S2（recoverOrphanedParallelToolResults inserts splice 删 → unit 平行 TR 恢复恰 1 红）/ P-S3（scanner finalizeOutput boundaryStartOffset 截断支删 → func 大文件截断测恰 1 红）。
+- **matrix**：session（engine 子域）非 8 域门扫描集（同 S-7b/c）→ 无 gate 改动（gate 6 不变）；证明 = 上两测试文件自证 + 前向登记头注（QueryEngine 8 recordTranscript 点 / loop recordContentReplacement / SessionMemoryPort 壳实现 / E-wave-end compose 接线）。
+
+### d2（restore 面 + sessionContext port）
+
+**文件清单 + 裁剪裁定**：
+1. **restore.ts** ← `sessionRestore.ts` 551L 裁剪解耦，提取 **slim `processResumedConversation`**（engine 所有权面，旧 L367-551 拆）：
+   - 留：forkSession=false → `switchSession(sid)` 所有权（env 注入口单参，projectDir 面随 d1 裁）+ **fork 支 `recordContentReplacement(result.contentReplacements)` seed**（FROZEN 误分类防治注释逐字——新 session id 下 source tool_use_id 无 replacement 记录 → 恒 FROZEN → 永久 overage）+ restoreSessionMetadata（fork 剥 worktreeSession 注释逐字）+ adoptResumedSessionFile（非 fork）+ saveMode（feature 门随新仓 feature 面裁，恒 save）+ 返回 shape（messages/contentReplacements/agentName/agentColor 'default'→undefined 归一）。
+   - 裁 + 登记（shell 域）：coordinator modeApi 匹配（新仓 coordinator 域不含 modeApi 服务，CLI/coordinator 波）/ renameRecordingForSession（asciicast）/ restoreCostStateForSession（cost-tracker）/ context-collapse require（零消费者，同 d1 裁定）/ restoreAgentFromSession + refreshAgentDefinitionsForModeSwitch（loadAgentsDir = CLI/agents 波）/ computeRestoredAttributionState（attribution 裁）/ updateSessionName（concurrentSessions）/ AppState initialState（壳）/ **restoreWorktreeForResume + exitRestoredWorktree**（worktree 状态缓存面；新仓 worktree 域（S-7c）不含 restoreWorktreeSession/getCurrentWorktreeSession → 裁 + 登记 shell worktree 波；slim 版不做 chdir，worktree 恢复面 = **前向注入口**（`onWorktreeRestore?` 可选回调，组合根注真 worktree 状态机，H6 前向接缝登记））。
+   - ResumeResult / ResumeLoadResult / ProcessedResume 裁至 engine 面（messages + contentReplacements + session 元数据字段；fileHistory/attribution/agentDefinitions 字段裁 + 登记）。
+2. **search.ts** ← `transcriptSearch.ts` 202L 逐字（renderableSearchText + computeSearchText + toolResultSearchText + toolUseSearchText + WeakMap 缓存 + RENDERED_AS_SENTINEL）：
+   - 解耦：INTERRUPT_MESSAGE / INTERRUPT_MESSAGE_FOR_TOOL_USE（旧 messages.ts:218-219）→ 域内常量逐字串（'[Request interrupted by user]' + tool_use 变体；新仓尚无 messages 常量面，头注登记）/ RenderableMessage → types.ts 最小形（user/assistant/attachment content block + toolUseResult duck 型 + toolUseResult 面注释逐字——phantom-match 防治：sentinel 滤 / tool_result 走原生 Out duck 非 model-facing 序列化）；UI 搜索消费面登记（REPL /transcript 搜索波）。
+3. **ports/sessionContext.ts 真契约**（替 `export {}`，charter Port 1 逐字）：
+   ```ts
+   export interface SessionSnapshot {
+     toolPermissionContext: ToolPermissionContext
+     mcp: { tools: Tool[]; clients: MCPServerConnection[] }
+     effortValue: EffortValue
+     advisorModel: string | undefined
+     tasks: Record<string, TaskState>
+   }
+   export interface SessionContextPort {
+     get(): SessionSnapshot
+     set(f: (prev: SessionSnapshot) => SessionSnapshot): void
+   }
+   ```
+   类型全存在（shared/types-session ToolPermissionContext/TaskState/MCPServerConnection + shared/types Tool/EffortValue）；**快照字段对象引用 = view 语义**（charter 注：实现唯一细节，set 按字段写回）；当前零消费 = 前向登记（QueryEngineConfig getAppState/setAppState 硬字段置换面，E-wave-end compose.ts 接线）。
+
+**d2 测试面**：
+- `tests/unit/engine-session-restore.test.ts`：processResumedConversation slim（env 假 + Project 假：非 fork switchSession 所有权 / **fork 支 contentReplacements seed 写入断言** / restoreSessionMetadata 缓存 / adoptResumedSessionFile sessionFile 指针 / saveMode entry / agentColor 'default' 归一）+ transcriptSearch（text 命中 / tool_result Bash {stdout,stderr} duck / tool_use input 拼接 / sentinel 滤（INTERRUPT phantom 防）/ attachment relevant_memories + queued_command isMeta 跳过 / WeakMap 缓存幂等）+ SessionContextPort 假适配器（get/set view 语义：字段对象引用同一性断言 + set 函数式写回）。
+- func（真盘，并入 d1 func 文件或独立，实施时定）：resume 链重建端到端（真 JSONL 构造 → loadTranscriptFile → buildConversationChain → processResumedConversation 非 fork 路）。
+- **突变探针**：P-S4（transcriptSearch toolResultSearchText Bash stdout duck 支删 → 恰 1 红）/ P-S5（processResumedConversation fork 支 recordContentReplacement 调用删 → fork seed 测恰 1 红）。
+- **matrix** 同 d1（engine 非 8 域门扫描集，gate 6 不变）。
+
+**基线谱系**：1210 pass / 78 文件 + gate 6（S-7c 末）→ **S-7d d1**（实施 + 探针 + 1 只读审视 + 闭环）→ **S-7d d2**（同）→ **§8.51 E-7 整波审视**（双只读 ≤2：A 旧仓对照 / B H6 死接缝）+ 终验四件套 + memory 同步。
+
+**编号**：§8.49 本节 = S-7d 执行前分析（落盘后 d1 动手）；d1/d2 各实施后在 §8.49 下补「实施记录 + 独立只读审视记录」段（S-7a/b/c 先例）。
