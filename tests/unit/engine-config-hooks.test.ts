@@ -9,7 +9,8 @@
  *     合并 disableAllHooks / 常规合并）+ should* 两判定
  *   - snapshot 三函数（capture 惰性 / update 先 resetSettingsCache 读盘 / reset）
  *   - createHooksConfigProvider 执行器契约过滤（command 变体保留，
- *     prompt/agent/http 归 E-5 剔除 + 空 matcher 剔除 + 通配字段保留）
+ *     prompt/agent/http 归未来 hooks-runner 全量波（§8.41 R6 重登记，E-5
+ *     整波范围不含非 command 执行面）剔除 + 空 matcher 剔除 + 通配字段保留）
  * I/O-free（mock FsOperations 注入，用户路径经 ATLAS_CONFIG_DIR 指向 /mock-home）
  * → unit 层。
  */
@@ -333,7 +334,7 @@ describe('engine/config snapshot 生命周期（§8.28）', () => {
 // ── createHooksConfigProvider（执行器契约过滤）─────────────────────────
 
 describe('engine/config createHooksConfigProvider（§8.28 过滤面）', () => {
-  test('保留 command 变体，剔除 prompt/agent/http（执行面归 E-5）', () => {
+  test('保留 command 变体，剔除 prompt/agent/http（执行面 = 未来 hooks-runner 全量波，§8.41 R6）', () => {
     const m = makeMockFs({
       [USER_SETTINGS]: JSON.stringify({
         hooks: {

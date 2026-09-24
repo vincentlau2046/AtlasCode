@@ -24,11 +24,13 @@ import {
   setCreateHookOutput,
   createHookOutput,
   resetTaskEdges,
+  runHooks,
   runPreToolUseHooks,
   runPostToolUseHooks,
   runSessionStartHooks,
   runStopHooks,
   runSessionEndHooks,
+  isSimpleModeHooksSkipped,
   type HookShellPort,
   type HookShellExecution,
   type HookMatcher,
@@ -246,6 +248,117 @@ describe('hooks JSON 输出解释 + 聚合', () => {
     const res = await runStopHooks()
     expect(res.preventContinuation).toBe(true)
     expect(res.stopReason).toBe('done')
+  })
+})
+
+describe('§8.42 整波审视修复面（MAJOR-2 双形 / MINOR-1 JSON 优先 / MINOR-2 守卫）', () => {
+  test('MAJOR-2 嵌套形：hookSpecificOutput.updatedInput 读取（旧仓 hooks.ts:614-616 载体）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({
+      stdout: JSON.stringify({
+        hookSpecificOutput: { updatedInput: { msg: 'rewritten' } },
+      }),
+      stderr: '',
+      code: 0,
+    })
+    setHookShellPort(port)
+    injectMatchers({
+      PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'rewriter' }] }],
+    })
+    const res = await runPreToolUseHooks('echo', { msg: 'orig' }, 'tu1')
+    expect(res.updatedInput).toEqual({ msg: 'rewritten' })
+  })
+
+  test('MAJOR-2 双形：顶层 updatedInput 覆盖嵌套形（与 additionalContext 读取序一致）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({
+      stdout: JSON.stringify({
+        hookSpecificOutput: { updatedInput: { msg: 'nested' } },
+        updatedInput: { msg: 'top' },
+      }),
+      stderr: '',
+      code: 0,
+    })
+    setHookShellPort(port)
+    injectMatchers({
+      PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'rewriter' }] }],
+    })
+    const res = await runPreToolUseHooks('echo', { msg: 'orig' }, 'tu1')
+    expect(res.updatedInput).toEqual({ msg: 'top' })
+  })
+
+  test('MINOR-1 JSON 解析成功 + exit-2 → 不加 blockingError（旧仓 JSON 优先角裁定）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({
+      stdout: JSON.stringify({ continue: false }),
+      stderr: 'should-be-ignored',
+      code: 2,
+    })
+    setHookShellPort(port)
+    injectMatchers({ Stop: [{ hooks: [{ type: 'command', command: 's' }] }] })
+    const res = await runStopHooks()
+    expect(res.blockingError).toBeUndefined()
+    expect(res.preventContinuation).toBe(true)
+  })
+
+  test('MINOR-1 边界：JSON 解析失败 + exit-2 → blockingError 照常（非 JSON 回退支）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({
+      stdout: '{broken json',
+      stderr: 'fallback block',
+      code: 2,
+    })
+    setHookShellPort(port)
+    injectMatchers({ Stop: [{ hooks: [{ type: 'command', command: 's' }] }] })
+    const res = await runStopHooks()
+    expect(res.blockingError?.blockingError).toBe('[s]: fallback block')
+  })
+
+  test('MINOR-2 ATLAS_SIMPLE 真值 → 全钩子跳过（不触碰 shell 端口）', async () => {
+    const saved = process.env.ATLAS_SIMPLE
+    process.env.ATLAS_SIMPLE = '1'
+    try {
+      const port = new FakeHookShell()
+      setHookShellPort(port)
+      injectMatchers({
+        PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'x' }] }],
+      })
+      const res = await runHooks('PreToolUse', {
+        session_id: 's',
+        transcript_path: '/t.jsonl',
+        cwd: '/p',
+        hook_event_name: 'PreToolUse',
+      })
+      expect(res.results).toHaveLength(0)
+      expect(port.calls).toHaveLength(0)
+    } finally {
+      if (saved === undefined) delete process.env.ATLAS_SIMPLE
+      else process.env.ATLAS_SIMPLE = saved
+    }
+  })
+
+  test('MINOR-2 isSimpleModeHooksSkipped 真值集（旧仓 envUtils 布尔语义）', () => {
+    const saved = process.env.ATLAS_SIMPLE
+    const cases: Array<[string | undefined, boolean]> = [
+      [undefined, false],
+      ['', false],
+      ['0', false],
+      ['false', false],
+      ['1', true],
+      ['true', true],
+      ['YES', true],
+      [' on ', true],
+    ]
+    try {
+      for (const [value, expected] of cases) {
+        if (value === undefined) delete process.env.ATLAS_SIMPLE
+        else process.env.ATLAS_SIMPLE = value
+        expect(isSimpleModeHooksSkipped(), `ATLAS_SIMPLE=${value}`).toBe(expected)
+      }
+    } finally {
+      if (saved === undefined) delete process.env.ATLAS_SIMPLE
+      else process.env.ATLAS_SIMPLE = saved
+    }
   })
 })
 

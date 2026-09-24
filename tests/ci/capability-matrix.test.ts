@@ -116,6 +116,10 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: '跨域斩断 fail-fast（shell/task 边未注入抛错）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
+  // E-5 S-5a（§8.38/§8.39）：engine 接线（ToolHooks 适配器 + loop stop hooks
+  // 消费点 + 三层断补齐第三断 bootstrap-env 注入；§8.42 审视 MINOR-6 补登记——
+  // 测试早已存在（engine-hooks 14 测 + compose-hooks-bootstrap 3 测），仅未入矩阵规约）
+  { domain: 'hooks', capability: 'engine 接线（ToolHooks 适配器 + loop stop hooks 消费点 + 三层断补齐）', status: 'done', proof: 'tests/unit/engine-hooks.test.ts' },
   // E-5 S-5b（§8.40）：L120 行拆/翻 —— 流式执行半 → done（proof = 流式单测）；
   // attachment 渲染半 → 残留守（新仓无 message/attachment 基建，C-3 前向接缝登记，H6 不假 done）
   { domain: 'hooks', capability: 'hooks 流式执行（AsyncGenerator，逐钩子 yield + 聚合返回值）', status: 'done', proof: 'tests/unit/hooks-stream.test.ts' },

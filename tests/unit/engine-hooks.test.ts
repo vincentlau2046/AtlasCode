@@ -374,3 +374,65 @@ describe('queryAgentLoop stop hooks 消费点（C-4：preventContinuation → �
     expect(await hooks.stopHooks?.()).toEqual({ preventContinuation: undefined })
   })
 })
+
+describe('§8.42 整波审视 MAJOR-1：pre-hook turn 终止意图透传 + 短路支', () => {
+  test('⑮ 适配器透传：PreToolUse continue:false + stopReason → PreToolUseHookOutcome 两字段', async () => {
+    const port = new FakeHookShell()
+    setHookShellPort(port)
+    injectMatchers({
+      PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'stopper' }] }],
+    })
+    port.enqueue({
+      stdout: '{"continue":false,"stopReason":"halt now"}',
+      stderr: '',
+      code: 0,
+    })
+    const hooks = createToolHooks()
+    const r = await hooks.preToolUse?.(
+      { name: 'echo' } as Tool,
+      { msg: 'hi' },
+      'tu-1',
+    )
+    expect(r?.preventContinuation).toBe(true)
+    expect(r?.stopReason).toBe('halt now')
+  })
+
+  test('⑯ 全链短路：pre-hook 防停 → executeToolUse is_error（工具不执行，旧仓 L869 逐字消息）', async () => {
+    const port = new FakeHookShell()
+    setHookShellPort(port)
+    injectMatchers({
+      PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'stopper' }] }],
+    })
+    port.enqueue({
+      stdout: '{"continue":false,"stopReason":"halt now"}',
+      stderr: '',
+      code: 0,
+    })
+    const calls: unknown[] = []
+    const r = await executeToolUse(tu('t1', 'echo', { msg: 'hi' }), ASSISTANT, {
+      tools: [makeRecordingTool('echo', calls)],
+      hooks: createToolHooks(),
+    })
+    expect(r.isError).toBe(true)
+    expect(String(r.block.content)).toBe(
+      '<tool_use_error>Execution stopped by PreToolUse hook: halt now</tool_use_error>',
+    )
+    expect(calls).toHaveLength(0) // 工具未执行
+  })
+
+  test('⑰ 无防停钩子 → 短路支不触发（放行主路径不变）', async () => {
+    const port = new FakeHookShell()
+    setHookShellPort(port)
+    injectMatchers({
+      PreToolUse: [{ matcher: 'echo', hooks: [{ type: 'command', command: 'pass' }] }],
+    })
+    port.enqueue({ stdout: '', stderr: '', code: 0 })
+    const calls: unknown[] = []
+    const r = await executeToolUse(tu('t1', 'echo', { msg: 'hi' }), ASSISTANT, {
+      tools: [makeRecordingTool('echo', calls)],
+      hooks: createToolHooks(),
+    })
+    expect(r.isError).toBe(false)
+    expect(calls).toHaveLength(1)
+  })
+})

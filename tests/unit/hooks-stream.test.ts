@@ -202,6 +202,34 @@ describe('runHooksStream 流式执行核心（§8.40 判别信号）', () => {
     expect(port.events.indexOf('fast:start')).toBeLessThan(port.events.indexOf('slow:end'))
   })
 
+  test('②b match 序时延差判别（§8.42 MINOR-4）：慢首钩 + 快次钩 → result yield 仍 match 序', async () => {
+    // 时延差端口：'hook-slow'（match 首）延迟 30ms，'hook-fast'（match 次）0ms。
+    // 若实现退化为 completion-order（旧仓 all() 语义），快钩先完成先 yield →
+    // yields[2] = hook-fast → 红。match 序实现 = 快钩完成被 await 队列挡住，
+    // 首 yield 仍为 hook-slow。
+    class DelayedShell implements HookShellPort {
+      async runCommand(
+        command: string,
+        _env: Record<string, string>,
+        _signal: AbortSignal,
+        _timeoutMs?: number,
+      ): Promise<HookShellExecution> {
+        if (command === 'hook-slow') await new Promise((r) => setTimeout(r, 30))
+        return { stdout: '', stderr: '', code: 0 }
+      }
+    }
+    const port = new DelayedShell()
+    setHookShellPort(port)
+    injectPreToolMatchers(['hook-slow', 'hook-fast'])
+
+    const { yields } = await drain(
+      runHooksStream('PreToolUse', makeInput('PreToolUse', { tool_name: 'echo' })),
+    )
+    const results = yields.filter((y) => y.kind === 'hook_result')
+    expect((results[0] as { kind: 'hook_result' }).result.command).toBe('hook-slow')
+    expect((results[1] as { kind: 'hook_result' }).result.command).toBe('hook-fast')
+  })
+
   test('③ exit-2 → blockingError（聚合 + 单钩子结果，stderr 归因 + command 归因）', async () => {
     const port = new FakeHookShell()
     setHookShellPort(port)
