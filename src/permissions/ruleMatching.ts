@@ -12,23 +12,26 @@
  *
  * 裁剪登记（H6 前向接缝 + 残留守，复审勿当遗漏重提）：
  *   - checkRuleBasedPermissions 1b 的 canSandboxAutoAllow（⑥ sandbox 自动放行）
- *     裁出 → 本面 ask 规则恒 ask；sandbox 自动放行随 E-6。
+ *     裁出 → 本面 ask 规则恒 ask；⑥ 随 S-6b 落 hasPermissionsToUseTool 面
+ *     半落（§8.43 裁定③；shouldUseSandbox 裁出归工具本体波）。
  *   - checkRuleBasedPermissions 1c = 鸭子可选分发（tool.checkPermissions? 存在才调）；
  *     旧 tool.inputSchema.parse 预解析裁（新 Tool 契约 inputSchema = JSON schema 无
  *     zod parse）/ catch 内 AbortError·APIUserAbortError 重抛裁（引擎类型，L3 域内
  *     不 import engine）+ logError → logForDebugging（shared/debug 无 logError）。
- *     工具面 checkPermissions 实现（Bash/PowerShell 等）归 E-6。
+ *     工具面 checkPermissions 实现（Bash/PowerShell 等）归工具本体波
+ *     （§8.43 裁定①；E-6 S-6b 仅落分发机制半，实现半顺延）。
  *   - createPermissionRequestMessage 裁六支（hook/subcommandResults/
  *     permissionPromptTool/sandboxOverride/asyncAgent/classifier 决策原因分支）——
- *     生产方 = E-5 hooks / E-6 工具面 / E-7 / 分类器波（新仓 shared
+ *     生产方 = E-5 hooks（已落）/ 工具本体波 / E-7 / 分类器波（auto-mode
+ *     纵切波；新仓 shared
  *     PermissionDecisionReason 仅 rule/mode/workingDir/safetyCheck/other 五变体）。
- *   - getUpdatedInputOrFallback（旧:1317）本切片零消费（消费点 = 旧 Inner 2a/2b
- *     工具面分发支，随 E-6）→ 裁出本切片，E-6 工具面分发片落（H6 防空洞）。
+ *   - getUpdatedInputOrFallback（旧:1317）已随 S-6b 落 permissions.ts
+ *     决策主体 2a/2b 消费（§8.43）→ 本切片裁出的 H6 防空洞登记核销。
  *
- * 前向消费接缝（本切片登记，S-4d / E-6 消费，防「以为已全」）：
+ * 前向消费接缝（本切片登记，S-4d / S-6b 消费，防「以为已全」）：
  *   - checkRuleBasedPermissions → S-4d gate 工厂（engine 侧 checkPermission 接线）
  *   - getDenyRuleForTool → S-4d filterToolsByDenyRules（deny 规则工具面过滤）
- *   - getRuleByContentsForToolName → E-6 Bash 工具面 checkPermissions（内容规则
+ *   - getRuleByContentsForToolName → 工具本体波 Bash 工具面 checkPermissions（内容规则（§8.43 裁定①）
  *     命中：deny `Bash(npm install)` 拒匹配 input）
  *   - getDenyRuleForAgent / filterDeniedAgents → AgentTool agentType 面
  *     （Agent(agentType) 语法，旧仓 swarm 链消费，新仓 AgentTool 消费登记）
@@ -355,7 +358,8 @@ export function createPermissionRequestMessage(
  * Returns a deny/ask decision if a rule blocks the tool, or null if no rule
  * objects. 与旧仓差异（裁剪登记）：不跑自动模式分类器 / 模式转换（dontAsk/
  * asyncAgent）/ PermissionRequest hooks（残留守 ②⑤）；1b 无 sandbox 自动放行
- * 特判（⑥ 随 E-6）；1c 鸭子可选分发（工具面实现归 E-6）。
+ * 特判（⑥ 随 S-6b 落 hasPermissionsToUseTool 面半落，§8.43 裁定③）；
+ * 1c 鸭子可选分发（工具面实现归工具本体波，§8.43 裁定①）。
  *
  * Caller must pre-check tool.requiresUserInteraction() — step 1e is not
  * replicated（旧仓头注逐字）。
