@@ -17,9 +17,10 @@
  *       **无** pipeline 分支 / 无 PipelineDeps 字段；不预造无消费点接缝，登记 §8.22 残余 ⑧）。
  *       MCP 连接生命周期（connect/reconnect/cache）仍残留守（归连接层纵切，见 mcp.ts 头注）。
  *     · 钩子 → deps.hooks 接缝（E-5 S-5a 落：ToolHooks 返回值类型化 + 消费支
- *       （pre：blockingError 短路 / updatedInput 回写 / hookBehavior 合权限门
- *       mergeHookPermission；post：additionalContext 捕获，回灌 = 消息面残留守
- *       前向接缝登记）；窄 spine（未注入）无操作。settings.hooks 生产接线的
+ *       （pre：blockingError 短路 / preventContinuation 短路（§8.42 MAJOR-1）/
+ *       updatedInput 回写 / hookBehavior 合权限门 mergeHookPermission；
+ *       post：additionalContext 捕获，回灌 = 消息面残留守前向接缝登记）；
+ *       窄 spine（未注入）无操作。settings.hooks 生产接线的
  *       适配器 = engine/hooks L3 连接器（createToolHooks，§8.39 C-1））
  *     · OTel 遥测 → 旧仓已删（879 logEvent 点清零），无对应物
  *     · 旧仓 zod `inputSchema.safeParse` → E-1b T-4c 落 JSON-schema 浅校验替身
@@ -64,11 +65,19 @@ export type PermissionGate = (
  *    （权限门在 effective 入参上重判 + tool.call 消费，旧仓 toolHooks.ts:270 语义）。
  *  - hookBehavior：钩子权限裁定（域最严优先聚合 deny>ask>allow>passthrough）
  *    → mergeHookPermission 合 E-4 权限门（不变量：hook 'allow' 不绕过 settings deny/ask）。
+ *  - preventContinuation / stopReason（§8.42 整波审视 MAJOR-1 修复）：钩子 turn
+ *    终止意图（JSON continue:false 域聚合，旧仓 toolHooks.ts:438-446 pre 支 yield
+ *    面）→ executeToolUse 短路 is_error（工具不执行）。消息 = 旧仓
+ *    toolExecution.ts:869 逐字形态（`Execution stopped by PreToolUse hook[: reason]`）。
+ *    角裁定：旧仓该标记仅在权限非 allow 时作消息兜底，新仓简化为直接短路（更严，
+ *    钩子 stop 意图不丢；§8.42 登记）。
  */
 export interface PreToolUseHookOutcome {
   blockingError?: string
   updatedInput?: unknown
   hookBehavior?: HookPermissionBehavior
+  preventContinuation?: boolean
+  stopReason?: string
 }
 
 /** E-5 S-5a：post-hook 结果（additionalContext 回灌 = 消息面残留守，见下前向接缝登记）。 */
@@ -219,6 +228,21 @@ export async function executeToolUse(
         type: 'tool_result',
         tool_use_id: tu.id,
         content: `<tool_use_error>hook blocked: ${preOutcome.blockingError}</tool_use_error>`,
+        is_error: true,
+      },
+      isError: true,
+    }
+  }
+  // §8.42 整波审视 MAJOR-1：钩子 turn 终止意图（JSON continue:false 域聚合）→
+  // 短路 is_error（工具不执行；LLM 仍收到该 tool_use 的回应）。消息 = 旧仓
+  // toolExecution.ts:869 逐字形态（角裁定：新仓直接短路，严于旧仓「权限非 allow
+  // 时消息兜底」，见 PreToolUseHookOutcome 头注）。
+  if (preOutcome?.preventContinuation) {
+    return {
+      block: {
+        type: 'tool_result',
+        tool_use_id: tu.id,
+        content: `<tool_use_error>Execution stopped by PreToolUse hook${preOutcome.stopReason ? `: ${preOutcome.stopReason}` : ''}</tool_use_error>`,
         is_error: true,
       },
       isError: true,

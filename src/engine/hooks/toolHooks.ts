@@ -8,8 +8,9 @@
  * 职责（三层断补齐的「让 settings.hooks 生产路径真生效」面，§8.38 C-5）：
  * ① createToolHooks：hooks 域 runPreToolUseHooks/runPostToolUseHooks → pipeline
  *    ToolHooks 适配器，消费 AggregatedHookResult（C-6 非 fire-and-forget）：
- *    pre → { blockingError, updatedInput, hookBehavior }（pipeline executeToolUse
- *    消费：blockingError 短路 / updatedInput 回写 / hookBehavior 经
+ *    pre → { blockingError, updatedInput, hookBehavior, preventContinuation,
+ *    stopReason }（pipeline executeToolUse 消费：blockingError 短路 /
+ *    preventContinuation 短路（§8.42 MAJOR-1）/ updatedInput 回写 / hookBehavior 经
  *    mergeHookPermission 合 E-4 权限门——hook 'allow' 不绕过 settings deny/ask 不变量）
  *    post → { additionalContext }（上下文回灌 = 消息/REPL 波前向接缝，pipeline 头注登记）
  * ② createLoopHooks：toolHooks 之上加 stopHooks = runStopHooks（loop terminal
@@ -79,6 +80,10 @@ export function createToolHooks(opts: ToolHooksAdapterOptions = {}): ToolHooks {
         blockingError: r.blockingError?.blockingError,
         updatedInput: r.updatedInput,
         hookBehavior: r.permissionBehavior,
+        // §8.42 整波审视 MAJOR-1：turn 终止意图透传（域聚合面已算出，此前
+        // 适配器静默丢弃——旧仓 toolHooks.ts:438-446 pre 支消费面补齐）
+        preventContinuation: r.preventContinuation,
+        stopReason: r.stopReason,
       }
       return outcome
     },

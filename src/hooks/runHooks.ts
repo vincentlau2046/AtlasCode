@@ -14,6 +14,14 @@
  *  - 裁剪（engine 波）：prompt/agent/http/callback/function 型钩子、插件变量插值、
  *    异步唤醒钩子（registerPendingAsyncHook）、messageQueue 通知、MCP elicitation、
  *    未知 decision / hookEventName 不匹配的抛错（薄骨架宽容，仅记结果）。
+ *  - PostToolUseFailure 执行面（§8.42 MINOR-3 登记）：27 事件 schema 可配 +
+ *    getMatchingHooks matchQuery 支存在（getMatchingHooks.ts:86），但无执行器
+ *    包装器，pipeline 工具失败支只触发 postToolUse（旧仓有专门
+ *    runPostToolUseFailureHooks 消费支，orchestrator toolHooks.ts:159-257）
+ *    → 未来 hooks-runner 全量波。
+ *  - systemMessage 消费面（§8.42 MINOR-5 登记）：interpretHookOutput 映射写入
+ *    HookResult.systemMessage，旧仓为纯展示面（hook_system_message attachment），
+ *    新仓无消费点（AggregatedHookResult 亦无此字段）→ 消息/REPL 波。
  *  - 流式执行面已落 S-5b（§8.40）：streaming.ts runHooksStream（AsyncGenerator，
  *    旧仓 executeHooks 执行循环移植，解耦 message/attachment；与本文件共享
  *    runOneHook/interpretHookOutput/mergeAggregated 单一事实源）。
@@ -41,6 +49,21 @@ function sessionEndHookTimeoutMs(): number {
   const raw = process.env.ATLAS_SESSIONEND_HOOKS_TIMEOUT_MS
   const parsed = raw ? Number(raw) : NaN
   return Number.isFinite(parsed) && parsed > 0 ? parsed : SESSION_END_HOOK_TIMEOUT_MS_DEFAULT
+}
+
+/**
+ * ATLAS_SIMPLE 执行期钩子守卫（§8.42 审视 MINOR-2 修复，旧仓 hooks.ts:1983/2984
+ * isEnvTruthy(ATLAS_SIMPLE) → 执行期跳过全部钩子；新仓 coordinator 简单模式 env
+ * 同名，语义一致）。hooks 域零 shared import 纪律（C-Deep 复审 L8：hooks = 0
+ * shared 边，全注入端口）→ 域内禀 env 读（同 ATLAS_SESSIONEND_HOOKS_TIMEOUT_MS
+ * 先例），不引 shared isEnvTruthy；真值集 = 旧仓 envUtils 布尔语义
+ * （1/true/yes/on，trim + 大小写不敏感）。
+ */
+export function isSimpleModeHooksSkipped(): boolean {
+  const raw = process.env.ATLAS_SIMPLE
+  if (raw === undefined) return false
+  const t = raw.trim().toLowerCase()
+  return t === '1' || t === 'true' || t === 'yes' || t === 'on'
 }
 
 /** 某事件执行选项（signal / 超时 / 会话上下文透传 / env 覆盖）。 */
@@ -90,9 +113,11 @@ function interpretHookOutput(p: {
     aborted: p.aborted,
   }
   const trimmed = p.stdout.trim()
+  let jsonParsed = false
   if (trimmed.startsWith('{')) {
     try {
       const json = JSON.parse(trimmed) as HookJSONOutput
+      jsonParsed = true
       if (json.continue === false) {
         result.preventContinuation = true
         if (json.stopReason) result.stopReason = json.stopReason
@@ -112,6 +137,10 @@ function interpretHookOutput(p: {
             permissionDecision?: 'allow' | 'deny' | 'ask'
             permissionDecisionReason?: string
             additionalContext?: string
+            // §8.42 审视 MAJOR-2：旧仓嵌套形载体（coreSchemas
+            // PreToolUseHookSpecificOutputSchema.updatedInput；旧仓 hooks.ts:614-616
+            // 读取面）——按旧契约写 PreToolUse 钩子的用户输入改写此前在新仓静默丢失
+            updatedInput?: Record<string, unknown>
           }
         | undefined
       if (specific?.permissionDecision === 'allow') {
@@ -128,6 +157,9 @@ function interpretHookOutput(p: {
       }
       if (specific?.additionalContext) result.additionalContext = specific.additionalContext
       if (json.additionalContext) result.additionalContext = json.additionalContext
+      // updatedInput 双形（§8.42 MAJOR-2）：嵌套形（specific）先读，顶层形后读
+      // 覆盖（顶层 wins，与 additionalContext 双形读取序一致）。
+      if (specific?.updatedInput) result.updatedInput = specific.updatedInput
       if (json.updatedInput) result.updatedInput = json.updatedInput
       if (json.suppressOutput) result.output = ''
       if (json.systemMessage) result.systemMessage = json.systemMessage
@@ -136,7 +168,10 @@ function interpretHookOutput(p: {
     }
   }
   // exit code 2 阻塞约定（非 aborted 且未由 JSON 已判阻塞）：stderr 作阻塞错误。
-  if (!p.aborted && p.code === 2 && !result.blockingError) {
+  // JSON 优先角裁定（§8.42 MINOR-1，旧仓语义）：JSON 解析成功时 exit-2 支不可达
+  // （旧仓 JSON 分支 outcome 恒 success 短路，exit-2 仅非 JSON 回退支可达）；
+  // 解析失败（catch）jsonParsed=false → exit-2 支照常可达。
+  if (!p.aborted && p.code === 2 && !jsonParsed && !result.blockingError) {
     result.blockingError = {
       blockingError: `[${p.command}]: ${p.stderr || 'No stderr output'}`,
       command: p.command,
@@ -212,16 +247,19 @@ export function runOneHook(
  * shell 端口逐条执行（顺序，runOneHook）→ 解释 + 聚合 → 返回 AggregatedHookResult。
  *
  * 信任门：非交互恒执行；交互式缺信任全跳过（返回空 results，不执行任何钩子）。
+ * ATLAS_SIMPLE 执行期守卫（§8.42 MINOR-2）：简单模式 env 真值 → 全跳过
+ * （isSimpleModeHooksSkipped，与 trust 门并列）。
  * 无匹配（未注入配置源 / 无 matcher / 无 command 钩子）→ 空 results 正常返回，
  * 不触碰 shell 端口（端口未注入不误伤常态）。
- * 流式并行版 = streaming.ts runHooksStream（§8.40，共享 runOneHook 执行核心）。
+ * 流式并行版 = streaming.ts runHooksStream（§8.40，共享 runOneHook 执行核心 +
+ * 同族守卫）。
  */
 export async function runHooks(
   hookEvent: HookEvent,
   hookInput: HookInput,
   options: HookRunOptions = {},
 ): Promise<AggregatedHookResult> {
-  if (shouldSkipHookDueToTrust()) {
+  if (shouldSkipHookDueToTrust() || isSimpleModeHooksSkipped()) {
     return { results: [] }
   }
   const matched = await getMatchingHooks(hookEvent, hookInput)

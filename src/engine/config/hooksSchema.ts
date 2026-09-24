@@ -36,6 +36,12 @@
  *     不挂 E-7 leaves）。
  *   - 坏条目预过滤（仿 filterInvalidPermissionRules 保文件，R7 B 案 UX
  *     纵切）——本切片严格路 = 整文件拒绝 + 错误显式呈现。
+ *   - command 变体 4 新字段（statusMessage/once/async/asyncRewake，§8.41 R3
+ *     全字段面补齐）= 配置数据面，本波无执行消费（runOneHook 只读
+ *     command/timeoutMs；async 唤醒 = §8.38 裁出清单 / statusMessage =
+ *     消息/REPL 波——§8.42 审视 MINOR-7 登记）。shell 枚举含 'powershell'
+ *     而执行面 = executor bash-only 纵切（E-6 全 shell 前）——可配不可执行
+ *     不对称随 E-6 收口，E-6 前无执行支消费 shell 字段。
  */
 import { z } from 'zod'
 // L3 域边界：hooks 域经域根门面 import（值 = HOOK_EVENTS 事件名集校验，

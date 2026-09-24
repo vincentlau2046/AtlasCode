@@ -47,7 +47,11 @@ export interface AgentLoopDeps {
   signal?: AbortSignal
   /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
   checkPermission?: PermissionGate
-  /** E-5 S-5a：钩子消费面（engine/hooks createLoopHooks 产物；未注入 = 窄 spine 无操作）。 */
+  /**
+   * E-5 S-5a：钩子消费面（engine/hooks createLoopHooks 产物；未注入 = 窄 spine
+   * 无操作；生产装配 = E-wave-end compose 接线——现仅测试消费，E-wave-end 消费
+   * 接缝清单登记，§8.42 审视 MINOR-8）。
+   */
   hooks?: LoopHooks
 }
 

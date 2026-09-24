@@ -17,7 +17,9 @@
  *     transcript / 遥测归后续纵切）。
  *   - initializeAgentMcpServers（agent frontmatter MCP 服务器连接 + 清理）→ 残留守
  *     （连接层 T-5a port 已落，agent frontmatter MCP 面归后续纵切）。
- *   - executeSubagentStartHooks / registerFrontmatterHooks（agent 生命周期钩子）→ 残留守（E-5）。
+ *   - executeSubagentStartHooks / registerFrontmatterHooks（agent 生命周期钩子）
+ *     → 残留守（未来 hooks-runner 全量波 / 插件面——§8.41 R6 重登记口径：E-5 整波
+ *     范围（§8.38/§8.41）不含子代理生命周期钩子，§8.42 审视归属双源订正）。
  *   - skills 预载（agent frontmatter skills → 内建命令内容）→ 残留守（skill 面）。
  *   - createSubagentContext（读文件状态缓存克隆 / 会话作用域 AppState 写）→ 裁剪
  *     （新仓子代理共享组合根 modelProvider，无独立文件状态缓存面）。

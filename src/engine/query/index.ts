@@ -4,9 +4,11 @@
  * 旧仓 core/orchestrator/query/（loop 主循环 / transitions / config / deps /
  * stopHooks / tokenBudget）+ QueryEngine ask() 的最小纵切落此。
  * E-1b T-4a：queryAgentLoop 多轮（pre-turn autoCompact + maxTurns + terminal）已落。
- * 残留守（后续纵切）：流式 chatStream / 错误恢复 + stop hooks / tokenBudget continuation
- * （max_tokens 截断续跑）/ MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身
- * 已按 E-2 闭环）/ 附件注入（E-5）。
+ * E-5 S-5a：stop hooks 已落（loop terminal 消费点，C-4 归属订正，见 loop.ts 头注）。
+ * 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（E-1b-full）/
+ * 错误恢复（E-1b-full）/ tokenBudget continuation（max_tokens 截断续跑）/
+ * MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
+ * 附件渲染 + 钩子 additionalContext 回灌（message/REPL 波，§8.40 C-3 前向接缝登记）。
  */
 export {
   queryOneRound,

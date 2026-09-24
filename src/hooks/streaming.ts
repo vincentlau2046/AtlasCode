@@ -16,9 +16,11 @@
  *  - **聚合 = 生成器返回值**（旧仓 executeHooks 无 final aggregate yield；新仓以
  *    return 值 = 单一消费面）。for-await 不暴露生成器返回值（JS 语义）→ 消费端
  *    须手动 .next() 循环（测试 drain 助手）。
- *  - 守卫族 = 与 runHooks 一致（trust skip + 无匹配）：旧仓 disableAll/ATLAS_SIMPLE
- *    守卫属 config 域（shouldDisableAllHooksIncludingManaged = engine/config L3），
- *    叶域不 import L3（STR-1）→ 与 runHooks 对齐（守卫单一事实源）。
+ *  - 守卫族 = 与 runHooks 一致（trust skip + ATLAS_SIMPLE 执行期守卫 + 无匹配）：
+ *    disableAll 门 = engine/config 快照门（shouldDisableAllHooksIncludingManaged，
+ *    L3 连接器层，叶域不 import L3 STR-1）；ATLAS_SIMPLE = 执行期 env 守卫
+ *    （isSimpleModeHooksSkipped，域内禀，§8.42 MINOR-2 归因订正——旧头注误归
+ *    config 域），两守卫经 runHooks 单一事实源共享。
  *  - **message/attachment 解耦**：旧仓 progress/system message yield
  *    （createAttachmentMessage）不迁 —— attachment 渲染 = message/REPL 波残留守
  *    （C-3 前向接缝，新仓无 message 基建）。
@@ -40,6 +42,7 @@ import type {
 } from './types'
 import {
   buildHookEnv,
+  isSimpleModeHooksSkipped,
   mergeAggregated,
   runOneHook,
   type HookRunOptions,
@@ -55,7 +58,8 @@ export type HookStreamYield =
 /**
  * 流式执行核心（参数化，旧仓 18 execute* 流式版折叠点）。
  *
- * 协议：守卫（trust skip / 无匹配 → 立即空聚合）→ progress yield（逐钩子，执行前）
+ * 协议：守卫（trust skip / ATLAS_SIMPLE 执行期守卫 / 无匹配 → 立即空聚合，
+ * §8.42 MINOR-2 与 runHooks 守卫族对齐）→ progress yield（逐钩子，执行前）
  * → 全钩子并行（per-hook 超时，旧仓 all() 语义）→ 逐钩子 hook_result yield（match 序）
  * + mergeAggregated → **return 值 = AggregatedHookResult**。
  *
@@ -67,7 +71,7 @@ export async function* runHooksStream(
   hookInput: HookInput,
   options: HookRunOptions = {},
 ): AsyncGenerator<HookStreamYield, AggregatedHookResult, void> {
-  if (shouldSkipHookDueToTrust()) {
+  if (shouldSkipHookDueToTrust() || isSimpleModeHooksSkipped()) {
     return { results: [] }
   }
   const matched = await getMatchingHooks(hookEvent, hookInput)

@@ -69,6 +69,8 @@ export {
   runSessionStartHooks,
   runStopHooks,
   runSessionEndHooks,
+  // ATLAS_SIMPLE 执行期钩子守卫（§8.42 MINOR-2，旧仓 hooks.ts:1983/2984 移植）
+  isSimpleModeHooksSkipped,
 } from './runHooks'
 export type { HookRunOptions } from './runHooks'
 // 流式执行核心（E-5 S-5b §8.40：旧仓 executeHooks 执行循环移植，解耦 message/attachment；

@@ -12,8 +12,10 @@
  *     → 残留守（重试面归 E-1b-full；本版单次摘要调用）。
  *   - 压缩后重建面（createPostCompactFileAttachments / plan / skill / deferred-tools /
  *     MCP-instructions 重宣告 + SessionStart hooks + PostCompactCleanup + readFileState 清空）
- *     → 残留守（attachments/hooks 归 E-5/E-2；CompactionResult 的 attachments/hookResults
- *     字段随之裁掉，buildPostCompactMessages ordering 残留守）。
+ *     → 残留守（attachment 渲染 = message/REPL 波（§8.40 C-3 前向接缝登记）；
+ *     SessionStart hooks 执行器已随 E-5 落（hooks 域 5 高频执行器），压缩重建面
+ *     接线归后续纵切；CompactionResult 的 attachments/hookResults 字段随之裁掉，
+ *     buildPostCompactMessages ordering 残留守）。
  *   - getCompactPrompt 文案 = 旧仓 prompt.ts 全文照抄（NO_TOOLS_PREAMBLE +
  *     BASE_COMPACT_PROMPT（含 DETAILED_ANALYSIS_INSTRUCTION_BASE + 9 段结构 + <example>
  *     模板 + 自定义指令示例段）+ NO_TOOLS_TRAILER，摘要质量关键资产，review 2026-09-23

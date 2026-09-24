@@ -106,8 +106,10 @@ export function createCoreDependencies(): CoreDependencies {
   //    生产路径 runHooks 必 fail-fast 抛「hooks bootstrap 未注入」）+
   //    hooks ← executor（D17，注入序末步；先于首次带命令钩子 runHooks）+
   //    hooks ← engine/config（S-3c settings.hooks 配置面，启动捕获一次快照）。
-  //    注入序遵 hooks 域门面头注：setHooksBootstrapEnv → setHookConfigProvider →
-  //    setHookShellPort。3 成员源 = bootstrap 域 ⑤ 族（transcript path 窄适配 /
+  //    实际注入序：setHooksBootstrapEnv → setHookShellPort → setHookConfigProvider
+  //    → captureHooksConfigSnapshot（三窗口注入期互不依赖，无功能影响；hooks 域
+  //    门面头注所列序为推荐序非约束——§8.42 审视 MINOR 注释失真订正）。
+  //    3 成员源 = bootstrap 域 ⑤ 族（transcript path 窄适配 /
   //    agent type 缺省 undefined=CLI 面残留守 / trust 缺省 true=headless 信任隐式）。
   setHooksBootstrapEnv({
     getSessionId,
