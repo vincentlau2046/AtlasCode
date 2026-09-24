@@ -153,6 +153,13 @@ describe('mark-read 族（真盘）', () => {
   })
 
   test('markMessagesAsReadByPredicate 选择性标记', async () => {
+    // E-wave-end 前向接缝登记（S-7e d1 审视 NOTE-2 闭环，复审勿当遗漏重提）：
+    // 本测刻意缺非匹配项 out[1].read===false 阴性断言——补之则 P-M2 单点
+    // （`read: false` 缺省态反转）突变下本测同红（out[1] 缺省已读），红集 2
+    // 违反单点探针「恰 1 红」登记（实测基线）。支覆盖裁定：丢 `!m.read` 守卫
+    // = 与退化 `predicate(m)` 值可观察等价（匹配且已读 → JSON 输出恒等，
+    // 标记幂等）；谓词反转被 out[2] 断言捕获；唯一开口「条件退化为全量
+    // 标记」E-wave-end 补阴性断言 + P-M2 单点红集重测（1→2）一并处置。
     await writeToMailbox('a1', msg('x', '1'), TEAM)
     await writeToMailbox('a1', msg('y', '2'), TEAM)
     await writeToMailbox('a1', msg('x', '3'), TEAM)

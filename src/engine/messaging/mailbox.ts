@@ -22,8 +22,8 @@
  *   - logForDebugging / getErrnoCode / lazySchema → shared（scheduler cronTasks
  *     先例）。
  *   - logError → logForDebugging(String(e), { level: 'error' })（新仓 shared
- *     无 logError；session/load.ts:31 + scheduler/cronTasks.ts:13 先例，6 调用
- *     点归一化，算法体零 delta）。
+ *     无 logError；session/load.ts:31 + scheduler/cronTasks.ts:13 先例，7 调用
+ *     点归一化 7/7 1:1（审视订正 off-by-one），算法体零 delta）。
  *   - zod/v4 → zod 主入口（新仓 zod 4.6.5 主入口 = v4，import 面 delta）。
  *   - PermissionModeSchema（旧 sdk/coreSchemas 5 值 enum）→ 域内本地最小
  *     enum（constants.ts 登记）；TEAMMATE_MESSAGE_TAG / TEAM_LEAD_NAME /
