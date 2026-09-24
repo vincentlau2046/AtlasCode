@@ -1716,3 +1716,40 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **四件套终验**：tsc 0 / eslint 0（5 改文件）/ build 0KB entry / 1160 pass + gate 6，零回归。
 
 **闭环判定**：S-7b scheduler（cron）全闭环（主体 5 文件 + 门面 + 2 测试文件 + 3 探针 + 单只读三视角审视 + MINOR×2/NIT×2 全处置 + 四件套终验），无 BLOCKER。**下一步 = S-7c worktree（§8.48）。**
+
+### §8.48 S-7c worktree（agent 隔离 + git 执行层）执行前分析 + 方案（2026-09-24）
+
+**范围**：E-7 第 3 leaf（§8.45.2 纪律）。旧仓 `src/utils/worktree.ts` 1451L → 新仓 `src/engine/worktree/`（greenfield，charter 子模块落位）。**关键事实**：新仓**无 git 执行层**（grep 零命中 gitExe/execFileNoThrow/findGitRoot），而 worktree 核心（getOrCreateWorktree / removeAgentWorktree / cleanupStaleAgentWorktrees / performPostCreationSetup）强依赖 git 子进程 + .git fs plumbing。故本叶**随迁最小 git 执行层子集**（旧仓 git.ts/gitFilesystem.ts/execFileNoThrow.ts/gitConfigParser.ts 的真子集），非旧仓全量 2052L——只迁 worktree 核心实际调用的函数，perf/可观测糖整砍登记。
+
+**旧仓文件画像**（a8af45b 逐文件核实）：
+| 来源 | 旧仓 LOC | 移植口径 |
+|---|---|---|
+| `worktree.ts` | 1451 | 见下方裁剪裁定（真实现 vs H6 前向接缝） |
+| `execFileNoThrow.ts` | 150 | **execFileNoThrowWithCwd 逐字核心**；**execa→node:child_process.execFile**（新仓 deps 仅 openai+zod，无 execa；国内 Linux 目标平台，Windows .bat/.cmd shell 支不保留）+ getCwd→process.cwd（本叶调用点恒显式传 cwd）+ logError→logForDebugging 归一化。**execFileNoThrow（no-cwd 变体）+ execSyncWithDefaults_DEPRECATED 整砍**（tmux/legacy 消费，随 tmux 族裁） |
+| `git.ts`（子集） | ~9 函数（of 926） | findGitRoot（walk-up 上探 .git dir/file，逻辑逐字；memoizeWithLRU+diagLogs 糖整砍→简单 Map 缓存登记）/ findCanonicalGitRoot（resolveCanonicalRoot 逐字，**SECURITY backlink 校验完整保留**——恶意 commondir/借 worktree 支不可裁；LRU 糖整砍）/ gitExe（whichSync 糖整砍→`process.env.ATLAS_GIT_EXE ?? 'git'` 登记）/ getDefaultBranch（旧仓经 GitFileWatcher fs 缓存 getCachedDefaultBranch → 新仓用已随迁 fs 助手 resolveGitDir/getCommonDir/readGitHead/resolveRef 直接算，**语义等价**（HEAD symref→分支名，否则 main/master 远端 ref 命中，否则 'main'），GitFileWatcher 缓存子系统整砍登记） |
+| `git/gitFilesystem.ts`（子集） | ~8 函数（of 699） | resolveGitDir / resolveRef(+resolveRefInDir) / getCommonDir / readGitHead / readWorktreeHeadSha / isSafeRefName / isValidGitSha **逐字**（自含，仅依赖 fs/promises + path + 彼此，无 GitFileWatcher）；**GitFileWatcher 缓存失效子系统（L311+）整砍**（性能缓存非核心行为，登记） |
+| `git/gitConfigParser.ts` | 277 | parseGitConfigValue + parseConfigString/parseKeyValue/parseValue/isKeyChar/matchesSectionHeader **逐字**（纯 .git/config 解析，自含零依赖，极可测） |
+
+**裁剪裁定**（真实现 vs H6 前向接缝；复审勿当遗漏重提）：
+- **真实现（git 子进程 + fs 核心逐字）**：validateWorktreeSlug（traversal/`..`/绝对路径/超 64 拒，安全门）/ worktreeBranchName(flattenSlug) / worktreesDir / worktreePathFor / getOrCreateWorktree（fetch + add -B + sparse-checkout + 快途 resume readWorktreeHeadSha）/ performPostCreationSetup（settings.local.json 拷贝 + core.hooksPath + symlinkDirectories）/ **createAgentWorktree（agent 隔离入口）/ removeAgentWorktree（agent 隔离出口）/ cleanupStaleAgentWorktrees（周期清扫，fail-closed）** / git 执行层（上表子集）。
+- **H6 前向接缝（整砍 + 头注登记）**：
+  - **tmux 族**（CLI/tmux 波）：isTmuxAvailable / getTmuxInstallInstructions / createTmuxSessionForWorktree / killTmuxSession / execIntoTmuxWorktree + spawnSync/chalk/isInITerm2 依赖。
+  - **交互会话绑定**（EnterWorktree/ExitWorktree 工具本体波）：createWorktreeForSession / keepWorktree / cleanupWorktree / getCurrentWorktreeSession / restoreWorktreeSession / generateTmuxSessionName + `currentWorktreeSession` 模块态 + `process.chdir` + saveCurrentProjectConfig（bootstrap state 未落）。（裁定：engine 叶聚焦 **agent 隔离**（createAgentWorktree/removeAgentWorktree，即 memory「worktree 自动移除」+ agent 定义 isolation:'worktree' 注入边界）；交互用户 EnterWorktree 会话路径归工具本体波。getOrCreateWorktree/performPostCreationSetup 的 git+fs 核心已由 createAgentWorktree 充分行使，交互 wrapper 的会话绑定副作用（chdir/模块态/config 持久化）为裁面。）
+  - **hook-based VCS 路径**（新仓无 worktree hooks 面，grep 零命中 WorktreeCreateHook）：hasWorktreeCreateHook / executeWorktreeCreateHook / executeWorktreeRemoveHook → **git 路径为真实现**，hook 支 forward 登记（settings.json 用户可配 VCS hook 的波未落）。
+  - **零消费面**（旧仓 grep 零外部消费者）：hasWorktreeChanges（旧仓仅 worktree.ts 内声明，无任何外部 import——旧仓即死导出）/ copyWorktreeIncludeFiles（`.worktreeinclude` 拷贝，唯一 `ignore` npm 包消费点 → **不引新 dep**，deps 维持 openai+zod）/ performPostCreationSetup 内 **attribution hook 支**（`feature('COMMIT_ATTRIBUTION')` + `postCommitAttribution` 动态 import——新仓 feature() 无该门 + postCommitAttribution 未迁，双裁）。
+  - **bootstrap 持久化**：saveCurrentProjectConfig（项目配置持久化 = CLI/bootstrap 波，未落）。
+  - **git 层性能/可观测糖**：memoizeWithLRU / diagLogs / whichSync / GitFileWatcher（LRU 缓存 + fs-watcher 缓存失效子系统，非核心行为 → 简单 Map 缓存 / fs 直接取值替代，逐处登记）。
+
+**消费面（forward 登记，本叶不接线）**：AgentTool `isolation:'worktree'` 支——E-2 已 trim 为残留守（`loadAgentsDir.ts:16`「initialPrompt/memory/isolation/color → 残留守（对应消费面未落）」，`agentDefinition.ts:11` 头注枚举）→ 本叶提供 createAgentWorktree/removeAgentWorktree/hasWorktreeChanges 供其消费，**接线归工具本体波 / E-wave-end**；toolRegistry ⑭ worktree 行登记。
+
+**落位**：`src/engine/worktree/` = git.ts（execFileNoThrowWithCwd + gitExe + findGitRoot + findCanonicalGitRoot + getDefaultBranch + resolveGitDir + resolveRef + getCommonDir + readGitHead + readWorktreeHeadSha + isSafeRefName + isValidGitSha + parseGitConfigValue）/ worktree.ts（核心 + 裁剪登记）/ index.ts（门面）；`engine/index.ts` STR-1 全显式名 re-export（scheduler 先例，L296-332 块后追加）。coordinator 不涉（worktree 是 engine 顶层域，非 coordinator 子模块）。
+
+**SettingsJson.worktree 字段**：schema 未声明 worktree（§8.27 砍字段族，L26 登记「对应功能面未落」，.passthrough() 透传运行时值但 SettingsJson 类型无该键）→ performPostCreationSetup 经最小 typed 读法访问 `sparsePaths`/`symlinkDirectories`（`getInitialSettings() as unknown as { worktree?: { sparsePaths?: string[]; symlinkDirectories?: string[] } }`，头注登记；settings 波补字段后改直接访问）。
+
+**测试面**（真判别零 tautology；unit 纯函数 + func 真 git 两层）：
+- `tests/unit/engine-worktree.test.ts`（零盘纯函数 + tmpdir 只读）：validateWorktreeSlug（`..`/绝对路径/超 64/`.` 段拒 + 合法 `user/feature` 过 + 全 64 边界）/ worktreeBranchName（nested→`+` 扁平 + 非法 slug 抛）/ parseGitConfigValue（section/subsection/quoted 值/inline comment/# ; 注释）/ isSafeRefName + isValidGitSha（shell 注入/`..`/`-` 前缀/`{` 拒 + 40/64 hex 过）/ findGitRoot（tmpdir 真 `.git` dir 与 worktree `.git` file + 非仓 null）/ findCanonicalGitRoot（worktree `.git` file→commondir→main root 解析 + 恶意 commondir backlink 拒）/ resolveRef（loose ref / packed-refs / symref 链）/ gitExe（env 覆写 + 缺省 'git'）。
+- `tests/func/worktree-git.test.ts`（真 git tmpdir 仓，sandbox smoke 先例；**git 不可用整族 skip**，gateway 门控先例）：建 tmpdir 仓（git init + user 配置 + 空 commit；可选 bare origin + push 供 unpushed 判定）→ **createAgentWorktree 真 `git worktree add`**（断言 .atlas/worktrees/<slug> 存在 + HEAD sha 匹配 + branch 建）→ **removeAgentWorktree 真 `git worktree remove` + branch -D**（断言目录 + branch 皆删）→ **cleanupStaleAgentWorktrees**（造 `agent-a<7hex>` 临时 worktree + utimes 40d 前 + 干净 + 可达 origin → 扫清；负例：dirty worktree fail-closed 不清 + 用户命名 slug 不清）+ 初载 surface。
+- **突变探针**：P-T1（validateWorktreeSlug `..` 段拒支删 → 恰 1 红）/ P-T2（findCanonicalGitRoot backlink 安全校验删 → 恶意 commondir 过，恰 1 红）/ P-T3（cleanupStaleAgentWorktrees dirty fail-closed 守卫删 → 恰 1 红，func 层）。
+- **matrix**：worktree 非 8 域门扫描集（engine 子模块，M-3 defer E-wave-end）→ 无 matrix 行，proof = 上两测试文件自证。
+
+**实施落盘**：待补（主体 git.ts + worktree.ts + index.ts + engine/index.ts + 2 测试文件，N 行）。**基线谱系**：1160 pass / 76 文件 + gate 6（S-7b 末）→ S-7c。
