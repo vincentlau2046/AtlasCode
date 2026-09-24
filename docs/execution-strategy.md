@@ -1448,3 +1448,58 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 - **四件套 + gate**：tsc 0 / eslint 6 变更文件 0 / build 0 KB（entry point）/ 全量 989 pass 0 fail 70 files（基线 974/69 → +15 测 +1 文件）/ gate 6 pass 0 fail 2 files（matrix ① 新 done 行 proof 文件存在且含真实测试）。
 
 **下一步 = E-5 整波审视（task #100 后半）**：双只读子代理（≤2 限额）对照旧仓 ground truth 审视 E-5 全波（S-5a f7da19c/75bf0f9 + S-5b c937dc9 + S-5c 本提交）→ 修复提交 + §8.42 整波审视记录 + memory 同步（atlascode-wave-c-progress.md + MEMORY.md 索引行）。
+
+### §8.42 E-5 整波审视记录（双视角只读审视 + 修复批，2026-09-24）
+
+**范围**：E-5 全波（S-5a f7da19c/75bf0f9 + S-5b c937dc9 + S-5c 416ef1e）整波审视 → 发现处置 → 修复批（本记录随修复批提交）→ E-5 波闭环判定。
+
+**审视执行**：双只读子代理（≤2 限额，独立 worktree，零写）对照旧仓 @ a8af45b ground truth 审视 E-5 全波；**全部发现经主会话对 live tree + 旧仓逐条复核后才处置**（子代理报告仅作输入，不具处置权威）。
+
+**双视角判定（均无 BLOCKER）**：
+- **视角 A（旧仓 ground-truth 对照，70 tool uses / 153K tokens）**：5 维度（流式语义 / 接线 / schema 字段逐对 / 残留守登记 / 测试假通过纸面突变）→ **2 MAJOR + 5 MINOR**。
+- **视角 B（H6 / 一致性，77 tool uses / 142K tokens）**：D1–D5（死接缝扫描 / 单一事实源 / 测试盲区 / 门-矩阵一致性 / 环境复验——独立复跑 989 pass / 70 files + gate 6 全绿）→ **1 MAJOR + 8 MINOR**。
+- 合计 **3 MAJOR + 13 MINOR**（处置编号 MAJOR-1..3 / MINOR-1..8 + 5 无编号订正项，编号以处置台账为准）。
+
+**处置台账**：
+
+**MAJOR（代码修复 3 项）**：
+1. **MAJOR-1 pre-hook turn 终止意图透传（A；适配器层丢弃）**：域聚合面已算出 `preventContinuation`/`stopReason`（旧仓 toolHooks.ts:438-446 pre 支 yield 面，JSON continue:false 域聚合），但 createToolHooks 适配器只取 3 字段（blockingError/updatedInput/hookBehavior）→ 钩子 stop 意图静默丢失，executeToolUse 仍执行工具。修复：`PreToolUseHookOutcome` 补 2 字段 + 适配器透传 + `executeToolUse` 短路支（工具不执行，LLM 仍收到该 tool_use 的回应；消息 = 旧仓 toolExecution.ts:869 逐字 `<tool_use_error>Execution stopped by PreToolUse hook[: reason]</tool_use_error>`）。**角裁定**：旧仓该标记仅在权限非 allow 时作消息兜底，新仓简化为直接短路（更严，钩子 stop 意图不丢）——裁定登记于 PreToolUseHookOutcome 头注。
+2. **MAJOR-2 updatedInput 嵌套形载体缺失（A）**：旧仓 coreSchemas PreToolUseHookSpecificOutputSchema.updatedInput（嵌套形 `hookSpecificOutput.updatedInput`，hooks.ts:614-616 读取面）新仓未读 → 按旧契约写 PreToolUse 钩子的用户输入改写嵌套形静默丢失（仅顶层形被读）。修复：嵌套形（specific）先读、顶层形后读覆盖（顶层 wins，与 additionalContext 双形读取序一致——单一事实源）。
+3. **MAJOR-3 capability-matrix S-5a 接线行缺失（B，其唯一 MAJOR）**：§8.38/§8.39 门/矩阵同步计划明列「新 done 行：engine 接线（ToolHooks 适配器 + stop hooks 消费点 + 三层断补齐，S-5a）」，但 75bf0f9 只加测试未加矩阵行——矩阵本身是门的单一事实源，未入规约行 = 无声失踪（H6 族）。修复：capability-matrix 补 1 行 done（proof = tests/unit/engine-hooks.test.ts；测试自 S-5a 起早已存在——engine-hooks 14 测 + compose-hooks-bootstrap 3 测——仅缺矩阵规约登记）。
+
+**MINOR（编号 8 项 + 无编号订正 5 项）**：
+1. **MINOR-1 exit-2 门控（A）**：旧仓 JSON 优先语义——JSON 解析成功时 exit-2 支不可达（旧仓 JSON 分支 outcome 恒 success 短路，exit-2 仅非 JSON 回退支可达）；新仓 exit-2 支缺门 → JSON 成功 + exit-2 双堆 blockingError。修复：`jsonParsed` 门（解析成功则 exit-2 不堆；解析失败 + exit-2 仍照常阻塞）。
+2. **MINOR-2 ATLAS_SIMPLE 执行期守卫（A）**：旧仓 hooks.ts:1983/2984 `isEnvTruthy(ATLAS_SIMPLE)` → 执行期跳过全部钩子；新仓该守卫整族缺失。修复：hooks 域内禀 `isSimpleModeHooksSkipped()`（域零 shared import 纪律——C-Deep 复审 L8 hooks = 0 shared 边全注入端口，故不引 shared isEnvTruthy，域内局部实现；真值集 = 旧仓 envUtils 布尔语义 1/true/yes/on，trim + 大小写不敏感）应用于 runHooks + runHooksStream，域根门面导出。
+3. **MINOR-3 PostToolUseFailure 残留守登记（A）**：27 事件 schema 可配 + getMatchingHooks matchQuery 支存在（getMatchingHooks.ts:86），但无执行器包装器，pipeline 工具失败支只触发 postToolUse（旧仓有专门 runPostToolUseFailureHooks 消费支，orchestrator toolHooks.ts:159-257）→ runHooks.ts 头注登记，未来 hooks-runner 全量波。
+4. **MINOR-4 流式 result yield 序盲区（B）**：既有 ①② 测未锁「result yield 按 match 序」（实现退化为 completion-order 时两测仍过）。修复：补 ②b 时延差判别测（慢首钩 30ms + 快次钩 0ms → result 仍 match 序；completion-order 回归会使 yields[2] 红）。
+5. **MINOR-5 systemMessage 消费面残留守登记（A）**：interpretHookOutput 映射写入 HookResult.systemMessage，旧仓为纯展示面（hook_system_message attachment），新仓无消费点（AggregatedHookResult 亦无此字段）→ runHooks.ts 头注登记，消息/REPL 波。
+6. **MINOR-7 hooksSchema 4 新字段 + powershell 不对称登记（B）**：command 变体 4 新字段（statusMessage/once/async/asyncRewake，§8.41 R3 全字段面）= 配置数据面本波无执行消费（runOneHook 只读 command/timeoutMs；async 唤醒 = §8.38 裁出清单 / statusMessage = 消息/REPL 波）；shell 枚举含 'powershell' 而执行面 = executor bash-only 纵切（E-6 前）——可配不可执行不对称随 E-6 收口。hooksSchema.ts 头注登记。
+7. **MINOR-8 loop.ts hooks 字段死接缝登记（B）**：AgentLoopDeps.hooks（E-5 S-5a 声明）= 现仅测试消费，生产装配（compose）未接线——H6 防空洞纪律要求前向接缝头注登记。loop.ts 字段头注登记：生产装配 = E-wave-end compose 接线（E-wave-end 消费接缝清单项）。
+8. **无编号订正 5 项（B 一致性面）**：① streaming.ts 头注守卫族归因订正（disableAll = engine/config 快照门 L3 vs ATLAS_SIMPLE = 执行期 env 守卫域内禀——旧头注误归 config 域）；② compose.ts 注入序注释失真订正（代码实际序 setHooksBootstrapEnv → setHookShellPort → setHookConfigProvider → captureHooksConfigSnapshot，三窗口注入期互不依赖，门面头注所列序为推荐序非约束）；③ 4 处陈旧头注订正（query/index stop hooks 归属 C-4 订正 + 残留守清单翻新 / pipeline/index 钩子消费支已落 + 权限规则树已落 E-4 / compact.ts 压缩重建面 = attachment 渲染归 message/REPL 波 + SessionStart hooks 执行器已随 E-5 落 / runAgent.ts 子代理生命周期钩子归属订正为「未来 hooks-runner 全量波 / 插件面」——§8.41 R6 重登记口径双源对齐）；④ engine-config-hooks.test.ts 2 处陈旧归属翻新（createHooksConfigProvider 测试名/头注：执行面 = 未来 hooks-runner 全量波 §8.41 R6）；⑤ runHooks.ts 头注残留守族补 PostToolUseFailure/systemMessage（= MINOR-3/5 登记载体）。
+
+**测试面（判别信号，+10 测全在既有文件，0 新文件）**：
+- engine-hooks.test.ts +3（MAJOR-1 族）：⑮ 适配器透传（continue:false + stopReason → 两字段）/ ⑯ 全链短路（executeToolUse is_error + 旧仓 L869 逐字消息断言 + 工具 calls = 0）/ ⑰ 无防停钩子放行主路径不变（calls = 1）。
+- hooks.test.ts +6：MAJOR-2 嵌套形（旧仓 hooks.ts:614-616 载体）/ MAJOR-2 双形（顶层覆盖嵌套）/ MINOR-1 JSON 成功 + exit-2 不堆 / MINOR-1 边界（解析失败 + exit-2 仍阻塞）/ MINOR-2 ATLAS_SIMPLE 真值全跳过（不触碰 shell 端口）/ MINOR-2 真值集 8 例（envUtils 布尔语义）。
+- hooks-stream.test.ts +1：②b match 序时延差判别（MINOR-4）。
+- 另 2 处既有测试名/注释归属翻新（engine-config-hooks，无断言变更）。
+
+**突变探针（4，cp 备份 → 突变 → 红 → 逐字还原 → 绿；探针前 cp 至 job tmp）**：
+- P-M1 MAJOR-1 短路支置永不触发（`if (false && ...)`）→ ⑯ 红（17 测 1 fail）。
+- P-M2 MAJOR-2 删嵌套形读取行 → 「MAJOR-2 嵌套形」测红（23 测 1 fail，红中测名逐字对上）。
+- P-N1 MINOR-1 删 `!jsonParsed &&` 门 → 「MINOR-1 JSON 解析成功 + exit-2」测红。
+- P-N2 MINOR-2 删 ATLAS_SIMPLE 守卫（回退 trust-only）→ 「MINOR-2 ATLAS_SIMPLE 真值」测红。
+- 还原 = cp 备份逐字；还原后 3 受影响测试文件 54 pass 全绿 + tsc 0（diff 与探针前逐字一致）。
+
+**四件套 + gate**：tsc 0 / eslint 12 变更 src 文件 0 / build 0 KB（entry point）/ 全量 **999 pass 0 fail 70 files**（基线 989/70 → +10 测 0 新文件）/ gate **6 pass 0 fail 2 files**（matrix ① 新 done 行 proof 文件存在且含真实测试）。
+
+**闭环判定**：3 MAJOR + 13 MINOR 全闭环（代码修复落盘 + 残留守头注登记 + 判别信号测试锁 + 探针判别成立）；双视角无 BLOCKER、无未处置项；**E-5 波（hooks 纵切：S-5a 三层断补齐 + L3 连接器 / S-5b 流式执行 / S-5c schema 收紧）闭环**。
+
+**E-wave-end 接缝清单补登记（hooks 装配项，随 §8.37 E-wave-end 审计清单合并执行）**：
+1. compose.ts ⑤ hooks 生产装配：createToolHooks/createLoopHooks 接 AgentLoopDeps.hooks 生产路径（现仅测试消费，MINOR-8 登记面）。
+2. runHooksStream 流式消费面（loop 流式 chatStream，E-1b-full 前向接缝）。
+3. attachment 渲染 + 钩子 additionalContext 回灌（message/REPL 波，§8.40 C-3）。
+4. hooks-runner 全量波（PostToolUseFailure 执行支 / 子代理生命周期钩子 / 非 command 变体执行面，MINOR-3/5 + §8.41 R6 口径）。
+5. powershell 可执行性不对称收口（E-6 全 shell 波，MINOR-7）。
+6. command 4 新字段执行消费（async 唤醒 / statusMessage，MINOR-7）。
+
+**下一步 = E-6（全 shell）**：bashClassifier stub 回填 + pathValidation（旧仓 487L 纵切）+ 工具面 checkPermissions 语义支回填（可并行纵切）。E-7（leaves：tasks/scheduler/worktree/session/messaging）与 E-wave-end（compose engine 装配 ⑦ + 子代理门透传 + hasPermissionsToUseTool 换回 + 1c abort 重抛 + engine anti-stub 门 + M-3 收口 + getTools 组合根接线 + 上列 hooks 装配接缝清单）随后。
