@@ -123,6 +123,9 @@ const MATRIX: readonly MatrixRow[] = [
   //（dangerouslyDisableSandbox 守卫）；实现半 = Bash/PowerShell 工具本体
   // checkPermissions 归工具本体波残留守）
   { domain: 'permissions', capability: '工具面分发（1c 鸭子 / 1f / 1g / 2a bypass updatedInput 采纳+回落 / 3 passthrough→ask + ⑥ sandbox 自动放行半落）', status: 'done', proof: 'tests/unit/permissions.test.ts' },
+  // E-6 S-6c（§8.43）：bash 分类器桩 61L 逐字（「stub 即外部构建形态」，
+  // 零活消费者 → 前向登记：auto-mode 纵切波分类器族 ~3030L 消费点）
+  { domain: 'permissions', capability: 'bash prompt 分类器消费（yoloClassifier 族）', status: 'missing', by: 'auto-mode 纵切波（分类器族 ~3030L：yoloClassifier / classifierShared / bashPermissions L1378-1490 speculative 族，§8.31 裁定 ①；bashClassifier 61L 桩已随 S-6c 前向迁，H6 前向声明）' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
