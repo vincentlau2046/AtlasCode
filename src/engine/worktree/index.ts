@@ -30,6 +30,7 @@ export {
   getDefaultBranch,
   resolveGitDir,
   resolveRef,
+  readRawSymref,
   getCommonDir,
   readGitHead,
   readWorktreeHeadSha,

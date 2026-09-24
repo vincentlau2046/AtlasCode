@@ -102,10 +102,45 @@ describe('git 执行层只读面（真仓）', () => {
     })
   })
 
-  it('getDefaultBranch → main（HEAD symref 解析，免子进程）', async () => {
+  it('getDefaultBranch → main（origin ref 回落，免子进程）', async () => {
     await withRepo(async () => {
+      // git init 仓无 origin/HEAD loose symref → main/master 远端 ref 回落命中
       expect(await getDefaultBranch()).toBe('main')
     })
+  })
+
+  it('getDefaultBranch clone + checkout -b feature → main（origin/HEAD symref，远端默认分支非本地分支）', async () => {
+    // 审视 MAJOR-1 回归探针：初版误用本地 HEAD（返 feature）；旧仓 computeDefaultBranch
+    // 经 origin/HEAD loose symref 返远端默认分支 main。git clone 写
+    // refs/remotes/origin/HEAD → refs/remotes/origin/main（loose 文件）。
+    const root = mkdtempSync(join(tmpdir(), 'atlas-wt-defbranch-'))
+    try {
+      const seed = join(root, 'seed')
+      const origin = join(root, 'origin.git')
+      mkdirSync(seed)
+      runGit(root, ['init', '--bare', origin])
+      runGit(seed, ['init', '-b', 'main'])
+      runGit(seed, ['config', 'user.email', 't@example.com'])
+      runGit(seed, ['config', 'user.name', 't'])
+      writeFileSync(join(seed, 'f.txt'), 'hello\n')
+      runGit(seed, ['add', '.'])
+      runGit(seed, ['commit', '-m', 'init'])
+      runGit(seed, ['remote', 'add', 'origin', origin])
+      runGit(seed, ['push', 'origin', 'main'])
+      const clone = join(root, 'clone')
+      runGit(root, ['clone', origin, clone])
+      runGit(clone, ['checkout', '-b', 'feature'])
+      const oldCwd = process.cwd()
+      process.chdir(clone)
+      resetWorktreeGitCaches()
+      try {
+        expect(await getDefaultBranch()).toBe('main')
+      } finally {
+        process.chdir(oldCwd)
+      }
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 
   it('findCanonicalGitRoot（从 worktree 内 → 主仓 canonical root）', async () => {

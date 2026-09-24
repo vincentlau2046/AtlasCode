@@ -35,6 +35,11 @@
  *   - validateWorktreeSlug（`..`/`.`/绝对/`/` 段拒支 + 64 上限 + 逐段 allowlist）。
  *   - getOrCreateWorktree（fast-resume readWorktreeHeadSha + fetch + `worktree add -B`
  *     + sparse-checkout 回滚 + rev-parse baseSha）。
+ *
+ * 已知边角（登记，逐字旧仓非移植缺陷，消费方应预期）：fast-resume 时若 worktree
+ * 目录仍在但其分支被带外 `git branch -D worktree-<slug>` 删除，readWorktreeHeadSha
+ * 返 null（loose ref 消失）→ 落入新建支 → `git worktree add -B` 对已存在目录
+ * fatal "already exists" → 抛出（审视 NOTE-1 登记）。
  *   - performPostCreationSetup 的 git/fs 核心（settings.local.json 拷贝 + core.hooksPath
  *     配置 + symlinkDirectories）。
  *   - cleanupStaleAgentWorktrees 的 EPHEMERAL_WORKTREE_PATTERNS + dirty/unpushed

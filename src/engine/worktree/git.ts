@@ -12,21 +12,26 @@
  *     国内 Linux 目标平台，旧仓 execa 的 Windows .bat/.cmd shell 支不保留。
  *     `stdin:'ignore'`（execa 选项）→ node 等价 `child.stdin?.end()`（execFile 无
  *     stdin 选项；belt-and-suspenders 防交互提示阻塞，GIT_TERMINAL_PROMPT=0 已禁）。
+ *     `stdin:'inherit'`/`'pipe'` 不转发（落回 execFile 默认 pipe stdio，仅 'ignore'
+ *     有映射；现存调用点皆 'ignore'，登记非遗漏——审视 MINOR-2）。
  *     `execFileNoThrow`（no-cwd 变体）+ `execSyncWithDefaults_DEPRECATED` 整砍
  *     （tmux/legacy 消费，随 worktree 模块 tmux 族裁）。
  *   - **getCwd → process.cwd**：本层调用点恒显式传 cwd；resolveGitDir/getDefaultBranch
  *     缺省用 process.cwd（旧仓 bootstrap state cwd 未落，CLI/bootstrap 波）。
- *   - **logError → logForDebugging(String(e), {level:'error'})**：新仓 logging port
- *     未落，归一化到 debug 面（scheduler 先例）。
+ *   - **logError 本最小子集无存活调用点**：旧仓唯一调用点在 execa 的 `.catch()`
+ *     异常支（execFileNoThrow.ts:146，spawn 异常）；新仓 `child_process.execFile`
+ *     用回调收拢 spawn 失败（error 参数统一走 code=1 resolve），异常支消失 → 无
+ *     存活调用点，不引 logForDebugging（避免死 import + void 抑制行，审视 NOTE-3
+ *     处置）；日后增调用点再归一化到 debug 面（scheduler 先例）。
  *   - **memoizeWithLRU（findGitRoot/resolveCanonicalRoot）→ 简单 Map 缓存**：LRU 上限/
  *     驱逐为性能糖，非核心行为（登记）。
  *   - **logForDiagnosticsNoPII（diagLogs）整砍**：可观测糖，新仓无 diagLogs。
  *   - **whichSync（gitExe 的 git 路径查找）→ `process.env.ATLAS_GIT_EXE ?? 'git'`**：
  *     国内 Linux git 恒在 PATH；env 覆写供测试/非常规安装（登记）。
  *   - **GitFileWatcher 缓存失效子系统（gitFilesystem L311+）整砍**：性能缓存非核心行为；
- *     `getDefaultBranch` 经已随迁 fs 助手（resolveGitDir/getCommonDir/readGitHead/
- *     resolveRef）直接算，**语义等价**旧仓 computeDefaultBranch（HEAD symref→分支名，
- *     否则 main/master 远端 ref 命中，否则 'main'）。
+ *     `getDefaultBranch` + `readRawSymref` 经已随迁 fs 助手（resolveGitDir/getCommonDir/
+ *     resolveRef）直接算，判定链**逐字**旧仓 computeDefaultBranch（origin/HEAD symref
+ *     → 远端默认分支，否则 main/master 远端 ref 命中，否则 'main'）。
  *
  * 逐字保留（faithfulness 锚点）：
  *   - findGitRoot 上探 `.git` dir/file 逻辑（git.ts:27-107，NFC 归一 + root 补查）。
@@ -42,7 +47,6 @@ import { execFile } from 'child_process'
 import { readFileSync, realpathSync, statSync } from 'fs'
 import { readFile, stat } from 'fs/promises'
 import { basename, dirname, join, resolve, sep } from 'path'
-import { logForDebugging } from '../../shared'
 
 // ── git 子进程执行（execa → node:child_process；见文件头注）─────────────────
 const MS_IN_SECOND = 1000
@@ -501,21 +505,64 @@ export async function readWorktreeHeadSha(
   return head.sha
 }
 
-// ── getDefaultBranch（旧仓 computeDefaultBranch 语义等价，GitFileWatcher 整砍）
+// ── readRawSymref（旧仓 gitFilesystem.ts:287 逐字，loose symref 只读）────────
 /**
- * 仓库默认分支名。旧仓经 GitFileWatcher fs 缓存 getCachedDefaultBranch（整砍，见文件
- * 头注）；新仓用已随迁 fs 助手直接算，语义等价：HEAD symref 指向分支 → 该分支名，
- * 否则 main/master 远端 ref 命中者，否则 'main'。缺省以 process.cwd() 为基准。
+ * 读 loose symref 文件（如 `refs/remotes/origin/HEAD`），返回剥掉 branchPrefix
+ * 后指向的分支名。逐字旧仓：只读 loose ref 文件（不查 packed-refs——`git clone`
+ * 把 origin/HEAD symref 写成 loose 文件）；篡改 symref 经 isSafeRefName 拒
+ * 路径穿越 / 参数注入（.git 文件攻击者可控）。
+ */
+export async function readRawSymref(
+  gitDir: string,
+  refPath: string,
+  branchPrefix: string,
+): Promise<string | null> {
+  try {
+    const content = (await readFile(join(gitDir, refPath), 'utf-8')).trim()
+    if (content.startsWith('ref:')) {
+      const target = content.slice('ref:'.length).trim()
+      if (target.startsWith(branchPrefix)) {
+        const name = target.slice(branchPrefix.length)
+        // Reject path traversal and argument injection from a tampered symref.
+        if (!isSafeRefName(name)) {
+          return null
+        }
+        return name
+      }
+    }
+  } catch {
+    // Not a loose ref
+  }
+  return null
+}
+
+// ── getDefaultBranch（旧仓 computeDefaultBranch 逐字，GitFileWatcher 整砍）──
+/**
+ * 仓库默认分支名 = 远端默认分支（非当前本地分支）。旧仓经 GitFileWatcher fs 缓存
+ * getCachedDefaultBranch（整砍，见文件头注）；新仓用已随迁 fs 助手直接算，判定链
+ * 逐字旧仓 computeDefaultBranch：origin/HEAD symref（`git clone` 写 loose 文件）
+ * → 该分支名，否则 main/master 远端 ref 命中者，否则 'main'。缺省以 process.cwd()
+ * 为基准。
+ *
+ * 审视订正（E-7 S-7c 独立审视 MAJOR-1）：初版误用本地 HEAD symref（当前本地分支名）
+ * 替代旧仓 origin/HEAD 步骤——clone + `checkout -b feature` 态下旧仓返 main、初版返
+ * feature（语义漂移，头注"语义等价"失实）。现补 readRawSymref origin/HEAD 步骤，
+ * 与旧仓逐字一致。
  */
 export async function getDefaultBranch(): Promise<string> {
   const gitDir = await resolveGitDir()
   if (!gitDir) {
     return 'main'
   }
+  // refs/remotes/ lives in commonDir, not the per-worktree gitDir
   const commonDir = (await getCommonDir(gitDir)) ?? gitDir
-  const head = await readGitHead(commonDir)
-  if (head && head.type === 'branch') {
-    return head.name
+  const branchFromSymref = await readRawSymref(
+    commonDir,
+    'refs/remotes/origin/HEAD',
+    'refs/remotes/origin/',
+  )
+  if (branchFromSymref) {
+    return branchFromSymref
   }
   for (const candidate of ['main', 'master']) {
     const sha = await resolveRef(commonDir, `refs/remotes/origin/${candidate}`)
@@ -769,5 +816,4 @@ export function resetWorktreeGitCaches(): void {
   canonicalRootCache.clear()
   resolveGitDirCache.clear()
   _gitExe = null
-  void logForDebugging
 }
