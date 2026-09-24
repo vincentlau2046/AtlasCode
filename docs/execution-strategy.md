@@ -2122,3 +2122,78 @@ grep/Read 复核全部 finding 后处置（子代理报告 = 数据非裁定，D
 
 **执行序**：详案提交（本段）→ d1 实施 → d1 独立审视 → d1 闭环 → d2 实施
 → d2 独立审视 → d2 闭环 → S-7e 完结，进入 §8.51 整波审视。
+
+#### d2 执行前分析（2026-09-24）
+
+**源与落点**：旧仓 a8af45b `src/utils/messageQueueManager.ts` 539L 逐字
+→ `src/engine/messaging/queueManager.ts`；类型面拆 `messaging/queueTypes.ts`
+域内本地（旧 textInputTypes.ts = shell UI 巨文件 ~500L 不随迁，仅队列层
+4 型 + 关联类型族随迁）。
+
+**类型面落点核验（执行时实测）**：
+
+| 旧依赖 | 新仓落点 | 处置 |
+|---|---|---|
+| PromptInputMode 4 字面量 / EditablePromptInputMode = Exclude<…>`${string}-notification`（余 bash/prompt/orphaned-permission）/ QueuePriority 3 值 / QueuedCommand 全形 | `messaging/queueTypes.ts` | 域内本地（值/形逐字） |
+| ContentBlockParam | shared types.ts:25 宽骨架 `{ type: string; [key: string]: unknown }`（B 波契约冻结，`export type *` 门面） | 跨域 import；**类型面 delta**：旧 image-base64 判别联合成员 ∉ shared 面 → extractImagesFromValue 局部 cast 收窄形（运行时守卫支 `block.type==='image' && source.type==='base64'` 逐字不变，cast 仅类型收窄，queueManager.ts 头注登记） |
+| UUID（旧 crypto 品牌串） | session 域 `type UUID = string`（别名，cast no-op 先例） | 跨域 import |
+| AgentId（旧 brand） | session 域 `type AgentId = string`（coordinator/worktree 先例） | 跨域 import |
+| PastedContent（旧 config.ts:46-54 8 字段） | 新仓无（grep 0 命中；config 域未随迁 pasted 面） | 域内本地移植（形逐字；ImageDimensions = 旧 imageResizer.ts:137 4 可选 number 字段随形，imageResizer 体 = shell 波） |
+| OrphanedPermission（旧 = { permissionResult: PermissionResult; assistantMessage: AssistantMessage }，两型均 ∉ 新仓） | 域内最小形 `{ permissionResult: unknown; assistantMessage: unknown }` | H6 登记（仅类型字段；引擎面无消费者；sdk/permissions 波前向接缝） |
+| MessageOrigin（旧 message.ts:43 = any） | 域内 `type MessageOrigin = string` | H6 any-stub → string 最小形（BackendType 先例）+ 登记 |
+| Permutations（旧 types/utils = any-stub） | 不随迁 | 旧 `satisfies Permutations<…> as any` 链在 stub 下退化（satisfies any 恒真）→ 新仓删链 `new Set<PromptInputMode>(['task-notification'])`（Set 构造语义等价；旧穷尽性检查在 stub 下本未生效，非行为回归，登记） |
+| AppState（旧 state/AppState React 状态接口 = 壳层） | 域内 `type AppState = object` 不透明最小形 | SetAppState duck 化（详案裁定「queueManager 仅导出类型不触体」；shell 波接真状态，登记） |
+
+**裁面收口（执行裁定）**：
+- **logOperation 族整体裁**：logOperation 函数 + 8 调用点（enqueue /
+  enqueuePendingNotification / dequeue / dequeueAll / dequeueAllMatching /
+  remove / removeByFilter / popAllEditable）+ import 面（getSessionId /
+  recordQueueOperation / QueueOperation / QueueOperationMessage）。依据：
+  详案裁面裁定「recordQueueOperation 裁，队列纯内存 + replay 面 = shell 波
+  前向接缝」；recordQueueOperation 是 logOperation 唯一 sink，sink 裁则
+  log 族整体死码 → 整体裁（详案「按实际裁定」执行裁定）。依赖映射行
+  「getSessionId → session 域」保留为潜在接回点（其唯一使用点随裁面消失；
+  shell 波接 replay 面时经 session 域 getSessionEnv().getSessionId() 注真值）。
+- **QueueOperation / QueueOperationMessage** = 旧仓 messageQueueTypes.ts
+  双 `any` stub → 不随迁（H6：绝不把 stub 签名当真行为；旧 logOperation
+  体 = `void recordQueueOperation(any)` no-op stub 行为）。
+
+**import 映射（旧 → 新）**：ContentBlockParam → shared / Permutations →
+删（登记）/ getSessionId → 随 logOperation 裁 / AppState → 域 duck /
+QueueOperation(Message) → 裁（登记）/ 4 textInput 型 → queueTypes /
+PastedContent → queueTypes（移植）/ extractTextContent → 域 textContent.ts
+（d1）/ objectGroupBy → 域 objectGroupBy.ts（d1）/ recordQueueOperation →
+裁（shell 波）/ createSignal → 域 signal.ts（d1）。
+
+**导出面**：30 值导出（21 主 + 8 deprecated pending-notifications 别名 +
+getCommandsByMaxPriority + isSlashCommand）+ 2 类型导出（SetAppState /
+PopAllEditableResult）+ queueTypes 型面（facade 化全 10 型：PromptInputMode
+/ EditablePromptInputMode / QueuePriority / QueuedCommand / PastedContent /
+OrphanedPermission / MessageOrigin / ImageDimensions / AppState /
+SetAppState 经 queueManager 面）。facade = messaging/index.ts 显式名块
+追加 + engine/index.ts d2 块（门面 = 全量面先例；无 d1 SEND_MESSAGE_TOOL_NAME
+类重名——d2 面 0 常量导出）。
+
+**突变探针（按执行代码面定支）**：
+- **P-M4** getCommandsByMaxPriority 过滤支：删
+  `PRIORITY_ORDER[cmd.priority ?? 'next'] <= threshold` 条件（退化为全队列
+  拷贝）→ 专用测 'P-M4 getCommandsByMaxPriority 优先级过滤' 恰 1 红。
+- **P-M5** enqueue 默认优先级支：删 `priority: command.priority ?? 'next'`
+  spread（原样 push）→ 专用测 'P-M5 enqueue 默认优先级 next' 恰 1 红。
+  详案原文「幂等/去重支」经本次执行核验订正：enqueue 代码面**无去重支**
+  （队列允许重复值；去重 = remove 的引用恒等语义）→ 按详案「执行时按实际
+  代码面定支」定为 priority 默认支。
+
+**测试布局**：`tests/unit/engine-messaging-queue.test.ts` 新文件（unit 零
+磁盘；模块级 commandQueue 态隔离 = beforeEach resetCommandQueue；不改 d1
+测试文件，避免与 d1 审视主体文件重叠）。覆盖 = 30 导出面全量（订阅族
+unsubscribe / snapshot 冻结引用稳定 / getCommandQueue 拷贝语义 / 优先级 +
+FIFO + filter / dequeueAll / peek / dequeueAllMatching / remove 引用恒等 /
+removeByFilter / clear / reset / editable-visible 守卫 4 模式 × isMeta /
+popAllEditable 字符串+块双源 + pastedContents id 保留 + 内嵌 base64 图
+提取 + task-notification 滞留 + cursorOffset / 别名面 8 / isSlashCommand
+3 支 / P-M4 / P-M5 锚点）。
+
+**四件套 + 基线**：tsc 0 / eslint 0（改动面）/ build 0 / 全量 1374+N pass
+（N = d2 新增；基线 1374/84 文件/2876 expect = d1 末）/ gate 6（messaging ∉
+8 域门扫描集）。
