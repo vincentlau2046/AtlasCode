@@ -1815,8 +1815,36 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **d1 测试面**（真判别零 tautology；unit 零磁盘 + func 真盘 JSONL 两层，S-7a/b/c 分层先例）：
 - `tests/unit/engine-session.test.ts`：buildConversationChain（内存 Map：正常链 / cycle 检测 partial 返回 / **平行 TR 恢复**（sibling assistant 同 id 组 + 孤儿 TR 组 anchor 后 splice，时序断言）/ compact boundary parentUuid=null + logicalParent）+ isTranscriptMessage/isChainParticipant/isEphemeralToolProgress + scanner 纯逻辑支（scanChunkLines/captureSnap/captureCarry/finalizeOutput 对内存 Buffer：boundary 截断 / attr-snap skip / straddle 跨块 / preservedSegment 不截断，纯函数支 unit 化）+ sessionMemory 状态机（init 10000 阈值 / update 5000 增长 / toolCalls 3 / stale 60s 不等待 / reset 全复位）+ SessionMemoryPort 假适配器（load null / save 捕获）+ paths（sanitizePath 长路径哈希稳定 / getTranscriptPath 布局断言 / agent transcript subdir 支）。
 - `tests/func/engine-session-fs.test.ts`（真盘 JSONL，域 env 注入 `setSessionEnv` 覆写 getProjectsDir → tmpdir；git 门控先例不适用——纯 fs）：recordTranscript → loadTranscriptFile **round-trip**（chain 重建逐条匹配 + last chain-participant 返回 uuid）+ recordTranscript prefix-skip（compaction 形：CB+summary 先、已录 toKeep 后 → CB parentUuid=null 断言）+ recordContentReplacement round-trip（sessionId keyed lookup 命中）+ recordSidechainTranscript（subagents/agent-<id>.jsonl 子目录真盘）+ flush 幂等 + 大文件 path（>5MB 构造：pre-boundary attr-snap + compact boundary → readTranscriptForLoad postBoundaryBuf 截断 + scanPreBoundaryMetadata 恢复 + walkChainBeforeParse 跳过死分支，ATLAS_DISABLE_PRECOMPACT_SKIP 两态）。
-- **突变探针**（备份→突变→恰 1 红→逐字恢复 diff 验净）：P-S1（recordTranscript prefix-tracked 守卫 `!seenNewMessage` 删 → func prefix-skip 测恰 1 红）/ P-S2（recoverOrphanedParallelToolResults inserts splice 删 → unit 平行 TR 恢复恰 1 红）/ P-S3（scanner finalizeOutput boundaryStartOffset 截断支删 → func 大文件截断测恰 1 红）。
+- **突变探针**（备份→突变→恰 1 红→逐字恢复 diff 验净）：P-S1（recordTranscript prefix-tracked 守卫 `!seenNewMessage` 删 → func prefix-skip 测恰 1 红）/ P-S2（recoverOrphanedParallelToolResults inserts splice 删 → unit 平行 TR 恢复恰 1 红）/ P-S3（scanner 前界截断支 `s.out.len = 0`（scanChunkLines L191 / processStraddle L147 两处，**非** finalizeOutput——它只做 carry 落写 + attr-snap EOF 重排）删 → func 大文件截断测恰 1 红）。
 - **matrix**：session（engine 子域）非 8 域门扫描集（同 S-7b/c）→ 无 gate 改动（gate 6 不变）；证明 = 上两测试文件自证 + 前向登记头注（QueryEngine 8 recordTranscript 点 / loop recordContentReplacement / SessionMemoryPort 壳实现 / E-wave-end compose 接线）。
+
+#### d1 实施记录（2026-09-24，主体提交见 git log）
+
+**落盘面**：`src/engine/session/` 12 文件（types 339 / project 901 / load 1274 / scanner 341 / record 369 / firstPrompt 191 / json 137 / paths 161 / predicates 88 / env 66+ / sessionMemory 222 / index 152 门面）+ `ports/sessionMemory.ts` Port 5 真契约（替 `export {}`）+ `engine/index.ts` 显式名 re-export 块。unit 42 测（零磁盘）+ func 10 测（真盘 JSONL，`setSessionEnv({getProjectsDir: () => tmp})` 注入序先于首次 getProjectDir + `TEST_ENABLE_SESSION_PERSISTENCE=1` 破 unit 守卫）。
+
+**关键实施决策（与详案偏差面均已头注登记）**：
+- TranscriptMessage.type 覆域 `Message.type?: string` 宽型为必填字面量联合（判别式收窄依赖）；insertMessageChain stamp 的 `...message` spread 后须显式 `type/uuid/timestamp` cast（spread 复引宽型），字段序 FROZEN 注释逐字保留（旧 L1041 块）。
+- P-S1 探针场景重设计：初版 `[u2,a2,u1,a3]` 非判别（u1 在 seenNewMessage=true 之后，去守卫零效果）→ 定案 `[u1旧, u2新, a1旧]` + hint 'seed'：有守卫 u2.parent='u1'（前缀 u1 推进），去守卫 'a1'（非前缀 a1 亦推进）→ 恰 1 红。配套契约：func 工厂 Message 不携带 parentUuid（旧类型面保证；stamp `...message` 在算出 parent 之后 spread，携带即覆写——H6 登记于 func 头注）。
+- node:fs 同步写辅助（appendEntryToFile / readFileTailSync 直用 node:fs）——shared FsOperations 无 appendFileSync 同步面（头注登记）。
+- 详案「scanner 纯逻辑支 unit 化 / paths 布局断言 unit 化」落为 func 行为面覆盖（scanner 内部函数模块私有，行为面经大文件两态 / legacy progress 桥 func 测覆盖）；常量面（LITE_READ_BUF_SIZE=65536 等）unit 断言保留。
+- 突变探针 P-S1/P-S2/P-S3 全部执行：备份→突变→恰 1 红→逐字恢复 diff 验净（P-S1 record.ts 守卫删→func 1 红 / P-S2 load.ts `inserts.set` 删→unit 1 红 / P-S3 scanner L191 `s.out.len=0` 删→func 1 红）。
+- 四件套：tsc 0 / eslint 0 / build（cli.ts A 波骨架 `export {}`，0 KB 属预期非回归）/ 全量 **1262 pass / 80 文件**（+2 测试文件 +52 测，1210 基线 +52）+ gate 6 不变。
+
+#### d1 独立只读审视记录（1 只读子代理，≤2 限额内）
+
+**裁定：PASS-with-fixes（4 项前置处置，无 BLOCKER）**。5 块逐字抽检 + 全头注「逐字」面 + H6 接缝核验 + 测试判别性 + 门面完备性全过；3 探针判别性全成立；基线复跑 52/1262 pass + tsc 0。
+
+| # | 级别 | 发现 | 处置 |
+|---|------|------|------|
+| A-1 | MAJOR | cwd 戳值 delta 未登记：旧 `getCwd()`（活态，Bash cd 持久化 / --resume workDir 刷新）→ 新 `SessionEnv.getOriginalCwd()`（模块加载冻结）；影响面 = 仅逐条消息 cwd 戳值（会话文件定位键控 originalCwd 不受影响，链完整性零 delta，消费者 = CLI ps 面归 CLI 波） | **登记 + 接受**：project.ts 头注补审视 A-1 登记块；E-wave-end 可选扩 SessionEnv 活态成员恢复（前向接缝登记，非遗漏） |
+| A-2 | MINOR | getGitBranch 值 delta 未登记：detached/非 git 仓旧 computeBranch 返字符串 'HEAD'，新映射 undefined；机制面（缓存族→逐次 spawn）已登记但「语义逐字」宣称不覆盖值级 | **登记 + 接受**：paths.ts getGitBranch 头注补 A-2 块（消费面 = gitBranch 戳 CLI 列表展示） |
+| A-3 | MINOR | getProjectsDir 缺旧 `getAtlasConfigHomeDir` 的 `.normalize('NFC')`（非 ASCII home/env 时目录名与旧平台工具不一致） | **恢复**（一行，保逐字）：env.ts getProjectsDir 补 `.normalize('NFC')` + memoize→每调用重读 env 语义等价登记 |
+| B-1 | NIT | 旧 readJSONLFile（100MB 尾读，json.ts L201）裁除未登记（唯一消费者 stats.ts:177 = CLI 统计面） | **登记**：json.ts 头注补裁面行 |
+| C-1 | NIT | P-S3 探针注释 3 处误标「finalizeOutput 截断」（实际截断支 = scanChunkLines/processStraddle 的 `s.out.len = 0`；finalizeOutput 只做 carry 落写 + attr-snap EOF 重排） | **修正**：unit/func 头注 + §8.49 探针行 3 处订正（探针效力不受影响，突变按真实截断支执行） |
+| C-2 | NIT | unit「全已录 → 前缀跟踪 uuid」对 P-S1 守卫非判别（有/无守卫均返 'a1'） | **接受**：该测测返回语义非探针；P-S1 判别覆盖在 func 层（头注探针映射正确） |
+| D-1 | NIT | engine/index.ts 野卡 `export * from './session'` vs §8.49 item 10 显式名块 | **修正**：改显式名块（~78 名 = session/index.ts 门面全量）。订正说明：审视报告称「permissions/hooks 先例为野卡」经 grep 复核**不成立**——本文件其余全部子门面块（tools/context/permissions/hooks）均为显式名，session 是唯一野卡，属仓库惯例偏差而非风格可选项 |
+
+**闭环**：A-1/A-2/A-3/B-1 头注登记 + A-3 恢复 + C-1 3 处订正 + D-1 显式名块，tsc 0 + 52 pass 复验。基线谱系 1210 → **1262 pass / 80 文件 + gate 6（S-7d d1 末）**。**下一步 = S-7d d2（restore 面 + sessionContext port，详案同上）。**
 
 ### d2（restore 面 + sessionContext port）
 
