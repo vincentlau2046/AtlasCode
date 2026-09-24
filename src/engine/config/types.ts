@@ -24,14 +24,17 @@
  *       cleanupPeriodDays/showClearContextOnPlanAccept/terminalTitleFromRename/
  *       includeCoAuthoredBy/plansDirectory/httpHook 系列/attribution/xaaIdp/agent/local/
  *       worktree）——对应功能面未落
- *   - 深层嵌套（permissions/hooks/sandbox）用 z.any() 兜底：字段族结构由消费域
- *     各自细化（permissions 族 → E-4 规则树；hooks 族 → engine/config/hooksSchema
- *     （S-3c）；sandbox 族 → sandbox 域）。
+ *   - 深层嵌套（permissions/hooks/sandbox）：hooks 族 → S-5c（§8.41）收紧
+ *     z.lazy(HooksSchema)（事件名集校验 record key ∈ HOOK_EVENTS 27 + 4 变体
+ *     全字段面，hooksSchema.ts）；permissions/sandbox 族维持 z.any() 兜底
+ *     （permissions 族 → E-4 规则树消费解析结果；sandbox 族 → sandbox 域）。
  *   - 旧仓类型别名（HookMatcher/HookCommand 等 any 桩 + CUSTOMIZATION_SURFACES +
  *     ExtraKnownMarketplaceSchema）不随迁：新仓 hooks 域（src/hooks/types.ts）是
  *     hook 类型单一事实源，settings 侧不重复声明（同 §8.27 HOOK_EVENTS 裁定）。
  */
 import { z } from 'zod'
+// S-5c（§8.41 R2）：hooks 字段收紧引用（engine/config 域内单向 import，无循环）
+import { HooksSchema } from './hooksSchema'
 
 /**
  * Settings 数据契约（settings.json 全层共用：user/project/local/flag/policy）。
@@ -63,9 +66,10 @@ export const SettingsSchema = () => z.object({
   // --- 沙箱 / 权限（sandbox 域 + E-4 规则树消费）
   sandbox: z.any().optional(),
   permissions: z.any().optional(),
-  // --- 钩子（E-5 hooks-runner 消费；数据契约 = engine/config/hooksSchema（S-3c 已落），
-  //     SettingsSchema 维持 z.any() 透传——旧仓无 hooks 校验面逐字一致，收紧归 E-5）
-  hooks: z.any().optional(),
+  // --- 钩子（E-5 hooks-runner 消费；数据契约 = engine/config/hooksSchema）
+  // S-5c（§8.41 R2）收紧：z.any() → z.lazy(HooksSchema)（事件名集校验 + 4 变体
+  // 全字段面；旧仓 settings 字段 z.any() 为 S-3a 逐字裁定，严格编辑面落 E-5）
+  hooks: z.lazy(() => HooksSchema).optional(),
   disableAllHooks: z.boolean().optional(),
   allowManagedHooksOnly: z.boolean().optional(),
   // --- 记忆 / git（memory 域消费）

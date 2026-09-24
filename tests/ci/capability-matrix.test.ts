@@ -120,6 +120,12 @@ const MATRIX: readonly MatrixRow[] = [
   // attachment 渲染半 → 残留守（新仓无 message/attachment 基建，C-3 前向接缝登记，H6 不假 done）
   { domain: 'hooks', capability: 'hooks 流式执行（AsyncGenerator，逐钩子 yield + 聚合返回值）', status: 'done', proof: 'tests/unit/hooks-stream.test.ts' },
   { domain: 'hooks', capability: 'attachment 渲染（钩子输出 → AttachmentMessage）', status: 'missing', by: 'message/REPL 波（新仓无 message/attachment 基建，§8.40 C-3 前向接缝登记）' },
+  // E-5 S-5c（§8.41）：hooks 配置 schema 严格编辑面 —— 4 变体全字段面（旧仓
+  // src/schemas/hooks.ts leaf 字段面 + 新仓 timeoutMs 命名）+ 事件名集校验
+  // （record key ∈ HOOK_EVENTS 27，z.partialRecord）+ SettingsSchema hooks
+  // z.any() → z.lazy(HooksSchema) 收紧（坏配置 parse 期拒，非静默透传）；
+  // 纯 schema 零磁盘
+  { domain: 'hooks', capability: 'hooks 配置 schema 校验（4 变体全字段面 + 事件名集校验 + SettingsSchema 收紧）', status: 'done', proof: 'tests/unit/hooks-schema.test.ts' },
   // ── B6-func 最小组合根（compose.ts 装配真链，§8.16/§8.17 4+7 前置清单 + 6 适配器）──
   // 与上列各域"孤立面"行区别：这些行证能力"经 getCoreDependencies 装配后"的真链
   // （port 之下全真，仅 modelprovider 注入 fake），B6-func 先于 engine 波落地

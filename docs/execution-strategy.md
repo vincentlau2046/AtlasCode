@@ -1407,3 +1407,44 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **四件套 + gate**：tsc 0 / eslint 9 变更文件 0 / build 0 KB（entry point）/ 全量 974 pass 0 fail 69 files（基线 961/68 → +13 测 +1 文件）/ gate 6 pass 0 fail 2 files（capability-matrix L120 拆 = 本门自身行变更：① 新 done 行 proof 文件存在且含真实测试 / ② missing 行有 by；engine 不在 anti-stub 扫描集）。
 
 **下一步 = S-5c**（task #100）：schema 收紧（engine/config：HooksSchema 4 变体全字段面 + 事件名集校验 record key ∈ HOOK_EVENTS + SettingsSchema hooks z.any() → z.lazy(HooksSchema)）+ 门/矩阵同步 + E-5 整波审视记录（双只读子代理 ≤2）+ memory 同步（atlascode-wave-c-progress.md + MEMORY.md 索引行）。
+
+### §8.41 E-5 S-5c 执行前分析 + 方案（2026-09-24）
+
+**范围**（task #100 S-5c 前半）：schema 收紧（engine/config：HooksSchema 4 变体全字段面 + 事件名集校验 record key ∈ HOOK_EVENTS 27 + SettingsSchema hooks z.any() → z.lazy(HooksSchema)）+ 门/矩阵同步。后半 = E-5 整波审视记录（双只读子代理 ≤2）+ memory 同步（§8.42）。
+
+**执行前分析（关键契约 + 裁定点）**：
+1. **旧仓 ground truth（实测 @ a8af45b）**：权威校验面在 `src/schemas/hooks.ts`（为斩 settings/types ↔ plugins/schemas 循环抽出的 leaf；settings/types.ts `hooks: z.any()` + `HooksSettings = any`，注释明示「HooksSchema VALUE lives in src/schemas/hooks.ts」）。该 leaf 全字段面：command{command, if?, shell?∈SHELL_TYPES[bash|powershell], timeout?(秒,positive), statusMessage?, once?, async?, asyncRewake?} / prompt{prompt, if?, timeout?, model?, statusMessage?, once?} / http{url(z.string().url()), if?, timeout?, headers?(record str→str), allowedEnvVars?(str[]), statusMessage?, once?} / agent{prompt, if?, timeout?, model?, statusMessage?, once?}；matcher{matcher?, hooks(必填)}；**HooksSchema = z.partialRecord(z.enum(HOOK_EVENTS), z.array(HookMatcherSchema))（事件名集校验）**；变体 = strict z.object（无 passthrough）+ .describe() 文档串。
+2. **旧仓 settings parse 从不校验 hooks**（z.any() 逐字）：schemas/hooks.ts 消费方 = plugins/schemas（plugin 钩子定义面）。新仓无 plugin 域 → 收紧落点 = settings 字段本身（S-3c 登记「z.lazy(HooksSchema) 收紧归 E-5 严格编辑面」）。
+3. **新仓现状**：S-3c hooksSchema.ts = isHookEqual 比较面（command{command,shell?,timeoutMs?,if?} 等）+ .passthrough() 通配 + **无事件名集校验**（z.record(z.string())）+ SettingsSchema hooks z.any() 透传。残留守（hooksSchema.ts 头注 L22-27）= 本切片核销对象。
+4. **裁定 R1（事件名集校验）**：z.record(z.string()) → **z.partialRecord(z.enum(HOOK_EVENTS), z.array(HookMatcherSchema))**（旧仓 leaf 逐字；zod v4 有 partialRecord；HOOK_EVENTS `as const` → z.enum 可载）。HOOK_EVENTS 值 import 自 hooks 域（engine/config L3 → 叶域值 import，与既有 HookEvent 型 import 同边，STR-1 合规方向）。
+5. **裁定 R2（SettingsSchema hooks 字段）**：z.any() → **z.lazy(() => HooksSchema)**（任务原文 z.lazy；zod v4 内建；新仓无 settings↔schemas 循环，z.lazy 留未来循环逃生口）。效果：垃圾事件名/坏变体 → **parse 期 ValidationError**（getSettingsWithErrors 面），不再静默流入运行时。
+6. **裁定 R3（全字段面，新仓命名）**：按旧仓 leaf 字段面补字段（command +statusMessage/once/async/asyncRewake，shell→z.enum(['bash','powershell'])，timeoutMs→positive；prompt/agent +timeoutMs/model/statusMessage/once；http +timeoutMs/headers/allowedEnvVars/statusMessage/once，url→z.url()）。**timeoutMs 保留新仓命名**（S-3c 裁定 = 旧仓 isHookEqual 比较面字段；旧仓 config schema 的 timeout（秒）不取——新仓运行时域 HookCommand = timeoutMs 单一事实源，config→runtime 零转换接缝（H6））。shell 枚举内联（同 types.ts defaultShell `z.union([z.literal...])` 先例；E-6 全 shell 面若落 SHELL_TYPES 常量再收拢）。
+7. **裁定 R4（passthrough 保留，偏离旧仓 strict）**：旧仓 leaf 变体/matcher = strict（未知字段丢弃）；新仓**保留 S-3c .passthrough()**（既有测试 engine-config-hooks L119/L344-368 已锁 `extra: 42`/`'keep-me'` 存活 = 新仓前向兼容裁定：SettingsSchema 顶层 .passthrough() 同原则，未知字段不丢数据；未来 prompt/agent/http 执行面将消费这些字段，现在丢弃 = 数据破坏）。收紧判别值 = 事件名集 + 已声明字段面（必填/positive/enum/record 类型），非 strict 丢弃。
+8. **裁定 R5（.describe() 文档串不迁）**：旧仓 schema 带 user-facing .describe()；新仓风格 = schema 旁注释语义（types.ts/hooksSchema.ts 全无 .describe）→ 不迁（残留守登记）。
+9. **裁定 R6（非 command 变体执行面残留守重登记）**：旧仓 hooks.ts L1743-1817 确有 prompt/agent/http 专属执行支（filter 后分路执行）；新仓 C-Deep 薄骨架 = command-only（provider 过滤非 command 变体已落）。hooksConfig.ts 头注「执行面归 E-5 hooks-runner」= **陈旧**（E-5 落 command 执行面，不含 LLM/HTTP 执行面；E-7 leaves = tasks/scheduler/worktree/session/messaging，不含 hooks）→ 重登记 = 未来 hooks-runner 全量波（独立残留守，不挂 E-7）；本切片同步改 hooksConfig.ts 头注。
+10. **裁定 R7（坏条目的整文件拒绝语义）**：parse 失败 → `{settings: null, errors}`（settings.ts L243，整文件拒绝——旧仓同款模式；permissions 族有 filterInvalidPermissionRules 预过滤先例「one bad entry doesn't reject the entire file」）。hooks 取**严格路（A）**：坏钩子条目 → 该源文件拒绝 + 错误经 getSettingsWithErrors 显式呈现（新仓 config 设计 = 错误显式面，非静默透传）。**残留守（B 案）**：hooks 条目预过滤（仿 filterInvalidPermissionRules 保文件）= UX 后续纵切，本切片不做（任务原文 = 纯 schema 收紧，预过滤是独立机制）。既有 T-1 测试（engine-config-hooks「缺 hooks 键 z.any() 放行 → 守卫剔除」）语义变更：S-5c 后该配置 parse 期即拒（断言 `[]` 仍成立，机制 = 文件拒绝非守卫剔除）→ 注释更新；provider Array 守卫降级为快照/cast 面双保险（保留不删，§8.30 T-1 登记面）。
+11. **门/矩阵同步**：capability-matrix hooks 域加 1 行「hooks 配置 schema 校验（4 变体全字段面 + 事件名集校验）」done（proof = tests/unit/hooks-schema.test.ts）；gate 2 文件保持绿（anti-stub 不扫 engine/config；matrix ① 校新 proof 文件存在 + 含真实测试）。
+12. **受影响既有文件**：types.ts（hooks 字段 + 头注 bullet）/ hooksSchema.ts（schema + 类型 + 头注残留守核销）/ hooksConfig.ts（头注：守卫降级双保险 + 执行面残留守重登记）/ engine-config-hooks.test.ts L392-405（T-1 测试注释语义更新）/ engine 根门面（无新导出——HooksSchema/SettingsSchema/4 变体类型均已导出）。
+
+**判别信号（测试，新文件 tests/unit/hooks-schema.test.ts，纯 schema 零磁盘，12 测）**：
+- 全字段面 round-trip：① command 8 字段 / ② prompt / ③ http（headers/allowedEnvVars）/ ④ agent（model）
+- 事件名集（⑤）：27 事件全过（`{[event]: []}` 逐一遍历）+ 假事件 'BogusEvent' 拒（error 路径含键）
+- SettingsSchema 收紧（⑥a/b）：合法 hooks 过（data.hooks 面保真）/ 假事件 → 拒（经 engine 根门面 import，L3 消费真）
+- 字段类型检（⑦-⑩）：shell enum（'zsh' 拒）/ timeoutMs positive（0/-5 拒）/ url 合法性 / headers 值非 string 拒 + allowedEnvVars 非 string[] 拒
+- 前向兼容（⑪）：passthrough 保留（变体 extra 字段存活，R4 裁定锁定）
+- L3 门面（⑫）：engine 根 HookCommandSchema 判别联合（未知 type 拒 / command 缺 command 拒）
+
+**突变探针（3，cp 备份 → 突变 → 红 → 逐字还原 → 绿）**：
+- P1 事件名集：z.partialRecord(z.enum(HOOK_EVENTS)) → z.record(z.string())（⑤⑥ 红）
+- P2 SettingsSchema 收紧：hooks: z.lazy(() => HooksSchema) → z.any()（⑥ 红）
+- P3 全字段面：删 command 变体 asyncRewake 声明 + 测试面……（passthrough 下删声明不丢字段 → 探针改 timeoutMs 删 .positive()，⑧ 红）
+
+**实施顺序**：hooksSchema.ts（schema+类型+头注）→ types.ts（字段+头注）→ hooksConfig.ts 头注 → engine-config-hooks.test.ts 注释 → 新测试文件 → matrix 行 → 四件套 + 探针 → §8.41 实施结果 → 切片提交。
+
+**实施结果 + 问题闭环**：
+- **落地面**：hooksSchema.ts（4 变体全字段面 schema + 类型 + HooksSchema = z.partialRecord(z.enum(HOOK_EVENTS), ...) 事件名集校验 + HOOK_EVENTS 值 import 域根门面）/ types.ts（SettingsSchema hooks z.any() → z.lazy(() => HooksSchema) + 头注 bullet 翻新）/ hooksConfig.ts（头注：T-1 守卫降级双保险 R7 + 非 command 执行面 R6 重登记「未来 hooks-runner 全量波」）/ engine-config-hooks.test.ts（T-1 测试名/注释翻新：机制 = parse 期拒，非守卫剔除）/ capability-matrix hooks 域 +1 行（hooks 配置 schema 校验 done，proof = tests/unit/hooks-schema.test.ts）/ 新测试文件 tests/unit/hooks-schema.test.ts（15 测 = §8.41 判别信号 12 项，⑤⑥ 各细分 a/b/c 与 b）。
+- **零回归**：既有 engine-config-hooks（T-1 断言 `[]` 机制变更仍成立）/ engine-config-sources（`hooks: {PreToolUse: []}` 合法事件名 + 空数组过收紧面）/ hooks 域 5 高频执行器 + 流式全绿——无既有测试假设 hooks 透传 z.any()。
+- **3 突变探针（全红 → 逐字还原 → 绿）**：P1 事件名集 z.partialRecord(z.enum(HOOK_EVENTS)) → z.record(z.string())（⑤b/⑤c/⑥b 3 红）/ P2 SettingsSchema hooks → z.any()（⑥b 红）/ P3 timeoutMs 删 .positive() 4 处（⑧ 红）。还原 = cp 备份逐字（探针前 cp 至 job tmp）。
+- **四件套 + gate**：tsc 0 / eslint 6 变更文件 0 / build 0 KB（entry point）/ 全量 989 pass 0 fail 70 files（基线 974/69 → +15 测 +1 文件）/ gate 6 pass 0 fail 2 files（matrix ① 新 done 行 proof 文件存在且含真实测试）。
+
+**下一步 = E-5 整波审视（task #100 后半）**：双只读子代理（≤2 限额）对照旧仓 ground truth 审视 E-5 全波（S-5a f7da19c/75bf0f9 + S-5b c937dc9 + S-5c 本提交）→ 修复提交 + §8.42 整波审视记录 + memory 同步（atlascode-wave-c-progress.md + MEMORY.md 索引行）。

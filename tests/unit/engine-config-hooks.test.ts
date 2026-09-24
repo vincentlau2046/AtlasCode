@@ -390,7 +390,7 @@ describe('engine/config createHooksConfigProvider（§8.28 过滤面）', () => 
     expect(provider.getHookMatchersForEvent('Stop')).toEqual([])
   })
 
-  test('畸形 matcher（缺 hooks 键，z.any() 放行）→ 守卫剔除不崩（§8.30 T-1）', () => {
+  test('畸形 matcher（缺 hooks 键）→ parse 期拒绝不崩（§8.41 R7，§8.30 T-1 降级双保险）', () => {
     const m = makeMockFs({
       [USER_SETTINGS]: JSON.stringify({
         hooks: { PreToolUse: [{ matcher: 'Bash(npm *)' }] },
@@ -398,9 +398,10 @@ describe('engine/config createHooksConfigProvider（§8.28 过滤面）', () => 
     })
     setFsImplementation(m.ops)
     const provider = createHooksConfigProvider()
-    // settings 面 hooks 经 z.any() 透传（S-3a 裁定）：用户配置缺 hooks 键时
-    // 旧仓 matcher.hooks.filter 抛 TypeError 崩钩子面（getMatchingHooks 无
-    // 守卫）；本版 Array 守卫剔除 → 空结果（回归锁定 T-1 加固）
+    // S-5c 收紧（§8.41 R2/R7）：本配置（matcher 缺必填 hooks 字段）parse 期
+    // 整文件拒绝（z.lazy(HooksSchema) + 错误经 getSettingsWithErrors 呈现）
+    // → 该源不进合并 → provider 空结果（不崩）。provider Array 守卫 = 快照/
+    // cast 面双保险（此路径不经守卫，保留不删）
     expect(provider.getHookMatchersForEvent('PreToolUse')).toEqual([])
   })
 })

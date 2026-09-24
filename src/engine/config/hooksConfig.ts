@@ -28,12 +28,14 @@
  *     调用点——登记组合根 / E-wave-end /hooks UI 面（H6：快照面被 provider
  *     消费，update 属 UI 写回面，不删除导出）。
  *   - 执行器契约过滤：新仓 hooks 域 runHooks 仅消费 command 变体（.command），
- *     prompt/agent/http 执行面归 E-5 hooks-runner → provider 过滤非 command
- *     变体（配置面数据契约仍保四类全量，hooksSchema.ts），过滤后空 matcher 剔除。
- *   - 畸形 matcher 加固（§8.30 T-1）：settings 面 hooks 经 z.any() 透传，
- *     用户配置缺 hooks 键/非数组时旧仓 matcher.hooks.filter 抛 TypeError
- *     崩钩子面（getMatchingHooks 无守卫）；provider 加 Array 守卫防用户
- *     配置崩 loop（加固登记，非逐字移植偏离）。
+ *     prompt/agent/http 执行面 = 未来 hooks-runner 全量波（§8.41 R6 重登记：
+ *     E-5 落 command 执行面（S-5a/S-5b），LLM/HTTP 执行支不随迁；E-7 leaves
+ *     不含 hooks 执行面）→ provider 过滤非 command 变体（配置面数据契约仍保
+ *     四类全量，hooksSchema.ts），过滤后空 matcher 剔除。
+ *   - 畸形 matcher 加固（§8.30 T-1，§8.41 R7 降级双保险）：S-5c 收紧后 settings
+ *     面 hooks 经 z.lazy(HooksSchema) 校验——坏条目（缺 hooks 键/坏事件名/坏
+ *     变体）parse 期整文件拒绝 + 错误经 getSettingsWithErrors 显式呈现；provider
+ *     Array 守卫保留为快照/cast 面双保险（非 settings 文件主路径，不删除）。
  */
 // L3 域边界：hooks 域类型经域根门面 import（不深入域内文件，eslint
 // boundaries/entry-point）
@@ -140,7 +142,8 @@ export function resetHooksConfigSnapshot(): void {
  * 构建 hooks 域配置源（组合根 setHookConfigProvider 注入，S-3c 消费点接线）。
  *
  * 执行器契约过滤（见头注）：保留 command 变体（runHooks 消费 .command）；
- * prompt/agent/http 执行面归 E-5。过滤后空 hooks 的 matcher 剔除。
+ * prompt/agent/http 执行面 = 未来 hooks-runner 全量波（§8.41 R6 重登记）。
+ * 过滤后空 hooks 的 matcher 剔除。
  */
 export function createHooksConfigProvider(): HookConfigProvider {
   return {
@@ -148,10 +151,9 @@ export function createHooksConfigProvider(): HookConfigProvider {
       const matchers = getHooksConfigFromSnapshot()[event] ?? []
       const result: HookMatcher[] = []
       for (const matcher of matchers) {
-        // 畸形配置加固（§8.30 T-1）：hooks 字段 z.any() 透传（S-3a 裁定），
-        // 用户配置缺 hooks 键/非数组时旧仓同风险崩溃（matcher.hooks.filter
-        // 抛 TypeError 经 getMatchingHooks 无守卫传播崩 loop）；本版 Array
-        // 守卫防用户配置崩钩子面（加固登记，非逐字移植偏离）
+        // 畸形配置加固（§8.30 T-1，§8.41 R7 降级双保险）：S-5c 收紧后 settings
+        // 文件面坏条目 parse 期即拒（z.lazy(HooksSchema)）；此守卫 = 快照/cast
+        // 面双保险（matcher 经 cast 进入时保 Array 语义，防崩 loop）
         const hooks = (Array.isArray(matcher.hooks) ? matcher.hooks : []).filter(
           (hook): hook is CommandHookCommand =>
             hook.type === 'command' && typeof hook.command === 'string',
