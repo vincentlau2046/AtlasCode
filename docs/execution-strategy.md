@@ -2322,3 +2322,134 @@ popAllEditable 字符串+块双源 + pastedContents id 保留 + 内嵌 base64 �
   模式断言可编辑性/长度，与优先级无关）；门面 611 导出名 0 重复（d2 41 名
   各恰 1 次），消费方仅经引擎门面 + shared（ContentBlockParam type-only）；
   依赖方向 messaging → session 仅 type 边，无循环、无新增第三方依赖。
+
+## §8.51 E-7 整波审视记录（2026-09-24，双只读 ≤2 限额 + 终验四件套）
+
+对象 = S-7 全波（§8.45-§8.50：tasks / scheduler / worktree / session d1+d2 /
+messaging d1+d2，60+ 文件）跨切面审视。2 只读子代理并行派发（A 旧仓对照 /
+B H6 死接缝），各自独立复跑四件套 + 全维度审计；全部发现经主会话 grep/Read
+逐条核验后处置（D-1 先例：子代理事实声明须实证）。
+
+### A 路（旧仓对照 / 代码保真度 + 安全）——PASS（0 MAJOR / 0 MINOR / 3 NOTE）
+
+- **机械逐字审计**：27 对整文件归一化 diff（去头注 + import）+ 部分映射文件
+  行段 token 级 diff → **零未登记行为 delta**（全部 delta 可回溯各文件头注
+  旧仓来源映射表 / 裁面登记）。加严抽样 5 高风险文件逐句：worktree/git.ts
+  getDefaultBranch 判定链（含 MAJOR-1 订正的 readRawSymref origin/HEAD 步）/
+  session/load.ts recoverOrphanedParallelToolResults（13 opcode 全为 as any
+  剥离 + 类型收紧，新守卫仅更严）/ session/scanner.ts（token opcode = 0 全
+  逐字）/ messaging/mailbox.ts（7 调用点 logError 归一化 7/7 1:1 + proper-
+  lockfile 4 锁 4 release 一一对应）/ tasks/framework.ts pollTasks 主循环 +
+  scheduler/cronScheduler.ts check/load 主路 + cronTasksLock.ts 租约锁
+  （O_EXCL + PID 探针 + stale 恢复逐字）。2 疑似 flag 核销误报（agentType
+  死支删除 = 必填 string 型验证 / sessionMemory 字段名 = 旧仓 typo 订正）。
+- **导出面交叉审计**：engine/index.ts 21 export 块跨块重名 0 + kind-clash
+  0；块 ↔ 域门面逐一全等（worktree 21=21 / session 114=114 / scheduler
+  32=34−2 登记小工具 / messaging 133=134−SEND_MESSAGE_TOOL_NAME 登记设计 /
+  coordinator-tasks 74=85−11 xml 域内名）。
+- **探针三方一致性**：P-T 族 ×3 波 + P-S1..S5 + P-M1..M5 全部（§8.45-§8.50
+  详案 ↔ 测试头注锚点 ↔ 测试函数名）三方吻合；P-S1 / P-M3 静态恰 1 红走查
+  成立（不跑突变）。
+- **安全面 vs 旧仓**：worktree git 执行层（execFile arg-array 免注入 +
+  findCanonicalGitRoot 双校验 backlink 守卫 + isSafeRefName 五重拒）/
+  scheduler 租约锁 / session scanner >5MB 截断双点 / mailbox 文件锁——
+  守卫在位且未被裁面削弱。
+- 3 NOTE 处置（1a8dc08，零行为面）：
+  - **A-NOTE-1** engine/index.ts:148 注释「coordinator/tasks 域门面全量面」
+    措辞过宽（实面 85−11 xml 域内名）→ 注释订正为「按消费面显式收窄」
+    （先例 coordinator/index.ts:33）。
+  - **A-NOTE-2** 旧 messages.ts L4606 findLastCompactBoundaryIndex / L4631
+    getMessagesAfterCompactBoundary（REPL snip 消费者，依赖 snipProjection /
+    HISTORY_SNIP 面 ∉ 新仓）未随迁——predicates.ts 头注补前向接缝登记
+    （shell/REPL 波前向补裁）。
+  - **A-NOTE-3** 域内小工具策略轻度不对称（scheduler 自持 jsonStringify /
+    safeParseJSON 域内拷贝 vs messaging 跨域 import session 域 json 面）——
+    两者均头注登记 + 均经域门面，零行为，**接受不修**（登记归档）。
+
+### B 路（H6 死接缝 / 测试·架构）——PASS（0 MAJOR / 0 MINOR / 2 NOTE）
+
+- **H6 前向接缝族双向扫描**：正向（登记了但代码还留着）全清——logOperation
+  族 / swarm 子树 7217L / UDS Port 9 / tasks 5 裁面符号 / project 6 裁面
+  符号 / worktree hooks 面 / chokidar / session-cron store 等 grep 全 0 live
+  残留；反向（悄悄裁了没登记）= 0（旧 vs 新导出面 diff 逐子波抽查，漏登记
+  0）。
+- **测试面零缺陷**：7 unit 文件零真实盘 I/O（env set/restore + 假路径串数据
+  两合规形态）；6 func 文件 mkdtempSync tmp 隔离 + ATLAS_CONFIG_DIR 先例；
+  空壳/永真断言扫描 0（13 处 toBeDefined 逐一复核，唯一独立型自带登记注释
+  合规）；gate 6 域封闭联合实证（scheduler/worktree/session/messaging ∉
+  8 域联合，tasks 2 matrix 行 proof 文件在位）。
+- **门面 STR-1 + 依赖方向**：S-7 域内部深路径 import 全仓（含测试）= 0；
+  跨域边仅 messaging→session（type + json 值，头注映射表登记）+
+  session→coordinator（isCoordinatorMode，restore.ts 头注登记）无环；
+  第三方依赖审计 9998971~1..8e0c9bc 仅 7ea9aa3 一处 = proper-lockfile
+  ^4.1.2（与宣称一致）。
+- **anti-stub 扫描**：S-7 全部 src `: any` / `as any` live 出现 = 0（全部
+  any 字样在头注「登记」语境 = 旧仓 stub 来源说明）；自造未登记 stub = 0。
+- 2 NOTE 处置（1a8dc08，零行为面）：
+  - **B-NOTE-1** registry.ts:11 + tasks/types.ts:6 头注「InProcessTeammateTask
+    随 S-7e 波」波归属陈旧（S-7a 写于 §8.50 范围裁定前）→ 回刷为
+    「shell/swarm 波（§8.50 裁定：inProcessTeammateHelpers 102L 依赖本任务
+    态归同波；S-7e 完结后 tasks 面仍两态）」。
+  - **B-NOTE-2** localAgentTask.ts:42-44 tools 域 3 深 import（type 2 +
+    值 1）绕过 tools 根门面 → 归一 `import { … } from '../../tools'`
+    （三符号均经 tools/index.ts re-export，值同一源 toolNames.ts:37；
+    零行为，包级 coordinator↔tools 双向边 = E-2 既存，归一仅改道经门面）。
+    **E-2/E-3 遗留 3 行（workerAgent.ts:19,21 + coordinatorMode.ts:25，
+    超 S-7 范围）不动，登记 E-wave-end 归一候选**（tools 域 STR-1 例外族）。
+
+### 终验四件套 + 基线
+
+- tsc 0 / eslint 0（5 改动文件）/ build 0 / **bun test 1403 pass / 85 文件 /
+  2975 expect（与 d2 闭环基线逐位不变，零行为实证）** / gate 6 pass。
+- S-7 全波提交链：9998971(S-7a) → 4713f03(S-7b) → fd49163(S-7c) →
+  6a8944e(S-7d d1) → 5e20333(S-7d d2) → 7ea9aa3(S-7e d1) → ada630b
+  (S-7e d2) + 各审视修复提交 + 本 1a8dc08；基线谱系 1100→1160→1210→
+  1262→1284→1374→1403 全程单调 +gate 6 恒 6。
+
+### E-wave-end 前向接缝清单（B 路全量 20 项 + 本审视新增 1 项，归档）
+
+1. tasks 通知注入窗口 E-wave-end 装配真实队列（默认 handler=logForDebugging
+   非黑洞）→ coordinator/tasks/notification.ts:8-12
+2. cleanupRegistry 运行入口（组合根 / CLI 关闭路径调 runCleanupFunctions）
+   → coordinator/tasks/cleanupRegistry.ts:4-6
+3. killShellTasks dequeueAllMatching 裁面复核（队列面落时）
+   → coordinator/tasks/killShellTasks.ts:6-9
+4. scheduler 消费面（ScheduleCronTool 族 = 工具本体波 / headless -p = CLI 波）
+   → scheduler/index.ts:14-15
+5. scheduler registerExitCleanup 缺省 no-op → 组合根注真 cleanupRegistry
+   → scheduler/cronEnv.ts:65-67
+6. jitter GrowthBook-backed 实现注入整换（未来 analytics 波）
+   → scheduler/cronJitterConfig.ts:15
+7. SessionEnv 组合根注真 bootstrap 值（compose.ts 接线）
+   → session/env.ts:8,61
+8. restore 跨项目 resume project dir 推导 + switchSession 二参 → 单参
+   → session/restore.ts:26-28
+9. restore onWorktreeRestore? 前向注入口（壳 worktree 波注入；unit/func 已
+   覆盖调用时点 + 值透传）→ session/restore.ts:44-47,113-117,163
+10. project 活态 cwd 状态机 → E-wave-end 可选扩 SessionEnv 活态成员
+    （审视 A-1 值 delta 裁定接受）→ session/project.ts:37-38
+11. project 裁面⑤ 远程持久化（remote/teleport 波）接线补调用点
+    → session/project.ts:811-812
+12. project 壳侧同步 fs 可测性接缝 → session/project.ts:860
+13. Port 5 SessionMemoryPort 壳实现 + compose 注入（零消费者前向登记）
+    → session/sessionMemory.ts:13-18 + ports/sessionMemory.ts:7
+14. Port 1 SessionContextPort 壳实现 + compose 注入（零消费者前向登记）
+    → session/index.ts:176 + ports/sessionContext.ts:6
+15. scanner compact boundary 写面 = QueryEngine 压缩层 E-wave-end 接线
+    → session/scanner.ts:15
+16. directMemberMessage writeToMailbox 真 mailbox 面注入
+    → messaging/directMemberMessage.ts:14
+17. queueManager replay 面（logOperation 族裁）经 getSessionEnv()
+    .getSessionId() 注真值 = 潜在接回点 → messaging/queueManager.ts:17-21
+18. worktree hookBased 形参保留（工具本体波 / E-wave-end 接线）
+    → worktree/worktree.ts:12-14,467-530
+19. runHooksStream 消费面 = loop 流式 chatStream E-1b-full（loop.ts 头注）
+    → engine/index.ts:512
+20. func 谓词阴性断言补 + P-M2 单点红集 1→2 重测一并处置
+    → tests/func/engine-messaging-fs.test.ts:157-162（§8.50 NOTE-2）
+21. **（§8.51 新增）predicates compact-boundary 检索族**（旧
+    findLastCompactBoundaryIndex / getMessagesAfterCompactBoundary，REPL snip
+    消费者）→ shell/REPL 波前向补裁 → session/predicates.ts 头注
+22. **（§8.51 新增）E-2/E-3 tools 域深 import 遗留 3 行**（workerAgent.ts:19,21
+    + coordinatorMode.ts:25）→ E-wave-end tools 域 STR-1 归一候选（随 compose
+    装配 pass 顺带）
