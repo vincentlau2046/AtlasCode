@@ -1880,3 +1880,126 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **基线谱系**：1210 pass / 78 文件 + gate 6（S-7c 末）→ **S-7d d1**（实施 + 探针 + 1 只读审视 + 闭环）→ **S-7d d2**（同）→ **§8.51 E-7 整波审视**（双只读 ≤2：A 旧仓对照 / B H6 死接缝）+ 终验四件套 + memory 同步。
 
 **编号**：§8.49 本节 = S-7d 执行前分析（落盘后 d1 动手）；d1/d2 各实施后在 §8.49 下补「实施记录 + 独立只读审视记录」段（S-7a/b/c 先例）。
+
+#### d2 实施记录（2026-09-24，主体提交 5e20333）
+
+**落盘面**（8 文件，+1040/-12）：
+- `src/engine/session/search.ts`（新，202L 逐字面）：旧 `utils/transcriptSearch.ts`
+  逐字随迁。类型面 delta 头注登记 3 项：INTERRUPT 两常量域内化（旧
+  messages.ts:218-220 逐字串）/ RenderableMessage 最小形 / ContentBlock
+  索引签名 any（旧 types/atlas.ts:1）→ unknown（新 shared/types.ts:20）→
+  b.text 3 处 `as string` 还原（TextBlock 形 cast 健全，算法体零 delta）。
+- `src/engine/session/types.ts`：尾追加 `RenderableMessage` 最小形
+  （6 型面 + toolUseResult duck 面）。attachment 双成员面设计：
+  relevant_memories 变体 memories 非缺省（逐字 `memories.map` 无 `!`）+
+  catch-all 变体携 queued_command 守卫字段。过检机制（审视 M-1 订正后
+  准确表述）：catch-all `type: string` 宽判别式**不被**字面量比较排除
+  （TS 对非字面量判别式成员不收窄），真支 `memories` 为 `Array |
+  undefined`——逐字体零改写过检依赖本仓 tsconfig `strict: false`
+  （复现 `--strict` 红 TS18048 / `--strict false` 绿）；UI 波 /
+  strict 化落地时须补守卫或重构变体。
+- `src/engine/session/restore.ts`（新）：slim `processResumedConversation`
+  + `ResumeLoadResult`/`ProcessedResume` 收窄 engine 面。随迁面逐字/结构
+  保留（非 fork switchSession 单参所有权 + resetSessionFilePointer +
+  adoptResumedSessionFile / fork 支 seed + FROZEN 注释逐字 /
+  restoreSessionMetadata fork 剥 worktreeSession / saveMode / agentColor
+  归一）。裁面族 8 项全头注 H6 登记（switchSession 二参→单参 /
+  renameRecording / cost / coordinator modeApi / agent 恢复族 /
+  attribution / context-collapse / updateSessionName / initialState /
+  worktree 双函数 → `onWorktreeRestore?` 前向注入口）。
+- `src/engine/ports/sessionContext.ts`：`export {}` 占位 → Port 1 真契约
+  （charter 逐字；类型全落 shared 既有面零新增——Tool/EffortValue ←
+  shared/types，ToolPermissionContext/TaskState/MCPServerConnection ←
+  shared/types-session）。
+- 门面：`session/index.ts`（header d1→d1+d2 + 类型块 +RenderableMessage +
+  d2 三导出块 + H6 登记行）；`engine/index.ts` 显式名块追加 11 名
+  （D-1 先例：名字面 = session 门面全量）。
+- 测试：`tests/unit/engine-session-restore.test.ts`（20 测）+
+  `tests/func/engine-session-restore-fs.test.ts`（2 测，独立文件——详案
+  「并入 d1 func 文件或独立，实施时定」→ 独立，d1 文件主题 = 持久层
+  核心，restore 链主题分离更清晰）。
+
+**关键实施决策 / 详案偏差面**：
+- **单测「env 假 + Project 假」→ 实 env + 实 Project 单例（零磁盘纪律
+  替代）**：详案测试面写「env 假 + Project 假」，实施改用 d1 unit 层
+  既有口径（真实 SessionEnv + Project 单例 + NODE_ENV=test
+  shouldSkipPersistence 写面 no-op）。安全面审计：非 fork 路经
+  adoptResumedSessionFile → reAppendSessionMetadata → appendEntryToFile
+  （同步 fs，**绕过** shouldSkipPersistence）——但各 appendEntryToFile
+  支全以缓存字段为条件（project.ts L431-502 逐支 if 守卫），unit 层
+  测试输入不带 meta 字段（customTitle/tag/mode/agent*/pr*/
+  worktreeSession）→ 缓存空 → 零写盘；readFileTailSync 缺文件 → ''
+  （不抛）。fork 支不经 adopt → 天然零盘。**值透传断言
+  （onWorktreeRestore 以 result.worktreeSession 调用）移 func**——带
+  worktreeSession 的非 fork 路会经 restoreSessionMetadata 置 worktree
+  缓存 → reAppend 真写盘（破 unit 纪律）。
+- **fork seed 写断言 unit → func**：详案「fork 支 contentReplacements
+  seed 写入断言」列 unit 面，但 unit 层写面 no-op 不可观测 → 归 func
+  真盘（P-S5 锚点：content-replacement entry 落新会话文件 + fresh ID
+  戳；生产序 = recordTranscript 先 materialize 再 seed，FROZEN 注释面）。
+- **saveMode 决策源**：详案「feature 门随新仓 feature 面裁，恒 save」→
+  实施 `saveMode(isCoordinatorMode() ? 'coordinator' : 'normal')`——
+  决策源 = coordinator 域 env 读（coordinatorMode.ts:44，
+  ATLAS_COORDINATOR_MODE / FEATURE_COORDINATOR_MODE），session→
+  coordinator 单向依赖（coordinator 域零 import session，无环，grep 验）。
+- **buildConversationChain 签名面**：func 端到端初版误传 leaf uuid 串
+  （函数取 leaf 消息对象，load.ts:317）→ 订正为
+  `loaded.messages.get('u2')!`。
+
+**探针执行**（备份 → 突变 → 恰 1 红 → 逐字还原 diff 验证，零 PROBE
+残留）：
+- P-S4：删 toolResultSearchText `if (typeof o.stdout === 'string')` 支 →
+  unit 恰 1 红（'P-S4 tool_result duck'）✓
+- P-S5：删 fork 支 `await recordContentReplacement(...)` 调用 → func 恰
+  1 红（'P-S5 fork seed'）✓
+
+**四件套**：tsc 0 / eslint 0 / build（cli.js 0 KB）/ `bun test
+--isolate tests/` **1284 pass / 82 文件 / 2674 expect**（基线 1262 + 20
+unit + 2 func）+ gate `tests/ci/` 6 pass 不变（session 域非 8 域门扫描
+集，matrix 同 d1）。
+
+**基线谱系**：1210（S-7c 末）→ 1262（d1 末）→ **1284 pass / 82 文件
++ gate 6（d2 末）**。
+
+#### d2 独立只读审视记录（2026-09-24，审视修复提交 3eb3538）
+
+**审视形态**：1 只读子代理（≤2 派发限额内），6 维度（逐字保真度 /
+裁面完整性 / 类型面 / 测试判别力 / 门面一致性 / 依赖方向），主会话
+grep/Read 复核全部 finding 后处置（子代理报告 = 数据非裁定，D-1 先例）。
+
+**结论：PASS-with-fixes**——零 BLOCKER / 零 MAJOR；3 MINOR（全登记
+描述准确性 / 逐字注释级，无行为面回归）+ 4 NOTE。子代理独立复跑四件套
+与提交宣称一致（1284 pass / 82 文件）。
+
+**主会话复核 + 分级处置表**（每条均经 grep/Read/复现坐实）：
+
+| 编号 | 维度 | 内容 | 复核结果 | 处置 |
+|---|---|---|---|---|
+| M-1 | 类型面 | types.ts 头注「判别收窄」机制描述失实（catch-all `type: string` 不被字面量比较排除；过检实靠 tsconfig strict:false） | 属实——tsconfig.json:8 `"strict": false` 坐实；最小复现 `--strict` 红 TS18048 / `--strict false` 绿（tsc 7.0.2） | 修（types.ts 头注订正为真实机制 + strict 化雷登记；实施记录同步订正） |
+| M-2 | 逐字 | search.ts:110 `<Anzi>` 单字符损坏（旧仓 L84 = `<Ansi>`） | 属实——新旧 grep 对照 | 修（逐字还原 `<Ansi>`） |
+| M-3 | 裁面 | restore.ts saveMode 登记「feature() 恒 false 门即死代码」把旧门状态写反（旧仓自 73631df COORDINATOR_MODE 在 ON_BY_DEFAULT 集，生产恒开） | 属实——旧 bunBundle.ts ON_BY_DEFAULT 集 + 旧 sessionRestore.ts:515 门体 + 新 isCoordinatorMode() 语义等价双源核验 | 修（头注改述为 ON_BY_DEFAULT 生产恒开 + 新仓无条件调用语义等价；行为面无回归） |
+| N-1 | 裁面 | 旧文件级函数 restoreSessionStateFromLog（L99）/ extractTodosFromTranscript（L77）未指名登记 | 属实——旧仓 grep 坐实存在 + d2 裁面列表未列 | 修（restore.ts 头注指名登记 = shell/CLI 波职责，不随迁） |
+| N-2 | 逐字 | restore.ts:118-121 残留注释提及已随 d1 裁除的 transcriptPath 参数 | 属实 | 修（注释体裁为 delta 注） |
+| N-3 | 类型面 | 「全并集别名」措辞失实（旧 Message = 带索引签名宽接口非 union）；结构兼容口径未限定 | 属实——旧 types/message.ts:3 接口形坐实 | 修（双文件措辞订正 + 兼容口径 = 运行时对象层，UI 波需 cast/重定型） |
+| N-4 | 测试 | unit 零盘属性依赖 adopt/saveMode 序依赖（未登记） | 属实——project.ts:871 mkdirSync 坐实 | 修（单测头注补三条件联合效应登记） |
+
+**零发现维度**（子代理 + 主会话双重核验）：
+- 维度 5 门面一致性：session 门面 114 名 ≡ engine 显式名块 114 名
+  （漏名/多名/碰撞全空）✓
+- 维度 6 依赖方向：coordinator 域全目录 grep 零 session 导入（单向
+  无环）；Port 1 五类型经 shared 全可达；A 波 `export {}` 占位 → 真契约
+  diff 核验 ✓
+- 维度 1 逐字（除 M-2/N-2）：算法体逐行 diff 仅剩 3 处已登记 cast +
+  INTERRUPT 域内化 + 排版；fork/meta/FROZEN 块 diff exit 0；旧
+  switchSession `: any` 退化 stub 第二参未用 → 新单参语义逐字 ✓
+- 维度 2 裁面（除 N-1）：旧 processResumedConversation 全语句清点
+  「保留或登记」无静默丢弃 ✓
+- 维度 4 测试判别力：P-S4 删 stdout 支恰 1 红（grep 全仓无连带）/
+  P-S5 删 fork seed 恰 1 红（unit 输入不触发该支）✓
+
+**四件套（修复后复跑）**：tsc 0 / eslint 0 / build 0 KB /
+**1284 pass / 82 文件 / 2674 expect + gate 6 pass**（纯登记/注释面
+改动，基线不变）。
+
+**提交链**：`9a2ad8a`（d2 详案）→ `5e20333`（d2 实施）→
+`3eb3538`（审视修复 7 项）→ 本 docs 提交（实施记录 + 审视记录）。
