@@ -330,6 +330,33 @@ export {
   isProcessRunning,
   type SchedulerEnv,
 } from './scheduler'
+// E-7 S-7c（§8.48）：worktree 子门面（agent 隔离 worktree 面
+// createAgentWorktree / removeAgentWorktree / cleanupStaleAgentWorktrees +
+// slug 校验 + 本域自含 git 执行层最小真子集；hooks 面 / 交互会话绑定 /
+// tmux 族 / copyWorktreeIncludeFiles / attribution hook 块 / hasWorktreeChanges
+// 全裁 = 前向接缝，见 worktree/index.ts 头注）
+export {
+  createAgentWorktree,
+  removeAgentWorktree,
+  cleanupStaleAgentWorktrees,
+  validateWorktreeSlug,
+  worktreeBranchName,
+  execFileNoThrowWithCwd,
+  gitExe,
+  findGitRoot,
+  findCanonicalGitRoot,
+  getDefaultBranch,
+  resolveGitDir,
+  resolveRef,
+  getCommonDir,
+  readGitHead,
+  readWorktreeHeadSha,
+  isSafeRefName,
+  isValidGitSha,
+  parseGitConfigValue,
+  parseConfigString,
+  resetWorktreeGitCaches,
+} from './worktree'
 export {
   parseBaseToolsFromCLI,
   parseToolListFromCLI,
