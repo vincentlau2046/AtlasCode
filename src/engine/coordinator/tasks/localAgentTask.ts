@@ -146,6 +146,8 @@ export function updateProgressFromMessage(
     if (block.type === 'tool_use') {
       tracker.toolUseCount++
       // Omit StructuredOutput from preview - it's an internal tool
+      // 前导 block.name !== undefined 守卫 = 对宽松 Message 铸形的防御
+      // （旧仓 content.name !== SYNTHETIC…；良构消息行为等价，头注登记）。
       if (block.name !== undefined && block.name !== SYNTHETIC_OUTPUT_TOOL_NAME) {
         const input = (block.input ?? {}) as Record<string, unknown>
         tracker.recentActivities.push({

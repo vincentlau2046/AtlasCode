@@ -15,6 +15,10 @@
  *     未迁，SDK 波随组合根落位；resume 防双发语义随 SDK 面复核）。
  *   - enqueueTaskNotification（私有 XML 构造器）→ 投递改走域内通知注入窗口
  *     notification.ts（messageQueueManager 全量队列随 S-7e messaging 波）。
+ *   - enqueueTaskStatusNotification 内 escapeXml(outputPath) +
+ *     escapeXml(description)（旧仓 raw 插值）= 有意加固：untrusted
+ *     description 不再 raw 注入 XML。当前 generateTaskAttachments 恒不 push
+ *     attachments（pollTasks 附件循环空转、构造器不可达）→ 零行为 delta，仅登记。
  *   - TaskAttachment 当前仅 status 面生成（running delta offset + terminal
  *     驱逐）；completed 附件支旧仓即不生成（per-type callback 自持通知，
  *     防 dual-delivery，注释保留）——附件消费面（UI/SDK）待组合根。

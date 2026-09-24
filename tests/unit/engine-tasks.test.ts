@@ -38,7 +38,6 @@ import {
   type AgentToolResult,
   type LocalAgentTaskState,
   type LocalShellTaskState,
-  type Message,
   type TaskNotification,
   type TaskState,
   SYNTHETIC_OUTPUT_TOOL_NAME,
@@ -81,6 +80,8 @@ import {
   killShellTasksForAgent,
   looksLikePrompt,
 } from '../../src/engine'
+// Message 面在 shared（engine 门面 STR-1 全显式 re-export 不含该类型）
+import type { Message } from '../../src/shared'
 
 const taskTmp = mkdtempSync(join(tmpdir(), 'atlas-engine-tasks-unit-'))
 beforeAll(() => {
