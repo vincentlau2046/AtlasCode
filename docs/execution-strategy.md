@@ -2250,3 +2250,75 @@ popAllEditable 字符串+块双源 + pastedContents id 保留 + 内嵌 base64 �
   ·isEnvTruthy·lazySchema 逐字或登记 delta）；门面 565 导出名去重 0 重复；
   依赖方向零循环（messaging → session/config/shared 单向）；duck 面方向
   核验（旧全形可赋新形，组合根注真值不破坏）。
+
+#### d2 实施记录（2026-09-24，主体提交 ada630b）
+
+- 5 文件：`src/engine/messaging/queueManager.ts`（新增 535L，旧仓
+  `src/utils/messageQueueManager.ts` 539L 逐字随迁 + 裁面）/
+  `src/engine/messaging/queueTypes.ts`（新增，队列层类型面 9 型）/
+  `src/engine/messaging/index.ts`（d2 显式名块）/ `src/engine/index.ts`
+  （d2 引擎块）/ `tests/unit/engine-messaging-queue.test.ts`（新增 29 测
+  零磁盘）。
+- **裁面 5 项（头注登记，复审勿当遗漏重提）**：a) logOperation 函数 +
+  8 调用点整体裁（recordQueueOperation = 唯一 sink，sink 已裁 sessionStorage
+  域 = shell 波 → log 族死码；replay 面 = shell 波前向接缝，
+  getSessionId 映射行 = 潜在接回点 getSessionEnv().getSessionId()）；
+  b) import 面 4 项裁（getSessionId / recordQueueOperation /
+  QueueOperation / QueueOperationMessage，后两者旧仓双 `any` stub——H6
+  绝不把 stub 签名当真行为）；c) Permutations 链删（旧 any-stub 下
+  `satisfies … as any` 穷尽性检查本未生效 → `new Set<PromptInputMode>(
+  ['task-notification'])` 构造语义等价）；d) extractImagesFromValue
+  局部 cast 收窄（shared 宽骨架无旧 image-base64 判别联合成员）+
+  `b.source?.type` 可选链——唯一运行时行为差异 = 畸形输入角（image 块缺
+  source：旧直访问 TypeError vs 新静默跳过），良形路径逐字恒等；
+  e) log 相关 JSDoc 行 2 处随裁。
+- **类型面落点（bb570f4 执行前分析裁定）**：PromptInputMode 4 字面量 /
+  EditablePromptInputMode / QueuePriority 3 值 / QueuedCommand 14 可选
+  字段（字段面 + JSDoc 词级逐字）← 旧 textInputTypes.ts；PastedContent
+  7 字段（旧 config.ts:46-54，新仓 grep 0 命中 → 域内移植）；
+  ImageDimensions 4 可选数（旧 imageResizer.ts:137，体不随迁）；
+  OrphanedPermission 2 字段 unknown 最小形 / MessageOrigin（旧 any
+  stub）→ string / AppState（旧 React 状态接口壳层）→ `object` 不透明
+  duck（SetAppState 导出型面，shell 波组合根注真值）；UUID / AgentId =
+  session 域 string 别名先例。
+- **导出面**：30 值（21 主面 + 8 deprecated pending-notifications 别名 +
+  getCommandsByMaxPriority + isSlashCommand）+ SetAppState /
+  PopAllEditableResult 2 型 + queueTypes 9 型；引擎面块与域门面块逐名
+  一致（全 engine/index.ts 0 重名）。
+- **基线谱系**：1374 pass / 84 文件 / 2876 expect（d1）→ **1403 / 85 /
+  2975**（+29/1/99，d2 新增恰 29 测 99 expect 1 文件）+ gate 6（messaging
+  ∉ 8 域 MatrixRow.domain 封闭联合，不变）。
+- **突变探针实测**：P-M4（getCommandsByMaxPriority 过滤支删 → 退化全队列
+  拷贝）恰 1 红（'P-M4 getCommandsByMaxPriority 优先级过滤'）；P-M5
+  （enqueue 默认优先级支删）恰 1 红（'P-M5 enqueue 默认优先级 next'）；
+  均 verbatim restore + diff 备份核验。**定支订正**：详案原文「enqueue
+  幂等/去重支」不成立——enqueue 无去重支（队列允许重复值，去重 =
+  remove 引用恒等语义）→ P-M5 定默认优先级支（bb570f4 执行时按代码面
+  裁定）。
+
+#### d2 独立只读审视记录（2026-09-24，审视修复提交 8a58a72）
+
+- 1 只读子代理（≤2 派发限额），6 维度（逐字保真度 / 裁面完整性 / 类型面
+  / 测试判别力 / 门面 STR-1 / 依赖方向）+ 四件套独立复跑全绿（tsc 0 /
+  eslint 0 / build 0 / 1403 pass 85 文件 2975 expect；单文件 29 pass 99
+  expect；verbatim restore diff = BAK_IDENTICAL）。
+- **结论 PASS-with-fixes：0 MAJOR / 0 MINOR / 2 NOTE / 1 NIT**，全处置
+  （8a58a72，零行为面）：
+  - **NOTE-1** queueTypes 头注「OrphanedPermission 旧形两型 ∉ 新仓」失实
+    ——grep 实证 AssistantMessage ∈ 新仓（shared/types.ts:91 宽骨架，
+    query/loop·pipeline/toolOrchestration·tools/agent/forkSubagent 在用），
+    仅 PermissionResult ∉ 新仓；2 处登记订正（来源行 + delta 块：
+    AssistantMessage 新仓宽骨架版非旧全型，同归 sdk/permissions 波）。
+  - **NOTE-2** 「AppState ← 旧 state/AppState.ts」引用路径不存在——旧仓实
+    为 `src/state/AppStateStore.ts:87`（`export type AppState =
+    DeepImmutable<{…}>`）+ `AppState.tsx` 壳 re-export；引用订正。
+  - **NIT-1** QueuedCommand 字段 JSDoc 折行随新仓 lint（~76 列 vs 旧 88
+    列）——词级逐字成立、纯注释面无行为，**接受 + 头注登记**（防复审重提）。
+- 其余维度零发现（供 §8.51 A 路参考）：逐字保真度机械 diff（旧 539L vs
+  新 535L 归一化）剩余 delta 恰 = 登记 a)–e) 五项，无未登记 delta（旧仓
+  `grep -c logOperation` = 9 = 1 定义 + 8 调用，头注计数与实测一致）；
+  裁面完整性双向扫描零残留；测试判别力静态推演 P-M4/P-M5 恰 1 红成立
+  （全文件仅探针测依赖缺省支，其余无显式 priority 入队均 task-notification
+  模式断言可编辑性/长度，与优先级无关）；门面 611 导出名 0 重复（d2 41 名
+  各恰 1 次），消费方仅经引擎门面 + shared（ContentBlockParam type-only）；
+  依赖方向 messaging → session 仅 type 边，无循环、无新增第三方依赖。
