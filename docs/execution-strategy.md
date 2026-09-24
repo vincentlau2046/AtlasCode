@@ -1669,3 +1669,26 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **残留守登记（S-7a 落头注，防「以为已全」）**：① SDK 事件队列（task_started/terminated，`enqueueSdkEvent` 裁，SDK 波随组合根）② 通知注入窗口默认 `logForDebugging`（messageQueueManager 全量队列随 S-7e messaging 波，teammateMailbox 54 export）③ completed 附件消费面（UI/SDK 待组合根；旧仓即 per-type callback 自持通知防 dual-delivery）④ registry 未迁态（RemoteAgentTask 855L / DreamTask 157L / InProcessTeammateTask 125L 随 S-7e / LocalWorkflowTask·MonitorMcpTask 门随模块裁）⑤ sessionStorage getAgentTranscriptPath symlink（S-7d session 波）⑥ PromptSuggestion abortSpeculation（对应波落位）。
 
 **闭环判定**：S-7a tasks 追踪层全闭环（主体 + 2 测试文件 + matrix 2 行 + 2 MINOR/2 NOTE 全处置 + 4 探针 + H6/faithfulness/门面 三视角审视 + 四件套终验），无 BLOCKER。**下一步 = S-7b scheduler（§8.47：cron.ts 308L 零 import 纯函数逐字 + cronScheduler 定时器主路 + 锁文件 zod + PID 活性探针，chokidar watch 支裁登记 + jitter GrowthBook 裁→DEFAULT 注入窗口；测试面 cron 解析边界 / nextCronRunMs 抖动 / findMissedTasks / 锁互斥 / 定时器 fire）**。
+
+### §8.47 S-7b scheduler（cron）执行前分析 + 方案（2026-09-24）
+
+**范围**：E-7 第 2 leaf（§8.45.2 纪律）。旧仓 5 文件 1568L → 新仓 `src/engine/scheduler/`（greenfield，charter L4.8 第 9 子模块落位）。
+
+**旧仓文件画像**（a8af45b 逐文件核实）：
+| 文件 | LOC | import | 移植口径 |
+|---|---|---|---|
+| `cron.ts` | 308 | 零 import 纯函数 | **逐字**（parseCronExpression 5 字段 / computeNextCronRun / cronToHuman；无 L/W/?/name alias，`L`/`#` 不支=非法） |
+| `cronScheduler.ts` | 530 | chokidar(FSWatcher L9 / 动态 import L371 / watch L409) + 本地 | **setInterval 定时器主路保留**（L341 "no chokidar, no load()" 支），**chokidar watch reload 支裁 + 登记** |
+| `cronTasks.ts` | 459 | crypto/fs/fs-promises/path | **逐字**（findMissedTasks + CRUD；`zod/v4`→`zod` 主入口） |
+| `cronTasksLock.ts` | 196 | fs-promises/path + `zod/v4` | **逐字**（锁文件 + PID 活性探针；`zod/v4`→`zod`） |
+| `cronJitterConfig.ts` | 75 | `zod/v4` + GrowthBook | **GrowthBook 支裁 → DEFAULT 常量 + 注入窗口**（setJitterConfigForTesting 先例） |
+
+**依赖面核验**：新仓 `zod` 已装且主入口即 v4（`import { z } from 'zod'`，hooksSchema/permissionUpdateSchema 先例）→ `zod/v4` 子路径换 `zod`（PermissionRule 同改法）。chokidar 仅 cronScheduler 消费且裁支 → **不引 chokidar dep**。无 feature 门（新仓 shared feature() 无 CRON/MONITOR；crons 门控属旧仓 tool registry，模块本体不门控）。**零现存消费者**（grep 无 import）→ 消费面 ScheduleCronTool 族 + headless print = 工具本体波/CLI 波 forward 登记（registry ② 行）。
+
+**落位**：`src/engine/scheduler/` = cron.ts / cronScheduler.ts / cronTasks.ts / cronTasksLock.ts / cronJitterConfig.ts / index.ts（门面）；coordinator/engine 双门面 re-export。AppState 不涉（scheduler 自持持久化 state via cronTasks 文件，非 React AppState）。
+
+**测试面**（真判别零 tautology；unit 纯函数 + func 真盘/真计时两层）：
+- `tests/unit/engine-scheduler.test.ts`（纯函数零盘）：parseCronExpression 边界（5 字段 / `*/n` step / 范围 N-M / 列表 N,M / 0=Sun+7=Sun alias / 非法 L·W·?·越界 拒）/ computeNextCronRun（DST 跳转 + 闰年 2/29 + DOM-DOW OR 语义）/ cronToHuman 各支 / 假时钟 jitter 抖动。
+- `tests/func/scheduler-fs.test.ts`（真盘 + 真计时）：cronTasks 写读 + findMissedTasks（func 假盘 + 时间窗）/ 锁互斥（cronTasksLock 真盘 acquire/release + PID 活性探针，死 PID 抢占）/ 定时器 fire（短周期真计时或注入时钟，fire 后 remove）。
+- 突变探针：P-T1（parseCronExpression step 支删 → 恰 1 红）/ P-T2（computeNextCronRun DST 支删 → 恰 1 红）/ P-T3（锁 PID 活性探针删 → 恰 1 红，func 层）。
+- matrix：scheduler 非 8 域门扫描集（engine 子模块，M-3 defer E-wave-end）→ 无 matrix 行，proof = 上两测试文件自证。
