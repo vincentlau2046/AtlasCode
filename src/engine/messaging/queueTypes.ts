@@ -5,21 +5,25 @@
  *   - PromptInputMode / EditablePromptInputMode / QueuePriority /
  *     QueuedCommand ← src/types/textInputTypes.ts（shell UI 巨文件 ~500L 不
  *     随迁；仅入轮队列层 4 型 + 关联类型族随迁，§8.50 d2 执行前分析
- *     bb570f4 裁定；字段面 + 字段 JSDoc 逐字）
+ *     bb570f4 裁定；字段面逐字 + 字段 JSDoc 词级逐字（折行随新仓 lint，
+ *     注释面无行为——d2 审视 NIT-1 接受登记，复审勿重提））
  *   - PastedContent ← src/utils/config.ts:46-54（新仓 grep 0 命中——config
  *     域未随迁 pasted 面；形逐字）
  *   - ImageDimensions ← src/utils/imageResizer.ts:137（形逐字；
  *     imageResizer 体 = shell 波不随迁）
  *   - OrphanedPermission ← 旧 textInputTypes.ts 尾（旧形 =
  *     { permissionResult: PermissionResult; assistantMessage:
- *     AssistantMessage }，两型 ∉ 新仓）
+ *     AssistantMessage }；PermissionResult ∉ 新仓，AssistantMessage ∈
+ *     新仓 shared 宽骨架（shared/types.ts:91，非旧全型 → delta 见下））
  *   - MessageOrigin ← 旧 types/message.ts:43（`any` stub）
- *   - AppState ← 旧 state/AppState.ts（React 状态接口 = 壳层）
+ *   - AppState ← 旧 state/AppStateStore.ts:87（`export type AppState =
+ *     DeepImmutable<{…}>`；AppState.tsx 为 React 壳 re-export = 壳层）
  *
  * 类型面 delta（H6 登记，复审勿当遗漏重提）：
  *   - OrphanedPermission → unknown 字段最小形（H6：仅类型字段，引擎面无
- *     消费者；旧形 PermissionResult / AssistantMessage 归 sdk/permissions
- *     波，前向接缝）。
+ *     消费者；旧形 PermissionResult 归 sdk/permissions 波；
+ *     AssistantMessage 新仓 shared 宽骨架版（shared/types.ts:91）非旧
+ *     全型，同归 sdk/permissions 波——前向接缝）。
  *   - MessageOrigin（旧 any-stub）→ string 最小形（BackendType 先例；
  *     H6：绝不把 `: any` stub 签名当真行为）。
  *   - AppState → `object` 不透明最小形：SetAppState duck 化类型面
