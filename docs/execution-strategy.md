@@ -1692,3 +1692,27 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 - `tests/func/scheduler-fs.test.ts`（真盘 + 真计时）：cronTasks 写读 + findMissedTasks（func 假盘 + 时间窗）/ 锁互斥（cronTasksLock 真盘 acquire/release + PID 活性探针，死 PID 抢占）/ 定时器 fire（短周期真计时或注入时钟，fire 后 remove）。
 - 突变探针：P-T1（parseCronExpression step 支删 → 恰 1 红）/ P-T2（computeNextCronRun DST 支删 → 恰 1 红）/ P-T3（锁 PID 活性探针删 → 恰 1 红，func 层）。
 - matrix：scheduler 非 8 域门扫描集（engine 子模块，M-3 defer E-wave-end）→ 无 matrix 行，proof = 上两测试文件自证。
+
+**实施落盘**：主体提交 `4713f03`（5 源文件 + index.ts 门面 + engine/index.ts STR-1 全显式名 re-export + unit/func 2 测试文件，2338 行）；审视修复提交 `f101b15`。全量 1160 pass / 76 files + gate 6（E-6 末 1054/72 → +106 测 +4 文件）。3 突变探针 P-T1（parseCronExpression dow-7 别名 cron.ts）/ P-T2（computeNextCronRun DOM-DOW OR cron.ts）/ P-T3（lease lock PID 活性探针 stale 恢复 cronTasksLock.ts，func 层）各恰 1 红、verbatim restore diff-verified。
+
+### §8.47 独立只读审视记录（S-7b scheduler，2026-09-24 闭环）
+
+**审视面**：1 只读子代理（≤2 限额），三视角 = ① 旧仓逐字 faithfulness（5 文件 diff）② H6 死接缝卫生（每条裁剪是否确证旧仓死/坏 + 头注登记完整）③ 突变探针判别力 + 测试缺口。旧仓 ground truth = a8af45b `src/utils/cron*`。
+
+**核心裁定（无 MAJOR / 无 BLOCKER / 无未登记回归）**——每条 H6 裁剪经旧仓核对确证为死代码或坏代码，非真行为丢失：
+- **REPL 自动使能轮询整砍 = 安全**：旧仓 state.ts:349 `getScheduledTasksEnabled: any = (() => ({}))` 恒返回 `{}`（truthy）→ 旧 cronScheduler 恒走 `enable()`，`enablePoll` 支 + `setScheduledTasksEnabled(true)`（gated on `!{}`）不可达。新仓 start() 恒 enable，行为等价。
+- **session-cron store 整砍 = 修复非丢失**：旧仓 state.ts:316-318 三函数皆 `(() => ({}))` → 旧 `for (const t of getSessionCronTasks())` = `for...of {}` 首 tick 即 TypeError、旧 `listAllCronTasks().map` 抛（连带坏旧 CronCreateTool.validateInput）。新仓 `addCronTask(durable:false)` 显式 throw 前向接缝错（拒绝"假装通过"，func 层测锚），比旧静默蒸发更优。
+- **chokidar watch-reload → 每 owner tick 轮询文件 = 语义保留**：owner 每 tick `readCronTasks(dir)`（新 cronScheduler.ts:321）保留 pickup（≤1s，快于 chokidar debounce）/ eviction（seen 重建 + 驱逐循环）/ unlink（readCronTasks→[]→nextFireAt.clear()）；非 owner 两版皆不 fire file 任务；async check() 重叠由 inFlight/missedAsked 守。
+- **cron.ts 逐字**（diff-verified body-only）；**isProcessRunning 逐字**（旧 genericProcessUtils.ts:20-28）；锁 + jitter schema 等价；GrowthBook 缺省 provider 返回 DEFAULT 且过 schema = 旧 GrowthBook-missing 路径同值。
+
+**发现处置**（审视修复全落 `f101b15`）：
+- **MINOR-1 头注 provenance 事实订正**：原头注/主提交误标 getProjectRoot/getSessionId "皆 : any stub / 返回 {}"——旧仓 state.ts:84（`.git` 上探）/ :105（`_sessionId=randomUUID()`）**皆真实现、逐字随迁**，非 stub。cronEnv.ts 头注改"两类"描述（真实现逐字随迁带行号锚点 vs stub 整砍），cronTasksLock.ts 头注同步订正。（教训：裁剪登记时须逐行核旧仓，别把"真逻辑"误并入"stub"。）
+- **MINOR-2** hasCronTasksSync 陈旧 doc 订正（auto-enable 决策已随死轮询整砍，现仅 start() debug 日志用）。
+- **MINOR-3(a)** 补 chokidar 替代面高价值 func 测试：运行中新增 overdue recurring 任务 → per-owner-tick 轮询 tick 内 fire（免重启即排程，锚定 watch-reload 替代语义）。**(b) one-shot check()-fire 自删 + inFlight 双发防 / (c) getNextFireTime 全 Infinity→null / (d) resolveProjectRoot .git-walk 缺省** 登记为低优先延后：(b) fire 支需 1-min cron 分辨率自然到期（≤60s）+ inFlight 竞态非确定性，异步 removeCronTasks 路径已被"初载 surface missed" func 测覆盖；(c) 全-Infinity 分支经公有 API 与"空 map"不可区分（黑盒空转），Infinity 过滤 `t<min` 目视即正确；(d) 缺省 .git-walk 逐字自旧 state.ts:84 + 传递性被 func 测覆盖，专测需 process.chdir 破坏层纪律。**复审勿重提 b/c/d。**
+- **NIT-4** 删 P-T2 测试残留未用 `const f` / `void f`。**NIT-5** P-T3 func 用 pid=1（`pid<=1` 守卫确定性覆盖），`isProcessRunning` EPERM 支（root 进程误判）不测——本仓非 root CI 可接受，登记。
+
+**探针判别力核验**（子代理独立复核）：P-T1（dow-7 别名）突变→null 或 [7] 即红；P-T2（DOM-DOW OR→AND）移匹配离 2026-01-04 即红；P-T3（stale 恢复支突变）func 红。3 探针全成立。
+
+**四件套终验**：tsc 0 / eslint 0（5 改文件）/ build 0KB entry / 1160 pass + gate 6，零回归。
+
+**闭环判定**：S-7b scheduler（cron）全闭环（主体 5 文件 + 门面 + 2 测试文件 + 3 探针 + 单只读三视角审视 + MINOR×2/NIT×2 全处置 + 四件套终验），无 BLOCKER。**下一步 = S-7c worktree（§8.48）。**
