@@ -2453,3 +2453,101 @@ B H6 死接缝），各自独立复跑四件套 + 全维度审计；全部发现
 22. **（§8.51 新增）E-2/E-3 tools 域深 import 遗留 3 行**（workerAgent.ts:19,21
     + coordinatorMode.ts:25）→ E-wave-end tools 域 STR-1 归一候选（随 compose
     装配 pass 顺带）
+
+## §8.52 E-wave-end 执行前分析（S-E0，2026-09-25）
+
+E-wave-end = engine 纵切收尾波：组合根注真值 + 门收口 + 前向接缝核销。本节 = S-E0 执行前分析（范围裁定 + 切片冻结 + 探针规划）；每切片按 ① 执行前分析（本节）→ ② 实施（四件套绿 + 探针恰 1 红）→ ③ 独立审视（≤2 只读）→ ④ 闭环（fix commit + docs + memory + task）执行。
+
+### 裁定 1：三桶归类（A = 本波做实体 / B = 跨波只登记不动 / C = 后续波）
+
+**A 桶 = 15 项，切片归属见裁定 3**
+
+S-E1 门收口族（3 项，纯引擎内、风险最低、先解锁语义）：
+- A1 **I-1 hasPermissionsToUseTool 换回门消费点**（E-wave-end 审计②；`engine/permissions/permissionGate.ts:23,35` 现消费 base `checkRuleBasedPermissions` 规则支 → 换回 base `hasPermissionsToUseTool` 全决策体（`src/permissions/permissions.ts:100`，mode-level 支 + 规则支）；3 值 verdict 映射保持，S-4d 门工厂测试同步更新）
+- A2 **F1 子代理门透传**（审计①；`runAgent.ts:119` `queryAgentLoop({modelProvider, role, signal}, {messages, tools})` 不带 checkPermission = 子代理工具调用绕过门 → RunAgentArgs 加可选 `checkPermission` 透传 loop deps）
+- A3 **F4 1c abort 重抛**（审计③；`src/permissions/ruleMatching.ts:413` catch 吞 AbortError/APIUserAbortError（头注 L19 裁减登记）→ catch 层重抛恢复；context abortController 回填 = 工具本体波前向登记（本项仅 catch 层重抛，不造全量 context））
+
+S-E2 组合根注真值（8 项）：
+- A4 **④ getTools 组合根 + loop-deps 构建器**（审计④；`loop.ts:108` 注「本纵切不造全局注册表」→ `compose.ts` 造注册表（getAllBaseTools + filterToolsByDenyRules + preset）+ loop-deps 构建器（modelProvider/checkPermission/hooks）；含 **hooks 装配①**（§8.42 项 1：createToolHooks/createLoopHooks → AgentLoopDeps.hooks 生产路径，现仅测试消费）；D 波 cli.ts（7L 骨架）以单入口消费，cli 本体仍 D 波）
+- A5 **#7 SessionEnv 注真值**（session/env.ts:8,61；setSessionEnv bootstrap 真值）
+- A6 **#13 Port 5 SessionMemoryPort 壳实现 + 注入**（sessionMemory.ts:126,130 + ports/sessionMemory.ts:7；零消费者前向登记收口 = 组合根最小真实现）
+- A7 **#14 Port 1 SessionContextPort 壳实现 + 注入**（session/index.ts:176 + ports/sessionContext.ts:6）
+- A8 **sandboxAccess 组合根接线**（src/permissions/sandboxAccess.ts 前向接缝「组合根接线（E-wave-end 装配项）」；setSandboxAccess(sandboxManager 闭包面)——compose ① 已有 sandboxManager）
+- A9 **#1+#2+#5 通知/cleanup/scheduler 三注入点**（coordinator/tasks/notification.ts:8-12 setTaskNotificationHandler 真实队列 + cleanupRegistry.ts:4-6 runCleanupFunctions 组合根暴露（CLI 关闭路径 = D 波消费）+ cronEnv.ts:65-67 registerExitCleanup 缺省 no-op → 真 cleanupRegistry + setSchedulerEnv 注真值）
+- A10 **#22 E-2/E-3 tools 深 import 3 行归一**（workerAgent.ts:19,21 + coordinatorMode.ts:25 → tools 域门面 STR-1 归一，零行为，顺带）
+
+S-E3 session 消费面接线（3 项）：
+- A11 **loop recordTranscript 7 点 + recordContentReplacement**（旧仓 `core/orchestrator/QueryEngine.ts` L450/607/706/722/724/774/828 → 新仓 loop.ts 消息追加面 + 旧仓 `query/loop.ts:377` → 新仓 loop compact 写面；**#15 scanner compact boundary 写面同点**（session/scanner.ts:15）；React 侧 5 点 = B12）
+- A12 **#10 SessionEnv 活态 cwd 成员**（session/project.ts:37-38；审视 A-1 值 delta 裁定接受的可选扩）
+- A13 **#3 killShellTasks dequeueAllMatching 裁面复核**（killShellTasks.ts:6-9；队列面已 S-7e d2 落，本波对照真队列复核谓词面）
+
+S-E4 门+探针收口（2 项）：
+- A14 **M-3 + anti-stub ⑥ 门收口**（docs:960,1110；engine 侧 37 个 `export {}` 占位中 engine 域 14 个既不在 anti-stub 扫描集（anti-stub.test.ts:35 DOMAINS = executor/sandbox/memory/modelprovider/shared + :43 CDEEP_DOMAINS = task/bootstrap/permissions/hooks，均无 engine）也不在 STUB_REGISTRY → engine 加扫描集（existsSync 守卫同模式）+ STUB_REGISTRY 登记 + wave tag 清零；ascend 9 / atlascode 14 项归各域后续波（本波仅 engine））
+- A15 **#20 P-M2 谓词阴性断言 + 红集重测**（tests/func/engine-messaging-fs.test.ts:157-162，§8.50 NOTE-2；零行为 func 断言）
+
+**B 桶 = 17 项（跨波只登记，登记处 = 原前向接缝头注 + 本节归档，本波不动）**
+- B1 #4 scheduler 消费面（ScheduleCronTool 族 = 工具本体波 / headless -p = CLI 波；scheduler/index.ts:14-15）
+- B2 #6 jitter GrowthBook-backed 整换（未来 analytics 波；cronJitterConfig.ts:15）
+- B3 #8 restore 跨项目 resume project dir 推导 + switchSession 二参→一参（shell/REPL 波；restore.ts:26-28）
+- B4 #9 restore onWorktreeRestore 前向注入口（壳 worktree 波注入；unit/func 已覆盖调用时点 + 值透传，restore.ts:44-47,113-117,163）
+- B5 #11 project 裁面⑤ 远程持久化（remote/teleport 波；project.ts:811-812）
+- B6 #12 project 壳侧同步 fs 可测性接缝（shell 波；project.ts:860）
+- B7 #16 directMemberMessage writeToMailbox 真 mailbox 面（shell/swarm 波；directMemberMessage.ts:14）
+- B8 #17 queueManager logOperation replay 接回（shell 波；queueManager.ts:17-21）
+- B9 #18 worktree hookBased 形参保留（工具本体波；worktree.ts:12-14,467-530）
+- B10 #19 runHooksStream 流式消费面（流式纵切；loop.ts:15 残留守已核未流式化）
+- B11 #21 predicates compact-boundary 检索族（shell/REPL 波；predicates.ts 头注）
+- B12 React 侧 recordTranscript/recordContentReplacement 5 点（useLogMessages.ts:69 / ResumeConversation.tsx:225 / plans.ts:393 / sessionRestore.ts:462 / queryHelpers.ts:310,331；shell/message 波）
+- B13 **QueryEngineConfig setAppState 置换 → D 波**（本裁定从原 A 桶归赋订正：loop deps 无 setAppState 字段已核（loop.ts 字段面）；messaging SetAppState duck 为 shell 波消费（queueManager）；`src/atlascode/state/index.ts` 7L 骨架 = D 波归属；engine state 域 EngineState set(f) 队列 = E-1 T-3 落点）
+- B14 InProcessTeammateTask TaskState 联合扩（shell/swarm 波，§8.50 裁定；tasks/types.ts 头注）
+- B15 RemoteAgentTask/DreamTask/LocalWorkflowTask/MonitorMcpTask 任务态（顺延波；registry.ts 裁面登记）
+- B16 20 门控槽位 + PowerShell 2049L 面（工具本体波 / bash-only 纵切，§8.21 口径）
+- B17 compose 残留守 applyConfigEnvironmentVariables（信任对话框面未落；shell 波；compose.ts 头注）
+
+**C 桶 = 后续波（不在本节）**：工具本体 47（bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位，§8.43 裁定①）/ auto-mode 分类器族 ~3030L（bashClassifier 61L 桩前向登记）/ shell·swarm 7217L（swarm + inProcessTeammateHelpers 102L + teamDiscovery + teamMemoryOps + UDS Port 9）
+
+### 裁定 2：组合根现状盘点 + 注入窗口清单
+
+`compose.ts` 152L（B6-func ①-⑦ 已落）：① sandboxManager in-memory ② executor 3 ports ③ permissions←bootstrap+config ④ task←permissions+bootstrap ⑤ hooks←bootstrap 6-member + executor + config snapshot ⑥ applySafeConfigEnvironmentVariables ⑦ setEndpointConfigSource + lazy singleton + resetCoreDependencies。残留守 = applyConfigEnvironmentVariables（B17）。
+`cli.ts` / `mount.ts` / `state/index.ts` = 7L A 波骨架（D 波归属，本波不动；cli 以 S-E2 loop-deps 构建器为单入口消费）。
+
+14 set-family 注入窗口（现状 → 本波裁定）：
+| 窗口 | 现状 | 本波 |
+|---|---|---|
+| setSessionEnv | placeholder | A5 注真值 |
+| setSessionMemoryPort | 零消费者前向 | A6 壳实现 + 注入 |
+| Port 1 SessionContextPort 注入口 | 零消费者前向 | A7 壳实现 + 注入 |
+| setTaskNotificationHandler | 默认 logForDebugging | A9 真实队列 |
+| setSchedulerEnv / registerExitCleanup | no-op | A9 注真值 / 真 cleanup |
+| setAgentTranscriptSubdir | 测试专用 | 不动（测试窗口） |
+| setCachedParsedFile / setCachedSettingsForSource / setSessionSettingsCache | config 域测试注入 | 不动（缓存自管） |
+| setCronJitterConfigProvider | 缺省配置 | B2（analytics 波） |
+| setDynamicTeamContext | 未注 | B7 关联（swarm 波） |
+| setLastSummarizedMessageId | 自管 | 不动（sessionMemory 内部态） |
+| setPluginSettingsBase | 缺省 | 不动（marketplace/D 波消费） |
+| setSessionFileForTesting | 测试专用 | 不动 |
+| setSessionMemoryConfig | 缺省配置 | 不动 |
+
+### 裁定 3：切片清单冻结 + 依赖方向
+
+```
+S-E1 门收口族（A1-A3）→ S-E2 组合根（A4-A10）→ S-E3 session 消费面（A11-A13）→ S-E4 门+探针收口（A14-A15）
+```
+依赖方向：S-E2 loop-deps 构建器供门 → 依赖 S-E1 I-1 换回语义；S-E3 loop record 需 S-E2 setSessionEnv 真值（Project 单例 FROZEN stamp 决策源）；S-E4 最后锁（anti-stub 扫描集 + STUB_REGISTRY 在所有切片落定后加，防本波期间新 stub 重复登记）。每切片 ①→②→③→④，审视 ≤2 只读（本地/云限流），突变探针「恰 1 红」纪律（backup→mutate→恰 1 红→verbatim-restore diff 核验）。
+
+### 裁定 4：探针规划（恰 1 红）
+
+| 探针 | 切片 | 突变 | 预期恰 1 红 |
+|---|---|---|---|
+| P-E1 | S-E1 | 门消费退回 checkRuleBasedPermissions | I-1 mode-level 支 verdict 测试 |
+| P-E2 | S-E1 | 删 runAgent checkPermission 透传 | F1 子代理门消费测试 |
+| P-E3 | S-E1 | 删 catch 重抛 | F4 abort 传播测试 |
+| P-E4 | S-E2 | 删 loop-deps 构建器 hooks/gate 注入 | S-E2 组合根 deps 断言 |
+| P-E5 | S-E3 | 删 recordTranscript 调用点 | S-E3 func 真盘 record 测试 |
+
+S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性断言新 func 测试（零行为）。
+
+### 裁定 5：基线与验收
+
+四件套：`bun x tsc --noEmit` 0 / `bun x eslint <changed>` 0 / `bun build src/atlascode/cli.ts --outfile <tmp> --target node` 0 / `bun test --isolate tests/` 基线 **1403 pass / 85 files / 2975 expect**（S-E1..E4 增测后基线增长，每切片完结点不变量）+ gate `bun test --isolate tests/ci/` 6（anti-stub 3 随 S-E4 engine 扫描集增长）。
+波末：双只读审视（≤2：A 路 = A 桶逐项旧仓对照 + 导出面 / B 路 = H6 死接缝 + B/C 桶登记完备性）+ 终验四件套 + 本节实施/审视记录 + memory 同步 + task #119 完结。
