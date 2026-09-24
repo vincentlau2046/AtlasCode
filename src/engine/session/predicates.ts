@@ -3,6 +3,12 @@
  * sessionStorage.ts L134-190 + messages.ts L4596 isCompactBoundaryMessage
  * 逐字随迁；独立小文件供 project/record/load 三面共享，避免 record↔load
  * 运行时环依赖）
+ *
+ * H6 前向接缝登记（§8.51 复审 A-NOTE-2，复审勿当遗漏重提）：旧
+ * messages.ts L4606 findLastCompactBoundaryIndex / L4631
+ * getMessagesAfterCompactBoundary（REPL snip 消费者，依赖 snipProjection /
+ * HISTORY_SNIP 面 ∉ 新仓）未随迁——shell/REPL 波若需 compact-boundary 检索
+ * 前向补裁。
  */
 import type { Message, Entry, TranscriptMessage, SystemCompactBoundaryMessage } from './types'
 

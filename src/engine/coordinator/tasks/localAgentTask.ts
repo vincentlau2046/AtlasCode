@@ -39,9 +39,14 @@ import {
   type TaskAppState,
   type TaskStateBase,
 } from '../../../task'
-import type { AgentDefinition } from '../../tools/agent/agentDefinition'
-import type { AgentToolResult } from '../../tools/agent/agentToolUtils'
-import { SYNTHETIC_OUTPUT_TOOL_NAME } from '../../tools/toolNames'
+// §8.51 复审 B-NOTE-2：tools 域 3 深 import 归一 tools 域门面（STR-1 跨域
+// 惯例，同 messaging→session / session→coordinator 先例；零行为——三符号均
+// 经 tools/index.ts re-export，值同一源 toolNames.ts:37）
+import {
+  SYNTHETIC_OUTPUT_TOOL_NAME,
+  type AgentDefinition,
+  type AgentToolResult,
+} from '../../tools'
 import {
   createAbortController,
   createChildAbortController,

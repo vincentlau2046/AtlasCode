@@ -9,7 +9,10 @@
  * 裁剪登记（H6 前向接缝，复审勿当遗漏重提）：
  *   - RemoteAgentTask（旧仓 855L，远程会话）/ DreamTask（157L，离线做梦）
  *     未迁（顺延波，登记）；InProcessTeammateTask（125L，teammate 进程内
- *     协作）随 S-7e messaging 波落（复用 runAgent）；LocalWorkflowTask /
+ *     协作）归 shell/swarm 波（§8.50 裁定：inProcessTeammateHelpers 102L 依赖
+ *     本任务态 + updateTaskState 归同波；S-7e 完结后 tasks 面仍两态——原注
+ *     「随 S-7e 波落」写于 §8.50 范围裁定前已陈旧，§8.51 复审 B-NOTE-1 回刷）；
+ *     LocalWorkflowTask /
  *     MonitorMcpTask 旧仓 feature('WORKFLOW_SCRIPTS') / feature('MONITOR_TOOL')
  *     require 门控 + 模块本体未迁 → 门随模块裁（新仓 shared feature() 纯模块，
  *     registry 级门无消费模块可 require）。

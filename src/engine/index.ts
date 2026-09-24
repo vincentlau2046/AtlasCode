@@ -145,7 +145,9 @@ export {
   getCoordinatorWorkerSystemPrompt,
   getCoordinatorAgents,
   WORKER_AGENT,
-  // E-7 S-7a（§8.46）：tasks 追踪层（coordinator/tasks 域门面全量面）
+  // E-7 S-7a（§8.46）：tasks 追踪层（coordinator/tasks 域门面，按消费面
+  // 显式收窄：11 个 xml 域内名（10 tag 常量 + escapeXml）不出引擎面，先例
+  // coordinator/index.ts:33；§8.51 复审 A-NOTE-1 措辞订正）
   POLL_INTERVAL_MS,
   STOPPED_DISPLAY_MS,
   PANEL_GRACE_MS,
