@@ -346,14 +346,22 @@ export function sortLogs(logs: LogOption[]): LogOption[] {
 
 /**
  * RenderableMessage 最小形（E-7 S-7d d2，§8.49）：旧仓 types/message.ts:30
- * `RenderableMessage = Message` 全并集别名 → 本域仅留 search.ts
+ * `RenderableMessage = Message`（Message = 带 `[key: string]: any` 索引签名
+ * 的宽接口，非 union；2026-09-24 审视 N-3 措辞订正）→ 本域仅留 search.ts
  * computeSearchText 消费的 6 型面 + toolUseResult duck 面（UI 渲染消费方
- * = REPL /transcript 搜索波，前向接缝；其旧形全消息按结构兼容本最小形）。
+ * = REPL /transcript 搜索波，前向接缝；兼容口径 = 运行时对象层——旧 UI
+ * 消息对象满足本最小形，但旧 TS 宽类型（`type?: string` 宽判别式）不可
+ * 直接赋给本字面量判别联合，UI 波落地需 cast / 重定型）。
  *
  * attachment 双成员面：relevant_memories 变体保证 memories 非缺省（computeSearchText
  * 逐字 `memories.map` 无 `!`）；catch-all 变体携带 queued_command 守卫字段
- * （commandMode/isMeta/prompt）+ 可选 memories——两变体并集使逐字体零改写
- * 通过类型检查（判别收窄：`type === 'relevant_memories'` 真支排除 catch-all）。
+ * （commandMode/isMeta/prompt）+ 可选 memories。过检机制（2026-09-24 审视
+ * M-1 订正，复现坐实）：catch-all 的 `type: string` 宽判别式**不被**
+ * `=== 'relevant_memories'` 字面量比较排除（TS 对非字面量判别式成员不收窄），
+ * 真支 `memories` 为 `Array | undefined`——今日通过依赖本仓 tsconfig
+ * `strict: false`（无 strictNullChecks；复现 `--strict` 红 TS18048 /
+ * `--strict false` 绿）。UI 波 / strict 化落地时须补守卫或重构变体
+ * （catch-all 判别式收窄为具体字面量联合 / memories 移出 catch-all）。
  */
 export type RenderableMessage =
   | {

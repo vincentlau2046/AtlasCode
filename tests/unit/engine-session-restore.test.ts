@@ -11,6 +11,11 @@
  * 条件，本层测试输入不带 meta 字段（customTitle / tag / mode / agent* /
  * pr* / worktreeSession）→ 缓存空 → 零写盘；readFileTailSync 缺文件 →
  * ''（不抛）。
+ * 零盘属性 = 三条件联合效应（2026-09-24 审视 N-4 登记）：① 测试输入不带
+ * meta 字段（appendEntryToFile 各支缓存条件式，project.ts）；② 序依赖——
+ * adoptResumedSessionFile（restore.ts L162）先于 saveMode（L167）；③
+ * appendEntryToFile 触发时真写 + mkdirSync（project.ts:871）。若有人重排
+ * adopt/saveMode 序或给单测输入加 meta 字段，将真写 ~/.atlas/projects/...。
  * fork 路不经 adopt → 天然零盘。fork seed 写断言 + resume 链重建端到端
  * 归 func 真盘层（tests/func/engine-session-restore-fs.test.ts，P-S5 探针
  * 锚点所在）。

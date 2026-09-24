@@ -9,10 +9,14 @@
  *   - fork 支 contentReplacements seed（recordContentReplacement；
  *     FROZEN 误分类防注释逐字保留——P-S5 探针锚点）
  *   - restoreSessionMetadata（fork 剥 worktreeSession，逐字）
- *   - saveMode（旧 feature('COORDINATOR_MODE') 门剔除——bun:bundle 下
- *     feature() 恒 false，门即死代码；决策源改 coordinator 域
- *     isCoordinatorMode()（env 读，无状态；session→coordinator 单向依赖，
- *     coordinator 不 import session，无环））
+ *   - saveMode（旧 `if (feature('COORDINATOR_MODE'))` 门剔除——2026-09-24
+ *     审视 M-3 订正：旧仓自 73631df 起 COORDINATOR_MODE 在 ON_BY_DEFAULT 集
+ *     （native-ts/bunBundle.ts），生产门恒开（仅 FEATURE_COORDINATOR_MODE
+ *     kill-switch 可关），**非死代码**；测试面 feature() 恒 false（bun:bundle
+ *     不可测）。新仓保留无条件调用，决策源改 coordinator 域
+ *     isCoordinatorMode()（env 读，无状态：同 ATLAS_COORDINATOR_MODE 门控 +
+ *     FEATURE_COORDINATOR_MODE kill-switch，语义与旧生产路径等价；
+ *     session→coordinator 单向依赖，coordinator 不 import session，无环））
  *   - agentColor 'default' → undefined 归一（逐字逻辑；旧 AgentColorName
  *     （agentColorManager，shell 域）→ string，类型面 delta 登记）
  *
@@ -38,6 +42,10 @@
  *     缓存失效族）：裁 → opts.onWorktreeRestore? 前向注入口（壳 worktree 波
  *     实现并注入；engine 域保留调用时点 = 非 fork、restoreSessionMetadata
  *     之后、adoptResumedSessionFile 之前）。
+ *   - 旧文件级函数 `restoreSessionStateFromLog`（旧 sessionRestore.ts:99，
+ *     REPL/SDK resume 入口）/ `extractTodosFromTranscript`（:77，todos 水合）：
+ *     不随迁——shell/CLI 波职责（REPL /resume + todos 水合），指名登记防
+ *     逐文件对照旧仓的复审者误判为遗漏（审视 N-1）。
  */
 import { isCoordinatorMode } from '../coordinator'
 import { getSessionEnv } from './env'
@@ -116,10 +124,11 @@ export async function processResumedConversation(
     const sid = opts.sessionIdOverride ?? result.sessionId
     if (sid) {
       // When resuming from a different project directory (git worktrees,
-      // cross-project), transcriptPath points to the actual file; its dirname
-      // is the project dir. Otherwise the session lives in the current
-      // project.（新 SessionEnv 单参——旧第二参 = project dir atom d1 已裁，
-      // 见文件头登记）
+      // cross-project), the old second arg was the transcript file's dirname
+      // (project dir). Both the SessionEnv project dir atom and the
+      // transcriptPath param were cut in d1 — the new SessionEnv takes a
+      // single arg（审视 N-2：旧 transcriptPath 参数已随 d1 裁面删除，
+      // 见文件头登记）.
       getSessionEnv().switchSession(sid)
       await resetSessionFilePointer()
     }

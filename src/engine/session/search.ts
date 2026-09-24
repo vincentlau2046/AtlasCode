@@ -8,9 +8,11 @@
  *   - INTERRUPT_MESSAGE / INTERRUPT_MESSAGE_FOR_TOOL_USE：旧仓 utils/messages.ts:218-220
  *     （shell 消息域）→ 本域内化常量（串逐字），使搜索文本面与 shell 消息域解耦；
  *     shell /interrupt 渲染面自持副本（跨波重复，UI 波登记）。
- *   - RenderableMessage：旧仓 types/message.ts:30 `RenderableMessage = Message` 全并集
- *     别名 → 本域最小形（types.ts：computeSearchText 消费 6 型面 + toolUseResult
- *     duck 面）；UI 渲染消费面 = REPL /transcript 搜索波，前向接缝。
+ *   - RenderableMessage：旧仓 types/message.ts:30 `RenderableMessage = Message`
+ *     （Message = 带 `[key: string]: any` 索引签名的宽接口，非 union；审视 N-3
+ *     措辞订正）→ 本域最小形（types.ts：computeSearchText 消费 6 型面 +
+ *     toolUseResult duck 面；兼容口径 = 运行时对象层，旧 TS 宽类型不可直接
+ *     赋给字面量判别联合）；UI 渲染消费面 = REPL /transcript 搜索波，前向接缝。
  *   - ContentBlock 类型面 delta：旧仓 types/atlas.ts:1 `[key: string]: any` → 新仓
  *     shared/types.ts:20 收窄 `[key: string]: unknown`；本文件 b.text 3 处直接索引
  *     以 `as string` 还原 string 面（TextBlock 形 { type: 'text'; text: string }，
@@ -107,7 +109,7 @@ function computeSearchText(msg: RenderableMessage): string {
     }
     case 'attachment': {
       // relevant_memories renders full m.content in transcript mode
-      // (AttachmentMessage.tsx <Anzi>{m.content}</Ansi>). Visible but
+      // (AttachmentMessage.tsx <Ansi>{m.content}</Ansi>). Visible but
       // unsearchable without this — [ dump finds it, / doesn't.
       if (msg.attachment.type === 'relevant_memories') {
         raw = msg.attachment.memories.map(m => m.content).join('\n')
