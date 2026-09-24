@@ -262,4 +262,35 @@ describe('scheduler 生命周期（真盘）', () => {
     expect(sched.getNextFireTime()!).toBeGreaterThan(Date.now())
     sched.stop()
   })
+
+  test('轮询 reload：运行中新增 overdue recurring 任务 → tick 内 fire（chokidar 替代锚点）', async () => {
+    await writeCronTasks([])
+    let fired: string | null = null
+    const sched = createCronScheduler({
+      onFire: () => {},
+      onFireTask: t => {
+        fired = t.id
+      },
+      isLoading: () => false,
+      dir: tmp,
+      // 零 jitter → overdue 任务（createdAt 2h 前）首 sight 即 due → 立即 fire
+      getJitterConfig: () => ({ ...DEFAULT_CRON_JITTER_CONFIG, recurringFrac: 0 }),
+    })
+    sched.start()
+    // 运行中写入 overdue recurring 任务（createdAt 2h 前 → next-from-createdAt
+    // 恒过去 → 首 sight due）。无论被初载还是 per-owner-tick 文件轮询拾取，
+    // 皆证"免重启即排程"（旧仓 chokidar watch-reload 的替代面，见模块头注）。
+    await writeCronTasks([
+      {
+        id: 'late',
+        cron: '* * * * *',
+        prompt: 'p',
+        createdAt: Date.now() - 2 * 3_600_000,
+        recurring: true,
+      },
+    ])
+    await until(() => fired === 'late', 3000)
+    expect(fired).toBe('late')
+    sched.stop()
+  })
 })

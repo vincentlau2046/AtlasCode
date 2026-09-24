@@ -1,14 +1,18 @@
 /**
  * scheduler 域 — 环境注入口 + 域内小工具（S-7b，§8.47 详案）
  *
- * 旧仓 scheduler 依赖 bootstrap/state.js 的 getProjectRoot / getSessionId /
- * session-cron store / getScheduledTasksEnabled —— 这些在新仓旧仓里**全是
- * `: any` stub**（旧仓 bootstrap/state.ts 是"重建 stub"，头注明示 "stub
- * exports"，getSessionCronTasks/addSessionCronTask/getProjectRoot 均返回 {}）。
+ * 旧仓 scheduler 依赖 bootstrap/state.js 的若干面，分两类（逐字核对旧仓
+ * state.ts 后订正，勿再误标为"全 stub"）：
+ *   - **真实现（逐字随迁为本注入口缺省，见下 resolveProjectRoot / _ownerKey）**：
+ *     getProjectRoot（state.ts:84 `.git` 上探，worktree 感知）/ getSessionId
+ *     （state.ts:105 进程启动 `randomUUID()` 捕获）——皆真逻辑，非 stub。
+ *   - **`: any` stub（返回 {}，非迭代；REPL 路径真跑会抛）**：session-cron
+ *     store（getSessionCronTasks/removeSessionCronTasks/addSessionCronTask，
+ *     state.ts:316-318）+ get/setScheduledTasksEnabled（state.ts:349/253）。
  * 故 scheduler leaf 只取**真契约面**：file-backed（durable）路径（dir 显式、
- * daemon 风格）——旧仓唯一真跑通的路径。bootstrap 依赖改为**域内注入口**
- * （setSchedulerEnv），组合根接线时覆写；缺省值自洽、可零依赖单测（不跨层
- * import bootstrap，保持域自包含）。
+ * daemon 风格）——旧仓唯一真跑通的路径；stub 面整砍（见下），真实现面改为
+ * **域内注入口**（setSchedulerEnv），组合根接线时覆写；缺省值自洽、可零依赖
+ * 单测（不跨层 import bootstrap，保持域自包含）。
  *
  * 裁剪 + 登记（H6 前向接缝，复审勿当遗漏重提）：
  *   - session-cron store（durable:false 路径 / getSessionCronTasks /

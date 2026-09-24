@@ -10,8 +10,10 @@
  * stale-lock 恢复、cleanup-on-exit。
  *
  * 依赖映射（新仓）：
- *   - getProjectRoot / getSessionId → 域内注入口 cronEnv（getOwnerKey 缺省
- *     进程级 randomUUID；旧仓 bootstrap/state 二者皆 `: any` stub，见 cronEnv 头注）。
+ *   - getProjectRoot / getSessionId → 域内注入口 cronEnv（getProjectRoot 缺省
+ *     `.git` 上探、getOwnerKey 缺省进程级 randomUUID；旧仓二者皆真实现
+ *     state.ts:84/:105，非 stub——stub 的是 session-cron store 与
+ *     get/setScheduledTasksEnabled，见 cronEnv 头注）。
  *   - registerCleanup（旧仓 coordinator/tasks cleanupRegistry）→ 域内注入口
  *     registerExitCleanup（缺省 no-op，组合根注真清理）——不跨域 import。
  *   - isProcessRunning / safeParseJSON / jsonStringify → cronEnv 域内小工具。

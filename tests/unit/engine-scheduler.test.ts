@@ -92,7 +92,6 @@ describe('computeNextCronRun', () => {
 
   test('DOM+DOW 双约束 OR 语义（dom 命中早于 dow）', () => {
     // P-T2 探针锚点：dom=4（周日）命中早于 dow=Monday，OR → 取 dom 日
-    const f = parseCronExpression('0 10 * * *')!
     // 覆写 dom/dow 约束：minute=[0] hour=[10] dom=[4] dow=[1] month 全
     const fields = {
       minute: [0],
@@ -106,7 +105,6 @@ describe('computeNextCronRun', () => {
     const next = computeNextCronRun(fields, from)!
     // dom=4 → Jan 4 10:00（早于 Jan 5 Monday）
     expect(next.getTime()).toBe(new Date(2026, 0, 4, 10, 0, 0).getTime())
-    void f
   })
 
   test('仅 dom 约束（dow 通配）', () => {

@@ -167,7 +167,9 @@ export async function readCronTasks(dir?: string): Promise<CronTask[]> {
 
 /**
  * Sync check for whether the cron file has any valid tasks. Used by
- * cronScheduler.start() to decide whether to auto-enable. One file read.
+ * cronScheduler.start() for its startup debug log line (the old auto-enable
+ * decision was cut with the dead getScheduledTasksEnabled poll — see the
+ * cronScheduler 头注); start() unconditionally enables. One file read.
  */
 export function hasCronTasksSync(dir?: string): boolean {
   let raw: string
