@@ -293,6 +293,43 @@ export {
   syncPermissionRulesFromDisk,
   type PermissionRuleFromEditableSettings,
 } from './permissions'
+// E-7 S-7b（§8.47）：scheduler 子门面（cron 解析 / scheduled_tasks CRUD /
+// lease lock / jitter config / 非 React scheduler 核心；durable file-backed
+// 真契约面，session-cron + chokidar + GrowthBook 整砍 = 前向接缝）
+export {
+  parseCronExpression,
+  computeNextCronRun,
+  cronToHuman,
+  type CronFields,
+  getCronFilePath,
+  readCronTasks,
+  hasCronTasksSync,
+  writeCronTasks,
+  addCronTask,
+  removeCronTasks,
+  markCronTasksFired,
+  listAllCronTasks,
+  nextCronRunMs,
+  DEFAULT_CRON_JITTER_CONFIG,
+  jitteredNextCronRunMs,
+  oneShotJitteredNextCronRunMs,
+  findMissedTasks,
+  type CronTask,
+  type CronJitterConfig,
+  tryAcquireSchedulerLock,
+  releaseSchedulerLock,
+  type SchedulerLockOptions,
+  setCronJitterConfigProvider,
+  getCronJitterConfig,
+  isRecurringTaskAged,
+  createCronScheduler,
+  buildMissedTaskNotification,
+  type CronScheduler,
+  setSchedulerEnv,
+  getSchedulerEnv,
+  isProcessRunning,
+  type SchedulerEnv,
+} from './scheduler'
 export {
   parseBaseToolsFromCLI,
   parseToolListFromCLI,
