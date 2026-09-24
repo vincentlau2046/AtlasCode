@@ -27,3 +27,8 @@ export {
   getCoordinatorAgents,
   WORKER_AGENT,
 } from './workerAgent'
+
+// E-7 S-7a（§8.46）：tasks 追踪层（状态机框架 + LocalAgent/LocalShell 任务态 +
+// stopTask 三态守卫 + 两态注册表 + 通知注入窗口 + 域内 utils 六件套）——
+// 域门面全量 re-export（~60 名；engine/index.ts 门面按消费面显式收窄）。
+export * from './tasks'

@@ -88,6 +88,12 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'task', capability: 'deleteOutputFile 真删 + ENOENT 吞错', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
   { domain: 'task', capability: '5GB cap 同构边界（MAX_TASK_OUTPUT_BYTES 单一事实源）', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
   { domain: 'task', capability: 'TaskId 双口径（type→前缀 + 字符集/长度）', status: 'done', proof: 'tests/func/task-real-fs.test.ts' },
+  // E-7 S-7a（§8.46）：tasks 追踪层状态机（engine/coordinator/tasks 域：
+  // framework 状态机 + LocalAgent/LocalShell 生命周期 + stopTask 三态 +
+  // 注册表派发 + 通知注入窗口 + ProgressTracker）。unit 零磁盘状态机
+  // （setDiskOutputEnv 仅注入路径计算）+ func 真盘 delta/驱逐两层。
+  { domain: 'task', capability: 'tasks 状态机（register/evict/stopTask 三态/kill 派发/registry 两态/通知注入窗口/ProgressTracker 计账）', status: 'done', proof: 'tests/unit/engine-tasks.test.ts' },
+  { domain: 'task', capability: 'tasks 真盘 delta/驱逐（running offset 补丁 + terminal+notified 驱逐 + TOCTOU 重检 + pollTasks 端到端）', status: 'done', proof: 'tests/func/tasks-framework-fs.test.ts' },
   // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
   { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
   { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
