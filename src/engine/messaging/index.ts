@@ -149,3 +149,57 @@ export {
   PermissionModeSchema,
   type BackendType,
 } from './constants'
+
+// 入轮命令队列（旧 utils/messageQueueManager.ts 539L 逐字，E-7 S-7e d2，
+// §8.50；logOperation 族整体裁（replay 面 = shell 波前向接缝）+ Permutations
+// 删链 + ContentBlockParam 宽骨架 cast 收窄等裁面/类型面 delta 登记见
+// queueManager.ts 头注）
+export {
+  subscribeToCommandQueue,
+  getCommandQueueSnapshot,
+  getCommandQueue,
+  getCommandQueueLength,
+  hasCommandsInQueue,
+  recheckCommandQueue,
+  enqueue,
+  enqueuePendingNotification,
+  dequeue,
+  dequeueAll,
+  peek,
+  dequeueAllMatching,
+  remove,
+  removeByFilter,
+  clearCommandQueue,
+  resetCommandQueue,
+  isPromptInputModeEditable,
+  isQueuedCommandEditable,
+  isQueuedCommandVisible,
+  popAllEditable,
+  subscribeToPendingNotifications,
+  getPendingNotificationsSnapshot,
+  hasPendingNotifications,
+  getPendingNotificationsCount,
+  recheckPendingNotifications,
+  dequeuePendingNotification,
+  resetPendingNotifications,
+  clearPendingNotifications,
+  getCommandsByMaxPriority,
+  isSlashCommand,
+  type SetAppState,
+  type PopAllEditableResult,
+} from './queueManager'
+
+// 入轮命令队列类型面（域内本地；旧 textInputTypes/messageQueueTypes 裁面
+// 裁定 + OrphanedPermission/MessageOrigin/AppState 最小形 delta 登记见
+// queueTypes.ts 头注）
+export type {
+  PromptInputMode,
+  EditablePromptInputMode,
+  QueuePriority,
+  QueuedCommand,
+  PastedContent,
+  OrphanedPermission,
+  MessageOrigin,
+  ImageDimensions,
+  AppState,
+} from './queueTypes'
