@@ -65,6 +65,10 @@ export interface Message extends BaseMessage {
   message?: { id?: string; content?: unknown; usage?: Usage }
   /** 旧 UserMessage.sourceToolAssistantUUID（tool_result 回指 assistant uuid）。 */
   sourceToolAssistantUUID?: string
+  /** 旧 UserMessage.toolUseResult（UI-native tool Out；messaging 域
+   *  isHumanTurn 判别字段 + transcriptSearch duck 面；S-7e d1 随迁补字段，
+   *  search.ts RenderableMessage duck 面同名同语义）。 */
+  toolUseResult?: unknown
   /** 旧 AttachmentMessage.attachment 面（isLoggableMessage hook 分支消费）。 */
   attachment?: { type: string; [key: string]: unknown }
   /** 旧 UserMessage.isCompactSummary（compact summary 消息标记）。 */
