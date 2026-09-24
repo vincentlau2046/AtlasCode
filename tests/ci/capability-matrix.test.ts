@@ -106,8 +106,9 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'permissions', capability: 'CLI 工具规则解析 + 初始权限上下文装配（auto/GB/校验支裁剪版 9 函数保留面）', status: 'done', proof: 'tests/unit/permission-setup.test.ts' },
   // E-4 S-4c2（§8.35）：persist 族 6 型写回 × supportsPersistence 门（session/cliArg
   // no-op）+ createReadRuleSuggestion 3 支 + 规则语法校验 5 检（接缝③ 语法过滤支
-  // 回填消费）+ permissionUpdateSchema 6 变体/direction enum 形状核验
-  { domain: 'permissions', capability: '权限更新持久化（6 型写回 × 3 可编辑源门控）+ 规则语法校验（5 检 + settings 过滤接缝③回填）', status: 'done', proof: 'tests/unit/permission-persist-validation.test.ts' },
+  // 回填消费）+ permissionUpdateSchema 6 变体/direction enum 形状核验；
+  // E-6 S-6d（§8.43）语义支 3 块同面回填（capability 描述随翻新）
+  { domain: 'permissions', capability: '权限更新持久化（6 型写回 × 3 可编辑源门控）+ 规则校验（语法 5 检 + 语义支 3 块：customValidation / Bash `:*` 两检 / File `:*` + 通配位启发 + settings 过滤接缝③回填）', status: 'done', proof: 'tests/unit/permission-persist-validation.test.ts' },
   // E-4 S-4d（§8.36）：门工厂 3 值 verdict（deny/ask fail-closed）× 执行链映射支
   // × loop deps 透传 + deny 规则工具面过滤（blanket 名 + MCP server 级剥整 server）
   // + agent spec/disallowedTools 域 parser 解析（替 split(':') 截断）

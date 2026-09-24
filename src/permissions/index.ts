@@ -51,6 +51,10 @@
  * - bashClassifier.ts：bash 分类器桩（E-6 S-6c，旧仓 61L 逐字——stub 即
  *   外部构建形态；零活消费者前向登记：auto-mode 纵切波分类器族 ~3030L
  *   消费点，§8.31 裁定 ①；matrix missing 行随之解锁）
+ * - toolValidationConfig.ts：工具校验配置（E-6 S-6d，旧仓 103L 纯数据对齐
+ *   裁定 ④：filePatternTools 裁 Notebook 族留 Read/Write/Edit/Glob +
+ *   bashPrefixTools ['Bash'] + customValidation WebSearch/WebFetch；
+ *   examples 字段沿 S-4c2 裁；消费点 = permissionValidation 语义支 3 块）
  * - pathValidation.ts：路径校验核心 8 函数（E-6 S-6a，旧仓 487L 逐字；
  *   isPathAllowed 决策序 + validatePath 五安全块 + glob / 危险删除 /
  *   sandbox 写 allowlist 3.7 支；消费面 = Bash 工具本体 1303L 残留守，
@@ -75,6 +79,7 @@ export * from './permissionValidation'
 export * from './permissionUpdateSchema'
 export * from './pathValidation'
 export * from './bashClassifier'
+export * from './toolValidationConfig'
 export * from './sandboxAccess'
 export * from './bootstrap-env'
 export * from './settingsPaths'

@@ -8,11 +8,13 @@
  *     过滤 + 警告（防单条坏规则毒化整个 settings 文件）
  *
  * E-4 S-4c2（§8.35）接缝③ 核销：
- *   - validatePermissionRule 规则**语法**校验已落域
+ *   - validatePermissionRule 规则校验已落域
  *     permissions/permissionValidation.ts（旧仓 settings/permissionValidation.ts
- *     262L 语法核心 5 检；语义支 3 块裁 E-6）→ filterInvalidPermissionRules
- *     谓词扩「非字符串 OR 语法校验失败」（本文件 import 域门面，L3 连接器
- *     口径；判别信号 `Bash(unbalanced` 滤 + warning，合法规则保留）。
+ *     262L：语法核心 5 检（S-4c2）+ 语义支 3 块（E-6 S-6d：customValidation /
+ *     Bash `:*` 两检 / File 通配位；examples / superRefine 不落））→
+ *     filterInvalidPermissionRules 谓词扩「非字符串 OR 校验失败」（本文件
+ *     import 域门面，L3 连接器口径；判别信号 `Bash(unbalanced` 滤 +
+ *     warning，合法规则保留）。
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - getValidationTip 提示面（旧仓 validationTips.ts，UI 修复建议/文档链接）
@@ -133,8 +135,9 @@ export function formatZodError(
  * validation. This prevents one bad entry from poisoning the entire
  * settings file. Returns warnings for each filtered entry.
  *
- * E-4 S-4c2 接缝③ 回填：谓词 = 非字符串 OR 语法校验失败（域
- * validatePermissionRule 语法核心 5 检，message 旧仓逐字）。
+ * E-4 S-4c2 接缝③ 回填 + E-6 S-6d 语义支随扩：谓词 = 非字符串 OR 校验
+ * 失败（域 validatePermissionRule 语法 5 检 + 语义支 3 块，error +
+ * suggestion 组 message 旧仓逐字）。
  * 注意：mutate 入参 data 的 permissions 数组（旧仓同语义——过滤后的
  * 数组被后续 schema 解析消费）。
  */

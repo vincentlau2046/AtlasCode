@@ -3,7 +3,9 @@
  *
  * 被测面：
  *   - validatePermissionRule 语法核心 5 检（空 / 括号失衡 / 空括号 /
- *     MCP 禁括号 / 工具名首字母大写 + 合法支）
+ *     MCP 禁括号 / 工具名首字母大写 + 合法支）+ 语义支 3 块（E-6 S-6d，
+ *     §8.43：customValidation WebSearch/WebFetch / Bash `:*` 两检 /
+ *     File `:*` + 通配位启发；examples 字段沿 S-4c2 裁）
  *   - filterInvalidPermissionRules 接缝③ 回填（语法支 `Bash(unbalanced`
  *     滤 + warning 全文 / 合法规则保留 / 非字符串旧支回归）
  *   - persist 族 6 型写回 × supportsPersistence 门（session/cliArg no-op
@@ -156,6 +158,61 @@ describe('validatePermissionRule 语法核心 5 检', () => {
     expect(validatePermissionRule('mcp__server').valid).toBe(true)
     expect(validatePermissionRule('mcp__server__*').valid).toBe(true)
     expect(validatePermissionRule('mcp__server__tool').valid).toBe(true)
+  })
+})
+
+describe('validatePermissionRule 语义支 3 块（E-6 S-6d，§8.43 判别信号）', () => {
+  test('Bash 中置 `:*` 拒（须末尾；末尾 `:*` 前缀形合法）', () => {
+    const r = validatePermissionRule('Bash(npm run:* test)')
+    expect(r.valid).toBe(false)
+    expect(r.error).toBe('The :* pattern must be at the end')
+  })
+
+  test('Bash `:*` 空前缀拒', () => {
+    const r = validatePermissionRule('Bash(:*)')
+    expect(r.valid).toBe(false)
+    expect(r.error).toBe('Prefix cannot be empty before :*')
+  })
+
+  test('Bash 通配任意位新语义（`npm *` / 末尾 `:*` 前缀形均合法）', () => {
+    expect(validatePermissionRule('Bash(npm *)').valid).toBe(true)
+    expect(validatePermissionRule('Bash(npm:*)').valid).toBe(true)
+    expect(validatePermissionRule('Bash(* install)').valid).toBe(true)
+  })
+
+  test('File 工具 `:*` 误用拒（P-D1 探针锚点）', () => {
+    const r = validatePermissionRule('Read(x:*)')
+    expect(r.valid).toBe(false)
+    expect(r.error).toBe('The ":*" syntax is only for Bash prefix rules')
+  })
+
+  test('File 中置通配（非 `**` 非边界）拒 / 边界与 `**` 形合法', () => {
+    const bad = validatePermissionRule('Read(foo*bar)')
+    expect(bad.valid).toBe(false)
+    expect(bad.error).toBe('Wildcard placement might be incorrect')
+    expect(validatePermissionRule('Read(src/**)').valid).toBe(true)
+    expect(validatePermissionRule('Read(*.ts)').valid).toBe(true)
+    expect(validatePermissionRule('Read(src/*)').valid).toBe(true)
+    expect(validatePermissionRule('Read(**/*.test.ts)').valid).toBe(true)
+  })
+
+  test('WebSearch 通配拒（customValidation 块）', () => {
+    const r = validatePermissionRule('WebSearch(claude*)')
+    expect(r.valid).toBe(false)
+    expect(r.error).toBe('WebSearch does not support wildcards')
+    expect(validatePermissionRule('WebSearch(claude ai)').valid).toBe(true)
+  })
+
+  test('WebFetch URL 拒 + domain: 前缀必填（customValidation 块）', () => {
+    const url = validatePermissionRule('WebFetch(https://example.com)')
+    expect(url.valid).toBe(false)
+    expect(url.error).toBe('WebFetch permissions use domain format, not URLs')
+    const noPrefix = validatePermissionRule('WebFetch(example.com)')
+    expect(noPrefix.valid).toBe(false)
+    expect(noPrefix.error).toBe('WebFetch permissions must use "domain:" prefix')
+    expect(validatePermissionRule('WebFetch(domain:example.com)').valid).toBe(
+      true,
+    )
   })
 })
 
