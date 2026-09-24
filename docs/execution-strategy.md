@@ -1752,4 +1752,23 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 - **突变探针**：P-T1（validateWorktreeSlug `..` 段拒支删 → 恰 1 红）/ P-T2（findCanonicalGitRoot backlink 安全校验删 → 恶意 commondir 过，恰 1 红）/ P-T3（cleanupStaleAgentWorktrees dirty fail-closed 守卫删 → 恰 1 红，func 层）。
 - **matrix**：worktree 非 8 域门扫描集（engine 子模块，M-3 defer E-wave-end）→ 无 matrix 行，proof = 上两测试文件自证。
 
-**实施落盘**：待补（主体 git.ts + worktree.ts + index.ts + engine/index.ts + 2 测试文件，N 行）。**基线谱系**：1160 pass / 76 文件 + gate 6（S-7b 末）→ S-7c。
+**实施落盘**（`fd49163` 主体 + `4954fed` 审视修复）：git.ts 773L（execFileNoThrowWithCwd + gitExe + findGitRoot + findCanonicalGitRoot + getDefaultBranch + readRawSymref + resolveGitDir + resolveRef + getCommonDir + readGitHead + readWorktreeHeadSha + isSafeRefName + isValidGitSha + parseGitConfigValue 族 + resetWorktreeGitCaches）/ worktree.ts 685L（核心 + 六裁面登记 + NOTE-1 边角登记）/ index.ts 门面 / engine/index.ts 追加块 / unit 37 + func 13（+MAJOR-1 回归探针）。**基线谱系**：1160 pass / 76 文件 + gate 6（S-7b 末）→ **1210 pass / 78 文件 + gate 6**（S-7c 末）。
+
+### §8.48 独立只读审视记录（S-7c worktree，2026-09-24 闭环）
+
+**审视面**：1 只读子代理（≤2 限额），范围 = ① 旧仓逐字 faithfulness（git.ts/worktree.ts vs a8af45b git.ts/gitFilesystem.ts/execFileNoThrow.ts/gitConfigParser.ts/worktree.ts）② 解耦 delta 是否"真照做"而非仅头注宣称（execa→execFile / whichSync→env / LRU→Map / GitFileWatcher 整砍 / getCwd→process.cwd）③ H6 六裁面头注登记完整 ④ 安全守卫（backlink 双校验 / isSafeRefName / fail-closed 双守卫）⑤ 突变探针判别力 + 门面 STR-1 ⑥ 静默失败面。子代理独立复跑 unit 37/37 + func 12/12 + tsc 0。
+
+**核心裁定（1 MAJOR + 1 MINOR + 3 NOTE，无 BLOCKER）**：
+- **MAJOR-1 `getDefaultBranch` 语义漂移 + 头注"语义等价"失实**（git.ts 初版）：初版误用**本地 HEAD symref**（当前本地分支名）替代旧仓 computeDefaultBranch 的 **origin/HEAD symref** 步骤（`readRawSymref` 未随迁且未登记为裁）。子代理真 clone 复现：clone（remote default main）+ `checkout -b feature` 态，旧仓返 `main`、初版返 `feature`——**每个常见 dev 态（clone 后切 feature 分支）皆命中漂移**；下游 getOrCreateWorktree 的 baseBranch 解析随之偏（origin/feature fetch 失败 → HEAD 兜底 → 以本地未 push 态 seed）。func 测试未捕获（`git init -b main` 新仓无 origin/HEAD loose symref，走 origin-ref 回落恰同值）。**修复**（`4954fed`）：补 `readRawSymref`（旧仓 gitFilesystem.ts:287 逐字，loose symref 只读 + isSafeRefName 守卫）→ getDefaultBranch 判定链逐字旧仓（origin/HEAD → main/master 远端 ref → 'main'）；头注"语义等价"订正为"判定链逐字旧仓"；门面链（worktree/index.ts + engine/index.ts）补导出。**回归探针**：新增 func 测（clone + checkout -b feature → main）；回归突变（重引入本地 HEAD 支）恰 1 红已验证。
+- **MINOR-2 stdin 解耦 delta 漏登记**：初版头注仅登记 `stdin:'ignore'` 映射，`'inherit'`/`'pipe'`（类型仍 advertise）落回 execFile 默认 pipe stdio 未登记。现存调用点皆 'ignore' → 潜在无行为影响，头注补一行（审视 MINOR-2 标注）。
+- **NOTE-1 fast-resume 边角**（逐字旧仓非移植缺陷）：worktree 目录在而分支被带外 `git branch -D` 删 → readWorktreeHeadSha null → 新建支 `add -B` 对已存在目录 fatal "already exists" → 抛。worktree.ts 头注登记（消费方预期）。
+- **NOTE-3 死 import + void 抑制行**：git.ts `logForDebugging` 仅 `void logForDebugging`（resetWorktreeGitCaches 内）存活——旧仓唯一调用点在 execa `.catch()` 异常支（execFileNoThrow.ts:146），回调式 execFile 收拢后异常支消失 → 无存活调用点。删 import + void 行，头注 logError 条订正为"本最小子集无存活调用点"（诚实头注，避死依赖）。
+- **NOTE（unbounded Map 缓存）**：LRU→Map 已登记；key 空间 = cwd/repo-root（新仓），增长风险低，维持现状。
+
+**clean 面（子代理核验，无动作）**：execFile wrapper（stdin:'ignore' 全调用点正确 / maxBuffer 1MB + timeout 10min 同旧 / error 支恒 resolve + err.code 数字退出·ENOENT→1·signal→1 / env 合并语义等价）；findCanonicalGitRoot backlink 双校验逐字（攻击面分析：攻击者可控 worktreeGitDir 唯能使 check(2) 通过的方式是指回自身 gitRoot/.git——无逃逸；借受害者真 worktree 条目则 git 写 backlink ≠ 攻击者 gitRoot → check(2) 失败；P-T2 fixture 正确隔离 check(2)）；isSafeRefName 完备（前导 -//空段、../`{`/空白/非 ASCII/NUL 全拒，execFile arg-array 无 shell 面）；cleanupStaleAgentWorktrees fail-closed 正确（status/unpushed 各需 code===0 && stdout 空，cwd=worktreePath 正确 scoped，非 ephemeral 永不入，status 失败 → skip）；createAgentWorktree/getOrCreateWorktree（非 git cwd → findCanonicalGitRoot null → 抛（正确）；sparse-checkout --no-checkout + 失败回滚逐字；resume mtime bump 逐字）；H6 六裁面全登记（含 hasWorktreeChanges 旧仓零消费者 grep 确证）；门面 = 域门面全量面（修复后 21 符号，5 核心 + 16 git），测试皆经门面导入（STR-1）；探针隔离力 P-T1（`..` 段检，regex 单独会放行）/ P-T2（check(2)）/ P-T3（dirty 守卫，真 ephemeral slug agent-aab12cd3）全成立；func test.skip git 门控正确。
+
+**实施订正（本段额外发现，非子代理）**：P-T3 初版探针失效根因 = 测试设计缺陷非源码缺陷——dirty 测初用 slug `agent-adeadbeef`（agent-a 后 8 hex）不匹配 `/^agent-a[0-9a-f]{7}$/` → 模式守卫先跳过，dirty 守卫从未被隔离（删守卫仍 12 pass）。订正为真 ephemeral slug `agent-aab12cd3`（7 hex）后，删 dirty 守卫恰 1 红。
+
+**四件套终验**：tsc 0 / eslint 0 / build 0KB entry / 1210 pass（+1 新 func 探针）/ gate 6，零回归。
+
+**闭环判定**：S-7c worktree（agent 隔离 + git 执行层）全闭环（主体 git.ts 773L + worktree.ts 685L + 门面 + engine 门面 + unit 37 + func 13 + 3 探针 + MAJOR-1 回归探针 + 单只读审视 1 MAJOR/1 MINOR/3 NOTE 全处置 + 四件套终验），无 BLOCKER。**下一步 = S-7d session（§8.49）。**
