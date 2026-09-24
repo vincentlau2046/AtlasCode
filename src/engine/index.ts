@@ -501,7 +501,8 @@ export {
   persistPermissionUpdates,
   createReadRuleSuggestion,
 } from './permissions'
-// E-4 S-4d（§8.36）：权限门工厂（域规则求值树 → pipeline PermissionGate 3 值 verdict）
+// E-4 S-4d（§8.36）+ S-E1 I-1 换回（§8.52 A1）：权限门工厂（base
+// hasPermissionsToUseTool 全决策体 → pipeline PermissionGate 3 值 verdict）
 export { createPermissionGate } from './permissions'
 // E-5 S-5a（§8.39）：hooks L3 连接器层（ToolHooks 适配器 C-6 消费支 + loop stop hooks 消费面 C-4）
 export {

@@ -365,6 +365,9 @@ export function createPermissionRequestMessage(
  *    = SDK minified 名 mangle，不適用）；DEP-2 C-Deep allow=[shared] 禁
  *    permissions 域 import modelprovider 值 → 形判别；若未来引入 minified
  *    外部 SDK 错误类，换注入窗口 instanceof（前向登记，工具本体波）。
+ *  - APIUserAbortError 新仓现零活 throw 点（modelprovider abort 面 throw =
+ *    C 波残留守，grep 全 src 无 `throw new APIUserAbortError`）→ 分支 2
+ *    当前纯惰性，经测试直接实例化钉形（审视 N-3 登记，复审勿判死分支）。
  */
 export function isAbortShapedError(e: unknown): boolean {
   if (!(e instanceof Error)) return false

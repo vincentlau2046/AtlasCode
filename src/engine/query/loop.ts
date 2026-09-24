@@ -140,9 +140,8 @@ export async function queryOneRound(
   const outcomes = await runToolBatch(toolUses, assistantMsg, {
     tools,
     signal: deps.signal,
-    // E-4 S-4d：权限门透传（queryOneRound→runToolBatch 唯一点；queryAgentLoop 的
-    // 第二调用点 runAgent.ts 子代理面不带门——前向接缝登记于 runAgent 头注，
-    // E-wave-end 装配透传，§8.37 审视 F1）
+    // E-4 S-4d：权限门透传（queryOneRound→runToolBatch 唯一点；F1 已落 S-E1
+    // （§8.52 A2）：子代理面经 runAgent checkPermission 透传同门执行）
     checkPermission: deps.checkPermission,
     // E-5 S-5a：工具钩子透传（同上唯一点；未注入 = 窄 spine 无操作）
     hooks: deps.hooks?.toolHooks,

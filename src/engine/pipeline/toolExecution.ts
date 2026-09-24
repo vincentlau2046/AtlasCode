@@ -56,8 +56,10 @@ import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidatio
  * ⑥ sandbox 自动放行半落 / 1c 鸭子分发 + updatedInput），非仅规则支
  * checkRuleBasedPermissions——单决策体单一事实源（E-6 M-1 门工厂消费面
  * 事实订正换回项）。verdict 扩 updatedInput = 门改写 call 入参（旧仓
- * 决策体 updatedInput 语义；现零活工具面 checkPermissions 实现 → 恒为
- * fallback 原入参，行为惰性，工具本体波落 checkPermissions 后生效）。
+ * 决策体 updatedInput 语义；现零非-passthrough 工具面 checkPermissions 实现
+ * （updatedInput 产出侧为零——mcp.ts/AgentTool 两活实现均返 passthrough，
+ * 审视 M-3 措辞订正）→ 恒为 fallback 原入参，行为惰性，工具本体波落
+ * checkPermissions 后生效）。
  */
 export type PermissionGate = (
   tool: Tool,
@@ -294,12 +296,17 @@ export async function executeToolUse(
     }
   }
 
+  // I-1（E-wave-end S-E1）：门放行后采纳门改写入参（全决策体 updatedInput 语义；
+  // 未注入 / 未改写 = undefined → effectiveInput 不变，窄 spine 语义保持）。
+  // 提升函数作用域（审视 N-1：:280 !verdict.allowed 早退后 verdict.allowed 恒真，
+  // 去死支）；post-hook 同消费 callInput（审视 M-1 修复——旧仓 toolExecution.ts:951-952
+  // post-hook 收 processedInput = 权限决策后实际入参，本版本传门改写前 effectiveInput
+  // 系未登记 delta；门 updatedInput 当前惰性（零非-passthrough 工具面实现），休眠期
+  // 零行为差，工具本体波回填时与旧仓语义自动一致）。
+  const callInput = verdict.updatedInput ?? effectiveInput
   let block: ToolResultBlockParam
   let isError = false
   try {
-    // I-1（E-wave-end S-E1）：门放行后采纳门改写入参（全决策体 updatedInput 语义；
-    // 未注入 / 未改写 = undefined → effectiveInput 不变，窄 spine 语义保持）。
-    const callInput = verdict.allowed ? (verdict.updatedInput ?? effectiveInput) : effectiveInput
     // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
     // 传最小 context 对象 { signal }，工具实现按需取用）。F1（E-wave-end S-E1）：checkPermission
     // 同入 context = 子代理门透传接缝（AgentTool 消费 → runAgent 子 loop 同门执行，
@@ -324,8 +331,9 @@ export async function executeToolUse(
   }
 
   // E-5 S-5a 接缝：post-hook（C-6 消费支：执行 + 捕获，非 fire-and-forget；
-  // 钩子本体命令真经 shell 端口执行——本版的真效果）。
-  const postOutcome = await deps.hooks?.postToolUse?.(tool, effectiveInput, block, tu.id)
+  // 钩子本体命令真经 shell 端口执行——本版的真效果）。入参 = callInput（门
+  // 改写后实际执行入参，审视 M-1 修复，旧仓 processedInput 语义，见上 callInput 头注）。
+  const postOutcome = await deps.hooks?.postToolUse?.(tool, callInput, block, tu.id)
   // additionalContext 上下文回灌 = message/REPL 波前向接缝（§8.39 C-6 登记）：
   // 本版捕获结果不硬填回灌（新仓无消息面）；回灌消费点 = 消息/REPL 波，
   // 登记于 engine/hooks 子门面头注（防 H6 死接缝：接缝有登记 + 有执行效果，非空置）。

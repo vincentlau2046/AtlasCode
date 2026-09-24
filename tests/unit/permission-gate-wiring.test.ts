@@ -22,6 +22,7 @@
  */
 import { describe, test, expect } from 'bun:test'
 import {
+  AgentTool,
   createPermissionGate,
   executeToolUse,
   GENERAL_PURPOSE_AGENT,
@@ -62,7 +63,7 @@ function ctx(
 }
 
 /** 最小 fake tool（shared Tool 契约消费字段：name/isEnabled/call/mapResult；
- * S-E1 扩 checkPermissions 鸭子支 + recordInput call 入参捕获）。 */
+ * S-E1 扩 checkPermissions 鸭子支 + recordInput call 入参捕获 + calls 调用记录）。 */
 function makeTool(
   name: string,
   opts?: {
@@ -70,6 +71,7 @@ function makeTool(
     enabled?: boolean
     checkPermissions?: () => Promise<unknown> | unknown
     recordInput?: (input: unknown) => void
+    calls?: string[]
   },
 ): Tool {
   return {
@@ -79,6 +81,7 @@ function makeTool(
     isConcurrencySafe: () => false,
     isEnabled: () => opts?.enabled ?? true,
     call: async (input: unknown) => {
+      opts?.calls?.push(name)
       opts?.recordInput?.(input)
       return { data: `ok:${name}` }
     },
@@ -344,6 +347,8 @@ describe('S-E1 I-1 门全决策体（I-1 换回，§8.52 A1）', () => {
  * （AgentTool 消费）→ RunAgentArgs.checkPermission → queryAgentLoop deps →
  * 子 loop 工具执行同门。判别 = 同规则树在子 loop 可观察（deny 规则子 loop
  * 工具 is_error），对照无门 = 窄 spine 默认放行（与父 loop 未注门语义对齐）。
+ * F-1c（审视 N-4 补）钉链前两跳：executeToolUse call context 塞入 →
+ * AgentTool ctx.checkPermission 转发 → runAgent。
  */
 describe('S-E1 F1 子代理门透传（runAgent，§8.52 A2）', () => {
   const steps: ScriptStep[] = [
@@ -387,6 +392,45 @@ describe('S-E1 F1 子代理门透传（runAgent，§8.52 A2）', () => {
     expect(dump).not.toContain('permission denied')
     expect(r.terminated).toBe(true)
     expect(r.turns).toBe(2)
+  })
+
+  test('F-1c AgentTool.call context 转发跳（审视 N-4）：带门 → 子 loop 拒执行 / 不带门 → 真执行', async () => {
+    const gateSteps: ScriptStep[] = [
+      {
+        content: [{ type: 'tool_use', id: 't1', name: 'Grep', input: { q: 'x' } }],
+        stopReason: 'tool_calls',
+      },
+      { content: [{ type: 'text', text: 'done' }] },
+    ]
+    const gate = createPermissionGate(ctx(['Grep']))
+    const denied: string[] = []
+    await AgentTool.call(
+      { description: 'find', prompt: 'find x' },
+      {
+        modelProvider: fakeProviderSteps(gateSteps),
+        parentRole: 'small',
+        tools: [makeTool('Grep', { calls: denied })],
+        checkPermission: gate,
+      },
+      undefined,
+      undefined,
+    )
+    // 门经 call context 转发到子 loop（F1 链前两跳：executeToolUse 塞入 →
+    // AgentTool 转发）→ deny 规则 Grep 被拒，工具真未执行
+    expect(denied).toEqual([])
+    const allowed: string[] = []
+    await AgentTool.call(
+      { description: 'find', prompt: 'find x' },
+      {
+        modelProvider: fakeProviderSteps(gateSteps),
+        parentRole: 'small',
+        tools: [makeTool('Grep', { calls: allowed })],
+      },
+      undefined,
+      undefined,
+    )
+    // 对照：未注入门 = 子 loop 窄 spine 放行，工具真执行
+    expect(allowed).toEqual(['Grep'])
   })
 })
 

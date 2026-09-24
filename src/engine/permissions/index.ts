@@ -16,9 +16,10 @@
  * E-4 S-4c2（§8.35）落 permissionPersist：persist 族 + createReadRuleSuggestion
  * （域叶约束不可 import engine settings/loader 面 → persist 必落本层）。
  *
- * E-4 S-4d（§8.36）落 permissionGate：createPermissionGate（域规则求值树
- * 包成 pipeline PermissionGate 3 值 verdict；ask fail-closed 裁定 +
- * L3 桥接 cast 登记，见 permissionGate.ts 头注）。
+ * E-4 S-4d（§8.36）落 permissionGate + S-E1 I-1 换回（§8.52 A1）：
+ * createPermissionGate（base hasPermissionsToUseTool 全决策体包成 pipeline
+ * PermissionGate 3 值 verdict + GateVerdict.updatedInput；ask fail-closed
+ * 裁定 + L3 桥接 cast 登记，见 permissionGate.ts 头注）。
  */
 export * from './permissionRulesLoader'
 export * from './permissionSetup'

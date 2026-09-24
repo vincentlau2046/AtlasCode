@@ -6,7 +6,8 @@
  * 闭包（3 值 verdict，§8.36 裁定）：
  *   - allow 决策（2a 模式支 / 2b allow 规则 / 1c 工具面 allow 透传）→
  *     { allowed: true, updatedInput }（门改写 call 入参，executeToolUse
- *     门放行后采纳；现零活工具面 checkPermissions 实现 → 恒 fallback
+ *     门放行后采纳；现零非-passthrough 工具面 checkPermissions 实现
+ *     （updatedInput 产出侧为零，审视 M-3 措辞订正）→ 恒 fallback
  *     原入参，行为惰性）
  *   - deny 决策 → { allowed: false, reason: decision.message }
  *   - ask 决策 → { allowed: false, ask: true, reason: decision.message }
