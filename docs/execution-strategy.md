@@ -2551,3 +2551,31 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 四件套：`bun x tsc --noEmit` 0 / `bun x eslint <changed>` 0 / `bun build src/atlascode/cli.ts --outfile <tmp> --target node` 0 / `bun test --isolate tests/` 基线 **1403 pass / 85 files / 2975 expect**（S-E1..E4 增测后基线增长，每切片完结点不变量）+ gate `bun test --isolate tests/ci/` 6（anti-stub 3 随 S-E4 engine 扫描集增长）。
 波末：双只读审视（≤2：A 路 = A 桶逐项旧仓对照 + 导出面 / B 路 = H6 死接缝 + B/C 桶登记完备性）+ 终验四件套 + 本节实施/审视记录 + memory 同步 + task #119 完结。
+
+### S-E1 门收口族 实施/审视记录（2026-09-25，master d895eeb + c8e785c，task #120 闭环）
+
+**② 实施（d895eeb，7 文件 +382/-47）**
+- **A1 I-1 换回**：`engine/permissions/permissionGate.ts` 消费面 `checkRuleBasedPermissions`（规则支 null=放行）→ base `hasPermissionsToUseTool` 全决策体（`src/permissions/permissions.ts:100`）；映射 allow→`{allowed, updatedInput}` / deny→`{allowed:false, reason}` / ask→`{allowed:false, ask:true}` fail-closed。`GateVerdict` 扩 `updatedInput?: unknown`（`pipeline/toolExecution.ts`），executeToolUse 门放行后采纳 `callInput = verdict.updatedInput ?? effectiveInput`（门晚于 hook last-wins；现零非-passthrough 工具面实现 → 行为惰性，工具本体波回填时生效）。规则支 `checkRuleBasedPermissions` 保留导出（域 API + 测试面），门不再消费。
+- **A2 F1 子代理门透传**：executeToolUse `tool.call(callInput, { signal, checkPermission }, …)`（shared Tool.call 第 2 参 context: unknown 契约不变）→ `AgentTool` AgentToolCallContext.checkPermission → `RunAgentArgs.checkPermission` → `queryAgentLoop` deps → 子 loop 同门。未注入 = 子 loop 窄 spine 默认放行（与父 loop 未注门语义对齐）。
+- **A3 F4 1c abort 重抛**：`ruleMatching.ts` 新增导出 `isAbortShapedError` 双支形判别（`e.name==='AbortError'`（DOMException 原生面，旧仓自研 AbortError 类未随迁 delta 登记）+ `e.constructor?.name==='APIUserAbortError'`（新仓无 minify；DEP-2 C-Deep allow=[shared] 禁 permissions 域 import modelprovider 值 → 形判别；minified 外部 SDK instanceof 换注入窗口 = 前向登记））；ruleMatching / permissions 双站点 1c catch `if (isAbortShapedError(e)) throw e`（旧仓 catch 逐字语义——abort 是控制流非工具错误）。
+- 测试 +10（I-1a/b/c 全决策体判别 / F-1a/b 子 loop 同门 + 窄 spine 对照 / F-4a–e 形判别 + 双站点重抛 + 非 abort 吞掉）。
+
+**探针实测（backup→mutate→红集→verbatim-restore diff 核验）**
+| 探针 | 突变 | 预期（裁定 4） | 实测红集 | 结论 |
+|---|---|---|---|---|
+| P-E1 | 门退回 checkRuleBasedPermissions | I-1 mode-level 支 verdict 测试 | {I-1a, I-1c}（2 红：3 落 ask fail-closed + updatedInput 采纳双点绑定，P-M2 先例同型） | 判别成立 |
+| P-E2 | 删 runAgent checkPermission 透传 | F1 子代理门消费测试 | {F-1a}（恰 1 红） | 判别成立 |
+| P-E3 | 删双站点 catch 重抛 | F4 abort 传播测试 | {F-4b, F-4c, F-4e}（3 红：双站点绑定，F-4a/F-4d 对照组按设计恒绿） | 判别成立 |
+
+**③ 独立审视（1 只读子代理，PASS-with-fixes：0 MAJOR / 3 MINOR / 4 NOTE，六维全绿）**
+- 忠实性：I-1 映射支 = 旧仓 toolExecution.ts:951-952 语义逐字；F4 双支 = 旧仓 catch 超集无漏支（第三支 DOMException 形为有意原生面扩展已登记）；F1 链 6 跳核验无断点。
+- M-1（唯一实质项）：post-hook 收门改写前 effectiveInput 系未登记 delta（旧仓 post-hook 收 processedInput = 权限决策后实际入参）→ **一行修**：callInput 提升函数作用域，postToolUse 改传 callInput（门 updatedInput 惰性期零行为差，工具本体波回填时与旧仓自动一致）。
+- M-2：loop.ts F1 前向接缝注释陈旧（已落仍标「不带门」）→ 刷新。
+- M-3：「零活工具面 checkPermissions 实现」字面失实（mcp.ts:166 / AgentTool.ts:128 两活 passthrough 实现）→ 措辞订正「零非-passthrough（updatedInput 产出侧为零）」。
+- N-1：callInput 三元 else 死支（早退后 allowed 恒真）→ 简化。
+- N-2：engine/index.ts + engine/permissions/index.ts 门面头注 S-4d 口径 → S-E1 换回口径同步。
+- N-3：APIUserAbortError 新仓零活 throw 点（分支 2 纯惰性）头注登记防复审误判死分支。
+- N-4：F1 链前两跳（executeToolUse 塞入 → AgentTool 转发）无测 → 补 F-1c（AgentTool.call 带门拒执行 / 不带门真执行双断言）。
+（c8e785c 处置 7 文件 +73/-16；commit message「零活」措辞不重写历史，以头注订正为准。）
+
+**④ 基线验收**：tsc 0 / eslint 0 / build 0 / 全量 **1414 pass / 85 文件 / 2998 expect**（基线 1403+10+1 F-1c；expect 2975+21+2）+ gate 6。task #120 闭环 → S-E2 解锁（loop-deps 构建器供门依赖 I-1 语义已落）。
