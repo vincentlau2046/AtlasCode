@@ -33,7 +33,11 @@
  *     sourceToolAssistantUUID/attachment）：旧仓 `(m as any).message.id` 类
  *     cast 在域扩展型下直接可访，逐字块内按需去 cast（语义逐字不变）。
  */
-import type { Message as BaseMessage, Usage } from '../../shared'
+import type {
+  ContentBlock,
+  Message as BaseMessage,
+  Usage,
+} from '../../shared'
 
 // 旧仓 crypto UUID 品牌串 → string（新仓无品牌，cast 保留为 no-op）
 export type UUID = string
@@ -337,3 +341,43 @@ export function sortLogs(logs: LogOption[]): LogOption[] {
     return b.created.getTime() - a.created.getTime()
   })
 }
+
+// ── d2：RenderableMessage 最小形（transcriptSearch 消费面）──────────────────
+
+/**
+ * RenderableMessage 最小形（E-7 S-7d d2，§8.49）：旧仓 types/message.ts:30
+ * `RenderableMessage = Message` 全并集别名 → 本域仅留 search.ts
+ * computeSearchText 消费的 6 型面 + toolUseResult duck 面（UI 渲染消费方
+ * = REPL /transcript 搜索波，前向接缝；其旧形全消息按结构兼容本最小形）。
+ *
+ * attachment 双成员面：relevant_memories 变体保证 memories 非缺省（computeSearchText
+ * 逐字 `memories.map` 无 `!`）；catch-all 变体携带 queued_command 守卫字段
+ * （commandMode/isMeta/prompt）+ 可选 memories——两变体并集使逐字体零改写
+ * 通过类型检查（判别收窄：`type === 'relevant_memories'` 真支排除 catch-all）。
+ */
+export type RenderableMessage =
+  | {
+      type: 'user'
+      message: { content: string | ContentBlock[] }
+      /** UI-native tool Out（duck 面；见 search.ts toolResultSearchText）。 */
+      toolUseResult?: unknown
+    }
+  | { type: 'assistant'; message: { content: string | ContentBlock[] } }
+  | {
+      type: 'attachment'
+      attachment:
+        | { type: 'relevant_memories'; memories: Array<{ content: string }> }
+        | {
+            type: string
+            memories?: Array<{ content: string }>
+            commandMode?: string
+            isMeta?: boolean
+            prompt?: string | ContentBlock[]
+          }
+    }
+  | {
+      type: 'collapsed_read_search'
+      relevantMemories?: Array<{ content: string }>
+    }
+  | { type: 'grouped_tool_use' }
+  | { type: 'system' }

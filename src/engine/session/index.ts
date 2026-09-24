@@ -1,9 +1,10 @@
 /**
- * engine/session 门面（E-7 S-7d d1，§8.49，STR-1 门面规则）。
+ * engine/session 门面（E-7 S-7d d1+d2，§8.49，STR-1 门面规则）。
  *
  * JSONL 持久层核心（写面 Project 类 + record 族 / 读面 load 族 /
  * scanner 分块读 / sessionMemory 阈值状态机 + Port 5 注入窗口）+
- * SessionEnv 注入窗口。
+ * SessionEnv 注入窗口 + d2 搜索文本面（search）/ 会话恢复处理面
+ * （restore）+ Port 1 真契约（ports/sessionContext）。
  *
  * 外部消费方（QueryEngine / E-wave-end compose / AgentTool 门）只许
  * `import { ... } from 'src/engine'`（STR-1）或域门面 `'../session'`，
@@ -12,7 +13,10 @@
  * H6 前向接缝登记（复审勿当遗漏重提）：各内部文件头注裁面
  * （project 6 裁面 / load 裁面族 / record save* 族 / firstPrompt
  * builtInCommandNames 空集 / env 组合根注真 bootstrap 值 /
- * SessionMemoryPort 壳实现）——预声明接缝非遗漏。
+ * SessionMemoryPort 壳实现 / d2 restore 裁面族（switchSession 二参 →
+ * 单参 + onWorktreeRestore? 注入口 + coordinator/agent/attribution/
+ * context-collapse/成本/录制面裁）/ search UI 消费面）——预声明接缝
+ * 非遗漏。
  */
 // 类型面
 export type {
@@ -41,6 +45,7 @@ export type {
   ContentReplacementRecord,
   TranscriptMessage,
   Entry,
+  RenderableMessage,
 } from './types'
 export { sortLogs } from './types'
 
@@ -150,3 +155,26 @@ export {
   resetSessionMemoryState,
 } from './sessionMemory'
 export type { SessionMemoryPort } from '../ports/sessionMemory'
+
+// E-7 S-7d d2（§8.49）：transcript 搜索文本面（旧 utils/transcriptSearch.ts
+// 202L 逐字随迁；INTERRUPT 常量域内化 + ContentBlock any→unknown 类型面
+// delta 登记见 search.ts 头注）
+export {
+  INTERRUPT_MESSAGE,
+  INTERRUPT_MESSAGE_FOR_TOOL_USE,
+  renderableSearchText,
+  toolUseSearchText,
+  toolResultSearchText,
+} from './search'
+
+// E-7 S-7d d2（§8.49）：会话恢复处理面（slim processResumedConversation；
+// 裁面族 H6 登记见 restore.ts 头注）
+export type { ResumeLoadResult, ProcessedResume } from './restore'
+export { processResumedConversation } from './restore'
+
+// E-7 S-7d d2（§8.49 item 3）：Port 1 真契约（快照 view 语义；壳实现 +
+// compose 注入 = E-wave-end 前向接缝，零消费者前向登记见 port 头注）
+export type {
+  SessionSnapshot,
+  SessionContextPort,
+} from '../ports/sessionContext'

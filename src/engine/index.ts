@@ -358,11 +358,12 @@ export {
   parseConfigString,
   resetWorktreeGitCaches,
 } from './worktree'
-// E-7 S-7d d1（§8.49）：session 子门面（JSONL 持久层核心：写面 Project
+// E-7 S-7d d1+d2（§8.49）：session 子门面（JSONL 持久层核心：写面 Project
 // 单例 + record 族 / 读面 load 族 / scanner 分块读 / sessionMemory 阈值
-// 状态机 + Port 5 注入窗口 / SessionEnv 注入窗口；裁面与 H6 前向接缝见
-// session/index.ts + 各内部文件头注）。显式名块（D-1 审视订正：其余子
-// 门面块先例，名字面 = session/index.ts 门面全量）。
+// 状态机 + Port 5 注入窗口 / SessionEnv 注入窗口 / d2 搜索文本面 + 恢复
+// 处理面 + Port 1 真契约；裁面与 H6 前向接缝见 session/index.ts +
+// 各内部文件头注）。显式名块（D-1 审视订正：其余子门面块先例，名字面
+// = session/index.ts 门面全量）。
 export {
   type UUID,
   type AgentId,
@@ -467,6 +468,18 @@ export {
   getToolCallsBetweenUpdates,
   resetSessionMemoryState,
   type SessionMemoryPort,
+  // d2（§8.49）：搜索文本面 + 恢复处理面 + Port 1 真契约
+  type RenderableMessage,
+  INTERRUPT_MESSAGE,
+  INTERRUPT_MESSAGE_FOR_TOOL_USE,
+  renderableSearchText,
+  toolUseSearchText,
+  toolResultSearchText,
+  type ResumeLoadResult,
+  type ProcessedResume,
+  processResumedConversation,
+  type SessionSnapshot,
+  type SessionContextPort,
 } from './session'
 export {
   parseBaseToolsFromCLI,
