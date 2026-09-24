@@ -252,6 +252,9 @@ export {
   type LoopHooks,
   type ToolHooksAdapterOptions,
 } from './hooks'
+// E-5 S-5b（§8.40）：流式执行核心（执行循环在域叶 src/hooks/streaming.ts；L3 re-export 面；
+// 消费面 = loop 流式 chatStream E-1b-full 前向接缝，loop.ts 头注登记）
+export { runHooksStream, type HookStreamYield } from './hooks'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,

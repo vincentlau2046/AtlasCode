@@ -116,8 +116,10 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: '跨域斩断 fail-fast（shell/task 边未注入抛错）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
-  // §8.16 裁剪：hooks 流式/attachment 渲染（AsyncGenerator）归 engine 波
-  { domain: 'hooks', capability: 'hooks 流式执行 / attachment 渲染（AsyncGenerator）', status: 'missing', by: 'engine（流式执行/attachment 渲染归 engine 波）' },
+  // E-5 S-5b（§8.40）：L120 行拆/翻 —— 流式执行半 → done（proof = 流式单测）；
+  // attachment 渲染半 → 残留守（新仓无 message/attachment 基建，C-3 前向接缝登记，H6 不假 done）
+  { domain: 'hooks', capability: 'hooks 流式执行（AsyncGenerator，逐钩子 yield + 聚合返回值）', status: 'done', proof: 'tests/unit/hooks-stream.test.ts' },
+  { domain: 'hooks', capability: 'attachment 渲染（钩子输出 → AttachmentMessage）', status: 'missing', by: 'message/REPL 波（新仓无 message/attachment 基建，§8.40 C-3 前向接缝登记）' },
   // ── B6-func 最小组合根（compose.ts 装配真链，§8.16/§8.17 4+7 前置清单 + 6 适配器）──
   // 与上列各域"孤立面"行区别：这些行证能力"经 getCoreDependencies 装配后"的真链
   // （port 之下全真，仅 modelprovider 注入 fake），B6-func 先于 engine 波落地

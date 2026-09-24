@@ -12,7 +12,8 @@
  *     maxTurns 守卫 + pre-turn autoCompactIfNeeded + terminal=无 tool_use）。
  *   - 工具执行已抽到 engine/pipeline（T-2）：本文件只管 LLM + 消息装配 + 轮次调度，
  *     工具链单一事实源在 pipeline。
- *   - 残留守（后续纵切）：流式 chatStream（E-1b-full）/ 错误恢复（E-1b-full）/
+ *   - 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（runHooksStream，
+ *     §8.40 S-5b 前向接缝登记，防 H6 死接缝）/ 错误恢复（E-1b-full）/
  *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
  *     附件渲染 + 钩子输出上下文回灌（消息/REPL 波残留守，§8.38 C-3/C-6）/
  *     tokenBudget continuation（max_tokens 截断续跑，E-1b）/

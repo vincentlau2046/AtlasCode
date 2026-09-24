@@ -71,3 +71,7 @@ export {
   runSessionEndHooks,
 } from './runHooks'
 export type { HookRunOptions } from './runHooks'
+// 流式执行核心（E-5 S-5b §8.40：旧仓 executeHooks 执行循环移植，解耦 message/attachment；
+// L3 re-export 面 = engine/hooks，消费面 = loop 流式 chatStream（E-1b-full 前向接缝））
+export { runHooksStream } from './streaming'
+export type { HookStreamYield } from './streaming'

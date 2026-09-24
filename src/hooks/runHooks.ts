@@ -13,12 +13,14 @@
  *    §8.16 D17 hooks→executor 边切端口）；hooks 域不 import executor 域（L3）。
  *  - 裁剪（engine 波）：prompt/agent/http/callback/function 型钩子、插件变量插值、
  *    异步唤醒钩子（registerPendingAsyncHook）、messageQueue 通知、MCP elicitation、
- *    streaming yield（薄骨架返回聚合 Promise 非 AsyncGenerator）、未知 decision /
- *    hookEventName 不匹配的抛错（薄骨架宽容，仅记结果）。
+ *    未知 decision / hookEventName 不匹配的抛错（薄骨架宽容，仅记结果）。
+ *  - 流式执行面已落 S-5b（§8.40）：streaming.ts runHooksStream（AsyncGenerator，
+ *    旧仓 executeHooks 执行循环移植，解耦 message/attachment；与本文件共享
+ *    runOneHook/interpretHookOutput/mergeAggregated 单一事实源）。
  */
 import { createBaseHookInput } from './createBaseHookInput'
 import { getMatchingHooks } from './getMatchingHooks'
-import { getHookShellPort } from './shell-port'
+import { getHookShellPort, type HookShellPort } from './shell-port'
 import { shouldSkipHookDueToTrust } from './shouldSkipHookDueToTrust'
 import type { HookEvent } from './hookEvents'
 import type {
@@ -26,6 +28,7 @@ import type {
   HookInput,
   HookJSONOutput,
   HookResult,
+  MatchedHook,
 } from './types'
 
 /** 旧仓 TOOL_HOOK_EXECUTION_TIMEOUT_MS（src/utils/hooks.ts L162，10min）。 */
@@ -56,7 +59,7 @@ export type HookRunOptions = {
 }
 
 /** 造钩子进程 env（process.env + 覆盖；剔除 undefined 值以匹配 Record<string,string>）。 */
-function buildHookEnv(override?: Record<string, string>): Record<string, string> {
+export function buildHookEnv(override?: Record<string, string>): Record<string, string> {
   const env: Record<string, string> = {}
   for (const [k, v] of Object.entries(process.env)) {
     if (v !== undefined) env[k] = v
@@ -151,7 +154,7 @@ const PERMISSION_RANK: Record<string, number> = {
 }
 
 /** 折叠单钩子结果进聚合（旧仓 AggregatedHookResult 主面：首阻塞 / 任续停 / 最严权限）。 */
-function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void {
+export function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void {
   if (r.blockingError && !acc.blockingError) acc.blockingError = r.blockingError
   if (r.preventContinuation) acc.preventContinuation = true
   if (r.stopReason && !acc.stopReason) acc.stopReason = r.stopReason
@@ -172,12 +175,46 @@ function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void {
 }
 
 /**
+ * 单钩子执行（runHooks 顺序 / runHooksStream 并行共享，§8.40 单一事实源）：
+ * shell 端口执行（per-hook 超时）+ spawn/执行抛错 → 非阻塞错误结果（旧仓
+ * non_blocking_error 面）+ 输出解释（interpretHookOutput）。域内面导出
+ * （streaming.ts 复用，不进域根门面）。
+ */
+export function runOneHook(
+  m: MatchedHook,
+  port: HookShellPort,
+  env: Record<string, string>,
+  signal: AbortSignal,
+  options: HookRunOptions,
+): Promise<HookResult> {
+  const cmd = m.hook
+  const timeoutMs = cmd.timeoutMs ?? options.timeoutMs ?? HOOK_EXECUTION_TIMEOUT_MS
+  return port.runCommand(cmd.command, env, signal, timeoutMs).then(
+    (exec) =>
+      interpretHookOutput({
+        command: cmd.command,
+        stdout: exec.stdout,
+        stderr: exec.stderr,
+        code: exec.code,
+        aborted: exec.aborted,
+      }),
+    (e: unknown) => ({
+      command: cmd.command,
+      status: -1,
+      succeeded: false,
+      stderr: e instanceof Error ? e.message : String(e),
+    }),
+  )
+}
+
+/**
  * 参数化钩子分发核心（18 execute* 折叠点）。信任门 → 匹配 → 命令钩子经注入
- * shell 端口逐条执行 → 解释 + 聚合 → 返回 AggregatedHookResult。
+ * shell 端口逐条执行（顺序，runOneHook）→ 解释 + 聚合 → 返回 AggregatedHookResult。
  *
  * 信任门：非交互恒执行；交互式缺信任全跳过（返回空 results，不执行任何钩子）。
  * 无匹配（未注入配置源 / 无 matcher / 无 command 钩子）→ 空 results 正常返回，
  * 不触碰 shell 端口（端口未注入不误伤常态）。
+ * 流式并行版 = streaming.ts runHooksStream（§8.40，共享 runOneHook 执行核心）。
  */
 export async function runHooks(
   hookEvent: HookEvent,
@@ -196,28 +233,7 @@ export async function runHooks(
   const env = buildHookEnv(options.env)
   const signal = options.signal ?? new AbortController().signal
   for (const m of matched) {
-    const cmd = m.hook
-    const timeoutMs = cmd.timeoutMs ?? options.timeoutMs ?? HOOK_EXECUTION_TIMEOUT_MS
-    let exec
-    try {
-      exec = await port.runCommand(cmd.command, env, signal, timeoutMs)
-    } catch (e) {
-      // spawn/执行抛错 → 非阻塞错误结果（旧仓 non-blocking error 面）。
-      results.push({
-        command: cmd.command,
-        status: -1,
-        succeeded: false,
-        stderr: e instanceof Error ? e.message : String(e),
-      })
-      continue
-    }
-    const result = interpretHookOutput({
-      command: cmd.command,
-      stdout: exec.stdout,
-      stderr: exec.stderr,
-      code: exec.code,
-      aborted: exec.aborted,
-    })
+    const result = await runOneHook(m, port, env, signal, options)
     results.push(result)
     mergeAggregated(aggregated, result)
   }

@@ -1376,3 +1376,34 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 - S-5a-②：pre-hook blockingError→tool_result is_error / hook allow 但 settings deny→拒（不变量）/ hook allow + settings 无规则→放行 / updatedInput 回写（tool.call 收到 updatedInput 非原入参）/ stop hooks preventContinuation→续跑（loop 不 terminated，turns>1）/ 未注入 hooks = 窄 spine 不变（回归）。
 
 **四件套 + gate**：tsc 0 / eslint 变更文件 0 / build 0 KB / 全量 + 新测；gate 6 pass（engine 非扫描集，新 engine/hooks 文件无 gate 影响）。
+
+### §8.40 E-5 S-5b 执行前分析 + 方案（2026-09-24）
+
+**范围**（§8.38 S-5b 计划 ①–④）：流式 hooks-runner（旧仓 executeHooks 执行循环 + processHookJSONOutput 字段映射移植，解耦 message/attachment）+ attachment 残留守登记 + matrix 行 L120 拆/翻 + loop 头注订正复核 + 流式 runner 消费面前向接缝登记。
+
+**执行前分析（关键契约 + 裁定点）**：
+1. **旧仓 ground truth（实测 @ a8af45b）**：`executeHooks`（utils/hooks.ts L1953，`async function*`）= 守卫族（disableAll/ATLAS_SIMPLE/trust/无匹配/signal.aborted）→ **逐钩子 progress yield（执行前，L2083-2101）** → `all(hookPromises)` 并行 merge（generators.ts L32 race，completion-order yield）→ 逐结果字段映射 yield（preventContinuation / blockingError / message / additionalContexts / permissionBehavior+updatedInput / 单独 updatedInput）→ 尾段 stats/OTel（**无 final aggregate yield**）。字段映射 `processHookJSONOutput`（L485）：continue:false→preventContinuation(+stopReason) / decision approve·block / hookSpecificOutput.permissionDecision allow·deny·ask / updatedInput / additionalContext / suppressOutput / **exit-2→blockingError**（stderr 归因，非 aborted）。
+2. **新仓现状**：域 `runHooks.ts` = 非流式核心（Promise，顺序 for 循环）+ `interpretHookOutput`（L485 映射 + exit-2）+ `mergeAggregated`（最严权限/首阻塞/last-wins）全已落（C-Deep 切片 3）；S-5a 已落 engine/hooks L3（createToolHooks/createLoopHooks + pipeline 消费支 + loop stop hooks 消费点）。**缺 = 流式执行面**（新仓无 AsyncGenerator hooks runner；§8.16 薄骨架裁为「streaming/attachment 归 engine」）。
+3. **分层裁定（C-1 细化）**：计划文「加 src/engine/hooks/ 流式 hooks-runner」→ **细化：执行循环落域叶 `src/hooks/streaming.ts`**（守卫/匹配/shell 端口/解释/聚合全部复用 runHooks 单一事实源——L3 重复实现 = 双源漂移）；engine/hooks L3 仅 **re-export 面**（子门面 + engine 根）+ 前向接缝登记。同 engine/permissions 分层（域逻辑在域，L3 = 连接器/re-export）。
+4. **流式契约（解耦 message/attachment）**：`runHooksStream(event, hookInput, options) → AsyncGenerator<HookStreamYield, AggregatedHookResult>`；`HookStreamYield = {kind:'hook_progress', hookEvent, command, toolUseID?} | {kind:'hook_result', result}`。yield 协议 = progress（逐钩子，执行前；旧仓 progress message 对象不迁 = attachment 解耦）→ hook_result（**确定性 match 序**——旧仓 all() completion-order 的订正：消费端推理 + 测试稳定；**并发语义不变**：全钩子并行、per-hook 超时，总墙钟 = max 非 sum）→ **生成器返回值 = AggregatedHookResult**（旧仓无 final aggregate yield；新仓以 return 值 = 单一消费面）。for-await 不暴露返回值（JS 语义）→ 消费端手动 .next() 循环（测试 drain 助手）。
+5. **单一事实源重构**：runHooks.ts 抽 per-hook 执行体（port.runCommand + spawn 抛错→非阻塞结果 + 解释）为 `runOneHook`（域内面导出）+ 导出 `buildHookEnv`/`mergeAggregated` → runHooks（顺序）与 runHooksStream（并行）共享同一执行/解释/聚合，零漂移。
+6. **守卫族 = 与 runHooks 一致**（trust skip + 无匹配）：旧仓 disableAll/ATLAS_SIMPLE 守卫属 config 域（shouldDisableAllHooksIncludingManaged = engine/config L3），叶域→L3 import 违 STR-1 → 与 runHooks 对齐（守卫单一事实源）。
+7. **5 事件流式包装器不预造**（H6 反向）：参数化核心 + 测试消费足够；5 事件键流式包装器（runStopHooksStream 等）归 E-1b-full 消费面（消费面落地同建）。
+8. **H6 防空洞**：runHooksStream = 真执行路径（shell 端口真执行 + 判别信号测试）+ 消费面前向接缝头注登记（loop 流式 chatStream = E-1b-full / attachment 渲染 = message/REPL 波）→ 非死接缝；L3 re-export = 测试消费（L3 面端到端测试 ⑩，防「只 re-export 无消费」）。
+9. **matrix 行 L120 拆/翻**：「hooks 流式执行 / attachment 渲染（AsyncGenerator）」（missing by engine 波）→ 2 行：「hooks 流式执行（AsyncGenerator，逐钩子 yield + 聚合返回值）」→ **done**（proof = tests/unit/hooks-stream.test.ts）/「attachment 渲染（钩子输出 → AttachmentMessage）」→ **missing**（by = message/REPL 波，新仓无 message/attachment 基建，C-3 前向接缝登记，H6 不假 done）。
+10. **loop.ts 头注订正（C-4）复核**：S-5a-② 已落（loop.ts：stop hooks = E-5 S-5a terminal 消费点 + attachment/钩子回灌 = message/REPL 波，L15-19/L180/L221-224）→ 本次仅残留守列表补「流式 hooks runner 消费面（runHooksStream，§8.40，E-1b-full 前向接缝）」。
+
+**判别信号（测试，新文件 tests/unit/hooks-stream.test.ts，13 测 / 零磁盘）**：
+- 流式 yield 序（①）：2 钩子 yields = [progress A, progress B, result A, result B]（全部先于聚合返回值；progress 先于执行；result 按 match 序）
+- 并发（②）：latch 端口（第 1 调用待第 2 调用启动后 resolve；顺序变异 → 内置 500ms 兜底 race → 事件序红，套件不挂）
+- exit-2→blockingError（③）/ continue:false→preventContinuation+stopReason（④）/ permissionDecision 三值（⑤a-c）+ 最严聚合（⑤d）/ updatedInput last-wins + additionalContext 拼接（⑥）
+- 守卫族（⑦⑧⑨）：trust skip / 无匹配 → 立即空聚合（不触碰端口）/ spawn 抛错 → 非阻塞结果
+- L3 门面面（⑩）：engine 根门面 import 消费（re-export 真 + 端到端 deny 映射）
+
+**实施结果 + 问题闭环**：
+- **测试抓到的 bug（非假通过）**：流式循环首实现漏 `results.push(result)`（只 mergeAggregated + yield）→ 聚合返回值 `results` 恒空 → ①③⑨ 首跑红（3 fail）→ 补 push 后 13/13 绿。判别信号测实抓真缺陷（H6① 纪律有效）。
+- **3 突变探针（全红 → 逐字还原 → 绿）**：P1 并行循环 → 顺序 await（② 红 503ms = 500ms 兜底支）/ P2 删 `mergeAggregated(aggregated, result)` 调用（8 红：③④⑤a-d⑥⑩）/ P3 `return aggregated` → `return { results: [] }`（① + 聚合面红）。
+
+**四件套 + gate**：tsc 0 / eslint 9 变更文件 0 / build 0 KB（entry point）/ 全量 974 pass 0 fail 69 files（基线 961/68 → +13 测 +1 文件）/ gate 6 pass 0 fail 2 files（capability-matrix L120 拆 = 本门自身行变更：① 新 done 行 proof 文件存在且含真实测试 / ② missing 行有 by；engine 不在 anti-stub 扫描集）。
+
+**下一步 = S-5c**（task #100）：schema 收紧（engine/config：HooksSchema 4 变体全字段面 + 事件名集校验 record key ∈ HOOK_EVENTS + SettingsSchema hooks z.any() → z.lazy(HooksSchema)）+ 门/矩阵同步 + E-5 整波审视记录（双只读子代理 ≤2）+ memory 同步（atlascode-wave-c-progress.md + MEMORY.md 索引行）。

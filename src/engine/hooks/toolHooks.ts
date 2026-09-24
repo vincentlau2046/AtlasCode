@@ -19,8 +19,10 @@
  *  - post-hook / stop-hook additionalContext + stopReason 上下文回灌 → 消息/REPL 波
  *    （新仓无消息面；本版只执行钩子 + 捕获结果，回灌消费点归消息/REPL 波）
  *  - stop-hooks blockingErrors 回灌（追加消息序列）→ 消息/REPL 波
- *  - 流式 hooks-runner（AsyncGenerator，旧仓 executeHooks 执行循环 +
- *    processHookJSONOutput 字段映射）→ S-5b；loop 流式 chatStream 消费面 → E-1b-full
+ *  - 流式执行核心已落 S-5b（§8.40）：执行循环 = 域叶 src/hooks/streaming.ts
+ *    runHooksStream（旧仓 executeHooks 执行循环移植，解耦 message/attachment；
+ *    L3 re-export 面 = 本子门面 + engine 根门面）；消费面 = loop 流式 chatStream
+ *    （E-1b-full 前向接缝，loop.ts 头注登记）+ attachment 渲染（消息/REPL 波）
  *
  * L3 桥接 cast（登记，同 E-4 §8.36 先例）：pipeline ToolHooks 入参契约 = unknown
  * （shared Tool.call args 面），hooks 域执行器入参 = Record<string, unknown>——
