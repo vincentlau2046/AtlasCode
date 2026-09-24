@@ -2003,3 +2003,122 @@ grep/Read 复核全部 finding 后处置（子代理报告 = 数据非裁定，D
 
 **提交链**：`9a2ad8a`（d2 详案）→ `5e20333`（d2 实施）→
 `3eb3538`（审视修复 7 项）→ 本 docs 提交（实施记录 + 审视记录）。
+
+### S-7e messaging（跨会话通信域，§8.50）——详案
+
+**旧仓面盘点**（charter L4.8/§7「messaging/ 跨会话通信 ~3550L」口径核对）：
+- utils 12 文件 2547L：teammateMailbox 1183 / messageQueueManager 539 /
+  teammate 292 / inProcessTeammateHelpers 102 / teammateContext 96 /
+  teamMemoryOps 88 / teamDiscovery 81 / directMemberMessage 69 /
+  collapseTeammateShutdowns 55 / controlMessageCompat 32 / udsMessaging 2 /
+  messagePredicates 8
+- tools/SendMessageTool 997L（工具 wrapper → 工具本体波）
+- swarm 子树 7217L（backends Tmux/ITerm/InProcess/Pane 进程执行层 +
+  inProcessRunner 1536 + permissionSync 928 + teamHelpers 683 + spawn 族）
+  = shell/swarm 波 + remote defer（Port 9），**不在** charter 3550L 口径内
+  （3550 ≈ 2547 + 997 ✓）
+
+**范围裁定（随迁 / 裁 / 前向接缝）**：
+
+随迁（engine/messaging 域，d1 = mailbox + 身份层）：
+1. `teammateMailbox.ts` 1183L → `messaging/mailbox.ts`（算法体逐字；导出
+   面 ~50：文件读写/mark-read/clear + 结构化协议消息 schema 族 8 型
+   （Permission / SandboxPermission / PlanApproval / Shutdown /
+   ModeSet / TaskAssignment / TeamPermissionUpdate / IdleNotification）
+   + 谓词 + getLastPeerDmSummary）
+2. `teammate.ts` 292L 无状态核心 → `messaging/teammate.ts`
+   （dynamicTeamContext AsyncLocalStorage 族 / getAgentId / getAgentName /
+   getTeamName / getTeammateColor / isTeammate / isPlanModeRequired /
+   isTeamLead / getParentSessionId / set-clearDynamicTeamContext）
+3. `teammateContext.ts` 96L → 逐字（AsyncLocalStorage 自含）
+4. `messagePredicates` 8L / `controlMessageCompat` 32L /
+   `collapseTeammateShutdowns` 55L / `directMemberMessage` 69L → 逐字/近逐字
+   （仅 Message 类型面 + AppState duck 面）
+5. 小工具面 162L 域内本地：lockfile 43（mailbox 写锁）/ signal 43
+   （queue 订阅原语）/ agentId 99（format/parse AgentId + RequestId 四函数）/
+   objectGroupBy 18；extractTextContent 9L（旧 messages.ts:2897）域内本地
+
+随迁（d2 = 入轮命令队列层）：
+6. `messageQueueManager.ts` 539L → `messaging/queueManager.ts`（入轮命令
+   队列 + pending notifications，纯内存 + signal 订阅；导出面 30）
+
+裁面（H6 登记，各波自持——复审勿当遗漏重提）：
+- **swarm 子树 7217L**：backends 进程执行 + inProcessRunner + permissionSync
+  + teamHelpers + spawn/UI 族 = shell/swarm 波 + remote defer（Port 9）
+- **inProcessTeammateHelpers 102L**：in-process 队友执行层（依赖
+  tasks/InProcessTeammateTask ∉ 新仓 tasks 面 + updateTaskState）→
+  shell/swarm 波
+- **teamDiscovery 81L**：Teams UI footer 状态扫描；依赖
+  `swarm/backends/types.ts`（`: any` stub 文件，PaneBackendType/isPaneBackend
+  全退化）+ teamHelpers.readTeamFile → shell/swarm 波
+- **teamMemoryOps 88L**：memdir/teamMemPaths ∉ 新仓（memory 域未随迁
+  team 面）→ memory/shell 波
+- **udsMessaging 2L**：`: any` stub（绝不把 stub 签名当真行为）；UDS =
+  remote/deferred Port 9 地 → 不随迁
+- **SendMessageTool 997L 工具 wrapper**：工具本体波（其引擎核心 = 本域
+  mailbox 面；SendMessageTool.ts 仅消费 writeToMailbox +
+  createShutdown*Message 族，全部本域随迁面 → 依赖方向登记，本体波接线）
+- **teammate.ts 尾 3 AppState 参函数**（hasActiveInProcessTeammates /
+  hasWorkingInProcessTeammates / waitForTeammatesToBecomeIdle，in-process
+  执行层状态读）→ 裁登记；执行时若引擎消费面浮现，重裁 duck 化
+- **recordQueueOperation**（queueManager 唯一持久化钩子）：d1 record 裁面
+  已登记（shell sessionStorage 域）→ 裁，队列纯内存 + replay 面 =
+  shell 波前向接缝
+- **Bootstrap/React 面**：bootstrap getState / AppState 实例 = 壳层；
+  引擎面经注入窗口（queueManager SetAppState duck 化）
+
+**依赖映射（旧 → 新仓落点）**：
+
+| 旧依赖 | 新仓面 | 处置 |
+|---|---|---|
+| getTeamsDir（envUtils） | `join(getAtlasConfigHomeDir(), 'teams')`（config 域 configRoot；`ATLAS_CONFIG_DIR` env 测试隔离，无需注入口） | 域内本地构造 |
+| jsonParse / jsonStringify | session/json（d1） | 跨域 import |
+| logForDebugging / logError / getErrnoCode | shared logging port（scheduler 先例 cronTasks 头注） | import shared |
+| lazySchema | shared（scheduler 先例 cronJitterConfig 登记「lazySchema → shared」） | import shared（执行时核验） |
+| TEAMMATE_MESSAGE_TAG（xml.ts） | 域内常量 `'teammate-message'`（串逐字） | 域内本地 |
+| TEAM_LEAD_NAME（swarm/constants 33L） | 域内常量 `'team-lead'`（串逐字；其余 TMUX/SWARM 常量 = shell swarm 波） | 域内本地 |
+| BackendType（swarm/backends/types `: any` stub） | H6：旧为 any-stub 退化面；新仓定义域内最小形或保 any + 登记 | 类型面 delta 登记（执行时按 mailbox 实际用法定） |
+| generateRequestId（agentId 99L） | `messaging/agentId.ts` 域内逐字随迁（四函数全量） | 随迁 |
+| count（array.ts） | 域内 1 行 | 随迁 |
+| getSessionId（bootstrap/state） | session 域 `getSessionEnv().getSessionId()`（d1 env 面） | 跨域 import |
+| extractTextContent（messages.ts:2897） | `messaging/textContent.ts` 9L 逐字 | 随迁 |
+| objectGroupBy（18L） | 域内逐字 | 随迁 |
+| PastedContent（config）/ Permutations（types/utils） | 执行时核验 shared/config 落点 | 按实际裁定 |
+| PermissionModeSchema（sdk/coreSchemas） | 域内 zod 最小 enum（新仓 zod 4.6.5 主入口 = v4，`zod/v4` → `zod` import 面 delta） | 类型面 delta 登记 |
+| AppState（state） | SetAppState duck 化（`(f: (prev: AppState) => AppState) => void` → 结构最小面；queueManager 仅导出类型不触体，执行时核验） | 类型面 delta |
+| Message（types/message） | session 域类型（d1） | 跨域 import |
+
+**子任务拆分**（可独立审视单元；每单元 1 只读审视，≤2 派发限额）：
+- **d1 = mailbox + 队友身份层**：mailbox 1183 + teammate 无状态核心 +
+  teammateContext + 小工具面（lockfile/signal/agentId/objectGroupBy/
+  textContent）+ 4 小文件 + 全裁面登记（含 swarm / inProcessTeammateHelpers /
+  teamDiscovery / teamMemoryOps / udsMessaging / SendMessageTool 依赖方向 /
+  teammate 尾 3 函数 / recordQueueOperation）。
+  - unit 零磁盘：schema 族 8 型 round-trip + 谓词 / formatTeammateMessages /
+    getLastPeerDmSummary / agentId round-trip / objectGroupBy /
+    extractTextContent / signal / teammate 动态上下文 run（AsyncLocalStorage
+    run 隔离）/ lockfile 纯判定面
+  - func 真盘（mkdtemp + `ATLAS_CONFIG_DIR` env 隔离 → getTeamsDir 落 tmp）：
+    mailbox 文件 round-trip（write → read → mark-read → clear）/ 写锁并发
+    （lockfile 互斥）/ unread 计数
+  - 突变探针：P-M1（markMessageAsReadByIndex 索引守卫删 → func 恰 1 红）/
+    P-M2（mailbox 写去重/原子支删 → func 恰 1 红）/ P-M3（agentId
+    parseAgentId 字段映射支删 → unit 恰 1 红）
+- **d2 = 入轮命令队列层**：queueManager 539 + PastedContent/Permutations
+  映射落点 + 裁面收口（recordQueueOperation replay 接缝登记）。
+  - unit 零磁盘（纯内存）：queue 全 30 导出面（enqueue/dequeue/peek/
+    remove/filter/clear/reset / 优先级 getCommandsByMaxPriority / 订阅
+    订阅族 / pending notifications 别名面 / isSlashCommand /
+    editable-visible 守卫）
+  - 突变探针：P-M4（getCommandsByMaxPriority 排序支删 → unit 恰 1 红）/
+    P-M5（enqueue 幂等/去重支删 → unit 恰 1 红；执行时按实际代码面定支）
+
+**基线谱系**：1284（S-7d d2 末）→ d1 ~13xx → d2 ~13xx（实测）+ gate 6
+（messaging 域 ∉ 8 域门扫描集，matrix 行按 session 先例登记）。
+
+**编号约定**（承接 L1613）：§8.50 = S-7e（d1/d2，各实施后补「实施记录 +
+独立只读审视记录」段，S-7a/b/c/d 先例）/ §8.51 = E-7 整波审视记录（双只读
+≤2：A 旧仓对照 / B H6 死接缝）+ 终验四件套 + memory 同步。
+
+**执行序**：详案提交（本段）→ d1 实施 → d1 独立审视 → d1 闭环 → d2 实施
+→ d2 独立审视 → d2 闭环 → S-7e 完结，进入 §8.51 整波审视。
