@@ -12,11 +12,22 @@
  * allow 命中 rule 原因 / mcp__server 前缀拒该 server 全部工具 /
  * 空规则集 = allow 默认兼容回归）。规则匹配核心族细测归
  * tests/unit/permission-rule-matching.test.ts（matrix 新行 proof）。
+ *
+ * E-6 S-6b 工具面分发扩展（§8.43 判别信号，fake duck 工具 + fake sandbox
+ * 窗口，零磁盘）：1c duck deny 透传（1d）/ 1f 内容 ask bypass-immune
+ * （P-B1 探针锚点）/ 1g safetyCheck bypass-immune / 2a bypass 采纳 duck
+ * updatedInput + 无 updatedInput 回落 input（P-B2 探针锚点）/ 2b 采纳 /
+ * ⑥ 三态（启用+auto-allow 1b 跳过落 3 decisionReason 无 rule /
+ * dangerouslyDisableSandbox 失活 / placeholder 失活 / bypass 态 delta）/
+ * 1c 抛错吞没落 3 / 完整上下文无规则落 3 ask（gate fail-closed）。
+ * 薄行为回归（无上下文 + 无 duck = 空规则集 allow）既有测守住。
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import {
   setPermissionsBootstrapEnv,
   resetPermissionsBootstrapEnv,
+  setSandboxAccess,
+  resetSandboxAccess,
   hasPermissionsToUseTool,
   checkReadPermissionForTool,
   checkWritePermissionForTool,
@@ -27,6 +38,7 @@ import {
 import type {
   ToolPermissionContext,
   PermissionDecision,
+  PermissionResult,
 } from '../../src/shared'
 
 function makeContext(): ToolPermissionContext {
@@ -50,14 +62,49 @@ const writeTool: PermissionTool = {
 }
 const noPathTool: PermissionTool = { name: 'NoPath' }
 
+const ruleContext = (
+  deny: string[] = [],
+  ask: string[] = [],
+  allow: string[] = [],
+  mode: ToolPermissionContext['mode'] = 'default',
+): ToolPermissionContext => ({
+  mode,
+  additionalWorkingDirectories: new Map(),
+  alwaysAllowRules: allow.length ? { session: allow } : {},
+  alwaysDenyRules: deny.length ? { session: deny } : {},
+  alwaysAskRules: ask.length ? { session: ask } : {},
+  isBypassPermissionsModeAvailable: false,
+})
+
+/** 假 sandbox 窗口（纯内存；placeholder 禁用态 = resetSandboxAccess）。 */
+function injectSandbox(cfg: { enabled: boolean; autoAllow?: boolean }): void {
+  setSandboxAccess({
+    isSandboxingEnabled: () => cfg.enabled,
+    isAutoAllowBashIfSandboxedEnabled: () => cfg.autoAllow ?? false,
+    getFsWriteConfig: () => ({ allowOnly: [], denyWithinAllow: [] }),
+  })
+}
+
+/** 带 checkPermissions 的 duck 工具（工具面分发半的假消费者）。 */
+function duckTool(
+  name: string,
+  checkPermissions?: (
+    input: Record<string, unknown>,
+  ) => Promise<PermissionResult>,
+): PermissionTool {
+  return { name, checkPermissions }
+}
+
 beforeEach(() => {
   setPermissionsBootstrapEnv({
     getOriginalCwd: () => '/tmp/proj',
     getCwd: () => '/tmp/proj',
   })
+  resetSandboxAccess()
 })
 afterEach(() => {
   resetPermissionsBootstrapEnv()
+  resetSandboxAccess()
 })
 
 describe('hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新）', () => {
@@ -88,20 +135,6 @@ describe('hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新）', () =
     )
     expect(decision.behavior).toBe('deny')
     expect(decision).toBe(forced)
-  })
-
-  const ruleContext = (
-    deny: string[] = [],
-    ask: string[] = [],
-    allow: string[] = [],
-    mode: ToolPermissionContext['mode'] = 'default',
-  ): ToolPermissionContext => ({
-    mode,
-    additionalWorkingDirectories: new Map(),
-    alwaysAllowRules: allow.length ? { session: allow } : {},
-    alwaysDenyRules: deny.length ? { session: deny } : {},
-    alwaysAskRules: ask.length ? { session: ask } : {},
-    isBypassPermissionsModeAvailable: false,
   })
 
   test('deny 规则命中 → deny（decisionReason rule + 固定拒绝消息）', async () => {
@@ -171,7 +204,8 @@ describe('hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新）', () =
       { getToolPermissionContext: () => ruleContext(['mcp__myserver__*']) },
     )
     expect(wildcardDenied.behavior).toBe('deny')
-    // 其他 server 不受该前缀规则影响
+    // 其他 server 不受该前缀规则影响（S-6b 后：无规则反对 → 3 落 ask
+    // gate fail-closed，非 deny 即未误伤）
     const otherServer = await hasPermissionsToUseTool(
       {
         name: 'mcp__other__tool1',
@@ -180,7 +214,7 @@ describe('hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新）', () =
       {},
       { getToolPermissionContext: () => ruleContext(['mcp__myserver']) },
     )
-    expect(otherServer.behavior).toBe('allow')
+    expect(otherServer.behavior).toBe('ask')
   })
 
   test('优先级：deny 规则先于 allow 规则（deny 命中即拒）', async () => {
@@ -192,6 +226,186 @@ describe('hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新）', () =
       },
     )
     expect(decision.behavior).toBe('deny')
+  })
+})
+
+describe('hasPermissionsToUseTool 工具面分发（E-6 S-6b，§8.43 判别信号）', () => {
+  test('1c duck deny 透传（1d：工具自拒原样返回）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Bash', async () => ({
+        behavior: 'deny',
+        message: 'tool self-denied',
+        decisionReason: { type: 'other', reason: 'tool policy' },
+      })),
+      { command: 'ls' },
+      { getToolPermissionContext: () => ruleContext() },
+    )
+    expect(decision.behavior).toBe('deny')
+    expect((decision as { message: string }).message).toBe('tool self-denied')
+  })
+
+  test('1c 抛错吞没（logForDebugging 无副作用）→ 落 3 ask（完整上下文）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Bash', () => {
+        throw new Error('boom')
+      }),
+      { command: 'ls' },
+      { getToolPermissionContext: () => ruleContext() },
+    )
+    expect(decision.behavior).toBe('ask')
+  })
+
+  test('1f 内容 ask（ruleBehavior===ask）bypass-immune（P-B1 探针锚点）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Bash', async () => ({
+        behavior: 'ask',
+        message: 'content-specific ask',
+        decisionReason: {
+          type: 'rule',
+          rule: {
+            source: 'session',
+            ruleBehavior: 'ask',
+            ruleValue: { toolName: 'Bash' },
+          },
+        },
+      })),
+      { command: 'npm publish' },
+      { getToolPermissionContext: () => ruleContext([], [], [], 'bypassPermissions') },
+    )
+    // bypass 态下仍 ask（1f 先于 2a）
+    expect(decision.behavior).toBe('ask')
+  })
+
+  test('1g safetyCheck bypass-immune', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Write', async () => ({
+        behavior: 'ask',
+        message: 'safety',
+        decisionReason: {
+          type: 'safetyCheck',
+          reason: 'dangerous path',
+          classifierApprovable: false,
+        },
+      })),
+      { file_path: '/tmp/proj/.gitconfig' },
+      { getToolPermissionContext: () => ruleContext([], [], [], 'bypassPermissions') },
+    )
+    expect(decision.behavior).toBe('ask')
+  })
+
+  test('2a bypass 采纳 duck updatedInput（工具改写 input 优先）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Bash', async () => ({
+        behavior: 'allow',
+        updatedInput: { command: 'rewritten' },
+      })),
+      { command: 'original' },
+      { getToolPermissionContext: () => ruleContext([], [], [], 'bypassPermissions') },
+    )
+    expect(decision.behavior).toBe('allow')
+    expect((decision as { updatedInput?: unknown }).updatedInput).toEqual({
+      command: 'rewritten',
+    })
+    expect(decision.decisionReason).toEqual({
+      type: 'mode',
+      mode: 'bypassPermissions',
+    })
+  })
+
+  test('2a 无 updatedInput 回落原 input（P-B2 探针锚点）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Bash', async () => ({
+        behavior: 'ask',
+        message: 'ask other reason',
+        decisionReason: { type: 'other', reason: 'x' },
+      })),
+      { command: 'original' },
+      { getToolPermissionContext: () => ruleContext([], [], [], 'bypassPermissions') },
+    )
+    // ask（other 原因，1f/1g 不截）+ bypass → 2a allow + updatedInput 回落 input
+    expect(decision.behavior).toBe('allow')
+    expect((decision as { updatedInput?: unknown }).updatedInput).toEqual({
+      command: 'original',
+    })
+  })
+
+  test('2b allow 规则采纳 duck updatedInput', async () => {
+    const decision = await hasPermissionsToUseTool(
+      duckTool('Read', async () => ({
+        behavior: 'allow',
+        updatedInput: { file_path: '/rewritten' },
+      })),
+      { file_path: '/tmp/proj/a.txt' },
+      { getToolPermissionContext: () => ruleContext([], [], ['Read']) },
+    )
+    expect(decision.behavior).toBe('allow')
+    expect(decision.decisionReason).toEqual({
+      type: 'rule',
+      rule: { source: 'session', ruleBehavior: 'allow', ruleValue: { toolName: 'Read' } },
+    })
+    expect((decision as { updatedInput?: unknown }).updatedInput).toEqual({
+      file_path: '/rewritten',
+    })
+  })
+
+  test('⑥ 有效（sandbox 启用 + auto-allow）→ 1b 跳过落 3（ask 无 rule 原因，区别于 1b）', async () => {
+    injectSandbox({ enabled: true, autoAllow: true })
+    const decision = await hasPermissionsToUseTool(
+      { name: 'Bash' },
+      { command: 'ls' },
+      { getToolPermissionContext: () => ruleContext([], ['Bash']) },
+    )
+    // ⑥ 跳过 1b → 1c 无 duck → passthrough → 3 ask（decisionReason 无 rule）
+    expect(decision.behavior).toBe('ask')
+    expect((decision as { decisionReason?: unknown }).decisionReason).toBeUndefined()
+  })
+
+  test('⑥ dangerouslyDisableSandbox=true 失活 → 1b rule ask', async () => {
+    injectSandbox({ enabled: true, autoAllow: true })
+    const decision = await hasPermissionsToUseTool(
+      { name: 'Bash' },
+      { command: 'ls', dangerouslyDisableSandbox: true },
+      { getToolPermissionContext: () => ruleContext([], ['Bash']) },
+    )
+    expect(decision.behavior).toBe('ask')
+    expect(decision.decisionReason).toEqual({
+      type: 'rule',
+      rule: { source: 'session', ruleBehavior: 'ask', ruleValue: { toolName: 'Bash' } },
+    })
+  })
+
+  test('⑥ placeholder（sandbox 禁用）失活 → 1b rule ask', async () => {
+    const decision = await hasPermissionsToUseTool(
+      { name: 'Bash' },
+      { command: 'ls' },
+      { getToolPermissionContext: () => ruleContext([], ['Bash']) },
+    )
+    expect(decision.behavior).toBe('ask')
+    expect(decision.decisionReason?.type).toBe('rule')
+  })
+
+  test('⑥ 有效 + bypass 态 → 2a allow（⑥ delta：无 ⑥ 则 1b rule ask）', async () => {
+    injectSandbox({ enabled: true, autoAllow: true })
+    const decision = await hasPermissionsToUseTool(
+      { name: 'Bash' },
+      { command: 'ls' },
+      { getToolPermissionContext: () => ruleContext([], ['Bash'], [], 'bypassPermissions') },
+    )
+    expect(decision.behavior).toBe('allow')
+    expect(decision.decisionReason).toEqual({
+      type: 'mode',
+      mode: 'bypassPermissions',
+    })
+  })
+
+  test('完整上下文 + 无规则 + 无 duck → 3 落 ask（gate fail-closed，非薄骨架 allow）', async () => {
+    const decision = await hasPermissionsToUseTool(
+      { name: 'NoRuleTool' },
+      { x: 1 },
+      { getToolPermissionContext: () => ruleContext() },
+    )
+    expect(decision.behavior).toBe('ask')
+    expect((decision as { decisionReason?: unknown }).decisionReason).toBeUndefined()
   })
 })
 

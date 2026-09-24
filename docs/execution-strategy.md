@@ -1561,3 +1561,5 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 **门 / 矩阵同步**：permissions 域 matrix 加 done 行 3（path-validation 测 / 工具面分发测（permissions.test.ts 扩展）/ 语义支 3 块（S-4c2 行 capability 描述翻新））+ missing 行 1（bash prompt 分类器消费，by = auto-mode 纵切波）；engine 域不在 8 域门扫描集 → 无 gate 改动；四件套 + 探针纪律不变。
 
 **基线谱系**：999 → S-6a（+path-validation 测）→ S-6b（permissions 工具面扩展）→ S-6c（bash-classifier-stub 测）→ S-6d（语义面扩展）→ **E-6 整波审视**（双只读 ≤2：A 旧仓 ground-truth 对照（8 函数逐字 + 1c/1f/1g/2a/3 语义 + 配置对齐）/ B H6 死接缝（前向字段消费面 + 注入窗口 placeholder 态 + matrix 行真实性 + §8.42 订正核验）+ 四件套）→ 修复提交 + §8.44 审视记录 + memory 同步。
+
+**S-6b 实施记录**（S-6a 22fba69 之后）：决策主体 120L → ~300L（1c 鸭子分发 / 1d / 1f / 1g / 2a / 2b / 3 + getUpdatedInputOrFallback + ⑥ 半落 + BASH_TOOL_NAME 域内镜像）。两实施注：(a) 3 支落 ask 后「完整上下文 + 无规则 + 无 duck」从 S-4b 薄骨架 allow 翻为 ask（gate fail-closed 映射 §8.36）——既有 mcp 前缀测 other-server 断言随翻 ask（非 deny = 未误伤，测内注明）；「无 getToolPermissionContext 注入 = 末端 allow」薄骨架兼容保留（既有「空规则集 = allow」测守住）；(b) ⑥ placeholder 态恒失活（零行为变化），⑥ 三态 + bypass 态 delta 全落测。permissions.test.ts +12 测（14 → 26），1040 pass / 71 文件。探针 P-B1（1f ruleBehavior 条件突变）/ P-B2（getUpdatedInputOrFallback 回落删）各恰 1 红，逐字恢复（diff 验净）。

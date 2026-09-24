@@ -13,9 +13,12 @@
  *   getAtlasTempDir / checkRead·WritePermissionForTool / pathInAllowedWorkingPath /
  *   DANGEROUS_FILES·DIRECTORIES；PermissionTool 窄视图 E-4 S-4b 扩 mcpInfo? +
  *   checkPermissions? 两可选字段）
- * - permissions.ts：hasPermissionsToUseTool 规则支决策面（E-4 S-4b 翻新：
- *   forceDecision → deny → ask → allow tool-wide → 空规则集 = allow 默认兼容；
- *   分类器 / dontAsk / denial 跟踪 / hooks 反向边 / sandbox 自动放行残留守）
+ * - permissions.ts：hasPermissionsToUseTool 决策主体（E-4 S-4b 规则支 +
+ *   E-6 S-6b 工具面分发回填：1c 鸭子分发 / 1f 内容 ask / 1g safetyCheck /
+ *   2a bypass + getUpdatedInputOrFallback / 3 passthrough→ask + ⑥ sandbox
+ *   自动放行半落（dangerouslyDisableSandbox 守卫）；无上下文 = allow 薄骨架
+ *   兼容；残留守：① 实现半 / ② dontAsk / ③ 分类器 / ④ denial 跟踪 /
+ *   ⑤ hooks 反向边 / ⑥ 窗口接线）
  * - permissionMode.ts：PermissionMode 常量族 + permissionModeFromString
  *   （E-4 S-4c1，旧仓 types/permissions 常量 + PermissionMode.ts fromString；
  *   auto 支裁登记，UI 配置面随 S-4b 裁剪口径）

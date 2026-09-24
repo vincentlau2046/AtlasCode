@@ -67,8 +67,9 @@ import { getSettingsPaths } from './settingsPaths'
  * E-4 S-4b 扩两可选字段（既有消费者零影响——全可选）：
  *   - mcpInfo —— 镜像 shared Tool.mcpInfo（规则匹配按全名 mcp__server__tool，
  *     防 builtin 同名规则误伤 MCP 替代；ruleMatching.toolMatchesRule 消费）。
- *   - checkPermissions —— 鸭子可选分发（残留守① 工具面半；实现归 E-6，
- *     checkRuleBasedPermissions 1c 存在才调；shared Tool 方法签名结构兼容）。
+ *   - checkPermissions —— 鸭子可选分发（残留守① 工具面半：分发机制 E-6
+ *     S-6b 落 permissions.ts 1c（存在才调）；Bash / PowerShell 工具本体
+ *     实现归工具本体波；shared Tool 方法签名结构兼容）。
  */
 export type PermissionTool = {
   name: string
