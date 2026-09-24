@@ -50,11 +50,19 @@ import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidatio
  *   - ask=true → 需用户确认（旧仓 TUI 弹窗面，新仓残留守）→ **fail-closed**
  *     is_error + 确认标记（静默执行 = 安全洞；映射支 message 分叉 = ask 字段
  *     消费点，E-5/UI prompt 面落时区分硬拒与待确认）。
+ *
+ * 门消费面（E-wave-end S-E1 I-1 换回，§8.52 A1）：createPermissionGate 消费
+ * base hasPermissionsToUseTool 全决策体（mode-level 支 2a / 规则支 2b /
+ * ⑥ sandbox 自动放行半落 / 1c 鸭子分发 + updatedInput），非仅规则支
+ * checkRuleBasedPermissions——单决策体单一事实源（E-6 M-1 门工厂消费面
+ * 事实订正换回项）。verdict 扩 updatedInput = 门改写 call 入参（旧仓
+ * 决策体 updatedInput 语义；现零活工具面 checkPermissions 实现 → 恒为
+ * fallback 原入参，行为惰性，工具本体波落 checkPermissions 后生效）。
  */
 export type PermissionGate = (
   tool: Tool,
   input: unknown,
-) => Promise<{ allowed: boolean; reason?: string; ask?: boolean }>
+) => Promise<GateVerdict>
 
 /**
  * E-5 S-5a：pre-hook 结果（§8.39 C-6：消费 AggregatedHookResult，非 fire-and-forget）。
@@ -89,8 +97,18 @@ export interface PostToolUseHookOutcome {
 /** 钩子权限裁定四值（hooks 域 AggregatedHookResult.permissionBehavior 值集）。 */
 export type HookPermissionBehavior = 'allow' | 'deny' | 'ask' | 'passthrough'
 
-/** 权限门 verdict 形态（PermissionGate 返回值，mergeHookPermission 参数/返回）。 */
-export type GateVerdict = { allowed: boolean; reason?: string; ask?: boolean }
+/**
+ * 权限门 verdict 形态（PermissionGate 返回值，mergeHookPermission 参数/返回）。
+ * updatedInput（E-wave-end S-E1 I-1）：门（全决策体 2a/2b / 1c 工具面 allow）
+ * 改写后的 call 入参；executeToolUse 在门放行后采纳（门晚于 hook，last wins
+ * = 门改写优先于 hook updatedInput）。
+ */
+export type GateVerdict = {
+  allowed: boolean
+  reason?: string
+  ask?: boolean
+  updatedInput?: unknown
+}
 
 /**
  * E-5 S-5a：钩子权限裁定 × E-4 权限门合流（§8.39 C-6，旧仓 toolHooks.ts:270
@@ -279,9 +297,19 @@ export async function executeToolUse(
   let block: ToolResultBlockParam
   let isError = false
   try {
+    // I-1（E-wave-end S-E1）：门放行后采纳门改写入参（全决策体 updatedInput 语义；
+    // 未注入 / 未改写 = undefined → effectiveInput 不变，窄 spine 语义保持）。
+    const callInput = verdict.allowed ? (verdict.updatedInput ?? effectiveInput) : effectiveInput
     // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
-    // 传最小 context 对象 { signal }，工具实现按需取用）。
-    const res = await tool.call(effectiveInput, { signal: deps.signal }, undefined, assistantMsg)
+    // 传最小 context 对象 { signal }，工具实现按需取用）。F1（E-wave-end S-E1）：checkPermission
+    // 同入 context = 子代理门透传接缝（AgentTool 消费 → runAgent 子 loop 同门执行，
+    // 旧仓子代理共享父会话权限上下文语义；context: unknown 契约不变）。
+    const res = await tool.call(
+      callInput,
+      { signal: deps.signal, checkPermission: deps.checkPermission },
+      undefined,
+      assistantMsg,
+    )
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
   } catch (error) {
     block = {

@@ -16,8 +16,9 @@
  *     半落（§8.43 裁定③；shouldUseSandbox 裁出归工具本体波）。
  *   - checkRuleBasedPermissions 1c = 鸭子可选分发（tool.checkPermissions? 存在才调）；
  *     旧 tool.inputSchema.parse 预解析裁（新 Tool 契约 inputSchema = JSON schema 无
- *     zod parse）/ catch 内 AbortError·APIUserAbortError 重抛裁（引擎类型，L3 域内
- *     不 import engine）+ logError → logForDebugging（shared/debug 无 logError）。
+ *     zod parse）/ catch 内 AbortError·APIUserAbortError 重抛 **S-E1 已落**
+ *     （isAbortShapedError 双支形判别，§8.52 A3；delta 登记见该函数头注）
+ *     + logError → logForDebugging（shared/debug 无 logError）。
  *     工具面 checkPermissions 实现（Bash/PowerShell 等）归工具本体波
  *     （§8.43 裁定①；E-6 S-6b 仅落分发机制半，实现半顺延）。
  *   - createPermissionRequestMessage 裁六支（hook/subcommandResults/
@@ -352,6 +353,26 @@ export function createPermissionRequestMessage(
 }
 
 /**
+ * F4（E-wave-end S-E1，§8.52 A3）：1c catch abort-shape 重抛判别（旧仓
+ * utils/errors.ts isAbortError 三支形 + 旧 catch `if (isAbortError(e)) throw e`
+ * 逐字语义——abort 是控制流非工具错误，吞掉 = 用户取消失效）。
+ *
+ * 新仓双支形判别（delta 登记，复审勿当遗漏重提）：
+ *  - 旧仓自研 AbortError 类（utils/errors.ts:12）未随迁 → 原生 abort 面 =
+ *    AbortController.abort() 的 DOMException（name === 'AbortError'）支；
+ *  - APIUserAbortError（modelprovider/types.ts:34，extends APIError 无 own
+ *    name）经 constructor.name 判别——新仓无 minify（旧仓 instanceof 理据
+ *    = SDK minified 名 mangle，不適用）；DEP-2 C-Deep allow=[shared] 禁
+ *    permissions 域 import modelprovider 值 → 形判别；若未来引入 minified
+ *    外部 SDK 错误类，换注入窗口 instanceof（前向登记，工具本体波）。
+ */
+export function isAbortShapedError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false
+  if (e.name === 'AbortError') return true
+  return e.constructor?.name === 'APIUserAbortError'
+}
+
+/**
  * Check only the rule-based steps of the permission pipeline — the subset
  * that bypassPermissions mode respects (everything that fires before step 2a).
  *
@@ -411,6 +432,8 @@ export async function checkRuleBasedPermissions(
     try {
       toolPermissionResult = await tool.checkPermissions(input, context)
     } catch (e) {
+      // F4（§8.52 A3）：abort 是控制流非工具错误 → 重抛（旧仓 catch 逐字）。
+      if (isAbortShapedError(e)) throw e
       logForDebugging(
         `checkPermissions failed for ${tool.name}: ${errorMessage(e)}`,
       )

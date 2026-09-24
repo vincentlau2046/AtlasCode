@@ -48,6 +48,7 @@ import { AGENT_TOOL_NAME, MAX_WORKER_SPAWN_DEPTH } from './constants'
 import { getPrompt } from './prompt'
 import { runAgent } from './runAgent'
 import { isCoordinatorMode } from '../../coordinator'
+import type { PermissionGate } from '../../pipeline'
 
 /** 输入 JSON schema（旧仓 zod inputSchema 裁剪；去 run_in_background/name/team_name）。 */
 const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
@@ -82,10 +83,12 @@ interface AgentToolInput {
 }
 
 /**
- * call 第 2 参 context（旧仓 ToolUseContext 裁剪）。pipeline 透传 { signal }；组合根
- * （E-wave-end）可再填 tools / modelProvider / parentRole / spawnDepth（父线程工具池 +
- * 单例 provider 注入窗口 + 父 role + spawn 深度）。未填 → 空工具池 / 单例 provider /
- * 'small' / 深度 0（安全退化，非假能力）。
+ * call 第 2 参 context（旧仓 ToolUseContext 裁剪）。pipeline 透传 { signal,
+ * checkPermission }（F1 子代理门透传，§8.52 A2：父 loop 门经 call context 入
+ * 子 loop 同门执行）；组合根（E-wave-end S-E2）可再填 tools / modelProvider /
+ * parentRole / spawnDepth（父线程工具池 + 单例 provider 注入窗口 + 父 role +
+ * spawn 深度）。未填 → 空工具池 / 单例 provider / 'small' / 深度 0（安全退化，
+ * 非假能力）。
  */
 interface AgentToolCallContext {
   signal?: AbortSignal
@@ -93,6 +96,8 @@ interface AgentToolCallContext {
   modelProvider?: ModelProvider
   parentRole?: ModelRole
   spawnDepth?: number
+  /** 权限门（F1，§8.52 A2）：父 loop 门 → 子 loop 同门执行（runAgent 透传）。 */
+  checkPermission?: PermissionGate
 }
 
 /** 未知 type 回落 general-purpose 语义但保留请求 type 名 + 自定义 whenToUse（旧仓 resolveAgentDefinition 同义）。 */
@@ -184,6 +189,7 @@ export const AgentTool: Tool = {
       agentId,
       spawnDepth: childSpawnDepth,
       signal: ctx.signal,
+      checkPermission: ctx.checkPermission,
     })
 
     return {

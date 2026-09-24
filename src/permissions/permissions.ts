@@ -18,9 +18,9 @@
  *   - 1e requiresUserInteraction 裁——新 Tool 契约无该字段；前向接缝 =
  *     工具本体波（47 本体延续）。
  *   - 1c inputSchema.parse 裁——新契约 inputJSONSchema（engine 波）；
- *     abort 重抛裁——窄 context 无 abortController，E-wave-end 装配项
- *     「1c abort 重抛」消费全量类型时回填；catch logError →
- *     logForDebugging（logging port no-op 占位，C-4）。
+ *     abort 重抛 **S-E1 已落**（catch 层 isAbortShapedError 双支形判别，
+ *     §8.52 A3；context abortController 活态回填 = 工具本体波前向登记）；
+ *     catch logError → logForDebugging（logging port no-op 占位，C-4）。
  *   - ⑥ shouldUseSandbox(input) 裁（124L 依赖面 = 工具本体波），以
  *     input.dangerouslyDisableSandbox !== true 守卫替代；delta 论证：
  *     新仓无 Bash 工具本体 → ⑥ 跳过后落 1c（passthrough）→ 3 → 非
@@ -64,6 +64,7 @@ import {
   createPermissionRequestMessage,
   getAskRuleForTool,
   getDenyRuleForTool,
+  isAbortShapedError,
   toolAlwaysAllowedRule,
 } from './ruleMatching'
 import { getSandboxAccess } from './sandboxAccess'
@@ -165,6 +166,9 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     try {
       toolPermissionResult = await tool.checkPermissions(input, context)
     } catch (e) {
+      // F4（§8.52 A3）：abort 是控制流非工具错误 → 重抛（旧仓 catch 逐字；
+      // 形判别 + delta 登记见 ruleMatching isAbortShapedError 头注）。
+      if (isAbortShapedError(e)) throw e
       // 旧仓 logError(e) → logForDebugging（logging port no-op 占位，C-4）
       logForDebugging(`checkPermissions threw for ${tool.name}: ${String(e)}`)
     }
