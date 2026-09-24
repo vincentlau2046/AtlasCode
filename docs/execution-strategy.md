@@ -1644,3 +1644,28 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 - **S-7d d1**：sessionStorage engine 面（旧仓 QueryEngine 8 处 recordTranscript + loop.ts recordContentReplacement:92 消费面；新仓 loop/QueryEngine 当前零调用点 → 状态机/持久核心落位 + 消费面 forward 登记）+ sessionMemory port 填真契约（H6 前向接缝收口）；94 export 裁至 engine 消费子集（~30，逐文件核）；测试面：record/load round-trip + chain build + checkResumeConsistency（func 层 JSONL 真盘）。
 - **S-7d d2**：sessionRestore.processResumedConversation 裁剪解耦（resume 总入口重耦合面拆解）+ transcriptSearch 202L 纯函数逐字（UI 搜索消费面登记）+ sessionContext port 填真契约；测试面：resume 链重建 + 搜索命中/边界。
 - **S-7e**：teammateMailbox 文件式 inbox 核心（54 export：getInboxPath/readMailbox/readUnreadMessages/writeToMailbox/markMessageAsRead/clearMailbox + lockfile + 消息 schema 族）+ teamHelpers 读写 + agentSwarmsEnabled（ATLAS_EXPERIMENTAL_AGENT_TEAMS env 门）+ teamDiscovery + spawnInProcess + inProcessRunner 核心（复用新仓 runAgent，permissionSync 928L 裁 + 登记 E-wave-end/权限波）；面板后端族 + useInboxPoller 裁 + 登记；registry ⑩/⑮ 行。测试面：mailbox 读写/已读/未读（unit 假盘 + func 真盘）+ 消息 schema 判别 + team file 读写 + env 门。
+
+### §8.46 S-7a tasks 追踪层实施 + 独立只读审视记录（2026-09-24 全闭环）
+
+**范围**：E-7 首个 leaf（§8.45.3 详案）——旧仓 `src/utils/task/framework.ts` 308L + `src/tasks/stopTask.ts` 100L + `LocalAgentTask.tsx` 695L + `LocalShellTask.tsx` 522L（含 guards 41L / killShellTasks 76L）随迁 `src/engine/coordinator/tasks/`（13 文件 + coordinator/engine 双门面 + 2 测试文件 + capability-matrix 2 done 行）。主体提交 `9998971`，审视修复批 `a941d1f`。
+
+**分层**：unit 零磁盘状态机（`engine-tasks` 40 测，`setDiskOutputEnv` 仅路径计算）+ func 真盘 delta/驱逐（`tasks-framework-fs` 6 测，真 tmpdir 注入序，memory-real-fs 先例）两层，覆盖 framework 状态机 / LocalAgent/LocalShell 生命周期 / stopTask 三态 / registry 两态 / 通知注入窗口 / ProgressTracker 计账 / 真盘 offset 补丁 / terminal+notified 驱逐 / TOCTOU 重检 / pollTasks 端到端。
+
+**突变探针**（backup→mutate→red→verbatim restore diff-verified）：
+- P-T1（registerTask merge 支删）= 恰 1 红（re-register 保留 UI 持有态）
+- P-T2（stopTask not_running 守卫删）= 恰 1 红（not_running 拒非 running）
+- P-T3（generateTaskAttachments terminal+notified 驱逐删）= 3 红——驱逐支被 3 个 func 测试共锚（直读 `evictedTaskIds` / apply 层 grace 重检 / pollTasks 端到端），共覆盖更强非缺陷；§8.45 计划"恰 1 红"系 func 测试落盘前预测，实测以 3 共锚为准。
+
+**独立只读审视（1 只读子代理，≤2 限额；旧仓 a8af45b ground-truth 对照 + H6 死接缝 + 突变锚点 + 门面 STR-1，发现全主会话 grep/Read 逐条复核）**：2 MINOR + 2 NOTE，全处置（无 MAJOR 无 BLOCKER）：
+- **MINOR-1 framework.ts 头注登记 escapeXml 加固 delta**——旧仓 `framework.ts:284,286` raw 插值 `outputPath`/`description`，新仓 `escapeXml(...)` 包裹（untrusted description 不再 raw 注入 XML = 有意加固）；当前 `generateTaskAttachments` 恒不 push attachments（pollTasks 附件循环空转、构造器不可达）→ 零行为 delta，裁定"登记不回归 raw"（头注补登记，`a941d1f`）。
+- **MINOR-2 测试 Message 导入源纠偏**——`engine-tasks.test.ts` 原从 `../../src/engine` 导 `type Message`，但 engine 门面 STR-1 全显式 re-export 不含该类型（type-only 擦除掩盖隐性断链）→ 改自 `../../src/shared`（`shared/types.ts:71`）。
+- **NOTE-1 localAgentTask 行内登记** `block.name !== undefined` 防御守卫（对宽松 Message 铸形，旧仓 `content.name`，良构消息行为等价；行内登记）。
+- **NOTE-2 localShellTask 内联 `agentType !== 'main-session'` 谓词**——已头注登记（等价 `isMainSessionTask`），零 delta 不处置。
+
+**审视核验通过项**：H6 类目 clean（`coordinator/tasks/` 零 `as any`/`{} as any`；SDK 事件队列 / abortSpeculation×2 / messageQueueManager→注入窗口 / sessionStorage symlink×2 / registry 未迁态 / killShellTasks 尾 dequeue / flushAndCleanup→executor port 全头注登记，无空洞）；5 逐字文件 faithfulness（framework/stopTask/guards/cleanupRegistry/abortController 除 MINOR-1 外全 clean）；突变锚点 P-T1/2/3 = 1/1/3 红全成立无 tautology；门面导出面（coordinator `export * from './tasks'` + engine/index.ts L140-210 显式块）全符。
+
+**基线谱系**：1054 pass / 72 文件 + gate 6（E-6 末）→ **S-7a 1100 pass / 0 fail / 74 文件**（+46 = engine-tasks 40 + tasks-framework-fs 6）+ gate 6（task 域入 8 域门扫描集，capability-matrix 加 2 done 行；engine 非门扫描集 gate 面不变）。四件套终验 tsc 0 / eslint 0 / build 0 KB entry / 1100 + gate 6 全绿。
+
+**残留守登记（S-7a 落头注，防「以为已全」）**：① SDK 事件队列（task_started/terminated，`enqueueSdkEvent` 裁，SDK 波随组合根）② 通知注入窗口默认 `logForDebugging`（messageQueueManager 全量队列随 S-7e messaging 波，teammateMailbox 54 export）③ completed 附件消费面（UI/SDK 待组合根；旧仓即 per-type callback 自持通知防 dual-delivery）④ registry 未迁态（RemoteAgentTask 855L / DreamTask 157L / InProcessTeammateTask 125L 随 S-7e / LocalWorkflowTask·MonitorMcpTask 门随模块裁）⑤ sessionStorage getAgentTranscriptPath symlink（S-7d session 波）⑥ PromptSuggestion abortSpeculation（对应波落位）。
+
+**闭环判定**：S-7a tasks 追踪层全闭环（主体 + 2 测试文件 + matrix 2 行 + 2 MINOR/2 NOTE 全处置 + 4 探针 + H6/faithfulness/门面 三视角审视 + 四件套终验），无 BLOCKER。**下一步 = S-7b scheduler（§8.47：cron.ts 308L 零 import 纯函数逐字 + cronScheduler 定时器主路 + 锁文件 zod + PID 活性探针，chokidar watch 支裁登记 + jitter GrowthBook 裁→DEFAULT 注入窗口；测试面 cron 解析边界 / nextCronRunMs 抖动 / findMissedTasks / 锁互斥 / 定时器 fire）**。
