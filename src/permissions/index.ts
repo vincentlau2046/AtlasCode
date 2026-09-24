@@ -45,6 +45,12 @@
  * - permissionUpdateSchema.ts：update 6 变体 zod discriminatedUnion +
  *   destination 5 值 enum（E-4 S-4c2 旧 78L 逐字；H6 预声明接缝，
  *   消费面 = E-5 hooks-runner / SDK controlSchema / 组合根残留守）
+ * - pathValidation.ts：路径校验核心 8 函数（E-6 S-6a，旧仓 487L 逐字；
+ *   isPathAllowed 决策序 + validatePath 五安全块 + glob / 危险删除 /
+ *   sandbox 写 allowlist 3.7 支；消费面 = Bash 工具本体 1303L 残留守，
+ *   规则命中步 / 内部路径步走 filesystem ①② 残留守桩降级直通）
+ * - sandboxAccess.ts：sandbox 状态跨域注入窗口（E-6 S-6a，placeholder
+ *   禁用态；组合根接线 = E-wave-end 装配项）
  * - bootstrap-env.ts：bootstrap 状态跨域注入窗口（setPermissionsBootstrapEnv /
  *   get / reset，未注入 fail-fast）
  * - settingsPaths.ts：settings 路径跨域注入窗口（S-3c，setSettingsPathsProvider /
@@ -61,5 +67,7 @@ export * from './shellRuleMatching'
 export * from './permissionUpdate'
 export * from './permissionValidation'
 export * from './permissionUpdateSchema'
+export * from './pathValidation'
+export * from './sandboxAccess'
 export * from './bootstrap-env'
 export * from './settingsPaths'

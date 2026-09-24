@@ -1503,3 +1503,61 @@ B 路五面核验零缺陷：① 叶域纯净（src/permissions 零 engine impor
 6. command 4 新字段执行消费（async 唤醒 / statusMessage，MINOR-7）。
 
 **下一步 = E-6（全 shell）**：bashClassifier stub 回填 + pathValidation（旧仓 487L 纵切）+ 工具面 checkPermissions 语义支回填（可并行纵切）。E-7（leaves：tasks/scheduler/worktree/session/messaging）与 E-wave-end（compose engine 装配 ⑦ + 子代理门透传 + hasPermissionsToUseTool 换回 + 1c abort 重抛 + engine anti-stub 门 + M-3 收口 + getTools 组合根接线 + 上列 hooks 装配接缝清单）随后。
+
+---
+
+## §8.43 E-6 执行前分析（全 shell：permissions 工具面纵切）
+
+**触发**：E-5 全闭环（2f8e7d2..6ece67f，基线 999/70 + gate 6）；任务清单下一波 = E-6（全 shell：bashClassifier stub + pathValidation 487L + 工具面 checkPermissions + 语义支回填，可并行纵切）。
+
+**勘察（主 session 直验，旧仓 @ a8af45b / 新仓 @ HEAD）**：
+
+1. **目标面清点（旧仓）**：
+   - `bashClassifier.ts` 61L：外部构建 no-op stub（10 导出，零依赖，classifyBashCommand 恒 `{matches:false,confidence:'high',reason:'This feature is disabled'}`）→ S-6c 逐字迁。
+   - `utils/permissions/pathValidation.ts` 487L：8 函数 + 3 类型；消费面 = 仅 `BashTool/pathValidation.ts:22`（1303L 工具本体残留守）+ PowerShellTool 2049L（域外）+ `createReadRuleSuggestion` suggestion 面（§8.34 残留守）→ 新仓 = 纯叶，消费接缝前向登记。
+   - `hasPermissionsToUseToolInner` ~162L（旧 permissions.ts L1000-1160）：1c 工具面分发 / 1e requiresUserInteraction / 1f 内容 ask / 1g safetyCheck / 2a bypass / 3 passthrough→ask；`getUpdatedInputOrFallback` L1314-1323（10L，2a/2b 消费点）。新仓回填点 = `src/permissions/permissions.ts` 残留守 ①（工具面分发半）+ ⑥（sandbox 自动放行）。
+   - 语义支 3 块（旧 `utils/settings/permissionValidation.ts` 262L L152-230）：customValidation / Bash `:*` 两检 / File `:*` + 通配位置启发；依赖 = `toolValidationConfig.ts` 103L **纯数据**（filePatternTools/bashPrefixTools/customValidation WebSearch·WebFetch，零 import，**非工具注册表** —— 订正 §8.34 裁定 ②「toolValidationConfig 依赖工具注册表」判断，裁定 ⑥）。
+   - **不在本波**：`bashPermissions.ts` 2471L + `BashTool/pathValidation.ts` 1303L + `shouldUseSandbox.ts` 124L（依赖 bashPermissions 5 函数 + splitCommand_DEPRECATED + settings.sandbox.excludedCommands）= Bash 工具本体 checkPermissions 实现 → 工具本体波（47 本体残留守延续），裁定 ①。
+2. **新仓落点直验**：
+   - `PermissionTool`（filesystem.ts L72-79）= name + getPath? + mcpInfo? + `checkPermissions?`（鸭子可选，返新 `PermissionResult` 联合含 passthrough 变体（suggestions/blockedPath））→ 1c 分发可回填。
+   - ruleMatching.checkRuleBasedPermissions 1c 鸭子分发已随 S-4b 落；本波回填点 = **permissions.ts 决策主体全量面**（1d/1f/1g/2a/3 + getUpdatedInputOrFallback），即残留守 ① 之「工具面分发半」。
+   - `requiresUserInteraction` 不在新 shared Tool 契约（types.ts L185-230 无此方法）→ 1e 裁（前向接缝：工具本体波契约扩面时回填）。
+   - shared/debug.logForDebugging ✓ / createPermissionRequestMessage(toolName, decisionReason?) 签名匹配 step 3 ✓ / BASH_TOOL_NAME·WEB_SEARCH·WEB_FETCH·READ·WRITE·EDIT·GLOB 在 toolNames.ts ✓ / **NotebookRead 新仓无**（S-6d 配置对齐裁，裁定 ④）。
+   - sandbox 面：createSandboxManager 有 isSandboxingEnabled（L314）/ isAutoAllowBashIfSandboxedEnabled（L284）/ getFsWriteConfig（runtime-types L107）→ ⑥ 与 isPathInSandboxWriteAllowlist 依赖面齐；permissions 为 L2 域不得跨域 import（E-1 裁定）→ 新增 permissions 域内注入窗口 `sandboxAccess`（placeholder 禁用态，组合根接线 = E-wave-end 装配项）。
+   - filesystem.ts：matchingRuleForInput（L504）/checkReadableInternalPath（L513）/checkEditableInternalPath（L520）/getPathsForPermissionCheck（L475）均模块私 → 本波加 export 4 行；getFsImplementation/containsPathTraversal/containsVulnerableUncPath/getPlatform = shared 单一事实源 ✓；lodash memoize → 本地 Map 缓存（新仓模式，filesystem.ts L395-405 先例，裁定 ⑦）。
+   - 门工厂 `createPermissionGate`（S-4d，engine/permissions/permissionGate.ts）已消费 hasPermissionsToUseTool → 本波决策主体原地演进，engine 侧零改动（verdict 映射不变）。
+3. **§8.42 装配项 5/6 波标订正**：「powershell 可执行性不对称收口（E-6 全 shell 波，MINOR-7）」「command 4 新字段执行消费（MINOR-7）」属 hooks 执行面（hooks-runner 全量波，§8.41 R6 口径 + 项 4），非 permissions 工具面；E-6 波名沿用任务清单 4 项口径（bashClassifier stub + pathValidation + 工具面 checkPermissions 分发/updatedInput + 语义支 3 块），PowerShell 2049L 面域外不随迁（bash-only 纵切，§8.21 口径）。
+
+**裁片（4 片串行；S-6b/S-6c/S-6d 相互独立，"可并行"指纵切不依赖，执行取串行保 review 粒度）**：
+
+- **S-6a pathValidation 487L 叶迁**（`src/permissions/pathValidation.ts` 新 + filesystem.ts export 4 行 + `src/permissions/sandboxAccess.ts` 注入窗口 ~40L + index.ts 门面）：
+  - 8 函数逐字；getGlobBaseDirectory Windows 分隔支保留（getPlatform 可用）；`memoize(getPathsForPermissionCheck)` → 本地 Map（getResolvedSandboxConfigPath）；isPathInSandboxWriteAllowlist 消费 sandboxAccess 窗口（placeholder 禁用态 = 恒 false，零行为变化）。
+  - 实施裁定（勘察后补登）：safeResolvePath = 本文件轻量版（旧仓 fsOperations L138 的 lstatSync 特殊文件支裁——新仓 FsOperations 无 lstatSync 面（filesystem ④ 裁定），悬空链接 / 40 层符号链接链遍历归 engine 波；UNC 早退 + 单级 realpathSync 保留）；旧仓 `(safetyCheck as any)` 换类型化收窄（`safe === false` 显式比较，checkWrite L743 口径）。
+  - 接缝头注登记：消费面 = BashTool/pathValidation 1303L 工具本体（残留守）/ createReadRuleSuggestion suggestion 面（§8.34 残留守）/ PowerShell 域外。
+  - 判别信号（`tests/unit/path-validation.test.ts`，零磁盘：fake sandbox 窗口 + bootstrap env 注入 /tmp/proj，无需 mock fs——不存在路径 realpath 回落逻辑路径，§8.16 T7 口径；UNC 块平台条件——Windows 判形 / POSIX 走末段 false）：isPathAllowed 决策序（read 工作目录 allow / write 无 acceptEdits 落末 false / sandbox 写 allowlist 3.7 支命中放行 + deny-within-allow 阻断 / 危险文件 .bashrc safety 支不被 acceptEdits 放行）/ validatePath 五安全块（UNC 平台条件 / ~user 变体 / `$%=` 展开语法 / write·create 拒 glob / 引号剥离）/ validateGlobPattern 遍历支 vs 基目录支 / isDangerousRemovalPath（`*`、`/*`、`/`、home、root 直接子、Windows 盘根+子、双斜杠折叠）/ expandTilde 边界 / formatDirectoryList 5 内 vs 6 截断。**桩态边界（H6 防假装通过）**：matchingRuleForInput / checkReadable·EditableInternalPath = filesystem ①② 残留守桩（engine 波 / E-7），isPathAllowed 规则命中步 / 内部路径步降级直通 → 不断言「deny 规则命中」/「内部路径命中」（桩态假信号，落地随桩核销补测）。
+  - 突变探针（桩态边界订正：规则命中 / 内部路径步 = ①② 桩，规则序变异 = 死信号不可用）：P-A1 = 删 isPathAllowed 2.5 safety 支 → 「write 危险文件 .bashrc + acceptEdits」测红（safetyCheck 拦截失活 = 工作目录 + acceptEdits 放行）；P-A1b = 删 isPathInSandboxWriteAllowlist denyWithinAllow 循环 → deny 阻断测红。
+- **S-6b 工具面分发回填**（permissions.ts 决策主体 ~120L → ~230L + getUpdatedInputOrFallback + ⑥ 半落）：
+  - 1c 鸭子分发（`tool.checkPermissions` 存在才调；catch → logForDebugging，**abort 重抛裁** —— 新窄 context 无 abortController，E-wave-end 装配项「1c abort 重抛」消费全量类型时回填）/ 1d deny / 1f ruleBehavior==='ask' / 1g safetyCheck 逐字 / **1e 裁**（requiresUserInteraction 契约缺，前向接缝工具本体波）/ 2a bypass（`bypassPermissions || (plan && isBypassPermissionsModeAvailable)`）→ allow + updatedInput = getUpdatedInputOrFallback / 2b updatedInput `input` → getUpdatedInputOrFallback（旧仓同形）/ 3 passthrough → ask（createPermissionRequestMessage(tool.name, decisionReason) + suggestions logForDebugging 逐字）。
+  - **⑥ 半落裁定（裁定 ③）**：1b sandbox 自动放行 = `tool.name === BASH_TOOL_NAME && sandboxAccess.isSandboxingEnabled() && sandboxAccess.isAutoAllowBashIfSandboxedEnabled() && input.dangerouslyDisableSandbox !== true`；**shouldUseSandbox(input) 裁**（124L 依赖面 = 工具本体波）。delta 论证：新仓无 Bash 工具本体 → ⑥ 跳过后落 1c（passthrough）→ 3 → 非 bypass 态仍 ask；delta 仅现于 bypass 态（恒 allow）与 2b 显式 allow 规则（用户显式授权），无安全方向回归；工具本体波落 shouldUseSandbox 后单点收编。
+  - 判别信号（`tests/unit/permissions.test.ts` 工具面扩展，fake duck 工具 + fake sandbox 窗口）：1c duck deny 透传 / 1f 内容 ask / 1g safetyCheck / 2a bypass allow + duck allow 带 updatedInput 采纳（无 updatedInput 回落 input）/ 3 passthrough→ask / ⑥ 三态（sandbox 启用+auto-allow → Bash 1b 跳过；dangerouslyDisableSandbox=true → ⑥ 失活；duck 无 checkPermissions 薄行为回归：空规则集 = allow 既有测守住）/ getUpdatedInputOrFallback 双形。
+  - 突变探针 P-B1：1f 条件变异（ruleBehavior 检查删）→ 红；P-B2：getUpdatedInputOrFallback 回落删（undefined 传播）→ 红。
+- **S-6c bashClassifier 61L stub 迁**（`src/permissions/bashClassifier.ts` 新 + index.ts）：逐字（no-op stub 即外部构建形态）；零消费者 → 前向登记（auto-mode 波分类器族 ~3030L 消费点：yoloClassifier / classifierShared / bashPermissions L1378-1490 speculative 族，§8.31 裁定 ① 口径）；matrix 加 missing 行「bash prompt 分类器消费（auto-mode 纵切波）」；判别：createPromptRuleContent('x') === 'prompt: x'（PROMPT_PREFIX 单一事实源）/ isClassifierPermissionsEnabled() === false / classifyBashCommand no-op 形状 / generateGenericDescription 透传 ?? null。
+- **S-6d 语义支 3 块回填**（`toolValidationConfig.ts` 103L → `src/permissions/` + permissionValidation.ts validatePermissionRule 语义支扩）：
+  - **配置对齐（裁定 ④）**：filePatternTools 裁 NotebookRead（新仓无）留 Read/Write/Edit/Glob；bashPrefixTools = ['Bash']；customValidation = WebSearch/WebFetch 逐字（新仓均有）。
+  - examples 字段沿 S-4c2 裁（提示面残留守）：3 块仅 error + suggestion；PermissionRuleSchema superRefine 续不落（H6 零消费点，§8.34 裁定 ②）。
+  - 判别信号（`tests/unit/permission-persist-validation.test.ts` 语义面扩展）：Bash 中置 `:*` 拒 / Bash `:*` 空前缀拒 / `npm *` 合法（通配任意位新语义）/ File `x:*` 拒 / File 中置通配（非 `**` 非边界）拒 / `src/**` 合法 / WebSearch 通配拒 / WebFetch URL 拒 / 语法核心 5 检回归全绿。
+  - 突变探针 P-D1：File `:*` 检删 → `Read(x:*)` 放行红。
+
+**裁定清单**：
+① bashPermissions 2471L + BashTool/pathValidation 1303L + shouldUseSandbox 124L（Bash 工具本体 checkPermissions 实现 + excludedCommands 检）= 工具本体波残留守（47 本体延续）；S-6b 落分发机制半（鸭子可选，零活工具面消费者 = 休眠接缝），头注重登记实现半「Bash 工具面 checkPermissions 实现 → 工具本体波」（H6 前向声明，非静默遗漏）。
+② getUpdatedInputOrFallback 随 S-6b 落（§8.33 裁定 ⑤「E-6 随工具面分发片落」核销）。
+③ ⑥ 半落 + dangerouslyDisableSandbox 守卫 + shouldUseSandbox 裁（delta 论证见 S-6b）。
+④ S-6d 配置对齐（NotebookRead 裁）。
+⑤ 1e / 1c-abort-重抛 裁（前者前向接缝工具本体波；后者 E-wave-end「1c abort 重抛」装配项消费，与既有登记一致）。
+⑥ customValidation「依赖工具注册表」判断订正（103L 纯数据零 import）→ 3 块全落。
+⑦ memoize → 本地 Map 缓存模式（新仓先例）。
+⑧ §8.42 装配项 5/6 波标订正（hooks 全量波，非 E-6）。
+
+**门 / 矩阵同步**：permissions 域 matrix 加 done 行 3（path-validation 测 / 工具面分发测（permissions.test.ts 扩展）/ 语义支 3 块（S-4c2 行 capability 描述翻新））+ missing 行 1（bash prompt 分类器消费，by = auto-mode 纵切波）；engine 域不在 8 域门扫描集 → 无 gate 改动；四件套 + 探针纪律不变。
+
+**基线谱系**：999 → S-6a（+path-validation 测）→ S-6b（permissions 工具面扩展）→ S-6c（bash-classifier-stub 测）→ S-6d（语义面扩展）→ **E-6 整波审视**（双只读 ≤2：A 旧仓 ground-truth 对照（8 函数逐字 + 1c/1f/1g/2a/3 语义 + 配置对齐）/ B H6 死接缝（前向字段消费面 + 注入窗口 placeholder 态 + matrix 行真实性 + §8.42 订正核验）+ 四件套）→ 修复提交 + §8.44 审视记录 + memory 同步。

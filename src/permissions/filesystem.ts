@@ -33,6 +33,9 @@
  *      薄骨架 safety 分支建议退化为 ③ 桩空数组。
  *   ⑥ Windows POSIX→Windows 路径转换（relativePath 的 windows 分支 /
  *      toPosixPath）不随迁——国内目标 POSIX。
+ *   ⑦ S-6a（§8.43）导出 ①② 桩 + getPathsForPermissionCheck（消费方 =
+ *      pathValidation.ts 8 函数；桩实现归属不变——①engine 波 / ②E-7
+ *      leaves / ④轻量版，导出仅开域内消费口，不核销残留守）。
  */
 import { tmpdir } from 'os'
 import { join, posix, sep } from 'path'
@@ -472,7 +475,7 @@ export function pathInWorkingPath(path: string, workingPath: string): boolean {
  * 权限检查应覆盖的路径集合（原始 + 已解析符号链接）。薄骨架轻量版：
  * tilde 展开 + UNC 早退 + 单级 realpath（悬空链接/40 层链遍历归 engine）。
  */
-function getPathsForPermissionCheck(inputPath: string): string[] {
+export function getPathsForPermissionCheck(inputPath: string): string[] {
   const pathSet = new Set<string>()
   let path = inputPath
   if (path === '~' || path.startsWith('~/')) {
@@ -501,7 +504,7 @@ function getPathsForPermissionCheck(inputPath: string): string[] {
 // 薄骨架桩（规则求值 / 内部路径 / 建议生成 → engine 波，见头注 ①②③）
 // ════════════════════════════════════════════════════════════════
 
-function matchingRuleForInput(
+export function matchingRuleForInput(
   _path: string,
   _toolPermissionContext: ToolPermissionContext,
   _toolType: 'edit' | 'read',
@@ -510,14 +513,14 @@ function matchingRuleForInput(
   return null
 }
 
-function checkReadableInternalPath(
+export function checkReadableInternalPath(
   _absolutePath: string,
   _input: Record<string, unknown>,
 ): PermissionResult {
   return { behavior: 'passthrough', message: '' }
 }
 
-function checkEditableInternalPath(
+export function checkEditableInternalPath(
   _absolutePath: string,
   _input: Record<string, unknown>,
 ): PermissionResult {

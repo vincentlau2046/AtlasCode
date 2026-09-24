@@ -112,6 +112,11 @@ const MATRIX: readonly MatrixRow[] = [
   // × loop deps 透传 + deny 规则工具面过滤（blanket 名 + MCP server 级剥整 server）
   // + agent spec/disallowedTools 域 parser 解析（替 split(':') 截断）
   { domain: 'permissions', capability: 'engine 接线（门工厂 3 值 verdict × 执行链映射 × loop 透传 + deny 工具面过滤 + agent spec 域 parser）', status: 'done', proof: 'tests/unit/permission-gate-wiring.test.ts' },
+  // E-6 S-6a（§8.43）：路径校验核心 8 函数（旧仓 487L 逐字：isPathAllowed
+  // 决策序 + validatePath 五安全块 + validateGlobPattern 双支 + 危险删除 /
+  // sandbox 写 allowlist 3.7 支 + 纯函数族；桩态边界=规则命中步 / 内部路径步
+  // 走 filesystem ①② 残留守桩降级直通，消费面 = Bash 工具本体 1303L 残留守）
+  { domain: 'permissions', capability: '路径校验核心（isPathAllowed 决策序 + validatePath 安全块 + glob / 危险删除 / sandbox 写 allowlist）', status: 'done', proof: 'tests/unit/path-validation.test.ts' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
