@@ -2197,3 +2197,56 @@ popAllEditable 字符串+块双源 + pastedContents id 保留 + 内嵌 base64 �
 **四件套 + 基线**：tsc 0 / eslint 0（改动面）/ build 0 / 全量 1374+N pass
 （N = d2 新增；基线 1374/84 文件/2876 expect = d1 末）/ gate 6（messaging ∉
 8 域门扫描集）。
+
+#### d1 实施记录（2026-09-24）
+
+- 实施提交 **7ea9aa3**（parent 6e026e1，20 文件 +3556）：messaging 域
+  14 src 文件（mailbox 1183L 逐字 → 1330L 域落位 + teammate 无状态核心 +
+  teammateContext + agentId/signal/objectGroupBy/textContent/lockfile 小
+  工具面 + 4 小文件 + constants 域内本地化 + index 门面）+ unit 77 测（零
+  磁盘）+ func 13 测（真盘，ATLAS_CONFIG_DIR tmp 隔离）+ engine/index.ts
+  messaging 显式名块（92 名 = 域门面 93 − SEND_MESSAGE_TOOL_NAME）+
+  session/types.ts Message 补 toolUseResult? + package.json/bun.lock
+  （proper-lockfile ^4.1.2）。
+- **测试基线**：1374 pass / 84 文件 / 2876 expect（d1 新增恰 90/2/202；
+  基线谱系 1284 → 1374）。gate 6 不变（messaging ∉ 8 域扫描集，实证
+  MatrixRow.domain 封闭联合）。
+- **突变探针实测**（backup→mutate→恰 N 红→verbatim restore diff 核验）：
+  P-M1 markMessageAsReadByIndex 越界+缺失守卫对删 → func 恰 1 红 ✓；
+  P-M2 单点（`read: false`→`true` 缺省态反转）→ func 恰 1 红 ✓；
+  **P-M2 双点（锁后重读支删）实测红集 6 测**（直接 2 + 下游支收敛 4）——
+  详案初版「2 测同红」为直接点下界，实测订正为 6，登记双点绑定非探针
+  违规（mailbox.ts + func 头注同源登记）；P-M3 parseAgentId slice 对调 →
+  unit 恰 1 红 ✓。
+- H6 登记落位：isStructuredProtocolMessage 旧仓逐字 10 型集（shutdown_
+  rejected 集外 = 终止信号无 useInboxPoller 路由处理器，非移植遗漏）/
+  jsonStringify 3 参→2 参签名 delta（replacer null≡undefined 论证）/
+  teammate 尾 3 AppState 函数裁（shell·swarm 波）/ collapse 本地 duck 不
+  导出 / directMember teamContext duck 组合根注入口 / lockfile createRequire
+  delta / SEND_MESSAGE_TOOL_NAME 不出引擎面（工具名单一源 = tools 域
+  toolNames.ts:43，messaging 域内同值常量自持、值恒等登记）。
+
+#### d1 独立只读审视记录（2026-09-24）
+
+- 1 只读子代理（≤2 派发限额），6 维度：逐字保真度 / 裁面完整性 / 类型面 /
+  测试判别力 / 门面 STR-1 / 依赖方向。四件套独立复跑全绿（tsc 0 / eslint 0
+  / build 0 / 90 pass 202 expect）。
+- **结论 PASS：0 MAJOR / 0 MINOR / 2 NOTE**，全处置（审视修复提交
+  **fb09b07**，零行为面）：
+  - **NOTE-1** mailbox 头注「logError 6 调用点归一化」off-by-one：grep 实证
+    旧仓 7 调用点（105/158/186/262/335/366/1132）↔ 新仓 7 logForDebugging
+    1:1（194/247/277/356/429/460/1226），算法体零 delta，仅登记数字订正
+    6→7。
+  - **NOTE-2** func 谓词选择性标记测缺 out[1] 阴性断言：审视报告建议补 1 行，
+    **执行裁定不补、改登记**（主 session 复核推翻子代理建议的机械适用）——
+    补断言则在 P-M2 单点（缺省态反转）突变下同红 → 红集 2 违反已实测
+    「恰 1 红」登记；且 `!m.read` 守卫支与退化支值可观察等价（匹配且已读
+    → JSON 恒等，标记幂等），现实突变（丢守卫/谓词反转）均已被现断言覆盖
+    或值等价无害。唯一开口「条件退化为全量标记」登记 **E-wave-end 前向
+    接缝**（func 测头注：补阴性断言 + P-M2 单点红集重测 1→2 一并处置），
+    对齐 H6 防空洞（预声明接缝须头注登记，复审勿当遗漏重提）。
+- 审视报告其余核验（供 E-7 整波审视 §8.51 A 路参考）：逐字保真度零发现
+  （mailbox 算法体逐句对照 / 小依赖 count·sanitizePathComponent·getTeamsDir
+  ·isEnvTruthy·lazySchema 逐字或登记 delta）；门面 565 导出名去重 0 重复；
+  依赖方向零循环（messaging → session/config/shared 单向）；duck 面方向
+  核验（旧全形可赋新形，组合根注真值不破坏）。
