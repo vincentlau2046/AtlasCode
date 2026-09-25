@@ -2742,4 +2742,35 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 **P-E5 探针（实测红集）**：删 queryAgentLoop compact 支 record 调用点（backup→mutate）→ 红集 = {unit T-3, func F-1} **双点绑定 2 红**（fake sink 面 + 真盘面同观同一调用点，P-M2 双点先例——执行前分析「F-1 恰 1 红」下界订正：T-3 同观调用点亦红，红集 2 非 1 属可判别设计非误报；其余 1442 全绿）→ verbatim restore diff 洁净（`diff` 零差）+ 回归全绿。
 
-（审视记录待 ③ 双只读回报后回填。）
+### S-E3 ③ 审视记录（2026-09-25，双只读 ≤2，A 路先回报）
+
+**A 路（旧仓对照保真）：PASS-with-fixes——2 MAJOR / 1 MINOR / 4 NOTE 全处置（修复提交 cec5378）**：
+- **M-1（MAJOR，真保真缺陷）**：轮末 result 消息缺 uuid/timestamp 恒戳——旧仓 messages.ts:525-526 createUserMessage 不变量（`uuid || randomUUID()` + `timestamp ?? ISO`，record 面消息恒带 uuid）未随迁；未修前 A11 接线后这些消息经 project.insertMessageChain `uuid: message.uuid as string` 对 undefined 纯透传 → JSONL 条目缺 uuid 字段（dedup miss 重复追加 + 父链 `parentUuid = message.uuid` 断裂）。修复：resultMessages 恒戳（randomUUID + 单 ISO 时戳）；回归探针 **T-8**（删戳此测红）。
+- **M-2（MAJOR，真保真缺陷）**：record 调用点传增量切片（轮末 `[assistant, ...results]`），旧仓 L722 = **全量数组**形态——recordTranscript 前缀追踪 walk（`!seenNewMessage && isChainParticipant`，P-S1 探针锚点）只在入参含已记录前缀时恢复 startingParentUuid；切片形态每次调用点开新根 → 磁盘链碎裂、resume 回放退化为末段。修复：轮末改 `void record([...messages, assistantMsg, ...resultMessages])`（= r.messages，T-1 `toEqual(r.messages)` 交叉核验）。回归探针 **F-3**（func 真盘 parentUuid 链连续：as1.parent = u1，as2.parent = tool_result 行 uuid——切片形态此测红；sink fire-and-forget 竞以 promise 跟踪消，非产品面改 await）。
+- **m-1（MINOR）**：compact 支 replacement 写面 `await` 无 catch（rejection 会拒绝 queryAgentLoop 全流）；旧仓 loop.ts:375-378 逐字 = `void ...catch(logError)` 吞错 + 日志永不阻塞。修复：void + catch（旧 logError → 域 debug 口 logForDebugging，shared/debug 无 logError，域内日志统一 debug 口，killShellTasks 同款裁定）。
+- **n-1（PASS 通过项）**：persistReplacements 门 `!!qs && (...)` undefined-qs fail-closed 扩展可接受（T-4 阴性测已登记）。
+- **n-2（NIT，登记）**：entry record 无条件（空序列 no-op 写 + 一次盘读）；bare 变体裁面登记（n-5 同源 drain 风险面）。
+- **n-3（NOTE 措辞订正）**：compact.ts 头注「旧 L471/L595 ack 分支恢复」失实——新仓无对应代码，判别式补齐使**未来消费方**（shell/message 波）前向依赖成立，非「代码恢复面」；头注已订正。
+- **n-4（NOTE，M-2 修复后消解）**：全量入参使 allMessages 缺省 = messages（同调用内 tool_use/tool_result 对同落，REPL 孤儿风险面消除）。
+- **n-5（NOTE，注释登记）**：旧 L724 非 assistant 支 await 翻转为统一 void（order-preserving 写队列排序无损；进程退出前 drain 风险与旧 bare 变体同构——F-3 测试面 promise 跟踪即对此面的消费纪律）。
+
+**B 路（H6 死接缝 + 测试面）：PASS-with-fixes——commit 态 1 MAJOR（= A 路 M-1 同源，cec5378 已修）/ WIP 态 1 MINOR 行为面（m-3 F-3 racy，cec5378 settle 修复）+ 2 MINOR 零行为面 + 1 微残留登记（全处置，处置提交见 ④ 行）**：
+- **m-3 [行为面/测试装置，WIP 新发现]**：F-3 初版断盘前未 settle——轮末 `void record` 在途（insertMessageChain 内 await 后入写队列），入队落在 flush 的 drainWriteQueue 迭代 + timer 取消之后 → 该行由重排 timer 晚于读落盘（实测 1/13 flake）。**flush 序核验（B 路末项）**：新仓 project.ts flush（cancel timer → await activeDrain → drain）与旧仓 sessionStorage.ts L842 **逐字同序** → 该窗口为旧仓继承语义非新仓回归。修复 = 测试面 sink 捕获 record promise + flush 前 `await Promise.all`（loop 侧 void 不改；cec5378 F-3 recPromises 即此修复）。flaky 复核：独跑 ×10 + 3 文件并跑 ×10（B 场景复现）全绿。
+- **F-1 盲区登记（零行为）**：F-1 不断言轮末尾行落盘（只数 recCount）→ 对 m-3 类竞态结构性盲（B 路注「这正是 F-3 被引入的原因」）；F-3 已配 settle，盲区面留登记不补。
+- **m-1 [零行为]**：fs 测试头注 P-E5 锚点陈旧（「F-1 恰 1 红」vs 实测双点 2 红）→ 头注订正（红集 = {unit T-3, func F-1}，P-M2 双点先例）。
+- **m-2 [零行为，覆盖缺口]**：T-11 仅函数形 + 可调用零盘（agentId 经 shouldSkipPersistence 守卫不可观察）；agentId → sidechain 路由（project.ts appendEntry content-replacement 支 `entry.agentId ? getAgentTranscriptPath : sessionFile`）unit/func 零覆盖 → **F-4 新探针**（agentId 在场 entry 落 sidechain 文件恰 1 条 + session 文件阴性不混入；routing seam 本身 = runAgent 子代理 loop 注入，compose 已注册前向接缝，本探针只补机制面）。
+- **M-1 微残留 [零行为，登记]**：旧 L137 `sourceToolAssistantUUID` 戳未随迁（result 行不戳）——M-2 全量序列接链不依赖 project.ts 该戳覆写机制（恒走 sequential-parent 回落即正确链），零行为；loop.ts 头注一行登记防复审重提。
+- **n-1 [零行为]**：`void record` unhandled-rejection 风险仅 docs 登记未入 loop.ts 头注 → 头注补一行（旧 L722 同款继承语义 + 测试 settle 纪律指向 F-3）。
+- **n-2 [已核销]**：commit 态 `await recordContentReplacement` 故障传播 delta → cec5378 已订正 void+catch（A 路 m-1 同源，双路独立发现互证）。
+- **n-3 [已注册]**：T-6a/T-6b 文件内序依赖 + func liveCwd 模块级泄漏 = 已注册已知脆弱（同进程 ad-hoc 全量跑受影响，bun --isolate 逐文件进程隔离免疫），B 路判 PASS 不补。
+- **PASS 七区（B 路逐项核过）**：映射表一致 / scanner 读面宽容 + 标记字节同点 / contentReplacements 前向接缝登记充分 / 活态 cwd + 键控分离 / killShellTasks import 零环 + 头注完备 / 无 tautology（fake 仅 LLM 接口替身 + 调用记录器 sink；T-7 真队列；F-1/F-3/F-4 真 record 链 + 真 fs）/ 前向接缝清扫（8 处登记与代码一致，未登记隐式裁剪仅 M-1 族已修 + 微残留 1 行级）。
+- **anti-stub：PASS**（S-E3 面 grep 无活 `: any` stub，唯一命中 env.ts 头注散文非代码）。
+- **H6 注册完备性：PASS**（含 1 行级 sourceToolAssistantUUID 微裁剪补登记后）。
+
+**探针复测（修复后树）**：M-2 切片突变红集 {T-1, T-8, F-3}（T-8 索引移位联红 = 判别成立）/ P-E5 compact 支删除红集 {T-3, F-1} 双点 2 红（① 文档下界口径不变，verbatim restore diff 零差）。
+
+**四件套（cec5378）**：tsc 0 / eslint 0 / build 0 KB / 全量 **1446 pass / 89 文件 / 3102 expect**（基线 1444 +2：T-8 + F-3）+ gate 6。
+
+### S-E3 ④ 闭环记录（2026-09-25，task #122 完结）
+
+**B 路处置提交**：fs 测试头注 P-E5 锚点订正（m-1）+ F-4 agentId 路由探针（m-2）+ loop.ts 头注 n-1/M-1 微残留两行登记（m-3 与 n-2 已由 cec5378 修复/订正，本提交不涉代码行为面）。**终验四件套**：tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3107 expect**（基线 1446 +1：F-4）+ gate 6；flake 复核 独跑 ×10 + 并跑 ×10 全绿。**S-E3 ①→②→③→④ 全闭环**：d4c2ece（① 执行前分析）→ 4a04339（② 实施）→ cec5378（③ A 路 2 MAJOR 修复 + 探针补齐）→ 本记录（③ B 路处置 + ④ 闭环）→ task #122 完结，S-E4（A14-A15，task #123）解锁。
