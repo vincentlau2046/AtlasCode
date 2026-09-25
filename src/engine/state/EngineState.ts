@@ -15,7 +15,8 @@
  *     已由单测锁（100 并发零丢失 + 反例 read-compute-write 丢更新守卫）。
  *   - 具体 AppState 族字段（fileHistory / attribution / totalUsage / readFileState /
  *     permissionDenials / mutableMessages，charter L4.7 裁定 #3 收进 EngineState）
- *     随各自纵切在此类上挂载（fileHistory/attribution 骨架待 C 波填实），本版不预造。
+ *     随各自纵切在此类上挂载（fileHistory/attribution 8 零消费者占位已 S-E4
+ *     删除，后续波按需重建且须实质实现，§8.52 B18），本版不预造。
  *   - 残留守：批处理合并策略（与 React 差异已原型验证为「不合并」，中间态可观测）/
  *     具体字段挂载（后续纵切）/ 可选 subscribe 观测 API（暂无消费方，不加）。
  */
