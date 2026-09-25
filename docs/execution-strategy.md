@@ -2940,3 +2940,46 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - 风险 2：15 文件单子域门面显式名块 0 重名核验（先例 = engine 面 611 名 0 重名）
 - 风险 3：sandboxAccess 窗口扩 +1 成员 = 组合根 ⑧ 注入 + placeholder 语义复审（placeholder 恒 false = 禁用态零行为变化，P-T 探针外加 1 窗口服判）
 - 验收：S-T5 双只读零 BLOCKER/MAJOR → 闭环；**波 tag 裁定 = 不切新 tag**（tag = 大波节点先例，C 桶子波提交链记录；gate ③ 仍用 wave-c tag 不受影响）；下一子波 = Bash 本体纵切（3310L ts 面 + UI 域外裁面）
+
+### S-T1~S-T4 ② 实施记录（2026-09-25/26，提交链）
+
+| 切片 | SHA | 内容 |
+|---|---|---|
+| S-T1 | 9aebe78 | bash 内核 8 文件（10535L）逐字随迁 + 4 本地小模块 + 内核 unit 测 |
+| S-T2a | 7b2286b | bash checkPermissions 面 4 文件（bashSecurity 2427/sedValidation 684/modeValidation 115/bashCommandHelpers 265 = 3491L）逐字随迁 + 面型恢复 |
+| S-T2b | ebf184d | bash 核心 3 文件（bashPermissions 2471/pathValidation 1303/shouldUseSandbox 124）+ 6 本地辅助模块逐字随迁 + sandboxAccess 窗口扩面 |
+| S-T3 | 63d295a | 20 槽裁定表落 registry 头注 + 审计 5 项预登记 + §8.3 回刷 + 49 口径订正 |
+| S-T4 | 23db653 | ⑧ 接线——组合根 setSandboxAccess 注入 + executor 端口 shouldUseSandbox 消费面激活 |
+
+（每切片四件套 tsc 0 / eslint 0 / build 0 / 全量 + gate 6 绿；终态基线见 ④。S-T5 审视修复 = cab2b99，见 ③。）
+
+### S-T5 ③ 整波审视记录（2026-09-26）
+
+**③a 突变探针 P-T1..P-T5**（纪律 = backup→mutate→定向红集实测→verbatim restore diff 核验→git clean；「恰 1 红」为下界，实测多红即订正登记）：
+
+| 探针 | 靶点 | 计划（下界） | 实测红集 |
+|---|---|---|---|
+| P-T1 | ast.ts 预检 UNICODE_WHITESPACE 守卫删 | 恰 1 红 | **1 恰红**（内核预检测；too-complex→simple 失守） |
+| P-T2 | bashPermissions stripSafeWrappers 安全包装白名单支反转 | 红集 | **4 红**（core-face 直接函数测 + bashToolHasPermission timeout 规则面 + shouldUseSandbox 不动点 unit + func；跨 3 消费面） |
+| P-T3 | bashSecurity sync 面单引号反斜杠早退守卫删 | 恰 1 红 | **1 恰红**（**改选登记**：初选 COMMAND_SUBSTITUTION_PATTERNS `/>/` 成员（进程替换 `>(`）= 0 红——core-face「进程替换 → ask」测锚点在 pathValidation 第 5 安全块（L1054-1068），非 bashSecurity 模式扫描；改选 = `bashCommandIsSafe_DEPRECATED` sync 面早退守卫（删即 passthrough，无下游兜底）） |
+| P-T4 | pathValidation 3.7 sandbox 写 allowlist 支删 | 红集 | **2 恰红**（core-face checkPathConstraints 写支 + path-validation.test.ts isPathAllowed 3.7 支） |
+| P-T5 | shouldUseSandbox excludedCommands 不动点循环删 | 恰 1 红 下界 | **3 红**（unit/func/adapter 三点绑定：core-face unit「不动点剥除」+ func「前缀命中 → 不 sandbox」+ S-T4 adapter「总门开 + excludedCommands 命中 → false」；下界订正，同 P-M2 先例；两点测试头注已登记三点绑定） |
+
+**③b 双只读 ≤2（A 路 = 旧仓逐字对照 + delta 完备性 / B 路 = H6 死接缝 + 测试面），双路零 BLOCKER/零 MAJOR**：
+
+- **A 路（4 MINOR + 5 NOTE）**：28 接缝登记全过 / anti-stub 0 新增 / 探针 5/5 非 tautology / 6 测试文件零盘合规 / 49 口径独立重数（19 无条件 + 30 门控 = 49，Ascend 16 另计）/ L3·STR-1 干净；2 异常项裁定正当（S-T1 bun.lock + package.json = shell-quote 1.10.0 新增依赖仅 / S-T2b modelprovider/index.ts = APIUserAbortError 导出）。
+- **B 路（1 MINOR + 4 NOTE）**：测试面零缺陷 + 接缝双向扫描零死接缝；1 MINOR = 探针标签（kernel 2 处 P-T1/P-T2 误标 + perm-face P-T3 正向基线缺失）。
+- **处置 = 全部经 grep/Read 核验后落（子代理报告 = 数据，逐项盘上复核方动手），cab2b99（18 文件，全注释/头注行，代码行零变更）**：
+  - 4 A-MINOR 头注事实订正：bashPermissions 消费者计数 14→29/9→10（Bash 本体换真 zod 型 10 位 duck 型）/ platform SUPPORTED_PLATFORMS 消费者 0→3（atlasDesktop.ts ×3 = 域外 D 波壳层核查面）/ bashReadOnly 前缀族 20→24 项（旧仓 10+6+8，数组体 diff 逐字核验）。
+  - 5 文件 6 处陈旧「47」口径同步 →「工具本体 49 个（47 = 历史口径，§8.53 审计④）」。
+  - B-MINOR 探针标签：kernel P-T1/P-T2 去误标 + P-T1 正向基线 tag / perm-face P-T3 正向基线 tag。
+  - NOTE 登记：json replacer 重载不随迁（本域 0 消费）/ prefixStatic LRU-200→无界 delta / S-T1 三文件 eslint 裁指令 4 处转纯注留理据 / func + adapter P-T5 三点绑定头注。
+  - **1 接缝裁定（B-NOTE-1）**：ruleMatching `createPermissionRequestMessage` 展示裁剪（旧仓 Bash 支 extractOutputRedirections）前向接缝 → **归属 auto-mode 波（C 桶 ②）**——纯展示面 delta（决策面「哪些段需审批」零变化，仅 needsApproval 列表展示原始分段命令），工具本体波接受该 delta 登记核销，不恢复展示裁剪（ruleMatching 头注已落裁定）。
+  - 余 NOTE 接受登记（零行为，未改）。
+
+### S-T5 ④ 闭环记录（2026-09-26，task #125/#127 闭环）
+
+- **终验四件套（cab2b99 后）**：tsc 0 / eslint 0 err（1 既有 ignore 警告 = tests/fixtures/executor-port-fakes.ts，修前同形）/ build 0 KB / 全量 **1573 pass / 94 文件 / 3398 expect**（开波前闭环态 1447/89/3109：+126 测 / +5 文件【kernel / core-face / perm-face / should-use-sandbox-func / adapter-delegation】/ +289 expect；S-T5 修复 pass 零行为，数字不变）+ gate **6 pass / 5 expect**。
+- **波 tag 裁定 = 不切新 tag**（tag = 大波节点先例；C 桶子波提交链 8861fa7（① 执行前分析）→ 9aebe78 → 7b2286b → ebf184d → 63d295a → 23db653 → cab2b99 记录本波；gate ③ 仍用 wave-c tag 不受影响）。
+- **子波范围闭环核验**：15 文件 17924L 逐字随迁（内核 8 10535L + 面 7 7389L）/ 20 槽裁定（关闭 3⑤⑰⑱ + 域外改判 1⑳ + 残留守 16）/ ⑧ 消费面接线（窗口 +1 成员 + 组合根注入 + executor 端口激活）/ 探针 5/5 非 tautology / 双只读零 BLOCKER/MAJOR / 残留守 7 文件 1539L 登记防「以为已全」。
+- **下一子波 = C 桶 ① Bash 本体纵切**（ts 面 3310L：BashTool.ts 251 / prompt 332 / commandSemantics 140 / readOnlyValidation 1924 / sedEditParser 322 / utils 221 / toolName 2 / commentLabel 13 / destructiveCommandWarning 102；UI.tsx / BashToolResultMessage.tsx = React 层域外，先例 = tasks 波 PowerShellTool.tsx 域外裁面）→ 其余 48 本体纵切（序列：高频 → 长尾）→ C 桶 ② auto-mode 纵切波（~3030L 分类器族；本波 bashClassifier 61L 桩 = 其前向接缝，② 真族换桩后族激活零代码改动）→ C 桶 ③ shell·swarm 波（7217L）。
