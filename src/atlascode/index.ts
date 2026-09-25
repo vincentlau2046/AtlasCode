@@ -19,3 +19,6 @@ export {
 export { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
 export { createSessionContextPort } from './adapters/sessionContextPortAdapter'
 export { createSessionMemoryPort } from './adapters/sessionMemoryPortAdapter'
+// S-T4 ⑧（§8.53）：sandbox 适配器（SandboxManager → ExecutorSandboxPort，含
+// shouldUseSandbox 委托）经根门面转出（STR-1；tests 经此引，非深路径）。
+export { adaptSandboxToExecutorPort } from './adapters/sandboxAdapter'

@@ -46,7 +46,10 @@ export class ShellExecutor implements Executor {
     try {
       shellCommand = await shellExec(commandString, localAbort.signal, {
         timeout: opts?.timeoutMs,
-        shouldUseSandbox: getExecutorSandboxPort().isSandboxingEnabled(),
+        // S-T4 ⑧ 消费面：每命令沙箱决策（isSandboxingEnabled 总门 + 用户
+        // excludedCommands 不动点剥除，经组合根 adapter 委托 engine shouldUseSandbox）。
+        // 逃生支（dangerouslyDisableSandbox）= 工具层输入，executor 面不透出。
+        shouldUseSandbox: getExecutorSandboxPort().shouldUseSandbox(commandString),
         onStdout: opts?.onStdout,
         // ShellExecutor 不透出：onProgress / preventCwdChanges
       })

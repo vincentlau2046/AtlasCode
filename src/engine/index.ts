@@ -51,6 +51,7 @@ export {
   getMcpPrefix,
   mcpInfoFromString,
   normalizeNameForMCP,
+  shouldUseSandbox,
   getAllBaseTools,
   getToolsForDefaultPreset,
   filterToolsByDenyRules,

@@ -6,8 +6,9 @@
  * ③ reset 复位未注入态。
  * fake 行为断言：④ wrap 非透传（带标记可断言，防"包装层被 fake 成 no-op 假绿"）
  * ⑤ 调用记录（命令 + signal + cleanup 计数）。
- * 窄面裁定核验：端口面 = 3 方法（isSandboxingEnabled/wrapWithSandbox/cleanupAfterCommand），
- * 无 customConfig（旧仓 Shell.ts 恒传 undefined）——由结构契约编译期锁死。
+ * 窄面裁定核验：端口面 = 4 方法（isSandboxingEnabled/shouldUseSandbox/wrapWithSandbox/
+ * cleanupAfterCommand），无 customConfig（旧仓 Shell.ts 恒传 undefined）——由结构契约
+ * 编译期锁死。S-T4 ⑧ 新增 shouldUseSandbox（决策方法，fake 可配返回值 + 调用记录）。
  * 无网络/无真实磁盘/无 PTY。
  */
 import { describe, test, expect, beforeEach } from 'bun:test'
@@ -62,5 +63,17 @@ describe('ExecutorSandboxPort 契约', () => {
     expect(fake.wrappedSignals[0]).toBe(abort.signal)
     expect(fake.wrappedSignals[1]).toBeUndefined()
     expect(fake.cleanups).toBe(1)
+  })
+
+  test('⑥ S-T4 ⑧ shouldUseSandbox：fake 可配返回值 + 调用记录（决策方法非 no-op 可断言）', () => {
+    const fake = new FakeExecutorSandbox()
+    setExecutorSandboxPort(fake)
+    // 默认决策 = true
+    expect(getExecutorSandboxPort().shouldUseSandbox('bazel test')).toBe(true)
+    // 可配决策 = false（模拟 excludedCommands 命中 / 总门关）
+    fake.shouldUseSandboxResult = false
+    expect(getExecutorSandboxPort().shouldUseSandbox('bazel test')).toBe(false)
+    // 调用记录（命令串逐次入列，可观测防假绿）
+    expect(fake.shouldUseSandboxCalls).toEqual(['bazel test', 'bazel test'])
   })
 })

@@ -2,7 +2,10 @@
  * ExecutorSandbox 端口 — sandbox 域 SandboxManager 在 executor 侧的窄视图（C2 · sandbox 注入）
  *
  * 旧仓消费面（32 方法 SandboxManager，新仓 src/sandbox/types.ts 已全量保留）：
- *   - ShellExecutor.exec → `isSandboxingEnabled()`（shouldUseSandbox 决策）
+ *   - ShellExecutor.exec → `shouldUseSandbox(command)`（S-T4 ⑧ 消费面激活，§8.53；
+ *     旧仓 shouldUseSandbox 决策：isSandboxingEnabled 总门 + 用户 excludedCommands
+ *     不动点剥除匹配，经组合根 adapter 委托 engine/tools shouldUseSandbox({command})）
+ *   - Shell.ts → `isSandboxingEnabled()`（useSandbox AND 支，manager 总门）
  *   - Shell.ts → `wrapWithSandbox(command, binShell, undefined, signal)`（旧仓恒传 undefined customConfig）
  *   - Shell.ts → `cleanupAfterCommand()`（bwrap 幽灵 dotfile 清理，Linux）
  *
@@ -16,12 +19,26 @@
  */
 
 /**
- * ExecutorSandbox 端口 — executor 真正消费的 sandbox 3 方法子集。
+ * ExecutorSandbox 端口 — executor 真正消费的 sandbox 4 方法子集。
  * wrapWithSandbox 返回值 = 改写后的命令串（沙箱包装层，shellquote 层内层 /bin/sh）。
+ *
+ * S-T4 ⑧ 消费面激活（§8.53）：新增 shouldUseSandbox(command) 决策方法——旧仓
+ * shouldUseSandbox 决策（isSandboxingEnabled 总门 + 用户 excludedCommands 不动点
+ * 剥除匹配）经组合根 adapter 委托 engine/tools shouldUseSandbox({command}) 落 executor
+ * 消费面。L3 保持：executor 只面向本端口编程（不 import engine/sandbox 域），决策实现
+ * 归组合根 adapter（两域互不 import，adapter 是组合根专属活，charter L4.7）。
+ * 逃生支（dangerouslyDisableSandbox + areUnsandboxedCommandsAllowed）= 工具层输入，
+ * 本 executor 端口面不透出（Bash 工具本体子波经 engine shouldUseSandbox 直接消费）。
  */
 export interface ExecutorSandboxPort {
-  /** 沙箱是否启用（ShellExecutor → shouldUseSandbox）。 */
+  /** 沙箱是否启用（manager 总门；Shell.ts useSandbox AND 支消费）。 */
   isSandboxingEnabled(): boolean
+  /**
+   * 每命令沙箱决策（S-T4 ⑧ 消费面）：isSandboxingEnabled 总门 + 用户
+   * excludedCommands 不动点剥除匹配（engine/tools shouldUseSandbox 语义）。
+   * ShellExecutor.exec 消费 → Shell.ts shouldUseSandbox 参。
+   */
+  shouldUseSandbox(command: string): boolean
   /**
    * 命令沙箱包装（旧仓 wrapWithSandbox(command, binShell, undefined, signal) 的窄面）。
    * 返回包装后的命令串；调用方以 /bin/sh -c 外层 spawn 解析 POSIX 输出。

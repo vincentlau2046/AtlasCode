@@ -164,12 +164,21 @@ export function createFakeBootstrapState(initialCwd = '/fake/original') {
  */
 export class FakeExecutorSandbox implements ExecutorSandboxPort {
   sandboxingEnabled = true
+  /** S-T4 ⑧：shouldUseSandbox 决策 fake 可配返回值（默认 true；非 no-op 可断言）。 */
+  shouldUseSandboxResult = true
+  /** S-T4 ⑧：shouldUseSandbox 调用记录（命令串，可观测防假绿）。 */
+  readonly shouldUseSandboxCalls: string[] = []
   readonly wrappedCommands: string[] = []
   readonly wrappedSignals: Array<AbortSignal | undefined> = []
   cleanups = 0
 
   isSandboxingEnabled(): boolean {
     return this.sandboxingEnabled
+  }
+
+  shouldUseSandbox(command: string): boolean {
+    this.shouldUseSandboxCalls.push(command)
+    return this.shouldUseSandboxResult
   }
 
   async wrapWithSandbox(
