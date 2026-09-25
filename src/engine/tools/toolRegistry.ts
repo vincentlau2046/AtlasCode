@@ -1,8 +1,10 @@
 /**
  * engine/tools — 工具注册表机制（§8.25 E-2 T-5e，旧仓 tools.ts getAllBaseTools 裁剪版真核心）
  *
- * 旧仓 tools.ts `getAllBaseTools()` 是 47 工具本体的模块级 import + feature()/env 门控装配。
- * 新仓裁剪为 **deps 注入的注册表机制**：工具本体未落（47 个残留守，随后续纵切逐个落），
+ * 旧仓 tools.ts `getAllBaseTools()` 是 49 基础工具本体（非 Ascend）的模块级 import +
+ * feature()/env 门控装配。口径（§8.53 审计④）：**49 = 朴素口径（每工具计 1，cron 三件套按 3 计）**；
+ * 历史「47」= cron 三件套计 1 项（E-2 沿用值），标历史口径。Ascend 16 = 独立门控族（另计）。
+ * 新仓裁剪为 **deps 注入的注册表机制**：工具本体未落（49 个残留守，随后续纵切逐个落），
  * 注册表只负责「已落本体 + 门控 + 去重」的装配机制，本体经 deps 增量注入，机制不变。
  *
  * 装配语义（旧仓 getAllBaseTools + assembleToolPool 折叠）：
@@ -16,10 +18,10 @@
  *     kill-switch `FEATURE_ASCEND_TOOLS=false` 关，否则开（env 可注入，单测不触 process.env）。
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
- *   - 47 工具本体（Read/Edit/Bash/Glob/Grep/… + Ascend 16）→ 残留守（deps 注入位已铺；
- *     各本体纵切落地时填 deps，本机制不改）。
+ *   - 49 基础工具本体（Read/Edit/Bash/Glob/Grep/…；非 Ascend 朴素口径，Ascend 16 = 独立门控族另计）
+ *     → 残留守（deps 注入位已铺；各本体纵切落地时填 deps，本机制不改）。
  *   - getToolsForDefaultPreset **E-4 S-4c1 已落**（机制面 deps 版，§8.34 裁定 ⑤；
- *     47 本体残留守不变，名单随 deps 注入增长）。
+ *     49 本体残留守不变，名单随 deps 注入增长）。
  *   - **E-4 S-4d ② 已落**：filterToolsByDenyRules（旧 tools.ts:271-278 逐字，
  *     域 getDenyRuleForTool 消费——MCP server 级 deny `mcp__server` 剥整 server，
  *     与运行时 1a 同匹配器）+ getTools(context, deps) = deny 过滤 + isEnabled
@@ -30,18 +32,26 @@
  *   - 旧仓 assembleToolPool 的分区按名排序（1P-REST claude_code_system_cache_policy 缓存断点
  *     稳定性）→ 残留守（新仓 auth 车道 = OpenAI 协议静态键，无服务端工具级缓存断点；
  *     去重仅按名先入为主，不排序）。
- *   - 旧仓 getAllBaseTools 的 20 个条件门控槽**全部**残留守（各槽本体未落，门随本体纵切落；
- *     本机制只保留已落面的 ASCEND 门 + deps 注入，其余槽不声明防死接缝）：
- *     ① IS_ATLAS_DEV（REPL + SuggestBackgroundPR）② AGENT_TRIGGERS（cron 三件套）
- *     ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger）④ MONITOR_TOOL（Monitor）
- *     ⑤ OVERFLOW_TEST_TOOL（OverflowTest）⑥ CONTEXT_COLLAPSE（CtxInspect）
- *     ⑦ TERMINAL_PANEL（TerminalCapture）⑧ WEB_BROWSER_TOOL（WebBrowser）
- *     ⑨ HISTORY_SNIP（Snip）⑩ UDS_INBOX（ListPeers）⑪ WORKFLOW_SCRIPTS（Workflow）
- *     ⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution）⑬ ENABLE_LSP_TOOL（LSP）
- *     ⑭ worktree mode（Enter/ExitWorktree）⑮ agentSwarms（TeamCreate/TeamDelete）
- *     ⑯ isTodoV2（Task 四件套）⑰ hasEmbeddedSearchTools（Glob/Grep 抑制）
- *     ⑱ NODE_ENV=test（TestingPermission）⑲ ToolSearch optimistic（ToolSearch）
- *     ⑳ PowerShell enabled（PowerShell）。
+ *   - 旧仓 getAllBaseTools 的 20 个条件门控槽 **逐槽裁定**（§8.53 S-T3 裁定表，复审勿当遗漏重提）：
+ *     **关闭 3**（不迁）：⑤ OVERFLOW_TEST_TOOL（OverflowTest，测试专用无产品价值）
+ *       ⑰ hasEmbeddedSearchTools（Glob/Grep 抑制，bun 内嵌 bfs/ugrep = 旧仓构建特例，
+ *       新仓条件恒 false → Glob/Grep 恒注册，槽退化为 2 常量注册）
+ *       ⑱ NODE_ENV=test（TestingPermission，新仓测试体系不消费该工具）。
+ *     **域外改判 1**：⑳ PowerShell enabled（PowerShell，bash-only 纵切域外；
+ *       B16 裁定同 = 域外改判登记，非 C 桶项）。
+ *     **残留守 16**（各槽本体未落，门随本体纵切落；本机制只保留已落面的 ASCEND 门
+ *       + deps 注入，其余槽不声明防死接缝；归属波标注）：
+ *       ① IS_ATLAS_DEV（Tungsten + SuggestBackgroundPR + REPL，无归属波，随体纵切声明）
+ *       ② AGENT_TRIGGERS（cron 三件套 → 任务工具本体子波，scheduler 域 E-7 S-7b 已落）
+ *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
+ *       ④ MONITOR_TOOL（Monitor → 本体纵切）⑥ CONTEXT_COLLAPSE（CtxInspect → 本体纵切）
+ *       ⑦ TERMINAL_PANEL（TerminalCapture → shell 波 TUI 面）⑧ WEB_BROWSER_TOOL（WebBrowser → 本体纵切）
+ *       ⑨ HISTORY_SNIP（Snip → shell/REPL 波）⑩ UDS_INBOX（ListPeers → shell·swarm 波）
+ *       ⑪ WORKFLOW_SCRIPTS（Workflow → 本体纵切）⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution → 本体纵切）
+ *       ⑬ ENABLE_LSP_TOOL（LSP → 本体纵切）⑭ worktree mode（Enter/ExitWorktree → worktree 工具本体子波，
+ *       worktree 域 E-7 S-7c 已落）⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
+ *       ⑯ isTodoV2（Task 四件套 → 任务工具本体子波，tasks 域 E-7 S-7a 已落，与 ② 同子波）
+ *       ⑲ ToolSearch optimistic（ToolSearch → 本体纵切；claude.ts 请求时 deferred 决策面 = D 波壳接线）。
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'
@@ -50,7 +60,7 @@ import { AgentTool } from './agent/AgentTool'
 
 /** 注册表注入面（H6：每个字段均有消费点，无死接缝）。 */
 export interface ToolRegistryDeps {
-  /** 已落基础工具本体（47 本体残留守；各本体纵切落地时注入，注册表机制不变）。 */
+  /** 已落基础工具本体（49 本体残留守，非 Ascend 朴素口径；各本体纵切落地时注入，注册表机制不变）。 */
   baseTools?: readonly Tool[]
   /** MCP 工具（T-5a createMcpTools 预构建，isMcp + mcpInfo 一等注册 Tool）。 */
   mcpTools?: readonly Tool[]
@@ -99,7 +109,7 @@ function uniqByName(tools: readonly Tool[]): Tools {
  * baseTools 补拒支消费）：getAllBaseTools(deps) 中 isEnabled() 工具名。
  * 旧仓 getToolsForDefaultPreset 逐字语义（`tool.isEnabled ? tool.isEnabled() : false`
  * → 新 shared Tool.isEnabled 必选方法，等价 `.filter(t => t.isEnabled())`）。
- * 47 工具本体残留守不变（机制面：本体经 deps 注入时名单随之增长）。
+ * 49 工具本体残留守不变（机制面：本体经 deps 注入时名单随之增长；49 = 朴素口径，47 = 历史口径，§8.53 审计④）。
  */
 export function getToolsForDefaultPreset(
   deps: ToolRegistryDeps = {},

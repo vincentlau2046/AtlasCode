@@ -323,9 +323,16 @@ C 波（12-18 天，纯串行，功能纵切优先 §8）：C1 叶子下沉 → 
    ↓
 E 波（3-5 天，串行）：ascend 块直调 → gelu L1 → wave-e tag
    ↓
-D 波（8-15 天，串行）：壳接线 → 全栈 gelu 复验 → wave-d tag
+E-wave-end（§8.52，2026-09-25）：A 桶 15 项（S-E1..S-E4）闭环 + B 桶 18 项登记（B18）+ 闭环后全量审计三路 PASS
    ↓
-F 波（3-5 天，串行）：清尾 → B13 → wave-f tag → 旧仓 archive
+**C 桶三波（§8.53 起，功能纵切）**：① 工具本体 49（Bash 纵切 checkPermissions 面 15 文件 + 20 门控槽裁定 + ⑧ sandboxAccess 接线）→ ② auto-mode 分类器族 ~3030L → ③ shell·swarm 7217L
+   ↓
+**D 波（8-15 天，串行）**：壳接线 + B13（setAppState 置换，S-E0 自 F 波改判）+ 全栈 gelu 复验 → wave-d tag
+   ↓
+**remote 波 → analytics 波**（B5 远程持久化 / B2 遥测面等跨波登记项核销）
+   ↓
+F 波（3-5 天，串行）：清尾 → wave-f tag → 旧仓 archive
+   （显式排序裁定 §8.53 审计③：C 桶 ①②③ → D 波 → remote → analytics；F 波 = 归档收尾）
 ```
 
 **关键决策点**：~~C 波 spike 跑完的那一刻~~ **spike 已跑完（2026-09-22，4/4 绿），决策=开 C 波**。整个迁移"该不该全量走"的最终判断点已通过——4 项验证全绿（分类口径已定位 + 单域耗时偏保守 + 并发模型成立 + 双跑可跑），唯一修正项（memory 3→21）不阻塞。下一步：开 A 波（骨架，2-3 天，低风险）。
@@ -2495,17 +2502,17 @@ S-E4 门+探针收口（2 项）：
 - B7 #16 directMemberMessage writeToMailbox 真 mailbox 面（shell/swarm 波；directMemberMessage.ts:14）
 - B8 #17 queueManager logOperation replay 接回（shell 波；queueManager.ts:17-21）
 - B9 #18 worktree hookBased 形参保留（工具本体波；worktree.ts:12-14,467-530）
-- B10 #19 runHooksStream 流式消费面（流式纵切；loop.ts:15 残留守已核未流式化）
+- B10 #19 runHooksStream 流式消费面（流式纵切；loop.ts:15 残留守已核未流式化）【S-T3 预登记：按需触发，D 波后】
 - B11 #21 predicates compact-boundary 检索族（shell/REPL 波；predicates.ts 头注）
 - B12 React 侧 recordTranscript/recordContentReplacement 5 点（useLogMessages.ts:69 / ResumeConversation.tsx:225 / plans.ts:393 / sessionRestore.ts:462 / queryHelpers.ts:310,331；shell/message 波）
 - B13 **QueryEngineConfig setAppState 置换 → D 波**（本裁定从原 A 桶归赋订正：loop deps 无 setAppState 字段已核（loop.ts 字段面）；messaging SetAppState duck 为 shell 波消费（queueManager）；`src/atlascode/state/index.ts` 7L 骨架 = D 波归属；engine state 域 EngineState set(f) 队列 = E-1 T-3 落点）
 - B14 InProcessTeammateTask TaskState 联合扩（shell/swarm 波，§8.50 裁定；tasks/types.ts 头注）
-- B15 RemoteAgentTask/DreamTask/LocalWorkflowTask/MonitorMcpTask 任务态（顺延波；registry.ts 裁面登记）
+- B15 RemoteAgentTask/DreamTask/LocalWorkflowTask/MonitorMcpTask 任务态（顺延波；registry.ts 裁面登记）【S-T3 预登记：任务工具本体子波，与门控槽 ②⑯ 同子波，下界 = shell/swarm 波后】
 - B16 20 门控槽位 + PowerShell 2049L 面（工具本体波 / bash-only 纵切，§8.21 口径）
 - B17 compose 残留守 applyConfigEnvironmentVariables（信任对话框面未落；shell 波；compose.ts 头注）
 - B18 12 engine 零消费者占位删除（S-E4 A14，2026-09-25：ports/domainMount·featureConfig·lspStatus·promptSuggestion + state/attribution 4 + state/fileHistory 4；M-3 门盲区收口——零消费者死骨架且 C 波未填实，「登记→即刻清零」退化裁定为直接删除（偏离 S-E0 裁定 1 措辞，理由见 S-E4 ① 节）；后续波（analytics/D/工具本体）按需重建且须实质实现，不重占位；state/index.ts + engine/index.ts 头注已登记前向接缝）
 
-**C 桶 = 后续波（不在本节）**：工具本体 47（bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位，§8.43 裁定①）/ auto-mode 分类器族 ~3030L（bashClassifier 61L 桩前向登记）/ shell·swarm 7217L（swarm + inProcessTeammateHelpers 102L + teamDiscovery + teamMemoryOps + UDS Port 9）
+**C 桶 = 后续波（不在本节）**：工具本体 49（47 = 历史口径，§8.53 审计④；bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位，§8.43 裁定①）/ auto-mode 分类器族 ~3030L（bashClassifier 61L 桩前向登记）/ shell·swarm 7217L（swarm + inProcessTeammateHelpers 102L + teamDiscovery + teamMemoryOps + UDS Port 9）
 
 ### 裁定 2：组合根现状盘点 + 注入窗口清单
 
@@ -2856,7 +2863,7 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 ### §8.53 工具本体波（C 桶 ①）执行前分析（2026-09-25，task #125）
 
-**波定位** = C 桶 ①「工具本体 47」的**首个子波** = **Bash 纵切 · checkPermissions 面**（§8.43 裁定① deferred 项，E-6 全 shell 波登记）+ 20 门控槽裁定 + ⑧ 消费面接线。C 桶 ①「工具本体 47」为伞项（47 本体纵切），本闭环子波落 Bash checkPermissions 面（叶 + 机制 + 接线）；Bash 本体纵切 + 其余 46 本体纵切 = 后续子波（序列登记，不新开 C 桶项）。
+**波定位** = C 桶 ①「工具本体 49」（47 = 历史口径，§8.53 审计④）的**首个子波** = **Bash 纵切 · checkPermissions 面**（§8.43 裁定① deferred 项，E-6 全 shell 波登记）+ 20 门控槽裁定 + ⑧ 消费面接线。C 桶 ①「工具本体 49」为伞项（49 本体纵切），本闭环子波落 Bash checkPermissions 面（叶 + 机制 + 接线）；Bash 本体纵切 + 其余 48 本体纵切 = 后续子波（序列登记，不新开 C 桶项）。
 
 **1. 范围裁定（冻结，旧仓 @ a8af45b 逐字行数基线）**
 
@@ -2922,7 +2929,7 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - ① B10（流式消费面）/ B15（任务态 4 项顺延波）未排总序列 → 预登记：B10 = 流式纵切（按需触发，D 波后）；B15 = 任务态 4 项 = 任务工具本体子波（与槽 ②⑯ 同子波，下界 = shell/swarm 波后）
 - ② §8.3 路线图 L324-328 陈旧 → S-T3 回刷（E-wave-end → C 桶三波插入 + B13 已 S-E0 改判 D 波 + 本节 §8.53 加入）
 - ③ D 波与 C 桶三波先后仅隐式 → 显式裁定：**C 桶 ①②③ → D 波（壳接线 + B13 + gelu 复验 + wave-d）→ remote → analytics**（S-T3 加行入 §8.3）
-- ④ 「47 工具本体」计数口径 → 钉死：旧仓 getAllBaseTools 名单全门开工具名计数（cron 三件套按 3 计 = 朴素 49；E-2 沿用 47 = cron 计 1 项）。**裁定 = 朴素 49 口径（每工具计 1），47 标历史口径**（S-T3 脚本点数核录本节）
+- ④ 「47 工具本体」计数口径 → 钉死：旧仓 getAllBaseTools 名单全门开工具名计数（cron 三件套按 3 计 = 朴素 49；E-2 沿用 47 = cron 计 1 项）。**裁定 = 朴素 49 口径（每工具计 1），47 标历史口径**。**S-T3 脚本点数核（2026-09-26）= 49 坐实**：旧仓 tools.ts `getAllBaseTools`（L200-259）**非 Ascend** 基础工具名全门开枚举 = 49 项，结构 = 19 无条件（AgentTool/TaskOutput/Bash/ExitPlanModeV2/FileRead/FileEdit/FileWrite/NotebookEdit/WebFetch/TodoWrite/WebSearch/TaskStop/AskUserQuestion/Skill/EnterPlanMode/Config/SendMessage/ListMcpResources/ReadMcpResource）+ 30 门控（Glob/Grep 2 + Tungsten/SuggestBackgroundPR/WebBrowser 3 + Task 四件套 4 + Overflow/CtxInspect/TerminalCapture/LSP 4 + Worktree 2 + ListPeers/Team 双件 3 + VerifyPlan/REPL/Workflow 3 + cron 三件套 3 + RemoteTrigger/Monitor/PowerShell/Snip/TestingPermission/ToolSearch 6）；历史 47 = cron 三件套计 1 项（49−2）。**Ascend 16 = 独立门控族，不计入本 49**（toolRegistry 头注 6 处 + C 桶/波定位口径已同步为 49）。
 - ⑤ bashClassifier 引用口径 → 钉死：记录统一引 61L 体（新仓盘上 78L 含 17L provenance 头注，diff 逐字）
 
 **5. 切片计划与验收门**
