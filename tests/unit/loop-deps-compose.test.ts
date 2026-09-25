@@ -23,7 +23,9 @@
  * （save→load 往返 + ENOENT→null）→ tests/func/loop-deps-compose-fs.test.ts。
  *
  * 运行口径注（同 §8.30 T-6）：compose 装配注入全量模块态窗口（session env /
- * messaging 队列 / scheduler env / tasks cleanup registry / sandboxAccess）；
+ * messaging 队列 / scheduler env / tasks cleanup registry / sandboxAccess /
+ * Port 5 + Port 1 注入窗口——各窗口无 reset 导出，ad-hoc 连跑时 createCoreDependencies
+ * 重注新壳幂等覆盖、tasks registry 残留 handler 仅波及后续 runCoreCleanup 消费面）；
  * 标准 `bun test --isolate` 每文件独立进程，无跨文件泄漏；单进程 ad-hoc 连跑
  * 时本文件窗口可波及后续文件（本文件排前或逐文件 isolate）。
  */
@@ -294,8 +296,10 @@ describe('通知/cleanup/scheduler 注入（S-E2 A9）', () => {
     expect(cmd.value).toBe('<task-notification>done</task-notification>')
     expect(cmd.mode).toBe('task-notification')
     expect(cmd.priority).toBe('next')
-    // delta 登记：新仓 QueuedCommand 裁 agentId 字段（旧仓有，主线程
-    // undefined 语义）——入队对象无 agentId 键（定向投递路由 = shell/swarm 波前向接缝）
+    // delta 登记（S-E2 审视订正）：类型面两侧均保留 agentId（TaskNotification
+    // agentId?: string / QueuedCommand.agentId queueTypes.ts:133 旧仓逐字，主线程
+    // = undefined）——本 handler 未接定向投递（入队对象无 agentId 键），
+    // 定向投递路由 = shell/swarm 波前向接缝（字段已在，届时仅需 handler 接线）
     expect('agentId' in cmd).toBe(false)
   })
 

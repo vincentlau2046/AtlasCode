@@ -203,8 +203,11 @@ export function createCoreDependencies(): CoreDependencies {
   setSessionContextPort(createSessionContextPort())
 
   // ⑪ S-E2 A9（§8.52）：通知 ← messaging 真队列（enqueuePendingNotification；
-  //    delta 登记：n.agentId 丢弃——新仓 QueuedCommand 裁 agentId 字段，
-  //    定向投递路由 = shell/swarm 波前向接缝）+ scheduler 退出清理 →
+  //    delta 登记（S-E2 审视订正）：类型面两侧均保留 agentId
+  //    （TaskNotification.agentId notification.ts:27 / QueuedCommand.agentId
+  //    queueTypes.ts:133 旧仓逐字「Undefined = 主线程」）——本 handler 未接
+  //    n.agentId → QueuedCommand.agentId 定向投递路由 = shell/swarm 波
+  //    前向接缝（字段已在，届时仅需 handler 接线））+ scheduler 退出清理 →
   //    tasks cleanupRegistry（unregister 句柄签名逐字匹配；getProjectRoot/
   //    getOwnerKey 保持域缺省——S-7b 审视确证 = 旧仓真逻辑非 stub）
   setTaskNotificationHandler(n =>
@@ -270,13 +273,21 @@ export interface AgentLoopDepsBundle {
 /**
  * loop 依赖构建器（S-E2 A4，§8.52 裁定 2 A 桶）——组合根消费 getTools /
  * 权限门 / hooks 装配① 的唯一入口（loop.ts:108「本纵切不造全局注册表」
- * 消费接缝兑现；旧仓 QueryEngine.ts:543 permissionMode ← ctx.mode 先例）：
+ * 消费接缝兑现；hook option 先例 = 旧仓 orchestrator/tools/toolHooks.ts:409
+ * （executePreToolHooks 现读 appState.toolPermissionContext.mode；注：
+ * QueryEngine.ts:543 系 buildSystemInitMessage 系统初始化消息面非 hook
+ * option 面——S-E2 审视 A 路 NOTE-1 锚点订正））：
  *   ① initializeToolPermissionContext（CLI 面 + 注册表 deps）
  *   ② getTools(ctx, deps)（注册表组合根消费点：getAllBaseTools + deny
  *      过滤 + isEnabled 尾行，47 本体仍经 deps 注入前向）
  *   ③ createPermissionGate(ctx)（S-E1 I-1 全决策体语义消费）
  *   ④ createLoopHooks（§8.42 项 1 hooks 装配① 生产路径）
  *   ⑤ AgentLoopDeps 组装（modelProvider 单例 + role 车道）
+ *
+ * delta 登记（S-E2 审视 A 路 NOTE-1）：sessionId/permissionMode 于本构建器
+ * 构建期固化进 HookRunOptions（旧仓 hook 执行时活态解析）——CLI 单进程
+ * 生命周期等价；长驻 TUI/bridge 会话中 switchSession 后复用本构建器须
+ * 重建 deps 或经 config.hookOptions 覆写（前向接缝）。
  */
 export async function createAgentLoopDeps(
   config: AgentLoopDepsConfig = {},

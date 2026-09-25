@@ -3,7 +3,8 @@
  *
  * 实现波次: E 波 S-7d d2 契约落地（§8.49 item 3；A 波占位「实现待 C 波」
  * 经 E 波 session 域规划改判 d2 真契约）
- * 状态: 契约就绪，壳侧实现 + compose 注入 = E-wave-end 前向接缝
+ * 状态: 契约就绪，壳实现 + compose 注入已落（S-E2 A7，§8.52）；D 波/CLI 波
+ * 经同一窗口整换真实现 + 激活消费者
  *
  * QueryEngineConfig getAppState/setAppState 替换面（charter Port 1）；
  * 当前零消费者 = 前向登记（H6 防空洞：接缝已声明非遗漏）。快照字段
