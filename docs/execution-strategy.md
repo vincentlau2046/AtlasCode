@@ -2467,7 +2467,7 @@ S-E1 门收口族（3 项，纯引擎内、风险最低、先解锁语义）：
 - A2 **F1 子代理门透传**（审计①；`runAgent.ts:119` `queryAgentLoop({modelProvider, role, signal}, {messages, tools})` 不带 checkPermission = 子代理工具调用绕过门 → RunAgentArgs 加可选 `checkPermission` 透传 loop deps）
 - A3 **F4 1c abort 重抛**（审计③；`src/permissions/ruleMatching.ts:413` catch 吞 AbortError/APIUserAbortError（头注 L19 裁减登记）→ catch 层重抛恢复；context abortController 回填 = 工具本体波前向登记（本项仅 catch 层重抛，不造全量 context））
 
-S-E2 组合根注真值（8 项）：
+S-E2 组合根注真值（7 项，A4-A10）：
 - A4 **④ getTools 组合根 + loop-deps 构建器**（审计④；`loop.ts:108` 注「本纵切不造全局注册表」→ `compose.ts` 造注册表（getAllBaseTools + filterToolsByDenyRules + preset）+ loop-deps 构建器（modelProvider/checkPermission/hooks）；含 **hooks 装配①**（§8.42 项 1：createToolHooks/createLoopHooks → AgentLoopDeps.hooks 生产路径，现仅测试消费）；D 波 cli.ts（7L 骨架）以单入口消费，cli 本体仍 D 波）
 - A5 **#7 SessionEnv 注真值**（session/env.ts:8,61；setSessionEnv bootstrap 真值）
 - A6 **#13 Port 5 SessionMemoryPort 壳实现 + 注入**（sessionMemory.ts:126,130 + ports/sessionMemory.ts:7；零消费者前向登记收口 = 组合根最小真实现）
@@ -2555,7 +2555,7 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 ### S-E2 组合根注真值 执行前分析（2026-09-25，task #121）
 
-**范围（裁定 1 A 桶 S-E2 8 项，A4-A10）**。勘查结论 + 设计冻结如下；实施时逐字对照本节，新增/偏离须回写本节。
+**范围（裁定 1 A 桶 S-E2 7 项，A4-A10）**。勘查结论 + 设计冻结如下；实施时逐字对照本节，新增/偏离须回写本节。
 
 **现状勘查（2026-09-25 实测）**
 - `compose.ts` 152L：①-⑦ 装配面已落（B6-func/S-3c/S-3d/E-5），残留守仅 applyConfigEnvironmentVariables（B17）。14 注入窗口清单（裁定 2）中本波 8 项现状 = 全缺省/placeholder：setSessionEnv placeholder / setSessionMemoryPort 零消费者 / Port 1 无注入口（grep 全仓无 setSessionContextPort——A7 须先建窗口）/ setTaskNotificationHandler 缺省 logForDebugging / setSchedulerEnv registerExitCleanup no-op / setSandboxAccess placeholder 禁用态（permissions 门面已 `export * from './sandboxAccess'`，无需补门面）/ getTools 组合根零消费（loop.ts:108 头注「本纵切不造全局注册表」）。
@@ -2615,14 +2615,14 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 ### S-E2 组合根注真值 实施/审视记录（2026-09-25，master acc4fee + 6511684，task #121 闭环）
 
-**② 实施（acc4fee，9 文件 +720 新增/修改）**
+**② 实施（acc4fee，9 文件 +767 新增/修改（git show --stat 实测；记录原 +720 为 47 行偏差，闭环后审计订正））**
 - **A4 loop-deps 构建器**：`createAgentLoopDeps(config?)` → ① `initializeToolPermissionContext`（CLI 面 + 注册表 deps）② `getTools(ctx, deps)`（注册表组合根消费：deny 过滤 + isEnabled 尾行 + 47 本体 deps 注入）③ `createPermissionGate(ctx)`（S-E1 I-1 全决策体消费）④ `createLoopHooks({options:{sessionId: bootstrap getSessionId(), permissionMode: ctx.mode, ...config.hookOptions}})`（hooks 装配① 生产路径）⑤ `AgentLoopDeps{modelProvider: 单例恒等, role: config.role ?? 'premium', signal?, checkPermission, hooks}`。
 - **A5 setSessionEnv 注真值**：bootstrap 3 成员 `getSessionId` / `switchSession: id => bootstrap switchSession(id)` / `getOriginalCwd` + `registerCleanup`→tasks cleanupRegistry。**getProjectsDir 不注**（域缺省 `ATLAS_CONFIG_DIR ?? ~/.atlas`+`projects` = 旧仓 projects 车道真值自包含；bootstrap 私有 `sessions` 目录系 hooks-input 辅路，混用会断 record 写面 FROZEN `projects` stamp）。
 - **A6 Port 5 壳实现**：`createSessionMemoryPort()` 路径 `join(getProjectDir(env.getOriginalCwd()), env.getSessionId(), 'session-memory', 'summary.md')`（旧 getSessionMemoryPath 逐字形态；getCwd → 冻结 getOriginalCwd A-1 值 delta）；load = readFile utf-8 + isFsInaccessible→null 其余 throw；save = mkdir(0o700, **recursive 登记 delta**) + writeFile(0o600)。**保真登记**：非原子 plain writeFile = 旧仓 sessionMemory.ts:195-202 先例（无 tmp+rename）。
 - **A7 Port 1 壳实现**：先建注入窗口 `engine/session/sessionContextPort.ts`（set/getSessionContextPort，Port 5 窗口 sessionMemory.ts:123-132 镜像）+ session 子门面 + engine 根门面追加；壳 `createSessionContextPort()` = holder（get 返快照引用 = view 语义，set 按字段写回不深拷贝）+ 缺省快照（最小 ToolPermissionContext mode 'default' 空规则族 + mcp{tools:[],clients:[]} + effortValue 'medium' + advisorModel undefined + tasks {}）。
 - **A8 sandboxAccess 接线**：compose ⑧ `setSandboxAccess({isSandboxingEnabled, isAutoAllowBashIfSandboxedEnabled, getFsWriteConfig 窄视图{allowOnly,denyWithinAllow}})`（消费点被 isSandboxingEnabled 恒 false 短路不可达 = 旧仓 disabled-stub 语义，T-8 前后态可判别）。
 - **A9 通知/cleanup/scheduler 三注入点**：⑪ `setTaskNotificationHandler(n => enqueuePendingNotification({value,mode:'task-notification',priority}))`（delta：handler 未接 `n.agentId` 定向投递 = shell/swarm 波前向接缝，见下 MINOR-1）+ `runCoreCleanup()`（= tasks `runCleanupFunctions`，CLI 关闭路径 D 波消费本波只暴露）+ session `registerCleanup`→tasks + `setSchedulerEnv({registerExitCleanup: fn => registerCleanup(fn)})`。
-- **A10 tools 深 import 归一——整项撤回**：预分析冻结 5 处（workerAgent.ts / coordinatorMode.ts / AgentTool.ts / forkSubagent.ts）改 tools 域门面。实施中实测 `tools↔coordinator` 模块求值环——剩余环边在 `builtInAgents.ts:21`（→ `workerAgent` 叶 → A10 门面 import → tools 门面 mid-eval），`workerAgent` 顶层 `const WORKER_AGENT` 消费门面名 → **TDZ 崩**（`Cannot access 'ASYNC_AGENT_ALLOWED_TOOLS' before initialization`）。裁定：门面归一仅 5 行 import、零行为价值，不值得引入 import-time TDZ 脆性 → **4 文件 `git checkout HEAD` 整项撤回**（复原 HEAD 深 import 形），C 桶边清理前向接缝（长期斩跨域边 = isCoordinatorMode 归属反转 / shared 叶化）。T-10 保留断言本体（深度门 fan-out 子句 + getTools baseTools 路径），改题「A10 撤回零行为回归」。
+- **A10 tools 深 import 归一——整项撤回**：预分析冻结 5 处（workerAgent.ts 3 + coordinatorMode.ts 2 = 2 文件，① 节范围 grep 枚举；本记录原文文件清单误含 AgentTool.ts / forkSubagent.ts——后两文件 import 系 tools/agent/ 域内相对 import，非 STR-1 跨域深 import 归一对象，不在预分析范围（闭环后审计订正）；实施时 4 文件被改）改 tools 域门面。实施中实测 `tools↔coordinator` 模块求值环——剩余环边在 `builtInAgents.ts:21`（→ `workerAgent` 叶 → A10 门面 import → tools 门面 mid-eval），`workerAgent` 顶层 `const WORKER_AGENT` 消费门面名 → **TDZ 崩**（`Cannot access 'ASYNC_AGENT_ALLOWED_TOOLS' before initialization`）。裁定：门面归一仅 5 行 import、零行为价值，不值得引入 import-time TDZ 脆性 → **4 文件 `git checkout HEAD` 整项撤回**（复原 HEAD 深 import 形），C 桶边清理前向接缝（长期斩跨域边 = isCoordinatorMode 归属反转 / shared 叶化）。T-10 保留断言本体（深度门 fan-out 子句 + getTools baseTools 路径），改题「A10 撤回零行为回归」。
 - 门面扩面：`atlascode/index.ts`（createAgentLoopDeps / runCoreCleanup / 两 adapter / 两 facade type）、`engine/index.ts` + `engine/session/index.ts`（Port 1 窗口）。
 
 **探针 P-E4 实测（backup→mutate→红集→verbatim-restore diff 核验）**
@@ -2841,5 +2841,15 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 ### S-E4 ④ 闭环记录（2026-09-25，task #123 完结）
 
 - **wave-c tag 切出**（门③ 激活开关；wave-b 2026-09-22 先例同实践；本地 tag 无 remote，`git tag -d wave-c` 可回退）。切后 tag 集 = wave-a / wave-b / wave-c。门③ 由休眠转实检：gate 复跑 6 pass，expect 计 4→5（`if (hasWaveC)` 实检分支执行 `expect(cdeepStubs).toEqual([])` = STUB_REGISTRY 3 shared 条目 ∉ 9 域 regex → 0 条目，门③ 实检绿）。
-- **终验四件套**（闭环态）：tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3108 expect** + gate 6（门③ 实检）。
+- **终验四件套**（闭环态）：tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3109 expect**（闭环态 = 切 tag 前 3108 + 门③ 实检分支 +1 expect——tests/ 集含 tests/ci 2 文件，wave-c tag 切出后 gate ③ 实检分支执行 `expect(cdeepStubs).toEqual([])`；gate 单跑 = 6 测 / 5 expect；3108 为 S-E4 ②/③ 记录点（切 tag 前）口径）+ gate 6（门③ 实检）。
 - **S-E4 ①→②→③→④ 全闭环**：10ecd09（① 执行前分析）→ 6e236d5（A15）→ 5bc9e75（A14）→ db798fc（③ A 路修复）→ ae60f59（③ B 路修复）→ wave-c tag（④）。**task #123 完结 → E-wave-end（task #119）完结**：A 桶 15 项（S-E1..S-E4）全闭环；B 桶 18 项登记（B18 = 12 engine 占位删除 + 重建要求）；C 桶（工具本体 + auto-mode + shell·swarm）= 后续既定波。下一步 = 工具本体波（bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位）。
+
+### 闭环后全量审计记录（2026-09-25，3 只读子代理【用户授权 ≤3 例外批次】，task #124）
+
+审计目标 = E-wave 完成内容（提交链 / 基线谱系 / gate 态 / B 桶登记 / H6 头注）↔ 三份文本记录（本 §8.52 / progress memory / MEMORY.md 索引）↔ 终态实测 + 后续计划合理性。三路 verdict 全 PASS-with-issues，零 BLOCKER/MAJOR：
+
+- **A 路（git / 基线 / gate 对照）**：PASS。全部 111 处引用 SHA 存在（含 2 处跨仓引用 a8af45b / 73631df 旧仓核验；d67c16 = 会话 ID 非 git 引用）；基线谱系 473 → 522 → 661 → 766 → 939 → 999 → 1054 → 1100/1160/1210/1262/1284/1374/1403（E-7 叶）→ 1414/2998（S-E1）→ 1428/3051（S-E2）→ 1447/89/3107（S-E3）→ 3108（S-E4 切 tag 前）→ **3109（闭环态）** 逐位自洽；gate ③ 机制逐字核验（wave-c 存在 → 9 域 regex → STUB_REGISTRY 3 shared 条目 ∉ regex → 0 条目；条件 expect 为 gate 文件唯一条件 expect，4→5 机制自洽，3 次复跑稳定非 flake）；四件套全绿；工作树干净零探针残留。2 NOTE：① acc4fee 记录 +720 vs `git show --stat` 实测 +767（记录层偏差，本次订正）② wave-c tag 指向 ③ 修复提交 ae60f59 而非 ④ 闭环 docs 07d4619——**裁定 = 接受不移动**（tag 语义 = 本波最终代码状态标记，gate ③ 仅查 tag 存在性，零行为影响；④ docs 系 post-tag 记录；wave-b 先例同实践）。
+- **B 路（三记录互一致）**：PASS。A 桶 15 项闭环 / 任务号（#119..#124）/ B 桶 17→18 演进 / 提交链三源一致。2 MINOR（均已修）：① S-E2「8 项」off-by-one——实际 A4-A10 = 7 项（「A 桶 15 项 = 3+7+3+2」仅 7 项自洽；L2470/L2558 两处）② A10 撤回记录「预分析冻结 5 处（workerAgent / coordinatorMode / AgentTool / forkSubagent）」归因失实——① 节预分析实冻结 2 文件 5 处（workerAgent.ts 3 + coordinatorMode.ts 2）；AgentTool.ts / forkSubagent.ts 系 tools/agent/ 域内相对 import 非 STR-1 归一对象（不在预分析范围，实施时 4 文件被改）。3 NOTE：① S-E1「（+11/21）」口径——expect 实 +23 = 实施 21 + 审视 F-1c 2（docs「2975+21+2」正确，progress memory 简注订正）② runAgent 行号漂移 111→119→126（文件演化，接受）③ B 桶逐项清单 docs 单一事实源（progress memory 仅引计数，接受）。
+- **C 路（后续计划合理性）**：PASS。数字全 grounded：bashPermissions 2471 / pathValidation 1303 / shouldUseSandbox 124 / PowerShell pathValidation 2049 逐字命中；swarm 整树 7217L 逐字；分类器族组件和 3014 ≈ 3030（yoloClassifier 1332 + prompts 288 + autoModeState 39 + classifierDecision 91 + classifierShared 39 + bypassPermissionsKillswitch 150 + bashClassifier 61 + denialTracking 45 + dangerousPatterns 54 = 2099 + permissionSetup auto 面 ~560 + permissions.ts auto 支 ~355；yoloClassifier 主树 1332 核验——C 路初测 1335 系陈旧 worktree checkout 值，记录值正确）；7L 骨架 ×3（cli / mount / state/index）= D 波归属；bashClassifier 引用口径 = 61L 体（新仓盘上 78L，含 provenance 头注，diff 逐字）。依赖有序（auto-mode 消费点 = bashPermissions L1378-1490 投机族 → 工具本体先行、分类器族随后；shell·swarm 消费 B7/B8/B12/B14 无跨波冲突）。B 桶 18 项零孤儿（全有归属波）。无自矛盾（20 门控槽位 C 桶 vs B16 = 同一件事非双计）。
+- **登记不修清单（C 路建议，工具本体波开波时预登记，本次不动代码/图）**：① B10（流式消费面）/ B15（任务态 4 项顺延波）属「按需触发 / 无排期」，未排入总波次序列 → 开波时显式登记归属 ② §8.3 路线图 L324-328 陈旧（未反映 E-wave-end 后插入的 C 桶三波；F 波行 B13 归属已 §8.52 S-E0 改判 D 波）→ 开波时回刷 ③ D 波与三波 C 桶先后仅隐式（推导链自洽）→ 补一行显式排序 ④「47 工具本体」计数口径未钉死（朴素枚举 49 / cron 计入 1 项 = 47，E-2 沿用值）→ 开波勘查重数定口径 ⑤ bashClassifier 引用口径按上条。
+- **记录层漂移修复（本审计，零行为，本提交 + memory 同步）**：5 项 = S-E2「8 项」→「7 项」×2（L2470/L2558）/ A10 预分析文件清单误归因订正（L2625）/ acc4fee「+720」→「+767」（L2618）/ 闭环态全量基线 3108→3109（gate ③ 实检 +1；3108 = 切 tag 前口径，本文件 L2844 + progress memory + MEMORY.md 索引三处同步）/ progress memory「（+11/21）」→「（+11 测 / +23 expect）」+ A10 订正。
