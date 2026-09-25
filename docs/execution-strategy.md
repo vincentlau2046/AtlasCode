@@ -2853,3 +2853,83 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - **C 路（后续计划合理性）**：PASS。数字全 grounded：bashPermissions 2471 / pathValidation 1303 / shouldUseSandbox 124 / PowerShell pathValidation 2049 逐字命中；swarm 整树 7217L 逐字；分类器族组件和 3014 ≈ 3030（yoloClassifier 1332 + prompts 288 + autoModeState 39 + classifierDecision 91 + classifierShared 39 + bypassPermissionsKillswitch 150 + bashClassifier 61 + denialTracking 45 + dangerousPatterns 54 = 2099 + permissionSetup auto 面 ~560 + permissions.ts auto 支 ~355；yoloClassifier 主树 1332 核验——C 路初测 1335 系陈旧 worktree checkout 值，记录值正确）；7L 骨架 ×3（cli / mount / state/index）= D 波归属；bashClassifier 引用口径 = 61L 体（新仓盘上 78L，含 provenance 头注，diff 逐字）。依赖有序（auto-mode 消费点 = bashPermissions L1378-1490 投机族 → 工具本体先行、分类器族随后；shell·swarm 消费 B7/B8/B12/B14 无跨波冲突）。B 桶 18 项零孤儿（全有归属波）。无自矛盾（20 门控槽位 C 桶 vs B16 = 同一件事非双计）。
 - **登记不修清单（C 路建议，工具本体波开波时预登记，本次不动代码/图）**：① B10（流式消费面）/ B15（任务态 4 项顺延波）属「按需触发 / 无排期」，未排入总波次序列 → 开波时显式登记归属 ② §8.3 路线图 L324-328 陈旧（未反映 E-wave-end 后插入的 C 桶三波；F 波行 B13 归属已 §8.52 S-E0 改判 D 波）→ 开波时回刷 ③ D 波与三波 C 桶先后仅隐式（推导链自洽）→ 补一行显式排序 ④「47 工具本体」计数口径未钉死（朴素枚举 49 / cron 计入 1 项 = 47，E-2 沿用值）→ 开波勘查重数定口径 ⑤ bashClassifier 引用口径按上条。
 - **记录层漂移修复（本审计，零行为，本提交 + memory 同步）**：5 项 = S-E2「8 项」→「7 项」×2（L2470/L2558）/ A10 预分析文件清单误归因订正（L2625）/ acc4fee「+720」→「+767」（L2618）/ 闭环态全量基线 3108→3109（gate ③ 实检 +1；3108 = 切 tag 前口径，本文件 L2844 + progress memory + MEMORY.md 索引三处同步）/ progress memory「（+11/21）」→「（+11 测 / +23 expect）」+ A10 订正。
+
+### §8.53 工具本体波（C 桶 ①）执行前分析（2026-09-25，task #125）
+
+**波定位** = C 桶 ①「工具本体 47」的**首个子波** = **Bash 纵切 · checkPermissions 面**（§8.43 裁定① deferred 项，E-6 全 shell 波登记）+ 20 门控槽裁定 + ⑧ 消费面接线。C 桶 ①「工具本体 47」为伞项（47 本体纵切），本闭环子波落 Bash checkPermissions 面（叶 + 机制 + 接线）；Bash 本体纵切 + 其余 46 本体纵切 = 后续子波（序列登记，不新开 C 桶项）。
+
+**1. 范围裁定（冻结，旧仓 @ a8af45b 逐字行数基线）**
+
+- 范围文件面 = **15 文件 / 17924L**：
+  - 3 指定（裁定① 点名）：`BashTool/bashPermissions.ts` 2471 / `BashTool/pathValidation.ts` 1303 / `BashTool/shouldUseSandbox.ts` 124
+  - 4 伴生（3 文件强制 import 闭包，不迁则 3 文件不可编译）：`bashCommandHelpers` 265 / `bashSecurity` 2427 / `modeValidation` 115 / `sedValidation` 684
+  - bash 内核闭包子集（旧仓 `src/utils/bash/` 14 文件 12074L 总，本波仅迁 8 文件闭包子集 = **10535L**）：`bashParser` 4436 / `ast` 2679 / `commands` 1339 / `heredoc` 733 / `treeSitterAnalysis` 506 / `ParsedCommand` 318 / `shellQuote` 304 / `parser` 220
+  - 残留守（7 文件 1539L 非闭包不迁，登记防「以为已全」）：ShellSnapshot 573 / bashPipeCommand 294 / shellCompletion 259 / prefix 204 / shellQuoting 128 / registry 53 / shellPrefix 28
+- **本子波不做**（前向登记）：
+  - **Bash 本体纵切 = 下一子波**：`BashTool/BashTool.ts` 251 + `prompt` 332 + `commandSemantics` 140 + `readOnlyValidation` 1924 + `sedEditParser` 322 + `utils` 221 + `toolName` 2 + `commentLabel` 13 + `destructiveCommandWarning` 102（ts 面 3310L；`UI.tsx` / `BashToolResultMessage.tsx` = React 层域外，先例 = tasks 波「PowerShellTool.tsx L819/948 React 层未移植」）
+  - auto-mode 分类器族 ~3030L = C 桶 ②：本波 `bashPermissions` L1378-1490 speculative 族**逐字随迁**，分类器消费接 61L stub（E-6 S-6c「stub 即外部构建形态」= enabled=false 惰性面），② 真族换 stub 后族激活零代码改动
+  - 其余 46 本体纵切 → 工具本体波后续子波（序列：Bash 本体 → Read/Edit 等高频 → 长尾；不新开 C 桶项）
+- **B16 PowerShell 2049L 裁定**：bash-only 纵切域外，**改判登记**（非 C 桶项，独立裁定 / 未来 PowerShell 纵切；与 §8.42「域外不随迁」裁定一致），B 桶 18 项计数不变（B16 处置 = 改判登记非核销）
+
+**2. 20 门控槽裁定表**（旧仓 `tools.ts` getAllBaseTools 398L 逐字基线；新仓门控机制 = `shared/feature.ts` feature() env kill-switch 约定【T-5d 先例，call-time 可测】，机制零新增，仅逐槽裁定）：
+
+| 槽 | 门（旧仓） | 本体 | 裁定 |
+|---|---|---|---|
+| ① IS_ATLAS_DEV | `ATLAS_DEV` env | Tungsten + SuggestBackgroundPR + REPL（3 工具 1 槽） | 残留守（dev 工具本体未落，各本体纵切落时随体声明门） |
+| ② AGENT_TRIGGERS | feature | cron 三件套（3 工具） | 残留守归 = 任务工具本体子波（scheduler 域 E-7 S-7b 已落） |
+| ③ AGENT_TRIGGERS_REMOTE | feature | RemoteTrigger | 残留守归 = remote 波（D 波后） |
+| ④ MONITOR_TOOL | feature | Monitor | 残留守（本体纵切） |
+| ⑤ OVERFLOW_TEST_TOOL | feature | OverflowTest | **关闭**（测试专用工具，新仓无产品价值不迁） |
+| ⑥ CONTEXT_COLLAPSE | feature | CtxInspect | 残留守（本体纵切） |
+| ⑦ TERMINAL_PANEL | feature | TerminalCapture | 残留守归 = shell 波（TUI 面） |
+| ⑧ WEB_BROWSER_TOOL | feature | WebBrowser | 残留守（本体纵切） |
+| ⑨ HISTORY_SNIP | feature | Snip | 残留守归 = shell/REPL 波（predicates compact-boundary 检索族 A-NOTE-2 先例） |
+| ⑩ UDS_INBOX | feature | ListPeers | 残留守归 = shell·swarm 波（UDS Port 9 已登记） |
+| ⑪ WORKFLOW_SCRIPTS | feature | Workflow | 残留守（本体纵切） |
+| ⑫ ATLAS_VERIFY_PLAN | feature | VerifyPlanExecution | 残留守（本体纵切） |
+| ⑬ ENABLE_LSP_TOOL | env | LSP | 残留守（本体纵切） |
+| ⑭ worktree | isWorktreeModeEnabled | Enter/ExitWorktree（2） | 残留守归 = worktree 工具本体子波（worktree 域 E-7 S-7c 已落） |
+| ⑮ agentSwarms | isAgentSwarmsEnabled | TeamCreate/TeamDelete（2） | 残留守归 = shell·swarm 波 |
+| ⑯ isTodoV2 | isTodoV2Enabled | Task 四件套（4） | 残留守归 = 任务工具本体子波（tasks 域 E-7 S-7a 已落，与 ② 同子波） |
+| ⑰ hasEmbeddedSearchTools | hasEmbeddedSearchTools() | Glob/Grep 抑制（反向条件） | **关闭**（bun 内嵌 bfs/ugrep = 旧仓构建特例，新仓条件恒 false → Glob/Grep 恒注册，槽退化为 2 常量注册） |
+| ⑱ NODE_ENV=test | `NODE_ENV==='test'` | TestingPermission | **关闭**（新仓测试体系不消费该工具） |
+| ⑲ ToolSearch | isToolSearchEnabledOptimistic() | ToolSearch | 残留守（本体纵切；claude.ts 请求时 deferred 决策面 = D 波壳接线） |
+| ⑳ PowerShell | getPowerShellTool() | PowerShell | **域外改判登记**（bash-only 纵切；B16 裁定同） |
+
+- 裁定汇总：**关闭 3（⑤⑰⑱）+ 域外改判 1（⑳）+ 残留守 16**（15 条各带归属波 + ① 无归属波 = 本体纵切随体声明）→ S-T3 更新 toolRegistry 头注（残留守枚举 → 逐槽裁定枚举）。
+
+**3. 落位与域裁定**
+
+- 15 文件 → 新 `src/engine/tools/bash/` 子域（Bash 工具面 = 首个本体纵切子域；内核与面同子域，toolRegistry 机制不变；后续 Read/Edit 纵切各立子域）+ 双门面（`bash/index.ts` 显式名块 + `tools/index.ts` 转出门，STR-1 先例；全引擎面 0 重名核验，先例 = engine 面 611 名）
+- **sandbox 消费经 `permissions/sandboxAccess` 注入窗口**（L3 自治先例 E-6 S-6a，permissions 域不 import sandbox 域）：`shouldUseSandbox` 消费 `isSandboxingEnabled()` + `areUnsandboxedCommandsAllowed()` → 窗口成员 **+1**（`areUnsandboxedCommandsAllowed`，placeholder = false，禁用态短路语义零变化）+ 组合根 ⑧ `setSandboxAccess` 注入同步扩面。tools 域不引新 tools→sandbox 直 import 边（依赖方向干净，审视核验面）
+- 跨域依赖闭包映射（旧 import → 新仓等价；标「② 核」= 实施时符号核验）：
+  - `feature`（bunBundle F5 stub）→ `shared/feature.ts` 真 feature()（**delta 登记**：旧仓 DCE cliff 注释 = bun 构建系统特例，新仓普通模块 cliff 不成立；alias const 重绑定逐字保留零 diff，头注登记「cliff 失效」）
+  - `getFeatureValue_CACHED_MAY_BE_STALE`（growthbook）→ **裁**（E-7 S-7b growthbook 注入口裁剪先例；消费点 ② 核，feature()/config 面替代）
+  - `getCwd` → `bootstrap/cwd.ts` ✓ / `logForDebugging` → `shared/debug.ts` ✓ / `isEnvTruthy` → `shared/env.ts` ✓ / `AbortError` → `shared/errors.ts` ✓ / `getPlatform` → `shared/platform.ts` ✓ / `getDirectoryForPath` → `shared/path.ts`（② 核符号）
+  - `count`（utils/array）→ shared 无既有 → 域内本地实现（lodash 裁剪先例）
+  - `APIUserAbortError` / `PendingClassifierCheck` / `ToolPermissionContext` / `ToolUseContext` → shared 类型面（② 核落位：types-session vs permissions）
+  - permissions 族（PermissionResult / PermissionRule / PermissionUpdate / permissionRuleParser / shellRuleMatching / permissions.ts 含 createPermissionRequestMessage + getRuleByContentsForTool）→ 新仓 `src/permissions/` 域 E-4 已落（② 符号逐个核）
+  - `getSandboxManager`（core/sandbox/compat）→ sandboxAccess 窗口（见上）
+  - `getSettings_DEPRECATED` → engine/config settings 门面（E-3；sandbox 面 z.any() 按源直读，消费 `sandbox?.excludedCommands`）
+  - `windowsPathToPosixPath`（utils/windowsPaths）→ **bash-only 基线裁定**：② grep 消费点——有消费则域内最小实现（纯函数路径转换）+ 登记；零消费则裁 + 登记
+  - `BashTool`（./BashTool.js 型 import，面文件用其 Input 型）→ 本体未落（下一子波）→ 域内最小 Input duck 型（AppState duck 最小形先例）+ 前向接缝登记（本子波末头注：本体子波换真型）
+  - `bashClassifier` → 新仓 61L stub（auto-mode ② 前向接缝，S-6c 已登记）
+- 测试分层：旧仓内核/面无专属测试文件（tests/unit 仅 sandbox 2 文件 156L，不属本波文件面闭包）→ **测试全量新写**（unit = 内核纯函数族 + 面决策族零磁盘；func = shouldUseSandbox settings tmp 隔离真盘 1 文件；R5 红分支攻击例）
+- 探针计划（各探针恰 N 红 + verbatim restore diff 核验）：P-T1 内核（ast fail-closed allowlist 删 1 守卫 → 恰 1 红）/ P-T2 bashPermissions（stripSafeWrappers 安全包装白名单支反转 → 红集）/ P-T3 bashSecurity（危险模式族删 1 成员 → 恰 1 红）/ P-T4 pathValidation（checkPathConstraints 3.7 sandbox 写 allowlist 支删 → 红集）/ P-T5 shouldUseSandbox（excludedCommands 不动点循环删 → 恰 1 红）
+
+**4. 审计 5 项预登记落位（task #124 登记不修 → 开波预登记，本节承载）**
+
+- ① B10（流式消费面）/ B15（任务态 4 项顺延波）未排总序列 → 预登记：B10 = 流式纵切（按需触发，D 波后）；B15 = 任务态 4 项 = 任务工具本体子波（与槽 ②⑯ 同子波，下界 = shell/swarm 波后）
+- ② §8.3 路线图 L324-328 陈旧 → S-T3 回刷（E-wave-end → C 桶三波插入 + B13 已 S-E0 改判 D 波 + 本节 §8.53 加入）
+- ③ D 波与 C 桶三波先后仅隐式 → 显式裁定：**C 桶 ①②③ → D 波（壳接线 + B13 + gelu 复验 + wave-d）→ remote → analytics**（S-T3 加行入 §8.3）
+- ④ 「47 工具本体」计数口径 → 钉死：旧仓 getAllBaseTools 名单全门开工具名计数（cron 三件套按 3 计 = 朴素 49；E-2 沿用 47 = cron 计 1 项）。**裁定 = 朴素 49 口径（每工具计 1），47 标历史口径**（S-T3 脚本点数核录本节）
+- ⑤ bashClassifier 引用口径 → 钉死：记录统一引 61L 体（新仓盘上 78L 含 17L provenance 头注，diff 逐字）
+
+**5. 切片计划与验收门**
+
+- S-T1 内核 8 文件（10535L）+ unit 测 → S-T2 面 7 文件（7389L，两段：S-T2a bashSecurity + 3 伴生【265+2427+115+684 = 3491L】/ S-T2b bashPermissions + pathValidation + shouldUseSandbox【3898L】）+ unit/func 测 → S-T3 20 槽裁定表落 registry 头注 + 审计 5 项预登记落位 + §8.3 L324-328 回刷 → S-T4 ⑧ 接线（sandboxAccess 窗口 +1 成员 + 组合根注入 + executor `ports/sandbox.ts` 消费面激活【该 port L5 已预声明「ShellExecutor.exec → isSandboxingEnabled()（shouldUseSandbox 决策）」】）→ S-T5 整波审视（双只读 ≤2：A 路旧仓逐字对照 / B 路 H6 死接缝 + 测试面）+ 闭环（四件套 + gate + memory）
+- 每切片四件套：tsc 0 / eslint 0 / build 0 KB / 全量 + gate 6（基线 1447 pass / 89 文件 / 3109 expect【闭环态】+ gate 单跑 6 测 / 5 expect；测试数随切片增，expect ② 实测）
+- 风险 1：bashParser 4436L 手写解析器**零继承测试面** = 本波最大盲区 → S-T1 unit 攻击例聚焦 fail-closed allowlist + PARSE_ABORTED 支（R5 红分支驱动，绝不写假装通过的能力测试）
+- 风险 2：15 文件单子域门面显式名块 0 重名核验（先例 = engine 面 611 名 0 重名）
+- 风险 3：sandboxAccess 窗口扩 +1 成员 = 组合根 ⑧ 注入 + placeholder 语义复审（placeholder 恒 false = 禁用态零行为变化，P-T 探针外加 1 窗口服判）
+- 验收：S-T5 双只读零 BLOCKER/MAJOR → 闭环；**波 tag 裁定 = 不切新 tag**（tag = 大波节点先例，C 桶子波提交链记录；gate ③ 仍用 wave-c tag 不受影响）；下一子波 = Bash 本体纵切（3310L ts 面 + UI 域外裁面）
