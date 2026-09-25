@@ -11,6 +11,11 @@
  *  - 逃生支不透出 executor 面：adapter 不传 dangerouslyDisableSandbox，
  *    即便 areUnsandboxedCommandsAllowed 真 + 无排除 → 仍 true（逃生支 = 工具层输入）
  * manager 参数本方法不消费（决策经窗口 + settings，非 manager 方法）→ 最小 stub 即可。
+ *
+ * 探针 P-T5 三点绑定之一（S-T5 突变面，§8.53）：「总门开 + excludedCommands 命中
+ * （env 前缀不动点剥除）→ false」测 = P-T5（shouldUseSandbox 不动点循环删）三锚
+ * 点之 S-T4 adapter 委托面（另两点 = core-face unit「excludedCommands 不动点剥除」
+ * + func「excludedCommands 前缀命中 → 不 sandbox」；删不动点循环三点同红）。
  */
 import {
   describe,

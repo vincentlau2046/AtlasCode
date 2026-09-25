@@ -13,6 +13,12 @@
  *     窗口面 = 内存 stub，真策略读归 S-T4 组合根 ⑧）
  * sandboxAccess 窗口 = 内存注入（isSandboxingEnabled 恒 true 门控到达
  * settings 消费面；零 mock fs——真 NodeFsOperations + 真 tmpdir）。
+ *
+ * 探针 P-T5 三点绑定之一（S-T5 突变面，§8.53）：「excludedCommands 前缀命中
+ * （env 前缀不动点剥除）」测 = P-T5（shouldUseSandbox 不动点循环删）三锚点之
+ * func 层（另两点 = core-face unit「excludedCommands 不动点剥除」+ S-T4
+ * adapter-sandbox-delegation「总门开 + excludedCommands 命中 → false」；删
+ * 不动点循环三点同红，下界 1 实测 3）。
  */
 import {
   describe,

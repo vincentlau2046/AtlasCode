@@ -2,7 +2,7 @@
  * engine/tools/bash — bashReadOnly（§8.53 S-T2b，旧仓 src/tools/BashTool/
  * BashTool.ts L84-107 逐字抽离）。
  *
- * 只读命令前缀族（READ_ONLY_PREFIXES 20 项 + 链接/替换操作符守卫）：旧仓
+ * 只读命令前缀族（READ_ONLY_PREFIXES 24 项 + 链接/替换操作符守卫）：旧仓
  * 本体文件 BashTool.ts 的 `isReadOnly: (input) => isReadOnlyCommand(...)`
  * 闭包。BashTool.ts 本体 = 下一子波（§8.53 前向登记）→ 本波 bashPermissions
  * L1041 `BashTool.isReadOnly(input)` 唯一值位消费点改引本域函数（零行为

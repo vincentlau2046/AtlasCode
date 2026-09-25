@@ -16,7 +16,7 @@
  *
  * 裁剪裁定（复审勿当遗漏重提）：
  *   - 1e requiresUserInteraction 裁——新 Tool 契约无该字段；前向接缝 =
- *     工具本体波（47 本体延续）。
+ *     工具本体波（49 本体延续；47 = 历史口径 §8.53 审计④）。
  *   - 1c inputSchema.parse 裁——新契约 inputJSONSchema（engine 波）；
  *     abort 重抛 **S-E1 已落**（catch 层 isAbortShapedError 双支形判别，
  *     §8.52 A3；context abortController 活态回填 = 工具本体波前向登记）；

@@ -2,6 +2,8 @@
  * engine/tools/bash — ast（§8.53 S-T1，旧仓 src/utils/bash/ast.ts 逐字随迁）
  *
  * 零行为 delta（内核内相对 import；.js 扩展名按新仓 bundler 约定去除）。
+ * eslint 裁指令 1 处（L259 no-control-regex disable 转纯注留理据，新仓规则
+ * 不触发；就地已登记）。
  */
 
 /**

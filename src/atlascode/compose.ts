@@ -265,7 +265,7 @@ export interface AgentLoopDepsConfig {
   addDirs?: string[]
   /** headless 主会话（ask 决策转 auto-deny 不弹框）。 */
   shouldAvoidPermissionPrompts?: boolean
-  /** 工具注册表注入（47 本体经 deps 增量注入的前向面）。 */
+  /** 工具注册表注入（49 本体经 deps 增量注入的前向面；47 = 历史口径 §8.53 审计④）。 */
   toolRegistryDeps?: ToolRegistryDeps
   /** 主模型角色车道（缺省 'premium' = 旧仓主模型车道）。 */
   role?: ModelRole
@@ -303,7 +303,7 @@ export interface AgentLoopDepsBundle {
  * option 面——S-E2 审视 A 路 NOTE-1 锚点订正））：
  *   ① initializeToolPermissionContext（CLI 面 + 注册表 deps）
  *   ② getTools(ctx, deps)（注册表组合根消费点：getAllBaseTools + deny
- *      过滤 + isEnabled 尾行，47 本体仍经 deps 注入前向）
+ *      过滤 + isEnabled 尾行，49 本体仍经 deps 注入前向（47 = 历史口径 §8.53 审计④））
  *   ③ createPermissionGate(ctx)（S-E1 I-1 全决策体语义消费）
  *   ④ createLoopHooks（§8.42 项 1 hooks 装配① 生产路径）
  *   ⑤ AgentLoopDeps 组装（modelProvider 单例 + role 车道）

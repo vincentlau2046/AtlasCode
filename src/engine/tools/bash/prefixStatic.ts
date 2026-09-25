@@ -14,7 +14,9 @@
  * 静态语义 = 旧 LLM 提取器的非 LLM 面逐字：preCheck 短路（如 isHelpCommand →
  * 命令自身即前缀）；未命中 preCheck → commandPrefix: null（消费方回落
  * exact-command 建议 = 旧生产态行为）。memoize 面：旧 memoizeWithLRU（LRU 200 +
- * 拒绝逐出守卫）→ 静态路径永不拒绝，Map 值缓存等价 + 同形 `.cache` 面
+ * 拒绝逐出守卫）→ 静态路径永不拒绝 + 无界 Map 值缓存（delta：旧 LRU-200 有界
+ * 丢，pathological 输入下无上界——生产消费者 0 故低风险；LLM 路径重引入波
+ * 若恢复高量路径须恢复有界）+ 同形 `.cache` 面
  * （clear/get/delete/size/has，命令 L535-537 clearCommandPrefixCaches 消费）。
  */
 

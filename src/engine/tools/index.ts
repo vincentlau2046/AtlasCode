@@ -2,7 +2,7 @@
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
  * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
- *   getAllBaseTools(deps)（T-5e）；47 基础工具本体 = 残留守（各本体纵切经 deps 注入）。
+ *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归

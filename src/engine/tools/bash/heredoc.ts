@@ -2,6 +2,8 @@
  * engine/tools/bash — heredoc（§8.53 S-T1，旧仓 src/utils/bash/heredoc.ts 逐字随迁）
  *
  * 零行为 delta（crypto 内建）。
+ * eslint 裁指令 1 处（L76 no-lookbehind-regex disable 转纯注留理据，新仓无此
+ * 规则；就地已登记）。
  */
 
 /**

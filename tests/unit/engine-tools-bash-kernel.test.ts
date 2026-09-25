@@ -80,7 +80,7 @@ describe('bash 内核 — bashParser（fail-closed 预算）', () => {
     }
   })
 
-  test('对抗输入（50 万层下标）→ null（节点预算 fail-closed，P-T1 靶点）', () => {
+  test('对抗输入（50 万层下标）→ null（节点预算 fail-closed）', () => {
     const root = getParserModule()!.parse(ADVERSARIAL_DEEP)
     expect(root).toBeNull()
   })
@@ -119,7 +119,7 @@ describe('bash 内核 — parser（三态：Node / null / PARSE_ABORTED）', () 
     expect(data!.commandNode).not.toBeNull()
   })
 
-  test('feature 开 + 对抗输入 → PARSE_ABORTED 哨兵（≠ null，安全面判别，P-T2 靶点）', async () => {
+  test('feature 开 + 对抗输入 → PARSE_ABORTED 哨兵（≠ null，安全面判别）', async () => {
     setTreeSitter(true)
     const result = await parseCommandRaw(ABORT_TRIGGER)
     expect(result).toBe(PARSE_ABORTED)
@@ -159,7 +159,7 @@ describe('bash 内核 — ast（预检 too-complex 支）', () => {
     }
   })
 
-  test('预检：控制字符 / Unicode 空白 / 反斜杠转义空白 → too-complex', () => {
+  test('预检：控制字符 / Unicode 空白 / 反斜杠转义空白 → too-complex（P-T1 正向基线）', () => {
     for (const cmd of ['\x01echo', 'a\u00a0b', 'a\\ b']) {
       const result = parseForSecurityFromAst(cmd, fakeRoot)
       expect(result.kind).toBe('too-complex')

@@ -10,10 +10,12 @@
  * （filterRulesByContentsMatchingInput env-var 剥除支族）。
  *
  * delta 登记（import 替换 + 型/值位替换，函数体逐字；复审勿当遗漏重提）：
- *  - 旧 `zod/v4` + `z.infer<typeof BashTool.inputSchema>`（9 位）→ 本地
- *    bashToolInput.ts duck 型（Bash 本体子波换真 zod 型，前向接缝见该文件）
- *  - 旧 `BashTool.name`（值位 14）→ toolNames BASH_TOOL_NAME（'Bash' 单一
- *    事实源，S-T2a 先例）
+ *  - 旧 `zod/v4` + `z.infer<typeof BashTool.inputSchema>`（10 位，含回调动参
+ *    位）→ 本地 bashToolInput.ts duck 型（Bash 本体子波换真 zod 型，前向接缝
+ *    见该文件）
+ *  - 旧 `BashTool.name`（码 29 位）→ toolNames BASH_TOOL_NAME（'Bash' 单一
+ *    事实源，S-T2a 先例；新仓额外行 = L99 import + L130 BASH_RULE_TOOL 窄视图
+ *    新行 + 头注 1，grep 32 行）
  *  - 旧 `BashTool.isReadOnly(input)`（值位 1）→ 本地 bashReadOnly.ts
  *    isReadOnlyCommand（旧 BashTool.ts L84-107 逐字抽离，本体子波消费）
  *  - 旧 `getRuleByContentsForTool(ctx, BashTool, ...)`（值位 3）→ 本地

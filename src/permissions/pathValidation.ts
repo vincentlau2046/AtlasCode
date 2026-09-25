@@ -5,7 +5,7 @@
  *
  * 8 函数 + 3 类型。纯叶：本仓唯一活消费者 = BashTool/pathValidation.ts
  * 1303L 工具本体（工具本体波残留守，§8.33 裁定——487L 是 E-4 规则求值
- * 输入面，工具本体 checkPermissions 实现随 47 本体残留守）；另
+ * 输入面，工具本体 checkPermissions 实现随 49 本体残留守（47 = 历史口径 §8.53 审计④））；另
  * createReadRuleSuggestion suggestion 面（S-4c2 残留守）与 PowerShell
  * 2049L（域外，bash-only 纵切不随迁）。消费面前向登记。
  *

@@ -8,7 +8,9 @@
  *  - lodash-es memoize → 同域 S-T1 本地 memoize（零参函数语义零差）
  *  - getFsImplementation().readFileSync → node:fs 直读（新仓无 fs 抽象层）
  *  - logError → 同域本地 log（S-T1）
- *  - SUPPORTED_PLATFORMS 常量旧仓 0 消费者不随迁（grep 核验）
+ *  - SUPPORTED_PLATFORMS 常量本域（bash）0 消费者不随迁（旧仓消费者 =
+ *    atlasDesktop.ts ×3 = 域外 D 波壳层核查面【docs/brand-string-classification
+ *    特判 3】；常量本体已由 shared/platform.ts 逐字保留，功能零损失）
  */
 import { readFileSync } from 'fs'
 import { logError } from './log'

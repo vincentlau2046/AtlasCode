@@ -12,7 +12,7 @@
  *     feature('AGENT_TRIGGERS') 条件项（CronCreate/CronDelete/CronList）→ 残留守
  *     （新仓无 bun:bundle feature()，见 bun-bundle-feature-untestable；Workflow/cron 工具
  *     本体亦未落，门控随对应工具纵切时定 env 方式并扩集）。
- *   - 工具本体 47 个 → 残留守（T-5e 落注册表机制 getAllBaseTools(deps)；本体随后续纵切
+ *   - 工具本体 49 个（47 = 历史口径，§8.53 审计④）→ 残留守（T-5e 落注册表机制 getAllBaseTools(deps)；本体随后续纵切
  *     逐个落，经 deps 注入，注册表机制不变）。
  *   - 逐字值验真（旧仓 grep）：SYNTHETIC_OUTPUT='StructuredOutput'（非 'SyntheticOutput'）、
  *     SKILL='Skill'、AGENT='Agent'（agent/constants.ts 已有，本模块不重复）、

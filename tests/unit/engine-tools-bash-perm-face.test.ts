@@ -318,7 +318,7 @@ describe('S-T2a bashSecurity · fail-closed 安全面', () => {
     }
   })
 
-  test('shell-quote 单引号反斜杠差分站 → ask + 标记（sync）', () => {
+  test('shell-quote 单引号反斜杠差分站 → ask + 标记（sync，P-T3 正向基线）', () => {
     const r = bashCommandIsSafe_DEPRECATED("'\\'' ls")
     expect(r.behavior).toBe('ask')
     if (r.behavior === 'ask') {

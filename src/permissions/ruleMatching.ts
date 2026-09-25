@@ -329,7 +329,9 @@ function permissionModeTitle(mode: PermissionMode): string {
  * extractOutputRedirections 展示裁剪支裁掉）：permissions 域 allow=[shared]
  * （boundary 规则）禁 import engine/tools；原支对 Bash 工具剥输出重定向
  * 避免文件名当命令展示。前向接缝：展示裁剪如需保真，注入窗口或展示工具
- * 迁位（auto-mode 波 / 工具本体波 S-T4 复审裁定）。
+ * 迁位。S-T5 整波审视裁定（2026-09-26）：归属 auto-mode 波（C 桶 ②）——
+ * 纯展示面 delta（决策面「哪些段需审批」零变化，仅 needsApproval 列表展示
+ * 原始分段命令），工具本体波接受该 delta 登记核销，不恢复展示裁剪。
  */
 export function createPermissionRequestMessage(
   toolName: string,

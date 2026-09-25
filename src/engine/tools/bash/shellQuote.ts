@@ -7,6 +7,8 @@
  *     （降级 logForDebugging，详见 log.ts 头注）
  *   - jsonStringify（旧 utils/slowOperations）→ ./json 域内小文件（计时包裹裁）
  *   - shell-quote = 新仓 package.json 新增依赖（@1.10.0，自带 d.ts）
+ *   - eslint 裁指令 2 处（L177/L182 no-lookbehind-regex disable 转纯注留理据，
+ *     新仓无此规则；就地已登记）
  */
 
 /**
