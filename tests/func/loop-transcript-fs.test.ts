@@ -8,8 +8,10 @@
  * 口径同 engine-session-fs；TEST_ENABLE_SESSION_PERSISTENCE=1 破 unit 层
  * shouldSkipPersistence 测试守卫）+ 每测试独立 sessionId。
  *
- * 探针锚点（§8.52 S-E3 详案，突变须恰好 1 red）：
- *   P-E5 loop compact 支 record 调用点删除 → F-1 恰 1 红（F-2 + unit 全绿）
+ * 探针锚点（§8.52 S-E3 详案；红集口径经 ③ 实测订正）：
+ *   P-E5 loop compact 支 record 调用点删除 → 红集 = {unit T-3, func F-1}
+ *   双点绑定 2 红（fake sink 面 + 真盘面同观同一调用点，P-M2 双点先例；
+ *   执行前分析「F-1 恰 1 红」下界订正为 2，见 docs ② 实施记录）
  */
 import {
   describe,
@@ -27,6 +29,7 @@ import {
   compactConversation,
   clearSessionMessagesCache,
   flushSessionStorage,
+  getAgentTranscriptPath,
   getTranscriptPath,
   loadTranscriptFile,
   queryAgentLoop,
@@ -246,6 +249,35 @@ describe('S-E3 审视修复 链戳面（M-1 uuid 戳 + M-2 全量序列接链）
     // M-2：跨轮接链——as2 的父 = tool_result（全量序列 record 前缀追踪恢复
     // startingParentUuid；切片形态下 as2.parentUuid = null 此测红）
     expect(loaded.messages.get('as2')!.parentUuid).toBe(trEntry!.uuid)
+  })
+})
+
+// ── F-4 B 路 m-2：recordContentReplacement agentId → sidechain 路由 ───────
+
+describe('S-E3 审视 B 路 m-2 处置：contentReplacements 路由覆盖', () => {
+  test('F-4 agentId 在场 → entry 落 sidechain 文件（getAgentTranscriptPath），session 文件不混入', async () => {
+    switchTo('agent-route')
+    // 先落一条 user 消息 materialize session 文件（routing 二选一的阴性参照）
+    await recordTranscript([userMsg('u1', 'seed-route')])
+    await recordContentReplacement(
+      [{ kind: 'tool-result', toolUseId: 'tu-9', replacement: '<trunc>' }],
+      'ag1',
+    )
+    await flushSessionStorage()
+
+    // 路由面（project.ts appendEntry content-replacement 支：entry.agentId ?
+    // getAgentTranscriptPath : sessionFile）：agent 文件恰 1 条 entry
+    const agentLines = readFileSync(getAgentTranscriptPath('ag1'), 'utf-8')
+      .trim()
+      .split('\n')
+      .map(l => JSON.parse(l) as Record<string, unknown>)
+    expect(agentLines).toHaveLength(1)
+    expect(agentLines[0].type).toBe('content-replacement')
+    expect(agentLines[0].agentId).toBe('ag1')
+    // 阴性面：session 文件无 content-replacement entry（二选一路由非双写）
+    const sessionRaw = readFileSync(getTranscriptPath(), 'utf-8')
+    expect(sessionRaw).not.toContain('"content-replacement"')
+    expect(sessionRaw).toContain('seed-route')
   })
 })
 

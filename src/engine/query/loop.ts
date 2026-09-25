@@ -217,6 +217,13 @@ export async function queryOneRound(
   // messages（同调用内 tool_use/tool_result 对同落，REPL 孤儿风险面消除）。
   // n-5 登记：旧 L724 非 assistant 支 await 翻转为统一 void（order-preserving
   // 写队列排序无损；进程退出前 drain 风险与旧 bare 变体同构）。
+  // n-1 登记（B 路 2026-09-25）：void record 的 unhandled rejection 风险 =
+  // 旧 L722 同款继承语义（rejection 不阻塞 loop，仅 unhandled rejection
+  // 面）；测试面以 sink promise 跟踪 settle 消竞（F-3 recPromises 纪律）。
+  // M-1 微残留登记（零行为）：旧 L137 `sourceToolAssistantUUID` 戳未随迁
+  // （result 行不戳）——M-2 全量序列接链不依赖 project.ts 该戳覆写机制
+  // （同轮 tool_use/tool_result 同落，前序链参与者 = 正确 assistant，恒走
+  // sequential-parent 回落即正确链）；登记防复审当遗漏重提。
   if (deps.transcript) {
     void deps.transcript.record([...messages, assistantMsg, ...resultMessages])
   }
