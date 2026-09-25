@@ -6,9 +6,12 @@
  * 先例；全引擎面 0 重名核验——CommandPrefixResult/CommandSubcommandPrefixResult
  * 两型经 commands 转出（单出口），prefixStatic 名块不重列）。
  *
- * 面文件（bashPermissions / pathValidation / shouldUseSandbox / bashSecurity /
- * bashCommandHelpers / modeValidation / sedValidation）= S-T2 随迁（同子域，
- * 本门面 S-T2 扩块）。
+ * S-T2a（§8.53）已落 checkPermissions 面 4 文件（旧仓 src/tools/BashTool/
+ * bashSecurity / sedValidation / modeValidation / bashCommandHelpers 逐字随迁
+ * + bashToolInput duck 型，delta 见各文件头注）→ 本门面扩块。
+ *
+ * 残留守（S-T2b 随迁，本门面再扩块）：bashPermissions / pathValidation /
+ * shouldUseSandbox（旧仓 3 指定文件 3898L）。
  */
 export {
   type TsNode,
@@ -88,3 +91,24 @@ export {
   createCommandPrefixExtractor,
   createSubcommandPrefixExtractor,
 } from './prefixStatic'
+// ── S-T2a（§8.53）：checkPermissions 面 4 文件 + duck 型 ──
+export {
+  stripSafeHeredocSubstitutions,
+  hasSafeHeredocSubstitution,
+  bashCommandIsSafe_DEPRECATED,
+  bashCommandIsSafeAsync_DEPRECATED,
+} from './bashSecurity'
+export {
+  isLinePrintingCommand,
+  isPrintCommand,
+  sedCommandIsAllowedByAllowlist,
+  hasFileArgs,
+  extractSedExpressions,
+  checkSedConstraints,
+} from './sedValidation'
+export { checkPermissionMode, getAutoAllowedCommands } from './modeValidation'
+export {
+  type CommandIdentityCheckers,
+  checkCommandOperatorPermissions,
+} from './bashCommandHelpers'
+export { type BashToolInput } from './bashToolInput'

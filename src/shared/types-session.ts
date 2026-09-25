@@ -96,11 +96,16 @@ export type ToolPermissionContext = {
 // 薄骨架裁量（复审勿当遗漏重提）：
 //  - PermissionDecisionReason 只留薄骨架 checkRead/checkWrite 实际产出的
 //    变体（rule/mode/workingDir/safetyCheck/other）；classifier/hook/
-//    asyncAgent/sandboxOverride/subcommandResults/permissionPromptTool
-//    变体归 engine 波（随 yoloClassifier/permissionSetup 真求值）。
-//  - contentBlocks（ContentBlockParam）/ pendingClassifierCheck /
-//    isBashSecurityCheckForMisparsing 字段不随迁（classifier + bash 工具面
-//    归 engine）——薄骨架 ask 决策不携内容块/异步分类器。
+//    asyncAgent/sandboxOverride/permissionPromptTool 变体归 engine 波
+//    （随 yoloClassifier/permissionSetup 真求值）。
+//  - subcommandResults 变体 = 工具本体波 S-T2a 恢复（2026-09-25，§8.53）：
+//    bashCommandHelpers.checkCommandOperatorPermissions 为第一真消费者
+//    （分段 ask 决策逐字产 { type:'subcommandResults', reasons }）；
+//    纯加性 union 扩展，既有消费者零影响。
+//  - contentBlocks（ContentBlockParam）/ pendingClassifierCheck 字段不随迁
+//    （classifier 归 auto-mode 纵切波）——薄骨架 ask 决策不携内容块/异步
+//    分类器。isBashSecurityCheckForMisparsing = 工具本体波 S-T2a 已恢复
+//    （2026-09-25，§8.53；bashSecurity 8 生产点，见 PermissionAskDecision）。
 // ════════════════════════════════════════════════════════════════
 
 /**
@@ -148,6 +153,14 @@ export type PermissionDecisionReason =
       type: "other"
       reason: string
     }
+  | {
+      /**
+       * 分段命令（splitCommand 多段）逐段权限结果聚合（工具本体波 S-T2a
+       * 恢复，bashCommandHelpers 第一真消费者；见文件头裁量登记）。
+       */
+      type: "subcommandResults"
+      reasons: Map<string, PermissionResult>
+    }
 
 /** 权限授予时的结果。 */
 export type PermissionAllowDecision<
@@ -172,6 +185,16 @@ export type PermissionAskDecision<
   suggestions?: PermissionUpdate[]
   blockedPath?: string
   metadata?: PermissionMetadata
+  /**
+   * If true, this ask decision was triggered by a bashCommandIsSafe_DEPRECATED
+   * security check for patterns that splitCommand_DEPRECATED could misparse
+   * (e.g. line continuations, shell-quote transformations). Used by
+   * bashToolHasPermission to block early before splitCommand_DEPRECATED
+   * transforms the command. Not set for simple newline compound commands.
+   *（工具本体波 S-T2a 恢复：bashSecurity 8 生产点为第一真消费者，§8.53 登记；
+   * 旧仓同族的 pendingClassifierCheck / contentBlocks 仍裁——分类器波消费。）
+   */
+  isBashSecurityCheckForMisparsing?: boolean
 }
 
 /** 权限拒绝时的结果。 */

@@ -19,8 +19,11 @@
  * E-4 S-4d（§8.36）已落 filterToolsByDenyRules + getTools（deny 规则工具面
  *   过滤，域 getDenyRuleForTool 消费；模式过滤支裁出见 toolRegistry 头注）。
  * §8.53 S-T1（工具本体波 C 桶 ①）已落 bash 内核 8 文件（旧仓 utils/bash 闭包
- *   子集逐字随迁）+ 4 本地小模块 → 在此 re-export（bash/ 子门面；面文件 S-T2
- *   扩块）。
+ *   子集逐字随迁）+ 4 本地小模块 → 在此 re-export（bash/ 子门面）。
+ * §8.53 S-T2a 已落 bash checkPermissions 面 4 文件（旧仓 tools/BashTool
+ *   bashSecurity/sedValidation/modeValidation/bashCommandHelpers 逐字随迁）
+ *   + bashToolInput duck 型 → bash/ 子门面 re-export 扩块；残留守 bashPermissions
+ *   / pathValidation / shouldUseSandbox = S-T2b。
  */
 export {
   createMcpTools,
@@ -180,4 +183,20 @@ export {
   type SubcommandPrefixExtractor,
   createCommandPrefixExtractor,
   createSubcommandPrefixExtractor,
+  // ── S-T2a（§8.53）：checkPermissions 面 ──
+  stripSafeHeredocSubstitutions,
+  hasSafeHeredocSubstitution,
+  bashCommandIsSafe_DEPRECATED,
+  bashCommandIsSafeAsync_DEPRECATED,
+  isLinePrintingCommand,
+  isPrintCommand,
+  sedCommandIsAllowedByAllowlist,
+  hasFileArgs,
+  extractSedExpressions,
+  checkSedConstraints,
+  checkPermissionMode,
+  getAutoAllowedCommands,
+  type CommandIdentityCheckers,
+  checkCommandOperatorPermissions,
+  type BashToolInput,
 } from './bash'

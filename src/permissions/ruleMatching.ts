@@ -24,8 +24,12 @@
  *   - createPermissionRequestMessage 裁六支（hook/subcommandResults/
  *     permissionPromptTool/sandboxOverride/asyncAgent/classifier 决策原因分支）——
  *     生产方 = E-5 hooks（已落）/ 工具本体波 / E-7 / 分类器波（auto-mode
- *     纵切波；新仓 shared
- *     PermissionDecisionReason 仅 rule/mode/workingDir/safetyCheck/other 五变体）。
+ *     纵切波）。**subcommandResults 支 S-T2a 已恢复**（2026-09-25，§8.53：
+ *     shared 变体随第一真消费者 bashCommandHelpers.checkCommandOperatorPermissions
+ *     回归，纯加性 union；该支 Bash 展示裁剪 delta 见 createPermissionRequestMessage
+ *     头注）。余五支（hook/permissionPromptTool/sandboxOverride/asyncAgent/
+ *     classifier）仍裁——shared 变体 rule/mode/workingDir/safetyCheck/other/
+ *     subcommandResults 六变体。
  *   - getUpdatedInputOrFallback（旧:1317）已随 S-6b 落 permissions.ts
  *     决策主体 2a/2b 消费（§8.43）→ 本切片裁出的 H6 防空洞登记核销。
  *
@@ -51,7 +55,7 @@ import type {
   PermissionRuleSource,
   ToolPermissionContext,
 } from '../shared'
-import { errorMessage, logForDebugging } from '../shared'
+import { errorMessage, logForDebugging, plural } from '../shared'
 import type { PermissionTool } from './filesystem'
 import {
   permissionRuleValueFromString,
@@ -318,7 +322,14 @@ function permissionModeTitle(mode: PermissionMode): string {
 
 /**
  * Creates a permission request message that explain the permission request
- * （裁剪版：仅新仓 shared PermissionDecisionReason 五变体，见文件头裁剪登记。）
+ * （shared PermissionDecisionReason 六变体——subcommandResults 工具本体波
+ * S-T2a 随第一真消费者 bashCommandHelpers 恢复，§8.53 登记。）
+ *
+ * subcommandResults 支 delta（旧仓 permissions.ts 逐字体的 Bash 特判
+ * extractOutputRedirections 展示裁剪支裁掉）：permissions 域 allow=[shared]
+ * （boundary 规则）禁 import engine/tools；原支对 Bash 工具剥输出重定向
+ * 避免文件名当命令展示。前向接缝：展示裁剪如需保真，注入窗口或展示工具
+ * 迁位（auto-mode 波 / 工具本体波 S-T4 复审裁定）。
  */
 export function createPermissionRequestMessage(
   toolName: string,
@@ -338,6 +349,21 @@ export function createPermissionRequestMessage(
       case 'mode': {
         const modeTitle = permissionModeTitle(decisionReason.mode)
         return `Current permission mode (${modeTitle}) requires approval for this ${toolName} command`
+      }
+      case 'subcommandResults': {
+        // delta 登记（见头注）：旧仓 Bash 支 extractOutputRedirections
+        // 展示裁剪不随迁 → 展示原始分段命令
+        const needsApproval: string[] = []
+        for (const [cmd, result] of decisionReason.reasons) {
+          if (result.behavior === 'ask' || result.behavior === 'passthrough') {
+            needsApproval.push(cmd)
+          }
+        }
+        if (needsApproval.length > 0) {
+          const n = needsApproval.length
+          return `This ${toolName} command contains multiple operations. The following ${plural(n, 'part')} ${plural(n, 'requires', 'require')} approval: ${needsApproval.join(', ')}`
+        }
+        return `This ${toolName} command contains multiple operations that require approval`
       }
       case 'workingDir':
       case 'safetyCheck':
