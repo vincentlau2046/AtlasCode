@@ -2820,3 +2820,26 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - 风险 1：engine 纳扫后 src/engine 内或存在 12 个之外的 <5 实质行非门面文件（勘查 Python 扫描正则与门 hasSubstantiveExport 判定存在差异面）→ 实施后跑 anti-stub 实测，门① 红则按「登记或填实」处置并登记
 - 风险 2：A15 红集重测对 mailbox.ts 复原保真度敏感 → verbatim restore + `git diff` 空双纪律（先例 F-4/P-E5）
 - 验收：四件套 tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3108 expect**（A15 补 1 expect，测试数不变）+ gate 6；④ 切 wave-c tag 后 gate 复跑（门③ 实检 engine 0 条目）
+
+### S-E4 ② 实施记录（2026-09-25，master 6e236d5 A15 + 5bc9e75 A14）
+
+- **A15（6e236d5，2 文件 +16/-12）**：谓词测试补 `expect(out[1]!.read).toBe(false)` 阴性断言（out[1] = from 'y' 非匹配项）。4 步红集重测全实测成立：① 基线重测（mailbox.ts L266 `read: false` 突变 → 恰 1 红 12 pass/1 fail）→ ② 补断言 → ③ 新红集重测（L267 突变 → 恰 2 红 11 pass/2 fail = 'P-M2 writeToMailbox：新消息默认未读' + 'markMessagesAsReadByPredicate 选择性标记'）→ ④ verbatim restore（diff vs 突变前备份空；git diff 终态 = 头注订正 2 ins/1 del，产品代码零改动）。登记面 3 处（func 头 L21-26 / mailbox L261-263 内联 / 谓词测 L156-163）；双点 6 红集不受影响（谓词测本在 6 红集内）。
+- **A14（5bc9e75，16 文件 +25/-97）**：12 零消费者占位删除（ports/ 4 + state/attribution/ 4 + state/fileHistory/ 4，各 7L、2 index 9L）+ anti-stub 门 3 改（CDEEP_DOMAINS + 'engine' / 门③ regex 9 域 / 测试文件头 S-E4 项）+ 前向接缝头注 2 处（state/index.ts + engine/index.ts，H6）+ docs B 桶 17→18（B18 登记）。门自探针判别成立：临时 `src/engine/__probe_stub__.ts`（`export {}`）→ 门① 红且列出该文件 → 删 → 3/3 绿（探针文件不入提交）。
+- 四件套绿 = ① 验收门逐位命中：1447 pass / 89 文件 / 3108 expect + gate 6。
+
+### S-E4 ③ 审视记录（2026-09-25，双只读 ≤2，task #123）
+
+**A 路（旧仓对照 + S-E0 冻结裁定逐项核验）verdict：PASS-with-fixes（1 MINOR + 1 NOTE，零 BLOCKER/MAJOR）**。5 检查点全 PASS：① 12 占位删除面 vs 旧仓零保真回归（旧仓 fileHistory/attribution 功能面 = src/utils/fileHistory.ts + attribution 族，归 shell·swarm 波 C 桶非本波范围；零消费者 grep 0 命中）② S-E0 偏离裁定（删而不登记）成立（门② readFileSync 使「登记+删除」同提交 ENOENT；门③ engine 入 CDEEP 后同波删光强制）③ A15 谓词语义 + 恰 2 红推演 + 双点 6 红集不变（逐测核验其余 11 func 测不断言缺省态）④ 「engine 14」口径漂移差额 2 = sessionContext/sessionMemory（S-7d Port 1/Port 5 填实，git log --follow 追证）⑤ 门改动正确性（CDEEP 5 目录在场 + existsSync 守卫；门③ 9 域 regex 无遗漏，shared 有意排除由门② 兜底）。
+- MINOR（EngineState.ts:18 头注「骨架待 C 波填实」失实，A14 同型订正漏第 3 处）→ 订正为 B18 口径（8 占位已删，后续波按需重建且须实质实现）：**db798fc**（纯头注，四件套 1447/89/3108 + gate 6 不变）
+- NOTE（architecture-charter.md L198-199/212/227/286/327/334/404 仍引已删 ports 路径 + state 模块树）→ **接受不升版**：charter = 版本化设计定稿，条目 = B18「按需重建」设计规格，状态事实源 = 本 B18 登记；与 B 路 NOTE-1 同源
+
+**B 路（H6 死接缝 + 测试面）verdict：PASS-with-fixes（3 MINOR + 1 NOTE，零 BLOCKER/MAJOR）**。5 检查点全 PASS：① H6 三登记（state/index.ts + engine/index.ts + docs B18）互相指认成立，删除后残留引用全为注释/文档面 ② anti-stub 门自身零缺陷（/tmp 探针逐字复现门逻辑：`export {}`/`export default`/local re-export 均检出 = 保守方向多检出不漏检，现树零现例；门② 3 shared 条目现态占位无漂移；门③ 审视时 vacuous = wave-c 未切，与 ④ 计划一致）③ A15 零行为 + 非 tautology（/tmp 仓快照突变实证 11 pass/2 fail = 红集 2，与登记逐字一致；per-test mkdtemp + ATLAS_CONFIG_DIR 还原，无新 flake）④ 提交卫生（6e236d5 恰 2 文件零产品代码 / 5bc9e75 恰 16 文件零测试断言 / 10ecd09 恰 1 文件）⑤ 全量 1447/89/3108 复现（A15 +1 expect 3107→3108，测试数不变）。
+- MINOR-1（func L92 锚点注释「本测恰 1 红」失实）+ MINOR-2（mailbox.ts 文件头探针锚点段「func 恰 1 红…其余测试刻意不断言缺省态」两处失实）→ 订正为 A15 红集 2 口径：**ae60f59**（纯注释 2 文件 +6/-4，四件套不变）
+- MINOR-3（EngineState.ts:18）= A 路 MINOR 同源，**db798fc 已核销**
+- NOTE-1（charter 引用）= A 路 NOTE 同源，接受不升版
+
+### S-E4 ④ 闭环记录（2026-09-25，task #123 完结）
+
+- **wave-c tag 切出**（门③ 激活开关；wave-b 2026-09-22 先例同实践；本地 tag 无 remote，`git tag -d wave-c` 可回退）。切后 tag 集 = wave-a / wave-b / wave-c。门③ 由休眠转实检：gate 复跑 6 pass，expect 计 4→5（`if (hasWaveC)` 实检分支执行 `expect(cdeepStubs).toEqual([])` = STUB_REGISTRY 3 shared 条目 ∉ 9 域 regex → 0 条目，门③ 实检绿）。
+- **终验四件套**（闭环态）：tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3108 expect** + gate 6（门③ 实检）。
+- **S-E4 ①→②→③→④ 全闭环**：10ecd09（① 执行前分析）→ 6e236d5（A15）→ 5bc9e75（A14）→ db798fc（③ A 路修复）→ ae60f59（③ B 路修复）→ wave-c tag（④）。**task #123 完结 → E-wave-end（task #119）完结**：A 桶 15 项（S-E1..S-E4）全闭环；B 桶 18 项登记（B18 = 12 engine 占位删除 + 重建要求）；C 桶（工具本体 + auto-mode + shell·swarm）= 后续既定波。下一步 = 工具本体波（bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位）。
