@@ -19,10 +19,11 @@
  *    越界索引不动 inbox'（length-2 断言）/ 'markMessagesAsReadByPredicate
  *    选择性标记'（length-3 断言））——支收敛红集，登记为双点绑定非探针
  *    违规（与 mailbox.ts 头注登记同源）。单点探针形态 = 写默认 read 态支
- *    `read: false` 反转为 `read: true` → 'P-M2 writeToMailbox：新消息默认
- *    未读（readUnreadMessages）' 恰 1 红（本文件其余测试刻意不断言新写入
- *    消息的 read 缺省态——缺省态断言收敛于该单测，保证反转突变红集恰 1，
- *    实测成立）。
+ *    `read: false` 反转为 `read: true` → 红集 2（2026-09-25 实测基线，
+ *    §8.52 A15 闭环：'P-M2 writeToMailbox：新消息默认未读（readUnreadMessages）'
+ *    + 'markMessagesAsReadByPredicate 选择性标记'（A15 阴性断言
+ *    out[1].read===false；A15 前登记「恰 1 红」——本文件其余测试当时刻意
+ *    不断言新写入消息的 read 缺省态，NOTE-2 接缝已由 A15 核销）。
  */
 import {
   describe,
@@ -153,13 +154,13 @@ describe('mark-read 族（真盘）', () => {
   })
 
   test('markMessagesAsReadByPredicate 选择性标记', async () => {
-    // E-wave-end 前向接缝登记（S-7e d1 审视 NOTE-2 闭环，复审勿当遗漏重提）：
-    // 本测刻意缺非匹配项 out[1].read===false 阴性断言——补之则 P-M2 单点
-    // （`read: false` 缺省态反转）突变下本测同红（out[1] 缺省已读），红集 2
-    // 违反单点探针「恰 1 红」登记（实测基线）。支覆盖裁定：丢 `!m.read` 守卫
-    // = 与退化 `predicate(m)` 值可观察等价（匹配且已读 → JSON 输出恒等，
-    // 标记幂等）；谓词反转被 out[2] 断言捕获；唯一开口「条件退化为全量
-    // 标记」E-wave-end 补阴性断言 + P-M2 单点红集重测（1→2）一并处置。
+    // S-7e d1 审视 NOTE-2 已闭环（S-E4 A15，2026-09-25）：非匹配项
+    // out[1].read===false 阴性断言已补——P-M2 单点（`read: false` 缺省态
+    // 反转）突变红集 1→2（本测 + 'P-M2 writeToMailbox：新消息默认未读'
+    // 双点，2026-09-25 实测基线，§8.52 A15；A15 前「恰 1 红」登记已订正，
+    // 复审勿当遗漏重提）。支覆盖裁定仍有效：丢 `!m.read` 守卫 = 与退化
+    // `predicate(m)` 值可观察等价（匹配且已读 → JSON 输出恒等，标记幂等）；
+    // 谓词反转被 out[2] 断言捕获。
     await writeToMailbox('a1', msg('x', '1'), TEAM)
     await writeToMailbox('a1', msg('y', '2'), TEAM)
     await writeToMailbox('a1', msg('x', '3'), TEAM)
@@ -170,6 +171,8 @@ describe('mark-read 族（真盘）', () => {
     const out = await readMailbox('a1', TEAM)
     expect(out).toHaveLength(3)
     expect(out[0]!.read).toBe(true)
+    // A15 阴性断言（NOTE-2 核销）：非匹配项 'y' 保持新写入缺省未读
+    expect(out[1]!.read).toBe(false)
     expect(out[2]!.read).toBe(true)
   })
 })

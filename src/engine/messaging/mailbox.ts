@@ -260,7 +260,8 @@ export async function writeToMailbox(
     // 锁后重读支 = 锁串行化原子性支，双点绑定登记见文件头探针锚点段）
     const messages = await readMailbox(recipientName, teamName)
 
-    // P-M2 单点探针支：新消息默认未读（反转为 true → func 恰 1 红）
+    // P-M2 单点探针支：新消息默认未读（反转为 true → func 红集 2（含 A15
+    // 谓词阴性断言，2026-09-25；A15 前登记「恰 1 红」，见 func 头注））
     const newMessage: TeammateMessage = {
       ...message,
       read: false,
