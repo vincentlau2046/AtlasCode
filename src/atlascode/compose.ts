@@ -30,6 +30,10 @@
  *     + setSchedulerEnv（scheduler 退出清理 → tasks cleanupRegistry）
  *     + createAgentLoopDeps 构建器（A4：getTools 组合根消费 + 权限门 +
  *     hooks 装配① 单入口）+ runCoreCleanup 暴露
+ *   + S-E3（§8.52 A11/A12）⑨ setSessionEnv 增注 getCwd 活态成员（bootstrap
+ *     getCwd() = try pwd() catch getOriginalCwd()，旧 utils/cwd.ts 逐字）+
+ *     createAgentLoopDeps 构建器 deps.transcript 接线（session 域 record 族
+ *     收敛 loop 写面；agentId 路由 config.agentId）
  *
  * 残留守（§8.29）：applyConfigEnvironmentVariables（信任后全量 env）→ 信任
  * 对话框面（新仓未落；§8.28 预声明消费接缝此处重登记，旧仓启动序
@@ -70,6 +74,8 @@ import {
   getSettingsPaths,
   getTools,
   initializeToolPermissionContext,
+  recordContentReplacement,
+  recordTranscript,
   registerCleanup,
   runCleanupFunctions,
   setSchedulerEnv,
@@ -78,12 +84,15 @@ import {
   setSessionMemoryPort,
   setTaskNotificationHandler,
   type AgentLoopDeps,
+  type ContentReplacementRecord,
+  type Message as SessionMessage,
   type ToolRegistryDeps,
 } from '../engine'
 import type { PermissionMode, ToolPermissionContext, Tools } from '../shared'
 import {
   getIsNonInteractiveSession,
   getMainThreadAgentType,
+  getCwd,
   getCwdState,
   getSessionId,
   getOriginalCwd,
@@ -192,6 +201,11 @@ export function createCoreDependencies(): CoreDependencies {
     getSessionId,
     switchSession: id => switchSession(id),
     getOriginalCwd,
+    // S-E3 A12（§8.52）：活态 cwd = bootstrap getCwd()（try pwd() catch
+    // getOriginalCwd()，旧仓 utils/cwd.ts 逐字——新仓 bootstrap C-Deep 切片 3
+    // T4 已落，回落支非裁面）。消费点 = project.ts insertMessageChain cwd 戳
+    // （审视 A-1 值 delta 核销）；键控点 getProjectDir(getOriginalCwd()) 不动。
+    getCwd,
     registerCleanup: handler => {
       registerCleanup(handler)
     },
@@ -258,6 +272,12 @@ export interface AgentLoopDepsConfig {
    * 可覆写 sessionId/permissionMode，缺省时 = 构建器注入值）。
    */
   hookOptions?: HookRunOptions
+  /**
+   * 子代理 id（S-E3 A11，§8.52）：recordContentReplacement 路由面（主会话 =
+   * undefined = 旧仓逐字「Undefined = 主线程」）。runAgent 子代理 loop 注入 =
+   * shell/swarm 波前向接缝（本波仅主会话构建器消费）。
+   */
+  agentId?: string
 }
 
 /** loop 依赖装配产物（S-E2 A4）：权限上下文 + 模型可见工具池 + loop deps。 */
@@ -319,6 +339,20 @@ export async function createAgentLoopDeps(
     signal: config.signal,
     checkPermission,
     hooks,
+    // S-E3 A11（§8.52）：transcript 写面 = session 域 record 族（recordTranscript
+    // dedup 幂等在内，重记安全；持久化门 = session 写面 shouldSkipPersistence
+    // 内部态，本波不加构建器门 = 裁面登记——D 波/CLI persistSession 面）。
+    // 类型面 delta：shared Message（timestamp string|number 宽型）→ session
+    // Message（timestamp string 窄型）跨域 cast（运行态 loop 消息恒携 string
+    // timestamp，构造面保证；readonly sink 参 → 可变 record 参 = 同值传递）。
+    transcript: {
+      record: msgs => recordTranscript(msgs as unknown as SessionMessage[]),
+      recordContentReplacement: recs =>
+        recordContentReplacement(
+          recs as unknown as ContentReplacementRecord[],
+          config.agentId,
+        ),
+    },
   }
   return { toolPermissionContext, tools, deps }
 }

@@ -3,16 +3,21 @@
  * 76L 随迁，S-7a）
  *
  * 裁剪登记（H6 前向接缝，复审勿当遗漏重提）：
- *   - killShellTasksForAgent 尾部 dequeueAllMatching(cmd => cmd.agentId ===
- *     agentId) 裁出：消息队列（messageQueueManager）归 S-7e messaging 波，
- *     本层保留 kill 循环本体；「已入队通知随 agent 退出无消费者、无害滞留」
- *     语义随队列面落时复核。
+ *   - 【S-E3 A13 核销（§8.52）】killShellTasksForAgent 尾部
+ *     `dequeueAllMatching(cmd => cmd.agentId === agentId)` 已恢复（S-7a 裁出
+ *     因队列面未落；S-7e d2 messaging 波 queueManager 落地后本波对照真队列
+ *     复核谓词面：dequeueAllMatching 谓词签名 + QueuedCommand.agentId
+ *     （queueTypes.ts:133 旧仓逐字「Undefined = main thread」）+ messaging 域
+ *     零 coordinator import 零环）。enqueue 侧 agentId 接线 = shell/swarm 波
+ *     前向接缝（S-E2 MINOR-1 同源裁定：本波 drain 侧预接线，当前零 producer
+ *     谓词 = 惰性接缝非 stub）。
  *   - logError → logForDebugging（shared/debug 无 logError，域内日志统一
  *     debug 口）。
  *   - 旧仓分离理由（runAgent.ts kill agent-scoped bash 不拖 React）在新仓无
  *     .tsx 面 → 文件保留仅为域内分层（localShellTask 消费 killTask）。
  */
 import { errorMessage, logForDebugging } from '../../../shared'
+import { dequeueAllMatching } from '../../messaging'
 import { evictTaskOutput, type SetAppState, type TaskAppState } from '../../../task'
 import { isLocalShellTask, type LocalShellTaskState } from './guards'
 import { updateTaskState } from './framework'
@@ -74,7 +79,10 @@ export function killShellTasksForAgent(
       killTask(taskId, setAppState)
     }
   }
-  // 已入队通知的清理（dequeueAllMatching）随 S-7e messaging 波消息队列落位
-  // （头注登记）——killTask 异步触发的 'killed' 通知对已退出的 agentId 无
-  // 匹配消费者，队列面落时复核滞留语义。
+  // Purge any queued notifications addressed to this agent — its query loop
+  // has exited and won't drain them. killTask fires 'killed' notifications
+  // asynchronously; drop the ones already queued and any that land later sit
+  // harmlessly (no consumer matches a dead agentId).（旧仓逐字；S-E3 A13
+  // 恢复——队列面 S-7e d2 已落，谓词面核销见头注。）
+  dequeueAllMatching(cmd => cmd.agentId === agentId)
 }

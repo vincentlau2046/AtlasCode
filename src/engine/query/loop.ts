@@ -40,6 +40,35 @@ import {
   type AutoCompactDeps,
   type AutoCompactTrackingState,
 } from '../context'
+import type { ContentReplacementRecord } from '../session/types'
+
+/**
+ * loop transcript 写面（S-E3 A11，§8.52）：旧仓 QueryEngine 7 点 recordTranscript
+ * + query/loop.ts:377 recordContentReplacement 收敛到窄 spine 的追加/compact 面。
+ * 组合根注入 session 域 record 面（compose 构建器 deps.transcript；未注入 =
+ * 窄 spine 无持久化安全缺省，同 checkPermission/hooks 惯例）。
+ *
+ * 7 点映射（执行前分析冻结，§8.52 S-E3）：
+ *   - L450 进 loop 前 persist → queryAgentLoop entry await record(args.messages)
+ *   - L722/724/774/828（assistant void / 非 assistant await / progress /
+ *     attachment）→ queryOneRound 尾部 void record([assistantMsg, ...results])
+ *     （新 spine 无 progress/attachment 消息面 = 消息/REPL 波残留守）
+ *   - L607 compact boundary persist → compact 支 await record(post-compact 序列)
+ *   - L706 preservedSegment tail flush = E-1b-full 裁面（新 CompactionResult
+ *     无 preservedSegment 三段 uuid）
+ *   - React 侧 5 点 = B12（shell/message 波）
+ */
+export interface LoopTranscriptSink {
+  /** 消息追加面记录（recordTranscript 消费；dedup 幂等在内，重记安全）。 */
+  record(messages: readonly Message[]): Promise<unknown>
+  /**
+   * loop compact 写面（旧 query/loop.ts:377 recordContentReplacement；旧
+   * loop.ts:360-363 persistReplacements 门 = querySource 前缀判据）。producer =
+   * E-1b-full budget 纵切（旧 applyToolResultBudget），本波零 producer = 前向
+   * 接缝登记（fake compact 测试面可 seed）。
+   */
+  recordContentReplacement?(replacements: readonly ContentReplacementRecord[]): Promise<void>
+}
 
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
@@ -53,6 +82,8 @@ export interface AgentLoopDeps {
    * 接缝清单登记，§8.42 审视 MINOR-8）。
    */
   hooks?: LoopHooks
+  /** S-E3 A11：transcript 写面（未注入 = 窄 spine 无持久化安全缺省）。 */
+  transcript?: LoopTranscriptSink
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -157,6 +188,13 @@ export async function queryOneRound(
     message: { role: 'user', content: [o.block] },
   }))
 
+  // S-E3 A11（旧 L722/724/774/828 收敛）：轮末追加面记录——assistant void
+  // 语义（fire-and-forget，未注入 = 无操作）；新 spine 无 progress/attachment
+  // 消息面（裁面登记，见 LoopTranscriptSink 头注映射表）。
+  if (deps.transcript) {
+    void deps.transcript.record([assistantMsg, ...resultMessages])
+  }
+
   return {
     messages: [...messages, assistantMsg, ...resultMessages],
     toolResults,
@@ -202,6 +240,13 @@ export async function queryAgentLoop(
   let terminated = false
   let lastRound: AgentRoundResult | undefined
 
+  // S-E3 A11（旧 L450 收敛）：进 loop 前 persist 入参序列——crash-resumable
+  // （旧 L437 注释：进程在首个 API 响应前被杀，transcript 仍可 resume；
+  // 非 bare await 语义，bare fire-and-forget 变体 = D 波/CLI 面裁面登记）。
+  if (deps.transcript) {
+    await deps.transcript.record(messages)
+  }
+
   while (turns < maxTurns) {
     turns++
     // pre-turn 压缩（未注入 context = 跳过，窄 spine 语义）
@@ -212,6 +257,30 @@ export async function queryAgentLoop(
         if (oc.tracking) {
           // 成功：重置 tracking（turnCounter 0 + 新 turnId + 失败计数清零，旧仓 L485-494）
           tracking = oc.tracking
+        }
+        // S-E3 A11（旧 L607 收敛）：compact 写面 persist post-compact 序列
+        // （boundaryMarker 携 subtype 判别式 → JSONL '"compact_boundary"'
+        // 标记字节面，scanner 同点 #15 核销；dedup 幂等在内重记安全）。
+        if (deps.transcript) {
+          await deps.transcript.record(messages)
+        }
+        // S-E3 A11-Δ2（旧 loop.ts:377 收敛）：content replacement 写面——
+        // persistReplacements 门（旧 loop.ts:360-363 逐字：querySource 前缀
+        // 判据，agent 路由 sidechain 文件 / repl 主线程 session 文件；
+        // 其余 querySource 的 ephemeral 调用方不 persist）。producer = E-1b-full
+        // budget 纵切（本波零 producer，CompactionResult 可选载体 = 前向接缝）。
+        const replacementRecords = oc.compactionResult.contentReplacements
+        if (
+          replacementRecords &&
+          replacementRecords.length > 0 &&
+          deps.transcript?.recordContentReplacement
+        ) {
+          const qs = args.context.autoCompact.querySource
+          const persistReplacements =
+            !!qs && (qs.startsWith('agent:') || qs.startsWith('repl_main_thread'))
+          if (persistReplacements) {
+            await deps.transcript.recordContentReplacement(replacementRecords)
+          }
         }
       } else if (oc.consecutiveFailures !== undefined) {
         // 失败：回灌熔断计数（旧仓 loop.ts:504-511 语义）。不回灌则熔断器在 loop 里

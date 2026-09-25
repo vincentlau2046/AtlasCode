@@ -11,8 +11,9 @@
  *   - 本块在旧仓「shared by loadTranscriptFile & SDK getSessionMessages」——
  *     SDK getSessionMessages 远程面 = 远程/teleport 波，本域只服务 load 路。
  *   - attr-snap / compact boundary 标记串 '"compact_boundary"' 逐字（与
- *     record 面 compact boundary 写入面同源；写面 = QueryEngine 压缩层，
- *     E-wave-end 接线）。
+ *     record 面 compact boundary 写入面同源；【#15 核销 S-E3 A11，§8.52】
+ *     写面 = loop compact 写面（queryAgentLoop compact 支 record post-compact
+ *     序列，boundaryMarker 携 subtype 判别式 → JSONL 标记字节面闭环））。
  * 消费面：load.ts loadTranscriptFile（>SKIP_PRECOMPACT_THRESHOLD 走本扫描器
  * + scanPreBoundaryMetadata 前界元数据恢复）。
  */

@@ -27,15 +27,17 @@
  * 解耦/适配登记：
  *   - getSessionId/switchSession/getOriginalCwd/registerCleanup 全走
  *    SessionEnv 注入窗口（env.ts），不跨 import bootstrap（§8.49 item 2）。
- *   - 【审视 A-1 登记（E-7 d1 独立审视 MAJOR，值 delta 裁定接受）】
- *    insertMessageChain cwd 戳：旧 `getCwd()`（活态——ALS 覆盖层 ??
- *    cwdState，Bash cd 持久化 / --resume workDir / agent worktree 会
- *    刷新，消费者 = 旧 CLI ps 列表面）→ 新 `SessionEnv.getOriginalCwd()`
- *    （模块加载冻结，进程启动 cwd 不可变）。影响面 = 仅逐条消息
- *    gitBranch 同级的 cwd 戳值（会话文件定位不受影响——project dir 键
- *    控 getOriginalCwd，旧 L216/L395 同源）；链完整性零 delta。新仓
- *    暂无活态 cwd 状态源（live cwd 状态机随 shell/组合根波）→ E-wave-end
- *    可选扩 SessionEnv 活态成员恢复，前向接缝登记（H6 防空洞：非遗漏）。
+ *   - 【审视 A-1 登记（E-7 d1 独立审视 MAJOR，值 delta 裁定接受）+ S-E3 A12
+ *    核销（§8.52）】insertMessageChain cwd 戳：旧 `getCwd()`（活态——ALS
+ *    覆盖层 ?? cwdState，Bash cd 持久化 / --resume workDir / agent worktree
+ *    会刷新，消费者 = 旧 CLI ps 列表面）→ E-7 d1 冻结 `SessionEnv
+ *    .getOriginalCwd()`（模块加载冻结）→ **S-E3 A12 已落**：SessionEnv 扩
+ *    活态成员 `getCwd()`（域缺省 process.cwd() 活读；compose ⑨ 注 bootstrap
+ *    pwd() = ALS 覆盖 ?? getCwdState，活态 cwd 状态源已随 C-Deep 切片 3 T4
+ *    bootstrap/cwd.ts 就绪——d1 时「暂无活态源」前提已失效），本戳位恢复
+ *    旧活态语义。影响面 = 仅逐条消息 gitBranch 同级的 cwd 戳值（会话文件
+ *    定位不受影响——project dir 键控 getOriginalCwd，旧 L216/L395 同源，
+ *    load.ts 键控点不动）；链完整性零 delta。
  *   - shouldSkipPersistence 裁 2 支：getSettings_DEPRECATED?.
  *    cleanupPeriodDays（config 域面，CLI 波）+ isSessionPersistenceDisabled
  *    （持久化 kill-switch 面，CLI 波）——留 NODE_ENV=test 测试守卫 +
@@ -641,7 +643,11 @@ class Project {
           // replacement records lost → FROZEN misclassification.
           userType: getUserType(),
           entrypoint: getEntrypoint(),
-          cwd: getSessionEnv().getOriginalCwd(),
+          // S-E3 A12（§8.52）：活态 cwd 戳（审视 A-1 可选扩已落）——旧
+          // getCwd() 活态语义恢复；project dir 键控点（load.ts
+          // getProjectDir(getOriginalCwd())）不动（A-1 裁定：会话文件定位
+          // 不受影响）。
+          cwd: getSessionEnv().getCwd(),
           sessionId,
           version: getVersion(),
           gitBranch,

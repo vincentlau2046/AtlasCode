@@ -30,6 +30,7 @@
  */
 import { randomUUID } from 'crypto'
 import type { Message } from '../../shared'
+import type { ContentReplacementRecord } from '../session/types'
 
 export const ERROR_MESSAGE_NOT_ENOUGH_MESSAGES =
   'Not enough messages to compact.'
@@ -46,6 +47,14 @@ export interface CompactionResult {
   messagesToKeep?: Message[]
   preCompactTokenCount?: number
   postCompactTokenCount?: number
+  /**
+   * S-E3 A11-Δ2（§8.52）：content replacement 记录载体（旧 loop.ts:377
+   * recordContentReplacement 触发面）。producer = E-1b-full budget 纵切（旧
+   * applyToolResultBudget），本波零 producer（compactConversation 不置位）=
+   * 前向接缝登记；loop compact 写面经 queryAgentLoop 消费（persistReplacements
+   * 门 = autoCompact.querySource 前缀判据）。
+   */
+  contentReplacements?: ContentReplacementRecord[]
 }
 
 export interface CompactDeps {
@@ -234,14 +243,30 @@ ${formattedSummary}`
   return baseSummary
 }
 
-/** 压缩边界标记（旧仓 createCompactBoundaryMessage 裁剪：system 消息 + compact 元信息）。 */
+/**
+ * 压缩边界标记（旧仓 createCompactBoundaryMessage 裁剪：system 消息 + compact
+ * 元信息）。
+ *
+ * S-E3 A11-Δ1 保真修复（§8.52 执行前分析勘查新发现）：补旧仓判别式
+ * `subtype: 'compact_boundary'`（旧 messages.ts:4518 SystemCompactBoundaryMessage
+ * 逐字面 + content/isMeta/level 字段）——消费面：isCompactBoundaryMessage 谓词
+ * （insertMessageChain parentUuid-null relink）+ scanner 字节标记
+ * `'"compact_boundary"'`（#15 同点）+ 旧 L471/L595 ack 分支。保留 role/message
+ * wire 形（post-compact 序列进 LLM 调用面）。delta 登记：旧 compactMetadata
+ * {trigger, userContext} 无新 producer（compactConversation 现签名不携）=
+ * 裁面，createdAt 保留（新面，无消费断言）。
+ */
 export function createCompactBoundaryMessage(
   preTokens: number | undefined,
   messagesSummarized: number,
 ): Message {
   return {
     type: 'system',
+    subtype: 'compact_boundary',
     role: 'system',
+    content: 'Conversation compacted',
+    isMeta: false,
+    level: 'info',
     uuid: randomUUID(),
     timestamp: new Date().toISOString(),
     message: { role: 'system', content: 'Conversation compacted' },

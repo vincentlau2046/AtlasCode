@@ -58,6 +58,7 @@ import { resetLegacyToolNameAliases } from '../../src/permissions'
 import {
   getSessionId as bootstrapGetSessionId,
   getOriginalCwd as bootstrapGetOriginalCwd,
+  runWithCwdOverride,
 } from '../../src/bootstrap'
 import {
   setFsImplementation,
@@ -334,6 +335,27 @@ describe('通知/cleanup/scheduler 注入（S-E2 A9）', () => {
 // 致 workerAgent 顶层 const 消费 TDZ 崩（§8.52 实施记录 delta 登记），已
 // 整项撤回（4 文件 import 源复原 HEAD 形，C 桶边清理前向接缝）。本回归
 // 保留断言本体（深度门语义 + getTools baseTools 路径），防撤回引入行为差。
+
+describe('S-E3 A11/A12 组合根 transcript 接线（§8.52）', () => {
+  test('T-11 deps.transcript 接线：record/recordContentReplacement 函数形 + 可调用（unit 持久化守卫 = 零盘不抛）', async () => {
+    const { deps } = await createAgentLoopDeps({ agentId: 'ag1' })
+    expect(deps.transcript?.record).toBeTypeOf('function')
+    expect(deps.transcript?.recordContentReplacement).toBeTypeOf('function')
+    // unit 环境 TEST_ENABLE_SESSION_PERSISTENCE 未设 → shouldSkipPersistence
+    // 守卫跳写面（零盘不抛；真盘 I/O 语义归 tests/func/loop-transcript-fs）
+    await deps.transcript!.record([{ role: 'user', content: 'x' }])
+    await deps.transcript!.recordContentReplacement!([
+      { kind: 'tool-result', toolUseId: 'tu-1', replacement: '<trunc>' },
+    ])
+  })
+
+  test('T-12 A12 getCwd 注真值 = bootstrap 活态面（ALS 覆盖层生效，判别域缺省 process.cwd() 活读）', () => {
+    createCoreDependencies()
+    // 域缺省（process.cwd() 活读）不感知 ALS 覆盖层 → 若接线缺失此断言红
+    const inside = runWithCwdOverride('/als-override', () => getSessionEnv().getCwd())
+    expect(inside).toBe('/als-override')
+  })
+})
 
 describe('coordinator 提示词深度门 + getTools 回归（S-E2 A10 撤回）', () => {
   test('T-10 getCoordinatorWorkerSystemPrompt 深度门语义 + getTools baseTools 不变', () => {
