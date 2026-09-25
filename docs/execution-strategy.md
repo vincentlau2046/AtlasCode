@@ -2774,3 +2774,48 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 ### S-E3 ④ 闭环记录（2026-09-25，task #122 完结）
 
 **B 路处置提交**：fs 测试头注 P-E5 锚点订正（m-1）+ F-4 agentId 路由探针（m-2）+ loop.ts 头注 n-1/M-1 微残留两行登记（m-3 与 n-2 已由 cec5378 修复/订正，本提交不涉代码行为面）。**终验四件套**：tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3107 expect**（基线 1446 +1：F-4）+ gate 6；flake 复核 独跑 ×10 + 并跑 ×10 全绿。**S-E3 ①→②→③→④ 全闭环**：d4c2ece（① 执行前分析）→ 4a04339（② 实施）→ cec5378（③ A 路 2 MAJOR 修复 + 探针补齐）→ 本记录（③ B 路处置 + ④ 闭环）→ task #122 完结，S-E4（A14-A15，task #123）解锁。
+
+### S-E4 ① 执行前分析（2026-09-25，task #123，A14-A15）
+
+**A14（M-3 + anti-stub ⑥ 门收口）勘查结论（事实）**：
+
+- engine 域纯占位文件实测 **12 个**（S-E0 docs「engine 14」/ M-3 登记（docs:960）口径陈旧，波内 2 个已填实）：
+  - `ports/` 4：domainMount / featureConfig / lspStatus / promptSuggestion（各 7 行 = 头注 + `export {}`）
+  - `state/attribution/` 4：attribution / config / index / types（index 9 行）
+  - `state/fileHistory/` 4：config / fileHistory / index / types（index 9 行）
+  - 全零实质导出 + **零导入消费者**（精确导入源 grep = 0：state/index.ts 仅 re-export EngineState，「attribution/fileHistory 随 C 波填实后追加 re-export」头注承诺未兑现；engine 根 index.ts 不 re-export 4 ports（仅 ports/mcpClient））
+  - ascend 9 / atlascode 12（.ts；另 1 .tsx 非门扫描对象）归各域后续波，本波不动（S-E0 裁定 1）
+- 门文件（tests/ci/anti-stub.test.ts）三门结构：DOMAINS 5 域恒扫（:35）/ CDEEP_DOMAINS 4 域 existsSync 守卫（:43）/ STUB_REGISTRY 3 条 shared 条目（门② 兜底）；门③ = `wave-c` tag 在场 → C-Deep 域登记条目清零（regex L196 覆盖 executor/sandbox/memory/modelprovider/task/bootstrap/permissions/hooks 8 域，**无 engine**）
+- git tag 实测 = wave-a / wave-b（wave-c 未切）
+- M-3 登记（docs:960，E-2 波末 defer）：engine 既不在 anti-stub 扫描集也不在 STUB_REGISTRY → defer 到 E-wave-end = **本波收口对象**
+
+**A14 方案（1 项偏离 S-E0 裁定措辞，理由随附）**：
+
+- 裁定措辞（§8.52 L2485）=「engine 加扫描集 + STUB_REGISTRY 登记 + wave tag 清零」；勘查事实 = 12 个均为**零消费者死骨架**且解锁波「C 波」即本波完结的波 → 登记→即刻清零退化为同波纯 churn（登记一行再删一行，无信号收益）。**偏离裁定：12 个直接删除、不登记 STUB_REGISTRY**（零消费者删除 tsc 验证安全，四件套为验收门；偏离随 ③ 审视复核）。
+- 门改 3 处（anti-stub.test.ts）：
+  1. CDEEP_DOMAINS 加 `'engine'`（existsSync 守卫同模式；src/engine 在场 → 实扫）
+  2. 门③ regex（L196）加 `engine` → wave-c tag 后 engine 域登记条目须清零（删除后 0 条目 → 门③ 由空转实）
+  3. 测试文件头注登记 S-E4 项（engine 纳扫 + 12 占位删除 + B18 指向）
+- 前向接缝头注登记 2 处（H6 防空洞）：
+  1. `state/index.ts` 头注「随 C 波填实后追加 re-export」→ 订正为「S-E4：attribution/fileHistory 2 子模块 8 零消费者占位已删（C 波未填实），后续波按需重建（§8.52 B18）」
+  2. `engine/index.ts` 头注 ports 段登记 4 ports 零消费者占位删除（analytics/D 波按需重建）
+- 门自探针（裁定 4）：临时造未登记 `export {}`（`src/engine/__probe_stub__.ts`）→ 门① 红（未登记检出）→ 删 → 绿；判别成立 = engine 域实入扫描集（探针文件不入提交）
+- §8.52 **B 桶新增 B18**（17→18 项，② 实施时落 B 桶清单 + 本 ① 节预登记）：12 engine 占位删除清单 + 重建要求（后续波需要 4 ports / attribution / fileHistory 时按需重建且须实质实现，不重占位）
+- **④ 闭环动作含切 `wave-c` tag**（tag = 门③ 激活开关；切后 gate 6 四件套验收门③ 实检；wave-b tag 先例 2026-09-22 同实践；本地 tag 无 remote 无 push 风险，可 `git tag -d` 回退）
+
+**A15（P-M2 谓词阴性断言 + 红集重测）勘查结论（事实）**：
+
+- §8.50 NOTE-2 登记（tests/func/engine-messaging-fs.test.ts:155-162）：谓词测试「markMessagesAsReadByPredicate 选择性标记」缺非匹配项 `out[1].read === false` 阴性断言——当时裁定「补之则 P-M2 单点突变红集 1→2 违反『恰 1 红』登记」→ 登记 E-wave-end 前向接缝（§8.52 第 20 项）
+- P-M2 单点锚 = `mailbox.ts:266` `read: false`（反转为 true）；现登记红集 = 恰 1 红（'P-M2 writeToMailbox：新消息默认未读（readUnreadMessages）'，func 文件头 L21-25）
+- 方案 4 步：
+  1. **先重测现基线**：mutate mailbox.ts:266 → 现树实测恰 1 红（核登记与实测一致）→ verbatim restore + `git diff` 空核验
+  2. 谓词测试补 `expect(out[1]!.read).toBe(false)`（L173 后；out[1] = from 'y' 非匹配项，突变态下缺省已读 → 红；反转型不敏感面 = out[0]/out[2] 两态恒 true 不变）
+  3. **重测新红集**：同突变 → 实测恰 2 红（谓词测 + 原 1 红）→ verbatim restore + diff 核验；2 红集登记为新基线
+  4. 双点绑定红集（6 测）不受影响：谓词测已在 6 红集内（length-3 断言收敛，头 L19-20），补断言不增红集
+- 登记面更新 3 处：func 文件头 L21-25（单点红集 1→2 + A15 闭环 2026-09-25）/ mailbox.ts L260 头注（「恰 1 红」→「红集 2（A15 谓词阴性断言后）」）/ 谓词测试 L156-162 头注（NOTE-2 闭环，「E-wave-end 补…一并处置」措辞改已落形态）
+
+**风险与验收门**：
+
+- 风险 1：engine 纳扫后 src/engine 内或存在 12 个之外的 <5 实质行非门面文件（勘查 Python 扫描正则与门 hasSubstantiveExport 判定存在差异面）→ 实施后跑 anti-stub 实测，门① 红则按「登记或填实」处置并登记
+- 风险 2：A15 红集重测对 mailbox.ts 复原保真度敏感 → verbatim restore + `git diff` 空双纪律（先例 F-4/P-E5）
+- 验收：四件套 tsc 0 / eslint 0 / build 0 KB / 全量 **1447 pass / 89 文件 / 3108 expect**（A15 补 1 expect，测试数不变）+ gate 6；④ 切 wave-c tag 后 gate 复跑（门③ 实检 engine 0 条目）
