@@ -2669,3 +2669,59 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 （c8e785c 处置 7 文件 +73/-16；commit message「零活」措辞不重写历史，以头注订正为准。）
 
 **④ 基线验收**：tsc 0 / eslint 0 / build 0 / 全量 **1414 pass / 85 文件 / 2998 expect**（基线 1403+10+1 F-1c；expect 2975+21+2）+ gate 6。task #120 闭环 → S-E2 解锁（loop-deps 构建器供门依赖 I-1 语义已落）。
+
+### S-E3 session 消费面接线 执行前分析（2026-09-25，task #122）
+
+**范围（裁定 1 A 桶 S-E3 3 项，A11-A13）**。勘查结论 + 设计冻结如下；实施时逐字对照本节，新增/偏离须回写本节。
+
+**现状勘查（2026-09-25 实测）**
+- **record 面已落（S-7d d1/d2）**：`session/record.ts` recordTranscript（旧 L1419 逐字：`messageSet.has(m.uuid)` 前缀跟踪 skip + `!seenNewMessage && isChainParticipant` P-S1 探针锚点 + `projectInstance().insertMessageChain`）/ recordContentReplacement（旧 L1505：`insertContentReplacement(records, agentId)` agentId→sidechain 路由）/ recordSidechainTranscript / resetSessionFilePointer / adoptResumedSessionFile / flushSessionStorage；`project.ts` insertMessageChain（`isCompactBoundaryMessage(message)` → `parentUuid: null` + `logicalParentUuid: parentUuid` relink；cwd 戳 = `getSessionEnv().getOriginalCwd()`（A-1 冻结）；`shouldSkipPersistence` 守卫 L540/558/704（NODE_ENV=test + ATLAS_SKIP_PROMPT_HISTORY 测试守卫，2 支裁面登记）+ insertContentReplacement（旧 L1126 逐字，`type:'content-replacement'` entry + agentId 面）。
+- **loop 面 = 窄 spine 零 record 消费**：`query/loop.ts` 245L（queryOneRound 单轮：`[...messages, assistantMsg, ...resultMessages]` 装配 L161 / queryAgentLoop 多轮：entry L200 + pre-turn compact 支 L208-221 + terminal L224-236）；`AgentLoopDeps` 无 transcript 成员；compact 管线 `context/compact.ts` createCompactBoundaryMessage（L238）产物**缺旧仓判别式**（勘查新发现 A11-Δ1）；`autoCompact.ts` AutoCompactOutcome 无 contentReplacements 载体（A11-Δ2）。
+- **killShellTasks 裁面**：`coordinator/tasks/killShellTasks.ts` 头注 6-9 行 + 77-79 行登记「尾部 dequeueAllMatching 随 S-7e messaging 波复核」；队列面已落（queueManager.ts:251 `dequeueAllMatching(predicate)` = 删除并返回全部匹配 + 非匹配滞留 + 优先级序保持；`queueTypes.ts:133` `QueuedCommand.agentId?: AgentId`（=string，session/types.ts:46）旧仓逐字「Undefined = main thread」保留）；messaging 域零 coordinator import（环风险 = 0）；入队面 `enqueue(command: QueuedCommand)`（queueManager.ts:149）可携 agentId。
+- **活态 cwd 源已就绪**：bootstrap `state.ts` `getCwdState()`（可变，setup/setCwd 刷新）+ `cwd.ts` `pwd()` = ALS 覆盖层 ?? getCwdState（`runWithCwdOverride` 并发面）；session 域 SessionEnv 冻结 `getOriginalCwd`（env.ts），消费点 = `project.ts:644` insertMessageChain cwd 戳（A-1 审视值 delta 裁定接受 + 「E-wave-end 可选扩 SessionEnv 活态成员恢复」前向登记，即 A12）。
+
+**设计冻结**
+
+- **A11 loop recordTranscript 7 点收敛 + recordContentReplacement + #15 同点**：
+  - 新 `LoopTranscriptSink`（loop.ts）：`record(messages: readonly Message[]): Promise<unknown>`（Message = shared 宽型；返回 UUID 消费点 = React 侧 B12，loop 丢弃）+ `recordContentReplacement?(replacements: readonly ContentReplacementRecord[]): Promise<void>`（ContentReplacementRecord type-only 引自 `../session/types`；环核验：session 域零 context import = 无环）。
+  - `AgentLoopDeps.transcript?: LoopTranscriptSink`——未注入 = 窄 spine 无持久化安全缺省（同 checkPermission/hooks 惯例）；窄 spine 测试/回放面零 I/O 不变。
+  - **7 点 → 新面映射表（冻结）**：
+
+    | 旧仓点 | 新仓面 | 语义 |
+    |---|---|---|
+    | L450 进 loop 前 user 消息 persist | `queryAgentLoop` entry `await record(args.messages)` | crash-resumable（旧 L437 注释：进程在首个 API 响应前被杀，transcript 仍可 resume） |
+    | L722 assistant void / L724 非 assistant await / L774 progress inline / L828 attachment inline | `queryOneRound` 尾部 `void record([assistantMsg, ...resultMessages])` | fire-and-forget（旧 L722 assistant void 语义）；新 spine 无 progress/attachment 消息面（裁面登记：attachment 渲染 = 消息/REPL 波残留守） |
+    | L607 compact boundary persist | compact 支 `messages = buildPostCompactMessages(...)` 后 `await record(messages)` | boundaryMarker+summary+keep 全序列 persist（record 内 dedup 幂等，重记安全） |
+    | L706 preservedSegment tail flush | 裁面登记 | 新 CompactionResult 无 compactMetadata.preservedSegment 三段 uuid；旧 tail flush 目标 = context-collapse preservedSegment（旧 L685-706），collapse 面 = E-1b-full 残留守 |
+    | React 侧 5 点（useLogMessages 等） | B12（shell/message 波） | 裁定 1 已归 |
+  - **A11-Δ1 保真修复（勘查新发现，并入 A11）**：`createCompactBoundaryMessage`（compact.ts:238）现产物缺旧仓判别式——旧 messages.ts:4518 SystemCompactBoundaryMessage = `{type:'system', subtype:'compact_boundary', content, isMeta:false, uuid, level:'info', compactMetadata:{trigger, preTokens, userContext, messagesSummarized}, logicalParentUuid?}`；新 = `{type:'system', role, uuid, timestamp, message:{...}, compactMetadata:{preTokens, messagesSummarized, createdAt}}`（无 subtype）。消费面全断：`isCompactBoundaryMessage` 谓词（insertMessageChain parentUuid-null relink）+ scanner 字节标记 `'"compact_boundary"'`（#15 同点）+ 旧 L471/L595 ack 分支。修复 = 补 `subtype: 'compact_boundary'` + `content: 'Conversation compacted'` + `isMeta: false` + `level: 'info'`（保留新 role/message wire 形 + 现签名；compactMetadata 保留 {preTokens, messagesSummarized, createdAt}，旧 {trigger, userContext} 无新 producer = 裁面登记）。
+  - **A11-Δ2 recordContentReplacement 写面**：`CompactionResult.contentReplacements?: ContentReplacementRecord[]` 可选载体（compact.ts；producer = E-1b-full budget 纵切（旧 loop.ts:350-390 applyToolResultBudget → 旧 L377 触发），本波零 producer = 前向接缝登记，fake compact 测试面可 seed）；loop compact 支消费点 = `oc.compactionResult?.contentReplacements?.length && persistReplacements && deps.transcript?.recordContentReplacement` → await；`persistReplacements` 门 = `autoCompact.querySource` startsWith `'agent:'`|`'repl_main_thread'`（旧 loop.ts:360-363 逐字）。
+  - **组合根**（compose.ts 构建器）：`deps.transcript = { record: msgs => recordTranscript(msgs as SessionMessage[]), recordContentReplacement: recs => recordContentReplacement(recs, config.agentId) }` + `AgentLoopDepsConfig.agentId?: string`（sidechain 路由；undefined = 主线程主 session 文件，旧 L377 agentId 参语义）；持久化门 = session 写面 shouldSkipPersistence 内部态（本波不加构建器门，D 波/CLI persistSession 面 = 裁面登记）。
+  - **runAgent 子代理 loop 本波不注 transcript**（子代理 sidechain 路由 = shell/swarm 波前向接缝登记；子 loop = 窄 spine 无持久化）。
+  - **scanner.ts:15 头注刷新**（#15 核销）：写面 = loop compact 写面（S-E3 A11 接线；boundaryMarker 携 subtype → JSONL 标记字节面闭环）。
+- **A12 SessionEnv 活态 cwd 成员**：
+  - `SessionEnv.getCwd(): string`（活态 cwd；域缺省 = `process.cwd()` 活读——无 bootstrap 约束下旧活态语义（ALS ?? cwdState）最近等价，自包含不破）。
+  - compose ⑨ 注 bootstrap `pwd()`（ALS 覆盖 ?? getCwdState；旧 utils/cwd.ts `getCwd()` = try pwd() catch getOriginalCwd() 回落支裁面登记——新仓 pwd 不抛，目录消失回落面 = shell 波残留守）。
+  - `project.ts:644` cwd 戳 `getOriginalCwd()` → `getCwd()`（旧 getCwd() 活戳语义恢复）；**project dir 键控点 load.ts:1230 不动**（A-1 裁定：会话文件定位不受影响）。
+  - project.ts A-1 头注刷新：「E-wave-end 可选扩」已落（A12）。
+- **A13 killShellTasks dequeueAllMatching 裁面复核**：
+  - 复核结论 = 队列面条件已满足（S-7e d2 落）→ **恢复尾部调用** `dequeueAllMatching(cmd => cmd.agentId === agentId)`（旧仓逐字 + 旧注释：killTask 异步触发的 'killed' 通知对已退出 agentId 无匹配消费者、无害滞留）；import 经 messaging 域门面 `../../messaging`（零环核验：messaging 零 coordinator import）。
+  - 谓词面核验：`cmd.agentId`（AgentId|undefined = string|undefined）vs `agentId: string`，`===` 类型安全；入队面 `enqueue` 可携 agentId（queueManager.ts:149）。
+  - **enqueue 侧 agentId 接线 = shell/swarm 波前向接缝**（S-E2 MINOR-1 同源裁定——本波 drain 侧预接线，入队侧随波；当前零 producer 谓词 = 惰性接缝非 stub，S-E4 anti-stub 扫描口径 = 已登记头注面）。
+  - 头注 6-9/77-79 行裁面登记 → 核销刷新。
+
+**测试规划**
+- **unit 零磁盘**（`tests/unit/loop-transcript-sink.test.ts`；fake sink 对象 + fake autoCompact deps（countTokens 巨值 → 真 shouldAutoCompact 触发 → fake `deps.compact` 返 CompactionResult），无 Fs mock 需求）：
+  - T-1 queryOneRound 轮末追加 record（恰 1 次，[assistantMsg, ...resultMessages]，fire-and-forget 不阻塞返回）
+  - T-2 queryAgentLoop entry record（首个 record 调用 = 入参序列，先于 LLM 调用）
+  - T-3 compact 支 record（record 调用含 boundaryMarker uuid 的 post-compact 序列）
+  - T-4 contentReplacements 消费点（fake compact 携 contentReplacements + querySource `'agent:t'` → sink 收到；阴性对照 querySource `'repl'` 不匹配 → 不调用）
+  - T-5 无 sink 缺省（transcript 缺席 = 不抛，窄 spine）
+  - T-6（A12）SessionEnv getCwd：域缺省 = process.cwd() + setSessionEnv 活源反射（fake env 活值可观察）
+  - T-7（A13）killShellTasksForAgent 队列清理：`enqueue` 3 条 {agentId:'a1'}/{agentId:'a2'}/{agentId:undefined 主} + fake TaskAppState（1 running local_bash）→ `killShellTasksForAgent('a1', ...)` → 队列滞留恰 {a2, 主}（a1 被 dequeueAllMatching 清除）+ task 态 'killed' 可观察（fake setAppState 更新面）
+- **func 真盘**（`tests/func/loop-transcript-fs.test.ts`；mkdtemp + ATLAS_CONFIG_DIR 重定向 + setSessionEnv + fake modelProvider + 真 session record 面，同 engine-session-fs 口径）：
+  - F-1 全 loop（1 轮工具 + autoCompact 触发）→ session JSONL 含 assistant/user 消息行 + **compact boundary 行（断言 `'"compact_boundary"'` 标记字节 = #15 同点断言 + A11-Δ1 修复效果面）**
+  - F-2（A12）活态 cwd 戳：setSessionEnv `{getCwd: () => '/live-cwd'}` → recordTranscript 后 JSONL 行 `cwd` 字段 = `'/live-cwd'`（project dir 键控仍 getOriginalCwd，文件定位不漂移）
+- **探针 P-E5（恰 1 红）**：删 queryAgentLoop compact 支 record 调用 → F-1 红（JSONL 缺 compact boundary 行），F-2 + unit 全绿 → 恰 1 红。backup→mutate→红集→verbatim-restore diff 核验。
+
+**基线与验收**：四件套 tsc 0 / eslint 0 / build 0 KB（cli 骨架属预期）/ 全量基线 1428+新测 + gate 6（anti-stub 门①②③ 不变，engine 扫描集随 S-E4 增长）。task #122 闭环 → S-E4 解锁（门+探针收口）。
