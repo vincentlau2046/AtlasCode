@@ -89,7 +89,15 @@ export const providerLifecycle: ProviderLifecycle = lazyProxy(getProviderLifecyc
 
 // ── 窄面门面导出（仅被外部域实际 import 的符号）──
 // types: APIError 类族（modelErrors/errorUtils 基类 + 错误分类测试构造）
-export { APIError, APIConnectionError, APIConnectionTimeoutError } from './types'
+// APIUserAbortError = 工具本体波 S-T2b 恢复（§8.53）：bashPermissions
+// 分类器 API 拒绝面（error instanceof APIUserAbortError || AbortError 并判，
+// 旧仓 types/atlas.js → 新仓本门面，窄面扩 1 符号）
+export {
+  APIError,
+  APIConnectionError,
+  APIConnectionTimeoutError,
+  APIUserAbortError,
+} from './types'
 export {
   API_ERROR_MESSAGE_PREFIX,
   PROMPT_TOO_LONG_ERROR_MESSAGE,

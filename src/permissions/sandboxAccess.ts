@@ -16,12 +16,20 @@
  *   - isSandboxingEnabled / isAutoAllowBashIfSandboxedEnabled = false
  *     （写 allowlist 3.7 支短路 false / ⑥ 自动放行短路失活——等价旧仓
  *     sandbox 未启用态，零行为变化）
+ *   - areUnsandboxedCommandsAllowed = false（工具本体波 S-T2b 扩面 2026-09-25，
+ *     §8.53：shouldUseSandbox 逃生支 `dangerouslyDisableSandbox &&
+ *     areUnsandboxedCommandsAllowed()` 为第一真消费者——placeholder 态
+ *     isSandboxingEnabled 恒 false 先行短路，此返回仅类型完备，零行为；
+ *     S-T4 组合根 ⑧ 注入真闭包 = sandbox 域
+ *     manager.areUnsandboxedCommandsAllowed（src/sandbox/
+ *     createSandboxManager.ts:288，旧仓 `?? true` 语义逐字））
  *   - getFsWriteConfig = 空配置（仅在 isSandboxingEnabled 真分支后触达；
  *     placeholder 态恒被前者短路，此返回仅类型完备）
  *
  * 前向消费接缝（H6 防空洞登记）：
  *   - S-6b ⑥ 半落（isAutoAllowBashIfSandboxedEnabled 消费点）
- *   - 组合根接线（E-wave-end 装配项）：生产链 setSandboxAccess(manager)
+ *   - 组合根接线（E-wave-end 装配项 / 工具本体波 S-T4 ⑧）：生产链
+ *     setSandboxAccess(manager 闭包面，含 areUnsandboxedCommandsAllowed）
  */
 
 /** sandbox FS 写配置窄视图（sandbox 域 FsWriteRestrictionConfig 同构子集）。 */
@@ -33,12 +41,19 @@ export type SandboxFsWriteConfig = {
 export type SandboxAccess = {
   isSandboxingEnabled(): boolean
   isAutoAllowBashIfSandboxedEnabled(): boolean
+  /**
+   * dangerouslyDisableSandbox 逃生门策略读面（S-T2b 扩面；旧仓
+   * SandboxManager.areUnsandboxedCommandsAllowed = settings.sandbox.
+   * allowUnsandboxedCommands ?? true）。placeholder false = 逃生支失活。
+   */
+  areUnsandboxedCommandsAllowed(): boolean
   getFsWriteConfig(): SandboxFsWriteConfig
 }
 
 const PLACEHOLDER: SandboxAccess = {
   isSandboxingEnabled: () => false,
   isAutoAllowBashIfSandboxedEnabled: () => false,
+  areUnsandboxedCommandsAllowed: () => false,
   getFsWriteConfig: () => ({ allowOnly: [], denyWithinAllow: [] }),
 }
 

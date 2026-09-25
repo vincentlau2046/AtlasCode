@@ -95,9 +95,12 @@ export type ToolPermissionContext = {
 //
 // 薄骨架裁量（复审勿当遗漏重提）：
 //  - PermissionDecisionReason 只留薄骨架 checkRead/checkWrite 实际产出的
-//    变体（rule/mode/workingDir/safetyCheck/other）；classifier/hook/
-//    asyncAgent/sandboxOverride/permissionPromptTool 变体归 engine 波
-//    （随 yoloClassifier/permissionSetup 真求值）。
+//    变体（rule/mode/workingDir/safetyCheck/other）；hook/asyncAgent/
+//    sandboxOverride/permissionPromptTool 变体归 engine 波（随
+//    yoloClassifier/permissionSetup 真求值）。classifier 变体 = 工具本体波
+//    S-T2b 恢复（2026-09-25，§8.53）：bashPermissions 决策族第一真生产者
+//    （speculative 分类器 ask 支；分类器 stub enabled=false 惰性面，真族
+//    归 auto-mode 纵切波 C 桶 ②）——纯加性 union 扩展，既有消费者零影响。
 //  - subcommandResults 变体 = 工具本体波 S-T2a 恢复（2026-09-25，§8.53）：
 //    bashCommandHelpers.checkCommandOperatorPermissions 为第一真消费者
 //    （分段 ask 决策逐字产 { type:'subcommandResults', reasons }）；
@@ -124,6 +127,21 @@ export type PermissionMetadata =
   | undefined
 
 /**
+ * Metadata for a pending classifier check that will run asynchronously.
+ * Used to enable non-blocking allow classifier evaluation.
+ *（旧仓 src/types/permissions.ts:185-194 逐字，工具本体波 S-T2b 恢复：
+ * bashPermissions buildPendingClassifierCheck 族第一真消费者。注：
+ * PermissionAskDecision 的 pendingClassifierCheck 字段本身仍裁——
+ * ask 决策产点以本地对象携值（结构流），字段恢复归 auto-mode 纵切波，
+ * 见文件头裁量登记。）
+ */
+export type PendingClassifierCheck = {
+  command: string
+  cwd: string
+  descriptions: string[]
+}
+
+/**
  * 权限决策原因（薄骨架裁剪版）。
  */
 export type PermissionDecisionReason =
@@ -134,6 +152,15 @@ export type PermissionDecisionReason =
   | {
       type: "mode"
       mode: PermissionMode
+    }
+  | {
+      /**
+       * 分类器代判原因（旧仓 L303-306 逐字，工具本体波 S-T2b 恢复；
+       * bashPermissions speculative 分类器 ask 支 2 产点，stub 态惰性）。
+       */
+      type: "classifier"
+      classifier: string
+      reason: string
     }
   | {
       type: "workingDir"

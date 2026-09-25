@@ -10,13 +10,18 @@
  * 传递依赖裁定（§8.33 矛盾 ①）：边界钉死的 applyPermissionRulesToPermissionContext
  * 传递依赖 applyPermissionUpdates（纯 context 变换）→ update 应用核心自 S-4c2
  * 提前入 S-4b。S-4c2 余：persistPermissionUpdate(s) / supportsPersistence /
- * extractRules / hasRules / PermissionUpdateSchema（zod）/ 接缝③ 语法过滤支。
+ * hasRules / PermissionUpdateSchema（zod）/ 接缝③ 语法过滤支。
+ * extractRules = 工具本体波 S-T2b 恢复（2026-09-25，§8.53 首消费者规则）：
+ * bashPermissions 规则建议面 2 消费点（L2379/2398）为第一真消费者，自
+ * S-4c2 提前（纯函数零磁盘）；hasRules 0 消费者不随迁（H6 核销维持
+ * S-4c2 判定）。
  * syncPermissionRulesFromDisk + deletePermissionRule 依赖 permissionsLoader
  * （S-4c1 engine 侧）→ 归 S-4c1，不本切片。
  *
  * 裁剪登记：旧 persistPermissionUpdate(s):222/349 + supportsPersistence:208 +
- * extractRules:30 / hasRules:45 不随迁（磁盘写回面 = S-4c1/c2；extractRules/
- * hasRules 无新仓消费点则不留死接缝，H6 核销归 S-4c2 判定）；旧 import
+ * hasRules:45 不随迁（磁盘写回面 = S-4c1/c2；hasRules 0 消费点不留死接缝，
+ * H6 核销归 S-4c2 判定）；extractRules:30 初裁后 S-T2b 恢复（见上，纯函数
+ * 零磁盘，首消费者规则）；旧 import
  * getSettingsForSource/updateSettingsForSource/addPermissionRulesToSettings/
  * toPosixPath 全裁（engine 侧面，L3 纯叶域不跨域）。
  * 依赖改法：logForDebugging = shared/debug（逐字语义）；jsonStringify =
@@ -245,4 +250,24 @@ export function applyPermissionRulesToPermissionContext(
 ): ToolPermissionContext {
   const updates = convertRulesToUpdates(rules, 'addRules')
   return applyPermissionUpdates(toolPermissionContext, updates)
+}
+
+/**
+ * Extract the rule values from a set of permission updates（旧仓
+ * PermissionUpdate.ts:30-44 逐字，S-T2b 恢复——bashPermissions 规则建议面
+ * L2379/2398 首消费者；hasRules 0 消费点不随迁）。
+ */
+export function extractRules(
+  updates: PermissionUpdate[] | undefined,
+): PermissionRuleValue[] {
+  if (!updates) return []
+
+  return updates.flatMap(update => {
+    switch (update.type) {
+      case 'addRules':
+        return update.rules
+      default:
+        return []
+    }
+  })
 }

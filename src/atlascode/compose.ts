@@ -181,9 +181,13 @@ export function createCoreDependencies(): CoreDependencies {
   //    不 import sandbox 域类型；placeholder runtime getFsWriteConfig 抛
   //    unavailable = 旧仓 disabled-stub 语义，消费点被 isSandboxingEnabled
   //    恒 false 短路不可达，测试判别见 loop-deps-compose T-8）
+  //    areUnsandboxedCommandsAllowed = 工具本体波 S-T2b 扩面（§8.53，
+  //    shouldUseSandbox 逃生支首消费者；旧仓 manager 同法 = settings.sandbox.
+  //    allowUnsandboxedCommands ?? true，直绑 sandbox 域 manager 方法）
   setSandboxAccess({
     isSandboxingEnabled: sandboxManager.isSandboxingEnabled,
     isAutoAllowBashIfSandboxedEnabled: sandboxManager.isAutoAllowBashIfSandboxedEnabled,
+    areUnsandboxedCommandsAllowed: sandboxManager.areUnsandboxedCommandsAllowed,
     getFsWriteConfig: () => {
       const c = sandboxManager.getFsWriteConfig()
       return { allowOnly: c.allowOnly, denyWithinAllow: c.denyWithinAllow }

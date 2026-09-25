@@ -10,8 +10,18 @@
  * bashSecurity / sedValidation / modeValidation / bashCommandHelpers 逐字随迁
  * + bashToolInput duck 型，delta 见各文件头注）→ 本门面扩块。
  *
- * 残留守（S-T2b 随迁，本门面再扩块）：bashPermissions / pathValidation /
- * shouldUseSandbox（旧仓 3 指定文件 3898L）。
+ * S-T2b（§8.53）已落核心 3 文件（bashPermissions 2471L / pathValidation
+ * 1303L / shouldUseSandbox 124L 逐字随迁）+ 6 本地辅助模块（bashReadOnly /
+ * abortError / platform / arrayUtils / windowsPaths / pathHelpers，delta 见
+ * 各文件头注）→ 本门面再扩块。
+ *
+ * 门面裁量（复审勿当遗漏重提）：
+ *  - stripWrappersFromArgv 只经 pathValidation 块转出（canonical 扩展版，
+ *    PR #21503 round 3；bashPermissions 同名的窄版拷贝 = 旧仓登记死代码
+ *    〔DCE cliff 不可删〕，门面不转出）
+ *  - 残留守（Bash 本体子波）：BashTool 3310L 本体 / inputSchema 真 zod 型 /
+ *    真 ToolUseContext / prompt.ts / BashTool 值位（本波 BASH_RULE_TOOL 窄
+ *    视图占位）。
  */
 export {
   type TsNode,
@@ -111,4 +121,44 @@ export {
   type CommandIdentityCheckers,
   checkCommandOperatorPermissions,
 } from './bashCommandHelpers'
-export { type BashToolInput } from './bashToolInput'
+export { type BashToolInput, type BashToolUseContext } from './bashToolInput'
+// ── S-T2b（§8.53）：核心 3 文件 + 6 本地辅助模块 ──
+export {
+  MAX_SUBCOMMANDS_FOR_SECURITY_CHECK,
+  MAX_SUGGESTED_RULES_FOR_COMPOUND,
+  BINARY_HIJACK_VARS,
+  bashPermissionRule,
+  bashToolCheckExactMatchPermission,
+  bashToolCheckPermission,
+  bashToolHasPermission,
+  checkCommandAndSuggestRules,
+  commandHasAnyCd,
+  clearSpeculativeChecks,
+  consumeSpeculativeClassifierCheck,
+  awaitClassifierAutoApproval,
+  executeAsyncClassifierCheck,
+  getFirstWordPrefix,
+  getSimpleCommandPrefix,
+  isNormalizedCdCommand,
+  isNormalizedGitCommand,
+  matchWildcardPattern,
+  peekSpeculativeClassifierCheck,
+  startSpeculativeClassifierCheck,
+  stripAllLeadingEnvVars,
+  stripSafeWrappers,
+} from './bashPermissions'
+export {
+  type PathCommand,
+  PATH_EXTRACTORS,
+  COMMAND_OPERATION_TYPE,
+  createPathChecker,
+  checkPathConstraints,
+  stripWrappersFromArgv,
+} from './pathValidation'
+export { shouldUseSandbox } from './shouldUseSandbox'
+export { isReadOnlyCommand } from './bashReadOnly'
+export { AbortError } from './abortError'
+export { type Platform, getPlatform } from './platform'
+export { count } from './arrayUtils'
+export { windowsPathToPosixPath } from './windowsPaths'
+export { getDirectoryForPath } from './pathHelpers'

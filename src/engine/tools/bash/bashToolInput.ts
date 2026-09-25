@@ -16,6 +16,8 @@
  * 真 zod 定义后，本 duck 型替换为 `z.infer<typeof BashTool.inputSchema>`
  * （或经 tools 域门面消费真型），调用点零改动。
  */
+import type { ToolPermissionContext } from '../../../shared'
+
 export type BashToolInput = {
   command: string
   description?: string
@@ -28,4 +30,24 @@ export type BashToolInput = {
   }
   run_in_background?: boolean
   dangerouslyDisableSandbox?: boolean
+}
+
+/**
+ * ToolUseContext duck 最小形（§8.53 S-T2b，旧仓 ToolUseContext 三消费面
+ * 逐字收窄）：bashPermissions 唯一消费文件（getAppState →
+ * toolPermissionContext / abortController.signal /
+ * options.isNonInteractiveSession）。
+ *
+ * delta 登记（复审勿当遗漏重提）：
+ *  - 旧 ToolUseContext 全字段面（messages/tools/options/appState 全族）不随迁
+ *    ——duck 只留 bash 权限面 3 成员（AppState duck 先例 E-7 S-7e）；
+ *    真 ToolUseContext 归 Bash 本体子波（⑧ 接线波随 tools 门面消费面
+ *    一并换回）。
+ *  - getAppState 返回型 = { toolPermissionContext } 单成员窄视图（grep
+ *    核验 bashPermissions 唯一 appState 成员消费）。
+ */
+export type BashToolUseContext = {
+  getAppState(): { toolPermissionContext: ToolPermissionContext }
+  abortController: { signal: AbortSignal }
+  options: { isNonInteractiveSession: boolean }
 }
