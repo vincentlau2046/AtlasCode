@@ -23,6 +23,13 @@
  *     三层断补齐之第三断；先于首次带命令钩子 runHooks，未注入 fail-fast）
  *   + S-3d（§8.29）applySafeConfigEnvironmentVariables（engine/config managedEnv，
  *     旧仓启动序信任前位——trusted 源 env 先入 process.env，后 roles lane env 读）
+ *   + S-E2（§8.52 A4-A10）⑧ setSandboxAccess（permissions ← sandbox 状态窄视图）
+ *     + ⑨ setSessionEnv（session ← bootstrap 3 成员 + registerCleanup → tasks
+ *     执行面）+ ⑩ setSessionMemoryPort/setSessionContextPort（Port 5/Port 1
+ *     壳实现注入）+ ⑪ setTaskNotificationHandler（通知 ← messaging 真队列）
+ *     + setSchedulerEnv（scheduler 退出清理 → tasks cleanupRegistry）
+ *     + createAgentLoopDeps 构建器（A4：getTools 组合根消费 + 权限门 +
+ *     hooks 装配① 单入口）+ runCoreCleanup 暴露
  *
  * 残留守（§8.29）：applyConfigEnvironmentVariables（信任后全量 env）→ 信任
  * 对话框面（新仓未落；§8.28 预声明消费接缝此处重登记，旧仓启动序
@@ -33,6 +40,7 @@ import {
   getModelProvider,
   setEndpointConfigSource,
   type ModelProvider,
+  type ModelRole,
 } from '../modelprovider'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
@@ -40,15 +48,39 @@ import {
   setBootstrapStatePort,
   setExecutorSandboxPort,
 } from '../executor'
-import { setPermissionsBootstrapEnv, setSettingsPathsProvider } from '../permissions'
+import {
+  setPermissionsBootstrapEnv,
+  setSettingsPathsProvider,
+  setSandboxAccess,
+} from '../permissions'
 import { setDiskOutputEnv } from '../task'
-import { setHookConfigProvider, setHooksBootstrapEnv, setHookShellPort } from '../hooks'
+import {
+  setHookConfigProvider,
+  setHooksBootstrapEnv,
+  setHookShellPort,
+  type HookRunOptions,
+} from '../hooks'
 import {
   applySafeConfigEnvironmentVariables,
   captureHooksConfigSnapshot,
   createHooksConfigProvider,
+  createLoopHooks,
+  createPermissionGate,
+  enqueuePendingNotification,
   getSettingsPaths,
+  getTools,
+  initializeToolPermissionContext,
+  registerCleanup,
+  runCleanupFunctions,
+  setSchedulerEnv,
+  setSessionContextPort,
+  setSessionEnv,
+  setSessionMemoryPort,
+  setTaskNotificationHandler,
+  type AgentLoopDeps,
+  type ToolRegistryDeps,
 } from '../engine'
+import type { PermissionMode, ToolPermissionContext, Tools } from '../shared'
 import {
   getIsNonInteractiveSession,
   getMainThreadAgentType,
@@ -57,6 +89,7 @@ import {
   getOriginalCwd,
   getTranscriptPathForSession,
   hasTrustAccepted,
+  switchSession,
 } from '../bootstrap'
 
 import { adaptSandboxToExecutorPort } from './adapters/sandboxAdapter'
@@ -66,6 +99,8 @@ import { adaptExecutorToHookShellPort } from './adapters/hookShellAdapter'
 import { createDiskOutputEnv } from './adapters/diskOutputEnvAdapter'
 import { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
 import { createInMemorySandboxDeps } from './sandboxDeps'
+import { createSessionMemoryPort } from './adapters/sessionMemoryPortAdapter'
+import { createSessionContextPort } from './adapters/sessionContextPortAdapter'
 
 /** 组合根装配产物（engine 波/消费方持有的域对象 + 已就绪的注入窗口）。 */
 export interface CoreDependencies {
@@ -132,11 +167,157 @@ export function createCoreDependencies(): CoreDependencies {
   //    替换 B6-func D18 env-only 版）
   setEndpointConfigSource(createEndpointConfigSource())
 
+  // ⑧ S-E2 A8（§8.52）：permissions ← sandbox 状态（S-6a 窗口；placeholder
+  //    禁用态 manager 闭包面，结构兼容窄视图 { allowOnly, denyWithinAllow }，
+  //    不 import sandbox 域类型；placeholder runtime getFsWriteConfig 抛
+  //    unavailable = 旧仓 disabled-stub 语义，消费点被 isSandboxingEnabled
+  //    恒 false 短路不可达，测试判别见 loop-deps-compose T-8）
+  setSandboxAccess({
+    isSandboxingEnabled: sandboxManager.isSandboxingEnabled,
+    isAutoAllowBashIfSandboxedEnabled: sandboxManager.isAutoAllowBashIfSandboxedEnabled,
+    getFsWriteConfig: () => {
+      const c = sandboxManager.getFsWriteConfig()
+      return { allowOnly: c.allowOnly, denyWithinAllow: c.denyWithinAllow }
+    },
+  })
+
+  // ⑨ S-E2 A5+A9（§8.52）：session ← bootstrap 真值（3 成员——域缺省
+  //    self-randomUUID 与 bootstrap 会话源分家 = 双 session id 隐患消除；
+  //    getProjectsDir 不注 = 裁定偏离登记：域缺省 `ATLAS_CONFIG_DIR ??
+  //    ~/.atlas` + projects 即旧仓 projects 车道真值自包含，bootstrap 私有
+  //    sessions 目录系 hooks-input 辅路，混用会断 record 写面 FROZEN stamp）+
+  //    registerCleanup → tasks cleanupRegistry 执行面（unregister 句柄丢弃
+  //    = 窗口 void 契约）
+  setSessionEnv({
+    getSessionId,
+    switchSession: id => switchSession(id),
+    getOriginalCwd,
+    registerCleanup: handler => {
+      registerCleanup(handler)
+    },
+  })
+
+  // ⑩ S-E2 A6+A7（§8.52）：Port 5/Port 1 壳实现 + 注入（壳 = 组合根最小真
+  //    实现防 H6 空洞；D 波/CLI 波注真实现经同一窗口整换）
+  setSessionMemoryPort(createSessionMemoryPort())
+  setSessionContextPort(createSessionContextPort())
+
+  // ⑪ S-E2 A9（§8.52）：通知 ← messaging 真队列（enqueuePendingNotification；
+  //    delta 登记：n.agentId 丢弃——新仓 QueuedCommand 裁 agentId 字段，
+  //    定向投递路由 = shell/swarm 波前向接缝）+ scheduler 退出清理 →
+  //    tasks cleanupRegistry（unregister 句柄签名逐字匹配；getProjectRoot/
+  //    getOwnerKey 保持域缺省——S-7b 审视确证 = 旧仓真逻辑非 stub）
+  setTaskNotificationHandler(n =>
+    enqueuePendingNotification({
+      value: n.value,
+      mode: 'task-notification',
+      priority: n.priority,
+    }),
+  )
+  setSchedulerEnv({
+    registerExitCleanup: fn => registerCleanup(fn),
+  })
+
   return {
     sandboxManager,
     modelProvider: getModelProvider(),
     memoryStore: new FileSystemMemoryStore(),
   }
+}
+
+/**
+ * loop 依赖装配配置（S-E2 A4，§8.52）：CLI 权限面 + 工具注册表注入 +
+ * loop 执行面。D 波 cli.ts 以 createAgentLoopDeps 为单入口消费。
+ */
+export interface AgentLoopDepsConfig {
+  /** --allowedTools CLI 面（缺省空）。 */
+  allowedToolsCli?: string[]
+  /** --disallowedTools CLI 面（缺省空）。 */
+  disallowedToolsCli?: string[]
+  /** --tools 预设名池（非空 → 池外全 deny 补拒）。 */
+  baseToolsCli?: string[]
+  /** 权限模式（缺省 'default'）。 */
+  permissionMode?: PermissionMode
+  /** --dangerously-skip-permissions（缺省 false）。 */
+  allowDangerouslySkipPermissions?: boolean
+  /** 附加工作目录（缺省空）。 */
+  addDirs?: string[]
+  /** headless 主会话（ask 决策转 auto-deny 不弹框）。 */
+  shouldAvoidPermissionPrompts?: boolean
+  /** 工具注册表注入（47 本体经 deps 增量注入的前向面）。 */
+  toolRegistryDeps?: ToolRegistryDeps
+  /** 主模型角色车道（缺省 'premium' = 旧仓主模型车道）。 */
+  role?: ModelRole
+  /** 取消信号透传（AgentLoopDeps.signal）。 */
+  signal?: AbortSignal
+  /**
+   * 钩子选项追加面（HookRunOptions 透传；spread 于 ctx 基值之后——调用方
+   * 可覆写 sessionId/permissionMode，缺省时 = 构建器注入值）。
+   */
+  hookOptions?: HookRunOptions
+}
+
+/** loop 依赖装配产物（S-E2 A4）：权限上下文 + 模型可见工具池 + loop deps。 */
+export interface AgentLoopDepsBundle {
+  /** initializeToolPermissionContext 产物（门 + 工具池 + 快照共用源）。 */
+  toolPermissionContext: ToolPermissionContext
+  /** getTools(ctx, deps) 模型可见工具池（deny 过滤 + isEnabled 尾行）。 */
+  tools: Tools
+  /** queryOneRound/queryAgentLoop 直接消费面（门 + hooks 已接线）。 */
+  deps: AgentLoopDeps
+}
+
+/**
+ * loop 依赖构建器（S-E2 A4，§8.52 裁定 2 A 桶）——组合根消费 getTools /
+ * 权限门 / hooks 装配① 的唯一入口（loop.ts:108「本纵切不造全局注册表」
+ * 消费接缝兑现；旧仓 QueryEngine.ts:543 permissionMode ← ctx.mode 先例）：
+ *   ① initializeToolPermissionContext（CLI 面 + 注册表 deps）
+ *   ② getTools(ctx, deps)（注册表组合根消费点：getAllBaseTools + deny
+ *      过滤 + isEnabled 尾行，47 本体仍经 deps 注入前向）
+ *   ③ createPermissionGate(ctx)（S-E1 I-1 全决策体语义消费）
+ *   ④ createLoopHooks（§8.42 项 1 hooks 装配① 生产路径）
+ *   ⑤ AgentLoopDeps 组装（modelProvider 单例 + role 车道）
+ */
+export async function createAgentLoopDeps(
+  config: AgentLoopDepsConfig = {},
+): Promise<AgentLoopDepsBundle> {
+  const toolRegistryDeps = config.toolRegistryDeps ?? {}
+  const { toolPermissionContext } = await initializeToolPermissionContext({
+    allowedToolsCli: config.allowedToolsCli ?? [],
+    disallowedToolsCli: config.disallowedToolsCli ?? [],
+    baseToolsCli: config.baseToolsCli,
+    permissionMode: config.permissionMode ?? 'default',
+    allowDangerouslySkipPermissions:
+      config.allowDangerouslySkipPermissions ?? false,
+    addDirs: config.addDirs ?? [],
+    shouldAvoidPermissionPrompts: config.shouldAvoidPermissionPrompts,
+    deps: toolRegistryDeps,
+  })
+  const tools = getTools(toolPermissionContext, toolRegistryDeps)
+  const checkPermission = createPermissionGate(toolPermissionContext)
+  const hooks = createLoopHooks({
+    options: {
+      sessionId: getSessionId(),
+      permissionMode: toolPermissionContext.mode,
+      ...config.hookOptions,
+    },
+  })
+  const deps: AgentLoopDeps = {
+    modelProvider: getCoreDependencies().modelProvider,
+    role: config.role ?? 'premium',
+    signal: config.signal,
+    checkPermission,
+    hooks,
+  }
+  return { toolPermissionContext, tools, deps }
+}
+
+/**
+ * 进程关闭清理（S-E2 A9）：tasks cleanupRegistry 全量执行（CLI 关闭路径
+ * D 波消费；本波只暴露不消费）。
+ */
+export function runCoreCleanup(): Promise<void> {
+  return runCleanupFunctions()
 }
 
 let _core: CoreDependencies | undefined

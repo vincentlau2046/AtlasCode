@@ -172,9 +172,17 @@ export {
 export type { ResumeLoadResult, ProcessedResume } from './restore'
 export { processResumedConversation } from './restore'
 
-// E-7 S-7d d2（§8.49 item 3）：Port 1 真契约（快照 view 语义；壳实现 +
-// compose 注入 = E-wave-end 前向接缝，零消费者前向登记见 port 头注）
+// E-7 S-7d d2（§8.49 item 3）：Port 1 真契约（快照 view 语义；零消费者
+// 前向登记见 port 头注）
 export type {
   SessionSnapshot,
   SessionContextPort,
 } from '../ports/sessionContext'
+
+// E-wave-end S-E2 A7（§8.52）：Port 1 注入窗口（镜像 Port 5 窗口先例
+// sessionMemory.ts:123-132；壳实现 + compose 注入接缝兑现，见
+// sessionContextPort.ts 头注）
+export {
+  setSessionContextPort,
+  getSessionContextPort,
+} from './sessionContextPort'

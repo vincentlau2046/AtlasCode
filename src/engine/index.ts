@@ -472,6 +472,10 @@ export {
   type SessionMemoryPort,
   // d2（§8.49）：搜索文本面 + 恢复处理面 + Port 1 真契约
   type RenderableMessage,
+  // E-wave-end S-E2 A7（§8.52）：Port 1 注入窗口（壳实现 + compose 注入
+  // 接缝兑现；镜像 Port 5 setSessionMemoryPort 窗口先例）
+  setSessionContextPort,
+  getSessionContextPort,
   INTERRUPT_MESSAGE,
   INTERRUPT_MESSAGE_FOR_TOOL_USE,
   renderableSearchText,

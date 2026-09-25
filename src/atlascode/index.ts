@@ -7,9 +7,15 @@
  * 其余子模块（cli/launcher/ui/state/marketplace/…）仍 A 波占位，随各实现波次填实。
  */
 export {
+  createAgentLoopDeps,
   createCoreDependencies,
   getCoreDependencies,
   resetCoreDependencies,
+  runCoreCleanup,
+  type AgentLoopDepsBundle,
+  type AgentLoopDepsConfig,
   type CoreDependencies,
 } from './compose'
 export { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
+export { createSessionContextPort } from './adapters/sessionContextPortAdapter'
+export { createSessionMemoryPort } from './adapters/sessionMemoryPortAdapter'
