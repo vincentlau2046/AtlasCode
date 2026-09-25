@@ -251,10 +251,13 @@ ${formattedSummary}`
  * `subtype: 'compact_boundary'`（旧 messages.ts:4518 SystemCompactBoundaryMessage
  * 逐字面 + content/isMeta/level 字段）——消费面：isCompactBoundaryMessage 谓词
  * （insertMessageChain parentUuid-null relink）+ scanner 字节标记
- * `'"compact_boundary"'`（#15 同点）+ 旧 L471/L595 ack 分支。保留 role/message
- * wire 形（post-compact 序列进 LLM 调用面）。delta 登记：旧 compactMetadata
- * {trigger, userContext} 无新 producer（compactConversation 现签名不携）=
- * 裁面，createdAt 保留（新面，无消费断言）。
+ * `'"compact_boundary"'`（#15 同点）。审视 n-3 措辞订正（2026-09-25 双只读 A 路）：
+ * 旧 L471（replayableMessages ack 过滤）/ L595（!shouldQuery 支 SDK yield）
+ * 消费分支本仓无对应代码——判别式补齐使上述**未来消费方的前向依赖**成立
+ * （shell/message 波），非「代码恢复面」（此前措辞易误导复审）。保留 role/
+ * message wire 形（post-compact 序列进 LLM 调用面）。delta 登记：旧
+ * compactMetadata {trigger, userContext} 无新 producer（compactConversation
+ * 现签名不携）= 裁面，createdAt 保留（新面，无消费断言）。
  */
 export function createCompactBoundaryMessage(
   preTokens: number | undefined,

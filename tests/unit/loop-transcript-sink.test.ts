@@ -105,7 +105,7 @@ function firingAutoCompact(extra?: Partial<AutoCompactDeps>): AutoCompactDeps {
 }
 
 describe('S-E3 A11 loop transcript 写面（LoopTranscriptSink 7 点收敛）', () => {
-  test('T-1 queryOneRound 轮末 record：恰 1 次，内容 = [assistantMsg, ...resultMessages]（fire-and-forget）', async () => {
+  test('T-1 queryOneRound 轮末 record：恰 1 次，内容 = 全量序列（入参 + assistant + resultMessages，M-2 形态）', async () => {
     const calls: Array<readonly Message[]> = []
     const deps: AgentLoopDeps = {
       modelProvider: fakeProvider(ECHO_CONTENT, 'tool_calls'),
@@ -119,11 +119,32 @@ describe('S-E3 A11 loop transcript 写面（LoopTranscriptSink 7 点收敛）', 
     }
     const r = await queryOneRound(deps, [makeEchoTool()], [userMsg('u1', 'hi')])
     expect(calls).toHaveLength(1)
-    // 内容 = 轮末追加面（assistant + 1 tool_result），不含入参序列
-    expect(calls[0]).toHaveLength(2)
-    expect(calls[0][0].type).toBe('assistant')
-    expect(calls[0][1].type).toBe('user')
-    expect(calls[0]).toEqual(r.messages.slice(1))
+    // 内容 = 全量序列（审视 M-2 修复：旧 L722 全量数组形态，前缀追踪接链）
+    expect(calls[0]).toHaveLength(3)
+    expect(calls[0][0].type).toBe('user') // 入参
+    expect(calls[0][1].type).toBe('assistant')
+    expect(calls[0][2].type).toBe('user') // tool_result
+    expect(calls[0]).toEqual(r.messages)
+  })
+
+  test('T-8 result 消息恒戳 uuid/timestamp（M-1 回归探针：删戳此测红）', async () => {
+    const calls: Array<readonly Message[]> = []
+    const deps: AgentLoopDeps = {
+      modelProvider: fakeProvider(ECHO_CONTENT, 'tool_calls'),
+      role: 'small',
+      transcript: {
+        record: msgs => {
+          calls.push(msgs)
+          return Promise.resolve(null)
+        },
+      },
+    }
+    await queryOneRound(deps, [makeEchoTool()], [userMsg('u1', 'hi')])
+    const resultMsg = calls[0][2] as { uuid?: unknown; timestamp?: unknown }
+    // 旧仓 messages.ts:525-526 不变量（record 面消息恒带 uuid）
+    expect(typeof resultMsg.uuid).toBe('string')
+    expect((resultMsg.uuid as string).length).toBeGreaterThan(0)
+    expect(typeof resultMsg.timestamp).toBe('string')
   })
 
   test('T-2 queryAgentLoop entry record 先于首次 LLM 调用（旧 L450 crash-resumable）', async () => {

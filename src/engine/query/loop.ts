@@ -24,12 +24,15 @@
  * port 之下全真：LLM 经 modelprovider 域门面 + Tool.call 契约（shared/types.ts）——
  * 防 H6 空洞等价。engine 消费面：modelprovider（DEP-4 allow）+ shared（门面）+ pipeline（域内）。
  */
-import type {
-  AssistantMessage,
-  Message,
-  ToolResultBlockParam,
-  ToolUseBlock,
-  Tools,
+import { randomUUID } from 'crypto'
+import {
+  errorMessage,
+  logForDebugging,
+  type AssistantMessage,
+  type Message,
+  type ToolResultBlockParam,
+  type ToolUseBlock,
+  type Tools,
 } from '../../shared'
 import type { ModelProvider, ModelRole } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
@@ -48,12 +51,18 @@ import type { ContentReplacementRecord } from '../session/types'
  * 组合根注入 session 域 record 面（compose 构建器 deps.transcript；未注入 =
  * 窄 spine 无持久化安全缺省，同 checkPermission/hooks 惯例）。
  *
- * 7 点映射（执行前分析冻结，§8.52 S-E3）：
+ * 7 点映射（执行前分析冻结，§8.52 S-E3；审视 M-1/M-2 形态订正后）：
  *   - L450 进 loop 前 persist → queryAgentLoop entry await record(args.messages)
  *   - L722/724/774/828（assistant void / 非 assistant await / progress /
- *     attachment）→ queryOneRound 尾部 void record([assistantMsg, ...results])
- *     （新 spine 无 progress/attachment 消息面 = 消息/REPL 波残留守）
+ *     attachment）→ queryOneRound 尾部 void record([...messages, assistantMsg,
+ *     ...resultMessages]) = **全量序列**（M-2 修复：旧 L722 全量数组形态，前缀
+ *     追踪 walk 才能恢复 startingParentUuid 接链；result 消息恒戳
+ *     uuid/timestamp = M-1 修复，旧 createUserMessage L525-526 不变量；
+ *     新 spine 无 progress/attachment 消息面 = 消息/REPL 波残留守）
  *   - L607 compact boundary persist → compact 支 await record(post-compact 序列)
+ *     （boundary 新根 by design：insertMessageChain parentUuid=null +
+ *     logicalParentUuid relink，与旧仓同款——前缀 walk 在 boundary 处
+ *     必断，scanner pre-compact 截读即消费本形态）
  *   - L706 preservedSegment tail flush = E-1b-full 裁面（新 CompactionResult
  *     无 preservedSegment 三段 uuid）
  *   - React 侧 5 点 = B12（shell/message 波）
@@ -182,17 +191,34 @@ export async function queryOneRound(
     name: o.name,
     block: o.block,
   }))
+  // S-E3 审视 M-1 修复（§8.52 双只读 A 路）：result 消息恒戳 uuid/timestamp
+  // （旧仓 messages.ts:525-526 createUserMessage 逐字语义：`uuid || randomUUID()`
+  // + `timestamp ?? ISO`——旧仓 record 面消息恒带 uuid 是 transcript 不变量）。
+  // 未修前：A11 sink 接线后这些消息经 project.ts insertMessageChain
+  // `uuid: message.uuid as string` 对 undefined 纯透传 → JSONL 条目缺 uuid
+  // 字段（dedup miss 重复追加 + 父链 `parentUuid = message.uuid` 断裂）。
+  const now = new Date().toISOString()
   const resultMessages = outcomes.map((o) => ({
     type: 'user',
     role: 'user',
+    uuid: randomUUID(),
+    timestamp: now,
     message: { role: 'user', content: [o.block] },
   }))
 
   // S-E3 A11（旧 L722/724/774/828 收敛）：轮末追加面记录——assistant void
   // 语义（fire-and-forget，未注入 = 无操作）；新 spine 无 progress/attachment
   // 消息面（裁面登记，见 LoopTranscriptSink 头注映射表）。
+  // S-E3 审视 M-2 修复：record 传**全量序列**（旧 L722 全量数组形态）——
+  // recordTranscript 前缀追踪 walk（record.ts `!seenNewMessage &&
+  // isChainParticipant`，P-S1 探针锚点）只在入参含已记录前缀时恢复
+  // startingParentUuid；增量切片形态会使每次调用点开新根（磁盘链碎裂，
+  // resume 回放退化为末段）。n-4 消解：全量入参使 allMessages 缺省 =
+  // messages（同调用内 tool_use/tool_result 对同落，REPL 孤儿风险面消除）。
+  // n-5 登记：旧 L724 非 assistant 支 await 翻转为统一 void（order-preserving
+  // 写队列排序无损；进程退出前 drain 风险与旧 bare 变体同构）。
   if (deps.transcript) {
-    void deps.transcript.record([assistantMsg, ...resultMessages])
+    void deps.transcript.record([...messages, assistantMsg, ...resultMessages])
   }
 
   return {
@@ -279,7 +305,17 @@ export async function queryAgentLoop(
           const persistReplacements =
             !!qs && (qs.startsWith('agent:') || qs.startsWith('repl_main_thread'))
           if (persistReplacements) {
-            await deps.transcript.recordContentReplacement(replacementRecords)
+            // S-E3 审视 m-1 修复：旧 loop.ts:375-378 逐字语义 = void +
+            // catch(logError)（吞错 + 日志，永不阻塞/中断 query 循环）。
+            // 旧 logError → 域 debug 口 logForDebugging（shared/debug 无
+            // logError，域内日志统一 debug 口，killShellTasks 同款裁定）。
+            void deps.transcript.recordContentReplacement(replacementRecords).catch(
+              error => {
+                logForDebugging(
+                  `recordContentReplacement failed: ${errorMessage(error)}`,
+                )
+              },
+            )
           }
         }
       } else if (oc.consecutiveFailures !== undefined) {

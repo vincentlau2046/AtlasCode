@@ -2725,3 +2725,21 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - **探针 P-E5（恰 1 红）**：删 queryAgentLoop compact 支 record 调用 → F-1 红（JSONL 缺 compact boundary 行），F-2 + unit 全绿 → 恰 1 红。backup→mutate→红集→verbatim-restore diff 核验。
 
 **基线与验收**：四件套 tsc 0 / eslint 0 / build 0 KB（cli 骨架属预期）/ 全量基线 1428+新测 + gate 6（anti-stub 门①②③ 不变，engine 扫描集随 S-E4 增长）。task #122 闭环 → S-E4 解锁（门+探针收口）。
+
+### S-E3 实施记录（2026-09-25，② 4a04339）
+
+**实施面（10 文件，723+/22-）**：
+- `src/engine/query/loop.ts`：`LoopTranscriptSink` 接口（record + 可选 recordContentReplacement）+ `AgentLoopDeps.transcript?` + 3 调用点（entry `await record(messages)` 旧 L450 / compact 支 `await record(messages)` 旧 L607 / queryOneRound 轮末 `void record([assistantMsg, ...resultMessages])` 旧 L722-828 收敛）+ compact 支 recordContentReplacement 消费块（persistReplacements 门逐字）。实施期 delta 登记：`void record(...)` fire-and-forget 的未捕获 rejection = 窄 spine 缺省面（record 真抛错仅 unhandled rejection，旧仓 L722 同款语义——旧 assistant 支即 void；不新增 catch 面，残留守登记）。
+- `src/engine/context/compact.ts`：A11-Δ1 createCompactBoundaryMessage 补判别式（`subtype/content/isMeta/level` 四字段 + 保留新 role/message wire 形与现签名）；A11-Δ2 `CompactionResult.contentReplacements?` 可选载体 + 头注前向接缝（producer = E-1b-full budget 纵切）。
+- `src/engine/session/env.ts`：`SessionEnv.getCwd()` 活态成员 + 缺省 `process.cwd()` 活读；**勘正执行前分析 A12 裁定**：bootstrap/cwd.ts 已含 `getCwd()` = try pwd() catch getOriginalCwd()（C-Deep 切片 3 T4 逐字随迁，旧仓 utils/cwd.ts 回落支**非裁面**——d4c2ece 登记「目录消失回落支残留守」实测为已落真值，头注随核销刷新）。
+- `src/engine/session/project.ts`：cwd 戳 `getOriginalCwd()` → `getSessionEnv().getCwd()`（A-1 审视值 delta 核销；键控点 getProjectDir(getOriginalCwd()) 不动）。
+- `src/engine/coordinator/tasks/killShellTasks.ts`：尾部 `dequeueAllMatching(cmd => cmd.agentId === agentId)` 恢复（旧注释逐字）+ messaging 门面 import（零环核验通过）。
+- `src/engine/session/scanner.ts`：#15 头注核销（写面 = loop compact 支）。
+- `src/atlascode/compose.ts`：⑨ setSessionEnv 增注 `getCwd`（bootstrap getCwd）；构建器 `deps.transcript` 接线 + `AgentLoopDepsConfig.agentId?: string` + 双 cast 类型面 delta 登记（shared Message 宽型 timestamp string|number → session Message 窄型 string 跨域 cast；readonly sink 参 → 可变 record 参同值传递）。实施期 delta：record/recordContentReplacement 经 engine 根门面 import（session/index.ts:104/106 已导出，门面链无新增）。
+- 测试：unit `loop-transcript-sink.test.ts`（T-1..T-7，11 测）+ func `loop-transcript-fs.test.ts`（F-1/F-2）+ loop-deps-compose T-11/T-12（transcript 接线可调用 + getCwd ALS 覆盖层判别）。测试面实施期订正 3 处（非方案偏离）：F-1 recCount 2→3（轮末 fire-and-forget 亦经真 recordTranscript 同步落盘，3 = entry+compact+轮末）/ T-3 调用序定位改判别式 find（抗调用点序变化）/ T-7 `resetDiskOutputEnv` import 源 = task 域门面（engine 根门面不导出，同 engine-tasks 口径）。
+
+**四件套（4a04339）**：tsc 0 / eslint 0 / build 0 KB exit 0 / 全量 1444 pass / 89 文件 / 3093 expect（基线 1428 +16：unit 11 + func 2 + compose 2 + …）+ gate 6。
+
+**P-E5 探针（实测红集）**：删 queryAgentLoop compact 支 record 调用点（backup→mutate）→ 红集 = {unit T-3, func F-1} **双点绑定 2 红**（fake sink 面 + 真盘面同观同一调用点，P-M2 双点先例——执行前分析「F-1 恰 1 红」下界订正：T-3 同观调用点亦红，红集 2 非 1 属可判别设计非误报；其余 1442 全绿）→ verbatim restore diff 洁净（`diff` 零差）+ 回归全绿。
+
+（审视记录待 ③ 双只读回报后回填。）

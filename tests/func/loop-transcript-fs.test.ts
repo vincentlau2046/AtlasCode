@@ -28,6 +28,7 @@ import {
   clearSessionMessagesCache,
   flushSessionStorage,
   getTranscriptPath,
+  loadTranscriptFile,
   queryAgentLoop,
   recordContentReplacement,
   recordTranscript,
@@ -37,6 +38,7 @@ import {
   type AgentLoopDeps,
   type AutoCompactDeps,
   type Message,
+  type Tool,
 } from '../../src/engine'
 import type { ModelProvider } from '../../src/modelprovider'
 
@@ -79,6 +81,41 @@ function userMsg(uuid: string, content: unknown): Message {
     timestamp: '2026-01-01T00:00:00Z',
     message: { content },
   }
+}
+
+/** 脚本化 LLM（按轮次 uuid 递增，口径同 engine-multi-round scriptedProvider）。 */
+function scriptedProvider(steps: Array<{ content: unknown[]; uuid: string }>) {
+  let call = 0
+  return {
+    chat: async () => {
+      const step = steps[call++]
+      return {
+        type: 'assistant' as const,
+        uuid: step.uuid,
+        timestamp: '2026-09-23T00:00:00Z',
+        message: {
+          id: `m-${step.uuid}`,
+          model: 'fake-model',
+          role: 'assistant' as const,
+          content: step.content,
+          stop_reason: 'end_turn',
+          usage: { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+        },
+      }
+    },
+  } as unknown as ModelProvider
+}
+
+function makeEchoTool(): Tool {
+  return {
+    name: 'echo',
+    call: async (args: unknown) => ({ data: `echo:${(args as { msg?: string })?.msg}` }),
+    mapToolResultToToolResultBlockParam: (content: unknown, toolUseID: string) => ({
+      type: 'tool_result',
+      tool_use_id: toolUseID,
+      content: String(content),
+    }),
+  } as unknown as Tool
 }
 
 /** 必触发的 autoCompact（口径同 engine-multi-round：阈值 167_000，摘要含 F-1 断言标记）。 */
@@ -163,6 +200,52 @@ describe('S-E3 A11 loop transcript 写面（func 真盘）', () => {
     expect(raw).toContain('FS-SUMMARY')
     // 入参 user 消息落盘（entry record）
     expect(raw).toContain('hello-fs')
+  })
+})
+
+// ── F-3 审视 M-1/M-2 链戳探针（双只读 A 路修复回归）───────────────────────
+
+describe('S-E3 审视修复 链戳面（M-1 uuid 戳 + M-2 全量序列接链）', () => {
+  test('F-3 双轮工具会话：tool_result 行恒带 uuid（M-1）+ 跨轮 parentUuid 接链（M-2，切片形态下 as2 根断此测红）', async () => {
+    switchTo('chain-stamp')
+    // 轮末 record = fire-and-forget（旧 L722 void 语义）：flush 前须待所有
+    // sink 调用完成入写队列（n-5 登记 drain 风险面——测试面以 promise 跟踪
+    // 消竞，非产品面改 await）。
+    const recPromises: Array<Promise<unknown>> = []
+    const deps: AgentLoopDeps = {
+      modelProvider: scriptedProvider([
+        { content: [{ type: 'tool_use', id: 'tu-1', name: 'echo', input: { msg: 'x' } }], uuid: 'as1' },
+        { content: [{ type: 'text', text: 'done' }], uuid: 'as2' },
+      ]),
+      role: 'small',
+      transcript: {
+        record: msgs => {
+          const p = Promise.resolve(recordTranscript(msgs as Message[]))
+          recPromises.push(p)
+          return p
+        },
+        recordContentReplacement: recs => recordContentReplacement(recs),
+      },
+    }
+    const r = await queryAgentLoop(deps, {
+      messages: [userMsg('u1', 'go')],
+      tools: [makeEchoTool()],
+    })
+    expect(r.terminated).toBe(true)
+    expect(r.turns).toBe(2)
+    await Promise.all(recPromises)
+    await flushSessionStorage()
+
+    const loaded = await loadTranscriptFile(getTranscriptPath())
+    // M-1：tool_result 行入盘且恒带 uuid（旧仓 record 面消息恒 uuid 不变量）
+    const trEntry = [...loaded.messages.values()].find(
+      m => Array.isArray(m.message.content) && (m.message.content as Array<{ type?: string }>)[0]?.type === 'tool_result',
+    )
+    expect(trEntry).toBeDefined()
+    expect(loaded.messages.get('as1')!.parentUuid).toBe('u1')
+    // M-2：跨轮接链——as2 的父 = tool_result（全量序列 record 前缀追踪恢复
+    // startingParentUuid；切片形态下 as2.parentUuid = null 此测红）
+    expect(loaded.messages.get('as2')!.parentUuid).toBe(trEntry!.uuid)
   })
 })
 
