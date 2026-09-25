@@ -3,6 +3,12 @@
  *
  * E-1 窄 spine（§8.21）落 query + pipeline + state 纵切后 re-export。ports/
  * context/coordinator/tools 随各自纵切（E-1b/E-2/E-3…）落地后在此追加 re-export。
+ *
+ * S-E4（2026-09-25，M-3 门盲区收口裁定）：ports/ 下 4 个零消费者占位
+ *（domainMount / featureConfig / lspStatus / promptSuggestion，各 `export {}`）
+ * 已删——analytics/D 波按需重建且须实质实现（§8.52 B18）；重建时在此追加
+ * re-export。现存 ports/ 实质模块：mcpClient 经本门面块导出；sessionContext /
+ * sessionMemory 经域内相对 import + session 域门面导出（engine/session/index.ts）。
  */
 export {
   queryOneRound,

@@ -20,8 +20,10 @@
  * 本门让"空壳"从结构合法变为显式登记项，C 波 wave-c tag 时 C-Deep 域条目须清零。
  *
  * 范围：B 波认领完成的四域（executor/sandbox/memory/modelprovider）
- * + shared 纯叶子（v0.12 纳扫：shared 占位 `export {}` 须登记，防叶子空模块逃门）。
- * engine/ascend 域骨架在 C/E 波各自建门（分层不变量，test-strategy §4）。
+ * + shared 纯叶子（v0.12 纳扫：shared 占位 `export {}` 须登记，防叶子空模块逃门）
+ * + engine（S-E4 A14，2026-09-25，M-3 门盲区收口：engine 域恒入 CDEEP_DOMAINS
+ * 扫描集 + 门③ 清零覆盖；12 个零消费者占位已删（§8.52 B18），ascend 域
+ * 归各域后续波建门）。
  */
 import { describe, test, expect } from 'bun:test'
 import { readFileSync, readdirSync, statSync, existsSync } from 'fs'
@@ -35,12 +37,14 @@ const REPO_ROOT = new URL('../../', import.meta.url).pathname.replace(/\/$/, '')
 const DOMAINS = ['executor', 'sandbox', 'memory', 'modelprovider', 'shared'] as const
 
 /**
- * C-Deep 将新建的四域（execution-strategy §8.2：task/bootstrap/permissions/hooks）。
+ * C-Deep 将新建的四域（execution-strategy §8.2：task/bootstrap/permissions/hooks）
+ * + engine（S-E4 A14，2026-09-25，M-3 门盲区收口：engine 12 零消费者占位已删，
+ * 恒入扫描集防新空壳回归；存在即扫同守卫模式）。
  * 目录存在即纳入扫描（C1 防腐前置：C-Deep 建骨架时门自动生效，
  * 新空壳须登记 STUB_REGISTRY，否则门①红——防"新域骨架逃过门"的腐化向量）。
  * 目录尚不存在时跳过（mkdir 前无文件可扫）。
  */
-const CDEEP_DOMAINS = ['task', 'bootstrap', 'permissions', 'hooks'] as const
+const CDEEP_DOMAINS = ['task', 'bootstrap', 'permissions', 'hooks', 'engine'] as const
 
 /** 实质内容 < 5 行的文件视为空壳 stub（须叠加 hasSubstantiveExport 判定） */
 const STUB_LINE_THRESHOLD = 5
@@ -191,9 +195,10 @@ describe("anti-stub 防腐门", () => {
       hasWaveC = false // 非 git 环境（如打包测试）不强制
     }
     if (hasWaveC) {
-      // 只清 C-Deep 域条目（8 域地基）；shared A 波占位随 A/C 波实现移除（门②兜底）
+      // 只清 C-Deep 域条目（9 域地基，含 engine S-E4 纳扫）；shared A 波占位
+      // 随 A/C 波实现移除（门②兜底）
       const cdeepStubs = STUB_REGISTRY.filter((e) =>
-        /^src\/(executor|sandbox|memory|modelprovider|task|bootstrap|permissions|hooks)\//.test(e.file),
+        /^src\/(executor|sandbox|memory|modelprovider|task|bootstrap|permissions|hooks|engine)\//.test(e.file),
       )
       expect(cdeepStubs).toEqual([])
     }

@@ -2485,7 +2485,7 @@ S-E4 门+探针收口（2 项）：
 - A14 **M-3 + anti-stub ⑥ 门收口**（docs:960,1110；engine 侧 37 个 `export {}` 占位中 engine 域 14 个既不在 anti-stub 扫描集（anti-stub.test.ts:35 DOMAINS = executor/sandbox/memory/modelprovider/shared + :43 CDEEP_DOMAINS = task/bootstrap/permissions/hooks，均无 engine）也不在 STUB_REGISTRY → engine 加扫描集（existsSync 守卫同模式）+ STUB_REGISTRY 登记 + wave tag 清零；ascend 9 / atlascode 14 项归各域后续波（本波仅 engine））
 - A15 **#20 P-M2 谓词阴性断言 + 红集重测**（tests/func/engine-messaging-fs.test.ts:157-162，§8.50 NOTE-2；零行为 func 断言）
 
-**B 桶 = 17 项（跨波只登记，登记处 = 原前向接缝头注 + 本节归档，本波不动）**
+**B 桶 = 18 项（跨波只登记，登记处 = 原前向接缝头注 + 本节归档，本波不动）**
 - B1 #4 scheduler 消费面（ScheduleCronTool 族 = 工具本体波 / headless -p = CLI 波；scheduler/index.ts:14-15）
 - B2 #6 jitter GrowthBook-backed 整换（未来 analytics 波；cronJitterConfig.ts:15）
 - B3 #8 restore 跨项目 resume project dir 推导 + switchSession 二参→一参（shell/REPL 波；restore.ts:26-28）
@@ -2503,6 +2503,7 @@ S-E4 门+探针收口（2 项）：
 - B15 RemoteAgentTask/DreamTask/LocalWorkflowTask/MonitorMcpTask 任务态（顺延波；registry.ts 裁面登记）
 - B16 20 门控槽位 + PowerShell 2049L 面（工具本体波 / bash-only 纵切，§8.21 口径）
 - B17 compose 残留守 applyConfigEnvironmentVariables（信任对话框面未落；shell 波；compose.ts 头注）
+- B18 12 engine 零消费者占位删除（S-E4 A14，2026-09-25：ports/domainMount·featureConfig·lspStatus·promptSuggestion + state/attribution 4 + state/fileHistory 4；M-3 门盲区收口——零消费者死骨架且 C 波未填实，「登记→即刻清零」退化裁定为直接删除（偏离 S-E0 裁定 1 措辞，理由见 S-E4 ① 节）；后续波（analytics/D/工具本体）按需重建且须实质实现，不重占位；state/index.ts + engine/index.ts 头注已登记前向接缝）
 
 **C 桶 = 后续波（不在本节）**：工具本体 47（bashPermissions 2471L + pathValidation 1303L + shouldUseSandbox 124L + 20 门控槽位，§8.43 裁定①）/ auto-mode 分类器族 ~3030L（bashClassifier 61L 桩前向登记）/ shell·swarm 7217L（swarm + inProcessTeammateHelpers 102L + teamDiscovery + teamMemoryOps + UDS Port 9）
 
