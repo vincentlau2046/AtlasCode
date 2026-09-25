@@ -2558,14 +2558,14 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 
 **现状勘查（2026-09-25 实测）**
 - `compose.ts` 152L：①-⑦ 装配面已落（B6-func/S-3c/S-3d/E-5），残留守仅 applyConfigEnvironmentVariables（B17）。14 注入窗口清单（裁定 2）中本波 8 项现状 = 全缺省/placeholder：setSessionEnv placeholder / setSessionMemoryPort 零消费者 / Port 1 无注入口（grep 全仓无 setSessionContextPort——A7 须先建窗口）/ setTaskNotificationHandler 缺省 logForDebugging / setSchedulerEnv registerExitCleanup no-op / setSandboxAccess placeholder 禁用态（permissions 门面已 `export * from './sandboxAccess'`，无需补门面）/ getTools 组合根零消费（loop.ts:108 头注「本纵切不造全局注册表」）。
-- 事实钉（grep 实测）：`PermissionMode` 型 = shared/types-session.ts:60（`export type *` 门面可取）；`EffortValue = EffortLevel | number`，EffortLevel 含 'medium'（shared/types.ts:137-139）；`Tools = readonly Tool[]`（shared/types.ts:239）；`HookRunOptions` = hooks 域 runHooks.ts:70（signal/timeoutMs/toolUseID/permissionMode/sessionId/agentInfo/env）；新仓 QueuedCommand **无 agentId 字段**（queueTypes.ts:73-120；旧仓 messageQueueManager.ts:163 注释证实旧型有 agentId、主线程 = undefined 语义）；`initializeToolPermissionContext` unit 可测（tests/unit/permission-setup.test.ts 口径：mock FsOperations + ATLAS_CONFIG_DIR=/mock-home，I/O-free）；bootstrap 无裸 transcript 目录 getter（仅 `getTranscriptPathForSession`，私有 `defaultTranscriptDir` = `<root>/sessions`）；session 域写面根 = `getProjectsDir()` 缺省 `<config>/projects`（paths.ts:37-46，FROZEN stamp）；旧仓 session memory 写面 = 非原子 `writeFile`（sessionMemory.ts:195-202：mkdir 0o700 + wx 建 + 0o600 写，无 tmp+rename）；旧仓 loop 钩子 option 先例 = permissionMode ← toolPermissionContext.mode（旧 QueryEngine.ts:543）。
+- 事实钉（grep 实测）：`PermissionMode` 型 = shared/types-session.ts:60（`export type *` 门面可取）；`EffortValue = EffortLevel | number`，EffortLevel 含 'medium'（shared/types.ts:137-139）；`Tools = readonly Tool[]`（shared/types.ts:239）；`HookRunOptions` = hooks 域 runHooks.ts:70（signal/timeoutMs/toolUseID/permissionMode/sessionId/agentInfo/env）；新仓 QueuedCommand **保留 agentId 字段**（queueTypes.ts:133 `agentId?: AgentId` 旧仓字段面逐字「Undefined = 主线程」；S-E2 审视 MINOR-1 订正——预分析 grep 行区间 73-120 漏尾部 133 行，原「无 agentId 字段」事实钉失实）；`initializeToolPermissionContext` unit 可测（tests/unit/permission-setup.test.ts 口径：mock FsOperations + ATLAS_CONFIG_DIR=/mock-home，I/O-free）；bootstrap 无裸 transcript 目录 getter（仅 `getTranscriptPathForSession`，私有 `defaultTranscriptDir` = `<root>/sessions`）；session 域写面根 = `getProjectsDir()` 缺省 `<config>/projects`（paths.ts:37-46，FROZEN stamp）；旧仓 session memory 写面 = 非原子 `writeFile`（sessionMemory.ts:195-202：mkdir 0o700 + wx 建 + 0o600 写，无 tmp+rename）；旧仓 loop 钩子 option 先例 = permissionMode ← toolPermissionContext.mode（旧 QueryEngine.ts:543）。
 
 **A4 getTools 组合根 + loop-deps 构建器（含 hooks 装配①）**
 - `compose.ts` 增 `AgentLoopDepsConfig` / `AgentLoopDepsBundle` / `createAgentLoopDeps(config?)`：
   ① `initializeToolPermissionContext({allowedToolsCli/disallowedToolsCli/baseToolsCli/permissionMode(缺省 'default')/addDirs/shouldAvoidPermissionPrompts/deps=toolRegistryDeps})` → toolPermissionContext；
   ② `tools = getTools(ctx, toolRegistryDeps ?? {})`（注册表组合根消费点：getAllBaseTools + deny 过滤 + isEnabled 尾行，47 本体仍经 deps 注入前向）；
   ③ `checkPermission = createPermissionGate(ctx)`（S-E1 I-1 语义消费）；
-  ④ `hooks = createLoopHooks({ options: { sessionId: bootstrap getSessionId(), permissionMode: ctx.mode, ...config.hookOptions } })`（§8.42 项 1 hooks 装配① 生产路径，旧 QueryEngine.ts:543 先例登记）；
+  ④ `hooks = createLoopHooks({ options: { sessionId: bootstrap getSessionId(), permissionMode: ctx.mode, ...config.hookOptions } })`（§8.42 项 1 hooks 装配① 生产路径；hook option 真先例 = 旧仓 orchestrator/tools/toolHooks.ts:409 executePreToolHooks 现读 appState.toolPermissionContext.mode——**S-E2 审视 A 路 NOTE-1 锚点订正**：预分析误引 QueryEngine.ts:543，该行系 buildSystemInitMessage 系统初始化消息面非 hook option 面）；delta 登记：sessionId/permissionMode 构建期固化进 HookRunOptions（旧仓 hook 执行时活态解析），CLI 单进程等价，长驻路径复用须重建 deps 或经 config.hookOptions 覆写（前向接缝）；
   ⑤ `deps = { modelProvider: getCoreDependencies().modelProvider, role: config.role ?? 'premium', signal?, checkPermission, hooks }`（role 缺省 'premium' = 旧主模型车道登记）。
 - D 波 cli.ts 以本构建器为单入口消费（cli 本体仍 D 波；本波只落构建器 + 装配，不造 CLI 消费面）。
 
@@ -2587,7 +2587,7 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - compose ⑧：`setSandboxAccess({ isSandboxingEnabled: mgr.isSandboxingEnabled, isAutoAllowBashIfSandboxedEnabled: mgr.isAutoAllowBashIfSandboxedEnabled, getFsWriteConfig: () => 窄视图({allowOnly, denyWithinAllow}) })`（permissions 头注「结构兼容」窄视图消费；placeholder 禁用态 manager 的 getFsWriteConfig 抛 unavailable = 旧仓 disabled-stub 语义，消费点被 isSandboxingEnabled 恒 false 短路，不可达，测试登记见下）。
 
 **A9 通知/cleanup/scheduler 三注入点**
-- 通知：`setTaskNotificationHandler(n => enqueuePendingNotification({ value: n.value, mode: 'task-notification', priority: n.priority }))`。**delta 登记**：`n.agentId` 丢弃——新仓 QueuedCommand 裁 agentId 字段（旧仓有，主线程 undefined 语义）；agentId 定向投递路由 = shell/swarm 波前向接缝。
+- 通知：`setTaskNotificationHandler(n => enqueuePendingNotification({ value: n.value, mode: 'task-notification', priority: n.priority }))`。**delta 登记（S-E2 审视 MINOR-1 订正）**：类型面两侧均保留 agentId（`TaskNotification.agentId?: string` notification.ts:27 + `QueuedCommand.agentId?: AgentId` queueTypes.ts:133，旧仓逐字主线程 = undefined）——delta 在 handler 接线层：本 handler 未接 `n.agentId` → `QueuedCommand.agentId` 定向投递（字段已在，shell/swarm 波仅需 handler 接线即活，勿据旧登记误判需补字段）。
 - cleanup 暴露：compose 增薄封装 `runCoreCleanup()`（= tasks 域 `runCleanupFunctions`，CLI 关闭路径 D 波消费，本波只暴露不消费）。
 - session env registerCleanup 成员 → `handler => registerCleanup(handler)`（tasks 注册表，unregister 句柄丢弃 = 窗口 void 契约）。
 - scheduler：`setSchedulerEnv({ registerExitCleanup: fn => registerCleanup(fn) })`（unregister 句柄签名逐字匹配）；getProjectRoot/getOwnerKey 保持域缺省（S-7b 审视确证 = 旧仓真逻辑非 stub，不动）。
@@ -2611,6 +2611,36 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - 突变：删 `createAgentLoopDeps` 内 `checkPermission` + `hooks` 两行注入。预期红集 = {T-2, T-3}（2 红双点绑定，P-E1/P-E3 同型先例登记——gate 与 hooks 两注入点各 1 断言，T-1/T-4 对照恒绿）。
 
 **基线不变量**：四件套绿 + 全量 1414 pass / 85 文件 / 2998 expect + 本切片增测（unit +T-1..T-10 约 12 测 / func +2 测）后基线增长，gate 6 不变（anti-stub engine 扫描集 = S-E4 才加，本波期间不预登记新 stub——Port 5/Port 1 壳实现为真实现非 stub，不触 STUB_REGISTRY）。
+
+### S-E2 组合根注真值 实施/审视记录（2026-09-25，master acc4fee + 6511684，task #121 闭环）
+
+**② 实施（acc4fee，9 文件 +720 新增/修改）**
+- **A4 loop-deps 构建器**：`createAgentLoopDeps(config?)` → ① `initializeToolPermissionContext`（CLI 面 + 注册表 deps）② `getTools(ctx, deps)`（注册表组合根消费：deny 过滤 + isEnabled 尾行 + 47 本体 deps 注入）③ `createPermissionGate(ctx)`（S-E1 I-1 全决策体消费）④ `createLoopHooks({options:{sessionId: bootstrap getSessionId(), permissionMode: ctx.mode, ...config.hookOptions}})`（hooks 装配① 生产路径）⑤ `AgentLoopDeps{modelProvider: 单例恒等, role: config.role ?? 'premium', signal?, checkPermission, hooks}`。
+- **A5 setSessionEnv 注真值**：bootstrap 3 成员 `getSessionId` / `switchSession: id => bootstrap switchSession(id)` / `getOriginalCwd` + `registerCleanup`→tasks cleanupRegistry。**getProjectsDir 不注**（域缺省 `ATLAS_CONFIG_DIR ?? ~/.atlas`+`projects` = 旧仓 projects 车道真值自包含；bootstrap 私有 `sessions` 目录系 hooks-input 辅路，混用会断 record 写面 FROZEN `projects` stamp）。
+- **A6 Port 5 壳实现**：`createSessionMemoryPort()` 路径 `join(getProjectDir(env.getOriginalCwd()), env.getSessionId(), 'session-memory', 'summary.md')`（旧 getSessionMemoryPath 逐字形态；getCwd → 冻结 getOriginalCwd A-1 值 delta）；load = readFile utf-8 + isFsInaccessible→null 其余 throw；save = mkdir(0o700, **recursive 登记 delta**) + writeFile(0o600)。**保真登记**：非原子 plain writeFile = 旧仓 sessionMemory.ts:195-202 先例（无 tmp+rename）。
+- **A7 Port 1 壳实现**：先建注入窗口 `engine/session/sessionContextPort.ts`（set/getSessionContextPort，Port 5 窗口 sessionMemory.ts:123-132 镜像）+ session 子门面 + engine 根门面追加；壳 `createSessionContextPort()` = holder（get 返快照引用 = view 语义，set 按字段写回不深拷贝）+ 缺省快照（最小 ToolPermissionContext mode 'default' 空规则族 + mcp{tools:[],clients:[]} + effortValue 'medium' + advisorModel undefined + tasks {}）。
+- **A8 sandboxAccess 接线**：compose ⑧ `setSandboxAccess({isSandboxingEnabled, isAutoAllowBashIfSandboxedEnabled, getFsWriteConfig 窄视图{allowOnly,denyWithinAllow}})`（消费点被 isSandboxingEnabled 恒 false 短路不可达 = 旧仓 disabled-stub 语义，T-8 前后态可判别）。
+- **A9 通知/cleanup/scheduler 三注入点**：⑪ `setTaskNotificationHandler(n => enqueuePendingNotification({value,mode:'task-notification',priority}))`（delta：handler 未接 `n.agentId` 定向投递 = shell/swarm 波前向接缝，见下 MINOR-1）+ `runCoreCleanup()`（= tasks `runCleanupFunctions`，CLI 关闭路径 D 波消费本波只暴露）+ session `registerCleanup`→tasks + `setSchedulerEnv({registerExitCleanup: fn => registerCleanup(fn)})`。
+- **A10 tools 深 import 归一——整项撤回**：预分析冻结 5 处（workerAgent.ts / coordinatorMode.ts / AgentTool.ts / forkSubagent.ts）改 tools 域门面。实施中实测 `tools↔coordinator` 模块求值环——剩余环边在 `builtInAgents.ts:21`（→ `workerAgent` 叶 → A10 门面 import → tools 门面 mid-eval），`workerAgent` 顶层 `const WORKER_AGENT` 消费门面名 → **TDZ 崩**（`Cannot access 'ASYNC_AGENT_ALLOWED_TOOLS' before initialization`）。裁定：门面归一仅 5 行 import、零行为价值，不值得引入 import-time TDZ 脆性 → **4 文件 `git checkout HEAD` 整项撤回**（复原 HEAD 深 import 形），C 桶边清理前向接缝（长期斩跨域边 = isCoordinatorMode 归属反转 / shared 叶化）。T-10 保留断言本体（深度门 fan-out 子句 + getTools baseTools 路径），改题「A10 撤回零行为回归」。
+- 门面扩面：`atlascode/index.ts`（createAgentLoopDeps / runCoreCleanup / 两 adapter / 两 facade type）、`engine/index.ts` + `engine/session/index.ts`（Port 1 窗口）。
+
+**探针 P-E4 实测（backup→mutate→红集→verbatim-restore diff 核验）**
+| 探针 | 突变 | 预期（裁定 4） | 实测红集 | 结论 |
+|---|---|---|---|---|
+| P-E4 | 删 `createAgentLoopDeps` 内 `checkPermission` + `hooks` 两行注入 | {T-2, T-3}（2 红双点绑定，T-1/T-4 对照恒绿） | {T-2, T-3}（10 pass / 2 fail，T-1/T-4 恒绿） | 判别成立 |
+
+**③ 独立审视（2 只读子代理：A 路旧仓保真对照 + B 路 H6 反桩/delta 完备性，均零 MAJOR/BLOCKER，6511684 处置）**
+- **A 路 PASS-with-fixes（1 MINOR + 3 NOTE）**：Port 5 全形（路径 sanitize / load 五码集 / save mode / 逐调用重算）零发现；构建器参数面 1:1 零发现；scheduler cleanupRegistry 映射零发现；A8 成员集 + disabled-stub 语义零发现；Port 1 缺省字段集 + view 语义登记零发现。
+  - MINOR-1（agentId 事实钉失实）：新仓 QueuedCommand **保留** `agentId?: AgentId`（queueTypes.ts:133，旧仓逐字「Undefined = 主线程」），预分析 grep 行区间 73-120 漏尾部 133 行。订正 4 处（compose ⑪ 头注 / T-9a 注释 / docs 事实钉 / docs A9 delta 行）：delta 在 **handler 接线层**（未接定向投递）非类型裁面；shell/swarm 波补 handler 接线即活（字段已在），勿据旧登记误判需补字段。处置选**订正措辞**（B 路建议）而非 handler 补透传（A 路建议）：补透传属 shell/swarm 波时序（drain-gate 消费点未落，提前接线 = 投机字段，S-E4 anti-stub 扫描反咬）。
+  - NOTE-1（hook 锚点 + 活态差）：旧 `QueryEngine.ts:543` 系 buildSystemInitMessage 系统初始化消息面非 hook 面；真先例 = `orchestrator/tools/toolHooks.ts:409`（executePreToolHooks 现读 ctx.mode）。锚点订正 + 活态→构建期固化 delta 登记（CLI 单进程等价，长驻路径 switchSession 后复用须重建 deps / config.hookOptions 覆写，前向接缝）+ ports/sessionContext.ts 状态行刷新。
+  - NOTE-2/3（Port 1 派生/裁面）：effortValue 'medium' = 旧 `AppStateStore.ts:554 undefined` → wire 回落 Atlas 缺省 'medium'（effort.ts:167）的预解析形；mcp 裁旧 6 字段（clients/tools/commands/resources/snapshotSequence/pluginReconnectKey）至 SessionSnapshot 契约面 tools+clients。两行头注登记（sessionContextPortAdapter.ts）。
+- **B 路 PASS-with-fixes（1 MINOR + 3 NOTE）**：测试判别力 14 测零 tautology（T-8 前后态 / T-9a agentId 缺席 / T-7 引用保持 / T-5 switchSession 跟随各至少 1 突变可红）；门面扩面零意外；src 面零 `: any`/`as unknown as` 桩消费（mkTool fake cast 允许）；Port 5/1 壳 = 真实现非 stub（不触 STUB_REGISTRY）。
+  - MINOR-1：与 A 路同源（agentId），已并入上述处置。
+  - NOTE-1：ports/sessionContext.ts 状态行未随 S-E2 刷新（纯文档陈旧）→ 已刷。
+  - NOTE-2：tasks cleanupRegistry 无 reset + Port 窗口无 reset + 头注枚举漏列（isolate runner 兜底，ad-hoc 连跑残留面）→ 运行口径注补 Port 5/1 窗口枚举（接受，不补 reset）。
+  - NOTE-3：atlascode 门面顺带导出 Port 工厂（D 波/CLI 波前向面，命名一致）→ 接受。
+
+**④ 基线验收**：四件套 tsc 0 / eslint 0 / build 0 / 全量 **1428 pass / 87 文件 / 3051 expect**（基线 1414+14 新测；expect 2998+53）+ gate 6。task #121 闭环 → S-E3 解锁（session 消费面依赖 setSessionEnv 真值 + Port 1 窗口）。
 
 ### S-E1 门收口族 实施/审视记录（2026-09-25，master d895eeb + c8e785c，task #120 闭环）
 
