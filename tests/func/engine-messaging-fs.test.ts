@@ -89,7 +89,8 @@ describe('mailbox 文件往返（真盘）', () => {
   })
 
   test('P-M2 writeToMailbox：新消息默认未读（readUnreadMessages）', async () => {
-    // P-M2 单点探针锚点（`read: false` 反转 → 本测恰 1 红）
+    // P-M2 单点探针锚点（`read: false` 反转 → 红集 2（本测 + 谓词测阴性断言，
+    // §8.52 A15；A15 前登记「恰 1 红」））
     await writeToMailbox('a1', msg('lead', 'm1'), TEAM)
     await writeToMailbox('a1', msg('lead', 'm2'), TEAM)
     const unread = await readUnreadMessages('a1', TEAM)

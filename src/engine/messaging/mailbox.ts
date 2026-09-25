@@ -67,9 +67,10 @@
  *    选择性标记'（其 length-3 断言））——支收敛红集，登记为双点绑定非探针
  *    违规（详案初版预测 2 测同红为直接点下界，实施实测订正为 6）；
  *    单点探针形态 = 写默认 read 态支 `read: false` 反转为 `read: true`
- *    → func 恰 1 红（'P-M2 writeToMailbox：新消息默认未读
- *    （readUnreadMessages）' 测，实测成立——本文件其余测试刻意不断言新
- *    写入消息的 read 缺省态，缺省态断言收敛于该单测）。
+ *    → func 红集 2（2026-09-25 实测基线，§8.52 A15：'P-M2 writeToMailbox：
+ *    新消息默认未读（readUnreadMessages）' + 'markMessagesAsReadByPredicate
+ *    选择性标记'（A15 阴性断言 out[1].read===false；A15 前登记「恰 1 红」
+ *    ——当时本文件其余测试刻意不断言 read 缺省态，NOTE-2 接缝已由 A15 核销））。
  */
 
 import { mkdir, readFile, writeFile } from 'fs/promises'
