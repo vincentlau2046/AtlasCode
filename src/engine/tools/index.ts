@@ -44,6 +44,17 @@
  *   （tasks/ 子门面）；残留守「49 本体」登记再缩 4 → 10/49（注册表
  *   ⑯ isTodoV2 槽随 Task 四件套 materialize，自门控 isEnabled =
  *   isTodoV2Enabled；cron 三件套 ② AGENT_TRIGGERS 槽 = S-D4 同子波）。
+ * §8.56 S-D4（任务工具本体子波 4）已落 schedule/ 子域 cron 三件套本体
+ *   （cronCreateTool/cronDeleteTool/cronListTool 3 对象 + JSON schema
+ *   3 常量 + Output 型 3 + schedulePrompt 门面 + scheduleToolInput duck
+ *   3 型，旧仓 tools/ScheduleCronTool 族 640L 逐字随迁）+ tasks/ 子域
+ *   扩 2 件（TaskStopTool + TodoWriteTool 本体 + 2 prompt 面 + duck
+ *   5 型扩块）→ 在此 re-export（schedule/ + tasks/ 子门面）；残留守
+ *   「49 本体」登记再缩 5 → 15/49（注册表 ② AGENT_TRIGGERS 槽随 cron
+ *   三件套 materialize，自门控 isEnabled = isCronEnabled（ATLAS_DISABLE_
+ *   CRON kill-switch）；⑯ isTodoV2 槽补 TodoWrite 反向门控支
+ *   isEnabled = !isTodoV2Enabled；TaskStop 无条件注册长尾；S-D5
+ *   TaskOutput = 同子波最后 1 件 → 16/49）。
  */
 export {
   createMcpTools,
@@ -467,7 +478,31 @@ export {
   type EditOutput,
   type WriteToolInput,
 } from './files'
-// ── S-D3（§8.56）：tasks 子域（Task 四件套本体）──
+// ── S-D4（§8.56）：schedule 子域（cron 三件套本体）──
+export {
+  CRON_CREATE_TOOL_INPUT_SCHEMA,
+  CronCreateTool,
+  type CronCreateOutput,
+  CRON_DELETE_TOOL_INPUT_SCHEMA,
+  CronDeleteTool,
+  type CronDeleteOutput,
+  CRON_LIST_TOOL_INPUT_SCHEMA,
+  CronListTool,
+  type CronListOutput,
+  isCronEnabled,
+  isDurableCronEnabled,
+  DEFAULT_MAX_AGE_DAYS,
+  buildCronCreateDescription,
+  buildCronCreatePrompt,
+  CRON_DELETE_DESCRIPTION,
+  buildCronDeletePrompt,
+  CRON_LIST_DESCRIPTION,
+  buildCronListPrompt,
+  type CronCreateToolInput,
+  type CronDeleteToolInput,
+  type CronListToolInput,
+} from './schedule'
+// ── S-D3（§8.56）：tasks 子域（Task 四件套本体）+ S-D4 扩 2 件 ──
 export {
   TASK_CREATE_TOOL_INPUT_SCHEMA,
   TaskCreateTool,
@@ -494,4 +529,19 @@ export {
   type TaskListToolInput,
   type TaskUpdateToolInput,
   type TaskToolUseContext,
+  // S-D4：TaskStop + TodoWrite 扩 2 件
+  TASK_STOP_TOOL_INPUT_SCHEMA,
+  TaskStopTool,
+  type TaskStopOutput,
+  TODO_WRITE_TOOL_INPUT_SCHEMA,
+  TodoWriteTool,
+  type TodoWriteOutput,
+  TASK_STOP_DESCRIPTION,
+  TODO_WRITE_DESCRIPTION,
+  TODO_WRITE_PROMPT,
+  type TaskStopToolInput,
+  type TaskStopToolUseContext,
+  type TodoWriteToolInput,
+  type TodoWriteAppState,
+  type TodoWriteToolUseContext,
 } from './tasks'

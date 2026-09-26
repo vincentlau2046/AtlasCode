@@ -109,6 +109,21 @@ const MATRIX: readonly MatrixRow[] = [
   // 回滚 / P-D2 completed 阻支 / deleted 早退 / mailbox / blocks 级联）。
   { domain: 'task', capability: 'Task 四件套本体（TaskCreate/TaskGet/TaskList/TaskUpdate，unit 零磁盘对象面 + isEnabled ⑯ 槽自门控）', status: 'done', proof: 'tests/unit/engine-tools-tasks-sd3-tools.test.ts' },
   { domain: 'task', capability: 'Task 四件套本体真盘（call 落盘支 / 钩子阻支回滚 / P-D2 completed 阻支 / deleted 早退 / mailbox 通知，func 真盘）', status: 'done', proof: 'tests/func/engine-tools-tasks-sd3-fs.test.ts' },
+  // §8.56 S-D4（2026-09-26）：schedule/ 子域 cron 三件套本体（旧仓
+  // tools/ScheduleCronTool 族 640L 逐字随迁 → 新 shared Tool 契约）+
+  // tasks/ 子域扩 2 件（TaskStopTool + TodoWriteTool）。cron 三件套 =
+  // 注册表 ② AGENT_TRIGGERS 槽 materialize（自门控 isEnabled =
+  // isCronEnabled（ATLAS_DISABLE_CRON kill-switch）+ isDurableCronEnabled
+  // 常量真（GB 'atlas_cron_durable' 支裁））；TodoWrite = ⑯ isTodoV2 槽
+  // 反向门控支（isEnabled = !isTodoV2Enabled）；TaskStop 无条件注册长尾
+  // （aliases KillShell）。unit 零磁盘对象面（validateInput 纯支 P-D3 /
+  // P-D5 探针锚点 + mapResult 逐字行 + 门控接线）；cron 真盘面 func
+  // （durable 落位 / durable:false 前向接缝 probe / MAX_JOBS ec 3 /
+  // 归属支文件面 agentId 缺省域锁定 / 列面缺省位投影）。
+  { domain: 'task', capability: 'cron 三件套本体（CronCreate/CronDelete/CronList，unit 零磁盘对象面 + ② AGENT_TRIGGERS 槽自门控 + validateInput P-D3 探针支）', status: 'done', proof: 'tests/unit/engine-tools-schedule-sd4.test.ts' },
+  { domain: 'task', capability: 'cron 三件套本体真盘（CronCreate durable 落位 / durable:false 前向接缝 probe / MAX_JOBS ec 3 / CronDelete 归属支 + 真盘删除 / CronList 列面缺省位投影，func 真盘）', status: 'done', proof: 'tests/func/engine-tools-schedule-sd4-fs.test.ts' },
+  { domain: 'task', capability: 'TaskStop 本体（aliases KillShell / validateInput 3 守卫 / call StopTaskError 传播两态 P-D5 探针 / mapResult JSON 行，unit 零磁盘对象面）', status: 'done', proof: 'tests/unit/engine-tools-schedule-sd4.test.ts' },
+  { domain: 'task', capability: 'TodoWrite 本体（⑯ 槽反向门控支 = !isTodoV2Enabled / call todoKey 解析（agentId 位 / getSessionId 回落位）+ allDone 清空支 + setAppState todos 面，unit 零磁盘对象面）', status: 'done', proof: 'tests/unit/engine-tools-schedule-sd4.test.ts' },
   // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
   { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
   { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },

@@ -1,6 +1,6 @@
 /**
  * engine/tools/tasks — Task 四件套本体 duck 型（§8.56 S-D3，任务工具本体
- * 子波 4）。
+ * 子波 4）+ TaskStop/TodoWrite 扩 2 件 duck 型（S-D4，文件尾块）。
  *
  * 旧仓来源（a8af45b）：zod inputSchema 推断型（TaskCreate 4 字段 /
  * TaskGet 1 字段 / TaskList 空 strictObject / TaskUpdate 9 字段）+
@@ -23,7 +23,8 @@
  *  - TaskToolUseContext.getAppState/setAppState/agentId 全面 = 残留守
  *    （TUI 波/D 波真 ToolUseContext 全字段面；本波仅 signal 消费）。
  */
-import type { TaskStatus } from '../../tasks'
+import type { TaskStatus, TodoList } from '../../tasks'
+import type { SetAppState, TaskAppState } from '../../../task'
 
 /** TaskCreate 输入（旧 zod 4 字段逐字段对齐）。 */
 export interface TaskCreateToolInput {
@@ -62,4 +63,48 @@ export interface TaskUpdateToolInput {
  */
 export interface TaskToolUseContext {
   abortController?: { signal: AbortSignal }
+}
+
+// ── S-D4（§8.56）：TaskStop + TodoWrite 扩 2 件 duck 型 ──
+
+/** TaskStop 输入（旧 zod 2 可选字段；shell_id = 旧 KillShell 废弃别名位）。 */
+export interface TaskStopToolInput {
+  task_id?: string
+  shell_id?: string
+}
+
+/**
+ * TaskStop context 消费子集（duck）：结构化 = coordinator/tasks
+ * stopTask 的 StopTaskContext（getAppState/setAppState 双函数，E-7 S-7a
+ * 已落）；旧 call 5 参中 abortController 不消费（裁，S-B5 delta ⑩ 先例）。
+ */
+export interface TaskStopToolUseContext {
+  getAppState: () => TaskAppState
+  setAppState: SetAppState
+}
+
+/** TodoWrite 输入（旧 zod 1 字段 = TodoList；TodoItem 3 字段面见 schema）。 */
+export interface TodoWriteToolInput {
+  todos: TodoList
+}
+
+/**
+ * TodoWrite AppState 消费子集（duck，残留守 ① 同族）：新仓 task 域
+ * TaskAppState 仅 tasks 记录面（S-7a），todos 会话态 = 全量 AppState
+ * 残留守（engine 波/D 波真 AppState 接入时整换）。duck 缺省零崩溃支
+ * （todos 可选，S-C5 delta ⑭ 先例）。
+ */
+export interface TodoWriteAppState {
+  todos?: Record<string, TodoList>
+}
+
+/**
+ * TodoWrite context 消费子集（duck）：getAppState/setAppState（todos
+ * 读写）+ agentId?（todoKey = agentId ?? getSessionId()，S-D1 §8.56.3
+ * context duck 裁定）。
+ */
+export interface TodoWriteToolUseContext {
+  getAppState: () => TodoWriteAppState
+  setAppState: (f: (prev: TodoWriteAppState) => TodoWriteAppState) => void
+  agentId?: string
 }
