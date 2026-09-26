@@ -2,7 +2,7 @@
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
  * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
- *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool = 1/49（48 剩，高频 → 长尾序列）。
+ *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool + §8.55 S-C4 已落 GlobTool + GrepTool = 3/49（46 剩，高频 → 长尾序列；S-C5 Read / S-C6 Write+Edit 随本波续落 → 6/49）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归
@@ -29,6 +29,11 @@
  *   在此 re-export（bash/ 子门面）；S-B5 落 BashTool 对象 = 49 基础工具本体
  *   首个纵切落地（残留守「49 本体」登记随之缩 1）+ 首个非-passthrough
  *   checkPermissions 工具面实现（§8.43 裁定① 闭环）。
+ * §8.55 S-C 子波（高频族本体纵切）S-C1~S-C4 已落 files/ 子域依赖闭包层
+ *   1/2/3 + Glob/Grep 本体 → 在此 re-export（files/ 子门面）；S-C4 落
+ *   GlobTool + GrepTool 对象（残留守「49 本体」登记再缩 2 → 3/49）+
+ *   checkPermissions 一线接线 checkReadPermissionForTool（搜索工具面
+ *   读权限决策体消费，§8.55 裁定）。
  */
 export {
   createMcpTools,
@@ -295,3 +300,100 @@ export {
   type Out,
   type BgTask,
 } from './bash'
+// ── S-C 子波（§8.55）：files 子域（S-C1~S-C3 依赖闭包层 + S-C4 Glob/Grep 本体）──
+export {
+  // S-C1：依赖闭包层 1
+  PDF_TARGET_RAW_SIZE,
+  PDF_EXTRACT_SIZE_THRESHOLD,
+  PDF_MAX_EXTRACT_SIZE,
+  PDF_MAX_PAGES_PER_READ,
+  PDF_AT_MENTION_INLINE_THRESHOLD,
+  CONTEXT_LINES,
+  DIFF_TIMEOUT_MS,
+  adjustHunkLineNumbers,
+  countLinesChanged,
+  getPatchFromContents,
+  getPatchForDisplay,
+  type FileEditInput,
+  type EditInput,
+  type FileEdit,
+  fileReadCache,
+  type LineEndingType,
+  detectEncodingForResolvedPath,
+  detectLineEndingsForString,
+  readFileSyncWithMetadata,
+  readFileSync,
+  type File,
+  pathExists,
+  MAX_OUTPUT_SIZE,
+  readFileSafe,
+  getFileModificationTime,
+  getFileModificationTimeAsync,
+  writeTextContent,
+  detectFileEncoding,
+  detectLineEndings,
+  convertLeadingTabsToSpaces,
+  getAbsoluteAndRelativePaths,
+  getDisplayPath,
+  findSimilarFile,
+  FILE_NOT_FOUND_CWD_NOTE,
+  suggestPathUnderCwd,
+  isCompactLinePrefixEnabled,
+  addLineNumbers,
+  stripLineNumberPrefix,
+  isDirEmpty,
+  readFileSyncCached,
+  writeFileSyncAndFlush_DEPRECATED,
+  getDesktopPath,
+  isFileWithinReadSizeLimit,
+  normalizePathForComparison,
+  pathsEqual,
+  semanticToNumber,
+  semanticToBoolean,
+  getMainLoopModelName,
+  getCanonicalModelName,
+  // S-C2：依赖闭包层 2
+  normalizePatternsToPath,
+  getFileReadIgnorePatterns,
+  extractGlobBaseDirectory,
+  glob,
+  // S-C3：pdf/notebook 族
+  execFileNoThrow,
+  type PDFError,
+  type PDFResult,
+  type PDFExtractPagesResult,
+  readPDF,
+  getPDFPageCount,
+  resetPdftoppmCache,
+  isPdftoppmAvailable,
+  extractPDFPages,
+  DOCUMENT_EXTENSIONS,
+  parsePDFPageRange,
+  isPDFSupported,
+  isPDFExtension,
+  readNotebook,
+  mapNotebookCellsToToolResult,
+  parseCellId,
+  type NotebookCellType,
+  type NotebookCell,
+  type NotebookDocument,
+  NotebookCellKind,
+  type NotebookContent,
+  type NotebookCellSource,
+  type NotebookCellSourceOutput,
+  type NotebookOutputImage,
+  type NotebookCellOutput,
+  // S-C4：Glob/Grep 本体
+  GLOB_DESCRIPTION,
+  getGrepDescription,
+  toRelativePath,
+  type GlobToolInput,
+  type GrepToolInput,
+  type FilesToolUseContext,
+  GLOB_TOOL_INPUT_SCHEMA,
+  GlobTool,
+  type GlobOutput,
+  GREP_TOOL_INPUT_SCHEMA,
+  GrepTool,
+  type GrepOutput,
+} from './files'
