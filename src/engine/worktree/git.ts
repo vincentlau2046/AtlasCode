@@ -42,6 +42,7 @@
  *   - resolveRef/resolveRefInDir loose+packed+symref 链 + isSafeRefName/isValidGitSha
  *     安全守卫（.git 文件攻击者可控，防 shell 注入/路径穿越）。
  *   - parseGitConfigValue + parseConfigString 族（.git/config 解析，纯函数）。
+ *   - getBranch（S-D2a §8.57 增）= 旧 computeBranch 判定链逐字（无缓存 idiom，见函数注）。
  */
 import { execFile } from 'child_process'
 import { readFileSync, realpathSync, statSync } from 'fs'
@@ -534,6 +535,25 @@ export async function readRawSymref(
     // Not a loose ref
   }
   return null
+}
+
+// ── getBranch（S-D2a §8.57：旧仓 computeBranch 逐字 fs 判定链）─────────────
+/**
+ * 当前分支名（旧仓 computeBranch 逐字，gitFilesystem:500-510：resolveGitDir →
+ * readGitHead → branch 名；无 gitDir / HEAD 不可解析 / detached 一律 'HEAD'）。
+ * 旧 GitFileWatcher 缓存整砍（E-7 先例）→ 无缓存逐次重算（同 getDefaultBranch
+ * 无缓存 idiom，登记）。消费方 = createWorktreeForSession 的 originalBranch 探针位。
+ */
+export async function getBranch(): Promise<string> {
+  const gitDir = await resolveGitDir()
+  if (!gitDir) {
+    return 'HEAD'
+  }
+  const head = await readGitHead(gitDir)
+  if (!head) {
+    return 'HEAD'
+  }
+  return head.type === 'branch' ? head.name : 'HEAD'
 }
 
 // ── getDefaultBranch（旧仓 computeDefaultBranch 逐字，GitFileWatcher 整砍）──

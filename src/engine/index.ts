@@ -339,10 +339,12 @@ export {
   isProcessRunning,
   type SchedulerEnv,
 } from './scheduler'
-// E-7 S-7c（§8.48）：worktree 子门面（agent 隔离 worktree 面
+// E-7 S-7c（§8.48）+ S-D2a（§8.57）：worktree 子门面（agent 隔离 worktree 面
 // createAgentWorktree / removeAgentWorktree / cleanupStaleAgentWorktrees +
-// slug 校验 + 本域自含 git 执行层最小真子集；hooks 面 / 交互会话绑定 /
-// tmux 族 / copyWorktreeIncludeFiles / attribution hook 块 / hasWorktreeChanges
+// slug 校验 + 交互会话绑定面 + tmux 族（S-D2a 回填，Enter/ExitWorktree 工具
+// 本体 S-D2b 消费）+ 本域自含 git 执行层最小真子集；hooks 面 /
+// saveCurrentProjectConfig 持久化面 / copyWorktreeIncludeFiles /
+// attribution hook 块 / hasWorktreeChanges / execIntoTmuxWorktree
 // 全裁 = 前向接缝，见 worktree/index.ts 头注）
 export {
   createAgentWorktree,
@@ -350,10 +352,23 @@ export {
   cleanupStaleAgentWorktrees,
   validateWorktreeSlug,
   worktreeBranchName,
+  type WorktreeSession,
+  getCurrentWorktreeSession,
+  restoreWorktreeSession,
+  generateTmuxSessionName,
+  createWorktreeForSession,
+  keepWorktree,
+  cleanupWorktree,
+  parsePRReference,
+  isTmuxAvailable,
+  getTmuxInstallInstructions,
+  createTmuxSessionForWorktree,
+  killTmuxSession,
   execFileNoThrowWithCwd,
   gitExe,
   findGitRoot,
   findCanonicalGitRoot,
+  getBranch,
   getDefaultBranch,
   resolveGitDir,
   resolveRef,

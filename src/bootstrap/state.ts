@@ -17,15 +17,21 @@
  *    hasTrustAccepted）。三者均**窄适配 + 前向接缝登记**（防假「真行为」声明）：
  *    transcript 持久化读写 = E-7 session 波 / --agent 标志 = CLI 面 / 信任对话框 =
  *    UI 波（各消费点见组合根 compose.ts setHooksBootstrapEnv 接线头注）。
+ * ⑥ projectRoot（S-D2a §8.57 worktree 工具本体子波回填）— getProjectRoot
+ *    （旧仓 L84 真逻辑：自 process.cwd() 上探最近 `.git` 条目，逐字；消费方 =
+ *    ExitWorktree 工具本体 restoreSessionToOriginalCwd 的 projectRootIsWorktree
+ *    判别支）+ setProjectRoot（旧仓 L344 no-op stub 语义逐字落地为真 no-op——
+ *    旧仓本即无行为，勿把签名当真行为，登记）。
  *
  * 砍除残余（归 engine/modelprovider 波，复审勿当遗漏重提）：turn 级累加器
  * （_turnHook/_turnTool/_turnClassifier，REPL 逐 query turn 重置）/
  * mainLoopModelOverride + getInitialMainLoopModel（modelprovider 域）/
- * remoteMode / projectRoot / sessionPersistence / spSectionCache 等 engine 面状态。
+ * remoteMode / sessionPersistence / spSectionCache 等 engine 面状态。
  */
+import { existsSync } from 'fs'
 import { randomUUID } from 'crypto'
 import { homedir } from 'os'
-import { join } from 'path'
+import { dirname, join } from 'path'
 import { getConfigDirName } from '../shared'
 
 // ── ① cwd 两状态 ────────────────────────────────────────────────────────────
@@ -49,6 +55,37 @@ export function getCwdState(): string {
 
 export function setCwdState(v: string): void {
   _cwdState = v
+}
+
+// ── project root（S-D2a §8.57 回填；头注 ⑥ 登记）──────────────────────────
+/**
+ * 旧仓 bootstrap/state.ts:84 逐字：自 process.cwd() 上探最近含 `.git` 条目
+ * 的目录（worktree = .git 文件 / 普通仓 = .git 目录），达文件系统根回落
+ * process.cwd()。旧仓为 inline require('fs'/'path')，新仓顶层 import
+ * （idiom 登记，判定链逐字）。消费方 = ExitWorktree 工具本体（S-D2b）。
+ */
+export function getProjectRoot(): string {
+  let dir = process.cwd()
+  for (;;) {
+    if (existsSync(join(dir, '.git'))) {
+      return dir
+    }
+    const parent = dirname(dir)
+    if (parent === dir) {
+      return process.cwd()
+    }
+    dir = parent
+  }
+}
+
+/**
+ * 旧仓 bootstrap/state.ts:344 = no-op stub（重建 stub 语义，本即无行为）。
+ * 新仓落地为真 no-op（no-op 语义逐字；`: any` stub 面不落地——勿把签名
+ * 当真行为，头注 ⑥ 登记）。消费方 = ExitWorktree 的
+ * restoreSessionToOriginalCwd projectRootIsWorktree 支（S-D2b）。
+ */
+export function setProjectRoot(_v: string): void {
+  // no-op（旧仓 stub 语义）
 }
 
 // ── ② session id ────────────────────────────────────────────────────────────

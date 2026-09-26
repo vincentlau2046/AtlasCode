@@ -1,10 +1,14 @@
 /**
- * worktree 域核心（E-7 S-7c，§8.48）：git worktree 的 agent 隔离面
- * （createAgentWorktree / removeAgentWorktree / cleanupStaleAgentWorktrees）+
- * 支撑核心（getOrCreateWorktree / performPostCreationSetup / slug 校验）。
+ * worktree 域核心（E-7 S-7c，§8.48 + S-D2a §8.57 回填）：git worktree 的
+ * agent 隔离面（createAgentWorktree / removeAgentWorktree /
+ * cleanupStaleAgentWorktrees）+ 支撑核心（getOrCreateWorktree /
+ * performPostCreationSetup / slug 校验）+ 交互会话绑定面（WorktreeSession /
+ * createWorktreeForSession / keepWorktree / cleanupWorktree /
+ * getCurrentWorktreeSession / restoreWorktreeSession /
+ * generateTmuxSessionName，Enter/ExitWorktree 工具本体 S-D2b 消费）+ tmux 族。
  *
- * 旧仓 `src/utils/worktree.ts`(1451) 的**真子集**随迁——只含 agent 隔离面 + 其
- * 支撑核心。git 子进程 + .git fs-plumbing 经 `./git`（本域自含 git 执行层）注入。
+ * 旧仓 `src/utils/worktree.ts`(1451) 的**真子集**随迁。git 子进程 + .git
+ * fs-plumbing 经 `./git`（本域自含 git 执行层）注入。
  *
  * 解耦裁定（H6 前向接缝 + 逐处登记，复审勿当遗漏重提）：
  *   - **worktree hooks 面整砍**（hasWorktreeCreateHook / executeWorktreeCreateHook /
@@ -12,15 +16,30 @@
  *     面 → createAgentWorktree/removeAgentWorktree 直走 git 路径。`removeAgentWorktree`
  *     的 `hookBased` 形参保留（消费方=工具本体波/E-wave-end 接线），为 true 时无 hook
  *     面可委派 → log warn + return false（登记）。
- *   - **交互会话绑定整砍**（WorktreeSession / currentWorktreeSession /
- *     createWorktreeForSession / keepWorktree / cleanupWorktree /
- *     getCurrentWorktreeSession / restoreWorktreeSession / generateTmuxSessionName）：
- *     = EnterWorktree/ExitWorktree 工具本体波（用 bootstrap saveCurrentProjectConfig +
- *     process.chdir，未落）。cleanupStaleAgentWorktrees 的 current-session skip 支随之
- *     裁（engine 叶无交互会话；agent 临时 worktree 永不 current）。
- *   - **tmux 族整砍**（createTmuxSessionForWorktree / killTmuxSession /
- *     execIntoTmuxWorktree / isTmuxAvailable / getTmuxInstallInstructions /
- *     parsePRReference）：CLI/tmux 波。
+ *   - **交互会话绑定面已回填（S-D2a §8.57）**（WorktreeSession /
+ *     currentWorktreeSession / createWorktreeForSession / keepWorktree /
+ *     cleanupWorktree / getCurrentWorktreeSession / restoreWorktreeSession /
+ *     generateTmuxSessionName），EnterWorktree/ExitWorktree 工具本体（S-D2b）消费。
+ *     回填内部解耦逐处登记（复审勿当遗漏重提）：
+ *       a. worktree hooks 面未落（E-7 裁定）→ createWorktreeForSession 的 hook 支裁
+ *          （仅 git 路径，报错文案沿用 E-7 createAgentWorktree 的订正先例）；
+ *          cleanupWorktree 的 hookBased 支随 removeAgentWorktree 先例 warn + 留置
+ *          （type 的 hookBased 字段保 restore 旧持久化态兼容，新仓新会话恒非 hookBased）。
+ *       b. saveCurrentProjectConfig 持久化面未落（CLI/持久化波）→ create/keep/cleanup
+ *          三处保存点裁（登记）；restoreWorktreeSession 消费方（--resume 接线）随之
+ *          归 CLI/bootstrap 波。
+ *       c. getCwd() → process.cwd()（E-7 先例：已落路径 state cwd 与 process.cwd()
+ *          恒 chdir/setCwd 同步；分叉接缝随 CLI/bootstrap 波，登记）。
+ *       d. cleanupStaleAgentWorktrees 的 current-session skip 支 E-7 已裁——会话面
+ *          回填后该支可接线，但 agent 临时 worktree 永不 current（E-7 裁定维持，
+ *          暂不接线，登记）。
+ *   - **tmux 族已回填（S-D2a §8.57）**（createTmuxSessionForWorktree /
+ *     killTmuxSession / isTmuxAvailable / getTmuxInstallInstructions /
+ *     parsePRReference），ExitWorktree remove 支 + generateTmuxSessionName 消费。
+ *     旧 bare execFileNoThrow（useCwd → cwd=getCwd()）→ 新 execFileNoThrowWithCwd
+ *     无显式 cwd（tmux 调用点不依赖 cwd：new-session 显式 -c；-V/kill-session 与
+ *     cwd 无关；node execFile 缺省 cwd = process.cwd() ≈ 旧 state-cwd 缺省，登记）。
+ *     execIntoTmuxWorktree 未回填（swarm 执行面，CLI/swarm 波，登记）。
  *   - **copyWorktreeIncludeFiles 整砍**：`ignore` npm 包唯一消费者，零外部消费者 +
  *     避免新依赖（新仓 deps 仅 openai+zod）。
  *   - **attribution hook 块整砍**（feature('COMMIT_ATTRIBUTION') + postCommitAttribution）：
@@ -44,14 +63,21 @@
  *     配置 + symlinkDirectories）。
  *   - cleanupStaleAgentWorktrees 的 EPHEMERAL_WORKTREE_PATTERNS + dirty/unpushed
  *     fail-closed 双守卫。
+ *   - S-D2a §8.57 回填逐字锚点：WorktreeSession 字段面 / generateTmuxSessionName
+ *     命名链（basename + [/.]→_）/ parsePRReference 双形态（GitHub URL + #N）/
+ *     tmux 族 4 函数（-V / new-session -d -s -c / kill-session -t）/
+ *     createWorktreeForSession 主链（validate → hook 裁后 git 路径 →
+ *     performPostCreationSetup → 会话态装配）/ keepWorktree / cleanupWorktree
+ *     （git worktree remove --force + sleep(100) + branch -D）。
  */
 import { copyFile, mkdir, readdir, stat, symlink, utimes } from 'fs/promises'
-import { dirname, join } from 'path'
+import { basename, dirname, join } from 'path'
 import {
   containsPathTraversal,
   errorMessage,
   getErrnoCode,
   getConfigDirName,
+  getPlatform,
   logForDebugging,
 } from '../../shared'
 import {
@@ -61,7 +87,9 @@ import {
 import {
   execFileNoThrowWithCwd,
   findCanonicalGitRoot,
+  findGitRoot,
   getDefaultBranch,
+  getBranch,
   getCommonDir,
   gitExe,
   parseGitConfigValue,
@@ -210,6 +238,52 @@ export function worktreeBranchName(slug: string): string {
 
 function worktreePathFor(repoRoot: string, slug: string): string {
   return join(worktreesDir(repoRoot), flattenSlug(slug))
+}
+
+// ── 交互会话绑定面（S-D2a §8.57 回填；解耦登记 a-d 见文件头注）──────────────
+/**
+ * 当前会话的 worktree 态（旧仓 WorktreeSession 字段面逐字）。
+ * hookBased 仅在 restore 旧持久化会话时为 true（新仓无 hooks 面，新会话恒
+ * 非 hookBased；type 面保 restore 兼容，见头注登记 a）。
+ */
+export type WorktreeSession = {
+  originalCwd: string
+  worktreePath: string
+  worktreeName: string
+  worktreeBranch?: string
+  originalBranch?: string
+  originalHeadCommit?: string
+  sessionId: string
+  tmuxSessionName?: string
+  hookBased?: boolean
+  /** How long worktree creation took (unset when resuming an existing worktree). */
+  creationDurationMs?: number
+  /** True if git sparse-checkout was applied via settings.worktree.sparsePaths. */
+  usedSparsePaths?: boolean
+}
+
+let currentWorktreeSession: WorktreeSession | null = null
+
+export function getCurrentWorktreeSession(): WorktreeSession | null {
+  return currentWorktreeSession
+}
+
+/**
+ * Restore the worktree session on --resume. The caller must have already
+ * verified the directory exists (via process.chdir) and set the bootstrap
+ * state (cwd, originalCwd).
+ */
+export function restoreWorktreeSession(session: WorktreeSession | null): void {
+  currentWorktreeSession = session
+}
+
+export function generateTmuxSessionName(
+  repoPath: string,
+  branch: string,
+): string {
+  const repoName = basename(repoPath)
+  const combined = `${repoName}_${branch}`
+  return combined.replace(/[/.]/g, '_')
 }
 
 type WorktreeCreateResult =
@@ -456,6 +530,260 @@ async function performPostCreationSetup(
   const dirsToSymlink = getWorktreeSettings().symlinkDirectories ?? []
   if (dirsToSymlink.length > 0) {
     await symlinkDirectories(repoRoot, worktreePath, dirsToSymlink)
+  }
+}
+
+// ── S-D2a §8.57 回填：tmux 族 + 会话三入口（解耦登记见文件头注）────────────
+/**
+ * Parses a PR reference from a string.
+ * Accepts GitHub-style PR URLs (e.g., https://github.com/owner/repo/pull/123,
+ * or GHE equivalents like https://ghe.example.com/owner/repo/pull/123)
+ * or `#N` format (e.g., #123).
+ * Returns the PR number or null if the string is not a recognized PR reference.
+ */
+export function parsePRReference(input: string): number | null {
+  // GitHub-style PR URL: https://<host>/owner/repo/pull/123 (with optional trailing slash, query, hash)
+  // The /pull/N path shape is specific to GitHub — GitLab uses /-/merge_requests/N,
+  // Bitbucket uses /pull-requests/N — so matching any host here is safe.
+  const urlMatch = input.match(
+    /^https?:\/\/[^/]+\/[^/]+\/[^/]+\/pull\/(\d+)\/?(?:[?#].*)?$/i,
+  )
+  if (urlMatch?.[1]) {
+    return parseInt(urlMatch[1], 10)
+  }
+
+  // #N format
+  const hashMatch = input.match(/^#(\d+)$/)
+  if (hashMatch?.[1]) {
+    return parseInt(hashMatch[1], 10)
+  }
+
+  return null
+}
+
+// 本地 sleep（旧仓 utils/sleep.js；新仓 sessionMemory/taskOutputTool 同族 idiom）。
+const sleep = (ms: number): Promise<void> =>
+  new Promise(r => setTimeout(r, ms))
+
+export async function isTmuxAvailable(): Promise<boolean> {
+  // S-D2a 登记：旧 bare execFileNoThrow（useCwd）→ 无显式 cwd 变体（见头注）。
+  const { code } = await execFileNoThrowWithCwd('tmux', ['-V'])
+  return code === 0
+}
+
+export function getTmuxInstallInstructions(): string {
+  const platform = getPlatform()
+  switch (platform) {
+    case 'macos':
+      return 'Install tmux with: brew install tmux'
+    case 'linux':
+    case 'wsl':
+      return 'Install tmux with: sudo apt install tmux (Debian/Ubuntu) or sudo dnf install tmux (Fedora/RHEL)'
+    case 'windows':
+      return 'tmux is not natively available on Windows. Consider using WSL or Cygwin.'
+    default:
+      return 'Install tmux using your system package manager.'
+  }
+}
+
+export async function createTmuxSessionForWorktree(
+  sessionName: string,
+  worktreePath: string,
+): Promise<{ created: boolean; error?: string }> {
+  const { code, stderr } = await execFileNoThrowWithCwd('tmux', [
+    'new-session',
+    '-d',
+    '-s',
+    sessionName,
+    '-c',
+    worktreePath,
+  ])
+
+  if (code !== 0) {
+    return { created: false, error: stderr }
+  }
+
+  return { created: true }
+}
+
+export async function killTmuxSession(sessionName: string): Promise<boolean> {
+  const { code } = await execFileNoThrowWithCwd('tmux', [
+    'kill-session',
+    '-t',
+    sessionName,
+  ])
+  return code === 0
+}
+
+/**
+ * Create (or resume) a worktree for the interactive session and record it as
+ * the current session worktree. EnterWorktree 工具本体（S-D2b）入口。
+ *
+ * S-D2a 解耦登记（见文件头注 a-d）：hook 支裁（仅 git 路径）/
+ * saveCurrentProjectConfig 保存点裁 / getCwd() → process.cwd()。
+ */
+export async function createWorktreeForSession(
+  sessionId: string,
+  slug: string,
+  tmuxSessionName?: string,
+  options?: { prNumber?: number },
+): Promise<WorktreeSession> {
+  // Must run before the hook branch below — hooks receive the raw slug as an
+  // argument, and the git branch builds a path from it via path.join.
+  validateWorktreeSlug(slug)
+
+  // S-D2a 登记 c：旧 getCwd()（state cwd）→ process.cwd()。
+  const originalCwd = process.cwd()
+
+  // H6 前向接缝（登记 a）：worktree hooks 面（用户可配 VCS WorktreeCreate hook）
+  // 未落 → 无 hook 分支，直接 git 路径（旧仓 hasWorktreeCreateHook 分支裁，
+  // E-7 S-7c createAgentWorktree 同裁定）。
+  const gitRoot = findGitRoot(process.cwd())
+  if (!gitRoot) {
+    throw new Error(
+      'Cannot create a worktree: not in a git repository. ' +
+        'Worktree isolation requires a git repository (new repo has no WorktreeCreate ' +
+        'hook 面; that forward seam lands with the CLI/bootstrap wave).',
+    )
+  }
+
+  const originalBranch = await getBranch()
+
+  const createStart = Date.now()
+  const { worktreePath, worktreeBranch, headCommit, existed } =
+    await getOrCreateWorktree(gitRoot, slug, options)
+
+  let creationDurationMs: number | undefined
+  if (existed) {
+    logForDebugging(`Resuming existing worktree at: ${worktreePath}`)
+  } else {
+    logForDebugging(
+      `Created worktree at: ${worktreePath} on branch: ${worktreeBranch}`,
+    )
+    await performPostCreationSetup(gitRoot, worktreePath)
+    creationDurationMs = Date.now() - createStart
+  }
+
+  currentWorktreeSession = {
+    originalCwd,
+    worktreePath,
+    worktreeName: slug,
+    worktreeBranch,
+    originalBranch,
+    originalHeadCommit: headCommit,
+    sessionId,
+    tmuxSessionName,
+    creationDurationMs,
+    // S-D2a 登记：新仓 SettingsJson 无 worktree 字段 → 本地 cast idiom 读旋钮。
+    usedSparsePaths: (getWorktreeSettings().sparsePaths?.length ?? 0) > 0,
+  }
+
+  // S-D2a 登记 b：saveCurrentProjectConfig 持久化面未落（CLI/持久化波）→ 保存点裁。
+  return currentWorktreeSession
+}
+
+export async function keepWorktree(): Promise<void> {
+  if (!currentWorktreeSession) {
+    return
+  }
+
+  try {
+    const { worktreePath, originalCwd, worktreeBranch } = currentWorktreeSession
+
+    // Change back to original directory first
+    process.chdir(originalCwd)
+
+    // Clear the session but keep the worktree intact
+    currentWorktreeSession = null
+
+    // S-D2a 登记 b：saveCurrentProjectConfig 保存点裁。
+
+    logForDebugging(
+      `Linked worktree preserved at: ${worktreePath}${worktreeBranch ? ` on branch: ${worktreeBranch}` : ''}`,
+    )
+    logForDebugging(
+      `You can continue working there by running: cd ${worktreePath}`,
+    )
+  } catch (error) {
+    logForDebugging(`Error keeping worktree: ${error}`, {
+      level: 'error',
+    })
+  }
+}
+
+export async function cleanupWorktree(): Promise<void> {
+  if (!currentWorktreeSession) {
+    return
+  }
+
+  try {
+    const { worktreePath, originalCwd, worktreeBranch, hookBased } =
+      currentWorktreeSession
+
+    // Change back to original directory first
+    process.chdir(originalCwd)
+
+    if (hookBased) {
+      // S-D2a 登记 a：WorktreeRemove hook 面未落（E-7 S-7c 裁定；
+      // removeAgentWorktree 先例）→ warn + 留置（worktree 留在原地）。
+      logForDebugging(
+        `Hook-based worktree cleanup requested but no WorktreeRemove hook 面 in new repo; worktree left at: ${worktreePath}`,
+        { level: 'warn' },
+      )
+    } else {
+      // Git-based worktree: use git worktree remove.
+      // Explicit cwd: the chdir above may already have failed or landed
+      // elsewhere (e.g. originalCwd deleted out-of-band, S-D2a 登记 c 语境——
+      // state cwd 分叉未落），so pass originalCwd explicitly instead of
+      // relying on the process cwd default.
+      const { code: removeCode, stderr: removeError } =
+        await execFileNoThrowWithCwd(
+          gitExe(),
+          ['worktree', 'remove', '--force', worktreePath],
+          { cwd: originalCwd },
+        )
+
+      if (removeCode !== 0) {
+        logForDebugging(`Failed to remove linked worktree: ${removeError}`, {
+          level: 'error',
+        })
+      } else {
+        logForDebugging(`Removed linked worktree at: ${worktreePath}`)
+      }
+    }
+
+    // Clear the session
+    currentWorktreeSession = null
+
+    // S-D2a 登记 b：saveCurrentProjectConfig 保存点裁。
+
+    // Delete the temporary worktree branch (git-based only)
+    if (!hookBased && worktreeBranch) {
+      // Wait a bit to ensure git has released all locks
+      await sleep(100)
+
+      const { code: deleteBranchCode, stderr: deleteBranchError } =
+        await execFileNoThrowWithCwd(
+          gitExe(),
+          ['branch', '-D', worktreeBranch],
+          { cwd: originalCwd },
+        )
+
+      if (deleteBranchCode !== 0) {
+        logForDebugging(
+          `Could not delete worktree branch: ${deleteBranchError}`,
+          { level: 'error' },
+        )
+      } else {
+        logForDebugging(`Deleted worktree branch: ${worktreeBranch}`)
+      }
+    }
+
+    logForDebugging('Linked worktree cleaned up completely')
+  } catch (error) {
+    logForDebugging(`Error cleaning up worktree: ${error}`, {
+      level: 'error',
+    })
   }
 }
 
