@@ -2,7 +2,7 @@
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
  * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
- *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）。
+ *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool = 1/49（48 剩，高频 → 长尾序列）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归
@@ -24,6 +24,11 @@
  *   bashSecurity/sedValidation/modeValidation/bashCommandHelpers 逐字随迁）
  *   + bashToolInput duck 型 → bash/ 子门面 re-export 扩块；残留守 bashPermissions
  *   / pathValidation / shouldUseSandbox = S-T2b。
+ * §8.53 S-T2b 已落核心 3 文件 + 6 本地辅助模块 → bash/ 子门面 re-export 再扩块。
+ * §8.54 S-B 子波（Bash 本体纵切）S-B1~S-B5 已落 9 文件本体 + 依赖闭包层 →
+ *   在此 re-export（bash/ 子门面）；S-B5 落 BashTool 对象 = 49 基础工具本体
+ *   首个纵切落地（残留守「49 本体」登记随之缩 1）+ 首个非-passthrough
+ *   checkPermissions 工具面实现（§8.43 裁定① 闭环）。
  */
 export {
   createMcpTools,
@@ -237,4 +242,56 @@ export {
   windowsPathToPosixPath,
   getDirectoryForPath,
   type BashToolUseContext,
+  // ── S-B1（§8.54）：依赖闭包层 ──
+  type FlagArgType,
+  type ExternalCommandConfig,
+  GIT_READ_ONLY_COMMANDS,
+  GH_READ_ONLY_COMMANDS,
+  DOCKER_READ_ONLY_COMMANDS,
+  RIPGREP_READ_ONLY_COMMANDS,
+  PYRIGHT_READ_ONLY_COMMANDS,
+  EXTERNAL_READONLY_COMMANDS,
+  containsVulnerableUncPath,
+  FLAG_PATTERN,
+  validateFlagArgument,
+  validateFlags,
+  isCurrentDirectoryBareGitRepo,
+  getDefaultBashTimeoutMs,
+  getMaxBashTimeoutMs,
+  hasEmbeddedSearchTools,
+  shouldMaintainProjectWorkingDir,
+  shouldIncludeGitInstructions,
+  prependBullets,
+  // ── S-B2（§8.54）：纯叶子本体 ──
+  extractBashCommentLabel,
+  getDestructiveCommandWarning,
+  type CommandSemantic,
+  interpretCommandResult,
+  type SedEditInfo,
+  isSedInPlaceEdit,
+  parseSedEditCommand,
+  applySedSubstitution,
+  stripEmptyLines,
+  isImageOutput,
+  parseDataUri,
+  buildImageToolResult,
+  resizeShellImageOutput,
+  formatOutput,
+  stdErrAppendShellResetMessage,
+  resetCwdIfOutsideProject,
+  createContentSummary,
+  // ── S-B3（§8.54）：只读命令校验本体 ──
+  isCommandSafeViaFlagParsing,
+  checkReadOnlyConstraints,
+  // ── S-B4（§8.54）：prompt 本体 ──
+  getDefaultTimeoutMs,
+  getMaxTimeoutMs,
+  getSimplePrompt,
+  // ── S-B5（§8.54）：BashTool 本体（首个非-passthrough checkPermissions 面）──
+  BASH_TOOL_INPUT_SCHEMA,
+  BashTool,
+  getBackgroundTask,
+  listBackgroundTasks,
+  type Out,
+  type BgTask,
 } from './bash'

@@ -15,13 +15,21 @@
  * abortError / platform / arrayUtils / windowsPaths / pathHelpers，delta 见
  * 各文件头注）→ 本门面再扩块。
  *
+ * S-B 子波（§8.54，Bash 本体纵切）S-B1~S-B5 随迁 9 文件 + 依赖闭包层——
+ * 各切片文件头注 delta 自登记，本门面按切片扩块归集（门面归集统一在
+ * S-B5 落，S-B1~S-B4 切片不预支扩块）。
+ *
  * 门面裁量（复审勿当遗漏重提）：
  *  - stripWrappersFromArgv 只经 pathValidation 块转出（canonical 扩展版，
  *    PR #21503 round 3；bashPermissions 同名的窄版拷贝 = 旧仓登记死代码
  *    〔DCE cliff 不可删〕，门面不转出）
- *  - 残留守（Bash 本体子波）：BashTool 3310L 本体 / inputSchema 真 zod 型 /
- *    真 ToolUseContext / prompt.ts / BashTool 值位（本波 BASH_RULE_TOOL 窄
- *    视图占位）。
+ *  - 残留守（D 波/TUI 波）：真 ToolUseContext 全字段面（BashToolUseContext
+ *    duck 最小形 + D-7 options.cwd 成员）/ UI 渲染面（UI.tsx /
+ *    BashToolResultMessage.tsx 域外，renderToolUseMessage = () => null）/
+ *    归属后缀支（D-1）/ 图像 resize 调用点（D-3）。
+ *  - 旧「inputSchema 真 zod 型」接缝改题：新 shared Tool 契约无 zod，
+ *    BASH_TOOL_INPUT_SCHEMA = 纯 JSON schema 对象（bashTool.ts，S-B5），
+ *    与 bashToolInput.ts duck 型逐字段对齐（类型位单一事实源）。
  */
 export {
   type TsNode,
@@ -162,3 +170,67 @@ export { type Platform, getPlatform } from './platform'
 export { count } from './arrayUtils'
 export { windowsPathToPosixPath } from './windowsPaths'
 export { getDirectoryForPath } from './pathHelpers'
+// ── S-B1（§8.54）：依赖闭包层 ──
+export {
+  type FlagArgType,
+  type ExternalCommandConfig,
+  GIT_READ_ONLY_COMMANDS,
+  GH_READ_ONLY_COMMANDS,
+  DOCKER_READ_ONLY_COMMANDS,
+  RIPGREP_READ_ONLY_COMMANDS,
+  PYRIGHT_READ_ONLY_COMMANDS,
+  EXTERNAL_READONLY_COMMANDS,
+  containsVulnerableUncPath,
+  FLAG_PATTERN,
+  validateFlagArgument,
+  validateFlags,
+} from './readOnlyCommandValidation'
+export { isCurrentDirectoryBareGitRepo } from './gitBareRepo'
+export { getDefaultBashTimeoutMs, getMaxBashTimeoutMs } from './bashTimeouts'
+export {
+  hasEmbeddedSearchTools,
+  shouldMaintainProjectWorkingDir,
+  shouldIncludeGitInstructions,
+  prependBullets,
+} from './bashHelpers'
+// ── S-B2（§8.54）：纯叶子本体 ──
+export { extractBashCommentLabel } from './commentLabel'
+export { getDestructiveCommandWarning } from './destructiveCommandWarning'
+export { type CommandSemantic, interpretCommandResult } from './commandSemantics'
+export {
+  type SedEditInfo,
+  isSedInPlaceEdit,
+  parseSedEditCommand,
+  applySedSubstitution,
+} from './sedEditParser'
+export {
+  stripEmptyLines,
+  isImageOutput,
+  parseDataUri,
+  buildImageToolResult,
+  resizeShellImageOutput,
+  formatOutput,
+  stdErrAppendShellResetMessage,
+  resetCwdIfOutsideProject,
+  createContentSummary,
+} from './bashUtils'
+// ── S-B3（§8.54）：只读命令校验本体 ──
+export {
+  isCommandSafeViaFlagParsing,
+  checkReadOnlyConstraints,
+} from './readOnlyValidation'
+// ── S-B4（§8.54）：prompt 本体 ──
+export {
+  getDefaultTimeoutMs,
+  getMaxTimeoutMs,
+  getSimplePrompt,
+} from './bashPrompt'
+// ── S-B5（§8.54）：BashTool 本体（首个非-passthrough checkPermissions 面）──
+export {
+  BASH_TOOL_INPUT_SCHEMA,
+  BashTool,
+  getBackgroundTask,
+  listBackgroundTasks,
+  type Out,
+  type BgTask,
+} from './bashTool'

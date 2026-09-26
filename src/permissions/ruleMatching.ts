@@ -411,7 +411,9 @@ export function isAbortShapedError(e: unknown): boolean {
  * objects. 与旧仓差异（裁剪登记）：不跑自动模式分类器 / 模式转换（dontAsk/
  * asyncAgent）/ PermissionRequest hooks（残留守 ②⑤）；1b 无 sandbox 自动放行
  * 特判（⑥ 随 S-6b 落 hasPermissionsToUseTool 面半落，§8.43 裁定③）；
- * 1c 鸭子可选分发（工具面实现归工具本体波，§8.43 裁定①）。
+ * 1c 鸭子可选分发（工具面实现：S-B5 已落首个非-passthrough 实现 =
+ * bashTool.checkPermissions → bashToolHasPermission，§8.54 ③ 闭环
+ * §8.43 裁定①；其余薄窄视图工具无 checkPermissions = 保持 passthrough）。
  *
  * Caller must pre-check tool.requiresUserInteraction() — step 1e is not
  * replicated（旧仓头注逐字）。
@@ -454,7 +456,9 @@ export async function checkRuleBasedPermissions(
   }
 
   // 1c. Tool-specific permission check (e.g. bash subcommand rules)——
-  // 鸭子可选分发：tool.checkPermissions? 不存在（薄窄视图工具）= 保持 passthrough。
+  // 鸭子可选分发：首个非-passthrough 实现已落（S-B5 bashTool.checkPermissions
+  // → bashToolHasPermission，§8.54 ③）；tool.checkPermissions? 不存在（其余
+  // 薄窄视图工具）= 保持 passthrough。
   let toolPermissionResult: PermissionResult = {
     behavior: 'passthrough',
     message: createPermissionRequestMessage(tool.name),
