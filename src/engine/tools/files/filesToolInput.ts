@@ -32,6 +32,18 @@
  *    nestedMemoryAttachmentTriggers?）：引擎侧注入位未落（组合根/D 波
  *    接线），旧调用点全 ?. 可选链 → 缺省零崩溃面（dedup 面缺省跳过 =
  *    dedup 引入前基线，readTool delta ⑭/⑨）。
+ *
+ * S-C6 扩面（§8.55，Write+Edit 本体消费子集）：
+ *  - WriteToolInput = 旧 zod strictObject 2 字段（无字符串容忍字段）。
+ *  - Edit 输入 duck = fileEditTypes 的 FileEditInput（S-C1 已落，本文件
+ *    不重复定义）；replace_all 字符串布尔容忍 = call/validate 入口
+ *    semanticToBoolean 转换（fileEditTool delta ②）。
+ *  - Write/Edit call/validate 消费 FilesToolUseContext 既有成员
+ *    （getAppState + readFileState?）：旧 context 的 userModified /
+ *    updateFileHistoryState / dynamicSkillDirTriggers 三成员随 fileHistory /
+ *    skills 域裁面而裁（fileWriteTool/fileEditTool 头注登记）→ 无新增
+ *    成员；readFileState 缺省降级 = 可选链（validate 恒「未读」支 /
+ *    call 既有文件恒 stale 支，S-C5 delta ⑭ 缺省零崩溃先例）。
  */
 import type { ToolPermissionContext } from '../../../shared'
 import type { FileReadingLimits } from './readFileLimits'
@@ -66,6 +78,15 @@ export interface ReadToolInput {
   offset?: number
   limit?: number
   pages?: string
+}
+
+/**
+ * Write 输入（§8.55 S-C6；旧 zod strictObject 2 字段逐字段对齐，
+ * 无字符串容忍字段）。
+ */
+export interface WriteToolInput {
+  file_path: string
+  content: string
 }
 
 /** 旧 FileState（旧仓 utils/fileStateCache.ts:4-15 形逐字）。 */

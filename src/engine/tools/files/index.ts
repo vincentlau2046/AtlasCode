@@ -7,15 +7,20 @@
  * notebook/notebookTypes/execFileNoThrow）+ S-C4（Glob/Grep 本体：
  * globTool/grepTool/globPrompt/grepPrompt/relativePath/filesToolInput）+
  * S-C5（Read 本体：readTool/binaryExtensions/readFileLimits/readPrompt/
- * userMessage/memoryFreshness + filesToolInput S-C5 扩面）。
+ * userMessage/memoryFreshness + filesToolInput S-C5 扩面）+ S-C6（Write+
+ * Edit 本体：fileWriteTool/fileEditTool/fileEditUtils/fileEditConstants/
+ * fileWritePrompt/fileEditPrompt + filesToolInput S-C6 扩面）。
  *
  * 纪律（tools/index.ts bash 块先例）：逐名显式 re-export，无 `export *`；
- * 全 118 名 0 重名核验（S-C5 逐文件 grep 收集：S-C4 90 + S-C5 28）；各
- * 文件头注 delta 登记不随门面重复（单一事实源 = 各模块头注）。
+ * 各文件头注 delta 登记不随门面重复（单一事实源 = 各模块头注）。
  *
- * 消费方：tools/ 门面 S-C5 re-export 块 + 组合根 baseTools 注入位
- * （ReadTool，注册表 ⑰ 槽 Read 恒注册，Glob/Grep 同槽）+ 后续 S-C6
- * Write+Edit 本体（同域依赖 fileUtils/fileRead/diffUtils 消费面）。
+ * S-C6 重名登记：fileWritePrompt DESCRIPTION 常量与 S-C5 readPrompt
+ * DESCRIPTION 同面重名 → 不入门面（新仓无消费面，模块内导出保留），
+ * 门面仅 re-export getWriteToolDescription。
+ *
+ * 消费方：tools/ 门面 S-C5/S-C6 re-export 块 + 组合根 baseTools 注入位
+ * （ReadTool/WriteTool/EditTool 恒注册槽，注册表 ⑰ 先例；Glob/Grep 同
+ * 槽）+ 后续本体纵切（同域依赖 fileUtils/fileRead/diffUtils 消费面）。
  */
 // ── S-C1（§8.55）：依赖闭包层 1 ──
 export {
@@ -131,6 +136,7 @@ export type {
   GlobToolInput,
   GrepToolInput,
   ReadToolInput,
+  WriteToolInput,
   FileState,
   ReadFileState,
   FilesToolUseContext,
@@ -183,3 +189,41 @@ export {
   registerFileReadListener,
   CYBER_RISK_MITIGATION_REMINDER,
 } from './readTool'
+// ── S-C6（§8.55）：Write+Edit 本体 ──
+export {
+  ATLAS_FOLDER_PERMISSION_PATTERN,
+  GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN,
+  FILE_UNEXPECTEDLY_MODIFIED_ERROR,
+} from './fileEditConstants'
+export {
+  LEFT_SINGLE_CURLY_QUOTE,
+  RIGHT_SINGLE_CURLY_QUOTE,
+  LEFT_DOUBLE_CURLY_QUOTE,
+  RIGHT_DOUBLE_CURLY_QUOTE,
+  normalizeQuotes,
+  stripTrailingWhitespace,
+  findActualString,
+  preserveQuoteStyle,
+  applyEditToFile,
+  getPatchForEdit,
+  getPatchForEdits,
+  getSnippetForTwoFileDiff,
+  getSnippetForPatch,
+  getSnippet,
+  getEditsForPatch,
+  normalizeFileEditInput,
+  areFileEditsEquivalent,
+  areFileEditsInputsEquivalent,
+} from './fileEditUtils'
+export { getEditToolDescription } from './fileEditPrompt'
+export { getWriteToolDescription } from './fileWritePrompt'
+export {
+  WRITE_TOOL_INPUT_SCHEMA,
+  WriteTool,
+  type WriteOutput,
+} from './fileWriteTool'
+export {
+  EDIT_TOOL_INPUT_SCHEMA,
+  EditTool,
+  type EditOutput,
+} from './fileEditTool'

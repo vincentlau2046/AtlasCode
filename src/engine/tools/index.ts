@@ -2,7 +2,7 @@
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
  * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
- *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool + §8.55 S-C4 已落 GlobTool + GrepTool + S-C5 已落 ReadTool = 4/49（45 剩，高频 → 长尾序列；S-C6 Write+Edit 随本波续落 → 6/49）。
+ *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool + §8.55 S-C4 已落 GlobTool + GrepTool + S-C5 已落 ReadTool + S-C6 已落 WriteTool + EditTool = 6/49（43 剩，高频族全闭环 → 长尾 43 本体纵切后续波）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归
@@ -33,8 +33,10 @@
  *   1/2/3 + Glob/Grep 本体 → 在此 re-export（files/ 子门面）；S-C4 落
  *   GlobTool + GrepTool 对象（残留守「49 本体」登记再缩 2 → 3/49）+
  *   checkPermissions 一线接线 checkReadPermissionForTool（搜索工具面
- *   读权限决策体消费，§8.55 裁定）；S-C5 落 ReadTool 本体（4/49 中间态，
- *   S-C6 Write+Edit 随本波续落 → 6/49 波终态）。
+ *   读权限决策体消费，§8.55 裁定）；S-C5 落 ReadTool 本体（4/49）+
+ *   S-C6 落 WriteTool + EditTool 本体（fileWriteTool/fileEditTool/
+ *   fileEditUtils/fileEditConstants/fileWritePrompt/fileEditPrompt）
+ *   → 6/49 波终态（高频族全闭环，43 长尾本体纵切后续波）。
  */
 export {
   createMcpTools,
@@ -426,4 +428,35 @@ export {
   type ReadToolInput,
   type FileState,
   type ReadFileState,
+  // S-C6：Write+Edit 本体
+  ATLAS_FOLDER_PERMISSION_PATTERN,
+  GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN,
+  FILE_UNEXPECTEDLY_MODIFIED_ERROR,
+  LEFT_SINGLE_CURLY_QUOTE,
+  RIGHT_SINGLE_CURLY_QUOTE,
+  LEFT_DOUBLE_CURLY_QUOTE,
+  RIGHT_DOUBLE_CURLY_QUOTE,
+  normalizeQuotes,
+  stripTrailingWhitespace,
+  findActualString,
+  preserveQuoteStyle,
+  applyEditToFile,
+  getPatchForEdit,
+  getPatchForEdits,
+  getSnippetForTwoFileDiff,
+  getSnippetForPatch,
+  getSnippet,
+  getEditsForPatch,
+  normalizeFileEditInput,
+  areFileEditsEquivalent,
+  areFileEditsInputsEquivalent,
+  getEditToolDescription,
+  getWriteToolDescription,
+  WRITE_TOOL_INPUT_SCHEMA,
+  WriteTool,
+  type WriteOutput,
+  EDIT_TOOL_INPUT_SCHEMA,
+  EditTool,
+  type EditOutput,
+  type WriteToolInput,
 } from './files'
