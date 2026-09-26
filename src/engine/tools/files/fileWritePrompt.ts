@@ -7,7 +7,8 @@
  *
  * delta 登记：旧 FILE_WRITE_TOOL_NAME/DESCRIPTION 本文件定义 → 新仓
  * FILE_WRITE_TOOL_NAME 归 toolNames（同 S-C1 先例）；DESCRIPTION 常量
- * 保留（旧 UI 消费面已裁，本体保真）。
+ * 保留（旧仓即孤儿导出——旧仓全仓零消费，新仓同样无消费面，本体保真；
+ * 重名不入门面登记见 files/index.ts 头注）。
  */
 import { FILE_READ_TOOL_NAME } from '../toolNames'
 

@@ -38,9 +38,14 @@
  *    backfillObservableInput（hooks 面，S-C5 ⑰ 先例）/ preparePermission
  *    Matcher（gate 侧，S-C4 ⑧ 先例）。
  *  ⑧ call 5 参 → 2 参声明（S-C5 delta ⑧ 先例）；旧 context 3 成员
- *    userModified/updateFileHistoryState/dynamicSkillDirTriggers 随 ⑦
- *    裁（fileHistory/skills 域）→ 新 duck = FilesToolUseContext（getAppState
- *    + readFileState? 既有成员，filesToolInput S-C6 扩面）。
+ *    readFileState/updateFileHistoryState/dynamicSkillDirTriggers（旧仓
+ *    L237 解构逐字；userModified 非 Write 侧成员，属 Edit 侧）：readFile-
+ *    State 保留（duck 可选成员）+ 后 2 成员随 ⑦ 裁（fileHistory/skills
+ *    域）→ 新 duck = FilesToolUseContext（getAppState + readFileState?
+ *    既有成员，filesToolInput S-C6 扩面）；call 入口 `(args ?? {})` 守卫
+ *    = 新 2 参契约 args: unknown 下防御性加固（旧仓 call 直接解构必填
+ *    已校验参，无此支；引擎恒传对象 → 零活行为差，S-C7 A 路 NOTE-2
+ *    登记）。
  *  ⑨ readFileState 可选链降级（S-C5 delta ⑭ 缺省零崩溃先例）：引擎侧注入
  *    位未落 → 缺省 = validate 恒「未读」支（errorCode 2）+ call 既有文件
  *    恒 stale 支（throw FILE_UNEXPECTEDLY_MODIFIED_ERROR）；注入后 = 旧

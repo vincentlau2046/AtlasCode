@@ -46,9 +46,14 @@
  *    Tool 契约无槽位 → 成员裁；算法族 areFileEditsInputsEquivalent 保留
  *    ./fileEditUtils 导出（消费面随 gate 波，fileEditUtils delta ③）。
  *  ⑩ call 5 参 → 2 参（S-C5 delta ⑧ 先例）；旧 context 4 成员
- *    userModified/updateFileHistoryState/dynamicSkillDirTriggers 随 ⑦ 裁
- *    → data.userModified 恒 false（旧 `userModified ?? false`，context
- *    成员缺面 → 常值，mapToolResult modifiedNote 支恒 '' 面登记）。
+ *    readFileState/userModified/updateFileHistoryState/dynamicSkillDirTriggers
+ *    （旧仓 L382-387 解构逐字）：readFileState 保留（duck 可选成员）+ 后
+ *    3 成员随 ⑦ 裁（fileHistory/skills 域）→ data.userModified 恒 false
+ *    （旧 `userModified ?? false`，context 成员缺面 → 常值，mapToolResult
+ *    modifiedNote 支恒 '' 面登记）；call 入口 `(args ?? {})` 守卫 = 新
+ *    2 参契约 args: unknown 下防御性加固（旧仓 call 直接解构 input:
+ *    FileEditInput 已校验参，无此支；引擎恒传对象 → 零活行为差，S-C7
+ *    A 路 NOTE-2 登记）。
  *  ⑪ readFileState 可选链降级（S-C5 delta ⑨ 同源）：缺省 = validate 恒
  *    「未读」支（errorCode 6）+ call 既有文件恒 stale 支；注入后 = 旧
  *    行为逐字。

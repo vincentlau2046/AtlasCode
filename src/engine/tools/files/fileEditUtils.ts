@@ -11,18 +11,27 @@
  *
  * delta 登记（复审勿当遗漏重提）：
  *  ① 旧 expandPath 单参（内部取 cwd）→ 新 shared 双参
- *    expandPath(path, baseDir) → normalizeFileEditInput 调用点补 getCwd()
- *    （零行为差，路径归一化语义一致）。
+ *    expandPath(path, baseDir) → 2 调用点：normalizeFileEditInput 补
+ *    getCwd()（零行为差，路径归一化语义一致）+ areFileEditsInputs
+ *    Equivalent 站点新增 expandPath（旧仓该点裸 readFileSyncCached，新
+ *    引入 ~ 展开 + 相对路径按 getCwd() 解析 = 新增行为，潜伏，消费面
+ *    gate 波；S-C7 A 路 MINOR-1 订正）。
+ *  ④ dash 字面量重编码（A 路 NOTE-1 可选登记落盘）：isOpeningContext
+ *    em/en dash 判定新仓用字面 '—'/'–'，旧仓为转义 '—'/'–'
+ *    （hexdump 核码点相同 e2 80 94 / e2 80 93，零行为）。
  *  ② 本地 CONTEXT_LINES = 4（getSnippetForPatch 专用）≠ diffUtils 导出
  *    CONTEXT_LINES = 3（structuredPatch 上下文行）——两常量不同值，
  *    本文件不 import diffUtils 版，逐字保留本地定义（防误合）。
- *  ③ 消费面残留守（H6 防空洞登记）：normalizeFileEditInput（旧 normalize
- *    站点）/ getSnippetForTwoFileDiff（attachments 面）/ getSnippetFor
- *    Patch / getSnippet（TUI snippet 面）/ getEditsForPatch（NotebookEdit
- *    面）/ areFileEditsEquivalent 直接消费（经 areFileEditsInputsEquivalent
- *    间接）/ inputsEquivalent 旧 buildTool 成员已裁（新 Tool 契面无槽位，
- *    fileEditTool 头注）→ 纯函数本体保留导出（零成本），消费面随 TUI 波 /
- *    NotebookEdit 本体波 / gate 波落。
+ *  ③ 消费面残留守（H6 防空洞登记，消费方 = 旧仓全仓 grep 实况）：
+ *    normalizeFileEditInput（旧 src/utils/api.ts normalize 站点）/
+ *    getSnippetForTwoFileDiff（旧 src/utils/attachments.ts 面）/
+ *    getSnippetForPatch + getSnippet（旧仓零消费孤儿）/ getEditsForPatch
+ *    （旧 src/hooks/useDiffInIDE.ts IDE diff 预览 hook = TUI 面，非
+ *    NotebookEdit）/ areFileEditsInputsEquivalent 直接消费（经
+ *    areFileEditsEquivalent 间接）/ inputsEquivalent 旧 buildTool 成员已
+ *    裁（新 Tool 契面无槽位，fileEditTool 头注）→ 纯函数本体保留导出
+ *    （零成本），消费面随 TUI 波 / gate 波落（NotebookEdit 本体波不消费
+ *    本文件）。
  */
 import { type StructuredPatchHunk, structuredPatch } from 'diff'
 import {
@@ -795,7 +804,10 @@ export function areFileEditsInputsEquivalent(
   // compare against empty content (no TOCTOU pre-check).
   let fileContent = ''
   try {
-    // delta ①：expandPath 双参（补 getCwd()，零行为差）
+    // delta ①（S-C7 A 路 MINOR-1 订正）：本站点旧仓为裸
+    // readFileSyncCached(input1.file_path)（无 expandPath）→ 新增
+    // expandPath 双参 = ~ 展开 + 相对路径按 getCwd() 解析（新增行为，
+    // 潜伏：消费面 gate 波 + file_path schema 面为绝对路径）
     fileContent = readFileSyncCached(expandPath(input1.file_path, getCwd()))
   } catch (error) {
     if (!isENOENT(error)) {
