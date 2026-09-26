@@ -72,6 +72,21 @@
  *   自门控 isEnabled = isWorktreeModeEnabled（ATLAS_DISABLE_WORKTREE_MODE
  *   kill-switch，GA 缺省开）；worktree 域 E-7 S-7c + S-D2a 会话/tmux 族
  *   已落，域已闭环）。
+ * §8.58 S-E2（plan 族子波）已落 plan/ 子域 EnterPlanModeTool /
+ *   ExitPlanModeV2Tool 两本体（2 对象 + JSON schema 2 常量 + Output 型 2 +
+ *   AllowedPrompt 型 + planPrompt 面（Enter interview 门双变体动态模板 +
+ *   Exit 29L 静态模板 + 2 DESCRIPTION 短常量 +
+ *   isPlanModeInterviewPhaseEnabled env-only 门）+ plan 域 7 函数
+ *   （planDomain：getPlanSlug 域内缓存 + getPlansDirectory 闭包 memo +
+ *   getPlanFilePath/getPlan + slug 管理 3 件，旧仓 utils/plans.ts 消费面
+ *   随迁 + utils/words.ts 800L 词表逐字 = planWords）+ planToolInput duck
+ *   8 型，旧仓 tools/EnterPlanModeTool 113L + prompt 103L +
+ *   tools/ExitPlanModeTool 475L + prompt 29L 逐字随迁多裁，见各文件头注
+ *   delta ①-⑨/⑩）→ 在此 re-export（plan/ 子门面）；残留守「49 本体」
+ *   登记再缩 2 → 20/49（plan 族无专属门控槽 = 无条件注册面，同 Read/
+ *   Write 族；裁面登记：team 支 → C 桶 ③ shell·swarm 波 / auto-mode gate
+ *   族 + bootstrap 4 旗标 → C 桶 ② auto-mode 纵切波 /
+ *   persistFileSnapshotIfRemote → remote 波 / _sdkInputSchema → D 波）。
  */
 export {
   createMcpTools,
@@ -589,3 +604,35 @@ export {
   type EnterWorktreeToolInput,
   type ExitWorktreeToolInput,
 } from './worktree'
+// ── S-E2（§8.58）：plan 子域（EnterPlanMode/ExitPlanModeV2 两本体 +
+// plan 域 7 函数 + 词表 800L）──
+export {
+  ENTER_PLAN_MODE_TOOL_INPUT_SCHEMA,
+  EnterPlanModeTool,
+  type EnterPlanModeOutput,
+  EXIT_PLAN_MODE_V2_TOOL_INPUT_SCHEMA,
+  ExitPlanModeV2Tool,
+  type AllowedPrompt,
+  type ExitPlanModeV2Output,
+  ENTER_PLAN_MODE_DESCRIPTION,
+  EXIT_PLAN_MODE_V2_DESCRIPTION,
+  EXIT_PLAN_MODE_V2_TOOL_PROMPT,
+  getEnterPlanModeToolPrompt,
+  isPlanModeInterviewPhaseEnabled,
+  clearAllPlanSlugs,
+  clearPlanSlug,
+  getPlan,
+  getPlanFilePath,
+  getPlanSlug,
+  getPlansDirectory,
+  setPlanSlug,
+  generateShortWordSlug,
+  generateWordSlug,
+  type EnterPlanModeAppState,
+  type EnterPlanModeToolContext,
+  type EnterPlanModeToolInput,
+  type ExitPlanModeV2AppState,
+  type ExitPlanModeV2ToolContext,
+  type ExitPlanModeV2ToolInput,
+  type ExitPlanModeV2ValidateContext,
+} from './plan'
