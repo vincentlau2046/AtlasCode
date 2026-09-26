@@ -17,7 +17,8 @@
  *    env 控长，纯 env 无大文件）+ '\n\n' join 位）。
  *  - validateInput 3 支守卫（缺 id ec 1 / 未找到 ec 2 / 找到真）。
  *  - call block=false 面（not-found throw / 终态 success + notified
- *    标记 / running not_ready 不标记）+ local_bash taskOutput 端口支
+ *    标记 / running not_ready 不标记 = P-D4 探针锚点，§8.56.5）+
+ *    local_bash taskOutput 端口支
  *    （stdout/stderr join 面，纯内存假句柄）+ local_agent cleanResult
  *    支（内存 result 净文本优先 + prompt/error 透传面）。
  *  - call block=true 面（onProgress waiting_for_task 发射面 / 等待中
@@ -334,7 +335,7 @@ describe('TaskOutputTool call block=false', () => {
     expect(store.getState().tasks['b1']!.notified).toBe(true)
   })
 
-  test('running → not_ready（notified 不标记位）', async () => {
+  test('running → not_ready（P-D4 探针锚点，notified 不标记位）', async () => {
     const running = makeBashTask('b2', { status: 'running' })
     const store = makeStore({ b2: running as unknown as TaskStateBase })
     const res = await TaskOutputTool.call(

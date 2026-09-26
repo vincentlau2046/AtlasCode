@@ -40,7 +40,7 @@ export interface TaskGetToolInput {
   taskId: string
 }
 
-/** TaskList 输入（旧 zod 空 strictObject，无字段）。 */
+/** TaskList 输入（旧 zod 空 strictObject，无字段；call 0 参无 cast 位，导出仅文档面，S-D6 审视 B 注记）。 */
 export interface TaskListToolInput {
   [k: string]: never
 }

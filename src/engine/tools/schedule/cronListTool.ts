@@ -18,8 +18,10 @@
  *  ② TOOL_DEFAULTS 成员对象化（逐值）：isConcurrencySafe true /
  *    isReadOnly true（def 显式覆写，只读列表面）/ isDestructive false
  *    （默认）/ maxResultSizeChars 100_000（def 体）/ shouldDefer true /
- *    searchHint 'list active cron jobs' / userFacingName ''（TOOL_
- *    DEFAULTS 缺省值，def 无 member）/ toAutoClassifierInput ''
+ *    searchHint 'list active cron jobs' / userFacingName 'CronList'
+ *    （def 无 member → 旧 buildTool name-wins 插入 userFacingName:
+ *    () => def.name 生效位 = 工具名，非 TOOL_DEFAULTS 缺省 ''；S-D6
+ *    审视 A 订正）/ toAutoClassifierInput ''
  *    （TOOL_DEFAULTS 缺省值逐值固化，def 无覆写；S-D3 TaskList 先例）。
  *  ③ checkPermissions = 旧 buildTool 默认（{ behavior:'allow',
  *    updatedInput }）显式固化（def 无 member，S-D3 delta ⑤ 同族先例）。
@@ -112,7 +114,7 @@ export const CronListTool: Tool = {
   isReadOnly: () => true,
   isDestructive: () => false,
   toAutoClassifierInput: () => '',
-  userFacingName: () => '',
+  userFacingName: () => 'CronList', // S-D6 审视 A 订正：旧 buildTool name-wins 生效位
   // delta ③：旧 buildTool 默认显式固化（委托通用权限系统）
   checkPermissions: async (input: unknown) => ({
     behavior: 'allow',

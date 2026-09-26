@@ -25,6 +25,7 @@ export interface CronDeleteToolInput {
   id: string
 }
 
+/** 列面空输入（call 0 参无 cast 位，导出仅文档面，S-D6 审视 B 注记）。 */
 export interface CronListToolInput {
   [key: string]: never
 }

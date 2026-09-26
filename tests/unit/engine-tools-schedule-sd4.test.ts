@@ -115,7 +115,8 @@ describe('CronCreateTool 对象面', () => {
     expect(CronCreateTool.isConcurrencySafe({})).toBe(false)
     expect(CronCreateTool.isReadOnly({})).toBe(false)
     expect(CronCreateTool.isDestructive?.({})).toBe(false)
-    expect(CronCreateTool.userFacingName({})).toBe('')
+    // S-D6 审视 A 订正：旧 buildTool name-wins 生效位 = 工具名（非 TOOL_DEFAULTS 缺省 ''）
+    expect(CronCreateTool.userFacingName({})).toBe('CronCreate')
     expect(
       CronCreateTool.toAutoClassifierInput({ cron: '*/5 * * * *', prompt: 'p' }),
     ).toBe('*/5 * * * *: p')
@@ -225,7 +226,8 @@ describe('CronDeleteTool 对象面', () => {
     expect(CronDeleteTool.isConcurrencySafe({})).toBe(false)
     expect(CronDeleteTool.isReadOnly({})).toBe(false)
     expect(CronDeleteTool.toAutoClassifierInput({ id: 'j1' })).toBe('j1')
-    expect(CronDeleteTool.userFacingName({})).toBe('')
+    // S-D6 审视 A 订正：旧 buildTool name-wins 生效位 = 工具名
+    expect(CronDeleteTool.userFacingName({})).toBe('CronDelete')
     expect(CronDeleteTool.isEnabled()).toBe(true)
   })
 
@@ -258,7 +260,8 @@ describe('CronListTool 对象面', () => {
     expect(CronListTool.isReadOnly({})).toBe(true)
     expect(CronListTool.isDestructive?.({})).toBe(false)
     expect(CronListTool.toAutoClassifierInput({})).toBe('')
-    expect(CronListTool.userFacingName({})).toBe('')
+    // S-D6 审视 A 订正：旧 buildTool name-wins 生效位 = 工具名
+    expect(CronListTool.userFacingName({})).toBe('CronList')
     expect(CronListTool.isEnabled()).toBe(true)
   })
 

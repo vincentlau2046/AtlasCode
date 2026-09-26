@@ -74,6 +74,9 @@
  *    （独消费者 = TaskOutputResultDisplay）/ 旧 zod lazySchema/
  *    semanticBoolean → 裁（纯 JSON schema 无 zod 运行时，S-C4 delta ②
  *    先例）。
+ *  ⑩ P-D4 探针锚点（§8.56.5，S-D6 审视 B 补标签）：call block=false
+ *    not_ready 支（running + block=false → retrieval_status 'not_ready'，
+ *    突变删支 → 恰 1 红；活测试 = sd5-unit 'running → not_ready' 行）。
  */
 import {
   type Tool,
@@ -334,6 +337,7 @@ export const TaskOutputTool: Tool<
           },
         }
       }
+      // P-D4 探针锚点（§8.56.5）：not_ready 支（delta ⑩）
       return {
         data: {
           retrieval_status: 'not_ready' as const,

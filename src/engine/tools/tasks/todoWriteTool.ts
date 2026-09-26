@@ -14,7 +14,9 @@
  *    'The updated todo list') }) 逐字段转写；TodoItem 3 字段：content /
  *    activeForm 旧 min(1, msg) → minLength: 1（todoTypes delta ① 登记
  *    的承载面），status 枚举约束不进 JSON schema（宽骨架面，S-C4 delta
- *    ② / S-D3 TaskUpdate 先例，非法值走 TodoStatus 型面 + 存储域守卫）/
+ *    ② / S-D3 TaskUpdate 先例，非法值走 TodoStatus 型面 + 存储域守卫）
+ *    且 status 无 description（旧 types.ts 该字段无 .describe()，S-D6
+ *    审视 A 移除未登记添加）/
  *    旧 zod outputSchema（z.infer）→ TS 型 TodoWriteOutput（引擎侧无
  *    wire outputSchema 消费者，D 波前向接缝）。
  *  ② 旧 prompt() 成员 → 新契约唯一 prompt 面 description() = 旧 prompt()
@@ -88,7 +90,6 @@ export const TODO_WRITE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
           },
           status: {
             type: 'string',
-            description: 'The status of the task',
           },
           activeForm: {
             type: 'string',

@@ -17,8 +17,10 @@
  *  ② TOOL_DEFAULTS 成员对象化（逐值）：isConcurrencySafe false /
  *    isReadOnly false / isDestructive false（def 无覆写取默认）/
  *    maxResultSizeChars 100_000（def 体）/ shouldDefer true / searchHint
- *    'cancel a scheduled cron job' / userFacingName ''（TOOL_DEFAULTS
- *    缺省值）/ toAutoClassifierInput = input.id（def 体）。
+ *    'cancel a scheduled cron job' / userFacingName 'CronDelete'（def
+ *    无 member → 旧 buildTool name-wins 插入 userFacingName: () =>
+ *    def.name 生效位 = 工具名，非 TOOL_DEFAULTS 缺省 ''；S-D6 审视 A
+ *    订正）/ toAutoClassifierInput = input.id（def 体）。
  *  ③ checkPermissions = 旧 buildTool 默认（{ behavior:'allow',
  *    updatedInput }）显式固化（def 无 member，S-D3 delta ⑤ 同族先例）。
  *  ④ 旧 getPath()（getCronFilePath）→ 裁（新契约无 getPath 面，权限波
@@ -76,7 +78,7 @@ export const CronDeleteTool: Tool = {
   isDestructive: () => false,
   toAutoClassifierInput: (input: unknown) =>
     (input as CronDeleteToolInput).id,
-  userFacingName: () => '',
+  userFacingName: () => 'CronDelete', // S-D6 审视 A 订正：旧 buildTool name-wins 生效位
   // delta ③：旧 buildTool 默认显式固化（委托通用权限系统）
   checkPermissions: async (input: unknown) => ({
     behavior: 'allow',
