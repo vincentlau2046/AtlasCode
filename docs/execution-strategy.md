@@ -3260,3 +3260,76 @@ S-C7 = 整波审视：A 路旧仓逐字对照 + B 路 H6 死接缝/探针双向�
 - 探针 P-C1..P-C5 复核：P-C2/P-C3/P-C4/P-C5 红集与登记基线一致（P-C4 写侧 3 红集 {acceptEdits 内 allow + {mode acceptEdits} + updatedInput 透传 / acceptEdits 外 ask / default 内 ask decisionReason undefined}），S-C7 修复全头注面未触碰探针锚点。
 
 波终态：**1976 pass / 115 文件 / 4408 expect + gate 6·5**；49 口径 6/49。既定序列下一子波 = 其余 43 长尾本体纵切 → C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L）→ D 波 → remote → analytics。
+
+## §8.56 任务工具本体子波（C 桶 ① 子波 4）：执行前分析（task #130 ①）
+
+**范围**：旧仓 10 个任务/调度面工具本体随迁入新仓 —— **Task 四件套**（TaskCreate/TaskGet/TaskUpdate/TaskList，门控槽 ⑯ isTodoV2）+ **cron 三件套**（CronCreate/CronDelete/CronList，门控槽 ② AGENT_TRIGGERS；registry 裁定 ②⑯ 同子波）+ **TaskStop / TaskOutput / TodoWrite**（无条件注册长尾，任务/调度面补齐）。本体落 `src/engine/tools/tasks/` + `src/engine/tools/schedule/` 两个新子域 + tools 门面 re-export（STR-1 先例）。**49 口径 6/49 → 16/49**（TaskCreate 7 / TaskGet 8 / TaskUpdate 9 / TaskList 10 / CronCreate 11 / CronDelete 12 / CronList 13 / TaskStop 14 / TaskOutput 15 / TodoWrite 16；余 33 长尾后续子波）。开波基线 = §8.55 闭环态 **1976 pass / 115 文件 / 4408 expect + gate 6·5**。波 tag 不切新 tag（子波提交链记录，门③ 仍用 wave-c）。
+
+### 8.56.1 范围裁定
+
+**本体 ts 面 ≈ 1935L（逐文件实清点）+ TaskOutput tsx 提取 ≈ 230L（transcript 非逐字，登记）**：
+
+| 工具 | 旧仓来源 | ts 面 | 备注 |
+|---|---|---|---|
+| TaskCreate | tools/TaskCreateTool/（Tool 138 + prompt 56 + constants 1） | 195 | hooks（TaskCreated 阻支回滚 deleteTask）+ setAppState expandedView='tasks' |
+| TaskGet | tools/TaskGetTool/（128 + 24 + 1） | 153 | 纯 tasks 存储读面 |
+| TaskUpdate | tools/TaskUpdateTool/（406 + 77 + 1） | 484 | hooks（TaskCompleted 阻支）+ blockTask + teammate 通知（writeToMailbox）+ swarm 门 3 站点 |
+| TaskList | tools/TaskListTool/（116 + 49 + 1） | 166 | 纯读面 + getPrompt |
+| CronCreate | tools/ScheduleCronTool/CronCreateTool.ts 157 + prompt 133 | 290 | scheduler 域消费（E-7 S-7b 已落） |
+| CronDelete | 95 | 95 | removeCronTasks |
+| CronList | 97 | 97 | listAllCronTasks |
+| TaskStop | tools/TaskStopTool/（131 + 8 + constants） | 139 | stopTask 三态守卫（E-7 S-7a 已落）消费面 |
+| TaskOutput | **tools/TaskOutputTool/TaskOutputTool.tsx（React Compiler 编译产物 585L，ts 面提取 ≈ 230L）** | ~230 | schema + userFacingName + validateInput + call（block/not_ready/timeout 三态）+ getTaskOutputData + waitForTaskCompletion + mapToolResult；UI React 面裁（§8.53 先例）；`isEnabled 'external'!=='ant'` 构建支 = de-ANT 先例恒 true |
+| TodoWrite | tools/TodoWriteTool/（115 + 184 + 1） | 300 | v1 todo；verification nudge 双门死支裁（growthbook） |
+
+**依赖闭包层 ≈ 1030L（3 新落点 + 2 扩面）**：
+- `src/utils/tasks.ts` **848L 任务列表存储** → 新域 **`src/engine/tasks/`**（disk JSON 每任务一文件 + `.highwatermark` + lockfile 互斥 + onTasksUpdated 信号 + claimTask/unassignTeammateTasks/getAgentStatuses teammate 协作面 + getTaskListId 四级判定链 env→teammateCtx.teamName→getTeamName→leaderTeamName→getSessionId）。zod Task/TaskStatus schema（L76-89，9 字段 + HIGH_WATER_MARK）→ TS 接口 + 轻量校验（JSON schema 转写先例 S-C1，delta 登记）。
+- `src/utils/todo/types.ts` 18L（TodoItem/TodoList zod）→ tasks 域同落（TodoItem 3 字段 + 枚举）。
+- `src/utils/task/outputFormatting.ts` **38L**（getMaxTaskOutputLength + formatTaskOutput + TASK_MAX_OUTPUT_* 常量）→ 既有 **`src/task/`** 域扩面（消费 diskOutput.getTaskOutputPath ✓ + shared 有界 env 解析面；TaskOutput 工具本体消费面）。
+- **task hook wrapper ≈ 90L**（旧 utils/hooks.ts：executeTaskCreatedHooks L3702 + executeTaskCompletedHooks + getTaskCreatedHookMessage L1915 + getTaskCompletedHookMessage，薄封装 executeHooks）→ 新 **`src/hooks/taskHooks.ts`**：新仓 runHooks（Promise 聚合，src/hooks/runHooks.ts L257）适配 —— 旧 AsyncGenerator 逐 hook yield → 新单聚合 yield（HOOK_EVENTS 已含 TaskCreated/TaskCompleted ✓ hookEvents.ts L27-28；createBaseHookInput ✓；TOOL_HOOK_EXECUTION_TIMEOUT_MS ✓），阻塞错误检测语义等价（消费面 for-await 收 blockingErrors），delta 登记。
+- `src/utils/agentSwarmsEnabled.ts` 44L（TaskUpdate 3 站点消费）→ **`src/engine/messaging/agentSwarmsEnabled.ts`**（teammate 域面）：env ATLAS_EXPERIMENTAL_AGENT_TEAMS + --agent-teams 旗标；growthbook 'atlas_amber_flint' killswitch 支裁（新仓无 GB，= opt-in 单门，delta 登记）。
+
+### 8.56.2 依赖落点（逐符号，全核过新仓既有面）
+
+- **既有面零新迁**：scheduler 域全（parseCronExpression/cronToHuman/nextCronRunMs/addCronTask/removeCronTasks/getCronFilePath/listAllCronTasks，E-7 S-7b 逐字）/ coordinator/tasks（stopTask ✓ framework.updateTaskState ✓ localShellTask/localAgentTask ✓）/ src/task 域（diskOutput.getTaskOutput ✓ L400 / TaskOutput 类 getStdout/getStderr ✓ / TaskStateBase ✓ task.ts L68 / fsRange ✓）/ messaging（getTeamName/getTeammateContext ✓ teammate·teammateContext / writeToMailbox ✓ mailbox / createSignal ✓ signal / lockfile.lock ✓ lockfile / getAtlasConfigHomeDir/getTeamsDir/jsonParse/jsonStringify ✓ mailbox）/ shared（isEnvTruthy / errorMessage / getErrnoCode / logError / logForDebugging / countCharInString / AbortError ✓ stopTask）/ bootstrap（getSessionId/getIsNonInteractiveSession ✓ state.ts）。
+- **扩面小件**：bootstrap/state.ts 补 `setScheduledTasksEnabled` = **any-stub 逐字**（旧仓 L253 即 `(() => ({})) as any` no-op stub，本体保真）；sleep 域内本地实现（bash/commands 先例）；uniq 域内本地实现（新仓无 lodash 先例）。
+- **RemoteAgentTaskState**（TaskOutput remote 支）：新仓未落（remote 波）→ duck 最小形（{command} 字段位）+ 前向接缝登记。
+- **TaskOutput `aliases: ['AgentOutputTool','BashOutputTool']`**：旧 buildTool 改名兼容 alias 面；新仓 legacyToolNameAliases.ts 4 项（Task→Agent/KillShell→TaskStop/…）不含此 2 名 = 独立机制 → S-D5 核新契约 alias 消费面后裁定（预计裁 + 登记，权限规则解析面零消费）。
+
+### 8.56.3 裁面裁定（H6，逐条带归属波）
+
+- **growthbook 2 站点裁**（新仓无 growthbook 域）：TaskUpdate L336 / TodoWrite L78 `getFeatureValue_CACHED_MAY_BE_STALE('atlas_hive_evidence', false)` 默认 false = verification nudge 死支 → 裁（恢复归属 analytics 波）；isAgentSwarmsEnabled 内 'atlas_amber_flint' killswitch 支裁（= opt-in 单门语义）。
+- **feature()（bun:bundle）裁**：TaskUpdate L335 / TodoWrite L78 `feature('VERIFICATION_AGENT')` 与 growthbook 双门合死 → 同支裁（bun:bundle 不可测先例 + 双门死支，恢复归属 analytics 波）。
+- **TaskOutput UI React 面裁**（renderToolUseMessage/renderToolResultMessage/AgentPromptDisplay/BashToolResultMessage 渲染体）→ 新契约 renderToolUseMessage 最小文本形（§8.53/§8.54 先例链）；extractSearchText 若旧有则逐字随迁。
+- **TaskOutput isEnabled 构建支裁**（`('external' as any)!=='ant'` = de-ANT 先例恒 true，isEnabled = () => true，delta 登记）。
+- **Task 四件套 context duck**：TaskToolUseContext（getAppState/setAppState/abortController/agentId?，FilesToolUseContext 先例扩面）；setAppState 消费 = todos/expandedView 面（TUI 波真注面前 = duck 缺省零崩溃支，S-C5 delta ⑭ 先例）。
+- **tasks.ts 存储面全量随迁**（含 claim/unassign/getAgentStatuses teammate 协作面 ~330L）：存储 = 单一事实源整体随迁，H6 只裁无新仓消费者的服务/域面（growthbook/telemetry 族），存储协作面不裁（多 agent 协调消费面 = 后续 TUI/shell·swarm 波，接缝登记不裁体）。
+- **backfillObservableInput / hooks 面**（若工具体含）：S-C5 ⑰ 先例登记。
+
+### 8.56.4 切片计划（S-D1…S-D7）
+
+| 切片 | 内容 | 测试面 |
+|---|---|---|
+| S-D1 | ① 执行前分析（本提交） | — |
+| S-D2 | 依赖闭包层：`src/engine/tasks/` 新域（tasks.ts 848L 逐字 + TodoItem/TodoList 型面 + 门面）+ `src/task/outputFormatting.ts` 38L + `src/hooks/taskHooks.ts` ~90L + `messaging/agentSwarmsEnabled.ts` 44L + bootstrap setScheduledTasksEnabled stub | unit 零盘（存储 CRUD/lock/claim 判别支）+ func 真盘 |
+| S-D3 | Task 四件套：`tools/tasks/` 子域（4 Tool + 4 prompt + constants + taskToolInput duck）+ tools 门面 re-export | unit 零盘（对象面/validateInput/checkPermissions 缺省支）+ P-D1/P-D2 |
+| S-D4 | cron 三件套 + TaskStop + TodoWrite：`tools/schedule/` 子域（3 cron + cronPrompt）+ tools/tasks 扩 2 件 + 门面 | unit + func（cron 校验支）+ P-D3/P-D5 |
+| S-D5 | TaskOutput：tools/tasks/taskOutput.ts（tsx 提取 ~230L）+ 门面 + alias 面裁定 | unit（call 三态 + mapToolResult 逐字）+ P-D4 |
+| S-D6 | 整波审视（双只读 ≤2：A 旧仓对照 / B H6 死接缝+探针）+ 修复 | 四联复验 |
+| S-D7 | 闭环：docs §8.56.6/7 + memory + task #130 闭环 | — |
+
+### 8.56.5 探针计划（恰 1 红 = 下界；backup→mutate→定向红集→verbatim restore diff 核验）
+
+- **P-D1** 存储 id 递增：createTask 最高 id 读盘支（fixture 最高 5 → 新建 '6'；突变改 0 基 → 恰 1 红）。
+- **P-D2** TaskUpdate hook 阻支：executeTaskCompletedHooks 阻塞 stub（突变删阻支门 → completed 标记照常落 → 恰 1 红）。
+- **P-D3** CronCreate validateInput 非法 cron：parseCronExpression null 支（突变去校验 → 恰 1 红）。
+- **P-D4** TaskOutput 非阻塞 not_ready 支：running + block=false → retrieval_status 'not_ready'（突变删支 → 恰 1 红）。
+- **P-D5** TaskStop 非任务态守卫：stopTask StopTaskError 支（突变放行 → 恰 1 红；S-7a 波已探 framework 面，本探针 = 工具面新锚）。
+
+### 8.56.6 验证四联（每切片）
+
+`bun x tsc --noEmit`（0）/ `bun x eslint <新增·改动文件>`（0）/ `bun build src/atlascode/cli.ts --outfile <tmp>/build-sdN.js --target node`（0 KB 级 entry）/ `bun test --isolate tests/`（全量 + 切片新测全绿）+ `bun test --isolate tests/ci/`（gate 6 pass / 5 expect，门③ wave-c 不变）。
+
+### 8.56.7 预测基线谱系
+
+开波 1976/115/4408 + gate 6·5 → S-D2 ~2016（存储 +40 测）→ S-D3 ~2046（+30 测）→ S-D4 ~2066（+20 测）→ S-D5 ~2081（+15 测）（+N 为预测，精确值各切片闭环时坐实；波终预测 ≈ 2080 pass / ~119 文件 / ~4650 expect）。
