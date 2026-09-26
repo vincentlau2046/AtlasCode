@@ -1,20 +1,21 @@
 /**
- * engine/tools/files 子门面（§8.55 S-C4，STR-1 显式名块纪律）。
+ * engine/tools/files 子门面（§8.55 S-C5，STR-1 显式名块纪律）。
  *
  * 覆盖 S-C1（依赖闭包层 1：fileUtils/fileRead/fileReadCache/diffUtils/
  * semantic/apiLimits/modelRef/fileEditTypes）+ S-C2（依赖闭包层 2：
  * globIgnorePatterns/globUtils）+ S-C3（pdf/notebook 族：pdf/pdfUtils/
  * notebook/notebookTypes/execFileNoThrow）+ S-C4（Glob/Grep 本体：
- * globTool/grepTool/globPrompt/grepPrompt/relativePath/filesToolInput）。
+ * globTool/grepTool/globPrompt/grepPrompt/relativePath/filesToolInput）+
+ * S-C5（Read 本体：readTool/binaryExtensions/readFileLimits/readPrompt/
+ * userMessage/memoryFreshness + filesToolInput S-C5 扩面）。
  *
  * 纪律（tools/index.ts bash 块先例）：逐名显式 re-export，无 `export *`；
- * 全 90 名 0 重名核验（S-C4 逐文件 grep 收集）；各文件头注 delta 登记
- * 不随门面重复（单一事实源 = 各模块头注）。
+ * 全 118 名 0 重名核验（S-C5 逐文件 grep 收集：S-C4 90 + S-C5 28）；各
+ * 文件头注 delta 登记不随门面重复（单一事实源 = 各模块头注）。
  *
- * 消费方：tools/ 门面 S-C4 re-export 块 + 组合根 baseTools 注入位
- * （GlobTool/GrepTool，注册表 ⑰ 槽 Glob/Grep 恒注册）+ 后续 S-C5
- * Read / S-C6 Write+Edit 本体（同域依赖 fileUtils/fileRead/diffUtils
- * 消费面）。
+ * 消费方：tools/ 门面 S-C5 re-export 块 + 组合根 baseTools 注入位
+ * （ReadTool，注册表 ⑰ 槽 Read 恒注册，Glob/Grep 同槽）+ 后续 S-C6
+ * Write+Edit 本体（同域依赖 fileUtils/fileRead/diffUtils 消费面）。
  */
 // ── S-C1（§8.55）：依赖闭包层 1 ──
 export {
@@ -129,6 +130,9 @@ export { toRelativePath } from './relativePath'
 export type {
   GlobToolInput,
   GrepToolInput,
+  ReadToolInput,
+  FileState,
+  ReadFileState,
   FilesToolUseContext,
 } from './filesToolInput'
 export {
@@ -141,3 +145,41 @@ export {
   GrepTool,
   type GrepOutput,
 } from './grepTool'
+// ── S-C5（§8.55）：Read 本体 ──
+export {
+  BINARY_EXTENSIONS,
+  hasBinaryExtension,
+  isBinaryContent,
+} from './binaryExtensions'
+export {
+  DEFAULT_MAX_OUTPUT_TOKENS,
+  getDefaultFileReadingLimits,
+  type FileReadingLimits,
+} from './readFileLimits'
+export {
+  FILE_UNCHANGED_STUB,
+  MAX_LINES_TO_READ,
+  DESCRIPTION,
+  LINE_FORMAT_INSTRUCTION,
+  OFFSET_INSTRUCTION_DEFAULT,
+  OFFSET_INSTRUCTION_TARGETED,
+  renderPromptTemplate,
+} from './readPrompt'
+export {
+  type InDomainUserMessage,
+  createUserMessage,
+} from './userMessage'
+export {
+  memoryAgeDays,
+  memoryAge,
+  memoryFreshnessText,
+  memoryFreshnessNote,
+} from './memoryFreshness'
+export {
+  READ_TOOL_INPUT_SCHEMA,
+  ReadTool,
+  type ReadOutput,
+  MaxFileReadTokenExceededError,
+  registerFileReadListener,
+  CYBER_RISK_MITIGATION_REMINDER,
+} from './readTool'

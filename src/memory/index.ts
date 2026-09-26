@@ -7,7 +7,9 @@
  * re-export: types / FileSystemMemoryStore / RootedMemoryStore /
  *            InMemoryStore / CompositeMemoryStore / paths / config /
  *            memoryTypes / memoryAge / memoryFileDetection（§8.55 S-C2）/
- *            validateMemoryFrontmatter / frontmatterParser
+ *            validateMemoryFrontmatter / frontmatterParser /
+ *            readFileInRange（§8.55 S-C5，engine/tools/files Read 本体
+ *            消费面经门面）
  */
 
 // 接口 + 实现类
@@ -83,3 +85,11 @@ export {
   type FrontmatterData,
   type ParsedMarkdown,
 } from './frontmatterParser'
+
+// §8.55 S-C5：行导向文件读取器（旧仓 utils/readFileInRange.ts 迁入，
+// engine/tools/files Read 本体消费面经门面；原深路径 import 违 STR-1）
+export {
+  readFileInRange,
+  FileTooLargeError,
+  type ReadFileRangeResult,
+} from './readFileInRange'

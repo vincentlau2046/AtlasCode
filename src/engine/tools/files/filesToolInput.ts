@@ -20,8 +20,21 @@
  *  - FilesToolUseContext.getAppState 返回面 = toolPermissionContext 单
  *    成员 duck（Glob/Grep call + checkPermissions 仅消费该成员；全
  *    AppState 面 = 残留守，真 ToolUseContext 全字段面 D 波/TUI 波）。
+ *
+ * S-C5 扩面（§8.55，Read 本体消费子集）：
+ *  - ReadToolInput = 旧 zod 4 字段（file_path/offset/limit/pages）；
+ *    offset/limit = **转换后**类型（number），字符串数字容忍 = call/render
+ *    入口 semanticToNumber 转换（S-C1/S-C4 先例，readTool delta ②）。
+ *  - FileState/ReadFileState = 旧 utils/fileStateCache.ts 值形 + get/set
+ *    duck（readTool delta ⑭：LRU 100 条/25MB 驱逐不随迁，新仓无
+ *    lru-cache 依赖，缓存实例创建 = 组合根/D 波责任，Map 即满足 duck）。
+ *  - FilesToolUseContext 新增 3 可选成员（readFileState?/fileReadingLimits?/
+ *    nestedMemoryAttachmentTriggers?）：引擎侧注入位未落（组合根/D 波
+ *    接线），旧调用点全 ?. 可选链 → 缺省零崩溃面（dedup 面缺省跳过 =
+ *    dedup 引入前基线，readTool delta ⑭/⑨）。
  */
 import type { ToolPermissionContext } from '../../../shared'
+import type { FileReadingLimits } from './readFileLimits'
 
 /** Glob 输入（旧 zod 2 字段逐字段对齐）。 */
 export interface GlobToolInput {
@@ -47,12 +60,51 @@ export interface GrepToolInput {
   multiline?: boolean
 }
 
+/** Read 输入（旧 zod 4 字段逐字段对齐；offset/limit = 转换后类型）。 */
+export interface ReadToolInput {
+  file_path: string
+  offset?: number
+  limit?: number
+  pages?: string
+}
+
+/** 旧 FileState（旧仓 utils/fileStateCache.ts:4-15 形逐字）。 */
+export interface FileState {
+  content: string
+  timestamp: number
+  offset: number | undefined
+  limit: number | undefined
+  // True when this entry was populated by auto-injection (e.g. ATLAS.md) and
+  // the injected content did not match disk (stripped HTML comments, stripped
+  // frontmatter, truncated MEMORY.md). The model has only seen a partial view;
+  // Edit/Write must require an explicit Read first. `content` here holds the
+  // RAW disk bytes (for getChangedFiles diffing), not what the model saw.
+  isPartialView?: boolean
+}
+
 /**
- * Glob/Grep call + checkPermissions 消费 context 子集（旧 ToolUseContext
- * 解构面 duck；globLimits 仅 Glob 消费）。
+ * readFileState duck（旧 FileStateCache LRU 消费面 get/set，delta ⑭；
+ * LRU 100 条/25MB 驱逐不随迁 — 缓存实例创建 = 组合根/D 波责任，
+ * Map 即满足本 duck）。
+ */
+export interface ReadFileState {
+  get(key: string): FileState | undefined
+  set(key: string, value: FileState): unknown
+}
+
+/**
+ * Glob/Grep/Read call + checkPermissions 消费 context 子集（旧
+ * ToolUseContext 解构面 duck；globLimits 仅 Glob 消费；S-C5 新增 3
+ * 可选成员 = Read 消费面，引擎侧注入位未落 → 组合根/D 波接线）。
  */
 export interface FilesToolUseContext {
   getAppState(): { toolPermissionContext: ToolPermissionContext }
   abortController: AbortController
   globLimits?: { maxResults?: number }
+  /** Read dedup/state 面（delta ⑭：缺省 = dedup 跳过 + 不写状态）。 */
+  readFileState?: ReadFileState
+  /** Read 输出限额 override（缺省 = getDefaultFileReadingLimits）。 */
+  fileReadingLimits?: FileReadingLimits
+  /** nested memory attachment 触发面（旧调用点 ?. 可选链，零崩溃面）。 */
+  nestedMemoryAttachmentTriggers?: Set<string>
 }

@@ -2,7 +2,7 @@
  * 基础工具 Read/Edit/Bash/Glob/Grep + AgentTool + 注册表 getAllBaseTools
  *
  * 实现波次: E-2 已落 AgentTool 核心（T-5b）+ MCP 构建（T-5a）+ 注册表机制
- *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool + §8.55 S-C4 已落 GlobTool + GrepTool = 3/49（46 剩，高频 → 长尾序列；S-C5 Read / S-C6 Write+Edit 随本波续落 → 6/49）。
+ *   getAllBaseTools(deps)（T-5e）；49 基础工具本体（47 = 历史口径，§8.53 审计④）= 残留守（各本体纵切经 deps 注入）——§8.54 S-B5 已落 BashTool + §8.55 S-C4 已落 GlobTool + GrepTool + S-C5 已落 ReadTool = 4/49（45 剩，高频 → 长尾序列；S-C6 Write+Edit 随本波续落 → 6/49）。
  *
  * T-5a（§8.25 E-2）已落 MCP 工具构建面 → 在此 re-export；port 类型面
  *   （McpToolResult/McpToolClient/McpToolDescriptor/MCPServerConnection）归
@@ -33,7 +33,8 @@
  *   1/2/3 + Glob/Grep 本体 → 在此 re-export（files/ 子门面）；S-C4 落
  *   GlobTool + GrepTool 对象（残留守「49 本体」登记再缩 2 → 3/49）+
  *   checkPermissions 一线接线 checkReadPermissionForTool（搜索工具面
- *   读权限决策体消费，§8.55 裁定）。
+ *   读权限决策体消费，§8.55 裁定）；S-C5 落 ReadTool 本体（4/49 中间态，
+ *   S-C6 Write+Edit 随本波续落 → 6/49 波终态）。
  */
 export {
   createMcpTools,
@@ -396,4 +397,33 @@ export {
   GREP_TOOL_INPUT_SCHEMA,
   GrepTool,
   type GrepOutput,
+  // S-C5：Read 本体
+  BINARY_EXTENSIONS,
+  hasBinaryExtension,
+  isBinaryContent,
+  DEFAULT_MAX_OUTPUT_TOKENS,
+  getDefaultFileReadingLimits,
+  type FileReadingLimits,
+  FILE_UNCHANGED_STUB,
+  MAX_LINES_TO_READ,
+  DESCRIPTION,
+  LINE_FORMAT_INSTRUCTION,
+  OFFSET_INSTRUCTION_DEFAULT,
+  OFFSET_INSTRUCTION_TARGETED,
+  renderPromptTemplate,
+  type InDomainUserMessage,
+  createUserMessage,
+  memoryAgeDays,
+  memoryAge,
+  memoryFreshnessText,
+  memoryFreshnessNote,
+  READ_TOOL_INPUT_SCHEMA,
+  ReadTool,
+  type ReadOutput,
+  MaxFileReadTokenExceededError,
+  registerFileReadListener,
+  CYBER_RISK_MITIGATION_REMINDER,
+  type ReadToolInput,
+  type FileState,
+  type ReadFileState,
 } from './files'
