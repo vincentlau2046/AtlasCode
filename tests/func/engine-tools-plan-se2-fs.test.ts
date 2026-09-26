@@ -6,7 +6,8 @@
  *  - plan 域（planDomain）真盘面：getPlansDirectory 缺省支
  *    join(ATLAS_CONFIG_DIR, 'plans') + mkdirSync 幂等（ATLAS_CONFIG_DIR
  *    指 tmpdir，首次 getPlansDirectory 前设置 = 闭包 memo 新鲜面）/
- *    getPlanSlug 3 段 slug 缓存 + 冲突重试（占用 {slug}.md 后重生成）/
+ *    getPlanSlug 3 段 slug 缓存 + 冲突重试（确定性注入
+ *    setPlanSlugGeneratorForTesting 序列，S-E3 B 路探针 (e) MUST-FIX）/
  *    getPlanFilePath 主会话 {slug}.md vs 子代理 {slug}-agent-{agentId}.md /
  *    getPlan ENOENT → null + 写后回读 + 子代理文件独立。
  *  - EnterPlanModeTool.call 真 appState duck（planToolInput 面）：
@@ -23,8 +24,9 @@
  * getPlanFilePath 内部 slug 面确定性）。
  *
  * 深度 import（门面归集）：../../src/engine/tools（两本体 + plan 域 7 函数
- * + slug 管理）+ ../../src/bootstrap（会话固定）+ ../../src/shared
- * （ToolPermissionContext 型）。
+ * + slug 管理 + 测试缝 setPlanSlugGeneratorForTesting）+
+ * ../../src/bootstrap（会话固定）+ ../../src/shared（ToolPermissionContext
+ * 型）。
  */
 import {
   describe,
@@ -53,6 +55,7 @@ import {
   clearAllPlanSlugs,
   getPlanFilePath,
   getPlan,
+  setPlanSlugGeneratorForTesting,
 } from '../../src/engine/tools'
 import { getSessionId, switchSession } from '../../src/bootstrap'
 import type { ToolPermissionContext } from '../../src/shared'
@@ -143,15 +146,25 @@ describe('plan 域 getPlanSlug slug 生命周期（真盘）', () => {
     expect(getPlanSlug('resume-s')).toBe('fixed-resume-slug')
   })
 
-  test('冲突重试：占用 {slug}.md 后 clear 重生成（真盘 I/O）', () => {
-    clearPlanSlug()
-    const slug1 = getPlanSlug()
-    writeFileSync(join(plansDir, `${slug1}.md`), 'occupied\n')
-    clearPlanSlug()
-    const slug2 = getPlanSlug()
-    expect(slug2).not.toBe(slug1)
-    // 重试循环保证不与既有文件冲突
-    expect(existsSync(join(plansDir, `${slug2}.md`))).toBe(false)
+  test('冲突重试：确定性注入 slug 序列（S-E3 B 路探针 (e)——existsSync 检查唯一保证位）', () => {
+    // 词表 9.76M 随机组合下原随机探针 P(red)≈1e-7（突变「去掉 existsSync
+    // 检查」不红）→ 经 setPlanSlugGeneratorForTesting 注入确定性序列
+    // [a,b,c]，预占 a/b 两文件：重试循环须跳过 a/b 落 c。突变「去掉
+    // existsSync 检查」将确定性返回已占用的 a → 两断言红。
+    const seq = ['seq-slug-a', 'seq-slug-b', 'seq-slug-c']
+    let i = 0
+    setPlanSlugGeneratorForTesting(() => seq[i++ % seq.length])
+    try {
+      writeFileSync(join(plansDir, 'seq-slug-a.md'), 'occupied\n')
+      writeFileSync(join(plansDir, 'seq-slug-b.md'), 'occupied\n')
+      clearPlanSlug()
+      const slug = getPlanSlug()
+      expect(slug).toBe('seq-slug-c')
+      expect(existsSync(join(plansDir, `${slug}.md`))).toBe(false)
+    } finally {
+      setPlanSlugGeneratorForTesting(null)
+      clearPlanSlug()
+    }
   })
 })
 

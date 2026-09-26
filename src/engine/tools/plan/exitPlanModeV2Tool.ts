@@ -20,7 +20,7 @@
  *    plan/planFilePath 键经此面放行，call 收窄 `'plan' in input` 判别支
  *    依赖不变）；旧 zod outputSchema（z.infer 推断 Output 7 字段）→ TS 型
  *    承载（D 波前向接缝，S-D2b delta ① 同面；awaitingLeaderApproval/
- *    requestId/hasTaskTool 3 可选字段运行时生产者随 delta ⑩⑫ 裁 = 恒
+ *    requestId/hasTaskTool 3 可选字段运行时生产者随 delta ⑥⑧ 裁 = 恒
  *    undefined，型面保留待 C 桶 ③ 恢复）。
  *  ② 旧 _sdkInputSchema 导出成员（inputSchema.extend(plan/planFilePath)
  *    SDK 面）→ 裁 + 登记（D 波 SDK 壳接线前向接缝，S-B5 族先例；duck
@@ -36,7 +36,7 @@
  *    裁 + 登记归属 C 桶 ② auto-mode 纵切波（~3030L 分类器族消费位；
  *    S-D1 裁定重指）。prePlanMode 恢复链主体保留 = delta ⑤。
  *  ⑤ 旧 4 个 plan-mode bootstrap 状态旗标（setHasExitedPlanMode /
- *    setNeedsPlanModeExitAttachment / setNeedsAutoModeExitAttachment /
+ *    setNeedsAutoModeExitAttachment / setNeedsPlanModeExitAttachment /
  *    hasExitedPlanModeInSession，旧 bootstrap/state.ts:237/248/249/308
  *    全 any-stub `: any = (() => ({})) as any`）→ 裁 + 登记（H6 纪律：
  *    stub 不当真行为，旧仓即 no-op 裁零行为差；TUI/attachment 波消费位）。

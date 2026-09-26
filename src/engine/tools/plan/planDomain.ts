@@ -7,9 +7,11 @@
  * 逐字随迁（planWords.ts，generateWordSlug 供 getPlanSlug 冲突重试面）。
  *
  * delta 登记（H6 逐条，复审勿当遗漏重提）：
- *  ① 旧 getPlanSlugCache（bootstrap/state 全局 Map，plans.ts:34 经
- *    getPlanSlugCache() 消费）→ 域内本地 Map（bootstrap 该 stub 面 S-D2a
- *    已整砍登记；单进程等价，测试操纵面 = setPlanSlug/clearPlanSlug/
+ *  ① 旧 getPlanSlugCache（bootstrap/state.ts:82 any-stub
+ *    `: any = () => new Map()`，每次调用新 Map = 旧仓实际无跨调用持久化；
+ *    H6 纪律 stub 不当真行为，旧 plans.ts:34/55/64/72 四处消费全经该
+ *    stub）→ 域内本地真 Map（意图面恢复而非 stub 复刻；bootstrap 该
+ *    stub 面 S-D2a 已整砍登记；测试操纵面 = setPlanSlug/clearPlanSlug/
  *    clearAllPlanSlugs 真导出面）。
  *  ② 旧 getPlansDirectory lodash-es memoize（plans.ts:79，「regressed in
  *    #20005」注释逐字保留）→ 域内闭包 memo（新仓无 lodash，toolRegistry
@@ -25,11 +27,17 @@
  *    同源先例重指；消费位 ExitPlanModeV2 call 同步支同裁，
  *    exitPlanModeV2Tool.ts delta ⑨ 登记）。
  *  ⑤ 旧 getPlanSlug import EXIT_PLAN_MODE_V2_TOOL_NAME（plans.ts:14，
- *    plan 模式工具出口检测面）+ getSlugFromLog/restorePlanSlug（resume/
- *    log 恢复面，plans.ts:149+）+ plan 快照恢复族 → 裁（CLI/resume 波
- *    前向接缝，H6 此处登记）。
+ *    plan 模式工具出口检测面）+ getSlugFromLog/copyPlanForResume/
+ *    copyPlanForFork（resume/log 恢复族，plans.ts:149+）+ plan 快照恢复
+ *    族 → 裁（CLI/resume 波前向接缝，H6 此处登记）。
  *  ⑥ 旧 AgentId/SessionId 品牌型（src/types/ids）→ 裸 string（新仓无
  *    品牌 ID 型面，duck 契约同族先例）。
+ *  ⑦ 测试缝 setPlanSlugGeneratorForTesting（S-E3 B 路探针 (e) MUST-FIX：
+ *    词表 9.76M 随机组合下「冲突重试 existsSync 检查」突变无可靠红位
+ *    P(red)≈1e-7 → 模块级 slugGenerator 引用（缺省 = generateWordSlug，
+ *    生产零行为差）+ 确定性序列注入；先例 = engine/session/project.ts
+ *    *ForTesting 族）。冲突重试循环体 `slug = generateWordSlug()` →
+ *    `slug = slugGenerator()` 为唯一非逐字位（本条登记）。
  *
  * 消费方：EnterPlanModeTool / ExitPlanModeV2Tool（call 面 getPlanFilePath/
  * getPlan）+ plan/index.ts 子门面（CLI/plans 波 setPlanSlug 恢复面预留）。
@@ -42,8 +50,23 @@ import { generateWordSlug } from './planWords'
 
 const MAX_SLUG_RETRIES = 10
 
-// delta ①：旧 bootstrap getPlanSlugCache 全局 Map → 域内本地（单进程等价）
+// delta ①：旧 bootstrap getPlanSlugCache any-stub（每次调用新 Map）→
+// 域内本地真 Map（意图面恢复，详见头注 delta ①）
 const planSlugCache = new Map<string, string>()
+
+// delta ⑦：测试缝（生产缺省 = generateWordSlug 零行为差，func 层确定性
+// 注入冲突序列，见 setPlanSlugGeneratorForTesting）
+let slugGenerator: () => string = generateWordSlug
+
+/**
+ * 测试缝：注入 slug 生成器（null = 恢复缺省 generateWordSlug）。
+ * 先例 = engine/session/project.ts *ForTesting 族（S-E3 B 路登记）。
+ */
+export function setPlanSlugGeneratorForTesting(
+  fn: (() => string) | null,
+): void {
+  slugGenerator = fn ?? generateWordSlug
+}
 
 /**
  * Get or generate a word slug for the current session's plan.
@@ -58,7 +81,7 @@ export function getPlanSlug(sessionId?: string): string {
     const plansDir = getPlansDirectory()
     // Try to find a unique slug that doesn't conflict with existing files
     for (let i = 0; i < MAX_SLUG_RETRIES; i++) {
-      slug = generateWordSlug()
+      slug = slugGenerator() // delta ⑦ 测试缝位（缺省 = generateWordSlug）
       const filePath = join(plansDir, `${slug}.md`)
       if (!getFsImplementation().existsSync(filePath)) {
         break

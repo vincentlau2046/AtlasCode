@@ -6,6 +6,7 @@
  * AllowedPrompt 型 + prompt 面（getEnterPlanModeToolPrompt /
  * EXIT_PLAN_MODE_V2_TOOL_PROMPT / 2 DESCRIPTION 短常量 +
  * isPlanModeInterviewPhaseEnabled 门控）+ plan 域 7 函数（planDomain）+
+ * 测试缝 1 件（setPlanSlugGeneratorForTesting，S-E3 B 路登记）+
  * 词 slug 2 函数（planWords）+ duck 型 8（planToolInput）。
  *
  * 纪律（tools/index.ts tasks/schedule/worktree 块先例）：逐名显式
@@ -45,6 +46,7 @@ export {
   getPlanSlug,
   getPlansDirectory,
   setPlanSlug,
+  setPlanSlugGeneratorForTesting,
 } from './planDomain'
 export {
   generateShortWordSlug,

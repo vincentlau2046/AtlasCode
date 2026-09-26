@@ -12,6 +12,11 @@
  *    atlas_plan_mode_interview_phase 缺省 false 整砍 → env-only 门，delta ③）。
  *  - 短 description() 串 2 件（旧 def description() 体）→ DESCRIPTION 常量
  *    留导出不接线（TUI 波前向接缝，S-D3 DESCRIPTION 族先例）。
+ *  - planModeV2.ts 域外未登记面（本波 7 文件不消费，S-E3 A 路 NOTE-4
+ *    登记）：旧仓另 3 件 getPlanModeV2AgentCount（planModeV2.ts:4）/
+ *    getPlanModeV2ExploreAgentCount（L17）/ getPewterLedgerVariant（L72），
+ *    旧消费面 = messages.ts:3195/3225/3226（plan-mode prompt/query/附件
+ *    面）→ 裁 + 登记（新仓消息域未落，前向接缝待消息域后续波认领）。
  *
  * 消费方：EnterPlanModeTool.description（= getEnterPlanModeToolPrompt，
  * 唯一 prompt 面）/ ExitPlanModeV2Tool.description（= EXIT_PLAN_MODE_V2_TOOL_PROMPT）

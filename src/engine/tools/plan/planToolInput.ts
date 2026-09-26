@@ -55,7 +55,8 @@ export type ExitPlanModeV2ValidateContext = {
 /**
  * ExitPlanModeV2 call context duck（agentId 后缀文件名面 + setAppState
  * prePlanMode 恢复链面；旧 addNotification/options.tools 消费支随
- * auto-mode gate 面 / team 面裁，见 exitPlanModeV2Tool delta ⑩⑪⑫）。
+ * auto-mode gate 族（delta ④）/ teammate leader 审批支（delta ⑥）/
+ * hasTaskTool 计算支（delta ⑧）裁，见 exitPlanModeV2Tool 头注 delta 登记）。
  */
 export type ExitPlanModeV2ToolContext = {
   agentId?: string

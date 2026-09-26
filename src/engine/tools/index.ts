@@ -626,6 +626,7 @@ export {
   getPlanSlug,
   getPlansDirectory,
   setPlanSlug,
+  setPlanSlugGeneratorForTesting,
   generateShortWordSlug,
   generateWordSlug,
   type EnterPlanModeAppState,
