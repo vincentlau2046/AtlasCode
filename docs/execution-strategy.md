@@ -3078,3 +3078,137 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 **残留守登记（E-wave-end 前向接缝）**：真 ToolUseContext 全字段面（BashToolUseContext duck 最小形 + D-7 options.cwd）/ UI 渲染面（UI.tsx / BashToolResultMessage.tsx 域外，renderToolUseMessage = () => null）/ D-1 归属后缀支（attribution/remote 波）/ D-3 图像 resize 调用点（图像面波）/ BgTask 模块态 map 读面经门面转出（TaskOutput/TaskStop 工具本体波消费）。anti-stub 门③ 零触碰（全真实现文件，零 `export {}` 占位）。
 
 **闭环**：task #128 闭环。C 桶 ①「工具本体 49」进度 = **1/49 落地（BashTool），48 剩（高频 → 长尾序列）**。既定序列下一步 = 其余 48 本体纵切（高频优先：Read/Write/Edit/Glob/Grep 族）→ C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L，B 桶 18 项登记处）→ D 波 → remote → analytics。
+
+---
+
+## §8.55 高频族本体纵切子波（C 桶 ① 子波 3）：执行前分析（task #129 ①）
+
+**范围**：旧仓 `src/tools/` 5 高频工具本体（FileReadTool / FileWriteTool / FileEditTool /
+GlobTool / GrepTool）随迁入新仓 `src/engine/tools/files/` 子域 + `files/` 子门面 +
+tools 门面 re-export。**49 口径 1/49 → 6/49**（49 朴素口径坐实第 2–6 项；47 = 历史口径
+不变，Ascend 16 另计）。开波基线 = §8.54 闭环态 **1694 pass / 102 文件 / 3697 expect +
+gate 6·5**。波 tag 不切新 tag（子波提交链记录，门③ 仍用 wave-c）。
+
+### 8.55.1 范围裁定
+
+**本体 .ts 面 4041L（逐文件实清点，task 描述 ≈3941L 口径订正为 4041L）**，UI.tsx 全族
+域外裁（§8.54 先例：renderToolUseMessage = () => null）：
+
+| 本体 | 旧仓文件（.ts 面） | 新仓落点（`src/engine/tools/files/`） |
+|---|---|---|
+| Read | FileReadTool.ts 1063 / limits.ts 92 / imageProcessor.ts 94（**裁**）/ prompt.ts 49 | fileReadTool.ts + readFileLimits.ts + readPrompt.ts |
+| Write | FileWriteTool.ts 426 / prompt.ts 18 | fileWriteTool.ts + writePrompt.ts |
+| Edit | FileEditTool.ts 601 / utils.ts 775 / types.ts 85 / constants.ts 12 / prompt.ts 26 | fileEditTool.ts + fileEditUtils.ts + fileEditTypes.ts + fileEditConstants.ts + editPrompt.ts |
+| Glob | GlobTool.ts 198 / prompt.ts 7 | globTool.ts + globPrompt.ts |
+| Grep | GrepTool.ts 577 / prompt.ts 18 | grepTool.ts + grepPrompt.ts |
+
+UI.tsx 域外合计 1138L（Read 184 / Write 404 / Edit 288 / Glob 62 / Grep 200，TUI 波）。
+落地 .ts 面 = 4041 − 94（imageProcessor 裁）= **3947L 逐字随迁 + delta 转写**。
+
+**依赖闭包裁定表（逐符号落点，grep 实证 2026-09-26）**：
+
+**A. 已落新仓（仅改 import 面）**
+
+| 符号 | 新仓落点 | 备注 |
+|---|---|---|
+| Tool 契约 / ToolInputJSONSchema / ToolResultBlockParam / Message / UserMessage / logForDebugging | shared（facade） | 契约逐字 §8.54 先例 |
+| errorMessage / getErrnoCode / isENOENT / isFsInaccessible | shared/errors | |
+| countCharInString / plural | shared/stringUtils | |
+| expandPath | shared/path（**2 参 (path, baseDir)**） | delta：旧 1 参调用点（默认 getCwd）→ `expandPath(p, getCwd())` 逐调用点显式化 |
+| getFsImplementation / setFsImplementation | shared/fs-operations（注入窗口已落） | **加法 +readFileBytes**（FsOperations 头注「加法式扩展」先例；Read L983 消费） |
+| formatFileSize | shared/format | |
+| lazySchema | shared/lazySchema | buildTool 时代但新仓已落（8L 逐字） |
+| isEnvTruthy / isEnvDefinedFalsy | shared/env | |
+| getPlatform | shared/platform | |
+| getConfigDirName | shared/configDir（`.atlas` + ATLAS_CONFIG_DIR_NAME 覆盖） | Edit constants 消费 |
+| getAtlasTempDirName | shared/tempDir | pdf getToolResultsDir 域内最小形消费 |
+| feature / FEATURE_ON_BY_DEFAULT | shared/feature | |
+| ripGrep(args, target, signal) → Promise\<string\[\]\> | sandbox（facade，E 波已落） | 签名与旧 utils/ripgrep.ts L344 逐字同参（新仓裁流式/超时面，Grep 消费位零改动） |
+| checkReadPermissionForTool / checkWritePermissionForTool / matchingRuleForInput | permissions/filesystem（facade） | 新签名 (tool: PermissionTool, input, toolPermissionContext) → **工具对象须加 `getPath` 成员**（旧 buildTool def.getPath 位 → 新显式成员，delta 登记；PermissionTool duck = { name, getPath }，缺 getPath 恒 ask） |
+| matchWildcardPattern / PermissionDecision | permissions（facade） | |
+| readFileInRange / memoryFreshnessNote | memory（facade） | |
+| getCwd / setCwdState / setOriginalCwd | bootstrap（facade） | 测试双戳先例 = sb5 core-face |
+| getRoleConfig | modelprovider（facade） | Read 缓解面（见 D 组 ①） |
+| logError | engine/tools/bash/log（域内） | 新仓 logError 落点（bash 波先例）；files 域内 import '../bash/log' |
+| jsonStringify / jsonParse | engine/session（facade L73，域内） | Read notebook 支 + 未来面 |
+| formatOutput | engine/tools/bash（子门面 L212，域内） | notebook.ts 依赖 |
+| FILE_READ/WRITE/EDIT/GLOB/GREP_TOOL_NAME / BASH_TOOL_NAME / NOTEBOOK_EDIT_TOOL_NAME | engine/tools/toolNames | |
+
+**B. 随迁（依赖闭包，逐文件子集）**
+
+| 旧仓文件 | 新仓落点 | delta |
+|---|---|---|
+| utils/file.ts 582 | files/fileUtils.ts 逐字 | ① growthbook `atlas_compact_line_prefix_killswitch`（默认 false=compact 开）→ env kill-switch **ATLAS_DISABLE_COMPACT_LINE_PREFIX**（isEnvTruthy → compact 关，等价语义）；② fileReadCache 依赖 → 随迁 |
+| utils/fileReadCache.ts 96 | files/fileReadCache.ts | LRUCache 依赖面核实（若独立模块则一并随迁；FileRead 本体只经 context.readFileState duck 消费，不直接依赖 LRU 实例） |
+| utils/diff.ts 172 | files/diffUtils.ts 逐字 | Write/Edit 消费 countLinesChanged / getPatchForDisplay / getPatchFromContents / DIFF_TIMEOUT_MS |
+| utils/notebook.ts 224 | files/notebook.ts 逐字 | formatOutput → 新 bash 子域；getFsImplementation → shared；NOTEBOOK_EDIT_TOOL_NAME = toolNames |
+| utils/pdf.ts 300 | files/pdf.ts 逐字 | execFileNoThrow → **域内小模块**（worktree git.ts 域内先例）；getToolResultsDir（旧 toolResultStorage = getSessionDir()+子目录）→ 域内最小形（getAtlasTempDirName 基，delta 登记，真实 session 目录面 = session/CLI 波前向接缝） |
+| utils/pdfUtils.ts 70 | files/pdfUtils.ts 逐字 | |
+| constants/apiLimits.ts 94 | files/apiLimits.ts **裁面提取 5 常量**（PDF_AT_MENTION_INLINE_THRESHOLD / PDF_EXTRACT_SIZE_THRESHOLD / PDF_MAX_PAGES_PER_READ / PDF_MAX_EXTRACT_SIZE / PDF_TARGET_RAW_SIZE） | 图像 4 常量随 D-3 裁面不迁（登记） |
+| utils/glob.ts 132 | files/globUtils.ts 逐字 | getFileReadIgnorePatterns / normalizePatternsToPath（旧 permissions/filesystem，新仓未落）→ **两函数随迁入 files/globUtils.ts**（单一消费方 = Glob，域内；delta 登记） |
+| utils/semanticNumber.ts 36 + semanticBoolean.ts 29 | files/semantic.ts | **delta（zod preprocess → 运行时转换）**：新 Tool 契约 = JSON schema（无 zod 运行时），模型面 type 仍 number/boolean；call 入口对 offset/limit/-B/-A/-C/context/head_limit/offset/multiline/replace_all/-n/-i 做 `semanticToNumber`/`semanticToBoolean` 字符串字面量容忍（正则/真值语义逐字旧仓） |
+| utils/memoryFileDetection.ts 289 | **memory 域**（facade 导出） | 消费方 = engine（DEP-4 engine→memory 合法，STR-1 经 facade）；isAutoMemFile 语义 = memory 域内禀 |
+| memdir/validateMemoryFrontmatter.ts 89 | **memory 域**（facade 导出） | 消费方 = FileWrite（isUnderMemoryDir / validateMemoryFrontmatter） |
+| services/tokenEstimation.ts 350（纯函数子集 ~50L：roughTokenCountEstimationForFileType + bytesPerTokenForFileType） | **填充新仓 shared/tokenEstimation.ts 占位**（头注「实现待 C 波」= 本波消费，B18 按需重建先例：实质实现非重占位） | countMessagesTokensWithAPI / countTokensViaHaikuFallback 等 8 导出位不迁（零本波消费者，登记） |
+
+**C. 裁面（调用点裁 + 逐处登记，各带归属波）**
+
+| 裁面 | 理据 | 归属 |
+|---|---|---|
+| imageProcessor.ts 94 + imageResizer 6 符号调用点（Read L814/L993-1021） | sharp 依赖新仓无（依赖面仅 4 包）；§8.54 已登记 D-3 前向接缝，本波裁定 | D-3 图像面波 |
+| gitDiff.ts 532 + fetchSingleFileGitDiff 调用点（Write L358 / Edit L529，双门 `isEnvTruthy(ATLAS_REMOTE) && atlas_quartz_lantern`（GB 默认 false = 生产树不可达死支） | GB 基建新仓无；flag 默认 false → 支恒死；gitDiffSchema 随之裁（hunkSchema 保留 = structuredPatch 输出面） | **remote 波**（ATLAS_REMOTE 真门裁定时随 gitDiff.ts 整体重建） |
+| fileHistory.ts 1065（fileHistoryEnabled / fileHistoryTrackEdit 调用点 ×2 本体） | S-E4 B18 已登记按需重建（engine/state fileHistory 子模块 E-4 已删，B 桶 18 项） | B18 按需重建波 |
+| LSP 族 4 符号（diagnosticTracker / clearDeliveredDiagnosticsForFile / getLspServerManager / notifyVscodeFileUpdated，Write+Edit 各 3 调用点） | LSP 域 = 长尾 LSPTool 本体（49 口径内）+ vscode mcp 域域外 | LSPTool 长尾波 |
+| skills 3 函数（loadSkillsDir 1064；Read L527-538 / Write L246-257 / Edit L401-415）+ context.dynamicSkillDirTriggers 调用点 | 新仓无 skills 域 | **E-wave-end 前向接缝：skills 域波（待排）** |
+| getGlobExclusionsForPluginCache（Grep L430，旧 plugins/orphanedPluginFilter） | 插件市场孤儿扫描域域外（新仓无 plugin 市场域） | 插件市场波 |
+| growthbook 3 点（Read L488 dedup / Write L358 + Edit L529 quartz_lantern） | 新仓无 GB 基建（C 波统一裁定先例：GB → env kill-switch 或裁） | ① dedup → env **ATLAS_DISABLE_READ_DEDUP**（D 组 ② 命名裁定）②③ 随 C 组 gitDiff 裁 |
+| countTokensWithAPI（Read L714，API 网络 token 计数） | 模型 provider token 计数面归 D 波；行为 delta = 溢出判定仅用 rough 估计（旧：rough > max/4 时 API 精算） | D 波（登记） |
+| limits.ts atlas_amber_wren GB 覆写 + lodash-es/memoize | GB 无基建；memoize = 新仓域本地先例（memory/paths.ts 域本地 memoize） | 优先级裁定 = env ATLAS_FILE_READ_MAX_OUTPUT_TOKENS > DEFAULT 25000 / MAX_OUTPUT_SIZE（GB 支裁，登记） |
+| UI.tsx 全族 1138L | TUI 域外（§8.54 delta ⑥ 先例 ×5） | TUI 波 |
+| 旧 buildTool(zod) 对象面 | 新 shared Tool 契约（§8.54 转写模式 ×5：JSON schema 纯对象 + TOOL_DEFAULTS 对象化 + 残留守登记） | 本波 |
+| 依赖 `diff`（FileEdit utils L366 structuredPatch） | 新仓依赖面 4 包无 diff | **裁定：新增依赖 `diff`**（纯 JS，无 native，4→5 包） |
+
+**D. 关键语义裁定**
+
+- **① Read 缓解面（L684）**：旧 `getCanonicalName(getMainLoopModel())`（model/model.ts 358 新仓无）→ 新 = modelprovider `getRoleConfig('premium').model` + 域内 canonical 名助手（剥 `/` 前缀，逐字旧 getCanonicalName 语义）；MITIGATION_EXEMPT_MODELS（`claude-opus-4-6`）保留（OpenAI 协议世界恒不命中 = 恒含缓解提示，行为保守等价，登记）。
+- **② dedup env 命名**：旧 `atlas_read_dedup_killswitch`（true=关 dedup）→ 新 **`ATLAS_DISABLE_READ_DEDUP`**（isEnvTruthy → 关 dedup，等价语义；命名对齐新仓 ATLAS_DISABLE_* kill-switch 族先例，如 ATLAS_DISABLE_GIT_INSTRUCTIONS）。
+- **③ duck context（files/fileToolInput.ts，bashToolInput 先例）**：公共面 getAppState / abortController / options；Read 加 readFileState（**FileStateCache 最小 duck = get/set/has + FileState 最小形 { content, timestamp, offset, limit, isPartialView? }**——真 LRU 实例 = 组合根注入，真 ToolUseContext 全字段面残留守 §8.54 已登记）+ fileReadingLimits + 可选 nestedMemoryAttachmentTriggers（3 调用点 `?.add` 无注入 = no-op 零行为，**保留不裁** = 保真）。
+- **④ checkPermissions**：Read/Glob → checkReadPermissionForTool；Write/Edit → checkWritePermissionForTool（逐字旧调用位；工具对象加 getPath 成员，delta 登记）。
+- **⑤ 注册面**：5 工具全 = 无条件注册（⑰ hasEmbeddedSearchTools 槽 §8.53 已裁定关闭 = 恒注册）；组合根 baseTools 注入（D 波 cli.ts 单入口，注入位零改动）。
+
+### 8.55.2 切片计划（S-C1…S-C8）
+
+| 切片 | 内容 | 预测 +N（pass/文件） |
+|---|---|---|
+| S-C1 | 依赖闭包层 1：files/semantic.ts（36+29 delta 转写）+ diffUtils 172 + fileReadCache 96 + apiLimits 裁面 5 常量 + shared/tokenEstimation 占位填充（rough 2 函数）+ shared/fs-operations +readFileBytes 加法 | +~35 |
+| S-C2 | 依赖闭包层 2：fileUtils 582（delta ①②）+ memory 域 +memoryFileDetection 289 / +validateMemoryFrontmatter 89（facade 导出）+ globUtils 132（ignore 2 函数随迁 + 插件排除裁） | +~60 |
+| S-C3 | pdf/notebook 族：pdf 300 + pdfUtils 70 + 域内 execFileNoThrow（~30）+ notebook 224 | +~40 |
+| S-C4 | Glob + Grep 本体：globTool 198 + grepTool 577 + prompt 25 + JSON schema 转写 + semantic 运行时转换 + checkPermissions 接线 + files 子门面 + tools 门面 re-export | +~70 |
+| S-C5 | Read 本体：fileReadTool 1063 + readFileLimits 92 + readPrompt 49 + duck context + 域内 createUserMessage（loop.ts S-E3 M-1 不变量：uuid 恒戳 + timestamp ISO + isMeta 面）+ 裁面落定（D-3 / skills / dedup env 门） | +~80 |
+| S-C6 | Write + Edit 本体：fileWriteTool 426 + fileEditTool 601 + fileEditUtils 775（diff 依赖落地）+ fileEditTypes 85（JSON schema + hunk 型保留 / gitDiffSchema 裁）+ constants 12 + prompt 44 + 裁面落定（gitDiff / fileHistory / LSP / skills） | +~90 |
+| S-C7 | S-C(n+1) 独立只读审视 ≤2（探针重选 + 双路 A 旧仓对照 / B H6 死接缝，恰 1 红下界纪律） | — |
+| S-C8 | 闭环：docs 实施记录 + 审视记录 + memory `atlascode-wave-c-progress.md` §8.55 条目 + MEMORY.md 索引 + task #129 闭环 | — |
+
+### 8.55.3 探针计划（恰 1 红 = 下界；backup→mutate→定向红集→verbatim restore diff 核验）
+
+| 探针 | 锚点 | 突变 | 预期 |
+|---|---|---|---|
+| P-C1 | Grep head_limit 字符串容忍（"30"→30，S-C1/S-C4） | 删 semanticToNumber 转换 | 恰 1 红 |
+| P-C2 | Read dedup env 门（ATLAS_DISABLE_READ_DEDUP=1 → 重读不返 file_unchanged） | env 门失效 | 恰 1 红 |
+| P-C3 | Edit structuredPatch 输出面（diff 依赖真 patch hunk） | 突变 structuredPatch 为恒空 patch | 恰 1 红 |
+| P-C4 | Grep checkPermissions deny 规则（P-B2 先例族） | 接线换回 passthrough | ≥1 红（2 红集 {deny,allow} 登记订正，P-E5 先例） |
+| P-C5 | Read 阻塞设备路径守卫（/dev/zero → 拒读） | 删 BLOCKED_DEVICE_PATHS 守卫 | 恰 1 红 |
+
+（锚点实施中可重选，0 红锚失效即重锚 + 三处登记纪律 = 测试头注 + 源文件头注 + 本节探针表。）
+
+### 8.55.4 验证四联（每切片）
+
+`bun x tsc --noEmit`（0）/ `bun x eslint <新增·改动文件>`（0）/ `bun build src/atlascode/cli.ts --outfile <tmp>/build-scN.js --target node`（0 KB 级 entry）/ `bun test --isolate tests/`（全量 + 切片新测全绿）+ `bun test --isolate tests/ci/`（gate 6 pass / 5 expect，门③ wave-c 不变）。
+
+### 8.55.5 预测基线谱系
+
+开波 1694/102/3697 + gate 6·5 → S-C1 ~1729 → S-C2 ~1789 → S-C3 ~1829 → S-C4 ~1899 → S-C5 ~1979 → S-C6 ~2069（+N 为预测，精确值各切片闭环时坐实；波终预测 ≈ 2070 pass / ~112 文件 / ~3990 expect + gate 6·5）。49 口径 **1/49 → 6/49**。
+
+### 8.55.6 E-wave-end 前向接缝（本波新增登记）
+
+skills 面（loadSkillsDir 3 函数 + dynamicSkillDirTriggers，skills 域波待排）/ gitDiff 532L + ATLAS_REMOTE 真门（remote 波）/ fileHistory（B18）/ LSP 族（LSPTool 长尾本体）/ countTokensWithAPI（D 波模型 token 计数面）/ 图像面（D-3 已登记，本波裁面确认）/ 插件缓存排除（插件市场波）/ getToolResultsDir 真 session 目录面（session/CLI 波）/ nestedMemoryAttachmentTriggers 真注入（memory 附件波）/ 真 ToolUseContext 全字段面（§8.54 已登记，本波 duck 沿用）。
