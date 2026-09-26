@@ -3426,5 +3426,50 @@ S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读�
 
 #### 8.57.4 闭环记录
 - S-D3 后基线：**2140 pass / 126 文件 / 4950 expect + gate 6 pass / 5 expect**（vs S-D2b 2139/126/4941：+1 func 测试 +9 expect，源零 delta；四件套 tsc 0 / eslint 0 / build 0KB entry 复验）。
-- 49 口径 18/49 坐实（余 31 长尾）；波 tag 不切（提交链 c9f41b0 → 7fc4499 → 3b36a17 → S-D3 闭环提交；gate ③ 仍用 wave-c）。
+- 49 口径 18/49 坐实（余 31 长尾）；波 tag 不切（提交链 c9f41b0 → 7fc4499 → 3b36a17 → 08452f8（S-D3 审视 + S-D4 闭环）；gate ③ 仍用 wave-c）。
 - **C 桶 ① 下一子波 = §8.58 plan 族（EnterPlanMode + ExitPlanModeV2，team/auto-mode 面接缝登记）** → §8.59-§8.64 序列 → C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
+
+### 8.58 plan 族子波（EnterPlanMode + ExitPlanModeV2，S-E1 执行前分析）
+
+#### 8.58.1 范围（A 类真本体 2 件，49 口径 18/49 → 20/49）
+- **EnterPlanMode**（旧 `src/tools/EnterPlanModeTool/EnterPlanModeTool.ts` 113L + prompt 103L）
+- **ExitPlanModeV2**（旧 `src/tools/ExitPlanModeTool/ExitPlanModeV2Tool.ts` 475L + prompt 29L）
+- 工具名：`ENTER_PLAN_MODE_TOOL_NAME` / `EXIT_PLAN_MODE_V2_TOOL_NAME`（新仓 toolNames seed 已有，值 `'EnterPlanMode'` / `'ExitPlanMode'`）
+
+#### 8.58.2 依赖闭包裁定（H6 逐条，旧仓实读核验）
+1. **plan 域（新仓零落）**：旧 `utils/plans.ts` 397L 中 §8.58 消费面 3 件——
+   - `getPlanFilePath(agentId?)`（L119：getPlanSlug(getSessionId()) + getPlansDirectory() memoize（plansPath = env 覆写 ?? join(getAtlasConfigHomeDir(), 'plans')，mkdirSync recursive 幂等）；主会话 `{slug}.md` / 子代理 `{slug}-agent-{agentId}.md`）
+   - `getPlan(agentId?)`（L135：readFileSync ENOENT→null）
+   - `persistFileSnapshotIfRemote`（L360：getEnvironmentKind()===null 早退 + recordTranscript 快照 = **remote 波面 → 裁 + 登记**（S-D2b delta ⑧ 同源先例））
+   - 注意：旧 getPlanFilePath 依赖 getPlanSlug（S-D2b Enter 已裁 randomUUID 兜底同面）→ plan 域自带 getPlanSlug 或复用 S-D2b 裁面登记（S-E2 定）；新仓落点 = 新 `src/engine/tools/plan/` 子域（plan 域函数与工具本体同居，子门面归集）。
+2. **EnterPlanMode 本体裁面**：
+   - `handlePlanModeTransition`（旧 `bootstrap/state.ts:201` = **any-stub** `: any = (() => ({})) as any`）→ **裁 + 登记**（旧仓即 no-op；真状态迁移 = prepareContextForPlanMode + applyPermissionUpdate，新仓 permissions 域已落：`permissionSetup.ts:458` / `permissionUpdate.ts`）。H6 纪律：stub 不当真行为。
+   - `isPlanModeInterviewPhaseEnabled`（旧 `utils/planModeV2.ts`：env `ATLAS_PLAN_MODE_INTERVIEW_PHASE` true/false 优先 + GB 门 `atlas_plan_mode_interview_phase` 缺省 false（整砍））→ 新仓 **env-only 门移植**（GB 支裁，GA 缺省关 = 旧 GB 缺省 false 等价；isCronEnabled 同族先例）；消费面 2 处（prompt whatHappens 段开关 + mapResult 双变体）。
+   - `prepareContextForPlanMode` / `applyPermissionUpdate` 新仓已落（E-4 permissions 域）→ 直接接线。
+   - `context.agentId` 守卫 / `context.getAppState/setAppState` → duck context（S-B5 D-7 先例）。
+   - userFacingName：旧 def 显式 `return ''`（def 有 member，非 S-D6 name-wins 场景）→ 新 `() => ''` 逐字。
+3. **ExitPlanModeV2 本体裁面（475L 最大闭包）**：
+   - **4 个 plan-mode bootstrap 状态旗标 = 旧仓 any-stub 族**（`bootstrap/state.ts:237/248/249/308`：setHasExitedPlanMode / setNeedsAutoModeExitAttachment / setNeedsPlanModeExitAttachment / hasExitedPlanModeInSession 全 `: any = (() => ({})) as any`）→ **裁 + 登记**（TUI/attachment 波消费位；旧仓即 no-op，裁零行为差）。
+   - **team/mailbox/swarm 面（S-D1 裁定 shell·swarm 波域）**：isTeammate/getAgentName/getTeamName/isPlanModeRequired/writeToMailbox/findInProcessTeammateTaskId/setAwaitingPlanApproval/isAgentSwarmsEnabled/toolMatchesName(AGENT_TOOL_NAME/TEAM_CREATE_TOOL_NAME) → 本波裁 teammate 分支（validateInput teammate 直通支 / checkPermissions teammate allow 支 / call plan_approval_request 支 / hasTaskTool 计算支），登记归属 shell·swarm 波（C 桶 ③）。
+   - **auto-mode gate 面（C 桶 ② 消费位）**：feature('TRANSCRIPT_CLASSIFIER') 整砍（新仓无 GB）+ autoModeState/permissionSetup auto-mode 门族（isAutoModeGateEnabled/getAutoModeUnavailableReason/getAutoModeUnavailableNotification/stripDangerousPermissionsForAutoMode/restoreDangerousPermissions/isAutoModeActive/setAutoModeActive）→ gate-off 回退支 + restoring-to-auto 支 **裁 + 登记归属 C 桶 ② auto-mode 纵切波**（prePlanMode 恢复链主体保留 = restoreMode = prePlanMode ?? 'default' + mode/prePlanMode 写回；auto 判别支全裁）。
+   - `context.addNotification`（gate 支通知面）→ 随 gate 支裁（TUI 波登记）。
+   - `getPlanFilePath(context.agentId)` + `getPlan` + input.plan CCR 覆写支（inputPlan ?? getPlan）保留（plan 域新落面消费）。
+   - validateInput `mode !== 'plan'` ec1 文案（非 teammate 支）+ checkPermissions 非 teammate ask 'Exit plan mode?' 保留。
+   - mapResult 4 变体（awaitingLeaderApproval → 随 teammate 裁 / isAgent（context.agentId）保留 / 空 plan / 正常 plan + teamHint 随 hasTaskTool 裁）+ planLabel 逐字。
+   - `_sdkInputSchema` 成员（旧 def）→ 裁（D 波 SDK 面接缝登记，S-B5 族先例）。
+4. **prompt 面**：
+   - Enter：`getEnterPlanModeToolPrompt`（interview 门控 whatHappens 段 + ASK_USER_QUESTION_TOOL_NAME 插值（新仓 toolNames 单一事实源）→ `ENTER_PLAN_MODE_PROMPT` 常量族（双变体或 gate 内联——S-E2 定）+ sha256 核。
+   - Exit：`EXIT_PLAN_MODE_V2_TOOL_PROMPT`（29L 静态，ASK_USER_QUESTION 硬编码 'AskUserQuestion' 注释「Hardcoded to avoid relative import issues in stub」→ 新仓 toolNames 值同，delta 登记）。
+   - 短 description() 串 2 件（'Requests permission to enter plan mode...' / 'Prompts the user to exit plan mode and start coding'）→ DESCRIPTION 常量留导出不接线（TUI 波，S-D3 族先例）。
+   - renderToolUseMessage 3 面（Enter/Exit 各 renderToolUseMessage/renderToolResultMessage/renderToolUseRejectedMessage，UI.tsx JSX 裁 TUI 波；纯字符串体若有保留）。
+
+#### 8.58.3 注册表门控
+- plan 族无专属 registry 槽（20 槽裁定表无 plan 槽 → **无条件注册面**，同 Read/Write 族；isEnabled 恒 true）；注册表残留守 13 不变。
+
+#### 8.58.4 测试面（S-E3 规划）
+- **unit 零盘**：对象面（schema 转写：Enter strictObject 无参 / Exit allowedPrompts 嵌套 `{ tool: enum ['Bash'], prompt: string }` + `_sdkInputSchema` 裁登记）/ mapResult 逐字变体（保留 2 变体面：isAgent / 空 plan / 正常 plan）/ validateInput `mode!=='plan'` ec1 / checkPermissions ask 支 / interview 门双变体切换 / userFacingName '' / isDestructive（Exit false）。
+- **func 真盘**：plan 域 getPlanFilePath/getPlan 真盘（plans 目录 mkdir + 文件读写 + ENOENT null + agent 后缀文件名面）+ Enter call 真 appState 面（duck getAppState/setAppState）+ Exit call 真盘（plan 文件覆写同步支 writeFile 真落盘）。
+- **探针 P-PL1..P-PL5**（突变 1 red 锚点：ec1 文案 / interview 门控关 / mapResult planLabel / getPlanFilePath agent 后缀 / interview 变体切换）。
+
+#### 8.58.5 基线预测
+开波 2140/126/4950 + gate 6·5 → 预测 S-E2 ~2160/128/~5010（+20 测 / +2 文件 / +60 expect，plan 域判别支 + Exit 4 变体面）。
