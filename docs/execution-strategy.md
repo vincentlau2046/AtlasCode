@@ -3364,3 +3364,36 @@ S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读�
   - 2 NOTE 处置：P-D4 代码侧标签补缺（taskOutputTool.ts 头注 delta ⑩ + call 支注释 + sd5 unit 测试名/头注）；空输入 duck 型补逐型「call 0 参无 cast 位，导出仅文档面」注记。
 
 波终态：**2098 pass / 123 文件 / 4828 expect + gate 6·5**；49 口径 16/49。既定序列下一子波 = 其余 33 长尾本体纵切 → C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L）→ D 波 → remote → analytics。
+
+### 8.57 余 33 长尾（C 桶 ① 尾）总分析 + 子波路线图（S-D1 执行前分析）
+
+**49 口径核对（旧仓 getAllBaseTools 逐门开重数）**：已落 16（§8.53-§8.56：Bash/Glob/Grep/Read/Write/Edit + Task 四件套 + cron 三件套 + TaskStop/TodoWrite/TaskOutput）。余 33 = 49 − 16。其中 **Agent 本体 E-2 已落**（`src/engine/tools/agent/AgentTool.ts` 203L 完整 Tool 对象，引擎波工具面，非 C 桶 ① 计数内）→ 实际待迁 **32**。
+
+**32 待迁 4 类裁定**（旧仓逐文件实清点，H6 防空洞；行数为旧仓 `src/tools/*` 本体 ts 面，.tsx 单列）：
+- **A 类 · 真本体可迁（15）**：ExitPlanModeV2 475L / NotebookEdit 490L / WebFetch 318L / WebSearch 354L / AskUserQuestion（tsx）/ Skill 915L / EnterPlanMode 113L / Config 456L / LSP 860L / EnterWorktree 123L / ExitWorktree 318L / SendMessage 917L / ListMcpResources 123L / ReadMcpResource 158L / ToolSearch 457L。
+  - 依赖闭包注记（复审勿当遗漏）：
+    - **ExitPlanModeV2** 拖 team/mailbox/swarm 面（`inProcessTeammateHelpers`/`teammate`/`teammateMailbox`/`agentSwarmsEnabled`）= shell·swarm 波域 → 本波仅随体纵切，team 协作面登记前向接缝。
+    - **WebSearch** 拖 modelprovider（`modelProvider`/`buildOpenAIParams`/`modelToRole`）+ growthbook（`getFeatureValue_CACHED_MAY_BE_STALE`）+ `messages`（createUserMessage）= 模型/provider 面 → 接缝登记。
+    - **MCP 族**（ListMcpResources/ReadMcpResource）拖 `services/mcp/client.ts` **3209L**（新仓 `ports/mcpClient.ts` 仅 `callTool` 面，无 resource 读面 `fetchResourcesForClient`/`ensureConnectedClient`）+ `utils/mcpOutputStorage.ts` 179L（blob 落盘 `persistBinaryContent`）；**ToolSearch** 拖 `utils/toolSearch.ts` 714L。
+    - **Enter/ExitWorktree** 拖 worktree **session 族**（旧 `utils/worktree.ts` 1451L 中 agent 族之外：`createWorktreeForSession`/`getCurrentWorktreeSession`/`keepWorktree`/`cleanupWorktree`/`restoreWorktreeSession` + tmux 族 `generateTmuxSessionName`/`createTmuxSessionForWorktree`/`killTmuxSession` + helper ~800L，E-7 S-7c 故意裁出）+ `bootstrap/state` 缺 `getProjectRoot`/`setProjectRoot`（旧 `getProjectRoot` = 从 cwd 向上找 `.git` 真逻辑 / `setProjectRoot` = no-op stub 逐字）。
+- **B 类 · any-stub 占位（5，无本体可迁，registry 槽登记 / 关闭）**：Monitor（④ 本体纵切，`({}) as any`）/ Workflow（⑪ 本体纵切，stub）/ Tungsten（① 无归属波，stub）/ REPL（① stub）/ OverflowTest（⑤ 关闭，测试专用）。
+- **C 类 · 旧仓本体缺失/仅壳（6，无真本体可迁）**：CtxInspect（⑥ 本体纵切，目录缺失）/ SuggestBackgroundPR（① 无归属波，目录缺失）/ ListPeers（⑩ shell·swarm 波，目录缺失）/ TerminalCapture（⑦ shell 波 TUI 面，仅 prompt.ts 2L）/ WebBrowser（⑧ 本体纵切，仅 WebBrowserPanel.tsx 1L React 面板）/ VerifyPlanExecution（⑫ 本体纵切，仅 constants.ts 2L）。
+- **D 类 · registry 20 槽裁定归属他波（非 C 桶 ①，本总分析登记不迁）**：TeamCreate ⑮ + TeamDelete ⑮ + ListPeers ⑩ → shell·swarm 波（C 桶 ③）/ Snip ⑨ → shell/REPL 波（C 桶 ③）/ RemoteTrigger ③ → remote 波（D 波后）/ PowerShell ⑳ → 域外改判（bash-only 纵切）/ TestingPermission ⑱ → 关闭（NODE_ENV=test）。
+
+**C 桶 ① 范围内真本体集 = A 类 15**（B/C/D 类登记不迁）。按依赖域 + 内聚度拆子波（序：域已落者先、闭包小者先）：
+- **§8.57 worktree 工具本体子波（首波）**：EnterWorktree + ExitWorktree（⑭ worktree mode 槽，域 E-7 S-7c agent 族已落）+ session 族 ~800L 重迁进 worktree 域 + `bootstrap/state` 补 `getProjectRoot`/`setProjectRoot`。域已落、本体薄壳、自包含。
+- §8.58 plan 族（EnterPlanMode + ExitPlanModeV2，team 面接缝登记）
+- §8.59 web 族（WebFetch + WebSearch，provider/growthbook 接缝登记）
+- §8.60 config + ask-user + skill 族（Config + AskUserQuestion + Skill）
+- §8.61 notebook + LSP 族（NotebookEdit + LSP）
+- §8.62 team/collab 工具面（SendMessage 917L，team 域随体）
+- §8.63 MCP + ToolSearch 族（ListMcpResources + ReadMcpResource + ToolSearch，MCP client 3209L 闭包）
+- §8.64 stub/壳登记批（B 类 5 + C 类 6 = 11 槽 registry 登记 + 头注，零本体）
+
+（子波号 §8.58-§8.64 为规划占位，各子波执行时坐实；C 桶 ① 49 口径 16/49 → 49/49 全闭环后进入 C 桶 ② auto-mode 纵切波。）
+
+#### 8.57.1 §8.57 worktree 子波切片规划（S-D1）
+- **S-D2a**：worktree session 族 + tmux 族重迁（旧 `utils/worktree.ts` `createWorktreeForSession`/`getCurrentWorktreeSession`/`keepWorktree`/`cleanupWorktree`/`restoreWorktreeSession`/`generateTmuxSessionName`/`killTmuxSession`/`createTmuxSessionForWorktree` + helper `getOrCreateWorktree`/`performPostCreationSetup`/`mkdirRecursive`/`symlinkDirectories`/`flattenSlug`/`worktreesDir`/`worktreePathFor`/`parsePRReference`/`isTmuxAvailable`/`getTmuxInstallInstructions` ~800L）进 `src/engine/worktree/worktree.ts`（E-7 S-7c 裁出位回填，delta 登记解耦点）+ `bootstrap/state` 补 `getProjectRoot`（向上找 `.git` 真逻辑）/ `setProjectRoot`（no-op 逐字 stub 语义）+ worktree 门面扩面。
+- **S-D2b**：EnterWorktree/ExitWorktree 两本体（123L+318L；delta 旧 buildTool(zod)→JSON schema 先例链 + React render 面裁（TUI 波）+ prompt 逐字（sha256 字节核）+ duck 型 + 双门面 + registry ⑭ worktree mode 门控槽 materialize）+ unit 零盘（对象面 / mapResult 逐字 / validateInput 3 支守卫 / call keep·remove 双分支 + countWorktreeChanges 判别支）+ func 真盘（真 git worktree 创建 / keep / remove + discard 守卫）+ matrix 2 行。
+- **S-D3**：整波审视（双只读 ≤2：A 旧仓对照 / B H6 死接缝 + 探针 P-W1..）。
+- **S-D4**：闭环 docs + memory + task。
