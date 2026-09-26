@@ -39,6 +39,9 @@
  *    here." + PR 示例体止于 TODO checklist 行（无归属后缀）。
  *  ⑨ **D-4**（§8.54 ⑥ 登记）：旧 ./toolName.js（BashTool 私有常量文件）
  *    新仓不落文件 → BASH_TOOL_NAME = ../toolNames（单一事实源）。
+ *  ⑩ **S-B6 MINOR-1 登记**：旧 L52 行尾尾随空格（git 安全协议节
+ *    "…when given direct instructions␣"）未随迁（写文件归一化，1 字符
+ *    零行为 delta——prompt 消费方为模型侧文本，行尾空格无语义）。
  *
  * feature('MONITOR_TOOL') ×2（sleep 子项支）逐字保留：bun:bundle 内建
  * 模块（新仓合法先例）；测试面 feature() 恒 false（bun-bundle-feature-

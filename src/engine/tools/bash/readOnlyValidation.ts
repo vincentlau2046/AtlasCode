@@ -42,9 +42,15 @@
  *    parse 极宽容（未终结引号宽容闭合，实测不抛）→ Linux unit 层无稳定
  *    复现输入，零支（分支逐字保留，行为 = 旧仓同宽容度）。
  *
- * 探针 P-B1 锚点（§8.54 ⑧ 突变面）：containsUnquotedExpansion 单引号
- * 反斜杠失步守卫 `!inSingleQuote` → unit「ls '\' *」判别测（有守卫：
- * glob 检出 → passthrough；突变去守卫 → 失步 → regex 命中 → allow 红）。
+ * 探针 P-B1 锚点（§8.54 ⑧ 突变面；S-B6 重选登记）：初版锚「删
+ * containsUnquotedExpansion 单引号反斜杠失步守卫 `!inSingleQuote`」实测
+ * 0 红失效——所有失步输入（奇数尾反斜杠引号串）被 checkReadOnly
+ * Constraints L1871 bashCommandIsSafe_DEPRECATED 预检先行拦截（passthrough
+ * 早退，追踪器不可达）；该守卫 = 设计性不可观测量（防御纵深，函数内
+ * 「Defense-in-depth」注释逐字旧仓）。活探针改挂**双引号 glob skip 支**
+ * （L1634-1636）：unit「ls "x*y"」判别测（skip 支在：双引号内 glob 字面
+ * → allow；突变删 skip 支 → 误检未引号 glob → 非只读 → passthrough 恰 1
+ * 红）。正向基线「ls '\' *」→ passthrough 保留（测试文件内登记）。
  */
 import {
   containsVulnerableUncPath,

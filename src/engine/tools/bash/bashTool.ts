@@ -14,16 +14,23 @@
  *  ① 旧 buildTool(zod inputSchema) → 新 shared Tool 契约：inputSchema = 纯
  *    JSON schema 对象（BASH_TOOL_INPUT_SCHEMA，AgentTool 先例；7 字段与
  *    bashToolInput.ts duck 型逐字段对齐——duck 型 = 类型位单一事实源，
- *    6 导入方零改动，§8.54 ④）。
+ *    类型位消费方 8 个（既有 6 + 本波新增 2，详见 bashToolInput 头注
+ *    S-B6 订正），§8.54 ④）。
  *  ② 旧 zod `.int().positive()` 约束不进 JSON schema（ToolInputJSONSchema
  *    宽骨架面）——行为 delta 登记：类型面不再约束 int/positive，运行时
- *    timeout clamp（Math.min 封顶）保留（P-B4 探针锚点）。
+ *    timeout clamp（Math.min 封顶）保留（P-B4 探针锚点）；嵌套
+ *    _simulatedSedEdit 的 required（filePath 必填）随转写保留（旧 zod
+ *    z.object 内必填逐字对齐，duck 型 filePath 非可选，S-B6 MINOR-3 补
+ *    登记）。
  *  ③ 旧 prompt() 成员（与 description 重复）不在新 Tool 契约 → 裁（
  *    description 唯一 prompt 面，getSimplePrompt 同源）。
  *  ④ 旧 buildTool TOOL_DEFAULTS 4 成员对象化显式（isConcurrencySafe false /
- *    isDestructive false / toAutoClassifierInput '' / userFacingName ''——
- *    旧仓头注「userFacingName → name」与代码默认值 '' 不符，以代码为准，
- *    登记）。
+ *    isDestructive false / toAutoClassifierInput ''；userFacingName 旧
+ *    **生效值 = name**（buildTool 返回体 `() => def.name` 夹在
+ *    TOOL_DEFAULTS 与 def 之间覆盖默认 ''，旧 def 无覆写——旧仓头注
+ *    「userFacingName → name」与生效链一致）→ 新 = BASH_TOOL_NAME
+ *    （toolNames 单一事实源，值逐字同 'Bash'；S-B6 MAJOR-1 订正：初版
+ *    误读生效链取 TOOL_DEFAULTS 默认 '' 且测试锁死，订正为恢复生效值）
  *  ⑤ checkPermissions：旧 = buildTool 默认 `{ allow, updatedInput }`（委托
  *    通用权限系统，§8.43 裁定① 旧仓事实）；**本波裁定** = 一线接线
  *    bashToolHasPermission（新核已鸭子化，签名逐字对齐；abort 重抛语义由
@@ -39,7 +46,9 @@
  *  ⑨ isReadOnly 消费同域 ./bashReadOnly（S-T2b 抽离单一事实源，前向接缝
  *    本切片闭合）；BASH_TOOL_NAME = ../toolNames（D-4 不落 toolName.ts）。
  *  ⑩ call 5 参声明 → 2 参声明（Tool 契约允少参；旧 canUseTool /
- *    _parentMessage / onProgress 旧体不消费，裁，零行为）。
+ *    _parentMessage / onProgress 旧体不消费，裁，零行为）；旧 `export
+ *    type BashProgress = any` 死类型（零消费者，S-B6 NOTE-1 登记）随之
+ *    不随迁。
  *  ⑪ getAtlasTempDir = permissions 域门面（S-B4 同 import 行先例）；
  *    logForDebugging = shared（C1 统一裁定）。
  *
@@ -100,6 +109,9 @@ export const BASH_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
         before: { type: 'string' },
         after: { type: 'string' },
       },
+      // 嵌套必填（旧 zod z.object 内 filePath 必填逐字对齐，duck 型
+      // filePath: string 非可选，S-B6 MINOR-3 补转写）
+      required: ['filePath'],
     },
     run_in_background: {
       type: 'boolean',
@@ -156,7 +168,10 @@ export const BashTool: Tool = {
   isConcurrencySafe: () => false,
   isDestructive: () => false,
   toAutoClassifierInput: () => '',
-  userFacingName: () => '',
+  // delta ④（S-B6 订正）：旧生效值 = buildTool 返回体 `userFacingName:
+  // () => def.name`（TOOL_DEFAULTS 与 def 之间，覆盖默认 ''；旧 def 无
+  // 覆写）= 'Bash'；新 = BASH_TOOL_NAME（toolNames 单一事实源，值逐字同）
+  userFacingName: () => BASH_TOOL_NAME,
   isReadOnly: (input: unknown) =>
     isReadOnlyCommand((input as BashToolInput).command),
   // delta ⑤：一线接线 bashToolHasPermission（首个非-passthrough 工具面；

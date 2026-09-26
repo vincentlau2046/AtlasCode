@@ -16,8 +16,13 @@
  *  - isSedInPlaceEdit / parseDataUri（bashUtils 侧）旧仓零仓内消费导出
  *    面 → 逐字保留导出（B18 先例：逐字随迁导出面不裁，零消费者登记即可）。
  *
- * 探针 P-B3 锚点（§8.54 ⑧ 突变面）：applySedSubstitution BRE→ERE 占位符
- * 顺序（BACKSLASH/PLUS 保护步互换 = 判别红）。
+ * 探针 P-B3 锚点（§8.54 ⑧ 突变面；S-B6 重选登记）：初版判别支「`a\+`
+ * one-or-more / 裸 `a+` literal」对 BACKSLASH/PLUS 保护步互换不敏感（两序
+ * 同结果，实测 0 红失效）；真正敏感输入 = `\\+`（双反斜杠 + 裸 plus：正序
+ * BACKSLASH 先保护 → 匹配 'a\+' 整体；步序互换时第二 \ 被 PLUS 步误当 `\+`
+ * 消费 → regex 退化为字面 'a+' → 不匹配）。活锚 = unit「BRE \\\\+ 字面反
+ * 斜杠+字面 plus」判别测（applySedSubstitution('xa\\+y', pattern 'a\\\\+')
+ * = 'xZy'；突变互换 → 恰 1 红）。
  */
 import { randomBytes } from 'crypto'
 import { tryParseShellCommand } from './shellQuote'

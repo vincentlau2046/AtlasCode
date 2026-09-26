@@ -12,7 +12,8 @@
  *
  * delta 登记（import 替换 + 型位替换，函数体逐字；复审勿当遗漏重提）：
  *  - 旧 `z.infer<typeof BashTool.inputSchema>`（L1014 型位 1）→ 本地
- *    bashToolInput.ts BashToolInput duck（S-T2a 先例；Bash 本体子波换真型）
+ *    bashToolInput.ts BashToolInput duck（S-T2a 先例；接缝已消费，§8.54
+ *    S-B5：本体 JSON schema 对齐，消费登记见 bashToolInput 头注）
  *  - 旧 `createReadRuleSuggestion`（utils/permissions/PermissionUpdate）→
  *    engine/permissions/permissionPersist 深 import（S-4c2 已落该函数；
  *    engine/permissions 门面 index 经 permissionSetup→engine/tools 门面→

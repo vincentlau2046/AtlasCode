@@ -21,7 +21,8 @@
  *
  * 探针锚点登记（§8.54 ⑧ 突变面，S-B6 消费）：
  *  - P-B3 = applySedSubstitution BRE→ERE 占位符顺序（BACKSLASH/PLUS 保护
- *    步互换）→ 本文件「BRE \\+ one-or-more vs 裸 + literal」判别测红。
+ *    步互换）→ S-B6 重选：原登记判别支对互换不敏感（0 红），活锚 =
+ *    「BRE \\\\+ 字面反斜杠+字面 plus」测（保护步顺序真敏感输入）。
  */
 import { describe, test, expect } from 'bun:test'
 import { interpretCommandResult } from '../../src/engine/tools/bash/commandSemantics'
@@ -289,6 +290,22 @@ describe('applySedSubstitution BRE→ERE + 替换面', () => {
         info({ pattern: 'a+', replacement: 'Z' }),
       ),
     ).toBe('xaaay')
+  })
+
+  test('BRE \\\\+ = 字面反斜杠 + 字面 plus（P-B3 重选锚：保护步顺序）', () => {
+    // S-B6 探针重选登记：原登记判别支 1/2（`a\+` / 裸 `a+`）对 BACKSLASH/PLUS
+    // 保护步互换不敏感（两序结果同），0 红失效；真正敏感输入 = `\\+`
+    // （双反斜杠 + 裸 plus：第二 \ 被 PLUS 步误消费仅当步序互换）。
+    // 正序：BACKSLASH 先保护 `\\` → JS regex 匹配 'a\+' 整体 → 'xZy'。
+    // 探针突变（S-B6 实测）：保护步互换 → `\\` 的第二 \ 被 PLUS 步当 `\+`
+    // （one-or-more）→ regex 退化为 'a+' 字面 → 对 'xa\+y' 不匹配 →
+    // 原样返回 恰 1 红。
+    expect(
+      applySedSubstitution(
+        'xa\\+y',
+        info({ pattern: 'a\\\\+', replacement: 'Z' }),
+      ),
+    ).toBe('xZy')
   })
 
   test('`&` = 全匹配 / `\\&` = 字面 &', () => {

@@ -139,13 +139,20 @@ describe('BashTool 对象面', () => {
       dangerouslyDisableSandbox: expect.any(Object),
     })
     expect(BASH_TOOL_INPUT_SCHEMA.required).toEqual(['command'])
+    // 嵌套 _simulatedSedEdit 必填字段（旧 zod z.object 内 filePath 必填逐字
+    // 对齐，duck 型非可选；S-B6 MINOR-3 补转写）
+    const nested = (BASH_TOOL_INPUT_SCHEMA.properties as Record<string, { required?: string[] }>)
+      ._simulatedSedEdit
+    expect(nested.required).toEqual(['filePath'])
   })
 
-  test('TOOL_DEFAULTS 4 成员逐值对象化（delta ④）', () => {
+  test('TOOL_DEFAULTS 4 成员逐值对象化（delta ④；userFacingName 生效值 = name，S-B6 MAJOR-1 订正）', () => {
     expect(BashTool.isConcurrencySafe()).toBe(false)
     expect(BashTool.isDestructive()).toBe(false)
     expect(BashTool.toAutoClassifierInput()).toBe('')
-    expect(BashTool.userFacingName()).toBe('')
+    // 旧生效值 = buildTool `() => def.name`（覆盖 TOOL_DEFAULTS 默认 ''）
+    // → 新 = BASH_TOOL_NAME（值逐字 'Bash'，非 ''）
+    expect(BashTool.userFacingName()).toBe(BASH_TOOL_NAME)
   })
 })
 

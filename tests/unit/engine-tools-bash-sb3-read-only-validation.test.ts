@@ -181,11 +181,25 @@ describe('checkReadOnlyConstraints 五段决策链', () => {
 
   test('P-B1 锚：单引号反斜杠失步守卫（glob 检出 → 非只读）', () => {
     // `ls '\' *`：bash 语义下 `*` 为未引号 glob（`'\'` 内反斜杠字面）→
-    // containsUnquotedExpansion 守卫在 → 检出 → 非只读 passthrough。
-    // 突变（删 `!inSingleQuote` 守卫）→ 追踪器失步 → `*` 误判引号内 →
-    // ls regex 命中 → allow（S-B6 突变探针恰 1 红）。
+    // 非只读 passthrough。S-B6 探针重选登记（§8.54 P-B1 初版锚失效）：
+    // 「删 `!inSingleQuote` 守卫」突变实测 0 红——所有失步输入（奇数尾
+    // 反斜杠引号串）被 L1871 bashCommandIsSafe_DEPRECATED 预检先行拦截
+    // （passthrough 早退，containsUnquotedExpansion 不可达），该守卫 =
+    // 设计性不可观测量（防御纵深，函数头注「Defense-in-depth」逐字旧仓）。
+    // 正向判别基线保留（本测试），活探针改挂双引号 glob 字面支（下测）。
     expect(
       checkReadOnlyConstraints({ command: "ls '\\' *" }, false).behavior,
     ).toBe('passthrough')
+  })
+
+  test('P-B1 重选锚：双引号内 glob 字面（unquoted-expansion 双引号 skip 支）', () => {
+    // `ls "x*y"`：双引号内 glob = 字面（bash 语义）→ containsUnquoted
+    // Expansion 双引号 skip 支（L1634-1636 逐字旧仓）→ 无未引号展开 →
+    // ls 只读 regex 族命中 → allow。
+    // 探针突变（S-B6 实测）：删双引号 skip 支 → `*` 误检未引号 glob →
+    // 非只读 → passthrough 恰 1 红。
+    expect(
+      checkReadOnlyConstraints({ command: 'ls "x*y"' }, false).behavior,
+    ).toBe('allow')
   })
 })

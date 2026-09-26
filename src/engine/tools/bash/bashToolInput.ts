@@ -12,14 +12,16 @@
  * `BashTool.name` 消费面（createPermissionRequestMessage 3 参位）→
  * engine/tools/toolNames BASH_TOOL_NAME（'Bash'，单一事实源，E-2 T-5d 已落）。
  *
- * 接缝消费登记（§8.54 ④，S-B5 2026-09-26，复审勿当遗漏重提）：
+ * 接缝消费登记（§8.54 ④，S-B5 2026-09-26，复审勿当遗漏重提；S-B6 头注
+ * 措辞订正 MINOR-1）：
  *  - **已消费**：bashTool.ts 本体已落（BASH_TOOL_INPUT_SCHEMA 纯 JSON
  *    schema 对象，新仓 shared Tool 契约无 zod——旧「真 zod 定义」接缝改题
- *    为 JSON schema 对齐）；本 duck 型坐实为**类型位单一事实源**（7 字段
- *    与本体 schema 逐字段对齐，既有类型位消费 6 方零改动：
- *    bashPermissions / pathValidation / bashCommandHelpers / modeValidation /
- *    readOnlyValidation（S-B3 新增）/ bashTool（本切片）+ bash/index 门面
- *    re-export）。
+ *    为 JSON schema 对齐）；本 duck 型坐实为**类型位单一事实源**（顶层
+ *    7 字段与本体 schema 逐字段对齐；类型位消费方 8 个 = 开波既有 6（计划
+ *    §8.54 ④ 口径：tools/index / bash/index / bashPermissions /
+ *    pathValidation / bashCommandHelpers / modeValidation，全 type-only
+ *    零改动）+ 本波新增 2（readOnlyValidation S-B3 / bashTool S-B5），
+ *    全 import type 位）。
  *  - 残留守：真 ToolUseContext 全字段面仍不随迁（BashToolUseContext duck
  *    最小形；本体 call 面 D-7 扩 1 成员 options.cwd）。
  */

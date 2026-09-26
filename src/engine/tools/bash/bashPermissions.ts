@@ -11,19 +11,21 @@
  *
  * delta 登记（import 替换 + 型/值位替换，函数体逐字；复审勿当遗漏重提）：
  *  - 旧 `zod/v4` + `z.infer<typeof BashTool.inputSchema>`（10 位，含回调动参
- *    位）→ 本地 bashToolInput.ts duck 型（Bash 本体子波换真 zod 型，前向接缝
- *    见该文件）
+ *    位）→ 本地 bashToolInput.ts duck 型（接缝已消费，§8.54 S-B5：旧「真
+ *    zod 型」接缝改题 JSON schema 对齐，消费登记见该文件头注）
  *  - 旧 `BashTool.name`（码 29 位）→ toolNames BASH_TOOL_NAME（'Bash' 单一
  *    事实源，S-T2a 先例；新仓额外行 = L99 import + L130 BASH_RULE_TOOL 窄视图
  *    新行 + 头注 1，grep 32 行）
  *  - 旧 `BashTool.isReadOnly(input)`（值位 1）→ 本地 bashReadOnly.ts
- *    isReadOnlyCommand（旧 BashTool.ts L84-107 逐字抽离，本体子波消费）
+ *    isReadOnlyCommand（旧 BashTool.ts L84-107 逐字抽离；接缝已消费，
+ *    §8.54 S-B5：bashTool 本体 isReadOnly 消费本域函数单一事实源）
  *  - 旧 `getRuleByContentsForTool(ctx, BashTool, ...)`（值位 3）→ 本地
  *    BASH_RULE_TOOL 窄视图（RuleTool name 位；checkPermissions 实现半 = 本
  *    文件函数族，E-6 S-6b 鸭子分发 ⑧ 接线波消费——前向接缝）
  *  - 旧 `ToolUseContext`（type 位 1）→ 本地 bashToolInput.ts BashToolUseContext
  *    duck 最小形（getAppState/abortController/options 三成员，AppState duck
- *    先例；真 ToolUseContext 归本体子波）
+ *    先例；S-B5 消费，D-7 扩 +1 options.cwd 成员——真 ToolUseContext 全字段
+ *    面仍残留守（D 波/TUI 波））
  *  - 旧 `getSandboxManager()`（值位 3）→ permissions 域 sandboxAccess 注入
  *    窗口（E-6 S-6a L3 自治先例）；窗口成员 areUnsandboxedCommandsAllowed
  *    随本波 +1（首真消费者，S-T4 组合根注入同步扩面——原 S-T4 窗口 +1 项
