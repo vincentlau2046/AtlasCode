@@ -3205,10 +3205,58 @@ UI.tsx 域外合计 1138L（Read 184 / Write 404 / Edit 288 / Glob 62 / Grep 200
 
 `bun x tsc --noEmit`（0）/ `bun x eslint <新增·改动文件>`（0）/ `bun build src/atlascode/cli.ts --outfile <tmp>/build-scN.js --target node`（0 KB 级 entry）/ `bun test --isolate tests/`（全量 + 切片新测全绿）+ `bun test --isolate tests/ci/`（gate 6 pass / 5 expect，门③ wave-c 不变）。
 
-### 8.55.5 预测基线谱系
+### 8.55.5 基线谱系（预测 → 实测）
 
-开波 1694/102/3697 + gate 6·5 → S-C1 ~1729 → S-C2 ~1789 → S-C3 ~1829 → S-C4 ~1899 → S-C5 ~1979 → S-C6 ~2069（+N 为预测，精确值各切片闭环时坐实；波终预测 ≈ 2070 pass / ~112 文件 / ~3990 expect + gate 6·5）。49 口径 **1/49 → 6/49**。
+预测（开波时）：开波 1694/102/3697 + gate 6·5 → S-C1 ~1729 → S-C2 ~1789 → S-C3 ~1829 → S-C4 ~1899 → S-C5 ~1979 → S-C6 ~2069。
+
+**实测（各切片四件套落盘值，闭环坐实）**：
+
+| 节点 | pass / 文件 / expect | gate |
+|---|---|---|
+| 开波（§8.54 闭环态） | 1694 / 102 / 3697 | 6·5 |
+| S-C1（03d836c） | 1744 / 105 / 3799 | 6·5 |
+| S-C2（26a4801） | 1792 / 107 | 6·5 |
+| S-C3（5ddab2d） | 1827 / 109 / 3961 | 6·5 |
+| S-C4（06c6079） | 1859 / 111 / 4065 | 6·5 |
+| S-C5（4c80502） | 1915 / 113 / 4245 | 6·5 |
+| **S-C6 波终（5649499）** | **1976 / 115 / 4408** | 6·5 |
+| S-C7 审视修复（440e4a5，纯头注） | 1976 / 115 / 4408（不变） | 6·5 |
+
+波终实测 1976/115/4408（预测 ~2070 偏保守 ~5%，6 本体切片全落在高频族 Read/Write/Edit/Glob/Grep）。49 口径 **1/49 → 6/49**。
 
 ### 8.55.6 E-wave-end 前向接缝（本波新增登记）
 
 skills 面（loadSkillsDir 3 函数 + dynamicSkillDirTriggers，skills 域波待排）/ gitDiff 532L + ATLAS_REMOTE 真门（remote 波）/ fileHistory（B18）/ LSP 族（LSPTool 长尾本体）/ countTokensWithAPI（D 波模型 token 计数面）/ 图像面（D-3 已登记，本波裁面确认）/ 插件缓存排除（插件市场波）/ getToolResultsDir 真 session 目录面（session/CLI 波）/ nestedMemoryAttachmentTriggers 真注入（memory 附件波）/ 真 ToolUseContext 全字段面（§8.54 已登记，本波 duck 沿用）。
+
+### 8.55.7 实施记录（S-C1..S-C6 逐切片闭环）
+
+提交链（master，无 remote）：b6c8699（① 分析）→ 03d836c → 26a4801 → 5ddab2d → 06c6079 → 4c80502 → 5649499 → 440e4a5（S-C7 审视修复）。各切片四件套（tsc 0 / eslint 0 / build 0KB 基线 / 全量测试 + gate 6·5）逐切片全绿。
+
+| 切片 | 提交 | 内容 | 基线（pass/文件/expect） |
+|---|---|---|---|
+| S-C1 依赖闭包层 1 | 03d836c | diff 依赖新增 + fs-operations 5 成员加法 + logError 提升 shared | 1744/105/3799 |
+| S-C2 依赖闭包层 2 | 26a4801 | memory 检测族 + frontmatter 族 + glob ignore 闭包 + windowsPaths 提升 shared | 1792/107 |
+| S-C3 pdf/notebook 族 | 5ddab2d | execFileNoThrow 域内最小形 + pdf 300L 逐字 + pdfUtils 70L + notebook 224L 逐字 + any-stub 型面 | 1827/109/3961 |
+| S-C4 Glob/Grep 本体 | 06c6079 | globTool 198L + grepTool 577L 逐字随迁 + JSON schema 转写 + semantic 运行时转换 + checkPermissions 接线 + files 子门面 | 1859/111/4065 |
+| S-C5 Read 本体 | 4c80502 | readTool 1050L 逐字 + binaryExtensions/readFileLimits/readPrompt/userMessage 4 依赖 + memoryFreshness 53L + memory 门面 re-export readFileInRange（STR-1 闭包）；unit 43 零盘 + func 13 真盘（P-C2 dedup 恰 1 红 / P-C4 workdir 边界 2 红 / P-C5 阻断设备 errorCode 9 恰 1 红 / PDF poppler 门控）；delta ⑱ 非严格 tsconfig 判别位取反不缩窄仓级坑预登记 | 1915/113/4245 |
+| S-C6 Write+Edit 本体 | 5649499 | fileWriteTool 380L + fileEditTool 530L + fileEditUtils 780L 逐字随迁 + fileEditConstants/fileWritePrompt/fileEditPrompt 3 小文件 + filesToolInput S-C6 扩面 WriteToolInput + files/tools 双门面 re-export；unit 42 零盘 + func 19 真盘（P-C3 structuredPatch diff v9 字段面 / P-C4 写侧 3 红集 / stale 守卫 delta ⑨ 双工具 / errorCode 全盘面 / mtime 粒度 60s 回拨规避） | 1976/115/4408 |
+
+49 口径 **1/49 → 6/49 坐实**（BashTool 1 + Glob 2 + Grep 3 + Read 4 + Write 5 + Edit 6；高频族 Read/Write/Edit/Glob/Grep 全闭环，43 长尾本体纵切后续波）。
+
+### 8.55.8 审视记录（S-C7 双路只读）
+
+S-C7 = 整波审视：A 路旧仓逐字对照 + B 路 H6 死接缝/探针双向扫描（双只读子代理），修复提交 440e4a5（4 文件 +40/−17，纯头注面，零行为差，基线 1976/115/4408 + gate 6·5 与 S-C6 闭环态不变）。
+
+- **A 路（旧仓对照）PASS-with-fixes**（1 MINOR + 2 NOTE 全处置）：
+  - MINOR-1 fileEditUtils delta ① 双调用点订正：normalizeFileEditInput 补 getCwd()（零行为差）+ areFileEditsInputsEquivalent 站点旧仓为裸 readFileSyncCached（无 expandPath），新引入 ~ 展开 + 相对路径按 getCwd() 解析 = 新增行为（潜伏，消费面 gate 波）——行内注释 + 头注订正。
+  - NOTE-1 dash 字面量重编码登记（新 delta ④）。
+  - NOTE-2 call 入口 `(args ?? {})` 守卫登记（fileWriteTool ⑧ / fileEditTool ⑩：旧仓 call 直接解构必填已校验参无此支，引擎恒传对象 → 零活行为差）。
+- **B 路（H6 死接缝/探针）PASS**（2 MINOR + 4 NOTE 全处置）：
+  - MINOR-1 fileWriteTool ⑧ 旧 context 3 成员枚举订正（readFileState 保留 + updateFileHistoryState/dynamicSkillDirTriggers 随 ⑦ 裁；userModified 非 Write 侧成员属 Edit 侧）。
+  - MINOR-2 fileEditTool ⑩ 旧 context 4 成员枚举订正（旧仓 L382-387 解构逐字）。
+  - NOTE-1 fileWritePrompt DESCRIPTION 旧仓即孤儿导出措辞订正（旧仓全仓零消费，本体保真）。
+  - NOTE-2 fileEditUtils ③ 消费面标签订正（getSnippetForPatch + getSnippet 旧仓零消费孤儿 / getEditsForPatch = useDiffInIDE TUI 面，非 NotebookEdit）。
+  - NOTE-3 门面分节装饰性接受 / NOTE-4 afterAll bootstrap 双戳不复位与 S-C4/S-C5 先例一致（逐文件进程隔离）接受。
+- 探针 P-C1..P-C5 复核：P-C2/P-C3/P-C4/P-C5 红集与登记基线一致（P-C4 写侧 3 红集 {acceptEdits 内 allow + {mode acceptEdits} + updatedInput 透传 / acceptEdits 外 ask / default 内 ask decisionReason undefined}），S-C7 修复全头注面未触碰探针锚点。
+
+波终态：**1976 pass / 115 文件 / 4408 expect + gate 6·5**；49 口径 6/49。既定序列下一子波 = 其余 43 长尾本体纵切 → C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L）→ D 波 → remote → analytics。
