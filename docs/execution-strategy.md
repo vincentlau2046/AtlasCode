@@ -3473,3 +3473,13 @@ S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读�
 
 #### 8.58.5 基线预测
 开波 2140/126/4950 + gate 6·5 → 预测 S-E2 ~2160/128/~5010（+20 测 / +2 文件 / +60 expect，plan 域判别支 + Exit 4 变体面）。
+
+#### 8.58.6 闭环记录（S-E2 实施 + S-E3 双只读审视 + 修复）
+- **S-E2 实施（54f170c）**：plan/ 子域 7 文件（enterPlanModeTool / exitPlanModeV2Tool / planPrompt / planDomain / planWords 800L 逐字 / planToolInput duck 8 型 / index 子门面 28 名显式 re-export）+ tools/index.ts 头注 §8.58 条目 + plan/ re-export 块 + 两测试文件。裁面全登记（头注 delta）：team 支 → C 桶 ③ / auto-mode gate 族 + bootstrap 4 旗标 → C ② / persistFileSnapshotIfRemote → remote 波 / _sdkInputSchema → D 波 / requiresUserInteraction 新契约无成员 / settings.plansDirectory 新 SettingsJson 无字段 / planModeV2 域外 3 件（S-E3 补登 delta ④）。
+- **S-E3 双只读审视（d083480 修复）**：
+  - **A 路（旧仓保真度）29/29 VERIFIED 零 MUST-FIX** + NOTE 5 条全修：① delta 悬空引用 ⑩⑫/⑩⑪⑫ → ⑥⑧/④⑥⑧（exitPlanModeV2Tool delta ① + planToolInput）；② getPlanSlugCache 措辞订正（旧 = any-stub `: any = () => new Map()` 每次调用新 Map 非「全局 Map」，新域内真 Map = 意图面恢复非 stub 复刻）；③ restorePlanSlug 笔误 → getSlugFromLog/copyPlanForResume/copyPlanForFork（plans.ts:149+，旧仓 grep 0 命中 restorePlanSlug 实证）；④ planModeV2 域外 3 件（getPlanModeV2AgentCount L4 / ExploreAgentCount L17 / getPewterLedgerVariant L72，旧消费位 messages.ts:3195/3225/3226 plan-mode prompt/query/附件面）前向接缝登记（planPrompt delta ④，新仓消息域未落）；⑤ delta ⑤ 旗标名行号顺序订正（237=setHasExitedPlanMode / 248=setNeedsAutoModeExitAttachment / 249=setNeedsPlanModeExitAttachment / 308=hasExitedPlanModeInSession）。
+  - **B 路（新仓一致性 + 测试面）13/14 PASS，MUST-FIX 1 修**：探针 (e)「plan 域冲突重试 existsSync 检查」原随机探针在词表 9.76M 组合下 P(red)≈1e-7 形同未覆盖 → 修法 = planDomain 测试缝 `setPlanSlugGeneratorForTesting`（生产缺省 = generateWordSlug 零行为差，delta ⑦ 登记；先例 engine/session/project.ts *ForTesting 族）+ func 冲突重试测试改确定性注入序列 [a,b,c] 预占 a/b；**突变实证**（existsSync 检查置 `if (true)` → 恰好 1 red 14 pass/1 fail 后还原）。B 路其余 PASS 项：Tool 契约合规（13 必选成员 + validateInput 失败支 errorCode）/ 门面 re-export 1:1（28 名脚本 diff 零漂移）/ 探针 (a)-(d) 红位全落 / 断言串 verbatim 全核 / 状态卫生（--isolate 每文件独立进程 + beforeAll/afterAll 清场）/ 注册表 20 槽表无 plan 槽实证 / 死接缝扫描零未登记（generateShortWordSlug 消费位旧仓 bridge/initReplBridge.ts:237 实证）。
+  - B 路 NOTE 1（测试数拆分）订正：S-E2 实际 **unit 26 + func 15 = 41**（任务单/提交文案 24/17 口径偏差，总数 41 正确）。
+- **波终基线：2181 pass / 128 文件 / 5064 expect + gate 6 pass / 5 expect**（vs 开波 2140/126/4950：+41 测 / +2 文件 / +114 expect；四件套 tsc 0 / eslint 0 / build 0KB entry 复验；S-E2 预测 ~2160/128/~5010 偏低，实测全量 +41/+114）。
+- 49 口径 **20/49 坐实**（余 29 长尾）；波 tag 不切（提交链 02c5889（S-E1）→ 54f170c（S-E2）→ d083480（S-E3 审视 + 修复）；gate ③ 仍用 wave-c）。
+- **C 桶 ① 下一子波 = §8.59 web 族（WebFetch 318L 管线 + preapproved 166L + utils 537L / WebSearch 354L LLM 面）** → §8.60-§8.64 序列 → C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
