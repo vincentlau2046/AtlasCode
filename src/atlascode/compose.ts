@@ -183,7 +183,10 @@ export function createCoreDependencies(): CoreDependencies {
   //    恒 false 短路不可达，测试判别见 loop-deps-compose T-8）
   //    areUnsandboxedCommandsAllowed = 工具本体波 S-T2b 扩面（§8.53，
   //    shouldUseSandbox 逃生支首消费者；旧仓 manager 同法 = settings.sandbox.
-  //    allowUnsandboxedCommands ?? true，直绑 sandbox 域 manager 方法）
+  //    allowUnsandboxedCommands ?? true，直绑 sandbox 域 manager 方法）+
+  //    S-B4 扩面 4 成员（§8.54 ⑤，bashPrompt getSimpleSandboxSection
+  //    配置读面首消费者；窄视图同构，直绑 manager 方法零映射；adapter 壳
+  //    零改——executor 端口不消费新成员）
   setSandboxAccess({
     isSandboxingEnabled: sandboxManager.isSandboxingEnabled,
     isAutoAllowBashIfSandboxedEnabled: sandboxManager.isAutoAllowBashIfSandboxedEnabled,
@@ -192,6 +195,10 @@ export function createCoreDependencies(): CoreDependencies {
       const c = sandboxManager.getFsWriteConfig()
       return { allowOnly: c.allowOnly, denyWithinAllow: c.denyWithinAllow }
     },
+    getFsReadConfig: sandboxManager.getFsReadConfig,
+    getNetworkRestrictionConfig: sandboxManager.getNetworkRestrictionConfig,
+    getAllowUnixSockets: sandboxManager.getAllowUnixSockets,
+    getIgnoreViolations: sandboxManager.getIgnoreViolations,
   })
 
   // ⑨ S-E2 A5+A9（§8.52）：session ← bootstrap 真值（3 成员——域缺省
