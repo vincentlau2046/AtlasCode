@@ -39,6 +39,20 @@ import {
  * E-4 S-4c1 加法（engine/permissions 规则磁盘加载/写回消费）：
  * - lstatSync（safeResolvePath 特殊文件守卫）
  * - safeResolvePath 助手（接口外纯函数，旧仓 utils/fsOperations.ts:138 逐字）
+ *
+ * §8.55 S-C1 加法（engine/tools/files 依赖闭包层消费，旧仓
+ * utils/fsOperations.ts NodeFsOperations 同名原语逐字，slowLogging 裁）：
+ * - readFileBytes（fs.readFile 无 encoding → Buffer；FileRead 图像支
+ *   消费；readFile 强制 encoding 成员不复用）
+ * - readSync（openSync + readSync(fd) + closeSync 逐字，非 Node 22
+ *   fs.readSync(path, opts) 新 API；detectLineEndings 4KB 采样）
+ * - isDirEmptySync（readdirSync withFileTypes length===0 逐字）
+ * - readlinkSync / renameSync（writeFileSyncAndFlush_DEPRECATED 原子写
+ *   面符号链接保留 + 原子 rename）
+ *
+ * 存量 setFsImplementation 测试 stub（9 文件字面实现）不补新成员：
+ * tests/ 不在 tsconfig include（tsc 0 基线实证）+ 各 stub 消费面
+ * 零调用新成员（运行时安全）——E-4 lstatSync 加法同款裁定先例。
  */
 export type FsOperations = {
   cwd(): string
@@ -61,6 +75,15 @@ export type FsOperations = {
   mkdirSync(path: string): void
   // E-4 S-4c1 加法（safeResolvePath 特殊文件守卫消费，见下）
   lstatSync(path: string): fs.Stats
+  // §8.55 S-C1 加法（engine/tools/files 依赖闭包层消费，见头注）
+  readFileBytes(path: string): Promise<Buffer>
+  readSync(
+    path: string,
+    options: { length: number },
+  ): { buffer: Buffer; bytesRead: number }
+  isDirEmptySync(path: string): boolean
+  readlinkSync(path: string): string
+  renameSync(oldPath: string, newPath: string): void
 }
 
 export const NodeFsOperations: FsOperations = {
@@ -134,6 +157,42 @@ export const NodeFsOperations: FsOperations = {
 
   lstatSync(fsPath) {
     return fs.lstatSync(fsPath)
+  },
+
+  // §8.55 S-C1 加法（readFile 无 encoding → Buffer；旧仓
+  // getFsImplementation().readFileBytes 消费面，FileRead 图像支 L983）
+  async readFileBytes(fsPath) {
+    return readFilePromise(fsPath)
+  },
+
+  // §8.55 S-C1 加法（旧仓 NodeFsOperations.readSync 逐字：openSync +
+  // readSync(fd, buffer, 0, length, 0) + closeSync；非 Node 22 的
+  // fs.readSync(path, opts) 新 API——旧仓此实现兼容低版本 node）
+  readSync(fsPath, options) {
+    let fd: number | undefined = undefined
+    try {
+      fd = fs.openSync(fsPath, 'r')
+      const buffer = Buffer.alloc(options.length)
+      const bytesRead = fs.readSync(fd, buffer, 0, options.length, 0)
+      return { buffer, bytesRead }
+    } finally {
+      if (fd) fs.closeSync(fd)
+    }
+  },
+
+  // §8.55 S-C1 加法（旧仓 NodeFsOperations.isDirEmptySync 逐字：
+  // readdirSync（本实现 withFileTypes）length === 0）
+  isDirEmptySync(dirPath) {
+    return this.readdirSync(dirPath).length === 0
+  },
+
+  // §8.55 S-C1 加法（旧仓 NodeFsOperations 同名原语直转）
+  readlinkSync(path) {
+    return fs.readlinkSync(path)
+  },
+
+  renameSync(oldPath: string, newPath: string) {
+    fs.renameSync(oldPath, newPath)
   },
 }
 

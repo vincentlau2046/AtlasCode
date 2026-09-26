@@ -3170,7 +3170,7 @@ UI.tsx 域外合计 1138L（Read 184 / Write 404 / Edit 288 / Glob 62 / Grep 200
 
 **D. 关键语义裁定**
 
-- **① Read 缓解面（L684）**：旧 `getCanonicalName(getMainLoopModel())`（model/model.ts 358 新仓无）→ 新 = modelprovider `getRoleConfig('premium').model` + 域内 canonical 名助手（剥 `/` 前缀，逐字旧 getCanonicalName 语义）；MITIGATION_EXEMPT_MODELS（`claude-opus-4-6`）保留（OpenAI 协议世界恒不命中 = 恒含缓解提示，行为保守等价，登记）。
+- **① Read 缓解面（L684）**：旧 `getCanonicalName(getMainLoopModel())`（model/model.ts 358 新仓无）→ 新 = 域内 files/modelRef.ts 两助手：`getMainLoopModelName` = modelprovider `getRoleConfig('small').model ?? ''`（旧 getMainLoopModel L105 语义 = modelRoles.**small** 角色池头，与 engine/query spine 默认 role 'small' 一致；本条初稿误写 'premium'，2026-09-26 订正）+ `getCanonicalModelName` = `fullModelName.toLowerCase()`（旧 getCanonicalName 回退支逐字——resolveModel 元数据表旧仓已删〔旧 L204 头注〕，新仓直接取回退语义，**无「剥 `/` 前缀」——初稿此处误记，同步订正**）；消费方两面：Read 缓解面（shouldIncludeFileReadMitigation，MITIGATION_EXEMPT_MODELS〔`claude-opus-4-6`〕恒不命中 = 恒含缓解提示，行为保守等价，登记）+ pdfUtils isPDFSupported（claude-3-haiku 子串判，新模型名恒不命中 = PDF 块面恒支持）。
 - **② dedup env 命名**：旧 `atlas_read_dedup_killswitch`（true=关 dedup）→ 新 **`ATLAS_DISABLE_READ_DEDUP`**（isEnvTruthy → 关 dedup，等价语义；命名对齐新仓 ATLAS_DISABLE_* kill-switch 族先例，如 ATLAS_DISABLE_GIT_INSTRUCTIONS）。
 - **③ duck context（files/fileToolInput.ts，bashToolInput 先例）**：公共面 getAppState / abortController / options；Read 加 readFileState（**FileStateCache 最小 duck = get/set/has + FileState 最小形 { content, timestamp, offset, limit, isPartialView? }**——真 LRU 实例 = 组合根注入，真 ToolUseContext 全字段面残留守 §8.54 已登记）+ fileReadingLimits + 可选 nestedMemoryAttachmentTriggers（3 调用点 `?.add` 无注入 = no-op 零行为，**保留不裁** = 保真）。
 - **④ checkPermissions**：Read/Glob → checkReadPermissionForTool；Write/Edit → checkWritePermissionForTool（逐字旧调用位；工具对象加 getPath 成员，delta 登记）。

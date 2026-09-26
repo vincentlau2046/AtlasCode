@@ -65,6 +65,9 @@ export { containsVulnerableUncPath } from "./unc"
 export { djb2Hash } from "./hash"
 export { lazySchema } from "./lazySchema"
 export { logForDebugging, type DebugLogLevel } from "./debug"
+// §8.55 S-C1：logError 跨域叶子（自 engine/tools/bash 域内 shim 提升，
+// shared = 唯一跨域叶子汇，C-Deep T5 提升先例）
+export { logError } from "./log"
 export {
   NodeFsOperations,
   setFsImplementation,
@@ -73,6 +76,13 @@ export {
   safeResolvePath,
   type FsOperations,
 } from "./fs-operations"
+
+// C 波（§8.55 S-C1）：rough token 估计族（占位填充，旧 services/tokenEstimation 纯函数子集）
+export {
+  roughTokenCountEstimation,
+  bytesPerTokenForFileType,
+  roughTokenCountEstimationForFileType,
+} from "./tokenEstimation"
 
 // B 波契约冻结：纯类型骨架（atlas/message/SystemPrompt/ThinkingConfig/Effort/Tool）
 export type * from "./types"
