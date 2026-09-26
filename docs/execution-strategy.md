@@ -3049,3 +3049,32 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - **S-B6 整波审视**（探针 5 + 双只读 ≤2 + 修复提交）→ ④ 闭环（docs 实施记录 + 审视记录 + 闭环 + memory + task #128 闭环）
 
 **开波基线**（S-T5 闭环态）：1573 pass / 94 文件 / 3398 expect + gate 6 pass / 5 expect；tsc 0 / eslint 0 err（1 既有 ignore 警告）/ build 0 KB。提交链 8861fa7…91d9e07（§8.53）为本波基线锚。
+
+**§8.54 实施记录 + S-B6 整波审视（2026-09-26，task #128 闭环）**
+
+提交链：21f3a4e（① 分析）→ bb85dc4（S-B1 依赖闭包层）→ d3590ba（S-B2 纯叶子本体）→ f3f5008（S-B3 readOnlyValidation 本体）→ 6c446d6（S-B4 bashPrompt + sandboxAccess 窗口扩 4 成员 + 组合根 ⑧ 注入）→ 0e5895d（S-B5 bashTool 本体 + 接缝消费 + 双门面）→ 549b953（S-B6 审视修复）。
+
+基线链（全量 pass/文件/expect，各步 tsc 0 / eslint 0 / build 0 KB）：开波 1573/94/3398 → S-B1 1608/96/3470（+35/2/72）→ S-B2 1642/98/3562（+34/2/92）→ S-B3 1661/99/3602（+19/1/40）→ S-B4 1667/100/3636（+6/1/34）→ S-B5 1692/102/3694（+25/2/58）→ S-B6 1694/102/3697（+2/0/+3）+ gate 6 pass/5 expect 全程不变。预测 vs 实测全切片精确吻合（+N 预值零偏差）。
+
+**S-B6 探针执行表**（恰 1 红 = 下界纪律）：
+
+| 探针 | 突变 | 实测 | 处置 |
+|---|---|---|---|
+| P-B1 | 初版：删 containsUnquotedExpansion `!inSingleQuote` 失步守卫 | **0 红（初版锚失效）** | 所有失步输入（奇数尾反斜杠引号串）被 checkReadOnlyConstraints L1871 bashCommandIsSafe 预检先行拦截（passthrough 早退，追踪器不可达）= 设计性不可观测量（函数内 Defense-in-depth 注释逐字旧仓）。活探针改挂**双引号 glob skip 支删除**（新锚 `ls "x*y"` → allow 钉文，S-B3 +1 测 +1 expect）→ 恰 1 红 ✓ |
+| P-B2 | bashTool checkPermissions 接线换回 passthrough 默认 | **2 红集 {deny, allow}**（下界 1，P-E5 先例登记订正） | 接受：判别支设计（无规则 passthrough 测不断言 suggestions 防红集升级） |
+| P-B3 | 初版：sedEditParser BACKSLASH/PLUS 保护步互换（原登记判别支 `a\+`/裸 `a+`） | **0 红（初版锚失效：两序终版 regex 相同，不敏感输入）** | 重选挂 `\\+` 输入（双反斜杠+裸 plus：正序 BACKSLASH 先保护匹配 `a\+` 整体；互换时第二 `\` 被 PLUS 步误当 `\+` 消费 → regex 退化字面 `a+`）→ S-B2 +1 测 +2 expect，恰 1 红 ✓ |
+| P-B4 | bashTool call timeout clamp `Math.min` 删 | 恰 1 红 ✓ | 400ms 封顶真 kill sleep 3（env 钉 BASH_DEFAULT_TIMEOUT_MS=200/BASH_MAX_TIMEOUT_MS=400） |
+| P-B5 | gitBareRepo `.git/HEAD` isFile 安全守卫删 | 恰 1 红 ✓ | 目录型 HEAD 攻击 fixture 误判非裸仓 |
+
+**S-B6 双只读 ≤2**：A 路（旧仓对照保真 + 探针重选合理性）PASS-with-issues 0 BLOCKER/1 MAJOR/1 MINOR/1 NOTE；B 路（H6 死接缝 + 测试面 + anti-stub + 登记一致性）PASS-with-issues 0/0/3 MINOR/2 NOTE。549b953 全处置 10 文件（零行为面，A-MAJOR-1 除外 = 恢复旧生效值）：
+- **A-MAJOR-1 userFacingName 生效值失实**（真缺陷）：旧 buildTool 返回体 `userFacingName: () => def.name` 夹 TOOL_DEFAULTS 与 def 之间覆盖默认 `''`（旧 def 无覆写）→ 旧生效值 `'Bash'`；S-B5 初版误读生效链取默认 `''` 且测试以「逐值」名义锁死。订正 = 恢复 `() => BASH_TOOL_NAME`（toolNames 单一事实源，值逐字同）+ delta ④ 理据订正 + 测试断言改（行为面 = 恢复旧仓语义，非新 delta）。
+- A-MINOR-1：bashPrompt 旧 L52 行尾空格归一化（写文件 1 字符零行为）→ delta ⑩ 补登记。
+- A-NOTE-1：旧 `export type BashProgress = any` 零消费者死类型 → delta ⑩ 补不随迁登记。
+- B-MINOR-1：bashToolInput 头注「6 导入方」措辞漂移 → 订正类型位消费方 8 个（既有 6 = 计划 §8.54 ④ 口径，全 type-only 零改动 + 本波新增 2：readOnlyValidation S-B3 / bashTool S-B5）。
+- B-MINOR-2：3 处陈旧「将来时」接缝注改题（bashPermissions zod 型/isReadOnly + pathValidation →「接缝已消费 §8.54 S-B5」）+ bashPermissions 真 ToolUseContext 行改题 D 波/TUI 波残留守。
+- B-MINOR-3：JSON schema 嵌套 `_simulatedSedEdit` 丢 `required: ['filePath']`（旧 zod z.object 内必填 + duck 型非可选）→ 补转写 + delta ② 补登记 + unit 断言钉。
+- B-NOTE-1：func 后台任务日志残留共享 temp 目录（工具设计面，接受不修）；B-NOTE-2：本节即 N-2 计划 §8.54 ⑦ 锚点文案改题落点。
+
+**残留守登记（E-wave-end 前向接缝）**：真 ToolUseContext 全字段面（BashToolUseContext duck 最小形 + D-7 options.cwd）/ UI 渲染面（UI.tsx / BashToolResultMessage.tsx 域外，renderToolUseMessage = () => null）/ D-1 归属后缀支（attribution/remote 波）/ D-3 图像 resize 调用点（图像面波）/ BgTask 模块态 map 读面经门面转出（TaskOutput/TaskStop 工具本体波消费）。anti-stub 门③ 零触碰（全真实现文件，零 `export {}` 占位）。
+
+**闭环**：task #128 闭环。C 桶 ①「工具本体 49」进度 = **1/49 落地（BashTool），48 剩（高频 → 长尾序列）**。既定序列下一步 = 其余 48 本体纵切（高频优先：Read/Write/Edit/Glob/Grep 族）→ C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L，B 桶 18 项登记处）→ D 波 → remote → analytics。
