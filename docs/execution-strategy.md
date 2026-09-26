@@ -3333,3 +3333,34 @@ S-C7 = 整波审视：A 路旧仓逐字对照 + B 路 H6 死接缝/探针双向�
 ### 8.56.7 预测基线谱系
 
 开波 1976/115/4408 + gate 6·5 → S-D2 ~2016（存储 +40 测）→ S-D3 ~2046（+30 测）→ S-D4 ~2066（+20 测）→ S-D5 ~2081（+15 测）（+N 为预测，精确值各切片闭环时坐实；波终预测 ≈ 2080 pass / ~119 文件 / ~4650 expect）。
+
+**实测订正（2026-09-27，S-D7）**：S-D2 **2011/117/4495** → S-D3 **2040/119/4604** → S-D4 **2074/121/4749** → S-D5 **2098/123/4828** = 波终（S-D6 审视修复 `d67e481` 全为值替换 + 注释面，零测试增删，基线持平）。gate 6 pass / 5 expect 全程不变（门③ 仍用 wave-c）。预测 2080/~119/~4650 实测 2098/123/4828（+18/+4/+178，存储域 848L 判别支测试面 + cron 校验 4 支 + TaskOutput 双分支面超预期）。
+
+### 8.56.8 实施记录（S-D2..S-D5 逐切片闭环）
+
+提交链（master，无 remote）：b1c5294（S-D1 分析）→ e942561 → 0b18863 → 35f177e → 795c3b1 → d67e481（S-D6 审视修复）。各切片四件套（tsc 0 / eslint 0 / build 0KB entry / 全量测试 + gate 6·5）逐切片全绿。
+
+| 切片 | 提交 | 内容 | 基线（pass/文件/expect） |
+|---|---|---|---|
+| S-D2 依赖闭包层 | e942561 | `src/engine/tasks/` 新域（旧 utils/tasks.ts 848L 逐字：disk JSON 每任务一文件 + .highwatermark + lockfile 互斥 + onTasksUpdated 信号 + claimTask/unassignTeammateTasks/getAgentStatuses teammate 协作面 + getTaskListId 四级判定链 + isTodoV2Enabled 门控 ⑯）+ TodoItem/TodoList 型面（todoTypes）+ 4 依赖件（taskHooks ~90L 旧 AsyncGenerator→新 Promise 聚合适配 / agentSwarmsEnabled 44L GB killswitch 支裁 / outputFormatting 38L / bootstrap setScheduledTasksEnabled any-stub 逐字）+ 门面；unit 零盘判别支 + func 真盘（CRUD/high watermark/锁竞争/claim 判别支/团队文件读面） | 2011/117/4495 |
+| S-D3 Task 四件套 | 0b18863 | taskCreateTool/taskGetTool/taskListTool/taskUpdateTool 4 对象 + JSON schema 4 + Output 型 4 + prompt 面 4 + taskToolInput duck 5 型（旧仓 tools/Task*Tool 族 826L 逐字随迁 → 新 shared Tool 契约：hooks Promise 适配 / setAppState expandedView + verificationNudge 双门死支裁 / checkPermissions allow 固化 / 2 参 call 裁）；注册表 ⑯ isTodoV2 槽 materialize 自门控；unit 零盘对象面 + func 真盘（createTask 落盘 / 钩子阻支回滚 / P-D2 completed 阻支 / deleted 早退 / mailbox / blocks 级联） | 2040/119/4604 |
+| S-D4 cron 三件套 + 扩 2 件 | 35f177e | cronCreateTool/cronDeleteTool/cronListTool + schedulePrompt 门面 + scheduleToolInput duck 3 型（旧仓 ScheduleCronTool 族 640L 逐字随迁）：注册表 ② AGENT_TRIGGERS 槽 materialize 自门控（isCronEnabled = ATLAS_DISABLE_CRON kill-switch / isDurableCronEnabled 常量真 GB 支裁）；tasks/ 扩 TaskStopTool（aliases KillShell，无条件注册长尾）+ TodoWriteTool（⑯ 槽反向门控 = !isTodoV2Enabled）；unit 零盘（P-D3 前 2 支 / P-D5 探针锚点 / mapResult 逐字行）+ func 真盘（durable 落位 / durable:false 前向接缝 probe / MAX_JOBS ec 3 / 归属支文件面 / 列面缺省位投影） | 2074/121/4749 |
+| S-D5 TaskOutput 末件 | 795c3b1 | taskOutputTool.ts（旧仓 583L buildTool 体逐字随迁多裁 delta ①-⑩：semanticBoolean→plain boolean / ant 面裁常真 / remote_agent 支裁（TaskState 两路联合无 remote 成员，D 波/remote 波接缝）/ call 5 参保留 onProgress waiting_for_task 消费支 / local_bash shellCommand.taskOutput 端口支 vs 磁盘读 / local_agent 内存 result 净文本支 / mapResult XML 6 行 + 截断面 / React render 5 面 + TaskOutputResultDisplay 230L 整裁（TUI 波））+ taskOutputPrompt（PROMPT shell 侧 sha256 字节核逐字 / DESCRIPTION 留导出不接线）+ duck 2 型 + 双门面扩块 + matrix 2 行；unit 21 零盘（对象面 / mapResult 逐字 / validateInput 3 守卫 / call 双分支 + P-D4 探针锚点 / AbortError 传播）+ func 3 真盘（getTaskOutput 真内容读回 / local_agent 磁盘回落位 / block 端到端真盘闭环） | 2098/123/4828 |
+
+49 口径 **6/49 → 16/49 坐实**（TaskCreate 7 / TaskGet 8 / TaskUpdate 9 / TaskList 10 / CronCreate 11 / CronDelete 12 / CronList 13 / TaskStop 14 / TodoWrite 15 / TaskOutput 16；余 33 长尾本体纵切后续波）。
+
+### 8.56.9 审视记录（S-D6 双路只读）
+
+S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读子代理 ≤2），修复提交 d67e481（9 文件 +33/−17，基线 2098/123/4828 + gate 6·5 持平）。
+
+- **A 路（旧仓对照）PASS-with-fixes**（4 finding 全处置，逐条旧仓 ground truth 核验后修）：
+  - MUST-FIX×3 cron 三件套 userFacingName 订正：旧 buildTool name-wins 插入（旧 src/Tool.ts:826-830 `userFacingName: () => def.name` 先于 `...def` 展开）+ 3 旧 cron def 无该 member（grep 零命中）→ 生效位 = 工具名，非 TOOL_DEFAULTS 缺省 ''；新 3 工具改 'CronCreate'/'CronDelete'/'CronList' + 头注错误主张（「def 无 member 取缺省 ''」）订正 + sd4 unit 3 处期望同步。
+  - NOTE×1 TodoWrite schema status 字段未登记 description 移除：旧 types.ts 该字段无 .describe()（全仓 grep 零命中），新添加 'The status of the task' = 未登记虚构，delta ① 补登记。
+  - NOTE×1（TaskOutput `tasks?.` → `tasks` = duck 型必填面行为等价后果）审查人自判非偏差，不行动。
+- **B 路（H6 死接缝/探针）PASS**（零 MUST-FIX，2 NOTE 卫生项处置）：
+  - 5/5 探针（P-D1..P-D5）活测试全在 + 突变语义具体（P-D1 taskstore-fs high watermark / P-D2 sd3-fs completed 钩子阻支 / P-D3 sd4-unit+fs 4 支 / P-D4 sd5-unit not_ready 支 / P-D5 sd4-unit StopTaskError 传播）。
+  - 20 行死接缝/残留守登记全带归属波（TUI 波 / D 波 / CLI·teammate 波 / 验证-agent 波 / analytics 波 / engine 波 / remote 波 / 权限波 / 组合根 CLI 波），零 MISSING-WAVE；9 短 DESCRIPTION 常量 + 2 空输入 duck 型（TaskListToolInput/CronListToolInput）导出仅文档面均登记。
+  - STR-1 三级门面（tasks/schedule/tools）零 `export *`；49 计数四方一致（头注累计标签 + 提交信息 + matrix 注释 + 旧仓 getAllBaseTools 独立重数 19 无条件 + 30 门控）；波 src 零活 any-stub。
+  - 2 NOTE 处置：P-D4 代码侧标签补缺（taskOutputTool.ts 头注 delta ⑩ + call 支注释 + sd5 unit 测试名/头注）；空输入 duck 型补逐型「call 0 参无 cast 位，导出仅文档面」注记。
+
+波终态：**2098 pass / 123 文件 / 4828 expect + gate 6·5**；49 口径 16/49。既定序列下一子波 = 其余 33 长尾本体纵切 → C 桶 ② auto-mode 纵切波（~3030L 分类器族）→ C 桶 ③ shell·swarm 波（7217L）→ D 波 → remote → analytics。
