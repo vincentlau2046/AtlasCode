@@ -2983,3 +2983,69 @@ S-E4 = 门自探针（anti-stub 门① 未登记 stub 红）+ P-M2 谓词阴性�
 - **波 tag 裁定 = 不切新 tag**（tag = 大波节点先例；C 桶子波提交链 8861fa7（① 执行前分析）→ 9aebe78 → 7b2286b → ebf184d → 63d295a → 23db653 → cab2b99 记录本波；gate ③ 仍用 wave-c tag 不受影响）。
 - **子波范围闭环核验**：15 文件 17924L 逐字随迁（内核 8 10535L + 面 7 7389L）/ 20 槽裁定（关闭 3⑤⑰⑱ + 域外改判 1⑳ + 残留守 16）/ ⑧ 消费面接线（窗口 +1 成员 + 组合根注入 + executor 端口激活）/ 探针 5/5 非 tautology / 双只读零 BLOCKER/MAJOR / 残留守 7 文件 1539L 登记防「以为已全」。
 - **下一子波 = C 桶 ① Bash 本体纵切**（ts 面 3310L：BashTool.ts 251 / prompt 332 / commandSemantics 140 / readOnlyValidation 1924 / sedEditParser 322 / utils 221 / toolName 2 / commentLabel 13 / destructiveCommandWarning 102；UI.tsx / BashToolResultMessage.tsx = React 层域外，先例 = tasks 波 PowerShellTool.tsx 域外裁面）→ 其余 48 本体纵切（序列：高频 → 长尾）→ C 桶 ② auto-mode 纵切波（~3030L 分类器族；本波 bashClassifier 61L 桩 = 其前向接缝，② 真族换桩后族激活零代码改动）→ C 桶 ③ shell·swarm 波（7217L）。
+
+### §8.54 Bash 本体纵切子波（C 桶 ① 子波 2）执行前分析（2026-09-26，task #128）
+
+**波定位** = C 桶 ①「工具本体 49」的**第二子波** = **Bash 本体纵切**（§8.53 ④ 闭环记录「下一子波」坐实项）。上一子波（checkPermissions 面）落 决策内核 15 文件 17924L；本子波落 **BashTool 本体 9 文件 ts 面 3307L + 依赖闭包层**，消费 S-T2a 前向接缝（bashToolInput duck 型换真输入型），落 §8.43 裁定①「工具面 checkPermissions 实现半」，闭环后 C 桶 ① 剩 其余 48 本体纵切（高频 → 长尾）。
+
+**① 范围裁定（9 文件逐字随迁 `src/engine/tools/bash/`，UI 两文件域外）**：
+
+| 旧仓文件 | 行数 | 落位 | 裁定 |
+|---|---|---|---|
+| `BashTool/BashTool.ts` | 251 | `bashTool.ts` | 本体。旧 `buildTool(zod)` → 新 shared Tool 契约（inputSchema = 纯 JSON schema 对象，AgentTool 先例）；call spawn 面 + 后台任务面（BgTask map 模块态）+ mapToolResult 逐字；`READ_ONLY_PREFIXES`/`isReadOnlyCommand` 不随迁（S-T2b 已抽离 `bashReadOnly.ts`，本体 isReadOnly 消费该域函数 = bashReadOnly 头注接缝消费）；`renderToolUseMessage` → `() => null`（TUI 残留守，AgentTool 先例，D 波/TUI 波）；**checkPermissions = 首个非-passthrough 工具面实现**（下详） |
+| `BashTool/prompt.ts` | 332 | `bashPrompt.ts` | getSimplePrompt/getDefaultTimeoutMs/getMaxTimeoutMs 逐字；`getSandboxManager()` 值位 → **sandboxAccess 注入窗口扩面**（S-T4 先例，下详）；`getAttributionTexts` 半裁（下详 D-1）；`TodoWriteTool.name` → `TODO_WRITE_TOOL_NAME`（toolNames 单一事实源，delta D-2）；`feature('MONITOR_TOOL')` 逐字保留（新 feature() 读 `FEATURE_MONITOR_TOOL` env，Monitor 工具未落 = 分支恒惰性，非裁面） |
+| `BashTool/commandSemantics.ts` | 140 | `commandSemantics.ts` | 逐字（splitCommand_DEPRECATED → 本域 commands.ts） |
+| `BashTool/readOnlyValidation.ts` | 1924 | `readOnlyValidation.ts` | 逐字；`z.infer<typeof BashTool.inputSchema>` → 本域 `BashToolInput` 型（bashToolInput.ts 单一事实源，S-T2a 接缝消费）；`isCurrentDirectoryBareGitRepo` → 本域 `gitBareRepo.ts`（新，下详） |
+| `BashTool/sedEditParser.ts` | 322 | `sedEditParser.ts` | 逐字（crypto randomBytes = node 内建） |
+| `BashTool/utils.ts` | 221 | `bashUtils.ts` | 逐字；`maybeResizeAndDownsampleImageBuffer` 依赖裁（下详 D-3）；`getMaxOutputLength` → task 域 outputLimits（已落） |
+| `BashTool/toolName.ts` | 2 | —（不落文件） | `BASH_TOOL_NAME` 新仓 `engine/tools/toolNames.ts` 单一事实源（E-2 T-5d 已落）；旧文件「破 prompt.ts 循环依赖」角色新仓消解（delta D-4） |
+| `BashTool/commentLabel.ts` | 13 | `commentLabel.ts` | 逐字纯叶子（旧消费方 collapseReadSearch = 旧 utils 域外面，函数迁位保留，消费面残留守登记） |
+| `BashTool/destructiveCommandWarning.ts` | 102 | `destructiveCommandWarning.ts` | 逐字纯叶子（旧消费方 = React BashPermissionRequest / PowerShell 族 = 域外，函数迁位保留，本波补 unit 面钉 DESTRUCTIVE_PATTERNS 表） |
+
+**React 层域外**（B16/PowerShell 域外改判先例）：`UI.tsx` / `BashToolResultMessage.tsx` 不随迁（renderToolUseMessage 残留守 = D 波/TUI 波）；旧仓 `PowerShellTool` 族 / `BashPermissionRequest` / `SedEditPermissionRequest` / `notebook.ts` / `PromptSuggestion` 消费面全部域外，本波零恢复。
+
+**② 依赖闭包层（新增随迁，旧仓散件归集）**：
+
+- `readOnlyCommandValidation.ts` **1893L**（旧 `utils/shell/`，5 张 READ_ONLY map + validateFlags + EXTERNAL_READONLY_COMMANDS + FlagArgType；唯一外部依赖 `getPlatform` → 新 shared/platform ✓；`containsVulnerableUncPath` 与已落 `shared/unc.ts` 去重 = 本文件 re-export shared 版（单一事实源，delta D-5））——Bash 域独占（新仓无 PowerShell 域，shared map 无拆分需求）。
+- `gitBareRepo.ts` ~60L（旧 `utils/git.ts` `isCurrentDirectoryBareGitRepo` 逐字；fs 面 = node:fs 直用，旧 `getFsImplementation()` 抽象层不随迁，delta D-6；func 层真 tmpdir 三 fixture：`.git/HEAD` 文件=非裸仓 / `.git/` 目录无 HEAD + `objects/` 目录=裸仓 / 无 `.git`=指示符判定）。
+- `bashTimeouts.ts` ~50L（旧 `utils/timeouts.ts` 2 env 函数逐字：`BASH_DEFAULT_TIMEOUT_MS`/`BASH_MAX_TIMEOUT_MS`）。
+- 小 env/prompt helper 归集（各 2-6L 逐字）：`hasEmbeddedSearchTools`（EMBEDDED_SEARCH_TOOLS + ATLAS_ENTRYPOINT 门）、`shouldMaintainProjectWorkingDir`（ATLAS_BASH_MAINTAIN_PROJECT_WORKING_DIR）、`shouldIncludeGitInstructions`（ATLAS_DISABLE_GIT_INSTRUCTIONS env + engine/config `includeGitInstructions ?? true`，旧 getInitialSettings 读面换 engine/config 门面）、`prependBullets`（旧 constants/prompts.ts 6L 纯函数，域内定义 + TODO PR to shared（shared 门面值缺口先例））。
+
+**③ checkPermissions 实现半裁定（§8.43 裁定① 闭环）**：旧仓事实 = BashTool 不覆写 checkPermissions（buildTool 默认 `{allow, updatedInput}` 委托通用系统）；Bash 特规决策核 `bashToolHasPermission`（2471L，S-T 波已随迁本域）经 bashCommandHelpers 接交互 UI 层，管线 1c 鸭子分发到默认。新仓 S-T 波 permissions 决策主体 ⑥ 半落 + 1c 零活实现（残留守①）。**本波裁定**：`BashTool.checkPermissions(input, context)` = 一线接线 `bashToolHasPermission(input as BashToolInput, context as BashToolUseContext)`（新核已鸭子化，签名逐字对齐；abort 重抛语义由 gate 侧 1c catch 继承，工具面零自有 try/catch = 旧核体逐字零 delta）。此为本仓**首个非-passthrough 工具面实现**，激活 S-T 波登记的 1c 分发面（ruleMatching 1c 鸭子 / permissions 1c 落点注释同步订正 = S-B5 内）。
+
+**④ 前向接缝消费（S-T2a，复审勿当遗漏重提）**：`bashToolInput.ts` `BashToolInput` duck 型 = 旧 inputSchema z.infer 展开字面量，本波坐实为单一事实源（与 bashTool.ts JSON schema 逐字段对齐，6 导入方零改动：tools/index / bash/index / bashPermissions / pathValidation / bashCommandHelpers / modeValidation）；头注接缝文改「已消费」登记。**`BashToolUseContext` duck 扩 1 成员 `options.cwd?: string`**（call 面 `context.options.cwd ?? process.cwd()` 消费，delta D-7；旧 ToolUseContext 全字段面仍不随迁 = duck 最小形先例）。
+
+**⑤ sandboxAccess 窗口扩面**：prompt 沙箱节消费 manager 7 方法（isSandboxingEnabled/getFsReadConfig/getFsWriteConfig/getNetworkRestrictionConfig/getAllowUnixSockets/getIgnoreViolations/areUnsandboxedCommandsAllowed），现窗口 4 成员 → 扩 4 成员（getFsReadConfig/getNetworkRestrictionConfig/getAllowUnixSockets/getIgnoreViolations），组合根 ⑧ 注入位同步扩（S-T4 ⑧ 先例；adapter 壳零改——executor 端口不消费新成员）。
+
+**⑥ delta/残留守登记（防「以为已全」）**：
+- **D-1** `getAttributionTexts` 半裁：commit/PR 指令节归属文本后缀（`🤖 Generated with…`/`Co-Authored-By`）不随迁——旧链 = modelprovider 模型显示名 + 远程 session URL + PRODUCT_URL 深链（跨域深链域外），`getCommitAndPRInstructions` 保留全节骨架、后缀支裁（git 安全协议 / gh PR 流程逐字保留）；归属 = attribution/remote 波（残留守登记）。
+- **D-2** `TodoWriteTool.name` → `TODO_WRITE_TOOL_NAME` 常量（值逐字相同 'TodoWrite'，单一事实源收口）。
+- **D-3** `maybeResizeAndDownsampleImageBuffer`（旧 imageResizer ← FileReadTool/imageProcessor 重链）不随迁：`resizeShellImageOutput` 函数壳保留（data-URI 解析 + 20MB 上限 + 溢出文件重读逐字），resize 调用点裁 = 返回原 data-URI 不缩放（行为 delta：大图不降采样，API 5MB 拒绝风险面登记）；归属 = 图像面波（残留守登记，func 测钉壳行为）。
+- **D-4** toolName.ts 不落文件（下详① 表）。
+- **D-5** containsVulnerableUncPath 去重 re-export（shared/unc 单一事实源）。
+- **D-6** gitBareRepo fs 面 node:fs 直用（getFsImplementation 抽象层不随迁）。
+- **D-7** BashToolUseContext duck +1 成员 options.cwd。
+- **TUI 残留守**：renderToolUseMessage `() => null` + UI.tsx/BashToolResultMessage.tsx 域外（D 波/TUI 波）。
+- **注册表消费面**：`getAllBaseTools(deps)` baseTools 经组合根注入（D 波 cli.ts 单入口消费）；本波经 `bash/` + `tools/` 双门面导出 `BashTool` 对象（模块态 BgTask map 保模块内）+ `getBackgroundTask`/`listBackgroundTasks`/`BASH_TOOL_INPUT_SCHEMA`，注入位零改动（组合根现 `baseToolsCli?: string[]` 面不动，D 波接线）。
+- **anti-stub 门**：新增全真实现文件，零 `export {}` 占位（门③ wave-c 9 域 regex 零触碰）。
+
+**⑦ 测试层**：
+- **unit 零磁盘**：bashTool 对象面（name/JSON schema 7 字段/isReadOnly 经 bashReadOnly/checkPermissions 接线 = duck context stub 打 bashToolHasPermission 决策面【deny 规则 ctx → deny / `ls` 只读 → allow】/mapToolResult 分支）；bashPrompt 各节（feature/env/sandbox 窗口 stub 控节 presence + timeout 文案）；readOnlyValidation（isCommandSafeViaFlagParsing 白名单/`$` 守卫/brace 展开 + checkReadOnlyConstraints 沙箱窗口 stub + cd+git 复合支）；sedEditParser（BRE/ERE 占位符转换 + 注入盐）；commandSemantics（grep/rg/find/diff/test 语义表）；commentLabel/destructiveCommandWarning/bashUtils 纯函数面；bashTimeouts env 面；gitBareRepo（纯 stub fs 面 unit 不真盘 → 归 func）。
+- **func 真盘**：call 同步 spawn（`echo` 真进程 stdout/exitCode）/ timeout clamp（min 封顶真 kill）/ run_in_background（真 detached spawn + getBackgroundTask + 输出文件落 getAtlasTempDir 真盘）/ resetCwdIfOutsideProject（真 tmpdir setCwd 复位）/ gitBareRepo 三 fixture / resizeShellImageOutput 溢出文件重读（真 temp 文件）。
+- **突变探针（恰 1 红下界纪律）**：
+  - **P-B1** readOnlyValidation `containsUnquotedExpansion` 单引号内反斜杠早退守卫删（`'\'` desync 支）→ 恰 1 红
+  - **P-B2** bashTool checkPermissions 接线换回 passthrough → 恰 1 红（unit 接线面）
+  - **P-B3** sedEditParser BRE 占位符序换（BACKSLASH/PLUS 保护步互换）→ 恰 1 红
+  - **P-B4** bashTool call timeout clamp `Math.min` 删（max 封顶失效）→ 恰 1 红（func）
+  - **P-B5** gitBareRepo `.git/HEAD` isFile 安全守卫删（目录型 HEAD 误判裸仓）→ 恰 1 红（func fixture）
+- **终验四件套**：tsc 0 / eslint 0 err / build 0 KB / 全量 + gate 6。
+
+**⑧ 切片计划（一模块一提交）**：
+- **S-B1 依赖闭包层**：readOnlyCommandValidation 1893L + gitBareRepo + bashTimeouts + 小 helper 归集（+unit）
+- **S-B2 纯叶子本体**：commentLabel + destructiveCommandWarning + commandSemantics + sedEditParser + bashUtils（+unit，含 D-3 delta 头注）
+- **S-B3 readOnlyValidation 1924L 本体**（+unit）
+- **S-B4 bashPrompt 332L**（sandboxAccess 窗口扩 4 成员 + 组合根 ⑧ 注入同步 +unit，含 D-1 delta 头注）
+- **S-B5 bashTool.ts 本体 + 接缝消费 + 双门面**（JSON schema + Tool 对象 + checkPermissions 实现半 + call/后台任务面 + bashToolInput 头注改「已消费」+ BashToolUseContext +cwd 成员 + permissions/ruleMatching 1c 落点注释订正 +func）
+- **S-B6 整波审视**（探针 5 + 双只读 ≤2 + 修复提交）→ ④ 闭环（docs 实施记录 + 审视记录 + 闭环 + memory + task #128 闭环）
+
+**开波基线**（S-T5 闭环态）：1573 pass / 94 文件 / 3398 expect + gate 6 pass / 5 expect；tsc 0 / eslint 0 err（1 既有 ignore 警告）/ build 0 KB。提交链 8861fa7…91d9e07（§8.53）为本波基线锚。
