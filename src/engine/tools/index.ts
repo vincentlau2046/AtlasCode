@@ -62,6 +62,16 @@
  *   多裁，见 taskOutputTool.ts 头注 delta ①-⑨）→ 在此 re-export
  *   （tasks/ 子门面）；残留守「49 本体」登记缩 1 → 16/49（高频族 +
  *   任务工具族全闭环，余 33 长尾本体纵切后续波）。
+ * §8.57 S-D2b（worktree 工具本体子波）已落 worktree/ 子域 Enter/ExitWorktree
+ *   两本体（2 对象 + JSON schema 2 常量 + Output 型 2 + worktreePrompt 面
+ *   （2 PROMPT 逐字 sha256 核 + 2 DESCRIPTION + isWorktreeModeEnabled 门控）
+ *   + worktreeToolInput duck 2 型，旧仓 tools/EnterWorktreeTool 123L +
+ *   ExitWorktreeTool 318L + prompt 62L 逐字随迁多裁，见各文件头注
+ *   delta ①-⑩/⑪）→ 在此 re-export（worktree/ 子门面）；残留守「49
+ *   本体」登记再缩 2 → 18/49（注册表 ⑭ worktree mode 槽 materialize，
+ *   自门控 isEnabled = isWorktreeModeEnabled（ATLAS_DISABLE_WORKTREE_MODE
+ *   kill-switch，GA 缺省开）；worktree 域 E-7 S-7c + S-D2a 会话/tmux 族
+ *   已落，域已闭环）。
  */
 export {
   createMcpTools,
@@ -563,3 +573,19 @@ export {
   type TaskOutputToolInput,
   type TaskOutputToolUseContext,
 } from './tasks'
+// ── S-D2b（§8.57）：worktree 子域（Enter/ExitWorktree 两本体）──
+export {
+  ENTER_WORKTREE_TOOL_INPUT_SCHEMA,
+  EnterWorktreeTool,
+  type EnterWorktreeOutput,
+  EXIT_WORKTREE_TOOL_INPUT_SCHEMA,
+  ExitWorktreeTool,
+  type ExitWorktreeOutput,
+  ENTER_WORKTREE_PROMPT,
+  EXIT_WORKTREE_PROMPT,
+  ENTER_WORKTREE_DESCRIPTION,
+  EXIT_WORKTREE_DESCRIPTION,
+  isWorktreeModeEnabled,
+  type EnterWorktreeToolInput,
+  type ExitWorktreeToolInput,
+} from './worktree'

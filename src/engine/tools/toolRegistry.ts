@@ -39,18 +39,23 @@
  *       ⑱ NODE_ENV=test（TestingPermission，新仓测试体系不消费该工具）。
  *     **域外改判 1**：⑳ PowerShell enabled（PowerShell，bash-only 纵切域外；
  *       B16 裁定同 = 域外改判登记，非 C 桶项）。
- *     **残留守 16**（各槽本体未落，门随本体纵切落；本机制只保留已落面的 ASCEND 门
- *       + deps 注入，其余槽不声明防死接缝；归属波标注）：
+ *     **残留守 13**（各槽本体未落，门随本体纵切落；本机制只保留已落面的 ASCEND 门
+ *       + deps 注入，其余槽不声明防死接缝；归属波标注。§8.53 S-T3 原始裁定
+ *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize 后余 13）：
  *       ① IS_ATLAS_DEV（Tungsten + SuggestBackgroundPR + REPL，无归属波，随体纵切声明）
- *       ② AGENT_TRIGGERS（cron 三件套 → 任务工具本体子波，scheduler 域 E-7 S-7b 已落）
+ *       ② AGENT_TRIGGERS（§8.56 S-D4 materialize：cron 三件套自门控 isEnabled =
+ *         isCronEnabled（ATLAS_DISABLE_CRON kill-switch），组合根 baseTools 注入位）
  *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
  *       ④ MONITOR_TOOL（Monitor → 本体纵切）⑥ CONTEXT_COLLAPSE（CtxInspect → 本体纵切）
  *       ⑦ TERMINAL_PANEL（TerminalCapture → shell 波 TUI 面）⑧ WEB_BROWSER_TOOL（WebBrowser → 本体纵切）
  *       ⑨ HISTORY_SNIP（Snip → shell/REPL 波）⑩ UDS_INBOX（ListPeers → shell·swarm 波）
  *       ⑪ WORKFLOW_SCRIPTS（Workflow → 本体纵切）⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution → 本体纵切）
- *       ⑬ ENABLE_LSP_TOOL（LSP → 本体纵切）⑭ worktree mode（Enter/ExitWorktree → worktree 工具本体子波，
- *       worktree 域 E-7 S-7c 已落）⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
- *       ⑯ isTodoV2（Task 四件套 → 任务工具本体子波，tasks 域 E-7 S-7a 已落，与 ② 同子波）
+ *       ⑬ ENABLE_LSP_TOOL（LSP → 本体纵切）⑭ worktree mode（§8.57 S-D2b materialize：
+ *       Enter/ExitWorktree 自门控 isEnabled = isWorktreeModeEnabled（ATLAS_DISABLE_
+ *       WORKTREE_MODE kill-switch，GA 缺省开），worktree 域 E-7 S-7c + S-D2a 会话/tmux
+ *       族已落，组合根 baseTools 注入位）⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
+ *       ⑯ isTodoV2（§8.56 S-D3 materialize：Task 四件套 + TodoWrite 自门控 isEnabled =
+ *         isTodoV2Enabled（+ TodoWrite 反向门控支），tasks 域 E-7 S-7a 已落，与 ② 同子波）
  *       ⑲ ToolSearch optimistic（ToolSearch → 本体纵切；claude.ts 请求时 deferred 决策面 = D 波壳接线）。
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
