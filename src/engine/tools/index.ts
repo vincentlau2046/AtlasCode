@@ -37,6 +37,13 @@
  *   S-C6 落 WriteTool + EditTool 本体（fileWriteTool/fileEditTool/
  *   fileEditUtils/fileEditConstants/fileWritePrompt/fileEditPrompt）
  *   → 6/49 波终态（高频族全闭环，43 长尾本体纵切后续波）。
+ * §8.56 S-D3（任务工具本体子波 4）已落 tasks/ 子域 Task 四件套本体
+ *   （taskCreateTool/taskGetTool/taskListTool/taskUpdateTool 4 对象 +
+ *   JSON schema 4 常量 + Output 型 4 + prompt 面 4 + taskToolInput duck
+ *   5 型，旧仓 tools/Task*Tool 族 826L 逐字随迁）→ 在此 re-export
+ *   （tasks/ 子门面）；残留守「49 本体」登记再缩 4 → 10/49（注册表
+ *   ⑯ isTodoV2 槽随 Task 四件套 materialize，自门控 isEnabled =
+ *   isTodoV2Enabled；cron 三件套 ② AGENT_TRIGGERS 槽 = S-D4 同子波）。
  */
 export {
   createMcpTools,
@@ -460,3 +467,31 @@ export {
   type EditOutput,
   type WriteToolInput,
 } from './files'
+// ── S-D3（§8.56）：tasks 子域（Task 四件套本体）──
+export {
+  TASK_CREATE_TOOL_INPUT_SCHEMA,
+  TaskCreateTool,
+  type TaskCreateOutput,
+  TASK_GET_TOOL_INPUT_SCHEMA,
+  TaskGetTool,
+  type TaskGetOutput,
+  TASK_LIST_TOOL_INPUT_SCHEMA,
+  TaskListTool,
+  type TaskListOutput,
+  TASK_UPDATE_TOOL_INPUT_SCHEMA,
+  TaskUpdateTool,
+  type TaskUpdateOutput,
+  TASK_CREATE_DESCRIPTION,
+  getTaskCreatePrompt,
+  TASK_GET_DESCRIPTION,
+  TASK_GET_PROMPT,
+  TASK_LIST_DESCRIPTION,
+  getTaskListPrompt,
+  TASK_UPDATE_DESCRIPTION,
+  TASK_UPDATE_PROMPT,
+  type TaskCreateToolInput,
+  type TaskGetToolInput,
+  type TaskListToolInput,
+  type TaskUpdateToolInput,
+  type TaskToolUseContext,
+} from './tasks'

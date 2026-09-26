@@ -102,6 +102,13 @@ const MATRIX: readonly MatrixRow[] = [
   // 锁竞争/claim 判别支/团队文件读面）。
   { domain: 'task', capability: '任务列表 disk 存储（CRUD/high watermark/锁竞争/claim 判别支，unit 零磁盘判别支）', status: 'done', proof: 'tests/unit/engine-taskstore.test.ts' },
   { domain: 'task', capability: '任务列表 disk 存储真盘（CRUD + high watermark + 并发锁 + claim/团队文件面，func 真盘）', status: 'done', proof: 'tests/func/engine-taskstore-fs.test.ts' },
+  // §8.56 S-D3（2026-09-26）：Task 四件套本体（engine/tools/tasks，旧仓
+  // tools/Task*Tool 族 826L 逐字随迁 → 新 shared Tool 契约：JSON schema /
+  // 钩子 Promise 适配 / setAppState+verificationNudge 裁 / checkPermissions
+  // allow 固化）unit 零磁盘对象面 + func 真盘（createTask 落盘 / 钩子阻支
+  // 回滚 / P-D2 completed 阻支 / deleted 早退 / mailbox / blocks 级联）。
+  { domain: 'task', capability: 'Task 四件套本体（TaskCreate/TaskGet/TaskList/TaskUpdate，unit 零磁盘对象面 + isEnabled ⑯ 槽自门控）', status: 'done', proof: 'tests/unit/engine-tools-tasks-sd3-tools.test.ts' },
+  { domain: 'task', capability: 'Task 四件套本体真盘（call 落盘支 / 钩子阻支回滚 / P-D2 completed 阻支 / deleted 早退 / mailbox 通知，func 真盘）', status: 'done', proof: 'tests/func/engine-tools-tasks-sd3-fs.test.ts' },
   // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
   { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
   { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
