@@ -68,6 +68,12 @@ export { logForDebugging, type DebugLogLevel } from "./debug"
 // §8.55 S-C1：logError 跨域叶子（自 engine/tools/bash 域内 shim 提升，
 // shared = 唯一跨域叶子汇，C-Deep T5 提升先例）
 export { logError } from "./log"
+// §8.55 S-C2：Windows↔POSIX 纯路径转换（memory 域 MinGW 比较 + bash 域
+// cwd 转换双消费，旧仓 utils/windowsPaths 两纯函数体逐字）
+export {
+  windowsPathToPosixPath,
+  posixPathToWindowsPath,
+} from "./windowsPaths"
 export {
   NodeFsOperations,
   setFsImplementation,

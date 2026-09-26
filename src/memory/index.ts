@@ -6,7 +6,8 @@
  *
  * re-export: types / FileSystemMemoryStore / RootedMemoryStore /
  *            InMemoryStore / CompositeMemoryStore / paths / config /
- *            memoryTypes / memoryAge
+ *            memoryTypes / memoryAge / memoryFileDetection（§8.55 S-C2）/
+ *            validateMemoryFrontmatter / frontmatterParser
  */
 
 // 接口 + 实现类
@@ -57,3 +58,28 @@ export {
   memoryFreshnessText,
   memoryFreshnessNote,
 } from './memoryAge'
+
+// §8.55 S-C2：记忆文件/目录/命令 检测族 + frontmatter 校验/解析
+// （旧仓 utils/memoryFileDetection 289L + memdir/validateMemoryFrontmatter
+// 89L + utils/frontmatterParser 裁面，import 重指域内）
+export {
+  detectSessionFileType,
+  detectSessionPatternType,
+  isAutoMemFile,
+  memoryScopeForPath,
+  isAutoManagedMemoryFile,
+  isMemoryDirectory,
+  isShellCommandTargetingMemory,
+  isAutoManagedMemoryPattern,
+  type MemoryScope,
+} from './memoryFileDetection'
+export {
+  validateMemoryFrontmatter,
+  isUnderMemoryDir,
+} from './validateMemoryFrontmatter'
+export {
+  parseFrontmatter,
+  FRONTMATTER_REGEX,
+  type FrontmatterData,
+  type ParsedMarkdown,
+} from './frontmatterParser'
