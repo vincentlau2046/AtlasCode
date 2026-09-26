@@ -3537,3 +3537,42 @@ S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读�
 - **波终基线：2224 pass / 130 文件 / 5251 expect + gate 6 pass / 5 expect**（vs 开波 2181/128/5064：+43 测 / +2 文件 / +187 expect；四件套 tsc 0 / eslint 0 / build 0KB entry 复验；S-E2 后 2223/130/5245 与 S-E1 预测 +42/+2/+181 精确吻合，S-E3 补测 +1/+6）。
 - 49 口径 **22/49 坐实**（余 27 长尾）；波 tag 不切（提交链 db5ff7b（S-E1）→ 6bab87f（S-E2）→ d4ae964（S-E3 审视 + 修复）；gate ③ 仍用 wave-c）。
 - **C 桶 ① 下一子波 = §8.60 config+ask-user+skill（Config 456L + AskUserQuestion.tsx + Skill 915L）** → §8.61-§8.64 序列 → C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
+
+#### 8.60.1 S-E1 执行前分析（config+ask-user+skill 族：依赖闭包裁定 + 重分类）
+**读面**：旧仓 ConfigTool.ts 456L + supportedSettings.ts 180L + prompt.ts 93L + UI.tsx 37L + constants / AskUserQuestionTool.tsx 256L（React-Compiler 编译态：逻辑可读；isEnabled 编译体 = `return true`，sourcemap KAIROS 支为死码）+ prompt.ts 44L / SkillTool.ts 915L + prompt.ts 213L（formatCommandsWithinBudget 预算化清单）+ UI.tsx 127L + constants。新仓 34 符号闭包 grep + config 域（settings.ts / types.ts）+ modelprovider roles + Tool 面（shared/types.ts:178）+ toolRegistry + toolNames + 组合根。
+
+**§8.60.1.1 重分类裁定：Skill（915L + prompt 213L + UI 127L）→ D 波（skill 域）**
+- 本体硬依赖闭包（新仓 grep 全 0 命中，未落）：
+  - **commands 域**：getCommands（旧 src/commands.ts:426）/ findCommand / builtInCommandNames / PromptCommand；prompt.ts 侧 getSkillToolCommands / getSlashCommandToolSkills（src/commands.js）——skill/斜杠命令目录域（src/commands/ + src/skills/ + src/services/skillSearch）整体未落；
+  - **forkedAgent**：prepareForkedCommandContext / extractResultText（executeForkedSkill 子代理支；runAgent 本体 §8.25 E-2 已落，但 fork 上下文 + 结果文本抽取层未落）；
+  - **processPromptSlashCommand**（processUserInput 族）/ recordSkillUsage（skillUsageTracking）/ invoked-skill tracking（addInvokedSkill / clearInvokedSkillsForAgent）/ parsePluginIdentifier / isOfficialMarketplaceName / createAgentId / tagMessagesWithToolUseID / COMMAND_MESSAGE_TAG / getAgentContext；
+  - feature('EXPERIMENTAL_SKILL_SEARCH') 远端 skill 4 模块（新仓 feature() 恒 false，整支裁）。
+- 裁定依据：落 commands/skills 域 = **整域落盘**（目录 + 斜杠命令处理 + usage tracking），超出子波「单工具本体纵切」scope。H6 登记：**Skill 重分类归 D 波（D 桶 ① skill 域）——D 波先落 commands/skills 域，再落 SkillTool 本体**。49 口径 Skill 槽 = 残留守（⑲ 族，归属波 = D 波 skill 域）；§8.64 stub/壳登记批不覆盖 Skill（它有本体，非零本体槽）。本波实收口标题改「config+ask-user（Skill 重分类 D 波）」。
+
+**§8.60.1.2 Config（767L）落盘 + 裁面裁定**
+- 新面 = `src/engine/tools/config/`（configTool.ts + supportedSettings.ts + configPrompt.ts + index.ts）+ tools/index.ts re-export 块。house style：`ConfigToolFace extends Tool`（checkPermissions 返回型收窄，readTool/web face 先例）+ inputSchema 纯 JSON（ToolInputJSONSchema）+ TOOL_NAME 常量 toolNames 单一事实源。
+- inputSchema：setting（string 必填）/ value（string|boolean|number 可选，additionalProperties false）。
+- checkPermissions 逐字（旧 L94-102）：value undefined → `{behavior:'allow'}`（GET 自动放行）；否则 `{behavior:'ask', message: 'Set ${setting} to ${jsonStringify(value)}'}`。
+- call：GET = getInitialSettings() path walk（buildNestedObject 反向读）+ formatOnRead；SET = boolean coercion（'true'/'false' 字符串）+ options 校验（`Invalid value "${value}". Options: ...`）+ write = updateSettingsForSource('userSettings', buildNestedObject(path, finalValue))——新签名 `{error: Error|null}`（settings.ts:393）与旧 `result.error.message` 消费兼容。**remoteControlAtStartup 'default' 特例（saveGlobalConfig 删键 + getRemoteControlAtStartup + setAppState replBridgeEnabled）随 global 段整裁**（残留守，归属 C 桶 ③ shell·swarm 波 TUI 面族）。
+- **AppState 同步（appStateKey 'verbose'|'mainLoopModel'|'thinkingEnabled'）裁**：新 Tool 面 / ToolUseContext 无 setAppState（grep 0 命中）；残留守。
+- mapToolResult 逐字：get `${setting} = ${jsonStringify(value)}` / set `Set ${setting} to ${jsonStringify(newValue)}` / error `Error: ${msg}` + is_error:true。
+- **SUPPORTED_SETTINGS 注册表裁剪（存活判据 = 新 SettingsJson 声明 ∩ 新仓活消费点，双满足才留）**：
+  - **留 3**：autoMemoryEnabled（src/memory/config.ts:53 isAutoMemoryEnabled 优先级链消费）/ model（modelprovider roles 面）/ 'permissions.defaultMode'（permissionSetup.ts:162-183 消费 + 'auto' 降级裁定 2026-09-19 逐字）。
+  - **裁 12（残留守登记）**：global 段 12 键（theme/editorMode/verbose/preferredNotifChannel/autoCompactEnabled/fileCheckpointingEnabled/showTurnDuration/terminalProgressBarEnabled/todoFeatureEnabled/teammateMode/remoteControlAtStartup 等）——新仓 globalConfig 面（getGlobalConfig/saveGlobalConfig + 配置文件 + freshness watcher）未落，且 12 键全为 TUI/CLI 态 → **归属 = C 桶 ③ shell·swarm 波（TUI 面族）**；settings 段 8 键：autoDreamEnabled（types.ts 砍字段族）/ language（UI/行为族裁）/ voiceEnabled（feature('VOICE_MODE') 恒 false）/ alwaysThinkingEnabled（types.ts 声明但无活消费点，thinking 控制 = effort B 方案）/ autoCompactEnabled（新 autoCompact 域 = env 覆写面 DISABLE_COMPACT 等，不消费 settings 布尔）等。
+  - **permissions.defaultMode options = 5 值集** `['default','plan','acceptEdits','dontAsk','auto']`：旧 feature('TRANSCRIPT_CLASSIFIER') 5/4 分拆在新仓恒 false → 旧有效集 = 4，但新 permissionSetup:176-183 逐字裁定显式消费 'auto'（全局持久值 → session 降级 'default'）→ **恢复 5 值集（delta 登记，非旧仓 feature-off 面逐字，裁定依据 = 新仓既有消费面）**。
+  - **model getOptions**：新面 = settings.availableModels（types.ts 声明字段）→ 缺省回落角色池默认 `['small','premium','fast']`（旧 catch 支逐字）；旧 getModelOptions 附加面（ATLAS_CUSTOM_MODEL_OPTION env / bootstrap cache / current+initial model 追加）裁（新 modelprovider 无 bootstrap cache 消费面，delta 登记）。
+  - **model validateOnWrite 裁**：旧 validateModel = sideQuery 真 API 探活（max_tokens 1）+ modelAllowlist + MODEL_ALIASES，三面无一在新仓；模型活面 = modelprovider healthCheck 域。formatOnRead null→'default' 逐字留（单行）。
+- UI.tsx 37L JSX → 裁（TUI 波）；prompt.ts 93L generatePrompt 注册表驱动 → 随注册表裁后仅列 3 存活键；model section catch fallback `(sonnet, opus, haiku, best, or full model ID)` 逐字。
+- **S-E2 基线预测**：unit 2 新文件（config / askUser）~30 测 / ~90 expect；无 func 文件（纯逻辑 + 无真 I/O 独占面）。
+
+**§8.60.1.3 AskUserQuestion（300L）落盘 + 裁面裁定**
+- 新面 = `src/engine/tools/askUser/`（askUserQuestionTool.ts + askUserPrompt.ts + index.ts）。
+- inputSchema = 纯 JSON（questions 1-4 / options 2-4 / multiSelect 默认 false / annotations record / commonFields answers record）。**旧 UNIQUENESS_REFINE（问题文本唯一 + 每题选项 label 唯一）纯 JSON schema 不可表达 → 移入 validateInput**（语义逐字：message `Question texts must be unique, option labels must be unique within each question`；delta 登记）。
+- validateInput HTML preview 校验裁：旧 getQuestionPreviewFormat = bootstrap/state.ts:98 `any` stub（返回 {} ≠ 'html' → html 支死码，H6 不认 stub 真行为）→ 新 validateInput = 唯一性校验单支（TUI 波可随真 preview-format 态复活，前向接缝登记）。
+- checkPermissions → `{behavior:'ask', message:'Answer questions?'}` 逐字；call = passthrough `{questions, answers:{}, annotations? spread}`；mapToolResult 逐字（per-answer `"q"="a"` + `selected preview:\n…` + `user notes: …` parts join ' '；content `User has answered your questions: ${answersText}. You can now continue with the user's answers in mind.`）。
+- isEnabled = true（旧编译体）；旧 requiresUserInteraction 新 Tool 面无位 → 裁（登记）。
+- prompt 44L：ASK_USER_QUESTION_TOOL_PROMPT 4 点用法 + "Other" + multiSelect + "(Recommended)" 逐字；EXIT_PLAN_MODE_TOOL_NAME → 新仓 **EXIT_PLAN_MODE_V2_TOOL_NAME**（plan 域 §8.58 单一事实源）；PREVIEW_FEATURE_PROMPT html 段裁（preview 态已裁）、markdown 段留；CHIP_WIDTH 12 逐字。
+- _sdkInputSchema / _sdkOutputSchema → D 波（plan 族先例）；UI JSX → TUI 波。
+
+**§8.60.1.4 组合根与注册**
+web 族先例：子域 index.ts 逐名显式 re-export（STR-1）+ tools/index.ts re-export 块 + 49 口径无条件注册位（无专属门控槽）。本族同：Config / AskUserQuestion = 无条件注册。**49 口径 S-E2 后 22/49 → 24/49**（+2 槽；Skill 槽留残守 → D 波）。**波终基线预测：2224 + ~30 测 ≈ 2254 pass / 132 文件 / ~5340 expect + gate 6·5 不变**。
