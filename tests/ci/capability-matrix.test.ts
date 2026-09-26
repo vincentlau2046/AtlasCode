@@ -124,6 +124,16 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'task', capability: 'cron 三件套本体真盘（CronCreate durable 落位 / durable:false 前向接缝 probe / MAX_JOBS ec 3 / CronDelete 归属支 + 真盘删除 / CronList 列面缺省位投影，func 真盘）', status: 'done', proof: 'tests/func/engine-tools-schedule-sd4-fs.test.ts' },
   { domain: 'task', capability: 'TaskStop 本体（aliases KillShell / validateInput 3 守卫 / call StopTaskError 传播两态 P-D5 探针 / mapResult JSON 行，unit 零磁盘对象面）', status: 'done', proof: 'tests/unit/engine-tools-schedule-sd4.test.ts' },
   { domain: 'task', capability: 'TodoWrite 本体（⑯ 槽反向门控支 = !isTodoV2Enabled / call todoKey 解析（agentId 位 / getSessionId 回落位）+ allDone 清空支 + setAppState todos 面，unit 零磁盘对象面）', status: 'done', proof: 'tests/unit/engine-tools-schedule-sd4.test.ts' },
+  // §8.56 S-D5（2026-09-27）：TaskOutput 本体（engine/tools/tasks，旧仓
+  // tools/TaskOutputTool 583L buildTool 体逐字随迁多裁，49 口径 16/49）。
+  // unit 零磁盘对象面（schema 3 字段 semanticBoolean→boolean 裁定 /
+  // TOOL_DEFAULTS 逐值 / mapResult XML 行 + 截断面 + exit_code 双缺省位 /
+  // validateInput 3 守卫 / call 双分支（notified 标记 / waiting_for_task
+  // progress 发射 / 超时回落双态 / AbortError 传播）+ local_bash 端口支 /
+  // local_agent cleanResult 支）；func 真盘（getTaskOutput 真内容读回 /
+  // local_agent 磁盘回落位 / block 端到端真盘闭环）。
+  { domain: 'task', capability: 'TaskOutput 本体（block 双分支 / waiting_for_task progress / local_bash 端口支 vs 磁盘读 / local_agent cleanResult 支 / mapResult XML 行 + 截断面，unit 零磁盘对象面）', status: 'done', proof: 'tests/unit/engine-tools-taskoutput-sd5.test.ts' },
+  { domain: 'task', capability: 'TaskOutput 本体真盘（getTaskOutput 真内容读回支 / local_agent 磁盘回落位 / block=true 端到端真盘闭环，func 真盘）', status: 'done', proof: 'tests/func/engine-tools-taskoutput-sd5-fs.test.ts' },
   // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
   { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
   { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },

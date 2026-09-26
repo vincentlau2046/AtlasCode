@@ -6,7 +6,9 @@
  * （taskCreatePrompt / taskGetPrompt / taskListPrompt / taskUpdatePrompt）+
  * duck 型（taskToolInput 5 型）+ S-D4 扩 2 件（TaskStopTool +
  * TodoWriteTool 各 1 对象 + JSON schema 常量 + Output 型 + 2 prompt 面
- * taskStopPrompt/todoWritePrompt + duck 型 5 型扩块）。
+ * taskStopPrompt/todoWritePrompt + duck 型 5 型扩块）+ S-D5 末件
+ * （TaskOutputTool 1 对象 + JSON schema 常量 + TaskOutput/
+ * TaskOutputToolOutput 型 + prompt 面 taskOutputPrompt + duck 型 2 型扩块）。
  *
  * 纪律（tools/index.ts bash 块先例）：逐名显式 re-export，无 `export *`；
  * 各文件头注 delta 登记不随门面重复（单一事实源 = 各模块头注）。
@@ -74,6 +76,20 @@ export {
   DESCRIPTION as TODO_WRITE_DESCRIPTION,
   PROMPT as TODO_WRITE_PROMPT,
 } from './todoWritePrompt'
+// ── S-D5（§8.56 任务工具本体子波 4 末件）：TaskOutput 本体 ──
+export {
+  TASK_OUTPUT_TOOL_INPUT_SCHEMA,
+  TaskOutputTool,
+  type TaskOutput,
+  type TaskOutputToolOutput,
+  type TaskOutputProgress,
+} from './taskOutputTool'
+// ── S-D5 prompt 面（PROMPT = 新契约 description() 唯一面；DESCRIPTION
+// 短常量保留导出不接线，TUI 波前向接缝，delta ②）──
+export {
+  DESCRIPTION as TASK_OUTPUT_DESCRIPTION,
+  PROMPT as TASK_OUTPUT_PROMPT,
+} from './taskOutputPrompt'
 // ── duck 型（taskToolInput.ts）──
 export type {
   TaskCreateToolInput,
@@ -86,4 +102,6 @@ export type {
   TodoWriteToolInput,
   TodoWriteAppState,
   TodoWriteToolUseContext,
+  TaskOutputToolInput,
+  TaskOutputToolUseContext,
 } from './taskToolInput'

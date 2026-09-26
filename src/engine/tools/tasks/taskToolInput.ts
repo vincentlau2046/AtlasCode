@@ -1,6 +1,7 @@
 /**
  * engine/tools/tasks — Task 四件套本体 duck 型（§8.56 S-D3，任务工具本体
- * 子波 4）+ TaskStop/TodoWrite 扩 2 件 duck 型（S-D4，文件尾块）。
+ * 子波 4）+ TaskStop/TodoWrite 扩 2 件 duck 型（S-D4，文件尾块）+
+ * TaskOutput 末件 duck 型（S-D5，文件尾块）。
  *
  * 旧仓来源（a8af45b）：zod inputSchema 推断型（TaskCreate 4 字段 /
  * TaskGet 1 字段 / TaskList 空 strictObject / TaskUpdate 9 字段）+
@@ -107,4 +108,25 @@ export interface TodoWriteToolUseContext {
   getAppState: () => TodoWriteAppState
   setAppState: (f: (prev: TodoWriteAppState) => TodoWriteAppState) => void
   agentId?: string
+}
+
+// ── S-D5（§8.56）：TaskOutput 末件 duck 型 ──
+
+/** TaskOutput 输入（旧 zod 3 字段；block/timeout 缺省位由 call 解构承旧 .default）。 */
+export interface TaskOutputToolInput {
+  task_id: string
+  block?: boolean
+  timeout?: number
+}
+
+/**
+ * TaskOutput context 消费子集（duck）：getAppState（任务记录读，call /
+ * validateInput / waitForTaskCompletion 轮询面）+ setAppState（notified
+ * 标记 updateTaskState 面）+ abortController?（waitForTaskCompletion
+ * 中断信号面，旧 5 参 call 消费位；异 S-D4 TaskStop 不消费位）。
+ */
+export interface TaskOutputToolUseContext {
+  getAppState: () => TaskAppState
+  setAppState: SetAppState
+  abortController?: AbortController
 }

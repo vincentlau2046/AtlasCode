@@ -55,6 +55,13 @@
  *   CRON kill-switch）；⑯ isTodoV2 槽补 TodoWrite 反向门控支
  *   isEnabled = !isTodoV2Enabled；TaskStop 无条件注册长尾；S-D5
  *   TaskOutput = 同子波最后 1 件 → 16/49）。
+ * §8.56 S-D5（任务工具本体子波 4 末件）已落 tasks/ 子域 TaskOutputTool
+ *   本体（1 对象 + JSON schema 1 常量 + TaskOutput/TaskOutputToolOutput
+ *   型 + TaskOutputProgress 结构型 + taskOutputPrompt 面 + taskToolInput
+ *   duck 2 型扩块，旧仓 tools/TaskOutputTool 583L buildTool 体逐字随迁
+ *   多裁，见 taskOutputTool.ts 头注 delta ①-⑨）→ 在此 re-export
+ *   （tasks/ 子门面）；残留守「49 本体」登记缩 1 → 16/49（高频族 +
+ *   任务工具族全闭环，余 33 长尾本体纵切后续波）。
  */
 export {
   createMcpTools,
@@ -502,7 +509,8 @@ export {
   type CronDeleteToolInput,
   type CronListToolInput,
 } from './schedule'
-// ── S-D3（§8.56）：tasks 子域（Task 四件套本体）+ S-D4 扩 2 件 ──
+// ── S-D3（§8.56）：tasks 子域（Task 四件套本体）+ S-D4 扩 2 件 + S-D5
+// 末件 TaskOutput ──
 export {
   TASK_CREATE_TOOL_INPUT_SCHEMA,
   TaskCreateTool,
@@ -544,4 +552,14 @@ export {
   type TodoWriteToolInput,
   type TodoWriteAppState,
   type TodoWriteToolUseContext,
+  // S-D5：TaskOutput 末件
+  TASK_OUTPUT_TOOL_INPUT_SCHEMA,
+  TaskOutputTool,
+  type TaskOutput,
+  type TaskOutputToolOutput,
+  type TaskOutputProgress,
+  TASK_OUTPUT_DESCRIPTION,
+  TASK_OUTPUT_PROMPT,
+  type TaskOutputToolInput,
+  type TaskOutputToolUseContext,
 } from './tasks'
