@@ -17,7 +17,9 @@
  *    测试确定性缝）。
  */
 
-export const WEB_SEARCH_TOOL_NAME = 'WebSearch'
+// 名字常量单一事实源 = toolNames 块 seed（plan 族先例 ../toolNames import；
+// S-E3 B-N1 订正：S-E2 实施曾域内双源字面，漂移风险已除）
+export { WEB_SEARCH_TOOL_NAME } from '../toolNames'
 
 /**
  * Returns "Month YYYY" (e.g. "February 2026") in the user's local timezone.

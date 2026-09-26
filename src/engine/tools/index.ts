@@ -88,7 +88,8 @@
  *   族 + bootstrap 4 旗标 → C 桶 ② auto-mode 纵切波 /
  *   persistFileSnapshotIfRemote → remote 波 / _sdkInputSchema → D 波）。
  * §8.59 S-E2（web 族子波）已落 web/ 子域 WebFetchTool / WebSearchTool 两
- *   本体（2 对象 + JSON schema 2 常量 + 型面 13（webToolInput duck 族）
+ *   本体（2 对象 + JSON schema 2 常量 + 型面 11（webToolInput duck 族，
+ *   S-E3 A-N6/B-N5 计数订正）
  *   + prompt 面 4（WebFetch auth-warning prompt / WebSearch 月年模板 +
  *   2 短 description 不接线）+ URL 管线（webFetchUtils：3 错误类 / 双 LRU
  *   缓存（本地 TtlLruCache，旧 lru-cache 裁）/ blocklist 预检（
@@ -683,7 +684,7 @@ export {
   type WebFetchTransport,
   type WebFetchTransportInit,
   // 重名登记：files 块已 seed readPrompt DESCRIPTION（Read 面）→ web 面
-  // 别名重出（plan 族重名登记先例）
+  // 别名重出（tasks 族 TASK_*_DESCRIPTION 别名先例，S-E3 B-N6 归属订正）
   DESCRIPTION as WEB_FETCH_DESCRIPTION,
   getWebFetchToolPrompt,
   makeSecondaryModelPrompt,

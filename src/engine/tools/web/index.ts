@@ -2,7 +2,8 @@
  * engine/tools/web 子门面（S-E2 §8.59 web 族子波，STR-1 显式名块纪律）。
  *
  * 覆盖两本体对象（WebFetchTool / WebSearchTool）+ JSON schema 2 常量
- * （WEB_FETCH/WEB_SEARCH_TOOL_INPUT_SCHEMA）+ 型面 12（webToolInput：
+ * （WEB_FETCH/WEB_SEARCH_TOOL_INPUT_SCHEMA）+ 型面 11（webToolInput 实
+ * 导出 11 型，S-E3 A-N6/B-N5 计数订正）：
  * WebFetch/WebSearch 输入输出 + context duck 2 + 流块型 2 + 进度 duck +
  * 服务工具 schema）+ prompt 面 4 函数（getWebFetchToolPrompt /
  * getWebSearchPrompt / getLocalMonthYear / 2 短 description 不接线导出）+

@@ -22,23 +22,30 @@
  *    先例同族）：useHaiku 恒 false → 旧 haiku 支（getDefaultFastModel /
  *    toolChoice web_search / thinkingConfig disabled）全裁，恒走
  *    mainLoopModel 路径（登记 = haiku 快模型搜索支 TUI/增强波复活候选）。
- *  ④ 旧 context.options.mainLoopModel（= small 角色池头，与旧
- *    getDefaultFastModel 同源）→ 新仓 getMainLoopModelName()
- *    （files 域，files/modelRef.ts:24，S-E1 裁定）。
+ *  ④ 旧 context.options.mainLoopModel（= small 角色池头）→ 新仓
+ *    getMainLoopModelName()（files 域，files/modelRef.ts:24，S-E1 裁定）；
+ *    措辞订正（S-E3 A-N3）：旧 getDefaultFastModel 源 = fast 角色池
+ *    （settings.modelRoles.fast > ATLAS_FAST_MODEL > getRoleModel('fast')），
+ *    与 mainLoopModel（small 池头）不同源——仅 ③ 所裁 GB 门 haiku 支
+ *    消费，该支整裁后新 ≡ 旧 mainLoopModel 支恒真。
  *  ⑤ 旧 buildOpenAIParams options 11 字段 → 新 builder 消费面
  *    （model/toolChoice/extraToolSchemas/maxOutputTokensOverride/
  *    temperatureOverride/effortValue）7 字段零命中裁：getToolPermissionContext
  *    / isNonInteractiveSession / hasAppendSystemPrompt / querySource / agents /
  *    mcpTools / agentId（登记）；toolChoice 随 ③ haiku 支裁（恒 undefined）；
  *    thinkingConfig 位保留 = ctx.options.thinkingConfig（旧 useHaiku-false
- *    支逐字）。
+ *    支逐字）；InDomainUserMessage → Message[] 双 cast（权威登记位 =
+ *    webFetchUtils delta ⑨，本文件自足登记，S-E3 B-N7）。
  *  ⑥ 旧 call 5 参声明（_canUseTool/_parentMessage/onProgress 体零消费，
  *    L233 声明实证）→ 新 2 参声明（readTool delta ⑧ 先例）；context duck
  *    局部化（WebSearchToolContext，webToolInput.ts delta ④）。
  *  ⑦ 旧 utils/slowOperations jsonStringify（slowLogging 包裹）→ 新仓
  *    session 域内版 `jsonStringify`（session/json.ts，计时面 d1 已裁；跨域
  *    import 先例 = messaging/mailbox.ts 溯源注释）——S-E1「稳定排序变体」
- *    判误核销：旧 slowOperations 无 sort 面，即 1 参 JSON.stringify 语义。
+ *    判误核销：旧 slowOperations 无 sort 面，即 1 参 JSON.stringify 语义；
+ *    签名面注（S-E3 A-N9）：新 session/json.ts 为 (data, space?) 2 参
+ *    （旧 slowOperations 3 参 value/replacer/space），web 消费面仅 1 参
+ *    调用 = 等价；该文件属 session 域（本波外），宽口径登记。
  *  ⑧ 旧 UI.tsx JSX 面（renderToolUseProgressMessage 双型 switch /
  *    renderToolResultMessage getSearchSummary 统计组件）→ 裁（TUI 波）；
  *    纯逻辑面逐字随迁：renderToolUseMessage 字符串逻辑（query 引号 +

@@ -33,11 +33,13 @@
  *    异 host）/ isPreapprovedUrl 双态 / isBinaryContentType 8 支 /
  *    extensionForMimeType（charset 剥离 + 未知 → bin）。
  *  - P-W9 重定向管线面（transport 缝注入，零真网）：跨域 3xx →
- *    RedirectInfo（statusCode 4 值透传）/ 同域 3xx 递归跟随 /
- *    MAX_REDIRECTS 环守卫 'Too many loops (exceeded 10)' / 403
+ *    RedirectInfo（statusCode 302 透传示证；statusText 4 支文案见
+ *    func F-W2，S-E3 B-N3 登记）/ 同域 3xx 递归跟随 /
+ *    MAX_REDIRECTS 环守卫 'Too many redirects (exceeded 10)' / 403
  *    x-proxy-error → EgressBlockedError（消息 JSON 面）/ 非代理 403 →
  *    状态码文案 / content-length 超限守卫 / blocklist 预检 fail-open
- *    （env 未设）+ env 已设 can_fetch 双支（缓存命中 transport 零再调）。
+ *    （env 未设，URL_CACHE 命中零再调）+ env 已设 can_fetch 双支
+ *    （allowed 缓存 DOMAIN_CHECK_CACHE / blocked 抛 DomainBlockedError）。
  *  - P-W10 mapToolResult 两工具（WebFetch 透传 content / WebSearch
  *    Links + No links + REMINDER + null 条目跳过 + trim）+
  *    renderToolUseMessage 两工具字符串面（verbose 双态 / 缺参 null）。
@@ -208,6 +210,12 @@ describe('P-W1 对象面（shared Tool 契约纯对象）', () => {
     expect(
       (WEB_FETCH_TOOL_INPUT_SCHEMA.properties?.url as { type: string }).type,
     ).toBe('string')
+    // S-E3 A-M2：wire 面 format:'uri' 复原（旧 zod .url() 面）
+    expect(
+      (
+        WEB_FETCH_TOOL_INPUT_SCHEMA.properties?.url as { format?: string }
+      ).format,
+    ).toBe('uri')
     expect(WEB_SEARCH_TOOL_INPUT_SCHEMA.type).toBe('object')
     expect(WEB_SEARCH_TOOL_INPUT_SCHEMA.required).toEqual(['query'])
     const query = WEB_SEARCH_TOOL_INPUT_SCHEMA.properties?.query as {
@@ -657,7 +665,7 @@ describe('P-W9 重定向管线面（transport 缝注入，零真网）', () => {
         new AbortController().signal,
         isPermittedRedirect,
       ),
-    ).rejects.toThrow('Too many loops (exceeded 10)')
+    ).rejects.toThrow('Too many redirects (exceeded 10)')
     setWebFetchTransportForTesting(null)
   })
 
@@ -753,6 +761,63 @@ describe('P-W9 重定向管线面（transport 缝注入，零真网）', () => {
     expect(transportCalls).toEqual(['https://plain.example/a'])
     expect(again.content).toBe('x')
     setWebFetchTransportForTesting(null)
+  })
+
+  test('blocklist 预检 env 已设 can_fetch 双支（S-E3 B-N2 补测）', async () => {
+    clearWebFetchCache()
+    process.env[DOMAIN_CHECK_ENV_KEY] = 'https://blocklist.example/check'
+    try {
+      let blocklistCalls = 0
+      const transport: WebFetchTransport = (url, _init) => {
+        if (url.startsWith('https://blocklist.example/check?domain=')) {
+          blocklistCalls++
+          const domain = new URL(url).searchParams.get('domain')
+          return Promise.resolve({
+            status: 200,
+            statusText: 'OK',
+            ok: true,
+            headers: headersOf({ 'content-type': 'application/json' }),
+            arrayBuffer: async () => new ArrayBuffer(0),
+            json: async () => ({ can_fetch: domain !== 'block.example' }),
+          })
+        }
+        return Promise.resolve({
+          status: 200,
+          statusText: 'OK',
+          ok: true,
+          headers: headersOf({ 'content-type': 'text/plain' }),
+          arrayBuffer: async () => new TextEncoder().encode('x').buffer,
+          json: async () => ({}),
+        })
+      }
+      setWebFetchTransportForTesting(transport)
+
+      // can_fetch true：放行至内容 fetch（blocklist 恰 1 调 + 内容 1 调）
+      const ok = await getURLMarkdownContent(
+        'https://fetch.example/a',
+        new AbortController(),
+      )
+      if ('type' in ok) throw new Error('unexpected redirect')
+      expect(ok.content).toBe('x')
+      expect(blocklistCalls).toBe(1)
+
+      // allowed 缓存进 DOMAIN_CHECK_CACHE：同域异 path → blocklist 零再调
+      const again = await getURLMarkdownContent(
+        'https://fetch.example/b',
+        new AbortController(),
+      )
+      if ('type' in again) throw new Error('unexpected redirect')
+      expect(again.content).toBe('x')
+      expect(blocklistCalls).toBe(1)
+
+      // can_fetch false：blocked → DomainBlockedError（消息文案逐字）
+      await expect(
+        getURLMarkdownContent('https://block.example/c', new AbortController()),
+      ).rejects.toThrow('Atlas is unable to fetch from block.example')
+    } finally {
+      delete process.env[DOMAIN_CHECK_ENV_KEY]
+      setWebFetchTransportForTesting(null)
+    }
   })
 })
 

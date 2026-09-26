@@ -13,7 +13,9 @@
  *    （TUI 波前向接缝，S-D3 DESCRIPTION 族先例）。
  */
 
-export const WEB_FETCH_TOOL_NAME = 'WebFetch'
+// 名字常量单一事实源 = toolNames 块 seed（plan 族先例 ../toolNames import；
+// S-E3 B-N1 订正：S-E2 实施曾域内双源字面，漂移风险已除）
+export { WEB_FETCH_TOOL_NAME } from '../toolNames'
 
 export const DESCRIPTION = `
 - Fetches content from a specified URL and processes it using an AI model

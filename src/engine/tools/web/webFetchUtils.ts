@@ -7,18 +7,25 @@
  *
  * delta 登记（H6 逐条，复审勿当遗漏重提）：
  *  ① 旧 axios 依赖（主 fetch + blocklist 预检两面）→ node 全局 fetch
- *    （3 依赖纪律：新仓仅 openai/zod/proper-lockfile，不为本面新增）；
+ *    （本面零新依赖，fetch = 全局内建）；
  *    getWithPermittedRedirects：旧 axios maxRedirects:0（3xx 抛错，catch
  *    支读 error.response.headers.location）→ fetch redirect:'manual'（3xx
  *    正常返回，原地读 status/headers，语义等价）；axios timeout 选项 →
  *    AbortSignal.any([调用方 signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)])；
+ *    环守卫消息 `Too many redirects (exceeded ${MAX_REDIRECTS})` 逐字
+ *    （S-E3 A-M1 订正：S-E2 实施误写 'Too many loops'，已还原旧文案）；
  *    axios maxContentLength → 原地 content-length 头守卫（超 10MB 抛错，
- *    旧 axios 错误消息面差异登记）。
+ *    旧 axios 错误消息面差异登记）；边缘登记（S-E3 A-N5）：旧 axios
+ *    maxContentLength 下载中强制（含 chunked 传输无 content-length 头
+ *    面）→ 新守卫仅带 content-length 头时生效，chunked 响应不受本守卫
+ *    约束（URL_CACHE 50MB + MAX_MARKDOWN_LENGTH 100K 截断双兜底）。
  *  ② 旧 lru-cache（LRUCache ×2）→ 域内本地 TtlLruCache（语义对齐消费面：
  *    get/set({size})/has/clear + TTL 惰性过期 + 访问刷新 recency + FIFO
- *    逐出；URL_CACHE 字节上限 50MB / DOMAIN_CHECK_CACHE 条数上限 128，
- *    双上限分别对齐旧两实例 maxSize / max 参数）。
- *  ③ 旧 turndown 懒单例（~1.4MB 保留堆）整砍（3 依赖纪律，不为本面新增）
+ *    逐出；URL_CACHE 字节上限 50MB + 条目上限 500（lru-cache v10 隐式
+ *    max=500 对齐，S-E3 A-N4 补登：S-E2 实施 maxEntries 曾留 undefined）
+ *    / DOMAIN_CHECK_CACHE 条数上限 128（旧 max 参数逐字），双上限分别
+ *    对齐旧两实例 maxSize / max 参数）。
+ *  ③ 旧 turndown 懒单例（~1.4MB 保留堆）整砍（本面零新依赖，不引转换库）
  *    → HTML 内容 raw 透传（旧 turndown 支裁，非 HTML 支逐字；HTML 支
  *    contentBytes 保 Buffer.byteLength(markdown) 语义，缓存逐出核算面
  *    保留）。登记 = HTML→markdown 转换面裁（TUI/增强波复活候选，非本波）。
@@ -39,7 +46,7 @@
  *  ⑧ 旧 axios data 释放行 `(response as {data:unknown}).data = null`
  *    （GC 回收 axios 持有副本注释）随 ① 裁——fetch arrayBuffer 无副本
  *    语义，动因不成立。
- *  ⑨ 旧 applyPromptToMarkdown options 7 字段（querySource/agents/
+ *  ⑨ 旧 applyPromptToMarkdown options 5 字段（querySource/agents/
  *    isNonInteractiveSession/hasAppendSystemPrompt/mcpTools）→ 新
  *    buildOpenAIParams 消费面（model/toolChoice/extraToolSchemas/
  *    maxOutputTokensOverride/temperatureOverride/effortValue）零命中 →
@@ -188,7 +195,7 @@ const MAX_CACHE_SIZE_BYTES = 50 * 1024 * 1024 // 50MB
 // delta ②：旧 new LRUCache<string, CacheEntry>({ maxSize, ttl })
 const URL_CACHE = new TtlLruCache<string, CacheEntry>(
   CACHE_TTL_MS,
-  undefined,
+  500, // lru-cache v10 隐式 max=500 对齐（S-E3 A-N4）
   MAX_CACHE_SIZE_BYTES,
 )
 
@@ -460,7 +467,7 @@ export async function getWithPermittedRedirects(
   depth = 0,
 ): Promise<WebFetchHttpResult | RedirectInfo> {
   if (depth > MAX_REDIRECTS) {
-    throw new Error(`Too many loops (exceeded ${MAX_REDIRECTS})`)
+    throw new Error(`Too many redirects (exceeded ${MAX_REDIRECTS})`)
   }
   // delta ①：旧 axios.get（maxRedirects:0 → 3xx 抛错，catch 支读
   // error.response.headers.location / x-proxy-error）→ fetch redirect:'manual'

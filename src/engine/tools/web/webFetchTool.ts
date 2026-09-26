@@ -2,7 +2,8 @@
  * engine/tools/web — WebFetchTool 本体（S-E2 §8.59 web 族子波）。
  *
  * 旧仓来源（a8af45b）：src/tools/WebFetchTool/WebFetchTool.ts 318L 逐字随迁
- * （tool 对象 16 成员 / checkPermissions 真规则面（preapproved 短路 +
+ * （tool 对象旧源 16 成员 → 新契约 19 成员（新契约加 inputSchema/
+ * inputJSONSchema/strict 3 成员，S-E3 A-N7 计数订正）/ checkPermissions 真规则面（preapproved 短路 +
  * deny/ask/allow 三查 + buildSuggestions）/ validateInput ec1 / call
  * （redirect 4 支 statusText + FetchedContent 解构 + preapproved 直通 +
  * applyPromptToMarkdown + 二进制落盘注记）/ mapToolResult / UI 纯逻辑
@@ -15,10 +16,13 @@
  *    旧 z.strictObject 面 → strict: true + required 双字段，readTool delta ①
  *    先例）；output → TS 型 WebFetchOutput 承载（webToolInput.ts delta ②）。
  *  ② 旧 rule-content 函数 WebFetchTool.inputSchema.safeParse（zod 全 schema
- *    校验后取 url.hostname）→ 域内本地 zod 同形 strictObject 解析（新仓
- *    zod 4.6.5 主入口 = v4，permissions/PermissionRule.ts 先例）；input
- *    解析失败面逐字 `input:${input.toString()}`（旧行为：degenerate 串，
- *    无规则可匹配，保留）。
+ *    校验后取 url.hostname）→ 域内本地 zod strictObject 解析（新仓
+ *    zod 4.6.5 主入口 = v4，permissions/PermissionRule.ts 先例；旧
+ *    `z.string().url()` 精炼随迁 = v4 `z.url()`，S-E3 A-M2 补登：
+ *    S-E2 实施曾漏 .url() 且 JSON schema 面丢 wire `format:'uri'` 提示，
+ *    已双补 = 旧 wire 面经 zodToJsonSchema 发 format:'uri' 提示面复原）；
+ *    input 解析失败面逐字 `input:${input.toString()}`（旧行为：degenerate
+ *    串，无规则可匹配，保留）。
  *  ③ 新契约 description 面 = 旧 prompt() 体（getWebFetchToolPrompt，auth
  *    warning 恒含，S-C5 delta ③ 先例）；旧短 description(input) 体 →
  *    webFetchShortDescription 导出不接线（webFetchPrompt.ts delta ①）。
@@ -37,8 +41,10 @@
  *    'invalid_url'}, errorCode} → 新 shared ValidationResult 无 meta 字段
  *    （shared/types.ts:169 两变体）→ meta 裁（引擎 dispatch 面只消费
  *    message/errorCode，登记）。
- *  ⑦ 旧 call 5 参声明（_canUseTool/_parentMessage/onProgress 体零消费）
- *    → 新 2 参声明（readTool delta ⑧ 先例）；context duck 局部化
+ *  ⑦ 旧 call 2 参声明（({url,prompt},{abortController,options}) 逐字；
+ *    5 参 _canUseTool/_parentMessage/onProgress 仅 WebSearch 旧面，见
+ *    webSearchTool delta ⑥——S-E3 A-N2 订正）→ 新 2 参声明
+ *    （readTool delta ⑧ 先例）；context duck 局部化
  *    （WebFetchToolContext，webToolInput.ts delta ④）。
  *  ⑧ 旧 UI.tsx getToolUseSummary 旧 truncate import（utils/format 宽感知）
  *    → 随 ⑤ 并入 truncateSummary 本地面（宽感知面裁登记）。
@@ -72,19 +78,23 @@ import {
   type WebFetchToolInput,
 } from './webToolInput'
 
-/** 输入 JSON schema（旧仓 zod inputSchema 逐字段转写，delta ①）。 */
+/** 输入 JSON schema（旧仓 zod inputSchema 逐字段转写，delta ①；format:'uri' = 旧 .url() 精炼 wire 提示面复原，delta ② / S-E3 A-M2）。 */
 export const WEB_FETCH_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   type: 'object',
   properties: {
-    url: { type: 'string', description: 'The URL to fetch content from' },
+    url: {
+      type: 'string',
+      format: 'uri',
+      description: 'The URL to fetch content from',
+    },
     prompt: { type: 'string', description: 'The prompt to run on the fetched content' },
   },
   required: ['url', 'prompt'],
 }
 
-/** delta ②：旧 rule-content 解析面（旧 WebFetchTool.inputSchema 同形 strictObject）。 */
+/** delta ②：旧 rule-content 解析面（旧 WebFetchTool.inputSchema 同形 strictObject；.url() 精炼 = v4 z.url()，S-E3 A-M2）。 */
 const webFetchInputRuleSchema = z.strictObject({
-  url: z.string().describe('The URL to fetch content from'),
+  url: z.url().describe('The URL to fetch content from'),
   prompt: z.string().describe('The prompt to run on the fetched content'),
 })
 

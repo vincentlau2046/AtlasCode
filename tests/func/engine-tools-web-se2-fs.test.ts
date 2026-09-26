@@ -9,8 +9,8 @@
  *
  *  - F-W1 WebFetch.call HTML 非 preapproved → 二级模型摘要支（fake chat
  *    计数 1，result = 固定 completion）。
- *  - F-W2 WebFetch.call 异域重定向 4 支 statusText（302 Found / 301
- *    Moved Permanently）+ 零模型调用。
+ *  - F-W2 WebFetch.call 异域重定向 statusText 双支（302 Found / 301
+ *    Moved Permanently；307/308 文案支未测登记，S-E3 B-N4）+ 零模型调用。
  *  - F-W3 WebFetch.call preapproved text/markdown 直通支（零模型调用，
  *    result = raw 内容）。
  *  - F-W4 WebFetch.call 二进制落盘支（application/pdf 真盘写 + 存在性
