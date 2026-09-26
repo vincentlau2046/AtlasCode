@@ -9,8 +9,9 @@
  *  - 会话守卫：有会话再 Enter → throw 'Already in a worktree session'。
  *  - ExitWorktree keep 支（净 worktree）：真盘保留（目录仍在）+ 会话复位
  *    + 进程 chdir 回 originalCwd + message 逐字面。
- *  - discard 守卫 ec2（脏 worktree：uncommitted 文件）：validateInput
- *    拒（errorCode 2 + 变更列举文案逐字）→ discard_changes=true 放行 →
+ *  - discard 守卫 ec2（脏 worktree：uncommitted 文件 / 未合并提交）：
+ *    validateInput 拒（errorCode 2 + 变更列举文案逐字——commits 项含
+ *    on <branch> 子句，旧 L211 分支钉）→ discard_changes=true 放行 →
  *    remove 支真盘删除（目录不在 + 分支删除）。
  *  - 失败封闭 ec3（countWorktreeChanges 判别支）：worktree 目录带外删除后
  *    git status 非零 → null → validateInput 拒（errorCode 3 文案逐字）。
@@ -208,6 +209,39 @@ describe('ExitWorktree discard 守卫（脏 worktree）', () => {
     )
     expect(rem.data.discardedFiles).toBe(1)
     expect(rem.data.discardedCommits).toBe(0)
+    expect(getCurrentWorktreeSession()).toBe(null)
+  })
+
+  test('commits > 0 → ec2 列举含 on <branch> 子句（旧 L211 分支钉，S-D3 A 路复审暴露覆盖缺口）', async () => {
+    const r = await EnterWorktreeTool.call({ name: 'sd2b-commits' })
+    const wt = r.data.worktreePath
+    // worktree 内真提交（worktree 继承主仓 .git/config 用户面）
+    writeFileSync(join(wt, 'feat.txt'), 'feat\n')
+    gitIn(wt, ['add', 'feat.txt'])
+    gitIn(wt, ['commit', '-m', 'feat'])
+
+    const v = await ExitWorktreeTool.validateInput!({ action: 'remove' })
+    expect(v.result).toBe(false)
+    if (v.result === false) {
+      expect(v.errorCode).toBe(2)
+      // commits 项 parts 末段 = on <worktreeBranch>（旧 L211 逐字）
+      expect(v.message).toBe(
+        'Worktree has 1 commit on worktree-sd2b-commits. Removing will discard this work permanently. Confirm with the user, then re-invoke with discard_changes: true — or use action: "keep" to preserve the worktree.',
+      )
+    }
+    const rem = await ExitWorktreeTool.call({
+      action: 'remove',
+      discard_changes: true,
+    })
+    expect(existsSync(wt)).toBe(false)
+    expect(gitIn(root, ['branch', '--list', 'worktree-sd2b-commits'])).toBe('')
+    expect(rem.data.discardedCommits).toBe(1)
+    expect(rem.data.discardedFiles).toBe(0)
+    expect(
+      rem.data.message,
+    ).toBe(
+      `Exited and removed worktree at ${wt}. Discarded 1 commit. Session is now back in ${root}.`,
+    )
     expect(getCurrentWorktreeSession()).toBe(null)
   })
 })

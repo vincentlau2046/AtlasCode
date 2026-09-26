@@ -3397,3 +3397,34 @@ S-D6 = 整波审视：A 路旧仓对照 + B 路 H6 死接缝/探针（双只读�
 - **S-D2b**：EnterWorktree/ExitWorktree 两本体（123L+318L；delta 旧 buildTool(zod)→JSON schema 先例链 + React render 面裁（TUI 波）+ prompt 逐字（sha256 字节核）+ duck 型 + 双门面 + registry ⑭ worktree mode 门控槽 materialize）+ unit 零盘（对象面 / mapResult 逐字 / validateInput 3 支守卫 / call keep·remove 双分支 + countWorktreeChanges 判别支）+ func 真盘（真 git worktree 创建 / keep / remove + discard 守卫）+ matrix 2 行。
 - **S-D3**：整波审视（双只读 ≤2：A 旧仓对照 / B H6 死接缝 + 探针 P-W1..）。
 - **S-D4**：闭环 docs + memory + task。
+
+#### 8.57.2 S-D2b 实施记录（Enter/ExitWorktree 两本体纵切 + ⑭ 槽 materialize，`3b36a17`）
+
+**落盘面（worktree/ 子域 5 文件 + 双门面 + 注册表）**：
+- `enterWorktreeTool.ts`（旧 123L 逐字随迁多裁）+ `exitWorktreeTool.ts`（旧 318L）+ `worktreePrompt.ts`（2 PROMPT 逐字 sha256 字节核 25ac6d86/63e76330 + 2 DESCRIPTION 短常量 + `isWorktreeModeEnabled` 门控）+ `worktreeToolInput.ts`（duck 2 型）+ `index.ts`（子门面显式名块）。
+- delta ①-⑩/⑪ 全头注登记：zod→纯 JSON schema（no required 宽骨架 / enum action 逐字段）/ superRefine→validateInput（失败支 errorCode：Enter 输入校验拒=1；Exit 会话 ec1 / 变更 ec2 / 探针失败 ec3）/ prompt()→description() / TOOL_DEFAULTS 成员化逐值 / checkPermissions allow 固化 / getPlanSlug→randomUUID 兜底（plans 域 CLI 波接缝）/ saveWorktreeState→CLI 波裁（session record.ts 登记同源）/ 清缓存三件套→CLI·TUI 波裁 / execFileNoThrow→worktree 域 `execFileNoThrowWithCwd(gitExe(),…)`（fail-closed null）/ count lodash 裁本地。
+
+**门控裁定（⑭ 槽 materialize，新仓唯一发明面）**：旧 `isWorktreeModeEnabled()` ≡ true（GrowthBook flag 整砍，CACHED_MAY_BE_STALE 吞 `--worktree`，旧仓 issue #27044 语境）→ 新仓按 isCronEnabled/isTodoV2Enabled 同族先例移植 **GA 缺省开 + env kill-switch `ATLAS_DISABLE_WORKTREE_MODE`**（设真静默关）。两工具 `isEnabled = isWorktreeModeEnabled` 自门控，注册表 ⑭ 槽从残留守移出（残留守 16→13）。
+
+**测试面**：unit 23（`engine-tools-worktree-sd2b.test.ts` 零盘，探针 P-WT1 对象面 / P-WT2 mapResult 逐字 / P-WT3 validateInput 守卫支（Enter 非法 slug 拒 errorCode 1 / Exit ec1 无会话 / remove+discard 跳探针零子进程）/ P-WT4 门控缺省开+kill-switch 关 / P-WT5 prompt 面锚点+description() 同一性）+ func 5（`engine-tools-worktree-sd2b-fs.test.ts` 真 git 真盘：Enter 创建（worktreesDir 面+会话装配+chdir 落 worktree）/ 会话守卫 / keep 支（真盘保留+`+` 前缀剥核分支名）/ discard ec2（脏 worktree 文案逐字→discard_changes 放行→真盘删除）/ ec3（带外删 worktree 目录→git status 非零→失败封闭文案逐字；注：仅删 .git 指针不够，git 上探 root 仓仍成功，须目录整体缺失））。
+
+**baseline 谱系**：§8.56 波终 2098/123/4828 → S-D2a（`7fc4499`）2111/124/4846 + gate 6·5 → **S-D2b（`3b36a17`）2139 pass / 126 文件 / 4941 expect + gate 6 pass / 5 expect**；四件套 tsc 0 / eslint 0 / build 0KB entry / 49 口径 18/49（余 31 长尾）。
+
+**matrix（P-W1.. 探针计划 = P-WT1..P-WT5，上）**：
+| 切片 | 本体 | 探针 | 门控/接缝 | 提交 |
+|---|---|---|---|---|
+| S-D2a | worktree session 族 + tmux 族重迁（域层，非 49 计） | E-7 S-7c 回填 + bootstrap projectRoot 面 | 无 | `7fc4499` |
+| S-D2b | EnterWorktree + ExitWorktree（49 计 +2 → 18/49） | P-WT1..P-WT5 | ⑭ 槽 materialize（isWorktreeModeEnabled + ATLAS_DISABLE_WORKTREE_MODE） | `3b36a17` |
+
+#### 8.57.3 S-D3 整波审视记录（双只读 ≤2：A 旧仓对照 / B H6 死接缝+探针；全 finding 经主 session grep/Read 对旧仓 ground truth 核验后处置）
+
+- **A 路（旧仓对照）最终报告 PASS 零 MUST-FIX**（初审 interim 3 项 claim 经主 session 对旧仓 L209-213 + 新仓 exitWorktreeTool.ts:287/330-360 逐字节核验全判误读，终报 8 条清单逐条 VERIFIED 定案）：函数体逐字面（Enter call / Exit validateInput 3 支 ec1·ec2·ec3 / Exit call keep·remove 双支 / countWorktreeChanges / restoreSessionToOriginalCwd / mapResult 两工具——全与旧源一致，唯四处替换 + inp 标识符位 delta 全头注登记）/ schema 转写面逐字段（description 串逐字 + enum 值序 + required 面）/ prompt 面字节一致（模板体口径独立复验 faad70f5/73ba6f0b；主 session 预核口径 25ac6d86/63e76330 = 导出常量全串 vs 旧函数返回值，两口径同不变量「旧体≡新体」，NOTE-5 登记）/ TOOL_DEFAULTS 逐值（旧 Tool.ts:785-790 缺省 + def 覆写位）/ Output 型全集（Exit 8 字段无缺）/ UI 纯字符串面逐字 + JSX 面裁 TUI 波登记 / 门控面三方一致（旧 worktreeModeEnabled ≡true 消费位 tools.ts:239 vs 新自门控）/ 测试文案逐字（含 em-dash 位 + 全角破折号，内存片段核过）。
+- **A 路审视暴露真覆盖缺口 1 → 已补**：ec2 `commits > 0` 分支（on <branch> 子句，旧 L211）初审时无测试锚定 → **补 func 测试 1 条**（`sd2b-commits`：worktree 内真提交 → ec2 文案逐字含 `1 commit on worktree-sd2b-commits` → discard 放行 → discardedCommits=1 真盘删除）= S-D3 后唯一测试面 delta。
+- **A 路 6 NOTE 处置（全接受登记，不阻塞）**：N-A1 delta ⑦ 缺省 slug UUID 化用户可见副作用（.atlas/worktrees/<uuid> 分支名不可读，plans 域前向接缝有意裁，头注 ⑦ 登记）/ N-A2 delta ⑩ getCwd()→getCwdState() 失 ALS 覆盖感知（跨波 C2-复审 F3 端口面裁定，非本子波发明，仅登记重指）/ N-A3 delta ⑦ execFileNoThrow→execFileNoThrowWithCwd + ATLAS_GIT_EXE env 覆写新增面（git -C 主导解析行为等价，whichSync 糖整砍 git.ts 头注登记）/ N-A4 z.strictObject additionalProperties:false 未随迁（delta ① 注「无可迁槽位」S-C5 同面先例，额外键经 duck cast 静默忽略 = 登记行为差非疏漏）/ N-A5 哈希口径差（见上）/ N-A6 input→inp 唯一标识符位 delta（自登记）.
+- **B 路（H6 死接缝+探针）PASS 零 MUST-FIX**：探针 P-WT1..P-WT5 全活（值锚定 + 引用同一性，零 toBeDefined 族弱断言）/ 死接缝零 MISSING-WAVE（⑦⑧⑨⑩ 裁面全带归属波，⑧ 跨链核验 record.ts:19-23 + session/types.ts:258 WorktreeStateEntry 实存）/ 导出面 13/13 消费点全落 / any-stub 零命中（cast 全走 typed duck）/ 门面零 `export *`（13 名与子门面同一集合）/ 门控三方一致（实现·注册表措辞·P-WT4）+ env 名全仓单一拼写 / func 卫生全件（5 件 afterAll 复位 + 4 会话序列无污染 + ec3 三件清理）。
+- **B 路 3 NOTE 处置（全接受登记，不阻塞）**：N1 = P-WT4「GA 缺省开」隐式依赖宿主 env 未设 ATLAS_DISABLE_WORKTREE_MODE（env 门控测试通病，isCronEnabled 同族，接受）；N2 = func keep 支 getProjectRoot（上探纯函数，linked worktree 带 .git 文件 → 返 worktree 路径）使 projectRootIsWorktree 实为 true → 触发 setProjectRoot（真 no-op）+ updateHooksConfigSnapshot——经主 session 核旧仓 bootstrap/state.ts:84 同为 cwd 上探（`: any` 包装真体）= **逐字随迁 quirk 非移植缺陷**（两触发面零行为危害，projectRoot 真面落地波可再议）；N3 = 两本体当前无真实注入点（组合根 baseTools = CLI 波，compose.ts:266 baseToolsCli 为预设名列表非 Tool 对象；注册表机制 + isEnabled 末行过滤已就位，注入即自门控）= 设计内预期。
+
+#### 8.57.4 闭环记录
+- S-D3 后基线：**2140 pass / 126 文件 / 4950 expect + gate 6 pass / 5 expect**（vs S-D2b 2139/126/4941：+1 func 测试 +9 expect，源零 delta；四件套 tsc 0 / eslint 0 / build 0KB entry 复验）。
+- 49 口径 18/49 坐实（余 31 长尾）；波 tag 不切（提交链 c9f41b0 → 7fc4499 → 3b36a17 → S-D3 闭环提交；gate ③ 仍用 wave-c）。
+- **C 桶 ① 下一子波 = §8.58 plan 族（EnterPlanMode + ExitPlanModeV2，team/auto-mode 面接缝登记）** → §8.59-§8.64 序列 → C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
