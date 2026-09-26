@@ -87,6 +87,25 @@
  *   Write 族；裁面登记：team 支 → C 桶 ③ shell·swarm 波 / auto-mode gate
  *   族 + bootstrap 4 旗标 → C 桶 ② auto-mode 纵切波 /
  *   persistFileSnapshotIfRemote → remote 波 / _sdkInputSchema → D 波）。
+ * §8.59 S-E2（web 族子波）已落 web/ 子域 WebFetchTool / WebSearchTool 两
+ *   本体（2 对象 + JSON schema 2 常量 + 型面 13（webToolInput duck 族）
+ *   + prompt 面 4（WebFetch auth-warning prompt / WebSearch 月年模板 +
+ *   2 短 description 不接线）+ URL 管线（webFetchUtils：3 错误类 / 双 LRU
+ *   缓存（本地 TtlLruCache，旧 lru-cache 裁）/ blocklist 预检（
+ *   ATLAS_WEB_DOMAIN_CHECK_URL [ATLAS-HOLD] fail-open 逐字）/ 受限重定向
+ *   （node fetch redirect:'manual'，旧 axios 裁）/ 二进制落盘（
+ *   tool-results 临时目录面）/ 二级模型面（buildOpenAIParams 'fast' +
+ *   modelProvider.chat））+ preapproved 双表 + rule-content 函数 2 +
+ *   makeToolSchema（web_search wire 面 max_uses 8）+
+ *   makeOutputFromSearchResponse 三块型流解析 + 测试缝
+ *   setWebFetchTransportForTesting（func 层 HTTP fixture 面），旧仓
+ *   tools/WebFetchTool（utils 537L + 本体 318L + prompt 46L + preapproved
+ *   166L）+ tools/WebSearchTool（本体 354L + prompt 34L）逐字随迁多裁
+ *   （axios→node fetch / lru-cache→本地 / turndown 裁 HTML raw 透传 /
+ *   GrowthBook haiku 门裁恒 mainLoopModel 路径 / UI React 面 → TUI 波，
+ *   见各文件头注 delta ①-⑩）→ 在此 re-export（web/ 子门面）；残留守
+ *   「49 本体」登记再缩 2 → 22/49（web 族无专属门控槽 = 无条件注册面，
+ *   同 Read/Write 族）。
  */
 export {
   createMcpTools,
@@ -637,3 +656,59 @@ export {
   type ExitPlanModeV2ToolInput,
   type ExitPlanModeV2ValidateContext,
 } from './plan'
+// ── S-E2（§8.59）：web 子域（WebFetch/WebSearch 两本体 + URL 管线 +
+// preapproved 双表；名字常量 WEB_FETCH/WEB_SEARCH_TOOL_NAME 由 toolNames
+// 块 seed，同 plan 族口径不重出）──
+export {
+  PREAPPROVED_HOSTS,
+  isPreapprovedHost,
+  clearWebFetchCache,
+  EgressBlockedError,
+  extensionForMimeType,
+  getURLMarkdownContent,
+  getWithPermittedRedirects,
+  isBinaryContentType,
+  isPermittedRedirect,
+  isPreapprovedUrl,
+  MAX_MARKDOWN_LENGTH,
+  persistBinaryContent,
+  setWebFetchTransportForTesting,
+  validateURL,
+  applyPromptToMarkdown,
+  type FetchedContent,
+  type PersistBinaryResult,
+  type RedirectInfo,
+  type WebFetchHttpResponse,
+  type WebFetchHttpResult,
+  type WebFetchTransport,
+  type WebFetchTransportInit,
+  // 重名登记：files 块已 seed readPrompt DESCRIPTION（Read 面）→ web 面
+  // 别名重出（plan 族重名登记先例）
+  DESCRIPTION as WEB_FETCH_DESCRIPTION,
+  getWebFetchToolPrompt,
+  makeSecondaryModelPrompt,
+  webFetchShortDescription,
+  WEB_FETCH_TOOL_INPUT_SCHEMA,
+  WebFetchTool,
+  webFetchToolInputToPermissionRuleContent,
+  makeOutputFromSearchResponse,
+  makeToolSchema,
+  WEB_SEARCH_TOOL_INPUT_SCHEMA,
+  WebSearchTool,
+  getLocalMonthYear,
+  getWebSearchPrompt,
+  webSearchShortDescription,
+  TOOL_SUMMARY_MAX_LENGTH,
+  truncateSummary,
+  type WebFetchOutput,
+  type WebFetchToolContext,
+  type WebFetchToolInput,
+  type WebSearchHit,
+  type WebSearchOutput,
+  type WebSearchProgress,
+  type WebSearchResult,
+  type WebSearchServerToolSchema,
+  type WebSearchToolContext,
+  type WebSearchToolInput,
+  type SearchContentBlock,
+} from './web'
