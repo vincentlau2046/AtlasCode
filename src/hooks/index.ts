@@ -77,3 +77,11 @@ export type { HookRunOptions } from './runHooks'
 // L3 re-export 面 = engine/hooks，消费面 = loop 流式 chatStream（E-1b-full 前向接缝））
 export { runHooksStream } from './streaming'
 export type { HookStreamYield } from './streaming'
+// Task 族钩子执行器（§8.56 S-D2：旧仓 executeTaskCreated/CompletedHooks
+// AsyncGenerator → run* Promise 适配 delta 登记见 taskHooks.ts 头注）
+export {
+  runTaskCreatedHooks,
+  runTaskCompletedHooks,
+  getTaskCreatedHookMessage,
+  getTaskCompletedHookMessage,
+} from './taskHooks'

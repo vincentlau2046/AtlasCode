@@ -699,3 +699,46 @@ export {
   type ImageDimensions,
   type AppState,
 } from './messaging'
+
+// §8.56 S-D2（2026-09-26）：任务列表存储域（旧仓 utils/tasks.ts 848L 逐字
+// 随迁 + Todo 型面 18L；Task 四件套 + TodoWrite 消费面，门控槽 ⑯ isTodoV2；
+// zod→TS 型转录 / lockfile namespace 面 / getTeamsDir·uniq 域内本地 /
+// growthbook killswitch 支裁等 delta 登记见 tasks/tasks.ts + todoTypes.ts +
+// messaging/agentSwarmsEnabled.ts 头注）
+export {
+  setLeaderTeamName,
+  clearLeaderTeamName,
+  onTasksUpdated,
+  notifyTasksUpdated,
+  TASK_STATUSES,
+  isTaskStatus,
+  type Task,
+  type TaskStatus,
+  resetTaskList,
+  isTodoV2Enabled,
+  getTaskListId,
+  sanitizePathComponent,
+  getTasksDir,
+  getTaskPath,
+  createTask,
+  getTask,
+  updateTask,
+  deleteTask,
+  listTasks,
+  blockTask,
+  type ClaimTaskResult,
+  type ClaimTaskOptions,
+  claimTask,
+  type TeamMember,
+  type AgentStatus,
+  getAgentStatuses,
+  type UnassignTasksResult,
+  unassignTeammateTasks,
+  DEFAULT_TASKS_MODE_TASK_LIST_ID,
+  type TodoStatus,
+  type TodoItem,
+  type TodoList,
+} from './tasks'
+
+// §8.56 S-D2：agent teams / swarms 总开关（messaging 域内文件，经域门面出）
+export { isAgentSwarmsEnabled } from './messaging'

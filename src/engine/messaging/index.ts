@@ -203,3 +203,7 @@ export type {
   ImageDimensions,
   AppState,
 } from './queueTypes'
+
+// agent teams / swarms 总开关（旧 utils/agentSwarmsEnabled.ts，§8.56 S-D2；
+// growthbook killswitch 支裁 delta 登记见 agentSwarmsEnabled.ts 头注）
+export { isAgentSwarmsEnabled } from './agentSwarmsEnabled'

@@ -94,6 +94,14 @@ const MATRIX: readonly MatrixRow[] = [
   // （setDiskOutputEnv 仅注入路径计算）+ func 真盘 delta/驱逐两层。
   { domain: 'task', capability: 'tasks 状态机（register/evict/stopTask 三态/kill 派发/registry 两态/通知注入窗口/ProgressTracker 计账）', status: 'done', proof: 'tests/unit/engine-tasks.test.ts' },
   { domain: 'task', capability: 'tasks 真盘 delta/驱逐（running offset 补丁 + terminal+notified 驱逐 + TOCTOU 重检 + pollTasks 端到端）', status: 'done', proof: 'tests/func/tasks-framework-fs.test.ts' },
+  // §8.56 S-D2（2026-09-26）：任务列表 disk JSON 存储域（engine/tasks，旧仓
+  // utils/tasks.ts 848L 逐字随迁 + Todo 型面；Task 四件套 + TodoWrite
+  // 消费面，门控槽 ⑯ isTodoV2）。unit 零磁盘判别支（isTodoV2/getTaskListId
+  // 优先级/信号/状态守卫/路径面 + agentSwarmsEnabled + outputFormatting 纯支
+  // + taskHooks 无配置源空结果）+ func 真盘（CRUD/high watermark P-D1/
+  // 锁竞争/claim 判别支/团队文件读面）。
+  { domain: 'task', capability: '任务列表 disk 存储（CRUD/high watermark/锁竞争/claim 判别支，unit 零磁盘判别支）', status: 'done', proof: 'tests/unit/engine-taskstore.test.ts' },
+  { domain: 'task', capability: '任务列表 disk 存储真盘（CRUD + high watermark + 并发锁 + claim/团队文件面，func 真盘）', status: 'done', proof: 'tests/func/engine-taskstore-fs.test.ts' },
   // bootstrap cwd 两状态分离 + ALS 覆盖层（纯状态无 fs，归 unit 层）
   { domain: 'bootstrap', capability: 'cwd 两状态分离（originalCwd 不可变 vs cwdState 可变）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
   { domain: 'bootstrap', capability: 'ALS 覆盖层（runWithCwdOverride 并发 agent cwd 隔离）', status: 'done', proof: 'tests/unit/bootstrap.test.ts' },
