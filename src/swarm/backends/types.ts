@@ -36,6 +36,22 @@ export type AgentColorName =
   | 'pink'
   | 'cyan'
 
+/**
+ * 配色轮转序（旧仓 AgentTool/agentColorManager.ts:14-23 AGENT_COLORS 名序
+ * 逐字镜像；S-E2b 增补——teammateLayoutManager round-robin 消费）。
+ * AGENT_COLOR_TO_THEME_COLOR（keyof Theme UI 映射）不镜像 = TUI 波裁面。
+ */
+export const AGENT_COLORS: readonly AgentColorName[] = [
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'purple',
+  'orange',
+  'pink',
+  'cyan',
+]
+
 /** Pane 系后端类型判别（tmux 内建 / iTerm2 it2 CLI）。 */
 export type PaneBackendType = 'tmux' | 'iterm2'
 

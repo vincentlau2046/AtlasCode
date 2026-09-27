@@ -19,10 +19,28 @@
  *   - 注：monitor 的 kind 输入面（BashTaskKind 'monitor'）与 MONITOR_TOOL
  *     通知支已随 LocalShellTask 落（runtime 支），仅 MonitorMcpTask 任务态
  *     本体顺延。
+ *
+ * 槽 ⑮ 核销（C 桶 ③ shell·swarm 波 S-E2b，§8.66；上段 InProcessTeammateTask
+ * 「归 shell/swarm 波」登记项闭合）：InProcessTeammateTask 本体（swarm 域
+ * inProcessTeammateTask.ts，.ts 零 JSX）经注入窗口 registerTaskDefinition
+ * 挂入注册表（PRT-2：导出函数非顶层调用；接线 = 组合根残留守 ⑤——
+ * 未接线时注册表保持两态基线零行为，getTaskByType('in_process_teammate')
+ * 返 undefined，无消费点触达即零影响）。
  */
 import type { Task, TaskType } from '../../../task'
 import { LocalAgentTask } from './localAgentTask'
 import { LocalShellTask } from './localShellTask'
+
+/** 注入窗挂入的任务定义（组合根装配；swarm InProcessTeammateTask 等）。 */
+const extraTaskDefinitions: Task[] = []
+
+/**
+ * 注入窗：挂入额外任务定义（registerTaskDefinition 为导出函数非顶层
+ * 自注册——PRT-2 合规；消费 = getAllTasks/getTaskByType 扩展面）。
+ */
+export function registerTaskDefinition(task: Task): void {
+  extraTaskDefinitions.push(task)
+}
 
 /**
  * Get all tasks.
@@ -30,7 +48,7 @@ import { LocalShellTask } from './localShellTask'
  * Note: Returns array inline to avoid circular dependency issues with top-level const
  */
 export function getAllTasks(): Task[] {
-  return [LocalShellTask, LocalAgentTask]
+  return [LocalShellTask, LocalAgentTask, ...extraTaskDefinitions]
 }
 
 /**

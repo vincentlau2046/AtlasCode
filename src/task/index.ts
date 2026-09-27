@@ -19,6 +19,7 @@
  *   fail-fast），组合根按 §8.14 注入序 permissions→task→hooks 注入
  */
 export * from './task'
+export * from './inProcessTeammate'
 export * from './TaskOutput'
 export * from './fsRange'
 export * from './outputLimits'

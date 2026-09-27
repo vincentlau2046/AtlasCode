@@ -133,13 +133,16 @@ export default tseslint.config(
             // + bootstrap(cwd 状态, exec no-cwd 变体) + permissions(poller 校验面
             // permissionUpdateSchema) + modelprovider(getRoleModel 窄面) + task(S-E2b
             // 任务状态面) + engine(messaging/mailbox/worktree-exec/runAgent/compaction
-            // 门面直连, R7 裁定更新: P-S1/P-S2 不建 port); 不依赖 ascend/atlascode/hooks。
+            // 门面直连, R7 裁定更新: P-S1/P-S2 不建 port) + memory(S-E2b 落位登记:
+            // teamHelpers getAtlasConfigHomeDir teams 目录 + teamMemoryOps
+            // getAutoMemPath/isAutoMemoryEnabled team 记忆支);
+            // 不依赖 ascend/atlascode/hooks。
             // S-E2b/c 实 import 图若需扩 allow 列表, 随该切片头注登记。
             {
               from: "swarm",
               allow: [
                 "shared", "bootstrap", "permissions", "modelprovider",
-                "task", "engine",
+                "task", "engine", "memory",
               ],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend

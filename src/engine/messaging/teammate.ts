@@ -7,10 +7,15 @@
  * getTeammateColor / isPlanModeRequired / isTeamLead / getParentSessionId）。
  *
  * 裁面登记（H6 前向接缝，复审勿当遗漏重提）：
- *   - 尾 3 AppState 参函数裁除：hasActiveInProcessTeammates /
- *     hasWorkingInProcessTeammates / waitForTeammatesToBecomeIdle（in-process
- *     执行层状态读，依赖旧 state/AppState tasks 面 ∉ 新仓）→ 登记 shell/swarm
- *     波自持；执行时若引擎消费面浮现，重裁 duck 化（§8.50 范围裁定）。
+ *   - 尾 3 AppState 参函数（hasActiveInProcessTeammates /
+ *     hasWorkingInProcessTeammates / waitForTeammatesToBecomeIdle）：
+ *     S-7e d1 裁除登记（依赖旧 state/AppState tasks 面 ∉ 新仓）→
+ *     C 桶 ③ shell·swarm 波 S-E2b 补差落位（R6 裁定：旧 utils/teammate.ts
+ *     L195-293 逐字算法体，参数面适配新仓 task 域 TaskAppState / SetAppState
+ *     + isInProcessTeammateTask 守卫收窄——旧 `as Record<string, any>` 迭代
+ *     改类型化迭代，零 any；本域 engine 允许 task，零 eslint 改动）。
+ *     消费面 = headless/print 退出前等待 + runner shutdown 支（S-E2d
+ *     inProcessRunner），当前零活消费者 = 惰性接缝登记。
  *   - 旧 `import type { AppState } from '../state/AppState.js'` 随尾 3 裁除。
  *   - isEnvTruthy：旧 utils/envUtils → 新仓 shared（C1 统一裁定布尔 env 单一
  *     事实源，shared/env.ts:50；import 面 delta 登记）。
@@ -28,6 +33,12 @@ export {
 } from './teammateContext'
 
 import { isEnvTruthy } from '../../shared'
+import {
+  isInProcessTeammateTask,
+  type InProcessTeammateTaskState,
+  type SetAppState,
+  type TaskAppState,
+} from '../../task'
 import { getTeammateContext } from './teammateContext'
 
 /**
@@ -199,4 +210,104 @@ export function isTeamLead(
   }
 
   return false
+}
+
+/**
+ * Checks if there are any active in-process teammates running.
+ * Used by headless/print mode to determine if we should wait for teammates
+ * before exiting.（S-E2b 尾 3 补差 R6；旧 L203-211 逐字，类型化迭代 delta。）
+ */
+export function hasActiveInProcessTeammates(appState: TaskAppState): boolean {
+  // Check for running in-process teammate tasks
+  for (const task of Object.values(appState.tasks)) {
+    if (isInProcessTeammateTask(task) && task.status === 'running') {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Checks if there are in-process teammates still actively working on tasks.
+ * Returns true if any teammate is running but NOT idle (still processing).
+ * Used to determine if we should wait before sending shutdown prompts.
+ *（S-E2b 尾 3 补差 R6；旧 L218-229 逐字。）
+ */
+export function hasWorkingInProcessTeammates(
+  appState: TaskAppState,
+): boolean {
+  for (const task of Object.values(appState.tasks)) {
+    if (
+      isInProcessTeammateTask(task) &&
+      task.status === 'running' &&
+      !task.isIdle
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Returns a promise that resolves when all working in-process teammates
+ * become idle. Registers callbacks on each working teammate's task — they
+ * call these when idle. Returns immediately if no teammates are working.
+ *（S-E2b 尾 3 补差 R6；旧 L236-293 逐字，setAppState = task 域 SetAppState。）
+ */
+export function waitForTeammatesToBecomeIdle(
+  setAppState: SetAppState,
+  appState: TaskAppState,
+): Promise<void> {
+  const workingTaskIds: string[] = []
+
+  for (const [taskId, task] of Object.entries(appState.tasks)) {
+    if (
+      isInProcessTeammateTask(task) &&
+      task.status === 'running' &&
+      !task.isIdle
+    ) {
+      workingTaskIds.push(taskId)
+    }
+  }
+
+  if (workingTaskIds.length === 0) {
+    return Promise.resolve()
+  }
+
+  // Create a promise that resolves when all working teammates become idle
+  return new Promise<void>(resolve => {
+    let remaining = workingTaskIds.length
+
+    const onIdle = (): void => {
+      remaining--
+      if (remaining === 0) {
+        resolve()
+      }
+    }
+
+    // Register callback on each working teammate.
+    // Check current isIdle state to handle race where teammate became idle
+    // between our initial snapshot and this callback registration.
+    setAppState(prev => {
+      const newTasks = { ...prev.tasks }
+      for (const taskId of workingTaskIds) {
+        const task = newTasks[taskId]
+        if (task && isInProcessTeammateTask(task)) {
+          // If task is already idle, call onIdle immediately
+          if (task.isIdle) {
+            onIdle()
+          } else {
+            // 类型化中间变量：fresh object literal 对 TaskStateBase 槽位触发
+            // 过量属性检查（onIdleCallbacks ∉ TaskStateBase）→ 经窄型变量赋值
+            const updated: InProcessTeammateTaskState = {
+              ...task,
+              onIdleCallbacks: [...(task.onIdleCallbacks ?? []), onIdle],
+            }
+            newTasks[taskId] = updated
+          }
+        }
+      }
+      return { ...prev, tasks: newTasks }
+    })
+  })
 }

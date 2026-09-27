@@ -41,6 +41,11 @@ export {
   getTeammateColor,
   isPlanModeRequired,
   isTeamLead,
+  // 尾 3 补差（C 桶 ③ shell·swarm 波 S-E2b R6；§8.50 裁除登记项核销，
+  // 参数面适配 task 域 TaskAppState/SetAppState，登记见 teammate.ts 头注）
+  hasActiveInProcessTeammates,
+  hasWorkingInProcessTeammates,
+  waitForTeammatesToBecomeIdle,
 } from './teammate'
 
 // 文件式队友信箱（54 导出面，旧 teammateMailbox.ts 1183L 随迁）

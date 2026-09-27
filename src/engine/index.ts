@@ -143,6 +143,11 @@ export {
   type AgentToolResult,
   type ResolvedAgentTools,
   type InjectedAgentFile,
+  // C 桶 ③ shell·swarm 波 S-E2b 扩 root（teammate 消息面单一出口登记）：
+  // 旧 utils/messages.createUserMessage（M-1 uuid/timestamp 不变量随迁，
+  // 见 query/loop.ts 头注）——swarm inProcessTeammateTask 注入支 +
+  // S-E2d inProcessRunner 消费。
+  createUserMessage,
 } from './tools'
 export {
   isCoordinatorMode,
@@ -589,6 +594,10 @@ export {
   getTeammateColor,
   isPlanModeRequired,
   isTeamLead,
+  // 尾 3 补差（C 桶 ③ shell·swarm 波 S-E2b R6；扩 root 登记见上 messaging 块头注）
+  hasActiveInProcessTeammates,
+  hasWorkingInProcessTeammates,
+  waitForTeammatesToBecomeIdle,
   getInboxPath,
   readMailbox,
   readUnreadMessages,

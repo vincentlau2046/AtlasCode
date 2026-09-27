@@ -270,6 +270,19 @@ export function resetCostState(): void {
 /** 测试复位（与 resetCostState 同语义，保留旧仓名）。 */
 export function resetStateForTests(): void {
   _costState = freshCostState()
+  sessionCreatedTeams.clear()
+}
+
+// ── ⑥ 会话创建 team 集合（C 桶 ③ shell·swarm 波 S-E2b 扩 bootstrap，§8.66）──
+// 旧仓 bootstrap/state.ts getSessionCreatedTeams 逐字面（Set 模块态 +
+// resetStateForTests 清，避 PR #17615 跨 shard 泄漏类）。消费 = swarm 域
+// teamHelpers register/unregister/cleanupSessionTeams（gracefulShutdown
+// 接线 = 组合根残留守）。
+const sessionCreatedTeams = new Set<string>()
+
+/** 本会话创建的 team 集合（swarm 域 teamHelpers 消费）。 */
+export function getSessionCreatedTeams(): Set<string> {
+  return sessionCreatedTeams
 }
 
 // ── ⑤ hooks bootstrap 3 成员（E-5 S-5a，§8.38 C-5；前向接缝登记见头注 ⑤）──
