@@ -14,9 +14,11 @@
  * delta 登记（H6 逐条，复审勿当遗漏重提）：
  *  ① 旧 buildTool(zod inputSchema + zod outputSchema z.infer) → 新 shared Tool
  *    契约：inputSchema = 纯 JSON schema 对象（NOTEBOOK_EDIT_TOOL_INPUT_SCHEMA，
- *    旧 z.strictObject 面 → strict: true + additionalProperties false 双字段，
- *    readTool delta ① 先例）；output → TS 型 NotebookEditOutput 承载（9 字段
- *    duck，delta ① web 族先例）。
+ *    旧 z.strictObject 面 → strict: true + additionalProperties false 双字段：
+ *    纯 JSON 化 = readTool delta ① 先例，双字段面 = §8.60 config/askUser 波
+ *    先例（S-E3 B 路 F2 订正：readTool/webFetch schema 无 additionalProperties
+ *    字段，双字段真先例 = configTool L113 / askUserQuestionTool L197））；
+ *    output → TS 型 NotebookEditOutput 承载（9 字段 duck，delta ① web 族先例）。
  *  ② 旧 call 的 fileHistory 支（fileHistoryEnabled() +
  *    fileHistoryTrackEdit(updateFileHistoryState, fullPath, parentMessage.
  *    uuid)）裁：fileHistory 域新仓未落（fileWriteTool delta ⑦ 裁面先例，
@@ -32,7 +34,14 @@
  *    content 串且 in-place mutate；新仓 jsonParse 非 memo 双站独立，问题结构性
  *    不存在，注释面随迁保因果链可读）；同批 jsonStringify 签名裁 replacer
  *    参位（新 (data, space) 两参，旧调用点 (notebook, null, 1) → 新
- *    (notebook, 1)：null ≡ 新实现硬编码 undefined，零行为差）。
+ *    (notebook, 1)：null ≡ 新实现硬编码 undefined，零行为差）；validate
+ *    站 BOM 面裁（S-E3 双路独立汇合 F1 补登）：旧 safeParseJSON 内部
+ *    JSON.parse(stripBOM(json))（旧 utils/json.ts L33/L71）剥 UTF-8 BOM，
+ *    新 jsonParse = 裸 JSON.parse 不剥 BOM——BOM 头 .ipynb 旧 validate 站
+ *    ec6 放行 / 新 ec6 拒绝；旧代码自不一致（旧 call 站 L333 非 memo
+ *    jsonParse 本不剥 BOM，BOM 头文件 call 侧旧即拒绝），新 = validate/call
+ *    双站统一拒绝 BOM 头（消解旧不一致，corner 面 Jupyter 不产 BOM，登记不
+ *    恢复）。
  *  ④ 旧 def 无 isConcurrencySafe/isReadOnly/isDestructive/isEnabled 覆写 →
  *    新契约缺省值对象化（writeTool delta ④ 先例逐值）：全 false + isEnabled
  *    () => true。
