@@ -133,6 +133,7 @@ export {
   getRoleModels,
   resolveModel,
   MODEL_ROLES,
+  HARD_DEFAULT_CONTEXT_WINDOW,
   setEndpointConfigSource,
   resetEndpointConfigSource,
   type ModelRole,

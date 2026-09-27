@@ -27,7 +27,12 @@
  *     （session list 探活）消歧 → 门面导出名 isIt2CliInstalled（登记见
  *     it2Setup.ts 头注）。
  *   S-E2d hub+D 类+核销：inProcessRunner / permissionSync（928L）/ D 类 3 工具 /
- *     registry 槽核销（⑨⑮ materialize + ⑩ 闭合证据）/ 测试面 8-12 文件
+ *     registry 槽核销（⑨⑮ materialize + ⑩ 闭合证据）/ 测试面 8-12 文件。
+ *     门面命名冲突面登记：permissionSync.generateRequestId（0 参 `perm-`
+ *     前缀）与 agentId generateRequestId（2 参，L53 已占名）消歧 → 门面
+ *     导出名 generatePermissionRequestId（it2Setup isIt2CliInstalled
+ *     消歧先例）；PermissionResponse 型 = L68 既存导出（permissionSync
+ *     再导出同源，门面不重出）。
  *
  * R7 前向接缝裁定更新（S-E2a 实测）：P-S1 agentLoop / P-S2 compaction 均裁定
  * 直连（runAgent 已在 engine 根门面 L114 / compactConversation 族已在 L227-238，
@@ -273,3 +278,44 @@ export {
   requireStartInProcessTeammate,
 } from './backends/inProcessRunnerPort'
 export { wireBackends } from './backends/wireBackends'
+// S-E2d hub（§8.66.1.5 切片 4）：inProcessRunner hub 1536L（R2/R4/R7
+// 裁剪）落位——seam ②（inProcessRunnerPort）真实现供体；组合根
+// setStartInProcessTeammate 接线（compose.ts），本模块零顶层副作用
+// （PRT-2）。
+export {
+  startInProcessTeammate,
+  runInProcessTeammate,
+  type InProcessRunnerConfig,
+  type InProcessRunnerResult,
+} from './inProcessRunner'
+// S-E2d 权限同步族（旧仓 permissionSync 928L 全迁）：目录流（write/read/
+// resolve/cleanup/poll）+ mailbox 变体（send…ViaMailbox 族）+ sandbox
+// 变体（generateSandboxRequestId + sendSandbox…ViaMailbox 族）。
+// 门面消歧：generateRequestId（0 参 perm- 前缀）→ generatePermissionRequestId
+// （与 L53 agentId 2 参 generateRequestId 消歧）；PermissionResponse
+// 型 L73 已占（同源 re-export 不重出）。
+export {
+  SwarmPermissionRequestSchema,
+  type SwarmPermissionRequest,
+  type PermissionResolution,
+  getPermissionDir,
+  generateRequestId as generatePermissionRequestId,
+  createPermissionRequest,
+  writePermissionRequest,
+  readPendingPermissions,
+  readResolvedPermission,
+  resolvePermission,
+  cleanupOldResolutions,
+  pollForResponse,
+  removeWorkerResponse,
+  isTeamLeader,
+  isSwarmWorker,
+  deleteResolvedPermission,
+  submitPermissionRequest,
+  getLeaderName,
+  sendPermissionRequestViaMailbox,
+  sendPermissionResponseViaMailbox,
+  generateSandboxRequestId,
+  sendSandboxPermissionRequestViaMailbox,
+  sendSandboxPermissionResponseViaMailbox,
+} from './permissionSync'

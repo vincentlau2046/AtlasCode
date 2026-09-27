@@ -111,7 +111,9 @@ export interface ResolvedModel {
   maxTokens: number
 }
 
-const HARD_DEFAULT_CONTEXT_WINDOW = 262144
+// C 桶 ③ S-E2d：swarm inProcessRunner 压缩支消费（AutoCompactDeps.contextWindow
+// 缺省面）→ 扩导出（原模块私有；漂移防：单一事实源本处）。
+export const HARD_DEFAULT_CONTEXT_WINDOW = 262144
 const HARD_DEFAULT_MAX_TOKENS = 32768
 
 /**

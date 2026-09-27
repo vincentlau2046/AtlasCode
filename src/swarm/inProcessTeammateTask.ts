@@ -31,10 +31,10 @@ import {
 } from '../task'
 import {
   type InProcessTeammateTaskState,
+  type TeammateMessageEntry,
   isInProcessTeammateTask,
   appendCappedMessage,
 } from '../task'
-import type { Message } from '../shared'
 import { logForDebugging } from '../shared'
 import { createUserMessage, updateTaskState } from '../engine'
 import { killInProcessTeammate } from './spawnInProcess'
@@ -74,7 +74,11 @@ export function requestTeammateShutdown(
  */
 export function appendTeammateMessage(
   taskId: string,
-  message: Message,
+  // S-E2d：参面随存面（task.messages = TeammateMessageEntry 两生产端
+  // 并集 = TUI 端 shared Message 全形 + S-E2d 端 InDomainUserMessage 窄形，
+  // task/inProcessTeammate.ts 头注）；engine createUserMessage 产物直接
+  // 可赋值，调用点零 cast
+  message: TeammateMessageEntry,
   setAppState: SetAppState,
 ): void {
   updateTaskState<InProcessTeammateTaskState>(taskId, setAppState, task => {

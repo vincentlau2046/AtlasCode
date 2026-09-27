@@ -9,7 +9,10 @@
  * ① AppState = 域内最小类型 TaskAppState（engine 波接入全量 AppState 时替换）
  * ② AgentId brand 类型未移植 → agentId 暂用 string（engine 波 types/ids 随迁后收编）
  * ③ Task（kill 派发）/ TaskContext 消费方在 engine（src/tasks/* impls /
- *    swarm/inProcessRunner / spawnMultiAgent，未移植）——类型面保留
+ *    swarm/inProcessRunner——C 桶 ③ S-E2d（§8.66）已落 swarm 域
+ *    inProcessRunner.ts hub 1536L；spawnMultiAgent = 旧仓零命中陈旧名，
+ *    消费面 = coordinator 注册表 TaskState 联合扩（B14 登记，docs L2509）
+ *    残留守）——类型面保留
  * ④ src/tasks.ts 注册表（getAllTasks/getTaskByType 按 TaskType 派发 kill）
  *    归 engine 波（消费方同上）
  * ⑤ static 轮询（TaskOutput.startPolling/stopPolling）保留 API 零消费者
