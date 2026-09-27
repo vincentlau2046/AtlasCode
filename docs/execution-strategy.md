@@ -3616,3 +3616,13 @@ web 族先例：子域 index.ts 逐名显式 re-export（STR-1）+ tools/index.t
 
 **§8.61.1.3 组合根与注册**
 notebook 族无专属门控槽 = 无条件注册面（同 web/config 族）。**49 口径 S-E2 后 24/49 → 25/49**（+NotebookEdit 1 槽；LSP 槽残守 → D 波 LSP 域）。**波终基线预测：2276 + ~24 测 ≈ 2300 pass / 134 文件 / ~5530 expect + gate 6·5 不变**（unit ~16 测 + func ~8 测）。
+
+#### 8.61.2 闭环记录（S-E2 实施 + S-E3 双只读审视 + 修复）
+- **S-E2 实施（a314d0a）**：notebook/ 子域 3 文件（notebookEditTool.ts 583L 本体 490L 旧仓裁剪随迁 / notebookEditPrompt.ts DESCRIPTION+PROMPT 逐字（含 legacy cell_number 措辞锚）/ index.ts 子门面 STR-1 逐名显式）+ tools/index.ts §8.61 头注条目 + re-export 块（NOTEBOOK_EDIT_DESCRIPTION/PROMPT 别名重名登记）+ 两测试文件（unit `engine-tools-notebook-se2.test.ts` 27 测零盘 FsOperations mock + 真 Map readFileState duck + FAKE_CWD 双戳 / func `engine-tools-notebook-se2-fs.test.ts` 9 测真盘 mkdtemp 写回 8 面 + validate ec10 真盘面；+36 测 / +2 文件 / +114 expect）。裁面全登记（头注 delta ①-⑨）：zod→JSON schema 双字段 / fileHistory 域裁（旧 4 参 call 2 参化）/ safeParseJSON→jsonParse 非 memo 双站 + jsonStringify replacer 参位裁 / 缺省值对象化 / TRANSCRIPT_CLASSIFIER 门裁 → C 桶 ② / UI 5 函数面 → TUI 波 / const 重赋值 let 化 / description 单面 / context duck 可选链降级；LSP 860L+client 域 2464L 重分类 D 波 LSP 域（§8.61.1.1 裁定）。
+- **S-E3 双只读审视（4553e3c 修复）**：
+  - A 路（旧仓 fidelity 8 项核验）全 PASS：9 码面逐字（旧 L176-294 vs 新 L256-387）/ call 分支 token 级 diff 仅登记 delta / mapToolResult 4 模板逐字 / prompt 字节一致 / checkPermissions 接线逐字 / delta ①-⑨ 全真。1 NOTE = F1 BOM 面裁未登记（旧 safeParseJSON 内部 stripBOM，新 jsonParse 裸 parse；旧代码自不一致——call 站 L333 本不剥 BOM，新 = 消解不一致，登记不恢复）。
+  - B 路（新仓一致性 + 测试面 8 项）全 PASS（四件套独立复跑全绿，数值与提交逐字吻合）：house style / import 块 / 门面 / 零空心壳 / any-stub 纪律 / 依赖纪律（零新增，仓内恰 5 允许集）/ 测试面卫生（FsOperations mock 20/20 成员 + 零真实盘 + 无 hollow expect）。2 NOTE = F1（同 A 路，双路独立汇合）/ F2 delta ① 双字段引文精度（readTool/webFetch schema 无 additionalProperties，真先例 = §8.60 config/askUser 波）。
+  - 处置 = 纯头注补登（delta ③ 补 BOM 面 + delta ① 引文订正），零代码改动；复跑四件套 2312/134/5501 + gate 6·5 逐值一致。
+- **波终基线：2312 pass / 134 文件 / 5501 expect + gate 6 pass / 5 expect**（vs 开波 2276/132/5387：+36 测 / +2 文件 / +114 expect；四件套 tsc 0 / eslint 0 / build 0 KB 入口复验；S-E1 预测 ~2300/134/~5530，实测 2312/5501——expect 口径预测略高（5530 vs 5501，断言密度），测试数预测偏低（2300 vs 2312），双向偏差均 <2%，非漂移）。
+- 49 口径 **25/49 坐实**（余 24 长尾；+NotebookEdit 1 槽，LSP 槽重分类 → D 波 LSP 域）；波 tag 不切（提交链 0f05b5b（S-E1）→ a314d0a（S-E2）→ 4553e3c（S-E3 审视 + 处置）；gate ③ 仍用 wave-c）。
+- **C 桶 ① 下一子波 = §8.62 team/collab（SendMessage 917L + prompt 49L + UI 30L）** → §8.63 MCP+ToolSearch（123L+158L+457L）→ §8.64 stub/壳登记批（49/49 收口减重分类 Skill+LSP 槽）→ C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
