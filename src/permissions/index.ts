@@ -65,10 +65,18 @@
  *   get / reset，未注入 fail-fast）
  * - settingsPaths.ts：settings 路径跨域注入窗口（S-3c，setSettingsPathsProvider /
  *   get / reset，未注入 = 空数组降级——区别于 bootstrap 窗 fail-fast）
+ * - denialMessages.ts：权限拒绝文案（§8.65 C 桶 ②，旧 messages.ts:234-250 逐字——
+ *   DENIAL_WORKAROUND_GUIDANCE + DONT_ASK_REJECT_MESSAGE；② dontAsk ask→deny 转换
+ *   文案单一事实源，permissions.ts 消费）
+ * - autoMode/：auto-mode 分类器族子域（§8.65 C 桶 ②，STR-1 子门面显式再导出，叶零
+ *   `export *`）——types / transcript / xml / usage / classifierShared / state /
+ *   denials / approvals / allowlist / prompts（2 .txt 资产）；可测纯逻辑面 + 提示词
+ *   数据；LLM 闭包 / CLI / settings / growthbook = 前向接缝（provider/settings/CLI 波）
  */
 export * from './PermissionRule'
 export * from './filesystem'
 export * from './permissions'
+export * from './denialMessages'
 export * from './permissionMode'
 export * from './permissionRuleParser'
 export * from './ruleMatching'
@@ -83,3 +91,4 @@ export * from './toolValidationConfig'
 export * from './sandboxAccess'
 export * from './bootstrap-env'
 export * from './settingsPaths'
+export * from './autoMode'

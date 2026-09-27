@@ -68,6 +68,7 @@ import {
   toolAlwaysAllowedRule,
 } from './ruleMatching'
 import { getSandboxAccess } from './sandboxAccess'
+import { DONT_ASK_REJECT_MESSAGE } from './denialMessages'
 
 // 旧仓 BASH_TOOL_NAME（tools/BashTool/toolName.js）域内本地镜像：permissions
 // 域不 import engine 域（L2 叶约束），单一事实源 = engine/tools/toolNames.ts
@@ -142,14 +143,18 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
       input.dangerouslyDisableSandbox !== true
 
     if (!canSandboxAutoAllow) {
-      return {
-        behavior: 'ask',
-        message: createPermissionRequestMessage(tool.name),
-        decisionReason: {
-          type: 'rule',
-          rule: askRule,
+      return applyDontAskMode(
+        {
+          behavior: 'ask',
+          message: createPermissionRequestMessage(tool.name),
+          decisionReason: {
+            type: 'rule',
+            rule: askRule,
+          },
         },
-      }
+        permissionContext,
+        tool.name,
+      )
     }
     // Fall through to let Bash's checkPermissions handle command-specific rules
     //（Bash 工具本体 checkPermissions 实现 = 工具本体波残留守，当前落 1c 空分发）
@@ -189,7 +194,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     toolPermissionResult.decisionReason?.type === 'rule' &&
     toolPermissionResult.decisionReason.rule.ruleBehavior === 'ask'
   ) {
-    return toolPermissionResult
+    return applyDontAskMode(toolPermissionResult, permissionContext, tool.name)
   }
 
   // 1g. 安全检查（.git/ / 配置目录 / shell 配置等）bypass-immune——
@@ -198,7 +203,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     toolPermissionResult?.behavior === 'ask' &&
     toolPermissionResult.decisionReason?.type === 'safetyCheck'
   ) {
-    return toolPermissionResult
+    return applyDontAskMode(toolPermissionResult, permissionContext, tool.name)
   }
 
   // 2a. 模式允许工具执行：bypassPermissions 直放 / plan 态且用户以
@@ -272,7 +277,8 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     )
   }
 
-  return result
+  // ② dontAsk 转换（ask→deny，末段统一套用，allow 产点不受影响）
+  return applyDontAskMode(result, permissionContext, tool.name)
 }
 
 /**
@@ -288,4 +294,31 @@ function getUpdatedInputOrFallback(
       ? permissionResult.updatedInput
       : undefined) ?? fallback
   )
+}
+
+/**
+ * ② dontAsk 模式 ask→deny 转换（§8.31 裁定 ① / §8.65 C 桶 ②，旧仓
+ * permissions.ts:490-504 逐字语义）：dontAsk 态下任何 'ask' 决策转 'deny'
+ * （message = DONT_ASK_REJECT_MESSAGE 逐字，decisionReason = { mode: 'dontAsk' }）。
+ * 旧仓在决策主体（inner）末端统一转换（「at the end so it can't be bypassed by
+ * early returns」）；新仓决策主体含 1b/1f/1g 早退 ask 产点 + 3 终端 ask 产点，
+ * 故在各 ask 产点统一套用本转换（语义 = 所有 ask 产点在 dontAsk 态均转 deny；
+ * allow 产点 2a/2b/薄骨架不受影响，同旧仓仅转换 behavior==='ask'）。
+ */
+function applyDontAskMode(
+  decision: PermissionDecision,
+  permissionContext: ToolPermissionContext | undefined,
+  toolName: string,
+): PermissionDecision {
+  if (decision.behavior === 'ask' && permissionContext?.mode === 'dontAsk') {
+    return {
+      behavior: 'deny',
+      message: DONT_ASK_REJECT_MESSAGE(toolName),
+      decisionReason: {
+        type: 'mode',
+        mode: 'dontAsk',
+      },
+    }
+  }
+  return decision
 }

@@ -170,9 +170,14 @@ const MATRIX: readonly MatrixRow[] = [
   //（dangerouslyDisableSandbox 守卫）；实现半 = Bash/PowerShell 工具本体
   // checkPermissions 归工具本体波残留守）
   { domain: 'permissions', capability: '工具面分发（1c 鸭子 / 1f / 1g / 2a bypass updatedInput 采纳+回落 / 3 passthrough→ask + ⑥ sandbox 自动放行半落）', status: 'done', proof: 'tests/unit/permissions.test.ts' },
-  // E-6 S-6c（§8.43）：bash 分类器桩 61L 逐字（「stub 即外部构建形态」，
-  // 零活消费者 → 前向登记：auto-mode 纵切波分类器族 ~3030L 消费点）
-  { domain: 'permissions', capability: 'bash prompt 分类器消费（yoloClassifier 族）', status: 'missing', by: 'auto-mode 纵切波（分类器族 ~3030L：yoloClassifier / classifierShared / bashPermissions L1378-1490 speculative 族，§8.31 裁定 ①；bashClassifier 61L 桩已随 S-6c 前向迁，H6 前向声明）' },
+  // E-6 S-6c（§8.43）：bash 分类器桩 61L 逐字（「stub 即外部构建形态」）。
+  // §8.65 C 桶 ② 落：分类器族可测纯逻辑面（transcript / xml / usage / state /
+  // denials / approvals / allowlist / prompts 2 .txt 资产）+ ② dontAsk ask→deny
+  // 转换 + 提示词数据（零盘零模型，proof 单文件 50 用例）。LLM 调用闭包
+  // （classifyYoloAction 族 ~700L，需 sideQuery 单发侧调机制）= 前向接缝
+  // 归 provider/settings 波
+  { domain: 'permissions', capability: 'auto-mode 分类器纯逻辑面 + ② dontAsk 转换 + 提示词数据（transcript/xml/usage/state/denials/approvals/allowlist/prompts）', status: 'done', proof: 'tests/unit/auto-mode-classifier.test.ts' },
+  { domain: 'permissions', capability: 'bash prompt 分类器 LLM 消费闭包（classifyYoloAction 族，需 sideQuery 单发侧调）', status: 'missing', by: 'provider/settings 波（sideQuery LLM 单发侧调机制就位后；§8.65 C 桶 ② 已落纯逻辑面 + ② + 提示词数据，本闭包为前向接缝，H6 前向声明）' },
   // hooks 薄骨架 5 高频执行器聚合面 + 匹配 + 跨域斩断 fail-fast（unit 零磁盘走假 shell port）
   { domain: 'hooks', capability: '信任门 + 5 高频执行器聚合面（JSON 解释/最严权限/additionalContext）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
   { domain: 'hooks', capability: 'getMatchingHooks 匹配（matchQuery + command 去重）', status: 'done', proof: 'tests/unit/hooks.test.ts' },
