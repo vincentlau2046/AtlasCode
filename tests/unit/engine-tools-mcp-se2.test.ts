@@ -133,6 +133,22 @@ describe('ListMcpResourcesTool call 接缝面（mcpClientRegistry）', () => {
     expect(res.data).toEqual([])
   })
 
+  // S-E3 B 路 F3：delta ③ 新支「connected 而 listResources 缺（seam 未接线）
+  // → []」专属单测（现覆盖 pending 跳 + reject，未覆盖本支）
+  test('connected 而 listResources 缺（seam 未接线）→ []', async () => {
+    setMcpClientRegistry({
+      clients: [
+        {
+          name: 'gamma',
+          type: 'connected',
+          capabilities: { resources: true },
+        },
+      ],
+    })
+    const res = await ListMcpResourcesTool.call({}, {})
+    expect(res.data).toEqual([])
+  })
+
   test('listResources reject → 一服务器不沉全果（他服务器仍回）', async () => {
     setMcpClientRegistry({
       clients: [

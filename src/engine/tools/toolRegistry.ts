@@ -56,7 +56,14 @@
  *       族已落，组合根 baseTools 注入位）⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
  *       ⑯ isTodoV2（§8.56 S-D3 materialize：Task 四件套 + TodoWrite 自门控 isEnabled =
  *         isTodoV2Enabled（+ TodoWrite 反向门控支），tasks 域 E-7 S-7a 已落，与 ② 同子波）
- *       ⑲ ToolSearch optimistic（ToolSearch → 本体纵切；claude.ts 请求时 deferred 决策面 = D 波壳接线）。
+ *       ⑲ ToolSearch optimistic（§8.63 S-E2 materialize：ToolSearch 本体纵切
+ *         （toolsearch/ 子域），自门控 isEnabled = isToolSearchEnabledOptimistic
+ *         （ATLAS_ENABLE_TOOL_SEARCH env + ATLAS_DISABLE_EXPERIMENTAL_BETAS
+ *         kill-switch + OPENAI_BASE_URL proxy 守卫，IFF env 常态 base 设真 →
+ *         默认 gate OFF = 旧语义忠实非新增门），toolsearch 域已落，组合根
+ *         baseTools 注入位；engine 面 4 函数族〔阈值判定 / modelSupportsTool
+ *         Reference / extractDiscoveredToolNames / DeferredToolsDelta〕= 新仓
+ *         0-hit 不复活登记，见 toolSearchGate 头注 delta ③）。
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'

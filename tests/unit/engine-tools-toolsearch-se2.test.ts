@@ -42,15 +42,28 @@ function setGateEnv(opts: {
   else process.env.OPENAI_BASE_URL = base
 }
 
+// S-E3 B 路 F1：Bun 下 `process.env.X = undefined` 写字符串 "undefined" 而非
+// 删除（`in` 判真）→ 还原须条件 delete（ORIG.x 为 undefined 时）
+function restoreEnv(
+  name:
+    | 'ATLAS_ENABLE_TOOL_SEARCH'
+    | 'ATLAS_DISABLE_EXPERIMENTAL_BETAS'
+    | 'OPENAI_BASE_URL',
+  value: string | undefined,
+): void {
+  if (value === undefined) delete process.env[name]
+  else process.env[name] = value
+}
+
 beforeEach(() => {
   setGateEnv()
   clearToolSearchDescriptionCache()
 })
 
 afterEach(() => {
-  process.env.ATLAS_ENABLE_TOOL_SEARCH = ORIG.enable
-  process.env.ATLAS_DISABLE_EXPERIMENTAL_BETAS = ORIG.kill
-  process.env.OPENAI_BASE_URL = ORIG.base
+  restoreEnv('ATLAS_ENABLE_TOOL_SEARCH', ORIG.enable)
+  restoreEnv('ATLAS_DISABLE_EXPERIMENTAL_BETAS', ORIG.kill)
+  restoreEnv('OPENAI_BASE_URL', ORIG.base)
 })
 
 function tool(

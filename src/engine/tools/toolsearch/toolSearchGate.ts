@@ -11,7 +11,10 @@
  *  ① env 改名 ENABLE_TOOL_SEARCH → ATLAS_ENABLE_TOOL_SEARCH（house 单一
  *    ATLAS_ 前缀规则，§8.63.1.2 ⑬）；log 文案中变量名同步改名（逐字面，
  *    仅变量名变化）；ATLAS_DISABLE_EXPERIMENTAL_BETAS kill-switch 逐字
- *    （issue-20031 注释逐字）。
+ *    （issue-20031 注释逐字）。cosmetic 括号删减 2 处登记（S-E3 A 路
+ *    F-1/F-2，输出逐字节不变）：旧 L174 `isEnvTruthy((process.env.X))`
+ *    内层冗余双括号 → 新单层；旧 L297 模板插值 `${(process.env.
+ *    OPENAI_BASE_URL)}` 括号 → 新 `${process.env.OPENAI_BASE_URL}`。
  *  ② 旧 isFirstPartyGatewayUrl()（utils/model/providers.js，新仓 0-hit）
  *    内联 = `!!process.env.OPENAI_BASE_URL` 取反（裁定 ⑬：IFF 网关语义
  *    「OPENAI_BASE_URL 设真即非 first-party host」）；gh-31936/CC-457

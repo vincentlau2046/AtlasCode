@@ -22,6 +22,13 @@ const UID = process.getuid?.() ?? 0
 const BLOB_BYTES = Buffer.from('hello-binary', 'utf8')
 const BLOB_B64 = BLOB_BYTES.toString('base64')
 
+// S-E3 B 路 F1：Bun 下 `process.env.X = undefined` 写字符串 "undefined" 而非
+// 删除（`in` 判真）→ 还原须条件 delete（orig 为 undefined 时）
+function restoreConfigDirName(orig: string | undefined): void {
+  if (orig === undefined) delete process.env.ATLAS_CONFIG_DIR_NAME
+  else process.env.ATLAS_CONFIG_DIR_NAME = orig
+}
+
 function blobClient(blob: string): void {
   setMcpClientRegistry({
     clients: [
@@ -71,7 +78,7 @@ describe('F-M1 blob 持久化成功面', () => {
   })
 
   afterAll(() => {
-    process.env.ATLAS_CONFIG_DIR_NAME = origEnv
+    restoreConfigDirName(origEnv)
     process.chdir(origCwd)
     rmSync(cwd, { recursive: true, force: true })
   })
@@ -117,7 +124,7 @@ describe('F-M2 blob 错误面（tool-results 预造为文件 → ENOTDIR）', ()
   })
 
   afterAll(() => {
-    process.env.ATLAS_CONFIG_DIR_NAME = origEnv
+    restoreConfigDirName(origEnv)
     process.chdir(origCwd)
     rmSync(cwd, { recursive: true, force: true })
   })
