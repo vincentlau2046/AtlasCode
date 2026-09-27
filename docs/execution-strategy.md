@@ -3757,3 +3757,53 @@ tools/index.ts                   头注 §8.63 块 + 2 re-export 块 + 49 口径
 - 门控面实测态：IFF env（`OPENAI_BASE_URL` 常态设真）下 ToolSearch 默认 gate OFF（`isEnabled()=false`）= 旧语义忠实（旧仓 `ENABLE_TOOL_SEARCH` 未设 + proxy 守卫同面）；显式 `ATLAS_ENABLE_TOOL_SEARCH=true`/`auto`/`auto:1-99` 越过 proxy 守卫。env 改名面 `ENABLE_TOOL_SEARCH` → `ATLAS_ENABLE_TOOL_SEARCH`（裁定 ⑬）。
 - 残留守登记（= 后续波，复审勿当遗漏）：MCP client 连接生命周期 + 重连 + resources/prompt 拉取（**MCP client 波**；本波 `mcpClientRegistry` 注入接缝 + set/reset 导出面已铺，工具面经接缝取 client）/ tool_reference wire 面 + engine 门控 4 函数族〔阈值判定 / modelSupportsToolReference / extractDiscoveredToolNames / DeferredToolsDelta〕（**auto-mode 波**，裁定 ⑭/⑱）/ UI JSX 渲染面（**TUI 波**；string 面逐字已落）/ MCP server 配置发现面（remote 波）。
 - 波 tag 不切（gate ③ 仍 `wave-c`）。下一步：**§8.64 stub/壳登记批**（task #138：B 类 5 any-stub + C 类 6 本体缺失/仅壳 = 11 槽 registry 登记 + 头注，零本体；49 口径 29/49 → 49/49 收口，减 Skill+LSP 重分类 D 波槽）。
+
+**§8.64.1 S-E1 总分析（stub/壳登记批：B 类 5 + C 类 6 = 11 槽零本体登记 + 头注，49 口径 29/49 → 49/49 收口，2026-09-27）**
+
+**§8.64.1.1 定位与范围**
+C 桶 ① 收口批。§8.57 S-D1 四分类裁定的 **B 类（5 any-stub）+ C 类（6 本体缺失/仅壳）= 11 槽**，零本体 registry 登记 + 头注：
+- **B 类 = 旧仓 `: any` stub 占位（无本体可迁，registry 槽登记/关闭，不建本体）**：
+  - Monitor（④ MONITOR_TOOL，`({}) as any` 占位）/ Workflow（⑪ WORKFLOW_SCRIPTS，stub）/ Tungsten（① IS_ATLAS_DEV，无归属 stub）/ REPL（① IS_ATLAS_DEV，stub；新仓无 REPL 工具本体 = E-4 S-4d ② 裁出登记）/ OverflowTest（⑤ OVERFLOW_TEST_TOOL，测试专用无产品价值，§8.53 S-T3 已关闭，B 类确认）。
+- **C 类 = 旧仓本体缺失/仅壳（无真本体可迁）**：
+  - CtxInspect（⑥ CONTEXT_COLLAPSE，目录缺失）/ SuggestBackgroundPR（① IS_ATLAS_DEV，目录缺失）/ ListPeers（⑩ UDS_INBOX，目录缺失；UDS 5 站点族 → remote 波）/ TerminalCapture（⑦ TERMINAL_PANEL，仅 prompt.ts 2L，TUI 面 → shell 波）/ WebBrowser（⑧ WEB_BROWSER_TOOL，仅 WebBrowserPanel.tsx 1L React 面板）/ VerifyPlanExecution（⑫ ATLAS_VERIFY_PLAN，仅 constants.ts 2L）。
+- 11 槽映射 **9 个 registry 门控槽**：① IS_ATLAS_DEV（Tungsten [B] + SuggestBackgroundPR [C] + REPL [B]，3 工具）④ MONITOR_TOOL ⑤ OVERFLOW_TEST_TOOL（已关闭）⑥ CONTEXT_COLLAPSE ⑦ TERMINAL_PANEL ⑧ WEB_BROWSER_TOOL ⑩ UDS_INBOX ⑪ WORKFLOW_SCRIPTS ⑫ ATLAS_VERIFY_PLAN。
+- **零本体**：本批不建工具对象/本体/测试；仅改 toolRegistry.ts 头注 + doc。8 个非关闭门控槽（①④⑥⑦⑧⑩⑪⑫）机制上从未声明（house style「其余槽不声明防死接缝」；类别间移动 = 零行为改动）；⑤ OverflowTest 已关闭（头注不动，仅 B 类确认）。
+
+**§8.64.1.2 49/49 收口算术（49 基础工具全槽定论）**
+
+| 定论 | 计数 | 槽 |
+|---|---|---|
+| 本体落（C 桶 ① §8.53-§8.63） | 29 | 增量 16→18→20→22→24→25→26→29（Bash/Glob/Grep/Read/Write/Edit + Task 四件套 + cron 三件套 + … + ListMcp/ReadMcp/ToolSearch） |
+| 本批 B/C 类零本体登记（§8.64） | 11 | Monitor/Workflow/Tungsten/REPL/OverflowTest + CtxInspect/SuggestBackgroundPR/ListPeers/TerminalCapture/WebBrowser/VerifyPlanExecution |
+| Skill + LSP（D 波重分类，§8.60/§8.61） | 2 | Skill 915L skill 域 + LSP 860L+client 2464L LSP 域 |
+| TeamCreate + TeamDelete + Snip（C 桶 ③，§8.57 S-D1 D 类） | 3 | ⑮ agentSwarms + ⑨ HISTORY_SNIP |
+| RemoteTrigger（remote 波，§8.57 S-D1 D 类） | 1 | ③ AGENT_TRIGGERS_REMOTE |
+| PowerShell（域外改判，§8.53 S-T3 ⑳） | 1 | ⑳ |
+| TestingPermission（关闭，§8.53 S-T3 ⑱） | 1 | ⑱ NODE_ENV=test |
+| Agent（E-2 engine 波，非 C 桶 ① 口径） | 1 | AgentTool |
+| **合计** | **49** | |
+
+- C 桶 ① 归属 = 29（本体）+ 11（本批登记）= **40/49**；余 9 = 他波/关闭/E-2 定论（前波已登记）。
+- 「减 Skill+LSP 重分类 D 波槽」= C 桶 ① 主张口径 47/47（49 − 2 D 波槽），其中 C 桶 ① 已收口 40，余 7（TeamCreate/TeamDelete/Snip/RemoteTrigger/PowerShell/TestingPermission/Agent）= 他波定论。全仓 49/49 含此 9 作他波定论。
+
+**§8.64.1.3 registry 头注重构（S-E2，零行为）**
+toolRegistry.ts 20 槽表由「残留守 13」（陈旧计数标签）重构为 **5 类定论**：
+- **关闭 3（不迁）**：⑤⑰⑱（不变）
+- **域外改判 1**：⑳（不变）
+- **materialize 4（本体落、门已声明、自门控 isEnabled）**：②⑭⑯⑲（不变）
+- **§8.64 登记零本体 8（B 类 any-stub / C 类仅壳，终局裁定，无本体可落；本机制不声明防死接缝）**：①④⑥⑦⑧⑩⑪⑫（① 3 工具，合计覆盖 10 工具；⑤ OverflowTest [B] 已关闭不在此列）
+- **残留守 4（本体未落，门随本体纵切落，归属波标注）**：③（RemoteTrigger → remote 波）⑨（Snip → shell/REPL 波）⑬（LSP → D 波重分类）⑮（TeamCreate/TeamDelete → shell·swarm 波）
+- **计数标签修正**：原「残留守 13」为 §8.63 F5 漂移（⑲ §8.63 materialize 未减计数，应 12）；本批按类重构，「残留守」收敛为 4（③⑨⑬⑮），「§8.64 登记零本体」= 8。
+
+**§8.64.1.4 测试面与基线预测**
+- 零本体 → 无新增测试。四件套预期：tsc 0 / eslint 0 / build 0KB entry / 全量 **2422/139/5750** + gate 6·5（不变，零漂移）。
+- 本批纯头注 + doc，无代码逻辑改动，无测试增量。
+
+**§8.64.1.5 残留守登记（= 后续波，复审勿当遗漏）**
+- ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger）→ remote 波（D 波后）
+- ⑨ HISTORY_SNIP（Snip）→ C 桶 ③ shell/REPL 波
+- ⑬ ENABLE_LSP_TOOL（LSP）→ D 波（LSP 域，§8.61 重分类）
+- ⑮ agentSwarms（TeamCreate/TeamDelete）→ C 桶 ③ shell·swarm 波
+- C 类 ListPeers UDS 5 站点族 → remote 波（ListPeers 槽头注登记）
+
+**下一步**：S-E2（toolRegistry.ts 头注重构 + 提交）→ S-E3（零本体批比例自审：头注 ↔ §8.57 S-D1 交叉核 + 计数标签 + git diff 零行为核验）→ S-E4（闭环记录 §8.64.2 + C 桶 ② auto-mode 预研段）。
