@@ -57,6 +57,12 @@ export const CRON_LIST_TOOL_NAME = 'CronList'
 export const CONFIG_TOOL_NAME = 'Config'
 export const WORKFLOW_TOOL_NAME = 'Workflow'
 export const REPL_TOOL_NAME = 'REPL'
+// ── §8.63 S-E2 补（MCP 族 2 seed；值逐一验真旧仓）──
+// LIST_MCP_RESOURCES_TOOL_NAME 旧仓 prompt.ts L1 常量逐字（'ListMcpResourcesTool'）
+export const LIST_MCP_RESOURCES_TOOL_NAME = 'ListMcpResourcesTool'
+// READ_MCP_RESOURCE_TOOL_NAME 旧仓 def 内联字面量（L60 name: 'ReadMcpResourceTool'）
+// → 常量收敛（house 单一事实源面）
+export const READ_MCP_RESOURCE_TOOL_NAME = 'ReadMcpResourceTool'
 
 /** Shell 工具名（旧仓 SHELL_TOOL_NAMES 逐字）。 */
 export const SHELL_TOOL_NAMES: string[] = [BASH_TOOL_NAME, POWERSHELL_TOOL_NAME]

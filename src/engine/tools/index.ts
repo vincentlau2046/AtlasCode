@@ -138,6 +138,20 @@
  *   再缩 1 → 26/49（team/collab 族专属门控槽 = isEnabled =
  *   isAgentSwarmsEnabled（ATLAS_EXPERIMENTAL_AGENT_TEAMS ∨ --agent-teams），
  *   本子波首个专属门控槽）。
+ * §8.63 S-E2（MCP+ToolSearch 族子波）已落 mcp/ + toolsearch/ 双子域
+ *   （ListMcpResourcesTool + ReadMcpResourceTool 本体 2 + ToolSearchTool
+ *   本体 1 + JSON schema 常量 3 + prompt 面 5 + Input/Output duck 型 6 +
+ *   mcpClientRegistry 注入接缝〔MCP client 状态面残留守登记：连接生命周期
+ *   / 重连 / resources·prompt 拉取 + tool_reference wire 面 = MCP client
+ *   波〕+ 门控面 getToolSearchMode/isToolSearchEnabledOptimistic〔env 改名
+ *   ATLAS_ENABLE_TOOL_SEARCH；engine 面 4 函数族裁 = 新仓 0-hit 不复活，见
+ *   各模块头注 delta 登记 ①-⑭〕）→ 在此 re-export（mcp/ + toolsearch/
+ *   子门面）；命名碰撞登记：旧 T-5a mcp.ts 门面（6 name helpers）与新
+ *   mcp/ 子域同名——`./mcp` spec 解析 = mcp.ts（Bun/tsc 文件优先于目录，
+ *   双态实证），子域门面经 `./mcp/index` 显式 spec 引入；残留守「49 本体」
+ *   登记再缩 3 → 29/49（MCP 族 2 无条件注册面 + ToolSearch = 2nd 专属
+ *   门控槽 = isEnabled = isToolSearchEnabledOptimistic，IFF env 常态
+ *   OPENAI_BASE_URL 设真 → 默认 gate OFF = 旧语义忠实非新增门）。
  */
 export {
   createMcpTools,
@@ -813,3 +827,53 @@ export {
   type SendMessageToolUseContext,
   type TeamFile,
 } from './team'
+
+// ── S-E2（§8.63）：mcp 子域（ListMcpResourcesTool + ReadMcpResourceTool
+// 本体 + mcpClientRegistry 注入接缝 + truncation + prompt 面 +
+// getBinaryBlobSavedMessage/formatFileSize 本地移植；名字常量
+// LIST_MCP_RESOURCES_TOOL_NAME / READ_MCP_RESOURCE_TOOL_NAME 由 toolNames
+// 块 seed 不重出；MCP client 状态面〔连接/重连/resources·prompt 拉取〕=
+// MCP client 波残留守，见各模块头注 delta ①-⑨。命名碰撞：`./mcp` spec
+// 解析 = 旧 T-5a mcp.ts（6 name helpers，文件优先于目录），本子域门面经
+// `./mcp/index` 显式 spec 引入（Bun/tsc 双态实证，§8.63 头注登记）──
+export {
+  getMcpClientRegistry,
+  resetMcpClientRegistry,
+  setMcpClientRegistry,
+  LIST_MCP_RESOURCES_DESCRIPTION,
+  LIST_MCP_RESOURCES_PROMPT,
+  LIST_MCP_RESOURCES_TOOL_INPUT_SCHEMA,
+  ListMcpResourcesTool,
+  READ_MCP_RESOURCE_DESCRIPTION,
+  READ_MCP_RESOURCE_PROMPT,
+  READ_MCP_RESOURCE_TOOL_INPUT_SCHEMA,
+  ReadMcpResourceTool,
+  getBinaryBlobSavedMessage,
+  isOutputLineTruncated,
+  type ListMcpResourcesInput,
+  type ListMcpResourcesOutput,
+  type McpClientEntry,
+  type McpClientRegistry,
+  type McpResourceContent,
+  type McpResourceItem,
+  type ReadMcpResourceInput,
+  type ReadMcpResourceOutput,
+  type ReadMcpResourceOutputContent,
+} from './mcp/index'
+
+// ── S-E2（§8.63）：toolsearch 子域（ToolSearchTool 本体 + 门控面 +
+// prompt 面 + 本地 Map memo〔lodash 裁先例〕；名字常量
+// TOOL_SEARCH_TOOL_NAME 由 toolNames 块 seed 不重出；env 改名
+// ATLAS_ENABLE_TOOL_SEARCH + engine 面裁登记见各模块头注 delta ①-⑭）──
+export {
+  clearToolSearchDescriptionCache,
+  getToolSearchMode,
+  isDeferredTool,
+  isToolSearchEnabledOptimistic,
+  ToolSearchTool,
+  TOOL_SEARCH_PROMPT,
+  TOOL_SEARCH_TOOL_INPUT_SCHEMA,
+  type ToolSearchInput,
+  type ToolSearchMode,
+  type ToolSearchOutput,
+} from './toolsearch'
