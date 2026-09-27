@@ -107,6 +107,15 @@
  *   见各文件头注 delta ①-⑩）→ 在此 re-export（web/ 子门面）；残留守
  *   「49 本体」登记再缩 2 → 22/49（web 族无专属门控槽 = 无条件注册面，
  *   同 Read/Write 族）。
+ * §8.60 S-E2（config+ask-user 族子波）已落 config/ 子域 ConfigTool 本体 +
+ *   askUser/ 子域 AskUserQuestionTool 本体（2 对象 + JSON schema 2 常量 +
+ *   prompt 面 + 注册表 3 键裁剪面（supportedSettings 存活判据 = 新 SettingsJson
+ *   声明 ∩ 活消费点）+ duck 型面 8），Skill 915L 重分类 D 波（skill 域依赖
+ *   闭包未落，§8.60.1.1；裁面登记：global 12 键段 → C 桶 ③ shell·swarm 波 /
+ *   HTML preview 支 = 旧 any stub 死码裁 / AppState 同步面裁 / UI JSX → TUI 波 /
+ *   _sdk* → D 波，见各文件头注 delta ①-⑧）→ 在此 re-export（config/ askUser/
+ *   子门面）；残留守「49 本体」登记再缩 2 → 24/49（config/askUser 族无专属
+ *   门控槽 = 无条件注册面，同 web 族）。
  */
 export {
   createMcpTools,
@@ -713,3 +722,35 @@ export {
   type WebSearchToolInput,
   type SearchContentBlock,
 } from './web'
+
+// ── S-E2（§8.60）：config 子域（ConfigTool 本体 + 注册表 3 键裁剪面 +
+// prompt 面；名字常量 CONFIG_TOOL_NAME 由 toolNames 块 seed 不重出）──
+export {
+  ConfigTool,
+  CONFIG_TOOL_INPUT_SCHEMA,
+  generatePrompt,
+  // 重名登记：files 块已 seed readPrompt DESCRIPTION（Read 面）→ config 面
+  // 别名重出（web 块 WEB_FETCH_DESCRIPTION 别名先例）
+  DESCRIPTION as CONFIG_DESCRIPTION,
+  type ConfigOutput,
+  type ConfigToolInput,
+  type SettingConfig,
+} from './config'
+
+// ── S-E2（§8.60）：askUser 子域（AskUserQuestionTool 本体 + JSON schema +
+// prompt 面；名字常量 ASK_USER_QUESTION_TOOL_NAME 由 toolNames 块 seed
+// 不重出）──
+export {
+  AskUserQuestionTool,
+  ASK_USER_QUESTION_TOOL_INPUT_SCHEMA,
+  ASK_USER_QUESTION_TOOL_CHIP_WIDTH,
+  ASK_USER_QUESTION_TOOL_PROMPT,
+  PREVIEW_FEATURE_PROMPT,
+  // 重名登记：同 config 面 DESCRIPTION 别名重出
+  DESCRIPTION as ASK_USER_QUESTION_DESCRIPTION,
+  type AskUserQuestion,
+  type AskUserQuestionOption,
+  type AskUserQuestionOutput,
+  type AskUserQuestionToolInput,
+  type QuestionAnnotation,
+} from './askUser'
