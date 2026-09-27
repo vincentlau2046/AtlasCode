@@ -17,6 +17,7 @@ export {
 } from './autoCompact'
 export {
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
+  ERROR_MESSAGE_USER_ABORT,
   COMPACT_MAX_OUTPUT_TOKENS,
   getCompactPrompt,
   formatCompactSummary,
@@ -33,6 +34,7 @@ export {
   estimateMessageTokens,
   evaluateTimeBasedTrigger,
   microcompactMessages,
+  resetMicrocompactState,
   type TimeBasedMCConfig,
   type MicrocompactDeps,
   type MicrocompactOutcome,

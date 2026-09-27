@@ -15,8 +15,21 @@
  * 注：messaging 域 BackendType = string（mailbox schema z.string() 对齐的退化最小形
  *   镜像，messaging/constants.ts 头注）为 schema 面命名；本域 BackendType = 3 值判别
  *   联合（executor type 判别用），两域各自 head 注登记，不互引（命名撞车面登记）。
+ *
+ * S-E2c backends 族扩面（§8.66 切片 3）：
+ *   - TeammateToolState += tasks（InProcessBackend terminate/kill/isActive 支
+ *     findTeammateTaskByAgentId(agentId, state.tasks) 消费；task 域单一事实源）。
+ *   - TeammateExecutorContext += setAppState（InProcessBackend terminate/kill
+ *     支 requestTeammateShutdown / killInProcessTeammate 消费）
+ *     += toolUseId（spawnInProcess createTaskStateBase 第 4 参消费，旧
+ *     ToolUseContext.toolUseId 窄视图；缺省 undefined 逐字透传）。
+ *   - TeammateToolState.toolPermissionContext.mode: string → PermissionMode
+ *     （shared types-session 冻结契约；PaneBackendExecutor.spawn 继承支
+ *     buildInheritedCliFlags(options.permissionMode?: PermissionMode) 直接
+ *     消费，string 宽形不可赋值；旧仓 AppState 真形即 PermissionMode）。
  */
-import type { Message } from '../../shared'
+import type { Message, PermissionMode } from '../../shared'
+import type { SetAppState, TaskStateBase } from '../../task'
 import type { TeammateContext } from '../teammateContext'
 
 /** tmux/it2 pane 标识（旧 PaneId = any stub → 消费端 string 形：killPane('-t', paneId) 全链）。 */
@@ -126,23 +139,31 @@ export type TeammateMessage = {
 
 /**
  * 旧 AppState 窄视图（PaneBackendExecutor.spawn 消费面：
- * getAppState().toolPermissionContext.mode → buildInheritedCliFlags 继承支）。
+ * getAppState().toolPermissionContext.mode → buildInheritedCliFlags 继承支；
+ * InProcessBackend terminate/kill/isActive 消费面：tasks → findTeammateTaskByAgentId）。
  * 全量 AppState 面 = TUI 波/D 波（残留守登记）。
  */
 export interface TeammateToolState {
-  toolPermissionContext: { mode: string }
+  /** 权限态窄视图（S-E2c：mode 收窄为 shared PermissionMode 冻结契约，登记见头注）。 */
+  toolPermissionContext: { mode: PermissionMode }
+  /** teammate 任务表（task 域 TaskStateBase 槽位单一事实源；S-E2c 扩面登记）。 */
+  tasks: Record<string, TaskStateBase>
 }
 
 /**
- * 旧 ToolUseContext 窄视图（duck 型 2 字段，TaskToolUseContext 先例 §8.56）：
+ * 旧 ToolUseContext 窄视图（duck 型，TaskToolUseContext 先例 §8.56）：
  *   - PaneBackendExecutor.spawn：getAppState() 继承 CLI flags 支
  *   - InProcessBackend.spawn：{...context, messages: []} 剥离透传 agent loop
- *    （P-S1 裁定改直连：runAgent 已在 engine 根门面，S-E2c inProcessRunner 经
+ *    （P-S1 裁定改直连：runAgent 已在 engine 根门面，S-E2d inProcessRunner 经
  *     engine 门面消费，零 port）
+ *   - InProcessBackend terminate/kill：setAppState（S-E2c 扩面登记）
+ *   - spawnInProcess createTaskStateBase 第 4 参：toolUseId（S-E2c 扩面登记）
  * 全量 ToolUseContext 50+ 字段面 = TUI 波/D 波（残留守登记）。
  */
 export interface TeammateExecutorContext {
   getAppState(): TeammateToolState
+  setAppState: SetAppState
+  toolUseId?: string
   messages: Message[]
 }
 

@@ -29,8 +29,13 @@ import { TEAMMATE_COMMAND_ENV_VAR } from './constants'
 import { isInBundledMode } from './bundledMode'
 import { type PermissionMode } from '../shared'
 
-/** 域内本地 quote（旧 shellQuote 包装面，登记见头注）。 */
-function quote(args: ReadonlyArray<unknown>): string {
+/**
+ * 域内 quote（旧 shellQuote 包装面，登记见头注）。
+ * S-E2c 扩导出：PaneBackendExecutor spawn 命令引号单一事实源（旧仓
+ * backends/PaneBackendExecutor.ts 自 utils/bash/shellQuote 直引 → 收敛
+ * 到本域包装，登记见该文件头注）。
+ */
+export function quote(args: ReadonlyArray<unknown>): string {
   return shellQuoteQuote([...args.map(String)])
 }
 

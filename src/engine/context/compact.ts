@@ -362,3 +362,12 @@ export async function compactConversation(
   }
   return result
 }
+
+/**
+ * S-E2c swarm backends 族扩面（C 桶 ③ shell·swarm 波 §8.66）：
+ * 用户中断错误消息常量（旧仓 a8af45b core/orchestrator/context/compact.ts:282
+ * 逐字）。消费 = S-E2d inProcessRunner abort 支（旧仓 inProcessRunner.ts:1283
+ * `createAssistantAPIErrorMessage({ content: ERROR_MESSAGE_USER_ABORT })`
+ * → appendCappedMessage，见该文件头注）。
+ */
+export const ERROR_MESSAGE_USER_ABORT = 'API Error: Request was aborted.'

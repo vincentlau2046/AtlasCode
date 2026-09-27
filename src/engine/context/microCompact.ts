@@ -222,3 +222,14 @@ export function microcompactMessages(
 
   return { messages: result, clearedToolIds, tokensSaved }
 }
+
+/**
+ * S-E2c swarm backends 族扩面（C 桶 ③ shell·swarm 波 §8.66）：注册 no-op。
+ * 旧仓 a8af45b core/orchestrator/context/microCompact.ts:126 的
+ * resetMicrocompactState 重置 cachedMicrocompact 模块态（cachedMCState /
+ * cachedMCModule / pendingCacheEdits）；新仓 microCompact 为无状态 DI 版
+ * （MicrocompactDeps 注入，零模块态，cache 面残留守见头注）→ 无可重置态，
+ * 调用点（旧仓 inProcessRunner.ts:1091 压缩后重建支）保留显式 no-op 接缝。
+ * 后续纵切：stateful microcompact（cachedMicrocompact 面）落位时重实现。
+ */
+export function resetMicrocompactState(): void {}

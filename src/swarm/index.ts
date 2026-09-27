@@ -16,9 +16,16 @@
  *     teammateModeSnapshot（原排 S-E2c，spawnUtils 硬依赖 getTeammateModeFromSnapshot
  *     提前，该文件头注登记）/ backends/port（seam ② 注入窗）
  *     + messaging/teammate 尾 3 补差（R6）
- *   S-E2c backends 族：detection / it2Setup / registry / TmuxBackend /
- *     ITermBackend / InProcessBackend / PaneBackendExecutor（+ setBackendModule 接线
- *     + engine root 2 符号扩面 resetMicrocompactState/ERROR_MESSAGE_USER_ABORT）
+ *   S-E2c backends 族（本提交落位）：detection / it2Setup / registry /
+ *     TmuxBackend / ITermBackend / InProcessBackend / PaneBackendExecutor /
+ *     inProcessRunnerPort（S-E2d 前向接缝 ②）/ wireBackends（组合接线）
+ *     + engine root 2 符号扩面 resetMicrocompactState/ERROR_MESSAGE_USER_ABORT。
+ *     门面命名冲突面登记：detection.isInsideTmux 不入门面（与
+ *     teammateLayoutManager.isInsideTmux 同名——后者 = port 委托消费面，
+ *     门面已占该名；域内消费者直接 import './backends/detection'）；
+ *     it2Setup.isIt2CliAvailable（which it2 安装性）与 detection 侧同名
+ *     （session list 探活）消歧 → 门面导出名 isIt2CliInstalled（登记见
+ *     it2Setup.ts 头注）。
  *   S-E2d hub+D 类+核销：inProcessRunner / permissionSync（928L）/ D 类 3 工具 /
  *     registry 槽核销（⑨⑮ materialize + ⑩ 闭合证据）/ 测试面 8-12 文件
  *
@@ -170,6 +177,7 @@ export {
   killInProcessTeammate,
 } from './spawnInProcess'
 export {
+  quote,
   getTeammateCommand,
   buildInheritedCliFlags,
   buildInheritedEnvVars,
@@ -212,3 +220,56 @@ export {
   computeInitialTeamContext,
   initializeTeammateContextFromSession,
 } from './reconnection'
+// S-E2c backends 族（§8.66.1.5 切片 3）
+export {
+  IT2_COMMAND,
+  isInsideTmuxSync,
+  getLeaderPaneId,
+  isTmuxAvailable,
+  isInITerm2,
+  isIt2CliAvailable,
+  resetDetectionCache,
+} from './backends/detection'
+export {
+  type PythonPackageManager,
+  type It2InstallResult,
+  type It2VerifyResult,
+  detectPythonPackageManager,
+  installIt2,
+  verifyIt2Setup,
+  getPythonApiInstructions,
+  markIt2SetupComplete,
+  setPreferTmuxOverIterm2,
+  getPreferTmuxOverIterm2,
+  isIt2CliAvailable as isIt2CliInstalled,
+} from './backends/it2Setup'
+export {
+  ensureBackendsRegistered,
+  registerTmuxBackend,
+  registerITermBackend,
+  detectAndGetBackend,
+  getBackendByType,
+  getCachedBackend,
+  getCachedDetectionResult,
+  markInProcessFallback,
+  isInProcessEnabled,
+  getResolvedTeammateMode,
+  getInProcessBackend,
+  getTeammateExecutor,
+  resetBackendDetection,
+} from './backends/registry'
+export { TmuxBackend } from './backends/TmuxBackend'
+export { ITermBackend } from './backends/ITermBackend'
+export { InProcessBackend, createInProcessBackend } from './backends/InProcessBackend'
+export {
+  PaneBackendExecutor,
+  createPaneBackendExecutor,
+} from './backends/PaneBackendExecutor'
+export {
+  type StartInProcessTeammateArgs,
+  type StartInProcessTeammateFn,
+  setStartInProcessTeammate,
+  resetStartInProcessTeammate,
+  requireStartInProcessTeammate,
+} from './backends/inProcessRunnerPort'
+export { wireBackends } from './backends/wireBackends'
