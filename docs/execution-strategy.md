@@ -3934,3 +3934,65 @@ tool_reference 延迟加载协议 → 4 函数确实 0-hit，无动作（复审�
 - autoMode CLI handler（170L）→ CLI 波（依赖 sideQuery）。
 - settings.autoMode 三函数（getAutoModeConfig / getUseAutoModeDuringPlan）→ settings 波。
 - growthbook getFlagDualRead（atlas_auto_mode_config）→ config/growthbook 波。
+
+**§8.65.2 S-E2 实施 + S-E3 双路审视 + 闭环（2026-09-27）**
+
+子波四段：S-E1 分析 `ab323d5` → S-E2 实施 `f07486f` → S-E3 双路审视修正 `a1571dd`
+→ S-E4 闭环。波 tag 不切（gate ③ 仍 wave-c）。
+
+**落盘面（`src/permissions/autoMode/` 子域，STR-1 子门面显式再导出，叶零 `export *`）：**
+- 10 子模块：types（AutoModeRules / TranscriptBlock·Entry / ClassifierUsage /
+  YoloClassifierResult 逐字）· transcript（buildTranscriptEntries·ForClassifier /
+  formatActionForClassifier / toCompact jsonl·text-prefix 两态 / jsonStringify
+  BigInt 降级 / jsonl 态门）· xml（XML_S1·S2_SUFFIX + stripThinking /
+  parseXmlBlock·Reason·Thinking + replaceOutputFormatWithXml）· usage（extractUsage /
+  combineUsage / getClassifierThinkingConfig / yoloClassifierResponseSchema /
+  YOLO_CLASSIFIER_TOOL_NAME·SCHEMA）· classifierShared（extractToolUseBlock /
+  parseClassifierResponse）· state（active/flagCli/circuitBroken）· denials
+  （recordAutoModeDenial 20-cap 头插）· approvals（bash+yolo 判别 + checking 信号 +
+  本地 createSignal）· allowlist（isAutoModeAllowlistedTool 21 件 + YOLO 自报）·
+  prompts（2 .txt 资产内联 + 外部模板解析 extractTaggedBullets /
+  getDefaultExternalAutoModeRules / buildDefaultExternalSystemPrompt）。
+- ② dontAsk ask→deny 转换：`permissions.ts applyDontAskMode` 于 **forceDecision /
+  1b / 1f / 1g / 3 终端** 5 个 ask 产点套用（旧仓 inner 末端 post-hoc 语义，
+  「can't be bypassed by early returns」）+ `denialMessages.ts` 文案单一事实源
+  （DENIAL_WORKAROUND_GUIDANCE + DONT_ASK_REJECT_MESSAGE 逐字）。
+- 2 .txt 资产 md5 逐字（`auto_mode_system_prompt` + `permissions_external`）：
+  bunfig.toml `[loader] ".txt"="text"` + `src/text-assets.d.ts` 声明；bun build
+  内联，CLI 入口维持 0 KB。
+
+**双只读审视（S-E3，报告 = DATA，全核销后落 `a1571dd`）：**
+- A 路（旧仓 a8af45b 保真）：**FAITHFUL 零行为丢**。14 面逐字核验 + 2 .txt md5
+  一致 + ② 转换命中旧仓全部 ask 早退产点（1b/1f/1g/终端）+ allowlist 元素级相等
+  （除登记排除 Workflow/TerminalCapture/OverflowTest/VerifyPlanExecution）。
+- B 路（新仓一致 + 测试面）：**0 hard / 5 minor，全处置**：
+  - F1 `forceDecision` 早退 bypass ② → 上提 `permissionContext` + 套
+    `applyDontAskMode`（闭合新仓独有早退产点；零活调用方，纯闭合非行为改动），
+    ② 头注 + permissions.ts/index.ts 残留守 ②③ 翻「已落」（③ 仅 LLM 闭包留守）。
+  - F2 `approvals.ts` 门裁 delta 头注锐化：TRANSCRIPT 门裁 = 旧默认保真
+    （ON_BY_DEFAULT），BASH 门裁 = 真激活（旧默认关，当前零活消费方，惰性）。
+  - B1 XML 后缀断言由 `length>0` 升级内容锚点（数据冻结判别化，防提示词漂移）。
+  - B2 `getDefaultExternalAutoModeRules` 三节（allow/soft_deny/environment）均断
+    `length>0`（原仅 allow 断非空，deny/environment tag 抽取 bug 致 `[]` 会漏红）。
+  - B3 ② 早退产点判别支补齐：forceDecision 早退 + 1b ask-rule 命中两新增测
+    （default 对照证 1b 真达 = rule 型 decisionReason；fixture 错配会落终端 mode
+    型 → 红）。矩阵「② 转换」声明随终端 + forceDecision + 1b 三产点实证成立。
+  - B5 `DONT_ASK_REJECT_MESSAGE` 去 2 行被 `toBe` 完全包含的 `toContain` 冗余。
+  - 结构性全清：facade 1:1 导出 / 域零碰撞 / 零 `feature()` 代码调用 / `*/` 注释
+    扫描净 / 前向接缝登记齐（autoMode/index.ts L23-25 + 各子模块头注）。
+
+**基线：** `bun x tsc --noEmit` 0 / `bun x eslint` 0 / `bun build` 0 KB 入口 /
+全量 `bun test --isolate tests/` **2474 pass·140 文件·5851 expect**（+50 测随
+S-E2 50 用例基线，+2 测 +6 expect 随 S-E3 判别支）/ gate `bun test --isolate
+tests/ci/` **6·5** 守住。capability-matrix 分类器行 split：纯逻辑面 + ② 转换 +
+提示词数据 = `done`（proof `tests/unit/auto-mode-classifier.test.ts` 52 用例），
+LLM 闭包（classifyYoloAction 族，需 sideQuery 单发侧调）= `missing`（provider/
+settings 波前向接缝，H6 前向声明）。
+
+**前向接缝（复审勿当遗漏重提，§8.65.1.6）：** LLM 闭包 classifyYoloAction 族 /
+autoMode CLI handler / settings.autoMode 三函数 / growthbook getFlagDualRead →
+provider/settings/CLI 波。
+
+**49 口径：** 本波 = C 桶 ② auto-mode 纵切（permissions 域分类器族纯逻辑面 + ②
+转换 + 提示词数据），非 49 工具本体槽；49/49 收口计数随 §8.64 登记批不变。
+
