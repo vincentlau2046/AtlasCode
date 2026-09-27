@@ -116,6 +116,17 @@
  *   _sdk* → D 波，见各文件头注 delta ①-⑧）→ 在此 re-export（config/ askUser/
  *   子门面）；残留守「49 本体」登记再缩 2 → 24/49（config/askUser 族无专属
  *   门控槽 = 无条件注册面，同 web 族）。
+ * §8.61 S-E2（notebook 族子波）已落 notebook/ 子域 NotebookEditTool 本体
+ *   （1 对象 + JSON schema 1 常量 + prompt 面 + Input/Output duck 型 2；旧仓
+ *   NotebookEditTool 490L + prompt 3L + UI 92L 裁剪随迁，LSP 860L + client
+ *   域 2464L 重分类 D 波 LSP 域（§8.61.1.1：LSP servers = plugins only →
+ *   依赖闭包 = client 域 + plugin 域 2 域落盘超子波范围，空心壳禁；
+ *   LSP_TOOL_NAME seed 随 D 波）；裁面登记：fileHistory 支 → files 波
+ *   delta ⑦ 先例 / safeParseJSON LRU memo → jsonParse 双站点 / UI JSX 4 函数
+ *   + getToolUseSummary → TUI 波 / TRANSCRIPT_CLASSIFIER 门裁 = 本体无条件
+ *   随迁，见各文件头注 delta ①-⑨）→ 在此 re-export（notebook/ 子门面）；
+ *   残留守「49 本体」登记再缩 1 → 25/49（notebook 族无专属门控槽 = 无条件
+ *   注册面，同 web/config 族；LSP 槽 = 残留守归属 D 波 LSP 域）。
  */
 export {
   createMcpTools,
@@ -754,3 +765,17 @@ export {
   type AskUserQuestionToolInput,
   type QuestionAnnotation,
 } from './askUser'
+
+// ── S-E2（§8.61）：notebook 子域（NotebookEditTool 本体 + JSON schema +
+// prompt 面；名字常量 NOTEBOOK_EDIT_TOOL_NAME 由 toolNames 块 seed 不重出；
+// LSP 重分类 D 波 LSP 域，§8.61.1.1）──
+export {
+  NotebookEditTool,
+  NOTEBOOK_EDIT_TOOL_INPUT_SCHEMA,
+  // 重名登记：同 config/askUser 面 DESCRIPTION 别名重出（web 块
+  // WEB_FETCH_DESCRIPTION 别名先例）
+  DESCRIPTION as NOTEBOOK_EDIT_DESCRIPTION,
+  PROMPT as NOTEBOOK_EDIT_PROMPT,
+  type NotebookEditInput,
+  type NotebookEditOutput,
+} from './notebook'
