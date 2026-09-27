@@ -39,21 +39,14 @@
  *       ⑱ NODE_ENV=test（TestingPermission，新仓测试体系不消费该工具）。
  *     **域外改判 1**：⑳ PowerShell enabled（PowerShell，bash-only 纵切域外；
  *       B16 裁定同 = 域外改判登记，非 C 桶项）。
- *     **残留守 13**（各槽本体未落，门随本体纵切落；本机制只保留已落面的 ASCEND 门
- *       + deps 注入，其余槽不声明防死接缝；归属波标注。§8.53 S-T3 原始裁定
- *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize 后余 13）：
- *       ① IS_ATLAS_DEV（Tungsten + SuggestBackgroundPR + REPL，无归属波，随体纵切声明）
+ *     **materialize 4**（本体已落、门已声明、自门控 isEnabled；本机制只保留已落面的
+ *       ASCEND 门 + deps 注入，其余槽不声明防死接缝）：
  *       ② AGENT_TRIGGERS（§8.56 S-D4 materialize：cron 三件套自门控 isEnabled =
  *         isCronEnabled（ATLAS_DISABLE_CRON kill-switch），组合根 baseTools 注入位）
- *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
- *       ④ MONITOR_TOOL（Monitor → 本体纵切）⑥ CONTEXT_COLLAPSE（CtxInspect → 本体纵切）
- *       ⑦ TERMINAL_PANEL（TerminalCapture → shell 波 TUI 面）⑧ WEB_BROWSER_TOOL（WebBrowser → 本体纵切）
- *       ⑨ HISTORY_SNIP（Snip → shell/REPL 波）⑩ UDS_INBOX（ListPeers → shell·swarm 波）
- *       ⑪ WORKFLOW_SCRIPTS（Workflow → 本体纵切）⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution → 本体纵切）
- *       ⑬ ENABLE_LSP_TOOL（LSP → 本体纵切）⑭ worktree mode（§8.57 S-D2b materialize：
+ *       ⑭ worktree mode（§8.57 S-D2b materialize：
  *       Enter/ExitWorktree 自门控 isEnabled = isWorktreeModeEnabled（ATLAS_DISABLE_
  *       WORKTREE_MODE kill-switch，GA 缺省开），worktree 域 E-7 S-7c + S-D2a 会话/tmux
- *       族已落，组合根 baseTools 注入位）⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
+ *       族已落，组合根 baseTools 注入位）
  *       ⑯ isTodoV2（§8.56 S-D3 materialize：Task 四件套 + TodoWrite 自门控 isEnabled =
  *         isTodoV2Enabled（+ TodoWrite 反向门控支），tasks 域 E-7 S-7a 已落，与 ② 同子波）
  *       ⑲ ToolSearch optimistic（§8.63 S-E2 materialize：ToolSearch 本体纵切
@@ -64,6 +57,20 @@
  *         baseTools 注入位；engine 面 4 函数族〔阈值判定 / modelSupportsTool
  *         Reference / extractDiscoveredToolNames / DeferredToolsDelta〕= 新仓
  *         0-hit 不复活登记，见 toolSearchGate 头注 delta ③）。
+ *     **§8.64 登记零本体 8**（B 类 any-stub / C 类仅壳，终局裁定，无本体可落；
+ *       本机制不声明防死接缝；§8.57 S-D1 B/C 类裁定 + §8.64 收口批，复审勿当遗漏重提）：
+ *       ① IS_ATLAS_DEV（Tungsten [B] + SuggestBackgroundPR [C] + REPL [B]，无归属波，3 工具）
+ *       ④ MONITOR_TOOL（Monitor [B]，`({}) as any` 占位）⑥ CONTEXT_COLLAPSE（CtxInspect [C]，目录缺失）
+ *       ⑦ TERMINAL_PANEL（TerminalCapture [C]，仅 prompt.ts 2L，TUI 面 → shell 波）⑧ WEB_BROWSER_TOOL（WebBrowser [C]，仅 WebBrowserPanel.tsx 1L）
+ *       ⑩ UDS_INBOX（ListPeers [C]，目录缺失；UDS 5 站点族 → remote 波）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
+ *       ⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution [C]，仅 constants.ts 2L）
+ *       （⑤ OVERFLOW_TEST_TOOL [B] 已列「关闭 3」，不在此列）
+ *     **残留守 4**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
+ *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize / ⑲ §8.63 materialize
+ *       后余 12，8 槽移「§8.64 登记零本体」后余 4）：
+ *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
+ *       ⑨ HISTORY_SNIP（Snip → shell/REPL 波）⑬ ENABLE_LSP_TOOL（LSP → D 波重分类，LSP 域）
+ *       ⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'
