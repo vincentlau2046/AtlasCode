@@ -3659,7 +3659,7 @@ notebook 族无专属门控槽 = 无条件注册面（同 web/config 族）。**
 - ⑨ context duck = SendMessageToolUseContext（`getAppState(): { toolPermissionContext?: unknown; teamContext?: { teamName: string } }` 最小面 + abortController；旧 ToolUseContext 40+ 成员面 → duck，S-C5 先例）。
 
 **§8.62.1.4 注册表门控（专属门控槽）**
-isEnabled = `isAgentSwarmsEnabled()`（env ∨ flag）= **49 口径工具本体波首个专属门控槽**（此前各族 = 无条件注册面）。对象面：searchHint 'send messages to agent teammates (swarm protocol)' 逐字 / maxResultSizeChars 100_000 / shouldDefer true / userFacingName 'SendMessage' / isReadOnly = `typeof message === 'string'`（输入面）/ isConcurrencySafe false / isDestructive false（旧 def 无覆写 = 缺省值，delta ④ 先例）。
+isEnabled = `isAgentSwarmsEnabled()`（env ∨ flag）= **本子波首个专属门控槽**（49 口径 26/49；此前各族专属门控槽 = cron 族 isCronEnabled ×3 / tasks 族 isTodoV2Enabled ×4 / worktree 族 isWorktreeModeEnabled ×2 共 9 槽，S-E3 B 路 NOTE-2 订正——原稿「首个专属门控槽（此前各族 = 无条件注册面）」超述；tools/index.ts 头注「本子波首个」范围限定措辞保留）。对象面：searchHint 'send messages to agent teammates (swarm protocol)' 逐字 / maxResultSizeChars 100_000 / shouldDefer true / userFacingName 'SendMessage' / isReadOnly = `typeof message === 'string'`（输入面）/ isConcurrencySafe false / isDestructive false（旧 def 无覆写 = 缺省值，delta ④ 先例）。
 
 **§8.62.1.5 测试面（S-E2 落 + S-E3 审视）**
 - unit 零盘（ATLAS_CONFIG_DIR=/mock-home 不存在目录戳 + ATLAS_EXPERIMENTAL_AGENT_TEAMS env 双戳）：对象面 / JSON schema 面（type 数组 + required）/ isReadOnly 双态 / isEnabled 门双态 / toAutoClassifierInput 4 模板 / validateInput 6 查面（to 空 / @ 含 / string 缺 summary / * structured / shutdown_response 目标 / shutdown_response reject 缺 reason——全逐字；UDS 3 查裁面登记）/ checkPermissions allow+updatedInput / mapToolResult jsonStringify 面 / renderToolUseMessage 3 面 / prompt gate-off 锚点（DESCRIPTION 值 + PROMPT 协议段）/ call 错误面（broadcast 无 teamName throw / string 无 teamName throw / structured dispatch 3 型 guard）。
@@ -3667,3 +3667,14 @@ isEnabled = `isAgentSwarmsEnabled()`（env ∨ flag）= **49 口径工具本体�
 
 **§8.62.1.6 基线预测**
 开波 2312/134/5501 + gate 6·5 → 预测 S-E2 ~2340/136/~5640（+~28 测 / +2 文件 / +~140 expect：validate 6 查 + classifier 4 模板 + mailbox 写面 5 + 错误面 3 + 对象面，plan 波 +41/+114 同族偏高预测）。
+
+**§8.62.2 闭环记录（S-E2 → S-E3 → S-E4，2026-09-27）**
+
+- S-E2 实施 `c481467`（6 文件 / +1646）：team/ 子域 sendMessageTool.ts 767L 本体（delta ①-⑩ 头注登记）+ sendMessagePrompt.ts 43L（gate-off PROMPT 逐字，旧 getPrompt() udsRow/udsSection 双 '' 模板 .trim()）+ team/index.ts STR-1 子门面 + tools/ 门面接线（duck 型 10 留子门面，根门面仅 namespaced 导出）+ unit 31 测（P-S1..P-S13）+ func 6 测（F-S1..F-S6 真盘 mailbox 面）。四联 tsc 0 / eslint 0 / build 0 KB / 全量 2349 pass · 0 fail · 5599 expect · 136 文件 + gate 6 pass · 5 expect。
+- S-E3 双路只读审视（≤2 子代理，报告 = DATA 全量 grep/Read 复核后处置）：
+  - A 路（旧仓保真）：25 保留面核过（24 逐字 + 1 登记等价 = isEnabled/growthbook killswitch 裁）/ 19 裁面登记完备零漏登 / 8 行为差（2 核验无差：getTeamName 无参回落链 + isTeamLead backwards-compat 支两仓逐字；5 已登记；1 未登记 = message 描述面 → 修正）；PROMPT 逐字符比对 1297 字符 IDENTICAL。4 NOTE（F1 描述面 / F2 delta ③ 0-hit 断言 / F3 UDS 计数 / F4 防御支）。
+  - B 路（新仓一致 + 测试面）：house style / STR-1 / import 纪律 / H6 零 any / 测试面质量全 CONFIRMED-OK；37 pass 实跑与提交声明逐字一致；tsc 实跑 0。5 NOTE（计数 9→10 / 「首个门控槽」超述 / UDS 计数 / 描述面 / unit 缺防御戳）。
+  - 双路 9 NOTE 全处置于 `2a74d62`（4 文件 +28/-14，零行为改动）：头注计数 6 处（duck 型 9→10 ×2 / UDS 4→5 站点 ×2 / 「UDS 3 检查面」→「4 块（3 文案面）」）+ delta ①③⑦ 补登记 3 条 + unit 层 ATLAS_CONFIG_DIR=/mock-home 防御戳（S-E1 规划项补落）。NOTE-2 超述 = 本节 §8.62.1.4 内联订正 + 提交消息不重写（登记于此）。
+- 波终：**2349/136/5599 + gate 6·5**（S-E3 修正零漂移）；49 口径 25/49 → **26/49**（+1 = SendMessage，再缩 23）。波 tag 不切（gate ③ 仍 wave-c）。
+- 裁面归属核销（债务登记）：C 桶 ③ shell·swarm 波 = in-process 名路由块（agentNameRegistry/queuePendingMessage 工具级接线）+ backfillObservableInput + findTeammateTaskByAgentId/gracefulShutdown + findTeammateColor/teammates 色映射 + setTeamFileLoader 真读者（readTeamFileAsync team-file 域）；remote 波 = UDS_INBOX 门族 5 站点（validate 4 块 + checkPermissions bridge ask + call postInterClaudeMessage/sendToUdsSocket，[ATLAS-HOLD]）；TUI 波 = UI JSX renderToolResultMessage 4 函数面。
+- 下一波 §8.63（MCP+ToolSearch 族）预研已备：3 工具本体 738L（ListMcpResourcesTool 123 + ReadMcpResourceTool 158 + ToolSearchTool 457）+ prompt/constants 119L。关键裁面判定输入——新仓 0-hit 面：ensureConnectedClient/fetchResourcesForClient（旧 services/mcp/client.js 未迁）/ logMCPError / isOutputLineTruncated / getBinaryBlobSavedMessage；@modelcontextprotocol/sdk 不在新仓 package.json（3-dep 纪律 → ReadResourceResult 结构化型需结构型裁/duck）；persistBinaryContent 在位（web/webFetchUtils.ts L668，经 web/ 子门面 + tools/ 门面 re-export）→ ReadMcpResource blob 拦截面可接；mcp.ts 门面现仅 name helpers 6 函数（client 域 0-hit = S-E1 待裁：MCP client 域状态裁定 + context.options.mcpClients duck）；ToolSearch 旧 lodash-es memoize → 新仓 TtlLruCache 本地缓存先例（lodash 裁先例）+ 旧 tool.prompt({...}) → 新 description() 签名 delta + term 评分面（parts exact 12/10 · contains 6/5 · full contains 3 · hint 4 · desc 2）+ isEnabled = isToolSearchEnabledOptimistic（新仓状态 S-E1 查）。
