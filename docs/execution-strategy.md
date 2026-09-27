@@ -3819,3 +3819,118 @@ toolRegistry.ts 20 槽表由「残留守 13」（陈旧计数标签）重构为 
 - **49 口径 29/49 → 49/49 收口**：29（本体落 C 桶 ① §8.53-§8.63）+ 11（本批 B/C 零本体登记）+ 2（Skill+LSP D 波重分类）+ 3（TeamCreate/TeamDelete/Snip C 桶 ③）+ 1（RemoteTrigger remote 波）+ 1（PowerShell 域外改判）+ 1（TestingPermission 关闭）+ 1（Agent E-2）= **49/49** ✓。C 桶 ① 归属 40/49（29 本体 + 11 登记）；余 9 = 他波/关闭/E-2 定论（前波已登记）。
 - 残留守登记（= 后续波，复审勿当遗漏）：③（remote 波）/ ⑨（C 桶 ③ shell/REPL）/ ⑬（D 波 LSP 域）/ ⑮（C 桶 ③ shell·swarm）/ ⑩ UDS inbox 本体（C 桶 ③）+ UDS 5 站点族（remote 波）。
 - 波 tag 不切（gate ③ 仍 `wave-c`）。**C 桶 ① 全闭环**（§8.57-§8.64，49 口径 49/49 收口）。下一步：**C 桶 ② auto-mode 纵切波**（task #139，~3030L 分类器族：getAutoToolSearchCharThreshold / modelSupportsToolReference / extractDiscoveredToolNames / DeferredToolsDelta 4 函数族 + tool_reference wire 面复活 + auto-mode 主分类器）。
+
+---
+
+**§8.65 C 桶 ② auto-mode 纵切波（分类器族，task #139，2026-09-27）**
+
+**§8.65.1 S-E1 总分析**
+
+**§8.65.1.1 定位与范围**
+
+旧仓来源（a8af45b）：`src/utils/permissions/yoloClassifier.ts` 1332L（auto-mode 主分类器，ANT-ONLY
+`feature('TRANSCRIPT_CLASSIFIER')` 门控）+ `classifierShared.ts` 39L + `classifierDecision.ts` 91L +
+`autoModeState.ts` 39L + `classifierApprovals.ts` 88L + `autoModeDenials.ts` 26L +
+`yolo-classifier-prompts/*.txt`（2 件 ≈120KB 提示词数据）+ `src/cli/handlers/autoMode.ts` 170L +
+② dontAsk 模式 ask→deny 转换（旧 `permissions.ts:490-504` + `messages.ts` DONT_ASK_REJECT_MESSAGE +
+DENIAL_WORKAROUND_GUIDANCE）。
+
+新仓既存面：
+- `src/permissions/permissions.ts` 残留守 ②（dontAsk 转换）/ ③（分类器族整族留守）。
+- `src/permissions/bashClassifier.ts` 78L stub（E-6 S-6c「stub 即外部构建形态」，前向登记 = 本波分类器族消费点）。
+- `shared/types.ts` Tool 契约已含 `toAutoClassifierInput` + `aliases`（§8.61 notebookEditTool delta ⑤ 无条件随迁）。
+- ToolSearch engine 面 4 函数族（阈值判定 / modelSupportsToolReference / extractDiscoveredToolNames /
+  DeferredToolsDelta）§8.63 已登记「新仓 0-hit 不复活」（toolSearchGate 头注 delta ③ + toolRegistry 头注 ⑲）——
+  本波复核确认，无动作（见 §8.65.1.5）。
+
+**§8.65.1.2 范围裁定（port vs 前向接缝）**
+
+旧仓分类器族 **LLM 调用耦合**：`sideQuery`（单发 LLM）+ growthbook `getFlagDualRead` +
+bootstrap state（getCachedClaudeMdContent / setLastClassifierRequests / getSessionId）+
+`settings.getAutoModeConfig` + `getMainLoopModel` + `getCacheControl` + `getDefaultMaxRetries`。
+新仓 **无 `sideQuery`**（LLM 单发侧调机制缺位，modelprovider 仅流式主环），且
+`feature('TRANSCRIPT_CLASSIFIER')` 新仓恒 false（bun:bundle 门恒 off）。故 **LLM 调用闭包 = 前向接缝**
+（归 provider/settings 波）。
+
+本波落 = **可测纯逻辑面** + ② dontAsk 转换 + 提示词数据；LLM 闭包登记前向接缝：
+
+落（纯 / 可测，映射新仓类型面）：
+- transcript 构造：buildTranscriptEntries / buildToolLookup / toCompactBlock / toCompact /
+  buildTranscriptForClassifier / formatActionForClassifier（旧强类型 Message → 新 shared Message 松接口，
+  类型守卫适配 delta）。
+- XML 解析：stripThinking / parseXmlBlock / parseXmlReason / parseXmlThinking / replaceOutputFormatWithXml /
+  XML_S1·S2_SUFFIX。
+- usage：extractUsage / combineUsage / getClassifierThinkingConfig / yoloClassifierResponseSchema /
+  YOLO_CLASSIFIER_TOOL_NAME·SCHEMA。
+- classifierShared：extractToolUseBlock / parseClassifierResponse。
+- state：autoModeState（setAutoModeActive / isAutoModeActive / FlagCli / CircuitBroken / _resetForTesting）。
+- denials：autoModeDenials（recordAutoModeDenial 20 cap 头插 / getAutoModeDenials）。
+- approvals：classifierApprovals（set/get × bash+yolo + checking + clear）。
+- allowlist：classifierDecision → isAutoModeAllowlistedTool（SAFE_YOLO_ALLOWLISTED_TOOLS）。
+- 模板解析：extractTaggedBullets / getDefaultExternalAutoModeRules / buildDefaultExternalSystemPrompt + 2 .txt 数据。
+- ② dontAsk 转换：permissions.ts ask→deny（DONT_ASK_REJECT_MESSAGE + DENIAL_WORKAROUND_GUIDANCE 逐字）。
+
+前向接缝（LLM 闭包，归 provider/settings 波，H6 前向声明非静默遗漏）：
+- classifyYoloAction / classifyYoloActionXml（2 段 XML）/ buildYoloSystemPrompt LLM 面 / buildClaudeMdMessage /
+  dumpErrorPrompts / getClassifierModel / resolveTwoStageClassifier / isTwoStageClassifierEnabled /
+  isJsonlTranscriptEnabled / getTwoStageMode / getAutoModeClassifierTranscript / POWERSHELL_DENY_GUIDANCE。
+- autoMode CLI handler（defaults / config / critique，依赖 sideQuery + settings + model）。
+- ③ auto 模式 AI 分类器调用点（旧 permissions.ts:505-519 `mode==='auto'` 支 → classifyYoloAction）→ provider/settings 波。
+
+**§8.65.1.3 子域布局**
+
+新子域 `src/permissions/autoMode/`（STR-1 子门面，显式命名再导出，叶零 `export *`）：
+- `types.ts` — AutoModeRules / TranscriptBlock / TranscriptEntry / YoloClassifierResult / ClassifierUsage。
+- `transcript.ts` — transcript 构造 6 函数。
+- `xml.ts` — XML 解析 + suffixes + 输出格式替换。
+- `usage.ts` — usage + thinking 配置 + 响应 schema + 工具名/schema 常量。
+- `classifierShared.ts` — extractToolUseBlock / parseClassifierResponse。
+- `state.ts` — autoModeState。
+- `denials.ts` — autoModeDenials。
+- `approvals.ts` — classifierApprovals。
+- `allowlist.ts` — isAutoModeAllowlistedTool。
+- `prompts.ts` — 2 .txt 资产（text import）+ 模板解析 3 函数。
+- `prompts/auto_mode_system_prompt.txt` + `prompts/permissions_external.txt`（数据，逐字拷贝）。
+- `index.ts` — STR-1 门面（显式命名再导出）。
+
+类型映射（旧 Anthropic Beta 型 → 新仓）：BetaContentBlock → shared ContentBlock/ToolUseBlock/TextBlock；
+AMessageParam → shared MessageParam；ABetaMessage（result.usage）→ shared Usage；
+Tool / Tools / ToolPermissionContext → shared（已存）。旧 `feature('BASH_CLASSIFIER')` /
+`feature('TRANSCRIPT_CLASSIFIER')` 门 → 新仓恒 off，approvals/denials 的 feature 门分支裁（恒执行，
+与 stub 语义一致；门复活随 provider 波）。
+
+bunfig.toml：`[loader]` 加 `".txt" = "text"`（与 .md/.py 同例，raw-text 内联）。
+
+**§8.65.1.4 测试面与基线预测**
+
+新测试 `tests/unit/auto-mode-classifier.test.ts`（零盘零模型）：
+- transcript：buildTranscriptEntries（user text / assistant tool_use / queued_command attachment / assistant text 排除）/
+  toCompact（jsonl vs text-prefix 两态）/ buildTranscriptForClassifier / formatActionForClassifier。
+- xml：parseXmlBlock（yes / no / 不可解析 / thinking 内嵌 tag 剥离）/ parseXmlReason / parseXmlThinking /
+  replaceOutputFormatWithXml。
+- usage：extractUsage / combineUsage / getClassifierThinkingConfig。
+- classifierShared：extractToolUseBlock（命中 / 未命中 / 非 tool_use）/ parseClassifierResponse（valid / invalid）。
+- state：set/get autoModeActive·FlagCli·CircuitBroken + _resetForTesting。
+- denials：recordAutoModeDenial（20 cap + 头插新者）/ getAutoModeDenials。
+- approvals：set/get bash+yolo approval + checking + clearClassifierApprovals。
+- allowlist：isAutoModeAllowlistedTool（列表内外）。
+- prompts：extractTaggedBullets / getDefaultExternalAutoModeRules / buildDefaultExternalSystemPrompt（3 user_* tag 替换）。
+- ② dontAsk：hasPermissionsToUseTool passthrough→ask→（mode dontAsk）→ deny + DONT_ASK_REJECT_MESSAGE 逐字。
+
+基线预测：开波 2422/139/5750 + gate 6·5；本波 +1 测试文件（~30-40 用例）→ 全量 ≈2455-2460 pass·140 文件；
+tsc 0 / eslint 0 / build 0KB entry（分类器纯逻辑不在 CLI 入口关键路径，.txt 内联不增 entry 字节判定）。
+
+**§8.65.1.5 ToolSearch 4 函数族复核**
+
+§8.63 S-E2 已登记「engine 面 4 函数族（阈值判定 / modelSupportsToolReference / extractDiscoveredToolNames /
+DeferredToolsDelta）= 新仓 0-hit 不复活」（toolSearchGate 头注 delta ③ + toolRegistry 头注 ⑲）。本波复核确认：
+新仓 ToolSearch（toolsearch/ 子域）走 optimistic gate 自门控（isToolSearchEnabledOptimistic），不消费
+tool_reference 延迟加载协议 → 4 函数确实 0-hit，无动作（复审勿当遗漏重提）。
+
+**§8.65.1.6 残留守登记（= provider/settings/CLI 波，复审勿当遗漏）**
+
+- ③ auto 模式 AI 分类器调用点（permissions.ts `mode==='auto'` 支）→ provider/settings 波。
+- LLM 调用闭包（classifyYoloAction 族 ≈700L）→ provider/settings 波。
+- autoMode CLI handler（170L）→ CLI 波（依赖 sideQuery）。
+- settings.autoMode 三函数（getAutoModeConfig / getUseAutoModeDuringPlan）→ settings 波。
+- growthbook getFlagDualRead（atlas_auto_mode_config）→ config/growthbook 波。
