@@ -3,7 +3,7 @@
  * 纪律）。
  *
  * 覆盖：SendMessageTool 本体 + JSON schema 常量 + prompt 面 + Input/
- * Structured/Output duck 型 9 + TeamFileLoader 注入接缝（旧仓
+ * Structured/Output duck 型 10 + TeamFileLoader 注入接缝（旧仓
  * tools/SendMessageTool 917L 本体 + prompt 49L + UI 30L + constants 1L
  * 裁剪随迁；UDS/bridge 面 4 站点 → remote 波，in-process 名路由 +
  * backfillObservableInput + team-file + gracefulShutdown 面 → C 桶 ③

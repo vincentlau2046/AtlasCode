@@ -9,11 +9,13 @@
  * $ATLAS_CONFIG_DIR/teams/<team>/inboxes/<agent>.json，FsOperations 不可
  * 覆写）→ 4 handler 的 mailbox 写成功面全落 func（plan/web func 先例）。
  *
- * env 面：门控 ATLAS_EXPERIMENTAL_AGENT_TEAMS（用例内存取还原）；身份面
- * = 无 ALS / dynamic（getAgentName/getTeamName 无参全 undefined，senderName
- * 回落 TEAM_LEAD_NAME）。
+ * env 面：门控 ATLAS_EXPERIMENTAL_AGENT_TEAMS（用例内存取还原）+ 防御戳
+ * ATLAS_CONFIG_DIR=/mock-home 不存在目录（S-E1 规划项，S-E3 B 路 NOTE-5
+ * 补落：未来写面回归触 writeToMailbox 时 EISDIR 而非静默写真实
+ * $ATLAS_CONFIG_DIR/~/.atlas）；身份面 = 无 ALS / dynamic（getAgentName/
+ * getTeamName 无参全 undefined，senderName 回落 TEAM_LEAD_NAME）。
  */
-import { afterEach, describe, expect, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import {
   SEND_MESSAGE_DESCRIPTION,
   SEND_MESSAGE_PROMPT,
@@ -34,9 +36,14 @@ function ctx(teamName?: string, mode = 'default'): unknown {
   }
 }
 
+beforeEach(() => {
+  process.env.ATLAS_CONFIG_DIR = '/mock-home'
+})
+
 afterEach(() => {
   resetTeamFileLoader()
   delete process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+  delete process.env.ATLAS_CONFIG_DIR
 })
 
 // ── P-S1 对象面 ────────────────────────────────────────────────────────

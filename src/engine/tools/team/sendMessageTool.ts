@@ -6,7 +6,8 @@
  * 先例）：inputSchema 纯 JSON 化（旧 lazySchema z.object 3 字段 +
  * discriminatedUnion 3 型 → 纯 JSON anyOf）/ validateInput 6 检查面逐字
  * （to 空 / @ 含 / string 缺 summary / * structured / shutdown_response
- * target / shutdown_response reject 缺 reason；UDS 3 检查面裁）/
+ * target / shutdown_response reject 缺 reason；UDS 4 块裁（3 文案面，2 块
+ * 共享同文案，delta ②））/
  * checkPermissions allow+updatedInput 单面（UDS bridge ask 面裁）/ call 2 参
  * 分发面（string → handleMessage/handleBroadcast / structured 3 型 guard；
  * UDS 双支 + in-process 名路由裁）/ mapToolResult jsonStringify 面 /
@@ -24,16 +25,20 @@
  *    inputSchema = 3 字段 to/summary/message（required to+message）+
  *    strict: true + additionalProperties false 双字段（configTool L113 /
  *    askUserQuestionTool L197 先例，§8.61 S-E3 B 路 F2 订正口径）；to 描述 =
- *    旧 gate-off 支逐字（UDS/bridge 描述面裁，delta ②）。
- *  ② UDS_INBOX 门族 4 站点（validate 站 parseAddress 2 站 + checkPermissions
- *    bridge ask 站 + call 站 postInterClaudeMessage/sendToUdsSocket 懒 require
- *    2 站）全裁 → remote 波 [ATLAS-HOLD]（新仓 0-hit；gate-off 旧行为 = 恰本
+ *    旧 gate-off 支逐字（UDS/bridge 描述面裁，delta ②）；message 父级描述 =
+ *    新造合成文本（旧 string 臂自带描述 'Plain text message content' 并入
+ *    父描述，纯 JSON 转写丢臂描述面，S-E3 A 路 F1 注）。
+ *  ② UDS_INBOX 门族 5 站点（validate 站 4 块〔含 parseAddress 2 站〕+
+ *    checkPermissions bridge ask 站 + call 站 postInterClaudeMessage/
+ *    sendToUdsSocket 懒 require 2 站）全裁 → remote 波 [ATLAS-HOLD]（新仓 0-hit；gate-off 旧行为 = 恰本
  *    波落盘面）；parseAddress（utils/peerAddress）/ truncate / errorMessage
  *    3 依赖随裁（消费点全在裁面内，零活消费）。
  *  ③ in-process 名路由块（旧 call L800-874：appState.agentNameRegistry +
  *    queuePendingMessage + resumeAgentBackground + isLocalAgentTask/
  *    isMainSessionTask + toAgentId + appState.tasks）裁 → C 桶 ③ shell·swarm
- *    波（新仓全 0-hit）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
+ *    波（裁面 = 本工具 in-process 名路由接线；queuePendingMessage /
+ *    isLocalAgentTask / isMainSessionTask 新仓 coordinator 域在位〔E 波既有
+ *    迁移，非 0-hit〕，S-E3 A 路 F2 注）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
  *    块唯一消费）→ 2 参（S-C5 delta ⑧ 先例）；旧 backfillObservableInput 面
  *    （TUI 可观测输入回填）随裁 = 新 Tool 契约无该成员槽（TUI 波）。
  *  ④ handleShutdownApproval in-process 支（own-pane teamFile 查 +
@@ -51,7 +56,9 @@
  *    旧 teammates 缺面 undefined（字段保留，值定 undefined）。
  *  ⑦ 旧 UI.tsx renderToolResultMessage（MessageResponse/Text JSX + jsonParse
  *    3 分支）裁 → TUI 波（config delta ⑨ 先例）；新契约 renderToolResultMessage
- *    槽 = 可选成员，留不实现。
+ *    槽 = 可选成员，留不实现；新 renderToolUseMessage `input ?? {}` 防御支
+ *    （旧 UI.tsx 直读 input.message，undefined 抛 TypeError；新契约入参
+ *    unknown → null，S-E3 A 路 F4 注）。
  *  ⑧ 旧 def description()/prompt() 双面 → 新 description() 单面 = PROMPT
  *    （web 族口径：本体不 import DESCRIPTION，短描述面经 team/ 子门面 +
  *    tools/ 门面 SEND_MESSAGE_DESCRIPTION 别名 re-export）。

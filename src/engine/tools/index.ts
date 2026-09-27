@@ -129,8 +129,8 @@
  *   注册面，同 web/config 族；LSP 槽 = 残留守归属 D 波 LSP 域）。
  * §8.62 S-E2（team/collab 族子波）已落 team/ 子域 SendMessageTool 本体
  *   （1 对象 + JSON schema 1 常量 + prompt 面 + Input/Structured/Output duck
- *   型 9 + TeamFileLoader 注入接缝；旧仓 SendMessageTool 917L + prompt 49L +
- *   UI 30L 裁剪随迁；裁面登记：UDS/bridge 4 站点族 → remote 波 / in-process
+ *   型 10 + TeamFileLoader 注入接缝；旧仓 SendMessageTool 917L + prompt 49L +
+ *   UI 30L 裁剪随迁；裁面登记：UDS/bridge 5 站点族 → remote 波 / in-process
  *   名路由 + backfillObservableInput → C 桶 ③ shell·swarm 波 / handleBroadcast
  *   team-file 面 = 本文件 TeamFileLoader 注入接缝（默认 = 旧 team-file-missing
  *   错误面逐字）/ findTeammateColor → C 桶 ③ / UI JSX → TUI 波，见各文件头注
