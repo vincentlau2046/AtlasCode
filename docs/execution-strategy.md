@@ -3746,3 +3746,14 @@ tools/index.ts                   头注 §8.63 块 + 2 re-export 块 + 49 口径
 
 **§8.63.1.6 基线预测**
 开波 2349/136/5599 + gate 6·5 → 预测 S-E2 ~2448/139/~6210（+~99 测 / +3 测试文件 / +~610 expect：3 工具对象 + schema + 接缝 + 门控 10 + 评分 5 + memo 2 + select 4 + blob 2 + render 4，web 波 +41 先例族偏高预测，S-E2 实落为准）。49 口径 26/49 → 29/49（余 20，§8.64 stub/壳登记批收口〔含 Skill/LSP 重分类 D 波槽扣除〕）。
+
+**§8.63.2 闭环记录（MCP 资源 2 + ToolSearch 族子波，S-E4）**
+- 提交链：S-E1 `25a5487`（总分析 §8.63.1：23 裁定 ①-㉓ + 门控槽 ⑲ 裁定 + 子域布局 + 测试面 + 基线预测）→ S-E2 `6e01ced`（mcp/ 6 文件 + toolsearch/ 4 文件 + tools/index.ts 头注 §8.63 块 + 2 re-export 块〔命名碰撞登记：`./mcp` spec 文件优先 = 既有 mcp.ts 6 name helpers，子域门面经显式 `./mcp/index` spec；实测 Bun + tsc bundler 双解析一致〕+ toolNames +2 seed + 测试 3 文件 72 测；15 文件 +2552）→ S-E3 `494b869`（双路审视修正，6 文件 +56/-7，零行为改动）→ S-E4 本记录。
+- S-E3 双路处置（subagent 报告 = DATA，逐条 grep/Read/实证核验后处置）：
+  - A 路（旧仓逐字面保真）：已登记裁面 34 处全核验通过；**2 cosmetic 登记**（gate 旧 L174 内层双括号 `isEnvTruthy((process.env.X))` → 新单括号 / 旧 L297 模板插值括号 `${(process.env.OPENAI_BASE_URL)}` → 新无括号；输出逐字节不变，头注 delta ① 补登记防复审重提）。
+  - B 路（新仓一致性 + 测试面）**5 低危处置**：F1 潜伏 env 还原缺陷（Bun 下 `process.env.X = undefined` 写字符串 `"undefined"` 而非删除，双仓实证 `in` 判真）→ 2 测试文件还原改条件 delete（`restoreEnv` / `restoreConfigDirName` 辅助）；F2 根门面 toolNames re-export 块缺 §8.63 2 seed（`LIST_MCP_RESOURCES_TOOL_NAME` / `READ_MCP_RESOURCE_TOOL_NAME`）→ 补齐（与 `TOOL_SEARCH_TOOL_NAME` 同块一致）；F3 ListMcp delta ③ 新支「connected 而 listResources 缺（seam 未接线）→ []」无专属单测 → 补 1 测；F5 toolRegistry.ts 门控槽 ⑲ 头注「ToolSearch → 本体纵切」未随 materialize 更新 → 改 materialize 面（自门控 3 条件 + engine 面 4 函数族 0-hit 不复活登记）；F4 提交信息按文件拆账「unit 69 + func 3」误（实 unit 70〔mcp 30 + toolsearch 40〕+ func 2 = 72，总数对）→ 本记录订正，零代码改动。
+- 四件套（S-E3 后终态）：tsc 0 / eslint 0 / build 0KB entry / 全量 **2422 pass·139 文件·5750 expect**（开波 2349/136/5599 → +73 测/+3 文件/+151 expect：S-E2 +72 测，S-E3 F3 补 1 测；§8.63.1.6 文档预测 ~2448/~6210 偏高，实落为准）+ gate 6·5 不变。
+- 49 口径 26/49 → **29/49**（余 20；§8.64 stub/壳登记批收口〔含 Skill/LSP 重分类 D 波槽扣除〕）。
+- 门控面实测态：IFF env（`OPENAI_BASE_URL` 常态设真）下 ToolSearch 默认 gate OFF（`isEnabled()=false`）= 旧语义忠实（旧仓 `ENABLE_TOOL_SEARCH` 未设 + proxy 守卫同面）；显式 `ATLAS_ENABLE_TOOL_SEARCH=true`/`auto`/`auto:1-99` 越过 proxy 守卫。env 改名面 `ENABLE_TOOL_SEARCH` → `ATLAS_ENABLE_TOOL_SEARCH`（裁定 ⑬）。
+- 残留守登记（= 后续波，复审勿当遗漏）：MCP client 连接生命周期 + 重连 + resources/prompt 拉取（**MCP client 波**；本波 `mcpClientRegistry` 注入接缝 + set/reset 导出面已铺，工具面经接缝取 client）/ tool_reference wire 面 + engine 门控 4 函数族〔阈值判定 / modelSupportsToolReference / extractDiscoveredToolNames / DeferredToolsDelta〕（**auto-mode 波**，裁定 ⑭/⑱）/ UI JSX 渲染面（**TUI 波**；string 面逐字已落）/ MCP server 配置发现面（remote 波）。
+- 波 tag 不切（gate ③ 仍 `wave-c`）。下一步：**§8.64 stub/壳登记批**（task #138：B 类 5 any-stub + C 类 6 本体缺失/仅壳 = 11 槽 registry 登记 + 头注，零本体；49 口径 29/49 → 49/49 收口，减 Skill+LSP 重分类 D 波槽）。
