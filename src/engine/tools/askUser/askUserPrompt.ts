@@ -8,7 +8,11 @@
  * delta 登记（H6 逐条，复审勿当遗漏重提）：
  *  ① 旧 ASK_USER_QUESTION_TOOL_NAME 本地定义 → 新 toolNames 单一事实源
  *    （T-5e 全量集已 seed，值 'AskUserQuestion' 逐一验真；web 族 B-N1 先例
- *    域内双源字面风险除）。
+ *    域内双源字面风险除）；尾部 `export { ASK_USER_QUESTION_TOOL_NAME }`
+ *    名字 re-export = 零消费孤儿面（名字单一事实源 = tools/ 门面 toolNames
+ *    块 seed，子门面/工具门面均不重出该名），与 web 族先例同形
+ *    （webFetchPrompt / webSearchPrompt 尾部同形 re-export）→ B-N2 预核登记，
+ *    复审勿当遗漏重报。
  *  ② 旧 prompt 体 getQuestionPreviewFormat() 分支（undefined → 纯 prompt；
  *    已设 → + PREVIEW_FEATURE_PROMPT[format]）裁：getQuestionPreviewFormat =
  *    旧 bootstrap/state.ts any stub（返回 {} 恒 ≠ 'html'/'markdown'，死支，

@@ -44,9 +44,12 @@
  *  ⑧ 旧 mapToolResult 三支逐字（get `setting = json` / set `Set ${setting} to
  *    ${json}` / error `Error: ${msg}` + is_error:true）；jsonStringify = 新仓
  *    engine/session/json 单一事实源（files 族先例）。
- *  ⑨ 旧 UI.tsx renderToolUseMessage 纯字符串逻辑逐字（!setting → null /
- *    GET `Getting ${setting}` / SET `Setting ${setting} to ${json}`）；JSX
- *    dimColor 面 → TUI 波（web 族 delta ⑤ 纯逻辑面随迁先例）。
+ *  ⑨ 旧 UI.tsx 3 渲染面登记：renderToolUseMessage 纯字符串逻辑逐字随迁
+ *    （!setting → null / GET `Getting ${setting}` / SET `Setting ${setting} to
+ *    ${json}`，web 族 delta ⑤ 纯逻辑面随迁先例）；renderToolResultMessage
+ *    （`Failed: {error}` 错误色 / bold setting·value get·set 三分支 JSX）+
+ *    renderToolUseRejectedMessage（`Config change rejected` 警示色）= TUI 波
+ *    裁面（旧 UI.tsx 全 3 函数核过，A-N3 复审注）。
  *
  * 消费方 = `config/` 子门面 + `tools/` 门面 re-export + 注册表 49 口径无条件
  * 注册位（§8.60.1.4；config 族无专属门控槽）。

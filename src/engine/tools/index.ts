@@ -111,7 +111,7 @@
  *   askUser/ 子域 AskUserQuestionTool 本体（2 对象 + JSON schema 2 常量 +
  *   prompt 面 + 注册表 3 键裁剪面（supportedSettings 存活判据 = 新 SettingsJson
  *   声明 ∩ 活消费点）+ duck 型面 8），Skill 915L 重分类 D 波（skill 域依赖
- *   闭包未落，§8.60.1.1；裁面登记：global 12 键段 → C 桶 ③ shell·swarm 波 /
+ *   闭包未落，§8.60.1.1；裁面登记：global 11 键段 → C 桶 ③ shell·swarm 波 /
  *   HTML preview 支 = 旧 any stub 死码裁 / AppState 同步面裁 / UI JSX → TUI 波 /
  *   _sdk* → D 波，见各文件头注 delta ①-⑧）→ 在此 re-export（config/ askUser/
  *   子门面）；残留守「49 本体」登记再缩 2 → 24/49（config/askUser 族无专属

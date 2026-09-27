@@ -29,6 +29,8 @@
  *  - P-C8 prompt 面：generatePrompt 注册表驱动结构（空 Global 段不渲染 /
  *    Project 段 2 键行面 / Model 段动态选项面）+ Examples 段键面 +
  *    description() = generatePrompt() 同一性 + CONFIG_DESCRIPTION 值锚点。
+ *  - P-C9 写回面直查：updateSettingsForSource('userSettings') 写后二读面
+ *    （跨测缓存面显式 reset，B-N1 复审注）。
  *
  * 深度 import（门面归集）：../../src/engine/tools（本体 + schema + prompt 面
  * + 2 短描述别名）+ ../../src/engine/tools/config 子门面（注册表查询函数）。

@@ -26,9 +26,14 @@
  *    description 面 = ASK_USER_QUESTION_TOOL_PROMPT + PREVIEW_FEATURE_PROMPT
  *    .markdown（markdown preview 段随迁，html 段死支裁）。
  *  ⑤ 旧 UI 面裁：renderToolResultMessage React 组件（AskUserQuestionResultMessage
- *    答案列表面）/ renderToolUseRejectedMessage JSX / renderToolUseProgressMessage
- *    null 面 → 裁（TUI 波）；新契约 renderToolUseMessage 位 = 旧同成员 null
- *    面逐字（TUI 前向接缝）。
+ *    答案列表面）/ renderToolUseRejectedMessage JSX（黑圆点 + `User declined to
+ *    answer questions`）/ renderToolUseProgressMessage null 面 /
+ *    renderToolUseErrorMessage null 面（旧 .tsx 共 5 渲染面核过，A-N4 复审注）
+ *    → 裁（TUI 波）；新契约 renderToolUseMessage 位 = 旧同成员 null 面逐字
+ *    （TUI 前向接缝）。
+ *  ⑨ 旧 multiSelect z.boolean().default(false)（旧 .tsx L22 逐字）default 语义
+ *    未随迁：JSON schema 面不承载 zod default（运行时 undefined ≡ false；TUI 波
+ *    消费面兜底登记，A-N2 复审注）。
  *  ⑥ 旧 requiresUserInteraction 成员（interactiveHandler 消费面）新 Tool 契约
  *    无位 → 裁（登记：该语义在新仓 = checkPermissions ask 支承载）。
  *  ⑦ 旧 _sdkInputSchema / _sdkOutputSchema 导出（SDK 消费面）→ D 波（plan 族

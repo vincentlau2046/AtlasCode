@@ -10,7 +10,9 @@
  *    （supportedSettings delta ②），整支无消费。
  *  ② 模板两段固定结构（### Global Settings / ### Project Settings）→ 空段不渲染
  *    （裁剪注册表 global 段为空 → 旧逐字模板会渲染空 Global 段，误导模型；
- *    TUI 波 global 面复活时恢复逐字两段，前向接缝登记）。
+ *    TUI 波 global 面复活时恢复逐字两段，前向接缝登记）；模板边界逐字 = 旧
+ *    `${modelSection}\n## Examples` 单换行面（model 段与 Examples 间无空行，
+ *    A-N5 复审注；model 行格式丢 `: ${description}` 后缀 = delta ③ 后果知悉项）。
  *  ③ 旧 generateModelSection 的 getModelOptions()（选项对象 {value, description,
  *    descriptionForModel} + catch 支）→ 新面 = supportedSettings getModelOptions()
  *    字符串列表（delta ④ supportedSettings）；catch 支（旧
@@ -49,13 +51,8 @@ export function generatePrompt(): string {
 
   const modelSection = generateModelSection()
 
-  // delta ②：空段不渲染（global 段裁剪后为空）
-  const sections: string[] = []
-  sections.push(
-    `### Project Settings (stored in settings.json)\n${projectSettings.join('\n')}`,
-  )
-  sections.push(modelSection)
-
+  // delta ②：空段不渲染（global 段裁剪后为空）；边界逐字 = 旧模板
+  // `${modelSection}\n## Examples` 单换行面（A-N5）
   return `Get or set Atlas configuration settings.
 
   View or change Atlas settings. Use when the user requests configuration changes, asks about current settings, or when adjusting a setting would benefit them.
@@ -68,8 +65,10 @@ export function generatePrompt(): string {
 ## Configurable settings list
 The following settings are available for you to change:
 
-${sections.join('\n\n')}
+### Project Settings (stored in settings.json)
+${projectSettings.join('\n')}
 
+${modelSection}
 ## Examples
 - Get model: { "setting": "model" }
 - Change model: { "setting": "model", "value": "premium" }
