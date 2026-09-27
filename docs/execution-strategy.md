@@ -3678,3 +3678,71 @@ isEnabled = `isAgentSwarmsEnabled()`（env ∨ flag）= **本子波首个专属�
 - 波终：**2349/136/5599 + gate 6·5**（S-E3 修正零漂移）；49 口径 25/49 → **26/49**（+1 = SendMessage，再缩 23）。波 tag 不切（gate ③ 仍 wave-c）。
 - 裁面归属核销（债务登记）：C 桶 ③ shell·swarm 波 = in-process 名路由块（agentNameRegistry/queuePendingMessage 工具级接线）+ backfillObservableInput + findTeammateTaskByAgentId/gracefulShutdown + findTeammateColor/teammates 色映射 + setTeamFileLoader 真读者（readTeamFileAsync team-file 域）；remote 波 = UDS_INBOX 门族 5 站点（validate 4 块 + checkPermissions bridge ask + call postInterClaudeMessage/sendToUdsSocket，[ATLAS-HOLD]）；TUI 波 = UI JSX renderToolResultMessage 4 函数面。
 - 下一波 §8.63（MCP+ToolSearch 族）预研已备：3 工具本体 738L（ListMcpResourcesTool 123 + ReadMcpResourceTool 158 + ToolSearchTool 457）+ prompt/constants 119L。关键裁面判定输入——新仓 0-hit 面：ensureConnectedClient/fetchResourcesForClient（旧 services/mcp/client.js 未迁）/ logMCPError / isOutputLineTruncated / getBinaryBlobSavedMessage；@modelcontextprotocol/sdk 不在新仓 package.json（3-dep 纪律 → ReadResourceResult 结构化型需结构型裁/duck）；persistBinaryContent 在位（web/webFetchUtils.ts L668，经 web/ 子门面 + tools/ 门面 re-export）→ ReadMcpResource blob 拦截面可接；mcp.ts 门面现仅 name helpers 6 函数（client 域 0-hit = S-E1 待裁：MCP client 域状态裁定 + context.options.mcpClients duck）；ToolSearch 旧 lodash-es memoize → 新仓 TtlLruCache 本地缓存先例（lodash 裁先例）+ 旧 tool.prompt({...}) → 新 description() 签名 delta + term 评分面（parts exact 12/10 · contains 6/5 · full contains 3 · hint 4 · desc 2）+ isEnabled = isToolSearchEnabledOptimistic（新仓状态 S-E1 查）。
+
+**§8.63.1 S-E1 总分析（MCP 资源 2 + ToolSearch 本体纵切，2026-09-27）**
+
+**§8.63.1.1 范围与口径**
+- 3 工具本体：ListMcpResourcesTool（旧仓 123L）+ ReadMcpResourceTool（158L）+ ToolSearchTool（457L）= 738L + prompt 面（ListMcp prompt 27L / ReadMcp prompt 22L / ToolSearch prompt 79L + constants 1L）+ 门控面（旧 utils/toolSearch.ts 714L → 引擎面裁、门控面 4 函数 ~150L 移植）。
+- **49 口径 26/49 → 29/49（余 20）**：ListMcp/ReadMcp = 无条件注册面（旧 buildTool 缺省 `isEnabled: () => true`（TOOL_DEFAULTS L786）→ 新契约显式化，delta ⑭）；ToolSearch = §8.62 team/collab 之后 49 口径第 2 个专属门控槽 = `isToolSearchEnabledOptimistic` 移植。
+- 注册表槽：3 对象经 `ToolRegistryDeps.baseTools` 消费方（组合根）注入，注册表机制不变（§8.56-§8.62 同族先例）。
+
+**§8.63.1.2 依赖闭包裁定（H6 预声明接缝头注登记，复审勿当遗漏重提）**
+- ① **MCP client 状态面 → mcpClientRegistry 注入接缝 + 残留守登记**：旧 `context.options.mcpClients` + `ensureConnectedClient`/`fetchResourcesForClient`（旧 services/mcp/client.js，新仓 0-hit）+ SDK `client.request({method:'resources/read'}, ReadResourceResultSchema)`（@modelcontextprotocol/sdk 不在新仓 3 依赖）→ 新建 `mcp/mcpClientRegistry.ts` 注入接缝（TeamFileLoader 接缝先例 §8.62 delta ⑤）：`McpClientEntry` duck（name / type 'connected'\|'pending' / capabilities?.resources / `listResources?` / `readResource?` 两残留守面）+ `setMcpClientRegistry/resetMcpClientRegistry/getMcpClientRegistry`；call 面 `options.mcpClients` 读 → `getMcpClientRegistry()`（delta ①）。连接生命周期（connectToServer/重连/缓存/resources·prompt 拉取）+ 真 MCP client 接线 = **MCP client 波（残留守登记）**；ports/mcpClient.ts 头注残留守（tools-only port）不变。
+- ② **SDK 结构型**：ReadResourceResult/ReadResourceResultSchema → 3-dep 纪律裁 → `readResource` 返回结构型（seam 保证；blob/text 判别面 `'text' in c` / `'blob' in c` 逐字，delta ②）。
+- ③ **readResource 缺失面（新造面）**：旧 SDK client 必有 request；新 seam capabilities.resources=true 而 readResource undefined = seam 未接线 → throw 复用旧逐字面 `Server "X" does not support resources`（零新造文案，delta ③）。
+- ④ **persistBinaryContent 在位**（web/webFetchUtils.ts L668，经 web/ 子门面 + tools/ 门面 L706 re-export）：ReadMcp blob 拦截面接线（persistId `mcp-resource-${Date.now()}-${i}-${random6}` 逐字 + 错误面 `Binary content could not be saved to disk: ...` 逐字 + 成功面 `getBinaryBlobSavedMessage` 5 参逐字〔旧 mcpOutputStorage.ts:171-179〕+ `formatFileSize`〔旧 format.ts:9-24 纯函数〕本地移植 mcp 子域）。
+- ⑤ **isOutputLineTruncated**（旧 terminal.ts:119-131，MAX_LINES_TO_SHOW=3）新仓 0-hit → mcp 子域本地移植（truncation.ts，2 工具共享面，逐字）。
+- ⑥ **logMCPError**（旧 sink 队列）→ `logForDebugging`（新 shared/debug.ts no-op 单一事实源）+ `errorMessage`（shared/errors.ts:25）逐字 import；文案 = 新造最小形 `MCP server "X" resource fetch failed: ...`（旧 sink 运维文案裁，delta ④）。
+- ⑦ **jsonStringify** = `../../session/json`（team 先例 L104）。
+- ⑧ **lodash-es memoize** → 本地 Map memo（description memo key = toolName，value Promise<string>；`.cache.clear()` 面 → 本地 `clear()`；`maybeInvalidateCache` + `cachedDeferredToolNames` + `clearToolSearchDescriptionCache`〔旧外部消费方 commands/clear/caches.ts = 新仓 0-hit，导出留作测试接缝〕逐字，delta ⑤；lodash 裁先例 = web 波 lru-cache → TtlLruCache 同族）。
+- ⑨ **旧 memo 调用面 `tool.prompt({getToolPermissionContext, tools, agents: []})` → 新 Tool 契约 `tool.description(undefined, { isNonInteractiveSession: false, toolPermissionContext: {}, tools })`**（新契约无 prompt 成员，旧 description+prompt 双面临合 = delta ⑧ 先例 §8.62；getToolPermissionContext async provider 面裁，delta ⑥）。
+- ⑩ **findToolByName**（旧 Tool.ts:371 name+aliases）→ 新 `findTool`（pipeline/toolExecution.ts:184，其头注逐字「旧仓 findToolByName 的窄 spine 等价物」）经 pipeline 门面 import（tools/agent 型 import 先例；value import 零循环——pipeline 不 import tools）。
+- ⑪ **escapeRegExp** → shared/stringUtils.ts:12（单一事实源，shared/index.ts:21 re-export）。
+- ⑫ **env helper** isEnvTruthy/isEnvDefinedFalsy → shared/env.ts:50/63（体逐字 = 旧 envUtils 语义）。
+- ⑬ **门控面移植（toolSearchGate.ts）**：`parseAutoPercentage` / `isAutoToolSearchMode` / `getToolSearchMode` / `isToolSearchEnabledOptimistic` 4 函数移植（env 改名 ENABLE_TOOL_SEARCH → **ATLAS_ENABLE_TOOL_SEARCH** = 单一 ATLAS_ 前缀 house 规则，delta ⑦；ATLAS_DISABLE_EXPERIMENTAL_BETAS 逐字；`isFirstPartyGatewayUrl`〔旧 providers.ts:8 = `!process.env.OPENAI_BASE_URL`〕内联 + 旧 gh-31936/CC-457 proxy 回归注释逐字；logForDebugging 2 站点面逐字〔新 no-op 单一事实源〕；once-log `loggedOptimistic` 面逐字）。
+- ⑭ **引擎面裁（无复活登记）**：toolSearch 域 714L 引擎面 = getAutoToolSearchCharThreshold/token-count API（getDeferredToolTokenCount/countToolDefinitionTokens）/ modelSupportsToolReference（GB atlas_tool_search_unsupported_models → GB 裁，DEFAULT_UNSUPPORTED_MODEL_PATTERNS ['fast'] 随裁）/ isToolSearchEnabled（definitive）/ isToolReferenceBlock / extractDiscoveredToolNames / DeferredToolsDelta 族 = 旧引擎侧 deferred protocol 消费，新仓引擎波 0-hit（无 deferred loading protocol）→ 裁（delta ⑧）。
+- ⑮ **pending_mcp_servers 面裁**：旧 call `getPendingServerNames` = appState.mcp.clients filter pending（新 AppState 无 mcp.clients 成员，0-hit）→ 新 `getPendingServerNames()` 恒返 undefined（buildSearchResult 参面 + output 型可选字段 + mapToolResult pending 后缀支保留逐字 = 数据契约面；MCP client 状态面归 MCP client 波，delta ⑨）。
+- ⑯ **feature('FORK_SUBAGENT') 支**（isDeferredTool Agent 工具豁免支）裁 = bun:bundle feature() 新仓恒 false（bun-bundle-feature-untestable 已知限）+ 分支实际死面（delta ⑩）。
+- ⑰ **GB atlas_glacier_2xr 门裁 → 取 delta-enabled 面**：getToolLocationHint = `'Deferred tools appear by name in <system-reminder> messages.'`（新仓 system-reminder attachment 先例；旧 `<available-deferred-tools>` pre-gate 块面裁 = 新仓 0-hit，delta ⑪）。
+- ⑱ **tool_reference wire 面裁（前向接缝登记）**：mapToolResult matches → `{type:'tool_reference', tool_name}` 块 cast 逐字（`as unknown as ToolResultBlockParam`）；新仓 shared/pipeline 0-hit（无 wire 序列化消费）= 前向接缝（deferred protocol 复活 = MCP client 波随门同步，delta ⑫）。
+- ⑲ **UI 面**：ListMcp renderToolUseMessage 2 面字符串逐字（`List MCP resources from server "X"` / `List all MCP resources`）+ `input ?? {}` 防御支（§8.62 S-E3 A 路 F4 先例）；ReadMcp renderToolUseMessage（`Read resource "uri" from server "server"` / null）逐字 + userFacingName 'readMcpResource'（旧 UI.tsx import → 新内联逐字值，delta ⑬）；两者 renderToolResultMessage JSX → TUI 波裁（可选槽不实现）；ToolSearch renderToolUseMessage → null 逐字 + userFacingName '' 逐字（旧 def 覆写面）+ 无 renderToolResultMessage 成员（旧 def 无 → 可选槽不实现）。
+- ⑳ **buildTool 缺省面显式化**：isEnabled `() => true`（ListMcp/ReadMcp）+ toAutoClassifierInput `() => ''`（ToolSearch，旧 TOOL_DEFAULTS L795 skip-classifier 面）（delta ⑭）；ListMcp/ReadMcp toAutoClassifierInput 旧 def 面逐字（`input.server ?? ''` / `` `${server} ${uri}` ``）。
+- ㉑ **call 2 参收窄**：旧 `{ options: { tools }, getAppState }` / `{ options: { mcpClients } }` → 新 Tool 契约 `call(args, context)` 2 参（S-C5 delta ⑧ / §8.62 先例）；ToolSearch context duck = `{ options?: { tools?: Tools } }`（getAppState 面裁 = ⑮ 同源）。
+- ㉒ **schema 纯 JSON 化**：lazySchema(zod) → 模块级纯 JSON schema 常量（house 先例 SEND_MESSAGE_TOOL_INPUT_SCHEMA）+ `additionalProperties: false` + `strict: true`（config/askUser/sendMessage 先例 §8.61 S-E3 B 路 F2 口径）；ToolSearch input 旧 zod `max_results .default(5)` 面 → call 侧 `max_results = 5` 缺省（schema 无 default 字段，delta ⑮）；output 面 = 本地 Output duck 型（house 面：output JSON schema 常量不保留）。
+- ㉓ **toolNames seed**：LIST_MCP_RESOURCES_TOOL_NAME = 'ListMcpResourcesTool'（旧 prompt.ts 常量逐字）+ READ_MCP_RESOURCE_TOOL_NAME = 'ReadMcpResourceTool'（旧 def 内联字面量 → 常量收敛单一事实源，delta ⑯）；TOOL_SEARCH_TOOL_NAME 已 seed（toolNames.ts:38）。
+
+**§8.63.1.3 门控槽裁定（ToolSearch 专属门控槽）**
+`isEnabled = isToolSearchEnabledOptimistic()`：① ATLAS_DISABLE_EXPERIMENTAL_BETAS kill-switch → 'standard' → false；② mode !== 'standard' 但 `!ATLAS_ENABLE_TOOL_SEARCH && OPENAI_BASE_URL 已设` → false（旧 gh-31936/CC-457 proxy 400 守卫逐字）；③ 余 true。**新仓 IFF 环境 OPENAI_BASE_URL 常态已设（OpenAI 静态键车道）→ 缺省 gate false（除非显式 ATLAS_ENABLE_TOOL_SEARCH）= 旧语义忠实，非新造门控**。mode 面：未设 → 'tst'（旧默认 ON 逐字）/ 'true' → 'tst' / 'false' → 'standard' / 'auto' 或 'auto:1-99' → 'tst-auto' / 'auto:0' → 'tst' / 'auto:100' → 'standard'。
+
+**§8.63.1.4 子域布局规划（STR-1 子门面）**
+```
+src/engine/tools/mcp/            （新子域）
+  mcpClientRegistry.ts           接缝 + duck 型（McpClientEntry/McpResourceItem/
+                                 McpResourceContent）+ set/reset/get
+  listMcpResourcesTool.ts        本体 + LIST_MCP_RESOURCES_TOOL_INPUT_SCHEMA + Output 型
+  readMcpResourceTool.ts         本体 + READ_MCP_RESOURCE_TOOL_INPUT_SCHEMA + Output 型
+                                 + getBinaryBlobSavedMessage/formatFileSize 本地移植
+  truncation.ts                  isOutputLineTruncated + MAX_LINES_TO_SHOW=3
+  mcpPrompt.ts                   DESCRIPTION/PROMPT ×2 逐字
+  index.ts                       STR-1 子门面（显式名块，零 export *）
+src/engine/tools/toolsearch/     （新子域）
+  toolSearchGate.ts              门控 4 函数（env 改名面）
+  toolSearchTool.ts              本体 + 本地 Map memo + parseToolName/
+                                 compileTermPatterns/searchToolsWithKeywords/
+                                 buildSearchResult/isDeferredTool 5 辅助 + def
+  toolSearchPrompt.ts            PROMPT 常量（delta-enabled hint 面）
+  index.ts                       STR-1 子门面
+tools/toolNames.ts               +2 seed
+tools/index.ts                   头注 §8.63 块 + 2 re-export 块 + 49 口径 29/49
+```
+
+**§8.63.1.5 测试面（S-E2 落 + S-E3 审视）**
+- unit 零盘（2 文件）：
+  - `tests/unit/engine-tools-mcp-se2.test.ts`（预测 ~31 测）：对象面 2（静态成员逐字 + 型收窄）/ schema 面 2（纯 JSON shape + 描述逐字 + additionalProperties false + required 面）/ 门控面 2（isEnabled true ×2）/ ListMcp call 接缝面 6（默认空 registry → data [] + mapToolResult 空面逐字 'No resources found. MCP servers may still provide tools even if they have no resources.' / connected client list 面〔server 字段 attach〕/ pending client 跳〔type!=='connected' → []〕/ listResources reject → logForDebugging + []（一服务器不沉全果）/ targetServer not-found throw 逐字（Available servers 列表）/ targetServer 过滤面）/ ReadMcp call 面 7（server not-found throw 逐字 / not-connected throw 逐字 / 无 capabilities.resources throw 逐字 / reader 缺失 throw（③ 同面）/ readResource 成功 text 面（'text' in c 透传 {uri,mimeType,text}）/ mapToolResult 非空 jsonStringify 面 / toAutoClassifierInput 模板逐字）/ isResultTruncated 面 2（≤3 行 false / >3 行 true）/ render 面 4（ListMcp 2 面 + ReadMcp 2 面 + 防御支）/ userFacingName 面 2（'listMcpResources' / 'readMcpResource' 逐字）/ prompt 面 2（DESCRIPTION/PROMPT ×2 常量逐字锚点）。
+  - `tests/unit/engine-tools-toolsearch-se2.test.ts`（预测 ~33 测）：对象面 1 / 门控面 10（getToolSearchMode 4 态〔未设→'tst' / 'false'→'standard' / 'auto'→'tst-auto' / 'auto:100'→'standard' / 'auto:0'→'tst' / 'auto:50'→'tst-auto' 6 态〕+ isToolSearchEnabledOptimistic 面〔kill-switch false / 未设 + 无 OPENAI_BASE_URL → true（默认 ON 面）/ 未设 + OPENAI_BASE_URL → false（proxy 守卫）/ 'true' → true / 'false' → false / 'auto' → true / 'auto:100' → false / 'auto:1' → true〕）/ isDeferredTool 面 5（alwaysLoad true → false / isMcp true → true / 自身 ToolSearch → false / shouldDefer true → true / 普通 → false；feature 支裁面登记）/ call select: 面 4（deferred 命中 / full 集命中〔harmless no-op 面〕/ 全 miss〔log + 空结果 + total_deferred_tools 面〕/ 多选逗号 + 去重）/ keyword 评分面 5（parts exact 10·mcp 12 / parts contains 5·mcp 6 / full 回落 3〔仅 score===0〕/ hint +4 / desc +2〔fake description() 可控〕/ required '+' 前缀预过滤 / 快路径 exact name + mcp__ prefix + max_results slice）/ memo 失效面 2（tool 集变 → 重取 + clearToolSearchDescriptionCache 导出面）/ mapToolResult 面 3（空 → 'No matching deferred tools found' / pending 后缀合成 content 面 / matches → tool_reference 块数组面）/ render null + userFacingName '' + toAutoClassifierInput '' 面 2。
+  - env 戳：ATLAS_ENABLE_TOOL_SEARCH / ATLAS_DISABLE_EXPERIMENTAL_BETAS / OPENAI_BASE_URL（3 戳 + 还原）。
+- func 真盘（1 文件）`tests/func/engine-tools-mcp-se2-fs.test.ts`（预测 2 测）：F-M1 blob 持久化成功面（**chdir(mkdtemp) 戳**：getToolResultsDir 相对名面 = `${ATLAS_CONFIG_DIR_NAME|'.atlas'}-${uid}/tool-results` cwd 相对〔web delta ⑦ 最小形〕→ per-file 进程隔离下 chdir 安全 + ATLAS_CONFIG_DIR_NAME=唯一名戳 + base64 blob → persistBinaryContent 真写 → blobSavedTo 文件存在 + getBinaryBlobSavedMessage text 面〔size KB 面〕+ mime ext 面）/ F-M2 blob 错误面（预造 `<name>-<uid>/tool-results` 为**文件** → mkdir ENOTDIR 静默 + writeFile ENOTDIR → {error} → text 'Binary content could not be saved to disk: ...' 面；uid 无关确定面）。
+- gate（tests/ci）6·5 不变（机制面不变）。
+
+**§8.63.1.6 基线预测**
+开波 2349/136/5599 + gate 6·5 → 预测 S-E2 ~2448/139/~6210（+~99 测 / +3 测试文件 / +~610 expect：3 工具对象 + schema + 接缝 + 门控 10 + 评分 5 + memo 2 + select 4 + blob 2 + render 4，web 波 +41 先例族偏高预测，S-E2 实落为准）。49 口径 26/49 → 29/49（余 20，§8.64 stub/壳登记批收口〔含 Skill/LSP 重分类 D 波槽扣除〕）。
