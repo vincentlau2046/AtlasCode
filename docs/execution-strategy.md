@@ -3804,6 +3804,6 @@ toolRegistry.ts 20 槽表由「残留守 13」（陈旧计数标签）重构为 
 - ⑨ HISTORY_SNIP（Snip）→ C 桶 ③ shell/REPL 波
 - ⑬ ENABLE_LSP_TOOL（LSP）→ D 波（LSP 域，§8.61 重分类）
 - ⑮ agentSwarms（TeamCreate/TeamDelete）→ C 桶 ③ shell·swarm 波
-- C 类 ListPeers UDS 5 站点族 → remote 波（ListPeers 槽头注登记）
+- ⑩ UDS_INBOX（ListPeers [C] 零本体登记；UDS inbox 本体 → C 桶 ③ shell·swarm 波〔§8.57 S-D1〕；UDS 5 站点族〔SendMessage〕→ remote 波〔§8.62〕）
 
 **下一步**：S-E2（toolRegistry.ts 头注重构 + 提交）→ S-E3（零本体批比例自审：头注 ↔ §8.57 S-D1 交叉核 + 计数标签 + git diff 零行为核验）→ S-E4（闭环记录 §8.64.2 + C 桶 ② auto-mode 预研段）。

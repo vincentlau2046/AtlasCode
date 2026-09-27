@@ -62,7 +62,8 @@
  *       ① IS_ATLAS_DEV（Tungsten [B] + SuggestBackgroundPR [C] + REPL [B]，无归属波，3 工具）
  *       ④ MONITOR_TOOL（Monitor [B]，`({}) as any` 占位）⑥ CONTEXT_COLLAPSE（CtxInspect [C]，目录缺失）
  *       ⑦ TERMINAL_PANEL（TerminalCapture [C]，仅 prompt.ts 2L，TUI 面 → shell 波）⑧ WEB_BROWSER_TOOL（WebBrowser [C]，仅 WebBrowserPanel.tsx 1L）
- *       ⑩ UDS_INBOX（ListPeers [C]，目录缺失；UDS 5 站点族 → remote 波）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
+ *       ⑩ UDS_INBOX（ListPeers [C]，目录缺失；UDS inbox 本体 → C 桶 ③ shell·swarm 波
+ *         〔§8.57 S-D1〕，UDS 5 站点族〔SendMessage〕→ remote 波〔§8.62〕）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
  *       ⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution [C]，仅 constants.ts 2L）
  *       （⑤ OVERFLOW_TEST_TOOL [B] 已列「关闭 3」，不在此列）
  *     **残留守 4**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
