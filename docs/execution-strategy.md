@@ -3626,3 +3626,44 @@ notebook 族无专属门控槽 = 无条件注册面（同 web/config 族）。**
 - **波终基线：2312 pass / 134 文件 / 5501 expect + gate 6 pass / 5 expect**（vs 开波 2276/132/5387：+36 测 / +2 文件 / +114 expect；四件套 tsc 0 / eslint 0 / build 0 KB 入口复验；S-E1 预测 ~2300/134/~5530，实测 2312/5501——expect 口径预测略高（5530 vs 5501，断言密度），测试数预测偏低（2300 vs 2312），双向偏差均 <2%，非漂移）。
 - 49 口径 **25/49 坐实**（余 24 长尾；+NotebookEdit 1 槽，LSP 槽重分类 → D 波 LSP 域）；波 tag 不切（提交链 0f05b5b（S-E1）→ a314d0a（S-E2）→ 4553e3c（S-E3 审视 + 处置）；gate ③ 仍用 wave-c）。
 - **C 桶 ① 下一子波 = §8.62 team/collab（SendMessage 917L + prompt 49L + UI 30L）** → §8.63 MCP+ToolSearch（123L+158L+457L）→ §8.64 stub/壳登记批（49/49 收口减重分类 Skill+LSP 槽）→ C 桶 ② auto-mode → C 桶 ③ shell·swarm → D 波 → remote → analytics。
+
+#### 8.62.1 S-E1 执行前分析（team/collab 族：SendMessage 落盘面 + 依赖闭包裁定）
+
+**§8.62.1.1 范围（A 类真本体 1 件，49 口径 25/49 → 26/49）**
+旧仓 `src/tools/SendMessageTool/`（a8af45b）997L = 本体 917L + prompt 49L + UI 30L + constants 1L。本体结构：inputSchema（lazySchema zod 3 字段：to 必填 / summary 可选 / message union string|StructuredMessage 3 型 discriminated：shutdown_request / shutdown_response / plan_approval_response）+ 7 handle* 函数（handleMessage / handleBroadcast / handleShutdownRequest / handleShutdownApproval / handleShutdownRejection / handlePlanApproval / handlePlanRejection）+ validateInput 9 查（全 errorCode 9）+ checkPermissions（UDS bridge → ask safetyCheck / 否则 allow updatedInput）+ call 分发（UDS bridge/uds 发送 2 支 + in-process 子代理路由 3 支 + string/structured 两大路 6 支）+ mapToolResult（jsonStringify text block 非模板族）+ toAutoClassifierInput 4 模板 + backfillObservableInput（hooks 面）。**49 口径 S-E2 后 25/49 → 26/49**（+SendMessage 1 槽；余 23）。
+
+**§8.62.1.2 依赖闭包裁定（H6 逐条，旧仓实读核验 + 新仓面核过）**
+已落面（import 重指，零落盘）：
+- `writeToMailbox` / `createShutdownRequestMessage` / `createShutdownApprovedMessage` / `createShutdownRejectedMessage` / `TeammateMessage` → `engine/messaging`（mailbox.ts 1281L，§8.56 S-D2 已落；getTeamsDir = `join(getAtlasConfigHomeDir(), 'teams')` 域内本地，config home 无 memo 直读 env → func 层 `ATLAS_CONFIG_DIR` 戳天然 fresh）。
+- `generateRequestId` → `engine/messaging/agentId.ts:40`（旧 utils/agentId.js；新 agentId 域 = formatAgentId/parseAgentId/generateRequestId/parseRequestId 4 面逐字）。
+- `TEAM_LEAD_NAME` / `BackendType` → `engine/messaging/constants.ts`（域内本地化常量）。
+- `getAgentId` / `getAgentName` / `getTeamName` / `isTeammate` / `getTeammateColor` / `isTeamLead` → `engine/messaging/teammate.ts` + 门面（新 `getTeamName(teamContext?: { teamName: string })` 简化面，先查 AsyncLocalStorage 后 dynamic 后参）。
+- `isAgentSwarmsEnabled` → `engine/messaging/agentSwarmsEnabled.ts` 39L（env `ATLAS_EXPERIMENTAL_AGENT_TEAMS` ∨ `--agent-teams` flag；growthbook killswitch 支已裁 §8.56 delta ①）。
+- `errorMessage` → `shared/errors.ts:25`；`jsonStringify` → `engine/session/json`（2 参）；`SEND_MESSAGE_TOOL_NAME` → `toolNames.ts:43` 已 seed（⚠ 双源面：`messaging/constants.ts` 另有同名值域内本地化——本体 house = toolNames 单一事实源，delta 头注登记）。
+
+未落面（开口 3 + remote 面 1）：
+1. **readTeamFileAsync 团队文件域**（旧 utils/swarm/teamHelpers.js）→ 新仓 0 命中 → **C 桶 ③ shell·swarm 波**。裁定：handleBroadcast 随波落 + **注入缝 `TeamFileLoader`**（默认 `async () => null` = 团队文件域未落态 → 旧 `Team "X" does not exist` 错误面逐字；C 桶 ③ 落团队文件域后接真 loader，H6 头注登记）；handleShutdownApproval own-pane 查找支 = 裁（paneId/backendType = undefined，与旧团队文件缺失态逐字）。
+2. **in-process 路由/生命周期面**（agentNameRegistry + setAppStateForTasks AppState 面 + toAgentId 格式校验 + findTeammateTaskByAgentId + gracefulShutdown）→ 新仓全 0 命中 → **C 桶 ③**（in-process teammate 路由/关停 = 该波核心面）。call 旧 4 参（canUseTool/parentMessage = in-process resume 支唯一消费）→ 新 2 参（fileHistory 族 delta ② 先例）。
+3. **in-process teammates 颜色 map 面**（旧 `appState.teamContext.teammates` → findTeammateColor 本地 helper L132-145）→ 新 teamContext 型 = `{ teamName }` 简化面（teammate.ts:115 无 teammates 颜色 map）→ findTeammateColor 裁，recipientColor = undefined（mailbox 写面 color = senderColor only）→ **C 桶 ③**（teamContext 扩面随归）。
+4. **UDS_INBOX/bridge 跨 session 面**（feature('UDS_INBOX') × 4 站 + parseAddress + getReplBridgeHandle/isReplBridgeActive + postInterClaudeMessage + sendToUdsSocket + truncate 预览面）→ 新仓全 0 命中 → **remote 波**（门复活面）。gate-off 旧仓行为 = 恰为本波落盘面（UDS 支全死码），逐字。
+
+**§8.62.1.3 裁面裁定（H6 逐条，带归属波；delta 编号 = S-E2 各文件头注）**
+- ① lazySchema(zod) → 模块级纯 JSON schema 常量：3 字段（to string 必填 / summary string 可选 / message = 旧 union string|StructuredMessage → `type: ['string', 'object']` + description 承载 3 型 structured 协议说明（zod discriminated 3 型面 → JSON 型数组表达性损失，taskOutput S-C4 delta ② 同族先例））+ approve 字段 semanticBoolean → 纯 boolean（S-C4 delta ② 裁面先例：纯 JSON 无 zod 运行时）。
+- ② UDS_INBOX 门族 × 4 站（to description uds/bridge 行 + prompt cross-session 段 + checkPermissions bridge ask + validateInput bridge/uds 3 查 + call bridge/uds 2 发送支）→ 裁，门复活 = remote 波（bun:bundle feature() 不可测 + 依赖 0 命中双因）。
+- ③ in-process 子代理路由支（call 3 面：running → queuePendingMessage / stopped → resumeAgentBackground / evicted-no-task → resume from transcript）→ 裁，C 桶 ③（registry/toAgentId 前置面未落，留支 = 空心壳，H6 防空洞）。
+- ④ handleShutdownApproval in-process 关停面（teamFile self-member 查找 + findTeammateTaskByAgentId abort + gracefulShutdown setImmediate + fallback 支）→ 裁，C 桶 ③；落盘面 = 批准消息写入 + 返回（paneId/backendType undefined）。
+- ⑤ findTeammateColor（teammates 颜色 map 面）→ 裁，C 桶 ③（新 teamContext 简化面无该 map）。
+- ⑥ backfillObservableInput（hooks.mdx allowlist 面，旧 L539-559）→ 裁，files 波 delta ⑰ 先例（hooks 面无消费）。
+- ⑦ UI 面：renderToolUseMessage 字符串面（plan_approval_response → `approve plan from: ${to}` / `reject plan from: ${to}` / 非结构化 null 守卫）= 新契约必选位逐字；renderToolResultMessage JSX（routing null / request_id+target null / MessageResponse dimColor）= TUI 波裁面（files 波 delta ⑪ 先例）。
+- ⑧ getPrompt() UDS 条件模板 2 站（udsRow + udsSection feature 支）→ gate-off 模板逐字（无 uds 行/段）+ DESCRIPTION（'Send a message to another agent'）逐字；UDS 复活 = remote 波随门同步复活。
+- ⑨ context duck = SendMessageToolUseContext（`getAppState(): { toolPermissionContext?: unknown; teamContext?: { teamName: string } }` 最小面 + abortController；旧 ToolUseContext 40+ 成员面 → duck，S-C5 先例）。
+
+**§8.62.1.4 注册表门控（专属门控槽）**
+isEnabled = `isAgentSwarmsEnabled()`（env ∨ flag）= **49 口径工具本体波首个专属门控槽**（此前各族 = 无条件注册面）。对象面：searchHint 'send messages to agent teammates (swarm protocol)' 逐字 / maxResultSizeChars 100_000 / shouldDefer true / userFacingName 'SendMessage' / isReadOnly = `typeof message === 'string'`（输入面）/ isConcurrencySafe false / isDestructive false（旧 def 无覆写 = 缺省值，delta ④ 先例）。
+
+**§8.62.1.5 测试面（S-E2 落 + S-E3 审视）**
+- unit 零盘（ATLAS_CONFIG_DIR=/mock-home 不存在目录戳 + ATLAS_EXPERIMENTAL_AGENT_TEAMS env 双戳）：对象面 / JSON schema 面（type 数组 + required）/ isReadOnly 双态 / isEnabled 门双态 / toAutoClassifierInput 4 模板 / validateInput 6 查面（to 空 / @ 含 / string 缺 summary / * structured / shutdown_response 目标 / shutdown_response reject 缺 reason——全逐字；UDS 3 查裁面登记）/ checkPermissions allow+updatedInput / mapToolResult jsonStringify 面 / renderToolUseMessage 3 面 / prompt gate-off 锚点（DESCRIPTION 值 + PROMPT 协议段）/ call 错误面（broadcast 无 teamName throw / string 无 teamName throw / structured dispatch 3 型 guard）。
+- func 真盘（ATLAS_CONFIG_DIR=mkdtemp，mailbox 文件面 = 写后读 JSON 断言）：F-1 handleMessage mailbox 写（文件 JSON from/text/summary/timestamp/color 面）/ F-2 handleBroadcast recipients 循环（TeamFileLoader fake 注入：sender 排除 + 无收件人 message 面 + 多收件人顺序写）/ F-3 shutdown_request mailbox 面 / F-4 shutdown_response 批准 mailbox 面（paneId undefined 面）/ F-5 plan 批准/拒绝 mailbox 面 + 非 team-lead throw guard（isTeamLead duck）。
+
+**§8.62.1.6 基线预测**
+开波 2312/134/5501 + gate 6·5 → 预测 S-E2 ~2340/136/~5640（+~28 测 / +2 文件 / +~140 expect：validate 6 查 + classifier 4 模板 + mailbox 写面 5 + 错误面 3 + 对象面，plan 波 +41/+114 同族偏高预测）。
