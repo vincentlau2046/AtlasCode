@@ -1,7 +1,8 @@
 /**
  * AtlasCode 边界 lint 配置（A 波, charter L8 规则映射；v0.12 八域扩展 + tests 门面收口）
  *
- * 12 element types（L3 v0.12 十二顶层目录）+ 1 特例（mount 挂载边, DEP-5 白名单）。
+ * 13 element types（L3 v0.12 十二顶层目录 + C 桶 ③ shell·swarm 波 swarm 域, §8.66 R1）
+ * + 1 特例（mount 挂载边, DEP-5 白名单）。
  * 规则映射：
  *   DEP-1 单向无环     → element-types: shared 禁一切内部依赖
  *   DEP-2 八域零向上   → element-types: 八域 allow=[shared] only
@@ -39,6 +40,8 @@ const ELEMENTS = [
   { type: "hooks", pattern: "src/hooks", mode: "folder" },
   { type: "engine", pattern: "src/engine", mode: "folder" },
   { type: "ascend", pattern: "src/ascend", mode: "folder" },
+  // C 桶 ③ shell·swarm 波（§8.66 R1）：swarm 新顶层域（旧仓 swarm 树 7217L 可插拔域包）
+  { type: "swarm", pattern: "src/swarm", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
 ];
 
@@ -105,7 +108,7 @@ export default tseslint.config(
               disallow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks",
-                "engine", "ascend", "atlascode", "mount",
+                "engine", "ascend", "swarm", "atlascode", "mount",
               ],
             },
             // DEP-2/3: 八域零向上 — 只依赖 shared（不 import engine/ascend/atlascode/彼此）
@@ -126,13 +129,26 @@ export default tseslint.config(
               from: "ascend",
               allow: ["shared", "engine", "executor"],
             },
+            // swarm (C 桶 ③ §8.66 R1): 消费型顶层域 — shared(日志/类型/Message 单一事实源)
+            // + bootstrap(cwd 状态, exec no-cwd 变体) + permissions(poller 校验面
+            // permissionUpdateSchema) + modelprovider(getRoleModel 窄面) + task(S-E2b
+            // 任务状态面) + engine(messaging/mailbox/worktree-exec/runAgent/compaction
+            // 门面直连, R7 裁定更新: P-S1/P-S2 不建 port); 不依赖 ascend/atlascode/hooks。
+            // S-E2b/c 实 import 图若需扩 allow 列表, 随该切片头注登记。
+            {
+              from: "swarm",
+              allow: [
+                "shared", "bootstrap", "permissions", "modelprovider",
+                "task", "engine",
+              ],
+            },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
             {
               from: "atlascode",
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
-                "task", "bootstrap", "permissions", "hooks", "engine",
+                "task", "bootstrap", "permissions", "hooks", "engine", "swarm",
               ],
             },
             // DEP-5 白名单: mount 是唯一可 import ascend 的元素（挂载边）
