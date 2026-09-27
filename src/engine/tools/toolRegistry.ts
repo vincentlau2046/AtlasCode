@@ -39,7 +39,7 @@
  *       ⑱ NODE_ENV=test（TestingPermission，新仓测试体系不消费该工具）。
  *     **域外改判 1**：⑳ PowerShell enabled（PowerShell，bash-only 纵切域外；
  *       B16 裁定同 = 域外改判登记，非 C 桶项）。
- *     **materialize 4**（本体已落、门已声明、自门控 isEnabled；本机制只保留已落面的
+ *     **materialize 6**（本体已落、门已声明、自门控 isEnabled；本机制只保留已落面的
  *       ASCEND 门 + deps 注入，其余槽不声明防死接缝）：
  *       ② AGENT_TRIGGERS（§8.56 S-D4 materialize：cron 三件套自门控 isEnabled =
  *         isCronEnabled（ATLAS_DISABLE_CRON kill-switch），组合根 baseTools 注入位）
@@ -56,22 +56,34 @@
  *         默认 gate OFF = 旧语义忠实非新增门），toolsearch 域已落，组合根
  *         baseTools 注入位；engine 面 4 函数族〔阈值判定 / modelSupportsTool
  *         Reference / extractDiscoveredToolNames / DeferredToolsDelta〕= 新仓
- *         0-hit 不复活登记，见 toolSearchGate 头注 delta ③）。
+ *         0-hit 不复活登记，见 toolSearchGate 头注 delta ③）
+ *       ⑨ HISTORY_SNIP（§8.66 S-E2d materialize：Snip 本体落 engine/tools/
+ *         team/（族位裁定 = team/ 子域，与 D 类 ⑮ 同族位同 compose baseTools
+ *         注入点），旧门 feature('HISTORY_SNIP') 裁 → 恒注册（isEnabled =
+ *         () => true，⑲ ToolSearch 门裁先例同型 = 门裁登记非新增门），
+ *         组合根 baseTools 注入位）
+ *       ⑮ agentSwarms（§8.66 S-E2d materialize：TeamCreate/TeamDelete 本体落
+ *         engine/tools/team/，自门控 isEnabled = isAgentSwarmsEnabled
+ *         （ATLAS_EXPERIMENTAL_AGENT_TEAMS env ∨ --agent-teams flag；
+ *         growthbook killswitch 支裁 = 恒放行，⑯ 模式同型），组合根
+ *         baseTools 注入位；swarm team-file 9 面经 TeamServices 注入接缝
+ *         消费（engine↛swarm L3 隔离），组合根绑 swarm 门面真实现）
  *     **§8.64 登记零本体 8**（B 类 any-stub / C 类仅壳，终局裁定，无本体可落；
  *       本机制不声明防死接缝；§8.57 S-D1 B/C 类裁定 + §8.64 收口批，复审勿当遗漏重提）：
  *       ① IS_ATLAS_DEV（Tungsten [B] + SuggestBackgroundPR [C] + REPL [B]，无归属波，3 工具）
  *       ④ MONITOR_TOOL（Monitor [B]，`({}) as any` 占位）⑥ CONTEXT_COLLAPSE（CtxInspect [C]，目录缺失）
  *       ⑦ TERMINAL_PANEL（TerminalCapture [C]，仅 prompt.ts 2L，TUI 面 → shell 波）⑧ WEB_BROWSER_TOOL（WebBrowser [C]，仅 WebBrowserPanel.tsx 1L）
- *       ⑩ UDS_INBOX（ListPeers [C]，目录缺失；UDS inbox 本体 → C 桶 ③ shell·swarm 波
- *         〔§8.57 S-D1〕，UDS 5 站点族〔SendMessage〕→ remote 波〔§8.62〕）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
+ *       ⑩ UDS_INBOX（ListPeers [C]，目录缺失；闭合证据行（§8.66 S-E2d，R5）：
+ *         C 桶 ③ shell·swarm 波完结 = UDS inbox 本体零落盘（ListPeers 目录
+ *         缺失不变，登记零本体维持）；UDS 5 站点族〔SendMessage〕→
+ *         remote 波 task #142〔R3 零迁移登记〕）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
  *       ⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution [C]，仅 constants.ts 2L）
  *       （⑤ OVERFLOW_TEST_TOOL [B] 已列「关闭 3」，不在此列）
- *     **残留守 4**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
+ *     **残留守 2**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
  *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize / ⑲ §8.63 materialize
- *       后余 12，8 槽移「§8.64 登记零本体」后余 4）：
+ *       后余 12，8 槽移「§8.64 登记零本体」后余 4，⑨⑮ §8.66 S-E2d materialize 后余 2）：
  *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
- *       ⑨ HISTORY_SNIP（Snip → shell/REPL 波）⑬ ENABLE_LSP_TOOL（LSP → D 波重分类，LSP 域）
- *       ⑮ agentSwarms（TeamCreate/TeamDelete → shell·swarm 波）
+ *       ⑬ ENABLE_LSP_TOOL（LSP → D 波重分类，LSP 域）
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'

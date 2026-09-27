@@ -28,6 +28,9 @@ export {
   updateTask,
   deleteTask,
   listTasks,
+  // C 桶 ③ shell·swarm 波 S-E2d 扩面：TeamCreate call 面（任务列表目录
+  // 创建，resetTaskList 后位）首消费者
+  ensureTasksDir,
   blockTask,
   type ClaimTaskResult,
   type ClaimTaskOptions,

@@ -99,6 +99,8 @@ export {
   TEAM_CREATE_TOOL_NAME,
   TEAM_DELETE_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
+  // C 桶 ③ S-E2d（§8.66）：SNIP_TOOL_NAME seed（与 tools 根门面同口径）
+  SNIP_TOOL_NAME,
   TASK_STOP_TOOL_NAME,
   SHELL_TOOL_NAMES,
   LEGACY_TOOL_NAME_ALIASES,
@@ -148,6 +150,19 @@ export {
   // 见 query/loop.ts 头注）——swarm inProcessTeammateTask 注入支 +
   // S-E2d inProcessRunner 消费。
   createUserMessage,
+} from './tools'
+export {
+  // C 桶 ③ S-E2d（§8.66）：D 类 3 工具本体 + TeamServices 注入接缝 +
+  // sendMessageTool TeamFileLoader 接缝（组合根消费面；tools 根门面
+  // 再出，本 root 按消费面显式收窄——prompt 别名 / input schema /
+  // 输入输出型不出引擎面 = tools 根 team/ 块头注登记，sendMessage
+  // S-E2 §8.62 先例同型）
+  SnipTool,
+  TeamCreateTool,
+  TeamDeleteTool,
+  setTeamServices,
+  createDefaultTeamContextStore,
+  setTeamFileLoader,
 } from './tools'
 export {
   isCoordinatorMode,

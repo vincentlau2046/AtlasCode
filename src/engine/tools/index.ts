@@ -212,6 +212,8 @@ export {
   TEAM_DELETE_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
   TASK_STOP_TOOL_NAME,
+  // C 桶 ③ S-E2d（§8.66）：SNIP_TOOL_NAME seed 补入（D 类块注释同口径）
+  SNIP_TOOL_NAME,
   // S-E3 B 路 F2：§8.63 2 seed 补入根门面（与 TOOL_SEARCH_TOOL_NAME 同块一致）
   LIST_MCP_RESOURCES_TOOL_NAME,
   READ_MCP_RESOURCE_TOOL_NAME,
@@ -829,6 +831,45 @@ export {
   type SendMessageToolOutput,
   type SendMessageToolUseContext,
   type TeamFile,
+} from './team'
+
+// ── C 桶 ③ shell·swarm 波 S-E2d（§8.66）：D 类 3 工具（Snip 族位裁定
+// 归 team/ 子域 + TeamCreate + TeamDelete 本体 + JSON schema 常量 +
+// prompt 面 + TeamServices 注入接缝；名字常量 SNIP_TOOL_NAME /
+// TEAM_CREATE_TOOL_NAME / TEAM_DELETE_TOOL_NAME 由 toolNames 块 seed 不
+// 重出；门控槽 ⑨ HISTORY_SNIP materialize = Snip 恒注册 + ⑮ agentSwarms
+// materialize = TeamCreate/TeamDelete 自门控 isEnabled =
+// isAgentSwarmsEnabled（⑯ TodoWrite 模式同型）；本体经 ToolRegistryDeps.
+// baseTools 组合根注入，注册表机制不变；TeamServices 未注入 fail-fast，
+// 组合根绑 swarm 门面真实现，见 teamServices.ts 头注）──
+export {
+  SNIP_TOOL_INPUT_SCHEMA,
+  SnipTool,
+  SNIP_DESCRIPTION,
+  SNIP_PROMPT,
+  TEAM_CREATE_TOOL_INPUT_SCHEMA,
+  TeamCreateTool,
+  TEAM_CREATE_DESCRIPTION,
+  TEAM_CREATE_PROMPT,
+  TEAM_DELETE_TOOL_INPUT_SCHEMA,
+  TeamDeleteTool,
+  TEAM_DELETE_DESCRIPTION,
+  TEAM_DELETE_PROMPT,
+  setTeamServices,
+  resetTeamServices,
+  requireTeamServices,
+  createDefaultTeamContextStore,
+  resetDefaultTeamContextStore,
+  type SnipInput,
+  type SnipOutput,
+  type TeamCreateInput,
+  type TeamCreateOutput,
+  type TeamDeleteInput,
+  type TeamDeleteOutput,
+  type TeamServices,
+  type TeamServicesFile,
+  type TeamMemberStateShape,
+  type TeamContextShape,
 } from './team'
 
 // ── S-E2（§8.63）：mcp 子域（ListMcpResourcesTool + ReadMcpResourceTool

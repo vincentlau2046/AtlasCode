@@ -17,9 +17,11 @@
  * swarm 波自持，消费面浮现重裁 duck 化）/ collapse 本地 duck 不导出（UI 波
  * 需要时导出更名）/ directMemberMessage teamContext duck（组合根注真值）/
  * lockfile createRequire delta（Node ESM 正确路径））——预声明接缝非遗漏。
- * swarm 子树 7217L（backends 进程执行 + inProcessRunner + permissionSync +
- * teamHelpers + spawn/UI 族）= shell/swarm 波 + remote defer（Port 9），
- * 不在本域（§8.50 范围裁定）。
+ * swarm 子树 7217L = C 桶 ③ shell·swarm 波 S-E2a–d（§8.66）已落顶层域
+ * src/swarm（backends 进程执行 + inProcessRunner hub + permissionSync +
+ * teamHelpers + spawn 族；UI JSX 族 → TUI 波）；UDS 5 站点族 → remote 波
+ * task #142（Port 9 零迁移登记）；§8.50 范围裁定闭合（S-E2d 核销 ②，
+ * 复审勿当遗漏重提）。
  */
 
 // 队友身份无状态层（teammateContext 4 函数 + TeammateContext 型经 teammate

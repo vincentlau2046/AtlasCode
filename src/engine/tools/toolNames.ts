@@ -40,6 +40,9 @@ export const ENTER_WORKTREE_TOOL_NAME = 'EnterWorktree'
 export const EXIT_WORKTREE_TOOL_NAME = 'ExitWorktree'
 export const TEAM_CREATE_TOOL_NAME = 'TeamCreate'
 export const TEAM_DELETE_TOOL_NAME = 'TeamDelete'
+// C 桶 ③ shell·swarm 波 S-E2d 补差（§8.66.1.4 ⑨ HISTORY_SNIP materialize；
+// 值逐一验真旧仓 SnipTool.ts:5）。
+export const SNIP_TOOL_NAME = 'Snip'
 export const SEND_MESSAGE_TOOL_NAME = 'SendMessage'
 export const TASK_STOP_TOOL_NAME = 'TaskStop'
 // ── T-5e 补全（注册表机制 + 工具名集消费，值逐一验真旧仓）──
