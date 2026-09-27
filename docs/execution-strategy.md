@@ -3996,3 +3996,271 @@ provider/settings/CLI 波。
 **49 口径：** 本波 = C 桶 ② auto-mode 纵切（permissions 域分类器族纯逻辑面 + ②
 转换 + 提示词数据），非 49 工具本体槽；49/49 收口计数随 §8.64 登记批不变。
 
+**§8.66.1 S-E1 总分析（C 桶 ③ shell·swarm 波，task #140）**
+
+**§8.66.1.1 定位与范围**
+
+旧仓来源（a8af45b）：agent-teams（swarm）执行域 = 三部分：
+
+1. `src/utils/swarm/` 子树 22 文件 7217L（wc 实测；21 `.ts` 6838L +
+   `It2SetupPrompt.tsx` 379L React 层）：inProcessRunner 1536（hub）/
+   permissionSync 928 / backends/TmuxBackend 764 / teamHelpers 683 /
+   backends/registry 464 / backends/ITermBackend 370 /
+   backends/PaneBackendExecutor 354 / backends/InProcessBackend 339 /
+   spawnInProcess 328 / backends/it2Setup 245 / spawnUtils 133 /
+   teammateInit 129 / backends/detection 128 / reconnection 119 /
+   teammateLayoutManager 107 / backends/teammateModeSnapshot 87 /
+   leaderPermissionBridge 54 / constants 33 / teammatePromptAddendum 18 /
+   It2SetupPrompt.tsx 379 / backends/types 11（**any-stub**，见 §8.66.1.2 R3）。
+2. 13 辅助 utils 2283L（wc 实测）：teammate 292 / teammateMailbox 1183 /
+   agentId 99 / agentSwarmsEnabled 39 / teamDiscovery 81 / teamMemoryOps 88 /
+   peerAddress 21 / concurrentSessions 204 / inProcessTeammateHelpers 102 /
+   collapseTeammateShutdowns 55 / teammateContext 96 / standaloneAgent 23。
+3. D 类归属件（registry 槽 ⑨⑮，§8.53 S-T3 / §8.64 裁定）：
+   `tools/SnipTool/` 76L（体 74 + prompt 2）/ `tools/TeamCreateTool/` 348L
+   （体 229 + prompt 113 + constants 1 + UI.tsx 5）/ `tools/TeamDeleteTool/`
+   169L（体 133 + prompt 16 + constants 1 + UI.tsx 19）。
+
+子树外依赖（不计入 7217）：`hooks/useSwarmPermissionPoller.ts` 330L
+（React hook + 纯 callback registry，inProcessRunner 消费）/
+`tasks/InProcessTeammateTask/`（.tsx 16390B 手写（`_c(` 0 命中）+ types.ts
+258B，S-7a 残留守 ④）/ `utils/udsClient.ts` 3L + `utils/udsMessaging.ts` 2L
+（全 **any-stub**）+ `bootstrap/state.ts` isReplBridgeActive（stub）=
+UDS inbox 面。
+
+新仓既存面（本波全部 grep 实测）：
+- messaging 域 5 符号已落（§8.62 及前波）：mailbox 1281L + constants 36L
+  （4 符号 getLastPeerDmSummary / isPermissionResponse / isShutdownRequest /
+  markMessageAsReadByIndex 复验**全在场** → teammateMailbox 零补差）/
+  agentId 77L / agentSwarmsEnabled 39L（growthbook 裁 delta① 已登记）/
+  teammateContext 103L / teammate 202L / collapseTeammateShutdowns 98L。
+- teammate 202L **缺旧仓尾 3 AppState 函数**（hasActiveInProcessTeammates /
+  hasWorkingInProcessTeammates / waitForTeammatesToBecomeIdle，90L）=
+  §8.50 裁定「shell·swarm 波」残留守（docs L2231）→ 本波补差（R6）。
+- 等价面已确认在场：engine/tasks tasks.ts setLeaderTeamName /
+  clearLeaderTeamName / resetTaskList / ensureTasksDir（teamHelpers /
+  TeamCreate / TeamDelete 消费）；generateWordSlug（engine/tools/plan/
+  planWords.ts）；gitExe + execFileNoThrow（engine/worktree/git.ts + engine
+  门面）；getRoleModel（modelprovider/roles.ts:90）；runAgent
+  （engine/tools/agent/runAgent.ts）；compactConversation +
+  buildPostCompactMessages（engine/context/compact.ts）；lazySchema /
+  registerCleanup（compose + engine 多处）；getTeamsDir（域内本地镜像先例：
+  engine/tasks + messaging/mailbox 各 1 处，头注单一事实源）。
+- 3 D 类工具旧契约 `buildTool + satisfies ToolDef` → 新仓无 buildTool 函数，
+  工具本体 = shared Tool 契约对象化（先例 = 49 本体对象化模式，
+  engine/tools/team/sendMessageTool.ts 头注 delta 同型）。
+- toolNames.ts L41-42 TEAM_CREATE / TEAM_DELETE 常量已预登记（INTERNAL_
+  WORKER_TOOLS 集消费）✓；toolRegistry ⑨⑩⑮ 头注与本波裁定一致
+  （§8.66.1.4）。eslint-plugin-boundaries 强制 L3 域墙（eslint.config.mjs）。
+
+**§8.66.1.2 范围裁定（迁 / 裁 / 前向接缝）**
+
+R1 **域裁定 = 新顶层域 `src/swarm/`**（sibling of src/task，STR-1 门面 +
+L3 自治）：swarm 运行时 = 可插拔执行域包（与 ascend 域包定位同型），agent
+loop 侧（engine）为消费方；旧仓 messaging 域头注「swarm 子树 7217L 不在
+本域」裁定维持。D 类工具本体不进 swarm 域——按 tools 域规则落
+`engine/tools/team/`（TeamCreate / TeamDelete 随 sendMessageTool.ts 同族）
++ Snip 族（S-E2 裁定族位）；工具本体反向消费 swarm 门面（teamHelpers /
+teammateLayoutManager / backends registry 等）。
+
+R2 **裁面（域外 / 他波，头注登记，复审勿当遗漏重提）**：
+- It2SetupPrompt.tsx 379L → React/Ink 域外裁（TUI 波）；其纯逻辑
+  it2Setup.ts 245L 正常随迁（零 React 依赖）。
+- TeamCreate UI.tsx 5L + TeamDelete UI.tsx 19L → React 渲染层裁（TUI 波）；
+  工具体 renderToolUseMessage / renderToolResultMessage 调用点裁 + 头注。
+- useSwarmPermissionPoller.ts 330L → **二分裁定**：React hook 面
+  （useEffect / useInterval / react imports）域外裁（TUI 波）；纯 callback
+  registry 面（registerPermissionCallback / unregisterPermissionCallback /
+  processMailboxPermissionResponse + parsePermissionUpdates）抽为域内 .ts
+  随迁（inProcessRunner 消费；S-E2 先读 330L 全文拆分，勿凭本行预判）。
+- InProcessTeammateTask.tsx → **二分裁定**：JSX 渲染面域外裁（TUI 波）；
+  非 React 框架函数面（findTeammateTaskByAgentId / requestTeammateShutdown
+  / appendTeammateMessage + types.ts）抽为 .ts 随迁（S-7a 残留守 ④ 闭合）。
+- perfettoTracing 3 函数（registerAgent / unregisterAgent /
+  isPerfettoTracingEnabled）→ 裁 + 头注（新仓无 telemetry 域；旧仓 no-op
+  sink 先例同型）。
+
+R3 **any-stub 裁定（绝不把 any-stub 签名当真行为）**：
+- backends/types.ts 11L（接口类型全 any + all-local-types 再导出，反编译
+  产物）→ **零逐字迁移，域内本地类型重建**：10 接口（PaneBackend /
+  TeammateExecutor / PaneId / CreatePaneResult / TeammateMessage /
+  TeammateSpawnConfig / TeammateSpawnResult / BackendDetectionResult /
+  BackendType / isPaneBackend 谓词）从 Tmux / ITerm / Pane / InProcess /
+  registry 消费点推定，零 any（估算 ≈80–120L，S-E2 实测）。
+- udsClient.ts 3L + udsMessaging.ts 2L + isReplBridgeActive（bootstrap
+  stub）→ **零迁移**，头注残留守登记（UDS socket 客户端面 + 5 站点族
+  [SendMessage] → remote 波 task #142；消费点 = SendMessageTool 惰性
+  require + conversationRecovery 动态 import = remote 波消费面）。
+
+R4 **门控裁定（新仓 bun:bundle feature() 恒 false 且不可测）**：
+- concurrentSessions.ts feature('BG_SESSIONS')×3 + feature('UDS_INBOX')×1
+  → **门裁、函数恒生效**（permissions/autoMode approvals.ts delta② 先例：
+  旧默认关门 → 新恒生效；当前零活消费者 = 惰性接缝，登记防复审误判；
+  PID 文件写仅在组合根调 registerSession 时发生，现 0 命中）。
+- inProcessRunner.ts feature('BASH_CLASSIFIER') L156 → 裁 +
+  awaitClassifierAutoApproval（旧 bashPermissions 2471L 族）=
+  permissions 残留守 ① 前向接缝（域内 no-op 登记，真体随
+  ① 实现半 / provider 波）。
+
+R5 **ListPeers ⑩ = 登记零本体闭合**：旧仓 `src/tools/ListPeersTool/`
+目录缺失（find 实测；旧 tools.ts:113-115 `feature('UDS_INBOX') ?
+require(...) : null` = DCE gated 支无文件）→ ⑩ 维持 §8.64「登记零本体 8」
+槽（本机制不声明防死接缝），本波仅补闭合证据行 + 归属对齐 §8.57 S-D1
+（d8bbbe6 已对齐，零行为）。UDS inbox「本体」= 本波 concurrentSessions
+204L（PID registry 半）+ peerAddress 21L（纯 parser）；socket 客户端半 =
+R3 登记（remote 波）。
+
+R6 **teammate 尾 3 补差（90L）**：hasActiveInProcessTeammates /
+hasWorkingInProcessTeammates / waitForTeammatesToBecomeIdle——旧仓参
+AppState（React state store，新仓域外）→ 适配新仓 task registry 面
+（engine/tasks InProcessTeammate 任务态，S-E2 裁定查询形态）；零活消费者
+= 惰性接缝登记（drain-gate 消费面，MINOR-1 同波先例）。
+
+R7 **跨域消费 = 门面 + 注入 port（L3）**：
+- runAgent（engine/tools/agent）+ compact 面（engine/context：
+  compactConversation / buildPostCompactMessages / getAutoCompactThreshold
+  / resetMicrocompactState，后两者新仓 0 命中 → 消费裁面 S-E2 裁定）→
+  **组合根注入 port**（P-S1 agentLoop / P-S2 compaction；Port 1
+  sessionContextPort + Port 5 sessionMemory 先例：set/get + placeholder
+  缺省 + 组合根接线，未接线 = 零行为）。
+- inProcessRunner 消费 8 工具名常量（SEND_MESSAGE / TASK_CREATE /
+  TASK_GET / TASK_LIST / TASK_UPDATE / TEAM_CREATE / TEAM_DELETE / BASH）→
+  域内本地镜像（单一事实源 = engine/tools/toolNames.ts；漂移防 = S-E2d
+  registry 核销统一收编，permissions 域 BASH_TOOL_NAME 先例同型）。
+
+**§8.66.1.3 域与子域布局（src/swarm/）**
+
+```
+src/swarm/
+  index.ts                  STR-1 门面（显式名再导出，叶零 export *）
+  constants.ts              ← 旧 constants.ts 33L 逐字（tmux session/socket/env 名）
+  teammatePromptAddendum.ts ← 18L 逐字（SendMessage 指示字符串）
+  peerAddress.ts            ← 旧 utils/peerAddress.ts 21L 逐字（uds:/bridge: 纯 parser）
+  standaloneAgent.ts        ← 旧 23L（AppState 参 → task registry 适配，同 R6）
+  teammateModel.ts          ← 旧 8L（getRoleModel，R7 门面/port S-E2 裁定）
+  inProcessTeammateTask/    ← types.ts + 框架函数抽取（R2 二分）
+  permissionPoller.ts       ← useSwarmPermissionPoller 纯 registry 抽取（R2 二分）
+  teamHelpers.ts            ← 683L（team file CRUD / 成员管理 / worktree；gitExe + execFileNoThrow 门面）
+  teammateInit.ts           ← 129L
+  reconnection.ts           ← 119L（AppState 参适配，同 R6）
+  teammateLayoutManager.ts  ← 107L（color round-robin；AGENT_COLORS → agent 门面 / 域内镜像）
+  leaderPermissionBridge.ts ← 54L（ToolUseConfirm 型 → shared 契约 / 域内窄视图）
+  spawnUtils.ts             ← 133L
+  spawnInProcess.ts         ← 328L（lodash sample → 本地一行；perfetto 裁 R2）
+  inProcessRunner.ts        ← 1536L hub（R2/R4/R7 裁剪）
+  permissionSync.ts         ← 928L
+  concurrentSessions.ts     ← 旧 utils 204L（门裁 R4，恒生效登记）
+  teamDiscovery.ts          ← 旧 utils 81L
+  teamMemoryOps.ts          ← 旧 utils 88L（isTeamMemFile → memory 门面 / 域内）
+  inProcessTeammateHelpers.ts ← 旧 utils 102L
+  backends/
+    types.ts                R3 类型重建（≈80–120L，零 any）
+    detection.ts            ← 128L
+    teammateModeSnapshot.ts ← 87L
+    it2Setup.ts             ← 245L
+    registry.ts             ← 464L
+    TmuxBackend.ts          ← 764L
+    ITermBackend.ts         ← 370L
+    InProcessBackend.ts     ← 339L
+    PaneBackendExecutor.ts  ← 354L
+  ports/                    P-S1 agentLoop / P-S2 compaction（Port 1/5 先例）
+```
+
+补差侧（既存域）：
+- engine/messaging/teammate.ts + 尾 3 函数 90L（R6）。
+- engine/tools/team/teamCreateTool.ts（229+113+1）/ teamDeleteTool.ts
+  （133+16+1）+ prompt / constants 伴随件；Snip → engine/tools/<S-E2 裁定
+  族位>（74+2）。
+- engine/tools/toolNames.ts 补差：Snip 工具名常量（若缺）。
+- atlascode/compose.ts：P-S1/P-S2 port 接线 + ⑨⑮ baseTools 注入
+  （teamCreateTool / teamDeleteTool / snipTool）。
+
+**§8.66.1.4 registry 槽裁定 + 登记处核销清单**
+
+- ⑨ HISTORY_SNIP → **materialize**：Snip 本体落（旧门 feature('HISTORY_
+  SNIP') 裁 → 恒注册，登记 delta（⑲ ToolSearch 门裁先例同型））；头注从
+  残留守 4 移 materialize（S-E2d 实测自门控形态）。
+- ⑮ agentSwarms → **materialize**：TeamCreate / TeamDelete 本体落，
+  自门控 isEnabled = isAgentSwarmsEnabled（messaging 域既存，growthbook
+  裁 delta① 已登记），组合根 deps.baseTools 注入（⑯ 模式同型）。
+- ⑩ UDS_INBOX → **维持登记零本体** + 闭合证据行（R5）。
+- 49 口径：§8.64 49/49 收口已含 C 桶 ③ 3 项（⑨⑮⑩）= 登记项 → 本波
+  ⑨⑮ 本体落 = 登记 → 本体落 proof 换血，**49/49 维持**（S-E4 口径行更新）。
+- B 桶 18 项 / 登记处核销清单（S-E4 逐项核销，复审勿当遗漏重提）：
+  1. toolRegistry 头 ⑨⑮ 残留守 → materialize + ⑩ 闭合证据行
+  2. engine/messaging/index.ts L21「swarm 子树 7217L 不在本域」登记
+  3. engine/tools/team/sendMessageTool.ts L34（parseAddress 接缝）+ L50 /
+     L242（TeamFile 真读者 / setTeamFileLoader 缺省报错面）→ 真读者接线
+     （teamHelpers readTeamFileAsync + peerAddress）
+  4. engine/coordinator/tasks/registry.ts L12 inProcessTeammateHelpers 102L 登记
+  5. engine/session/restore.ts L35 concurrentSessions updateSessionName 登记
+  6. src/task/task.ts L12「swarm/inProcessRunner / spawnMultiAgent 未移植」登记
+  7. permissions/permissionUpdateSchema.ts L14「swarm permissionSync」登记
+  8. docs L2231 teammate 尾 3 AppState 函数登记（R6 闭合）
+  9. docs L2502 B7 directMemberMessage writeToMailbox 真 mailbox 面登记
+  10. docs L2509 B14 InProcessTeammateTask TaskState 联合扩登记
+
+**§8.66.1.5 子波切片（S-E2 四模块提交）+ 测试面与基线预测**
+
+- S-E2a **叶子 + 类型层**：src/swarm/ 域骨架 + STR-1 门面 + constants 33 /
+  teammatePromptAddendum 18 / peerAddress 21 / standaloneAgent 23 /
+  teammateModel 8 + backends/types 类型重建（R3）+ inProcessTeammateTask
+  抽取 + permissionPoller 抽取（R2 二分，先读 330L 全文拆分）+
+  messaging/teammate 尾 3 补差（R6）+ ports/ 占位（P-S1/P-S2，未接线零
+  行为）。
+- S-E2b **中层**：teamHelpers 683 / teammateInit 129 / reconnection 119 /
+  teammateLayoutManager 107 / leaderPermissionBridge 54 / spawnUtils 133 /
+  teamDiscovery 81 / teamMemoryOps 88 / concurrentSessions 204 /
+  inProcessTeammateHelpers 102（逐文件裁定：AppState 参 → task registry
+  （同 R6）/ utils-internal 面 → 新仓等价面映射（§8.66.1.1）/ 域内本地
+  镜像（单一事实源 + 漂移防登记））。
+- S-E2c **backends 族**：detection 128 / teammateModeSnapshot 87 /
+  it2Setup 245 / registry 464 / TmuxBackend 764 / ITermBackend 370 /
+  InProcessBackend 339 / PaneBackendExecutor 354（execFileNoThrow → engine
+  门面；AGENT_COLORS / AgentColorName → agent 门面 / 域内镜像，S-E2 裁定）。
+- S-E2d **hub + D 类 + 核销**：inProcessRunner 1536（R2/R4/R7 裁剪）/
+  spawnInProcess 328（lodash → 本地一行）/ permissionSync 928 +
+  TeamCreate / TeamDelete / Snip 3 工具（buildTool 成员面 → shared Tool
+  契约对象化，49 本体先例）+ registry ⑨⑮ 核销 + toolNames 补差 +
+  compose.ts port 接线 + baseTools 注入 + **四件套**（tsc 0 / eslint 0 /
+  build 0KB 入口 / 全量 test + gate 6·5）。
+
+测试面（防空洞，仅测纯逻辑面 + 可注入 FS / shell 面，零假测试）：
+- 新增 ≈8–12 文件 / +150–250 用例：peerAddress（纯 parser，新）/
+  concurrentSessions（PID registry tmp-dir 流 + 门裁恒生效 delta 断言）/
+  inProcessTeammateHelpers / teamDiscovery / teamMemoryOps / spawnUtils
+  （纯 builder）/ teammateLayoutManager（color round-robin + clear）/
+  permissionSync（fake mailbox 目录请求-响应流，含 sandbox 变体）/
+  teammate 尾 3 补差（task registry fake）/ backends/types（类型层编译断言
+  + isPaneBackend 谓词）/ D 类 3 工具（isEnabled 门：TeamCreate /
+  TeamDelete = isAgentSwarmsEnabled 三态 / Snip 恒注册 + inputSchema +
+  prompt 面）。
+- 既存：messaging 域 5 符号全在场（零补差零新测）。
+- 基线预测（S-E2 实测为准）：波终 ≈ **2620–2720 pass / 148–152 文件 /
+  6050–6150 expect + gate 6·5**（起点 = §8.65 波终 2474/140/5851 + gate
+  6·5，本波开波 live 复跑已核）。
+
+**§8.66.1.6 残留守登记（= 前向接缝，复审勿当遗漏重提）**
+
+1. UDS socket 客户端面（udsClient / udsMessaging / startUdsMessaging /
+   getDefaultUdsSocketPath / sendToUdsSocket / listAllLiveSessions）+
+   SendMessage UDS 5 站点族 → **remote 波 task #142**（R3 零迁移登记）。
+2. P-S1 runAgent port / P-S2 compact 面 port 接线 = **组合根 S-E2d 装配
+   项**（未接线 placeholder = 惰性接缝零行为；getAutoCompactThreshold /
+   resetMicrocompactState 新仓 0 命中 → 消费裁面随 S-E2d 实测登记）。
+3. awaitClassifierAutoApproval（bash 分类器自动放行，inProcessRunner L156
+   门裁登记）→ **permissions 残留守 ①**（工具面 checkPermissions 实现半 /
+   provider 波）。
+4. React/Ink 面 4 件（It2SetupPrompt.tsx 379 / TeamCreate+TeamDelete
+   UI.tsx 24 / useSwarmPermissionPoller hook 面 / InProcessTeammateTask
+   JSX 面）→ **TUI 波**（R2 裁面登记）。
+5. teammate 尾 3 零活消费者 + concurrentSessions 恒生效零活消费者 =
+   **惰性接缝登记**（drain-gate / 组合根消费面，MINOR-1 同波先例：已登记
+   头注面非 stub）。
+6. 8 工具名常量域内本地镜像漂移防 = **S-E2d registry 核销统一收编**
+   （单一事实源 = engine/tools/toolNames.ts，permissions 域 BASH_TOOL_NAME
+   先例同型）。
+7. AGENT_COLORS / isTeamMemFile / getTeamsDir 等 utils-internal /
+   tools-internal 面 → 逐文件 S-E2 裁定登记（门面直引或域内本地镜像，
+   头注单一事实源标注逐件）。
+
