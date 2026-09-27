@@ -38,7 +38,10 @@
  *    isMainSessionTask + toAgentId + appState.tasks）裁 → C 桶 ③ shell·swarm
  *    波（裁面 = 本工具 in-process 名路由接线；queuePendingMessage /
  *    isLocalAgentTask / isMainSessionTask 新仓 coordinator 域在位〔E 波既有
- *    迁移，非 0-hit〕，S-E3 A 路 F2 注）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
+ *    迁移，非 0-hit〕，S-E3 A 路 F2 注；S-E2d 核销 ③ 补差：parseAddress 依赖
+ *    件已落 swarm 域 peerAddress.ts 叶（S-E2a，swarm 门面导出），名路由消费
+ *    块本体残留守——appState.agentNameRegistry 状态面归 TUI 波，接线点随
+ *    appState 全量面浮现重裁）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
  *    块唯一消费）→ 2 参（S-C5 delta ⑧ 先例）；旧 backfillObservableInput 面
  *    （TUI 可观测输入回填）随裁 = 新 Tool 契约无该成员槽（TUI 波）。
  *  ④ handleShutdownApproval in-process 支（own-pane teamFile 查 +
@@ -48,9 +51,11 @@
  *    paneId/backendType 2 参缺省 = 旧 team-file-missing 面 undefined，消息
  *    内容等价）。
  *  ⑤ handleBroadcast readTeamFileAsync（旧 utils/swarm/teamHelpers，新仓
- *    0-hit = team-file 域 C 桶 ③）→ 本文件 TeamFileLoader 注入接缝（默认
- *    async () => null = 旧 team-file-missing 错误面逐字 'Team "X" does not
- *    exist'）；真读者（team-file 域）C 桶 ③ 经 setTeamFileLoader 注入。
+ *    0-hit = team-file 域 C 桶 ③）→ 本文件 TeamFileLoader 注入接缝（未接线
+ *    缺省 async () => null = 旧 team-file-missing 错误面逐字 'Team "X" does
+ *    not exist'）；真读者 = C 桶 ③ S-E2d 组合根（atlascode/compose.ts ⑫）
+ *    setTeamFileLoader(readTeamFileAsync) 接线闭合（swarm teamHelpers 单一
+ *    事实源，§8.66.1.4 核销 ③）。
  *  ⑥ findTeammateColor（旧 appState.teamContext.teammates 色映射查）裁：新仓
  *    AppState 无 teammates 色映射成员（C 桶 ③ 归属）；routing.targetColor =
  *    旧 teammates 缺面 undefined（字段保留，值定 undefined）。

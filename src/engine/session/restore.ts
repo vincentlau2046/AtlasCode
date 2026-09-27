@@ -32,7 +32,9 @@
  *   - coordinator modeApi（matchSessionMode modeWarning 系统消息推）/
  *     restoreAgentFromSession + refreshAgentDefinitionsForModeSwitch（agent 波）/
  *     computeRestoredAttributionState（attribution，旧 ant-only feature）/
- *     updateSessionName（concurrentSessions，shell 域）/ AppState
+ *     updateSessionName（concurrentSessions——C 桶 ③ S-E2b（§8.66.1.5）
+ *     已落 swarm 域 src/swarm/concurrentSessions.ts 204L〔门裁 R4 恒生效〕，
+ *     本恢复点消费面残留守，drain-gate/组合根浮现重裁，核销 ⑤）/ AppState
  *     initialState 计算：全裁——ProcessedResume 收敛 engine 面（messages /
  *     contentReplacements / agentName / agentColor），壳消费方各装配。
  *   - context-collapse restoreFromEntries（旧 feature('CONTEXT_COLLAPSE')，

@@ -2228,7 +2228,8 @@ popAllEditable 字符串+块双源 + pastedContents id 保留 + 内嵌 base64 �
 - H6 登记落位：isStructuredProtocolMessage 旧仓逐字 10 型集（shutdown_
   rejected 集外 = 终止信号无 useInboxPoller 路由处理器，非移植遗漏）/
   jsonStringify 3 参→2 参签名 delta（replacer null≡undefined 论证）/
-  teammate 尾 3 AppState 函数裁（shell·swarm 波）/ collapse 本地 duck 不
+  teammate 尾 3 AppState 函数裁（闭合：S-E2b 补差落位 R6 = messaging 域
+  teammate.ts 尾 3 函数逐字迁，§8.66 核销 ⑧）/ collapse 本地 duck 不
   导出 / directMember teamContext duck 组合根注入口 / lockfile createRequire
   delta / SEND_MESSAGE_TOOL_NAME 不出引擎面（工具名单一源 = tools 域
   toolNames.ts:43，messaging 域内同值常量自持、值恒等登记）。
@@ -2499,14 +2500,14 @@ S-E4 门+探针收口（2 项）：
 - B4 #9 restore onWorktreeRestore 前向注入口（壳 worktree 波注入；unit/func 已覆盖调用时点 + 值透传，restore.ts:44-47,113-117,163）
 - B5 #11 project 裁面⑤ 远程持久化（remote/teleport 波；project.ts:811-812）
 - B6 #12 project 壳侧同步 fs 可测性接缝（shell 波；project.ts:860）
-- B7 #16 directMemberMessage writeToMailbox 真 mailbox 面（shell/swarm 波；directMemberMessage.ts:14）
+- B7 #16 directMemberMessage writeToMailbox 真 mailbox 面（shell/swarm 波；directMemberMessage.ts:14）【S-E2d 核销 ⑨：函数本体 E 波 messaging 域已落（sendDirectMemberMessage 4 参注入形）；writeToMailbox 参真 mailbox 面 = 消费端注入口（调用方注 mailbox 域真实现，TUI/CLI 波残留守）】
 - B8 #17 queueManager logOperation replay 接回（shell 波；queueManager.ts:17-21）
 - B9 #18 worktree hookBased 形参保留（工具本体波；worktree.ts:12-14,467-530）
 - B10 #19 runHooksStream 流式消费面（流式纵切；loop.ts:15 残留守已核未流式化）【S-T3 预登记：按需触发，D 波后】
 - B11 #21 predicates compact-boundary 检索族（shell/REPL 波；predicates.ts 头注）
 - B12 React 侧 recordTranscript/recordContentReplacement 5 点（useLogMessages.ts:69 / ResumeConversation.tsx:225 / plans.ts:393 / sessionRestore.ts:462 / queryHelpers.ts:310,331；shell/message 波）
 - B13 **QueryEngineConfig setAppState 置换 → D 波**（本裁定从原 A 桶归赋订正：loop deps 无 setAppState 字段已核（loop.ts 字段面）；messaging SetAppState duck 为 shell 波消费（queueManager）；`src/atlascode/state/index.ts` 7L 骨架 = D 波归属；engine state 域 EngineState set(f) 队列 = E-1 T-3 落点）
-- B14 InProcessTeammateTask TaskState 联合扩（shell/swarm 波，§8.50 裁定；tasks/types.ts 头注）
+- B14 InProcessTeammateTask TaskState 联合扩（shell/swarm 波，§8.50 裁定；tasks/types.ts 头注）【闭合：S-E2b 落位——coordinator/tasks/types.ts TaskState 联合扩三态（InProcessTeammateTaskState 归 task 域门面单一事实源），§8.66 核销 ⑩】
 - B15 RemoteAgentTask/DreamTask/LocalWorkflowTask/MonitorMcpTask 任务态（顺延波；registry.ts 裁面登记）【S-T3 预登记：任务工具本体子波，与门控槽 ②⑯ 同子波，下界 = shell/swarm 波后】
 - B16 20 门控槽位 + PowerShell 2049L 面（工具本体波 / bash-only 纵切，§8.21 口径）
 - B17 compose 残留守 applyConfigEnvironmentVariables（信任对话框面未落；shell 波；compose.ts 头注）

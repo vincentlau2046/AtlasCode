@@ -34,6 +34,16 @@
  *     getCwd() = try pwd() catch getOriginalCwd()，旧 utils/cwd.ts 逐字）+
  *     createAgentLoopDeps 构建器 deps.transcript 接线（session 域 record 族
  *     收敛 loop 写面；agentId 路由 config.agentId）
+ *   + S-E2d（§8.66 C 桶 ③ shell·swarm 波）⑫ swarm 域组合根接线：
+ *     wireBackends（backends ① 注入窗 = setBackendModule 4 成员）+
+ *     setStartInProcessTeammate（inProcessRunner hub 1536L seam ② 真
+ *     实现；inProcessRunner 模块零顶层副作用 PRT-2）+ setTeamServices
+ *     （swarm team-file 9 面真实现 + 内存缺省 team-context store，
+ *     engine↛swarm L3 隔离，teamServices.ts 头注）+ setTeamFileLoader
+ *     （sendMessageTool 真读者 = teamHelpers readTeamFileAsync，
+ *     §8.66.1.4 核销 ③ 缺省 loader 缺省报错面换血）+ ⑨⑮ baseTools
+ *     注入（D 类 3 工具 Snip/TeamCreate/TeamDelete → 注册表，自门控
+ *     isEnabled，注册表机制不变，registry 头 materialize 裁定）
  *
  * 残留守（§8.29）：applyConfigEnvironmentVariables（信任后全量 env）→ 信任
  * 对话框面（新仓未落；§8.28 预声明消费接缝此处重登记，旧仓启动序
@@ -87,7 +97,30 @@ import {
   type ContentReplacementRecord,
   type Message as SessionMessage,
   type ToolRegistryDeps,
+  // C 桶 ③ S-E2d（§8.66）：D 类 3 工具本体 + TeamServices 接缝 +
+  // TeamFileLoader 接缝（组合根消费面，engine root S-E2d 扩面）
+  SnipTool,
+  TeamCreateTool,
+  TeamDeleteTool,
+  setTeamServices,
+  createDefaultTeamContextStore,
+  setTeamFileLoader,
 } from '../engine'
+import {
+  startInProcessTeammate,
+  setStartInProcessTeammate,
+  wireBackends,
+  readTeamFileAsync,
+  readTeamFile,
+  writeTeamFileAsync,
+  getTeamFilePath,
+  registerTeamForSessionCleanup,
+  unregisterTeamForSessionCleanup,
+  cleanupTeamDirectories,
+  assignTeammateColor,
+  clearTeammateColors,
+  sanitizeName,
+} from '../swarm'
 import type { PermissionMode, ToolPermissionContext, Tools } from '../shared'
 import {
   getIsNonInteractiveSession,
@@ -246,6 +279,31 @@ export function createCoreDependencies(): CoreDependencies {
     registerExitCleanup: fn => registerCleanup(fn),
   })
 
+  // ⑫ S-E2d（§8.66 C 桶 ③ shell·swarm 波）：swarm 域组合根接线——
+  //    backends ① 注入窗（wireBackends = setBackendModule 4 成员，R3
+  //    零 any 重建）+ inProcessRunner hub 1536L seam ② 真实现
+  //    （inProcessRunner 模块零顶层副作用，PRT-2 显式装配）+
+  //    TeamServices 接缝（swarm team-file 9 面真实现 + 内存缺省
+  //    team-context store；engine↛swarm L3 隔离，teamServices.ts 头注）+
+  //    sendMessageTool TeamFileLoader 真读者（§8.66.1.4 核销 ③：
+  //    缺省 loader 缺省报错面换血，readTeamFileAsync = team-file 域
+  //    单一事实源）
+  wireBackends()
+  setStartInProcessTeammate(startInProcessTeammate)
+  setTeamServices({
+    readTeamFile,
+    writeTeamFileAsync,
+    getTeamFilePath,
+    registerTeamForSessionCleanup,
+    unregisterTeamForSessionCleanup,
+    cleanupTeamDirectories,
+    assignTeammateColor,
+    clearTeammateColors,
+    sanitizeName,
+    ...createDefaultTeamContextStore(),
+  })
+  setTeamFileLoader(readTeamFileAsync)
+
   return {
     sandboxManager,
     modelProvider: getModelProvider(),
@@ -323,7 +381,20 @@ export interface AgentLoopDepsBundle {
 export async function createAgentLoopDeps(
   config: AgentLoopDepsConfig = {},
 ): Promise<AgentLoopDepsBundle> {
-  const toolRegistryDeps = config.toolRegistryDeps ?? {}
+  // S-E2d（§8.66）：⑨⑮ materialize = D 类 3 工具入注册表 baseTools
+  // （registry 头注 ⑨ HISTORY_SNIP 恒注册 + ⑮ agentSwarms 自门控
+  // isEnabled = isAgentSwarmsEnabled，注册表机制不变；消费方指定
+  // baseTools 在前，先入为主 = 测试 fake 可替换，注册表先入为主
+  // 去重语义不变）
+  const toolRegistryDeps: ToolRegistryDeps = {
+    ...config.toolRegistryDeps,
+    baseTools: [
+      ...(config.toolRegistryDeps?.baseTools ?? []),
+      SnipTool,
+      TeamCreateTool,
+      TeamDeleteTool,
+    ],
+  }
   const { toolPermissionContext } = await initializeToolPermissionContext({
     allowedToolsCli: config.allowedToolsCli ?? [],
     disallowedToolsCli: config.disallowedToolsCli ?? [],

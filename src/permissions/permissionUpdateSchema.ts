@@ -11,8 +11,12 @@
  * B 波契约冻结下沉 shared/types-session（域 index 门面统一出口）。
  *
  * 消费面登记（H6 预声明接缝）：本版零消费点——旧消费 = types/hooks.ts /
- * SDK controlSchemas / bridge permissionCallbacks / swarm permissionSync，
- * 均 E-5 hooks-runner / SDK 面 / 组合根残留守（落时随消费点挂接，勿当遗漏重提）。
+ * SDK controlSchemas / bridge permissionCallbacks / swarm permissionSync
+ *（swarm permissionSync = C 桶 ③ S-E2d（§8.66）已落 swarm 域
+ * permissionSync.ts 928L，核销 ⑦；其消费面 = 目录流请求-响应 + mailbox
+ * 变体，schema 消费点随 UDS/SDK 面归 remote 波）——余 types/hooks.ts /
+ * SDK controlSchemas / bridge permissionCallbacks 三面均 E-5 hooks-runner
+ * / SDK 面 / 组合根残留守（落时随消费点挂接，勿当遗漏重提）。
  */
 import { z } from 'zod'
 import { lazySchema } from '../shared'
