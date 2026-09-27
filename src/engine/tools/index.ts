@@ -127,6 +127,17 @@
  *   随迁，见各文件头注 delta ①-⑨）→ 在此 re-export（notebook/ 子门面）；
  *   残留守「49 本体」登记再缩 1 → 25/49（notebook 族无专属门控槽 = 无条件
  *   注册面，同 web/config 族；LSP 槽 = 残留守归属 D 波 LSP 域）。
+ * §8.62 S-E2（team/collab 族子波）已落 team/ 子域 SendMessageTool 本体
+ *   （1 对象 + JSON schema 1 常量 + prompt 面 + Input/Structured/Output duck
+ *   型 9 + TeamFileLoader 注入接缝；旧仓 SendMessageTool 917L + prompt 49L +
+ *   UI 30L 裁剪随迁；裁面登记：UDS/bridge 4 站点族 → remote 波 / in-process
+ *   名路由 + backfillObservableInput → C 桶 ③ shell·swarm 波 / handleBroadcast
+ *   team-file 面 = 本文件 TeamFileLoader 注入接缝（默认 = 旧 team-file-missing
+ *   错误面逐字）/ findTeammateColor → C 桶 ③ / UI JSX → TUI 波，见各文件头注
+ *   delta ①-⑩）→ 在此 re-export（team/ 子门面）；残留守「49 本体」登记
+ *   再缩 1 → 26/49（team/collab 族专属门控槽 = isEnabled =
+ *   isAgentSwarmsEnabled（ATLAS_EXPERIMENTAL_AGENT_TEAMS ∨ --agent-teams），
+ *   本子波首个专属门控槽）。
  */
 export {
   createMcpTools,
@@ -779,3 +790,26 @@ export {
   type NotebookEditInput,
   type NotebookEditOutput,
 } from './notebook'
+
+// ── S-E2（§8.62）：team 子域（SendMessageTool 本体 + JSON schema + prompt
+// 面 + TeamFileLoader 接缝；名字常量 SEND_MESSAGE_TOOL_NAME 由 toolNames
+// 块 seed 不重出；UDS/bridge 面 4 站点 → remote 波 / in-process 名路由 +
+// team-file + gracefulShutdown 面 → C 桶 ③ shell·swarm 波；泛型 Output 5 型
+// 族（MessageRouting/MessageOutput/BroadcastOutput/RequestOutput/
+// ResponseOutput）留 team/ 子门面 = tools/ 根门面仅 namespaced 导出面
+// （tasks 块 Task*Input 先例），避免与根门面泛名冲突）──
+export {
+  SendMessageTool,
+  SEND_MESSAGE_TOOL_INPUT_SCHEMA,
+  setTeamFileLoader,
+  resetTeamFileLoader,
+  // 重名登记：同 config/askUser/notebook 面 DESCRIPTION 别名重出（web 块
+  // WEB_FETCH_DESCRIPTION 别名先例）
+  DESCRIPTION as SEND_MESSAGE_DESCRIPTION,
+  PROMPT as SEND_MESSAGE_PROMPT,
+  type SendMessageInput,
+  type StructuredMessage,
+  type SendMessageToolOutput,
+  type SendMessageToolUseContext,
+  type TeamFile,
+} from './team'
