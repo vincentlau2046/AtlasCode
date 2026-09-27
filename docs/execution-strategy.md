@@ -3807,3 +3807,15 @@ toolRegistry.ts 20 槽表由「残留守 13」（陈旧计数标签）重构为 
 - ⑩ UDS_INBOX（ListPeers [C] 零本体登记；UDS inbox 本体 → C 桶 ③ shell·swarm 波〔§8.57 S-D1〕；UDS 5 站点族〔SendMessage〕→ remote 波〔§8.62〕）
 
 **下一步**：S-E2（toolRegistry.ts 头注重构 + 提交）→ S-E3（零本体批比例自审：头注 ↔ §8.57 S-D1 交叉核 + 计数标签 + git diff 零行为核验）→ S-E4（闭环记录 §8.64.2 + C 桶 ② auto-mode 预研段）。
+
+**§8.64.2 闭环记录（stub/壳登记批，S-E4，2026-09-27）**
+- 提交链：S-E1 `d35fa30`（总分析 §8.64.1：B 5 + C 6 = 11 槽零本体登记 + 49/49 收口算术 + registry 头注 5 类重构规划 + 残留守登记）→ S-E2 `88d1f87`（toolRegistry.ts 20 槽表 5 类定论重构〔materialize 4 ②⑭⑯⑲ / §8.64 登记零本体 8 ①④⑥⑦⑧⑩⑪⑫ / 残留守 4 ③⑨⑬⑮〕+ 计数标签修正，纯头注 18+/11-，零代码逻辑 / 零测试增量）→ S-E3 `d8bbbe6`（双路审视修正，1 处零行为）→ S-E4 本记录。
+- S-E3 双路审视（**零本体批比例自审**：本批仅头注 + doc，无本体/测试面，双只读聚焦「登记准确性 + 零行为」，未派 subagent——登记批与本体纵切波审视面不同，比例自审已覆盖全部可核面）：
+  - **A 路（§8.57 S-D1 交叉核）**：B 类 5〔Monitor ④ / Workflow ⑪ / Tungsten ① / REPL ① / OverflowTest ⑤〕+ C 类 6〔CtxInspect ⑥ / SuggestBackgroundPR ① / ListPeers ⑩ / TerminalCapture ⑦ / WebBrowser ⑧ / VerifyPlanExecution ⑫〕= 11 槽映射 9 门控槽（①④⑤⑥⑦⑧⑩⑪⑫），与 §8.57 S-D1 四分类表（L3379-3380）逐条一致 ✓。
+  - **20 槽分区核验**：关闭 3（⑤⑰⑱）+ 域外 1（⑳）+ materialize 4（②⑭⑯⑲）+ §8.64 登记零本体 8（①④⑥⑦⑧⑩⑪⑫）+ 残留守 4（③⑨⑬⑮）= 20，无重漏 ✓。计数标签「残留守 13」（§8.63 F5 漂移，⑲ materialize 未减）→ 重构为 5 类，「残留守」收敛 4 ✓。
+  - **1 处修正**：⑩ UDS_INBOX 头注原「UDS 5 站点族 → remote 波」与 §8.57 S-D1（ListPeers ⑩ → C 桶 ③ shell·swarm 波）不一致 → 订正为「UDS inbox 本体 → C 桶 ③〔§8.57〕；UDS 5 站点族〔SendMessage〕→ remote〔§8.62〕」（头注 + doc §8.64.1.5 双处，纯注释）。
+  - **零行为核验**：`git show 88d1f87` 全为 ` * ` 头注行（18+/11-，0 代码行）；四件套 2422/139/5750 + gate 6·5 零漂移（开波 = §8.63 波终，本批无测试增量）。
+- 四件套（S-E3 后终态）：tsc 0 / eslint 0 / build 0KB entry / 全量 **2422 pass·139 文件·5750 expect**（= §8.63 波终基线，零漂移）+ gate 6·5 不变。
+- **49 口径 29/49 → 49/49 收口**：29（本体落 C 桶 ① §8.53-§8.63）+ 11（本批 B/C 零本体登记）+ 2（Skill+LSP D 波重分类）+ 3（TeamCreate/TeamDelete/Snip C 桶 ③）+ 1（RemoteTrigger remote 波）+ 1（PowerShell 域外改判）+ 1（TestingPermission 关闭）+ 1（Agent E-2）= **49/49** ✓。C 桶 ① 归属 40/49（29 本体 + 11 登记）；余 9 = 他波/关闭/E-2 定论（前波已登记）。
+- 残留守登记（= 后续波，复审勿当遗漏）：③（remote 波）/ ⑨（C 桶 ③ shell/REPL）/ ⑬（D 波 LSP 域）/ ⑮（C 桶 ③ shell·swarm）/ ⑩ UDS inbox 本体（C 桶 ③）+ UDS 5 站点族（remote 波）。
+- 波 tag 不切（gate ③ 仍 `wave-c`）。**C 桶 ① 全闭环**（§8.57-§8.64，49 口径 49/49 收口）。下一步：**C 桶 ② auto-mode 纵切波**（task #139，~3030L 分类器族：getAutoToolSearchCharThreshold / modelSupportsToolReference / extractDiscoveredToolNames / DeferredToolsDelta 4 函数族 + tool_reference wire 面复活 + auto-mode 主分类器）。
