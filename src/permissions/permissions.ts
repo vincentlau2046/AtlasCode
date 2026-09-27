@@ -34,13 +34,18 @@
  *   - 旧仓 2a 二次 getAppState() 刷新裁——窄 context provider 顶部
  *     单次调用，无 appState 状态机。
  *
+ * 已落（§8.65 C 桶 ② 本波）：
+ *   ② dontAsk 模式 ask→deny 转换——applyDontAskMode 于 forceDecision / 1b /
+ *      1f / 1g / 3 终端各 ask 产点套用（§8.31 裁定 ①；文案单一事实源
+ *      ./denialMessages.ts）。
+ *   ③ 自动模式 AI 分类器纯逻辑面——autoMode 子域（transcript/xml/usage/
+ *      state/denials/approvals/allowlist/prompts 2 .txt 资产）已落；LLM 闭包
+ *      （classifyYoloAction 族）留守 → provider 波（前向接缝，见 autoMode 门面）。
  * 残留守（复审勿当遗漏重提）：
  *   ① 工具面 checkPermissions 实现半——Bash / PowerShell 工具本体
  *      checkPermissions 实现（bashPermissions 2471L / BashTool
  *      pathValidation 1303L）归工具本体波；本文件落分发机制半（鸭子
  *      可选，当前零活工具面消费者 = 休眠接缝，H6 前向声明非静默遗漏）。
- *   ② dontAsk 模式 ask→deny 转换（auto-mode 纵切波，§8.31 裁定 ①）。
- *   ③ 自动模式 AI 分类器（yoloClassifier 族整族留守 → auto-mode 纵切波）。
  *   ④ 连续拒绝跟踪（recordSuccess / persistDenialState）。
  *   ⑤ executePermissionRequestHooks —— hooks→permissions 反向边
  *      （§8.14 注入序 permissions 先于 hooks，E-wave-end 接回；当前 no-op）。
@@ -107,11 +112,15 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
   _toolUseID,
   forceDecision,
 ): Promise<PermissionDecision> => {
+  const permissionContext = context.getToolPermissionContext?.()
+
   if (forceDecision !== undefined) {
-    return forceDecision
+    // ② dontAsk 转换覆盖 forceDecision 早退：旧仓转换置于 inner 末端（「so it
+    // can't be bypassed by early returns」），forceDecision 为新仓独有早退产点，
+    // 不套则 dontAsk 态下 forced 'ask' 会 bypass ② 不变式（零活调用方，纯闭合）。
+    return applyDontAskMode(forceDecision, permissionContext, tool.name)
   }
 
-  const permissionContext = context.getToolPermissionContext?.()
   const sandbox = getSandboxAccess()
 
   // 1a. 整工具 deny 规则命中（含 mcp__server 前缀 / __* 通配，toolMatchesRule）
@@ -301,9 +310,11 @@ function getUpdatedInputOrFallback(
  * permissions.ts:490-504 逐字语义）：dontAsk 态下任何 'ask' 决策转 'deny'
  * （message = DONT_ASK_REJECT_MESSAGE 逐字，decisionReason = { mode: 'dontAsk' }）。
  * 旧仓在决策主体（inner）末端统一转换（「at the end so it can't be bypassed by
- * early returns」）；新仓决策主体含 1b/1f/1g 早退 ask 产点 + 3 终端 ask 产点，
- * 故在各 ask 产点统一套用本转换（语义 = 所有 ask 产点在 dontAsk 态均转 deny；
- * allow 产点 2a/2b/薄骨架不受影响，同旧仓仅转换 behavior==='ask'）。
+ * early returns」）；新仓决策主体含 forceDecision 早退 + 1b/1f/1g 早退 ask 产点
+ * + 3 终端 ask 产点，故在各 ask 产点（含 forceDecision 早退）统一套用本转换
+ * （语义 = 所有 ask 产点在 dontAsk 态均转 deny；allow 产点 2a/2b/薄骨架不受
+ * 影响，同旧仓仅转换 behavior==='ask'）。forceDecision 早退套转换 = 闭合新仓
+ * 独有早退产点（零活调用方传 forceDecision，纯闭合，非行为改动）。
  */
 function applyDontAskMode(
   decision: PermissionDecision,

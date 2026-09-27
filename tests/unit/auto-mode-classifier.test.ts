@@ -93,6 +93,7 @@ import type {
   Tools,
   Message,
   ToolPermissionContext,
+  PermissionDecision,
 } from '../../src/shared'
 
 /** 最小 Tool 假件（transcript 只读 name / aliases / toAutoClassifierInput）。 */
@@ -326,9 +327,11 @@ describe('XML 2 段分类器解析面', () => {
     expect(out).not.toContain(toolUseLine)
   })
 
-  test('XML_S1_SUFFIX / XML_S2_SUFFIX 非空常量', () => {
-    expect(XML_S1_SUFFIX.length).toBeGreaterThan(0)
-    expect(XML_S2_SUFFIX.length).toBeGreaterThan(0)
+  test('XML_S1_SUFFIX / XML_S2_SUFFIX 内容锚点（数据冻结，防提示词漂移）', () => {
+    expect(XML_S1_SUFFIX).toContain('Err on the side of blocking')
+    expect(XML_S1_SUFFIX).toContain('<block>')
+    expect(XML_S2_SUFFIX).toContain('follow it carefully')
+    expect(XML_S2_SUFFIX).toContain('<thinking>')
   })
 })
 
@@ -548,10 +551,9 @@ describe('分类器提示词数据 + 外部模板解析', () => {
 
   test('getDefaultExternalAutoModeRules 解析三节（allow / soft_deny / environment 均非空数组）', () => {
     const rules = getDefaultExternalAutoModeRules()
-    expect(Array.isArray(rules.allow)).toBe(true)
     expect(rules.allow.length).toBeGreaterThan(0)
-    expect(Array.isArray(rules.soft_deny)).toBe(true)
-    expect(Array.isArray(rules.environment)).toBe(true)
+    expect(rules.soft_deny.length).toBeGreaterThan(0)
+    expect(rules.environment.length).toBeGreaterThan(0)
   })
 
   test('buildDefaultExternalSystemPrompt 替换占位 + 3 user_* tag（无残留 tag）', () => {
@@ -567,8 +569,6 @@ describe('分类器提示词数据 + 外部模板解析', () => {
 describe('② dontAsk 模式 ask→deny 转换', () => {
   test('DONT_ASK_REJECT_MESSAGE 逐字（含 dontAsk 短语 + 拒绝引导）', () => {
     const msg = DONT_ASK_REJECT_MESSAGE('Bash')
-    expect(msg).toContain("running in don't ask mode")
-    expect(msg).toContain(DENIAL_WORKAROUND_GUIDANCE)
     expect(msg).toBe(
       `Permission to use Bash has been denied because Atlas is running in don't ask mode. ${DENIAL_WORKAROUND_GUIDANCE}`,
     )
@@ -592,5 +592,50 @@ describe('② dontAsk 模式 ask→deny 转换', () => {
       { getToolPermissionContext: () => contextWithMode('default') },
     )
     expect(decision.behavior).toBe('ask')
+  })
+
+  test('forceDecision 早退 ask →（mode dontAsk）→ deny（F1：② 覆盖新仓独有早退产点）', async () => {
+    const forcedAsk: PermissionDecision = {
+      behavior: 'ask',
+      message: 'forced ask',
+      decisionReason: { type: 'other', reason: 'forced' },
+    }
+    const decision = await hasPermissionsToUseTool(
+      probeTool,
+      {},
+      { getToolPermissionContext: () => contextWithMode('dontAsk') },
+      undefined,
+      'tu1',
+      forcedAsk,
+    )
+    expect(decision.behavior).toBe('deny')
+    expect(decision.decisionReason).toEqual({ type: 'mode', mode: 'dontAsk' })
+    expect(decision.message).toBe(DONT_ASK_REJECT_MESSAGE('Probe'))
+  })
+
+  test('1b ask 规则命中 →（mode dontAsk）→ deny（早退 ask 产点 ② 覆盖；default 对照证 1b 真达）', async () => {
+    const ctx = (mode: ToolPermissionContext['mode']) => ({
+      ...contextWithMode(mode),
+      alwaysAskRules: { session: ['Probe'] },
+    })
+    const dDefault = await hasPermissionsToUseTool(
+      probeTool,
+      {},
+      { getToolPermissionContext: () => ctx('default') },
+    )
+    // default 态 1b 命中 = ask 且 decisionReason 为 rule 型（非终端 mode 型），
+    // 证 1b 早退产点真达（fixture 错配会落终端 mode-reasoned ask → 本断言红）
+    expect(dDefault.behavior).toBe('ask')
+    expect(dDefault.decisionReason).toEqual({
+      type: 'rule',
+      rule: { source: 'session', ruleBehavior: 'ask', ruleValue: { toolName: 'Probe' } },
+    })
+    const dDontAsk = await hasPermissionsToUseTool(
+      probeTool,
+      {},
+      { getToolPermissionContext: () => ctx('dontAsk') },
+    )
+    expect(dDontAsk.behavior).toBe('deny')
+    expect(dDontAsk.decisionReason).toEqual({ type: 'mode', mode: 'dontAsk' })
   })
 })

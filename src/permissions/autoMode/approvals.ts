@@ -10,7 +10,12 @@
  * 裁剪 delta（复审勿当遗漏重提）：
  * ① 旧 `feature('BASH_CLASSIFIER')` / `feature('TRANSCRIPT_CLASSIFIER')` 门 → 新仓
  *    bun:bundle feature() 恒 false，保留门则全部 setter/getter 恒 no-op（无价值 + 不可测）。
- *    故新仓恒生效（门复活随 provider 波 ③ 接线时按需加回）。
+ *    故新仓恒生效（门复活随 provider 波 ③ 接线时按需加回）。两门裁后语义不同：
+ *    - TRANSCRIPT 门（yolo/auto-mode 支）：旧仓 ON_BY_DEFAULT 默认开 → 裁门 =
+ *      旧默认保真（行为不变）。
+ *    - BASH 门（set/getClassifierApproval）：旧仓默认关（非 ON_BY_DEFAULT）→ 裁门
+ *      = 真激活（旧默认下恒 no-op，新仓恒生效）。当前零活消费方（bash 分类器
+ *      本体未随迁，前向接缝），激活为惰性无副作用，登记防复审误判为遗漏。
  * ② 旧 `createSignal`（utils/signal.js）→ 子域本地 createSignal（permissions 域 L3 自治
  *    不 import engine/messaging；本地实现 subscribe/emit/clear 逐字语义，供
  *    subscribeClassifierChecking 消费——检查中指示 UI 面随 TUI 波）。

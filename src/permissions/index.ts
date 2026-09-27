@@ -17,7 +17,8 @@
  *   E-6 S-6b 工具面分发回填：1c 鸭子分发 / 1f 内容 ask / 1g safetyCheck /
  *   2a bypass + getUpdatedInputOrFallback / 3 passthrough→ask + ⑥ sandbox
  *   自动放行半落（dangerouslyDisableSandbox 守卫）；无上下文 = allow 薄骨架
- *   兼容；残留守：① 实现半 / ② dontAsk / ③ 分类器 / ④ denial 跟踪 /
+ *   兼容；② dontAsk 转换 + ③ 分类器纯逻辑面已落（§8.65，见下两行门面）；
+ *   残留守：① 实现半 / ③ 分类器 LLM 闭包（provider 波）/ ④ denial 跟踪 /
  *   ⑤ hooks 反向边 / ⑥ 窗口接线）
  * - permissionMode.ts：PermissionMode 常量族 + permissionModeFromString
  *   （E-4 S-4c1，旧仓 types/permissions 常量 + PermissionMode.ts fromString；
