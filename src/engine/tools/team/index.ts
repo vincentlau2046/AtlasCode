@@ -5,7 +5,9 @@
  * 覆盖：SendMessageTool 本体 + JSON schema 常量 + prompt 面 + Input/
  * Structured/Output duck 型 10 + TeamFileLoader 注入接缝（旧仓
  * tools/SendMessageTool 917L 本体 + prompt 49L + UI 30L + constants 1L
- * 裁剪随迁；UDS/bridge 面 4 站点 → remote 波，in-process 名路由 +
+ * 裁剪随迁；UDS/bridge 面 5 站点族 §8.68 S-E2a 复活（remote 域门 face，
+ * getSendMessagePrompt / schema to 描述 getter / checkPermissions /
+ * validate / call 各站 env-live），in-process 名路由 +
  * backfillObservableInput + team-file + gracefulShutdown 面 → C 桶 ③
  * shell·swarm 波，UI JSX → TUI 波，见各文件头注 delta ①-⑩）
  * + C 桶 ③ S-E2d D 类 3 工具（Snip 族位裁定归本族，见 snipTool.ts 头注）
@@ -35,7 +37,9 @@ export {
   type SendMessageToolUseContext,
   type TeamFile,
 } from './sendMessageTool'
-export { DESCRIPTION, PROMPT } from './sendMessagePrompt'
+// §8.68 S-E2a：prompt 面 = DESCRIPTION + PROMPT（gate-off 锚点）+
+// getSendMessagePrompt（门 face 每次访问重读 env-live）
+export { DESCRIPTION, PROMPT, getSendMessagePrompt } from './sendMessagePrompt'
 
 // ── C 桶 ③ shell·swarm 波 S-E2d（§8.66 补差侧）：D 类 3 工具（Snip
 // 族位裁定归 team/ 子域）+ TeamServices 注入接缝。prompt 伴随件 4 文件

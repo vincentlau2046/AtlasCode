@@ -6,13 +6,14 @@
  * 先例）：inputSchema 纯 JSON 化（旧 lazySchema z.object 3 字段 +
  * discriminatedUnion 3 型 → 纯 JSON anyOf）/ validateInput 6 检查面逐字
  * （to 空 / @ 含 / string 缺 summary / * structured / shutdown_response
- * target / shutdown_response reject 缺 reason；UDS 4 块裁（3 文案面，2 块
- * 共享同文案，delta ②））/
- * checkPermissions allow+updatedInput 单面（UDS bridge ask 面裁）/ call 2 参
- * 分发面（string → handleMessage/handleBroadcast / structured 3 型 guard；
- * UDS 双支 + in-process 名路由裁）/ mapToolResult jsonStringify 面 /
- * renderToolUseMessage 3 面 / prompt gate-off 锚点（PROMPT = 旧 getPrompt()
- * gate-off trim 结果逐字，delta ⑧）。
+ * target / shutdown_response reject 缺 reason；UDS 4 块 §8.68 S-E2a 门复活
+ * （3 文案面，2 块共享同文案，delta ②））/
+ * checkPermissions allow + UDS bridge ask 双支（§8.68 S-E2a 门复活）/
+ * call 2 参分发面（string → handleMessage/handleBroadcast / structured 3 型
+ * guard；UDS 双支 §8.68 门复活 + in-process 名路由裁）/ mapToolResult
+ * jsonStringify 面 / renderToolUseMessage 3 面 / description =
+ * getSendMessagePrompt（§8.68 门 face 每次访问重读；gate-off = PROMPT 逐字
+ * 锚点，delta ⑧）。
  *
  * 门控槽（49 口径 25/49 → 26/49，本子波首个专属门控槽）：
  * isEnabled = isAgentSwarmsEnabled（ATLAS_EXPERIMENTAL_AGENT_TEAMS env ∨
@@ -30,9 +31,20 @@
  *    父描述，纯 JSON 转写丢臂描述面，S-E3 A 路 F1 注）。
  *  ② UDS_INBOX 门族 5 站点（validate 站 4 块〔含 parseAddress 2 站〕+
  *    checkPermissions bridge ask 站 + call 站 postInterClaudeMessage/
- *    sendToUdsSocket 懒 require 2 站）全裁 → remote 波 [ATLAS-HOLD]（新仓 0-hit；gate-off 旧行为 = 恰本
- *    波落盘面）；parseAddress（utils/peerAddress）/ truncate / errorMessage
- *    3 依赖随裁（消费点全在裁面内，零活消费）。
+ *    sendToUdsSocket 懒 require 2 站）§8.62 全裁登记 remote 波 →
+ *    **§8.68 S-E2a 复活**（门 = isUdsInboxEnabled env opt-in 默认 OFF = 旧
+ *    编译期 gate-OFF 保真；门控站点每次访问重读门 env-live，schema to 描述面
+ *    = getter 每次访问重读〔旧 lazySchema per-eval live 等价，JSON.stringify /
+ *    structuredClone 均 invoke getter〕；address target 空检查旧 L617 非门控
+ *    恒运行 = 逐字保真）。依赖 3 件处置：parseAddress = remote 门面
+ *    re-export 单一事实源（swarm/peerAddress 逐字 21L；engine↛swarm L3 经
+ *    remote 门面保持）/ truncate = 本文件 truncatePreview 本地 ASCII 面（旧
+ *    width-aware → skillPrompt delta ② 先例同型）/ errorMessage = shared
+ *    门面；旧懒 require 2 站 = ESM 化静态 import（经 remote 门面）；
+ *    postInterClaudeMessage / sendToUdsSocket = 旧仓自身 any stub 逐字落
+ *    remote 域 stub 面〔H6：stub 非真行为，真实现新旧仓均 0-hit〕；call
+ *    bridge 支 success = result.ok ?? false 归一（旧 any stub {} →
+ *    undefined JSON 缺键面 → 新显式 false；message 面逐字）。
  *  ③ in-process 名路由块（旧 call L800-874：appState.agentNameRegistry +
  *    queuePendingMessage + resumeAgentBackground + isLocalAgentTask/
  *    isMainSessionTask + toAgentId + appState.tasks）裁 → C 桶 ③ shell·swarm
@@ -64,9 +76,11 @@
  *    槽 = 可选成员，留不实现；新 renderToolUseMessage `input ?? {}` 防御支
  *    （旧 UI.tsx 直读 input.message，undefined 抛 TypeError；新契约入参
  *    unknown → null，S-E3 A 路 F4 注）。
- *  ⑧ 旧 def description()/prompt() 双面 → 新 description() 单面 = PROMPT
- *    （web 族口径：本体不 import DESCRIPTION，短描述面经 team/ 子门面 +
- *    tools/ 门面 SEND_MESSAGE_DESCRIPTION 别名 re-export）。
+ *  ⑧ 旧 def description()/prompt() 双面 → 新 description() 单面 =
+ *    getSendMessagePrompt()（§8.68 S-E2a 门 face 每次访问重读；gate-off =
+ *    PROMPT 逐字锚点不变）（web 族口径：本体不 import DESCRIPTION，短描述
+ *    面经 team/ 子门面 + tools/ 门面 SEND_MESSAGE_DESCRIPTION 别名
+ *    re-export）。
  *  ⑨ validateInput/call 双站点 context duck = SendMessageToolUseContext（本
  *    文件新）：getAppState().teamContext? 3 字段 intra-duck 必填（新 getTeamName
  *    参面 { teamName: string } + 新 isTeamLead 参面 { leadAgentId: string }
@@ -82,6 +96,7 @@
  * ToolRegistryDeps.baseTools 消费方注入，注册表机制不变）。
  */
 import {
+  errorMessage,
   logForDebugging,
   type PermissionDecision,
   type Tool,
@@ -90,6 +105,14 @@ import {
   type ToolResultBlockParam,
   type ValidationResult,
 } from '../../../shared'
+import {
+  getReplBridgeHandle,
+  isReplBridgeActive,
+  isUdsInboxEnabled,
+  parseAddress,
+  postInterClaudeMessage,
+  sendToUdsSocket,
+} from '../../../remote'
 import {
   TEAM_LEAD_NAME,
   type BackendType,
@@ -108,7 +131,7 @@ import {
 } from '../../messaging'
 import { jsonStringify } from '../../session/json'
 import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
-import { PROMPT } from './sendMessagePrompt'
+import { getSendMessagePrompt } from './sendMessagePrompt'
 
 /** 结构化协议消息（旧 zod discriminatedUnion 3 型转写，delta ①：
  * semanticBoolean → boolean）。 */
@@ -189,15 +212,21 @@ export type SendMessageToolUseContext = {
 }
 
 /** 输入 JSON schema（旧 lazySchema z.object 3 字段逐字段转写，delta ①；
- * message 联合 = anyOf string + structured 3 型对象臂；gate-off to 描述 =
- * 旧非 UDS 支逐字，delta ②）。 */
+ * message 联合 = anyOf string + structured 3 型对象臂；to 描述 = 门 face
+ * getter〔gate-off = 旧非 UDS 支逐字，delta ② / §8.68 S-E2a〕）。 */
 export const SEND_MESSAGE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   type: 'object',
   properties: {
     to: {
       type: 'string',
-      description:
-        'Recipient: teammate name, or "*" for broadcast to all teammates',
+      // §8.68 S-E2a：to 描述门 face（旧 lazySchema feature('UDS_INBOX')
+      // per-eval live → getter 每次访问重读 isUdsInboxEnabled env-live；
+      // JSON.stringify / structuredClone 均 invoke getter，序列化面等价）
+      get description() {
+        return isUdsInboxEnabled()
+          ? 'Recipient: teammate name, "*" for broadcast, "uds:<socket-path>" for a local peer, or "bridge:<session-id>" for a Remote Control peer (use ListPeers to discover)'
+          : 'Recipient: teammate name, or "*" for broadcast to all teammates'
+      },
     },
     summary: {
       type: 'string',
@@ -266,6 +295,13 @@ export function setTeamFileLoader(loader: TeamFileLoader): void {
 
 export function resetTeamFileLoader(): void {
   teamFileLoader = async () => null
+}
+
+/** §8.68 delta ②：旧 utils truncate（width-aware '…' 尾标）→ 本地 ASCII 面
+ * （skillPrompt delta ② 先例同型：超宽 = slice(0, maxWidth - 1) + '…'）。 */
+function truncatePreview(text: string, maxWidth: number): string {
+  if (text.length <= maxWidth) return text
+  return text.slice(0, Math.max(0, maxWidth - 1)) + '…'
 }
 
 async function handleMessage(
@@ -584,7 +620,8 @@ async function handlePlanRejection(
 }
 
 // Tool 契约非参数化（readTool face 先例）；face 扩型 = checkPermissions
-// 返回型收窄（web face 先例；落盘面 = 纯 allow 单支，UDS ask 支 delta ② 裁）。
+// 返回型收窄（web face 先例；落盘面 = allow 单支 + UDS bridge ask 支
+// §8.68 S-E2a 门复活，delta ②）。
 type SendMessageToolFace = Tool & {
   checkPermissions(
     input: unknown,
@@ -626,9 +663,25 @@ export const SendMessageTool: SendMessageToolFace = {
   },
 
   async checkPermissions(input: unknown, _context: unknown) {
-    // delta ②：UDS_INBOX bridge ask 支（safetyCheck 跨机 prompt 注入
-    // bypass-immune 面）裁 → remote 波
-    return { behavior: 'allow' as const, updatedInput: input as SendMessageInput }
+    const i = input as SendMessageInput
+    // §8.68 S-E2a：UDS bridge ask 支（旧 L586 feature('UDS_INBOX') → 门
+    // isUdsInboxEnabled env opt-in，逐字旧 L586-600）
+    if (isUdsInboxEnabled() && parseAddress(i.to).scheme === 'bridge') {
+      return {
+        behavior: 'ask' as const,
+        message: `Send a message to Remote Control session ${i.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasHarness servers.`,
+        // safetyCheck (not mode) — permissions.ts guards this before both
+        // bypassPermissions (step 1g) and auto-mode's allowlist/classifier.
+        // Cross-machine prompt injection must stay bypass-immune.
+        decisionReason: {
+          type: 'safetyCheck' as const,
+          reason:
+            'Cross-machine bridge message requires explicit user consent',
+          classifierApprovable: false,
+        },
+      }
+    }
+    return { behavior: 'allow' as const, updatedInput: i }
   },
 
   async validateInput(
@@ -643,7 +696,19 @@ export const SendMessageTool: SendMessageToolFace = {
         errorCode: 9,
       }
     }
-    // delta ②：UDS address target 空检查（parseAddress 0-hit）裁
+    // §8.68 S-E2a：UDS address target 空检查（旧 L617 非门控恒运行逐字——
+    // 旧 gate-OFF 态亦检查，保真）
+    const addr = parseAddress(i.to)
+    if (
+      (addr.scheme === 'bridge' || addr.scheme === 'uds') &&
+      addr.target.trim().length === 0
+    ) {
+      return {
+        result: false,
+        message: 'address target must not be empty',
+        errorCode: 9,
+      }
+    }
     if (i.to.includes('@')) {
       return {
         result: false,
@@ -652,8 +717,45 @@ export const SendMessageTool: SendMessageToolFace = {
         errorCode: 9,
       }
     }
-    // delta ②：UDS bridge structured 拒绝 + 连接检查 / uds string 放行
-    // 2 检查面裁
+    // §8.68 S-E2a：UDS bridge 结构化拒绝（永久约束优先）+ 连接检查
+    // （旧 L631 门控面逐字，feature → isUdsInboxEnabled）
+    if (isUdsInboxEnabled() && parseAddress(i.to).scheme === 'bridge') {
+      // Structured-message rejection first — it's the permanent constraint.
+      // Showing "not connected" first would make the user reconnect only to
+      // hit this error on retry.
+      if (typeof i.message !== 'string') {
+        return {
+          result: false,
+          message:
+            'structured messages cannot be sent cross-session — only plain text',
+          errorCode: 9,
+        }
+      }
+      // postInterClaudeMessage derives from= via getReplBridgeHandle() —
+      // check handle directly for the init-timing window. Also check
+      // isReplBridgeActive() to reject outbound-only (CCR mirror) mode
+      // where the bridge is write-only and peer messaging is unsupported.
+      if (!getReplBridgeHandle() || !isReplBridgeActive()) {
+        return {
+          result: false,
+          message:
+            'Remote Control is not connected — cannot send to a bridge: target. Reconnect with /remote-control first.',
+          errorCode: 9,
+        }
+      }
+      return { result: true }
+    }
+    // §8.68 S-E2a：UDS string 早放行（旧 L658 门控面逐字）
+    if (
+      isUdsInboxEnabled() &&
+      parseAddress(i.to).scheme === 'uds' &&
+      typeof i.message === 'string'
+    ) {
+      // UDS cross-session send: summary isn't rendered (UI.tsx returns null
+      // for string messages), so don't require it. Structured messages fall
+      // through to the rejection below.
+      return { result: true }
+    }
     if (typeof i.message === 'string') {
       if (!i.summary || i.summary.trim().length === 0) {
         return {
@@ -672,7 +774,15 @@ export const SendMessageTool: SendMessageToolFace = {
         errorCode: 9,
       }
     }
-    // delta ②：UDS structured cross-session 拒绝面裁
+    // §8.68 S-E2a：UDS structured cross-session 拒绝面（旧 L685 门控面逐字）
+    if (isUdsInboxEnabled() && parseAddress(i.to).scheme !== 'other') {
+      return {
+        result: false,
+        message:
+          'structured messages cannot be sent cross-session — only plain text',
+        errorCode: 9,
+      }
+    }
 
     if (i.message.type === 'shutdown_response' && i.to !== TEAM_LEAD_NAME) {
       return {
@@ -698,8 +808,9 @@ export const SendMessageTool: SendMessageToolFace = {
   },
 
   async description(): Promise<string> {
-    // delta ⑧：旧 prompt() 面 → PROMPT（gate-off 锚点逐字）
-    return PROMPT
+    // delta ⑧ + §8.68 S-E2a：旧 prompt() 面 → getSendMessagePrompt()
+    // （门 face 每次访问重读 env-live；gate-off = PROMPT 逐字锚点）
+    return getSendMessagePrompt()
   },
 
   mapToolResultToToolResultBlockParam(
@@ -721,7 +832,59 @@ export const SendMessageTool: SendMessageToolFace = {
   async call(args: unknown, context: unknown) {
     const input = args as SendMessageInput
     const ctx = context as SendMessageToolUseContext
-    // delta ②：UDS_INBOX bridge/uds 2 支裁 → remote 波
+    // §8.68 S-E2a：UDS bridge/uds 2 支（旧 L742 门控面逐字；懒 require →
+    // 静态 import ESM 化，经 remote 门面）
+    if (isUdsInboxEnabled() && typeof input.message === 'string') {
+      const udsAddr = parseAddress(input.to)
+      if (udsAddr.scheme === 'bridge') {
+        // Re-check handle — checkPermissions blocks on user approval (can be
+        // minutes). validateInput's check is stale if the bridge dropped
+        // during the prompt wait; without this, from="unknown" ships.
+        // Also re-check isReplBridgeActive for outbound-only mode.
+        if (!getReplBridgeHandle() || !isReplBridgeActive()) {
+          return {
+            data: {
+              success: false,
+              message: `Remote Control disconnected before send — cannot deliver to ${input.to}`,
+            },
+          }
+        }
+        const result = await postInterClaudeMessage(
+          udsAddr.target,
+          input.message,
+        )
+        const preview = input.summary || truncatePreview(input.message, 50)
+        // delta ②：result.ok ?? false 归一（旧 any stub {} → undefined
+        // JSON 缺键面 → 新显式 false；message 面逐字）
+        return {
+          data: {
+            success: result.ok ?? false,
+            message: result.ok
+              ? `“${preview}” → ${input.to}`
+              : `Failed to send to ${input.to}: ${result.error ?? 'unknown'}`,
+          },
+        }
+      }
+      if (udsAddr.scheme === 'uds') {
+        try {
+          await sendToUdsSocket(udsAddr.target, input.message)
+          const preview = input.summary || truncatePreview(input.message, 50)
+          return {
+            data: {
+              success: true,
+              message: `“${preview}” → ${input.to}`,
+            },
+          }
+        } catch (e) {
+          return {
+            data: {
+              success: false,
+              message: `Failed to send to ${input.to}: ${errorMessage(e)}`,
+            },
+          }
+        }
+      }
+    }
     // delta ③：in-process 名路由块裁 → C 桶 ③ shell·swarm 波
     if (typeof input.message === 'string') {
       if (input.to === '*') {

@@ -845,7 +845,7 @@ export {
 
 // ── S-E2（§8.62）：team 子域（SendMessageTool 本体 + JSON schema + prompt
 // 面 + TeamFileLoader 接缝；名字常量 SEND_MESSAGE_TOOL_NAME 由 toolNames
-// 块 seed 不重出；UDS/bridge 面 4 站点 → remote 波 / in-process 名路由 +
+// 块 seed 不重出；UDS/bridge 面 5 站点族 §8.68 S-E2a 复活（remote 域）/ in-process 名路由 +
 // team-file + gracefulShutdown 面 → C 桶 ③ shell·swarm 波；泛型 Output 5 型
 // 族（MessageRouting/MessageOutput/BroadcastOutput/RequestOutput/
 // ResponseOutput）留 team/ 子门面 = tools/ 根门面仅 namespaced 导出面
