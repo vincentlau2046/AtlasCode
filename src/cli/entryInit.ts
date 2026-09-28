@@ -247,6 +247,12 @@ export function initializeEntrypoint(isNonInteractive: boolean): void {
     return
   }
   if (process.env.ATLAS_ACTION) {
+    // S-C5 修波 B3 登记（值域 token，非缺陷）：'claude-code-github-action' =
+    // 旧仓 main.tsx L473 逐字随迁的 entrypoint 值域 token（env 变量名合规
+    // 单一 ATLAS_ 前缀，残留仅在值域）。rebrand 归品牌 pass（同 dispatch.ts
+    // clientType 'claude-vscode'/'claude-desktop' 值域登记模式）——改值须
+    // 协同消费面（session/paths.ts entrypoint 判别 / dispatch clientType 族），
+    // 本波仅登记不改。
     process.env.ATLAS_ENTRYPOINT = 'claude-code-github-action'
     return
   }
