@@ -78,12 +78,6 @@ export function parseMcpJsonConfig(raw: unknown): McpJsonConfig | null {
   return parsed.success ? parsed.data : null
 }
 
-/**
- * 最小 2 源发现（§8.68 R2 裁定）：settings record（scope 'user'）+
- * 项目 .mcp.json（scope 'project'）。同名冲突 = project 源优先
- * （旧仓发现链 project/local 先于 user 的就近原则同向；2 源面内
- * project 更具体）。
- */
 // ── 发现输入注入窗（S-E2d 组合根 ⑭ 供给面；LSP setLspServerSource 先例
 // 同型：域窗口 + 组合根注册 + 测试 fake 注入面；未注册 = null = 组合根
 // 缺省发现（settings + .mcp.json），fail-soft 语义不变）─────────────
@@ -100,6 +94,12 @@ export function getMcpDiscoveryInput(): McpDiscoveryInput | null {
   return discoveryInput
 }
 
+/**
+ * 最小 2 源发现（§8.68 R2 裁定）：settings record（scope 'user'）+
+ * 项目 .mcp.json（scope 'project'）。同名冲突 = project 源优先
+ * （旧仓发现链 project/local 先于 user 的就近原则同向；2 源面内
+ * project 更具体）。
+ */
 export async function buildMcpServerConfigs(
   input: McpDiscoveryInput,
 ): Promise<Record<string, ScopedMcpServerConfig>> {
