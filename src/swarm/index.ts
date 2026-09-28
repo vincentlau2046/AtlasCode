@@ -292,6 +292,11 @@ export { wireBackends } from './backends/wireBackends'
 export {
   startInProcessTeammate,
   runInProcessTeammate,
+  // delta ⑭ 接缝回填（S-E2d）：agent 注册表 + TPC/gate 消费端面。
+  buildTeammateSystemPrompt,
+  resolveTeammateAgentFace,
+  createTeammateTpcBuilder,
+  createInProcessPermissionGate,
   type InProcessRunnerConfig,
   type InProcessRunnerResult,
 } from './inProcessRunner'

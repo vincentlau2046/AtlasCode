@@ -47,8 +47,8 @@
  *      default = TEAMMATE_SYSTEM_PROMPT_ADDENDUM（+ append 支 systemPrompt）；
  *      InProcessBackend spawn 支通常传显式 systemPrompt（replace 模式），default
  *      支为兜底。旧 agentDefinition 自定义 def 的 `# Custom Agent Instructions`
- *      追加面随 agentDefinition 参数裁除（port 输入面无该字段；自定义 agent
- *      注册表归 D 波）。
+ *      追加面随 agentDefinition 参数裁除——S-E2d 接缝回填已落（port
+ *      agentDefinition 字段 + buildTeammateSystemPrompt 自定义支，本条闭环）。
  *   ② R2 逐消息消费族整裁：progress tracker（createProgressTracker /
  *      updateProgressFromMessage / getProgressUpdate /
  *      createActivityDescriptionResolver）/ inProgressToolUseIDs 追踪 /
@@ -88,8 +88,9 @@
  *      未设窗 fail-soft 零 deps 最小池。MCP/Ascend 池随注入 deps 面
  *      传导，in-process teammate 不单独继承父 MCP 池，登记）。
  *      旧 agentDefinition?.tools 的 7 工具名 Set-union 语义（自定义 def 限定池
- *      时保底 team-essential 7 件）随 agentDefinition 参数裁除（D 波 agent
- *      注册表落时随 def.tools 一并回填，登记）。
+ *      时保底 team-essential 7 件）随 agentDefinition 参数裁除——S-E2d 接缝
+ *      回填已落（resolveTeammateAgentFace def.tools Set-union + resolveAgentTools
+ *      池限制面，本条闭环）。
  *   ⑬ 描述面 isNonInteractiveSession 硬编码 true（S-E2d 初版）→ S-E3 A 路
  *      minor 1 修波：改读 bootstrap getIsNonInteractiveSession()（旧仓
  *      L182 toolUseContext.options.isNonInteractiveSession 同源 = 父会话
@@ -98,8 +99,17 @@
  *      （S-E3 A 路 minor 3 核销：新 hub 零消费，旧生产调用方恒未设——
  *      旧 L1178 canShowPermissionPrompts ?? true / L1185 池 Set-union
  *      消费端随 delta ①⑧ 裁面归 D 波 agent 注册表 / leader 权限面波
- *      回填；inProcessRunnerPort.ts 字段注 + InProcessBackend 透传点
- *      双站点登记，零行为差）。
+ *      回填）——S-E2d 接缝回填已落，两参转活消费端（本条闭环）：
+ *      allowedTools → createTeammateTpcBuilder session alwaysAllow 规则
+ *      （旧 runAgent L475-488 session 规则语义逐字，session 规则 ≠ 池限制，
+ *      cliArg 保留支 = hub TPC 本地构造恒空零差登记）；allowPermissionPrompts
+ *      → canShowPermissionPrompts ?? true（旧 L1178 逐字）=== false →
+ *      TPC.shouldAvoidPermissionPrompts（旧 runAgent L450-459 isAsync 显式支
+ *      语义；新仓权限决策体无该 flag 消费端 → gate ask 支 auto-deny 为唯一
+ *      消费点，无交互提示）；旧 isAsync awaitAutomatedChecksBeforeDialog 支
+ *      随 delta ③ BASH_CLASSIFIER/hooks 自动检查面裁除（新仓零消费端，登记）。
+ *      agent 注册表输入面 = port agentDefinition 字段（buildTeammateSystemPrompt
+ *      自定义指令支 + resolveTeammateAgentFace 池限制/model 传播，见 delta ①⑧）。
  *   ⑨ LOCAL 常量 TEAMMATE_MESSAGE_TAG = 'teammate-message'（旧 constants/xml.ts:52
  *      逐字；新仓无 xml 常量域，域内本地镜像，单一消费点本文件）。
  *   ⑩ onPermissionWaitMs 回调 + task 态 totalPausedMs 记账支整裁：新
@@ -174,6 +184,16 @@ import {
   listTasks,
   claimTask,
   updateTask,
+  // delta ⑭ agent 注册表回填（S-E2d）：池限制面 = agent 域 resolveAgentTools
+  // + team-essential 7 件名（Set-union 保底，旧 L966-980 逐字）。
+  resolveAgentTools,
+  SEND_MESSAGE_TOOL_NAME,
+  TEAM_CREATE_TOOL_NAME,
+  TEAM_DELETE_TOOL_NAME,
+  TASK_CREATE_TOOL_NAME,
+  TASK_GET_TOOL_NAME,
+  TASK_LIST_TOOL_NAME,
+  TASK_UPDATE_TOOL_NAME,
   type AgentDefinition,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
@@ -236,6 +256,129 @@ function buildTeammateToolPermissionContext(
   }
 }
 
+/**
+ * delta ⑭ 接缝回填（S-E2d）：teammate 系统提示词构造（旧 inProcessRunner
+ * L915-955 逐字）。replace 支 = systemPrompt 逐字（无 addendum / 无自定义
+ * 追加，旧逐字）；default/append 支 = ADDENDUM + 自定义 def 提示词追加
+ *（旧 L937-947：`\n# Custom Agent Instructions\n${customPrompt}`；旧
+ * agentDefinition.memory 空支（analytics 事件）随 delta ② 裁除，新
+ * AgentDefinition 无 memory 字段）+ append 支 systemPrompt。新
+ * getSystemPrompt 可异步（AgentDefinition 契约）→ await。
+ */
+export async function buildTeammateSystemPrompt(opts: {
+  systemPrompt?: string
+  systemPromptMode?: 'default' | 'replace' | 'append'
+  agentDefinition?: InProcessRunnerConfig['agentDefinition']
+}): Promise<string> {
+  const { systemPrompt, systemPromptMode, agentDefinition } = opts
+  if (systemPromptMode === 'replace' && systemPrompt) {
+    return systemPrompt
+  }
+  const systemPromptParts = [TEAMMATE_SYSTEM_PROMPT_ADDENDUM]
+  if (agentDefinition) {
+    // delta ⑭（旧 L937-947 逐字；新面可异步 → await）。
+    const customPrompt = await agentDefinition.getSystemPrompt({})
+    if (customPrompt) {
+      systemPromptParts.push(`\n# Custom Agent Instructions\n${customPrompt}`)
+    }
+  }
+  if (systemPromptMode === 'append' && systemPrompt) {
+    systemPromptParts.push(systemPrompt)
+  }
+  return systemPromptParts.join('\n')
+}
+
+/**
+ * delta ⑭ 接缝回填（S-E2d）：teammate agent 定义 + 工具池解析（纯函数：
+ * basePool 注入）。def.tools = def.tools ∪ team-essential 7 件 Set-union
+ *（旧 L966-980 逐字：teammate 即使显式工具清单也总能响应 shutdown 请求 /
+ * 发消息 / 经任务列表面协调）；无自定义 def → undefined ≡ 旧 ['*'] 通配
+ *（resolveAgentTools 通配支全量池，剔 agent 禁用集，旧 resolveAgentTools
+ * 机制逐字）。model = 旧 L984 传播（ModelAlias → ModelRole 面；新
+ * resolveRole 优先级 overrideRole > def.model > parentRole，overrideRole
+ * 由 runAgent 调用参单独传，本函数不掺 config.model）。disallowedTools
+ * 透传（禁用集剔除消费端，旧 resolveAgentTools 逐字）。
+ */
+export function resolveTeammateAgentFace(params: {
+  identity: TeammateIdentity
+  teammateSystemPrompt: string
+  agentDefinition?: InProcessRunnerConfig['agentDefinition']
+  basePool: Tools
+}): { def: AgentDefinition; tools: Tools } {
+  const { identity, teammateSystemPrompt, agentDefinition, basePool } = params
+  const def: AgentDefinition = {
+    agentType: identity.agentName,
+    whenToUse: `In-process teammate: ${identity.agentName}`,
+    getSystemPrompt: () => teammateSystemPrompt,
+    // delta ⑥：source 'projectSettings' → 'user'（新三态联合，逐字）。
+    source: 'user',
+    // delta ⑭（旧 L966-980 逐字）：Set-union 保底；无 def → undefined 通配。
+    tools: agentDefinition?.tools
+      ? [
+          ...new Set([
+            ...agentDefinition.tools,
+            SEND_MESSAGE_TOOL_NAME,
+            TEAM_CREATE_TOOL_NAME,
+            TEAM_DELETE_TOOL_NAME,
+            TASK_CREATE_TOOL_NAME,
+            TASK_GET_TOOL_NAME,
+            TASK_LIST_TOOL_NAME,
+            TASK_UPDATE_TOOL_NAME,
+          ]),
+        ]
+      : undefined,
+    // delta ⑭（旧 L984 逐字，条件 spread 保留）：自定义 def 面透传。
+    ...(agentDefinition?.disallowedTools
+      ? { disallowedTools: agentDefinition.disallowedTools }
+      : {}),
+    ...(agentDefinition?.model ? { model: agentDefinition.model } : {}),
+  }
+  // 池限制面 = agent 域 resolveAgentTools（旧 runAgent L510-517 消费端逐字：
+  // useExactTools 未设 → resolveAgentTools(agentDefinition, availableTools)；
+  // 无效 spec 静默剔除落 invalidTools，旧机制逐字）。
+  const tools: Tools = resolveAgentTools(def, basePool).resolvedTools
+  return { def, tools }
+}
+
+/**
+ * delta ⑭ 接缝回填（S-E2d）：teammate TPC 工厂（旧 runAgent L475-488
+ * session 规则 + L450-459 shouldAvoidPrompts 语义逐字）。基 = live appState
+ * mode 最小 TPC（buildTeammateToolPermissionContext）+ allowedTools →
+ * alwaysAllowRules.session（session 规则 ≠ 池限制；cliArg 保留支：hub TPC
+ * 本地构造 cliArg map 恒空，保留语义零差登记）+ avoidPermissionPrompts →
+ * shouldAvoidPermissionPrompts（新仓权限决策体无该 flag 消费端 → gate ask
+ * 支 auto-deny 为唯一消费点）。
+ */
+export function createTeammateTpcBuilder(
+  getAppState: () => TeammateToolState,
+  opts?: {
+    allowedTools?: string[]
+    avoidPermissionPrompts?: boolean
+  },
+): () => ToolPermissionContext {
+  return () => {
+    // 不可变合并（shared ToolPermissionContext 规则 map 只读面）：基 = live
+    // appState mode 最小 TPC + 条件 spread 两字段。
+    const base = buildTeammateToolPermissionContext(
+      getAppState().toolPermissionContext,
+    )
+    return {
+      ...base,
+      ...(opts?.allowedTools !== undefined
+        ? {
+            alwaysAllowRules: {
+              ...base.alwaysAllowRules,
+              session: [...opts.allowedTools],
+            },
+          }
+        : {}),
+      ...(opts?.avoidPermissionPrompts
+        ? { shouldAvoidPermissionPrompts: true }
+        : {}),
+    }
+  }
+}
+
 /** 本地窄助手消息（裁面族：旧 createAssistantAPIErrorMessage 全形裁除，仅 interrupt 支消费）。 */
 function createAssistantAPIErrorMessage(content: string): Message {
   return {
@@ -262,20 +405,28 @@ const sleep = (ms: number): Promise<void> =>
  * sends a permission request to the leader's inbox, waits for the response
  * in the teammate's own mailbox.
  */
-function createInProcessPermissionGate(
+export function createInProcessPermissionGate(
   identity: TeammateIdentity,
   abortController: AbortController,
   tools: Tools,
   getAppState: () => TeammateToolState,
+  /**
+   * delta ⑭ 消费端注入（S-E2d 接缝回填）：TPC 工厂（createTeammateTpcBuilder
+   * 产物：session alwaysAllow 规则 + shouldAvoidPermissionPrompts 预合并）。
+   * 未设 = 回填前行为（本地最小 TPC，规则空 map，leader 队列 / mailbox
+   * 双支零规则面）。
+   */
+  buildTpc?: () => ToolPermissionContext,
 ): PermissionGate {
+  const effectiveBuildTpc =
+    buildTpc ??
+    (() => buildTeammateToolPermissionContext(getAppState().toolPermissionContext))
   return async (tool, input) => {
     // 每请求合成队列去重键 + mailbox toolUseId（delta ⑤）。
     const toolUseKey = `inproc-${randomUUID()}`
 
     const appState = getAppState()
-    const tpc = buildTeammateToolPermissionContext(
-      appState.toolPermissionContext,
-    )
+    const tpc = effectiveBuildTpc()
 
     const decision = await decidePermission(tool, input, tpc)
 
@@ -303,6 +454,14 @@ function createInProcessPermissionGate(
     })
 
     if (abortController.signal.aborted) {
+      return { allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE }
+    }
+
+    // delta ⑭ 消费端（旧 L1178 + runAgent L450-459 语义）：
+    // allowPermissionPrompts === false → TPC.shouldAvoidPermissionPrompts →
+    // ask 支 auto-deny（无交互提示；新仓权限决策体无该 flag 消费端，gate
+    // 为唯一消费点；leader 队列 / mailbox 两支均不进）。
+    if (tpc.shouldAvoidPermissionPrompts) {
       return { allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE }
     }
 
@@ -384,9 +543,9 @@ function createInProcessPermissionGate(
             const freshResult = await decidePermission(
               tool,
               input,
-              buildTeammateToolPermissionContext(
-                getAppState().toolPermissionContext,
-              ),
+              // delta ⑭：recheck 走同一 TPC 工厂（session 规则 / flag 预合并面
+              // 与主决策同源，live appState 重读）。
+              effectiveBuildTpc(),
             )
             if (freshResult.behavior === 'allow') {
               decisionMade = true
@@ -944,6 +1103,10 @@ export async function runInProcessTeammate(
     model,
     systemPrompt,
     systemPromptMode,
+    // delta ⑭ 消费端（S-E2d 接缝回填，port 死透传 → 活消费端，见 delta ⑭）。
+    allowedTools,
+    allowPermissionPrompts,
+    agentDefinition,
   } = config
   const { setAppState, getAppState } = toolUseContext
 
@@ -962,38 +1125,40 @@ export async function runInProcessTeammate(
     `[inProcessRunner] Starting agent loop for ${identity.agentId}`,
   )
 
-  // Build system prompt based on systemPromptMode（delta ① 登记）。
-  let teammateSystemPrompt: string
-  if (systemPromptMode === 'replace' && systemPrompt) {
-    teammateSystemPrompt = systemPrompt
-  } else {
-    const systemPromptParts = [TEAMMATE_SYSTEM_PROMPT_ADDENDUM]
-    // Append mode: add provided system prompt after default
-    if (systemPromptMode === 'append' && systemPrompt) {
-      systemPromptParts.push(systemPrompt)
-    }
-    teammateSystemPrompt = systemPromptParts.join('\n')
-  }
+  // Build system prompt based on systemPromptMode（delta ①/⑭ 登记）。
+  const teammateSystemPrompt = await buildTeammateSystemPrompt({
+    systemPrompt,
+    systemPromptMode,
+    agentDefinition,
+  })
 
-  // Resolve agent definition - use full system prompt with teammate addendum.
-  // delta ⑥：source 'projectSettings' → 'user'（新三态联合）。
-  const resolvedAgentDefinition: AgentDefinition = {
-    agentType: identity.agentName,
-    whenToUse: `In-process teammate: ${identity.agentName}`,
-    getSystemPrompt: () => teammateSystemPrompt,
-    source: 'user',
-    // delta ⑧：team-essential 7 件 Set-union 随 agentDefinition 参数裁除
-    // （D 波 agent 注册表回填）；无自定义 def → 全量池。
-    model: overrideRole,
-  }
+  // delta ⑭ 消费端（旧 L1178 逐字）：canShowPermissionPrompts =
+  // allowPermissionPrompts ?? true（=== false → TPC.shouldAvoidPermissionPrompts
+  // → gate ask 支 auto-deny，无交互提示）。
+  const canShowPermissionPrompts = allowPermissionPrompts ?? true
+  // delta ⑭ 消费端（旧 runAgent L475-488 session 规则语义逐字）：
+  // allowedTools → session alwaysAllow 规则（非池限制）+ flag 预合并。
+  const buildTeammateTpc = createTeammateTpcBuilder(getAppState, {
+    allowedTools,
+    avoidPermissionPrompts: !canShowPermissionPrompts,
+  })
 
-  // 工具池（delta ⑧ 回填 S-E3 A 路 blocker）：getTools(最小 TPC,
-  // teammate deps 注入窗) = 父会话等价池 + deny 过滤 + isEnabled（旧 L1184
-  // options.tools 等价面；窗未设 = 零 deps 最小池 fail-soft，登记）。
-  const tools: Tools = getTools(
+  // Agent 定义 + 工具池（delta ⑥⑧⑭ 登记）：基础池 = getTools(最小 TPC,
+  // teammate deps 注入窗) ≡ 父会话 loop 池（旧 L1184 options.tools 等价面；
+  // 窗未设 = 零 deps 最小池 fail-soft，登记）；def / 池限制 =
+  // resolveTeammateAgentFace（旧 L966-984 + runAgent L510-517 消费端逐字：
+  // 自定义 def tools ∪ team-essential 7 件 Set-union / 无 def → 通配全量池 /
+  // model 传播 / 禁用集剔除）。
+  const basePool: Tools = getTools(
     buildTeammateToolPermissionContext(getAppState().toolPermissionContext),
     getTeammateToolRegistryDeps(),
   )
+  const { def: resolvedAgentDefinition, tools } = resolveTeammateAgentFace({
+    identity,
+    teammateSystemPrompt,
+    agentDefinition,
+    basePool,
+  })
 
   // All messages across all prompts
   const allMessages: Message[] = []
@@ -1152,6 +1317,9 @@ export async function runInProcessTeammate(
             currentWorkAbortController,
             tools,
             getAppState,
+            // delta ⑭ 消费端注入：session 规则 / shouldAvoidPermissionPrompts
+            // 预合并 TPC 工厂（gate ask 支 auto-deny 消费点）。
+            buildTeammateTpc,
           ),
         })
 

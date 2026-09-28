@@ -18,6 +18,7 @@
  * `{...this.context, messages: []}` 剥离产物——S-E2d 消费端经 engine 门面
  * 适配，接缝类型 = 生产端产物形，单一事实源在本文件）。
  */
+import type { AgentDefinition } from '../../engine'
 import type { Message } from '../../shared'
 import type { TeammateIdentity } from '../../task'
 import type { TeammateContext } from '../teammateContext'
@@ -42,20 +43,38 @@ export type StartInProcessTeammateArgs = {
   systemPrompt?: string
   systemPromptMode?: 'default' | 'replace' | 'append'
   /**
-   * 登记死透传（S-E3 A 路 minor 3 核销，inProcessRunner delta ⑭）：新 hub
-   * 零消费——旧消费端 = 工具池 7 工具名 Set-union（旧 inProcessRunner.ts:1185，
-   * 随 delta ①⑧ agentDefinition 参数裁面归 D 波 agent 注册表回填）。
-   * 旧生产调用方恒未设（undefined）→ 透传零行为差，不删字段（后端 config
-   * 面公共形保留）。
+   * delta ⑭ 消费端（S-E2d 接缝回填，旧 runAgent L475-488 session 规则语义
+   * 逐字）：allowedTools → TPC alwaysAllowRules.session（session 规则 ≠ 池
+   * 限制；cliArg 保留支 = hub TPC 本地构造 cliArg map 恒空，零差登记）。
+   * 生产调用方 = InProcessBackend config.permissions 透传（活消费端；旧仓
+   * 同站点透传，逐字）。
    */
   allowedTools?: string[]
   /**
-   * 登记死透传（S-E3 A 路 minor 3 核销，inProcessRunner delta ⑭）：新 hub
-   * 零消费——旧消费端 = canShowPermissionPrompts（旧 inProcessRunner.ts:1178，
-   * leader-queue vs mailbox 回退选择面 = 新 hub createInProcessPermissionGate
-   * bridge 在场检查）；旧生产调用方恒未设（?? true 恒生效）→ 零行为差。
+   * delta ⑭ 消费端（S-E2d 接缝回填，旧 inProcessRunner.ts:1178 逐字）：
+   * canShowPermissionPrompts = allowPermissionPrompts ?? true；=== false →
+   * TPC.shouldAvoidPermissionPrompts（旧 runAgent L450-459 isAsync 显式支
+   * 语义）→ gate ask 支 auto-deny（无交互提示；新仓权限决策体无该 flag
+   * 消费端，gate 为唯一消费点）。生产调用方 = InProcessBackend
+   * config.allowPermissionPrompts 透传（?? true 缺省恒活提示面，零行为差
+   * 不变）。
    */
   allowPermissionPrompts?: boolean
+  /**
+   * delta ⑭ agent 注册表回填（S-E2d）：自定义 agent 定义 duck 面（= 新
+   * engine AgentDefinition 消费面 Pick：getSystemPrompt 自定义指令追加支 /
+   * tools 池限制（∪ team-essential 7 件 Set-union 保底）/ disallowedTools
+   * 禁用集剔除 / model 角色传播）。旧 CustomAgentDefinition 的
+   * memory/permissionMode 字段随 delta ②⑥⑦ 裁除（新 AgentDefinition 无该
+   * 字段，memory 空支 analytics 面随遥测 #143 波）。生产调用方零设值（旧
+   * spawn 路径零命中，注册表输入面保留；消费端 = hub
+   * buildTeammateSystemPrompt + resolveTeammateAgentFace，未设 = 全量池 +
+   * 无自定义指令支，零行为差）。
+   */
+  agentDefinition?: Pick<
+    AgentDefinition,
+    'getSystemPrompt' | 'tools' | 'disallowedTools' | 'model'
+  >
 }
 
 export type StartInProcessTeammateFn = (args: StartInProcessTeammateArgs) => void

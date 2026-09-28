@@ -140,8 +140,11 @@ export class InProcessBackend implements TeammateExecutor {
         model: config.model,
         systemPrompt: config.systemPrompt,
         systemPromptMode: config.systemPromptMode,
-        // 登记死透传（S-E3 A 路 minor 3，port 字段注 + inProcessRunner
-        // delta ⑭ 双站点登记）：新 hub 零消费，旧生产调用方恒未设，零行为差。
+        // delta ⑭ 消费端（S-E2d 接缝回填，双站点登记闭环）：旧仓同站点透传
+        // 逐字——allowedTools → hub TPC session alwaysAllow 规则 /
+        // allowPermissionPrompts → gate ask 支 auto-deny 面（hub delta ⑭）。
+        // agentDefinition 未透传：TeammateSpawnConfig 无该字段（旧仓生产 spawn
+        // 路径亦零设值，注册表输入面 = port 字段保留，消费端 = hub，登记）。
         allowedTools: config.permissions,
         allowPermissionPrompts: config.allowPermissionPrompts,
       })
