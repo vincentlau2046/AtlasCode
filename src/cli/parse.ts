@@ -10,13 +10,18 @@
  *   - --advisor（canUserConfigureAdvisor advisor 面域外）/ --teleport·--remote
  *     （remote 族波）/ --remote-control·--rc（BRIDGE_MODE 桥面 [ATLAS-HOLD]）
  *   - --sdk-url 消费支（CCR 域外；选项注册保留为惰性数据，消费裁）
- *   - 子命令域外子集（不注册）：server / ssh / open（remote 族波）·
+ *   - 子命令域外子集（不注册）：server（remote 族波；旧仓 = cc:// URL 改写
+ *     面，无 command('server') 注册）· ssh / open（订正 #27：旧仓 main.tsx
+ *     无 command('ssh')/command('open') 注册，仅 L3113 cc:// 注释提及 open，
+ *     原登记「ssh/open 子命令」前提不实——无旧命令面可裁）·
  *     plugin·marketplace 全族（新仓无 plugin 域，plugin 域波）· agents
  *     （agent 定义 loader 缺席，残留守）· auth 全族（订阅车道裁 [ATLAS-HOLD]，
  *     新仓 auth 车道 = OpenAI 静态键，无账号面）· doctor / update / install
  *     （版本管理方案波）· setup-token（订阅裁）· mcp add-from-claude-desktop
  *     （无 Desktop 面）· mcp xaa-idp（isXaaEnabled XAA 面域外）· bg / up /
- *     rollback（旧仓 de-ANT no-op 存根不迁，H6 防空洞）
+ *     rollback（订正 #29：旧仓 src/cli/{bg,up,rollback}.ts 文件在场但无
+ *     commander 子命令注册面，未接线；H6 防空洞 = 无可迁命令面，非「de-ANT
+ *     no-op 存根命令」）
  *   preAction hook 裁（面未落盘，前向接缝）：
  *   - ensureMdmSettingsLoaded / ensureKeychainPrefetchCompleted（MDM/keychain
  *     面残留守）/ init()（组合根启动 init = S-C3/S-C4）/ initSinks（logEvent
@@ -34,8 +39,20 @@
  *     （新仓 modelprovider = OpenAI 静态键车道，3P 异构已清）。
  *   - auto-mode 注册：旧 getAutoModeEnabledStateIfCached() 缓存态短路支裁（新仓
  *     缺席；feature('TRANSCRIPT_CLASSIFIER') 门保留，ON_BY_DEFAULT 恒开）。
+ *   S-C5 修波 delta 登记（双路复审核销，复审勿当遗漏重提）：
+ *   - S5 replayUserMessages UDS 自动支：旧 main.tsx L1621-1628 feature
+ *     ('UDS_INBOX') 下 !replay ∧ outputFormat=stream-json → effectiveReplay
+ *     = !!messagingSocketPath；新仓 --messaging-socket-path 选项已注册
+ *     （isUdsInboxEnabled 门，gate 默认 OFF）但 print 支未消费做 auto-replay
+ *     ——UDS/remote 波前向接缝（gate 默认 OFF，影响面受限，登记不随迁）。
+ *   - S6 verbose 全局配置回落：旧 main.tsx L975 verbose = options.verbose ??
+ *     getGlobalConfig().verbose；新仓无全局 config store 面 → 仅 option 值
+ *     （buildHeadlessOptions 只透传 option）。分支 delta 登记：全局
+ *     verbose=true 用户跑 -p --output-format=stream-json 不带 --verbose，
+ *     旧过、新报错（config 域缺席连带，登记不随迁）。
  *   主面 action（H6 防空洞：明示接缝，exit 1，不伪装能力不静默通过）：
- *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义）/ -p·--print = S-C4 commit 6 落盘（buildHeadlessOptions 映射 + dispatch.getInputPrompt stdin 3s peek 面 + 旧 main.tsx L1500-1535 格式兼容校验 3 支 + print.runHeadless S-C3 本体，惰性动态 import）/
+ *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义；hook 执行体 = hooks 波前向接缝〔S3：选项 help 文本逐字保真，runCliSetup 快照 hooks 配置 + 初始化 watcher，不执行 Setup/SessionStart hooks，旧 main.tsx L2156-2165 执行体归 hooks 波〕）/
+ *     -p·--print = S-C4 commit 6 落盘 + S-C5 修波补接 setup（buildHeadlessOptions 映射 + dispatch.getInputPrompt stdin 3s peek 面 + 旧 main.tsx L1500-1535 格式兼容校验 3 支〔S4 订正支 1 文案逐字〕+ print.runHeadless S-C3 本体，惰性动态 import）；**S-C5 修波 S2**：-p 支前置 runCliSetup（旧 main.tsx L1599 setup() 全模式前置，恢复 root/sudo 安全门 + cwd/worktree 状态初始化，核销 setup.ts:6 不实声明）/
  *     交互入口 = 壳波 #152 前向接缝（launchRepl/showSetupScreens 归壳波，明示接缝 exit 1）。
  *   - 支消解登记：旧 --no-session-persistence「仅 print 模式可用」错误支
  *     （旧 main.tsx L1533，交互态校验）= 消解（交互入口 = 壳波前向接缝，
@@ -169,6 +186,24 @@ async function mainActionSeam(
     })
     return
   } else if (options.print) {
+    // S-C5 修波（S2 HIGH 安全门回归核销）：-p 支 setup 接线。旧 main.tsx
+    // L1599 setup() 全模式前置（含 -p；L2168 print 支在 setup 之后），新仓
+    // commit 6 遗漏此调用 → root/sudo 安全门（bypassPermissions/skip-
+    // permissions ∧ root → exit 1）+ cwd/worktree 状态初始化在 -p 面被绕过
+    // （安全回归 + setup.ts:6 头注「-p 支 commit 6 接线」不实声明）。本修波
+    // 补接 runCliSetup（options 映射同 --init-only 支；旧 setup 前置序）。
+    await runCliSetup({
+      permissionMode: options.permissionMode as string | undefined,
+      allowDangerouslySkipPermissions:
+        options.allowDangerouslySkipPermissions === true,
+      worktreeEnabled: options.worktree !== undefined,
+      worktreeName:
+        typeof options.worktree === 'string' ? options.worktree : undefined,
+      tmuxEnabled: options.tmux !== undefined,
+      customSessionId: options.sessionId as string | undefined,
+      messagingSocketPath: options.messagingSocketPath as string | undefined,
+      bare: options.bare === true,
+    })
     // --no-session-persistence（commander --no- 负位选项：present 时
     // options.sessionPersistence === false，缺省 undefined）→ bootstrap ⑥ 族
     // 持久化 kill-switch（S-C4；旧仓 main.tsx 调用点同语义，--print 面生效；
@@ -187,8 +222,10 @@ async function mainActionSeam(
     // 已保值域，仅保留跨字段约束 3 支——旧「非法 input format」支消解于
     // choices 面）
     if (inputFormat === 'stream-json' && outputFormat !== 'stream-json') {
+      // S4 订正：旧 main.tsx L1507 逐字「requires output-format=stream-json」
+      //（output-format 前无 --；commit 6 误带 --，本修波订正保真）。
       process.stderr.write(
-        'Error: --input-format=stream-json requires --output-format=stream-json.\n',
+        'Error: --input-format=stream-json requires output-format=stream-json.\n',
       )
       process.exit(1)
     }
@@ -721,6 +758,8 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
         'Examples:\n' +
         '  # Add HTTP server:\n' +
         '  atlascode mcp add --transport http sentry https://mcp.sentry.dev/mcp\n\n' +
+        '  # Add HTTP server with headers:\n' +
+        '  atlascode mcp add --transport http corridor https://app.corridor.dev/api/mcp --header "Authorization: Bearer ..."\n\n' +
         '  # Add stdio server with environment variables:\n' +
         '  atlascode mcp add -e API_KEY=xxx my-server -- npx my-mcp-server\n\n' +
         '  # Add stdio server with subprocess flags:\n' +

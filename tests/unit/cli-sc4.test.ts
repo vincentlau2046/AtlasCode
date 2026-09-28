@@ -10,10 +10,16 @@
  *  - commit 6 格式兼容校验 3 支（旧 main.tsx L1500-1535 S-C4 回填）：
  *    stream-json 输入 + 非 stream-json 输出 / --sdk-url / --replay-user-
  *    messages 跨字段约束 → 文案 + exit 1（process.exit stub 断言，H6
- *    防空洞：断言显式校验行为而非能力假绿）
+ *    防空洞：断言显式校验行为而非能力假绿；支 1 文案 = S-C5 修波 S4 订正
+ *    后逐字「requires output-format=stream-json」）
  *  - commit 6 门面显式名块（commands/sessionList/setup）：函数面在场
+ *  - S-C5 修波：-p 支前置 runCliSetup（S2 安全门接线）后 -p 主面测试经
+ *    setup 前导（hooks 快照 / getCommands 预取），ATLAS_CONFIG_DIR 隔离
+ *    指不存在 tmp 路径 = ENOENT fail-soft 零真磁盘（getCommands 预取
+ *    fire-and-forget + .catch 不阻塞断言面）
  */
 import { describe, test, expect } from 'bun:test'
+import { tmpdir } from 'node:os'
 import {
   buildHeadlessOptions,
   buildProgram,
@@ -25,7 +31,10 @@ import {
   runCliSetup,
 } from '../../src/cli'
 
-// -p 主面校验支测试具：process.exit stub 抛验 + stderr 捕获
+// -p 主面测试具：process.exit stub 抛验 + stderr 捕获 + ATLAS_CONFIG_DIR 隔离
+// （S-C5 修波 S2 后 -p 支前置 runCliSetup：hooks 快照 / getCommands 预取经
+// settings 读面，指向不存在 tmp 路径 → ENOENT fail-soft 零真磁盘；getCommands
+// 预取 fire-and-forget + .catch（setup.ts 保真订正），不阻塞本断言面）。
 async function runPrintAction(
   args: string[],
 ): Promise<{ exited: number | undefined; stderr: string }> {
@@ -33,6 +42,7 @@ async function runPrintAction(
   program.exitOverride()
   const realExit = process.exit
   const realStderrWrite = process.stderr.write
+  const realConfigDir = process.env.ATLAS_CONFIG_DIR
   let stderr = ''
   let exited: number | undefined
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -43,6 +53,7 @@ async function runPrintAction(
     exited = code
     throw new Error('__process_exit_stub')
   }) as typeof process.exit
+  process.env.ATLAS_CONFIG_DIR = `${tmpdir()}/atlas-cli-sc4-p-nonexistent`
   try {
     await program.parseAsync(['node', 'atlascode', ...args])
   } catch (e) {
@@ -50,6 +61,8 @@ async function runPrintAction(
   } finally {
     process.exit = realExit
     process.stderr.write = realStderrWrite
+    if (realConfigDir === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = realConfigDir
   }
   return { exited, stderr }
 }
@@ -128,8 +141,10 @@ describe('cli 域 S-C4 commit 6 · -p 格式兼容校验支（旧 main.tsx L1500
       'hello',
     ])
     expect(exited).toBe(1)
+    // S4 订正：旧 main.tsx L1507 逐字「requires output-format=stream-json」
+    //（output-format 前无 --）
     expect(stderr).toContain(
-      '--input-format=stream-json requires --output-format=stream-json',
+      '--input-format=stream-json requires output-format=stream-json',
     )
   })
 
