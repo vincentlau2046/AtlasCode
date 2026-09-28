@@ -5194,3 +5194,57 @@ analytics 未切 tag，gate ③ 停留 wave-c，本波为首个下一里程碑 t
 波终基线 = 2984/0/7110/177 + gate 6·0·5·2（F 波零代码/测试改动，纯归档收尾）。**wave-f tag 已切**。
 至此 C 工具波次既定序列完结；后续 = 各前向接缝归属波（CLI 波 / MAJOR-1 接线波 / 跨波 6 项）
 按需排期，非既定序列范畴。
+
+## §8.71 CLI 公共域波 S-E1 总分析（task #151，2026-09-28）
+
+**§8.71.1.1 波定位**：既定序列外新波（前向接缝归属波；既定序列末棒已于 F 波 §8.70 归档）。
+用户裁定（2026-09-28）：**CLI = 跨壳公共层，不属于任何壳**——壳公共部分重新落位。
+序列 = CLI 公共域波（#151）→ TUI 壳波（#152）→ AtlasCode 全功能复刻审视优化（#154）；
+Atlas Office 壳占位（#153）已本波开波时预建（81d0386，仅标注扩展方向防单体漂移，不实施）。
+
+**§8.71.1.2 落位裁定（新开 L3 顶层公共域）**：新开 `src/cli/`（engine/task/bootstrap/mcp/remote
+兄弟位；L3 域隔离 + STR-1 根门面；跨域消费走根门面 = swarm/mcp/remote 同型先例）。壳
+（`atlascode/`）降消费方（ui/ TUI 壳 + launcher 薄壳归 #152）。**不塞 `src/shared/`**
+（叶子域纪律：CLI 面需消费 engine 根门面，shared 只许纯叶子 + S1 独占）。
+分层 = shared（叶子）← cli（公共命令面）← 壳（atlascode/ui · 未来 atlasoffice 占位）。
+
+**§8.71.1.3 逐件归属表（旧仓 CLI 面 ≈12.4K；旧仓 = 只读 ground truth，归属仅登记新仓侧）**：
+
+*随迁 → src/cli/（公共域）*：
+
+| 旧仓件 | 体量 | 新仓落点 | 切片 |
+|---|---|---|---|
+| main.tsx commander option 面（L883-3126）+ run() 子命令路由（L3127-3726 入域子集） | ≈2.8K | cli/parse.ts | S-C2 |
+| main.tsx main() 分派（L517-773）+ getInputPrompt（L773-800） | ≈250 | cli/dispatch.ts | S-C2 |
+| main.tsx 入口初始化面（L194-516：settings 加载/migrations/prefetch/entrypoint） | ≈320 | cli/entryInit.ts | S-C2 |
+| cli.ts（dev 面 --tools/--skills/--check/--e2e/--auth-help；「Default: start TUI」支 delta 裁 → 壳） | 143 | cli/dev.ts | S-C2 |
+| cli/print.ts（headless 本体 + drainSdkEvents 4 站点 L2045/2067/2201/2292） | 5046 | cli/print.ts | S-C3 |
+| cli/structuredIO.ts / cli/ndjsonSafeStringify.ts / cli/exit.ts | 859/32/31 | 同名 | S-C3 |
+| commands.ts（内建命令注册表 → firstPrompt builtInCommandNames 注入口） | 705 | cli/commands.ts | S-C4 |
+| setup.ts（Setup hooks/entrypoint） | 415 | cli/setup.ts | S-C4 |
+| cli/handlers/{agents 70 / autoMode 170 / auth 136 / plugins 924 / mcp.tsx / util.tsx 999} | ≈2310 | cli/handlers/* | S-C4 |
+
+*域外裁登记（不随迁，归属波）*：
+
+| 件 | 体量 | 归属 | 依据 |
+|---|---|---|---|
+| cli/update.ts（自更新） | 424 | 版本管理方案波 | 用户裁定 |
+| cli/remoteIO.ts | 255 | remote 族波 | 用户裁定 |
+| cli/transports/*（ccrClient 999 / SSE 712 / WebSocket 780 / Hybrid 282 / SerialBatch 275 / WorkerState 131 / utils 45 / Transport 1） | 4535 | IFF 网关波 [ATLAS-HOLD] | 云传输面，旧 claude.ai 链残余 |
+| main.tsx `server`（feature('DIRECT_CONNECT') 门控）/ `ssh` / `open` 子命令 | ≈200 | remote 族波 | session-server / remote-control 面 |
+| `auth login`（Atlas 订阅面；status/logout 入域） | ≈40 | 订阅裁 [ATLAS-HOLD] | 活车道 = OpenAI 静态键（2026-09-17 endpoint-cleanup） |
+| cli/{bg 5 / up 1 / rollback 1} + handlers/{ant 9 / templateJobs 1} | 17 | 不迁（旧仓 de-ANT no-op 存根） | H6 防空洞：存根不迁不伪装能力 |
+
+**§8.71.1.4 切片计划**：
+- **S-C1（零行为）**：本 S-E1 文档 + `src/cli/` 域骨架（STR-1 门面占位 + 头注归属登记）+ 壳骨架瘦身（atlascode/cli.ts → 薄壳登记，bin 路径不变；launcher/mount 留壳侧归 #152）。
+- **S-C2（真实现）**：parse.ts + dispatch.ts + entryInit.ts + dev.ts（commander 面逐字 + 入域子命令子集；域外子命令裁登记）。
+- **S-C3（真实现）**：print.ts + structuredIO + ndjsonSafeStringify + exit + **drainSdkEvents 4 站点接线（analytics 波前向接缝核销）+ initMcpConnections 启动消费**。
+- **S-C4（真实现）**：commands.ts + setup.ts + handlers/*（两 .tsx 的 Ink 对话框面 = 预声明注入窗：对话框渲染由 TUI 壳供给）+ **firstPrompt builtInCommandNames 注入口回填 + session 4 站点 + cron 消费点 + skill 命令索引**。
+- **S-C5**：双路只读审视（A 旧仓保真 / B 新仓一致性）+ 修波 + 闭环（docs §8.71.2 + memory + task #151）。
+
+**§8.71.1.5 测试面计划**：unit（parse option 面判别 / dispatch 分支三态 / print stream-json
+fixture replay〔tests/fixtures〕/ commands 注册表形状 / exit 族）+ func（零模型真 spawn：
+dev 面 --tools/--check headless smoke）；gate 不变（ci/ 6·0·5·2）。
+
+**开波基线**：2984/0/7110/177 + gate 6·0·5·2（F 波终）。**波 tag 不切**（gate ③ 停留
+wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
