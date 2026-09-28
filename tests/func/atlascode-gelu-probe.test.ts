@@ -33,6 +33,12 @@
  *       LSPTool.isEnabled 门关（P-1 门控缺席面同点）；全链假 server 面
  *       归 tests/func/engine-tools-lsp-se2c-fs（本 probe 只锁门控/初态
  *       注册表接缝，不重复全链）
+ *   P-5 MCP 供给面复验（§8.68 remote 波 S-E2d，swarms 门双向先例同型）：
+ *       1 假 stdio server（发现窗 fake 注入，hermetic）→ initMcpConnections
+ *       → builder mcpTools 供给 = 池 +1 mcp__ 名判别（isMcp + mcpInfo 一等
+ *       注册面）+ registry 实填面（ListMcp 工具真调用）+ MCP skill 注册窗
+ *       （getMcpSkillCommands 无参面 + 提示词真执行）+ ToolSearch delta ⑤
+ *       settle 后 pending 空面
  *
  * 分层纪律：func 层真装配（组合根 8 域真链，fake 仅限 modelprovider——
  * setModelProviderForTesting 脚本化 fixture，非 mock openai transport）；
@@ -59,6 +65,9 @@ import {
   expect,
   test,
 } from 'bun:test'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import {
   AgentTool,
   AskUserQuestionTool,
@@ -98,8 +107,10 @@ import {
   type Tool,
 } from '../../src/engine/tools'
 import {
+  getMcpClientRegistry,
   getTools,
   queryAgentLoop,
+  resetMcpClientRegistry,
   resetSchedulerEnv,
   resetSessionContextPort,
   resetSessionEnv,
@@ -112,6 +123,7 @@ import {
 import {
   getCoreDependencies,
   createAgentLoopDeps,
+  initMcpConnections,
   resetCoreDependencies,
   type AgentLoopDepsBundle,
 } from '../../src/atlascode'
@@ -124,7 +136,9 @@ import {
 import {
   clearBundledSkills,
   getBundledSkills,
+  getMcpSkillCommands,
   registerBundledSkill,
+  resetMcpSkillCommandSource,
 } from '../../src/engine/skill'
 import {
   _resetLspManagerForTesting,
@@ -136,6 +150,12 @@ import {
   resetStartInProcessTeammate,
   resetTeammateToolRegistryDeps,
 } from '../../src/swarm'
+// S-E2d（§8.68 remote 波）P-5：mcp 域连接生命周期 + 发现窗（fake 注入面）
+import {
+  getMcpConnectionManager,
+  resetMcpConnectionManager,
+  setMcpDiscoveryInput,
+} from '../../src/mcp'
 
 // ── env 定化（save/set/restore 三态）────────────────────────────────────
 const TRACKED_ENV_KEYS = [
@@ -492,5 +512,152 @@ describe('gelu P-4 LSP 域活体（初态门控面；全链假 server 归 se2c-f
     // 门控消费面：LSPTool.isEnabled = isLspConnected（P-1b 缺席面同点判别）
     expect(LSPTool.name).toBe('LSP')
     expect(LSPTool.isEnabled()).toBe(false)
+  })
+})
+
+// ── P-5 MCP 供给面复验（§8.68 S-E2d；swarms 门双向先例同型）──────────
+
+/** fake stdio MCP server（NDJSON JSON-RPC：initialize + tools/list +
+ * prompts/list + prompts/get；零网络零模型，se2b 假 server 同型）。 */
+function writeGelUFakeMcpServer(dir: string): string {
+  const path = join(dir, 'gelu-fake-mcp.mjs')
+  writeFileSync(
+    path,
+    `let buf = ''
+process.stdin.on('data', (chunk) => {
+  buf += chunk.toString('utf8')
+  let i
+  while ((i = buf.indexOf('\\n')) !== -1) {
+    const line = buf.slice(0, i)
+    buf = buf.slice(i + 1)
+    if (!line.trim()) continue
+    const msg = JSON.parse(line)
+    if (msg.method === 'initialize') {
+      process.stdout.write(JSON.stringify({
+        jsonrpc: '2.0',
+        id: msg.id,
+        result: {
+          protocolVersion: '2025-03-26',
+          capabilities: { tools: true, prompts: true },
+          serverInfo: { name: 'gelu-fake-mcp', version: '1.0.0' },
+        },
+      }) + '\\n')
+    } else if (msg.method === 'tools/list') {
+      process.stdout.write(JSON.stringify({
+        jsonrpc: '2.0',
+        id: msg.id,
+        result: {
+          tools: [
+            {
+              name: 'echo_tool',
+              description: 'gelu fake echo',
+              inputSchema: { type: 'object', properties: { a: { type: 'string' } } },
+            },
+          ],
+        },
+      }) + '\\n')
+    } else if (msg.method === 'prompts/list') {
+      process.stdout.write(JSON.stringify({
+        jsonrpc: '2.0',
+        id: msg.id,
+        result: {
+          prompts: [
+            { name: 'greet', description: 'gelu fake prompt', arguments: [{ name: 'who' }] },
+          ],
+        },
+      }) + '\\n')
+    } else if (msg.method === 'prompts/get') {
+      process.stdout.write(JSON.stringify({
+        jsonrpc: '2.0',
+        id: msg.id,
+        result: {
+          messages: [
+            { type: 'text', content: 'hello ' + (msg.params?.arguments?.who ?? 'anon') },
+          ],
+        },
+      }) + '\\n')
+    }
+  }
+})
+process.stdin.on('end', () => process.exit(0))
+`,
+  )
+  return path
+}
+
+let geluMcpDir: string | undefined
+let geluMcpScript: string | undefined
+
+// P-5 跑在 P-1..P-4 之后（init 前池精确集不受影响）；teardown = mcp
+// 4 窗对称复位 + 假 server 子进程关闭（afterAll 注册序在主 afterAll 后）。
+afterAll(async () => {
+  await resetMcpConnectionManager()
+  setMcpDiscoveryInput(null)
+  resetMcpClientRegistry()
+  resetMcpSkillCommandSource()
+  if (geluMcpDir) rmSync(geluMcpDir, { recursive: true, force: true })
+})
+
+describe('gelu P-5 MCP 供给面复验（1 假 stdio server → 池 +1 mcp__ 名判别）', () => {
+  test('P-5a mcpTools 供给：池 +1 mcp__ 名（isMcp + mcpInfo 一等注册面）', async () => {
+    geluMcpDir = mkdtempSync(join(tmpdir(), 'atlas-gelu-mcp-'))
+    geluMcpScript = writeGelUFakeMcpServer(geluMcpDir)
+    // 发现窗 fake 注入（hermetic：不触测试机真实 settings / .mcp.json）
+    setMcpDiscoveryInput({
+      settingsServers: {
+        gelufake: {
+          type: 'stdio',
+          command: process.execPath,
+          args: [geluMcpScript],
+        },
+      },
+    })
+    await initMcpConnections()
+    // builder mcpTools 供给（构建时 manager 态快照；单入口 =
+    // toolRegistryDeps.mcpTools，注册表去重先入为主机制不变）
+    const bundle5 = await createAgentLoopDeps({
+      toolRegistryDeps: { baseTools: ALL_BODIES },
+    })
+    const names = bundle5.tools.map(t => t.name)
+    expect(names).toContain('mcp__gelufake__echo_tool')
+    // 池 = 29（P-1a 精确集）+ 1 mcp__ 判别
+    expect(names).toHaveLength(30)
+    const mcpTool = bundle5.tools.find(t => t.name === 'mcp__gelufake__echo_tool')!
+    expect(mcpTool.isMcp).toBe(true)
+    expect(mcpTool.mcpInfo).toEqual({
+      serverName: 'gelufake',
+      toolName: 'echo_tool',
+    })
+  })
+
+  test('P-5b registry 供给面：connected 条目实填 + ListMcp 工具真调用', async () => {
+    const { clients } = getMcpClientRegistry()
+    expect(clients.map(c => c.name)).toEqual(['gelufake'])
+    expect(clients[0]!.type).toBe('connected')
+    // ListMcp 真调用（listResources 实填面；假 server 无 resources
+    // capability → 供应商 [] 面，非假绿）
+    const r = await ListMcpResourcesTool.call({}, {})
+    expect(r.data).toEqual([])
+  })
+
+  test('P-5c MCP skill 注册窗：无参面读窗 + 提示词真执行', async () => {
+    const cmds = getMcpSkillCommands()
+    expect(cmds.map(c => c.name)).toEqual(['mcp__gelufake__greet'])
+    // engine Command 映射面（source/loadedFrom/isMcp + 默认值补）
+    expect(cmds[0]!.loadedFrom).toBe('mcp')
+    expect(cmds[0]!.isMcp).toBe(true)
+    // 提示词真执行（delta ④ 扁平 content 面；zipObject who 配对）
+    const blocks = await cmds[0]!.getPromptForCommand('alice', {})
+    expect(blocks).toEqual([{ type: 'text', content: 'hello alice' }])
+  })
+
+  test('P-5d ToolSearch delta ⑤ settle 面：pending 空 = 字段省略', async () => {
+    expect(getMcpConnectionManager().getPendingServerNames()).toEqual([])
+    const r = await ToolSearchTool.call(
+      { query: 'zzz-no-match' },
+      { options: { tools: [] } },
+    )
+    expect(r.data.pending_mcp_servers).toBeUndefined()
+    expect(r.data.matches).toEqual([])
   })
 })
