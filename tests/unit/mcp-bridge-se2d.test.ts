@@ -79,8 +79,13 @@ function fakeConnected(
   } as unknown as ConnectedMcpServer
 }
 
-/** fake manager（仅 list 面消费）。 */
-function fakeManager(conns: McpServerConnection[]): McpConnectionManager {
+/** fake manager（list + pending Set 活面消费；真 manager 形状：
+ * connections Map 仅存 connected/failed 对象，pending 存独立 Set →
+ * 占位条目经 getPendingServerNames 供给，非 list() 条目面）。 */
+function fakeManager(
+  conns: McpServerConnection[],
+  pendingNames: string[] = [],
+): McpConnectionManager {
   return {
     list: () => conns,
     connect: async () => {
@@ -89,12 +94,13 @@ function fakeManager(conns: McpServerConnection[]): McpConnectionManager {
     get: () => undefined,
     close: async () => {},
     closeAll: async () => {},
-    getPendingServerNames: () => [],
+    getPendingServerNames: () => pendingNames,
   } as unknown as McpConnectionManager
 }
 
 /** fake mcp 域 prompt 命令（delta ④ 扁平 content 面：string | 块对象，
- *  与 mcpFetch 真形态一致——非引擎块面，映射归桥）。 */
+ *  与 mcpFetch 真形态一致——非引擎块面，映射归桥；第 2 项 = 块对象
+ *  透传支〔新仓 TextBlock 契约字段 text〕）。 */
 function fakePromptCmd(name: string): McpPromptCommand {
   return {
     type: 'prompt',
@@ -104,7 +110,7 @@ function fakePromptCmd(name: string): McpPromptCommand {
     userFacingName: () => `${name} (MCP)`,
     getPromptForCommand: async (args: string) => [
       `hi ${args}`,
-      { type: 'text', content: `block ${args}` },
+      { type: 'text', text: `block ${args}` },
     ],
   }
 }
@@ -184,15 +190,19 @@ describe('B-P3 mapMcpPromptCommands（engine Command 映射）', () => {
     expect(c.isMcp).toBe(true)
     expect(c.loadedFrom).toBe('mcp')
     expect(c.source).toBe('mcp')
-    // engine 型字段默认值补（mcp 门面头注预声明映射面）
+    // engine 型字段映射侧补（mcp 门面头注预声明映射面）
     expect(c.contentLength).toBe(0)
-    expect(c.progressMessage).toBe('mcp__srv__p')
-    // 提示词真执行面（mcp 扁平面 → 引擎块面映射：string → text 块，
-    // 块对象透传〔旧仓 transformResultContent 语义〕）
+    // progressMessage = 旧 'running' 逐字（S-E3 A 路修面）
+    expect(c.progressMessage).toBe('running')
+    // hasUserSpecifiedDescription（S-E3 A 路 D-2：缺此字段 MCP 命令
+    // 永不进 getSkillToolCommands 列表过滤）
+    expect(c.hasUserSpecifiedDescription).toBe(true)
+    // 提示词真执行面（mcp 扁平面 → 引擎块面映射：string →
+    // {type:'text', text} 块〔TextBlock 契约字段〕，块对象透传）
     const blocks = await c.getPromptForCommand('x', {} as never)
     expect(blocks).toEqual([
-      { type: 'text', content: 'hi x' },
-      { type: 'text', content: 'block x' },
+      { type: 'text', text: 'hi x' },
+      { type: 'text', text: 'block x' },
     ])
   })
 })
@@ -274,16 +284,12 @@ describe('B-P5 syncMcpClientRegistry（实填 + 4 态过滤）', () => {
       config: { type: 'stdio', command: 'f', scope: 'user' },
       error: 'x',
     } as unknown as McpServerConnection
-    const pending: McpServerConnection = {
-      name: 'srv-p',
-      type: 'pending',
-      config: { type: 'stdio', command: 'p', scope: 'user' },
-    } as unknown as McpServerConnection
-
-    syncMcpClientRegistry(fakeManager([connected, failed, pending]))
+    syncMcpClientRegistry(
+      fakeManager([connected, failed], ['srv-p2']),
+    )
     const { clients } = getMcpClientRegistry()
     // failed 不进注册表（engine 条目型 union 仅 connected|pending）
-    expect(clients.map(c => c.name)).toEqual(['srv-r', 'srv-p'])
+    expect(clients.map(c => c.name)).toEqual(['srv-r', 'srv-p2'])
     const entry = clients.find(c => c.name === 'srv-r')!
     expect(entry.type).toBe('connected')
     expect(entry.capabilities).toEqual({ resources: true })
@@ -297,8 +303,9 @@ describe('B-P5 syncMcpClientRegistry（实填 + 4 态过滤）', () => {
     expect(read?.contents).toEqual([
       { uri: 'file:///a', mimeType: 'text/plain', text: 'A' },
     ])
-    // pending 占位条目（无 listResources/readResource 方法面）
-    const pEntry = clients.find(c => c.name === 'srv-p')!
+    // pending 占位条目 = manager pending Set 活面供给（S-E3 A 路修面：
+    // 真 manager list() 不含 pending 对象，占位经 getPendingServerNames）
+    const pEntry = clients.find(c => c.name === 'srv-p2')!
     expect(pEntry.type).toBe('pending')
     expect(pEntry.listResources).toBeUndefined()
   })

@@ -646,9 +646,10 @@ describe('gelu P-5 MCP 供给面复验（1 假 stdio server → 池 +1 mcp__ 名
     // engine Command 映射面（source/loadedFrom/isMcp + 默认值补）
     expect(cmds[0]!.loadedFrom).toBe('mcp')
     expect(cmds[0]!.isMcp).toBe(true)
-    // 提示词真执行（delta ④ 扁平 content 面；zipObject who 配对）
+    // 提示词真执行（delta ④ 扁平 content 面 → 引擎块面映射：string →
+    // {type:'text', text} 块〔TextBlock 契约字段〕；zipObject who 配对）
     const blocks = await cmds[0]!.getPromptForCommand('alice', {})
-    expect(blocks).toEqual([{ type: 'text', content: 'hello alice' }])
+    expect(blocks).toEqual([{ type: 'text', text: 'hello alice' }])
   })
 
   test('P-5d ToolSearch delta ⑤ settle 面：pending 空 = 字段省略', async () => {

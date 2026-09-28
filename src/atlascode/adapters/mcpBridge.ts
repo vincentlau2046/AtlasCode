@@ -14,19 +14,38 @@
  *     预取 = LRU 缓存 + drop 失效面；createMcpTools 单入口消费不变）
  *  ③ syncMcpClientRegistry — manager 4 态 → engine mcpClientRegistry
  *     条目（connected = listResources/readResource 实填〔mcp 域供应商 +
- *     resources/read 直取〕；pending = 占位条目；failed/disabled 不进
- *     注册表 = engine 条目型 union 仅 connected|pending 面，旧
- *     options.mcpClients = 客户端状态数组同语义；drop 后条目面 = 再
- *     sync 前陈旧 → 供应商非 connected 早退 [] 降级面，非假绿）
+ *     resources/read 直取〕；pending 占位条目 = manager pending Set 活面
+ *     〔getPendingServerNames，旧面 appState.mcp.clients pending 条目；
+ *     新真 manager 的 connections Map 仅存 connected/failed 对象，
+ *     pending 存独立 Set〕；failed/disabled 不进注册表 = engine 条目型
+ *     union 仅 connected|pending 面——**文案分歧面登记**（S-E3 A 路 D-3）：
+ *     旧 options.mcpClients 含 failed/disabled 条目 → 工具报错面旧 =
+ *     List 静默 [] / Read 'is not connected'，新 = 'not found' 且 failed
+ *     名从 Available 列表消失（union 收窄本身 S-E2b 已登记，文案分歧
+ *     本行补登记，行为面不改）；drop 机制修正登记（S-E3 A 路）：
+ *     manager close 用**新对象**替换 Map 条目（非 mutate 已捕获对象）→
+ *     注册表闭包捕获的旧对象 type 仍 'connected' → 供应商门通过 →
+ *     closed client request 被拒（mcpJsonRpc 'Connection disposed'）→
+ *     供应商 try/catch → [] 降级面（fail-soft 非假绿，净结果同旧 LRU
+ *     失效早退 []））
  *  ④ mapMcpPromptCommands — mcp 域 McpPromptCommand → engine skill
  *     Command（mcp 门面头注预声明映射面：type/name/description/
- *     argNames/userFacingName 面保真，engine 型字段
- *     progressMessage/contentLength/source/loadedFrom 映射侧补默认值；
- *     getPromptForCommand = mcp 域 delta ④ 扁平 content 面（string |
- *     content 块对象）→ engine ContentBlockParam 块面映射〔旧仓
- *     transformResultContent 语义：string → text 块，块对象透传〕，
+ *     argNames/userFacingName 面保真，engine 型字段映射侧补〔
+ *     progressMessage = 旧 'running' 逐字 / contentLength 0 /
+ *     source+loadedFrom 'mcp' / hasUserSpecifiedDescription =
+ *     description !== ''（旧 client.ts:1955 逐字；缺此字段 MCP 命令
+ *     永不进 getSkillToolCommands 列表过滤）〕；getPromptForCommand
+ *     = mcp 域 delta ④ 扁平 content 面（string | content 块对象）→
+ *     engine 块面映射〔旧仓 transformResultContent text 案逐字：
+ *     string → {type:'text', text} 块（新仓 TextBlock 契约字段 =
+ *     text，wire 面 params.ts 读 b.text）；块对象透传；undefined 项
+ *     跳过 = 旧意外 TypeError rethrow 裁登记（畸形 server 面）〕，
  *     非 cast 委托；isError 结果面 = ① 透传 content 不 throw〔旧
- *     throw + TelemetrySafeError 面裁登记，模型可见错误面经 content 真〕）
+ *     throw + TelemetrySafeError 面裁登记，模型可见错误面经 content
+ *     真〕；MCP_TOOL_TIMEOUT 每请求超时限裁登记（S-E3 A 路）：env
+ *     名单仅 engine/config/managedEnv.ts:98，mcpJsonRpc request 无
+ *     per-request 超时（连接超时 MCP_TIMEOUT 30s 面逐字保留；设
+ *     该 env 用户旧仓生效新仓静默忽略 = 裁登记））
  *
  * 消费面：组合根 compose.ts initMcpConnections（①②③④）+ createAgent
  * LoopDeps ⑭ mcpTools 供给（②）；tests 经 atlascode 根门面引（STR-1）。
@@ -135,11 +154,17 @@ export function syncMcpClientRegistry(manager: McpConnectionManager): void {
           return { contents: result?.contents ?? [] }
         },
       })
-    } else if (conn.type === 'pending') {
-      clients.push({ name: conn.name, type: 'pending' })
     }
     // failed / disabled → 不进注册表（engine 条目型 union 仅
     // connected|pending；failed = 状态面，见头注 ③）
+  }
+  // pending 占位条目 = manager pending Set 活面（旧面：appState.mcp.
+  // clients pending 条目；新真 manager 的 connections Map 仅存
+  // connected/failed 对象，pending 存独立 Set → 占位经
+  // getPendingServerNames 供给；sync 时点 pending 已 settle 时此面 =
+  // 空，重连中再 sync 时物化）
+  for (const name of manager.getPendingServerNames()) {
+    clients.push({ name, type: 'pending' })
   }
   setMcpClientRegistry({ clients })
 }
@@ -159,22 +184,34 @@ export function mapMcpPromptCommands(
     loadedFrom: 'mcp' as const,
     userFacingName: c.userFacingName,
     // engine 型字段默认值补（mcp 门面头注预声明映射面）：MCP prompt 无
-    // 静态内容 = contentLength 0；progressMessage = 命令名（运行标签）
-    progressMessage: c.name,
+    // 静态内容 = contentLength 0；progressMessage = 旧 'running' 逐字
+    // （旧 client.ts:1960，新仓非 MCP 命令同值约定）
+    progressMessage: 'running',
     contentLength: 0,
+    // 旧 client.ts:1955 逐字（description = mcpFetch ?? '' 补 →
+    // !== '' ≡ !!prompt.description）：缺此字段 MCP 命令永不进
+    // getSkillToolCommands 列表过滤（须 hasUserSpecifiedDescription ||
+    // whenToUse）
+    hasUserSpecifiedDescription: c.description !== '',
     getPromptForCommand: async (
       args: string,
       _context: SkillCommandContext,
     ): Promise<ContentBlockParam[]> => {
       // mcp 域 delta ④ 扁平 content 面（string | content 块对象）→
-      // engine 块面（旧仓 transformResultContent 语义：string → text
-      // 块，块对象透传）
+      // engine 块面（旧仓 transformResultContent text 案逐字：string →
+      // {type:'text', text} 块——新仓 TextBlock 契约字段 = text，
+      // shared/types.ts，wire 面 params.ts 读 b.text；块对象透传；
+      // undefined 项跳过面 = 旧意外 TypeError rethrow 裁登记，
+      // 畸形 server 面）
       const flat = await c.getPromptForCommand(args)
-      return flat.map(item =>
-        typeof item === 'string'
-          ? { type: 'text', content: item }
-          : (item as ContentBlockParam),
-      )
+      return flat
+        .filter(
+          (item): item is string | ContentBlockParam =>
+            item !== undefined,
+        )
+        .map(item =>
+          typeof item === 'string' ? { type: 'text', text: item } : item,
+        )
     },
   }))
 }
