@@ -1,8 +1,9 @@
 /**
  * AtlasCode 边界 lint 配置（A 波, charter L8 规则映射；v0.12 八域扩展 + tests 门面收口）
  *
- * 14 element types（L3 v0.12 十二顶层目录 + C 桶 ③ shell·swarm 波 swarm 域 §8.66 R1
- * + §8.67 D 波 S-E2c lsp 域）+ 1 特例（mount 挂载边, DEP-5 白名单）。
+ * 15 element types（L3 v0.12 十二顶层目录 + C 桶 ③ shell·swarm 波 swarm 域 §8.66 R1
+ * + §8.67 D 波 S-E2c lsp 域 + §8.68 remote 波 S-E2a remote 域）+ 1 特例（mount
+ * 挂载边, DEP-5 白名单）。
  * 规则映射：
  *   DEP-1 单向无环     → element-types: shared 禁一切内部依赖
  *   DEP-2 八域零向上   → element-types: 八域 allow=[shared] only
@@ -45,6 +46,11 @@ const ELEMENTS = [
   // §8.67 D 波 S-E2c：lsp 新顶层域（旧仓 services/lsp 9 文件 2464L client 域
   // + 配置注入窗 + manager 单例；engine/tools/lsp LSPTool 本体消费其门面）
   { type: "lsp", pattern: "src/lsp", mode: "folder" },
+  // §8.68 remote 波 S-E2a：remote 新顶层域（旧仓 UDS 5 站点族基础设施：门
+  // isUdsInboxEnabled + socket 客户端 stub + messaging 启动 + bridge handle +
+  // 跨 session 消息 stub + parseAddress 消费窗 re-export；engine/tools/team
+  // SendMessageTool 5 站点族消费其门面，L3 engine↛swarm 经本域门面保持）
+  { type: "remote", pattern: "src/remote", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
 ];
 
@@ -111,7 +117,8 @@ export default tseslint.config(
               disallow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks",
-                "engine", "ascend", "swarm", "lsp", "atlascode", "mount",
+                "engine", "ascend", "swarm", "lsp", "remote", "atlascode",
+                "mount",
               ],
             },
             // DEP-2/3: 八域零向上 — 只依赖 shared（不 import engine/ascend/atlascode/彼此）
@@ -125,7 +132,7 @@ export default tseslint.config(
             // v0.12: 四域→八域（engine 波接线 hooks-runner/permissions-engine/task 消费）
             {
               from: "engine",
-              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks", "lsp"],
+              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks", "lsp", "remote"],
             },
             // ascend (域包): DIP — 依赖 shared + engine(port 接口) + executor(NpuToolchain 接口)
             {
@@ -155,6 +162,16 @@ export default tseslint.config(
             {
               from: "lsp",
               allow: ["shared", "bootstrap"],
+            },
+            // remote (§8.68 S-E2a): UDS 5 站点族基础设施 — shared(isEnvTruthy
+            // 门 + errorMessage 单一事实源) + swarm(parseAddress 门面
+            // re-export 单一事实源, engine↛swarm L3 经 remote 门面保持);
+            // 不依赖 engine/ascend/atlascode（engine 侧反向接线:
+            // engine/tools/team SendMessage 5 站点族 → remote 门面,
+            // DEP-4 allow 面）。
+            {
+              from: "remote",
+              allow: ["shared", "swarm"],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
