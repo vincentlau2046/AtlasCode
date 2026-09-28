@@ -115,6 +115,83 @@ export function setIsInteractive(v: boolean): void {
   _isNonInteractiveSession = !v
 }
 
+// ── ⑥ CLI 入口状态族（CLI 公共域波 §8.71 S-C2；旧仓 bootstrap/state.js 同族）──
+// 消费方：cli 域 dispatch（clientType/preview 格式/session 来源/旁路权限标记）。
+let _clientType: string | undefined
+let _questionPreviewFormat: 'markdown' | 'html' | undefined
+let _sessionSource: string | undefined
+let _sessionBypassPermissionsMode = false
+
+export function setClientType(t: string): void {
+  _clientType = t
+}
+
+export function getClientType(): string | undefined {
+  return _clientType
+}
+
+export function setQuestionPreviewFormat(f: 'markdown' | 'html'): void {
+  _questionPreviewFormat = f
+}
+
+export function getQuestionPreviewFormat(): 'markdown' | 'html' | undefined {
+  return _questionPreviewFormat
+}
+
+export function setSessionSource(s: string): void {
+  _sessionSource = s
+}
+
+export function getSessionSource(): string | undefined {
+  return _sessionSource
+}
+
+export function setSessionBypassPermissionsMode(v: boolean): void {
+  _sessionBypassPermissionsMode = v
+}
+
+export function getSessionBypassPermissionsMode(): boolean {
+  return _sessionBypassPermissionsMode
+}
+
+// settings flag 持有面（--settings 路径 / --setting-sources 白名单）。
+// 本地型定义（L3：bootstrap 不 import engine 的 SettingSource 型；结构同型
+// 'user'|'project'|'local'，engine 侧消费经组合根适配器，前向接缝登记）。
+export type CliSettingSource = 'user' | 'project' | 'local'
+
+let _flagSettingsPath: string | undefined
+let _allowedSettingSources: readonly CliSettingSource[] | undefined
+
+export function setFlagSettingsPath(p: string): void {
+  _flagSettingsPath = p
+}
+
+export function getFlagSettingsPath(): string | undefined {
+  return _flagSettingsPath
+}
+
+export function setAllowedSettingSources(
+  sources: readonly CliSettingSource[],
+): void {
+  _allowedSettingSources = sources
+}
+
+export function getAllowedSettingSources():
+  | readonly CliSettingSource[]
+  | undefined {
+  return _allowedSettingSources
+}
+
+/** 测试复位（⑥ 族 6 成员恢复缺省；单进程连跑泄漏守卫先例同型）。 */
+export function resetCliEntryStateForTests(): void {
+  _clientType = undefined
+  _questionPreviewFormat = undefined
+  _sessionSource = undefined
+  _sessionBypassPermissionsMode = false
+  _flagSettingsPath = undefined
+  _allowedSettingSources = undefined
+}
+
 // ── ④ cost state 累加器族（会话用量累加器）─────────────────────────────────
 // 消费方：cost-tracker formatTotalCost() → /cost 显示 & 退出汇总。
 // 写入方：toolExecution.addToToolDuration / diff.addToTotalLinesChanged /
