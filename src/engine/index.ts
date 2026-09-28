@@ -210,6 +210,12 @@ export {
   type SkillCommandContext,
 } from './skill'
 export {
+  // CLI dev 面 --skills 读面（S-C2 §8.71.1.4）：bundled 技能注册表读面
+  // （写面 registerBundledSkill/clearBundledSkills 留 skill 子门面，组合根/
+  // 测试面消费；cli 跨域仅消费读面，STR-1 根门面显式名）
+  getBundledSkills,
+} from './skill'
+export {
   isCoordinatorMode,
   matchSessionMode,
   getCoordinatorUserContext,
