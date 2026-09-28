@@ -34,8 +34,8 @@
  *     （新仓 modelprovider = OpenAI 静态键车道，3P 异构已清）。
  *   - auto-mode 注册：旧 getAutoModeEnabledStateIfCached() 缓存态短路支裁（新仓
  *     缺席；feature('TRANSCRIPT_CLASSIFIER') 门保留，ON_BY_DEFAULT 恒开）。
- *   主面 seam action（H6 防空洞：明示接缝，exit 1，不伪装能力不静默通过）：
- *   - --init-only = S-C4 setup.ts 前向接缝 / -p·--print = S-C3 print.ts 前向接缝 /
+ *   主面 action（H6 防空洞：明示接缝，exit 1，不伪装能力不静默通过）：
+ *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义）/ -p·--print = S-C3 print.ts 前向接缝（runHeadless 真接线 = S-C4 commit 6）/
  *     交互入口 = 壳波 #152 前向接缝（launchRepl/showSetupScreens 归壳波）。
  */
 import {
@@ -47,6 +47,7 @@ import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
+import { runCliSetup } from './setup'
 
 /**
  * 版本占位（旧仓 MACRO.VERSION 构建期注入 → 本地占位；D 波 identity 波接管，
@@ -96,9 +97,23 @@ async function mainActionSeam(
   options: Record<string, unknown>,
 ): Promise<void> {
   if (options.initOnly) {
-    process.stderr.write(
-      'atlascode --init-only: Setup hooks 入口 = S-C4 setup.ts 前向接缝（未落盘）\n',
-    )
+    // --init-only（S-C4 回填，S-C2 前向接缝核销）：跑 setup 面后退出（旧
+    // main.tsx「Run Setup and SessionStart hooks, then exit」语义，不进
+    // query 环）。options 映射 = setup.ts CliSetupOptions（worktreePRNumber
+    // 无选项面恒 undefined，setup.ts 头注登记）。
+    await runCliSetup({
+      permissionMode: options.permissionMode as string | undefined,
+      allowDangerouslySkipPermissions:
+        options.allowDangerouslySkipPermissions === true,
+      worktreeEnabled: options.worktree !== undefined,
+      worktreeName:
+        typeof options.worktree === 'string' ? options.worktree : undefined,
+      tmuxEnabled: options.tmux !== undefined,
+      customSessionId: options.sessionId as string | undefined,
+      messagingSocketPath: options.messagingSocketPath as string | undefined,
+      bare: options.bare === true,
+    })
+    return
   } else if (options.print) {
     // --no-session-persistence（commander --no- 负位选项：present 时
     // options.sessionPersistence === false，缺省 undefined）→ bootstrap ⑥ 族

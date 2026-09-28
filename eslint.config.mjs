@@ -192,19 +192,22 @@ export default tseslint.config(
               from: "mcp",
               allow: ["shared", "bootstrap"],
             },
-            // cli (§8.71 S-C1/S-C2/S-C3): CLI 公共域 — 跨壳公共层（L3 公共域）：
+            // cli (§8.71 S-C1/S-C2/S-C3/S-C4): CLI 公共域 — 跨壳公共层（L3 公共域）：
             // shared(feature/env 单一事实源) + bootstrap(CLI 入口状态族) +
             // engine/permissions/remote/mcp/hooks（根门面消费，swarm/mcp/remote
             // 同型先例）+ modelprovider（S-C3 扩 allow 登记：print headless
             // 驱动体消费 ModelProvider 实例 + modelToRole/getRoleModel 角色
             // 映射 + getProviderContextWindow 压缩阈值面；print.ts 头注同
-            // 登记）；不依赖 atlascode/ascend/atlasoffice（公共层不反向
-            // 依赖壳）。S-C4 handler 波 allow 面如需扩展随该切片头注登记。
+            // 登记）+ swarm（S-C4 commit 3 扩 allow 登记：setup.ts
+            // captureTeammateModeSnapshot teammate 快照面，壳 compose.ts 同型
+            // 先例；setup.ts 头注同登记）；不依赖 atlascode/ascend/atlasoffice
+            // （公共层不反向依赖壳）。S-C4 handler 波 allow 面如需扩展随该
+            // 切片头注登记。
             {
               from: "cli",
               allow: [
                 "shared", "bootstrap", "engine", "permissions",
-                "remote", "mcp", "hooks", "modelprovider",
+                "remote", "mcp", "hooks", "modelprovider", "swarm",
               ],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
