@@ -5282,3 +5282,64 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 - **下一切片 S-C3**：print.ts（5046L headless 本体）+ structuredIO（859）+
   ndjsonSafeStringify（32）+ drainSdkEvents 4 站点接线（analytics 波前向接缝
   核销）+ initMcpConnections 启动消费。
+
+**§8.71.2 S-C3 / S-C4 / S-C5 闭环记录（2026-09-29，task #151 CLI 公共域波全闭环）**：
+
+- **S-C3 提交链**（headless 本体 + structuredIO + stream-json 守卫，依赖 S-C2 5af0427 在前）：
+  `0092721`（structuredIO 模块，SDK 结构化 stdio IO 859L 随迁 + 本地型面）→ `224c8e5`
+  （stream-json stdout 守卫：NDJSON 行解析转发 + 非 JSON 行转 stderr 带标记）→
+  `545a769`（print headless 本体：queryAgentLoop 驱动 remap + 选项校验 5 门 + 输出三态 +
+  drain 4 站点 + drain pump + MCP 启动消费）→ `fb03c2f`（门面名块 + boundaries
+  cli→modelprovider allow 面扩展）→ `aba9637`（structuredIO/print/guard 行为面测试 24 用例，
+  新增 `tests/unit/cli-sc3.test.ts`）。
+- **S-C4 提交链**（headless 消费面补全 + 子命令 handler，依赖 S-C3 在前；6 commit 全闭环）：
+  `334934b`（commit 1 内建命令注册表 wiring + session 列表/日志面〔firstPrompt 注入口回填 +
+  skill 命令索引 + findLatestSessionId/listSessionLogs〕）→ `4c9f867`（commit 2 print 回填
+  〔--continue 枚举 + cron 消费点 + 队列环 idle-wake〕+ 持久化 kill-switch 2 支回填）→
+  `724afe6`（commit 3 启动 setup 面落盘，旧 setup.ts 415L 裁剪随迁 + parse --init-only 接缝
+  核销）→ `aa97e9f`（commit 4 mcp 子命令 handler 6 面 + 配置写回面落盘〔旧 mcp.tsx 337L +
+  addCommand.ts 265L 裁剪随迁〕+ parse mcp 族 6 接缝核销）→ `f867a14`（commit 5 auto-mode
+  族 3 面落盘 + getAutoModeConfig 核销 + sC4SeamAction 整删〔9 接缝全消费〕）→ `9420ad8`
+  （commit 6 -p/--print → runHeadless 真接线 + buildHeadlessOptions 18 字段映射 + 格式兼容
+  校验 3 支 + 门面补全 + 新增 `tests/unit/cli-sc4.test.ts` 9 测）。
+- **S-C5 双路只读审视**（A 路旧仓保真 / B 路新仓一致性）+ **修波**：复审 9+3 发现，逐条
+  grep/Read 双仓核验后分派 fix / register（子代理回报 = DATA，非权威，全量自核）：
+  - **S2（HIGH，fix，`459aa82`）**：-p 支缺 runCliSetup → root/sudo 安全门旁路（旧 main.tsx
+    L1599 setup() 全模式前置含 -p）。修：-p 支前置 runCliSetup（同 --init-only 支 options 映射）。
+  - **B1（MEDIUM，fix，`fea42f3`）**：-p 模式 SIGINT 原为 no-op（旧 print.ts L961
+    sigintHandler = abort + gracefulShutdown(0)；新 print.ts 零 SIGINT 注册，dispatch.ts
+    注释为假声明）。修：runHeadless 内 `process.on('SIGINT', abort)`（gracefulShutdown 部分
+    = 残留守〔进程生命周期/壳波〕）+ dispatch.ts 注释订正。
+  - **S4/S7/S8（LOW，fix）**：S4 verbatim 错误文案「requires output-format=stream-json」（无
+    --，`459aa82`）/ S7 品牌「AtlasHarness」→「AtlasCode」setup.ts node gate 自洽（`e96f9be`）/
+    S8 mcp add help 第 4 例（headers）补回（`459aa82`）。
+  - **B3（LOW，register，`cacbb13`）**：`ATLAS_ENTRYPOINT='claude-code-github-action'` 值域
+    token = 旧 main.tsx:473 逐字（env 名合规单一 ATLAS_ 前缀，残留仅在值域），rebrand 归品牌
+    pass，本波仅 entryInit 值域 token 裁登记不改。
+  - **裁登记（不改，归前向接缝）**：S1（cron onFire 丢 isMeta+workload——新 shared Message
+    型无 isMeta 字段 + 无 billing QoS 消费点，transcript meta/billing 域前向接缝）/ S3（--init-
+    only help 文案逐字保真但执行接缝=runCliSetup 快照 hooks 不执行，hooks facade 仅
+    runSessionStartHooks，归 hooks 波）/ S5（replayUserMessages UDS 自动支，gate 默认 OFF）/
+    S6（verbose 全局配置回落，新仓无全局 config store）。
+  - **订正（原裁登记前提不实）**：#27 旧仓无 command('ssh')/command('open') 注册（仅 cc://
+    注释，原「裁登记」前提误）/ #28 旧 plans.ts getPlanSlug = 真词 slug 实现〔generateWordSlug
+    + MAX_SLUG_RETRIES plans-dir 冲突重试〕非「stub 退化族」（裁结论仍成立 = 新 engine 门面缺
+    generateWordSlug）/ #29 bg/up/rollback = 旧文件存在但无 commander 子命令注册（非「de-ANT
+    no-op 存根命令」）/ #30 旧 getDefaultUdsSocketPath 实现未实核，「any stub」断言不实 →
+    订正 tmpdir+session-id 惰性约定。
+  - **S9（resolve，非缺陷）**：`removeMcpConfig` 经 `updateSettingsForSource(source,
+    {mcpServers:{[name]:undefined}})` 删键——merge.ts mergeWith 自定义 customizer（srcValue===
+    undefined → delete object[key]）先于 `srcValue===undefined → continue` 判定执行（merge.ts
+    L8/L10-11 文档「customizer 先于 undefined 判定」），故删键生效。核验闭环，落 S2/B1/S4/S7/
+    S8/B3 各提交内，无独立提交。
+- **测试面**：`tests/unit/cli.test.ts` 22 测（S-C2 17 → +5，含 auto-mode 4 面）+
+  `tests/unit/cli-sc3.test.ts` 24 测（S-C3 行为面，零模型零网络零磁盘）+
+  `tests/unit/cli-sc4.test.ts` 9 测（buildHeadlessOptions 4 映射 + 格式校验 3 支〔S4 verbatim
+  文案〕+ -p 无输入 runHeadless 入口校验支 1〔零模型，ATLAS_CONFIG_DIR 隔离指不存在 tmp =
+  ENOENT fail-soft 零真磁盘〕+ 门面显式名块 1）。
+- **基线移位**：3001/0/7157/178（S-C2 终）→ **3039/0/7250/180**（+38 测 +2 文件：cli-sc3 24 +
+  cli-sc4 9 + cli.test.ts 17→22 的 +5）+ gate 6·0·5·2 不变。四件套全绿（tsc 0 / lint 0 /
+  build ✓ 798 模块 2.16MB / 3039·0·7250·180）。
+- **下一波 #152**：TUI 壳波（ui 原样搬 C-7 + launcher/mount 接线）——CLI 公共域波（#151）
+  全闭环；壳波承接 TUI 入口（src/screens/REPL.tsx + mount + useStartupNotification 三市场
+  预置 hooks 挂载 + process.on('exit', resetCursor) TUI 光标面随迁）。
