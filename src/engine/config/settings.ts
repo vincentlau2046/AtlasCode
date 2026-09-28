@@ -43,8 +43,10 @@
  *     getSettingsWithSources（/status 逐源呈现）/ getSettings_DEPRECATED /
  *     getManagedFileSettingsPresence（UI）/ getManagedSettingsKeysForLogging
  *     （日志展开面）/ rawSettingsContainsKey / hasAutoModeOptIn /
- *     getUseAutoModeDuringPlan / getAutoModeConfig（auto-mode 三函数，
- *     TRANSCRIPT_CLASSIFIER 面未落）。hasSkipDangerousModePermissionPrompt
+ *     getUseAutoModeDuringPlan（残留守：CLI 面不消费，auto-mode 波按需
+ *     回填）。getAutoModeConfig **S-C4 commit 5（CLI 波）已落**（本文件
+ *     尾段；裁登记核销，消费点 = cli/handlers/autoMode.ts defaults/config/
+ *     critique 3 handler）。hasSkipDangerousModePermissionPrompt
  *     **E-4 S-4c1 已落**（本文件，接缝⑥；trusted 4 源读 + RCE 排除注释逐字）。
  *   - 错误日志：旧仓 logError/logForDiagnosticsNoPII/profileCheckpoint →
  *     新仓 logForDebugging no-op 门面（charter C-4 logging port 定案前）。
@@ -68,12 +70,14 @@
 import { dirname, join, resolve } from 'path'
 import {
   errorMessage,
+  feature,
   getErrnoCode,
   getFsImplementation,
   isENOENT,
   logForDebugging,
   getConfigDirName,
 } from '../../shared'
+import { z } from 'zod'
 import { getAtlasConfigHomeDir } from './configRoot'
 import {
   getEnabledSettingSources,
@@ -598,4 +602,64 @@ export function getSettingsWithErrors(): SettingsWithErrors {
   const result = loadSettingsFromDisk()
   setSessionSettingsCache(result)
   return result
+}
+
+/**
+ * Returns the merged autoMode config from trusted settings sources.
+ * Only available when TRANSCRIPT_CLASSIFIER is active; returns undefined
+ * otherwise.
+ * projectSettings is intentionally excluded — a malicious project could
+ * otherwise inject classifier allow/deny rules (RCE risk).（旧仓注释逐字）
+ *
+ * S-C4 commit 5（CLI 波）随迁：旧仓 utils/settings/settings.ts getAutoModeConfig
+ * 逐字（4 源循环 userSettings/localSettings/flagSettings/policySettings；
+ * flagSettings 新仓死源短路同义；deny 键解析支保留 = de-ANT 注释逐字，
+ * 值不消费）。消费点 = cli/handlers/autoMode.ts。
+ */
+export function getAutoModeConfig():
+  | { allow?: string[]; soft_deny?: string[]; environment?: string[] }
+  | undefined {
+  if (feature('TRANSCRIPT_CLASSIFIER')) {
+    const schema = z.object({
+      allow: z.array(z.string()).optional(),
+      soft_deny: z.array(z.string()).optional(),
+      deny: z.array(z.string()).optional(),
+      environment: z.array(z.string()).optional(),
+    })
+
+    const allow: string[] = []
+    const soft_deny: string[] = []
+    const environment: string[] = []
+
+    for (const source of [
+      'userSettings',
+      'localSettings',
+      'flagSettings',
+      'policySettings',
+    ] as const) {
+      const settings = getSettingsForSource(source)
+      if (!settings) continue
+      const result = schema.safeParse(
+        (settings as Record<string, unknown>).autoMode,
+      )
+      if (result.success) {
+        if (result.data.allow) allow.push(...result.data.allow)
+        if (result.data.soft_deny) soft_deny.push(...result.data.soft_deny)
+        // de-ANT: the ant-only "deny → soft_deny" permission hardening was
+        // removed.
+        if (result.data.environment) {
+          environment.push(...result.data.environment)
+        }
+      }
+    }
+
+    if (allow.length > 0 || soft_deny.length > 0 || environment.length > 0) {
+      return {
+        ...(allow.length > 0 && { allow }),
+        ...(soft_deny.length > 0 && { soft_deny }),
+        ...(environment.length > 0 && { environment }),
+      }
+    }
+  }
+  return undefined
 }

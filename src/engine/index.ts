@@ -392,6 +392,7 @@ export {
   getPolicySettingsOrigin,
   getSettingsPaths,
   updateSettingsForSource,
+  getAutoModeConfig,
   getInitialSettings,
   getSettingsWithErrors,
 } from './config'

@@ -40,8 +40,9 @@
  *   - mcp 族 6 接缝（serve/add/remove/list/get/add-json）= S-C4 commit 4 落盘
  *     （cli/handlers/mcp.ts handler 面 + cli/mcpConfigWrite.ts 写回面；本文件
  *     惰性动态 import + type-only 选项面，handler 模块不 eager 加载）/
- *     auto-mode 族 3 接缝 = S-C4 commit 5（cli/handlers/autoMode.ts +
- *     getAutoModeConfig，sC4SeamAction 残留守）。
+ *     auto-mode 族 3 接缝（defaults/config/critique）= S-C4 commit 5 落盘
+ *     （cli/handlers/autoMode.ts + engine/config getAutoModeConfig；sC4SeamAction
+ *     随最后一族核销整删，本文件全 9 接缝 0 残留守）。
  */
 import {
   Command as CommanderCommand,
@@ -52,6 +53,7 @@ import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
+import type { AutoModeCritiqueOptions } from './handlers/autoMode'
 import type {
   McpAddJsonOptions,
   McpAddOptions,
@@ -87,19 +89,6 @@ function createSortedHelpConfig(): {
         getOptionSortKey(a).localeCompare(getOptionSortKey(b)),
     },
   )
-}
-
-/**
- * 子命令 seam action（S-C2 注册 / S-C4 handlers/* 实现，前向接缝登记）。
- * H6 防空洞：明示「handler 未落盘」+ exit 1，不伪装能力。
- */
-function sC4SeamAction(subcommand: string) {
-  return async (..._args: unknown[]): Promise<void> => {
-    process.stderr.write(
-      `atlascode ${subcommand}: handler 未落盘（S-C4 handlers/* 前向接缝）\n`,
-    )
-    process.exit(1)
-  }
 }
 
 /** 主面 seam action（裁登记见头注；options 面 = commander 解析后全量）。 */
@@ -749,18 +738,28 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
       .description(
         'Print the default auto mode environment, allow, and deny rules as JSON',
       )
-      .action(sC4SeamAction('auto-mode defaults'))
+      .action(async () => {
+        // 惰性加载面保真（同 mcp 族：handler 模块按子命令动态 import）
+        const { autoModeDefaultsHandler } = await import('./handlers/autoMode')
+        autoModeDefaultsHandler()
+      })
     autoModeCmd
       .command('config')
       .description(
         'Print the effective auto mode config as JSON: your settings where set, defaults otherwise',
       )
-      .action(sC4SeamAction('auto-mode config'))
+      .action(async () => {
+        const { autoModeConfigHandler } = await import('./handlers/autoMode')
+        autoModeConfigHandler()
+      })
     autoModeCmd
       .command('critique')
       .description('Get AI feedback on your custom auto mode rules')
       .option('--model <model>', 'Override which model is used')
-      .action(sC4SeamAction('auto-mode critique'))
+      .action(async (options: AutoModeCritiqueOptions) => {
+        const { autoModeCritiqueHandler } = await import('./handlers/autoMode')
+        await autoModeCritiqueHandler(options)
+      })
   }
 }
 

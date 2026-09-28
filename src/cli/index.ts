@@ -36,9 +36,12 @@
  * streamJsonStdoutGuard；TUI 默认启动支归壳波 #152，非本域）+
  * S-C4 commit 4 落盘（mcp 子命令 handler 6 面 + mcp 配置写回面
  * mcpConfigWrite〔scope 映射 local→localSettings / user→userSettings /
- * project→.mcp.json 权限保持写〕；mcp 域 mcpConfig.ts 头注域外登记核销。
- * 后续 commit：auto-mode 族（commit 5）/ -p 接线 + 测试 + 四件套
- * （commit 6））。
+ * project→.mcp.json 权限保持写〕；mcp 域 mcpConfig.ts 头注域外登记核销）+
+ * S-C4 commit 5 落盘（auto-mode 子命令 handler 3 面〔defaults/config/
+ * critique〕+ engine/config getAutoModeConfig；critique = sideQuery →
+ * ModelProvider.chat remap，裁登记见 handlers/autoMode.ts 头注；
+ * parse.ts sC4SeamAction 残留守随全 9 接缝核销整删）。
+ * 后续 commit：-p 接线 + 测试 + 四件套（commit 6）。
  */
 export { cliError, cliOk } from './exit'
 export {
@@ -136,3 +139,11 @@ export {
   removeMcpConfig,
   type McpCliScope,
 } from './mcpConfigWrite'
+
+// ── S-C4 commit 5: auto-mode 子命令 handler（3 面）────────────────
+export {
+  autoModeConfigHandler,
+  autoModeCritiqueHandler,
+  autoModeDefaultsHandler,
+  type AutoModeCritiqueOptions,
+} from './handlers/autoMode'

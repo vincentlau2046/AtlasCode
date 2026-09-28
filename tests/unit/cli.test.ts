@@ -17,10 +17,19 @@
  *    = 无配置空态输出 + 自然返回（无 process.exit）/ mcpConfigWrite 纯面
  *    （ensureConfigScope / ensureTransport / parseHeaders / parseEnvVars /
  *    expandEnvVarsInString）
+ *  - S-C4 commit 5 落盘断言（auto-mode 族 3 接缝 → 真 handler，零模型 /
+ *    零网络 / 零磁盘）：autoModeDefaultsHandler = permissions 域缺省规则
+ *    JSON 输出 / autoModeConfigHandler 无配置 = 缺省（per-section REPLACE
+ *    回落面）/ getAutoModeConfig（engine 门面）无配置 undefined /
+ *    autoModeCritiqueHandler 无自定义规则早退文案（不进 provider 面）
  */
 import { describe, test, expect } from 'bun:test'
 import { tmpdir } from 'node:os'
+import { getAutoModeConfig } from '../../src/engine'
 import {
+  autoModeConfigHandler,
+  autoModeCritiqueHandler,
+  autoModeDefaultsHandler,
   buildProgram,
   eagerParseCliFlag,
   ensureConfigScope,
@@ -284,5 +293,69 @@ describe('cli 域 S-C4 commit 4 · mcp 族落盘（S-C2 seam 断言更新，H6 �
     )
     expect(r.expanded).toBe('${ATLAS_SC4_TEST_VAR} and dflt')
     expect(r.missingVars).toEqual(['ATLAS_SC4_TEST_VAR'])
+  })
+})
+
+describe('cli 域 S-C4 commit 5 · auto-mode 族落盘（3 面真 handler，零模型 / 零网络 / 零磁盘）', () => {
+  // config home 隔离具（同 mcp 族测试面：ATLAS_CONFIG_DIR 指向不存在 tmp
+  // 路径 → user/local settings 源空，零磁盘写；settings 源空态 fail-soft）
+  function withIsolatedConfigHome<T>(fn: () => T): T {
+    const saved = process.env.ATLAS_CONFIG_DIR
+    process.env.ATLAS_CONFIG_DIR =
+      `${tmpdir()}/atlas-cli-sc4-auto-nonexistent`
+    try {
+      return fn()
+    } finally {
+      if (saved === undefined) delete process.env.ATLAS_CONFIG_DIR
+      else process.env.ATLAS_CONFIG_DIR = saved
+    }
+  }
+
+  async function captureStdout(fn: () => void | Promise<void>): Promise<string> {
+    const realStdoutWrite = process.stdout.write
+    let stdout = ''
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      stdout += String(chunk)
+      return true
+    }) as typeof process.stdout.write
+    try {
+      await fn()
+    } finally {
+      process.stdout.write = realStdoutWrite
+    }
+    return stdout
+  }
+
+  test('autoModeDefaultsHandler = permissions 域缺省规则 JSON（三段非空，零模型）', async () => {
+    await withIsolatedConfigHome(async () => {
+      const stdout = await captureStdout(() => autoModeDefaultsHandler())
+      const rules = JSON.parse(stdout)
+      for (const key of ['allow', 'soft_deny', 'environment']) {
+        expect(Array.isArray(rules[key]), `${key} 段`).toBe(true)
+        expect(rules[key].length > 0, `${key} 段非空`).toBe(true)
+      }
+    })
+  })
+
+  test('autoModeConfigHandler 无配置 = 缺省规则（per-section REPLACE 回落面）', async () => {
+    await withIsolatedConfigHome(async () => {
+      const defaultsOut = await captureStdout(() => autoModeDefaultsHandler())
+      const configOut = await captureStdout(() => autoModeConfigHandler())
+      expect(JSON.parse(configOut)).toEqual(JSON.parse(defaultsOut))
+    })
+  })
+
+  test('getAutoModeConfig 无配置 = undefined（feature 门 ON_BY_DEFAULT 开 + 4 源空）', () => {
+    withIsolatedConfigHome(() => {
+      expect(getAutoModeConfig()).toBeUndefined()
+    })
+  })
+
+  test('autoModeCritiqueHandler 无自定义规则早退（零模型路径，不进 provider）', async () => {
+    await withIsolatedConfigHome(async () => {
+      const stdout = await captureStdout(() => autoModeCritiqueHandler({}))
+      expect(stdout).toContain('No custom auto mode rules found.')
+      expect(stdout).toContain('atlascode auto-mode defaults')
+    })
   })
 })
