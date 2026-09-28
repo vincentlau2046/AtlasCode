@@ -4348,3 +4348,271 @@ src/swarm/
   permissions 残留守 ①；React/Ink 面 → TUI 波；emitTaskTerminatedSdk →
   analytics 波 task #143。
 
+## §8.67 S-E1 总分析（D 波，task #141，2026-09-28）
+
+**§8.67.1.1 波定位与范围**
+
+D 波 = 既定序列第 4 棒（C ③ → D → remote → analytics），task #141。
+范围 4 部分，来源 4 处信息：
+
+1. **D 桶 ① Skill 域**（§8.60.1.1 裁定）：先落 skill 目录/模型面/usage
+   tracking 目录域，再落 SkillTool 915L 本体（+prompt 213L；UI 127L
+   JSX → TUI 波）。本体硬依赖闭包 = commands 域 + forkedAgent 核层 +
+   processPromptSlashCommand 核层 + skill usage/invoked 状态 +
+   parsePluginIdentifier/isOfficialMarketplaceName + 消息 tag/agent
+   context；feature('EXPERIMENTAL_SKILL_SEARCH') 远端 skill 4 模块整支
+   裁（新仓 feature() 恒 false，旧仓 4 文件 = 1-3L 桩）。
+2. **D 桶 ② LSP 域**（§8.61.1.1 裁定）：先落 LSP client 域（旧
+   services/lsp 8 文件 2464L）+ wire 型本地转写（旧仓
+   vscode-languageserver wire 型全 ambient any stub = 无真型契约可保真；
+   新仓 3-dep 纪律亦无真包可引）+ 插件域 LSP 集成面（新仓 0 命中 →
+   注入窗），再落 LSPTool 860L 本体（+formatters 592/schemas 215/
+   prompt 21/symbolContext 90；UI 227L JSX → TUI 波）。本体不能单独落
+   = isEnabled()≡false + call() 4 缝无宿主 = 空心壳（H6 违规）→ client
+   域与本体同波。
+3. **§8.66.2.5 前向接缝**（C 桶 ③ 登记，归 D 波）：① agent 注册表
+   （def.tools Set-union / agentDefinition duck 字段，inProcessRunner
+   delta ⑧ 回填点 L975-1010）② leader 权限面（leaderPermissionBridge
+   队列 headless 消费；注册侧已落）③ delta ⑭ 死参消费端（port
+   allowedTools/allowPermissionPrompts 零消费 → 消费端 = 旧 L1178
+   canShowPermissionPrompts ?? true / 旧 L1185 + 旧 runAgent L475-486
+   session rule 语义）。
+4. **路线图 §8.3 D 波行**：壳接线（atlascode/cli.ts + mount.ts +
+   state/index.ts 3× 7L `export {}` 骨架）+ B13（setAppState 置换，S-E0
+   自 F 波改判）+ 全栈 gelu 复验。
+
+**波终基线底数 = 2653/152/6229 + gate 6·5**（§8.66.2.4 波终）。
+
+**§8.67.1.2 旧仓读面（ground-truth 盘点）**
+
+D 桶 ① Skill 域：
+
+| 旧仓文件 | 行 | 处置 |
+|---|---|---|
+| tools/SkillTool/SkillTool.ts | 915 | 本体 → `src/engine/tools/skill/`（裁：远端支整支 / MCP 支 → remote 波 / TUI render → TUI 波） |
+| tools/SkillTool/prompt.ts | 213 | prompt 面 → `src/engine/tools/skill/` |
+| tools/SkillTool/UI.tsx | 127 | JSX render → TUI 波（Tool 契约 renderToolUseMessage 字符串面保留） |
+| commands.ts | 705 | 目录模型面 6 函数（builtInCommandNames/getCommands/getSkillToolCommands/getSlashCommandToolSkills/findCommand/clearCommandsCache）→ `src/engine/skill/`；~70 本地 TUI 命令（COMMANDS 清单，多数 .tsx）→ TUI 波 |
+| skills/loadSkillsDir.ts | 1064 | skill 目录装载（getSkillDirCommands/clearSkillCaches/getDynamicSkills/getBundledSkills 装载链/parseSkillFrontmatterFields/discoverSkillDirsForPaths/addSkillDirectories/activateConditionalSkillsForPaths/LoadedFrom）→ `src/engine/skill/` |
+| skills/bundledSkills.ts | 220 | 内置 skill 注册（getBundledSkills→Command[]/registerBundledSkill/createSkillCommand）→ `src/engine/skill/` |
+| utils/forkedAgent.ts | 652 | 核层 ~120L（prepareForkedCommandContext/extractResultText/createGetAppStateWithAllowedTools）→ `src/engine/skill/`；runForkedAgent 生成器族裁（新 runAgent = Promise 一次性全序列，fork 面适配：agentMessages = result.messages） |
+| utils/processUserInput/processSlashCommand.tsx | 698 | processPromptSlashCommand + getMessagesForPromptSlashCommand 核层（skill → 消息展开）→ `src/engine/skill/`（转写 .ts，JSX 纠缠度 S-E2 判定）；processSlashCommand TUI 入口（setToolJSX/uuid 参数）→ TUI 波 |
+| utils/skills/skillUsageTracking.ts | 55 | recordSkillUsage → `src/engine/skill/` |
+| utils/skills/skillChangeDetector.ts | 304 | 消费端 = useSkillsChange TUI hook → 裁登记（TUI 波） |
+| services/skillSearch/ | 10（4× 1-3L 桩） | feature 恒 false → 整支裁登记 |
+
+本体硬依赖闭包（新仓落面确认，§8.67.1.3）：getRuleByContentsForTool ✓ /
+parseToolListFromCLI ✓ / agent 注册表（getBuiltInAgents +
+loadAgentsDir + resolveAgentTools）✓ / runAgent（Promise 面 +
+forkContextMessages/checkPermission）✓ / createAgentId（randomUUID）✓ /
+shared uniq·expandPath + bootstrap getCwd ✓。
+
+D 桶 ② LSP 域：
+
+| 旧仓文件 | 行 | 处置 |
+|---|---|---|
+| tools/LSPTool/LSPTool.ts | 860 | 本体（9 操作 enum strictObject + validateInput 4 码 + UNC skip / checkPermissions 单线 checkReadPermissionForTool / call 4 缝 / filterGitIgnoredLocations / formatResult 9 支）→ `src/engine/tools/lsp/` |
+| tools/LSPTool/formatters.ts | 592 | 结果格式化面（countSymbols 嵌套/countUniqueFiles/invalid-uri logError）→ `src/engine/tools/lsp/` |
+| tools/LSPTool/schemas.ts | 215 | zod schema（lspToolInputSchema）→ `src/engine/tools/lsp/` |
+| tools/LSPTool/prompt.ts | 21 | → `src/engine/tools/lsp/` |
+| tools/LSPTool/symbolContext.ts | 90 | → `src/engine/tools/lsp/` |
+| tools/LSPTool/UI.tsx | 227 | JSX → TUI 波（renderToolUseMessage 字符串面保留） |
+| services/lsp/config.ts | 79 | "LSP servers are only supported via plugins, not user/project settings" — 插件唯一源（loadAllPluginsCacheOnly + getPluginLspServers，新仓 0 命中）→ `src/lsp/` + 配置注入窗（未注册 = 空 = LSP 断连态） |
+| services/lsp/LSPClient.ts | 447 | client（createLSPClient，JSON-RPC stdio）→ `src/lsp/` + wire 型本地转写 |
+| services/lsp/LSPDiagnosticRegistry.ts | 386 | registry 活面（register/check/clear/reset/clearDelivered/getPendingCount）→ `src/lsp/` |
+| services/lsp/LSPServerInstance.ts | 511 | → `src/lsp/` |
+| services/lsp/LSPServerManager.ts | 420 | createLSPServerManager → `src/lsp/` |
+| services/lsp/manager.ts | 289 | 单例状态机（getLspServerManager/getInitializationStatus/isLspConnected/waitForInitialization/initialize/reinitialize/shutdown/_resetLspManagerForTesting）→ `src/lsp/` |
+| services/lsp/passiveFeedback.ts | 328 | 二分裁定：registerLSPNotificationHandlers（handler 注册面，client 域消费）保留 → `src/lsp/`；formatDiagnosticsForAttachment（TUI attachment 渲染面）→ TUI 波 |
+| services/lsp/types.ts | 4 | 本地型再导出 + 3 个 any 型（转写对象）→ `src/lsp/` |
+| （wire 型） | ~10-15 型 | LSP wire 子集（Request/Response/Location/SymbolInformation/CallHierarchy(Item)s/TextDocument(Position)Params/InitializeParams/PublishDiagnosticsParams 等）本地转写 — 旧仓 ambient any stub（无真型契约可保真），转写面 = LSPTool + formatters + client 域消费面，头注登记 |
+
+call 4 缝宿主确认（同波落，非空心）：getInitializationStatus /
+getLspServerManager = manager.ts 单例（LSPTool L 缝 1/2）；
+getMethodAndParams = 本体 9 操作 → LSP method 映射表（1-based→0-based）
+（缝 3）；sendRequest = LSPServerInstance（缝 4，isFileOpen → open +
+stat > MAX_LSP_FILE_SIZE_BYTES 10MB → 'File too large…' +
+No LSP server available for file type 兜底）。
+
+接缝面（§8.66.2.5 三件，旧仓 ground truth）：
+- 旧 inProcessRunner L966-980：`resolvedAgentDefinition.tools =
+  agentDefinition?.tools ? [...new Set([...agentDefinition.tools,
+  SEND_MESSAGE_TOOL_NAME, TEAM_CREATE_TOOL_NAME, TEAM_DELETE_TOOL_NAME,
+  TASK_CREATE_TOOL_NAME, TASK_GET_TOOL_NAME, TASK_LIST_TOOL_NAME,
+  TASK_UPDATE_TOOL_NAME])] : ['*']`（team-essential 7 件 Set-union）；
+  L937-947 custom prompt append `\n# Custom Agent Instructions\n${
+  customPrompt}`；L984 model 传播。
+- 旧 L1178：`canShowPermissionPrompts: allowPermissionPrompts ?? true`；
+  旧 L1185 + 旧 runAgent L475-486：allowedTools = **session 级权限规则**
+  （非池限制；旧注释逐字 "when allowedTools is provided, use them as
+  session rules. Preserve cliArg rules (from SDK's --allowedTools)" →
+  session: [...allowedTools]）。
+- 新仓消费端映射：① 回填点 = inProcessRunner delta ⑧ 注释点（L975-1010，
+  "team-essential 7 件 Set-union 随 agentDefinition 参数裁除（D 波
+  agent 注册表回填）；无自定义 def → 全量池"）② allowedTools → teammate
+  TPC alwaysAllowRules（session rule 语义，gate 构建前）③
+  allowPermissionPrompts≡false → gate ask 支 auto-deny（leader 权限面
+  headless 消费；leaderPermissionBridge 注册侧已落，UI queue 接线 = TUI
+  波）。
+
+**§8.67.1.3 新仓落面确认（存在性 grep 记录，2026-09-28）**
+
+已落可消费（✓）：
+- `getRuleByContentsForTool` = src/permissions/ruleMatching.ts:264（E-4
+  逐字落）
+- `parseToolListFromCLI` = src/engine/permissions/permissionSetup.ts:112
+  （门面 engine/index.ts:536）
+- agent 注册表 = getBuiltInAgents（engine/tools/agent/builtInAgents.ts:31）
+  + loadAgentsDir（143L）+ resolveAgentTools（agentToolUtils：通配/按名/
+  禁用集/mcp__ 透传/seen Set 去重）
+- runAgent = engine/tools/agent/runAgent.ts（RunAgentArgs：agentId 必填 /
+  forkContextMessages? / checkPermission?；Promise 一次性全序列）
+- Executor 接口 exec(command, args, opts)（executor/types.ts:77）；
+  child_process 直用先例 = bashTool/shell 域
+- bootstrap getCwd（cwd.ts:41）/ shared expandPath（path.ts:31）/
+  memory frontmatterParser
+- SKILL_TOOL_NAME 已 seed（toolNames.ts:36）
+
+未落（接缝登记，复审勿当遗漏重提）：
+- addInvokedSkill / clearInvokedSkillsForAgent / getInvokedSkills — 0
+  命中 → skill invoked 状态 = 本波 skill 子域落面（模块态，不进
+  bootstrap）
+- AppState `mcp.commands` — 0 命中 → MCP skill 支 = **remote 波
+  （task #142）前向接缝**；skill 域 skill 源注入窗（未注册 = 空源，
+  fail-soft，模型 skill 池 = bundled + 用户目录 + plugin 源）
+- resolveSkillModelOverride — 0 命中 → skill 模型覆写面 = skill 子域本地
+  纯函数（skill.model → mainLoopModel 覆写，~15L），头注登记
+- execFileNoThrowWithCwd（LSP git check-ignore batch 50，timeout 5000，
+  exit 0=ignored/1=none/128=not-repo）— 0 命中 → **lsp 域本地
+  child_process.execFile 等价**（单消费点；L3 域自治不拉 executor；
+  先例 = bashTool 直用 child_process；零新依赖）
+- LSP_TOOL_NAME — toolNames.ts 0 命中 → 本波 seed
+- 插件域 LSP 集成（loadAllPluginsCacheOnly + getPluginLspServers）— 0
+  命中 → 插件域前向接缝（既定序列外，登记；lsp 配置注入窗 fail-soft）
+
+**§8.67.1.4 范围裁定（迁 / 裁 / 前向接缝）**
+
+**R1 域布局裁定：**
+- D 桶 ① = `src/engine/skill/`（skill 目录子域：commands 模型面 +
+  loadSkillsDir + bundledSkills + skillUsageTracking + invoked-skill
+  状态 + forkedAgent 核层 + processPromptSlashCommand 核层 + 注入窗；
+  全在 engine 内无跨域 import，先例 = agent 注册表在 engine/tools/agent/
+  下）+ `src/engine/tools/skill/`（SkillTool 本体 915 裁 + prompt 213 +
+  注册；SKILL_TOOL_NAME 已 seed）
+- D 桶 ② = `src/lsp/`（**新顶级域**：client 域 2464L + wire 型 + 配置
+  注入窗 + manager 单例；自治 = JSON-RPC + child_process + fs only，不
+  import engine）+ `src/engine/tools/lsp/`（LSPTool 本体 +
+  formatters/schemas/prompt/symbolContext + LSP_TOOL_NAME seed；工具面 →
+  服务域，方向同 files→bootstrap/executor 先例；isEnabled = lsp 域
+  isLspConnected = 同波落非空心）
+- §8.66.2.5 接缝 = swarm 域 inProcessRunner 回填（delta ⑧/⑭ 消费端）+
+  leader 权限面（headless 消费）
+- 壳 = atlascode/cli.ts + mount.ts + state/index.ts 3× 7L 骨架 + B13 +
+  gelu
+
+**R2 Skill 裁面（全登记，复审勿当遗漏重提）：**
+1. executeRemoteSkill 整支（feature 恒 false，旧 4 模块 = 1-3L 桩）→ 裁
+2. MCP skill 支（getAppState().mcp.commands 过滤 + uniqBy）→ remote 波
+   前向接缝（注入窗 fail-soft）
+3. plugin skill/command 源（getPluginSkills/getPluginCommands）→ 插件域
+   注入窗（同上）
+4. COMMANDS ~70 本地 TUI 命令（多数 .tsx）→ TUI 波；模型面
+   getSkillToolCommands 过滤 `source!=='builtin'` 不受影响
+5. REMOTE_SAFE_COMMANDS/BRIDGE_SAFE_COMMANDS → remote 波；
+   INTERNAL_ONLY_COMMANDS → 裁登记
+6. skillChangeDetector 304L（消费端 = useSkillsChange TUI hook）→ TUI 波
+7. querySource 'agent:custom' + isAsync + preserveToolUseResults → 新
+   runAgent 签名无此字段 = 裁登记（新 runAgent = Promise 一次性，无
+   异步/分叉语义）
+8. command.effort 合并（{...baseAgent, effort: command.effort}）→ 新
+   AgentDefinition 无 effort 字段 = 裁登记（skill effort 面 = 残留守，
+   本波不造字段）
+9. getAgentContext → 新 createAgentId（randomUUID）+ agentId 参数
+10. onProgress skill_progress → 保留（新 Tool 契约有 onProgress 槽，零
+    成本）
+11. meetsAvailabilityRequirement（'claude-ai' break / 'console'
+    isFirstPartyGatewayUrl / 'vendor' OPENAI_*）→ 新仓 auth lane =
+    OpenAI 静态键：claude-ai 支裁；vendor 面 = OPENAI_* env 面本地转写
+    （S-E2 细则裁定）
+12. UI.tsx 127L JSX → TUI 波（renderToolUseMessage 字符串面保留）
+
+**R3 LSP 裁面（全登记，复审勿当遗漏重提）：**
+1. config 插件唯一源 → LspServerConfig 注入窗（未注册 = 空配置 = LSP
+   断连 = 工具 disabled 态，活面非空心）+ 插件域 LSP 集成（旧
+   lspPluginIntegration 390L）= 插件域前向接缝
+2. lspRecommendation 374L（TUI 推荐面）→ TUI 波
+3. UI.tsx 227L JSX → TUI 波（renderToolUseMessage 字符串面保留）
+4. passiveFeedback 二分：registerLSPNotificationHandlers 保留（handler
+   注册面）/ formatDiagnosticsForAttachment → TUI 波（attachment 渲染
+   面）
+5. wire 型 = 本地转写（旧仓 ambient any stub 无真型契约可保真；转写面 =
+   LSPTool + formatters + client 域消费面；头注登记"转写 = D 波裁定面，
+   非旧仓保真"）
+6. execFileNoThrowWithCwd → lsp 域本地 child_process.execFile 等价（单
+   消费点 = git-ignore filter；不拉 executor）
+7. MAX_LSP_FILE_SIZE_BYTES 10MB / filterGitIgnoredLocations（4 location
+   操作 + workspaceSymbol；batch 50）→ 落面（域本地）
+
+**R4 接缝裁定（§8.66.2.5 三件回填）：**
+- agent 注册表回填 = port 输入面（inProcessRunnerPort/types.ts）+
+  agentDefinition duck 字段（getSystemPrompt/tools/model/customPrompt）
+  + inProcessRunner 回填：custom prompt append（旧 L937-947 逐字）+
+  resolvedAgentDefinition.tools = def.tools ∪ team-essential 7 件
+  Set-union（无自定义 def → 全量池，delta ⑧ 注释语义逐字）+ model 传播
+  （旧 L984）；池限制面 = agent 域 resolveAgentTools（已落）
+- delta ⑭ allowedTools 消费端 = teammate TPC alwaysAllowRules 合并（旧
+  runAgent L475-486 session rule 语义：session 规则非池限制；Preserve
+  cliArg rules）
+- delta ⑭ allowPermissionPrompts 消费端 = `canShowPermissionPrompts =
+  allowPermissionPrompts ?? true`（旧 L1178 逐字）；false → gate ask 支
+  auto-deny（无交互提示）；leader 权限面 = leaderPermissionBridge 队列
+  headless 消费（注册侧已落，UI queue 接线 = TUI 波）
+
+**R5 壳接线 + B13 + gelu：**
+- cli.ts = commander CLI 入口（消费 loop-deps builder 单入口；--check/
+  --tools/--e2e → 新仓等价面）
+- mount.ts = DomainPackage 挂载（DEP-5 接线点）
+- state/index.ts = AppState 实现（engine/ports/sessionContext.ts
+  QueryEngineConfig getAppState/setAppState 替换面，charter Port 1）
+- B13 = setAppState 置换（engine/state/EngineState.ts functional-update
+  串行语义；atlascode/state 7L → 真实现）
+- 全栈 gelu 复验 = 新全栈 liveness probe（engine loop + 工具注册表 +
+  provider + 新 2 域；fixture replay 零真模型；落 tests/func 或 e2e —
+  S-E2 裁定，gate ⑥ 不变）
+
+**R6 测试面预测 + 波终基线预测：**
+- skill 子域 unit（frontmatter/目录过滤/availability/usage/invoked-skill
+  状态）+ func（skill 目录真 FS 装载 round-trip）
+- SkillTool 本体 unit（validateInput 5 码 / checkPermissions 规则面 /
+  contextModifier allowedTools Set-union / mapToolResult 2 支 / forked
+  路径 runAgent mock）
+- lsp 域 unit（wire 型/formatters 9 操作/manager 状态机/git-ignore
+  filter mock）+ func（fake LSP server stub 真 stdio JSON-RPC，零模型）
+- 接缝 unit（def.tools Set-union / allowedTools TPC 合并 /
+  allowPermissionPrompts gate 支）
+- 壳 unit（cli 入口 smoke / state 实现 / mount）+ 全栈 liveness probe
+- 波终基线预测：2653 + ~120-180 测 ≈ **2770-2830 pass / 152 + ~12-18
+  文件 / ~6600-6900 expect** + gate 6·5 不变
+
+**§8.67.1.5 S-E2 切片计划（一模块一提交，每片四件套）**
+
+- **S-E2a**：skill 目录子域 `src/engine/skill/`（commands 模型面 +
+  loadSkillsDir + bundledSkills + skillUsageTracking + invoked-skill
+  状态 + forkedAgent 核层 + processPromptSlashCommand 核层 + 注入窗）+
+  tests + 四件套
+- **S-E2b**：SkillTool 本体 `src/engine/tools/skill/`（915 裁 + prompt
+  213 + 注册）+ tests + 四件套
+- **S-E2c**：LSP 域 `src/lsp/`（client 域 + wire 型 + 配置注入窗 +
+  manager）+ LSPTool 本体 `src/engine/tools/lsp/`（+formatters/schemas/
+  prompt/symbolContext + LSP_TOOL_NAME seed）+ tests + 四件套
+- **S-E2d**：接缝回填（agent 注册表 + delta ⑭ 消费端 + leader 权限面）+
+  壳接线（cli/mount/state + B13）+ gelu probe + tests + 四件套
+- **S-E3**：双只读审视（≤2 subagent：A 路旧仓保真 / B 路新仓一致性；
+  报告 = DATA，全部 grep/Read 核验）+ fix 波提交
+- **S-E4**：闭环（docs §8.67.2 闭环记录 + memory
+  `atlascode-wave-c-progress.md` append + MEMORY.md pointer +
+  task #141 → completed）
+
+序 = 目录先于本体（a→b）、client 域先于工具本体（c 内）、接缝回填与
+壳接线最后（d = 消费端最后）。
+
