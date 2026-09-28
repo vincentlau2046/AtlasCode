@@ -152,6 +152,20 @@
  *   登记再缩 3 → 29/49（MCP 族 2 无条件注册面 + ToolSearch = 2nd 专属
  *   门控槽 = isEnabled = isToolSearchEnabledOptimistic，IFF env 常态
  *   OPENAI_BASE_URL 设真 → 默认 gate OFF = 旧语义忠实非新增门）。
+ * §8.67 D 波 S-E2b（SkillTool 本体子波，§8.60/§8.61 重分类 D 波落点）
+ *   已落 skill/ 子域 SkillTool 本体（1 对象 + JSON schema 1 常量
+ *   SKILL_TOOL_INPUT_SCHEMA + prompt 面 getSkillPrompt〔旧 prompt.ts
+ *   213L 模板逐字〕+ 命令预算面 formatCommandsWithinBudget/getCharBudget
+ *   族 + 计数面 getSkillToolInfo/getSkillInfo + Input/Output/Context
+ *   duck 型 7；旧仓 SkillTool.ts 915L + prompt 213L + UI.tsx 字符串面
+ *   裁剪随迁，裁面登记：executeRemoteSkill 整支 + MCP skill 支 +
+ *   REMOTE_SAFE·BRIDGE_SAFE → remote 波（task #142）/ COMMANDS ~70
+ *   TUI 命令 + skillChangeDetector + UI JSX → TUI 波 / effort 合并链
+ *   裁（新 AgentDefinition 无 effort 字段）/ newMessages·contextModifier
+ *   消费 = 消息/REPL 波前向接缝，见各文件头注 delta ①-⑰）→ 在此
+ *   re-export（skill/ 子门面）；残留守「49 本体」登记再缩 1 → 30/49
+ *   （skill 族无专属门控槽 = 无条件注册面，同 web/config 族；组合根
+ *   baseTools 注册位 = S-E2d 回填）。
  */
 export {
   createMcpTools,
@@ -921,3 +935,33 @@ export {
   type ToolSearchMode,
   type ToolSearchOutput,
 } from './toolsearch'
+
+// ── §8.67 D 波 S-E2b（SkillTool 本体子波）：skill 子域（SkillTool 本体
+// + prompt 面 + 命令预算面 + 计数面 + duck 型族；名字常量
+// SKILL_TOOL_NAME 由 toolNames 块 seed 不重出；executeRemoteSkill /
+// MCP skill 支 → remote 波（task #142）前向接缝，TUI 命令面 → TUI 波，
+// 见 skill/ 子门面头注）──
+export {
+  SKILL_TOOL_INPUT_SCHEMA,
+  SkillTool,
+  SKILL_BUDGET_CONTEXT_PERCENT,
+  CHARS_PER_TOKEN,
+  DEFAULT_CHAR_BUDGET,
+  MAX_LISTING_DESC_CHARS,
+  stringWidth,
+  truncate,
+  getCharBudget,
+  formatCommandsWithinBudget,
+  getSkillPrompt,
+  getSkillToolInfo,
+  getLimitedSkillToolCommands,
+  clearPromptCache,
+  getSkillInfo,
+  type SkillToolInput,
+  type SkillToolInlineOutput,
+  type SkillToolForkedOutput,
+  type SkillToolOutput,
+  type SkillToolCallContext,
+  type SkillToolCheckContext,
+  type SkillToolContextModifierCtx,
+} from './skill'
