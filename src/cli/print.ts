@@ -65,7 +65,13 @@
  *     L2515-2544 同形；旧 feature('AGENT_TRIGGERS') 门 + cronGate
  *     isCronEnabled 检查裁除——新仓裁定无 feature 门，登记不随迁；旧
  *     session 任务支〔dir 缺省 → session store〕旧仓即 `: any` stub
- *    〔scheduler 域头注整砍〕，本消费点走 file-backed durable 路径。
+ *    〔scheduler 域头注整砍〕，本消费点走 file-backed durable 路径）。
+ *    S-C5 修波 S1 登记（语义漂移，复审勿当遗漏重提）：旧仓 cron onFire
+ *    enqueue 带 isMeta:true（system 生成，防 cron prompt 泄漏进 visible
+ *    transcript）+ workload:WORKLOAD_CRON（线程进 cc_workload 计费 QoS）；
+ *    新仓 shared Message 型无 isMeta 字段 + 无计费 QoS 消费面 → 两字段裁
+ *    （transcript meta 域 / billing 域前向接缝，归 session·analytics 波，
+ *    登记不随迁——cron 触发 prompt 现以普通 user 消息入队）。
  *   - boundaries allow 面扩展登记（S-C3，eslint.config.mjs cli 规则同
  *     登记）：cli → modelprovider（ModelProvider 实例 + modelToRole /
  *     getRoleModel 角色映射 + getProviderContextWindow 压缩阈值面）。
@@ -542,6 +548,16 @@ export async function runHeadless(
     )
   }
   const abortController = createAbortController()
+  // S-C5 修波 B1：-p 支 SIGINT = abort 在途 query（旧 print.ts L961 sigintHandler
+  // 核心支逐字：abort 后 agent loop 经 deps.signal 干净 unwind → runHeadless
+  // 返回 → 进程自然退出）。旧 sigintHandler 附 gracefulShutdown(0)（持久化 +
+  // force-exit）= 残留守〔进程生命周期/壳波〕，本支只落 abort 核心支。
+  // dispatch.ts 主面 SIGINT handler 对 -p 早退不抢占（其头注本支核销后为真）。
+  process.on('SIGINT', () => {
+    if (!abortController.signal.aborted) {
+      abortController.abort()
+    }
+  })
   const makeCtx = (): SdkToolUseContext => ({
     abortController,
     getAppState: () => ({ toolPermissionContext: tpcRef.current }),
@@ -783,6 +799,8 @@ export async function runHeadless(
   const cronScheduler: CronScheduler = createCronScheduler({
     onFire: prompt => {
       if (stdinClosed) return
+      // S1 裁登记：旧仓此处 enqueue 带 isMeta:true + workload:WORKLOAD_CRON
+      //（transcript 可见性 / 计费 QoS），新仓两字段裁（见头注 S-C5 S1 登记）。
       queuedUserTurns.push(prompt)
       idleWake?.()
     },

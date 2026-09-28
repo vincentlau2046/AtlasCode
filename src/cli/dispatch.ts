@@ -61,9 +61,10 @@ export async function main(): Promise<void> {
     // 保留挂载点时序不变
   })
   process.on('SIGINT', () => {
-    // In print mode, print.ts registers its own SIGINT handler that aborts
-    // the in-flight query and calls gracefulShutdown; skip here to avoid
-    // preempting it with a synchronous process.exit().
+    // In print mode, print.ts 注册自身 SIGINT handler = abort 在途 query
+    //（S-C5 修波 B1，print.ts runHeadless 内 process.on('SIGINT', abort)；
+    // 旧附 gracefulShutdown(0) 持久化/force-exit = 残留守〔进程生命周期/壳波〕）；
+    // skip here to avoid preempting it with a synchronous process.exit().
     if (process.argv.includes('-p') || process.argv.includes('--print')) {
       return
     }
