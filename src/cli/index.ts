@@ -29,8 +29,12 @@
  *   - bg/up/rollback/ant/templateJobs（旧仓 de-ANT no-op 存根，不迁——
  *     H6 防空洞：存根不迁不伪装能力）
  *
- * 状态: S-C2 落盘（parse 面 + 分派面 + dev 面 + entryInit/exit 随迁；
- * TUI 默认启动支归壳波 #152，非本域）。
+ * 状态: S-C2 落盘（parse 面 + 分派面 + dev 面 + entryInit/exit 随迁）+
+ * S-C3 落盘（print headless 本体〔queryAgentLoop 驱动 remap + 选项校验 +
+ * 输出三态 + drainSdkEvents 4 站点 + MCP 启动消费〕/ structuredIO 8 面 /
+ * sdkTypes 本地型面 / permissionPrompt wire schema / stream / ndjson /
+ * streamJsonStdoutGuard；TUI 默认启动支归壳波 #152，非本域；S-C4
+ * handlers/* 前向接缝登记见 print.ts 头注）。
  */
 export { cliError, cliOk } from './exit'
 export {
@@ -45,3 +49,57 @@ export {
 export { buildProgram, registerInDomainSubcommands, runCli } from './parse'
 export { getInputPrompt, main } from './dispatch'
 export { hasDevFlag, runDevCli } from './dev'
+
+// ── S-C3: headless 本体 + structuredIO 模块 ────────────────────────
+export { ndjsonSafeStringify } from './ndjsonSafeStringify'
+export {
+  permissionToolInputSchema,
+  permissionToolOutputSchema,
+  permissionPromptToolResultToPermissionDecision,
+  type DecisionClassification,
+  type PermissionToolOutput,
+} from './permissionPrompt'
+export {
+  getCanUseToolFn,
+  runHeadless,
+  type HeadlessOptions,
+} from './print'
+export {
+  sdkElicitationResponseSchema,
+  sdkHookJSONOutputSchema,
+  type CanUseToolFn,
+  type ElicitResult,
+  type HookCallback,
+  type JsonRpcMessage,
+  type SDKControlRequest,
+  type SDKControlRequestInner,
+  type SDKControlResponse,
+  type SDKMessage,
+  type SdkAssistantMessage,
+  type SdkCanUseToolRequest,
+  type SdkControlCancelRequest,
+  type SdkElicitationRequest,
+  type SdkHookCallbackRequest,
+  type SdkKeepAliveMessage,
+  type SdkMcpMessageRequest,
+  type SdkResultMessage,
+  type SdkSystemMessage,
+  type SdkToolUseContext,
+  type SdkToolView,
+  type SdkUpdateEnvironmentVariables,
+  type SdkUserMessage,
+  type StdinMessage,
+  type StdoutMessage,
+} from './sdkTypes'
+export { Stream } from './stream'
+export {
+  STDOUT_GUARD_MARKER,
+  installStreamJsonStdoutGuard,
+  _resetStreamJsonStdoutGuardForTesting,
+} from './streamJsonStdoutGuard'
+export {
+  normalizeControlMessageKeys,
+  SANDBOX_NETWORK_ACCESS_TOOL_NAME,
+  StructuredIO,
+  type RequiresActionDetails,
+} from './structuredIO'
