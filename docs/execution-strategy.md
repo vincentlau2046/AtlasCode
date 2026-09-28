@@ -5031,3 +5031,69 @@ eslint 0 / build 0KB entry；波终全量 + gate 实跑核逐值一致）；
 
 **下一步 = analytics 波（task #143，末棒；含 emitTaskTerminatedSdk
 残留守）**。详见本 §8.68（§8.68.1 S-E1 分析 + §8.68.2 本闭环记录）。
+
+## §8.69 analytics 波 S-E1 总分析（task #143 末棒，2026-09-28）
+
+**§8.69.1.1 波定位**：既定序列末棒（C 桶 ①②③ → D 波 → remote → **analytics** → F 波归档）。
+task #143。范围 = 跨波登记项核销（B5 远程持久化 / B2 遥测面 / perfetto 面等
+「归属 analytics 波」登记面）+ **SDK 事件队列落地（emitTaskTerminatedSdk
+残留守 = 本波主项）**。开波基线 = remote 波终 2979/0/7083/176 + gate 6·0·5·2。
+
+**§8.69.1.2 SDK 事件队列（H6 非空洞壳，落地面）**：
+- 旧仓 `src/utils/sdkEventQueue.ts` 135L 自足模块：SdkEvent 4 型
+  （task_started / task_progress / task_notification / session_state_changed）
+  + `enqueueSdkEvent`（TUI 门 `getIsNonInteractiveSession` 假早退 +
+  MAX_QUEUE_SIZE 1000 shift 溢出）+ `drainSdkEvents`（splice 全取 +
+  逐条附 `randomUUID` + `getSessionId`）+ `emitTaskTerminatedSdk`
+  （task_notification 收尾 bookend，旧 registerTask 恒发 task_started）。
+- **消费端裁定**：旧 `drainSdkEvents` 唯一消费 = `cli/print.ts` 4 站点
+  （headless/streaming 输出流直接 drain）→ 新仓 cli/mount 仍 A 波骨架
+  （D 波 N-1 登记 = CLI 波前向接缝）→ **`drainSdkEvents` = 前向接缝**
+  （CLI 波 print 路径接线；本波落地队列 + 生产端，drain 消费者登记）。
+- **生产端 = 真可达（非空洞判据）**：4 处裁除站点全有真终态路径——
+  `engine/coordinator/tasks/framework.ts` registerTask → task_started /
+  `engine/coordinator/tasks/stopTask.ts` → stopped /
+  `swarm/spawnInProcess.ts` kill 支 → stopped / `swarm/inProcessRunner.ts`
+  成功支 → completed + 失败支 → failed（旧仓 5 调用点逐字：
+  task_started `{task_id, tool_use_id, description, task_type,
+  workflow_name?, prompt?}`；emitTaskTerminatedSdk 4 站 `{toolUseId,
+  summary}`〔stopTask=task.description / spawnInProcess=kill 捕获
+  description / inProcessRunner 两支=identity.agentId〕）。
+- **落点裁定**：`src/engine/coordinator/tasks/sdkEventQueue.ts`（与拥有
+  task_started/terminated 的 task framework 共域）+ engine 根门面
+  re-export（swarm 顶域经 engine 根门面消费，L3 同型先例；in-domain
+  framework/stopTask 直接兄弟导入）。
+- **型面保真**：旧 `SdkWorkflowProgress = any` 退化型 → 新仓
+  `workflow_progress?: unknown[]`（any 语义保真去 lint 禁 any）；
+  task_progress 子型新仓零生产端（其 producer 域 LocalWorkflowTask 随
+  S-7a 残留守 ④ 门随模块裁）= 型面保留（wire 数据契约）生产端裁登记；
+  session_state_changed 生产端 = print.ts（CLI 波前向）= 型面保留裁登记。
+- **测试面**：队列 cap 1000 shift / TUI 门假早退（非交互才入队）/
+  drain 附 uuid+session_id 且清空 / emitTaskTerminatedSdk task_notification
+  形状 / 模块级队列 `resetSdkEventQueueForTesting` 对称复位（单进程连跑
+  泄漏守卫先例同型）。
+
+**§8.69.1.3 跨波登记项核销（裁定逐条，多数 = 保裁 + 形式核销）**：
+| 登记项 | 归属 | 裁定 |
+|---|---|---|
+| emitTaskTerminatedSdk 5 站点 | 本波主项 | **落地**（§8.69.1.2 生产端 rewire） |
+| B2 #6 jitter GrowthBook 整换（cronJitterConfig.ts:15） | 本波 | **保裁**：新仓无 growthbook 域；jitter 配置经 FeatureConfigPort（Port 8）注入缺省，growthbook-backed 实现 = 遥测后端未落域外（登记核销，不复活） |
+| B5 #11 project 裁面 ⑤ 远程持久化（project.ts:817 persistToRemote） | 远程/teleport 波 | **保裁**：登记归属正确（远程/teleport 波，非本波），核销确认 |
+| checkResumeConsistency（session/load.ts 遥测残余） | 本波 | **保裁**：旧体纯 no-op 遥测残余（H6 不迁空洞），核销确认 |
+| TaskUpdate/TodoWrite growthbook 2 站点 + feature('VERIFICATION_AGENT') 双门死支 | 本波 | **保裁**：无 growthbook 域 + bun:bundle feature() 不可测 + 双门死支，核销确认 |
+| WebSearch options querySource/agents 面（无消费者裁） | 本波 / C 桶 ③ | **保裁**：遥测/agent 域外，核销确认 |
+| isPerfettoTracingEnabled + perfetto register/unregister（spawnInProcess/inProcessRunner） | 本波 | **保裁**：遥测域未落 + 旧仓 no-op，核销确认 |
+
+**§8.69.1.4 切片计划（一模块一提交）**：
+- **S-E2a**：`sdkEventQueue.ts` 落盘 + 5 生产端 rewire + engine 根门面
+  re-export + 队列/门/drain/emit/复位 5 族单测。
+- **S-E2b**：跨波登记项核销（§8.69.1.3 表逐条头注核销标记 + 6 登记点
+  归属 wave 收口，零行为改动纯登记）。
+- **S-E3**：双只读审视（A 路旧仓保真 / B 路新仓一致性）≤2 subagent +
+  修波（一模块一提交）。
+- **S-E4**：闭环（docs §8.69.2 闭环记录 + memory `atlascode-wave-c-
+  progress.md` append + MEMORY.md pointer + task #143 → completed）。
+
+**基线预测**（S-E2 后，实落为准）：开波 2979/0/7083/176 + gate 6·0·5·2；
+S-E2a +~12 测（队列 5 族）→ 预测 ~2991 pass / ~177 文件（±5%）；gate
+6·5 恒；**波 tag 不切（gate ③ 仍 wave-c，末棒后 F 波归档才切 wave-f）**。
