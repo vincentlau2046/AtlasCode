@@ -8,8 +8,16 @@
  * 裁剪登记（H6 前向接缝，复审勿当遗漏重提）：
  *   - isLocalShellTask 抑制支的 emitTaskTerminatedSdk 已落（analytics 波
  *     §8.69）：抑制 XML 通知同时抑制 print.ts 解析出的 task_notification
- *     SDK 事件，故经 suppress 旗标（setAppState 回调内同步置位，B13
- *     state 域同步直 apply 保序）直发 SDK 事件让消费者看到任务关闭。
+ *     SDK 事件，故经 suppress 旗标（setAppState 回调内置位 + 下一行同步读）
+ *     直发 SDK 事件让消费者看到任务关闭。
+ *     ⚠ [§8.69 S-E3 A路 MAJOR-1 前向接缝] flag-capture 模式假设 setAppState
+ *     同步 apply（updater 内 `suppressed = true` 于紧随行可见）：旧仓
+ *     state/AppStateStore 同步直 apply → 成立。新仓 B13 state 域 = 异步串行
+ *     （atlascode/state EngineState.set 微任务边界，f 延迟一个 microtask 才
+ *     跑）→ 若任务域 setAppState 接 B13 AppState，`suppressed` 紧随行仍
+ *     false，'stopped' bookend 静默丢失。接线波（TaskStopTool 组合根 /
+ *     或任务域专用同步 store）须裁定：同步 store 或重构 flag 捕获（预读
+ *     getAppState 条件 / 无条件 emit + 双发守卫另置）。详见 §8.69.2。
  *   - AppState → task 域 TaskAppState（残余 ①）。
  */
 import type { SetAppState, TaskAppState, TaskStateBase } from '../../../task'

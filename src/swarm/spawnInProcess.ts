@@ -31,9 +31,14 @@
  *     直发 SDK task 收尾 bookend（旧
  *     emitTaskTerminatedSdk(taskId, 'stopped', { toolUseId, summary:
  *     description }) 逐字；捕获面 toolUseId/description 随 emit 复原）。
+ *     ⚠ [§8.69 S-E3 A路 MAJOR-1 前向接缝] killed/toolUseId/description 旗标
+ *     捕获假设 setAppState 同步 apply（updater 内置位 + 紧随行可见）：旧仓
+ *     同步成立，新仓 B13 state 域异步串行 → 接线波须裁定同步 store 或重构
+ *     （killed 旗标失活 = 整支 kill 后处理跳过 + return 误 false）。详见 §8.69.2。
  *   - perfetto tracing（isPerfettoTracingEnabled/register/unregister）裁除：
  *     遥测域未落（analytics 波 #143）。[§8.69 核销] 保裁确认：遥测域未落 +
- *     旧仓 no-op，核销确认（不复活）。
+ *     旧仓真实现（Chrome-Trace，ATLAS_PERFETTO_TRACE 门默认 isEnabled=false，
+ *     外部构建态 no-op），核销确认（不复活）。
  *   - kill 支 teamContext.teammates 清理支裁除：teamContext 状态面 = TUI 波
  *     （旧 AppState.teamContext ∉ 新仓 task 域最小 AppState）。
  *   - kill 更新面 `inProgressToolUseIDs/currentWorkAbortController: undefined`

@@ -1,5 +1,5 @@
 /**
- * SDK 事件队列（analytics 波 §8.69，末棒主项；旧仓 utils/sdkEventQueue.ts 135L
+ * SDK 事件队列（analytics 波 §8.69，末棒主项；旧仓 utils/sdkEventQueue.ts 134L
  * 逐字移植，delta 登记如下）。
  *
  * 语义（旧仓逐字）：SDK 事件仅在 headless/streaming（非交互）态入队，TUI 态

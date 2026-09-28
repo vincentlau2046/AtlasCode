@@ -5040,7 +5040,7 @@ task #143。范围 = 跨波登记项核销（B5 远程持久化 / B2 遥测面 /
 残留守 = 本波主项）**。开波基线 = remote 波终 2979/0/7083/176 + gate 6·0·5·2。
 
 **§8.69.1.2 SDK 事件队列（H6 非空洞壳，落地面）**：
-- 旧仓 `src/utils/sdkEventQueue.ts` 135L 自足模块：SdkEvent 4 型
+- 旧仓 `src/utils/sdkEventQueue.ts` 134L 自足模块：SdkEvent 4 型〔S-E3 N2 订正：wc -l 实测 134〕
   （task_started / task_progress / task_notification / session_state_changed）
   + `enqueueSdkEvent`（TUI 门 `getIsNonInteractiveSession` 假早退 +
   MAX_QUEUE_SIZE 1000 shift 溢出）+ `drainSdkEvents`（splice 全取 +
@@ -5077,12 +5077,12 @@ task #143。范围 = 跨波登记项核销（B5 远程持久化 / B2 遥测面 /
 | 登记项 | 归属 | 裁定 |
 |---|---|---|
 | emitTaskTerminatedSdk 5 站点 | 本波主项 | **落地**（§8.69.1.2 生产端 rewire） |
-| B2 #6 jitter GrowthBook 整换（cronJitterConfig.ts:15） | 本波 | **保裁**：新仓无 growthbook 域；jitter 配置经 FeatureConfigPort（Port 8）注入缺省，growthbook-backed 实现 = 遥测后端未落域外（登记核销，不复活） |
+| B2 #6 jitter GrowthBook 整换（cronJitterConfig.ts:15） | 本波 | **保裁**：新仓无 growthbook 域；jitter 配置经本地注入口 setCronJitterConfigProvider 注入缺省（facade 导出，组合根未接线，DEFAULT），growthbook-backed 实现 = 遥测后端未落域外（登记核销，不复活）〔S-E3 N1 订正〕 |
 | B5 #11 project 裁面 ⑤ 远程持久化（project.ts:817 persistToRemote） | 远程/teleport 波 | **保裁**：登记归属正确（远程/teleport 波，非本波），核销确认 |
 | checkResumeConsistency（session/load.ts 遥测残余） | 本波 | **保裁**：旧体纯 no-op 遥测残余（H6 不迁空洞），核销确认 |
 | TaskUpdate/TodoWrite growthbook 2 站点 + feature('VERIFICATION_AGENT') 双门死支 | 本波 | **保裁**：无 growthbook 域 + bun:bundle feature() 不可测 + 双门死支，核销确认 |
 | WebSearch options querySource/agents 面（无消费者裁） | 本波 / C 桶 ③ | **保裁**：遥测/agent 域外，核销确认 |
-| isPerfettoTracingEnabled + perfetto register/unregister（spawnInProcess/inProcessRunner） | 本波 | **保裁**：遥测域未落 + 旧仓 no-op，核销确认 |
+| isPerfettoTracingEnabled + perfetto register/unregister（spawnInProcess/inProcessRunner） | 本波 | **保裁**：遥测域未落 + 旧仓真实现（Chrome-Trace，ATLAS_PERFETTO_TRACE 门默认 isEnabled=false，外部构建态 no-op），核销确认（不复活）〔S-E3 M1 订正〕 |
 
 **§8.69.1.4 切片计划（一模块一提交）**：
 - **S-E2a**：`sdkEventQueue.ts` 落盘 + 5 生产端 rewire + engine 根门面

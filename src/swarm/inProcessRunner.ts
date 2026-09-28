@@ -59,9 +59,14 @@
  *      无 toolUseContext 参）/ runWithAgentContext + AgentContext（perfetto
  *      归因）/ evictTerminalTask（task 域无驱逐面）/ unregisterPerfettoAgent
  *      （perfetto 面）—— 裁除，新仓零活消费。[§8.69 核销] 保裁确认：遥测域
- *      未落 + 旧仓 no-op，核销确认（不复活）。emitTaskTerminatedSdk 已落
- *      （analytics 波 §8.69，completed/failed 两终态 bookend 复原
- *      alreadyTerminal/toolUseId 双发守卫，经 engine 根门面消费）。
+ *      未落 + 旧仓真实现（Chrome-Trace，ATLAS_PERFETTO_TRACE 门默认
+ *      isEnabled=false，外部构建态 no-op），核销确认（不复活）。
+ *      emitTaskTerminatedSdk 已落（analytics 波 §8.69，completed/failed 两终态
+ *      bookend 复原 alreadyTerminal/toolUseId 双发守卫，经 engine 根门面
+ *      消费）。⚠ [§8.69 S-E3 A路 MAJOR-1 前向接缝] alreadyTerminal/toolUseId
+ *      旗标捕获假设 setAppState 同步 apply（updater 内置位 + 紧随行可见）：
+ *      旧仓同步成立，新仓 B13 state 域异步串行 → 接线波须裁定同步 store 或
+ *      重构（alreadyTerminal 恒 false = 双发守卫失效 + 双 emit）。详见 §8.69.2。
  *   ③ R4 裁：BASH_CLASSIFIER 门（feature('BASH_CLASSIFIER') +
  *      awaitClassifierAutoApproval + BASH_TOOL_NAME pendingClassifierCheck 支）
  *      → permissions 域残留守 ①（BASH_CLASSIFIER 门归权限分类器波；新仓
