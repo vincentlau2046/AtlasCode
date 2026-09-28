@@ -89,7 +89,10 @@
  *         旧门 feature('ENABLE_LSP_TOOL') 裁 → isEnabled = isLspConnected() 自门控
  *         （断连态 = false，⑨ HISTORY_SNIP 门裁先例同型 = 门裁登记非新增门），
  *         LSP server 真配置源 = 插件域 LSP 集成波经 setLspServerSource 注入窗
- *         注册（前向接缝），组合根 baseTools 注入位 = S-E2d 回填）
+ *         注册（前向接缝），本体注入位 = 调用方 toolRegistryDeps.baseTools
+ *         （CLI 波单入口消费；组合根现不硬接 LSP/Skill 本体——S-E3 审视
+ *         B 路 M-1 订正原「组合根 baseTools 注入位 = S-E2d 回填」完成态
+ *         措辞，compose.ts 零 LSP/skill 引用实证）
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'

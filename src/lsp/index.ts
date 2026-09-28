@@ -8,9 +8,11 @@
  *     （getInitializationStatus/getLspServerManager/isLspConnected/
  *     waitForInitialization）+ wire 型（LSPTool + formatters +
  *     symbolContext 消费面）
- *   - 组合根（S-E2d 回填）：initializeLspServerManager /
- *     shutdownLspServerManager / reinitializeLspServerManager +
- *     setLspServerSource（插件域 LSP 集成波注册真源）
+ *   - CLI / 插件域 LSP 集成波（前向接缝，B 路 M-1 措辞订正：组合根
+ *     S-E2d 三提交未接 LSP 面，compose.ts 零 LSP 引用，原「组合根
+ *     （S-E2d 回填）」完成态措辞夸大）：initializeLspServerManager /
+ *     shutdownLspServerManager / reinitializeLspServerManager 生命周期
+ *     + setLspServerSource（插件域 LSP 集成波注册真源）导出待消费波接线
  *   - 消息/TUI 波（前向接缝登记）：checkForLSPDiagnostics 诊断取出面 +
  *     clearDeliveredDiagnosticsForFile 编辑清除面
  */

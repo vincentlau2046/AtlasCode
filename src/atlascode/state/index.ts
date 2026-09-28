@@ -27,8 +27,9 @@
  *     undefined` → wire 层回落 Atlas 缺省 'medium'（effort.ts:167 doc）
  *     的**预解析形**（旧初值 undefined + 消费时回落，本实现预解析为终值，
  *     无显式 effort 场景语义等价）。
- *   - mcp 裁面：旧 AppState.mcp 6 字段（clients/tools/commands/resources/
- *     snapshotSequence/pluginReconnectKey，AppStateStore.ts:163-172），
+ *   - mcp 裁面：旧 AppState.mcp 5 字段（clients/tools/commands/resources/
+ *     pluginReconnectKey，AppStateStore.ts:163-172；snapshotSequence 属
+ *     fileHistory 块 :498，非 mcp 成员——S-E3 审视 minor-1 计数订正），
  *     本 SessionSnapshot 契约面仅 tools + clients（新仓型面定义）；未来
  *     消费方需 commands/resources 时经同一窗口扩 SessionSnapshot 形。
  */
