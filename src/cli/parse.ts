@@ -35,8 +35,14 @@
  *   - auto-mode 注册：旧 getAutoModeEnabledStateIfCached() 缓存态短路支裁（新仓
  *     缺席；feature('TRANSCRIPT_CLASSIFIER') 门保留，ON_BY_DEFAULT 恒开）。
  *   主面 action（H6 防空洞：明示接缝，exit 1，不伪装能力不静默通过）：
- *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义）/ -p·--print = S-C3 print.ts 前向接缝（runHeadless 真接线 = S-C4 commit 6）/
- *     交互入口 = 壳波 #152 前向接缝（launchRepl/showSetupScreens 归壳波）。
+ *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义）/ -p·--print = S-C4 commit 6 落盘（buildHeadlessOptions 映射 + dispatch.getInputPrompt stdin 3s peek 面 + 旧 main.tsx L1500-1535 格式兼容校验 3 支 + print.runHeadless S-C3 本体，惰性动态 import）/
+ *     交互入口 = 壳波 #152 前向接缝（launchRepl/showSetupScreens 归壳波，明示接缝 exit 1）。
+ *   - 支消解登记：旧 --no-session-persistence「仅 print 模式可用」错误支
+ *     （旧 main.tsx L1533，交互态校验）= 消解（交互入口 = 壳波前向接缝，
+ *     非 print 支无落盘面；print 支双面消费：bootstrap ⑥ 族 kill-switch +
+ *     HeadlessOptions.disablePersistence transcript 持久化裁支）/
+ *     旧 --include-partial-messages 校验支 = 裁（字段不入 HeadlessOptions
+ *     契约，选项注册惰性数据）。
  *   - mcp 族 6 接缝（serve/add/remove/list/get/add-json）= S-C4 commit 4 落盘
  *     （cli/handlers/mcp.ts handler 面 + cli/mcpConfigWrite.ts 写回面；本文件
  *     惰性动态 import + type-only 选项面，handler 模块不 eager 加载）/
@@ -60,6 +66,7 @@ import type {
   McpRemoveOptions,
   McpServeOptions,
 } from './handlers/mcp'
+import type { HeadlessOptions } from './print'
 import { runCliSetup } from './setup'
 
 /**
@@ -91,9 +98,56 @@ function createSortedHelpConfig(): {
   )
 }
 
-/** 主面 seam action（裁登记见头注；options 面 = commander 解析后全量）。 */
+/**
+ * commander options → HeadlessOptions 映射（S-C4 commit 6；print.ts 定契约、
+ * dispatch 侧做映射——print.ts L147 头注同裁定）。测试面导出（cli-sc4.test.ts
+ * 映射断言）。
+ *
+ * 字段映射（旧 main.tsx L2405-2436 选项块 → S-C3 HeadlessOptions 契约）：
+ *   - tools → baseTools（commander key 'tools' = 基础工具池选项面）
+ *   - addDir → addDirs（commander key 'addDir' vs 契约 'addDirs'）
+ *   - permissionPromptTool → permissionPromptToolName
+ *   - sessionPersistence === false → disablePersistence（headless transcript
+ *     持久化裁支；与 bootstrap ⑥ 族 kill-switch 同 flag 双面消费）
+ * 裁登记（选项注册惰性数据、字段不入契约，见头注主面段）：jsonSchema /
+ * thinking / maxThinkingTokens / taskBudget / systemPrompt /
+ * appendSystemPrompt / fallbackModel / includePartialMessages / forkSession /
+ * enableAuthStatus / betas / workload / file / chrome / agents /
+ * settingSources。
+ */
+export function buildHeadlessOptions(
+  options: Record<string, unknown>,
+): HeadlessOptions {
+  return {
+    continue: options.continue === true ? true : undefined,
+    resume: options.resume as HeadlessOptions['resume'],
+    resumeSessionAt: options.resumeSessionAt as HeadlessOptions['resumeSessionAt'],
+    rewindFiles: options.rewindFiles as HeadlessOptions['rewindFiles'],
+    verbose: options.verbose === true ? true : undefined,
+    outputFormat: options.outputFormat as HeadlessOptions['outputFormat'],
+    allowedTools: options.allowedTools as HeadlessOptions['allowedTools'],
+    disallowedTools: options.disallowedTools as HeadlessOptions['disallowedTools'],
+    baseTools: options.tools as HeadlessOptions['baseTools'],
+    permissionMode: options.permissionMode as HeadlessOptions['permissionMode'],
+    permissionPromptToolName: options
+      .permissionPromptTool as HeadlessOptions['permissionPromptToolName'],
+    maxTurns: options.maxTurns as HeadlessOptions['maxTurns'],
+    model: options.model as HeadlessOptions['model'],
+    dangerouslySkipPermissions:
+      options.dangerouslySkipPermissions === true ? true : undefined,
+    addDirs: options.addDir as HeadlessOptions['addDirs'],
+    sdkUrl: options.sdkUrl as HeadlessOptions['sdkUrl'],
+    replayUserMessages:
+      options.replayUserMessages === true ? true : undefined,
+    agent: options.agent as HeadlessOptions['agent'],
+    disablePersistence:
+      options.sessionPersistence === false ? true : undefined,
+  }
+}
+
+/** 主面 action（裁登记见头注；options 面 = commander 解析后全量）。 */
 async function mainActionSeam(
-  _prompt: string | undefined,
+  prompt: string | undefined,
   options: Record<string, unknown>,
 ): Promise<void> {
   if (options.initOnly) {
@@ -122,9 +176,48 @@ async function mainActionSeam(
     if (options.sessionPersistence === false) {
       setSessionPersistenceDisabled(true)
     }
-    process.stderr.write(
-      'atlascode -p/--print: headless 入口 = S-C3 print.ts 前向接缝（未落盘）\n',
-    )
+    // S-C4 commit 6：-p/--print → runHeadless 真接线（S-C3 前向接缝核销；
+    // 旧 main.tsx L1543 getInputPrompt + L2402 runHeadless import + L2405
+    // 选项块 → 新 buildHeadlessOptions 契约映射）
+    const inputFormat = (options.inputFormat ?? 'text') as
+      | 'text'
+      | 'stream-json'
+    const outputFormat = options.outputFormat as HeadlessOptions['outputFormat']
+    // 旧 main.tsx L1500-1535 格式兼容校验支（S-C4 回填；commander choices
+    // 已保值域，仅保留跨字段约束 3 支——旧「非法 input format」支消解于
+    // choices 面）
+    if (inputFormat === 'stream-json' && outputFormat !== 'stream-json') {
+      process.stderr.write(
+        'Error: --input-format=stream-json requires --output-format=stream-json.\n',
+      )
+      process.exit(1)
+    }
+    if (
+      options.sdkUrl &&
+      (inputFormat !== 'stream-json' || outputFormat !== 'stream-json')
+    ) {
+      process.stderr.write(
+        'Error: --sdk-url requires both --input-format=stream-json and --output-format=stream-json.\n',
+      )
+      process.exit(1)
+    }
+    if (
+      options.replayUserMessages &&
+      (inputFormat !== 'stream-json' || outputFormat !== 'stream-json')
+    ) {
+      process.stderr.write(
+        'Error: --replay-user-messages requires both --input-format=stream-json and --output-format=stream-json.\n',
+      )
+      process.exit(1)
+    }
+    // 惰性接线（handler 族同型）：dispatch.getInputPrompt（stdin 3s peek
+    // 面）+ print.runHeadless（S-C3 headless 本体；await = 自然退出码面，
+    // 旧 void fire-and-forget delta 登记——新仓 main action 返回后自然退出）
+    const { getInputPrompt } = await import('./dispatch')
+    const { runHeadless } = await import('./print')
+    const inputPrompt = await getInputPrompt(prompt ?? '', inputFormat)
+    await runHeadless(inputPrompt, buildHeadlessOptions(options))
+    return
   } else {
     process.stderr.write(
       'atlascode 交互入口 = 壳波 #152 前向接缝（launchRepl 未落盘）\n',

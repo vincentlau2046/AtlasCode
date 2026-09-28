@@ -40,8 +40,11 @@
  * S-C4 commit 5 落盘（auto-mode 子命令 handler 3 面〔defaults/config/
  * critique〕+ engine/config getAutoModeConfig；critique = sideQuery →
  * ModelProvider.chat remap，裁登记见 handlers/autoMode.ts 头注；
- * parse.ts sC4SeamAction 残留守随全 9 接缝核销整删）。
- * 后续 commit：-p 接线 + 测试 + 四件套（commit 6）。
+ * parse.ts sC4SeamAction 残留守随全 9 接缝核销整删）+
+ * S-C4 commit 6 落盘（-p/--print → runHeadless 真接线〔parse 主面 print 支：
+ * buildHeadlessOptions 契约映射 + getInputPrompt stdin peek + 格式兼容校验
+ * 3 支 + 惰性动态 import〕+ commands/sessionList/setup 门面显式名块补全；
+ * 交互入口留壳波 #152 前向接缝）。
  */
 export { cliError, cliOk } from './exit'
 export {
@@ -53,7 +56,12 @@ export {
   parseSettingSourcesFlag,
   safeParseJSON,
 } from './entryInit'
-export { buildProgram, registerInDomainSubcommands, runCli } from './parse'
+export {
+  buildHeadlessOptions,
+  buildProgram,
+  registerInDomainSubcommands,
+  runCli,
+} from './parse'
 export { getInputPrompt, main } from './dispatch'
 export { hasDevFlag, runDevCli } from './dev'
 
@@ -147,3 +155,19 @@ export {
   autoModeDefaultsHandler,
   type AutoModeCritiqueOptions,
 } from './handlers/autoMode'
+
+// ── S-C4 commit 6: commands/sessionList/setup 门面显式名块 ────────
+export {
+  getCommands,
+  getSkillCommandIndex,
+  registerBuiltinCommandNames,
+} from './commands'
+export {
+  findLatestSessionId,
+  listSessionLogs,
+  type SessionLogEntry,
+} from './sessionList'
+export {
+  runCliSetup,
+  type CliSetupOptions,
+} from './setup'
