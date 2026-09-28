@@ -16,11 +16,18 @@
  *      新仓 context.checkPermission 透传面（PermissionGate duck，
  *      pipeline 契约）：注入 → 门判定（拒绝 = MalformedCommandError）；
  *      未注入 = 窄 spine 放行（与父 loop 未注门语义对齐）。
- *   ③ processToolResultBlock 持久化面未落 → 输出经 Out 面直取
- *      （stdout/stderr 组合，旧 formatBashOutput 逐字值）。
+ *   ③ processToolResultBlock 持久化面未落（持久化子面 = 残留守）→
+ *      S-E3 修波回填（审视 A 路 major-3）：输出经
+ *      BashTool.mapToolResultToToolResultBlockParam（旧仓主路径形：
+ *      恒产 [exit code: N] / [command was interrupted or timed out] /
+ *      background 行，旧 BashTool.ts:127-132 逐字），formatBashOutput
+ *      降为非 string content 分支 fallback（旧 :125-128 逐字镜像）——
+ *      初版 formatBashOutput 直取全程（丢 exit code / interrupted 行，
+ *      且旧主路径 baseline 错归「formatBashOutput 逐字值」）。
  *   ④ Tool.call 契约 parentMessage 必填但新 BashTool 不消费（窄 spine）
  *      → null cast（cast 收窄登记，同 engine/tools/bash 宽骨架先例）。
  */
+import { randomUUID } from 'crypto'
 import { logForDebugging, type AssistantMessage } from '../../shared'
 import { BashTool, type Out } from '../tools/bash'
 import { MalformedCommandError } from './errors'
@@ -102,7 +109,18 @@ export async function executeShellCommandsInPrompt(
             )
           }
           const out = data as Out
-          const output = formatBashOutput(out.stdout, out.stderr)
+          // S-E3 修波（头注 ③，审视 A 路 major-3）：主路径 = mapResult
+          // 面（恒产 [exit code: N] / [command was interrupted or timed
+          // out] / background 行，旧仓 processToolResultBlock 主路径形）；
+          // formatBashOutput 降为非 string content 分支 fallback（旧
+          // :125-128 逐字镜像——旧仓 toolResultBlock.content 非 string 时
+          // 回落，新仓 mapResult 恒 string，回落面保留防未来形态漂移）。
+          const toolResultBlock =
+            BashTool.mapToolResultToToolResultBlockParam(out, randomUUID())
+          const output =
+            typeof toolResultBlock.content === 'string'
+              ? toolResultBlock.content
+              : formatBashOutput(out.stdout, out.stderr)
           // 函数替换器 — String.replace 对替换串解释 $$/$&/`$/$'，
           // shell 输出（尤其 $$、$env 类）是任意用户数据，裸串会损坏
           result = result.replace(match[0], () => output)
