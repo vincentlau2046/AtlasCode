@@ -2,8 +2,10 @@
  * cli（CLI 公共域）S-C4（§8.71.1.4）— 启动 setup 面（旧仓 src/setup.ts 415L
  * 裁剪随迁）。
  *
- * 消费点：parse --init-only 支（本提交落盘；旧 main.tsx「Run Setup and
- * SessionStart hooks, then exit」语义）+ -p 支 runHeadless 前置（commit 6 接线）。
+ * 消费点：parse --init-only 支（S-C4 落盘；旧 main.tsx「Run Setup and
+ * SessionStart hooks, then exit」语义）+ -p 支 runHeadless 前置（**S-C5 修波
+ * S2 接线**；commit 6 头注误记「commit 6 接线」已订正——旧 main.tsx L1599
+ * setup() 全模式前置含 -p，恢复 root/sudo 安全门 + cwd/worktree 状态初始化）。
  *
  * 随迁面（支序旧仓逐字）：
  *   - node>=18 gate（exit 1；chalk → plain stderr delta）
@@ -46,11 +48,13 @@
  *    各归属波登记）；
  *   - worktreePRNumber 参数面保留但 parse 面传 undefined（无 --worktree-pr
  *    选项，PR 号面登记残留守）；
- *   - 默认 slug（旧 getPlanSlug 词 slug 面 = 旧仓 stub 退化族 + 新仓 engine
- *    根门面未携 generateWordSlug）→ 本地 session 片段前缀（delta 登记，勿
- *    为单一缺省扩 engine 门面）；
- *   - UDS 缺省 socket 路径 = tmpdir 约定（旧 getDefaultUdsSocketPath 同为
- *    any stub 无真值，新约定登记；stub no-op 下路径值惰性）。
+ *   - 默认 slug（订正 #28：旧 plans.ts L32-47 getPlanSlug 是真实词 slug 实现
+ *   〔generateWordSlug + MAX_SLUG_RETRIES plans-dir 冲突重试〕，非「stub 退化
+ *    族」；裁结论成立 = 新仓 engine 根门面未携 generateWordSlug，缺省降级本地
+ *    session 片段前缀，勿为单一缺省扩 engine 门面）；
+ *   - UDS 缺省 socket 路径 = tmpdir + session-id 约定（订正 #30：旧
+ *    getDefaultUdsSocketPath 实现未实核，原登记「any stub 无真值」不实；本
+ *    约定为惰性值——startUdsMessaging = 旧仓逐字 stub no-op，路径值不被消费）。
  *
  * boundaries allow 面扩展登记（eslint.config.mjs cli 规则同登记，S-C4
  * commit 3）：cli → swarm（captureTeammateModeSnapshot teammate 快照面，
@@ -112,8 +116,10 @@ export async function runCliSetup(options: CliSetupOptions): Promise<void> {
   // ── node>=18 gate（旧仓逐字；chalk → plain stderr delta）──
   const nodeVersion = process.version.match(/^v(\d+)\./)?.[1]
   if (!nodeVersion || parseInt(nodeVersion) < 18) {
+    // S7 订正：新仓品牌 = AtlasCode（与 parse.ts program 描述句自洽；commit 3
+    // 误抄旧仓「AtlasHarness」，本修波订正品牌自洽）。
     process.stderr.write(
-      'Error: AtlasHarness requires Node.js version 18 or higher.\n',
+      'Error: AtlasCode requires Node.js version 18 or higher.\n',
     )
     process.exit(1)
   }
@@ -233,7 +239,10 @@ export async function runCliSetup(options: CliSetupOptions): Promise<void> {
   // ── getCommands 预取（旧 skipPluginPrefetch 面 → bare 参数；plugin 预取
   //    裁登记见头注）──
   if (!bare) {
-    void getCommands(getProjectRoot())
+    // 保真订正（旧 main.tsx L1603 commandsPromise?.catch(() => {}) 逐字）：
+    // getCommands 预取 fire-and-forget，吞掉 reject 防 unhandledRejection
+    //（-p 支 S-C5 修波接线后，unit 测试经本支，catch 兼作测试面安全网）。
+    void getCommands(getProjectRoot()).catch(() => {})
   }
 
   // ── bypassPermissions root/sudo 安全门（旧仓逐字；de-ANT 沙箱硬检已裁，
