@@ -79,3 +79,12 @@ export function setSessionEnv(partial: Partial<SessionEnv>): void {
 export function getSessionEnv(): SessionEnv {
   return _env
 }
+
+/**
+ * 测试复位（恢复域缺省，丢弃组合根/测试注入的 Partial 合并；单进程连跑跨文件
+ * 泄漏守卫——setSessionEnv 为 Partial 合并进程内不可逆，本导出 = teardown 出口；
+ * 合并走 spread 新对象，defaultEnv 本体不被写，复位安全）。
+ */
+export function resetSessionEnv(): void {
+  _env = defaultEnv
+}

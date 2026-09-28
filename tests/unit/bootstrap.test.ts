@@ -8,7 +8,7 @@
  * 从 tests/func/task-real-fs.test.ts 迁出（该块无真盘 I/O，归 unit 层；
  * T8 能力矩阵 bootstrap 域行需 domain↔proof 对应，故单列本文件）。
  */
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterAll } from 'bun:test'
 import {
   setOriginalCwd,
   getOriginalCwd,
@@ -25,6 +25,15 @@ import {
   hasTrustAccepted,
   resetHooksBootstrapMembersForTests,
 } from '../../src/bootstrap'
+
+// bootstrap cwd 面存还对称复位（单进程连跑：测试戳 '/orig' 不泄漏后序文件）
+const savedOriginalCwd = getOriginalCwd()
+const savedCwdState = getCwdState()
+
+afterAll(() => {
+  setOriginalCwd(savedOriginalCwd)
+  setCwdState(savedCwdState)
+})
 
 describe('H6⑤ bootstrap cwd 两状态分离', () => {
   beforeEach(() => {

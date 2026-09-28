@@ -30,13 +30,18 @@ import {
   initializeToolPermissionContext,
   resetSettingsCache,
 } from '../../src/engine'
-import { setOriginalCwd, resetStateForTests } from '../../src/bootstrap'
+import {
+  getOriginalCwd,
+  resetStateForTests,
+  setOriginalCwd,
+} from '../../src/bootstrap'
 
 const USER_SETTINGS = (root: string) => join(root, 'settings.json')
 
 let root: string
 let savedConfigDir: string | undefined
 let savedPwd: string | undefined
+let savedOriginalCwd: string
 
 function readDisk(rootDir: string): Record<string, unknown> {
   return JSON.parse(readFileSync(USER_SETTINGS(rootDir), 'utf-8'))
@@ -44,9 +49,12 @@ function readDisk(rootDir: string): Record<string, unknown> {
 
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), 'atlas-perm-roundtrip-'))
+  // bootstrap cwd 面存还对称复位（单进程连跑不跨文件泄漏）
+  savedOriginalCwd = getOriginalCwd()
 })
 
 afterAll(() => {
+  setOriginalCwd(savedOriginalCwd)
   rmSync(root, { recursive: true, force: true })
 })
 

@@ -51,7 +51,7 @@ import {
   registerBundledSkill,
   type Command,
 } from '../../src/engine/skill'
-import { getAtlasTempDir } from '../../src/permissions'
+import { getAtlasTempDir, _resetAtlasTempDirForTest } from '../../src/permissions'
 
 const TMP = mkdtempSync(join(tmpdir(), 'atlas-skill-func-'))
 const CFG = join(TMP, 'cfg') // ATLAS_CONFIG_DIR
@@ -78,7 +78,9 @@ const PREV_TMPDIR = process.env.ATLAS_TMPDIR
 beforeAll(() => {
   mkdirSync(PROJ, { recursive: true })
   // getAtlasTempDir 首调 memoize → env 必须在任何 getBundledSkillsRoot
-  // 调用前就位
+  // 调用前就位；单进程连跑：前序文件可能已钉 memo（到其 ATLAS_TMPDIR），
+  // 先清 memo 使本文件首调从 PROV_TMP 重派生
+  _resetAtlasTempDirForTest()
   process.env.ATLAS_CONFIG_DIR = CFG
   process.env.ATLAS_TMPDIR = PROV_TMP
 })
@@ -87,6 +89,8 @@ afterAll(() => {
   clearSkillCaches()
   clearDynamicSkills()
   clearBundledSkills()
+  // memo 清（本文件 PROV_TMP 已钉 memo，删 env + TMP 前清，防泄漏后序文件）
+  _resetAtlasTempDirForTest()
   if (PREV_CONFIG_DIR === undefined) delete process.env.ATLAS_CONFIG_DIR
   else process.env.ATLAS_CONFIG_DIR = PREV_CONFIG_DIR
   if (PREV_TMPDIR === undefined) delete process.env.ATLAS_TMPDIR

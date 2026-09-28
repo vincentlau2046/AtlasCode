@@ -59,13 +59,15 @@ function resolveProjectRoot(): string {
 // 进程启动捕获的稳定 owner key（旧仓注释："a randomUUID() captured at startup"）。
 const _ownerKey = randomUUID()
 
-let env: SchedulerEnv = {
+const defaultEnv: SchedulerEnv = {
   getProjectRoot: resolveProjectRoot,
   getOwnerKey: () => _ownerKey,
   // 前向接缝 no-op：注册成功但清理不接线（返回 unregister 以匹配签名；
   // 组合根注真 cleanupRegistry 后本缺省被整换）。
   registerExitCleanup: _fn => () => {},
 }
+
+let env: SchedulerEnv = defaultEnv
 
 /** 组合根 / 测试覆写（部分合并，未给键保留现值）。 */
 export function setSchedulerEnv(partial: Partial<SchedulerEnv>): void {
@@ -74,6 +76,14 @@ export function setSchedulerEnv(partial: Partial<SchedulerEnv>): void {
 
 export function getSchedulerEnv(): SchedulerEnv {
   return env
+}
+
+/**
+ * 测试复位（恢复域缺省，丢弃组合根注真 cleanupRegistry 合并；单进程连跑跨文件
+ * 泄漏守卫——setSchedulerEnv 为 Partial 合并进程内不可逆，本导出 = teardown 出口）。
+ */
+export function resetSchedulerEnv(): void {
+  env = defaultEnv
 }
 
 /**

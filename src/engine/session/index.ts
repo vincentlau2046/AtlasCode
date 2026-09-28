@@ -51,7 +51,7 @@ export { sortLogs } from './types'
 
 // SessionEnv 注入窗口
 export type { SessionEnv } from './env'
-export { setSessionEnv, getSessionEnv } from './env'
+export { setSessionEnv, getSessionEnv, resetSessionEnv } from './env'
 
 // 路径 + session-stamp 解耦面
 export {
@@ -185,4 +185,5 @@ export type {
 export {
   setSessionContextPort,
   getSessionContextPort,
+  resetSessionContextPort,
 } from './sessionContextPort'

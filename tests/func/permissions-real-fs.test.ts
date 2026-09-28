@@ -7,7 +7,9 @@
  * 层互补（unit 用假 tool.getPath 不触 fs，本层触真 fs 验 realpath 链不崩 + 决议对）。
  *
  * getAtlasTempDir 模块级 memoize：ATLAS_TMPDIR 须先于首调设置（--isolate 每文件
- * 新进程，memo 初始未定形），本文件顶层设 env 后首调拾取。
+ * 新进程，memo 初始未定形），本文件顶层设 env 后首调拾取；单进程连跑时顶层
+ * 设 env 可能已迟（前序文件首调已钉 memo 到其 tmpdir）→ beforeAll 先
+ * _resetAtlasTempDirForTest 清 memo 再首调（afterAll 同清，防泄漏给后序文件）。
  */
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import {
@@ -26,6 +28,7 @@ import {
   getAtlasTempDirName,
   getProjectTempDir,
   checkReadPermissionForTool,
+  _resetAtlasTempDirForTest,
   type PermissionTool,
 } from '../../src/permissions'
 import type { ToolPermissionContext } from '../../src/shared'
@@ -54,10 +57,14 @@ const readTool: PermissionTool = {
 }
 
 beforeAll(() => {
+  // 单进程连跑：前序文件可能已钉 memo（到其 ATLAS_TMPDIR），清后本文件
+  // 首调从顶层设的 env（realTmp）重派生
+  _resetAtlasTempDirForTest()
   setPermissionsBootstrapEnv({ getOriginalCwd: () => projDir, getCwd: () => projDir })
 })
 afterAll(() => {
   resetPermissionsBootstrapEnv()
+  _resetAtlasTempDirForTest()
   delete process.env.ATLAS_TMPDIR
   rmSync(realTmp, { recursive: true, force: true })
 })

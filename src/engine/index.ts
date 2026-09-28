@@ -164,8 +164,10 @@ export {
   TeamCreateTool,
   TeamDeleteTool,
   setTeamServices,
+  resetTeamServices,
   createDefaultTeamContextStore,
   setTeamFileLoader,
+  resetTeamFileLoader,
 } from './tools'
 export {
   // §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：LSPTool 本体（9 操作
@@ -370,6 +372,7 @@ export {
   type CronScheduler,
   setSchedulerEnv,
   getSchedulerEnv,
+  resetSchedulerEnv,
   isProcessRunning,
   type SchedulerEnv,
 } from './scheduler'
@@ -452,6 +455,7 @@ export {
   type SessionEnv,
   setSessionEnv,
   getSessionEnv,
+  resetSessionEnv,
   getProjectDir,
   getProjectsDir,
   getTranscriptPath,
@@ -532,6 +536,7 @@ export {
   // 接缝兑现；镜像 Port 5 setSessionMemoryPort 窗口先例）
   setSessionContextPort,
   getSessionContextPort,
+  resetSessionContextPort,
   INTERRUPT_MESSAGE,
   INTERRUPT_MESSAGE_FOR_TOOL_USE,
   renderableSearchText,

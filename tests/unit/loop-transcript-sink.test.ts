@@ -17,6 +17,7 @@ import {
   queryAgentLoop,
   queryOneRound,
   resetCommandQueue,
+  resetSessionEnv,
   getSessionEnv,
   setSessionEnv,
   type AgentLoopDeps,
@@ -284,7 +285,14 @@ describe('S-E3 A11 loop transcript 写面（LoopTranscriptSink 7 点收敛）', 
 })
 
 describe('S-E3 A12 SessionEnv.getCwd 活态面', () => {
-  // 缺省断言须先于活源注入（注入为 Partial 合并，进程内不可逆）
+  // setSessionEnv 为 Partial 合并：beforeAll 复位域缺省（T-6a 缺省断言排序无关——
+  // 前序文件/compose 注入的合并不残留）+ afterAll 复位出口（T-6b 注入不外泄）
+  beforeAll(() => {
+    resetSessionEnv()
+  })
+  afterAll(() => {
+    resetSessionEnv()
+  })
   test('T-6a 域缺省 = process.cwd() 活读（无 bootstrap 约束自包含）', () => {
     expect(getSessionEnv().getCwd()).toBe(process.cwd())
   })

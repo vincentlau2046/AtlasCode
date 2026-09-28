@@ -28,6 +28,20 @@ import {
   getTranscriptPathForSession,
   hasTrustAccepted,
 } from '../../src/bootstrap'
+import {
+  resetBackendModule,
+  resetStartInProcessTeammate,
+  resetTeammateToolRegistryDeps,
+} from '../../src/swarm'
+import {
+  resetSchedulerEnv,
+  resetSessionContextPort,
+  resetSessionEnv,
+  resetTaskNotificationHandler,
+  resetTeamFileLoader,
+  resetTeamServices,
+  setSessionMemoryPort,
+} from '../../src/engine'
 
 describe('E-5 S-5a 组合根 hooks bootstrap-env 接线（三层断之第三断）', () => {
   beforeAll(() => {
@@ -38,6 +52,18 @@ describe('E-5 S-5a 组合根 hooks bootstrap-env 接线（三层断之第三断�
     resetHooksBootstrapEnv()
     resetHookConfigProvider()
     resetHookShellPort()
+    // compose ⑨⑩⑪⑫ 注入面对称复位（同 b6-func-smoke teardown 口径——
+    // getCoreDependencies 同调用面，单进程连跑防串味）
+    resetSessionEnv()
+    setSessionMemoryPort(null)
+    resetSessionContextPort()
+    resetTaskNotificationHandler()
+    resetSchedulerEnv()
+    resetBackendModule()
+    resetStartInProcessTeammate()
+    resetTeammateToolRegistryDeps()
+    resetTeamServices()
+    resetTeamFileLoader()
   })
 
   test('① 装配后 getHooksBootstrapEnv 不 fail-fast（接线前 = 抛「未注入」）', () => {

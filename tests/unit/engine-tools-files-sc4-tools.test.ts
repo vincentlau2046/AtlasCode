@@ -55,7 +55,12 @@ import {
   resetPermissionsBootstrapEnv,
   setPermissionsBootstrapEnv,
 } from '../../src/permissions'
-import { setOriginalCwd, setCwdState } from '../../src/bootstrap'
+import {
+  getCwdState,
+  getOriginalCwd,
+  setOriginalCwd,
+  setCwdState,
+} from '../../src/bootstrap'
 import type { ToolPermissionContext } from '../../src/shared'
 
 // ── 公共夹具（core-face 同形）───────────────────────────────────────────
@@ -86,6 +91,9 @@ function makeFilesCtx(
   }
 }
 
+let savedOriginalCwd: string
+let savedCwdState: string
+
 beforeAll(() => {
   // permissions 域工作目录面 + bootstrap 域 cwd 面双戳 FAKE_CWD 零盘
   // （P-B2 core-face 先例）
@@ -93,11 +101,16 @@ beforeAll(() => {
     getOriginalCwd: () => FAKE_CWD,
     getCwd: () => FAKE_CWD,
   })
+  // bootstrap cwd 面存还对称复位（单进程连跑不跨文件泄漏）
+  savedOriginalCwd = getOriginalCwd()
+  savedCwdState = getCwdState()
   setOriginalCwd(FAKE_CWD)
   setCwdState(FAKE_CWD)
 })
 
 afterAll(() => {
+  setOriginalCwd(savedOriginalCwd)
+  setCwdState(savedCwdState)
   resetPermissionsBootstrapEnv()
 })
 

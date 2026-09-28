@@ -35,8 +35,25 @@ import {
   type ModelProvider,
 } from '../../src/modelprovider'
 import { resetDiskOutputEnv, _resetTaskOutputDirForTest } from '../../src/task'
-import { resetPermissionsBootstrapEnv } from '../../src/permissions'
+import {
+  resetPermissionsBootstrapEnv,
+  _resetAtlasTempDirForTest,
+} from '../../src/permissions'
 import { resetHookShellPort } from '../../src/hooks'
+import {
+  resetBackendModule,
+  resetStartInProcessTeammate,
+  resetTeammateToolRegistryDeps,
+} from '../../src/swarm'
+import {
+  resetSchedulerEnv,
+  resetSessionContextPort,
+  resetSessionEnv,
+  resetTaskNotificationHandler,
+  resetTeamFileLoader,
+  resetTeamServices,
+  setSessionMemoryPort,
+} from '../../src/engine'
 
 // ── fake modelprovider（§8.13 L-2：返固定 completion，非 fake transport）─────
 const MOCK_TEXT = 'MOCK-COMPLETION'
@@ -83,13 +100,17 @@ let core: ReturnType<typeof getCoreDependencies>
 beforeAll(() => {
   testTmp = mkdtempSync(join(tmpdir(), 'atlascode-b6func-'))
   // 真 task 输出目录落测试 tmpdir（getAtlasTempDir 读 ATLAS_TMPDIR，memoize 前先设）
+  // memo 复位须先于 env 设置（单进程连跑：前序文件可能已钉 memo 到其 tmpdir，
+  // 不清则本文件 ① 的 taskOutput.path.startsWith(testTmp) 断言拿旧值）
+  _resetAtlasTempDirForTest()
   process.env.ATLAS_TMPDIR = testTmp
   // 唯一跨 8 域装配点：注入 4+7 前置清单（§8.14 注入序 permissions→task→hooks）
   core = getCoreDependencies()
 })
 
 afterAll(() => {
-  // 复位所有注入窗口 + 组合根缓存 + 真 task 输出目录 memo（--isolate 下防串味）
+  // 复位所有注入窗口 + 组合根缓存 + 真 task 输出目录 memo（--isolate 下防串味；
+  // 单进程连跑时本 teardown = 防串味唯一出口）
   resetModelProviderForTesting()
   resetCoreDependencies()
   resetTaskOutputPort()
@@ -99,6 +120,21 @@ afterAll(() => {
   resetDiskOutputEnv()
   _resetTaskOutputDirForTest()
   resetHookShellPort()
+  // compose ⑨⑩⑪⑫ 注入面（S-E2/S-E3 扩窗后本 teardown 补齐，对称 getCoreDependencies）：
+  // SessionEnv Partial 合并 / Port 5+Port 1 壳 / 通知 handler / scheduler 真 cleanup /
+  // swarm 三窗（backend 模块 / seam ② / teammate 工具池 deps）/ team 服务两窗
+  resetSessionEnv()
+  setSessionMemoryPort(null)
+  resetSessionContextPort()
+  resetTaskNotificationHandler()
+  resetSchedulerEnv()
+  resetBackendModule()
+  resetStartInProcessTeammate()
+  resetTeammateToolRegistryDeps()
+  resetTeamServices()
+  resetTeamFileLoader()
+  // getAtlasTempDir memo 清（删 env + tmpdir 前清，后续文件重派生缺省 /tmp 基）
+  _resetAtlasTempDirForTest()
   delete process.env.ATLAS_TMPDIR
   rmSync(testTmp, { recursive: true, force: true })
 })

@@ -63,7 +63,12 @@ import {
   resetSettingsCache,
   setSessionSettingsCache,
 } from '../../src/engine'
-import { setOriginalCwd, setCwdState } from '../../src/bootstrap'
+import {
+  getCwdState,
+  getOriginalCwd,
+  setOriginalCwd,
+  setCwdState,
+} from '../../src/bootstrap'
 import type {
   PermissionResult,
   ToolPermissionContext,
@@ -123,6 +128,9 @@ function stubSandbox(
   })
 }
 
+let savedOriginalCwd: string
+let savedCwdState: string
+
 beforeAll(() => {
   // permissions 域工作目录面（allWorkingDirectories 源）
   setPermissionsBootstrapEnv({
@@ -132,11 +140,16 @@ beforeAll(() => {
   // bootstrap 域 cwd 面：bashPermissions 路径检查经 getCwd()（bootstrap）解析
   // 相对路径 '.'，须与 permissions 工作目录对齐（否则 ls 的 '.' 落到真
   // process.cwd() → 工作目录外 → 误判 ask）。两域 cwd 同戳 FAKE_CWD 零盘。
+  // bootstrap cwd 面存还对称复位（单进程连跑不跨文件泄漏）
+  savedOriginalCwd = getOriginalCwd()
+  savedCwdState = getCwdState()
   setOriginalCwd(FAKE_CWD)
   setCwdState(FAKE_CWD)
 })
 
 afterAll(() => {
+  setOriginalCwd(savedOriginalCwd)
+  setCwdState(savedCwdState)
   resetPermissionsBootstrapEnv()
   resetSandboxAccess()
   resetSettingsCache()

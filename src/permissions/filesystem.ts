@@ -221,6 +221,17 @@ export function getAtlasTempDir(): string {
 }
 
 /**
+ * getAtlasTempDir memo 测试专用复位（单进程连跑跨文件泄漏守卫；先例 = task
+ * 域 _resetTaskOutputDirForTest）。--isolate 每文件新进程 memo 天然未定形；
+ * 单进程 ad-hoc 连跑时，前序文件设 ATLAS_TMPDIR 并首调 memoize 后 teardown
+ * 删 env + tmpdir，后序文件顶层/beforeAll 再设 env 已迟（memo 已钉）→ 由
+ * 泄漏方 afterAll / 受害方 beforeAll 调本导出清 memo 使下次调用重派生。
+ */
+export function _resetAtlasTempDirForTest(): void {
+  _atlasTempDir = null
+}
+
+/**
  * 项目临时目录路径（带尾分隔符）：{atlasTmpDir}/{sanitized-cwd}/。
  * task diskOutput 消费面（经 setDiskOutputEnv 注入窗口，§8.14 注入序）。
  */

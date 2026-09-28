@@ -21,13 +21,12 @@
  *     裸空 stub：池头不可解析 → undefined；无 reset 则模块态泄漏跨 case）
  * mock fs + ATLAS_CONFIG_DIR 指向 /mock-home（unit 层无真实磁盘）。
  *
- * 运行口径注（§8.30 T-6）：compose 装配测试经 createCoreDependencies 注入
- * 7 组模块态窗口（hooks 快照+provider / permissions settingsPaths /
- * executor 三 port / task port / bootstrap env）；本文件 afterEach 仅复位
- * endpoint source + settings cache（其余窗口由各自域测试的 reset 助手负责）。
- * 标准跑法 `bun test --isolate` 每文件独立进程，无跨文件泄漏；单进程 ad-hoc
- * 多文件连跑时本文件注入的窗口可波及后续文件（如 hooks 域 fail-fast 断言
- * 会见到已注入态）——此类跑法须本文件排前或逐文件 isolate。
+ * 运行口径注（§8.30 T-6，2026-09-28 复位面补齐后订正）：compose 装配经
+ * createCoreDependencies 注入全量模块态窗口（hooks 三 port / permissions
+ * bootstrap env + settingsPaths / executor 三 port / task port + diskOutput +
+ * 输出目录 memo / SessionEnv / Port 5+1 / 通知 handler / scheduler / swarm
+ * 三窗 / team 服务两窗）；本文件 afterEach 对称复位全量（同 b6-func-smoke
+ * teardown 口径——同一装配调用面；单进程连跑不跨文件泄漏）。
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { join } from 'path'
@@ -36,7 +35,36 @@ import {
   createCoreDependencies,
 } from '../../src/atlascode'
 import { getRoleModel, resetEndpointConfigSource } from '../../src/modelprovider'
-import { resetSettingsCache } from '../../src/engine'
+import {
+  resetSchedulerEnv,
+  resetSessionContextPort,
+  resetSessionEnv,
+  resetSettingsCache,
+  resetTaskNotificationHandler,
+  resetTeamFileLoader,
+  resetTeamServices,
+  setSessionMemoryPort,
+} from '../../src/engine'
+import {
+  resetBootstrapStatePort,
+  resetExecutorSandboxPort,
+  resetTaskOutputPort,
+} from '../../src/executor'
+import {
+  _resetAtlasTempDirForTest,
+  resetPermissionsBootstrapEnv,
+} from '../../src/permissions'
+import { _resetTaskOutputDirForTest, resetDiskOutputEnv } from '../../src/task'
+import {
+  resetHookConfigProvider,
+  resetHooksBootstrapEnv,
+  resetHookShellPort,
+} from '../../src/hooks'
+import {
+  resetBackendModule,
+  resetStartInProcessTeammate,
+  resetTeammateToolRegistryDeps,
+} from '../../src/swarm'
 import {
   setFsImplementation,
   setOriginalFsImplementation,
@@ -133,6 +161,27 @@ afterEach(() => {
   setOriginalFsImplementation()
   resetEndpointConfigSource()
   resetSettingsCache()
+  // createCoreDependencies 装配面全量窗口对称复位（同 b6-func-smoke 口径）
+  resetHooksBootstrapEnv()
+  resetHookConfigProvider()
+  resetHookShellPort()
+  resetPermissionsBootstrapEnv()
+  resetTaskOutputPort()
+  resetBootstrapStatePort()
+  resetExecutorSandboxPort()
+  resetDiskOutputEnv()
+  _resetTaskOutputDirForTest()
+  _resetAtlasTempDirForTest()
+  resetSessionEnv()
+  setSessionMemoryPort(null)
+  resetSessionContextPort()
+  resetTaskNotificationHandler()
+  resetSchedulerEnv()
+  resetBackendModule()
+  resetStartInProcessTeammate()
+  resetTeammateToolRegistryDeps()
+  resetTeamServices()
+  resetTeamFileLoader()
   if (savedConfigDir === undefined) delete process.env.ATLAS_CONFIG_DIR
   else process.env.ATLAS_CONFIG_DIR = savedConfigDir
 })

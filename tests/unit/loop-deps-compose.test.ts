@@ -22,12 +22,14 @@
  * permission-setup / engine-config-endpoint-adapter 口径）；Port 5 I/O 语义
  * （save→load 往返 + ENOENT→null）→ tests/func/loop-deps-compose-fs.test.ts。
  *
- * 运行口径注（同 §8.30 T-6）：compose 装配注入全量模块态窗口（session env /
- * messaging 队列 / scheduler env / tasks cleanup registry / sandboxAccess /
- * Port 5 + Port 1 注入窗口——各窗口无 reset 导出，ad-hoc 连跑时 createCoreDependencies
- * 重注新壳幂等覆盖、tasks registry 残留 handler 仅波及后续 runCoreCleanup 消费面）；
- * 标准 `bun test --isolate` 每文件独立进程，无跨文件泄漏；单进程 ad-hoc 连跑
- * 时本文件窗口可波及后续文件（本文件排前或逐文件 isolate）。
+ * 运行口径注（同 §8.30 T-6，2026-09-28 复位面补齐后订正）：compose 装配注入
+ * 全量模块态窗口（session env / messaging 队列 / scheduler env / tasks cleanup
+ * registry / sandboxAccess / Port 5 + Port 1 注入窗口 + swarm 三窗 + team 服务
+ * 两窗）——各窗口 reset 导出已落（resetSessionEnv / resetSchedulerEnv /
+ * resetSessionContextPort / setSessionMemoryPort(null) / swarm·team 复位族），
+ * afterEach 对称复位，单进程连跑不跨文件泄漏；tasks registry 残留 handler
+ * 仅波及后续 runCoreCleanup 消费面（resetCoreDependencies 不接管该 registry，
+ * 登记残留守）。标准 `bun test --isolate` 每文件独立进程，无跨文件泄漏。
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import {
@@ -41,11 +43,22 @@ import {
   getTools,
   MAX_WORKER_SPAWN_DEPTH,
   resetCommandQueue,
+  resetSchedulerEnv,
+  resetSessionContextPort,
+  resetSessionEnv,
   resetSettingsCache,
   resetTaskNotificationHandler,
+  resetTeamFileLoader,
+  resetTeamServices,
+  setSessionMemoryPort,
   enqueueTaskNotification,
   type Tool,
 } from '../../src/engine'
+import {
+  resetBackendModule,
+  resetStartInProcessTeammate,
+  resetTeammateToolRegistryDeps,
+} from '../../src/swarm'
 import { getSandboxAccess, resetSandboxAccess } from '../../src/permissions'
 import {
   createAgentLoopDeps,
@@ -156,6 +169,16 @@ afterEach(() => {
   resetCommandQueue()
   resetTaskNotificationHandler()
   resetSandboxAccess()
+  // compose 注入窗口对称复位（复位面补齐后，头注运行口径注已订正）
+  resetSessionEnv()
+  setSessionMemoryPort(null)
+  resetSessionContextPort()
+  resetSchedulerEnv()
+  resetBackendModule()
+  resetStartInProcessTeammate()
+  resetTeammateToolRegistryDeps()
+  resetTeamServices()
+  resetTeamFileLoader()
   if (savedConfigDir === undefined) delete process.env.ATLAS_CONFIG_DIR
   else process.env.ATLAS_CONFIG_DIR = savedConfigDir
   if (savedPwd === undefined) delete process.env.PWD

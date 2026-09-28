@@ -22,3 +22,11 @@ export function setSessionContextPort(port: SessionContextPort): void {
 export function getSessionContextPort(): SessionContextPort | null {
   return _sessionContextPort
 }
+
+/**
+ * 测试复位 / 卸载（teardown 出口；组合根重接线经 setSessionContextPort。
+ * 单进程连跑跨文件泄漏守卫——compose 注入的壳实现进程内不自动失效）。
+ */
+export function resetSessionContextPort(): void {
+  _sessionContextPort = null
+}
