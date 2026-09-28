@@ -154,6 +154,7 @@ import {
 import {
   getMcpConnectionManager,
   resetMcpConnectionManager,
+  resetMcpFetchCaches,
   setMcpDiscoveryInput,
 } from '../../src/mcp'
 
@@ -592,6 +593,9 @@ let geluMcpScript: string | undefined
 // 4 窗对称复位 + 假 server 子进程关闭（afterAll 注册序在主 afterAll 后）。
 afterAll(async () => {
   await resetMcpConnectionManager()
+  // LRU 缓存对称清（B 路观察 ②：模块级 fetch 缓存 keyed 服务器名，
+  // 不清留 'gelufake' 条目；逐文件隔离下无实害，卫生级对称）
+  resetMcpFetchCaches()
   setMcpDiscoveryInput(null)
   resetMcpClientRegistry()
   resetMcpSkillCommandSource()
