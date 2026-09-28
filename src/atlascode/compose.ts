@@ -120,6 +120,7 @@ import {
   assignTeammateColor,
   clearTeammateColors,
   sanitizeName,
+  setTeammateToolRegistryDeps,
 } from '../swarm'
 import type { PermissionMode, ToolPermissionContext, Tools } from '../shared'
 import {
@@ -303,6 +304,14 @@ export function createCoreDependencies(): CoreDependencies {
     ...createDefaultTeamContextStore(),
   })
   setTeamFileLoader(readTeamFileAsync)
+  // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池
+  //    deps 注入窗 ⑬——⑫ 静态底线 = registry 3 工具 materialize 面
+  //    （与 createAgentLoopDeps ⑨⑮ baseTools 追加同源）；per-run 全量
+  //    池由 createAgentLoopDeps 以全量 toolRegistryDeps 重建（= 父会话
+  //    loop 池 ≡ teammate 池，旧仓 options.tools 等价面）。
+  setTeammateToolRegistryDeps({
+    baseTools: [SnipTool, TeamCreateTool, TeamDeleteTool],
+  })
 
   return {
     sandboxManager,
@@ -395,6 +404,10 @@ export async function createAgentLoopDeps(
       TeamDeleteTool,
     ],
   }
+  // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池窗
+  // 以全量 deps 重建（= 本构建器模型可见池，旧仓 options.tools 等价面；
+  // 后写覆盖 ⑫ 静态底线，幂等）。
+  setTeammateToolRegistryDeps(toolRegistryDeps)
   const { toolPermissionContext } = await initializeToolPermissionContext({
     allowedToolsCli: config.allowedToolsCli ?? [],
     disallowedToolsCli: config.disallowedToolsCli ?? [],
