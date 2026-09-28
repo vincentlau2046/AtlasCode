@@ -4923,3 +4923,111 @@ RemoteTrigger 族：
 S-E2a +~20 测 / S-E2b +~80 测（最大面）/ S-E2c +~20 测 / S-E2d +~10 测
 → 预测 ~2960 pass / ~172 文件 / ~6850 expect（±5% 非漂移）；gate 6·5 恒；
 **波 tag 不切（gate ③ 仍 wave-c）**。
+
+## §8.68.2 闭环记录（2026-09-28，task #142 remote 波全闭环）
+
+**提交链**：8ab0f6a（S-E1 总分析）→ 8181928/4073cd9（S-E2a）→
+be34aed/9177133（S-E2b）→ 37c9485/3a136d4（S-E2c）→
+6c014fb/06ca21f（S-E2d）→ cc90d50/017f3d7（S-E3 A 路修波）→
+fcb5c99/3351ac0（S-E3 B 路修波）→ <本闭环 docs>。
+
+**S-E2 切片落盘**：
+- **S-E2a（8181928/4073cd9）**：`src/remote/` 5 文件（UDS 门
+  isUdsInboxEnabled env opt-in 默认 OFF 保真 + udsClient/udsMessaging/
+  peerBridge 3 stub 面 + STR-1 门面）+ SendMessage 5 站点族门复活
+  （feature() → isUdsInboxEnabled()，gate-OFF 默认面逐字不变量）+
+  prompt udsRow/udsSection 2 站点 + 门双向测试。
+- **S-E2b（be34aed/9177133）**：`src/mcp/` 6 文件（mcpJsonRpc 本地
+  转写 JSON-RPC 2.0 stdio / mcpConnectionManager 4 态 + pending Set
+  独立活面 + 断连 3 连续 terminal error 8 子串逐字 / mcpConfig 最小
+  2 源 + 8 型 zod 逐字 / mcpFetch 3 供应商 + delta ④ 扁平 content 面 +
+  sanitize 本地实现 / types / index STR-1）+ 80 测（unit 4 族 72 零盘
+  + func fake-stdio 真 spawn 8 零模型，se2b 假 server 模板双反斜杠
+  先例 = 后续 gelu P-5 转义修复基准）。
+- **S-E2c（37c9485/3a136d4）**：`src/engine/tools/remotetriggers/`
+  4 文件子域（schema/description/prompt 逐字 + isReadOnly list·get +
+  classifier 4 模板 + 自门控 OFF + [ATLAS-HOLD] 注入端口 5 方法
+  登记 throw）+ toolNames seed + registry ③ 槽 materialize（49 口径
+  32/49 残留守 0 收口）+ bundled skill 400L 裁登记（随 ⑫ 端口同
+  供给方 IFF 网关波）+ 15 测（门双向 / schema / 5 动作面 / 端口
+  throw 文案含 [ATLAS-HOLD] + IFF 网关）。
+- **S-E2d（6c014fb/06ca21f）**：组合根 ⑭ MCP 接线——mcp 域发现输入
+  窗（setMcpDiscoveryInput/getMcpDiscoveryInput，LSP setLspServerSource
+  先例同型；未注册 = null = 组合根缺省 2 源 fail-soft）+ mcpBridge L3
+  桥 4 面（① McpToolClient 桥 tools/call 请求面 + signal 面裁登记 /
+  ② buildMcpEngineConnections connected 过滤 + 描述符预取 / ③
+  syncMcpClientRegistry connected 实填 + pending 占位 + failed·disabled
+  不进 / ④ mapMcpPromptCommands 保真 6 面 + 默认补 4 面 + 扁平 →
+  块面映射）+ collectMcpPromptCommands + compose ⑭ initMcpConnections
+  4 步（发现窗 → buildMcpServerConfigs 缺省 2 源 → allSettled connect
+  → registry 实填 + prompt 快照注册窗）+ builder mcpTools 供给
+  （**builder 零意外 I/O 裁定**：构建时 manager 态快照，新连接先
+  显式 initMcpConnections 再重建 deps）+ ToolSearch delta ⑤ 回填
+  （getPendingServerNames = manager pending Set 活面，§8.63.1.2 ⑮
+  原裁核销）+ skill ⑥ 核销（setMcpSkillCommandSource 注册窗 +
+  getMcpSkillCommands 无参面读窗，有参过滤面逐字不变）；测试面
+  桥 10（B-P1..B-P6；06ca21f 提交信息误写「桥 9」= 本记录订正）+
+  窗 4 + ToolSearch pending 2（真 spawn 无响应 server，MCP_TIMEOUT
+  1500 定化）+ gelu P-5 4（假 stdio server NDJSON 4 方法 → 池 +1
+  mcp__ 名判别 / registry / skill 窗 / pending 空面）。
+
+**S-E3 双只读审视处置（≤2 subagent，报告 = DATA 全 grep/Read 复核）**：
+- **A 路（旧仓保真，7 项核对）3 确认缺陷全修（cc90d50）**：
+  **D-1（高）** string 内容包裹字段 `content` → `text`（新仓 TextBlock
+  契约字段 shared/types.ts:52；wire 面 params.ts 读 `b.text`；旧
+  transformResultContent text 案 `{type:'text', text}` 逐字；旧仓不
+  处理裸 string → 新仓 string → text 块为映射侧裁定）/ **D-2（中）**
+  补 `hasUserSpecifiedDescription = description !== ''`（旧
+  client.ts:1955 逐字；缺此字段 MCP 命令永不进 getSkillToolCommands
+  列表过滤）/ **D-3（低，文案面）** registry 排除 failed 服务器后
+  工具报错面由旧 'is not connected' 变 'not found' = 头注补登记
+  （行为面不改）。**观察处置**：progressMessage `c.name` → 旧
+  'running' 逐字（client.ts:1960）/ 归一 'claude.ai ' 前缀特判裁登记
+  （新仓无发现源产出该前缀；engine 2 副本保留特判，原头注「同规则」
+  claim 订正，017f3d7）/ 发现 3 子裁补登记（.mcp.json 父目录上溯 /
+  企业策略 allowed·deniedMcpServers 过滤 / disabled·enabledMcpServers
+  开关面，017f3d7）/ MCP_TOOL_TIMEOUT 每请求超时限裁登记（env 名单
+  仅 managedEnv.ts:98，设该 env 用户旧仓生效新仓静默忽略）/
+  undefined content 项跳过面（旧意外 TypeError rethrow 裁）/
+  pending 占位条目改经 manager getPendingServerNames Set 活面供给
+  （真 manager list() 仅含 connected/failed 对象，占位非 list 条目面；
+  B-P5 fake manager 2 参形状同步）+ 头注 ③④ 文案/drop 机制修正
+  （manager close 新对象替换 Map 条目 → 闭包捕获旧对象 → disposed
+  client 请求拒 → 供应商 try/catch [] 降级，非假绿）。
+- **B 路（新仓一致性 + 家规，7 项核对）3 确认缺陷 = A 路 D-1..D-3
+  同源（独立交叉验认，HEAD cc90d50 已修）**；H6 消费点审计全接缝
+  有真消费点零死接缝；L3/STR-1 import 图零违规（atlascode 消费
+  engine 全经根门面，mcp 域零 engine import）；compose 完整性
+  （runCoreCleanup 导出链 / builder 零意外 I/O / initMcpConnections
+  4 步序 + 快照语义登记）通过。**5 观察**：① getMcpSkillCommands 未上
+  engine 根门面（commands.ts:29-30 已登记前向穿线 = TUI/CLI 波 skill
+  索引接线时补根门面导出）/ ② gelu P-5 afterAll LRU 缓存对称清
+  （**3351ac0 修**）/ ③ manager connect finally 序（Map.set →
+  pending.delete）理论重复条目窗：生产路径 sync 仅 allSettled 后
+  调用不可达，无实害（登记不修）/ ④ 06ca21f 提交信息「桥 9」实
+  10（本记录订正）/ ⑤ buildMcpServerConfigs JSDoc 被插入块隔断脱节
+  （**fcb5c99 修**）。预声明接缝（头注 delta ①-⑭ + 各域裁登记）
+  两路交叉核 0 重报。
+
+**基线谱系**：§8.67 波终 2833/0/6750/165 + gate 6·5 → S-E2a/b/c/d
++~146 测/+11 文件 → **S-E3 修波波终（= 波终）2979 pass / 0 fail /
+7083 expect / 176 files + gate 6 pass / 0 fail / 5 expect / 2 files**
+（§8.68.1.4 预测 ~2960/~6850 偏低，实落为准；四件套 tsc 0 /
+eslint 0 / build 0KB entry；波终全量 + gate 实跑核逐值一致）；
+**波 tag 不切（gate ③ 仍 wave-c）**。
+
+**残留守登记（= 后续波，复审勿当遗漏重提）**：
+- getMcpSkillCommands engine 根门面导出 → TUI/CLI 波 skill 索引接线
+  （B 观察 ①，commands.ts:29-30 前向穿线登记）
+- MCP transport sse/http/ws = 前向接缝（§8.68.1.4 ⑦ stdio-only 裁定；
+  连接层返 failed 态 + 登记消息）
+- MCP_TOOL_TIMEOUT 每请求超时消费面 = 裁登记（设该 env 用户面）
+- RemoteTrigger ⑫ 端口真供给方 + bundled skill 复活 = IFF 网关波
+  [ATLAS-HOLD]（旧仓 claude.ai OAuth 车道已删）
+- manager connect finally 序窗（B 观察 ③）= 理论无实害，后续 mcp
+  域 pass 顺修
+- LSP server 真配置源 = 插件域 LSP 集成波（setLspServerSource 注入窗，
+  D 波 N 登记面随本波 mcp 域先例同型复用）
+
+**下一步 = analytics 波（task #143，末棒；含 emitTaskTerminatedSdk
+残留守）**。详见本 §8.68（§8.68.1 S-E1 分析 + §8.68.2 本闭环记录）。
