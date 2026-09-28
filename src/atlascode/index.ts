@@ -11,12 +11,24 @@ export {
   createAgentLoopDeps,
   createCoreDependencies,
   getCoreDependencies,
+  // S-E2d（§8.68 remote 波）⑭：MCP 连接生命周期组合根接线（显式动作；
+  // CLI 波启动消费接缝，builder 路径不自动触发）
+  initMcpConnections,
   resetCoreDependencies,
   runCoreCleanup,
   type AgentLoopDepsBundle,
   type AgentLoopDepsConfig,
   type CoreDependencies,
 } from './compose'
+// S-E2d（§8.68 remote 波）⑭：MCP 组合根桥 4 面（L3 顶域 ↛ engine，
+// 映射面归组合根；tests 经根门面引，非深路径）
+export {
+  bridgeMcpToolClient,
+  buildMcpEngineConnections,
+  collectMcpPromptCommands,
+  mapMcpPromptCommands,
+  syncMcpClientRegistry,
+} from './adapters/mcpBridge'
 export { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
 // D 波 S-E2d 提交 2（B13）：state 域真实现（EngineState<SessionSnapshot> 串行
 // apply 队列置换 React 批处理；A7 闭包壳 sessionContextPortAdapter 经

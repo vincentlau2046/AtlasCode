@@ -189,6 +189,27 @@ export {
   RemoteTriggerTool,
 } from './tools'
 export {
+  // S-E2d（§8.68 remote 波 组合根 ⑭）：mcpClientRegistry 注入接缝
+  // （setMcpClientRegistry 供给 + 4 型面，组合根 mcpBridge 消费面；
+  // 工具侧读面 getMcpClientRegistry 同源出，ListMcp/ReadMcp 本体消费）
+  getMcpClientRegistry,
+  resetMcpClientRegistry,
+  setMcpClientRegistry,
+  type McpClientEntry,
+  type McpClientRegistry,
+  type McpResourceContent,
+  type McpResourceItem,
+} from './tools'
+export {
+  // S-E2d（§8.68 remote 波 组合根 ⑭）：MCP skill 注册窗（⑥ 核销；组合根
+  // initMcpConnections 供给面）+ 2 型面（映射面在组合根 mcpBridge 消费）
+  setMcpSkillCommandSource,
+  resetMcpSkillCommandSource,
+  type McpSkillCommandSource,
+  type Command,
+  type SkillCommandContext,
+} from './skill'
+export {
   isCoordinatorMode,
   matchSessionMode,
   getCoordinatorUserContext,

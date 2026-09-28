@@ -44,6 +44,17 @@
  *     §8.66.1.4 核销 ③ 缺省 loader 缺省报错面换血）+ ⑨⑮ baseTools
  *     注入（D 类 3 工具 Snip/TeamCreate/TeamDelete → 注册表，自门控
  *     isEnabled，注册表机制不变，registry 头 materialize 裁定）
+ *   + S-E2d（§8.68 remote 波）⑭ MCP 组合根接线（mcpBridge 4 面）：
+ *     initMcpConnections 显式动作（发现输入窗 getMcpDiscoveryInput →
+ *     缺省 settings mcpServers + 项目 .mcp.json〔buildMcpServerConfigs
+ *     最小 2 源〕→ manager 全量 connect allSettled → syncMcpClientRegistry
+ *     实填 listResources/readResource + MCP skill 注册窗 setMcpSkillCommand
+ *     Source 供给〔getMcpSkillCommands ⑥ 核销〕）；**builder 零意外 I/O
+ *     裁定**：createAgentLoopDeps 路径不自动触发连接，mcpTools 供给 =
+ *     构建时 manager 态快照（buildMcpEngineConnections → createMcpTools
+ *     单入口不变，toolRegistryDeps.mcpTools 单入口），新连接先
+ *     initMcpConnections 再重建 deps（LSP manager 态读同型）；CLI 波
+ *     启动消费接缝 = initMcpConnections（前向接缝登记）
  *
  * 残留守（§8.29）：applyConfigEnvironmentVariables（信任后全量 env）→ 信任
  * 对话框面（新仓未落；§8.28 预声明消费接缝此处重登记，旧仓启动序
@@ -79,15 +90,18 @@ import {
   captureHooksConfigSnapshot,
   createHooksConfigProvider,
   createLoopHooks,
+  createMcpTools,
   createPermissionGate,
   enqueuePendingNotification,
   getSettingsPaths,
+  getSettingsWithErrors,
   getTools,
   initializeToolPermissionContext,
   recordContentReplacement,
   recordTranscript,
   registerCleanup,
   runCleanupFunctions,
+  setMcpSkillCommandSource,
   setSchedulerEnv,
   setSessionContextPort,
   setSessionEnv,
@@ -134,6 +148,21 @@ import {
   hasTrustAccepted,
   switchSession,
 } from '../bootstrap'
+// S-E2d（§8.68 remote 波）⑭：mcp 域发现/连接生命周期 + skill 注册窗 +
+// 组合根桥（L3 顶域 ↛ engine，映射面归组合根）
+import { join } from 'node:path'
+import {
+  buildMcpServerConfigs,
+  getMcpConnectionManager,
+  getMcpDiscoveryInput,
+  type McpDiscoveryInput,
+} from '../mcp'
+import {
+  buildMcpEngineConnections,
+  collectMcpPromptCommands,
+  mapMcpPromptCommands,
+  syncMcpClientRegistry,
+} from './adapters/mcpBridge'
 
 import { adaptSandboxToExecutorPort } from './adapters/sandboxAdapter'
 import { adaptBootstrapToExecutorPort } from './adapters/bootstrapAdapter'
@@ -403,6 +432,12 @@ export async function createAgentLoopDeps(
   // isEnabled = isAgentSwarmsEnabled，注册表机制不变；消费方指定
   // baseTools 在前，先入为主 = 测试 fake 可替换，注册表先入为主
   // 去重语义不变）
+  // ⑭ S-E2d（§8.68 remote 波）：mcpTools 供给（toolRegistryDeps.mcpTools
+  // 单入口不变；构建时 manager 态快照——新连接先 initMcpConnections 再
+  // 重建 deps；零 MCP 态 = 空表零 I/O，builder 零意外 I/O 裁定）
+  const mcpTools = await createMcpTools(
+    await buildMcpEngineConnections(getMcpConnectionManager()),
+  )
   const toolRegistryDeps: ToolRegistryDeps = {
     ...config.toolRegistryDeps,
     baseTools: [
@@ -411,6 +446,7 @@ export async function createAgentLoopDeps(
       TeamCreateTool,
       TeamDeleteTool,
     ],
+    mcpTools: [...(config.toolRegistryDeps?.mcpTools ?? []), ...mcpTools],
   }
   // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池窗
   // 以全量 deps 重建（= 本构建器模型可见池，旧仓 options.tools 等价面；
@@ -464,6 +500,47 @@ export async function createAgentLoopDeps(
     },
   }
   return { toolPermissionContext, tools, deps }
+}
+
+/**
+ * ⑭ S-E2d（§8.68 remote 波）：MCP 连接生命周期组合根接线（显式动作；
+ * CLI 波启动消费接缝）。链：
+ *   ① 发现输入（注入窗 getMcpDiscoveryInput → 缺省 = settings mcpServers
+ *      record + 项目 .mcp.json〔buildMcpServerConfigs 最小 2 源，scope
+ *      user/project；坏台/坏文件跳过面域内保真〕）
+ *   ② manager 全量 connect（Promise.allSettled：单台失败不沉全果；
+ *      非 stdio 传输 = 前向接缝登记 failed 态，域内裁定面不变）
+ *   ③ syncMcpClientRegistry 实填（listResources/readResource 真实现；
+ *      重复调用 = 幂等覆写注册窗）
+ *   ④ MCP skill 注册窗供给（collectMcpPromptCommands → mapMcpPrompt
+ *      Commands → setMcpSkillCommandSource；getMcpSkillCommands ⑥
+ *      核销，过滤面逐字 + 无参面读窗）
+ * builder（createAgentLoopDeps）路径不自动触发本动作（零意外 I/O 裁定，
+ * 见头注 ⑭ 块）；重复调用 = 重连 + 再 sync（connected 态去重直接返回，
+ * failed 态重跑生命周期 = manager connect 语义不变）。
+ */
+export async function initMcpConnections(): Promise<void> {
+  const input: McpDiscoveryInput =
+    getMcpDiscoveryInput() ??
+    ({
+      settingsServers: getSettingsWithErrors().settings?.mcpServers,
+      projectMcpJsonPath: join(getOriginalCwd(), '.mcp.json'),
+    })
+  const configs = await buildMcpServerConfigs(input)
+  const manager = getMcpConnectionManager()
+  await Promise.allSettled(
+    Object.entries(configs).map(([name, config]) =>
+      manager.connect(name, config),
+    ),
+  )
+  syncMcpClientRegistry(manager)
+  // ④ MCP skill 注册窗供给（快照语义 = 注册时点 connected 态命令面，
+  // 与 builder mcpTools 快照裁定同型；新连接 = 再 initMcpConnections
+  // 重注册。collectMcpPromptCommands 走 mcpFetch LRU 缓存（② 已
+  // settle，缓存命中零 I/O；drop 后 miss = 重拉面供应商早退 []
+  // 降级，非假绿）
+  const mcpPromptCommands = await collectMcpPromptCommands(manager)
+  setMcpSkillCommandSource(() => mapMcpPromptCommands(mcpPromptCommands))
 }
 
 /**

@@ -127,7 +127,11 @@ export {
   getSlashCommandToolSkills,
   hasCommand,
   meetsAvailabilityRequirement,
+  // S-E2d（§8.68 remote 波）：MCP skill 注册窗（⑥ 核销；组合根 ⑭ 供给面）
+  resetMcpSkillCommandSource,
+  setMcpSkillCommandSource,
 } from './commands'
+export type { McpSkillCommandSource } from './commands'
 
 // --- forked 执行准备核层 ---
 export type { PreparedForkedContext } from './forkedAgent'

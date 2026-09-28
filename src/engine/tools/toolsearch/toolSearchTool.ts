@@ -20,11 +20,13 @@
  *    经 pipeline 门面 = tools/agent 型导入零循环先例，§8.63.1.2 ⑩）。
  *  ④ call context 2 参 duck（§8.63.1.2 ㉑）：`{ options?: { tools?: Tools } }`
  *    + `tools ?? []` 缺省（单测零态可跑）；getAppState 面裁 = ⑮ 同源。
- *  ⑤ pending_mcp_servers 面裁（§8.63.1.2 ⑮）：旧 appState.mcp.clients
- *    filter type==='pending' → 新 const 返 undefined（新 AppState 无
- *    mcp.clients；MCP client 状态 → MCP client 波残留守）；数据契约面保留
- *    逐字（buildSearchResult 参 + output 可选字段 + mapToolResult pending
- *    后缀支虽不可达，复活 = MCP client 波）。
+ *  ⑤ pending_mcp_servers 面 **S-E2d 回填（§8.68 remote 波）**：旧
+ *    appState.mcp.clients filter type==='pending' → 新 mcp 域 manager
+ *    pending Set 单一事实源（getMcpConnectionManager().getPendingServerNames()；
+ *    注册窗 = 组合根 ⑭ initMcpConnections，连接中态活面）；数据契约面
+ *    逐字保留（buildSearchResult 参 + output 可选字段 + mapToolResult
+ *    pending 后缀支；空 pending = 字段省略面不变）。§8.63.1.2 ⑮ 原裁
+ *    （const 返 undefined）随本波核销。
  *  ⑥ 旧 description()/prompt() 双临 → 新 description() 单面 =
  *    TOOL_SEARCH_PROMPT（house 先例 §8.62 delta ⑧）。
  *  ⑦ mapToolResult tool_reference wire 面保留前向接缝（§8.63.1.2 ⑱：
@@ -55,6 +57,7 @@ import {
   type ToolResultBlockParam,
   type Tools,
 } from '../../../shared'
+import { getMcpConnectionManager } from '../../../mcp'
 import { findTool } from '../../pipeline'
 import { TOOL_SEARCH_TOOL_NAME } from '../toolNames'
 import { isToolSearchEnabledOptimistic } from './toolSearchGate'
@@ -399,10 +402,11 @@ export const ToolSearchTool = {
     const deferredTools = tools.filter(isDeferredTool)
     maybeInvalidateCache(deferredTools)
 
-    // delta ⑤：旧 appState.mcp.clients pending 面 → const 返 undefined
-    // （新 AppState 无 mcp.clients；数据契约面保留，复活 = MCP client 波）
-    function getPendingServerNames(): string[] | undefined {
-      return undefined
+    // delta ⑤ S-E2d 回填（§8.68）：旧 appState.mcp.clients pending 面 →
+    // mcp 域 manager pending Set（连接中态活面；空 = buildSearchResult
+    // 字段省略面不变）
+    function getPendingServerNames(): string[] {
+      return getMcpConnectionManager().getPendingServerNames()
     }
 
     // Helper to log search outcome（no-op 逐字；参名 _ 前缀 = 新仓

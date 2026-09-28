@@ -21,7 +21,13 @@
  *   ⑤ REMOTE_SAFE_COMMANDS / BRIDGE_SAFE_COMMANDS / isBridgeSafeCommand /
  *      filterCommandsForRemoteMode（remote 安全过滤面）→ remote 波。
  *   ⑥ getMcpSkillCommands 旧 feature('MCP_SKILLS') 门 → 新仓 feature 机制
- *      未落 → 门裁（过滤面逐字保留，MCP skill 注册窗 = remote 波）。
+ *      未落 → 门裁（过滤面逐字保留）。**S-E2d 核销（§8.68 remote 波）**：
+ *      注册窗落面 = setMcpSkillCommandSource 注入窗（旧仓供给面 =
+ *      skills/mcpSkills fetchMcpSkillsForClient stub + feature OFF →
+ *      新仓注册窗为真供给接缝；供给方 = 组合根 ⑭ initMcpConnections
+ *      经 mcp 域 fetchCommandsForClient 映射 engine Command，L3 顶域
+ *      ↛ engine 映射在组合根侧）；getMcpSkillCommands 无参面读窗
+ *      （有参面逐字不变，skill 索引调用方 = TUI/CLI 波穿线消费）。
  *   ⑦ meetsAvailabilityRequirement 'console' 支：旧 isFirstPartyGatewayUrl()
  *      （utils/model/providers.ts，新仓 0 命中）内联 =
  *      !OPENAI_BASE_URL（IFF 语义「OPENAI_BASE_URL 设真即非 first-party
@@ -196,14 +202,37 @@ export function clearCommandsCache(): void {
 }
 
 /**
+ * MCP skill 注册窗（S-E2d 核销 ⑥；LSP setLspServerSource 先例同型：
+ * 域窗口 + 组合根 ⑭ 注册 + 测试面 reset；未注册 = null = 无 MCP skill，
+ * fail-soft 语义 = 旧 feature OFF 缺省 [] 保真）。
+ */
+export type McpSkillCommandSource = () => readonly Command[]
+
+let mcpSkillCommandSource: McpSkillCommandSource | null = null
+
+/** 注册 MCP skill 供给源（组合根 ⑭ initMcpConnections；重复注册 = 后者胜出）。 */
+export function setMcpSkillCommandSource(
+  source: McpSkillCommandSource | null,
+): void {
+  mcpSkillCommandSource = source
+}
+
+/** 测试面：清注册窗（回到未注册态）。 */
+export function resetMcpSkillCommandSource(): void {
+  mcpSkillCommandSource = null
+}
+
+/**
  * 过滤 MCP 提供的技能（prompt 型、模型可调用、loadedFrom 'mcp'）。
  * 这些命令不走 getCommands() —— 需要 MCP 技能的 skill 索引调用方
- * 单独穿线。头注 ⑥：旧 feature 门裁，MCP skill 注册窗 = remote 波。
+ * 单独穿线。S-E2d 核销 ⑥：有参面逐字不变；无参面读注册窗
+ * （未注册 = [] = 旧 feature OFF 缺省面保真）。
  */
 export function getMcpSkillCommands(
-  mcpCommands: readonly Command[],
+  mcpCommands?: readonly Command[],
 ): readonly Command[] {
-  return mcpCommands.filter(
+  const commands = mcpCommands ?? mcpSkillCommandSource?.() ?? []
+  return commands.filter(
     cmd =>
       cmd.type === 'prompt' &&
       cmd.loadedFrom === 'mcp' &&

@@ -79,6 +79,22 @@ export function parseMcpJsonConfig(raw: unknown): McpJsonConfig | null {
  * （旧仓发现链 project/local 先于 user 的就近原则同向；2 源面内
  * project 更具体）。
  */
+// ── 发现输入注入窗（S-E2d 组合根 ⑭ 供给面；LSP setLspServerSource 先例
+// 同型：域窗口 + 组合根注册 + 测试 fake 注入面；未注册 = null = 组合根
+// 缺省发现（settings + .mcp.json），fail-soft 语义不变）─────────────
+
+let discoveryInput: McpDiscoveryInput | null = null
+
+/** 注册发现输入（组合根 ⑭ / 测试 fake 注入；重复注册 = 后者胜出）。 */
+export function setMcpDiscoveryInput(input: McpDiscoveryInput | null): void {
+  discoveryInput = input
+}
+
+/** 取发现输入（未注册 = null；组合根缺省发现面自组装 settings + .mcp.json）。 */
+export function getMcpDiscoveryInput(): McpDiscoveryInput | null {
+  return discoveryInput
+}
+
 export async function buildMcpServerConfigs(
   input: McpDiscoveryInput,
 ): Promise<Record<string, ScopedMcpServerConfig>> {

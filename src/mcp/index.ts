@@ -67,6 +67,9 @@ export {
   parseMcpServerConfig,
   parseMcpJsonConfig,
   buildMcpServerConfigs,
+  // S-E2d（§8.68 组合根 ⑭）：发现输入注入窗（LSP setLspServerSource 先例同型）
+  setMcpDiscoveryInput,
+  getMcpDiscoveryInput,
 } from './mcpConfig'
 
 // ── 连接生命周期（mcpConnectionManager.ts）─────────────────────────
