@@ -77,4 +77,34 @@ describe('splitPathInFrontmatter', () => {
     expect(splitPathInFrontmatter(undefined)).toEqual([])
     expect(splitPathInFrontmatter(42)).toEqual([])
   })
+
+  // S-E3 修波锚（审视 A 路 major-2）：花括号感知逗号切分 + 花括号展开
+  // （旧仓 frontmatterParser.ts:189-266 逐字语义；初版朴素切分丢此两面）
+  test('花括号内逗号不切分 + expandBraces 展开（旧仓 @example 4 例）', () => {
+    expect(splitPathInFrontmatter('a, b')).toEqual(['a', 'b'])
+    expect(splitPathInFrontmatter('a, src/*.{ts,tsx}')).toEqual([
+      'a',
+      'src/*.ts',
+      'src/*.tsx',
+    ])
+    expect(splitPathInFrontmatter('{a,b}/{c,d}')).toEqual([
+      'a/c',
+      'a/d',
+      'b/c',
+      'b/d',
+    ])
+    expect(splitPathInFrontmatter(['a', 'src/*.{ts,tsx}'])).toEqual([
+      'a',
+      'src/*.ts',
+      'src/*.tsx',
+    ])
+  })
+
+  test('花括号面 + 换行/数组混合', () => {
+    expect(splitPathInFrontmatter('src/*.{ts,tsx}\nlib/**')).toEqual([
+      'src/*.ts',
+      'src/*.tsx',
+      'lib/**',
+    ])
+  })
 })
