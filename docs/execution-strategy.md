@@ -5097,3 +5097,65 @@ task #143。范围 = 跨波登记项核销（B5 远程持久化 / B2 遥测面 /
 **基线预测**（S-E2 后，实落为准）：开波 2979/0/7083/176 + gate 6·0·5·2；
 S-E2a +~12 测（队列 5 族）→ 预测 ~2991 pass / ~177 文件（±5%）；gate
 6·5 恒；**波 tag 不切（gate ③ 仍 wave-c，末棒后 F 波归档才切 wave-f）**。
+
+## §8.69.2 analytics 波闭环记录（task #143 完结，2026-09-28）
+
+**波定位**：既定序列末棒（C 桶 ①②③ → D 波 → remote → **analytics**）。
+范围 = 跨波登记项核销（§8.69.1.3 六登记点）+ **SDK 事件队列落地（末棒
+主项）**。task #143 完结。
+
+**提交链**（一模块一提交，零行为改动均独立成提交）：
+- `6052044` S-E1 总分析（§8.69.1，docs）
+- `05d1b79` S-E2a 源：sdkEventQueue.ts 落盘（134L 逐字移植 + SdkWorkflowProgress
+  any→unknown[] + resetSdkEventQueueForTesting）+ 生产端 5 站点 rewire
+  （framework registerTask→task_started / stopTask 抑制支→stopped〔复原
+  suppressed 旗标〕/ spawnInProcess kill 支→stopped〔复原 toolUseId/description
+  捕获〕/ inProcessRunner completed+failed 两终态〔复原 alreadyTerminal/toolUseId
+  双发守卫〕）+ facade 链（tasks 子门面 export * + engine 根门面显式名 STR-1）
+- `b25f2a7` S-E2a 测试面：sdk-event-queue.test.ts 5 族（Q-P1 headless 入队/TUI 假早退 /
+  Q-P2 cap 1000 溢出 shift / Q-P3 drain 附 uuid+session_id 且清空 / Q-P4 emit
+  task_notification 3 态 + 缺省 / Q-P5 reset 对称复位），零模型零盘（bootstrap 域
+  门面控门/会话，engine 根门面导入）
+- `a326c45` S-E2b 跨波登记项核销（§8.69.1.3 六登记点头注核销标记，零行为纯登记；
+  ③ checkResumeConsistency 旧体纯 no-op 遥测残余 H6 不迁空洞新仓零命中 = 缺席登记）
+- `a343f1d` S-E3 修波（A 路 MAJOR-1 前向接缝登记 + B 路 M1/N1/N2 订正，零行为）
+
+**S-E3 双只读审视（A 路旧仓保真 / B 路新仓一致性，≤2 subagent，报告 = DATA 全 grep/Read 复核）**：
+- **A 路 = 5 项全保真**（sdkEventQueue 4 子型 field-for-field + enqueue cap/gate +
+  drain uuid/session_id + emit 缺省逐字，唯一 delta = 裁定 any→unknown[]；framework/
+  stopTask/spawnInProcess/inProcessRunner 5 站点 call-shape parity 全核）。
+  **A 路 MAJOR-1（潜在接线期前提分歧，非本波活缺陷）**：三站 flag-capture 模式
+  （updater 内置位 + 紧随行同步读）假设 setAppState 同步 apply——旧仓
+  state/AppStateStore 同步成立；新仓 B13 state 域 = 异步串行（atlascode/state
+  EngineState.set 微任务边界，updater 延迟一 microtask 才跑）。若任务域
+  setAppState 接 B13 AppState（SessionSnapshot.tasks 承 tasks 面），`suppressed`/
+  `killed`/`alreadyTerminal` 于紧随行仍 false → stopTask 'stopped' bookend 静默丢 /
+  spawnInProcess 整支 kill 后处理跳过 + return 误 false / inProcessRunner 双发守卫
+  失效双 emit。**裁定 = 前向接缝登记非缺陷**：任务域 setAppState 接线波（TaskStopTool
+  组合根 / InProcessBackend.setContext）未落（grep 零调用点），本波测试用同步 mock
+  （engine-tasks.test.ts makeStore `state = f(state)`）故全绿；接线波须裁定（同步
+  store 或重构 flag 捕获）。三站点头注 ⚠ 登记 + 本记录，复审勿当遗漏重提。
+- **B 路 = 内部一致（STR-1 门面链 / L3 域隔离 / 型面 unknown[] 无 any / 测试非空洞
+  5/5 27 expect 判别性断言 / 核销标记纯登记 7 文件 +12/-3 全注释）**，M1/N1/N2 订正：
+  - M1（MINOR）perfetto 裁面「旧仓 no-op」过述 → 旧仓真实现（Chrome-Trace 735L，
+    ATLAS_PERFETTO_TRACE 门默认 isEnabled=false，外部构建态 no-op），保裁裁定不变
+  - N1 cronJitter「经 FeatureConfigPort（Port 8）」→ 本地注入口
+    setCronJitterConfigProvider（facade 导出，组合根未接线，缺省 DEFAULT）
+  - N2「135L 逐字」→ 134L（wc -l 实测）；N3 §8.69.1.4 预测 +~12 测实 +5（±5% 容差内）
+
+**终基线（四件套全绿）**：tsc 0 / `bun run lint` 0 / build 0（dist/cli.js 0 bytes
+= 已知基线）/ 全量 `bun test --isolate tests/` **2984 pass / 0 fail / 7110 expect /
+177 文件**（开波 2979/7083/176 → +5 测〔队列 5 族〕/+27 expect/+1 文件）+ gate
+`bun test tests/ci/` **6 pass / 0 fail / 5 expect / 2 文件**。
+
+**残留守 / 前向接缝（本波登记，随对应波核销）**：
+- SDK 事件队列消费端 drainSdkEvents = **CLI 波前向接缝**（cli/print.ts headless
+  输出流 4 站点未迁，D 波 N-1 登记）；本波落队列 + 生产端，drain 消费者随 CLI 波。
+- task_progress / session_state_changed 子型 = 型面保留（wire 数据契约），生产端
+  裁登记（LocalWorkflowTask 随 S-7a 残留守 ④ / print.ts 随 CLI 波）。
+- **A 路 MAJOR-1**：三站 flag-capture 同步 apply 前提（见上），接线波裁定。
+- ①–⑥ 跨波登记项（§8.69.1.3）= 保裁 + 形式核销，逐点头注已核销标记，不复活。
+
+**波 tag 不切**（gate ③ 仍 wave-c；末棒后 F 波归档收尾才切 wave-f）。
+**下一步 = F 波（归档收尾）**：既定序列末棒闭环，F 波 = 归档 + 收尾审计，
+切 wave-f tag。
