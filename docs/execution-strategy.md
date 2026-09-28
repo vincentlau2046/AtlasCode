@@ -5159,3 +5159,38 @@ S-E2a +~12 测（队列 5 族）→ 预测 ~2991 pass / ~177 文件（±5%）；
 **波 tag 不切**（gate ③ 仍 wave-c；末棒后 F 波归档收尾才切 wave-f）。
 **下一步 = F 波（归档收尾）**：既定序列末棒闭环，F 波 = 归档 + 收尾审计，
 切 wave-f tag。
+
+
+## §8.70 F 波（归档收尾）闭环记录（2026-09-28）
+
+**波定位**：既定序列收尾棒（C 桶 ①②③ → D 波 → remote → analytics → **F 波归档**，§8.53
+显式排序裁定审计③）。F 波 = 清尾（收尾审计）+ 归档，切 `wave-f` tag（子波 D / remote /
+analytics 未切 tag，gate ③ 停留 wave-c，本波为首个下一里程碑 tag）。
+
+**S-E1 清尾审计（收尾审计，零代码改动）**：
+- 新仓全绿独立：四件套 tsc 0 / eslint 0 / build 0KB（dist/cli.js 0 bytes 已知基线）/ 全量
+  `bun test --isolate tests/` 2984 pass / 0 fail / 7110 expect / 177 文件 + gate
+  `bun test tests/ci/` 6 pass / 0 fail / 5 expect / 2 文件（继承 analytics 波终基线；
+  F 波纯归档收尾、零代码/测试改动 → 基线不变）。
+- 全仓前向接缝 grep 复核**无悬挂**（复审勿当遗漏重提）：
+  - **MAJOR-1** flag-capture 同步 apply 前提（stopTask / spawnInProcess / inProcessRunner
+    三站点头注 ⚠ 登记，接线波裁定）。
+  - **S-E2b 跨波 6 项保裁核销 marker**（cronJitterConfig ① / session·project ② / taskUpdate·
+    todoWrite ④ / webSearch ⑤ / spawnInProcess·inProcessRunner ⑥；③ checkResumeConsistency
+    新仓缺席登记）——7 文件纯注释核销。
+  - **drainSdkEvents 消费端** = CLI 波前向接缝（cli/print.ts headless 输出流 4 站点未迁，
+    D 波 N-1 登记）。
+  三者均为**前向接缝**（留待归属波），非 F 波范围，登记在册。
+
+**S-E2 归档（归档收尾，用户裁定 = 「文档记录·目录原样保留」）**：
+- 旧仓就地归档标记 = 旧仓 `AtlasHarness/ARCHIVED.md`（superseded by AtlasCode，2026-09-28；
+  只读 ground truth 基线 `a8af45b` / tag `atlascode-baseline-2026-09-21`；冻结物理路径
+  `/home/vince/projects/AtlasHarness` → 目录结构原样保留，**不移动/重命名/删除**；本地
+  doc-only commit `41d5fa6`，**绝不 push**——远端 GitHub ground truth 保持 `a8af45b` 不动）。
+- AtlasCode 切 `wave-f` tag（本地无 remote，沿 wave-a/b/c 里程碑 tag 惯例，指向本 §8.70
+  闭环 commit）。
+
+**波终**：既定序列（C 桶 ①②③ + D + remote + analytics + **F 波归档**）**全部闭环**。
+波终基线 = 2984/0/7110/177 + gate 6·0·5·2（F 波零代码/测试改动，纯归档收尾）。**wave-f tag 已切**。
+至此 C 工具波次既定序列完结；后续 = 各前向接缝归属波（CLI 波 / MAJOR-1 接线波 / 跨波 6 项）
+按需排期，非既定序列范畴。
