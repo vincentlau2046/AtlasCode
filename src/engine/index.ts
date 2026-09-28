@@ -287,6 +287,12 @@ export {
   runCleanupFunctions,
   createAbortController,
   createChildAbortController,
+  // analytics 波 §8.69：SDK 事件队列（末棒主项；drain 消费者 = CLI 波前向接缝）
+  enqueueSdkEvent,
+  drainSdkEvents,
+  emitTaskTerminatedSdk,
+  resetSdkEventQueueForTesting,
+  type SdkEvent,
 } from './coordinator'
 export {
   getAutoCompactThreshold,

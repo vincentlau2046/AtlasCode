@@ -56,10 +56,11 @@
  *      task.messages = allMessages 末 100 截断镜像，等价 appendCappedMessage
  *      连添语义）/ contentReplacementState（createContentReplacementState）/
  *      cloneFileStateCache 隔离压缩上下文（新 compactConversation deps 注入形
- *      无 toolUseContext 参）/ runWithAgentContext + AgentContext（perfetto/
- *      analytics 归因）/ evictTerminalTask（task 域无驱逐面）/
- *      emitTaskTerminatedSdk（analytics #143 波）/ unregisterPerfettoAgent
- *      （perfetto 面）—— 全部裁除，新仓零活消费。
+ *      无 toolUseContext 参）/ runWithAgentContext + AgentContext（perfetto
+ *      归因）/ evictTerminalTask（task 域无驱逐面）/ unregisterPerfettoAgent
+ *      （perfetto 面）—— 裁除，新仓零活消费。emitTaskTerminatedSdk 已落
+ *      （analytics 波 §8.69，completed/failed 两终态 bookend 复原
+ *      alreadyTerminal/toolUseId 双发守卫，经 engine 根门面消费）。
  *   ③ R4 裁：BASH_CLASSIFIER 门（feature('BASH_CLASSIFIER') +
  *      awaitClassifierAutoApproval + BASH_TOOL_NAME pendingClassifierCheck 支）
  *      → permissions 域残留守 ①（BASH_CLASSIFIER 门归权限分类器波；新仓
@@ -167,6 +168,7 @@ import {
   compactConversation,
   createAbortController,
   createUserMessage,
+  emitTaskTerminatedSdk,
   estimateMessageTokens,
   ERROR_MESSAGE_USER_ABORT,
   getTools,
@@ -1494,17 +1496,23 @@ export async function runInProcessTeammate(
 
     // Mark as completed when exiting the loop
     //（旧 alreadyTerminal/toolUseId 2 变量 = evictTerminalTask 消费的
-    // 写而不读残留，随 delta ② 裁剪 S-E3 修波删除）
+    // 写而不读残留，随 delta ② 裁剪 S-E3 修波删除；analytics 波 §8.69
+    // emitTaskTerminatedSdk 复原——SDK bookend 双发守卫重新读取
+    // alreadyTerminal，非残留）。
+    let alreadyTerminal = false
+    let toolUseId: string | undefined
     updateTaskState<InProcessTeammateTaskState>(
       taskId,
       setAppState,
       task => {
         // killInProcessTeammate may have already set status:killed +
         // notified:true + cleared fields. Don't overwrite (would flip
-        // killed → completed).
+        // killed → completed and double-emit the SDK bookend).
         if (task.status !== 'running') {
+          alreadyTerminal = true
           return task
         }
+        toolUseId = task.toolUseId
         task.onIdleCallbacks?.forEach(cb => cb())
         task.unregisterCleanup?.()
         return {
@@ -1521,8 +1529,16 @@ export async function runInProcessTeammate(
       },
     )
     void evictTaskOutput(taskId)
-    // delta ②：evictTerminalTask（task 域无驱逐面）/ emitTaskTerminatedSdk
-    // （analytics #143）/ unregisterPerfettoAgent（perfetto 面）裁除。
+    // delta ②：evictTerminalTask（task 域无驱逐面）/ unregisterPerfettoAgent
+    // （perfetto 面）裁除；emitTaskTerminatedSdk 已落（analytics 波 §8.69）。
+    // notified:true pre-set → no XML notification → print.ts won't emit
+    // the SDK task_notification. Close the task_started bookend directly.
+    if (!alreadyTerminal) {
+      emitTaskTerminatedSdk(taskId, 'completed', {
+        toolUseId,
+        summary: identity.agentId,
+      })
+    }
 
     return { success: true, messages: allMessages }
   } catch (error) {
@@ -1534,15 +1550,20 @@ export async function runInProcessTeammate(
     )
 
     // Mark task as failed and notify any waiters（delta ⑪：error 字段不写，
-    // 失败原因经 idle notification failureReason 传达；旧 alreadyTerminal
-    // 写而不读残留随 delta ② S-E3 修波删除）。
+    // 失败原因经 idle notification failureReason 传达；analytics 波 §8.69
+    // emitTaskTerminatedSdk 复原 alreadyTerminal/toolUseId 两变量——SDK
+    // bookend 双发守卫读取 alreadyTerminal，非残留）。
+    let alreadyTerminal = false
+    let toolUseId: string | undefined
     updateTaskState<InProcessTeammateTaskState>(
       taskId,
       setAppState,
       task => {
         if (task.status !== 'running') {
+          alreadyTerminal = true
           return task
         }
+        toolUseId = task.toolUseId
         task.onIdleCallbacks?.forEach(cb => cb())
         task.unregisterCleanup?.()
         return {
@@ -1560,7 +1581,15 @@ export async function runInProcessTeammate(
       },
     )
     void evictTaskOutput(taskId)
-    // delta ②：evictTerminalTask / emitTaskTerminatedSdk 裁除（同上）。
+    // delta ②：evictTerminalTask 裁除；emitTaskTerminatedSdk 已落
+    // （analytics 波 §8.69）。notified:true pre-set → no XML notification →
+    // close the SDK task_started bookend directly.
+    if (!alreadyTerminal) {
+      emitTaskTerminatedSdk(taskId, 'failed', {
+        toolUseId,
+        summary: identity.agentId,
+      })
+    }
 
     // Send idle notification with failure via file-based mailbox
     await sendIdleNotification(

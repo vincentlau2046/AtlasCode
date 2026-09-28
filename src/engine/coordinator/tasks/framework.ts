@@ -11,8 +11,11 @@
  *   - TaskState（旧仓 any 桩）→ 域内真联合 types.ts
  *
  * 裁剪登记（H6 前向接缝，复审勿当遗漏重提）：
- *   - registerTask 尾部 enqueueSdkEvent(task_started) 裁除（SDK 事件队列
- *     未迁，SDK 波随组合根落位；resume 防双发语义随 SDK 面复核）。
+ *   - registerTask 尾部 enqueueSdkEvent(task_started) 已落（analytics 波
+ *     §8.69，SDK 事件队列 sdkEventQueue.ts 共域）：新注册发 task_started，
+ *     resume 防双发（isReplacement 早退）语义逐字保留；task 终态收尾
+ *     bookend 由 stopTask / spawnInProcess / inProcessRunner 经
+ *     emitTaskTerminatedSdk 补发（各文件 delta 头注）。
  *   - enqueueTaskNotification（私有 XML 构造器）→ 投递改走域内通知注入窗口
  *     notification.ts（messageQueueManager 全量队列随 S-7e messaging 波）。
  *   - enqueueTaskStatusNotification 内 escapeXml(outputPath) +
@@ -35,6 +38,7 @@ import {
   isTerminalTaskStatus,
 } from '../../../task'
 import { enqueueTaskNotification } from './notification'
+import { enqueueSdkEvent } from './sdkEventQueue'
 import type { LocalAgentTaskState } from './localAgentTask'
 import type { TaskState } from './types'
 import {
@@ -131,8 +135,19 @@ export function registerTask(task: TaskState, setAppState: SetAppState): void {
   // Replacement (resume) — not a new start. Skip to avoid double-emit.
   if (isReplacement) return
 
-  // 旧仓 enqueueSdkEvent({ type:'system', subtype:'task_started', ... }) 裁除
-  // （SDK 事件队列未迁，头注登记；resume 防双发语义随 SDK 面复核）。
+  enqueueSdkEvent({
+    type: 'system',
+    subtype: 'task_started',
+    task_id: task.id,
+    tool_use_id: task.toolUseId,
+    description: task.description,
+    task_type: task.type,
+    workflow_name:
+      'workflowName' in task
+        ? (task.workflowName as string | undefined)
+        : undefined,
+    prompt: 'prompt' in task ? (task.prompt as string) : undefined,
+  })
 }
 
 /**

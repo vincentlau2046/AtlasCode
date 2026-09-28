@@ -26,12 +26,11 @@
  *   - lodash-es sample（spinnerVerb/pastTenseVerb 字段）整支裁除：TUI 动词
  *     列表（constants/spinnerVerbs + turnCompletionVerbs）新仓未落 + 3 依赖
  *     纪律禁 lodash（本地 one-liner 亦无消费语义可保）→ 两字段不置位。
- *   - emitTaskTerminatedSdk（SDK 事件队列）调用支裁除：SDK 事件面新仓未落
- *     （engine/coordinator/tasks/stopTask.ts:9 同型裁面先例）；
- *     notified:true 预设 + 终态 evict 面逐字保留。旧 kill 捕获的
- *     toolUseId/description 两变量唯一消费端 = 该 SDK emit 支（旧
+ *   - emitTaskTerminatedSdk（SDK 事件队列）已落（analytics 波 §8.69，经
+ *     engine 根门面消费）：kill 支 notified:true 预设 → 无 XML 通知，故
+ *     直发 SDK task 收尾 bookend（旧
  *     emitTaskTerminatedSdk(taskId, 'stopped', { toolUseId, summary:
- *     description })）→ 捕获面随裁除删除（零消费者残留）。
+ *     description }) 逐字；捕获面 toolUseId/description 随 emit 复原）。
  *   - perfetto tracing（isPerfettoTracingEnabled/register/unregister）裁除：
  *     遥测域未落（analytics 波 #143）。
  *   - kill 支 teamContext.teammates 清理支裁除：teamContext 状态面 = TUI 波
@@ -52,6 +51,7 @@ import {
 } from '../task'
 import {
   createAbortController,
+  emitTaskTerminatedSdk,
   evictTerminalTask,
   registerTask,
   STOPPED_DISPLAY_MS,
@@ -242,6 +242,8 @@ export function killInProcessTeammate(
   let killed = false
   let teamName: string | null = null
   let agentId: string | null = null
+  let toolUseId: string | undefined
+  let description: string | undefined
 
   setAppState(prev => {
     const task = prev.tasks[taskId]
@@ -258,6 +260,8 @@ export function killInProcessTeammate(
     // Capture identity for cleanup after state update
     teamName = teammateTask.identity.teamName
     agentId = teammateTask.identity.agentId
+    toolUseId = teammateTask.toolUseId
+    description = teammateTask.description
 
     // Abort the controller to stop execution
     teammateTask.abortController?.abort()
@@ -299,7 +303,14 @@ export function killInProcessTeammate(
 
   if (killed) {
     void evictTaskOutput(taskId)
-    // notified:true was pre-set so no XML notification fires.
+    // notified:true was pre-set so no XML notification fires; close the SDK
+    // task_started bookend directly. The in-process runner's own
+    // completion/failure emit guards on status==='running' so it won't
+    // double-emit after seeing status:killed.
+    emitTaskTerminatedSdk(taskId, 'stopped', {
+      toolUseId,
+      summary: description,
+    })
     setTimeout(
       evictTerminalTask.bind(null, taskId, setAppState),
       STOPPED_DISPLAY_MS,

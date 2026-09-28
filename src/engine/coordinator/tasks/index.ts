@@ -11,6 +11,8 @@
  *   - registry.ts：getAllTasks/getTaskByType（两态注册表）
  *   - 域内 utils：notification（注入窗口）/ xml / cleanupRegistry /
  *     abortController / types（TaskState 真联合）
+ *   - sdkEventQueue.ts（analytics 波 §8.69）：SDK 事件队列（enqueueSdkEvent /
+ *     drainSdkEvents 前向接缝 / emitTaskTerminatedSdk + 生产端 5 站点 rewire）
  */
 export * from './framework'
 export * from './guards'
@@ -20,6 +22,7 @@ export * from './localShellTask'
 export * from './notification'
 export * from './registry'
 export * from './stopTask'
+export * from './sdkEventQueue'
 export * from './types'
 export * from './xml'
 export * from './cleanupRegistry'
