@@ -10,7 +10,9 @@
  *   T-4 modelProvider 单例恒等（组合根消费面 = 域 lazy 单例同一实例）
  *   T-5 A5 setSessionEnv 注真值（session 域会话源跟随 bootstrap，双 id 隐患消除）
  *   T-6 A6 Port 5 壳实现注入（函数形；I/O 语义归 func 真盘层）
- *   T-7 A7 Port 1 壳实现 + view 语义（set 字段写回 / 未动字段引用保持 / 无深拷贝）
+ *   T-7 A7→B13 Port 1（D 波 S-E2d 提交 2 置换：atlascode/state 真实现
+ *     fire-and-forget 提交）+ view 语义（set 字段写回 / 未动字段引用
+ *     保持 / 无深拷贝）
  *   T-8 A8 sandboxAccess 接线判别（wired 前域缺省空配置 / wired 后 placeholder
  *       runtime 抛 unavailable——前后态可判别）
  *   T-9 A9 通知 ← messaging 真队列（agentId 缺席 = delta 面）+ scheduler
@@ -260,7 +262,7 @@ describe('Port 5/Port 1 壳实现 + 注入（S-E2 A6/A7）', () => {
     expect(typeof port!.save).toBe('function')
   })
 
-  test('T-7 Port 1 注入 + view 语义（set 字段写回 / 未动字段引用保持 / 无深拷贝）', () => {
+  test('T-7 Port 1 注入 + view 语义（set 字段写回 / 未动字段引用保持 / 无深拷贝；B13 fire-and-forget 提交）', async () => {
     createCoreDependencies()
     const port = getSessionContextPort()
     expect(port).not.toBeNull()
@@ -275,6 +277,11 @@ describe('Port 5/Port 1 壳实现 + 注入（S-E2 A6/A7）', () => {
     const mcpRef = before.mcp
     const tasksRef = before.tasks
     port!.set(prev => ({ ...prev, effortValue: 'high' }))
+    // B13（D 波 S-E2d 提交 2）：port.set = fire-and-forget 形（旧仓 React
+    // setState ground truth，strangler 整换 A7 闭包壳同步直 apply 后语义
+    // 变更——宏任务 flush 核验提交边界；同步 get 先于提交中间态 unit 面
+    // atlascode-state 已锁）
+    await new Promise(r => setTimeout(r, 0))
     const after = port!.get()
     expect(after.effortValue).toBe('high')
     expect(after.mcp).toBe(mcpRef)

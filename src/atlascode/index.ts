@@ -4,7 +4,8 @@
  * 将 re-export: cli/launcher/identity/mount/compose/ui/state/marketplace/featureConfig/evals
  *
  * 实现波次: B6-func 起逐步填实（compose 组合根 = 全仓唯一跨 8 域装配点，charter L4.7）。
- * 其余子模块（cli/launcher/ui/state/marketplace/…）仍 A 波占位，随各实现波次填实。
+ * 其余子模块（cli/launcher/ui/marketplace/…）仍 A 波占位，随各实现波次填实。
+ * state 域 D 波 S-E2d 提交 2（B13）填实（atlascode/state，见下）。
  */
 export {
   createAgentLoopDeps,
@@ -17,7 +18,10 @@ export {
   type CoreDependencies,
 } from './compose'
 export { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
-export { createSessionContextPort } from './adapters/sessionContextPortAdapter'
+// D 波 S-E2d 提交 2（B13）：state 域真实现（EngineState<SessionSnapshot> 串行
+// apply 队列置换 React 批处理；A7 闭包壳 sessionContextPortAdapter 经
+// strangler 整换后零引用删除）。
+export { createAppState, type AppState } from './state'
 export { createSessionMemoryPort } from './adapters/sessionMemoryPortAdapter'
 // S-T4 ⑧（§8.53）：sandbox 适配器（SandboxManager → ExecutorSandboxPort，含
 // shouldUseSandbox 委托）经根门面转出（STR-1；tests 经此引，非深路径）。

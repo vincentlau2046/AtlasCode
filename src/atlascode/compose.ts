@@ -143,7 +143,7 @@ import { createDiskOutputEnv } from './adapters/diskOutputEnvAdapter'
 import { createEndpointConfigSource } from './adapters/endpointConfigSourceAdapter'
 import { createInMemorySandboxDeps } from './sandboxDeps'
 import { createSessionMemoryPort } from './adapters/sessionMemoryPortAdapter'
-import { createSessionContextPort } from './adapters/sessionContextPortAdapter'
+import { createAppState, type AppState } from './state'
 
 /** 组合根装配产物（engine 波/消费方持有的域对象 + 已就绪的注入窗口）。 */
 export interface CoreDependencies {
@@ -153,6 +153,10 @@ export interface CoreDependencies {
   modelProvider: ModelProvider
   /** memory 域：文件系统 store（只读面；写经真 fs，§8.13 L-1）。 */
   memoryStore: MemoryStore
+  /** state 域（D 波 B13）：AppState 真实现（EngineState<SessionSnapshot> 串行
+   * apply 队列置换 React 批处理；Port 1 替换面，旧 QueryEngineConfig
+   * getAppState/setAppState；注入窗 = setSessionContextPort(appState.port)）。 */
+  appState: AppState
 }
 
 /**
@@ -256,10 +260,13 @@ export function createCoreDependencies(): CoreDependencies {
     },
   })
 
-  // ⑩ S-E2 A6+A7（§8.52）：Port 5/Port 1 壳实现 + 注入（壳 = 组合根最小真
-  //    实现防 H6 空洞；D 波/CLI 波注真实现经同一窗口整换）
+  // ⑩ S-E2 A6+A7（§8.52）→ S-E2d 提交 2 B13 置换（§8.67.1.5）：Port 5 壳
+  //    实现 + Port 1 AppState 真实现（atlascode/state，EngineState<
+  //    SessionSnapshot> 串行 apply 队列置换旧仓 React functional-update；
+  //    strangler 整换 A7 闭包壳，适配器零引用后删）注入
   setSessionMemoryPort(createSessionMemoryPort())
-  setSessionContextPort(createSessionContextPort())
+  const appState = createAppState()
+  setSessionContextPort(appState.port)
 
   // ⑪ S-E2 A9（§8.52）：通知 ← messaging 真队列（enqueuePendingNotification；
   //    delta 登记（S-E2 审视订正）：类型面两侧均保留 agentId
@@ -317,6 +324,7 @@ export function createCoreDependencies(): CoreDependencies {
     sandboxManager,
     modelProvider: getModelProvider(),
     memoryStore: new FileSystemMemoryStore(),
+    appState,
   }
 }
 

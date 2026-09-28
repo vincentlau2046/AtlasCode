@@ -7,8 +7,10 @@
  * 「壳侧实现 + compose 注入 = E-wave-end」本项兑现）。
  *
  * 缺省 null = 未注入（消费方自判，同 Port 5 getSessionMemoryPort 口径）；
- * 壳实现（组合根最小真实现，atlascode/adapters/sessionContextPortAdapter.ts）
- * 经组合根 setSessionContextPort 注入；D 波/CLI 波可整换真实现（同窗口）。
+ * AppState 真实现（atlascode/state，D 波 S-E2d 提交 2 B13 置换——
+ * EngineState<SessionSnapshot> 串行 apply 队列置换旧仓 React functional-
+ * update）经组合根 setSessionContextPort(appState.port) 注入（A7 闭包壳
+ * sessionContextPortAdapter 经 strangler 整换后零引用删除）。
  */
 import type { SessionContextPort } from '../ports/sessionContext'
 

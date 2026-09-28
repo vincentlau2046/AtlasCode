@@ -9,7 +9,9 @@
  *
  * 断言：① echo hi 真 spawn + 真盘读回 ② 组合根构造 sandbox manager（禁用态可工作）
  * ③ mock completion 双腿（非流式 + 流式，§8.13 L-2 收口）④ memory 写后读
- * （真 fs 写 + 只读 store 读回，§8.13 L-1 收口）。
+ * （真 fs 写 + 只读 store 读回，§8.13 L-1 收口）⑤ B13 compose ⑩ 注入面
+ * （core.appState 真实现 + Port 1 窗同源 + fire-and-forget 提交，D 波
+ * S-E2d 提交 2；unit 面见 tests/unit/atlascode-state.test.ts）。
  *
  * 分层纪律：func 层真 I/O（--isolate 每文件独立进程，全局注入窗口不跨文件泄漏）。
  * fake 仅限 modelprovider（setModelProviderForTesting 返固定 completion，非 mock
@@ -46,6 +48,7 @@ import {
   resetTeammateToolRegistryDeps,
 } from '../../src/swarm'
 import {
+  getSessionContextPort,
   resetSchedulerEnv,
   resetSessionContextPort,
   resetSessionEnv,
@@ -189,5 +192,38 @@ describe('B6-func 最小组合根 4 功能 smoke（经 getCoreDependencies 装�
     await writeFile(p, 'hello memory')
     const content = await core.memoryStore.readFile(p)
     expect(content).toBe('hello memory')
+  })
+})
+
+describe('⑤ B13 compose ⑩ 注入面（D 波 S-E2d 提交 2，AppState 真实现）', () => {
+  test('core.appState 真实现 + Port 1 窗同源 + fire-and-forget 提交', async () => {
+    expect(core.appState).toBeDefined()
+    // ⑩ 注入面置换核验：setSessionContextPort 持有的是 appState.port 本身
+    //（strangler 整换 A7 闭包壳后的真实现，非另一壳实例）
+    expect(getSessionContextPort()).toBe(core.appState.port)
+    // 缺省快照面（承 A7 壳缺省面）
+    const snap = core.appState.get()
+    expect(snap.effortValue).toBe('medium')
+    expect(snap.tasks).toEqual({})
+    // fire-and-forget port 提交（宏任务 flush 后核验；同步 get 先于提交
+    // 的中间态语义 = unit 面 atlascode-state 已锁，此处只验提交完成面）
+    core.appState.port.set(prev => ({
+      ...prev,
+      tasks: {
+        ...prev.tasks,
+        b6: {
+          id: 'b6',
+          type: 'local_bash',
+          status: 'completed',
+          description: 'b6',
+          startTime: 0,
+          outputFile: join(testTmp, 'b6-out'),
+          outputOffset: 0,
+          notified: false,
+        },
+      },
+    }))
+    await new Promise(r => setTimeout(r, 0))
+    expect(Object.keys(core.appState.get().tasks)).toEqual(['b6'])
   })
 })
