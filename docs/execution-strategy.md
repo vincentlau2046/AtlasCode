@@ -5248,3 +5248,37 @@ dev 面 --tools/--check headless smoke）；gate 不变（ci/ 6·0·5·2）。
 
 **开波基线**：2984/0/7110/177 + gate 6·0·5·2（F 波终）。**波 tag 不切**（gate ③ 停留
 wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
+
+**§8.71.1.6 S-C2 闭环记录（2026-09-29）**：
+
+- **提交链**（依赖 f690838 + S-C1 91aa6c3 在前）：`126b83e`（entryInit 逐字随迁 +
+  exit 31L 逐字 + bootstrap ⑥ CLI 入口状态族〔clientType/questionPreviewFormat/
+  sessionSource/sessionBypassPermissionsMode + settings flag 持有面 + 测试复位〕）→
+  `05df4a8`（parse.ts：commander option 面逐字 52 选项 + 尾段条件选项 + print 模式
+  子命令跳过 + 入域子命令子集〔mcp 族 6 支 + auto-mode 族 3 支，S-C4 seam action〕+
+  域外裁登记〔server/ssh/open·plugin/marketplace 全族·agents·auth 全族·doctor/
+  update/install·setup-token·mcp add-from-claude-desktop·xaa-idp + --advisor/
+  --teleport/--remote/--remote-control 选项裁〕）→ `260e1a6`（dispatch.ts：main()
+  L517-773 逐字 + 裁登记〔profileCheckpoint/warningHandler/resetCursor/cc://·
+  LODESTONE·SSH_REMOTE 三预解析块域外裁/stopCapturingEarlyInput/gracefulShutdown
+  族〕+ getInputPrompt L773-799 逐字 + peekForStdinData 本地转写）→ `981e170`
+  （dev.ts：5 flag 面通用化〔16 Ascend 名单/CANN probe/officialVerify 域外裁，
+  --e2e 改 spawn tests/func/atlascode-gelu-probe.test.ts 全栈探针〕+ engine 根门面
+  补 getBundledSkills 名块）→ `67d00e9`（cli 根门面 STR-1 填实 + atlascode/cli.ts
+  bin 交接〔dev 嗅探 → 主面〕+ eslint boundaries cli L3 域注册〔ELEMENTS +
+  element-types allow 面 + atlascode allow 补 cli〕）→ `5af0427`（测试面 17 测）。
+- **delta/订正**：① generateTempFilePath 订正为旧仓 utils/tempfile.ts 逐字
+  （sha256 hex16 / randomUUID / os.tmpdir；S-E1 摘要误记 djb2Hash 基 36，以旧仓
+  源文件为准）② commander v15 无 getOptions() 公共 API（结构测试面走 options
+  数组属性）③ dist/cli.js 基线移位 0 bytes → 1.8MB（bin 有真内容）④ UDS 门
+  feature('UDS_INBOX') → remote 域 isUdsInboxEnabled()（语义保真）⑤ --bare 描述
+  裁 keychain/3P 句（新仓无 keychain 面 + 3P 异构已清）⑥ 旧仓 macos keychain /
+  MDM preAction 支全裁登记（面缺席残留守）。
+- **测试面**：`tests/unit/cli.test.ts` 17 测（entryInit 纯函数 9 / dev 嗅探 1 /
+  buildProgram 结构面 5 / 接缝接线 1〔S-C4 seam process.exit stub 抛验，H6 断言
+  接缝行为非能力假绿〕）+ 四件套全绿。
+- **基线移位**：2984/0/7110/177 → **3001/0/7157/178**（+17 测 +1 文件）+ gate
+  6·0·5·2 不变。
+- **下一切片 S-C3**：print.ts（5046L headless 本体）+ structuredIO（859）+
+  ndjsonSafeStringify（32）+ drainSdkEvents 4 站点接线（analytics 波前向接缝
+  核销）+ initMcpConnections 启动消费。
