@@ -20,6 +20,11 @@
  *     = CLI `mcp add/remove` 面，归 CLI 波（域外登记）
  *   - env 展开（旧 expandEnvVarsInString 在 .mcp.json 值面）= 裁登记
  *     （env 展开消费面随 CLI 波）
+ *   - **3 子裁补登记（S-E3 A 路）**：(a) .mcp.json 父目录上溯（旧
+ *     发现链 cwd→root 就近优先）= 新仓仅读 `<cwd>/.mcp.json` 单文件
+ *     （loadProjectMcpJson 面）；(b) 企业策略 allowedMcpServers /
+ *     deniedMcpServers 过滤面 = 裁登记（随 enterprise 面，policy 波）；
+ *     (c) disabledMcpServers / enabledMcpServers 开/关面 = 裁登记
  * 8 型配置 zod union = types.ts 逐字（型面保真；本文件消费 parse 面）。
  */
 import { readFile } from 'node:fs/promises'

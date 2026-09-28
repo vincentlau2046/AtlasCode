@@ -308,8 +308,11 @@ function zipObject(keys: string[], values: string[]): Record<string, string> {
 
 /** prompt 命令供应商（旧 fetchCommandsForClient L1928 面：gate +
  * sanitize + 命令映射；命令名面 `mcp__<server>__<prompt>` = 旧仓逐字
- * 组合〔归一本地最小面：server 名非法字符 → 下划线，engine
- * normalizeNameForMCP 同规则，L3 域内副本 delta 登记〕）。 */
+ * 组合〔归一本地最小面：server 名非法字符 → 下划线，L3 域内副本 delta
+ * 登记；**裁登记（S-E3 A 路）**：旧 normalizeNameForMCP 'claude.ai '
+ * 前缀特判（连续下划线折叠 + 去首尾）未拷——新仓无发现源产出
+ * 'claude.ai ' 前缀服务器名（claudeai-proxy 连接支直接 failed），
+ * engine 2 副本（tools/mcp.ts + permissions/mcpRuleNames.ts）保留特判〕）。 */
 export async function fetchCommandsForClient(
   connection: McpServerConnection,
 ): Promise<McpPromptCommand[]> {
