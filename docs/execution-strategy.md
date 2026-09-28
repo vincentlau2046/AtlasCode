@@ -4699,3 +4699,227 @@ No LSP server available for file type 兜底）。
 - D 波后序 = remote 波（task #142：SendMessage UDS 5 站点族 + MCP
   client 波）→ analytics 波（task #143）；cli/mount 壳接线 = D 桶
   归属 CLI 波（§8.67.2.2 N-1 登记）。
+
+## §8.68 remote 波 S-E1 总分析（task #142，2026-09-28）
+
+**§8.68.1.1 波定位与范围**
+
+remote 波 = 既定序列第 5 棒（D → remote → analytics），task #142。
+范围 3 部分，来源 4 处登记：
+
+1. **SendMessage UDS 5 站点族**（C 桶 ③ §8.66.2.5 前向接缝 + §8.62.1.6 裁面
+   债务登记 + §8.64 ⑩ 头注）：UDS_INBOX 门族 5 站点（to description
+   uds/bridge 行 + prompt cross-session 段 + checkPermissions bridge ask +
+   validateInput 4 块 + call postInterClaudeMessage/sendToUdsSocket 2 发送
+   支）+ UDS socket 客户端面（udsClient/udsMessaging/peerBridge 面）。
+2. **MCP client 波**（§8.63.1.6 残留守 + §8.63.1.2 ①⑮ 登记）：MCP client
+   连接生命周期 + 重连 + 缓存 + resources/prompt 拉取 + MCP server 配置
+   发现面 + ToolSearch delta ⑤ pending 面回填。
+3. **③ AGENT_TRIGGERS_REMOTE（RemoteTrigger）**（§8.64 残留守 ③ + 路线图
+   §8.3 D 桶后序）：49 口径最后残留守槽 materialize（31/49 → 32/49，
+   残留守 0 收口）。
+
+**波终基线底数 = 2833/0/6750/165 + gate 6·5**（§8.67.2.3 波终）。
+
+**§8.68.1.2 旧仓读面（ground-truth 盘点，a8af45b）**
+
+UDS 5 站点族：
+
+| 旧仓文件 | 行 | 处置 |
+|---|---|---|
+| tools/SendMessageTool/SendMessageTool.ts 5 UDS 站点 | 997 内 | L72 to describe 三元支（gate-on 行含 uds:/bridge: 说明 + ListPeers 提示）/ L586 checkPermissions bridge ask（behavior 'ask' + decisionReason safetyCheck classifierApprovable:false，跨机 prompt injection 须 bypass-immune 注释逐字）/ L631-689 validate 4 块（bridge structured 先拒〔永久约束优先〕+ handle/active 双查〔init-timing 窗 + CCR mirror 只写模式〕/ uds string pass〔summary 不渲染不要求〕/ L685 structured non-'other' scheme 拒）/ L742+ call 2 支（bridge → getReplBridgeHandle 重查〔canUseTool 阻塞数分钟 validate 检查已陈旧，from="unknown" 防漏注释逐字〕+ lazy require postInterClaudeMessage + preview = summary \|\| truncate(msg,50) + “…” 弯引号面；uds → lazy require sendToUdsSocket try/catch + errorMessage 面） |
+| tools/SendMessageTool/prompt.ts udsRow+udsSection | 49 | getPrompt 2 模板站点（gate-off = '' 逐字已落 §8.62；gate-on 面 = 本波随门复活） |
+| utils/peerAddress.ts | 21 | uds:/bridge: 纯 parser（**C 桶 ③ 已落**新仓 src/swarm/peerAddress.ts 逐字，本波 0 增量） |
+| utils/udsClient.ts | 3 | `sendToUdsSocket : any = (() => ({})) as any` = **旧仓自身 any stub**（真 socket 实现旧仓不在） |
+| utils/udsMessaging.ts | 2 | `startUdsMessaging : any` = **any stub**（消费点 = 旧 setup.ts/main.tsx = CLI/TUI 面 → 域外） |
+| bootstrap/state.ts:203 | 3 | `isReplBridgeActive : any` = **any stub** |
+| bridge/replBridgeHandle.ts | 36 | setReplBridgeHandle（updateSessionBridgeId 副作用 + .catch 吞面）/ getReplBridgeHandle / getSelfBridgeCompatId（toCompatSessionId）；ReplBridgeHandle 型 = replBridge.ts 2343L 域外（型面本地最小定义） |
+| bridge/peerSessions.ts | 1 | `postInterClaudeMessage : any` = **any stub**（call 支 lazy require 消费） |
+
+旧仓门态：feature('UDS_INBOX') 编译期 **gate-OFF**（bun:bundle）= 全部
+UDS 支死码；C 桶 ③ 落盘面 = gate-off 逐字（§8.62 S-E2 已坐实）。
+**本波 = 门复活面**（feature() 恒 false 不可测 → 新仓 env 门）。
+
+MCP client（services/mcp/）：
+
+| 旧仓文件 | 行 | 处置 |
+|---|---|---|
+| client.ts connectToServer（memoize L550-1540） | 3209 内 | 8 transport 分支（sse/sse-ide/ws-ide/ws/http/sdk/claudeai-proxy/stdio）+ client 构造（name 'claude-code' + capabilities roots+elicitation 空对象声明〔Java MCP SDK 零字段类面注释逐字〕）+ ListRoots handler（cwd file:// 单 root）+ 连接超时（getConnectionTimeoutMs，超时 = TelemetrySafeError『MCP server "X" connection timed out after Nms』）+ 连后面（capabilities/serverVersion/instructions MAX_MCP_DESCRIPTION_LENGTH 2048 截断『… [truncated]』）+ 断连检测（onerror 分类 8 类消息 + 3 连续 terminal error → closeTransportAndRejectPending，isTerminalConnectionError 8 子串面）+ 分 transport 错误（401/Unauthorized → handleRemoteAuthFailure〔needs-auth 态，auth 面裁〕） |
+| client.ts stdio 支 | 内 | StdioClientTransport（command + args + env = subprocessEnv() 叠 serverRef.env + stderr 'pipe'）+ **ATLAS_SHELL_PREFIX env 覆写**（设真 = command 折 args join ' '）+ stderr 64MB 上限累积 logMCPError 面 |
+| client.ts fetchTools/fetchResources/fetchCommands | 内 | 3 面 LRU 20 + reconnect re-fetch（cache key = server name）+ capabilities 门（tools/resources/prompts 缺 → []）+ recursivelySanitizeUnicode + Command 构建（isMcp + source 'mcp' + userFacingName `${server}:${prompt} (MCP)`〔programmatic 名防空格破 slash 解析注释逐字〕+ argNames + getPromptForCommand = ensureConnectedClient + getPrompt + transformResultContent flat） |
+| types.ts | 258 | 8 型 config zod union（stdio command/args/env / sse url+headers+oauth / sse-ide / ws-ide / http / ws / sdk / claudeai-proxy）+ 5 态 union（connected/failed/needs-auth/pending/disabled）+ SerializedTool/SerializedClient/MCPCliState |
+| config.ts | 1563 | 配置发现（user .atlas.json + project .mcp.json + enterprise + plugin + managed 多 scope + policy filter + add/remove）→ **新仓最小 2-scope 移植**（settings mcpServers record + project .mcp.json），余裁登记 |
+| auth.ts 2370 + oauth/xaa/elicitation/vscode/managedMcp/InProcessTransport/MCPConnectionManager.tsx+useManageMCPConnections 887（React） | — | **整支裁**（OAuth 车道已删 2026-09-17 / 3-dep 纪律 / 新仓无 React） |
+
+RemoteTrigger 族：
+
+- tools/RemoteTriggerTool/RemoteTriggerTool.ts 158L：schema（action 5 枚举
+  list/get/create/update/run + trigger_id `/^[\w-]+$/` + body record +
+  outputSchema {status, json}）+ isEnabled = growthbook
+  'atlas_surreal_dali' && isPolicyAllowed('allow_remote_sessions')（新仓
+  0-hit）+ call = **axios + getOAuthTokens + BASE_API_URL/v1/code/triggers
+  + WIRE_API_VERSION/WIRE_TRIGGERS_BETA 头**（20s timeout +
+  validateStatus 恒真 + 5 action URL 构造逐字）+ mapToolResult
+  `HTTP ${status}\n${json}` 逐字。
+- prompt.ts 15L（DESCRIPTION/PROMPT/REMOTE_TRIGGER_TOOL_NAME）+ UI.tsx
+  16L（JSX → TUI 波，renderToolUseMessage 字符串面保留）。
+- skills/bundled/scheduleRemoteAgents.ts 400L：gate = 同 growthbook+policy；
+  本体面 = claude.ai 车道（getOAuthTokens〔已删〕/ fetchEnvironments +
+  createDefaultCloudEnvironment〔teleport 域新仓 0-hit〕/
+  checkRepoForRemoteAccess〔background/remote 0-hit〕/ claude.ai URL 族）。
+- tools.ts:30 门 `feature('AGENT_TRIGGERS_REMOTE')` OFF +
+  skills/bundled/index.ts:64 同门注册。
+
+**§8.68.1.3 新仓落面确认（存在性 grep 记录，2026-09-28）**
+
+已落可消费（✓）：
+- `src/swarm/peerAddress.ts`（C 桶 ③ 逐字 21L，parseAddress 纯 parser）
+- `src/engine/tools/team/sendMessageTool.ts` 767L（UDS 5 站点 = 裁面登记
+  gate-off 逐字，§8.62 delta ②⑧；复活 = 本波）
+- `src/engine/tools/mcp/mcpClientRegistry.ts`（§8.63 注入接缝：
+  McpClientEntry duck〔name/type/capabilities/listResources?/readResource?〕
+  + set/get/resetMcpClientRegistry）
+- `src/engine/ports/mcpClient.ts`（MCPServerConnection port 面 +
+  McpToolClient.callTool + McpToolDescriptor；连接生命周期 = 残留守登记
+  = 本波）
+- `src/engine/tools/mcp.ts` createMcpTools（T-5a：连接层预取
+  McpToolDescriptor[] → Tool 构建 + mcp 名归一 4 纯函数 +
+  findMcpServerConnection 权限 scope 查找）
+- `src/engine/skill/commands.ts` getMcpSkillCommands（消费端契约：
+  mcpCommands readonly Command[] 过滤面；头注 ⑥「MCP skill 注册窗 =
+  remote 波」→ 本波核销）
+- `src/engine/tools/toolsearch/toolSearchTool.ts` delta ⑤
+  getPendingServerNames const undefined（「复活 = MCP client 波」→
+  本波回填）
+- settings `mcpServers: z.record(string, any).optional()`（engine/config/
+  types.ts:61，E-3 已落）
+- ⑮ isAgentSwarmsEnabled 先例（engine/messaging/agentSwarmsEnabled.ts：
+  env opt-in 门 + growthbook killswitch 支裁 = 恒放行）
+- LSP 波本地转写先例（src/lsp/lspJsonRpc.ts 3-dep 违规面本地转写 delta ①
+  + child_process spawn 先例 bashTool）
+- 49 口径 31/49（§8.67 S-E2c；残留守 1 = ③ 本波收口）
+
+未落（接缝登记，复审勿当遗漏重提）：
+- MCP client 域（stdio client / 连接生命周期 / 配置发现 / 3 fetch 供给方）
+  = **本波落面**
+- UDS socket 客户端真实现 = **旧仓自身 any stub**（udsClient 3L /
+  udsMessaging 2L / peerSessions 1L / bootstrap isReplBridgeActive 3L）
+  → 本波 = stub 面逐字随迁 + 头注登记（H6：绝不把 stub 签名当真行为；
+  真实现 = 旧仓亦无，非裁面漂移）
+- WIRE_TRIGGERS_BETA / WIRE_API_VERSION = 新仓 0-hit（旧仓冻结 WIRE 层
+  85L 未随迁）→ RemoteTrigger call 面 = 注入端口默认登记（engine 不引
+  WIRE 常量；真供给方 = IFF 网关波 / CLI 波）
+- @modelcontextprotocol/sdk = 3-dep 纪律外（diff/openai/proper-
+  lockfile/shell-quote/zod）→ stdio client 本地转写（JSON-RPC 2.0 over
+  stdio，LSP lspJsonRpc 先例同型）
+- REMOTE_TRIGGER_TOOL_NAME = toolNames.ts 0-hit → 本波 seed
+- ListPeers ⑩ 零本体登记不变（C 桶 ③ 闭合证据；UDS inbox 本体 = CLI 波）
+
+**§8.68.1.4 范围裁定（迁 / 裁 / 前向接缝）+ S-E2 切片计划**
+
+**R1 UDS 5 站点族（门复活，env opt-in，旧 gate-OFF 默认保真）：**
+- ① 新门函数 `isUdsInboxEnabled()`（`src/remote/` 域内，⑮ agentSwarms
+  先例同型）：env `ATLAS_EXPERIMENTAL_UDS_INBOX=1` opt-in（旧编译期
+  gate-OFF = 新仓默认 OFF 保真；growthbook killswitch 支裁 = 恒放行）。
+- ② `src/remote/` 顶域（LSP 域同型：独立域包 + STR-1 门面；零 engine
+  import 无循环）：udsClient.ts（sendToUdsSocket stub 面）/ udsMessaging.
+  ts（startUdsMessaging stub 面；CLI 波 setup 面消费登记）/ peerBridge.
+  ts（ReplBridgeHandle 型本地最小定义〔bridgeSessionId〕+ get/set
+  ReplBridgeHandle + isReplBridgeActive stub 面 + postInterClaudeMessage
+  stub 面〔(sessionId, message) → {ok, error?}，call 支消费形〕）/
+  udsInboxEnabled.ts（门）+ index.ts（STR-1 门面）。
+- ③ SendMessage 5 站点复活 = 新仓 sendMessageTool 5 裁面 re-instate
+  （feature() → isUdsInboxEnabled()，5 站点逐字；默认 OFF → 面 = 现状
+  gate-off 逐字不变量，ON → UDS 面活）；prompt.ts udsRow/udsSection 同门。
+- ④ 测试面：门双向（OFF = 面逐字不变判别 / ON = 5 站点判别），gelu
+  swarms 门双向先例同型。
+- ⑤ ListPeers ⑩ 零本体登记不变（本波不动，CLI 波）。
+
+**R2 MCP client 波（新顶域 `src/mcp/`，LSP 域同型 + 3-dep 本地转写）：**
+- ⑥ `src/mcp/` 5 文件 + 门面：mcpJsonRpc.ts（JSON-RPC 2.0 stdio 客户端
+  本地转写：initialize/tools·list/tools/call/resources·list/
+  resources/read/prompts/list/prompts/get + roots/list server→client 请求
+  handler，LSP lspJsonRpc 先例同型 delta ①；零新依赖 child_process
+  spawn 先例）/ mcpConnectionManager.ts（连接生命周期：connect/
+  disconnect/reconnect/清理 + 5 态 union 落 **4 态**（connected/failed/
+  pending/disabled；needs-auth = auth 面裁（OAuth 车道已删）→ failed
+  登记消息合流，头注登记）+ 连接超时面 + 断连检测 3 连续 terminal error
+  面〔8 子串面逐字〕+ ATLAS_SHELL_PREFIX 覆写 + stderr 64MB 上限面）/
+  mcpConfig.ts（配置发现 **最小 2-scope 移植**：settings mcpServers
+  record 〔E-3 已落字段〕+ project .mcp.json〔旧 getProjectMcpConfigsFromCwd
+  等价面〕；8 型 config zod union 逐字移植（types.ts 258L 型面）；
+  enterprise/managed/plugin/CLI --mcp-server 面 = 裁登记（policy 0-hit /
+  插件域波 / CLI 波））/ mcpFetch.ts（tools/resources/commands 3 供给方
+  = 旧 3 fetch 面移植：LRU 20 + reconnect re-fetch + capabilities 门 +
+  sanitize unicode 本地实现（无 lodash，memory/paths 先例）+ Command 描述符
+  域本地型〔McpPromptCommand：name/description/argNames/getPrompt，engine
+  Command 映射 = 组合根（L3：顶域 ↛ engine）〕）/ index.ts（STR-1 门面）。
+- ⑦ **transport 裁定**：stdio = 真（本地核心面，零新依赖）；sse/http/ws =
+  前向接缝登记（连接层返 failed 态 + 登记消息『transport 未支持（MCP
+  client 波 = stdio only）』，真实现 = 后续 transport 波）；sdk = 旧仓
+  即 throw（print.ts 处理，新仓 print 域外 → 同登记）；claudeai-proxy =
+  OAuth 车道已删 [ATLAS-HOLD] 登记；ws-ide/sse-ide = IDE 扩展面域外
+  （新仓无 IDE 扩展）—— 8 型 config 面逐字保留（型面保真），连接面
+  仅 stdio 活。
+- ⑧ 组合根接线（compose 下一槽 ⑭）：mcp manager 构造（settings
+  mcpServers 源注入窗，LSP setLspServerSource 先例同型：未注册 = 空 =
+  无服务器 fail-soft）+ createMcpTools 供给（调用方 toolRegistryDeps.
+  mcpTools 单入口消费不变）+ setMcpClientRegistry 供给（listResources/
+  readResource 实填）+ ToolSearch delta ⑤ 回填（getPendingServerNames
+  = manager pending 态，数据契约面不变）+ getMcpSkillCommands 供给核销
+  （commands 域头注 ⑥「MCP skill 注册窗 = remote 波」）。
+- ⑨ 测试面：func 层 = **真 stdio MCP server**（测试本地脚本 speak MCP
+  JSON-RPC：initialize/tools/list/tools/call/resources/list/prompts/list，
+  零网络零模型）+ manager 生命周期（pending→connected→failed→reconnect）
+  + 配置发现（settings fake + .mcp.json 临时文件）+ registry 供给 +
+  ToolSearch pending 回填 + sanitize unicode 面。
+
+**R3 RemoteTrigger ③ materialize（49 口径 31/49 → 32/49，残留守 0 收口）：**
+- ⑩ 本体 `src/engine/tools/remotetriggers/`（子域 4 文件：本体 + prompt
+  + index STR-1 + remoteTriggersPort）：schema/description/prompt/
+  isReadOnly（list/get）/toAutoClassifierInput 4 模板/mapToolResult
+  `HTTP ${status}\n${json}` 逐字移植；UI 16L JSX → TUI 波裁（
+  renderToolUseMessage 字符串面保留）。
+- ⑪ 门面：tools.ts ③ feature 门（OFF）→ 新自门控
+  `isEnabled = isRemoteTriggersEnabled()`（env
+  `ATLAS_EXPERIMENTAL_REMOTE_TRIGGERS=1` opt-in 默认 OFF = 旧编译期
+  OFF + growthbook 双门缺省保真；growthbook+policy 支裁登记，⑮ 先例
+  同型）。
+- ⑫ call 面 = **[ATLAS-HOLD] 注入端口**（remoteTriggersPort 5 方法
+  listTriggers/getTrigger/createTrigger/updateTrigger/runTrigger；
+  LSP setLspServerSource / mcp 源注入窗同型）：默认供给方 = 登记 throw
+  Error（『[ATLAS-HOLD] remote trigger 端点待 IFF 网关换值；旧仓
+  claude.ai OAuth 车道已删（axios 非 3-dep）』）；头注登记旧 call 面
+  全貌（axios + getOAuthTokens + WIRE 头 + BASE_API_URL/v1/code/triggers
+  [ATLAS-HOLD] URL 族）；真供给方 = IFF 网关波 / CLI 波。H6：非空心壳
+  （schema/prompt/门/readonly/classifier/mapResult 面真，call = 登记接缝，
+  模型可见错误面真）。
+- ⑬ bundled skill scheduleRemoteAgents 400L = **裁登记**（本体面全在
+  claude.ai 车道：getOAuthTokens 已删 / fetchEnvironments+
+  createDefaultCloudEnvironment teleport 域 0-hit / checkRepoForRemote
+  Access 0-hit / claude.ai URL 族）；③ 槽 materialize = 工具面 only，
+  skill 复活 = 随 ⑫ 端口同供给方（IFF 网关波 / CLI 波），头注登记。
+- ⑭ toolNames seed REMOTE_TRIGGER_TOOL_NAME + toolRegistry ③ 槽登记行
+  （残留守 1 → materialize ③ 后 **49 口径 32/49 残留守 0 收口**，registry
+  头注 49 口径终态同步）。
+
+**S-E2 切片计划**（一模块一提交）：
+- **S-E2a**：`src/remote/` 域 5 文件（UDS infra 面 + 门）+ SendMessage
+  5 站点复活 + prompt 2 站点 + 门双向测试。
+- **S-E2b**：`src/mcp/` 域 6 文件（jsonrpc + manager + config + fetch +
+  型 + 门面）+ unit/func 真 stdio server 测试族。
+- **S-E2c**：RemoteTrigger 子域 4 文件（本体 + prompt + 端口 + 门面）+
+  toolNames seed + registry ③ 行 + 49 口径收口登记 + skill 裁登记。
+- **S-E2d**：组合根 ⑭ 接线（mcp manager 构造 + registry 供给 +
+  ToolSearch pending 回填 + mcpTools 供给 + getMcpSkillCommands 核销）
+  + 全栈 gelu 复验（mcp 供给面 = 1 假 stdio server → 池 +1
+  mcp__ 名判别，swarms 门双向先例同型）。
+- **S-E3**：双只读审视（A 路旧仓保真 / B 路新仓一致性）≤2 subagent +
+  修波（一模块一提交）。
+- **S-E4**：闭环（docs §8.68.2 闭环记录 + memory `atlascode-wave-c-
+  progress.md` append + MEMORY.md pointer + task #142 → completed）。
+
+**基线预测**（S-E2 后，实落为准）：开波 2833/0/6750/165 + gate 6·5；
+S-E2a +~20 测 / S-E2b +~80 测（最大面）/ S-E2c +~20 测 / S-E2d +~10 测
+→ 预测 ~2960 pass / ~172 文件 / ~6850 expect（±5% 非漂移）；gate 6·5 恒；
+**波 tag 不切（gate ③ 仍 wave-c）**。
