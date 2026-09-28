@@ -74,28 +74,31 @@ export type TeamContextShape = {
   teammates: Record<string, TeamMemberStateShape>
 }
 
-/** 组合根注入面（swarm 门面真实现绑定；未注入 fail-fast）。 */
+/** 组合根注入面（swarm 门面真实现绑定；未注入 fail-fast）。
+ * 标号订正（S-E3 A 路 minor 4）：9 团队文件面成员注的行号 = 新仓
+ * swarm 行号（teamHelpers / teammateLayoutManager），非旧仓行号；
+ * 成员语义 = 旧仓 TeamCreate/TeamDelete call 体消费面逐字。 */
 export interface TeamServices {
-  /** 旧 readTeamFile（teamHelpers L180，同步读面）。 */
+  /** 新仓 readTeamFile（swarm teamHelpers L180，同步读面）。 */
   readTeamFile(teamName: string): TeamServicesFile | null
-  /** 旧 writeTeamFileAsync（teamHelpers L224）。 */
+  /** 新仓 writeTeamFileAsync（swarm teamHelpers L224）。 */
   writeTeamFileAsync(
     teamName: string,
     teamFile: TeamServicesFile,
   ): Promise<void>
-  /** 旧 getTeamFilePath（teamHelpers L171，~/.atlas/teams/<name>/config.json）。 */
+  /** 新仓 getTeamFilePath（swarm teamHelpers L171，~/.atlas/teams/<name>/config.json）。 */
   getTeamFilePath(teamName: string): string
-  /** 旧 registerTeamForSessionCleanup（teamHelpers L609，gh-32730）。 */
+  /** 新仓 registerTeamForSessionCleanup（swarm teamHelpers L609，gh-32730）。 */
   registerTeamForSessionCleanup(teamName: string): void
-  /** 旧 unregisterTeamForSessionCleanup（teamHelpers L617）。 */
+  /** 新仓 unregisterTeamForSessionCleanup（swarm teamHelpers L617）。 */
   unregisterTeamForSessionCleanup(teamName: string): void
-  /** 旧 cleanupTeamDirectories（teamHelpers L692，团队目录 + worktree 清面）。 */
+  /** 新仓 cleanupTeamDirectories（swarm teamHelpers L692，团队目录 + worktree 清面）。 */
   cleanupTeamDirectories(teamName: string): Promise<void>
-  /** 旧 assignTeammateColor（teammateLayoutManager L44，round-robin 色池）。 */
+  /** 新仓 assignTeammateColor（swarm teammateLayoutManager L44，round-robin 色池）。 */
   assignTeammateColor(agentId: string): string
-  /** 旧 clearTeammateColors（teammateLayoutManager L70）。 */
+  /** 新仓 clearTeammateColors（swarm teammateLayoutManager L70）。 */
   clearTeammateColors(): void
-  /** 旧 sanitizeName（teamHelpers L149，taskListId 派生面）。 */
+  /** 新仓 sanitizeName（swarm teamHelpers L149，taskListId 派生面）。 */
   sanitizeName(name: string): string
   /** 旧 appState.teamContext 读面（内存缺省 store，见下）。 */
   getTeamContext(): TeamContextShape | undefined
