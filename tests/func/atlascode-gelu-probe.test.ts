@@ -22,6 +22,10 @@
  *       调用）；真 pipeline（find→门→validate→hooks→call→mapResult）+
  *       真权限门（1c 工具面自决 allow 产点消费）+ 真 hooks 装配（无钩子
  *       配置 no-op 面）
+ *   P-2b S-E3 修波锚（审视 A 路 major-1）：门 context getAppState 面
+ *       活体——echo 工具面 checkPermissions 消费 gate 注入的 getAppState
+ *       （活 TPC 窄视图，身份 = 构建器 ① 产物；缺线 = 1c catch 吞
+ *       TypeError 回落 passthrough，本断言红）
  *   P-3 skill 域活体：registerBundledSkill 注册 → getBundledSkills 面
  *       （source 'bundled' / prompt 型 / getPromptForCommand 真执行）
  *       + Skill 工具在模型可见池（P-1 交叉面）
@@ -196,7 +200,10 @@ function createScriptedProvider(): ModelProvider {
 
 /** 探测工具（F-3 先例面 + checkPermissions 自决 allow——真权限门 1c
  * 工具面产点消费，default 模式无规则下经 3 终端 passthrough 判别后
- * allow 保真放行）。 */
+ * allow 保真放行）。S-E3 修波锚（审视 A 路 major-1）：checkPermissions
+ * 消费 gate 注入的 context.getAppState()（活 TPC 窄视图）——记录供
+ * P-2b 身份断言（缺线 = 1c catch 吞 TypeError 回落 passthrough）。 */
+let recordedCheckCtx: unknown
 function makeEchoTool(): Tool {
   return {
     name: 'echo',
@@ -212,7 +219,10 @@ function makeEchoTool(): Tool {
       tool_use_id: toolUseID,
       content: String(content),
     }),
-    checkPermissions: async () => ({ behavior: 'allow' }),
+    checkPermissions: async (_input: unknown, context: unknown) => {
+      recordedCheckCtx = context
+      return { behavior: 'allow' }
+    },
   } as unknown as Tool
 }
 
@@ -440,7 +450,16 @@ describe('gelu P-2 engine loop 活体（queryAgentLoop 双轮 + 真 pipeline/门
       )
     expect(toolResultBlocks).toHaveLength(1)
     expect(toolResultBlocks[0]!.content).toBe('echo:gelu')
-    expect(toolResultBlocks[0]!.content !== undefined).toBe(true)
+    // P-2b S-E3 修波锚（审视 A 路 major-1）：gate context getAppState 面
+    // 活体（活 TPC 窄视图身份 = 构建器 ① 产物；缺线 = 1c catch 吞
+    // TypeError 回落 passthrough → 本探针红）
+    const checkCtx = recordedCheckCtx as {
+      getAppState?: () => { toolPermissionContext?: unknown }
+    }
+    expect(typeof checkCtx?.getAppState).toBe('function')
+    expect(checkCtx!.getAppState()!.toolPermissionContext).toBe(
+      bundle.toolPermissionContext,
+    )
   })
 })
 

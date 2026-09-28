@@ -90,7 +90,20 @@ export type CanUseToolFn<
 > = (
   tool: PermissionTool,
   input: Input,
-  context: { getToolPermissionContext?(): ToolPermissionContext },
+  context: {
+    getToolPermissionContext?(): ToolPermissionContext
+    /**
+     * 工具面自决权限消费面（D 波 S-E3 修波回填，审视 A 路 major-1）：
+     * 工具面 checkPermissions（Skill/LSP 等旧仓逐字随迁体）经
+     * context.getAppState().toolPermissionContext 读活 TPC（旧仓富
+     * ToolUseContext.getAppState() 窄视图 = 工具面消费者唯一读取字段；
+     * 全字段面 = 残留守）。未注入 = 1c catch 吞 TypeError 回落
+     * passthrough（gate 3 值 verdict fail-closed），旧仓「工具面自决
+     * 权限看活 TPC」不变量失守——组合根经 createPermissionGate opts
+     * 注入活 TPC 窄视图（compose.ts ③，S-E3 修波）。
+     */
+    getAppState?(): { toolPermissionContext: ToolPermissionContext }
+  },
   assistantMessage?: unknown,
   toolUseID?: string,
   forceDecision?: PermissionDecision<Input>,

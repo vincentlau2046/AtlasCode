@@ -428,7 +428,13 @@ export async function createAgentLoopDeps(
     deps: toolRegistryDeps,
   })
   const tools = getTools(toolPermissionContext, toolRegistryDeps)
-  const checkPermission = createPermissionGate(toolPermissionContext)
+  // S-E3 修波（审视 A 路 major-1）：工具面自决权限 context 面回填——
+  // getAppState 活 TPC 窄视图（= 本构建器 ① 产物活对象，旧仓
+  // context.getAppState().toolPermissionContext 活 TPC 不变量；工具面
+  // 消费者 Skill/LSP checkPermissions 只读该字段，全字段面残留守）
+  const checkPermission = createPermissionGate(toolPermissionContext, {
+    getAppState: () => ({ toolPermissionContext }),
+  })
   const hooks = createLoopHooks({
     options: {
       sessionId: getSessionId(),

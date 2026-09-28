@@ -6,9 +6,9 @@
  * 闭包（3 值 verdict，§8.36 裁定）：
  *   - allow 决策（2a 模式支 / 2b allow 规则 / 1c 工具面 allow 透传）→
  *     { allowed: true, updatedInput }（门改写 call 入参，executeToolUse
- *     门放行后采纳；现零非-passthrough 工具面 checkPermissions 实现
- *     （updatedInput 产出侧为零，审视 M-3 措辞订正）→ 恒 fallback
- *     原入参，行为惰性）
+ *     门放行后采纳；非-passthrough 工具面实现自 S-B5 起 3 件
+ *     （Bash S-B5 / Skill S-E2b / LSP S-E2c，E-4 头注「现零」措辞
+ *     S-E3 修波订正）→ updatedInput 产出侧随实现增长，门采纳面不变）
  *   - deny 决策 → { allowed: false, reason: decision.message }
  *   - ask 决策 → { allowed: false, ask: true, reason: decision.message }
  *     （ask = 需用户确认；新仓无 prompt 面（TUI 弹窗）→ pipeline 映射支
@@ -45,15 +45,25 @@ import type { GateVerdict, PermissionGate } from '../pipeline'
 /**
  * 构造绑定 ToolPermissionContext 的权限门（全决策体裁定；工具面 1c 鸭子
  * 分发随 tool.checkPermissions 实现在工具本体波回填时生效）。
+ *
+ * opts.getAppState（D 波 S-E3 修波，审视 A 路 major-1）：工具面自决权限
+ * 消费面注入——Skill/LSP 等工具面 checkPermissions（旧仓逐字随迁体）经
+ * context.getAppState().toolPermissionContext 读活 TPC（旧仓富
+ * ToolUseContext.getAppState() 窄视图，工具面消费者唯一读取字段）。
+ * 未注入 = 1c catch 吞 TypeError 回落 passthrough（gate fail-closed），
+ * 旧仓不变量失守——组合根（compose.ts ③）以活 TPC 窄视图注入。
  */
 export function createPermissionGate(
   context: ToolPermissionContext,
+  opts: {
+    getAppState?(): { toolPermissionContext: ToolPermissionContext }
+  } = {},
 ): PermissionGate {
   return async (tool, input): Promise<GateVerdict> => {
     const decision = await hasPermissionsToUseTool(
       tool as unknown as PermissionTool,
       (input ?? {}) as Record<string, unknown>,
-      { getToolPermissionContext: () => context },
+      { getToolPermissionContext: () => context, getAppState: opts.getAppState },
     )
     if (decision.behavior === 'allow') {
       return { allowed: true, updatedInput: decision.updatedInput }
