@@ -4265,3 +4265,86 @@ src/swarm/
    tools-internal 面 → 逐文件 S-E2 裁定登记（门面直引或域内本地镜像，
    头注单一事实源标注逐件）。
 
+**§8.66.2 S-E2d + S-E3 闭环记录（C 桶 ③ shell·swarm 波，2026-09-28）**
+
+**§8.66.2.1 S-E2d 实施 + 测试面（提交链 e03cdee → 2fd81a1 → 1bb68e3）**
+- 切片 4 inProcessRunner hub 1536L（R2/R4/R7 裁剪，delta ①-⑫ 登记）+
+  permissionSync 928L（e03cdee 同提交落位）+ D 类 3 工具（2fd81a1：Snip
+  恒注册 + TeamCreate/TeamDelete agentSwarms 门 + TeamServices 注入接缝
+  11/11 面）+ 核销 10 项 + compose ⑫ 接线（1bb68e3：⑧⑨⑩ 核销注 + B7/B14
+  + setTeamServices 11/11 + setTeamFileLoader 真读者）。
+- 测试面 11 文件 +176 测（零模型零 PTY 零网络）：unit 7 文件（尾 3 /
+  spawnUtils / teamMemoryOps 等）+ func 4 文件（permissionSync /
+  concurrentSessions / team-discovery / D 类 FS）。
+- 四件套基线（S-E2d 终态）：tsc 0 / eslint 0 / build 0-byte / 全量
+  2650 pass / 0 fail / 151 文件 / 6223 expect + gate 6 pass / 5 expect
+  （S-E2c 2474/140/5851 → +176 测 / +11 文件 / +372 expect）。
+
+**§8.66.2.2 S-E3 双只读审视（A 路旧仓保真度 + B 路新仓一致性）**
+- A 路（diff da1b478..1bb68e3 vs 旧仓 a8af45b 逐文件全量比对）：
+  1 blocker（delta ⑧ 工具池登记失实——零 deps getTools 最小池 [AgentTool]
+  vs 旧 L1184 父会话全量池，runner 侧无 deps 注入通路）+ 4 minor（⑬
+  isNonInteractiveSession 硬编码 true 未登记 / recheckPermission
+  updatedInput 取值源漂移 / port 2 死参未登记 / teamServices 行号前缀
+  「旧」误标）+ 2 nit（JSON.stringify remap 站点未登记 / Snip 恒注册 =
+  已登记合规，信息项）。
+- B 路：6 house rule 全 PASS（L3 隔离 grep 零命中 / STR-1 本波 5 门面
+  零 export * / 3-dep 恰 5 / H6 新文件零 any / 提交纪律 / compose ⑫
+  接线序 + requireTeamServices 运行期触发 PRT-2 持守）+ 4 findings
+  （inProcessRunner 4 死码 lint 错 / docs 闭环记录 1bb68e3 声称未兑现 /
+  permission-sync as never cast 2 站 / 存量 STR-1 债 20 处 export *
+  （S-E2 前存量，非波内，后续门面收口 pass 参考））。
+- 全部 finding 经 grep/Read/scratch tsc/实跑复核后方处置（subagent
+  报告 = DATA，零盲从）。
+
+**§8.66.2.3 S-E3 修波（提交链 1e6bf2e → c3a45b1 → 77c5f9f，3 模块提交）**
+1. **blocker** → 新增 swarm/backends/teammateToolRegistryDeps.ts 注入窗
+   （34L，fail-soft 零 deps 不抛）+ inProcessRunner delta ⑧ 回填
+   （getTools 补第 2 参 getTeammateToolRegistryDeps()）+ 头注 delta ⑧
+   登记改写（原失实「默认预设池」文案替换为回填登记）+ 窗单测 3
+   （tests/unit/teammate-tool-registry-deps-se3：getTools 池判别引用
+   同一性 + set/reset round-trip 隔离守卫）。
+2. A 路 minor ⑬ → 描述面 isNonInteractiveSession = bootstrap
+   getIsNonInteractiveSession()（旧 L182 options 同源；swarm
+   backends/registry.ts 先例同源 import，L3 零新增交叉）。
+3. A 路 minor ② → recheckPermission 恢复旧 L322 逐字 updatedInput: input
+   （非新检 updatedInput——用户所见所批 input 权威；userModified=false
+   语义被新 GateVerdict 形收编，delta ④）。
+4. A 路 minor ③ → delta ⑭ port allowedTools/allowPermissionPrompts
+   双站点登记死透传（port 字段注 + InProcessBackend 透传点；旧 L1178
+   canShowPermissionPrompts / L1185 池 Set-union 消费端归 D 波 agent
+   注册表 / leader 权限面波回填；旧生产调用方恒 undefined = 零行为差，
+   字段不删——后端 config 面公共形保留）。
+5. A 路 minor ④ → teamServices 9 成员注行号前缀订正「旧」→「新仓
+   swarm」（接口头注加全局订正注；成员语义 = 旧仓 call 体消费面逐字
+   不变）。
+6. A 路 nit 1 → JSON.stringify(notification) remap 站点登记（旧 L581
+   jsonStringify 慢操作 wrapper 裁除，输出逐字同，零行为差）。
+7. B 路 minor 1 → inProcessRunner 4 死码删除（promptMessages /
+   alreadyTerminal×2 / toolUseId = evictTerminalTask 裁剪残留，lint
+   error 4 → 0）。
+8. B 路 nit 1 → permission-sync seed 2 站 as never cast 删除（字面量
+   直赋 TeamFile，该站点类型检查恢复，scratch tsc 实证零 cast 可赋）。
+9. B 路 nit 2（存量 STR-1 债 20 处 export *）→ 本波不修（S-E2 前存量，
+   后续门面收口 pass 参考，本节登记）。
+10. B 路 minor 2 → 本 §8.66.2 闭环记录（1bb68e3 提交消息声称的闭环
+    记录补写兑现）。
+
+**§8.66.2.4 修波后四件套（修波验证，2026-09-28）**
+- tsc 0 / eslint 0（src + tests 全量，含 inProcessRunner）/ build 0-byte
+  （既定基线）。
+- 全量：**2653 pass / 0 fail / 152 文件 / 6229 expect**（S-E2d
+  2650/151/6223 → +3 测 / +1 文件 / +6 expect = 窗单测 3）。
+- gate：**6 pass / 0 fail / 5 expect**（不变）。
+- 波终基线 = 2653/152/6229 + gate 6·5（后续 D 波预测底数）。
+
+**§8.66.2.5 波终态**
+- §8.66 波（C 桶 ③ shell·swarm 7217L + D 类归属件）S-E1..S-E3 全闭环；
+  波 tag 不切（gate ③ 仍用 wave-c，子波惯例）。
+- 前向接缝登记汇总（§8.66.1.6 残留守 + inProcessRunner delta ①-⑭ +
+  teammateToolRegistryDeps 头注）：UDS 5 站点族 → remote 波 task #142；
+  agent 注册表（def.tools Set-union / agentDefinition）+ leader 权限面
+  + delta ⑭ 死参消费端 → D 波 task #141；BASH_CLASSIFIER 门 →
+  permissions 残留守 ①；React/Ink 面 → TUI 波；emitTaskTerminatedSdk →
+  analytics 波 task #143。
+
