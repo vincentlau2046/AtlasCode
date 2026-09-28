@@ -32,7 +32,8 @@
  *    （model/toolChoice/extraToolSchemas/maxOutputTokensOverride/
  *    temperatureOverride/effortValue）7 字段零命中裁：getToolPermissionContext
  *    / isNonInteractiveSession / hasAppendSystemPrompt / querySource / agents /
- *    mcpTools / agentId（登记）；toolChoice 随 ③ haiku 支裁（恒 undefined）；
+ *    mcpTools / agentId（登记）；[§8.69 核销] querySource/agents 面遥测/agent
+ *    域外，保裁确认（不复活）；toolChoice 随 ③ haiku 支裁（恒 undefined）；
  *    thinkingConfig 位保留 = ctx.options.thinkingConfig（旧 useHaiku-false
  *    支逐字）；InDomainUserMessage → Message[] 双 cast（权威登记位 =
  *    webFetchUtils delta ⑨，本文件自足登记，S-E3 B-N7）。

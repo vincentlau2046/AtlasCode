@@ -32,7 +32,8 @@
  *     emitTaskTerminatedSdk(taskId, 'stopped', { toolUseId, summary:
  *     description }) 逐字；捕获面 toolUseId/description 随 emit 复原）。
  *   - perfetto tracing（isPerfettoTracingEnabled/register/unregister）裁除：
- *     遥测域未落（analytics 波 #143）。
+ *     遥测域未落（analytics 波 #143）。[§8.69 核销] 保裁确认：遥测域未落 +
+ *     旧仓 no-op，核销确认（不复活）。
  *   - kill 支 teamContext.teammates 清理支裁除：teamContext 状态面 = TUI 波
  *     （旧 AppState.teamContext ∉ 新仓 task 域最小 AppState）。
  *   - kill 更新面 `inProgressToolUseIDs/currentWorkAbortController: undefined`

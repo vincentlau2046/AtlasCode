@@ -816,6 +816,7 @@ class Project {
           // 旧仓此处 `if (isTranscriptMessage(entry)) await
           // this.persistToRemote(sessionId, entry)` = 裁面 ⑤（远程/teleport 波，
           // 前向接缝登记：远程持久化接线时在此补调用点）。
+          // [§8.69 核销] 保裁确认：归属正确（远程/teleport 波，非 analytics 波），核销确认。
         }
       }
     }

@@ -48,6 +48,7 @@
  *    enabled delta ① 同族先例）+ VERIFICATION_AGENT_TYPE（AgentTool 域，
  *    不在本子波）→ 三重前置全死，整支裁（output verificationNudgeNeeded
  *    字段 + mapResult nudge 行同裁）；恢复 = verification-agent 波/D 波。
+ *    [§8.69 核销] 保裁确认：无 growthbook 域 + feature() 不可测 + 双门死支，核销确认（不复活）。
  *  ⑧ call 5 参声明 → 2 参声明（args, context；旧 canUseTool/
  *    parentMessage/onProgress 旧体不消费，裁，S-B5 delta ⑩ 先例）；旧
  *    import 重指：bootstrap/state → ../../../bootstrap / utils/tasks +

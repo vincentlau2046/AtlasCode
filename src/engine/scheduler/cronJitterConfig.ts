@@ -13,6 +13,8 @@
  *     新仓无 GrowthBook（analytics/modelprovider 域，非本 leaf 依赖面）。
  *     改为**注入口**（setCronJitterConfigProvider），缺省返回 DEFAULT；组合根
  *     / 未来 analytics 波可注 GrowthBook-backed 实现整换（前向接缝登记）。
+ *   - [§8.69 核销] 保裁确认：新仓无 growthbook 域，jitter 配置经 FeatureConfigPort
+ *     （Port 8）注入缺省，growthbook-backed 实现 = 遥测后端未落域外（登记核销，不复活）。
  *
  * 保留语义：schema 校验 + 违界回落（旧仓逐字）。缺省 provider 返回井构的
  * DEFAULT（恒通过 schema → 得 DEFAULT）；注入 provider 返回 raw config 时

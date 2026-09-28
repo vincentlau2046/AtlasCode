@@ -58,6 +58,8 @@
  * 残留守（防「以为已全」）：verification agent 本体 + VERIFICATION_AGENT_
  * TYPE 常量（T-5c 内建注册表）+ 真 ToolUseContext 全字段面（setAppState /
  *  expandedView / agentId）= 残留守（TUI 波/D 波/验证-agent 波）。
+ * [§8.69 核销] 保裁确认：无 growthbook 域 + bun:bundle feature() 不可测 +
+ * 双门死支，核销确认（不复活）。
  */
 import type {
   Tool,

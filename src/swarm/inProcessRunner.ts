@@ -58,7 +58,8 @@
  *      cloneFileStateCache 隔离压缩上下文（新 compactConversation deps 注入形
  *      无 toolUseContext 参）/ runWithAgentContext + AgentContext（perfetto
  *      归因）/ evictTerminalTask（task 域无驱逐面）/ unregisterPerfettoAgent
- *      （perfetto 面）—— 裁除，新仓零活消费。emitTaskTerminatedSdk 已落
+ *      （perfetto 面）—— 裁除，新仓零活消费。[§8.69 核销] 保裁确认：遥测域
+ *      未落 + 旧仓 no-op，核销确认（不复活）。emitTaskTerminatedSdk 已落
  *      （analytics 波 §8.69，completed/failed 两终态 bookend 复原
  *      alreadyTerminal/toolUseId 双发守卫，经 engine 根门面消费）。
  *   ③ R4 裁：BASH_CLASSIFIER 门（feature('BASH_CLASSIFIER') +
