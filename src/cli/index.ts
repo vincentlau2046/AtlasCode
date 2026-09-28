@@ -1,0 +1,34 @@
+/**
+ * cli（CLI 公共域）模块唯一公共出口（STR-1 门面规则：根门面显式名，子门面
+ * export *）。
+ *
+ * 落位裁定（§8.71.1.2，用户裁定 2026-09-28）：CLI = 跨壳公共层，不属于任何
+ * 壳——新 L3 顶层公共域，engine/task/bootstrap/mcp/remote 兄弟位；壳
+ * （atlascode/）降消费方（ui/ TUI 壳 + launcher 薄壳归 #152 壳波）。不塞
+ * src/shared/（叶子域纪律：CLI 面需消费 engine 根门面，shared 只许纯叶子）。
+ * 跨域消费走根门面（swarm/mcp/remote 同型先例）。
+ *
+ * 切片计划（§8.71.1.4，实现波逐步填实 + 门面逐切片补显式名块）：
+ *   - S-C2: parse.ts（commander option 面 + 子命令路由）/ dispatch.ts
+ *     （main() 模式分派 + getInputPrompt）/ entryInit.ts（settings 加载 /
+ *     migrations / prefetch / entrypoint 初始化）/ dev.ts（dev 面
+ *     --tools/--skills/--check/--e2e/--auth-help）
+ *   - S-C3: print.ts（headless 本体）/ structuredIO.ts /
+ *     ndjsonSafeStringify.ts / exit.ts + drainSdkEvents 4 站点接线
+ *     （analytics 波前向接缝核销）+ initMcpConnections 启动消费
+ *   - S-C4: commands.ts（内建命令注册表）/ setup.ts（Setup hooks /
+ *     entrypoint）/ handlers/*（子命令惰性 handlers）+ firstPrompt
+ *     builtInCommandNames 注入口回填 + session 4 站点 + cron 消费点 +
+ *     skill 命令索引接线
+ *
+ * 域外裁登记（不随迁，归属波；详见 docs §8.71.1.3 逐件归属表）：
+ *   - update.ts（424L 自更新 → 版本管理方案波）/ remoteIO.ts（255L →
+ *     remote 族波）/ transports/*（4535L 云传输 → IFF 网关波 [ATLAS-HOLD]）
+ *   - main.tsx server/ssh/open 子命令（→ remote 族波）/ auth login（订阅裁
+ *     [ATLAS-HOLD]；status/logout 入域）
+ *   - bg/up/rollback/ant/templateJobs（旧仓 de-ANT no-op 存根，不迁——
+ *     H6 防空洞：存根不迁不伪装能力）
+ *
+ * 状态: S-C1 骨架占位（零行为零测试；TUI 默认启动支归壳波 #152，非本域）。
+ */
+export {}
