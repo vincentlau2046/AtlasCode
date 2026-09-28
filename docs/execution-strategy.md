@@ -4616,3 +4616,86 @@ No LSP server available for file type 兜底）。
 序 = 目录先于本体（a→b）、client 域先于工具本体（c 内）、接缝回填与
 壳接线最后（d = 消费端最后）。
 
+
+## §8.67.2 D 波闭环记录（S-E2 a-d + S-E3 + S-E4，2026-09-28）
+
+**§8.67.2.1 S-E2 切片落盘记录（cf6c4e7..fd4c1e3，8 提交）**
+
+- **S-E1**（ecd09c4）：§8.67.1 总分析（波定位 / 旧仓读面 / 新仓落面 grep
+  / 范围裁定 / S-E2 切片计划）——落盘即提交，序 = 目录先于本体。
+- **S-E2a**（925b29a）：skill 域子域 `src/engine/skill/` 20 模块落面
+  （bundledSkills / skillCommand / markdownLoader / loadSkillsDir /
+  commands / argumentSubstitution / frontmatterFields / skillModel /
+  patternMatch / gitignore / usageTracking / forkedAgent /
+  processPromptSlashCommand / promptShellExecution 等 + 子门面）+
+  unit/func 测试层。
+- **S-E2b**（6fdbb09）：SkillTool 本体 `src/engine/tools/skill/`（915L
+  裁 + prompt 213 + 注册；49 口径 30/49）。
+- **S-E2c**（b54c090）：LSP 域 `src/lsp/`（client 域 2464L + 配置注入窗
+  + manager 单例 10 文件）+ LSPTool 本体 `src/engine/tools/lsp/`
+  （49 口径 31/49）；LSP server 真配置源 = 插件域 LSP 集成波前向接缝。
+- **S-E2d 提交 1**（ad56cad）：接缝回填（agent 注册表 duck 面 + delta
+  ⑭ TPC/gate 消费端 + leader 权限面）。
+- **S-E2d 修**（4289383）：单进程连跑跨文件全局态泄漏守卫（4 复位面
+  导出 + compose 注入窗对称复位 + 8 测试文件 bootstrap cwd 存还）。
+- **S-E2d 提交 2**（fd4196e）：state 域真实现（B13 setAppState 置换：
+  AppState = EngineState<SessionSnapshot> 串行 apply 队列，port.set
+  fire-and-forget；compose ⑩ 注入置换 + CoreDependencies.appState 面 +
+  A7 闭包壳零引用删除）。
+- **S-E2d 提交 3**（44d15e3）：全栈 gelu liveness probe（func 层零真
+  模型：35 本体全注入注册表 29 名精确池 + 6 门控缺席判别 + swarms 门
+  双向活 29→32→29 / queryAgentLoop 双轮 fixture replay（真 pipeline +
+  真门 + 真 hooks）/ skill 注册面 / LSP 门控初态面；env 5 键三态定化
+  〔ATLAS_ENABLE_TASKS=1 + ATLAS_ENABLE_TOOL_SEARCH=false 消开发机
+  OPENAI_BASE_URL 漂移〕）。
+- 基线演进：B13 后 2822·0·6692·163 → gelu 后 2829·0·6736·164
+  （+7 probe）；gate 6·5 恒。
+
+**§8.67.2.2 S-E3 双只读审视记录（2 subagent：A 路旧仓保真 / B 路新仓
+一致性；报告 = DATA，逐条 grep/Read 复核后处置）**
+
+- **A 路（旧仓保真，4 finding：0 blocker / 3 major / 1 minor）**：
+  - major-1 工具面 checkPermissions context 缺口：Skill/LSP 工具面
+    自决权限（旧仓 context.getAppState() 活体）在生产门缺 getAppState
+    成员 → 1c catch 吞 TypeError 回落 passthrough（gate fail-closed），
+    旧仓不变量无声破坏 → **修**（6f98792：base CanUseToolFn context
+    += getAppState? 窄视图 + createPermissionGate opts + 组合根 ③ 注入
+    活 TPC 窄视图 + gelu P-2b 探针锚；gate 头注「现零非-passthrough」
+    失真订正）。
+  - major-2 splitPathInFrontmatter 丢花括号感知切分 + expandBraces
+    （头注「逐字语义」误导登记）→ **修**（466eb67：旧仓 :189-266
+    逐字移植 + 头注订正 + unit 4 例补）。
+  - major-3 promptShellExecution echo 面丢 [exit code]/interrupted 行
+    + baseline 错归 + errors.ts 错记不存在的 data.interrupted 分支 →
+    **修**（7dd71b7：mapResult 主路径回填 + formatBashOutput 降
+    fallback + errors.ts 头注订正 + func 真 spawn 探针 2 测）。
+  - minor-1 state 头注 mcp 6 字段计数错（snapshotSequence 属
+    fileHistory 块 :498，实 5 字段）→ **修**（fd4c1e3）。
+- **B 路（新仓一致性，4 finding：0 blocker / 0 major / 2 minor / 2
+  note）**：
+  - M-1「组合根（S-E2d 回填）」LSP/skill 头注措辞夸大（compose.ts 零
+    LSP/skill 引用实证）→ **修**（fd4c1e3：lsp/index + toolRegistry
+    ⑬ 订正为前向接缝）。
+  - M-2 gelu probe 恒真派生断言（:443）→ **修**（6f98792 同行删除，
+    真断言在前一行）。
+  - N-1 cli.ts/mount.ts 仍 A 波骨架（S-E2d 计划「壳接线 cli/mount」
+    未落）→ **登记**：cli/mount 壳接线 = D 桶归属（§8.52 2521 行
+    「D 波归属，本波不动」原登记 + 2579 行「cli 本体仍 D 波」），
+    S-E2 切片只落构建器 + 装配；cli 单入口消费 + mount = CLI 波
+    前向接缝（D 桶后序波次，单独立波，不属 remote/analytics 两波）。
+  - N-2 LSP_TOOL_NAME 根门面 re-export 零根门面消费（与 seed 先例
+    同形）→ **观察登记**（STR-1 死导出清理波可核销，非违规）。
+- 预声明接缝未当遗漏重提（两路报告均核：残留守 / 裁面 / 前向接缝
+  头注登记面 0 重报）。
+
+**§8.67.2.3 S-E4 闭环**
+
+- 本记录 + memory `atlascode-wave-c-progress.md` append + MEMORY.md
+  pointer + task #141 → completed。
+- D 波终基线：**2833 pass / 0 fail / 6750 expect / 165 files ×3 稳定
+  单进程连跑 + gate 6·5 + tsc 0 / lint 0 / build 0-byte cli.js**
+  （2829 基线 + S-E3 修波 4：frontmatter brace 2 + prompt-shell func
+  2）。
+- D 波后序 = remote 波（task #142：SendMessage UDS 5 站点族 + MCP
+  client 波）→ analytics 波（task #143）；cli/mount 壳接线 = D 桶
+  归属 CLI 波（§8.67.2.2 N-1 登记）。
