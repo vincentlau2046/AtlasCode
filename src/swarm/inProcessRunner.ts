@@ -80,11 +80,26 @@
  *      permissionMode 读取支（leader Shift+Tab cycle 面）整裁（R2：新
  *      AgentDefinition 无 permissionMode 字段；权限模式循环面归 TUI 波）。
  *   ⑧ availableTools（旧 toolUseContext.options.tools 父会话全量池）→ engine 根
- *      getTools(最小 TPC)（默认预设池 + deny 过滤 + isEnabled，等价面；MCP/
- *      Ascend 池 = 组合根注入 deps，in-process teammate 不继承父 MCP 池，登记）。
+ *      getTools(最小 TPC, teammateToolRegistryDeps 注入窗)（deny 过滤 +
+ *      isEnabled；S-E3 A 路 blocker 修波回填注入窗 backends/
+ *      teammateToolRegistryDeps.ts：组合根 compose ⑫ 注 registry 3 工具
+ *      materialize 底线 + createAgentLoopDeps 以全量 toolRegistryDeps 重建
+ *      = 父会话 loop 池 ≡ teammate 池等价面，旧仓 options.tools 同源；
+ *      未设窗 fail-soft 零 deps 最小池。MCP/Ascend 池随注入 deps 面
+ *      传导，in-process teammate 不单独继承父 MCP 池，登记）。
  *      旧 agentDefinition?.tools 的 7 工具名 Set-union 语义（自定义 def 限定池
  *      时保底 team-essential 7 件）随 agentDefinition 参数裁除（D 波 agent
  *      注册表落时随 def.tools 一并回填，登记）。
+ *   ⑬ 描述面 isNonInteractiveSession 硬编码 true（S-E2d 初版）→ S-E3 A 路
+ *      minor 1 修波：改读 bootstrap getIsNonInteractiveSession()（旧仓
+ *      L182 toolUseContext.options.isNonInteractiveSession 同源 = 父会话
+ *      交互态；in-process teammate 与父同进程，会话态继承语义逐字）。
+ *   ⑭ port 输入面 allowedTools/allowPermissionPrompts 两参 = 登记死透传
+ *      （S-E3 A 路 minor 3 核销：新 hub 零消费，旧生产调用方恒未设——
+ *      旧 L1178 canShowPermissionPrompts ?? true / L1185 池 Set-union
+ *      消费端随 delta ①⑧ 裁面归 D 波 agent 注册表 / leader 权限面波
+ *      回填；inProcessRunnerPort.ts 字段注 + InProcessBackend 透传点
+ *      双站点登记，零行为差）。
  *   ⑨ LOCAL 常量 TEAMMATE_MESSAGE_TAG = 'teammate-message'（旧 constants/xml.ts:52
  *      逐字；新仓无 xml 常量域，域内本地镜像，单一消费点本文件）。
  *   ⑩ onPermissionWaitMs 回调 + task 态 totalPausedMs 记账支整裁：新
@@ -125,6 +140,9 @@ import {
   modelToRole,
   type ModelRole,
 } from '../modelprovider'
+// delta ⑬（S-E3 A 路 minor 1）：父会话交互态 = bootstrap 会话状态面
+// （swarm backends/registry.ts 先例同源 import，L3 零新增交叉）。
+import { getIsNonInteractiveSession } from '../bootstrap'
 import {
   evictTaskOutput,
   MAX_TEAMMATE_DISPLAY_MESSAGES,
@@ -184,6 +202,8 @@ import { TEAM_LEAD_NAME } from './constants'
 import { TEAMMATE_SYSTEM_PROMPT_ADDENDUM } from './teammatePromptAddendum'
 import type { TeammateToolState } from './backends/types'
 import type { StartInProcessTeammateArgs } from './backends/inProcessRunnerPort'
+// delta ⑧ 回填（S-E3 A 路 blocker）：teammate 工具池 deps 注入窗。
+import { getTeammateToolRegistryDeps } from './backends/teammateToolRegistryDeps'
 
 type SetAppStateFn = SetAppState
 
@@ -274,8 +294,10 @@ function createInProcessPermissionGate(
       return { allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE }
     }
 
+    // delta ⑬（S-E3 A 路 minor 1）：会话交互态读 bootstrap 会话状态面
+    //（旧 L182 options.isNonInteractiveSession 同源；in-process 继承父进程态）。
     const description = await tool.description(input, {
-      isNonInteractiveSession: true,
+      isNonInteractiveSession: getIsNonInteractiveSession(),
       toolPermissionContext: tpc,
       tools,
     })
@@ -375,9 +397,12 @@ function createInProcessPermissionGate(
               setToolUseConfirmQueue(queue =>
                 queue.filter(item => item.toolUseID !== toolUseKey),
               )
+              // 旧 L322 逐字：recheck allow 钉用户所见的原 input（userModified=
+              // false 语义被新 GateVerdict 形收编，delta ④）——非新检 updatedInput
+              //（用户所见所批 input 为权威）。
               resolve({
                 allowed: true,
-                updatedInput: freshResult.updatedInput ?? input,
+                updatedInput: input,
               })
             }
           },
@@ -603,6 +628,9 @@ async function sendIdleNotification(
 ): Promise<void> {
   const notification = createIdleNotification(agentName, options)
 
+  // 旧 L581 jsonStringify(notification)（slowOperations 慢操作计时 wrapper）
+  // → 直接 JSON.stringify（输出逐字同，计时面随 slowOperations 族裁除；
+  // S-E3 A 路 nit 登记，零行为差）。
   await sendMessageToLeader(
     agentName,
     JSON.stringify(notification),
@@ -959,9 +987,12 @@ export async function runInProcessTeammate(
     model: overrideRole,
   }
 
-  // 工具池（delta ⑧）：getTools(最小 TPC) = 默认预设池 + deny 过滤 + isEnabled。
+  // 工具池（delta ⑧ 回填 S-E3 A 路 blocker）：getTools(最小 TPC,
+  // teammate deps 注入窗) = 父会话等价池 + deny 过滤 + isEnabled（旧 L1184
+  // options.tools 等价面；窗未设 = 零 deps 最小池 fail-soft，登记）。
   const tools: Tools = getTools(
     buildTeammateToolPermissionContext(getAppState().toolPermissionContext),
+    getTeammateToolRegistryDeps(),
   )
 
   // All messages across all prompts
@@ -1010,16 +1041,15 @@ export async function runInProcessTeammate(
       // The lifecycle abortController still kills the whole teammate if needed.
       const currentWorkAbortController = createAbortController()
 
-      // Prepare prompt messages for this iteration
-      // For the first iteration, start fresh
-      // For subsequent iterations, pass accumulated messages as context
+      // Prepare prompt message for this iteration（上下文经
+      // contextMessages = allMessages 累积支传递；旧 promptMessages 本地
+      // 数组 = evictTerminalTask 裁剪后死码残留，S-E3 修波删除）
       // delta ⑫：InDomainUserMessage 最小形（engine files/userMessage.ts
       // §8.55）无 shared Message 索引签名 → 消费点 cast（跨域 cast 先例
       // = compose.ts session Message 双 cast，同语义）
       const userMessage = createUserMessage({
         content: currentPrompt,
       }) as unknown as Message
-      const promptMessages: Message[] = [userMessage]
 
       // Check if compaction is needed before building context
       // （旧 tokenCountWithEstimation + 隔离 context 压缩面 → AutoCompactDeps 注入形，
@@ -1295,8 +1325,8 @@ export async function runInProcessTeammate(
     }
 
     // Mark as completed when exiting the loop
-    let alreadyTerminal = false
-    let toolUseId: string | undefined
+    //（旧 alreadyTerminal/toolUseId 2 变量 = evictTerminalTask 消费的
+    // 写而不读残留，随 delta ② 裁剪 S-E3 修波删除）
     updateTaskState<InProcessTeammateTaskState>(
       taskId,
       setAppState,
@@ -1305,10 +1335,8 @@ export async function runInProcessTeammate(
         // notified:true + cleared fields. Don't overwrite (would flip
         // killed → completed).
         if (task.status !== 'running') {
-          alreadyTerminal = true
           return task
         }
-        toolUseId = task.toolUseId
         task.onIdleCallbacks?.forEach(cb => cb())
         task.unregisterCleanup?.()
         return {
@@ -1338,14 +1366,13 @@ export async function runInProcessTeammate(
     )
 
     // Mark task as failed and notify any waiters（delta ⑪：error 字段不写，
-    // 失败原因经 idle notification failureReason 传达）。
-    let alreadyTerminal = false
+    // 失败原因经 idle notification failureReason 传达；旧 alreadyTerminal
+    // 写而不读残留随 delta ② S-E3 修波删除）。
     updateTaskState<InProcessTeammateTaskState>(
       taskId,
       setAppState,
       task => {
         if (task.status !== 'running') {
-          alreadyTerminal = true
           return task
         }
         task.onIdleCallbacks?.forEach(cb => cb())

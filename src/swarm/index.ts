@@ -277,6 +277,13 @@ export {
   resetStartInProcessTeammate,
   requireStartInProcessTeammate,
 } from './backends/inProcessRunnerPort'
+// S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池
+// ToolRegistryDeps 注入窗（组合根 compose ⑫ / createAgentLoopDeps 装配）。
+export {
+  setTeammateToolRegistryDeps,
+  resetTeammateToolRegistryDeps,
+  getTeammateToolRegistryDeps,
+} from './backends/teammateToolRegistryDeps'
 export { wireBackends } from './backends/wireBackends'
 // S-E2d hub（§8.66.1.5 切片 4）：inProcessRunner hub 1536L（R2/R4/R7
 // 裁剪）落位——seam ②（inProcessRunnerPort）真实现供体；组合根

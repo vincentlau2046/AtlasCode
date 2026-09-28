@@ -102,6 +102,8 @@ function makeRequest(over: Partial<SwarmPermissionRequest> = {}): SwarmPermissio
 }
 
 async function seedTeamFile(leadName = 'team-lead'): Promise<void> {
+  // 字面量直赋 TeamFile（零 cast——S-E3 B 路 nit 核销：cast 会禁该站点
+  // 类型检查，未来 TeamFile 加必填字段此 seed 不报）
   await writeTeamFileAsync(TEAM, {
     name: TEAM,
     createdAt: Date.now(),
@@ -116,7 +118,7 @@ async function seedTeamFile(leadName = 'team-lead'): Promise<void> {
         subscriptions: [],
       },
     ],
-  } as never)
+  })
 }
 
 function inboxPath(team: string, agent: string): string {
@@ -351,7 +353,7 @@ describe('P-S3 mailbox 变体', () => {
       createdAt: Date.now(),
       leadAgentId: 'ghost@t2',
       members: [{ agentId: 'w9@t2', name: 'w9', joinedAt: Date.now(), tmuxPaneId: '', cwd: '/tmp', subscriptions: [] }],
-    } as never)
+    })
     expect(await getLeaderName('t2')).toBe('team-lead') // lead 成员缺位回落
 
     expect(await getLeaderName('t3')).toBeNull()

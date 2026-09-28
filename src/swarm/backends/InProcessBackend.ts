@@ -140,6 +140,8 @@ export class InProcessBackend implements TeammateExecutor {
         model: config.model,
         systemPrompt: config.systemPrompt,
         systemPromptMode: config.systemPromptMode,
+        // 登记死透传（S-E3 A 路 minor 3，port 字段注 + inProcessRunner
+        // delta ⑭ 双站点登记）：新 hub 零消费，旧生产调用方恒未设，零行为差。
         allowedTools: config.permissions,
         allowPermissionPrompts: config.allowPermissionPrompts,
       })

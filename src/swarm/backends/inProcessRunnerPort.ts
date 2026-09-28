@@ -41,7 +41,20 @@ export type StartInProcessTeammateArgs = {
   model?: string
   systemPrompt?: string
   systemPromptMode?: 'default' | 'replace' | 'append'
+  /**
+   * 登记死透传（S-E3 A 路 minor 3 核销，inProcessRunner delta ⑭）：新 hub
+   * 零消费——旧消费端 = 工具池 7 工具名 Set-union（旧 inProcessRunner.ts:1185，
+   * 随 delta ①⑧ agentDefinition 参数裁面归 D 波 agent 注册表回填）。
+   * 旧生产调用方恒未设（undefined）→ 透传零行为差，不删字段（后端 config
+   * 面公共形保留）。
+   */
   allowedTools?: string[]
+  /**
+   * 登记死透传（S-E3 A 路 minor 3 核销，inProcessRunner delta ⑭）：新 hub
+   * 零消费——旧消费端 = canShowPermissionPrompts（旧 inProcessRunner.ts:1178，
+   * leader-queue vs mailbox 回退选择面 = 新 hub createInProcessPermissionGate
+   * bridge 在场检查）；旧生产调用方恒未设（?? true 恒生效）→ 零行为差。
+   */
   allowPermissionPrompts?: boolean
 }
 
