@@ -68,6 +68,10 @@ export const LIST_MCP_RESOURCES_TOOL_NAME = 'ListMcpResourcesTool'
 export const READ_MCP_RESOURCE_TOOL_NAME = 'ReadMcpResourceTool'
 // ── §8.67 D 波 S-E2c 补（LSP seed；值逐一验真旧仓 prompt.ts L1 逐字 'LSP'）──
 export const LSP_TOOL_NAME = 'LSP'
+// ── §8.68 remote 波 S-E2c 补（RemoteTrigger seed；值逐一验真旧仓
+// prompt.ts L1 逐字 'RemoteTrigger'；49 口径 ③ 槽 AGENT_TRIGGERS_REMOTE
+// materialize）──
+export const REMOTE_TRIGGER_TOOL_NAME = 'RemoteTrigger'
 
 /** Shell 工具名（旧仓 SHELL_TOOL_NAMES 逐字）。 */
 export const SHELL_TOOL_NAMES: string[] = [BASH_TOOL_NAME, POWERSHELL_TOOL_NAME]

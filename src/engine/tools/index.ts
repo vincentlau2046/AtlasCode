@@ -183,6 +183,25 @@
  *   残留守「49 本体」登记再缩 1 → 31/49（LSP 族专属门控槽 ⑬
  *   ENABLE_LSP_TOOL materialize = 自门控 isEnabled = isLspConnected，
  *   注册表残留守 2→1；组合根 baseTools 注册位 = S-E2d 回填）。
+ * §8.68 remote 波 S-E2c（RemoteTrigger 子域，49 本体 ③ 槽
+ *   AGENT_TRIGGERS_REMOTE materialize）已落 remotetriggers/ 子域
+ *   （RemoteTriggerTool 本体 1 对象 + JSON schema 1 常量
+ *   REMOTE_TRIGGER_TOOL_INPUT_SCHEMA + Output 型 + prompt 2 面
+ *   DESCRIPTION/PROMPT + [ATLAS-HOLD] 注入端口 remoteTriggersPort
+ *   5 方法族 〔登记 throw 缺省供给方，真供给方 = IFF 网关波 / CLI 波〕；
+ *   旧仓 RemoteTriggerTool.ts 158L + prompt 15L + UI 16L 裁剪随迁，
+ *   裁面登记：axios + getOAuthTokens + getGlobalConfig + WIRE 头 +
+ *   BASE_API_URL/v1/code/triggers 〔ATLAS-HOLD URL 族〕→ ⑫ 端口 /
+ *   growthbook 'atlas_surreal_dali' + isPolicyAllowed 双门裁 →
+ *   isEnabled = isRemoteTriggersEnabled() 自门控〔env
+ *   ATLAS_EXPERIMENTAL_REMOTE_TRIGGERS=1 opt-in 默认 OFF，⑮ 先例
+ *   同型〕/ UI JSX renderToolResultMessage → TUI 波 / bundled skill
+ *   scheduleRemoteAgents 400L 裁登记〔claude.ai 车道全裁，随 ⑫ 同
+ *   供给方复活〕，见各文件头注 delta 登记）→ 在此 re-export
+ *   （remotetriggers/ 子门面）；残留守「49 本体」登记再缩 1 → 32/49
+ *   （RemoteTrigger 专属门控槽 ③ AGENT_TRIGGERS_REMOTE materialize =
+ *   自门控 isEnabled = isRemoteTriggersEnabled，注册表残留守 1→0
+ *   收口；组合根 baseTools 注册位 = S-E2d 回填）。
  */
 export {
   createMcpTools,
@@ -250,6 +269,9 @@ export {
   READ_MCP_RESOURCE_TOOL_NAME,
   // §8.67 D 波 S-E2c：LSP_TOOL_NAME seed 补入根门面（LSP 族 ⑬ 槽）
   LSP_TOOL_NAME,
+  // §8.68 remote 波 S-E2c：REMOTE_TRIGGER_TOOL_NAME seed 补入根门面
+  //（RemoteTrigger 族 ③ 槽）
+  REMOTE_TRIGGER_TOOL_NAME,
   SHELL_TOOL_NAMES,
 } from './toolNames'
 export { LEGACY_TOOL_NAME_ALIASES } from './legacyToolNameAliases'
@@ -1010,3 +1032,26 @@ export {
   formatWorkspaceSymbolResult,
   getSymbolAtPosition,
 } from './lsp'
+
+// ── §8.68 remote 波 S-E2c（RemoteTrigger 子域，49 本体 ③ 槽
+// AGENT_TRIGGERS_REMOTE materialize）：remotetriggers 子域（本体 +
+// JSON schema + prompt 2 面 + [ATLAS-HOLD] 注入端口 5 方法族；名字
+// 常量 REMOTE_TRIGGER_TOOL_NAME 由 toolNames 块 seed 不重出；旧双门
+// growthbook + policy 裁 → isEnabled = isRemoteTriggersEnabled()
+// 自门控，call HTTP 面 = ⑫ 端口登记 throw 缺省供给方，见
+// remotetriggers/ 子门面头注）──
+export {
+  RemoteTriggerTool,
+  REMOTE_TRIGGER_TOOL_INPUT_SCHEMA,
+  isRemoteTriggersEnabled,
+  type RemoteTriggerToolInput,
+  type RemoteTriggerToolOutput,
+  REMOTE_TRIGGER_DESCRIPTION,
+  REMOTE_TRIGGER_PROMPT,
+  getRemoteTriggersPort,
+  setRemoteTriggersPort,
+  clearRemoteTriggersPort,
+  REMOTE_TRIGGERS_HOLD_MESSAGE,
+  type RemoteTriggersPort,
+  type RemoteTriggerResponse,
+} from './remotetriggers'
