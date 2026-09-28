@@ -216,6 +216,12 @@ export {
   getBundledSkills,
 } from './skill'
 export {
+  // CLI 公共域 S-C3（§8.71.1.4）：SDK structuredIO sendRequest abort 语义
+  // 错误型消费面（旧仓 utils/errors.ts AbortError 经 tools 子门面随迁，
+  // cli 跨域经引擎根门面消费；STR-1 根门面显式名）
+  AbortError,
+} from './tools'
+export {
   isCoordinatorMode,
   matchSessionMode,
   getCoordinatorUserContext,
