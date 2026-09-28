@@ -12,16 +12,25 @@
  *    UDS env 门两态（ATLAS_EXPERIMENTAL_UDS_INBOX opt-in 默认 OFF）/
  *    TRANSCRIPT_CLASSIFIER 门（ON_BY_DEFAULT → --enable-auto-mode 在场）
  *  - 接缝接线断言（H6 防空洞：断言「显式接缝行为」而非能力假绿）：
- *    子命令 action = S-C4 seam（seam 文案 + process.exit(1)，process.exit
- *    stub 抛验；主面 seam = S-C3 print / 壳波 #152 前向接缝同型）
+ *    主面 seam = S-C3 print / 壳波 #152 前向接缝（process.exit stub 抛验）
+ *  - S-C4 commit 4 落盘断言（mcp 族 6 接缝 → 真 handler）：mcp list handler
+ *    = 无配置空态输出 + 自然返回（无 process.exit）/ mcpConfigWrite 纯面
+ *    （ensureConfigScope / ensureTransport / parseHeaders / parseEnvVars /
+ *    expandEnvVarsInString）
  */
 import { describe, test, expect } from 'bun:test'
+import { tmpdir } from 'node:os'
 import {
   buildProgram,
   eagerParseCliFlag,
+  ensureConfigScope,
+  ensureTransport,
+  expandEnvVarsInString,
   generateTempFilePath,
   hasDevFlag,
   initializeEntrypoint,
+  parseEnvVars,
+  parseHeaders,
   parseSettingSourcesFlag,
   registerInDomainSubcommands,
   safeParseJSON,
@@ -223,37 +232,57 @@ describe('cli 域 S-C2 · buildProgram 结构面', () => {
   })
 })
 
-describe('cli 域 S-C2 · 接缝接线（H6 防空洞：断言接缝行为非能力假绿）', () => {
-  test('子命令 action = S-C4 seam（seam 文案 + process.exit(1)）', async () => {
+describe('cli 域 S-C4 commit 4 · mcp 族落盘（S-C2 seam 断言更新，H6 防空洞：断言 handler 行为）', () => {
+  test('mcp list handler = 无配置空态输出 + 自然返回（无 process.exit）', async () => {
     const program = buildProgram()
     registerInDomainSubcommands(program)
     program.exitOverride()
     const realExit = process.exit
-    const realStderrWrite = process.stderr.write
-    let exitCode: number | undefined
-    let stderr = ''
-    process.stderr.write = ((chunk: string | Uint8Array) => {
-      stderr += String(chunk)
+    const realStdoutWrite = process.stdout.write
+    const realConfigDir = process.env.ATLAS_CONFIG_DIR
+    let stdout = ''
+    let exited = false
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      stdout += String(chunk)
       return true
-    }) as typeof process.stderr.write
-    process.exit = ((code?: number) => {
-      exitCode = code
-      throw new Error(`__seam_exit:${code}`)
+    }) as typeof process.stdout.write
+    process.exit = (() => {
+      exited = true
+      throw new Error('__handler_exit')
     }) as typeof process.exit
+    // config home = 不存在的 tmp 路径（user/local settings 源空，零磁盘写；
+    // 仓根无 .mcp.json → project 源空 = 3 源全空，读面 ENOENT fail-soft）
+    process.env.ATLAS_CONFIG_DIR = `${tmpdir()}/atlas-cli-sc4-mcp-nonexistent`
     try {
       await program.parseAsync(['node', 'atlascode', 'mcp', 'list'])
-      throw new Error('expected seam exit')
-    } catch (e) {
-      if ((e as Error).message.startsWith('__seam_exit:')) {
-        // expected — seam 抛验路径
-      } else {
-        throw e
-      }
     } finally {
+      process.env.ATLAS_CONFIG_DIR = realConfigDir
+      process.stdout.write = realStdoutWrite
       process.exit = realExit
-      process.stderr.write = realStderrWrite
     }
-    expect(exitCode).toBe(1)
-    expect(stderr).toContain('mcp list')
+    expect(exited).toBe(false)
+    expect(stdout).toContain('No MCP servers configured')
+  })
+
+  test('mcpConfigWrite 纯面（scope / transport / header / env / env 展开）', () => {
+    expect(ensureConfigScope()).toBe('local')
+    expect(ensureConfigScope('user')).toBe('user')
+    expect(() => ensureConfigScope('bogus')).toThrow(/Invalid scope/)
+    expect(ensureTransport()).toBe('stdio')
+    expect(ensureTransport('sse')).toBe('sse')
+    expect(() => ensureTransport('ws')).toThrow(/Invalid transport/)
+    expect(parseHeaders(['X-Api-Key: abc123'])).toEqual({
+      'X-Api-Key': 'abc123',
+    })
+    expect(() => parseHeaders(['no-colon'])).toThrow(/Invalid header/)
+    expect(parseEnvVars(['A=1', 'B=x=y'])).toEqual({ A: '1', B: 'x=y' })
+    expect(() => parseEnvVars(['NOVALUE'])).toThrow(
+      /Invalid environment variable/,
+    )
+    const r = expandEnvVarsInString(
+      '${ATLAS_SC4_TEST_VAR} and ${ATLAS_SC4_TEST_VAR2:-dflt}',
+    )
+    expect(r.expanded).toBe('${ATLAS_SC4_TEST_VAR} and dflt')
+    expect(r.missingVars).toEqual(['ATLAS_SC4_TEST_VAR'])
   })
 })

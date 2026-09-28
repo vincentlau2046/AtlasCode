@@ -37,6 +37,11 @@
  *   主面 action（H6 防空洞：明示接缝，exit 1，不伪装能力不静默通过）：
  *   - --init-only = S-C4 setup.ts 已落盘（cli/setup.ts runCliSetup，S-C2 前向接缝核销；旧 main.tsx「Run Setup and SessionStart hooks, then exit」语义）/ -p·--print = S-C3 print.ts 前向接缝（runHeadless 真接线 = S-C4 commit 6）/
  *     交互入口 = 壳波 #152 前向接缝（launchRepl/showSetupScreens 归壳波）。
+ *   - mcp 族 6 接缝（serve/add/remove/list/get/add-json）= S-C4 commit 4 落盘
+ *     （cli/handlers/mcp.ts handler 面 + cli/mcpConfigWrite.ts 写回面；本文件
+ *     惰性动态 import + type-only 选项面，handler 模块不 eager 加载）/
+ *     auto-mode 族 3 接缝 = S-C4 commit 5（cli/handlers/autoMode.ts +
+ *     getAutoModeConfig，sC4SeamAction 残留守）。
  */
 import {
   Command as CommanderCommand,
@@ -47,6 +52,12 @@ import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
+import type {
+  McpAddJsonOptions,
+  McpAddOptions,
+  McpRemoveOptions,
+  McpServeOptions,
+} from './handlers/mcp'
 import { runCliSetup } from './setup'
 
 /**
@@ -612,7 +623,12 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
     .description('Start the AtlasCode MCP server')
     .option('-d, --debug', 'Enable debug mode', () => true)
     .option('--verbose', 'Override verbose mode setting from config', () => true)
-    .action(sC4SeamAction('mcp serve'))
+    .action(async (options: McpServeOptions) => {
+      // 惰性加载面保真（旧头注：dynamically imported only when the command
+      // runs）
+      const { mcpServeHandler } = await import('./handlers/mcp')
+      await mcpServeHandler(options)
+    })
 
   // 旧仓 commands/mcp/addCommand.ts 选项面逐字随迁（--xaa 裁：isXaaEnabled XAA
   // 面域外，登记）；handler = S-C4 handlers/mcp.ts
@@ -652,7 +668,17 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
       'Fixed port for OAuth callback (for servers requiring pre-registered redirect URIs)',
     )
     .helpOption('-h, --help', 'Display help for command')
-    .action(sC4SeamAction('mcp add'))
+    .action(
+      async (
+        name: string,
+        commandOrUrl: string,
+        args: string[] | undefined,
+        options: McpAddOptions,
+      ) => {
+        const { mcpAddHandler } = await import('./handlers/mcp')
+        await mcpAddHandler(name, commandOrUrl, args ?? [], options)
+      },
+    )
 
   mcp
     .command('remove <name>')
@@ -663,21 +689,30 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
       '-s, --scope <scope>',
       'Configuration scope (local, user, or project) - if not specified, removes from whichever scope it exists in',
     )
-    .action(sC4SeamAction('mcp remove'))
+    .action(async (name: string, options: McpRemoveOptions) => {
+      const { mcpRemoveHandler } = await import('./handlers/mcp')
+      await mcpRemoveHandler(name, options)
+    })
 
   mcp
     .command('list')
     .description(
       'List configured MCP servers. Note: The workspace trust dialog is skipped and stdio servers from .mcp.json are spawned for health checks. Only use this command in directories you trust.',
     )
-    .action(sC4SeamAction('mcp list'))
+    .action(async () => {
+      const { mcpListHandler } = await import('./handlers/mcp')
+      await mcpListHandler()
+    })
 
   mcp
     .command('get <name>')
     .description(
       'Get details about an MCP server. Note: The workspace trust dialog is skipped and stdio servers from .mcp.json are spawned for health checks. Only use this command in directories you trust.',
     )
-    .action(sC4SeamAction('mcp get'))
+    .action(async (name: string) => {
+      const { mcpGetHandler } = await import('./handlers/mcp')
+      await mcpGetHandler(name)
+    })
 
   mcp
     .command('add-json <name> <json>')
@@ -691,7 +726,12 @@ export function registerInDomainSubcommands(program: CommanderCommand): void {
       '--client-secret',
       'Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)',
     )
-    .action(sC4SeamAction('mcp add-json'))
+    .action(
+      async (name: string, json: string, options: McpAddJsonOptions) => {
+        const { mcpAddJsonHandler } = await import('./handlers/mcp')
+        await mcpAddJsonHandler(name, json, options)
+      },
+    )
 
   // 裁登记：mcp reset-project-choices（.mcp.json 项目批准面 = 信任对话框面，
   // 壳波随迁）/ mcp add-from-claude-desktop（无 Desktop 面）/ mcp xaa-idp

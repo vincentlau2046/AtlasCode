@@ -33,8 +33,12 @@
  * S-C3 落盘（print headless 本体〔queryAgentLoop 驱动 remap + 选项校验 +
  * 输出三态 + drainSdkEvents 4 站点 + MCP 启动消费〕/ structuredIO 8 面 /
  * sdkTypes 本地型面 / permissionPrompt wire schema / stream / ndjson /
- * streamJsonStdoutGuard；TUI 默认启动支归壳波 #152，非本域；S-C4
- * handlers/* 前向接缝登记见 print.ts 头注）。
+ * streamJsonStdoutGuard；TUI 默认启动支归壳波 #152，非本域）+
+ * S-C4 commit 4 落盘（mcp 子命令 handler 6 面 + mcp 配置写回面
+ * mcpConfigWrite〔scope 映射 local→localSettings / user→userSettings /
+ * project→.mcp.json 权限保持写〕；mcp 域 mcpConfig.ts 头注域外登记核销。
+ * 后续 commit：auto-mode 族（commit 5）/ -p 接线 + 测试 + 四件套
+ * （commit 6））。
  */
 export { cliError, cliOk } from './exit'
 export {
@@ -103,3 +107,32 @@ export {
   StructuredIO,
   type RequiresActionDetails,
 } from './structuredIO'
+
+// ── S-C4 commit 4: mcp 子命令 handler + 配置写回面 ─────────────────
+export {
+  mcpAddHandler,
+  mcpAddJsonHandler,
+  mcpGetHandler,
+  mcpListHandler,
+  mcpRemoveHandler,
+  mcpServeHandler,
+  type McpAddJsonOptions,
+  type McpAddOptions,
+  type McpRemoveOptions,
+  type McpServeOptions,
+} from './handlers/mcp'
+export {
+  addMcpConfig,
+  describeMcpConfigFilePath,
+  ensureConfigScope,
+  ensureTransport,
+  expandEnvVarsInString,
+  getAllMcpConfigs,
+  getMcpConfigByName,
+  getMcpConfigsByScope,
+  getScopeLabel,
+  parseEnvVars,
+  parseHeaders,
+  removeMcpConfig,
+  type McpCliScope,
+} from './mcpConfigWrite'
