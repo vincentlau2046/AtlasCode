@@ -29,6 +29,19 @@
  *   - bg/up/rollback/ant/templateJobs（旧仓 de-ANT no-op 存根，不迁——
  *     H6 防空洞：存根不迁不伪装能力）
  *
- * 状态: S-C1 骨架占位（零行为零测试；TUI 默认启动支归壳波 #152，非本域）。
+ * 状态: S-C2 落盘（parse 面 + 分派面 + dev 面 + entryInit/exit 随迁；
+ * TUI 默认启动支归壳波 #152，非本域）。
  */
-export {}
+export { cliError, cliOk } from './exit'
+export {
+  enforceNoDebugGuard,
+  eagerLoadSettings,
+  eagerParseCliFlag,
+  generateTempFilePath,
+  initializeEntrypoint,
+  parseSettingSourcesFlag,
+  safeParseJSON,
+} from './entryInit'
+export { buildProgram, registerInDomainSubcommands, runCli } from './parse'
+export { getInputPrompt, main } from './dispatch'
+export { hasDevFlag, runDevCli } from './dev'

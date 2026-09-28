@@ -57,6 +57,10 @@ const ELEMENTS = [
   // 2 源发现 + 连接生命周期 manager（stdio live / 非 stdio 前向接缝登记）+
   // 3 供应商 LRU 20；LSP 域先例同构，engine 侧反向接线 DEP-4 allow 面）
   { type: "mcp", pattern: "src/mcp", mode: "folder" },
+  // §8.71 CLI 公共域波 S-C1：cli 新顶层公共域（跨壳公共层，用户裁定 2026-09-28：
+  // CLI 不属于任何壳；壳（atlascode/ + 未来 atlasoffice/）降消费方；不塞
+  // shared（叶子域纪律：CLI 面需消费 engine 根门面））
+  { type: "cli", pattern: "src/cli", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
 ];
 
@@ -188,6 +192,18 @@ export default tseslint.config(
               from: "mcp",
               allow: ["shared", "bootstrap"],
             },
+            // cli (§8.71 S-C1/S-C2): CLI 公共域 — 跨壳公共层（L3 公共域）：
+            // shared(feature/env 单一事实源) + bootstrap(CLI 入口状态族) +
+            // engine/permissions/remote/mcp/hooks（根门面消费，swarm/mcp/remote
+            // 同型先例）；不依赖 atlascode/ascend/atlasoffice（公共层不反向
+            // 依赖壳）。S-C3/S-C4 handler 波 allow 面如需扩展随该切片头注登记。
+            {
+              from: "cli",
+              allow: [
+                "shared", "bootstrap", "engine", "permissions",
+                "remote", "mcp", "hooks",
+              ],
+            },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
             {
@@ -195,7 +211,7 @@ export default tseslint.config(
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks", "engine", "swarm",
-                "lsp", "mcp",
+                "lsp", "mcp", "cli",
               ],
             },
             // DEP-5 白名单: mount 是唯一可 import ascend 的元素（挂载边）
