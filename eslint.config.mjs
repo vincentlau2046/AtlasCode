@@ -1,8 +1,8 @@
 /**
  * AtlasCode 边界 lint 配置（A 波, charter L8 规则映射；v0.12 八域扩展 + tests 门面收口）
  *
- * 13 element types（L3 v0.12 十二顶层目录 + C 桶 ③ shell·swarm 波 swarm 域, §8.66 R1）
- * + 1 特例（mount 挂载边, DEP-5 白名单）。
+ * 14 element types（L3 v0.12 十二顶层目录 + C 桶 ③ shell·swarm 波 swarm 域 §8.66 R1
+ * + §8.67 D 波 S-E2c lsp 域）+ 1 特例（mount 挂载边, DEP-5 白名单）。
  * 规则映射：
  *   DEP-1 单向无环     → element-types: shared 禁一切内部依赖
  *   DEP-2 八域零向上   → element-types: 八域 allow=[shared] only
@@ -42,6 +42,9 @@ const ELEMENTS = [
   { type: "ascend", pattern: "src/ascend", mode: "folder" },
   // C 桶 ③ shell·swarm 波（§8.66 R1）：swarm 新顶层域（旧仓 swarm 树 7217L 可插拔域包）
   { type: "swarm", pattern: "src/swarm", mode: "folder" },
+  // §8.67 D 波 S-E2c：lsp 新顶层域（旧仓 services/lsp 9 文件 2464L client 域
+  // + 配置注入窗 + manager 单例；engine/tools/lsp LSPTool 本体消费其门面）
+  { type: "lsp", pattern: "src/lsp", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
 ];
 
@@ -108,7 +111,7 @@ export default tseslint.config(
               disallow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks",
-                "engine", "ascend", "swarm", "atlascode", "mount",
+                "engine", "ascend", "swarm", "lsp", "atlascode", "mount",
               ],
             },
             // DEP-2/3: 八域零向上 — 只依赖 shared（不 import engine/ascend/atlascode/彼此）
@@ -122,7 +125,7 @@ export default tseslint.config(
             // v0.12: 四域→八域（engine 波接线 hooks-runner/permissions-engine/task 消费）
             {
               from: "engine",
-              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks"],
+              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks", "lsp"],
             },
             // ascend (域包): DIP — 依赖 shared + engine(port 接口) + executor(NpuToolchain 接口)
             {
@@ -145,6 +148,14 @@ export default tseslint.config(
                 "task", "engine", "memory",
               ],
             },
+            // lsp (§8.67 D 波 S-E2c): LSP client 域 — shared(日志/错误/类型
+            // 单一事实源) + bootstrap(cwd 状态, server 工作根面); 不依赖
+            // engine/ascend/atlascode/swarm（engine 侧反向接线:
+            // engine/tools/lsp LSPTool 本体 → lsp 域门面, DEP-4 allow 面）。
+            {
+              from: "lsp",
+              allow: ["shared", "bootstrap"],
+            },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
             {
@@ -152,6 +163,7 @@ export default tseslint.config(
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks", "engine", "swarm",
+                "lsp",
               ],
             },
             // DEP-5 白名单: mount 是唯一可 import ascend 的元素（挂载边）
@@ -161,7 +173,7 @@ export default tseslint.config(
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks",
-                "engine", "ascend",
+                "engine", "ascend", "lsp",
               ],
             },
           ],

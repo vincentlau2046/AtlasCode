@@ -79,11 +79,17 @@
  *         remote 波 task #142〔R3 零迁移登记〕）⑪ WORKFLOW_SCRIPTS（Workflow [B]，stub）
  *       ⑫ ATLAS_VERIFY_PLAN（VerifyPlanExecution [C]，仅 constants.ts 2L）
  *       （⑤ OVERFLOW_TEST_TOOL [B] 已列「关闭 3」，不在此列）
- *     **残留守 2**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
+ *     **残留守 1**（各槽本体未落，门随本体纵切落；归属波标注。§8.53 S-T3 原始裁定
  *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize / ⑲ §8.63 materialize
- *       后余 12，8 槽移「§8.64 登记零本体」后余 4，⑨⑮ §8.66 S-E2d materialize 后余 2）：
+ *       后余 12，8 槽移「§8.64 登记零本体」后余 4，⑨⑮ §8.66 S-E2d materialize 后余 2，
+ *       ⑬ §8.67 D 波 S-E2c materialize 后余 1）：
  *       ③ AGENT_TRIGGERS_REMOTE（RemoteTrigger → remote 波，D 波后）
- *       ⑬ ENABLE_LSP_TOOL（LSP → D 波重分类，LSP 域）
+ *       ⑬ ENABLE_LSP_TOOL（§8.67 D 波 S-E2c materialize：LSP 本体落 engine/tools/lsp/
+ *         + LSP 域 src/lsp/（client 域 2464L + 配置注入窗 + manager 单例），
+ *         旧门 feature('ENABLE_LSP_TOOL') 裁 → isEnabled = isLspConnected() 自门控
+ *         （断连态 = false，⑨ HISTORY_SNIP 门裁先例同型 = 门裁登记非新增门），
+ *         LSP server 真配置源 = 插件域 LSP 集成波经 setLspServerSource 注入窗
+ *         注册（前向接缝），组合根 baseTools 注入位 = S-E2d 回填）
  *   - 新仓无 lodash（memory/paths、sandbox 同例本地实现）→ 去重为本地 uniqByName。
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'

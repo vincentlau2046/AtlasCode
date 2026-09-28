@@ -104,6 +104,9 @@ export {
   TASK_STOP_TOOL_NAME,
   SHELL_TOOL_NAMES,
   LEGACY_TOOL_NAME_ALIASES,
+  // §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：LSP_TOOL_NAME seed
+  //（与 tools 根门面同口径，LSP 族 ⑬ 槽 materialize）
+  LSP_TOOL_NAME,
 } from './tools'
 export type {
   McpToolResult,
@@ -163,6 +166,15 @@ export {
   setTeamServices,
   createDefaultTeamContextStore,
   setTeamFileLoader,
+} from './tools'
+export {
+  // §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：LSPTool 本体（9 操作
+  // 代码智能面；LSP 域 src/lsp/ 门面 = client 域 + 配置注入窗 + manager
+  // 单例，LSP server 真配置源经 setLspServerSource 注入窗由插件域 LSP
+  // 集成波注册 = 前向接缝，ENABLE_LSP_TOOL 门裁 → isEnabled =
+  // isLspConnected() 自门控，组合根 baseTools 注册位 = S-E2d 回填，见
+  // lsp/ 子门面头注）
+  LSPTool,
 } from './tools'
 export {
   isCoordinatorMode,

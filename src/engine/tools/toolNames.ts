@@ -66,6 +66,8 @@ export const LIST_MCP_RESOURCES_TOOL_NAME = 'ListMcpResourcesTool'
 // READ_MCP_RESOURCE_TOOL_NAME 旧仓 def 内联字面量（L60 name: 'ReadMcpResourceTool'）
 // → 常量收敛（house 单一事实源面）
 export const READ_MCP_RESOURCE_TOOL_NAME = 'ReadMcpResourceTool'
+// ── §8.67 D 波 S-E2c 补（LSP seed；值逐一验真旧仓 prompt.ts L1 逐字 'LSP'）──
+export const LSP_TOOL_NAME = 'LSP'
 
 /** Shell 工具名（旧仓 SHELL_TOOL_NAMES 逐字）。 */
 export const SHELL_TOOL_NAMES: string[] = [BASH_TOOL_NAME, POWERSHELL_TOOL_NAME]

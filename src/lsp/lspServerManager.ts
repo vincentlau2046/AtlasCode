@@ -1,0 +1,427 @@
+/**
+ * lsp 域 — LSP server 多实例路由管理器（§8.67 D 波 S-E2c；旧仓
+ * services/lsp/LSPServerManager.ts 420L 逐字转写）。
+ *
+ * 多 server 实例生命周期 + 按文件扩展名路由 + didOpen/didChange/didSave/
+ * didClose 同步面 + workspace/configuration 反向请求兜底。
+ *
+ * delta 登记（H6 逐条，复审勿当遗漏重提）：
+ *  ① 旧 getAllLspServers（config.ts 插件域唯一源）→ 配置注入窗
+ *    （lspConfig.ts；插件域 LSP 集成 = 插件域前向接缝，未注册 = 空配置
+ *    = LSP 断连态，活面非空心）。
+ *  ② 旧 utils 三件套 → shared 门面 + bootstrap getCwd 不经本文件（
+ *    workspace 面全在 instance 层）。
+ */
+
+import * as path from 'path'
+import { pathToFileURL } from 'url'
+
+import { errorMessage, logError, logForDebugging } from '../shared'
+import { getAllLspServers } from './lspConfig'
+import {
+  createLSPServerInstance,
+  type LSPServerInstance,
+} from './lspServerInstance'
+import type { ScopedLspServerConfig } from './types'
+
+/**
+ * LSP Server Manager interface returned by createLSPServerManager.
+ * Manages multiple LSP server instances and routes requests based on file extensions.
+ */
+export type LSPServerManager = {
+  /** Initialize the manager by loading all configured LSP servers */
+  initialize(): Promise<void>
+  /** Shutdown all running servers and clear state */
+  shutdown(): Promise<void>
+  /** Get the LSP server instance for a given file path */
+  getServerForFile(filePath: string): LSPServerInstance | undefined
+  /** Ensure the appropriate LSP server is started for the given file */
+  ensureServerStarted(filePath: string): Promise<LSPServerInstance | undefined>
+  /** Send a request to the appropriate LSP server for the given file */
+  sendRequest<T>(
+    filePath: string,
+    method: string,
+    params: unknown,
+  ): Promise<T | undefined>
+  /** Get all running server instances */
+  getAllServers(): Map<string, LSPServerInstance>
+  /** Synchronize file open to LSP server (sends didOpen notification) */
+  openFile(filePath: string, content: string): Promise<void>
+  /** Synchronize file change to LSP server (sends didChange notification) */
+  changeFile(filePath: string, content: string): Promise<void>
+  /** Synchronize file save to LSP server (sends didSave notification) */
+  saveFile(filePath: string): Promise<void>
+  /** Synchronize file close to LSP server (sends didClose notification) */
+  closeFile(filePath: string): Promise<void>
+  /** Check if a file is already open on a compatible LSP server */
+  isFileOpen(filePath: string): boolean
+}
+
+/**
+ * Creates an LSP server manager instance.
+ *
+ * Manages multiple LSP server instances and routes requests based on file extensions.
+ * Uses factory function pattern with closures for state encapsulation (avoiding classes).
+ *
+ * @returns LSP server manager instance
+ */
+export function createLSPServerManager(): LSPServerManager {
+  // Private state managed via closures
+  const servers: Map<string, LSPServerInstance> = new Map()
+  const extensionMap: Map<string, string[]> = new Map()
+  // Track which files have been opened on which servers (URI -> server name)
+  const openedFiles: Map<string, string> = new Map()
+
+  /**
+   * Initialize the manager by loading all configured LSP servers.
+   *
+   * @throws {Error} If configuration loading fails
+   */
+  async function initialize(): Promise<void> {
+    let serverConfigs: Record<string, ScopedLspServerConfig>
+
+    try {
+      const result = await getAllLspServers()
+      serverConfigs = result.servers
+      logForDebugging(
+        `[LSP SERVER MANAGER] getAllLspServers returned ${Object.keys(serverConfigs).length} server(s)`,
+      )
+    } catch (error) {
+      const err = error as Error
+      logError(
+        new Error(`Failed to load LSP server configuration: ${err.message}`),
+      )
+      throw error
+    }
+
+    // Build extension → server mapping
+    for (const [serverName, config] of Object.entries(serverConfigs)) {
+      try {
+        // Validate config before using it
+        if (!config.command) {
+          throw new Error(
+            `Server ${serverName} missing required 'command' field`,
+          )
+        }
+        if (
+          !config.extensionToLanguage ||
+          Object.keys(config.extensionToLanguage).length === 0
+        ) {
+          throw new Error(
+            `Server ${serverName} missing required 'extensionToLanguage' field`,
+          )
+        }
+
+        // Map file extensions to this server (derive from extensionToLanguage)
+        const fileExtensions = Object.keys(config.extensionToLanguage)
+        for (const ext of fileExtensions) {
+          const normalized = ext.toLowerCase()
+          if (!extensionMap.has(normalized)) {
+            extensionMap.set(normalized, [])
+          }
+          const serverList = extensionMap.get(normalized)
+          if (serverList) {
+            serverList.push(serverName)
+          }
+        }
+
+        // Create server instance
+        const instance = createLSPServerInstance(serverName, config)
+        servers.set(serverName, instance)
+
+        // Register handler for workspace/configuration requests from the server
+        // Some servers (like TypeScript) send these even when we say we don't support them
+        instance.onRequest(
+          'workspace/configuration',
+          (params: { items: Array<{ section?: string }> }) => {
+            logForDebugging(
+              `LSP: Received workspace/configuration request from ${serverName}`,
+            )
+            // Return empty/null config for each requested item
+            // This satisfies the protocol without providing actual configuration
+            return params.items.map(() => null)
+          },
+        )
+      } catch (error) {
+        const err = error as Error
+        logError(
+          new Error(
+            `Failed to initialize LSP server ${serverName}: ${err.message}`,
+          ),
+        )
+        // Continue with other servers - don't fail entire initialization
+      }
+    }
+
+    logForDebugging(`LSP manager initialized with ${servers.size} servers`)
+  }
+
+  /**
+   * Shutdown all running servers and clear state.
+   * Only servers in 'running' state are explicitly stopped;
+   * servers in other states are cleared without shutdown.
+   *
+   * @throws {Error} If one or more servers fail to stop
+   */
+  async function shutdown(): Promise<void> {
+    const toStop = Array.from(servers.entries()).filter(
+      ([, s]) => s.state === 'running' || s.state === 'error',
+    )
+
+    const results = await Promise.allSettled(
+      toStop.map(([, server]) => server.stop()),
+    )
+
+    servers.clear()
+    extensionMap.clear()
+    openedFiles.clear()
+
+    const errors = results
+      .map((r, i) =>
+        r.status === 'rejected'
+          ? `${toStop[i]![0]}: ${errorMessage(r.reason)}`
+          : null,
+      )
+      .filter((e): e is string => e !== null)
+
+    if (errors.length > 0) {
+      const err = new Error(
+        `Failed to stop ${errors.length} LSP server(s): ${errors.join('; ')}`,
+      )
+      logError(err)
+      throw err
+    }
+  }
+
+  /**
+   * Get the LSP server instance for a given file path.
+   * If multiple servers handle the same extension, returns the first registered server.
+   * Returns undefined if no server handles this file type.
+   */
+  function getServerForFile(filePath: string): LSPServerInstance | undefined {
+    const ext = path.extname(filePath).toLowerCase()
+    const serverNames = extensionMap.get(ext)
+
+    if (!serverNames || serverNames.length === 0) {
+      return undefined
+    }
+
+    // Use first server (can add priority later)
+    const serverName = serverNames[0]
+    if (!serverName) {
+      return undefined
+    }
+
+    return servers.get(serverName)
+  }
+
+  /**
+   * Ensure the appropriate LSP server is started for the given file.
+   * Returns undefined if no server handles this file type.
+   *
+   * @throws {Error} If server fails to start
+   */
+  async function ensureServerStarted(
+    filePath: string,
+  ): Promise<LSPServerInstance | undefined> {
+    const server = getServerForFile(filePath)
+    if (!server) return undefined
+
+    if (server.state === 'stopped' || server.state === 'error') {
+      try {
+        await server.start()
+      } catch (error) {
+        const err = error as Error
+        logError(
+          new Error(
+            `Failed to start LSP server for file ${filePath}: ${err.message}`,
+          ),
+        )
+        throw error
+      }
+    }
+
+    return server
+  }
+
+  /**
+   * Send a request to the appropriate LSP server for the given file.
+   * Returns undefined if no server handles this file type.
+   *
+   * @throws {Error} If server fails to start or request fails
+   */
+  async function sendRequest<T>(
+    filePath: string,
+    method: string,
+    params: unknown,
+  ): Promise<T | undefined> {
+    const server = await ensureServerStarted(filePath)
+    if (!server) return undefined
+
+    try {
+      return await server.sendRequest<T>(method, params)
+    } catch (error) {
+      const err = error as Error
+      logError(
+        new Error(
+          `LSP request failed for file ${filePath}, method '${method}': ${err.message}`,
+        ),
+      )
+      throw error
+    }
+  }
+
+  // Return public interface
+  function getAllServers(): Map<string, LSPServerInstance> {
+    return servers
+  }
+
+  async function openFile(filePath: string, content: string): Promise<void> {
+    const server = await ensureServerStarted(filePath)
+    if (!server) return
+
+    const fileUri = pathToFileURL(path.resolve(filePath)).href
+
+    // Skip if already opened on this server
+    if (openedFiles.get(fileUri) === server.name) {
+      logForDebugging(`LSP: File already open, skipping didOpen for ${filePath}`)
+      return
+    }
+
+    // Get language ID from server's extensionToLanguage mapping
+    const ext = path.extname(filePath).toLowerCase()
+    const languageId = server.config.extensionToLanguage[ext] || 'plaintext'
+
+    try {
+      await server.sendNotification('textDocument/didOpen', {
+        textDocument: {
+          uri: fileUri,
+          languageId,
+          version: 1,
+          text: content,
+        },
+      })
+      // Track that this file is now open on this server
+      openedFiles.set(fileUri, server.name)
+      logForDebugging(
+        `LSP: Sent didOpen for ${filePath} (languageId: ${languageId})`,
+      )
+    } catch (error) {
+      const err = new Error(
+        `Failed to sync file open ${filePath}: ${errorMessage(error)}`,
+      )
+      logError(err)
+      // Re-throw to propagate error to caller
+      throw err
+    }
+  }
+
+  async function changeFile(filePath: string, content: string): Promise<void> {
+    const server = getServerForFile(filePath)
+    if (!server || server.state !== 'running') {
+      return openFile(filePath, content)
+    }
+
+    const fileUri = pathToFileURL(path.resolve(filePath)).href
+
+    // If file hasn't been opened on this server yet, open it first
+    // LSP servers require didOpen before didChange
+    if (openedFiles.get(fileUri) !== server.name) {
+      return openFile(filePath, content)
+    }
+
+    try {
+      await server.sendNotification('textDocument/didChange', {
+        textDocument: {
+          uri: fileUri,
+          version: 1,
+        },
+        contentChanges: [{ text: content }],
+      })
+      logForDebugging(`LSP: Sent didChange for ${filePath}`)
+    } catch (error) {
+      const err = new Error(
+        `Failed to sync file change ${filePath}: ${errorMessage(error)}`,
+      )
+      logError(err)
+      // Re-throw to propagate error to caller
+      throw err
+    }
+  }
+
+  /**
+   * Save a file in LSP servers (sends didSave notification)
+   * Called after file is written to disk to trigger diagnostics
+   */
+  async function saveFile(filePath: string): Promise<void> {
+    const server = getServerForFile(filePath)
+    if (!server || server.state !== 'running') return
+
+    try {
+      await server.sendNotification('textDocument/didSave', {
+        textDocument: {
+          uri: pathToFileURL(path.resolve(filePath)).href,
+        },
+      })
+      logForDebugging(`LSP: Sent didSave for ${filePath}`)
+    } catch (error) {
+      const err = new Error(
+        `Failed to sync file save ${filePath}: ${errorMessage(error)}`,
+      )
+      logError(err)
+      // Re-throw to propagate error to caller
+      throw err
+    }
+  }
+
+  /**
+   * Close a file in LSP servers (sends didClose notification)
+   *
+   * NOTE: Currently available but not yet integrated with compact flow.
+   * TODO: Integrate with compact - call closeFile() when compact removes files from context
+   * This will notify LSP servers that files are no longer in active use.
+   */
+  async function closeFile(filePath: string): Promise<void> {
+    const server = getServerForFile(filePath)
+    if (!server || server.state !== 'running') return
+
+    const fileUri = pathToFileURL(path.resolve(filePath)).href
+
+    try {
+      await server.sendNotification('textDocument/didClose', {
+        textDocument: {
+          uri: fileUri,
+        },
+      })
+      // Remove from tracking so file can be reopened later
+      openedFiles.delete(fileUri)
+      logForDebugging(`LSP: Sent didClose for ${filePath}`)
+    } catch (error) {
+      const err = new Error(
+        `Failed to sync file close ${filePath}: ${errorMessage(error)}`,
+      )
+      logError(err)
+      // Re-throw to propagate error to caller
+      throw err
+    }
+  }
+
+  function isFileOpen(filePath: string): boolean {
+    const fileUri = pathToFileURL(path.resolve(filePath)).href
+    return openedFiles.has(fileUri)
+  }
+
+  return {
+    initialize,
+    shutdown,
+    getServerForFile,
+    ensureServerStarted,
+    sendRequest,
+    getAllServers,
+    openFile,
+    changeFile,
+    saveFile,
+    closeFile,
+    isFileOpen,
+  }
+}

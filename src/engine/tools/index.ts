@@ -166,6 +166,23 @@
  *   re-export（skill/ 子门面）；残留守「49 本体」登记再缩 1 → 30/49
  *   （skill 族无专属门控槽 = 无条件注册面，同 web/config 族；组合根
  *   baseTools 注册位 = S-E2d 回填）。
+ * §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波，§8.61 重分类 D 波落点）
+ *   已落 LSP 域 src/lsp/（client 域 9 文件 2464L 落面 + 本地 JSON-RPC
+ *   stdio 客户端〔旧 vscode-jsonrpc 3-dep 违规面本地转写〕+ 本地 LRU
+ *   〔旧 lru-cache 同面〕+ 配置注入窗 setLspServerSource〔插件域 LSP
+ *   集成波注册真源，前向接缝〕+ manager 单例 4 态初始化）+ lsp/ 子域
+ *   LSPTool 本体（1 对象 + JSON schema 1 常量 LSP_TOOL_INPUT_SCHEMA +
+ *   prompt 面 LSP_DESCRIPTION + 9 操作 formatResult 格式化族 +
+ *   符号提取面 getSymbolAtPosition + 本地 git-check-ignore 过滤
+ *   〔旧 execa execFileNoThrowWithCwd 本地转写〕；旧仓 LSPTool.ts
+ *   860L + UI.tsx 字符串面 + prompt.ts 裁剪随迁，裁面登记：ENABLE_LSP_TOOL
+ *   门裁 → isEnabled = isLspConnected() 自门控〔⑨ HISTORY_SNIP 门裁
+ *   先例同型〕/ prompt() 成员裁 / call 5→2 参 / React JSX 面 → TUI 波 /
+ *   LSP server 真配置源 = 插件域 LSP 集成波 setLspServerSource 注入窗，
+ *   见各文件头注 delta 登记）→ 在此 re-export（lsp/ 子门面）；
+ *   残留守「49 本体」登记再缩 1 → 31/49（LSP 族专属门控槽 ⑬
+ *   ENABLE_LSP_TOOL materialize = 自门控 isEnabled = isLspConnected，
+ *   注册表残留守 2→1；组合根 baseTools 注册位 = S-E2d 回填）。
  */
 export {
   createMcpTools,
@@ -231,6 +248,8 @@ export {
   // S-E3 B 路 F2：§8.63 2 seed 补入根门面（与 TOOL_SEARCH_TOOL_NAME 同块一致）
   LIST_MCP_RESOURCES_TOOL_NAME,
   READ_MCP_RESOURCE_TOOL_NAME,
+  // §8.67 D 波 S-E2c：LSP_TOOL_NAME seed 补入根门面（LSP 族 ⑬ 槽）
+  LSP_TOOL_NAME,
   SHELL_TOOL_NAMES,
 } from './toolNames'
 export { LEGACY_TOOL_NAME_ALIASES } from './legacyToolNameAliases'
@@ -965,3 +984,29 @@ export {
   type SkillToolCheckContext,
   type SkillToolContextModifierCtx,
 } from './skill'
+
+// ── §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：lsp 子域（LSPTool
+// 本体 + JSON schema + prompt 面 + 9 操作格式化族 + 符号提取面；名字
+// 常量 LSP_TOOL_NAME 由 toolNames 块 seed 不重出；LSP 域 src/lsp/
+// 门面 = client 域 + 配置注入窗 + manager 单例，LSP server 真配置源
+// 经 setLspServerSource 注入窗由插件域 LSP 集成波注册 = 前向接缝，
+// ENABLE_LSP_TOOL 门裁 → isEnabled = isLspConnected() 自门控，见
+// lsp/ 子门面头注）──
+export {
+  LSPTool,
+  LSP_TOOL_INPUT_SCHEMA,
+  type LSPToolOutput,
+  lspToolInputSchema,
+  type LSPToolInput,
+  isValidLSPOperation,
+  LSP_DESCRIPTION,
+  formatDocumentSymbolResult,
+  formatFindReferencesResult,
+  formatGoToDefinitionResult,
+  formatHoverResult,
+  formatIncomingCallsResult,
+  formatOutgoingCallsResult,
+  formatPrepareCallHierarchyResult,
+  formatWorkspaceSymbolResult,
+  getSymbolAtPosition,
+} from './lsp'
