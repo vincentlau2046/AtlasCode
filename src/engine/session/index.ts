@@ -119,6 +119,10 @@ export {
   COMMAND_NAME_TAG,
   getFirstMeaningfulUserMessageTextContent,
   extractFirstPrompt,
+  // S-C4（§8.71.1.4）：内建命令名集合注入窗（CLI 波注入口回填；cli 域
+  // cli/commands.ts registerBuiltinCommandNames 经引擎根门面消费）
+  setBuiltinCommandNamesSource,
+  resetBuiltinCommandNamesSourceForTesting,
 } from './firstPrompt'
 
 // 读面核心

@@ -10,10 +10,14 @@
  *
  * 适配登记（H6 前向接缝，复审勿当遗漏重提）：
  *   - builtInCommandNames：旧仓 = 内建命令注册表动态集合（`/model`、
- *    `/compact` 等）→ 新仓本域无内建命令注册表（命令面归 CLI 波），收敛为
- *    **空 Set**——行为 delta：任何 `<command-name>` 提取不再走「内建跳过」
- *    支，落入 custom 支（仅当有 command-args 才保留）。CLI 波补内建命令
- *    注册表时替换注入点（本文件头注登记）。
+ *    `/compact` 等）→ 新仓本域无内建命令注册表（命令面归 CLI 波），缺省
+ *    收敛为**空 Set**——未注入时行为 delta：任何 `<command-name>` 提取
+ *    不再走「内建跳过」支，落入 custom 支（仅当有 command-args 才保留）。
+ *    **S-C4 回填（§8.71.1.4 firstPrompt builtInCommandNames 注入口回填）**：
+ *    注入窗 setBuiltinCommandNamesSource 落盘——CLI 域 cli/commands.ts
+ *    registerBuiltinCommandNames() 注入 engine/skill 域 builtInCommandNames
+ *    读面（engine/skill BUILT_IN_COMMANDS 占位空集，TUI 波 #152 回填后
+ *    集合自动生效，本注入面无需再动）。
  *   - 旧文 `msg.message.content` 强类型数组 → 域 Message.message.content
  *    为 unknown，块迭代经 `ContentBlock[]` 收敛 cast（语义逐字不变）。
  */
@@ -89,12 +93,29 @@ function extractTag(html: string, tagName: string): string | null {
   return null
 }
 
+// ── 内建命令名集合注入窗（S-C4 CLI 波注入口回填，头注登记）────────────
+type BuiltinCommandNamesSource = () => Set<string>
+let builtinCommandNamesSource: BuiltinCommandNamesSource = () => new Set()
+
 /**
- * 内建命令名集合（适配登记：新仓无内建命令注册表 → 空 Set；CLI 波注入点
- * 见头注）。
+ * 内建命令名集合注入窗（S-C4 注入口回填，§8.71.1.4）：CLI 域
+ * cli/commands.ts registerBuiltinCommandNames() 注入 engine/skill 域
+ * builtInCommandNames 读面（调用一次即持久；缺省空 Set = 未注入态行为）。
  */
+export function setBuiltinCommandNamesSource(
+  src: BuiltinCommandNamesSource,
+): void {
+  builtinCommandNamesSource = src
+}
+
+/** 测试复位面（缺省空 Set 态）。 */
+export function resetBuiltinCommandNamesSourceForTesting(): void {
+  builtinCommandNamesSource = () => new Set()
+}
+
+/** 内建命令名集合（注入窗读；缺省空 Set，头注适配登记）。 */
 function builtInCommandNames(): Set<string> {
-  return new Set()
+  return builtinCommandNamesSource()
 }
 
 function extractFirstPrompt(transcript: TranscriptMessage[]): string {

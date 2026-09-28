@@ -216,6 +216,25 @@ export {
   getBundledSkills,
 } from './skill'
 export {
+  // CLI 公共域 S-C4（§8.71.1.4）：命令模型面读面消费（旧仓 commands.ts 705L
+  // 模型面 → engine/skill 域落面，本块 = cli 跨域消费显式名）：
+  //   - builtInCommandNames（cli/commands.ts registerBuiltinCommandNames
+  //     注入 session 域 firstPrompt 注入窗的读源；BUILT_IN_COMMANDS 占位
+  //     空集，TUI 波回填后自动生效）
+  //   - getCommands（cli/setup.ts 启动预取面，旧仓 setup getCommands 预取
+  //     随迁）
+  //   - getSkillToolCommands / getSlashCommandToolSkills / getMcpSkillCommands
+  //     （skill 命令索引三族，⑥「skill 索引调用方 = TUI/CLI 波穿线消费」
+  //     核销：cli/commands.ts getSkillCommandIndex 聚合消费）
+  //   - clearCommandsCache（plugin 热更 / 测试复位面）
+  builtInCommandNames,
+  getCommands,
+  getSkillToolCommands,
+  getSlashCommandToolSkills,
+  getMcpSkillCommands,
+  clearCommandsCache,
+} from './skill'
+export {
   // CLI 公共域 S-C3（§8.71.1.4）：SDK structuredIO sendRequest abort 语义
   // 错误型消费面（旧仓 utils/errors.ts AbortError 经 tools 子门面随迁，
   // cli 跨域经引擎根门面消费；STR-1 根门面显式名）
@@ -552,6 +571,10 @@ export {
   COMMAND_NAME_TAG,
   getFirstMeaningfulUserMessageTextContent,
   extractFirstPrompt,
+  // S-C4（§8.71.1.4）：内建命令名集合注入窗（CLI 波注入口回填；cli 域
+  // cli/commands.ts registerBuiltinCommandNames 消费）
+  setBuiltinCommandNamesSource,
+  resetBuiltinCommandNamesSourceForTesting,
   removeExtraFields,
   buildConversationChain,
   loadTranscriptFromFile,
