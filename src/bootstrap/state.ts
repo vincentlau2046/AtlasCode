@@ -26,7 +26,8 @@
  * 砍除残余（归 engine/modelprovider 波，复审勿当遗漏重提）：turn 级累加器
  * （_turnHook/_turnTool/_turnClassifier，REPL 逐 query turn 重置）/
  * mainLoopModelOverride + getInitialMainLoopModel（modelprovider 域）/
- * remoteMode / sessionPersistence / spSectionCache 等 engine 面状态。
+ * remoteMode / spSectionCache 等 engine 面状态（sessionPersistence 经
+ * §8.71.1.4 S-C4 重裁归 CLI 波，落 ⑥ 族，见下）。
  */
 import { existsSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -116,7 +117,9 @@ export function setIsInteractive(v: boolean): void {
 }
 
 // ── ⑥ CLI 入口状态族（CLI 公共域波 §8.71 S-C2；旧仓 bootstrap/state.js 同族）──
-// 消费方：cli 域 dispatch（clientType/preview 格式/session 来源/旁路权限标记）。
+// 消费方：cli 域 dispatch（clientType/preview 格式/session 来源/旁路权限
+// 标记）+ S-C4 会话持久化 kill-switch（parse --no-session-persistence 支
+// setter / engine/session project.ts shouldSkipPersistence getter）。
 let _clientType: string | undefined
 let _questionPreviewFormat: 'markdown' | 'html' | undefined
 let _sessionSource: string | undefined
@@ -154,6 +157,21 @@ export function getSessionBypassPermissionsMode(): boolean {
   return _sessionBypassPermissionsMode
 }
 
+// 会话持久化 kill-switch（S-C4 回填；旧仓 bootstrap/state.ts set/get 2 函数
+// 逐字语义：旧仓 main.tsx --no-session-persistence 支 setter，sessionStorage
+// shouldSkipPersistence 支 getter）。setter 消费方 = cli/parse.ts
+// --no-session-persistence 支（--print 面）；getter 消费方 =
+// engine/session/project.ts shouldSkipPersistence 回填支。
+let _sessionPersistenceDisabled = false
+
+export function isSessionPersistenceDisabled(): boolean {
+  return _sessionPersistenceDisabled
+}
+
+export function setSessionPersistenceDisabled(v: boolean): void {
+  _sessionPersistenceDisabled = v
+}
+
 // settings flag 持有面（--settings 路径 / --setting-sources 白名单）。
 // 本地型定义（L3：bootstrap 不 import engine 的 SettingSource 型；结构同型
 // 'user'|'project'|'local'，engine 侧消费经组合根适配器，前向接缝登记）。
@@ -182,12 +200,13 @@ export function getAllowedSettingSources():
   return _allowedSettingSources
 }
 
-/** 测试复位（⑥ 族 6 成员恢复缺省；单进程连跑泄漏守卫先例同型）。 */
+/** 测试复位（⑥ 族 7 成员恢复缺省；单进程连跑泄漏守卫先例同型）。 */
 export function resetCliEntryStateForTests(): void {
   _clientType = undefined
   _questionPreviewFormat = undefined
   _sessionSource = undefined
   _sessionBypassPermissionsMode = false
+  _sessionPersistenceDisabled = false
   _flagSettingsPath = undefined
   _allowedSettingSources = undefined
 }

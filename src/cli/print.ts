@@ -59,8 +59,13 @@
  *     扩门签名后回填（前向接缝登记）。
  *   - 会话域：setSessionEnv 未注入 = 域缺省（sessionId 随机 / cwd 活读 /
  *     projectsDir env 缺省）；壳侧活态注入 = 壳波消费接缝。
- *   - --continue 无最新 session 枚举面（transcript 目录扫描）= 壳波 /
- *     session 域前向接缝（本支 log + 全新会话，非假绿）。
+ *   - --continue 最新 session 枚举面 = S-C4 已回填（cli/sessionList.ts
+ *     findLatestSessionId 目录 mtime 枚举；无会话 → 全新会话，旧语义）。
+ *   - cron 消费点 = S-C4 已回填（engine 门面 createCronScheduler，旧仓
+ *     L2515-2544 同形；旧 feature('AGENT_TRIGGERS') 门 + cronGate
+ *     isCronEnabled 检查裁除——新仓裁定无 feature 门，登记不随迁；旧
+ *     session 任务支〔dir 缺省 → session store〕旧仓即 `: any` stub
+ *    〔scheduler 域头注整砍〕，本消费点走 file-backed durable 路径。
  *   - boundaries allow 面扩展登记（S-C3，eslint.config.mjs cli 规则同
  *     登记）：cli → modelprovider（ModelProvider 实例 + modelToRole /
  *     getRoleModel 角色映射 + getProviderContextWindow 压缩阈值面）。
@@ -79,10 +84,13 @@ import {
 import {
   compactConversation,
   createAbortController,
+  createCronScheduler,
   createLoopHooks,
   createMcpTools,
   createPermissionGate,
   drainSdkEvents,
+  getCronJitterConfig,
+  getSchedulerEnv,
   getSettingsWithErrors,
   getTools,
   getSessionEnv,
@@ -96,6 +104,7 @@ import {
   type CompactDeps,
   type CompactionResult,
   type ContentReplacementRecord,
+  type CronScheduler,
   type MCPServerConnection,
   type McpClientEntry,
   type McpResourceContent,
@@ -132,6 +141,7 @@ import {
   type SdkUserMessage,
   type StdoutMessage,
 } from './sdkTypes'
+import { findLatestSessionId } from './sessionList'
 import { installStreamJsonStdoutGuard } from './streamJsonStdoutGuard'
 
 // ── 选项面（dispatch 侧 program.args 映射 = S-C4 回填；本文件定契约）────
@@ -649,12 +659,19 @@ export async function runHeadless(
       compactConversation(msgs, compactDeps),
   }
 
-  const runTurn = (turnMessages: Message[]): Promise<AgentLoopResult> =>
-    queryAgentLoop(deps, {
+  // turnRunning = cron scheduler isLoading 面（旧仓 running 标志同义：回合
+  // 执行期 fire 延迟到下一 tick，队列环顶 recheck 拾起）。
+  let turnRunning = false
+  const runTurn = (turnMessages: Message[]): Promise<AgentLoopResult> => {
+    turnRunning = true
+    return queryAgentLoop(deps, {
       messages: turnMessages,
       tools,
       context: { autoCompact, maxTurns: options.maxTurns },
+    }).finally(() => {
+      turnRunning = false
     })
+  }
 
   const writeMessage = async (message: StdoutMessage): Promise<void> => {
     if (options.outputFormat === 'stream-json' && options.verbose) {
@@ -751,6 +768,30 @@ export async function runHeadless(
     stdinClosed = true
   })()
 
+  // ── cron 消费点（S-C4 §8.71.1.4；旧仓 L2515-2544 同形回填）────────
+  // onFire 语义旧 enqueue+run() 逐字转写：进顺序队列；回合执行期 = 队列
+  // 环顶 recheck 拾起（旧 "post-run recheck" 语义），idle 阻塞 drainPump
+  // 等待期 = idleWake 即时唤醒（旧 run() idle 支语义）。旧 inputClosed
+  // 守卫逐字（host 输入关断后不再入队）。dir = scheduler 域 env
+  // getProjectRoot（缺省 .git 上探，组合根可注）→ file-backed durable
+  // 路径 <project>/.atlas/scheduled_tasks.json（真契约面；裁登记见头注）。
+  let idleWake: (() => void) | null = null
+  const waitIdle = (): Promise<void> =>
+    new Promise(resolve => {
+      idleWake = resolve
+    })
+  const cronScheduler: CronScheduler = createCronScheduler({
+    onFire: prompt => {
+      if (stdinClosed) return
+      queuedUserTurns.push(prompt)
+      idleWake?.()
+    },
+    isLoading: () => turnRunning || stdinClosed,
+    getJitterConfig: () => getCronJitterConfig(),
+    dir: getSchedulerEnv().getProjectRoot(),
+  })
+  cronScheduler.start()
+
   try {
     // ── 执行 + 输出（旧 runHeadlessStreaming 流式环 → 新引擎阻塞环 + 输出面）──
     let loopResult = await runTurn(conversation)
@@ -795,34 +836,42 @@ export async function runHeadless(
       }
     }
 
-    // ── stdin 多回合 drain（pump 顺序队列消费；drain 站点 ③ = 环顶）──
-    while (queuedUserTurns.length > 0) {
-      // drain 站点 ③：回合 drain 环顶 flush（进度先于 task_notification）
-      await drainToOutput()
-      const userText = queuedUserTurns.shift()!
-      conversation.push(makeUserMessage(userText))
-      loopResult = await runTurn(conversation)
-      conversation = loopResult.messages
-      const nextResult = await writeTurnOutputs(loopResult)
-      if (options.outputFormat === 'json' || !options.outputFormat) {
-        process.stdout.write(
-          options.outputFormat === 'json'
-            ? JSON.stringify(nextResult) + '\n'
-            : ((nextResult as SdkResultLike).result ?? '') +
-              (((nextResult as SdkResultLike).result ?? '').endsWith('\n')
-                ? ''
-                : '\n'),
-        )
+    // ── stdin 多回合 drain + cron idle-wake 环（drain 站点 ③ = 环顶）──
+    // 旧 run() "post-run recheck" 语义：回合执行期 / 等待期 fire 的 prompt
+    // 均进顺序队列，环顶按序 drain；idle 等待等「pump 完成（stdin 关断）」
+    // 或「cron fire 唤醒」（idle 期 fire 须即时 drain，旧 run() idle 支
+    // 语义等价）。
+    while (true) {
+      while (queuedUserTurns.length > 0) {
+        // drain 站点 ③：回合 drain 环顶 flush（进度先于 task_notification）
+        await drainToOutput()
+        const userText = queuedUserTurns.shift()!
+        conversation.push(makeUserMessage(userText))
+        loopResult = await runTurn(conversation)
+        conversation = loopResult.messages
+        const nextResult = await writeTurnOutputs(loopResult)
+        if (options.outputFormat === 'json' || !options.outputFormat) {
+          process.stdout.write(
+            options.outputFormat === 'json'
+              ? JSON.stringify(nextResult) + '\n'
+              : ((nextResult as SdkResultLike).result ?? '') +
+                (((nextResult as SdkResultLike).result ?? '').endsWith('\n')
+                  ? ''
+                  : '\n'),
+          )
+        }
       }
+      if (stdinClosed) break
+      await Promise.race([drainPump, waitIdle()])
     }
 
-    // ── stdin 关断等待（pump 完成 = host 输入耗尽）+ drain 站点 ④（idle
-    //    前 flush，idle session_state_changed 事件先于阻塞下回合上流）──
-    if (!stdinClosed) {
-      await drainPump
-    }
+    // ── host 输入耗尽：cron 计时器关断（旧 L3781 inputClosed 支 stop 语义；
+    //    1s timer 不拆会挂进程）+ drain 站点 ④（idle 前 flush，idle
+    //    session_state_changed 事件先于阻塞下回合上流）──
+    cronScheduler.stop()
     await drainToOutput()
   } catch (error) {
+    cronScheduler.stop()
     // 旧仓错误 result 消息逐字面（error_during_execution + is_error +
     // 零值 usage 面；getInMemoryErrors 族裁登记——新仓 errorUtils 域缺席）
     try {
@@ -855,6 +904,7 @@ async function loadResumedMessages(
   // = hooks 波 / 壳波前向接缝（登记不随迁）
   const {
     buildConversationChain,
+    getProjectDir,
     getTranscriptPathForSession,
     loadTranscriptFile,
   } = await import('../engine')
@@ -864,11 +914,19 @@ async function loadResumedMessages(
       ? options.resume
       : getTranscriptPathForSession(options.resume)
   } else {
-    // --continue：最新 session 枚举面 = 壳波 / session 域前向接缝
-    logForDebugging(
-      '[headless] --continue without latest-session enumeration (forward seam); starting fresh',
+    // --continue：最新 session 枚举（S-C4 回填，S-C3 前向接缝核销）：
+    // project 目录 mtime 最新 .jsonl = 最近会话（纯 fs stat，不解析内容）；
+    // 无会话 / 目录缺失 → 全新会话（旧语义：continue 无会话 = fresh）。
+    const latestId = await findLatestSessionId(
+      getProjectDir(getSessionEnv().getOriginalCwd()),
     )
-    return []
+    if (!latestId) {
+      logForDebugging(
+        '[headless] --continue without a prior session; starting fresh',
+      )
+      return []
+    }
+    filePath = getTranscriptPathForSession(latestId)
   }
   const loaded = await loadTranscriptFile(filePath)
   if (loaded.messages.size === 0) {

@@ -43,6 +43,7 @@ import {
   InvalidArgumentError,
   Option,
 } from '@commander-js/extra-typings'
+import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
@@ -99,6 +100,13 @@ async function mainActionSeam(
       'atlascode --init-only: Setup hooks 入口 = S-C4 setup.ts 前向接缝（未落盘）\n',
     )
   } else if (options.print) {
+    // --no-session-persistence（commander --no- 负位选项：present 时
+    // options.sessionPersistence === false，缺省 undefined）→ bootstrap ⑥ 族
+    // 持久化 kill-switch（S-C4；旧仓 main.tsx 调用点同语义，--print 面生效；
+    // 消费点 = engine/session project.ts shouldSkipPersistence 回填支）。
+    if (options.sessionPersistence === false) {
+      setSessionPersistenceDisabled(true)
+    }
     process.stderr.write(
       'atlascode -p/--print: headless 入口 = S-C3 print.ts 前向接缝（未落盘）\n',
     )

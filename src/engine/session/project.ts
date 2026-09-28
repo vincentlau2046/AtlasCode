@@ -38,11 +38,13 @@
  *    旧活态语义。影响面 = 仅逐条消息 gitBranch 同级的 cwd 戳值（会话文件
  *    定位不受影响——project dir 键控 getOriginalCwd，旧 L216/L395 同源，
  *    load.ts 键控点不动）；链完整性零 delta。
- *   - shouldSkipPersistence 裁 2 支：getSettings_DEPRECATED?.
- *    cleanupPeriodDays（config 域面，CLI 波）+ isSessionPersistenceDisabled
- *    （持久化 kill-switch 面，CLI 波）——留 NODE_ENV=test 测试守卫 +
- *    ATLAS_SKIP_PROMPT_HISTORY（tmux 测试会话防污染语义，func 真盘测试
- *    经 TEST_ENABLE_SESSION_PERSISTENCE 覆写）。
+ *   - shouldSkipPersistence 裁 2 支：S-C4（§8.71.1.4）已回填——
+ *    getSettingsWithErrors().settings?.cleanupPeriodDays===0（config 域面，
+ *    经 engine/config 门面；旧仓 getSettings_DEPRECATED 同面更名，passthrough
+ *    字段族）+ bootstrap ⑥ 族 isSessionPersistenceDisabled（持久化
+ *    kill-switch 面，--no-session-persistence 支置位）；支序旧仓逐字。
+ *    留 NODE_ENV=test 测试守卫 + ATLAS_SKIP_PROMPT_HISTORY（tmux 测试会话
+ *    防污染语义，func 真盘测试经 TEST_ENABLE_SESSION_PERSISTENCE 覆写）。
  *   - getBranch（旧 utils/git.ts 缓存族）→ 域内 getGitBranch（paths.ts）。
  *   - VERSION（旧 MACRO 构建 define）→ package.json 读（paths.ts，头注）。
  *   - 旧 bootstrap getPlanSlugCache/getPromptId（`: any` 退化 stub）→
@@ -60,7 +62,9 @@ import {
 } from 'fs/promises'
 import { appendFileSync, closeSync, fstatSync, mkdirSync, openSync, readSync } from 'fs'
 import { dirname } from 'path'
+import { isSessionPersistenceDisabled } from '../../bootstrap'
 import { isEnvTruthy, isFsInaccessible, logForDebugging } from '../../shared'
+import { getSettingsWithErrors } from '../config'
 import { getSessionEnv } from './env'
 import { jsonStringify } from './json'
 import {
@@ -528,23 +532,26 @@ class Project {
   }
 
   /**
-   * True when test env / ATLAS_SKIP_PROMPT_HISTORY should suppress all
-   * transcript writes.
+   * True when test env / cleanupPeriodDays=0 / --no-session-persistence /
+   * ATLAS_SKIP_PROMPT_HISTORY should suppress all transcript writes.
    * Shared guard for appendEntry and materializeSessionFile so both skip
    * consistently. The env var is set by tmuxSocket.ts so Tungsten-spawned
    * test sessions don't pollute the user's --resume list.
    *
-   * 裁支登记（§8.49 item 4 ⑥ 族）：getSettings_DEPRECATED?.
-   * cleanupPeriodDays===0（config 域面）+ isSessionPersistenceDisabled()
-   * （持久化 kill-switch 面）两支归 CLI 波，本域缺省不裁行为（新仓无
-   * settings 默认值时两支恒 false）。
+   * S-C4（§8.71.1.4）回填 2 支（旧仓 sessionStorage 同支序逐字）：
+   * cleanupPeriodDays===0（config 域面，engine/config 门面读合并 settings；
+   * 旧仓 getSettings_DEPRECATED 同面）+ isSessionPersistenceDisabled()
+   * （bootstrap ⑥ 族 kill-switch，cli/parse --no-session-persistence 支置位）。
    */
   private shouldSkipPersistence(): boolean {
     const allowTestPersistence = isEnvTruthy(
       process.env.TEST_ENABLE_SESSION_PERSISTENCE,
     )
+    const settings = getSettingsWithErrors().settings
     return (
       (getNodeEnv() === 'test' && !allowTestPersistence) ||
+      settings?.cleanupPeriodDays === 0 ||
+      isSessionPersistenceDisabled() ||
       isEnvTruthy(process.env.ATLAS_SKIP_PROMPT_HISTORY)
     )
   }
