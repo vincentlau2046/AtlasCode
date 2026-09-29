@@ -5482,3 +5482,37 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 2. **D-4b lint 5 规则体从零重写**（F-S2-3）：no-process-exit / no-sync-fs / no-cross-platform-process-issues / no-lookbehind-regex / no-process-env-top-level 真检查体（`eslint-legacy-plugins.mjs` 替换 no-op）；13 条维持 no-op 登记。
 3. **S-1/S-2 HIGH/MED 项**：F-A1（49 计数订正 32→35/49）/ F-A2（LSP closeFile 头注）/ F-A3（compact 尾随空格 2 处）/ F-B2（CACHED_MICROCOMPACT 13 桩头注登记）/ F-B3（ERROR_MESSAGE_NOT_ENOUGH_MESSAGES 根门面 re-export）/ F-B4（engineCompat 14→15 头注）/ F-S2-1（能力矩阵补 3 组双份登记行）。
 - 排除（登记不启动）：D-2a 切端 / D-3 Ascend 实施波 / D-9 换值 / D-6 非 stdio。
+
+### §8.73.3 S-4 修波闭环（2026-09-29，task #171）
+
+**修波提交链（7 commit，按模块，全落 master）**：
+| commit | 发现 | 内容 |
+|---|---|---|
+| `d868b4c` | F-A1 | engine/tools 49 计数口径核销（docs 32→实测 35/49 订正）|
+| `0758d30` | F-A3 + F-B3 | compact BASE prompt 补 2 尾随空格 + 根门面补兄弟常量 re-export |
+| `783ed80` | F-A2 | LSP closeFile 前向接缝头注登记（×2 站点）|
+| `a2b3898` | F-B2 + F-B4 | CACHED_MICROCOMPACT 桩头注登记（×13）+ engineCompat 冲突全集 14→15 |
+| `bcdc13e` | F-S2-1 | 能力矩阵补 3 组跨域去重债登记行（engine-orchestrator / ascend 六件套 / bootstrapState 187，by=E-wave-end/D-3）|
+| `0bc3626` | D-4b（F-S2-3）| 5 高价值 custom-rules 真体从零重写（no-process-exit/no-sync-fs/no-cross-platform-process-issues/no-lookbehind-regex/no-process-env-top-level）+ 执行验证单测（7 测逐体 report 断言，非空洞 no-op）；13 条维持 no-op |
+| `8e8d8ec` | D-5b（F-S2-2 + F-S2-5）| headless 高频 5 选项（jsonSchema/systemPrompt/appendSystemPrompt/fallbackModel/thinkingConfig）+ --effort 三段真消费回填〔声明 + buildHeadlessOptions 映射含 -file 读支 + 引擎面 AgentLoopDeps/queryOneRound/modelProvider.chat 逐槽透传〕+ json_schema_response.json orphan fixture 接断言参照端 + 9 测 |
+
+**发现核销状态**：
+- 修波核销（本波）：F-A1/F-A2/F-A3/F-B2/F-B3/F-B4（头注登记）/ F-S2-1（矩阵补行）/ F-S2-2=D-5b（真消费回填）/ F-S2-3=D-4b（5 真体重写）/ F-S2-5（json_schema_response.json 接 fixture，余孤儿件登记死资产）。
+- 登记不启动（归属波）：D-2a 切端（E-wave-end engine-dedup 独立波）/ D-3 Ascend 实施波（C-7 六件套实挂载 + DomainPackage 注册面 + mount.ts + gelu S5）/ D-9 换值（IFF 网关波 [ATLAS-HOLD]）/ D-6 非 stdio（remote 族波）。
+- D-4b 前向接缝登记（H6）：5 真体「已注册未启用」（eslint.config.mjs 未按 severity 启用，不重燃 1483-error 基线保 0-error quartet）；启用 + 处置重燃基线 = 全量 lint 复原波（非本波量级）。
+
+**四件套（S-4 修波终）**：tsc 0 / lint 0 error（384 warn 基线）/ build 798 模块 / 全量 3055 pass·0 fail·7318 expect·182 文件 + CI gate 6·0·5·2（全绿）。
+
+### §8.73.4 S-5 闭环 + 波终基线 + #154 关闭（2026-09-29，task #172）
+
+**基线刷新（F-S2-4 裁定兑现）**：
+- `[ATLAS-HOLD]`：docs 旧基线 **31**（陈旧）→ 实测 **56 行 / 31 文件**（src/ 全域；S-2 时 54/29 → 本波 56/31 微漂移，逐行带注无复活/换值，D-9 PASS 不变）。
+- 前向接缝/残留守登记标记（grep 口径：`前向接缝|残留守|前向声明|归X波|owner=` 族，src/ 全域）：S-2 记「接缝 736 行核销」→ 本波 S-4 修波 H6 头注新增后 **823 标记**（标记数口径，非 S-2 行数口径）。
+
+**F-S2-5 核销**：`json_schema_response.json`（orphan fixture）已接为 D-5b 断言参照端（`8e8d8ec` tests/unit/engine-headless-options.test.ts F-S2-5 段）；`tests/fixtures/{gateway,baseline}/` 余孤儿件（22+ json 零消费者）归死资产登记（D-9 / 版本管理波清理）。
+
+**S-3 待补项收口**：⑤ TUI launcher React-mount reach 依赖 §8.72 Slice E PTY 验真（`9c402f6` VoiceProvider 修后真达 React mount；本波未重跑 PTY——CI 环境 PTY hang 故 skip，本地 `script -qec` 可复）；⑥ CI gate 6·0·5·2 波终跑 PASS。
+
+**波终基线（#154 审视波终）**：tsc 0 / lint 0 error（384 warn）/ build 798 模块 / 全量 **3055 pass·0 fail·7318 expect·182 文件** + CI gate **6·0·5·2**（四件套全绿，零行为面回归）。
+
+**#154 全功能复刻审视优化波关闭**：S-E1 总分析（§8.73）+ S-1 保真审轮 1（§8.73.1）+ S-2 保真审轮 2 + S-3 活性 + S-4 裁定/修波（§8.73.2/§8.73.3）+ S-5 本闭环全落盘。**D-8b 不切波 tag**（子波例，闭环记录即归档，同 §8.72 壳波先例）。**残口归波**（非本波量级，登记不启动）：E-wave-end 审计（engine spine vs tui orchestrator 12K 去重 / Ascend 执行器六件套 vs ascend 域 9 占位去重 / bootstrapState 187 双份 / 全量 lint 复原波〔D-4b 5 真体启用 + 1483-error 基线处置〕）/ D-2a 切端 / D-3 Ascend 独立实施波 / D-9 换值 / D-6 非 stdio transport / mount.ts 实挂载。
