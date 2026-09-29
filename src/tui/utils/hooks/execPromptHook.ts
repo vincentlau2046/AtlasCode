@@ -74,7 +74,8 @@ export async function execPromptHook(
 
 Your response must be a JSON object matching one of the following schemas:
 1. If the condition is met, return: {"ok": true}
-2. If the condition is not met, return: {"ok": false, "reason": "Reason for why it is not met"}`]), thinkingConfig: { type: 'disabled' as const }, tools: toolUseContext.options.tools as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'], options: opts },
+2. If the condition is not met, return: {"ok": false, "reason": "Reason for why it is not met"}`]), thinkingConfig: { type: 'disabled' as const }, tools: toolUseContext.options.tools as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'], // tui 类型边界（C-7）：闭包 tui Tools → 新 modelprovider Tools 面（与 compact.ts / apiQueryHookHelper.ts 两调用点同型）
+        options: opts },
         'small',
       )
       const response = await modelProvider.chat({

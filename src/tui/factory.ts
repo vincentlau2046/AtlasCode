@@ -100,7 +100,11 @@ export interface CoreDependencies {
    * getPromptForCommand 追加非阻塞漂移提醒（vault 23 §5bis，仿 AscendMockPort）。
    */
   ascendFreshnessPort: AscendFreshnessPort
-  /** Phase A: Orchestrator 域接线（新仓 engine 门面尚未导出 Orchestrator 型 — 前向接缝） */
+  /**
+   * Phase A: Orchestrator 域接线（新仓 engine 门面尚未导出 Orchestrator 型 —
+   * 前向接缝；责任波：E-wave-end 审计〔engine 门面类型面扩 Orchestrator 型 +
+   * 闭包去重，与 engineCompat 去重登记同归口；H6 登记，复审勿重提〕）
+   */
   orchestrator?: unknown
 }
 

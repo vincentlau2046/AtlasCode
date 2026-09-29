@@ -2,6 +2,13 @@
 // Bodyless (shorthand) modules resolve all imports to any.
 // Modules whose named/default imports are used AS TYPES get explicit
 // bodies declaring those symbols as `any`, avoiding TS2709 (namespace-as-type).
+//
+// 注（2026-09-29 TUI 壳波 Slice D，复审勿重提）：@opentelemetry/api /
+// asciichart / vscode-jsonrpc 已为真依赖（package.json，Slice D 引入）：
+// asciichart = 纯 JS 包无自带类型，本 ambient 块仍是其唯一类型源（不可删）；
+// 另两包 ambient 块与真类型共存，tsc 0 验真（无冲突）。其余 declare 块对应
+// 包 = 真环境遮蔽（未引入新仓；运行时经 try/catch / lazy require /
+// darwin 平台门 / env 门 / #atlas-* vendor stub 兜底，Slice D 停机点登记）。
 
 // --- OpenTelemetry ---
 declare module '@opentelemetry/api' {
