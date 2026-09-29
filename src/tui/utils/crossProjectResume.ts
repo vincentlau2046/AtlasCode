@@ -1,4 +1,4 @@
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import type { LogOption } from '../types/logs.js'
 import { quote } from './bash/shellQuote.js'
 import { getSessionIdFromLog } from './sessionStorage.js'

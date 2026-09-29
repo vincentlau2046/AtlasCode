@@ -4,7 +4,8 @@ import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
   getFeatureValue_CACHED_MAY_BE_STALE,
 } from 'src/tui/services/analytics/growthbook.js'
-import { getIsNonInteractiveSession, getSdkBetas } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
+import { getSdkBetas } from 'src/tui/bootstrapState.js'
 import {
   ATLAS_20250219_BETA_HEADER,
   CLI_INTERNAL_BETA_HEADER,

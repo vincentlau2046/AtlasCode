@@ -12,7 +12,7 @@
 
 import axios from 'axios'
 import { dirname, join } from 'path'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { createBufferedWriter } from './bufferedWriter.js'
 import { CACHE_PATHS } from './cachePaths.js'
 import { registerCleanup } from './cleanupRegistry.js'

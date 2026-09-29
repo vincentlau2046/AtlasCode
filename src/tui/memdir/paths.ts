@@ -1,10 +1,7 @@
 import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import { isAbsolute, join, normalize, sep } from 'path'
-import {
-  getIsNonInteractiveSession,
-  getProjectRoot,
-} from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession, getProjectRoot } from 'src/bootstrap'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   getAtlasConfigHomeDir,

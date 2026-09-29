@@ -1,5 +1,5 @@
 import { spawnSync } from 'child_process'
-import { getIsInteractive } from 'src/tui/bootstrapState.js'
+import { getIsInteractive } from 'src/bootstrap'
 import { logForDebugging } from './debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 import { execFileNoThrow } from './execFileNoThrow.js'

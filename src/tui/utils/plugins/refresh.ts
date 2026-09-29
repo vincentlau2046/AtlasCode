@@ -17,7 +17,7 @@
  * - /plugin menu — sets needsRefresh, user runs /reload-plugins (PR 5b)
  */
 
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
 import { reinitializeLspServerManager } from '../../services/lsp/manager.js'
 import type { AppState } from '../../state/AppState.js'

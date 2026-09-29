@@ -5,7 +5,7 @@
 import type { ToolResultBlockParam } from '../types/atlas.js'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import {
   BYTES_PER_TOKEN,
   DEFAULT_MAX_RESULT_SIZE_CHARS,

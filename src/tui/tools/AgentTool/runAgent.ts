@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { isAtlasDev } from 'src/tui/utils/atlasDev.js'
 import { logForDebugging } from 'src/tui/utils/debug.js'
-import { getProjectRoot, getSessionId } from 'src/tui/bootstrapState.js'
+import { getProjectRoot, getSessionId } from 'src/bootstrap'
 import { getCommand, getSkillToolCommands, hasCommand } from '../../commands.js'
 import {
   DEFAULT_AGENT_PROMPT,

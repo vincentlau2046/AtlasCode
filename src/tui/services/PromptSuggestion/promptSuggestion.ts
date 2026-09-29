@@ -1,4 +1,4 @@
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import type { AppState } from '../../state/AppState.js'
 import type { Message } from '../../types/message.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'

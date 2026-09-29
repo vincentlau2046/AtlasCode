@@ -2,7 +2,8 @@ import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { useAppState, useSetAppState } from 'src/tui/state/AppState.js';
 import type { PermissionMode } from 'src/tui/utils/permissions/PermissionMode.js';
-import { getIsRemoteMode, getMainThreadAgentType, getOriginalCwd, getSdkBetas, getSessionId } from 'src/tui/bootstrapState.js';
+import { getMainThreadAgentType, getOriginalCwd, getSessionId } from 'src/bootstrap'
+import { getIsRemoteMode, getSdkBetas } from 'src/tui/bootstrapState.js';
 import { DEFAULT_OUTPUT_STYLE_NAME } from '../constants/outputStyles.js';
 import { useNotifications } from '../context/notifications.js';
 import { getTotalAPIDuration, getTotalDuration, getTotalInputTokens, getTotalLinesAdded, getTotalLinesRemoved, getTotalOutputTokens } from '../cost-tracker.js';

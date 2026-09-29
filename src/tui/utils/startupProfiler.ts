@@ -10,7 +10,7 @@
  */
 
 import { dirname, join } from 'path'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { isAtlasDev } from './atlasDev.js'
 import { logForDebugging } from './debug.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'

@@ -13,7 +13,7 @@ import {
   getHeapStatistics,
   type HeapSpaceInfo,
 } from 'v8'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { logForDebugging } from './debug.js'
 import { toError } from './errors.js'
 import { getDesktopPath } from './file.js'

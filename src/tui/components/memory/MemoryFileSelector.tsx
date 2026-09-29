@@ -5,7 +5,7 @@ import { mkdir } from 'fs/promises';
 import { join } from 'path';
 import * as React from 'react';
 import { use, useEffect, useState } from 'react';
-import { getOriginalCwd } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd } from 'src/bootstrap';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Text } from '../../ink.js';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';

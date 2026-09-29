@@ -6,7 +6,8 @@ import { type Command, type CommandBase, findCommand, getCommand, getCommandName
 import { NO_CONTENT_MESSAGE } from 'src/tui/constants/messages.js';
 import type { SetToolJSXFn, ToolUseContext } from 'src/tui/Tool.js';
 import type { AssistantMessage, AttachmentMessage, Message, NormalizedUserMessage, ProgressMessage, UserMessage } from 'src/tui/types/message.js';
-import { addInvokedSkill, getSessionId } from 'src/tui/bootstrapState.js';
+import { getSessionId } from 'src/bootstrap'
+import { addInvokedSkill } from 'src/tui/bootstrapState.js';
 import { COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG } from '../../constants/xml.js';
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js';
 import { buildPostCompactMessages } from 'src/tui/engineCompat';

@@ -13,7 +13,8 @@ const registerProtocolModule = feature('LODESTONE')
 
 /* eslint-enable @typescript-eslint/no-require-imports */
 
-import { getIsInteractive, getLastInteractionTime } from 'src/tui/bootstrapState.js'
+import { getIsInteractive } from 'src/bootstrap'
+import { getLastInteractionTime } from 'src/tui/bootstrapState.js'
 import { cleanupOldMessageFilesInBackground } from './cleanup.js'
 import { cleanupOldVersions } from './nativeInstaller/index.js'
 import { autoUpdateMarketplacesAndPluginsInBackground } from './plugins/pluginAutoupdate.js'

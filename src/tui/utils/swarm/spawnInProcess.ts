@@ -14,7 +14,7 @@
  */
 
 import sample from 'lodash-es/sample.js'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { getSpinnerVerbs } from '../../constants/spinnerVerbs.js'
 import { TURN_COMPLETION_VERBS } from '../../constants/turnCompletionVerbs.js'
 import type { AppState } from '../../state/AppState.js'

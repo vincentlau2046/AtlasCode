@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import type { BetaToolUseBlock } from '../../types/atlas.js'
 import { randomUUID } from 'crypto'
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import {
   FORK_BOILERPLATE_TAG,
   FORK_DIRECTIVE_PREFIX,

@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { ATLAS_GUIDE_AGENT } from './built-in/atlasCodeGuideAgent.js'

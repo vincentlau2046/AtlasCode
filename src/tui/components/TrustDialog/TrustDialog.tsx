@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import { homedir } from 'os';
 import React from 'react';
-import { setSessionTrustAccepted } from 'src/tui/bootstrapState.js';
+import { setTrustAccepted } from 'src/bootstrap';
 import type { Command } from '../../commands.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Link, Text } from '../../ink.js';
@@ -149,7 +149,7 @@ export function TrustDialog(t0) {
       }
       const isHomeDir_0 = homedir() === getCwd();
       if (isHomeDir_0) {
-        setSessionTrustAccepted(true);
+        setTrustAccepted(true);
       } else {
         saveCurrentProjectConfig(_temp5);
       }

@@ -1,6 +1,6 @@
 import { feature } from 'src/shared'
 import { stat } from 'fs/promises'
-import { getClientType } from 'src/tui/bootstrapState.js'
+import { getClientType } from 'src/bootstrap'
 import {
   getRemoteSessionUrl,
   isRemoteSessionLocal,

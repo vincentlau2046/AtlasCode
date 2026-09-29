@@ -5,7 +5,7 @@ import { unwatchFile, watchFile } from 'fs'
 import memoize from 'lodash-es/memoize.js'
 import pickBy from 'lodash-es/pickBy.js'
 import { basename, dirname, join, resolve } from 'path'
-import { getOriginalCwd, getSessionTrustAccepted } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, hasTrustAccepted } from 'src/bootstrap'
 import { getAutoMemEntrypoint } from '../memdir/paths.js'
 import type { McpServerConfig } from '../services/mcp/types.js'
 import type { BillingType } from '../services/oauth/types.js'
@@ -623,7 +623,7 @@ function computeTrustDialogAccepted(): boolean {
   // Check session-level trust (for home directory case where trust is not persisted)
   // When running from home dir, trust dialog is shown but acceptance is stored
   // in memory only. This allows hooks and other features to work during the session.
-  if (getSessionTrustAccepted()) {
+  if (hasTrustAccepted()) {
     return true
   }
 

@@ -1,6 +1,6 @@
 import { mkdir, open } from 'fs/promises'
 import { join } from 'path'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import type { PastedContent } from './config.js'
 import { logForDebugging } from './debug.js'
 import { getAtlasConfigHomeDir } from './envUtils.js'

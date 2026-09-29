@@ -1,6 +1,6 @@
 import { feature } from 'src/shared'
 import { useCallback, useEffect, useRef } from 'react'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
 import type { Tool } from '../../Tool.js'
 import {

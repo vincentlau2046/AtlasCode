@@ -4,7 +4,7 @@ import type {
   ToolResultBlockParam,
 } from '../../types/atlas.js'
 import { readFile, stat } from 'fs/promises'
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import type { ToolPermissionContext } from 'src/tui/Tool.js'
 import { getCwd } from 'src/tui/utils/cwd.js'
 import { pathInAllowedWorkingPath } from 'src/tui/utils/permissions/filesystem.js'

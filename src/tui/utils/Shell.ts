@@ -4,10 +4,7 @@ import { type FileHandle, mkdir, open, realpath } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { isAbsolute, resolve } from 'path'
 import { join as posixJoin } from 'path/posix'
-import {
-  getOriginalCwd,
-  setCwdState,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { generateTaskId } from '../Task.js'
 import { pwd } from './cwd.js'
 import { logForDebugging } from './debug.js'

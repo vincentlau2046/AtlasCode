@@ -211,7 +211,7 @@ export function trackGitOperations(
         // Import is done dynamically to avoid circular dependency
         void import('../../utils/sessionStorage.js').then(
           ({ linkSessionToPR }) => {
-            void import('src/tui/bootstrapState.js').then(({ getSessionId }) => {
+            void import('src/bootstrap').then(({ getSessionId }) => {
               const sessionId = getSessionId()
               if (sessionId) {
                 void linkSessionToPR(

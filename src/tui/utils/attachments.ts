@@ -73,7 +73,7 @@ import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js'
 import { getSkillToolCommands, getMcpSkillCommands } from '../commands.js'
 import type { Command } from '../types/command.js'
 import uniqBy from 'lodash-es/uniqBy.js'
-import { getProjectRoot } from 'src/tui/bootstrapState.js'
+import { getProjectRoot } from 'src/bootstrap'
 import { formatCommandsWithinBudget } from '../tools/SkillTool/prompt.js'
 import { getContextWindowForModel } from './context.js'
 import type { DiscoverySignal } from '../services/skillSearch/signals.js'
@@ -130,22 +130,8 @@ import {
 import { getTaskOutputPath } from './task/diskOutput.js'
 import { drainPendingMessages } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { TaskType, TaskStatus } from '../Task.js'
-import {
-  getOriginalCwd,
-  getSessionId,
-  getSdkBetas,
-  getTotalOutputTokens,
-  getCurrentTurnTokenBudget,
-  getTurnOutputTokens,
-  hasExitedPlanModeInSession,
-  setHasExitedPlanMode,
-  needsPlanModeExitAttachment,
-  setNeedsPlanModeExitAttachment,
-  needsAutoModeExitAttachment,
-  setNeedsAutoModeExitAttachment,
-  getLastEmittedDate,
-  setLastEmittedDate,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId, getTotalOutputTokens } from 'src/bootstrap'
+import { getSdkBetas, getCurrentTurnTokenBudget, getTurnOutputTokens, hasExitedPlanModeInSession, setHasExitedPlanMode, needsPlanModeExitAttachment, setNeedsPlanModeExitAttachment, needsAutoModeExitAttachment, setNeedsAutoModeExitAttachment, getLastEmittedDate, setLastEmittedDate } from 'src/tui/bootstrapState.js'
 import type { QuerySource } from '../constants/querySource.js'
 import {
   getDeferredToolsDelta,

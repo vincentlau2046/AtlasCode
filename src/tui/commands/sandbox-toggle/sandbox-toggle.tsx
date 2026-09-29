@@ -1,6 +1,6 @@
 import { relative } from 'path';
 import React from 'react';
-import { getCwdState } from 'src/tui/bootstrapState.js';
+import { getCwdState } from 'src/bootstrap';
 import { SandboxSettings } from '../../components/sandbox/SandboxSettings.js';
 import { color } from '../../ink.js';
 import { getPlatform } from '../../utils/platform.js';

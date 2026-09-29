@@ -1,5 +1,5 @@
 import type { z } from 'zod/v4'
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import {
   extractOutputRedirections,
   splitCommand_DEPRECATED,

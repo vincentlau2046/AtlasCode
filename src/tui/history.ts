@@ -1,6 +1,6 @@
 import { appendFile, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { getProjectRoot, getSessionId } from 'src/tui/bootstrapState.js'
+import { getProjectRoot, getSessionId } from 'src/bootstrap'
 import { registerCleanup } from './utils/cleanupRegistry.js'
 import type { HistoryEntry, PastedContent } from './utils/config.js'
 import { logForDebugging } from './utils/debug.js'

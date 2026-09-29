@@ -4,6 +4,9 @@ import { randomUUID } from 'crypto'
 import { getSettings_DEPRECATED } from 'src/tui/utils/settings/settings.js'
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 import { getRoleModel, type ModelRole } from 'src/modelprovider'
+// W2-2d drift ③（§8.74.3）：cost 类型切 domain 单源（本地 type 遮蔽核销；
+// 与 src/bootstrap/state.ts:219/229 逐字段一致已核验）
+import type { CostModelUsage, CostState } from 'src/bootstrap'
 
 let _spSectionCache: Map<string, string | null> = new Map()
 let _agentColorMap: Map<string, string> = new Map()
@@ -118,25 +121,8 @@ export const getStrictToolResultPairing : any = (() => ({})) as any;
 // - cost-tracker.ts addToTotalSessionCost() → addToTotalCostState()
 // Restore/reset: setCostStateForRestore() (/resume), resetCostState() (/clear)
 // ---------------------------------------------------------------------------
-type CostModelUsage = {
-  inputTokens: number
-  outputTokens: number
-  cacheReadInputTokens: number
-  cacheCreationInputTokens: number
-  webSearchRequests: number
-  contextWindow: number
-  maxOutputTokens: number
-}
-
-type CostState = {
-  totalAPIDuration: number
-  totalAPIDurationWithoutRetries: number
-  totalToolDuration: number
-  totalLinesAdded: number
-  totalLinesRemoved: number
-  modelUsage: Record<string, CostModelUsage>
-}
-
+// CostModelUsage / CostState 本地定义已删（W2-2d drift ③：切 src/bootstrap
+// 单源 import type，见文件头）
 function freshCostState(): CostState {
   return {
     totalAPIDuration: 0,

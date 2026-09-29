@@ -1,6 +1,7 @@
 import { feature } from 'src/shared'
 import { randomUUID } from 'crypto'
-import { getSdkBetas, getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getSdkBetas } from 'src/tui/bootstrapState.js'
 import { DEFAULT_OUTPUT_STYLE_NAME } from 'src/tui/constants/outputStyles.js'
 import type {
   ApiKeySource,

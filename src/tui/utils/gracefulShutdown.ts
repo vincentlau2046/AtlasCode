@@ -3,13 +3,8 @@ import { writeSync } from 'fs'
 import memoize from 'lodash-es/memoize.js'
 import { onExit } from 'signal-exit'
 import type { ExitReason } from 'src/tui/entrypoints/agentSdkTypes.js'
-import {
-  getIsInteractive,
-  getIsScrollDraining,
-  getLastMainRequestId,
-  getSessionId,
-  isSessionPersistenceDisabled,
-} from 'src/tui/bootstrapState.js'
+import { getIsInteractive, getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
+import { getIsScrollDraining, getLastMainRequestId } from 'src/tui/bootstrapState.js'
 import instances from '../ink/instances.js'
 import {
   DISABLE_KITTY_KEYBOARD,

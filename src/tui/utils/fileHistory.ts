@@ -11,11 +11,7 @@ import {
   unlink,
 } from 'fs/promises'
 import { dirname, isAbsolute, join, relative } from 'path'
-import {
-  getIsNonInteractiveSession,
-  getOriginalCwd,
-  getSessionId,
-} from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession, getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { notifyVscodeFileUpdated } from 'src/tui/services/mcp/vscodeSdkMcp.js'
 import type { LogOption } from 'src/tui/types/logs.js'
 import { inspect } from 'util'

@@ -3,12 +3,8 @@ import { getConfigDirName } from '../configDir.js'
 import mergeWith from 'lodash-es/mergeWith.js'
 import { dirname, join, resolve } from 'path'
 import { z } from 'zod/v4'
-import {
-  getFlagSettingsInline,
-  getFlagSettingsPath,
-  getOriginalCwd,
-  getUseCoworkPlugins,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
+import { getFlagSettingsInline, getFlagSettingsPath, getUseCoworkPlugins } from 'src/tui/bootstrapState.js'
 import { uniq } from '../array.js'
 const remoteSettings: SettingsJson | null = null
 import { logForDebugging } from '../debug.js'

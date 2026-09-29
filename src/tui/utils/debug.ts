@@ -1,7 +1,7 @@
 import { appendFile, mkdir, symlink, unlink } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { dirname, join } from 'path'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 
 import { isAtlasDev } from './atlasDev.js'
 import { type BufferedWriter, createBufferedWriter } from './bufferedWriter.js'

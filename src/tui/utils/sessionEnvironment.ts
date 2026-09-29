@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { logForDebugging } from './debug.js'
 import { getAtlasConfigHomeDir } from './envUtils.js'
 import { errorMessage, getErrnoCode } from './errors.js'

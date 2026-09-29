@@ -1,14 +1,8 @@
 import { feature } from 'src/shared'
 import type { UUID } from 'crypto'
 import { dirname } from 'path'
-import {
-  getMainLoopModelOverride,
-  getSessionId,
-  setMainLoopModelOverride,
-  setMainThreadAgentType,
-  setOriginalCwd,
-  switchSession,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId, setMainThreadAgentType, setOriginalCwd, switchSession } from 'src/bootstrap'
+import { getMainLoopModelOverride, setMainLoopModelOverride } from 'src/tui/bootstrapState.js'
 import { clearSystemPromptSections } from '../constants/systemPromptSections.js'
 import { restoreCostStateForSession } from '../cost-tracker.js'
 import type { AppState } from '../state/AppState.js'

@@ -12,7 +12,7 @@
  * Set ATLAS_PROFILE_STARTUP=1 for detailed logging output.
  */
 
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { logForDebugging } from './debug.js'
 import { isAtlasDev } from './atlasDev.js'
 import { isEnvTruthy } from './envUtils.js'

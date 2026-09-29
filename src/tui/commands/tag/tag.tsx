@@ -2,7 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import chalk from 'chalk';
 import type { UUID } from 'crypto';
 import * as React from 'react';
-import { getSessionId } from 'src/tui/bootstrapState.js';
+import { getSessionId } from 'src/bootstrap';
 import type { CommandResultDisplay } from '../../commands.js';
 import { Select } from '../../components/CustomSelect/select.js';
 import { Dialog } from '../../components/design-system/Dialog.js';

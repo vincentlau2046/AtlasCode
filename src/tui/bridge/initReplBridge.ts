@@ -15,7 +15,7 @@
 
 import { feature } from 'src/shared'
 import { hostname } from 'os'
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type { SDKControlResponse } from '../entrypoints/sdk/controlTypes.js'
 import { getFeatureValue_CACHED_WITH_REFRESH } from '../services/analytics/growthbook.js'

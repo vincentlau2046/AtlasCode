@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import type { HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import type { AppState } from '../../state/AppState.js'
 import type { EditableSettingSource } from '../settings/constants.js'
 import { SOURCES } from '../settings/constants.js'

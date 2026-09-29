@@ -14,7 +14,7 @@ import axios from 'axios'
 import { mkdir, readFile, stat, writeFile } from 'fs/promises'
 import pickBy from 'lodash-es/pickBy.js'
 import { dirname } from 'path'
-import { getIsInteractive } from 'src/tui/bootstrapState.js'
+import { getIsInteractive } from 'src/bootstrap'
 import { getOauthConfig } from '../../constants/oauth.js'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,

@@ -2,10 +2,7 @@ import { feature } from 'src/shared'
 import type { ContentBlockParam } from '../../types/atlas.js'
 import { randomUUID } from 'crypto'
 import last from 'lodash-es/last.js'
-import {
-  getSessionId,
-  isSessionPersistenceDisabled,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
 import type {
   PermissionMode,
   SDKCompactBoundaryMessage,

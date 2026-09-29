@@ -10,14 +10,7 @@ import { getCwd } from 'src/tui/utils/cwd.js'
 import { checkForReleaseNotes } from 'src/tui/utils/releaseNotes.js'
 import { setCwd } from 'src/tui/utils/Shell.js'
 import { initSinks } from 'src/tui/utils/sinks.js'
-import {
-  getIsNonInteractiveSession,
-  getProjectRoot,
-  getSessionId,
-  setOriginalCwd,
-  setProjectRoot,
-  switchSession,
-} from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession, getProjectRoot, getSessionId, setOriginalCwd, setProjectRoot, switchSession } from 'src/bootstrap'
 import { getCommands } from './commands.js'
 import { initSessionMemory } from './services/SessionMemory/sessionMemory.js'
 import { asSessionId } from './types/ids.js'

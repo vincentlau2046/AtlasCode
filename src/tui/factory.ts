@@ -69,12 +69,8 @@ import {
 import { SETTING_SOURCES } from './utils/settings/constants'
 import { settingsChangeDetector } from './utils/settings/changeDetector'
 import { getManagedSettingsDropInDir } from './utils/settings/managedPath'
-import {
-  getCwdState,
-  getOriginalCwd,
-  getAdditionalDirectoriesForClaudeMd,
-  setCwdState,
-} from 'src/tui/bootstrapState'
+import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
+import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { getPlatform } from './utils/platform'
 import { getConfigDirName } from './utils/configDir'
 import { getAtlasTempDir } from './utils/permissions/filesystem'

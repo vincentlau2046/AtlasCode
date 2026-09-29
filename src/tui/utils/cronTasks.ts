@@ -14,12 +14,8 @@ import { getConfigDirName } from './configDir.js'
 import { readFileSync } from 'fs'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import {
-  addSessionCronTask,
-  getProjectRoot,
-  getSessionCronTasks,
-  removeSessionCronTasks,
-} from 'src/tui/bootstrapState.js'
+import { getProjectRoot } from 'src/bootstrap'
+import { addSessionCronTask, getSessionCronTasks, removeSessionCronTasks } from 'src/tui/bootstrapState.js'
 import { computeNextCronRun, parseCronExpression } from './cron.js'
 import { logForDebugging } from './debug.js'
 import { isFsInaccessible } from './errors.js'

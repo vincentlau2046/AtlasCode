@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { verifyApiKey } from '../services/api/auth.js'
 import {
   getAtlasApiKeyWithSource,

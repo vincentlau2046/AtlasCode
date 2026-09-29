@@ -77,7 +77,8 @@ const coordinatorModeModule = feature('COORDINATOR_MODE') ? require('./coordinat
 import { resolve } from 'path';
 import { isAnalyticsDisabled } from 'src/tui/services/analytics/config.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/tui/services/analytics/growthbook.js';
-import { getOriginalCwd, setAdditionalDirectoriesForClaudeMd, setIsRemoteMode, setMainLoopModelOverride, setMainThreadAgentType, setTeleportedSessionInfo } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd, setMainThreadAgentType } from 'src/bootstrap'
+import { setAdditionalDirectoriesForClaudeMd, setIsRemoteMode, setMainLoopModelOverride, setTeleportedSessionInfo } from 'src/tui/bootstrapState.js';
 import { filterCommandsForRemoteMode, getCommands } from './commands.js';
 import type { StatsStore } from './context/stats.js';
 import { launchInvalidSettingsDialog, launchResumeChooser, launchSnapshotUpdateDialog, launchTeleportRepoMismatchDialog, launchTeleportResumeWrapper } from './dialogLaunchers.js';
@@ -149,7 +150,8 @@ import { setCwd } from 'src/tui/utils/Shell.js';
 import { type ProcessedResume, processResumedConversation } from 'src/tui/utils/sessionRestore.js';
 import { parseSettingSourcesFlag } from 'src/tui/utils/settings/constants.js';
 import { plural } from 'src/tui/utils/stringUtils.js';
-import { getInitialMainLoopModel, getIsNonInteractiveSession, getSdkBetas, getSessionId, setAllowedSettingSources, setClientType, setCwdState, setDirectConnectServerUrl, setFlagSettingsPath, setInitialMainLoopModel, setInlinePlugins, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSdkBetas, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, setSessionSource, switchSession } from 'src/tui/bootstrapState.js';
+import { getIsNonInteractiveSession, getSessionId, setClientType, setCwdState, setFlagSettingsPath, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, setSessionSource, switchSession } from 'src/bootstrap'
+import { getInitialMainLoopModel, getSdkBetas, setAllowedSettingSources, setDirectConnectServerUrl, setInitialMainLoopModel, setInlinePlugins, setSdkBetas } from 'src/tui/bootstrapState.js';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;

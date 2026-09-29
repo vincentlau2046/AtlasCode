@@ -13,7 +13,7 @@ import type { LogOption } from '../types/logs.js'
 import type { UUID } from 'crypto'
 import { loadSameRepoMessageLogs, isLiteLog, loadFullLog } from '../utils/sessionStorage.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getLogDisplayTitle } from '../utils/log.js'
 import { saveCustomTitle } from '../utils/sessionStorage.js'
 import {

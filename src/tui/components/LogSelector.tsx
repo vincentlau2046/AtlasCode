@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import figures from 'figures';
 import Fuse from 'fuse.js';
 import React from 'react';
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd, getSessionId } from 'src/bootstrap';
 import { useExitOnCtrlCDWithKeybindings } from '../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { useSearchInput } from '../hooks/useSearchInput.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';

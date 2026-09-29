@@ -1,6 +1,6 @@
 import { randomUUID, type UUID } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import type { LocalJSXCommandContext } from '../../commands.js'
 import type { LocalJSXCommandOnDone } from '../../types/command.js'
 import type {

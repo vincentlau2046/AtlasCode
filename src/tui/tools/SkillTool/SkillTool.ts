@@ -2,7 +2,7 @@ import { feature } from 'src/shared'
 import type { ToolResultBlockParam } from '../../types/atlas.js'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { dirname } from 'path'
-import { getProjectRoot } from 'src/tui/bootstrapState.js'
+import { getProjectRoot } from 'src/bootstrap'
 import {
   builtInCommandNames,
   findCommand,
@@ -33,11 +33,8 @@ import {
   parsePluginIdentifier,
 } from 'src/tui/utils/plugins/pluginIdentifier.js'
 import { z } from 'zod/v4'
-import {
-  addInvokedSkill,
-  clearInvokedSkillsForAgent,
-  getSessionId,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { addInvokedSkill, clearInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
 import { COMMAND_MESSAGE_TAG } from '../../constants/xml.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import { getAgentContext } from '../../utils/agentContext.js'

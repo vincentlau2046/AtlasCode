@@ -9,12 +9,8 @@ import type {
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { z } from 'zod/v4'
-import {
-  getCachedClaudeMdContent,
-  getLastClassifierRequests,
-  getSessionId,
-  setLastClassifierRequests,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getCachedClaudeMdContent, getLastClassifierRequests, setLastClassifierRequests } from 'src/tui/bootstrapState.js'
 import { getFlagDualRead } from '../../services/analytics/growthbook.js'
 import { getCacheControl } from '../../services/api/metadata.js'
 import { parsePromptTooLongTokenCounts } from '../../utils/apiErrors.js'

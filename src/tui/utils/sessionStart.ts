@@ -1,4 +1,4 @@
-import { getMainThreadAgentType } from 'src/tui/bootstrapState.js'
+import { getMainThreadAgentType } from 'src/bootstrap'
 import type { HookResultMessage } from '../types/message.js'
 import { createAttachmentMessage } from './attachments.js'
 import { logForDebugging } from './debug.js'

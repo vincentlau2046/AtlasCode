@@ -9,7 +9,7 @@
 
 import isEqual from 'lodash-es/isEqual.js'
 import { isAbsolute, resolve } from 'path'
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import { logForDebugging } from '../debug.js'
 import { errorMessage } from '../errors.js'
 import { pathExists } from '../file.js'

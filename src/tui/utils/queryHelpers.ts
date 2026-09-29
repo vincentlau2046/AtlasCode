@@ -1,9 +1,6 @@
 import type { ToolUseBlock } from '../types/atlas.js'
 import last from 'lodash-es/last.js'
-import {
-  getSessionId,
-  isSessionPersistenceDisabled,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
 import type { SDKMessage } from 'src/tui/entrypoints/agentSdkTypes.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { runTools } from 'src/tui/engineCompat'

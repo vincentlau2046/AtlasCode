@@ -3,7 +3,7 @@ import { feature } from 'src/shared';
 import { dirname } from 'path';
 import React from 'react';
 import { useTerminalSize } from 'src/tui/hooks/useTerminalSize.js';
-import { getOriginalCwd, switchSession } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd, switchSession } from 'src/bootstrap';
 import type { Command } from '../commands.js';
 import { LogSelector } from '../components/LogSelector.js';
 import { Spinner } from '../components/Spinner.js';

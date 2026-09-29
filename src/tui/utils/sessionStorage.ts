@@ -16,15 +16,8 @@ import {
 } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join } from 'path'
-import {
-  getOriginalCwd,
-  getPlanSlugCache,
-  getPromptId,
-  getSessionId,
-  getSessionProjectDir,
-  isSessionPersistenceDisabled,
-  switchSession,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId, isSessionPersistenceDisabled, switchSession } from 'src/bootstrap'
+import { getPlanSlugCache, getPromptId, getSessionProjectDir } from 'src/tui/bootstrapState.js'
 import { builtInCommandNames } from '../commands.js'
 import { COMMAND_NAME_TAG } from '../constants/xml.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
@@ -2713,7 +2706,7 @@ export function getCurrentSessionTag(sessionId: UUID): string | undefined {
 }
 
 export function getCurrentSessionTitle(
-  sessionId: SessionId,
+  sessionId: string,
 ): string | undefined {
   // Only returns title for current session (the only one we cache)
   if (sessionId === getSessionId()) {

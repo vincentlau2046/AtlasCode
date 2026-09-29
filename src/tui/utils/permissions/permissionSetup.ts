@@ -1,12 +1,7 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import { relative } from 'path'
-import {
-  getOriginalCwd,
-  handleAutoModeTransition,
-  handlePlanModeTransition,
-  setHasExitedPlanMode,
-  setNeedsAutoModeExitAttachment,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
+import { handleAutoModeTransition, handlePlanModeTransition, setHasExitedPlanMode, setNeedsAutoModeExitAttachment } from 'src/tui/bootstrapState.js'
 import type {
   ToolPermissionContext,
   ToolPermissionRulesBySource,

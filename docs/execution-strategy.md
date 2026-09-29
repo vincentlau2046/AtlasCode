@@ -5692,3 +5692,54 @@ W2 2a 实施前消费者 grep 揭示：§8.74.1 类 a「7 目录全删」/类 b�
 **engineCompat 冲突面更新**：填平后 engine 门面新增导出与 orchestrator index 双导 → 星号冲突消解全集 15 → **23**（主块 22 + 深层 getAutoCompactThreshold 1）；新增 8 名入主块（2 buffer 常量 + 6 纯函数 mergeHookInstructions/stripImagesFromMessages/reactive 4 谓词，orchestrator 胜 = 零行为）；深层块 mergeHookInstructions 行删（双显式块 TS2300 消解）；ERROR 常量/getTimeBasedMCConfig/snip 投影 3 = orchestrator index 未导无星号冲突（engine 星号面透出）。
 
 **判别单测**：engine-auto-compact-token-warning.test.ts（16）+ engine-context-w2-pre-surfaces.test.ts（20）+ env 测试扩 2（共 56 测/113 断言全绿）。零行为 = 新面 0 生产消费方（engine 行为面经既有 3055 测保护不变），预声明消费接缝头注登记（W3 TUI 活链路装配 + E-wave-end 组合根）。
+
+#### 8.74.10 W2-2d bootstrapState 单源切换实施裁定（2026-09-29，临场裁回设计记录，不变式 1）
+
+§8.74.3 裁定的执行实测 + 临场订正（全部核验留痕）：
+
+**切换集 45（非 47）**：`getAllowedSettingSources`/`setAllowedSettingSources` 对**排除不切**——
+域侧 `CliSettingSource = 'user'|'project'|'local'` 与 tui `SettingSource = 'userSettings'|'projectSettings'|…`
+**类型形状不匹配**（constants.ts `new Set<SettingSource>(allowed)` 直接 tsc 红）且域版状态化语义偏离旧仓
+ground truth（旧仓 bootstrap/state.ts:32 硬编码 `['userSettings']` + setter no-op；域版 = state 化 +
+初始 undefined = 默认启动丢 userSettings 回归风险）。对保留 tui 侧单源；类型体系统一（CliSettingSource
+↔ SettingSource）+ 域默认值对齐 = E-wave-end 审计 / W-opt（H6 登记，复审勿当遗漏重提）。
+
+**3 drift 裁定兑现**：① trust 面切域真实现（`getSessionTrustAccepted/setSessionTrustAccepted` any-stub
+→ `hasTrustAccepted/setTrustAccepted`）——**实测域 `_trustAccepted` 初始 true**（state.ts:424）= 旧
+stub `{}` 恒真语义等价，零行为；3 调用点改名（interactiveHelpers/TrustDialog/config）。
+② `addToTotalDurationState` 参数序（withRetries, withoutRetries）+ 体双侧逐字一致，核验通过。
+③ cost 类型 tui 本地 `CostModelUsage/CostState` 与域导出**逐字段一致**核验 → bootstrapState.ts
+切 `import type from 'src/bootstrap'`，本地定义删。
+
+**13 stub 名激活裁定（tui any-stub → 域真实现，消费点逐点核验安全/修复）**：
+- `getSessionBypassPermissionsMode`：旧 stub `{}` 恒真 → spawnUtils:50 **恒追加
+  `--dangerously-skip-permissions`**（安全缺陷）；域 = 启动期 main.tsx:1241 按 CLI 实置 = **修复**。
+- `getFlagSettingsPath`：旧 tui 硬编码 `/tmp/.claude-flags.json`（恒 truthy → swarm 恒传假
+  `--settings` 路径）；域 = 仅 `--settings` flag 实置后有效 = **修复**。
+- `getQuestionPreviewFormat`：旧 stub `{}` → AskUserQuestionTool `PROMPT[{}]` = undefined
+  拼接出字面 "undefined" 污染 prompt；域 = undefined 早退 = **修复**。
+- `getSessionCreatedTeams`：旧 `{}` 上 `.add` 运行时 TypeError 潜伏；域 = 真 Set = **修复**。
+- `getClientType/getMainThreadAgentType`：`=== 'remote'` 比较双侧 false 等价；hooks env
+  `agent_type` 旧传 stub 对象垃圾值 → 新 undefined 省略 = **修复**。
+- setter 族（setClientType/setSessionSource/setQuestionPreviewFormat 等 7）：no-op → 状态化，
+  消费链 = 启动期 CLI 实置 + 读取，设计内闭环。
+
+**类型面暴露修复（旧 tui any 遮蔽的真类型差，切换后 tsc 暴露，单点边界放宽）**：
+- `SessionId` 品牌型（tui types/ids.ts `string & {__brand}`）vs 域 `getSessionId(): string`
+  → 12 调用点 3 处签名放宽为 string（sessionStorage `getCurrentSessionTitle` / plans.ts
+  5 签名 / query `QueryConfig.sessionId`；brand 为 string 子型，放宽双向安全零运行时）。
+- `src/tui/utils/cwd.ts` = 域 `src/bootstrap/cwd.ts` 的 C-7 重复体（严格类型下 `never` 死分支
+  错误暴露）→ 转 **re-export shim**（`getCwd/pwd/runWithCwdOverride` 66+ 消费方保留旧路径，
+  2e 删净波直切 'src/bootstrap' 前向接缝登记）。
+
+**boundaries 边登记**：`eslint.config.mjs` tui allow 面 +`bootstrap`（W2-2d 142 消费文件
+import 边；`boundaries/element-types` 142 error 消解，0 error/380 warn 基线恢复）。
+
+**规模**：静态 import 138 文件 233 名切 'src/bootstrap' + 3 动态 import + 3 trust 调用点改名
++ bootstrapState.ts cost 类型 import type + 3 签名放宽 + cwd.ts shim。0 引用探针
+（45 名 × 全 tui 多行 import 解析）= 0 残留。
+**四件套**：tsc 0 / lint 0 error（380 warn 基线）/ build 801 模块 2.16MB / 全量
+**3099 pass·0 fail·7402 expect·184 文件**（= 2-pre 基线，零行为不变式成立）+ CI gate 6·0·5·2。
+**残留守**：bootstrapState.ts 内 45 名本地定义（+2 trust stub）= 死代码（0 消费者），2e 删净波
+删除（注意模块内交叉引用：`_sessionId`/`_costState` 等模块态被 ~140 tui-only 函数引用，
+删净时逐段核）；`randomUUID` import 随 `_sessionId` 删净核销。

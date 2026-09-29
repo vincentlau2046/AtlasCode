@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { getSessionId, setOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getSessionId, setOriginalCwd } from 'src/bootstrap'
 import { clearSystemPromptSections } from '../../constants/systemPromptSections.js'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'

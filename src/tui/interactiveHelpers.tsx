@@ -2,7 +2,8 @@ import { feature } from 'src/shared'; // F5: stub import — dev source-direct c
 import { appendFileSync } from 'fs';
 import React from 'react';
 import { gracefulShutdown, gracefulShutdownSync } from 'src/tui/utils/gracefulShutdown.js';
-import { setSessionTrustAccepted, setStatsStore } from 'src/tui/bootstrapState.js';
+import { setTrustAccepted } from 'src/bootstrap'
+import { setStatsStore } from 'src/tui/bootstrapState.js';
 import type { Command } from './commands.js';
 import { createStatsStore, type StatsStore } from './context/stats.js';
 import { getSystemContext } from './context.js';
@@ -167,7 +168,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
 
     // Signal that trust has been verified for this session.
     // GrowthBook checks this to decide whether to include auth headers.
-    setSessionTrustAccepted(true);
+    setTrustAccepted(true);
 
     // Reset and reinitialize GrowthBook after trust is established.
     // Defense for login/logout: clears any prior client so the next init

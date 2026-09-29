@@ -8,7 +8,7 @@ import { McpParsingWarnings } from 'src/tui/components/mcp/McpParsingWarnings.js
 import { getModelMaxOutputTokens } from 'src/tui/utils/context.js';
 import { getAtlasConfigHomeDir } from 'src/tui/utils/envUtils.js';
 import type { SettingSource } from 'src/tui/utils/settings/constants.js';
-import { getOriginalCwd } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd } from 'src/bootstrap';
 import type { CommandResultDisplay } from '../commands.js';
 import { Pane } from '../components/design-system/Pane.js';
 import { PressEnterToContinue } from '../components/PressEnterToContinue.js';

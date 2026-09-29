@@ -4,10 +4,8 @@ import { execa } from 'execa'
 import memoize from 'lodash-es/memoize.js'
 import { USER_PROFILE_SCOPE } from 'src/tui/constants/wire.js'
 
-import {
-  getIsNonInteractiveSession,
-  preferThirdPartyAuthentication,
-} from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
+import { preferThirdPartyAuthentication } from 'src/tui/bootstrapState.js'
 import { getOauthProfileFromOauthToken } from '../services/oauth/getOauthProfile.js'
 import type { OAuthTokens } from '../services/oauth/types.js'
 import {

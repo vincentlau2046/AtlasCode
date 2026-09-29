@@ -41,10 +41,8 @@ import {
   sep,
 } from 'path'
 import picomatch from 'picomatch'
-import {
-  getAdditionalDirectoriesForClaudeMd,
-  getOriginalCwd,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
+import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { truncateEntrypointContent } from '../memdir/memdir.js'
 import { getAutoMemEntrypoint, isAutoMemoryEnabled } from '../memdir/paths.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'

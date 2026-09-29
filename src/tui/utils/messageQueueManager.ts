@@ -1,6 +1,6 @@
 import type { ContentBlockParam } from '../types/atlas.js'
 import type { Permutations } from 'src/tui/types/utils.js'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import type { AppState } from '../state/AppState.js'
 import type {
   QueueOperation,

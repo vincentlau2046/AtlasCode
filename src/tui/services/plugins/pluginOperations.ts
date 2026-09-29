@@ -12,7 +12,7 @@
  * - Can throw errors for unexpected failures
  */
 import { dirname, join } from 'path'
-import { getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
 import { isBuiltinPluginId } from '../../plugins/builtinPlugins.js'
 import type { LoadedPlugin, PluginManifest } from '../../types/plugin.js'
 import { findManifestInDir } from '../../utils/configDir.js'

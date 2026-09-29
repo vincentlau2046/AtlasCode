@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import type { UUID } from 'crypto';
 import figures from 'figures';
 import * as React from 'react';
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd, getSessionId } from 'src/bootstrap';
 import type { CommandResultDisplay, ResumeEntrypoint } from '../../commands.js';
 import { LogSelector } from '../../components/LogSelector.js';
 import { MessageResponse } from '../../components/MessageResponse.js';

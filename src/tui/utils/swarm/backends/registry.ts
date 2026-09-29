@@ -1,4 +1,4 @@
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { logForDebugging } from '../../../utils/debug.js'
 import { getPlatform } from '../../../utils/platform.js'
 import {

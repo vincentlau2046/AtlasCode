@@ -16,7 +16,7 @@
  */
 
 import { spawn, spawnSync } from 'child_process'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import instances from '../ink/instances.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { pwd } from './cwd.js'

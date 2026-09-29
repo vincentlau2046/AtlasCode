@@ -1,6 +1,6 @@
 import type { BetaContentBlock } from '../../types/atlas.js'
 import { randomUUID, type UUID } from 'crypto'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import {
   LOCAL_COMMAND_STDERR_TAG,
   LOCAL_COMMAND_STDOUT_TAG,

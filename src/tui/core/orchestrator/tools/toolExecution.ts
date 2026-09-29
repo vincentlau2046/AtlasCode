@@ -15,11 +15,8 @@ import {
   sanitizeToolNameForAnalytics,
 } from 'src/tui/services/analytics/metadata.js'
 import { isAtlasDev } from 'src/tui/utils/atlasDev.js'
-import {
-  addToToolDuration,
-  getCodeEditToolDecisionCounter,
-  getStatsStore,
-} from 'src/tui/bootstrapState.js'
+import { addToToolDuration } from 'src/bootstrap'
+import { getCodeEditToolDecisionCounter, getStatsStore } from 'src/tui/bootstrapState.js'
 import {
   buildCodeEditToolAttributes,
   isCodeEditingTool,

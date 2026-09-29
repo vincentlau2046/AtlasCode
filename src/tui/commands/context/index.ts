@@ -1,4 +1,4 @@
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
 
 export const context: Command = {

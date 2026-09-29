@@ -26,16 +26,8 @@ import {
   substituteUserConfigVariables,
 } from './plugins/pluginOptionsStorage.js'
 import { getPluginDataDir } from './plugins/pluginDirectories.js'
-import {
-  getSessionId,
-  getProjectRoot,
-  getIsNonInteractiveSession,
-  getRegisteredHooks,
-  getStatsStore,
-  addToTurnHookDuration,
-  getOriginalCwd,
-  getMainThreadAgentType,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId, getProjectRoot, getIsNonInteractiveSession, getOriginalCwd, getMainThreadAgentType } from 'src/bootstrap'
+import { getRegisteredHooks, getStatsStore, addToTurnHookDuration } from 'src/tui/bootstrapState.js'
 import { checkHasTrustDialogAccepted } from './config.js'
 import {
   getHooksConfigFromSnapshot,

@@ -1,10 +1,5 @@
 import { z } from 'zod/v4'
-import {
-  getOriginalCwd,
-  getProjectRoot,
-  setOriginalCwd,
-  setProjectRoot,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getProjectRoot, setOriginalCwd, setProjectRoot } from 'src/bootstrap'
 import { clearSystemPromptSections } from '../../constants/systemPromptSections.js'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'

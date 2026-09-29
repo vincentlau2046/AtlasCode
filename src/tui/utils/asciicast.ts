@@ -1,6 +1,6 @@
 import { appendFile, rename } from 'fs/promises'
 import { basename, dirname, join } from 'path'
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { isAtlasDev } from './atlasDev.js'
 import { createBufferedWriter } from './bufferedWriter.js'
 import { registerCleanup } from './cleanupRegistry.js'

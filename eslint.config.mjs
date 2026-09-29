@@ -238,6 +238,11 @@ export default tseslint.config(
               allow: [
                 "shared", "modelprovider", "memory", "sandbox",
                 "executor", "engine", "cli",
+                // W2-2d（§8.74.3/§8.74.10）：bootstrapState 45 碰撞名切
+                // src/bootstrap 单源（session/cwd/cost/interactive/trust 态
+                // 单一事实源；142 消费文件 import 边登记；tui 本地
+                // bootstrapState.ts 残留守归 2e 删净）
+                "bootstrap",
               ],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend

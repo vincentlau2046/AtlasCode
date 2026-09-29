@@ -4,12 +4,8 @@
  */
 import { feature } from 'src/shared'
 import { randomUUID, type UUID } from 'crypto'
-import {
-  getLastMainRequestId,
-  getOriginalCwd,
-  getSessionId,
-  regenerateSessionId,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
+import { getLastMainRequestId, regenerateSessionId } from 'src/tui/bootstrapState.js'
 import type { AppState } from '../../state/AppState.js'
 import { isInProcessTeammateTask } from '../../tasks/InProcessTeammateTask/types.js'
 import {

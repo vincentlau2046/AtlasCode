@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { copyFile, writeFile } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join, resolve, sep } from 'path'
-import type { AgentId, SessionId } from 'src/tui/types/ids.js'
+import type { AgentId } from 'src/tui/types/ids.js'
 import type { LogOption } from 'src/tui/types/logs.js'
 import type {
   AssistantMessage,
@@ -10,7 +10,8 @@ import type {
   SystemFileSnapshotMessage,
   UserMessage,
 } from 'src/tui/types/message.js'
-import { getPlanSlugCache, getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getPlanSlugCache } from 'src/tui/bootstrapState.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../tools/ExitPlanModeTool/constants.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
@@ -29,7 +30,7 @@ const MAX_SLUG_RETRIES = 10
  * The slug is generated lazily on first access and cached for the session.
  * If a plan file with the generated slug already exists, retries up to 10 times.
  */
-export function getPlanSlug(sessionId?: SessionId): string {
+export function getPlanSlug(sessionId?: string): string {
   const id = sessionId ?? getSessionId()
   const cache = getPlanSlugCache()
   let slug = cache.get(id)
@@ -51,7 +52,7 @@ export function getPlanSlug(sessionId?: SessionId): string {
 /**
  * Set a specific plan slug for a session (used when resuming a session)
  */
-export function setPlanSlug(sessionId: SessionId, slug: string): void {
+export function setPlanSlug(sessionId: string, slug: string): void {
   getPlanSlugCache().set(sessionId, slug)
 }
 
@@ -59,7 +60,7 @@ export function setPlanSlug(sessionId: SessionId, slug: string): void {
  * Clear the plan slug for the current session.
  * This should be called on /clear to ensure a fresh plan file is used.
  */
-export function clearPlanSlug(sessionId?: SessionId): void {
+export function clearPlanSlug(sessionId?: string): void {
   const id = sessionId ?? getSessionId()
   getPlanSlugCache().delete(id)
 }
@@ -163,7 +164,7 @@ function getSlugFromLog(log: LogOption): string | undefined {
  */
 export async function copyPlanForResume(
   log: LogOption,
-  targetSessionId?: SessionId,
+  targetSessionId?: string,
 ): Promise<boolean> {
   const slug = getSlugFromLog(log)
   if (!slug) {
@@ -238,7 +239,7 @@ export async function copyPlanForResume(
  */
 export async function copyPlanForFork(
   log: LogOption,
-  targetSessionId: SessionId,
+  targetSessionId: string,
 ): Promise<boolean> {
   const originalSlug = getSlugFromLog(log)
   if (!originalSlug) {

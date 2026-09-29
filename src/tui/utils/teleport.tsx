@@ -2,7 +2,7 @@ import axios from 'axios';
 import chalk from 'chalk';
 import { randomUUID } from 'crypto';
 import React from 'react';
-import { getOriginalCwd, getSessionId } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd, getSessionId } from 'src/bootstrap';
 import { checkGate_CACHED_OR_BLOCKING } from 'src/tui/services/analytics/growthbook.js';
 import { isPolicyAllowed } from 'src/tui/services/policyLimits/index.js';
 import { z } from 'zod/v4';

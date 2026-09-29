@@ -7,7 +7,8 @@ import memoize from 'lodash-es/memoize.js'
 import { createConnection } from 'net'
 import * as os from 'os'
 import { basename, join, sep as pathSeparator, resolve } from 'path'
-import { getIsScrollDraining, getOriginalCwd } from 'src/tui/bootstrapState.js'
+import { getOriginalCwd } from 'src/bootstrap'
+import { getIsScrollDraining } from 'src/tui/bootstrapState.js'
 import { callIdeRpc } from '../services/mcp/client.js'
 import type {
   ConnectedMCPServer,

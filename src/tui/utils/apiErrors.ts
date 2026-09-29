@@ -22,7 +22,7 @@ import {
   createAssistantAPIErrorMessage,
   NO_RESPONSE_REQUESTED,
 } from './messages.js'
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { isEnvTruthy } from './envUtils.js'
 import { ImageResizeError } from './imageResizer.js'
 import { ImageSizeError } from './imageValidation.js'

@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { formatAgentId } from '../../utils/agentId.js'

@@ -82,21 +82,8 @@ import {
   APIError,
   APIUserAbortError,
 } from '../../../types/atlas.js'
-import {
-  getAfkModeHeaderLatched,
-  getCacheEditingHeaderLatched,
-  getLastApiCompletionTimestamp,
-  getPromptCache1hAllowlist,
-  getPromptCache1hEligible,
-  getSessionId,
-  getThinkingClearLatched,
-  setAfkModeHeaderLatched,
-  setCacheEditingHeaderLatched,
-  setLastMainRequestId,
-  setPromptCache1hAllowlist,
-  setPromptCache1hEligible,
-  setThinkingClearLatched,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getAfkModeHeaderLatched, getCacheEditingHeaderLatched, getLastApiCompletionTimestamp, getPromptCache1hAllowlist, getPromptCache1hEligible, getThinkingClearLatched, setAfkModeHeaderLatched, setCacheEditingHeaderLatched, setLastMainRequestId, setPromptCache1hAllowlist, setPromptCache1hEligible, setThinkingClearLatched } from 'src/tui/bootstrapState.js'
 import {
   AFK_MODE_BETA_HEADER,
   CONTEXT_MANAGEMENT_BETA_HEADER,

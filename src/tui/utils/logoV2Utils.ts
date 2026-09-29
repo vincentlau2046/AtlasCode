@@ -1,4 +1,5 @@
-import { getDirectConnectServerUrl, getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getDirectConnectServerUrl } from 'src/tui/bootstrapState.js'
 import { stringWidth } from '../ink/stringWidth.js'
 import type { LogOption } from '../types/logs.js'
 import { getCwd } from './cwd.js'

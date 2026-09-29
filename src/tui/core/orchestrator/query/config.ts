@@ -1,6 +1,5 @@
-import { getSessionId } from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
 import { checkStatsigFeatureGate_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js'
-import type { SessionId } from '../../../types/ids.js'
 import { isEnvTruthy } from '../../../utils/envUtils.js'
 
 // -- config
@@ -13,7 +12,7 @@ import { isEnvTruthy } from '../../../utils/envUtils.js'
 // Intentionally excludes feature() gates — those are tree-shaking boundaries
 // and must stay inline at the guarded blocks for dead-code elimination.
 export type QueryConfig = {
-  sessionId: SessionId
+  sessionId: string
 
   // Runtime gates (env/statsig). NOT feature() gates — see above.
   gates: {

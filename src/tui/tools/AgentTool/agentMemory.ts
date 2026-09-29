@@ -1,6 +1,6 @@
 import { getConfigDirName } from '../../utils/configDir.js'
 import { join, normalize, sep } from 'path'
-import { getProjectRoot } from 'src/tui/bootstrapState.js'
+import { getProjectRoot } from 'src/bootstrap'
 import {
   buildMemoryPrompt,
   ensureMemoryDirExists,

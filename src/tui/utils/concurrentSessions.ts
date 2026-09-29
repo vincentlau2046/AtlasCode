@@ -1,11 +1,8 @@
 import { feature } from 'src/shared'
 import { chmod, mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
-import {
-  getOriginalCwd,
-  getSessionId,
-  onSessionSwitch,
-} from 'src/tui/bootstrapState.js'
+import { getOriginalCwd, getSessionId } from 'src/bootstrap'
+import { onSessionSwitch } from 'src/tui/bootstrapState.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
 import { getAtlasConfigHomeDir } from './envUtils.js'

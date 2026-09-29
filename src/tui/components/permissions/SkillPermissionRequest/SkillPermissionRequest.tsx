@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import React, { useCallback, useMemo } from 'react';
 import { logError } from 'src/tui/utils/log.js';
-import { getOriginalCwd } from 'src/tui/bootstrapState.js';
+import { getOriginalCwd } from 'src/bootstrap';
 import { Box, Text } from '../../../ink.js';
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js';
 import { SKILL_TOOL_NAME } from '../../../tools/SkillTool/constants.js';

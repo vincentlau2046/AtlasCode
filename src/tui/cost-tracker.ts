@@ -1,28 +1,7 @@
 import type { BetaUsage as Usage } from './types/atlas.js'
 import chalk from 'chalk'
-import {
-  addToTotalCostState,
-  addToTotalLinesChanged,
-  getModelUsage,
-  getSdkBetas,
-  getSessionId,
-  getTokenCounter,
-  getTotalAPIDuration,
-  getTotalAPIDurationWithoutRetries,
-  getTotalCacheCreationInputTokens,
-  getTotalCacheReadInputTokens,
-  getTotalDuration,
-  getTotalInputTokens,
-  getTotalLinesAdded,
-  getTotalLinesRemoved,
-  getTotalOutputTokens,
-  getTotalToolDuration,
-  getTotalWebSearchRequests,
-  getUsageForModel,
-  resetCostState,
-  resetStateForTests,
-  setCostStateForRestore,
-} from 'src/tui/bootstrapState.js'
+import { addToTotalCostState, addToTotalLinesChanged, getModelUsage, getSessionId, getTotalAPIDuration, getTotalAPIDurationWithoutRetries, getTotalCacheCreationInputTokens, getTotalCacheReadInputTokens, getTotalDuration, getTotalInputTokens, getTotalLinesAdded, getTotalLinesRemoved, getTotalOutputTokens, getTotalToolDuration, getTotalWebSearchRequests, getUsageForModel, resetCostState, resetStateForTests, setCostStateForRestore } from 'src/bootstrap'
+import { getSdkBetas, getTokenCounter } from 'src/tui/bootstrapState.js'
 import type { ModelUsage } from './entrypoints/agentSdkTypes.js'
 import { getAdvisorUsage } from './utils/advisor.js'
 import {

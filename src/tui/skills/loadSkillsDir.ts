@@ -10,10 +10,8 @@ import {
   sep as pathSep,
   relative,
 } from 'path'
-import {
-  getAdditionalDirectoriesForClaudeMd,
-  getSessionId,
-} from 'src/tui/bootstrapState.js'
+import { getSessionId } from 'src/bootstrap'
+import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { Command, PromptCommand } from '../types/command.js'
 import {

@@ -1,6 +1,6 @@
 import { c as _c } from "react/compiler-runtime";
 import * as React from 'react';
-import { getQuestionPreviewFormat } from 'src/tui/bootstrapState.js';
+import { getQuestionPreviewFormat } from 'src/bootstrap';
 import { MessageResponse } from 'src/tui/components/MessageResponse.js';
 import { BLACK_CIRCLE } from 'src/tui/constants/figures.js';
 import { getModeColor } from 'src/tui/utils/permissions/PermissionMode.js';

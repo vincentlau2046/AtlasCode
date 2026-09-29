@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { rm } from 'fs'
 import { appendFile, copyFile, mkdir } from 'fs/promises'
 import { dirname, isAbsolute, join, relative } from 'path'
-import { getCwdState } from 'src/tui/bootstrapState.js'
+import { getCwdState } from 'src/bootstrap'
 import type { CompletionBoundary } from '../../state/AppStateStore.js'
 import {
   type AppState,

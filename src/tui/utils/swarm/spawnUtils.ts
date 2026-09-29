@@ -2,12 +2,8 @@
  * Shared utilities for spawning teammates across different backends.
  */
 
-import {
-  getFlagSettingsPath,
-  getInlinePlugins,
-  getMainLoopModelOverride,
-  getSessionBypassPermissionsMode,
-} from 'src/tui/bootstrapState.js'
+import { getSessionBypassPermissionsMode } from 'src/bootstrap'
+import { getFlagSettingsPath, getInlinePlugins, getMainLoopModelOverride } from 'src/tui/bootstrapState.js'
 import { quote } from '../bash/shellQuote.js'
 import { isInBundledMode } from '../bundledMode.js'
 import type { PermissionMode } from '../permissions/PermissionMode.js'

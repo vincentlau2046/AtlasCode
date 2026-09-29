@@ -13,7 +13,7 @@
  */
 
 import { z } from 'zod/v4'
-import { getIsNonInteractiveSession } from 'src/tui/bootstrapState.js'
+import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { modelProvider, buildOpenAIParams, toResponseFormat } from 'src/modelprovider'
 import type { Message } from '../types/message.js'
 import { logForDebugging } from './debug.js'
