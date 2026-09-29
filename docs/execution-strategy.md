@@ -6367,3 +6367,77 @@ build cli.js 2.33MB（813 模块不变）/ `bun test --isolate tests/` 全量
 套件内真跑绿）。突变判别仪式实测留痕（engine-loop-emit 5/8 定向红 →
 verbatim restore → 8/8 复绿）。G-α 冒烟「须真跑 ≥1 次通过」= live gelu
 native=true 首跑绿达成。
+
+#### 8.74.21 W4 全量 lint 复原波实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**裁定 4-1（重燃面 211→324 计划偏差，锁定条件改述）**：§8.74.5「终局数 < 211
+再锁定新基线」基于「W2 只删不增」假设；W2/W3 实际树除删码外有**新增域面**
+（cli 公共域 7 文件 / engine 工具迁移体 / swarm 域），重燃面重测 = **324 errors**
+= no-sync-fs **220**/62 文件 + no-process-exit **85**/15 + no-process-env-top-level
+**11**/9 + no-lookbehind-regex **8**/5（no-cross-platform-process-issues 0 命中，
+与 W1-1.6 先测一致）。裁定：锁定条件由「< 211」改述为「**0 error**（存量全量
+owner 注豁免登记，新代码全 error 无豁免）」——211/324 均为存量面快照而非目标
+数。warn 侧同步 370 → **303**（旧仓内联 legacy disable 中 85 条对应 5 真体者
+转生效，「unused directive」噪音减 85，**零新增 warning**——stash 前后逐条
+比对核实）。
+
+**临场裁定 4-2（豁免粒度：逐站点 → 逐文件）**：§8.74.5 原「main.tsx 47 =
+逐站点 eslint-disable」基于旧树 6 非主 + 47 主站点；现树 process-exit = 85 站点
+/ 15 文件（cli 域新增 38 站点全为 exit 分发层/关闭工具/对话框退出动作/探针
+退出 = 合法进程出口）→ **逐文件** `/* eslint-disable custom-rules/no-process-exit
+-- owner 注 */`（15 文件）。逐站点 85 条注释仅扩 diff 噪音，登记意图不变。
+误的代价：同文件新增 exit 点不被规则拦截——可接受（新代码纪律另由评审
+维持，规则对新文件的拦截力保留）。
+
+**临场裁定 4-3（env-top-level 11 站点：豁免非惰性化）**：§8.74.5「8 处 = 低成本
+修」基于旧树站点形态；现树 11 站点/9 文件全为「模块加载期捕获常量」形态，
+部分站点是**刻意捕获语义**（swarm/detection.ts 注释明示「captured at module
+load, not process.env.TMUX」= 语义依赖加载时点）→ const→function 惰性化 =
+跨文件 API + 行为面（违行为零改动纪律）→ 9 文件逐文件豁免 + owner 注，
+惰性化归 W-opt 波再议。
+
+**临场裁定 4-4（lookbehind 8 站点：逐行豁免，改写 defer）**：lookbehind 正则
+改写 = 匹配行为面（违零行为纪律）→ 8 站点逐行 `eslint-disable-next-line`
++ owner 注（bashSecurity 3 / shellQuote 2 / promptShellExecution 1 /
+heredoc 1 / shared/unc 1）；等价形式改写 + 判别单测归 W-opt 波。
+
+**临场裁定 4-5（启用位置：src 全域块 > roadmap 4a 的「tui 桶」）**：roadmap
+§4 W4 4a 原文「eslint.config.mjs **tui 桶** 5 规则 severity 翻 error」；
+实测重燃面横跨 14 域（cli 8+6+5+5+2+2+1+1 / engine 17+1+1+3+2+1+1 /
+swarm 2+2 / tui 余量 / shared / atlascode / executor / memory / permissions /
+sandbox）→ tui 桶启用不覆盖新域存量且放过新域新代码 → **src 全域块按
+error 启用 + custom-rules 插件注册上移 src 全域**（tui 桶保留注册供
+9 枚 no-op 名消内联 disable 的 Definition not found，重复注册无害）。
+
+**临场裁定 4-6（shebang 文件豁免注释行位）**：`src/atlascode/cli.ts` /
+`launcher.ts` 首行 `#!/usr/bin/env bun`，文件级 disable 注释置首行即
+parsing error（`'#!' can only be used at the start of a file`，实测红）→
+两文件注释置第 2 行（shebang 下）。
+
+**处置实施（全部零行为改动：仅 eslint.config.mjs + 87 文件豁免注释，零
+代码逻辑改动）**：
+- 启用：eslint.config.mjs src 全域块 5 真体 `custom-rules/*` = error
+  （裁定 4-5）+ 插件注册上移
+- no-sync-fs 220/62 文件：逐文件豁免（owner 注：sync→async 改写归 W-opt）
+- no-process-exit 85/15 文件：逐文件豁免（裁定 4-2）
+- no-process-env-top-level 11/9 文件：逐文件豁免（裁定 4-3）
+- no-lookbehind-regex 8/5 文件：逐行豁免（裁定 4-4）
+- 合计 87 文件触改（82 文件级〔4 文件双规则各 2 行〕+ 5 纯逐行），
+  豁免注释 94 行（文件级 86 + 逐行 8）
+
+**W-opt 登记（残口，owner = W-opt 优化波）**：① sync→async 真改写
+（220 站点，62 文件）② exit 助手收敛（85 站点 → 单一 graceful exit 门面）
+③ env 顶层惰性化（11 站点）④ lookbehind 等价改写 + 判别单测（8 站点）
+⑤ 13 枚 no-op 规则体（9 custom + 2 react-hooks + 2 plugin-n）逐体恢复
+（E-wave-end 审计同族）。豁免注释即登记载体，W-opt 处置后逐文件核销删除。
+
+**域外残口（W4 范围外，登记不处置）**：`eslint .`（含 tests/）有 3 枚
+tests 桶存量 error（prefer-const ×2 / no-unused-vars ×1，
+tests/func/mcp-stdio-server-se2b + tests/unit/cli-sc3 + tests/unit/mcp-json-rpc-
+se2b）——quartet lint 口径 = `eslint src/`（package.json "lint"），tests 桶
+error 归 tests 卫生波次。
+
+**新 lint 基线锁定**：`bun run lint`（eslint src/）= **0 error / 303 warn**
+（303 = 13 枚 no-op 注册族「unused directive」存量噪音 + 少量既有项；新代码
+全 error 无豁免）。测试基线不变（W4 零测试改动：3132 pass / 0 fail /
+7498 expect / 192 文件，quartet 复验后锁定）。
