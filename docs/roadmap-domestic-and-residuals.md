@@ -50,7 +50,7 @@
 
 ### R1 — E-wave-end 审计 + 架构收敛波（地基，最高优先）
 - **范围**（= §8.73 残口"engine spine vs tui orchestrator 去重" + 全量 lint 复原波）：
-  1. **双工具面去重**：**两套完整注册表**——`src/tui/tools/`（**181 文件/44k 行**自带本体 + 真 React 渲染成员，C-7 原样搬，实测 **0 import engine**）vs `src/engine/tools/`（49 本体，render 成员裁到字符串/null 面，引擎 DI 架构，经 3055 测保真）——裁定**生产单一事实源**（建议：engine 为行为事实源 + tui 渲染路由接 engine 工具对象，收敛为"一套本体 + 一层渲染"），删双份。
+  1. **双工具面去重**：**两套完整注册表**——`src/tui/tools/`（**216 文件/49,827 行**〔§8.74 实测订正 181/44k 旧口径〕自带本体 + 真 React 渲染成员，C-7 原样搬，实测 **0 import engine**）vs `src/engine/tools/`（35 真工具对象 + 4 非工具导出，render 成员裁到字符串/null 面，引擎 DI 架构，经 3055 测保真）——裁定**生产单一事实源**（**§8.74 已裁定**：engine 为行为事实源 + tui 27 UI.tsx 渲染路由叠加，删双份），逐文件命运清单见 `execution-strategy.md §8.74.1`。
   2. **engine spine vs tui orchestrator 运行体去重**（12K 行级）：`src/tui/` orchestrator 运行体 vs `src/engine/query+pipeline` 去重，单一 loop 事实源。
   3. **bootstrapState 187 双份**：`src/tui/bootstrapState.ts`（187 全量副本）vs 新 `bootstrap` 域 54 导出——去重，单源。
   4. **全量 lint 复原波**：D-4b 5 真体（no-process-exit/no-sync-fs/no-cross-platform-process-issues/no-lookbehind-regex/no-process-env-top-level）从"已注册未启用"翻 severity 启用 + 处置重燃的 1483-error 基线（保 quartet 0-error 语义，非清零后放任）。
@@ -123,19 +123,20 @@ G-α 后：W-opt（国产替代优化波，DSH/PI 研读 + §1 八项实施，�
 
 **W1 设计裁定波（零代码，纯 docs）**
 - ~~1.1 DSH 参考研读~~（**划出 → W-opt 发布后优化波**，排期裁定见 §1；W1 纯发布关键路径设计）
-- 1.2 双工具面收敛裁定：**181 文件逐文件命运清单**（保留为渲染层 / 删除 / 归并）+ 渲染叠加接法（裁定：engine = 行为事实源，tui 保留 UI.tsx React 渲染函数作路由叠加，删 tui 重复注册与本体）
+- 1.2 双工具面收敛裁定：**216 文件逐文件命运清单**（§8.74.1 已落盘：类 a 34 目录删体留 27 UI.tsx 渲染层 / 类 b 16 目录 9 删 7 留 / 类 c 0）+ 渲染叠加接法（裁定：engine = 行为事实源，tui 保留 UI.tsx React 渲染函数作路由叠加，删 tui 重复注册与本体；删体前先迁兄弟体类型）
 - 1.3 单 loop 切法：tui orchestrator 运行体 12K 行 vs engine query+pipeline 的保留/删除清单
 - 1.4 bootstrapState 187 vs 54 导出裁定
 - 1.5 TUI 活链路接法设计（REPL → 单 loop → 工具执行 → 渲染路由 → 续轮 + PTY 探针设计）
 - 1.6 lint 复原处置策略（重燃基线：修集合 vs 登记延后集合）
 - 门禁：§8.74 设计记录落盘 + 四件套不变（纯 docs 波）
 
-**W2 双工具面去重 + 单 loop（行为零改动，每切片四件套绿）**
-- 2a 工具注册面收敛（照 1.2 命运清单）/ 2b 渲染路由层（tui UI.tsx 渲染函数挂接 engine 工具对象；删 tui 重复本体）/ 2c 单 loop 收敛（照 1.3）/ 2d bootstrapState 去重（照 1.4）/ 2e 删净 + 旧路径 0 引用探针 + 四件套 + gate 6·0·5·2
+**W2 双工具面去重 + 单 loop（行为零改动，每切片四件套绿）**〔§8.74.6 已重分切片，以此为准〕
+- 2a 工具注册面收敛（照 §8.74.1 命运清单）/ 2b 渲染路由层（先迁 UI.tsx 兄弟体类型，27 UI.tsx + 2 fused 特例 + MCPTool KEEP；渲染函数挂接 engine 工具对象；删 tui 重复本体）/ **2-pre engine 缺面填平**（autoCompact 3 / compact 4 / microCompact 3 / context 扩面族，零行为 + 判别单测，为 W3 删码铺路）/ 2d bootstrapState 去重（47 碰撞名切 src/bootstrap + 3 drift 裁定）/ 2e 删净 + 旧路径 0 引用探针 + 四件套 + gate 6·0·5·2
+- **单 loop 运行体（orchestrator ≈11k (a) 类）删除不在 W2**（活链路依赖 orchestrator generator，删除 = 行为变更 → W3）
 - 门禁：波终四件套（行为零改动，测试数谱系 ±0 或仅探针增减）+ execution-strategy 记录
 
-**W3 TUI 活链路接上 + 端到端验真（行为新增）**
-- 3a REPL 驱动单 loop（真 LLM 一轮）/ 3b 工具执行 + 渲染路由 + 续轮 / 3c PTY 探针固化（func/gelu；live-gateway 门控，网关不可达 skip-clean）/ 3d 人工 PTY 验真（`script -qec`，本地跑；CI skip）
+**W3 TUI 活链路接上 + 单 loop 切换 + 端到端验真（行为新增）**〔§8.74.4/§8.74.6〕
+- 3a engine 扩面：`AgentLoopDeps.emit?` 可选槽（不注入 = 零行为）+ 事件适配层 / 3b REPL 重接线五件套 + `createAgentLoopDeps` 单组合根（替换 headless 行内组装 + factory 注入，核销 `orchestrator?: unknown` 接缝）/ 3c 删 orchestrator (a) 类 27 文件 ≈11k + (c) 类改写薄 re-export / 3d PTY 探针固化（func/gelu；live-gateway 门控，网关不可达 skip-clean；G-α 冒烟真跑 ≥1 次）+ 人工 PTY 验真（`script -qec`，本地跑；CI skip）
 - 门禁：四件套 + 新探针全绿（P-2 端点可用态）
 
 **W4 全量 lint 复原（殿后）**
@@ -163,8 +164,8 @@ G-α 后：W-opt（国产替代优化波，DSH/PI 研读 + §1 八项实施，�
 - ✅ 引擎完善：agent loop / 49 工具本体 / skill / session / hooks / 权限 / auto-mode / scheduler / swarm / LSP / MCP(stdio) / Web
 - ✅ CLI headless（-p / stream-json / 高频 5 选项 + effort）活探验真（gelu 探针）
 - ⚠️ **TUI 渲染 = 已移植但活链路未接**（勿误判"整个 TUI 没做"）：
-  - ✅ 渲染**本体/组件已实施**：`src/tui/tools/` **181 文件 / 44008 行**自带工具本体（C-7 整体搬入），`renderToolUseMessage`/`renderToolResultMessage` 是**真 React 渲染成员**（`BashTool/UI.tsx` 等，非 engine 的 `() => null` 面）；启动已 PTY 验真到 REPL（banner + 输入框）。
-  - ❌ **交互活链路未落地**：① "输入 prompt → LLM → tool_use → 真执行 → 结果渲染 → 续轮"整回合**从未端到端验真**（Slice E 只验到 REPL 可达，非完整 tool 回合）；② **双工具面 = 两套完整注册表未去重**（R1 实质）：`src/tui/tools/`（181/44k，真 React 渲染，C-7 原样搬，**实测 0 import engine/tools**）vs `src/engine/tools/`（49 本体，render 裁 null/字符串面，引擎 DI 架构，**经 3055 测保真**）——**只有 engine 那套经保真测试，tui 这套原样搬、没接引擎 DI、没验**；发布前必须收敛（否则交互面与 headless 面行为漂移）。
+  - ✅ 渲染**本体/组件已实施**：`src/tui/tools/` **216 文件 / 49,827 行**〔§8.74 实测订正〕自带工具本体（C-7 整体搬入），`renderToolUseMessage`/`renderToolResultMessage` 是**真 React 渲染成员**（`BashTool/UI.tsx` 等 27 个，非 engine 的 `() => null` 面）；启动已 PTY 验真到 REPL（banner + 输入框）。
+  - ❌ **交互活链路未落地**：① "输入 prompt → LLM → tool_use → 真执行 → 结果渲染 → 续轮"整回合**从未端到端验真**（Slice E 只验到 REPL 可达，非完整 tool 回合）；§8.74.4 坐实：活链路 `query` 经 engineCompat 解析到 **tui orchestrator 自有 generator**（loop.ts:215），engine `queryAgentLoop`（`Promise<AgentLoopResult>`，窄 spine 无 emit 面）在 TUI **零消费**，headless 亦为行内组装 deps 直接调 `queryAgentLoop`（`createAgentLoopDeps` 全仓 0 活调用方 = 前向接缝）；② **双工具面 = 两套完整注册表未去重**（R1 实质）：`src/tui/tools/`（216/49.8k，真 React 渲染，C-7 原样搬，**实测 0 import engine/tools**）vs `src/engine/tools/`（35 本体，render 裁 null/字符串面，引擎 DI 架构，**经 3055 测保真**）——**只有 engine 那套经保真测试，tui 这套原样搬、没接引擎 DI、没验**；发布前必须收敛（否则交互面与 headless 面行为漂移）。
 - ❌ **分发工具链缺失**：AtlasCode 现**无 git remote**（本地 master，330 提交不 push）/ 仅波 tag（wave-a/b/c/f，**SemVer 未初始化**，memory 版本管理方案"一次性初始化待执行"未做）/ 无安装脚本 / 无自升级命令
 - ⚠️ `[ATLAS-HOLD]` 56 行（IFF 网关端点）未换值——**非基础发布阻塞**：基础车道 = OpenAI 协议静态键，经 `settings.json` modelRoles / `ATLAS_*_MODEL` env 可接**任意 OpenAI-compatible 端点（含 DeepSeek 官方 OpenAI 兼容 API）**；D-9 只影响"国产默认端点"内置，不阻塞 alpha
 

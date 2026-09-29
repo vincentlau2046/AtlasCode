@@ -5516,3 +5516,135 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 **波终基线（#154 审视波终）**：tsc 0 / lint 0 error（384 warn）/ build 798 模块 / 全量 **3055 pass·0 fail·7318 expect·182 文件** + CI gate **6·0·5·2**（四件套全绿，零行为面回归）。
 
 **#154 全功能复刻审视优化波关闭**：S-E1 总分析（§8.73）+ S-1 保真审轮 1（§8.73.1）+ S-2 保真审轮 2 + S-3 活性 + S-4 裁定/修波（§8.73.2/§8.73.3）+ S-5 本闭环全落盘。**D-8b 不切波 tag**（子波例，闭环记录即归档，同 §8.72 壳波先例）。**残口归波**（非本波量级，登记不启动）：E-wave-end 审计（engine spine vs tui orchestrator 12K 去重 / Ascend 执行器六件套 vs ascend 域 9 占位去重 / bootstrapState 187 双份 / 全量 lint 复原波〔D-4b 5 真体启用 + 1483-error 基线处置〕）/ D-2a 切端 / D-3 Ascend 独立实施波 / D-9 换值 / D-6 非 stdio transport / mount.ts 实挂载。
+
+### §8.74 W1 设计裁定波（2026-09-29，task #173）
+
+> W1 = E-wave-end 审计序列（R1）的**设计先于实施**波（不变式 1：本波产出是 W2/W3 删码**唯一依据**；本波零代码纯 docs，实施中如需临场裁 → 回本波补设计）。
+> 数据来源 = 2 个只读枚举 subagent（工具面命运清单 / orchestrator·bootstrapState·活链路）+ **主 session 逐条 grep/Read 复核**（subagent 报告 = 数据，下表所有数字均为复核后口径，含对 subagent 报告的 3 处订正，见 §8.74.7）。
+> **旧口径订正**：`src/tui/tools/`「181 文件/44k 行」（roadmap §2/§5 旧称）→ 实测 **216 个 .ts/.tsx 文件 / 49,827 行 / 52 顶层条目**（50 工具目录 + shared + testing 2 辅助目录）。
+
+#### 8.74.1 双工具面收敛裁定（1.2 命运清单）
+
+**实测口径**：
+- `src/tui/tools/` = **216 文件 / 49,827 行 / 52 条目**（C-7 原样搬；对 `src/engine` **直接 import = 0**，唯一桥接 = `AgentTool/runAgent.ts:16` 经 `engineCompat` 取 `query` + `factory.ts:51` `shouldUseSandbox`）
+- `src/engine/tools/` = **35 真工具对象**（Face 型）+ 4 非工具导出（`bashToolCheckPermission` / `bashToolCheckExactMatchPermission` / `lspToolInputSchema`）= `^export const` 39 命中（旧「49 口径」= 35 本体 + 门控/辅助展开，F-A1 已核销）
+- **命名映射**（W2 收敛须处理）：`FileReadTool/FileEditTool/FileWriteTool`（tui）↔ `ReadTool/EditTool/WriteTool`（engine）；`ScheduleCronTool`（tui 目录）↔ `CronCreate/CronDelete/CronListTool`（engine 3 体）；`ExitPlanModeTool`（tui）↔ `ExitPlanModeV2Tool`（engine）
+
+**类 a：34 目录有 engine 对应（154 文件）— 裁定：删本体，保留渲染叠加层**
+- **27 个 UI.tsx = KEEP**（渲染路由层，全列 = W2-2b 输入清单：Agent/Bash/Config/EnterPlanMode/EnterWorktree/ExitPlanMode/ExitWorktree/FileEdit/FileRead/FileWrite/Glob/Grep/ListMcpResources/LSP/MCP/NotebookEdit/PowerShell/ReadMcpResource/RemoteTrigger/ScheduleCron/SendMessage/Skill/TaskStop/TeamCreate/TeamDelete/WebFetch/WebSearch 各 1 UI.tsx）
+- **删本体前必须先迁类型**：UI.tsx 兄弟体类型 import 形态 = `import type { BashProgress, BashToolInput, Out } from './BashTool.js'`（BashTool/UI.tsx:20 为代表）→ 类型先迁 engine Face 或 shared types 模块（W2 先迁类型再删体，防断链）
+- **2 个 fused .tsx 特例**（本体即 .tsx 渲染，非「体 + UI.tsx」分离形态）：`AskUserQuestionTool/AskUserQuestionTool.tsx`（+prompt.ts）/ `TaskOutputTool/TaskOutputTool.tsx`（+constants.ts）——渲染成员保留，tui 内嵌体删（engine 35 体均含对应物），渲染挂接 engine 工具对象
+- **7 目录全删**（无 UI.tsx、engine 本体齐）：Snip / TaskCreate / TaskGet / TaskList / TaskUpdate / TodoWrite / ToolSearch
+- **MCPTool 订正 = 类 b 保留**（subagent 报「UI.tsx 402L 孤儿」**错**：`MCPTool.ts:11` 活 import `./UI.js`；MCPTool 4 文件 = tui 动态 MCP 工具包装，engine 仅 ListMcpResources/ReadMcpResource 两体无对应）
+- **4 个 dead require 删**（目录不存在、运行时恒 null 死支，连同 eslint-disable 块）：`SuggestBackgroundPRTool`（tools.ts L19-21，IS_ATLAS_DEV）/ `CtxInspectTool`（L97-99，feature('CONTEXT_COLLAPSE')）/ `ListPeersTool`（L113-115，feature('UDS_INBOX')）/ `WorkflowTool/bundled`（L118，initBundledWorkflows）
+
+**类 b：16 个 tui-only 工具目录（18 目录 = 16 工具 + shared + testing）— 裁定表**
+
+| 目录/文件 | 规模 | 裁定 | 依据（实测） |
+|---|---|---|---|
+| `PowerShellTool` | 14 文件/8,862L | **KEEP** | 平台分支（Windows），engine 无对应；`getPowerShellTool()` 活注册 |
+| `ascend/` | 22 文件/2,882L | **KEEP** | 域包（deps 注入），归 D-3 波（G-β） |
+| `shared/` `testing/` | 2 / 1 文件 | **KEEP** | 辅助目录非工具 |
+| `gitOperationTracking`（根级文件） | — | **KEEP** | 3 活消费者：`utils/collapseReadSearch.ts` / `PowerShellTool.tsx` / `core/orchestrator/tools/toolExecution.ts` |
+| `spawnMultiAgent.ts`（根级，1,084L） | — | **删** | 0 活导入（仅 task/task.ts:13、computerUse/wrapper.tsx:291 注释提及） |
+| `VerifyPlanExecutionTool` | 1 | **删** | `ATLAS_VERIFY_PLAN` dev-only 门（tools.ts L74-77 + L245 注册行同删）；engine 侧仅 2L constants stub（⑫ 登记） |
+| `WorkflowTool` | 1 | **删** | bundled 目录 dead require（L118）；engine 无对应 |
+| `SyntheticOutputTool` | 1 | **先迁常量再删** | `SYNTHETIC_OUTPUT_TOOL_NAME` 被 tools.ts L81 活 import（常量迁 engine/shared 后删） |
+| `MCPTool` | 4 | **KEEP** | 订正见上（活 import 非孤儿；动态 MCP 工具包装 tui 独） |
+| `DiscoverSkills` / `McpAuth` / `Monitor` / `OverflowTest` / `REPL` / `ReviewArtifact` / `TerminalCapture` / `Tungsten` / `WebBrowser` | 各 1-3 | **删**（各 1 个 gated require + 注册行同删） | engine 无对应本体（策展裁剪面：WebBrowser L231 / OverflowTest L235 / TerminalCapture L236 / REPL L244 / Monitor L247） |
+
+**类 c：engine-only（无 tui 侧本体）= 0** —— 35 个 engine 本体全部有 tui 目录或 fused 文件对应（命名映射 + Cron 3 体 ↔ ScheduleCronTool），无缺口。
+
+**tools.ts 注册面收敛（W2-2a 输入）**：现 40 个 `.js')` require 行 + 门控展开块（L230-252 段）→ 删 4 dead require + 类 b 删集（9 工具 + WorkflowTool + VerifyPlanExecution）+ 类 a 7 目录注册行后，注册面 = **engine 35 体 + PowerShell（域外 KEEP）** 单一口径（ascend 域包经 D-3 挂载，不在本波）。
+
+#### 8.74.2 单 loop 裁定（1.3：orchestrator 13,540 LOC / 45 文件）
+
+**实测**：`src/tui/core/` + `src/tui/coordinator/` = **13,540 LOC / 45 文件**（43 core + 2 coordinator）；engine 侧 **0 react/ink import**（纯 DI 域）；tui 对 engine loop 符号（`queryAgentLoop`/`queryOneRound`）**0 调用**（excl. engineCompat re-export）。
+
+**活链路实况（load-bearing）**：`REPL.tsx:158` `import { query } from 'src/tui/engineCompat'` → `engineCompat.ts`（`export * from 'src/engine'` + `export * from './core/orchestrator'`，**15 名冲突块以 orchestrator 为准**——头注 F-B4 口径）→ `core/orchestrator/index.ts:33` → **`query/loop.ts:215` `export async function* query(`（tui 自有 generator，1,641L）**。engine `queryAgentLoop`（`Promise<AgentLoopResult>`，非 generator）在 TUI 闭包**零消费**——TUI 活链路跑在 13.5k orchestrator 旧仓运行体上；engine loop 现仅 headless `print.ts:731` 直接调用（deps 在 print.ts L662+ **行内组装**）。
+⚠️ **订正 subagent 报告**：`createAgentLoopDeps`（compose.ts:427）**全仓 0 活调用方**（仅导出 + 注释 + atlascode/index.ts re-export）——它是**未接通的前向接缝**，不是"CLI 已消费的装配器"。W3 须使其成为唯一组合根（替换 headless 行内组装 + 注入 TUI），非"threading"。
+
+**45 文件命运表（(a) 删 / (b) 留 / (c) 改写；LOC 逐文件抽验 top-5 全中：1641/1523/1511/1241/381）**：
+
+| 类 | 文件（LOC） | 裁定 |
+|---|---|---|
+| (a) 27 文件 ≈11k | query/loop.ts (1641) / context/compact.ts (1523) / tools/toolExecution.ts (1511) / QueryEngine.ts (1241) / context/sessionMemoryCompact.ts (614) / llm/query.ts (601) / tools/toolHooks.ts (558) / tools/StreamingToolExecutor.ts (530) / context/microCompact.ts (507) / query/stopHooks.ts (454) / coordinator/coordinatorMode.ts (381) / context/autoCompact.ts (360) / context/snipCompact.ts (265) / context/reactiveCompact.ts (200) / tools/toolOrchestration.ts (193) / tools/defaultPipeline.ts (117) / context/defaultManager.ts (107) / query/tokenBudget.ts (93) / coordinator/workerAgent.ts (76) / context/postCompactCleanup.ts (77) / query/transitions.ts (70) / tools/pipeline.ts (65) / context/manager.ts (63) / context/snipProjection.ts (57) / context/timeBasedMCConfig.ts (43) / query/config.ts (41) / context/cachedMicrocompact.ts (21) / context/cachedMCConfig.ts (6) | **删**（engine 为单一事实源）。engine twin 存在性已核：executeToolUse (pipeline/toolExecution.ts:190, async) / findTool (:182) / classifyToolError (pipeline/errorClassification.ts:11) / buildPostCompactMessages (context/compact.ts:288) / CompactionResult (:41) / microCompact 4 函数 + 2 常量 / coordinatorMode 4 函数 / getAutoCompactThreshold (autoCompact.ts:112) |
+| (b) 9 文件 ≈1.4k | core/executor/{ascendMockFixtures 386, AscendExecutor 237, types 108, toolchain 61, AscendMockPort 42} / context/prompt.ts (356, glue) / context/grouping.ts (63) / context/continue-site-audit (47) / context/compactWarningState (18) / context/compactWarningHook (16) / tools/toolUseSummaryGenerator (121) / context/apiMicrocompact (154, glue) / core/memory/MemoryConfig (104) | **KEEP**（Ascend 执行器六件套归 D-3 去重；glue 类 W3 改写输入源） |
+| (c) 8 文件 ≈2k | orchestrator/index.ts (121) / query/deps.ts (80) / api.ts (76) + 上述 glue 改写面 | **REWRITE**（薄 re-export from `src/engine` + 事件适配层，= W3 接线面） |
+
+**engine 缺面先迁清单（W2-pre 切片，零行为新增，带判别单测——先迁后删的硬顺序约束）**：
+1. `context/autoCompact` ← `calculateTokenWarningState` / `getEffectiveContextWindowSize` / `isAutoCompactEnabled`（3 缺面实测确认 engine 无）
+2. `context/compact` ← `mergeHookInstructions` / `stripImages` / `createCompactCanUseTool` / `createPlanAttachmentIfNeeded`（4 tui 独有 extras）
+3. `context/microCompact` ← `pinCacheEdits` / `consumePendingCacheEdits` / `markToolsSentToAPIState`（3 extras）
+4. `context` ← snip 族（snipCompact + snipProjection 的 `isSnipBoundaryMessage`/`projectSnippedView`）/ sessionMemoryCompact / reactiveCompact（`reactiveCompactOnPromptTooLong`）/ cachedMicrocompact + cachedMCConfig + timeBasedMCConfig + postCompactCleanup + defaultManager（engine context 扩面）
+
+**流式事件缺口裁定**：`AgentLoopDeps` 现无任何事件发射面（窄 spine 配置袋：modelProvider/role/signal/checkPermission/hooks/transcript + D-5b 5 槽）；`queryAgentLoop` 返回 `Promise<AgentLoopResult>`，而 TUI `onQueryImpl`（REPL.tsx:2621）消费 `AsyncGenerator<StreamEvent>`。**裁定**：W3 给 `AgentLoopDeps` 加**可选 `emit?` 回调槽**（不注入 = 不发射，headless 行为零改动；窄 spine 语义不变），TUI 侧事件适配层（W3-(c) 类胶水）包 engine loop 重放 `onQueryEvent` 期望的事件契约；engine 侧 streaming-tool-executor 变体（tui toolExecution 1511L + StreamingToolExecutor 530L 的 generator 语义）**不入发布关键路径**，归 W-opt 优化项（避免引擎面膨胀）。
+
+**单一组合根裁定**：W3 使 `createAgentLoopDeps`（compose.ts:427）= 唯一 AgentLoopDeps 装配点——① 替换 headless print.ts L662+ 行内组装块；② 注入 TUI `factory.ts`（替换 `orchestrator?: unknown` 前向接缝，factory.ts:108 H6 登记处核销）；③ REPL `canUseTool` 改消费 engine `createPermissionGate`（engine/index.ts:647）产物 + `getTools`/`ToolRegistryDeps`（engine/tools/toolRegistry.ts:204/:121）替代 tui tools.ts 注册面（域外 KEEP 工具经 tui overlay 追加注册）。
+
+#### 8.74.3 bootstrapState 裁定（1.4：187 vs 60）
+
+**实测**：`src/tui/bootstrapState.ts` = **187 导出**（373L，123 处 `as any` stub 重载）/ **217 消费文件（100% 在 src/tui/ 内，0 非 tui 消费方**——全仓 4 个含 "bootstrapState" 字符串的非 tui 文件均为 executor `getBootstrapStatePort`（异符号）或注释）；`src/bootstrap/`（state.ts + cwd.ts + index.ts）= **60 导出 / 49 消费文件 / 0 tui**（subagent 报 20 为 pattern 低估，"两面完全不相交"结论不变）。
+**裁定**：
+- **47 碰撞名 → 切 `src/bootstrap` 单源**（实测 comm 精确 = 47：getCwdState/getOriginalCwd/getSessionId/switchSession/getIsInteractive/getIsNonInteractiveSession/setIsInteractive/getClientType/getProjectRoot/getAllowedSettingSources/… 成本累积族/resetCostState 等）。217 消费站点逐一切换 import（W2-2d 切片，零行为：抽验 5 名语义逐一一致——`getCwdState` 均返回 `_cwdState` 模块变量、`getSessionId` 均 `randomUUID()`、`getProjectRoot` 均 walk-up .git 同算法、`addToTotalCostState` 均 append `_costState.modelUsage`）
+- **13 个 domain-unique 名免费获得**（tui 切单源后即得）：CliSettingSource / CostModelUsage / CostState / getCwd（ALS 感知）/ pwd / runWithCwdOverride / getSessionSource / setSessionSource / getTranscriptPathForSession / setTranscriptDir / hasTrustAccepted / setTrustAccepted / resetCliEntryStateForTests（+ resetHooksBootstrapMembersForTests）
+- **~140 tui-only 名留在 tui 本地 state 模块**（REPL 渲染/feature-flag/telemetry 态无 engine twin；123 `as any` stub 在 W2 切片中审计——纯 stub 无消费者的随删）
+- **3 处 drift 逐点裁定**：① trust 面 = tui `getSessionTrustAccepted/setSessionTrustAccepted`（`: any` no-op stub）vs domain `hasTrustAccepted/setTrustAccepted`（真实现，state.ts:426-430 UI 波残留守）→ **采 domain 名 + 真实现**，trust dialog 接线归 W3；② `addToTotalDurationState` 同名同签名，**切换前须核验参数序逐字一致**（W2-2d 前置检查）；③ 成本类型 = tui 内联 `CostModelUsage/CostState` 本地 type 遮蔽 domain 导出 → 切 `import type from 'src/bootstrap'`
+
+#### 8.74.4 TUI 活链路裁定 + PTY 探针（1.5）
+
+**现状链（实测行号全中）**：PromptInput (REPL.tsx:4560) → `onSubmit` (2905) → `onQuery` (2642) → `onQueryImpl` (2473) → **`for await (event of query({...}))` (2621)** → tui orchestrator `query` generator (loop.ts:215) → `productionDeps().callModel`（forward `modelprovider/streamAssistant`）+ `runTools`（toolOrchestration.ts:19）→ `runToolUse`/`checkPermissionsAndCallTool`（toolExecution.ts:333/:523，执行 **tui tools.ts 注册面**）→ `onQueryEvent`（REPL.tsx:2410 handleMessageFromStream）渲染。**LLM 一轮 + tool_use 可触发，但全程走 11k orchestrator 双份，engine 单 loop 零接入。**
+
+**W3 五件套接线（行为新增波，非纯验证）**：
+1. `query` 符号 → engine `queryAgentLoop`（engineCompat 删 orchestrator `query` 重导出 + 事件适配层；emit 槽见 §8.74.2）
+2. `createAgentLoopDeps()` 注入 factory.ts（核销 `orchestrator?: unknown` 接缝）+ 替换 headless 行内组装
+3. 流式事件契约映射（engine `AgentRoundResult`/emit → TUI `onQueryEvent` 事件族）
+4. `canUseTool`/`toolUseContext` → engine `createPermissionGate` + `getTools(ToolRegistryDeps)`（域外 KEEP 工具 overlay）
+5. 删 orchestrator (a) 类 ≈11k LOC（27 文件）+ (c) 类改写为薄 re-export
+
+**PTY 探针设计（W3 门禁，非纯断言旧行为）**：
+- **func 探针**（tests/func，真 spawn + 真盘）：PTY 起 TUI → 断言 banner + 输入框可达（§8.72 Slice E 已验面）→ 输入 prompt → 断言 tool_use 渲染（Read/Write/Bash 之一）+ 结果消息 + 续轮可输入
+- **gelu 活探**（live-gateway 门控）：经 `modelProvider.healthCheck` 门控——网关可达（P-2 端点）跑真 LLM 一轮完整 tool 回合；不可达 **skip-clean**（不红）；**G-α 冒烟须真跑 ≥1 次通过**
+- **人工 PTY**：`script -qec` 本地跑（CI skip，沿 e2e PTY hang 先例）
+- 探针突变判别：备份 → 断 engine emit 面被消费（mutate 去 emit → 定向红）→ verbatim restore
+
+#### 8.74.5 lint 复原策略（1.6：211 实测口径）
+
+**W4 重燃面实测**（W2 删码前口径，临时配置 5 真体翻 error 实测，非旧"1483 基线"——1483 = 14 条豁免规则全开口径，W4 范围仅 5 真体）：**211 errors** = no-sync-fs **149**/39 文件（大头 utils 层：fsOperations 30 / config 17 / plugins 17 / pidLock 10 / file 8 / git 7…）+ no-process-exit **54**/6 文件（main.tsx 独占 47 = CLI 出口分发层）+ no-process-env-top-level **8**/7 文件；no-cross-platform-process-issues 与 no-lookbehind-regex **0 命中**。
+**策略（行为零改动纪律下）**：
+- 低成本修：no-process-env-top-level 8 + no-process-exit 非 main.tsx 6 处 = 14 处逐点修
+- main.tsx 47 = CLI 合法进程出口 → **登记延后**（逐站点 eslint-disable 带 owner 注，或抽 exit 助手函数收敛）
+- no-sync-fs 149 = **不改写 sync→async**（行为零改动纪律）→ 按文件 legacy-debt 豁免（逐文件 eslint-disable 带 owner 注，W-opt 波再议）
+- W2 删掉的 tui 重复本体（BashTool 族 / AgentTool 等）自带重燃点随删消失 → **W4 在 W2 删码后重测缩面，终局数 < 211 再锁定新基线**（测试基线文档同步）
+
+#### 8.74.6 W2/W3 切片重分（roadmap §4 原 2a-2e 据此修订）
+
+**W2（行为零改动，每切片四件套绿）**：
+- **2a 注册面收敛**：照 §8.74.1 命运清单——engine 35 体为单一事实源，删 4 dead require + 类 b 删集 + 类 a 7 目录 + spawnMultiAgent；注册集合与门控**与现状逐一对齐**（零行为）
+- **2b 渲染路由层**：先迁 UI.tsx 兄弟体类型（27 UI.tsx + 2 fused 特例 + MCPTool KEEP），渲染成员挂接 engine 工具对象；删 tui 重复本体
+- **2-pre engine 缺面填平**：§8.74.2 缺面先迁清单 4 组（autoCompact 3 / compact 4 / microCompact 3 / context 扩面族）迁 engine + 判别单测（零行为，为 W3 删码铺路）
+- **2d bootstrapState 去重**：47 碰撞名切 `src/bootstrap`（217 站点）+ 3 drift 逐点裁定兑现 + ~140 tui-only 留 tui（stub 审计）
+- **2e 删净 + 探针**：旧路径 0 引用 grep 探针 + 四件套 + gate 6·0·5·2
+- （单 loop 运行体删除**不在 W2**——活链路依赖 orchestrator generator，删除 = 行为变更，归 W3）
+
+**W3（活链路 + 单 loop 切换，行为新增，需 P-2 端点）**：
+- **3a** engine 扩面：`AgentLoopDeps.emit?` 可选槽（不注入 = 零行为）+ 事件适配层
+- **3b** REPL 重接线五件套（§8.74.4）+ `createAgentLoopDeps` 单组合根（headless 行内块替换 + factory 注入）
+- **3c** 删 orchestrator (a) 类 27 文件 ≈11k LOC + (c) 类 8 文件改写薄 re-export
+- **3d** PTY func/gelu 探针固化 + 人工 `script -qec` 验真（探针突变判别）
+
+#### 8.74.7 核验台账 + 四件套 + 波闭环
+
+**主 session 复核台账（subagent 报告 = 数据，逐条核验）**：
+- ✓ 216/49,827/52（ls 口径 52，agent 报 51 差 1，以 ls 为准）/ engine 39 命中 = 35 体 + 4 非工具导出（agent 报 35 正确，主 session 裸 grep 39 为口径偏差，已对账）
+- ✓ 4 dead require 目录 4/4 MISSING + tools.ts 行号全中 / spawnMultiAgent 0 活导入 / MCPTool 3 消费者中 toolExecution 为 (a) 类将删面（W2 删后消费者减 1，不影响 KEEP 裁定——另 2 消费者 collapseReadSearch/PowerShellTool 保留）
+- **订正 ①**：MCPTool/UI.tsx 非孤儿（`MCPTool.ts:11` 活 import `./UI.js`，agent 漏查相对形态）→ MCPTool 整体归类 b KEEP
+- **订正 ②**：UI.tsx 实测 **27** 个（agent 报 25）
+- **订正 ③**：`createAgentLoopDeps` **0 活调用方**（agent 报"CLI headless 消费"——实为 headless 行内组装 + 直接调 `queryAgentLoop`）；bootstrap 域消费实测 **49** 文件（agent 报 20，pattern 低估，"0 tui 消费"结论不变）
+- ✓ orchestrator 13,540/45（top-5 LOC 抽验全中）/ query 链行号全中（2473/2621/2642/2905）/ engine 0 react/ink / tui 0 调 queryAgentLoop / `queryAgentLoop` = `Promise<AgentLoopResult>` / `AgentLoopDeps` 无 emit 面 / 碰撞集 comm 实测 = 47 / domain-unique = 13 / bootstrapState 187 导出 / 217 tui 消费 / 123 `as any`
+- ✓ engine twin 存在性（executeToolUse:190 / findTool:182 / classifyToolError errorClassification.ts:11 / buildPostCompactMessages:288 / coordinatorMode 4 函数 / microCompact 4 函数）/ autoCompact 3 缺面确认 engine 无
+- lint 211 实测（W1-1.6 先行落，策略 §8.74.5）
+
+**四件套（纯 docs 波，代码/测试基线不变）**：tsc 0 / lint 0 error（384 warn）/ build 798 模块 / 全量 **3055 pass·0 fail·7318 expect·182 文件** + CI gate **6·0·5·2**（继承 §8.73.4 波终基线，本波零代码面）。
+
+**波闭环**：W1 设计裁定完成（1.2 命运清单 / 1.3 单 loop / 1.4 bootstrapState / 1.5 活链路 + 探针 / 1.6 lint 策略全落盘，= W2/W3 删码唯一依据）。**不切波 tag**（设计子波，沿 §8.72/§8.73 先例；R1 波 tag 归 W4/W5 收口时切 `wave-r1`）。随即开 W2（task #174）按 §8.74.6 切片序 2a → 2b → 2-pre → 2d → 2e。
