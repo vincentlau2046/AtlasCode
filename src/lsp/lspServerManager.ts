@@ -380,6 +380,11 @@ export function createLSPServerManager(): LSPServerManager {
    * NOTE: Currently available but not yet integrated with compact flow.
    * TODO: Integrate with compact - call closeFile() when compact removes files from context
    * This will notify LSP servers that files are no longer in active use.
+   *
+   * 前向接缝登记（F-A2 · S-4，H6 防空洞）：closeFile 声明/导出但零消费方，
+   * 待 LSP×compact 集成波接入（owner = LSP×compact 集成波：compact 移除
+   * 文件路径时调 closeFile() 通知 LSP 释放）。C-7 原样继承旧仓同款
+   * TODO + 零消费方（src/services/lsp/LSPServerManager.ts:374）。复审勿重提。
    */
   async function closeFile(filePath: string): Promise<void> {
     const server = getServerForFile(filePath)
