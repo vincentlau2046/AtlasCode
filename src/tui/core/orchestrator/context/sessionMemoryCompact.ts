@@ -38,7 +38,8 @@ import {
   type CompactionResult,
   createPlanAttachmentIfNeeded,
 } from './compact.js'
-import { estimateMessageTokens } from './microCompact.js'
+// W3-3c-2（§8.74.19）：microCompact (a) 类删净 → engine 单源（2-pre 缺面填平）
+import { estimateMessageTokens } from 'src/engine'
 import { getCompactUserSummaryMessage } from './prompt.js'
 
 /**

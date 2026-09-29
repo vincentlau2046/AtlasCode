@@ -13,7 +13,7 @@ import type { CacheSafeParams } from '../../../utils/forkedAgent.js'
 import { logError } from '../../../utils/log.js'
 import { tokenCountWithEstimation } from '../../../utils/tokens.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js'
-import { getMaxOutputTokensForModel } from '../../../core/orchestrator/llm/query.js'
+import { getMaxOutputTokensForModel } from 'src/tui/utils/model/maxOutputTokens.js'
 import { notifyCompaction } from '../../../services/api/promptCacheBreakDetection.js'
 import { setLastSummarizedMessageId } from '../../../services/SessionMemory/sessionMemoryUtils.js'
 import {

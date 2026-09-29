@@ -1,14 +1,19 @@
 # core/orchestrator — Agent 循环与编排域
 
-> 状态：Phase A 完成（接口骨架 + 审计文档就位），Phase B 暂不执行
-> 门面：`import { ... } from 'core/orchestrator/index.js'`
-> 构造方式：`QueryEngine` 类（当前消费 `query()`）；未来 `createOrchestrator()` 经 `factory.ts` 接线
+> 状态：W3-3c-2（§8.74.19）后 = (a) 类 18 文件删净（主循环 / 工具执行管道 / 查询引擎 /
+> 状态机 / 纯谓词投影，engine 单源承接）；(b) 留集 = LLM-bound 压缩体 / 跨域 cache
+> 编排 / tui 类型面 / 残留守 stub（engine twin 非 drop-in，W-opt 回填波处置）
+> 门面：`index.ts` 窄消费面（逐名 grep 核验）；engine 面经 `src/tui/engineCompat.ts`
+> 双星号 + 消费方驱动窄冲突块透出（(b) 富体胜）
+> 主循环活链路 = engine `queryAgentLoop`（`src/tui/loopEvents.ts` queryEngineLoopStream
+> 事件适配 + agentLoopDeps/replLoopDeps 装配体），本域不再承载 loop
 
-域内 35 文件 / 约 12000 行，承担：Agent 主循环（LLM 流式 + 工具调度 + 错误恢复）、
-上下文压缩（auto/reactive/snip/collapse/microcompact）、工具执行管道（权限 + MCP 路由 +
-调用 + 遥测）、查询引擎封装。
+域内原 35 文件 / 约 12000 行（W3-3c-2 前口径），承担：Agent 主循环（LLM 流式 + 工具
+调度 + 错误恢复）、上下文压缩（auto/reactive/snip/collapse/microcompact）、工具执行
+管道（权限 + MCP 路由 + 调用 + 遥测）、查询引擎封装。
 
-## 文件地图
+## 文件地图（W3-3c-2 前历史口径；(a) 类删集见 §8.74.19 命运表订正，现存 (b) 留集
+## 以 index.ts 头注为准）
 
 ### 根级
 

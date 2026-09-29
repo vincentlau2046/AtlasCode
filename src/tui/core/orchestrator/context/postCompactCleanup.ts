@@ -7,7 +7,8 @@ import { clearClassifierApprovals } from '../../../utils/classifierApprovals.js'
 import { resetGetMemoryFilesCache } from '../../../utils/memoryFiles.js'
 import { clearSessionMessagesCache } from '../../../utils/sessionStorage.js'
 import { clearBetaTracingState } from '../../../utils/telemetry/betaSessionTracing.js'
-import { resetMicrocompactState } from './microCompact.js'
+// W3-3c-2（§8.74.19）：microCompact (a) 类删净 → engine 单源（2-pre 缺面填平）
+import { resetMicrocompactState } from 'src/engine'
 
 /**
  * Run cleanup of caches and tracking state after compaction.

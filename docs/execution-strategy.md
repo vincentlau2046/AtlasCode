@@ -6206,3 +6206,67 @@ repl-loop-deps + cli-headless-result-text 10/10 / bun test --isolate 全量
 coordinator 6 站点 `require('../coordinator/coordinatorMode.js')` 重指向
 engine coordinator 门面（systemPrompt.ts / toolPool.ts / ResumeConversation.tsx
 ×2 / REPL.tsx ×2，`feature('COORDINATOR_MODE')` 门不变）。
+
+#### 8.74.19 W3-3c-2 orchestrator (a) 类删净 + 命运表订正实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：3c-2 = S8-agent 消费族切换（3c-1）后 orchestrator 双运行体删净。
+§8.74.2 命运表 45 文件表经「engine twin drop-in 性 + 活消费面」逐名实测后
+**订正**（H6 防空洞：以下裁定复审勿当遗漏重提）：
+
+- **裁定 3c-2-1（(a)/(b) 命运表订正：(a) 27 → 18 删）**：7 项 (a)→(b) 留
+  （engine twin 缺面/非 drop-in + 活消费面）：① context/compact.ts（engine
+  compactConversation = 裁剪 DI 体——无 PreCompact hooks/附件重建/
+  userDisplayMessage/PTL fork 支；/compact 命令 6 参富签名 + REPL
+  partialCompact 活消费）② context/microCompact.ts（engine 同步裁剪体无
+  GB config 注入/warning 抑制/cached-MC 缝；富 async 签名 6 消费方）③
+  context/autoCompact.ts（engine TokenWarningParams DI 面 vs tui
+  model-string 签名族；5 消费方）④ context/sessionMemoryCompact.ts（LLM-
+  bound，2-pre ④ 缝）⑤ context/reactiveCompact.ts（2 LLM 入口，2-pre ④ 缝）
+  ⑥ context/postCompactCleanup.ts（跨域 cache 编排，2-pre ④ 缝）⑦
+  context/cachedMCConfig.ts（getCachedMCConfig 活消费 prompts.ts；
+  feature-OFF stub 就地留）。2 coordinator 项（coordinatorMode/workerAgent）
+  (a)→(b) 留：engine twin getCoordinatorUserContext **缺 scratchpad GB 门控
+  段**（engine 头注已登记残留守；REPL:2605 传 scratchpadDir = 切面会丢
+  行为）+ getCoordinatorAgents 类型面不匹配（tui BuiltInAgentDefinition
+  vs engine AgentDefinition）→ tui 留，W-opt 回填。门控等价核验：tui
+  `feature('COORDINATOR_MODE')`（shared/feature.ts ON_BY_DEFAULT + FEATURE_
+  kill-switch）≡ engine `FEATURE_COORDINATOR_MODE==='false'` 门（旧仓
+  bunBundle stub 生产 bundle 语义逐字）→ isCoordinatorMode 面切换语义安全
+  但非必要（文件整体留）。2 (c) 项（query/deps.ts / api.ts）(c)→(a) 删：
+  productionDeps/QueryDeps/Orchestration* 类型面 0 外域消费（消费方 = 将删
+  loop）。**终删集 18 文件 ≈7.7k LOC** = query/{loop, stopHooks,
+  tokenBudget, transitions, config, deps} + QueryEngine + api + llm/query +
+  tools/{toolExecution, toolHooks, StreamingToolExecutor, toolOrchestration,
+  defaultPipeline, pipeline} + context/{manager, defaultManager,
+  snipProjection}。
+- **裁定 3c-2-2（面迁出 3 项，删集依赖解耦）**：① getMaxOutputTokensForModel
+  + isMaxTokensCapEnabled（私有）→ 新 `src/tui/utils/model/maxOutputTokens.ts`
+  （唯一活消费 = (b) compact.ts；growthbook 静态导入无环——环风险域 =
+  utils/context.ts 本体，新文件非其替身）② LlmQueryOptions 类型 → 新
+  `src/tui/services/api/llmQueryTypes.ts`（唯一消费 = metadata.ts
+  `LlmQueryOptions['taskBudget']` 索引面）③ queryHelpers 死链切除
+  （normalizeMessage / handleOrphanedPermission / isResultSuccessful /
+  PermissionPromptTool 唯一消费方 = 已删 QueryEngine；runTools import 随
+  toolOrchestration 删净；存活面 = extractReadFiles/extractBashTools 2 函数）。
+- **裁定 3c-2-3（门面收窄 + 冲突块再收窄）**：orchestrator/index.ts = (b)
+  留集窄消费面 15 名（逐名 grep 核验；engine 同名不经本面双导 → index 星号
+  无 TS2308）。engineCompat = 双星号 + **3 消费方驱动窄冲突块**（compact 富
+  7 名 / microCompact 富 2 名 / autoCompact 富 9 名——(b) 富体胜 = 零行为；
+  旧 23 名主块 + 4 深块按「仅活消费方」再收窄，classifyToolError/ask 等
+  无 tui 消费方名随 (a) 删净退出块）；W-opt engine 富面回填后块随删。
+  (b) 文件内 import 重指向 3 处（autoCompact → maxOutputTokens 新址；
+  sessionMemoryCompact/postCompactCleanup 的 estimateMessageTokens /
+  resetMicrocompactState → 'src/engine' 单源——engine 纯函数版 drop-in）。
+- **零引用探针**：18 删模块路径 0 活引用（bootstrapState/engine 3 命中均
+  provenance 注释，非 import）。
+
+**验收（2026-09-30）**：tsc 0 / lint 0 error（**370 warn** = 380 − 10
+(a) 删净自消，W4 重测缩面口径更新）/ bun test --isolate 全量
+**3125/0/7483/189**（G-α 波基线不变，零回归）/ build cli.js 2.33MB 不变 /
+0 引用探针干净。
+
+**残留守（H6 登记，owner = W-opt 优化波 / E-wave-end 审计）**：(b) 富体
+engine 回填（compact hooks/附件/userDisplayMessage DI 化 + microcompact GB
+config/缝 + autoCompact model-string 面收敛）/ cached-MC 面（feature-OFF
+stub）/ coordinator scratchpad 段回填 engine + 类型面适配 / GB 覆写回填
+（getTimeBasedMCConfig engine 缺省副本面）/ bootstrapState 45 死名删净（2e）。

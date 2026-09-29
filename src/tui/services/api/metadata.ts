@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import type { BetaOutputConfig } from '../../types/atlas.js'
 import type { QuerySource } from '../../constants/querySource.js'
-import type { LlmQueryOptions } from 'src/tui/engineCompat'
+import type { LlmQueryOptions } from './llmQueryTypes.js'
 import { getSessionId } from 'src/bootstrap'
 import { getPromptCache1hAllowlist, getPromptCache1hEligible, setPromptCache1hAllowlist, setPromptCache1hEligible } from 'src/tui/bootstrapState.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'

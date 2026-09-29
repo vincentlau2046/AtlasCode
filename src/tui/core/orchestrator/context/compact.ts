@@ -89,7 +89,7 @@ import {
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js'
 import { modelProvider } from 'src/modelprovider'
 import { buildOpenAIParams } from 'src/modelprovider'
-import { getMaxOutputTokensForModel } from '../llm/query.js'
+import { getMaxOutputTokensForModel } from 'src/tui/utils/model/maxOutputTokens.js'
 import { modelToRole } from 'src/modelprovider'
 import { getPromptTooLongTokenGap } from '../../../utils/apiErrors.js'
 import { PROMPT_TOO_LONG_ERROR_MESSAGE, startsWithApiErrorPrefix } from 'src/modelprovider'
