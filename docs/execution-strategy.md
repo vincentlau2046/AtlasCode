@@ -5743,3 +5743,45 @@ import 边；`boundaries/element-types` 142 error 消解，0 error/380 warn 基�
 **残留守**：bootstrapState.ts 内 45 名本地定义（+2 trust stub）= 死代码（0 消费者），2e 删净波
 删除（注意模块内交叉引用：`_sessionId`/`_costState` 等模块态被 ~140 tui-only 函数引用，
 删净时逐段核）；`randomUUID` import 随 `_sessionId` 删净核销。
+
+#### 8.74.11 W2-2a-2 注册面名表对齐实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.8「2a-2 注册面 = engine 35 桥 + KEEP 域外设〔注册集合名表与现状逐一对齐〕」的执行裁定：
+
+**口径订正（35 → 36 实测）**：engine tools/ 对象文件实测 **36**（双 subagent 映射独立
+收敛：agent 目录 36 命中，含 team/ 4〔Snip/TeamCreate/TeamDelete/SendMessage〕+
+schedule 3 + tasks 6 + mcp 静态 2〔ListMcpResources/ReadMcpResource，非 createMcpTools
+动态面〕）；§8.74.1「35 本体」= 39 命中 − 4 非工具导出的旧口径，差 1 = 双口径计数差
+（tasks 目录 6 体 vs 5 体口径），本波起以 **36 对象文件**为实测口径（注册面组 A = 36）。
+engine 注册表机制（toolRegistry.ts getAllBaseTools(deps)）= deps 注入壳（硬编码仅
+AgentTool + compose 根 baseTools 注入 Snip/TeamCreate/TeamDelete 3 + ascendTools 门），
+**无预装配数组**——36 体经门面/深路径导出，生产注册面仍是 tui tools.ts（= 2a-2 目标面，
+2b 桥切换）。
+
+**切片实质（零行为 = 名表对齐 + 单源化，不切体）**：
+1. **constants/tools.ts 切 engine toolNames 单一事实源**：5 名集 + MAX_WORKER_SPAWN_DEPTH
+   全 re-export `src/engine`（值逐字验真旧仓，双侧缺省态一致）；25+ tui 目录常量 import
+   删（随 2b 本体删净自然核销）。8 消费方 import 路径不变（re-export 面 = 旧导出面）。
+   **H6 前向接缝 ①**：IN_PROCESS_TEAMMATE 旧 tui 版 = 5 静态 + feature('AGENT_TRIGGERS')
+   cron 3 门控支；engine 静态集 5 名（cron 条件成员不入集，engine toolNames 头注残留守）
+   → 缺省态值逐字一致（零行为），feature-on 态差 3 = H6 登记，owner = W3/E-wave-end。
+2. **tools.ts 注册面两分组登记**（行序零改动 = 零行为；池装配侧 assembleToolPool 按名
+   排序，序无行为义）：组 A engine-backed 36 本体（暂留 tui 体，2b 桥切换 = 前向接缝）
+   + 组 B KEEP 域外设（ascend 16 域包 / PowerShell 域外 / TestingPermission 测试面 /
+   REPL+Tungsten dev 面 / SyntheticOutput·DiscoverSkills·McpAuth·ReviewArtifact 活消费者
+   KEEP 非注册面成员）。
+3. **tui 域最小门面 index.ts 新建**（注册装配 6 函数 + preset 面 + 名集 re-export +
+   REPL_ONLY_TOOLS）：tests STR-1 门面收口入口（tests import src 域必须走域根 index.ts，
+   tui 此前 0 门面 = 0 测试可 import tui）；壳侧 'src/tui/main.js' 薄壳直走不变
+   （Slice D 先例，两出口并存）；扩面归 W3。
+4. **判别单测 tests/unit/tui-tools-registration-table.test.ts（4 测/11 断言）**：
+   缺省态（env pin 16 键 + NODE_ENV=test）getAllBaseTools 名表 = 显式锁定表 29 名
+   （组 A 缺省门开 25 + 组 B 测试面 4；实测锁定：ToolSearch optimistic ON 入〔firstParty
+   缺省 true〕、ascend/cron/RemoteTrigger/Snip/REPL/Tungsten/Team/LSP 缺省 off 不入）
+   + 无重名不变式 + 5 名集与 engine 引用同一对象（re-export 单源核验）+ 名集内容值核验。
+   **门控基线已头注登记**（突变须同步改表 + 设计记录）。
+
+**四件套**：tsc 0 / lint 0 error（380 warn 基线）/ build 801 模块 2.16MB / 全量
+**3103 pass·0 fail·7413 expect·185 文件**（= 2d 基线 +4 新测，零回归）+ CI gate 6·0·5·2。
+**残留守**：组 A 36 tui 本体 + 27 UI.tsx + 2 fused = 2b 切片（桥 + 渲染路由 + 类型迁移 +
+逐族消费方改写，Bash 族先行 pilot）；constants/tools.ts H6 ① cron 3 门控支 = W3/E-wave-end。

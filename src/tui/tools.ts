@@ -1,4 +1,25 @@
 // biome-ignore-all assist/source/organizeImports: dev-only import markers must not be reordered
+/**
+ * W2-2a-2 注册面名表对齐（§8.74.8/§8.74.11）——注册集合 = 两组：
+ *
+ * 组 A「engine-backed 36 本体」：Agent/TaskOutput/Bash/Glob/Grep/ExitPlanMode/Read/
+ *   Edit/Write/NotebookEdit/WebFetch/TodoWrite/WebSearch/TaskStop/AskUserQuestion/
+ *   Skill/EnterPlanMode/Config/TaskCreate/TaskGet/TaskUpdate/TaskList/LSP/
+ *   EnterWorktree/ExitWorktree/SendMessage/TeamCreate/TeamDelete/ListMcpResourcesTool/
+ *   ReadMcpResourceTool/ToolSearch/CronCreate/CronDelete/CronList（36 体，engine
+ *   tools/ 36 对象文件一一对应；命名映射 File*↔Read/Edit/Write、ScheduleCron 3 体、
+ *   ExitPlanModeV2 已对齐）——本体暂留 tui 体（2b 切 tui 契约适配器桥：行为成员
+ *   委托 engine 对象 + 渲染成员挂 UI.tsx/fused；前向接缝登记，复审勿当遗漏重提）。
+ * 组 B「KEEP 域外设」（暂留 tui 体，去重顺延 W3 carry-over / D-3）：ascend 16
+ *   （域包，D-3 挂载）/ PowerShell（域外 Windows 平台支）/ TestingPermission（NODE_ENV
+ *   测试面）/ REPL + Tungsten（IS_ATLAS_DEV dev 面）/ SyntheticOutput（控制面，不入门
+ *   池，hooks 层单独注入）/ DiscoverSkills + McpAuth + ReviewArtifact（活消费者 KEEP，
+ *   非注册面成员）。
+ *
+ * 名集单一事实源 = engine tools/toolNames.ts（constants/tools.ts re-export 已切单源，
+ * 本模块 4 名集 re-export 随之单源）；判别单测 tests/unit/tui-tools-registration-table.test.ts
+ * 锁定缺省态注册名表（删注册行/改名即红）。
+ */
 import { toolMatchesName, type Tool, type Tools } from './Tool.js'
 import { AgentTool } from './tools/AgentTool/AgentTool.js'
 import { SkillTool } from './tools/SkillTool/SkillTool.js'
@@ -160,7 +181,10 @@ export function getToolsForDefaultPreset(): string[] {
  * NOTE: This MUST stay in sync with https://console.statsig.com/4aF3Ewatb6xPVpCwxb5nA3/dynamic_configs/claude_code_global_system_caching, in order to cache the system prompt across users.
  */
 export function getAllBaseTools(): Tools {
+  // 注册集合两组构成 + 名表单一事实源见文件头 W2-2a-2 注（§8.74.11）。
+  // 行序 = 现状逐字保持（零行为；池装配侧 assembleToolPool 按名排序，序无行为义）。
   return [
+    // ── 组 A：engine-backed 36 本体（暂留 tui 体，2b 桥切换）──
     AgentTool,
     TaskOutputTool,
     BashTool,
@@ -174,6 +198,7 @@ export function getAllBaseTools(): Tools {
     FileWriteTool,
     NotebookEditTool,
     WebFetchTool,
+    // ── 组 B：KEEP 域外设 ── ascend 域包 16 体（feature('ASCEND_TOOLS') 门，D-3 挂载）──
     ...(AscendBridge
       ? [AscendBridge.CompilerBridge, AscendBridge.GoldenTest, AscendBridge.SpecParser, AscendBridge.TilingPlanner]
       : []),
@@ -181,6 +206,7 @@ export function getAllBaseTools(): Tools {
     ...(AscendBridge ? [AscendBridge.FaultCollector, AscendBridge.ErrorClassifier, AscendBridge.ProfileAnalyzer] : []),
     ...(AscendBridge ? [AscendBridge.BenchmarkRunner, AscendBridge.ProfileReportParser] : []),
     ...(AscendBridge ? [AscendBridge.ModelConverter, AscendBridge.OnnxOptimizer, AscendBridge.DataPrepTool, AscendBridge.InferValidator] : []),
+    // ── 组 A（续）──
     TodoWriteTool,
     WebSearchTool,
     TaskStopTool,
@@ -201,6 +227,7 @@ export function getAllBaseTools(): Tools {
     ...(REPLTool ? [REPLTool] : []),
     ...cronTools,
     ...(RemoteTriggerTool ? [RemoteTriggerTool] : []),
+    // 组 B 尾（域外/平台/测试面：PowerShell 域外支 / Snip·TestingPermission）
     ...(getPowerShellTool() ? [getPowerShellTool()] : []),
     ...(SnipTool ? [SnipTool] : []),
     ...(process.env.NODE_ENV === 'test' ? [TestingPermissionTool] : []),

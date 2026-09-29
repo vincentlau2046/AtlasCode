@@ -1,118 +1,29 @@
-// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
-import { feature } from 'src/shared'
-import { TASK_OUTPUT_TOOL_NAME } from '../tools/TaskOutputTool/constants.js'
-import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../tools/ExitPlanModeTool/constants.js'
-import { ENTER_PLAN_MODE_TOOL_NAME } from '../tools/EnterPlanModeTool/constants.js'
-import { AGENT_TOOL_NAME } from '../tools/AgentTool/constants.js'
-import { ASK_USER_QUESTION_TOOL_NAME } from '../tools/AskUserQuestionTool/prompt.js'
-import { TASK_STOP_TOOL_NAME } from '../tools/TaskStopTool/prompt.js'
-import { FILE_READ_TOOL_NAME } from '../tools/FileReadTool/prompt.js'
-import { WEB_SEARCH_TOOL_NAME } from '../tools/WebSearchTool/prompt.js'
-import { TODO_WRITE_TOOL_NAME } from '../tools/TodoWriteTool/constants.js'
-import { GREP_TOOL_NAME } from '../tools/GrepTool/prompt.js'
-import { WEB_FETCH_TOOL_NAME } from '../tools/WebFetchTool/prompt.js'
-import { GLOB_TOOL_NAME } from '../tools/GlobTool/prompt.js'
-import { SHELL_TOOL_NAMES } from '../utils/shell/shellToolUtils.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
-import { NOTEBOOK_EDIT_TOOL_NAME } from '../tools/NotebookEditTool/constants.js'
-import { SKILL_TOOL_NAME } from '../tools/SkillTool/constants.js'
-import { SEND_MESSAGE_TOOL_NAME } from '../tools/SendMessageTool/constants.js'
-import { TASK_CREATE_TOOL_NAME } from '../tools/TaskCreateTool/constants.js'
-import { TASK_GET_TOOL_NAME } from '../tools/TaskGetTool/constants.js'
-import { TASK_LIST_TOOL_NAME } from '../tools/TaskListTool/constants.js'
-import { TASK_UPDATE_TOOL_NAME } from '../tools/TaskUpdateTool/constants.js'
-import { TOOL_SEARCH_TOOL_NAME } from '../tools/ToolSearchTool/prompt.js'
-import { SYNTHETIC_OUTPUT_TOOL_NAME } from '../tools/SyntheticOutputTool/SyntheticOutputTool.js'
-import { ENTER_WORKTREE_TOOL_NAME } from '../tools/EnterWorktreeTool/constants.js'
-import { EXIT_WORKTREE_TOOL_NAME } from '../tools/ExitWorktreeTool/constants.js'
-import {
-  CRON_CREATE_TOOL_NAME,
-  CRON_DELETE_TOOL_NAME,
-  CRON_LIST_TOOL_NAME,
-} from '../tools/ScheduleCronTool/prompt.js'
-
-export const ALL_AGENT_DISALLOWED_TOOLS = new Set([
-  TASK_OUTPUT_TOOL_NAME,
-  EXIT_PLAN_MODE_V2_TOOL_NAME,
-  ENTER_PLAN_MODE_TOOL_NAME,
-  // de-ANT: the ant "allow nested agents" carve-out was removed; the Agent tool
-  // is disallowed for subagents (external semantics).
-  AGENT_TOOL_NAME,
-  ASK_USER_QUESTION_TOOL_NAME,
-  TASK_STOP_TOOL_NAME,
-  // Prevent recursive workflow execution inside subagents.
-])
-
-export const CUSTOM_AGENT_DISALLOWED_TOOLS = new Set([
-  ...ALL_AGENT_DISALLOWED_TOOLS,
-])
-
-/*
- * Async Agent Tool Availability Status (Source of Truth)
- */
-export const ASYNC_AGENT_ALLOWED_TOOLS = new Set([
-  FILE_READ_TOOL_NAME,
-  WEB_SEARCH_TOOL_NAME,
-  TODO_WRITE_TOOL_NAME,
-  GREP_TOOL_NAME,
-  WEB_FETCH_TOOL_NAME,
-  GLOB_TOOL_NAME,
-  ...SHELL_TOOL_NAMES,
-  FILE_EDIT_TOOL_NAME,
-  FILE_WRITE_TOOL_NAME,
-  NOTEBOOK_EDIT_TOOL_NAME,
-  SKILL_TOOL_NAME,
-  SYNTHETIC_OUTPUT_TOOL_NAME,
-  TOOL_SEARCH_TOOL_NAME,
-  ENTER_WORKTREE_TOOL_NAME,
-  EXIT_WORKTREE_TOOL_NAME,
-])
+// biome-ignore-all assist/source/organizeImports: dev-only import markers must not be reordered
 /**
- * Tools allowed only for in-process teammates (not general async agents).
- * These are injected by inProcessRunner.ts and allowed through filterToolsForAgent
- * via isInProcessTeammate() check.
- */
-export const IN_PROCESS_TEAMMATE_ALLOWED_TOOLS = new Set([
-  TASK_CREATE_TOOL_NAME,
-  TASK_GET_TOOL_NAME,
-  TASK_LIST_TOOL_NAME,
-  TASK_UPDATE_TOOL_NAME,
-  SEND_MESSAGE_TOOL_NAME,
-  // Teammate-created crons are tagged with the creating agentId and routed to
-  // that teammate's pendingUserMessages queue (see useScheduledTasks.ts).
-  ...(feature('AGENT_TRIGGERS')
-    ? [CRON_CREATE_TOOL_NAME, CRON_DELETE_TOOL_NAME, CRON_LIST_TOOL_NAME]
-    : []),
-])
-
-/**
- * Maximum coordinator→worker spawn depth. The coordinator main thread is
- * depth 0 (uncapped). A depth-1 worker keeps the Agent tool (may fan out);
- * a depth-2 worker is terminal (Agent tool stripped). See plan 2026-09-21.
- */
-export const MAX_WORKER_SPAWN_DEPTH = 2
-
-/*
- * BLOCKED FOR ASYNC AGENTS:
- * - AgentTool: Blocked to prevent recursion
- * - TaskOutputTool: Blocked to prevent recursion
- * - ExitPlanModeTool: Plan mode is a main thread abstraction.
- * - TaskStopTool: Requires access to main thread task state.
- * - TungstenTool: Uses singleton virtual terminal abstraction that conflicts between agents.
+ * tui/constants/tools — 工具名集单一事实源切 engine（W2-2a-2，§8.74.8/§8.74.11）
  *
- * ENABLE LATER (NEED WORK):
- * - MCPTool: TBD
- * - ListMcpResourcesTool: TBD
- * - ReadMcpResourceTool: TBD
+ * 旧形态：本模块从 25+ tui 工具目录常量文件各 import 一个 *_TOOL_NAME 再组装
+ * 5 名集（双源值手工对账，engine tools/toolNames.ts 亦声明同一套值 = 漂移面）。
+ * 新形态：5 名集 + MAX_WORKER_SPAWN_DEPTH 全部 re-export engine 单一事实源
+ * （src/engine → tools/toolNames.ts，值逐字验真旧仓）；25+ tui 目录常量 import
+ * 随工具本体在 2b 删净。8 个消费方（tools.ts / toolPool / coordinatorMode /
+ * workerAgent / execAgentHook / AgentTool / agentToolUtils / 本模块）import 路径
+ * 不变（本模块 re-export 面 = 旧导出面逐名一致，零行为）。
+ *
+ * H6 前向接缝登记（复审勿当遗漏重提）：
+ *  ① IN_PROCESS_TEAMMATE_ALLOWED_TOOLS：旧 tui 版 = 5 静态名 + feature('AGENT_TRIGGERS')
+ *    cron 三件套门控支（门开 +3）；engine 静态集 = 5 名（cron 条件成员不入集，见
+ *    engine toolNames.ts 头注残留守）。缺省态（feature 全 off）双侧值逐字一致 =
+ *    零行为；feature-on 态差 3 名 = H6 策展登记，owner = W3 活链路接线 / E-wave-end
+ *    （engine 集扩门控变体或 tui 侧保留变体，届时裁定）。
+ *  ② MAX_WORKER_SPAWN_DEPTH：engine 侧同值常量（coordinator 面）已入 engine 门面，
+ *    本处 re-export 单源化（值 = 2，双侧逐字一致）。
  */
-
-/**
- * Tools allowed in coordinator mode - only output and agent management tools for the coordinator
- */
-export const COORDINATOR_MODE_ALLOWED_TOOLS = new Set([
-  AGENT_TOOL_NAME,
-  TASK_STOP_TOOL_NAME,
-  SEND_MESSAGE_TOOL_NAME,
-  SYNTHETIC_OUTPUT_TOOL_NAME,
-])
+export {
+  ALL_AGENT_DISALLOWED_TOOLS,
+  CUSTOM_AGENT_DISALLOWED_TOOLS,
+  ASYNC_AGENT_ALLOWED_TOOLS,
+  IN_PROCESS_TEAMMATE_ALLOWED_TOOLS,
+  COORDINATOR_MODE_ALLOWED_TOOLS,
+  MAX_WORKER_SPAWN_DEPTH,
+} from 'src/engine'
