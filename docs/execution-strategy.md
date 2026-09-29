@@ -5393,3 +5393,39 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 - **审视回应（3 + 1 项）**：① missing-deps.d.ts 3 已装包无注 → 头注补登记（asciichart = 纯 JS 包无自带类型，ambient 块仍是唯一类型源不可删；另两包与真类型共存 tsc 0 验真）② `memdir/memoryTypes.ts:207/:213` "H6 (branch-pollution evals #22856)" = 上游 verbatim 注释（与旧仓 byte 一致），**不动**（C-7 保真优先），登记为 grep 基 H6 盘点已知假阳性（本审视实测 1 误报）③ factory.ts `orchestrator?: unknown` 前向缝无责任波 → 补"责任波：E-wave-end 审计"（engine 门面类型面扩 + 闭包去重同归口 engineCompat 登记）④（Path A borderline）execPromptHook.ts cast 缺类型边界注释 → 补与 compact.ts / apiQueryHookHelper.ts 两调用点同型注。
 - **四件套（波终 = Slice E 终）**：tsc 0 / lint 0 error（384 warnings = 基线）/ build ✓ 798 模块 2.16MB / 全量 3039/0/7250/180 + gate 6·0·5·2。
 - **§8.72 TUI 壳波（task #152）闭环**：A（cdb3f8a）→ B（78624e4，Slice C #164 吸收）→ D（b6478ba）→ E（本记录 + 9c402f6 VoiceProvider 修 + 审视回应小修）全闭环，#152 关闭。残口 = #154 全功能复刻审视（E-wave-end 审计归口：engine spine vs tui orchestrator 去重 / Ascend 执行器六件套 vs ascend 域占位去重 / bootstrapState 187 双份去重 / legacy lint 规则体恢复 / CLI HeadlessOptions 扩展面 / 非 stdio MCP transport / mount.ts 实挂载）。
+
+## §8.73 全功能复刻审视优化波（task #154，§8.73 S-E1 总分析，2026-09-29）
+
+**波定位**：壳波（#151 CLI 公共域 + #152 TUI 壳）之后的全仓复刻保真审计 + 仓内一致性优化。双轴：① **保真轴**——对照旧仓（只读 ground truth，`/home/vince/projects/AtlasHarness/AtlasHarness`）核新仓 14 顶域 + 双壳 + tui 闭包移植保真（逐字/裁剪/接缝登记是否属实，有无 silent gap）② **一致性轴**——仓内重复模块台账 / no-op 检查 / 前向接缝核销（每缝归属波非空）/ 运行时活性（真实可达非假绿）。交付 = 发现台账 + 本波修波（D-1a）+ §8.73.x 闭环记录。基线谱系自 3039/0/7250/180 + gate 6·0·5·2（#151/#152 终）起。
+
+**审计范围（体量实测 2026-09-29）**：
+- **顶层域**：engine 294 文件 76966L（根门面 ~103 导出名）/ swarm 39 文件 9320L / permissions 30 文件 5012L / lsp 10 文件 3236L / modelprovider 18 文件 2806L / memory 15 文件 1962L / mcp 6 文件 1676L / sandbox 10 文件 1678L / executor 11 文件 1609L / task 8 文件 1409L / hooks 14 文件 1312L / remote 5 文件 145L / **ascend 9 文件 65L（9 个 `export {}` 占位 = D-3 独立实施波）**。
+- **壳层**：atlascode 23 文件 1344L（含 8 `export {}` 占位）/ atlasoffice 1 占位（#153 扩展方向不实施）/ tui 闭包（34 目录 + 17 顶层 + orchestrator 运行体 36 文件 11999L〔旧仓 36 文件 1:1〕+ Ascend 执行器六件套〔C-7 原样搬，与 ascend 占位双份〕）。
+- **残口/重复面**：前向接缝/残留守登记 736 行 / 338 文件（须核每缝归属波非空 + 零 silent gap）/ `export {}` 占位全仓 29 处（ascend 9 + atlascode 8 + tui 9 + shared 2 + atlasoffice 1）/ 重复模块 3 组（engine vs tui orchestrator 12K / Ascend 六件套 vs ascend 占位 / bootstrapState 187 vs bootstrap 域 57）/ no-op lint 18 规则（custom-rules 14 + react-hooks 2 + eslint-plugin-n 2，检查体未随迁）/ vendor stub 3（@anthropic-ai/{mcpb,sandbox-runtime,claude-agent-sdk}，[ATLAS-HOLD] 物理包名）/ [ATLAS-HOLD] marker 全仓 31 处。
+
+**决策裁定记录（用户 2026-09-29 裁定「按推荐决策实施」，D-9 用户新增）**：
+- **D-1 波范围 = a（审计 + 本波修波）**：延续各波 S-E3 先例，发现问题按严重度本波修，非本波量级的登记归波。
+- **D-2 tui orchestrator 12K vs engine 去重 = a（保留双份 + 矩阵登记）**：engine 域已非窄 spine（294 文件 77K L 全重建），但 engine 根门面 ~103 导出名 vs tui orchestrator 36 门面**交集实测仅 ~3 名**（新 API 命名体系，非同名超集）→ 切端 = 重写 tui 闭包或 engine 扩 12K 旧 API 面，均非本波量级。本波只做**追齐度表**（S-1 产出）+ 能力矩阵登记双份，切换 = 后续「engine 旧 API 面扩展」独立波。
+- **D-3 Ascend 实施波 = a（独立成波）**：ascend 域 9 占位填实（C-7 六件套实挂载 + engine DomainPackage 注册面）+ mount.ts 实挂载 + gelu S5 = 独立变更轴（可插拔域包），#154 保持审计 + 优化定位不膨胀。
+- **D-4 legacy lint 18 规则体 = b（高价值子集 4-6 条恢复）**：选 no-process-exit / no-sync-fs / no-cross-platform-process-issues / no-lookbehind-regex / no-process-env-top-level 等对真安全/平台面有效的规则体移植；其余（纯风格类）留 no-op 登记。全恢复（移植旧仓 lint 管线）量过大不选，全留 no-op（现状）欠安全面不选。
+- **D-5 CLI HeadlessOptions 回填度 = b（高频子集 5 项）**：jsonSchema / systemPrompt / appendSystemPrompt / fallbackModel / thinkingConfig 真消费回填；其余 8（taskBudget/teleport/includePartialMessages/forkSession/enableAuthStatus/workload/setupTrigger/sessionStartHooksPromise）留登记。**约束：回填须真消费（plumb 进 runHeadless 新 CLI 域驱动链），非仅 interface 加字段，否则 H6 空洞（假完成）**。
+- **D-6 非 stdio MCP transport = b（维持 stdio-only 裁定）**：sse/http/ws 无真后端（旧仓该面属 [ATLAS-HOLD] 域外 URL 族待 IFF 网关），实现 = 假完成，维持前向接缝登记。
+- **D-7 bootstrapState 187 vs bootstrap 域 57 = a（保留双份 + 登记）**：统一 = bootstrap 域 57→187 扩面 + 依赖方向变更（与 D-2 同类），非本波量级；能力矩阵登记双份。
+- **D-8 波 tag = b（不切，闭环记录即归档）**：§8.72 壳波先例 = 子波不切 tag；本审视波同例。
+- **D-9 [ATLAS-HOLD] URL 族 / Header 换值 = 最后统一处理（用户 2026-09-29 裁定，#154 排除）**：GitHub repo 路径作 Header 头 + repo URL + npm 安装路径替代 —— 用户「现在还没完全准备好，等最后再统一进行」。本波 **S-2 接缝扫描遇 [ATLAS-HOLD] marker（31 处）只核「登记仍在 + 未复活」，不启动换值**；换值 = 独立收尾项（非既定序列），前向接缝登记，复审勿当遗漏重提。
+
+**范围冻结**：
+- **纳入**：保真审双轮（S-1 engine/工具本体/skill + 追齐度表 / S-2 余域 + 接缝/重复面）+ 运行时活性（S-3）+ 发现裁定 + 本波修波（S-4：D-4b lint 子集 + D-5b HeadlessOptions 5 项真消费回填 + S-1/S-2 发现的 HIGH 项）+ 闭环（S-5）。
+- **排除（登记不启动）**：D-2 切端 / D-3 Ascend 实施波 / D-9 [ATLAS-HOLD] 换值 / D-6 非 stdio transport —— 均登记归属波，复审勿当遗漏重提。
+- **不决策仅核销**：跨波 6 项保裁（analytics 波 marker）+ MAJOR-1 flag-capture 接线裁定（InProcessBackend/TaskStopTool 接线波）—— S-2 只核「登记仍在 + 未复活」，不动实现。
+
+**切片序列（自底向上，每片四件套）**：S-E1 总分析 + 范围冻结（本段，已落盘）→ S-1 保真审轮 1（engine/工具本体/skill + **追齐度表**，喂 D-2 复核）→ S-2 保真审轮 2（余域 + 接缝 736 行核销 + 重复台账 + no-op lint + vendor）→ S-3 运行时活性（主 session 自做零模型，逐路 smoke）→ S-4 发现裁定 + 修波（按模块提交）→ S-5 §8.73.x 闭环记录 + memory + 波终基线 + #154 关闭。
+
+**双路只读审视分工（≤2 限额，报告 = 数据主 session 逐条 grep/Read 复核，绝不直接采信）**：
+- **Path A（旧仓 C-7/保真对照）**：新域 vs 旧仓逐字/裁剪核——engine 294 文件 vs 旧 orchestrator + 47 本体 + skill；抽查 high-risk 文件逐句（旧仓 ground truth 锚 a8af45b）；导出面/探针三方一致。
+- **Path B（新仓一致 + H6 反桩）**：重复台账 / no-op 活性（lint 18 规则体哪些真该恢复）/ 接缝核销（736 行归属波非空 + 零 silent gap）/ 假绿扫描（test.skip 均须环境门控带注）/ [ATLAS-HOLD] 31 处登记仍在核销。
+- 两路交叉核预声明接缝 0 重报（S-E3 先例）。
+
+**修波范围（S-4，本波修；非本波量级登记归波）**：D-4b lint 高价值子集 4-6 规则体恢复 / D-5b HeadlessOptions 5 项真消费回填 / S-1/S-2 判 HIGH 的发现（逐条三裁定）。零行为面改动须四件套全绿（tsc 0 / lint 0 error / build ✓ / 3039/0/7250/180 + gate 6·0·5·2）。
+
+**基线谱系**：3039/0/7250/180 + gate 6·0·5·2（#151/#152 终，本波开波基线）。
