@@ -371,3 +371,98 @@ export async function compactConversation(
  * → appendCappedMessage，见该文件头注）。
  */
 export const ERROR_MESSAGE_USER_ABORT = 'API Error: Request was aborted.'
+
+// ── W2-2-pre 缺面先迁②（§8.74.2 compact 4 extras）：2 纯函数移植 + 2 前向接缝 ──
+// 裁断（§8.74.9 落盘）：stripImagesFromMessages / mergeHookInstructions = 零依赖
+// 纯函数 → 移植；createCompactCanUseTool（依赖 tui CanUseToolFn/PermissionDecision
+// 类型面，engine 权限面为 GateVerdict 异型；唯一消费方 = fork 压缩支，本体归
+// 本文件 PTL/fork 残留守）+ createPlanAttachmentIfNeeded（依赖 plan 域
+// getPlan/getPlanFilePath + 附件域 createAttachmentMessage/AttachmentMessage，
+// 附件面 = §8.40 C-3 前向接缝已登记）→ 前向接缝不迁（H6 防空洞：零消费方 +
+// 依赖域未入门面，迁移 = 空头体）。owner = W3 活链路接线 / E-wave-end 审计。
+
+/** 内容块结构窄视图（stripImagesFromMessages 仅读 type/text/content 字段；
+ * engine shared Message.message 为 unknown 松散型，块数组经本窄视图 cast）。 */
+interface MediaContentBlock {
+  type: string
+  text?: string
+  content?: unknown
+  [key: string]: unknown
+}
+
+/**
+ * 摘要前剥离图片/文档块（旧仓 compact.ts stripImagesFromMessages 语义逐字，
+ * W2-2-pre 缺面先迁②）：user 消息的 image/document 块（含 tool_result 嵌套）
+ * 替换为文本标记，防压缩 API 调用自身撞 prompt-too-long。纯函数零 I/O。
+ */
+export function stripImagesFromMessages(messages: Message[]): Message[] {
+  return messages.map(message => {
+    if (message.type !== 'user') {
+      return message
+    }
+    const inner = (message.message ?? {}) as { content?: unknown }
+    const content = inner.content
+    if (!Array.isArray(content)) {
+      return message
+    }
+    const blocks = content as MediaContentBlock[]
+
+    let hasMediaBlock = false
+    const newContent = blocks.flatMap(block => {
+      if (block.type === 'image') {
+        hasMediaBlock = true
+        return [{ type: 'text' as const, text: '[image]' }]
+      }
+      if (block.type === 'document') {
+        hasMediaBlock = true
+        return [{ type: 'text' as const, text: '[document]' }]
+      }
+      // 嵌套 tool_result 内容数组内的 image/document 同步剥离
+      if (block.type === 'tool_result' && Array.isArray(block.content)) {
+        const items = block.content as MediaContentBlock[]
+        let toolHasMedia = false
+        const newToolContent = items.map(item => {
+          if (item.type === 'image') {
+            toolHasMedia = true
+            return { type: 'text' as const, text: '[image]' }
+          }
+          if (item.type === 'document') {
+            toolHasMedia = true
+            return { type: 'text' as const, text: '[document]' }
+          }
+          return item
+        })
+        if (toolHasMedia) {
+          hasMediaBlock = true
+          return [{ ...block, content: newToolContent }]
+        }
+      }
+      return [block]
+    })
+
+    if (!hasMediaBlock) {
+      return message
+    }
+    return {
+      ...message,
+      message: {
+        ...((message.message ?? {}) as Record<string, unknown>),
+        content: newContent,
+      },
+    } as Message
+  })
+}
+
+/**
+ * 合并用户自定义指令与 hook 指令（旧仓 compact.ts mergeHookInstructions
+ * 语义逐字，W2-2-pre 缺面先迁②）：用户指令在前、hook 指令追加；
+ * 空串归一 undefined。纯函数零 I/O。
+ */
+export function mergeHookInstructions(
+  userInstructions: string | undefined,
+  hookInstructions: string | undefined,
+): string | undefined {
+  if (!hookInstructions) return userInstructions || undefined
+  if (!userInstructions) return hookInstructions
+  return `${userInstructions}\n\n${hookInstructions}`
+}

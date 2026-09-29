@@ -3,8 +3,10 @@
  * （§8.29 E-3 S-3d：旧仓 autoCompact 三 env 覆写收拢 config 面，残留守③ 核销）。
  *
  * 被测能力：
- *   - getAutoCompactEnvOverrides 三变量解析 + 有效域（旧仓 autoCompact.ts
- *     解析 guard 逐字：pct (0,100] / window >0 / DISABLE_COMPACT isEnvTruthy）
+ *   - getAutoCompactEnvOverrides 五变量解析 + 有效域（旧仓 autoCompact.ts
+ *     解析 guard 逐字：pct (0,100] / window >0 / DISABLE_COMPACT isEnvTruthy
+ *     + W2-2-pre 扩面① DISABLE_AUTO_COMPACT isEnvTruthy /
+ *     ATLAS_BLOCKING_LIMIT_OVERRIDE parseInt >0）
  *   - getAutoCompactThreshold 双覆写语义（window cap / pct floor + min 取小；
  *     越界值忽略不生效——raw 注入亦安全）+ 无覆写回归（既有 2 参调用不变）
  *   - shouldAutoCompact / autoCompactIfNeeded override 提前触发
@@ -26,6 +28,8 @@ const TRACKED_ENV_KEYS = [
   'ATLAS_AUTOCOMPACT_PCT_OVERRIDE',
   'ATLAS_AUTO_COMPACT_WINDOW',
   'DISABLE_COMPACT',
+  'DISABLE_AUTO_COMPACT',
+  'ATLAS_BLOCKING_LIMIT_OVERRIDE',
 ]
 
 let savedEnv: Record<string, string | undefined> = {}
@@ -83,6 +87,28 @@ describe('engine/config getAutoCompactEnvOverrides（§8.29 三变量收拢）',
     expect(getAutoCompactEnvOverrides().disabled).toBeUndefined()
     delete process.env.DISABLE_COMPACT
     expect(getAutoCompactEnvOverrides().disabled).toBeUndefined()
+  })
+})
+
+// ── W2-2-pre 扩面① 两变量（§8.74.2 缺面先迁①配套）────────────────────
+
+describe('getAutoCompactEnvOverrides W2-2-pre 扩面（DISABLE_AUTO_COMPACT / ATLAS_BLOCKING_LIMIT_OVERRIDE）', () => {
+  test('DISABLE_AUTO_COMPACT isEnvTruthy 语义（细粒度开关：保手动 /compact）', () => {
+    process.env.DISABLE_AUTO_COMPACT = '1'
+    expect(getAutoCompactEnvOverrides().autoCompactDisabled).toBe(true)
+    process.env.DISABLE_AUTO_COMPACT = 'false'
+    expect(getAutoCompactEnvOverrides().autoCompactDisabled).toBeUndefined()
+    delete process.env.DISABLE_AUTO_COMPACT
+    expect(getAutoCompactEnvOverrides().autoCompactDisabled).toBeUndefined()
+  })
+
+  test('ATLAS_BLOCKING_LIMIT_OVERRIDE parseInt >0 语义（越界/非数忽略）', () => {
+    process.env.ATLAS_BLOCKING_LIMIT_OVERRIDE = '5000'
+    expect(getAutoCompactEnvOverrides().blockingLimitOverride).toBe(5_000)
+    for (const v of ['0', '-100', 'abc']) {
+      process.env.ATLAS_BLOCKING_LIMIT_OVERRIDE = v
+      expect(getAutoCompactEnvOverrides().blockingLimitOverride).toBeUndefined()
+    }
   })
 })
 

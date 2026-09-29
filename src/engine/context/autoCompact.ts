@@ -20,7 +20,11 @@
  *     deps.pctOverride / windowOverride / enabled 消费（H6 预声明消费接缝：无生产
  *     调用点，消费方 = E-wave-end 组合根 loop deps 装配，当前仅测试消费）。
  *   - 旧仓 DISABLE_AUTO_COMPACT（细粒度开关）+ ATLAS_BLOCKING_LIMIT_OVERRIDE
- *     （TUI warning 态面）未收拢 → 残留守（caller enabled 判定面 / TUI 面）。
+ *     （TUI warning 态面）W2-2-pre 缺面先迁①已收拢：config 面
+ *     getAutoCompactEnvOverrides 扩面（autoCompactDisabled /
+ *     blockingLimitOverride）+ isAutoCompactEnabled 纯函数面 +
+ *     calculateTokenWarningState 参数面（H6 预声明消费接缝：消费方 = W3
+ *     TUI 活链路装配 + E-wave-end 组合根，当前仅测试消费）。
  *   - token 计数/ contextWindow / compact 体均为注入 deps（port 之下全真，非 fake 自证）；
  *     未注入 countTokens 时 fail-safe 返回 false（不压缩，不误判）。
  *
@@ -97,22 +101,15 @@ export interface AutoCompactOutcome {
 }
 
 /**
- * 有效窗口 − 缓冲 = 触发阈值（旧仓 getAutoCompactThreshold + env 覆写面）。
- * 有效窗口 = contextWindow − 摘要输出预留（旧仓 getEffectiveContextWindowSize 语义：
- * min(getMaxOutputTokensForModel, COMPACT_MAX_OUTPUT_TOKENS)——新仓经 deps.maxOutputTokens
- * 注入接缝；未注入按满额 20k 预留，与旧仓大输出模型 min(maxOut, 20k) 行为等价）。
- *
- * 双覆写（S-3d config 面收拢 §8.29，旧仓解析 guard 逐字——越界值忽略不生效，
- * 既有 2 参调用向后兼容）：
- *   - windowOverride（ATLAS_AUTO_COMPACT_WINDOW，>0 有效）：窗口 cap，
- *     contextWindow = min(contextWindow, windowOverride)（旧仓 :40-46）。
- *   - pctOverride（ATLAS_AUTOCOMPACT_PCT_OVERRIDE，(0,100] 有效）：
- *     阈值 = min(floor(有效窗口 × pct/100), 基础阈值)（旧仓 :79-88）。
+ * 有效窗口（旧仓 getEffectiveContextWindowSize 独立导出面，W2-2-pre 缺面先迁①）：
+ * 窗口 cap（windowOverride >0 有效）− 摘要输出预留（min(maxOutputTokens ??
+ * COMPACT_MAX_OUTPUT_TOKENS, COMPACT_MAX_OUTPUT_TOKENS)——未注入按满额 20k 预留，
+ * 与旧仓大输出模型 min(maxOut, 20k) 行为等价）。TUI TokenWarning UI / blocking
+ * limit 判定消费（旧仓 autoCompact.ts:33-49 语义逐字）。
  */
-export function getAutoCompactThreshold(
+export function getEffectiveContextWindowSize(
   contextWindow: number,
   maxOutputTokens?: number,
-  pctOverride?: number,
   windowOverride?: number,
 ): number {
   const window =
@@ -123,7 +120,31 @@ export function getAutoCompactThreshold(
     maxOutputTokens ?? COMPACT_MAX_OUTPUT_TOKENS,
     COMPACT_MAX_OUTPUT_TOKENS,
   )
-  const effectiveContextWindow = window - reservedForSummary
+  return window - reservedForSummary
+}
+
+/**
+ * 有效窗口 − 缓冲 = 触发阈值（旧仓 getAutoCompactThreshold + env 覆写面）。
+ * 有效窗口 = getEffectiveContextWindowSize（独立导出面；行为不变重构）。
+ *
+ * 双覆写（S-3d config 面收拢 §8.29，旧仓解析 guard 逐字——越界值忽略不生效，
+ * 既有 2 参调用向后兼容）：
+ *   - windowOverride（ATLAS_AUTO_COMPACT_WINDOW，>0 有效）：窗口 cap，
+ *     contextWindow = min(contextWindow, windowOverride)（旧仓 :40-46）。
+ *   - pctOverride（ATLAS_AUTOCOMPACT_PCT_OVERRIDE，(0,100] 有效）：
+ *     阈值 = min(floor(有效窗口 × pct/100)，基础阈值)（旧仓 :79-88）。
+ */
+export function getAutoCompactThreshold(
+  contextWindow: number,
+  maxOutputTokens?: number,
+  pctOverride?: number,
+  windowOverride?: number,
+): number {
+  const effectiveContextWindow = getEffectiveContextWindowSize(
+    contextWindow,
+    maxOutputTokens,
+    windowOverride,
+  )
   let threshold = effectiveContextWindow - AUTOCOMPACT_BUFFER_TOKENS
   if (pctOverride !== undefined && pctOverride > 0 && pctOverride <= 100) {
     threshold = Math.min(
@@ -133,6 +154,120 @@ export function getAutoCompactThreshold(
   }
   return threshold
 }
+
+// ── W2-2-pre 缺面先迁①（§8.74.2）：TUI warning 态面三常量（旧仓 :63-65 逐字）──
+
+/** TUI TokenWarning 警告缓冲（旧仓 WARNING_THRESHOLD_BUFFER_TOKENS）。 */
+export const WARNING_THRESHOLD_BUFFER_TOKENS = 20_000
+/** TUI TokenWarning 错误缓冲（旧仓 ERROR_THRESHOLD_BUFFER_TOKENS）。 */
+export const ERROR_THRESHOLD_BUFFER_TOKENS = 20_000
+/** 手动 /compact 缓冲（旧仓 MANUAL_COMPACT_BUFFER_TOKENS；blocking limit 判据）。 */
+export const MANUAL_COMPACT_BUFFER_TOKENS = 3_000
+
+export interface TokenWarningState {
+  percentLeft: number
+  isAboveWarningThreshold: boolean
+  isAboveErrorThreshold: boolean
+  isAboveAutoCompactThreshold: boolean
+  isAtBlockingLimit: boolean
+}
+
+export interface TokenWarningParams {
+  /** 模型 contextWindow（modelprovider 配置面提供方；旧仓 getContextWindowForModel 注入接缝）。 */
+  contextWindow: number
+  /** 模型 maxOutputTokens（旧仓 getMaxOutputTokensForModel 注入接缝）。 */
+  maxOutputTokens?: number
+  /**
+   * 旧仓 isAutoCompactEnabled 判定面（DISABLE_COMPACT / DISABLE_AUTO_COMPACT /
+   * settings.autoCompactEnabled 缺省 true——caller 经 config 读侧 + settings 面
+   * 映射；未注入按缺省开，与旧 config 缺省一致）。
+   */
+  autoCompactEnabled?: boolean
+  pctOverride?: number
+  windowOverride?: number
+  /** ATLAS_BLOCKING_LIMIT_OVERRIDE（旧仓 :127 TUI warning 态面；>0 有效，config 读侧映射）。 */
+  blockingLimitOverride?: number
+}
+
+/**
+ * token 使用量 → TUI warning 态（旧仓 calculateTokenWarningState 语义逐字，
+ * W2-2-pre 缺面先迁①：engine 原无此面 = TUI TokenWarning 组件 + engineCompat
+ * 15 名冲突块消费方）。纯函数：env 读侧归 config 面（getAutoCompactEnvOverrides
+ * 扩面 + settings 面），本函数零 I/O。
+ */
+export function calculateTokenWarningState(
+  tokenUsage: number,
+  params: TokenWarningParams,
+): TokenWarningState {
+  const {
+    contextWindow,
+    maxOutputTokens,
+    autoCompactEnabled,
+    pctOverride,
+    windowOverride,
+    blockingLimitOverride,
+  } = params
+  const enabled = autoCompactEnabled !== false
+  const autoCompactThreshold = getAutoCompactThreshold(
+    contextWindow,
+    maxOutputTokens,
+    pctOverride,
+    windowOverride,
+  )
+  const threshold = enabled
+    ? autoCompactThreshold
+    : getEffectiveContextWindowSize(contextWindow, maxOutputTokens, windowOverride)
+
+  const percentLeft = Math.max(
+    0,
+    Math.round(((threshold - tokenUsage) / threshold) * 100),
+  )
+
+  const warningThreshold = threshold - WARNING_THRESHOLD_BUFFER_TOKENS
+  const errorThreshold = threshold - ERROR_THRESHOLD_BUFFER_TOKENS
+
+  const isAboveWarningThreshold = tokenUsage >= warningThreshold
+  const isAboveErrorThreshold = tokenUsage >= errorThreshold
+  const isAboveAutoCompactThreshold =
+    enabled && tokenUsage >= autoCompactThreshold
+
+  const actualContextWindow = getEffectiveContextWindowSize(
+    contextWindow,
+    maxOutputTokens,
+    windowOverride,
+  )
+  const defaultBlockingLimit = actualContextWindow - MANUAL_COMPACT_BUFFER_TOKENS
+  const blockingLimit =
+    blockingLimitOverride !== undefined && blockingLimitOverride > 0
+      ? blockingLimitOverride
+      : defaultBlockingLimit
+  const isAtBlockingLimit = tokenUsage >= blockingLimit
+
+  return {
+    percentLeft,
+    isAboveWarningThreshold,
+    isAboveErrorThreshold,
+    isAboveAutoCompactThreshold,
+    isAtBlockingLimit,
+  }
+}
+
+/**
+ * 旧仓 isAutoCompactEnabled 纯函数面（W2-2-pre 缺面先迁①）：
+ * DISABLE_COMPACT（disabled）→ false；DISABLE_AUTO_COMPACT（autoCompactDisabled，
+ * 细粒度开关，保留手动 /compact）→ false；settings.autoCompactEnabled（缺省 true，
+ * 旧 config 缺省 :516）。env 读侧归 config 面（getAutoCompactEnvOverrides 扩面）。
+ */
+export function isAutoCompactEnabled(flags?: {
+  disabled?: boolean
+  autoCompactDisabled?: boolean
+  settingsEnabled?: boolean
+}): boolean {
+  if (flags?.disabled) return false
+  if (flags?.autoCompactDisabled) return false
+  return flags?.settingsEnabled !== false
+}
+
 
 /**
  * token 计数超阈值判定（旧仓 shouldAutoCompact 裁剪真核心：NaN guard + 递归守卫 + 阈值比较）。

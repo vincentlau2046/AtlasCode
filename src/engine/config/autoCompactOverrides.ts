@@ -10,12 +10,15 @@
  *     AutoCompactDeps.enabled 判定面）
  *
  * 残留守登记（H6 防空洞）：
- *   - 三变量消费面 = AutoCompactDeps.pctOverride / windowOverride / enabled
- *     （engine/context/autoCompact.ts）——无生产调用点 = 预声明消费接缝（消费
- *     方 = E-wave-end 组合根 loop deps 装配，当前仅测试消费）。
- *   - 旧仓 DISABLE_AUTO_COMPACT（细粒度开关）+ ATLAS_BLOCKING_LIMIT_OVERRIDE
- *     （TUI warning 态面 calculateTokenWarningState）未收拢（不在 §8.27 三变量
- *     清单；caller enabled 判定面 / TUI 面残留守）。
+ *   - 五变量消费面 = AutoCompactDeps.pctOverride / windowOverride / enabled
+ *     （engine/context/autoCompact.ts）+ calculateTokenWarningState 参数面
+ *     （autoCompactEnabled / blockingLimitOverride）——无生产调用点 = 预声明
+ *     消费接缝（消费方 = E-wave-end 组合根 loop deps 装配 + W3 TUI 活链路
+ *     装配，当前仅测试消费）。
+ *   - W2-2-pre 扩面①（§8.74.2 缺面先迁①配套）：DISABLE_AUTO_COMPACT（旧仓
+ *     autoCompact.ts:152 细粒度开关，isEnvTruthy）+ ATLAS_BLOCKING_LIMIT_OVERRIDE
+ *     （旧仓 :127 TUI warning 态面，parseInt >0 有效）收拢至本读侧（解析 guard
+ *     与旧仓逐字）。
  */
 import { isEnvTruthy } from '../../shared'
 
@@ -26,6 +29,16 @@ export interface AutoCompactEnvOverrides {
   windowOverride?: number
   /** DISABLE_COMPACT（isEnvTruthy → true = 关 auto-compact；映射 deps.enabled）。 */
   disabled?: boolean
+  /**
+   * DISABLE_AUTO_COMPACT（W2-2-pre 扩面①，旧仓 :152 细粒度开关 isEnvTruthy →
+   * true = 关 auto-compact 但保留手动 /compact；映射 isAutoCompactEnabled 纯函数面）。
+   */
+  autoCompactDisabled?: boolean
+  /**
+   * ATLAS_BLOCKING_LIMIT_OVERRIDE（W2-2-pre 扩面①，旧仓 :127 TUI warning 态面
+   * parseInt >0 有效，越界/未设 = undefined；映射 calculateTokenWarningState）。
+   */
+  blockingLimitOverride?: number
 }
 
 /**
@@ -51,6 +64,18 @@ export function getAutoCompactEnvOverrides(): AutoCompactEnvOverrides {
 
   if (isEnvTruthy(process.env['DISABLE_COMPACT'])) {
     overrides.disabled = true
+  }
+
+  // W2-2-pre 扩面①（旧仓 autoCompact.ts:152 / :127 解析 guard 逐字）
+  if (isEnvTruthy(process.env['DISABLE_AUTO_COMPACT'])) {
+    overrides.autoCompactDisabled = true
+  }
+  const blockingLimit = parseInt(
+    process.env['ATLAS_BLOCKING_LIMIT_OVERRIDE'] ?? '',
+    10,
+  )
+  if (!Number.isNaN(blockingLimit) && blockingLimit > 0) {
+    overrides.blockingLimitOverride = blockingLimit
   }
 
   return overrides

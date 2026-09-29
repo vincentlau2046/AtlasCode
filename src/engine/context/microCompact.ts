@@ -10,6 +10,14 @@
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - cached microcompact 路径（cache_edits API 层 + GrowthBook 计数配置 + forked-agent
  *     隔离）→ 残留守（cache 面归 modelprovider 域 + Port 8 配置）。
+ *     W2-2-pre 缺面先迁③裁定（§8.74.9 落盘）：tui cache-edit 面 4 函数
+ *     （pinCacheEdits / consumePendingCacheEdits / markToolsSentToAPIState /
+ *     getPinnedCacheEdits）= feature('CACHED_MICROCOMPACT') 门控死路径（消费点
+ *     llm/query.ts useCachedMC 参数缺省 false + loop.ts:416/:833 feature 门 +
+ *     tokenUsage.ts 两门，缺省全 OFF）且背衬模块 cachedMicrocompact.ts 为
+ *     全 any-stub（F-B2 · S-4 头注登记）→ 前向接缝不迁（H6 防空洞：迁 stub =
+ *     引擎空头体）。owner = E-wave-end engine-dedup 波（cache 面归 modelprovider
+ *     域）。
  *   - COMPACTABLE_TOOLS 白名单 → deps.compactableTools 注入接缝（新仓工具域未移植，
  *     由调用方传「注册工具名 ∩ 可压缩类」；未注入 = 空集 = 不 clear，安全默认）。
  *   - compactWarning 抑制态 / querySource main-thread 判定 → 残留守（warning 面 + source
@@ -34,6 +42,17 @@ export const TIME_BASED_MC_CONFIG_DEFAULTS: TimeBasedMCConfig = {
   enabled: false,
   gapThresholdMinutes: 60,
   keepRecent: 5,
+}
+
+/**
+ * time-based MC 配置读侧（W2-2-pre 缺面先迁④，§8.74.2）：旧仓
+ * getTimeBasedMCConfig = GrowthBook 读（'atlas_slate_heron'，缺省
+ * TIME_BASED_MC_CONFIG_DEFAULTS）。新仓 engine 面无 settings.featureFlags /
+ * GrowthBook 读面（tui D3 GB 化层留 tui 侧）→ 返回缺省值副本（= tui GB-off
+ * 态行为等价）；settings 覆写面随 W3 活链路接线回填（H6 前向接缝登记）。
+ */
+export function getTimeBasedMCConfig(): TimeBasedMCConfig {
+  return { ...TIME_BASED_MC_CONFIG_DEFAULTS }
 }
 
 /** 单 image/document 块 token 估值上限（旧仓常量）。 */

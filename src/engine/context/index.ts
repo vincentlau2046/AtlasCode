@@ -8,12 +8,20 @@
 export {
   AUTOCOMPACT_BUFFER_TOKENS,
   MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES,
+  WARNING_THRESHOLD_BUFFER_TOKENS,
+  ERROR_THRESHOLD_BUFFER_TOKENS,
+  MANUAL_COMPACT_BUFFER_TOKENS,
   getAutoCompactThreshold,
+  getEffectiveContextWindowSize,
+  calculateTokenWarningState,
+  isAutoCompactEnabled,
   shouldAutoCompact,
   autoCompactIfNeeded,
   type AutoCompactTrackingState,
   type AutoCompactDeps,
   type AutoCompactOutcome,
+  type TokenWarningState,
+  type TokenWarningParams,
 } from './autoCompact'
 export {
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
@@ -25,12 +33,18 @@ export {
   createCompactBoundaryMessage,
   buildPostCompactMessages,
   compactConversation,
+  // W2-2-pre 缺面先迁②（§8.74.2 compact 4 extras 之纯函数面；
+  // createCompactCanUseTool / createPlanAttachmentIfNeeded 前向接缝，见
+  // compact.ts 头注裁断）
+  stripImagesFromMessages,
+  mergeHookInstructions,
   type CompactionResult,
   type CompactDeps,
 } from './compact'
 export {
   TIME_BASED_MC_CLEARED_MESSAGE,
   TIME_BASED_MC_CONFIG_DEFAULTS,
+  getTimeBasedMCConfig,
   estimateMessageTokens,
   evaluateTimeBasedTrigger,
   microcompactMessages,
@@ -39,3 +53,16 @@ export {
   type MicrocompactDeps,
   type MicrocompactOutcome,
 } from './microCompact'
+// W2-2-pre 缺面先迁④（§8.74.2 context 扩面族纯谓词/投影面；LLM-bound 体
+// 前向接缝登记见各文件头注 + §8.74.9）
+export {
+  isSnipBoundaryMessage,
+  projectSnippedView,
+  snipProjection,
+} from './snipProjection'
+export {
+  isReactiveCompactEnabled,
+  isWithheldPromptTooLong,
+  isWithheldMediaSizeError,
+  isReactiveOnlyMode,
+} from './reactiveCompact'

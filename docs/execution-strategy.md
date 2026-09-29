@@ -5670,3 +5670,25 @@ W2 2a 实施前消费者 grep 揭示：§8.74.1 类 a「7 目录全删」/类 b�
 **零行为纪律边界裁定**：TUI 活链路从无 e2e ground truth（整回合从未验真）→ W2「零行为」约束绑定**受测面**（engine 行为面经 3055 测保护，不得变）；TUI 侧切 engine-backed = 切到受测行为，新 ground truth = W3 PTY 探针（§8.74.4）。
 
 **切片序修订（W2 内）**：2a-1 安全删集（本事件后首切片）→ 2a-2 注册面 = engine 35 桥 + KEEP 域外设（PowerShell/ascend/TestingPermission/任务族/Snip/SyntheticOutput 等暂留 tui 体）〔注册集合名表与现状逐一对齐〕→ 2b 桥接 + 渲染路由 + 类型迁移 + 逐族消费方改写 → 2-pre engine 缺面填平 → 2d bootstrapState 47 名切换 → 2e 删净 + 0 引用探针 + carry-over 清单落盘（W3 输入）。
+
+#### 8.74.9 W2-2-pre 缺面填平实施裁定（2026-09-29，临场裁回设计记录，不变式 1）
+
+§8.74.2 缺面先迁 4 组清单的**逐组移植/接缝裁定**（实测依赖面后裁断，H6 防空洞纪律：零消费方 + 依赖域未入门面 = 不迁，头注登记）：
+
+**组① autoCompact 3（全迁 ✅）**：calculateTokenWarningState / getEffectiveContextWindowSize / isAutoCompactEnabled 纯函数面入 engine/context/autoCompact.ts + 3 buffer 常量（20k/20k/3k，旧仓 :63-65 逐字）+ config 面扩 2 字段（DISABLE_AUTO_COMPACT / ATLAS_BLOCKING_LIMIT_OVERRIDE，autoCompactOverrides.ts）。判别单测 = engine-auto-compact-token-warning.test.ts（30 断言族）+ env 测试扩 2 变量。
+
+**组② compact 4 extras（2 迁 2 缝）**：
+- ✅ 迁：`stripImagesFromMessages`（媒体块→文本标记 + tool_result 嵌套剥离，纯函数；engine 松散 Message 经 MediaContentBlock 结构窄视图 cast）+ `mergeHookInstructions`（指令合并，纯函数）→ engine/context/compact.ts
+- ⏸ 缝：`createCompactCanUseTool`（依赖 tui CanUseToolFn/PermissionDecision 类型面；engine 权限面 = GateVerdict 异型；唯一消费方 = fork 压缩支，本体归 compact.ts PTL/fork 残留守）/ `createPlanAttachmentIfNeeded`（依赖 plan 域 getPlan/getPlanFilePath + 附件域 createAttachmentMessage〔attachments.ts 3104L 域文件〕/AttachmentMessage；附件面 = §8.40 C-3 前向接缝已登记）
+- owner = W3 活链路接线 / E-wave-end 审计
+
+**组③ microCompact 3 cache-edit 面（全缝，不迁）**：pinCacheEdits / consumePendingCacheEdits / markToolsSentToAPIState（+ getPinnedCacheEdits）实测 = **feature('CACHED_MICROCOMPACT') 门控死路径**（消费点 llm/query.ts `useCachedMC` 参数缺省 false + loop.ts:416/:833 feature 门 + tokenUsage.ts 两门，缺省全 OFF）且背衬模块 cachedMicrocompact.ts 为**全 any-stub**（F-B2 · S-4 头注登记，10 value + 3 type stub）→ 迁 stub = 引擎空头体（H6 防空洞）。engine microCompact.ts 头注已登记残留守（cache 面归 modelprovider 域，owner = E-wave-end engine-dedup 波）。
+
+**组④ context 扩面族（纯谓词/投影迁，LLM-bound 体缝）**：
+- ✅ 迁：snip 投影 3（isSnipBoundaryMessage / projectSnippedView / snipProjection 别名，新文件 engine/context/snipProjection.ts）+ reactive-compact 4 谓词（isReactiveCompactEnabled / isWithheldPromptTooLong / isWithheldMediaSizeError / isReactiveOnlyMode，新文件 engine/context/reactiveCompact.ts；env 读侧谓词内联 = 2 枚 1 行谓词不开新 config 面，H6 登记）+ getTimeBasedMCConfig（engine microCompact.ts；旧仓 GB 读 'atlas_slate_heron' 裁断 = 新仓 engine 无 settings.featureFlags/GB 读面 → 返回缺省值副本〔= tui GB-off 态行为等价〕，settings 覆写面随 W3 回填）
+- ⏸ 缝：sessionMemoryCompact 614L（LLM-bound 会话记忆压缩体）/ snipCompact 265L（LLM-bound snip 摘要 + 旧仓 snip 域消费链）/ reactiveCompact 2 LLM 入口（tryReactiveCompact / reactiveCompactOnPromptTooLong 依赖 tui 富 compactConversation〔ToolUseContext + CacheSafeParams fork 支〕，engine 窄 spine DI 契约不匹配，归 W-opt 防引擎面膨胀）/ postCompactCleanup 77L（8 个 tui 域 cache 清理编排 = 跨域 cache 面未入门面）/ manager + defaultManager（上下文管理器脚手架，消费方 = 将删的 orchestrator loop）/ cachedMicrocompact + cachedMCConfig（全 any-stub 模块，组③ 同裁定）
+- owner = W3 活链路接线 / W-opt 优化波 / E-wave-end 审计（各文件头注 + 本条登记）
+
+**engineCompat 冲突面更新**：填平后 engine 门面新增导出与 orchestrator index 双导 → 星号冲突消解全集 15 → **23**（主块 22 + 深层 getAutoCompactThreshold 1）；新增 8 名入主块（2 buffer 常量 + 6 纯函数 mergeHookInstructions/stripImagesFromMessages/reactive 4 谓词，orchestrator 胜 = 零行为）；深层块 mergeHookInstructions 行删（双显式块 TS2300 消解）；ERROR 常量/getTimeBasedMCConfig/snip 投影 3 = orchestrator index 未导无星号冲突（engine 星号面透出）。
+
+**判别单测**：engine-auto-compact-token-warning.test.ts（16）+ engine-context-w2-pre-surfaces.test.ts（20）+ env 测试扩 2（共 56 测/113 断言全绿）。零行为 = 新面 0 生产消费方（engine 行为面经既有 3055 测保护不变），预声明消费接缝头注登记（W3 TUI 活链路装配 + E-wave-end 组合根）。

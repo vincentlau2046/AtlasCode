@@ -327,10 +327,19 @@ export {
 } from './coordinator'
 export {
   getAutoCompactThreshold,
+  getEffectiveContextWindowSize,
+  calculateTokenWarningState,
+  isAutoCompactEnabled,
   shouldAutoCompact,
   autoCompactIfNeeded,
   AUTOCOMPACT_BUFFER_TOKENS,
   MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES,
+  // W2-2-pre 缺面先迁①（§8.74.2）：TUI warning 态面三常量 + 纯函数面
+  WARNING_THRESHOLD_BUFFER_TOKENS,
+  ERROR_THRESHOLD_BUFFER_TOKENS,
+  MANUAL_COMPACT_BUFFER_TOKENS,
+  type TokenWarningState,
+  type TokenWarningParams,
   // F-B3（S-4）：补齐兄弟错误常量 re-export（engine/context 两枚同族常量，
   // 原根门面仅导 USER_ABORT，NOT_ENOUGH_MESSAGES 面缺 → 一致性轴订正）
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
@@ -340,13 +349,25 @@ export {
   getCompactPrompt,
   formatCompactSummary,
   getCompactUserSummaryMessage,
+  // W2-2-pre 缺面先迁②（§8.74.2 compact 4 extras 之纯函数面）
+  stripImagesFromMessages,
+  mergeHookInstructions,
   microcompactMessages,
   resetMicrocompactState,
+  getTimeBasedMCConfig,
   buildPostCompactMessages,
   estimateMessageTokens,
   evaluateTimeBasedTrigger,
   TIME_BASED_MC_CLEARED_MESSAGE,
   TIME_BASED_MC_CONFIG_DEFAULTS,
+  // W2-2-pre 缺面先迁④（§8.74.2 context 扩面族纯谓词/投影面）
+  isSnipBoundaryMessage,
+  projectSnippedView,
+  snipProjection,
+  isReactiveCompactEnabled,
+  isWithheldPromptTooLong,
+  isWithheldMediaSizeError,
+  isReactiveOnlyMode,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
   type AutoCompactOutcome,
