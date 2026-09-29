@@ -120,7 +120,11 @@ const HARD_DEFAULT_MAX_TOKENS = 32768
  * The ordered list of "provider/model-id" references for a role, in
  * horizontal-fallback order. Reads settings.providers + settings.modelRoles.<role>.models.
  */
-export function getRoleModels(role: ModelRole, sessionModel?: string): string[] {
+export function getRoleModels(
+  role: ModelRole,
+  sessionModel?: string,
+  fallbackModel?: string,
+): string[] {
   const roleKey = role.toUpperCase()
   const envModel = process.env['ATLAS_' + roleKey + '_MODEL']
   const providers: any = getEndpointConfigSource().getProviders()
@@ -139,14 +143,22 @@ export function getRoleModels(role: ModelRole, sessionModel?: string): string[] 
     return ref
   }
 
+  let refs: string[]
   if (sessionModel) {
-    return [normalizeRef(sessionModel), ...rolePool]
+    refs = [normalizeRef(sessionModel), ...rolePool]
+  } else if (envModel) {
+    refs = [normalizeRef(envModel)]
+  } else {
+    refs = rolePool
   }
 
-  if (envModel) {
-    return [normalizeRef(envModel)]
+  // D-5b（S-4，§8.73.2）：--fallback-model 追加为 role 池末位 fallback（最低优先
+  // 级；已在池内则去重不重复）。无 fallbackModel = 原三态行为不变（2 参调用兼容）。
+  if (fallbackModel) {
+    const fb = normalizeRef(fallbackModel)
+    if (!refs.includes(fb)) refs.push(fb)
   }
-  return rolePool
+  return refs
 }
 
 /** Resolve a "provider/model-id" reference to a fully-resolved model. */

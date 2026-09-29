@@ -72,9 +72,11 @@ import {
   InvalidArgumentError,
   Option,
 } from '@commander-js/extra-typings'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
-import { feature, isEnvTruthy } from '../shared'
+import { feature, isEnvTruthy, type ThinkingConfig } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
 import type { AutoModeCritiqueOptions } from './handlers/autoMode'
 import type {
@@ -126,12 +128,91 @@ function createSortedHelpConfig(): {
  *   - permissionPromptTool → permissionPromptToolName
  *   - sessionPersistence === false → disablePersistence（headless transcript
  *     持久化裁支；与 bootstrap ⑥ 族 kill-switch 同 flag 双面消费）
- * 裁登记（选项注册惰性数据、字段不入契约，见头注主面段）：jsonSchema /
- * thinking / maxThinkingTokens / taskBudget / systemPrompt /
- * appendSystemPrompt / fallbackModel / includePartialMessages / forkSession /
- * enableAuthStatus / betas / workload / file / chrome / agents /
- * settingSources。
+ * D-5b（S-4，§8.73.2）headless 5 高频选项 + --effort 真消费回填（Stage 2 映射
+ * 面，含 -file 读支）：systemPrompt / appendSystemPrompt（--*-prompt-file 读支
+ * readPromptFileInline，旧 main.tsx L1186-1225 语义）/ fallbackModel / jsonSchema
+ * （--json-schema 经 parseJsonSchemaOption 解析）/ thinkingConfig（--thinking +
+ * --max-thinking-tokens 经 buildHeadlessThinkingConfig，旧 main.tsx L2051-2077
+ * 语义，裁登记：headless 无 shouldEnableThinkingByDefault 交互缺省态 → 未设
+ * 两 flag = provider 缺省 undefined，MAX_THINKING_TOKENS env 回落面随交互缺省
+ * 一并裁）/ effort（--effort，argParser 校验 low/medium/high/xhigh/max 后透传）。
+ * 裁登记（选项注册惰性数据、字段不入契约，见头注主面段）：taskBudget /
+ * includePartialMessages / forkSession / enableAuthStatus / betas / workload /
+ * file / chrome / agents / settingSources。
  */
+
+/**
+ * D-5b（S-4）：--*-prompt-file 读支（旧 main.tsx L1186-1225 语义逐字）：
+ * 同设 inline + file → stderr + exit 1；file ENOENT → stderr + exit 1；其他
+ * 读错 → stderr + exit 1。仅 inline（无 -file）时原样返回 inline。
+ */
+function readPromptFileInline(
+  inline: string | undefined,
+  file: string | undefined,
+  label: string,
+): string | undefined {
+  if (!file) return inline
+  if (inline) {
+    process.stderr.write(
+      `Error: Cannot use both the inline prompt and its -file variant for ${label}. Please use only one.\n`,
+    )
+    process.exit(1)
+  }
+  try {
+    return readFileSync(resolve(file), 'utf8')
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code
+    if (code === 'ENOENT') {
+      process.stderr.write(`Error: ${label} file not found: ${resolve(file)}\n`)
+    } else {
+      process.stderr.write(
+        `Error reading ${label} file: ${(error as Error).message}\n`,
+      )
+    }
+    process.exit(1)
+  }
+}
+
+/**
+ * D-5b（S-4）：--json-schema（commander argParser=String 原样 JSON 文本）→ 解析
+ * 为 schema 对象；空/非对象/非法 JSON → stderr + exit 1（保 H6 不静默透传坏 schema）。
+ */
+function parseJsonSchemaOption(
+  raw: unknown,
+): Record<string, unknown> | undefined {
+  if (typeof raw !== 'string' || raw.trim() === '') return undefined
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch (error) {
+    process.stderr.write(
+      `Error: --json-schema is not valid JSON: ${(error as Error).message}\n`,
+    )
+    process.exit(1)
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    process.stderr.write('Error: --json-schema must be a JSON object.\n')
+    process.exit(1)
+  }
+  return parsed as Record<string, unknown>
+}
+
+/**
+ * D-5b（S-4）：--thinking / --max-thinking-tokens → ThinkingConfig（旧 main.tsx
+ * L2051-2077 语义；裁登记见头注：无交互缺省态，两 flag 均未设 → undefined）。
+ */
+function buildHeadlessThinkingConfig(
+  thinking: 'enabled' | 'adaptive' | 'disabled' | undefined,
+  maxThinkingTokens: number | undefined,
+): ThinkingConfig | undefined {
+  if (thinking === 'adaptive' || thinking === 'enabled') return { type: 'adaptive' }
+  if (thinking === 'disabled') return { type: 'disabled' }
+  if (maxThinkingTokens !== undefined) {
+    if (maxThinkingTokens > 0) return { type: 'enabled', budgetTokens: maxThinkingTokens }
+    if (maxThinkingTokens === 0) return { type: 'disabled' }
+  }
+  return undefined
+}
 export function buildHeadlessOptions(
   options: Record<string, unknown>,
 ): HeadlessOptions {
@@ -159,6 +240,24 @@ export function buildHeadlessOptions(
     agent: options.agent as HeadlessOptions['agent'],
     disablePersistence:
       options.sessionPersistence === false ? true : undefined,
+    // ── D-5b（S-4，§8.73.2）：headless 5 高频选项 + --effort 真消费映射 ──
+    jsonSchema: parseJsonSchemaOption(options.jsonSchema),
+    systemPrompt: readPromptFileInline(
+      options.systemPrompt as string | undefined,
+      options.systemPromptFile as string | undefined,
+      'System prompt',
+    ),
+    appendSystemPrompt: readPromptFileInline(
+      options.appendSystemPrompt as string | undefined,
+      options.appendSystemPromptFile as string | undefined,
+      'Append system prompt',
+    ),
+    fallbackModel: options.fallbackModel as HeadlessOptions['fallbackModel'],
+    thinkingConfig: buildHeadlessThinkingConfig(
+      options.thinking as 'enabled' | 'adaptive' | 'disabled' | undefined,
+      options.maxThinkingTokens as number | undefined,
+    ),
+    effort: options.effort as HeadlessOptions['effort'],
   }
 }
 

@@ -79,11 +79,13 @@
 import { randomUUID } from 'crypto'
 import { join } from 'path'
 import {
+  asSystemPrompt,
   logForDebugging,
   type AssistantMessage,
   type Message,
   type PermissionDecision,
   type PermissionMode,
+  type ThinkingConfig,
   type ToolPermissionContext,
   type Tools,
 } from '../shared'
@@ -131,6 +133,7 @@ import {
   getProviderContextWindow,
   getModelProvider,
   modelToRole,
+  toResponseFormat,
   type ModelProvider,
   type ModelRole,
 } from '../modelprovider'
@@ -172,6 +175,18 @@ export interface HeadlessOptions {
   replayUserMessages?: boolean
   agent?: string
   disablePersistence?: boolean
+  // D-5b（S-4，§8.73.2）：headless 高频 5 选项 + --effort 真消费回填（Path B
+  // registered-unmapped 核销）——Stage 1 声明。Stage 2 = buildHeadlessOptions
+  // 映射（含 -file 读支，parse.ts）；Stage 3 = AgentLoopDeps/queryOneRound 引擎
+  // 面真消费（loop.ts + modelprovider chat/roles）。其余 8（taskBudget/teleport/
+  // includePartialMessages/forkSession/enableAuthStatus/workload/setupTrigger/
+  // sessionStartHooksPromise）留登记不回填。
+  systemPrompt?: string
+  appendSystemPrompt?: string
+  fallbackModel?: string
+  jsonSchema?: Record<string, unknown>
+  thinkingConfig?: ThinkingConfig
+  effort?: string
 }
 
 // 本地窄型（result wire 消息读面；writer 支类型自明，避免与 sdkTypes 循环）
@@ -619,6 +634,20 @@ export async function runHeadless(
     ? modelToRole(options.model)
     : 'premium'
   const roleModel = getRoleModel(role)
+  // D-5b（S-4）：--fallback-model === --model 守卫（旧 main.tsx L1180-1183 语义：
+  // fallback 不得等于主模型）。headless 主模型 = options.model（role 由其派生）；
+  // 未设 --model 时 role='premium' 缺省、无主模型可比，守卫空转（与旧仓一致）。
+  if (
+    options.fallbackModel &&
+    options.model &&
+    options.fallbackModel === options.model
+  ) {
+    process.stderr.write(
+      `Error: Fallback model cannot be the same as the main model. ` +
+        `Please specify a different model for --fallback-model.\n`,
+    )
+    process.exit(1)
+  }
   const compactDeps: CompactDeps = {
     summarize: async (msgs, prompt) => {
       const resp = await modelProvider.chat({
@@ -644,6 +673,25 @@ export async function runHeadless(
     modelProvider,
     role,
     signal: abortController.signal,
+    // D-5b（S-4）：headless 5 选项 + --effort → LLM 调用真消费面（引擎链）。
+    // systemPrompt = --system-prompt + --append-system-prompt 合并（SystemPrompt）；
+    // 未设任一 → undefined（窄 spine 缺省，行为不变）。
+    systemPrompt:
+      options.systemPrompt || options.appendSystemPrompt
+        ? asSystemPrompt(
+            [options.systemPrompt, options.appendSystemPrompt].filter(
+              (s): s is string => Boolean(s),
+            ),
+          )
+        : undefined,
+    thinkingConfig: options.thinkingConfig,
+    // responseFormat = --json-schema 经 modelprovider toResponseFormat（结构化
+    // 输出 response_format；未设 --json-schema → undefined = 非结构化）。
+    responseFormat: options.jsonSchema
+      ? toResponseFormat({ type: 'json_schema', schema: options.jsonSchema })
+      : undefined,
+    effortValue: options.effort,
+    fallbackModel: options.fallbackModel,
     checkPermission,
     hooks: createLoopHooks({
       options: { sessionId, permissionMode: tpcRef.current.mode },

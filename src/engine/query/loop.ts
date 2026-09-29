@@ -30,6 +30,8 @@ import {
   logForDebugging,
   type AssistantMessage,
   type Message,
+  type SystemPrompt,
+  type ThinkingConfig,
   type ToolResultBlockParam,
   type ToolUseBlock,
   type Tools,
@@ -93,6 +95,23 @@ export interface AgentLoopDeps {
   hooks?: LoopHooks
   /** S-E3 A11：transcript 写面（未注入 = 窄 spine 无持久化安全缺省）。 */
   transcript?: LoopTranscriptSink
+  /**
+   * D-5b（S-4，§8.73.2）：headless 高频 5 选项 + --effort → LLM 调用真消费面
+   * （runHeadless 组合根注入；未注入 = 窄 spine 缺省，行为不变）。
+   *   - systemPrompt    = --system-prompt + --append-system-prompt 合并（SystemPrompt）
+   *   - thinkingConfig  = --thinking / --max-thinking-tokens 构建的 ThinkingConfig
+   *   - responseFormat  = --json-schema 经 modelprovider toResponseFormat 产物
+   *   - effortValue     = --effort（buildOpenAIParams options.effortValue → reasoning_effort）
+   *   - fallbackModel   = --fallback-model（role 池末位，getRoleModels 追加）
+   *
+   * H6 防空洞：本 5 槽经 queryOneRound 逐字段透传 modelProvider.chat（非仅接口
+   * 声明），tests/unit/engine-headless-options.test.ts 假 provider 断言逐槽消费。
+   */
+  systemPrompt?: SystemPrompt
+  thinkingConfig?: ThinkingConfig
+  responseFormat?: unknown
+  effortValue?: string
+  fallbackModel?: string
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -159,6 +178,15 @@ export async function queryOneRound(
     messages,
     role: deps.role,
     signal: deps.signal,
+    // D-5b（S-4）：headless 5 选项 + --effort 真消费透传（引擎面 → LLM 调用）。
+    // effortValue 经 options 槽（buildOpenAIParams 读 options.effortValue）；
+    // 未设任一 = 字段 undefined，窄 spine 缺省行为不变。
+    systemPrompt: deps.systemPrompt,
+    thinkingConfig: deps.thinkingConfig,
+    responseFormat: deps.responseFormat,
+    fallbackModel: deps.fallbackModel,
+    options:
+      deps.effortValue !== undefined ? { effortValue: deps.effortValue } : undefined,
   })
 
   const assistantContent: unknown[] = resp.message.content ?? []

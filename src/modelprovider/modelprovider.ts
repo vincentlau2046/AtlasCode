@@ -17,7 +17,7 @@ import { randomUUID } from 'crypto'
 import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
-import { asSystemPrompt, type Message, type SystemPrompt } from '../shared'
+import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig } from '../shared'
 import { logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
@@ -59,6 +59,12 @@ export interface ModelProvider {
     signal?: AbortSignal
     options?: any
     openaiParams?: any
+    // D-5b（S-4，§8.73.2）：headless 真消费三槽——thinkingConfig → buildOpenAIParams
+    // effort 派生；responseFormat = 结构化输出（toResponseFormat 产物 → response_format）；
+    // fallbackModel = role 池末位（getRoleModels 追加）。未传 = 窄 spine 缺省，行为不变。
+    thinkingConfig?: ThinkingConfig
+    responseFormat?: unknown
+    fallbackModel?: string
   }): Promise<{
     type: 'assistant'
     uuid: string
@@ -137,8 +143,11 @@ export class OpenAIProvider implements ModelProvider {
     signal?: AbortSignal
     options?: any
     openaiParams?: any
+    thinkingConfig?: ThinkingConfig
+    responseFormat?: unknown
+    fallbackModel?: string
   }) {
-    const refs = getRoleModels(args.role, args.sessionModel)
+    const refs = getRoleModels(args.role, args.sessionModel, args.fallbackModel)
     if (refs.length === 0) {
       throw new Error(
         `No models configured for role '${args.role}' (empty pool). ` +
@@ -165,11 +174,17 @@ export class OpenAIProvider implements ModelProvider {
             {
               messages: args.messages ?? [],
               systemPrompt: (args.systemPrompt ?? asSystemPrompt([])) as SystemPrompt,
+              // D-5b（S-4）：thinkingConfig 真消费（effort 派生：enabled+budget →
+              // mapBudgetToEffort；否则回落 options.effortValue / 模型缺省）。
+              thinkingConfig: args.thinkingConfig,
               options: args.options,
             },
             args.role,
             entry,
           )),
+          // D-5b（S-4）：结构化输出（--json-schema 经 toResponseFormat 产物 →
+          // OpenAI response_format；未设 = 非结构化，键不出现）。
+          ...(args.responseFormat ? { response_format: args.responseFormat } : {}),
           stream: false,
         }
       }
