@@ -23,7 +23,9 @@ export {
   buildPostCompactMessages,
   classifyToolError,
   compactConversation,
-  CompactionResult,
+  type CompactionResult, // 接口=纯类型：内联 type 修饰。Bun 运行时对值导出清单逐名核销，
+                         // 未标 type 的纯类型名 → 加载期 FATAL "export not found in './core/orchestrator'"
+                         // （tsc 无 isolatedModules 不报此误标，唯运行时暴露；其余 13 名均函数/常量值导出）
   estimateMessageTokens,
   evaluateTimeBasedTrigger,
   microcompactMessages,

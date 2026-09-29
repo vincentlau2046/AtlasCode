@@ -1,7 +1,15 @@
+#!/usr/bin/env bun
 /**
- * TUI 启动入口（real entry; main.tsx 只 export main()）
+ * TUI 启动入口（real entry; ui/main 只 re-export main()）
  *
- * 实现波次: D 波
- * 状态: A 波骨架占位（实现待 D 波）
+ * §8.72 TUI 壳波 Slice D（task #152/#165）：旧仓 src/launcher.ts 5 行 C-7
+ * 同形（交接面 ./main.js → ./ui/main.js，品牌面 AtlasHarness → AtlasCode）。
+ * 动 import = 旧仓时序保真（闭包图懒加载，交接后只触 tui/main 全闭包）。
+ * S-C1 裁定核销：TUI 默认启动支归本薄壳（`bun run src/atlascode/launcher.ts`），
+ * 不经 bin（bin 走 cli 域 parse，-p headless 经新 runHeadless）。
  */
-export {}
+process.stderr.write("[AtlasCode] starting TUI...\n");
+import("./ui/main.js").then(m => m.main()).catch(e => {
+  process.stderr.write("[AtlasCode] FATAL: " + (e?.message || e) + "\n");
+  process.exit(1);
+});

@@ -1,7 +1,8 @@
 /**
- * TUI（main.tsx/screens/components/ink）— .tsx 原样搬不重编译（C-7）
+ * TUI 门面（STR-1 门面收口：ui 面对外消费只经本文件）
  *
- * 实现波次: D 波
- * 状态: A 波骨架占位（实现待 D 波）
+ * §8.72 TUI 壳波 Slice D（task #152/#165）：薄 re-export ui/main
+ * （→ tui 域 main() + startDeferredPrefetches）。.tsx 本体原样搬不重编译
+ * （C-7，落位 src/tui/，Slice B）。
  */
-export {}
+export { main, startDeferredPrefetches } from './main.js'
