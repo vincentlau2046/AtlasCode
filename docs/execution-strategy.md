@@ -6441,3 +6441,38 @@ error 归 tests 卫生波次。
 （303 = 13 枚 no-op 注册族「unused directive」存量噪音 + 少量既有项；新代码
 全 error 无豁免）。测试基线不变（W4 零测试改动：3132 pass / 0 fail /
 7498 expect / 192 文件，quartet 复验后锁定）。
+#### 8.74.22 W5 前 bootstrapState 2e 死名删净实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：§8.74.10（W2-2d）登记残口「bootstrapState.ts 内 45 名本地定义（+2 trust
+stub）= 死代码（0 消费者），2e 删净波删除（注意模块内交叉引用：_sessionId/_costState
+等模块态被 ~140 tui-only 函数引用，删净时逐段核）；randomUUID import 随 _sessionId
+删净核销」。本波执行该删净。
+
+**临场裁定 5-1（删净口径 45 → 71 扩大）**：§8.74.10 登记 45 碰撞名 + 2 trust stub
+为 W2-2d 时点快照；2e 删净波重测（repo 全域 2665 文件命名导入扫描 + 文件内活引用
+扫描）= **71 死名** = 44 碰撞（src/bootstrap 单源已接管）+ 27 tui-only-dead（同 0
+消费者 0 文件内活引用，仅存注释引用）。同性质死名一并删净（登记口径 45→71）；
+getActiveTimeCounter 因 tests 命名导入改判活保留（src-only 扫描会误判其死，
+repo 全域扫描纠回）。
+
+**临场裁定 5-2（删净范围含 6 孤儿模块态 + freshCostState + 2 import 核销）**：删
+71 死导出后逐段核模块态活用户（各态 accessor 是否全落 71 死集）——**孤儿 6 态**
+（accessor 全死）随删净核销：_isNonInteractiveSession / _cwdState / _originalCwd /
+_sessionId / _costState / _sessionPersistenceDisabled + freshCostState 辅助函数 +
+`import { randomUUID }`（仅 _sessionId 初值用）+ `import type { CostModelUsage,
+CostState }`（仅死 cost 家族用）；**保留 12 活态**（各含 ≥1 非死 accessor）：
+_spSectionCache / _agentColorMap / _isRemoteMode / _mainLoopModelOverride /
+_activeTimeCounter / _locCounter / 6 个 _turn* 累积态。行为零改动（孤儿态无任何
+活消费者，删净不触运行路径）。
+
+**临场裁定 5-3（孤儿态判死依据 = 命名导入扫描非行为追踪）**：6 孤儿态「accessor
+全死」判定基于 repo 全域 2665 文件 `import {…} from '…bootstrapState'` 命名扫描
+（含 tests/）= 0 命中 + 文件内活引用扫描（排除注释行）= 0 命中；旧仓「main.tsx:788
+setIsInteractive」注释为 W2-2d 前陈旧态（现消费者全走 src/bootstrap 域门面
+getIsNonInteractiveSession/getIsInteractive，实测 tui 文件 0 命中）。
+
+**处置实施（单文件 src/tui/bootstrapState.ts，零行为改动）**：187 导出 → **116**
+导出（删 71 死导出 + 6 孤儿态 + freshCostState + 2 孤儿 import + 1 随附孤儿
+drift ③ cost 注释）；359 行 → 175 行（-184 / +0，纯删除）。四件套核销：tsc 0 /
+build 0（cli.js 2.33MB）/ lint 0e·303w（基线不变）/ 全量 3132/0/7498/192
+（quartet 复验）。
