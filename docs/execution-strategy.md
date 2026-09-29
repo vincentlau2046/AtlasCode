@@ -5648,3 +5648,25 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 **四件套（纯 docs 波，代码/测试基线不变）**：tsc 0 / lint 0 error（384 warn）/ build 798 模块 / 全量 **3055 pass·0 fail·7318 expect·182 文件** + CI gate **6·0·5·2**（继承 §8.73.4 波终基线，本波零代码面）。
 
 **波闭环**：W1 设计裁定完成（1.2 命运清单 / 1.3 单 loop / 1.4 bootstrapState / 1.5 活链路 + 探针 / 1.6 lint 策略全落盘，= W2/W3 删码唯一依据）。**不切波 tag**（设计子波，沿 §8.72/§8.73 先例；R1 波 tag 归 W4/W5 收口时切 `wave-r1`）。随即开 W2（task #174）按 §8.74.6 切片序 2a → 2b → 2-pre → 2d → 2e。
+
+#### 8.74.8 W2 开波范围订正（2026-09-29，消费者地图实测，开波后第一设计事件）
+
+W2 2a 实施前消费者 grep 揭示：§8.74.1 类 a「7 目录全删」/类 b「9 工具删」裁定基于「engine 有对应本体 + 无 UI.tsx」，**未覆盖外部消费者**（tools.ts 之外 pipeline/UI/swarm/hook 对工具本体/常量的活引用）。逐目录 grep 后裁定（不变式 1：临场裁回设计记录）：
+
+**改判 KEEP（去重顺延，W2 不动本体）**：
+- **任务族 5（TaskCreate/Get/List/Update + TodoWrite）+ ToolSearch + Snip**：外部活消费者 = `constants/tools.ts` 名表 + `swarm/inProcessRunner`（materialize）+ `classifierDecision`（决策支）+ `messages/attachments/sessionRestore/ToolSelector`（UI/管线）+ `force-snip/snipCompact`（snip 族）→ 删体须待 2b 桥接 + 逐族消费方改写；**W2 收尾仍持消费者的族 → 顺延 W3（carry-over 清单，零意外）**
+- **SyntheticOutputTool**（main.tsx + LocalAgentTask + coordinatorMode + hooks 活 import 常量族）/ **DiscoverSkills**（prompts.ts lazy require prompt.js）/ **McpAuth**（mcp client `createMcpAuthTool` 活）/ **ReviewArtifact**（PermissionRequest UI 支）/ **Tungsten**（REPL `TungstenLiveMonitor` 组件）/ **REPLTool**（constants 模块 = tools.ts 自身 + sessionStorage 消费）/ **MCPTool**（活 import 非孤儿，§8.74.1 已订正）
+
+**2a-1 安全删集（零行为：死模块 / feature-off 门 / dev-only env；feature() 无 GrowthBook = env 门控缺省全 off，删集在默认态零行为，feature-on 态丢失 = H6 策展登记）**：
+1. **4 dead require**（目标目录/模块不存在，运行时恒 null）：SuggestBackgroundPR（tools.ts L19-22）/ CtxInspect（L97-99）/ ListPeers（L113-115）/ WorkflowTool/bundled（L118，目录不存在）
+2. **VerifyPlanExecutionTool**：删目录（1 文件）+ tools.ts L74-79/L245（`ATLAS_VERIFY_PLAN` dev-only；execAgentHook:45 / classifierDecision:36 引用 = 纯注释）
+3. **WorkflowTool**：删目录（4 文件全 feature-gated）+ 5 消费点〔tools.ts L116-121/L247 / commands.ts:349 / classifierDecision:40 族 / PermissionRequest:38-39/71〕（全 `WORKFLOW_SCRIPTS` 门，缺省 off）
+4. **TerminalCaptureTool**：删目录（仅 prompt.ts；本体模块 `TerminalCaptureTool.js` 缺失 = require 已死）+ tools.ts L100-103/L237 + classifierDecision L26-29 gated 名常量
+5. **WebBrowserTool**：删目录（仅 WebBrowserPanel.tsx；本体 `WebBrowserTool.js` 缺失 = require 已死）+ tools.ts L104-106/L231 + REPL.tsx L265/L4284 gated 面板行
+6. **OverflowTestTool + MonitorTool**：删目录（各 1 文件）+ tools.ts L33-35/L94-96/L235/L250 + classifierDecision L31-34/83 + PermissionRequest L40/73（全 feature-off）
+7. **spawnMultiAgent.ts**（根级 1,084L，0 活导入，§8.74.1 已核）
+
+**W2-2b 桥接架构裁定（契约面 gap 实测）**：两 Tool 契约结构性不同（tui = `buildTool` + zod inputSchema + `prompt()` + React 渲染成员；engine = 纯 JSON schema + DI `call` + 无渲染）→ 2b = **逐工具 tui 契约适配器**（行为成员 `checkPermissions/isEnabled/description/call` 委托 engine 对象；inputSchema 桥接〔zod 化 engine JSON schema 或透传，按消费点实测〕；`prompt()` ← engine prompt 文本族；渲染成员 ← UI.tsx/fused 特例）；Bash 族先行 pilot 再推广 35。
+**零行为纪律边界裁定**：TUI 活链路从无 e2e ground truth（整回合从未验真）→ W2「零行为」约束绑定**受测面**（engine 行为面经 3055 测保护，不得变）；TUI 侧切 engine-backed = 切到受测行为，新 ground truth = W3 PTY 探针（§8.74.4）。
+
+**切片序修订（W2 内）**：2a-1 安全删集（本事件后首切片）→ 2a-2 注册面 = engine 35 桥 + KEEP 域外设（PowerShell/ascend/TestingPermission/任务族/Snip/SyntheticOutput 等暂留 tui 体）〔注册集合名表与现状逐一对齐〕→ 2b 桥接 + 渲染路由 + 类型迁移 + 逐族消费方改写 → 2-pre engine 缺面填平 → 2d bootstrapState 47 名切换 → 2e 删净 + 0 引用探针 + carry-over 清单落盘（W3 输入）。
