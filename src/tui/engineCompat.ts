@@ -47,6 +47,12 @@ export {
   isSnipBoundaryMessage,
   projectSnippedView,
 } from './core/orchestrator/context/snipProjection'
+// autoCompact 深层缺面 3（calculateTokenWarningState /
+// getEffectiveContextWindowSize / isAutoCompactEnabled：仅 orchestrator 导出、
+// engine 门面 0 = 真缺面）+ 第 15 枚星号冲突 getAutoCompactThreshold（engine
+// 门面 :329 + orchestrator index :57 双导 → TS2308，本行显式 re-export 消解）。
+// F-B4（S-4）订正：冲突消解全集 = 主块 14 名 + 此 1 = 15（原「14-name 冲突块」
+// 漏计此枚，其非深缺面）。
 export {
   calculateTokenWarningState,
   getEffectiveContextWindowSize,
