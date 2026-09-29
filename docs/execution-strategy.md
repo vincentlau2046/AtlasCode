@@ -5429,3 +5429,25 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 **修波范围（S-4，本波修；非本波量级登记归波）**：D-4b lint 高价值子集 4-6 规则体恢复 / D-5b HeadlessOptions 5 项真消费回填 / S-1/S-2 判 HIGH 的发现（逐条三裁定）。零行为面改动须四件套全绿（tsc 0 / lint 0 error / build ✓ / 3039/0/7250/180 + gate 6·0·5·2）。
 
 **基线谱系**：3039/0/7250/180 + gate 6·0·5·2（#151/#152 终，本波开波基线）。
+
+### §8.73.1 S-1 保真审轮 1 闭环 + findings 台账（2026-09-29）
+
+**双路只读审视**（Path A 旧仓 C-7 保真对照 + Path B 新仓一致/H6 反桩，≤2 限额，报告 = 数据主 session 逐条 grep/Read 复核，零未登记 silent functional gap）：
+- **Path A 判定 = FAITHFUL-WITH-FINDINGS**：5 spot-tool（Bash/Skill/LSP/RemoteTrigger/WebFetch）逐句对照旧仓 ground truth（a8af45b）全保真，行为 delta 全登记头注（11/17/10/9/8 项）；autoCompact 阈值式 + 熔断器 + getCompactPrompt 重建 + query loop 裁剪 + skill 域（loadSkillsDir/argumentSubstitution/promptShellExecution）全保真；49 口径核销（47 = 历史口径，cron×3 计 3）；导出面 `tsc --noEmit` exit 0 无 dangling import。
+- **Path B 追齐度表 = D-2a 确认**：tui 闭包消费 33 名，**22/33 [GAP]**（21 域 gap + 1 门面 gap），tui 100% orchestrator 依赖（33 名 0 引擎源，702/710 引擎门面名 tui 未用）→ 切端 = 大后续波（「engine 旧 API 面扩展」独立波），#154 排除（D-2a 确认，双份 + 矩阵登记不变）。D-2 原估「交集 ~3 名」订正为「8 名 [SAME] 碰撞全归 orchestrator〔有效 0〕+ 22 名 [GAP]」。
+
+**findings 台账（S-4 三裁定输入；状态 = 待 S-4）**：
+| ID | 域 | file:line | 严重度 | 裁定建议 | 处置波 |
+|---|---|---|---|---|---|
+| F-A1 | engine/tools | `tools/index.ts:201` 头注 + `toolRegistry.ts:89`「32/49 收口」 | MED | 计数文订正（Snip/TeamCreate/TeamDelete 3 本体 §8.66 已落 + re-export，实 35/49；纯簿记无功能缺口） | S-4 修 |
+| F-A2 | lsp | `lsp/lspServerManager.ts:381` + 重复 `tui/services/lsp/LSPServerManager.ts:374`（closeFile 零消费者，compact 集成未接线） | LOW | 头注登记前向接缝（owner = LSP×compact 集成波），非遗漏 | S-4 修（头注） |
+| F-A3 | engine/context | `context/compact.ts` BASE_COMPACT_PROMPT 2 行尾随空格较旧 prompt.ts 丢失（零行为，头注称「全文照抄」） | LOW | 补回 2 空格 或 头注登记归一化 | S-4 修 |
+| F-B2 | tui/orch | `tui/core/orchestrator/context/cachedMCConfig.ts:1` + `cachedMicrocompact.ts:1-15`（13 桩，C-7 逐字搬旧仓，`feature('CACHED_MICROCOMPACT')` 关 = 死支，今日零运行时影响，**无头注/归属波**） | MEDIUM | 头注登记前向接缝（归属 = E-wave-end 引擎去重波，cache 面归 modelprovider 域，对齐 `engine/context/microCompact.ts:12/17/230-231` 残留守） | S-4 修（头注） |
+| F-B3 | engine 门面 | `engine/index.ts:334` 仅 `ERROR_MESSAGE_USER_ABORT`，姊妹 `ERROR_MESSAGE_NOT_ENOUGH_MESSAGES` 未提升（仅 `context/index.ts:19` + `compact.ts:35`） | LOW | 根门面补 1 行 re-export | S-4 修（1 行） |
+| F-B4 | tui/engineCompat | `engineCompat.ts` 头注「14-name 冲突块」少计（实 15，第 15 `getAutoCompactThreshold` 在 autoCompact deep-gap 块 :54） | LOW | 头注 14→15 订正 | S-4 修（doc） |
+| F-A4 | 继承债 | `bash/commands.ts:639` / `files/fileEditUtils.ts:399` / `bash/ast.ts:2567`（旧仓既有 tech-debt TODO，非移植遗漏） | INFO | 登记（继承，范围外） | 登记 |
+| F-A5 | SkillTool | 旧 `description`「Execute skill: X」未接新契约（新 description = 旧 prompt body，delta ④，仅展示，归 ⑪ TUI 波裁） | INFO | 登记（展示面，范围外） | 登记 |
+| F-B1 | 决策 | 追齐度表 22/33 [GAP] → D-2a 确认 | DECISION | D-2a 确认（双份 + 矩阵登记），切端登记归「engine 旧 API 面扩展」独立波 | 裁定 |
+| F-B5 | tui 解耦 | `tui/factory.ts:51` 直引 `src/engine` `shouldUseSandbox`（引擎独有，绕过 engineCompat） | INFO | 登记（必要，可接受） | 登记 |
+
+**S-4 修波本波量级子集**：F-A1 / F-A2 / F-A3 / F-B2 / F-B3 / F-B4（6 项，均零行为面〔头注/簿记/1 行 re-export〕，四件套须全绿）。F-A4/F-A5/F-B5 = 登记不修（继承债/范围外/必要）。F-B1 = 裁定落档（非代码）。
