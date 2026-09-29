@@ -106,6 +106,10 @@ export default tseslint.config(
     files: ["src/**/*.ts", "src/**/*.tsx"],
     plugins: {
       boundaries,
+      // W4（§8.74.21 全量 lint 复原波）：custom-rules 插件注册上移 src 全域
+      // （原仅 tui 桶注册——5 真体规则全域启用后须全域可见；tui 桶重复注册
+      // 无害，其 9 枚 no-op 名继续消闭包内联 eslint-disable 的 Definition not found）。
+      "custom-rules": customRules,
     },
     settings: {
       "boundaries/elements": ELEMENTS,
@@ -288,6 +292,19 @@ export default tseslint.config(
             "PRT-2: 顶层禁止模块加载时自注册语句。状态/port 注册经 compose.ts 显式注入（lazy-init `??=` 合规）。",
         },
       ],
+
+      // ── W4（§8.74.21 全量 lint 复原波）：5 高价值 custom-rules 真体全域启用 ──
+      // F-S2-3 · D-4b 自研 AST 真体（eslint-legacy-plugins.mjs）自「已注册未启用」
+      // 前向接缝转正：旧仓 211 实测口径（W1-1.6 先行，§8.74.5）在 W2 删码后重测
+      // 锁定新基线。存量处置纪律（行为零改动）：
+      //   - no-sync-fs 存量 = 逐文件 legacy-debt 豁免（头注 owner 注，W-opt 波再议）
+      //   - no-process-exit main.tsx 存量 = 逐站点 eslint-disable（CLI 合法进程出口）
+      //   - 新代码全 error 无豁免（新域八域+cli 等自落位起即受此 5 规则约束）
+      "custom-rules/no-sync-fs": "error",
+      "custom-rules/no-process-exit": "error",
+      "custom-rules/no-process-env-top-level": "error",
+      "custom-rules/no-cross-platform-process-issues": "error",
+      "custom-rules/no-lookbehind-regex": "error",
     },
   },
 
@@ -297,10 +314,15 @@ export default tseslint.config(
   // 不适用于逐字搬入的旧代码 → 本桶豁免质量/风格规则，仅保留 boundaries 三规则
   // （element-types 依赖方向 / entry-point 门面收口 / no-unknown 未知元素）=
   // 架构核心不受豁免。旧仓 3 插件族（custom-rules 14 规则 / react-hooks 2 规则 /
-  // eslint-plugin-n 2 规则）规则名经本地 no-op 插件注册（eslint-legacy-plugins.mjs，
-  // 检查体未随迁，消闭包内联 eslint-disable 指令的 "Definition not found" 报错；
-  // 逐条恢复归 E-wave-end 审计，该文件头注同登记）。豁免清单 = 2026-09-29 lint
-  // 实测 1483 error 的规则直方图（非预置全关，新出现的规则报错须随切片头注扩登记）。
+  // eslint-plugin-n 2 规则）规则名经本地插件注册（eslint-legacy-plugins.mjs，
+  // 消闭包内联 eslint-disable 指令的 "Definition not found" 报错）。
+  // W4（§8.74.21）后态：custom-rules 14 枚中 **5 枚高价值真体已 src 全域按 error
+  // 启用**（本块上方 src 全域块，旧仓「已注册未启用」前向接缝 W4 闭环核销）；
+  // 存量 324 重燃点按行为零改动纪律逐文件/逐行 eslint-disable 带 owner 注登记
+  // （豁免注释即登记），新代码全 error 无豁免。其余 9 枚 custom-rules +
+  // react-hooks 2 + pluginN 2 仍 no-op（检查体未随迁，逐体恢复归 W-opt /
+  // E-wave-end 审计，该文件头注同登记）。豁免清单 = 2026-09-29 lint 实测 1483
+  // error 的规则直方图（非预置全关，新出现的规则报错须随切片头注扩登记）。
   {
     files: ["src/tui/**/*.ts", "src/tui/**/*.tsx"],
     plugins: {

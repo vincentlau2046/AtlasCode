@@ -23,12 +23,15 @@
  * 2 + pluginN 2 仍全 no-op（合计 13 枚 no-op 注册，消闭包内联 eslint-disable
  * 的 "Definition not found"）。
  *
- * H6 防空洞登记（复审勿重提）：这 5 枚真体**已注册未启用**（eslint.config.mjs
- * 未在 tui 桶按 severity 启用 → `eslint src/` 不跑这些体，不重燃 1483-error
- * 基线，保 0-error quartet）。启用 + 处置重燃基线 = 全量 lint 复原波前向接缝
- * （owner = 全量 lint 复原波，非本波量级）。5 真体经 tests/unit/eslint-legacy-
- * plugins.test.ts 逐体执行验证（create(ctx) + 喂代表 AST 节点 + 断言 report），
- * 非空洞 no-op。
+ * H6 防空洞登记（复审勿重提）：这 5 枚真体 **W4 已全域启用**（eslint.config.mjs
+ * src 全域块按 error 启用，§8.74.21 全量 lint 复原波）——重燃面 W4 重测 =
+ * 324 errors（no-sync-fs 220/62 文件 + no-process-exit 85/15 + no-process-env-
+ * top-level 11/9 + no-lookbehind-regex 8/5；no-cross-platform 0）；存量处置 =
+ * 逐文件/逐行 eslint-disable 带 owner 注登记（行为零改动纪律：sync→async 改写 /
+ * 顶层 env 惰性化 / lookbehind 正则改写均违零行为，W-opt 波再议）。启用前
+ * 的「已注册未启用」前向接缝（F-S2-3 · D-4b 登记）由 W4 闭环核销。5 真体经
+ * tests/unit/eslint-legacy-plugins.test.ts 逐体执行验证（create(ctx) + 喂代表
+ * AST 节点 + 断言 report），非空洞 no-op。
  */
 
 const noopRule = {
