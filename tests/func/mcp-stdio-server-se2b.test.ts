@@ -117,7 +117,7 @@ function sleep(ms: number): Promise<void> {
 
 let dir: string
 let serverScript: string
-let manager = getMcpConnectionManager()
+const manager = getMcpConnectionManager()
 
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), 'atlas-mcp-func-'))

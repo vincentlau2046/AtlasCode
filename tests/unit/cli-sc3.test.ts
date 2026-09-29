@@ -78,7 +78,7 @@ function makeCtx(): { ctx: SdkToolUseContext; abort: AbortController } {
 /** 可控 push 型 stdin 流（结构化 IO 读面喂点）。 */
 function pushableStdin() {
   let pendingResolve: ((v: IteratorResult<string>) => void) | undefined
-  let queue: string[] = []
+  const queue: string[] = []
   let closed = false
   const iterable: AsyncIterable<string> = {
     [Symbol.asyncIterator]() {

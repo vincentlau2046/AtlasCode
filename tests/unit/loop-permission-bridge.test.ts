@@ -46,9 +46,7 @@ function makeContext(
  * remap 实际读取字段子集（behavior/message/updatedInput）；any = 判别单测
  * 不绑 TUI PermissionDecision 全 union（避免 decisionReason 必填面噪音）。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fakeCanUseTool(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   decision: any,
 ): { fn: CanUseToolFn; calls: Array<{ toolUseId?: string; assistantMessage?: unknown }> } {
   const calls: Array<{ toolUseId?: string; assistantMessage?: unknown }> = []

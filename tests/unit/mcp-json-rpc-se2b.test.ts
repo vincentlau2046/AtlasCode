@@ -18,7 +18,6 @@ import { PassThrough } from 'node:stream'
 import {
   createMcpJsonRpcClient,
   spawnMcpStdioClient,
-  McpJsonRpcError,
 } from '../../src/mcp'
 
 /** 双工对：client 读 a（server→client 方向）、写 b（client→server 方向）。 */
