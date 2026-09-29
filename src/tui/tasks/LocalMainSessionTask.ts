@@ -19,7 +19,11 @@ import {
   TASK_NOTIFICATION_TAG,
   TOOL_USE_ID_TAG,
 } from '../constants/xml.js'
-import { type QueryParams, query } from 'src/tui/engineCompat'
+import { queryEngineLoopStream } from 'src/tui/loopEvents'
+import {
+  buildAgentLoopParams,
+  type AgentLoopMaterials,
+} from 'src/tui/agentLoopDeps'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { SetAppState } from '../Task.js'
 import { createTaskStateBase } from '../Task.js'
@@ -330,20 +334,37 @@ type ToolActivity = {
 }
 
 /**
+ * bg-session loop 原料（W3-3c 3c-1c，§8.74.18）：旧 Omit<QueryParams,'messages'>
+ * 面的活字段子集（orchestrator QueryParams 随 (a) 类删净退役）；tools /
+ * toolPermissionContext / getAppState / signal 内部经 toolUseContext 派生
+ * （装配体单点，调用方零新增）。
+ */
+export type BackgroundSessionLoopParams = Pick<
+  AgentLoopMaterials,
+  | 'systemPrompt'
+  | 'userContext'
+  | 'systemContext'
+  | 'canUseTool'
+  | 'toolUseContext'
+  | 'querySource'
+>
+
+/**
  * Start a fresh background session with the given messages.
  *
- * Spawns an independent query() call with the current messages and registers it
- * as a background task. The caller's foreground query continues running normally.
+ * Spawns an independent engine-loop call with the current messages and
+ * registers it as a background task. The caller's foreground loop continues
+ * running normally.
  */
 export function startBackgroundSession({
   messages,
-  queryParams,
+  loopParams,
   description,
   setAppState,
   agentDefinition,
 }: {
   messages: Message[]
-  queryParams: Omit<QueryParams, 'messages'>
+  loopParams: BackgroundSessionLoopParams
   description: string
   setAppState: SetAppState
   agentDefinition?: AgentDefinition
@@ -380,10 +401,38 @@ export function startBackgroundSession({
       let tokenCount = 0
       let lastRecordedUuid: UUID | null = (messages.at(-1)?.uuid as any) ?? null
 
-      for await (const event of query({
+      // W3-3c 3c-1c（§8.74.18）：orchestrator query 面退役 → engine loop
+      // 流（装配体 buildAgentLoopParams 单点装配；tools / TPC / getAppState
+      // / signal 自 toolUseContext 派生，逐字旧面）。每轮顶部推进一次
+      // （for-await 语义保真：循环体 continue/return 均安全）。
+      const {
+        deps: bgLoopDeps,
+        args: bgLoopArgs,
+      } = buildAgentLoopParams({
         messages: bgMessages,
-        ...queryParams,
-      })) {
+        userContext: loopParams.userContext,
+        systemPrompt: loopParams.systemPrompt,
+        systemContext: loopParams.systemContext,
+        tools: loopParams.toolUseContext.options.tools,
+        canUseTool: loopParams.canUseTool,
+        toolUseContext: loopParams.toolUseContext,
+        toolPermissionContext:
+          loopParams.toolUseContext.getAppState().toolPermissionContext,
+        getAppState: () => loopParams.toolUseContext.getAppState(),
+        querySource: loopParams.querySource,
+        signal: loopParams.toolUseContext.abortController?.signal,
+      })
+      const bgStream = queryEngineLoopStream({
+        deps: bgLoopDeps,
+        args: bgLoopArgs,
+      })
+      for (;;) {
+        const bgStep = await bgStream.next()
+        if (bgStep.done) break
+        const event = bgStep.value as unknown as Message & {
+          type?: string
+          uuid?: string
+        }
         if (abortSignal.aborted) {
           // Aborted mid-stream — completeMainSessionTask won't be reached.
           // chat:killAgents path already marked notified + emitted; stopTask path did not.
@@ -416,7 +465,7 @@ export function startBackgroundSession({
         void recordSidechainTranscript([event], taskId, lastRecordedUuid).catch(
           err => logForDebugging(`bg-session transcript write failed: ${err}`),
         )
-        lastRecordedUuid = event.uuid
+        lastRecordedUuid = (event.uuid as UUID | undefined) ?? null
 
         if (event.type === 'assistant') {
           for (const block of event.message.content) {

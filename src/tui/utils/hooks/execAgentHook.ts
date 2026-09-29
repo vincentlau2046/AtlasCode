@@ -1,6 +1,10 @@
 import { randomUUID } from 'crypto'
 import type { HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js'
-import { query } from 'src/tui/engineCompat'
+import {
+  queryEngineLoopStream,
+  type EngineLoopStreamEvent,
+} from 'src/tui/loopEvents'
+import { buildAgentLoopParams } from 'src/tui/agentLoopDeps'
 import type { ToolUseContext } from '../../Tool.js'
 import { type Tool, toolMatchesName } from '../../Tool.js'
 import { SYNTHETIC_OUTPUT_TOOL_NAME } from '../../tools/SyntheticOutputTool/SyntheticOutputTool.js'
@@ -161,16 +165,39 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
       let turnCount = 0
       let hitMaxTurns = false
 
-      // Use query() for multi-turn execution
-      for await (const message of query({
+      // Use the engine loop for multi-turn execution（W3-3c S8-agent 族
+      // §8.74.18：orchestrator query 退役）。W-opt 残留守（H6 登记，复审
+      // 勿当遗漏重提）：structured_output attachment 活流 → assistant
+      // 消息 tool_use 块探测面（SyntheticOutput 工具名匹配；input = 旧
+      // attachment.data 同源，StructuredOutput 工具 call 返回
+      // { data, structured_output: input } 经 pipeline 映射，input 即载荷）；
+      // per-token stream_event 活流不入 engine（§8.74.2 裁定同型）。
+      const {
+        deps: hookLoopDeps,
+        args: hookLoopArgs,
+      } = buildAgentLoopParams({
         messages: agentMessages,
-        systemPrompt,
         userContext: {},
+        systemPrompt,
         systemContext: {},
+        tools,
         canUseTool: hasPermissionsToUseTool,
         toolUseContext: agentToolUseContext,
+        toolPermissionContext:
+          agentToolUseContext.getAppState().toolPermissionContext,
+        getAppState: () => agentToolUseContext.getAppState(),
         querySource: 'hook_agent',
-      })) {
+        signal: hookAbortController.signal,
+      })
+      const hookStream = queryEngineLoopStream({
+        deps: hookLoopDeps,
+        args: hookLoopArgs,
+      })
+      let hookStreamDone = false
+      let hookStep = await hookStream.next()
+      while (!hookStreamDone && !hookStep.done) {
+        const message = hookStep.value as EngineLoopStreamEvent
+
         // Process stream events to update response length in the spinner
         handleMessageFromStream(
           message,
@@ -184,10 +211,8 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
         )
 
         // Skip streaming events for further processing
-        if (
-          message.type === 'stream_event' ||
-          message.type === 'stream_request_start'
-        ) {
+        if (message.type === 'stream_request_start') {
+          hookStep = await hookStream.next()
           continue
         }
 
@@ -202,26 +227,44 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
               `Hooks: Agent turn ${turnCount} hit max turns, aborting`,
             )
             hookAbortController.abort()
+            hookStreamDone = true
             break
           }
-        }
 
-        // Check for structured output in attachments
-        if (
-          message.type === 'attachment' &&
-          message.attachment.type === 'structured_output'
-        ) {
-          const parsed = hookResponseSchema().safeParse(message.attachment.data)
-          if (parsed.success) {
-            structuredOutputResult = parsed.data
-            logForDebugging(
-              `Hooks: Got structured output: ${jsonStringify(structuredOutputResult)}`,
-            )
-            // Got structured output, abort and exit
-            hookAbortController.abort()
-            break
+          // Check for structured output in the assistant tool_use blocks
+          // （旧 attachment 活流 → tool_use 块探测，W-opt 残留守见上头注）
+          const content = (
+            message as { message?: { content?: unknown } }
+          ).message?.content
+          if (Array.isArray(content)) {
+            for (const block of content) {
+              const toolUseBlock = block as {
+                type?: string
+                name?: string
+                input?: unknown
+              }
+              if (
+                toolUseBlock.type === 'tool_use' &&
+                toolUseBlock.name === SYNTHETIC_OUTPUT_TOOL_NAME
+              ) {
+                const parsed = hookResponseSchema().safeParse(
+                  toolUseBlock.input,
+                )
+                if (parsed.success) {
+                  structuredOutputResult = parsed.data
+                  logForDebugging(
+                    `Hooks: Got structured output: ${jsonStringify(structuredOutputResult)}`,
+                  )
+                  // Got structured output, abort and exit
+                  hookAbortController.abort()
+                  hookStreamDone = true
+                  break
+                }
+              }
+            }
           }
         }
+        hookStep = await hookStream.next()
       }
 
       parentTimeoutSignal.removeEventListener('abort', onParentTimeout)

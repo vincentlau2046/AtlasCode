@@ -13,8 +13,11 @@ import { randomUUID } from 'crypto'
 import type { PromptCommand } from '../commands.js'
 import type { QuerySource } from '../constants/querySource.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
-import { query } from 'src/tui/engineCompat'
-import { accumulateUsage, updateUsage } from '../services/api/tokenUsage.js'
+import {
+  queryEngineLoopStream,
+  type EngineLoopStreamEvent,
+} from 'src/tui/loopEvents'
+import { buildAgentLoopParams } from 'src/tui/agentLoopDeps'
 import { EMPTY_USAGE, type NonNullableUsage } from '../services/api/logging.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
@@ -537,32 +540,40 @@ export async function runForkedAgent({
   }
 
   // Run the query loop with isolated context (cache-safe params preserved)
+  // W3-3c S8-agent 族（§8.74.18）：forked 子 loop → engine loop 切换
+  // （orchestrator query 退役）。W-opt 残留守（H6 登记，复审勿当遗漏重提）：
+  // per-token stream_event 活流（usage 累积面 → totalUsage 恒零值，metrics
+  // 日志面降级）/ maxOutputTokensOverride / skipCacheWrite（engine 无槽，
+  // §8.74.2 裁定同型）；消息面 = 轮粒度 assistant/tool-result 重放
+  // （recordable 记录面不变）。
   try {
-    for await (const message of query({
+    const {
+      deps: forkLoopDeps,
+      args: forkLoopArgs,
+    } = buildAgentLoopParams({
       messages: initialMessages,
-      systemPrompt,
       userContext,
+      systemPrompt,
       systemContext,
+      tools: isolatedToolUseContext.options.tools,
       canUseTool,
       toolUseContext: isolatedToolUseContext,
+      toolPermissionContext:
+        isolatedToolUseContext.getAppState().toolPermissionContext,
+      getAppState: () => isolatedToolUseContext.getAppState(),
       querySource,
-      maxOutputTokensOverride: maxOutputTokens,
       maxTurns,
-      skipCacheWrite,
-    })) {
-      // Extract real usage from message_delta stream events (final usage per API call)
-      if (message.type === 'stream_event') {
-        if (
-          'event' in message &&
-          message.event?.type === 'message_delta' &&
-          message.event.usage
-        ) {
-          const turnUsage = updateUsage({ ...EMPTY_USAGE }, message.event.usage)
-          totalUsage = accumulateUsage(totalUsage, turnUsage)
-        }
-        continue
-      }
+      signal: isolatedToolUseContext.abortController?.signal,
+    })
+    const stream = queryEngineLoopStream({
+      deps: forkLoopDeps,
+      args: forkLoopArgs,
+    })
+    let step = await stream.next()
+    while (!step.done) {
+      const message = step.value as EngineLoopStreamEvent
       if (message.type === 'stream_request_start') {
+        step = await stream.next()
         continue
       }
 
@@ -570,11 +581,11 @@ export async function runForkedAgent({
         `Forked agent [${forkLabel}] received message: type=${message.type}`,
       )
 
-      outputMessages.push(message as Message)
-      onMessage?.(message as Message)
+      outputMessages.push(message as unknown as Message)
+      onMessage?.(message as unknown as Message)
 
       // Record transcript for recordable message types (same pattern as runAgent.ts)
-      const msg = message as Message
+      const msg = message as unknown as Message
       if (
         agentId &&
         (msg.type === 'assistant' ||
@@ -588,9 +599,10 @@ export async function runForkedAgent({
             ),
         )
         if (msg.type !== 'progress') {
-          lastRecordedUuid = (msg.uuid as any)
+          lastRecordedUuid = msg.uuid as UUID
         }
       }
+      step = await stream.next()
     }
   } finally {
     // Release cloned file state cache memory (same pattern as runAgent.ts)

@@ -13,7 +13,12 @@ import {
 import type { QuerySource } from '../../constants/querySource.js'
 import { getSystemContext, getUserContext } from '../../context.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
-import { query } from 'src/tui/engineCompat'
+import {
+  queryEngineLoopStream,
+  type EngineLoopStreamEvent,
+} from 'src/tui/loopEvents'
+import { buildAgentLoopParams } from 'src/tui/agentLoopDeps'
+import type { AgentLoopResult } from 'src/engine'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { getDumpPromptsPath } from '../../services/api/dumpPrompts.js'
 import { cleanupAgentTracking } from '../../services/api/promptCacheBreakDetection.js'
@@ -33,12 +38,6 @@ import type { AgentId } from '../../types/ids.js'
 import type {
   AssistantMessage,
   Message,
-  ProgressMessage,
-  RequestStartEvent,
-  StreamEvent,
-  SystemCompactBoundaryMessage,
-  TombstoneMessage,
-  ToolUseSummaryMessage,
   UserMessage,
 } from '../../types/message.js'
 import { createAttachmentMessage } from '../../utils/attachments.js'
@@ -218,31 +217,20 @@ async function initializeAgentMcpServers(
   }
 }
 
-type QueryMessage =
-  | StreamEvent
-  | RequestStartEvent
-  | Message
-  | ToolUseSummaryMessage
-  | TombstoneMessage
-
 /**
- * Type guard to check if a message from query() is a recordable Message type.
- * Matches the types we want to record: assistant, user, progress, or system compact_boundary.
+ * Type guard（W3-3c S8-agent 面）：engine 流面（queryEngineLoopStream 事件族
+ * = stream_request_start + shared Message）上的可记录 Message 判定。旧
+ * stream_event / attachment / tombstone / streaming-summary 活流面不入
+ * engine（per-token 流式 + 附件活流 = W-opt 残留守，§8.74.2/§8.74.18 头注）。
+ * 匹配记录型：assistant, user, progress, or system compact_boundary。
  */
-function isRecordableMessage(
-  msg: QueryMessage,
-): msg is
-  | AssistantMessage
-  | UserMessage
-  | ProgressMessage
-  | SystemCompactBoundaryMessage {
+function isRecordableMessage(msg: EngineLoopStreamEvent): boolean {
+  if (msg.type === 'stream_request_start') return false
   return (
     msg.type === 'assistant' ||
     msg.type === 'user' ||
     msg.type === 'progress' ||
-    (msg.type === 'system' &&
-      'subtype' in msg &&
-      msg.subtype === 'compact_boundary')
+    (msg.type === 'system' && (msg as { subtype?: unknown }).subtype === 'compact_boundary')
   )
 }
 
@@ -765,64 +753,75 @@ export async function* runAgent({
   let lastRecordedUuid: UUID | null = (initialMessages.at(-1)?.uuid as UUID) ?? null
 
   try {
-    for await (const message of query({
+    // W3-3c S8-agent（§8.74.18）：subagent 链 → engine loop 活态装配切换
+    // （orchestrator query generator 退役，W3-3c (a) 类删净前置）。
+    // 面映射：model 车道 = agentToolUseContext.options.mainLoopModel
+    // （= resolvedAgentModel，旧 loop.ts:542 逐字）；轮次语义 = maxTurns 未设
+    // 无上限（旧 loop.ts:1617 逐字，builder 推导）；transcript = 主 session
+    // sink + 本处 sidechain 逐消息记录（双写保真）。
+    // W-opt 残留守（H6 登记，复审勿当遗漏重提）：per-token stream_event
+    // （TTFT/OTPS 上转 + usage 累积面）与 attachment 活流（structured_output
+    // 等）不入 engine 流面（§8.74.2 裁定同型）；max_turns_reached 改由终态
+    // !terminated 合成（旧 loop.ts:1617-1622 语义）。
+    const effectiveMaxTurns = maxTurns ?? agentDefinition.maxTurns
+    const {
+      deps: agentLoopDeps,
+      args: agentLoopArgs,
+    } = buildAgentLoopParams({
       messages: initialMessages,
-      systemPrompt: agentSystemPrompt,
       userContext: resolvedUserContext,
+      systemPrompt: agentSystemPrompt,
       systemContext: resolvedSystemContext,
+      tools: agentToolUseContext.options.tools,
       canUseTool,
       toolUseContext: agentToolUseContext,
+      toolPermissionContext:
+        agentToolUseContext.getAppState().toolPermissionContext,
+      getAppState: () => agentToolUseContext.getAppState(),
       querySource,
-      maxTurns: maxTurns ?? agentDefinition.maxTurns,
-    })) {
+      maxTurns: effectiveMaxTurns,
+      signal: agentAbortController.signal,
+    })
+    const stream = queryEngineLoopStream({
+      deps: agentLoopDeps,
+      args: agentLoopArgs,
+    })
+    let step = await stream.next()
+    while (!step.done) {
+      // IteratorResult 判别窄化限制（done 变体可选面）→ 显式 cast 取值
+      const message = step.value as EngineLoopStreamEvent
       onQueryProgress?.()
-      // Forward subagent API request starts to parent's metrics display
-      // so TTFT/OTPS update during subagent execution.
-      if (
-        message.type === 'stream_event' &&
-        message.event.type === 'message_start' &&
-        message.ttftMs != null
-      ) {
-        toolUseContext.pushApiMetricsEntry?.(message.ttftMs)
-        continue
-      }
-
-      // Yield attachment messages (e.g., structured_output) without recording them
-      if (message.type === 'attachment') {
-        // Handle max turns reached signal from query.ts
-        if (message.attachment.type === 'max_turns_reached') {
-          logForDebugging(
-            `[Agent
-: $
-{
-  agentDefinition.agentType
-}
-] Reached max turns limit ($
-{
-  message.attachment.maxTurns
-}
-)`,
-          )
-          break
-        }
-        yield message
+      if (message.type === 'stream_request_start') {
+        step = await stream.next()
         continue
       }
 
       if (isRecordableMessage(message)) {
         // Record only the new message with correct parent (O(1) per message)
         await recordSidechainTranscript(
-          [message],
+          [message as unknown as Message],
           agentId,
           lastRecordedUuid,
         ).catch(err =>
           logForDebugging(`Failed to record sidechain transcript: ${err}`),
         )
         if (message.type !== 'progress') {
-          lastRecordedUuid = message.uuid
+          lastRecordedUuid =
+            ((message as { uuid?: string }).uuid as UUID | undefined) ?? null
         }
-        yield message
+        yield message as unknown as Message
       }
+      step = await stream.next()
+    }
+
+    // 终态 max_turns_reached 信号（旧 loop.ts:1617-1622 逐字语义：maxTurns
+    // 截断 → debug 日志 + 上抛面；旧面经 attachment yield，本面经 !terminated
+    // 终态判别，W-opt 残留守见上头注）
+    const loopResult = step.value as AgentLoopResult
+    if (!loopResult.terminated && effectiveMaxTurns !== undefined) {
+      logForDebugging(
+        `[Agent: ${agentDefinition.agentType}] Reached max turns limit (${effectiveMaxTurns})`,
+      )
     }
 
     if (agentAbortController.signal.aborted) {

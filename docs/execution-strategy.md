@@ -6149,3 +6149,60 @@ Qwen38-27B-TXT；~/.atlas/settings.json 三角色池 + providers.iff baseURL/api
 **波终四件套（2026-09-30）**：tsc 0 / lint 0 error（380 warn = W4 基线不变）/
 bun test --isolate 3125/0/7483/189（基线 3121/7478/188 + cli-headless-result-text
 4 测试）/ build cli.js 2.33MB（+组合根接线 +result 提取面）。
+
+#### 8.74.18 W3-3c S8-agent 消费族切换实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：3c 顺序 = 先切 S8-agent 消费族（子 loop 族：subagent / forked /
+hook agent / 后台主 session）orchestrator `query` 消费面 → engine loop 流，
+**缩小 (a) 类 27 文件删净（3c-2）的爆炸半径**（删净后 orchestrator query 面
+零消费，engineCompat 冲突块随 (a) 类自然死）。
+
+- **裁定 3c-1（通用装配体下沉，REPL/子 loop 共享单点）**：新
+  `src/tui/agentLoopDeps.ts` `buildAgentLoopParams(m: AgentLoopMaterials)`
+  = 子 loop 通用活态装配（engine 原语活态装配第三消费面——REPL 活态装配
+  之外的子 loop 族）。与 replLoopDeps 差异仅两点（其余装配体逐字同）：
+  ① 模型车道 = 显式 `mainLoopModel`（REPL 面）缺省回落
+  `toolUseContext.options.mainLoopModel`（旧 orchestrator loop.ts:542
+  `mainLoopModel: toolUseContext.options.mainLoopModel` 逐字——子 loop 跑
+  会话主模型车道）；② 轮次语义（旧 loop.ts:1617 `if (maxTurns &&
+  nextTurnCount > maxTurns)` 逐字：maxTurns 未设 = **无轮次上限**，非
+  engine 缺省 20 兜底）→ 装配体 `unboundedTurns = m.unboundedTurns ??
+  m.maxTurns === undefined`，maxTurns 显式设才下发截断门。`replLoopDeps.ts`
+  改薄包装（`unboundedTurns: true` 恒 + mainLoopModel 显式；判别单测
+  R-1..R-5 不变）。transcript 面 = 主 session `recordTranscript` sink（旧
+  productionDeps 同面），子 loop 消费方自带 sidechain 逐消息记录 = 双写保真。
+- **裁定 3c-1（四消费方切换 + 残留守登记，H6 防空洞）**：runAgent.ts /
+  forkedAgent.ts / execAgentHook.ts / LocalMainSessionTask.ts 的
+  `for await (message of query(...))` 面全换 `queryEngineLoopStream({deps,args})`
+  + `buildAgentLoopParams` 装配产物 + 手工迭代器（`step = await stream.next()`
+  顶部推进，`step.value` 按 done 双形 cast）。各消费方头注登记 W-opt 残留守
+  （复审勿当遗漏重提）：per-token stream_event 活流（TTFT/usage 转发 →
+  forkedAgent totalUsage 恒零值，metrics 面登记）；execAgentHook
+  structured_output attachment 活流 → assistant `tool_use` 块探测面
+  （`block.type==='tool_use' && name===SYNTHETIC_OUTPUT_TOOL_NAME`；工具
+  `call` 返回 `{ data, structured_output: input }`，input 即载荷，经
+  `hookResponseSchema().safeParse(input)` 解析）；`max_turns_reached`
+  attachment → 终态 `!loopResult.terminated && effectiveMaxTurns !==
+  undefined` 合成（runAgent 头注）；override 面（maxOutputTokensOverride /
+  skipCacheWrite / toolChoice / taskBudget）无 engine 槽位（§8.74.2 同型裁定）。
+- **裁定 3c-1c（LocalMainSessionTask bg-session 面窄化）**：旧
+  `Omit<QueryParams,'messages'>` 面（orchestrator QueryParams 随 (a) 类删净
+  退役）→ 新导出 `BackgroundSessionLoopParams = Pick<AgentLoopMaterials,
+  'systemPrompt'|'userContext'|'systemContext'|'canUseTool'|'toolUseContext'|
+  'querySource'>`；tools / TPC / getAppState / signal 内部经 toolUseContext
+  派生（装配体单点，调用方零新增）。循环体 `for(;;)` + 顶部单点推进
+  （for-await 语义保真：体 continue/return 均安全，无尾推进跳过风险）；
+  事件 cast `Message & { type?: string; uuid?: string }`（新流事件
+  stream_request_start 经既有 user/assistant/system 过滤天然剔除）。REPL.tsx
+  调用点 = 最小 .tsx 编辑（`queryParams:` → `loopParams:`，React Compiler
+  产物零逻辑变更）。
+
+**验收（2026-09-30）**：tsc 0 / lint 0 error（380 warn = W4 基线）/ 定向
+repl-loop-deps + cli-headless-result-text 10/10 / bun test --isolate 全量
+3125/0/7483/189（G-α 波基线不变，零回归）。
+
+**下一步（3c-2）**：orchestrator (a) 类 27 文件 ≈11k LOC 删净 + (c) 类
+8 文件薄 re-export（engine 转引）+ engineCompat 冲突块/深块随 (a) 死 +
+coordinator 6 站点 `require('../coordinator/coordinatorMode.js')` 重指向
+engine coordinator 门面（systemPrompt.ts / toolPool.ts / ResumeConversation.tsx
+×2 / REPL.tsx ×2，`feature('COORDINATOR_MODE')` 门不变）。

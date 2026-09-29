@@ -2384,7 +2384,7 @@ export function REPL({
       const uniqueNotifications = notificationMessages.filter(m => m.attachment.type === 'queued_command' && (typeof m.attachment.prompt !== 'string' || !existingPrompts.has(m.attachment.prompt)));
       startBackgroundSession({
         messages: [...messagesRef.current, ...uniqueNotifications],
-        queryParams: {
+        loopParams: {
           systemPrompt,
           userContext,
           systemContext,
