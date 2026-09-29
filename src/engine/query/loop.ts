@@ -109,6 +109,14 @@ export type AgentLoopEvent =
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
   role: ModelRole
+  /**
+   * W3-3b（§8.74.15）：会话级主模型 pin（getRoleModels(role, sessionModel)
+   * 池头语义——会话主模型优先，失败回落角色池；未注入 = 角色池原行为
+   * 不变，窄 spine 缺省）。TUI REPL 主链活态装配消费（mainLoopModel 会话
+   * 面）；headless 经 createAgentLoopDeps 构建器同槽透传（D-5b
+   * fallbackModel 同款前向槽模式，H6 登记防复审当遗漏）。
+   */
+  sessionModel?: string
   signal?: AbortSignal
   /**
    * W3-3a（§8.74.2）：loop 事件发射槽（未注入 = 不发射，headless 行为零改动，
@@ -157,6 +165,13 @@ export interface AgentLoopContextConfig {
   autoCompact: AutoCompactDeps
   /** 轮次上限（默认 DEFAULT_AGENT_LOOP_MAX_TURNS）。 */
   maxTurns?: number
+  /**
+   * W3-3b（§8.74.15）：无轮次上限（REPL 活链路面）——旧仓 REPL queryLoop
+   * while(true) 无 maxTurns 门（maxTurns 缺省 = 不截断，仅自然终止 / abort 止）；
+   * headless 经构建器不置位 = 保留 DEFAULT_AGENT_LOOP_MAX_TURNS 防不可终止兜底。
+   * 置 true 时 maxTurns 参数忽略（循环仅由自然终止 / 压缩熔断 / abort 终止）。
+   */
+  unboundedTurns?: boolean
 }
 
 /** 多轮循环入参（T-4a）：context 可选（未注入 = 不跑 pre-turn 压缩）。 */
@@ -208,6 +223,9 @@ export async function queryOneRound(
   const resp = await deps.modelProvider.chat({
     messages,
     role: deps.role,
+    // W3-3b（§8.74.15）：会话主模型 pin 透传（getRoleModels 池头；未设 =
+    // 角色池原行为，窄 spine 缺省不变）。
+    sessionModel: deps.sessionModel,
     signal: deps.signal,
     // D-5b（S-4）：headless 5 选项 + --effort 真消费透传（引擎面 → LLM 调用）。
     // effortValue 经 options 槽（buildOpenAIParams 读 options.effortValue）；
@@ -321,7 +339,11 @@ export async function queryAgentLoop(
   args: AgentLoopArgs,
 ): Promise<AgentLoopResult> {
   const tools = args.tools ?? []
-  const maxTurns = args.context?.maxTurns ?? DEFAULT_AGENT_LOOP_MAX_TURNS
+  // W3-3b（§8.74.15）：unboundedTurns（REPL 活链路保真）→ 无轮次上限；
+  // 未置位 = maxTurns ?? DEFAULT（headless 防不可终止兜底不变）。
+  const maxTurns = args.context?.unboundedTurns
+    ? Number.MAX_SAFE_INTEGER
+    : (args.context?.maxTurns ?? DEFAULT_AGENT_LOOP_MAX_TURNS)
   let tracking: AutoCompactTrackingState = args.tracking ?? {
     compacted: false,
     turnCounter: 0,

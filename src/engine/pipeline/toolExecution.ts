@@ -61,9 +61,23 @@ import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidatio
  * 审视 M-3 措辞订正）→ 恒为 fallback 原入参，行为惰性，工具本体波落
  * checkPermissions 后生效）。
  */
+/**
+ * W3-3b（§8.74.15）：权限门调用上下文（executeToolUse 在门消费点填充）。
+ * toolUseId / assistantMessage 是 TUI 交互权限面（canUseTool 弹窗队列 +
+ * classifier 审批键控 + messageId 日志）的事实源——旧仓 checkPermissionsAndCallTool
+ * 逐 tool_use 携带 tu.id + assistantMsg，门消费点本为闭包内可见；W3-3b 把门
+ * 提升为 AgentLoopDeps 注入口后此上下文须显式透传（窄 spine 缺省 = 未填，
+ * 门按 2 参闭包消费不变，零行为）。
+ */
+export type PermissionCallContext = {
+  toolUseId?: string
+  assistantMessage?: unknown
+}
+
 export type PermissionGate = (
   tool: Tool,
   input: unknown,
+  callContext?: PermissionCallContext,
 ) => Promise<GateVerdict>
 
 /**
@@ -276,7 +290,10 @@ export async function executeToolUse(
   // 不变量（mergeHookPermission）：hook 'allow' 不绕过 settings deny/ask。
   // 窄 spine（门未注入）= 默认放行。
   const gateVerdict = deps.checkPermission
-    ? await deps.checkPermission(tool, effectiveInput)
+    ? await deps.checkPermission(tool, effectiveInput, {
+        toolUseId: tu.id,
+        assistantMessage: assistantMsg,
+      })
     : { allowed: true }
   const verdict = mergeHookPermission(preOutcome?.hookBehavior, gateVerdict)
   if (!verdict.allowed) {

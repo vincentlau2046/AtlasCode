@@ -5976,3 +5976,134 @@ emit 抛传播（④）/ 适配层流族重放 + uuid 序（⑤）/ .next() 尾�
 queryEngineLoopStream（五件套 #1）+ createAgentLoopDeps 单组合根（#2）+
 canUseTool → engine createPermissionGate（#4）+ Terminal 映射（generator
 return AgentLoopResult → REPL Terminal 型）。
+
+#### 8.74.15 W3-3b REPL 重接线五件套实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.4「W3 五件套」3b 切片的执行裁定（P-2 端点 127.0.0.1:8999 Qwen38-27B-TXT
+已验真 LIVE，G-α 冒烟可跑）：
+
+**① `query` 符号 → engine（REPL 主链切换）**：
+- REPL onQueryImpl（REPL.tsx:2620）`for await (event of query({...}))` 面替换
+  为 3a 适配层 `queryEngineLoopStream({ deps, args })`（src/tui/loopEvents.js）；
+  `query` 仅从 REPL 的 engineCompat 导入中撤出（L160 行删）——engineCompat 的
+  orchestrator `query` 重导出**保留**（`AgentTool/runAgent.ts:16` 子代理链仍
+  消费 = S8-agent 子切片，3c 删 orchestrator (a) 类前必须已切换）。
+- 模型面向映射（旧 query 参数 → engine 面）：`systemPrompt` + `systemContext`
+  → `asSystemPrompt(appendSystemContext(systemPrompt, systemContext))`（旧
+  loop.ts:442-444 逐字语义，两助手 = src/tui/utils/api.ts tui 本地面，3c 幸存）
+  → `deps.systemPrompt`；`userContext` → `prependUserContext(messages,
+  userContext)`（旧 loop.ts:631 逐字：system-reminder user 消息前置，空
+  context/测试态 = 原序列）→ `args.messages`；`mainLoopModelParam`（会话主
+  模型名）→ **engine 新槽 `AgentLoopDeps.sessionModel?`**（H6 登记：
+  getRoleModels(role, sessionModel) 池头 pin 语义，D-5b fallbackModel 同款
+  前向槽模式；role = modelToRole(mainLoopModelParam)，sessionModel 缺省 =
+  角色池原行为不变）。
+- Terminal 映射：generator return = AgentLoopResult（旧 Terminal 型 REPL 侧
+  0 消费——for-await 丢弃终态值，零行为）。
+
+**② `createAgentLoopDeps` 单组合根**：
+- 构建器扩面（AgentLoopDepsConfig 增 7 槽）：`sessionModel?` /
+  `disablePersistence?`（transcript 门，headless 持久化裁面）/ D-5b 5 槽
+  （systemPrompt / thinkingConfig / responseFormat / effortValue /
+  fallbackModel，头less -- 选项真消费面）；AgentLoopDepsBundle 增 `warnings`
+  透出（① initializeToolPermissionContext 告警 stderr 面，headless 逐字）。
+- headless print.ts L532-555（①②③ 行内块）+ L631-714（deps 行内组装）整段
+  替换为 `createAgentLoopDeps(config)` 单调用；**checkPermission 构建后赋值**
+  （L592-619 SDK prompt 路由门 wrapper 依赖 tpcRef 活 TPC，构建器 ③ 产物为
+  缺省体，调用方注入面 = 构建后 `loopDeps.checkPermission = wrapper`；
+  H6 登记：不加 config 注入槽，避免零消费者死缝）。
+- factory.ts 核销 `orchestrator?: unknown` 前向接缝（factory.ts:104）→
+  **`agentLoopDeps?: AgentLoopDeps`**（engine 类型面，import type from
+  'src/engine'；DI 窗语义不变——UI 独立态懒单例不装配 = 未定义，壳侧 compose
+  组合根装配位保留前向）。
+- **REPL 活态装配 ≠ 构建器调用（裁定）**：REPL 的 TPC/工具池 = React 活态
+  （store.getState()），进程启动期不可建——REPL 经 engine 原语活态装配
+  （createPermissionGate 活 TPC + createLoopHooks + recordTranscript 族 +
+  ② 的 modelProvider 单例），构建器 = 配置驱动面（headless/swarm/壳启动）
+  唯一组合根。两面同源原语，零 tui 侧决策体复制。
+
+**④ canUseTool → engine createPermissionGate（ask 桥）**：
+- REPL 门 = engine gate（活 TPC + getAppState 活读，I-1 全决策体）+ **ask
+  桥**：gate verdict `ask:true`（fail-closed 支）→ 转 tui `canUseTool`
+  （useCanUseTool 产物：决策 + 确认队列弹窗）→ allow/deny 回映 GateVerdict
+  （allow 携 updatedInput 透传）。桥体抽 `src/tui/loopPermissionBridge.ts`
+  纯函数（buildInteractiveGate），判别单测独立可测；REPL 只装配。
+- 语义对齐核验（旧链 = canUseTool 单一决策体 vs 新链 = engine gate + ask 桥）：
+  allow/deny 支 engine gate 与旧 tui 决策体同源（hasPermissionsToUseTool
+  全决策体 I-1 换回，§8.52 A1），ask 支经桥保持旧弹窗语义。
+- REPL deps 其余槽：hooks = createLoopHooks（sessionId + 活 tpc.mode）；
+  **transcript 注入**（recordTranscript + recordContentReplacement 主会话
+  面——旧 orchestrator 链 L377 recordContentReplacement 语义，TUI 会话持久化
+  不回归）；autoCompact = REPL 行内构建（headless 同形：summarize 经
+  modelProvider.chat small + countTokens 门面 + compactConversation 绑定 +
+  querySource = getQuerySourceForREPL() 的 persistReplacements 门）；
+  effortValue = onQueryImpl effort 参（skill 覆盖面，旧 L2567-2573 getAppState
+  包面 → engine 槽直传）。
+
+**残留守（W-opt / W3-S 登记，H6 防空洞）**：
+- per-token 流式（StreamEvent 族）/ TombstoneMessage / ToolUseSummaryMessage /
+  reactive compact / tokenBudget continuation / maxOutputTokens 恢复 / 记忆
+  预取 + 技能发现预取 / thinkingConfig TUI 面 / 附件 getAttachmentMessages 逐
+  轮回灌（engine loop.ts 头注 §8.40 C-3 已登记）= W-opt 残留守。
+- runAgent.ts 子代理链 `query` 切换 = S8-agent 子切片（3c 前必须完成）；
+  REPL computeTools 注册面 → engine getTools(ToolRegistryDeps) 全替换 =
+  W3-S1..S8 随活链路按族（3b 保持 tui 活态池作 overlay，§8.74.4 #4 后半）。
+
+#### 8.74.16 W3-3b REPL 重接线落地实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.15 五件套落地实装（REPL 活链路接上 engine loop，行为新增，需 P-2 端点
+活验真归 3d）。本段临场裁定的 6 项（H6 登记，复审勿重提）：
+
+- **裁定 A（engine 门 callContext 透传，向后兼容扩面）**：engine
+  `PermissionGate` 由 `(tool, input)` 扩为 `(tool, input, callContext?)`，新
+  导出 `PermissionCallContext { toolUseId?, assistantMessage? }`；executeToolUse
+  门消费点填充 `{ toolUseId: tu.id, assistantMessage: assistantMsg }`（旧仓
+  checkPermissionsAndCallTool 逐 tool_use 闭包内可见，门提升为注入口后须显式
+  透传）。现有 2 参门（createPermissionGate 产物）经 TS 少参可赋值性零改仍
+  合法；窄 spine（callContext 未填）零行为。TUI ask 桥经 callContext 键控
+  canUseTool 弹窗队列（tu.id）+ messageId 日志（assistantMsg）——非键控会
+  使「记住此决策」/classifier 审批键控失准。
+- **裁定 B（REPL 活态装配 = 第二条消费面，非构建器调用）**：新增
+  `src/tui/replLoopDeps.ts buildReplLoopParams`——REPL 的 TPC/tools 是 React
+  活态（store.getState()），进程启动期无法构建，故经 engine 原语活态装配
+  （createPermissionGate 活 TPC + createLoopHooks + recordTranscript +
+  modelProvider 单例）。config 驱动构建器 createAgentLoopDeps（engine/loopDeps）
+  仅供 headless/swarm/shell 启动面。两消费面并存，单一 loop 本体不变（§8.74.4 #2）。
+- **裁定 C（unboundedTurns 保真，engine 缺省兜底分道）**：旧 REPL queryLoop
+  while(true) 无 maxTurns 门（maxTurns 缺省 = 不截断，仅自然终止 / abort 止）。
+  engine queryAgentLoop 缺省 20 轮兜底（防不可终止会话）仅 headless 消费——
+  REPL 面经 `AgentLoopContextConfig.unboundedTurns=true`（新字段）显式无上限
+  （= Number.MAX_SAFE_INTEGER），headless 经构建器不置位 = 保留 20 轮兜底。
+  两语义分道，零行为（headless 兜底不变，REPL 无上限保真）。
+- **裁定 D（autoCompact summarize 走主模型车道，订正 §8.74.15「small」近似）**：
+  旧 REPL compactConversation 摘要 LLM 调用经 `context.options.mainLoopModel`
+  （compact.ts:531/555/863/1136 逐字核验）= 会话主模型，非 small。本实装
+  summarize 经 modelProvider.chat(role, sessionModel)（= 会话主模型 pin 车道）
+  保真；§8.74.15 头注「summarize 经 modelProvider.chat small」系设计期近似，
+  此订正为行为保真（摘要质量/成本对齐旧链）。
+- **裁定 E（跨域 TPC cast 单点收敛在桥内）**：REPL 活 TPC 是 tui DeepImmutable
+  形（Tool.ts:123），engine 门消费 shared readonly 形（types-session:77）——
+  两形运行态同对象（store 活 TPC 单源），cast 单点收敛在
+  loopPermissionBridge 内（桥入参面宽化 = unknown，装配体/replLoopDeps 零 cast，
+  .tsx 侧零 cast）。
+- **裁定 F（工厂 orchestrator 占位退役为 agentLoopDeps 前向接缝）**：tui
+  factory CoreDependencies 的 `orchestrator?: unknown`（Phase A 占位，零消费者）
+  退役为 `agentLoopDeps?: AgentLoopDeps`（engine 型）——旧仓 orchestrator 运行体
+  3c 删净后本接缝即 engine loop 依赖注入口；未消费者 = 窄缺省零行为。
+
+**面映射落地（§8.74.15 ① 逐字核验，replLoopDeps 判别单测 R-1..R-5 覆盖）**：
+systemPrompt+systemContext → asSystemPrompt(appendSystemContext(...))；
+userContext → prependUserContext（NODE_ENV=test 早退 = test-env 消息透传，真前插
+归 func-live）；mainLoopModel → sessionModel pin + role=modelToRole；
+autoCompact = engine 裁剪版（contextWindow/maxOutput 经 resolveModel 池头，
+缺省回落 HARD_DEFAULT）；transcript = recordTranscript + recordContentReplacement
+主会话面（persist 门 querySource 前缀判据在 loop 内）；effortValue = String(effort)。
+
+**桥语义判别单测（loop-permission-bridge B-1..B-4）**：allow/deny 快路径不落
+canUseTool（非交互保真）；ask 支经 canUseTool 弹窗 allow/deny remap（updatedInput
+透传 + callContext 键控面消费）；deny reason 逐字（fail-closed engine 窄 spine 同语义）。
+
+**波终四件套（2026-09-30）**：tsc 0 / lint 0 error（380 warn = W4 基线不变）/
+bun test --isolate 3121/0/7478/188（基线 3111/7444/186 + 2 判别测试文件 +10 测试）/
+build 802 modules 2.19MB（+1 模块 = 新 tui 活装配文件）。CI gate（tests/ci
+anti-stub + capability-matrix）随全量套件绿。

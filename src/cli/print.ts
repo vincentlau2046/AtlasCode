@@ -91,27 +91,22 @@ import {
 } from '../shared'
 import {
   compactConversation,
+  createAgentLoopDeps,
   createAbortController,
   createCronScheduler,
-  createLoopHooks,
   createMcpTools,
   createPermissionGate,
   drainSdkEvents,
   getCronJitterConfig,
   getSchedulerEnv,
   getSettingsWithErrors,
-  getTools,
   getSessionEnv,
-  initializeToolPermissionContext,
   queryAgentLoop,
-  recordContentReplacement,
-  recordTranscript,
   type AgentLoopDeps,
   type AgentLoopResult,
   type AutoCompactDeps,
   type CompactDeps,
   type CompactionResult,
-  type ContentReplacementRecord,
   type CronScheduler,
   type MCPServerConnection,
   type McpClientEntry,
@@ -526,22 +521,56 @@ export async function runHeadless(
   const mcpTools = createMcpTools(mcpConnections)
   syncMcpClientRegistryLocal(mcpManager)
 
-  // ── 权限上下文 + 工具池（旧 appState 面 → engine 注册表机制层）──
+  // ── 权限上下文 + 工具池 + loop deps（组合根 createAgentLoopDeps，
+  // W3-3b §8.74.15：①②③④⑤ 经构建器单入口，headless 行内组装块替换）──
   const hasPromptRoute =
     isUsingSdkUrl || options.permissionPromptToolName === 'stdio'
-  const { toolPermissionContext: initialTpc, warnings } =
-    await initializeToolPermissionContext({
-      allowedToolsCli: options.allowedTools ?? [],
-      disallowedToolsCli: options.disallowedTools ?? [],
-      baseToolsCli: options.baseTools,
-      permissionMode: options.permissionMode ?? 'default',
-      allowDangerouslySkipPermissions:
-        options.dangerouslySkipPermissions ?? false,
-      addDirs: options.addDirs ?? [],
-      // headless 无 prompt 路由（非 SDK host）：ask 决策转干净 auto-deny
-      // （permissions.ts headless 支，旧仓同语义）
-      shouldAvoidPermissionPrompts: !hasPromptRoute,
-    })
+  const role: ModelRole = options.model
+    ? modelToRole(options.model)
+    : 'premium'
+  const roleModel = getRoleModel(role)
+  const bundle = await createAgentLoopDeps({
+    allowedToolsCli: options.allowedTools ?? [],
+    disallowedToolsCli: options.disallowedTools ?? [],
+    baseToolsCli: options.baseTools,
+    permissionMode: options.permissionMode ?? 'default',
+    allowDangerouslySkipPermissions:
+      options.dangerouslySkipPermissions ?? false,
+    addDirs: options.addDirs ?? [],
+    // headless 无 prompt 路由（非 SDK host）：ask 决策转干净 auto-deny
+    // （permissions.ts headless 支，旧仓同语义）
+    shouldAvoidPermissionPrompts: !hasPromptRoute,
+    // mcpTools = 本层本地转写面（mcpBridge ② 同型 local bridge，先入为主
+    // 去重）；构建器 port ②（MCP 连接快照）headless 独立运行 = 壳 wire 未
+    // 注册 → 构建器侧零 MCP，本面自供 = 旧行为逐字
+    toolRegistryDeps: { mcpTools, env: process.env },
+    // W3-3b（§8.74.15）：角色车道 + 7 槽配置面（单组合根；role 由 --model
+    // 派生，未设 = 'premium' 缺省不变）
+    role,
+    // 会话主模型 pin（--model 池头语义；未设 = 角色池原行为）
+    sessionModel: options.model,
+    disablePersistence: options.disablePersistence,
+    // D-5b（S-4）：headless 5 选项 + --effort → LLM 调用真消费面（引擎链）。
+    // systemPrompt = --system-prompt + --append-system-prompt 合并（SystemPrompt）；
+    // 未设任一 → undefined（窄 spine 缺省，行为不变）。
+    systemPrompt:
+      options.systemPrompt || options.appendSystemPrompt
+        ? asSystemPrompt(
+            [options.systemPrompt, options.appendSystemPrompt].filter(
+              (s): s is string => Boolean(s),
+            ),
+          )
+        : undefined,
+    thinkingConfig: options.thinkingConfig,
+    // responseFormat = --json-schema 经 modelprovider toResponseFormat（结构化
+    // 输出 response_format；未设 --json-schema → undefined = 非结构化）。
+    responseFormat: options.jsonSchema
+      ? toResponseFormat({ type: 'json_schema', schema: options.jsonSchema })
+      : undefined,
+    effortValue: options.effort,
+    fallbackModel: options.fallbackModel,
+  })
+  const { toolPermissionContext: initialTpc, tools, warnings } = bundle
   if (warnings.length > 0) {
     process.stderr.write(warnings.join('\n') + '\n')
   }
@@ -549,10 +578,6 @@ export async function runHeadless(
   // 活 TPC ref（allow 支 permission updates 活更新；工具面 1c getAppState
   // 活读不变量——旧 appState.toolPermissionContext 活态语义等价）
   const tpcRef: { current: ToolPermissionContext } = { current: initialTpc }
-  const tools = getTools(tpcRef.current, {
-    mcpTools,
-    env: process.env,
-  })
 
   // ── canUseTool + 权限门（ask 支 SDK prompt 路由）──
   const onPermissionPrompt = (details: RequiresActionDetails): void => {
@@ -628,15 +653,12 @@ export async function runHeadless(
     conversation.push(makeUserMessage(inputPrompt))
   }
 
-  // ── loop deps（组合根 createAgentLoopDeps headless 形态）──
+  // ── loop deps（组合根产物 + headless 覆写面，W3-3b §8.74.15）──
   const modelProvider: ModelProvider = getModelProvider()
-  const role: ModelRole = options.model
-    ? modelToRole(options.model)
-    : 'premium'
-  const roleModel = getRoleModel(role)
   // D-5b（S-4）：--fallback-model === --model 守卫（旧 main.tsx L1180-1183 语义：
   // fallback 不得等于主模型）。headless 主模型 = options.model（role 由其派生）；
   // 未设 --model 时 role='premium' 缺省、无主模型可比，守卫空转（与旧仓一致）。
+  // role/roleModel 上移 ①②③ 块（builder 配置面消费，单一计算点）。
   if (
     options.fallbackModel &&
     options.model &&
@@ -669,48 +691,15 @@ export async function runHeadless(
     // 不压缩面——本处实注入，压缩阈值真判）
     countTokens: msgs => modelProvider.countTokens('small', undefined, msgs),
   }
-  const deps: AgentLoopDeps = {
-    modelProvider,
-    role,
+  const loopDeps: AgentLoopDeps = {
+    // 组合根产物（①③④⑤ + 7 槽配置面 + transcript disablePersistence 门，
+    // builder 配置面——单组合根，行内组装块零残留）
+    ...bundle.deps,
+    // abortController 创建在 canUseTool 块（序依赖）：构建后赋值
     signal: abortController.signal,
-    // D-5b（S-4）：headless 5 选项 + --effort → LLM 调用真消费面（引擎链）。
-    // systemPrompt = --system-prompt + --append-system-prompt 合并（SystemPrompt）；
-    // 未设任一 → undefined（窄 spine 缺省，行为不变）。
-    systemPrompt:
-      options.systemPrompt || options.appendSystemPrompt
-        ? asSystemPrompt(
-            [options.systemPrompt, options.appendSystemPrompt].filter(
-              (s): s is string => Boolean(s),
-            ),
-          )
-        : undefined,
-    thinkingConfig: options.thinkingConfig,
-    // responseFormat = --json-schema 经 modelprovider toResponseFormat（结构化
-    // 输出 response_format；未设 --json-schema → undefined = 非结构化）。
-    responseFormat: options.jsonSchema
-      ? toResponseFormat({ type: 'json_schema', schema: options.jsonSchema })
-      : undefined,
-    effortValue: options.effort,
-    fallbackModel: options.fallbackModel,
+    // SDK prompt 路由门（createPermissionGate 单次重建 + canUseTool ask 路由，
+    // 构建点读活 TPC）——覆写构建器 ③ 缺省体
     checkPermission,
-    hooks: createLoopHooks({
-      options: { sessionId, permissionMode: tpcRef.current.mode },
-    }),
-    // S-E3 A11 先例同型：transcript 写面 = session 域 record 族（dedup
-    // 幂等在内，重记安全；persistSession 裁面 = disablePersistence 支）
-    transcript: options.disablePersistence
-      ? undefined
-      : {
-          // shared Message ↔ session 域 Message 型面差（timestamp string|number
-          // → string；makeUserMessage 产点恒 string）：cast 登记
-          record: (msgs: readonly Message[]) =>
-            recordTranscript(
-              [...msgs] as unknown as Parameters<typeof recordTranscript>[0],
-            ),
-          recordContentReplacement: (
-            recs: readonly ContentReplacementRecord[],
-          ) => recordContentReplacement([...recs]),
-        },
   }
 
   // autoCompact 构建（AutoCompactDeps 最小面：contextWindow = modelprovider
@@ -728,7 +717,7 @@ export async function runHeadless(
   let turnRunning = false
   const runTurn = (turnMessages: Message[]): Promise<AgentLoopResult> => {
     turnRunning = true
-    return queryAgentLoop(deps, {
+    return queryAgentLoop(loopDeps, {
       messages: turnMessages,
       tools,
       context: { autoCompact, maxTurns: options.maxTurns },

@@ -48,7 +48,7 @@ import {
   setBootstrapStatePort,
 } from 'src/executor'
 import type { Executor, AscendConfig } from 'src/executor'
-import { shouldUseSandbox } from 'src/engine'
+import { shouldUseSandbox, type AgentLoopDeps } from 'src/engine'
 
 import { AscendExecutor } from './core/executor/AscendExecutor'
 import { DefaultAscendMockPort } from './core/executor/AscendMockPort'
@@ -97,11 +97,13 @@ export interface CoreDependencies {
    */
   ascendFreshnessPort: AscendFreshnessPort
   /**
-   * Phase A: Orchestrator 域接线（新仓 engine 门面尚未导出 Orchestrator 型 —
-   * 前向接缝；责任波：E-wave-end 审计〔engine 门面类型面扩 Orchestrator 型 +
-   * 闭包去重，与 engineCompat 去重登记同归口；H6 登记，复审勿重提〕）
+   * W3-3b（§8.74.15）：engine loop 依赖活态装配前向接缝（取代 Phase A
+   * orchestrator?: unknown 占位——旧仓 orchestrator 运行体 3c 删净后本接缝
+   * 即 engine AgentLoopDeps 注入口）。REPL 活链路经 replLoopDeps.buildReplLoopParams
+   * 活态装配（非经本工厂）；headless 经 createAgentLoopDeps 构建器；本字段为
+   * 未来「工厂统一供 deps」面的前向接缝（未消费者 = 窄缺省，零行为）。
    */
-  orchestrator?: unknown
+  agentLoopDeps?: AgentLoopDeps
 }
 
 // ============================================================================

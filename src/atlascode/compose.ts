@@ -28,8 +28,9 @@
  *     执行面）+ ⑩ setSessionMemoryPort/setSessionContextPort（Port 5/Port 1
  *     壳实现注入）+ ⑪ setTaskNotificationHandler（通知 ← messaging 真队列）
  *     + setSchedulerEnv（scheduler 退出清理 → tasks cleanupRegistry）
- *     + createAgentLoopDeps 构建器（A4：getTools 组合根消费 + 权限门 +
- *     hooks 装配① 单入口）+ runCoreCleanup 暴露
+ *     + createAgentLoopDeps 构建器（A4：W3-3b §8.74.15 起落位 engine 层
+ *     engine/loopDeps，本壳 re-export + 2 port 注册〔teammate 池同步 /
+ *     MCP 连接快照〕）+ runCoreCleanup 暴露
  *   + S-E3（§8.52 A11/A12）⑨ setSessionEnv 增注 getCwd 活态成员（bootstrap
  *     getCwd() = try pwd() catch getOriginalCwd()，旧 utils/cwd.ts 逐字）+
  *     createAgentLoopDeps 构建器 deps.transcript 接线（session 域 record 族
@@ -65,7 +66,6 @@ import {
   getModelProvider,
   setEndpointConfigSource,
   type ModelProvider,
-  type ModelRole,
 } from '../modelprovider'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
@@ -83,34 +83,24 @@ import {
   setHookConfigProvider,
   setHooksBootstrapEnv,
   setHookShellPort,
-  type HookRunOptions,
 } from '../hooks'
 import {
   applySafeConfigEnvironmentVariables,
   captureHooksConfigSnapshot,
   createHooksConfigProvider,
-  createLoopHooks,
-  createMcpTools,
-  createPermissionGate,
   enqueuePendingNotification,
   getSettingsPaths,
   getSettingsWithErrors,
-  getTools,
-  initializeToolPermissionContext,
-  recordContentReplacement,
-  recordTranscript,
   registerCleanup,
   runCleanupFunctions,
+  setAgentLoopDepsMcpConnectionsProvider,
+  setAgentLoopDepsTeammatePoolSync,
   setMcpSkillCommandSource,
   setSchedulerEnv,
   setSessionContextPort,
   setSessionEnv,
   setSessionMemoryPort,
   setTaskNotificationHandler,
-  type AgentLoopDeps,
-  type ContentReplacementRecord,
-  type Message as SessionMessage,
-  type ToolRegistryDeps,
   // C 桶 ③ S-E2d（§8.66）：D 类 3 工具本体 + TeamServices 接缝 +
   // TeamFileLoader 接缝（组合根消费面，engine root S-E2d 扩面）
   SnipTool,
@@ -136,7 +126,6 @@ import {
   sanitizeName,
   setTeammateToolRegistryDeps,
 } from '../swarm'
-import type { PermissionMode, ToolPermissionContext, Tools } from '../shared'
 import {
   getIsNonInteractiveSession,
   getMainThreadAgentType,
@@ -349,6 +338,16 @@ export function createCoreDependencies(): CoreDependencies {
     baseTools: [SnipTool, TeamCreateTool, TeamDeleteTool],
   })
 
+  // W3-3b（§8.74.15）：engine 层构建器（engine/loopDeps）壳侧 port 注册——
+  //    ① teammate 池同步 = swarm setTeammateToolRegistryDeps（构建器全量
+  //       deps 重建面，teammate 池 ≡ 父会话 loop 池不变量）
+  //    ② MCP 连接快照 = mcpBridge buildMcpEngineConnections（manager 态
+  //       快照裁定不变：新连接先 initMcpConnections 再重建 deps）
+  setAgentLoopDepsTeammatePoolSync(setTeammateToolRegistryDeps)
+  setAgentLoopDepsMcpConnectionsProvider(() =>
+    buildMcpEngineConnections(getMcpConnectionManager()),
+  )
+
   return {
     sandboxManager,
     modelProvider: getModelProvider(),
@@ -358,149 +357,18 @@ export function createCoreDependencies(): CoreDependencies {
 }
 
 /**
- * loop 依赖装配配置（S-E2 A4，§8.52）：CLI 权限面 + 工具注册表注入 +
- * loop 执行面。D 波 cli.ts 以 createAgentLoopDeps 为单入口消费。
+ * W3-3b（§8.74.15）：createAgentLoopDeps 构建器已迁 engine 层
+ * （engine/loopDeps.ts——cli 公共域不反向依赖壳 + 元素级环防；壳侧 2 面
+ * port 注册见 wire 步 ⑬ 后块，构建器头注 ①②）。本处薄 re-export 保留
+ * 壳消费路径（atlascode/index 门面 + swarm 前向消费方 import 路径不变）。
  */
-export interface AgentLoopDepsConfig {
-  /** --allowedTools CLI 面（缺省空）。 */
-  allowedToolsCli?: string[]
-  /** --disallowedTools CLI 面（缺省空）。 */
-  disallowedToolsCli?: string[]
-  /** --tools 预设名池（非空 → 池外全 deny 补拒）。 */
-  baseToolsCli?: string[]
-  /** 权限模式（缺省 'default'）。 */
-  permissionMode?: PermissionMode
-  /** --dangerously-skip-permissions（缺省 false）。 */
-  allowDangerouslySkipPermissions?: boolean
-  /** 附加工作目录（缺省空）。 */
-  addDirs?: string[]
-  /** headless 主会话（ask 决策转 auto-deny 不弹框）。 */
-  shouldAvoidPermissionPrompts?: boolean
-  /** 工具注册表注入（49 本体经 deps 增量注入的前向面；47 = 历史口径 §8.53 审计④）。 */
-  toolRegistryDeps?: ToolRegistryDeps
-  /** 主模型角色车道（缺省 'premium' = 旧仓主模型车道）。 */
-  role?: ModelRole
-  /** 取消信号透传（AgentLoopDeps.signal）。 */
-  signal?: AbortSignal
-  /**
-   * 钩子选项追加面（HookRunOptions 透传；spread 于 ctx 基值之后——调用方
-   * 可覆写 sessionId/permissionMode，缺省时 = 构建器注入值）。
-   */
-  hookOptions?: HookRunOptions
-  /**
-   * 子代理 id（S-E3 A11，§8.52）：recordContentReplacement 路由面（主会话 =
-   * undefined = 旧仓逐字「Undefined = 主线程」）。runAgent 子代理 loop 注入 =
-   * shell/swarm 波前向接缝（本波仅主会话构建器消费）。
-   */
-  agentId?: string
-}
-
-/** loop 依赖装配产物（S-E2 A4）：权限上下文 + 模型可见工具池 + loop deps。 */
-export interface AgentLoopDepsBundle {
-  /** initializeToolPermissionContext 产物（门 + 工具池 + 快照共用源）。 */
-  toolPermissionContext: ToolPermissionContext
-  /** getTools(ctx, deps) 模型可见工具池（deny 过滤 + isEnabled 尾行）。 */
-  tools: Tools
-  /** queryOneRound/queryAgentLoop 直接消费面（门 + hooks 已接线）。 */
-  deps: AgentLoopDeps
-}
-
-/**
- * loop 依赖构建器（S-E2 A4，§8.52 裁定 2 A 桶）——组合根消费 getTools /
- * 权限门 / hooks 装配① 的唯一入口（loop.ts:108「本纵切不造全局注册表」
- * 消费接缝兑现；hook option 先例 = 旧仓 orchestrator/tools/toolHooks.ts:409
- * （executePreToolHooks 现读 appState.toolPermissionContext.mode；注：
- * QueryEngine.ts:543 系 buildSystemInitMessage 系统初始化消息面非 hook
- * option 面——S-E2 审视 A 路 NOTE-1 锚点订正））：
- *   ① initializeToolPermissionContext（CLI 面 + 注册表 deps）
- *   ② getTools(ctx, deps)（注册表组合根消费点：getAllBaseTools + deny
- *      过滤 + isEnabled 尾行，49 本体仍经 deps 注入前向（47 = 历史口径 §8.53 审计④））
- *   ③ createPermissionGate(ctx)（S-E1 I-1 全决策体语义消费）
- *   ④ createLoopHooks（§8.42 项 1 hooks 装配① 生产路径）
- *   ⑤ AgentLoopDeps 组装（modelProvider 单例 + role 车道）
- *
- * delta 登记（S-E2 审视 A 路 NOTE-1）：sessionId/permissionMode 于本构建器
- * 构建期固化进 HookRunOptions（旧仓 hook 执行时活态解析）——CLI 单进程
- * 生命周期等价；长驻 TUI/bridge 会话中 switchSession 后复用本构建器须
- * 重建 deps 或经 config.hookOptions 覆写（前向接缝）。
- */
-export async function createAgentLoopDeps(
-  config: AgentLoopDepsConfig = {},
-): Promise<AgentLoopDepsBundle> {
-  // S-E2d（§8.66）：⑨⑮ materialize = D 类 3 工具入注册表 baseTools
-  // （registry 头注 ⑨ HISTORY_SNIP 恒注册 + ⑮ agentSwarms 自门控
-  // isEnabled = isAgentSwarmsEnabled，注册表机制不变；消费方指定
-  // baseTools 在前，先入为主 = 测试 fake 可替换，注册表先入为主
-  // 去重语义不变）
-  // ⑭ S-E2d（§8.68 remote 波）：mcpTools 供给（toolRegistryDeps.mcpTools
-  // 单入口不变；构建时 manager 态快照——新连接先 initMcpConnections 再
-  // 重建 deps；零 MCP 态 = 空表零 I/O，builder 零意外 I/O 裁定）
-  const mcpTools = await createMcpTools(
-    await buildMcpEngineConnections(getMcpConnectionManager()),
-  )
-  const toolRegistryDeps: ToolRegistryDeps = {
-    ...config.toolRegistryDeps,
-    baseTools: [
-      ...(config.toolRegistryDeps?.baseTools ?? []),
-      SnipTool,
-      TeamCreateTool,
-      TeamDeleteTool,
-    ],
-    mcpTools: [...(config.toolRegistryDeps?.mcpTools ?? []), ...mcpTools],
-  }
-  // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池窗
-  // 以全量 deps 重建（= 本构建器模型可见池，旧仓 options.tools 等价面；
-  // 后写覆盖 ⑫ 静态底线，幂等）。
-  setTeammateToolRegistryDeps(toolRegistryDeps)
-  const { toolPermissionContext } = await initializeToolPermissionContext({
-    allowedToolsCli: config.allowedToolsCli ?? [],
-    disallowedToolsCli: config.disallowedToolsCli ?? [],
-    baseToolsCli: config.baseToolsCli,
-    permissionMode: config.permissionMode ?? 'default',
-    allowDangerouslySkipPermissions:
-      config.allowDangerouslySkipPermissions ?? false,
-    addDirs: config.addDirs ?? [],
-    shouldAvoidPermissionPrompts: config.shouldAvoidPermissionPrompts,
-    deps: toolRegistryDeps,
-  })
-  const tools = getTools(toolPermissionContext, toolRegistryDeps)
-  // S-E3 修波（审视 A 路 major-1）：工具面自决权限 context 面回填——
-  // getAppState 活 TPC 窄视图（= 本构建器 ① 产物活对象，旧仓
-  // context.getAppState().toolPermissionContext 活 TPC 不变量；工具面
-  // 消费者 Skill/LSP checkPermissions 只读该字段，全字段面残留守）
-  const checkPermission = createPermissionGate(toolPermissionContext, {
-    getAppState: () => ({ toolPermissionContext }),
-  })
-  const hooks = createLoopHooks({
-    options: {
-      sessionId: getSessionId(),
-      permissionMode: toolPermissionContext.mode,
-      ...config.hookOptions,
-    },
-  })
-  const deps: AgentLoopDeps = {
-    modelProvider: getCoreDependencies().modelProvider,
-    role: config.role ?? 'premium',
-    signal: config.signal,
-    checkPermission,
-    hooks,
-    // S-E3 A11（§8.52）：transcript 写面 = session 域 record 族（recordTranscript
-    // dedup 幂等在内，重记安全；持久化门 = session 写面 shouldSkipPersistence
-    // 内部态，本波不加构建器门 = 裁面登记——D 波/CLI persistSession 面）。
-    // 类型面 delta：shared Message（timestamp string|number 宽型）→ session
-    // Message（timestamp string 窄型）跨域 cast（运行态 loop 消息恒携 string
-    // timestamp，构造面保证；readonly sink 参 → 可变 record 参 = 同值传递）。
-    transcript: {
-      record: msgs => recordTranscript(msgs as unknown as SessionMessage[]),
-      recordContentReplacement: recs =>
-        recordContentReplacement(
-          recs as unknown as ContentReplacementRecord[],
-          config.agentId,
-        ),
-    },
-  }
-  return { toolPermissionContext, tools, deps }
-}
+export {
+  createAgentLoopDeps,
+  setAgentLoopDepsTeammatePoolSync,
+  setAgentLoopDepsMcpConnectionsProvider,
+  type AgentLoopDepsConfig,
+  type AgentLoopDepsBundle,
+} from '../engine'
 
 /**
  * ⑭ S-E2d（§8.68 remote 波）：MCP 连接生命周期组合根接线（显式动作；

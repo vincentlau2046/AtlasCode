@@ -23,6 +23,16 @@ export {
   type AgentLoopResult,
   type AskArgs,
 } from './query'
+// W3-3b（§8.74.15）：AgentLoopDeps 组合根构建器（自 atlascode/compose 迁入
+// engine 层——cli 公共域不反向依赖壳，壳侧 2 面经 port 注册窗，见 loopDeps
+// 头注）。
+export {
+  createAgentLoopDeps,
+  setAgentLoopDepsTeammatePoolSync,
+  setAgentLoopDepsMcpConnectionsProvider,
+  type AgentLoopDepsConfig,
+  type AgentLoopDepsBundle,
+} from './loopDeps'
 export {
   executeToolUse,
   findTool,
@@ -34,6 +44,7 @@ export {
   buildSchemaNotSentHint,
   type PipelineDeps,
   type PermissionGate,
+  type PermissionCallContext,
   type ToolHooks,
   type PreToolUseHookOutcome,
   type PostToolUseHookOutcome,

@@ -157,7 +157,8 @@ import { useQueueProcessor } from '../hooks/useQueueProcessor.js';
 import { useMailboxBridge } from '../hooks/useMailboxBridge.js';
 import { queryCheckpoint, logQueryProfileReport } from '../utils/queryProfiler.js';
 import type { Message as MessageType, UserMessage, ProgressMessage, HookResultMessage, PartialCompactDirection } from '../types/message.js';
-import { query } from 'src/tui/engineCompat';
+import { queryEngineLoopStream } from 'src/tui/loopEvents';
+import { buildReplLoopParams } from 'src/tui/replLoopDeps';
 import { mergeClients, useMergedClients } from '../hooks/useMergedClients.js';
 import { getQuerySourceForREPL } from '../utils/promptCategory.js';
 import { useMergedTools } from '../hooks/useMergedTools.js';
@@ -2617,14 +2618,26 @@ export function REPL({
     resetTurnHookDuration();
     resetTurnToolDuration();
     resetTurnClassifierDuration();
-    for await (const event of query({
+    // W3-3b（§8.74.15）：REPL 活链路 → engine loop 活态装配（config 驱动构建器
+    // 之外的第二条消费面——TPC/tools 是 React 活态，进程启动期无法构建）。
+    const { deps: loopDeps, args: loopArgs } = buildReplLoopParams({
       messages: messagesIncludingNewMessages,
-      systemPrompt,
       userContext,
+      systemPrompt,
       systemContext,
+      tools: freshTools,
+      mainLoopModel: mainLoopModelParam,
+      effort,
+      signal: abortController.signal,
+      toolPermissionContext,
+      getAppState: () => toolUseContext.getAppState(),
       canUseTool,
       toolUseContext,
       querySource: getQuerySourceForREPL()
+    });
+    for await (const event of queryEngineLoopStream({
+      deps: loopDeps,
+      args: loopArgs
     })) {
       onQueryEvent(event);
     }

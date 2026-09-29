@@ -16,6 +16,7 @@ export {
   mergeHookPermission,
   type PipelineDeps,
   type PermissionGate,
+  type PermissionCallContext,
   type ToolHooks,
   type PreToolUseHookOutcome,
   type PostToolUseHookOutcome,

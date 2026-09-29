@@ -7,6 +7,10 @@
  * 其余子模块（cli/launcher/ui/marketplace/…）仍 A 波占位，随各实现波次填实。
  * state 域 D 波 S-E2d 提交 2（B13）填实（atlascode/state，见下）。
  */
+// W3-3b（§8.74.15）：构建器落位 engine 层（engine/loopDeps；cli 公共域
+// 不反向依赖壳 + 元素级环防），本壳经 compose 薄 re-export 转出 + 壳侧
+// 2 port（teammate 池同步 / MCP 连接快照）经 compose wire 步注册，
+// port setter 经本门面透出（壳外测试/接线面）。
 export {
   createAgentLoopDeps,
   createCoreDependencies,
@@ -19,6 +23,10 @@ export {
   type AgentLoopDepsBundle,
   type AgentLoopDepsConfig,
   type CoreDependencies,
+} from './compose'
+export {
+  setAgentLoopDepsMcpConnectionsProvider,
+  setAgentLoopDepsTeammatePoolSync,
 } from './compose'
 // S-E2d（§8.68 remote 波）⑭：MCP 组合根桥 4 面（L3 顶域 ↛ engine，
 // 映射面归组合根；tests 经根门面引，非深路径）
