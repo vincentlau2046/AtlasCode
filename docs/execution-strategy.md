@@ -5343,3 +5343,22 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 - **下一波 #152**：TUI 壳波（ui 原样搬 C-7 + launcher/mount 接线）——CLI 公共域波（#151）
   全闭环；壳波承接 TUI 入口（src/screens/REPL.tsx + mount + useStartupNotification 三市场
   预置 hooks 挂载 + process.on('exit', resetCursor) TUI 光标面随迁）。
+
+## §8.72 TUI 壳波（task #152，§8.72 S-E1 执行前分析，2026-09-29）
+
+**波定位**：既定序列（C 桶 ①②③ + D + remote + analytics + F 波）+ CLI 公共域波（#151）之后的前向接缝波（D 波 N-1「cli/mount 壳接线 单独立波」+ §8.68 remote 波 getMcpSkillCommands 根门面 → TUI/CLI 波 双登记核销）。落位裁定 = 新 L3 顶层域 `src/tui/` + 壳 `src/atlascode/` 接线。**用户裁定（2026-09-29）：立即全量执行**（破 3 依赖纪律，注册 UI 域例外）。
+
+**体量勘察**（旧仓 a8af45b 只读 ground truth，subagent 只读地图 + 主会话核验）：旧 TUI 表面 = 533 `.tsx`（React Compiler 产物，`_c(` memoization 276 文件）+ `main.tsx` 3726L（CLI+mount 混合）+ 4 screens 6144L + components/ 403 文件 77K + ink/ 98 文件 20K + hooks/(React) 98 文件 18K + commands/ 167 文件 23K + services/ 90 文件 28K + utils/ 565 文件 169K + keybindings/ 14·context/ 10·state/ 6·constants/ 22。UI 闭包 ~300K 行 = **项目迄今最大单波**。
+
+**七项裁定**：
+- **D1 落位 = 新顶层域 `src/tui/`**（镜像旧 UI 布局：components/·utils/·hooks/·services/·screens/·ink/·context/·state/·keybindings/·commands/·constants/·native-ts/ + 特性模块）。理由：避免与 new `src/hooks`（域 hooks，非 React，勿混）/`src/state`（B13）命名碰撞；C-7 相对 import（`../utils/…`）在 src/tui/ 内自解。壳 `src/atlascode/`（launcher/mount/ui）L3→L3 接入 src/tui/。
+- **D2 依赖栈（破 3 依赖纪律，UI 域例外登记）**：package.json dependencies 增（精确版本对齐旧仓）react@19.2.8 / react-dom@19.2.8 / react-reconciler@0.33.0 / ink@7.1.1 / @types/react / @types/react-dom + 运行期长尾（chalk/figures/cli-boxes/cli-truncate/fuse.js/markdown-it/marked/emoji-regex/string-width/wrap-ansi/supports-hyperlinks…，按 UI 实际 import 闭包裁最小集）。**React Compiler runtime**：313 .tsx import `react/compiler-runtime`（隐式依赖，`_c()` memoization）须随 react 版本一并 pin——版本不匹配 memoization 静默失效（最大风险）。
+- **D3 bun:bundle 重映射（C-7 保真，零 import 行改动）**：新仓**既有** `src/shared/feature.ts`（普通模块）语义同旧 `native-ts/bunBundle.ts` shim（ON_BY_DEFAULT TRANSCRIPT_CLASSIFIER+COORDINATOR_MODE + FEATURE_X 语义）。裁定 = 新 package.json 增 `"imports": {"bun:bundle": "./src/shared/feature.ts"}` → **137 UI 文件** `import { feature } from 'bun:bundle'` 原样保留（零 import 行编辑，不搬 shim）。delta 登记：旧 shim 有 `ATLAS_DEV_FEATURES` dev-source 覆写（F5），新 feature.ts 缺（生产 bundle no-op，dev 便利面；Slice C 按需补/登记，不阻塞启动）。
+- **D4 native 绑定**：旧 `src/native-ts/yoga-layout`（ink 布局硬依赖，`ink/layout/yoga.ts:1` 直 import 该 vendored 绑定）+ color-diff + file-index → 移入 `src/tui/native-ts/`（与 ink/ 同移，缺一布局即崩）。bun:bundle 无需 shim（D3 走 shared/feature）。
+- **D5 跨域 import 重映射**：C-7 原样搬 UI 整闭包入 src/tui/（相对 import 自解）；仅跨域 import 重映射（旧 `../core/*`→engine/* / 部分 services 已落新域 modelprovider·permissions·mcp·memory·remote·swarm·task·lsp / `../types`→shared/types）+ bootstrap/state 缺口填充（新仓 `bootstrap/state.ts` 50 真导出 vs 旧 stub ~80，~40 UI 调用 fn〔getDirectConnectServerUrl/getEventLogger/getIsRemoteMode/getRegisteredHooks/getSdkBetas…〕fail-soft stub + H6 登记）。
+- **D6 main.tsx 拆分**：CLI 头（L517-728 commander 解析 + -p/--init-only 分派）= **已落** src/cli/dispatch.ts（#151），不重复搬；交互 mount 尾（L1826-3063 + `launchRepl` 5 站点〔L2670/2709/2854/2996/3055〕+ interactiveHelpers/dialogLaunchers）→ `src/tui/main.tsx`；壳 `src/atlascode/launcher.ts`→真入口、`mount.ts`→域注册、`ui/main.tsx`→真 main()。
+- **D7 风险**：① React Compiler runtime 版本耦合（pin react/reconciler 精确版本）② services 层 28K 缺席（notifier/preventSleep/growthbook 等，原样搬或 adapter 缝 stub）③ ink 版本耦合（vendored ink fork + native yoga 绑定须同移）④ bootstrap/state 面漂移（缺口 fail-soft 补）⑤ 体量 ~300K 行切片化自底向上。
+
+**切片序列（自底向上，每片四件套）**：A 构建环境（deps+imports 映射+native-ts+loader）→ B 原样搬闭包 + 跨域 import 重映射 → C 面补齐（bootstrap 缺口 + bun:bundle〔D3 已定〕+ types）→ D mount 接线（main.tsx 拆 + launcher/mount + 三市场 hooks + resetCursor 光标面）→ E 验真（TUI 交互支真达 React mount）+ 四件套 + 双路审视（A 旧仓 C-7 保真 / B 新仓一致+H6）+ §8.72 闭环。
+
+**测试面**：TUI 启动验真（非 -p 交互支经 launcher→main→mount→REPL 真达渲染，零模型 headless smoke 或 fixture；无 PTY 时以 mount 树构造 + 首渲染断言代 PTY）。基线谱系自 3039/0/7250/180（#151 终）起。
