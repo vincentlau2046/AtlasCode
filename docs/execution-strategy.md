@@ -5451,3 +5451,34 @@ wave-f；#154 全功能复刻审视后统一裁定归档 tag）。
 | F-B5 | tui 解耦 | `tui/factory.ts:51` 直引 `src/engine` `shouldUseSandbox`（引擎独有，绕过 engineCompat） | INFO | 登记（必要，可接受） | 登记 |
 
 **S-4 修波本波量级子集**：F-A1 / F-A2 / F-A3 / F-B2 / F-B3 / F-B4（6 项，均零行为面〔头注/簿记/1 行 re-export〕，四件套须全绿）。F-A4/F-A5/F-B5 = 登记不修（继承债/范围外/必要）。F-B1 = 裁定落档（非代码）。
+
+### §8.73.2 S-2 保真审轮 2 闭环 + S-3 活性 + S-4 修波范围（2026-09-29）
+
+**S-2 双轴判定**（Path A 保真 + Path B 一致性，≤2 限额，主 session 逐条 grep/Read 复核 + 自补 swarm/permissions 深度核）：
+- **保真轴 = FAITHFUL-WITH-FINDINGS**：9 域（modelprovider/memory/mcp/sandbox/executor/task/hooks/remote/shared）逐字/裁剪 delta 全登记头注 + 注册表 20 槽裁定表回旧 tools.ts 逐槽核 + 长尾本体 3（Cron/Team/AskUserQuestion）delta 全登记。swarm/permissions 深度核由主 session 自补（子代理停讯）：`permissions.ts` 348L vs 旧 1326L = 决策主体逐字移植 + 5 裁剪裁定 + 6 残留守全登记（`yoloClassifier` 折入 autoMode/，LLM 闭包留守 provider 波）；`swarm/inProcessRunner.ts` 1644 vs 旧 1536（BASH_CLASSIFIER 残留守① 三处头注）+ teammate 核 all new≥old + 零未登记 crop marker。
+- **一致性轴 = CONSISTENT-WITH-FINDINGS**：重复台账 3 组〔组 1 engine-orchestrator + 组 2 ascend 六件套 = 代码级头注登记在位（engineCompat.ts:11 / factory.ts:103-108 / ascend 9 占位头注 / mount.ts:1-10）；组 3 bootstrapState 187 = 仅 docs 级，能力矩阵无行 = F-S2-1〕/ no-op lint 18 规则体全 no-op（`eslint-legacy-plugins.mjs` `create:()=>({})` 自登记，D-4b 候选 5 真体旧仓不存在〔四查 0 命中 + 上游 sourcemap 还原 0〕→ S-4 = 从零重写 5 body）/ vendor 3 stub + [ATLAS-HOLD] 全量核销 PASS（src 54 行/29 文件，逐行带注无复活无换值，D-9 登记仍在）/ 假绿扫描 PASS（0 未门控 skip，5 条件重赋值门控 + 头注全带注：rg/git/poppler/pdfinfo）。
+
+**S-2 findings 台账（并入 S-1；状态 = 待 S-4）**：
+| ID | 域 | 定位 | 严重度 | 裁定 | 处置 |
+|---|---|---|---|---|---|
+| F-S2-1 | 一致性 | `tests/ci/capability-matrix.test.ts` 58 行无「双份/去重登记」行（D-7 明文「能力矩阵登记双份」未兑现；组 3 bootstrapState 仅 docs 级） | MED | 补矩阵 3 组登记行（by=归属波 E-wave-end/D-3）或裁定「矩阵登记=docs §8.73 盘点」口径 | S-4 修（补行）|
+| F-S2-2 | D-5b | HeadlessOptions 19 字段无 jsonSchema/systemPrompt/appendSystemPrompt/fallbackModel/thinkingConfig（连声明都无 = H6-hollow；AgentLoopDeps loop.ts:82-96 无 systemPrompt 槽） | INFO→S-4 | D-5b 5 项三段回填〔声明 + buildHeadlessOptions 映射 + 引擎面 AgentLoopDeps/queryOneRound 真消费〕 | S-4 修（真消费回填）|
+| F-S2-3 | D-4b | 旧仓无 lint 管线（tree/历史/pkg/node_modules 四查 0）；D-4b 5 候选规则真体任何本地副本不存在（上游 2.1.88 sourcemap 还原 0，仅内联 disable 注释 ~10 文件） | INFO→S-4 | S-4 从零重写 5 规则检查体（no-process-exit/no-sync-fs/no-cross-platform-process-issues/no-lookbehind-regex/no-process-env-top-level）；其余 13 条维持 no-op 登记 | S-4 修（重写）|
+| F-S2-4 | 一致性 | [ATLAS-HOLD] 计数漂移：docs 基线 31 → 实测 src 54 行/29 文件（全仓 93）；逐行带注无复活/换值（D-9 PASS） | LOW | S-5 刷新基线数字 | 登记（S-5）|
+| F-S2-5 | 一致性 | 孤儿 fixture：`tests/fixtures/{gateway,baseline}/`（22+ json 零消费者；`json_schema_response.json` 与 D-5b jsonSchema 回填相关） | LOW | json_schema_response.json 接为 D-5b 断言 fixture，余归死资产登记 | 登记 |
+| F-S2-6 | 任务订正 | vendor stub 实际在 `src/tui/vendor/`（非 `src/vendor/`），import-map `#atlas-*` 于 package.json:82-86 | INFO | 任务描述订正 | 登记 |
+| F-S2-1a | 保真 | `tui/entrypoints/agentSdkTypes.ts` 15 处 `not implemented` = 旧仓同路径同 15 行逐字继承（主 session 复核核销） | INFO | 核销（C-7 继承，非未登记裁剪） | 核销 |
+| F-S2-x | 保真 | `modelprovider/constants.ts:47 CACHE_EDITING_BETA_HEADER` any-stub = 头注登记「旧仓 any stub 保留形态」（区别于 F-B2 tui 侧未登记） | INFO | 已登记（非空洞） | 核销 |
+
+**S-3 运行时活性（主 session 零模型逐路，2026-09-29 实测）**：
+- ① CLI `--help` → exit 0（entry `atlascode/cli.ts` + commander dispatch + help 渲染 live）
+- ② `mcp list` → exit 0（MCP manager live，「No MCP servers configured」）
+- ③ headless `-p "hi"` → 全链达 parse→runHeadless→modelProvider 解析；两道 config 门均产结构化 JSON error envelope（empty pool / unknown model ref，exit 0 `is_error`）= agent-loop 路由可达非假绿
+- ④ gelu L1（`ATLAS_ASCEND_MOCK=1`）→ **ALL 16 TOOLS PASSED**（S1 算子/S2 定位/S3 性能采/S4 性能析/S5 部署五管线全 OK，`mocked:true` 无 LLM 无硬件，exit 0）
+- 待补：⑤ TUI launcher React-mount reach（§8.72 Slice E 已 PTY 验真，本波复核）+ ⑥ CI gate 6·0·5·2（S-5 波终跑）
+
+**S-4 修波范围（本波修，按模块提交，四件套全绿；非本波量级登记归波）**：
+1. **D-5b HeadlessOptions 5 项真消费回填**（F-S2-2，高价值行为面）：HeadlessOptions 加 5 字段 + buildHeadlessOptions 映射（含 -file 读支）+ 引擎面 AgentLoopDeps 扩 systemPrompt 槽 / queryOneRound 传 systemPrompt / thinkingConfig→chat openaiParams / fallbackModel→role 池或 queryWithRoleFallback 接线 / jsonSchema→结构化输出（复用 modelprovider `toResponseFormat` + 接 `json_schema_response.json` fixture）。**约束：真消费（plumb 进引擎链），非仅 interface 加字段。**
+2. **D-4b lint 5 规则体从零重写**（F-S2-3）：no-process-exit / no-sync-fs / no-cross-platform-process-issues / no-lookbehind-regex / no-process-env-top-level 真检查体（`eslint-legacy-plugins.mjs` 替换 no-op）；13 条维持 no-op 登记。
+3. **S-1/S-2 HIGH/MED 项**：F-A1（49 计数订正 32→35/49）/ F-A2（LSP closeFile 头注）/ F-A3（compact 尾随空格 2 处）/ F-B2（CACHED_MICROCOMPACT 13 桩头注登记）/ F-B3（ERROR_MESSAGE_NOT_ENOUGH_MESSAGES 根门面 re-export）/ F-B4（engineCompat 14→15 头注）/ F-S2-1（能力矩阵补 3 组双份登记行）。
+- 排除（登记不启动）：D-2a 切端 / D-3 Ascend 实施波 / D-9 换值 / D-6 非 stdio。
