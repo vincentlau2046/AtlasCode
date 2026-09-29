@@ -829,6 +829,18 @@ export function buildProgram(): CommanderCommand {
  * 解析支）。
  */
 export function registerInDomainSubcommands(program: CommanderCommand): void {
+  // atlascode update（R0 发布工具链 #177：远端升级车道；tag/release 归 W5）
+  program
+    .command('update')
+    .description(
+      'Update AtlasCode in place (git pull --ff-only + bun install + rebuild)',
+    )
+    .action(async () => {
+      // 惰性加载（对齐 mcp handler 模式：仅命令执行时 import）
+      const { updateHandler } = await import('./handlers/update')
+      await updateHandler()
+    })
+
   // atlascode mcp
   const mcp = program
     .command('mcp')

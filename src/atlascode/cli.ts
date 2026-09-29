@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 /**
  * bin 入口（package.json "atlascode" → dist/cli.js；build 根路径不变）— 薄壳。
  *
