@@ -85,6 +85,14 @@
  *       后余 12，8 槽移「§8.64 登记零本体」后余 4，⑨⑮ §8.66 S-E2d materialize 后余 2，
  *       ⑬ §8.67 D 波 S-E2c materialize 后余 1，③ §8.68 remote 波 S-E2c
  *       materialize 后余 0 = 49 口径 32/49 收口）：
+ *       计数口径（F-A1 核销，S-4）：「32/49」= C桶① 真本体 materialized
+ *       running tally（materialized-real-body，非 file count；§8.63=28 →
+ *       §8.66 +3 Snip/TeamCreate/TeamDelete =31 → §8.68 +1 RemoteTrigger
+ *       =32，内部一致）。全槽 disposition 权威口径 = §8.64 八项分解
+ *       49/49 收口（29 本体 + 11 零本体登记 + 2 Skill/LSP D波 + 3 Team
+ *       + 1 RemoteTrigger + 1 PowerShell 域外 + 1 TestingPermission
+ *       关闭 + 1 Agent E-2）。⚠ 36 tool-object 文件 − AgentTool = 35 系
+ *       file count，勿与本 49 口径 materialized tally 混淆。
  *       ③ AGENT_TRIGGERS_REMOTE（§8.68 remote 波 S-E2c materialize：RemoteTrigger
  *         本体落 engine/tools/remotetriggers/ 子域 + [ATLAS-HOLD] 注入端口
  *         （5 方法族，登记 throw 缺省供给方，真供给方 = IFF 网关波 / CLI 波），

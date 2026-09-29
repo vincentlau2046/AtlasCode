@@ -202,6 +202,15 @@
  *   （RemoteTrigger 专属门控槽 ③ AGENT_TRIGGERS_REMOTE materialize =
  *   自门控 isEnabled = isRemoteTriggersEnabled，注册表残留守 1→0
  *   收口；组合根 baseTools 注册位 = S-E2d 回填）。
+ * 计数口径（F-A1 核销，S-4）：「32/49」= C桶① 真本体 materialized
+ * running tally（materialized-real-body，非 file count；§8.66 Snip/
+ * TeamCreate/TeamDelete 3 本体 + §8.68 RemoteTrigger 已计入，内部一致
+ * §8.63=28 → +3=31 → +1=32）；全槽 disposition 权威口径 = §8.64 八项
+ * 分解 49/49 收口（29 本体 + 11 零本体登记 + 2 Skill/LSP D波 + 3 Team
+ * + 1 RemoteTrigger + 1 PowerShell 域外 + 1 TestingPermission 关闭 +
+ * 1 Agent E-2）。⚠ 36 tool-object 文件 − AgentTool = 35 系 file count，
+ * 非本 49 口径 materialized tally，勿混淆（原 S-1 F-A1「实 35/49」
+ * 误把 file count 当 tally 口径）。
  */
 export {
   createMcpTools,
