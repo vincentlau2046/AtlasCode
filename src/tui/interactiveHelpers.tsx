@@ -6,6 +6,7 @@ import { setSessionTrustAccepted, setStatsStore } from 'src/tui/bootstrapState.j
 import type { Command } from './commands.js';
 import { createStatsStore, type StatsStore } from './context/stats.js';
 import { getSystemContext } from './context.js';
+import { VoiceProvider } from './context/voice.js'; // H6（2026-09-29 TUI 壳波 Slice E 验真）：setup 对话框根补 VoiceProvider（见 showSetupDialog 头注）
 import { initializeTelemetryAfterTrust } from './entrypoints/init.js';
 import { isSynchronizedOutputSupported } from './ink/terminal.js';
 import type { RenderOptions, Root, TextProps } from './ink.js';
@@ -85,8 +86,17 @@ export async function exitWithMessage(root: Root, message: string, options?: {
 export function showSetupDialog<T = void>(root: Root, renderer: (done: (result: T) => void) => React.ReactNode, options?: {
   onChangeAppState?: typeof onChangeAppState;
 }): Promise<T> {
+  // H6（2026-09-29 TUI 壳波 Slice E 验真，复审勿重提）：setup 对话框根缺 VoiceProvider——
+  // ModelSetup endpoint 步渲染 TextInput（无条件调 useVoiceState，context/voice.tsx:46
+  // 无 provider 即 throw）→ 空池首启选 IFF 预设 Enter 确认即崩（旧仓潜伏 bug：
+  // ModelSetup.tsx / voice.tsx 与旧仓 verbatim 一致，旧仓未走空池 + endpoint 步故未触发）。
+  // 在本助手统一包 VoiceProvider（覆盖全部 setup 对话框：Onboarding/ModelSetup/
+  // TrustDialog/AtlasMdExternalIncludes/Grove）；VOICE_MODE 关 = 'idle' 空壳（与
+  // TextInput feature 门语义一致），修复零行为面。
   return showDialog<T>(root, done => <AppStateProvider onChangeAppState={options?.onChangeAppState}>
-      <KeybindingSetup>{renderer(done)}</KeybindingSetup>
+      <KeybindingSetup>
+        <VoiceProvider>{renderer(done)}</VoiceProvider>
+      </KeybindingSetup>
     </AppStateProvider>);
 }
 
