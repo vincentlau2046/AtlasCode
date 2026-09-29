@@ -1,14 +1,38 @@
-import { spawn } from 'child_process'
+/**
+ * tui/tools/BashTool — W2-2b 桥适配器（§8.74.8/§8.74.12，Bash 族 pilot）：
+ * 行为成员委托 engine 本体（src/engine 门面 BashTool，C-Deep 全量纵切 §8.54），
+ * prompt 文本族 + 渲染叠加层 KEEP tui（prompt.ts / UI.tsx / BashToolResultMessage.tsx），
+ * inputSchema 保 tui zod 面（orchestrator 三消费点 tool.inputSchema.safeParse 实测：
+ * toolExecution.ts:536 / StreamingToolExecutor.ts:104 / toolOrchestration.ts:102，
+ * 非 JSON 透传 = 裁定「zod 保留」），外部 import 路径 + 导出名不变
+ * （BashTool / BashToolInput / Out）。
+ *
+ * 裁定登记（临场裁回设计记录，不变式 1；复审勿当遗漏重提）：
+ *  ① checkPermissions = tui 本地缺省（buildTool 默认 `{ allow, updatedInput }`
+ *    旧行为），**不委托** engine bashToolHasPermission（delta ⑤ 升级面）——
+ *    speculative classifier 态一致性：tui 独占 2 函数 awaitClassifierAutoApproval /
+ *    executeAsyncClassifierCheck（engine 0-hit 实测）消费 tui bashPermissions 模块态
+ *    speculative 缓存；engine 链若消费 engine 侧缓存 = 预计算结果失配（auto-mode
+ *    投机支行为回归）。engine 升级接缝 = W3 活链路接线 / W-opt（状态一致性裁定后
+ *    两缓存合一再切，H6 登记）。
+ *  ② 同 ① 之 2 tui 独占函数 → tui bashPermissions.ts 为**部分 KEEP**（9 外部站点
+ *    import 路径不变；辅助模块族 bashSecurity/readOnlyValidation/pathValidation/
+ *    sedValidation/sedEditParser/commandSemantics/modeValidation/destructiveCommandWarning
+ *    随其保留 = 残留守，整族删净归 2e 全局探针 + W3 状态一致性裁定后）。
+ *  ③ BgTask 读面（getBackgroundTask/listBackgroundTasks）外部 0 消费方实测 →
+ *    适配器不 re-export；engine 本体 call 后台任务态 = engine 模块内单态（无分裂
+ *    消费方，安全）。旧 tui BgTask map 随本体删。
+ *  ④ prompt/description = tui prompt.ts getSimplePrompt（与 engine bashPrompt 同源
+ *    逐字，零行为；叠加层 KEEP）。
+ *  ⑤ isReadOnly = 委托 engine（engine bashReadOnly 域内单一事实源，旧 tui 本地函数
+ *    逐字移植体，无状态）。
+ */
 import { z } from 'zod/v4'
 import type { ToolResult } from '../../Tool.js'
-import { buildTool } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { getAtlasTempDir } from '../../utils/permissions/filesystem.js'
-import { getSimplePrompt, getDefaultTimeoutMs, getMaxTimeoutMs } from './prompt.js'
+import { BashTool as EngineBashTool } from 'src/engine'
+import { getSimplePrompt } from './prompt.js'
 import { renderToolUseMessage } from './UI.js'
 import { BASH_TOOL_NAME } from './toolName.js'
-import path from 'path'
-import fs from 'fs'
 
 const inputSchema = z.object({
   command: z
@@ -62,190 +86,40 @@ export type Out = {
   backgroundTaskId?: string | null
 }
 
-type BgTask = {
-  id: string
-  pid: number | null
-  command: string
-  outputFile: string
-  done: boolean
-  exitCode: number | null
-}
-
-const backgroundTasks = new Map<string, BgTask>()
-
-export function getBackgroundTask(taskId: string): BgTask | undefined {
-  return backgroundTasks.get(taskId)
-}
-
-export function listBackgroundTasks(): BgTask[] {
-  return [...backgroundTasks.values()]
-}
-
-const READ_ONLY_PREFIXES = [
-  'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'pwd', 'which',
-  'git status', 'git log', 'git diff', 'git branch', 'git show', 'echo',
-  'file', 'stat', 'du', 'df', 'whoami', 'env', 'printenv', 'type',
-]
-
-// Shell chaining / substitution operators can hide a write command behind a
-// read-only prefix (e.g. `ls && rm -rf /`, `find . -exec rm {} ;`,
-// `echo $(rm x)`). If any of these appear, treat the command as non-read-only.
-function isReadOnlyCommand(command: string): boolean {
-  const trimmed = command.trim()
-  if (
-    trimmed.includes('&&') ||
-    trimmed.includes('||') ||
-    trimmed.includes(';') ||
-    trimmed.includes('|') ||
-    trimmed.includes('`') ||
-    trimmed.includes('$(')
-  ) {
-    return false
-  }
-  return READ_ONLY_PREFIXES.some(p => trimmed === p || trimmed.startsWith(p + ' '))
-}
-
-export const BashTool: any = buildTool({
+export const BashTool: any = {
   name: BASH_TOOL_NAME,
   searchHint: 'run shell commands via bash',
   maxResultSizeChars: 20_000,
   inputSchema: inputSchema,
   isEnabled: () => true,
-  isReadOnly: (input: BashToolInput) => isReadOnlyCommand(input.command),
-  isDestructive: (_input: BashToolInput) => false,
-  async description(_input: BashToolInput): Promise<string> {
+  isConcurrencySafe: () => false,
+  isReadOnly: (input: BashToolInput) => EngineBashTool.isReadOnly(input),
+  isDestructive: () => false,
+  toAutoClassifierInput: () => '',
+  userFacingName: () => BASH_TOOL_NAME,
+  async description(): Promise<string> {
     return getSimplePrompt()
   },
   async prompt(): Promise<string> {
     return getSimplePrompt()
   },
-  renderToolUseMessage,
-  mapToolResultToToolResultBlockParam(content: unknown, toolUseID: string) {
-    const c = content as unknown as Out
-    const parts: string[] = []
-    if (c) {
-      const codeText = c.exitCode === null || c.exitCode === undefined ? 'n/a' : String(c.exitCode)
-      parts.push('[exit code: ' + codeText + ']')
-      if (c.stdout) parts.push(c.stdout)
-      if (c.stderr && c.stderr.trim() !== '') parts.push(c.stderr)
-      if (c.backgroundTaskId) parts.push('[running in background, task id: ' + c.backgroundTaskId + ']')
-      if (c.interrupted) parts.push('[command was interrupted or timed out]')
-    }
-    return {
-      type: 'tool_result',
-      tool_use_id: toolUseID,
-      content: parts.filter(x => x !== '').join(String.fromCharCode(10)),
-    } as any
+  // 裁定①：旧 buildTool 默认面（委托通用权限系统），零行为
+  async checkPermissions(input: { [key: string]: unknown }): Promise<unknown> {
+    return { behavior: 'allow', updatedInput: input }
   },
+  renderToolUseMessage,
+  mapToolResultToToolResultBlockParam: EngineBashTool.mapToolResultToToolResultBlockParam,
+  // 行为委托 engine 本体（duck 可选链语义 = 旧 any 三判守卫等价，delta ⑦）；
+  // 尾 3 参（canUseTool/parentMessage/onProgress）旧体不消费（delta ⑩），不透传。
+  // engine 本体以共享 Tool 接口标注（call 4 必参签名），此处 2 参收窄调用
   async call(
     args: BashToolInput,
-    context: any,
-    canUseTool: any,
-    _parentMessage: any,
-    onProgress?: (progress: any) => void,
+    context: unknown,
+    _canUseTool: unknown,
+    _parentMessage: unknown,
+    _onProgress?: unknown,
   ): Promise<ToolResult<Out>> {
-    logForDebugging('[BASH] executing: ' + args.command)
-    const cwd = (context && context.options && context.options.cwd) || process.cwd()
-    const timeoutMs = Math.min(
-      args.timeout_ms ?? args.timeout ?? getDefaultTimeoutMs(),
-      getMaxTimeoutMs(),
-    )
-
-    if (args.run_in_background) {
-      const id = 'task-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
-      const outputFile = path.join(getAtlasTempDir(), 'bash-' + id + '.log')
-      try { fs.mkdirSync(path.dirname(outputFile), { recursive: true }) } catch {}
-      const outFd = fs.openSync(outputFile, 'w')
-      const child = spawn('bash', ['-c', args.command], {
-        cwd: cwd,
-        detached: true,
-        stdio: ['ignore', outFd, outFd],
-        env: process.env,
-      })
-      const task: BgTask = {
-        id: id,
-        pid: child.pid ?? null,
-        command: args.command,
-        outputFile: outputFile,
-        done: false,
-        exitCode: null,
-      }
-      backgroundTasks.set(id, task)
-      child.on('close', (code: number | null, signal: string | null) => {
-        task.done = true
-        task.exitCode = code !== null ? code : (signal ? 1 : 0)
-        try { fs.closeSync(outFd) } catch {}
-        logForDebugging('[BASH] background task ' + id + ' finished, exit=' + task.exitCode)
-      })
-      child.on('error', (err: Error) => {
-        task.done = true
-        task.exitCode = 127
-        try { fs.closeSync(outFd) } catch {}
-        logForDebugging('[BASH] background task ' + id + ' error: ' + err.message)
-      })
-      child.unref()
-      return {
-        data: {
-          stdout: '',
-          stderr: '',
-          exitCode: null,
-          interrupted: false,
-          backgroundTaskId: id,
-        },
-      }
-    }
-
-    return await new Promise<ToolResult<Out>>((resolve) => {
-      const child = spawn('bash', ['-c', args.command], {
-        cwd: cwd,
-        env: process.env,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      })
-      let stdout = ''
-      let stderr = ''
-      let settled = false
-
-      child.stdout.on('data', (d: Buffer) => {
-        stdout += d.toString()
-      })
-      child.stderr.on('data', (d: Buffer) => {
-        stderr += d.toString()
-      })
-
-      const timer = setTimeout(() => {
-        child.kill('SIGTERM')
-      }, timeoutMs)
-
-      child.on('close', (code: number | null, signal: string | null) => {
-        if (settled) return
-        settled = true
-        clearTimeout(timer)
-        const interrupted = signal !== null || (code !== null && code !== 0)
-        logForDebugging('[BASH] finished, exit=' + (code !== null ? String(code) : 'signal'))
-        resolve({
-          data: {
-            stdout: stdout,
-            stderr: stderr,
-            exitCode: code !== null ? code : (signal ? 1 : 0),
-            interrupted: interrupted,
-            noOutputExpected: false,
-          },
-        })
-      })
-      child.on('error', (err: Error) => {
-        if (settled) return
-        settled = true
-        clearTimeout(timer)
-        logForDebugging('[BASH] spawn error: ' + err.message)
-        resolve({
-          data: {
-            stdout: '',
-            stderr: 'Error: ' + err.message,
-            exitCode: 127,
-            interrupted: false,
-          },
-        })
-      })
-    })
+    const engineCall = EngineBashTool.call as (a: unknown, c: unknown) => Promise<ToolResult<Out>>
+    return engineCall(args, context)
   },
-})
+}

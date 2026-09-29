@@ -5785,3 +5785,71 @@ AgentTool + compose 根 baseTools 注入 Snip/TeamCreate/TeamDelete 3 + ascendTo
 **3103 pass·0 fail·7413 expect·185 文件**（= 2d 基线 +4 新测，零回归）+ CI gate 6·0·5·2。
 **残留守**：组 A 36 tui 本体 + 27 UI.tsx + 2 fused = 2b 切片（桥 + 渲染路由 + 类型迁移 +
 逐族消费方改写，Bash 族先行 pilot）；constants/tools.ts H6 ① cron 3 门控支 = W3/E-wave-end。
+
+#### 8.74.12 W2-2b Bash 族 pilot 桥实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.8「2b 双工具面去重（Bash 族先行 pilot 再推广 35）」的执行裁定：
+
+**pilot 范围 = Bash 族 1 体**：tui `tools/BashTool/BashTool.ts` 251L 本体 → tui 契约
+适配器（行为成员委托 engine 本体 `src/engine` 门面 BashTool + 渲染/文本叠加层 KEEP
+tui），engine 门面 36 体全量 lift（推广地基）。
+
+**契约面 5 裁定**（消费方实测驱动；推广各族复验，差异须逐族登记）：
+1. **inputSchema = KEEP tui zod 面**：orchestrator 3 消费点 `tool.inputSchema.safeParse`
+   实测（toolExecution.ts:536 / StreamingToolExecutor.ts:104 / toolOrchestration.ts:102）
+   —— engine 的 JSON schema（inputJSONSchema）若透传会断 zod parse 面 → 适配器持本地
+   zod 7 字段 schema（旧 tui 体逐字）；engine 体 `inputJSONSchema` 不被 tui 侧消费
+   （无 JSON 透传路径）。
+2. **prompt()/description 文本 = KEEP tui prompt.ts getSimplePrompt**：与 engine
+   bashPrompt 同源逐字（零行为）；文本族引用 tui 工具图（sandboxCompat 等），engine 不
+   import tui = 无环。
+3. **renderToolUseMessage = KEEP tui UI.tsx**：渲染叠加层（React 成员）；engine 体
+   `renderToolUseMessage: () => null` = TUI 残留守（delta ⑥），tui 侧自持。
+4. **checkPermissions = KEEP tui 本地缺省（buildTool 默认 allow-passthrough），不委托
+   engine bashToolHasPermission（delta ⑤ 升级面）**：speculative-classifier 态一致性
+   —— tui 独占 2 函数 `awaitClassifierAutoApproval` / `executeAsyncClassifierCheck`
+   （engine 0-hit 实测）消费 tui bashPermissions 模块态 speculative 缓存；engine 链若
+   消费 engine 侧缓存 = 预计算结果失配（auto-mode 投机支行为回归）。engine 升级接缝 =
+   **H6 前向接缝 ①**（owner = W3 活链路接线 / W-opt：状态一致性裁定、两缓存合一后再切）。
+   故 tui bashPermissions.ts = 部分 KEEP（9 外部站点 import 路径不变）；辅助模块族
+   （bashSecurity / readOnlyValidation / pathValidation / sedValidation / sedEditParser /
+   commandSemantics / modeValidation / destructiveCommandWarning / shouldUseSandbox /
+   utils / bashCommandHelpers）随其保留 = **残留守**，整族删净 = 2e 全局探针
+   （逐模块外部消费方 0 核验）+ W3 状态一致性裁定后。
+5. **call() = 委托 engine 本体**（2 参收窄调用：engine 体以共享 Tool 接口标注 = 4 必参
+   签名，delta ⑩ 尾 3 参旧体不消费故不透传；delta ⑦ duck 可选链 = 旧 any 三判守卫等价）。
+   **BgTask 读面**（getBackgroundTask / listBackgroundTasks）：外部 0 消费方实测 →
+   适配器不 re-export，backgroundTasks 模块态收敛 engine（单态、无分裂消费方、安全）；
+   旧 tui BgTask map 随本体删。
+6. **isReadOnly = 委托 engine 本体**（engine bashReadOnly = 域内单一事实源；旧 tui 本地
+   函数 = 逐字移植体、无状态，零行为）。
+
+**名常量单源**：`toolName.ts` → `export { BASH_TOOL_NAME } from 'src/engine'`（值逐字
+'Bash'；27 外部消费点 import 路径不变 = 零消费方改动；文件保留语义 = 原循环依赖断点，
+engine 域不 import tui 故断点性质不变）。
+
+**engine 门面全量 lift（36 体）**：原 `src/engine/index.ts` 仅 6 体 lift（AgentTool /
+Snip / TeamCreate / TeamDelete / LSP / RemoteTrigger）+ 名常量；本切片 +30 体导出
+（Bash / Read / Edit / Write / Glob / Grep / NotebookEdit / TaskCreate / TaskGet /
+TaskList / TaskUpdate / TaskStop / TaskOutput / TodoWrite / CronCreate / CronDelete /
+CronList / EnterWorktree / ExitWorktree / EnterPlanMode / ExitPlanModeV2 / WebFetch /
+WebSearch / Config / AskUserQuestion / SendMessage / ListMcpResources / ReadMcpResource
+/ ToolSearch / Skill）= 零行为纯扩面（导出面 only，既有消费者 import 图不变），
+STR-1 合法 tui→engine 导入路径（tests / tui 经域根 index.ts）= 2b 推广地基。
+
+**适配器形状裁定**：不经 buildTool（直接对象字面量 `: any`），显式定义 8 个
+TOOL_DEFAULTS 可缺省成员（isEnabled / isConcurrencySafe / isReadOnly / isDestructive /
+checkPermissions / toAutoClassifierInput / userFacingName / mapToolResultToToolResultBlock
+Param —— 末位委托 engine），值逐字旧 buildTool 体（保真审计：旧 def 9 成员 +
+TOOL_DEFAULTS 4 生效值逐一对应；userFacingName 生效值 = buildTool 插入 `() => def.name`
+= 'Bash' 逐字同）。导出面 = 旧面 − BgTask 2 函数（0 消费方）（BashTool / BashToolInput /
+BashProgress / Out 全保留；外部 import 站点实测全取 `{ BashTool }` 值 + 类型，路径不变）。
+
+**四件套**：tsc 0 / lint 0 error（380 warn 基线不变，dir 内 6 warn = legacy
+unused-directive 归 W4）/ build 801 模块 2.16MB（模块数不变：engine 图本已在 bundle）/
+全量 **3103 pass·0 fail·7413 expect·185 文件**（= 2a-2 基线，零回归；pilot 零行为零新测，
+注册面锁定表由 2a-2 判别单测覆盖）+ CI gate 6·0·5·2（tests/ci 防腐 + 能力矩阵）。
+**残留守**：① bashPermissions 9 站点 + 辅助模块族（裁定 4）= 2e 全局探针 + W3 状态
+一致性裁定；② 余 35 体推广（逐族：5 裁定预期同构但个体差异须复验——如 FileRead 族
+fused 渲染 / Grep·Glob 无 BgTask 面 / Task 族 context 依赖）；③ 2e 删净 + 0 引用探针 +
+carry-over 清单（W3 输入）。

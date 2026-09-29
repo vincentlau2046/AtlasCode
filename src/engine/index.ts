@@ -189,6 +189,43 @@ export {
   RemoteTriggerTool,
 } from './tools'
 export {
+  // W2-2b 基础（§8.74.8/§8.74.12）：注册面单一出口——36 工具本体全量 lift
+  // （原仅 6 体 lifted，其余 30 体只经 tools/ 深路径可取 = tui 2b 适配器经
+  // STR-1 门面收口无法合法取件）。30 体 = 36 全集 − 已 lift 6（AgentTool/
+  // SnipTool/TeamCreateTool/TeamDeleteTool/LSPTool/RemoteTriggerTool）；
+  // 各体逐字 C-Deep 纵切已落（§8.54-§8.68 各子波头注），本块零行为纯扩面。
+  BashTool,
+  ReadTool,
+  EditTool,
+  WriteTool,
+  GlobTool,
+  GrepTool,
+  NotebookEditTool,
+  TaskCreateTool,
+  TaskGetTool,
+  TaskListTool,
+  TaskUpdateTool,
+  TaskStopTool,
+  TaskOutputTool,
+  TodoWriteTool,
+  CronCreateTool,
+  CronDeleteTool,
+  CronListTool,
+  EnterWorktreeTool,
+  ExitWorktreeTool,
+  EnterPlanModeTool,
+  ExitPlanModeV2Tool,
+  WebFetchTool,
+  WebSearchTool,
+  ConfigTool,
+  AskUserQuestionTool,
+  SendMessageTool,
+  ListMcpResourcesTool,
+  ReadMcpResourceTool,
+  ToolSearchTool,
+  SkillTool,
+} from './tools'
+export {
   // S-E2d（§8.68 remote 波 组合根 ⑭）：mcpClientRegistry 注入接缝
   // （setMcpClientRegistry 供给 + 4 型面，组合根 mcpBridge 消费面；
   // 工具侧读面 getMcpClientRegistry 同源出，ListMcp/ReadMcp 本体消费）
