@@ -48,21 +48,38 @@ cd ~/.atlas/atlascode && git commit --allow-empty -m smoke && git push
 ## 5. headless `-p` 一轮（真 LLM 回合）
 
 ```bash
-echo "回复且仅回复：OK" | atlas -p --output-format stream-json
+echo "回复且仅回复：OK" | atlas -p --output-format stream-json --verbose
 ```
+（stream-json 输出格式需 `--verbose`，否则 gate 5 拒：「--output-format=stream-json requires --verbose」。
+P-2 端点未通时本项 SKIP（live-gateway 门控，非红）。）
 
-- [ ] 收到 assistant 文本（含 "OK"），stream-json 事件流完整（init/message/result），
-  进程正常退出（**G-α 冒烟真跑 ≥ 1 次通过**，P-2 端点）
+- [ ] 收到 assistant 文本（含 "OK"），stream-json 事件流完整（init/assistant/result），
+  进程正常退出（**G-α 冒烟真跑 ≥ 1 次通过**，P-2 端点）。
+  2026-09-30 dry-run 实测（IFF 网关 127.0.0.1:8999，模型 Qwen38-27B-TXT）：exit 0，
+  assistant 文本 "OK"，`result.subtype=success, is_error=false, num_turns=1` ✓
 
 ## 6. TUI 启动 + 交互一轮（PTY）
 
 ```bash
-script -qec 'atlas' /dev/null      # PTY 包裹（CI 无 PTY 会挂起，本地跑）
-# 交互：输入一轮 prompt → Enter → 观察到 assistant 流式渲染 + 工具调用（如有）
+# TUI 入口 = dev launcher 薄壳（不经 bin；S-C1 裁定「TUI 默认启动支归 launcher 壳，不经 bin」）
+script -qec 'bun run src/atlascode/launcher.ts' /dev/null   # PTY 包裹（CI 无 PTY 会挂起，本地跑）
+# 交互：首启 = 模型预设屏（选 IFF 预设 → 端点表单 3 字段）→ REPL；输入 prompt → Enter →
+# 观察到 assistant 流式渲染 + 工具调用（如有）
 ```
+
+> ⚠️ 已知态（勿当新故障）：安装的 `atlascode` bin（= dist/cli.js）无参交互态 =
+> **登记前向接缝**（`src/cli/parse.ts:361`「交互入口 = 壳波 #152 前向接缝（launchRepl
+> 未落盘）」H6 登记）——TUI 真启动走 dev launcher，bin 侧 TUI 接线 = **W5 收口项**
+> （G-α 若要求「安装即用 TUI」须补 bin→TUI 接线，否则 v0.1.0 alpha 产品面 = headless
+> -p + CLI 命令，TUI 需 dev 源）。另 banner 品牌面现仍渲染 **AtlasHarness**（`AtlasHarness
+> v0.0.1`），与 CLI bin 名 `atlascode` / launcher 日志 `[AtlasCode]` 不一致 = 品牌一致性
+> 残口（双层品牌规范：对外品牌 = AtlasHarness 对 AtlasHarness 仓成立；AtlasCode 仓是否
+> 改对外品牌归 W5 裁定）。
 
 - [ ] banner 模型 = `modelRoles.<defaultRole>` 池头（provider 前缀剥离）
 - [ ] 交互一轮往返渲染正常；退出（Ctrl-D / 退出命令）进程无悬挂
+  2026-09-30 dry-run 实测（dev launcher + IFF 网关）：banner `AtlasHarness v0.0.1 /
+  Qwen38-27B-TXT` → REPL → prompt「回复且仅回复：OK」→ `✽ Roosting…` → assistant `● OK` 渲染 ✓
 
 ## 7. 静态门禁（发布前全量）
 
