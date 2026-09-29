@@ -5853,3 +5853,77 @@ unused-directive 归 W4）/ build 801 模块 2.16MB（模块数不变：engine �
 一致性裁定；② 余 35 体推广（逐族：5 裁定预期同构但个体差异须复验——如 FileRead 族
 fused 渲染 / Grep·Glob 无 BgTask 面 / Task 族 context 依赖）；③ 2e 删净 + 0 引用探针 +
 carry-over 清单（W3 输入）。
+
+#### 8.74.13 W2-2b 推广 35 族复验裁定表 + 2e 裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.12 残留守 ②「余 35 体推广（逐族：5 裁定预期同构但个体差异须复验）」的
+复验执行结果 = **35 族全判 W3（活链路）顺延，W2 零桥扩面（唯一 W2 可桥族 =
+Bash pilot，`d09a80b` 已落）**：
+
+**裁定门（双 AND）**：族可 W2 桥 ⇔ (a) engine call 裁面 = 缺省态等价（仅基础设施
+替代：GrowthBook→env / lru-cache→本地 LRU / axios→node fetch / lodash memoize→本地 /
+遥测 no-op，缺省态零 diff）且 (b) 被裁 tui 契约成员 tui 活消费方 0 命中，或可适配器
+重挂（render←UI.tsx / prompt←prompt.ts / zod inputSchema 本地 / checkPermissions 本地 /
+engine 模块态单源化）。任一不满足 → W3。
+
+**实测口径**：
+- **tui 活消费方普查**（族目录外，grep 实测）：preparePermissionMatcher 2 文件 /
+  isSearchOrReadCommand 4 / getToolUseSummary 9 / getActivityDescription 6 /
+  backfillObservableInput 4 / inputsEquivalent 2 / extractSearchText 6 —— engine 契约
+  被裁成员（gate 侧分类 / UI 进度面 / hooks 守卫面）全活消费 → 门 (b) 高频族失守。
+- **call 路径织入裁面**（engine 头注 delta 族实测，族 → 裁面 → W3 owner 波）：
+  - files 5（Read/Edit/Write/Glob/Grep）+ NotebookEdit = **W3-S1**：Read ⑩ skills
+    discovery 织入 + ⑪ countTokensWithAPI 精确计数裁（estimate-only）+ ⑫ imageResizer
+    族裁（无 resize/压缩/dimensions/metadata 消息）；Edit ⑦ skills 校验 + LSP
+    didChange·didSave + vscode notify；Write ⑦ skills discover + notifyVscodeFileUpdated
+    + gitDiff；Glob ⑨ plugin-cache 排除循环裁（tui plugins 域活）+ gate 侧成员；
+    Grep 同形；NotebookEdit ② fileHistory 支裁。owner = skills 域波 + D 波
+    modelprovider/图像面 + LSP 域波合流。
+  - Task 7（Create/Get/List/Update/Stop/Output/TodoWrite）+ cron 3（Create/Delete/
+    List）= **W3-S2**：task/cron 模块态分裂（engine 自有 store/scheduler vs tui 自
+    有 store；TaskOutput 读面 vs TaskCreate 写面跨体一致性 + TUI todo/任务 UI 读面
+    重指向 = 状态单源化工程）。
+  - worktree 2（Enter/Exit）+ plan 2（EnterPlanMode/ExitPlanModeV2）= **W3-S3**：
+    交互会话绑定/tmux/chdir/saveCurrentProjectConfig（§8.57 裁定：engine 叶聚焦
+    agent 隔离，交互路径归工具本体波）+ plan 族 auto-mode gate 家族（TRANSCRIPT_
+    CLASSIFIER ON_BY_DEFAULT = 活）+ team 支（swarm 门缺省 off = 零缺省 diff，随 C
+    桶 ③ 核销）。
+  - web 2（WebFetch/WebSearch）= **W3-S4**：turndown 裁 = 模型面 HTML→markdown
+    内容 diff（实测 tui WebFetchTool/utils.ts:83 活 import）+ GB haiku 门裁（恒
+    mainLoopModel 路径裁定）+ lru→本地 LRU / axios→node fetch 等价性裁定。
+  - config + askUser = **W3-S5**：Config ② 依赖/麦克风权限 4 查 + settingsChange-
+    Detector.notifyChange 裁（TUI 设置变更面活）；AskUser ② UNIQUENESS_REFINE 裁
+    （实测 tui AskUserQuestionTool.tsx:64 活 refine = 输入校验行为 diff：重复问题
+    /重复选项旧拒新放）。
+  - team 4（SendMessage/Snip/TeamCreate/TeamDelete）+ Skill = **W3-S6**：team
+    3 体 ② appState.teamContext 读/写面裁（team 状态分裂）+ SendMessage ② UDS_INBOX
+    5 站点 + in-process 名路由 + Skill skill 域状态分裂（engine skill/ 子域 vs tui
+    skills 域 bundled/marketplace）。
+  - MCP 2（ListMcpResources/ReadMcpResource）+ ToolSearch = **W3-S7**：mcpClient-
+    Registry 注入接缝（client 状态面 = MCP client 波：连接生命周期/重连/resources
+    拉取未落）+ ToolSearch GB atlas_glacier_2xr 门缺省值裁定 + FORK_SUBAGENT 支裁。
+  - LSP + RemoteTrigger + AgentTool = **W3-S8**：LSP client 域 2464L 未随迁（D 波
+    LSP 域）；RemoteTrigger engine 体 = throw 登记（remote 波）；AgentTool 子代理
+    执行引擎切换（tui query 环 vs engine 环）= W3 主链本体。
+- **Bash 族（pilot，唯一 W2 可桥族）复验依据**：engine call 逐字零裁面 + 被裁成员
+  0 活消费（BgTask 读面 0 外部消费方实测）+ 可重挂面 5 裁定（§8.74.12）→ `d09a80b`。
+
+**裁定**：
+1. **W2-2b 切片 = Bash pilot（已落）+ 本裁定表（零代码）**。W2 零行为规则 × 35 族
+   系统性裁面 = 桥即活链路接线 = W3 语义；35 族 H6 前向接缝全预声明（族 → 裁面 →
+   owner 波映射 = 上表 W3-S1..S8），复审勿当遗漏重提。
+2. **2e（删净 + 0 引用探针）同判 W3**：2e 删净目标 = 已去重桥接的 tui 本体 + 辅助
+   模块族；35 体未桥 → 2e W2 可删面 = 0（Bash pilot 已随本体删净 BgTask 2 函数；
+   bash 辅助模块族 = §8.74.12 裁定 ② 残留守）。W2-2e 切片 = **0 引用探针 + W3
+   carry-over 清单**（本裁定 = 清单本体，W3 开波输入），零代码。
+3. **W3 波内序列建议**（P-2 端点就绪后）：S8 主链（AgentTool 引擎切换 + REPL 重
+   接线五件套，§8.74.6 既定）先行，S1..S7 随活链路消费面按族桥接（桥 = 适配器 +
+   状态单源化 + 裁面回填三件套，逐族四件套绿 + 逐族 delta 核销）。
+4. **探针面**（2e 0 引用探针已随 pilot 落）：BgTask 读面 0 消费方（pilot 删）/
+   bash 辅助模块族 11 文件外部消费方 = bashPermissions 9 站点（残留守，2e W3 全局
+   探针时逐模块 0 核验）/ 35 族本体外部消费方 = tools.ts 注册行 + 族 UI 面
+   （W3 桥后核销）。
+
+**四件套**：本切片 = 裁定记录零代码 → 继承 pilot 基线（tsc 0 / lint 0 error 380 warn
+/ build 801 模块 2.16MB / 全量 3103 pass·0 fail·7413 expect·185 文件 + CI gate
+6·0·5·2，零新测），不独立重跑（零代码切片先例）。
