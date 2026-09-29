@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * session 域 — transcript 路径 + session-stamp 解耦面（E-7 S-7d d1，
  * §8.49 详案 item 3；旧 sessionStorage.ts L191-260 + L407-438 逐字裁剪）

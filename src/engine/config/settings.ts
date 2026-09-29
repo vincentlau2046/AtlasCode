@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/config — settings 加载/合并/写回核心（§8.27 E-3 S-3b，
  * 旧仓 utils/settings/settings.ts 1011L 裁剪版真核心）

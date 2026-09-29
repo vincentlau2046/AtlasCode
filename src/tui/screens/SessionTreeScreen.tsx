@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 // SessionTreeScreen——/sessionlist 打开的 session 管理列表（17-TUI设计方案 v5 单一场景）
 //
 // 场景不变量：

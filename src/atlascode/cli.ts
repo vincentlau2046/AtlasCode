@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/* eslint-disable custom-rules/no-process-exit -- W4 全量 lint 复原（§8.74.21）：CLI/壳合法进程出口点（exit 分发层/关闭工具/对话框退出动作），登记延后（exit 助手收敛 W-opt 波再议） */
 /**
  * bin 入口（package.json "atlascode" → dist/cli.js；build 根路径不变）— 薄壳。
  *

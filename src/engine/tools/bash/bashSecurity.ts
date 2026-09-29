@@ -863,6 +863,7 @@ function validateNewlines(context: ValidationContext): PermissionResult {
   // like `tr\<newline>aceroute` are still flagged because they can hide
   // dangerous command names from allowlist checks.
   //（旧仓 custom rule no-lookbehind-regex，新仓无此规则，裁指令留理据：.test() + gated by /[\n\r]/.test() above）
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
   const looksLikeCommand = /(?<![\s]\\)[\n\r]\s*\S/.test(fullyUnquotedPreStrip)
   if (looksLikeCommand) {
     return {
@@ -1806,8 +1807,10 @@ function validateMidWordHash(context: ValidationContext): PermissionResult {
   })
   if (
     //（旧仓 custom rule no-lookbehind-regex，新仓无此规则，裁指令留理据：.test() with atom search: fast when # absent）
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
     /\S(?<!\$\{)#/.test(unquotedKeepQuoteChars) ||
     //（旧仓 custom rule no-lookbehind-regex，新仓无此规则，裁指令留理据：same as above）
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
     /\S(?<!\$\{)#/.test(joined)
   ) {
     return {

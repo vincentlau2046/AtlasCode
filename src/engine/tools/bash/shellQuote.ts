@@ -177,11 +177,13 @@ export function hasMalformedTokens(
     // Count quotes that aren't escaped (preceded by backslash)
     // A token with an odd number of unescaped quotes is malformed
     // 旧仓 custom rule no-lookbehind-regex（新仓无此规则，裁指令留说明）：gated by hasCommandSeparator check at caller, runs on short per-token strings
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
     const doubleQuotes = entry.match(/(?<!\\)"/g) || []
     if (doubleQuotes.length % 2 !== 0) return true
 
     // Check for unbalanced single quotes
     // 旧仓 custom rule no-lookbehind-regex（新仓无此规则，裁指令留说明）：same as above
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
     const singleQuotes = entry.match(/(?<!\\)'/g) || []
     if (singleQuotes.length % 2 !== 0) return true
   }

@@ -1,3 +1,5 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
+/* eslint-disable custom-rules/no-process-exit -- W4 全量 lint 复原（§8.74.21）：CLI/壳合法进程出口点（exit 分发层/关闭工具/对话框退出动作），登记延后（exit 助手收敛 W-opt 波再议） */
 /**
  * CLI arg 解析面（S-C2，§8.71.1.4）— 旧仓 main.tsx run() L800-3726 commander 面
  * 逐字随迁 + 裁登记。

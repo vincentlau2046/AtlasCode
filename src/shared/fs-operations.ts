@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * 文件系统抽象（C1 下沉，跨 ≥2 域：memory FileSystemMemoryStore +
  * C-Deep executor Shell.ts 移植（旧仓 utils/fsOperations.ts 消费方含 Shell.ts/debug.ts 等 10+ 文件））。

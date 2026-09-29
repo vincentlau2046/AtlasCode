@@ -27,6 +27,7 @@ export function containsVulnerableUncPath(pathOrCommand: string): boolean {
   // 2. 正斜杠 UNC：//server、//server/share、//192.168.1.1/share
   //    (?<!:) 排除 URL（https:// 等），捕引号/=/其它非冒号字符前的 //
   const forwardSlashUncPattern =
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
     /(?<!:)\/\/[^\s\\/]+(?:@(?:\d+|ssl))?(?:[\\/]|$|\s)/i
   if (forwardSlashUncPattern.test(pathOrCommand)) {
     return true

@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/tools/files — 文件内容内存缓存（C 桶 ① 子波 3 §8.55 S-C1 依赖
  * 闭包层，旧仓 src/utils/fileReadCache.ts 96L 逐字随迁；delta 仅 import

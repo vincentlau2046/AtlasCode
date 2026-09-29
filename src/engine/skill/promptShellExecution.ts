@@ -41,6 +41,7 @@ const BLOCK_PATTERN = /```!\s*\n?([\s\S]*?)\n?```/g
 // 行内代码 `!!` / 相邻 span `foo`!`bar` / shell 变量 $! 误匹配。
 // 慢路径（lookbehind 扫描）由下方 text.includes('!`') 子串门控
 // （93% 技能无 !`，跳过昂贵扫描；BLOCK_PATTERN 无此需求恒扫）。
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
 const INLINE_PATTERN = /(?<=^|\s)!`([^`]+)`/gm
 
 /** PermissionGate duck（pipeline 契约 {allowed, reason?}）。 */

@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * cli（CLI 公共域）R0 发布工具链（#177，roadmap R0 并行带）— update 子命令
  * handler（远端升级车道；tag/release 动作归 W5，本命令只做"拉取 + 重建"）。

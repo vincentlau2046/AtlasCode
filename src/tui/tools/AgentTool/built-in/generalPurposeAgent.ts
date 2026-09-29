@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-process-env-top-level -- W4 全量 lint 复原（§8.74.21）：模块加载期捕获常量（含刻意捕获语义站点），惰性读改写违行为零改动纪律（W-opt 波再议） */
 import type { BuiltInAgentDefinition } from '../loadAgentsDir.js'
 import { isEnvDefinedFalsy } from '../../../utils/envUtils.js'
 

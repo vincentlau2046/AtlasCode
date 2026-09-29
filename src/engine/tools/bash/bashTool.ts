@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/tools/bash — BashTool 本体（Bash 本体纵切子波 §8.54 S-B5，
  * C 桶 ① 子波 2）。

@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/skill — markdown 配置目录装载器（§8.67 D 波 S-E2a，
  * 旧仓 src/utils/markdownConfigLoader.ts skill 域消费子集）。

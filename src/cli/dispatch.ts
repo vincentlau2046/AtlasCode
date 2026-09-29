@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-process-exit -- W4 全量 lint 复原（§8.74.21）：CLI/壳合法进程出口点（exit 分发层/关闭工具/对话框退出动作），登记延后（exit 助手收敛 W-opt 波再议） */
 /**
  * CLI 模式分派面（S-C2，§8.71.1.4）— 旧仓 main.tsx main() L517-773 逐字随迁 +
  * 裁登记，及 getInputPrompt L773-799 逐字随迁。

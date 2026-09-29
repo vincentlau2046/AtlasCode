@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/tools/bash — 裸 git 仓库判定（Bash 本体纵切子波 §8.54 S-B1 依赖闭包层）。
  *

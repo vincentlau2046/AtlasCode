@@ -76,6 +76,7 @@ function generatePlaceholderSalt(): string {
  */
 const HEREDOC_START_PATTERN =
   // 旧仓 custom rule no-lookbehind-regex（新仓无此规则，裁指令留说明）：gated by command.includes('<<') at extractHeredocs() entry
+// eslint-disable-next-line custom-rules/no-lookbehind-regex -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（lookbehind 正则改写=行为面，W-opt 波再议）
   /(?<!<)<<(?!<)(-)?[ \t]*(?:(['"])(\\?\w+)\2|\\?(\w+))/
 
 export type HeredocInfo = {

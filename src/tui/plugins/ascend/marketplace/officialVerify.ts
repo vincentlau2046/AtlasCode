@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * officialVerify — post-install verification for the auto-installed Ascend
  * official marketplace (registry key `agent-skills` → gitcode.com/Ascend/agent-skills).

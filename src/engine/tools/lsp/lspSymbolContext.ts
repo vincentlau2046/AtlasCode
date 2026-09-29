@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 /**
  * engine/tools/lsp — LSPTool 符号提取面（§8.67 D 波 S-E2c；旧仓
  * src/tools/LSPTool/symbolContext.ts 91L 逐字转写）。

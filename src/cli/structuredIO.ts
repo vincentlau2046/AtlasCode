@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-process-exit -- W4 全量 lint 复原（§8.74.21）：CLI/壳合法进程出口点（exit 分发层/关闭工具/对话框退出动作），登记延后（exit 助手收敛 W-opt 波再议） */
 /**
  * SDK 结构化 stdio IO（旧仓 cli/structuredIO.ts 859L 逐字随迁 + remap 登记）。
  *

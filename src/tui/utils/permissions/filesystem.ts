@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
 import { getConfigDirName } from '../configDir.js'
 import { randomBytes } from 'crypto'

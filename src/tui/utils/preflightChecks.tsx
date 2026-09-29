@@ -1,3 +1,4 @@
+/* eslint-disable custom-rules/no-process-exit -- W4 全量 lint 复原（§8.74.21）：CLI/壳合法进程出口点（exit 分发层/关闭工具/对话框退出动作），登记延后（exit 助手收敛 W-opt 波再议） */
 import { c as _c } from "react/compiler-runtime";
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
