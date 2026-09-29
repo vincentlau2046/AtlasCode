@@ -81,8 +81,7 @@
 
 > 「已裁登记」= 明确裁剪、头注登记、**非遗漏**；复审勿当遗漏重提。
 
-- **UI 工具级 render JSX 面**：工具本体自持的 `renderToolResultMessage` 等 5 渲染面裁到字符串面（TUI 波已搬整体 UI 闭包 `src/tui/`，此处指工具对象内嵌的 JSX 渲染）。
-- **第三方依赖 3-dep 纪律本地转写**（不引原包）：axios→node fetch（redirect manual）/ lodash→本地 TtlLruCache / @modelcontextprotocol/sdk→结构型本地转写 / turndown 整砍（HTML raw 透传）/ proper-lockfile 保留（唯一新增第三方）。
+- **第三方依赖 3-dep 纪律本地转写**（核心域波不引原包）：axios→node fetch（redirect:'manual' 语义移植）/ lodash·lru-cache→本地 TtlLruCache（500 条目）+ 本地 Map memo（reject 亦缓存，同旧 memoize 语义）/ @modelcontextprotocol/sdk→手写 JSON-RPC 2.0 stdio client + 本地结构型 / turndown 整砍（HTML raw 透传，delta 登记）/ chokidar→per-tick 轮询 / execa→execFile arg-array（免 shell 注入）；proper-lockfile 保留（唯一新增第三方）。⚠️ **UI 例外栈**：TUI 壳波 §8.72 裁定装全 UI 闭包运行时依赖栈（46 包，含 ink/react/axios/turndown/@modelcontextprotocol/sdk 等），tui 闭包消费这些包；**核心域（engine/mcp 等）仍用本地转写**（`src/mcp/` 核验 0 import 该 SDK，纯本地转写）。**功能定位** = 依赖面收敛（国产化产品：供应链/许可/版本须可审计，核心域运行时第三方仅 openai/zod/proper-lockfile）+ 行为保真（转写语义与旧仓库行为逐字对齐并单测回归，如 memoize「reject 亦缓存」语义保留）。
 - **GrowthBook 支**：新仓无 GB，改 env 门控或整砍（cron jitter / worktree GA 缺省开 + kill-switch / ToolSearch 门）。
 - **整域缺失面**（登记归属波，未落盘）：MCP client 连接生命周期 + resources/prompt 拉取（MCP client 波）/ LSP server 真配置源（插件域 LSP 集成波 `setLspServerSource` 注入窗）/ 非 stdio transport（sse/http/ws，remote 波）。
 - **死代码 / any-stub 死导出**：`checkResumeConsistency` 纯 no-op 遥测残余缺席登记不复活 / `recordQueueOperation` 等 log 族死码 / `Permutations` 链等 any-stub 面。
@@ -97,6 +96,7 @@
 | 残口 | 内容 | 归属波 |
 |---|---|---|
 | **E-wave-end 审计** | engine spine vs tui orchestrator 运行体去重 / Ascend 执行器六件套 vs ascend 域 9 占位去重 / bootstrapState 187 双份去重 / **全量 lint 复原波**（D-4b 5 真体启用 + 1483-error 基线处置） | E-wave-end 独立审计波 |
+| **UI 工具渲染面 / 双工具面去重**（自 §2.2 移入，2026-09-29 裁定） | tui 闭包自持 `src/tui/tools.ts` + `src/tui/Tool.ts`（工具注册面 + 自有 Tool 契约 + 46 包全依赖栈）；engine 49 工具本体 render 成员裁到字符串/null 面（`renderToolUseMessage`）——**两面去重 + 工具结果渲染面接线**（哪个工具面是生产单一事实源、engine 工具对象是否接 tui 渲染路由）= 残口，未接线 | E-wave-end 审计波（与「engine spine vs tui orchestrator 去重」同项） |
 | **D-2a 切端** | engine-dedup 切端 | E-wave-end 独立波 |
 | **D-3 Ascend 独立实施波** | C-7 执行器六件套实挂载 + DomainPackage 注册面 + `mount.ts` 实挂载 + gelu S5 | 独立实施波 |
 | **D-9 换值** | IFF 网关 `[ATLAS-HOLD]` URL 族（**56 行 / 31 文件**：`ATLAS_API_BASE_URL` / `ATLAS_WEB_DOMAIN_CHECK_URL` / remote trigger 端点） | IFF 网关波 |
@@ -126,5 +126,5 @@
 ## 4. 保真度定性（如何读"复刻完成度"）
 
 1. **已移植面逐字保真**：每波闭环都跑 A 路（旧仓 a8af45b 逐行/逐字对照）+ B 路（H6 死接缝/测试面）双只读审视，逐字 diff **零未登记 delta**；探针突变判别（恰 1 红）验真非空洞。
-2. **非逐字节 1:1**：策展裁剪（死码 / GrowthBook / 3-dep 本地转写 / UI 工具渲染面 / 整域缺失）+ **828 前向接缝显式延后**（各带归属波，非遗漏）。
+2. **非逐字节 1:1**：策展裁剪（死码 / GrowthBook / 3-dep 本地转写 / 整域缺失；UI 工具渲染面 = 待启动残口见 §2.3）+ **828 前向接缝显式延后**（各带归属波，非遗漏）。
 3. **复刻的是"已落盘面的行为保真"**，不等于"旧仓每行每功能都搬了"。判断完成度看三类清单：**§2.1 已落盘**（已搬且验真）/ **§2.2 已裁登记**（有意不搬）/ **§2.3 待启动残口**（登记未启动）。
