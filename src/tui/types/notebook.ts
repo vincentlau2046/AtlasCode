@@ -1,0 +1,9 @@
+export type NotebookCellType = any;
+export type NotebookCell = any;
+export type NotebookDocument = any;
+export const NotebookCellKind: any = { Markup: 1, Code: 2 };
+export type NotebookContent = any;
+export type NotebookCellSource = any;
+export type NotebookCellSourceOutput = any;
+export type NotebookOutputImage = any;
+export type NotebookCellOutput = any;

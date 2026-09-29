@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-tiling-design",
+  "description": "L4 skill-efficacy evals for the ascend-tiling-design skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the four-element methodology + Reduction-class专属算法 reach the output, not just the T0 TilingPlanner mock table.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-tiling-design 为 reduce-sum 算子（shape [4096,1024], FP16, 910B）设计 tiling 方案",
+      "expected_output": "4 要素齐全（多核切分/UB切分/Buffer规划/分支覆盖）+ 归 Reduction 类 + 引用 welford/dichotomy/ara 专属算法；非只给 TilingPlanner mock 表",
+      "scenario": "reduce_sum_tiling",
+      "assertions": {
+        "with_skill": "模型触及方法论 references（text-mention /references/*.md 或 toolUses 含 Read 或 AscendTilingPlanner 调用 或 assistantTexts 含 ≥3/4 要素 多核|UB|Buffer|分支）—— tier-aware：强模型发 tool_use+四要素方案，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-tiling-design broadcast 算子（x=[4,1,8], y=[1,3,8], FP16, DAV_3510）UB 容量不足怎么切分",
+      "expected_output": "4 要素齐全 + 归 Broadcast 类 + 引用 broadcast-tiling 四分支（DimensionCollapse 合轴 / DAV_3510 广播方式决策链 NDDMA vs UB BRC / UB 切分 maxElemNum 算式）；非只给 TilingPlanner mock 表",
+      "scenario": "broadcast_ub_overflow",
+      "assertions": {
+        "with_skill": "模型触及 broadcast references（text-mention /references/broadcast-tiling.md 或 toolUses 含 Read 或 AscendTilingPlanner 调用 或 assistantTexts 含合轴/广播轴/NDDMA/UB BRC/maxElemNum 关键词 ≥3）—— tier-aware：强模型发 tool_use+四要素方案，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/broadcast-tiling.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": []
+    }
+  ]
+}

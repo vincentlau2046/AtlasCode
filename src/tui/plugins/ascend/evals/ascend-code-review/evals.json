@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-code-review",
+  "description": "L4 skill-efficacy evals for the ascend-code-review skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the model reaches the hypothesis-testing methodology + red-line classification + fix routing, not just a subjective code scan.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-code-review 检视这段 Host 侧 tiling 代码：`int64_t workDim = totalSize / blockDim;` 其中 blockDim 来自 shape 未做非零校验。是否有问题？",
+      "expected_output": "判 Host 侧 + 红线 §1（除法/求余必须除零保护）违反 + 假设检验（正向证据：规范违反 +40% / 上下文防御缺失 +30%；负向证据：需附代码引用，blockDim 来自 shape 未校验则无防御证据）+ 自信值 ≥ 70% 判 FAIL(HIGH) + 修复建议（加 OP_CHECK_IF(blockDim != 0) 或 assert 非零校验）+ 参数级修复路由（Read/Edit 定点改，非 AscendCodeGen 重生成）；引用 review-redlines-defects Host 红线 §1 或 review-methodology 假设检验",
+      "scenario": "host_division_by_zero_redline",
+      "assertions": {
+        "with_skill": "模型判 Host 红线除零违规（assistantTexts 含 除零/除法/红线/blockDim/校验/OP_CHECK_IF/assert/FAIL 关键词）或触及 references（text-mention /references/{review-methodology,review-redlines-defects,review-fix-routing}.md 或 toolUses 含 Read references/ 或 AscendCodeGen 调用）—— tier-aware：强模型发 tool_use+缺陷分类，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["host_tiling_div_zero.cpp"]
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-code-review 检视这段 SIMT kernel 代码：`int tid = GetThreadNum();` 是否合规？",
+      "expected_output": "判 SIMT Kernel + 红线 §1（SIMT kernel 必须将 C++ 风格 API 转换为 C 风格 API，GetThreadNum → blockDim.x）违反 + FAIL + 修复建议（GetThreadNum() → blockDim.x，但 Simt::UintDiv 必须保留禁转）+ 变量名禁 threadIdx/blockIdx/blockDim/gridDim + 头文件 simt_api/asc_simt.h 须在 namespace 外 + 修复后必须 AscendCompilerBridge 编译验证（Kernel §5）+ SIMT 修复路由（Read/Edit 修 API 转换 + 编译验证）；引用 review-redlines-defects Kernel SIMT 红线 或 review-fix-routing SIMT 链 C",
+      "scenario": "simt_api_not_converted_redline",
+      "assertions": {
+        "with_skill": "模型判 SIMT 红线 API 未转 C 风格（assistantTexts 含 SIMT/GetThreadNum/blockDim.x/C 风格/UintDiv/红线/FAIL 关键词）或触及 references（text-mention /references/{review-redlines-defects,review-fix-routing,review-methodology}.md 或 toolUses 含 Read references/）—— tier-aware：强模型发 tool_use+红线分类，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["simt_kernel_get_thread_num.asc"]
+    }
+  ]
+}

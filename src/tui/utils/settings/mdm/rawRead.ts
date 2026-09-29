@@ -1,0 +1,1 @@
+export const fireRawRead: any = () => Promise.resolve({ plistStdouts: [], regQueryStdouts: [], exitCode: 0 }); export const getMdmRawReadPromise: any = () => null; export type RawReadResult = any;

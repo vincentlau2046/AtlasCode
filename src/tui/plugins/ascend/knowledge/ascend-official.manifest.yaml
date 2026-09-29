@@ -1,0 +1,82 @@
+# Ascend 官方知识源清单（治理层）
+#
+# verify-ascend-knowledge.ts 消费本清单：每个 reference 的 provenance stamp.repo
+# 必须在此有条目（契约校验，红）。pinned_sha 非 null 的源走红校验
+# （git ls-remote <url> <sha> + clone + cat-file -e <sha> + ls-tree <sha> <path>）；
+# pinned_sha null 的源走黄校验（仅 git ls-remote 验 url 活）。
+#
+# 许可二分（关键）：
+#   - cannbot-skills (submodule) = CANN OSL v2.0 — field-limited 华为 AI 处理器,
+#     non-sublicensable/revocable → 引用+溯源不 vendor 文本（含 scripts）。
+#   - agent-skills 父仓 = Apache-2.0 + CC-BY-SA-4.0（代码可 vendor）。
+#   - msprobe = MulanPSL-2.0（宽松）。
+#   本切片 references 均自撰验真文本（从源抽取事实重写表述），非逐字 copy。
+#
+# 主源规则：gitcode.com/Ascend 是主源（github 仅部分镜像）。“github 零命中≠虚构，
+# 必查 gitcode 主源”。local_clone 路径相对 AtlasHarness 仓库根。
+
+sources:
+  - repo: cannbot-skills
+    host: gitcode
+    url: https://gitcode.com/cann/cannbot-skills.git
+    pinned_sha: c24e8b5bc53e190504d8b09359fe5d5fa4ef3a4c
+    upstream_head: 80bd6c2                 # drift 信号：pinned vs upstream head（偏离则提示 re-verify）
+    cann_version: 8.0.RC3
+    license: CANN-OSL-2.0
+    status: active
+    local_clone: ../ascend-skills-gitcode/official/CANNBot   # 复用本地 clone 省 network
+    note: "CANNBot ops 47 skill submodule；ascendc-tiling-design + aiss-tiling-solver 源材料"
+
+  - repo: cann-learning-hub
+    host: gitcode
+    url: https://gitcode.com/cann/cann-learning-hub.git
+    pinned_sha: d59ef392b0b6afc16e90c1c7a7effbdd41415291
+    cann_version: 8.0.RC3
+    license: CANN-OSL-2.0
+    status: active
+    local_clone: null                      # 无本地 clone，verify 时 blobless clone 到 tmp
+    note: "Ascend C 算子开发官方教程（notebooks）；T1 tiling 方法论主源"
+
+  - repo: msprobe
+    host: gitcode
+    url: https://gitcode.com/Ascend/msprobe.git
+    pinned_sha: 6824676473debc2adfe868751fddfd270ce9c9a6
+    cann_version: 8.0.RC3
+    license: MulanPSL-2.0
+    status: active
+    local_clone: null                      # 无本地 clone，verify 时 blobless clone 到 tmp
+    note: "msTT 工具族；模型级精度 Shape B 知识依据（PrecisionDebugger/L0-L1/ATB dump/compare），MulanPSL-2.0 宽松许可"
+
+  - repo: aiss-tiling-solver
+    host: gitcode
+    url: https://gitcode.com/HIT1920/TilingSolver.git
+    pinned_sha: null                       # 第三方/preview，代码未全开源 → 仅验 url 活
+    cann_version: null
+    license: external-preview
+    status: external
+    local_clone: null
+    note: "哈工大第三方/学术/preview；T3 启发式，不作事实断言来源"
+
+  # ---------------------------------------------------------------------------
+  # Marketplace source — the auto-installed `ascend-official` plugin (agent-skills
+  # parent repo, incl. the CANNBot ops submodule). Unlike the sources above this
+  # is consumed as an installed PLUGIN, not as our self-authored references: it is
+  # materialized by addMarketplaceSource (known_marketplaces.json) and verified by
+  # scripts/verify-ascend-official.ts (World B — pin + drift + integrity), NOT by
+  # verify-ascend-knowledge (World A). World A ignores it (no reference stamps it).
+  #   license: 父仓 Apache-2.0（代码可 vendor）+ CC-BY-SA-4.0（文档 ShareAlike）；
+  #            含 CANNBot submodule = CANN-OSL-2.0（引用+溯源不 vendor）。
+  #   pinned_sha: 信任的官方版本锚；resolvedSha（安装时记）== 它 → Pin pass。
+  #   upstream_head: sync:ascend 填（git ls-remote），drift 信号（非阻塞）。
+  #   本切片不逐条验 skill 内容（顶层 HEAD 移动即触发 re-pin 信号，够用）；
+  #   逐 skill / 逐 submodule 完整性留作后续扩展。
+  - repo: agent-skills
+    host: gitcode
+    url: https://gitcode.com/Ascend/agent-skills.git
+    pinned_sha: d4504945d9393262cd6c2ef1d774783cbdb3754b
+    upstream_head: null                    # sync:ascend 填
+    cann_version: null
+    license: Apache-2.0+CC-BY-SA-4.0
+    status: active
+    local_clone: null
+    note: "marketplace 源；auto-installed 为 ascend-official 插件（含 CANNBot submodule）；World B 验真锚顶层 HEAD（resolvedSha）"

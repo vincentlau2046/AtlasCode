@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-precision-debug",
+  "description": "L4 skill-efficacy evals for the ascend-precision-debug skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the model reaches the correct level judgment (model-level msprobe vs operator-level DumpTensor/golden) + methodology references, not just the T0 GoldenTest/Diagnoser mock evidence.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-precision-debug GELU 算子 FP16 实现输出含 NaN，但同实现 FP32 输出正常（shape [4096,1024], 910B）。定位精度根因。",
+      "expected_output": "判算子级（FP32-pass-FP16-fail 模式）+ 取 DumpTensor/GoldenTest 证据 + 候选根因 FP16 溢出/精度不足（exp 溢出或中间累加）+ 修复方向（数值稳定化/升 FP32 累加）；引用 ascendc-operator-precision 9 陷阱表或 dumptensor-7step",
+      "scenario": "gelu_fp16_nan",
+      "assertions": {
+        "with_skill": "模型判算子级（assistantTexts 含 算子级/operator-level/FP16 溢出/精度不足 关键词）或触及 references（text-mention /references/{ascendc-operator-precision,dumptensor-7step,pypto-binary-search,precision-standard}.md 或 toolUses 含 Read references/ 或 AscendGoldenTest 调用）—— tier-aware：强模型发 tool_use+根因假设，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["gelu_fp16_nan_stderr.txt"]
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-precision-debug 大模型训练第 3000 步 loss 变 NaN，前 2999 步正常，gradnorm 也在 3000 步溢出。与 GPU 标杆对比定位根因。",
+      "expected_output": "判模型级（整网 loss/gradnorm NaN）+ 过 CheckList 后用 msprobe L1 dump + compare 逐层定位首差异 + 转判算子级或结构问题；引用 msprobe-usage/msprobe-best-practices 方法论",
+      "scenario": "train_loss_nan",
+      "assertions": {
+        "with_skill": "模型判模型级（assistantTexts 含 模型级/model-level/msprobe/loss NaN/gradnorm/逐层 关键词）或触及 references（text-mention /references/{msprobe-usage,msprobe-compare,msprobe-best-practices,debug-decision-tree}.md 或 toolUses 含 Read references/）—— tier-aware：强模型发 tool_use+定位链，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["msprobe_dump_l1_sample.json"]
+    }
+  ]
+}

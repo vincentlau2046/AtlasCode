@@ -1,0 +1,17 @@
+{
+  "skill_name": "cannbot-infra-skills",
+  "description": "L4 skill-efficacy evals for the cannbot-infra-skills official-curation wrapper (atlas-plugins marketplace). with_skill (curation wrapper prompt active: tool catalog + provenance pointer) vs without_skill on the same prompt — the differentiator is whether the official-pack provenance (pack name / pinned anchor / license marker) + the routed-tool catalog reach the output.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "训练时 aclnn 算子返回错误码 161030，进程还间歇性卡住，帮我做 NPU 故障分诊定位",
+      "expected_output": "with_skill: 提及官方 pack `cannbot-infra-skills` 或溯源锚 `c24e8b5b` 或许可标记 `CANN OSL`，且/或调用 wrapper Tool catalog 路由工具之一；without_skill: 三者皆不出现（无 skill 则溯源指针不可达）—— A/B 差异化判据",
+      "scenario": "cannbot-infra-skills",
+      "assertions": {
+        "with_skill": "tier-aware OR：assistantTexts 提及 cannbot-infra-skills|c24e8b5b|CANN OSL 之一，或 toolUses 含 wrapper catalog 工具（含弱模型 text-tool-call 形态提及）—— 证明 curation wrapper 的路由+溯源引导生效",
+        "without_skill": "不出现官方 pack 名 / 溯源锚 / 许可标记（无 skill 则溯源指针不落 context，模型无从引用）—— A/B 差异化判据"
+      },
+      "files": []
+    }
+  ]
+}

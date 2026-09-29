@@ -1,0 +1,29 @@
+import { feature } from 'src/shared'
+ // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
+export const ATLAS_20250219_BETA_HEADER = 'claude-code-20250219'
+export const INTERLEAVED_THINKING_BETA_HEADER =
+  'interleaved-thinking-2025-05-14'
+export const CONTEXT_MANAGEMENT_BETA_HEADER = 'context-management-2025-06-27'
+export const STRUCTURED_OUTPUTS_BETA_HEADER = 'structured-outputs-2025-12-15'
+export const WEB_SEARCH_BETA_HEADER = 'web-search-2025-03-05'
+// Tool search beta headers differ by provider:
+// - Claude API / Foundry: advanced-tool-use-2025-11-20
+// - Vertex AI / Bedrock: tool-search-tool-2025-10-19
+export const TOOL_SEARCH_BETA_HEADER_1P = 'advanced-tool-use-2025-11-20'
+export const TOOL_SEARCH_BETA_HEADER_3P = 'tool-search-tool-2025-10-19'
+export const EFFORT_BETA_HEADER = 'effort-2025-11-24'
+export const TASK_BUDGETS_BETA_HEADER = 'task-budgets-2026-03-13'
+export const PROMPT_CACHING_SCOPE_BETA_HEADER =
+  'prompt-caching-scope-2026-01-05'
+export const REDACT_THINKING_BETA_HEADER = 'redact-thinking-2026-02-12'
+export const TOKEN_EFFICIENT_TOOLS_BETA_HEADER =
+  'token-efficient-tools-2026-03-28'
+export const SUMMARIZE_CONNECTOR_TEXT_BETA_HEADER = feature('CONNECTOR_TEXT')
+  ? 'summarize-connector-text-2026-03-13'
+  : ''
+export const AFK_MODE_BETA_HEADER = feature('TRANSCRIPT_CLASSIFIER')
+  ? 'afk-mode-2026-01-31'
+  : ''
+export const CLI_INTERNAL_BETA_HEADER = ''
+export const ADVISOR_BETA_HEADER = 'advisor-tool-2026-03-01'
+export const CACHE_EDITING_BETA_HEADER : any = (() => ({})) as any;

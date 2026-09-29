@@ -1,0 +1,350 @@
+import type {
+  BetaMessageParam,
+  BetaToolUnion,
+  BetaToolUseBlockParam,
+  BetaToolResultBlockParam,
+  ContentBlock,
+  ContentBlockParam,
+} from '../types/atlas.js'
+import type { BetaMessageParam as MessageParam } from '../types/atlas.js'
+import type { Attachment } from '../utils/attachments.js'
+import { logError } from '../utils/log.js'
+import { normalizeAttachmentForAPI } from '../utils/messages.js'
+import {
+  getMainLoopModel,
+  getDefaultFastModel,
+} from '../utils/model/model.js'
+import { normalizeModelStringForAPI, modelToRole } from 'src/modelprovider'
+import type { Message } from '../types/message.js'
+import { jsonStringify } from '../utils/slowOperations.js'
+import { isToolReferenceBlock } from '../utils/toolSearch.js'
+import { modelProvider } from 'src/modelprovider'
+import { withTokenCountVCR } from './vcr.js'
+
+// Minimal values for token counting with thinking enabled
+// API constraint: max_tokens must be greater than thinking.budget_tokens
+const TOKEN_COUNT_THINKING_BUDGET = 1024
+const TOKEN_COUNT_MAX_TOKENS = 2048
+
+/**
+ * Check if messages contain thinking blocks
+ */
+function hasThinkingBlocks(
+  messages: BetaMessageParam[],
+): boolean {
+  for (const message of messages) {
+    if (message.role === 'assistant' && Array.isArray(message.content)) {
+      for (const block of message.content) {
+        if (
+          typeof block === 'object' &&
+          block !== null &&
+          'type' in block &&
+          (block.type === 'thinking' || block.type === 'redacted_thinking')
+        ) {
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
+/**
+ * Strip tool search-specific fields from messages before sending for token counting.
+ * This removes 'caller' from tool_use blocks and 'tool_reference' from tool_result content.
+ * These fields are only valid with the tool search beta and will cause errors otherwise.
+ *
+ * Note: We use 'as unknown as' casts because the SDK types don't include tool search beta fields,
+ * but at runtime these fields may exist from API responses when tool search was enabled.
+ */
+function stripToolSearchFieldsFromMessages(
+  messages: BetaMessageParam[],
+): BetaMessageParam[] {
+  return messages.map(message => {
+    if (!Array.isArray(message.content)) {
+      return message
+    }
+
+    const normalizedContent = message.content.map(block => {
+      // Strip 'caller' from tool_use blocks (assistant messages)
+      if (block.type === 'tool_use') {
+        // Destructure to exclude any extra fields like 'caller'
+        const toolUse =
+          block as BetaToolUseBlockParam & {
+            caller?: unknown
+          }
+        return {
+          type: 'tool_use' as const,
+          id: toolUse.id,
+          name: toolUse.name,
+          input: toolUse.input,
+        }
+      }
+
+      // Strip tool_reference blocks from tool_result content (user messages)
+      if (block.type === 'tool_result') {
+        const toolResult =
+          block as BetaToolResultBlockParam
+        if (Array.isArray(toolResult.content)) {
+          const filteredContent = (toolResult.content as unknown[]).filter(
+            c => !isToolReferenceBlock(c),
+          ) as typeof toolResult.content
+
+          if (filteredContent.length === 0) {
+            return {
+              ...toolResult,
+              content: [{ type: 'text' as const, text: '[tool references]' }],
+            }
+          }
+          if (filteredContent.length !== toolResult.content.length) {
+            return {
+              ...toolResult,
+              content: filteredContent,
+            }
+          }
+        }
+      }
+
+      return block
+    })
+
+    return {
+      ...message,
+      content: normalizedContent,
+    }
+  })
+}
+
+export async function countTokensWithAPI(
+  content: string,
+): Promise<number | null> {
+  // Special case for empty content - API doesn't accept empty messages
+  if (!content) {
+    return 0
+  }
+
+  const message: BetaMessageParam = {
+    role: 'user',
+    content: content,
+  }
+
+  return countMessagesTokensWithAPI([message], [])
+}
+
+export async function countMessagesTokensWithAPI(
+  messages: BetaMessageParam[],
+  tools: BetaToolUnion[],
+): Promise<number | null> {
+  // P5: converge onto modelProvider.countTokens (R5: chars/4 heuristic, no
+  // network round-trip). When tools are passed with no messages we send a
+  // dummy message so tool schemas are counted.
+  return withTokenCountVCR(messages, tools, async () => {
+    try {
+      const model = getMainLoopModel()
+      const role = modelToRole(model)
+      const msgs = messages.length > 0 ? messages : [{ role: 'user', content: 'foo' } as BetaMessageParam]
+      const count = await modelProvider.countTokens(
+        role,
+        normalizeModelStringForAPI(model),
+        msgs as unknown as Message[],
+        tools as unknown as any[],
+      )
+      return typeof count === 'number' ? count : null
+    } catch (error) {
+      logError(error)
+      return null
+    }
+  })
+}
+
+export function roughTokenCountEstimation(
+  content: string,
+  bytesPerToken: number = 4,
+): number {
+  return Math.round(content.length / bytesPerToken)
+}
+
+/**
+ * Returns an estimated bytes-per-token ratio for a given file extension.
+ * Dense JSON has many single-character tokens (`{`, `}`, `:`, `,`, `"`)
+ * which makes the real ratio closer to 2 rather than the default 4.
+ */
+export function bytesPerTokenForFileType(fileExtension: string): number {
+  switch (fileExtension) {
+    case 'json':
+    case 'jsonl':
+    case 'jsonc':
+      return 2
+    default:
+      return 4
+  }
+}
+
+/**
+ * Like {@link roughTokenCountEstimation} but uses a more accurate
+ * bytes-per-token ratio when the file type is known.
+ *
+ * This matters when the API-based token count is unavailable (e.g. on
+ * Bedrock) and we fall back to the rough estimate — an underestimate can
+ * let an oversized tool result slip into the conversation.
+ */
+export function roughTokenCountEstimationForFileType(
+  content: string,
+  fileExtension: string,
+): number {
+  return roughTokenCountEstimation(
+    content,
+    bytesPerTokenForFileType(fileExtension),
+  )
+}
+
+/**
+ * Estimates token count for a Message object by extracting and analyzing its text content.
+ * This provides a more reliable estimate than getTokenUsage for messages that may have been compacted.
+ * Uses Haiku for token counting (Haiku 4.5 supports thinking blocks), except:
+ * - Vertex global region: uses Sonnet (Haiku not available)
+ * - Vertex with thinking blocks: uses Sonnet (Haiku 3.5 doesn't support thinking)
+ */
+export async function countTokensViaHaikuFallback(
+  messages: BetaMessageParam[],
+  tools: BetaToolUnion[],
+): Promise<number | null> {
+  // Vertex provider removed — always use the default fast model for token counting.
+  // (The isVertexGlobalEndpoint / isVertexWithThinking guards are gone;
+  // 3P Vertex is no longer a valid provider.)
+  const model = getDefaultFastModel()
+
+  // P5: converge onto modelProvider.countTokens (R5: chars/4 heuristic, no
+  // network round-trip). Strip tool-search-specific fields before counting.
+  const normalizedMessages = stripToolSearchFieldsFromMessages(messages)
+  const messagesToSend: MessageParam[] =
+    normalizedMessages.length > 0
+      ? (normalizedMessages as MessageParam[])
+      : [{ role: 'user', content: 'count' }]
+
+  const role = modelToRole(model)
+  try {
+    const count = await modelProvider.countTokens(
+      role,
+      normalizeModelStringForAPI(model),
+      messagesToSend as unknown as Message[],
+      tools as unknown as any[],
+    )
+    return typeof count === 'number' ? count : null
+  } catch (error) {
+    // Match countMessagesTokensWithAPI: log + return null (callers handle null → rough estimate).
+    logError(error)
+    return null
+  }
+}
+
+export function roughTokenCountEstimationForMessages(
+  messages: readonly {
+    type: string
+    message?: { content?: unknown }
+    attachment?: Attachment
+  }[],
+): number {
+  let totalTokens = 0
+  for (const message of messages) {
+    totalTokens += roughTokenCountEstimationForMessage(message)
+  }
+  return totalTokens
+}
+
+export function roughTokenCountEstimationForMessage(message: {
+  type: string
+  message?: { content?: unknown }
+  attachment?: Attachment
+}): number {
+  if (
+    (message.type === 'assistant' || message.type === 'user') &&
+    message.message?.content
+  ) {
+    return roughTokenCountEstimationForContent(
+      message.message?.content as
+        | string
+        | Array<ContentBlock>
+        | Array<ContentBlockParam>
+        | undefined,
+    )
+  }
+
+  if (message.type === 'attachment' && message.attachment) {
+    const userMessages = normalizeAttachmentForAPI(message.attachment)
+    let total = 0
+    for (const userMsg of userMessages) {
+      total += roughTokenCountEstimationForContent(userMsg.message.content)
+    }
+    return total
+  }
+
+  return 0
+}
+
+function roughTokenCountEstimationForContent(
+  content:
+    | string
+    | Array<ContentBlock>
+    | Array<ContentBlockParam>
+    | undefined,
+): number {
+  if (!content) {
+    return 0
+  }
+  if (typeof content === 'string') {
+    return roughTokenCountEstimation(content)
+  }
+  let totalTokens = 0
+  for (const block of content) {
+    totalTokens += roughTokenCountEstimationForBlock(block)
+  }
+  return totalTokens
+}
+
+function roughTokenCountEstimationForBlock(
+  block: string | ContentBlock | ContentBlockParam,
+): number {
+  if (typeof block === 'string') {
+    return roughTokenCountEstimation(block)
+  }
+  if (block.type === 'text') {
+    return roughTokenCountEstimation(block.text)
+  }
+  if (block.type === 'image' || block.type === 'document') {
+    // https://platform.claude.com/docs/en/build-with-claude/vision#calculate-image-costs
+    // tokens = (width px * height px)/750
+    // Images are resized to max 2000x2000 (5333 tokens). Use a conservative
+    // estimate that matches microCompact's IMAGE_MAX_TOKEN_SIZE to avoid
+    // underestimating and triggering auto-compact too late.
+    //
+    // document: base64 PDF in source.data.  Must NOT reach the
+    // jsonStringify catch-all — a 1MB PDF is ~1.33M base64 chars →
+    // ~325k estimated tokens, vs the ~2000 the API actually charges.
+    // Same constant as microCompact's calculateToolResultTokens.
+    return 2000
+  }
+  if (block.type === 'tool_result') {
+    return roughTokenCountEstimationForContent(block.content)
+  }
+  if (block.type === 'tool_use') {
+    // input is the JSON the model generated — arbitrarily large (bash
+    // commands, Edit diffs, file contents).  Stringify once for the
+    // char count; the API re-serializes anyway so this is what it sees.
+    return roughTokenCountEstimation(
+      block.name + jsonStringify(block.input ?? {}),
+    )
+  }
+  if (block.type === 'thinking') {
+    return roughTokenCountEstimation(block.thinking)
+  }
+  if (block.type === 'redacted_thinking') {
+    return roughTokenCountEstimation(block.data)
+  }
+  // server_tool_use, web_search_tool_result, mcp_tool_use, etc. —
+  // text-like payloads (tool inputs, search results, no base64).
+  // Stringify-length tracks the serialized form the API sees; the
+  // key/bracket overhead is single-digit percent on real blocks.
+  return roughTokenCountEstimation(jsonStringify(block))
+}
+

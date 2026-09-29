@@ -1,0 +1,11 @@
+export * from '../../../types/all-local-types.js';
+export type PaneBackendType = any;
+export const isPaneBackend : any = (() => ({})) as any;
+export type CreatePaneResult = any;
+export type PaneId = any;
+export type TeammateExecutor = any;
+export type TeammateMessage = any;
+export type TeammateSpawnConfig = any;
+export type TeammateSpawnResult = any;
+export type BackendDetectionResult = any;
+export type BackendType = any;

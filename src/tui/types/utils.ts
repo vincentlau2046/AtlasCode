@@ -1,0 +1,9 @@
+export type DeepImmutable<T> = any;
+export type PickByValue<T, V> = any;
+export type Assert = any;
+export type UndefinedToOptional<T> = any;
+export type PromiseValue<T> = any;
+export type ValueOf<T> = any;
+export type KeysOfType<T, U> = any;
+export type UnionToIntersection<U> = any;
+export type Permutations<T> = any;

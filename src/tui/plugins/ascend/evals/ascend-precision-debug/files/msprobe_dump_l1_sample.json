@@ -1,0 +1,42 @@
+{
+  "_comment": "Fixture (self-authored, not real dump). msprobe L1 (API-level) dump sample for the train_loss_nan eval — step 3000 loss/gradnorm NaN scenario. Illustrates the compare input shape + first-divergent-API signal. Real dump format per references/msprobe-usage.md + msprobe-compare.md (msprobe@6824676).",
+  "task": "statistics",
+  "level": "L1",
+  "step": [2999, 3000],
+  "rank": [0],
+  "dump_path": "/home/data_dump/train_nan",
+  "apis": [
+    {
+      "api_name": "Functional.linear",
+      "call_count": 48,
+      "direction": "forward",
+      "step_2999": {"mere": 1.2e-5, "mare": 3.4e-5, "max_abs": 0.00012, "has_nan": false},
+      "step_3000": {"mere": 1.1e-5, "mare": 3.2e-5, "max_abs": 0.00011, "has_nan": false}
+    },
+    {
+      "api_name": "Functional.gelu",
+      "call_count": 24,
+      "direction": "forward",
+      "step_2999": {"mere": 2.8e-4, "mare": 9.1e-4, "max_abs": 0.0034, "has_nan": false},
+      "step_3000": {"mere": "NaN", "mare": "NaN", "max_abs": "NaN", "has_nan": true, "nan_count": 4}
+    },
+    {
+      "api_name": "Tensor.sum",
+      "call_count": 1,
+      "direction": "forward",
+      "step_2999": {"mere": 0.0, "mare": 0.0, "value": 2.314, "has_nan": false},
+      "step_3000": {"mere": "NaN", "mare": "NaN", "value": "NaN", "has_nan": true}
+    },
+    {
+      "api_name": "Functional.linear",
+      "call_count": 48,
+      "direction": "backward",
+      "step_3000": {"mere": "NaN", "mare": "NaN", "has_nan": true, "note": "gradnorm NaN propagated from gelu forward NaN"}
+    }
+  ],
+  "first_divergent_api": "Functional.gelu",
+  "first_divergent_step": 3000,
+  "first_divergent_signal": "forward NaN at 4 positions (large |x| region) → exp overflow hypothesis",
+  "compare_cmd": "msprobe compare -tp /home/data_dump/train_nan/npu -gp /home/data_dump/train_nan/gpu -da",
+  "interpretation": "msprobe L1 compare 定位首差异 API = Functional.gelu (step 3000 forward NaN); 之前 linear 正常 → 转算子级验证 gelu FP16 实现 (exp 溢出)"
+}

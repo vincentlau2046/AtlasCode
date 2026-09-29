@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-perf-optimize",
+  "description": "L4 skill-efficacy evals for the ascend-perf-optimize skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the model reaches the correct bound classification + tiling-correction + before/after throughput methodology, not just the T0 profiling/bench mock evidence.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-perf-optimize msprof 采数显示 aiv_vec_ratio 55%、aiv_mte2_ratio 30%、aic_cube_ratio 10%。定位瓶颈并给优化方向。",
+      "expected_output": "判 VEC Bound（aiv_vec_ratio > 50% 占比最大）+ 优化方向（UB 融合多 elementwise 合一 / 减少 Cast 类型转换 / 融合指令 / AIC:AIV=1:2 加 Vector 核 / Counter 模式）+ 三层管线定位核内层（Step 4 单核流水）+ tiling 修正（AIC:AIV 核比 + 融合策略）回溯 ascend-tiling-design；引用 bottleneck-location VEC Bound 或 msprof-collection Main Bound 判定",
+      "scenario": "vec_bound_high_vec_ratio",
+      "assertions": {
+        "with_skill": "模型判 VEC Bound（assistantTexts 含 VEC/bound/aiv_vec_ratio/融合/Cast/AIC:AIV/Vector 关键词）或触及 references（text-mention /references/{bottleneck-location,msprof-collection,perf-tiling-recorrection,profiling-tool-routing}.md 或 toolUses 含 Read references/ 或 AscendProfileReportParser/AscendBenchmarkRunner 调用）—— tier-aware：强模型发 tool_use+bound 假设，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["op_summary_vec_bound.csv"]
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-perf-optimize matmul 算子 msprof 显示各核 cycle 差异大（核0 12000 cyc / 核7 4000 cyc），整体吞吐偏低。优化。",
+      "expected_output": "判核间负载不均衡（各核 cycle 差异 > 10%，12000 vs 4000）+ 优化方向（增 blockDim 让每核满载 / 均匀分配尾块 / 动态负载均衡）+ 三层管线定位核间层（Step 3）+ tiling 修正（blockDim + 尾块分配）回溯 ascend-tiling-design + 前后吞吐量化（AscendBenchmarkRunner 跑两轮对比）+ 正确性硬门（优化后先 AscendGoldenTest 再看性能）；引用 bottleneck-location 核间负载不均衡 或 perf-pipeline-methodology 核间流水",
+      "scenario": "inter_core_imbalance_high_cycle_variance",
+      "assertions": {
+        "with_skill": "模型判核间负载不均衡（assistantTexts 含 核间/不均衡/blockDim/尾块/cycle/负载 关键词）或触及 references（text-mention /references/{bottleneck-location,perf-pipeline-methodology,perf-tiling-recorrection}.md 或 toolUses 含 Read references/ 或 AscendBenchmarkRunner 调用）—— tier-aware：强模型发 tool_use+优化链，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["op_summary_imbalance.csv"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "skill_name": "community-ascendc-op",
+  "description": "L4 skill-efficacy evals for the community-ascendc-op official-curation wrapper (atlas-plugins marketplace). with_skill (curation wrapper prompt active: tool catalog + provenance pointer) vs without_skill on the same prompt — the differentiator is whether the official-pack provenance (pack name / pinned anchor / license marker) + the routed-tool catalog reach the output.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我从零开发一个社区 Ascend C 算子：GEMM 矩阵乘算子（[1024,1024]×[1024,512], FP16, 910B），走设计→代码生成→编译→精度验证全流程",
+      "expected_output": "with_skill: 提及官方 pack `community-ascendc-op-skills` 或溯源锚 `d4504945` 或许可标记 `Apache-2.0`，且/或调用 wrapper Tool catalog 路由工具之一；without_skill: 三者皆不出现（无 skill 则溯源指针不可达）—— A/B 差异化判据",
+      "scenario": "community-ascendc-op",
+      "assertions": {
+        "with_skill": "tier-aware OR：assistantTexts 提及 community-ascendc-op-skills|d4504945|Apache-2.0 之一，或 toolUses 含 wrapper catalog 工具（含弱模型 text-tool-call 形态提及）—— 证明 curation wrapper 的路由+溯源引导生效",
+        "without_skill": "不出现官方 pack 名 / 溯源锚 / 许可标记（无 skill 则溯源指针不落 context，模型无从引用）—— A/B 差异化判据"
+      },
+      "files": []
+    }
+  ]
+}

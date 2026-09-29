@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+// Atlas vendored ripgrep: delegates to the WASM-based ripgrep
+// CLI from the 'ripgrep' npm package (system/builtin rg binary missing).
+import { spawn } from 'node:child_process'
+import { createRequire } from 'node:module'
+import * as path from 'node:path'
+const require = createRequire(import.meta.url)
+const pkgDir = path.dirname(require.resolve('ripgrep'))
+const cli = path.join(pkgDir, 'rg.mjs')
+const args = process.argv.slice(2)
+const child = spawn(process.execPath === '' ? 'node' : process.execPath, [cli, ...args], {
+  stdio: 'inherit',
+})
+child.on('close', (code, signal) => {
+  if (signal) process.kill(process.pid, signal)
+  process.exit(code ?? 0)
+})
+child.on('error', (err) => {
+  console.error('ripgrep wrapper: ' + err.message)
+  process.exit(127)
+})

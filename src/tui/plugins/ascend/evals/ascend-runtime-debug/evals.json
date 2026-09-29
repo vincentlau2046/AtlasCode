@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-runtime-debug",
+  "description": "L4 skill-efficacy evals for the ascend-runtime-debug skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the model reaches the correct error-code/symptom classification + methodology references, not just the T0 ErrorClassifier/FaultCollector/Diagnoser mock evidence.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-runtime-debug aclnn 调用返回 507035（向量核异常），FP16 输入 shape [4096,1024]，innerDim=9。定位根因。",
+      "expected_output": "判 507035 向量核异常（AICore 错误码）+ 高置信根因 DataCopyPad blockLen 非 32B 对齐（FP16 innerDim=9 → 9*2=18B 非对齐）+ 修复方向（blockLen 向上对齐到 16 的倍数即 32B）+ 先 AscendFaultCollector 采现场再 AscendErrorClassifier 解码；引用 error-code-taxonomy 507035 根因分级",
+      "scenario": "vector_core_exception_507035",
+      "assertions": {
+        "with_skill": "模型判 507035 向量核异常 + 32B 对齐根因（assistantTexts 含 507035/向量核/32B/DataCopyPad/对齐 关键词）或触及 references（text-mention /references/{error-code-taxonomy,plog-parsing,fault-tool-routing}.md 或 toolUses 含 Read references/ 或 AscendErrorClassifier/AscendFaultCollector 调用）—— tier-aware：强模型发 tool_use+根因假设，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["aclnn_507035_stderr.txt"]
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-runtime-debug Ascend C 算子程序卡死无响应，跑了一直不返回，无错误码。定位卡死原因。",
+      "expected_output": "判卡死/超时症状类（非 AICore 错误码）+ 读 plog 日志定位 + 检查 Buffer 配对（AllocTensor/FreeTensor、EnQue/DeQue）+ 候选根因（Buffer 未释放/死锁/多核同步缺失）+ 修复方向（循环内 Alloc 后必 Free/配对/CrossCoreWaitFlag↔SetFlag）；引用 crash-hang-diagnosis Buffer 死锁模式 或 plog-parsing",
+      "scenario": "kernel_hang_no_error_code",
+      "assertions": {
+        "with_skill": "模型判卡死症状类（assistantTexts 含 卡死/挂起/plog/Buffer/AllocTensor/FreeTensor/死锁/EnQue/DeQue 关键词）或触及 references（text-mention /references/{crash-hang-diagnosis,plog-parsing,fault-tool-routing}.md 或 toolUses 含 Read references/）—— tier-aware：强模型发 tool_use+定位链，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["plog_hang_sample.log"]
+    }
+  ]
+}

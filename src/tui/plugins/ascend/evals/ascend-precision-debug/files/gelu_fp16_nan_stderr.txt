@@ -1,0 +1,12 @@
+=== GELU FP16 golden-test stderr (fixture, self-authored) ===
+$ python3 test_gelu.py --dtype float16
+[AscendGoldenTest] running numpy golden vs NPU (shape [4096,1024], dtype float16, 910B)
+[NPU kernel] GELU forward, x.dtype=float16
+[NPU kernel] intermediate: exp(x) for x in [-32, 32]
+[GoldenTest] FAIL: output contains 4 NaN values at indices [1024, 2048, 3072, 4095]
+[GoldenTest]   actual[1024] = NaN,  golden[1024] = 0.99998 (FP32 golden)
+[GoldenTest]   max_abs_diff = NaN (at NaN positions)
+[GoldenTest]   non-NaN positions: MERE=2.1e-4, MARE=8.7e-4 (within FP16 threshold 2^-10)
+[GoldenTest]   FP32 run (same kernel, dtype=float32): PASS, MERE=1.8e-6
+[GoldenTest] verdict: FP16 NaN at 4 positions; FP32 normal → FP32-pass-FP16-fail pattern
+[GoldenTest] hint: NaN appears where |x| is large → suspect exp(x) overflow in FP16 (exp(large)→inf→NaN)

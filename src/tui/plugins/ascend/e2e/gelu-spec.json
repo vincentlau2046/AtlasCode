@@ -1,0 +1,20 @@
+{
+  "op_name": "gelu_fp16",
+  "op_type": "activation",
+  "data_types": [
+    "float16",
+    "bfloat16"
+  ],
+  "shapes": [
+    [
+      1,
+      1024,
+      1024
+    ]
+  ],
+  "tiling_constraints": {
+    "preferred_batch": 128,
+    "max_inner_dim": 1024
+  },
+  "description": "Gaussian Error Linear Unit (GELU) activation for transformer models"
+}

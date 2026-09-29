@@ -1,0 +1,28 @@
+{
+  "skill_name": "ascend-test-design",
+  "description": "L4 skill-efficacy evals for the ascend-test-design skill. with_skill (skill + provenance references active) vs without_skill (filtered out) on the same prompt — the differentiator is whether the model reaches the correct test-type selection + methodology references, not just a generic test plan.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/ascend-test-design 为 add 算子设计接口级系统测试用例，覆盖参数组合。怎么设计？",
+      "expected_output": "选 ST 系统测试（接口级参数组合，test-strategy 决策树）+ st-design 9 步流程（输入校准 aclnn{Op}.md→参数定义 3 大类 6 种→测试因子→约束分析 9 类型→隐式约束→依赖图→求解→L0/L1/L2 生成）+ L0 ≤200 门槛/L1 500-700 功能精度/L2 ≤20 异常分级 + 6 脚本（generate_test_factors/implicit_constraints/solver_config/factor_values/test_cases）+ 空tensor派生；引用 st-design 或 test-strategy",
+      "scenario": "st_design_interface_level",
+      "assertions": {
+        "with_skill": "模型选 ST + 9 步流程（assistantTexts 含 ST/系统测试/L0/L1/L2/参数定义/测试因子/约束/aclnn/脚本 关键词）或触及 references（text-mention /references/{st-design,test-strategy,ut-develop,whitebox-design}.md 或 toolUses 含 Read references/ 或 AscendGoldenTest 调用）—— tier-aware：强模型发 tool_use+测试设计，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["aclnnAdd.md"]
+    },
+    {
+      "id": 2,
+      "prompt": "/ascend-test-design 验证 add 算子正确性，numpy 参考实现 vs NPU 输出。怎么测？",
+      "expected_output": "选 golden 正确性门（numpy ref vs NPU，test-strategy 决策树——golden 是正确性门非覆盖度）+ AscendGoldenTest 跑 golden-test 脚本（np.allclose(rtol, atol)）+ pass/fail + mismatch 证据 + 正确性门是覆盖率测试前提（先 golden 过门再做 ST/UT/whitebox 覆盖）+ mocked:true 是 liveness 非正确性 + rtol/atol 禁改；引用 test-strategy golden 决策树 或 whitebox 精度标准锁定",
+      "scenario": "golden_correctness_gate",
+      "assertions": {
+        "with_skill": "模型选 golden 正确性门（assistantTexts 含 golden/正确性/numpy/allclose/rtol/atol/AscendGoldenTest/NPU 关键词）或触及 references（text-mention /references/{test-strategy,whitebox-design,st-design}.md 或 toolUses 含 Read references/ 或 AscendGoldenTest 调用）—— tier-aware：强模型发 tool_use+正确性门，弱模型发 text-tool-call 提及 references，均证明 skill catalog 引导生效",
+        "without_skill": "不触及 references/*.md（无 skill 则 references 不落盘，模型无从引用 nonce-dir 路径）—— A/B 差异化判据"
+      },
+      "files": ["test_add.py"]
+    }
+  ]
+}

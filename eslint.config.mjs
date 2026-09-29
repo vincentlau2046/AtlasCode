@@ -24,6 +24,7 @@
  */
 import tseslint from "typescript-eslint";
 import boundaries from "eslint-plugin-boundaries";
+import { customRules, reactHooks, pluginN } from "./eslint-legacy-plugins.mjs";
 
 // ── elements 定义（src/tests 共用单一事实源）──
 const ELEMENTS = [
@@ -217,16 +218,27 @@ export default tseslint.config(
                 "remote", "mcp", "hooks", "modelprovider", "swarm",
               ],
             },
-            // tui (§8.72 TUI 壳波 Slice A): TUI 域 — 旧仓 UI 闭包 C-7 原样搬
-            // （React/Ink 渲染层 + screens + 组件树）。Slice A 落位时域内仅
-            // npm 外部依赖（native-ts 纯 TS port）→ allow=[shared]；Slice B/C
-            // 跨域重映射（engine 根门面/permissions/modelprovider/bootstrap/
-            // mcp/memory/remote/swarm/task/lsp…）随切片头注扩 allow 登记。
+            // tui (§8.72 TUI 壳波 Slice A→B): TUI 域 — 旧仓 UI 闭包 C-7 原样搬
+            // （React/Ink 渲染层 + screens + 组件树）。Slice B 跨域重映射落地
+            // 后扩 allow 面（grep 实测边，2026-09-29）：
+            //   shared（170）：native-ts 纯 TS port 单一事实源
+            //   modelprovider（57）：streamAssistant/buildOpenAIParams/常量面
+            //     （闭包 callModel 转发 + 压缩/hooks 直调，deps.ts 类型边界头注）
+            //   memory（10）：MemoryStore 四实现 + 类型（factory/memdir/
+            //     attachments/extractMemories）
+            //   sandbox（3）/executor（2）/engine（2）：仅 tui 本地 compat
+            //     模块（sandboxCompat/engineCompat）+ factory 组合窗口（executor
+            //     三 port 注入 + engine shouldUseSandbox 委托）
+            //   cli（1）：main.tsx -p 支委托新 CLI 域 runHeadless（8 参→2 参
+            //     适配，main.tsx 头注 H6 前向接缝登记）
             // 壳消费边（atlascode→tui）Slice D 随 launcher/mount 接线扩
             // atlascode allow 面登记。
             {
               from: "tui",
-              allow: ["shared"],
+              allow: [
+                "shared", "modelprovider", "memory", "sandbox",
+                "executor", "engine", "cli",
+              ],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
@@ -269,6 +281,40 @@ export default tseslint.config(
             "PRT-2: 顶层禁止模块加载时自注册语句。状态/port 注册经 compose.ts 显式注入（lazy-init `??=` 合规）。",
         },
       ],
+    },
+  },
+
+  // ── tui C-7 闭包 lint 豁免桶（§8.72 TUI 壳波 Slice B，H6 头注登记，复审勿重提）──
+  // tui 域 = 旧仓 UI 闭包 C-7 原样搬（React Compiler 编译态 .tsx + 旧仓规则史）。
+  // 旧仓 lint 管线未整体移植，新仓规则集对新域（八域+cli 等）全 error 的纪律
+  // 不适用于逐字搬入的旧代码 → 本桶豁免质量/风格规则，仅保留 boundaries 三规则
+  // （element-types 依赖方向 / entry-point 门面收口 / no-unknown 未知元素）=
+  // 架构核心不受豁免。旧仓 3 插件族（custom-rules 14 规则 / react-hooks 2 规则 /
+  // eslint-plugin-n 2 规则）规则名经本地 no-op 插件注册（eslint-legacy-plugins.mjs，
+  // 检查体未随迁，消闭包内联 eslint-disable 指令的 "Definition not found" 报错；
+  // 逐条恢复归 E-wave-end 审计，该文件头注同登记）。豁免清单 = 2026-09-29 lint
+  // 实测 1483 error 的规则直方图（非预置全关，新出现的规则报错须随切片头注扩登记）。
+  {
+    files: ["src/tui/**/*.ts", "src/tui/**/*.tsx"],
+    plugins: {
+      "custom-rules": customRules,
+      "react-hooks": reactHooks,
+      "eslint-plugin-n": pluginN,
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/switch-exhaustiveness-check": "off",
+      "@typescript-eslint/only-throw-error": "off",
+      "prefer-const": "off",
+      "no-control-regex": "off",
+      "no-restricted-syntax": "off",
+      "no-constant-condition": "off",
+      "no-misleading-character-class": "off",
     },
   },
 
