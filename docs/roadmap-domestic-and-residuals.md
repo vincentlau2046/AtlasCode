@@ -39,6 +39,8 @@
 
 > 落地纪律：每项**先读 DSH 对应包源码**（本机 `deepseek-harness/packages/...`），再在 AtlasCode 落国产方案；**PI Agent 具体实现引用须其仓核验后补**，本路线图不虚构。每项国产替代都须**行为不弱于旧仓 + 带判别单测**（非空洞替换）。
 
+> **排期裁定（2026-09-29，用户）**：§1 国产替代轨整体**顺延为发布后优化波（W-opt）**——"先完成完整功能发布上线，再做优化"。W1 不做 DSH 研读（原 W1-1.1 划出）；W2-W5 发布关键路径不含任何国产替代钩子。W-opt 与 G-β 前置波（R2/R3）并行排期，不阻塞 G-α/G-β。
+
 ---
 
 ## 2. 残口排波（Residual Wave Sequencing）
@@ -114,13 +116,13 @@ W1 设计裁定波（零代码，纯 docs）
  │             └─→ W4 全量 lint 复原（殿后，一次性）
  │                    └─→ W5 发布工具链收口 + G-α v0.1.0（需 P-1，解除 no-push）
  └─→ R0 并行带：install.sh / atlas update / dev-loop 文档（纯新增，随时并入；tag 动作归 W5）
-G-α 后：W6 = R2（D-3 Ascend 实施）→ W7 = R3（D-9 换值，IFF 前置）→ G-β v1.0 → W8 = R4/R5
+G-α 后：W-opt（国产替代优化波，DSH/PI 研读 + §1 八项实施，用户裁定发布后）∥ W6 = R2（D-3 Ascend 实施）→ W7 = R3（D-9 换值，IFF 前置）→ G-β v1.0 → W8 = R4/R5
 ```
 
 **波/切片定义**：
 
 **W1 设计裁定波（零代码，纯 docs）**
-- 1.1 DSH 参考研读（本机 `packages/subagent` 4659L / `sandbox`+`sandbox-policy` / `core/agent` / `compaction` 4 件 → 国产替代轨挂靠素材）
+- ~~1.1 DSH 参考研读~~（**划出 → W-opt 发布后优化波**，排期裁定见 §1；W1 纯发布关键路径设计）
 - 1.2 双工具面收敛裁定：**181 文件逐文件命运清单**（保留为渲染层 / 删除 / 归并）+ 渲染叠加接法（裁定：engine = 行为事实源，tui 保留 UI.tsx React 渲染函数作路由叠加，删 tui 重复注册与本体）
 - 1.3 单 loop 切法：tui orchestrator 运行体 12K 行 vs engine query+pipeline 的保留/删除清单
 - 1.4 bootstrapState 187 vs 54 导出裁定
