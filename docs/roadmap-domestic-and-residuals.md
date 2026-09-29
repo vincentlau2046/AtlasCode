@@ -89,7 +89,68 @@
 
 ---
 
-## 4. 发布门禁评估（何时可发布 + 安装/升级/迭代方式）
+## 4. 严谨执行顺序（波/切片 + 依赖图 + 前置项 + 门禁）
+
+> 把 §2 的 R1-R5 细化为**可执行波（W1-W5 + 并行带 R0）**。R1 拆成 W1（设计）/W2（去重）/W3（TUI 活链路）/W4（lint 复原）四段**严格串行**；R0 工具链为**并行带**（零代码面冲突），但 tag/release 动作严格收进 W5。
+
+**六条不变式（严谨性约束）**：
+1. **设计先于实施**：W1 的逐文件命运清单是 W2 删码**唯一依据**；W2 实施中如需临场裁 → 回 W1 补设计，不在实施波裁设计。
+2. **零行为波每切片绿**：W2 是行为零改动去重，每个切片四件套（tsc/lint/build/3055 测）必须绿才进下一切片；W3 是行为新增，须带新探针（非纯断言旧行为）。
+3. **lint 复原殿后**：W2/W3 新增代码全部在**旧 lint 基线**下落，W4 一次性启用 5 真体 + 处置重燃错误——不在"将被 W2 删除 / 将被 W3 改动"的代码上修 lint。
+4. **工具链并行、tag 最后**：R0（install.sh / `atlas update` / dev-loop 文档）纯新增文件，可与 W2-W4 并行合并；**v0.1.0 tag + push + Release 严格在 W4 之后（W5）**。
+5. **每波收尾三件套**：`execution-strategy.md` 记录 + memory 更新 + 基线谱系（测试数谱系）落盘。
+6. **既有规则变更显式化**：「AtlasCode 绝不 push」自 **W5 起解除**（用户明确要求远端升级）；W5 前全部本地 master 提交。
+
+**用户前置项（前置到 W1 期间完成，不阻塞 W1/W2 开跑，但阻塞后续门禁）**：
+- **P-1**：建 GitHub 仓库（私有/公开待裁定）→ R0 远端 / W5 push + Release 渠道
+- **P-2**：TUI 端到端验真可用的 LLM 端点 + key（IFF 网关或任意 OpenAI-compatible，如 DeepSeek 兼容端点）→ W3 活验真（网关不可达时探针走 skip-clean 门控，但 **G-α 冒烟至少需真跑 1 次通过**）
+- **P-3**：确认发布渠道 = GitHub only（按版本管理方案 memory）
+
+**依赖图（串行主链 + 并行带）**：
+```
+W1 设计裁定波（零代码，纯 docs）
+ ├─→ W2 双工具面去重 + 单 loop + bootstrapState（行为零改动）
+ │      └─→ W3 TUI 活链路接上 + 端到端验真（行为新增，需 P-2）
+ │             └─→ W4 全量 lint 复原（殿后，一次性）
+ │                    └─→ W5 发布工具链收口 + G-α v0.1.0（需 P-1，解除 no-push）
+ └─→ R0 并行带：install.sh / atlas update / dev-loop 文档（纯新增，随时并入；tag 动作归 W5）
+G-α 后：W6 = R2（D-3 Ascend 实施）→ W7 = R3（D-9 换值，IFF 前置）→ G-β v1.0 → W8 = R4/R5
+```
+
+**波/切片定义**：
+
+**W1 设计裁定波（零代码，纯 docs）**
+- 1.1 DSH 参考研读（本机 `packages/subagent` 4659L / `sandbox`+`sandbox-policy` / `core/agent` / `compaction` 4 件 → 国产替代轨挂靠素材）
+- 1.2 双工具面收敛裁定：**181 文件逐文件命运清单**（保留为渲染层 / 删除 / 归并）+ 渲染叠加接法（裁定：engine = 行为事实源，tui 保留 UI.tsx React 渲染函数作路由叠加，删 tui 重复注册与本体）
+- 1.3 单 loop 切法：tui orchestrator 运行体 12K 行 vs engine query+pipeline 的保留/删除清单
+- 1.4 bootstrapState 187 vs 54 导出裁定
+- 1.5 TUI 活链路接法设计（REPL → 单 loop → 工具执行 → 渲染路由 → 续轮 + PTY 探针设计）
+- 1.6 lint 复原处置策略（重燃基线：修集合 vs 登记延后集合）
+- 门禁：§8.74 设计记录落盘 + 四件套不变（纯 docs 波）
+
+**W2 双工具面去重 + 单 loop（行为零改动，每切片四件套绿）**
+- 2a 工具注册面收敛（照 1.2 命运清单）/ 2b 渲染路由层（tui UI.tsx 渲染函数挂接 engine 工具对象；删 tui 重复本体）/ 2c 单 loop 收敛（照 1.3）/ 2d bootstrapState 去重（照 1.4）/ 2e 删净 + 旧路径 0 引用探针 + 四件套 + gate 6·0·5·2
+- 门禁：波终四件套（行为零改动，测试数谱系 ±0 或仅探针增减）+ execution-strategy 记录
+
+**W3 TUI 活链路接上 + 端到端验真（行为新增）**
+- 3a REPL 驱动单 loop（真 LLM 一轮）/ 3b 工具执行 + 渲染路由 + 续轮 / 3c PTY 探针固化（func/gelu；live-gateway 门控，网关不可达 skip-clean）/ 3d 人工 PTY 验真（`script -qec`，本地跑；CI skip）
+- 门禁：四件套 + 新探针全绿（P-2 端点可用态）
+
+**W4 全量 lint 复原（殿后）**
+- 4a 5 真体启用（eslint.config.mjs severity 翻启）/ 4b 重燃错误处置（照 1.6 策略：修 vs 登记延后）/ 4c 新 lint 基线锁定（测试基线文档同步）
+- 门禁：lint = 新基线（启用规则下 0 error）+ 四件套
+
+**W5 发布工具链收口 + G-α**
+- 5a 版本初始化（SemVer + 注解 tag；需 P-1 远端）→ **解除 no-push 规则** / 5b README + 冒烟清单（settings.json 三角色模型池配置 / `--help` / headless `-p` 一轮 / TUI 启动 + 交互一轮）/ 5c G-α 全绿门禁 → **v0.1.0 注解 tag + push + GitHub Release（alpha，内部）**
+- 门禁：一键安装验真（全新目录）+ `atlas update` 验真 + 冒烟全过
+
+**R0 并行带（零代码面冲突）**：install.sh / `atlas update` 命令 / `docs/dev-loop.md`（本地 clone 改码 → build → 即刻生效）——纯新增，随 W2-W4 期间并入提交；**tag/release 动作严格归 W5**。
+
+**tag 体系**：波 tag（wave-r1.. 沿既有波收尾先例，每波闭环可切）与 SemVer 发布 tag（v0.1.0/v1.0.0）**双轨并存不混用**。
+
+---
+
+## 5. 发布门禁评估（何时可发布 + 安装/升级/迭代方式）
 
 > 用户目标：本地 git repo **一键安装**、**远端升级**、**本地边使用边优化**持续迭代；
 > 发布硬条件 = **TUI UI + 完善的 Coding Agent 功能**。
@@ -130,7 +191,7 @@ G-α ──→ R2（D-3 Ascend 实挂载）+ R3（D-9 换值）──→ G-β 1.
 
 ---
 
-## 5. 下一步
+## 6. 下一步
 
 - 本路线图为**规划文档**（用户裁定"先出路线图文档"）；评审通过后**开 R1**（地基波）+ **并行 R0 发布准备**（安装/升级工具链 + 版本初始化，与 R1 无代码面冲突）。
 - R1 开波前：读 DSH `packages/subagent/`、`packages/core/agent`、`packages/sandbox/` 源码（本机已 checkout），定双工具面去重 + 单 loop 事实源的**具体切法**，落 `execution-strategy.md §8.74`。
