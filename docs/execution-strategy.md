@@ -6270,3 +6270,100 @@ engine 回填（compact hooks/附件/userDisplayMessage DI 化 + microcompact GB
 config/缝 + autoCompact model-string 面收敛）/ cached-MC 面（feature-OFF
 stub）/ coordinator scratchpad 段回填 engine + 类型面适配 / GB 覆写回填
 （getTimeBasedMCConfig engine 缺省副本面）/ bootstrapState 45 死名删净（2e）。
+
+#### 8.74.20 W3-3d PTY/活探针 + 工具 schema 注入面实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**3d 探针落盘（2 文件，双门 skip-clean）**：
+- `tests/func/atlascode-tui-pty-probe.test.ts`（PTY func 探针，§8.74.4 spec 面）：
+  `script -qec` 真起 TUI（IS_DEMO=1 跳过 onboarding，interactiveHelpers 先例）→
+  p1 = Bash 工具回合（'Use the Bash tool to run exactly: echo pty-probe-ok'）→
+  p2 = text-only 续轮（'Reply with exactly the word: pty-probe-two'）→ 断言
+  marker 词 ≥2 次（回显 + 工具结果/自述）+ 续轮同判 = 输入框可达 / 活链端到端 /
+  轮后可再输入 三接缝。时序标定（人工校准实测）：TUI 启动 ~10s 达 REPL，
+  单 LLM 轮 ~40-60s，工具回合 = 2 LLM 轮 → p1@10s / p2@90s / timeout 200s。
+- `tests/func/atlascode-tui-live-gelu.test.ts`（gelu 活探针，G-α 冒烟清单项）：
+  组合根真链（getCoreDependencies → createAgentLoopDeps role='small' baseTools
+  空注入 + args.tools echo 工具）→ queryAgentLoop maxTurns 4 上界 → tier-aware
+  efficacy（native tool_result 路 OR text 自述路，L4 eval tier-aware 先例）→
+  路径命中 console.log 记面。
+- **门控裁定（临场裁回）**：① CI/非 Linux → PTY 探针 skip（沿 e2e PTY hang
+  先例）② 网关门 = `modelProvider.healthCheck('small')`，但**须先 compose**
+  （getCoreDependencies）——healthCheck 走 roles lane = 组合根 D18 注册的
+  settings-based endpoint source，裸测试进程池为空恒 false（实测：首版探针
+  3 skip 假象，诊断 `bun -e` healthCheck ok:false model:'' 定位）。全角色池
+  同指 IFF 端点（settings modelRoles 实测 2026-09-30），单角色门控覆盖全角色。
+  网关不可达 = skip-clean 不红（旧仓 agent-loop live 门控同形）。
+
+**工具 schema 注入面（活探针 H6 揭出的未登记缺面，补位落盘）**：
+- **发现链**：首版 live 探针 red（turns=1，模型自述「没有 echo 工具可用」）→
+  诊断（真 compose + 捕获 chat args）确认 `queryOneRound` 未向 LLM 送工具
+  schema——fixture replay 纪律（脚本化 provider 直接发 tool_use 块）使活链
+  从未向真 LLM 送过 schema，loop.ts 残留守清单未登记本面（H6 风险实锤）。
+  PTY 校准期模型写 TEXT 形工具调用（`<tool_call><function=Bash>`）同根因
+  （模型无 schema 可依 → 训练分布幻觉调用形制）。
+- **裁定 3d-1（chat tools 槽）**：`ModelProvider.chat` args +tools?: Tools
+  （接口 + 实现）→ buildOpenAIParams 透传 → buildOpenAITools（既有
+  shared Tool[] → OpenAI function schema 转换器，空集 = params.tools 键
+  不出现，既有调用方零行为）。
+- **裁定 3d-2（queryOneRound 透传）**：`tools: tools.length > 0 ? tools :
+  undefined`（loop.ts，头注 H6 登记本面此前缺位 + fixture replay 盲区根因）。
+- **裁定 3d-3（buildOpenAITools 双形 schema 修）**：既有转换逻辑假设
+  inputSchema 为 zod 实例（旧仓遗产）→ 新 shared Tool 契约 inputSchema =
+  纯 JSON（ToolInputJSONSchema）经 zodToJsonSchema 抛 TypeError（探针
+  T-3b 定向红揭出）。修 = isZodV4Instance 判别（_zod 内属性）：zod 实例 →
+  转换；纯 JSON → 原样透传；无 schema → {type:'object',properties:{}}。
+  判别单测 `tests/unit/engine-tool-schemas.test.ts` 5 测（T-1 引擎透传引用
+  同一性 / T-2 空集缺省 / T-3 转换面 3 支 / T-3b 抛错回落 name / T-3c
+  params 层空键面）。
+- **活证（G-α 首跑绿）**：live gelu 探针 **native=true turns=2**（模型见
+  echo schema → 原生 tool_use → 真执行 → tool_result 'echo:live-gelu-ok' →
+  终文 GELU-LIVE-DONE）= 活链工具回合端到端真证 + G-α「冒烟须真跑 ≥1 次
+  通过」达成。echo 工具活探针鲁棒化（显式 inputSchema + 结果 stringify
+  全参——弱模型参名漂移时 marker 仍留痕）。
+
+**探针突变判别（§8.74.4 ritual，实测留痕）**：备份 `src/engine/query/loop.ts`
+→ 去 5 处 `deps.emit?.(...)` 调用点（loop_start/compacted/round_start/
+round_end/loop_end）→ `bun test --isolate tests/unit/engine-loop-emit.test.ts`
+**定向红 5/8 fail**（emit 消费面 = 探针 assistant 渲染链唯一数据源，去 emit
+= 流内零消息重放）→ verbatim restore（cp 备份回位，emit 站点 5/5 复原）→
+**复绿 8/8**。PTZ/PTY 探针端到端同链消费（loopEvents 适配层入队面），
+突变时同红（仪式取 unit 定向面 = 同链最短路径，PTY 全链红为等价推论）。
+
+**tier-aware 裁定（H6，复审勿当遗漏重提）**：PTY p1 工具回合 marker 断言
+**形制无关**（'pty-probe-ok' ≥2 = 回显 + 工具结果/模型自述其一）——P-2 池
+Qwen38 弱模型可能原生 tool_use（schema 面落盘后 live gelu 已证 native 路
+可达）也可能 TEXT 形调用（engine 无 text→tool 解析器，不真执行）；断言
+绑定「回合端到端完成」而非模型能力。native 强模型入池后收紧为工具结果
+渲染断言 = 残口（W-opt）。
+
+**残留守（H6 登记，owner = W-opt 优化波）**：per-token stream_event 活流
+（TTFT/usage 面）/ PTY 探针工具结果严格渲染断言（native 模型池后）/
+chatStream 面 tools 透传为 OpenAI 形 raw 直通（engine 不消费，非缺面）/
+live gelu 探针 maxTurns 4 上界 = 探针防挂死面（engine 缺省无上界 = 窄
+spine 不变式，不改）。
+
+**裁定 3d-4（PTY 探针 spec 分裂 + 时序复标，首跑 red 诊断后临场裁）**：
+首跑 PTY 探针 red（工具提示词下 marker 仅 1 次 = 仅回显）→ 会话 transcript
+诊断（~/.atlas/projects/-home-vince-projects-AtlasCode/380ed0f9…jsonl）定位：
+p1 轮模型**复述 system prompt 的 `<system_warning>`（Ascend mock 提示块）**
+不发工具调用（弱模型对 TUI 全量系统提示 + 29 工具 schema 重上下文的输出
+漂移）——模型能力非 harness 可断言面（H6）。裁定：
+- **spec 分裂**：§8.74.4「tool_use 渲染 + 结果消息」面归 live gelu 探针
+  （工具回合经同一 engine 活链 + 工具管线真执行，native=true 首跑绿）；
+  PTY 探针专证 TUI 特化面（PTY 起 / 输入框可达 / 活链端到端渲染 / 轮后
+  续轮），text-only 提示词（「Reply with exactly the word」指令遵循实测
+  可靠——headless 诊断模型精确回 GELU-LIVE-DONE 先例）。
+- **时序复标**：TUI 重上下文（系统提示 + 全量工具 schema prefill）单 LLM
+  轮 60-110s（headless 轻量上下文 0.4-3s 的口径不可迁移）→ p1@10s /
+  p2@110s（输入队列面：轮中输入住队，校准先例）/ timeout 320s。
+- 权限面核销：`echo` 读-only 经 bashTool 1c 鸭子自决 allow（gelu P-2
+  先例），活探针无交互批准挂起风险；IS_DEMO 无权限语义（仅 onboarding/
+  内部命令面，grep 核验），探针不依赖。
+
+**验收（2026-09-30 四件套）**：tsc 0 / lint 0 error（370 warn 不变）/
+build cli.js 2.33MB（813 模块不变）/ `bun test --isolate tests/` 全量
+**3132 pass / 0 fail / 7498 expect / 192 文件**（G-α 基线 3125/189 + 3 新
+文件 7 测：engine-tool-schemas 5 + live-gelu 1 + pty-probe 1；双活探针
+套件内真跑绿）。突变判别仪式实测留痕（engine-loop-emit 5/8 定向红 →
+verbatim restore → 8/8 复绿）。G-α 冒烟「须真跑 ≥1 次通过」= live gelu
+native=true 首跑绿达成。
