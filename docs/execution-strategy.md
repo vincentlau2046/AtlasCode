@@ -6107,3 +6107,45 @@ canUseTool（非交互保真）；ask 支经 canUseTool 弹窗 allow/deny remap�
 bun test --isolate 3121/0/7478/188（基线 3111/7444/186 + 2 判别测试文件 +10 测试）/
 build 802 modules 2.19MB（+1 模块 = 新 tui 活装配文件）。CI gate（tests/ci
 anti-stub + capability-matrix）随全量套件绿。
+
+#### 8.74.17 W3-3d G-α 真跑修波实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：W3-3d G-α = headless `-p` 端到端真跑（P-2 IFF 网关 127.0.0.1:8999 ·
+Qwen38-27B-TXT；~/.atlas/settings.json 三角色池 + providers.iff baseURL/apiKey 全配）。
+首跑暴露新引擎活链路 2 缺陷，本波全修，真跑复验通过：
+
+- **裁定 G-α-1（headless 组合根接线 = 壳入口，非 cli 分派）**：`-p` 首跑
+  `error_during_execution` "No models configured for role 'premium' (empty
+  pool)"——根因 = headless 路径（src/cli）全程未调组合根
+  `createCoreDependencies()`（atlascode/compose），modelprovider EndpointConfigSource
+  窗口停默认空 stub（roles.ts emptyEndpointConfigSource：getRoleSetting → {} /
+  getProviders → {}）→ role 池恒空 → settings.json 已配 modelRoles/providers 也
+  读不到（假阴性）。裁定 = `getCoreDependencies()`（lazy 单例）接线落**壳入口
+  src/atlascode/cli.ts binMain 主面交接点**（`main()` 前），组合根 ①-⑨ 全步覆盖
+  （executor port / hooks bootstrap〔runHooks fail-fast 面〕/ permissions /
+  sandbox access / settings 面；旧仓语义 = headless 在完全接线进程内运行）。
+  - 落位裁定（边界硬约束）：先落 cli 公共域分派（parse.ts -p 支）→ eslint
+    boundaries/element-types 硬错（cli allow 面不含 atlascode，「公共层不反向
+    依赖壳」）→ 移壳入口（atlascode 域，atlascode→cli 合法消费边）。
+  - dev 面残留守：5 dev flag（--tools/--skills/--check/--e2e/--auth-help）当前
+    均无模型车道消费（--e2e = Ascend mock 探针非 gateway 面）；暂不接线，dev 面
+    将来消费模型车道时随该切片在此扩接线（cli.ts 头注同登记）。
+  - 交互 TUI 支经 tui/factory 同款装配（壳波 #152）；两入口进程内互斥（单入口
+    单进程），注入窗 = 模块态 setter 无冲突。
+- **裁定 G-α-2（headless 终态 result.result 文本双形状提取）**：G-α-1 修后 `-p`
+  通但 text 面 stdout 空 + stream-json `result.result` = ""——根因 = print.ts
+  `finalAssistantText` 闭包只读顶层 `m.content`，而引擎 queryOneRound 实产形 =
+  嵌套（content 在 `m.message.content`，loop.ts AssistantMessage 构造序，无顶层
+  content）→ 恒 undefined → result.result 恒空。修 = 闭包提为顶层导出
+  `extractFinalAssistantText`（print.ts），双形状提取（嵌套形 m.message.content
+  块数组 / 扁平形顶层 content 字符串+块数组）+ 末位 assistant 优先；判别单测
+  tests/unit/cli-headless-result-text.test.ts H-1..H-4（嵌套形 / 扁平形 / 末位胜 /
+  无文本→''）。
+- **G-α 真跑验收（2026-09-30）**：`echo "Say exactly: OK" | bun run
+  src/atlascode/cli.ts -p` → stdout `OK` · exit 0 · 真 LLM 往返（stream-json
+  面 assistant 事件 text='OK' + result subtype=success · num_turns=1 ·
+  result.result='OK' 复验）。#183 G-α 冒烟清单「真跑 ≥1」验收项闭环。
+
+**波终四件套（2026-09-30）**：tsc 0 / lint 0 error（380 warn = W4 基线不变）/
+bun test --isolate 3125/0/7483/189（基线 3121/7478/188 + cli-headless-result-text
+4 测试）/ build cli.js 2.33MB（+组合根接线 +result 提取面）。

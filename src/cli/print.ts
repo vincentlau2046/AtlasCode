@@ -447,6 +447,42 @@ function handleControlRequestLocal(
   }
 }
 
+/**
+ * headless 终态 result.result 文本提取（W3-3d G-α 修波，自 runHeadless 内
+ * finalAssistantText 闭包提为可测顶层面）：末位 assistant 消息优先，双形状
+ * 提取 text 块——
+ *   - 嵌套形（引擎 queryOneRound 实产形：content 在 m.message.content，无
+ *     顶层 content——loop.ts AssistantMessage 构造序）
+ *   - 扁平形（顶层 content 字符串/块数组——旧仓 transcript 回放形）
+ * G-α 真跑发现源：原闭包只读顶层 m.content → 引擎产物消息恒 undefined →
+ * result.result 恒 ""（-p text 面 stdout 空 / stream-json result.result 空）；
+ * 双形状提取由 tests/unit/cli-headless-result-text.test.ts（H-1..H-4）锁定。
+ */
+export function extractFinalAssistantText(loopResult: AgentLoopResult): string {
+  const contentOf = (m: AgentLoopResult['messages'][number]): unknown => {
+    const msg = m.message as { content?: unknown } | undefined
+    return m.content !== undefined ? m.content : msg?.content
+  }
+  for (let i = loopResult.messages.length - 1; i >= 0; i--) {
+    const m = loopResult.messages[i]
+    if (m.role === 'assistant') {
+      const content = contentOf(m)
+      if (typeof content === 'string') return content
+      if (Array.isArray(content)) {
+        const text = content
+          .filter(
+            (block: { type?: string; text?: string }) =>
+              block.type === 'text' && typeof block.text === 'string',
+          )
+          .map((block: { text: string }) => block.text)
+          .join('')
+        if (text) return text
+      }
+    }
+  }
+  return ''
+}
+
 // ── 驱动主体 ─────────────────────────────────────────────────────────
 
 export async function runHeadless(
@@ -732,32 +768,11 @@ export async function runHeadless(
     }
   }
 
-  const finalAssistantText = (loopResult: AgentLoopResult): string => {
-    for (let i = loopResult.messages.length - 1; i >= 0; i--) {
-      const m = loopResult.messages[i]
-      if (m.role === 'assistant') {
-        const content = m.content
-        if (typeof content === 'string') return content
-        if (Array.isArray(content)) {
-          const text = content
-            .filter(
-              (block: { type?: string; text?: string }) =>
-                block.type === 'text' && typeof block.text === 'string',
-            )
-            .map((block: { text: string }) => block.text)
-            .join('')
-          if (text) return text
-        }
-      }
-    }
-    return ''
-  }
-
   const buildResultMessage = (
     loopResult: AgentLoopResult,
     isError: boolean,
   ): SDKMessage => {
-    const resultText = finalAssistantText(loopResult)
+    const resultText = extractFinalAssistantText(loopResult)
     return {
       type: 'result',
       subtype: loopResult.terminated ? 'success' : 'error_max_turns',

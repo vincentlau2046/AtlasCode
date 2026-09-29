@@ -9,8 +9,23 @@
  *
  * 裁定（S-C1 保留）：TUI 默认启动支归 launcher 薄壳（#152 壳波），不经 bin。
  * 基线移位登记：dist/cli.js 由 0 bytes 占位转真内容（四件套 build 项口径）。
+ *
+ * W3-3d G-α 修波（§8.74.16 G）：主面交接前组合根接线（getCoreDependencies
+ * lazy 单例）。缺此步时 modelprovider EndpointConfigSource 窗口停默认空
+ * stub（roles.ts emptyEndpointConfigSource）→ role 池恒空 → "No models
+ * configured for role ... (empty pool)" 假阴性（~/.atlas/settings.json 已配
+ * modelRoles/providers 也读不到）——G-α 真跑首跑发现。组合根 ①-⑨ 全步覆盖
+ * executor port / hooks bootstrap（runHooks fail-fast 面）/ permissions /
+ * sandbox access / settings 面（旧仓语义 = headless 在完全接线进程内运行；
+ * 交互 TUI 支经 tui/factory 同款装配，本支 = atlascode/compose 消费面）。
+ * 落位壳入口（atlascode 域）而非 cli 公共域分派：cli allow 面不含
+ * atlascode（公共层不反向依赖壳，eslint boundaries/element-types 硬约束）。
+ * dev 面（--tools/--skills/--check/--e2e/--auth-help）暂不接线：现 5 flag
+ * 均无模型车道消费（--e2e = Ascend mock 探针非 gateway 面）；dev 面将来
+ * 若消费模型车道，随该切片在此扩接线（残留守登记）。
  */
 import { enforceNoDebugGuard, hasDevFlag, main, runDevCli } from '../cli'
+import { getCoreDependencies } from './compose'
 
 async function binMain(): Promise<void> {
   enforceNoDebugGuard()
@@ -19,6 +34,7 @@ async function binMain(): Promise<void> {
     await runDevCli()
     return
   }
+  getCoreDependencies()
   await main()
 }
 
