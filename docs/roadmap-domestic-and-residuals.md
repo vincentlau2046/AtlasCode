@@ -139,8 +139,10 @@ G-α 后：W-opt（国产替代优化波，DSH/PI 研读 + §1 八项实施，�
 - 门禁：四件套 + 新探针全绿（P-2 端点可用态）
 
 **W4 全量 lint 复原（殿后）**
-- 4a 5 真体启用（eslint.config.mjs severity 翻启）/ 4b 重燃错误处置（照 1.6 策略：修 vs 登记延后）/ 4c 新 lint 基线锁定（测试基线文档同步）
-- 门禁：lint = 新基线（启用规则下 0 error）+ 四件套
+- 4a 5 真体启用（eslint.config.mjs tui 桶 5 规则 severity 翻 error）/ 4b 重燃错误处置（照 1.6 策略：修 vs 登记延后）/ 4c 新 lint 基线锁定（测试基线文档同步）
+- **重燃面实测（W1-1.6，2026-09-29，W2 删码前口径）**：5 真体启用 = **211 errors**（非文档旧称"1483 基线"——1483 是 14 条豁免规则全开口径，W4 范围仅 5 真体；§8.73 旧措辞订正）：no-sync-fs **149**/39 文件（大头集中 utils 层：fsOperations 30 / config 17 / plugins 17 / pidLock 10 / file 8 / git 7…）+ no-process-exit **54**/6 文件（main.tsx 独占 47 = CLI 出口分发层）+ no-process-env-top-level **8**/7 文件（逐点可修）；no-cross-platform-process-issues 与 no-lookbehind-regex **0 命中**
+- **策略（W2 删码后重测缩面再定终局）**：no-process-env-top-level 8 + no-process-exit 非 main.tsx 6 处 = 低成本修；main.tsx 47 = CLI 合法出口（登记延后逐站点 eslint-disable 带 owner 注 或 抽 exit 助手）；no-sync-fs 大头 = **不改写 sync→async（行为零改动纪律）**，按文件登记 legacy-debt 豁免（逐文件 eslint-disable 带注，W-opt 波再议）；W2 删掉的 tui 重复本体（BashTool 4 / AgentTool 等）自带重燃点随之消失，W4 终局数 < 211
+- 门禁：lint = 新基线（启用 5 规则下 0 error，豁免全部带 owner 注）+ 四件套
 
 **W5 发布工具链收口 + G-α**
 - 5a 版本初始化（SemVer + 注解 tag；需 P-1 远端）→ **解除 no-push 规则** / 5b README + 冒烟清单（settings.json 三角色模型池配置 / `--help` / headless `-p` 一轮 / TUI 启动 + 交互一轮）/ 5c G-α 全绿门禁 → **v0.1.0 注解 tag + push + GitHub Release（alpha，内部）**
