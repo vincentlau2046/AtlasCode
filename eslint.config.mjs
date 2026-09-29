@@ -61,6 +61,13 @@ const ELEMENTS = [
   // CLI 不属于任何壳；壳（atlascode/ + 未来 atlasoffice/）降消费方；不塞
   // shared（叶子域纪律：CLI 面需消费 engine 根门面））
   { type: "cli", pattern: "src/cli", mode: "folder" },
+  // §8.72 TUI 壳波 Slice A：tui 新顶层域（旧仓 UI 闭包 C-7 原样搬落位，
+  // 镜像旧 UI 布局：components/utils/hooks(React)/services/screens/ink/
+  // context/state/keybindings/commands/constants/native-ts；与 new src/hooks
+  // 〔域 hooks〕/src/state 〔B13〕命名隔离，勿混）。allow 面 Slice A 仅
+  // [shared]（native-ts 纯 TS port 零内部 import）；Slice B/C 跨域重映射
+  // （engine/permissions/modelprovider/bootstrap/…）随切片头注扩 allow 登记。
+  { type: "tui", pattern: "src/tui", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
 ];
 
@@ -209,6 +216,17 @@ export default tseslint.config(
                 "shared", "bootstrap", "engine", "permissions",
                 "remote", "mcp", "hooks", "modelprovider", "swarm",
               ],
+            },
+            // tui (§8.72 TUI 壳波 Slice A): TUI 域 — 旧仓 UI 闭包 C-7 原样搬
+            // （React/Ink 渲染层 + screens + 组件树）。Slice A 落位时域内仅
+            // npm 外部依赖（native-ts 纯 TS port）→ allow=[shared]；Slice B/C
+            // 跨域重映射（engine 根门面/permissions/modelprovider/bootstrap/
+            // mcp/memory/remote/swarm/task/lsp…）随切片头注扩 allow 登记。
+            // 壳消费边（atlascode→tui）Slice D 随 launcher/mount 接线扩
+            // atlascode allow 面登记。
+            {
+              from: "tui",
+              allow: ["shared"],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
