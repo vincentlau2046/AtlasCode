@@ -331,6 +331,9 @@ export {
   autoCompactIfNeeded,
   AUTOCOMPACT_BUFFER_TOKENS,
   MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES,
+  // F-B3（S-4）：补齐兄弟错误常量 re-export（engine/context 两枚同族常量，
+  // 原根门面仅导 USER_ABORT，NOT_ENOUGH_MESSAGES 面缺 → 一致性轴订正）
+  ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
   ERROR_MESSAGE_USER_ABORT,
   COMPACT_MAX_OUTPUT_TOKENS,
   compactConversation,
