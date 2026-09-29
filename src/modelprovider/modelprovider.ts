@@ -17,7 +17,7 @@ import { randomUUID } from 'crypto'
 import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
-import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig } from '../shared'
+import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig, type Tools } from '../shared'
 import { logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
@@ -59,6 +59,10 @@ export interface ModelProvider {
     signal?: AbortSignal
     options?: any
     openaiParams?: any
+    // W3-3d（§8.74.20）：工具 schema 注入面（shared Tool[] → buildOpenAITools
+    // OpenAI function schema；未传 = tools 键不出现，窄 spine 缺省行为不变。
+    // 消费方 = engine queryOneRound 活链（活探针 H6 揭出的未登记缺面））。
+    tools?: Tools
     // D-5b（S-4，§8.73.2）：headless 真消费三槽——thinkingConfig → buildOpenAIParams
     // effort 派生；responseFormat = 结构化输出（toResponseFormat 产物 → response_format）；
     // fallbackModel = role 池末位（getRoleModels 追加）。未传 = 窄 spine 缺省，行为不变。
@@ -143,6 +147,10 @@ export class OpenAIProvider implements ModelProvider {
     signal?: AbortSignal
     options?: any
     openaiParams?: any
+    // W3-3d（§8.74.20）：工具 schema 注入面（shared Tool[] → buildOpenAITools
+    // OpenAI function schema；未传 = tools 键不出现，窄 spine 缺省行为不变。
+    // 消费方 = engine queryOneRound 活链（活探针 H6 揭出的未登记缺面））。
+    tools?: Tools
     thinkingConfig?: ThinkingConfig
     responseFormat?: unknown
     fallbackModel?: string
@@ -174,6 +182,9 @@ export class OpenAIProvider implements ModelProvider {
             {
               messages: args.messages ?? [],
               systemPrompt: (args.systemPrompt ?? asSystemPrompt([])) as SystemPrompt,
+              // W3-3d（§8.74.20）：工具 schema 面透传（buildOpenAITools 消费；
+              // 未传 = params.tools 键不出现，零行为）。
+              tools: args.tools,
               // D-5b（S-4）：thinkingConfig 真消费（effort 派生：enabled+budget →
               // mapBudgetToEffort；否则回落 options.effortValue / 模型缺省）。
               thinkingConfig: args.thinkingConfig,

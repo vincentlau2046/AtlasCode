@@ -121,6 +121,19 @@ export function toOpenAIMessages(messages: any[]): any[] {
 }
 
 /** Build OpenAI function-tool schemas from Atlas Tool objects. */
+/**
+ * W3-3d（§8.74.20）：zod v4 实例判别（legacy Tool.inputSchema 形态）。
+ * zod v4 实例暴露内部 `_zod` 对象（toJSONSchema 读 `schema._zod.def`）；
+ * 纯 JSON schema（新 shared Tool 契约）无此属性 → 原样透传。
+ */
+function isZodV4Instance(x: unknown): boolean {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    typeof (x as Record<string, unknown>)._zod === 'object'
+  )
+}
+
 async function buildOpenAITools(
   tools: Tools,
   options: any,
@@ -146,7 +159,12 @@ async function buildOpenAITools(
       'inputJSONSchema' in tool && tool.inputJSONSchema
         ? tool.inputJSONSchema
         : tool.inputSchema
-          ? (zodToJsonSchema(tool.inputSchema as any) as any)
+          // W3-3d（§8.74.20）：双形 schema 面——legacy zod 实例 → 转换；
+          // 新 shared Tool 纯 JSON schema（ToolInputJSONSchema）原样使用
+          // （zodToJsonSchema 对非 zod 输入抛 TypeError，活探针 H6 揭出）。
+          ? (isZodV4Instance(tool.inputSchema)
+              ? (zodToJsonSchema(tool.inputSchema as any) as any)
+              : (tool.inputSchema as unknown as Record<string, unknown>))
           : { type: 'object', properties: {} }
     let desc: string
     try {

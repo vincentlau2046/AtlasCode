@@ -12,6 +12,9 @@
  *     maxTurns 守卫 + pre-turn autoCompactIfNeeded + terminal=无 tool_use）。
  *   - 工具执行已抽到 engine/pipeline（T-2）：本文件只管 LLM + 消息装配 + 轮次调度，
  *     工具链单一事实源在 pipeline。
+ *   - 工具 schema 注入面 W3-3d 已落（§8.74.20）：queryOneRound → modelProvider
+ *     .chat tools 槽（shared Tool[] → buildOpenAITools）；活探针揭出的未登记
+ *     缺面补位（H6）。
  *   - 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（runHooksStream，
  *     §8.40 S-5b 前向接缝登记，防 H6 死接缝）/ 错误恢复（E-1b-full）/
  *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
@@ -230,6 +233,12 @@ export async function queryOneRound(
     // D-5b（S-4）：headless 5 选项 + --effort 真消费透传（引擎面 → LLM 调用）。
     // effortValue 经 options 槽（buildOpenAIParams 读 options.effortValue）；
     // 未设任一 = 字段 undefined，窄 spine 缺省行为不变。
+    // W3-3d（§8.74.20）：工具 schema 注入面（shared Tool[] → modelprovider
+    // buildOpenAITools → OpenAI function schema）。H6 登记：本面此前缺位——
+    // fixture replay 纪律（脚本化 provider 直接发 tool_use 块）从未向真 LLM
+    // 送过 schema，活探针（W3-3d G-α）揭出；未传/空集 = params.tools 键不
+    // 出现，窄 spine 缺省不变。
+    tools: tools.length > 0 ? tools : undefined,
     systemPrompt: deps.systemPrompt,
     thinkingConfig: deps.thinkingConfig,
     responseFormat: deps.responseFormat,
