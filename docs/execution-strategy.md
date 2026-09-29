@@ -5927,3 +5927,52 @@ engine 模块态单源化）。任一不满足 → W3。
 **四件套**：本切片 = 裁定记录零代码 → 继承 pilot 基线（tsc 0 / lint 0 error 380 warn
 / build 801 模块 2.16MB / 全量 3103 pass·0 fail·7413 expect·185 文件 + CI gate
 6·0·5·2，零新测），不独立重跑（零代码切片先例）。
+
+#### 8.74.14 W3-3a engine emit 槽 + TUI 事件适配层实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+§8.74.6「3a engine 扩面：AgentLoopDeps.emit? 可选槽（不注入 = 零行为）+ 事件
+适配层」的执行裁定：
+
+**engine 面（src/engine/query/loop.ts）**：
+1. **AgentLoopEvent 轮粒度事件族**（5 型）：loop_start{messageCount} / compacted
+   {turn, messages(post-compact 全序列)} / round_start{turn} / round_end{turn,
+   result, assistantMessage, toolResultMessages} / loop_end{result}。发射点 =
+   queryAgentLoop 驱动层（queryOneRound 单轮 API 不发射 = H6 登记：单轮直调方
+   如需事件 = 自包驱动层）。
+2. **AgentLoopDeps.emit? 可选槽**：未注入 = 全 no-op（headless print.ts 不注入
+   = 现状零变化，窄 spine 语义不变）。**emit 同步观察者契约**：不 catch 不吞
+   （抛 = 观察方 bug，传播；适配层入队不抛）。
+3. **round_end 载荷派生不变式**：queryOneRound 构造序 [...入参, assistantMsg,
+   ...resultMessages]（resultMessages 长度 = toolResults 长度）→ 驱动层以
+   roundInputLen = 轮前 messages.length 派生 assistantMessage =
+   lastRound.messages[roundInputLen] / toolResultMessages = slice(+1)（判别单测
+   ②③ 锁定）。
+4. **类型面坑（H6 登记）**：engine 根门面 re-export 的 `Message` = session 域
+   窄形（timestamp string），loop 事件载荷 = shared 宽形（timestamp
+   string|number）——两型不可混用；适配层经 `src/shared` 取 Message 事实源。
+
+**TUI 面（src/tui/loopEvents.ts 新建，零活消费者 = W3-3b 前向接缝）**：
+5. **queryEngineLoopStream(deps, args) 异步生成器**：同步 emit 回调 → 通知队列
+   桥 → 重放 `stream_request_start` + Message 族；generator return =
+   AgentLoopResult。事件族映射裁定（H6 登记）：loop_start/loop_end 不入流
+   （启动 = 首 yield / 终态 = return）；compacted → 仅重放 messages[0]（压缩
+   边界 marker，TUI isCompactBoundaryMessage 渲染面；摘要/保留段不入流，内容
+   已在上下文，展示面 3b 再裁）；round_end → assistantMessage + toolResult-
+   Messages（terminal 轮 = 仅 assistant）。
+6. **per-token 流式面 = W-opt 残留守**（engine 不引入 chatStream，§8.74.2 既定）
+   ——本面 = 轮粒度重放（assistant 消息整条到达，非逐 token），G-α 冒烟探针
+   断言 = tool_use 渲染 + 结果消息 + 续轮可输入（§8.74.4），轮粒度满足。
+
+**判别单测（tests/unit/engine-loop-emit.test.ts，8 测/31 断言）**：未注入零
+行为（①）/ 发射顺序 + 载荷核验 + 终态同引用（②）/ 压缩边界事件序 + 载荷（③）/
+emit 抛传播（④）/ 适配层流族重放 + uuid 序（⑤）/ .next() 尾态 return（⑥）/
+错误重抛（⑦）/ 压缩 marker 重放（⑧）。harness = engine-multi-round 同形本地
+拷贝（scripted LLM 按轮次返不同 completion，非 tautology）。
+
+**四件套**：tsc 0 / lint 0 error（380 warn 基线不变，新文件 0 warn）/ build
+801 模块 2.17MB / 全量 **3111 pass·0 fail·7444 expect·186 文件**（= 2b 基线
++8 新测 +1 文件，零回归）+ CI gate 6·0·5·2。
+**3b 输入**：REPL onQueryImpl `for await (event of query(...))` 面替换为
+queryEngineLoopStream（五件套 #1）+ createAgentLoopDeps 单组合根（#2）+
+canUseTool → engine createPermissionGate（#4）+ Terminal 映射（generator
+return AgentLoopResult → REPL Terminal 型）。

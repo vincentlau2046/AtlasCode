@@ -16,6 +16,7 @@ export {
   DEFAULT_AGENT_LOOP_MAX_TURNS,
   ask,
   type AgentLoopDeps,
+  type AgentLoopEvent,
   type AgentRoundResult,
   type AgentLoopContextConfig,
   type AgentLoopArgs,

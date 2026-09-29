@@ -81,10 +81,41 @@ export interface LoopTranscriptSink {
   recordContentReplacement?(replacements: readonly ContentReplacementRecord[]): Promise<void>
 }
 
+/**
+ * W3-3a（§8.74.2/§8.74.14）：loop 事件发射面 — 轮粒度事件族（assistant 消息 /
+ * tool result 消息 / 压缩边界 / 终态）。per-token 流式面 = W-opt 残留守
+ * （streaming chatStream 不入引擎面，§8.74.2 裁定；本面只重放轮粒度契约，
+ * TUI 侧事件适配层消费 = src/tui/loopEvents.ts）。
+ *
+ * 发射点 = queryAgentLoop 驱动层（queryOneRound 单轮 API 不发射，H6 登记：
+ * 单轮直调方如需事件 = 自包驱动层）；emit 同步观察面（适配器入队不抛；
+ * 抛 = 观察方 bug，传播语义 = 同步观察者契约，不 catch 不吞）。
+ */
+export type AgentLoopEvent =
+  | { type: 'loop_start'; messageCount: number }
+  | { type: 'compacted'; turn: number; messages: Message[] }
+  | { type: 'round_start'; turn: number }
+  | {
+      type: 'round_end'
+      turn: number
+      result: AgentRoundResult
+      /** 本轮 assistant 消息对象（tui Message 同形，适配层直接消费）。 */
+      assistantMessage: AssistantMessage
+      /** 本轮 tool_result 消息族（顺序 = toolResults 顺序；terminal 轮 = 空族）。 */
+      toolResultMessages: Message[]
+    }
+  | { type: 'loop_end'; result: AgentLoopResult }
+
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
   role: ModelRole
   signal?: AbortSignal
+  /**
+   * W3-3a（§8.74.2）：loop 事件发射槽（未注入 = 不发射，headless 行为零改动，
+   * 窄 spine 语义不变）。TUI 活链路接线（W3-3b）经 src/tui/loopEvents.ts
+   * 适配层注入；headless print.ts 不注入 = 现状零变化。
+   */
+  emit?: (event: AgentLoopEvent) => void
   /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
   checkPermission?: PermissionGate
   /**
@@ -308,6 +339,9 @@ export async function queryAgentLoop(
     await deps.transcript.record(messages)
   }
 
+  // W3-3a（§8.74.14）：loop 事件发射面（未注入 emit = 全 no-op，零行为）
+  deps.emit?.({ type: 'loop_start', messageCount: messages.length })
+
   while (turns < maxTurns) {
     turns++
     // pre-turn 压缩（未注入 context = 跳过，窄 spine 语义）
@@ -358,9 +392,25 @@ export async function queryAgentLoop(
         // 永不跳闸——超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用。
         tracking = { ...tracking, consecutiveFailures: oc.consecutiveFailures }
       }
+      if (oc.wasCompacted && oc.compactionResult) {
+        // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
+        deps.emit?.({ type: 'compacted', turn: turns, messages })
+      }
     }
+    deps.emit?.({ type: 'round_start', turn: turns })
+    const roundInputLen = messages.length
     lastRound = await queryOneRound(deps, tools, messages)
     messages = lastRound.messages
+    // W3-3a：轮末事件（assistant 消息 + tool result 消息族，派生不变式 =
+    // queryOneRound 构造序 [...入参, assistantMsg, ...resultMessages]，
+    // resultMessages 长度 = toolResults 长度）。
+    deps.emit?.({
+      type: 'round_end',
+      turn: turns,
+      result: lastRound,
+      assistantMessage: lastRound.messages[roundInputLen] as AssistantMessage,
+      toolResultMessages: lastRound.messages.slice(roundInputLen + 1),
+    })
     if (lastRound.toolResults.length === 0) {
       // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
       // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
@@ -381,5 +431,8 @@ export async function queryAgentLoop(
     }
   }
 
-  return { messages, turns, terminated, tracking, lastRound }
+  const result: AgentLoopResult = { messages, turns, terminated, tracking, lastRound }
+  // W3-3a：终态事件（适配层 = generator return 面）
+  deps.emit?.({ type: 'loop_end', result })
+  return result
 }
