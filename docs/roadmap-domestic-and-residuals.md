@@ -48,10 +48,11 @@
 
 ### R1 — E-wave-end 审计 + 架构收敛波（地基，最高优先）
 - **范围**（= §8.73 残口"engine spine vs tui orchestrator 去重" + 全量 lint 复原波）：
-  1. **双工具面去重**：`src/tui/tools.ts`（tui 自持 `getAllBaseTools`）+ `src/tui/Tool.ts`（自有 Tool 契约）vs `src/engine/tools/`（49 本体，render 成员裁到字符串/null 面）——裁定**生产单一事实源**，engine 工具对象接 tui 渲染路由，删双份。
+  1. **双工具面去重**：**两套完整注册表**——`src/tui/tools/`（**181 文件/44k 行**自带本体 + 真 React 渲染成员，C-7 原样搬，实测 **0 import engine**）vs `src/engine/tools/`（49 本体，render 成员裁到字符串/null 面，引擎 DI 架构，经 3055 测保真）——裁定**生产单一事实源**（建议：engine 为行为事实源 + tui 渲染路由接 engine 工具对象，收敛为"一套本体 + 一层渲染"），删双份。
   2. **engine spine vs tui orchestrator 运行体去重**（12K 行级）：`src/tui/` orchestrator 运行体 vs `src/engine/query+pipeline` 去重，单一 loop 事实源。
   3. **bootstrapState 187 双份**：`src/tui/bootstrapState.ts`（187 全量副本）vs 新 `bootstrap` 域 54 导出——去重，单源。
   4. **全量 lint 复原波**：D-4b 5 真体（no-process-exit/no-sync-fs/no-cross-platform-process-issues/no-lookbehind-regex/no-process-env-top-level）从"已注册未启用"翻 severity 启用 + 处置重燃的 1483-error 基线（保 quartet 0-error 语义，非清零后放任）。
+  5. **TUI 交互活链路实施 + 端到端验真**（去重后的落地）：接 TUI 交互 loop（输入 prompt → LLM → tool_use 真执行 → 结果在 TUI 渲染 → 续轮）+ PTY func/gelu 探针固化——**这是实施量，非纯验证**。
 - **国产替代钩子**：去重后单一 loop/工具面，是 §1"子代理/编排 多后端"（DSH subagent）与"依赖面收敛"的落点地基。
 - **验收**：四件套全绿 + gate 6·0·5·2 + 探针（删双份后旧路径引用 0 命中）+ lint 复原基线锁定。
 
@@ -96,15 +97,15 @@
 **现状盘点（3055/0/182 + gate 6·0·5·2）**：
 - ✅ 引擎完善：agent loop / 49 工具本体 / skill / session / hooks / 权限 / auto-mode / scheduler / swarm / LSP / MCP(stdio) / Web
 - ✅ CLI headless（-p / stream-json / 高频 5 选项 + effort）活探验真（gelu 探针）
-- ✅ TUI 闭包已搬（C-7）+ 启动验真（PTY：模型配置→写 settings→**REPL banner + 输入框**）
-- ❌ **TUI 交互全链未验**：输入 prompt → 真 LLM → tool_use → 执行 → 结果渲染 → 续轮（Slice E 只验到 banner/输入框，**未验完整 tool 执行回合**）
-- ❌ **双工具面未去重**（R1）：`src/tui/tools.ts`（自持 `getAllBaseTools`）vs `src/engine/tools/`（49 本体）——**交互式 TUI 的工具执行面 vs CLI headless 的 engine 面，尚未裁定单一事实源**；发布前必须收敛（否则交互面与 headless 面行为漂移）
+- ⚠️ **TUI 渲染 = 已移植但活链路未接**（勿误判"整个 TUI 没做"）：
+  - ✅ 渲染**本体/组件已实施**：`src/tui/tools/` **181 文件 / 44008 行**自带工具本体（C-7 整体搬入），`renderToolUseMessage`/`renderToolResultMessage` 是**真 React 渲染成员**（`BashTool/UI.tsx` 等，非 engine 的 `() => null` 面）；启动已 PTY 验真到 REPL（banner + 输入框）。
+  - ❌ **交互活链路未落地**：① "输入 prompt → LLM → tool_use → 真执行 → 结果渲染 → 续轮"整回合**从未端到端验真**（Slice E 只验到 REPL 可达，非完整 tool 回合）；② **双工具面 = 两套完整注册表未去重**（R1 实质）：`src/tui/tools/`（181/44k，真 React 渲染，C-7 原样搬，**实测 0 import engine/tools**）vs `src/engine/tools/`（49 本体，render 裁 null/字符串面，引擎 DI 架构，**经 3055 测保真**）——**只有 engine 那套经保真测试，tui 这套原样搬、没接引擎 DI、没验**；发布前必须收敛（否则交互面与 headless 面行为漂移）。
 - ❌ **分发工具链缺失**：AtlasCode 现**无 git remote**（本地 master，330 提交不 push）/ 仅波 tag（wave-a/b/c/f，**SemVer 未初始化**，memory 版本管理方案"一次性初始化待执行"未做）/ 无安装脚本 / 无自升级命令
 - ⚠️ `[ATLAS-HOLD]` 56 行（IFF 网关端点）未换值——**非基础发布阻塞**：基础车道 = OpenAI 协议静态键，经 `settings.json` modelRoles / `ATLAS_*_MODEL` env 可接**任意 OpenAI-compatible 端点（含 DeepSeek 官方 OpenAI 兼容 API）**；D-9 只影响"国产默认端点"内置，不阻塞 alpha
 
 **发布门禁 G-α（0.1.0 内部 alpha）= 以下全绿方可发布**：
 1. **R1 波闭环**（双工具面去重 + 单 loop 事实源 + bootstrapState 187 去重 + 全量 lint 复原）——正确性前提
-2. **TUI 交互全链验真**：PTY 真 LLM 一轮（tool_use 真执行 Read/Write/Bash 之一 + 结果渲染 + 续轮），落 func/gelu 探针固化
+2. **TUI 活链路实施 + 双工具面去重 + 端到端验真**（= R1 的实施量，**非"只差验真"**）：裁定 tui/engine 双工具面单一事实源 → 接 TUI 交互活链路（真 LLM 一轮：tool_use 真执行 Read/Write/Bash 之一 + 结果在 TUI 渲染 + 续轮）→ PTY func/gelu 探针固化
 3. **版本管理初始化**（memory 版本方案：master 主干 + SemVer + 注解 tag + **GitHub 渠道 only**）：`v0.1.0` 注解 tag + 远端仓库建立
 4. **安装/升级/迭代工具链**：
    - `install.sh` 一键：git clone → pnpm install → build（dist/cli.js，798 模块）→ link `atlas` 入 PATH（~/.atlas/bin）
@@ -115,7 +116,7 @@
 
 **门禁序列**：
 ```
-现在 ──→ R1（E-wave-end 架构收敛）──→ TUI 交互全链验真 ──→ 版本初始化 + install.sh + atlas update
+现在 ──→ R1（E-wave-end 架构收敛：双工具面去重 + TUI 活链路实施+验真 + bootstrapState + lint 复原）──→ 版本初始化 + install.sh + atlas update
         （R0 发布准备 3/4 项可与 R1 并行，无代码面冲突）
                 ───────────────────────────────────────────→ G-α 0.1.0 alpha（内部）
 G-α ──→ R2（D-3 Ascend 实挂载）+ R3（D-9 换值）──→ G-β 1.0 外部（国产默认端点 + NPU 差异化域）
@@ -123,8 +124,8 @@ G-α ──→ R2（D-3 Ascend 实挂载）+ R3（D-9 换值）──→ G-β 1.
 ```
 
 **结论（回答"哪个环节可发布"）**：
-- **现在不可发布**：交互全链未验 + 双工具面未去重 + 分发工具链三缺（remote/SemVer/install+update 全未做）。
-- **可发布环节 = R1 闭环 + 3 项发布准备（TUI 交互验真 / 版本初始化 / 安装升级工具链）完成 = G-α 0.1.0 alpha**；按既往波节奏（单波 5–12 提交）R1 + 发布准备 ≈ 1–2 波量级，**并行 R0 准备项可压缩到 R1 同期收尾**。
+- **现在不可发布**：TUI 交互活链路未落地（渲染本体已移植但活链路没接没验）+ 双工具面（两套完整注册表）未去重 + 分发工具链三缺（remote/SemVer/install+update 全未做）。
+- **可发布环节 = R1（双工具面去重 + TUI 活链路实施 + 端到端验真 + bootstrapState 去重 + 全量 lint 复原）闭环 + 2 项发布准备（版本初始化 / 安装升级工具链）完成 = G-α 0.1.0 alpha**。⚠️ **量级提醒**：R1 含 TUI 活链路实施（非纯验证）+ 双工具面收敛，比"R1 + 验真"预估大，建议 **R1 单独立波（≥1 波）+ 并行 R0 发布准备**，不塞进"1–2 波压缩"乐观口径。
 - **外部 1.0（G-β）等 D-9（IFF 换值）+ D-3（Ascend）**；alpha 阶段用 OpenAI-compatible 车道（settings.json 配端点 + 静态键）即可真用，不阻塞。
 
 ---
