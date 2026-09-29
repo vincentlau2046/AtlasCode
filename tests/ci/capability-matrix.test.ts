@@ -26,6 +26,11 @@ type MatrixRow = {
     | 'bootstrap'
     | 'permissions'
     | 'hooks'
+    // 跨域去重债登记行专用域（F-S2-1 · S-4）：engine↔tui orchestrator 双份 /
+    // ascend 六件套↔占位双份 = 跨 8 业务域的去重债务，归 E-wave-end / D-3。
+    // 仅扩展行 domain 取值面，不加入下方 DOMAINS 必需集（8 业务域规约不变）。
+    | 'engine'
+    | 'ascend'
   capability: string
   status: 'done' | 'missing'
   /** done：证明测试文件（仓内相对路径） */
@@ -202,6 +207,17 @@ const MATRIX: readonly MatrixRow[] = [
   { domain: 'executor', capability: '组合根装配链执行命令（getCoreDependencies 注入后真 spawn + 真盘读回）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
   { domain: 'sandbox', capability: '组合根构造 sandbox manager（placeholder runtime 禁用态 + port 链）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
   { domain: 'memory', capability: '组合根写后读 memory（真 fs 写 + 只读 store 读，§8.13 L-1）', status: 'done', proof: 'tests/func/b6-func-smoke.test.ts' },
+  // ── F-S2-1 · S-4：跨域去重债 3 组登记行（#154 保真/一致性审「重复台账 3 组」兑现
+  // 「能力矩阵登记双份」，D-7 明文；缺失则去重债无声失踪 = H6 防空洞）──
+  // 组 1（D-2a，§8.73）：engine 域 vs tui orchestrator 12K 运行体双份；追齐度表
+  // 33 名 tui 消费面 22/33 [GAP]（tui 100% 依赖 orchestrator，切端非本波量级）。
+  { domain: 'engine', capability: 'orchestrator 双份去重（engine 域 vs tui orchestrator 12K 运行体，D-2a 追齐度表 22/33 [GAP]）', status: 'missing', by: 'E-wave-end engine-dedup 波（engine 旧 API 面扩展独立波，#154 排除登记；§8.73 D-2a/D-2）' },
+  // 组 2（D-3，§8.73）：ascend 域 9 占位 vs tui core/executor Ascend 执行器六件套
+  // 双份；C-7 六件套实挂载 + engine DomainPackage 注册面 + mount.ts 实挂载 + gelu S5。
+  { domain: 'ascend', capability: 'Ascend 执行器六件套去重（ascend 域 9 占位 vs tui core/executor 六件套实挂载，D-3 独立实施波）', status: 'missing', by: 'D-3 Ascend 独立实施波（C-7 六件套实挂载 + engine DomainPackage 注册面 + mount.ts 实挂载 + gelu S5；§8.73 D-3）' },
+  // 组 3（D-7，§8.73）：tui 本地 bootstrapState 187 副本 vs bootstrap 域 57 双份；
+  // 统一 = bootstrap 域 57→187 扩面 + 依赖方向变更（与 D-2 同类，非本波量级）。
+  { domain: 'bootstrap', capability: 'bootstrapState 双份去重（tui 本地 187 副本 vs bootstrap 域 57，D-7 保留双份 + 登记）', status: 'missing', by: 'E-wave-end 审计（bootstrap 域 57→187 扩面 + 依赖方向变更，与 D-2 同类，非本波量级；§8.73 D-7）' },
 ]
 
 const DOMAINS = new Set<MatrixRow['domain']>([
