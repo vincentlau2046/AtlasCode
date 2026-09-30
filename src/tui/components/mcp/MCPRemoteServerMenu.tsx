@@ -1,7 +1,13 @@
+// G-3（§8.74.28 ⑫ MCP 菜单留通用面裁 claude.ai 2 支）: 本菜单的
+// claude.ai connectors 浏览器认证流（'claudeai-auth' / 'claudeai-clear-auth'
+// 两菜单支 + 对应视图/状态/handler，经 CLAUDE_AI_ORIGIN/settings/connectors）
+// 已整裁——通用面保留（Stdio/Remote/Agent 三菜单、通用 OAuth 流、
+// reconnect、enable/disable、tools 查看）。claudeai-proxy 型仍存于 TUI
+// 型面（⑩ 裁定），但菜单不再为其提供认证选项（守卫 + 前向缝登记，
+// 见 handleAuthenticate / handleClearAuth / menuOptions 注释）。
 import figures from 'figures';
 import React, { useEffect, useRef, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
-import { getOauthConfig } from '../../constants/oauth.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { setClipboard } from '../../ink/termio/osc.js';
@@ -13,7 +19,6 @@ import { clearServerCache } from '../../services/mcp/client.js';
 import { useMcpReconnect, useMcpToggleEnabled } from '../../services/mcp/MCPConnectionManager.js';
 import { describeMcpConfigFilePath, excludeCommandsByServer, excludeResourcesByServer, excludeToolsByServer, filterMcpPromptsByServer } from '../../services/mcp/utils.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
-import { openBrowser } from '../../utils/browser.js';
 import { errorMessage } from '../../utils/errors.js';
 import { logMCPDebug } from '../../utils/log.js';
 import { capitalize } from '../../utils/stringUtils.js';
@@ -56,11 +61,7 @@ export function MCPRemoteServerMenu({
   const [authorizationUrl, setAuthorizationUrl] = React.useState<string | null>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const authAbortControllerRef = useRef<AbortController | null>(null);
-  const [isClaudeAIAuthenticating, setIsClaudeAIAuthenticating] = useState(false);
-  const [claudeAIAuthUrl, setClaudeAIAuthUrl] = useState<string | null>(null);
-  const [isClaudeAIClearingAuth, setIsClaudeAIClearingAuth] = useState(false);
-  const [claudeAIClearAuthUrl, setClaudeAIClearAuthUrl] = useState<string | null>(null);
-  const [claudeAIClearAuthBrowserOpened, setClaudeAIClearAuthBrowserOpened] = useState(false);
+  // G-3（§8.74.28 ⑫）: claude.ai auth/clear-auth 两支状态已裁（见文件头）。
   const [urlCopied, setUrlCopied] = useState(false);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const unmountedRef = useRef(false);
@@ -87,55 +88,8 @@ export function MCPRemoteServerMenu({
   // 2. It's connected and has tools (meaning it's working via some auth mechanism)
   const isEffectivelyAuthenticated = server.isAuthenticated || server.client.type === 'connected' && serverToolsCount > 0;
   const reconnectMcpServer = useMcpReconnect();
-  const handleClaudeAIAuthComplete = React.useCallback(async () => {
-    setIsClaudeAIAuthenticating(false);
-    setClaudeAIAuthUrl(null);
-    setIsReconnecting(true);
-    try {
-      const result = await reconnectMcpServer(server.name);
-      const success = result.client.type === 'connected';
-      if (success) {
-        onComplete?.(`Authentication successful. Connected to ${server.name}.`);
-      } else if (result.client.type === 'needs-auth') {
-        onComplete?.('Authentication successful, but server still requires authentication. You may need to manually restart AtlasHarness.');
-      } else {
-        onComplete?.('Authentication successful, but server reconnection failed. You may need to manually restart Atlas for the changes to take effect.');
-      }
-    } catch (err) {
-      onComplete?.(handleReconnectError(err, server.name));
-    } finally {
-      setIsReconnecting(false);
-    }
-  }, [reconnectMcpServer, server.name, onComplete]);
-  const handleClaudeAIClearAuthComplete = React.useCallback(async () => {
-    await clearServerCache(server.name, {
-      ...server.config,
-      scope: server.scope
-    });
-    setAppState(prev => {
-      const newClients = prev.mcp.clients.map(c => c.name === server.name ? {
-        ...c,
-        type: 'needs-auth' as const
-      } : c);
-      const newTools = excludeToolsByServer(prev.mcp.tools, server.name);
-      const newCommands = excludeCommandsByServer(prev.mcp.commands, server.name);
-      const newResources = excludeResourcesByServer(prev.mcp.resources, server.name);
-      return {
-        ...prev,
-        mcp: {
-          ...prev.mcp,
-          clients: newClients,
-          tools: newTools,
-          commands: newCommands,
-          resources: newResources
-        }
-      };
-    });
-    onComplete?.(`Disconnected from ${server.name}.`);
-    setIsClaudeAIClearingAuth(false);
-    setClaudeAIClearAuthUrl(null);
-    setClaudeAIClearAuthBrowserOpened(false);
-  }, [server.name, server.config, server.scope, setAppState, onComplete]);
+  // G-3（§8.74.28 ⑫）: handleClaudeAIAuthComplete /
+  // handleClaudeAIClearAuthComplete 随 claude.ai 两支裁除（见文件头）。
 
   // Escape to cancel authentication flow
   useKeybinding('confirm:no', () => {
@@ -148,43 +102,12 @@ export function MCPRemoteServerMenu({
     isActive: isAuthenticating
   });
 
-  // Escape to cancel Claude AI authentication
-  useKeybinding('confirm:no', () => {
-    setIsClaudeAIAuthenticating(false);
-    setClaudeAIAuthUrl(null);
-  }, {
-    context: 'Confirmation',
-    isActive: isClaudeAIAuthenticating
-  });
-
-  // Escape to cancel Claude AI clear auth
-  useKeybinding('confirm:no', () => {
-    setIsClaudeAIClearingAuth(false);
-    setClaudeAIClearAuthUrl(null);
-    setClaudeAIClearAuthBrowserOpened(false);
-  }, {
-    context: 'Confirmation',
-    isActive: isClaudeAIClearingAuth
-  });
-
+  // G-3（§8.74.28 ⑫）: claude.ai 两支的 Esc 取消键位 + Return 浏览器
+  // 确认流已裁（见文件头）。
   // Return key handling for authentication flows and 'c' to copy URL
   useInput((input, key) => {
-    if (key.return && isClaudeAIAuthenticating) {
-      void handleClaudeAIAuthComplete();
-    }
-    if (key.return && isClaudeAIClearingAuth) {
-      if (claudeAIClearAuthBrowserOpened) {
-        void handleClaudeAIClearAuthComplete();
-      } else {
-        // First Enter: open the browser
-        const connectorsUrl = `${getOauthConfig().CLAUDE_AI_ORIGIN}/settings/connectors`;
-        setClaudeAIClearAuthUrl(connectorsUrl);
-        setClaudeAIClearAuthBrowserOpened(true);
-        void openBrowser(connectorsUrl);
-      }
-    }
     if (input === 'c' && !urlCopied) {
-      const urlToCopy = authorizationUrl || claudeAIAuthUrl || claudeAIClearAuthUrl;
+      const urlToCopy = authorizationUrl;
       if (urlToCopy) {
         void setClipboard(urlToCopy).then(raw => {
           if (unmountedRef.current) return;
@@ -203,33 +126,23 @@ export function MCPRemoteServerMenu({
   // Count MCP prompts for this server (skills are shown in /skills, not here)
   const serverCommandsCount = filterMcpPromptsByServer(mcp.commands, server.name).length;
   const toggleMcpServer = useMcpToggleEnabled();
-  const handleClaudeAIAuth = React.useCallback(async () => {
-    const claudeAiBaseUrl = getOauthConfig().CLAUDE_AI_ORIGIN;
-    // No claude.ai OAuth account for domestic vendors (getOauthAccountInfo removed);
-    // always use the settings/connectors fallback URL.
-    const authUrl = `${claudeAiBaseUrl}/settings/connectors`;
-    setClaudeAIAuthUrl(authUrl);
-    setIsClaudeAIAuthenticating(true);
-    await openBrowser(authUrl);
-  }, [server.config]);
-  const handleClaudeAIClearAuth = React.useCallback(() => {
-    setIsClaudeAIClearingAuth(true);
-  }, []);
+  // G-3（§8.74.28 ⑫）: handleClaudeAIAuth / handleClaudeAIClearAuth 随
+  // claude.ai 两支裁除（见文件头）。
   const handleToggleEnabled = React.useCallback(async () => {
     const wasEnabled = server.client.type !== 'disabled';
     try {
       await toggleMcpServer(server.name);
-      if (server.config.type === 'claudeai-proxy') {
-      }
-
       // Return to the server list so user can continue managing other servers
       onCancel();
     } catch (err_0) {
       const action = wasEnabled ? 'disable' : 'enable';
       onComplete?.(`Failed to ${action} MCP server '${server.name}': ${errorMessage(err_0)}`);
     }
-  }, [server.client.type, server.config.type, server.name, toggleMcpServer, onCancel, onComplete]);
+  }, [server.client.type, server.name, toggleMcpServer, onCancel, onComplete]);
   const handleAuthenticate = React.useCallback(async () => {
+    // G-3（§8.74.28 ⑫）: claudeai-proxy 型（⑩ 裁定保留于 TUI 型面）不再走
+    // 通用 OAuth 认证流——菜单不再为其提供认证选项（守卫 + 前向缝登记：
+    // 回流 = claude.ai 账号面随 IFF 网关恢复）。
     if (server.config.type === 'claudeai-proxy') return;
     setIsAuthenticating(true);
     setError(null);
@@ -274,6 +187,7 @@ export function MCPRemoteServerMenu({
     }
   }, [server.isAuthenticated, server.config, server.name, onComplete, reconnectMcpServer, isEffectivelyAuthenticated]);
   const handleClearAuth = async () => {
+    // G-3（§8.74.28 ⑫）: claudeai-proxy 型守卫同 handleAuthenticate（见其注释）。
     if (server.config.type === 'claudeai-proxy') return;
     if (server.config) {
       // First revoke the authentication tokens and clear all auth state
@@ -314,7 +228,9 @@ export function MCPRemoteServerMenu({
     // XAA: silent exchange (cached id_token → no browser), so don't claim
     // one will open. If IdP login IS needed, authorizationUrl populates and
     // the URL fallback block below still renders.
-    const authCopy = server.config.type !== 'claudeai-proxy' && server.config.oauth?.xaa ? ' Authenticating via your identity provider' : ' A browser window will open for authentication';
+    // G-3（§8.74.28 ⑫）: claudeai-proxy 型到不了此视图（handleAuthenticate
+    // 守卫早退），旧 `!== 'claudeai-proxy'` 判半已裁。
+    const authCopy = server.config.oauth?.xaa ? ' Authenticating via your identity provider' : ' A browser window will open for authentication';
     return <Box flexDirection="column" gap={1} padding={1}>
         <Text color="brand">Authenticating with {server.name}…</Text>
         <Box>
@@ -354,79 +270,8 @@ export function MCPRemoteServerMenu({
         </Box>
       </Box>;
   }
-  if (isClaudeAIAuthenticating) {
-    return <Box flexDirection="column" gap={1} padding={1}>
-        <Text color="brand">Authenticating with {server.name}…</Text>
-        <Box>
-          <Spinner />
-          <Text> A browser window will open for authentication</Text>
-        </Box>
-        {claudeAIAuthUrl && <Box flexDirection="column">
-            <Box>
-              <Text dimColor>
-                If your browser doesn&apos;t open automatically, copy this URL
-                manually{' '}
-              </Text>
-              {urlCopied ? <Text color="success">(Copied!)</Text> : <Text dimColor>
-                  <KeyboardShortcutHint shortcut="c" action="copy" parens />
-                </Text>}
-            </Box>
-            <Link url={claudeAIAuthUrl} />
-          </Box>}
-        <Box marginLeft={3} flexDirection="column">
-          <Text color="permission">
-            Press <Text bold>Enter</Text> after authenticating in your browser.
-          </Text>
-          <Text dimColor italic>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
-          </Text>
-        </Box>
-      </Box>;
-  }
-  if (isClaudeAIClearingAuth) {
-    return <Box flexDirection="column" gap={1} padding={1}>
-        <Text color="brand">Clear authentication for {server.name}</Text>
-        {claudeAIClearAuthBrowserOpened ? <>
-            <Text>
-              Find the MCP server in the browser and click
-              &quot;Disconnect&quot;.
-            </Text>
-            {claudeAIClearAuthUrl && <Box flexDirection="column">
-                <Box>
-                  <Text dimColor>
-                    If your browser didn&apos;t open automatically, copy this
-                    URL manually{' '}
-                  </Text>
-                  {urlCopied ? <Text color="success">(Copied!)</Text> : <Text dimColor>
-                      <KeyboardShortcutHint shortcut="c" action="copy" parens />
-                    </Text>}
-                </Box>
-                <Link url={claudeAIClearAuthUrl} />
-              </Box>}
-            <Box marginLeft={3} flexDirection="column">
-              <Text color="permission">
-                Press <Text bold>Enter</Text> when done.
-              </Text>
-              <Text dimColor italic>
-                <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
-              </Text>
-            </Box>
-          </> : <>
-            <Text>
-              This will open Atlas web in the browser. Find the MCP server in
-              the list and click &quot;Disconnect&quot;.
-            </Text>
-            <Box marginLeft={3} flexDirection="column">
-              <Text color="permission">
-                Press <Text bold>Enter</Text> to open the browser.
-              </Text>
-              <Text dimColor italic>
-                <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
-              </Text>
-            </Box>
-          </>}
-      </Box>;
-  }
+  // G-3（§8.74.28 ⑫）: isClaudeAIAuthenticating / isClaudeAIClearingAuth 两
+  // 视图块随 claude.ai 两支裁除（见文件头）。
   if (isReconnecting) {
     return <Box flexDirection="column" gap={1} padding={1}>
         <Text color="text">
@@ -454,19 +299,10 @@ export function MCPRemoteServerMenu({
       value: 'tools'
     });
   }
-  if (server.config.type === 'claudeai-proxy') {
-    if (server.client.type === 'connected') {
-      menuOptions.push({
-        label: 'Clear authentication',
-        value: 'claudeai-clear-auth'
-      });
-    } else if (server.client.type !== 'disabled') {
-      menuOptions.push({
-        label: 'Authenticate',
-        value: 'claudeai-auth'
-      });
-    }
-  } else {
+  // G-3（§8.74.28 ⑫）: claudeai-proxy 型不再提供菜单认证支（'claudeai-auth' /
+  // 'claudeai-clear-auth' 已裁，前向缝登记见文件头）；通用认证选项仅
+  // 非 claudeai-proxy 型。
+  if (server.config.type !== 'claudeai-proxy') {
     if (isEffectivelyAuthenticated) {
       menuOptions.push({
         label: 'Re-authenticate',
@@ -566,25 +402,15 @@ export function MCPRemoteServerMenu({
             case 'clear-auth':
               await handleClearAuth();
               break;
-            case 'claudeai-auth':
-              await handleClaudeAIAuth();
-              break;
-            case 'claudeai-clear-auth':
-              handleClaudeAIClearAuth();
-              break;
             case 'reconnectMcpServer':
               setIsReconnecting(true);
               try {
                 const result_1 = await reconnectMcpServer(server.name);
-                if (server.config.type === 'claudeai-proxy') {
-                }
                 const {
                   message: message_0
                 } = handleReconnectResult(result_1, server.name);
                 onComplete?.(message_0);
               } catch (err_2) {
-                if (server.config.type === 'claudeai-proxy') {
-                }
                 onComplete?.(handleReconnectError(err_2, server.name));
               } finally {
                 setIsReconnecting(false);
