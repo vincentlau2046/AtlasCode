@@ -19,11 +19,13 @@
  *    ruleContent 建议面。
  *  - P-W4 rule-content 函数：合法 input → domain:hostname / zod 解析失败
  *    → input: 回退面（逐字 input.toString()）。
- *  - P-W5 makeToolSchema：type/name 字面 + max_uses 8 硬编 + domains 双
- *    透传（undefined 透传）。
- *  - P-W6 makeOutputFromSearchResponse：三块型流解析（text 累积 /
- *    server_tool_use flush / web_search_tool_result array hits / error_code
- *    错误支 / 尾部 trim）。
+ *  - P-W5 G-2 客户端 provider 面（旧 makeToolSchema / makeOutputFromSearch
+ *    Response 随 Anthropic 服务端工具车道整裁，§8.74.27）：
+ *    resolveWebSearchProvider（缺省 bing / tavily 切换 / endpoint 覆盖 /
+ *    非法值回落 + 大小写空白不敏感）+ parseBingResults fixture 解析 /
+ *    0 命中支 + filterHitsByDomains 子域感知双支。
+ *  - P-W6 G-2 错误串结果面：runWebSearch tavily 无 key → results[0] 错误
+ *    串 + key 指引（B8 语义随迁，模型可反应）。
  *  - P-W7 prompt 面：makeSecondaryModelPrompt 双变体（preapproved 简版 /
  *    非 preapproved 125-char 引用限 + not-a-lawyer 指南）+ getWebFetchToolPrompt
  *    auth-warning 前缀恒含 + getWebSearchPrompt Sources 强制段 + 月年模板
@@ -61,9 +63,16 @@ import {
   isPermittedRedirect,
   isPreapprovedHost,
   isPreapprovedUrl,
-  makeOutputFromSearchResponse,
   makeSecondaryModelPrompt,
-  makeToolSchema,
+  // G-2（2026-09-30）：客户端 provider 层（旧 makeToolSchema /
+  // makeOutputFromSearchResponse 随裁，§8.74.27）
+  BING_DEFAULT_ENDPOINT,
+  TAVILY_DEFAULT_ENDPOINT,
+  filterHitsByDomains,
+  parseBingResults,
+  resolveWebSearchProvider,
+  runWebSearch,
+  setWebSearchSettingsKeyProvider,
   WebFetchTool,
   WEB_FETCH_TOOL_NAME,
   webFetchShortDescription,
@@ -403,73 +412,85 @@ describe('P-W4 rule-content 函数', () => {
   })
 })
 
-describe('P-W5 makeToolSchema wire 面', () => {
-  test('type/name 字面 + max_uses 8 硬编 + domains 双透传', () => {
-    const full = makeToolSchema({
-      query: 'q',
-      allowed_domains: ['a.com'],
-      blocked_domains: undefined,
+describe('P-W5 G-2 客户端 provider 面（旧服务端工具面随裁，§8.74.27）', () => {
+  test('resolveWebSearchProvider：缺省 bing / tavily 切换 / endpoint 覆盖 / 非法值回落', () => {
+    expect(resolveWebSearchProvider({})).toEqual({
+      provider: 'bing',
+      endpoint: BING_DEFAULT_ENDPOINT,
     })
-    expect(full).toEqual({
-      type: 'web_search_20250305',
-      name: 'web_search',
-      allowed_domains: ['a.com'],
-      blocked_domains: undefined,
-      max_uses: 8,
+    expect(resolveWebSearchProvider({ WEB_SEARCH_PROVIDER: 'tavily' })).toEqual({
+      provider: 'tavily',
+      endpoint: TAVILY_DEFAULT_ENDPOINT,
     })
-    expect(makeToolSchema({ query: 'q' }).max_uses).toBe(8)
+    expect(resolveWebSearchProvider({ WEB_SEARCH_ENDPOINT: 'https://x.example' })).toEqual({
+      provider: 'bing',
+      endpoint: 'https://x.example',
+    })
+    // 非法值回落缺省 bing（fail-open 登记：搜索不被拼写错误打死）
+    expect(resolveWebSearchProvider({ WEB_SEARCH_PROVIDER: 'duckduckgo' }).provider).toBe('bing')
+    // 大小写 + 首尾空白不敏感
+    expect(resolveWebSearchProvider({ WEB_SEARCH_PROVIDER: ' TAVILY ' }).provider).toBe('tavily')
+  })
+
+  test('parseBingResults：b_algo 块解析（标题实体解码 + 摘要截断）/ 0 命中支', () => {
+    const html =
+      '<html><ol id="b_results">' +
+      '<li class="b_algo" data-hid="1"><h2 class="b_lineclamp1"><a href="https://a.example/p?a=1&amp;b=2" target="_blank">Title A &amp; B</a></h2><div class="b_caption"><p>Snippet A &lt;tag&gt;</p></div></li>' +
+      '<li class="b_algo" data-hid="2"><h2><a href="https://b.example/">B</a></h2><p>Snippet B</p></li>' +
+      '<li class="b_ans"><p>无链接广告位</p></li>' +
+      '</ol></html>'
+    expect(parseBingResults(html)).toEqual([
+      { title: 'Title A & B', url: 'https://a.example/p?a=1&b=2', snippet: 'Snippet A <tag>' },
+      { title: 'B', url: 'https://b.example/', snippet: 'Snippet B' },
+    ])
+    // 反爬同意页 / 无 b_algo 块 → 0 命中（上层转错误支）
+    expect(parseBingResults('<html><body>consent page</body></html>')).toEqual([])
+  })
+
+  test('filterHitsByDomains：allowed 保留 / blocked 排除（子域感知）', () => {
+    const hits = [
+      { title: '1', url: 'https://x.a.com/p' },
+      { title: '2', url: 'https://sub.b.com/q' },
+      { title: '3', url: 'https://c.org/z' },
+    ]
+    expect(filterHitsByDomains(hits, { allowed_domains: ['a.com', 'b.com'] })).toEqual([
+      hits[0],
+      hits[1],
+    ])
+    // 子域感知：blocked b.com 命中 sub.b.com
+    expect(filterHitsByDomains(hits, { blocked_domains: ['b.com'] })).toEqual([
+      hits[0],
+      hits[2],
+    ])
+    // 双域同现 = validateInput ec2 互斥（域内双支按序生效面）
+    expect(filterHitsByDomains(hits, {})).toBe(hits)
   })
 })
 
-describe('P-W6 makeOutputFromSearchResponse 三块型流解析', () => {
-  test('成功流：hits 归一 + text 累积 + 尾部 trim', () => {
-    const out = makeOutputFromSearchResponse(
-      [
-        { type: 'text', text: 'intro commentary ' },
-        { type: 'server_tool_use' },
-        {
-          type: 'web_search_tool_result',
-          tool_use_id: 't1',
-          content: [
-            { title: 'T1', url: 'https://a.example' },
-            { title: 'T2', url: 'https://b.example' },
-          ],
-        },
-        { type: 'text', text: ' mid ' },
-        { type: 'text', text: 'tail' },
-      ],
-      'my query',
-      0.5,
-    )
-    expect(out.query).toBe('my query')
-    expect(out.durationSeconds).toBe(0.5)
-    expect(out.results).toEqual([
-      'intro commentary',
-      {
-        tool_use_id: 't1',
-        content: [
-          { title: 'T1', url: 'https://a.example' },
-          { title: 'T2', url: 'https://b.example' },
-        ],
-      },
-      // 尾部 textAcc 恒 trim（makeOutputFromSearchResponse 末行面）
-      'mid tail',
-    ])
-  })
-
-  test('错误支：error_code → 字符串结果面', () => {
-    const out = makeOutputFromSearchResponse(
-      [
-        {
-          type: 'web_search_tool_result',
-          tool_use_id: 't2',
-          content: { error_code: 'rate_limited' },
-        },
-      ],
-      'q',
-      0.1,
-    )
-    expect(out.results).toEqual(['Web search error: rate_limited'])
+describe('P-W6 G-2 错误串结果面（B8 语义随迁）', () => {
+  test('tavily 无 key → results[0] 错误串 + key 指引', async () => {
+    const savedProvider = process.env.WEB_SEARCH_PROVIDER
+    const savedKey = process.env.TAVILY_API_KEY
+    process.env.WEB_SEARCH_PROVIDER = 'tavily'
+    delete process.env.TAVILY_API_KEY
+    setWebSearchSettingsKeyProvider(() => undefined)
+    try {
+      const out = await runWebSearch(
+        { query: 'cann op' },
+        { abortController: new AbortController() },
+      )
+      expect(out.results).toHaveLength(1)
+      expect(out.results[0]).toContain('Web search error (tavily)')
+      expect(out.results[0]).toContain('TAVILY_API_KEY')
+      expect(out.results[0]).toContain('search.tavilyApiKey')
+      expect(typeof out.durationSeconds).toBe('number')
+    } finally {
+      if (savedProvider === undefined) delete process.env.WEB_SEARCH_PROVIDER
+      else process.env.WEB_SEARCH_PROVIDER = savedProvider
+      if (savedKey === undefined) delete process.env.TAVILY_API_KEY
+      else process.env.TAVILY_API_KEY = savedKey
+      setWebSearchSettingsKeyProvider(() => undefined)
+    }
   })
 })
 
@@ -507,7 +528,9 @@ describe('P-W7 prompt 面', () => {
       const prompt = getWebSearchPrompt()
       expect(prompt).toContain('you MUST include a "Sources:" section')
       expect(prompt).toContain('MANDATORY - never skip including sources')
-      expect(prompt).toContain('Web search is only available in the US')
+      // G-2（§8.74.27）：US-only 措辞随客户端化裁（旧服务端工具车道面）
+      expect(prompt).toContain('Searches are performed client-side')
+      expect(prompt).not.toContain('Web search is only available in the US')
       expect(prompt).toContain('The current month is February 2026')
     } finally {
       if (saved === undefined) delete process.env.ATLAS_OVERRIDE_DATE

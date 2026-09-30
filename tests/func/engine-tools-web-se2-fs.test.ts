@@ -1,11 +1,12 @@
 /**
  * engine/tools/web S-E2（§8.59 web 族子波）：func 层真 I/O ——
- * WebFetch / WebSearch 本体 call 全管线（HTTP fixture 缝 + model 双假，
- * 零真网零真模；persistBinaryContent 真盘落读 = func 层独占面）。
+ * WebFetch / WebSearch 本体 call 全管线（WebFetch = HTTP fixture 缝 + model
+ * 假；WebSearch = G-2 客户端 provider 面〔§8.74.27〕transport fixture，
+ * 零模型；零真网零真模；persistBinaryContent 真盘落读 = func 层独占面）。
  *
- * 分层纪律（plan-se2-fs 同族）：--isolate 每文件独立进程，双注入缝
- * 窗口（setWebFetchTransportForTesting / setModelProviderForTesting）
- * 不跨文件泄漏；afterAll 全复位。
+ * 分层纪律（plan-se2-fs 同族）：--isolate 每文件独立进程，三注入缝
+ * 窗口（setWebFetchTransportForTesting / setModelProviderForTesting /
+ * setWebSearchTransportForTesting）不跨文件泄漏；afterAll 全复位。
  *
  *  - F-W1 WebFetch.call HTML 非 preapproved → 二级模型摘要支（fake chat
  *    计数 1，result = 固定 completion）。
@@ -17,10 +18,10 @@
  *    真读 + result 注记面 + afterAll 清理）。
  *  - F-W5 applyPromptToMarkdown 截断面（>100K 内容 → 二级模型收到的
  *    messages 带截断标记且长度封顶，经 fake chat 捕获 args 观测）。
- *  - F-W6 WebSearch.call 流成功支（三块型流 → results 归一 + mapToolResult
- *    Links 面）。
- *  - F-W7 WebSearch.call 流错误支（B8 error 事件 message 透传 + 缺 message
- *    文案模板面）。
+ *  - F-W6 WebSearch.call 客户端成功支（G-2 §8.74.27：transport fixture
+ *    全管线 → results 归一 + mapToolResult Links 面 + 零模型调用）。
+ *  - F-W7 WebSearch.call 客户端错误支（G-2 §8.74.27：HTTP 非 2xx /
+ *    0 命中反爬页 → results[0] 错误串结果面，B8 语义随迁）。
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { rmSync } from 'fs'
@@ -30,6 +31,7 @@ import {
   WebSearchTool,
   clearWebFetchCache,
   setWebFetchTransportForTesting,
+  setWebSearchTransportForTesting,
   MAX_MARKDOWN_LENGTH,
   type WebFetchHttpResponse,
   type WebFetchTransport,
@@ -87,21 +89,8 @@ function fixTransport(handler: (url: string) => WebFetchHttpResponse): WebFetchT
   return (url) => Promise.resolve(handler(url))
 }
 
-// ── fake modelprovider（b6-func 同形；chat 计数 + args 捕获 /
-//     chatStream 事件流可配）────────────────────────────────────────────
+// ── fake modelprovider（b6-func 同形；chat 计数 + args 捕获）───────────
 const MOCK_FETCH_SUMMARY = 'MOCK-FETCH-SUMMARY'
-type SearchStreamEvent =
-  | {
-      type: 'assistant'
-      message: { content: Array<Record<string, unknown>> }
-    }
-  | {
-      type: 'error'
-      message?: string
-      code?: string
-      retryable?: boolean
-    }
-let searchStreamEvents: SearchStreamEvent[] = []
 let chatCallCount = 0
 let lastChatArgs: { role: string; openaiParams: Record<string, unknown> } | null =
   null
@@ -136,10 +125,13 @@ function createFakeModelProvider(): ModelProvider {
         },
       }
     },
+    // G-2（§8.74.27）：WebSearch 客户端化后零模型调用，WebFetch 管线
+    // 亦不消费 chatStream（grep 验证零消费）——抛错守卫：车道复活误走
+    // 即炸（防空洞纪律）。
     chatStream: async function* () {
-      for (const ev of searchStreamEvents) {
-        yield ev
-      }
+      throw new Error(
+        'fake ModelProvider: chatStream 未被 web-se2 func 消费（G-2 WebSearch 客户端化）',
+      )
     },
     healthCheck: notExercised,
     countTokens: notExercised,
@@ -168,14 +160,33 @@ function makeSearchCtx() {
 
 const persistedFiles: string[] = []
 
+// G-2 SERP fixture（F-W6/F-W7 消费；entity 解码面 &amp; 随迁断言）
+const BING_SERP_FIXTURE =
+  '<html><ol id="b_results">' +
+  '<li class="b_algo" data-hid="1"><h2><a href="https://docs.example/cann-op" target="_blank">CANN 算子开发 &amp; 指南</a></h2><div class="b_caption"><p>Ascend C 算子开发文档</p></div></li>' +
+  '</ol></html>'
+
 // blocklist 预检 env 面隔离（与 unit 面同族）：若宿主环境设了
 // ATLAS_WEB_DOMAIN_CHECK_URL，checkDomainBlocklist 会对 fixture transport
 // 发预检请求（json {} → check_failed 全管线炸）→ 确定性 fail-open
 const DOMAIN_CHECK_ENV_KEY = 'ATLAS_WEB_DOMAIN_CHECK_URL'
 let savedDomainCheckEnv: string | undefined
+// G-2（§8.74.27）：web search provider env 面隔离（宿主设了
+// WEB_SEARCH_PROVIDER=tavily + 无 key 时 F-W6/F-W7 会走 tavily 错误支 →
+// 非确定性；与 unit 面 engine-tools-web-search-provider 同族同式）
+const WEB_SEARCH_ENV_KEYS = [
+  'WEB_SEARCH_PROVIDER',
+  'WEB_SEARCH_ENDPOINT',
+  'TAVILY_API_KEY',
+] as const
+const savedWebSearchEnv: Record<(typeof WEB_SEARCH_ENV_KEYS)[number], string | undefined> = {}
 beforeAll(() => {
   savedDomainCheckEnv = process.env[DOMAIN_CHECK_ENV_KEY]
   delete process.env[DOMAIN_CHECK_ENV_KEY]
+  for (const k of WEB_SEARCH_ENV_KEYS) {
+    savedWebSearchEnv[k] = process.env[k]
+    delete process.env[k]
+  }
   setModelProviderForTesting(createFakeModelProvider())
   clearWebFetchCache()
 })
@@ -185,7 +196,12 @@ afterAll(() => {
   } else {
     process.env[DOMAIN_CHECK_ENV_KEY] = savedDomainCheckEnv
   }
+  for (const k of WEB_SEARCH_ENV_KEYS) {
+    if (savedWebSearchEnv[k] === undefined) delete process.env[k]
+    else process.env[k] = savedWebSearchEnv[k]
+  }
   setWebFetchTransportForTesting(null)
+  setWebSearchTransportForTesting(null)
   resetModelProviderForTesting()
   for (const f of persistedFiles) {
     rmSync(f, { force: true })
@@ -319,73 +335,70 @@ describe('F-W5 applyPromptToMarkdown 截断面', () => {
   })
 })
 
-describe('F-W6 WebSearch.call 流成功支', () => {
-  test('三块型流 → results 归一 + mapToolResult Links 面', async () => {
-    searchStreamEvents = [
-      {
-        type: 'assistant',
-        message: {
-          content: [
-            { type: 'text', text: 'intro commentary ' },
-            { type: 'server_tool_use' },
-            {
-              type: 'web_search_tool_result',
-              tool_use_id: 't1',
-              content: [{ title: 'T', url: 'https://t.example' }],
-            },
-            { type: 'text', text: 'tail' },
-          ],
-        },
-      },
-    ]
+describe('F-W6 WebSearch.call 客户端成功支（G-2 §8.74.27）', () => {
+  test('transport fixture 全管线 → results 归一 + Links 面 + 零模型', async () => {
+    setWebSearchTransportForTesting(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        text: async () => BING_SERP_FIXTURE,
+      }),
+    )
+    chatCallCount = 0
     const { data } = await WebSearchTool.call(
       { query: 'cann op' },
       makeSearchCtx(),
     )
     expect(data.query).toBe('cann op')
     expect(typeof data.durationSeconds).toBe('number')
-    // text 累积 → server_tool_use flush（trim）/ hits 归一 / 尾部 trim
-    expect(data.results).toEqual([
-      'intro commentary',
+    // G-2：单结果块（tool_use_id 本地 randomUUID + hits 归一，entity 解码）
+    expect(data.results).toHaveLength(1)
+    const hitBlock = data.results[0] as {
+      tool_use_id: string
+      content: { title: string; url: string; snippet?: string }[]
+    }
+    expect(hitBlock.tool_use_id.length).toBeGreaterThan(0)
+    expect(hitBlock.content).toEqual([
       {
-        tool_use_id: 't1',
-        content: [{ title: 'T', url: 'https://t.example' }],
+        title: 'CANN 算子开发 & 指南',
+        url: 'https://docs.example/cann-op',
+        snippet: 'Ascend C 算子开发文档',
       },
-      'tail',
     ])
     const block =
       WebSearchTool.mapToolResultToToolResultBlockParam(data, 'tu-1')
     expect(block.tool_use_id).toBe('tu-1')
     expect(block.type).toBe('tool_result')
     expect(block.content).toContain('Links: [')
-    expect(block.content).toContain('"url":"https://t.example"')
+    expect(block.content).toContain('"url":"https://docs.example/cann-op"')
+    // 客户端 lane 核心语义回归守卫：零模型调用（旧服务端工具车道已裁）
+    expect(chatCallCount).toBe(0)
   })
 })
 
-describe('F-W7 WebSearch.call 流错误支（B8）', () => {
-  test('error 事件 message 透传支', async () => {
-    searchStreamEvents = [
-      {
-        type: 'error',
-        message: 'provider boom',
-        code: 'boom_code',
-        retryable: false,
-      },
-    ]
-    const { data } = await WebSearchTool.call(
-      { query: 'q' },
-      makeSearchCtx(),
+describe('F-W7 WebSearch.call 客户端错误支（G-2 B8 错误串面）', () => {
+  test('HTTP 非 2xx → results[0] 错误串（状态码透传 + 切 tavily 指引）', async () => {
+    setWebSearchTransportForTesting(() =>
+      Promise.resolve({ ok: false, status: 403, text: async () => 'forbidden' }),
     )
-    expect(data.results).toContain('provider boom')
+    const { data } = await WebSearchTool.call({ query: 'q' }, makeSearchCtx())
+    expect(data.results).toHaveLength(1)
+    expect(typeof data.results[0]).toBe('string')
+    expect(data.results[0]).toContain('Web search error (bing)')
+    expect(data.results[0]).toContain('HTTP 403')
   })
 
-  test('缺 message → 文案模板面（code/retryable 逐字）', async () => {
-    searchStreamEvents = [
-      { type: 'error', code: 'boom_code', retryable: false },
-    ]
-    const { data } = await WebSearchTool.call({ query: 'q' }, makeSearchCtx())
-    expect(data.results).toContain(
-      'Web search provider error (code: boom_code, retryable: false)',
+  test('0 命中（反爬页）→ 错误串面 + 切 tavily 指引', async () => {
+    setWebSearchTransportForTesting(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        text: async () => '<html><body>consent</body></html>',
+      }),
     )
+    const { data } = await WebSearchTool.call({ query: 'q' }, makeSearchCtx())
+    expect(data.results).toHaveLength(1)
+    expect(data.results[0]).toContain('Web search error (bing)')
+    expect(data.results[0]).toContain('WEB_SEARCH_PROVIDER=tavily')
   })
 })
