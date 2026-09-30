@@ -6,8 +6,9 @@
  *    引用同一对象（单源核验，防 tui 侧重新本地化漂移）。
  *
  * 门控基线（缺省态实测口径，突变须同步改表 + 设计记录）：
- *  - feature 缺省全 off（ASCEND_TOOLS/AGENT_TRIGGERS/AGENT_TRIGGERS_REMOTE/HISTORY_SNIP
- *    均非 ON_BY_DEFAULT）→ ascend 16 / cron 3 / RemoteTrigger / Snip 不入门池
+ *  - feature 缺省全 off（ASCEND_TOOLS/AGENT_TRIGGERS/HISTORY_SNIP
+ *    均非 ON_BY_DEFAULT）→ ascend 16 / cron 3 / Snip 不入门池
+ *    （AGENT_TRIGGERS_REMOTE 门 + RemoteTrigger 面 G-3 §8.74.28 F 类整裁）
  *  - ATLAS_DEV 未设 → REPL / Tungsten 不入；IS_ATLAS_DEV 为模块加载期常量 → env 必须在
  *    动态 import 之前 pin
  *  - isTodoV2Enabled = true（交互态缺省）→ 任务族 4 入
@@ -74,8 +75,8 @@ const EXPECTED_BASE_TOOLS = [
   'EnterWorktree',
   'ExitWorktree',
   'SendMessage',
-  // 组 A feature 门缺省 off（ascend 16 / cron 3 / RemoteTrigger / LSP / Snip / REPL /
-  // Tungsten / Team 2）= 不入缺省表
+  // 组 A feature 门缺省 off（ascend 16 / cron 3 / LSP / Snip / REPL /
+  // Tungsten / Team 2）= 不入缺省表（RemoteTrigger G-3 整裁，面已删）
   // 组 B 缺省入池者
   'TestingPermission', // NODE_ENV=test
   'ListMcpResourcesTool',

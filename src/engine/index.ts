@@ -119,9 +119,6 @@ export {
   // §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：LSP_TOOL_NAME seed
   //（与 tools 根门面同口径，LSP 族 ⑬ 槽 materialize）
   LSP_TOOL_NAME,
-  // §8.68 remote 波 S-E2c：REMOTE_TRIGGER_TOOL_NAME seed（与 tools 根门面
-  // 同口径，RemoteTrigger 族 ③ 槽 materialize）
-  REMOTE_TRIGGER_TOOL_NAME,
 } from './tools'
 export type {
   McpToolResult,
@@ -192,19 +189,13 @@ export {
   // isLspConnected() 自门控，组合根 baseTools 注册位 = S-E2d 回填，见
   // lsp/ 子门面头注）
   LSPTool,
-  // §8.68 remote 波 S-E2c（RemoteTrigger 子域，49 本体 ③ 槽
-  // AGENT_TRIGGERS_REMOTE materialize）：RemoteTriggerTool 本体（5 动作
-  // 远程触发面；call HTTP 面 = ⑫ 注入端口登记 throw 缺省供给方，
-  // growthbook + policy 双门裁 → isEnabled = isRemoteTriggersEnabled()
-  // 自门控，组合根 baseTools 注册位 = S-E2d 回填，见 remotetriggers/
-  // 子门面头注）
-  RemoteTriggerTool,
 } from './tools'
 export {
   // W2-2b 基础（§8.74.8/§8.74.12）：注册面单一出口——36 工具本体全量 lift
   // （原仅 6 体 lifted，其余 30 体只经 tools/ 深路径可取 = tui 2b 适配器经
-  // STR-1 门面收口无法合法取件）。30 体 = 36 全集 − 已 lift 6（AgentTool/
-  // SnipTool/TeamCreateTool/TeamDeleteTool/LSPTool/RemoteTriggerTool）；
+  // STR-1 门面收口无法合法取件）。30 体 = 36 全集 − 已 lift 5（AgentTool/
+  // SnipTool/TeamCreateTool/TeamDeleteTool/LSPTool）− G-3 整裁 1
+  // （RemoteTriggerTool，§8.74.28 F 类 1P 整裁）；
   // 各体逐字 C-Deep 纵切已落（§8.54-§8.68 各子波头注），本块零行为纯扩面。
   BashTool,
   ReadTool,

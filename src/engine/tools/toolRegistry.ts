@@ -84,24 +84,22 @@
  *       残留守 16，②⑯ §8.56 materialize / ⑭ §8.57 S-D2b materialize / ⑲ §8.63 materialize
  *       后余 12，8 槽移「§8.64 登记零本体」后余 4，⑨⑮ §8.66 S-E2d materialize 后余 2，
  *       ⑬ §8.67 D 波 S-E2c materialize 后余 1，③ §8.68 remote 波 S-E2c
- *       materialize 后余 0 = 49 口径 32/49 收口）：
- *       计数口径（F-A1 核销，S-4）：「32/49」= C桶① 真本体 materialized
+ *       materialize 后余 0 = 49 口径 32/49 收口；G-3（§8.74.28）F 类
+ *       1P 整裁 RemoteTrigger ③ 槽后 = 31/49）：
+ *       计数口径（F-A1 核销，S-4）：「31/49」= C桶① 真本体 materialized
  *       running tally（materialized-real-body，非 file count；§8.63=28 →
  *       §8.66 +3 Snip/TeamCreate/TeamDelete =31 → §8.68 +1 RemoteTrigger
- *       =32，内部一致）。全槽 disposition 权威口径 = §8.64 八项分解
- *       49/49 收口（29 本体 + 11 零本体登记 + 2 Skill/LSP D波 + 3 Team
- *       + 1 RemoteTrigger + 1 PowerShell 域外 + 1 TestingPermission
- *       关闭 + 1 Agent E-2）。⚠ 36 tool-object 文件 − AgentTool = 35 系
- *       file count，勿与本 49 口径 materialized tally 混淆。
- *       ③ AGENT_TRIGGERS_REMOTE（§8.68 remote 波 S-E2c materialize：RemoteTrigger
- *         本体落 engine/tools/remotetriggers/ 子域 + [ATLAS-HOLD] 注入端口
- *         （5 方法族，登记 throw 缺省供给方，真供给方 = IFF 网关波 / CLI 波），
- *         旧双门 growthbook 'atlas_surreal_dali' + isPolicyAllowed 裁 →
- *         isEnabled = isRemoteTriggersEnabled() 自门控（env
- *         ATLAS_EXPERIMENTAL_REMOTE_TRIGGERS=1 opt-in 默认 OFF = 旧编译期
- *         OFF 保真，⑮ 先例同型 = 门裁登记非新增门）；本体注入位 = 调用方
- *         toolRegistryDeps.baseTools（S-E2d 回填）；bundled skill
- *         scheduleRemoteAgents 400L 裁登记〔随 ⑫ 端口同供给方复活〕）
+ *       =32 → G-3 F 类整裁 −1 = 31，内部一致）。全槽 disposition 权威
+ *       口径 = §8.64 八项分解 49/49 收口（29 本体 + 11 零本体登记 + 2
+ *       Skill/LSP D波 + 3 Team + 1 RemoteTrigger〔G-3 整裁〕+ 1 PowerShell
+ *       域外 + 1 TestingPermission 关闭 + 1 Agent E-2）。⚠ 36 tool-object
+ *       文件 − AgentTool = 35 系 file count，勿与本 49 口径 materialized
+ *       tally 混淆。
+ *       ③ AGENT_TRIGGERS_REMOTE（§8.68 remote 波 S-E2c 曾 materialize：
+ *         RemoteTrigger 本体落 engine/tools/remotetriggers/ 子域 + ⑫ 注入
+ *         端口（5 方法族）+ tui 面 3 文件 + bundled skill
+ *         scheduleRemoteAgents —— G-3（§8.74.28）F 类 1P 整裁：1P
+ *         claude.ai 车道全裁，整子系统删除，门控槽 ③ 随裁消失）
  *       ⑬ ENABLE_LSP_TOOL（§8.67 D 波 S-E2c materialize：LSP 本体落 engine/tools/lsp/
  *         + LSP 域 src/lsp/（client 域 2464L + 配置注入窗 + manager 单例），
  *         旧门 feature('ENABLE_LSP_TOOL') 裁 → isEnabled = isLspConnected() 自门控

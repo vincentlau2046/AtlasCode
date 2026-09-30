@@ -183,34 +183,23 @@
  *   残留守「49 本体」登记再缩 1 → 31/49（LSP 族专属门控槽 ⑬
  *   ENABLE_LSP_TOOL materialize = 自门控 isEnabled = isLspConnected，
  *   注册表残留守 2→1；组合根 baseTools 注册位 = S-E2d 回填）。
- * §8.68 remote 波 S-E2c（RemoteTrigger 子域，49 本体 ③ 槽
- *   AGENT_TRIGGERS_REMOTE materialize）已落 remotetriggers/ 子域
- *   （RemoteTriggerTool 本体 1 对象 + JSON schema 1 常量
- *   REMOTE_TRIGGER_TOOL_INPUT_SCHEMA + Output 型 + prompt 2 面
- *   DESCRIPTION/PROMPT + [ATLAS-HOLD] 注入端口 remoteTriggersPort
- *   5 方法族 〔登记 throw 缺省供给方，真供给方 = IFF 网关波 / CLI 波〕；
- *   旧仓 RemoteTriggerTool.ts 158L + prompt 15L + UI 16L 裁剪随迁，
- *   裁面登记：axios + getOAuthTokens + getGlobalConfig + WIRE 头 +
- *   BASE_API_URL/v1/code/triggers 〔ATLAS-HOLD URL 族〕→ ⑫ 端口 /
- *   growthbook 'atlas_surreal_dali' + isPolicyAllowed 双门裁 →
- *   isEnabled = isRemoteTriggersEnabled() 自门控〔env
- *   ATLAS_EXPERIMENTAL_REMOTE_TRIGGERS=1 opt-in 默认 OFF，⑮ 先例
- *   同型〕/ UI JSX renderToolResultMessage → TUI 波 / bundled skill
- *   scheduleRemoteAgents 400L 裁登记〔claude.ai 车道全裁，随 ⑫ 同
- *   供给方复活〕，见各文件头注 delta 登记）→ 在此 re-export
- *   （remotetriggers/ 子门面）；残留守「49 本体」登记再缩 1 → 32/49
- *   （RemoteTrigger 专属门控槽 ③ AGENT_TRIGGERS_REMOTE materialize =
- *   自门控 isEnabled = isRemoteTriggersEnabled，注册表残留守 1→0
- *   收口；组合根 baseTools 注册位 = S-E2d 回填）。
- * 计数口径（F-A1 核销，S-4）：「32/49」= C桶① 真本体 materialized
- * running tally（materialized-real-body，非 file count；§8.66 Snip/
- * TeamCreate/TeamDelete 3 本体 + §8.68 RemoteTrigger 已计入，内部一致
- * §8.63=28 → +3=31 → +1=32）；全槽 disposition 权威口径 = §8.64 八项
- * 分解 49/49 收口（29 本体 + 11 零本体登记 + 2 Skill/LSP D波 + 3 Team
- * + 1 RemoteTrigger + 1 PowerShell 域外 + 1 TestingPermission 关闭 +
- * 1 Agent E-2）。⚠ 36 tool-object 文件 − AgentTool = 35 系 file count，
- * 非本 49 口径 materialized tally，勿混淆（原 S-1 F-A1「实 35/49」
- * 误把 file count 当 tally 口径）。
+ * §8.68 remote 波 S-E2c 的 RemoteTrigger 子域（49 本体 ③ 槽
+ *   AGENT_TRIGGERS_REMOTE materialize = remotetriggers/ 子域 4 文件 +
+ *   ⑫ 注入端口 5 方法族 + tui 面 3 文件 + bundled skill
+ *   scheduleRemoteAgents 447L）G-3（§8.74.28）F 类 1P 整裁：
+ *   1P claude.ai 车道全裁（v1/code/triggers URL 族 + OAuth +
+ *   claude.ai/code/scheduled 链接面），真供给方（IFF 网关 / CLI 波）
+ *   不随本仓产品面保留 → 整子系统删除，登记非删除前向缝。
+ * 计数口径（F-A1 核销，S-4；G-3 整裁后）：「31/49」= C桶① 真本体
+ * materialized running tally（materialized-real-body，非 file count；
+ * §8.63=28 → +3=31（S-E2d）→ +1=32（§8.68 RemoteTrigger）→
+ * G-3 整裁 −1=31）；全槽
+ * disposition 权威口径 = §8.64 八项分解 49/49 收口（29 本体 + 11 零本体
+ * 登记 + 2 Skill/LSP D波 + 3 Team + 1 RemoteTrigger〔G-3 整裁〕+ 1
+ * PowerShell 域外 + 1 TestingPermission 关闭 + 1 Agent E-2）。⚠ 36
+ * tool-object 文件 − AgentTool = 35 系 file count，非本 49 口径
+ * materialized tally，勿混淆（原 S-1 F-A1「实 35/49」误把 file count
+ * 当 tally 口径）。
  */
 export {
   createMcpTools,
@@ -278,9 +267,6 @@ export {
   READ_MCP_RESOURCE_TOOL_NAME,
   // §8.67 D 波 S-E2c：LSP_TOOL_NAME seed 补入根门面（LSP 族 ⑬ 槽）
   LSP_TOOL_NAME,
-  // §8.68 remote 波 S-E2c：REMOTE_TRIGGER_TOOL_NAME seed 补入根门面
-  //（RemoteTrigger 族 ③ 槽）
-  REMOTE_TRIGGER_TOOL_NAME,
   SHELL_TOOL_NAMES,
 } from './toolNames'
 export { LEGACY_TOOL_NAME_ALIASES } from './legacyToolNameAliases'
@@ -1055,25 +1041,6 @@ export {
   getSymbolAtPosition,
 } from './lsp'
 
-// ── §8.68 remote 波 S-E2c（RemoteTrigger 子域，49 本体 ③ 槽
-// AGENT_TRIGGERS_REMOTE materialize）：remotetriggers 子域（本体 +
-// JSON schema + prompt 2 面 + [ATLAS-HOLD] 注入端口 5 方法族；名字
-// 常量 REMOTE_TRIGGER_TOOL_NAME 由 toolNames 块 seed 不重出；旧双门
-// growthbook + policy 裁 → isEnabled = isRemoteTriggersEnabled()
-// 自门控，call HTTP 面 = ⑫ 端口登记 throw 缺省供给方，见
-// remotetriggers/ 子门面头注）──
-export {
-  RemoteTriggerTool,
-  REMOTE_TRIGGER_TOOL_INPUT_SCHEMA,
-  isRemoteTriggersEnabled,
-  type RemoteTriggerToolInput,
-  type RemoteTriggerToolOutput,
-  REMOTE_TRIGGER_DESCRIPTION,
-  REMOTE_TRIGGER_PROMPT,
-  getRemoteTriggersPort,
-  setRemoteTriggersPort,
-  clearRemoteTriggersPort,
-  REMOTE_TRIGGERS_HOLD_MESSAGE,
-  type RemoteTriggersPort,
-  type RemoteTriggerResponse,
-} from './remotetriggers'
+// ── §8.68 RemoteTrigger ③ 槽 + ⑫ 端口整面 G-3（§8.74.28）F 类 1P 整裁
+// （remotetriggers/ 子域 4 文件 + tui 面 3 文件 + bundled skill
+// scheduleRemoteAgents 已删；登记见头注，真供给方不随本仓保留）──

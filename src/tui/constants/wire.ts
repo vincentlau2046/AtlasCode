@@ -59,7 +59,8 @@ export const WIRE_FILES_API_BETA = `files-api-2025-04-14,${WIRE_OAUTH_BETA}`
 
 /**
  * `anthropic-beta` 头取值：remote triggers 特性门。
- * 用途：RemoteTriggerTool 远程触发请求。
+ * 用途：RemoteTriggerTool 远程触发请求 —— G-3（§8.74.28）F 类 1P 整裁后
+ * 零消费者（本常量随 WIRE 簇归 #200 裁撤）。
  */
 export const WIRE_TRIGGERS_BETA = 'ccr-triggers-2026-01-30'
 

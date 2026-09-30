@@ -61,14 +61,9 @@ export function initBundledSkills(): void {
     // the skill's own isEnabled callback decides visibility.
     registerLoopSkill()
   }
-  if (feature('AGENT_TRIGGERS_REMOTE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
-    const {
-      registerScheduleRemoteAgentsSkill,
-    } = require('./scheduleRemoteAgents.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
-    registerScheduleRemoteAgentsSkill()
-  }
+  // G-3（§8.74.28）F 类 1P 整裁：scheduleRemoteAgents bundled skill（447L，
+  // feature AGENT_TRIGGERS_REMOTE 门控 + claude.ai 车道内容）随
+  // remotetriggers 子系统删除
   if (feature('RUN_SKILL_GENERATOR')) {
     /* eslint-disable @typescript-eslint/no-require-imports */
     const { registerRunSkillGeneratorSkill } = require('src/tui/skills/bundled/runSkillGenerator.js')

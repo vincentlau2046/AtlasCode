@@ -44,10 +44,9 @@ const cronTools = feature('AGENT_TRIGGERS')
       require('./tools/ScheduleCronTool/CronListTool.js').CronListTool,
     ]
   : []
-const RemoteTriggerTool = feature('AGENT_TRIGGERS_REMOTE')
-  ? require('./tools/RemoteTriggerTool/RemoteTriggerTool.js').RemoteTriggerTool
-  : null
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
+// G-3（§8.74.28）F 类 1P 整裁：RemoteTriggerTool 面（feature
+// AGENT_TRIGGERS_REMOTE 门控行 + 池行）随 remotetriggers 子系统删除
 import { TaskOutputTool } from './tools/TaskOutputTool/TaskOutputTool.js'
 import { WebSearchTool } from './tools/WebSearchTool/WebSearchTool.js'
 import { TodoWriteTool } from './tools/TodoWriteTool/TodoWriteTool.js'
@@ -226,7 +225,6 @@ export function getAllBaseTools(): Tools {
       : []),
     ...(REPLTool ? [REPLTool] : []),
     ...cronTools,
-    ...(RemoteTriggerTool ? [RemoteTriggerTool] : []),
     // 组 B 尾（域外/平台/测试面：PowerShell 域外支 / Snip·TestingPermission）
     ...(getPowerShellTool() ? [getPowerShellTool()] : []),
     ...(SnipTool ? [SnipTool] : []),
