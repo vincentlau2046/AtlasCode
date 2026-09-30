@@ -66,7 +66,8 @@ export const WIRE_TRIGGERS_BETA = 'ccr-triggers-2026-01-30'
 
 /**
  * `anthropic-beta` 头取值：managed MCP servers 特性门。
- * 用途：managedMcp 托管 MCP 服务器请求。
+ * 用途：managedMcp 托管 MCP 服务器请求（⑥ 已裁——1P 端点不存在）；本常量随
+ * WIRE 簇归 #200 裁撤（零消费者）。
  */
 export const WIRE_MCP_SERVERS_BETA = 'mcp-servers-2025-12-04'
 

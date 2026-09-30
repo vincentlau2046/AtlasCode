@@ -55,10 +55,6 @@ import {
 import { errorMessage } from '../../utils/errors.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
-import {
-  clearClaudeAIMcpConfigsCache,
-  fetchManagedMcpConfigs,
-} from './managedMcp.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
 import { getMcpPrefix } from './mcpStringUtils.js'
 import { commandBelongsToServer, excludeStalePluginClients } from './utils.js'
@@ -630,18 +626,10 @@ export function useManageMCPConnections(
     let cancelled = false
 
     async function loadAndConnectMcpConfigs() {
-      // Clear claude.ai MCP cache so we fetch fresh configs with current auth
-      // state. This is important when authVersion changes (e.g., after login/
-      // logout). Kick off the fetch now so it overlaps with loadAllPlugins()
-      // inside getMcpConfigs; it's awaited only at the dedup step.
-      // Phase 2 below awaits the same promise — no second network call.
-      let claudeaiPromise: Promise<Record<string, ScopedMcpServerConfig>>
-      if (isStrictMcpConfig || doesEnterpriseMcpConfigExist()) {
-        claudeaiPromise = Promise.resolve({})
-      } else {
-        clearClaudeAIMcpConfigsCache()
-        claudeaiPromise = fetchManagedMcpConfigs()
-      }
+      // G-3（§8.74.28 ⑥）: claude.ai 托管 MCP 拉取（managedMcp.ts）已裁——1P
+      // org-config 端点不存在。claudeaiPromise 恒空；下游 dedup/Phase 2 分支
+      // 保留（对空对象 no-op）。
+      const claudeaiPromise: Promise<Record<string, ScopedMcpServerConfig>> = Promise.resolve({})
 
       // Phase 1: Load Atlas configs. Plugin MCP servers that duplicate a
       // --mcp-config entry or a claude.ai connector are suppressed here so they

@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useNotifications } from 'src/tui/context/notifications.js';
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js';
 import { Text } from '../../ink.js';
-import { hasClaudeAiMcpEverConnected } from '../../services/mcp/managedMcp.js';
 import type { MCPServerConnection } from '../../services/mcp/types.js';
 type Props = {
   mcpClients?: MCPServerConnection[];
@@ -74,13 +73,13 @@ export function useMcpConnectivityStatus(t0) {
   useEffect(t2, t3);
 }
 function _temp4(client_2) {
-  return client_2.type === "needs-auth" && client_2.config.type === "claudeai-proxy" && hasClaudeAiMcpEverConnected(client_2.name);
+  return false; // G-3（§8.74.28 ⑥）: claude.ai 托管 MCP 已裁，claudeai connector 不复存在
 }
 function _temp3(client_1) {
   return client_1.type === "needs-auth" && client_1.config.type !== "claudeai-proxy";
 }
 function _temp2(client_0) {
-  return client_0.type === "failed" && client_0.config.type === "claudeai-proxy" && hasClaudeAiMcpEverConnected(client_0.name);
+  return false; // G-3（§8.74.28 ⑥）: claude.ai 托管 MCP 已裁，claudeai connector 不复存在
 }
 function _temp(client) {
   return client.type === "failed" && client.config.type !== "sse-ide" && client.config.type !== "ws-ide" && client.config.type !== "claudeai-proxy";

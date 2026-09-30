@@ -36,7 +36,6 @@ import {
 } from '../../utils/settings/types.js'
 import type { ValidationError } from '../../utils/settings/validation.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { fetchManagedMcpConfigs } from './managedMcp.js'
 import { expandEnvVarsInString } from './envExpansion.js'
 import {
   type ConfigScope,
@@ -1242,7 +1241,8 @@ export async function getMcpConfigs(
 }
 
 /**
- * Get all MCP configurations across all scopes, including claude.ai servers.
+ * Get all MCP configurations across all scopes (claude.ai 托管服务器面已随
+ * G-3 §8.74.28 ⑥ 裁除——原 "including claude.ai servers" 分支恒空保留管线)。
  * This may be slow due to network calls - use getMcpConfigs() for fast startup.
  * @returns All server configurations with appropriate scopes
  */
@@ -1255,9 +1255,9 @@ export async function getAllMcpConfigs(): Promise<{
     return getMcpConfigs()
   }
 
-  // Kick off the claude.ai fetch before getMcpConfigs so it overlaps
-  // with loadAllPluginsCacheOnly() inside. Memoized — the awaited call below is a cache hit.
-  const claudeaiPromise = fetchManagedMcpConfigs()
+  // G-3（§8.74.28 ⑥）: claude.ai 托管 MCP 拉取（managedMcp.ts）已裁——1P
+  // org-config 端点不存在；claudeai 分支恒空（dedup/merge 管线保留 no-op）。
+  const claudeaiPromise = Promise.resolve({})
   const { servers: claudeCodeServers, errors } = await getMcpConfigs(
     {},
     claudeaiPromise,

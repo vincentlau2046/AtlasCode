@@ -136,7 +136,6 @@ import { validateUuid } from './utils/uuid.js';
 
 import { registerMcpAddCommand } from 'src/tui/commands/mcp/addCommand.js';
 import { registerMcpXaaIdpCommand } from 'src/tui/commands/mcp/xaaIdpCommand.js';
-import { fetchManagedMcpConfigs } from 'src/tui/services/mcp/managedMcp.js';
 import { clearServerCache } from 'src/tui/services/mcp/client.js';
 import { areMcpConfigsAllowedWithEnterpriseMcpConfig, dedupManagedMcpServers, doesEnterpriseMcpConfigExist, filterMcpServersByPolicy, getMcpConfigs, getMcpServerSignature, parseMcpConfig, parseMcpConfigFromFilePath } from 'src/tui/services/mcp/config.js';
 import { excludeCommandsByServer, excludeResourcesByServer } from 'src/tui/services/mcp/utils.js';
@@ -1469,24 +1468,11 @@ async function run(): Promise<CommanderCommand> {
     });
     void assertMinVersion();
 
-    // claude.ai config fetch: -p mode only (interactive uses useManageMCPConnections
-    // two-phase loading). Kicked off here to overlap with setup(); awaited
-    // before runHeadless so single-turn -p sees connectors. Skipped under
-    // enterprise/strict MCP to preserve policy boundaries.
-    const claudeaiConfigPromise: Promise<Record<string, ScopedMcpServerConfig>> = isNonInteractiveSession && !strictMcpConfig && !doesEnterpriseMcpConfigExist() &&
-    // --bare / SIMPLE: skip claude.ai proxy servers (datadog, Gmail,
-    // Slack, BigQuery, PubMed — 6-14s each to connect). Scripted calls
-    // that need MCP pass --mcp-config explicitly.
-    !isBareMode() ? fetchManagedMcpConfigs().then(configs => {
-      const {
-        allowed,
-        blocked
-      } = filterMcpServersByPolicy(configs);
-      if (blocked.length > 0) {
-        process.stderr.write(`Warning: claude.ai MCP ${plural(blocked.length, 'server')} blocked by enterprise policy: ${blocked.join(', ')}\n`);
-      }
-      return allowed;
-    }) : Promise.resolve({});
+    // G-3（§8.74.28 ⑥）: claude.ai 托管 MCP 拉取（managedMcp.ts）已裁——1P
+    // org-config 端点不存在；claudeaiConfigPromise 恒空。下游 dedup/prefetch/
+    // connect 分支保留（对空对象 no-op）。企业 managed-settings MCP 路径不变
+    // （doesEnterpriseMcpConfigExist 仍门控本地加载，见 L1381 面）。
+    const claudeaiConfigPromise: Promise<Record<string, ScopedMcpServerConfig>> = Promise.resolve({});
 
     // Kick off MCP config loading early (safe - just reads files, no execution).
     // Both interactive and -p use getMcpConfigs (local file reads only).
