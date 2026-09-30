@@ -250,6 +250,27 @@ export {
   type McpResourceItem,
 } from './tools'
 export {
+  // G-2（2026-09-30）：WebSearch 客户端 provider 层（bing 无 key 默认 +
+  // tavily key 可选；双工具面共享主入口 runWebSearch，TUI 面经本根门面
+  // 消费 = tui↛engine 深 import 纪律同型）+ 2 测试缝（transport 注入 /
+  // settings 键供给方，组合根 mcpBridge 型接线面见 atlascode/compose.ts）
+  BING_DEFAULT_ENDPOINT,
+  TAVILY_DEFAULT_ENDPOINT,
+  SearchProviderError,
+  filterHitsByDomains,
+  parseBingResults,
+  resolveWebSearchApiKey,
+  resolveWebSearchProvider,
+  runWebSearch,
+  setWebSearchSettingsKeyProvider,
+  setWebSearchTransportForTesting,
+  type WebSearchExecutionContext,
+  type WebSearchHttpResponse,
+  type WebSearchProvider,
+  type WebSearchTransport,
+  type WebSearchTransportInit,
+} from './tools'
+export {
   // S-E2d（§8.68 remote 波 组合根 ⑭）：MCP skill 注册窗（⑥ 核销；组合根
   // initMcpConnections 供给面）+ 2 型面（映射面在组合根 mcpBridge 消费）
   setMcpSkillCommandSource,

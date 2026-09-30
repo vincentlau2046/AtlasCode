@@ -91,6 +91,14 @@ export const SettingsSchema = () => z.object({
   cleanupPeriodDays: z.number().optional(),
   showClearContextOnPlanAccept: z.boolean().optional(),
   skipWebFetchPreflight: z.boolean().optional(),
+  // --- Web 搜索（G-2 客户端化 2026-09-30：Tavily key 模板项；env TAVILY_API_KEY
+  // 优先，组合根 atlascode/compose.ts 经 setWebSearchSettingsKeyProvider 注入
+  // 本键读者，模板见根目录 settings.template.json）
+  search: z
+    .object({
+      tavilyApiKey: z.string().optional(),
+    })
+    .optional(),
   terminalTitleFromRename: z.boolean().optional(),
   includeCoAuthoredBy: z.boolean().optional(),
   plansDirectory: z.string().optional(),

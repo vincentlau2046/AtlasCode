@@ -101,6 +101,13 @@ import {
   setSessionEnv,
   setSessionMemoryPort,
   setTaskNotificationHandler,
+  // G-2（2026-09-30）：WebSearch 客户端 provider 层 settings 键供给缝
+  // （engine web 域 setWebSearchSettingsKeyProvider，§8.74.27）+ 合并
+  // settings 读面 getInitialSettings（engine/config 门面，S-3d settings-
+  // adapter 消费先例同面；壳不深 import tui settings 模块 = entry-point
+  // 规则面）
+  getInitialSettings,
+  setWebSearchSettingsKeyProvider,
   // C 桶 ③ S-E2d（§8.66）：D 类 3 工具本体 + TeamServices 接缝 +
   // TeamFileLoader 接缝（组合根消费面，engine root S-E2d 扩面）
   SnipTool,
@@ -347,6 +354,20 @@ export function createCoreDependencies(): CoreDependencies {
   setAgentLoopDepsMcpConnectionsProvider(() =>
     buildMcpEngineConnections(getMcpConnectionManager()),
   )
+
+  // ⑮ G-2（2026-09-30 R1 裁定，§8.74.27）：WebSearch 客户端化 settings 键
+  //    面——settings.json search.tavilyApiKey（模板项见仓根 settings.template.json）；
+  //    优先级 env TAVILY_API_KEY > 本键（provider 层 resolveWebSearchApiKey
+  //    内裁定）。try/catch：启动早位 settings 读面未就绪/文件不可读 → 键面
+  //    降级 env-only，不阻断组合根装配。
+  setWebSearchSettingsKeyProvider(() => {
+    try {
+      const s = getInitialSettings()
+      return s.search?.tavilyApiKey
+    } catch {
+      return undefined
+    }
+  })
 
   return {
     sandboxManager,

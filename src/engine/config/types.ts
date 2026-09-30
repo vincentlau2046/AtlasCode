@@ -4,7 +4,8 @@
  * 真核心：
  *   - SettingsSchema（zod v4，全 optional + .passthrough()）：engine 消费字段族
  *     （model 角色族 / providers / env / mcp 族 / sandbox / permissions / hooks /
- *     记忆族 / defaultShell / skipWebFetchPreflight）+ SettingsJson = z.infer。
+ *     记忆族 / defaultShell / skipWebFetchPreflight / search〔G-2 tavilyApiKey〕）
+ *     + SettingsJson = z.infer。
  *   - providers 补声明：旧仓该字段未被 schema 声明（靠 passthrough 透传），但新仓
  *     settings-adapter（S-3d）经 EndpointConfigSource.getProviders() 显式消费
  *     settings.providers → 本版补 z.record 声明（数据契约先行，S-3d 消费不靠 any）。
@@ -82,6 +83,12 @@ export const SettingsSchema = () => z.object({
   defaultShell: z.union([z.literal('bash'), z.literal('powershell')]).optional(),
   // --- WebFetch 工具面（skipWebFetchPreflight 裁剪：工具本体纵切消费）
   skipWebFetchPreflight: z.boolean().optional(),
+  // --- WebSearch 工具面（G-2 §8.74.27：settings.json search.tavilyApiKey；
+  //     组合根 atlascode/compose.ts 经 getInitialSettings 注入 engine web 域
+  //     key 供给缝——数据契约先行，consumption 不靠 passthrough unknown 面）
+  search: z
+    .object({ tavilyApiKey: z.string().optional() })
+    .optional(),
 }).passthrough()
 
 export type SettingsJson = z.infer<ReturnType<typeof SettingsSchema>>

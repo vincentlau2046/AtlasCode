@@ -806,10 +806,25 @@ export {
   WEB_FETCH_TOOL_INPUT_SCHEMA,
   WebFetchTool,
   webFetchToolInputToPermissionRuleContent,
-  makeOutputFromSearchResponse,
-  makeToolSchema,
   WEB_SEARCH_TOOL_INPUT_SCHEMA,
   WebSearchTool,
+  // G-2（2026-09-30）：客户端 provider 层（bing 无 key 默认 + tavily key
+  // 可选；makeToolSchema / makeOutputFromSearchResponse 随裁，§8.74.27）
+  BING_DEFAULT_ENDPOINT,
+  TAVILY_DEFAULT_ENDPOINT,
+  SearchProviderError,
+  filterHitsByDomains,
+  parseBingResults,
+  resolveWebSearchApiKey,
+  resolveWebSearchProvider,
+  runWebSearch,
+  setWebSearchSettingsKeyProvider,
+  setWebSearchTransportForTesting,
+  type WebSearchExecutionContext,
+  type WebSearchHttpResponse,
+  type WebSearchProvider,
+  type WebSearchTransport,
+  type WebSearchTransportInit,
   getLocalMonthYear,
   getWebSearchPrompt,
   webSearchShortDescription,
@@ -822,10 +837,8 @@ export {
   type WebSearchOutput,
   type WebSearchProgress,
   type WebSearchResult,
-  type WebSearchServerToolSchema,
   type WebSearchToolContext,
   type WebSearchToolInput,
-  type SearchContentBlock,
 } from './web'
 
 // ── S-E2（§8.60）：config 子域（ConfigTool 本体 + 注册表 3 键裁剪面 +

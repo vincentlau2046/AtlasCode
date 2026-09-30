@@ -56,11 +56,21 @@
  *    （旧 onProgress 体零消费实证），型面 = 进度波前向接缝。
  *  ⑨ 旧 getActivityDescription 成员新契约无位 → 裁（TUI 波前向接缝，
  *    webFetchTool.ts delta ④ 同面）。
+ * ⑩ G-2 客户端化（2026-09-30 R1 裁定，§8.74.27）：call() 旧 Anthropic
+ *    服务端工具车道（makeToolSchema web_search_20250305 经 extraToolSchemas
+ *    注入 + chatStream 收集 web_search_tool_result 块 + makeOutputFromSearch
+ *    Response 三块型解析）整裁 → 客户端 provider 层 runWebSearch
+ *    （webSearchProvider.ts：bing 无 key 默认 + tavily key 可选；env
+ *    WEB_SEARCH_PROVIDER/WEB_SEARCH_ENDPOINT/TAVILY_API_KEY〔第三方引擎
+ *    语义，非 ATLAS_* 命名空间〕+ settings.json search.tavilyApiKey
+ *    组合根注入）。随裁面：makeToolSchema / makeOutputFromSearchResponse
+ *    两函数 + modelprovider/files/shared(asSystemPrompt/Message) import 面
+ *    + WebSearchServerToolSchema/SearchContentBlock 型面（webToolInput 同批）。
+ *    错误语义随迁：B8 错误串结果面（results[0]，模型可反应）。
+ *    getMainLoopModelName/searchModel/searchRole 消费面随车道整裁（登记 =
+ *    haiku 快模型搜索支 TUI/增强波复活候选，delta ③ 同源）。
  */
 import {
-  asSystemPrompt,
-  logError,
-  type Message,
   type PermissionResult,
   type Tool,
   type ToolInputJSONSchema,
@@ -68,16 +78,12 @@ import {
   type ToolResultBlockParam,
   type ValidationResult,
 } from '../../../shared'
-import { buildOpenAIParams, modelProvider, modelToRole } from '../../../modelprovider'
 import { jsonStringify } from '../../session'
-import { createUserMessage, getMainLoopModelName } from '../files'
 import { getWebSearchPrompt, WEB_SEARCH_TOOL_NAME } from './webSearchPrompt'
+import { runWebSearch } from './webSearchProvider'
 import {
   truncateSummary,
-  type SearchContentBlock,
   type WebSearchOutput,
-  type WebSearchResult,
-  type WebSearchServerToolSchema,
   type WebSearchToolContext,
   type WebSearchToolInput,
 } from './webToolInput'
@@ -101,83 +107,9 @@ export const WEB_SEARCH_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   required: ['query'],
 }
 
-/** 旧 makeToolSchema 逐字（wire 面 = extraToolSchemas 注入，delta ②）。 */
-export function makeToolSchema(input: WebSearchToolInput): WebSearchServerToolSchema {
-  return {
-    type: 'web_search_20250305',
-    name: 'web_search',
-    allowed_domains: input.allowed_domains,
-    blocked_domains: input.blocked_domains,
-    max_uses: 8, // Hardcoded to 8 searches maximum
-  }
-}
-
-/** 旧 makeOutputFromSearchResponse 逐字（三块型流解析，delta ② 型面）。 */
-export function makeOutputFromSearchResponse(
-  result: SearchContentBlock[],
-  query: string,
-  durationSeconds: number,
-): WebSearchOutput {
-  // The result is a sequence of these blocks:
-  // - text to start -- always?
-  // [
-  //    - server_tool_use
-  //    - web_search_tool_result
-  //    - text and citation blocks intermingled
-  //  ]+  (this block repeated for each search)
-
-  const results: (WebSearchResult | string)[] = []
-  let textAcc = ''
-  let inText = true
-
-  for (const block of result) {
-    if (block.type === 'server_tool_use') {
-      if (inText) {
-        inText = false
-        if (textAcc.trim().length > 0) {
-          results.push(textAcc.trim())
-        }
-        textAcc = ''
-      }
-      continue
-    }
-
-    if (block.type === 'web_search_tool_result') {
-      // Handle error case - content is a WebSearchToolResultError
-      if (!Array.isArray(block.content)) {
-        const errorMessage = `Web search error: ${block.content.error_code}`
-        logError(new Error(errorMessage))
-        results.push(errorMessage)
-        continue
-      }
-      // Success case - add results to our collection
-      const hits = block.content.map(r => ({ title: r.title, url: r.url }))
-      results.push({
-        tool_use_id: block.tool_use_id,
-        content: hits,
-      })
-    }
-
-    if (block.type === 'text') {
-      if (inText) {
-        textAcc += block.text
-      } else {
-        inText = true
-        textAcc = block.text
-      }
-    }
-  }
-
-  if (textAcc.length) {
-    results.push(textAcc.trim())
-  }
-
-  return {
-    query,
-    results,
-    durationSeconds,
-  }
-}
+// G-2（2026-09-30，delta ⑩）：makeToolSchema（web_search_20250305 wire 面）+
+// makeOutputFromSearchResponse（三块型流解析）随 Anthropic 服务端工具车道
+// 整裁（H6 登记，§8.74.27）；客户端搜索 = webSearchProvider.runWebSearch。
 
 /**
  * 旧 UI.tsx getToolUseSummary 逐字（delta ⑧：truncate → 本地面）。
@@ -210,8 +142,8 @@ export const WebSearchTool: WebSearchToolFace = {
   // delta ①：旧 z.strictObject 面
   strict: true,
   isEnabled: () => {
-    // provider 恒为 'firstParty'（3P Vertex/Foundry 分支随 legacy-model-stack
-    // 清理删除）→ 恒启用。
+    // G-2（delta ⑩）：客户端 provider 层（bing 无 key 默认）不依赖任何
+    // 网关/模型车道 → 恒启用（失败 = 错误串结果面，非禁用）。
     return true
   },
   // 旧 buildTool TOOL_DEFAULTS 成员对象化（webFetchTool.ts delta ④ 同面，逐值）
@@ -293,92 +225,12 @@ export const WebSearchTool: WebSearchToolFace = {
     return message
   },
   async call(args: unknown, context: unknown): Promise<ToolResult<WebSearchOutput>> {
+    // G-2 客户端化（delta ⑩，§8.74.27）：Anthropic 服务端工具车道整裁 →
+    // 客户端 provider 层（bing 无 key 默认 / tavily key 可选；错误 =
+    // results[0] 错误串结果面，模型可反应，B8 语义随迁）。
     const input = args as WebSearchToolInput
     const ctx = context as WebSearchToolContext
-
-    const startTime = performance.now()
-    const { query } = input
-    const userMessage = createUserMessage({
-      content: 'Perform a web search for the query: ' + query,
-    })
-    const toolSchema = makeToolSchema(input)
-
-    const appState = ctx.getAppState()
-    // delta ③/④：GB 门裁（useHaiku 恒 false，haiku 支全裁）+ mainLoopModel
-    // → small 角色池头（getMainLoopModelName）
-    const searchModel = getMainLoopModelName()
-    const searchRole = modelToRole(searchModel)
-    const params = await buildOpenAIParams(
-      {
-        // InDomainUserMessage → Message[] 双 cast（webFetchUtils 同面登记）
-        messages: [userMessage] as unknown as Message[],
-        systemPrompt: asSystemPrompt([
-          'You are an assistant for performing a web search tool use',
-        ]),
-        thinkingConfig: ctx.options.thinkingConfig,
-        tools: [],
-        // delta ⑤：7 选项字段裁（头部登记）；toolChoice 随 haiku 支裁
-        options: {
-          model: searchModel,
-          extraToolSchemas: [toolSchema],
-          effortValue: appState.effortValue,
-        },
-      },
-      searchRole,
-    )
-    const queryStream = modelProvider.chatStream({
-      role: searchRole,
-      messages: params.messages,
-      tools: params.tools,
-      maxTokens: params.max_tokens,
-      temperature: params.temperature,
-      signal: ctx.abortController.signal,
-    })
-
-    const allContentBlocks: SearchContentBlock[] = []
-    let streamError: string | null = null
-    try {
-      for await (const event of queryStream) {
-        if (event.type === 'assistant') {
-          allContentBlocks.push(
-            ...(event as { message: { content: SearchContentBlock[] } })
-              .message.content,
-          )
-        } else if (event.type === 'error') {
-          // B8: chatStream yields {type:'error'} when the provider exhausted
-          // retries + horizontal fallback. Surface it as a string result so
-          // the model can react (mirrors web_search_tool_result error handling
-          // in makeOutputFromSearchResponse).
-          const err = event as {
-            message?: string
-            code?: string
-            retryable?: boolean
-          }
-          streamError =
-            err.message ||
-            `Web search provider error (code: ${err.code ?? 'UNKNOWN'}, retryable: ${String(err.retryable ?? false)})`
-          logError(new Error(streamError))
-          break
-        }
-      }
-    } catch (error) {
-      logError(error)
-      streamError = error instanceof Error ? error.message : String(error)
-    }
-
-    // Process the final result
-    const endTime = performance.now()
-    const durationSeconds = (endTime - startTime) / 1000
-
-    const data = makeOutputFromSearchResponse(
-      allContentBlocks,
-      query,
-      durationSeconds,
-    )
-    if (streamError !== null) {
-      data.results.push(streamError)
-    }
-    return { data }
+    return { data: await runWebSearch(input, ctx) }
   },
   mapToolResultToToolResultBlockParam(
     output: WebSearchOutput,

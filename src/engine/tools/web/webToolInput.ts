@@ -59,10 +59,12 @@ export type WebSearchToolInput = {
   blocked_domains?: string[]
 }
 
-/** 旧 searchResultSchema 命中条目（z.infer 面，delta ②）。 */
+/** 旧 searchResultSchema 命中条目（z.infer 面，delta ②）；G-2 客户端化增
+ * 可选 snippet（bing 摘要 / tavily content 截 500 面，旧服务端面无此字段）。 */
 export type WebSearchHit = {
   title: string
   url: string
+  snippet?: string
 }
 
 /** 旧 SearchResult（searchResultSchema z.infer，delta ②）。 */
@@ -97,31 +99,11 @@ export interface WebSearchToolContext {
   }
 }
 
-/**
- * 旧 BetaWebSearchTool20250305（types/atlas.ts 旧 SDK 型）→ 域内结构型
- * （makeToolSchema 返回值，extraToolSchemas 注入面）。
- */
-export type WebSearchServerToolSchema = {
-  type: 'web_search_20250305'
-  name: 'web_search'
-  allowed_domains?: string[]
-  blocked_domains?: string[]
-  max_uses: number
-}
-
-/**
- * 旧 BetaContentBlock[]（流收集面）→ 域内结构 duck：makeOutputFromSearchResponse
- * 三块型消费面（server_tool_use / web_search_tool_result（成功 array +
- * 失败 error_code 双形态）/ text）。
- */
-export type SearchContentBlock =
-  | { type: 'server_tool_use' }
-  | {
-      type: 'web_search_tool_result'
-      tool_use_id: string
-      content: WebSearchHit[] | { error_code?: string }
-    }
-  | { type: 'text'; text: string }
+// G-2（2026-09-30）：WebSearchServerToolSchema（BetaWebSearchTool20250305 域内
+// 型，makeToolSchema 返回值 extraToolSchemas 注入面）+ SearchContentBlock
+//（BetaContentBlock[] 流收集 duck，makeOutputFromSearchResponse 三块型消费面）
+// 随 Anthropic 服务端工具车道整裁（webSearchProvider.ts 头注 H6 登记，
+// §8.74.27）——客户端搜索无 wire 注入/流块收集消费点。
 
 // ── 摘要面（delta ⑤）───────────────────────────────────────────────────
 

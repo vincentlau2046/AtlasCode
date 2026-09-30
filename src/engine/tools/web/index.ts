@@ -2,18 +2,20 @@
  * engine/tools/web 子门面（S-E2 §8.59 web 族子波，STR-1 显式名块纪律）。
  *
  * 覆盖两本体对象（WebFetchTool / WebSearchTool）+ JSON schema 2 常量
- * （WEB_FETCH/WEB_SEARCH_TOOL_INPUT_SCHEMA）+ 型面 11（webToolInput 实
- * 导出 11 型，S-E3 A-N6/B-N5 计数订正）：
- * WebFetch/WebSearch 输入输出 + context duck 2 + 流块型 2 + 进度 duck +
- * 服务工具 schema）+ prompt 面 4 函数（getWebFetchToolPrompt /
+ * （WEB_FETCH/WEB_SEARCH_TOOL_INPUT_SCHEMA）+ 型面 9（webToolInput 实
+ * 导出 9 型；G-2 客户端化裁 2：WebSearchServerToolSchema / SearchContentBlock
+ * 随 Anthropic 服务端工具车道整裁，webToolInput 头注 G-2 登记）：
+ * WebFetch/WebSearch 输入输出 + context duck 2 + 进度 duck + Hit/Result/
+ * Output 3）+ prompt 面 4 函数（getWebFetchToolPrompt /
  * getWebSearchPrompt / getLocalMonthYear / 2 短 description 不接线导出）+
  * URL 管线 10 面（webFetchUtils：3 错误类 / validateURL /
  * checkDomainBlocklist / isPermittedRedirect / getWithPermittedRedirects /
  * getURLMarkdownContent / applyPromptToMarkdown / 二进制落盘 3 件 /
  * clearWebFetchCache / 测试缝 setWebFetchTransportForTesting）+
- * preapproved 双表 + rule-content 函数 2 + makeToolSchema /
- * makeOutputFromSearchResponse + 摘要面（TOOL_SUMMARY_MAX_LENGTH /
- * truncateSummary）。
+ * preapproved 双表 + rule-content 函数 2 + 摘要面（TOOL_SUMMARY_MAX_LENGTH /
+ * truncateSummary）+ G-2 客户端 provider 层（webSearchProvider：runWebSearch
+ * 主入口 / bing SERP 解析 / tavily API / 域过滤 / env+settings 键解析 /
+ * 2 测试缝 + 端点常量 2 + SearchProviderError）。
  *
  * 纪律（tools/index.ts plan 块先例）：逐名显式 re-export，无 `export *`；
  * 各文件头注 delta 登记不随门面重复（单一事实源 = 各模块头注）。
@@ -61,12 +63,24 @@ export {
   WebFetchTool,
   webFetchToolInputToPermissionRuleContent,
 } from './webFetchTool'
+export { WEB_SEARCH_TOOL_INPUT_SCHEMA, WebSearchTool } from './webSearchTool'
 export {
-  makeOutputFromSearchResponse,
-  makeToolSchema,
-  WEB_SEARCH_TOOL_INPUT_SCHEMA,
-  WebSearchTool,
-} from './webSearchTool'
+  BING_DEFAULT_ENDPOINT,
+  TAVILY_DEFAULT_ENDPOINT,
+  SearchProviderError,
+  filterHitsByDomains,
+  parseBingResults,
+  resolveWebSearchApiKey,
+  resolveWebSearchProvider,
+  runWebSearch,
+  setWebSearchSettingsKeyProvider,
+  setWebSearchTransportForTesting,
+  type WebSearchExecutionContext,
+  type WebSearchHttpResponse,
+  type WebSearchProvider,
+  type WebSearchTransport,
+  type WebSearchTransportInit,
+} from './webSearchProvider'
 export {
   getLocalMonthYear,
   getWebSearchPrompt,
@@ -83,8 +97,6 @@ export {
   type WebSearchOutput,
   type WebSearchProgress,
   type WebSearchResult,
-  type WebSearchServerToolSchema,
   type WebSearchToolContext,
   type WebSearchToolInput,
 } from './webToolInput'
-export type { SearchContentBlock } from './webToolInput'
