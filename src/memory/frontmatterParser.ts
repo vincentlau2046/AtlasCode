@@ -14,8 +14,9 @@
  *    签名取）；索引签名保留，未来 skill/command 域波迁移 parser 时按域重建
  *    字段（HooksSettings 型随之归 skill 域，不在此引入 settings 域依赖）。
  *  - parseYaml：旧仓 15L 包装（Bun.YAML + 非 Bun 运行时 `yaml` npm
- *    lazy-require 回退）裁为纯 Bun 面——新仓无 yaml 依赖（package.json 无
- *    该键），运行时 = Bun；非 Bun 构建回退归 A 波构建配置波按需重建。
+ *    回退）曾裁为纯 Bun 面；W5 npm 通道（node 运行器）恢复非 Bun 回退——
+ *    `yaml` 现为顶层依赖（package.json 有该键），静态 import 随 bundle 内联；
+ *    Bun 下仍优先 `Bun.YAML`（内建零拷贝），node 下走 `yaml.parse`。
  *  - 旧仓其余导出（splitPathInFrontmatter / expandBraces /
  *    parsePositiveIntFromFrontmatter / coerceDescriptionToString /
  *    parseBooleanFrontmatter / parseShellFrontmatter = skill/command 面
@@ -23,6 +24,9 @@
  */
 
 import { logForDebugging } from '../shared'
+// node 运行器（W5 npm 通道）：非 Bun 运行时用 `yaml` npm 回退（命名 import，
+// 随 bundle 内联；Bun 下走内建 Bun.YAML，此包仅 node 路径实际调用）。
+import { parse as yamlParse } from 'yaml'
 
 /**
  * Frontmatter data shape for markdown files（memory 域裁面，见头注）。
@@ -102,11 +106,15 @@ function quoteProblematicValues(frontmatterText: string): string {
 export const FRONTMATTER_REGEX = /^---\s*\n([\s\S]*?)---\s*\n?/
 
 /**
- * YAML 解析（delta：旧仓非 Bun `yaml` npm 回退裁，见头注；Bun.YAML
- * 内建零成本）。
+ * YAML 解析（Bun 下用内建 `Bun.YAML`（零拷贝）；node 运行器（W5 npm 通道）
+ * 下 `Bun` 全局不存在，回退 `yaml` npm 包（见头注 delta）。`typeof Bun` 守卫
+ * 保 Bun 路径零行为改动。
  */
 function parseYaml(input: string): unknown {
-  return Bun.YAML.parse(input)
+  if (typeof Bun !== 'undefined') {
+    return Bun.YAML.parse(input)
+  }
+  return yamlParse(input)
 }
 
 /**
