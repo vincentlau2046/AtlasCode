@@ -88,7 +88,7 @@ import { findThinkingTriggerPositions, getRainbowColor, isUltrathinkEnabled } fr
 import { findTokenBudgetPositions } from '../../utils/tokenBudget.js';
 import { findUltraplanTriggerPositions } from '../../utils/ultraplan/keyword.js';
 import { AutoModeOptInDialog } from '../AutoModeOptInDialog.js';
-import { BridgeDialog } from '../BridgeDialog.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：BridgeDialog（1P bridge 对话框）随 1P 簇裁除
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { getVisibleAgentTasks, useCoordinatorTaskCount } from '../CoordinatorAgentStatus.js';
 // getEffortNotificationText now consumed by PersistentFooterIndicator.
@@ -344,7 +344,6 @@ function PromptInput({
   // (arrow, escape, backspace, paste, space) disarms without inserting.
   const pendingSpaceAfterPillRef = useRef(false);
   const [showTeamsDialog, setShowTeamsDialog] = useState(false);
-  const [showBridgeDialog, setShowBridgeDialog] = useState(false);
   const [teammateFooterIndex, setTeammateFooterIndex] = useState(0);
   // -1 sentinel: tasks pill is selected but no specific agent row is selected yet.
   // First ↓ selects the pill, second ↓ moves to row 0. Prevents double-select
@@ -1712,10 +1711,7 @@ function PromptInput({
           setShowTeamsDialog(true);
           selectFooterItem(null);
           break;
-        case 'bridge':
-          setShowBridgeDialog(true);
-          selectFooterItem(null);
-          break;
+        // 前向缝登记（§8.74.29 1P 簇裁，#200）：'bridge' footer 项（setShowBridgeDialog）随 1P 簇裁除
       }
     },
     'footer:clearSelection': () => {
@@ -1980,12 +1976,6 @@ function PromptInput({
   // Show loop mode menu when requested (ant-only, eliminated from external builds)
   if (thinkingToggleElement) {
     return thinkingToggleElement;
-  }
-  if (showBridgeDialog) {
-    return <BridgeDialog onDone={() => {
-      setShowBridgeDialog(false);
-      selectFooterItem(null);
-    }} />;
   }
   const baseProps: BaseTextInputProps = {
     multiline: true,

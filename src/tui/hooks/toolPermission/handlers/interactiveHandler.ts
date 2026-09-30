@@ -2,7 +2,31 @@ import { feature } from 'src/shared' // F5: stub import — dev source-direct ca
 import type { ContentBlockParam } from '../../../types/atlas.js'
 import { randomUUID } from 'crypto'
 import { logForDebugging } from 'src/tui/utils/debug.js'
-import type { BridgePermissionCallbacks } from '../../../bridge/bridgePermissionCallbacks.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge/bridgePermissionCallbacks 整裁；1P 远程权限委托回调类型
+// 就地定义（domestic 下 bridgeCallbacks 恒 undefined，所有 gate 块 no-op，行为保持）
+type BridgePermissionResponse = {
+  behavior: 'allow' | 'deny'
+  updatedInput?: Record<string, unknown>
+  updatedPermissions?: PermissionUpdate[]
+  message?: string
+}
+type BridgePermissionCallbacks = {
+  sendRequest(
+    requestId: string,
+    toolName: string,
+    input: Record<string, unknown>,
+    toolUseId: string,
+    description: string,
+    permissionSuggestions?: PermissionUpdate[],
+    blockedPath?: string,
+  ): void
+  sendResponse(requestId: string, response: BridgePermissionResponse): void
+  cancelRequest(requestId: string): void
+  onResponse(
+    requestId: string,
+    handler: (response: BridgePermissionResponse) => void,
+  ): () => void
+}
 import { getTerminalFocused } from '../../../ink/terminal-focus-state.js'
 import { executeAsyncClassifierCheck } from '../../../tools/BashTool/bashPermissions.js'
 import { BASH_TOOL_NAME } from '../../../tools/BashTool/toolName.js'

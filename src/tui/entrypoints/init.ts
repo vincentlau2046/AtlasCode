@@ -8,10 +8,7 @@ import type { AttributedCounter } from 'src/tui/bootstrapState.js'
 import { getSessionCounter, setMeter } from 'src/tui/bootstrapState.js'
 import { shutdownLspServerManager } from '../services/lsp/manager.js'
 import { populateOAuthAccountInfoIfNeeded } from '../services/oauth/client.js'
-import {
-  initializePolicyLimitsLoadingPromise,
-  isPolicyLimitsEligible,
-} from '../services/policyLimits/index.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：policyLimits 簇（initializePolicyLimitsLoadingPromise/isPolicyLimitsEligible）裁除
 import { preconnectAtlasApi } from '../utils/apiPreconnect.js'
 import { applyExtraCACertsFromConfig } from '../utils/caCertsConfig.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
@@ -97,9 +94,6 @@ export const init = memoize(async (): Promise<void> => {
     // Detect GitHub repository asynchronously (populates cache for gitDiff PR linking)
     void detectCurrentRepository()
 
-    if (isPolicyLimitsEligible()) {
-      initializePolicyLimitsLoadingPromise()
-    }
     profileCheckpoint('init_after_remote_settings_check')
 
     // Record the first start time
@@ -132,29 +126,7 @@ export const init = memoize(async (): Promise<void> => {
     // reuse the global pool.
     preconnectAtlasApi()
 
-    // CCR upstreamproxy: start the local CONNECT relay so agent subprocesses
-    // can reach org-configured upstreams with credential injection. Gated on
-    // ATLAS_REMOTE + GrowthBook; fail-open on any error. Lazy import so
-    // non-CCR startups don't pay the module load. The getUpstreamProxyEnv
-    // function is registered with subprocessEnv.ts so subprocess spawning can
-    // inject proxy vars without a static import of the upstreamproxy module.
-    if (isEnvTruthy((process.env.ATLAS_REMOTE))) {
-      try {
-        const { initUpstreamProxy, getUpstreamProxyEnv } = await import(
-          '../upstreamproxy/upstreamproxy.js'
-        )
-        const { registerUpstreamProxyEnvFn } = await import(
-          '../utils/subprocessEnv.js'
-        )
-        registerUpstreamProxyEnvFn(getUpstreamProxyEnv)
-        await initUpstreamProxy()
-      } catch (err) {
-        logForDebugging(
-          `[init] upstreamproxy init failed: ${err instanceof Error ? err.message : String(err)}; continuing without proxy`,
-          { level: 'warn' },
-        )
-      }
-    }
+    // 前向缝登记（§8.74.29 1P 簇裁，#200）：CCR upstreamproxy（upstreamproxy 簇，ATLAS_REMOTE + CONNECT relay + 凭据注入）裁除
 
     // Set up git-bash if relevant
     setShellIfWindows()

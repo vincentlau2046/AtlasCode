@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { clearTrustedDeviceTokenCache } from '../../bridge/trustedDevice.js';
 import { Text } from '../../ink.js';
 import { refreshGrowthBookAfterAuthChange } from '../../services/analytics/growthbook.js';
-import { clearPolicyLimitsCache } from '../../services/policyLimits/index.js';
 // flushTelemetry is loaded lazily to avoid pulling in ~1.1MB of OpenTelemetry at startup
 import { getOAuthTokens, removeApiKey } from '../../utils/auth.js';
 import { clearBetasCaches } from '../../utils/betas.js';
@@ -44,8 +42,8 @@ export async function performLogout({
 // clearing anything memoized that must be invalidated when user/session/auth changes
 export async function clearAuthRelatedCaches(): Promise<void> {
   // Clear the OAuth token cache
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：clearTrustedDeviceTokenCache（bridge/trustedDevice 簇）裁除
   getOAuthTokens.cache?.clear?.();
-  clearTrustedDeviceTokenCache();
   clearBetasCaches();
   clearToolSchemaCache();
 
@@ -55,10 +53,7 @@ export async function clearAuthRelatedCaches(): Promise<void> {
 
   // G-3（§8.74.28 ⑦）: Grove 配置缓存面（getGroveNoticeConfig/getGroveSettings
   // memoize cache）已随 grove.ts 整裁删除——logout 不再清 grove 缓存。
-
-
-  // Clear policy limits cache
-  await clearPolicyLimitsCache();
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：clearPolicyLimitsCache（policyLimits 簇）裁除
 }
 export async function call(): Promise<React.ReactNode> {
   await performLogout({

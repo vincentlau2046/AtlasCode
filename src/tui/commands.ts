@@ -42,7 +42,7 @@ import skills from './commands/skills/index.js'
 import status from './commands/status/index.js'
 import tasks from './commands/tasks/index.js'
 import tasklist from './commands/tasklist/index.js'
-import teleport from './commands/teleport/index.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：teleport 命令（1P CCR/teleport 簇死 stub）随 1P 簇裁除
 /* eslint-disable @typescript-eslint/no-require-imports */
 const IS_ATLAS_DEV = (process.env.ATLAS_DEV) === '1' || (process.env.ATLAS_DEV) === 'true'
 const agentsPlatform = IS_ATLAS_DEV
@@ -58,13 +58,8 @@ import vim from './commands/vim/index.js'
 import { feature } from 'src/shared'
 // Dead code elimination: conditional imports
 /* eslint-disable @typescript-eslint/no-require-imports */
-const bridge = feature('BRIDGE_MODE')
-  ? require('./commands/bridge/index.js').default
-  : null
-const remoteControlServerCommand =
-  feature('DAEMON') && feature('BRIDGE_MODE')
-    ? require('src/tui/commands/remoteControlServer/index.js').default
-    : null
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge（BRIDGE_MODE）+ remoteControlServer（DAEMON+BRIDGE_MODE）
+// 两 1P 远程面命令裁除；voice（VOICE_MODE）为国产 ASR 网关车道，保留
 const voiceCommand = feature('VOICE_MODE')
   ? require('./commands/voice/index.js').default
   : null
@@ -76,18 +71,11 @@ const workflowsCmd = feature('WORKFLOW_SCRIPTS')
       require('./commands/workflows/index.js') as typeof import('./commands/workflows/index.js')
     ).default
   : null
-const webCmd = feature('CCR_REMOTE_SETUP')
-  ? (
-      require('./commands/remote-setup/index.js') as typeof import('./commands/remote-setup/index.js')
-    ).default
-  : null
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：webCmd（CCR_REMOTE_SETUP / remote-setup）+ ultraplan（ULTRAPLAN / CCR 簇）两 1P 命令裁除
 const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
   ? (
       require('./services/skillSearch/localSearch.js') as typeof import('./services/skillSearch/localSearch.js')
     ).clearSkillIndexCache
-  : null
-const ultraplan = feature('ULTRAPLAN')
-  ? require('./commands/ultraplan.js').default
   : null
 const torch = feature('TORCH') ? require('src/tui/commands/torch.js').default : null
 const peersCmd = feature('UDS_INBOX')
@@ -113,7 +101,6 @@ import plugin from './commands/plugin/index.js'
 import reloadPlugins from './commands/reload-plugins/index.js'
 import rewind from './commands/rewind/index.js'
 import heapDump from './commands/heapdump/index.js'
-import bridgeKick from './commands/bridge-kick.js'
 import version from './commands/version.js'
 import summary from './commands/summary/index.js'
 import antTrace from './commands/ant-trace/index.js'
@@ -144,7 +131,6 @@ import exportCommand from './commands/export/index.js'
 import model from './commands/model/index.js'
 import tag from './commands/tag/index.js'
 import outputStyle from './commands/output-style/index.js'
-import remoteEnv from './commands/remote-env/index.js'
 import statusline from './commands/statusline.js'
 import { sessionlist } from './commands/sessionlist.js'
 import effort from './commands/effort/index.js'
@@ -197,13 +183,11 @@ export const INTERNAL_ONLY_COMMANDS = [
   issue,
   initVerifiers,
   ...(forceSnip ? [forceSnip] : []),
-  bridgeKick,
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridgeKick / ultraplan / teleport 三 1P 命令注册项裁除
   version,
-  ...(ultraplan ? [ultraplan] : []),
   onboarding,
   share,
   summary,
-  teleport,
   antTrace,
   perfIssue,
   env,
@@ -243,7 +227,6 @@ const COMMANDS = memoize((): Command[] => [
   memory,
   model,
   outputStyle,
-  remoteEnv,
   plugin,
   pr_comments,
   releaseNotes,
@@ -267,10 +250,8 @@ const COMMANDS = memoize((): Command[] => [
   usage,
   usageReport,
   vim,
-  ...(webCmd ? [webCmd] : []),
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：webCmd（remote-setup）/ bridge（BRIDGE_MODE）/ remoteControlServer 三 1P 命令注册项裁除
   ...(forkCmd ? [forkCmd] : []),
-  ...(bridge ? [bridge] : []),
-  ...(remoteControlServerCommand ? [remoteControlServerCommand] : []),
   ...(voiceCommand ? [voiceCommand] : []),
   thinkback,
   thinkbackPlay,

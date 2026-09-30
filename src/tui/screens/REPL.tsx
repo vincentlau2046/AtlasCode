@@ -51,7 +51,7 @@ import { isLocalAgentTask, queuePendingMessage, appendMessageToLocalAgent, type 
 import { registerLeaderToolUseConfirmQueue, unregisterLeaderToolUseConfirmQueue, registerLeaderSetToolPermissionContext, unregisterLeaderSetToolPermissionContext } from '../utils/swarm/leaderPermissionBridge.js';
 import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js';
 import { useLogMessages } from '../hooks/useLogMessages.js';
-import { useReplBridge } from '../hooks/useReplBridge.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：useReplBridge（1P REPL bridge 消息复制钩子）裁除。
 import { type Command, type CommandResultDisplay, type ResumeEntrypoint, getCommandName, isCommandEnabled } from '../commands.js';
 import type { PromptInputMode, QueuedCommand, VimMode } from '../types/textInputTypes.js';
 import { MessageSelector, selectableUserMessagesFilter, messagesAfterAreOnlySynthetic } from '../components/MessageSelector.js';
@@ -62,10 +62,10 @@ import { PromptDialog } from '../components/hooks/PromptDialog.js';
 import type { PromptRequest, PromptResponse } from '../types/hooks.js';
 import PromptInput from '../components/PromptInput/PromptInput.js';
 import { PromptInputQueuedCommands } from '../components/PromptInput/PromptInputQueuedCommands.js';
-import { useRemoteSession } from '../hooks/useRemoteSession.js';
-import { useDirectConnect } from '../hooks/useDirectConnect.js';
-import type { DirectConnectConfig } from '../server/directConnectManager.js';
-import { useSSHSession } from '../hooks/useSSHSession.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 远程传输三钩子（useRemoteSession WebSocket /
+// useDirectConnect cc 连接 / useSSHSession ssh 子进程）+ directConnectManager 整簇裁除。
+// DirectConnectConfig 型面随裁 → 本地 unknown 占位（props 面保留，运行时恒 undefined）。
+type DirectConnectConfig = unknown
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SSHSession = any
 import { SkillImprovementSurvey } from '../components/SkillImprovementSurvey.js';
@@ -202,7 +202,7 @@ import { recordAttributionSnapshot } from '../utils/sessionStorage.js';
 import { computeStandaloneAgentContext, restoreAgentFromSession, restoreSessionStateFromLog, restoreWorktreeForResume, exitRestoredWorktree } from '../utils/sessionRestore.js';
 import { isBgSession, updateSessionName, updateSessionActivity } from '../utils/concurrentSessions.js';
 import { isInProcessTeammateTask, type InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js';
-import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTask.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：restoreRemoteAgentTasks（1P 远程 agent 任务恢复面）裁除。
 import { useInboxPoller } from '../hooks/useInboxPoller.js';
 /* eslint-disable @typescript-eslint/no-require-imports */
 const SUGGEST_BG_PR_NOOP = (_p: string, _n: string): boolean => false;
@@ -225,7 +225,8 @@ import { diagnosticTracker } from '../services/diagnosticTracking.js';
 import { handleSpeculationAccept, type ActiveSpeculationState } from '../services/PromptSuggestion/speculation.js';
 import { IdeOnboardingDialog } from '../components/IdeOnboardingDialog.js';
 import type { EffortValue } from '../utils/effort.js';
-import { RemoteCallout } from '../components/RemoteCallout.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteCallout（1P 远程会话 callout 组件）裁除，
+// 渲染支（focusedInputDialog === 'remote-callout'）一并裁（该 dialog 1P 已不可达）。
 // de-ANT: ant-only AntModelSwitchCallout / UndercoverAutoCallout conditional
 // requires removed (their render sites below were ant-gated and deleted).
 import { activityManager } from '../utils/activityManager.js';
@@ -268,9 +269,13 @@ import { IssueFlagBanner } from '../components/PromptInput/IssueFlagBanner.js';
 import { useIssueFlagBanner } from '../hooks/useIssueFlagBanner.js';
 import { DevBar } from '../components/DevBar.js';
 // Session manager removed - using AppState now
-import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionConfig（1P remote-session 配置，
+// RemoteSessionManager 簇）+ RemoteMessageContent（1P teleport/api 簇）裁除 → 本地占位型
+// （remoteSessionConfig 仅 .hasInitialPrompt 被消费；remoteContent = string | 内容块数组，
+// 与上方 remoteBlocks 型面对齐）。
+type RemoteSessionConfig = { hasInitialPrompt?: boolean }
+type RemoteMessageContent = string | Array<{ type: string; [key: string]: unknown }>
 import { REMOTE_SAFE_COMMANDS } from '../commands.js';
-import type { RemoteMessageContent } from '../utils/teleport/api.js';
 import { FullscreenLayout, useUnseenDivider, computeUnseenDivider } from '../components/FullscreenLayout.js';
 import { SessionTreeScreen } from './SessionTreeScreen.js';
 import { DebugPanel } from '../components/DebugPanel/DebugPanel.js';
@@ -1331,38 +1336,19 @@ export function REPL({
   const [inProgressToolUseIDs, setInProgressToolUseIDs] = useState<Set<string>>(new Set());
   const hasInterruptibleToolInProgressRef = useRef(false);
 
-  // Remote session hook - manages WebSocket connection and message handling for --remote mode
-  const remoteSession = useRemoteSession({
-    config: remoteSessionConfig,
-    setMessages,
-    setIsLoading: setIsExternalLoading,
-    onInit: handleRemoteInit,
-    setToolUseConfirmQueue,
-    tools: combinedInitialTools,
-    setStreamingToolUses,
-    setStreamMode,
-    setInProgressToolUseIDs
-  });
-
-  // Direct connect hook - manages WebSocket to the remote server for `atlas connect` mode
-  const directConnect = useDirectConnect({
-    config: directConnectConfig,
-    setMessages,
-    setIsLoading: setIsExternalLoading,
-    setToolUseConfirmQueue,
-    tools: combinedInitialTools
-  });
-
-  // SSH session hook - manages ssh child process for `atlas ssh` mode.
-  // Same callback shape as useDirectConnect; only the transport under the
-  // hood differs (ChildProcess stdin/stdout vs WebSocket).
-  const sshRemote = useSSHSession({
-    session: sshSession,
-    setMessages,
-    setIsLoading: setIsExternalLoading,
-    setToolUseConfirmQueue,
-    tools: combinedInitialTools
-  });
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 远程传输三钩子（useRemoteSession WebSocket /
+  // useDirectConnect cc 连接 / useSSHSession ssh 子进程，各自 transport + 消息处理）整簇裁除。
+  // --remote/--connect/ssh 旗标已在 CLI 层裁（§8.74.28 ⑭）→ 1P 远程传输不可达。替换为
+  // no-op handle（isRemoteMode 恒 false、无 transport、sendMessage/cancelRequest 空操作），
+  // activeRemote 恒解析为「无远程」态（行为保真：1P 远程路径本即死码）。
+  const noRemoteHandle = {
+    isRemoteMode: false,
+    cancelRequest: () => {},
+    sendMessage: async (_content: unknown, _opts?: unknown) => {},
+  };
+  const remoteSession = noRemoteHandle;
+  const directConnect = noRemoteHandle;
+  const sshRemote = noRemoteHandle;
 
   // Use whichever remote mode is active
   const activeRemote = sshRemote.isRemoteMode ? sshRemote : directConnect.isRemoteMode ? directConnect : remoteSession;
@@ -1746,11 +1732,8 @@ export function REPL({
         exitRestoredWorktree();
         restoreWorktreeForResume(log.worktreeSession);
         adoptResumedSessionFile();
-        void restoreRemoteAgentTasks({
-          abortController: new AbortController(),
-          getAppState: () => store.getState(),
-          setAppState
-        });
+        // 前向缝登记（§8.74.29 1P 簇裁，#200）：restoreRemoteAgentTasks（1P 远程 agent
+        // 任务恢复）裁除，resume 支不再恢复 1P 远程任务。
       } else {
         // Fork: same re-persist as /clear (conversation.ts). The clear
         // above wiped currentSessionWorktree, forkLog doesn't carry it,
@@ -1841,11 +1824,8 @@ export function REPL({
   useEffect(() => {
     if (initialMessages && initialMessages.length > 0) {
       restoreReadFileState(initialMessages, getOriginalCwd());
-      void restoreRemoteAgentTasks({
-        abortController: new AbortController(),
-        getAppState: () => store.getState(),
-        setAppState
-      });
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：restoreRemoteAgentTasks（1P 远程 agent
+      // 任务恢复）裁除，mount 支不再恢复 1P 远程任务。
     }
     // Only run on mount - initialMessages shouldn't change during component lifetime
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3557,11 +3537,10 @@ export function REPL({
   // anything else
   useLogMessages(messages, messages.length === initialMessages?.length);
 
-  // REPL Bridge: replicate user/assistant messages to the bridge session
-  // for remote access via claude.ai. No-op in external builds or when not enabled.
-  const {
-    sendBridgeResult
-  } = useReplBridge(messages, setMessages, abortControllerRef, commands, mainLoopModel);
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P REPL bridge（useReplBridge，消息复制到
+  // bridge session 供远程访问）裁除；sendBridgeResult 置 no-op（ref 型 () => void，
+  // 消费支 sendBridgeResultRef.current() 保真为空操作）。
+  const sendBridgeResult = () => {};
   sendBridgeResultRef.current = sendBridgeResult;
   useAfterFirstRender();
 
@@ -4498,20 +4477,9 @@ export function REPL({
           }} />}
                 {focusedInputDialog === 'ide-onboarding' && <IdeOnboardingDialog onDone={() => setShowIdeOnboarding(false)} installationStatus={ideInstallationStatus} />}
                 {/* de-ANT: ant-only model-switch / undercover callout dialogs removed */}
-                {focusedInputDialog === 'remote-callout' && <RemoteCallout onDone={selection => {
-            setAppState(prev => {
-              if (!prev.showRemoteCallout) return prev;
-              return {
-                ...prev,
-                showRemoteCallout: false,
-                ...(selection === 'enable' && {
-                  replBridgeEnabled: true,
-                  replBridgeExplicit: true,
-                  replBridgeOutboundOnly: false
-                })
-              };
-            });
-          }} />}
+                {/* 前向缝登记（§8.74.29 1P 簇裁，#200）：remote-callout 渲染支（RemoteCallout，
+                    1P 远程会话 enable prompt，set showRemoteCallout/replBridge* 面）裁除。
+                    showRemoteCallout 仅 1P 远程流置位（已裁）→ 恒 false，此支不可达。 */}
 
                 {exitFlow}
 

@@ -10,7 +10,16 @@ import { sequential } from '../../utils/sequential.js'
 import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { getOAuthHeaders } from '../../utils/teleport/api.js'
+
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：teleport/api 整裁；getOAuthHeaders（Bearer + Content-Type +
+// anthropic-version 冻结字面量 WIRE_API_VERSION='2023-06-01'）就地内联（行为保持）
+function getOAuthHeaders(accessToken: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+    'anthropic-version': '2023-06-01',
+  }
+}
 
 interface SessionIngressError {
   error?: {

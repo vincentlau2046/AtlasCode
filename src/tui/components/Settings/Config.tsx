@@ -14,7 +14,9 @@ import chalk from 'chalk';
 import { permissionModeTitle, permissionModeFromString, toExternalPermissionMode, isExternalPermissionMode, EXTERNAL_PERMISSION_MODES, PERMISSION_MODES, type ExternalPermissionMode, type PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { getAutoModeEnabledState, hasAutoModeOptInAnySource, transitionPlanAutoMode } from '../../utils/permissions/permissionSetup.js';
 import { logError } from '../../utils/log.js';
-import { isBridgeEnabled } from '../../bridge/bridgeEnabled.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：bridgeEnabled 簇整裁；isBridgeEnabled 恒 false（bridge 永不启用），
+// 就地 no-op stub 承载 remoteControlAtStartup 菜单项门控（该支恒不渲染，H6 不造假绿）
+const isBridgeEnabled = () => false;
 import { ThemePicker } from '../ThemePicker.js';
 import { useAppState, useSetAppState, useAppStateStore } from '../../state/AppState.js';
 import { ModelPicker } from '../ModelPicker.js';

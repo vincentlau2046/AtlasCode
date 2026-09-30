@@ -2,7 +2,6 @@ import { c as _c } from "react/compiler-runtime";
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import * as React from 'react';
 import { resetCostState } from 'src/bootstrap';
-import { clearTrustedDeviceToken, enrollTrustedDevice } from '../../bridge/trustedDevice.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { ConsoleOAuthFlow } from '../../components/ConsoleOAuthFlow.js';
@@ -10,7 +9,6 @@ import { Dialog } from '../../components/design-system/Dialog.js';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';
 import { Text } from '../../ink.js';
 import { refreshGrowthBookAfterAuthChange } from '../../services/analytics/growthbook.js';
-import { refreshPolicyLimits } from '../../services/policyLimits/index.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { stripSignatureBlocks } from '../../utils/messages.js';
 import { checkAndDisableAutoModeIfNeeded, checkAndDisableBypassPermissionsIfNeeded, resetAutoModeGateCheck, resetBypassPermissionsCheck } from '../../utils/permissions/bypassPermissionsKillswitch.js';
@@ -25,19 +23,12 @@ export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXComma
       // Post-login refresh logic. Keep in sync with onboarding in src/interactiveHelpers.tsx
       // Reset cost state when switching accounts
       resetCostState();
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：refreshPolicyLimits（policyLimits 簇）+ trusted-device 登记/清（bridge/trustedDevice 簇，Remote Control 10-min 窗口）裁除；登录刷新仅保留本地缓存 + GrowthBook
       // Refresh remotely managed settings after login (non-blocking)
-      // Refresh policy limits after login (non-blocking)
-      void refreshPolicyLimits();
       // Clear user data cache BEFORE GrowthBook refresh so it picks up fresh credentials
       resetUserCache();
       // Refresh GrowthBook after login to get updated feature flags (e.g., for claude.ai MCPs)
       refreshGrowthBookAfterAuthChange();
-      // Clear any stale trusted device token from a previous account before
-      // re-enrolling — prevents sending the old token on bridge calls while
-      // the async enrollTrustedDevice() is in-flight.
-      clearTrustedDeviceToken();
-      // Enroll as a trusted device for Remote Control (10-min fresh-session window)
-      void enrollTrustedDevice();
       // Reset killswitch gate checks and re-run with new org
       resetBypassPermissionsCheck();
       const appState = context.getAppState();

@@ -1,9 +1,5 @@
 import type { UUID } from 'crypto'
 import { getSessionId } from 'src/bootstrap'
-import {
-  getBridgeBaseUrlOverride,
-  getBridgeTokenOverride,
-} from '../../bridge/bridgeConfig.js'
 import type { ToolUseContext } from '../../Tool.js'
 import type {
   LocalJSXCommandContext,
@@ -56,21 +52,7 @@ export async function call(
   // Always save the custom title (session name)
   await saveCustomTitle(sessionId, newName, fullPath)
 
-  // Sync title to bridge session on claude.ai/code (best-effort, non-blocking).
-  // v2 env-less bridge stores cse_* in replBridgeSessionId —
-  // updateBridgeSessionTitle retags internally for the compat endpoint.
-  const appState = context.getAppState()
-  const bridgeSessionId = appState.replBridgeSessionId
-  if (bridgeSessionId) {
-    const tokenOverride = getBridgeTokenOverride()
-    void import('../../bridge/createSession.js').then(
-      ({ updateBridgeSessionTitle }) =>
-        updateBridgeSessionTitle(bridgeSessionId, newName, {
-          baseUrl: getBridgeBaseUrlOverride(),
-          getAccessToken: tokenOverride ? () => tokenOverride : undefined,
-        }).catch(() => {}),
-    )
-  }
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge 会话标题同步（updateBridgeSessionTitle / claude.ai/code replBridgeSessionId）随 1P 簇裁除；本地会话名仅持久化到转录 + agent 名
 
   // Also persist as the session's agent name for prompt-bar display
   await saveAgentName(sessionId, newName, fullPath)

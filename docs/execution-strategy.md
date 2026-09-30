@@ -6633,3 +6633,22 @@ frontmatter yaml 回退无崩）。
 **四件套（⑫+⑬+⑭ 叠态终审）**：tsc 0 / lint 0e·297w / build cli.js 2.56MB / 全量套 `bun test --isolate tests/` = 3108 pass·0 fail·191 文件（基线 3126·0·7477·192 减 ⑬ 18 测·1 文件，7453 expect）。
 
 **波终收口**：批量 push（未 push 提交 11+ 条，自 `c5d84c5` 后 G-3 全切片）+ `git merge-base --is-ancestor origin/master master` 祖先链核验。
+
+#### 8.74.29 #200 1P-REST/remote 子系统簇裁剪波（task #200，2026-09-30）
+
+**裁面判定（读码实测）**：整个 1P remote-control / CCR / teleport / code-session 簇**已死**——`bridgeEnabled.ts` `isBridgeEnabled()` / `isBridgeEnabledBlocking()` 硬返回 `false`（「Domestic vendors use the OpenAI-protocol static key, not a claude.ai subscription — so bridge is never enabled」）。故本簇裁 = **行为保持**（国产品车道本就不启用），纯削 ~23K LOC 死 1P 重量（代码瘦身波）。core `atlascode/` + `engine/` 只经 MCP bridge（`./adapters/mcpBridge`，无关）或死注释触达，非风险面。
+
+**簇清单（~23K LOC）**：bridge/ 32 文件 12015L + remote/ 4 + utils/teleport/ 4 + teleport.tsx 1 + cli/transports/ 8 + commands/remote-setup 3 + remote-env 2 + filesApi 1 + upstreamproxy 2 + settingsSync 2 + policyLimits 2 + wire.ts 1。
+
+**切片序（叶→中央，每片四件套绿 + 提交）**：
+- S1（隔离，不触中央挂载）：transports/ + remote/ + upstreamproxy/ + filesApi + settingsSync/ + policyLimits/ + wire.ts 9 常量 → seam 其少数非中央 importers（entrypoints/init.ts / subprocessEnv.ts / filePersistence.ts / commands login·logout·feedback·reload-plugins / background/remote/remoteSession.ts）。
+- S2（中央挂载）：bridge/ 32 + teleport* + remote-setup/remote-env + 5 个 remote hooks + teleport components + RemoteAgentTask → seam main.tsx / REPL.tsx / commands.ts。
+- S3：四件套终审 + 账本收口 + 批量 push。
+
+**H6 纪律**：seam 挂载点 = 诚实 no-op / 抛错 + 前向缝登记头注（回流 = IFF 网关 1P remote-control 车道定案），不造假绿。
+
+**波终（S1+S2+S3 全闭环，2026-09-30）**：1P 簇 89 文件裁净（`git rm`）+ 27 seam 文件（leaf 隔离 + 中央挂载 main.tsx/REPL.tsx/commands.ts/SendMessageTool.ts）。关键裁定：
+- 中央挂载 seam（main.tsx/REPL.tsx）：`--remote`/`--teleport`/`--remote-control`/`--rc` 旗标已在 CLI 层裁（§8.74.28 ⑭）→ 相关 1P 分支不可达（行为保真）；DIRECT_CONNECT/SSH_REMOTE/BRIDGE_MODE/CCR_MIRROR 门默认关（`feature()` ON_BY_DEFAULT 仅 TRANSCRIPT_CLASSIFIER/COORDINATOR_MODE）→ 优雅失败对齐 SSH 先例。
+- REPL.tsx 三远程钩子（useRemoteSession/useDirectConnect/useSSHSession）→ 本地 no-op handle（isRemoteMode 恒 false），activeRemote 恒「无远程」态；RemoteSessionConfig/RemoteMessageContent/DirectConnectConfig 型面本地占位。
+- **SendMessageTool 边界裁定**：tui 域不直接依赖 remote 域（DEP allow 面不含 remote，remote 是 engine 域出口）→ tui 侧 SendMessageTool 的 bridge/uds 发送支（UDS_INBOX 门默认关 + 1P bridge 已裁，本即死码）**不接线 src/remote 门面**，改本地诚实 no-op（getReplBridgeHandle 恒 null / postInterClaudeMessage·sendToUdsSocket 空操作）；engine 侧 `src/engine/tools/team/sendMessageTool.ts` 才是 src/remote 门面的合法消费方。
+- **四件套终绿**：tsc 0 / lint 0e（270w，低于 ~300w 基线）/ build cli.js 2.56MB（881 模块）/ 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 文件**（= G-3 ⑬ 后基线，零回归）。

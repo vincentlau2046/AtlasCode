@@ -1,39 +1,9 @@
-import { feature } from 'src/shared'
-import { getIsRemoteMode } from 'src/tui/bootstrapState.js'
-import { redownloadUserSettings } from '../../services/settingsSync/index.js'
 import type { LocalCommandCall } from '../../types/command.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
 import { refreshActivePlugins } from '../../utils/plugins/refresh.js'
-import { settingsChangeDetector } from '../../utils/settings/changeDetector.js'
 import { plural } from '../../utils/stringUtils.js'
 
 export const call: LocalCommandCall = async (_args, context) => {
-  // CCR: re-pull user settings before the cache sweep so enabledPlugins /
-  // extraKnownMarketplaces pushed from the user's local CLI (settingsSync)
-  // take effect. Non-CCR headless (e.g. vscode SDK subprocess) shares disk
-  // with whoever writes settings — the file watcher delivers changes, no
-  // re-pull needed there.
-  //
-  // Managed settings intentionally NOT re-fetched: it already polls hourly
-  // (POLLING_INTERVAL_MS), and policy enforcement is eventually-consistent
-  // by design (stale-cache fallback on fetch failure). Interactive
-  // /reload-plugins has never re-fetched it either.
-  //
-  // No retries: user-initiated command, one attempt + fail-open. The user
-  // can re-run /reload-plugins to retry. Startup path keeps its retries.
-  if (
-    feature('DOWNLOAD_USER_SETTINGS') &&
-    (isEnvTruthy((process.env.ATLAS_REMOTE)) || getIsRemoteMode())
-  ) {
-    const applied = await redownloadUserSettings()
-    // applyRemoteEntriesToLocal uses markInternalWrite to suppress the
-    // file watcher (correct for startup, nothing listening yet); fire
-    // notifyChange here so mid-session applySettingsChange runs.
-    if (applied) {
-      settingsChangeDetector.notifyChange('userSettings')
-    }
-  }
-
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：CCR 远程用户配置重拉（redownloadUserSettings / settingsSync 簇）裁除；本地 /reload-plugins 仅刷新已装插件（refreshActivePlugins）
   const r = await refreshActivePlugins(context.setAppState)
 
   const parts = [

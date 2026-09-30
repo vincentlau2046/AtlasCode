@@ -17,12 +17,25 @@ import { LocalShellTask } from 'src/tui/tasks/LocalShellTask/LocalShellTask.js';
 // Type import is erased at build time — safe even though module is ant-gated.
 import type { LocalWorkflowTaskState } from 'src/tui/tasks/LocalWorkflowTask/LocalWorkflowTask.js';
 import type { MonitorMcpTaskState } from 'src/tui/tasks/MonitorMcpTask/MonitorMcpTask.js';
-import { RemoteAgentTask, type RemoteAgentTaskState } from 'src/tui/tasks/RemoteAgentTask/RemoteAgentTask.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteAgentTask（1P 远程会话任务）随 1P 簇裁除；
+// 就地 no-op stub 承载本组件 remote_agent 支（该任务类型已不存在，全部支 no-op，H6 不造假绿）
+type RemoteAgentTaskState = {
+  id: string;
+  sessionId?: string;
+  isUltraplan?: boolean;
+  status: string;
+  command?: string;
+  [k: string]: unknown;
+};
+const RemoteAgentTask = {
+  kill: async (_id: string, _setAppState: unknown): Promise<void> => {},
+};
 import { type BackgroundTaskState, isBackgroundTask, type TaskState } from 'src/tui/tasks/types.js';
 import type { DeepImmutable } from 'src/tui/types/utils.js';
 import { intersperse } from 'src/tui/utils/array.js';
 import { TEAM_LEAD_NAME } from 'src/tui/utils/swarm/constants.js';
-import { stopUltraplan } from '../../commands/ultraplan.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：stopUltraplan（ultraplan 1P CCR 命令）随 1P 簇裁除；no-op stub
+const stopUltraplan = async (_id: string, _sessionId: string, _setAppState: unknown): Promise<void> => {};
 import type { CommandResultDisplay } from '../../commands.js';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
 import type { ExitState } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
@@ -38,7 +51,15 @@ import { AsyncAgentDetailDialog } from './AsyncAgentDetailDialog.js';
 import { BackgroundTask as BackgroundTaskComponent } from './BackgroundTask.js';
 import { DreamDetailDialog } from './DreamDetailDialog.js';
 import { InProcessTeammateDetailDialog } from './InProcessTeammateDetailDialog.js';
-import { RemoteSessionDetailDialog } from './RemoteSessionDetailDialog.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionDetailDialog（1P 远程会话详情）随 1P 簇裁除；no-op stub
+const RemoteSessionDetailDialog = (_p: {
+  session?: unknown;
+  onDone?: unknown;
+  toolUseContext?: unknown;
+  onBack?: unknown;
+  onKill?: unknown;
+  key?: string | number;
+}) => null;
 import { ShellDetailDialog } from './ShellDetailDialog.js';
 type ViewState = {
   mode: 'list';

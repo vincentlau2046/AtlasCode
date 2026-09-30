@@ -10,9 +10,11 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { logForDebugging } from '../debug.js'
-import type { EnvironmentKind } from '../teleport/environments.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：teleport/environments + constants/wire 整裁；
+// EnvironmentKind 联合类型 + WIRE_ENVIRONMENT_KIND_CLOUD 冻结字面量就地内联（行为保持）
+type EnvironmentKind = 'anthropic_cloud' | 'byoc' | 'bridge'
+const WIRE_ENVIRONMENT_KIND_CLOUD = 'anthropic_cloud'
 import type { TurnStartTime } from './types.js'
-import { WIRE_ENVIRONMENT_KIND_CLOUD } from '../../constants/wire.js'
 
 /** Shared debug logger for file persistence modules */
 export function logDebug(message: string): void {

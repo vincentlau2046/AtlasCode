@@ -7,7 +7,15 @@ import { useAppState, useAppStateStore, useSetAppState } from 'src/tui/state/App
 import { getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
 import { getSdkBetas, setHasExitedPlanMode, setNeedsAutoModeExitAttachment, setNeedsPlanModeExitAttachment } from 'src/tui/bootstrapState.js';
 import { generateSessionName } from '../../../commands/rename/generateSessionName.js';
-import { launchUltraplan } from '../../../commands/ultraplan.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：launchUltraplan（ultraplan 1P CCR 命令）随 1P 簇裁除；
+// 就地 no-op stub（showUltraplan 门控 feature('ULTRAPLAN')，domestic 恒 false，该支不触发，H6 不造假绿）
+const launchUltraplan = (_o: {
+  blurb?: string;
+  seedPlan?: string;
+  getAppState: unknown;
+  setAppState: unknown;
+  signal?: AbortSignal;
+}): Promise<string> => Promise.resolve('Ultraplan 不可用（1P 簇已裁）');
 import type { KeyboardEvent } from '../../../ink/events/keyboard-event.js';
 import { Box, Text } from '../../../ink.js';
 import type { AppState } from '../../../state/AppStateStore.js';

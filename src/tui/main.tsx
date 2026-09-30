@@ -36,17 +36,16 @@ import mapValues from 'lodash-es/mapValues.js';
 import pickBy from 'lodash-es/pickBy.js';
 import uniqBy from 'lodash-es/uniqBy.js';
 import React from 'react';
-import { getOauthConfig } from './constants/oauth.js';
-import { getRemoteSessionUrl } from './constants/product.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 常量面 getOauthConfig（oauth 面）/
+// getRemoteSessionUrl（remote-session URL 面，产品面留 attribution 消费）裁除；
+// filesApi（1P Files API 会话文件下载）/ policyLimits（1P 企业策略限额）整簇裁除。
 import { getSystemContext, getUserContext } from './context.js';
 import { init, initializeTelemetryAfterTrust } from './entrypoints/init.js';
 import { addToHistory } from './history.js';
 import type { Root } from './ink.js';
 import { launchRepl } from './replLauncher.js';
 import { hasGrowthBookEnvOverride, initializeGrowthBook, refreshGrowthBookAfterAuthChange } from './services/analytics/growthbook.js';
-import { type DownloadResult, downloadSessionFiles, type FilesApiConfig, parseFileSpecs } from './services/api/filesApi.js';
 import type { McpSdkServerConfig, McpServerConfig, ScopedMcpServerConfig } from './services/mcp/types.js';
-import { isPolicyAllowed, loadPolicyLimits, refreshPolicyLimits, waitForPolicyLimitsToLoad } from './services/policyLimits/index.js';
 import type { ToolInputJSONSchema } from './Tool.js';
 import { createSyntheticOutputTool, isSyntheticOutputToolEnabled } from './tools/SyntheticOutputTool/SyntheticOutputTool.js';
 import { getTools } from './tools.js';
@@ -63,7 +62,6 @@ import { applyConfigEnvironmentVariables } from './utils/managedEnv.js';
 import { createSystemMessage, createUserMessage } from './utils/messages.js';
 import { getPlatform } from './utils/platform.js';
 import { getBaseRenderOptions } from './utils/renderOptions.js';
-import { getSessionIngressAuthToken } from './utils/sessionIngressAuth.js';
 import { settingsChangeDetector } from './utils/settings/changeDetector.js';
 import { skillChangeDetector } from './utils/skills/skillChangeDetector.js';
 import { jsonParse, writeFileSync_DEPRECATED } from './utils/slowOperations.js';
@@ -88,7 +86,10 @@ import { getOriginalCwd, setMainThreadAgentType } from 'src/bootstrap'
 import { setAdditionalDirectoriesForClaudeMd, setIsRemoteMode, setMainLoopModelOverride, setTeleportedSessionInfo } from 'src/tui/bootstrapState.js';
 import { filterCommandsForRemoteMode, getCommands } from './commands.js';
 import type { StatsStore } from './context/stats.js';
-import { launchInvalidSettingsDialog, launchResumeChooser, launchSnapshotUpdateDialog, launchTeleportRepoMismatchDialog, launchTeleportResumeWrapper } from './dialogLaunchers.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：dialogLaunchers 的 teleport 双启动器
+// （launchTeleportRepoMismatchDialog / launchTeleportResumeWrapper）随 1P teleport 簇裁除，
+// 仅留国产三启动器（invalid-settings / resume-chooser / snapshot-update）。
+import { launchInvalidSettingsDialog, launchResumeChooser, launchSnapshotUpdateDialog } from './dialogLaunchers.js';
 import { SHOW_CURSOR } from './ink/termio/dec.js';
 import { exitWithError, exitWithMessage, getRenderContext, renderAndRun, showSetupScreens } from './interactiveHelpers.js';
 import { initBuiltinPlugins } from './plugins/bundled/index.js';
@@ -168,10 +169,9 @@ import { migrateBypassPermissionsAcceptedToSettings } from './migrations/migrate
 import { migrateEnableAllProjectMcpServersToSettings } from './migrations/migrateEnableAllProjectMcpServersToSettings.js';
 import { migrateReplBridgeEnabledToRemoteControlAtStartup } from './migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.js';
 import { resetAutoModeOptInForDefaultOffer } from './migrations/resetAutoModeOptInForDefaultOffer.js';
-import { createRemoteSessionConfig } from './remote/RemoteSessionManager.js';
 /* eslint-enable @typescript-eslint/no-require-imports */
-// teleportWithProgress dynamically imported at call site
-import { createDirectConnectSession, DirectConnectError } from './server/createDirectConnectSession.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionManager（1P remote-session
+// 配置面）/ createDirectConnectSession·DirectConnectError（1P direct-connect 客户端）裁除。
 import { initializeLspServerManager } from './services/lsp/manager.js';
 import { shouldEnablePromptSuggestion } from './services/PromptSuggestion/promptSuggestion.js';
 import { type AppState, getDefaultAppState, IDLE_SPECULATION_STATE } from './state/AppStateStore.js';
@@ -185,8 +185,8 @@ import { filterExistingPaths, getKnownPathsForRepo } from './utils/githubRepoPat
 import { clearPluginCache, loadAllPluginsCacheOnly } from './utils/plugins/pluginLoader.js';
 import { migrateChangelogFromConfig } from './utils/releaseNotes.js';
 import { getSandboxManager } from 'src/tui/sandboxCompat';
-import { fetchSession, prepareApiRequest } from './utils/teleport/api.js';
-import { checkOutTeleportedSessionBranch, processMessagesForTeleportResume, teleportToRemoteWithErrorHandling, validateGitState, validateSessionRepository } from './utils/teleport.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：utils/teleport/api（1P CCR 会话 fetch/
+// prepareApiRequest）+ utils/teleport（teleport 五函数）整簇裁除。
 import { shouldEnableThinkingByDefault, type ThinkingConfig } from './utils/thinking.js';
 import { initUser, resetUserCache } from './utils/user.js';
 import { getTmuxInstallInstructions, isTmuxAvailable, parsePRReference } from './utils/worktree.js';
@@ -874,18 +874,10 @@ async function run(): Promise<CommanderCommand> {
     runMigrations();
     profileCheckpoint('preAction_after_migrations');
 
-    // Load remote managed settings for enterprise customers (non-blocking)
-    // Fails open - if fetch fails, continues without remote settings
-    // Settings are applied via hot-reload when they arrive
-    // Must happen after init() to ensure config reading is allowed
-    void loadPolicyLimits();
+    // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 企业远程策略限额（policyLimits 簇，
+    // loadPolicyLimits/refreshPolicyLimits/waitForPolicyLimitsToLoad/isPolicyAllowed）
+    // 与 1P settings-sync 上行（UPLOAD_USER_SETTINGS 门，settingsSync 簇）整簇裁除。
     profileCheckpoint('preAction_after_remote_settings');
-
-    // Load settings sync (non-blocking, fail-open)
-    // CLI: uploads local settings to remote (CCR download is handled by print.ts)
-    if (feature('UPLOAD_USER_SETTINGS')) {
-      void import('./services/settingsSync/index.js').then(m => m.uploadUserSettingsInBackground());
-    }
     profileCheckpoint('preAction_after_settings_sync');
   });
   program.name('atlas').description(`AtlasHarness - starts an interactive session by default, use -p/--print for non-interactive output`).argument('[prompt]', 'Your prompt', String)
@@ -965,8 +957,7 @@ async function run(): Promise<CommanderCommand> {
       seedEarlyInput(options.prefill);
     }
 
-    // Promise for file downloads - started early, awaited before REPL renders
-    let fileDownloadPromise: Promise<DownloadResult[]> | undefined;
+    // 前向缝登记（§8.74.29 1P 簇裁，#200）：fileDownloadPromise（1P Files API 下载面）裁除。
     const agentsJson = options.agents;
     const agentCli = options.agent;
     if (feature('BG_SESSIONS') && agentCli) {
@@ -1152,33 +1143,15 @@ async function run(): Promise<CommanderCommand> {
       }
     }
 
-    // Download file resources if specified via --file flag
+    // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P Files API 会话文件下载簇
+    // （filesApi：parseFileSpecs/downloadSessionFiles/FilesApiConfig/DownloadResult +
+    // sessionIngressAuthToken/oauth 取数面）裁除。--file 旗标仍注册（CLI 层），但
+    // 1P 下载后端已裁 → 诚实 no-op：仅 stderr 提示不可用、不阻塞启动（H6 不造假绿）。
     const fileSpecs = (options as {
       file?: string[];
     }).file;
     if (fileSpecs && fileSpecs.length > 0) {
-      // Get session ingress token (provided by EnvManager via ATLAS_SESSION_ACCESS_TOKEN)
-      const sessionToken = getSessionIngressAuthToken();
-      if (!sessionToken) {
-        process.stderr.write(chalk.red('Error: Session token required for file downloads. ATLAS_SESSION_ACCESS_TOKEN must be set.\n'));
-        process.exit(1);
-      }
-
-      // Resolve session ID: prefer remote session ID, fall back to internal session ID
-      const fileSessionId = (process.env.ATLAS_REMOTE_SESSION_ID) || getSessionId();
-      const files = parseFileSpecs(fileSpecs);
-      if (files.length > 0) {
-        // Use OPENAI_BASE_URL if set (by EnvManager), otherwise use OAuth config
-        // This ensures consistency with session ingress API in all environments
-        const config: FilesApiConfig = {
-          baseUrl: (process.env.OPENAI_BASE_URL) || getOauthConfig().BASE_API_URL,
-          oauthToken: sessionToken,
-          sessionId: fileSessionId
-        };
-
-        // Start download without blocking startup - await before REPL renders
-        fileDownloadPromise = downloadSessionFiles(files, config);
-      }
+      process.stderr.write(chalk.yellow(`Warning: --file session-file download is unavailable in this build (1P Files API cluster cut §8.74.29, #200); ${fileSpecs.length} spec(s) ignored.\n`));
     }
 
     // Get isNonInteractiveSession from state (was set before init())
@@ -1841,18 +1814,9 @@ async function run(): Promise<CommanderCommand> {
       const onboardingShown = await showSetupScreens(root, permissionMode, allowDangerouslySkipPermissions, commands);
       logForDebugging(`[STARTUP] showSetupScreens() completed in ${Date.now() - setupScreensStart}ms`);
 
-      // Now that trust is established and GrowthBook has auth headers,
-      // resolve the --remote-control / --rc entitlement gate.
-      if (feature('BRIDGE_MODE') && remoteControlOption !== undefined) {
-        const {
-          getBridgeDisabledReason
-        } = await import('./bridge/bridgeEnabled.js');
-        const disabledReason = await getBridgeDisabledReason();
-        remoteControl = disabledReason === null;
-        if (disabledReason) {
-          process.stderr.write(chalk.yellow(`${disabledReason}\n--rc flag ignored.\n`));
-        }
-      }
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P bridge 面（bridgeEnabled 簇，
+      // getBridgeDisabledReason）+ --remote-control/--rc 旗标（CLI 层已裁）裁除。
+      // remoteControl 恒 false（1P remote-control 不再可达），下游 replBridgeExplicit 面诚实置 false。
 
       // Check for pending agent memory snapshot updates (only for --agent mode, ant-only)
       if (feature('AGENT_MEMORY_SNAPSHOT') && mainThreadAgentDefinition && isCustomAgent(mainThreadAgentDefinition) && mainThreadAgentDefinition.memory && mainThreadAgentDefinition.pendingSnapshotUpdate) {
@@ -1877,22 +1841,14 @@ async function run(): Promise<CommanderCommand> {
         prompt = '';
       }
       if (onboardingShown) {
-        // Refresh auth-dependent services now that the user has logged in during onboarding.
-        // Keep in sync with the post-login logic in src/commands/login.tsx
-        void refreshPolicyLimits();
+        // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 策略限额刷新（refreshPolicyLimits）
+        // 与 1P trusted-device 面（trustedDevice 簇，clearTrustedDeviceToken/enrollTrustedDevice，
+        // Remote Control 强校验门）裁除。国产登录后刷新面（resetUserCache +
+        // refreshGrowthBookAfterAuthChange）保留。
         // Clear user data cache BEFORE GrowthBook refresh so it picks up fresh credentials
         resetUserCache();
-        // Refresh GrowthBook after login to get updated feature flags (e.g., for claude.ai MCPs)
+        // Refresh GrowthBook after login to get updated feature flags
         refreshGrowthBookAfterAuthChange();
-        // Clear any stale trusted device token then enroll for Remote Control.
-        // Both self-gate on atlas_sessions_elevated_auth_enforcement internally
-        // — enrollTrustedDevice() via checkGate_CACHED_OR_BLOCKING (awaits
-        // the GrowthBook reinit above), clearTrustedDeviceToken() via the
-        // sync cached check (acceptable since clear is idempotent).
-        void import('./bridge/trustedDevice.js').then(m => {
-          m.clearTrustedDeviceToken();
-          return m.enrollTrustedDevice();
-        });
       }
 
       // Validate that the active token's org matches forceLoginOrgUUID (if set
@@ -2451,15 +2407,10 @@ async function run(): Promise<CommanderCommand> {
       mode: isAgentSwarmsEnabled() && getTeammateUtils().isPlanModeRequired() ? 'plan' as const : toolPermissionContext.mode
     };
     const fullRemoteControl = remoteControl || getRemoteControlAtStartup();
+    // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P CCR 镜像面（CCR_MIRROR 门 +
+    // bridgeEnabled.isCcrMirrorEnabled）裁除。CCR_MIRROR 默认关（门恒不进），
+    // ccrMirrorEnabled 恒 false（行为保真：原运行时该块本就不执行）。
     let ccrMirrorEnabled = false;
-    if (feature('CCR_MIRROR') && !fullRemoteControl) {
-      /* eslint-disable @typescript-eslint/no-require-imports */
-      const {
-        isCcrMirrorEnabled
-      } = require('./bridge/bridgeEnabled.js') as typeof import('./bridge/bridgeEnabled.js');
-      /* eslint-enable @typescript-eslint/no-require-imports */
-      ccrMirrorEnabled = isCcrMirrorEnabled();
-    }
     const initialState: AppState = {
       settings: getInitialSettings(),
       tasks: {},
@@ -2659,42 +2610,10 @@ async function run(): Promise<CommanderCommand> {
         process.exit(1);
       }
     } else if (feature('DIRECT_CONNECT') && _pendingConnect?.url) {
-      // `claude connect <url>` — full interactive TUI connected to a remote server
-      let directConnectConfig;
-      try {
-        const session = await createDirectConnectSession({
-          serverUrl: _pendingConnect.url,
-          authToken: _pendingConnect.authToken,
-          cwd: getOriginalCwd(),
-          dangerouslySkipPermissions: _pendingConnect.dangerouslySkipPermissions
-        });
-        if (session.workDir) {
-          setOriginalCwd(session.workDir);
-          setCwdState(session.workDir);
-        }
-        setDirectConnectServerUrl(_pendingConnect.url);
-        directConnectConfig = session.config;
-      } catch (err) {
-        return await exitWithError(root, err instanceof DirectConnectError ? err.message : String(err), () => gracefulShutdown(1));
-      }
-      const connectInfoMessage = createSystemMessage(`Connected to server at ${_pendingConnect.url}\nSession: ${directConnectConfig.sessionId}`, 'info');
-      await launchRepl(root, {
-        getFpsMetrics,
-        stats,
-        initialState
-      }, {
-        debug: debug || debugToStderr,
-        commands,
-        initialTools: [],
-        initialMessages: [connectInfoMessage],
-        mcpClients: [],
-        autoConnectIdeFlag: ide,
-        mainThreadAgentDefinition,
-        disableSlashCommands,
-        directConnectConfig,
-        thinkingConfig
-      }, renderAndRun);
-      return;
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P direct-connect 客户端（createDirectConnectSession/
+      // DirectConnectError）裁除。DIRECT_CONNECT 门默认关；若 env 强制开启，优雅失败
+      // （H6 不造假绿），对齐下方 SSH_REMOTE 先例。
+      return await exitWithError(root, 'Direct connect is not available in this build (1P cluster cut §8.74.29, #200).', () => gracefulShutdown(1));
     } else if (feature('SSH_REMOTE') && _pendingSSH?.host) {
       // P0: src/ssh/ stub deleted. SSH_REMOTE off by default. If this branch is
       // somehow reached at runtime (feature flag overridden), fail gracefully.
@@ -2746,173 +2665,13 @@ async function run(): Promise<CommanderCommand> {
         }
       }
 
-      // --remote and --teleport both create/resume Atlas Web (CCR) sessions.
-      // Remote Control (--rc) is a separate feature gated in initReplBridge.ts.
-      if (remote !== null || teleport) {
-        await waitForPolicyLimitsToLoad();
-        if (!isPolicyAllowed('allow_remote_sessions')) {
-          return await exitWithError(root, "Error: Remote sessions are disabled by your organization's policy.", () => gracefulShutdown(1));
-        }
-      }
-      if (remote !== null) {
-        // Create remote session (optionally with initial prompt)
-        const hasInitialPrompt = remote.length > 0;
-
-        // Check if TUI mode is enabled - description is only optional in TUI mode
-        const isRemoteTuiEnabled = getFeatureValue_CACHED_MAY_BE_STALE('atlas_remote_backend', false);
-        if (!isRemoteTuiEnabled && !hasInitialPrompt) {
-          return await exitWithError(root, 'Error: --remote requires a description.\nUsage: atlas --remote "your task description"', () => gracefulShutdown(1));
-        }
-
-        // Pass current branch so CCR clones the repo at the right revision
-        const currentBranch = await getBranch();
-        const createdSession = await teleportToRemoteWithErrorHandling(root, hasInitialPrompt ? remote : null, new AbortController().signal, currentBranch || undefined);
-        if (!createdSession) {
-          return await exitWithError(root, 'Error: Unable to create remote session', () => gracefulShutdown(1));
-        }
-
-        // Check if new remote TUI mode is enabled via feature gate
-        if (!isRemoteTuiEnabled) {
-          // Original behavior: print session info and exit
-          process.stdout.write(`Created remote session: ${createdSession.title}\n`);
-          process.stdout.write(`View: ${getRemoteSessionUrl(createdSession.id)}?m=0\n`);
-          process.stdout.write(`Resume with: atlas --teleport ${createdSession.id}\n`);
-          await gracefulShutdown(0);
-          process.exit(0);
-        }
-
-        // New behavior: start local TUI with CCR engine
-        // Mark that we're in remote mode for command visibility
-        setIsRemoteMode(true);
-        switchSession(asSessionId(createdSession.id));
-
-        // Get OAuth credentials for remote session
-        let apiCreds: {
-          accessToken: string;
-          orgUUID: string;
-        };
-        try {
-          apiCreds = await prepareApiRequest();
-        } catch (error) {
-          logError(toError(error));
-          return await exitWithError(root, `Error: ${errorMessage(error) || 'Failed to authenticate'}`, () => gracefulShutdown(1));
-        }
-
-        // Create remote session config for the REPL
-        const {
-          getOAuthTokens: getTokensForRemote
-        } = await import('./utils/auth.js');
-        const getAccessTokenForRemote = (): string => getTokensForRemote()?.accessToken ?? apiCreds.accessToken;
-        const remoteSessionConfig = createRemoteSessionConfig(createdSession.id, getAccessTokenForRemote, apiCreds.orgUUID, hasInitialPrompt);
-
-        // Add remote session info as initial system message
-        const remoteSessionUrl = `${getRemoteSessionUrl(createdSession.id)}?m=0`;
-        const remoteInfoMessage = createSystemMessage(`/remote-control is active. Code in CLI or at ${remoteSessionUrl}`, 'info');
-
-        // Create initial user message from the prompt if provided (CCR echoes it back but we ignore that)
-        const initialUserMessage = hasInitialPrompt ? createUserMessage({
-          content: remote
-        }) : null;
-
-        // Set remote session URL in app state for footer indicator
-        const remoteInitialState = {
-          ...initialState,
-          remoteSessionUrl
-        };
-
-        // Pre-filter commands to only include remote-safe ones.
-        // CCR's init response may further refine the list (via handleRemoteInit in REPL).
-        const remoteCommands = filterCommandsForRemoteMode(commands);
-        await launchRepl(root, {
-          getFpsMetrics,
-          stats,
-          initialState: remoteInitialState
-        }, {
-          debug: debug || debugToStderr,
-          commands: remoteCommands,
-          initialTools: [],
-          initialMessages: initialUserMessage ? [remoteInfoMessage, initialUserMessage] : [remoteInfoMessage],
-          mcpClients: [],
-          autoConnectIdeFlag: ide,
-          mainThreadAgentDefinition,
-          disableSlashCommands,
-          remoteSessionConfig,
-          thinkingConfig
-        }, renderAndRun);
-        return;
-      } else if (teleport) {
-        if (teleport === true || teleport === '') {
-          // Interactive mode: show task selector and handle resume
-          logForDebugging('selectAndResumeTeleportTask: Starting teleport flow...');
-          const teleportResult = await launchTeleportResumeWrapper(root);
-          if (!teleportResult) {
-            // User cancelled or error occurred
-            await gracefulShutdown(0);
-            process.exit(0);
-          }
-          const {
-            branchError
-          } = await checkOutTeleportedSessionBranch(teleportResult.branch);
-          messages = processMessagesForTeleportResume(teleportResult.log, branchError);
-        } else if (typeof teleport === 'string') {
-          try {
-            // First, fetch session and validate repository before checking git state
-            const sessionData = await fetchSession(teleport);
-            const repoValidation = await validateSessionRepository(sessionData);
-
-            // Handle repo mismatch or not in repo cases
-            if (repoValidation.status === 'mismatch' || repoValidation.status === 'not_in_repo') {
-              const sessionRepo = repoValidation.sessionRepo;
-              if (sessionRepo) {
-                // Check for known paths
-                const knownPaths = getKnownPathsForRepo(sessionRepo);
-                const existingPaths = await filterExistingPaths(knownPaths);
-                if (existingPaths.length > 0) {
-                  // Show directory switch dialog
-                  const selectedPath = await launchTeleportRepoMismatchDialog(root, {
-                    targetRepo: sessionRepo,
-                    initialPaths: existingPaths
-                  });
-                  if (selectedPath) {
-                    // Change to the selected directory
-                    process.chdir(selectedPath);
-                    setCwd(selectedPath);
-                    setOriginalCwd(selectedPath);
-                  } else {
-                    // User cancelled
-                    await gracefulShutdown(0);
-                  }
-                } else {
-                  // No known paths - show original error
-                  throw new TeleportOperationError(`You must run atlas --teleport ${teleport} from a checkout of ${sessionRepo}.`, chalk.red(`You must run atlas --teleport ${teleport} from a checkout of ${chalk.bold(sessionRepo)}.\n`));
-                }
-              }
-            } else if (repoValidation.status === 'error') {
-              throw new TeleportOperationError(repoValidation.errorMessage || 'Failed to validate session', chalk.red(`Error: ${repoValidation.errorMessage || 'Failed to validate session'}\n`));
-            }
-            await validateGitState();
-
-            // Use progress UI for teleport
-            const {
-              teleportWithProgress
-            } = await import('./components/TeleportProgress.js');
-            const result = await teleportWithProgress(root, teleport);
-            // Track teleported session for reliability logging
-            setTeleportedSessionInfo({
-              sessionId: teleport
-            });
-            messages = result.messages;
-          } catch (error) {
-            if (error instanceof TeleportOperationError) {
-              process.stderr.write(error.formattedMessage + '\n');
-            } else {
-              logError(error);
-              process.stderr.write(chalk.red(`Error: ${errorMessage(error)}\n`));
-            }
-            await gracefulShutdown(1);
-          }
-        }
-      }
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P CCR remote-session / teleport 簇（策略门
+      // waitForPolicyLimitsToLoad/isPolicyAllowed + remote-session createRemoteSessionConfig/
+      // teleportToRemoteWithErrorHandling/prepareApiRequest + teleport launchTeleportResumeWrapper/
+      // fetchSession/validateSessionRepository/checkOutTeleportedSessionBranch/validateGitState/
+      // TeleportProgress）整簇裁除。--remote / --teleport 旗标已在 CLI 层裁（§8.74.28 ⑭）→
+      // 此支不可达（行为保真）；messages 恒 null，下游 resumeData 走 processedResume（国产
+      // resume-by-ID）路径。
 
       // If not loaded as a file, try as session ID
       if (maybeSessionId) {
@@ -2941,20 +2700,10 @@ async function run(): Promise<CommanderCommand> {
         }
       }
 
-      // Await file downloads before rendering REPL (files must be available)
-      if (fileDownloadPromise) {
-        try {
-          const results = await fileDownloadPromise;
-          const failedCount = count(results, r => !r.success);
-          if (failedCount > 0) {
-            process.stderr.write(chalk.yellow(`Warning: ${failedCount}/${results.length} file(s) failed to download.\n`));
-          }
-        } catch (error) {
-          return await exitWithError(root, `Error downloading files: ${errorMessage(error)}`);
-        }
-      }
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：fileDownloadPromise 下载 await 面
+      // （1P Files API）裁除，与上方 --file no-op 对齐。
 
-      // If we have a processed resume or teleport messages, render the REPL
+      // If we have a processed resume, render the REPL
       const resumeData = processedResume ?? (Array.isArray(messages) ? {
         messages,
         fileHistorySnapshots: undefined,
@@ -3265,38 +3014,12 @@ async function run(): Promise<CommanderCommand> {
       print?: string | boolean;
       outputFormat: string;
     }) => {
-      const {
-        parseConnectUrl
-      } = await import('./server/parseConnectUrl.js');
-      const {
-        serverUrl,
-        authToken
-      } = parseConnectUrl(ccUrl);
-      let connectConfig;
-      try {
-        const session = await createDirectConnectSession({
-          serverUrl,
-          authToken,
-          cwd: getOriginalCwd(),
-          dangerouslySkipPermissions: _pendingConnect?.dangerouslySkipPermissions
-        });
-        if (session.workDir) {
-          setOriginalCwd(session.workDir);
-          setCwdState(session.workDir);
-        }
-        setDirectConnectServerUrl(serverUrl);
-        connectConfig = session.config;
-      } catch (err) {
-        // biome-ignore lint/suspicious/noConsole: intentional error output
-        console.error(err instanceof DirectConnectError ? err.message : String(err));
-        process.exit(1);
-      }
-      const {
-        runConnectHeadless
-      } = await import('./server/connectHeadless.js');
-      const prompt = typeof opts.print === 'string' ? opts.print : '';
-      const interactive = opts.print === true;
-      await runConnectHeadless(connectConfig, prompt, opts.outputFormat, interactive);
+      // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P direct-connect 客户端（createDirectConnectSession/
+      // DirectConnectError + connectHeadless 消费支）裁除。DIRECT_CONNECT 门默认关；若 env
+      // 强制开启 `open` 子命令，优雅失败（H6 不造假绿），对齐 SSH 先例。命令仍注册以保 --help 面。
+      // biome-ignore lint/suspicious/noConsole: intentional error output
+      console.error('Direct connect is not available in this build (1P cluster cut §8.74.29, #200).');
+      process.exit(1);
     }) as any);
   }
 
@@ -3550,26 +3273,9 @@ async function run(): Promise<CommanderCommand> {
     }
   }
 
-  // Remote Control command — connect local environment to claude.ai/code.
-  // The actual command is intercepted by the fast-path in cli.tsx before
-  // Commander.js runs, so this registration exists only for help output.
-  // Always hidden: isBridgeEnabled() at this point (before enableConfigs)
-  // would throw and return false via the try/catch — but not before paying
-  // ~65ms of side effects (25ms settings Zod parse + 40ms sync `security`
-  // keychain subprocess). The dynamic visibility never worked; the command
-  // was always hidden.
-  if (feature('BRIDGE_MODE')) {
-    program.command('remote-control', {
-      hidden: true
-    }).alias('rc').description('Connect your local environment for remote-control sessions via atlas deep link').action(async () => {
-      // Unreachable — cli.tsx fast-path handles this command before main.tsx loads.
-      // If somehow reached, delegate to bridgeMain.
-      const {
-        bridgeMain
-      } = await import('./bridge/bridgeMain.js');
-      await bridgeMain(process.argv.slice(3));
-    });
-  }
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P remote-control 子命令（BRIDGE_MODE 门 +
+  // bridgeMain 委托 + --rc 别名）整块裁除；--remote-control/--rc 旗标已在 CLI 层裁
+  // （§8.74.28 ⑭），命令不再注册（1P bridge 面已无）。
   // Doctor command - check installation health
   program.command('doctor').description('Check the health of your Atlas auto-updater. Note: The workspace trust dialog is skipped and stdio servers from .mcp.json are spawned for health checks. Only use this command in directories you trust.').action(async () => {
     const [{

@@ -2,7 +2,8 @@ import chalk from 'chalk'
 import { exec } from 'child_process'
 import { execa } from 'execa'
 import memoize from 'lodash-es/memoize.js'
-import { USER_PROFILE_SCOPE } from 'src/tui/constants/wire.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：constants/wire.ts 整裁；USER_PROFILE_SCOPE 为冻结层字面量，就地内联（行为保持，原值 'user:profile'）
+const USER_PROFILE_SCOPE = 'user:profile' as const
 
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { preferThirdPartyAuthentication } from 'src/tui/bootstrapState.js'

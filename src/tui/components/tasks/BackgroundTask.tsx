@@ -7,7 +7,11 @@ import { truncate } from 'src/tui/utils/format.js';
 import { toInkColor } from 'src/tui/utils/ink.js';
 import { plural } from 'src/tui/utils/stringUtils.js';
 import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../constants/figures.js';
-import { RemoteSessionProgress } from './RemoteSessionProgress.js';
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionProgress（1P 远程会话进度组件）随 1P 簇裁除；
+// remote_agent 任务类型已不存在，就地 no-op stub 承载原引用（编译态文件，保 $[] 缓存索引不动，H6 不造假绿）
+const RemoteSessionProgress = (_p: {
+  session?: unknown;
+}) => null;
 import { ShellProgress, TaskStatusText } from './ShellProgress.js';
 import { describeTeammateActivity } from './taskStatusUtils.js';
 type Props = {

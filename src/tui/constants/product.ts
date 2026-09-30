@@ -54,25 +54,14 @@ export function getClaudeAiBaseUrl(
 /**
  * Get the full session URL for a remote session.
  *
- * The cse_→session_ translation is a temporary shim gated by
- * atlas_bridge_repl_v2_cse_shim_enabled (see isCseShimEnabled). Worker
- * endpoints (/v1/code/sessions/{id}/worker/*) want `cse_*` but the claude.ai
- * frontend currently routes on `session_*` (compat/convert.go:27 validates
- * TagSession). Same UUID body, different tag prefix. Once the server tags by
- * environment_kind and the frontend accepts `cse_*` directly, flip the gate
- * off. No-op for IDs already in `session_*` form. See toCompatSessionId in
- * src/bridge/sessionIdCompat.ts for the canonical helper (lazy-required here
- * to keep constants/ leaf-of-DAG at module-load time).
+ * 前向缝登记（§8.74.29 1P 簇裁，#200）：原 cse_→session_ compat shim（bridge/sessionIdCompat
+ * toCompatSessionId，atlas_bridge_repl_v2_cse_shim_enabled 门控）随 1P 簇裁除；
+ * 现直接用原始 sessionId 构造 URL（shim 是 no-op 等价，对已是 session_* 形态的 ID 无行为变化）。
  */
 export function getRemoteSessionUrl(
   sessionId: string,
   ingressUrl?: string,
 ): string {
-  /* eslint-disable @typescript-eslint/no-require-imports */
-  const { toCompatSessionId } =
-    require('../bridge/sessionIdCompat.js') as typeof import('../bridge/sessionIdCompat.js')
-  /* eslint-enable @typescript-eslint/no-require-imports */
-  const compatId = toCompatSessionId(sessionId)
-  const baseUrl = getClaudeAiBaseUrl(compatId, ingressUrl)
-  return `${baseUrl}/code/${compatId}`
+  const baseUrl = getClaudeAiBaseUrl(sessionId, ingressUrl)
+  return `${baseUrl}/code/${sessionId}`
 }

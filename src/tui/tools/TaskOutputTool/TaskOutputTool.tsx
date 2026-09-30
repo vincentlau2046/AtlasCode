@@ -11,7 +11,6 @@ import type { Tool } from '../../Tool.js';
 import { buildTool, type ToolDef } from '../../Tool.js';
 import type { LocalAgentTaskState } from '../../tasks/LocalAgentTask/LocalAgentTask.js';
 import type { LocalShellTaskState } from '../../tasks/LocalShellTask/guards.js';
-import type { RemoteAgentTaskState } from '../../tasks/RemoteAgentTask/RemoteAgentTask.js';
 import type { TaskState } from '../../tasks/types.js';
 import { AbortError } from '../../utils/errors.js';
 import { lazySchema } from '../../utils/lazySchema.js';
@@ -104,13 +103,7 @@ async function getTaskOutputData(task: TaskState): Promise<TaskOutput> {
       error: agentTask.error
     };
   }
-  if (task.type === 'remote_agent') {
-    const remoteTask = task as RemoteAgentTaskState;
-    return {
-      ...baseOutput,
-      prompt: remoteTask.command
-    };
-  }
+  // 前向缝登记（§8.74.29 1P 簇裁，#200）：remote_agent 任务输出支（RemoteAgentTaskState）随 1P 簇裁除
   return baseOutput;
 }
 

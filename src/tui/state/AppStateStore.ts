@@ -1,6 +1,13 @@
 import type { Notification } from 'src/tui/context/notifications.js'
 import type { TodoList } from 'src/tui/utils/todo/types.js'
-import type { BridgePermissionCallbacks } from '../bridge/bridgePermissionCallbacks.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge/bridgePermissionCallbacks 整裁；1P 远程权限委托回调类型
+// 就地最小化定义（replBridgePermissionCallbacks 恒 undefined，行为保持）
+type BridgePermissionCallbacks = {
+  sendRequest(...args: unknown[]): void
+  sendResponse(requestId: string, response: { behavior: 'allow' | 'deny' }): void
+  cancelRequest(requestId: string): void
+  onResponse(requestId: string, handler: (response: { behavior: 'allow' | 'deny' }) => void): () => void
+}
 import type { Command } from '../commands.js'
 import type { ElicitationRequestEvent } from '../services/mcp/elicitationHandler.js'
 import type {

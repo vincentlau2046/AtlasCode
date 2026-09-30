@@ -1,7 +1,25 @@
 import { feature } from 'src/shared'
 import { z } from 'zod/v4'
 import { isReplBridgeActive } from 'src/tui/bootstrapState.js'
-import { getReplBridgeHandle } from '../../bridge/replBridgeHandle.js'
+// 前向缝登记（§8.74.29 1P 簇裁，#200）：1P bridge/ 簇（REPL-bridge handle + 跨 session
+// 消息 postInterClaudeMessage + UDS socket 发送 sendToUdsSocket）裁除。本 tui 工具的
+// bridge/uds 发送支均 1P 且不可达（UDS_INBOX 门默认关 + 1P bridge 已裁）→ 诚实 no-op：
+// getReplBridgeHandle 恒 null（guard 命中 "Remote Control is not connected" 支）、
+// postInterClaudeMessage/sendToUdsSocket 空操作。国产 UDS/remote 门面（src/remote）是
+// engine 域出口，tui 域不直接依赖 remote（DEP allow 面不含 remote），故此处不接线、
+// 仅 no-op 保真（行为保真：1P 远程发送路径本即死码）。
+const getReplBridgeHandle = () => null
+const postInterClaudeMessage = async (
+  _target: string,
+  _message: string,
+): Promise<{ ok: boolean; error?: string }> => ({
+  ok: false,
+  error: '1P bridge cluster cut (§8.74.29, #200)',
+})
+const sendToUdsSocket = async (
+  _socketPath: string,
+  _message: string,
+): Promise<void> => {}
 import type { Tool, ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { findTeammateTaskByAgentId } from '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
@@ -754,10 +772,6 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
               },
             }
           }
-          /* eslint-disable @typescript-eslint/no-require-imports */
-          const { postInterClaudeMessage } =
-            require('../../bridge/peerSessions.js') as typeof import('../../bridge/peerSessions.js')
-          /* eslint-enable @typescript-eslint/no-require-imports */
           const result = await postInterClaudeMessage(
             addr.target,
             input.message,
@@ -773,10 +787,6 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
           }
         }
         if (addr.scheme === 'uds') {
-          /* eslint-disable @typescript-eslint/no-require-imports */
-          const { sendToUdsSocket } =
-            require('../../utils/udsClient.js') as typeof import('../../utils/udsClient.js')
-          /* eslint-enable @typescript-eslint/no-require-imports */
           try {
             await sendToUdsSocket(addr.target, input.message)
             const preview = input.summary || truncate(input.message, 50)
