@@ -6476,3 +6476,52 @@ getIsNonInteractiveSession/getIsInteractive，实测 tui 文件 0 命中）。
 drift ③ cost 注释）；359 行 → 175 行（-184 / +0，纯删除）。四件套核销：tsc 0 /
 build 0（cli.js 2.33MB）/ lint 0e·303w（基线不变）/ 全量 3132/0/7498/192
 （quartet 复验）。
+
+#### 8.74.23 W5 npm 一行安装通道 + 统一 node 运行器实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：用户要求同步增加 npm 一行命名安装方式（裸名 `atlas`/`atlascode` 已被 npm
+占用，须 `@scope/package`），并告知 GitHub 账号用户名改为 `vincentlau2046`、发布仓
+为 `AtlasCode`。本波落 npm 发布面 + 让 `dist/cli.js` 在纯 node 下可运行（bun 降为
+构建工具），并订正全仓 GitHub 地址。
+
+**临场裁定 6-1（npm 包身份）**：包名 `@atlasharness/atlascode`（scope =
+`@atlasharness`，用户裁定）；全局命令名 `atlas`（与 git 通道符号链接 `~/.atlas/bin/
+atlas` + 全仓文档/冒烟清单一致，单一命令面）。package.json 发布面：`name`→
+`@atlasharness/atlascode` / `bin`→`atlas` / 加 `files:["dist"]`（只发 dist）/
+`publishConfig:{access:"public"}`（scoped 包默认 restricted）/ 删 `private:true` /
+加 `prepublishOnly: bun run build`（publish 前现构建 dist）。
+
+**临场裁定 6-2（统一 node 运行器）**：出货 bin（`src/atlascode/cli.ts`）shebang
+`#!/usr/bin/env bun`→`#!/usr/bin/env node`（bun build 逐字拷贝 entry shebang 进
+dist/cli.js）；bun 降为**仅构建**工具，运行器统一 node（≥20，package.json engines
+已声明）。两安装通道（npm 一行 / git 源码）皆以 node 运行；dev TUI launcher
+（`src/atlascode/launcher.ts`，`bun run` 入口，不随 npm 出货）保持 bun 不动。
+
+**临场裁定 6-3（node 安全补丁面 = 仅 1 处）**：实测 `dist/cli.js`（`--target node`
+产物）= ESM（141 顶层 import / 0 `require(`），且 build 已**剥离全部 `bun:` 引用 +
+`feature()` 调用**（构建期决议为常量）→ 运行时无 bun 内建依赖。全 src `Bun.*` 全局
+逐点核：除 TUI 专属（`src/tui/*` 不随 cli 出货）与已 `typeof Bun` 守卫者外，CLI 出货
+路径上**唯一未守卫 = `src/memory/frontmatterParser.ts:109` `Bun.YAML.parse`**（memory
+域，随 cli 出货）→ 补 `typeof Bun` 守卫 + 静态命名 import `yaml` npm（`import { parse
+as yamlParse }`，ESM 必须静态 import 非 `require`；`yaml` 现为顶层依赖，头注「新仓无
+yaml 依赖」裁面前提已陈旧——tui/utils/yaml.ts 早已消费，bundle 内联 ~270KB 可忽略）。
+Bun 下仍优先内建 `Bun.YAML`（零行为改动）；node 下走 `yamlParse`。swarm/bundledMode
+（`Bun.embeddedFiles`）已全 `typeof Bun` 守卫且实测 0 次入 cli bundle，不动。
+
+**临场裁定 6-4（repo 地址订正 + git remote = P-1 不执行）**：GitHub 用户名
+`vincentlau2046`→`vincentlau2046`，发布仓 = `AtlasCode`；install.sh 缺省 REPO +
+README + docs（brand-string-classification / architecture-charter / smoke-checklist）全
+订正为 `https://github.com/vincentlau2046/AtlasCode`。**git remote add + push 不执行**
+（CLAUDE.md 不变式：no git remote / never push until W5 P-1 解除；gh CLI 本环境
+segfault）——远端建仓 + push + `npm login` + `npm publish @atlasharness/atlascode`
+均归 P-1 外部动作（用户侧），本波只做到「发布就绪」（package.json 面 + node 干净 bin
++ 文档/冒烟清单 npm 项登记）。
+
+**处置实施（多文件，零行为改动除 frontmatterParser node 回退支 + shebang）**：
+① `src/atlascode/cli.ts` shebang→node ② `src/memory/frontmatterParser.ts` 补 yaml
+回退 + 头注订正 ③ `package.json` 发布面（6-1）④ `install.sh` npm 通道头注 + REPO 订正
++ node 前置检查 ⑤ `README.md` npm 一行通道置顶 ⑥ `docs/smoke-checklist.md` 加 §1b
+npm 验真 + 用户名订正 ⑦ 全 docs `vincentlau2046`→`vincentlau2046` 机械替换。
+**验真**：`node dist/cli.js --help` exit 0（bun 剥离后 node 可加载）+ 四件套（tsc 0 /
+lint 0e / build / 全量 suite）+ node headless 一轮（IFF 网关可达则真 LLM 回合，验证
+frontmatter yaml 回退无崩）。
