@@ -69,7 +69,7 @@ import type { PermissionMode } from '../utils/permissions/PermissionMode.js'
 
 // de-ANT: version 头取值收敛至 WIRE_API_VERSION（src/constants/wire.ts）。
 // 双版本头迁移窗口（anthropic-version 旧 + atlas-version 新）保持不变。
-// [ATLAS-HOLD] 网关协同确认可弃用旧头后，在此移除 'anthropic-version' 头。
+// 前向缝登记（§8.74.28 ⑭，#200） 网关协同确认可弃用旧头后，在此移除 'anthropic-version' 头。
 import { WIRE_API_VERSION, WIRE_CCR_BYOC_BETA } from '../constants/wire.js'
 const ANTHROPIC_VERSION = WIRE_API_VERSION
 const ATLAS_VERSION = WIRE_API_VERSION

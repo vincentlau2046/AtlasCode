@@ -23,9 +23,9 @@
  *
  * 域外裁登记（不随迁，归属波；详见 docs §8.71.1.3 逐件归属表）：
  *   - update.ts（424L 自更新 → 版本管理方案波）/ remoteIO.ts（255L →
- *     remote 族波）/ transports/*（4535L 云传输 → IFF 网关波 [ATLAS-HOLD]）
+ *     remote 族波）/ transports/*（4535L 云传输 → IFF 网关波 前向缝登记（§8.74.28 ⑭，#200））
  *   - main.tsx server/ssh/open 子命令（→ remote 族波）/ auth login（订阅裁
- *     [ATLAS-HOLD]；status/logout 入域）
+ *     前向缝登记（§8.74.28 ⑭，#200）；status/logout 入域）
  *   - bg/up/rollback/ant/templateJobs（旧仓 de-ANT no-op 存根，不迁——
  *     H6 防空洞：存根不迁不伪装能力）
  *

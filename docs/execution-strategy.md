@@ -6584,3 +6584,52 @@ frontmatter yaml 回退无崩）。
 **残口**：真网冒烟归生产 lane（npm 0.2.0 发布后统一验证 = G-1 同批；开发 lane 不真网）；cn.bing.com 反爬率与 Tavily 免费额度 = 运行时观测项（非代码面）。
 
 **沟通协议裁定（不变式 1）**：用户裁定「需要决策的内容拆分原子决策、分多轮完成」——G-3 待决策清单原子化为 R2（域黑名单/反馈服务占位裁否）/ R3（/mobile 裁否）/ R4（header 品牌串落细）/ R5（@anthropic-ai 物理包注记措辞）/ R6（标记文本方案），每轮至多 1 决策；已闭环项（A/C 值保持 / F 整裁 / G-1 三命令 + 最后处理）不重审。
+
+#### 8.74.28 G-3 [ATLAS-HOLD] 全量清理 + F 类整子系统裁波（task #199，2026-09-30）
+
+**背景**：`[ATLAS-HOLD]` 标记 62 处（波前实测：src 56 行 + tests 6 行，2026-09-29 清册 task #199）+ F 类 1P 整子系统（RemoteTrigger / 域黑名单·反馈占位 / /mobile / vendor 三包 / managedMcp / grove / 1P bootstrap / voice P1 / MCP 菜单 claude.ai 支 / createModelProviderConfig）统一清理。波后执行序：#200 1P-REST/remote 簇裁 → #201 模型配置统一波 → G-1 0.1.2 发布统一验真（最后）。
+
+**执行面（13 切片/项，全预裁定，提交序）**：
+
+| 切片 | 提交 | 内容 |
+|---|---|---|
+| A（F 类 1P 整裁） | `dc7e1fc` | RemoteTrigger 子系统整裁（17 文件 −1316L；注入端口 throw 缺省 = H6 前向缝） |
+| B（R2） | `8078bb6` | 域黑名单预检 + 反馈端点整面裁（ATLAS_WEB_DOMAIN_CHECK_URL / ATLAS_FEEDBACK_URL 占位裁） |
+| C（R3） | `78adcd8` | /mobile 命令整裁（占位链接前向缝裁） |
+| D（R4） | `df9356b` | 虚构域链接族全换真实源 + repo 内 reference 指导文件族（release 产品标准，不偷懒） |
+| R5 | `d083479` | vendor 三包全裁（agent-sdk / sandbox-runtime〔型面落 src/sandbox/runtime-types〕/ mcpb 安装流；loadMcpbFile 前向缝 stub） |
+| ⑥ | `b6b2056` | managedMcp claude.ai 1P 托管 MCP 整裁（145L 模块删 + 6 调用方切面） |
+| ⑦ | `fb9bfb1` | grove claude.ai 1P 条款 UI 整裁（API + 对话框 + /privacy-settings 命令） |
+| ⑧ | `676efff` | 1P bootstrap 整链全删（api/bootstrap.ts 137L + startupPrefetches 块 + config 记账字段） |
+| ⑩ | `4e19c1d` | D3 mcp 型面分域裁定：engine 域 8→4（裁 sse-ide/ws-ide/sdk/claudeai-proxy）；TUI 域保 8 型（/ide 活功能生成/消费面） |
+| ⑨ | `7bef4be` | preflight 探测改指 provider 端点（1P /api/hello 支裁除；env 解析链 ATLAS_API_BASE_URL→OPENAI_BASE_URL→默认基址） |
+| ⑪ | `2f29163` | voice 换血（P1 voice_stream WS anthropic 支整裁 607→131L + 网关 ASR 单车道 + settings voice 模板项 asrModel 活/sttUrl 前向缝） |
+| ⑫ | `b0be624` | MCP 菜单留通用面裁 claude.ai 2 支（claudeai-auth/clear-auth 浏览器 connectors 流整裁；型面按 ⑩ 保留，守卫早退 + 前向缝登记） |
+| ⑬ | `384ee80` | #17 createModelProviderConfig 整删（config.ts 113L 全闭包 + index.ts:117 死导出 + 136L·18 测单测 + env-defaults-decision.md:34 行 + D-9 除名） |
+| ⑭ | 本节 | [ATLAS-HOLD] 字样全删（grep src tests = 0）+ 62 去向表 + 波终收口 |
+
+**62 去向表**（56 src + 6 tests = 62；35 项随各切片裁除 + 27 项 ⑭ 转前向缝登记）：
+
+*35 项裁除（git show 逐提交 `^-.*ATLAS-HOLD` 提取，tests 6 行 = 原 6 项全裁净；src 29 行 = 原 56 之 29）*：
+
+| 提交 | 文件（marker 行数） |
+|---|---|
+| `dc7e1fc` A | engine/tools/remotetriggers/{remoteTriggersPort 5, remoteTriggerTool 3, remoteTriggerPrompt 1} + engine/tools/index 3 + engine/tools/toolRegistry 1 + engine/tools/web/webFetchUtils 2 + tui/tools/WebFetchTool/utils 1 + tui/types/missing-deps 1 + tests/unit/engine-tools-remote-trigger-se2c 2 |
+| `8078bb6` B | tui/components/Feedback 1 + tests（域黑名单/反馈占位 4 行含 docs 外） |
+| `78adcd8` C | tui/commands/mobile/mobile.tsx 1（占位链接裁） |
+| `d083479` R5 | tui/vendor/{atlas-agent-sdk, atlas-sandbox-runtime, atlas-mcpb} 各 1 |
+| `4e19c1d` ⑩ | mcp 型面 8→4 相关 10 行（engine 域型面 + tests 断言换面） |
+| `384ee80` ⑬ | modelprovider/config.ts 1 + docs 2（env-defaults-decision.md:34 行 + product-status.md D-9 行） |
+
+*27 项 ⑭ 转前向缝登记（marker 原地置换为仓内「前向缝登记（§8.74.28 ⑭，归属波）」头注，语义保留；grep `ATLAS-HOLD` src tests = 0）*：
+
+| 归属波 | 文件:行 |
+|---|---|
+| #200 1P-REST/remote 簇（26 项） | tui/constants/wire.ts:9（WIRE 9 常量族）/ tui/constants/oauth.ts:20,30,52（CLAUDE_AI_ORIGIN·BASE_API_URL 账号面 4 值族）/ tui/upstreamproxy/upstreamproxy.ts:47,114 / tui/services/api/filesApi.ts:23,33 / tui/bridge/{remoteBridgeCore 72, codeSessionApi 15} / mcp/types.ts:16 / cli/{index 26,28 · parse 13,20,850 · print 36,344 · dispatch 19 · entryInit 18 · mcpConfigWrite 32 · handlers/mcp 13,17,170,172} / engine/tools/index.ts:96（ATLAS_WEB_DOMAIN_CHECK_URL fail-open 逐字） |
+| #201 模型配置统一波（1 项） | tui/utils/model/providers.ts:6（一方判定重锚：IFF 网关国内域名定案后按网关 host 精细判定） |
+
+**H6 纪律**：全部裁除/登记均头注「前向缝登记（§8.74.28 …）」或诚实抛错/no-op stub，不造假绿；回流面 = #200（wire 9 常量 + oauth 账号面 + 桥/CCR/code-session 簇）→ #201（providers 一方判定）→ G-1 0.1.2 发布统一验真。
+
+**四件套（⑫+⑬+⑭ 叠态终审）**：tsc 0 / lint 0e·297w / build cli.js 2.56MB / 全量套 `bun test --isolate tests/` = 3108 pass·0 fail·191 文件（基线 3126·0·7477·192 减 ⑬ 18 测·1 文件，7453 expect）。
+
+**波终收口**：批量 push（未 push 提交 11+ 条，自 `c5d84c5` 后 G-3 全切片）+ `git merge-base --is-ancestor origin/master master` 祖先链核验。

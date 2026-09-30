@@ -33,7 +33,7 @@
  *
  * 裁 / 接缝登记（H6 防空洞，复审勿当遗漏重提）：
  *   - RemoteIO（旧仓 cli/remoteIO.ts 255L，--sdk-url 云传输）= 域外裁
- *     （remote 族波 [ATLAS-HOLD]）→ sdkUrl 选项校验保留，运行支 throw 明示。
+ *     （remote 族波 前向缝登记（§8.74.28 ⑭，#200））→ sdkUrl 选项校验保留，运行支 throw 明示。
  *   - 旧仓命令队列 + 后台 agent do-while 等待环（getRunningTasks /
  *     isBackgroundTask / heldBackResult 背压）→ drain pump 架构：
  *     后台 for-await 泵（启动即开跑，SDK host control_response 任意
@@ -341,7 +341,7 @@ function createStructuredIO(
   options: { sdkUrl: string | undefined; replayUserMessages?: boolean },
 ): StructuredIO {
   if (options.sdkUrl) {
-    // 域外裁（[ATLAS-HOLD]）：--sdk-url 云传输（RemoteIO 255L）未随迁
+    // 域外裁（前向缝登记（§8.74.28 ⑭，#200））：--sdk-url 云传输（RemoteIO 255L）未随迁
     throw new Error(
       '--sdk-url is not available in this build (cloud transport cut; see cli 域裁登记)',
     )

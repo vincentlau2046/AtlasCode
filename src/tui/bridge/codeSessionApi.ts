@@ -12,7 +12,7 @@ import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import { extractErrorDetail } from './debugUtils.js'
-// de-ANT: version 头取值收敛至 WIRE 集中常量（[ATLAS-HOLD] 见 src/constants/wire.ts）。
+// de-ANT: version 头取值收敛至 WIRE 集中常量（前向缝登记（§8.74.28 ⑭，#200） 见 src/constants/wire.ts）。
 import { WIRE_API_VERSION } from '../constants/wire.js'
 
 function oauthHeaders(accessToken: string): Record<string, string> {

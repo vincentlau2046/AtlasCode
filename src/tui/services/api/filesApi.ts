@@ -20,7 +20,7 @@ import { sleep } from '../../utils/sleep.js'
 
 // Files API is currently in beta. oauth-2025-04-20 enables Bearer OAuth
 // on public-api routes (auth.py: "oauth_auth" not in beta_versions → 404).
-// de-ANT: WIRE beta/version 取值收敛至集中常量（[ATLAS-HOLD] 见 src/constants/wire.ts）。
+// de-ANT: WIRE beta/version 取值收敛至集中常量（前向缝登记（§8.74.28 ⑭，#200） 见 src/constants/wire.ts）。
 import {
   WIRE_API_VERSION,
   WIRE_FILES_API_BETA,
@@ -30,7 +30,7 @@ const ANTHROPIC_VERSION = WIRE_API_VERSION
 
 // API base URL - uses OPENAI_BASE_URL set by env-manager for the appropriate environment
 // Falls back to public API for standalone usage
-// [ATLAS-HOLD] 兜底默认 base URL 为 api.anthropic.com（WIRE 域名簇，与
+// 前向缝登记（§8.74.28 ⑭，#200） 兜底默认 base URL 为 api.anthropic.com（WIRE 域名簇，与
 // oauth.ts BASE_API_URL 同批）：待 IFF 国内网关域名定案后替换；
 // OPENAI_BASE_URL / ATLAS_API_BASE_URL 已可覆盖。
 function getDefaultApiBaseUrl(): string {

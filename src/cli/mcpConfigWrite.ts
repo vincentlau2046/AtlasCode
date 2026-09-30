@@ -29,7 +29,7 @@
  *     域外）/ 企业策略 allowedMcpServers·deniedMcpServers 过滤（policy 波）
  *   - secure storage 清理（旧 remove 面 clearServerTokensFromLocalStorage /
  *     clearMcpClientConfig keychain 槽）= 新仓无 auth 存储面（OAuth 车道
- *     裁 [ATLAS-HOLD]）
+ *     裁 前向缝登记（§8.74.28 ⑭，#200））
  *   - env 展开 missingVars 错误上报面：旧 ValidationError 聚合硬错误 →
  *     新仓解析面 fail-soft（坏台跳过），missingVars 仅 logForDebugging
  *     登记（delta 裁定：发现链不因缺变量崩面，与 mcp 域 fail-soft 同向）

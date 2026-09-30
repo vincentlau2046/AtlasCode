@@ -93,7 +93,7 @@
  *   + prompt 面 4（WebFetch auth-warning prompt / WebSearch 月年模板 +
  *   2 短 description 不接线）+ URL 管线（webFetchUtils：3 错误类 / 双 LRU
  *   缓存（本地 TtlLruCache，旧 lru-cache 裁）/ blocklist 预检（
- *   ATLAS_WEB_DOMAIN_CHECK_URL [ATLAS-HOLD] fail-open 逐字）/ 受限重定向
+ *   ATLAS_WEB_DOMAIN_CHECK_URL 前向缝登记（§8.74.28 ⑭，#200） fail-open 逐字）/ 受限重定向
  *   （node fetch redirect:'manual'，旧 axios 裁）/ 二进制落盘（
  *   tool-results 临时目录面）/ 二级模型面（buildOpenAIParams 'fast' +
  *   modelProvider.chat））+ preapproved 双表 + rule-content 函数 2 +

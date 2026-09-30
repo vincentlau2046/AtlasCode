@@ -44,7 +44,7 @@ const NO_PROXY_LIST = [
   '192.168.0.0/16',
   // de-ANT: 原 Anthropic API 域名 MITM 排除（anthropic.com / .anthropic.com /
   // *.anthropic.com 三形式，因 NO_PROXY 跨运行时解析差异）已移除——LLM 流量不再
-  // 走 api.anthropic.com。[ATLAS-HOLD] IFF 网关国内域名定案后，按同样的三形式
+  // 走 api.anthropic.com。前向缝登记（§8.74.28 ⑭，#200） IFF 网关国内域名定案后，按同样的三形式
   // 模式（*.gw / .gw / gw apex）在此为网关域名补排除项（用途：防 MITM 伪造 CA
   // 破坏非 Bun 运行时）。
   'github.com',
@@ -111,7 +111,7 @@ export async function initUpstreamProxy(opts?: {
   // sessionHandler.ts). getOauthConfig() is wrong here: it keys off
   // USE_{LOCAL,STAGING}_OAUTH, none of which the container sets, so it
   // always returned the prod URL and the CA fetch 404'd.
-  // [ATLAS-HOLD] 兜底默认 base URL 为 api.anthropic.com（WIRE 域名簇，与
+  // 前向缝登记（§8.74.28 ⑭，#200） 兜底默认 base URL 为 api.anthropic.com（WIRE 域名簇，与
   // oauth.ts BASE_API_URL 同批）：待 IFF 国内网关域名定案后替换；
   // ccrBaseUrl 选项 / OPENAI_BASE_URL 已可覆盖。
   const baseUrl =

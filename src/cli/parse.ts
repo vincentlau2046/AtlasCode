@@ -10,14 +10,14 @@
  * 裁登记（不随迁 / 不注册，复审勿当遗漏重提）：
  *   域外裁（归属波）：
  *   - --advisor（canUserConfigureAdvisor advisor 面域外）/ --teleport·--remote
- *     （remote 族波）/ --remote-control·--rc（BRIDGE_MODE 桥面 [ATLAS-HOLD]）
+ *     （remote 族波）/ --remote-control·--rc（BRIDGE_MODE 桥面 前向缝登记（§8.74.28 ⑭，#200））
  *   - --sdk-url 消费支（CCR 域外；选项注册保留为惰性数据，消费裁）
  *   - 子命令域外子集（不注册）：server（remote 族波；旧仓 = cc:// URL 改写
  *     面，无 command('server') 注册）· ssh / open（订正 #27：旧仓 main.tsx
  *     无 command('ssh')/command('open') 注册，仅 L3113 cc:// 注释提及 open，
  *     原登记「ssh/open 子命令」前提不实——无旧命令面可裁）·
  *     plugin·marketplace 全族（新仓无 plugin 域，plugin 域波）· agents
- *     （agent 定义 loader 缺席，残留守）· auth 全族（订阅车道裁 [ATLAS-HOLD]，
+ *     （agent 定义 loader 缺席，残留守）· auth 全族（订阅车道裁 前向缝登记（§8.74.28 ⑭，#200），
  *     新仓 auth 车道 = OpenAI 静态键，无账号面）· doctor / update / install
  *     （版本管理方案波）· setup-token（订阅裁）· mcp add-from-claude-desktop
  *     （无 Desktop 面）· mcp xaa-idp（isXaaEnabled XAA 面域外）· bg / up /
@@ -847,7 +847,7 @@ export function buildProgram(): CommanderCommand {
   )
 
   // 裁登记：--teleport / --remote（remote 族波）/ --remote-control·--rc
-  // （BRIDGE_MODE 桥面 [ATLAS-HOLD]）不随迁
+  // （BRIDGE_MODE 桥面 前向缝登记（§8.74.28 ⑭，#200））不随迁
   if (feature('HARD_FAIL')) {
     program.addOption(
       new Option(
