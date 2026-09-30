@@ -2,7 +2,7 @@
  * sandbox runtime 加载器（裁剪版，C-Deep 切片 2）
  *
  * 旧仓来源（a8af45b）: src/vendor/atlas-sandbox-runtime.ts（170L）。
- * 旧仓经 `#atlas-sandbox-runtime` alias 加载外部未发布包
+ * 旧仓经 `#atlas-sandbox-runtime` alias 加载外部未发布包（G-3 R5-a：shim + 别名已裁）
  * （@anthropic-ai/sandbox-runtime，仅 CI 安装；本地 fallback = placeholder
  * 禁用态）。**真 bwrap 行为在该外部包内，不在仓内**——新仓 deps 仅
  * openai+zod，不 vendor 该包，裁剪版 = 默认 placeholder（与旧仓 fallback

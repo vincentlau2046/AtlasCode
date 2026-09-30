@@ -2,7 +2,7 @@
  * sandbox-runtime 结构类型（sandbox 域自管，B 波 S1 迁入）。
  *
  * 旧仓来源（a8af45b）: src/vendor/atlas-sandbox-runtime.ts（类型部分）
- * 旧仓经 `#atlas-sandbox-runtime` package.json imports map 别名消费；新仓无该别名，
+ * 旧仓经 `#atlas-sandbox-runtime` imports map 别名消费（G-3 R5-a：shim + 别名已裁，本文件=型面落点）；新仓无该别名，
  * 类型下沉到 sandbox 域内（runtime 值加载器待 createSandboxManager 迁移时落）。
  *
  * 这些结构类型是 sandbox 消费面的单一事实源（旧仓 vendor shim 注释明示），

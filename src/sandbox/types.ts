@@ -2,8 +2,8 @@
  * Sandbox module types — interfaces for the Sandbox service（B 波 S1 迁入）。
  *
  * 旧仓来源（a8af45b）: src/core/sandbox/types.ts
- * 旧仓经 `#atlas-sandbox-runtime` + settings/constants + settings/types + platform
- * 消费；新仓下沉：runtime 类型 → ./runtime-types（域内自管），settings/platform 类型
+ * 旧仓经 `#atlas-sandbox-runtime` 别名 + settings/constants + settings/types + platform
+ * 消费（G-3 R5-a：别名 + vendor shim 已裁，外部包不落地）；新仓下沉：runtime 类型 → ./runtime-types（域内自管），settings/platform 类型
  * → 域内本地定义（C 波 settings 模块落地后下沉 shared，见 TODO 标记）。
  *
  * SandboxManager 32 方法签名不变（旧仓实测 32 非 28，全保留）。

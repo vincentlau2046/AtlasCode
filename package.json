@@ -84,10 +84,5 @@
     "eslint-plugin-boundaries": "^5.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8"
-  },
-  "imports": {
-    "#atlas-mcpb": "./src/tui/vendor/atlas-mcpb.ts",
-    "#atlas-sandbox-runtime": "./src/tui/vendor/atlas-sandbox-runtime.ts",
-    "#atlas-agent-sdk": "./src/tui/vendor/atlas-agent-sdk.ts"
   }
 }

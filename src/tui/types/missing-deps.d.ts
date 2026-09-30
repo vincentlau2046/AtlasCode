@@ -153,18 +153,13 @@ declare module 'ws' {
   export default WsWebSocket;
 }
 
-// --- MCPB / agent-sdk ---
-// De-Anthropic (P1.2): the mcpb and sandbox-runtime packages are now pulled
-// in through `#atlas-mcpb` / `#atlas-sandbox-runtime` import-map subpaths
-// (see package.json "imports" and src/vendor/ shims), so their ambient
-// declarations are no longer needed. Only the type-only claude-agent-sdk
-// ambient module remains (re-exported by src/vendor/atlas-agent-sdk.ts).
-// [ATLAS-HOLD] module 名 @anthropic-ai/claude-agent-sdk 为物理 npm 包名，
-// 须与 src/vendor/atlas-agent-sdk.ts 的 re-export 说明符一致；Atlas 以
-// 自有 scope 重发包后再统一改名。
-declare module '@anthropic-ai/claude-agent-sdk' {
-  export type PermissionMode = any;
-}
+// --- MCPB / agent-sdk / sandbox-runtime 三包裁除登记（G-3 §8.74.28 R5-a/b/c）---
+// 旧 P1.2 经 package.json "imports" 别名（#atlas-mcpb / #atlas-sandbox-runtime /
+// #atlas-agent-sdk）+ src/tui/vendor/ shim 消费 @anthropic-ai 三包（本地不安装，
+// require 回落恒空 stub）。R5 全裁：shim 文件 + imports map 条目 + 本 ambient
+// 模块声明一并删除（PermissionMode 型零消费者，grep 确认）。mcpb 安装流走
+// mcpbHandler.ts 头注的 H6 前向缝；sandbox-runtime 结构型面已本地化到
+// src/sandbox/runtime-types.ts。回流 = 自建对应包（无排期）。
 
 // --- GrowthBook (class used as a type) ---
 declare module '@growthbook/growthbook' {

@@ -6,7 +6,7 @@
  * 一行注册，manager 与消费方零改动）。
  *
  * 移植口径（裁剪版）：
- * - 旧仓 AtlasSandboxBackend 静态 import `#atlas-sandbox-runtime` 的
+ * - 旧仓 AtlasSandboxBackend 静态 import `#atlas-sandbox-runtime` 的（G-3 R5-a：别名 + shim 已裁）
  *   BaseSandboxManager 静态面；新仓 runtime 经注入窗口（./runtime
  *   getSandboxRuntimeModule，调用时查找）——构造后可换入真 runtime，
  *   与 executor 三 port 注入同款 idiom。

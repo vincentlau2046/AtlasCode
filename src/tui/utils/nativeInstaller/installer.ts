@@ -1551,7 +1551,7 @@ export async function cleanupNpmInstallations(): Promise<{
   const warnings: string[] = []
   let removed = 0
 
-  // Always attempt to remove @anthropic-aigetConfigDirName()-code
+  // Always attempt to remove the legacy 'atlas' npm package (old distribution channel)
   const codePackageResult = await attemptNpmUninstall(
     'atlas',
   )
