@@ -6509,7 +6509,7 @@ Bun 下仍优先内建 `Bun.YAML`（零行为改动）；node 下走 `yamlParse`
 （`Bun.embeddedFiles`）已全 `typeof Bun` 守卫且实测 0 次入 cli bundle，不动。
 
 **临场裁定 6-4（repo 地址订正 + git remote = P-1 不执行）**：GitHub 用户名
-`vincentlau2046`→`vincentlau2046`，发布仓 = `AtlasCode`；install.sh 缺省 REPO +
+`vincentlau2046-sudo`→`vincentlau2046`，发布仓 = `AtlasCode`；install.sh 缺省 REPO +
 README + docs（brand-string-classification / architecture-charter / smoke-checklist）全
 订正为 `https://github.com/vincentlau2046/AtlasCode`。**git remote add + push 不执行**
 （CLAUDE.md 不变式：no git remote / never push until W5 P-1 解除；gh CLI 本环境
@@ -6521,7 +6521,27 @@ segfault）——远端建仓 + push + `npm login` + `npm publish @atlasharness/
 ① `src/atlascode/cli.ts` shebang→node ② `src/memory/frontmatterParser.ts` 补 yaml
 回退 + 头注订正 ③ `package.json` 发布面（6-1）④ `install.sh` npm 通道头注 + REPO 订正
 + node 前置检查 ⑤ `README.md` npm 一行通道置顶 ⑥ `docs/smoke-checklist.md` 加 §1b
-npm 验真 + 用户名订正 ⑦ 全 docs `vincentlau2046`→`vincentlau2046` 机械替换。
+npm 验真 + 用户名订正 ⑦ 全 docs `vincentlau2046-sudo`→`vincentlau2046` 机械替换。
 **验真**：`node dist/cli.js --help` exit 0（bun 剥离后 node 可加载）+ 四件套（tsc 0 /
 lint 0e / build / 全量 suite）+ node headless 一轮（IFF 网关可达则真 LLM 回合，验证
 frontmatter yaml 回退无崩）。
+
+#### 8.74.24 W5 自动更新接线波（atlas update 双通道 + TUI 自检端点 npm 接线 + dev flag 位置所有权修）实施裁定（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：用户诉求 = 「远端安装到本地 + 自动更新，未来开发迭代经远端更新消费，等同正常用户」。§8.74.23 落 npm 发布面 + 统一 node 运行器后，自动更新面三断点：① `atlas update` 仅 git 通道且无 `--check` ② TUI 自动更新组件（AutoUpdater 族，Notifications.tsx 挂载）的 npm 版本查询车道 `getLatestVersion` = `npm view ${MACRO.PACKAGE_URL}@<tag>` 但 MACRO 只有 `VERSION` 无 `PACKAGE_URL` → 车道不触发 ③ 旧仓 GCS native 二进制通道残留指向域外桶。本波三件 + 一修。
+
+**临场裁定 A（update 双通道 + 自识别包根，零硬编码包名）**：`resolveInstallRoot()`→`resolvePackageRoot()`：自 `process.argv[1]` realpath 向上找最近含 `name` 的 package.json = 包根（dev 态命中 repo 根含 `.git` → git 通道；npm 全局安装命中 node_modules 包根无 `.git` → npm 通道）。git 通道 = `git remote get-url origin` 存在性核验（无 origin = P-1 未建仓常态 → 明示「无远端可拉」+ 手动指引，exit 1，不伪装升级能力）→ `git pull --ff-only`（拒 diverge，不 force/reset = dev-loop 边界）→ `bun install` → `bun run build`（原地重建，`~/.atlas/bin/atlas` 符号链接指向 dist/cli.js 即刻生效）。npm 通道 = `npm install -g <pkg>@latest`。`--check` = 仅报告不拉取：npm 通道 `npm view <pkg> version --prefer-online`（registry 查询失败 = P-1 未 publish 期常态 → 明示无远端可查 exit 1）+ `semverGt` 比较报「发现更新/已是最新」；git 通道报本地版本 + 指引（不做 fetch 比较，最小面）。**安全裁断**：npm 类子进程一律于 homedir 运行（避项目级 `.npmrc` 恶意重定向，对齐 tui/utils/autoUpdater 既有安全裁断）；execFile arg-array 免 shell 注入（对齐核心域 execa→execFile 裁断），零第三方依赖。**代价若错**：包根定位失败（argv[1] 树无 package.json 祖先）→ 明示 dev-loop 指引 exit 1，不伪装升级能力（H6 登记见 update.ts 头注裁登记表）。
+
+**临场裁定 B（TUI 自检端点 npm 接线）**：`src/tui/main.tsx` MACRO 补 `PACKAGE_URL: '@atlasharness/atlascode'`（VERSION 随版本 bump 同步 0.1.0）。TUI 出货不在 npm bundle 内（cli bin 不含 TUI），该 MACRO 面为 TUI launcher（bun dev 面）+ 未来 TUI 随货形态服务；**行为零改动**（TUI 组件已挂载，此前 PACKAGE_URL 缺失 = 车道静默不触发，补值 = 车道激活）。
+
+**临场裁定 C（旧仓 GCS native 通道残留裁 = no-op 化非删组件）**：`getLatestVersionFromGcs(channel)` → `void channel; return null`；`getGcsDistTags()` → `{latest:null, stable:null}`；域外桶 URL 常量（`storage.googleapis.com/claude-code-dist-…/claude-code-releases`）删除不 vendor。理由 = 本产品无 native 二进制发布形态（出货 = npm 包 / git 源码，node 运行器）；消费方（PackageManagerAutoUpdater / Doctor）据 null 静默不触发 native 更新。**H6 前向接缝**：native 发行形态 = 未排期波（owner = native-dist），消费方组件不删（删了接缝就没了）。
+
+**临场裁定 D（版本 bump 0.0.1 → 0.1.0 = G-α 首发布版）**：npm 首 publish 版本号定 0.1.0（G-α 里程碑号，非 0.0.1 占位）。
+
+**临场裁定 E（dev flag 位置所有权修，本波阻断项）**：`update --check` 实跑报 `error: too many arguments. Expected 0 arguments but got 1: update.`（exit 1）。诊断链 = ① 最小 commander 15 复现（root enablePositionalOptions + [prompt] + 子命令 --check）不复现 → 排除 commander 组合面 ② dist 副本埋点 `_excessArguments`（log name/parent/registeredArgs/args + stack）→ **stack 指向 `runDevCli` 非 commander parse**：bin 壳 `hasDevFlag(argv)` = `DEV_FLAGS.some(f => argv.includes(f))` 全 argv 扫描，`--check` 是 5 dev flag 之一 → `update --check` 整体劫持进 dev program（0 位置参数、无子命令）→ excess-args。根因 = S-C2 壳预嗅探丢失旧仓位置所有权（旧仓 5 flag 挂 root program，commander `enablePositionalOptions` 天然保证「operand 后 flag 归子面」）。**修** = `hasDevFlag` 嗅探止于首个非 option token（`!a.startsWith('-')` 即 break）：纯 dev 调用（`--check` / `-d --tools`）不变，`update --check` / `mcp list --e2e`（假想）归子面。回归面 = 单测新增位置所有权 4 断言（RED→GREEN）。**代价若错**：若未来某 dev flag 合法出现在 operand 后（如 `atlascode prompt --check` 欲触发健康检查），本修不命中 = 回归 includes 语义需显式裁定（当前无任何该语义消费方）。
+
+**处置实施**：① `src/cli/handlers/update.ts` 重写（双通道 + `--check` + `resolvePackageRoot` + 头注裁登记表）② `src/cli/parse.ts` update 子命令补 `.option('--check')` + action 透传 `checkOnly` ③ `src/tui/main.tsx` MACRO.PACKAGE_URL ④ `src/tui/utils/autoUpdater.ts` GCS 双函数 no-op 化 + 头注 H6 登记 + `axios` import 删 ⑤ `package.json` 0.1.0 ⑥ `src/cli/dev.ts` hasDevFlag 位置所有权 ⑦ `tests/unit/cli.test.ts` 位置所有权 4 断言。
+
+**验真**：四件套（tsc 0 / lint 0e·303w 基线不变 / build 2.57MB / 全量 suite **3133**/0/7502/192，+1 测试 +4 expect = 位置所有权新断言）+ 冒烟矩阵：`node dist/cli.js update --check` exit 0（git 通道报本地 0.1.0 + 指引）/ `update` exit 1（无 origin = P-1 前现状明示）/ `--check` dev 面健康检查不变 / `--help` exit 0。
+
+**残口**：npm publish + git push 仍 P-1 外部动作（用户建 GitHub 仓 + `npm login` + publish `@atlasharness/atlascode@0.1.0` + GitHub Release）；publish 后 `atlas update` npm 通道 + TUI 版本检查车道自动转活（无需再改码）。
