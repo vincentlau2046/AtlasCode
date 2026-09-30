@@ -1,0 +1,684 @@
+{
+  "runId": "r-20261001-0332",
+  "generatedAt": "2026-09-30T19:43:02.042Z",
+  "totals": {
+    "PASS": 7,
+    "FAIL": 2,
+    "STUCK": 76
+  },
+  "cases": [
+    {
+      "id": "gate",
+      "tier": "gate",
+      "verdict": "PASS",
+      "ms": 223,
+      "note": "网关 200/1ms models=Qwen38-27B-TXT,bge-m3,deepseek-v4-flash,deepseek-v4-pro,glm-5,glm-5.1；settings roles=small,fast,premium；LLM 单轮 OK"
+    },
+    {
+      "id": "core-1",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 32141,
+      "note": "4/4 轮 marker 渲染（基本多轮通）"
+    },
+    {
+      "id": "core-2",
+      "tier": "core",
+      "verdict": "FAIL",
+      "ms": 507,
+      "layer": "L2",
+      "note": "headless 多轮断：r1=true r2=ok——engine loop 续轮面"
+    },
+    {
+      "id": "core-3",
+      "tier": "core",
+      "verdict": "FAIL",
+      "ms": 301138,
+      "layer": "L2",
+      "note": "工具回合断：渲染=false（marker 1/2）磁盘=false"
+    },
+    {
+      "id": "core-4",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 21460,
+      "note": "流式中排队输入正常（w2 入队 → w1 完成后渲染）"
+    },
+    {
+      "id": "slash/add-dir",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 4013,
+      "note": "add-dir（local）"
+    },
+    {
+      "id": "slash/agents",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 4017,
+      "note": "agents（local）"
+    },
+    {
+      "id": "slash/ant-trace",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] ant-trace（local）"
+    },
+    {
+      "id": "slash/backfill-sessions",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] backfill-sessions（local）"
+    },
+    {
+      "id": "slash/branch",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3216,
+      "layer": "L2",
+      "note": "[STUCK] branch（local）"
+    },
+    {
+      "id": "slash/break-cache",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3215,
+      "layer": "L2",
+      "note": "[STUCK] break-cache（local）"
+    },
+    {
+      "id": "slash/clear",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] clear（local，清屏后输入面须恢复）"
+    },
+    {
+      "id": "slash/color",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] color（local）"
+    },
+    {
+      "id": "slash/config",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] config（local）"
+    },
+    {
+      "id": "slash/context",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] context（local）"
+    },
+    {
+      "id": "slash/copy",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] copy（local）"
+    },
+    {
+      "id": "slash/cost",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] cost（local）"
+    },
+    {
+      "id": "slash/ctx_viz",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] ctx_viz（local）"
+    },
+    {
+      "id": "slash/debug-tool-call",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] debug-tool-call（local）"
+    },
+    {
+      "id": "slash/diff",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] diff（local）"
+    },
+    {
+      "id": "slash/effort",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] effort（local）"
+    },
+    {
+      "id": "slash/env",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] env（local）"
+    },
+    {
+      "id": "slash/export",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3212,
+      "layer": "L2",
+      "note": "[STUCK] export（local）"
+    },
+    {
+      "id": "slash/files",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3212,
+      "layer": "L2",
+      "note": "[STUCK] files（local）"
+    },
+    {
+      "id": "slash/heapdump",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3217,
+      "layer": "L2",
+      "note": "[STUCK] heapdump（local）"
+    },
+    {
+      "id": "slash/help",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3217,
+      "layer": "L2",
+      "note": "[STUCK] help（local）"
+    },
+    {
+      "id": "slash/hooks",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3212,
+      "layer": "L2",
+      "note": "[STUCK] hooks（local）"
+    },
+    {
+      "id": "slash/ide",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] ide（local）"
+    },
+    {
+      "id": "slash/init-verifiers",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] init-verifiers（local）"
+    },
+    {
+      "id": "slash/install",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3212,
+      "layer": "L2",
+      "note": "[STUCK] install（local，安装面（沙箱内））"
+    },
+    {
+      "id": "slash/keybindings",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] keybindings（local）"
+    },
+    {
+      "id": "slash/mcp",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] mcp（local）"
+    },
+    {
+      "id": "slash/memory",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] memory（local）"
+    },
+    {
+      "id": "slash/model",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] model（local）"
+    },
+    {
+      "id": "slash/onboarding",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] onboarding（local）"
+    },
+    {
+      "id": "slash/output-style",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] output-style（local）"
+    },
+    {
+      "id": "slash/permissions",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3212,
+      "layer": "L2",
+      "note": "[STUCK] permissions（local）"
+    },
+    {
+      "id": "slash/plan",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] plan（local，plan 模式切换）"
+    },
+    {
+      "id": "slash/plugin",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] plugin（local）"
+    },
+    {
+      "id": "slash/release-notes",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] release-notes（local）"
+    },
+    {
+      "id": "slash/reload-plugins",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] reload-plugins（local）"
+    },
+    {
+      "id": "slash/rename",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] rename（local）"
+    },
+    {
+      "id": "slash/resume",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] resume（local）"
+    },
+    {
+      "id": "slash/sandbox-toggle",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3216,
+      "layer": "L2",
+      "note": "[STUCK] sandbox-toggle（local）"
+    },
+    {
+      "id": "slash/session",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] session（local）"
+    },
+    {
+      "id": "slash/sessionlist",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] sessionlist（local）"
+    },
+    {
+      "id": "slash/skills",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] skills（local）"
+    },
+    {
+      "id": "slash/stats",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3215,
+      "layer": "L2",
+      "note": "[STUCK] stats（local）"
+    },
+    {
+      "id": "slash/status",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3217,
+      "layer": "L2",
+      "note": "[STUCK] status（local）"
+    },
+    {
+      "id": "slash/statusline",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] statusline（local）"
+    },
+    {
+      "id": "slash/stickers",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3215,
+      "layer": "L2",
+      "note": "[STUCK] stickers（local）"
+    },
+    {
+      "id": "slash/tag",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] tag（local）"
+    },
+    {
+      "id": "slash/tasklist",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] tasklist（local）"
+    },
+    {
+      "id": "slash/tasks",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] tasks（local）"
+    },
+    {
+      "id": "slash/terminal-setup",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] terminal-setup（local）"
+    },
+    {
+      "id": "slash/theme",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3210,
+      "layer": "L2",
+      "note": "[STUCK] theme（local）"
+    },
+    {
+      "id": "slash/thinkback",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] thinkback（local）"
+    },
+    {
+      "id": "slash/thinkback-play",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3214,
+      "layer": "L2",
+      "note": "[STUCK] thinkback-play（local）"
+    },
+    {
+      "id": "slash/usage",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] usage（local）"
+    },
+    {
+      "id": "slash/version",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] version（local）"
+    },
+    {
+      "id": "slash/vim",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3213,
+      "layer": "L2",
+      "note": "[STUCK] vim（local，vim 模式切换后 Esc 退出）"
+    },
+    {
+      "id": "slash/btw",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] btw（llm）"
+    },
+    {
+      "id": "slash/bughunter",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4015,
+      "layer": "L2",
+      "note": "[STUCK] bughunter（llm）"
+    },
+    {
+      "id": "slash/commit",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] commit（llm，sweep 工作区已 git init）"
+    },
+    {
+      "id": "slash/commit-push-pr",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4015,
+      "layer": "L2",
+      "note": "[STUCK] commit-push-pr（llm，无远端 PR，预期优雅失败）"
+    },
+    {
+      "id": "slash/compact",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4016,
+      "layer": "L2",
+      "note": "[STUCK] compact（llm）"
+    },
+    {
+      "id": "slash/doctor",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4016,
+      "layer": "L2",
+      "note": "[STUCK] doctor（llm）"
+    },
+    {
+      "id": "slash/feedback",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4016,
+      "layer": "L2",
+      "note": "[STUCK] feedback（llm）"
+    },
+    {
+      "id": "slash/good-atlas",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4015,
+      "layer": "L2",
+      "note": "[STUCK] good-atlas（llm）"
+    },
+    {
+      "id": "slash/init",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] init（llm，写 CLAUDE.md（沙箱工作区））"
+    },
+    {
+      "id": "slash/insights",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] insights（llm）"
+    },
+    {
+      "id": "slash/issue",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4015,
+      "layer": "L2",
+      "note": "[STUCK] issue（llm）"
+    },
+    {
+      "id": "slash/perf-issue",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4018,
+      "layer": "L2",
+      "note": "[STUCK] perf-issue（llm）"
+    },
+    {
+      "id": "slash/review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] review（llm）"
+    },
+    {
+      "id": "slash/security-review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4017,
+      "layer": "L2",
+      "note": "[STUCK] security-review（llm）"
+    },
+    {
+      "id": "slash/summary",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 4015,
+      "layer": "L2",
+      "note": "[STUCK] summary（llm）"
+    },
+    {
+      "id": "slash/autofix-pr",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3211,
+      "layer": "L2",
+      "note": "[STUCK] autofix-pr（auth，无 PR，优雅降级）"
+    },
+    {
+      "id": "slash/install-slack-app",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3209,
+      "layer": "L2",
+      "note": "[STUCK] install-slack-app（auth）"
+    },
+    {
+      "id": "slash/login",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3208,
+      "layer": "L2",
+      "note": "[STUCK] login（auth，OAuth 流程面，Esc 中止）"
+    },
+    {
+      "id": "slash/logout",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3207,
+      "layer": "L2",
+      "note": "[STUCK] logout（auth）"
+    },
+    {
+      "id": "slash/oauth-refresh",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3207,
+      "layer": "L2",
+      "note": "[STUCK] oauth-refresh（auth）"
+    },
+    {
+      "id": "slash/pr_comments",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3209,
+      "layer": "L2",
+      "note": "[STUCK] pr_comments（auth，无 PR，优雅降级）"
+    },
+    {
+      "id": "slash/share",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 3208,
+      "layer": "L2",
+      "note": "[STUCK] share（auth，未登录态断优雅降级）"
+    },
+    {
+      "id": "slash/exit",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 4820,
+      "note": "/exit 进程干净退出"
+    },
+    {
+      "id": "slash/rewind",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 7638,
+      "note": "rewind（独立 session，未崩）"
+    }
+  ]
+}

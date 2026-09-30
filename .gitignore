@@ -19,3 +19,8 @@ coverage/
 .scratch/
 .atlas-1000/
 embedded64.txt
+
+# user-e2e runtime state (指定才跑的 e2e 套件：工作区/沙箱 HOME/原始留痕)
+user-e2e/workspaces/
+user-e2e/home/
+user-e2e/artifacts/

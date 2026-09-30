@@ -1,0 +1,18 @@
+[
+  {
+    "id": "medium-fixbug",
+    "fixture": "calc",
+    "prompt": "当前仓库的测试失败：运行 `node test/run.js` 会报错。请定位并修复 src/calc.js 中的 bug，使 `node test/run.js` 全部通过（看到 ALL TESTS PASSED）。不要修改 test/ 目录下的文件。",
+    "drivers": ["pty", "headless"],
+    "assertTest": true,
+    "timeoutMs": 1500000
+  },
+  {
+    "id": "medium-feature",
+    "fixture": "calc",
+    "prompt": "请完成以下改动：1) 在 src/ 下新增 power.js 模块，导出 power(base, exp) 函数（返回 base 的 exp 次方，用 Math.pow）；2) 在 test/run.js 中追加针对 power(2,3)===8 的断言（不得删改既有断言）；3) 运行 `node test/run.js` 确认全部通过。",
+    "drivers": ["pty", "headless"],
+    "assertTest": true,
+    "timeoutMs": 1500000
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "short-marker",
+    "prompt": "回复且仅回复标记词：e2e-short-alpha",
+    "drivers": ["pty", "headless"],
+    "marker": "e2e-short-alpha",
+    "timeoutMs": 240000
+  },
+  {
+    "id": "short-multiturn",
+    "prompt": "回复且仅回复标记词：e2e-short-m1",
+    "prompt2": "回复且仅回复标记词：e2e-short-m2",
+    "drivers": ["pty"],
+    "marker": "e2e-short-m1",
+    "marker2": "e2e-short-m2",
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-filewrite",
+    "prompt": "在 ./out 目录创建文件 hello.txt，内容只有一行：hello-atlas-e2e。创建完成后用工具读取该文件并回复文件内容。",
+    "drivers": ["pty", "headless"],
+    "disk": { "path": "out/hello.txt", "contains": "hello-atlas-e2e" },
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-tool-read",
+    "prompt": "当前目录下若没有 README.md，先创建它（内容一行：e2e-fixture-readme），然后读取该文件并原样回复第一行内容。",
+    "drivers": ["pty", "headless"],
+    "disk": { "path": "README.md", "contains": "e2e-fixture-readme" },
+    "timeoutMs": 300000
+  }
+]
