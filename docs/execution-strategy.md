@@ -6652,3 +6652,45 @@ frontmatter yaml 回退无崩）。
 - REPL.tsx 三远程钩子（useRemoteSession/useDirectConnect/useSSHSession）→ 本地 no-op handle（isRemoteMode 恒 false），activeRemote 恒「无远程」态；RemoteSessionConfig/RemoteMessageContent/DirectConnectConfig 型面本地占位。
 - **SendMessageTool 边界裁定**：tui 域不直接依赖 remote 域（DEP allow 面不含 remote，remote 是 engine 域出口）→ tui 侧 SendMessageTool 的 bridge/uds 发送支（UDS_INBOX 门默认关 + 1P bridge 已裁，本即死码）**不接线 src/remote 门面**，改本地诚实 no-op（getReplBridgeHandle 恒 null / postInterClaudeMessage·sendToUdsSocket 空操作）；engine 侧 `src/engine/tools/team/sendMessageTool.ts` 才是 src/remote 门面的合法消费方。
 - **四件套终绿**：tsc 0 / lint 0e（270w，低于 ~300w 基线）/ build cli.js 2.56MB（881 模块）/ 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 文件**（= G-3 ⑬ 后基线，零回归）。
+
+#### 8.74.30 #201 模型配置统一波（task #201，2026-10-01）
+
+**任务面**（三子面）：① settings.json 唯一模型配置源 ② modelprovider 遗留清理 ③ 一方判定重锚。
+
+**用户裁定（2026-10-01，原子决策轮 R1）**：env override 层**保留**（行为保真）。收敛到单一解析路径（`EndpointConfigSource` 端口 + `roles.ts`），settings.json 为主源，`ATLAS_{ROLE}_*` env 保留为**文档化的更高优先 override**（MDM/CI 逃生口，织入 managedEnv.ts 清单 + 报错文案 + 启动守卫，硬切会破坏依赖 env 配模型的部署）；本波**只裁分散/遗留的重复读取面 + modelprovider 遗留**，不翻转既有优先级。
+
+**现状盘点（双 Explore 实测 + 主 session 逐条核销 grep）**：
+- **唯一解析路径** = `roles.ts` `getRoleConfig`/`getRoleModels`/`resolveModel` 经 `getEndpointConfigSource()` 端口。**端口有两 adapter（重复）**：`tui/config/settings-adapter.ts`（`tui/factory.ts:160` 注入）+ `atlascode/adapters/endpointConfigSourceAdapter.ts`（`atlascode/compose.ts:240` 注入）→ 写同一 module-level 槽，last-wins（非本波风险面，登记残口）。
+- **5 个独立模型配置源**：(a) 端口内 env 直读（roles.ts:70-73,129）(b) 端口 settings (c) 标量 `settings.model`+`ATLAS_MODEL` (d) 硬编码缺省（configs.ts ROLE_MODELS / roles.ts:116 HARD_DEFAULT_CONTEXT_WINDOW）(e) 全局 key 车道（adapter:35）+ settings.env→env（managedEnv.ts:141,156）。
+- **优先级不一致面**：`getRoleConfig` env 胜 settings（roles.ts:78-79）vs `getDefaultFastModel` settings 胜 env（model.ts:18-24，**反置**）vs `getMainLoopModel` settings.modelRoles.small 胜 ATLAS_MODEL（model.ts:104-108）。
+
+**切片序（叶→中央，每片四件套绿 + 提交）**：
+- **S1（modelprovider 遗留裁净，zero-consumer 死码，纯行为保真）**：
+  1. 删 `src/tui/utils/model/configs.ts`（0 importer，硬编码 ROLE_MODELS IFF 表）
+  2. 删 `src/modelprovider/streamAssistant.ts` + `CallModelOptions`（0 consumer；index.ts:113-114 导出删）
+  3. 删 `ProviderLifecycle` 家族（modelprovider.ts:604-660 class+interface + index.ts import:11/导出:14-15/`_lifecycle`:75/getProviderLifecycle:83-88/providerLifecycle:87-88，0 consumer）
+  4. 删 `getTtsModel`（model.ts:33-39，0 consumer；**getAsrModel 保留**=voice 车道活 voiceModeEnabled/voiceStreamSTT）
+  5. 删 `resolveRoleForQuery`（model.ts:163+，0 consumer）
+  6. 删 `capabilities.ts:11-18` 重复 roles re-export 块（无 `from 'src/modelprovider/...'` 深导入，consumer 走门面 index.ts:130-139；**getModelMeta/getProviderContextWindow 保留**=门面:162 活）
+- **S2（scattered model-config reader 收敛到端口，行为保真，保 env override）**：
+  - `modelOptions.ts:87` 直读 `settings.modelRoles`（hasModelRoles 探针）→ 端口
+  - `Config.tsx:599-617` 直读面 → 端口（display 面）
+  - `getDefaultFastModel`（model.ts:18-24 优先级反置）→ **裁定：保真优先，本波不翻转**（翻转=行为变更，违背裁定）；登记已知残口归后续波
+- **S3（裁定登记，非代码/前向缝）**：
+  - APIError 双族（`modelprovider/types.ts` vs `tui/types/atlas.ts`）→ **defer**（合并=instanceof 跨模块 risk，非本波行为保真范围）
+  - 一方判定 `providers.ts:6` → 保持前向缝（IFF 网关域未定案，G-3 §8.74.28 ⑭ 已裁定，不重审）
+
+**H6 纪律**：裁除面均 zero-consumer grep 核销（configs=0 / streamAssistant=index+self / ProviderLifecycle=0 / getTtsModel+resolveRoleForQuery=0 / capabilities 无深导入），零 consumer 才裁；前向缝登记不造假绿。
+
+**S2/S3 裁定（2026-10-01，行为保真前提下收敛面实测核销）**：
+- **S2 裁定：分散直读面均为「存在性探针 / display 回退链」，非会偏离端口的值解析，本波不强改**（强改=行为变更，违背裁定）：
+  - `modelOptions.ts:87 hasModelRoles`（`!!settings.modelRoles`）= UI 形状门（role 行 vs 旧行），角色值数据本就走端口（getRoleConfig/getRoleModels/resolveModel）；收敛需新增端口「modelRoles 存在性」方法 + 风险 empty-object-truthy 边 → **defer**（保留直读）。
+  - `Config.tsx:599-618`（`ATLAS_<ROLE>_MODEL || settings.modelRoles.<r>.model || getRoleModel(r)`）= /config 显示面三级回退，第 3 级 `getRoleModel` 已含 1/2 级逻辑（端口 env??settings）；坍缩为单 `getRoleModel` 有 `||` vs `??` empty-string 病理差 → **defer**（保留显示链）。
+  - `getDefaultFastModel`（model.ts:15-26，settings 胜 env，与 roles.ts env 胜 settings **反置**）= 真不一致，但翻转=行为变更 → **defer**（保真优先），登记残口归后续「优先级统一」波。
+- **真 SOT 缺口 = 端口两 adapter**（`tui/config/settings-adapter.ts` @ tui/factory.ts:160 注入 + `atlascode/adapters/endpointConfigSourceAdapter.ts` @ atlascode/compose.ts:240 注入，写同一 module-level 槽 last-wins）：统一=选单 adapter，依赖 entrypoint 流（TUI vs headless CLI）注入序，非本波低风险面 → **defer** 归后续「SOT-adapter 统一」波。
+- **S3 裁定**：APIError 双族（modelprovider/types.ts vs tui/types/atlas.ts）defer（instanceof 跨模块 risk）；一方判定 providers.ts:6 保持前向缝（IFF 网关域未定案，G-3 §8.74.28 ⑭ 已裁定不重审）。
+- **净产出裁定**：settings.json **本即主源**（端口 roles.ts 读 settings.json，env=文档化更高优先 override，裁定保留）；本波实质 = modelprovider 遗留裁净（S1）+ 分散面/双 adapter/APIError/一方判定 逐面 scoping 裁定（S2/S3），不强改行为。
+
+**波终（S1+S2+S3 全闭环，2026-10-01）**：S1 6 项 zero-consumer 死码裁净（commit `4e9fb5b`，−209 行：configs.ts + streamAssistant.ts 删，ProviderLifecycle 家族 + getTtsModel + resolveRoleForQuery + capabilities 重复 re-export 块裁）。S2/S3 全裁定（无强改，逐面 defer 登记）。
+- **四件套终绿**：tsc 0 / lint 0e·270w（= 基线）/ build cli.js 2.56MB·880 模块 / 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 文件**（= #200 波终基线，S1 死码裁零回归）。
+- **残口登记（归后续波）**：① 端口两 adapter 统一（SOT-adapter 统一波）② getDefaultFastModel 优先级反置翻转 ③ APIError 双族合并 ④ 一方判定 providers.ts:6 host 精细判定（IFF 域网名定案后）⑤ presence 探针（hasModelRoles / Config 显示链）收敛（随 ① 一起做）。
