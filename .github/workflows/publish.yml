@@ -1,0 +1,53 @@
+# 发布通道（§8.74.31 S5 升级，#197）：npm trusted publisher（OIDC）。
+# 前提：npm 侧已建 trusted publisher（provider=GitHub Actions，repo=本仓，
+# workflow 文件名=publish.yml，固定不可改——改须删了重建）。
+# 触发：推 tag v*（版本纪律：0.1.x 自主 tag，跨 0.2/1.0 须问用户）或 Actions 页手动
+# Run workflow。runner（非国内网络）直连 registry.npmjs.org，免本地 token：
+# OIDC 免密 + `--provenance` 供应链 attestation（包 ↔ 本 run 绑定）。
+# 本地 ~/.npmrc registry 域 token 发布降为应急 fallback（网络双通道容灾）。
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC 必需：npm trusted publisher 经 id-token 换 publish 权限
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install bun（构建面仅依赖 bun build）
+        run: npm i -g bun
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: 幂等检查（本地 token 已发过该版本则 no-op，双通道不冲突）
+        id: check
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "@atlasharness/atlascode@$V" version --registry https://registry.npmjs.org >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "@atlasharness/atlascode@$V 已在 registry，跳过发布"
+          fi
+
+      - name: Publish（OIDC + provenance）
+        if: steps.check.outputs.exists != 'true'
+        run: npm publish --access public --provenance
