@@ -1,7 +1,6 @@
 import { normalizeLanguageForSTT } from '../../hooks/useVoice.js'
 import { getShortcutDisplay } from '../../keybindings/shortcutFormat.js'
 import type { LocalCommandCall } from '../../types/command.js'
-import { isAnthropicAuthEnabled } from '../../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { settingsChangeDetector } from '../../utils/settings/changeDetector.js'
 import {
@@ -13,17 +12,11 @@ import { isVoiceModeEnabled } from '../../voice/voiceModeEnabled.js'
 const LANG_HINT_MAX_SHOWS = 2
 
 export const call: LocalCommandCall = async () => {
-  // Check auth and kill-switch before allowing voice mode
+  // G-3（§8.74.28 ⑪ voice 换血）: 门控 = ASR 配置面（网关 ASR，P2；
+  // 恒满足，默认 funasr）+ GrowthBook kill-switch。旧 P1 Anthropic
+  // OAuth 支（"requires a Claude.ai account. Please run /login"）已裁
+  // ——语音只走网关 ASR，不再要求 claude.ai 账号。
   if (!isVoiceModeEnabled()) {
-    // Differentiate: OAuth-less users get an auth hint, everyone else
-    // gets nothing (command shouldn't be reachable when the kill-switch is on).
-    if (!isAnthropicAuthEnabled()) {
-      return {
-        type: 'text' as const,
-        value:
-          'Voice mode requires a Claude.ai account. Please run /login to sign in.',
-      }
-    }
     return {
       type: 'text' as const,
       value: 'Voice mode is not available.',
@@ -68,12 +61,15 @@ export const call: LocalCommandCall = async () => {
     }
   }
 
-  // Check for API key
+  // G-3（§8.74.28 ⑪）: 网关 ASR 可用性守卫（前向缝：模型解析链
+  // ATLAS_ASR_MODEL > settings.asrModel > 'funasr' 默认，当前恒真；
+  // 保留守卫 = ASR 车道裁除/回流时的诚实错误面）。
   if (!isVoiceStreamAvailable()) {
     return {
       type: 'text' as const,
       value:
-        'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+        'Voice mode is not available. Gateway ASR must be configured ' +
+        '(set ATLAS_ASR_MODEL or the "asrModel" settings key).',
     }
   }
 

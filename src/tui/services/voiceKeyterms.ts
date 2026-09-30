@@ -1,8 +1,13 @@
-// Voice keyterms for improving STT accuracy in the voice_stream endpoint.
+// Voice keyterms for improving STT accuracy.
 //
-// Provides domain-specific vocabulary hints (Deepgram "keywords") so the STT
-// engine correctly recognises coding terminology, project names, and branch
-// names that would otherwise be misheard.
+// G-3（§8.74.28 ⑪ voice 换血）: 原 P1 voice_stream 端点（Deepgram
+// "keywords" 查询参数面）已整裁，本文件保留为前向缝——useVoice 仍生成并
+// 传入 keyterms，网关 ASR 车道（voiceStreamSTT.ts）接受但不消费（见其
+// 头注登记）。回流 = 网关侧 keyterms 车道或自建 voice_stream 等价物。
+//
+// Provides domain-specific vocabulary hints so the STT engine correctly
+// recognises coding terminology, project names, and branch names that
+// would otherwise be misheard.
 
 import { basename } from 'path'
 import { getProjectRoot } from 'src/bootstrap'

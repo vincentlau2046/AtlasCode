@@ -23,7 +23,12 @@ export const SettingsSchema = () => z.object({
   // effortLevel (global last-write) > Atlas default 'medium'.
   effortByModel: z.record(z.string(), z.string()).optional(),
   ttsModel: z.string().optional(),
+  // G-3（§8.74.28 ⑪ voice 换血）voice 模板项：asrModel 为活项（网关 ASR
+  // 解析链 ATLAS_ASR_MODEL > settings.asrModel > 'funasr' 默认，
+  // utils/model/model.ts getAsrModel 消费）；sttUrl 为纯模板项——
+  // STT URL 客户端未实现（前向缝，H6 登记，不造假绿）。
   asrModel: z.string().optional(),
+  sttUrl: z.string().optional(),
   advisorModel: z.string().optional(),
   // --- 认证 / 密钥辅助（P0 已修 H12 apiKeyHelper 执行方式）
   apiKeyHelper: z.string().optional(),

@@ -1,10 +1,13 @@
-// React hook for hold-to-talk voice input using Anthropic voice_stream STT.
+// React hook for hold-to-talk voice input (gateway ASR lane).
+//
+// G-3（§8.74.28 ⑪ voice 换血）: P1 Anthropic voice_stream WS 支已整裁，
+// STT 走 IFF 网关 ASR（modelProvider.transcribeAudio，final-only）。
 //
 // Hold the keybinding to record; release to stop and submit.  Auto-repeat
 // key events reset an internal timer — when no keypress arrives within
 // RELEASE_TIMEOUT_MS the recording stops automatically.  Uses the native
-// audio module (macOS) or SoX for recording, and Anthropic's voice_stream
-// endpoint (conversation_engine) for STT.
+// audio module (macOS) or SoX for recording, and the gateway ASR lane for
+// STT.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSetVoiceState } from '../context/voice.js'
@@ -27,14 +30,12 @@ import { sleep } from '../utils/sleep.js'
 
 const DEFAULT_STT_LANGUAGE = 'en'
 
-// Maps language names (English and native) to BCP-47 codes supported by
-// the voice_stream Deepgram backend.  Keys must be lowercase.
+// Maps language names (English and native) to BCP-47 codes for the
+// gateway ASR lane.  Keys must be lowercase.
 //
-// This list must be a SUBSET of the server-side supported_language_codes
-// allowlist (GrowthBook: speech_to_text_voice_stream_config).
-// If the CLI sends a code the server rejects, the WebSocket closes with
-// 1008 "Unsupported language" and voice breaks.  Unsupported languages
-// fall back to DEFAULT_STT_LANGUAGE so recording still works.
+// G-3（§8.74.28 ⑪）: P1 服务端 supported_language_codes allowlist 面
+// 已随 voice_stream 支裁除——本表为客户端受支持语言集（模板面），
+// 不支持的语言回退 DEFAULT_STT_LANGUAGE，录音不受影响。
 const LANGUAGE_NAME_TO_CODE: Record<string, string> = {
   english: 'en',
   spanish: 'es',
@@ -84,8 +85,8 @@ const LANGUAGE_NAME_TO_CODE: Record<string, string> = {
   norsk: 'no',
 }
 
-// Subset of the GrowthBook speech_to_text_voice_stream_config allowlist.
-// Sending a code not in the server allowlist closes the connection.
+// 客户端受支持语言码集（§8.74.28 ⑪：P1 服务端 allowlist 面已裁，
+// 网关 ASR 车道透传 language 参数，本集为模板面）。
 const SUPPORTED_LANGUAGE_CODES = new Set([
   'en',
   'es',
@@ -110,7 +111,7 @@ const SUPPORTED_LANGUAGE_CODES = new Set([
 ])
 
 // Normalize a language preference string (from settings.language) to a
-// BCP-47 code supported by the voice_stream endpoint.  Returns the
+// BCP-47 code for the gateway ASR lane.  Returns the
 // default language if the input cannot be resolved.  When the input is
 // non-empty but unsupported, fellBackFrom is set to the original input so
 // callers can surface a warning.
@@ -168,7 +169,7 @@ const REPEAT_FALLBACK_MS = 600
 export const FIRST_PRESS_FALLBACK_MS = 2000
 
 // How long (ms) to keep a focus-mode session alive without any speech
-// before tearing it down to free the WebSocket connection. Re-arms on
+// before tearing it down to free the ASR connection. Re-arms on
 // the next focus cycle (blur → refocus).
 const FOCUS_SILENCE_TIMEOUT_MS = 5_000
 
@@ -332,7 +333,7 @@ export function useVoice({
     focusTriggeredRef.current = false
     updateState('processing')
     voiceModule?.stopRecording()
-    // Capture duration BEFORE the finalize round-trip so that the WebSocket
+    // Capture duration BEFORE the finalize round-trip so that the finalize
     // wait time is not included (otherwise a quick tap looks like > 2s).
     // All ref-backed values are captured here, BEFORE the async boundary —
     // a keypress during the finalize wait can start a new session and reset
@@ -355,9 +356,9 @@ export function useVoice({
     const isStale = () => sessionGenRef.current !== myGen
     logForDebugging('[voice] Recording stopped')
 
-    // Send finalize and wait for the WebSocket to close before reading the
-    // accumulated transcript.  The close handler promotes any unreported
-    // interim text to final, so we must wait for it to fire.
+    // Send finalize and await the transcription round-trip before reading
+    // the accumulated transcript.  网关 ASR 车道为 final-only：finalize
+    // 在转写返回后 resolve（无 interim 提升面，见 voiceStreamSTT 头注）。
     const finalizePromise: Promise<FinalizeSource | undefined> =
       connectionRef.current
         ? connectionRef.current.finalize()
@@ -457,7 +458,7 @@ export function useVoice({
         // (where each final is injected immediately and accumulatedRef reset).
         //
         // NOTE: this fires only on the finishRecording() path. The onError
-        // fallthrough and !conn (no-OAuth) paths bypass this → don't compute
+        // fallthrough and !conn paths bypass this → don't compute
         // COUNT(completed)/COUNT(started) as a success rate; the silent-drop
         // denominator (completed events only) is internally consistent.
 
@@ -476,8 +477,8 @@ export function useVoice({
           // mode either, and recording was > 2s (short recordings = accidental
           // taps → silently return to idle).
           if (!wsConnected) {
-            // WS never connected → audio never reached backend. Not a silent
-            // drop; a connection failure (slow OAuth refresh, network, etc).
+            // ASR 车道连接未建立 → 音频未到达后端。非 silent-drop；
+            // 连接/网关失败（网络、网关 ASR 不可达等）。
             onErrorRef.current?.(
               'Voice connection failed. Check your network and try again.',
             )
@@ -612,7 +613,7 @@ export function useVoice({
     }
   }, [enabled, focusMode, isFocused])
 
-  // ── Start a new recording session (voice_stream connect + audio) ──
+  // ── Start a new recording session (ASR connect + audio) ──
   async function startRecordingSession(): Promise<void> {
     if (!voiceModule) {
       onErrorRef.current?.(
@@ -654,25 +655,22 @@ export function useVoice({
       return
     }
 
-    logForDebugging(
-      '[voice] Starting recording session, connecting voice stream',
-    )
+    logForDebugging('[voice] Starting recording session, connecting ASR lane')
     // Clear any previous error
     setVoiceState(prev => {
       if (!prev.voiceError) return prev
       return { ...prev, voiceError: null }
     })
 
-    // Buffer audio chunks while the WebSocket connects. Once the connection
-    // is ready (onReady fires), buffered chunks are flushed and subsequent
-    // chunks are sent directly.
+    // Buffer audio chunks until the connection is ready (onReady fires —
+    // 网关 ASR 车道无握手，立即就绪). Buffered chunks are flushed and
+    // subsequent chunks are sent directly.
     const audioBuffer: Buffer[] = []
 
-    // Start recording IMMEDIATELY — audio is buffered until the WebSocket
-    // opens, eliminating the 1-2s latency from waiting for OAuth + WS connect.
-    logForDebugging(
-      '[voice] startRecording: buffering audio while WebSocket connects',
-    )
+    // Start recording IMMEDIATELY — audio is buffered until the ASR
+    // connection is ready (gateway lane: onReady fires immediately,
+    // 无 OAuth/WS 握手延迟).
+    logForDebugging('[voice] startRecording: buffering audio until ASR ready')
     audioLevelsRef.current = []
     const started = await voiceModule.startRecording(
       (chunk: Buffer) => {
@@ -730,22 +728,20 @@ export function useVoice({
     const rawLanguage = getInitialSettings().language
     const stt = normalizeLanguageForSTT(rawLanguage)
 
-    // Retry once if the connection errors before delivering any transcript.
-    // The conversation-engine proxy can reject rapid reconnects (~1/N_pods
-    // same-pod collision) or CE's Deepgram upstream can fail during its own
-    // teardown window (anthropics/anthropic#287008 surfaces this as
-    // TranscriptError instead of silent-drop). A 250ms backoff clears both.
+    // Retry once if the connection errors before delivering any transcript
+    // （网关 ASR 车道：transcribeAudio 首调失败 / 网关瞬时不可达）。
+    // A 250ms backoff clears transient failures.
     // Audio captured during the retry window routes to audioBuffer (via the
     // connectionRef.current null check in the recording callback above) and
     // is flushed by the second onReady.
     let sawTranscript = false
 
-    // Connect WebSocket in parallel with audio recording.
+    // Connect the ASR lane in parallel with audio recording.
     // Gather keyterms first (async but fast — no model calls), then connect.
     // Bail from callbacks if a newer session has started. Prevents a
-    // slow-connecting zombie WS (e.g. user released, pressed again, first
-    // WS still handshaking) from firing onReady/onError into the new
-    // session and corrupting its connectionRef / triggering a bogus retry.
+    // slow-connecting zombie connection (e.g. user released, pressed again,
+    // first connect still in flight) from firing onReady/onError into the
+    // new session and corrupting its connectionRef / triggering a bogus retry.
     const isStale = () => sessionGenRef.current !== myGen
 
     const attemptConnect = (keyterms: string[]): void => {
@@ -828,8 +824,8 @@ export function useVoice({
               return
             }
             // Early-failure retry: server error before any transcript =
-            // likely a transient upstream race (CE rejection, Deepgram
-            // not ready). Clear connectionRef so audio re-buffers, back
+            // likely a transient upstream race (网关 ASR 瞬时不可达 /
+            // 未就绪). Clear connectionRef so audio re-buffers, back
             // off, reconnect. Skip if the user has already released the
             // key (state left 'recording') — no point retrying a session
             // they've ended. Fatal errors (Cloudflare bot challenge, auth
@@ -843,7 +839,7 @@ export function useVoice({
               if (!retryUsedRef.current) {
                 retryUsedRef.current = true
                 logForDebugging(
-                  `[voice] early voice_stream error (pre-transcript), retrying once: ${error}`,
+                  `[voice] early ASR error (pre-transcript), retrying once: ${error}`,
                 )
                 connectionRef.current = null
                 attemptGenRef.current++
@@ -864,7 +860,7 @@ export function useVoice({
             // Surfacing — bump gen so this conn's trailing close-error
             // (ws fires error then close 1006) is swallowed above.
             attemptGenRef.current++
-            logError(new Error(`[voice] voice_stream error: ${error}`))
+            logError(new Error(`[voice] ASR error: ${error}`))
             onErrorRef.current?.(`Voice stream error: ${error}`)
             // Clear the audio buffer on error to avoid memory leaks
             audioBuffer.length = 0
@@ -885,17 +881,17 @@ export function useVoice({
               return
             }
 
-            // The WebSocket is now truly open — assign connectionRef so
+            // The ASR connection is now ready — assign connectionRef so
             // subsequent audio callbacks send directly instead of buffering.
             connectionRef.current = conn
             everConnectedRef.current = true
 
-            // Flush all audio chunks that were buffered while the WebSocket
-            // was connecting.  This is safe because onReady fires from the
-            // WebSocket 'open' event, guaranteeing send() will not be dropped.
+            // Flush all audio chunks that were buffered before the
+            // connection was ready. This is safe because onReady only
+            // fires once send() will not be dropped（网关车道立即就绪）。
             //
-            // Coalesce into ~1s slices rather than one ws.send per chunk
-            // — fewer WS frames means less overhead on both ends.
+            // Coalesce into ~1s slices rather than one send() per chunk
+            // — fewer send calls means less overhead.
             const SLICE_TARGET_BYTES = 32_000 // ~1s at 16kHz/16-bit/mono
             if (audioBuffer.length > 0) {
               let totalBytes = 0
@@ -922,7 +918,7 @@ export function useVoice({
             }
             audioBuffer.length = 0
 
-            // Reset the release timer now that the WebSocket is ready.
+            // Reset the release timer now that the ASR connection is ready.
             // Only arm it if auto-repeat has been seen — otherwise the OS
             // key repeat delay (~500ms) hasn't elapsed yet and the timer
             // would fire prematurely.
@@ -955,11 +951,10 @@ export function useVoice({
           return
         }
         if (!conn) {
-          logForDebugging(
-            '[voice] Failed to connect to voice_stream (no OAuth token?)',
-          )
+          logForDebugging('[voice] Failed to connect to gateway ASR lane')
           onErrorRef.current?.(
-            'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+            'Voice mode is not available. Gateway ASR must be configured ' +
+              '(set ATLAS_ASR_MODEL or the "asrModel" settings key).',
           )
           // Clear the audio buffer on failure
           audioBuffer.length = 0

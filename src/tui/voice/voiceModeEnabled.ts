@@ -1,9 +1,6 @@
 import { feature } from 'src/shared'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-import {
-  getOAuthTokens,
-  isAnthropicAuthEnabled,
-} from '../utils/auth.js'
+import { getAsrModel } from '../utils/model/model.js'
 
 /**
  * Kill-switch check for voice mode. Returns true unless the
@@ -23,32 +20,24 @@ export function isVoiceGrowthBookEnabled(): boolean {
 }
 
 /**
- * Auth-only check for voice mode. Returns true when the user has a valid
- * Anthropic OAuth token. Backed by the memoized getOAuthTokens —
- * first call spawns `security` on macOS (~20-50ms), subsequent calls are
- * cache hits. The memoize clears on token refresh (~once/hour), so one
- * cold spawn per refresh is expected. Cheap enough for usage-time checks.
+ * Voice ASR config check. G-3（§8.74.28 ⑪ voice 换血）: P1 Anthropic
+ * OAuth 门（getOAuthTokens / isAnthropicAuthEnabled，旧名 hasVoiceAuth）
+ * 已随 voice_stream WS 支整裁——语音 STT 只走网关 ASR 车道（P2），
+ * 模型恒可解析（ATLAS_ASR_MODEL > settings.asrModel > 'funasr' 默认，
+ * 见 utils/model/model.ts getAsrModel），故此检查为 ASR 配置面存在性
+ * 检查而非鉴权检查。
  */
-export function hasVoiceAuth(): boolean {
-  // Voice mode requires Anthropic OAuth — it uses the voice_stream
-  // endpoint on claude.ai which is not available with API keys,
-  // Bedrock, Vertex, or Foundry.
-  if (!isAnthropicAuthEnabled()) {
-    return false
-  }
-  // isAnthropicAuthEnabled only checks the auth *provider*, not whether
-  // a token exists. Without this check, the voice UI renders but
-  // connectVoiceStream fails silently when the user isn't logged in.
-  const tokens = getOAuthTokens()
-  return Boolean(tokens?.accessToken)
+export function hasVoiceAsrConfig(): boolean {
+  return Boolean(getAsrModel())
 }
 
 /**
- * Full runtime check: auth + GrowthBook kill-switch. Callers: `/voice`
- * (voice.ts, voice/index.ts), ConfigTool, VoiceModeNotice — command-time
- * paths where a fresh keychain read is acceptable. For React render
- * paths use useVoiceEnabled() instead (memoizes the auth half).
+ * Full runtime check: ASR config + GrowthBook kill-switch. Callers:
+ * `/voice` (voice.ts, voice/index.ts), ConfigTool, VoiceModeNotice —
+ * command-time paths where a fresh settings read is acceptable. For
+ * React render paths use useVoiceEnabled() instead (memoizes the
+ * config half).
  */
 export function isVoiceModeEnabled(): boolean {
-  return hasVoiceAuth() && isVoiceGrowthBookEnabled()
+  return hasVoiceAsrConfig() && isVoiceGrowthBookEnabled()
 }

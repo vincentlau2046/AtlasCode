@@ -233,14 +233,13 @@ export const ConfigTool = buildTool({
       const { isVoiceModeEnabled } = await import(
         '../../voice/voiceModeEnabled.js'
       )
+      // G-3（§8.74.28 ⑪ voice 换血）: 旧 P1 Anthropic OAuth 支已裁——
+      // 语音只走网关 ASR（P2），不再要求 claude.ai 账号。
       if (!isVoiceModeEnabled()) {
-        const { isAnthropicAuthEnabled } = await import('../../utils/auth.js')
         return {
           data: {
             success: false,
-            error: !isAnthropicAuthEnabled()
-              ? 'Voice mode requires a Claude.ai account. Please run /login to sign in.'
-              : 'Voice mode is not available.',
+            error: 'Voice mode is not available.',
           },
         }
       }
@@ -264,12 +263,15 @@ export const ConfigTool = buildTool({
           },
         }
       }
+      // G-3（§8.74.28 ⑪ voice 换血）: isVoiceStreamAvailable 现为网关
+      // ASR 配置面检查（恒满足，默认 funasr）；保留守卫作为前向缝诚实面。
       if (!isVoiceStreamAvailable()) {
         return {
           data: {
             success: false,
             error:
-              'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+              'Voice mode is not available. Gateway ASR must be configured ' +
+              '(set ATLAS_ASR_MODEL or the "asrModel" settings key).',
           },
         }
       }
