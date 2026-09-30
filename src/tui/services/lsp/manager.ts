@@ -212,7 +212,7 @@ export function initializeLspServerManager(): void {
  * successful init. Called from refreshActivePlugins() after plugin caches
  * are cleared, so newly-loaded plugin LSP servers are picked up.
  *
- * Fixes https://github.com/vincentlau2046/AtlasHarness/issues/15521:
+ * Fixes upstream issue 15521（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）:
  * loadAllPlugins() is memoized and can be called very early in startup
  * (via getCommands prefetch in setup.ts) before marketplaces are reconciled,
  * caching an empty plugin list. initializeLspServerManager() then reads that

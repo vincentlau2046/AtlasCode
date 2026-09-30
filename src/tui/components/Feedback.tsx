@@ -26,7 +26,8 @@ import TextInput from './TextInput.js';
 
 // This value was determined experimentally by testing the URL length limit
 const GITHUB_URL_LIMIT = 7250;
-const GITHUB_ISSUES_REPO_URL = 'https://github.com/vincentlau2046/AtlasHarness/issues'
+// G-3（§8.74.28 R4）：原旧仓 AtlasHarness issues → 当前产品仓 AtlasCode。
+const GITHUB_ISSUES_REPO_URL = 'https://github.com/vincentlau2046/AtlasCode/issues'
 type Props = {
   abortSignal: AbortSignal;
   messages: Message[];

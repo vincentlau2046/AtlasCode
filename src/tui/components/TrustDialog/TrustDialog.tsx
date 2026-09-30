@@ -194,7 +194,7 @@ export function TrustDialog(t0) {
   }
   let t19;
   if ($[23] === Symbol.for("react.memo_cache_sentinel")) {
-    t19 = <Text dimColor={true}><Link url="https://code.atlas.ai/docs/en/security">Security guide</Link></Text>;
+    t19 = <Text dimColor={true}><Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/security.md">Security guide</Link></Text>;
     $[23] = t19;
   } else {
     t19 = $[23];

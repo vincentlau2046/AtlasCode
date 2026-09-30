@@ -23,9 +23,9 @@
 // that sandbox network restrictions require explicit user permission rules.
 
 export const PREAPPROVED_HOSTS = new Set([
-  // Anthropic
-  'platform.claude.com',
-  'code.atlas.ai',
+  // 产品自有（G-3 §8.74.28 R4：code.atlas.ai 虚构域裁，换真实 repo 条目）
+  'github.com/vincentlau2046', // AtlasCode / AtlasHarness 产品仓（docs/reference 族）
+  'platform.claude.com', // guide agent CDP 文档地图（llms.txt）
   'modelcontextprotocol.io',
   'github.com/anthropics',
   'agentskills.io',

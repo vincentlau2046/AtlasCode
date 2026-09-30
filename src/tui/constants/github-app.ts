@@ -51,7 +51,7 @@ jobs:
 
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.atlas.ai/docs/en/cli-reference for available options
+          # or https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/cli-reference.md for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
 
 `
@@ -141,6 +141,6 @@ jobs:
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review \${{ github.repository }}/pull/\${{ github.event.pull_request.number }}'
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.atlas.ai/docs/en/cli-reference for available options
+          # or https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/cli-reference.md for available options
 
 `

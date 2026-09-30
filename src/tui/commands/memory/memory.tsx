@@ -74,7 +74,7 @@ function MemoryCommand({
 
         <Box marginTop={1}>
           <Text dimColor>
-            Learn more: <Link url="https://code.atlas.ai/docs/en/memory" />
+            Learn more: <Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/memory.md" />
           </Text>
         </Box>
       </Box>

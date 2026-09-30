@@ -21,7 +21,7 @@ import { pollForApprovedExitPlanMode, UltraplanPollError } from '../utils/ultrap
 
 // Multi-agent exploration is slow; 30min timeout.
 const ULTRAPLAN_TIMEOUT_MS = 30 * 60 * 1000;
-export const CCR_TERMS_URL = 'https://code.atlas.ai/docs/en/claude-code-on-the-web';
+export const CCR_TERMS_URL = 'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/remote-control.md';
 
 // CCR runs against the first-party gateway — use the premium-role model,
 // resolved from the config file (settings.modelRoles.premium) via

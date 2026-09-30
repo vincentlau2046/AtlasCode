@@ -277,7 +277,7 @@ function SandboxModeTab(t0) {
   }
   let t6;
   if ($[12] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = <Box flexDirection="column" marginTop={1} gap={1}>{t5}<Text dimColor={true}>Learn more:{" "}<Link url="https://code.atlas.ai/docs/en/sandboxing">code.atlas.ai/docs/en/sandboxing</Link></Text></Box>;
+    t6 = <Box flexDirection="column" marginTop={1} gap={1}>{t5}<Text dimColor={true}>Learn more:{" "}<Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/sandboxing.md">sandboxing docs</Link></Text></Box>;
     $[12] = t6;
   } else {
     t6 = $[12];

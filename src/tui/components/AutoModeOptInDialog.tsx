@@ -83,7 +83,7 @@ export function AutoModeOptInDialog(t0) {
   const onChange = t2;
   let t3;
   if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
-    t3 = <Box flexDirection="column" gap={1}><Text>{AUTO_MODE_DESCRIPTION}</Text><Link url="https://code.atlas.ai/docs/en/security" /></Box>;
+    t3 = <Box flexDirection="column" gap={1}><Text>{AUTO_MODE_DESCRIPTION}</Text><Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/security.md" /></Box>;
     $[4] = t3;
   } else {
     t3 = $[4];

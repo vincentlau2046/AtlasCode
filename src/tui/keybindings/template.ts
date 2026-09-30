@@ -44,7 +44,7 @@ export function generateKeybindingsTemplate(): string {
   // Format as object wrapper with bindings array
   const config = {
     $schema: 'https://www.schemastore.org/claude-code-keybindings.json',
-    $docs: 'https://code.atlas.ai/docs/en/keybindings',
+    $docs: 'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/keybindings.md',
     bindings,
   }
 

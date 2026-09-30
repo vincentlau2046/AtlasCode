@@ -70,7 +70,7 @@ export async function startMCPServer(
               const convertedSchema = zodToJsonSchema(tool.outputSchema)
               // MCP SDK requires outputSchema to have type: "object" at root level
               // Skip schemas with anyOf/oneOf at root (from z.union, z.discriminatedUnion, etc.)
-              // See: https://github.com/vincentlau2046/AtlasHarness/issues/8014
+              // See: upstream issue 8014（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
               if (
                 typeof convertedSchema === 'object' &&
                 convertedSchema !== null &&

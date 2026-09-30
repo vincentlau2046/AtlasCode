@@ -25,10 +25,12 @@ const MAX_RELEASE_NOTES_SHOWN = 5
  * 2. We fetch the changelog in the background and store it in config
  * 3. Next time the user starts Atlas, the cached changelog is available immediately
  */
+// G-3（§8.74.28 R4）：原指向旧仓 AtlasHarness（无 CHANGELOG.md，404）→
+// 新仓 AtlasCode（repo 根 CHANGELOG.md 真实落点，R4 升格随迁建）。
 export const CHANGELOG_URL =
-  'https://github.com/vincentlau2046/AtlasHarness/blob/master/CHANGELOG.md'
+  'https://github.com/vincentlau2046/AtlasCode/blob/master/CHANGELOG.md'
 const RAW_CHANGELOG_URL =
-  'https://raw.githubusercontent.com/vincentlau2046/AtlasHarness/refs/heads/master/CHANGELOG.md'
+  'https://raw.githubusercontent.com/vincentlau2046/AtlasCode/refs/heads/master/CHANGELOG.md'
 
 /**
  * Get the path for the cached changelog file.

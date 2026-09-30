@@ -23,7 +23,11 @@ type TipMatcher = {
   tip: ValidationTip
 }
 
-const DOCUMENTATION_BASE = 'https://code.atlas.ai/docs/en'
+// G-3（§8.74.28 R4 升格）：原 code.atlas.ai/docs/en 虚构域 → AtlasCode repo
+// 内 docs/reference/ 指导文件族（GitHub blob 真实可点开；子页后缀逐条映射到
+// 主题文件，见下方各 docLink 位）。
+const DOCUMENTATION_BASE =
+  'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference'
 
 const TIP_MATCHERS: TipMatcher[] = [
   {
@@ -32,7 +36,7 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Valid modes: "acceptEdits" (ask before file changes), "plan" (analysis only), "bypassPermissions" (auto-accept all), or "default" (standard behavior)',
-      docLink: `${DOCUMENTATION_BASE}/iam#permission-modes`,
+      docLink: `${DOCUMENTATION_BASE}/security.md`,
     },
   },
   {
@@ -59,7 +63,7 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Environment variables must be strings. Wrap numbers and booleans in quotes. Example: "DEBUG": "true", "PORT": "3000"',
-      docLink: `${DOCUMENTATION_BASE}/settings#environment-variables`,
+      docLink: `${DOCUMENTATION_BASE}/network-config.md`,
     },
   },
   {
@@ -98,7 +102,7 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Check for typos or refer to the documentation for valid fields',
-      docLink: `${DOCUMENTATION_BASE}/settings`,
+      docLink: `${DOCUMENTATION_BASE}/overview.md`,
     },
   },
   {
@@ -126,15 +130,15 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Must be an array of directory paths. Example: ["~/projects", "/tmp/workspace"]. You can also use --add-dir flag or /add-dir command',
-      docLink: `${DOCUMENTATION_BASE}/iam#working-directories`,
+      docLink: `${DOCUMENTATION_BASE}/security.md`,
     },
   },
 ]
 
 const PATH_DOC_LINKS: Record<string, string> = {
-  permissions: `${DOCUMENTATION_BASE}/iam#configuring-permissions`,
-  env: `${DOCUMENTATION_BASE}/settings#environment-variables`,
-  hooks: `${DOCUMENTATION_BASE}/hooks`,
+  permissions: `${DOCUMENTATION_BASE}/security.md`,
+  env: `${DOCUMENTATION_BASE}/network-config.md`,
+  hooks: `${DOCUMENTATION_BASE}/hooks.md`,
 }
 
 export function getValidationTip(context: TipContext): ValidationTip | null {

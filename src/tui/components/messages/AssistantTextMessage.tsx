@@ -85,7 +85,10 @@ export function AssistantTextMessage(t0) {
       {
         let t2;
         if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-          t2 = <MessageResponse height={1}><Text color="error">Credit balance too low · Add funds: https://platform.atlas.ai/settings/billing</Text></MessageResponse>;
+          // G-3（§8.74.28 R4）：原 platform.atlas.ai 虚构计费域裁——本仓模型车道
+          // = OpenAI 协议静态键，无产品计费面；余额 = 用户自配 provider/网关侧。
+          // 指引指向 repo 内真实文档页（网络与模型配置）。
+          t2 = <MessageResponse height={1}><Text color="error">Credit balance too low · Add funds at your model provider (see https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/network-config.md)</Text></MessageResponse>;
           $[5] = t2;
         } else {
           t2 = $[5];

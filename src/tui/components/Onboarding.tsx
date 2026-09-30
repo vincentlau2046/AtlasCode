@@ -78,7 +78,7 @@ export function Onboarding({
             <Text dimColor wrap="wrap">
               For more details see:
               <Newline />
-              <Link url="https://code.atlas.ai/docs/en/security" />
+              <Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/security.md" />
             </Text>
           </OrderedList.Item>
         </OrderedList>

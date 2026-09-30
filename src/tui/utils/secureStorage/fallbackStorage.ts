@@ -33,7 +33,7 @@ export function createFallbackStorage(
       if (result.success) {
         // Delete secondary when migrating to primary for the first time
         // This preserves credentials when sharing .claude between host and containers
-        // See: https://github.com/vincentlau2046/AtlasHarness/issues/1414
+        // See: upstream issue 1414（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
         if (primaryDataBefore === null) {
           secondary.delete()
         }

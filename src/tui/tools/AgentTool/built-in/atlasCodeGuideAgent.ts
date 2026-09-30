@@ -14,7 +14,7 @@ import type {
 } from '../loadAgentsDir.js'
 
 const ATLAS_DOCS_MAP_URL =
-  'https://code.atlas.ai/docs/en/claude_code_docs_map.md'
+  'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/README.md'
 const CDP_DOCS_MAP_URL = 'https://platform.claude.com/llms.txt'
 
 export const ATLAS_GUIDE_AGENT_TYPE = 'atlas-code-guide'

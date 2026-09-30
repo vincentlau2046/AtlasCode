@@ -72,7 +72,9 @@ export function getAttributionTexts(): AttributionTexts {
       ? getPublicModelName(model)
       : 'Atlas Opus 4.6'
   const defaultAttribution = `🤖 Generated with [AtlasHarness](${PRODUCT_URL})`
-  const defaultCommit = `Co-Authored-By: ${modelName} <noreply@atlas.ai>`
+  // G-3（§8.74.28 R4）：原 noreply@atlas.ai 虚构邮箱域 → 真实维护者邮箱
+  // （用户裁定 2026-09-30，与 git 作者邮箱一致）。
+  const defaultCommit = `Co-Authored-By: ${modelName} <vincent.lau2046@gmail.com>`
 
   const settings = getInitialSettings()
 

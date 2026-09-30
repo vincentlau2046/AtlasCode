@@ -37,8 +37,9 @@
  *    占位 env 面整裁（端点不建、调用点删）——原 preflight 端点 de-ANT 已
  *    废弃，黑名单面若未来复活 = 独立功能波（带真端点），非本接缝复活。
  *  ⑥ 旧 getWebFetchUserAgent（utils/http.ts:54，atlas/${MACRO.VERSION}
- *    构建宏 + env 段）→ 域内固定 UA 常量（新仓无版本宏，版本段裁登记；
- *    support.atlas.ai 后缀品牌面逐字保留）。
+ *    构建宏 + env 段）→ 域内固定 UA 常量（新仓无版本宏，版本段裁登记）；
+ *    后缀品牌面 G-3（§8.74.28 R4 升格）换血：support.atlas.ai 虚构域 →
+ *    AtlasCode 真实 repo 链接。
  *  ⑦ 旧 isBinaryContentType / persistBinaryContent / extensionForMimeType
  *    （utils/mcpOutputStorage.ts:62-171）→ 域内本地随迁（content-type 判
  *    定 + writeFile + 扩展名表逐字）；旧 getToolResultsDir = 会话目录 +
@@ -226,8 +227,9 @@ const MAX_REDIRECTS = 10
 export const MAX_MARKDOWN_LENGTH = 100_000
 
 // delta ⑥：旧 getWebFetchUserAgent（utils/http.ts:54，版本构建宏 + env 段）
-// → 域内固定 UA（版本段裁登记；support.atlas.ai 后缀品牌面逐字保留）
-const WEB_FETCH_USER_AGENT = 'Atlas-User (+https://support.atlas.ai/)'
+// → 域内固定 UA（版本段裁登记）；G-3（§8.74.28 R4 升格）：原 support.atlas.ai
+// 虚构域后缀 → 真实 repo 链接（AtlasCode repo）。
+const WEB_FETCH_USER_AGENT = 'Atlas-User (+https://github.com/vincentlau2046/AtlasCode)'
 
 // ── URL 校验（逐字）──────────────────────────────────────────────────
 

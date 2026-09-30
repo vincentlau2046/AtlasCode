@@ -431,7 +431,7 @@ export function MCPListPanel(t0) {
   }
   let t27;
   if ($[62] === Symbol.for("react.memo_cache_sentinel")) {
-    t27 = <Text dimColor={true}><Link url="https://code.atlas.ai/docs/en/mcp">https://code.atlas.ai/docs/en/mcp</Link>{" "}for help</Text>;
+    t27 = <Text dimColor={true}><Link url="https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/mcp.md">https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/mcp.md</Link>{" "}for help</Text>;
     $[62] = t27;
   } else {
     t27 = $[62];

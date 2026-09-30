@@ -88,7 +88,7 @@ import type { OutputStyleConfig } from './outputStyles.js'
 import { CYBER_RISK_INSTRUCTION } from './cyberRiskInstruction.js'
 
 export const ATLAS_DOCS_MAP_URL =
-  'https://code.atlas.ai/docs/en/claude_code_docs_map.md'
+  'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/README.md'
 
 /**
  * Boundary marker separating static (cross-org cacheable) content from dynamic content.

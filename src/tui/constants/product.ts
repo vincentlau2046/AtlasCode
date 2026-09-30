@@ -1,4 +1,6 @@
-export const PRODUCT_URL = 'https://atlas.local'
+// G-3（§8.74.28 R4 升格）：原 atlas.local 虚构域 → 真实产品 repo
+// （attribution 行链接 + MCP server websiteUrl 两消费面共用）。
+export const PRODUCT_URL = 'https://github.com/vincentlau2046/AtlasCode'
 
 // Atlas Remote session URLs
 export const CLAUDE_AI_BASE_URL = 'https://claude.ai'

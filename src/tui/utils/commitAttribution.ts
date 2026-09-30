@@ -25,9 +25,11 @@ import { sequential } from './sequential.js'
  * NOTE: This is intentionally a repo allowlist, not an org-wide check.
  * Only add repos here that are confirmed PRIVATE.
  */
+// G-3（§8.74.28 R4）：原旧仓 AtlasHarness 两条 → 当前产品仓 AtlasCode
+// （私有仓，trailer 允许内部模型名的 allowlist 单一事实源）。
 const INTERNAL_MODEL_REPOS = [
-  'github.com:vincentlau2046/AtlasHarness',
-  'github.com/vincentlau2046/AtlasHarness',
+  'github.com:vincentlau2046/AtlasCode',
+  'github.com/vincentlau2046/AtlasCode',
 ]
 
 /**

@@ -94,7 +94,7 @@ export function getToolSearchMode(): ToolSearchMode {
   // reach the wire, even if ATLAS_ENABLE_TOOL_SEARCH is also set. This is the
   // explicit escape hatch for proxy gateways that the heuristic in
   // isToolSearchEnabledOptimistic doesn't cover.
-  // github.com/vincentlau2046/AtlasHarness/issues/20031
+  // upstream issue 20031（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
   if (isEnvTruthy(process.env.ATLAS_DISABLE_EXPERIMENTAL_BETAS)) {
     return 'standard'
   }
@@ -144,7 +144,7 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // is 'firstParty' but the base URL points elsewhere, the proxy will reject
   // tool_reference blocks with a 400. Vertex/Bedrock/Foundry are unaffected —
   // they have their own endpoints and beta headers.
-  // https://github.com/vincentlau2046/AtlasHarness/issues/30912
+  // upstream issue 30912（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
   //
   // HOWEVER: some proxies DO support tool_reference (LiteLLM passthrough,
   // Cloudflare AI Gateway, corp gateways that forward beta headers). The

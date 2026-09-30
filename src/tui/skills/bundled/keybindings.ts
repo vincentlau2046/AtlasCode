@@ -113,7 +113,7 @@ function generateReservedShortcuts(): string {
 
 const FILE_FORMAT_EXAMPLE: KeybindingsSchemaType = {
   $schema: 'https://www.schemastore.org/claude-code-keybindings.json',
-  $docs: 'https://code.atlas.ai/docs/en/keybindings',
+  $docs: 'https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/keybindings.md',
   bindings: [
     {
       context: 'Chat',

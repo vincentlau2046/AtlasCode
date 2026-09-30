@@ -190,7 +190,7 @@ async function getWatchTargets(): Promise<{
     // Skip flagSettings - they're provided via CLI and won't change during the session.
     // Additionally, they may be temp files in $TMPDIR which can contain special files
     // (FIFOs, sockets) that cause the file watcher to hang or error.
-    // See: https://github.com/vincentlau2046/AtlasHarness/issues/16469
+    // See: upstream issue 16469（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
     if (source === 'flagSettings') {
       continue
     }

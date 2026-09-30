@@ -420,7 +420,7 @@ export const NodeFsOperations: FsOperations = {
       // FILE_ATTRIBUTE_READONLY bit set (Group Policy, OneDrive, desktop.ini).
       // Bun's directoryExistsAt misclassifies DIRECTORY+READONLY as not-a-dir
       // (bun-internal src/sys.zig existsAtType). The dir exists; ignore.
-      // https://github.com/vincentlau2046/AtlasHarness/issues/30924
+      // upstream issue 30924（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
       if (getErrnoCode(e) !== 'EEXIST') throw e
     }
   },
@@ -541,7 +541,7 @@ export const NodeFsOperations: FsOperations = {
       // FILE_ATTRIBUTE_READONLY bit set (Group Policy, OneDrive, desktop.ini).
       // Bun's directoryExistsAt misclassifies DIRECTORY+READONLY as not-a-dir
       // (bun-internal src/sys.zig existsAtType). The dir exists; ignore.
-      // https://github.com/vincentlau2046/AtlasHarness/issues/30924
+      // upstream issue 30924（原仓注释溯源，旧仓链接失效已裁，G-3 §8.74.28 R4）
       if (getErrnoCode(e) !== 'EEXIST') throw e
     }
   },
