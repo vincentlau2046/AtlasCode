@@ -462,9 +462,8 @@ export type GlobalConfig = {
   // Used to detect cross-session changes and notify users.
   penguinModeOrgEnabled?: boolean
 
-  // Epoch ms when background refreshes last ran (fast mode, quota, passes, client data).
-  // Used with atlas_cicada_nap_ms to throttle API calls
-  startupPrefetchedAt?: number
+  // G-3（§8.74.28 ⑧）: startupPrefetchedAt 字段随 1P bootstrap prefetch 块整裁
+  // 删除（唯一写入方 main.tsx prefetch 块已删）；磁盘旧键忽略。
 
   // Run Remote Control at startup (requires BRIDGE_MODE)
   // undefined = use default (see getRemoteControlAtStartup() for precedence)

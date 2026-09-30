@@ -44,7 +44,6 @@ import { addToHistory } from './history.js';
 import type { Root } from './ink.js';
 import { launchRepl } from './replLauncher.js';
 import { hasGrowthBookEnvOverride, initializeGrowthBook, refreshGrowthBookAfterAuthChange } from './services/analytics/growthbook.js';
-import { fetchBootstrapData } from './services/api/bootstrap.js';
 import { type DownloadResult, downloadSessionFiles, type FilesApiConfig, parseFileSpecs } from './services/api/filesApi.js';
 import type { McpSdkServerConfig, McpServerConfig, ScopedMcpServerConfig } from './services/mcp/types.js';
 import { isPolicyAllowed, loadPolicyLimits, refreshPolicyLimits, waitForPolicyLimitsToLoad } from './services/policyLimits/index.js';
@@ -1935,30 +1934,12 @@ async function run(): Promise<CommanderCommand> {
       }
     }
 
-    // Warm bootstrap data caches after trust is established.
-    // These make API calls which could trigger apiKeyHelper execution.
-    // (passes eligibility prefetch + quota 预检 checkQuotaStatus 已随商务簇 / P6-2 C-3 删除)
-    // --bare / SIMPLE: skip — these are cache-warms for the REPL's
-    // first-turn responsiveness (bootstrap data).
-    const bgRefreshThrottleMs = getFeatureValue_CACHED_MAY_BE_STALE('atlas_cicada_nap_ms', 0);
-    const lastPrefetched = getGlobalConfig().startupPrefetchedAt ?? 0;
-    const skipStartupPrefetches = isBareMode() || bgRefreshThrottleMs > 0 && Date.now() - lastPrefetched < bgRefreshThrottleMs;
-    if (!skipStartupPrefetches) {
-      const lastPrefetchedInfo = lastPrefetched > 0 ? ` last ran ${Math.round((Date.now() - lastPrefetched) / 1000)}s ago` : '';
-      logForDebugging(`Starting background startup prefetches${lastPrefetchedInfo}`);
+    // G-3（§8.74.28 ⑧）: 1P bootstrap 整链裁除（services/api/bootstrap.ts 137L 删除）
+    // —— claude.ai /api/bootstrap 端点（client_data/additional_model_options）不存在于
+    // 本产品车道；原 startupPrefetches 块唯一真活 = fetchBootstrapData，throttle
+    // 记账（startupPrefetchedAt/atlas_cicada_nap_ms）随块删除。refreshExampleCommands
+    // 面（git log，非 API）保留于下方。
 
-      // Fetch bootstrap data from the server and update all cache values.
-      void fetchBootstrapData();
-
-      if (bgRefreshThrottleMs > 0) {
-        saveGlobalConfig(current => ({
-          ...current,
-          startupPrefetchedAt: Date.now()
-        }));
-      }
-    } else {
-      logForDebugging(`Skipping startup prefetches, last ran ${Math.round((Date.now() - lastPrefetched) / 1000)}s ago`);
-    }
     if (!isNonInteractiveSession) {
       void refreshExampleCommands(); // Pre-fetch example commands (runs git log, no API call)
     }
