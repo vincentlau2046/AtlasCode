@@ -39,9 +39,9 @@
  *    func F-W2，S-E3 B-N3 登记）/ 同域 3xx 递归跟随 /
  *    MAX_REDIRECTS 环守卫 'Too many redirects (exceeded 10)' / 403
  *    x-proxy-error → EgressBlockedError（消息 JSON 面）/ 非代理 403 →
- *    状态码文案 / content-length 超限守卫 / blocklist 预检 fail-open
- *    （env 未设，URL_CACHE 命中零再调）+ env 已设 can_fetch 双支
- *    （allowed 缓存 DOMAIN_CHECK_CACHE / blocked 抛 DomainBlockedError）。
+ *    状态码文案 / content-length 超限守卫 / URL_CACHE 命中零再调
+ *    （G-3 §8.74.28 R2：blocklist 预检面整裁，原 env 未设 fail-open +
+ *    env 已设 can_fetch 双支测试随面删除）。
  *  - P-W10 mapToolResult 两工具（WebFetch 透传 content / WebSearch
  *    Links + No links + REMINDER + null 条目跳过 + trim）+
  *    renderToolUseMessage 两工具字符串面（verbose 双态 / 缺参 null）。
@@ -51,7 +51,6 @@
  */
 import {
   afterAll,
-  beforeAll,
   describe,
   expect,
   test,
@@ -157,19 +156,9 @@ function redirectResponse(
   }
 }
 
-// blocklist 预检 env 面隔离（fail-open 语义测试确定性）
-const DOMAIN_CHECK_ENV_KEY = 'ATLAS_WEB_DOMAIN_CHECK_URL'
-let savedDomainCheckEnv: string | undefined
-beforeAll(() => {
-  savedDomainCheckEnv = process.env[DOMAIN_CHECK_ENV_KEY]
-  delete process.env[DOMAIN_CHECK_ENV_KEY]
-})
+// G-3（§8.74.28）R2：blocklist 预检面裁后 ATLAS_WEB_DOMAIN_CHECK_URL env 面
+// 不存在，原 env 隔离脚手架随面删除（fail-open 确定性保证同步出局）。
 afterAll(() => {
-  if (savedDomainCheckEnv === undefined) {
-    delete process.env[DOMAIN_CHECK_ENV_KEY]
-  } else {
-    process.env[DOMAIN_CHECK_ENV_KEY] = savedDomainCheckEnv
-  }
   setWebFetchTransportForTesting(null)
 })
 
@@ -752,7 +741,7 @@ describe('P-W9 重定向管线面（transport 缝注入，零真网）', () => {
     setWebFetchTransportForTesting(null)
   })
 
-  test('blocklist 预检 env 未设 fail-open（管线直走主 fetch 支）+ URL_CACHE 命中零再调', async () => {
+  test('URL_CACHE 命中零再调（G-3 §8.74.28 R2：blocklist 预检面已裁，管线直走主 fetch）', async () => {
     clearWebFetchCache()
     const transportCalls: string[] = []
     const transport: WebFetchTransport = (url, _init) => {
@@ -786,62 +775,9 @@ describe('P-W9 重定向管线面（transport 缝注入，零真网）', () => {
     setWebFetchTransportForTesting(null)
   })
 
-  test('blocklist 预检 env 已设 can_fetch 双支（S-E3 B-N2 补测）', async () => {
-    clearWebFetchCache()
-    process.env[DOMAIN_CHECK_ENV_KEY] = 'https://blocklist.example/check'
-    try {
-      let blocklistCalls = 0
-      const transport: WebFetchTransport = (url, _init) => {
-        if (url.startsWith('https://blocklist.example/check?domain=')) {
-          blocklistCalls++
-          const domain = new URL(url).searchParams.get('domain')
-          return Promise.resolve({
-            status: 200,
-            statusText: 'OK',
-            ok: true,
-            headers: headersOf({ 'content-type': 'application/json' }),
-            arrayBuffer: async () => new ArrayBuffer(0),
-            json: async () => ({ can_fetch: domain !== 'block.example' }),
-          })
-        }
-        return Promise.resolve({
-          status: 200,
-          statusText: 'OK',
-          ok: true,
-          headers: headersOf({ 'content-type': 'text/plain' }),
-          arrayBuffer: async () => new TextEncoder().encode('x').buffer,
-          json: async () => ({}),
-        })
-      }
-      setWebFetchTransportForTesting(transport)
-
-      // can_fetch true：放行至内容 fetch（blocklist 恰 1 调 + 内容 1 调）
-      const ok = await getURLMarkdownContent(
-        'https://fetch.example/a',
-        new AbortController(),
-      )
-      if ('type' in ok) throw new Error('unexpected redirect')
-      expect(ok.content).toBe('x')
-      expect(blocklistCalls).toBe(1)
-
-      // allowed 缓存进 DOMAIN_CHECK_CACHE：同域异 path → blocklist 零再调
-      const again = await getURLMarkdownContent(
-        'https://fetch.example/b',
-        new AbortController(),
-      )
-      if ('type' in again) throw new Error('unexpected redirect')
-      expect(again.content).toBe('x')
-      expect(blocklistCalls).toBe(1)
-
-      // can_fetch false：blocked → DomainBlockedError（消息文案逐字）
-      await expect(
-        getURLMarkdownContent('https://block.example/c', new AbortController()),
-      ).rejects.toThrow('Atlas is unable to fetch from block.example')
-    } finally {
-      delete process.env[DOMAIN_CHECK_ENV_KEY]
-      setWebFetchTransportForTesting(null)
-    }
-  })
+  // G-3（§8.74.28）R2：原「blocklist 预检 env 已设 can_fetch 双支」测试
+  // （S-E3 B-N2 补测）随预检面整裁删除——ATLAS_WEB_DOMAIN_CHECK_URL env
+  // 面不存在，can_fetch 双支 + DOMAIN_CHECK_CACHE 断言无对象。
 })
 
 describe('P-W10 mapToolResult + renderToolUseMessage', () => {

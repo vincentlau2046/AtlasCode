@@ -8,10 +8,11 @@
  * WebFetch/WebSearch 输入输出 + context duck 2 + 进度 duck + Hit/Result/
  * Output 3）+ prompt 面 4 函数（getWebFetchToolPrompt /
  * getWebSearchPrompt / getLocalMonthYear / 2 短 description 不接线导出）+
- * URL 管线 10 面（webFetchUtils：3 错误类 / validateURL /
- * checkDomainBlocklist / isPermittedRedirect / getWithPermittedRedirects /
+ * URL 管线 9 面（webFetchUtils：1 错误类 / validateURL /
+ * isPermittedRedirect / getWithPermittedRedirects /
  * getURLMarkdownContent / applyPromptToMarkdown / 二进制落盘 3 件 /
- * clearWebFetchCache / 测试缝 setWebFetchTransportForTesting）+
+ * clearWebFetchCache / 测试缝 setWebFetchTransportForTesting；
+ * blocklist 预检面 G-3 §8.74.28 R2 整裁）+
  * preapproved 双表 + rule-content 函数 2 + 摘要面（TOOL_SUMMARY_MAX_LENGTH /
  * truncateSummary）+ G-2 客户端 provider 层（webSearchProvider：runWebSearch
  * 主入口 / bing SERP 解析 / tavily API / 域过滤 / env+settings 键解析 /

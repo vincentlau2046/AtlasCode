@@ -166,11 +166,8 @@ const BING_SERP_FIXTURE =
   '<li class="b_algo" data-hid="1"><h2><a href="https://docs.example/cann-op" target="_blank">CANN 算子开发 &amp; 指南</a></h2><div class="b_caption"><p>Ascend C 算子开发文档</p></div></li>' +
   '</ol></html>'
 
-// blocklist 预检 env 面隔离（与 unit 面同族）：若宿主环境设了
-// ATLAS_WEB_DOMAIN_CHECK_URL，checkDomainBlocklist 会对 fixture transport
-// 发预检请求（json {} → check_failed 全管线炸）→ 确定性 fail-open
-const DOMAIN_CHECK_ENV_KEY = 'ATLAS_WEB_DOMAIN_CHECK_URL'
-let savedDomainCheckEnv: string | undefined
+// G-3（§8.74.28）R2：blocklist 预检 env 面隔离随预检面整裁（env 面
+// ATLAS_WEB_DOMAIN_CHECK_URL 不建，预检请求路径不复存在）。
 // G-2（§8.74.27）：web search provider env 面隔离（宿主设了
 // WEB_SEARCH_PROVIDER=tavily + 无 key 时 F-W6/F-W7 会走 tavily 错误支 →
 // 非确定性；与 unit 面 engine-tools-web-search-provider 同族同式）
@@ -181,8 +178,6 @@ const WEB_SEARCH_ENV_KEYS = [
 ] as const
 const savedWebSearchEnv: Record<(typeof WEB_SEARCH_ENV_KEYS)[number], string | undefined> = {}
 beforeAll(() => {
-  savedDomainCheckEnv = process.env[DOMAIN_CHECK_ENV_KEY]
-  delete process.env[DOMAIN_CHECK_ENV_KEY]
   for (const k of WEB_SEARCH_ENV_KEYS) {
     savedWebSearchEnv[k] = process.env[k]
     delete process.env[k]
@@ -191,11 +186,6 @@ beforeAll(() => {
   clearWebFetchCache()
 })
 afterAll(() => {
-  if (savedDomainCheckEnv === undefined) {
-    delete process.env[DOMAIN_CHECK_ENV_KEY]
-  } else {
-    process.env[DOMAIN_CHECK_ENV_KEY] = savedDomainCheckEnv
-  }
   for (const k of WEB_SEARCH_ENV_KEYS) {
     if (savedWebSearchEnv[k] === undefined) delete process.env[k]
     else process.env[k] = savedWebSearchEnv[k]

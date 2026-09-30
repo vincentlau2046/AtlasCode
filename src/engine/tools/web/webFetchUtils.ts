@@ -2,12 +2,13 @@
  * engine/tools/web — WebFetch URL→markdown 管线（S-E2 §8.59 web 族子波）。
  *
  * 旧仓来源（a8af45b）：src/tools/WebFetchTool/utils.ts 537L 逐字随迁多裁
- * （3 错误类 / 双缓存 / validateURL / blocklist 预检 / 受限重定向 /
- * 二进制落盘 / LRU 缓存 / applyPromptToMarkdown 二级模型面）。
+ * （3 错误类→G-3 后 1 类（EgressBlockedError）/ 双缓存→单缓存 / validateURL /
+ * 受限重定向 / 二进制落盘 / LRU 缓存 / applyPromptToMarkdown 二级模型面；
+ * blocklist 预检面 G-3 §8.74.28 R2 整裁）。
  *
  * delta 登记（H6 逐条，复审勿当遗漏重提）：
- *  ① 旧 axios 依赖（主 fetch + blocklist 预检两面）→ node 全局 fetch
- *    （本面零新依赖，fetch = 全局内建）；
+ *  ① 旧 axios 依赖（主 fetch 面；blocklist 预检面 G-3 整裁）→ node 全局
+ *    fetch（本面零新依赖，fetch = 全局内建）；
  *    getWithPermittedRedirects：旧 axios maxRedirects:0（3xx 抛错，catch
  *    支读 error.response.headers.location）→ fetch redirect:'manual'（3xx
  *    正常返回，原地读 status/headers，语义等价）；axios timeout 选项 →
@@ -23,18 +24,18 @@
  *    get/set({size})/has/clear + TTL 惰性过期 + 访问刷新 recency + FIFO
  *    逐出；URL_CACHE 字节上限 50MB + 条目上限 500（lru-cache v10 隐式
  *    max=500 对齐，S-E3 A-N4 补登：S-E2 实施 maxEntries 曾留 undefined）
- *    / DOMAIN_CHECK_CACHE 条数上限 128（旧 max 参数逐字），双上限分别
- *    对齐旧两实例 maxSize / max 参数）。
+ *    / 单缓存 URL_CACHE（DOMAIN_CHECK_CACHE 随 G-3 blocklist 预检面整裁，
+ *    条数上限 500 逐字保留）。
  *  ③ 旧 turndown 懒单例（~1.4MB 保留堆）整砍（本面零新依赖，不引转换库）
  *    → HTML 内容 raw 透传（旧 turndown 支裁，非 HTML 支逐字；HTML 支
  *    contentBytes 保 Buffer.byteLength(markdown) 语义，缓存逐出核算面
  *    保留）。登记 = HTML→markdown 转换面裁（TUI/增强波复活候选，非本波）。
  *  ④ 旧 getSettings_DEPRECATED().skipWebFetchPreflight 企业 opt-out 支裁
  *    （新仓无 SettingsJson 面——config 功能面恢复位，同 plan 域 delta ③
- *    先例）→ blocklist 预检恒逐字执行。
- *  ⑤ 旧 checkDomainBlocklist [ATLAS-HOLD] ATLAS_WEB_DOMAIN_CHECK_URL env
- *    面逐字保留（未配置 = fail-open 放行；国内黑名单服务就绪配置该 env
- *    恢复远端检查；de-ANT 原 preflight 端点废弃注释逐字）。
+ *    先例）→ blocklist 预检恒执行（该「恒执行」态随 ⑤ G-3 整裁出局）。
+ *  ⑤ G-3（§8.74.28）R2：旧 checkDomainBlocklist + ATLAS_WEB_DOMAIN_CHECK_URL
+ *    占位 env 面整裁（端点不建、调用点删）——原 preflight 端点 de-ANT 已
+ *    废弃，黑名单面若未来复活 = 独立功能波（带真端点），非本接缝复活。
  *  ⑥ 旧 getWebFetchUserAgent（utils/http.ts:54，atlas/${MACRO.VERSION}
  *    构建宏 + env 段）→ 域内固定 UA 常量（新仓无版本宏，版本段裁登记；
  *    support.atlas.ai 后缀品牌面逐字保留）。
@@ -72,22 +73,10 @@ import { makeSecondaryModelPrompt } from './webFetchPrompt'
 
 // ── 错误类（逐字）─────────────────────────────────────────────────────
 
-// Custom error classes for domain blocking
-class DomainBlockedError extends Error {
-  constructor(domain: string) {
-    super(`Atlas is unable to fetch from ${domain}`)
-    this.name = 'DomainBlockedError'
-  }
-}
-
-class DomainCheckFailedError extends Error {
-  constructor(domain: string) {
-    super(
-      `Unable to verify if domain ${domain} is safe to fetch. This may be due to network restrictions or enterprise security policies blocking the Atlas preflight service.`,
-    )
-    this.name = 'DomainCheckFailedError'
-  }
-}
+// G-3（§8.74.28）R2：DomainBlockedError / DomainCheckFailedError（blocklist
+// 预检 2 错误类）随整预检面裁 —— ATLAS_WEB_DOMAIN_CHECK_URL 不建（原
+// preflight 端点 de-ANT 已废弃，国内黑名单服务未就绪）；黑名单面若未来
+// 复活 = 独立功能波（带真端点），非本接缝复活。
 
 export class EgressBlockedError extends Error {
   constructor(public readonly domain: string) {
@@ -199,20 +188,11 @@ const URL_CACHE = new TtlLruCache<string, CacheEntry>(
   MAX_CACHE_SIZE_BYTES,
 )
 
-// Separate cache for preflight domain checks. URL_CACHE is URL-keyed, so
-// fetching two paths on the same domain triggers two identical preflight
-// HTTP round-trips to the preflight domain-check endpoint. This
-// hostname-keyed cache avoids that. Only 'allowed' is cached —
-// blocked/failed re-check on next attempt.
-// delta ②：旧 new LRUCache<string, true>({ max: 128, ttl })
-const DOMAIN_CHECK_CACHE = new TtlLruCache<string, true>(
-  5 * 60 * 1000, // 5 minutes — shorter than URL_CACHE TTL
-  128,
-)
+// G-3（§8.74.28）R2：DOMAIN_CHECK_CACHE（blocklist 预检 host 键缓存）随
+// 预检面裁（双缓存 → 单缓存 URL_CACHE）。
 
 export function clearWebFetchCache(): void {
   URL_CACHE.clear()
-  DOMAIN_CHECK_CACHE.clear()
 }
 
 // ── 常量（逐字 + 注释）───────────────────────────────────────────────
@@ -235,9 +215,6 @@ const MAX_HTTP_CONTENT_LENGTH = 10 * 1024 * 1024
 // Timeout for the main HTTP fetch request (60 seconds).
 // Prevents hanging indefinitely on slow/unresponsive servers.
 const FETCH_TIMEOUT_MS = 60_000
-
-// Timeout for the domain blocklist preflight check (10 seconds).
-const DOMAIN_CHECK_TIMEOUT_MS = 10_000
 
 // Cap same-host redirect hops. Without this a malicious server can return
 // a redirect loop (/a → /b → /a …) and the per-request FETCH_TIMEOUT_MS
@@ -295,53 +272,10 @@ export function validateURL(url: string): boolean {
   return true
 }
 
-// ── blocklist 预检（delta ⑤ 面逐字，fetch 化）───────────────────────
-
-type DomainCheckResult =
-  | { status: 'allowed' }
-  | { status: 'blocked' }
-  | { status: 'check_failed'; error: Error }
-
-export async function checkDomainBlocklist(
-  domain: string,
-): Promise<DomainCheckResult> {
-  if (DOMAIN_CHECK_CACHE.has(domain)) {
-    return { status: 'allowed' }
-  }
-  // de-ANT: 原 preflight 端点 https://api.anthropic.com/api/web/domain_info 已废弃。
-  // [ATLAS-HOLD] 占位：域黑名单服务端点由 ATLAS_WEB_DOMAIN_CHECK_URL 提供。
-  // 未配置时 fail-open 放行（check_failed 会抛 DomainCheckFailedError 导致全部
-  // WebFetch 失败，不能用作未配置时的默认行为）；国内黑名单服务就绪后配置该 env 恢复远端检查。
-  const domainCheckUrl = (process.env.ATLAS_WEB_DOMAIN_CHECK_URL)
-  if (!domainCheckUrl) {
-    return { status: 'allowed' }
-  }
-  try {
-    // delta ①：axios.get({timeout}) → fetch + AbortSignal.timeout
-    const response = await fetchImpl(
-      `${domainCheckUrl}${domainCheckUrl.includes('?') ? '&' : '?'}domain=${encodeURIComponent(domain)}`,
-      { signal: AbortSignal.timeout(DOMAIN_CHECK_TIMEOUT_MS) },
-    )
-    if (response.status === 200) {
-      // delta ①：axios 自动 JSON 解析（非 JSON 抛错 → catch → check_failed
-      // 等价路径）→ 显式 json()（同样抛错进 catch 面）
-      const data = (await response.json()) as { can_fetch?: boolean }
-      if (data.can_fetch === true) {
-        DOMAIN_CHECK_CACHE.set(domain, true)
-        return { status: 'allowed' }
-      }
-      return { status: 'blocked' }
-    }
-    // Non-200 status but didn't throw
-    return {
-      status: 'check_failed',
-      error: new Error(`Domain check returned status ${response.status}`),
-    }
-  } catch (e) {
-    logError(e)
-    return { status: 'check_failed', error: e as Error }
-  }
-}
+// ── G-3（§8.74.28）R2：blocklist 预检整面裁（原 delta ⑤ checkDomainBlocklist
+// 逐字面 + ATLAS_WEB_DOMAIN_CHECK_URL 占位 env + DomainCheckResult 型 +
+// DOMAIN_CHECK_CACHE + 10s 超时常量）—— 端点不建、调用点删；原 preflight
+// 端点 de-ANT 已废弃，黑名单面若未来复活 = 独立功能波。 ──
 
 // ── 受限重定向（判定函数逐字，fetch 化）─────────────────────────────
 
@@ -722,29 +656,10 @@ export async function getURLMarkdownContent(
       upgradedUrl = parsedUrl.toString()
     }
 
-    const hostname = parsedUrl.hostname
-
-    // delta ④：旧 settings.skipWebFetchPreflight 企业 opt-out 支裁（新仓无
-    // SettingsJson 面）→ blocklist 预检恒执行（checkDomainBlocklist 面）
-    const checkResult = await checkDomainBlocklist(hostname)
-    switch (checkResult.status) {
-      case 'allowed':
-        // Continue with the fetch
-        break
-      case 'blocked':
-        throw new DomainBlockedError(hostname)
-      case 'check_failed':
-        throw new DomainCheckFailedError(hostname)
-    }
-
+    // G-3（§8.74.28）R2：blocklist 预检面裁后，本块仅剩 URL 解析 +
+    // http→https 升级；delta ④（skipWebFetchPreflight 企业 opt-out 支裁，
+    // 预检恒执行）随预检面整体出局，登记收口。
   } catch (e) {
-    if (
-      e instanceof DomainBlockedError ||
-      e instanceof DomainCheckFailedError
-    ) {
-      // Expected user-facing failures - re-throw without logging as internal error
-      throw e
-    }
     logError(e)
   }
 
