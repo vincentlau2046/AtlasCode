@@ -189,6 +189,16 @@ describe('cli 域 S-C2 · dev 面嗅探', () => {
     expect(hasDevFlag([])).toBe(false)
     expect(hasDevFlag(['--print'])).toBe(false)
   })
+
+  test('hasDevFlag: 位置所有权（§8.74.24 修：operand/子命令面不劫持）', () => {
+    // dev flag 出现在非 option token（子命令名 / prompt operand）之后 = 该面所有，
+    // 嗅探止于首个非 option token（对齐 commander enablePositionalOptions 位置语义）；
+    // 回归面：update 子命令自有 --check 曾被 dev 面劫持致 "too many arguments"。
+    expect(hasDevFlag(['update', '--check'])).toBe(false)
+    expect(hasDevFlag(['mcp', 'list', '--e2e'])).toBe(false)
+    expect(hasDevFlag(['--check'])).toBe(true)
+    expect(hasDevFlag(['-d', '--tools'])).toBe(true)
+  })
 })
 
 describe('cli 域 S-C2 · buildProgram 结构面', () => {

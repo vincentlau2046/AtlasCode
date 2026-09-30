@@ -30,9 +30,24 @@ import { getAllBaseTools, getBundledSkills } from '../engine'
 /** dev 面 flag 集（bin 壳嗅探面；旧仓 cli.ts 5 flag 同集）。 */
 const DEV_FLAGS = ['--tools', '--skills', '--check', '--e2e', '--auth-help']
 
-/** argv 含任一 dev flag（旧仓 commander boolean 语义：`--tools=x` 不命中）。 */
+/**
+ * argv 前段含任一 dev flag（旧仓 commander boolean 语义：`--tools=x` 不命中）。
+ *
+ * 位置所有权（§8.74.24 修，H6 防空洞登记，复审勿当遗漏重提）：嗅探止于首个
+ * 非 option token —— dev flag 出现在 operand/子命令名之后 = 该面所有（如
+ * `update --check` 的 update 子命令自有 --check、`mcp list --e2e` 假想面），
+ * 不得被 dev 面劫持。对齐 commander enablePositionalOptions 位置语义（旧仓 5
+ * flag 挂在 root program，位置所有权由解析器天然保证；新仓 bin 壳预嗅探是
+ * S-C2 简化，曾致 `atlascode update --check` 被劫持进 dev program →
+ * "too many arguments. Expected 0 arguments but got 1: update"，本修核销）。
+ * 行为面零改动：纯 dev 面调用（`--check` / `-d --tools` 等首 token 段）不变。
+ */
 export function hasDevFlag(argv: string[]): boolean {
-  return DEV_FLAGS.some(f => argv.includes(f))
+  for (const a of argv) {
+    if (!a.startsWith('-')) break // 首个 operand/子命令 → 其后 flag 归该面
+    if (DEV_FLAGS.includes(a)) return true
+  }
+  return false
 }
 
 function listBaseTools(): void {
