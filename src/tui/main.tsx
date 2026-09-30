@@ -10,7 +10,13 @@ const ensureKeychainPrefetchCompleted: any = () => Promise.resolve();
 //    sequentially via sync spawn inside applySafeConfigEnvironmentVariables()
 //    (~65ms on every macOS startup)
 import { profileCheckpoint, profileReport } from './utils/startupProfiler.js';
-(globalThis as any).MACRO = { VERSION: '0.0.1' };
+// §8.74.23（npm 通道 + 自动更新接线）：PACKAGE_URL 供 tui/utils/autoUpdater 的
+// TUI 自检端点（`npm view ${MACRO.PACKAGE_URL}@<tag> version` + installGlobalPackage
+// `npm i -g ${MACRO.PACKAGE_URL}`）——缺此字段时版本检查静默失败（现补）。
+(globalThis as any).MACRO = {
+  VERSION: '0.1.0',
+  PACKAGE_URL: '@atlasharness/atlascode',
+};
 
 // eslint-disable-next-line custom-rules/no-top-level-side-effects
 profileCheckpoint('main_tsx_entry');

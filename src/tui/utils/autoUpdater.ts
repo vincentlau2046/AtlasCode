@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { constants as fsConstants } from 'fs'
 import { access, writeFile } from 'fs/promises'
 import { homedir } from 'os'
@@ -23,8 +22,13 @@ import {
 } from './shellConfig.js'
 import { jsonParse } from './slowOperations.js'
 
-const GCS_BUCKET_URL =
-  'https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases'
+// §8.74.23（旧仓 GCS 残留裁）：旧仓 native 二进制发布走 GCS 桶
+// `storage.googleapis.com/claude-code-dist-…/claude-code-releases`（域外
+// CLAUDE_AI 残留）。本产品**无 native 二进制发布形态**（出货 = npm 包 / git 源码，
+// node 运行器）→ native 版本查询通道裁为 no-op（getLatestVersionFromGcs /
+// getGcsDistTags 返空，消费方 PackageManagerAutoUpdater / Doctor 据此静默不触发
+// native 更新）。native 发行形态 = H6 前向接缝（owner = native-dist 波，未排期）。
+// 域外 URL 已删（不 vendor、不指向旧仓桶）。
 
 class AutoUpdaterError extends ClaudeError {}
 
@@ -367,34 +371,26 @@ export async function getNpmDistTags(): Promise<NpmDistTags> {
 
 /**
  * Get the latest version from GCS bucket for a given release channel.
- * This is used by installations that don't have npm (e.g. package manager installs).
+ *
+ * §8.74.23（旧仓 GCS 残留裁）：本产品无 native 二进制发布形态（见文件头
+ * H6 登记）→ 旧仓 GCS 桶查询裁为 no-op，恒返 null（消费方据此静默不触发
+ * native 更新；npm 通道版本检查走 getLatestVersion / getNpmDistTags）。
+ * native 发行形态 = H6 前向接缝（owner = native-dist 波，未排期）。
  */
 export async function getLatestVersionFromGcs(
   channel: ReleaseChannel,
 ): Promise<string | null> {
-  try {
-    const response = await axios.get(`${GCS_BUCKET_URL}/${channel}`, {
-      timeout: 5000,
-      responseType: 'text',
-    })
-    return response.data.trim()
-  } catch (error) {
-    logForDebugging(`Failed to fetch ${channel} from GCS: ${error}`)
-    return null
-  }
+  void channel
+  return null
 }
 
 /**
  * Get available versions from GCS bucket (for native installations).
- * Fetches both latest and stable channel pointers.
+ * §8.74.23：无 native 发行形态 → 恒返空 tags（H6 前向接缝，见
+ * getLatestVersionFromGcs 头注）。
  */
 export async function getGcsDistTags(): Promise<NpmDistTags> {
-  const [latest, stable] = await Promise.all([
-    getLatestVersionFromGcs('latest'),
-    getLatestVersionFromGcs('stable'),
-  ])
-
-  return { latest, stable }
+  return { latest: null, stable: null }
 }
 
 /**
