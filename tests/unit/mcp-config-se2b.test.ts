@@ -1,13 +1,14 @@
 /**
- * mcp 域 S-E2b（§8.68 R2）unit 层：mcpConfig 最小 2 源发现面 + 8 型
+ * mcp 域 S-E2b（§8.68 R2）unit 层：mcpConfig 最小 2 源发现面 + 4 型（G-3 ⑩ D3 8→4）
  * config zod union parse 面。
  *
  * 覆盖：
  *   C-P1 2 源发现：user 源（settings record，逐台 parse，坏台跳过）/
  *       project 源（.mcp.json fs 读）/ 同名冲突 project 优先（就近原则）/
  *       坏 JSON → user 源兜底 / 文件缺失 → user 源兜底
- *   C-P2 8 型 union parse：stdio / sse / sse-ide / ws-ide / http / ws /
- *       sdk / claudeai-proxy 各臂接受 + 非法（缺 command / 空 command /
+ *   C-P2 4 型 union parse：stdio / sse / http / ws 各臂接受 + 4 裁型
+ *       （sse-ide / ws-ide / sdk / claudeai-proxy = G-3 ⑩ 型面已裁 → 按未知
+ *       type 拒绝）+ 非法（缺 command / 空 command /
  *       未知 type）拒绝
  *   C-P3 loadProjectMcpJson 宽松面：缺失 / 坏 JSON / 非对象根 → null
  */
@@ -101,17 +102,14 @@ describe('C-P1 最小 2 源发现面', () => {
   })
 })
 
-describe('C-P2 8 型 union parse 面', () => {
+describe('C-P2 4 型 union parse 面（G-3 ⑩ D3 8→4）', () => {
   const arms: Array<[string, unknown]> = [
     ['stdio', { type: 'stdio', command: 'node' }],
     ['sse', { type: 'sse', url: 'http://localhost:1' }],
-    ['sse-ide', { type: 'sse-ide', url: 'http://localhost:2', ideName: 'vscode' }],
-    ['ws-ide', { type: 'ws-ide', url: 'ws://localhost:3', ideName: 'jbr' }],
     ['http', { type: 'http', url: 'http://localhost:4' }],
     ['ws', { type: 'ws', url: 'ws://localhost:5' }],
-    ['sdk', { type: 'sdk', name: 'in-proc' }],
-    ['claudeai-proxy', { type: 'claudeai-proxy', url: 'https://x', id: 'i1' }],
   ]
+
 
   test.each(arms)('%s 臂接受', (_label, cfg) => {
     const parsed = parseMcpServerConfig(cfg)
@@ -133,7 +131,7 @@ describe('C-P2 8 型 union parse 面', () => {
     ).toBeNull()
   })
 
-  test('sse-ide 缺 ideName 拒绝', () => {
+  test('G-3 ⑩ 裁型拒绝（sse-ide 随 8→4 型面裁除 → 按未知 type 拒绝）', () => {
     expect(
       parseMcpServerConfig({ type: 'sse-ide', url: 'http://x' }),
     ).toBeNull()

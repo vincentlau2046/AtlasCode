@@ -3,9 +3,9 @@
  *
  * 覆盖（零 spawn 面；真 spawn 生命周期面在 tests/func/mcp-stdio-server-se2b）：
  *   M-P1 terminal error 判定面：9 子串全命中 + 良性消息不命中
- *   M-P2 前向接缝登记面：sse/http/ws/sse-ide/ws-ide → failed + 登记文案 /
- *       sdk → 'Unsupported server type: sdk'（旧仓 throw 同登记）/
- *       claudeai-proxy → failed + authFailure 标记（OAuth 车道已删 [ATLAS-HOLD]）
+ *   M-P2 前向接缝登记面：sse/http/ws → failed + 登记文案（G-3 ⑩ D3 型面 8→4：
+ *       sse-ide/ws-ide/sdk/claudeai-proxy 4 型随 engine 型面裁除，原 4 型
+ *       断言支删除——分发兜底落 stdio 支，schema 解析面不产出 4 裁型）
  *   M-P3 状态机面：failed 态重跑生命周期（去重仅 connected 生效）/
  *       close 移除 failed 登记 / closeAll 空表 no-op / pending 表落定后空
  *   M-P4 单例注入窗：getMcpConnectionManager 同例 / reset 后新例 +
@@ -29,7 +29,7 @@ function cfg(over: Record<string, unknown>): ScopedMcpServerConfig {
   } as ScopedMcpServerConfig
 }
 
-const SEAM_TYPES = ['sse', 'http', 'ws', 'sse-ide', 'ws-ide'] as const
+const SEAM_TYPES = ['sse', 'http', 'ws'] as const
 
 describe('M-P1 terminal error 判定面（旧 L1178-1191 9 子串逐字）', () => {
   const hits = [
@@ -68,33 +68,16 @@ describe('M-P2 前向接缝登记面（§8.68 R2 裁定）', () => {
     expect(conn.type).toBe('failed')
     if (conn.type === 'failed') {
       expect(conn.error).toContain('前向接缝登记')
-      expect(conn.error).toContain('[ATLAS-HOLD]')
       expect(conn.authFailure).toBeUndefined()
     }
     // 登记面 = 落态可查（list 含 failed 登记）
     expect(manager.list().some(c => c.name === `${t}-server` && c.type === 'failed')).toBe(true)
   })
 
-  test('sdk → failed Unsupported server type: sdk（旧仓 throw 同登记，文案逐字）', async () => {
-    const conn = await manager.connect('sdk-server', cfg({ type: 'sdk', name: 'in-proc' }))
-    expect(conn.type).toBe('failed')
-    if (conn.type === 'failed') {
-      expect(conn.error).toBe('Unsupported server type: sdk')
-    }
-  })
-
-  test('claudeai-proxy → failed + authFailure 标记（OAuth 车道已删 [ATLAS-HOLD]）', async () => {
-    const conn = await manager.connect(
-      'proxy-server',
-      cfg({ type: 'claudeai-proxy', id: 'i1' }),
-    )
-    expect(conn.type).toBe('failed')
-    if (conn.type === 'failed') {
-      expect(conn.authFailure).toBe(true)
-      expect(conn.error).toContain('OAuth 车道已删')
-      expect(conn.error).toContain('[ATLAS-HOLD]')
-    }
-  })
+  // G-3（§8.74.28 ⑩ D3 8→4）: 原 'sdk → Unsupported server type' +
+  // 'claudeai-proxy → authFailure 标记' 两测试随 4 裁型断言面删除——
+  // manager 分发支已随型面裁除（未知 type 兜底落 stdio 支）；4 型残面
+  // 归 TUI 域（IDE 型）/ 域外登记（SDK 型）/ 1P 车道已删（claudeai）。
 })
 
 describe('M-P3 状态机面（零 spawn）', () => {

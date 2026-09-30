@@ -13,7 +13,7 @@
  * 裁面登记（H6 逐条，复审勿当遗漏重提）：
  *   - enterprise / managed（managed-mcp.json + fetchManagedMcpConfigs）/
  *     plugin（getPluginMcpServers + pluginSource 通道门）/ claudeai
- *     （OAuth 车道已删 [ATLAS-HOLD]）/ dynamic 5 scope 支 = 裁登记
+ *     （OAuth 车道已删；G-3 ⑩ D3 型面 8→4 同步裁）/ dynamic 5 scope 支 = 裁登记
  *     （ScopedMcpServerConfig.scope 型面保留 7 值 enum 逐字，值域收窄
  *     到 user/project 2 值 = 发现面实际产出）
  *   - 写回面（addMcpServer / removeMcpServer / .mcp.json 权限保持写）

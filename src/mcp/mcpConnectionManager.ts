@@ -12,12 +12,13 @@
  *     逐字）+ SIGINT→SIGTERM→SIGKILL 清理阶梯（旧 L1355-1470 行为等价
  *     转写：50ms 轮询 interval + 600ms failsafe → 100ms/400ms 阶梯
  *     await，信号时序面不变，delta 登记）
- *   - **sse/http/ws/ws-ide/sse-ide = 前向接缝登记**（failed 态 + 登记
- *     message：真传输面待 IFF 网关 / 远程车道，[ATLAS-HOLD]）
- *   - **sdk = 旧仓 throw 同登记**（`Unsupported server type: sdk` 文案
- *     逐字 → failed 态）
- *   - **claudeai-proxy = OAuth 车道已删 [ATLAS-HOLD]**（2026-09-18
- *     endpoint-cleanup；failed 态 + 登记 message）
+ *   - **sse/http/ws = 前向接缝登记**（failed 态 + 登记 message：真传输
+ *     实装待 IFF 网关 / 远程车道，#200 波；G-3 §8.74.28 ⑩ D3 型面 8→4 后
+ *     分发面 = 3 非 stdio 型）
+ *   - **sse-ide / ws-ide / sdk / claudeai-proxy 型 = G-3 ⑩ 型面已裁**（types.ts
+ *     8→4：IDE 型归 TUI 域 / SDK 型域外 / claudeai 1P 车道已删）——本 manager
+ *     原 sdk throw 支 + claudeai-proxy authFailure 支随型面裁除；未知 type
+ *     运行时兜底落 stdio 分发支（schema 解析面保证不产出 4 裁型）
  *
  * 状态面（旧 useManageMCPConnections React 状态 887L = TUI 波域外）→
  * 非 React 单例 manager：connections Map（4 态）+ pending Set（连接中，
@@ -142,7 +143,7 @@ async function terminateChild(
 // ── 前向接缝登记 message（非 stdio 传输支；§8.68 R2 裁定）──────────
 
 const FORWARD_SEAM_MESSAGE =
-  'MCP transport = 前向接缝登记（§8.68 R2：非 stdio 传输真实现待 IFF 网关 / 远程车道 [ATLAS-HOLD]；型面 8 型 config 保真，仅 stdio 连接支 live）'
+  'MCP transport = 前向接缝登记（§8.68 R2：非 stdio 传输真实现待 IFF 网关 / 远程车道（#200 波）；G-3 ⑩ D3 型面 8→4 后 4 型 config，仅 stdio 连接支 live）'
 
 // ── manager 面 ────────────────────────────────────────────────────────
 
@@ -355,27 +356,14 @@ export function createMcpConnectionManager(): McpConnectionManager {
     pending.add(name)
     try {
       const t = (config as { type?: string }).type
-      // 非 stdio 传输支：前向接缝登记（§8.68 R2 裁定）
-      if (t === 'sse' || t === 'http' || t === 'ws' || t === 'sse-ide' || t === 'ws-ide') {
+      // 非 stdio 传输支：前向接缝登记（§8.68 R2 裁定；G-3 ⑩ D3 8→4 后
+      // sse-ide/ws-ide/sdk/claudeai-proxy 型已随型面裁除，分发面 = 3 型）
+      if (t === 'sse' || t === 'http' || t === 'ws') {
         return fail(name, config, `${t}: ${FORWARD_SEAM_MESSAGE}`)
       }
-      if (t === 'sdk') {
-        // 旧仓 connectToServer sdk 支 = throw 'Unsupported server type: sdk'
-        // 同登记（SDK 模式客户端 = 旧 setupSdkMcpClients 3123L 面，
-        // agent-SDK 域外；failed 态承载文案逐字）
-        return fail(name, config, 'Unsupported server type: sdk')
-      }
-      if (t === 'claudeai-proxy') {
-        // OAuth 车道已删（2026-09-18 endpoint-cleanup；[ATLAS-HOLD]）
-        return fail(
-          name,
-          config,
-          'claudeai-proxy: OAuth 车道已删 [ATLAS-HOLD]（旧仓 claude.ai 订阅车道 2026-09-18 端点清理裁，待 IFF 网关换值）',
-          true,
-        )
-      }
       // stdio（type 'stdio' | 缺省 = 旧 `type === 'stdio' || !type` 支逐字；
-      // 分发已排除 6 非 stdio 型，union 收窄到 stdio 臂）
+      // 分发已排除 3 非 stdio 型，union 收窄到 stdio 臂；未知 type 运行时
+      // 兜底落此支 → 缺 command 面 failed，schema 解析面保证不产出 4 裁型）
       return await connectStdio(name, config as ScopedMcpStdioConfig)
     } finally {
       pending.delete(name)

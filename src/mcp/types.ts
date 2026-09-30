@@ -3,8 +3,13 @@
  * （remote 波 S-E2b，§8.68 R2 MCP client 波）。
  *
  * 旧仓来源（a8af45b）：src/services/mcp/types.ts 258L 型面保真转写：
- *   - 8 型配置 schema（ConfigScope 7 值 + Transport 6 值 + 7 服务器型 +
- *     union + McpJsonConfig）逐字（型面保真：裁的是传输实现面，型面全留）
+ *   - 4 型配置 schema（ConfigScope 7 值 + Transport 4 值 + stdio/sse/http/ws
+ *     4 服务器型 + union + McpJsonConfig）。**G-3（§8.74.28 ⑩ D3 8→4）型面修正**：
+ *     旧 8 型裁 4 型——sse-ide / ws-ide（IDE 扩展面归 TUI 域，TUI 侧
+ *     services/mcp/types.ts 保全 8 型供 /ide 活功能）/ sdk（SDK 嵌入面域外
+ *     登记）/ claudeai-proxy（1P OAuth 车道已删，⑥ managedMcp 裁后零产出）；
+ *     保留 4 型中传输实装 = stdio live，sse/http/ws = 前向接缝（mcpConnectionManager
+ *     failed 态登记，真传输待 IFF 网关 #200）
  *   - 旧 5 态 union（connected/failed/needs-auth/pending/disabled）→
  *     **4 态裁定**：needs-auth 折叠进 failed（authFailure 标记位）——认证面
  *     （旧 auth.ts 2370L + oauthPort/xaaIdpLogin）= 域外残留守（OAuth 车道
@@ -42,7 +47,7 @@ export const ConfigScopeSchema = lazySchema(() =>
 export type ConfigScope = z.infer<ReturnType<typeof ConfigScopeSchema>>
 
 export const TransportSchema = lazySchema(() =>
-  z.enum(['stdio', 'sse', 'sse-ide', 'http', 'ws', 'sdk']),
+  z.enum(['stdio', 'sse', 'http', 'ws']),
 )
 export type Transport = z.infer<ReturnType<typeof TransportSchema>>
 
@@ -86,27 +91,9 @@ export const McpSSEServerConfigSchema = lazySchema(() =>
   }),
 )
 
-// Internal-only server type for IDE extensions
-export const McpSSEIDEServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('sse-ide'),
-    url: z.string(),
-    ideName: z.string(),
-    ideRunningInWindows: z.boolean().optional(),
-  }),
-)
-
-// Internal-only server type for IDE extensions
-export const McpWebSocketIDEServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('ws-ide'),
-    url: z.string(),
-    ideName: z.string(),
-    authToken: z.string().optional(),
-    ideRunningInWindows: z.boolean().optional(),
-  }),
-)
-
+// G-3（§8.74.28 ⑩ D3 8→4）: sse-ide / ws-ide 型 schema 裁除——IDE 扩展
+// 传输面归 TUI 域（src/tui/services/mcp/types.ts 保全供 /ide 活功能）；
+// engine 域发现面（.mcp.json 等）不产出 IDE 型。
 export const McpHTTPServerConfigSchema = lazySchema(() =>
   z.object({
     type: z.literal('http'),
@@ -126,32 +113,15 @@ export const McpWebSocketServerConfigSchema = lazySchema(() =>
   }),
 )
 
-export const McpSdkServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('sdk'),
-    name: z.string(),
-  }),
-)
-
-// Config type for Claude.ai proxy servers
-export const McpClaudeAIProxyServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('claudeai-proxy'),
-    url: z.string(),
-    id: z.string(),
-  }),
-)
+// G-3（§8.74.28 ⑩ D3 8→4）: sdk 型 schema 裁除（SDK 嵌入客户端面域外登记）；
+// claudeai-proxy 型 schema 裁除（1P OAuth 车道已删，⑥ managedMcp 裁后零产出）。
 
 export const McpServerConfigSchema = lazySchema(() =>
   z.union([
     McpStdioServerConfigSchema(),
     McpSSEServerConfigSchema(),
-    McpSSEIDEServerConfigSchema(),
-    McpWebSocketIDEServerConfigSchema(),
     McpHTTPServerConfigSchema(),
     McpWebSocketServerConfigSchema(),
-    McpSdkServerConfigSchema(),
-    McpClaudeAIProxyServerConfigSchema(),
   ]),
 )
 
@@ -161,23 +131,11 @@ export type McpStdioServerConfig = z.infer<
 export type McpSSEServerConfig = z.infer<
   ReturnType<typeof McpSSEServerConfigSchema>
 >
-export type McpSSEIDEServerConfig = z.infer<
-  ReturnType<typeof McpSSEIDEServerConfigSchema>
->
-export type McpWebSocketIDEServerConfig = z.infer<
-  ReturnType<typeof McpWebSocketIDEServerConfigSchema>
->
 export type McpHTTPServerConfig = z.infer<
   ReturnType<typeof McpHTTPServerConfigSchema>
 >
 export type McpWebSocketServerConfig = z.infer<
   ReturnType<typeof McpWebSocketServerConfigSchema>
->
-export type McpSdkServerConfig = z.infer<
-  ReturnType<typeof McpSdkServerConfigSchema>
->
-export type McpClaudeAIProxyServerConfig = z.infer<
-  ReturnType<typeof McpClaudeAIProxyServerConfigSchema>
 >
 export type McpServerConfig = z.infer<ReturnType<typeof McpServerConfigSchema>>
 
