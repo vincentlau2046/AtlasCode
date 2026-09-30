@@ -82,8 +82,8 @@ export const SettingsSchema = () => z.object({
   autoUpdatesChannel: z.union([z.literal('stable'), z.literal('latest')]).optional(),
   companyAnnouncements: z.array(z.any()).optional(),
   // --- 功能开关 / 其他
-  grove_enabled: z.boolean().optional(),
-  grove_notice_viewed_at: z.union([z.string(), z.number()]).optional(),
+  // G-3（§8.74.28 ⑦）: grove_enabled / grove_notice_viewed_at 字段随 grove
+  // 整裁删除（.passthrough() 透传，磁盘旧键不致解析失败）。
   voiceEnabled: z.boolean().optional(),
   autoMode: z.boolean().optional(),
   autoDreamEnabled: z.boolean().optional(),

@@ -14,7 +14,6 @@ import type { RenderOptions, Root, TextProps } from './ink.js';
 import { KeybindingSetup } from './keybindings/KeybindingProviderSetup.js';
 import { startDeferredPrefetches } from './main.js';
 import { checkGate_CACHED_OR_BLOCKING, initializeGrowthBook, resetGrowthBook } from './services/analytics/growthbook.js';
-import { isQualifiedForGrove } from './services/api/grove.js';
 import { handleMcpjsonServerApprovals } from './services/mcpServerApproval.js';
 import { AppStateProvider } from './state/AppState.js';
 import { onChangeAppState } from './state/onChangeAppState.js';
@@ -92,7 +91,7 @@ export function showSetupDialog<T = void>(root: Root, renderer: (done: (result: 
   // 无 provider 即 throw）→ 空池首启选 IFF 预设 Enter 确认即崩（旧仓潜伏 bug：
   // ModelSetup.tsx / voice.tsx 与旧仓 verbatim 一致，旧仓未走空池 + endpoint 步故未触发）。
   // 在本助手统一包 VoiceProvider（覆盖全部 setup 对话框：Onboarding/ModelSetup/
-  // TrustDialog/AtlasMdExternalIncludes/Grove）；VOICE_MODE 关 = 'idle' 空壳（与
+  // TrustDialog/AtlasMdExternalIncludes；Grove 对话框已随 G-3 ⑦ 裁）；VOICE_MODE 关 = 'idle' 空壳（与
   // TextInput feature 门语义一致），修复零行为面。
   return showDialog<T>(root, done => <AppStateProvider onChangeAppState={options?.onChangeAppState}>
       <KeybindingSetup>
@@ -215,16 +214,9 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
   // Defer to next tick so the OTel dynamic import resolves after first render
   // instead of during the pre-render microtask queue.
   setImmediate(() => initializeTelemetryAfterTrust());
-  if (await isQualifiedForGrove()) {
-    const {
-      GroveDialog
-    } = await import('src/tui/components/grove/Grove.js');
-    const decision = await showSetupDialog<string>(root, done => <GroveDialog showIfAlreadyViewed={false} location={onboardingShown ? 'onboarding' : 'policy_update_modal'} onDone={done} />);
-    if (decision === 'escape') {
-      gracefulShutdownSync(0);
-      return false;
-    }
-  }
+  // G-3（§8.74.28 ⑦）: claude.ai 1P Grove 条款对话框（grove.ts + Grove.tsx +
+  // /privacy-settings 命令）已整裁——1P 账号端点不存在；setup 序列 =
+  // Onboarding/ModelSetup/TrustDialog/AtlasMdExternalIncludes（Grove 步移除）。
 
   // Check for custom API key
   // On homespace, OPENAI_API_KEY is preserved in process.env for child

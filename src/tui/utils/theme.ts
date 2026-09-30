@@ -45,7 +45,7 @@ export type Theme = {
   orange_FOR_SUBAGENTS_ONLY: string
   pink_FOR_SUBAGENTS_ONLY: string
   cyan_FOR_SUBAGENTS_ONLY: string
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: string
   // Chrome colors
   chromeYellow: string
@@ -151,7 +151,7 @@ const lightTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'rgb(234,88,12)', // Orange 600
   pink_FOR_SUBAGENTS_ONLY: 'rgb(219,39,119)', // Pink 600
   cyan_FOR_SUBAGENTS_ONLY: 'rgb(8,145,178)', // Cyan 600
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'rgb(106,155,204)',
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
@@ -231,7 +231,7 @@ const lightAnsiTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'ansi:redBright',
   pink_FOR_SUBAGENTS_ONLY: 'ansi:magentaBright',
   cyan_FOR_SUBAGENTS_ONLY: 'ansi:cyan',
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'ansi:blueBright',
   // Chrome colors
   chromeYellow: 'ansi:yellow', // Chrome yellow
@@ -310,7 +310,7 @@ const darkAnsiTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'ansi:redBright',
   pink_FOR_SUBAGENTS_ONLY: 'ansi:magentaBright',
   cyan_FOR_SUBAGENTS_ONLY: 'ansi:cyanBright',
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'rgb(106,155,204)',
   // Chrome colors
   chromeYellow: 'ansi:yellowBright', // Chrome yellow
@@ -389,7 +389,7 @@ const lightDaltonizedTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'rgb(255,128,0)', // True orange
   pink_FOR_SUBAGENTS_ONLY: 'rgb(255,102,178)', // Adjusted pink
   cyan_FOR_SUBAGENTS_ONLY: 'rgb(0,178,178)', // Adjusted cyan
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'rgb(106,155,204)',
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
@@ -468,7 +468,7 @@ const darkTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'rgb(234,88,12)', // Orange 600
   pink_FOR_SUBAGENTS_ONLY: 'rgb(219,39,119)', // Pink 600
   cyan_FOR_SUBAGENTS_ONLY: 'rgb(8,145,178)', // Cyan 600
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'rgb(106,155,204)',
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
@@ -547,7 +547,7 @@ const darkDaltonizedTheme: Theme = {
   orange_FOR_SUBAGENTS_ONLY: 'rgb(255,178,102)', // Bright orange
   pink_FOR_SUBAGENTS_ONLY: 'rgb(255,153,204)', // Bright pink
   cyan_FOR_SUBAGENTS_ONLY: 'rgb(102,204,204)', // Bright cyan
-  // Grove colors
+  // 强调色（原 Grove 对话框色，⑦ 裁后 HelpV2 tabs/pane 消费）
   professionalBlue: 'rgb(106,155,204)',
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow

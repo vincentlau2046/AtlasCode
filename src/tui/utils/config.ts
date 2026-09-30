@@ -280,11 +280,8 @@ export type GlobalConfig = {
     { hasAccess: boolean; hasAccessNotAsDefault?: boolean; timestamp: number }
   >
 
-  // Grove config cache per account - key is account UUID
-  groveConfigCache?: Record<
-    string,
-    { grove_enabled: boolean; timestamp: number }
-  >
+  // G-3（§8.74.28 ⑦）: groveConfigCache 字段随 grove.ts 整裁删除（1P Grove
+  // 账号配置缓存，写入方 grove.ts 已删）；磁盘旧配置残留键忽略。
 
   // Voice mode notice tracking
   voiceNoticeSeenCount?: number // Number of times the voice-mode-available notice has been shown

@@ -5,7 +5,7 @@
  *
  * 架构裁定（新仓引擎面重构，非旧仓 5046L 逐字）：
  *   旧仓 runHeadless（485L 设置体）+ runHeadlessStreaming（2900L 流式环）
- *   绑定旧 orchestrator `ask` 生成器 + 旧 AppState/React 面 + Grove/GrowthBook
+ *   绑定旧 orchestrator `ask` 生成器 + 旧 AppState/React 面 + GrowthBook
  *   → 新仓 headless 核心 = engine 门面 queryAgentLoop（E-1b T-4a 多轮
  *   pre-turn autoCompact + maxTurns + terminal）+ 本文件的协议 / 输出 /
  *   权限路由层。wire 面逐字保留（NDJSON / 控制协议 / result 消息 / 输出
@@ -50,7 +50,7 @@
  *     buildMcpTool）无旧 PermissionPromptTool 契约（.call 4 参 /
  *     mapToolResultToToolResultBlockParam / inputJSONSchema）→ mcp 波
  *     前向接缝（支内 throw 明示，非假绿）。
- *   - 旧仓 sessionStartHooks 初始消息 / agent 恢复 / Grove / GrowthBook /
+ *   - 旧仓 sessionStartHooks 初始消息 / agent 恢复 / Grove（G-3 ⑦ 本波已裁）/ GrowthBook /
  *     headlessProfiler / extractMemories / streamlined 变换 / UDS inbox =
  *     各自归属波裁（hooks 波 / 壳波 / analytics 已删 / engine 残留守），
  *     登记不随迁。

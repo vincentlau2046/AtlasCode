@@ -21,7 +21,7 @@
  *       /spinner* /statusLine/fileSuggestion）——TUI 面残留守
  *     · 登录/远程族（forceLoginMethod/forceLoginOrgUUID/remote）——订阅链已硬切
  *     · 自动更新/公告族（autoUpdatesChannel/companyAnnouncements）
- *     · 低消费功能 flag（grove 系列/voiceEnabled/autoDreamEnabled/minimumVersion/
+ *     · 低消费功能 flag（voiceEnabled/autoDreamEnabled/minimumVersion/
  *       cleanupPeriodDays/showClearContextOnPlanAccept/terminalTitleFromRename/
  *       includeCoAuthoredBy/plansDirectory/httpHook 系列/attribution/xaaIdp/agent/local/
  *       worktree）——对应功能面未落

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { clearTrustedDeviceTokenCache } from '../../bridge/trustedDevice.js';
 import { Text } from '../../ink.js';
 import { refreshGrowthBookAfterAuthChange } from '../../services/analytics/growthbook.js';
-import { getGroveNoticeConfig, getGroveSettings } from '../../services/api/grove.js';
 import { clearPolicyLimitsCache } from '../../services/policyLimits/index.js';
 // flushTelemetry is loaded lazily to avoid pulling in ~1.1MB of OpenTelemetry at startup
 import { getOAuthTokens, removeApiKey } from '../../utils/auth.js';
@@ -54,9 +53,8 @@ export async function clearAuthRelatedCaches(): Promise<void> {
   resetUserCache();
   refreshGrowthBookAfterAuthChange();
 
-  // Clear Grove config cache
-  getGroveNoticeConfig.cache?.clear?.();
-  getGroveSettings.cache?.clear?.();
+  // G-3（§8.74.28 ⑦）: Grove 配置缓存面（getGroveNoticeConfig/getGroveSettings
+  // memoize cache）已随 grove.ts 整裁删除——logout 不再清 grove 缓存。
 
 
   // Clear policy limits cache
