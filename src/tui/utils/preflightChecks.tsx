@@ -16,24 +16,26 @@ export interface PreflightCheckResult {
 }
 async function checkEndpoints(): Promise<PreflightCheckResult> {
   try {
-    const oauthConfig = getOauthConfig();
-    // The OAuth token-endpoint probe was removed with the subscription chain
-    // (module ⑥); only the 1P REST base is probed for connectivity.
-    const endpoints = [`${oauthConfig.BASE_API_URL}/api/hello`];
+    // G-3（§8.74.28 ⑨）: 原 1P `${BASE_API_URL}/api/hello` 探测裁除（1P REST
+    // 车道已删）——改探模型 provider 端点基址：与 apiPreconnect 同族 env 解析
+    // （ATLAS_API_BASE_URL〔IFF 网关，值随 #200 域外 URL 族换〕→ OPENAI_BASE_URL
+    // 〔OpenAI 协议车道〕→ 默认基址兜底）。HEAD 探基址本身：网关不必实现
+    // HEAD /，任意 HTTP 响应即"可达"（TCP+TLS 握手成功）；仅网络层失败
+    // （DNS / 拒连 / 超时 / TLS）判 failed，sslHint 面保留。
+    const baseUrl =
+      process.env.ATLAS_API_BASE_URL ||
+      process.env.OPENAI_BASE_URL ||
+      getOauthConfig().BASE_API_URL;
+    const endpoints = [baseUrl];
     const checkEndpoint = async (url: string): Promise<PreflightCheckResult> => {
       try {
-        const response = await axios.get(url, {
+        await axios.head(url, {
           headers: {
             'User-Agent': getUserAgent()
-          }
+          },
+          validateStatus: () => true,
+          timeout: 10_000
         });
-        if (response.status !== 200) {
-          const hostname = new URL(url).hostname;
-          return {
-            success: false,
-            error: `Failed to connect to ${hostname}: Status ${response.status}`
-          };
-        }
         return {
           success: true
         };
