@@ -601,60 +601,6 @@ export class OpenAIProvider implements ModelProvider {
   }
 }
 
-// ── ProviderLifecycle ─────────────────────────────────────────────────
-
-export interface ProviderLifecycleOptions {
-  probeRole: ModelRole
-  intervalMs: number
-  baseBackoffMs?: number
-  maxBackoffMs?: number
-}
-
-export class ProviderLifecycle {
-  private readonly provider: ModelProvider
-  private timer: ReturnType<typeof setInterval> | null = null
-  private alive = true
-  _backoffMs = 1000
-  private readonly baseBackoffMs: number
-  private readonly maxBackoffMs: number
-  private probeRole: ModelRole
-  private probeCount = 0
-
-  constructor(provider: ModelProvider, options?: Partial<ProviderLifecycleOptions>) {
-    this.provider = provider
-    this.baseBackoffMs = options?.baseBackoffMs ?? 1000
-    this.maxBackoffMs = options?.maxBackoffMs ?? 60000
-    this._backoffMs = this.baseBackoffMs
-    this.probeRole = options?.probeRole ?? 'small'
-  }
-
-  start(intervalMs: number): void {
-    if (this.timer) return
-    this.timer = setInterval(() => {
-      void this.probe()
-    }, intervalMs)
-  }
-
-  stop(): void {
-    if (this.timer) {
-      clearInterval(this.timer)
-      this.timer = null
-    }
-  }
-
-  isAlive(): boolean {
-    return this.alive
-  }
-
-  async probe(): Promise<void> {
-    this.probeCount++
-    const res = await this.provider.healthCheck(this.probeRole)
-    if (res.ok) {
-      this.alive = true
-      this._backoffMs = this.baseBackoffMs
-    } else {
-      this.alive = false
-      this._backoffMs = Math.min(this._backoffMs * 2, this.maxBackoffMs)
-    }
-  }
-}
+// 前向缝登记（§8.74.30 S1 遗留清理，#201）：ProviderLifecycle（provider 健康
+// 轮询 + isAlive 门控）已裁——0 consumer（healthCheck 直用即可，无轮询调用方）。
+// 回流 = 若未来需 role-model 调用前 liveness ping 门控。

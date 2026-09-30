@@ -26,18 +26,11 @@ export function getDefaultFastModel(): ModelName {
 }
 
 /**
- * P2 (unified model settings): TTS / ASR model names for the IFF gateway.
+ * P2 (unified model settings): ASR model name for the IFF gateway.
  * Precedence: env var > settings file value > built-in default.
- * Defaults follow the vault services: CosyVoice (TTS) and FunASR (ASR).
+ * Default follows the vault service FunASR.
+ * （getTtsModel 已裁：0 consumer，#201 S1 遗留清理。）
  */
-export function getTtsModel(): string {
-  return (
-    process.env.ATLAS_TTS_MODEL ||
-    getSettings_DEPRECATED()?.ttsModel ||
-    'cosyvoice'
-  )
-}
-
 export function getAsrModel(): string {
   return (
     process.env.ATLAS_ASR_MODEL ||
@@ -151,29 +144,9 @@ export function getRuntimeMainLoopModel(params: {
   return mainLoopModel
 }
 
-/**
- * Determine the model role for the current query context.
- * Used by gateway.ts to resolve the correct role pool when the engine
- * passes a model ID via options.model.
- * Not called by query.ts directly (engine interface unchanged).
- *
- * Plan mode: premium → small → fast fallback
- * Non-plan mode: determined by modelToRole in gateway
- */
-export function resolveRoleForQuery(params: {
-  permissionMode: PermissionMode
-  exceeds200kTokens?: boolean
-}): ModelRole {
-  const { permissionMode, exceeds200kTokens = false } = params
-
-  if (permissionMode === 'plan' && !exceeds200kTokens) {
-    if (getDefaultPremiumModel()) return 'premium'
-    if (getDefaultSmallModel()) return 'small'
-    return 'fast'
-  }
-
-  return 'small'
-}
+// 前向缝登记（§8.74.30 S1 遗留清理，#201）：resolveRoleForQuery（plan 模式
+// premium→small→fast 角色回退）已裁——0 consumer（gateway 面 modelToRole 才是
+// 角色路由活路径）。回流 = 若未来 gateway 需按 permissionMode 精细选角色池。
 
 /**
  * Get the default main loop model setting.

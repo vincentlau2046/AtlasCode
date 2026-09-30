@@ -8,14 +8,8 @@
 // 运行期不依赖 services/api。计费子系统（utils/modelCost）已在 Phase 4 整体删除，
 // 能力元数据（contextWindow/maxTokens/marketing name）由 provider 元数据承载。
 
-// 模型路由（模型池解析）——收口再导出自 roles
-export {
-  getRoleModel,
-  getRoleModels,
-  resolveModel,
-} from './roles'
-export type { ModelRole, ResolvedModel } from './roles'
-export { MODEL_ROLES } from './roles'
+// 模型路由 re-export 块已裁（§8.74.30 S1 遗留清理，#201）：无 `from 'src/modelprovider/capabilities'`
+// 深导入，consumer 走门面 index.ts（getRoleModel/getRoleModels/resolveModel 自 './roles'）。
 
 // 上下文窗口查询（自 roles.ts 迁入）。
 import { getEndpointConfigSource } from './roles'

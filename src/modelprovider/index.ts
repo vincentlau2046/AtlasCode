@@ -1,18 +1,16 @@
 // P5 (docs/06): module-level singleton ModelProvider.
 //
 // B1 (docs/06 §十一): lazy initialization — importing this module no longer
-// instantiates OpenAIProvider or ProviderLifecycle. Embedders control the
-// lifecycle: the shared instance is created on first access via
-// getModelProvider()/getProviderLifecycle() (or the compat `modelProvider`
-// getter used by existing consumers).
+// instantiates OpenAIProvider. The shared instance is created on first access
+// via getModelProvider() (or the compat `modelProvider` getter).
+// （ProviderLifecycle / getProviderLifecycle 已裁，§8.74.30 S1。）
 //
 // STR-1 门面规则：外域只经此门面 import，不深导入内部文件。
 
-import { OpenAIProvider, ProviderLifecycle, type ModelProvider } from './modelprovider'
+import { OpenAIProvider, type ModelProvider } from './modelprovider'
 import { parseBoundedIntEnv } from '../shared'
 
-export { OpenAIProvider, ProviderLifecycle, type ModelProvider, type ProviderStreamEvent } from './modelprovider'
-export type { ProviderLifecycleOptions } from './modelprovider'
+export { OpenAIProvider, type ModelProvider, type ProviderStreamEvent } from './modelprovider'
 
 let _provider: ModelProvider | undefined
 
@@ -28,7 +26,7 @@ export function getModelProvider(): ModelProvider {
  * 测试 seam：注入 fake ModelProvider 替代 lazy `new OpenAIProvider(...)`
  * （B6-func 非流式/流式 completion 双腿断言用，§8.13 L-2）。fake 实现
  * ModelProvider 接口返固定 completion（非 fake transport，不 mock openai 客户端）。
- * getModelProvider()/modelProvider lazy proxy / getProviderLifecycle 均读此 seam。
+ * getModelProvider()/modelProvider lazy proxy 均读此 seam。
  */
 export function setModelProviderForTesting(provider: ModelProvider): void {
   _provider = provider
@@ -72,20 +70,9 @@ function lazyProxy<T extends object>(resolve: () => T): T {
  */
 export const modelProvider: ModelProvider = lazyProxy(getModelProvider)
 
-let _lifecycle: ProviderLifecycle | undefined
-
-/**
- * One shared lifecycle manager for the provider (lazy). It polls provider
- * health (liveness ping) and exposes isAlive() for call sites that need a
- * healthy role-model list before making a call. start() is invoked by the
- * host — never at import time.
- */
-export function getProviderLifecycle(): ProviderLifecycle {
-  return (_lifecycle ??= new ProviderLifecycle(getModelProvider()))
-}
-
-/** Backward-compat export (lazy), mirrors `modelProvider`. */
-export const providerLifecycle: ProviderLifecycle = lazyProxy(getProviderLifecycle)
+// 前向缝登记（§8.74.30 S1 遗留清理，#201）：getProviderLifecycle / providerLifecycle
+// 懒单例已裁（0 consumer；ProviderLifecycle 类同步裁）。回流 = 若未来需 provider
+// 健康轮询门控。lazyProxy 仍供上方 modelProvider compat 导出。
 
 // ── 窄面门面导出（仅被外部域实际 import 的符号）──
 // types: APIError 类族（modelErrors/errorUtils 基类 + 错误分类测试构造）
@@ -110,8 +97,6 @@ export {
 } from './modelErrors'
 export { buildOpenAIParams } from './params'
 export { modelToRole, normalizeModelStringForAPI } from './roles'
-export { streamAssistant } from './streamAssistant'
-export type { CallModelOptions } from './streamAssistant'
 
 export { extractConnectionErrorDetails, formatAPIError, getSSLErrorHint, sanitizeAPIError } from './errorUtils'
 export {
