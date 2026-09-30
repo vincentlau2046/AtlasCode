@@ -17,3 +17,5 @@ coverage/
 
 # Job-local scratch (never committed)
 .scratch/
+.atlas-1000/
+embedded64.txt
