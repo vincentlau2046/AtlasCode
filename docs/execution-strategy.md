@@ -6727,3 +6727,9 @@ frontmatter yaml 回退无崩）。
 **S4 四件套（全绿基线对齐）**：tsc 0 · lint 0 error/270 warning（基线不变，4 前向缝 stub + cli.ts 各零 lint 发现）· build 17.40MB（3819 模块，TUI 闭包入包体积升）· 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 files**（零回归）。
 
 **S5 发布 + 生产 lane（P-1）**：`npm publish --registry https://registry.npmjs.org`（@atlasharness/atlascode@0.1.2；token 仅 `~/.npmrc` registry 域作用域行 600，绝不入 repo/commit/log）→ 生产 lane `atlas update`（`~/.npm-global` 已装 0.1.1，npm 通道）拉 0.1.2 统一验真（开发/生产隔离裁定：开发 lane 不装生产 `atlas` 命令面）。
+
+**S5 实施记录（2026-10-01 01:20-02:10 本地时区）**：
+- **发布**：0.1.2 经本地 token 通道 publish 成功（重试循环抓网络窗口，shasum `b5272e0f`）。npm 对首发版本有 **Validating 安全校验期**（数分钟）：校验期 `registry.npmjs.org/...@0.1.2` 端点 404 + mirror 不同步（曾误判为「MITM 假成功」，实为校验期正常不可见）；npmjs 版本页 Status 列 Validating 即此态。转正后 mirror 同步（`latest: 0.1.2`，npmmirror 于 02:03 可见）。
+- **网络实况（本机国内线路）**：到 `registry.npmjs.org` 被中间层干扰——DNS 解到 `2406:cb42::/12`（运营商段），握手换无 SAN 拦截证（curl `ERR_TLS_CERT_ALTNAME_INVALID` / node ETIMEDOUT），但 GET API 路径间歇可用（校验期结束后 `registry.npmjs.org/@atlasharness/atlascode` 全文档 200）。PUT 上传路径不稳定 → 本地 publish 靠多轮重试窗口化成功。OIDC 通道（`publish.yml`，`18c3c73`）已备好为长期主通道，待 npm 2FA 配通（建 trusted publisher 需 2FA，用户当前配不了）后切主。
+- **生产 lane 验真**：mirror 未同步期 `atlas update`（默认 registry=npmmirror）会 no-op，故生产更新走权威源显式指定：`npm install -g @atlasharness/atlascode@0.1.2 --registry https://registry.npmjs.org`（仍经发布通道，仅显式指权威 registry）→ `~/.npm-global` 0.1.1→0.1.2。生产 `atlas` PTY 验真（临时目录，不碰开发仓）：无参起 TUI → 模型配置向导（IFF 网关预填）→ Enter×4 达 REPL 主屏 **`AtlasHarness v0.1.2`** banner + `Qwen38-27B-TXT with medium effort · API Usage Billing`（IFF 真网活）+ `⚡ Qwen38-27B-TXT · 🧠 med · ▶ Default` 状态条 + `❯` 光标，全渲染。三命令（atlas / atlascode / atlas code）中 atlas + code 已 PTY 坐实（atlascode 与 atlas 同 dist/cli.js 无参支，等价）。
+- **波终四件套**：tsc 0 / lint 0e/270w（基线）/ build 17.40MB（3817 模块）/ 全量 3108 pass·0 fail·7453 expect·191 files（零回归）。提交 `95636de`（G-1 全量 10 文件）+ `18c3c73`（publish.yml），均已 push，`merge-base --is-ancestor origin/master master` 对齐。
