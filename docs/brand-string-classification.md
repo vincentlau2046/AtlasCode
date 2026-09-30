@@ -72,13 +72,13 @@ md 文件正文、代码 JSDoc/注释描述性文本、issue URL 注释（历史
 
 ## 特判2 · GitHub repo URL → AtlasCode repo + 旧仓 archive 保留
 
-**新仓 repo**：`https://github.com/vincentlau2046-sudo/AtlasCode`
+**新仓 repo**：`https://github.com/vincentlau2046/AtlasCode`
 
 **两类分别处置**：
 
 | 子类 | 涉及 | 处置 |
 |---|---|---|
-| **代码 URL/allowlist**（releaseNotes.ts L29/31 CHANGELOG/raw URL、commitAttribution.ts L28/29 repo allowlist、Feedback.tsx L31 issues URL） | 5 处 | → 改 `vincentlau2046-sudo/AtlasCode` |
+| **代码 URL/allowlist**（releaseNotes.ts L29/31 CHANGELOG/raw URL、commitAttribution.ts L28/29 repo allowlist、Feedback.tsx L31 issues URL） | 5 处 | → 改 `vincentlau2046/AtlasCode` |
 | **注释 issue URL**（api.ts、toolSearch.ts×2、fsOperations.ts×2、changeDetector.ts、worktreeModeEnabled.ts、entrypoints/mcp.ts、lsp/manager.ts、mcp/auth.ts、secureStorage/fallbackStorage.ts，~10 处） | ~10 处 | **保留指向旧仓 archive**（旧仓 e 裁定 archive 后 URL 仍有效，历史 issue 编号有意义） |
 
 **旧仓处置**：暂时保留旧仓（不立即 archive，e 裁定新仓稳定 4-8 周后 archive）。注释 issue URL 指向旧仓，有效。
@@ -111,9 +111,9 @@ md 文件正文、代码 JSDoc/注释描述性文本、issue URL 注释（历史
 
 ## 特判5 · coordinatorMode.ts prompt 示例 repo 路径 → AtlasCode
 
-**涉及**：`src/coordinator/coordinatorMode.ts:309` prompt 示例文本 `vincentlau2046-sudo/AtlasHarness as reviewer`。
+**涉及**：`src/coordinator/coordinatorMode.ts:309` prompt 示例文本 `vincentlau2046/AtlasHarness as reviewer`。
 
-**裁定**：改 `vincentlau2046-sudo/AtlasCode`。无争议（机械替换，归特判2 同一 repo 名规则）。
+**裁定**：改 `vincentlau2046/AtlasCode`。无争议（机械替换，归特判2 同一 repo 名规则）。
 
 ---
 

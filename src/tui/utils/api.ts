@@ -232,7 +232,7 @@ export async function toolToAPISchema(
   // standard prompt caching (Bedrock/Vertex supported); the beta sub-fields
   // (scope, ttl) are already gated upstream by shouldIncludeFirstPartyOnlyBetas
   // which independently respects this kill switch.
-  // github.com/vincentlau2046-sudo/AtlasHarness/issues/20031
+  // github.com/vincentlau2046/AtlasHarness/issues/20031
   if (isEnvTruthy((process.env.ATLAS_DISABLE_EXPERIMENTAL_BETAS))) {
     const allowed = new Set([
       'name',

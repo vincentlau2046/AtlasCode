@@ -2,7 +2,7 @@ import { isInBundledMode } from 'src/tui/utils/bundledMode.js';
 import { getCurrentInstallationType } from 'src/tui/utils/doctorDiagnostic.js';
 import { isEnvTruthy } from 'src/tui/utils/envUtils.js';
 import { useStartupNotification } from './useStartupNotification.js';
-const NPM_DEPRECATION_MESSAGE = 'Atlas has switched from npm to native installer. Run `atlas install` or see https://github.com/vincentlau2046-sudo/AtlasHarness for more options.';
+const NPM_DEPRECATION_MESSAGE = 'Atlas has switched from npm to native installer. Run `atlas install` or see https://github.com/vincentlau2046/AtlasHarness for more options.';
 export function useNpmDeprecationNotification() {
   useStartupNotification(_temp as any);
 }

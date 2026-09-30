@@ -26,9 +26,9 @@ const MAX_RELEASE_NOTES_SHOWN = 5
  * 3. Next time the user starts Atlas, the cached changelog is available immediately
  */
 export const CHANGELOG_URL =
-  'https://github.com/vincentlau2046-sudo/AtlasHarness/blob/master/CHANGELOG.md'
+  'https://github.com/vincentlau2046/AtlasHarness/blob/master/CHANGELOG.md'
 const RAW_CHANGELOG_URL =
-  'https://raw.githubusercontent.com/vincentlau2046-sudo/AtlasHarness/refs/heads/master/CHANGELOG.md'
+  'https://raw.githubusercontent.com/vincentlau2046/AtlasHarness/refs/heads/master/CHANGELOG.md'
 
 /**
  * Get the path for the cached changelog file.

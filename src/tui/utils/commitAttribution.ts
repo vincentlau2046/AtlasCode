@@ -26,8 +26,8 @@ import { sequential } from './sequential.js'
  * Only add repos here that are confirmed PRIVATE.
  */
 const INTERNAL_MODEL_REPOS = [
-  'github.com:vincentlau2046-sudo/AtlasHarness',
-  'github.com/vincentlau2046-sudo/AtlasHarness',
+  'github.com:vincentlau2046/AtlasHarness',
+  'github.com/vincentlau2046/AtlasHarness',
 ]
 
 /**

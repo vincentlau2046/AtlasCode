@@ -4,7 +4,7 @@
  * Previously gated by GrowthBook flag 'atlas_worktree_mode', but the
  * CACHED_MAY_BE_STALE pattern returns the default (false) on first launch
  * before the cache is populated, silently swallowing --worktree.
- * See https://github.com/vincentlau2046-sudo/AtlasHarness/issues/27044.
+ * See https://github.com/vincentlau2046/AtlasHarness/issues/27044.
  */
 export function isWorktreeModeEnabled(): boolean {
   return true

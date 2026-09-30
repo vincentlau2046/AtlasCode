@@ -4,7 +4,7 @@
  * skills stay in their official repo (agent-skills, read-only); self-built
  * skills are published to this repo via `plugin marketplace publish`.
  *
- * Repo: github.com/vincentlau2046-sudo/atlas-plugins (public — customers
+ * Repo: github.com/vincentlau2046/atlas-plugins (public — customers
  * clone it anonymously at startup; a private repo would break preinstall).
  * The marketplace manifest declares `name: "atlas-plugins"` with plugins at
  * string-relative sources, both covered by the existing base-layer probes
@@ -13,7 +13,7 @@
  *
  * Uses the `github` source form: the base-layer github branch has a native
  * SSH/HTTPS heuristic (same pattern as the claude-plugins-official preset),
- * and the cache path is `vincentlau2046-sudo-atlas-plugins`.
+ * and the cache path is `vincentlau2046-atlas-plugins`.
  */
 
 import type { MarketplaceSource } from './schemas.js'
@@ -25,7 +25,7 @@ import {
 /** Source configuration for the Atlas self-built marketplace (GitHub). */
 export const ATLAS_MARKETPLACE_SOURCE = {
   source: 'github',
-  repo: 'vincentlau2046-sudo/atlas-plugins',
+  repo: 'vincentlau2046/atlas-plugins',
 } as const satisfies MarketplaceSource
 
 /**

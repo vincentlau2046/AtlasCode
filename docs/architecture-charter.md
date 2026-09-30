@@ -45,7 +45,7 @@
 > 2. **F 测试迁移策略定案**：四层——unit co-located 随模块走；integration A/B（7）模板化迁（C 波后 L4 接验证）+ C/D（2）并入 E fixture 矩阵 + web-bridge（1）defer D 波；regression 行为型（12）迁为 E 种子 + 不变量型（3）转 eslint-plugin-boundaries；preload 弃（feature() 改 `shared/feature.ts` 普通模块，内建模块可测性坑根除）；e2e fixture-driven headless 改造。ascend 资产 vs L4 测试分波（E 波迁结构 / C 波后接验证）。
 > 3. **Tier 2 闭环**：D（被 v0.6 自治模型吸收）+ E + F 全部裁定。架构层 + 迁移机制层无 open question，仅剩两项实施期待办（`CANN_PKG_VER` 归一 / `auto_optimizer` 文档同步）。
 > 4. **Tier 3 第3项 留档三件套 + 基线锚点确认**：锚点 = 旧仓 HEAD `a8af45b`（2026-09-21 20:26，全量 99 文件 / 1109 pass / 0 fail / 0 skip，unit 82/1024 + integration 10/63 + regression 2/15）；三件套 = tag `atlascode-baseline-2026-09-21` + test-report.json + 黄金参照（14 engine 测试旧仓产出，A 波初始集 E 波补全）。
-> 5. **Tier 3 第4项 品牌串预分类**：全量 379 处/123 文件（分类规则快照，F 波前全仓 grep 重跑为权威清单；修正原 145/62 仅 src scope），五类 + 五特判裁定，全量表落盘 `docs/brand-string-classification.md`。新仓 repo `github.com/vincentlau2046-sudo/AtlasCode`；vault 新开 `16-AtlasCode`（提取 latest 非拷贝）；ATLASHARNESS.md 迁移逻辑消解（A 波前用户清理 ~/.atlas/）。
+> 5. **Tier 3 第4项 品牌串预分类**：全量 379 处/123 文件（分类规则快照，F 波前全仓 grep 重跑为权威清单；修正原 145/62 仅 src scope），五类 + 五特判裁定，全量表落盘 `docs/brand-string-classification.md`。新仓 repo `github.com/vincentlau2046/AtlasCode`；vault 新开 `16-AtlasCode`（提取 latest 非拷贝）；ATLASHARNESS.md 迁移逻辑消解（A 波前用户清理 ~/.atlas/）。
 > 6. **冻结层清单落盘（L8.1）**：旧仓四项冻结在新仓重判——WIRE 协议常量 + claude.ai URL 延续冻结（缩面：bridge 群 7 保留 carry [ATLAS-HOLD]，非 bridge 群 15 随 F 波死代码消解，待逐模块判）；MDM registry key **解冻改 `Policies\AtlasCode`**（D 波，新仓无已部署 profile 依赖）；物理路径已解冻（→ atlascode）。[ATLAS-HOLD] 18 处/14 文件延续 HOLD 姿态（L8.1 2026-09-21 实测，原记 ~10 处遗漏近半；IFF 网关域名是国内基础设施决策，超出架构层，不阻塞核心功能）。新仓零真冻结品牌串。
 
 > **v0.6 变更摘要（2026-09-21，四域自治模型——从"ascend 域包可插拔"推到"四域地基自身可插拔"）**：
