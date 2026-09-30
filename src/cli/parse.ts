@@ -832,15 +832,18 @@ export function buildProgram(): CommanderCommand {
  */
 export function registerInDomainSubcommands(program: CommanderCommand): void {
   // atlascode update（R0 发布工具链 #177：远端升级车道；tag/release 归 W5）
+  // 双通道（§8.74.23）：git 安装根 → pull+install+build；npm 全局安装 →
+  // install -g <pkg>@latest。--check 仅报版本不拉取（H6 前向接缝核销）。
   program
     .command('update')
     .description(
-      'Update AtlasCode in place (git pull --ff-only + bun install + rebuild)',
+      'Update AtlasCode in place (git: pull+bun+build / npm: install -g @latest)',
     )
-    .action(async () => {
+    .option('--check', 'Only check for a newer version (no install), then exit')
+    .action(async (options: { check?: boolean }) => {
       // 惰性加载（对齐 mcp handler 模式：仅命令执行时 import）
       const { updateHandler } = await import('./handlers/update')
-      await updateHandler()
+      await updateHandler({ checkOnly: options.check === true })
     })
 
   // atlascode mcp
