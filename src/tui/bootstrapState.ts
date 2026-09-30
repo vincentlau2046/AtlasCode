@@ -35,7 +35,13 @@ export const getDirectConnectServerUrl: any = () => null;
 export const getInitialMainLoopModel: any = () => {
   const settings = getSettings_DEPRECATED() || {}
   const defaultRole: ModelRole = ((settings as any).defaultRole as ModelRole) || 'small'
-  return getRoleModel(defaultRole)
+  // 未接线（EndpointConfigSource 空 stub）或角色池未配时 getRoleModel 返回
+  // undefined；回落 null（"用默认"语义）绝不为 undefined——否则 main.tsx
+  // initialState 冻结 mainLoopModel=undefined → /model 选择器 modelDisplayString
+  // (undefined) 渲染 "undefined ()" 伪行 + Select 值键卡死（§8.74.31 model-
+  // picker 修，#202）。兼防 modelOptions.ts:205 customModel=undefined →
+  // isModelAllowed(undefined) 潜在崩。
+  return getRoleModel(defaultRole) ?? null
 }
 export const getInlinePlugins : any = (() => ({})) as any;
 // Consumer (compact.ts createSkillAttachmentIfNeeded) calls `.size` and `.values()`,
