@@ -1,7 +1,7 @@
 {
   "name": "@atlasharness/atlascode",
-  "version": "0.1.0",
-  "description": "AtlasCode — Coding Agent for the domestic computing ecosystem (Ascend NPU + domestic LLM backends)",
+  "version": "0.1.1",
+  "description": "AtlasCode \u2014 Coding Agent for the domestic computing ecosystem (Ascend NPU + domestic LLM backends)",
   "bin": {
     "atlas": "dist/cli.js"
   },
