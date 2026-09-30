@@ -6563,3 +6563,24 @@ frontmatter yaml 回退无崩）。
 **验真**：四件套（tsc 0 / lint 0e·303w / build / 全量 **3135**/0/7504/192，+2 测 +2 expect = 版本自识别断言）+ `node dist/cli.js --version` = 0.1.1 (AtlasCode)（dev repo 态）+ 真机 npm 安装态闭环（见上执行记录）。
 
 **残口**：GitHub Release 页面 1 点击（v0.1.0 / v0.1.1，gh CLI segfault 代劳不了）；npmmirror 镜像传播 ~分钟级（npm 通道 update 走用户本机 registry 配置，国内用户走镜像时 update 可见性同样延迟分钟级，属 registry 基础设施非产品面）。
+
+#### 8.74.27 G-2 WebSearch 客户端化（R1 裁定：Bing 无 key 默认 + Tavily key 可选 + env 去 ATLAS_ 前缀 + settings 键模板项 + 双工具面共享 provider 层）（2026-09-30）
+
+**背景**：WebSearch 工具 call() 旧实现 = Anthropic 服务端工具车道（`web_search_20250305` 经 `extraToolSchemas` 注入 + chatStream 收集 `web_search_tool_result` 块）——OpenAI 协议 IFF 网关车道上**恒死**（无损转发，无服务端工具执行面）。用户指令：「将 websearch 功能模块优化，不适用 anthropic」+ R1 裁定修正：无 Atlas 专属搜索端点 → **Bing 默认 + Tavily 方案**；env 不加 `ATLAS_*` 前缀（引擎是第三方，非内部命名空间）；Tavily API key 进 settings.json 并加模板项。
+
+**R1 裁定（原子决策轮 1，用户 2026-09-30 定稿）**：
+- provider 集 = `bing`（默认，无 key，cn.bing.com SERP 抓取 best-effort）+ `tavily`（官方 API，key 必需）。
+- env 面（第三方引擎语义，**非 ATLAS_***）：`WEB_SEARCH_PROVIDER=bing|tavily`（缺省/非法值 → bing fail-open）/ `WEB_SEARCH_ENDPOINT`（激活 provider 端点覆盖）/ `TAVILY_API_KEY`（provider 原生命名）。
+- settings.json 新键 `search.tavilyApiKey`（zod 型面 + 根目录 `settings.template.json` 模板项〔旧仓模板首次迁入 AtlasCode〕）；key 优先级 **env > settings**（provider 层 `resolveWebSearchApiKey` 内裁定）；组合根 `compose.ts` 经 `setWebSearchSettingsKeyProvider` 注入 settings 读面（**壳不深 import tui settings 模块**——boundaries/entry-point 规则拦，改走 engine 根门面 `getInitialSettings`〔S-3d settings-adapter 消费先例同面〕，临场裁定）。
+- 错误语义随迁旧 B8 面：provider 失败不 throw → `results[0]` = 错误串（含 provider + 处置指引），模型可反应。
+- 双工具面策略：engine `webSearchTool.ts` + tui `WebSearchTool.ts` 两活面共享 engine 域 provider 层（`webSearchProvider.ts` 单实现；tui 面经 engine 根门面消费 = 跨域深 import 纪律同型）。
+
+**裁面登记（H6，随 G-2 整裁）**：`makeToolSchema`（web_search_20250305 wire 面，engine + tui 双份）/ `makeOutputFromSearchResponse`（三块型流解析，双份）/ `WebSearchServerToolSchema` / `SearchContentBlock` 型面 / tui 面 haiku GB 门支（`atlas_plum_vx3`，随车道死）/ `getMainLoopModelName`/searchModel/searchRole 搜索消费面 / prompt 面 2 行事实订正（「US only」裁 + 「single API call」→ 客户端化措辞）。测试面同步：se2 P-W5/P-W6 换客户端断言 + P-W7 US-only 断言改 client-side 断言；dist 验真 `web_search_20250305` 残留 = 0。
+
+**实施面**：① `engine/tools/web/webSearchProvider.ts` 新（provider 层：resolveWebSearchProvider/resolveWebSearchApiKey/parseBingResults〔零依赖宽容正则 + 实体解码〕/tavilySearch〔POST /search Bearer〕/filterHitsByDomains〔子域感知〕/runWebSearch 主入口 + 2 测试缝〔transport 注入 + settings 键供给方〕+ 端点常量 2）② webToolInput（Hit +snippet 可选 / 2 型面随裁）③ engine webSearchTool call() 重写 ④ web/ + tools/ + engine 根门面 3 级导出同步 ⑤ tui WebSearchTool call() 重写 ⑥ settings/types.ts `search` 键 + `settings.template.json` 模板（旧仓形状随迁 + search 模板项）⑦ compose.ts ⑮ 键供给缝注入 ⑧ webSearchPrompt 2 行 ⑨ 测试（se2 P-W5/P-W6 换面 + 新 `engine-tools-web-search-provider.test.ts` 14 测 fixture 回放零网络）。
+
+**验真**：四件套（tsc 0 / lint 0e·303w 基线不变 / build 2.57MB / 全量 suite 见本波收口数字）+ 目标 2 文件 49/49 + dist 旧 wire 面 0 残留。
+
+**残口**：真网冒烟归生产 lane（npm 0.2.0 发布后统一验证 = G-1 同批；开发 lane 不真网）；cn.bing.com 反爬率与 Tavily 免费额度 = 运行时观测项（非代码面）。
+
+**沟通协议裁定（不变式 1）**：用户裁定「需要决策的内容拆分原子决策、分多轮完成」——G-3 待决策清单原子化为 R2（域黑名单/反馈服务占位裁否）/ R3（/mobile 裁否）/ R4（header 品牌串落细）/ R5（@anthropic-ai 物理包注记措辞）/ R6（标记文本方案），每轮至多 1 决策；已闭环项（A/C 值保持 / F 整裁 / G-1 三命令 + 最后处理）不重审。
