@@ -60,6 +60,7 @@ export {
   buildHeadlessOptions,
   buildProgram,
   registerInDomainSubcommands,
+  resolveCliVersion,
   runCli,
 } from './parse'
 export { getInputPrompt, main } from './dispatch'

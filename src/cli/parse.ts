@@ -32,8 +32,9 @@
  *     --plugin-dir 选项保留为惰性数据）/ loadPolicyLimits（远程企业设置域外）/
  *     UPLOAD_USER_SETTINGS（settingsSync 服务缺席；feature 门保留，消费裁）
  *   delta 登记：
- *   - 旧 MACRO.VERSION（构建期注入）→ 本地 CLI_VERSION 占位；D 波
- *     atlascode/identity.ts 构建期 --define 注入点（现 A 波骨架占位）落盘后接管。
+ *   - 旧 MACRO.VERSION（构建期注入）→ 本地 CLI_VERSION 占位 → §8.74.25 闭核：
+ *     resolveCliVersion 运行时包根自识别（package.json 单一事实源，与 update
+ *     通道同一原则；构建期 --define 注入点 = 弃裁，identity 波不排期）。
  *   - 旧 feature('UDS_INBOX') 门 → 新仓 remote 域 isUdsInboxEnabled()（UDS inbox
  *     env opt-in 默认 OFF，语义保真；remote 根门面消费，swarm/mcp/remote 同型先例）。
  *   - --bare 描述句裁：「OAuth and keychain are never read」（新仓无 keychain 面）+
@@ -74,8 +75,8 @@ import {
   InvalidArgumentError,
   Option,
 } from '@commander-js/extra-typings'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { existsSync, readFileSync, realpathSync } from 'fs'
+import { dirname, join, resolve } from 'path'
 import { setSessionPersistenceDisabled } from '../bootstrap'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy, type ThinkingConfig } from '../shared'
@@ -91,10 +92,40 @@ import type { HeadlessOptions } from './print'
 import { runCliSetup } from './setup'
 
 /**
- * 版本占位（旧仓 MACRO.VERSION 构建期注入 → 本地占位；D 波 identity 波接管，
- * delta 登记见头注）。
+ * 版本自识别（§8.74.25 占位闭核，临场裁回设计记录）：旧 MACRO.VERSION 构建期
+ * 注入 seam 退役 —— 版本 = 运行时包根 package.json（单一事实源；npm 发布面
+ * 即 package.json version，与 update 通道 resolvePackageRoot 同一自识别原则：
+ * dev 态命中 repo 包根 / npm 全局安装命中 node_modules 包根）。startDir 缺省
+ * = process.argv[1] realpath dirname（构建产物 dist/cli.js 上两级 = 包根）。
+ * 定位失败回落 '0.0.0'（明示未知，不假成功）。buildProgram 注册期求值一次
+ * （fs 上行走数步，开销可忽略）。
  */
-const CLI_VERSION = '0.0.0'
+export function resolveCliVersion(startDir?: string): string {
+  let dir: string
+  try {
+    dir = startDir ?? dirname(realpathSync(process.argv[1] ?? ''))
+  } catch {
+    return '0.0.0'
+  }
+  if (!existsSync(dir)) return '0.0.0'
+  for (let d = dir; ; d = dirname(d)) {
+    const pkgPath = join(d, 'package.json')
+    if (existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+          version?: string
+        }
+        if (typeof pkg.version === 'string' && pkg.version.length > 0) {
+          return pkg.version
+        }
+      } catch {
+        // 不可解析 package.json —— 继续向上找
+      }
+    }
+    if (d === dirname(d)) break // 到文件系统根
+  }
+  return '0.0.0'
+}
 
 /**
  * 本地逐字（旧仓 run() 内 createSortedHelpConfig L806-817 逐字）：
@@ -739,7 +770,11 @@ export function buildProgram(): CommanderCommand {
       'File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)',
     )
     .action(mainActionSeam)
-    .version(`${CLI_VERSION} (AtlasCode)`, '-v, --version', 'Output the version number')
+    .version(
+      `${resolveCliVersion()} (AtlasCode)`,
+      '-v, --version',
+      'Output the version number',
+    )
 
   // Worktree flags
   program.option(

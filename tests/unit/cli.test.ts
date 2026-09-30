@@ -24,7 +24,9 @@
  *    autoModeCritiqueHandler 无自定义规则早退文案（不进 provider 面）
  */
 import { describe, test, expect } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { dirname } from 'node:path'
 import { getAutoModeConfig } from '../../src/engine'
 import {
   autoModeConfigHandler,
@@ -42,6 +44,7 @@ import {
   parseHeaders,
   parseSettingSourcesFlag,
   registerInDomainSubcommands,
+  resolveCliVersion,
   safeParseJSON,
 } from '../../src/cli'
 
@@ -198,6 +201,22 @@ describe('cli 域 S-C2 · dev 面嗅探', () => {
     expect(hasDevFlag(['mcp', 'list', '--e2e'])).toBe(false)
     expect(hasDevFlag(['--check'])).toBe(true)
     expect(hasDevFlag(['-d', '--tools'])).toBe(true)
+  })
+})
+
+describe('cli 域 · 版本自识别（§8.74.25 版本占位闭核，H6 防空洞）', () => {
+  test('resolveCliVersion: 自 startDir 向上定位包根 package.json（版本单一事实源 = 包根，非构建期注入）', () => {
+    const repoPkgUrl = new URL('../../package.json', import.meta.url)
+    const expected = (
+      JSON.parse(readFileSync(repoPkgUrl, 'utf8')) as { version: string }
+    ).version
+    // dev 态（repo 内跑）命中 repo 包根；npm 全局安装态命中 node_modules 包根
+    // （= update 通道 resolvePackageRoot 同一自识别原则）。
+    expect(resolveCliVersion(dirname(repoPkgUrl.pathname))).toBe(expected)
+  })
+
+  test('resolveCliVersion: 包根无法定位回落 0.0.0（明示未知，不假成功）', () => {
+    expect(resolveCliVersion('/nonexistent-atlas-resolve-root')).toBe('0.0.0')
   })
 })
 
