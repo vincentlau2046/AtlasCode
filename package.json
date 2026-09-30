@@ -1,10 +1,15 @@
 {
-  "name": "atlascode",
+  "name": "@atlasharness/atlascode",
   "version": "0.0.1",
-  "private": true,
   "description": "AtlasCode — Coding Agent for the domestic computing ecosystem (Ascend NPU + domestic LLM backends)",
   "bin": {
-    "atlascode": "dist/cli.js"
+    "atlas": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "type": "module",
   "engines": {
@@ -16,7 +21,8 @@
     "build": "bun build src/atlascode/cli.ts --outfile dist/cli.js --target node",
     "dev": "bun run --watch src/atlascode/launcher.ts",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",

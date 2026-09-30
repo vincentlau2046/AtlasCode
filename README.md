@@ -10,7 +10,16 @@
 
 ## 安装
 
-前置：`git` + [bun](https://bun.sh)（构建与运行时）。
+两种通道，命令名均为 `atlas`：
+
+**① npm 一行（推荐，仅需 [node](https://nodejs.org) ≥ 20，无需 bun/源码构建）**
+
+```bash
+npm install -g @atlasharness/atlascode
+atlas --help
+```
+
+**② git 源码**（前置：`git` + [bun](https://bun.sh)（构建）+ `node`（运行））
 
 ```bash
 ./install.sh [repo-url]
@@ -21,9 +30,12 @@
 可覆盖 env：`ATLAS_INSTALL_ROOT`（默认 `~/.atlas/atlascode`）/ `ATLAS_BIN_DIR`
 （默认 `~/.atlas/bin`）/ `ATLAS_BIN_NAME`（默认 `atlas`）。
 
-> P-1 占位：发布仓缺省 URL 为占位值，安装请显式传参（本地仓路径或 `ATLAS_REPO`）。
-> 装好后远端升级：`atlas update`（= `git pull --ff-only` + `bun install` + build，
-> 原地重建符号链接即刻生效）。本地 dev loop 见 `docs/dev-loop.md`。
+> P-1 占位：发布仓 `vincentlau2046/AtlasCode` 尚未 push（P-1 未解除），git 通道
+> 缺省 REPO 为预期地址——远端未建前请显式传参（本地仓路径或 `ATLAS_REPO`）；
+> npm 通道不依赖 git 远端，发布后即可用。
+> 装好后远端升级：git 通道跑 `atlas update`（= `git pull --ff-only` + `bun install`
+> + build，原地重建符号链接即刻生效）；npm 通道跑 `npm install -g
+> @atlasharness/atlascode@latest`。本地 dev loop 见 `docs/dev-loop.md`。
 
 ## 配置
 

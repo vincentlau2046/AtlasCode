@@ -6,7 +6,7 @@
 
 ## 0. 版本管理初始化（5a）
 
-- [ ] 远端仓库建立（P-1：`vincentlau2046-sudo/atlascode`，公开/私有裁定后）
+- [ ] 远端仓库建立（P-1：`vincentlau2046/AtlasCode`，公开/私有裁定后）
 - [ ] `package.json` version → `0.1.0`；`v0.1.0` **注解 tag**（波 tag 与 SemVer 双轨不混用）
 - [ ] push master + tag；GitHub Release（alpha，内部；附本清单结果）
 
@@ -21,6 +21,23 @@ ATLAS_REPO=<P-1 仓 URL> ./install.sh
 
 - [ ] 全新目录安装成功，`atlas` 在 PATH（`~/.atlas/bin`）
 - [ ] `--help` exit 0 且含 TUI/headless 选项
+
+## 1b. npm 一行安装验真（W5 npm 通道）
+
+```bash
+# 前置：node >= 20（无需 bun / git 源码）；包已 publish 到 npm 后
+npm install -g @atlasharness/atlascode
+which atlas && atlas --help         # 全局 bin 生效，banner + 选项表，exit 0
+node --version                      # 运行器 = node（非 bun）
+# headless 一轮（P-2 端点；同 §5，验证 node 运行器真 LLM 回合）
+echo "回复且仅回复：OK" | atlas -p --output-format stream-json --verbose
+```
+
+- [ ] `npm install -g @atlasharness/atlascode` 成功，`atlas` 在全局 PATH
+- [ ] `atlas --help` exit 0（node 运行器，无 bun 依赖）
+- [ ] npm 通道 headless 一轮通过（node 运行时 frontmatter yaml 回退无崩）
+  > ⚠️ 前置：`@atlasharness/atlascode` 须先 publish（P-1 同批：`npm login` +
+  >    拥有 `@atlasharness` scope + `npm publish`）。未 publish 前本项 SKIP。
 
 ## 2. 远端升级验真（`atlas update`）
 
