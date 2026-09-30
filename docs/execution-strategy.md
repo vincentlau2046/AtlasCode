@@ -6545,3 +6545,21 @@ frontmatter yaml 回退无崩）。
 **验真**：四件套（tsc 0 / lint 0e·303w 基线不变 / build 2.57MB / 全量 suite **3133**/0/7502/192，+1 测试 +4 expect = 位置所有权新断言）+ 冒烟矩阵：`node dist/cli.js update --check` exit 0（git 通道报本地 0.1.0 + 指引）/ `update` exit 1（无 origin = P-1 前现状明示）/ `--check` dev 面健康检查不变 / `--help` exit 0。
 
 **残口**：npm publish + git push 仍 P-1 外部动作（用户建 GitHub 仓 + `npm login` + publish `@atlasharness/atlascode@0.1.0` + GitHub Release）；publish 后 `atlas update` npm 通道 + TUI 版本检查车道自动转活（无需再改码）。
+
+#### 8.74.25 版本占位闭核 + P-1 收口执行记录（atlas --version 自识别 + GitHub push + npm publish 0.1.0→0.1.1 + 真机自动更新闭环验真）（2026-09-30，临场裁回设计记录，不变式 1）
+
+**背景**：P-1 用户侧解锁（GitHub 公开仓 `vincentlau2046/AtlasCode` 建好 + npm 2FA-bypass granular token 提供）。publish 真机验真时发现发布面真缺陷：`atlas --version` = **0.0.0**（parse.ts:97 旧仓 MACRO.VERSION 占位，§8.71 delta 登记「D 波 identity 波接管」前向接缝）——首发布版用户装完看到 0.0.0，等同正常用户诉求下的真缺陷，本波核销。
+
+**临场裁定 F（版本自识别，构建期 --define 注入点弃裁）**：`resolveCliVersion(startDir?)`（parse.ts 导出 + cli 根门面）= 自 startDir（缺省 process.argv[1] realpath dirname）向上找最近含 `version` 的 package.json 返回；dev 态命中 repo 包根 / npm 全局安装命中 node_modules 包根（与 update 通道 resolvePackageRoot 同一自识别原则，包根 = 版本单一事实源）。定位失败回落 '0.0.0'（明示未知不假成功）。buildProgram 注册期求值一次（fs 上行走数步，开销可忽略）。**弃裁**：§8.71 delta 登记的构建期 `--define` 注入点（atlascode/identity.ts）不排期 —— npm 发布面 version 即 package.json，运行时自识别零构建期耦合更简单，identity 波取消。**代价若错**：若未来 TUI 随货形态（非 bin 入口）消费版本号，argv[1] 自识别失效 = 届时补显式注入点（前向接缝，owner = TUI 随货波）。
+
+**P-1 收口执行记录（用户侧 2 动作 + 本侧执行链）**：
+- GitHub：`git remote add origin git@github.com:vincentlau2046/AtlasCode.git`（SSH 凭据已通，`ssh -T` = Hi vincentlau2046）→ `git push -u origin master`（首推遇瞬时 "Internal Server Error" 拒，重试成功）+ 注解 tag `v0.1.0` 推上；local/remote 对齐（`merge-base --is-ancestor` 双向验真）。GitHub Release = 用户侧 1 点击（gh CLI 本环境 segfault）。
+- npm：账号 `vincentlau2026`（npm 侧用户名 ≠ GitHub 用户名 vincentlau2046，无碍）。本机 `~/.npmrc` 缺省 registry = 国内镜像 npmmirror（publish 必须显式 `--registry=https://registry.npmjs.org`；token 按 registry 域作用域写入 `//registry.npmjs.org/:_authToken`，文件 600）。首个 classic token 撞 2FA（账号开了双因子，classic 全权 token 不足以 publish）→ 用户改提供 **granular + bypass 2FA** token → `npm publish` 成功（0.1.0，tarball 3 文件 522.7 kB，public access）。**registry 读端传播延迟实测 ~5 分钟**（publish 成功后 `npm view` 404 持续 3.5 分钟，search 端点先可见，随后 view 端恢复）。
+- 版本链：0.1.0 首发 tarball 内仍是 0.0.0 显示 dist（发布前构建）→ 本波版本自识别修 + **bump 0.1.1 再发**（patch 语义：发布面显示修复，零功能面改动）。
+- **真机自动更新闭环验真**（用户诉求「经远端更新消费迭代」的首次实证）：`npm install -g @atlasharness/atlascode`（0.1.0）→ `atlas update --check` 经 npm 通道（node_modules 包根无 .git 自识别）`npm view` 发现 0.1.1 > 0.1.0 报「发现更新」→ `atlas update`（npm 通道 `npm install -g @latest`）→ `atlas --version` = 0.1.1（版本自识别真生效于全局安装态）。
+
+**处置实施**：① parse.ts resolveCliVersion + 占位头注订正 ② cli 根门面导出 ③ 单测 2 断言（包根自识别 = repo package.json version 动态读取 / 不可定位回落 0.0.0）④ package.json 0.1.1 ⑤ 本记录。
+
+**验真**：四件套（tsc 0 / lint 0e·303w / build / 全量 **3135**/0/7504/192，+2 测 +2 expect = 版本自识别断言）+ `node dist/cli.js --version` = 0.1.1 (AtlasCode)（dev repo 态）+ 真机 npm 安装态闭环（见上执行记录）。
+
+**残口**：GitHub Release 页面 1 点击（v0.1.0 / v0.1.1，gh CLI segfault 代劳不了）；npmmirror 镜像传播 ~分钟级（npm 通道 update 走用户本机 registry 配置，国内用户走镜像时 update 可见性同样延迟分钟级，属 registry 基础设施非产品面）。
