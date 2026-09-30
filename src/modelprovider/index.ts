@@ -114,7 +114,6 @@ export { streamAssistant } from './streamAssistant'
 export type { CallModelOptions } from './streamAssistant'
 
 export { extractConnectionErrorDetails, formatAPIError, getSSLErrorHint, sanitizeAPIError } from './errorUtils'
-export { createModelProviderConfig } from './config'
 export {
   EFFORT_LEVELS,
   isEffortLevel,

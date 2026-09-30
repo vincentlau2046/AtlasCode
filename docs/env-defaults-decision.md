@@ -31,7 +31,6 @@
 |  | `ATLAS_CUSTOM_MODEL_OPTION` | ② | preset 国产模型池头（具体值随 IFF 网关/角色池配置定案） |
 |  | `ATLAS_CUSTOM_MODEL_OPTION_NAME` | ② | preset 国产模型池头（具体值随 IFF 网关/角色池配置定案） |
 |  | `ATLAS_CUSTOM_MODEL_OPTION_DESCRIPTION` | ② | preset 国产模型池头（具体值随 IFF 网关/角色池配置定案） |
-| OpenAI 静态键车道 | `ATLAS_API_BASE_URL` | ② | preset IFF 网关 endpoint（[ATLAS-HOLD] 待 IFF 定案换值） |
 |  | `ATLAS_LLM_TIMEOUT` | ② | preset 超时默认（沿用代码 fallback） |
 |  | `ATLAS_MAX_OUTPUT_TOKENS` | ② | preset 沿用代码 fallback |
 |  | `ATLAS_EXTRA_BODY` | ② | preset 空（仅国内容器网关需要时覆盖） |

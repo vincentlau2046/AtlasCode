@@ -99,7 +99,7 @@
 | **UI 工具渲染面 / 双工具面去重**（自 §2.2 移入，2026-09-29 裁定） | tui 闭包自持 `src/tui/tools.ts` + `src/tui/Tool.ts`（工具注册面 + 自有 Tool 契约 + 46 包全依赖栈）；engine 49 工具本体 render 成员裁到字符串/null 面（`renderToolUseMessage`）——**两面去重 + 工具结果渲染面接线**（哪个工具面是生产单一事实源、engine 工具对象是否接 tui 渲染路由）= 残口，未接线 | E-wave-end 审计波（与「engine spine vs tui orchestrator 去重」同项） |
 | **D-2a 切端** | engine-dedup 切端 | E-wave-end 独立波 |
 | **D-3 Ascend 独立实施波** | C-7 执行器六件套实挂载 + DomainPackage 注册面 + `mount.ts` 实挂载 + gelu S5 | 独立实施波 |
-| **D-9 换值** | IFF 网关 `[ATLAS-HOLD]` URL 族（**56 行 / 31 文件**：`ATLAS_API_BASE_URL` / `ATLAS_WEB_DOMAIN_CHECK_URL` / remote trigger 端点） | IFF 网关波 |
+| **D-9 换值** | IFF 网关 `[ATLAS-HOLD]` URL 族（**56 行 / 31 文件**：`ATLAS_WEB_DOMAIN_CHECK_URL` / remote trigger 端点；`ATLAS_API_BASE_URL` 的 modelprovider 域 config 层读者已随 G-3 ⑬（`createModelProviderConfig` 整删）除名，残余消费（preflight 探测 / filesApi）归 #200 1P-REST/remote 簇） | IFF 网关波 |
 | **D-6 非 stdio transport** | remote 族 sse/http/ws | remote 族波 |
 | **mount.ts 实挂载** | ascend 域实挂载 | E 波 ascend 实施波 |
 
