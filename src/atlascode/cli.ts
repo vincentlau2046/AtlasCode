@@ -8,7 +8,9 @@
  * 旧仓时序保真：debug 守卫（旧 main.tsx 顶层 L244）= 本壳首行，任何命令
  * 执行前生效。
  *
- * 裁定（S-C1 保留）：TUI 默认启动支归 launcher 薄壳（#152 壳波），不经 bin。
+ * G-1（§8.74.31，#197）：TUI 启动支并入 bin——atlas / atlascode（无参）与
+ * atlas code 起 TUI（懒闭包动态 import ui/main，launcher.ts 同款）。原 S-C1
+ * 裁定「TUI 不经 bin」废止：三命令齐归 bin（package.json 增 atlascode）。
  * 基线移位登记：dist/cli.js 由 0 bytes 占位转真内容（四件套 build 项口径）。
  *
  * W3-3d G-α 修波（§8.74.16 G）：主面交接前组合根接线（getCoreDependencies
@@ -33,6 +35,22 @@ async function binMain(): Promise<void> {
   const argv = process.argv.slice(2)
   if (hasDevFlag(argv)) {
     await runDevCli()
+    return
+  }
+  // G-1（§8.74.31，#197）：交互 TUI 启动面——atlas / atlascode（无参）与
+  // atlas code（子命令）起 TUI。TUI 支 = launcher.ts 同款懒闭包（动态 import
+  // ui/main，执行期才触 tui 全闭包，headless 支零 TUI 重量）。`code` 子命令
+  // 剥 token：TUI main 自读 process.argv（把剥后 positional 当初始 prompt）。
+  // 其余（-p / --flag / 子命令）仍走 CLI 公共域 main()。L3 边界：TUI 接线落
+  // 壳（atlascode 域），cli 公共域不反向依赖壳（parse.ts 交互支前向缝保留
+  // = 直调 main() 兜底，不经 bin 的三命令路径不可达）。
+  const isTuiInvocation = argv.length === 0 || argv[0] === 'code'
+  if (isTuiInvocation) {
+    if (argv[0] === 'code') {
+      process.argv = [process.argv[0]!, process.argv[1]!, ...argv.slice(1)]
+    }
+    const { main: tuiMain } = await import('./ui/main.js')
+    await tuiMain()
     return
   }
   getCoreDependencies()

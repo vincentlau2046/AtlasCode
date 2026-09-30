@@ -14,7 +14,8 @@ import { profileCheckpoint, profileReport } from './utils/startupProfiler.js';
 // TUI 自检端点（`npm view ${MACRO.PACKAGE_URL}@<tag> version` + installGlobalPackage
 // `npm i -g ${MACRO.PACKAGE_URL}`）——缺此字段时版本检查静默失败（现补）。
 (globalThis as any).MACRO = {
-  VERSION: '0.1.0',
+  // G-1（§8.74.31，#197）：随 package.json 0.1.2 发布统一（banner / autoUpdater / 自检端点读此常量）。
+  VERSION: '0.1.2',
   PACKAGE_URL: '@atlasharness/atlascode',
 };
 

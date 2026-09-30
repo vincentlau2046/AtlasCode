@@ -1,9 +1,10 @@
 {
   "name": "@atlasharness/atlascode",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AtlasCode \u2014 Coding Agent for the domestic computing ecosystem (Ascend NPU + domestic LLM backends)",
   "bin": {
-    "atlas": "dist/cli.js"
+    "atlas": "dist/cli.js",
+    "atlascode": "dist/cli.js"
   },
   "files": [
     "dist"
@@ -18,7 +19,7 @@
   "scripts": {
     "check": "bun run --check src/atlascode/cli.ts",
     "test": "bun test --isolate tests/",
-    "build": "bun build src/atlascode/cli.ts --outfile dist/cli.js --target node",
+    "build": "bun build src/atlascode/cli.ts --outfile dist/cli.js --target node --external modifiers-napi --external url-handler-napi --external audio-capture-napi --external audio-capture.node --external image-processor-napi --external plist --external sharp --external fflate --external cli-highlight --external undici --external vscode-languageserver-protocol --external vscode-languageserver-types --external @ant/computer-use-input --external @ant/computer-use-swift",
     "dev": "bun run --watch src/atlascode/launcher.ts",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",

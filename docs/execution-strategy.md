@@ -6694,3 +6694,36 @@ frontmatter yaml 回退无崩）。
 **波终（S1+S2+S3 全闭环，2026-10-01）**：S1 6 项 zero-consumer 死码裁净（commit `4e9fb5b`，−209 行：configs.ts + streamAssistant.ts 删，ProviderLifecycle 家族 + getTtsModel + resolveRoleForQuery + capabilities 重复 re-export 块裁）。S2/S3 全裁定（无强改，逐面 defer 登记）。
 - **四件套终绿**：tsc 0 / lint 0e·270w（= 基线）/ build cli.js 2.56MB·880 模块 / 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 文件**（= #200 波终基线，S1 死码裁零回归）。
 - **残口登记（归后续波）**：① 端口两 adapter 统一（SOT-adapter 统一波）② getDefaultFastModel 优先级反置翻转 ③ APIError 双族合并 ④ 一方判定 providers.ts:6 host 精细判定（IFF 域网名定案后）⑤ presence 探针（hasModelRoles / Config 显示链）收敛（随 ① 一起做）。
+
+#### 8.74.31 #197 G-1 TUI bin 接线波（task #197，2026-10-01，最后一波收发布）
+
+**任务面**：三命令起 TUI（`atlas` / `atlascode` / `atlas code`）+ node PTY 验真 + 0.1.2 + npm publish + 生产 lane 统一验真。
+
+**现状（读码实测）**：
+- `package.json` bin 仅 `{ atlas: dist/cli.js }`（`atlascode` 缺）；version 0.1.1。
+- TUI 入口 `src/atlascode/launcher.ts`（dev 薄壳）→ `import('./ui/main.js').main()`（懒闭包，执行期才触 tui 全闭包）；`ui/main.tsx` 只 re-export `main`/`startDeferredPrefetches` 自 `src/tui/main.js`（525 行 `export async function main()` 零参，自读 process.argv）。
+- CLI 公共域 `main()`（dispatch）尾段 `runCli()` → `mainActionSeam` 交互支（parse.ts:390）**前向缝**（「launchRepl 未落盘」= G-α dry-run 登记的 parse.ts 前向缝）。
+- **L3 边界**：cli 公共域 ↛ atlascode 壳（公共层不反向依赖壳，eslint element-types 硬约束）→ TUI 接线必落壳，cli 交互支前向缝保留作直调 main() 兜底。
+
+**切片序（每片四件套绿 + 提交）**：
+- **S1（TUI bin 接线）**：`src/atlascode/cli.ts` binMain 加交互 TUI 支——`isTuiInvocation = argv.length===0 || argv[0]==='code'`；`code` 子命令剥 token（`process.argv=[p0,p1,...argv.slice(1)]`，TUI main 自读 argv 把剥后 positional 当初始 prompt）→ `await import('./ui/main.js').main()`（launcher 同款懒闭包，headless 支零 TUI 重量）；其余（-p/--flag/子命令）仍走 `main()`。`package.json` 加 `atlascode` bin（同 dist/cli.js）→ 三命令齐。
+- **S2（0.1.2 bump）**：version 0.1.1 → 0.1.2（版本纪律 G-1=0.1.2，0.1.x 自主）。
+- **S3（node PTY 验真）**：build dist 后 `script -qec`/node-pty 跑三命令，断言 TUI banner 渲染 + 无 fatal（开发 lane PTY，非真网）。
+- **S4（四件套 + 账本收口）**：tsc 0 / lint 0e / build（TUI 闭包入 bundle，体积升，无硬上限）/ 全量套基线对齐。
+- **S5（发布 + 生产 lane）**：npm publish @atlasharness/atlascode@0.1.2（P-1，token 仅 ~/.npmrc registry 域）→ 生产 lane `atlas update` 拉 0.1.2 统一验真（开发/生产隔离裁定：开发 lane 不装生产 `atlas` 命令面）。
+
+**H6 纪律**：TUI 接线 = 懒闭包（非顶层 static import，headless 支零 TUI 重量）；`code` 剥 token 保 TUI 自读 argv 语义；不造假绿（PTY 验真坐实 banner）。
+
+**S1 实施记录（TUI bin 接线）**：`src/atlascode/cli.ts` binMain 加交互 TUI 支（`isTuiInvocation = argv.length===0 || argv[0]==='code'`；`code` 剥 token 后 `await import('./ui/main.js').main()`；其余走 `main()`）。`package.json` bin 加 `atlascode`（同 dist/cli.js），version 0.1.1→0.1.2；`src/tui/main.tsx` MACRO.VERSION 0.1.0→0.1.2（banner / autoUpdater / 自检端点单源）。
+
+**构建解禁（本波核心工程，TUI 闭包首次入单文件 node ESM bundle）**：
+- **14 `--external`**（node_modules 缺席的 native/optional/feature 门控包，运行期惰性 `require`/dynamic-import，与 dev `bun run` 流一致）：modifiers-napi / url-handler-napi / audio-capture-napi / audio-capture.node / image-processor-napi / plist / sharp / fflate / cli-highlight / undici / vscode-languageserver-protocol / vscode-languageserver-types / @ant/computer-use-input / @ant/computer-use-swift。
+- **`react/compiler-runtime` 内联（非 external）**：339 处 top-level `import`（React Compiler 产物），且 react 19.2.8 自带 `compiler-runtime.js` 可解析——内联成自包含闭包，node 加载期零依赖 react 子路径 export。
+- **`@ant/computer-use-mcp` 走 tui 域内 no-op build-aid stub**（`src/tui/utils/computerUse/antMcpBuildStub/index.ts`，bare + /types + /sentinelApps 三 specifier 经 tsconfig paths 别名指向同一 index，bun 内联）：Ant-internal 包 uninstallable 且 4 处 top-level static import（setup/mcpServer/wrapper/ComputerUseApproval）加载期即求值，external 会致 node 启动 `ERR_MODULE_NOT_FOUND`。stub 落 tui 域（全 import 方均 tui）→ intra-element 边过 boundaries 三规则（element-types/no-unknown/entry-point）。值导出 no-op（CHICAGO_MCP 门控默认关运行期永不调用），类型导出 `Record<string,any>` 消 `import type`。
+- **4 feature 门控前向缝 stub**（bun 静态解析 require 需真文件存在；feature 默认关运行期短路，stub 仅满足 resolver）：`commands/torch.ts`（TORCH，default null）/ `commands/agents-platform/index.ts`（IS_ATLAS_DEV，default null）/ `skills/bundled/hunter.ts`（REVIEW_ARTIFACT，registerHunterSkill no-op）/ `skills/bundled/runSkillGenerator.ts`（RUN_SKILL_GENERATOR，registerRunSkillGeneratorSkill no-op）。`clear/clear/{caches,conversation}` 经核为注释非 live import，未建 stub。
+
+**S3 node PTY 验真（开发 lane，node dist/cli.js，非生产 atlas 命令面）**：Python `pty` 跑器（`script -qec` 前台会因 TUI 持 PTY 无法回收，改 pty.fork + killpg + 定时收流）驱动 `node dist/cli.js`（无参）与 `node dist/cli.js code`：三命令均起 TUI，穿过模型配置向导（Enter×4 逐字段 IFF 网关预填）达 REPL 主屏——`╭───AtlasHarness v0.1.2───╮` banner + `AI Coding Agent` + `Qwen38-27B-TXT with medium effort · API Usage Billing`（IFF 真网 127.0.0.1:8999 活）+ `⚡ Qwen38-27B-TXT · 🧠 med · ▶ Default` 状态条 + `❯` 输入光标全渲染。`node dist/cli.js --help` 亦正常打印 commander 帮助（原 `ERR_MODULE_NOT_FOUND` 崩溃面已消）。
+
+**S4 四件套（全绿基线对齐）**：tsc 0 · lint 0 error/270 warning（基线不变，4 前向缝 stub + cli.ts 各零 lint 发现）· build 17.40MB（3819 模块，TUI 闭包入包体积升）· 全量套 `bun test --isolate tests/` = **3108 pass · 0 fail · 7453 expect · 191 files**（零回归）。
+
+**S5 发布 + 生产 lane（P-1）**：`npm publish --registry https://registry.npmjs.org`（@atlasharness/atlascode@0.1.2；token 仅 `~/.npmrc` registry 域作用域行 600，绝不入 repo/commit/log）→ 生产 lane `atlas update`（`~/.npm-global` 已装 0.1.1，npm 通道）拉 0.1.2 统一验真（开发/生产隔离裁定：开发 lane 不装生产 `atlas` 命令面）。

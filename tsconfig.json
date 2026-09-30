@@ -13,7 +13,15 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      // 前向缝登记（§8.74.31 G-1，#197）：@ant/computer-use-mcp（Ant-internal，uninstallable）
+      // 经此别名指向 tui 域内 no-op build-aid stub（bare + /types + /sentinelApps 三
+      // specifier 均指向同一 index），bun build（--target node 单文件 ESM 闭包）内联进
+      // dist/cli.js，node 加载期对 uninstallable 包零依赖（top-level import 不再悬空）。
+      // 落位 tui（全 import 方均 tui，intra-element 边过 boundaries 三规则）。
+      "@ant/computer-use-mcp": ["src/tui/utils/computerUse/antMcpBuildStub/index.ts"],
+      "@ant/computer-use-mcp/types": ["src/tui/utils/computerUse/antMcpBuildStub/index.ts"],
+      "@ant/computer-use-mcp/sentinelApps": ["src/tui/utils/computerUse/antMcpBuildStub/index.ts"]
     },
     "types": ["node", "bun"]
   },
