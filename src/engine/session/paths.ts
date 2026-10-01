@@ -23,9 +23,8 @@
  *     兜底哈希线，目录名跨升级稳定）。
  */
 import { execFile } from 'child_process'
-import { readFileSync } from 'fs'
+import { existsSync, readFileSync, realpathSync } from 'fs'
 import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
 import { sanitizePath } from '../../shared'
 import { getSessionEnv } from './env'
 
@@ -147,22 +146,31 @@ export function getGitBranch(): Promise<string | undefined> {
 }
 
 // 旧 MACRO.VERSION（bun --define）面新仓无 → package.json version 读 +
-// 'unknown' 回落（头注登记）。模块级缓存（旧仓同样模块级缓存防 async 上下文
-// define bug，语义保留）。
+// '0.0.0' 回落（明示未知，不假成功）。模块级缓存（旧仓同样模块级缓存防 async
+// 上下文 define bug，语义保留）。
+// 路径算法 = process.argv[1] 上行走定位包根 package.json（与 resolveCliVersion
+// 同款，dev 源树 / npm 安装两态一致）；旧 import.meta.url+相对级数算法在 dist
+// bundle 后 import.meta.url 落 dist/cli.js，上走级数错位 → 安装态返 'unknown'
+// 的 latent bug，本收口修正。
 const VERSION: string = (() => {
   try {
-    // src/engine/session/paths.ts → 仓库根 package.json
-    const pkgPath = join(
-      dirname(fileURLToPath(import.meta.url)),
-      '../../../package.json',
-    )
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
-      version?: string
+    let d = dirname(realpathSync(process.argv[1] ?? ''))
+    for (;;) {
+      const pkgPath = join(d, 'package.json')
+      if (existsSync(pkgPath)) {
+        const v = (JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+          version?: string
+        }).version
+        if (typeof v === 'string' && v) return v
+      }
+      const parent = dirname(d)
+      if (parent === d) break
+      d = parent
     }
-    return pkg.version ?? 'unknown'
   } catch {
-    return 'unknown'
+    // 落空回落明示未知
   }
+  return '0.0.0'
 })()
 
 export function getVersion(): string {

@@ -10,12 +10,22 @@ const ensureKeychainPrefetchCompleted: any = () => Promise.resolve();
 //    sequentially via sync spawn inside applySafeConfigEnvironmentVariables()
 //    (~65ms on every macOS startup)
 import { profileCheckpoint, profileReport } from './utils/startupProfiler.js';
+import { getVersion } from 'src/engine';
 // §8.74.23（npm 通道 + 自动更新接线）：PACKAGE_URL 供 tui/utils/autoUpdater 的
 // TUI 自检端点（`npm view ${MACRO.PACKAGE_URL}@<tag> version` + installGlobalPackage
 // `npm i -g ${MACRO.PACKAGE_URL}`）——缺此字段时版本检查静默失败（现补）。
+//
+// VERSION 单一事实源收口（原硬编码 '0.1.2' 字面量随 bump 漂移致 banner≠--version）：
+// 全局 MACRO polyfill 在此赋值，VERSION 取 engine/session/paths.getVersion()——
+// 它自 process.argv[1] 上行走定位包根 package.json（dev/安装两态一致，同
+// resolveCliVersion 语义；'0.0.0' 回落明示未知）。~20 处 MACRO.VERSION 消费点
+// （banner/autoUpdater/userAgent/telemetry/heapDump…）均经此 polyfill 读同一源。
+//
+// 求值序不变量：此赋值是普通语句，ESM import 提升 → 所有 import 求值后才执行。
+// 当前 MACRO.VERSION 消费点均在运行时（渲染/事件处理）读，非模块加载期，故安全；
+// 新增「加载期读 MACRO.VERSION」的模块须改直接 import getVersion()，勿依赖此 polyfill。
 (globalThis as any).MACRO = {
-  // G-1（§8.74.31，#197）：随 package.json 0.1.2 发布统一（banner / autoUpdater / 自检端点读此常量）。
-  VERSION: '0.1.2',
+  VERSION: getVersion(),
   PACKAGE_URL: '@atlasharness/atlascode',
 };
 
