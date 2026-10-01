@@ -9,6 +9,9 @@
  * 已删——analytics/D 波按需重建且须实质实现（§8.52 B18）；重建时在此追加
  * re-export。现存 ports/ 实质模块：mcpClient 经本门面块导出；sessionContext /
  * sessionMemory 经域内相对 import + session 域门面导出（engine/session/index.ts）。
+ * M3-S1（D-3 Ascend 独立实施波）：domainMount 重建为实质模块（DomainPackage
+ * 四元挂载类型 + registerDomainMount/getDomainMount holder），经本门面块导出；
+ * featureConfig/lspStatus/promptSuggestion 仍删待按需重建。
  */
 export {
   queryOneRound,
@@ -128,6 +131,14 @@ export type {
   McpToolDescriptor,
   MCPServerConnection,
 } from './ports/mcpClient'
+// M3-S1（D-3 Ascend 独立实施波）：domain-mount 四元挂载 port（charter Port 3，
+// PRT-1 承重）— DomainPackage 类型 + registerDomainMount/getDomainMount holder
+export {
+  type DomainPackage,
+  registerDomainMount,
+  getDomainMount,
+  resetDomainMountForTests,
+} from './ports/domainMount'
 export {
   AgentTool,
   runAgent,
