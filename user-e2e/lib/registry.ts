@@ -32,9 +32,10 @@ const BAKED: string[] = [
 
 export async function dumpCommands(cwd: string): Promise<{ cmds: RegCmd[]; source: 'live' | 'baked' }> {
   try {
-    const { getCoreDependencies } = await import('../src/atlascode/index.js')
+    // 本文件在 user-e2e/lib/ 下：repo 根 = ../../（单层 ../ 会落到 user-e2e/src，不存在）
+    const { getCoreDependencies } = await import('../../src/atlascode/index.js')
     getCoreDependencies()
-    const mod = await import('../src/tui/commands.js')
+    const mod = await import('../../src/tui/commands.js')
     const cmds = (await mod.getCommands(cwd)) as any[]
     const out: RegCmd[] = cmds
       .filter(c => c && typeof c.name === 'string' && !c.isMcp && !c.isPlugin)
