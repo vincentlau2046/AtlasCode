@@ -30,7 +30,7 @@
     "timeoutMs": 300000
   },
   {
-    "_note": "工具触发族（方案 C）：逐工具暴露模型工具调用遵循率。headless 断 toolExpect（stream-json tool_use）；pty 断 marker（模型回复含工具输出）。弱模型 0 调用时 headless 缺工具、pty 无 marker → 双 FAIL（P1-C 暴露面）。",
+    "_note": "工具触发族（方案 C）：逐工具暴露模型工具调用遵循率。headless 断 toolExpect（stream-json tool_use）；pty 断 marker（模型回复含工具输出）。0 tool_use 时 headless 缺工具、pty 无 marker → 双 FAIL（P1-C 暴露面；根因待定位，不预设模型能力——Qwen38-27B 具备工具调用能力）。",
     "id": "short-fileedit",
     "prompt": "第一步用 Write 工具创建文件 edit-target.txt，内容三行：alpha / beta / gamma。第二步用 Edit 工具把 beta 这一行改成 EDITED-E2E。完成后回复最终文件内容。",
     "drivers": ["pty", "headless"],
@@ -81,5 +81,30 @@
     "toolExpect": ["EnterWorktree", "ExitWorktree"],
     "gitInit": true,
     "timeoutMs": 360000
+  },
+  {
+    "_note": "Task 工具族覆盖（G3 缺口补全）：TaskCreate/TaskUpdate/TodoWrite——coding-agent 多步任务跟踪核心能力，0405 近零覆盖。",
+    "id": "short-task-create",
+    "prompt": "用 TaskCreate 工具创建一个任务：subject 为 'Fix subtract bug'，description 为 'The subtract function returns wrong results for negative numbers'。创建完成后回复任务的 subject。",
+    "drivers": ["headless"],
+    "marker": "Fix subtract bug",
+    "toolExpect": ["TaskCreate"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-task-lifecycle",
+    "prompt": "按顺序完成：1) 用 TaskCreate 创建任务，subject 为 'Setup project config'；2) 用 TaskUpdate 把该任务状态改为 in_progress；3) 再用 TaskUpdate 把状态改为 completed。回复每一步执行结果。",
+    "drivers": ["headless"],
+    "toolExpect": ["TaskCreate", "TaskUpdate"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-todo",
+    "prompt": "这是一个多步骤任务，请先用 TodoWrite 工具创建待办清单来跟踪进度，然后执行：步骤1 用 Write 创建文件 todo-done.txt（内容一行：TODO-DONE-E2E）；步骤2 用 Read 读取该文件确认内容。完成后回复文件内容。",
+    "drivers": ["pty", "headless"],
+    "marker": "TODO-DONE-E2E",
+    "disk": { "path": "todo-done.txt", "contains": "TODO-DONE-E2E" },
+    "toolExpect": ["TodoWrite"],
+    "timeoutMs": 300000
   }
 ]

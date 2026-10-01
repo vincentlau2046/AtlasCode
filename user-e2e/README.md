@@ -31,12 +31,13 @@ bun run user-e2e/run.ts --full-home
 | T0 gate | 网关探针 + settings 装载 + 真 LLM 单轮 | 三项；LLM 未放行 → 后续 LLM 面 SKIP(GATE) |
 | T1 core | 4 轮 marker 对话 / headless --resume 多轮 / 工具回合 / **流式中排队输入** | marker ≥2（回显+渲染）+ 磁盘 ground truth |
 | T2 slash | 注册表全量命令遍历（单一真源，live dump；danger 面独立 session） | **picker 导航三段式**（渲染→↓→Esc恢复）/ local 快面 / LLM 回合完成 / auth 优雅降级 |
-| T3 short | 短任务 ×10（PTY+headless 双跑）：marker/multiturn/filewrite/tool-read + **工具触发族 5**（FileEdit/Bash/Grep/Glob/Agent）+ **worktree 隔离** | marker + 磁盘 + **toolExpect**（stream-json tool_use 断言） |
+| T3 short | 短任务 ×13（PTY+headless 双跑）：marker/multiturn/filewrite/tool-read + **工具触发族 5**（FileEdit/Bash/Grep/Glob/Agent）+ **worktree 隔离** + **Task 工具族 3**（TaskCreate/TaskUpdate/TodoWrite） | marker + 磁盘 + **toolExpect**（stream-json tool_use 断言） |
 | T4 medium | fixture 迷你 git 仓修 bug / 加功能 ×2 | `node test/run.js` exit 0（只信磁盘不信自述） |
 | T5 long | 多步长任务（工具预算 25）+ soak 连续 10 轮 | 磁盘 + git log + 逐轮时延曲线 |
-| T6 int | **交互 UI** ×10（独立 session）：权限 dialog Allow/Deny / vim 编辑 / bash 模式 / plan 模式 / Ctrl-C 中断 / Ctrl-R 历史搜索 / 会话导航 / TUI resume / **配置往返存活** | 交互功能断言（picker 渲染+导航+恢复 / dialog+选择 / 模式切换往返 / 配置持久化） |
+| T6 int | **交互 UI** ×12（独立 session）：权限 dialog Allow/Deny / vim 编辑 / bash 模式 / plan 模式 / Ctrl-C 中断 / Ctrl-R 历史搜索 / 会话导航 / TUI resume / **配置往返存活** / **tasklist 面板** / **tasks 后台面板** | 交互功能断言（picker 渲染+导航+恢复 / dialog+选择 / 模式切换往返 / 配置持久化 / task 面板渲染） |
 | T7 sec | **安全/质量** ×8：沙箱越权拦截 / 文件注入抵御 / 用户注入抵御 / 工具白名单(--allowed-tools) / 工具黑名单(--disallowed) / 系统prompt跨compact / append-prompt跨resume / --disable-slash-commands | 安全不变量（被拦/不盲从/限制生效/完整性存活） |
 | T8 cli | **CLI flag 冒烟** ×7：--continue / --bare / --debug / --model / --output-style / **--output-format text** / **--output-format json** | flag 接线不崩 + 出回合 + 格式契约 |
+| T9 conv | **交互式多轮对话** ×3（井字棋建游戏 / 重构 calc.js / 调试 bug）：每脚本 5 轮真实对话（首条复杂任务→追问→纠正→跑验证→总结） | **L1 结构自动**（每轮响应/输入面活/工具轮磁盘/上下文关键词代理）+ **L2 质量人工 checklist**（`docs/interactive-conversation-quality-checklist.md`）— 抓「首条复杂消息无响应」+ 多轮断 |
 
 ### verdict 语义
 
@@ -62,8 +63,10 @@ bun run user-e2e/run.ts --full-home
 - **H（安全/质量 T7）**：8 case — 沙箱越权 / 文件注入 / 用户注入 / 工具白黑名单 / 系统 prompt 跨 compact·resume / --disable-slash。
 - **I（CLI flag T8）**：7 case — --continue/--bare/--debug/--model/--output-style/--output-format text/json。
 - **B1/B6/B8（追加盲区）**：int-config-roundtrip（配置往返）+ short-worktree（worktree 隔离）+ cli-output-text/json（格式契约）。
+- **Task 覆盖补全（第二轮验证后）**：short +3 case（TaskCreate/TaskUpdate/TodoWrite，toolExpect 断言）+ int +2 case（int-tasklist-panel/int-tasks-panel，面板渲染+导航+恢复）。G3 工具覆盖 2/44 → 11/44。
+- **T9 交互式多轮对话（方案 J，用户主诉根因面）**：3 脚本 ×5 轮真实对话（井字棋/重构/调试）；L1 结构断言自动（抓「首条复杂消息无响应」+ 多轮断），L2 质量人工 checklist（`docs/interactive-conversation-quality-checklist.md`）。补 marker benchmark 测不到的「真实人机对话」面。
 - 评估文档：`reports/coverage-eval-20261001.md`（覆盖率矩阵 + 缺口分析 + 方案详情 + 盲区二次审视）。
-- **验证状态**：`bun build` + `node --check` 通过（1846 模块，SYNTAX-OK，含 T7+T8+B1/B6/B8）。**待 main 优化完后重跑全量测试 + 定位**（用户分工：我只做用例方案优化）。
+- **验证状态**：`bun build` + `node --check` 通过（1846 模块，SYNTAX-OK，含 T7+T8+Task 族+T9 conv）。**待 main 优化完后重跑全量测试 + 定位**（用户分工：我只做用例方案优化）。
 
 ## 输出
 

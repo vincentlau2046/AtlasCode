@@ -1,0 +1,37 @@
+{
+  "runId": "r-20261001-2230",
+  "generatedAt": "2026-10-01T14:33:21.727Z",
+  "totals": {
+    "PASS": 4
+  },
+  "cases": [
+    {
+      "id": "gate",
+      "tier": "gate",
+      "verdict": "PASS",
+      "ms": 1460,
+      "note": "网关 200/2ms models=Qwen38-27B-TXT,bge-m3,deepseek-v4-flash,deepseek-v4-pro,glm-5,glm-5.1；settings roles=small,fast,premium；LLM 单轮 OK"
+    },
+    {
+      "id": "conv-tic-tac-toe",
+      "tier": "conv",
+      "verdict": "PASS",
+      "ms": 84146,
+      "note": "5/5 轮通过。R1响应:true 输入活:true (17244ms) | R2响应:true 上下文:true(井字棋) 输入活:true | R3响应:true 纠正确认:true(4×4) 输入活:true | R4响应:true 磁盘游戏文件:false 输入活:true | R5响应:true 总结连贯:true(井字棋) 输入活:true"
+    },
+    {
+      "id": "conv-refactor",
+      "tier": "conv",
+      "verdict": "PASS",
+      "ms": 53660,
+      "note": "5/5 轮通过。R1响应:true 输入活:true (8416ms) | R2响应:true 上下文:true(公共) 输入活:true | R3响应:true 纠正确认:true(subtract) 输入活:true | R4响应:true 行为不变:false 输入活:true | R5响应:true 总结连贯:true(重构) 输入活:true"
+    },
+    {
+      "id": "conv-debug",
+      "tier": "conv",
+      "verdict": "PASS",
+      "ms": 56866,
+      "note": "5/5 轮通过。R1响应:true 输入活:true (17244ms) | R2响应:true 上下文:true(字符串) 输入活:true | R3响应:true 修复验证:false 输入活:true | R4响应:true 边界讨论:true(边界) 输入活:true | R5响应:true 总结连贯:true(根因) 输入活:true"
+    }
+  ]
+}

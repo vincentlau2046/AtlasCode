@@ -110,6 +110,7 @@
 - **现状**：仅 FileWrite + FileRead 被任务用例触发。
 - **后果**：Edit（diff/patch）、Bash（运行命令）、Grep/Glob（搜索）、NotebookEdit、WebFetch、Agent（子代理）、Task 系列等——全部未验证。0405 实测 0 tool_use（根因待定位，不预设模型能力）；逐工具用例能定位是哪条工具链坏了。
 - **影响面**：任务型使用的真实能力评估。
+- **补全（2026-10-01 第二轮）**：short 加 3 case（TaskCreate / TaskUpdate / TodoWrite），int 加 2 case（/tasklist 面板 / /tasks 后台面板）。工具覆盖从 2/44 → **11/44**（Write/Read/Edit/Bash/Grep/Glob/Agent/EnterWorktree/ExitWorktree/TaskCreate/TaskUpdate/TodoWrite，含 worktree）；Task 功能族（后台任务 + 文件任务 + task-notification）从零覆盖到面板+工具面覆盖。
 
 ### G4【P1】韧性/降级零覆盖（无主动诱发错误）
 - **现状**：无主动诱发空池/0-token/网关断/凭据缺/工具拒/未知命令。

@@ -86,15 +86,40 @@ export async function runGates(
   }
 }
 
-/** 建沙箱 HOME（方案 §3 隔离）：复制 settings，默认裁剪插件/MCP 面（确定性优先） */
-export function makeSandboxHome(
+/** 建沙箱 HOME（方案 §3 隔离）：复制 settings，默认裁剪插件/MCP 面（确定性优先）
+ *  重试容错：活跃 session 并发写 settings.json 时可能瞬态非法（非原子写/中间态内容），
+ *  瞬态竞态不应硬崩整轮跑测（2026-10-01 16:02 实测：读中瞬态全角逗号，~30s 后自愈）。 */
+export async function makeSandboxHome(
   runHome: string,
   realSettingsPath: string,
   fullHome: boolean,
-): string {
+  tries = 5,
+  retryDelayMs = 2000,
+): Promise<string> {
   const atlasDir = join(runHome, '.atlas')
   mkdirSync(atlasDir, { recursive: true })
-  const raw = JSON.parse(readFileSync(realSettingsPath, 'utf8'))
+  let raw: Record<string, unknown> | null = null
+  let lastErr: unknown = null
+  for (let i = 0; i < tries; i++) {
+    try {
+      raw = JSON.parse(readFileSync(realSettingsPath, 'utf8'))
+      lastErr = null
+      if (i > 0) console.error(`[user-e2e] settings.json 重试 ${i} 次后解析成功（曾瞬态非法，并发写竞态）`)
+      break
+    } catch (e) {
+      lastErr = e
+      if (i + 1 < tries) {
+        console.error(`[user-e2e] settings.json 解析失败（并发写竞态？${String(e).slice(0, 100)}），${retryDelayMs}ms 后重试（${i + 1}/${tries - 1}）`)
+        await new Promise(r => setTimeout(r, retryDelayMs))
+      }
+    }
+  }
+  if (raw === null) {
+    throw new Error(
+      `settings.json 解析失败（重试 ${tries} 次仍非法）：${String(lastErr).slice(0, 200)}\n` +
+      '疑似活跃 AtlasCode session 并发非原子写；请停止写配置的 session 后重跑。',
+    )
+  }
   if (!fullHome) {
     delete raw.enabledPlugins
     delete raw.enabledMcpServers

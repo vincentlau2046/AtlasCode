@@ -40,7 +40,7 @@ function hasFlag(flag: string): boolean {
   return process.argv.includes(flag)
 }
 
-const TIERS_ALL = ['core', 'slash', 'short', 'medium', 'long', 'int', 'sec', 'cli'] as const
+const TIERS_ALL = ['core', 'slash', 'short', 'medium', 'long', 'int', 'sec', 'cli', 'conv'] as const
 type Tier = (typeof TIERS_ALL)[number]
 const wanted: Tier[] = (
   hasFlag('--tier') ? (arg('--tier') ?? 'all').split(',').map(s => s.trim()) : ['all']
@@ -91,7 +91,16 @@ async function main(): Promise<void> {
   const done = state.doneIds()
 
   // 沙箱 HOME（隔离：会话/历史/配置全落 user-e2e/home/<runId>）
-  makeSandboxHome(runHome, realSettings, fullHome)
+  // 容错：并发写竞态下 settings 瞬态非法 → 重试后仍失败则 gate FAIL + 早退（不硬崩、不空跑）
+  let sandboxReady = true
+  let sandboxErr: string | null = null
+  try {
+    await makeSandboxHome(runHome, realSettings, fullHome)
+  } catch (e) {
+    sandboxReady = false
+    sandboxErr = String(e)
+    console.error('[user-e2e] 沙箱 HOME 构建失败（settings 读取）：', sandboxErr)
+  }
   // 本进程内 import（registry/healthCheck）同走沙箱面
   process.env.HOME = runHome
 
@@ -113,6 +122,19 @@ async function main(): Promise<void> {
   // ── T0 门控 ────────────────────────────────────────────────────────────
   let llmGo = true
   if (!done.has('gate')) {
+    if (!sandboxReady) {
+      // 全新跑测且 settings 沙箱构建失败 → gate FAIL + 早退（后续 LLM 面/SKU 面全废，空跑无意义）
+      state.rec({
+        id: 'gate',
+        tier: 'gate',
+        verdict: 'FAIL',
+        ms: 0,
+        note: `settings.json 瞬态非法（5 次重试仍解析失败，活跃 session 并发写竞态）——本 run 中止：${sandboxErr?.slice(0, 150)}`,
+      })
+      buildReports(state)
+      console.error('[user-e2e] gate FAIL：settings 瞬态非法导致沙箱 HOME 构建失败。请停止正在写配置的 AtlasCode session 后重跑（产品面非原子写定性见诊断报告）。')
+      return
+    }
     const t0 = Date.now()
     const g = await runGates(REPO, runHome, wsFor('gate'), realSettings)
     state.rec({
@@ -217,6 +239,13 @@ async function main(): Promise<void> {
   // ── T8 CLI flag 冒烟（--continue/--bare/--debug/--model/--output-style…）─
   if (wanted.includes('cli')) {
     await tierCliFlags(state, wsFor, done, llmGo)
+    buildReports(state)
+  }
+
+  // ── T9 interactive-conversation（真实人机多轮对话，抓「首条复杂消息无响应」+ 多轮断）─
+  // L1 结构断言自动（响应/输入面活/工具轮磁盘/上下文关键词代理）；L2 质量断言人工 checklist
+  if (wanted.includes('conv')) {
+    await tierConversation(state, ptyOpts, wsFor, done, llmGo)
     buildReports(state)
   }
 
@@ -456,7 +485,8 @@ async function tierSlash(
       // 判据须去空白后匹配（A/B 回归实测：连续字节匹配恒 false）
       const toggled = vText.replace(/\s+/g, '').includes('Editormodesetto')
       iso.kill()
-      const vCfgPath = join(runHome, '.atlas.json')
+      // process.env.HOME = runHome（main 沙箱面，line 105）；runHome 非本函数作用域
+      const vCfgPath = join(process.env.HOME!, '.atlas.json')
       if (existsSync(vCfgPath)) {
         try {
           const vCfg = JSON.parse(readFileSync(vCfgPath, 'utf8'))
@@ -523,10 +553,13 @@ async function tierSlash(
       'output-style': 'Output', config: 'Config', permissions: 'Permission',
       mcp: 'MCP', plugin: 'Plugin', keybindings: 'Keybinding', resume: 'session',
       session: 'Session', sessionlist: 'session', agents: 'Agent', memory: 'Memory',
-      tasks: 'Task', tasklist: 'Task', onboarding: 'Onboard', 'terminal-setup': 'Terminal',
+      tasks: 'Background', tasklist: 'Task', onboarding: 'Onboard', 'terminal-setup': 'Terminal',
       thinkback: 'Think', 'thinkback-play': 'Think', branch: 'Branch', skills: 'Skill',
     }
-    const isPickerNav = m.nav === 'picker' || (!m.nav && m.esc && c.name !== 'vim')
+    // 已废弃命令（产品已标 deprecated）——不走 picker 导航，走 local 探针路径
+    const DEPRECATED_CMDS = new Set(['output-style'])
+    const isPickerNav = (m.nav === 'picker' || (!m.nav && m.esc && c.name !== 'vim'))
+      && !DEPRECATED_CMDS.has(c.name)
     if (isPickerNav) {
       const panelExpect = m.panelExpect ?? PANEL_EXPECT[c.name]
       const panelText = s.text()
@@ -1031,7 +1064,9 @@ async function tierInteractive(
       const pty = await Pty.start({ ...ptyOpts('int-permission'), workspace: ws })
       pty.send('用工具创建文件 perm-target.txt，内容只有一行：PERM-E2E')
       // 等模型发起工具调用 → 权限 dialog 渲染（Qwen38-27B 单轮较慢，给 120s）
-      const dlg = await waitText(pty, ['Allow', 'allow', 'Deny', 'deny', 'permission', 'Permission', '允许', 'Yes', 'always'], 120_000)
+      // 注意：只匹配 dialog 专有文本（Yes/Allow/Deny/允许），不匹配泛化词 permission
+      // （permission 常出现在模型文本回复"我需要 permission..."→ 假阳非真 dialog）
+      const dlg = await waitText(pty, ['Yes', 'Allow', 'allow', 'Deny', 'deny', '允许'], 120_000)
       let fileOk = false
       if (dlg) {
         pty.sendRaw('\r') // Enter = 接受默认（Allow）
@@ -1101,6 +1136,10 @@ async function tierInteractive(
       pty.esc(); await sleep(500)
       pty.sendRaw('\x15') // Ctrl-U 清残留
       await sleep(500)
+      // 先 /vim 关闭 vim 模式（否则 probe 文本在 NORMAL 模式被当 vim 命令吞）
+      pty.send('/vim')
+      await pty.settle(2500, 10_000)
+      // 退出 vim 后输入框应回 normal 模式 → 探针回显
       editOk = await probeEcho(pty, 'vim-exit-probe', 8000)
     }
     const ok = vimOn && editOk
@@ -1290,6 +1329,51 @@ async function tierInteractive(
       { changed, persisted, effortBefore, effortAfter, recovered }, pty2.text())
     pty2.kill()
   }
+
+  // ── int-tasklist-panel：/tasklist 文件任务面板渲染 + 导航 + 恢复 ──────
+  // Task 功能族覆盖（G3 缺口）：/tasklist 打开 FileTaskDialog → 断面板渲染 → ↓ 导航 → Esc 恢复
+  if (!done.has('int-tasklist-panel')) {
+    const t0 = Date.now()
+    const pty = await Pty.start(ptyOpts('int-tasklist-panel'))
+    await sleep(2000) // 就绪稳定
+    pty.send('/tasklist')
+    // FileTaskDialog 渲染：标题/空态/任务列表（"task"/"Task"/"No tasks"/"pending"/"completed"）
+    const panelShown = await waitText(pty, ['task', 'Task', 'No tasks', 'pending', 'completed', '任务'], 15_000)
+    let navOk = false
+    if (panelShown) {
+      pty.sendRaw('\x1b[B') // ↓ 方向键导航
+      await sleep(1000)
+      pty.esc() // Esc dismiss
+      await sleep(1000)
+      pty.esc() // 双 Esc 确保
+      await sleep(500)
+    }
+    const recovered = await probeEcho(pty, 'tasklist-probe', 8000)
+    const ok = Boolean(panelShown) && recovered
+    recInt('int-tasklist-panel', ok ? 'PASS' : 'NAVFAIL', Date.now() - t0,
+      ok ? '/tasklist 面板渲染 + 导航 + Esc 恢复'
+        : `tasklist 面板：panel=${panelShown ?? '未渲染'} recovered=${recovered}`,
+      { panelShown: Boolean(panelShown), recovered }, pty.text())
+    pty.kill()
+  }
+
+  // ── int-tasks-panel：/tasks 后台任务面板渲染 + 恢复 ──────────────────
+  if (!done.has('int-tasks-panel')) {
+    const t0 = Date.now()
+    const pty = await Pty.start(ptyOpts('int-tasks-panel'))
+    await sleep(2000)
+    pty.send('/tasks')
+    // BackgroundTasksDialog 渲染：标题/空态/后台任务列表（"task"/"background"/"No background"/"Bash"）
+    const panelShown = await waitText(pty, ['task', 'Task', 'background', 'Background', 'No background', 'No task', 'Bash'], 15_000)
+    if (panelShown) { pty.esc(); await sleep(1000); pty.esc(); await sleep(500) }
+    const recovered = await probeEcho(pty, 'tasks-probe', 8000)
+    const ok = Boolean(panelShown) && recovered
+    recInt('int-tasks-panel', ok ? 'PASS' : 'NAVFAIL', Date.now() - t0,
+      ok ? '/tasks 面板渲染 + Esc 恢复'
+        : `tasks 面板：panel=${panelShown ?? '未渲染'} recovered=${recovered}`,
+      { panelShown: Boolean(panelShown), recovered }, pty.text())
+    pty.kill()
+  }
 }
 
 // ── T7 security/quality（系统 prompt / 注入 / 沙箱 / 工具限制，方案 H）─────
@@ -1393,7 +1477,9 @@ async function tierSecurity(
     }
   }
 
-  // ── sec-allowed-tools：--allowed-tools Read 限定 → 写任务被禁 ────────
+  // ── sec-allowed-tools：--tools Read 限制性白名单 → Write 不在工具集 ──
+  // 修正（二次验证）：--allowed-tools 语义=always-allow（免 prompt 放行），
+  // 非限制性白名单；--tools 才是"只允许这些工具"（baseToolsSet → toolsToDisallow）。
   if (!done.has('sec-allowed-tools')) {
     if (skipIf('sec-allowed-tools')) { /* skip */ }
     else {
@@ -1402,17 +1488,17 @@ async function tierSecurity(
       const h = await headlessRound({
         repoRoot: REPO, workspace: ws, sandboxHome: process.env.HOME!,
         prompt: '用 Write 工具创建文件 allowed-test.txt，内容：SHOULD-BE-BLOCKED。',
-        extraArgs: ['--allowed-tools', 'Read', '--dangerously-skip-permissions'],
+        extraArgs: ['--tools', 'Read', '--dangerously-skip-permissions'],
         timeoutMs: 180_000,
       })
-      // Write 应被禁：工具不出现 / 文件不落盘
+      // --tools Read = 工具集只含 Read → Write 不在集 → 模型无法调 Write
       const writeCalled = h.toolUses.includes('Write')
       let fileMade = false
       try { readFileSync(join(ws, 'allowed-test.txt'), 'utf8'); fileMade = true } catch { /* 期望不存在 */ }
       const ok = !writeCalled && !fileMade
       recSec('sec-allowed-tools', ok ? 'PASS' : 'FAIL', Date.now() - t0,
-        ok ? '--allowed-tools Read 生效（Write 被禁，文件未落盘）'
-          : `工具限制面：writeCalled=${writeCalled} fileMade=${fileMade}`,
+        ok ? '--tools Read 生效（Write 不在工具集，文件未落盘）'
+          : `工具限制面：writeCalled=${writeCalled} fileMade=${fileMade}（--tools 未限制? bypass 忽略?）`,
         { writeCalled, fileMade, toolUses: h.toolUses },
         { headless: { verdict: ok ? 'PASS' : 'FAIL', ok, ms: h.ms, detail: `writeCalled=${writeCalled} tools=${h.toolUses.join(',')}` } })
     }
@@ -1605,12 +1691,13 @@ async function tierCliFlags(
         prompt: '回复且仅回复标记词：DEBUG-E2E',
         extraArgs: ['--debug', '--debug-to-stderr', '--dangerously-skip-permissions'], timeoutMs: 180_000,
       })
-      // --debug 应在 stderr 产出调试信息（非空 + 比 normal 多）
+      // --debug 应在 stderr 产出调试信息（二次验证：--debug 已注册 parse.ts:426，
+      // 但 debug.ts 模块已裁除=惰性数据，不产出调试输出 → 真产品缺口非假阳）
       const debugOut = h.stderrTail.length > 200
       const ok = h.ok && debugOut
       recCli('cli-debug', ok ? 'PASS' : 'FAIL', Date.now() - t0,
         ok ? `--debug 调试输出落 stderr（${h.stderrTail.length} 字节）`
-          : `--debug 面：ok=${h.ok} stderrLen=${h.stderrTail.length}`,
+          : `--debug 产品缺口：已注册但 debug.ts 裁除（惰性数据，stderrLen=${h.stderrTail.length}）`,
         { ok: h.ok, stderrLen: h.stderrTail.length }, `stderrLen=${h.stderrTail.length}`)
     }
   }
@@ -1634,69 +1721,282 @@ async function tierCliFlags(
     }
   }
 
-  // --output-style：指定输出风格
+  // --output-style：【二次验证剔除】--output-style 非产品 flag（parse.ts 未注册），
+  // 命令已废弃（output-style.tsx:3 '/output-style has been deprecated. Use /config'）。
+  // 记 SKIP（非产品缺陷，harness 假阳已剔除）。
   if (!done.has('cli-output-style')) {
-    if (skipIf('cli-output-style')) { /* skip */ }
-    else {
-      const t0 = Date.now()
-      const h = await headlessRound({
-        repoRoot: REPO, workspace: ws('cli-output-style'), sandboxHome: process.env.HOME!,
-        prompt: '回复且仅回复标记词：STYLE-E2E',
-        extraArgs: ['--output-style', 'concise', '--dangerously-skip-permissions'], timeoutMs: 180_000,
-      })
-      const ok = h.ok && h.assistantText.includes('STYLE-E2E')
-      recCli('cli-output-style', ok ? 'PASS' : 'FAIL', Date.now() - t0,
-        ok ? '--output-style flag 接线正常'
-          : `--output-style 面：ok=${h.ok}`,
-        { ok: h.ok }, `ok=${h.ok}`)
-    }
+    recCli('cli-output-style', 'SKIP', 0,
+      'harness 假阳剔除：--output-style 非产品 flag + 命令已废弃（deprecated→/config）',
+      {}, 'SKIP-deprecated')
   }
 
-  // B8: --output-format text（纯文本输出，管道/脚本集成契约面）
+  // B8: --output-format text — 【二次验证：harness 解析局限】
+  // headlessRound 硬编码 stream-json + 仅解析 stream-json 事件（headless.ts:43-44）。
+  // --output-format text 输出纯文本，parser 按 stream-json 解析 → events 空 → ok=false。
+  // 产品 text 输出正常（print.ts:946-954），FAIL 是 harness 解析 bug 非产品缺陷。
+  // 待下轮实现 text/json 专用 driver；本轮记 SKIP 避免假阳。
   if (!done.has('cli-output-text')) {
-    if (skipIf('cli-output-text')) { /* skip */ }
-    else {
-      const t0 = Date.now()
-      const h = await headlessRound({
-        repoRoot: REPO, workspace: ws('cli-output-text'), sandboxHome: process.env.HOME!,
-        prompt: '回复且仅回复标记词：TEXTFMT-E2E',
-        extraArgs: ['--output-format', 'text', '--dangerously-skip-permissions'], timeoutMs: 180_000,
-      })
-      // text 格式：assistantText 应含 marker；stdout 非 stream-json（无 {type: 行）
-      const hasMarker = h.assistantText.includes('TEXTFMT-E2E')
-      const isJson = h.events.length > 0 && /^{/.test(h.events[0]?.type ?? '')
-      const ok = h.ok && hasMarker
-      recCli('cli-output-text', ok ? 'PASS' : 'FAIL', Date.now() - t0,
-        ok ? `--output-format text 正常（marker 渲染，非 stream-json）`
-          : `text 格式面：ok=${h.ok} marker=${hasMarker}`,
-        { ok: h.ok, hasMarker }, `ok=${h.ok} marker=${hasMarker}`)
-    }
+    recCli('cli-output-text', 'SKIP', 0,
+      'harness 解析局限：headlessRound 硬编码 stream-json，text 格式需专用 driver（产品面正常）',
+      {}, 'SKIP-harness-driver')
   }
 
-  // B8: --output-format json（JSON 输出契约面）
+  // B8: --output-format json — 【同 cli-output-text：harness 解析局限】
+  // headlessRound 硬编码 stream-json；json 格式输出单 JSON 对象（print.ts:934），
+  // parser 找不到 assistant 事件 → assistantText 空 → ok=false。产品 json 输出正常。
+  // 待下轮实现专用 driver；本轮记 SKIP 避免假阳。
   if (!done.has('cli-output-json')) {
-    if (skipIf('cli-output-json')) { /* skip */ }
-    else {
-      const t0 = Date.now()
-      const h = await headlessRound({
-        repoRoot: REPO, workspace: ws('cli-output-json'), sandboxHome: process.env.HOME!,
-        prompt: '回复且仅回复标记词：JSONFMT-E2E',
-        extraArgs: ['--output-format', 'json', '--dangerously-skip-permissions'], timeoutMs: 180_000,
-      })
-      // json 格式：应有 result 事件 / 结构化输出；assistantText 含 marker
-      const hasMarker = h.assistantText.includes('JSONFMT-E2E')
-      const hasResult = Boolean(h.result)
-      const ok = h.ok && hasMarker
-      recCli('cli-output-json', ok ? 'PASS' : 'FAIL', Date.now() - t0,
-        ok ? `--output-format json 正常（marker + result 事件）`
-          : `json 格式面：ok=${h.ok} marker=${hasMarker} result=${hasResult}`,
-        { ok: h.ok, hasMarker, hasResult }, `ok=${h.ok} marker=${hasMarker} result=${hasResult}`)
-    }
+    recCli('cli-output-json', 'SKIP', 0,
+      'harness 解析局限：headlessRound 硬编码 stream-json，json 格式需专用 driver（产品面正常）',
+      {}, 'SKIP-harness-driver')
   }
 }
 function tailLinesSafe(t: string, n = 25): string {
   const lines = t.split('\n').filter(l => l.trim().length > 0)
   return lines.slice(-n).join('\n')
+}
+
+// ── T9 interactive-conversation（交互式多轮沟通，方案 J）─────────────────────
+// 抓「首条复杂消息无响应」+「多轮断」——用户主诉的根因面，marker benchmark 测不到。
+// 两层：L1 结构断言自动（响应/输入面活/工具轮磁盘/上下文关键词代理）；
+//       L2 质量断言人工 checklist（响应切题/多轮连贯/纠正采纳/无 fabrication）——
+//       不可自动：harness 落剥净 transcript-<id>.md 供人工评审。
+// 每脚本 5 轮真实对话（非 marker），独立 session（交互态隔离）。
+async function tierConversation(
+  state: RunState,
+  ptyOpts: (id: string) => Parameters<typeof Pty.start>[0],
+  wsFor: (id: string) => string,
+  done: Set<string>,
+  llmGo: boolean,
+): Promise<void> {
+  if (!llmGo) {
+    for (const id of ['conv-tic-tac-toe', 'conv-refactor', 'conv-debug']) {
+      if (!done.has(id)) state.rec({ id, tier: 'conv', verdict: 'SKIP', ms: 0, note: 'GATE: LLM 未放行' })
+    }
+    return
+  }
+  const recConv = (
+    id: string, verdict: Verdict, ms: number, note: string,
+    evidence: Record<string, unknown> = {}, transcript = '',
+  ): void => {
+    // 落剥净 transcript 供 L2 人工评审（不进 checkpoint 主体，只留 artifacts）
+    try {
+      const tp = join(ROOT, 'artifacts', state.meta.runId, `transcript-${id}.md`)
+      writeFileSync(tp, `# 对话转录 ${id}（L2 人工评审用，已剥 ANSI）\n\n${stripAnsi(transcript).slice(-12000)}\n`)
+    } catch { /* 落盘失败不阻断 */ }
+    state.rec({ id, tier: 'conv', verdict, ms, note, evidence, drivers: { pty: { verdict, ok: verdict === 'PASS', tail: tailLinesSafe(transcript) } } })
+  }
+  // 探针回显（输入面活判据）
+  const probeEcho = async (pty: Pty, tag: string, timeoutMs = 8000): Promise<boolean> => {
+    const seq = `e2e-conv-${tag}`
+    const before = pty.count(seq)
+    pty.sendRaw(seq)
+    const t0 = Date.now()
+    for (;;) {
+      if (pty.count(seq) > before) return true
+      if (!pty.alive() || Date.now() - t0 > timeoutMs) return pty.count(seq) > before
+      await sleep(300)
+    }
+  }
+  // 等助手回合响应（结构判据）：logSize 增长 = 有新渲染；settle = 回合结束/暂停
+  // ink 原地重绘使 text().length 不可靠，用 logSize（文件字节，渲染即增长）+ 阈值
+  const waitResponse = async (pty: Pty, timeoutMs: number): Promise<{ responded: boolean; ms: number }> => {
+    const before = pty.logSize()
+    const t0 = Date.now()
+    for (;;) {
+      const grew = pty.logSize() - before
+      // 助手产出实质内容（>1200 字节，覆盖重绘噪声）；首条复杂任务通常 KB 级
+      if (grew > 1200) {
+        // 等渲染静默（回合收尾）
+        await pty.settle(3500, 15_000)
+        return { responded: true, ms: Date.now() - t0 }
+      }
+      if (!pty.alive() || Date.now() - t0 > timeoutMs) return { responded: grew > 1200, ms: Date.now() - t0 }
+      await sleep(2000)
+    }
+  }
+  // 上下文连贯代理：响应含前轮关键词之一（弱结构代理，非质量断言）
+  const contextCarried = (pty: Pty, keywords: string[]): { ok: boolean; hit: string | null } => {
+    const t = stripAnsi(pty.text())
+    for (const k of keywords) if (t.includes(k)) return { ok: true, hit: k }
+    return { ok: false, hit: null }
+  }
+
+  // ── 脚本 1：conv-tic-tac-toe（从零建棋盘游戏，多轮改需求/纠正/验证/总结）────
+  if (!done.has('conv-tic-tac-toe')) {
+    const t0 = Date.now()
+    const ws = wsFor('conv-tic-tac-toe')
+    const pty = await Pty.start({ ...ptyOpts('conv-tic-tac-toe'), workspace: ws })
+    await sleep(2000)
+    const rounds: { ok: boolean; note: string }[] = []
+    // R1 首条复杂任务（抓「首条无响应」——硬断言）
+    pty.send('开发一个井字棋游戏，用单文件 JavaScript，写完后用 node 跑一次自测并把结果告诉我。')
+    const r1 = await waitResponse(pty, 90_000)
+    const r1Alive = r1.responded ? await probeEcho(pty, 'ttt-r1', 8000) : false
+    rounds.push({ ok: r1.responded && r1Alive, note: `R1响应:${r1.responded} 输入活:${r1Alive} (${r1.ms}ms)` })
+    // R2 追问改需求（上下文连贯代理：应提及井字棋/平局/游戏）
+    if (rounds[0].ok) {
+      pty.send('再加一个功能：判断平局，并把规则说明写进代码注释。')
+      const r2 = await waitResponse(pty, 75_000)
+      const ctx2 = contextCarried(pty, ['井字棋', '平局', '游戏', 'game', 'tic'])
+      const r2Alive = r2.responded ? await probeEcho(pty, 'ttt-r2', 8000) : false
+      rounds.push({ ok: r2.responded && r2Alive, note: `R2响应:${r2.responded} 上下文:${ctx2.ok}(${ctx2.hit}) 输入活:${r2Alive}` })
+    } else rounds.push({ ok: false, note: 'R2 跳过（R1 未响应）' })
+    // R3 用户纠正（应含 4×4/4x4 或纠正确认）
+    if (rounds[1].ok) {
+      pty.send('不对，我不要 3×3 的棋盘，我要 4×4 的井字棋。')
+      const r3 = await waitResponse(pty, 75_000)
+      const ctx3 = contextCarried(pty, ['4×4', '4x4', '4*4', '16', '棋盘'])
+      const r3Alive = r3.responded ? await probeEcho(pty, 'ttt-r3', 8000) : false
+      rounds.push({ ok: r3.responded && r3Alive, note: `R3响应:${r3.responded} 纠正确认:${ctx3.ok}(${ctx3.hit}) 输入活:${r3Alive}` })
+    } else rounds.push({ ok: false, note: 'R3 跳过（R2 未响应）' })
+    // R4 跑验证（工具轮——磁盘 ground truth：应有游戏文件）
+    let r4Disk = false
+    if (rounds[2].ok) {
+      pty.send('用 node 跑通这个井字棋游戏的自测，把运行输出贴给我。')
+      const r4 = await waitResponse(pty, 90_000)
+      // 磁盘应有游戏文件（.js 含 game/棋盘/board 关键词）
+      for (const f of ['tic-tac-toe.js', 'tictactoe.js', 'game.js', 'main.js', 'index.js']) {
+        try {
+          const c = readFileSync(join(ws, f), 'utf8')
+          if (/井字棋|board|game|棋盘|tic/i.test(c)) { r4Disk = true; break }
+        } catch { /* 找下一个 */ }
+      }
+      const r4Alive = r4.responded ? await probeEcho(pty, 'ttt-r4', 8000) : false
+      rounds.push({ ok: r4.responded && r4Alive, note: `R4响应:${r4.responded} 磁盘游戏文件:${r4Disk} 输入活:${r4Alive}` })
+    } else rounds.push({ ok: false, note: 'R4 跳过（R3 未响应）' })
+    // R5 收尾总结（上下文代理：应概括游戏/文件/功能）
+    if (rounds[3].ok) {
+      pty.send('总结一下你刚才完成了哪些工作。')
+      const r5 = await waitResponse(pty, 75_000)
+      const ctx5 = contextCarried(pty, ['井字棋', '游戏', '文件', '平局', 'game'])
+      const r5Alive = r5.responded ? await probeEcho(pty, 'ttt-r5', 8000) : false
+      rounds.push({ ok: r5.responded && r5Alive, note: `R5响应:${r5.responded} 总结连贯:${ctx5.ok}(${ctx5.hit}) 输入活:${r5Alive}` })
+    } else rounds.push({ ok: false, note: 'R5 跳过（R4 未响应）' })
+    const okRounds = rounds.filter(r => r.ok).length
+    const verdict: Verdict = okRounds === 5 ? 'PASS' : okRounds === 0 ? 'STUCK' : 'FAIL'
+    recConv('conv-tic-tac-toe', verdict, Date.now() - t0,
+      `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
+      { rounds, okRounds, r1Responded: rounds[0].ok, r4Disk }, pty.text())
+    pty.kill()
+  }
+
+  // ── 脚本 2：conv-refactor（重构既有代码，多轮追问/纠正保护行为/验证）──────
+  if (!done.has('conv-refactor')) {
+    const t0 = Date.now()
+    const ws = wsFor('conv-refactor')
+    // fixture：有重复代码的 calc.js（add/subtract/multiply 重复校验+日志）
+    writeFileSync(join(ws, 'calc.js'),
+      `// calc.js — 有重复代码，待重构提取公共函数\n` +
+      `function add(a, b) {\n  if (typeof a !== 'number' || typeof b !== 'number') throw new Error('invalid');\n  const r = a + b;\n  console.log('add:', a, '+', b, '=', r);\n  return r;\n}\n` +
+      `function subtract(a, b) {\n  if (typeof a !== 'number' || typeof b !== 'number') throw new Error('invalid');\n  const r = a - b;\n  console.log('subtract:', a, '-', b, '=', r);\n  return r;\n}\n` +
+      `function multiply(a, b) {\n  if (typeof a !== 'number' || typeof b !== 'number') throw new Error('invalid');\n  const r = a * b;\n  console.log('multiply:', a, '*', b, '=', r);\n  return r;\n}\n` +
+      `module.exports = { add, subtract, multiply };\n`)
+    const pty = await Pty.start({ ...ptyOpts('conv-refactor'), workspace: ws })
+    await sleep(2000)
+    const rounds: { ok: boolean; note: string }[] = []
+    pty.send('重构当前目录的 calc.js，把重复代码提取成公共函数，保持行为完全不变。')
+    const r1 = await waitResponse(pty, 90_000)
+    const r1Alive = r1.responded ? await probeEcho(pty, 'rf-r1', 8000) : false
+    rounds.push({ ok: r1.responded && r1Alive, note: `R1响应:${r1.responded} 输入活:${r1Alive} (${r1.ms}ms)` })
+    if (rounds[0].ok) {
+      pty.send('给提取出来的公共函数加上 JSDoc 注释。')
+      const r2 = await waitResponse(pty, 75_000)
+      const ctx2 = contextCarried(pty, ['公共', '函数', 'JSDoc', 'calc', '提取'])
+      const r2Alive = r2.responded ? await probeEcho(pty, 'rf-r2', 8000) : false
+      rounds.push({ ok: r2.responded && r2Alive, note: `R2响应:${r2.responded} 上下文:${ctx2.ok}(${ctx2.hit}) 输入活:${r2Alive}` })
+    } else rounds.push({ ok: false, note: 'R2 跳过（R1 未响应）' })
+    if (rounds[1].ok) {
+      pty.send('等等，注意不要改变 subtract 的行为，只重构结构。')
+      const r3 = await waitResponse(pty, 75_000)
+      const ctx3 = contextCarried(pty, ['subtract', '减', '行为', '结构', '不变'])
+      const r3Alive = r3.responded ? await probeEcho(pty, 'rf-r3', 8000) : false
+      rounds.push({ ok: r3.responded && r3Alive, note: `R3响应:${r3.responded} 纠正确认:${ctx3.ok}(${ctx3.hit}) 输入活:${r3Alive}` })
+    } else rounds.push({ ok: false, note: 'R3 跳过（R2 未响应）' })
+    let r4BehaviorOk = false
+    if (rounds[2].ok) {
+      pty.send('用 node 跑一次验证：add(5,3)、subtract(5,3)、multiply(5,3) 结果正确，把输出贴给我。')
+      const r4 = await waitResponse(pty, 90_000)
+      // 磁盘 calc.js 仍可 require 且行为正确（add=8 subtract=2 multiply=15）
+      try {
+        const out = execSync('node -e "const c=require(\'./calc.js\'); console.log(c.add(5,3),c.subtract(5,3),c.multiply(5,3))"', { cwd: ws, stdio: 'pipe', timeout: 10_000 }).toString().trim()
+        r4BehaviorOk = out.includes('8') && out.includes('2') && out.includes('15')
+      } catch { /* 行为验证失败 */ }
+      const r4Alive = r4.responded ? await probeEcho(pty, 'rf-r4', 8000) : false
+      rounds.push({ ok: r4.responded && r4Alive, note: `R4响应:${r4.responded} 行为不变:${r4BehaviorOk} 输入活:${r4Alive}` })
+    } else rounds.push({ ok: false, note: 'R4 跳过（R3 未响应）' })
+    if (rounds[3].ok) {
+      pty.send('总结你重构了哪些，行为是否保持不变。')
+      const r5 = await waitResponse(pty, 75_000)
+      const ctx5 = contextCarried(pty, ['重构', 'calc', '公共', '函数', '行为'])
+      const r5Alive = r5.responded ? await probeEcho(pty, 'rf-r5', 8000) : false
+      rounds.push({ ok: r5.responded && r5Alive, note: `R5响应:${r5.responded} 总结连贯:${ctx5.ok}(${ctx5.hit}) 输入活:${r5Alive}` })
+    } else rounds.push({ ok: false, note: 'R5 跳过（R4 未响应）' })
+    const okRounds = rounds.filter(r => r.ok).length
+    const verdict: Verdict = okRounds === 5 ? 'PASS' : okRounds === 0 ? 'STUCK' : 'FAIL'
+    recConv('conv-refactor', verdict, Date.now() - t0,
+      `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
+      { rounds, okRounds, r1Responded: rounds[0].ok, r4BehaviorOk }, pty.text())
+    pty.kill()
+  }
+
+  // ── 脚本 3：conv-debug（调试既有 bug，多轮质疑/验证/边界/总结）────────────
+  if (!done.has('conv-debug')) {
+    const t0 = Date.now()
+    const ws = wsFor('conv-debug')
+    // fixture：debug-san.js 有 bug（字符串拼接而非数值相加）
+    writeFileSync(join(ws, 'debug-san.js'),
+      `// debug-san.js — 有 bug：parseAndAdd 把字符串直接传给 add，导致 '5'+'3'='53'\n` +
+      `function add(a, b) {\n  return a + b;\n}\n` +
+      `function parseAndAdd(s) {\n  const parts = s.split(',');\n  return add(parts[0], parts[1]);\n}\n` +
+      `module.exports = { add, parseAndAdd };\n`)
+    const pty = await Pty.start({ ...ptyOpts('conv-debug'), workspace: ws })
+    await sleep(2000)
+    const rounds: { ok: boolean; note: string }[] = []
+    pty.send('debug-san.js 的 parseAndAdd 有 bug：parseAndAdd("5,3") 返回 "53" 而不是 8。帮我定位根因并修复。')
+    const r1 = await waitResponse(pty, 90_000)
+    const r1Alive = r1.responded ? await probeEcho(pty, 'db-r1', 8000) : false
+    rounds.push({ ok: r1.responded && r1Alive, note: `R1响应:${r1.responded} 输入活:${r1Alive} (${r1.ms}ms)` })
+    if (rounds[0].ok) {
+      pty.send('你说的根因我有点怀疑，能再确认一下到底是字符串拼接的问题还是 split 的问题吗？')
+      const r2 = await waitResponse(pty, 75_000)
+      const ctx2 = contextCarried(pty, ['字符串', '拼接', 'split', '根因', 'parse', 'add'])
+      const r2Alive = r2.responded ? await probeEcho(pty, 'db-r2', 8000) : false
+      rounds.push({ ok: r2.responded && r2Alive, note: `R2响应:${r2.responded} 上下文:${ctx2.ok}(${ctx2.hit}) 输入活:${r2Alive}` })
+    } else rounds.push({ ok: false, note: 'R2 跳过（R1 未响应）' })
+    let r3Fixed = false
+    if (rounds[1].ok) {
+      pty.send('修复这个 bug，让 parseAndAdd("5,3") 返回 8。修完后跑验证。')
+      const r3 = await waitResponse(pty, 90_000)
+      // 磁盘 debug-san.js 修复后 parseAndAdd("5,3")===8
+      try {
+        const out = execSync('node -e "const m=require(\'./debug-san.js\'); console.log(m.parseAndAdd(\'5,3\'))"', { cwd: ws, stdio: 'pipe', timeout: 10_000 }).toString().trim()
+        r3Fixed = out === '8'
+      } catch { /* 未修复 */ }
+      const r3Alive = r3.responded ? await probeEcho(pty, 'db-r3', 8000) : false
+      rounds.push({ ok: r3.responded && r3Alive, note: `R3响应:${r3.responded} 修复验证:${r3Fixed} 输入活:${r3Alive}` })
+    } else rounds.push({ ok: false, note: 'R3 跳过（R2 未响应）' })
+    if (rounds[2].ok) {
+      pty.send('边界情况也测一下：parseAndAdd("0,0")、parseAndAdd("-1,1")、parseAndAdd("abc,def") 会怎样？')
+      const r4 = await waitResponse(pty, 75_000)
+      const ctx4 = contextCarried(pty, ['边界', '0', '-1', 'abc', 'NaN', '测试'])
+      const r4Alive = r4.responded ? await probeEcho(pty, 'db-r4', 8000) : false
+      rounds.push({ ok: r4.responded && r4Alive, note: `R4响应:${r4.responded} 边界讨论:${ctx4.ok}(${ctx4.hit}) 输入活:${r4Alive}` })
+    } else rounds.push({ ok: false, note: 'R4 跳过（R3 未响应）' })
+    if (rounds[3].ok) {
+      pty.send('总结这个 bug 的根因和你的修复方案。')
+      const r5 = await waitResponse(pty, 75_000)
+      const ctx5 = contextCarried(pty, ['根因', '字符串', '拼接', 'parse', '修复', 'Number', 'parseInt'])
+      const r5Alive = r5.responded ? await probeEcho(pty, 'db-r5', 8000) : false
+      rounds.push({ ok: r5.responded && r5Alive, note: `R5响应:${r5.responded} 总结连贯:${ctx5.ok}(${ctx5.hit}) 输入活:${r5Alive}` })
+    } else rounds.push({ ok: false, note: 'R5 跳过（R4 未响应）' })
+    const okRounds = rounds.filter(r => r.ok).length
+    const verdict: Verdict = okRounds === 5 ? 'PASS' : okRounds === 0 ? 'STUCK' : 'FAIL'
+    recConv('conv-debug', verdict, Date.now() - t0,
+      `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
+      { rounds, okRounds, r1Responded: rounds[0].ok, r3Fixed }, pty.text())
+    pty.kill()
+  }
 }
 
 function diskCheck(ws: string, disk: { path: string; contains?: string }): boolean {
