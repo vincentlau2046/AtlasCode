@@ -47,6 +47,42 @@ export {
   type CompactionResult,
   type CompactDeps,
 } from './compact'
+// D-2a S3（M5 切端）：PTL 重试族 + 消息分组/文本提取纯逻辑移植
+export {
+  MAX_PTL_RETRIES,
+  PTL_RETRY_MARKER,
+  ERROR_MESSAGE_PROMPT_TOO_LONG,
+  groupMessagesByApiRound,
+  isPromptTooLongMessage,
+  parsePromptTooLongTokenCounts,
+  getPromptTooLongTokenGap,
+  getAssistantMessageText,
+  truncateHeadForPTLRetry,
+  extractDiscoveredToolNames,
+} from './compactPtl'
+// D-2a S3（M5 切端）：压缩路径 token 工具族（旧 tokens.ts 逐字移植）
+export {
+  getTokenUsage,
+  getTokenCountFromUsage,
+  tokenCountFromLastAPIResponse,
+  roughTokenCountEstimation,
+  roughTokenCountEstimationForContent,
+  roughTokenCountEstimationForMessages,
+  tokenCountWithEstimation,
+} from './compactTokens'
+// D-2a S3（M5 切端）：compact 富路径 DI 端口（宿主 setCompactPorts 注入）
+export {
+  setCompactPorts,
+  getCompactPorts,
+  type CompactPorts,
+  type CompactContext,
+  type CompactOptions,
+  type CompactProgressEvent,
+  type CacheSafeParams,
+  type RecompactionInfo,
+  type PreCompactHookResult,
+  type PostCompactHookResult,
+} from './compactPorts'
 export {
   TIME_BASED_MC_CLEARED_MESSAGE,
   TIME_BASED_MC_CONFIG_DEFAULTS,

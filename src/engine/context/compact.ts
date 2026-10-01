@@ -8,15 +8,17 @@
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
  *   - partialCompact（direction up_to/from + pivot 选取）→ 残留守（后续纵切）。
- *   - PTL（prompt-too-long）重试循环 + 流式重试（streamCompactSummary + MAX_PTL_RETRIES）
- *     → 残留守（重试面归 E-1b-full；本版单次摘要调用）。
- *   - 压缩后重建面（createPostCompactFileAttachments / plan / skill / deferred-tools /
- *     MCP-instructions 重宣告 + SessionStart hooks + PostCompactCleanup + readFileState 清空）
- *     → 残留守（attachment 渲染 = message/REPL 波（§8.40 C-3 前向接缝登记）；
- *     SessionStart hooks 执行器已随 E-5 落（hooks 域 5 高频执行器），压缩重建面
- *     接线归后续纵切；D-2a S2 起 CompactionResult 的 attachments/hookResults
- *     字段已复原（additive，裁剪 producer 置空数组）+ buildPostCompactMessages
- *     富 ordering 复原——富 producer 放置归 S3）。
+ *   - PTL（prompt-too-long）重试循环 + 流式重试：D-2a S3 起富模式已落
+ *     （compactPtl.ts truncateHeadForPTLRetry/MAX_PTL_RETRIES 逐字 +
+ *     ports.summarize 单端口承载 streamCompactSummary fork/流式双支——
+ *     宿主注完整 LLM 路径，engine 本体零 modelprovider 直调）；裁剪模式
+ *     仍单次摘要调用（deps.summarize）。
+ *   - 压缩后重建面（附件重建簇 / SessionStart hooks / PostCompact hooks /
+ *     markPostCompaction/notifyCompaction / readFileState 清空）：D-2a S3
+ *     起富模式已落（CompactPorts DI 缝——LLM-bound / 文件 IO / 宿主模块态
+ *     叶全走 setCompactPorts 宿主注入，engine 保 React-free 零 tui 依赖）；
+ *     S8 切端时 tui 挂真实现。CompactionResult attachments/hookResults 字段
+ *     + buildPostCompactMessages 富 ordering = S2 复原，S3 富 producer 置位。
  *   - getCompactPrompt 文案 = 旧仓 prompt.ts 全文照抄（NO_TOOLS_PREAMBLE +
  *     BASE_COMPACT_PROMPT（含 DETAILED_ANALYSIS_INSTRUCTION_BASE + 9 段结构 + <example>
  *     模板 + 自定义指令示例段）+ NO_TOOLS_TRAILER，摘要质量关键资产，review 2026-09-23
@@ -31,7 +33,30 @@
  */
 import { randomUUID } from 'crypto'
 import type { Message, Usage } from '../../shared'
+import { logForDebugging } from '../../shared'
+import { PROMPT_TOO_LONG_ERROR_MESSAGE, startsWithApiErrorPrefix } from '../../modelprovider'
+import { getTranscriptPath, reAppendSessionMetadata } from '../session'
+import { createUserMessage } from '../tools'
 import type { ContentReplacementRecord } from '../session/types'
+import {
+  ERROR_MESSAGE_PROMPT_TOO_LONG,
+  MAX_PTL_RETRIES,
+  extractDiscoveredToolNames,
+  getAssistantMessageText,
+  truncateHeadForPTLRetry,
+} from './compactPtl'
+import {
+  getTokenUsage,
+  roughTokenCountEstimationForMessages,
+  tokenCountFromLastAPIResponse,
+  tokenCountWithEstimation,
+} from './compactTokens'
+import {
+  getCompactPorts,
+  type CacheSafeParams,
+  type CompactContext,
+  type RecompactionInfo,
+} from './compactPorts'
 
 export const ERROR_MESSAGE_NOT_ENOUGH_MESSAGES =
   'Not enough messages to compact.'
@@ -264,19 +289,38 @@ export function formatCompactSummary(summary: string): string {
  * suppressFollowUpQuestions 续跑段照抄；旧仓 transcriptPath / recentMessagesPreserved
  * 两参残留守——transcript 文件面 / partial keep 面归后续纵切，见头注）。
  */
+/**
+ * 旧仓 prompt.ts:328 逐字（D-2a S3 扩 4 参：transcriptPath /
+ * recentMessagesPreserved 两段复原——旧仓全量压缩路径传 3 参，partial 路径
+ * 传 4 参；2 参旧调用向后兼容）。
+ */
 export function getCompactUserSummaryMessage(
   summary: string,
   suppressFollowUpQuestions?: boolean,
+  transcriptPath?: string,
+  recentMessagesPreserved?: boolean,
 ): string {
   const formattedSummary = formatCompactSummary(summary)
+
   let baseSummary = `This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 ${formattedSummary}`
-  if (suppressFollowUpQuestions) {
-    baseSummary +=
-      `\nContinue the conversation from where it left off without asking the user any further questions. ` +
-      `Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.`
+
+  if (transcriptPath) {
+    baseSummary += `\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: ${transcriptPath}`
   }
+
+  if (recentMessagesPreserved) {
+    baseSummary += `\n\nRecent messages are preserved verbatim.`
+  }
+
+  if (suppressFollowUpQuestions) {
+    const continuation = `${baseSummary}
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.`
+
+    return continuation
+  }
+
   return baseSummary
 }
 
@@ -297,9 +341,47 @@ ${formattedSummary}`
  * 现签名不携）= 裁面，createdAt 保留（新面，无消费断言）。
  */
 export function createCompactBoundaryMessage(
+  trigger: 'manual' | 'auto',
+  preTokens: number,
+  lastPreCompactMessageUuid?: string,
+  userContext?: string,
+  messagesSummarized?: number,
+): Message
+export function createCompactBoundaryMessage(
   preTokens: number | undefined,
   messagesSummarized: number,
+): Message
+export function createCompactBoundaryMessage(
+  triggerOrPreTokens: 'manual' | 'auto' | number | undefined,
+  second: number,
+  lastPreCompactMessageUuid?: string,
+  userContext?: string,
+  messagesSummarized?: number,
 ): Message {
+  // 富形（旧 tui/utils/messages.ts:4518 逐字）：trigger 元信息 +
+  // logicalParentUuid relink（D-2a S3 回填）
+  if (typeof triggerOrPreTokens === 'string') {
+    return {
+      type: 'system',
+      subtype: 'compact_boundary',
+      content: `Conversation compacted`,
+      isMeta: false,
+      level: 'info',
+      uuid: randomUUID(),
+      timestamp: new Date().toISOString(),
+      compactMetadata: {
+        trigger: triggerOrPreTokens,
+        preTokens: second,
+        userContext,
+        messagesSummarized,
+      },
+      ...(lastPreCompactMessageUuid && {
+        logicalParentUuid: lastPreCompactMessageUuid,
+      }),
+    }
+  }
+  // 裁剪形（S-E3 A11-Δ1 判别式补全面）：preTokens/messagesSummarized/createdAt
+  const preTokens = triggerOrPreTokens
   return {
     type: 'system',
     subtype: 'compact_boundary',
@@ -312,7 +394,7 @@ export function createCompactBoundaryMessage(
     message: { role: 'system', content: 'Conversation compacted' },
     compactMetadata: {
       preTokens,
-      messagesSummarized,
+      messagesSummarized: second,
       createdAt: new Date().toISOString(),
     },
   }
@@ -334,10 +416,65 @@ export function buildPostCompactMessages(result: CompactionResult): Message[] {
 }
 
 /**
- * 压缩体（旧仓 compactConversation 裁剪真核心：guard → 计数 → 摘要调用 → 结果构造）。
- * PTL/流式重试 + 压缩后重建面（attachments/hooks/cleanup）归残留守（见头注）。
+ * 压缩体（D-2a S3，M5 切端）双模式重载——
+ *  - 裁剪模式（DI deps，E-1b T-4b 真核心）：guard → 计数 → 摘要调用 → 结果构造
+ *  - 富模式（CompactContext，旧仓 orchestrator 300L 真体移植）：PreCompact
+ *    hooks + PTL 重试（CC-1180 截头）+ 压缩后附件重建（DI 端口）+ SessionStart
+ *    hooks + PostCompact hooks + markPostCompaction/notifyCompaction +
+ *    reAppendSessionMetadata。LLM-bound / tui 耦合叶全走 CompactPorts DI 缝
+ *    （setCompactPorts 宿主注入；engine React-free 红线——本体零 tui 依赖）。
+ *
+ * 重载判别：第二参有 getAppState = 富模式，有 summarize = 裁剪模式。
+ * S8 切端后 TUI 7 参调用点解析富模式；engine 内部 agentLoopDeps /
+ * autoCompact deps.compact 仍走裁剪模式（行为零变更）。
  */
-export async function compactConversation(
+export function compactConversation(
+  messages: Message[],
+  deps: CompactDeps,
+  customInstructions?: string,
+): Promise<CompactionResult>
+export function compactConversation(
+  messages: Message[],
+  context: CompactContext,
+  cacheSafeParams: CacheSafeParams,
+  suppressFollowUpQuestions: boolean,
+  customInstructions?: string,
+  isAutoCompact?: boolean,
+  recompactionInfo?: RecompactionInfo,
+): Promise<CompactionResult>
+export function compactConversation(
+  messages: Message[],
+  contextOrDeps: CompactContext | CompactDeps,
+  cacheSafeParamsOrInstructions?: CacheSafeParams | string,
+  suppressFollowUpQuestions?: boolean,
+  customInstructions?: string,
+  isAutoCompact?: boolean,
+  recompactionInfo?: RecompactionInfo,
+): Promise<CompactionResult> {
+  const rich =
+    typeof (contextOrDeps as { getAppState?: unknown }).getAppState === 'function'
+  if (rich) {
+    return richCompactConversation(
+      messages,
+      contextOrDeps as CompactContext,
+      cacheSafeParamsOrInstructions as CacheSafeParams,
+      suppressFollowUpQuestions ?? false,
+      customInstructions,
+      isAutoCompact ?? false,
+      recompactionInfo,
+    )
+  }
+  return trimmedCompactConversation(
+    messages,
+    contextOrDeps as CompactDeps,
+    typeof cacheSafeParamsOrInstructions === 'string'
+      ? cacheSafeParamsOrInstructions
+      : undefined,
+  )
+}
+
+/** 裁剪模式体（E-1b T-4b 真核心，行为不变）。 */
+async function trimmedCompactConversation(
   messages: Message[],
   deps: CompactDeps,
   customInstructions?: string,
@@ -405,6 +542,264 @@ export async function compactConversation(
     )
   }
   return result
+}
+
+/**
+ * 富模式体（旧仓 tui/core/orchestrator/context/compact.ts:374-677 移植；
+ * D-2a S3 移植裁定——LLM-bound / tui 耦合叶全走 CompactPorts DI 缝）：
+ *  - streamCompactSummary（fork 支 runForkedAgent + 流式兜底 chatStream +
+ *    GB cache-prefix 门 + sessionActivity 心跳）→ ports.summarize 单端口
+ *    （宿主注完整 LLM 路径；返回完整 assistant 消息供 PTL 文本前缀判定）
+ *  - executePre/PostCompactHooks（tui utils/hooks.ts executeHooksOutsideREPL
+ *    链）/ processSessionStartHooks（plugin 加载/bare mode/watch paths 包装）
+ *    → ports hook 执行器（engine hooks 域 5 高频执行器不含 Pre/PostCompact）
+ *  - 附件重建簇（createPostCompactFileAttachments 文件 IO + plan/skill/
+ *    async-agent 模块态 + deferred-tools/agent-listing/MCP 重宣告）→
+ *    ports.buildPostCompactAttachments 单端口（文件 IO + 模块态留宿主）
+ *  - markPostCompaction/notifyCompaction（宿主模块态；旧仓 bootstrapState
+ *    本 fork 为 stub）→ 可选端口（未注 = no-op，宿主按需注）
+ *  - GB gate（promptCacheSharingEnabled / PROMPT_CACHE_BREAK_DETECTION
+ *    feature() 构建期门）裁：cache 共享判定归宿主 summarize 实现，
+ *    notifyCompaction 无条件走可选端口（宿主自门控）
+ *  - getCompactUserSummaryMessage 3 参（transcriptPath 段；recentMessages
+ *    4 参段归 partial 路径 S6）
+ */
+async function richCompactConversation(
+  messages: Message[],
+  context: CompactContext,
+  cacheSafeParams: CacheSafeParams,
+  suppressFollowUpQuestions: boolean,
+  customInstructions: string | undefined,
+  isAutoCompact: boolean,
+  recompactionInfo: RecompactionInfo | undefined,
+): Promise<CompactionResult> {
+  const p = getCompactPorts()
+  if (!p) {
+    throw new Error(
+      'compactConversation rich path requires setCompactPorts(...) — register host compact ports (tui wiring, D-2a S8)',
+    )
+  }
+  try {
+    if (messages.length === 0) {
+      throw new Error(ERROR_MESSAGE_NOT_ENOUGH_MESSAGES)
+    }
+
+    const preCompactTokenCount = tokenCountWithEstimation(messages)
+
+    context.onCompactProgress?.({
+      type: 'hooks_start',
+      hookType: 'pre_compact',
+    })
+
+    context.setSDKStatus?.('compacting')
+    const hookResult = await p.executePreCompactHooks(
+      {
+        trigger: isAutoCompact ? 'auto' : 'manual',
+        customInstructions: customInstructions ?? null,
+      },
+      context.abortController.signal,
+    )
+    customInstructions = mergeHookInstructions(
+      customInstructions,
+      hookResult.newCustomInstructions,
+    )
+    const userDisplayMessage = hookResult.userDisplayMessage
+
+    context.setStreamMode?.('requesting')
+    context.setResponseLength?.(() => 0)
+    context.onCompactProgress?.({ type: 'compact_start' })
+
+    const compactPrompt = getCompactPrompt(customInstructions)
+    const summaryRequest = createUserMessage({
+      content: compactPrompt,
+    }) as unknown as Message
+
+    let messagesToSummarize = messages
+    let retryCacheSafeParams = cacheSafeParams
+    let summaryResponse: Message
+    let summary: string | null
+    let ptlAttempts = 0
+    for (;;) {
+      summaryResponse = await p.summarize({
+        messages: messagesToSummarize,
+        summaryRequest,
+        preCompactTokenCount,
+        cacheSafeParams: retryCacheSafeParams,
+        signal: context.abortController.signal,
+        onProgress: context.onCompactProgress,
+      })
+      summary = getAssistantMessageText(summaryResponse)
+      if (summary !== null && !summary.startsWith(PROMPT_TOO_LONG_ERROR_MESSAGE)) {
+        break
+      }
+
+      // CC-1180: compact request itself hit prompt-too-long. Truncate the
+      // oldest API-round groups and retry rather than leaving the user stuck.
+      ptlAttempts++
+      const truncated =
+        ptlAttempts <= MAX_PTL_RETRIES
+          ? truncateHeadForPTLRetry(messagesToSummarize, summaryResponse)
+          : null
+      if (!truncated) {
+        throw new Error(ERROR_MESSAGE_PROMPT_TOO_LONG)
+      }
+      messagesToSummarize = truncated
+      // 截断集同步 fork 支参数（宿主 summarize 经 cacheSafeParams 消费）
+      retryCacheSafeParams = {
+        ...retryCacheSafeParams,
+        forkContextMessages: truncated,
+      }
+    }
+
+    if (!summary) {
+      logForDebugging('Compact failed: no summary text in response.', {
+        level: 'error',
+      })
+      throw new Error(
+        'Failed to generate conversation summary - response did not contain valid text content',
+      )
+    } else if (startsWithApiErrorPrefix(summary)) {
+      throw new Error(summary)
+    }
+
+    // 清空前保存文件态（post-compact 附件重建 DI 端口消费；重建簇留宿主）
+    const preCompactReadFileState = Object.fromEntries(
+      context.readFileState.entries(),
+    )
+
+    context.readFileState.clear()
+    context.loadedNestedMemoryPaths?.clear()
+
+    context.onCompactProgress?.({
+      type: 'hooks_start',
+      hookType: 'session_start',
+    })
+    const hookMessages = await p.processSessionStartHooks('compact', {
+      model: context.options.mainLoopModel,
+    })
+
+    const postCompactFileAttachments = await p.buildPostCompactAttachments(
+      preCompactReadFileState,
+      context,
+    )
+
+    const boundaryMarker = createCompactBoundaryMessage(
+      isAutoCompact ? 'auto' : 'manual',
+      preCompactTokenCount ?? 0,
+      (messages.at(-1) as { uuid?: string } | undefined)?.uuid,
+    )
+    // 携带 loaded-tool 状态（摘要不保 tool_reference 块，post-compact
+    // schema filter 需此集持续下发已加载 deferred 工具 schema）
+    const preCompactDiscovered = extractDiscoveredToolNames(messages)
+    if (preCompactDiscovered.size > 0) {
+      ;(
+        boundaryMarker as { compactMetadata?: Record<string, unknown> }
+      ).compactMetadata = {
+        ...((boundaryMarker as { compactMetadata?: Record<string, unknown> })
+          .compactMetadata ?? {}),
+        preCompactDiscoveredTools: [...preCompactDiscovered].sort(),
+      }
+    }
+
+    const transcriptPath = getTranscriptPath()
+    const summaryMessages: Message[] = [
+      {
+        type: 'user',
+        role: 'user',
+        uuid: randomUUID(),
+        timestamp: new Date().toISOString(),
+        message: {
+          role: 'user',
+          content: getCompactUserSummaryMessage(
+            summary,
+            suppressFollowUpQuestions,
+            transcriptPath,
+          ),
+        },
+      },
+    ]
+
+    // 「postCompactTokenCount」= 压缩 API 调用总 usage（旧仓事件字段
+    // 连续性保留命名），非结果上下文大小
+    const compactionCallTotalTokens = tokenCountFromLastAPIResponse([
+      summaryResponse,
+    ])
+
+    // 结果上下文消息载荷估算（软信号：下一轮 shouldAutoCompact 参考量）
+    const truePostCompactTokenCount = roughTokenCountEstimationForMessages([
+      boundaryMarker,
+      ...summaryMessages,
+      ...postCompactFileAttachments,
+      ...hookMessages,
+    ] as never)
+
+    const compactionUsage = getTokenUsage(summaryResponse)
+
+    p.notifyCompaction?.(
+      recompactionInfo?.querySource ?? context.options.querySource ?? 'compact',
+      context.agentId,
+    )
+    p.markPostCompaction?.()
+
+    // 压缩后重追加会话元数据（custom title/tag 保 16KB tail 窗口）
+    reAppendSessionMetadata()
+
+    context.onCompactProgress?.({
+      type: 'hooks_start',
+      hookType: 'post_compact',
+    })
+    const postCompactHookResult = await p.executePostCompactHooks(
+      {
+        trigger: isAutoCompact ? 'auto' : 'manual',
+        compactSummary: summary,
+      },
+      context.abortController.signal,
+    )
+
+    const combinedUserDisplayMessage = [
+      userDisplayMessage,
+      postCompactHookResult.userDisplayMessage,
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const result: CompactionResult = {
+      boundaryMarker,
+      summaryMessages,
+      attachments: postCompactFileAttachments,
+      hookResults: hookMessages,
+      userDisplayMessage: combinedUserDisplayMessage || undefined,
+      preCompactTokenCount,
+      postCompactTokenCount: compactionCallTotalTokens,
+      truePostCompactTokenCount,
+      compactionUsage,
+    }
+    return result
+  } catch (error) {
+    // 仅手动 /compact 弹错误通知（自动压缩失败下轮重试，旧仓注释逐字）；
+    // USER_ABORT / NOT_ENOUGH_MESSAGES 不通知（旧 addErrorNotificationIfNeeded
+    // hasExactErrorMessage 语义移植）。
+    if (!isAutoCompact) {
+      const msg = error instanceof Error ? error.message : String(error)
+      if (
+        msg !== ERROR_MESSAGE_USER_ABORT &&
+        msg !== ERROR_MESSAGE_NOT_ENOUGH_MESSAGES
+      ) {
+        context.addNotification?.({
+          key: 'error-compacting-conversation',
+          text: 'Error compacting conversation',
+          priority: 'immediate',
+          color: 'error',
+        })
+      }
+    }
+    throw error
+  } finally {
+    context.setStreamMode?.('requesting')
+    context.setResponseLength?.(() => 0)
+    context.onCompactProgress?.({ type: 'compact_end' })
+    context.setSDKStatus?.(null)
+  }
 }
 
 /**
