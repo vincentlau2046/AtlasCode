@@ -24,3 +24,12 @@ embedded64.txt
 user-e2e/workspaces/
 user-e2e/home/
 user-e2e/artifacts/
+
+# B0: 顶层运行时/构建产物（0405 e2e 误提交进历史，防回归）
+.bun/
+home/
+
+# B0: 内部/敏感 docs（本地-only，绝不上 GitHub）
+docs/atlas-office-frontend-migration.md
+docs/web-gui-port-assessment.md
+docs/web-gui-render-scheme.md
