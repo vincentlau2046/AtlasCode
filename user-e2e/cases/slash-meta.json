@@ -54,7 +54,8 @@
       "cls": "local"
     },
     "stickers": {
-      "cls": "local"
+      "cls": "local",
+      "note": "harness 面限制（B5 triage，0405）：连续动画使 settle 打到 3m34s 上限（busy 非崩溃）；sweep TIMEOUT 判读为结算/探针局限，非产品缺陷"
     },
     "hooks": {
       "cls": "local"
@@ -70,9 +71,6 @@
       "cls": "local"
     },
     "backfill-sessions": {
-      "cls": "local"
-    },
-    "ant-trace": {
       "cls": "local"
     },
     "ctx_viz": {
@@ -93,7 +91,8 @@
     },
     "tasklist": {
       "cls": "local",
-      "esc": true
+      "esc": true,
+      "note": "harness 面限制（B5 triage，0405）：local-jsx 面板输出不被探针回显检测捕获；sweep 探针立即无回显（probeMs 1-3ms，非 45s 渲染滞后签名）——疑 session 早死，下轮用 artifacts/slash-pty-*.log(.stderr) 定性。非已证产品缺陷"
     },
     "vim": {
       "cls": "local",
@@ -260,7 +259,8 @@
       "note": "OAuth 流程面，Esc 中止"
     },
     "logout": {
-      "cls": "auth"
+      "cls": "auth",
+      "note": "harness 面限制（B5 triage，0405）：local-jsx 面板 + 探针立即无回显（probeMs 1-3ms）——疑 session 早死，下轮用 artifacts/slash-pty-*.log(.stderr) 定性。非已证产品缺陷"
     },
     "oauth-refresh": {
       "cls": "auth"

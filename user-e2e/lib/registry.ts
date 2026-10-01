@@ -14,7 +14,7 @@ export interface RegCmd {
 
 /** 回退清单（src/tui/commands.ts 注册表 2026-10-01 静态枚举；feature/dev 门控项默认关） */
 const BAKED: string[] = [
-  'add-dir', 'agents', 'ant-trace', 'autofix-pr', 'backfill-sessions',
+  'add-dir', 'agents', 'autofix-pr', 'backfill-sessions',
   'branch', 'break-cache', 'btw', 'bughunter', 'clear', 'color',
   'commit', 'commit-push-pr', 'compact', 'config', 'context', 'copy',
   'cost', 'ctx_viz', 'debug-tool-call', 'diff', 'doctor', 'effort',

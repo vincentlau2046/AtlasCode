@@ -103,7 +103,6 @@ import rewind from './commands/rewind/index.js'
 import heapDump from './commands/heapdump/index.js'
 import version from './commands/version.js'
 import summary from './commands/summary/index.js'
-import antTrace from './commands/ant-trace/index.js'
 import perfIssue from './commands/perf-issue/index.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
 import stickers from './commands/stickers/index.js'
@@ -188,7 +187,6 @@ export const INTERNAL_ONLY_COMMANDS = [
   onboarding,
   share,
   summary,
-  antTrace,
   perfIssue,
   env,
   oauthRefresh,
