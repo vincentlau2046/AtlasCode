@@ -142,7 +142,7 @@ export function MCPRemoteServerMenu({
   const handleAuthenticate = React.useCallback(async () => {
     // G-3（§8.74.28 ⑫）: claudeai-proxy 型（⑩ 裁定保留于 TUI 型面）不再走
     // 通用 OAuth 认证流——菜单不再为其提供认证选项（守卫 + 前向缝登记：
-    // 回流 = claude.ai 账号面随 IFF 网关恢复）。
+    // 回流 = claude.ai 账号面随网关恢复）。
     if (server.config.type === 'claudeai-proxy') return;
     setIsAuthenticating(true);
     setError(null);

@@ -3,7 +3,7 @@
  *
  * Direct API:
  * - OPENAI_API_KEY: API key for the gateway/endpoint
- * - OPENAI_BASE_URL: gateway base URL (IFF default: http://127.0.0.1:8999)
+ * - OPENAI_BASE_URL: gateway base URL (默认: http://127.0.0.1:8999)
  *
  * P3 note: the AWS Bedrock / GCP Vertex / Azure Foundry client branches were
  * removed in the de-Claude-ification cleanup — model routing now goes through

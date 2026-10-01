@@ -3,7 +3,7 @@
 // G-3（§8.74.28 ⑪ voice 换血）: P1 Anthropic voice_stream WebSocket 支已整裁
 // （原 607L 中的 L181-607：voice_stream 端点 + KeepAlive/CloseStream 协议 +
 // 流式 TranscriptText interim + Nova 3 gate + keyterms query-param 面）。
-// 语音 STT 现只走 IFF 网关 OpenAI 协议 /audio/transcriptions
+// 语音 STT 现只走网关 OpenAI 协议 /audio/transcriptions
 // （modelProvider.transcribeAudio）。
 //
 // 前向缝登记（H6，不造假绿）:
@@ -64,7 +64,7 @@ export async function connectVoiceStream(
   callbacks: VoiceStreamCallbacks,
   options?: { language?: string; keyterms?: string[] },
 ): Promise<VoiceStreamConnection | null> {
-  // P2（gateway ASR）: 音频块本地累积；finalize() 时经 IFF 网关的
+  // P2（gateway ASR）: 音频块本地累积；finalize() 时经网关的
   // OpenAI 兼容 /audio/transcriptions 一次性转写。
   // options.keyterms 前向缝不消费（见文件头登记）。
   if (options?.keyterms?.length) {

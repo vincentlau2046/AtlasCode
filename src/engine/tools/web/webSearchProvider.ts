@@ -3,7 +3,7 @@
  *
  * 背景：旧 WebSearchTool call() = Anthropic 服务端工具车道（web_search_20250305
  * 经 extraToolSchemas 注入 + chatStream 收集 web_search_tool_result 块）——
- * OpenAI 协议车道上恒死（IFF 网关无损转发，无服务端工具执行面）。G-2 改
+ * OpenAI 协议车道上恒死（网关无损转发，无服务端工具执行面）。G-2 改
  * 客户端直接抓取（零新增 npm 依赖，node 运行器安全：global fetch +
  * AbortSignal.any/timeout + randomUUID，仓内先例 webFetchUtils/cronEnv）。
  *

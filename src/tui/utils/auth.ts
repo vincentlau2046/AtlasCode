@@ -656,7 +656,7 @@ export const getOAuthTokens = memoize((): OAuthTokens | null => {
   // --bare: API-key-only. No OAuth env tokens, no keychain, no credentials file.
   if (isBareMode()) return null
 
-  // OpenAI-standard token env var (domestic-vendor / IFF gateway path)
+  // OpenAI-standard token env var (domestic-vendor / gateway path)
   if (process.env.OPENAI_AUTH_TOKEN) {
     return {
       accessToken: process.env.OPENAI_AUTH_TOKEN,

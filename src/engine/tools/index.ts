@@ -150,7 +150,7 @@
  *   mcp/ 子域同名——`./mcp` spec 解析 = mcp.ts（Bun/tsc 文件优先于目录，
  *   双态实证），子域门面经 `./mcp/index` 显式 spec 引入；残留守「49 本体」
  *   登记再缩 3 → 29/49（MCP 族 2 无条件注册面 + ToolSearch = 2nd 专属
- *   门控槽 = isEnabled = isToolSearchEnabledOptimistic，IFF env 常态
+ *   门控槽 = isEnabled = isToolSearchEnabledOptimistic，默认 env 常态
  *   OPENAI_BASE_URL 设真 → 默认 gate OFF = 旧语义忠实非新增门）。
  * §8.67 D 波 S-E2b（SkillTool 本体子波，§8.60/§8.61 重分类 D 波落点）
  *   已落 skill/ 子域 SkillTool 本体（1 对象 + JSON schema 1 常量
@@ -188,7 +188,7 @@
  *   ⑫ 注入端口 5 方法族 + tui 面 3 文件 + bundled skill
  *   scheduleRemoteAgents 447L）G-3（§8.74.28）F 类 1P 整裁：
  *   1P claude.ai 车道全裁（v1/code/triggers URL 族 + OAuth +
- *   claude.ai/code/scheduled 链接面），真供给方（IFF 网关 / CLI 波）
+ *   claude.ai/code/scheduled 链接面），真供给方（网关 / CLI 波）
  *   不随本仓产品面保留 → 整子系统删除，登记非删除前向缝。
  * 计数口径（F-A1 核销，S-4；G-3 整裁后）：「31/49」= C桶① 真本体
  * materialized running tally（materialized-real-body，非 file count；

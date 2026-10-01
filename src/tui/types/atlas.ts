@@ -66,7 +66,7 @@ export class APIConnectionTimeoutError extends APIError { }
 export class APIUserAbortError extends APIError { }
 /**
  * De-Anthropic-ification (P1): abstract client interface. Provider
- * SDK clients (now the OpenAI-protocol IFF gateway client) are cast to
+ * SDK clients (now the OpenAI-protocol gateway client) are cast to
  * this interface. Callers type against `AtlasClient`.
  */
 export interface AtlasClient {

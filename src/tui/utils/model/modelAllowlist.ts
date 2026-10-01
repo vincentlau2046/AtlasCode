@@ -89,7 +89,7 @@ export function isModelAllowed(model: string): boolean {
 /**
  * 本地模型配置池成员判定（跟随本地模型配置，无硬编码模型名）:
  * 模型是否出现在默认放行角色池（**small + premium**）的
- * env ATLAS_<ROLE>_MODEL > settings modelRoles 池 > provider/IFF 默认
+ * env ATLAS_<ROLE>_MODEL > settings modelRoles 池 > provider/默认
  * 并集里，或等于默认主循环模型。**fast 不进默认放行清单**——快速/轻量
  * 模型不预信任跑安全分类器；确需放行某模型，把它配进 small/premium
  * 角色池即可（单一规则，无独立 allow 配置层——原

@@ -16,7 +16,7 @@
  *   - cc://·cc+unix:// 预解析改写块（feature DIRECT_CONNECT，_pendingConnect
  *     缺席）/ LODESTONE deep-link 块（--handle-uri / __CFBundleIdentifier
  *     Apple Event）/ SSH_REMOTE 预解析块（_pendingSSH 缺席）= 域外裁
- *     （remote 族波 / IFF 网关波 前向缝登记（§8.74.28 ⑭，#200），§8.71.1.3）
+ *     （remote 族波 / 网关波 前向缝登记（§8.74.28 ⑭，#200），§8.71.1.3）
  *   - stopCapturingEarlyInput（早期输入捕获面未落盘，残留守）
  *   - SIGINT 非 -p 支：旧 gracefulShutdown(0) 族缺席（残留守）→ process.exit(0)
  *     逐字落地（headless -p 支由 print.ts 自注册 handler，S-C3 核销）

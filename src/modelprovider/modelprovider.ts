@@ -227,7 +227,7 @@ export class OpenAIProvider implements ModelProvider {
           const content: any[] = []
           const msg: any = choice?.message
           const reasoningText = msg?.reasoning_content || ''
-          if (reasoningText) content.push({ type: 'thinking', thinking: reasoningText, signature: 'iff-gateway' })
+          if (reasoningText) content.push({ type: 'thinking', thinking: reasoningText, signature: 'first-party' })
           const text = typeof msg?.content === 'string' ? msg.content : ''
           if (text) content.push({ type: 'text', text })
           content.push(...toolUseBlocks)
@@ -421,7 +421,7 @@ export class OpenAIProvider implements ModelProvider {
     }
 
     const contentBlocks: any[] = []
-    if (reasoningText) contentBlocks.push({ type: 'thinking', thinking: reasoningText, signature: 'iff-gateway' })
+    if (reasoningText) contentBlocks.push({ type: 'thinking', thinking: reasoningText, signature: 'first-party' })
     if (fullText) contentBlocks.push({ type: 'text', text: fullText })
     const toolUseBlocks = [...toolCalls.values()]
       .filter((t) => t.name)

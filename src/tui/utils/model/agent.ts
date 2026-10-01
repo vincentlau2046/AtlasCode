@@ -43,7 +43,7 @@ export function getAgentModel(
   }
 
   // Bedrock cross-region inference-prefix 继承随 Bedrock provider 删除
-  //（provider 恒为 'firstParty'，IFF 网关），子代理模型不再需要 region 前缀。
+  //（provider 恒为 'firstParty'，网关），子代理模型不再需要 region 前缀。
 
   // Prioritize tool-specified model if provided
   if (toolSpecifiedModel) {

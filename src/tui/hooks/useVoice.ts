@@ -1,7 +1,7 @@
 // React hook for hold-to-talk voice input (gateway ASR lane).
 //
 // G-3（§8.74.28 ⑪ voice 换血）: P1 Anthropic voice_stream WS 支已整裁，
-// STT 走 IFF 网关 ASR（modelProvider.transcribeAudio，final-only）。
+// STT 走网关 ASR（modelProvider.transcribeAudio，final-only）。
 //
 // Hold the keybinding to record; release to stop and submit.  Auto-repeat
 // key events reset an internal timer — when no keypress arrives within

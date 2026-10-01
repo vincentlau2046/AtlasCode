@@ -10,7 +10,7 @@
  * 裁登记（H6 防空洞，复审勿当遗漏重提）：
  *   - mcp serve 尾段 = startMCPServer 前向接缝登记：新仓无 MCP server 入口
  *     （旧 entrypoints/mcp.ts = Atlas 自身作 MCP server 的 stdio 入口，
- *     mcp 域 R2 = client 面；server 面待 IFF 网关 / 远程车道 前向缝登记（§8.74.28 ⑭，#200））
+ *     mcp 域 R2 = client 面；server 面待 MCP 标准远程传输（M6 波） 前向缝登记（§8.74.28 ⑭，#200））
  *     ——明示接缝 exit 1，不伪装能力；
  *   - secure storage 清理（旧 remove handler cleanupSecureStorage /
  *     auth.ts clearServerTokensFromLocalStorage·clearMcpClientConfig
@@ -169,7 +169,7 @@ export async function mcpServeHandler(
   await runCliSetup({ cwd: providedCwd })
   // startMCPServer 前向接缝登记（见头注：新仓无 MCP server 入口 前向缝登记（§8.74.28 ⑭，#200））
   cliError(
-    'atlascode mcp serve: startMCPServer = 前向接缝登记（MCP server 入口未落盘，IFF 网关 / 远程车道 前向缝登记（§8.74.28 ⑭，#200））',
+    'atlascode mcp serve: startMCPServer = 前向接缝登记（MCP server 入口未落盘，MCP 标准远程传输（M6 波） 前向缝登记（§8.74.28 ⑭，#200））',
   )
 }
 

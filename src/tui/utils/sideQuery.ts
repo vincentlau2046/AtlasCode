@@ -161,7 +161,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
 
   // P5 Step C（06 文档 §1.3-4 遗留）：参数组装统一收敛到共享 builder
   // buildOpenAIParams。system 仍按 Bug A 的约束拼成单条 {role:'system'} 消息
-  // （IFF 网关无顶层 system 字段），attribution header 保持独立块以防服务端解析
+  // （网关无顶层 system 字段），attribution header 保持独立块以防服务端解析
   // 把 system 内容并入 cc_entrypoint。
   const systemStrings: string[] = []
   if (attributionHeader) systemStrings.push(attributionHeader)

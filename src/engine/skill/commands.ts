@@ -30,7 +30,7 @@
  *      （有参面逐字不变，skill 索引调用方 = TUI/CLI 波穿线消费）。
  *   ⑦ meetsAvailabilityRequirement 'console' 支：旧 isFirstPartyGatewayUrl()
  *      （utils/model/providers.ts，新仓 0 命中）内联 =
- *      !OPENAI_BASE_URL（IFF 语义「OPENAI_BASE_URL 设真即非 first-party
+ *      !OPENAI_BASE_URL（first-party 语义「OPENAI_BASE_URL 设真即非 first-party
  *      host」，同 engine/tools/toolsearch/toolSearchGate.ts 裁定 ⑬ 先例）。
  *   ⑧ formatDescriptionWithSource 的 getSettingSourceName（settings 显示
  *      名面，新仓 0 命中）→ 裁，回落 source 字串直出。
@@ -96,7 +96,7 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
         break
       case 'console':
         // 一方网关直连用户。头注 ⑦：isFirstPartyGatewayUrl 内联 =
-        // !OPENAI_BASE_URL（IFF 语义）。
+        // !OPENAI_BASE_URL（first-party 语义）。
         if (!process.env.OPENAI_BASE_URL) {
           return true
         }

@@ -16,7 +16,7 @@
  *    内层冗余双括号 → 新单层；旧 L297 模板插值 `${(process.env.
  *    OPENAI_BASE_URL)}` 括号 → 新 `${process.env.OPENAI_BASE_URL}`。
  *  ② 旧 isFirstPartyGatewayUrl()（utils/model/providers.js，新仓 0-hit）
- *    内联 = `!!process.env.OPENAI_BASE_URL` 取反（裁定 ⑬：IFF 网关语义
+ *    内联 = `!!process.env.OPENAI_BASE_URL` 取反（裁定 ⑬：网关语义
  *    「OPENAI_BASE_URL 设真即非 first-party host」）；gh-31936/CC-457
  *    proxy 回归注释逐字。
  *  ③ engine 面裁（裁定 ⑭，新仓 engine 0-hit 不复活登记）：
@@ -33,7 +33,7 @@
  *    logForDebugging（shared/debug 无 op 面）。
  *
  * 消费方 = toolSearchTool.isEnabled（§8.63.1.3 门控槽：ToolSearch = 2nd
- * 专属门控槽，IFF env 常态 OPENAI_BASE_URL 设真 → 默认 gate OFF = 旧语义
+ * 专属门控槽，默认 env 常态 OPENAI_BASE_URL 设真 → 默认 gate OFF = 旧语义
  * 忠实，非新增门）+ tools/ 门面 re-export + 门控面测试。
  */
 import { isEnvDefinedFalsy, isEnvTruthy, logForDebugging } from '../../../shared'
@@ -156,8 +156,8 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // means the user is explicitly configuring tool search and asserts their
   // setup supports it. The falsy check (rather than === undefined) aligns
   // with getToolSearchMode(), which also treats "" as unset.
-  // provider 恒为 'firstParty'（IFF 网关），原 3P 条件已删。
-  // delta ②：isFirstPartyGatewayUrl() 内联 = !OPENAI_BASE_URL（IFF 语义）
+  // provider 恒为 'firstParty'（网关），原 3P 条件已删。
+  // delta ②：isFirstPartyGatewayUrl() 内联 = !OPENAI_BASE_URL（first-party 语义）
   if (!process.env.ATLAS_ENABLE_TOOL_SEARCH && !!process.env.OPENAI_BASE_URL) {
     if (!loggedOptimistic) {
       loggedOptimistic = true

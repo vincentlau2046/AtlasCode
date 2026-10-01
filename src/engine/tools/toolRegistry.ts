@@ -52,7 +52,7 @@
  *       ⑲ ToolSearch optimistic（§8.63 S-E2 materialize：ToolSearch 本体纵切
  *         （toolsearch/ 子域），自门控 isEnabled = isToolSearchEnabledOptimistic
  *         （ATLAS_ENABLE_TOOL_SEARCH env + ATLAS_DISABLE_EXPERIMENTAL_BETAS
- *         kill-switch + OPENAI_BASE_URL proxy 守卫，IFF env 常态 base 设真 →
+ *         kill-switch + OPENAI_BASE_URL proxy 守卫，默认 env 常态 base 设真 →
  *         默认 gate OFF = 旧语义忠实非新增门），toolsearch 域已落，组合根
  *         baseTools 注入位；engine 面 4 函数族〔阈值判定 / modelSupportsTool
  *         Reference / extractDiscoveredToolNames / DeferredToolsDelta〕= 新仓

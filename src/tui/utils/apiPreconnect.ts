@@ -32,7 +32,7 @@ export function preconnectAtlasApi(): void {
   if (fired) return
   fired = true
 
-  // (3P guard removed — provider 恒为 'firstParty'，模型路由走 OpenAI-协议 IFF 网关)
+  // (3P guard removed — provider 恒为 'firstParty'，模型路由走 OpenAI-协议网关)
   // Skip if proxy/mTLS/unix — SDK's custom dispatcher won't reuse this pool
   if (
     process.env.HTTPS_PROXY ||

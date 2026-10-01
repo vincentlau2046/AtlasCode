@@ -18,7 +18,7 @@ type OauthConfig = {
   /**
    * The claude.ai web origin. Retained for live consumers (MCP connectors,
    * remote-setup deep links).
-   * 前向缝登记（§8.74.28 ⑭，#200）：domain swap pending the IFF gateway。
+   * 前向缝登记（§8.74.28 ⑭，#200）：domain swap pending the gateway。
    */
   CLAUDE_AI_ORIGIN: string
   MCP_PROXY_URL: string
@@ -28,7 +28,7 @@ type OauthConfig = {
 // de-ANT: the browser authorize/success/redirect URL fields (and, with the
 // subscription chain, TOKEN_URL / API_KEY_URL / ROLES_URL / CLIENT_ID) were
 // removed. Only the 1P REST base + MCP proxy + web origin remain. Domain swap
-// 前向缝登记（§8.74.28 ⑭，#200）：domain swap item (IFF gateway).
+// 前向缝登记（§8.74.28 ⑭，#200）：domain swap item (gateway).
 const PROD_OAUTH_CONFIG: OauthConfig = {
   BASE_API_URL: 'https://api.anthropic.com',
   CLAUDE_AI_ORIGIN: 'https://claude.ai',
@@ -50,7 +50,7 @@ export const MCP_CLIENT_METADATA_URL =
  * Return the 1P-REST / OAuth endpoint config. The refresh-token / API-key /
  * roles / CLIENT_ID endpoints are gone (subscription chain removed, module ⑤);
  * this build authenticates via the OpenAI-protocol static key. Domain swap of
- * BASE_API_URL / CLAUDE_AI_ORIGIN：前向缝登记（§8.74.28 ⑭，#200）domain swap item (IFF gateway).
+ * BASE_API_URL / CLAUDE_AI_ORIGIN：前向缝登记（§8.74.28 ⑭，#200）domain swap item (gateway).
  */
 export function getOauthConfig(): OauthConfig {
   return PROD_OAUTH_CONFIG

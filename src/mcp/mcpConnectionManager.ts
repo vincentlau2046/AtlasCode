@@ -13,7 +13,7 @@
  *     转写：50ms 轮询 interval + 600ms failsafe → 100ms/400ms 阶梯
  *     await，信号时序面不变，delta 登记）
  *   - **sse/http/ws = 前向接缝登记**（failed 态 + 登记 message：真传输
- *     实装待 IFF 网关 / 远程车道，#200 波；G-3 §8.74.28 ⑩ D3 型面 8→4 后
+ *     实装待 MCP 标准远程传输（M6 波），#200 波；G-3 §8.74.28 ⑩ D3 型面 8→4 后
  *     分发面 = 3 非 stdio 型）
  *   - **sse-ide / ws-ide / sdk / claudeai-proxy 型 = G-3 ⑩ 型面已裁**（types.ts
  *     8→4：IDE 型归 TUI 域 / SDK 型域外 / claudeai 1P 车道已删）——本 manager
@@ -143,7 +143,7 @@ async function terminateChild(
 // ── 前向接缝登记 message（非 stdio 传输支；§8.68 R2 裁定）──────────
 
 const FORWARD_SEAM_MESSAGE =
-  'MCP transport = 前向接缝登记（§8.68 R2：非 stdio 传输真实现待 IFF 网关 / 远程车道（#200 波）；G-3 ⑩ D3 型面 8→4 后 4 型 config，仅 stdio 连接支 live）'
+  'MCP transport = 前向接缝登记（§8.68 R2：非 stdio 传输真实现待 MCP 标准远程传输（M6 波）（#200 波）；G-3 ⑩ D3 型面 8→4 后 4 型 config，仅 stdio 连接支 live）'
 
 // ── manager 面 ────────────────────────────────────────────────────────
 

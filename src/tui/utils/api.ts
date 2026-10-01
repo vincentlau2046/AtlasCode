@@ -189,7 +189,7 @@ export async function toolToAPISchema(
     // input_json_delta events, causing multi-minute hangs on large tool inputs.
     // Gated to direct api.anthropic.com: proxies (LiteLLM etc.) and Bedrock/Vertex
     // with Claude 4.5 reject this field with 400. See GH#32742, PR #21729.
-    // provider 恒为 'firstParty'（IFF 网关）——冗余 3P 条件已删。
+    // provider 恒为 'firstParty'（网关）——冗余 3P 条件已删。
     if (
       isFirstPartyGatewayUrl() &&
       (getFeatureValue_CACHED_MAY_BE_STALE('atlas_fgts', false) ||

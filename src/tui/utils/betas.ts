@@ -143,7 +143,7 @@ export function shouldIncludeFirstPartyOnlyBetas(): boolean {
  * treatment data is firstParty-only.
  */
 export function shouldUseGlobalCacheScope(): boolean {
-  // provider 恒为 'firstParty'（IFF 网关），仅 env-flag 检查
+  // provider 恒为 'firstParty'（网关），仅 env-flag 检查
   // (ATLAS_DISABLE_EXPERIMENTAL_BETAS) 门控此项。
   return !isEnvTruthy((process.env.ATLAS_DISABLE_EXPERIMENTAL_BETAS))
 }
@@ -243,7 +243,7 @@ export const getAllModelBetas = memoize((model: string): string[] => {
 
 export const getModelBetas = memoize((model: string): string[] => {
   // Bedrock extra-body-params split 随 Bedrock provider 删除
-  //（provider 恒为 'firstParty'，IFF 网关）；返回完整 model betas。
+  //（provider 恒为 'firstParty'，网关）；返回完整 model betas。
   return getAllModelBetas(model)
 })
 

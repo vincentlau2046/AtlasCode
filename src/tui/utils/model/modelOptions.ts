@@ -24,7 +24,7 @@ export type ModelOption = {
 
 export function getDefaultOptionForUser(): ModelOption {
   // de-ANT: subscriber default-model branch removed (isAtlasAISubscriber always false).
-  // PAYG — provider 恒为 'firstParty'（IFF 网关），3P pricing 后缀恒显示。
+  // PAYG — provider 恒为 'firstParty'（网关），3P pricing 后缀恒显示。
   return {
     value: null,
     label: 'Default (recommended)',
@@ -81,7 +81,7 @@ function getPremiumMaxOption(): ModelOption {
 function getModelOptionsBase(): ModelOption[] {
   // P3: when modelRoles is configured, the model picker shows role-based
   // options (Default + Small + Premium + Fast) regardless of provider —
-  // this keeps the role options reachable in the default IFF deployment
+  // this keeps the role options reachable in the default gateway deployment
   //（provider 恒为 'firstParty'）。
   const settings = getSettings_DEPRECATED() || {}
   const hasModelRoles = !!(settings as any).modelRoles
@@ -158,7 +158,7 @@ function getModelOptionsBase(): ModelOption[] {
   }
 
   // PAYG 1P API: Default + Premium + Fast（[1m] 变体随 P6-2 B-4 删除）。
-  // provider 恒为 'firstParty'（IFF 网关），legacy 3P fallback
+  // provider 恒为 'firstParty'（网关），legacy 3P fallback
   //（default-only list）不可达，已删。
   const payg1POptions = [getDefaultOptionForUser()]
   payg1POptions.push(getPremiumOption())

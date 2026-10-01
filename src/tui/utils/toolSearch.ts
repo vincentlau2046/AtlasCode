@@ -289,7 +289,7 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // means the user is explicitly configuring tool search and asserts their
   // setup supports it. The falsy check (rather than === undefined) aligns
   // with getToolSearchMode(), which also treats "" as unset.
-  // provider 恒为 'firstParty'（IFF 网关），原 3P 条件已删。
+  // provider 恒为 'firstParty'（网关），原 3P 条件已删。
   if (!process.env.ENABLE_TOOL_SEARCH && !isFirstPartyGatewayUrl()) {
     if (!loggedOptimistic) {
       loggedOptimistic = true

@@ -26,7 +26,7 @@ export function getDefaultFastModel(): ModelName {
 }
 
 /**
- * P2 (unified model settings): ASR model name for the IFF gateway.
+ * P2 (unified model settings): ASR model name for the gateway.
  * Precedence: env var > settings file value > built-in default.
  * Default follows the vault service FunASR.
  * （getTtsModel 已裁：0 consumer，#201 S1 遗留清理。）
@@ -106,7 +106,7 @@ export function getMainLoopModel(): ModelName {
 }
 
 // @[MODEL LAUNCH]: defaults are role-driven (premium/small/fast) via the
-// role layer; each role resolves env > settings.modelRoles.<role> > IFF default.
+// role layer; each role resolves env > settings.modelRoles.<role> > 默认.
 export function getDefaultPremiumModel(): ModelName {
   return getRoleModel('premium')
 }

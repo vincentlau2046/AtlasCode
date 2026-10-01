@@ -15,7 +15,7 @@
  *   - prefetchSystemContextIfSafe / startDeferredPrefetches = TUI 首渲染后预取
  *     （getSystemContext/getUserContext 新仓缺席）→ 壳波 #152 前向接缝。
  *   - _pendingConnect / _pendingSSH（feature('DIRECT_CONNECT')/'SSH_REMOTE'）=
- *     域外裁（§8.71.1.3：remote 族波 / IFF 网关波 前向缝登记（§8.74.28 ⑭，#200））。
+ *     域外裁（§8.71.1.3：remote 族波 / 网关波 前向缝登记（§8.74.28 ⑭，#200））。
  */
 import { writeFileSync, readFileSync } from 'fs'
 import { createHash, randomUUID } from 'crypto'

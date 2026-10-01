@@ -366,7 +366,7 @@ export const ToolSearchTool = {
   inputJSONSchema: TOOL_SEARCH_TOOL_INPUT_SCHEMA,
   strict: true,
   maxResultSizeChars: 100_000,
-  // §8.63.1.3 门控槽（2nd 专属门控槽）：IFF env 常态 OPENAI_BASE_URL 设真
+  // §8.63.1.3 门控槽（2nd 专属门控槽）：默认 env 常态 OPENAI_BASE_URL 设真
   // → 默认 gate OFF（旧语义忠实，非新增门）
   isEnabled: () => isToolSearchEnabledOptimistic(),
   isConcurrencySafe: () => true,

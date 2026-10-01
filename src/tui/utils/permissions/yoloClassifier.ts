@@ -1228,7 +1228,7 @@ function getClassifierModel(): string {
   // 裁定(2026-09-19):分类器恒用主模型,不单独配安全门模型。
   // 做不好 auto 即接受质量上限,不为"强安全门"加第二套模型。
   // 原 atlas_auto_mode_config.model 覆盖分支已删——auto 数据面只走用户自配
-  // 的 OpenAI/IFF 端点,不引入单独的模型配置。
+  // 的 OpenAI/默认端点,不引入单独的模型配置。
   return getMainLoopModel()
 }
 

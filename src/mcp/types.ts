@@ -9,11 +9,11 @@
  *     services/mcp/types.ts 保全 8 型供 /ide 活功能）/ sdk（SDK 嵌入面域外
  *     登记）/ claudeai-proxy（1P OAuth 车道已删，⑥ managedMcp 裁后零产出）；
  *     保留 4 型中传输实装 = stdio live，sse/http/ws = 前向接缝（mcpConnectionManager
- *     failed 态登记，真传输待 IFF 网关 #200）
+ *     failed 态登记，真传输待 MCP 标准远程传输（M6 波） #200）
  *   - 旧 5 态 union（connected/failed/needs-auth/pending/disabled）→
  *     **4 态裁定**：needs-auth 折叠进 failed（authFailure 标记位）——认证面
  *     （旧 auth.ts 2370L + oauthPort/xaaIdpLogin）= 域外残留守（OAuth 车道
- *     2026-09-18 endpoint-cleanup 已删，前向缝登记（§8.74.28 ⑭，#200） 待 IFF 网关）
+ *     2026-09-18 endpoint-cleanup 已删，前向缝登记（§8.74.28 ⑭，#200） 待 MCP 标准远程传输（M6 波））
  *   - 旧 SerializedTool/SerializedClient/MCPCliState（CLI 状态面）= CLI 波
  *     域外，裁登记（新仓 CLI --mcp 面随 CLI 波落，型届时随面补）
  *

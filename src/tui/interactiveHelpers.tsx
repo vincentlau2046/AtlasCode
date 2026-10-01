@@ -88,7 +88,7 @@ export function showSetupDialog<T = void>(root: Root, renderer: (done: (result: 
 }): Promise<T> {
   // H6（2026-09-29 TUI 壳波 Slice E 验真，复审勿重提）：setup 对话框根缺 VoiceProvider——
   // ModelSetup endpoint 步渲染 TextInput（无条件调 useVoiceState，context/voice.tsx:46
-  // 无 provider 即 throw）→ 空池首启选 IFF 预设 Enter 确认即崩（旧仓潜伏 bug：
+  // 无 provider 即 throw）→ 空池首启选 默认预设 Enter 确认即崩（旧仓潜伏 bug：
   // ModelSetup.tsx / voice.tsx 与旧仓 verbatim 一致，旧仓未走空池 + endpoint 步故未触发）。
   // 在本助手统一包 VoiceProvider（覆盖全部 setup 对话框：Onboarding/ModelSetup/
   // TrustDialog/AtlasMdExternalIncludes；Grove 对话框已随 G-3 ⑦ 裁）；VOICE_MODE 关 = 'idle' 空壳（与
