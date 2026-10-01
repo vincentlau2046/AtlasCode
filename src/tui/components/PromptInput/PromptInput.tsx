@@ -75,6 +75,7 @@ import { editPromptInEditor } from '../../utils/promptEditor.js';
 import { hasAutoModeOptIn } from '../../utils/settings/settings.js';
 import { findBtwTriggerPositions } from '../../utils/sideQuestion.js';
 import { findSlashCommandPositions } from '../../utils/suggestions/commandSuggestions.js';
+import { shouldHoldSubmitForSuggestions } from './submitGate.js';
 import { findSlackChannelPositions, getKnownChannelsVersion, hasSlackMcpServer, subscribeKnownChannels } from '../../utils/suggestions/slackChannelSuggestions.js';
 import { isInProcessEnabled } from '../../utils/swarm/backends/registry.js';
 import { syncTeammateMode } from '../../utils/swarm/teamHelpers.js';
@@ -1000,10 +1001,15 @@ function PromptInput({
       return;
     }
 
-    // PromptInput UX: Check if suggestions dropdown is showing
-    // For directory suggestions, allow submission (Tab is used for completion)
-    const hasDirectorySuggestions = suggestionsState.suggestions.length > 0 && suggestionsState.suggestions.every(s => s.description === 'directory');
-    if (suggestionsState.suggestions.length > 0 && !isSubmittingSlashCommand && !hasDirectorySuggestions) {
+    // PromptInput UX: Check if suggestions dropdown is showing — 决策抽为纯函数
+    // shouldHoldSubmitForSuggestions（submitGate.ts，可单测）。P0-A（#204 B1 收口）：
+    // 命令输入（slash）+ 命令下拉可见（慢输入自动选中被重置为无选中态）→ 走文本面放行
+    // 提交（onSubmitProp 识别 leading / 路由命令），不再双门吞 Enter 静默 no-op。
+    if (shouldHoldSubmitForSuggestions({
+      suggestions: suggestionsState.suggestions,
+      isSubmittingSlashCommand,
+      inputParam,
+    })) {
       logForDebugging(`[onSubmit] early return: suggestions showing (count=${suggestionsState.suggestions.length})`);
       return; // Don't submit, user needs to clear suggestions first
     }
