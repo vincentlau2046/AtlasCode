@@ -93,6 +93,17 @@ export {
   resetMicrocompactState,
   // D-2a S1（M5 切端）：CACHED_MICROCOMPACT 残留守 stub（旧仓 cachedMCConfig 逐字）
   getCachedMCConfig,
+  // D-2a S4（M5 切端）：富面回填（旧仓 orchestrator 507L）——主线程 source 门 +
+  // cached-MC env kill-switch + 富 Result 类型 + CachedMCModulePort DI 缝 +
+  // time-based 配置源注入（宿主 GB 读面）
+  isMainThreadSource,
+  isCachedMicrocompactEnabled,
+  setCachedMCModulePort,
+  getCachedMCModulePort,
+  setTimeBasedMCConfigSource,
+  type CachedMCModulePort,
+  type PendingCacheEdits,
+  type MicrocompactResult,
   type TimeBasedMCConfig,
   type MicrocompactDeps,
   type MicrocompactOutcome,

@@ -435,6 +435,17 @@ export {
   evaluateTimeBasedTrigger,
   TIME_BASED_MC_CLEARED_MESSAGE,
   TIME_BASED_MC_CONFIG_DEFAULTS,
+  // D-2a S4（M5 切端）：microcompact 富面回填（旧仓 orchestrator 507L）——
+  // 主线程 source 门 + cached-MC env kill-switch + 富 Result 类型 +
+  // CachedMCModulePort DI 缝 + time-based 配置源注入
+  isMainThreadSource,
+  isCachedMicrocompactEnabled,
+  setCachedMCModulePort,
+  getCachedMCModulePort,
+  setTimeBasedMCConfigSource,
+  type CachedMCModulePort,
+  type PendingCacheEdits,
+  type MicrocompactResult,
   // W2-2-pre 缺面先迁④（§8.74.2 context 扩面族纯谓词/投影面）
   isSnipBoundaryMessage,
   projectSnippedView,
