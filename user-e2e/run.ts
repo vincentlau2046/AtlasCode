@@ -396,6 +396,7 @@ async function tierSlash(
   let respawns = 0
   let sessN = 0
   let probeN = 0
+  let stuckStreak = 0 // 连续 STUCK 数：存活 session 复用 1 次（测自恢复），第 2 次才换
   const ensureSession = async (): Promise<Pty> => {
     if (session?.alive()) return session
     if (session) {
@@ -422,6 +423,46 @@ async function tierSlash(
       state.rec({ id, tier: 'slash', verdict: 'SKIP', ms: 0, note: 'GATE: LLM 未放行（本地面照跑）' })
       continue
     }
+    // vim 面：toggle 会把 editorMode=vim 持久化进沙箱 .atlas.json（全局配置），
+    // 污染后续 case（Esc 进 vim NORMAL 后探针串/恢复键 q、'/' 全被吞成 vim 指令；
+    // session 复带/重启动直接进 vim 模式）——0405 实测 80/83 STUCK 级联即此。
+    // 处置：独立 session 跑 + 结束后删 editorMode 键（只削本面污染，其余持久化态不动；
+    // 初始沙箱无 .atlas.json，重启动回到初始配置面）。
+    if (c.name === 'vim') {
+      const vt0 = Date.now()
+      const iso = await Pty.start(ptyOpts(`slash-${c.name}`))
+      iso.send(`/${c.name}`)
+      const vSettle = await iso.settle(2500, 30_000)
+      const vText = iso.text()
+      // ink 原地重绘：PTY 流里命令输出按列覆写、空格不连续（"Editormodesettovim"），
+      // 判据须去空白后匹配（A/B 回归实测：连续字节匹配恒 false）
+      const toggled = vText.replace(/\s+/g, '').includes('Editormodesetto')
+      iso.kill()
+      const vCfgPath = join(runHome, '.atlas.json')
+      if (existsSync(vCfgPath)) {
+        try {
+          const vCfg = JSON.parse(readFileSync(vCfgPath, 'utf8'))
+          if (vCfg.editorMode) {
+            delete vCfg.editorMode
+            writeFileSync(vCfgPath, JSON.stringify(vCfg, null, 2))
+          }
+        } catch {
+          // 不可解析则留原样：只针对 editorMode 污染面，不破坏其他持久化态
+        }
+      }
+      state.rec({
+        id,
+        tier: 'slash',
+        verdict: toggled ? 'PASS' : 'STUCK',
+        ms: Date.now() - vt0,
+        note: toggled
+          ? 'vim 模式切换（独立 session；已复原沙箱 .atlas.json editorMode，防污染后续 case）'
+          : `vim（独立 session；命令面未响应${vSettle.ok ? '' : '，settle 超时'}）`,
+        evidence: { cls, settleOk: vSettle.ok, inputAlive: toggled, expectOk: toggled, recovered: false, respawns, probeMs: 0 },
+        drivers: { pty: { verdict: toggled ? 'PASS' : 'STUCK', ok: toggled, tail: tailLinesSafe(vText) } },
+      })
+      continue
+    }
     const s = await ensureSession()
     const t0 = Date.now()
     const basePromptCount = s.count('❯')
@@ -444,7 +485,9 @@ async function tierSlash(
     }
     const sizeBefore = s.logSize()
     s.send(`/${c.name}${argStr}`)
-    const waitMs = cls === 'llm' ? 180_000 : cls === 'auth' ? 45_000 : 20_000
+    // local-jsx 命令也可能走 LLM 回合（如 /add-dir 的「Channelling…」面）：
+    // settle 窗口放宽（静默即早退，快命令零代价；慢命令等回合完成再探针）
+    const waitMs = cls === 'llm' ? 180_000 : cls === 'auth' ? 60_000 : 120_000
     let settle = await s.settle(cls === 'llm' ? 4000 : 2500, waitMs)
     // meta.esc 命令（对话框/列表/picker 面）：先 Esc 再判
     if (m.esc) {
@@ -452,29 +495,37 @@ async function tierSlash(
       await sleep(1500)
       settle = await s.settle(2500, 12_000)
     }
-    let inputAlive = await echoProbe('', 8000)
+    // 45s 窗口：渲染管线可能落后墙钟 12s~100s+（footer 12s tick 批量冲刷，实测
+    // session-8 迟到 >12s、add-dir session 迟到 ~100s）。延迟本身即诊断证据
+    // （probeMs 记入 evidence）；>45s 的冻结记 STUCK（渲染冻结），非输入面判据问题。
+    const probeT0 = Date.now()
+    let inputAlive = await echoProbe('', 45_000)
+    const probeMs = Date.now() - probeT0
     let recovered = false
     if (!inputAlive && s.alive()) {
       // 恢复阶梯：Esc → q → Esc+q（每步后复探针）
       s.esc()
       await sleep(1000)
-      inputAlive = await echoProbe('-r1')
+      inputAlive = await echoProbe('-r1', 15_000)
       if (inputAlive) await cleanupLine()
       if (!inputAlive) {
         s.sendRaw('q')
         await sleep(1000)
-        inputAlive = await echoProbe('-r2')
+        inputAlive = await echoProbe('-r2', 15_000)
         if (inputAlive) await cleanupLine()
       }
       if (!inputAlive) {
         s.esc()
         s.sendRaw('q')
         await sleep(1200)
-        inputAlive = await echoProbe('-r3')
+        inputAlive = await echoProbe('-r3', 15_000)
         if (inputAlive) await cleanupLine()
       }
       recovered = inputAlive
     }
+    // 探针串/被吞命令残留在输入框（Enter 被 suggestions guard 吞掉的场景）：
+    // 清行，防污染下一条命令的输入面
+    if (inputAlive) await cleanupLine()
     const text = s.text()
     const alive = s.alive()
     const expectOk = m.expect ? countOcc(text, m.expect) > 0 : true
@@ -482,9 +533,11 @@ async function tierSlash(
     let verdict: CaseRec['verdict']
     if (!alive) verdict = 'STUCK'
     else if (inputAlive && expectOk) verdict = 'PASS'
+    else if (inputAlive && !expectOk && m.expect) verdict = 'FAIL' // 输入面活但命令输出缺失（命令处理面断）
     else if (busy) verdict = 'TIMEOUT'
     else verdict = 'STUCK'
     const tail = tailLinesSafe(text)
+    const lagNote = probeMs > 10_000 ? `（渲染滞后 ${Math.round(probeMs / 1000)}s）` : ''
     state.rec({
       id,
       tier: 'slash',
@@ -492,15 +545,25 @@ async function tierSlash(
       ms: Date.now() - t0,
       note:
         (verdict === 'PASS' ? (recovered ? '（UX：需 Esc/q 恢复输入面）' : '') : `[${verdict}] `) +
-        `${c.name}（${cls}${m.note ? `，${m.note}` : ''}${!inLive ? '，不在 live 注册表' : ''}）`,
-      evidence: { cls, settleOk: settle.ok, inputAlive, expectOk, recovered, respawn: respawns },
+        `${c.name}（${cls}${m.note ? `，${m.note}` : ''}${!inLive ? '，不在 live 注册表' : ''}${lagNote}）`,
+      evidence: { cls, settleOk: settle.ok, inputAlive, expectOk, recovered, respawn: respawns, probeMs },
       drivers: { pty: { verdict, ok: verdict === 'PASS', tail } },
     })
-    // STUCK：输入面失联 → 换 session 续跑（该命令记 STUCK，下一条在新 session 重头来）
+    // STUCK：输入面失联。进程存活且非连发 → 复用 session（测渲染冻结能否自恢复；
+    // 避免每条命令都付一次新 session 启动成本）；连发 2 次或进程已死 → 换 session。
     if (verdict === 'STUCK') {
-      session?.kill()
-      session = null
-      respawns++
+      stuckStreak++
+      if (session?.alive() && stuckStreak < 2) {
+        s.esc()
+        s.sendRaw('\x15') // 预清输入残留（被吞命令/探针串）
+        await sleep(500)
+      } else {
+        session?.kill()
+        session = null
+        respawns++
+      }
+    } else {
+      stuckStreak = 0
     }
   }
 
@@ -612,7 +675,7 @@ async function tierShort(
         let ok = true
         const details: string[] = []
         // 顺序发送：前一轮 marker 渲染后才发下一轮（干净多轮，非排队场景）
-        const pairs: [string, string][] = c.marker2
+        const pairs: [string, string | undefined][] = c.marker2
           ? [
               [c.prompt, c.marker],
               [c.prompt2, c.marker2],
@@ -621,9 +684,17 @@ async function tierShort(
         const perTurnMs = (c.timeoutMs ?? 300_000) / pairs.length + 60_000
         for (const [step, word] of pairs) {
           pty.send(step)
-          const r = await pty.waitCount(word, 2, perTurnMs, 2500)
-          details.push(`${word}:${r.count}/2`)
-          if (!r.ok) ok = false
+          if (word) {
+            const r = await pty.waitCount(word, 2, perTurnMs, 2500)
+            details.push(`${word}:${r.count}/2`)
+            if (!r.ok) ok = false
+          } else {
+            // 无 marker 用例（磁盘 ground truth 面，如 short-filewrite）：
+            // 等渲染静默即可，断言交给下方 disk 检查（旧版误等字面量 "undefined"）
+            const s = await pty.settle(10_000, perTurnMs)
+            details.push(`settle:${s.ok}`)
+            if (!s.ok) ok = false
+          }
         }
         if (c.disk) {
           const dOk = diskCheck(drvWs, c.disk)
