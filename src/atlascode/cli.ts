@@ -29,9 +29,13 @@
  */
 import { enforceNoDebugGuard, hasDevFlag, main, runDevCli } from '../cli'
 import { getCoreDependencies } from './compose'
+import { mountDomains } from './mount'
 
 async function binMain(): Promise<void> {
   enforceNoDebugGuard()
+  // M3-S5：挂载 ascend 域包（先于组合根 + agent loop；getDomainMount() 消费面
+  // 在 loopDeps 读 ascendTools / compose 读 skills+prompt+executor）
+  mountDomains()
   const argv = process.argv.slice(2)
   if (hasDevFlag(argv)) {
     await runDevCli()

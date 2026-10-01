@@ -253,12 +253,14 @@ export default tseslint.config(
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
             // §8.72 Slice D: 壳消费边扩 tui（ui/main.tsx 真 main() re-export tui 域
             // main 门面；launcher.ts 薄壳经 ui/main 间接消费，同边登记）
+            // M3-S5: mount 边接线——atlascode/cli.ts 调 mountDomains() 注册域包
+            //（mount.ts 仅导出 mountDomains() 不暴露 ascend 内部符号，安全）
             {
               from: "atlascode",
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks", "engine", "swarm",
-                "lsp", "mcp", "cli", "tui",
+                "lsp", "mcp", "cli", "tui", "mount",
               ],
             },
             // DEP-5 白名单: mount 是唯一可 import ascend 的元素（挂载边）

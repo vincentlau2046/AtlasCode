@@ -36,6 +36,7 @@ import type {
   Tools,
 } from '../shared'
 import type { MCPServerConnection } from './ports/mcpClient'
+import { getDomainMount } from './ports/domainMount'
 import { getTools, type ToolRegistryDeps } from './tools/toolRegistry'
 import { initializeToolPermissionContext } from './permissions/permissionSetup'
 import { createMcpTools } from './tools/mcp'
@@ -186,6 +187,9 @@ export async function createAgentLoopDeps(
       TeamDeleteTool,
     ],
     mcpTools: [...(config.toolRegistryDeps?.mcpTools ?? []), ...mcpTools],
+    // M3-S5：ascend 16 工具经 DomainPackage 挂载面注入（mount.ts 注册 →
+    // getDomainMount()?.tools；未挂载 = AtlasOffice 形态 → undefined → 门控跳过）
+    ascendTools: getDomainMount()?.tools,
   }
   // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池窗
   // 以全量 deps 重建（= 本构建器模型可见池，旧仓 options.tools 等价面；

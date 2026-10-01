@@ -1,11 +1,28 @@
 /**
- * 域包挂载（DomainPackage 注册到 engine, DEP-5 接线点）
+ * 域包挂载（DomainPackage 注册到 engine, DEP-5 接线点）。
  *
- * §8.72 TUI 壳波 Slice D 状态确认（task #152/#165）：engine 域
- * DomainPackage 注册面未落盘（ascend 域仍 A 波占位 `export {}`，四元组
- * 挂载面 = charter PRT-1 声明式）→ 本文件实挂载随 E 波 ascend 实施波
- * 前向接缝（H6 登记，复审勿重提）。DEP-5 挂载边语义（mount = 唯一可
- * import ascend 域的元素，eslint mount 元素白名单）不变，原样保留待
- * E 波消费。
+ * M3-S5（D-3 Ascend 独立实施波）：实挂载落盘。mount = 唯一可 import ascend
+ * 域的元素（eslint mount 元素 DEP-5 白名单）。本文件从 ascend 域取 ascendPackage
+ * 四元组（tools + skills + prompt + executor），经 registerDomainMount 注册进
+ * engine/ports/domainMount holder；compose.ts / loopDeps 经 getDomainMount()
+ * 消费四元注入 engine（tools→ascendTools / skills→命令池 / prompt→
+ * systemPromptSection / executor→ascend 执行器）。
+ *
+ * PRT-2（零模块级副作用）：registerDomainMount 经 mountDomains() 显式调用
+ * （非顶层自注册语句）；cli.ts 启动期调 mountDomains() 先于 getCoreDependencies()。
+ *
+ * "不挂 ascend = AtlasOffice"：不调 mountDomains() → getDomainMount() 返回 null
+ * → 四元全缺 → engine 无 ascend 工具/skill/prompt/executor。
  */
-export {}
+import { ascendPackage } from '../ascend'
+import { registerDomainMount } from '../engine'
+
+/**
+ * 挂载 ascend 域包（charter Port 3 四元挂载）。
+ *
+ * 仅 atlascode/cli.ts 启动期调用（先于 getCoreDependencies / createAgentLoopDeps）。
+ * 幂等——重复调用覆写前次注册（registerDomainMount 语义）。
+ */
+export function mountDomains(): void {
+  registerDomainMount(ascendPackage)
+}

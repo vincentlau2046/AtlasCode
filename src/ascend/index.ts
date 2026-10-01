@@ -41,3 +41,6 @@ export {
   ASCEND_TOOL_USAGE_GUIDE,
   getAscendSystemPromptSection,
 } from './prompt'
+
+// S5：ascendPackage 四元挂载单元（charter Port 3；mount.ts DEP-5 实挂载消费）
+export { ascendPackage } from './package'
