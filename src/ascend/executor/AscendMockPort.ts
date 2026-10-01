@@ -1,7 +1,40 @@
 /**
- * AscendMockPort（mock 决策 port 化）
+ * AscendMockPort — env-reading port for AscendExecutor mock decision.
  *
- * 实现波次: E 波
- * 状态: A 波骨架占位（实现待 E 波）
+ * M3-S2（D-3 Ascend 独立实施波）：从 AtlasHarness src/core/executor/AscendMockPort.ts
+ * 逐字移植（自包含，仅 process.env）。Extracted from AscendExecutor.shouldMock() so
+ * that the mock logic can be replaced at the composition root without touching the
+ * core executor module。Pattern: modelprovider MockEnvPort（06 文档 B2）。
  */
-export {}
+
+/** Port interface — isolate process.env reads for the Ascend mock decision. */
+export interface AscendMockPort {
+  /** Read ATLAS_ASCEND_MOCK — '1' to force mock mode. */
+  getAscendMockFlag(): string | undefined
+
+  /** Read ATLAS_MOCK_ON_NONINTERACTIVE — non-'0' to auto-mock in non-interactive sessions. */
+  getMockOnNonInteractiveFlag(): string | undefined
+
+  /**
+   * Read ATLAS_ASCEND_MOCK_SCENARIO — selects which fixture replay scenario
+   * mockExec returns (e.g. 'happy', 'oom', 'mismatch'). Default 'happy'.
+   * Used by L2 fixture-driven correctness tests to exercise error paths
+   * non-tautologically (mock no longer always returns exit 0).
+   */
+  getMockScenario(): string
+}
+
+/** Default adapter — delegates to process.env. */
+export class DefaultAscendMockPort implements AscendMockPort {
+  getAscendMockFlag(): string | undefined {
+    return process.env.ATLAS_ASCEND_MOCK
+  }
+
+  getMockOnNonInteractiveFlag(): string | undefined {
+    return process.env.ATLAS_MOCK_ON_NONINTERACTIVE
+  }
+
+  getMockScenario(): string {
+    return process.env.ATLAS_ASCEND_MOCK_SCENARIO || 'happy'
+  }
+}
