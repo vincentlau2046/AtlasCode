@@ -82,7 +82,7 @@ import { clearSessionMessagesCache } from './utils/sessionStorage.js'
 import { clearBetaTracingState } from './utils/telemetry/betaSessionTracing.js'
 import { resetContextCollapse } from './services/contextCollapse/index.js'
 // S8 本体仍在 orchestrator 目录（S9 迁 contextBodies/，本文件 import 随迁）
-import { streamCompactSummary } from './core/orchestrator/context/compact.js'
+import { streamCompactSummary } from './contextBodies/compact.js'
 import {
   createAsyncAgentAttachmentsIfNeeded,
   createPlanAttachmentIfNeeded,
@@ -90,13 +90,13 @@ import {
   createPostCompactFileAttachments,
   createSkillAttachmentIfNeeded,
   POST_COMPACT_MAX_FILES_TO_RESTORE,
-} from './core/orchestrator/context/compact.js'
-import { trySessionMemoryCompaction as sessionMemoryCompactBody } from './core/orchestrator/context/sessionMemoryCompact.js'
+} from './contextBodies/compact.js'
+import { trySessionMemoryCompaction as sessionMemoryCompactBody } from './contextBodies/sessionMemoryCompact.js'
 import {
   reactiveCompactOnPromptTooLong as reactivePTLBody,
   tryReactiveCompact as reactiveTryBody,
-} from './core/orchestrator/context/reactiveCompact.js'
-import { partialCompactConversation as partialCompactBody } from './core/orchestrator/context/compact.js'
+} from './contextBodies/reactiveCompact.js'
+import { partialCompactConversation as partialCompactBody } from './contextBodies/compact.js'
 
 /**
  * post-compact 附件重建组合（旧仓 orchestrator compact.ts L493-549 逐字）：

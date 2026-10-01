@@ -2,36 +2,36 @@
  * EXPERIMENT: Session memory compaction
  */
 
-import type { AgentId } from '../../../types/ids.js'
-import type { HookResultMessage, Message } from '../../../types/message.js'
-import { isAtlasDev } from '../../../utils/atlasDev.js'
-import { logForDebugging } from '../../../utils/debug.js'
-import { isEnvTruthy } from '../../../utils/envUtils.js'
-import { errorMessage } from '../../../utils/errors.js'
+import type { AgentId } from '../types/ids.js'
+import type { HookResultMessage, Message } from '../types/message.js'
+import { isAtlasDev } from '../utils/atlasDev.js'
+import { logForDebugging } from '../utils/debug.js'
+import { isEnvTruthy } from '../utils/envUtils.js'
+import { errorMessage } from '../utils/errors.js'
 import {
   createCompactBoundaryMessage,
   createUserMessage,
   isCompactBoundaryMessage,
-} from '../../../utils/messages.js'
-import { getMainLoopModel } from '../../../utils/model/model.js'
-import { getSessionMemoryPath } from '../../../utils/permissions/filesystem.js'
-import { processSessionStartHooks } from '../../../utils/sessionStart.js'
-import { getTranscriptPath } from '../../../utils/sessionStorage.js'
-import { tokenCountFromLastAPIResponse } from '../../../utils/tokens.js'
-import { extractDiscoveredToolNames } from '../../../utils/toolSearch.js'
+} from '../utils/messages.js'
+import { getMainLoopModel } from '../utils/model/model.js'
+import { getSessionMemoryPath } from '../utils/permissions/filesystem.js'
+import { processSessionStartHooks } from '../utils/sessionStart.js'
+import { getTranscriptPath } from '../utils/sessionStorage.js'
+import { tokenCountFromLastAPIResponse } from '../utils/tokens.js'
+import { extractDiscoveredToolNames } from '../utils/toolSearch.js'
 import {
   getDynamicConfig_BLOCKS_ON_INIT,
   getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../../../services/analytics/growthbook.js'
+} from '../services/analytics/growthbook.js'
 import {
   isSessionMemoryEmpty,
   truncateSessionMemoryForCompact,
-} from '../../../services/SessionMemory/prompts.js'
+} from '../services/SessionMemory/prompts.js'
 import {
   getLastSummarizedMessageId,
   getSessionMemoryContent,
   waitForSessionMemoryExtraction,
-} from '../../../services/SessionMemory/sessionMemoryUtils.js'
+} from '../services/SessionMemory/sessionMemoryUtils.js'
 import {
   annotateBoundaryWithPreservedSegment,
   buildPostCompactMessages,

@@ -18,4 +18,4 @@
 export * from 'src/engine'
 
 // tui 独有：压缩警告抑制 React hook（引擎 React-free 红线，留 tui 壳）
-export { useCompactWarningSuppression } from './core/orchestrator/context/compactWarningHook.js'
+export { useCompactWarningSuppression } from './contextBodies/compactWarningHook.js'

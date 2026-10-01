@@ -1,7 +1,7 @@
-import type { Message } from '../../../types/message.js'
-import type { QuerySource } from '../../../constants/querySource.js'
-import type { ToolUseContext } from '../../../Tool.js'
-import type { CacheSafeParams } from '../../../utils/forkedAgent.js'
+import type { Message } from '../types/message.js'
+import type { QuerySource } from '../constants/querySource.js'
+import type { ToolUseContext } from '../Tool.js'
+import type { CacheSafeParams } from '../utils/forkedAgent.js'
 
 /**
  * Reactive compact — a compaction strategy that fires *reactively* when the
