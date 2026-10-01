@@ -17,6 +17,13 @@
  * lMainLoopModel `?? null`，本文件保持薄 re-export 不动——atlascode/ui 边界
  * 禁 value-import tui entry-point，boundaries/entry-point 硬约束）。
  *
+ * #203（ModelSetup 每次启动误弹）同根因收口：上面这条"组合根懒单例晚于
+ * 早期消费者触发 → EndpointConfigSource 停空 stub"机制，此前 getInitialMainLo
+ * opModel（#202 表面症状）与 needsModelSetup（ModelSetup 守卫，showSetupScre
+ * ens 内）各自兜底；现 tui/main.tsx preAction 内 init() 后 eager 注入
+ * setEndpointConfigSource(createSettingsAdapter()) 根治——三角色池经真 settin
+ * gs 读取，全池空（首装）才弹引导，已配置机器不再误弹。
+ *
  * 消费方：`src/atlascode/launcher.ts`（TUI 默认启动支薄壳，S-C1 裁定）；
  * STR-1 门面：ui 面对外消费经 `ui/index.ts` 收口。
  */

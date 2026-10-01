@@ -115,7 +115,8 @@ import { getGhAuthStatus } from './utils/github/ghAuthStatus.js';
 import { safeParseJSON } from './utils/json.js';
 import { logError } from './utils/log.js';
 import { getDefaultMainLoopModel, getUserSpecifiedModelSetting, parseUserSpecifiedModel } from './utils/model/model.js';
-import { normalizeModelStringForAPI } from 'src/modelprovider';
+import { normalizeModelStringForAPI, setEndpointConfigSource } from 'src/modelprovider';
+import { createSettingsAdapter } from './config/settings-adapter.js';
 import { PERMISSION_MODES } from './utils/permissions/PermissionMode.js';
 import { checkAndDisableBypassPermissions, getAutoModeEnabledStateIfCached, initializeToolPermissionContext, initialPermissionModeFromCLI, isDefaultPermissionModeAuto, parseToolListFromCLI, stripDangerousPermissionsForAutoMode, verifyAutoModeGateAccess } from './utils/permissions/permissionSetup.js';
 import { cleanupOrphanedPluginVersionsInBackground } from './utils/plugins/cacheUtils.js';
@@ -840,6 +841,18 @@ async function run(): Promise<CommanderCommand> {
     profileCheckpoint('preAction_after_mdm');
     await init();
     profileCheckpoint('preAction_after_init');
+
+    // #203（ModelSetup 每次启动误弹根因）：交互 TUI 路径此前从不接线
+    // EndpointConfigSource——组合根 createCoreDependencies（tui/factory.ts:160）
+    // 是懒单例，showSetupScreens（下方 action 内）调 needsModelSetup() 时
+    // modelprovider 的 EndpointConfigSource 仍是空 stub，三角色池恒读空 →
+    // 已配置机器也每次启动误弹（与 #202 /model undefined 同源的晚接线）。
+    // 此处 init() 后（首次 settings 读取完成）即注入 settings 适配器：
+    // needsModelSetup 改读真 settings → 仅真·全池空（首装）才弹。
+    // 仅注入模型配置 port（非 getCoreDependencies 全量装配，避免提前拉入
+    // sandbox/executor/ascend 组合面）；后续 createCoreDependencies 再注入
+    // 同款适配器 = 幂等无冲突。
+    setEndpointConfigSource(createSettingsAdapter());
 
     // process.title on Windows sets the console title directly; on POSIX,
     // terminal shell integration may mirror the process name to the tab.
