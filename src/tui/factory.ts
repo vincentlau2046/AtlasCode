@@ -52,6 +52,9 @@ import { shouldUseSandbox, type AgentLoopDeps } from 'src/engine'
 
 import { AscendExecutor } from './core/executor/AscendExecutor'
 import { DefaultAscendMockPort } from './core/executor/AscendMockPort'
+// D-2a S8（M5 切端）：engine context 簇宿主端口接线（组合根单一装配点；
+// 切端后 TUI 富 compact/SM/reactive/partial 本体经 engine DI 端口委托回宿主）
+import { wireContextHostPorts } from './contextHostWiring'
 import {
   DefaultAscendFreshnessPort,
   type AscendFreshnessPort,
@@ -158,6 +161,10 @@ export function createCoreDependencies(
   // 组合根注册模型配置端口适配器（依赖倒置注入窗口，R5）：
   // 未来替换数据源（如 WebGUI 远程配置）只改这一行。
   setEndpointConfigSource(createSettingsAdapter())
+
+  // D-2a S8（M5 切端）：engine context 簇宿主端口接线（compact/SM/reactive/
+  // partial 富体 + post-compact reset 注册表 + settings/GB 读面；幂等）
+  wireContextHostPorts()
 
   // 默认 mock port 注册（委托 process.env）；测试在此单行替换。
   AscendExecutor.setMockPort(new DefaultAscendMockPort())

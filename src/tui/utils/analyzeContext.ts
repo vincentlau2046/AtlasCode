@@ -855,7 +855,11 @@ function processAttachment(
 async function approximateMessageTokens(
   messages: Message[],
 ): Promise<MessageBreakdown> {
-  const microcompactResult = await microcompactMessages(messages)
+  // D-2a S8（M5 切端）：engine 消息模型为宽松面（message?: unknown），单点
+  // cast 复原 tui 面（运行时实参 = TUI 传入的 tui Message 数组）
+  const microcompactResult = (await microcompactMessages(
+    messages,
+  )) as unknown as { messages: Message[] }
 
   // Initialize tracking
   const breakdown: MessageBreakdown = {

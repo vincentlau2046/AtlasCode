@@ -18,8 +18,12 @@ import type { Message } from '../../shared'
 import type { CompactionResult } from './compact'
 import type { CacheSafeParams, CompactContext } from './compactPorts'
 
-/** 旧仓 PartialCompactDirection 逐字（'up_to' = 摘要 pivot 之前 / 'from' = 之后）。 */
-export type PartialCompactDirection = 'up_to' | 'from'
+/**
+ * 旧仓 tui PartialCompactDirection 逐字（4 值联合）：'up_to' = 摘要 pivot
+ * 之前 / 'from' = 之后；'older'/'newer' = REPL 部分压缩 UI 的别名面（宿主
+ * 本体仅判 === 'up_to' 二分，余值走 'from' 族）。
+ */
+export type PartialCompactDirection = 'older' | 'newer' | 'up_to' | 'from'
 
 /** 旧仓 TryReactiveCompactParams 结构面（reactiveCompact.ts L74-88 逐字）。 */
 export interface TryReactiveCompactParams {

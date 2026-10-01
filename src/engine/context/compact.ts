@@ -627,6 +627,9 @@ async function richCompactConversation(
         cacheSafeParams: retryCacheSafeParams,
         signal: context.abortController.signal,
         onProgress: context.onCompactProgress,
+        // D-2a S8 additive：宿主 summarize 流式兜底支消费（options/appState/
+        // UI setter 面；运行时实参 = TUI 真实 ToolUseContext）
+        context,
       })
       summary = getAssistantMessageText(summaryResponse)
       if (summary !== null && !summary.startsWith(PROMPT_TOO_LONG_ERROR_MESSAGE)) {
@@ -785,11 +788,12 @@ async function richCompactConversation(
         msg !== ERROR_MESSAGE_USER_ABORT &&
         msg !== ERROR_MESSAGE_NOT_ENOUGH_MESSAGES
       ) {
+        // D-2a S8：duck addNotification 收窄 = tui TextNotification 结构
+        // 子型（无 color 面——engine 不知 tui Theme keyof，头注裁定）
         context.addNotification?.({
           key: 'error-compacting-conversation',
           text: 'Error compacting conversation',
           priority: 'immediate',
-          color: 'error',
         })
       }
     }

@@ -51,11 +51,16 @@ export interface CompactContext {
     effortValue?: unknown
   }
   onCompactProgress?: (event: CompactProgressEvent) => void
+  /**
+   * 通知追加（D-2a S8 收窄 = tui TextNotification 结构子型，逆变可赋）：
+   * tui addNotification 收 Notification（priority 必填字面量联合），duck 参
+   * 须为其子型方可结构可赋（逆变）；color 弃（engine 不知 tui Theme
+   * keyof——error 通知失红色，罕见错误路径小差，头注裁定）。
+   */
   addNotification?: (notification: {
     key: string
     text: string
-    priority?: string
-    color?: string
+    priority: 'low' | 'medium' | 'high' | 'immediate'
   }) => void
   setSDKStatus?: (status: string | null) => void
   setStreamMode?: (mode: string) => void
@@ -115,6 +120,14 @@ export interface CompactPorts {
     cacheSafeParams: CacheSafeParams
     signal: AbortSignal
     onProgress?: (event: CompactProgressEvent) => void
+    /**
+     * 调用方上下文（D-2a S8 additive）：宿主 summarize 实现的流式兜底支
+     * 需 options（mainLoopModel/tools/isNonInteractiveSession）+ getAppState
+     * （effortValue/toolPermissionContext）+ setStreamMode/setResponseLength
+     * + setSDKStatus（压缩 keep-alive）——运行时实参 = TUI 真实
+     * ToolUseContext（duck 结构可赋，宿主侧单点 cast）。
+     */
+    context: CompactContext
   }) => Promise<Message>
   executePreCompactHooks: (
     data: { trigger: 'manual' | 'auto'; customInstructions: string | null },

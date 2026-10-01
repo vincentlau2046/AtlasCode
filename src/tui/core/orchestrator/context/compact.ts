@@ -992,7 +992,9 @@ export function createCompactCanUseTool(): CanUseToolFn {
   })
 }
 
-async function streamCompactSummary({
+// D-2a S8（M5 切端）：export 供宿主接线（tui/contextHostWiring 注
+// CompactPorts.summarize 端口；S9 随本体迁 contextBodies/）
+export async function streamCompactSummary({
   messages,
   summaryRequest,
   appState,
