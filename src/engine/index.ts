@@ -457,6 +457,8 @@ export {
   type AutoCompactTrackingState,
   type AutoCompactOutcome,
   type CompactionResult,
+  type AttachmentMessage,
+  type HookResultMessage,
   type CompactDeps,
   type MicrocompactDeps,
   type MicrocompactOutcome,

@@ -41,6 +41,9 @@ export {
   // compact.ts 头注裁断）
   stripImagesFromMessages,
   mergeHookInstructions,
+  // D-2a S2（M5 切端）：富面字段复原的类型面（CompactionResult 加字段随出）
+  type AttachmentMessage,
+  type HookResultMessage,
   type CompactionResult,
   type CompactDeps,
 } from './compact'

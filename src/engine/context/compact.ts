@@ -14,8 +14,9 @@
  *     MCP-instructions 重宣告 + SessionStart hooks + PostCompactCleanup + readFileState 清空）
  *     → 残留守（attachment 渲染 = message/REPL 波（§8.40 C-3 前向接缝登记）；
  *     SessionStart hooks 执行器已随 E-5 落（hooks 域 5 高频执行器），压缩重建面
- *     接线归后续纵切；CompactionResult 的 attachments/hookResults 字段随之裁掉，
- *     buildPostCompactMessages ordering 残留守）。
+ *     接线归后续纵切；D-2a S2 起 CompactionResult 的 attachments/hookResults
+ *     字段已复原（additive，裁剪 producer 置空数组）+ buildPostCompactMessages
+ *     富 ordering 复原——富 producer 放置归 S3）。
  *   - getCompactPrompt 文案 = 旧仓 prompt.ts 全文照抄（NO_TOOLS_PREAMBLE +
  *     BASE_COMPACT_PROMPT（含 DETAILED_ANALYSIS_INSTRUCTION_BASE + 9 段结构 + <example>
  *     模板 + 自定义指令示例段）+ NO_TOOLS_TRAILER，摘要质量关键资产，review 2026-09-23
@@ -29,7 +30,7 @@
  *   - 摘要调用无 abort CANCEL 短路（signal 未接）→ 残留守（E-1b-full 工具/流式面）。
  */
 import { randomUUID } from 'crypto'
-import type { Message } from '../../shared'
+import type { Message, Usage } from '../../shared'
 import type { ContentReplacementRecord } from '../session/types'
 
 export const ERROR_MESSAGE_NOT_ENOUGH_MESSAGES =
@@ -42,15 +43,47 @@ export const COMPACT_MAX_OUTPUT_TOKENS = 20_000
 export const ERROR_MESSAGE_INCOMPLETE_RESPONSE =
   'Compaction interrupted · This may be due to network issues — please try again.'
 
+/**
+ * D-2a S2（M5 切端）：post-compact 附件消息（旧 tui types/message.ts:8 形状
+ * `UserMessage & { attachment?: T }` 的 engine 等价——Message 取 shared 宽形，
+ * attachment 默认 any 对齐旧仓 T=any；S8 TUI 消费方若需更强附件收窄在调用
+ * 点处理，类型契约先立）。
+ */
+export type AttachmentMessage<T = any> = Message & { attachment?: T }
+
+/** D-2a S2（M5 切端）：hook 结果消息（旧 tui types/message.ts:20 逐字）。 */
+export type HookResultMessage = {
+  type: 'hook_result'
+  hookName?: string
+  result?: unknown
+  [key: string]: any
+}
+
 export interface CompactionResult {
   /** 压缩边界标记（system 消息，post-compact 消息序列头）。 */
   boundaryMarker: Message
   /** 摘要消息（user 消息，getCompactUserSummaryMessage 文案）。 */
   summaryMessages: Message[]
+  /**
+   * D-2a S2（M5 切端）：post-compact 附件消息（旧仓富面字段复原；engine 裁剪
+   * producer 置空数组，富放置归 S3 富体回填）。
+   */
+  attachments: AttachmentMessage[]
+  /**
+   * D-2a S2（M5 切端）：PreCompact/PostCompact hook 结果消息（旧仓富面字段
+   * 复原；engine 裁剪 producer 置空数组，富放置归 S3）。
+   */
+  hookResults: HookResultMessage[]
   /** 保留的近期消息（keepRecent>0 时）。 */
   messagesToKeep?: Message[]
+  /** D-2a S2（M5 切端）：压缩展示消息（TUI 用户可见压缩反馈行；S3 富体置位）。 */
+  userDisplayMessage?: string
   preCompactTokenCount?: number
   postCompactTokenCount?: number
+  /** D-2a S2（M5 切端）：真实 post-compact token 计数（S3 富体重算置位）。 */
+  truePostCompactTokenCount?: number
+  /** D-2a S2（M5 切端）：压缩调用自身 token usage（S3 富体置位）。 */
+  compactionUsage?: Usage
   /**
    * S-E3 A11-Δ2（§8.52）：content replacement 记录载体（旧 loop.ts:377
    * recordContentReplacement 触发面）。producer = E-1b-full budget 纵切（旧
@@ -287,13 +320,16 @@ export function createCompactBoundaryMessage(
 
 /**
  * post-compact 消息序列拼接（旧仓 buildPostCompactMessages ordering 照抄：
- * boundaryMarker → summaryMessages → messagesToKeep；attachments/hookResults 残留守）。
+ * boundaryMarker → summaryMessages → messagesToKeep → attachments → hookResults；
+ * D-2a S2 复原富 ordering——裁剪 producer 空数组时退化为旧 3 段，行为零变更）。
  */
 export function buildPostCompactMessages(result: CompactionResult): Message[] {
   return [
     result.boundaryMarker,
     ...result.summaryMessages,
     ...(result.messagesToKeep ?? []),
+    ...result.attachments,
+    ...result.hookResults,
   ]
 }
 
@@ -351,9 +387,13 @@ export async function compactConversation(
     messages.length,
   )
 
+  // D-2a S2：attachments/hookResults 必填字段先立——裁剪 producer 置空数组
+  // （空 spread = 旧 3 段 ordering 零变更），富放置归 S3 富体回填。
   const result: CompactionResult = {
     boundaryMarker,
     summaryMessages,
+    attachments: [],
+    hookResults: [],
     ...(messagesToKeep ? { messagesToKeep } : {}),
     ...(preCompactTokenCount !== undefined
       ? { preCompactTokenCount }

@@ -482,6 +482,9 @@ describe('engine/context compactConversation（摘要体 + post-compact 拼接�
       boundaryMarker: { type: 'system' } as Message,
       summaryMessages: [{ role: 'user', content: 'summary' } as Message],
       messagesToKeep: [{ role: 'user', content: 'kept' } as Message],
+      // D-2a S2：CompactionResult 富面必填字段（空 = 本测 3 段 ordering 语义不变）
+      attachments: [],
+      hookResults: [],
     }
     const ordered = buildPostCompactMessages(result as never)
     expect(ordered[0].type).toBe('system') // 边界

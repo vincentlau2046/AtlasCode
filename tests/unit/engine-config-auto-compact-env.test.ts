@@ -150,6 +150,9 @@ describe('getAutoCompactThreshold 双覆写（§8.29 旧仓 guard 逐字）', ()
 const fakeCompact = async (): Promise<CompactionResult> => ({
   boundaryMarker: { role: 'system', content: 'compact' } as unknown as Message,
   summaryMessages: [],
+  // D-2a S2：CompactionResult 富面必填字段（裁剪 fake 置空数组）
+  attachments: [],
+  hookResults: [],
 })
 
 const depsBase = {
