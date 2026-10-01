@@ -446,6 +446,8 @@ export {
   type CachedMCModulePort,
   type PendingCacheEdits,
   type MicrocompactResult,
+  // D-2a S5（重裁范围 = 原 S7）：autoCompact model-string 便捷形的 settings 读侧注入
+  setAutoCompactSettingsSource,
   // W2-2-pre 缺面先迁④（§8.74.2 context 扩面族纯谓词/投影面）
   isSnipBoundaryMessage,
   projectSnippedView,

@@ -17,6 +17,9 @@ export {
   isAutoCompactEnabled,
   shouldAutoCompact,
   autoCompactIfNeeded,
+  // D-2a S5（重裁范围 = 原 S7，M5 切端）：autoCompact 4 活消费名 model-string
+  // 便捷形重载落 autoCompact.ts；settings 读侧注入面（宿主 settings.json）
+  setAutoCompactSettingsSource,
   type AutoCompactTrackingState,
   type AutoCompactDeps,
   type AutoCompactOutcome,

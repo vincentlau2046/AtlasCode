@@ -37,6 +37,8 @@
  */
 import { randomUUID } from 'crypto'
 import type { Message } from '../../shared'
+import { getProviderContextWindow } from '../../modelprovider'
+import { getAutoCompactEnvOverrides } from '../config'
 import { COMPACT_MAX_OUTPUT_TOKENS, type CompactionResult } from './compact'
 
 /**
@@ -100,14 +102,56 @@ export interface AutoCompactOutcome {
   error?: string
 }
 
+// ───────────────────── D-2a S5（重裁范围 = 原 S7）：model-string 便捷形重载 ─────────────────────
+// TUI 4 活消费面（calculateTokenWarningState / getEffectiveContextWindowSize /
+// isAutoCompactEnabled / getAutoCompactThreshold——TokenWarning.tsx /
+// analyzeContext.ts / attachments.ts / contextSuggestions.ts / inProcessRunner.ts
+// 钉旧仓 model-string 形）切端零调用点改动：重载解析 model→contextWindow
+// （modelprovider provider 注册表）+ env 覆写（getAutoCompactEnvOverrides 读侧）
+// 后委托 DI 核（canonical 源不变）。
+//
+// 范围裁定登记（复审勿重提）：shouldAutoCompact / autoCompactIfNeeded 富
+// model-string 形 TUI 零活消费（engineCompat 冲突块陈旧条目，grep 核验仅
+// analyzeContext:1113 注释命中；TUI 活 auto-compact 走 engine query/loop.ts
+// DI 裁剪面）→ 富体不迁（H6 防空洞：迁死体 = 引擎膨胀），S8 随冲突块裁净。
+//
+// delta 登记：
+//   ① MODEL_CONTEXT_WINDOW_DEFAULT = 150k 对齐 tui 常量（provider 注册表
+//      未声明 contextWindow 的回落值，P4 收口后单一来源 = provider 元数据）。
+//   ② maxOut 不读 tui GB slot-cap（atlas_otk_slot_v1 = host/GB 域）→ 预留恒
+//      min(maxOut ?? 20k, 20k) = 20k（GB cap 关〔3P 缺省〕行为等价；cap 开时
+//      差 12k 归 host 域差异，随 W-opt 宿主注）。
+//   ③ isAutoCompactEnabled() 0 参形 settings 读侧 = setAutoCompactSettingsSource
+//      注入（宿主 settings.json autoCompactEnabled；未注 = 缺省 true，旧 config 缺省一致）。
+
+/** provider 注册表未声明 contextWindow 的模型回落窗口（delta ①）。 */
+const MODEL_CONTEXT_WINDOW_DEFAULT = 150_000
+
+/** model→contextWindow 解析（provider 注册表优先，回落缺省值）。 */
+function resolveModelContextWindow(model: string): number {
+  return getProviderContextWindow(model) ?? MODEL_CONTEXT_WINDOW_DEFAULT
+}
+
+/** settings.autoCompactEnabled 读侧注入（delta ③；宿主 S8 接线，单测 teardown 传 null）。 */
+type AutoCompactSettingsSource = () => boolean | undefined
+
+let autoCompactSettingsSource: AutoCompactSettingsSource | null = null
+
+export function setAutoCompactSettingsSource(
+  next: AutoCompactSettingsSource | null,
+): void {
+  autoCompactSettingsSource = next
+}
+
 /**
  * 有效窗口（旧仓 getEffectiveContextWindowSize 独立导出面，W2-2-pre 缺面先迁①）：
  * 窗口 cap（windowOverride >0 有效）− 摘要输出预留（min(maxOutputTokens ??
  * COMPACT_MAX_OUTPUT_TOKENS, COMPACT_MAX_OUTPUT_TOKENS)——未注入按满额 20k 预留，
  * 与旧仓大输出模型 min(maxOut, 20k) 行为等价）。TUI TokenWarning UI / blocking
  * limit 判定消费（旧仓 autoCompact.ts:33-49 语义逐字）。
+ * S5 重载：model-string 形（旧仓 TUI 活链路签名）→ env 窗口 cap 后委托本核。
  */
-export function getEffectiveContextWindowSize(
+function getEffectiveContextWindowSizeCore(
   contextWindow: number,
   maxOutputTokens?: number,
   windowOverride?: number,
@@ -124,6 +168,38 @@ export function getEffectiveContextWindowSize(
 }
 
 /**
+ * 有效窗口导出面（S5 双形重载）：
+ *  - DI 形（E-1b T-4b 真核心，engine 内部/判别单测消费）
+ *  - model-string 形（旧仓 TUI 活链路签名，S5 切端零调用点改动）：
+ *    provider 注册表窗口 + env 窗口 cap（ATLAS_AUTO_COMPACT_WINDOW）后委托 DI 核。
+ */
+export function getEffectiveContextWindowSize(
+  contextWindow: number,
+  maxOutputTokens?: number,
+  windowOverride?: number,
+): number
+export function getEffectiveContextWindowSize(model: string): number
+export function getEffectiveContextWindowSize(
+  contextWindowOrModel: number | string,
+  maxOutputTokens?: number,
+  windowOverride?: number,
+): number {
+  if (typeof contextWindowOrModel === 'string') {
+    const { windowOverride: envWindow } = getAutoCompactEnvOverrides()
+    return getEffectiveContextWindowSizeCore(
+      resolveModelContextWindow(contextWindowOrModel),
+      undefined,
+      envWindow,
+    )
+  }
+  return getEffectiveContextWindowSizeCore(
+    contextWindowOrModel,
+    maxOutputTokens,
+    windowOverride,
+  )
+}
+
+/**
  * 有效窗口 − 缓冲 = 触发阈值（旧仓 getAutoCompactThreshold + env 覆写面）。
  * 有效窗口 = getEffectiveContextWindowSize（独立导出面；行为不变重构）。
  *
@@ -134,7 +210,7 @@ export function getEffectiveContextWindowSize(
  *   - pctOverride（ATLAS_AUTOCOMPACT_PCT_OVERRIDE，(0,100] 有效）：
  *     阈值 = min(floor(有效窗口 × pct/100)，基础阈值)（旧仓 :79-88）。
  */
-export function getAutoCompactThreshold(
+function getAutoCompactThresholdCore(
   contextWindow: number,
   maxOutputTokens?: number,
   pctOverride?: number,
@@ -153,6 +229,42 @@ export function getAutoCompactThreshold(
     )
   }
   return threshold
+}
+
+/**
+ * 压缩触发阈值导出面（S5 双形重载）：
+ *  - DI 形（真核心）
+ *  - model-string 形（旧仓 :72-91 语义）：provider 注册表窗口 + env 双覆写
+ *    （ATLAS_AUTOCOMPACT_PCT_OVERRIDE / ATLAS_AUTO_COMPACT_WINDOW）后委托 DI 核。
+ */
+export function getAutoCompactThreshold(
+  contextWindow: number,
+  maxOutputTokens?: number,
+  pctOverride?: number,
+  windowOverride?: number,
+): number
+export function getAutoCompactThreshold(model: string): number
+export function getAutoCompactThreshold(
+  contextWindowOrModel: number | string,
+  maxOutputTokens?: number,
+  pctOverride?: number,
+  windowOverride?: number,
+): number {
+  if (typeof contextWindowOrModel === 'string') {
+    const o = getAutoCompactEnvOverrides()
+    return getAutoCompactThresholdCore(
+      resolveModelContextWindow(contextWindowOrModel),
+      undefined,
+      o.pctOverride,
+      o.windowOverride,
+    )
+  }
+  return getAutoCompactThresholdCore(
+    contextWindowOrModel,
+    maxOutputTokens,
+    pctOverride,
+    windowOverride,
+  )
 }
 
 // ── W2-2-pre 缺面先迁①（§8.74.2）：TUI warning 态面三常量（旧仓 :63-65 逐字）──
@@ -196,6 +308,33 @@ export interface TokenWarningParams {
  * 扩面 + settings 面），本函数零 I/O。
  */
 export function calculateTokenWarningState(
+  tokenUsage: number,
+  params: TokenWarningParams,
+): TokenWarningState
+// S5：model-string 形（旧仓 TUI TokenWarning 组件签名）——provider 窗口 +
+// env 覆写（pct/window/blockingLimit）+ isAutoCompactEnabled() 0 参形后委托 DI 核。
+export function calculateTokenWarningState(
+  tokenUsage: number,
+  model: string,
+): TokenWarningState
+export function calculateTokenWarningState(
+  tokenUsage: number,
+  paramsOrModel: TokenWarningParams | string,
+): TokenWarningState {
+  if (typeof paramsOrModel === 'string') {
+    const o = getAutoCompactEnvOverrides()
+    return calculateTokenWarningStateCore(tokenUsage, {
+      contextWindow: resolveModelContextWindow(paramsOrModel),
+      autoCompactEnabled: isAutoCompactEnabled(),
+      pctOverride: o.pctOverride,
+      windowOverride: o.windowOverride,
+      blockingLimitOverride: o.blockingLimitOverride,
+    })
+  }
+  return calculateTokenWarningStateCore(tokenUsage, paramsOrModel)
+}
+
+function calculateTokenWarningStateCore(
   tokenUsage: number,
   params: TokenWarningParams,
 ): TokenWarningState {
@@ -253,19 +392,29 @@ export function calculateTokenWarningState(
 }
 
 /**
- * 旧仓 isAutoCompactEnabled 纯函数面（W2-2-pre 缺面先迁①）：
- * DISABLE_COMPACT（disabled）→ false；DISABLE_AUTO_COMPACT（autoCompactDisabled，
- * 细粒度开关，保留手动 /compact）→ false；settings.autoCompactEnabled（缺省 true，
- * 旧 config 缺省 :516）。env 读侧归 config 面（getAutoCompactEnvOverrides 扩面）。
+ * isAutoCompactEnabled 导出面（S5 双形）：
+ *  - DI flags 形（W2-2-pre 缺面先迁① 纯函数面）：DISABLE_COMPACT（disabled）→
+ *    false；DISABLE_AUTO_COMPACT（autoCompactDisabled，细粒度开关，保留手动
+ *    /compact）→ false；settings.autoCompactEnabled（缺省 true，旧 config 缺省
+ *    :516）。
+ *  - 0 参形（旧仓 :147-158 TUI 活链路签名）：env 读侧（getAutoCompactEnvOverrides
+ *    收拢的 DISABLE_COMPACT / DISABLE_AUTO_COMPACT isEnvTruthy 语义）+ settings
+ *    读侧（setAutoCompactSettingsSource 注入，delta ③；未注 = 缺省 true）。
  */
 export function isAutoCompactEnabled(flags?: {
   disabled?: boolean
   autoCompactDisabled?: boolean
   settingsEnabled?: boolean
 }): boolean {
-  if (flags?.disabled) return false
-  if (flags?.autoCompactDisabled) return false
-  return flags?.settingsEnabled !== false
+  if (flags === undefined) {
+    const o = getAutoCompactEnvOverrides()
+    if (o.disabled) return false
+    if (o.autoCompactDisabled) return false
+    return autoCompactSettingsSource ? (autoCompactSettingsSource() ?? true) : true
+  }
+  if (flags.disabled) return false
+  if (flags.autoCompactDisabled) return false
+  return flags.settingsEnabled !== false
 }
 
 
