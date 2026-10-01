@@ -111,6 +111,30 @@ export {
   type MicrocompactDeps,
   type MicrocompactOutcome,
 } from './microCompact'
+// D-2a S6（M5 切端）：post-compact 清理注册表（重置体宿主侧注册，主线程门控
+// 语义旧仓逐字）+ HIGH GAP 重体端口缝（4 名 engine 名+契约落位，本体宿主侧
+// S8 接线注入；未注册门面 THROW）
+export {
+  registerPostCompactReset,
+  clearPostCompactResetsForTesting,
+  runPostCompactCleanup,
+  type PostCompactReset,
+} from './postCompactCleanup'
+export {
+  setSessionMemoryCompactPort,
+  setReactiveCompactPort,
+  setPartialCompactPort,
+  trySessionMemoryCompaction,
+  tryReactiveCompact,
+  reactiveCompactOnPromptTooLong,
+  partialCompactConversation,
+  type PartialCompactDirection,
+  type TryReactiveCompactParams,
+  type ReactiveCompactOutcome,
+  type SessionMemoryCompactPort,
+  type ReactiveCompactPort,
+  type PartialCompactPort,
+} from './highGapPorts'
 // W2-2-pre 缺面先迁④（§8.74.2 context 扩面族纯谓词/投影面；LLM-bound 体
 // 前向接缝登记见各文件头注 + §8.74.9）
 export {

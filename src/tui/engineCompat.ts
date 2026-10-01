@@ -69,3 +69,17 @@ export {
   getCachedMCConfig,
   suppressCompactWarning,
 } from 'src/engine'
+
+// D-2a S6（M5 切端）：HIGH GAP 簇 5 名——engine 持名 + 契约
+// （postCompactCleanup 注册表骨架 / highGapPorts 端口缝），orchestrator 持
+// LLM-bound 富体：S8 切端前 TUI 仍路由 orchestrator 富体（显式块压过双星号）；
+// S8 删 orchestrator 星号导出 + tui 接线 setSessionMemoryCompactPort /
+// setReactiveCompactPort / setPartialCompactPort / registerPostCompactReset 后
+// 本块随删，同名解到 engine 门面（注端口本体 / 注册表跑宿主注册 reset）。
+export { runPostCompactCleanup } from './core/orchestrator/context/postCompactCleanup.js'
+export { trySessionMemoryCompaction } from './core/orchestrator/context/sessionMemoryCompact.js'
+export {
+  tryReactiveCompact,
+  reactiveCompactOnPromptTooLong,
+} from './core/orchestrator/context/reactiveCompact.js'
+export { partialCompactConversation } from './core/orchestrator/context/compact.js'
