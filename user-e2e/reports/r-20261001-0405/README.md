@@ -21,9 +21,9 @@
 | tier | 结果 | 判读 |
 |---|---|---|
 | gate | 1 PASS | 网关 200，settings 角色池正常 |
-| core | 2 PASS / 2 FAIL | core-1 基本多轮通（4/4 marker）；core-2 = **P0-B resume 空池假阴性**；core-3 = P1-C 工具 0 调用；core-4 流式中排队正常 |
+| core | 2 PASS / 2 FAIL | core-1 基本多轮通（4/4 marker）；core-2 = **P0-B resume 空池假阴性**；core-3 = **P1-C**（0 tool_use，根因待定位）；core-4 流式中排队正常 |
 | slash（83） | 2 PASS / 1 TIMEOUT / 80 STUCK | STUCK 全部同签名：45s 探针窗内输入回显始终未出现（**P1-A 渲染冻结/输入门控**）；仅 /exit、/rewind PASS；/stickers TIMEOUT（连续动画）；tasklist、logout 2 条探针立即无回显（疑 session 早死，待定性） |
-| short | 2 PASS / 2 FAIL | marker/multiturn 双驱动 PASS；filewrite/tool-read FAIL = **P1-C**（模型 0 工具调用、声称成功、磁盘无产物） |
+| short | 2 PASS / 2 FAIL | marker/multiturn 双驱动 PASS；filewrite/tool-read FAIL = **P1-C**（0 tool_use、声称成功、磁盘无产物；根因待定位，不预设模型能力） |
 | medium | 2 FAIL | fixbug/feature 双驱动 **tools=0 次**，fixture 测试不通过（磁盘 ground truth） |
 | long | 1 FAIL | 5 轮全文本回合，工具 0/25，无 commit |
 | soak | 1 PASS | 10/10 轮 marker 无漂移，时延 3.2–5.6s/轮（loop 稳定面 OK） |

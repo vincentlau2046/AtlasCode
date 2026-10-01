@@ -357,7 +357,7 @@ async function coreQueueInput(
   const w1 = `e2e-queue-a`
   const w2 = `e2e-queue-b`
   pty.send(`回复且仅回复标记词：${w1}`)
-  await sleep(15_000) // w1 流式中（弱模型单轮 60-110s）
+  await sleep(15_000) // w1 流式中（Qwen38-27B 单轮 60-110s）
   pty.send(`回复且仅回复标记词：${w2}`) // 排队
   const r1 = await pty.waitCount(w1, 2, 300_000, 2000)
   const r2 = await pty.waitCount(w2, 2, 300_000, 2000)
@@ -733,7 +733,7 @@ async function tierShort(
         let diskOk = true
         if (c.disk) diskOk = diskCheck(drvWs, c.disk)
         // 工具触发 case：断言期望工具被调（stream-json tool_use 事件）
-        // 弱模型常见失败 = 0 工具调用、纯文本声称完成（P1-C fabrication）
+        // 0 工具调用、纯文本声称完成（P1-C fabrication，根因待定位——非模型能力，Qwen38-27B 具备工具调用能力）
         let toolOk = true
         const missingTools: string[] = []
         if (c.toolExpect) {
@@ -1030,7 +1030,7 @@ async function tierInteractive(
       const ws = wsFor('int-permission')
       const pty = await Pty.start({ ...ptyOpts('int-permission'), workspace: ws })
       pty.send('用工具创建文件 perm-target.txt，内容只有一行：PERM-E2E')
-      // 等模型发起工具调用 → 权限 dialog 渲染（弱模型慢，给 120s）
+      // 等模型发起工具调用 → 权限 dialog 渲染（Qwen38-27B 单轮较慢，给 120s）
       const dlg = await waitText(pty, ['Allow', 'allow', 'Deny', 'deny', 'permission', 'Permission', '允许', 'Yes', 'always'], 120_000)
       let fileOk = false
       if (dlg) {

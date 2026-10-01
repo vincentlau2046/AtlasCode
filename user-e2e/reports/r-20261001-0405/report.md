@@ -217,6 +217,6 @@
 - **slash/stickers**（slash）⏰ TIMEOUT：[TIMEOUT] stickers（local（渲染滞后 45s））
 
 ## 判据与复跑
-- marker 判据：「回复且仅回复标记词：X」→ X 在剥净转录中 ≥2 次（输入回显 + assistant 渲染）；弱模型（Qwen38-27B）下该指令遵循实测可靠。
+- marker 判据：「回复且仅回复标记词：X」→ X 在剥净转录中 ≥2 次（输入回显 + assistant 渲染）；Qwen38-27B 下该指令遵循实测可靠。
 - 工具/编码任务只信磁盘 ground truth（文件存在 / 测试 exit 0 / git log），不信模型自述。
 - 复跑：`bun run user-e2e/run.ts --tier <tier>`（指定才跑，非必测）；断点：`--resume <runId>`。

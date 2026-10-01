@@ -3,7 +3,7 @@
  * python3 stdlib pty 驱动（lib/pty-driver.py，替代 util-linux `script`——
  * 实测 script 在 stdin 非 TTY 时不写 typescript 文件），expect 式驱动：
  * 保持 stdin pipe 存活、写输入、尾随日志文件做 marker 等待
- * （非固定 sleep；弱模型单轮 60-110s，固定 sleep 太脆）。
+ * （非固定 sleep；Qwen38-27B 单轮 60-110s，固定 sleep 太脆）。
  *
  * 隔离：HOME = 沙箱（方案 §3），IS_DEMO=1 跳 onboarding（interactiveHelpers 先例）。
  * TUI 进程 cwd = 该 case 独立工作区（项目面 .atlas 落工作区内，不污染真实 ~/.atlas）。

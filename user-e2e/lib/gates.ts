@@ -65,7 +65,7 @@ export async function runGates(
     settings = { ok: false, note: `settings 读取失败: ${e?.message ?? e}`, defaultRole: null, poolHead: null }
   }
 
-  // ③ 真 LLM 单轮（marker，弱模型下确定性最高）
+  // ③ 真 LLM 单轮（marker，单轮判定确定性最高）
   const probe = await headlessRound({
     repoRoot,
     workspace,
