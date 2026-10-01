@@ -220,6 +220,10 @@ export {
   type ToolRegistryDeps,
   type ToolPreset,
 } from './toolRegistry'
+// #187 注册池缺口收口（P1-C 0405 根因修点）：基础工具本体全集单一事实源
+// （惰性 getter：函数体延迟求值绕开「门面 re-export ← bash 闭包可达门面 →
+// 顶层 const 数组 TDZ」环；详见 baseToolEntities.ts 头注）。
+export { getBaseToolEntities } from './baseToolEntities'
 export {
   ASYNC_AGENT_ALLOWED_TOOLS,
   INTERNAL_WORKER_TOOLS,

@@ -69,6 +69,8 @@ export {
   filterToolsByDenyRules,
   getTools,
   isAscendToolsEnabled,
+  // #187 注册池缺口收口（P1-C 0405 根因修点）：基础工具本体全集（惰性 getter）
+  getBaseToolEntities,
   TOOL_PRESETS,
   parseToolPreset,
   type ToolRegistryDeps,

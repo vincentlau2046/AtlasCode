@@ -86,11 +86,13 @@ import {
   type Message,
   type PermissionDecision,
   type PermissionMode,
+  type SystemPrompt,
   type ThinkingConfig,
   type ToolPermissionContext,
   type Tools,
 } from '../shared'
 import {
+  getBaseToolEntities,
   compactConversation,
   createAgentLoopDeps,
   createAbortController,
@@ -310,6 +312,33 @@ function makeUserMessage(text: string): Message {
     uuid: randomUUID(),
     timestamp: String(Date.now()),
   }
+}
+
+/**
+ * P1-C（0405 收口二件）：headless 车道基础系统提示词（环境接地）。
+ * 未设 --system-prompt/--append-system-prompt 时，引擎窄 spine 缺省 = 无 system
+ * 消息 → 模型无环境上下文（cwd/平台/日期），弱模型按训练先验臆造绝对路径
+ * （实测 Qwen38-27B-TXT 臆造 /root/.nvm/…/node_modules/.bin/out/hello.txt，
+ * validateInput stat EACCES → error_during_execution；fs.promises.stat 拦截
+ * 栈证据 fileWriteTool.validateInput → toolExecution → loop.queryOneRound）。
+ * 基础环境块仅 headless 车道关切（TUI 车道有完整系统提示词面；引擎缺省不变）。
+ */
+function headlessBaseSystemPrompt(): SystemPrompt {
+  return asSystemPrompt([
+    [
+      "You are AtlasCode, an interactive CLI coding agent operating in the user's terminal.",
+      'You have tools for reading and writing files and for running shell commands.',
+      'When a task requires file changes or command execution, you MUST call the matching tool (Write / Edit / Bash / Read, etc.); never describe or claim work that you did not perform via a tool call.',
+      'Prefer paths relative to the working directory; use absolute paths only when the user provides them.',
+    ].join(' '),
+    [
+      'Environment:',
+      `- Primary working directory: ${process.cwd()}`,
+      `- Platform: ${process.platform}`,
+      `- Shell: ${process.env.SHELL ?? '(unknown)'}`,
+      `- Today's date: ${new Date().toISOString().slice(0, 10)}`,
+    ].join('\n'),
+  ])
 }
 
 /** SDK user 消息 wire 面 → 纯文本抽取（content = string | 块数组，text 块拼接）。 */
@@ -570,7 +599,13 @@ export async function runHeadless(
     allowedToolsCli: options.allowedTools ?? [],
     disallowedToolsCli: options.disallowedTools ?? [],
     baseToolsCli: options.baseTools,
-    permissionMode: options.permissionMode ?? 'default',
+    // P1-C 权限面：--dangerously-skip-permissions 语义 = bypassPermissions 模式
+    //（旧仓逐字：flag 本身仅置 allowDangerouslySkipPermissions 可用性面，
+    // 模式面须显式派生；用户显式 --permission-mode 优先）。root/sudo 安全门
+    // 在 parse 层（setup.ts 同型）。
+    permissionMode:
+      options.permissionMode ??
+      (options.dangerouslySkipPermissions ? 'bypassPermissions' : 'default'),
     allowDangerouslySkipPermissions:
       options.dangerouslySkipPermissions ?? false,
     addDirs: options.addDirs ?? [],
@@ -580,7 +615,16 @@ export async function runHeadless(
     // mcpTools = 本层本地转写面（mcpBridge ② 同型 local bridge，先入为主
     // 去重）；构建器 port ②（MCP 连接快照）headless 独立运行 = 壳 wire 未
     // 注册 → 构建器侧零 MCP，本面自供 = 旧行为逐字
-    toolRegistryDeps: { mcpTools, env: process.env },
+    // P1-C（0405 core-2/fixture 族）收口：基础工具本体注入位——不注入则
+    // headless 池仅 Agent+Snip（0405 任务族 6/6 FAIL 根因：模型无文件/Shell
+    // 面，纯文本回合「声称完成」result=success 而磁盘 ground truth 证伪；
+    // 定性证据=记录代理保真捕获 + 模型自述 + 直连网关 tool_calls 探测）。
+    toolRegistryDeps: {
+      mcpTools,
+      env: process.env,
+      // 惰性 getter：此处（runHeadless 内、全模块初始化后）求值 34 件基础工具本体
+      baseTools: getBaseToolEntities(),
+    },
     // W3-3b（§8.74.15）：角色车道 + 7 槽配置面（单组合根；role 由 --model
     // 派生，未设 = 'premium' 缺省不变）
     role,
@@ -589,7 +633,9 @@ export async function runHeadless(
     disablePersistence: options.disablePersistence,
     // D-5b（S-4）：headless 5 选项 + --effort → LLM 调用真消费面（引擎链）。
     // systemPrompt = --system-prompt + --append-system-prompt 合并（SystemPrompt）；
-    // 未设任一 → undefined（窄 spine 缺省，行为不变）。
+    // 未设任一 → headlessBaseSystemPrompt() 基础环境块（P1-C 0405 收口：旧
+    // 「窄 spine 缺省 = 无 system 消息」致弱模型按先验臆造绝对路径 EACCES，
+    // 见 headlessBaseSystemPrompt 头注；用户显式 --system-prompt 仍整替）。
     systemPrompt:
       options.systemPrompt || options.appendSystemPrompt
         ? asSystemPrompt(
@@ -597,7 +643,7 @@ export async function runHeadless(
               (s): s is string => Boolean(s),
             ),
           )
-        : undefined,
+        : headlessBaseSystemPrompt(),
     thinkingConfig: options.thinkingConfig,
     // responseFormat = --json-schema 经 modelprovider toResponseFormat（结构化
     // 输出 response_format；未设 --json-schema → undefined = 非结构化）。
@@ -801,13 +847,23 @@ export async function runHeadless(
   ): Promise<SDKMessage> => {
     // drain 站点 ②：末 assistant 消息前 flush（task 进度实时上流）
     await drainToOutput()
-    if (loopResult.lastRound) {
+    // P1-C（0405 收口三件）：stream-json assistant 事件面 = 各轮 assistant
+    // 消息全量上流。旧实仅 lastRound 上流——中间工具回合（tool_use 块）在
+    // stream-json 不可见，harness toolUses 计数 / triage「零 tool_use 事件」
+    // 证据面部分归此缺口（0405 fixture 族 tools=0 记录含此盲区成分）。
+    // 实时（loop 内逐轮上流）= 引擎 loop 回调面，前向接缝登记。
+    for (const m of loopResult.messages) {
+      if (m.role !== 'assistant') continue
+      const content = (
+        m as unknown as { message?: { content?: unknown[] } }
+      ).message?.content
+      if (!content || content.length === 0) continue
       await writeMessage({
         type: 'assistant',
         session_id: sessionId,
         message: {
           role: 'assistant',
-          content: loopResult.lastRound.assistantContent,
+          content,
         },
         uuid: randomUUID(),
       } as unknown as StdoutMessage)

@@ -27,6 +27,7 @@ import {
   filterToolsForAgent,
   AgentTool,
   AGENT_TOOL_NAME,
+  getBaseToolEntities,
 } from '../../src/engine'
 import type { Tool, Tools } from '../../src/shared'
 
@@ -154,5 +155,34 @@ describe('filterToolsForAgent（T-5e 全量禁用集接线判别）', () => {
     const names = kept.map((t) => t.name)
     for (const n of DISALLOWED_NAMES) expect(names).not.toContain(n)
     expect(names).toContain('Read')
+  })
+})
+
+// ── getBaseToolEntities()（headless 车道基础工具本体全集单一事实源，#187 收口 / P1-C 0405 根因）──
+// 惰性 getter：函数体延迟求值（绕开「门面 re-export ← bash 闭包可达门面 → 顶层 const
+// 数组 TDZ」环）。判别信号：headless 池 = 调用方 toolRegistryDeps.baseTools 注入位。
+// 若本集静默丢工具（重构遗漏 / 误删 import），headless 车道再次退化为「Agent+Snip
+// 无文件/Shell 面」，弱模型 0 工具调用 fabrication family 复现（0405 定性证据）。本块锁全集契约。
+describe('getBaseToolEntities()（headless 基础工具全集契约）', () => {
+  const base = getBaseToolEntities()
+  const names = () => base.map((t) => t.name)
+  test('⑳ 名称唯一 + 全 34 件（单一事实源，防重构静默丢工具）', () => {
+    expect(names()).toHaveLength(34)
+    expect(new Set(names()).size).toBe(base.length)
+  })
+  test('㉑ 覆盖 headless 编码必需面（0405 fabrication 根因：文件/Shell/搜索工具在场）', () => {
+    for (const n of ['Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep']) {
+      expect(names()).toContain(n)
+    }
+  })
+  test('㉒ AgentTool 内建不在 baseTools 数组（registry 序位：AgentTool 先于 baseTools）', () => {
+    expect(names()).not.toContain(AGENT_TOOL_NAME)
+  })
+  test('㉓ 注入 getAllBaseTools 后全量在池（Agent 首位 + 无静默丢失 + 无重名）', () => {
+    const pool = getAllBaseTools({ baseTools: getBaseToolEntities(), env: {} })
+    const poolNames = pool.map((t) => t.name)
+    expect(poolNames[0]).toBe(AGENT_TOOL_NAME)
+    for (const t of base) expect(poolNames).toContain(t.name)
+    expect(new Set(poolNames).size).toBe(poolNames.length)
   })
 })
