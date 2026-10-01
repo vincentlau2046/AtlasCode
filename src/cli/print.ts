@@ -681,11 +681,15 @@ export async function runHeadless(
   }
 
   // ── 初始消息（session 域 resume 面 + 首 prompt）──
-  const sessionId = getSessionEnv().getSessionId()
   let conversation: Message[] = []
   if (typeof options.resume === 'string' || options.continue) {
     conversation = await loadResumedMessages(options)
   }
+  // P0-B（0405 core-2）：sessionId 捕获必须在 resume 块之后——loadResumedMessages
+  // 内 processResumedConversation 会 switchSession(resumedId)（engine session env
+  // 切到被 resume 的会话），先捕获则 result/control 事件的 session_id 仍是启动随机
+  // ID（r2 ID 漂移的残留面；转录写指针已由 resetSessionFilePointer 回挂，仅剩此常量）。
+  const sessionId = getSessionEnv().getSessionId()
   if (typeof inputPrompt === 'string' && inputPrompt.trim() !== '') {
     conversation.push(makeUserMessage(inputPrompt))
   }
@@ -978,9 +982,12 @@ async function loadResumedMessages(
     getProjectDir,
     getTranscriptPathForSession,
     loadTranscriptFile,
+    processResumedConversation,
   } = await import('../engine')
   let filePath: string
+  let resumedId: string | undefined
   if (typeof options.resume === 'string') {
+    resumedId = options.resume
     filePath = options.resume.endsWith('.jsonl')
       ? options.resume
       : getTranscriptPathForSession(options.resume)
@@ -997,6 +1004,7 @@ async function loadResumedMessages(
       )
       return []
     }
+    resumedId = latestId
     filePath = getTranscriptPathForSession(latestId)
   }
   const loaded = await loadTranscriptFile(filePath)
@@ -1012,5 +1020,26 @@ async function loadResumedMessages(
     return []
   }
   const chain = buildConversationChain(loaded.messages, leafMessage)
+  // P0-B（0405 core-2）：headless 车道 session ID 采纳缺失——不调 switchSession 时
+  // 转录写入新 session 文件，--resume 多轮契约断（r2 session_id 漂移：0405 checkpoint
+  // r2=ok 但 id 失配 FAIL；2026-10-01 复现 r1 d4aaa9ea… → r2 e0b1d950…）。
+  // engine processResumedConversation = E-wave-end 组合根前向接缝调用点（TUI 走
+  // sessionRestore.ts 变体，headless 一直未接线）：switchSession(resumedId) +
+  // resetSessionFilePointer（转录写指针回挂被 resume 文件）+ 元数据恢复。
+  // forkSession 恒 false（headless 无 --fork-session 面；contentReplacements 播种
+  // 仅 fork 分支消费，本车道不需要）。文件缺失/空转录走上方 early-return，
+  // 行为不变（fresh session，优雅降级）。
+  await processResumedConversation(
+    {
+      // 边界类型差（shared Message.timestamp: string|number vs engine session
+      // Message.timestamp: string）：restore 仅透传 messages（非 fork 分支不消费），
+      // 按目标签名回注
+      messages: chain as unknown as Parameters<
+        typeof processResumedConversation
+      >[0]['messages'],
+      sessionId: resumedId,
+    },
+    { forkSession: false, sessionIdOverride: resumedId },
+  )
   return chain as unknown as Message[]
 }
