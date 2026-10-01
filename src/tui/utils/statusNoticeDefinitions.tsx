@@ -27,12 +27,11 @@ export type StatusNoticeDefinition = {
   render: (context: StatusNoticeContext) => React.ReactNode;
 };
 
-// IFF gateway deployments authenticate with OPENAI_API_KEY=iff-local
-// (plus a CCR OAuth token file for the bridge). In that mode the
-// "auth conflict" notices are expected noise, not a real conflict.
-const IFF_LOCAL_KEY = 'iff-local'
-function isIffGatewayMode(): boolean {
-  return (process.env.OPENAI_API_KEY) === IFF_LOCAL_KEY ||
+// 本地网关部署以 OPENAI_API_KEY=atlas-local 认证（+ bridge 用 CCR OAuth token 文件）。
+// 该模式下 "auth conflict" notice 是预期噪声，非真实冲突。
+const LOCAL_GATEWAY_KEY = 'atlas-local'
+function isLocalGatewayMode(): boolean {
+  return (process.env.OPENAI_API_KEY) === LOCAL_GATEWAY_KEY ||
     ((process.env.OPENAI_BASE_URL) || '').includes('127.0.0.1:8999') ||
     process.env.OPENAI_BASE_URL !== undefined ||
     process.env.ATLAS_MODEL !== undefined
@@ -85,7 +84,7 @@ const apiKeyConflictNotice: StatusNoticeDefinition = {
   id: 'api-key-conflict',
   type: 'warning',
   isActive: () => {
-    if (isIffGatewayMode()) return false
+    if (isLocalGatewayMode()) return false
     const {
       source: apiKeySource
     } = getAtlasApiKeyWithSource({
@@ -112,7 +111,7 @@ const bothAuthMethodsNotice: StatusNoticeDefinition = {
   id: 'both-auth-methods',
   type: 'warning',
   isActive: () => {
-    if (isIffGatewayMode()) return false
+    if (isLocalGatewayMode()) return false
     const {
       source: apiKeySource
     } = getAtlasApiKeyWithSource({

@@ -24,8 +24,8 @@ export function needsModelSetup(): boolean {
 }
 
 export interface ModelSetupInput {
-  /** Provider namespace written into settings.providers: 'iff' (本地网关) or 'openai' (自定义端点). */
-  preset: 'iff' | 'openai'
+  /** Provider namespace written into settings.providers: 'default' (本地网关, 去 IFF 化档2 新值；旧 'iff' 读取时经 normalizeProvider 归一) or 'openai' (自定义端点). */
+  preset: 'default' | 'openai'
   baseURL: string
   modelId: string
   /** Optional — when empty/absent the apiKey key is OMITTED (see buildModelSetupPayload). */

@@ -52,7 +52,21 @@ const emptyEndpointConfigSource: EndpointConfigSource = {
 export type ModelRole = 'premium' | 'fast' | 'small'
 export const MODEL_ROLES: readonly ModelRole[] = ['premium', 'fast', 'small'] as const
 
-export type RoleProvider = 'openai' | 'iff'
+export type RoleProvider = 'openai' | 'default'
+
+/**
+ * 去 IFF 化（M5 档2）：旧 settings/env 可能含 provider 值 'iff'（pre-去 IFF 命名）。
+ * 读取时经 normalizeProvider 归一到 'default'（保留 'openai' 及未知值透传）。
+ * 旧用户 ~/.atlas/settings.json 的 providers['iff'] + 'iff/<model>' ref 经
+ * resolveModel 的 raw string lookup 仍可解析（本 map 只影响 config 面展示值）。
+ */
+const LEGACY_PROVIDER_MAP: Record<string, RoleProvider> = { iff: 'default' }
+
+/** 归一 provider 值：旧 'iff' → 'default'，其余透传（未设 → undefined）。 */
+function normalizeProvider(p: string | undefined): RoleProvider | undefined {
+  if (p === undefined) return undefined
+  return LEGACY_PROVIDER_MAP[p] ?? (p as RoleProvider)
+}
 
 export interface RoleModelConfig {
   provider: RoleProvider
@@ -74,7 +88,7 @@ export function getRoleConfig(role: ModelRole): RoleModelConfig {
 
   const roleSetting: any = getEndpointConfigSource().getRoleSetting(role)
 
-  const provider: RoleProvider = envProvider ?? roleSetting.provider ?? 'openai'
+  const provider: RoleProvider = normalizeProvider(envProvider) ?? normalizeProvider(roleSetting.provider as string | undefined) ?? 'openai'
   const model: string | undefined = envModel ?? roleSetting.model
   const baseURL: string | undefined = envBaseUrl ?? roleSetting.baseURL
 

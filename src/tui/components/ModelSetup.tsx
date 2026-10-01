@@ -11,16 +11,16 @@ import { Dialog } from './design-system/Dialog.js';
 import { KeyboardShortcutHint } from './design-system/KeyboardShortcutHint.js';
 import TextInput from './TextInput.js';
 
-type Preset = 'iff' | 'openai';
+type Preset = 'default' | 'openai';
 type Field = 'baseURL' | 'modelId' | 'apiKey';
 
-const IFF_BASE_URL = 'http://127.0.0.1:8999/v1';
-const IFF_MODEL_ID = 'Qwen38-27B-TXT';
+const DEFAULT_BASE_URL = 'http://127.0.0.1:8999/v1';
+const DEFAULT_MODEL_ID = 'Qwen38-27B-TXT';
 
 const PRESET_OPTIONS = [{
-  label: 'IFF 本地网关',
-  value: 'iff',
-  description: `预填 ${IFF_BASE_URL} + ${IFF_MODEL_ID}`
+  label: '默认网关（本地端点预填）',
+  value: 'default',
+  description: `预填 ${DEFAULT_BASE_URL} + ${DEFAULT_MODEL_ID}`
 }, {
   label: 'OpenAI 兼容端点',
   value: 'openai',
@@ -40,7 +40,7 @@ export function ModelSetup({
   onDone
 }: ModelSetupProps): React.ReactNode {
   const [step, setStep] = useState<'preset' | 'endpoint'>('preset');
-  const [preset, setPreset] = useState<Preset>('iff');
+  const [preset, setPreset] = useState<Preset>('default');
   const [baseURL, setBaseURL] = useState('');
   const [modelId, setModelId] = useState('');
   // 选填：预填 OpenAI 静态键 env（OpenAI 协议静态键车道），留空走 getGlobalApiKey 回退。
@@ -58,11 +58,11 @@ export function ModelSetup({
   const handlePresetSelect = (value: string): void => {
     const p = value as Preset;
     setPreset(p);
-    if (p === 'iff') {
-      setBaseURL(IFF_BASE_URL);
-      setModelId(IFF_MODEL_ID);
-      setBaseCursor(IFF_BASE_URL.length);
-      setModelCursor(IFF_MODEL_ID.length);
+    if (p === 'default') {
+      setBaseURL(DEFAULT_BASE_URL);
+      setModelId(DEFAULT_MODEL_ID);
+      setBaseCursor(DEFAULT_BASE_URL.length);
+      setModelCursor(DEFAULT_MODEL_ID.length);
     } else {
       setBaseURL('');
       setModelId('');
