@@ -428,8 +428,9 @@ export function buildProgram(): CommanderCommand {
       (_value: string | true) => {
         // If value is provided, it will be the filter string
         // If not provided but flag is present, value will be true
-        // The actual filtering is handled in debug.ts by parsing process.argv
-        // 裁登记：新仓无 debug.ts（debug 面 = 残留守），选项注册为惰性数据
+        // 实际消费面（user-e2e 1606 §7 项 6 N9-debug 收口，argv 扫描）：
+        //  - headless 车道 = cli/debugSink（runHeadless initDebugSink 接线）
+        //  - TUI 车道 = tui/utils/debug.ts（直读 process.argv，原样生效）
         return true
       },
     )

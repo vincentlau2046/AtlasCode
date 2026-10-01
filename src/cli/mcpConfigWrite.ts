@@ -59,7 +59,9 @@ import {
   type McpServerConfig,
   type ScopedMcpServerConfig,
 } from '../mcp'
-import { logForDebugging } from '../shared'
+// N9-debug（user-e2e 1606 §7 项 6）：headless debug 面真 sink（shared no-op
+// 换绑 cli 域 writer；charter C-4 不动）
+import { logForDebugging } from './debugSink'
 
 /** CLI 可写 scope 值域（parse 选项面 -s local/user/project；型面 7 值 enum
  * 逐字保留于 mcp 域，值域收窄 = R2 裁定同向）。 */

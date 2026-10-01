@@ -212,7 +212,11 @@ export default tseslint.config(
             // 映射 + getProviderContextWindow 压缩阈值面；print.ts 头注同
             // 登记）+ swarm（S-C4 commit 3 扩 allow 登记：setup.ts
             // captureTeammateModeSnapshot teammate 快照面，壳 compose.ts 同型
-            // 先例；setup.ts 头注同登记）；不依赖 atlascode/ascend/atlasoffice
+            // 先例；setup.ts 头注同登记）+ executor（0.1.7 user-e2e 收口
+            // 扩 allow 登记：cli/hooksWiring.ts headless hooks 三窗口接线
+            // 的 HookShellPort 适配器消费 executor 真 Shell〔execShell〕，
+            // 壳 atlascode/adapters/hookShellAdapter.ts 同型先例；
+            // hooksWiring.ts 头注同登记）；不依赖 atlascode/ascend/atlasoffice
             // （公共层不反向依赖壳）。S-C4 handler 波 allow 面如需扩展随该
             // 切片头注登记。
             {
@@ -220,6 +224,7 @@ export default tseslint.config(
               allow: [
                 "shared", "bootstrap", "engine", "permissions",
                 "remote", "mcp", "hooks", "modelprovider", "swarm",
+                "executor",
               ],
             },
             // tui (§8.72 TUI 壳波 Slice A→B): TUI 域 — 旧仓 UI 闭包 C-7 原样搬

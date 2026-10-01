@@ -172,3 +172,20 @@ export {
   runCliSetup,
   type CliSetupOptions,
 } from './setup'
+
+// ── 0.1.7 user-e2e 1606 §7 收口：headless 提示词面 + debug 面真 sink ──
+export {
+  HEADLESS_INJECTION_GUARD,
+  headlessBaseSystemPrompt,
+  resolveHeadlessSystemPrompt,
+} from './headlessPrompt'
+export {
+  flushDebugSink,
+  getDebugSinkTarget,
+  initDebugSink,
+  isDebugSinkActive,
+  logForDebugging,
+  resetDebugSinkForTesting,
+  type DebugLogLevel,
+} from './debugSink'
+export { wireCliHooksDeps } from './hooksWiring'

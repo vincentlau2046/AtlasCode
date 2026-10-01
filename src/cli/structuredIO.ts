@@ -35,12 +35,14 @@ import { randomUUID } from 'crypto'
 import { z, type ZodType } from 'zod'
 import {
   feature,
-  logForDebugging,
   type AssistantMessage,
   type PermissionDecision,
   type PermissionDecisionReason,
   type PermissionUpdate,
 } from '../shared'
+// N9-debug（user-e2e 1606 §7 项 6）：headless debug 面真 sink（shared no-op
+// 换绑 cli 域 writer；charter C-4 不动）
+import { logForDebugging } from './debugSink'
 import { hasPermissionsToUseTool } from '../permissions'
 import { AbortError } from '../engine'
 import type { HookJSONOutput } from '../hooks'

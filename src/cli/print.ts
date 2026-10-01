@@ -80,13 +80,10 @@
 import { randomUUID } from 'crypto'
 import { join } from 'path'
 import {
-  asSystemPrompt,
-  logForDebugging,
   type AssistantMessage,
   type Message,
   type PermissionDecision,
   type PermissionMode,
-  type SystemPrompt,
   type ThinkingConfig,
   type ToolPermissionContext,
   type Tools,
@@ -150,6 +147,13 @@ import {
 } from './sdkTypes'
 import { findLatestSessionId } from './sessionList'
 import { installStreamJsonStdoutGuard } from './streamJsonStdoutGuard'
+import { resolveHeadlessSystemPrompt } from './headlessPrompt'
+// N9-debug（user-e2e 1606 §7 项 6）：headless debug 面真 sink（shared no-op
+// 换绑 cli 域 writer；charter C-4 不动）
+import { flushDebugSink, initDebugSink, logForDebugging } from './debugSink'
+// P0 headless「hooks bootstrap 未注入」回归修：hooks 三窗口 cli 域侧接线
+// （壳 compose ⑤ 步等价；hooksWiring 头注 = 根因 + 逐字同形裁定）
+import { wireCliHooksDeps } from './hooksWiring'
 
 // ── 选项面（dispatch 侧 program.args 映射 = S-C4 回填；本文件定契约）────
 
@@ -314,32 +318,8 @@ function makeUserMessage(text: string): Message {
   }
 }
 
-/**
- * P1-C（0405 收口二件）：headless 车道基础系统提示词（环境接地）。
- * 未设 --system-prompt/--append-system-prompt 时，引擎窄 spine 缺省 = 无 system
- * 消息 → 模型无环境上下文（cwd/平台/日期），弱模型按训练先验臆造绝对路径
- * （实测 Qwen38-27B-TXT 臆造 /root/.nvm/…/node_modules/.bin/out/hello.txt，
- * validateInput stat EACCES → error_during_execution；fs.promises.stat 拦截
- * 栈证据 fileWriteTool.validateInput → toolExecution → loop.queryOneRound）。
- * 基础环境块仅 headless 车道关切（TUI 车道有完整系统提示词面；引擎缺省不变）。
- */
-function headlessBaseSystemPrompt(): SystemPrompt {
-  return asSystemPrompt([
-    [
-      "You are AtlasCode, an interactive CLI coding agent operating in the user's terminal.",
-      'You have tools for reading and writing files and for running shell commands.',
-      'When a task requires file changes or command execution, you MUST call the matching tool (Write / Edit / Bash / Read, etc.); never describe or claim work that you did not perform via a tool call.',
-      'Prefer paths relative to the working directory; use absolute paths only when the user provides them.',
-    ].join(' '),
-    [
-      'Environment:',
-      `- Primary working directory: ${process.cwd()}`,
-      `- Platform: ${process.platform}`,
-      `- Shell: ${process.env.SHELL ?? '(unknown)'}`,
-      `- Today's date: ${new Date().toISOString().slice(0, 10)}`,
-    ].join('\n'),
-  ])
-}
+// headless 系统提示词面（base 环境块 + 注入防线 + --system/append 选择逻辑）
+// 抽 ./headlessPrompt（N11 合并语义判别单测面；user-e2e 1606 §7 项 3/4）
 
 /** SDK user 消息 wire 面 → 纯文本抽取（content = string | 块数组，text 块拼接）。 */
 function extractUserText(message: SdkUserMessage): string {
@@ -519,6 +499,12 @@ export async function runHeadless(
   inputPrompt: string | AsyncIterable<string>,
   options: HeadlessOptions,
 ): Promise<void> {
+  // N9-debug（user-e2e 1606 §7 项 6）：debug 面真 sink 初始化（幂等；
+  // --debug/--debug-to-stderr/--debug-file 经 argv 扫描启用，未启用 = no-op）
+  initDebugSink()
+  // P0 headless「hooks bootstrap 未注入」回归修：hooks 三窗口 cli 域侧接线
+  // （幂等；用户 HOME 有 hooks 配置时 runHooks 不再 fail-fast）
+  wireCliHooksDeps()
   // ── 选项校验（旧仓 L495-735 逐字 5 支）──
   if (options.resumeSessionAt && !options.resume) {
     process.stderr.write(`Error: --resume-session-at requires --resume\n`)
@@ -632,18 +618,10 @@ export async function runHeadless(
     sessionModel: options.model,
     disablePersistence: options.disablePersistence,
     // D-5b（S-4）：headless 5 选项 + --effort → LLM 调用真消费面（引擎链）。
-    // systemPrompt = --system-prompt + --append-system-prompt 合并（SystemPrompt）；
-    // 未设任一 → headlessBaseSystemPrompt() 基础环境块（P1-C 0405 收口：旧
-    // 「窄 spine 缺省 = 无 system 消息」致弱模型按先验臆造绝对路径 EACCES，
-    // 见 headlessBaseSystemPrompt 头注；用户显式 --system-prompt 仍整替）。
-    systemPrompt:
-      options.systemPrompt || options.appendSystemPrompt
-        ? asSystemPrompt(
-            [options.systemPrompt, options.appendSystemPrompt].filter(
-              (s): s is string => Boolean(s),
-            ),
-          )
-        : headlessBaseSystemPrompt(),
+    // systemPrompt 选择（./headlessPrompt，N11 修正语义）：--system-prompt
+    // 整替；仅 --append-system-prompt = base 环境块 + append 合并（旧整替
+    // 致弱模型失 agent 身份接地）；未设 = base 块（P1-C 0405 收口）。
+    systemPrompt: resolveHeadlessSystemPrompt(options),
     thinkingConfig: options.thinkingConfig,
     // responseFormat = --json-schema 经 modelprovider toResponseFormat（结构化
     // 输出 response_format；未设 --json-schema → undefined = 非结构化）。
@@ -1024,6 +1002,8 @@ export async function runHeadless(
     abortController.abort()
     process.exitCode = 1
   }
+  // N9-debug：debug 面异步写队列等齐（防进程退出丢尾行；成功/错误支后位）
+  await flushDebugSink()
 }
 
 // ── session 域 resume 面（旧 loadInitialMessages 核心支 + 裁登记）────
