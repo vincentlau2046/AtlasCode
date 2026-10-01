@@ -175,6 +175,22 @@ export function setSessionPersistenceDisabled(v: boolean): void {
 // settings flag 持有面（--settings 路径 / --setting-sources 白名单）。
 // 本地型定义（L3：bootstrap 不 import engine 的 SettingSource 型；结构同型
 // 'user'|'project'|'local'，engine 侧消费经组合根适配器，前向接缝登记）。
+//
+// 【M1 三层状态裁定登记，2026-10-01 #209，复审勿当"四份收敛"遗漏重提】
+// 状态单源三分层，本域 = engine/CLI headless 车道唯一状态源（真状态）：
+//   · 本域 4 setter/getter + CliSettingSource = engine 真状态。headless 由
+//     cli/entryInit.ts set（--settings / --setting-sources 解析，L179/L193）。
+//     get 侧当前零消费者 = 前向接缝（engine settings 功能面未迁移，
+//     engine/config/settings.ts:24 登记"不随迁"）——engine settings 面
+//     迁移波落地后由该面消费，届时 headless `--setting-sources` 生效。
+//   · TUI 车道读侧 = src/tui/bootstrapState.ts 独立 stub 面（同名硬编码
+//     getAllowedSettingSources()=['userSettings'] / getFlagSettingsPath()=
+//     '/tmp/.claude-flags.json'，TUI 型 SettingSource 世界，非本域 CliSettingSource
+//     型）——两模块状态完全独立，互不读写。TUI 面分工见该文件头注（镜像登记）。
+//   护栏：tests/unit/bootstrap-state-split.test.ts 锁定分层（TUI 面硬编码缺省不变
+//   + 两模块状态独立 + 本域 get 缺省 undefined）——防后续"收敛"波误把 TUI 读侧
+//   切到本域 undefined 缺省（= TUI getEnabledSettingSources 丢 userSettings 回归，
+//   #203 族 needsModelSetup 晚接线误判先例）。
 export type CliSettingSource = 'user' | 'project' | 'local'
 
 let _flagSettingsPath: string | undefined

@@ -1,5 +1,31 @@
-// Reconstructed bootstrap/state.ts - stub exports
-// Generated from consumer import analysis
+/**
+ * TUI 车道 bootstrap 状态桥（M1 分层裁定登记，2026-10-01 #209，复审勿当"四份收敛"遗漏重提）：
+ *
+ * 状态单源三分层（W2-2d #182 切 47 碰撞名 + #185 删净 2e 死名后的既成事实，本头注固化）：
+ *   1. **engine 真状态** = `src/bootstrap/`（state.ts 57 导出）：engine/CLI headless 车道
+ *      的唯一状态源。executor 域经 BootstrapStatePort（src/executor/ports/bootstrapState.ts）
+ *      + 组合根适配器（atlascode/adapters/bootstrapAdapter.ts）DI 注入——两域互不 import（L3）。
+ *   2. **TUI 运行态** = 本文件（112 个 TUI 独有导出）：TUI 车道运行态
+ *      （scroll drain / LSP 推荐 / mainLoopModelOverride / turn 累加器族 / OTel 计数器等），
+ *      域纯度裁定：TUI 运行态不入 engine 侧 bootstrap 域。含少量真状态
+ *      （_isRemoteMode / _mainLoopModelOverride / _spSectionCache / turn 累加器）
+ *      + getInitialMainLoopModel 真实现（De-Claude config 驱动，#202 收口）。
+ *   3. **3 个同名分歧**（非重复，类型层不同，L3 边界有意保留——bootstrap/state.ts 头注
+ *      "不 import engine SettingSource 型"登记）：
+ *      · getAllowedSettingSources：本文件 TUI 面 = 硬编码 ['userSettings']（SettingSource 型）；
+ *        bootstrap 域 = CliSettingSource 型真状态（headless 由 cli/entryInit set，get 待
+ *        engine settings 面迁移后消费 = 前向接缝，engine/config/settings.ts:24 登记"不随迁"）。
+ *      · getFlagSettingsPath：本文件 TUI 面 = 硬编码 '/tmp/.claude-flags.json'（flag-settings
+ *        功能未落盘，H6 登记）；bootstrap 域 = 真状态（同上接缝）。
+ *      · setAllowedSettingSources：本文件 TUI 面 = no-op（TUI 车道该 flag 消费面未落盘）；
+ *        bootstrap 域 = 真实现（headless entryInit 接线中）。
+ *    护栏：tests/unit/bootstrap-state-split.test.ts 锁定分层语义（TUI 面硬编码缺省不变 +
+ *    两模块状态独立）——防后续"收敛"波误把 TUI 面切到 bootstrap 域 undefined 缺省
+ *    （= TUI getEnabledSettingSources 丢 userSettings，#203 族误判先例）。
+ *
+ * 复审勿当遗漏：本文件是 C-7 原样搬 TUI 闭包的重建桥（consumer import analysis 重建），
+ * 112 个 no-op 占位 = H6 前向接缝登记（feature 未实现的占位，非死码）。
+ */
 import { getSettings_DEPRECATED } from 'src/tui/utils/settings/settings.js'
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 import { getRoleModel, type ModelRole } from 'src/modelprovider'
