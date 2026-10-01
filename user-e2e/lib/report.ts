@@ -14,6 +14,7 @@ const VERDICT_ICON: Record<string, string> = {
   FAIL: '❌',
   TIMEOUT: '⏰',
   STUCK: '💥',
+  NAVFAIL: '🧭',
   SKIP: '⏭️',
 }
 
@@ -33,6 +34,7 @@ function verdictSummary(recs: CaseRec[]): string {
       c.FAIL ? `❌ ${c.FAIL}` : '',
       c.TIMEOUT ? `⏰ ${c.TIMEOUT}` : '',
       c.STUCK ? `💥 ${c.STUCK}` : '',
+      c.NAVFAIL ? `🧭 ${c.NAVFAIL}` : '',
       c.SKIP ? `⏭️ ${c.SKIP}` : '',
     ]
       .filter(Boolean)
@@ -170,7 +172,7 @@ export function buildReports(state: RunState): { report: string; diagnosis: stri
   for (const r of failed) {
     const c = classify(r)
     if (r.tier === 'core' || c.layer === 'L2') p0.push(`${r.id}（${c.layer}：${c.title}）`)
-    else if (r.verdict === 'FAIL' || r.verdict === 'STUCK') p1.push(`${r.id}（${c.layer}：${c.title}）`)
+    else if (r.verdict === 'FAIL' || r.verdict === 'STUCK' || r.verdict === 'NAVFAIL') p1.push(`${r.id}（${c.layer}：${c.title}）`)
     else p2.push(`${r.id}（${c.title}）`)
   }
   d.push(`- **P0（核心 loop / 基本功能不可用）**：${p0.length ? p0.join('；') : '无'}`)

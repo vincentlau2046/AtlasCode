@@ -127,7 +127,9 @@
     },
     "model": {
       "cls": "local",
-      "esc": true
+      "esc": true,
+      "nav": "picker",
+      "panelExpect": "Select"
     },
     "config": {
       "cls": "local",
@@ -135,7 +137,9 @@
     },
     "theme": {
       "cls": "local",
-      "esc": true
+      "esc": true,
+      "nav": "picker",
+      "panelExpect": "Theme"
     },
     "keybindings": {
       "cls": "local",
@@ -143,7 +147,9 @@
     },
     "permissions": {
       "cls": "local",
-      "esc": true
+      "esc": true,
+      "nav": "picker",
+      "panelExpect": "Permission"
     },
     "mcp": {
       "cls": "local",

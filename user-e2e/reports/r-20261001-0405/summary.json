@@ -1,0 +1,772 @@
+{
+  "runId": "r-20261001-0405",
+  "generatedAt": "2026-10-01T03:36:09.596Z",
+  "totals": {
+    "PASS": 8,
+    "FAIL": 7,
+    "STUCK": 80,
+    "TIMEOUT": 1
+  },
+  "cases": [
+    {
+      "id": "gate",
+      "tier": "gate",
+      "verdict": "PASS",
+      "ms": 245,
+      "note": "网关 200/1ms models=Qwen38-27B-TXT,bge-m3,deepseek-v4-flash,deepseek-v4-pro,glm-5,glm-5.1；settings roles=small,fast,premium；LLM 单轮 OK"
+    },
+    {
+      "id": "core-1",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 40186,
+      "note": "4/4 轮 marker 渲染（基本多轮通）"
+    },
+    {
+      "id": "core-2",
+      "tier": "core",
+      "verdict": "FAIL",
+      "ms": 466,
+      "layer": "L2",
+      "note": "headless 多轮断：r1=true r2=ok——engine loop 续轮面"
+    },
+    {
+      "id": "core-3",
+      "tier": "core",
+      "verdict": "FAIL",
+      "ms": 301111,
+      "layer": "L2",
+      "note": "工具回合断：渲染=false（marker 1/2）磁盘=false"
+    },
+    {
+      "id": "core-4",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 21459,
+      "note": "流式中排队输入正常（w2 入队 → w1 完成后渲染）"
+    },
+    {
+      "id": "slash/add-dir",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 127233,
+      "layer": "L2",
+      "note": "[STUCK] add-dir（local（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/agents",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 131957,
+      "layer": "L2",
+      "note": "[STUCK] agents（local（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/branch",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 127227,
+      "layer": "L2",
+      "note": "[STUCK] branch（local（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/clear",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 127226,
+      "layer": "L2",
+      "note": "[STUCK] clear（local，清屏后输入面须恢复（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/color",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 127230,
+      "layer": "L2",
+      "note": "[STUCK] color（local（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/config",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 71956,
+      "layer": "L2",
+      "note": "[STUCK] config（local（渲染滞后 60s））"
+    },
+    {
+      "id": "slash/copy",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97232,
+      "layer": "L2",
+      "note": "[STUCK] copy（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/context",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101263,
+      "layer": "L2",
+      "note": "[STUCK] context（local，命令面板面：Enter 被 suggestions guard 吞掉时输出缺失（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cost",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97235,
+      "layer": "L2",
+      "note": "[STUCK] cost（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/diff",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97230,
+      "layer": "L2",
+      "note": "[STUCK] diff（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/effort",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97227,
+      "layer": "L2",
+      "note": "[STUCK] effort（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/heapdump",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97234,
+      "layer": "L2",
+      "note": "[STUCK] heapdump（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/help",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97241,
+      "layer": "L2",
+      "note": "[STUCK] help（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ide",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97240,
+      "layer": "L2",
+      "note": "[STUCK] ide（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/mcp",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101955,
+      "layer": "L2",
+      "note": "[STUCK] mcp（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/memory",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101961,
+      "layer": "L2",
+      "note": "[STUCK] memory（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/model",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101957,
+      "layer": "L2",
+      "note": "[STUCK] model（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/output-style",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101955,
+      "layer": "L2",
+      "note": "[STUCK] output-style（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/plugin",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101956,
+      "layer": "L2",
+      "note": "[STUCK] plugin（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/release-notes",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97229,
+      "layer": "L2",
+      "note": "[STUCK] release-notes（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/reload-plugins",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97230,
+      "layer": "L2",
+      "note": "[STUCK] reload-plugins（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/rename",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97234,
+      "layer": "L2",
+      "note": "[STUCK] rename（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/resume",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101950,
+      "layer": "L2",
+      "note": "[STUCK] resume（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/session",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101945,
+      "layer": "L2",
+      "note": "[STUCK] session（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/skills",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 106885,
+      "layer": "L2",
+      "note": "[STUCK] skills（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/stats",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97238,
+      "layer": "L2",
+      "note": "[STUCK] stats（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/status",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97233,
+      "layer": "L2",
+      "note": "[STUCK] status（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/sessionlist",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101959,
+      "layer": "L2",
+      "note": "[STUCK] sessionlist（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/stickers",
+      "tier": "slash",
+      "verdict": "TIMEOUT",
+      "ms": 213921,
+      "layer": "L2",
+      "note": "[TIMEOUT] stickers（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/theme",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 106001,
+      "layer": "L2",
+      "note": "[STUCK] theme（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/terminal-setup",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 105211,
+      "layer": "L2",
+      "note": "[STUCK] terminal-setup（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/vim",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101966,
+      "layer": "L2",
+      "note": "[STUCK] vim（local，vim 模式切换后 Esc 退出（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/permissions",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101956,
+      "layer": "L2",
+      "note": "[STUCK] permissions（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/plan",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97232,
+      "layer": "L2",
+      "note": "[STUCK] plan（local，plan 模式切换（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/hooks",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97235,
+      "layer": "L2",
+      "note": "[STUCK] hooks（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/export",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97237,
+      "layer": "L2",
+      "note": "[STUCK] export（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/sandbox",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97231,
+      "layer": "L2",
+      "note": "[STUCK] sandbox（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/tasks",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101959,
+      "layer": "L2",
+      "note": "[STUCK] tasks（local（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/tasklist",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 2308,
+      "layer": "L2",
+      "note": "[STUCK] tasklist（local）"
+    },
+    {
+      "id": "slash/code-review:code-review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98051,
+      "layer": "L2",
+      "note": "[STUCK] code-review:code-review（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/claude-md-management:revise-claude-md",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98032,
+      "layer": "L2",
+      "note": "[STUCK] claude-md-management:revise-claude-md（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/feature-dev:feature-dev",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97245,
+      "layer": "L2",
+      "note": "[STUCK] feature-dev:feature-dev（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/frontend-design:frontend-design",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98039,
+      "layer": "L2",
+      "note": "[STUCK] frontend-design:frontend-design（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/claude-md-management:claude-md-improver",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98045,
+      "layer": "L2",
+      "note": "[STUCK] claude-md-management:claude-md-improver（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/skill-creator:skill-creator",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98040,
+      "layer": "L2",
+      "note": "[STUCK] skill-creator:skill-creator（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-code-review:ascend-code-review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98064,
+      "layer": "L2",
+      "note": "[STUCK] ascend-code-review:ascend-code-review（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-perf-optimize:ascend-perf-optimize",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98045,
+      "layer": "L2",
+      "note": "[STUCK] ascend-perf-optimize:ascend-perf-optimize（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-precision-debug:ascend-precision-debug",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98042,
+      "layer": "L2",
+      "note": "[STUCK] ascend-precision-debug:ascend-precision-debug（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-runtime-debug:ascend-runtime-debug",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98049,
+      "layer": "L2",
+      "note": "[STUCK] ascend-runtime-debug:ascend-runtime-debug（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-test-design:ascend-test-design",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98046,
+      "layer": "L2",
+      "note": "[STUCK] ascend-test-design:ascend-test-design（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/ascend-tiling-design:ascend-tiling-design",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98038,
+      "layer": "L2",
+      "note": "[STUCK] ascend-tiling-design:ascend-tiling-design（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-aiss-tiling-solver:cannbot-aiss-tiling-solver",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98039,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-aiss-tiling-solver:cannbot-aiss-tiling-solver（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-catlass-op:cannbot-catlass-op",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98041,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-catlass-op:cannbot-catlass-op（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-cuda2ascend-simt:cannbot-cuda2ascend-simt",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98042,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-cuda2ascend-simt:cannbot-cuda2ascend-simt（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-infra-skills:cannbot-infra-skills",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98038,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-infra-skills:cannbot-infra-skills（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-model-infer:cannbot-model-infer",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98040,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-model-infer:cannbot-model-infer（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-ops-direct-invoke:cannbot-ops-direct-invoke",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98040,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-ops-direct-invoke:cannbot-ops-direct-invoke（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-pypto-op-orchestrator:cannbot-pypto-op-orchestrator",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98040,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-pypto-op-orchestrator:cannbot-pypto-op-orchestrator（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-tilelang-op:cannbot-tilelang-op",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98036,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-tilelang-op:cannbot-tilelang-op（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/cannbot-triton-op-generator:cannbot-triton-op-generator",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97248,
+      "layer": "L2",
+      "note": "[STUCK] cannbot-triton-op-generator:cannbot-triton-op-generator（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/common-deploy:common-deploy",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98047,
+      "layer": "L2",
+      "note": "[STUCK] common-deploy:common-deploy（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/common-infra-skills:common-infra-skills",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98042,
+      "layer": "L2",
+      "note": "[STUCK] common-infra-skills:common-infra-skills（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/common-migration:common-migration",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98045,
+      "layer": "L2",
+      "note": "[STUCK] common-migration:common-migration（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/community-ascendc-op:community-ascendc-op",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98072,
+      "layer": "L2",
+      "note": "[STUCK] community-ascendc-op:community-ascendc-op（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/community-catlass-op:community-catlass-op",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98044,
+      "layer": "L2",
+      "note": "[STUCK] community-catlass-op:community-catlass-op（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/community-triton-op:community-triton-op",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98042,
+      "layer": "L2",
+      "note": "[STUCK] community-triton-op:community-triton-op（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/mindspeed-drivingsdk:mindspeed-drivingsdk",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98043,
+      "layer": "L2",
+      "note": "[STUCK] mindspeed-drivingsdk:mindspeed-drivingsdk（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/mindstudio-ascendc-perf-optim:mindstudio-ascendc-perf-optim",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98041,
+      "layer": "L2",
+      "note": "[STUCK] mindstudio-ascendc-perf-optim:mindstudio-ascendc-perf-optim（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/vllm-ascend:vllm-ascend",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98043,
+      "layer": "L2",
+      "note": "[STUCK] vllm-ascend:vllm-ascend（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/btw",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98042,
+      "layer": "L2",
+      "note": "[STUCK] btw（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/compact",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98038,
+      "layer": "L2",
+      "note": "[STUCK] compact（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/doctor",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98044,
+      "layer": "L2",
+      "note": "[STUCK] doctor（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/init",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 99653,
+      "layer": "L2",
+      "note": "[STUCK] init（llm，写 CLAUDE.md（沙箱工作区）（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/pr-comments",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 99645,
+      "layer": "L2",
+      "note": "[STUCK] pr-comments（llm，无 PR，优雅降级（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/statusline",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 99647,
+      "layer": "L2",
+      "note": "[STUCK] statusline（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/feedback",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98043,
+      "layer": "L2",
+      "note": "[STUCK] feedback（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 98039,
+      "layer": "L2",
+      "note": "[STUCK] review（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/security-review",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 97246,
+      "layer": "L2",
+      "note": "[STUCK] security-review（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/insights",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 139791,
+      "layer": "L2",
+      "note": "[STUCK] insights（llm（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/logout",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 807,
+      "layer": "L2",
+      "note": "[STUCK] logout（auth）"
+    },
+    {
+      "id": "slash/login",
+      "tier": "slash",
+      "verdict": "STUCK",
+      "ms": 101975,
+      "layer": "L2",
+      "note": "[STUCK] login（auth，OAuth 流程面，Esc 中止（渲染滞后 45s））"
+    },
+    {
+      "id": "slash/exit",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 5649,
+      "note": "/exit 进程干净退出"
+    },
+    {
+      "id": "slash/rewind",
+      "tier": "slash",
+      "verdict": "PASS",
+      "ms": 7678,
+      "note": "rewind（独立 session，未崩）"
+    },
+    {
+      "id": "short-marker",
+      "tier": "short",
+      "verdict": "PASS",
+      "ms": 6674,
+      "note": "short 任务通过（pty+headless）"
+    },
+    {
+      "id": "short-multiturn",
+      "tier": "short",
+      "verdict": "PASS",
+      "ms": 9670,
+      "note": "short 任务通过（pty）"
+    },
+    {
+      "id": "short-filewrite",
+      "tier": "short",
+      "verdict": "FAIL",
+      "ms": 365257,
+      "layer": "L2",
+      "note": "short 任务断：pty(undefined:0/2 disk:false)；headless(result=success is_error=false tools= disk=false)"
+    },
+    {
+      "id": "short-tool-read",
+      "tier": "short",
+      "verdict": "FAIL",
+      "ms": 366278,
+      "layer": "L2",
+      "note": "short 任务断：pty(undefined:0/2 disk:false)；headless(result=success is_error=false tools= disk=false)"
+    },
+    {
+      "id": "medium-fixbug",
+      "tier": "medium",
+      "verdict": "FAIL",
+      "ms": 23975,
+      "layer": "L2",
+      "note": "fixture 任务断：pty(settle=true test=false（磁盘 ground truth）)；headless(result=success is_error=false tools=0次 test=false)"
+    },
+    {
+      "id": "medium-feature",
+      "tier": "medium",
+      "verdict": "FAIL",
+      "ms": 59398,
+      "layer": "L2",
+      "note": "fixture 任务断：pty(settle=true test=false（磁盘 ground truth）)；headless(result=success is_error=false tools=0次 test=false)"
+    },
+    {
+      "id": "long-multistep",
+      "tier": "long",
+      "verdict": "FAIL",
+      "ms": 7347,
+      "layer": "L2",
+      "note": "长程断：result=true test=false commit=false 工具=0/25"
+    },
+    {
+      "id": "soak",
+      "tier": "long",
+      "verdict": "PASS",
+      "ms": 39365,
+      "note": "soak 10/10 轮（loop 无漂移）；时延曲线 {\"e2e-soak-1\":4017,\"e2e-soak-2\":3216,\"e2e-soak-3\":3216,\"e2e-soak-4\":4016,\"e2e-soak-5\":3211,\"e2e-soak-6\":3211,\"e2e-soak-7\":5619,\"e2e-soak-8\":3208,\"e2e-soak-9\":3209,\"e2e-soak"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { appendFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { nowIso } from './util'
 
-export type Verdict = 'PASS' | 'FAIL' | 'TIMEOUT' | 'STUCK' | 'SKIP'
+export type Verdict = 'PASS' | 'FAIL' | 'TIMEOUT' | 'STUCK' | 'NAVFAIL' | 'SKIP'
 
 export interface CaseRec {
   id: string

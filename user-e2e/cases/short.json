@@ -28,5 +28,58 @@
     "drivers": ["pty", "headless"],
     "disk": { "path": "README.md", "contains": "e2e-fixture-readme" },
     "timeoutMs": 300000
+  },
+  {
+    "_note": "工具触发族（方案 C）：逐工具暴露模型工具调用遵循率。headless 断 toolExpect（stream-json tool_use）；pty 断 marker（模型回复含工具输出）。弱模型 0 调用时 headless 缺工具、pty 无 marker → 双 FAIL（P1-C 暴露面）。",
+    "id": "short-fileedit",
+    "prompt": "第一步用 Write 工具创建文件 edit-target.txt，内容三行：alpha / beta / gamma。第二步用 Edit 工具把 beta 这一行改成 EDITED-E2E。完成后回复最终文件内容。",
+    "drivers": ["pty", "headless"],
+    "marker": "EDITED-E2E",
+    "disk": { "path": "edit-target.txt", "contains": "EDITED-E2E" },
+    "toolExpect": ["Edit"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-bash-run",
+    "prompt": "用 Bash 工具运行命令 node -e 'console.log(\"BASH-OUT-e2e\")'，然后把命令的标准输出原样回复。",
+    "drivers": ["pty", "headless"],
+    "marker": "BASH-OUT-e2e",
+    "toolExpect": ["Bash"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-grep",
+    "prompt": "第一步用 Write 工具创建文件 grep-target.txt，内容三行：foo / GREP-TARGET-e2e / bar。第二步用 Grep 工具搜索 grep-target.txt 中包含 GREP-TARGET-e2e 的行。回复匹配的行。",
+    "drivers": ["pty", "headless"],
+    "marker": "GREP-TARGET-e2e",
+    "toolExpect": ["Grep"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-glob",
+    "prompt": "第一步用 Write 工具在 src 目录下创建两个文件：src/glob-alpha-e2e.js（内容 // alpha）和 src/glob-beta-e2e.js（内容 // beta）。第二步用 Glob 工具列出 src 下所有 .js 文件。回复文件名列表。",
+    "drivers": ["pty", "headless"],
+    "marker": "glob-alpha-e2e",
+    "toolExpect": ["Glob"],
+    "timeoutMs": 300000
+  },
+  {
+    "id": "short-agent",
+    "prompt": "用 Agent 工具（子代理）完成以下任务并汇报结果：在当前目录创建文件 agent-target.txt（内容一行：AGENT-TARGET-e2e），然后读取该文件并确认内容。汇报子代理的执行结果。",
+    "drivers": ["pty", "headless"],
+    "marker": "AGENT-TARGET-e2e",
+    "toolExpect": ["Agent"],
+    "timeoutMs": 360000
+  },
+  {
+    "_note": "B6 worktree 隔离（AtlasCode 核心卖点）：EnterWorktree 创建隔离 git worktree → 在其中创建文件 → ExitWorktree 恢复。需 gitInit。",
+    "id": "short-worktree",
+    "prompt": "请按顺序完成：1) 用 EnterWorktree 工具创建一个隔离 worktree（名字用 wt-e2e）；2) 在 worktree 内用 Write 工具创建文件 wt-target.txt，内容一行：WT-TARGET-E2E；3) 用 ExitWorktree 工具退出 worktree（action=remove，discard_changes=true）；4) 回复完成情况。",
+    "drivers": ["headless"],
+    "marker": "WT-TARGET-E2E",
+    "disk": { "path": "wt-target.txt", "contains": "WT-TARGET-E2E" },
+    "toolExpect": ["EnterWorktree", "ExitWorktree"],
+    "gitInit": true,
+    "timeoutMs": 360000
   }
 ]

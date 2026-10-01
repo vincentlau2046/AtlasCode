@@ -97,6 +97,21 @@ export function classify(rec: CaseRec): LayerResult {
     }
   }
 
+  // NAVFAIL（picker/dialog 渲染了但导航坏：选不中/Esc 关不掉/选择后崩）
+  // 与 STUCK 区分：STUCK = 输入框死（连探针都不回显）；NAVFAIL = 面板出了但交互坏
+  if (rec.verdict === 'NAVFAIL') {
+    return {
+      layer: 'L1',
+      title: 'picker/dialog 渲染但交互导航坏（选择/Esc/焦点异常）',
+      rationale: notes,
+      suspects: [
+        ...SUSPECTS.L1,
+        'src/tui/components/CustomSelect/（键盘导航 ↑↓EnterEsc）',
+        'src/tui/keybindings/（Select scope 绑定）',
+      ],
+    }
+  }
+
   // STUCK（session 被打死/输入失联）
   if (rec.verdict === 'STUCK') {
     return {
