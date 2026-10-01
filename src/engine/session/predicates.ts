@@ -11,6 +11,8 @@
  * 前向补裁。
  */
 import type { Message, Entry, TranscriptMessage, SystemCompactBoundaryMessage } from './types'
+// D-2a S1：compact 边界谓词单源参数放宽到 shared Message（见下 isCompactBoundaryMessage 头注）
+import type { Message as SharedMessage } from '../../shared'
 
 /**
  * 旧 L134 逐字。Type guard to check if an entry is a transcript message.
@@ -84,11 +86,14 @@ export function isEphemeralToolProgress(dataType: unknown): boolean {
 }
 
 /**
- * 旧 messages.ts L4596 逐字（入参收敛为域 Message 型）。Checks if a message
- * is a compact boundary marker.
+ * 旧 messages.ts L4596 逐字（D-2a S1 入参放宽：域 Message 型 → shared
+ * Message 单源契约——结构谓词只读 {type, subtype} 两字段判别，session 域
+ * Message / Entry 并集 / shared Message 均结构可赋，判别收窄形不变；
+ * 新仓跨子域消费方 context/snipRuntime 经 shared Message 单源调用）。
+ * Checks if a message is a compact boundary marker.
  */
 export function isCompactBoundaryMessage(
-  message: Message,
+  message: SharedMessage,
 ): message is SystemCompactBoundaryMessage {
   return message?.type === 'system' && message.subtype === 'compact_boundary'
 }

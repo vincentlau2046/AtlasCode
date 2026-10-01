@@ -252,3 +252,11 @@ export function microcompactMessages(
  * 后续纵切：stateful microcompact（cachedMicrocompact 面）落位时重实现。
  */
 export function resetMicrocompactState(): void {}
+
+/**
+ * CACHED_MICROCOMPACT 残留守 stub（D-2a S1：旧仓 cachedMCConfig.ts 逐字迁入；
+ * 原 tui orchestrator/context/cachedMCConfig.ts 同名 stub 随 S9 删目录退役）。
+ * feature('CACHED_MICROCOMPACT') 门控默认 OFF = 死路径零运行时影响（any-stub，
+ * 消费点 tui constants/prompts.ts 懒加载 + 门控，缺省态返回空对象）。
+ */
+export const getCachedMCConfig : any = (() => ({})) as any;

@@ -26,6 +26,9 @@ export {
 export {
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
   ERROR_MESSAGE_USER_ABORT,
+  // D-2a S1（M5 切端）：旧仓 compact.ts:283 中断错误常量
+  //（isCompactBoundaryMessage 谓词单源 = session/predicates.ts，session 门面已出）
+  ERROR_MESSAGE_INCOMPLETE_RESPONSE,
   COMPACT_MAX_OUTPUT_TOKENS,
   getCompactPrompt,
   formatCompactSummary,
@@ -49,6 +52,8 @@ export {
   evaluateTimeBasedTrigger,
   microcompactMessages,
   resetMicrocompactState,
+  // D-2a S1（M5 切端）：CACHED_MICROCOMPACT 残留守 stub（旧仓 cachedMCConfig 逐字）
+  getCachedMCConfig,
   type TimeBasedMCConfig,
   type MicrocompactDeps,
   type MicrocompactOutcome,
@@ -59,7 +64,21 @@ export {
   isSnipBoundaryMessage,
   projectSnippedView,
   snipProjection,
+  // D-2a S1（M5 切端）：旧仓名 dedup 别名 + nudge 文案常量
+  isSnipMarkerMessage,
+  SNIP_NUDGE_TEXT,
 } from './snipProjection'
+// D-2a S1（M5 切端）：snip 运行时门控 + nudge 节奏（env kill-switch 化）
+export {
+  isSnipRuntimeEnabled,
+  shouldNudgeForSnips,
+} from './snipRuntime'
+// D-2a S1（M5 切端）：压缩警告抑制 store（React-free；hook 留 tui 壳）
+export {
+  compactWarningStore,
+  suppressCompactWarning,
+  clearCompactWarningSuppression,
+} from './compactWarningState'
 export {
   isReactiveCompactEnabled,
   isWithheldPromptTooLong,

@@ -38,6 +38,10 @@ export const ERROR_MESSAGE_NOT_ENOUGH_MESSAGES =
 /** 压缩摘要预留输出 token（旧仓常量）。 */
 export const COMPACT_MAX_OUTPUT_TOKENS = 20_000
 
+/** 摘要中断错误（旧仓 compact.ts:283 逐字，D-2a S1 回填）。 */
+export const ERROR_MESSAGE_INCOMPLETE_RESPONSE =
+  'Compaction interrupted · This may be due to network issues — please try again.'
+
 export interface CompactionResult {
   /** 压缩边界标记（system 消息，post-compact 消息序列头）。 */
   boundaryMarker: Message

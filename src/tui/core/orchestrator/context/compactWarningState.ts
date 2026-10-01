@@ -1,18 +1,10 @@
-import { createStore } from '../../../state/store.js'
-
-/**
- * Tracks whether the "context left until autocompact" warning should be suppressed.
- * We suppress immediately after successful compaction since we don't have accurate
- * token counts until the next API response.
- */
-export const compactWarningStore = createStore<boolean>(false)
-
-/** Suppress the compact warning. Call after successful compaction. */
-export function suppressCompactWarning(): void {
-  compactWarningStore.setState(() => true)
-}
-
-/** Clear the compact warning suppression. Called at start of new compact attempt. */
-export function clearCompactWarningSuppression(): void {
-  compactWarningStore.setState(() => false)
-}
+// D-2a S1（M5 切端）：压缩警告抑制态面单源迁 engine（engine/context/
+// compactWarningState.ts，React-free store）——本文件退化为 re-export 壳：
+// orchestrator 内部（microCompact clear/suppress 调用）+ React hook
+// compactWarningHook（useSyncExternalStore 订阅）经本壳统一拿到 engine store
+// 单实例（S9 随 orchestrator 目录删除）。
+export {
+  compactWarningStore,
+  suppressCompactWarning,
+  clearCompactWarningSuppression,
+} from 'src/engine'

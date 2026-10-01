@@ -438,6 +438,17 @@ export {
   isSnipBoundaryMessage,
   projectSnippedView,
   snipProjection,
+  // D-2a S1（M5 切端）：engine context 低/中风险面回填（常量/谓词/stub/store；
+  // tui 同名符号经 engineCompat 显式 engine 侧 re-export 胜双星号）
+  ERROR_MESSAGE_INCOMPLETE_RESPONSE,
+  isSnipMarkerMessage,
+  SNIP_NUDGE_TEXT,
+  isSnipRuntimeEnabled,
+  shouldNudgeForSnips,
+  getCachedMCConfig,
+  compactWarningStore,
+  suppressCompactWarning,
+  clearCompactWarningSuppression,
   isReactiveCompactEnabled,
   isWithheldPromptTooLong,
   isWithheldMediaSizeError,

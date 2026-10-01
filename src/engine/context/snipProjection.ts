@@ -21,6 +21,23 @@ export function isSnipBoundaryMessage(message: Message): boolean {
 }
 
 /**
+ * 旧仓名 isSnipMarkerMessage（旧仓 snipCompact.ts:227）= isSnipBoundaryMessage
+ * 逐字等价谓词。D-2a S1 dedup：仅导出别名（旧仓消费名），不保留第二份拷贝。
+ */
+export function isSnipMarkerMessage(message: Message): boolean {
+  return isSnipBoundaryMessage(message)
+}
+
+/**
+ * 上下文效率 nudge 文案（旧仓 snipCompact.ts:262 逐字，D-2a S1 回填）。
+ * 作为 meta user 消息 content 逐字使用（normalizeAttachmentForAPI 面）。
+ */
+export const SNIP_NUDGE_TEXT: string =
+  'Your context is getting inefficient. If you have low-value, redundant, or ' +
+  'superseded history, use the Snip tool to summarize and remove it, keeping ' +
+  'only the most recent turns verbatim so the context window stays efficient.'
+
+/**
  * 投影消息列表至**模型可见** snip 视图（旧仓逐字）：模型不应看到最近
  * snip 边界之前的轮次（已被摘要替换）；仅返回最后一个 snip_boundary
  * 之后的消息（边界自身不含——下游 normalizeMessagesForAPI 过滤）。

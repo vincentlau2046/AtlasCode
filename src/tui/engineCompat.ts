@@ -52,3 +52,20 @@ export {
   MANUAL_COMPACT_BUFFER_TOKENS,
   WARNING_THRESHOLD_BUFFER_TOKENS,
 } from './core/orchestrator/context/autoCompact.js'
+
+// D-2a S1（M5 切端）：engine context 低/中风险面已回填 engine（D-2a 回填波
+// engine/context/{compact,snipProjection,microCompact,snipRuntime,compactWarningState}）
+// → 7 名从 orchestrator 切 engine 单源（engine 与 orchestrator 星号同名冲突
+// 时显式 re-export 胜——engine 侧显式块压过两侧星号；(b) 富体簇 18 名仍走上方
+// orchestrator 冲突块，待 S2-S6 富体回填后逐簇切）。useCompactWarningSuppression
+// （React hook）= 引擎 React-free 红线，留 tui 壳（store 已切 engine，hook 经
+// tui compactWarningState.ts re-export 壳订阅 engine store）。
+export {
+  ERROR_MESSAGE_INCOMPLETE_RESPONSE,
+  isSnipMarkerMessage,
+  isSnipRuntimeEnabled,
+  shouldNudgeForSnips,
+  SNIP_NUDGE_TEXT,
+  getCachedMCConfig,
+  suppressCompactWarning,
+} from 'src/engine'
