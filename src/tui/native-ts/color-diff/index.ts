@@ -34,7 +34,6 @@ type HLJSApi = typeof hljsNamespace
 let cachedHljs: HLJSApi | null = null
 function hljs(): HLJSApi {
   if (cachedHljs) return cachedHljs
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const mod = require('highlight.js')
   // highlight.js uses `export =` (CJS). Under bun/ESM the interop wraps it
   // in .default; under node CJS the module IS the API. Check at runtime.

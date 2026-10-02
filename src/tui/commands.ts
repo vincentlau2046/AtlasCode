@@ -43,12 +43,10 @@ import status from './commands/status/index.js'
 import tasks from './commands/tasks/index.js'
 import tasklist from './commands/tasklist/index.js'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：teleport 命令（1P CCR/teleport 簇死 stub）随 1P 簇裁除
-/* eslint-disable @typescript-eslint/no-require-imports */
 const IS_ATLAS_DEV = (process.env.ATLAS_DEV) === '1' || (process.env.ATLAS_DEV) === 'true'
 const agentsPlatform = IS_ATLAS_DEV
   ? require('src/tui/commands/agents-platform/index.js').default
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 import securityReview from './commands/security-review.js'
 import bughunter from './commands/bughunter/index.js'
 import terminalSetup from './commands/terminalSetup/index.js'
@@ -57,7 +55,6 @@ import theme from './commands/theme/index.js'
 import vim from './commands/vim/index.js'
 import { feature } from 'src/shared'
 // Dead code elimination: conditional imports
-/* eslint-disable @typescript-eslint/no-require-imports */
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge（BRIDGE_MODE）+ remoteControlServer（DAEMON+BRIDGE_MODE）
 // 两 1P 远程面命令裁除；voice（VOICE_MODE）为国产 ASR 网关车道，保留
 const voiceCommand = feature('VOICE_MODE')
@@ -88,7 +85,6 @@ const forkCmd = feature('FORK_SUBAGENT')
       require('./commands/fork/index.js') as typeof import('./commands/fork/index.js')
     ).default
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 import thinkback from './commands/thinkback/index.js'
 import thinkbackPlay from './commands/thinkback-play/index.js'
 import permissions from './commands/permissions/index.js'

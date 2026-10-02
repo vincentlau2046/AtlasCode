@@ -287,7 +287,6 @@ export function getRenderContext(exitOnCtrlC: boolean): {
           // on abrupt exit. ~100 bytes at ≤60fps is negligible. rss/cpu are
           // single syscalls; cpu is cumulative — bench side computes delta.
           const line =
-          // eslint-disable-next-line custom-rules/no-direct-json-operations -- tiny object, hot bench path
           JSON.stringify({
             total: event.durationMs,
             ...event.phases,

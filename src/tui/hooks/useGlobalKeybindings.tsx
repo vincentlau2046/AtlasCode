@@ -57,7 +57,6 @@ export function GlobalKeybindingHandlers({
       const {
         getAllInProcessTeammateTasks
       } =
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../tasks/InProcessTeammateTask/InProcessTeammateTask.js') as typeof import('../tasks/InProcessTeammateTask/InProcessTeammateTask.js');
       const hasTeammates = count(getAllInProcessTeammateTasks(prev.tasks), t => t.status === 'running') > 0;
       if (hasTeammates) {

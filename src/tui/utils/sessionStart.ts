@@ -65,7 +65,6 @@ export async function processSessionStartHooks(
       await withDiagnosticsTiming('load_plugin_hooks', () => loadPluginHooks())
     } catch (error) {
       // Log error but don't crash - continue with session start without plugin hooks
-      /* eslint-disable no-restricted-syntax -- both branches wrap with context, not a toError case */
       const enhancedError =
         error instanceof Error
           ? new Error(
@@ -74,7 +73,6 @@ export async function processSessionStartHooks(
           : new Error(
               `Failed to load plugin hooks during ${source}: ${String(error)}`,
             )
-      /* eslint-enable no-restricted-syntax */
 
       if (error instanceof Error && error.stack) {
         enhancedError.stack = error.stack

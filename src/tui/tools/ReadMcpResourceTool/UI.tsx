@@ -30,7 +30,6 @@ export function renderToolResultMessage(output: Output, _progressMessagesForMess
   }
 
   // Format as JSON for better readability
-  // eslint-disable-next-line no-restricted-syntax -- human-facing UI, not tool_result
   const formattedOutput = jsonStringify(output, null, 2);
   return <OutputLine content={formattedOutput} verbose={verbose} />;
 }

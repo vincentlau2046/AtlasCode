@@ -10,7 +10,6 @@ let _npmSemver: typeof import('semver') | undefined
 
 function getNpmSemver(): typeof import('semver') {
   if (!_npmSemver) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     _npmSemver = require('semver') as typeof import('semver')
   }
   return _npmSemver

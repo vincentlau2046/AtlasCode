@@ -74,7 +74,6 @@ import {
 } from '../utils/sessionStorage.js'
 import { sleep } from '../utils/sleep.js'
 import { jsonStringify } from '../utils/slowOperations.js'
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { asSystemPrompt } from '../utils/systemPromptType.js'
 import { getTaskOutputPath } from '../utils/task/diskOutput.js'
 import {

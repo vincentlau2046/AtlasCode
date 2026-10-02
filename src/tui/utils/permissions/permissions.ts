@@ -55,7 +55,6 @@ import {
   shouldAllowManagedPermissionRulesOnly,
 } from './permissionsLoader.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const classifierDecisionModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('./classifierDecision.js') as typeof import('./classifierDecision.js'))
   : null
@@ -76,7 +75,6 @@ import {
   buildYoloRejectionMessage,
   DONT_ASK_REJECT_MESSAGE,
 } from '../messages.js'
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { jsonStringify } from '../slowOperations.js'
 import {
   createDenialTrackingState,

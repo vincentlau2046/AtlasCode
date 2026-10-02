@@ -816,7 +816,6 @@ type ToolDefaults = typeof TOOL_DEFAULTS
 // constraint provides contextual typing for method parameters; `any` in
 // constraint position is structural and never leaks into the return type.
 // BuiltTool<D> mirrors runtime `{...TOOL_DEFAULTS, ...def}` at the type level.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyToolDef = ToolDef<any, any, any>
 
 export function buildTool<D extends AnyToolDef>(def: D): BuiltTool<D> {

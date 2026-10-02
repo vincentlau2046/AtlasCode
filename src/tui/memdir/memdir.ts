@@ -9,7 +9,6 @@ import { RootedMemoryStore } from 'src/memory'
 import type { MemoryStore } from 'src/memory'
 import { getAutoMemPath } from './paths.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
   ? (require('./teamMemPaths.js') as typeof import('./teamMemPaths.js'))
   : null
@@ -17,7 +16,6 @@ const teamMemPaths = feature('TEAMMEM')
 import { getOriginalCwd } from 'src/bootstrap'
 import { getCoreDependencies } from 'src/tui/factory'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { GREP_TOOL_NAME } from '../tools/GrepTool/prompt.js'
 import { isReplModeEnabled } from '../tools/REPLTool/constants.js'
 import { logForDebugging } from '../utils/debug.js'
@@ -108,11 +106,9 @@ export function truncateEntrypointContent(raw: string): EntrypointTruncation {
   }
 }
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPrompts = feature('TEAMMEM')
   ? (require('./teamMemPrompts.js') as typeof import('./teamMemPrompts.js'))
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 /**
  * Shared guidance text appended to each memory directory prompt line.
@@ -258,7 +254,6 @@ export function buildMemoryPrompt(
   // Read existing memory entrypoint (sync: prompt building is synchronous)
   let entrypointContent = ''
   try {
-    // eslint-disable-next-line custom-rules/no-sync-fs
     entrypointContent = s.readFileSync(entrypoint, { encoding: 'utf-8' })
   } catch {
     // No memory file yet

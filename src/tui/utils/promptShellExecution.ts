@@ -31,7 +31,6 @@ import { isPowerShellToolEnabled } from './shell/shellToolUtils.js'
 // (and transitively parser.ts, validators, etc.) at startup on all
 // platforms, defeating tools.ts's lazy require. Deferred until the
 // first skill with `shell: powershell` actually runs.
-/* eslint-disable @typescript-eslint/no-require-imports */
 const getPowerShellTool = (() => {
   let cached: PromptShellTool | undefined
   return (): PromptShellTool => {
@@ -43,7 +42,6 @@ const getPowerShellTool = (() => {
     return cached
   }
 })()
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 // Pattern for code blocks: ```! command ```
 const BLOCK_PATTERN = /```!\s*\n?([\s\S]*?)\n?```/g

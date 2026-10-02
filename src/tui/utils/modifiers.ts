@@ -13,7 +13,6 @@ export function prewarmModifiers(): void {
   prewarmed = true
   // Load module in background
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { prewarm } = require('modifiers-napi') as { prewarm: () => void }
     prewarm()
   } catch {
@@ -30,7 +29,6 @@ export function isModifierPressed(modifier: ModifierKey): boolean {
   }
   // Dynamic import to avoid loading native module at top level
   const { isModifierPressed: nativeIsModifierPressed } =
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('modifiers-napi') as { isModifierPressed: (m: string) => boolean }
   return nativeIsModifierPressed(modifier)
 }

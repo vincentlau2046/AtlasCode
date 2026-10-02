@@ -106,7 +106,6 @@ export function createLSPServerInstance(
   // Private state encapsulated via closures. Lazy-require LSPClient so
   // vscode-jsonrpc (~129KB) only loads when an LSP server is actually
   // instantiated, not when the static import chain reaches this module.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createLSPClient } = require('./LSPClient.js') as {
     createLSPClient: typeof createLSPClientType
   }

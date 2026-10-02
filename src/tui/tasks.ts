@@ -5,14 +5,12 @@ import { LocalAgentTask } from './tasks/LocalAgentTask/LocalAgentTask.js'
 import { LocalShellTask } from './tasks/LocalShellTask/LocalShellTask.js'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteAgentTask（1P 远程会话任务）随 1P 簇裁除
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const LocalWorkflowTask: Task | null = feature('WORKFLOW_SCRIPTS')
   ? require('./tasks/LocalWorkflowTask/LocalWorkflowTask.js').LocalWorkflowTask
   : null
 const MonitorMcpTask: Task | null = feature('MONITOR_TOOL')
   ? require('./tasks/MonitorMcpTask/MonitorMcpTask.js').MonitorMcpTask
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 /**
  * Get all tasks.

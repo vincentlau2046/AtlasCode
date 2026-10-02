@@ -32,7 +32,7 @@ import { NotebookEditTool } from './tools/NotebookEditTool/NotebookEditTool.js'
 import { WebFetchTool } from './tools/WebFetchTool/WebFetchTool.js'
 import { TaskStopTool } from './tools/TaskStopTool/TaskStopTool.js'
 // Dead code elimination: conditional import for dev-only tools (gated by ATLAS_DEV)
-/* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
+/* eslint-disable custom-rules/no-process-env-top-level */
 const IS_ATLAS_DEV = (process.env.ATLAS_DEV) === '1' || (process.env.ATLAS_DEV) === 'true'
 const REPLTool = IS_ATLAS_DEV
   ? require('./tools/REPLTool/REPLTool.js').REPLTool
@@ -44,7 +44,7 @@ const cronTools = feature('AGENT_TRIGGERS')
       require('./tools/ScheduleCronTool/CronListTool.js').CronListTool,
     ]
   : []
-/* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
+/* eslint-enable custom-rules/no-process-env-top-level */
 // G-3（§8.74.28）F 类 1P 整裁：RemoteTriggerTool 面（feature
 // AGENT_TRIGGERS_REMOTE 门控行 + 池行）随 remotetriggers 子系统删除
 import { TaskOutputTool } from './tools/TaskOutputTool/TaskOutputTool.js'
@@ -55,7 +55,6 @@ import { TestingPermissionTool } from './tools/testing/TestingPermissionTool.js'
 import { GrepTool } from './tools/GrepTool/GrepTool.js'
 import { TungstenTool } from './tools/TungstenTool/TungstenTool.js'
 // Lazy require to break circular dependency: tools.ts -> TeamCreateTool/TeamDeleteTool -> ... -> tools.ts
-/* eslint-disable @typescript-eslint/no-require-imports */
 const getTeamCreateTool = () =>
   require('./tools/TeamCreateTool/TeamCreateTool.js')
     .TeamCreateTool as typeof import('./tools/TeamCreateTool/TeamCreateTool.js').TeamCreateTool
@@ -65,7 +64,6 @@ const getTeamDeleteTool = () =>
 const getSendMessageTool = () =>
   require('./tools/SendMessageTool/SendMessageTool.js')
     .SendMessageTool as typeof import('./tools/SendMessageTool/SendMessageTool.js').SendMessageTool
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { AskUserQuestionTool } from './tools/AskUserQuestionTool/AskUserQuestionTool.js'
 import { LSPTool } from './tools/LSPTool/LSPTool.js'
 import { ListMcpResourcesTool } from './tools/ListMcpResourcesTool/ListMcpResourcesTool.js'
@@ -94,7 +92,6 @@ export {
 // bundled build resolves `bun:bundle` to this same shim, so this is zero behavior
 // change for production — see src/native-ts/bunBundle.ts (mirrors memdir.ts:1-5).
 import { feature } from 'src/shared'
-/* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const coordinatorModeModule = feature('COORDINATOR_MODE')
   ? (require('./coordinator/coordinatorMode.js') as typeof import('./coordinator/coordinatorMode.js'))
   : null
@@ -121,7 +118,6 @@ const AscendBridge = feature('ASCEND_TOOLS')
       InferValidator: require('./tools/ascend/InferValidator.js').InferValidator,
     }
   : null
-/* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 import type { ToolPermissionContext } from './Tool.js'
 import { getDenyRuleForTool } from './utils/permissions/permissions.js'
 import { hasEmbeddedSearchTools } from './utils/embeddedTools.js'
@@ -135,14 +131,12 @@ import {
   isReplModeEnabled,
 } from './tools/REPLTool/constants.js'
 export { REPL_ONLY_TOOLS }
-/* eslint-disable @typescript-eslint/no-require-imports */
 const getPowerShellTool = () => {
   if (!isPowerShellToolEnabled()) return null
   return (
     require('./tools/PowerShellTool/PowerShellTool.js') as typeof import('./tools/PowerShellTool/PowerShellTool.js')
   ).PowerShellTool
 }
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 /**
  * Predefined tool presets that can be used with --tools flag

@@ -29,15 +29,12 @@ import { getVersion } from 'src/engine';
   PACKAGE_URL: '@atlasharness/atlascode',
 };
 
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 profileCheckpoint('main_tsx_entry');
 // MDM // import { startMdmRawRead } from './utils/settings/mdm/rawRead.js';
 
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 // MDM // startMdmRawRead();
 // Keychain // import { ensureKeychainPrefetchCompleted, startKeychainPrefetch } from './utils/secureStorage/keychainPrefetch.js';
 
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 // Keychain // startKeychainPrefetch();
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import { Command as CommanderCommand, InvalidArgumentError, Option } from '@commander-js/extra-typings';
@@ -81,15 +78,11 @@ import { initializeWarningHandler } from './utils/warningHandler.js';
 import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js';
 
 // Lazy require to avoid circular dependency: teammate.ts -> AppState.tsx -> ... -> main.tsx
-/* eslint-disable @typescript-eslint/no-require-imports */
 const getTeammateUtils = () => require('./utils/teammate.js') as typeof import('./utils/teammate.js');
 const getTeammatePromptAddendum = () => require('./utils/swarm/teammatePromptAddendum.js') as typeof import('./utils/swarm/teammatePromptAddendum.js');
 const getTeammateModeSnapshot = () => require('./utils/swarm/backends/teammateModeSnapshot.js') as typeof import('./utils/swarm/backends/teammateModeSnapshot.js');
-/* eslint-enable @typescript-eslint/no-require-imports */
 // Dead code elimination: conditional import for COORDINATOR_MODE
-/* eslint-disable @typescript-eslint/no-require-imports */
 const coordinatorModeModule = feature('COORDINATOR_MODE') ? require('./coordinator/coordinatorMode.js') as typeof import('./coordinator/coordinatorMode.js') : null;
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { resolve } from 'path';
 import { isAnalyticsDisabled } from 'src/tui/services/analytics/config.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/tui/services/analytics/growthbook.js';
@@ -104,7 +97,6 @@ import { launchInvalidSettingsDialog, launchResumeChooser, launchSnapshotUpdateD
 import { SHOW_CURSOR } from './ink/termio/dec.js';
 import { exitWithError, exitWithMessage, getRenderContext, renderAndRun, showSetupScreens } from './interactiveHelpers.js';
 import { initBuiltinPlugins } from './plugins/bundled/index.js';
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { getMcpToolsCommandsAndResources, prefetchAllMcpResources } from './services/mcp/client.js';
 import { VALID_INSTALLABLE_SCOPES, VALID_UPDATE_SCOPES } from './services/plugins/pluginCliCommands.js';
 import { initBundledSkills } from './skills/bundled/index.js';
@@ -172,7 +164,6 @@ import { plural } from 'src/tui/utils/stringUtils.js';
 import { getIsNonInteractiveSession, getSessionId, setClientType, setCwdState, setFlagSettingsPath, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, setSessionSource, switchSession } from 'src/bootstrap'
 import { getInitialMainLoopModel, getSdkBetas, setAllowedSettingSources, setDirectConnectServerUrl, setInitialMainLoopModel, setInlinePlugins, setSdkBetas } from 'src/tui/bootstrapState.js';
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;
 
 // TeleportRepoMismatchDialog, TeleportResumeWrapper dynamically imported at call sites
@@ -181,7 +172,6 @@ import { migrateBypassPermissionsAcceptedToSettings } from './migrations/migrate
 import { migrateEnableAllProjectMcpServersToSettings } from './migrations/migrateEnableAllProjectMcpServersToSettings.js';
 import { migrateReplBridgeEnabledToRemoteControlAtStartup } from './migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.js';
 import { resetAutoModeOptInForDefaultOffer } from './migrations/resetAutoModeOptInForDefaultOffer.js';
-/* eslint-enable @typescript-eslint/no-require-imports */
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionManager（1P remote-session
 // 配置面）/ createDirectConnectSession·DirectConnectError（1P direct-connect 客户端）裁除。
 import { initializeLspServerManager } from './services/lsp/manager.js';
@@ -203,7 +193,6 @@ import { shouldEnableThinkingByDefault, type ThinkingConfig } from './utils/thin
 import { initUser, resetUserCache } from './utils/user.js';
 import { getTmuxInstallInstructions, isTmuxAvailable, parsePRReference } from './utils/worktree.js';
 
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 profileCheckpoint('main_tsx_imports_loaded');
 
 /**
@@ -246,7 +235,6 @@ function isBeingDebugged() {
   // Check if inspector is available and active (indicates debugging)
   try {
     // Dynamic import would be better but is async - use global object instead
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const inspector = (global as any).require('inspector');
     const hasInspectorUrl = !!inspector.url();
     return hasInspectorUrl || hasInspectArg || hasInspectEnv;
@@ -260,7 +248,6 @@ function isBeingDebugged() {
 if (("external" as any) !== 'ant' && isBeingDebugged()) {
   // Use process.exit directly here since we're in the top-level code before imports
   // and gracefulShutdown is not yet available
-  // eslint-disable-next-line custom-rules/no-top-level-side-effects
   process.exit(1);
 }
 

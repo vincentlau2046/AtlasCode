@@ -112,7 +112,6 @@ export function useScheduledTasks({
     // Mount-once: store/setAppState are stable refs from
     // useSyncExternalStore; setMessages is a stable useCallback;
     // isLoading is read through a ref so it needs no dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
 

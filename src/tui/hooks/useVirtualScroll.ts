@@ -268,7 +268,6 @@ export function useVirtualScroll(
   // GC stale cache entries (compaction, /clear, screenToggleId bump). Only
   // runs when itemKeys identity changes — scrolling doesn't touch keys.
   // itemRefs self-cleans via ref(null) on unmount.
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- refs are stable
   useMemo(() => {
     const live = new Set(itemKeys)
     let dirty = false

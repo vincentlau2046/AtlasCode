@@ -13,11 +13,9 @@ import {
   windowsPathToPosixPath,
 } from './windowsPaths.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
   ? (require('../memdir/teamMemPaths.js') as typeof import('../memdir/teamMemPaths.js'))
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 const IS_WINDOWS = process.platform === 'win32'
 

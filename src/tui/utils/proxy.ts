@@ -194,7 +194,6 @@ export function createAxiosInstance(
  * Now respects NO_PROXY environment variable
  */
 export const getProxyAgent = memoize((uri: string): undici.Dispatcher => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const undiciMod = require('undici') as typeof undici
   const mtlsConfig = getMTLSConfig()
   const caCerts = getCACertificates()
@@ -365,7 +364,6 @@ export function configureGlobalAgents(): void {
     })
 
     // Set global dispatcher that now respects NO_PROXY via EnvHttpProxyAgent
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     ;(require('undici') as typeof undici).setGlobalDispatcher(
       getProxyAgent(proxyUrl),
     )
@@ -376,7 +374,6 @@ export function configureGlobalAgents(): void {
     // Set undici global dispatcher with mTLS
     const mtlsOptions = getTLSFetchOptions()
     if (mtlsOptions.dispatcher) {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       ;(require('undici') as typeof undici).setGlobalDispatcher(
         mtlsOptions.dispatcher,
       )

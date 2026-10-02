@@ -1759,7 +1759,6 @@ function validateBraceExpansion(context: ValidationContext): PermissionResult {
 // separators but bash treats as literal word content. While this differential
 // is defense-favorable (shell-quote over-splits), blocking these proactively
 // prevents future edge cases.
-// eslint-disable-next-line no-misleading-character-class
 const UNICODE_WS_RE =
   /[\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]/
 
@@ -2091,7 +2090,6 @@ function validateZshDangerousCommands(
 // validators. Bash silently drops null bytes and ignores most control chars,
 // so an attacker can use them to slip metacharacters past our checks while
 // bash still executes them (e.g., "echo safe\x00; rm -rf /").
-// eslint-disable-next-line no-control-regex
 const CONTROL_CHAR_RE = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/
 
 /**

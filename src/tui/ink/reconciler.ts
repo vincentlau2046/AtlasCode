@@ -1,5 +1,4 @@
 /* eslint-disable custom-rules/no-process-env-top-level -- W4 全量 lint 复原（§8.74.21）：模块加载期捕获常量（含刻意捕获语义站点），惰性读改写违行为零改动纪律（W-opt 波再议） */
-/* eslint-disable custom-rules/no-top-level-side-effects */
 
 import { appendFileSync } from 'fs'
 import createReconciler from 'react-reconciler'
@@ -33,9 +32,7 @@ import applyStyles, { type Styles, type TextStyles } from './styles.js'
 // See https://github.com/vadimdemedes/ink/issues/384
 if (process.env.NODE_ENV === 'development') {
   try {
-    // eslint-disable-next-line custom-rules/no-top-level-dynamic-import -- dev-only; NODE_ENV check is DCE'd in production
     void import('./devtools.js')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.code === 'ERR_MODULE_NOT_FOUND') {
       // biome-ignore lint/suspicious/noConsole: intentional warning
@@ -50,7 +47,6 @@ $ npm install --save-dev react-devtools-core
 				`.trim() + '\n',
       )
     } else {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw error
     }
   }
@@ -188,7 +184,6 @@ export function isDebugRepaintsEnabled(): boolean {
 export const dispatcher = new Dispatcher()
 
 // --- COMMIT INSTRUMENTATION (temp debugging) ---
-// eslint-disable-next-line custom-rules/no-process-env-top-level -- debug instrumentation, read-once is fine
 const COMMIT_LOG = (process.env.ATLAS_COMMIT_LOG)
 let _commits = 0
 let _lastLog = 0

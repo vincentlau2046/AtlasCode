@@ -60,7 +60,6 @@ export function isDeferredTool(tool: Tool): boolean {
   // through constants/tools.ts at module init.
   if (feature('FORK_SUBAGENT') && tool.name === AGENT_TOOL_NAME) {
     type ForkMod = typeof import('../AgentTool/forkSubagent.js')
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const m = require('../AgentTool/forkSubagent.js') as ForkMod
     if (m.isForkSubagentEnabled()) return false
   }

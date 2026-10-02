@@ -49,10 +49,8 @@ export async function collectContextData(
 
   let apiView = getMessagesAfterCompactBoundary(messages)
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { projectView } =
       require('../../services/contextCollapse/operations.js') as typeof import('../../services/contextCollapse/operations.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     apiView = projectView(apiView)
   }
 
@@ -112,10 +110,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
   // the user needs to know which strategy is managing their context
   // even before anything has fired.
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { getStats, isContextCollapseEnabled } =
       require('../../services/contextCollapse/index.js') as typeof import('../../services/contextCollapse/index.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     if (isContextCollapseEnabled()) {
       const s = getStats()
       const { health: h } = s

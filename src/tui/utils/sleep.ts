@@ -74,7 +74,6 @@ export function withTimeout<T>(
 ): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   const timeoutPromise = new Promise<never>((_, reject) => {
-    // eslint-disable-next-line no-restricted-syntax -- not a sleep: REJECTS after ms (timeout guard)
     timer = setTimeout(rejectWithTimeout, ms, reject, message)
     if (typeof timer === 'object') timer.unref?.()
   })

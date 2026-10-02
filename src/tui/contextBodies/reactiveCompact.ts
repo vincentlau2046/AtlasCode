@@ -110,7 +110,6 @@ export async function tryReactiveCompact(
   // already provides minimal context).
   const context = params.cacheSafeParams.toolUseContext as ToolUseContext
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const compact = require('./compact.js') as typeof import('./compact.js')
 
   // Fall back to full compaction.
@@ -161,7 +160,6 @@ export async function reactiveCompactOnPromptTooLong(
   cacheSafeParams: any,
   options: { customInstructions?: string; trigger: 'manual' | 'auto' },
 ): Promise<ReactiveCompactResult> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const compact = require('./compact.js') as typeof import('./compact.js')
 
   // Build a context from the provided cache-safe params.

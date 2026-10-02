@@ -5,7 +5,6 @@ import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithK
 import type { WizardContextValue, WizardProviderProps } from './types.js';
 
 // Use any here for the context since it will be cast properly when used
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const WizardContext = createContext<WizardContextValue<any> | null>(null);
 export function WizardProvider(t0) {
   const $ = _c(38);

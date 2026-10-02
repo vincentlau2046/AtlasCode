@@ -31,11 +31,9 @@ import {
   type SystemPrompt,
 } from '../../utils/systemPrompt.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const reactiveCompact = feature('REACTIVE_COMPACT')
   ? (require('src/tui/engineCompat') as typeof import('src/tui/engineCompat'))
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 export const call: LocalCommandCall = async (args, context) => {
   const { abortController } = context

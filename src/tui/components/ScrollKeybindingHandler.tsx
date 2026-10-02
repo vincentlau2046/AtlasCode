@@ -6,7 +6,6 @@ import { useSelection } from '../ink/hooks/use-selection.js';
 import type { FocusMove, SelectionState } from '../ink/selection.js';
 import { isXtermJs } from '../ink/terminal.js';
 import { getClipboardPath } from '../ink/termio/osc.js';
-// eslint-disable-next-line custom-rules/prefer-use-keybindings -- Esc needs conditional propagation based on selection state
 import { type Key, useInput } from '../ink.js';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { logForDebugging } from '../utils/debug.js';

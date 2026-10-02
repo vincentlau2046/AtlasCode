@@ -202,12 +202,10 @@ export async function clearConversation({
   // wiped both from the cache, but the process is still in the same mode
   // and (if applicable) the same worktree directory.
   if (feature('COORDINATOR_MODE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { saveMode } = require('../../utils/sessionStorage.js')
     const {
       isCoordinatorMode,
     } = require('../../coordinator/coordinatorMode.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     saveMode(isCoordinatorMode() ? 'coordinator' : 'normal')
   }
   const worktreeSession = getCurrentWorktreeSession()

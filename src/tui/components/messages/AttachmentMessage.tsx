@@ -116,7 +116,6 @@ export function AttachmentMessage({
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check -- teammate_mailbox/skill_discovery handled before switch
   switch (attachment.type) {
     case 'directory':
       return <Line>

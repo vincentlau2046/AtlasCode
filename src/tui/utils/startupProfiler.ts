@@ -26,7 +26,6 @@ const DETAILED_PROFILING = isEnvTruthy((process.env.ATLAS_PROFILE_STARTUP))
 // Sampling for Statsig logging: 100% ant, 0.5% external
 // Decision made once at startup - non-sampled users pay no profiling cost
 const STATSIG_SAMPLE_RATE = 0.005
-// eslint-disable-next-line custom-rules/no-process-env-top-level
 const STATSIG_LOGGING_SAMPLED =
   isAtlasDev() || Math.random() < STATSIG_SAMPLE_RATE
 
@@ -53,7 +52,6 @@ const PHASE_DEFINITIONS = {
 
 // Record initial checkpoint if profiling is enabled
 if (SHOULD_PROFILE) {
-  // eslint-disable-next-line custom-rules/no-top-level-side-effects
   profileCheckpoint('profiler_initialized')
 }
 

@@ -1501,7 +1501,6 @@ async function attemptNpmUninstall(
   const { code, stderr } = await execFileNoThrowWithCwd(
     'npm',
     ['uninstall', '-g', packageName],
-    // eslint-disable-next-line custom-rules/no-process-cwd -- matches original behavior
     { cwd: process.cwd() },
   )
 

@@ -27,7 +27,6 @@ export type ElementNames =
 
 export type NodeNames = ElementNames | TextName
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type DOMElement = {
   nodeName: ElementNames
   attributes: Record<string, DOMNodeAttribute>
@@ -95,7 +94,6 @@ export type TextNode = {
   nodeValue: string
 } & InkNode
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type DOMNode<T = { nodeName: NodeNames }> = T extends {
   nodeName: infer U
 }
@@ -104,7 +102,6 @@ export type DOMNode<T = { nodeName: NodeNames }> = T extends {
     : DOMElement
   : never
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type DOMNodeAttribute = boolean | string | number
 
 export const createNode = (nodeName: ElementNames): DOMElement => {

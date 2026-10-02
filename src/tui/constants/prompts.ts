@@ -64,7 +64,6 @@ import { getCoreDependencies } from 'src/tui/factory'
 import { isMcpInstructionsDeltaEnabled } from '../utils/mcpInstructionsDelta.js'
 
 // Dead code elimination: conditional imports for feature-gated modules
-/* eslint-disable @typescript-eslint/no-require-imports */
 const getCachedMCConfigForFRC = feature('CACHED_MICROCOMPACT')
   ? (
       require('src/tui/engineCompat') as typeof import('src/tui/engineCompat')
@@ -83,7 +82,6 @@ const DISCOVER_SKILLS_TOOL_NAME: string | null = feature(
 const skillSearchFeatureCheck = feature('EXPERIMENTAL_SKILL_SEARCH')
   ? (require('../services/skillSearch/featureCheck.js') as typeof import('../services/skillSearch/featureCheck.js'))
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 import type { OutputStyleConfig } from './outputStyles.js'
 import { CYBER_RISK_INSTRUCTION } from './cyberRiskInstruction.js'
 
@@ -152,7 +150,6 @@ export function prependBullets(items: Array<string | string[]>): string[] {
 function getSimpleIntroSection(
   outputStyleConfig: OutputStyleConfig | null,
 ): string {
-  // eslint-disable-next-line custom-rules/prompt-spacing
   return `
 You are an interactive agent that helps users ${outputStyleConfig !== null ? 'according to your "Output Style" below, which describes how you should respond to user queries.' : 'with software engineering tasks.'} Use the instructions below and the tools available to you to assist the user.
 

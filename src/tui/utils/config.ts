@@ -30,12 +30,10 @@ import { getEssentialTrafficOnlyReason } from './privacyLevel.js'
 import { getManagedFilePath } from './settings/managedPath.js'
 import type { ThemeSetting } from './theme.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
   ? (require('../memdir/teamMemPaths.js') as typeof import('../memdir/teamMemPaths.js'))
   : null
 
-/* eslint-enable @typescript-eslint/no-require-imports */
 import type { ImageDimensions } from './imageResizer.js'
 import type { ModelOption } from './model/modelOptions.js'
 import { jsonParse, jsonStringify } from './slowOperations.js'
@@ -805,7 +803,6 @@ function reportConfigCacheStats(): void {
 }
 
 // Register cleanup to report cache stats at session end
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 registerCleanup(async () => {
   reportConfigCacheStats()
 })

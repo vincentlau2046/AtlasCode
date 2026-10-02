@@ -453,10 +453,8 @@ export type AppStateStore = Store<AppState>
 export function getDefaultAppState(): AppState {
   // Determine initial permission mode for teammates spawned with plan_mode_required
   // Use lazy require to avoid circular dependency with teammate.ts
-  /* eslint-disable @typescript-eslint/no-require-imports */
   const teammateUtils =
     require('../utils/teammate.js') as typeof import('../utils/teammate.js')
-  /* eslint-enable @typescript-eslint/no-require-imports */
   const initialMode: PermissionMode =
     teammateUtils.isTeammate() && teammateUtils.isPlanModeRequired()
       ? 'plan'

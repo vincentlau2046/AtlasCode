@@ -17,7 +17,6 @@ import type {
   ServerResource,
 } from './types.js'
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const fetchMcpSkillsForClient = feature('MCP_SKILLS')
   ? (
       require('../../skills/mcpSkills.js') as typeof import('../../skills/mcpSkills.js')
@@ -53,7 +52,6 @@ import {
   useSetAppState,
 } from '../../state/AppState.js'
 import { errorMessage } from '../../utils/errors.js'
-/* eslint-enable @typescript-eslint/no-require-imports */
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
 import { getMcpPrefix } from './mcpStringUtils.js'
@@ -386,7 +384,6 @@ export function useManageMCPConnections(
                   )
 
                   await new Promise<void>(resolve => {
-                    // eslint-disable-next-line no-restricted-syntax -- timer stored in ref for cancellation; sleep() doesn't expose the handle
                     const timer = setTimeout(resolve, backoffMs)
                     reconnectTimersRef.current.set(client.name, timer)
                   })

@@ -119,14 +119,12 @@ export function restoreSessionStateFromLog(
   // first — without that, an in-session /resume into a session with no
   // commits would leave the prior session's stale commit log intact.
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     ;(
       require('../services/contextCollapse/persist.js') as typeof import('../services/contextCollapse/persist.js')
     ).restoreFromEntries(
       result.contextCollapseCommits ?? [],
       result.contextCollapseSnapshot,
     )
-    /* eslint-enable @typescript-eslint/no-require-imports */
   }
 
   // Restore TodoWrite state from transcript (SDK/non-interactive only).
@@ -486,14 +484,12 @@ export async function processResumedConversation(
   // --continue/--resume goes through here instead. Called unconditionally
   // — see the restoreSessionStateFromLog callsite above for why.
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     ;(
       require('../services/contextCollapse/persist.js') as typeof import('../services/contextCollapse/persist.js')
     ).restoreFromEntries(
       result.contextCollapseCommits ?? [],
       result.contextCollapseSnapshot,
     )
-    /* eslint-enable @typescript-eslint/no-require-imports */
   }
 
   // Restore agent setting from resumed session

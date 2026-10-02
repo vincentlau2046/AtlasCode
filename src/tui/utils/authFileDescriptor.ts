@@ -62,7 +62,6 @@ export function readTokenFromWellKnownFile(
 ): string | null {
   try {
     const fsOps = getFsImplementation()
-    // eslint-disable-next-line custom-rules/no-sync-fs -- fallback read for CCR subprocess path, one-shot at startup, caller is sync
     const token = fsOps.readFileSync(path, { encoding: 'utf8' }).trim()
     if (!token) {
       return null
@@ -143,7 +142,6 @@ function getCredentialFromFd({
         ? `/dev/fd/${fd}`
         : `/proc/self/fd/${fd}`
 
-    // eslint-disable-next-line custom-rules/no-sync-fs -- legacy FD path, read once at startup, caller is sync
     const token = fsOps.readFileSync(fdPath, { encoding: 'utf8' }).trim()
     if (!token) {
       logForDebugging(`File descriptor contained empty ${label}`, {

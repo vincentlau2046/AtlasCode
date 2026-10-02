@@ -1499,13 +1499,11 @@ export function areMcpConfigsAllowedWithEnterpriseMcpConfig(
  * (opt-out via disabledMcpServers), this requires explicit opt-in via
  * enabledMcpServers. Shows up in /mcp as disabled until the user enables it.
  */
-/* eslint-disable @typescript-eslint/no-require-imports */
 const DEFAULT_DISABLED_BUILTIN = feature('CHICAGO_MCP')
   ? (
       require('../../utils/computerUse/common.js') as typeof import('../../utils/computerUse/common.js')
     ).COMPUTER_USE_MCP_SERVER_NAME
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 function isDefaultDisabledBuiltin(name: string): boolean {
   return DEFAULT_DISABLED_BUILTIN !== null && name === DEFAULT_DISABLED_BUILTIN

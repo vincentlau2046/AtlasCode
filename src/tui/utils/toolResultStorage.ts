@@ -1064,7 +1064,6 @@ export function reconstructForSubagentResume(
  */
 function getFileSystemErrorMessage(error: Error): string {
   // Node.js filesystem errors have a 'code' property
-  // eslint-disable-next-line no-restricted-syntax -- uses .path, not just .code
   const nodeError = error as NodeJS.ErrnoException
   if (nodeError.code) {
     switch (nodeError.code) {

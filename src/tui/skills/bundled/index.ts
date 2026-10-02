@@ -47,15 +47,11 @@ export function initBundledSkills(): void {
   registerAscendModelAdaptSkill()
   registerAscendValidateSkill()
   if (feature('REVIEW_ARTIFACT')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { registerHunterSkill } = require('src/tui/skills/bundled/hunter.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     registerHunterSkill()
   }
   if (feature('AGENT_TRIGGERS')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { registerLoopSkill } = require('./loop.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     // /loop's isEnabled delegates to isCronEnabled() — same lazy
     // per-invocation pattern as the cron tools. Registered unconditionally;
     // the skill's own isEnabled callback decides visibility.
@@ -65,9 +61,7 @@ export function initBundledSkills(): void {
   // feature AGENT_TRIGGERS_REMOTE 门控 + claude.ai 车道内容）随
   // remotetriggers 子系统删除
   if (feature('RUN_SKILL_GENERATOR')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
     const { registerRunSkillGeneratorSkill } = require('src/tui/skills/bundled/runSkillGenerator.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
     registerRunSkillGeneratorSkill()
   }
 }

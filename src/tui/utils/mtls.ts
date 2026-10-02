@@ -136,7 +136,6 @@ export function getTLSFetchOptions(): {
   logForDebugging('TLS: Created undici agent with custom certificates')
   // Create a custom undici Agent with TLS options. Lazy-required so that
   // the ~1.5MB undici package is only loaded when mTLS/CA certs are configured.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const undiciMod = require('undici') as typeof undici
   const agent = new undiciMod.Agent({
     connect: {

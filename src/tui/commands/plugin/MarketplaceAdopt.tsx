@@ -43,7 +43,6 @@ export function MarketplaceAdopt({ target, name, onComplete }: Props) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, name]);
   useEffect(() => {
     if (done !== null) {
@@ -51,7 +50,6 @@ export function MarketplaceAdopt({ target, name, onComplete }: Props) {
     } else if (error !== null) {
       onComplete(`Error adopting marketplace '${target}': ${error}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done, error]);
   if (done !== null) {
     return <Text color="brand">{done}</Text>;

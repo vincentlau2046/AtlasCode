@@ -133,7 +133,6 @@ export class ITermBackend implements PaneBackend {
       // the next-to-last. Cheaper than a proactive 'it2 session list' on every spawn.
       // Bounded at O(N+1) iterations: each continue shrinks teammateSessionIds by 1;
       // when empty → firstPaneUsed resets → next iteration has no target → throws.
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const isFirstTeammate = !firstPaneUsed
         logForDebugging(
@@ -366,5 +365,4 @@ export class ITermBackend implements PaneBackend {
 
 // Register the backend with the registry when this module is imported.
 // This side effect is intentional - the registry needs backends to self-register to avoid circular dependencies.
-// eslint-disable-next-line custom-rules/no-top-level-side-effects
 registerITermBackend(ITermBackend)

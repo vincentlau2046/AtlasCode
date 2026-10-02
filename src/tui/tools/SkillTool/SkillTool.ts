@@ -95,7 +95,6 @@ import type { SkillToolProgress as Progress } from '../../types/tools.js'
 // side-effecting initializers. All usages are inside
 // feature('EXPERIMENTAL_SKILL_SEARCH') guards, so remoteSkillModules is
 // non-null at every call site.
-/* eslint-disable @typescript-eslint/no-require-imports */
 const remoteSkillModules = feature('EXPERIMENTAL_SKILL_SEARCH')
   ? {
       ...(require('../../services/skillSearch/remoteSkillState.js') as typeof import('../../services/skillSearch/remoteSkillState.js')),
@@ -104,7 +103,6 @@ const remoteSkillModules = feature('EXPERIMENTAL_SKILL_SEARCH')
       ...(require('../../services/skillSearch/featureCheck.js') as typeof import('../../services/skillSearch/featureCheck.js')),
     }
   : null
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 /**
  * Executes a skill in a forked sub-agent context.

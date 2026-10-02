@@ -5,7 +5,6 @@ import StackUtils from 'stack-utils';
 import Box from './Box.js';
 import Text from './Text.js';
 
-/* eslint-disable custom-rules/no-process-cwd -- stack trace file:// paths are relative to the real OS cwd, not the virtual cwd */
 
 // Error's source file is reported as file:///home/user/file.js
 // This function removes the file://[cwd] part
@@ -20,7 +19,6 @@ function getStackUtils(): StackUtils {
   });
 }
 
-/* eslint-enable custom-rules/no-process-cwd */
 
 type Props = {
   readonly error: Error;
