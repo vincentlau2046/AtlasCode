@@ -457,7 +457,11 @@ export function CollapsedReadSearchContent({
           {isActiveGroup && <Text key="ellipsis">…</Text>} <CtrlOToExpand />
         </Text>
       </Box>
-      {isActiveGroup && displayedHint !== undefined &&
+      // S3（感知面反馈波，用户收窄范围）：解除 isActiveGroup 门控——折叠组
+      // 完成后最后一行文件名/搜索提示（displayedHint，源 = readPaths?.at(-1)
+      // / latestDisplayHint，数据全程在）仍渲染，而非只剩 "Read N files" 计数。
+      // 用户明确不做截断全列表方案（slice(0,3)+N more 等），纯渲染层 1 处。
+      {displayedHint !== undefined &&
     // Row layout: 5-wide gutter for ⎿, then a flex column for the text.
     // Ink's wrap stays inside the right column so continuation lines
     // indent under ⎿. MAX_HINT_CHARS in commandAsHint caps total at ~5 lines.
