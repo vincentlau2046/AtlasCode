@@ -342,12 +342,26 @@ async function coreHeadlessResume(
   })
 }
 
+/**
+ * TUI 自动放行 env 注入（按 case，Pty.start 前设、case 末清——套件顺序跑 case 安全）。
+ * R6（v0.1.10）后工具任务 case（core-3 / short 工具族 / medium）在 TUI 真执行工具，
+ * 默认权限模式会停在权限 dialog（harness 不应答 dialog → disk=false 假阴，
+ * 2026-10-02 v0.1.10 全量 core-3 签名：turn 已推进到「Yes, allow all edits」dialog 未执行）。
+ * `code` 子命令形跨版本稳（0.1.7 G-1 起）；int-permission/int-deny 保持默认模式
+ * （dialog 本身是测试对象，不放行）。
+ */
+function setTuiAutoApprove(on: boolean): void {
+  if (on) process.env.ATLAS_E2E_TUI_ARGS = 'code --dangerously-skip-permissions'
+  else delete process.env.ATLAS_E2E_TUI_ARGS
+}
+
 async function coreToolRound(
   state: RunState,
   ptyOpts: (id: string) => Parameters<typeof Pty.start>[0],
   id: string,
 ): Promise<void> {
   const t0 = Date.now()
+  setTuiAutoApprove(true)
   const pty = await Pty.start(ptyOpts(id))
   const PROMPT = '用工具在 ./out 目录创建文件 hello.txt（内容一行：hello-atlas-e2e-core），然后读取该文件并回复文件内容。'
   pty.send(PROMPT)
@@ -362,6 +376,7 @@ async function coreToolRound(
   const ok = r.ok && diskOk
   const tail = pty.text()
   pty.kill()
+  setTuiAutoApprove(false)
   state.rec({
     id,
     tier: 'core',
@@ -790,6 +805,10 @@ async function tierShort(
           stderrTail: h.stderrTail.slice(-400),
         }
       } else {
+        // 工具任务 case（toolExpect/disk 断言）自动放行权限 dialog，
+        // 防默认权限模式 dialog 拦执行 → disk=false 假阴（int-permission 族除外）
+        const autoApprove = Boolean(c.toolExpect || c.disk)
+        setTuiAutoApprove(autoApprove)
         const pty = await Pty.start({
           ...ptyOpts(id),
           workspace: drvWs,
@@ -826,6 +845,7 @@ async function tierShort(
         }
         const tail = tailLinesSafe(pty.text())
         pty.kill()
+        setTuiAutoApprove(false)
         allOk = allOk && ok
         drivers[drv] = { verdict: ok ? 'PASS' : 'FAIL', ok, tail, detail: details.join(' ') }
       }
@@ -890,6 +910,7 @@ async function tierMedium(
           stderrTail: h.stderrTail.slice(-400),
         }
       } else {
+        setTuiAutoApprove(true) // fixture 任务必走工具（Write/Edit/Bash），自动放行 dialog
         const pty = await Pty.start({
           ...ptyOpts(id),
           workspace: drvWs,
@@ -902,6 +923,7 @@ async function tierMedium(
         allOk = allOk && ok
         const tail = tailLinesSafe(pty.text())
         pty.kill()
+        setTuiAutoApprove(false)
         drivers[drv] = {
           verdict: ok ? 'PASS' : 'FAIL',
           ok,
