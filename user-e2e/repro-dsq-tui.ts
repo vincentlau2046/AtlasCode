@@ -18,8 +18,11 @@ const REAL_SETTINGS = join(process.env.HOME!, '.atlas', 'settings.json')
 
 async function main() {
   // 自动放行权限 dialog（2026-10-02 d3259e2 后：loop 活、模型真发 tool_use，
-  // 默认权限模式下 loop 会停在权限等待——非挂起；自动放行面才能测完整回合）
-  process.env.ATLAS_E2E_TUI_ARGS = process.env.REPRO_TUI_ARGS ?? '--dangerously-skip-permissions'
+  // 默认权限模式下 loop 会停在权限等待——非挂起；自动放行面才能测完整回合）。
+  // 注意（F7 定位发现）：TUI 入口（bin cli.ts）带任何 flag 会落 cli 公共域交互
+  // 前向缝（parse.ts:392「壳波 #152 前向接缝（launchRepl 未落盘）」exit 1）——
+  // 只有 `code` 子命令形态（argv[0]==='code'）才走 TUI 支且 TUI main 自读 argv。
+  process.env.ATLAS_E2E_TUI_ARGS = process.env.REPRO_TUI_ARGS ?? 'code --dangerously-skip-permissions'
   const workspace = join(WS, 'tui')
   mkdirSync(workspace, { recursive: true })
   mkdirSync(ART, { recursive: true })
