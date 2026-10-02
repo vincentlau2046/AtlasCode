@@ -4,6 +4,37 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.14
+
+#250 issule-analyst 专项收口：concern 2（`/autocompact` 命令）+ concern 3
+（spinner 早显）。自动压缩阈值首次成为用户可配面（settings 持久化 + env
+覆写 + 运行时 DI 注入，三车道单一事实源）：
+
+- **concern 3（spinner 早显）**：spinner 状态行 timer + token 计数原共用
+  30s 门 → timer 1s / tokens 5s 双门（`spinnerGates.ts` 纯函数 + 8 件判别
+  单测；计时门先亮，`totalTokens>0` 值门保留防 0 计数闪帧）。真 token 计数
+  接法裁定不接（getTokenCounter 本仓 OTel no-op，真 usage 是 session 面非
+  turn 面，留前向缝记 #250）。
+- **concern 2（/autocompact 命令，5 切片）**：
+  - engine 档位面：`autoCompactWindow` 纯 resolver（auto/off/window/pct 四档
+    + 越界 guard）+ settings 源注入缝 + env⊕settings 合并纯函数（**env 胜
+    settings**：`ATLAS_AUTOCOMPACT_PCT_OVERRIDE` / `ATLAS_AUTO_COMPACT_WINDOW`
+    / `DISABLE_*` 压同名 settings 档位；禁用面三源 OR）。
+  - settings 新键 `autoCompactWindow`（zod 判别联合，结构单源 = engine 类型，
+    engine 保 React-free 红线）+ 宿主 contextHostWiring 档位源接线。
+  - `/autocompact` local-jsx 命令：无参 = 选择器（auto / 预设 100k·128k·200k·256k
+    / 自定义 Nk·P% 输入框 / off），双写持久化（settings.json + AppState
+    覆写，ThemePicker 先例）；**参数直用形 `/autocompact 128k`** 免选择器
+    直落档（纯解析 `parseAutoCompactTierArg`；未识别参数用法回执不误写）。
+  - agentLoopDeps 注入：`mergeAutoCompactOverrides(env, 档位)` 单点合并后注入
+    AutoCompactDeps（pctOverride/windowOverride/enabled）——UI 阈值车道与
+    loop 触发车道同源，防劈叉。
+- meta（peer 第 4 轮 5be3c17）：user-e2e S1-S4 感知面回归 + 全量终局探针
+  （随 0.1.13 列车 push，本 tag 入档）。
+
+发布：GitHub master + tag v0.1.14；npm `@atlasharness/atlascode@0.1.14`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.53MB / 全量 3341/0（220 文件）。
+
 ## v0.1.13
 
 S5 NL 自动触发波（用户 2026-09-30 裁定「自己规划」）+ S1/S3 回归收口 +
