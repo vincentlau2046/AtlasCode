@@ -188,4 +188,14 @@ export {
   resetDebugSinkForTesting,
   type DebugLogLevel,
 } from './debugSink'
+// #240（cli-debug P3）：基线 lifecycle debug 行构造（纯函数面）
+export {
+  headlessErrorLine,
+  headlessStartLine,
+  mcpConnectLine,
+  modelLine,
+  toolNamesFromMessages,
+  turnEndLine,
+  turnStartLine,
+} from './debugLines'
 export { wireCliHooksDeps } from './hooksWiring'

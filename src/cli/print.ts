@@ -151,6 +151,15 @@ import { resolveHeadlessSystemPrompt } from './headlessPrompt'
 // N9-debug（user-e2e 1606 §7 项 6）：headless debug 面真 sink（shared no-op
 // 换绑 cli 域 writer；charter C-4 不动）
 import { flushDebugSink, initDebugSink, logForDebugging } from './debugSink'
+// #240（cli-debug P3）：基线 lifecycle debug 行构造（纯函数，见 debugLines 头注）
+import {
+  headlessErrorLine,
+  headlessStartLine,
+  mcpConnectLine,
+  modelLine,
+  turnEndLine,
+  turnStartLine,
+} from './debugLines'
 // P0 headless「hooks bootstrap 未注入」回归修：hooks 三窗口 cli 域侧接线
 // （壳 compose ⑤ 步等价；hooksWiring 头注 = 根因 + 逐字同形裁定）
 import { wireCliHooksDeps } from './hooksWiring'
@@ -564,11 +573,14 @@ export async function runHeadless(
       projectMcpJsonPath: join(process.cwd(), '.mcp.json'),
     })
   const mcpConfigs = await buildMcpServerConfigs(discoveryInput)
-  await Promise.allSettled(
+  const mcpResults = await Promise.allSettled(
     Object.entries(mcpConfigs).map(([name, config]) =>
       mcpManager.connect(name, config),
     ),
   )
+  // #240（cli-debug P3）：基线行 ③ MCP 连接汇总（常路径诊断面）
+  const mcpOk = mcpResults.filter(r => r.status === 'fulfilled').length
+  logForDebugging(mcpConnectLine(mcpOk, mcpResults.length - mcpOk))
   const mcpConnections = await buildMcpEngineConnectionsLocal(mcpManager)
   const mcpTools = createMcpTools(mcpConnections)
   syncMcpClientRegistryLocal(mcpManager)
@@ -581,6 +593,9 @@ export async function runHeadless(
     ? modelToRole(options.model)
     : 'premium'
   const roleModel = getRoleModel(role)
+  // #240（cli-debug P3）：基线行 ② 模型解析（sessionModel = --model 池头
+  // 语义；未设 = 角色池头缺省）
+  logForDebugging(modelLine(role, options.model ?? roleModel))
   const bundle = await createAgentLoopDeps({
     allowedToolsCli: options.allowedTools ?? [],
     disallowedToolsCli: options.disallowedTools ?? [],
@@ -714,6 +729,15 @@ export async function runHeadless(
   // 切到被 resume 的会话），先捕获则 result/control 事件的 session_id 仍是启动随机
   // ID（r2 ID 漂移的残留面；转录写指针已由 resetSessionFilePointer 回挂，仅剩此常量）。
   const sessionId = getSessionEnv().getSessionId()
+  // #240（cli-debug P3）：基线行 ① session 启动（resume 块后捕获 =
+  // switch 后 ID，与 result 事件 session_id 同语义）
+  logForDebugging(
+    headlessStartLine(sessionId, {
+      resume: options.resume,
+      continue: options.continue,
+      model: options.model,
+    }),
+  )
   if (typeof inputPrompt === 'string' && inputPrompt.trim() !== '') {
     conversation.push(makeUserMessage(inputPrompt))
   }
@@ -780,15 +804,26 @@ export async function runHeadless(
   // turnRunning = cron scheduler isLoading 面（旧仓 running 标志同义：回合
   // 执行期 fire 延迟到下一 tick，队列环顶 recheck 拾起）。
   let turnRunning = false
+  let turnNo = 0
   const runTurn = (turnMessages: Message[]): Promise<AgentLoopResult> => {
     turnRunning = true
+    turnNo += 1
+    const n = turnNo
+    // #240（cli-debug P3）：基线行 ④a/④b 回合开始/结束（全回合经 runTurn
+    // 单入口 = 首轮 + drain 环顶全覆盖；工具面 = 该 turn tool_use 块名）
+    logForDebugging(turnStartLine(n, turnMessages.length))
     return queryAgentLoop(loopDeps, {
       messages: turnMessages,
       tools,
       context: { autoCompact, maxTurns: options.maxTurns },
-    }).finally(() => {
-      turnRunning = false
     })
+      .then(r => {
+        logForDebugging(turnEndLine(n, r))
+        return r
+      })
+      .finally(() => {
+        turnRunning = false
+      })
   }
 
   const writeMessage = async (message: StdoutMessage): Promise<void> => {
@@ -981,6 +1016,8 @@ export async function runHeadless(
     await drainToOutput()
   } catch (error) {
     cronScheduler.stop()
+    // #240（cli-debug P3）：基线行 ⑤ 运行错误（level=error 过级别门）
+    logForDebugging(headlessErrorLine(error), { level: 'error' })
     // 旧仓错误 result 消息逐字面（error_during_execution + is_error +
     // 零值 usage 面；getInMemoryErrors 族裁登记——新仓 errorUtils 域缺席）
     try {
