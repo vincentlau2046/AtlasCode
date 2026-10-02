@@ -50,7 +50,15 @@ def main() -> int:
             os.environ["LINES"] = str(ROWS)
             # TUI 从 repo 根解析模块（tsconfig paths / node_modules 按文件位置解析），
             # 进程 cwd = workspace（项目级隔离）
-            os.execvp("bun", ["bun", "run", os.path.join(repo_root, "src/atlascode/cli.ts")])
+            # 附加 CLI 参数面（env 驱动，默认空）：定向复现用
+            # （如 --dangerously-skip-permissions 自动放行权限 dialog，
+            # 避免 loop 停在权限等待被误判为「挂起/无响应」）
+            extra = os.environ.get("ATLAS_E2E_TUI_ARGS", "").split()
+            os.execvp(
+                "bun",
+                ["bun", "run", os.path.join(repo_root, "src/atlascode/cli.ts")]
+                + extra,
+            )
         except Exception as e:  # noqa: BLE001
             os.write(2, f"pty-driver child exec failed: {e}\n".encode())
             os._exit(127)

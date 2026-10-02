@@ -17,6 +17,9 @@ const PROMPT = '开发一个斗兽棋游戏'
 const REAL_SETTINGS = join(process.env.HOME!, '.atlas', 'settings.json')
 
 async function main() {
+  // 自动放行权限 dialog（2026-10-02 d3259e2 后：loop 活、模型真发 tool_use，
+  // 默认权限模式下 loop 会停在权限等待——非挂起；自动放行面才能测完整回合）
+  process.env.ATLAS_E2E_TUI_ARGS = process.env.REPRO_TUI_ARGS ?? '--dangerously-skip-permissions'
   const workspace = join(WS, 'tui')
   mkdirSync(workspace, { recursive: true })
   mkdirSync(ART, { recursive: true })
