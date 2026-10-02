@@ -1256,9 +1256,32 @@ export function getSessionMessages(sessionId: string): Promise<Set<string>> {
 /**
  * Clear the memoized session messages cache.
  * Call after compaction when old message UUIDs are no longer valid.
+ * R7（jsonl 双写收敛）：本缓存是会话去重 Set 的**单一事实源**（TUI
+ * sessionStorage 的旧本地 memoize 实例已裁，改经 engine 门面委托本缓存——
+ * 两写者四接缝共享同一 Set，docs/r3-jsonl-double-write-root-cause.md
+ * 修复方向 ①）。
  */
 export function clearSessionMessagesCache(): void {
   _sessionMessagesCache.clear()
+}
+
+/**
+ * R7（jsonl 双写收敛）：预置会话去重 Set 缓存（--resume 挂载面性能优化：
+ * getLastSessionLog 已全量读盘，预置避免 recordTranscript 二次全读，
+ * 旧 tui lodash memoize `.cache.set` 逐字语义）。调用方契约：仅在缓存
+ * 为空时预置（先经 hasSessionMessagesCache 判）——覆写活缓存会用陈旧
+ * 盘快照丢掉未 flush 的 UUID，破坏写层 dedup。
+ */
+export function primeSessionMessages(
+  sessionId: string,
+  uuids: Set<string>,
+): void {
+  _sessionMessagesCache.set(sessionId, Promise.resolve(uuids))
+}
+
+/** 缓存是否已有该会话的去重 Set（R7：预置前守卫，见 primeSessionMessages 契约）。 */
+export function hasSessionMessagesCache(sessionId: string): boolean {
+  return _sessionMessagesCache.has(sessionId)
 }
 
 /**

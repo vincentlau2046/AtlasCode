@@ -18,6 +18,12 @@ import {
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join } from 'path'
 import { getOriginalCwd, getSessionId, isSessionPersistenceDisabled, switchSession } from 'src/bootstrap'
+import {
+  getSessionMessages as engineGetSessionMessages,
+  clearSessionMessagesCache as engineClearSessionMessagesCache,
+  primeSessionMessages,
+  hasSessionMessagesCache,
+} from 'src/engine'
 import { getPlanSlugCache, getPromptId, getSessionProjectDir } from 'src/tui/bootstrapState.js'
 import { builtInCommandNames } from '../commands.js'
 import { COMMAND_NAME_TAG } from '../constants/xml.js'
@@ -3802,21 +3808,25 @@ async function loadSessionFile(sessionId: UUID): Promise<{
 /**
  * Gets message UUIDs for a specific session without loading all sessions.
  * Memoized to avoid re-reading the same session file multiple times.
+ *
+ * R7（jsonl 双写收敛，docs/r3-jsonl-double-write-root-cause.md 修复方向 ①）：
+ * 旧 tui 本地 lodash memoize 是**独立 Set 实例**——与 engine 写者
+ * （engine/session/load.ts `_sessionMessagesCache`）各带各的去重 Set，
+ * 两写者（engine loop sink / REPL useLogMessages）对同一 session 文件
+ * 双 append。现委托 engine 域单一事实源：预过滤 / 写层 dedup / 写回
+ * （messageSet.add）四接缝（engine 预过滤·写层 / tui 预过滤·写层）
+ * 命中同一 Set（per session），双写于写层消解。
  */
-const getSessionMessages = memoize(
-  async (sessionId: UUID): Promise<Set<string>> => {
-    const { messages } = await loadSessionFile(sessionId)
-    return new Set(messages.keys())
-  },
-  (sessionId: UUID) => sessionId,
-)
+const getSessionMessages = (sessionId: UUID): Promise<Set<string>> =>
+  engineGetSessionMessages(sessionId)
 
 /**
- * Clear the memoized session messages cache.
+ * Clear the session messages dedup cache.
  * Call after compaction when old message UUIDs are no longer valid.
+ * R7：委托 engine 域共享缓存（单一事实源，见 getSessionMessages 头注）。
  */
 export function clearSessionMessagesCache(): void {
-  getSessionMessages.cache.clear?.()
+  engineClearSessionMessagesCache()
 }
 
 /**
@@ -3848,16 +3858,14 @@ export async function getLastSessionLog(
     contextCollapseSnapshot,
   } = await loadSessionFile(sessionId)
   if (messages.size === 0) return null
-  // Prime getSessionMessages cache so recordTranscript (called after REPL
-  // mount on --resume) skips a second full file load. -170~227ms on large sessions.
+  // Prime the shared session messages dedup cache (engine 域单一事实源，R7)
+  // so recordTranscript (called after REPL mount on --resume) skips a second
+  // full file load. -170~227ms on large sessions.
   // Guard: only prime if cache is empty. Mid-session callers (e.g. IssueFeedback)
   // may call getLastSessionLog on the current session — overwriting a live cache
   // with a stale disk snapshot would lose unflushed UUIDs and break dedup.
-  if (!getSessionMessages.cache.has(sessionId)) {
-    getSessionMessages.cache.set(
-      sessionId,
-      Promise.resolve(new Set(messages.keys())),
-    )
+  if (!hasSessionMessagesCache(sessionId)) {
+    primeSessionMessages(sessionId, new Set(messages.keys()))
   }
 
   // Find the most recent non-sidechain message

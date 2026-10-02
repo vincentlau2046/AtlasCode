@@ -753,6 +753,8 @@ export {
   loadTranscriptFile,
   getSessionMessages,
   clearSessionMessagesCache,
+  primeSessionMessages,
+  hasSessionMessagesCache,
   doesMessageExistInSession,
   type SessionMemoryConfig,
   DEFAULT_SESSION_MEMORY_CONFIG,

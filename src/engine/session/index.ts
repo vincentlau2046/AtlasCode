@@ -133,6 +133,8 @@ export {
   loadTranscriptFile,
   getSessionMessages,
   clearSessionMessagesCache,
+  primeSessionMessages,
+  hasSessionMessagesCache,
   doesMessageExistInSession,
 } from './load'
 
