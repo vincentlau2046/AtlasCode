@@ -1837,17 +1837,28 @@ async function tierConversation(
       await sleep(2000)
     }
   }
-  // 上下文连贯代理：响应含前轮关键词之一（弱结构代理，非质量断言）
+  // 上下文连贯代理：响应含前轮关键词之一（弱结构代理，非质量代理）
   const contextCarried = (pty: Pty, keywords: string[]): { ok: boolean; hit: string | null } => {
     const t = stripAnsi(pty.text())
     for (const k of keywords) if (t.includes(k)) return { ok: true, hit: k }
     return { ok: false, hit: null }
+  }
+  // 工作区 CJS 钉：repo 根 package.json `type: module` 沿目录树下贯（Node 向上找最近
+  // package.json），工作区内 .js 全被当 ESM → CJS fixture/验证（module.exports/require）
+  // 必崩「module is not defined in ES module scope」（2026-10-02 conv 磁盘 ground truth
+  // 假阴根因，模型代码本身正确）。工作区落 CJS 钉包，模型回合内 node 直跑 + harness 断言同面。
+  const pinCjs = (ws: string): void => {
+    try { writeFileSync(join(ws, 'package.json'), JSON.stringify({ type: 'commonjs' })) } catch { /* 钉失败不阻断 */ }
   }
 
   // ── 脚本 1：conv-tic-tac-toe（从零建棋盘游戏，多轮改需求/纠正/验证/总结）────
   if (!done.has('conv-tic-tac-toe')) {
     const t0 = Date.now()
     const ws = wsFor('conv-tic-tac-toe')
+    // 任务必走 Write/Bash → 默认权限模式会停 dialog（harness 不应答 → 输入面假死，
+    // 2026-10-02 v0.1.10 全量 conv 假阴签名：R1 停在「Do you want to create …?」）
+    setTuiAutoApprove(true)
+    pinCjs(ws)
     const pty = await Pty.start({ ...ptyOpts('conv-tic-tac-toe'), workspace: ws })
     await sleep(2000)
     const rounds: { ok: boolean; note: string }[] = []
@@ -1901,6 +1912,7 @@ async function tierConversation(
       `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
       { rounds, okRounds, r1Responded: rounds[0].ok, r4Disk }, pty.text())
     pty.kill()
+    setTuiAutoApprove(false)
   }
 
   // ── 脚本 2：conv-refactor（重构既有代码，多轮追问/纠正保护行为/验证）──────
@@ -1914,6 +1926,9 @@ async function tierConversation(
       `function subtract(a, b) {\n  if (typeof a !== 'number' || typeof b !== 'number') throw new Error('invalid');\n  const r = a - b;\n  console.log('subtract:', a, '-', b, '=', r);\n  return r;\n}\n` +
       `function multiply(a, b) {\n  if (typeof a !== 'number' || typeof b !== 'number') throw new Error('invalid');\n  const r = a * b;\n  console.log('multiply:', a, '*', b, '=', r);\n  return r;\n}\n` +
       `module.exports = { add, subtract, multiply };\n`)
+    // 重构任务必走 Edit/Bash → auto-approve（同 conv-tic-tac-toe 假阴修复）
+    setTuiAutoApprove(true)
+    pinCjs(ws)
     const pty = await Pty.start({ ...ptyOpts('conv-refactor'), workspace: ws })
     await sleep(2000)
     const rounds: { ok: boolean; note: string }[] = []
@@ -1960,6 +1975,7 @@ async function tierConversation(
       `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
       { rounds, okRounds, r1Responded: rounds[0].ok, r4BehaviorOk }, pty.text())
     pty.kill()
+    setTuiAutoApprove(false)
   }
 
   // ── 脚本 3：conv-debug（调试既有 bug，多轮质疑/验证/边界/总结）────────────
@@ -1972,6 +1988,9 @@ async function tierConversation(
       `function add(a, b) {\n  return a + b;\n}\n` +
       `function parseAndAdd(s) {\n  const parts = s.split(',');\n  return add(parts[0], parts[1]);\n}\n` +
       `module.exports = { add, parseAndAdd };\n`)
+    // 修复任务必走 Edit/Bash → auto-approve（同 conv-tic-tac-toe 假阴修复）
+    setTuiAutoApprove(true)
+    pinCjs(ws)
     const pty = await Pty.start({ ...ptyOpts('conv-debug'), workspace: ws })
     await sleep(2000)
     const rounds: { ok: boolean; note: string }[] = []
@@ -2018,6 +2037,7 @@ async function tierConversation(
       `${okRounds}/5 轮通过。${rounds.map(r => r.note).join(' | ')}`,
       { rounds, okRounds, r1Responded: rounds[0].ok, r3Fixed }, pty.text())
     pty.kill()
+    setTuiAutoApprove(false)
   }
 }
 
