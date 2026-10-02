@@ -26,6 +26,7 @@ import {
 import {
   resolveAutoCompactWindow,
   parseAutoCompactTierInput,
+  parseAutoCompactTierArg,
   setAutoCompactWindowSettingsSource,
   setAutoCompactSettingsSource,
   getAutoCompactThreshold,
@@ -117,6 +118,31 @@ describe('resolveAutoCompactWindow 四档解析', () => {
     expect(resolveAutoCompactWindow({ kind: 'pct', pct: 0 })).toEqual({})
     expect(resolveAutoCompactWindow({ kind: 'pct', pct: 101 })).toEqual({})
     expect(resolveAutoCompactWindow({ kind: 'pct', pct: Number.NaN })).toEqual({})
+  })
+})
+
+describe('parseAutoCompactTierArg 斜杠命令参数解析（/autocompact <arg> 直用形）', () => {
+  test('"auto" / "AUTO " → auto 档（大小写/空白容忍）', () => {
+    expect(parseAutoCompactTierArg('auto')).toEqual({ kind: 'auto' })
+    expect(parseAutoCompactTierArg(' AUTO ')).toEqual({ kind: 'auto' })
+  })
+
+  test('"off" → off 档', () => {
+    expect(parseAutoCompactTierArg('off')).toEqual({ kind: 'off' })
+  })
+
+  test('档位形委托 parseAutoCompactTierInput（150k / 75% / 75）', () => {
+    expect(parseAutoCompactTierArg('150k')).toEqual({
+      kind: 'window',
+      tokens: 150_000,
+    })
+    expect(parseAutoCompactTierArg('75%')).toEqual({ kind: 'pct', pct: 75 })
+  })
+
+  test('空串 / 未识别词 → null', () => {
+    expect(parseAutoCompactTierArg('')).toBeNull()
+    expect(parseAutoCompactTierArg('   ')).toBeNull()
+    expect(parseAutoCompactTierArg('banana')).toBeNull()
   })
 })
 

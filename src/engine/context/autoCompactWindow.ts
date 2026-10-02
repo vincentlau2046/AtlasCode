@@ -98,3 +98,27 @@ export function parseAutoCompactTierInput(
   }
   return null
 }
+
+/**
+ * 斜杠命令参数解析（/autocompact <arg> 直用形，纯函数）：
+ *   - "auto" → { kind: 'auto' }（缺省，大小写不敏感）
+ *   - "off"  → { kind: 'off' }（禁用自动压缩）
+ *   - 其余 → parseAutoCompactTierInput（"150k" / "75%" / "75"）
+ *   - 空串 / 未识别词 → null（调用方回执用法提示，不误写 settings）
+ */
+export function parseAutoCompactTierArg(
+  raw: string,
+): AutoCompactWindowSetting | null {
+  const s = raw.trim()
+  if (s === '') {
+    return null
+  }
+  const lower = s.toLowerCase()
+  if (lower === 'auto') {
+    return { kind: 'auto' }
+  }
+  if (lower === 'off') {
+    return { kind: 'off' }
+  }
+  return parseAutoCompactTierInput(raw)
+}

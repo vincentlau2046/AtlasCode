@@ -454,6 +454,7 @@ export {
   setAutoCompactWindowSettingsSource,
   resolveAutoCompactWindow,
   parseAutoCompactTierInput,
+  parseAutoCompactTierArg,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
   type AutoCompactWindowSetting,
   type AutoCompactWindowResolution,

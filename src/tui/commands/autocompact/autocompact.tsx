@@ -10,6 +10,7 @@ import { useAppState, useSetAppState } from '../../state/AppState.js'
 import { updateSettingsForSource } from '../../utils/settings/settings.js'
 import {
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  parseAutoCompactTierArg,
   parseAutoCompactTierInput,
   type AutoCompactWindowSetting,
 } from 'src/engine'
@@ -79,6 +80,50 @@ function describeTier(setting: AutoCompactWindowSetting): string {
     case 'pct':
       return `Auto-compact threshold: ${setting.pct}% of the effective window`
   }
+}
+
+/** 双写持久化（ThemePicker 先例）：settings 落盘 + AppState 覆写（当 session
+ * 立即生效；引擎 model-string / agentLoopDeps 两车道经 getInitialSettings
+ * 缓存重置同步见新档）。 */
+function persistTier(
+  setting: AutoCompactWindowSetting,
+  setAppState: ReturnType<typeof useSetAppState>,
+  onDone: Props['onDone'],
+): void {
+  const { error } = updateSettingsForSource('userSettings', {
+    autoCompactWindow: setting,
+  })
+  if (error) {
+    onDone(`Failed to persist auto-compact tier: ${error.message}`, {
+      display: 'system',
+    })
+    return
+  }
+  setAppState(prev => ({
+    ...prev,
+    settings: { ...prev.settings, autoCompactWindow: setting },
+  }))
+  onDone(describeTier(setting))
+}
+
+/** 参数直用形（/autocompact 128k）：挂载即双写持久化，不渲染选择器。 */
+function AutoCompactApply({
+  setting,
+  onDone,
+}: {
+  setting: AutoCompactWindowSetting
+  onDone: Props['onDone']
+}): React.ReactNode {
+  const setAppState = useSetAppState()
+  const doneRef = React.useRef(false)
+  React.useEffect(() => {
+    if (doneRef.current) {
+      return
+    }
+    doneRef.current = true
+    persistTier(setting, setAppState, onDone)
+  }, [setting, onDone, setAppState])
+  return null
 }
 
 function AutoCompactCommand({ onDone }: Props): React.ReactNode {
@@ -165,6 +210,22 @@ function AutoCompactCommand({ onDone }: Props): React.ReactNode {
   )
 }
 
-export const call: LocalJSXCommandCall = async (onDone, _context) => {
-  return <AutoCompactCommand onDone={onDone} />
+export const call: LocalJSXCommandCall = async (onDone, _context, args) => {
+  const raw = (args ?? '').trim()
+  if (raw === '') {
+    // 无参 = 选择器形（预设档 + 自定义输入框 + auto/off）
+    return <AutoCompactCommand onDone={onDone} />
+  }
+  const parsed = parseAutoCompactTierArg(raw)
+  if (parsed) {
+    // 参数直用形（/autocompact 128k）：免选择器，挂载即双写持久化
+    return <AutoCompactApply setting={parsed} onDone={onDone} />
+  }
+  // 未识别参数：用法提示早退路径（onDone 先于返回触发 → 各 runner 的
+  // doneWasCalled 守卫跳过 setToolJSX；不写 settings，不误改现档）
+  onDone(
+    `Unrecognized /autocompact argument "${raw}" — usage: /autocompact <100k|128k|200k|256k|Nk|P%|auto|off> (no argument for the picker)`,
+    { display: 'system' },
+  )
+  return null
 }
