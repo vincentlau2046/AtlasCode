@@ -4,6 +4,15 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.8
+
+- 修复 P0-1 TUI 车道空回合（用户主诉，斗兽棋确定性复现）：TUI 车道
+  （bin TUI 支 + launcher 薄壳）挂 ui/main 前漏 wire 壳组合根
+  （8 域装配含 hooks bootstrap）→ 首轮工具执行 pre-hook 抛「hooks
+  bootstrap 未注入」reject 整个 agent loop → LLM 已成功返 tool_use 但
+  0 assistant 落盘 = 空回合。两 TUI 入口挂 ui/main 前 wire 组合根根治；
+  headless 支不受影响（0.1.7 已 wire）。
+
 ## v0.1.1
 
 - 修复 `--version` 显示：版本占位 `0.0.0` 闭核，改运行时包根自识别
