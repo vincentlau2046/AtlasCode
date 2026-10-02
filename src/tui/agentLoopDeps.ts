@@ -162,6 +162,14 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
       canUseTool: m.canUseTool,
       toolUseContext: m.toolUseContext,
     }),
+    // R6（P0）：工具调用 context 桥——活 ToolUseContext 入 engine pipeline（工具
+    // call/validateInput 第 2 参全活面：getAppState/setAppState/abortController/
+    // readFileState/options）；Write/TaskCreate/WebFetch/WebSearch 崩溃族单点修复
+    // （engine 侧合并 { ...toolContext, signal, checkPermission }，engine 字段优先）。
+    // 跨域面 = object 型（engine React-free 红线，loopPermissionBridge 同型）。
+    // 覆盖 REPL（replLoopDeps 包装）+ 子 loop 族（runAgent/forkedAgent/
+    // execAgentHook/LocalMainSessionTask 直接消费本装配体）。
+    toolContext: m.toolUseContext,
     hooks: createLoopHooks({
       options: {
         sessionId: getSessionId(),

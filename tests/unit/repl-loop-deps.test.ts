@@ -11,6 +11,8 @@
  *   R-4 装配槽位：checkPermission（gate 可调用）/ hooks（createLoopHooks 产物）
  *       / transcript（record + recordContentReplacement 双写面）/ effortValue
  *       （EffortValue→string）/ tools 透传。
+ *   R-6 工具调用 context 桥：deps.toolContext = 活 toolUseContext 同引用（TUI
+ *       活 ToolUseContext 入 engine pipeline，getAppState 族崩溃面单点修复）。
  *
  * 运行口径注：prependUserContext 在 NODE_ENV=test 早退（= 消息面透传，R-5
  * 断言 test-env 保真）；autoCompact 面（contextWindow 经 resolveModel 缺省
@@ -102,5 +104,12 @@ describe('buildReplLoopParams（W3-3b §8.74.15 ①）', () => {
     // NODE_ENV=test → prependUserContext 早退（不前插 system-reminder）
     expect(args.messages).toHaveLength(1)
     expect((args.messages[0] as { uuid?: string }).uuid).toBe('m1')
+  })
+
+  test('R-6 工具调用 context 桥：deps.toolContext = 活 toolUseContext（同引用，非拷贝）', () => {
+    const { deps } = buildReplLoopParams(makeMaterials())
+    // R6（P0）：TUI 活 ToolUseContext 入 engine pipeline（tool.call/validateInput
+    // 第 2 参全活面）；断言同引用 = 活态桥（非装配时快照拷贝）
+    expect(deps.toolContext).toBe(fakeToolUseContext)
   })
 })

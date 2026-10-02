@@ -130,6 +130,14 @@ export interface AgentLoopDeps {
   /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
   checkPermission?: PermissionGate
   /**
+   * R6（P0，user-e2e 第 3 轮）：工具调用 context 桥（TUI 面注入活 ToolUseContext；
+   * 型 = object 保 engine React-free，跨域面单点 = TUI buildAgentLoopParams 装配，
+   * loopPermissionBridge 同型）。未注入 = 窄 spine（tool.call/validateInput 第 2 参
+   * = 最小 context { signal, checkPermission }，headless 行为零改动）；注入时
+   * pipeline 合并 { ...toolContext, signal, checkPermission }（engine 字段优先）透传。
+   */
+  toolContext?: object
+  /**
    * E-5 S-5a：钩子消费面（engine/hooks createLoopHooks 产物；未注入 = 窄 spine
    * 无操作；生产装配 = E-wave-end compose 接线——现仅测试消费，E-wave-end 消费
    * 接缝清单登记，§8.42 审视 MINOR-8）。
@@ -305,6 +313,8 @@ export async function queryOneRound(
     checkPermission: deps.checkPermission,
     // E-5 S-5a：工具钩子透传（同上唯一点；未注入 = 窄 spine 无操作）
     hooks: deps.hooks?.toolHooks,
+    // R6（P0）：工具调用 context 桥透传（同上唯一点；未注入 = 窄 spine 最小 context）
+    toolContext: deps.toolContext,
   })
   const toolResults = outcomes.map((o) => ({
     toolUseId: o.toolUseId,

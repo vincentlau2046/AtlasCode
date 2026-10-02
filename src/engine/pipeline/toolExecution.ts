@@ -185,6 +185,16 @@ export interface PipelineDeps {
    * deferred 工具 schema 未下发时 schema 校验失败会回 not-sent 提示。
    */
   discoveredToolNames?: ReadonlySet<string>
+  /**
+   * R6（P0，user-e2e 第 3 轮）：工具调用 context 桥（TUI ToolUseContext 跨域注入面；
+   * 型 = object 保 engine React-free，loopPermissionBridge 同型跨域面）。未注入 =
+   * 窄 spine 语义不变（validateInput/call 第 2 参 = 最小 context { signal, checkPermission }）；
+   * 注入时第 2 参 = { ...toolContext, signal, checkPermission }（engine 运行字段优先——
+   * F1 子代理门透传契约仍权威；TUI 工具按 ToolUseContext 消费 getAppState/setAppState/
+   * abortController/readFileState/options 全活面——Write/TaskCreate/WebFetch/WebSearch
+   * 崩溃族单点修复，旧仓 toolExecution 双处传全量 toolUseContext 语义复原）。
+   */
+  toolContext?: object
 }
 
 export interface ToolExecutionOutcome {
@@ -219,6 +229,14 @@ export async function executeToolUse(
     }
   }
 
+  // R6（P0）：工具调用 context = 桥面（TUI ToolUseContext，未注入 = 窄 spine）+
+  // engine 运行字段（signal/checkPermission 优先——F1 子代理门透传契约权威）。
+  // validateInput 与 call 共用同一 context（旧仓双处传全量 toolUseContext 语义）。
+  const toolCallContext =
+    deps.toolContext !== undefined
+      ? { ...deps.toolContext, signal: deps.signal, checkPermission: deps.checkPermission }
+      : { signal: deps.signal, checkPermission: deps.checkPermission }
+
   // 输入校验 ①：浅 JSON-schema 校验（T-4c，旧仓 zod safeParse 替身）+ schema-not-sent 提示
   const schemaResult = validateInputBySchema(tu.input, tool.inputSchema)
   if (schemaResult.valid === false) {
@@ -238,8 +256,9 @@ export async function executeToolUse(
       isError: true,
     }
   }
-  // 输入校验 ②：tool 自带 validateInput（真契约钩子，可选）；signal 经 context 透传
-  const validation = await tool.validateInput?.(tu.input, { signal: deps.signal })
+  // 输入校验 ②：tool 自带 validateInput（真契约钩子，可选）；context 透传
+  // （R6：同 tool.call 的合并 context——TUI 工具 validateInput 亦按 ToolUseContext 消费）
+  const validation = await tool.validateInput?.(tu.input, toolCallContext)
   if (validation && validation.result === false) {
     return {
       block: {
@@ -327,10 +346,11 @@ export async function executeToolUse(
     // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
     // 传最小 context 对象 { signal }，工具实现按需取用）。F1（E-wave-end S-E1）：checkPermission
     // 同入 context = 子代理门透传接缝（AgentTool 消费 → runAgent 子 loop 同门执行，
-    // 旧仓子代理共享父会话权限上下文语义；context: unknown 契约不变）。
+    // 旧仓子代理共享父会话权限上下文语义；context: unknown 契约不变）。R6（P0）：
+    // TUI 桥面注入时 context = 全量 ToolUseContext + engine 运行字段（见 toolCallContext）。
     const res = await tool.call(
       callInput,
-      { signal: deps.signal, checkPermission: deps.checkPermission },
+      toolCallContext,
       undefined,
       assistantMsg,
     )
