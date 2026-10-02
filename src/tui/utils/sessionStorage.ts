@@ -4328,8 +4328,15 @@ export function isLoggableMessage(m: Message): boolean {
   // user-configured hook output that is useful for session context on resume.
   // de-ANT: `getUserType() !== 'ant'` 恒真（getUserType 已静态化为 'atlas'），坍缩。
   if (m.type === 'attachment') {
+    // skill_listing（2026-10-02 裁定，R4 S1 根因收口；与 engine 车道
+    // session/record.ts 同款例外 + `?.` 对齐）：模型面 skill 目录持久化——
+    // resume 锁（conversationRecovery suppressNextSkillListing）+ e2e 验真
+    // 均依赖其转录内存在。
+    if (m.attachment?.type === 'skill_listing') {
+      return true
+    }
     if (
-      m.attachment.type === 'hook_additional_context' &&
+      m.attachment?.type === 'hook_additional_context' &&
       isEnvTruthy((process.env.ATLAS_SAVE_HOOK_ADDITIONAL_CONTEXT))
     ) {
       return true
