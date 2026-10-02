@@ -537,9 +537,10 @@ function AssistantMessageBlock(t0) {
       }
     case "thinking":
       {
-        if (!isTranscriptMode && !verbose) {
-          return null;
-        }
+        // R2（P1）：活回合 thinking 块渲染——移除 live 支（!isTranscriptMode &&
+        // !verbose）的 early null，落 AssistantThinkingMessage 的折叠行（∴ Thinking
+        // ⌃O，shouldShowFullThinking=false 折叠形态）。原 early return 使活回合
+        // thinking 块 0 渲染（transcript 有 THINK 但 pty 无标记）。
         const isLastThinking = !lastThinkingBlockId || thinkingBlockId === lastThinkingBlockId;
         const t1 = isTranscriptMode && !isLastThinking;
         let t2;
