@@ -245,7 +245,8 @@ export function parseSkillFrontmatterFields(
     argumentNames: parseArgumentNames(
       frontmatter.arguments as string | string[] | undefined,
     ),
-    whenToUse: frontmatter.when_to_use as string | undefined,
+    whenToUse: (frontmatter['when-to-use'] ??
+      frontmatter.when_to_use) as string | undefined,
     version: frontmatter.version as string | undefined,
     model,
     disableModelInvocation: parseBooleanFrontmatter(

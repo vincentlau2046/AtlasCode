@@ -265,7 +265,11 @@ function createPluginCommand(
     const argumentNames = parseArgumentNames(
       frontmatter.arguments as string | string[] | undefined,
     )
-    const whenToUse = frontmatter.when_to_use as string | undefined
+    // S1 补全（P1 回归）：连字符 `when-to-use`（兄弟键约定一致）此前静默
+    // 丢失——插件 skill 命令车道与 TUI 目录车道（loadSkillsDir）同款修，
+    // 双形式归一：连字符优先 + 下划线兼容（bundled ascend 技能现用形式）。
+    const whenToUse = (frontmatter['when-to-use'] ??
+      frontmatter.when_to_use) as string | undefined
     const version = frontmatter.version as string | undefined
     const displayName = frontmatter.name as string | undefined
 
