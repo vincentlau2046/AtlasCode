@@ -40,6 +40,10 @@ import type { Message } from '../../shared'
 import { getProviderContextWindow } from '../../modelprovider'
 import { getAutoCompactEnvOverrides } from '../config'
 import { COMPACT_MAX_OUTPUT_TOKENS, type CompactionResult } from './compact'
+import {
+  resolveAutoCompactWindow,
+  type AutoCompactWindowSetting,
+} from './autoCompactWindow'
 
 /**
  * 压缩预留缓冲（旧仓常量，p99.99 摘要输出 17387 token 之上取的安全边）。
@@ -144,6 +148,64 @@ export function setAutoCompactSettingsSource(
 }
 
 /**
+ * settings.autoCompactWindow 档位读侧注入（#250 concern 2：/autocompact 命令
+ * 持久化档位，宿主 contextHostWiring 接线 getInitialSettings 面；未注 = 无档位
+ * 覆写。单测 teardown 传 null）。
+ */
+type AutoCompactWindowSettingsSource =
+  | (() => AutoCompactWindowSetting | null | undefined)
+  | null
+
+let autoCompactWindowSettingsSource: AutoCompactWindowSettingsSource = null
+
+export function setAutoCompactWindowSettingsSource(
+  next: AutoCompactWindowSettingsSource,
+): void {
+  autoCompactWindowSettingsSource = next
+}
+
+/**
+ * 合并覆写纯函数（#250 concern 2，单一事实源）：settings 档位
+ * （resolveAutoCompactWindow 解析）⊕ env 覆写，**env 胜**（显式 CLI/env >
+ * 持久化 settings；越界值两侧解析 guard 同纪律——忽略不生效）。禁用面三源
+ * OR：env 总开关（DISABLE_COMPACT disabled）/ env 细粒度
+ * （DISABLE_AUTO_COMPACT autoCompactDisabled）/ settings off 档。
+ * 消费点 = 本模块各 model-string / 0 参便捷形（经 getMergedAutoCompact
+ * Overrides 包装）+ 宿主 agentLoopDeps DI 注入（env ⊕ settings 单点合并，
+ * 防 UI 阈值面与 loop 触发面两车道分裂）。
+ */
+export function mergeAutoCompactOverrides(
+  env: ReturnType<typeof getAutoCompactEnvOverrides>,
+  setting: AutoCompactWindowSetting | null | undefined,
+): {
+  pctOverride?: number
+  windowOverride?: number
+  autoCompactDisabled: boolean
+} {
+  const tier = resolveAutoCompactWindow(setting)
+  return {
+    pctOverride: env.pctOverride ?? tier.pctOverride,
+    windowOverride: env.windowOverride ?? tier.windowOverride,
+    autoCompactDisabled:
+      env.disabled === true ||
+      env.autoCompactDisabled === true ||
+      tier.autoCompactDisabled === true,
+  }
+}
+
+/** 合并覆写（settings 源接缝读侧包装；消费点 = model-string / 0 参便捷形）。 */
+function getMergedAutoCompactOverrides(): {
+  pctOverride?: number
+  windowOverride?: number
+  autoCompactDisabled: boolean
+} {
+  return mergeAutoCompactOverrides(
+    getAutoCompactEnvOverrides(),
+    autoCompactWindowSettingsSource?.() ?? null,
+  )
+}
+
+/**
  * 有效窗口（旧仓 getEffectiveContextWindowSize 独立导出面，W2-2-pre 缺面先迁①）：
  * 窗口 cap（windowOverride >0 有效）− 摘要输出预留（min(maxOutputTokens ??
  * COMPACT_MAX_OUTPUT_TOKENS, COMPACT_MAX_OUTPUT_TOKENS)——未注入按满额 20k 预留，
@@ -185,11 +247,13 @@ export function getEffectiveContextWindowSize(
   windowOverride?: number,
 ): number {
   if (typeof contextWindowOrModel === 'string') {
-    const { windowOverride: envWindow } = getAutoCompactEnvOverrides()
+    // #250 concern 2：env 窗口 cap ⊕ settings 档位（getMergedAutoCompactOverrides，
+    // env 胜；off 档不影响窗口面）。
+    const { windowOverride } = getMergedAutoCompactOverrides()
     return getEffectiveContextWindowSizeCore(
       resolveModelContextWindow(contextWindowOrModel),
       undefined,
-      envWindow,
+      windowOverride,
     )
   }
   return getEffectiveContextWindowSizeCore(
@@ -251,7 +315,8 @@ export function getAutoCompactThreshold(
   windowOverride?: number,
 ): number {
   if (typeof contextWindowOrModel === 'string') {
-    const o = getAutoCompactEnvOverrides()
+    // #250 concern 2：env 双覆写 ⊕ settings 档位（env 胜）。
+    const o = getMergedAutoCompactOverrides()
     return getAutoCompactThresholdCore(
       resolveModelContextWindow(contextWindowOrModel),
       undefined,
@@ -322,13 +387,15 @@ export function calculateTokenWarningState(
   paramsOrModel: TokenWarningParams | string,
 ): TokenWarningState {
   if (typeof paramsOrModel === 'string') {
-    const o = getAutoCompactEnvOverrides()
+    const env = getAutoCompactEnvOverrides()
+    const o = getMergedAutoCompactOverrides()
     return calculateTokenWarningStateCore(tokenUsage, {
       contextWindow: resolveModelContextWindow(paramsOrModel),
       autoCompactEnabled: isAutoCompactEnabled(),
       pctOverride: o.pctOverride,
       windowOverride: o.windowOverride,
-      blockingLimitOverride: o.blockingLimitOverride,
+      // blocking limit 只走 env（ATLAS_BLOCKING_LIMIT_OVERRIDE），档位面不覆写。
+      blockingLimitOverride: env.blockingLimitOverride,
     })
   }
   return calculateTokenWarningStateCore(tokenUsage, paramsOrModel)
@@ -410,6 +477,10 @@ export function isAutoCompactEnabled(flags?: {
     const o = getAutoCompactEnvOverrides()
     if (o.disabled) return false
     if (o.autoCompactDisabled) return false
+    // #250 concern 2：off 档位（settings 持久化禁用，手动 /compact 保留）。
+    if (getMergedAutoCompactOverrides().autoCompactDisabled) {
+      return false
+    }
     return autoCompactSettingsSource ? (autoCompactSettingsSource() ?? true) : true
   }
   if (flags.disabled) return false

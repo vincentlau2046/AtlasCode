@@ -20,12 +20,26 @@ export {
   // D-2a S5（重裁范围 = 原 S7，M5 切端）：autoCompact 4 活消费名 model-string
   // 便捷形重载落 autoCompact.ts；settings 读侧注入面（宿主 settings.json）
   setAutoCompactSettingsSource,
+  // #250 concern 2（/autocompact 命令）：settings.autoCompactWindow 档位读侧
+  // 注入缝（宿主 contextHostWiring 接线；env 胜 settings 合并纪律见
+  // autoCompact.ts getMergedAutoCompactOverrides）
+  setAutoCompactWindowSettingsSource,
   type AutoCompactTrackingState,
   type AutoCompactDeps,
   type AutoCompactOutcome,
   type TokenWarningState,
   type TokenWarningParams,
 } from './autoCompact'
+// #250 concern 2：autoCompact 窗口档位纯面（resolver + 自定义档解析 + 预设档位）
+export {
+  resolveAutoCompactWindow,
+  parseAutoCompactTierInput,
+  AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  type AutoCompactWindowSetting,
+  type AutoCompactWindowResolution,
+} from './autoCompactWindow'
+// #250 concern 2：env ⊕ settings 档位合并纯函数（agentLoopDeps DI 注入单点）
+export { mergeAutoCompactOverrides } from './autoCompact'
 export {
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
   ERROR_MESSAGE_USER_ABORT,

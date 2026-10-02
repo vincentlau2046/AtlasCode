@@ -448,6 +448,16 @@ export {
   type MicrocompactResult,
   // D-2a S5（重裁范围 = 原 S7）：autoCompact model-string 便捷形的 settings 读侧注入
   setAutoCompactSettingsSource,
+  // #250 concern 2（/autocompact 命令）：settings.autoCompactWindow 档位读侧
+  // 注入缝 + 档位纯面（resolver / 自定义档解析 / 预设档位）+ env ⊕ settings
+  // 合并纯函数（agentLoopDeps DI 注入单点）
+  setAutoCompactWindowSettingsSource,
+  resolveAutoCompactWindow,
+  parseAutoCompactTierInput,
+  AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  type AutoCompactWindowSetting,
+  type AutoCompactWindowResolution,
+  mergeAutoCompactOverrides,
   // D-2a S6（M5 切端）：post-compact 清理注册表 + HIGH GAP 重体端口缝
   registerPostCompactReset,
   clearPostCompactResetsForTesting,
