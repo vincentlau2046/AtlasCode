@@ -4,6 +4,7 @@ import React from 'react';
 import { Box, Text } from '../../ink.js';
 import { CtrlOToExpand } from '../CtrlOToExpand.js';
 import { Markdown } from '../Markdown.js';
+import { thinkingFirstLinePreview } from './thinkingPreview.js';
 type Props = {
   // Accept either full ThinkingBlock/ThinkingBlockParam or a minimal shape with just type and thinking
   param: ThinkingBlock | ThinkingBlockParam | {
@@ -39,22 +40,13 @@ export function AssistantThinkingMessage(t0) {
   const shouldShowFullThinking = isTranscriptMode || verbose;
   if (!shouldShowFullThinking) {
     const t4 = addMargin ? 1 : 0;
-    let t5;
-    if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-      t5 = <Text dimColor={true} italic={true}>{"\u2234 Thinking"} <CtrlOToExpand /></Text>;
-      $[0] = t5;
-    } else {
-      t5 = $[0];
-    }
-    let t6;
-    if ($[1] !== t4) {
-      t6 = <Box marginTop={t4}>{t5}</Box>;
-      $[1] = t4;
-      $[2] = t6;
-    } else {
-      t6 = $[2];
-    }
-    return t6;
+    // S2\uff08\u611f\u77e5\u9762\u53cd\u9988\u6ce2\uff09\uff1a\u6298\u53e0\u652f\u6e32\u67d3 thinking \u4e00\u53e5\u8bdd\u9884\u89c8\uff08\u9996\u4e2a\u975e\u7a7a\u884c 80 \u5b57
+    // \u622a\u65ad\uff0cdim italic\uff09\u2014\u2014\u4fee\u524d\u9ed8\u8ba4\u5c4f thinking \u5185\u5bb9 0 \u5b57\uff08label \u540e\u76f4\u63a5
+    // CtrlOToExpand\uff0c\u5185\u5bb9\u53d8\u91cf\u96f6\u5f15\u7528\uff09\uff0c\u4fdd\u7559 CtrlOToExpand \u5c55\u5f00\u63d0\u793a\u3002
+    // \u7f16\u8bd1\u6001\u6700\u5c0f\u63d2\u5165\uff1a\u672c\u652f\u8fd4\u56de fresh JSX\uff08\u4e0d\u5f00\u65b0 memo-cache \u69fd\uff1b\u5168\u91cf\u652f
+    // $[3..8] \u4e0d\u53d7\u5f71\u54cd\uff1bpreview \u6bcf\u6e32\u67d3\u91cd\u7b97 = \u6bd4\u4fee\u524d\u9759\u6001\u7f13\u5b58\u66f4\u6d3b\uff09\u3002
+    const preview = thinkingFirstLinePreview(thinking);
+    return <Box marginTop={t4}><Text dimColor={true} italic={true}>{"\u2234 Thinking"}{preview ? <Text dimColor={true} italic={true}>{' ' + preview}</Text> : null} <CtrlOToExpand /></Text></Box>;
   }
   const t4 = addMargin ? 1 : 0;
   let t5;
