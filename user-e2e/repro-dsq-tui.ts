@@ -34,7 +34,7 @@ async function main() {
   const t0 = Date.now()
   const samples: { t: number; logSize: number; tail: string }[] = []
   let firstSubstantiveAtMs: number | null = null
-  for (let t = 0; t <= 180_000; t += 5_000) {
+  for (let t = 0; t <= 600_000; t += 5_000) { // 600s 观察窗（R1 修复后合法回合含重试+渲染，>3min）
     await new Promise(r => setTimeout(r, 5_000))
     const since = pty.sinceText()
     const tail = since.split('\n').slice(-6).join(' | ')
