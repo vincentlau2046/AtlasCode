@@ -14,9 +14,10 @@ import { SpinnerGlyph } from './SpinnerGlyph.js';
 import type { SpinnerMode } from './types.js';
 import { useStalledAnimation } from './useStalledAnimation.js';
 import { interpolateColor, toRGBColor } from './utils.js';
+import { getSpinnerDisplayGates } from './spinnerGates.js';
 const SEP_WIDTH = stringWidth(' · ');
 const THINKING_BARE_WIDTH = stringWidth('thinking');
-const SHOW_TOKENS_AFTER_MS = 30_000;
+// #250 concern 3：timer/tokens 时间门抽 spinnerGates.ts 纯函数面（1s/5s 双门）。
 
 // Thinking shimmer constants. Previously lived in a separate ThinkingShimmerText
 // component with its own useAnimationFrame(50) — inlined here to reuse our
@@ -176,7 +177,11 @@ export function SpinnerAnimationRow({
   const messageWidth = glimmerMessageWidth + 2;
   const sep = SEP_WIDTH;
   const wantsThinking = thinkingStatus !== null;
-  const wantsTimerAndTokens = verbose || hasRunningTeammates || effectiveElapsedMs > SHOW_TOKENS_AFTER_MS;
+  const { wantsTimer, wantsTokens } = getSpinnerDisplayGates({
+    verbose,
+    hasRunningTeammates,
+    effectiveElapsedMs
+  });
   const availableSpace = columns - messageWidth - 5;
   let showThinking = wantsThinking && availableSpace > thinkingWidthValue;
   if (!showThinking && wantsThinking && thinkingStatus === 'thinking' && effortSuffix) {
@@ -187,9 +192,9 @@ export function SpinnerAnimationRow({
     }
   }
   const usedAfterThinking = showThinking ? thinkingWidthValue + sep : 0;
-  const showTimer = wantsTimerAndTokens && availableSpace > usedAfterThinking + timerWidth;
+  const showTimer = wantsTimer && availableSpace > usedAfterThinking + timerWidth;
   const usedAfterTimer = usedAfterThinking + (showTimer ? timerWidth + sep : 0);
-  const showTokens = wantsTimerAndTokens && totalTokens > 0 && availableSpace > usedAfterTimer + tokensWidth;
+  const showTokens = wantsTokens && totalTokens > 0 && availableSpace > usedAfterTimer + tokensWidth;
   const thinkingOnly = showThinking && thinkingStatus === 'thinking' && !spinnerSuffix && !showTimer && !showTokens && true;
 
   // === Thinking shimmer color (formerly ThinkingShimmerText's own timer) ===
