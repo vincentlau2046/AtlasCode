@@ -39,6 +39,10 @@ import type { Message } from 'src/shared'
  */
 export type EngineLoopStreamEvent = { type: 'stream_request_start' } | Message
 
+// R1（P0 静默终止）：REPL 捕获终态 AgentLoopResult（emptyTerminated 面）经本
+// tui 适配器 re-export（边界面：REPL 只依赖 tui 适配器，不直引 engine 根门面）。
+export type { AgentLoopResult } from 'src/engine'
+
 export interface EngineLoopParams {
   deps: AgentLoopDeps
   args: AgentLoopArgs

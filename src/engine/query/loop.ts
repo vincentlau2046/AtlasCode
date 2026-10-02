@@ -198,6 +198,12 @@ export interface AgentLoopResult {
   tracking: AutoCompactTrackingState
   /** 最后一轮单轮结果（供断言/遥测；terminated=false 时为截断前最后一轮）。 */
   lastRound?: AgentRoundResult
+  /**
+   * R1（P0 静默终止）：循环末轮是否为空内容响应（末轮 empty）——REPL 据此出
+   * 用户可见「本轮未产生响应」提示面（非静默）。正常文本终止 / 非空截断 =
+   * false/absent。
+   */
+  emptyTerminated?: boolean
 }
 
 export interface AgentRoundResult {
@@ -208,6 +214,13 @@ export interface AgentRoundResult {
   /** assistant 原始 content（含 text + tool_use 块） */
   assistantContent: unknown[]
   stopReason: string
+  /**
+   * R1（P0 静默终止）：本轮 assistant 为「空内容响应」——content 无非空 text 块
+   * 且无 tool_use 块（网关 0/0 或模型空输出）。queryOneRound 已做 1 次有界重试
+   * 仍空 = true。上层（queryAgentLoop → REPL）据此出用户可见提示，非静默终止。
+   * 正常 end_turn（含 text）/ 正常工具轮恒 false/absent。
+   */
+  empty?: boolean
 }
 
 /**
@@ -223,31 +236,52 @@ export async function queryOneRound(
   tools: Tools,
   messages: Message[],
 ): Promise<AgentRoundResult> {
-  const resp = await deps.modelProvider.chat({
+  // R1（P0 静默终止）：空内容响应（网关 0/0 / 模型空输出）检测 + 有界重试。
+  // 原逻辑空内容 → toolUses 空 → terminal 判 toolResults===0 → 静默终止（无
+  // assistant 可见产出、无错误面，用户只见 spinner 停 = 主诉「无响应」间歇面）。
+  // 区分「空可重试」与「正常 end_turn（含 text）」：空走 1 次有界重试（signal 感知），
+  // 仍空 → empty=true 供上层（queryAgentLoop → REPL）出用户可见提示，非静默。
+  const chatArgs = {
     messages,
     role: deps.role,
-    // W3-3b（§8.74.15）：会话主模型 pin 透传（getRoleModels 池头；未设 =
-    // 角色池原行为，窄 spine 缺省不变）。
+    // W3-3b（§8.74.15）：会话主模型 pin 透传（getRoleModels 池头；未设 = 角色池原行为）。
     sessionModel: deps.sessionModel,
     signal: deps.signal,
-    // D-5b（S-4）：headless 5 选项 + --effort 真消费透传（引擎面 → LLM 调用）。
-    // effortValue 经 options 槽（buildOpenAIParams 读 options.effortValue）；
-    // 未设任一 = 字段 undefined，窄 spine 缺省行为不变。
-    // W3-3d（§8.74.20）：工具 schema 注入面（shared Tool[] → modelprovider
-    // buildOpenAITools → OpenAI function schema）。H6 登记：本面此前缺位——
-    // fixture replay 纪律（脚本化 provider 直接发 tool_use 块）从未向真 LLM
-    // 送过 schema，活探针（W3-3d G-α）揭出；未传/空集 = params.tools 键不
-    // 出现，窄 spine 缺省不变。
+    // W3-3d（§8.74.20）：工具 schema 注入面（shared Tool[] → buildOpenAITools）。
+    // H6 登记：本面此前缺位（fixture replay 从未向真 LLM 送 schema，活探针揭出）；
+    // 未传/空集 = params.tools 键不出现，窄 spine 缺省不变。
     tools: tools.length > 0 ? tools : undefined,
     systemPrompt: deps.systemPrompt,
     thinkingConfig: deps.thinkingConfig,
     responseFormat: deps.responseFormat,
     fallbackModel: deps.fallbackModel,
+    // D-5b（S-4）：headless --effort 真消费透传（options.effortValue → reasoning_effort）。
     options:
       deps.effortValue !== undefined ? { effortValue: deps.effortValue } : undefined,
-  })
-
-  const assistantContent: unknown[] = resp.message.content ?? []
+  }
+  let resp = await deps.modelProvider.chat(chatArgs)
+  let assistantContent: unknown[] = resp.message.content ?? []
+  // 空内容判据：无非空 text 块且无 tool_use 块（仅 thinking / 全空 = 空响应）。
+  // 与 terminal 判据（toolUses 空）同源但更宽：正常 end_turn 含 text 块 → 非空。
+  const isEmptyContent = (content: unknown): boolean => {
+    if (!Array.isArray(content)) return true
+    return !content.some(block => {
+      const b = block as { type?: string; text?: unknown } | null
+      if (!b) return false
+      if (b.type === 'tool_use') return true
+      return b.type === 'text' && String(b.text ?? '').trim() !== ''
+    })
+  }
+  // 首次空响应再试 1 次（瞬时 0/0 恢复面；signal aborted 即止，不追加挂起调用）。
+  if (isEmptyContent(assistantContent) && !deps.signal?.aborted) {
+    const retried = await deps.modelProvider.chat(chatArgs)
+    const retriedContent: unknown[] = retried.message.content ?? []
+    if (!isEmptyContent(retriedContent)) {
+      resp = retried
+      assistantContent = retriedContent
+    }
+  }
+  const empty = isEmptyContent(assistantContent)
   const assistantMsg: AssistantMessage = {
     type: 'assistant',
     role: 'assistant',
@@ -319,6 +353,7 @@ export async function queryOneRound(
     toolResults,
     assistantContent,
     stopReason: resp.message.stop_reason,
+    empty,
   }
 }
 
@@ -462,7 +497,17 @@ export async function queryAgentLoop(
     }
   }
 
-  const result: AgentLoopResult = { messages, turns, terminated, tracking, lastRound }
+  // R1（P0 静默终止）：末轮空内容（terminal-break 或 maxTurns 截断于空）= 静默空回合
+  // 信号。正常文本终止 lastRound.empty=false → 不触发。供 REPL 出用户可见提示。
+  const emptyTerminated = lastRound?.empty === true
+  const result: AgentLoopResult = {
+    messages,
+    turns,
+    terminated,
+    tracking,
+    lastRound,
+    emptyTerminated,
+  }
   // W3-3a：终态事件（适配层 = generator return 面）
   deps.emit?.({ type: 'loop_end', result })
   return result

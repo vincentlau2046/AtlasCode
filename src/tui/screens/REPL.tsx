@@ -152,7 +152,7 @@ import { useQueueProcessor } from '../hooks/useQueueProcessor.js';
 import { useMailboxBridge } from '../hooks/useMailboxBridge.js';
 import { queryCheckpoint, logQueryProfileReport } from '../utils/queryProfiler.js';
 import type { Message as MessageType, UserMessage, ProgressMessage, HookResultMessage, PartialCompactDirection } from '../types/message.js';
-import { queryEngineLoopStream } from 'src/tui/loopEvents';
+import { queryEngineLoopStream, type AgentLoopResult, type EngineLoopStreamEvent } from 'src/tui/loopEvents';
 import { buildReplLoopParams } from 'src/tui/replLoopDeps';
 import { mergeClients, useMergedClients } from '../hooks/useMergedClients.js';
 import { getQuerySourceForREPL } from '../utils/promptCategory.js';
@@ -2596,11 +2596,24 @@ export function REPL({
       toolUseContext,
       querySource: getQuerySourceForREPL()
     });
-    for await (const event of queryEngineLoopStream({
+    // R1（P0 静默终止）：手动驱动 engine 生成器以捕获终态 AgentLoopResult
+    // （for-await 丢弃生成器 return 值）；末轮空内容（emptyTerminated）→
+    // 用户可见警告行（原空回合 = spinner 停、无产出、无提示 = 主诉「无响应」）。
+    const loopGen = queryEngineLoopStream({
       deps: loopDeps,
       args: loopArgs
-    })) {
-      onQueryEvent(event);
+    });
+    let loopResult: AgentLoopResult | undefined;
+    {
+      let iter: IteratorResult<EngineLoopStreamEvent, AgentLoopResult> = await loopGen.next();
+      while (!iter.done) {
+        onQueryEvent(iter.value);
+        iter = await loopGen.next();
+      }
+      loopResult = iter.value;
+    }
+    if (loopResult?.emptyTerminated) {
+      setMessages(prev => [...prev, createSystemMessage('本轮未产生任何响应（模型空输出，已重试仍为空）。请重试，或检查网关连接与模型配置。', 'warning')]);
     }
     queryCheckpoint('query_end');
 
@@ -2674,6 +2687,12 @@ export function REPL({
         }
       }
       await onQueryImpl(latestMessages, newMessages, abortController, shouldQuery, additionalAllowedTools, mainLoopModelParam, effort);
+    } catch (error) {
+      // R1（P0 静默终止，异常面）：turn 异常原为 unhandled rejection（原 try/finally
+      // 无 catch）→ 用户只见 spinner 停、无错误行、无落盘 = 主诉「无响应」。出用户
+      // 可见错误行 + logError 留痕；finally 仍跑清理（resetLoadingState / onTurnComplete）。
+      logError(error);
+      setMessages(prev => [...prev, createSystemMessage(`本轮执行出错：${errorMessage(error)}。请重试。`, 'error')]);
     } finally {
       // queryGuard.end() atomically checks generation and transitions
       // running→idle. Returns false if a newer query owns the guard
