@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.12
+
+0.1.10 后用户实测反馈感知面修波（5 项分级，用户逐项 sign-off；S1–S4
+落地，S5 归产品决策暂缓）：
+
+- **S1（P1）whenToUse 键名双形式接受（自动触发线索降级修）**：
+  skill frontmatter 解析仅读下划线 `when_to_use`，连字符 `when-to-use`
+  （与 allowed-tools / disable-model-invocation 等兄弟键约定一致）整
+  字段静默丢失 → 模型「何时用此 skill」唯一线索缺失 → 自动触发能力
+  降级（用户「skill 没自动加载」主诉命中项）。修 = 双形式归一接受：
+  连字符优先 + 下划线兼容（bundled ascend 技能现用形式回归保护）。
+- **S2（P2）thinking 折叠支一句话预览**：折叠态此前只输出静态
+  "∴ Thinking" 标记（内容 0 字）。修 = label 后渲染首个非空行（trim +
+  80 字截断，dim italic），保留 CtrlOToExpand；提取逻辑落纯函数
+  `thinkingPreview.ts`（判别单测 6 例），编译态 .tsx 最小插入。
+- **S3（P2）文件名提示完成后持久可见（用户收窄范围）**：折叠组完成
+  后最后一个文件名提示被 `isActiveGroup` 门控整行消失。修 = 解除门控
+  （按 `displayedHint` 存在性渲染；数据源全程在）。用户明确不做截断
+  全列表方案。
+- **S4（P3）单条描述上限 env 可配**：engine + tui 双车道各一份
+  `MAX_LISTING_DESC_CHARS = 250` 硬编码。修 = 双车道同 env
+  `SKILL_LISTING_MAX_DESC_CHARS`（正整数覆盖；默认 250 不变 = 零行为
+  变更，总预算仍受 getCharBudget 治理；提默认值归用户决策）。
+- **S5（P3，暂缓）**：NL 自动触发（skillSearch 7 文件全 stub +
+  EXPERIMENTAL_SKILL_SEARCH 非默认开）= 从零实现，产品决策项，归后续
+  波；匹配质量依赖 S1 whenToUse 修复（已在本波兑现）。
+- meta 全面性信息结论（供知悉，非修复项）：skill frontmatter 解析
+  16 字段，模型可见仅 3（name/description/whenToUse）；version 解析
+  为死数据；allowed-tools 不注入模型可见（仅调用期预授权）；paths
+  条件激活模型无感知（UI-only attachment）。
+
+发布：GitHub master + tag v0.1.12；npm `@atlasharness/atlascode@0.1.12`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.53MB / 全量 3277/0（基线 3262 + 15
+新增，214 文件）。
+
 ## v0.1.11
 
 R7（jsonl 双写收敛，P2，持久化专项波）——双写者双去重 Set 收敛为 engine 域
