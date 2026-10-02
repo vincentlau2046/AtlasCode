@@ -4,6 +4,39 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.10
+
+user-e2e 第 3 轮终测 R6（P0，收尾主项）——TUI 工具车道 ToolUseContext 桥
+（R7 = R3 jsonl 双写维持 defer，根因文档不变）：
+
+- **R6（P0）TUI tool.call 缺完整 ToolUseContext 桥（getAppState 族崩溃）**：
+  engine `executeToolUse` 给 `tool.call`/`validateInput` 第 2 参传最小 context
+  `{ signal, checkPermission }`，而 TUI 工具按 ToolUseContext 消费全活面 →
+  TUI 车道 TypeError（`getAppState is not a function` / `undefined is not an
+  object`）→ 回合错误终止（R1 错误面如实显示）→ 0 任务执行 / 0 落盘（斗兽棋
+  TUI 断点、core-3 FAIL 单根因；headless 车道正常 = 断点在 TUI 装配面，
+  P0-1 同族）。修：`PipelineDeps`/`AgentLoopDeps` 新增 `toolContext?: object`
+  槽（engine React-free 红线：型 = object，跨域面单点 = TUI 装配）；
+  `executeToolUse` 合并 `{ ...toolContext, signal, checkPermission }`
+  （engine 运行字段优先——F1 子代理门透传契约仍权威）透传 call +
+  validateInput 双接缝（旧仓双处传全量 toolUseContext 语义复原）；TUI
+  `buildAgentLoopParams` 注入活 `toolUseContext`（REPL + 子 loop 族
+  runAgent/forkedAgent/execAgentHook/LocalMainSessionTask 全覆盖）；
+  headless 零注入 = 窄 spine 行为零改动（`engine/loopDeps.ts`/`cli/print.ts`
+  零 toolContext 面）。四工具崩溃族单点修复：Write（getAppState +
+  readFileState）/ TaskCreate（setAppState）/ WebFetch（getAppState）/
+  WebSearch（runWebSearch `ctx.abortController.signal` 缺位）。判别单测 4 例
+  （engine-loop-tool-context 3：桥合并对象/engine 字段优先/窄 spine 键集合
+  封闭 + loop→pipeline 接缝透传；repl-loop-deps R-6 1：装配同引用活态桥）。
+- **R7（= R3，P2）jsonl 双写 — 维持 defer**：根因（两套发散 transcript 写者
+  + 独立去重 Set）与修复方向（收敛单写者 / 删一写者 + 判别单测）见
+  `docs/r3-jsonl-double-write-root-cause.md`；归专项波（持久化关键路径，
+  非发布列车内投机改造）。
+
+发布：GitHub master + tag v0.1.10；npm `@atlasharness/atlascode@0.1.10`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.53MB / 全量 3258/0（基线 3254 + 4 新增，
+210 文件）。
+
 ## v0.1.9
 
 user-e2e 第 2 轮「最后 1 英里」修复（R1/R2/R4/R5 落，R3 记录根因 defer）：
