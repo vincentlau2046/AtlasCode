@@ -53,6 +53,15 @@ async function binMain(): Promise<void> {
     if (argv[0] === 'code') {
       process.argv = [process.argv[0]!, process.argv[1]!, ...argv.slice(1)]
     }
+    // P0-1 修（TUI 车道空回合）：TUI 支挂 ui/main 前先 wire 壳组合根
+    // （getCoreDependencies 8 域装配含 ⑤ hooks bootstrap）。旧路径 TUI 支只挂
+    // tuiMain 不接线 → hooks 域 bootstrap 未设 → 首轮工具执行 pre-hook 抛
+    // 「hooks bootstrap 未注入」reject 整个 agent loop（round_end 永不发射 /
+    // record 永不执行）→ 空回合（斗兽棋确定性复现，斗兽棋→Write/Bash 2 tool_use
+    // 后 preToolUse 断）。headless 支（下行 getCoreDependencies）同款接线，TUI 支对齐
+    // （懒单例幂等，重复调用零副作用；tui 域 init 的 setEndpointConfigSource
+    // 晚于本调用 = 后写者胜，#202/#203 模型池行为不变）。
+    getCoreDependencies()
     const { main: tuiMain } = await import('./ui/main.js')
     await tuiMain()
     return

@@ -11,13 +11,20 @@
    探针最终回显）。§7 改归因 = 渲染滞后性能问题（非 turn-busy 旗标），嫌疑
    engine loop 消息处理 / ink reconcile。**未修**（需 live 性能剖析 +
    真机计时，非过夜可裁）。建议：开专项性能波（用户主诉「界面无响应」直接面）。
-2. **P0-1 TUI 0-tool_use 深层（1606 N1 / T9）** — 产品侧缓解已落 0.1.7
-   （TUI 系统提示词工具调用纪律声明，与 headless B4 同措辞：「必须经工具
-   调用完成，禁止声称未执行的工作」）。深层 = engine loop 级「文本工具调用
-   救援」（弱模型把 tool call 发成 TEXT `<function=...>` 时解析回 tool_use，
-   见 L4 tier-aware 记忆）——engine 侧改动，量级未评估。**建议**：先下轮
-   T9 conv tier 重跑观察提示词防线效果（R4 磁盘 ground truth 是否转 true），
-   无效再开 loop 救援波。
+2. **P0-1 TUI 空回合（1606 N1 / T9）— ✅ 已修（0.1.8）** — 原假设（弱模型把
+   tool call 发成 TEXT 需 loop 级救援）**订正为接线缺口**：systematic-debugging
+   斗兽棋确定性复现（dev 车道 PTY + ATLAS_P0_TRACE 取证）钉死真根因 = **TUI 车道
+   挂 ui/main 前未 wire 壳组合根**（`cli.ts` TUI 支 + `launcher.ts` 薄壳只 mount
+   `ui/main` 不调 `getCoreDependencies`）→ 8 域装配（含 ⑤ hooks bootstrap
+   `setHooksBootstrapEnv`）未设 → 首轮工具执行 `preToolUse` 抛「hooks bootstrap
+   未注入」→ 经 `executeToolUse`（pre-hook 无 try/catch）传播 reject 整个 agent
+   loop（`round_end` 永不发射 / `transcript.record` 永不执行）→ LLM 已成功返
+   tool_use 但 0 assistant 落盘 = 空回合。headless 支 0.1.7 已 wire（cli/hooksWiring.ts）
+   故 headless 正常、仅 TUI 车道炸。修 = `cli.ts` TUI 支 + `launcher.ts` 挂 TUI 前
+   `getCoreDependencies()`（懒单例幂等；tui 域 init 的 setEndpointConfigSource 晚于
+   本调用=后写者胜，#202/#203 模型池行为不变）。验真：斗兽棋 PTY 空回合（0 assistant）
+   → 修复后多轮 agent loop（8 assistant + 8 thinking + tool_result 落盘 + TUI 渲染
+   Bash/AskUserQuestion）。原「文本工具调用救援」loop 波不开了（非本根因）。
 3. **logging port 定案（charter C-4）** — 本轮 0.1.7 在 cli 域落了真 writer
    （cli/debugSink，headless 面 --debug 三 flag 真消费；实测 186 行日志）；
    engine/shared 域维持 no-op 占位。TUI 域 debug.ts 为完整实现。**决策**：
