@@ -45,11 +45,22 @@ async function binMain(): Promise<void> {
   // atlas code（子命令）起 TUI。TUI 支 = launcher.ts 同款懒闭包（动态 import
   // ui/main，执行期才触 tui 全闭包，headless 支零 TUI 重量）。`code` 子命令
   // 剥 token：TUI main 自读 process.argv（把剥后 positional 当初始 prompt）。
-  // 其余（-p / --flag / 子命令）仍走 CLI 公共域 main()。L3 边界：TUI 接线落
-  // 壳（atlascode 域），cli 公共域不反向依赖壳（parse.ts 交互支前向缝保留
-  // = 直调 main() 兜底，不经 bin 的三命令路径不可达）。
-  const isTuiInvocation = argv.length === 0 || argv[0] === 'code'
+  // R4（P2）：leading-flag 交互形式（--dangerously-skip-permissions / -c / -r /
+  // --version / --permission-mode 等）此前落 cli 公共域 main() → parse.ts 交互支
+  // 前向缝（launchRepl 未落盘）exit 1 死胡同（`code` 子命令形可用、flag 形死）。
+  // TUI main()（src/tui/main.tsx）= 旧仓全 commander 面（version/help/子命令 +
+  // -p headless 支 + 交互 launchRepl），是 cli 公共域的超集 → 非 headless 的
+  // leading-flag 形前向到 TUI。headless（-p/--print 在列）仍走 cli 公共域
+  // main()（活着的 headless 车道不动，避回归）。dev flag（--tools/--check/
+  // --skills/--e2e/--auth-help）已被上方 hasDevFlag 先行路由 runDevCli，不触此支。
+  const hasPrintFlag = argv.includes('-p') || argv.includes('--print')
+  const isTuiInvocation =
+    argv.length === 0 ||
+    argv[0] === 'code' ||
+    (argv[0].startsWith('-') && !hasPrintFlag)
   if (isTuiInvocation) {
+    // `code` 子命令剥 token；flag 形 / 无参形不重写 process.argv（TUI main 自读
+    // 原始 argv，flag 形原样透传）。
     if (argv[0] === 'code') {
       process.argv = [process.argv[0]!, process.argv[1]!, ...argv.slice(1)]
     }
