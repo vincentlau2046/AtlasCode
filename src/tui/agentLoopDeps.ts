@@ -32,6 +32,8 @@ import {
 import {
   compactConversation,
   createLoopHooks,
+  getAutoCompactEnvOverrides,
+  mergeAutoCompactOverrides,
   recordTranscript,
   recordContentReplacement,
   type AgentLoopArgs,
@@ -39,6 +41,7 @@ import {
   type AutoCompactDeps,
   type Message,
 } from 'src/engine'
+import { getInitialSettings } from './utils/settings/settings.js'
 import { asSystemPrompt, type Tools } from 'src/shared'
 import { getSessionId } from 'src/bootstrap'
 import { appendSystemContext, prependUserContext } from './utils/api'
@@ -113,10 +116,23 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
       msgs,
       toolList as unknown as any[],
     )
+  // autoCompact 档位覆写（#250 concern 2：/autocompact 命令）：
+  // settings.autoCompactWindow 档位（/autocompact 持久化 userSettings）⊕ env
+  // 覆写（ATLAS_AUTOCOMPACT_PCT_OVERRIDE / ATLAS_AUTO_COMPACT_WINDOW /
+  // DISABLE_COMPACT / DISABLE_AUTO_COMPACT）——mergeAutoCompactOverrides 纯
+  // 合并（env 胜 settings；与 engine model-string 便捷形同一单一事实源，防
+  // UI 阈值面与 loop 触发面两车道分裂）。
+  const mergedAutoCompact = mergeAutoCompactOverrides(
+    getAutoCompactEnvOverrides(),
+    getInitialSettings().autoCompactWindow,
+  )
   const autoCompact: AutoCompactDeps = {
     contextWindow: resolved?.contextWindow ?? HARD_DEFAULT_CONTEXT_WINDOW,
     maxOutputTokens: resolved?.maxTokens,
     countTokens,
+    enabled: mergedAutoCompact.autoCompactDisabled ? false : undefined,
+    pctOverride: mergedAutoCompact.pctOverride,
+    windowOverride: mergedAutoCompact.windowOverride,
     compact: (msgs) =>
       compactConversation(
         msgs,
