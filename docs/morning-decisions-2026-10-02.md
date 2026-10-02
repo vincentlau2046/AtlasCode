@@ -22,9 +22,19 @@
    （cli/debugSink，headless 面 --debug 三 flag 真消费；实测 186 行日志）；
    engine/shared 域维持 no-op 占位。TUI 域 debug.ts 为完整实现。**决策**：
    是否开 logging port 波统一三面（shared no-op → port 注入，TUI/cli 实现体）。
-4. **N2 bypass 模式忽略权限规则（1606 §3 修正）** — `--dangerously-skip-
-   permissions`（bypassPermissions 模式）忽略 allow 规则面被裁定「合法改进
-   点」，本轮未动。**决策**：是否做（bypass 下 --tools 限制性白名单仍生效）。
+4. **N2 bypass 语义（1606 §3 修正）— 已实测重界定**：
+   2026-10-02 dev 车道 IFF 活测 3 组：
+   (a) `--tools Read` + bypass：Write 被拒、模型转 Bash 亦被拒、文件未落盘
+       → **--tools 限制性白名单在 bypass 下仍生效**（N2「bypass 忽略白名单」
+       的原假设不成立，无安全缺口）。
+   (b) 对照：纯 bypass（无 --tools）→ Write 亦被拒、文件未落盘
+       （模型自述「需要权限」）。**新发现（归 N10，待专项）**：headless 车道
+       `--dangerously-skip-permissions` 疑似未真达 bypassPermissions 模式
+       （print.ts `shouldAvoidPermissionPrompts: !hasPromptRoute`=true 下
+       ask→auto-deny 支 / 或 loopDeps 构建器 mode 未落）——根因未定界，
+       非本小修波范围。**决策**：是否开 headless bypass 车道专项（安全姿态
+       修正，量级小但涉权限门，建议单独波 + 判别单测）。
+   原「bypass 忽略权限规则」项据此核销（白名单生效 = 无需加固）。
 5. **CachedMCModulePort 未注（M5 S8 裁定，H6 前向接缝）** — 默认 stub 全关
    = 旧仓 any-stub 逐字等价。**决策**：真 cached-MC 何时落地（注 setCachedMCModulePort）。
 6. **注入防线 e2e 常规化** — 0.1.7 落 headless 注入防线块 + TUI 注入行
