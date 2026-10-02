@@ -12,6 +12,7 @@ import color from './commands/color/index.js'
 import commit from './commands/commit.js'
 import copy from './commands/copy/index.js'
 import commitPushPr from './commands/commit-push-pr.js'
+import autocompact from './commands/autocompact/index.js'
 import compact from './commands/compact/index.js'
 import config from './commands/config/index.js'
 import { context, contextNonInteractive } from './commands/context/index.js'
@@ -191,6 +192,9 @@ export const INTERNAL_ONLY_COMMANDS = [
 const COMMANDS = memoize((): Command[] => [
   addDir,
   agents,
+  // #250 concern 2（/autocompact 命令）：autoCompact 窗口档位（预设 100k/128k/
+  // 200k/256k + 自定义 N k·P% + auto/off，持久化 settings.autoCompactWindow）
+  autocompact,
   branch,
   btw,
   clear,
