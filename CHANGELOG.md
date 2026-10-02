@@ -4,6 +4,40 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.13
+
+S5 NL 自动触发波（用户 2026-09-30 裁定「自己规划」）+ S1/S3 回归收口 +
+#240 debug 面。NL 自动触发核心面（catalog 注入 + 模型自判）已随 0.1.12 S1
+whenToUse 修复就位；本波补「目录跨会话一致 + 死 stub 清理 + e2e 验收面」：
+
+- **S5-1（R4 S1 根因收口）**：`skill_listing` 附件此前被 jsonl 持久化的
+  `isLoggableMessage` 车道丢弃 → resume 后 skill 目录不复活（sentSkillNames
+  resume 锁失效，自动触发线索跨会话不一致）。修 = 双车道放行 `skill_listing`
+  + `?.` 对齐 + 复活 `conversationRecovery` 的 resume 锁（suppressNextSkillListing）；
+  判别单测 `tests/unit/skill-listing-loggable.test.ts`（8 件，mutation-red）。
+- **S5-3（死 stub 清理）**：`skillSearch` 7 文件全 `: any` 占位（翻开
+  EXPERIMENTAL_SKILL_SEARCH 即 TypeError），裁删 + 全门控站点 + `skill_discovery`
+  附件族 + `executeRemoteSkill` 孤儿；DiscoverSkills 前向缝保留。行为零变更。
+- **S5-4（e2e 自动触发验真面）**：新增 live-gateway 门控探针
+  `tests/func/atlascode-skill-auto-trigger.test.ts`——catalog（含 whenToUse，
+  匹配 + distractor 双技能）+ NL 任务（不点名 id 仅描述工作）→ 断言模型自动
+  触发对技能（tier-aware：native `Skill` tool_use 回显 或 assistant 文本点名
+  特异 id）；网关不可达 skip-clean。本地实测 native 路命中。
+- **S1 回归收口（P1）**：0.1.12 S1 的 whenToUse 双形式归一未覆盖 TUI 域两
+  车道，`when-to-use` 连字符形式在 skill 目录 + 插件命令两车道仍漏 → 补全
+  （两车道均接受 `when-to-use` / `when_to_use`）。
+- **S3 回归收口（P0）**：JSX 内 `//` 行注释被解析器当除法致渲染崩溃（第 4 轮
+  回归 P0）→ 改 `{/* */}` 块注释。
+- **#240（cli-debug 基线）**：headless `--debug` 基线 lifecycle 面常路径真输出
+  （此前 flag 注册但实现被裁）。
+- meta（S5-2 裁定，非代码）：DSH catalog 工程增量（sha256 条目去重 / 全量原地
+  替换 + initial/update 双框 / `/name` gesture 正则）逐项核 AtlasCode 既有面后
+  判「不采」——`/name` 已被 slash-command 路径覆盖、全量原地替换与追加式 jsonl
+  架构冲突、digest 仅同名 description 变更检测的低频边际收益；记录备查不重提。
+
+发布：GitHub master + tag v0.1.13；npm `@atlasharness/atlascode@0.1.13`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.52MB / 全量 3307/0（218 文件）。
+
 ## v0.1.12
 
 0.1.10 后用户实测反馈感知面修波（5 项分级，用户逐项 sign-off；S1–S4
