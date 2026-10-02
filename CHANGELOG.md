@@ -4,6 +4,36 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.11
+
+R7（jsonl 双写收敛，P2，持久化专项波）——双写者双去重 Set 收敛为 engine 域
+单一事实源（根因文档 0.1.9 判定 defer 项，本波开工闭环）：
+
+- **R7（= R3，P2）jsonl 双写收敛（会话去重 Set 单一事实源）**：
+  根因（`docs/r3-jsonl-double-write-root-cause.md`）：主 session 双写者
+  （engine loop sink / REPL useLogMessages）各带**独立去重 Set 缓存**，对
+  同一 session 文件双 append（"每个事件写两遍"）。修 = 根因文档修复方向 ①
+  （写层 dedup 收敛到共享 Set）：① engine `engine/session/load.ts`
+  `_sessionMessagesCache` 升格会话去重 Set 单一事实源，新增
+  `primeSessionMessages`（--resume 挂载面预置，契约 = 仅在缓存为空时预置，
+  防陈旧盘快照覆写活缓存丢未 flush UUID）+ `hasSessionMessagesCache`
+  （预置守卫），双门面导出；② tui `sessionStorage.ts` 裁本地 lodash
+  memoize 独立 Set 实例，`getSessionMessages` / `clearSessionMessagesCache`
+  委托 engine 域缓存，`getLastSessionLog` 预置改经 prime 面 + 守卫
+  （旧 `.cache.has/.set` 语义保留）。四接缝（engine 预过滤·写层 /
+  tui 预过滤·写层）命中同一 Set（per session），双写于写层消解。
+  判别单测 4 例（mutation-red 已核销：回退 tui 委托后 3 红——func 双写
+  2 行 / tui 清不掉 engine 缓存 / tui 读面不见 engine prime uuid）：
+  `tests/unit/session-dedup-shared.test.ts`（3，无盘）+
+  `tests/func/session-double-write.test.ts`（1，真盘，生产时序复刻，
+  session 文件 uuid 各单行）。
+- **排期**：cli-debug P3（#240，`--debug` flag 注册但实现被裁）归下一
+  小修波（裁定 = 实现最小 debug 面或删 flag），非阻塞。
+
+发布：GitHub master + tag v0.1.11；npm `@atlasharness/atlascode@0.1.11`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.53MB / 全量 3262/0（基线 3258 + 4
+新增，212 文件）。
+
 ## v0.1.10
 
 user-e2e 第 3 轮终测 R6（P0，收尾主项）——TUI 工具车道 ToolUseContext 桥
