@@ -24,6 +24,19 @@ export const DEFAULT_CHAR_BUDGET = 8_000 // Fallback: 1% of 200k × 4
 // since the cap is generous enough to preserve the core use case.
 export const MAX_LISTING_DESC_CHARS = 250
 
+/**
+ * S4（感知面反馈波）：单条描述上限可配——env `SKILL_LISTING_MAX_DESC_CHARS`
+ * （正整数）覆盖，默认 250 不变（零行为变更；总预算仍受 getCharBudget /
+ * SLASH_COMMAND_TOOL_CHAR_BUDGET 治理）。调用时读取（函数面，判别单测无
+ * import 序依赖）。
+ */
+export function getMaxListingDescChars(): number {
+  const override = Number(process.env.SKILL_LISTING_MAX_DESC_CHARS)
+  return Number.isFinite(override) && override > 0
+    ? Math.floor(override)
+    : MAX_LISTING_DESC_CHARS
+}
+
 export function getCharBudget(contextWindowTokens?: number): number {
   if (Number(process.env.SLASH_COMMAND_TOOL_CHAR_BUDGET)) {
     return Number(process.env.SLASH_COMMAND_TOOL_CHAR_BUDGET)
@@ -40,9 +53,9 @@ function getCommandDescription(cmd: Command): string {
   const desc = cmd.whenToUse
     ? `${cmd.description} - ${cmd.whenToUse}`
     : cmd.description
-  return desc.length > MAX_LISTING_DESC_CHARS
-    ? desc.slice(0, MAX_LISTING_DESC_CHARS - 1) + '\u2026'
-    : desc
+  // S4\uff1a\u8c03\u7528\u65f6\u8bfb env \u53ef\u914d\u4e0a\u9650\uff08\u9ed8\u8ba4 = MAX_LISTING_DESC_CHARS\uff09
+  const cap = getMaxListingDescChars()
+  return desc.length > cap ? desc.slice(0, cap - 1) + '\u2026' : desc
 }
 
 function formatCommandDescription(cmd: Command): string {

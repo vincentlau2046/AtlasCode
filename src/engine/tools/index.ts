@@ -1001,6 +1001,7 @@ export {
   CHARS_PER_TOKEN,
   DEFAULT_CHAR_BUDGET,
   MAX_LISTING_DESC_CHARS,
+  getMaxListingDescChars,
   stringWidth,
   truncate,
   getCharBudget,

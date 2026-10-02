@@ -47,6 +47,19 @@ export const DEFAULT_CHAR_BUDGET = 8_000 // Fallback: 1% of 200k × 4
 // use case.
 export const MAX_LISTING_DESC_CHARS = 250
 
+/**
+ * S4（感知面反馈波）：单条描述上限可配——env `SKILL_LISTING_MAX_DESC_CHARS`
+ * （正整数）覆盖，默认 250 不变（零行为变更；总预算仍受 getCharBudget /
+ * SLASH_COMMAND_TOOL_CHAR_BUDGET 治理）。调用时读取（函数面，判别单测无
+ * import 序依赖）。engine 车道与 tui/tools/SkillTool/prompt.ts 同 env 同默认。
+ */
+export function getMaxListingDescChars(): number {
+  const override = Number(process.env.SKILL_LISTING_MAX_DESC_CHARS)
+  return Number.isFinite(override) && override > 0
+    ? Math.floor(override)
+    : MAX_LISTING_DESC_CHARS
+}
+
 /** 本地最小宽度面（delta ②：旧 ink stringWidth 全角感知 → ASCII 字符数）。 */
 export function stringWidth(str: string): number {
   return str.length
@@ -74,9 +87,9 @@ function getCommandDescription(cmd: Command): string {
   const desc = cmd.whenToUse
     ? `${cmd.description} - ${cmd.whenToUse}`
     : cmd.description
-  return desc.length > MAX_LISTING_DESC_CHARS
-    ? desc.slice(0, MAX_LISTING_DESC_CHARS - 1) + '…'
-    : desc
+  // S4：调用时读 env 可配上限（默认 = MAX_LISTING_DESC_CHARS）
+  const cap = getMaxListingDescChars()
+  return desc.length > cap ? desc.slice(0, cap - 1) + '…' : desc
 }
 
 function formatCommandDescription(cmd: Command): string {
