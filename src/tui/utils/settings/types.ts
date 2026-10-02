@@ -70,6 +70,17 @@ export const SettingsSchema = () => z.object({
   outputStyle: z.string().optional(),
   language: z.string().optional(),
   theme: z.string().optional(),
+  // #250 concern 2（/autocompact 命令）：autoCompact 窗口档位（命令持久化到
+  // userSettings；结构型单源 = engine AutoCompactWindowSetting，本 schema 对齐
+  // 该形；消费 = engine 阈值/开关便捷形 + agentLoopDeps DI 注入）
+  autoCompactWindow: z
+    .discriminatedUnion('kind', [
+      z.object({ kind: z.literal('auto') }),
+      z.object({ kind: z.literal('off') }),
+      z.object({ kind: z.literal('window'), tokens: z.number().int().min(1_000) }),
+      z.object({ kind: z.literal('pct'), pct: z.number().min(1).max(100) }),
+    ])
+    .optional(),
   prefersReducedMotion: z.boolean().optional(),
   syntaxHighlightingDisabled: z.boolean().optional(),
   spinnerTipsEnabled: z.boolean().optional(),

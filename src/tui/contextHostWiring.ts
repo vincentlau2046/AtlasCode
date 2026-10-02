@@ -29,6 +29,9 @@
  *    内建 engine 注册表骨架）
  *  - setAutoCompactSettingsSource ← getGlobalConfig().autoCompactEnabled
  *    （默认 true，与旧仓 0 参 isAutoCompactEnabled 逐字等价）
+ *  - setAutoCompactWindowSettingsSource ← getInitialSettings().autoCompactWindow
+ *    （#250 concern 2：/autocompact 命令持久化档位；env 胜 settings 合并
+ *    纪律在 engine getMergedAutoCompactOverrides 单点）
  *  - setTimeBasedMCConfigSource ← GB 'atlas_slate_heron' 读面（旧仓
  *    timeBasedMCConfig.ts 逐字：默认 {enabled:false, 60min, keepRecent:5}）
  *
@@ -45,6 +48,8 @@ import {
   clearPostCompactResetsForTesting,
   registerPostCompactReset,
   setAutoCompactSettingsSource,
+  // #250 concern 2（/autocompact 命令）：settings.autoCompactWindow 档位读侧注入缝
+  setAutoCompactWindowSettingsSource,
   setCompactPorts,
   setPartialCompactPort,
   setReactiveCompactPort,
@@ -59,6 +64,7 @@ import type { UserMessage } from './types/message.js'
 import type { ToolUseContext } from './Tool.js'
 import type { AttachmentMessage } from './types/message.js'
 import { getGlobalConfig } from './utils/config.js'
+import { getInitialSettings } from './utils/settings/settings.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from './services/analytics/growthbook.js'
 import {
   executePostCompactHooks,
@@ -214,6 +220,10 @@ export function wireContextHostPorts(): void {
 
   // settings 读侧（autoCompact 0 参判定；默认 true 与旧仓逐字）
   setAutoCompactSettingsSource(() => getGlobalConfig().autoCompactEnabled)
+  // #250 concern 2（/autocompact 命令）：settings.autoCompactWindow 档位读侧
+  // （userSettings 持久化面；getInitialSettings 会话缓存在 updateSettingsForSource
+  // 后重置 → 命令内改档当 session 生效，env 胜 settings 合并纪律在 engine 侧）。
+  setAutoCompactWindowSettingsSource(() => getInitialSettings().autoCompactWindow)
   // GB 时间触发配置读面（旧仓 timeBasedMCConfig.ts 逐字）
   setTimeBasedMCConfigSource(() =>
     getFeatureValue_CACHED_MAY_BE_STALE(
