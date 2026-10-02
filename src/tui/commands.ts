@@ -69,11 +69,6 @@ const workflowsCmd = feature('WORKFLOW_SCRIPTS')
     ).default
   : null
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：webCmd（CCR_REMOTE_SETUP / remote-setup）+ ultraplan（ULTRAPLAN / CCR 簇）两 1P 命令裁除
-const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
-  ? (
-      require('./services/skillSearch/localSearch.js') as typeof import('./services/skillSearch/localSearch.js')
-    ).clearSkillIndexCache
-  : null
 const torch = feature('TORCH') ? require('src/tui/commands/torch.js').default : null
 const peersCmd = feature('UDS_INBOX')
   ? (
@@ -438,11 +433,6 @@ export function clearCommandMemoizationCaches(): void {
   loadAllCommands.cache?.clear?.()
   getSkillToolCommands.cache?.clear?.()
   getSlashCommandToolSkills.cache?.clear?.()
-  // getSkillIndex in skillSearch/localSearch.ts is a separate memoization layer
-  // built ON TOP of getSkillToolCommands/getCommands. Clearing only the inner
-  // caches is a no-op for the outer — lodash memoize returns the cached result
-  // without ever reaching the cleared inners. Must clear it explicitly.
-  clearSkillIndexCache?.()
 }
 
 export function clearCommandsCache(): void {

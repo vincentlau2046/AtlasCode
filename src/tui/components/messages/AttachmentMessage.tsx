@@ -97,25 +97,6 @@ export function AttachmentMessage({
       </Box>;
   }
 
-  // skill_discovery rendered here (not in the switch) so the 'skill_discovery'
-  // string literal stays inside a feature()-guarded block. A case label can't
-  // be conditionally eliminated; an if-body can.
-  if (feature('EXPERIMENTAL_SKILL_SEARCH')) {
-    if (attachment.type === 'skill_discovery') {
-      if (attachment.skills.length === 0) return null;
-      // Ant users get shortIds inline so they can /skill-feedback while the
-      // turn is still fresh. External users (when this un-gates) just see
-      // names — shortId is undefined outside ant builds anyway.
-      const names = attachment.skills.map(s => s.shortId ? `${s.name} [${s.shortId}]` : s.name).join(', ');
-      const hint = '';
-      return <Line>
-          <Text bold>{attachment.skills.length}</Text> relevant{' '}
-          {plural(attachment.skills.length, 'skill')}: {names}
-          {hint && <Text dimColor>{hint}</Text>}
-        </Line>;
-    }
-  }
-
   switch (attachment.type) {
     case 'directory':
       return <Line>
@@ -341,9 +322,9 @@ export function AttachmentMessage({
       // a case) or render nothing (add to the array). Messages.tsx pre-filters
       // these so this branch is defense-in-depth for other render paths.
       //
-      // skill_discovery and teammate_mailbox are handled BEFORE the switch in
-      // runtime-gated blocks (feature() / isAgentSwarmsEnabled()) that TS can't
-      // narrow through — excluded here via type union (compile-time only, no emit).
+      // teammate_mailbox is handled BEFORE the switch in a runtime-gated block
+      // (isAgentSwarmsEnabled()) that TS can't narrow through — excluded here
+      // via type union (compile-time only, no emit).
       attachment.type satisfies any;
       return null;
   }

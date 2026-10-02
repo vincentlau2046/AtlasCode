@@ -22,12 +22,6 @@ const fetchMcpSkillsForClient = feature('MCP_SKILLS')
       require('../../skills/mcpSkills.js') as typeof import('../../skills/mcpSkills.js')
     ).fetchMcpSkillsForClient
   : null
-const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
-  ? (
-      require('../skillSearch/localSearch.js') as typeof import('../skillSearch/localSearch.js')
-    ).clearSkillIndexCache
-  : null
-
 import {
   PromptListChangedNotificationSchema,
   ResourceListChangedNotificationSchema,
@@ -456,9 +450,6 @@ export function useManageMCPConnections(
                     ...client,
                     commands: [...mcpPrompts, ...mcpSkills],
                   })
-                  // MCP skills changed — invalidate skill-search index so
-                  // next discovery rebuilds with the new set.
-                  clearSkillIndexCache?.()
                 } catch (error) {
                   logMCPError(
                     client.name,
@@ -497,9 +488,6 @@ export function useManageMCPConnections(
                       resources: newResources,
                       commands: [...mcpPrompts, ...mcpSkills],
                     })
-                    // MCP skills changed — invalidate skill-search index so
-                    // next discovery rebuilds with the new set.
-                    clearSkillIndexCache?.()
                   } else {
                     const newResources = await fetchResourcesForClient(client)
                     updateServer({ ...client, resources: newResources })

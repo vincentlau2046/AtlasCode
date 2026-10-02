@@ -234,7 +234,7 @@ export type ToolUseContext = {
    */
   loadedNestedMemoryPaths?: Set<string>
   dynamicSkillDirTriggers?: Set<string>
-  /** Skill names surfaced via skill_discovery this session. Telemetry only (feeds was_discovered). */
+  /** Skill names surfaced via skill discovery this session. Telemetry only (feeds was_discovered). */
   discoveredSkillNames?: Set<string>
   userModified?: boolean
   setInProgressToolUseIDs: (f: (prev: Set<string>) => Set<string>) => void

@@ -3501,26 +3501,7 @@ Read the team config to discover your teammates' names. Check the task list peri
   }
 
 
-  // skill_discovery handled here (not in the switch) so the 'skill_discovery'
-  // string literal lives inside a feature()-guarded block. A case label can't
-  // be gated, but this pattern can — same approach as teammate_mailbox above.
-  if (isFeatureOn('EXPERIMENTAL_SKILL_SEARCH')) {
-    if (attachment.type === 'skill_discovery') {
-      if (attachment.skills.length === 0) return []
-      const lines = attachment.skills.map(s => `- ${s.name}: ${s.description}`)
-      return wrapMessagesInSystemReminder([
-        createUserMessage({
-          content:
-            `Skills relevant to your task:\n\n${lines.join('\n')}\n\n` +
-            `These skills encode project-specific conventions. ` +
-            `Invoke via Skill("<name>") for complete instructions.`,
-          isMeta: true,
-        }),
-      ])
-    }
-  }
-
-  // biome-ignore lint/nursery/useExhaustiveSwitchCases: teammate_mailbox/team_context/max_turns_reached/skill_discovery/bagel_console handled above, can't add case for dead code elimination
+  // biome-ignore lint/nursery/useExhaustiveSwitchCases: teammate_mailbox/team_context/max_turns_reached/bagel_console handled above, can't add case for dead code elimination
   switch (attachment.type) {
     case 'directory': {
       return wrapMessagesInSystemReminder([

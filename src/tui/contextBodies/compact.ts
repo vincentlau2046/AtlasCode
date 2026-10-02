@@ -187,22 +187,16 @@ export function stripImagesFromMessages(messages: Message[]): Message[] {
 
 /**
  * Strip attachment types that are re-injected post-compaction anyway.
- * skill_discovery/skill_listing are re-surfaced by resetSentSkillNames()
- * + the next turn's discovery signal, so feeding them to the summarizer
- * wastes tokens and pollutes the summary with stale skill suggestions.
+ * skill_listing is re-surfaced by resetSentSkillNames() + the next turn's
+ * listing, so feeding it to the summarizer wastes tokens and pollutes the
+ * summary with stale skill suggestions.
  *
- * No-op when EXPERIMENTAL_SKILL_SEARCH is off (the attachment types
- * don't exist on external builds).
+ * No-op when EXPERIMENTAL_SKILL_SEARCH is off.
  */
 export function stripReinjectedAttachments(messages: Message[]): Message[] {
   if (feature('EXPERIMENTAL_SKILL_SEARCH')) {
     return messages.filter(
-      m =>
-        !(
-          m.type === 'attachment' &&
-          (m.attachment.type === 'skill_discovery' ||
-            m.attachment.type === 'skill_listing')
-        ),
+      m => !(m.type === 'attachment' && m.attachment.type === 'skill_listing'),
     )
   }
   return messages
@@ -485,9 +479,7 @@ export async function compactConversation(
     // Intentionally NOT resetting sentSkillNames: re-injecting the full
     // skill_listing (~4K tokens) post-compact is pure cache_creation with
     // marginal benefit. The model still has SkillTool in its schema and
-    // invoked_skills attachment (below) preserves used-skill content. Ants
-    // with EXPERIMENTAL_SKILL_SEARCH already skip re-injection via the
-    // early-return in getSkillListingAttachments.
+    // invoked_skills attachment (below) preserves used-skill content.
 
     // Run async attachment generation in parallel
     const [fileAttachments, asyncAgentAttachments] = await Promise.all([

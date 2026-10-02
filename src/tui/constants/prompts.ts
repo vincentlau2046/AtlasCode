@@ -77,11 +77,6 @@ const DISCOVER_SKILLS_TOOL_NAME: string | null = feature(
       require('../tools/DiscoverSkillsTool/prompt.js') as typeof import('../tools/DiscoverSkillsTool/prompt.js')
     ).DISCOVER_SKILLS_TOOL_NAME
   : null
-// Capture the module (not .isSkillSearchEnabled directly) so spyOn() in tests
-// patches what we actually call — a captured function ref would point past the spy.
-const skillSearchFeatureCheck = feature('EXPERIMENTAL_SKILL_SEARCH')
-  ? (require('../services/skillSearch/featureCheck.js') as typeof import('../services/skillSearch/featureCheck.js'))
-  : null
 import type { OutputStyleConfig } from './outputStyles.js'
 import { CYBER_RISK_INSTRUCTION } from './cyberRiskInstruction.js'
 
@@ -277,12 +272,12 @@ function getAgentToolSection(): string {
 }
 
 /**
- * Guidance for the skill_discovery attachment ("Skills relevant to your
- * task:") and the DiscoverSkills tool. Shared between the main-session
+ * Forward-seam guidance for the DiscoverSkills tool. S5-3 (2026-10-02)
+ * trimmed the skill_discovery attachment + skillSearch service family; this
+ * tool name + guidance remain as the forward seam (inert while
+ * EXPERIMENTAL_SKILL_SEARCH is off). Shared between the main-session
  * getUsingYourToolsSection bullet and the subagent path in
- * enhanceSystemPromptWithEnvDetails — subagents receive skill_discovery
- * attachments (post #22830) but don't go through getSystemPrompt, so
- * without this they'd see the reminders with no framing.
+ * enhanceSystemPromptWithEnvDetails.
  *
  * feature() guard is internal — external builds DCE the string literal
  * along with the DISCOVER_SKILLS_TOOL_NAME interpolation.
@@ -670,15 +665,13 @@ export async function enhanceSystemPromptWithEnvDetails(
 - In your final response, share file paths (always absolute, never relative) that are relevant to the task. Include code snippets only when the exact text is load-bearing (e.g., a bug you found, a function signature the caller asked for) — do not recap code you merely read.
 - For clear communication with the user the assistant MUST avoid using emojis.
 - Do not use a colon before tool calls. Text like "Let me read the file:" followed by a read tool call should just be "Let me read the file." with a period.`
-  // Subagents get skill_discovery attachments (prefetch.ts runs in query(),
-  // no agentId guard since #22830) but don't go through getSystemPrompt —
-  // surface the same DiscoverSkills framing the main session gets. Gated on
-  // enabledToolNames when the caller provides it (runAgent.ts does).
-  // AgentTool.tsx:768 builds the prompt before assembleToolPool:830 so it
-  // omits this param — `?? true` preserves guidance there.
+  // Subagents don't go through getSystemPrompt — surface the same DiscoverSkills
+  // framing the main session gets (forward seam; inert until the skill-search
+  // family is re-wired). Gated on enabledToolNames when the caller provides it
+  // (runAgent.ts does). AgentTool.tsx builds the prompt before assembleToolPool
+  // so it omits this param — `?? true` preserves guidance there.
   const discoverSkillsGuidance =
     feature('EXPERIMENTAL_SKILL_SEARCH') &&
-    skillSearchFeatureCheck?.isSkillSearchEnabled() &&
     DISCOVER_SKILLS_TOOL_NAME !== null &&
     (enabledToolNames?.has(DISCOVER_SKILLS_TOOL_NAME) ?? true)
       ? getDiscoverSkillsGuidance()
