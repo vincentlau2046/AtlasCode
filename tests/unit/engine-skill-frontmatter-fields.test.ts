@@ -7,6 +7,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   coerceDescriptionToString,
   parseBooleanFrontmatter,
+  parseSkillFrontmatterFields,
   parseShellFrontmatter,
   splitPathInFrontmatter,
 } from '../../src/engine/skill'
@@ -106,5 +107,50 @@ describe('splitPathInFrontmatter', () => {
       'src/*.tsx',
       'lib/**',
     ])
+  })
+})
+
+/**
+ * S1（感知面反馈波）whenToUse 键名双形式接受（mutation-red：修前连字符
+ * 形态整字段静默丢失 → whenToUse undefined，自动触发线索降级）：
+ *   ① 连字符 `when-to-use`（与 allowed-tools / disable-model-invocation
+ *      兄弟键约定一致，skill 作者按约定书写的主形态）→ 命中；
+ *   ② 下划线 `when_to_use`（bundled ascend 技能现用形态）→ 回归保护；
+ *   ③ 双写 → 连字符优先（约定面胜出，契约锁定）；
+ *   ④ 均缺 → undefined。
+ */
+describe('parseSkillFrontmatterFields whenToUse 双形式接受（S1）', () => {
+  const base = { description: 'd' } as const
+
+  test('① 连字符 when-to-use（约定面）命中', () => {
+    const out = parseSkillFrontmatterFields(
+      { ...base, 'when-to-use': 'WHEN' },
+      '',
+      's',
+    )
+    expect(out.whenToUse).toBe('WHEN')
+  })
+
+  test('② 下划线 when_to_use（bundled 兼容面）回归', () => {
+    const out = parseSkillFrontmatterFields(
+      { ...base, when_to_use: 'WHEN_US' },
+      '',
+      's',
+    )
+    expect(out.whenToUse).toBe('WHEN_US')
+  })
+
+  test('③ 双写连字符优先（契约锁定）', () => {
+    const out = parseSkillFrontmatterFields(
+      { ...base, 'when-to-use': 'HY', when_to_use: 'US' },
+      '',
+      's',
+    )
+    expect(out.whenToUse).toBe('HY')
+  })
+
+  test('④ 均缺 → undefined', () => {
+    const out = parseSkillFrontmatterFields({ ...base }, '', 's')
+    expect(out.whenToUse).toBeUndefined()
   })
 })

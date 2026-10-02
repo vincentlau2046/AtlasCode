@@ -205,7 +205,13 @@ export function parseSkillFrontmatterFields(
     argumentNames: parseArgumentNames(
       frontmatter.arguments as string | string[] | undefined,
     ),
-    whenToUse: frontmatter.when_to_use as string | undefined,
+    // S1（感知面反馈波）：连字符 `when-to-use`（与 allowed-tools /
+    // disable-model-invocation 等兄弟键约定一致）此前静默丢失 → 模型
+    // 「何时用此 skill」触发线索降级（自动触发能力直接降档）。双形式
+    // 归一接受：连字符优先（约定面），下划线兼容（bundled ascend 技能
+    // 现用形式，回归保护）。
+    whenToUse: (frontmatter['when-to-use'] ??
+      frontmatter.when_to_use) as string | undefined,
     version: frontmatter.version as string | undefined,
     model,
     disableModelInvocation: parseBooleanFrontmatter(
