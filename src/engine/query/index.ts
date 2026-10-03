@@ -6,8 +6,10 @@
  * E-1b T-4a：queryAgentLoop 多轮（pre-turn autoCompact + maxTurns + terminal）已落。
  * E-5 S-5a：stop hooks 已落（loop terminal 消费点，C-4 归属订正，见 loop.ts 头注）。
  * 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（E-1b-full）/
- * 错误恢复（E-1b-full）/ tokenBudget continuation（max_tokens 截断续跑）/
- * MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
+ * 错误恢复（E-1b-full）：回合级有界恢复已落 #262（turnRecovery withTurnRecovery，
+ * queryOneRound 经有界+退避+signal 感知续试穿越 5xx 风暴窗）；余 = tokenBudget
+ * continuation（max_tokens 截断续跑）/ MCP 连接生命周期（连接层纵切，见 mcp.ts
+ * 头注；MCP 工具路由本身已按 E-2 闭环）/
  * 附件渲染 + 钩子 additionalContext 回灌（message/REPL 波，§8.40 C-3 前向接缝登记）。
  */
 export {
@@ -21,4 +23,12 @@ export {
   type AgentLoopArgs,
   type AgentLoopResult,
 } from './loop'
+export {
+  withTurnRecovery,
+  resolveTurnRecoveryConfig,
+  turnRecoveryBackoffMs,
+  sleepSignalAware,
+  type TurnRecoveryConfig,
+  type WithTurnRecoveryOptions,
+} from './turnRecovery'
 export { ask, type AskArgs } from './QueryEngine'

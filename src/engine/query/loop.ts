@@ -15,8 +15,11 @@
  *   - 工具 schema 注入面 W3-3d 已落（§8.74.20）：queryOneRound → modelProvider
  *     .chat tools 槽（shared Tool[] → buildOpenAITools）；活探针揭出的未登记
  *     缺面补位（H6）。
+ *   - 错误恢复（E-1b-full）：回合级有界恢复已落（#262，turnRecovery.ts
+ *     withTurnRecovery——queryOneRound 两处 modelProvider.chat 经有界 + 指数退避 +
+ *     signal 感知续试穿越 5xx 风暴窗，长跑不中断；非可重试/abort 立即穿透）。
  *   - 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（runHooksStream，
- *     §8.40 S-5b 前向接缝登记，防 H6 死接缝）/ 错误恢复（E-1b-full）/
+ *     §8.40 S-5b 前向接缝登记，防 H6 死接缝）/
  *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
  *     附件渲染 + 钩子输出上下文回灌（消息/REPL 波残留守，§8.38 C-3/C-6）/
  *     tokenBudget continuation（max_tokens 截断续跑，E-1b）/
@@ -41,6 +44,7 @@ import {
 } from '../../shared'
 import type { ModelProvider, ModelRole } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
+import { withTurnRecovery } from './turnRecovery'
 import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
@@ -267,7 +271,14 @@ export async function queryOneRound(
     options:
       deps.effortValue !== undefined ? { effortValue: deps.effortValue } : undefined,
   }
-  let resp = await deps.modelProvider.chat(chatArgs)
+  // loop-robustness 缺口②（#262）：回合级有界恢复——provider 内部 3 次重试预算
+  // 耗尽仍抛「可重试模型错误」（5xx 风暴 / 网关持续抖动）→ withTurnRecovery 有界
+  // + 指数退避 + signal 感知续试，穿越风暴窗（长跑不中断），非整个任务被回合级
+  // 丢弃。非可重试（400/死网）/ client-timeout fail-fast / abort 立即穿透（不放大
+  // #260 快速失败）。退避/预算 env 可调（见 turnRecovery.ts 头注）。
+  let resp = await withTurnRecovery(() => deps.modelProvider.chat(chatArgs), {
+    signal: deps.signal,
+  })
   let assistantContent: unknown[] = resp.message.content ?? []
   // 空内容判据：无非空 text 块且无 tool_use 块（仅 thinking / 全空 = 空响应）。
   // 与 terminal 判据（toolUses 空）同源但更宽：正常 end_turn 含 text 块 → 非空。
@@ -282,7 +293,11 @@ export async function queryOneRound(
   }
   // 首次空响应再试 1 次（瞬时 0/0 恢复面；signal aborted 即止，不追加挂起调用）。
   if (isEmptyContent(assistantContent) && !deps.signal?.aborted) {
-    const retried = await deps.modelProvider.chat(chatArgs)
+    // 空内容重发同样走回合级恢复（同一 5xx 故障类；首发已成功仅内容为空，
+    // 本次重发若撞网关抖动仍受 withTurnRecovery 兜底）。
+    const retried = await withTurnRecovery(() => deps.modelProvider.chat(chatArgs), {
+      signal: deps.signal,
+    })
     const retriedContent: unknown[] = retried.message.content ?? []
     if (!isEmptyContent(retriedContent)) {
       resp = retried
@@ -386,7 +401,9 @@ export async function queryOneRound(
  *   4. 继续轮末 turnCounter 自增（旧仓 L1458-1460，仅 compacted 会话）
  *   5. maxTurns 截断（terminated=false，防不可终止会话；stop-hooks 防停亦受此兜底）
  *
- * 裁剪版真核心：无 error recovery / tokenBudget continuation（残留守，见头注）；
+ * 裁剪版真核心：tokenBudget continuation（残留守，见头注）；error recovery
+ * （E-1b-full 回合级有界恢复）已落 #262（queryOneRound 经 withTurnRecovery 穿越
+ * 5xx 风暴窗，长跑不中断）。
  * stop hooks 已落 E-5 S-5a（terminal 支消费点，C-4 归属订正）。
  * 未注入 context = 纯多轮（不压缩），窄 spine 语义。
  * 残留守：pre-turn microcompact 未接线（旧仓 pre-turn 序 budget→snip→microcompact→
