@@ -184,15 +184,33 @@ function startLlmWaitHeartbeat(
 export class OpenAIProvider implements ModelProvider {
   private readonly maxRetriesPerModel: number
   private readonly timeoutMs: number
+  /**
+   * #262 缺口③（llmTimeoutMs 死键 + headless 设置源缝未接，live 复现铁证）：
+   * 可选活态超时读面（缺省 = 构造期快照 timeoutMs，兼容直构测试面）。单例
+   * getModelProvider 注 resolveLlmTimeoutMs(env, llmTimeoutSettingsSource?.())
+   * 活读器——settings 源缝注入 / 值变更 / env 翻转后每次请求现读，非构造期
+   * 一次性快照（修 provider 构造快照 vs getCurrentLlmTimeoutMs 现读 两车道
+   * 分裂：TUI 提示说 8s 实际 600s；headless 未注源缝 llmTimeoutMs 死键）。
+   */
+  private readonly timeoutResolver?: () => number
 
-  constructor(maxRetriesPerModel: number = 3, timeoutMs: number = LLM_TIMEOUT_DEFAULT_MS) {
+  constructor(
+    maxRetriesPerModel: number = 3,
+    timeoutMs: number = LLM_TIMEOUT_DEFAULT_MS,
+    timeoutResolver?: () => number,
+  ) {
     this.maxRetriesPerModel = maxRetriesPerModel
     this.timeoutMs = timeoutMs
+    this.timeoutResolver = timeoutResolver
   }
 
-  /** #260：当前生效请求超时读面（REPL remediation 提示 / 单测断言用）。 */
+  /**
+   * #260：当前生效请求超时读面（REPL remediation 提示 / 单测断言用）。
+   * #262 缺口③：活态——timeoutResolver 现读（settings 源缝 / env 变即生效）；
+   * 未注 = 构造期快照（直构测试面零行为变更）。
+   */
   getTimeoutMs(): number {
-    return this.timeoutMs
+    return this.timeoutResolver ? this.timeoutResolver() : this.timeoutMs
   }
 
   async chat(args: {
@@ -262,7 +280,7 @@ export class OpenAIProvider implements ModelProvider {
           const stopWait = startLlmWaitHeartbeat(entry.modelId, attempt, this.maxRetriesPerModel)
           let res: any
           try {
-            res = await client.chat.completions.create(params, { signal: args.signal, timeout: this.timeoutMs } as any)
+            res = await client.chat.completions.create(params, { signal: args.signal, timeout: this.getTimeoutMs() } as any)
           } finally {
             stopWait()
           }
@@ -402,7 +420,7 @@ export class OpenAIProvider implements ModelProvider {
     try {
       stream = await client.chat.completions.create(
         { ...params, stream: true, stream_options: { include_usage: true } },
-        { signal, timeout: this.timeoutMs } as any,
+        { signal, timeout: this.getTimeoutMs() } as any,
       )
     } finally {
       stopWait()
@@ -603,7 +621,7 @@ export class OpenAIProvider implements ModelProvider {
     const client = getClientForEntry(entry)
     const resp: any = await client.audio.transcriptions.create(
       { file, model, ...(language ? { language } : {}) } as any,
-      { timeout: this.timeoutMs } as any,
+      { timeout: this.getTimeoutMs() } as any,
     )
     return resp?.text ?? ''
   }
@@ -620,7 +638,7 @@ export class OpenAIProvider implements ModelProvider {
         input: text,
         response_format: 'mp3',
       } as any,
-      { timeout: this.timeoutMs } as any,
+      { timeout: this.getTimeoutMs() } as any,
     )
     const buf = await resp.arrayBuffer()
     return Buffer.from(buf)

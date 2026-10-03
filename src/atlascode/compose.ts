@@ -65,6 +65,7 @@ import { createSandboxManager, type SandboxManager } from '../sandbox'
 import {
   getModelProvider,
   setEndpointConfigSource,
+  setLlmTimeoutSettingsSource,
   type ModelProvider,
 } from '../modelprovider'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
@@ -364,6 +365,25 @@ export function createCoreDependencies(): CoreDependencies {
     try {
       const s = getInitialSettings()
       return s.search?.tavilyApiKey
+    } catch {
+      return undefined
+    }
+  })
+
+  // #262 缺口③（llmTimeoutMs 死键，headless 设置源缝未接；与缺口①「headless
+  //    公共 entry 层」同族，live 复现铁证）：headless 车道补 settings llmTimeoutMs
+  //    超时档读侧缝——TUI 经 wireContextHostPorts 注（contextHostWiring.ts:235），
+  //    headless 此前全死 → settings.json llmTimeoutMs 恒 600s（用户 #260
+  //    remediation「改 settings 没用」主诉）。provider 活态 resolver（getModelProvider
+  //    第三参）现读此源，与 getCurrentLlmTimeoutMs 提示面同源（两车道对齐不分裂）。
+  //    try/catch：启动早位 settings 未就绪/不可读 → 降级 env-or-缺省，不阻断组合
+  //    根装配（同 ⑮ WebSearch 键面纪律）。autoCompactWindow / timeBasedMCConfig 同类
+  //    headless 缝未接 = 后续「headless settings 缝」族（本波聚焦 llmTimeoutMs =
+  //    用户 #260 死键主诉 + 探针实证）。
+  setLlmTimeoutSettingsSource(() => {
+    try {
+      const v = getInitialSettings().llmTimeoutMs
+      return typeof v === 'number' ? v : undefined
     } catch {
       return undefined
     }

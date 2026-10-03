@@ -24,7 +24,13 @@ export function getModelProvider(): ModelProvider {
   return (
     _provider ??= new OpenAIProvider(
       3,
-      resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
+      // #262 缺口③：第二参仅兜底（resolver 缺省时用）；第三参 = 活态读器，每次
+      // 请求现读 resolveLlmTimeoutMs(env, settings 源缝)——settings 源缝
+      // （TUI wireContextHostPorts / headless createCoreDependencies 注）注入或
+      // 值变 / env 翻转后即时生效，非构造期一次性快照（修 llmTimeoutMs 死键 +
+      // TUI 提示面 getCurrentLlmTimeoutMs 现读 vs provider 快照 两车道分裂）。
+      LLM_TIMEOUT_DEFAULT_MS,
+      () => resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
     )
   )
 }
