@@ -48,6 +48,10 @@
  */
 export { cliError, cliOk } from './exit'
 export {
+  isCrashBackstopRegistered,
+  registerGlobalCrashBackstop,
+} from './crashBackstop'
+export {
   enforceNoDebugGuard,
   eagerLoadSettings,
   eagerParseCliFlag,

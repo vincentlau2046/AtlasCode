@@ -27,7 +27,13 @@
  * 均无模型车道消费（--e2e = Ascend mock 探针非 gateway 面）；dev 面将来
  * 若消费模型车道，随该切片在此扩接线（残留守登记）。
  */
-import { enforceNoDebugGuard, hasDevFlag, main, runDevCli } from '../cli'
+import {
+  enforceNoDebugGuard,
+  hasDevFlag,
+  main,
+  registerGlobalCrashBackstop,
+  runDevCli,
+} from '../cli'
 import { getCoreDependencies } from './compose'
 import { mountDomains } from './mount'
 
@@ -76,6 +82,18 @@ async function binMain(): Promise<void> {
     const { main: tuiMain } = await import('./ui/main.js')
     await tuiMain()
     return
+  }
+  // loop-robustness 缺口①（#262，用户裁定最高优先）：headless 车道装全局崩溃
+  // 兜底（对齐 TUI；headless 支此前无此兜底 → uncaught 走 Node 默认 FATAL 崩，
+  // 击穿「长跑不中断」）。首段武装（早于 getCoreDependencies + main/loop），
+  // 不触上方 TUI/dev 支（TUI 车道自有更富 setupGracefulShutdown，语义不变）。
+  registerGlobalCrashBackstop()
+  // 判别活探针（#262 func 活探针用）：ATLAS_TEST_CRASH_BACKSTOP=1 → 装兜底后
+  // emit 受控 uncaught——兜底已接 → 被 log + 存活（process.exit 0）；未接
+  // （回退未接）→ Node 默认 FATAL 崩（exit!=0）。生产 env 恒 unset → 零行为变更。
+  if (process.env.ATLAS_TEST_CRASH_BACKSTOP === '1') {
+    process.emit('uncaughtException', new Error('atlas crash-backstop live probe'))
+    process.exit(0)
   }
   getCoreDependencies()
   await main()
