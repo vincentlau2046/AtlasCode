@@ -8,7 +8,9 @@
 // STR-1 门面规则：外域只经此门面 import，不深导入内部文件。
 
 import { OpenAIProvider, type ModelProvider } from './modelprovider'
+import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { parseBoundedIntEnv } from '../shared'
+export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS } from './constants'
 
 export { OpenAIProvider, type ModelProvider, type ProviderStreamEvent } from './modelprovider'
 
@@ -19,7 +21,28 @@ let _provider: ModelProvider | undefined
  * constructing their own OpenAIProvider.
  */
 export function getModelProvider(): ModelProvider {
-  return (_provider ??= new OpenAIProvider(3, resolveLlmTimeoutMs()))
+  return (
+    _provider ??= new OpenAIProvider(
+      3,
+      resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
+    )
+  )
+}
+
+// #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 请求超时 settings
+// 源注入缝（autoCompactWindow settings 源缝先例）：宿主 contextHostWiring
+// 注 getInitialSettings().llmTimeoutMs 读侧；未注 = 无 settings 档。
+// env ATLAS_LLM_TIMEOUT 恒胜此缝（显式 CLI/env > 持久化 settings）。
+type LlmTimeoutSettingsSource = (() => number | undefined) | null
+let llmTimeoutSettingsSource: LlmTimeoutSettingsSource = null
+
+export function setLlmTimeoutSettingsSource(next: LlmTimeoutSettingsSource): void {
+  llmTimeoutSettingsSource = next
+}
+
+/** 当前生效的 LLM 请求超时（ms）：env 胜 settings 源缝 胜 缺省（纯读，不构造单例）。 */
+export function getCurrentLlmTimeoutMs(): number {
+  return resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.())
 }
 
 /**
@@ -38,20 +61,36 @@ export function resetModelProviderForTesting(): void {
 }
 
 /**
- * F3: LLM request timeout (ms), configurable via ATLAS_LLM_TIMEOUT.
- * Default 120_000 equals the previous hardcoded value, so an unset env var means
- * zero behavior change. Capped at 30 min so a stuck/queued gateway can't silently
- * hang a whole session past any sane bound.
- * C1b：解析切 shared parseBoundedIntEnv（min=1 保留旧仓"0 无效"语义）。
+ * F3 → #260 P0（2026-10-03）：LLM 请求超时（ms）纯 resolver。
+ * 优先级：env ATLAS_LLM_TIMEOUT（有效值恒胜）> settings llmTimeoutMs
+ * （源缝注入值，int ≥ 1，越上限 cap）> 缺省 LLM_TIMEOUT_DEFAULT_MS（600s，
+ * 120s→600s = 国产慢模型基线裁定，用户复核定 600s；上限 30min 防挂死网关
+ * 拖挂 session）。env 显式无效（非数字 / < 1）落 settings 档——显式打错的
+ * env 不应把 settings 档也一并废掉。纯函数（测试 seam 直传，无 process.env
+ * 依赖）。
  */
-function resolveLlmTimeoutMs(): number {
-  return parseBoundedIntEnv(
+export function resolveLlmTimeoutMs(
+  envRaw: string | undefined = process.env.ATLAS_LLM_TIMEOUT,
+  settingsMs?: number,
+): number {
+  // settings 档：int ≥ 1 越上限 cap（与 env 同纪律；形状无效 = 无档）。
+  const fromSettings = (): number =>
+    typeof settingsMs === 'number' && Number.isInteger(settingsMs) && settingsMs >= 1
+      ? Math.min(settingsMs, LLM_TIMEOUT_CAP_MS)
+      : LLM_TIMEOUT_DEFAULT_MS
+  // env 未设（undefined/空串）= 该档缺位 → 直落 settings 档。
+  if (envRaw === undefined || envRaw === '') return fromSettings()
+  const env = parseBoundedIntEnv(
     'ATLAS_LLM_TIMEOUT',
-    process.env.ATLAS_LLM_TIMEOUT,
-    120_000,
-    1_800_000,
+    envRaw,
+    LLM_TIMEOUT_DEFAULT_MS,
+    LLM_TIMEOUT_CAP_MS,
     1,
-  ).effective
+  )
+  // env 显式设了但无效（非数字 / < 1）→ 落 settings 档（不打掉的显式错值
+  // 不应废掉 settings 档）。
+  if (env.status !== 'invalid') return env.effective
+  return fromSettings()
 }
 
 function lazyProxy<T extends object>(resolve: () => T): T {
@@ -95,6 +134,7 @@ export {
   getAssistantMessageFromError,
   getErrorMessageIfRefusal,
 } from './modelErrors'
+export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint } from './modelprovider'
 export { buildOpenAIParams } from './params'
 export { modelToRole, normalizeModelStringForAPI } from './roles'
 

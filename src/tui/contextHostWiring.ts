@@ -32,6 +32,9 @@
  *  - setAutoCompactWindowSettingsSource ← getInitialSettings().autoCompactWindow
  *    （#250 concern 2：/autocompact 命令持久化档位；env 胜 settings 合并
  *    纪律在 engine getMergedAutoCompactOverrides 单点）
+ *  - setLlmTimeoutSettingsSource ← getInitialSettings().llmTimeoutMs
+ *    （#260 P0：LLM 请求超时档；env 胜 settings 合并纪律在 modelprovider
+ *    resolveLlmTimeoutMs 单点）
  *  - setTimeBasedMCConfigSource ← GB 'atlas_slate_heron' 读面（旧仓
  *    timeBasedMCConfig.ts 逐字：默认 {enabled:false, 60min, keepRecent:5}）
  *
@@ -44,6 +47,8 @@
  * 复用 engine 测试钩子，生产语义 = 注册表重建）。
  */
 import { feature } from 'src/shared'
+// #260 P0（2026-10-03）：LLM 请求超时 settings 源缝（modelprovider 域）
+import { setLlmTimeoutSettingsSource } from 'src/modelprovider'
 import {
   clearPostCompactResetsForTesting,
   registerPostCompactReset,
@@ -224,6 +229,10 @@ export function wireContextHostPorts(): void {
   // （userSettings 持久化面；getInitialSettings 会话缓存在 updateSettingsForSource
   // 后重置 → 命令内改档当 session 生效，env 胜 settings 合并纪律在 engine 侧）。
   setAutoCompactWindowSettingsSource(() => getInitialSettings().autoCompactWindow)
+  // #260 P0（2026-10-03）：settings.llmTimeoutMs 超时档读侧（userSettings
+  // 持久化面；env ATLAS_LLM_TIMEOUT 恒胜此键的合并纪律在 modelprovider 域
+  // resolveLlmTimeoutMs 单点，防 UI 读面与 provider 构造面两车道分裂）
+  setLlmTimeoutSettingsSource(() => getInitialSettings().llmTimeoutMs)
   // GB 时间触发配置读面（旧仓 timeBasedMCConfig.ts 逐字）
   setTimeBasedMCConfigSource(() =>
     getFeatureValue_CACHED_MAY_BE_STALE(

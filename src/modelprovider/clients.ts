@@ -6,6 +6,7 @@
 
 import OpenAI from 'openai'
 import type { ResolvedModel } from './roles'
+import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
 
 type OpenAIClient = InstanceType<typeof OpenAI>
 
@@ -26,7 +27,8 @@ export function getClientForEntry(entry: ResolvedModel): OpenAIClient {
     baseURL: entry.baseURL,
     apiKey: entry.apiKey,
     maxRetries: 0,
-    timeout: 120_000,
+    // #260：客户端缺省对齐 LLM_TIMEOUT_DEFAULT_MS（per-request timeout 逐请求胜）
+    timeout: LLM_TIMEOUT_DEFAULT_MS,
   })
   clientCache.set(key, client)
   return client

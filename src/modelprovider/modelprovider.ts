@@ -16,11 +16,14 @@
 import { randomUUID } from 'crypto'
 import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
+import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
 import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig, type Tools } from '../shared'
 import { logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
+import { APIConnectionTimeoutError } from './types'
+import { LLM_TIMEOUT_CAP_MS } from './constants'
 
 export type ModelUsage = {
   input_tokens: number
@@ -50,7 +53,55 @@ function isRetryableError(err: any): boolean {
   return /timeout|ECONN|EPIPE|fetch failed|socket|aborted/i.test(msg)
 }
 
+/**
+ * #260 P0（2026-10-03 斗兽棋 "Request timed out"）：客户端请求超时判别
+ * （SDK 超时类族：本仓 APIConnectionTimeoutError 实例 / openai SDK 命名
+ * 变体 APITimeoutError / 类名判别兜底）。仅认 SDK 超时类——连接期错误
+ * （ECONN/EPIPE/socket 断）不在其列。
+ */
+export function isClientRequestTimeout(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const e = err as { name?: string; constructor?: { name?: string } }
+  if (err instanceof APIConnectionTimeoutError) return true
+  if (e.name === 'APIConnectionTimeoutError' || e.name === 'APITimeoutError') return true
+  return false
+}
+
+/**
+ * #260 P0：模型请求错误重试门（isRetryableError 之上加超时 fail-fast 层）。
+ * 判别点 = 旧门 /timeout/ 正则命中 SDK 生成超时 → 整段长生成重做 3 次
+ * （斗兽棋观察值 ≈4m5s）；生成超时重试零收益（网关已掐断，重发再等一个
+ * 超时窗）→ fail-fast。连接期错误（fetch failed / ECONN / 429 / 5xx）仍
+ * 重试（旧语义保留）；signal aborted 不重试（旧判别保留）。
+ */
+export function shouldRetryModelError(err: unknown, signal?: AbortSignal): boolean {
+  if (signal?.aborted) return false
+  if (isClientRequestTimeout(err)) return false
+  return isRetryableError(err as any)
+}
+
+/**
+ * #260 P0：LLM 超时错误行的 remediation 提示面（REPL 错误行消费）。
+ * 非超时错误 → null（不打扰）；超时 → 给修复旋钮（env ATLAS_LLM_TIMEOUT /
+ * settings llmTimeoutMs，上限 30min）。currentTimeoutMs 未给时不造数字
+ * （不假绿）。
+ */
+export function llmTimeoutRemediationHint(
+  error: unknown,
+  currentTimeoutMs?: number,
+): string | null {
+  if (!isClientRequestTimeout(error)) return null
+  const head =
+    typeof currentTimeoutMs === 'number' && currentTimeoutMs > 0
+      ? `当前超时 ${Math.round(currentTimeoutMs / 1000)}s`
+      : '慢模型长生成可能超过缺省超时'
+  return `LLM 请求超时（${head}）。可调大：env ATLAS_LLM_TIMEOUT=<毫秒> 或 settings.json llmTimeoutMs 键（上限 ${Math.round(LLM_TIMEOUT_CAP_MS / 60000)}min）。`
+}
+
 export interface ModelProvider {
+
+  /** #260：当前生效请求超时读面（实现 = OpenAIProvider.timeoutMs）。 */
+  getTimeoutMs(): number
   chat(args: {
     messages?: Message[]
     systemPrompt?: SystemPrompt
@@ -134,9 +185,14 @@ export class OpenAIProvider implements ModelProvider {
   private readonly maxRetriesPerModel: number
   private readonly timeoutMs: number
 
-  constructor(maxRetriesPerModel: number = 3, timeoutMs: number = 120_000) {
+  constructor(maxRetriesPerModel: number = 3, timeoutMs: number = LLM_TIMEOUT_DEFAULT_MS) {
     this.maxRetriesPerModel = maxRetriesPerModel
     this.timeoutMs = timeoutMs
+  }
+
+  /** #260：当前生效请求超时读面（REPL remediation 提示 / 单测断言用）。 */
+  getTimeoutMs(): number {
+    return this.timeoutMs
   }
 
   async chat(args: {
@@ -256,7 +312,8 @@ export class OpenAIProvider implements ModelProvider {
           }
         } catch (err: any) {
           lastErr = err
-          if (!isRetryableError(err) || args.signal?.aborted) break
+          // #260：生成超时 fail-fast（shouldRetryModelError 内判 aborted）
+          if (!shouldRetryModelError(err, args.signal)) break
         }
       }
     }
@@ -316,7 +373,8 @@ export class OpenAIProvider implements ModelProvider {
           break
         } catch (err: any) {
           lastErr = err
-          if (!isRetryableError(err) || args.signal?.aborted) break
+          // #260：生成超时 fail-fast（shouldRetryModelError 内判 aborted）
+          if (!shouldRetryModelError(err, args.signal)) break
         }
       }
       if (succeeded || args.signal?.aborted) return
@@ -325,7 +383,7 @@ export class OpenAIProvider implements ModelProvider {
     if (lastErr) {
       const message = lastErr instanceof Error ? lastErr.message || lastErr.name : String(lastErr)
       const code: LLMErrorCode = lastErr?.name === 'TimeoutError' ? 'TIMEOUT' : 'API_ERROR'
-      yield { type: 'error', code, message, retryable: isRetryableError(lastErr) }
+      yield { type: 'error', code, message, retryable: shouldRetryModelError(lastErr, args.signal) }
       return
     }
     throw new Error(`No models configured for role '${args.role}'.`)

@@ -81,6 +81,10 @@ export const SettingsSchema = () => z.object({
       z.object({ kind: z.literal('pct'), pct: z.number().min(1).max(100) }),
     ])
     .optional(),
+  // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 请求超时持久化档
+  // （ms，int ≥ 1；env ATLAS_LLM_TIMEOUT 恒胜此键；缺省 600s 在 resolver 层。
+  // 形状校验在合并层 resolveLlmTimeoutMs：非 int / < 1 落缺省，越 30min cap）
+  llmTimeoutMs: z.number().int().positive().optional(),
   prefersReducedMotion: z.boolean().optional(),
   syntaxHighlightingDisabled: z.boolean().optional(),
   spinnerTipsEnabled: z.boolean().optional(),

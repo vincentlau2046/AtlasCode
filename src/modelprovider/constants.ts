@@ -16,6 +16,20 @@ export const IMAGE_TARGET_RAW_SIZE = (API_IMAGE_MAX_BASE64_SIZE * 3) / 4 // 3.75
 export const PDF_TARGET_RAW_SIZE = 20 * 1024 * 1024 // 20 MB
 export const API_PDF_MAX_PAGES = 100
 
+// LLM 请求超时（#260 P0，2026-10-03 斗兽棋 "Request timed out" 修波）
+
+/**
+ * LLM 请求缺省超时 120s→600s（#260 裁定，用户 2026-10-03 复核定 600s）：
+ * 国产慢模型基线——用户 profile 实测 27B 模型 xhigh effort 长生成超 120s
+ * （斗兽棋回合死，"Worked for 4m5s" = 3×120s 重试放大器）。env
+ * ATLAS_LLM_TIMEOUT / settings llmTimeoutMs 覆写；消费点 = OpenAIProvider
+ * 构造（index.ts resolveLlmTimeoutMs）+ clients.ts 客户端缺省
+ * （per-request timeout 仍逐请求胜）。
+ */
+export const LLM_TIMEOUT_DEFAULT_MS = 600_000
+/** 超时上限 30min（沿用旧语义）：防挂死/排队网关把整个 session 拖挂。 */
+export const LLM_TIMEOUT_CAP_MS = 1_800_000
+
 // ════════════════════════════════════════════════════════════════
 // Beta Headers（旧仓 constants/betas.ts）
 // ════════════════════════════════════════════════════════════════
