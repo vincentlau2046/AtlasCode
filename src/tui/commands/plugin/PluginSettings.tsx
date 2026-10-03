@@ -16,6 +16,7 @@ import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { loadMarketplacesWithGracefulDegradation } from '../../utils/plugins/marketplaceHelpers.js';
 import { loadKnownMarketplacesConfig, removeMarketplaceSource } from '../../utils/plugins/marketplaceManager.js';
 import { getPluginEditableScopes } from '../../utils/plugins/pluginStartupCheck.js';
+import { refreshActivePluginsLightweight } from '../../utils/plugins/refresh.js';
 import type { EditableSettingSource } from '../../utils/settings/constants.js';
 import { getSettingsForSource, updateSettingsForSource } from '../../utils/settings/settings.js';
 import { AddMarketplace } from './AddMarketplace.js';
@@ -772,7 +773,11 @@ export function PluginSettings(t0) {
   let t3;
   if ($[5] !== setAppState) {
     t3 = () => {
-      setAppState(_temp1);
+      // 2026-10-04 issule 工单 Task C：/plugin 菜单事件（install/enable/
+      // disable/uninstall/marketplace 增删）→ 轻量自动激活（AppState 数据面
+      // swap + 发现缓存清除），不再设 needsRefresh 等用户手动 /reload-plugins。
+      // 新插件 hooks/MCP/LSP 三面仍留全量 /reload-plugins 域（refresh.ts 登记）。
+      void refreshActivePluginsLightweight(setAppState);
     };
     $[5] = setAppState;
     $[6] = t3;
@@ -1072,15 +1077,6 @@ export function PluginSettings(t0) {
     t27 = $[74];
   }
   return t27;
-}
-function _temp1(prev) {
-  return prev.plugins.needsRefresh ? prev : {
-    ...prev,
-    plugins: {
-      ...prev.plugins,
-      needsRefresh: true
-    }
-  };
 }
 function _temp0(s) {
   let count = s.plugins.errors.length;

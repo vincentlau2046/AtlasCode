@@ -558,7 +558,10 @@ export async function installPluginFromMarketplace({
 
     return {
       success: true,
-      message: `✓ Installed ${entry.name}${result.depNote}. Run /reload-plugins to activate.`,
+      // 2026-10-04 issule 工单 Task C：安装完成即轻量自动激活（/plugin 菜单
+      // 面 onInstallComplete → refreshActivePluginsLightweight），数据面
+      // （skills/commands/agents）立即可用，不再提示 /reload-plugins。
+      message: `✓ Installed ${entry.name}${result.depNote}.`,
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)

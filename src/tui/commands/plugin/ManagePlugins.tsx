@@ -468,7 +468,9 @@ export function ManagePlugins({
       // User can configure later via the Configure options menu if they want.
       setViewState('plugin-list');
       setSelectedPlugin(null);
-      setResult('Plugin enabled. Configuration skipped — run /reload-plugins to apply.');
+      // 2026-10-04 issule 工单 Task C：启用已轻量自动激活（onManageComplete →
+      // refreshActivePluginsLightweight），跳过配置无东西可 apply，去提示尾巴。
+      setResult('Plugin enabled. Configuration skipped.');
       if (onManageComplete) {
         void onManageComplete();
       }
@@ -1124,7 +1126,10 @@ export function ManagePlugins({
       // Single-line warning — notification timeout is ~8s, multi-line would scroll off.
       // The persistent record is in the Errors tab (dependency-unsatisfied after reload).
       const depWarn = reverseDependents && reverseDependents.length > 0 ? ` · required by ${reverseDependents.join(', ')}` : '';
-      const message = `✓ ${operationName} ${selectedPlugin.plugin.name}${depWarn}. Run /reload-plugins to apply.`;
+      // 2026-10-04 issule 工单 Task C：enable/disable/update/uninstall 完成即
+      // 轻量自动激活（onManageComplete → refreshActivePluginsLightweight），
+      // 数据面立即可用，不再提示 /reload-plugins（hooks/MCP/LSP 面留全量域）。
+      const message = `✓ ${operationName} ${selectedPlugin.plugin.name}${depWarn}.`;
       setResult(message);
       if (onManageComplete) {
         await onManageComplete();
@@ -1523,7 +1528,7 @@ export function ManagePlugins({
         return;
       }
       clearAllCaches();
-      setResult(`✓ Disabled ${selectedPlugin.plugin.name} in .atlas/settings.local.json. Run /reload-plugins to apply.`);
+      setResult(`✓ Disabled ${selectedPlugin.plugin.name} in .atlas/settings.local.json.`);
       if (onManageComplete) void onManageComplete();
       setParentViewState({
         type: 'menu'
@@ -1631,8 +1636,9 @@ export function ManagePlugins({
     function finish(msg: string): void {
       setResult(msg);
       // Plugin is enabled regardless of whether config was saved or
-      // skipped — onManageComplete → markPluginsChanged → the
-      // persistent "run /reload-plugins" notice.
+      // skipped — onManageComplete → markPluginsChanged → 轻量自动激活
+      // （2026-10-04 issule 工单 Task C：refreshActivePluginsLightweight）。
+      // 配置（options/MCPB）的 MCP 面生效仍走全量 /reload-plugins。
       if (onManageComplete) {
         void onManageComplete();
       }
@@ -1643,10 +1649,10 @@ export function ManagePlugins({
     return <PluginOptionsFlow plugin={selectedPlugin.plugin} pluginId={pluginId_10} onDone={(outcome, detail) => {
       switch (outcome) {
         case 'configured':
-          finish(`✓ Enabled and configured ${selectedPlugin.plugin.name}. Run /reload-plugins to apply.`);
+          finish(`✓ Enabled and configured ${selectedPlugin.plugin.name}.`);
           break;
         case 'skipped':
-          finish(`✓ Enabled ${selectedPlugin.plugin.name}. Run /reload-plugins to apply.`);
+          finish(`✓ Enabled ${selectedPlugin.plugin.name}.`);
           break;
         case 'error':
           finish(`Failed to save configuration: ${detail}`);

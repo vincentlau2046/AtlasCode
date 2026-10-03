@@ -29,6 +29,13 @@ import { loadAllPlugins } from '../utils/plugins/pluginLoader.js'
  * Does NOT auto-refresh. All Layer-3 swap (commands, agents, hooks, MCP)
  * goes through refreshActivePlugins() via /reload-plugins for one consistent
  * mental model. See Outline: declarative-settings-hXHBMDIf4b PR 5c.
+ *
+ * 2026-10-04 issule 工单 Task C 起：/plugin 菜单（install/enable/disable/
+ * uninstall/marketplace 增删）不再设 needsRefresh——完成事件直接走
+ * refreshActivePluginsLightweight()（utils/plugins/refresh.ts）轻量自动激活
+ * 数据面。needsRefresh 现仅由残留路径设置：performStartupChecks（启动陈旧
+ * 信号）与 PluginInstallationManager（后台自动更新），二者仍需全量
+ * /reload-plugins（hooks/MCP/LSP 面）。
  */
 export function useManagePlugins({
   enabled = true,
@@ -262,12 +269,13 @@ export function useManagePlugins({
     })
   }, [initialPluginLoad, enabled])
 
-  // Plugin state changed on disk (background reconcile, /plugin menu,
-  // external settings edit). Show a notification; user runs /reload-plugins
-  // to apply. The previous auto-refresh here had a stale-cache bug (only
-  // cleared loadAllPlugins, downstream memoized loaders returned old data)
-  // and was incomplete (no MCP, no agentDefinitions). /reload-plugins
-  // handles all of that correctly via refreshActivePlugins().
+  // Residual needsRefresh paths (2026-10-04 Task C 后 /plugin 菜单改轻量
+  // 自动激活，不再走这里)：background reconcile（PluginInstallationManager
+  // 后台自动更新）+ performStartupChecks 启动陈旧信号。Show a notification;
+  // user runs /reload-plugins to apply. The previous auto-refresh here had a
+  // stale-cache bug (only cleared loadAllPlugins, downstream memoized loaders
+  // returned old data) and was incomplete (no MCP, no agentDefinitions).
+  // /reload-plugins handles all of that correctly via refreshActivePlugins().
   useEffect(() => {
     if (!enabled || !needsRefresh) return
     addNotification({

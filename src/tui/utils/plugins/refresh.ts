@@ -13,8 +13,11 @@
  *
  * NOT called from:
  * - useManagePlugins needsRefresh effect — interactive mode shows a notification;
- *   user explicitly runs /reload-plugins (PR 5c)
- * - /plugin menu — sets needsRefresh, user runs /reload-plugins (PR 5b)
+ *   user explicitly runs /reload-plugins (PR 5c). Residual needsRefresh setters:
+ *   performStartupChecks (startup-stale signal) + PluginInstallationManager
+ *   (background auto-update).
+ * - /plugin menu — 2026-10-04 issule 工单 Task C 起改为轻量自动激活
+ *   (refreshActivePluginsLightweight，本文件下方)，不再设 needsRefresh。
  */
 
 import { getOriginalCwd } from 'src/bootstrap'
@@ -185,6 +188,85 @@ export async function refreshActivePlugins(
     mcp_count,
     lsp_count,
     error_count: errors.length + (hook_load_failed ? 1 : 0),
+    agentDefinitions,
+    pluginCommands,
+  }
+}
+
+export type RefreshActivePluginsLightweightResult = {
+  enabled_count: number
+  disabled_count: number
+  command_count: number
+  agent_count: number
+  error_count: number
+  /** The refreshed agent definitions (same rationale as the full refresh). */
+  agentDefinitions: AgentDefinitionsResult
+  /** The refreshed plugin commands (same rationale as the full refresh). */
+  pluginCommands: Command[]
+}
+
+/**
+ * Lightweight Layer-3 activation: swap the plugin DATA PLANE in AppState
+ * (enabled/disabled/commands/errors + agentDefinitions + needsRefresh:false)
+ * WITHOUT the full-refresh side effects:
+ * - no mcp.pluginReconnectKey bump (new plugin MCP servers don't connect)
+ * - no reinitializeLspServerManager() (plugin LSP servers not picked up)
+ * - no loadPluginHooks() (new plugin hooks not registered)
+ * - no MCP/LSP manifest warmup (loadPluginMcpServers/loadPluginLspServers)
+ *
+ * 2026-10-04 issule 工单 Task C：interactive /plugin 菜单（install /
+ * enable / disable / uninstall / marketplace 增删）完成后自动激活——新装
+ * 插件的 skills/commands/agents 立即可用，无需 /reload-plugins。
+ * 前向缝（登记）：新插件的 hooks / MCP servers / LSP servers 三个面
+ * 仍是全量 /reload-plugins（或下次启动）域——轻量面只覆盖「装完即用」
+ * 主流程的数据面（AppState.plugins.commands + agentDefinitions + 发现
+ * 缓存清除，skill/命令面经 clearAllCaches → getSkillToolCommands 重读）。
+ * 残留 needsRefresh 路径（启动陈旧 / 后台自动更新）仍走全量刷新通知。
+ */
+export async function refreshActivePluginsLightweight(
+  setAppState: SetAppState,
+): Promise<RefreshActivePluginsLightweightResult> {
+  logForDebugging(
+    'refreshActivePluginsLightweight: clearing all plugin caches',
+  )
+  clearAllCaches()
+  // 与全量刷新同语义：disk-changed 信号，重算 orphan exclusions。
+  clearPluginCacheExclusions()
+
+  // 序列同全量版：先 loadAllPlugins 暖 cache-only memoize，再并行读
+  // commands/agents（loadAllPlugins 完成后 await ~free）。
+  const pluginResult = await loadAllPlugins()
+  const [pluginCommands, agentDefinitions] = await Promise.all([
+    getPluginCommands(),
+    getAgentDefinitionsWithOverrides(getOriginalCwd()),
+  ])
+
+  const { enabled, disabled, errors } = pluginResult
+
+  // 只换数据面，不动 mcp.pluginReconnectKey（MCP 面留全量刷新域）。
+  setAppState(prev => ({
+    ...prev,
+    plugins: {
+      ...prev.plugins,
+      enabled,
+      disabled,
+      commands: pluginCommands,
+      errors: mergePluginErrors(prev.plugins.errors, errors),
+      needsRefresh: false,
+    },
+    agentDefinitions,
+  }))
+
+  logForDebugging(
+    `refreshActivePluginsLightweight: ${enabled.length} enabled, ${pluginCommands.length} commands, ${agentDefinitions.allAgents.length} agents`,
+  )
+
+  return {
+    enabled_count: enabled.length,
+    disabled_count: disabled.length,
+    command_count: pluginCommands.length,
+    agent_count: agentDefinitions.allAgents.length,
+    error_count: errors.length,
     agentDefinitions,
     pluginCommands,
   }
