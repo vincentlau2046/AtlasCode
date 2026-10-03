@@ -203,6 +203,54 @@ describe('engine/pipeline 执行链顺序（review I-3 回归：schema→validat
   })
 })
 
+describe('engine/pipeline G1 toolUseResult 挂法（#258：TUI 渲染面随消息携带工具原生 Output）', () => {
+  test('G1-① 成功支：toolUseResult = res.data（原生 Output 对象，非 block 文本）', async () => {
+    const data = { filePath: '/tmp/a', linesAdded: 5, linesRemoved: 1 }
+    const r = await executeToolUse(tu('g1', 'echo'), ASSISTANT, {
+      tools: [makeTool('echo', { data })],
+    })
+    expect(r.isError).toBe(false)
+    expect(r.toolUseResult).toBe(data)
+  })
+
+  test('G1-② catch 支：toolUseResult = 错误文本串（与 block content 内文同串，旧仓 detailedError 挂法）', async () => {
+    const boom = new Error('kaboom')
+    ;(boom as NodeJS.ErrnoException).code = 'ENOENT'
+    const r = await executeToolUse(tu('g2', 'echo'), ASSISTANT, {
+      tools: [makeTool('echo', { throw: boom })],
+    })
+    expect(r.isError).toBe(true)
+    expect(typeof r.toolUseResult).toBe('string')
+    expect(r.toolUseResult as string).toContain('Error:ENOENT')
+    expect(r.toolUseResult).toBe(String(r.block.content).replace(/^<tool_use_error>|<\/tool_use_error>$/g, ''))
+  })
+
+  test('G1-③ 早退支不挂（unknown tool / 权限 deny / validateInput 失败 → toolUseResult undefined）', async () => {
+    const ghost = await executeToolUse(tu('g3a', 'ghost'), ASSISTANT, { tools: [makeTool('echo')] })
+    expect(ghost.toolUseResult).toBeUndefined()
+    const denied = await executeToolUse(tu('g3b', 'echo'), ASSISTANT, {
+      tools: [makeTool('echo')],
+      checkPermission: async () => ({ allowed: false, reason: 'no' }),
+    })
+    expect(denied.toolUseResult).toBeUndefined()
+    const invalid = await executeToolUse(tu('g3c', 'echo'), ASSISTANT, {
+      tools: [makeTool('echo', { validateFail: 'bad' })],
+    })
+    expect(invalid.toolUseResult).toBeUndefined()
+  })
+
+  test('G1-④ runToolBatch 透传：outcome 携带 toolUseResult（成功挂 / 早退不挂）', async () => {
+    const data = { linesAdded: 3 }
+    const outcomes = await runToolBatch(
+      [tu('g4a', 'echo'), tu('g4b', 'ghost')],
+      ASSISTANT,
+      { tools: [makeTool('echo', { data })] },
+    )
+    expect(outcomes[0].toolUseResult).toBe(data)
+    expect(outcomes[1].toolUseResult).toBeUndefined()
+  })
+})
+
 describe('engine/pipeline classifyToolError（错误分类小件）', () => {
   test('⑩ errno.code 优先（ENOENT → Error:ENOENT）', () => {
     const e = new Error('x')

@@ -200,6 +200,18 @@ export interface PipelineDeps {
 export interface ToolExecutionOutcome {
   block: ToolResultBlockParam
   isError: boolean
+  /**
+   * G1（TUI 对比轮，#258）：工具原生 Output（res.data，UI-native tool Out 面）。
+   * 旧仓 toolExecution.ts addToolResult 随 user message 携带 toolUseResult（UI 渲染面：
+   * Edit diff / Write 行数 / Bash 输出经各工具 renderToolResultMessage 入转录）；
+   * 新仓此前只透传 block → TUI UserToolSuccessMessage 因 !message.toolUseResult
+   * 恒 return null → 默认转录只见工具名行（S2-edit 对比缺口 G1）。成功支 = res.data；
+   * catch 支 = 错误文本串（旧仓 detailedError 串挂法等价）；早退支（unknown tool /
+   * schema / validate / hook / 权限）= undefined 最小挂法（登记：旧仓各错误支挂错误串，
+   * 新仓错误 UI 面消费 block.content 非 toolUseResult，早退支不挂，isHumanTurn 谓词对
+   * 早退错误支的误计为既有态，deferred）。
+   */
+  toolUseResult?: unknown
 }
 
 /** 注册表按 name/aliases 查工具（旧仓 findToolByName 的窄 spine 等价物）。 */
@@ -342,6 +354,9 @@ export async function executeToolUse(
   const callInput = verdict.updatedInput ?? effectiveInput
   let block: ToolResultBlockParam
   let isError = false
+  // G1（#258）：toolUseResult 挂法（成功 = res.data / catch = 错误文本串，见
+  // ToolExecutionOutcome 头注；早退支不挂）。
+  let toolUseResult: unknown
   try {
     // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
     // 传最小 context 对象 { signal }，工具实现按需取用）。F1（E-wave-end S-E1）：checkPermission
@@ -355,16 +370,23 @@ export async function executeToolUse(
       assistantMsg,
     )
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
+    // G1（#258）：挂工具原生 Output（res.data）——TUI 渲染面经 message.toolUseResult
+    // 消费（UserToolSuccessMessage → tool.renderToolResultMessage）。
+    toolUseResult = res.data
   } catch (error) {
+    // 旧仓 detailedError 挂法（toolExecution.ts:423-441）：toolUseResult = block
+    // content 内文同串（错误面 UI 消费 block.content，此处保语义面一致，零渲染回归）。
+    const errorText = `tool error [${classifyToolError(
+      error,
+    )}]: ${String((error as Error)?.message ?? error)}`
     block = {
       type: 'tool_result',
       tool_use_id: tu.id,
-      content: `<tool_use_error>tool error [${classifyToolError(
-        error,
-      )}]: ${String((error as Error)?.message ?? error)}</tool_use_error>`,
+      content: `<tool_use_error>${errorText}</tool_use_error>`,
       is_error: true,
     }
     isError = true
+    toolUseResult = errorText
   }
 
   // E-5 S-5a 接缝：post-hook（C-6 消费支：执行 + 捕获，非 fire-and-forget；
@@ -376,5 +398,5 @@ export async function executeToolUse(
   // 登记于 engine/hooks 子门面头注（防 H6 死接缝：接缝有登记 + 有执行效果，非空置）。
   void postOutcome
 
-  return { block, isError }
+  return { block, isError, toolUseResult }
 }

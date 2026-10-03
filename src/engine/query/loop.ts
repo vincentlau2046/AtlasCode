@@ -334,6 +334,10 @@ export async function queryOneRound(
     uuid: randomUUID(),
     timestamp: now,
     message: { role: 'user', content: [o.block] },
+    // G1（#258）：toolUseResult 挂入 result user message（旧仓 addToolResult 同语义：
+    // 工具原生 Output 随消息走，TUI 渲染面经 message.toolUseResult 消费；早退支
+    // 此处 = undefined 不挂，见 toolExecution ToolExecutionOutcome 头注）。
+    toolUseResult: o.toolUseResult,
   }))
 
   // S-E3 A11（旧 L722/724/774/828 收敛）：轮末追加面记录——assistant void

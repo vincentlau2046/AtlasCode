@@ -110,4 +110,20 @@ describe('engine/query 单轮 agent loop（LLM→tool→result）', () => {
     expect(r.toolResults[0].block.content).toBe('echo:hi')
     expect(r.assistantContent).toEqual(ECHO_CONTENT)
   })
+
+  test('G1 ⑤ tool_result user message 携带 toolUseResult（#258 TUI 渲染面；早退支不挂）', async () => {
+    const r = await ask(fakeProvider(ECHO_CONTENT, 'tool_calls'), {
+      messages: [],
+      tools: [makeEchoTool()],
+      role: 'small' as ModelRole,
+    })
+    const last = r.messages[r.messages.length - 1] as { toolUseResult?: unknown }
+    // 成功支 = res.data 原生 Output（非 block 文本形态）
+    expect(last.toolUseResult).toBe('echo:hi')
+    const ghost = await ask(
+      fakeProvider([{ type: 'tool_use', id: 'tu-g', name: 'ghost', input: {} }], 'tool_calls'),
+      { messages: [], tools: [makeEchoTool()], role: 'small' as ModelRole },
+    )
+    expect((ghost.messages[ghost.messages.length - 1] as { toolUseResult?: unknown }).toolUseResult).toBeUndefined()
+  })
 })

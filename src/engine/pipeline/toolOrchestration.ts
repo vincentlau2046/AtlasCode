@@ -47,6 +47,8 @@ export interface ToolBatchOutcome {
   name: string
   block: ToolResultBlockParam
   isError: boolean
+  /** G1（#258）：工具原生 Output 透传（挂法见 toolExecution ToolExecutionOutcome 头注）。 */
+  toolUseResult?: unknown
 }
 
 /**
@@ -62,7 +64,13 @@ export async function runToolBatch(
     // 窄 spine：批次内串行（含 safe 批）。E-1b 接缝：safe 批并发池在此替换。
     for (const tu of batch.blocks) {
       const r = await executeToolUse(tu, assistantMsg, deps)
-      outcomes.push({ toolUseId: tu.id, name: tu.name, block: r.block, isError: r.isError })
+      outcomes.push({
+        toolUseId: tu.id,
+        name: tu.name,
+        block: r.block,
+        isError: r.isError,
+        toolUseResult: r.toolUseResult,
+      })
     }
   }
   return outcomes
