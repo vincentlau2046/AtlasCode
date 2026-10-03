@@ -3,7 +3,7 @@ import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpda
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 import { generateShellSuggestionsLabel } from '../shellPermissionHelpers.js';
-export type PowerShellToolUseOption = 'yes' | 'yes-apply-suggestions' | 'yes-prefix-edited' | 'no';
+export type PowerShellToolUseOption = 'yes' | 'yes-apply-suggestions' | 'yes-prefix-edited' | 'yes-auto-mode' | 'no';
 export function powershellToolUseOptions({
   suggestions = [],
   onRejectFeedbackChange,
@@ -11,7 +11,10 @@ export function powershellToolUseOptions({
   yesInputMode = false,
   noInputMode = false,
   editablePrefix,
-  onEditablePrefixChange
+  onEditablePrefixChange,
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode（caller 经
+  // isAutoModeOptionVisible(toolPermissionContext) 计算后传入）
+  showAutoModeOption = false
 }: {
   suggestions?: PermissionUpdate[];
   onRejectFeedbackChange: (value: string) => void;
@@ -20,6 +23,8 @@ export function powershellToolUseOptions({
   noInputMode?: boolean;
   editablePrefix?: string;
   onEditablePrefixChange?: (value: string) => void;
+  /** 2026-10-04 issule 工单 Task A2: show the 4th "auto mode" option. */
+  showAutoModeOption?: boolean;
 }): OptionWithDescription<PowerShellToolUseOption>[] {
   const options: OptionWithDescription<PowerShellToolUseOption>[] = [];
   if (yesInputMode) {
@@ -70,6 +75,16 @@ export function powershellToolUseOptions({
         });
       }
     }
+  }
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode —— 选中即把本
+  // session 切到 auto 并把当前 pending 请求 re-dispatch 走 auto 门控
+  // （PowerShellPermissionRequest onSelect 'yes-auto-mode' 分支）。
+  if (showAutoModeOption) {
+    options.push({
+      label: 'Auto mode',
+      description: 'Switch this session to auto mode; this request is re-checked by the auto gate',
+      value: 'yes-auto-mode'
+    });
   }
   if (noInputMode) {
     options.push({

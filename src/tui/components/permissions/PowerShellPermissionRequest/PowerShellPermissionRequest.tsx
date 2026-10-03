@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Text, useTheme } from '../../../ink.js';
 import { useKeybinding } from '../../../keybindings/useKeybinding.js';
+import { useAppState, useSetAppState } from '../../../state/AppState.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js';
 import { getDestructiveCommandWarning } from '../../../tools/PowerShellTool/destructiveCommandWarning.js';
 import { PowerShellTool } from '../../../tools/PowerShellTool/PowerShellTool.js';
 import { isAllowlistedCommand } from '../../../tools/PowerShellTool/readOnlyValidation.js';
+import { applyAutoModePermissionOption, isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
 import { getCompoundCommandPrefixesStatic } from '../../../utils/powershell/staticPrefix.js';
 import { Select } from '../../CustomSelect/select.js';
@@ -30,6 +32,9 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     description
   } = PowerShellTool.inputSchema.parse(toolUseConfirm.input);
   const [theme] = useTheme();
+  const toolPermissionContext = useAppState(s => s.toolPermissionContext);
+  // 2026-10-04 issule 工单 Task A2：auto mode 第 4 选项发布切模用
+  const setAppState = useSetAppState();
   const explainerState = usePermissionExplainerUI({
     toolName: toolUseConfirm.tool.name,
     toolInput: toolUseConfirm.input,
@@ -101,8 +106,10 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     yesInputMode,
     noInputMode,
     editablePrefix,
-    onEditablePrefixChange
-  }), [toolUseConfirm, yesInputMode, noInputMode, editablePrefix, onEditablePrefixChange]);
+    onEditablePrefixChange,
+    // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode
+    showAutoModeOption: isAutoModeOptionVisible(toolPermissionContext)
+  }), [toolUseConfirm, yesInputMode, noInputMode, editablePrefix, onEditablePrefixChange, toolPermissionContext]);
 
   // Toggle permission debug info with keybinding
   const handleToggleDebug = useCallback(() => {
@@ -130,6 +137,13 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
         toolUseConfirm.onAllow(toolUseConfirm.input, prefixUpdates);
       }
       onDone();
+      return;
+    }
+    // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode —— 切本 session
+    // 到 auto 并把当前这笔 pending 请求 re-dispatch 走 auto 门控（不 onDone：
+    // recheck 自动放行则弹框关闭，危险工具则弹框留在原地再问）。
+    if (value === 'yes-auto-mode') {
+      applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
       return;
     }
     switch (value) {

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useAppState } from 'src/tui/state/AppState.js'
+import { useAppState, useSetAppState } from 'src/tui/state/AppState.js'
 import { useKeybindings } from '../../../keybindings/useKeybinding.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import type { CompletionType } from '../../../utils/unaryLogging.js'
@@ -56,6 +56,8 @@ export function useFilePermissionDialog<T extends ToolInput>({
   operationType = 'write',
 }: UseFilePermissionDialogProps<T>): UseFilePermissionDialogResult<T> {
   const toolPermissionContext = useAppState(s => s.toolPermissionContext)
+  // 2026-10-04 issule 工单 Task A2：'accept-auto-mode' 处理器发布切模用
+  const setAppState = useSetAppState()
   const [acceptFeedback, setAcceptFeedback] = useState('')
   const [rejectFeedback, setRejectFeedback] = useState('')
   const [focusedOption, setFocusedOption] = useState('yes')
@@ -93,6 +95,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
         completionType,
         languageName,
         operationType,
+        setAppState,
       }
 
       // Override the input in toolUseConfirm to pass the parsed input
@@ -127,6 +130,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
       operationType,
       yesFeedbackModeEntered,
       noFeedbackModeEntered,
+      setAppState,
     ],
   )
 

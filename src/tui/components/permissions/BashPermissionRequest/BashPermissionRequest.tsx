@@ -5,7 +5,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Text, useTheme } from '../../../ink.js';
 import { useKeybinding } from '../../../keybindings/useKeybinding.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js';
-import { useAppState } from '../../../state/AppState.js';
+import { useAppState, useSetAppState } from '../../../state/AppState.js';
+import { applyAutoModePermissionOption, isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
 import { BashTool } from '../../../tools/BashTool/BashTool.js';
 import { getFirstWordPrefix, getSimpleCommandPrefix } from '../../../tools/BashTool/bashPermissions.js';
 import { getDestructiveCommandWarning } from '../../../tools/BashTool/destructiveCommandWarning.js';
@@ -146,6 +147,8 @@ function BashPermissionRequestInner({
 }): React.ReactNode {
   const [theme] = useTheme();
   const toolPermissionContext = useAppState(s => s.toolPermissionContext);
+  // 2026-10-04 issule 工单 Task A2：auto mode 第 4 选项发布切模用
+  const setAppState = useSetAppState();
   const explainerState = usePermissionExplainerUI({
     toolName: toolUseConfirm.tool.name,
     toolInput: toolUseConfirm.input,
@@ -296,8 +299,10 @@ function BashPermissionRequestInner({
     yesInputMode,
     noInputMode,
     editablePrefix,
-    onEditablePrefixChange
-  }), [toolUseConfirm, classifierDescription, initialClassifierDescriptionEmpty, existingAllowDescriptions, yesInputMode, noInputMode, editablePrefix, onEditablePrefixChange]);
+    onEditablePrefixChange,
+    // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode
+    showAutoModeOption: isAutoModeOptionVisible(toolPermissionContext)
+  }), [toolUseConfirm, classifierDescription, initialClassifierDescriptionEmpty, existingAllowDescriptions, yesInputMode, noInputMode, editablePrefix, onEditablePrefixChange, toolPermissionContext]);
 
   // Toggle permission debug info with keybinding
   const handleToggleDebug = useCallback(() => {
@@ -354,6 +359,13 @@ function BashPermissionRequestInner({
         toolUseConfirm.onAllow(toolUseConfirm.input, permissionUpdates);
       }
       onDone();
+      return;
+    }
+    // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode —— 切本 session
+    // 到 auto 并把当前这笔 pending 请求 re-dispatch 走 auto 门控（不 onDone：
+    // recheck 自动放行则弹框关闭，危险工具则弹框留在原地再问）。
+    if (value_0 === 'yes-auto-mode') {
+      applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
       return;
     }
     switch (value_0) {

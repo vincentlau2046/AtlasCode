@@ -8,6 +8,7 @@ import { getShortcutDisplay } from '../../../keybindings/shortcutFormat.js';
 import type { ToolPermissionContext } from '../../../Tool.js';
 import { expandPath, getDirectoryForPath } from '../../../utils/path.js';
 import { normalizeCaseForComparison, pathInAllowedWorkingPath } from '../../../utils/permissions/filesystem.js';
+import { isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 /**
  * Check if a path is within the project's getConfigDirName()/ folder.
@@ -46,6 +47,9 @@ export type PermissionOption = {
   scope?: 'claude-folder' | 'global-claude-folder';
 } | {
   type: 'reject';
+} | {
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode（门控可见时出现）
+  type: 'accept-auto-mode';
 };
 export type PermissionOptionWithLabel = OptionWithDescription<string> & {
   option: PermissionOption;
@@ -170,6 +174,21 @@ export function getFilePermissionOptions({
       value: 'no',
       option: {
         type: 'reject'
+      }
+    });
+  }
+
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode（gate 开且当前非
+  // auto 模式时可见，isAutoModeOptionVisible）。选中即把本 session 切到 auto
+  // 并把当前 pending 请求 re-dispatch 走 auto 门控（usePermissionHandler 的
+  // 'accept-auto-mode' 处理器），不再重收 accept/reject。
+  if (isAutoModeOptionVisible(toolPermissionContext)) {
+    options.push({
+      label: 'Auto mode',
+      description: 'Switch this session to auto mode; this request is re-checked by the auto gate',
+      value: 'auto-mode',
+      option: {
+        type: 'accept-auto-mode'
       }
     });
   }

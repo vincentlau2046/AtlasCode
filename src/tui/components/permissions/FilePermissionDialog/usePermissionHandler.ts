@@ -1,5 +1,7 @@
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js'
 import type { ToolPermissionContext } from '../../../Tool.js'
+import type { AppState } from '../../../state/AppState.js'
+import { applyAutoModePermissionOption } from '../../../utils/permissions/autoModePermissionOption.js'
 import {
   ATLAS_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
@@ -47,6 +49,8 @@ export type PermissionHandlerParams = {
   completionType: CompletionType
   languageName: string | Promise<string>
   operationType: FileOperationType
+  // 2026-10-04 issule 工单 Task A2：'accept-auto-mode' 处理器需要发布切模
+  setAppState: (updater: (prev: AppState) => AppState) => void
 }
 
 export type PermissionHandlerOptions = {
@@ -153,6 +157,25 @@ function handleReject(
   toolUseConfirm.onReject(options?.feedback)
 }
 
+/**
+ * 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode。切本 session 到
+ * auto（transitionPermissionMode + 危险权限剥离），并把当前这 1 个 pending
+ * 请求 re-dispatch 走 auto 门控（recheckPermission）：非危险工具 auto 放行
+ * （recheck 自行 resolve + 移队列，弹框关闭），危险工具弹框留在原地再问。
+ * 注意不调 onDone() —— 队列项由 recheck 的 resolve 路径移除；提前 onDone
+ * 会把项移出队列导致 recheck 失手、agent loop 挂起。
+ */
+function handleAcceptAutoMode(
+  params: PermissionHandlerParams,
+  _options?: PermissionHandlerOptions,
+): void {
+  applyAutoModePermissionOption(
+    params.toolPermissionContext,
+    params.setAppState,
+    () => params.toolUseConfirm.recheckPermission(),
+  )
+}
+
 export const PERMISSION_HANDLERS: Record<
   PermissionOption['type'],
   (params: PermissionHandlerParams, options?: PermissionHandlerOptions) => void
@@ -160,4 +183,5 @@ export const PERMISSION_HANDLERS: Record<
   'accept-once': handleAcceptOnce,
   'accept-session': handleAcceptSession,
   reject: handleReject,
+  'accept-auto-mode': handleAcceptAutoMode,
 }

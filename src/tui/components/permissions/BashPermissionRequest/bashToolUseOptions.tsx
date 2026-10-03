@@ -5,7 +5,7 @@ import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpda
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 import { generateShellSuggestionsLabel } from '../shellPermissionHelpers.js';
-export type BashToolUseOption = 'yes' | 'yes-apply-suggestions' | 'yes-prefix-edited' | 'yes-classifier-reviewed' | 'no';
+export type BashToolUseOption = 'yes' | 'yes-apply-suggestions' | 'yes-prefix-edited' | 'yes-classifier-reviewed' | 'yes-auto-mode' | 'no';
 
 /**
  * Check if a description already exists in the allow list.
@@ -39,7 +39,10 @@ export function bashToolUseOptions({
   yesInputMode = false,
   noInputMode = false,
   editablePrefix,
-  onEditablePrefixChange
+  onEditablePrefixChange,
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode（caller 经
+  // isAutoModeOptionVisible(toolPermissionContext) 计算后传入）
+  showAutoModeOption = false
 }: {
   suggestions?: PermissionUpdate[];
   decisionReason?: PermissionDecisionReason;
@@ -56,6 +59,8 @@ export function bashToolUseOptions({
   editablePrefix?: string;
   /** Callback when the user edits the prefix value. */
   onEditablePrefixChange?: (value: string) => void;
+  /** 2026-10-04 issule 工单 Task A2: show the 4th "auto mode" option. */
+  showAutoModeOption?: boolean;
 }): OptionWithDescription<BashToolUseOption>[] {
   const options: OptionWithDescription<BashToolUseOption>[] = [];
   if (yesInputMode) {
@@ -104,6 +109,16 @@ export function bashToolUseOptions({
       }
     }
 
+  }
+  // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode —— 选中即把本
+  // session 切到 auto 并把当前 pending 请求 re-dispatch 走 auto 门控
+  // （BashPermissionRequest onSelect 'yes-auto-mode' 分支）。
+  if (showAutoModeOption) {
+    options.push({
+      label: 'Auto mode',
+      description: 'Switch this session to auto mode; this request is re-checked by the auto gate',
+      value: 'yes-auto-mode'
+    });
   }
   if (noInputMode) {
     options.push({
