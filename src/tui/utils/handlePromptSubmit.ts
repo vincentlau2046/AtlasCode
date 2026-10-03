@@ -235,7 +235,11 @@ export async function handlePromptSubmit(
 
     const immediateCommand = commands.find(
       cmd =>
-        cmd.immediate &&
+        // 2026-10-04 issule 工单 Task B：local-jsx 默认 immediate
+        // （undefined → true，显式 immediate: false 可 opt-out）——/autocompact
+        // 与只读展示命令（/cost /usage /stats /memory /session /context）
+        // busy 态立即执行，不再排队等整回合结束。
+        (cmd.immediate ?? true) &&
         isCommandEnabled(cmd) &&
         (cmd.name === commandName ||
           cmd.aliases?.includes(commandName) ||
