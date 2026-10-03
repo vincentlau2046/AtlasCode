@@ -641,17 +641,23 @@ export const getSkillDirCommands = memoize(
     // Load from additional directories (--add-dir)
     const additionalDirs = getAdditionalDirectoriesForClaudeMd()
     const skillsLocked = isRestrictedToPluginOnly('skills')
-    const projectSettingsEnabled =
-      isSettingSourceEnabled('projectSettings') && !skillsLocked
+    // G2 (#259, 2026-10-03 TUI 对比轮): 项目 skill 发现（.atlas/skills 目录链
+    // + --add-dir 面）与 projectSettings 设置源解耦（设置源维持关 —
+    // .atlas/settings.json RCE 面排除不变）：只读 markdown，风险类 = Claude
+    // 现状，默认发现；kill switch ATLAS_DISABLE_PROJECT_SKILLS（先例
+    // ATLAS_DISABLE_POLICY_SKILLS）。legacy commands-as-skills 项目层仍源门
+    // （前向接缝，最小范围 = skills only）。
+    const projectSkillsEnabled =
+      !skillsLocked && !isEnvTruthy(process.env.ATLAS_DISABLE_PROJECT_SKILLS)
 
     // --bare: skip auto-discovery (managed/user/project dir walks + legacy
     // commands-dir). Load ONLY explicit --add-dir paths. Bundled skills
     // register separately. skillsLocked still applies — --bare is not a
     // policy bypass.
     if (isBareMode()) {
-      if (additionalDirs.length === 0 || !projectSettingsEnabled) {
+      if (additionalDirs.length === 0 || !projectSkillsEnabled) {
         logForDebugging(
-          `[bare] Skipping skill dir discovery (${additionalDirs.length === 0 ? 'no --add-dir' : 'projectSettings disabled or skillsLocked'})`,
+          `[bare] Skipping skill dir discovery (${additionalDirs.length === 0 ? 'no --add-dir' : 'project skills disabled (kill switch) or skillsLocked'})`,
         )
         return []
       }
@@ -682,14 +688,16 @@ export const getSkillDirCommands = memoize(
       isSettingSourceEnabled('userSettings') && !skillsLocked
         ? loadSkillsFromSkillsDir(userSkillsDir, 'userSettings')
         : Promise.resolve([]),
-      projectSettingsEnabled
+      // G2 (#259): 项目 skill 发现面经新门 projectSkillsEnabled（默认开 +
+      // ATLAS_DISABLE_PROJECT_SKILLS kill switch），非 projectSettings 设置源。
+      projectSkillsEnabled
         ? Promise.all(
             projectSkillsDirs.map(dir =>
               loadSkillsFromSkillsDir(dir, 'projectSettings'),
             ),
           )
         : Promise.resolve([]),
-      projectSettingsEnabled
+      projectSkillsEnabled
         ? Promise.all(
             additionalDirs.map(dir =>
               loadSkillsFromSkillsDir(
@@ -914,12 +922,15 @@ export async function discoverSkillDirsForPaths(
  * @param dirs Array of skill directories to load from (should be sorted deepest first)
  */
 export async function addSkillDirectories(dirs: string[]): Promise<void> {
+  // G2 (#259): 动态发现与静态项目链同裁定（默认开 + 同一 kill switch；
+  // 原门 isSettingSourceEnabled('projectSettings') 恒 false 使本函数恒
+  // no-op）。plugin-only 策略门保留（skillsLocked 语义不变）。
   if (
-    !isSettingSourceEnabled('projectSettings') ||
+    isEnvTruthy(process.env.ATLAS_DISABLE_PROJECT_SKILLS) ||
     isRestrictedToPluginOnly('skills')
   ) {
     logForDebugging(
-      '[skills] Dynamic skill discovery skipped: projectSettings disabled or plugin-only policy',
+      '[skills] Dynamic skill discovery skipped: ATLAS_DISABLE_PROJECT_SKILLS kill switch or plugin-only policy',
     )
     return
   }

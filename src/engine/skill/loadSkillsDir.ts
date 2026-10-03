@@ -22,6 +22,13 @@
  *   ⑤ 条件技能 gitignore 风格匹配：旧 `ignore` 库 → 本地最小 matcher
  *      （./patternMatch.ts，3 依赖纪律，语义差登记见该文件头注）。
  *   ⑥ ATLAS_DISABLE_POLICY_SKILLS env 门保留（managed 源跳过，逐字语义）。
+ *   ⑦ G2（#259，2026-10-03 TUI 对比轮）：项目 skill 发现与 projectSettings
+ *      设置源解耦——项目链 .atlas/skills + --add-dir 面 + addSkillDirectories
+ *      动态发现默认开（只读 markdown，风险类 = Claude 现状）；kill switch
+ *      ATLAS_DISABLE_PROJECT_SKILLS（先例 ATLAS_DISABLE_POLICY_SKILLS）。
+ *      设置源面不变：.atlas/settings.json（RCE 面）仍排除（源门维持关），
+ *      legacy commands 项目层仍经 markdownLoader 源门（前向接缝，最小范围
+ *      = skills only）。
  */
 import { realpath } from 'fs/promises'
 import {
@@ -337,8 +344,14 @@ export const getSkillDirCommands = memoize(
     // --add-dir 附加目录（头注 ②：面未落，恒空）
     const additionalDirs: string[] = []
     const skillsLocked = false // 头注 ③
-    const projectSettingsEnabled =
-      isSettingSourceEnabled('projectSettings') && !skillsLocked
+    // G2（#259，2026-10-03 TUI 对比轮）：项目 skill 发现与 project settings 源
+    // 解耦——.atlas/skills 目录链 = 只读 markdown（风险类 = Claude 现状：项目
+    // skill 发现默认开），默认发现；.atlas/settings.json（RCE 面）仍排除
+    // （projectSettings 设置源维持关闭，ALLOWED_SETTING_SOURCES 不变，
+    // markdownLoader 内 legacy commands 项目层仍经源门 = 前向接缝，最小范围
+    // = skills only）。kill switch 先例 ATLAS_DISABLE_POLICY_SKILLS。
+    const projectSkillsEnabled =
+      !skillsLocked && !isEnvTruthy(process.env.ATLAS_DISABLE_PROJECT_SKILLS)
 
     // --bare 面裁（头注 ①）→ 恒全发现路径
 
@@ -355,14 +368,17 @@ export const getSkillDirCommands = memoize(
       isSettingSourceEnabled('userSettings') && !skillsLocked
         ? loadSkillsFromSkillsDir(userSkillsDir, 'userSettings')
         : Promise.resolve([]),
-      projectSettingsEnabled
+      // G2（#259）：项目 skill 发现面（目录链 + --add-dir 面）经新门
+      // projectSkillsEnabled（默认开 + ATLAS_DISABLE_PROJECT_SKILLS kill
+      // switch），非 projectSettings 设置源（源门仍关，见上头注）。
+      projectSkillsEnabled
         ? Promise.all(
             projectSkillsDirs.map(dir =>
               loadSkillsFromSkillsDir(dir, 'projectSettings'),
             ),
           )
         : Promise.resolve([]),
-      projectSettingsEnabled
+      projectSkillsEnabled
         ? Promise.all(
             additionalDirs.map(dir =>
               loadSkillsFromSkillsDir(
@@ -572,9 +588,12 @@ export async function discoverSkillDirsForPaths(
  * @param dirs 技能目录数组（应已最深优先排序）
  */
 export async function addSkillDirectories(dirs: string[]): Promise<void> {
-  if (!isSettingSourceEnabled('projectSettings')) {
+  // G2（#259）：动态发现与静态项目链同裁定（同风险类：只读 markdown）→
+  // 默认开，kill switch 同一开关（原门 isSettingSourceEnabled('projectSettings')
+  // 恒 false 使本函数恒 no-op，头注 ⑦ 登记）。
+  if (isEnvTruthy(process.env.ATLAS_DISABLE_PROJECT_SKILLS)) {
     logForDebugging(
-      '[skills] Dynamic skill discovery skipped: projectSettings disabled or plugin-only policy',
+      '[skills] Dynamic skill discovery skipped: ATLAS_DISABLE_PROJECT_SKILLS kill switch',
     )
     return
   }

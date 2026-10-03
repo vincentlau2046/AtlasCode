@@ -8,13 +8,15 @@
  * 分层纪律：func 层真 fs（mkdtemp 真 tmpdir，ATLAS_CONFIG_DIR /
  * ATLAS_TMPDIR 指 tmp；无网络 / 无模型 / 无 PTY）。
  *
- * 当前态门语义断言（残留守登记，非空洞）：
- *   - ALLOWED_SETTING_SOURCES 固定 ['userSettings']（组合根纵切扩展）
- *     → 项目链 /skills/ 不载（getSkillDirCommands 只回 user 源）；
- *     addSkillDirectories 门控早退 no-op；legacy /commands/ 装载分支
- *     恒过（skillsLocked 恒 false），但其 markdownLoader 项目层仍经
- *     isSettingSourceEnabled('projectSettings') 门 → 当前态仅
- *     managed/user 层命令可载。
+ * 当前态门语义断言（G2 #259 后，残留守登记，非空洞）：
+ *   - G2（#259，2026-10-03 TUI 对比轮）：项目 skill 发现与 projectSettings
+ *     设置源解耦——项目链 /skills/ + addSkillDirectories 动态发现**默认载**
+ *     （只读 markdown，风险类 = Claude 现状）；ATLAS_DISABLE_PROJECT_SKILLS
+ *     kill switch 可关。设置源面不变：ALLOWED_SETTING_SOURCES 固定
+ *     ['userSettings']（.atlas/settings.json RCE 面仍排除）；legacy
+ *     /commands/ 装载分支恒过（skillsLocked 恒 false），但其 markdownLoader
+ *     项目层仍经 isSettingSourceEnabled('projectSettings') 门 → 当前态仅
+ *     managed/user 层命令可载（前向接缝，最小范围 = skills only）。
  *   - 宿主无 /etc/atlas（managed 目录 ENOENT 恒跳过，不断言其内容）。
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
@@ -122,12 +124,28 @@ describe('技能装载链（/skills/ 目录形态）', () => {
     expect(plain!.hasUserSpecifiedDescription).toBe(false)
   })
 
-  test('项目链 /skills/ 当前态不载（残留守：allowed 源固定 userSettings）', async () => {
+  test('项目链 /skills/ 默认发现（G2 #259：与 projectSettings 设置源解耦，设置源门仍关）', async () => {
     writeSkill(join(PROJ, '.atlas', 'skills'), 'proj-skill', {}, '# Proj Skill')
     freshSkillState()
 
     const cmds = await getSkillDirCommands(PROJ)
-    expect(cmds.find(c => c.name === 'proj-skill')).toBeUndefined()
+    const sk = cmds.find(c => c.name === 'proj-skill')
+    expect(sk).toBeDefined()
+    expect(sk!.source).toBe('projectSettings')
+    expect(sk!.loadedFrom).toBe('skills')
+  })
+
+  test('ATLAS_DISABLE_PROJECT_SKILLS kill switch（项目链不载；user 源不受影响）', async () => {
+    process.env.ATLAS_DISABLE_PROJECT_SKILLS = '1'
+    try {
+      freshSkillState()
+      const cmds = await getSkillDirCommands(PROJ)
+      expect(cmds.find(c => c.name === 'proj-skill')).toBeUndefined()
+      // user 源不受 kill switch 影响（开关只管项目级发现面）
+      expect(cmds.find(c => c.name === 'user-skill')).toBeDefined()
+    } finally {
+      delete process.env.ATLAS_DISABLE_PROJECT_SKILLS
+    }
   })
 
   test('realpath 去重：符号链接同文件首现者胜（两链同载仅一）', async () => {
@@ -229,11 +247,21 @@ describe('动态技能发现（cwd 之下嵌套 .atlas/skills）', () => {
     ])
   })
 
-  test('addSkillDirectories 当前态门控（projectSettings 禁用 → no-op）', async () => {
+  test('addSkillDirectories 默认载（G2 #259：动态发现与静态项目链同裁定）', async () => {
     clearDynamicSkills()
     await addSkillDirectories([join(PROJ, 'pkg', '.atlas', 'skills')])
-    // 残留守：组合根纵切启用 projectSettings 后此断言翻转
-    expect(getDynamicSkills()).toHaveLength(0)
+    expect(getDynamicSkills().map(c => c.name)).toContain('pkg-skill')
+  })
+
+  test('addSkillDirectories kill switch（ATLAS_DISABLE_PROJECT_SKILLS → no-op）', async () => {
+    clearDynamicSkills()
+    process.env.ATLAS_DISABLE_PROJECT_SKILLS = '1'
+    try {
+      await addSkillDirectories([join(PROJ, 'pkg', '.atlas', 'skills')])
+      expect(getDynamicSkills()).toHaveLength(0)
+    } finally {
+      delete process.env.ATLAS_DISABLE_PROJECT_SKILLS
+    }
   })
 })
 
