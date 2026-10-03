@@ -33,3 +33,5 @@ home/
 docs/atlas-office-frontend-migration.md
 docs/web-gui-port-assessment.md
 docs/web-gui-render-scheme.md
+node_modules
+worktrees/
