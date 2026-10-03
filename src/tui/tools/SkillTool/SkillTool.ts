@@ -2,7 +2,6 @@ import { feature } from 'src/shared'
 import type { ToolResultBlockParam } from '../../types/atlas.js'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { dirname } from 'path'
-import { getProjectRoot } from 'src/bootstrap'
 import {
   builtInCommandNames,
   findCommand,
@@ -79,8 +78,13 @@ async function getAllCommands(context: ToolUseContext): Promise<Command[]> {
     .mcp.commands.filter(
       cmd => cmd.type === 'prompt' && cmd.loadedFrom === 'mcp',
     )
-  if (mcpSkills.length === 0) return getCommands(getProjectRoot())
-  const localCommands = await getCommands(getProjectRoot())
+  // #261（#259 验收缺口，issule-analyst P1）：根锚定 getProjectRoot()→process.cwd()
+  // （主 init 一致）。getProjectRoot 上探最近 .git——非 git 工作区 / git 子目录
+  // 里的 .atlas/skills 被上探到无关上游 repo root 而漏扫；cwd 锚定 + 装载器
+  // getProjectDirsUpToHome 向上遍历（git root / home 停界）语义不变，git 项目
+  // 行为零变化。
+  if (mcpSkills.length === 0) return getCommands(process.cwd())
+  const localCommands = await getCommands(process.cwd())
   return uniqBy([...localCommands, ...mcpSkills], 'name')
 }
 
@@ -255,7 +259,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
 
   description: async ({ skill }) => `Execute skill: ${skill}`,
 
-  prompt: async () => getPrompt(getProjectRoot()),
+  prompt: async () => getPrompt(process.cwd()), // #261：cwd 锚定（同上）
 
   // Only one skill/command should run at a time, since the tool expands the
   // command into a full prompt that Claude must process before continuing.

@@ -75,7 +75,6 @@
  */
 import { randomUUID } from 'crypto'
 
-import { getProjectRoot } from '../../../bootstrap'
 import {
   type AssistantMessage,
   type PermissionResult,
@@ -148,7 +147,9 @@ type SkillToolFace = Tool & {
  * 注入窗前向接缝——注入窗未注册时恒返回本地池）。
  */
 async function getAllCommands(): Promise<Command[]> {
-  return getCommands(getProjectRoot())
+  // #261（#259 验收缺口）：根锚定 getProjectRoot()→process.cwd()（主 init 一致；
+  // 非 git 工作区 / git 子目录 .atlas/skills 漏扫收口，git 项目零变化）
+  return getCommands(process.cwd())
 }
 
 /**
@@ -346,7 +347,7 @@ export const SkillTool: SkillToolFace = {
   },
   async description() {
     // delta ④（skillPrompt）：新契约唯一 prompt 面 = 旧 prompt() 体
-    return getSkillPrompt(getProjectRoot())
+    return getSkillPrompt(process.cwd()) // #261：cwd 锚定（同上）
   },
   async checkPermissions(
     input: unknown,

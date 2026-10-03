@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { isAtlasDev } from 'src/tui/utils/atlasDev.js'
 import { logForDebugging } from 'src/tui/utils/debug.js'
-import { getProjectRoot, getSessionId } from 'src/bootstrap'
+import { getSessionId } from 'src/bootstrap'
 import { getCommand, getSkillToolCommands, hasCommand } from '../../commands.js'
 import {
   DEFAULT_AGENT_PROMPT,
@@ -582,7 +582,7 @@ export async function* runAgent({
   // Preload skills from agent frontmatter
   const skillsToPreload = agentDefinition.skills ?? []
   if (skillsToPreload.length > 0) {
-    const allSkills = await getSkillToolCommands(getProjectRoot())
+    const allSkills = await getSkillToolCommands(process.cwd()) // #261：cwd 锚定（#259 验收缺口，SkillTool 两车道同修）
 
     // Filter valid skills and warn about missing ones
     const validSkills: Array<{
