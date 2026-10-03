@@ -4,6 +4,38 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.15
+
+TUI 对比轮（atlas vs Claude 基线，约束：不降级）G1/G2 修波：
+
+- **G1（#258）改文件 diff 默认可见**：根因 = engine 工具管线丢弃工具
+  原生 Output（只透传 mapToolResult 的 LLM 侧 block）→ TUI
+  UserToolSuccessMessage 因 `!message.toolUseResult` 恒 return null →
+  默认转录 Edit/Write 只见工具名行、无 diff/行数（Claude 基线 = 内联
+  diff `Added/Removed N lines` + hunk）。修 = 4 挂点零 TUI 改动
+  （engine toolUseResult 挂法复原旧仓 addToolResult 语义）：成功支挂
+  res.data / catch 支挂错误串（旧仓 detailedError 挂法：与 block
+  content 内文同串）/ 早退支不挂（登记），toolOrchestration 透传 +
+  loop resultMessages 挂入 → Edit 内联 diff / Write 行数默认渲染。
+  isHumanTurn 谓词消费面（attachments walk / REPL lastMsgIsHuman）
+  语义随之收敛回旧仓（工具结果消息不再误计为 human turn）。
+- **G2（#259）项目级 skill `.atlas/skills/` 默认可发现**：根因 = 项目
+  skill 扫描门控在 `isSettingSourceEnabled('projectSettings')`（恒
+  false——projectSettings 不在 ALLOWED_SETTING_SOURCES）→ `.atlas/skills`
+  从不被发现 → Skill 工具 by-name 调用 = Unknown skill（模型手读
+  SKILL.md 回落）。裁定（最小范围 = skills only）：项目 skill 发现面
+  （engine + tui 双车道装载器：`.atlas/skills` 目录链 + `--add-dir` 面 +
+  addSkillDirectories 动态发现）与 project settings 源解耦、默认开
+  （只读 markdown，风险类 = Claude 现状）；新 kill switch
+  `ATLAS_DISABLE_PROJECT_SKILLS`（先例 ATLAS_DISABLE_POLICY_SKILLS，
+  单开关管三发现面）；`.atlas/settings.json`（RCE 面）仍排除（设置源
+  不变），legacy commands-as-skills 项目层仍源门（前向接缝登记）。
+- chore(repo)：worktree 开发工作流守卫（.gitignore node_modules 符号
+  链接 + worktrees/ 顶层；用户裁定 2026-10-03）。
+
+发布：GitHub master + tag v0.1.15；npm `@atlasharness/atlascode@0.1.15`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.54MB / 全量 3351/0（221 文件）。
+
 ## v0.1.14
 
 #250 issule-analyst 专项收口：concern 2（`/autocompact` 命令）+ concern 3
