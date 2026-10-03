@@ -4,6 +4,31 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.16
+
+主循环 LLM 超时 P0（斗兽棋回合死「Request timed out」）+ G2 残余验收缺口修波：
+
+- **#260 P0 主循环 LLM 请求超时**：根因链 = 主循环 chat() 非流式 + 缺省
+  120s 超时（用户 profile 未设 ATLAS_LLM_TIMEOUT）→ 27B 慢模型 xhigh
+  effort 长生成 > 120s → SDK 超时 → 旧重试门 /timeout/ 命中 → 3 次整段
+  重生成（观察值 ≈4m5s）→ 回合死。修 = ① 缺省 120s→600s（国产慢模型
+  基线，用户裁定；上限 30min 不变）② settings.json 新键 llmTimeoutMs
+  （env ATLAS_LLM_TIMEOUT 恒胜；autoCompactWindow settings 源缝先例）
+  ③ 生成超时 fail-fast 重试门（SDK 超时类族不重试——重发再等一个超时窗
+  零收益；连接期 ECONN/429/5xx 旧语义保留）④ REPL 错误行 remediation
+  提示面（超时附修复旋钮，非超时错误行原句不变）。判别单测 17 件。
+- **#261 G2 残余（#259 验收缺口，issule-analyst P1）：SkillTool 两车道
+  根锚定 getProjectRoot→process.cwd**：0.1.15 S4 回归 Skill(summarize-
+  numbers) 仍 Unknown skill——两车道 SkillTool（+AgentTool 同族 1 站点）
+  技能目录面写死 getProjectRoot()（上探 .git），非 git 工作区 / git 子
+  目录里 ws/.atlas/skills 在下游漏扫。修 = 4+1 站点改 process.cwd()
+  （主 init 一致，git 项目零变化）。判别单测 3 件（func 真 fs + chdir
+  仓内 ws 场景：外层 .git 标记目录 + ws 下游 .atlas/skills）。
+- docs(tui)：TUI 差异化 spec v2 落仓（atlascode-b8 设计/验收分工面）。
+
+发布：GitHub master + tag v0.1.16；npm `@atlasharness/atlascode@0.1.16`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.55MB / 全量 3371/0（224 文件）。
+
 ## v0.1.15
 
 TUI 对比轮（atlas vs Claude 基线，约束：不降级）G1/G2 修波：
