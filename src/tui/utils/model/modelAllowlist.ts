@@ -88,11 +88,12 @@ export function isModelAllowed(model: string): boolean {
 
 /**
  * 本地模型配置池成员判定（跟随本地模型配置，无硬编码模型名）:
- * 模型是否出现在默认放行角色池（**small + premium**）的
+ * 模型是否出现在默认放行角色池（**small + fast + premium**）的
  * env ATLAS_<ROLE>_MODEL > settings modelRoles 池 > provider/默认
- * 并集里，或等于默认主循环模型。**fast 不进默认放行清单**——快速/轻量
- * 模型不预信任跑安全分类器；确需放行某模型，把它配进 small/premium
- * 角色池即可（单一规则，无独立 allow 配置层——原
+ * 并集里，或等于默认主循环模型。三角色全预信任跑安全分类器（2026-10-04
+ * 用户终版裁定；2026-09-19「fast 不进默认放行清单」裁定被推翻——快速/轻量
+ * 模型同样放行，不需要判断 premium/small 角色池）；确需放行池外某模型，
+ * 把它配进任一角色池即可（单一规则，无独立 allow 配置层——原
  * atlas_auto_mode_config.allowModels 覆盖层 2026-09-19 整删）。
  *
  * 供 auto-mode 模型门（betas.ts modelSupportsAutoMode）使用：
@@ -104,7 +105,9 @@ export function isModelAllowed(model: string): boolean {
  * resolveModel 解析后的 modelId（provider 未知时 resolveModel 返回
  * undefined，前两种形态兜底，判定不因 provider 未注册而误 fail-closed）。
  */
-const AUTO_MODE_ROLES: ModelRole[] = ['premium', 'small']
+// 2026-10-04 用户终版裁定：premium/fast/small 全开放（不需要判断角色池），
+// fast 一并预信任跑安全分类器（2026-09-19「fast 不进默认放行清单」裁定被推翻）。
+const AUTO_MODE_ROLES: ModelRole[] = ['premium', 'fast', 'small']
 
 function localPoolRefs(): Set<string> {
   const refs = new Set<string>()

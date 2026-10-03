@@ -107,8 +107,9 @@ export function modelSupportsStructuredOutputs(model: string): boolean {
 // 前缀覆盖层整删——双层 + REPLACE 语义不清晰,且任何硬编码模型前缀清单都
 // 随模型代际漂移失效）:
 // feature gate 通过后,模型支持 auto 当且仅当它是本地模型配置的池成员
-// (isModelInLocalModelPools):small + premium 角色池并集 + 默认主循环模型,
-// fast 不进默认放行清单(轻量模型不预信任跑安全分类器)。
+// (isModelInLocalModelPools):small + fast + premium 角色池并集 + 默认主
+// 循环模型(2026-10-04 用户终版裁定三角色全开放,2026-09-19「fast 不进默认
+// 放行清单」被推翻——快速/轻量模型同样预信任跑安全分类器)。
 // 无硬编码模型名、无能力探测;旧的 ^claude-(opus|sonnet)-4-6 / qwen38
 // 硬编码白名单与 allowModels 配置层均已删除——想放行某模型,把它配进
 // 本地模型池(settings modelRoles / ATLAS_<ROLE>_MODEL)即可,单一规则。
