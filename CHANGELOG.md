@@ -4,6 +4,39 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.18
+
+TUI 工单 A1+B+C+A2（issule-analyst 2026-10-04，`docs/2026-10-04-config-skill-automode-implement.md`；
+= 用户 3 PR 同一件事）四子决策全落盘：
+
+- **A1 auto mode 三角色全开放**：`AUTO_MODE_ROLES` = premium/fast/small
+  （2026-10-04 用户终版裁定，推翻 2026-09-19「fast 不进默认放行清单」——
+  快速/轻量模型同样预信任跑安全分类器；betas.ts 两处陈旧注释同步修正）。
+- **B 配置命令 busy 态立即生效**：local-jsx 命令 `immediate` 缺省翻 true
+  （`cmd.immediate ?? true`，显式 `immediate: false` 可 opt-out）——/autocompact
+  + 只读展示命令（/cost /usage /stats /memory /session /context）busy 态不再
+  排队等整回合结束；`shouldInferenceConfigCommandBeImmediate()` 恒 true
+  （原 growthbook 死 stub gate 是死码，整删）。
+- **C 交互式安装轻量自动激活**：新 `refreshActivePluginsLightweight`
+  （数据面 swap：clearAllCaches + loadAllPlugins + commands/agents 重读 +
+  AppState plugins 面更新 + needsRefresh:false）；/plugin 菜单 install /
+  enable / disable / uninstall / marketplace 增删完成后自动激活，新装插件
+  skills/commands/agents 立即可用（无需 /reload-plugins）。前向缝登记：
+  新插件 hooks / MCP / LSP 三面仍属全量刷新域；成功消息面去 /reload-plugins
+  尾缀（config/MCP 域消息保留）。
+- **A2 权限弹框第 4 选项 = auto mode**：文件族弹框（FileEdit/FileWrite/
+  Filesystem/NotebookEdit 均委托 FilePermissionDialog，一处 canonical 选项）
+  + Bash + PowerShell 内联面统一加「Auto mode」第 4 选项（共享 helper
+  `autoModePermissionOption.ts`，工单点名复用）。裁定：选中 = 切 session
+  到 auto（`transitionPermissionMode` + setAppState 发布）+ 经既有
+  `ToolUseConfirm.recheckPermission()` re-dispatch **当前这 1 个** pending
+  请求（不重收 accept/reject、不重放历史队列）：非危险/规则已覆盖 →
+  auto 放行关框，危险工具 → 留框按 auto 态再问。门控关或已在 auto 时选项
+  隐藏；render→点击间 gate 翻关走竞态兜底（仅原样 re-dispatch）。
+  Fallback/WebFetch/Skill/AskUserQuestion 弹框不在工单点名面内，未扩。
+  判别单测 `tests/unit/auto-mode-permission-option.test.ts` 5 件
+  （mock.module 全导出面 spread + gate 两函数覆写；弹框面活判别归 PTY 探针）。
+
 ## v0.1.17
 
 loop-robustness 优化波（#262，用户裁定 #1 优先）——headless / 长任务车道健壮性
