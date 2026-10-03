@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.17
+
+loop-robustness 优化波（#262，用户裁定 #1 优先）——headless / 长任务车道健壮性
+三缺口全落盘（peer atlas-user-e2e 故障注入面 code-verified gaps）：
+
+- **#262 缺口① headless 车道全局崩溃兜底**：headless/CLI 车道缺进程级
+  uncaughtException/unhandledRejection 兜底 → 未捕获异常直接崩进程丢任务。
+  修 = 新 React-free leaf `src/cli/crashBackstop.ts` registerGlobalCrashBackstop
+  （幂等双 handler，log-to-stderr + survive），经 cli 门面导出，headless 分支
+  binMain 挂载（先于 getCoreDependencies）。判别单测 5 件（含 func 活探针
+  spawnSync）。
+- **#262 缺口② 回合级有界恢复（E-1b-full 错误恢复纵切核销）**：loop 无 turn
+  级错误恢复，provider 3 次内重试被 5xx 风暴耗净 → 回合级丢任务。修 = 新原语
+  `src/engine/query/turnRecovery.ts` withTurnRecovery（默认 maxRetries=13 →
+  42 LLM 调用跨 40 次 5xx 风暴窗口；重试谓词复用 modelprovider
+  shouldRetryModelError 单一事实源——5xx/429/连接可重试，400/客户端请求超时
+  （#260 fail-fast）/abort 不放大；首试恒跑保 R1 空响应 abort=1 次调用语义），
+  queryOneRound 两挂点包 withTurnRecovery。env 可调
+  ATLAS_TURN_RECOVER_ENABLED / _MAX / _BACKOFF_MS / _BACKOFF_CAP_MS。判别单测
+  10 件（mutation-red）。
+- **#262 缺口③ llmTimeoutMs 死键 + headless 源缝未接（用户 #260「改 settings
+  没用」主诉）**：provider 超时构造期一次性快照 + headless 从不注 settings 源缝
+  → settings.json llmTimeoutMs 恒 600s 死键（live 铁证：8000+15s 延迟仍跑 35s，
+  env=8000 则 8s 中止）。修 = provider 加可选活态 timeoutResolver（getTimeoutMs
+  每请求现读，直构测试面零变更，4 请求点全切）+ getModelProvider 单例注活态
+  resolver（与 TUI 提示面 getCurrentLlmTimeoutMs 同源，两车道不分裂）+
+  headless createCoreDependencies 补注 setLlmTimeoutSettingsSource（typeof 守卫
+  + try/catch 早位降级，同 WebSearch 键面纪律）。判别单测 4 件（mutation-red）。
+
+发布：GitHub master + tag v0.1.17；npm `@atlasharness/atlascode@0.1.17`。
+四件套绿 tsc 0 / lint 0e·0w / build 17.55MB / 全量 3390/0（228 文件）。
+post-fix gate（peer atlas-user-e2e 故障注入面）：① 静态 grep 崩溃兜底注册 /
+② turnrecover --expect post proxyCalls≥40 / ③ LT1 探针 tui-longtask +
+settings-lane（llmTimeoutMs=8000+15s 延迟须 8s 中止）。
+
 ## v0.1.16
 
 主循环 LLM 超时 P0（斗兽棋回合死「Request timed out」）+ G2 残余验收缺口修波：
