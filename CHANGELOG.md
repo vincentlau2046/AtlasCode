@@ -4,6 +4,35 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.22
+
+P1a 验收 R1 缺陷修补发（0.1.21 随车 P1a 含两缺陷经 b8 lane 验收 R1 打回，npm
+版本不可撤回，本版补发两修；R2 验收 PASS 后触发补发）：
+
+- **R1 缺陷① `/sidebar` 命令漏注册已修**：P1a 命令文件
+  `src/tui/commands/sidebar/index.ts` 已建但 `src/tui/commands.ts` 主注册表漏
+  import + `COMMANDS` 数组登记，`/sidebar` 落入 skill 派发报「Unknown skll」。
+  补 import（:41）+ 注册（:231）（`27df1ed`）。
+- **R1 缺陷② Kitty 终端 ctrl+shift 族死键（协议级真缺陷）已修**：ink
+  parse-keypress 的 CSI-u（Kitty 键盘协议）分支误用 XTerm modifyOtherKeys 的
+  1-based modifier 解码；Kitty 协议是 0-based 位掩码（shift=1/alt=2/ctrl=4/
+  super=8），真 kitty 终端 `Ctrl+Shift+D` 发 `\x1b[100;5u`（1+4），旧解码解成
+  ctrl-only（shift 静默丢失），ctrl+shift 族绑定在 kitty 协议终端永不触发。
+  新增 `decodeKittyModifier`（0-based，modifier 字段缺省=0 无修饰键，:480 + :653）；
+  modifyOtherKeys 1-based 路径不变（`\x1b[27;6;100~` 仍正确解码）。
+  ⚠️ **探针编码注记**：修后 `\x1b[100;6u` = alt+ctrl（Kitty 正确语义），不再触发
+  ctrl+shift+d；harness/探针应改 `\x1b[100;5u`（kitty 0-based）或
+  `\x1b[27;6;100~`（xterm 1-based，6=ctrl+shift，不变）。
+- **Diff 页空态可观测**：clean worktree（git diff 空、无 hunk）时 Diff 页显式标
+  「工作树干净 —— 无未提交改动（git diff 空）· 当前档 unified/side-by-side」
+  （`DiffPage.tsx:24-28`），空树切档亦可验（验收探针/人工核均适用）。
+  键链判别单测 9 例（`tests/unit/sidepanel-sbs-keychain.test.ts`：协议层 5 /
+  事件层 1 / 匹配层 3，含双协议 kitty+xterm 编码 + ctrl-only 与无 SidePanel
+  上下文负例）（`d4341a1`）。
+
+四件套绿：tsc 0 / lint 0e·0w / build 17.58MB / 全量 13782 pass·0 fail·939 文件
+（master superset 口径，同 0.1.21）。
+
 ## v0.1.21
 
 P1a 多页面侧抽屉 + #272 LLM 出站 UA 品牌串（spec `docs/tui-differentiation-spec.md`
