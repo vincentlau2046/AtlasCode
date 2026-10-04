@@ -193,4 +193,15 @@ export {
 export { getModelMeta, getProviderContextWindow } from './capabilities'
 export type { EndpointConfigSource } from './ports/endpointConfig'
 export { zodToJsonSchema, type JsonSchema7Type } from './schema'
-export { queryWithRoleFallback } from './queryWithRoleFallback'
+export {
+  queryWithRoleFallback,
+  type QueryWithRoleFallbackResult,
+  type RoleQueryOptions,
+} from './queryWithRoleFallback'
+// P0b① 信任线「已从 X 回退到 Y」信号源（水平回退最近一次记录，只读消费）
+export {
+  clearRoleFallback,
+  recordRoleFallback,
+  getLastRoleFallback,
+  type RoleFallbackRecord,
+} from './roleFallbackStore'

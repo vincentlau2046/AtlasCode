@@ -90,8 +90,10 @@ export interface StatusLineJsonConfig {
 
 // ── 默认 segment 配置（故障自愈降级用，§9.1.1） ────────────────────
 
+// role-fallback 紧跟 model（信任线：首选模型失败时可见"实际由谁在答"，§P0b①）
 export const DEFAULT_SIMPLE_LINE1: SegmentConfig[] = [
   { type: 'model' },
+  { type: 'role-fallback' },
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
@@ -100,6 +102,7 @@ export const DEFAULT_SIMPLE_LINE1: SegmentConfig[] = [
 
 export const DEFAULT_DETAILED_LINE1: SegmentConfig[] = [
   { type: 'model' },
+  { type: 'role-fallback' },
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
