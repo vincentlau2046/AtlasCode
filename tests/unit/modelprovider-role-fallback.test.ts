@@ -10,7 +10,9 @@
  *   ① roleFallbackStore 纯 leaf（record / clear / getLast / re-record 覆盖）
  *   ② queryWithRoleFallback 加性返回 + store 写入/清除时序 + 失败侧 onPrimaryError/
  *      onFallbackError 不变（provider 经 setModelProviderForTesting 注入缝，非 mock 网络）
- *   ③ RoleFallbackSegment 渲染谓词（无回退=null 不留分隔符；有回退=含 from→to 文本）
+ *   ③ ModelSegment 回退尾标渲染谓词（B1 2026-10-05 §4b：role-fallback 独立段删除，
+ *      信任线折入 model 段）——无回退=仅模型名无 ↦ 尾标；有回退=尾部黄
+ *      ` ↦ {to}`（spec 形 `⚡ deepseek-v4-pro ↦ fast`）
  *
  * 分层纪律：纯函数 + provider 注入缝 + React 元素谓词（无网络 / 无盘 / 无 PTY）。
  */
@@ -27,10 +29,9 @@ import {
   type ModelProvider,
 } from '../../src/modelprovider'
 import { asSystemPrompt } from '../../src/shared'
-import { RoleFallbackSegment } from '../../src/tui/components/StatusLine/segments/RoleFallbackSegment.js'
+import { ModelSegment } from '../../src/tui/components/StatusLine/segments/ModelSegment.js'
 import type {
   SegmentRenderContext,
-  SegmentComponent,
 } from '../../src/tui/components/StatusLine/segments/types.js'
 
 // ── fake ModelProvider（§8.13 L-2：返固定 completion，非 mock 网络）────────
@@ -191,44 +192,63 @@ describe('P0b① queryWithRoleFallback 加性返回 servedRole/fallbackUsed', ()
   })
 })
 
-// ── ③ RoleFallbackSegment 渲染谓词 ───────────────────────────────────────
-describe('P0b① RoleFallbackSegment 渲染谓词（信任线「已从 X 回退到 Y」）', () => {
+// ── ③ ModelSegment 回退尾标渲染谓词（B1：信任线折入 model 段）─────────────
+describe('P0b① ModelSegment 回退尾标（B1 2026-10-05 §4b：role-fallback 段删除，黄 ↦ 尾标）', () => {
   const ctx: SegmentRenderContext = {
-    input: {} as SegmentRenderContext['input'],
+    input: {
+      model: { id: 'm-1', display_name: 'deepseek-v4-pro' },
+      exceeds_200k_tokens: false,
+      version: '0.0.0',
+    } as unknown as SegmentRenderContext['input'],
     width: 120,
     density: 'detailed',
   }
-  const children = (node: React.ReactNode): string => {
+  const flatten = (node: React.ReactNode): string => {
     if (node == null) return ''
     if (typeof node === 'string' || typeof node === 'number') return String(node)
-    if (Array.isArray(node)) return node.map(children).join('')
+    if (Array.isArray(node)) return node.map(flatten).join('')
     // React 元素：递归取 props.children
-    return children((node as { props?: { children?: React.ReactNode } }).props?.children)
+    return flatten((node as { props?: { children?: React.ReactNode } }).props?.children)
+  }
+  /** 顶层子节点中 color=yellow 的嵌套 Text 文本（B1 尾标 = 独立黄字，§4.3 色阶） */
+  const yellowSuffix = (node: React.ReactNode): string => {
+    const kids = (node as { props?: { children?: React.ReactNode } }).props?.children
+    const list = Array.isArray(kids) ? kids : kids == null ? [] : [kids]
+    return list
+      .filter(
+        c =>
+          React.isValidElement(c) &&
+          (c as { props?: { color?: string } }).props?.color === 'yellow',
+      )
+      .map(c =>
+        flatten(
+          (c as { props?: { children?: React.ReactNode } }).props?.children,
+        ),
+      )
+      .join('')
   }
   beforeEach(() => clearRoleFallback())
 
-  test('无回退 → null（不留分隔符残余）', () => {
-    expect(RoleFallbackSegment(ctx)).toBeNull()
-  })
-
-  test('有回退 → 元素文本含 from→to（已从 X 回退到 Y）', () => {
-    recordRoleFallback('premium', 'small')
-    const node = RoleFallbackSegment(ctx)
+  test('无回退 → 仅模型名，无 ↦ 尾标（不留残余）', () => {
+    const node = ModelSegment(ctx)
     expect(React.isValidElement(node)).toBe(true)
-    const text = children(node)
-    expect(text).toContain('premium')
-    expect(text).toContain('small')
-    expect(text).toContain('已从')
-    expect(text).toContain('回退到')
+    expect(flatten(node)).toBe('⚡ deepseek-v4-pro')
+    expect(yellowSuffix(node)).toBe('')
   })
 
-  test('re-record 后谓词跟随最近一次（fast→small）', () => {
+  test('有回退 → 尾部黄 ` ↦ {to}`（spec 形 deepseek-v4-pro ↦ fast）', () => {
+    recordRoleFallback('premium', 'fast')
+    const node = ModelSegment(ctx)
+    expect(flatten(node)).toBe('⚡ deepseek-v4-pro ↦ fast')
+    expect(yellowSuffix(node)).toBe(' ↦ fast')
+  })
+
+  test('re-record 后尾标跟随最近一次（fast→small）', () => {
     recordRoleFallback('premium', 'fast')
     recordRoleFallback('fast', 'small')
-    const text = children(RoleFallbackSegment(ctx))
-    expect(text).toContain('fast')
-    expect(text).toContain('small')
-    // 最近一次 from=fast（premium 已不是当前 from）
-    expect(text).not.toContain('premium')
+    const text = flatten(ModelSegment(ctx))
+    expect(text).toBe('⚡ deepseek-v4-pro ↦ small')
+    // 尾标只取最近一次的 to（fast 已不是当前回退目标）
+    expect(text).not.toContain('↦ fast')
   })
 })
