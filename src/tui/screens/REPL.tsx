@@ -274,8 +274,6 @@ import { REMOTE_SAFE_COMMANDS } from '../commands.js';
 import { FullscreenLayout, useUnseenDivider, computeUnseenDivider } from '../components/FullscreenLayout.js';
 import { SessionTreeScreen } from './SessionTreeScreen.js';
 import { DebugPanel } from '../components/DebugPanel/DebugPanel.js';
-import { SidePanelDrawer } from '../components/SidePanel/SidePanel.js';
-import { SidePanelKeybindings } from '../components/SidePanel/SidePanelKeybindings.js';
 import { useDebugEventTracker } from '../components/DebugPanel/useDebugEventTracker.js';
 import { isFullscreenEnvEnabled, maybeGetTmuxMouseHint, isMouseTrackingEnabled } from '../utils/fullscreen.js';
 import { ENABLE_MOUSE_TRACKING, DISABLE_MOUSE_TRACKING } from '../ink/termio/dec.js';
@@ -4634,10 +4632,8 @@ export function REPL({
               </Box>
               </Box>} />
       </MCPConnectionManager>
-      <SidePanelKeybindings />
     </KeybindingSetup>
       </Box>
-      <SidePanelDrawer messages={displayedMessages} />
     </Box>;
   if (isFullscreenEnvEnabled()) {
     return <AlternateScreen mouseTracking={isMouseTrackingEnabled()}>
