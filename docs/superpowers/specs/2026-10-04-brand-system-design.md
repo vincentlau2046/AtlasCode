@@ -65,17 +65,17 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 
 | 触面 | 静态 | 动态（loading/思考） |
 |---|---|---|
-| **mark** | 5 行渐变三角 + 顶点光心 | 顶点呼吸脉冲（reduced-motion 时静态） |
+| **mark** | 5 行渐变三角 + 顶点光心 | 顶点呼吸脉冲 |
 | **spinner** | `█████` 光束串 + `<verb>…` 状态行 | 从底向顶**逐行点亮**（"光扫上爬"= Ascend 上升动效）；verb 池为算力+意象双轴（§7.4） |
 | **进度条** | `███░░░░` 光束填充 | 光束向前推进 |
 | **边框角标** | `╱` 斜线角装饰（U+2572 Neutral） | — |
 | **分隔线** | `█ █ █` 光束串（Block Elements，CJK 安全） | — |
 | **空态底纹** | 暗淡 `░` 光锥底纹 | — |
-| **闲时 tips 轮播** | prefix `·` 改 `▀` 光锥顶点色块 | 切换瞬间光扫渐显（reduced-motion 时纯文本切换） |
+| **闲时 tips 轮播** | prefix `·` 改 `▀` 光锥顶点色块 | 切换瞬间光扫渐显 |
 
 **闲时态说明**：spinner 静止后，status line 闲时 tips（`useDynamicTips.ts` 12s 轮播 6 条命令提示）是 TUI 唯一动效触面。光锥母题延伸至此——tips 前缀 `·` 改为光锥顶点色块 `▀`（brand_mark 色），切换时用"光扫渐显"动画（80ms 渐入）而非硬切。这让闲时态仍保持品牌视觉认知，不退化为纯灰文本。
 
-**loading 动效预览**（光扫上爬，4 帧，reduced-motion 时仅显示帧 4 静态终态；顶点 █ 全程 amber 高亮 + 脉冲）：
+**loading 动效预览**（光扫上爬，4 帧循环，顶点 █ 全程 amber 高亮 + 脉冲）：
 ```
 帧1: █        帧2: █        帧3: █        帧4: █
     ·            ██           ██           ██
@@ -170,7 +170,7 @@ AtlasCode
 
 - **WCAG 对比度**：amber `#FFB800` 对深底（`#1e1e1e`）对比度 ≈ 10.3:1（AAA）；对浅底（`#ffffff`）≈ 1.8:1（不足）→ light 主题用 `amber-deep #D97706`（对比度 ≈ 4.6:1 AA）。spec 实施时用工具校验所有主题 brand 对 background 的对比度 ≥ AA 4.5:1。
 - **色盲**：deuteranopia/protanopia 变体用蓝→金渐变（蓝金轴对红绿色盲可辨），不依赖红绿区分。
-- **reduced-motion**：顶点脉冲 + loading 上爬动效默认尊重 `prefers-reduced-motion`（终端探测：`ATLAS_NO_MOTION` env 或 tmux/CI 环境推断）；reduced-motion 时 mark/spinner 显示静态终态。详见 §7。
+- **动效**：顶点脉冲 + 光扫上爬 + tips 渐入等动效**始终开启**（不做 reduced-motion 探测，详见 §9.1）。
 
 ---
 
@@ -196,13 +196,15 @@ AtlasCode
 
 **用户每轮启动看到**：暖金顶点光心 + 冷蓝底光锥 + 暖冷对照 wordmark——一眼是 AtlasCode，不是任何通用 agent。
 
-### 5.1 响应式降级
+### 5.1 响应式布局（不缩 mark）
 
 | 终端宽度 | 布局 | mark 处理 |
 |---|---|---|
 | ≥ 70 col | horizontal（现有 `getLayoutMode`） | 完整 9×5 光锥 + 渐变 |
-| < 70 col | compact | 凝缩 3×3 mini 光锥（`█ / ███ / █████` 三行），渐变保留 |
-| CondensedLogo（侧栏凝缩态） | 单行 `Atlas█` mark icon + wordmark | 顶点色块作 icon |
+| < 70 col | compact | **完整 9×5 光锥**（9 宽本就窄，70col 容得下；只调周围布局，不缩 mark） |
+| CondensedLogo（侧栏凝缩态） | 单行 `Atlas█` mark icon + wordmark | 顶点色块作 icon（凝缩态本就该极简，独立组件非降级） |
+
+**不缩 mark 理由**：光锥 9 宽是设计最小单元，70col 终端留 60+col 给文本仍充足；3×3 mini 光锥会丢渐变层次（3 行承不了 5 档），破坏品牌识别。compact 模式只调布局间距，mark 形态不变。
 
 `logoV2Utils.ts` `calculateOptimalLeftWidth` 的 "Minimum for clawd art 20" 注释改为 "Minimum for beam art 9"（光锥更窄，布局更省）。
 
@@ -229,7 +231,7 @@ export const PRODUCT_NAME = 'AtlasCode'                  // 已存在（配方�
 export const PRODUCT_BRAND = 'AtlasCode'                 // 新增（对外品牌名；与 PRODUCT_NAME 同值但语义独立——未来 atlasoffice 配方可 PRODUCT_NAME='AtlasOffice'）
 export const PACKAGE_NAME = '@atlasharness/atlascode'    // 已存在（家族 scope 保留）
 export const REPOSITORY_URL = 'https://github.com/vincentlau2046/AtlasCode'  // 已存在
-export const FEEDBACK_CHANNEL = '<待定>'                 // 新增（charter 列明，当前 undefined 是 bug 症状；建议 GitHub issues URL）
+export const FEEDBACK_CHANNEL = 'https://github.com/vincentlau2046/AtlasCode/issues'  // 新增（charter 列明，当前 undefined 是 bug 症状）
 export const ACCENT_HUE = 'compute'                      // 新增（配方注入；atlasoffice='neutral'）
 // FAMILY_MARK_PEAK 不进 identity（视觉常量归 theme/brand 模块，非身份串）
 ```
@@ -287,7 +289,7 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 | 项 | 当前 | 改为 |
 |---|---|---|
 | `PREFIX_CHAR`（L77） | `·` | `▀`（光锥顶点色块，brand_mark 色） |
-| tips 切换 | 硬切 | 80ms 渐入（reduced-motion 时硬切） |
+| tips 切换 | 硬切 | 80ms 渐入 |
 | IDLE_TIPS 内容 | 6 条命令提示 | **保留**（已中文化、无品牌串 leak） |
 
 **理由**：闲时态是 spinner 静止后 TUI 唯一动效触面，prefix `·` 改 `▀` 让光锥母题延伸到闲时，品牌视觉认知不断档。tips 内容已合规不动。
@@ -308,24 +310,35 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 ```ts
 // src/tui/constants/spinnerVerbs.ts（重写）
 export const SPINNER_VERBS = [
-  // ── 算力轴：编译/推理/优化/编排语义 ──
+  // ── 算力轴（45）：编译/推理/优化/编排/算子开发语义 ──
   'Compiling', 'Inferring', 'Synthesizing', 'Optimizing', 'Orchestrating',
   'Profiling', 'Vectorizing', 'Parallelizing', 'Quantizing', 'Scheduling',
   'Dispatching', 'Pipelining', 'Tiling', 'Fusing', 'Lowering',
   'Analyzing', 'Computing', 'Crunching', 'Hashing', 'Resolving',
   'Indexing', 'Tracing', 'Instrumenting', 'Diagnosing', 'Verifying',
-  // ── 意象轴：攀升/光锥/聚焦语义（呼应昇腾光锥 mark）──
+  'Transpiling', 'Linking', 'Loading', 'Executing', 'Evaluating',
+  'Benchmarking', 'Debugging', 'Refactoring', 'Parsing', 'Tokenizing',
+  'Embedding', 'Aligning', 'Calibrating', 'Tuning', 'Pruning',
+  'Distilling', 'Caching', 'Streaming', 'Decoding', 'Encoding',
+  // ── 意象轴（30）：攀升/光锥/聚焦/构造语义（呼应昇腾光锥 mark）──
   'Ascending', 'Climbing', 'Summiting', 'Rising', 'Elevating',
   'Converging', 'Focusing', 'Beaming', 'Illuminating', 'Kindling',
   'Forging', 'Crafting', 'Building', 'Shaping', 'Refining',
   'Reasoning', 'Pondering', 'Deliberating', 'Reflecting', 'Imagining',
+  'Exploring', 'Navigating', 'Mapping', 'Charting', 'Pioneering',
+  'Awakening', 'Igniting', 'Catalyzing', 'Amplifying', 'Accelerating',
+  // ── 通用收尾（15）：保多样性、避免高频重复 ──
+  'Working', 'Processing', 'Thinking', 'Considering', 'Contemplating',
+  'Generating', 'Producing', 'Assembling', 'Composing', 'Constructing',
+  'Investigating', 'Researching', 'Studying', 'Reviewing', 'Planning',
 ];
 ```
 
-- **算力轴**（25 个）：编译/推理/优化/编排等 coding agent + NPU 算力语义，含 `Tiling`/`Fusing`/`Lowering`/`Quantizing` 等 Ascend 算子开发专属动词（AtlasCode 差异化能力）
-- **意象轴**（20 个）：`Ascending`/`Climbing`/`Summiting`/`Rising` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦意象
-- 共 ~45 个（vs fork 188 个）——精简但语义密度高，每个动词都指向品牌双轴
-- **保留少量通用**（`Analyzing`/`Computing`/`Reasoning`/`Pondering`/`Crafting`/`Building`）避免动词池过于硬核
+- **算力轴**（45 个）：编译/推理/优化/编排等 coding agent + NPU 算力语义，含 `Tiling`/`Fusing`/`Lowering`/`Quantizing`/`Transpiling` 等 Ascend 算子开发专属动词（AtlasCode 差异化能力）
+- **意象轴**（30 个）：`Ascending`/`Climbing`/`Summiting` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦，`Pioneering`/`Catalyzing`/`Amplifying`/`Accelerating` 传递算力加速
+- **通用收尾**（15 个）：`Working`/`Processing`/`Thinking` 等保多样性，避免高频重复显眼
+- **共 ~90 个**（vs fork 188 个）——保 48% 体量，重复率与 fork 同量级（fork 188 个动词在 12s 轮播下周期 37min，90 个周期 18min，均远超单次会话典型时长，用户感知重复率低）
+- 删 `Clauding`（L45）+ 删 Anthropic whimsical 专属词（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting` 等 fork 品牌人格词），保留 `Pondering`/`Musing`/`Brewing`/`Conjuring` 等通用 whimsical（实际已纳入意象轴）
 
 **`turnCompletionVerbs.ts` 同步重写**（过去式，`<verb> for <duration>`）：
 ```ts
@@ -333,6 +346,7 @@ export const TURN_COMPLETION_VERBS = [
   'Compiled', 'Inferred', 'Synthesized', 'Optimized', 'Orchestrated',
   'Analyzed', 'Computed', 'Crunched', 'Resolved', 'Verified',
   'Ascended', 'Converged', 'Forged', 'Crafted', 'Built', 'Refined',
+  'Explored', 'Reasoned', 'Generated', 'Processed',
 ];
 ```
 
@@ -341,26 +355,46 @@ export const TURN_COMPLETION_VERBS = [
 **settings 覆盖机制保留**：`getSpinnerVerbs()` 的 `settings.spinnerVerbs`（mode=replace/extend）用户自定义机制保留——用户可注入自己的动词池，默认池改上述重写版。
 
 **核查清单**（实施时验证）：
-- [ ] `grep -rni "clauding" src/` = 0（确认 SPINNER_VERBS 无 Clauding + insights.ts 的 multi-clauding 是内部术语非用户可见，单独裁定是否改）
-- [ ] `turnCompletionVerbs.ts` 8 个过去式同步重写
+- [ ] `grep -rni "clauding" src/` 排除 insights.ts multi-clauding 内部术语后 = 0
+- [ ] `turnCompletionVerbs.ts` 过去式同步重写
 - [ ] 主 spinner + TeammateSpinnerLine + spawnInProcess.ts 三处消费方验证
 - [ ] e2e 基线（若含 spinner 动词快照）重生成
 
-### 7.5 atlasCodeGuideAgent Claude 文案去 fork 化
+### 7.5 built-in agents Claude 文案去 fork 化（全 6 agent 核查）
 
-`src/tui/tools/AgentTool/built-in/atlasCodeGuideAgent.ts` L37/61 用户可见的 agent 自我描述含 Anthropic 品牌串：
+**核查范围**：`src/tui/tools/AgentTool/built-in/` 全 6 个 agent 文件。
+
+**① atlasCodeGuideAgent.ts**（重灾区，9 处）：
 
 | 行 | 当前 | 改为 |
 |---|---|---|
-| L37 | `**Claude Agent SDK**: A framework for building custom AI agents based on Atlas technology.` | `**Atlas Agent SDK**: A framework for building custom AI agents based on Atlas technology.` |
-| L61 | `**Claude API docs** … Claude API (formerly known as the Anthropic API) …` | `**Atlas API docs** … Atlas API (model interaction, tool use, integrations) …` |
+| L18 | `platform.claude.com/llms.txt` | 保留（外部 Anthropic 文档 URL，AtlasCode fork 仍引 Anthropic SDK 文档；改 URL 会断文档源） |
+| L29 | `You are the Claude guide agent… Atlas, the Claude Agent SDK, and the Claude API (formerly the Anthropic API)` | `You are the Atlas guide agent… Atlas, the Atlas Agent SDK, and the Atlas API` |
+| L35 | `**Claude Agent SDK**: … based on Atlas technology.` | `**Atlas Agent SDK**: … based on Atlas technology.` |
+| L37 | `**Claude API**: The Claude API (formerly known as the Anthropic API) …` | `**Atlas API**: … model interaction, tool use, integrations` |
 | L52 | `**Claude Agent SDK docs**` | `**Atlas Agent SDK docs**` |
+| L59 | `Agent SDK docs are part of the Claude API documentation` | `… part of the Atlas API documentation` |
+| L61 | `**Claude API docs** … Claude API (formerly the Anthropic API)` | `**Atlas API docs** … Atlas API` |
+| L63 | `Anthropic-defined tools (computer use, code execution…)` | `vendor-defined tools (computer use, code execution…)` |
+| L95 | `whenToUse: … ("Can Claude...", "Does Claude...") … Claude Agent SDK … Claude API (formerly Anthropic API) … Anthropic SDK usage` | `… ("Can Atlas...", "Does Atlas...") … Atlas Agent SDK … Atlas API … Atlas SDK usage` |
 
-**注意**：这是 agent 内部知识库描述（guideAgent 给用户介绍 SDK/API 时用），非 LLM 系统提示词。Claude Agent SDK / Claude API 是 Anthropic 产品名——AtlasCode 作为 fork，其 "Agent SDK" 实际是 Atlas Agent SDK（`ATLAS_AGENT_SDK_VERSION` env 已在 UA 用）。本 spec 改 "Claude" → "Atlas"，与 L7 内部层一致。
+**② exploreAgent.ts:80 + planAgent.ts:90** `omitClaudeMd: true`：
+- flag 名指 CLAUDE.md 记忆文件（AtlasCode 用 ATLAS.md）
+- **核查**：`omitClaudeMd` 散落 15+ 文件（context.ts/factory.ts/memoryFiles.ts 等全用 `ClaudeMd`/`getAdditionalDirectoriesForClaudeMd`/`setCachedClaudeMdContent` 命名族）
+- **裁定**：**保留不改**。理由：(a) `omitClaudeMd` 是内部 API flag 名非用户可见；(b) 改名触及 15+ 文件大范围重构，出 spec scope；(c) AtlasCode 的 ATLAS.md 实际是 CLAUDE.md 的别名（fork 兼容），内部命名留 `ClaudeMd` 不影响用户面。归 F 波清尾候选（低优）。
+
+**③ verificationAgent.ts:22,30,59** `mcp__claude-in-chrome__*`：
+- 引用真实 MCP server `claude-in-chrome`（Anthropic 第一方浏览器自动化工具）
+- **裁定**：**保留不改**。理由：(a) `mcp__claude-in-chrome__*` 是 MCP 工具名，改名破坏工具匹配（agent 按此名探测工具是否存在）；(b) 这是外部 MCP server 名非 AtlasCode 品牌串；(c) 若用户装了 claude-in-chrome MCP server，工具名就是 `mcp__claude-in-chrome__*`，必须原样引用。
+
+**④ generalPurposeAgent.ts / statuslineSetup.ts**：核查无 Claude 残留（✅ 干净）。
 
 **核查清单**（实施时验证）：
-- [ ] atlasCodeGuideAgent.ts 全文 grep `Claude` 逐处裁定（区分：Anthropic 产品名引用 vs L7 内部 "Atlas" 短名）
-- [ ] 其他 built-in agent（generalPurposeAgent.ts 等）同步核查 Claude 残留
+- [ ] atlasCodeGuideAgent.ts L29/35/37/52/59/61/63/95 共 8 处改 Claude→Atlas
+- [ ] L18 `platform.claude.com` URL 保留（外部文档源）
+- [ ] exploreAgent/planAgent `omitClaudeMd` 保留（内部 flag，归 F 波）
+- [ ] verificationAgent `claude-in-chrome` 保留（外部 MCP 工具名）
+- [ ] generalPurposeAgent/statuslineSetup 复核无残留
 
 ### 7.6 已合规面（不动，仅记录）
 
@@ -422,11 +456,11 @@ const BEAM_ART: Array<{ chars: string; color: string }> = [
 
 ## 9. 无障碍
 
-### 9.1 reduced-motion
+### 9.1 动效策略（已定 · 始终开启）
 
-- 探测：`prefers-reduced-motion`（ink 不直接支持 CSS media query，改用环境推断）—— `ATLAS_NO_MOTION=1` env / CI 环境（`CI=true` 且无 TTY）/ `--no-animation` CLI flag（可选）
-- 行为：mark 顶点脉冲关、loading 上爬动效关（显示静态终态帧 4）、spinner 用静态 `█` 串
-- 默认：动效开启（终端用户默认有动效）；CI/无 TTY 自动降级静态
+- **不做 reduced-motion 探测**：终端不像浏览器有 `prefers-reduced-motion` media query，环境推断（env/CI）不准确，显式 flag 又增加用户认知负担。
+- **动效始终开启**：mark 顶点脉冲、loading 光扫上爬、tips 80ms 渐入、spinner verb 轮播等动效在所有环境（含 CI/无 TTY）始终按设计渲染。
+- **降级仅在色彩档位**：truecolor → 256 → 16 ANSI → 单色降级链（§4.2）只影响色彩，不影响动效；单色/no-TTY 环境动效仍跑（用字符形状传递动效，如 spinner 用 `█` 串逐行点亮）。
 
 ### 9.2 WCAG 对比度
 
@@ -467,8 +501,9 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | commit/PR 签名 `🤖 Generated with [AtlasHarness]` | AtlasHarness 品牌名 × 3 处 | → `[${PRODUCT_BRAND}]`（§7.2） |
 | 闲时 tips prefix `·` | 中性点，无品牌 | → `▀` 光锥顶点色块（§7.3） |
 | guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.5） |
-| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象双轴 ~45 个（§7.4） |
+| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象双轴 ~90 个（保 48% 体量，§7.4） |
 | spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
+| guideAgent `Claude` × 8 处 + `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 8 处改 Atlas；flag/MCP 名保留（§7.5） |
 
 ### 10.3 UA 串
 
@@ -592,11 +627,12 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 - [ ] errorMessaging 4 处错误消息显 AtlasCode
 - [ ] commit/PR 签名 `git commit` 后 trailer 显 `Generated with [AtlasCode]`（§7.2 三处）
 - [ ] 闲时 tips prefix 显 `▀` 光锥顶点色块（§7.3）
-- [ ] spinner 动词池无 `Clauding`，动词为算力+意象双轴（§7.4）
+- [ ] spinner 动词池无 `Clauding`，动词为算力+意象双轴 ~90 个（§7.4）
 - [ ] spinner `· <verb>…` prefix 显 `▀` 光锥顶点色块
-- [ ] guideAgent 自我描述显 `Atlas Agent SDK` / `Atlas API`（§7.5）
+- [ ] atlasCodeGuideAgent 8 处 Claude→Atlas（§7.5）
+- [ ] compact 模式（<70col）mark 保持完整 9×5 不缩（§5.1）
 - [ ] 6 套主题 brand 色对比度 ≥ AA
-- [ ] reduced-motion 下 mark/spinner/tips 切换静态
+- [ ] 动效始终开启（顶点脉冲/光扫上爬/tips 渐入在所有环境渲染）
 - [ ] e2e 基线重生成 + 全绿
 
 ---
@@ -635,8 +671,8 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 2. **色板**：✅ 暖金 `#FFB800` 顶点 + 冷蓝 `#0066FF` 底渐变（§4.1）
 3. **pose 机制**：✅ 废弃重写上爬动效（§8.2）
 4. **时序**：✅ 0.2.x 单独版本 + master 不开分支 + 不设 feature flag（§13.1）
-5. **FEEDBACK_CHANNEL 值**：建议 `https://github.com/vincentlau2046/AtlasCode/issues`（实施时定，非阻塞）
-6. **是否加 `--no-animation` CLI flag**：reduced-motion 默认 env 推断（推荐，实施时定）
+5. **动效策略**：✅ 不做 reduced-motion，动效始终开（§9.1）
+6. **FEEDBACK_CHANNEL 值**：✅ `https://github.com/vincentlau2046/AtlasCode/issues`（§6.2）
 7. **P2 历史"移植自 AtlasHarness"注释清尾时机**：随大重构（推荐，非 0.2.0 必须）
 
 ---
