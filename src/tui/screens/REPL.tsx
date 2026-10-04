@@ -5,7 +5,7 @@ import { c as _c } from "react/compiler-runtime";
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 超时错误行 remediation 提示面
-import { getCurrentLlmTimeoutMs, llmTimeoutRemediationHint } from 'src/modelprovider';
+import { getCurrentLlmTimeoutMs, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint } from 'src/modelprovider';
 import { spawnSync } from 'child_process';
 import { getTotalInputTokens } from 'src/bootstrap'
 import { snapshotOutputTokensForTurn, getCurrentTurnTokenBudget, getTurnOutputTokens, getBudgetContinuationCount } from 'src/tui/bootstrapState.js';
@@ -2697,7 +2697,9 @@ export function REPL({
       // #260 P0：LLM 超时错误行附 remediation 提示（env ATLAS_LLM_TIMEOUT /
       // settings llmTimeoutMs 修复旋钮；非超时错误提示面 = null 原句不变）
       const llmTimeoutHint = llmTimeoutRemediationHint(error, getCurrentLlmTimeoutMs());
-      setMessages(prev => [...prev, createSystemMessage(`本轮执行出错：${errorMessage(error)}。${llmTimeoutHint ? `${llmTimeoutHint} ` : ''}请重试。`, 'error')]);
+      // P0b③ 网关不可达：给方向不给 mood（已切人工确认 + /doctor 排查；非网关错误 = null 原句不变）
+      const gwHint = gatewayUnreachableRemediationHint(error);
+      setMessages(prev => [...prev, createSystemMessage(`本轮执行出错：${errorMessage(error)}。${llmTimeoutHint ? `${llmTimeoutHint} ` : ''}${gwHint ? `${gwHint} ` : ''}请重试。`, 'error')]);
     } finally {
       // queryGuard.end() atomically checks generation and transitions
       // running→idle. Returns false if a newer query owns the guard

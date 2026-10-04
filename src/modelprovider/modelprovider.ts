@@ -98,6 +98,49 @@ export function llmTimeoutRemediationHint(
   return `LLM 请求超时（${head}）。可调大：env ATLAS_LLM_TIMEOUT=<毫秒> 或 settings.json llmTimeoutMs 键（上限 ${Math.round(LLM_TIMEOUT_CAP_MS / 60000)}min）。`
 }
 
+/**
+ * P0b③ 网关不可达错误行的方向性 remediation 提示面（llmTimeoutRemediationHint 姊妹，
+ * REPL 错误行消费）。给方向不给 mood：LLM 端点（网关）连接失败 → 指引"已切人工
+ * 确认 + /doctor 排查"；其余（超时归 llmTimeout 面 / 用户主动 abort / 拿到 HTTP
+ * 状态的业务·鉴权错误 = 网关可达）→ null（零行为变更，不打扰）。
+ *
+ * 连接失败族判别：SDK APIConnectionError（openai "Connection error." 固定文案）+
+ * 网络层 errno（fetch/undici 连接族；errno 常在 error.cause.code 上——loop-robustness
+ * #4 ECONNRESET 链同款盲区，本函数据此覆盖）。
+ */
+export function gatewayUnreachableRemediationHint(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null
+  const e = error as {
+    name?: string
+    message?: string
+    status?: number
+    response?: { status?: number }
+    cause?: unknown
+  }
+  // 用户主动 abort（Ctrl+C / 用户掐）≠ 网关不可达（非端点问题）
+  if (e.name === 'AbortError' || e.name === 'APIUserAbortError') return null
+  // 生成超时归 llmTimeoutRemediationHint（避免两提示叠加误导）
+  if (isClientRequestTimeout(error)) return null
+  // 拿到 HTTP 状态 = 网关可达（业务/鉴权错误），非"不可达"
+  const status = e.status ?? e.response?.status
+  if (typeof status === 'number') return null
+  const causeCode =
+    e.cause && typeof e.cause === 'object' && 'code' in (e.cause as object)
+      ? String((e.cause as { code?: unknown }).code ?? '')
+      : ''
+  const haystack = `${e.message ?? ''} ${causeCode}`
+  const isSdkConnection =
+    e.name === 'APIConnectionError' || e.message === 'Connection error.'
+  const isNetworkErrno =
+    /ECONNREFUSED|ECONNRESET|ENOTFOUND|ENETUNREACH|EHOSTUNREACH|EAI_AGAIN|fetch failed|socket hang up/i.test(
+      haystack,
+    )
+  if (!isSdkConnection && !isNetworkErrno) return null
+  // spec §4 P0b③ 精确串（S-C 三锚点：gwDown「IFF 不可达」/ gwManual「已切人工确认」/
+  // gwDoctor「/doctor 排查」）
+  return 'IFF 不可达：已切人工确认 —— /doctor 排查'
+}
+
 export interface ModelProvider {
 
   /** #260：当前生效请求超时读面（实现 = OpenAIProvider.timeoutMs）。 */
