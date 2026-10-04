@@ -71,6 +71,9 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 | **边框角标** | `╱` 斜线角装饰（U+2572 Neutral） | — |
 | **分隔线** | `█ █ █` 光束串（Block Elements，CJK 安全） | — |
 | **空态底纹** | 暗淡 `░` 光锥底纹 | — |
+| **闲时 tips 轮播** | prefix `·` 改 `▀` 光锥顶点色块 | 切换瞬间光扫渐显（reduced-motion 时纯文本切换） |
+
+**闲时态说明**：spinner 静止后，status line 闲时 tips（`useDynamicTips.ts` 12s 轮播 6 条命令提示）是 TUI 唯一动效触面。光锥母题延伸至此——tips 前缀 `·` 改为光锥顶点色块 `▀`（brand_mark 色），切换时用"光扫渐显"动画（80ms 渐入）而非硬切。这让闲时态仍保持品牌视觉认知，不退化为纯灰文本。
 
 **loading 动效预览**（光扫上爬，4 帧，reduced-motion 时仅显示帧 4 静态终态；顶点 █ 全程 amber 高亮 + 脉冲）：
 ```
@@ -260,7 +263,52 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 - [ ] 4 处错误消息是否按子串匹配触发（若 LLM 后端返回的错误体含 "AtlasHarness" 子串做条件分支，改品牌名会破坏匹配）→ 实施前 grep `includes('AtlasHarness')` 核查
 - [ ] 错误消息是否有 i18n 多语言版本（若有 zh/en 双语，同步改）
 
-### 7.2 已合规面（不动，仅记录）
+### 7.2 commit/PR 签名行 leak（高频用户可见 · 每次 git commit 写入）
+
+`src/tui/utils/attribution.ts` 生成 commit trailer + PR body 签名，**每次 git commit 都写入**——这是最高频用户可见品牌串之一，当前 3 处仍 `AtlasHarness`：
+
+| 文件:行 | 当前 | 改为 | 备注 |
+|---|---|---|---|
+| `src/tui/utils/attribution.ts:74` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL})` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})` | PR body 默认签名 |
+| `src/tui/utils/attribution.ts:77` | `Co-Authored-By: ${modelName} <vincentlau2046@gmail.com>` | 保留（邮箱是用户个人 git config，非品牌串） | commit trailer |
+| `src/tui/utils/attribution.ts:321` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL})` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})` | 增强签名 fallback |
+| `src/tui/utils/attribution.ts:367` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL}) (${atlasPercent}% …)` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL}) (${atlasPercent}% …)` | 增强签名主形态 |
+
+**`PRODUCT_URL` 统一**：`src/tui/constants/product.ts:3` `PRODUCT_URL='https://github.com/vincentlau2046/AtlasCode'` 已正确（URL 对），但 attribution.ts 用 `[AtlasHarness](${PRODUCT_URL})` 是"URL 对、品牌名错"。本 spec 改为 `[${PRODUCT_BRAND}](${REPOSITORY_URL})`——品牌名走 identity 单一事实源，URL 走 `REPOSITORY_URL`（`shared/identity.ts` 已有），去 `PRODUCT_URL` 重复定义（`constants/product.ts` 的 `PRODUCT_URL` 后续归并 identity，非本 spec 强制）。
+
+**模型名 `Atlas Opus 4.6`**（L73）：已用 "Atlas" 短名（L7 合规），但 "Opus" 是 Anthropic 模型族名。AtlasCode 接国产 LLM 后端（Qwen38 等），签名模型名应反映实际后端——本 spec **不硬编码模型族名**，改用 `${shortModelName}` 动态取（attribution.ts L367 已有 `shortModelName` 变量，L74 的 `modelName` 同步改动态）。
+
+**签名 `🤖` emoji**：保留（emoji 是跨品牌通用符号，非 Anthropic 专属；`🤖 Generated with` 是 GitHub 生态约定俗成的 AI 辅助提交标记，去 emoji 反而打破惯例）。
+
+### 7.3 闲时动态文字品牌化（useDynamicTips）
+
+`src/tui/components/StatusLine/useDynamicTips.ts` 闲时 tips 轮播（12s 周期 6 条命令提示），现状纯文本 + prefix `·`（L77 `PREFIX_CHAR`）。本 spec 品牌化：
+
+| 项 | 当前 | 改为 |
+|---|---|---|
+| `PREFIX_CHAR`（L77） | `·` | `▀`（光锥顶点色块，brand_mark 色） |
+| tips 切换 | 硬切 | 80ms 渐入（reduced-motion 时硬切） |
+| IDLE_TIPS 内容 | 6 条命令提示 | **保留**（已中文化、无品牌串 leak） |
+
+**理由**：闲时态是 spinner 静止后 TUI 唯一动效触面，prefix `·` 改 `▀` 让光锥母题延伸到闲时，品牌视觉认知不断档。tips 内容已合规不动。
+
+### 7.4 atlasCodeGuideAgent Claude 文案去 fork 化
+
+`src/tui/tools/AgentTool/built-in/atlasCodeGuideAgent.ts` L37/61 用户可见的 agent 自我描述含 Anthropic 品牌串：
+
+| 行 | 当前 | 改为 |
+|---|---|---|
+| L37 | `**Claude Agent SDK**: A framework for building custom AI agents based on Atlas technology.` | `**Atlas Agent SDK**: A framework for building custom AI agents based on Atlas technology.` |
+| L61 | `**Claude API docs** … Claude API (formerly known as the Anthropic API) …` | `**Atlas API docs** … Atlas API (model interaction, tool use, integrations) …` |
+| L52 | `**Claude Agent SDK docs**` | `**Atlas Agent SDK docs**` |
+
+**注意**：这是 agent 内部知识库描述（guideAgent 给用户介绍 SDK/API 时用），非 LLM 系统提示词。Claude Agent SDK / Claude API 是 Anthropic 产品名——AtlasCode 作为 fork，其 "Agent SDK" 实际是 Atlas Agent SDK（`ATLAS_AGENT_SDK_VERSION` env 已在 UA 用）。本 spec 改 "Claude" → "Atlas"，与 L7 内部层一致。
+
+**核查清单**（实施时验证）：
+- [ ] atlasCodeGuideAgent.ts 全文 grep `Claude` 逐处裁定（区分：Anthropic 产品名引用 vs L7 内部 "Atlas" 短名）
+- [ ] 其他 built-in agent（generalPurposeAgent.ts 等）同步核查 Claude 残留
+
+### 7.5 已合规面（不动，仅记录）
 
 | 触面 | 文件 | 状态 |
 |---|---|---|
@@ -274,7 +322,7 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 | releaseNotes repo URL | `src/tui/utils/releaseNotes.ts` | ✅ |
 | 系统提示词 "You are Atlas" | `src/tui/constants/system.ts:18-20` | ✅ L7 内部名合规，**不动** |
 
-### 7.3 历史"移植自 AtlasHarness"注释（P2，随大重构清尾）
+### 7.6 历史"移植自 AtlasHarness"注释（P2，随大重构清尾）
 
 ~150 处 `// 从 AtlasHarness src/... 移植` 注释（集中 `src/ascend/tools/*` + `src/engine/session/*`），非用户可见，零功能影响。本 spec 不强制清尾，归 F 波 ② 类机械替换或下次大重构。
 
@@ -362,6 +410,9 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | theme `brand` `// Claude orange` 注释 | Anthropic 品牌色 | → `// Atlas-Orange` + 换值（§4.3） |
 | 系统 prompt "You are Atlas" | 已去 fork 化（Atlas 非 Claude） | ✅ 保留（L7 内部名） |
 | 文件名 `Clawd.tsx` 引用 | 散落 import | 全量改 `Beam.js` |
+| commit/PR 签名 `🤖 Generated with [AtlasHarness]` | AtlasHarness 品牌名 × 3 处 | → `[${PRODUCT_BRAND}]`（§7.2） |
+| 闲时 tips prefix `·` | 中性点，无品牌 | → `▀` 光锥顶点色块（§7.3） |
+| guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.4） |
 
 ### 10.3 UA 串
 
@@ -483,8 +534,11 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 - [ ] `grep -rn "AtlasHarness" --include="*.ts" --include="*.tsx" src/` 排除注释行后 = 0（CI grep 门，charter L8 ③ review 桶加一条）
 - [ ] TUI 启动屏真机截图（≥3 终端）显 AtlasCode + 光锥 mark + 暖金顶点
 - [ ] errorMessaging 4 处错误消息显 AtlasCode
+- [ ] commit/PR 签名 `git commit` 后 trailer 显 `Generated with [AtlasCode]`（§7.2 三处）
+- [ ] 闲时 tips prefix 显 `▀` 光锥顶点色块（§7.3）
+- [ ] guideAgent 自我描述显 `Atlas Agent SDK` / `Atlas API`（§7.4）
 - [ ] 6 套主题 brand 色对比度 ≥ AA
-- [ ] reduced-motion 下 mark/spinner 静态
+- [ ] reduced-motion 下 mark/spinner/tips 切换静态
 - [ ] e2e 基线重生成 + 全绿
 
 ---
