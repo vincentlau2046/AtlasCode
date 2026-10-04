@@ -7,6 +7,7 @@
 
 import * as React from 'react'
 import { Box, Text } from '../../ink.js'
+import { useIsModalOverlayActive } from '../../context/overlayContext.js'
 import { useSidePanel } from './store.js'
 import {
   SIDE_PANEL_PAGES,
@@ -22,7 +23,13 @@ import { BudgetPage } from './pages/BudgetPage.js'
 
 export function SidePanelDrawer({ messages }: { messages: Message[] }): React.ReactNode {
   const panel = useSidePanel()
+  // 0.1.23 P0a 回归修（红线③ 渲染面）：模态 overlay（权限弹框/模型选择等）激活
+  // 时抽屉不渲染/不挤占——否则 40% 右列与模态双底栏重叠（P1 视觉缺陷）。
+  // 布局态（open/page）留存 store，模态关闭后抽屉原页复原，零状态丢失。
+  // （hook 须先于早退调用）
+  const isModalActive = useIsModalOverlayActive()
   if (!panel.open) return null
+  if (isModalActive) return null
   const page: SidePanelPage = panel.page
   return (
     <Box flexDirection="column" width="40%" borderStyle="round" borderColor="gray">
