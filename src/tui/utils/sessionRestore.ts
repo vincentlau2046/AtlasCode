@@ -32,6 +32,9 @@ import {
 import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
+import { applyPermissionUpdates } from './permissions/PermissionUpdate.js'
+import type { PermissionUpdate } from './permissions/PermissionUpdateSchema.js'
+import { readCurrentSessionPermissionRules } from './permissions/sessionPermissionRules.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { fileHistoryRestoreStateFromLog } from './fileHistory.js'
 import { createSystemMessage } from './messages.js'
@@ -417,6 +420,9 @@ export async function processResumedConversation(
 ): Promise<ProcessedResume> {
   // Match coordinator/normal mode to the resumed session
   let modeWarning: string | undefined
+  // 2026-10-05 §4b A1：session 域 always 规则（sidecar）—— 仅非 fork 恢复
+  // （fork = 新 session ID → 无 sidecar → 天然零残留）
+  let restoredSessionRules: PermissionUpdate[] = []
   if (feature('COORDINATOR_MODE')) {
     modeWarning = context.modeApi?.matchSessionMode(result.mode)
     if (modeWarning) {
@@ -440,6 +446,8 @@ export async function processResumedConversation(
       await renameRecordingForSession()
       await resetSessionFilePointer()
       restoreCostStateForSession(sid)
+      // switchSession 后当前 session = 恢复目标 → 读其 sidecar
+      restoredSessionRules = await readCurrentSessionPermissionRules()
     }
   } else if (result.contentReplacements?.length) {
     // --fork-session keeps the fresh startup session ID. useLogMessages will
@@ -536,6 +544,13 @@ export async function processResumedConversation(
       ...(restoredAttribution && { attribution: restoredAttribution }),
       ...(standaloneAgentContext && { standaloneAgentContext }),
       agentDefinitions: refreshedAgentDefs,
+      // 2026-10-05 §4b A1：session 域 always 规则种回内存上下文（resume 恢复）
+      ...(restoredSessionRules.length > 0 && {
+        toolPermissionContext: applyPermissionUpdates(
+          context.initialState.toolPermissionContext,
+          restoredSessionRules,
+        ),
+      }),
     },
   }
 }

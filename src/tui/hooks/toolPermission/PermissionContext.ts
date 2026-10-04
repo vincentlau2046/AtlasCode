@@ -18,6 +18,8 @@ import type {
 } from '../../types/permissions.js'
 import { setClassifierApproval } from '../../utils/classifierApprovals.js'
 import { logForDebugging } from '../../utils/debug.js'
+import { logError } from '../../utils/log.js'
+import { mergeCurrentSessionPermissionRules } from '../../utils/permissions/sessionPermissionRules.js'
 import { executePermissionRequestHooks } from '../../utils/hooks.js'
 import {
   REJECT_MESSAGE,
@@ -130,6 +132,43 @@ function createPermissionContext(
     async persistPermissions(updates: PermissionUpdate[]) {
       if (updates.length === 0) return false
       persistPermissionUpdates(updates)
+      // 2026-10-05 §4b A1：session 域规则合并进 sidecar（resume 恢复源）。
+      // sidecar 是便利层：写失败不影响内存生效（本 session 同前缀命中仍
+      // 直接 allow），但 spec 要求显式上报（notification），不静默。
+      const sessionRuleUpdates = updates.filter(
+        u => u.type === 'addRules' && u.destination === 'session',
+      )
+      if (sessionRuleUpdates.length > 0) {
+        if (!(await mergeCurrentSessionPermissionRules(sessionRuleUpdates))) {
+          logError(
+            new Error(
+              'Failed to persist session permission rules (rules will not be restored on resume)',
+            ),
+          )
+          const failState = toolUseContext.getAppState()
+          if (
+            !failState.notifications.queue.some(
+              n => n.key === 'session-rules-persist-failed',
+            )
+          ) {
+            toolUseContext.setAppState(prev => ({
+              ...prev,
+              notifications: {
+                ...prev.notifications,
+                queue: [
+                  ...prev.notifications.queue,
+                  {
+                    key: 'session-rules-persist-failed',
+                    text: 'Session permission rules could not be saved — they will not be restored on resume.',
+                    color: 'warning',
+                    priority: 'low',
+                  },
+                ],
+              },
+            }))
+          }
+        }
+      }
       const appState = toolUseContext.getAppState()
       setToolPermissionContext(
         applyPermissionUpdates(appState.toolPermissionContext, updates),

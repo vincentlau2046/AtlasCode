@@ -135,6 +135,7 @@ const getCoordinatorUserContext: (mcpClients: ReadonlyArray<{
 import useCanUseTool from '../hooks/useCanUseTool.js';
 import type { ToolPermissionContext, Tool } from '../Tool.js';
 import { applyPermissionUpdate, applyPermissionUpdates, persistPermissionUpdate } from '../utils/permissions/PermissionUpdate.js';
+import { readCurrentSessionPermissionRules } from '../utils/permissions/sessionPermissionRules.js';
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js';
 import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permissionSetup.js';
 import { getScratchpadDir, isScratchpadEnabled } from '../utils/permissions/filesystem.js';
@@ -1690,6 +1691,17 @@ export function REPL({
       } = await import('../utils/asciicast.js');
       await renameRecordingForSession();
       await resetSessionFilePointer();
+
+      // 2026-10-05 §4b A1：恢复 session 域 always 规则（sidecar）到内存
+      // toolPermissionContext。switchSession 后当前 session = 恢复目标
+      // （fork 入口的新 ID 无 sidecar → 天然零残留，不特判）。
+      const restoredSessionRules = await readCurrentSessionPermissionRules();
+      if (restoredSessionRules.length > 0) {
+        setAppState(prev => ({
+          ...prev,
+          toolPermissionContext: applyPermissionUpdates(prev.toolPermissionContext, restoredSessionRules)
+        }));
+      }
 
       // Clear then restore session metadata so it's re-appended on exit via
       // reAppendSessionMetadata. clearSessionMetadata must be called first:
