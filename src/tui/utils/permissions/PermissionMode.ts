@@ -39,12 +39,16 @@ type PermissionModeConfig = {
   external: ExternalPermissionMode
 }
 
+// 2026-10-05 §4b A5（f4 批准）：statusline 标签定稿 —— shortTitle 三态
+// default / automode enabled / bypass enabled（shortTitle 仅
+// PermissionModeSegment 消费，title 族不动：A4 verdict 句与 Config 屏
+// 仍用 title 原文案）
 const PERMISSION_MODE_CONFIG: Partial<
   Record<PermissionMode, PermissionModeConfig>
 > = {
   default: {
     title: 'Default',
-    shortTitle: 'Default',
+    shortTitle: 'default',
     symbol: '▶', // ▶ play
     color: 'text',
     external: 'default',
@@ -65,7 +69,7 @@ const PERMISSION_MODE_CONFIG: Partial<
   },
   bypassPermissions: {
     title: 'Bypass Permissions',
-    shortTitle: 'Bypass',
+    shortTitle: 'bypass enabled',
     symbol: '⏭', // ⏭ skip-next
     color: 'error',
     external: 'bypassPermissions',
@@ -81,7 +85,7 @@ const PERMISSION_MODE_CONFIG: Partial<
     ? {
         auto: {
           title: 'Auto mode',
-          shortTitle: 'Auto',
+          shortTitle: 'automode enabled',
           symbol: '∞', // ∞ infinity/auto-loop
           color: 'warning' as ModeColorKey,
           external: 'default' as ExternalPermissionMode,
