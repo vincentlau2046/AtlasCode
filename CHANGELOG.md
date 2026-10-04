@@ -4,6 +4,27 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.20
+
+P0b 信任透明层三验收门禁（spec `docs/tui-differentiation-spec.md` §4 P0b；验收
+b8 lane `accept.ts P0b` S-B 熔断 soft + S-C 网关 hard×3）：
+
+- **① 水平回退发生可见**（信任线「已从 X 回退到 Y」）：`queryWithRoleFallback`
+  成功侧加性返回 `servedRole`（实际应答 role）/ `fallbackUsed`（spec §1 L29 钉死
+  形状，非回调；消费者零签名变更）+ 独立纯 leaf `roleFallbackStore`（primary 成功
+  清除 / fallback 成功记录）；新 StatusLine 通道 B segment `role-fallback`（无回退
+  null / 有回退 warning 黄「已从 {from} 回退到 {to}」）默认可见（紧随 model）。
+- **② autoCompact 熔断预警**（statusline「将自动压缩，可 /rewind 回退」）：新
+  segment `auto-compact-warning`——上下文用量进入 autoCompact 阈值预警区（阈值 − 20k
+  缓冲）且 autoCompact 启用时提示（给用户撤销点），数据经 `src/engine` 门面
+  model-string 形（calculateTokenWarningState + isAutoCompactEnabled）。
+- **③ 网关不可达给方向不给 mood**：纯 leaf `gatewayUnreachableRemediationHint`
+  （SDK 连接失败族 + 网络层 errno，含 `error.cause.code` ECONNRESET 链盲区）→ REPL
+  错误行附「IFF 不可达：已切人工确认 —— /doctor 排查」（S-C 三锚点）；超时/abort/
+  拿到 HTTP 状态的错误 → null（零行为变更）。
+
+四件套绿：tsc 0 / lint 0e·0w / build 17.56MB / 全量 3436 pass·0 fail·233 文件（+25 判别单测）。
+
 ## v0.1.19
 
 P0a 可解释审批波（spec `docs/tui-differentiation-spec.md` §4-P0a；验收单 b8
