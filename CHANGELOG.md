@@ -4,6 +4,38 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.24
+
+P0a 审批行为定稿（§4b A 波）+ P0b 持续监控收敛（B 波）+ P1a 全量回退（C 波）
+（e2e §4b gate：P0 S-A/B/C PASS hardFail=0 + 31 探针 23 PASS / 0 FAIL /
+8 INCONCLUSIVE，f4 放行发布）：
+
+- **C 波 P1a 全量回退**（`626e378`）：移除 P1a 五页侧边抽屉（SidePanel 15
+  文件 + /sidebar 命令 + 3 接线注册点）；kitty 协议/事件层 6 例单测保留，
+  迁 parse-keypress 名下（键位行为不随抽屉删除）。P1a v2 独立波重新设计。
+- **A2 No 不退出**（`a556da2`）：审批卡显式 No → buildReject 不 abort
+  （会话不终止，继续当前回合）；Esc/中断改路由 onAbort 语义对齐。
+- **A1 always 规则 session 域化 + 危险前缀护栏**（`410d7bc`+`f30bf37`）：
+  always-allow 规则不再写全局规则文件——域化到当前 session（sidecar：
+  resume 恢复 / 新 session 重置 / 写失败显式上报）；危险前缀（`rm -rf /`、
+  mkfs、dd 裸盘覆写等）不进 always 快车道，仍走确认。
+- **A3+A4 automode 确认门 + verdict 句式定稿**（`dc8e78a`）：审批 4 表面
+  （Bash/PowerShell/File 对话框/ShowInIDE）的 automode 选项先过 4 行确认
+  视图（Entering automode / auto-approved by safety classifier /
+  Switch back: Shift+Tab / 1 Confirm 2 Cancel），Confirm 才执行
+  applyAutoModePermissionOption（shift+tab 手切不加门）；verdict 行定稿
+  6 句 canonical 英文句式（rule / classifier 危险 / classifier 自动放行 /
+  mode·other / bypass + 加性 toolName/classifierAutoApproved 参数）。
+- **A5 statusline 授权模式标签三态**（`5867cfd`）：default / automode
+  enabled / bypass enabled（shortTitle 仅 statusline 消费；Config 屏与
+  A4 verdict 的 title 原文案不动）。
+- **B1 回退信任线折入 model 段**（`4dcd56e`）：role 回退发生时 model 段
+  尾部黄 `↦ {to}`（spec 形 `⚡ deepseek-v4-pro ↦ fast`），独立
+  role-fallback 段删除（旧 statusline.json 条目走 schema 降级自愈）。
+- **B2 autoCompact 熔断预警折入 context-bar 段**（`fbee6de`）：用量进
+  autoCompact 阈值预警区（且 autoCompact 启用）时上下文条尾部黄 `▲`；
+  色阶改 cyan→黄 70%→红 90%；独立 auto-compact-warning 段删除。
+
 ## v0.1.23
 
 P0a 回归修 + loop-robustness #271 #4/#5（e2e P0 回归门禁打回 0.1.21/0.1.22
