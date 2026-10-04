@@ -21,7 +21,15 @@ export function DiffPage(): React.ReactNode {
     return <Text dimColor>加载 git diff…</Text>
   }
   if (diff.files.length === 0) {
-    return <Text dimColor>工作树干净 —— 无未提交改动（git diff 空）</Text>
+    // 空态也标当前档：无 hunk 时 ctrl+shift+d 切档无内容可见差异，
+    // 显式标注让切档在 clean tree 下也可验（验收探针/人工核均适用）。
+    return (
+      <Text dimColor>
+        {`工作树干净 —— 无未提交改动（git diff 空）· 当前档 ${
+          diffLayout === 'side-by-side' ? 'side-by-side' : 'unified'
+        }`}
+      </Text>
+    )
   }
   // 最近改动文件（DiffData files 顺序 = git diff 输出顺序；v1 无页内翻页，后续波）
   const file = diff.files[diff.files.length - 1]

@@ -465,6 +465,33 @@ function decodeModifier(modifier: number): {
 }
 
 /**
+ * Decode Kitty keyboard protocol (CSI u) modifier value to individual flags.
+ *
+ * CRITICAL: the Kitty protocol uses a ZERO-based bitmask (1=shift, 2=alt,
+ * 4=ctrl, 8=super, 16=hyper) — distinct from the XTerm modifyOtherKeys
+ * one-based encoding decoded by decodeModifier above. A real
+ * kitty-protocol terminal sends Ctrl+Shift+D as ESC[100;5u (1+4), NOT
+ * 6u. Reusing the one-based decode for CSI u silently drops shift on
+ * ctrl+shift combos (5 decodes as ctrl-only), so ctrl+shift bindings
+ * never fire on kitty-protocol terminals.
+ *
+ * Hyper (bit 16, Mac Super key) has no slot in our Key model — ignored.
+ */
+function decodeKittyModifier(modifier: number): {
+  shift: boolean
+  meta: boolean
+  ctrl: boolean
+  super: boolean
+} {
+  return {
+    shift: !!(modifier & 1),
+    meta: !!(modifier & 2),
+    ctrl: !!(modifier & 4),
+    super: !!(modifier & 8),
+  }
+}
+
+/**
  * Map keycode to key name for modifyOtherKeys/CSI u sequences.
  * Handles both ASCII keycodes and Kitty keyboard protocol functional keys.
  *
@@ -619,9 +646,11 @@ function parseKeypress(s: string = ''): ParsedKey {
   let match: RegExpExecArray | null
   if ((match = CSI_U_RE.exec(s))) {
     const codepoint = parseInt(match[1]!, 10)
-    // Modifier defaults to 1 (no modifiers) when not present
-    const modifier = match[2] ? parseInt(match[2], 10) : 1
-    const mods = decodeModifier(modifier)
+    // Kitty protocol: modifier field absent = 0 (no modifiers); the field
+    // is a zero-based bitmask (see decodeKittyModifier — NOT the one-based
+    // XTerm encoding used by modifyOtherKeys below).
+    const modifier = match[2] ? parseInt(match[2], 10) : 0
+    const mods = decodeKittyModifier(modifier)
     const name = keycodeToName(codepoint)
     return {
       kind: 'key',
