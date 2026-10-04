@@ -341,4 +341,21 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       i: 'plugin:install',
     },
   },
+  // P1a 多页面侧抽屉（spec §4 P1a）：1-5 = 打开+直达对应页 / 已开时切页；←→ 循环；
+  // Esc 关；ctrl+shift+d diff side-by-side 切档。抽屉关闭时全部 handler 透传
+  // （return false），既有键行为零改动（见 SidePanelKeybindings）。
+  {
+    context: 'SidePanel',
+    bindings: {
+      '1': 'sidePanel:openDiff',
+      '2': 'sidePanel:openPlan',
+      '3': 'sidePanel:openActivity',
+      '4': 'sidePanel:openDecisions',
+      '5': 'sidePanel:openBudget',
+      left: 'sidePanel:prevPage',
+      right: 'sidePanel:nextPage',
+      escape: 'sidePanel:close',
+      'ctrl+shift+d': 'sidePanel:toggleDiffLayout',
+    },
+  },
 ]

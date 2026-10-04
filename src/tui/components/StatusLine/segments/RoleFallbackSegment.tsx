@@ -17,7 +17,8 @@ export const RoleFallbackSegment: SegmentComponent = () => {
   // 回退=降级信号（首选角色失败，实际由更小角色在答）→ warning 黄（§4.3 色阶）
   return (
     <Text color="yellow">
-      已从 {fb.from} 回退到 {fb.to}
+      {/* P1a 信任线直达（spec §4 P1a 门禁③）：「谁在答」→ 预算页模型摘要层（tab 键 5） */}
+      已从 {fb.from} 回退到 {fb.to} · 5 谁在答
     </Text>
   )
 }

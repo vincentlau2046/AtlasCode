@@ -274,6 +274,8 @@ import { REMOTE_SAFE_COMMANDS } from '../commands.js';
 import { FullscreenLayout, useUnseenDivider, computeUnseenDivider } from '../components/FullscreenLayout.js';
 import { SessionTreeScreen } from './SessionTreeScreen.js';
 import { DebugPanel } from '../components/DebugPanel/DebugPanel.js';
+import { SidePanelDrawer } from '../components/SidePanel/SidePanel.js';
+import { SidePanelKeybindings } from '../components/SidePanel/SidePanelKeybindings.js';
 import { useDebugEventTracker } from '../components/DebugPanel/useDebugEventTracker.js';
 import { isFullscreenEnvEnabled, maybeGetTmuxMouseHint, isMouseTrackingEnabled } from '../utils/fullscreen.js';
 import { ENABLE_MOUSE_TRACKING, DISABLE_MOUSE_TRACKING } from '../ink/termio/dec.js';
@@ -4238,7 +4240,12 @@ export function REPL({
       overrideColor: spinnerColor, overrideShimmerColor: spinnerShimmerColor,
       hasActiveTools: inProgressToolUseIDs.size > 0, leaderIsIdle: !isLoading,
   };
-  const mainReturn = <KeybindingSetup>
+  // P1a（spec §4 P1a）：多页面侧抽屉 split 布局——水平 Box 左列 = 消息流
+  // （FullscreenLayout，flexGrow 占剩余宽），右列 = 抽屉（40% 定宽，关闭时 null）。
+  // 终端填高来自根部 AlternateScreen 的 height 约束，本层纯 flex（见 FullscreenLayout 头注）。
+  const mainReturn = <Box flexDirection="row" flexGrow={1}>
+      <Box flexGrow={1} flexDirection="column">
+      <KeybindingSetup>
       <AnimatedTerminalTitle isAnimating={titleIsAnimating} title={terminalTitle} disabled={titleDisabled} noPrefix={showStatusInTerminalTab} />
       <GlobalKeybindingHandlers {...globalKeybindingProps} />
       {feature('VOICE_MODE') ? <VoiceKeybindingHandler voiceHandleKeyEvent={voice.handleKeyEvent} stripTrailing={voice.stripTrailing} resetAnchor={voice.resetAnchor} isActive={!toolJSX?.isLocalJSXCommand} /> : null}
@@ -4627,7 +4634,11 @@ export function REPL({
               </Box>
               </Box>} />
       </MCPConnectionManager>
-    </KeybindingSetup>;
+      <SidePanelKeybindings />
+    </KeybindingSetup>
+      </Box>
+      <SidePanelDrawer messages={displayedMessages} />
+    </Box>;
   if (isFullscreenEnvEnabled()) {
     return <AlternateScreen mouseTracking={isMouseTrackingEnabled()}>
         {mainReturn}

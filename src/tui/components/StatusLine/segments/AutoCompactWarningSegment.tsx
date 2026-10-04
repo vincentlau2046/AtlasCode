@@ -40,7 +40,8 @@ export const AutoCompactWarningSegment: SegmentComponent = ({ input }) => {
   if (!state.isAboveWarningThreshold) return null
   return (
     <Text color="yellow">
-      将自动压缩，可 /rewind 回退
+      {/* P1a 信任线直达（spec §4 P1a 门禁③）：「还剩」→ 预算页上下文层（tab 键 5） */}
+      将自动压缩，可 /rewind 回退 · 5 还剩
     </Text>
   )
 }

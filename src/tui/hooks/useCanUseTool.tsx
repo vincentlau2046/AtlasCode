@@ -23,6 +23,7 @@ import { handleInteractivePermission } from './toolPermission/handlers/interacti
 import { handleSwarmWorkerPermission } from './toolPermission/handlers/swarmWorkerHandler.js';
 import { createPermissionContext, createPermissionQueueOps } from './toolPermission/PermissionContext.js';
 import { logPermissionDecision } from './toolPermission/permissionLogging.js';
+import { recordDecision } from '../utils/decisionLog.js';
 export type CanUseToolFn<Input extends Record<string, unknown> = Record<string, unknown>> = (tool: ToolType, input: Input, toolUseContext: ToolUseContext, assistantMessage: AssistantMessage, toolUseID: string, forceDecision?: PermissionDecision<Input>) => Promise<PermissionDecision<Input>>;
 function useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext) {
   const $ = _c(3);
@@ -35,6 +36,8 @@ function useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext) {
       }
       const decisionPromise = forceDecision !== undefined ? Promise.resolve(forceDecision) : hasPermissionsToUseTool(tool, input, toolUseContext, assistantMessage, toolUseID);
       return decisionPromise.then(async result => {
+        // P1a Decisions 页（spec §4）：加性记录（TUI 层只读 ring buffer，判定逻辑零改动）
+        recordDecision(result.behavior, tool.name, toolUseID, result.decisionReason);
         if (result.behavior === "allow") {
           if (ctx.resolveIfAborted(resolve)) {
             return;
