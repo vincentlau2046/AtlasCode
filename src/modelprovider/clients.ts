@@ -5,6 +5,7 @@
  */
 
 import OpenAI from 'openai'
+import { buildUserAgent } from '../shared'
 import type { ResolvedModel } from './roles'
 import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
 
@@ -29,6 +30,8 @@ export function getClientForEntry(entry: ResolvedModel): OpenAIClient {
     maxRetries: 0,
     // #260：客户端缺省对齐 LLM_TIMEOUT_DEFAULT_MS（per-request timeout 逐请求胜）
     timeout: LLM_TIMEOUT_DEFAULT_MS,
+    // #272：出站 UA 品牌串（AtlasCode/<v> (+repo)），经 shared 叶子取，覆盖 SDK 默认 OpenAI/JS
+    defaultHeaders: { 'User-Agent': buildUserAgent() },
   })
   clientCache.set(key, client)
   return client

@@ -72,16 +72,11 @@ const STUB_REGISTRY: ReadonlyArray<{
   // fail-fast idiom）；T3 真实现跟踪 = 文件头注 + 任务清单 T3 + T7 H6 断言
   // ②③ + 门③ wave-c tag 清零兜底。
 
-  // v0.12 shared 纳扫：3 个 A 波骨架占位 `export {}` 空模块（无实质导出符号）。
-  // identity 待 A 波 A-2（--define 注入）；sanitizeToolName 待 C 波。
-  // tokenEstimation 已由 §8.55 S-C1（C 桶 ① 子波 3）填实（rough token 估计族
-  // 逐字旧 services 纯函数子集，门②「填实即移除」销此条目）。
+  // v0.12 shared 纳扫：A 波骨架占位 `export {}` 空模块（无实质导出符号）。
+  // sanitizeToolName 待 C 波。identity 已由 #272（HTTP User-Agent 工单，A-2 品牌串
+  // 单一事实源）填实（getVersion/buildUserAgent 经 shared 门面导出，门②「填实即
+  // 移除」销此条目）；tokenEstimation 已由 §8.55 S-C1（C 桶 ① 子波 3）填实。
   // wave-c tag 时门③只清 C-Deep 域条目，shared 占位保留至 A/C 波实现（门②兜底）。
-  {
-    file: 'src/shared/identity.ts',
-    reason: 'A 波骨架占位 `export {}`（VERSION/PRODUCT_NAME 等 --define 注入面待 A-2）',
-    unlock: 'A 波 (A-2)',
-  },
   {
     file: 'src/shared/sanitizeToolName.ts',
     reason: 'A 波骨架占位 `export {}`（analytics/metadata.ts 下沉纯函数待 C 波）',

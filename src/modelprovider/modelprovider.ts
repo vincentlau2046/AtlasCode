@@ -19,7 +19,7 @@ import { getClientForEntry } from './clients'
 import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
 import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig, type Tools } from '../shared'
-import { logForDebugging } from '../shared'
+import { buildUserAgent, logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 import { APIConnectionTimeoutError } from './types'
@@ -694,6 +694,8 @@ export class OpenAIProvider implements ModelProvider {
       apiKey: apiKey || process.env.OPENAI_API_KEY,
       maxRetries: 2,
       timeout: 30_000,
+      // #272：出站 UA 品牌串（同 clients.ts），经 shared 叶子取，覆盖 SDK 默认 OpenAI/JS
+      defaultHeaders: { 'User-Agent': buildUserAgent() },
     })
 
     try {

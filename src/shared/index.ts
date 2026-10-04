@@ -11,6 +11,17 @@
 // A 波：feature flag
 export { feature, FEATURE_ON_BY_DEFAULT } from "./feature"
 
+// A 波 A-2（工单 #272 HTTP User-Agent）：品牌串单一事实源（VERSION/PRODUCT_NAME/
+// PACKAGE_NAME/REPOSITORY_URL + buildUserAgent）。核 modelprovider 经此门面取
+// buildUserAgent 作 LLM 出站 UA（DEP-3 allow=[shared]），不引 tui/engine。
+export {
+  PRODUCT_NAME,
+  PACKAGE_NAME,
+  REPOSITORY_URL,
+  getVersion,
+  buildUserAgent,
+} from "./identity"
+
 // B 波 S1 + C1：env 解析纯函数（四域 config.ts 共用）
 // C1 统一裁定：isEnvTruthy/isEnvDefinedFalsy = 布尔 env 单一事实源
 // （B 波 parseBoolEnv 窄集合已被取代，C1b 删除）
