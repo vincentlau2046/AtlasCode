@@ -1,6 +1,6 @@
 # AtlasCode 品牌系统设计 spec
 
-> **状态**：设计 spec，待审批 · **不落地代码** · 实施在 TUI 优化专项完成后单独起 0.2.x 版本
+> **状态**：设计 spec，待审批 · **不落地代码** · 实施在 TUI 优化专项完成后以**多个干净 0.1.x 版本**逐一落地（不升 0.2.x）
 > **日期**：2026-10-04 · **作者**：品牌标志专项 · **关联**：`docs/2026-10-04-brand-assets-audit.md`（现状审计）、`docs/brand-string-classification.md`（串分类）、`docs/architecture-charter.md` L7/IDN-1/IDN-2
 
 ---
@@ -16,9 +16,9 @@
 | 品牌架构 | **Branded House** —— "Atlas" 主品牌（共享家族 mark + 家族色），AtlasCode/AtlasOffice = 描述性子产品（wordmark 后缀 + tagline + 垂直点缀差异） |
 | 品牌视觉概念 | **昇腾光锥（Ascend Beam）** —— 底宽冷蓝向顶点暖金收敛上升的光锥，Ascend 攀升意象 + 算力上电升温叙事 |
 | 色彩战略 | **独立色系**，不贴近华为昇腾官方品牌青绿（昇腾是华为注册商标，避商标风险）；算力叙事靠形态/文案传递 |
-| 迁移时序 | **视觉品牌系统**：先 spec 不落地，TUI 优化专项完成后单独起 **0.2.x** 版本实施（不挂 0.1.23、不与 TUI 列车并轨）；**UA 品牌串标准化（§10.3/BR-8）独立起一个干净 0.1.x 版本**（与视觉系统解耦，紧随 TUI 列车、在 0.2.x 之前）——用户裁定「作为干净的版本实施，版本变更会更干净」 |
+| 迁移时序 | **先 spec 不落地**（不挂 0.1.23、不与 TUI 列车并轨）；TUI 优化专项完成后，**完整方案拆成多个干净 0.1.x 版本逐一落地**（UA 品牌串 BR-8 起头，随后色板/mark/Beam/动词池逐工单排进后续 0.1.x），**全程 0.1.x、不升级 0.2.x**——用户 2026-10-05 裁定「通过多个 0.1.x 干净版本落地完整方案，不想升级大版本」 |
 | npm scope | `@atlasharness` 作为家族序列 scope **保留不迁**（未来 `@atlasharness/atlasoffice` 同族） |
-| UA 品牌串 | 「品牌 + 版本 + repo URL」三段定式，**无字面 `+` 号**，identity 单一事实源 + delta ⑥ 版本段收口（§10.3）；**独立干净 0.1.x 版本**实施（§13.1） |
+| UA 品牌串 | 「品牌 + 版本 + repo URL」三段定式，**无字面 `+` 号**，identity 单一事实源 + delta ⑥ 版本段收口（§10.3）；**作为完整方案 0.1.x 序列的起点版本**实施（§13.1） |
 
 ### 不在本 spec 范围
 
@@ -237,7 +237,7 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 // FAMILY_MARK_PEAK 不进 identity（视觉常量归 theme/brand 模块，非身份串）
 ```
 
-**Step 1b（BR-8 · 独立干净 0.1.x 版本落地，非 0.2.x 视觉系统）**：WebFetch UA 共用 builder 进 `shared/identity.ts`——**只用现有 identity.ts 常量**（`PRODUCT_NAME`/`getVersion`/`REPOSITORY_URL`，均已在库），不依赖上面 0.2.x 视觉系统的 `PRODUCT_FAMILY`/`PRODUCT_BRAND` 扩展，故 BR-8 可与视觉系统解耦、单独起一个干净 0.1.x：
+**Step 1b（BR-8 · 完整方案 0.1.x 序列的起点版本）**：WebFetch UA 共用 builder 进 `shared/identity.ts`——**只用现有 identity.ts 常量**（`PRODUCT_NAME`/`getVersion`/`REPOSITORY_URL`，均已在库），不依赖后续视觉工单 BR-1 的 `PRODUCT_FAMILY`/`PRODUCT_BRAND` 扩展，故 BR-8 可与 BR-1~BR-7 解耦、单独起一个干净 0.1.x（序列第一版）：
 
 ```ts
 // BR-8（§10.3）：WebFetch UA 共用 builder（tui ④ 与 engine ⑤ 同一出处，零分叉）。
@@ -245,8 +245,8 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 export function buildWebFetchUserAgent(): string {
   return `Atlas-User (${PRODUCT_NAME}/${getVersion()}; ${REPOSITORY_URL})`
 }
-// 0.2.x 视觉系统 BR-1 落地 PRODUCT_FAMILY/PRODUCT_BRAND 后，'Atlas-User' 可切
-// `${PRODUCT_FAMILY}-User`、版本段可切 PRODUCT_BRAND（同值，无行为变化）——归 0.2.x。
+// 后续视觉工单 BR-1 落地 PRODUCT_FAMILY/PRODUCT_BRAND 后，'Atlas-User' 可切
+// `${PRODUCT_FAMILY}-User`、版本段可切 PRODUCT_BRAND（同值，无行为变化）——归后续 0.1.x 视觉工单。
 ```
 
 **Step 2（本 spec）**：所有品牌触面改 `import { PRODUCT_BRAND, PRODUCT_FAMILY } from 'shared/identity'` 而非硬编码 `'AtlasCode'`——单一事实源落地。未来 atlasoffice 配方改一个常量值，全触面跟着变，零代码分支。
@@ -515,7 +515,7 @@ mark 是装饰性图形，TUI 无屏幕阅读器场景（终端），不强制 a
 | CLI 命令 / bin 名 | `atlas` / `atlascode`（lower） | `atlas --help` |
 | npm 包名 | `@atlasharness/atlascode` | `npm install -g @atlasharness/atlascode` |
 | 仓库名 | `AtlasCode` | `github.com/vincentlau2046/AtlasCode` |
-| HTTP User-Agent | `AtlasCode/<version> (repo URL)`（三段定式，**无字面 `+`**，§10.3） | `AtlasCode/0.2.0 (https://github.com/vincentlau2046/AtlasCode)` |
+| HTTP User-Agent | `AtlasCode/<version> (repo URL)`（三段定式，**无字面 `+`**，§10.3） | `AtlasCode/0.1.24 (https://github.com/vincentlau2046/AtlasCode)` |
 | 内部机器标识 | `atlas`（短名） | env `ATLAS_*`、类名 `Atlas*` |
 | 句中提及 | `AtlasCode`（不拆 "Atlas Code"） | "AtlasCode supports Ascend NPU" |
 
@@ -557,11 +557,11 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 
 辅助面 `getDefaultUserAgent()`（`src/tui/utils/userAgent.ts:10`）= `AtlasCode/<v>`，当前干净（0.1.22 无 `+` 无 repo）。BR-8 后 ④ 改用共用 builder，该 helper 仓内零消费者（现唯一消费者即 http.ts:59）——保留不删（dependency-free 设计供 SDK bundle 外部消费者使用，见文件头注）。
 
-**落地规则（BR-8 工单执行 · 独立干净 0.1.x 版本，依赖仅 identity.ts 现有常量，与 0.2.x 视觉系统解耦）**：
+**落地规则（BR-8 工单执行 · 完整方案 0.1.x 序列起点版本，依赖仅 identity.ts 现有常量，与 BR-1~BR-7 视觉工单解耦）**：
 
 1. **去字面 `+`**：5 处代码串（①-⑤）+ 6 处注释（`http.ts:13-15,33,49` G-3 裁定注 ×3 / `userAgent.ts:8-9` / `identity.ts:50` / `clients.ts:33`）统一改写为「品牌串 = 品牌/版本 + 版本 + repo URL（无 `+`）」
 2. **repo URL 单一事实源**：4 处硬编码 `https://github.com/vincentlau2046/AtlasCode`（②③④⑤）改 `import { REPOSITORY_URL }`，字面量只留 `shared/identity.ts` 一处（与 §7.2 commitAttribution allowlist 同机制）
-3. **版本/品牌段单一事实源**：②③ 的 `MACRO.VERSION`（charter L72 明记运行时 globalThis 退化 bug）与 `'AtlasCode'` 字面量改 `import { getVersion, PRODUCT_NAME }`（**0.1.x 用现有 identity.ts 常量**；0.2.x 视觉系统 BR-1 落地 `PRODUCT_BRAND` 后同值可切换，无行为变化）；⑤ 静态常量升级为 `shared/identity.ts` 新增 `buildWebFetchUserAgent()`（§6.2 Step 1b，随 BR-8 落地），tui ④ 与 engine ⑤ 共用同一 builder（engine import shared 为既有 DEP 模式，`agentDefinition.ts` 同款），零分叉保证
+3. **版本/品牌段单一事实源**：②③ 的 `MACRO.VERSION`（charter L72 明记运行时 globalThis 退化 bug）与 `'AtlasCode'` 字面量改 `import { getVersion, PRODUCT_NAME }`（**用现有 identity.ts 常量**；后续视觉工单 BR-1 落地 `PRODUCT_BRAND` 后同值可切换，无行为变化）；⑤ 静态常量升级为 `shared/identity.ts` 新增 `buildWebFetchUserAgent()`（§6.2 Step 1b，随 BR-8 落地），tui ④ 与 engine ⑤ 共用同一 builder（engine import shared 为既有 DEP 模式，`agentDefinition.ts` 同款），零分叉保证
 4. **`Atlas-User` 保留**：WebFetch 对外 agent 名（站点 operator robots.txt 匹配串，已文档化），非品牌串标准化对象
 5. **delta ⑥ 版本段缺口收口**：engine ⑤ 恢复版本段（与 ④ 对齐），版本段统一走 identity `getVersion()`（process.argv[1] 上行走算法，dev/npm 两态一致）
 
@@ -629,17 +629,21 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 ### 13.1 时序（用户已定）
 
 ```
-当前 (0.1.22) ──> TUI 优化专项 (0.1.23) ──> UA 品牌串 (干净 0.1.x · BR-8) ──> 品牌视觉系统 (0.2.x)
-   │                    │                          │                          │
-   └ spec 设计          └ TUI P0a/P0b/P1a 列车     └ 单独干净 0.1.x 版本        └ 本 spec 视觉部分实施
-     （本文件）           （不并轨）               （仅 UA 五变体改动，           （色板/mark/Beam/动词池）
-                                                        与视觉系统解耦）
+当前 (0.1.22) ──> TUI 优化专项 (0.1.23) ──> 品牌系统完整方案（多个干净 0.1.x）
+   │                    │                          │
+   └ spec 设计          └ TUI P0a/P0b/P1a 列车     └ 逐工单拆块、逐版干净落地：
+     （本文件）           （不并轨）               · 0.1.24 UA 品牌串（BR-8，自包含 · 序列起点）
+                                               · 0.1.25 色板（BR-1 identity + BR-2 theme）
+                                               · 0.1.26 mark/Beam（BR-3 + BR-4 触面）
+                                               · 0.1.27 动词池 + 资产（§7.4 + BR-5）
+                                               （序号示意，随 TUI 列车顺延；全程 0.1.x，不升 0.2.x）
 ```
 
 - **不挂 0.1.23**：0.1.23 是 TUI P0a 回归列车（memory `tui-optimization-division`），品牌不并轨
-- **UA 品牌串（BR-8）独立干净 0.1.x**：紧跟 TUI 列车之后单独成一个 0.1.x 版本（如 0.1.24，TUI 列车若加车则顺延），**diff 仅 UA 五变体字符串改动**——用户裁定「作为干净的版本实施，版本变更会更干净」。非 breaking（HTTP 头字符串修正 + import 化 + 版本段补齐），不进 0.2.x
-- **0.2.x breaking 窗口**：品牌色变更（Claude orange → Atlas-Orange）+ mark 变更（AH → Beam）是用户可见 breaking，走 minor bump（0.1.x → 0.2.0）；**UA 改动已前置到干净 0.1.x，0.2.x 只含视觉系统**
-- **master 不开分支**：BR-8 与 0.2.x 视觉部分都直接在 master 上实施，不开 feature 分支；各自作为独立版本发布
+- **完整方案 = 多个干净 0.1.x 版本**：TUI 列车之后，把本 spec 全部工单逐块拆成多个干净 0.1.x（每版 diff 聚焦一块：UA / 色板 / mark+Beam / 动词池+资产…），**全程 0.1.x、不升级 0.2.x**——用户 2026-10-05 裁定「通过多个 0.1.x 干净版本落地完整方案，不想升级大版本」
+- **BR-8（UA）为序列起点**：紧跟 TUI 列车（如 0.1.24，TUI 加车则顺延），diff 仅 UA 五变体，自包含（不依赖 BR-1），是整条 0.1.x 序列的第一版
+- **用户可见变更不升大版本**：品牌色（Claude orange → Atlas-Orange）+ mark（AH → Beam）是用户可见变更，但**随 0.1.x 干净版本落地**（pre-1.0，用户接受 0.1.x 承载用户可见变更，不用 0.2.0 minor-bump 信号）；原「0.2.x breaking 窗口」口径作废
+- **master 不开分支**：所有 0.1.x 版本都直接在 master 上实施，不开 feature 分支；逐版独立发布
 - **feature flag 回退**：不设回退 flag（品牌系统是确定方向，不预留旧视觉回退；若需回退靠 `git revert` 发布补丁）
 
 ### 13.2 实施工单分解（实施时落 writing-plans）
@@ -653,7 +657,9 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 | BR-5 资产目录 | `docs/assets/` SVG/PNG + README 引用 | BR-3 |
 | BR-6 e2e 基线重生成 | user-e2e/compare + tui-diff 启动屏快照重生成 | BR-4 |
 | BR-7 真机多终端验证 | iTerm2/GNOME/kitty/Windows Terminal/Alacritty 截图校验 | BR-6 |
-| BR-8 UA 品牌串标准化（**干净 0.1.x 版本**） | 五变体去字面 `+`（5 串 + 6 注释）+ repo/版本/品牌段 import 化（现有 `REPOSITORY_URL`/`getVersion`/`PRODUCT_NAME`）+ `shared/identity.ts` 新增 `buildWebFetchUserAgent()`（§6.2 Step 1b）+ delta ⑥ 版本段收口（§10.3）。**与 0.2.x 视觉系统解耦，单独成干净 0.1.x 版本** | 无（identity.ts 现有常量已足，不依赖 BR-1） |
+| BR-8 UA 品牌串标准化（**序列起点 · 干净 0.1.x**） | 五变体去字面 `+`（5 串 + 6 注释）+ repo/版本/品牌段 import 化（现有 `REPOSITORY_URL`/`getVersion`/`PRODUCT_NAME`）+ `shared/identity.ts` 新增 `buildWebFetchUserAgent()`（§6.2 Step 1b）+ delta ⑥ 版本段收口（§10.3）。**完整方案 0.1.x 序列的起点版本，与 BR-1~BR-7 视觉工单解耦** | 无（identity.ts 现有常量已足，不依赖 BR-1） |
+
+> **版本策略（用户 2026-10-05 裁定）**：以上全部工单随 **多个干净 0.1.x 版本**逐一落地，**不升级 0.2.x**。BR-8 自包含可先行（序列起点）；BR-1~BR-7 按依赖链成组排进后续 0.1.x，每版 diff 聚焦一块（序号随 TUI 列车顺延，见 §13.1）。
 
 ---
 
@@ -706,11 +712,11 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 |---|---|---|---|
 | 块字符 `█` 在某冷门终端宽度异常 | 低 | mark 错位 | §14.2 真机验证矩阵覆盖主流终端；`stringWidth()` 已校验 Neutral 宽度 |
 | errorMessaging 改品牌名破坏子串匹配 | 中 | 错误分支误判 | §7.1 实施前 grep `includes('AtlasHarness')` 核查清单 |
-| 品牌色变更用户感知 breaking | 高 | 用户困惑 | 0.2.0 release notes 说明 + README 截图更新 |
+| 品牌色变更用户感知 breaking | 高 | 用户困惑 | 随对应 0.1.x 视觉版 release notes 说明 + README 截图更新（不升 0.2.x） |
 | AnimatedClawd 重构引入性能回归 | 中 | TUI 启动卡顿 | 保 react compiler memo 结构；启动性能 profiler 对比（memory `tui-optimization-division` P0a 已有 profiler 基建） |
 | AtlasOffice 远期需求迫使 mark 重做 | 低 | 返工 | §12 接缝设计预留 ACCENT_HUE + 顶点字符常量，非阻塞 |
 
-**回退策略**：不设 feature flag。若 0.2.0 发布后严重问题，`git revert` + 0.2.1 补丁回退到 0.1.x 视觉。
+**回退策略**：不设 feature flag。若某 0.1.x 视觉版发布后严重问题，`git revert` + 下一个 0.1.x 补丁回退到上一版视觉（全程 0.1.x，无 0.2.x）。
 
 ---
 
@@ -733,11 +739,12 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 1. **tagline**：✅ `算力驱动的 Coding Agent`（§3.4）
 2. **色板**：✅ 暖金 `#FFB800` 顶点 + 冷蓝 `#0066FF` 底渐变（§4.1）
 3. **pose 机制**：✅ 废弃重写上爬动效（§8.2）
-4. **时序**：✅ 0.2.x 单独版本 + master 不开分支 + 不设 feature flag（§13.1）
+4. **时序**：✅ 完整方案拆**多个干净 0.1.x 版本**落地（不升 0.2.x）+ master 不开分支 + 不设 feature flag（§13.1）
 5. **动效策略**：✅ 不做 reduced-motion，动效始终开（§9.1）
 6. **FEEDBACK_CHANNEL 值**：✅ `https://github.com/vincentlau2046/AtlasCode/issues`（§6.2）
-7. **P2 历史"移植自 AtlasHarness"注释清尾时机**：随大重构（推荐，非 0.2.0 必须）
-8. **UA 品牌串标准**：✅ 三段定式「品牌/版本 + 版本 + repo URL」，去字面 `+`（RFC 9110 `+url` 惯例不采纳）+ identity 单一事实源 + delta ⑥ 版本段收口（§10.3，BR-8）；**时序 = 独立干净 0.1.x 版本**（用户 2026-10-05 裁定，与 0.2.x 视觉系统解耦，§13.1）
+7. **P2 历史"移植自 AtlasHarness"注释清尾时机**：随大重构（推荐，非本方案必须）
+8. **UA 品牌串标准**：✅ 三段定式「品牌/版本 + 版本 + repo URL」，去字面 `+`（RFC 9110 `+url` 惯例不采纳）+ identity 单一事实源 + delta ⑥ 版本段收口（§10.3，BR-8）
+9. **版本策略（整案）**：✅ 完整品牌方案拆成**多个干净 0.1.x 版本**落地，**不升级 0.2.x**（用户 2026-10-05 裁定；BR-8 为序列起点，逐工单排进后续 0.1.x，§13.1）
 
 ---
 
