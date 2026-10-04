@@ -18,6 +18,7 @@
 | 色彩战略 | **独立色系**，不贴近华为昇腾官方品牌青绿（昇腾是华为注册商标，避商标风险）；算力叙事靠形态/文案传递 |
 | 迁移时序 | **先 spec 不落地，TUI 优化专项完成后单独起 0.2.x 版本**实施；不挂 0.1.23、不与 TUI 列车并轨 |
 | npm scope | `@atlasharness` 作为家族序列 scope **保留不迁**（未来 `@atlasharness/atlasoffice` 同族） |
+| UA 品牌串 | 「品牌 + 版本 + repo URL」三段定式，**无字面 `+` 号**，identity 单一事实源 + delta ⑥ 版本段收口（§10.3） |
 
 ### 不在本 spec 范围
 
@@ -234,6 +235,12 @@ export const REPOSITORY_URL = 'https://github.com/vincentlau2046/AtlasCode'  // 
 export const FEEDBACK_CHANNEL = 'https://github.com/vincentlau2046/AtlasCode/issues'  // 新增（charter 列明，当前 undefined 是 bug 症状）
 export const ACCENT_HUE = 'compute'                      // 新增（配方注入；atlasoffice='neutral'）
 // FAMILY_MARK_PEAK 不进 identity（视觉常量归 theme/brand 模块，非身份串）
+
+// BR-8（§10.3）：WebFetch UA 共用 builder（tui ④ 与 engine ⑤ 同一出处，零分叉）
+export function buildWebFetchUserAgent(): string {
+  // 'Atlas-User' = 家族级 WebFetch agent 名（Branded House 共享面，§12 家族接缝）
+  return `${PRODUCT_FAMILY}-User (${PRODUCT_BRAND}/${getVersion()}; ${REPOSITORY_URL})`
+}
 ```
 
 **Step 2（本 spec）**：所有品牌触面改 `import { PRODUCT_BRAND, PRODUCT_FAMILY } from 'shared/identity'` 而非硬编码 `'AtlasCode'`——单一事实源落地。未来 atlasoffice 配方改一个常量值，全触面跟着变，零代码分支。
@@ -420,7 +427,7 @@ export const TURN_COMPLETION_VERBS = [
 
 | 触面 | 文件 | 状态 |
 |---|---|---|
-| LLM UA / MCP UA / WebFetch UA / default UA | `src/tui/utils/http.ts` + `userAgent.ts` + `webFetchUtils.ts` | ✅ 0.1.21 收口 |
+| UA 品牌串五变体 | `http.ts` ×3 + `userAgent.ts` + `webFetchUtils.ts` + `identity.ts buildUserAgent` | ⚠️ 本 spec 标准对象面（§10.3：去 `+` + import 化 + delta ⑥ 收口，BR-8），0.2.x 实施前不动 |
 | `--version` / CLI description / program name | `src/cli/parse.ts:417-419,774` | ✅ |
 | launcher stderr | `src/atlascode/launcher.ts:12,24` | ✅ |
 | headless 提示词 | `src/cli/headlessPrompt.ts:35` | ✅ |
@@ -502,6 +509,7 @@ mark 是装饰性图形，TUI 无屏幕阅读器场景（终端），不强制 a
 | CLI 命令 / bin 名 | `atlas` / `atlascode`（lower） | `atlas --help` |
 | npm 包名 | `@atlasharness/atlascode` | `npm install -g @atlasharness/atlascode` |
 | 仓库名 | `AtlasCode` | `github.com/vincentlau2046/AtlasCode` |
+| HTTP User-Agent | `AtlasCode/<version> (repo URL)`（三段定式，**无字面 `+`**，§10.3） | `AtlasCode/0.2.0 (https://github.com/vincentlau2046/AtlasCode)` |
 | 内部机器标识 | `atlas`（短名） | env `ATLAS_*`、类名 `Atlas*` |
 | 句中提及 | `AtlasCode`（不拆 "Atlas Code"） | "AtlasCode supports Ascend NPU" |
 
@@ -525,10 +533,33 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
 | guideAgent `Claude` × 8 处 + `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 8 处改 Atlas；flag/MCP 名保留（§7.5） |
 
-### 10.3 UA 串
+### 10.3 UA 品牌串标准（请求头识别面）
 
-- LLM UA `AtlasCode/<v>`、MCP UA、WebFetch UA `Atlas-User (AtlasCode/<v>; +repo)` 已 0.1.21 收口，**不动**
-- `Atlas-User` 串保留（WebFetch 对外 agent 名，已文档化，不改）
+**标准（用户 2026-10-04 裁定）**：UA 品牌串 = **品牌 + 版本 + repo URL** 三段，段间以空格/括号分隔，**不带字面 `+` 号**。
+
+> **`+` 号根因**：G-3 裁定注释（§8.74.28 R4）写的是「品牌串 = AtlasCode + 版本 + repo」——`+` 是裁定笔记里的**枚举分隔符**，0.1.21 实施时把分隔符字符写进了串体，形成 `+repo` 形态（`+url` 亦为 RFC 9110 世界 bot UA 的"信息指针"惯例，但 Atlas 品牌标准**不采纳**：无爬虫识别依赖，品牌串服务于人/服务端日志识别，`+` 无品牌语义，纯污染）。
+
+**五变体标准表**（现状 0.1.22 → 目标 0.2.x）：
+
+| # | 变体 | 触面 | 现状 | 目标 |
+|---|---|---|---|---|
+| ① | LLM 出站 UA（核主请求路径） | `src/shared/identity.ts:52` `buildUserAgent()`（`modelprovider/clients.ts:34` + `modelprovider.ts:730` 消费） | `AtlasCode/<v> (+repo)` | `AtlasCode/<v> (repo)` |
+| ② | LLM 出站 UA（tui 面，带客户端后缀） | `src/tui/utils/http.ts:16` `getUserAgent()` | `AtlasCode/<v> (atlascode, <entry>[, agent-sdk/x][, client-app/y][, workload/z], +repo)` | 同左，仅去 repo 前 `+` |
+| ③ | MCP UA | `src/tui/utils/http.ts:37` `getMCPUserAgent()` | `AtlasCode/<v>[ (parts)] (+repo)` | `AtlasCode/<v>[ (parts)] (repo)` |
+| ④ | WebFetch UA（tui 面） | `src/tui/utils/http.ts:58` `getWebFetchUserAgent()` | `Atlas-User (AtlasCode/<v>; +repo)` | `Atlas-User (AtlasCode/<v>; repo)` |
+| ⑤ | WebFetch UA（engine 静态面） | `src/engine/tools/web/webFetchUtils.ts:232` | `Atlas-User (+repo)`（**无版本段，delta ⑥ 裁登记**） | `Atlas-User (AtlasCode/<v>; repo)`（**delta ⑥ 收口：版本段恢复**） |
+
+辅助面 `getDefaultUserAgent()`（`src/tui/utils/userAgent.ts:10`）= `AtlasCode/<v>`，当前干净（0.1.22 无 `+` 无 repo）。BR-8 后 ④ 改用共用 builder，该 helper 仓内零消费者（现唯一消费者即 http.ts:59）——保留不删（dependency-free 设计供 SDK bundle 外部消费者使用，见文件头注）。
+
+**落地规则（接 §6 Step 2 import 化，BR-8 工单执行）**：
+
+1. **去字面 `+`**：5 处代码串（①-⑤）+ 6 处注释（`http.ts:13-15,33,49` G-3 裁定注 ×3 / `userAgent.ts:8-9` / `identity.ts:50` / `clients.ts:33`）统一改写为「品牌串 = 品牌/版本 + 版本 + repo URL（无 `+`）」
+2. **repo URL 单一事实源**：4 处硬编码 `https://github.com/vincentlau2046/AtlasCode`（②③④⑤）改 `import { REPOSITORY_URL }`，字面量只留 `shared/identity.ts` 一处（与 §7.2 commitAttribution allowlist 同机制）
+3. **版本/品牌段单一事实源**：②③ 的 `MACRO.VERSION`（charter L72 明记运行时 globalThis 退化 bug）与 `'AtlasCode'` 字面量改 `import { getVersion, PRODUCT_BRAND }`；⑤ 静态常量升级为 `shared/identity.ts` 新增 `buildWebFetchUserAgent()`，tui ④ 与 engine ⑤ 共用同一 builder（engine import shared 为既有 DEP 模式，`agentDefinition.ts` 同款），零分叉保证
+4. **`Atlas-User` 保留**：WebFetch 对外 agent 名（站点 operator robots.txt 匹配串，已文档化），非品牌串标准化对象
+5. **delta ⑥ 版本段缺口收口**：engine ⑤ 恢复版本段（与 ④ 对齐），版本段统一走 identity `getVersion()`（process.argv[1] 上行走算法，dev/npm 两态一致）
+
+**非对象**：billing header `cc_version`（`x-atlas-billing-header`，`constants/system.ts:76`）与 MCP server_name `atlascode`（L7 内部层）不涉及本条。
 
 ### 10.4 系统提示词自我认知
 
@@ -614,6 +645,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 | BR-5 资产目录 | `docs/assets/` SVG/PNG + README 引用 | BR-3 |
 | BR-6 e2e 基线重生成 | user-e2e/compare + tui-diff 启动屏快照重生成 | BR-4 |
 | BR-7 真机多终端验证 | iTerm2/GNOME/kitty/Windows Terminal/Alacritty 截图校验 | BR-6 |
+| BR-8 UA 品牌串标准化 | 五变体去字面 `+`（5 串 + 6 注释）+ repo/版本/品牌段 import 化 + `shared/identity.ts` 新增 `buildWebFetchUserAgent()` + delta ⑥ 版本段收口（§10.3） | BR-1 |
 
 ---
 
@@ -643,6 +675,9 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 ### 14.4 验收 gate
 
 - [ ] `grep -rn "AtlasHarness" --include="*.ts" --include="*.tsx" src/` 排除注释行后 = 0（CI grep 门，charter L8 ③ review 桶加一条）
+- [ ] `grep -rn '+https://github' src/` = 0（UA 品牌串无字面 `+`，§10.3）
+- [ ] repo URL 字面量 src/ 内仅 `shared/identity.ts`（REPOSITORY_URL）一处，UA 4 触面 import 化（§10.3 规则 2）
+- [ ] WebFetch engine 静态串带版本段（delta ⑥ 收口）：`Atlas-User (AtlasCode/<v>; repo)`（§10.3 ⑤）
 - [ ] TUI 启动屏真机截图（≥3 终端）显 AtlasCode + 光锥 mark + 暖金顶点
 - [ ] errorMessaging 4 处错误消息显 AtlasCode
 - [ ] commit/PR 签名 `git commit` 后 trailer 显 `Generated with [AtlasCode]`（§7.2 三处）
@@ -694,6 +729,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 5. **动效策略**：✅ 不做 reduced-motion，动效始终开（§9.1）
 6. **FEEDBACK_CHANNEL 值**：✅ `https://github.com/vincentlau2046/AtlasCode/issues`（§6.2）
 7. **P2 历史"移植自 AtlasHarness"注释清尾时机**：随大重构（推荐，非 0.2.0 必须）
+8. **UA 品牌串标准**：✅ 三段定式「品牌/版本 + 版本 + repo URL」，去字面 `+`（RFC 9110 `+url` 惯例不采纳）+ identity 单一事实源 + delta ⑥ 版本段收口（§10.3，BR-8）
 
 ---
 
