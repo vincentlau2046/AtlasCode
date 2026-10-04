@@ -320,38 +320,45 @@ export const SPINNER_VERBS = [
   'Benchmarking', 'Debugging', 'Refactoring', 'Parsing', 'Tokenizing',
   'Embedding', 'Aligning', 'Calibrating', 'Tuning', 'Pruning',
   'Distilling', 'Caching', 'Streaming', 'Decoding', 'Encoding',
-  // ── 意象轴（30）：攀升/光锥/聚焦/构造语义（呼应昇腾光锥 mark）──
+  // ── 意象轴（25）：攀升/光锥/聚焦/加速动势（呼应昇腾光锥 mark）──
   'Ascending', 'Climbing', 'Summiting', 'Rising', 'Elevating',
   'Converging', 'Focusing', 'Beaming', 'Illuminating', 'Kindling',
   'Forging', 'Crafting', 'Building', 'Shaping', 'Refining',
-  'Reasoning', 'Pondering', 'Deliberating', 'Reflecting', 'Imagining',
   'Exploring', 'Navigating', 'Mapping', 'Charting', 'Pioneering',
   'Awakening', 'Igniting', 'Catalyzing', 'Amplifying', 'Accelerating',
-  // ── 趣味轴（33）：从 fork 原 188 池保留有算力/构造/物理意象的幽默动词 ──
+  // ── 哲学轴（20）：Atlas 擎天智者/知识承载语义——深度思辨、追问、洞察 ──
+  // 思辨（深度思考的正式感，非幽默自嘲）
+  'Reasoning', 'Pondering', 'Deliberating', 'Reflecting', 'Imagining',
+  'Cerebrating', 'Cogitating', 'Ruminating', 'Contemplating', 'Considering',
+  // 追问（追问本质、洞察真相）
+  'Philosophising', 'Pontificating', 'Deciphering', 'Perusing', 'Mulling',
+  // 愿景（承载知识、构想未来——Atlas 权威地图集语义）
+  'Envisioning', 'Determining', 'Mustering', 'Musing', 'Discerning',
+  // ── 趣味轴（26）：从 fork 原 188 池保留有算力/构造/物理意象的幽默动词 ──
   // 算力化学/相变意象（加热、结晶、电离——幽默呼应算力升温）
   'Brewing', 'Cooking', 'Crystallizing', 'Caramelizing', 'Fermenting',
   'Ionizing', 'Photosynthesizing', 'Percolating', 'Simmering', 'Stewing',
   'Levitating', 'Transmuting', 'Metamorphosing', 'Unfurling',
-  // 思考趣味（用脑的幽默正式感 + 自嘲）
-  'Cerebrating', 'Cogitating', 'Ruminating', 'Pontificating', 'Philosophising',
-  'Musing', 'Tinkering', 'Bootstrapping',
+  // 工匠趣味（修补/自举）
+  'Tinkering', 'Bootstrapping',
   // 烹饪数据双关（切片/搅拌/腌制——Tiling/Hashing 的趣味版）
   'Julienning', 'Whisking', 'Kneading', 'Marinating',
   // 探索/执行趣味
   'Spelunking', 'Foraging', 'Meandering', 'Skedaddling', 'Swooping',
   'Warping', 'Transfiguring',
-  // ── 通用收尾（15）：保多样性、避免高频重复 ──
-  'Working', 'Processing', 'Thinking', 'Considering', 'Contemplating',
-  'Generating', 'Producing', 'Assembling', 'Composing', 'Constructing',
-  'Investigating', 'Researching', 'Studying', 'Reviewing', 'Planning',
+  // ── 通用收尾（13）：保多样性、避免高频重复 ──
+  'Working', 'Processing', 'Thinking', 'Generating', 'Producing',
+  'Assembling', 'Composing', 'Constructing', 'Investigating',
+  'Researching', 'Studying', 'Reviewing', 'Planning',
 ];
 ```
 
 - **算力轴**（45 个）：编译/推理/优化/编排等 coding agent + NPU 算力语义，含 `Tiling`/`Fusing`/`Lowering`/`Quantizing`/`Transpiling` 等 Ascend 算子开发专属动词（AtlasCode 差异化能力）
-- **意象轴**（30 个）：`Ascending`/`Climbing`/`Summiting` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦，`Pioneering`/`Catalyzing`/`Amplifying`/`Accelerating` 传递算力加速
-- **趣味轴**（33 个）：**从 fork 原 188 池保留**有算力/构造/物理意象的幽默动词——算力化学相变（`Crystallizing`/`Caramelizing`/`Ionizing`/`Fermenting`，幽默呼应算力升温）、思考趣味（`Cerebrating`/`Cogitating`/`Ruminating`/`Pontificating`，用脑的幽默正式感）、烹饪数据双关（`Julienning`/`Whisking`/`Kneading`，Tiling/Hashing 的趣味版）、探索执行（`Spelunking` 深挖代码库/`Warping` 算力加速扭曲）。**保留 fork 品牌人格的趣味性，但只留与算力/构造/物理意象同调的**，排除纯荒诞词（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting` 等）和 fork 专属梗（`Clauding`/`Gitifying`/`Hyperspacing`/`Quantumizing`）
-- **通用收尾**（15 个）：`Working`/`Processing`/`Thinking` 等保多样性，避免高频重复显眼
-- **共 ~123 个**（vs fork 188 个）——保 65% 体量，重复率与 fork 同量级（12s 轮播周期 25min，远超典型会话，用户感知重复率低）；其中趣味轴 33 个让品牌人格留趣味性，不全严肃
+- **意象轴**（25 个）：`Ascending`/`Climbing`/`Summiting` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦，`Pioneering`/`Catalyzing`/`Amplifying`/`Accelerating` 传递算力加速——纯动势，不混入思辨动词
+- **哲学轴**（20 个）：**Atlas 擎天智者/权威地图集语义**——深度思辨（`Reasoning`/`Pondering`/`Deliberating`/`Reflecting`/`Cerebrating`/`Cogitating`/`Ruminating`/`Contemplating`）、追问本质（`Philosophising`/`Pontificating`/`Deciphering`/`Perusing`/`Mulling`/`Discerning`）、愿景与知识承载（`Envisioning`/`Determining`/`Mustering`/`Musing`/`Imagining`/`Considering`）。与光锥 mark 的一动一静互补——光锥是上升聚焦动势，哲学是沉淀深度思辨；同时诚实表达 LLM 推理时在"思考"
+- **趣味轴**（27 个）：**从 fork 原 188 池保留**有算力/构造/物理意象的幽默动词——算力化学相变（`Crystallizing`/`Caramelizing`/`Ionizing`/`Fermenting`，幽默呼应算力升温）、烹饪数据双关（`Julienning`/`Whisking`/`Kneading`，Tiling/Hashing 的趣味版）、探索执行（`Spelunking` 深挖代码库/`Warping` 算力加速扭曲）。**保留 fork 品牌人格的趣味性，但只留与算力/构造/物理意象同调的**，排除纯荒诞词（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting` 等）和 fork 专属梗（`Clauding`/`Gitifying`/`Hyperspacing`/`Quantumizing`）
+- **通用收尾**（13 个）：`Working`/`Processing`/`Thinking` 等保多样性，避免高频重复显眼
+- **共 ~130 个**（vs fork 188 个）——保 69% 体量，零跨轴重复已校验；四轴覆盖算力硬核（45）+ 光锥动势（25）+ 哲学深度（20）+ 趣味幽默（27）+ 通用（13），品牌人格立体；12s 轮播周期 26min，远超典型会话，用户感知重复率低
 
 **`turnCompletionVerbs.ts` 同步重写**（过去式，`<verb> for <duration>`）：
 ```ts
@@ -514,7 +521,7 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | commit/PR 签名 `🤖 Generated with [AtlasHarness]` | AtlasHarness 品牌名 × 3 处 | → `[${PRODUCT_BRAND}]`（§7.2） |
 | 闲时 tips prefix `·` | 中性点，无品牌 | → `▀` 光锥顶点色块（§7.3） |
 | guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.5） |
-| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象+趣味三轴 ~123 个（保 65%，§7.4） |
+| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象+哲学+趣味四轴 ~130 个（保 69%，§7.4） |
 | spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
 | guideAgent `Claude` × 8 处 + `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 8 处改 Atlas；flag/MCP 名保留（§7.5） |
 
@@ -640,7 +647,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 - [ ] errorMessaging 4 处错误消息显 AtlasCode
 - [ ] commit/PR 签名 `git commit` 后 trailer 显 `Generated with [AtlasCode]`（§7.2 三处）
 - [ ] 闲时 tips prefix 显 `▀` 光锥顶点色块（§7.3）
-- [ ] spinner 动词池无 `Clauding`，动词为算力+意象+趣味三轴 ~123 个（§7.4）
+- [ ] spinner 动词池无 `Clauding`，动词为算力+意象+哲学+趣味四轴 ~130 个（§7.4）
 - [ ] spinner `· <verb>…` prefix 显 `▀` 光锥顶点色块
 - [ ] atlasCodeGuideAgent 8 处 Claude→Atlas（§7.5）
 - [ ] compact 模式（<70col）mark 保持完整 9×5 不缩（§5.1）
