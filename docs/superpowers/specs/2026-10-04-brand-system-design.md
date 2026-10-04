@@ -66,7 +66,7 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 | 触面 | 静态 | 动态（loading/思考） |
 |---|---|---|
 | **mark** | 5 行渐变三角 + 顶点光心 | 顶点呼吸脉冲（reduced-motion 时静态） |
-| **spinner** | `█████` 光束串 | 从底向顶**逐行点亮**（"光扫上爬"= Ascend 上升动效） |
+| **spinner** | `█████` 光束串 + `<verb>…` 状态行 | 从底向顶**逐行点亮**（"光扫上爬"= Ascend 上升动效）；verb 池为算力+意象双轴（§7.4） |
 | **进度条** | `███░░░░` 光束填充 | 光束向前推进 |
 | **边框角标** | `╱` 斜线角装饰（U+2572 Neutral） | — |
 | **分隔线** | `█ █ █` 光束串（Block Elements，CJK 安全） | — |
@@ -292,7 +292,61 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 
 **理由**：闲时态是 spinner 静止后 TUI 唯一动效触面，prefix `·` 改 `▀` 让光锥母题延伸到闲时，品牌视觉认知不断档。tips 内容已合规不动。
 
-### 7.4 atlasCodeGuideAgent Claude 文案去 fork 化
+### 7.4 Spinner 动词池重写（最高频品牌人格触面 · 每次 LLM 推理显示）
+
+`src/tui/constants/spinnerVerbs.ts` 的 `SPINNER_VERBS`（188 个 whimsical 动词）+ `src/tui/components/Spinner.tsx:139-143` 主 spinner 渲染：每次 LLM 推理随机抽一个动词显示为 `· <verb>… (elapsed · ↓ tokens)` 状态行。
+
+**现状问题**：
+- L45 `'Clauding'` —— Anthropic Claude 品牌串直接混在动词池（用户看到的 `· clauding…` 来源）
+- 整个 188 动词池是 Claude Code fork 的"幽默 whimsical"人格（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting`…）——Anthropic Claude 品牌人格表达，非 AtlasCode 调性
+- `turnCompletionVerbs.ts` 8 个过去式（`Baked`/`Brewed`/`Cogitated`…）同款 whimsical 调性
+
+**重写方向（已定 · 算力 + 意象混合池）**：
+
+删 `Clauding` + 整个 whimsical 池，重写为**双轴混合**——核心算力动词 + 昇腾光锥意象动词，呼应 AtlasCode 差异化双轴（算力 × coding agent）+ 光锥 mark 的 Ascend 攀升叙事：
+
+```ts
+// src/tui/constants/spinnerVerbs.ts（重写）
+export const SPINNER_VERBS = [
+  // ── 算力轴：编译/推理/优化/编排语义 ──
+  'Compiling', 'Inferring', 'Synthesizing', 'Optimizing', 'Orchestrating',
+  'Profiling', 'Vectorizing', 'Parallelizing', 'Quantizing', 'Scheduling',
+  'Dispatching', 'Pipelining', 'Tiling', 'Fusing', 'Lowering',
+  'Analyzing', 'Computing', 'Crunching', 'Hashing', 'Resolving',
+  'Indexing', 'Tracing', 'Instrumenting', 'Diagnosing', 'Verifying',
+  // ── 意象轴：攀升/光锥/聚焦语义（呼应昇腾光锥 mark）──
+  'Ascending', 'Climbing', 'Summiting', 'Rising', 'Elevating',
+  'Converging', 'Focusing', 'Beaming', 'Illuminating', 'Kindling',
+  'Forging', 'Crafting', 'Building', 'Shaping', 'Refining',
+  'Reasoning', 'Pondering', 'Deliberating', 'Reflecting', 'Imagining',
+];
+```
+
+- **算力轴**（25 个）：编译/推理/优化/编排等 coding agent + NPU 算力语义，含 `Tiling`/`Fusing`/`Lowering`/`Quantizing` 等 Ascend 算子开发专属动词（AtlasCode 差异化能力）
+- **意象轴**（20 个）：`Ascending`/`Climbing`/`Summiting`/`Rising` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦意象
+- 共 ~45 个（vs fork 188 个）——精简但语义密度高，每个动词都指向品牌双轴
+- **保留少量通用**（`Analyzing`/`Computing`/`Reasoning`/`Pondering`/`Crafting`/`Building`）避免动词池过于硬核
+
+**`turnCompletionVerbs.ts` 同步重写**（过去式，`<verb> for <duration>`）：
+```ts
+export const TURN_COMPLETION_VERBS = [
+  'Compiled', 'Inferred', 'Synthesized', 'Optimized', 'Orchestrated',
+  'Analyzed', 'Computed', 'Crunched', 'Resolved', 'Verified',
+  'Ascended', 'Converged', 'Forged', 'Crafted', 'Built', 'Refined',
+];
+```
+
+**prefix 联动**：`Spinner.tsx` 的 `· <verb>…` 的 `·` prefix 同 §7.3 改 `▀`（光锥顶点色块），与闲时 tips prefix 统一——spinner 活跃态与闲时态都顶光锥顶点色块，品牌视觉贯穿。
+
+**settings 覆盖机制保留**：`getSpinnerVerbs()` 的 `settings.spinnerVerbs`（mode=replace/extend）用户自定义机制保留——用户可注入自己的动词池，默认池改上述重写版。
+
+**核查清单**（实施时验证）：
+- [ ] `grep -rni "clauding" src/` = 0（确认 SPINNER_VERBS 无 Clauding + insights.ts 的 multi-clauding 是内部术语非用户可见，单独裁定是否改）
+- [ ] `turnCompletionVerbs.ts` 8 个过去式同步重写
+- [ ] 主 spinner + TeammateSpinnerLine + spawnInProcess.ts 三处消费方验证
+- [ ] e2e 基线（若含 spinner 动词快照）重生成
+
+### 7.5 atlasCodeGuideAgent Claude 文案去 fork 化
 
 `src/tui/tools/AgentTool/built-in/atlasCodeGuideAgent.ts` L37/61 用户可见的 agent 自我描述含 Anthropic 品牌串：
 
@@ -308,7 +362,7 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 - [ ] atlasCodeGuideAgent.ts 全文 grep `Claude` 逐处裁定（区分：Anthropic 产品名引用 vs L7 内部 "Atlas" 短名）
 - [ ] 其他 built-in agent（generalPurposeAgent.ts 等）同步核查 Claude 残留
 
-### 7.5 已合规面（不动，仅记录）
+### 7.6 已合规面（不动，仅记录）
 
 | 触面 | 文件 | 状态 |
 |---|---|---|
@@ -322,7 +376,7 @@ export const ACCENT_HUE = 'compute'                      // 新增（配方注�
 | releaseNotes repo URL | `src/tui/utils/releaseNotes.ts` | ✅ |
 | 系统提示词 "You are Atlas" | `src/tui/constants/system.ts:18-20` | ✅ L7 内部名合规，**不动** |
 
-### 7.6 历史"移植自 AtlasHarness"注释（P2，随大重构清尾）
+### 7.7 历史"移植自 AtlasHarness"注释（P2，随大重构清尾）
 
 ~150 处 `// 从 AtlasHarness src/... 移植` 注释（集中 `src/ascend/tools/*` + `src/engine/session/*`），非用户可见，零功能影响。本 spec 不强制清尾，归 F 波 ② 类机械替换或下次大重构。
 
@@ -412,7 +466,9 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | 文件名 `Clawd.tsx` 引用 | 散落 import | 全量改 `Beam.js` |
 | commit/PR 签名 `🤖 Generated with [AtlasHarness]` | AtlasHarness 品牌名 × 3 处 | → `[${PRODUCT_BRAND}]`（§7.2） |
 | 闲时 tips prefix `·` | 中性点，无品牌 | → `▀` 光锥顶点色块（§7.3） |
-| guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.4） |
+| guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.5） |
+| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象双轴 ~45 个（§7.4） |
+| spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
 
 ### 10.3 UA 串
 
@@ -536,7 +592,9 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 - [ ] errorMessaging 4 处错误消息显 AtlasCode
 - [ ] commit/PR 签名 `git commit` 后 trailer 显 `Generated with [AtlasCode]`（§7.2 三处）
 - [ ] 闲时 tips prefix 显 `▀` 光锥顶点色块（§7.3）
-- [ ] guideAgent 自我描述显 `Atlas Agent SDK` / `Atlas API`（§7.4）
+- [ ] spinner 动词池无 `Clauding`，动词为算力+意象双轴（§7.4）
+- [ ] spinner `· <verb>…` prefix 显 `▀` 光锥顶点色块
+- [ ] guideAgent 自我描述显 `Atlas Agent SDK` / `Atlas API`（§7.5）
 - [ ] 6 套主题 brand 色对比度 ≥ AA
 - [ ] reduced-motion 下 mark/spinner/tips 切换静态
 - [ ] e2e 基线重生成 + 全绿
