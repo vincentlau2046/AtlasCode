@@ -1,0 +1,186 @@
+/**
+ * 2026-10-04 P0a 可解释审批（spec docs/tui-differentiation-spec.md §4-P0a）——
+ * verdict 一行纯面（permissionVerdict.ts）+ 用户批准标记（userApprovals.ts）
+ * 判别单测（mutation-red 风）：
+ *
+ *   1. verdict 三态（spec §1 钉死）：rule 命中 → ruleValue + source（非 r-NN）；
+ *      classifier → 分类器名 + reason；mode/other → 哪个 mode。
+ *   2. 数值置信度不出现（P0a-no-conf absent 型探针的单测侧）：任一输出
+ *      不匹配 数值+%/confidence 族正则。
+ *   3. reason 缺省 → null（弹框保持原样，不加行）。
+ *   4. userApprovals 标记 set/get/delete 生命周期。
+ *
+ * 弹框/卡片渲染面活判别归 b8 的 PTY 验收（user-e2e/tui-diff/accept.ts P0a）；
+ * 本文件钉纯面本体 + 标记面。
+ */
+import { describe, expect, it } from 'bun:test'
+import {
+  VERDICT_PREFIX,
+  verdictLine,
+} from '../../src/tui/components/permissions/permissionVerdict.js'
+import type {
+  PermissionDecisionReason,
+  PermissionRule,
+} from '../../src/tui/types/permissions.js'
+import {
+  deleteUserApproval,
+  getUserApproval,
+  setUserApproval,
+} from '../../src/tui/utils/userApprovals.js'
+
+function rule(
+  source: PermissionRule['source'],
+  ruleBehavior: PermissionRule['ruleBehavior'],
+  ruleContent?: string,
+): PermissionRule {
+  return {
+    source,
+    ruleBehavior,
+    ruleValue: { toolName: 'Bash', ruleContent },
+  }
+}
+
+// spec P0a-no-conf：任一 verdict 输出不得出现数值置信度（% / confidence / 置信）。
+const NUMERIC_CONFIDENCE = /(\d+(\.\d+)?\s*(%|confidence|置信))/i
+
+describe('verdictLine（P0a 审批面 verdict 一行）', () => {
+  it('rule 态：hit <behavior> rule "<tool>(content)" from <source>（ruleValue+source 直出）', () => {
+    const line = verdictLine(
+      { type: 'rule', rule: rule('projectSettings', 'ask', 'echo probe:*') },
+      'default',
+    )
+    expect(line).toContain(`${VERDICT_PREFIX}: hit ask rule`)
+    expect(line).toContain('Bash(echo probe:*)')
+    expect(line).toContain('from shared project settings')
+  })
+
+  it('rule 态：allow/deny 行为词区分', () => {
+    expect(
+      verdictLine({ type: 'rule', rule: rule('userSettings', 'allow') }, 'default'),
+    ).toContain('hit allow rule')
+    expect(
+      verdictLine({ type: 'rule', rule: rule('userSettings', 'deny') }, 'default'),
+    ).toContain('hit deny rule')
+  })
+
+  it('rule 态：无 ruleContent 时仅工具名（Bash 非 Bash(*)）', () => {
+    const line = verdictLine(
+      { type: 'rule', rule: rule('localSettings', 'ask') },
+      'default',
+    )
+    expect(line).toContain('"Bash"')
+    expect(line).toContain('from project local settings')
+  })
+
+  it('classifier 态：分类器名 + reason 文本（auto-mode 方向）', () => {
+    const line = verdictLine(
+      {
+        type: 'classifier',
+        classifier: 'auto-mode',
+        reason: 'writes to .atlas/ config',
+      },
+      'auto',
+    )
+    expect(line).toContain('auto-mode classifier says: writes to .atlas/ config')
+  })
+
+  it('mode 态与 other 态归一：无规则命中 + 当前 mode 标题', () => {
+    const modeLine = verdictLine({ type: 'mode', mode: 'plan' }, 'plan')
+    expect(modeLine).toContain('no rule matched')
+    expect(modeLine).toContain('Plan Mode mode asks you')
+    // 引擎 pass-through ask 的 {type:'other'} 与 mode 三态同形
+    const otherLine = verdictLine(
+      { type: 'other', reason: 'This command requires approval' },
+      'default',
+    )
+    expect(otherLine).toContain('no rule matched')
+    expect(otherLine).toContain('Default mode asks you')
+  })
+
+  it('hook 态：钩子名 + 来源 + reason', () => {
+    const line = verdictLine(
+      {
+        type: 'hook',
+        hookName: 'PreToolUse',
+        hookSource: 'project',
+        reason: 'blocked by hook',
+      },
+      'default',
+    )
+    expect(line).toContain('hook "PreToolUse" (project) says: blocked by hook')
+  })
+
+  it('subcommandResults 态：子命令计数 + mode', () => {
+    const line = verdictLine(
+      {
+        type: 'subcommandResults',
+        reasons: new Map<string, never>([
+          ['cmd a', undefined as never],
+          ['cmd b', undefined as never],
+        ]),
+      },
+      'default',
+    )
+    expect(line).toContain('2 sub-commands checked')
+    expect(line).toContain('Default mode asks you')
+  })
+
+  it('safetyCheck / workingDir / sandboxOverride / asyncAgent / permissionPromptTool 各有形', () => {
+    expect(
+      verdictLine({ type: 'safetyCheck', reason: 'sensitive path', classifierApprovable: true }, 'default'),
+    ).toContain('safety check — sensitive path')
+    expect(
+      verdictLine({ type: 'workingDir', reason: 'outside working dir' }, 'default'),
+    ).toContain('outside working dir')
+    expect(
+      verdictLine({ type: 'sandboxOverride', reason: 'excludedCommand' }, 'default'),
+    ).toContain('sandbox override (excludedCommand)')
+    expect(
+      verdictLine({ type: 'asyncAgent', reason: 'agent pending' }, 'default'),
+    ).toContain('agent pending')
+    expect(
+      verdictLine(
+        { type: 'permissionPromptTool', permissionPromptToolName: 'AskUserQuestion', toolResult: null },
+        'default',
+      ),
+    ).toContain('AskUserQuestion handled this request')
+  })
+
+  it('reason 缺省 → null（不渲染，弹框保持原样）', () => {
+    expect(verdictLine(undefined, 'default')).toBeNull()
+  })
+
+  it('P0a-no-conf：任一输出无数值置信度（% / confidence / 置信）', () => {
+    const cases: Array<PermissionDecisionReason | undefined> = [
+      undefined,
+      { type: 'rule', rule: rule('projectSettings', 'ask', 'echo probe:*') },
+      { type: 'classifier', classifier: 'auto-mode', reason: 'writes to .atlas/' },
+      { type: 'mode', mode: 'plan' },
+      { type: 'other', reason: 'This command requires approval' },
+      { type: 'hook', hookName: 'PreToolUse', reason: 'blocked' },
+    ]
+    for (const reason of cases) {
+      const line = verdictLine(reason, 'default')
+      if (line !== null) {
+        expect(NUMERIC_CONFIDENCE.test(line)).toBe(false)
+      }
+    }
+  })
+})
+
+describe('userApprovals（P0a 用户批准标记）', () => {
+  it('set → get true → delete → get false（生命周期）', () => {
+    expect(getUserApproval('tu-1')).toBe(false)
+    setUserApproval('tu-1')
+    expect(getUserApproval('tu-1')).toBe(true)
+    deleteUserApproval('tu-1')
+    expect(getUserApproval('tu-1')).toBe(false)
+  })
+
+  it('按 toolUseID 隔离', () => {
+    setUserApproval('tu-a')
+    expect(getUserApproval('tu-b')).toBe(false)
+    deleteUserApproval('tu-a')
+    deleteUserApproval('tu-b')
+  })
+})
