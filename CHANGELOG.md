@@ -4,6 +4,31 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.21
+
+P1a 多页面侧抽屉 + #272 LLM 出站 UA 品牌串（spec `docs/tui-differentiation-spec.md`
+§4 P1a；验收 b8 lane `accept.ts P1a --repo <worktree>`）：
+
+- **P1a 多页面侧抽屉**（消息流旁 40% split 布局，非覆盖）：5 页 =
+  `1 Diff / 2 Plan / 3 Activity / 4 Decisions / 5 Budget`；←→ 循环切页
+  （wrap-around）、Esc 关、`ctrl+shift+d` 仅 Diff 页切 unified ↔ side-by-side
+  （双列 diff 渲染为纯新增组件）。抽屉关闭时全部 SidePanel 键位透传
+  （return false），既有键位零改动。命令面 `/sidebar [page]`（空/无效参数
+  回落 Diff 页）。数据面全只读投影：Diff=git 工作树 diff（useDiffData）、
+  Plan=getPlan+任务清单、Activity=消息流 tool_use/tool_result 末 12 条、
+  Decisions=新增 ring buffer（cap 50，useCanUseTool 判定点**加性**记录，
+  engine 主循环零改动）、Budget=模型角色 + 上下文余量 + 会话累计。
+  信任线直达（门禁③）：回退预警段「· 5 谁在答」/ autoCompact 熔断段
+  「· 5 还剩」→ 预算页 tab 键 5。
+- **#272 LLM 出站 UA 品牌串**：openai SDK 客户端此前无自定义 UA（出站头
+  是 SDK 默认 `OpenAI/JS`）。新增 `src/shared/identity.ts`（buildUserAgent
+  = `AtlasCode/<v> (+repo)`，getVersion 沿 process.argv[1] 上行走读
+  package.json）+ modelprovider 两处 `new OpenAI` 加 defaultHeaders
+  User-Agent；层边界干净（shared 叶子域，不引 tui/engine）。
+
+四件套绿：tsc 0 / lint 0e·0w / build 17.58MB / 全量 3465 pass·0 fail·237
+文件（+29 判别单测：store 9 / decisionLog 5 / handlers 6 / projection 9）。
+
 ## v0.1.20
 
 P0b 信任透明层三验收门禁（spec `docs/tui-differentiation-spec.md` §4 P0b；验收
