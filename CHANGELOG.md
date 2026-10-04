@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.23
+
+P0a 回归修 + loop-robustness #271 #4/#5（e2e P0 回归门禁打回 0.1.21/0.1.22
+P1a 侧抽屉引入的审批卡死回归；#271 两缺口同车，e2e 复合验收 4/4 全绿后发布）：
+
+- **P0a 回归修（红线③ 键位不打仗）**（`3968a81`）：P1a 侧抽屉 1-5 键在
+  模态（权限弹框/模型选择）激活时抢先消费、饿死模态 ink 数字选 → 审批批准
+  卡死（e2e P0 S-A hardFail=4，0.1.21/0.1.22 引入）。根因 = 本地 'SidePanel'
+  context 恒入 useKeybinding 匹配栈（isActive 仅控 activeContexts 注册，
+  本地 context 不受控）+ open* handler 无模态门。修 = 双 cede 面：键位面
+  （`sidePanelHandlers` 工厂 deps.isModalActive，模态 overlay 激活全 9
+  handler 透传，模态拥有键位）+ 渲染面（模态激活抽屉不渲染/不挤占，双底栏
+  重叠同修；布局态留 store，模态关闭原页复原零丢失）。无模态保留 spec 门禁①
+  1-5 一键开页（判别单测护住）。
+- **loop-robustness #271 #4 连接重置不重试**（`ff33357`）：openai SDK
+  APIConnectionError 顶层 message 是固定文案 "Connection error."（无 errno
+  子串），连接期 errno（ECONNRESET 等）在 error.cause.code 上 → 旧重试门只查
+  顶层 message/code 判「不可重试」→ drop 断连直接穿越给用户。修 = 重试门
+  检索面扩展（SDK 连接错误类名 APIConnectionError + cause 链 code/message
+  并入 haystack，同 gatewayUnreachableRemediationHint 已覆盖的 #4 盲区同款
+  面）；#260 生成超时 fail-fast 语义不回归（APITimeoutError 族仍不重试，
+  门入口先拦）。e2e droprecover 判据：recovered（proxyCalls=7，pre-fix 基线
+  1 整任务死）。
+- **loop-robustness #271 #5 空 0-0 占位符绕过空检测**（`ca810e8`）：网关
+  0/0 占位响应（usage 0/0）经 OpenAI 协议映射后无真实内容块，provider 合成
+  占位 text 块供渲染面可见——旧空判定把占位块当非空 text → 空判定/R1 有界
+  重试/emptyTerminated 用户可见提示全不触发（末轮当正常终止，静默穿越）。
+  修 = 单一定义常量 `PROVIDER_EMPTY_CONTENT_PLACEHOLDER`（两处合成点收敛）
+  + engine loop 空判定排除占位块（占位+实内容共存时实内容仍算非空，防过度
+  修）→ 0/0 占位走 R1 有界重试 + emptyTerminated 用户可见路径。e2e
+  emptyretry 判据：recovered（proxyCalls=10，pre-fix 基线 2 假 success）。
+- **四件套**：tsc 0 / lint 0e·0w / build 17.58MB / 全量 17286 pass·0
+  fail·1180 文件（superset 口径含嵌套 worktree 测试扫入，同 0.1.19-0.1.22
+  先例）。
+
 ## v0.1.22
 
 P1a 验收 R1 缺陷修补发（0.1.21 随车 P1a 含两缺陷经 b8 lane 验收 R1 打回，npm
