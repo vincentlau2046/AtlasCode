@@ -16,6 +16,7 @@
 import { describe, expect, it } from 'bun:test'
 import {
   VERDICT_PREFIX,
+  successCardRenderMode,
   verdictLine,
 } from '../../src/tui/components/permissions/permissionVerdict.js'
 import type {
@@ -165,6 +166,31 @@ describe('verdictLine（P0a 审批面 verdict 一行）', () => {
         expect(NUMERIC_CONFIDENCE.test(line)).toBe(false)
       }
     }
+  })
+})
+
+describe('successCardRenderMode（P0a allow 面修：无结果渲染器工具的批准标记行）', () => {
+  // 根因（b8 第 4 轮 cardAllow FAIL）：UserToolSuccessMessage 对
+  // renderedMessage === null（工具无 renderToolResultMessage，如 TUI-lane Bash
+  // 桥接适配器）早退 return null，把已 set 的用户批准标记行一并跳过。
+  // 修：marker 存在时放行 marker-only 渲染形；否则零行为变更。
+  it('renderedMessage 非 null → full（有无标记都走原形）', () => {
+    expect(successCardRenderMode({ type: 'element' }, true)).toBe('full')
+    expect(successCardRenderMode({ type: 'element' }, false)).toBe('full')
+  })
+
+  it('Bash 适配器鉴别例：renderedMessage null + userApproved → marker（批准标记行可见）', () => {
+    expect(successCardRenderMode(null, true)).toBe('marker')
+  })
+
+  it('renderedMessage null + 无标记 → skip（零行为变更：未批准仍早退）', () => {
+    expect(successCardRenderMode(null, false)).toBe('skip')
+  })
+
+  it('classifier/yolo 行不受本决策影响（无对应入参 = 不引入新门控）', () => {
+    // 签名仅 (renderedMessage, userApproved)：classifier 态工具若无结果渲染器
+    // 且无用户标记，仍 skip（原语义）；有标记则 marker（批准优先于分类器行）。
+    expect(successCardRenderMode(null, true)).toBe('marker')
   })
 })
 

@@ -11,6 +11,10 @@
  *
  * 两个方向：ask 态 =「为何在问你」（弹框默认可见行）；allow 态的「为何自动放行」
  * 走 userApprovals.ts（用户批准标记）+ UserToolSuccessMessage 既有 classifier 行。
+ *
+ * allow 面修（2026-10-04，b8 第 4 轮 cardAllow 根因）：successCardRenderMode——
+ * 无结果渲染器工具（TUI-lane Bash 桥接适配器无 renderToolResultMessage）的
+ * 用户批准标记行不再被 renderedMessage === null 早退一并跳过。
  */
 import {
   getSettingSourceDisplayNameLowercase,
@@ -68,4 +72,27 @@ export function verdictLine(
     default:
       return null
   }
+}
+
+/**
+ * P0a allow 面修（2026-10-04，b8 第 4 轮 cardAllow 根因）：成功卡渲染决策。
+ *
+ * 原 UserToolSuccessMessage 对 renderedMessage === null（工具无
+ * renderToolResultMessage，如 TUI-lane Bash 桥接适配器——W2-2b 结果体走
+ * BashToolResultMessage 独立叠加层，适配器对象不挂结果渲染器）早退
+ * return null，把已 setUserApproval 的用户批准标记行一并跳过（marker 设了
+ * 但不可见）。修：marker 存在时放行 marker-only 渲染形；否则原早退语义
+ * 逐字保持（未批准工具零行为变更）。
+ *
+ *   - 'full'   ：renderedMessage 非 null → 原完整渲染形（含 PostToolUse hook 进度）。
+ *   - 'marker' ：renderedMessage null + 用户批准标记 → 仅渲染批准标记行（无 hook 进度，
+ *                与 pre-P0a 早退行为对齐，只新增标记行本身）。
+ *   - 'skip'   ：renderedMessage null + 无标记 → 早退（原语义）。
+ */
+export function successCardRenderMode(
+  renderedMessage: unknown,
+  userApproved: boolean,
+): 'full' | 'marker' | 'skip' {
+  if (renderedMessage !== null) return 'full'
+  return userApproved ? 'marker' : 'skip'
 }
