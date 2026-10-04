@@ -44,24 +44,24 @@ function rule(
 // spec P0a-no-conf：任一 verdict 输出不得出现数值置信度（% / confidence / 置信）。
 const NUMERIC_CONFIDENCE = /(\d+(\.\d+)?\s*(%|confidence|置信))/i
 
-describe('verdictLine（P0a 审批面 verdict 一行）', () => {
-  it('rule 态：hit <behavior> rule "<tool>(content)" from <source>（ruleValue+source 直出）', () => {
+describe('verdictLine（P0a 审批面 verdict 一行；A4 句式定稿 2026-10-05 §4b）', () => {
+  it('rule 态（ask/deny）：Rule "<ruleValue>" from <source> requires confirmation.', () => {
     const line = verdictLine(
       { type: 'rule', rule: rule('projectSettings', 'ask', 'echo probe:*') },
       'default',
     )
-    expect(line).toContain(`${VERDICT_PREFIX}: hit ask rule`)
-    expect(line).toContain('Bash(echo probe:*)')
-    expect(line).toContain('from shared project settings')
-  })
-
-  it('rule 态：allow/deny 行为词区分', () => {
-    expect(
-      verdictLine({ type: 'rule', rule: rule('userSettings', 'allow') }, 'default'),
-    ).toContain('hit allow rule')
+    expect(line).toBe(
+      `${VERDICT_PREFIX}: Rule "Bash(echo probe:*)" from shared project settings requires confirmation.`,
+    )
     expect(
       verdictLine({ type: 'rule', rule: rule('userSettings', 'deny') }, 'default'),
-    ).toContain('hit deny rule')
+    ).toBe(`${VERDICT_PREFIX}: Rule "Bash" from user settings requires confirmation.`)
+  })
+
+  it('rule 态（allow）：Allowed by rule "<ruleValue>" (<source>).', () => {
+    expect(
+      verdictLine({ type: 'rule', rule: rule('userSettings', 'allow') }, 'default'),
+    ).toBe(`${VERDICT_PREFIX}: Allowed by rule "Bash" (user settings).`)
   })
 
   it('rule 态：无 ruleContent 时仅工具名（Bash 非 Bash(*)）', () => {
@@ -69,11 +69,12 @@ describe('verdictLine（P0a 审批面 verdict 一行）', () => {
       { type: 'rule', rule: rule('localSettings', 'ask') },
       'default',
     )
-    expect(line).toContain('"Bash"')
-    expect(line).toContain('from project local settings')
+    expect(line).toBe(
+      `${VERDICT_PREFIX}: Rule "Bash" from project local settings requires confirmation.`,
+    )
   })
 
-  it('classifier 态：分类器名 + reason 文本（auto-mode 方向）', () => {
+  it('classifier 态（危险 flag）：Auto mode: classifier flagged this as dangerous.', () => {
     const line = verdictLine(
       {
         type: 'classifier',
@@ -82,20 +83,48 @@ describe('verdictLine（P0a 审批面 verdict 一行）', () => {
       },
       'auto',
     )
-    expect(line).toContain('auto-mode classifier says: writes to .atlas/ config')
+    expect(line).toBe(`${VERDICT_PREFIX}: Auto mode: classifier flagged this as dangerous.`)
   })
 
-  it('mode 态与 other 态归一：无规则命中 + 当前 mode 标题', () => {
-    const modeLine = verdictLine({ type: 'mode', mode: 'plan' }, 'plan')
-    expect(modeLine).toContain('no rule matched')
-    expect(modeLine).toContain('Plan Mode mode asks you')
-    // 引擎 pass-through ask 的 {type:'other'} 与 mode 三态同形
-    const otherLine = verdictLine(
-      { type: 'other', reason: 'This command requires approval' },
-      'default',
+  it('classifier 态（自动放行）：Auto-approved by classifier: <reason>.', () => {
+    const line = verdictLine(
+      {
+        type: 'classifier',
+        classifier: 'auto-mode',
+        reason: 'writes to .atlas/ config',
+      },
+      'auto',
+      'Bash',
+      true,
     )
-    expect(otherLine).toContain('no rule matched')
-    expect(otherLine).toContain('Default mode asks you')
+    expect(line).toBe(
+      `${VERDICT_PREFIX}: Auto-approved by classifier: writes to .atlas/ config.`,
+    )
+  })
+
+  it('mode 态：default mode requires confirmation for <tool>.', () => {
+    expect(
+      verdictLine({ type: 'other', reason: 'This command requires approval' }, 'default', 'Bash'),
+    ).toBe(`${VERDICT_PREFIX}: default mode requires confirmation for Bash.`)
+    // plan 标签已含 mode（Plan Mode）→ 去重不叠 "mode mode"
+    expect(
+      verdictLine({ type: 'mode', mode: 'plan' }, 'plan', 'Bash'),
+    ).toBe(`${VERDICT_PREFIX}: plan mode requires confirmation for Bash.`)
+  })
+
+  it('mode 态：toolName 缺省回落 this command（旧 2 参调用点兼容）', () => {
+    expect(
+      verdictLine({ type: 'other', reason: 'This command requires approval' }, 'default'),
+    ).toBe(`${VERDICT_PREFIX}: default mode requires confirmation for this command.`)
+  })
+
+  it('mode/other 归一（bypass 态）：Bypass mode — all commands allowed.', () => {
+    expect(
+      verdictLine({ type: 'other', reason: 'x' }, 'bypassPermissions', 'Bash'),
+    ).toBe(`${VERDICT_PREFIX}: Bypass mode — all commands allowed.`)
+    expect(
+      verdictLine({ type: 'mode', mode: 'default' }, 'bypassPermissions', 'Bash'),
+    ).toBe(`${VERDICT_PREFIX}: Bypass mode — all commands allowed.`)
   })
 
   it('hook 态：钩子名 + 来源 + reason', () => {

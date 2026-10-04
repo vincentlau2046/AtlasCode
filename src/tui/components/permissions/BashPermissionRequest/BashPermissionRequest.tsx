@@ -32,6 +32,7 @@ import { setUserApproval } from '../../../utils/userApprovals.js';
 import { SedEditPermissionRequest } from '../SedEditPermissionRequest/SedEditPermissionRequest.js';
 import { useShellPermissionFeedback } from '../useShellPermissionFeedback.js';
 import { logUnaryPermissionEvent } from '../utils.js';
+import { AutoModeConfirm } from '../AutoModeConfirm.js';
 import { bashToolUseOptions } from './bashToolUseOptions.js';
 const CHECKING_TEXT = 'Attempting to auto-approve\u2026';
 
@@ -179,6 +180,9 @@ function BashPermissionRequestInner({
     explainerVisible: explainerState.visible
   });
   const [showPermissionDebug, setShowPermissionDebug] = useState(false);
+  // 2026-10-05 §4b A3：automode 切换确认视图（4 行文案 + 1 Confirm 2 Cancel）
+  // 门控 applyAutoModePermissionOption 的唯一点（shift+tab 手动切模不经此门）
+  const [showAutoModeConfirm, setShowAutoModeConfirm] = useState(false);
   const [classifierDescription, setClassifierDescription] = useState(description || '');
   // Track whether the initial description (from prop or async generation) was empty.
   // Once we receive a non-empty description, this stays false.
@@ -377,7 +381,8 @@ function BashPermissionRequestInner({
     // 到 auto 并把当前这笔 pending 请求 re-dispatch 走 auto 门控（不 onDone：
     // recheck 自动放行则弹框关闭，危险工具则弹框留在原地再问）。
     if (value_0 === 'yes-auto-mode') {
-      applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
+      // 2026-10-05 §4b A3：先过确认视图，Confirm 才执行切模 + re-dispatch
+      setShowAutoModeConfirm(true);
       return;
     }
     switch (value_0) {
@@ -417,7 +422,9 @@ function BashPermissionRequestInner({
   }
   // 2026-10-04 P0a 可解释审批：ask 态默认可见 verdict 一行（为何在问你；
   // 三态 rule/classifier/mode 见 permissionVerdict.ts，零新数据只读投影）
-  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode);
+  // 2026-10-05 §4b A4：加性传 toolName（mode 句 <tool> 槽）+ classifierAutoApproved
+  // （classifier 自动放行态选「Auto-approved by classifier」句，弹框选项禁用态）
+  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode, toolUseConfirm.tool.name, toolUseConfirm.classifierAutoApproved === true);
   const classifierSubtitle = feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved ? <Text>
         <Text color="success">{figures.tick} Auto-approved</Text>
         {toolUseConfirm.classifierMatchedRule && <Text dimColor>
@@ -458,10 +465,13 @@ function BashPermissionRequestInner({
             <Text dimColor={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false}>
               Do you want to proceed?
             </Text>
-            <Select options={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved ? options.map(o => ({
+            {showAutoModeConfirm ? <AutoModeConfirm onConfirm={() => {
+          setShowAutoModeConfirm(false);
+          applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
+        }} onCancel={() => setShowAutoModeConfirm(false)} /> : <Select options={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved ? options.map(o => ({
           ...o,
           disabled: true
-        })) : options : options} isDisabled={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
+        })) : options : options} isDisabled={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />}
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>

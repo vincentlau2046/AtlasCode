@@ -21,6 +21,7 @@ import { verdictLine } from '../permissionVerdict.js';
 import { setUserApproval } from '../../../utils/userApprovals.js';
 import { useShellPermissionFeedback } from '../useShellPermissionFeedback.js';
 import { logUnaryPermissionEvent } from '../utils.js';
+import { AutoModeConfirm } from '../AutoModeConfirm.js';
 import { powershellToolUseOptions } from './powershellToolUseOptions.js';
 export function PowerShellPermissionRequest(props: PermissionRequestProps): React.ReactNode {
   const {
@@ -66,6 +67,9 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
   });
   const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('atlas_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
   const [showPermissionDebug, setShowPermissionDebug] = useState(false);
+  // 2026-10-05 §4b A3：automode 切换确认视图（4 行文案 + 1 Confirm 2 Cancel）
+  // 门控 applyAutoModePermissionOption 的唯一点（shift+tab 手动切模不经此门）
+  const [showAutoModeConfirm, setShowAutoModeConfirm] = useState(false);
 
   // Editable prefix — compute static prefix locally (no LLM call).
   // Initialize synchronously to the raw command for single-line commands so
@@ -153,7 +157,8 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     // 到 auto 并把当前这笔 pending 请求 re-dispatch 走 auto 门控（不 onDone：
     // recheck 自动放行则弹框关闭，危险工具则弹框留在原地再问）。
     if (value === 'yes-auto-mode') {
-      applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
+      // 2026-10-05 §4b A3：先过确认视图，Confirm 才执行切模 + re-dispatch
+      setShowAutoModeConfirm(true);
       return;
     }
     switch (value) {
@@ -193,7 +198,9 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
   }
   // 2026-10-04 P0a 可解释审批：ask 态默认可见 verdict 一行（为何在问你；
   // 三态 rule/classifier/mode 见 permissionVerdict.ts，零新数据只读投影）
-  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode);
+  // 2026-10-05 §4b A4：加性传 toolName（mode 句 <tool> 槽；PowerShell 无
+  // classifier 面，classifierAutoApproved 缺省 false 不传）
+  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode, toolUseConfirm.tool.name);
   return <PermissionDialog workerBadge={workerBadge} title="PowerShell command">
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text dimColor={explainerState.visible}>
@@ -222,7 +229,10 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
                 <Text color="warning">{destructiveWarning}</Text>
               </Box>}
             <Text>Do you want to proceed?</Text>
-            <Select options={options} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
+            {showAutoModeConfirm ? <AutoModeConfirm onConfirm={() => {
+            setShowAutoModeConfirm(false);
+            applyAutoModePermissionOption(toolPermissionContext, setAppState, () => toolUseConfirm.recheckPermission());
+          }} onCancel={() => setShowAutoModeConfirm(false)} /> : <Select options={options} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />}
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>

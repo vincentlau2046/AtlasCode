@@ -185,9 +185,11 @@ export function getFilePermissionOptions({
   // auto 模式时可见，isAutoModeOptionVisible）。选中即把本 session 切到 auto
   // 并把当前 pending 请求 re-dispatch 走 auto 门控（usePermissionHandler 的
   // 'accept-auto-mode' 处理器），不再重收 accept/reject。
+  // 2026-10-05 §4b A3：label 改「Enable automode」（选中先过 FilePermissionDialog
+  // 的确认视图，Confirm 才走 usePermissionHandler 的 'accept-auto-mode' 处理器）
   if (isAutoModeOptionVisible(toolPermissionContext)) {
     options.push({
-      label: 'Auto mode',
+      label: 'Enable automode',
       description: 'Switch this session to auto mode; this request is re-checked by the auto gate',
       value: 'auto-mode',
       option: {

@@ -1,5 +1,5 @@
 import { relative } from 'path';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDiffInIDE } from '../../../hooks/useDiffInIDE.js';
 import { Box, Text } from '../../../ink.js';
 import type { ToolUseContext } from '../../../Tool.js';
@@ -12,6 +12,7 @@ import { Select } from '../../CustomSelect/index.js';
 import { ShowInIDEPrompt } from '../../ShowInIDEPrompt.js';
 import { usePermissionRequestLogging } from '../hooks.js';
 import { PermissionDialog } from '../PermissionDialog.js';
+import { AutoModeConfirm } from '../AutoModeConfirm.js';
 import type { ToolUseConfirm } from '../PermissionRequest.js';
 import type { WorkerBadgeProps } from '../WorkerBadge.js';
 import type { IDEDiffSupport } from './ideDiffConfig.js';
@@ -152,10 +153,31 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
     showingDiffInIDE,
     ideName
   } = useDiffInIDE(diffParams);
+  // 2026-10-05 §4b A3：automode 选项先过确认视图（4 行文案 + 1 Confirm 2
+  // Cancel），Confirm 才 dispatch 'accept-auto-mode'（usePermissionHandler
+  // 的 handleAcceptAutoMode → applyAutoModePermissionOption 唯一入口）。
+  // 状态放在 IDE-diff 早退之前：主 Select 与 ShowInIDEPrompt 两表面的
+  // automode 选项都走这个门（shift+tab 手动切模不经此门）。
+  const [showAutoModeConfirm, setShowAutoModeConfirm] = useState(false);
   const onChange = (option_0: PermissionOption, feedback?: string) => {
+    if (option_0.type === 'accept-auto-mode') {
+      setShowAutoModeConfirm(true);
+      return;
+    }
     closeTabInIDE?.();
     fileDialogResult.onChange(option_0, parsedInput, feedback?.trim());
   };
+  if (showAutoModeConfirm) {
+    return <PermissionDialog title={title} subtitle={subtitle} innerPaddingX={0} workerBadge={workerBadge}>
+        <AutoModeConfirm onConfirm={() => {
+        setShowAutoModeConfirm(false);
+        closeTabInIDE?.();
+        fileDialogResult.onChange({
+          type: 'accept-auto-mode'
+        }, parsedInput);
+      }} onCancel={() => setShowAutoModeConfirm(false)} />
+      </PermissionDialog>;
+  }
   if (showingDiffInIDE && ideDiffConfig && path) {
     return <ShowInIDEPrompt onChange={(option_1: PermissionOption, _input, feedback_0?: string) => onChange(option_1, feedback_0)} options={options} filePath={path} input={parsedInput} ideName={ideName} symlinkTarget={symlinkTarget} rejectFeedback={rejectFeedback} acceptFeedback={acceptFeedback} setFocusedOption={setFocusedOption} onInputModeToggle={handleInputModeToggle} focusedOption={focusedOption} yesInputMode={yesInputMode} noInputMode={noInputMode} />;
   }

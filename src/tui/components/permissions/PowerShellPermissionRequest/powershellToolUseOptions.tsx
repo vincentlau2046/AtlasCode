@@ -82,9 +82,11 @@ export function powershellToolUseOptions({
   // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode —— 选中即把本
   // session 切到 auto 并把当前 pending 请求 re-dispatch 走 auto 门控
   // （PowerShellPermissionRequest onSelect 'yes-auto-mode' 分支）。
+  // 2026-10-05 §4b A3：label 改「Enable automode」（选中先过确认视图，
+  // 见 PowerShellPermissionRequest 的 showAutoModeConfirm 门）
   if (showAutoModeOption) {
     options.push({
-      label: 'Auto mode',
+      label: 'Enable automode',
       description: 'Switch this session to auto mode; this request is re-checked by the auto gate',
       value: 'yes-auto-mode'
     });

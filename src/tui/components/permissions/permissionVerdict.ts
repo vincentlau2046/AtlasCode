@@ -15,6 +15,18 @@
  * allow 面修（2026-10-04，b8 第 4 轮 cardAllow 根因）：successCardRenderMode——
  * 无结果渲染器工具（TUI-lane Bash 桥接适配器无 renderToolResultMessage）的
  * 用户批准标记行不再被 renderedMessage === null 早退一并跳过。
+ *
+ * A4 句式定稿（2026-10-05 §4b，f4 批准）：rule/classifier/mode(+other)/bypass
+ * 四族全英文 6 句（VERDICT_PREFIX 前缀 + 定稿句体）：
+ *   - rule(ask/deny)   → Rule "<ruleValue>" from <source> requires confirmation.
+ *   - rule(allow)      → Allowed by rule "<ruleValue>" (<source>).
+ *   - classifier 危险  → Auto mode: classifier flagged this as dangerous.
+ *   - classifier 自动放行 → Auto-approved by classifier: <reason>.（classifierAutoApproved）
+ *   - mode             → <modeLabel> mode requires confirmation for <tool>.
+ *   - bypass           → Bypass mode — all commands allowed.
+ * 其余 reason 型（hook/safetyCheck/workingDir/subcommandResults/permissionPromptTool/
+ * asyncAgent/sandboxOverride）保持既有英文句式。toolName / classifierAutoApproved
+ * 为加性可选参（旧 2 参调用点与单测全兼容，缺省 tool 回落 'this command'）。
  */
 import {
   getSettingSourceDisplayNameLowercase,
@@ -32,27 +44,46 @@ export const VERDICT_PREFIX = 'Verdict'
 /**
  * 审批弹框 ask 态的默认可见 verdict 一行：为何在问你。
  * reason 缺省（引擎未附 decisionReason）→ null（不渲染，保持弹框原样）。
+ * A4 加性参：toolName（mode 句 <tool> 槽，缺省 'this command'）+
+ * classifierAutoApproved（classifier 句二态选择，Bash 面 classifier 自动放行时传 true）。
  */
 export function verdictLine(
   reason: PermissionDecisionReason | undefined,
   mode: PermissionMode,
+  toolName?: string,
+  classifierAutoApproved = false,
 ): string | null {
   const modeLabel = permissionModeTitle(mode)
+  const tool = toolName ?? 'this command'
   switch (reason?.type) {
     case 'rule': {
-      // ruleValue + source 直出（非 r-NN 内部 ID）；行为词区分 allow/deny/ask 规则。
-      const behavior = reason.rule.ruleBehavior
-      return `${VERDICT_PREFIX}: hit ${behavior} rule "${permissionRuleValueToString(reason.rule.ruleValue)}" from ${getSettingSourceDisplayNameLowercase(reason.rule.source)}`
+      // A4：rule 态两句定稿 —— allow 句 / ask·deny 句（ruleValue + source 直出，
+      // 非 r-NN 内部 ID）。
+      const ruleValue = permissionRuleValueToString(reason.rule.ruleValue)
+      const source = getSettingSourceDisplayNameLowercase(reason.rule.source)
+      if (reason.rule.ruleBehavior === 'allow') {
+        return `${VERDICT_PREFIX}: Allowed by rule "${ruleValue}" (${source}).`
+      }
+      return `${VERDICT_PREFIX}: Rule "${ruleValue}" from ${source} requires confirmation.`
     }
     case 'classifier':
-      // auto-mode 方向：分类器 + reason 文本（无数值置信度）。
-      return `${VERDICT_PREFIX}: ${reason.classifier} classifier says: ${reason.reason}`
+      // A4：classifier 态两句定稿 —— 危险 flag（auto-mode 门控方向）/ 自动放行
+      // （classifier 先于用户批准，弹框选项禁用态，带 reason 文本；无数值置信度）。
+      if (classifierAutoApproved) {
+        return `${VERDICT_PREFIX}: Auto-approved by classifier: ${reason.reason}.`
+      }
+      return `${VERDICT_PREFIX}: Auto mode: classifier flagged this as dangerous.`
     case 'mode':
-      return `${VERDICT_PREFIX}: no rule matched — ${modeLabel} mode asks you`
-    case 'other':
-      // 引擎 pass-through ask（无规则命中）附 {type:'other'}：归一到 mode 三态
-      // （为何在问你 = 无规则命中 + 当前 mode），不回显引擎原始措辞。
-      return `${VERDICT_PREFIX}: no rule matched — ${modeLabel} mode asks you`
+    case 'other': {
+      // A4：mode/other 归一（引擎 pass-through ask {type:'other'} 不回显引擎原始措辞）：
+      // bypass 态独立句；其余 mode 用 <modeLabel> 定稿句（plan 标签已含 mode，去重）。
+      if (mode === 'bypassPermissions') {
+        return `${VERDICT_PREFIX}: Bypass mode — all commands allowed.`
+      }
+      const label = modeLabel.toLowerCase()
+      const modeWord = label.endsWith('mode') ? label : `${label} mode`
+      return `${VERDICT_PREFIX}: ${modeWord} requires confirmation for ${tool}.`
+    }
     case 'hook':
       return `${VERDICT_PREFIX}: hook "${reason.hookName}"${reason.hookSource ? ` (${reason.hookSource})` : ''}${reason.reason ? ` says: ${reason.reason}` : ''}`
     case 'safetyCheck':
