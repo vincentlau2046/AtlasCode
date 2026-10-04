@@ -6,6 +6,7 @@ import { Box, Text, useTheme } from '../../../ink.js';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
 import type { NormalizedUserMessage, ProgressMessage } from '../../../types/message.js';
 import { deleteClassifierApproval, getClassifierApproval, getYoloClassifierApproval } from '../../../utils/classifierApprovals.js';
+import { deleteUserApproval, getUserApproval } from '../../../utils/userApprovals.js';
 import type { buildMessageLookups } from '../../../utils/messages.js';
 import { MessageResponse } from '../../MessageResponse.js';
 import { HookProgressMessage } from '../HookProgressMessage.js';
@@ -39,8 +40,11 @@ export function UserToolSuccessMessage({
   // useState lazy initializer ensures the value persists across re-renders.
   const [classifierRule] = React.useState(() => getClassifierApproval(toolUseID));
   const [yoloReason] = React.useState(() => getYoloClassifierApproval(toolUseID));
+  // 2026-10-04 P0a：用户弹框批准标记（同模式：挂载读取 + 立即删除防无界增长）
+  const [userApproved] = React.useState(() => getUserApproval(toolUseID));
   React.useEffect(() => {
     deleteClassifierApproval(toolUseID);
+    deleteUserApproval(toolUseID);
   }, [toolUseID]);
   if (!message.toolUseResult || !tool) {
     return null;
@@ -85,8 +89,14 @@ export function UserToolSuccessMessage({
                 </Text>
               </MessageResponse> : null}
         {feature('TRANSCRIPT_CLASSIFIER') ? yoloReason && <MessageResponse height={1}>
-                <Text dimColor>Allowed by auto mode classifier</Text>
+                <Text dimColor>{'Allowed by auto mode classifier: '}{yoloReason}</Text>
               </MessageResponse> : null}
+        {userApproved && <MessageResponse height={1}>
+                <Text dimColor>
+                  <Text color="success">{figures.tick}</Text>
+                  {' Allowed · your decision'}
+                </Text>
+              </MessageResponse>}
       </Box>
       <SentryErrorBoundary>
         <HookProgressMessage hookEvent="PostToolUse" lookups={lookups} toolUseID={toolUseID} verbose={verbose} isTranscriptMode={isTranscriptMode} />
