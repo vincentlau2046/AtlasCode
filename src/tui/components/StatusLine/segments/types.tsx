@@ -90,13 +90,16 @@ export interface StatusLineJsonConfig {
 
 // ── 默认 segment 配置（故障自愈降级用，§9.1.1） ────────────────────
 
-// role-fallback 紧跟 model（信任线：首选模型失败时可见"实际由谁在答"，§P0b①）
+// role-fallback 紧跟 model（信任线：首选模型失败时可见"实际由谁在答"，§P0b①）；
+// auto-compact-warning 紧跟 context-bar（熔断预警：接近 autoCompact 阈值时提示
+// "将自动压缩，可 /rewind 回退"，§P0b②；平时 null 不占位）
 export const DEFAULT_SIMPLE_LINE1: SegmentConfig[] = [
   { type: 'model' },
   { type: 'role-fallback' },
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
+  { type: 'auto-compact-warning' },
   { type: 'cwd' },
 ]
 
@@ -106,6 +109,7 @@ export const DEFAULT_DETAILED_LINE1: SegmentConfig[] = [
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
+  { type: 'auto-compact-warning' },
   { type: 'cwd' },
 ]
 

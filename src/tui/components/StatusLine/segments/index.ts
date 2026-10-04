@@ -17,11 +17,13 @@ import { ControlLinkSegment } from './ControlLinkSegment.js'
 import { PermissionModeSegment } from './PermissionModeSegment.js'
 import { SessionDurationSegment } from './SessionDurationSegment.js'
 import { RoleFallbackSegment } from './RoleFallbackSegment.js'
+import { AutoCompactWarningSegment } from './AutoCompactWarningSegment.js'
 import type { SegmentComponent } from './types.js'
 
 export const segmentRegistry = new Map<string, SegmentComponent>([
   ['model', ModelSegment],
   ['role-fallback', RoleFallbackSegment],
+  ['auto-compact-warning', AutoCompactWarningSegment],
   ['permission-mode', PermissionModeSegment],
   ['context-bar', ContextBarSegment],
   ['context-absolute', ContextAbsoluteSegment],

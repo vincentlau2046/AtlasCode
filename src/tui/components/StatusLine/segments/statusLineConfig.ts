@@ -23,7 +23,7 @@ import {
 // ── Schema（§9.4 安全红线：收紧，白名单 segment type） ────────────
 
 const SEGMENT_TYPES = [
-  'model', 'role-fallback', 'permission-mode', 'git-branch', 'git-files', 'git-combined', 'context-bar', 'tok-s',
+  'model', 'role-fallback', 'auto-compact-warning', 'permission-mode', 'git-branch', 'git-files', 'git-combined', 'context-bar', 'tok-s',
   'session-duration',
   'tools-count', 'thinking-level', 'context-absolute',
   'cost', 'tokens-in', 'tokens-out', 'cwd', 'control-link',
