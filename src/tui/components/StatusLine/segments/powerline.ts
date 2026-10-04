@@ -73,8 +73,8 @@ export function getSegmentSeparator(): { content: string; isArrow: boolean } {
 export function getContextThemeColors(): { good: string; warn: string; bad: string } {
   // 使用当前主题的 success/warning/error token
   // getTheme 需要 ThemeName 参数——这里用默认 dark 主题
-  // 消费方调 contextColorForPercentage 拿到 green/yellow/red 后，
-  // 可通过此函数拿到 rgb 值做 Powerline 背景色填充
+  // 消费方调 contextColorForPercentage 拿到 cyan/yellow/red（B2 2026-10-05 §4b：
+  // <70% cyan）后，可通过此函数拿到 rgb 值做 Powerline 背景色填充
   try {
     const theme = getTheme('dark')
     return {

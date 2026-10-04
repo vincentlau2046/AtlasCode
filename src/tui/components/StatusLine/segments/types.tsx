@@ -90,14 +90,14 @@ export interface StatusLineJsonConfig {
 
 // ── 默认 segment 配置（故障自愈降级用，§9.1.1） ────────────────────
 
-// B1（2026-10-05 §4b）：role-fallback 独立段删除——回退信任线折入 model 段
-// （ModelSegment 尾部黄 ↦ 尾标，§P0b①）
+// B1/B2（2026-10-05 §4b）：role-fallback / auto-compact-warning 独立段删除——
+// 回退信任线折入 model 段（ModelSegment 尾部黄 ↦ 尾标，§P0b①），autoCompact
+// 熔断预警折入 context-bar 段（ContextBarSegment 尾部 ▲，§P0b②）
 export const DEFAULT_SIMPLE_LINE1: SegmentConfig[] = [
   { type: 'model' },
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
-  { type: 'auto-compact-warning' },
   { type: 'cwd' },
 ]
 
@@ -106,7 +106,6 @@ export const DEFAULT_DETAILED_LINE1: SegmentConfig[] = [
   { type: 'thinking-level' },
   { type: 'permission-mode' },
   { type: 'context-bar' },
-  { type: 'auto-compact-warning' },
   { type: 'cwd' },
 ]
 
@@ -119,12 +118,12 @@ export const DEFAULT_DETAILED_LINE2: SegmentConfig[] = [
   { type: 'tokens-out' },
 ]
 
-// ── 辅助：色阶映射（§4.3 色阶约定，复用 theme.ts success/warning/error） ──
+// ── 辅助：色阶映射（§4.3 色阶约定，2026-10-05 §4b B2：cyan→黄 70%→红 90%） ──
 
 export function contextColorForPercentage(pct: number | null): string {
   if (pct == null) return 'gray'
-  if (pct < 50) return 'green' // success
-  if (pct <= 70) return 'yellow' // warning
+  if (pct < 70) return 'cyan' // B2：<70% 正常态（cyan，对齐 model 段）
+  if (pct <= 90) return 'yellow' // warning
   return 'red' // error
 }
 

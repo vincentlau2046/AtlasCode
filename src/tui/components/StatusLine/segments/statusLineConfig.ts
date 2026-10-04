@@ -23,9 +23,10 @@ import {
 // ── Schema（§9.4 安全红线：收紧，白名单 segment type） ────────────
 
 const SEGMENT_TYPES = [
-  // B1（2026-10-05 §4b）：role-fallback 段删除——回退信任线折入 model 段
-  // （ModelSegment 尾部黄 ↦ 尾标），statusline.json 白名单同步移除。
-  'model', 'auto-compact-warning', 'permission-mode', 'git-branch', 'git-files', 'git-combined', 'context-bar', 'tok-s',
+  // B1/B2（2026-10-05 §4b）：role-fallback / auto-compact-warning 段删除——
+  // 回退信任线折入 model 段（ModelSegment 尾部黄 ↦ 尾标），autoCompact 熔断
+  // 预警折入 context-bar 段（▲ 尾标），statusline.json 白名单同步移除。
+  'model', 'permission-mode', 'git-branch', 'git-files', 'git-combined', 'context-bar', 'tok-s',
   'session-duration',
   'tools-count', 'thinking-level', 'context-absolute',
   'cost', 'tokens-in', 'tokens-out', 'cwd', 'control-link',
