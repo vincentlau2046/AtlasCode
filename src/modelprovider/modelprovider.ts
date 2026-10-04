@@ -49,7 +49,28 @@ function isRetryableError(err: any): boolean {
   if (status) {
     return status === 400 || status === 408 || status === 429 || (status >= 500 && status < 600)
   }
-  const msg = String(err?.message || err?.code || '')
+  // #271 #4（2026-10-04，e2e loop-robustness「drop 断连穿越」判据）：openai SDK
+  // APIConnectionError 顶层 message 是固定文案 "Connection error."（无 errno 子串），
+  // 连接期 errno（ECONNRESET 等）在 error.cause.code 上——旧门只查顶层
+  // message/code → drop 断连判「不可重试」直接穿越给用户。检索面扩展：
+  // ① SDK 连接错误类名（APIConnectionError，连接期错误 = 定义可重试；用户 abort
+  //    是 APIUserAbortError 不同类，且 shouldRetryModelError 入口先判 signal.aborted）
+  // ② cause 链 code/message（同 gatewayUnreachableRemediationHint 的 #4 盲区同款面）。
+  // 超时 fail-fast 不受影响：APIConnectionTimeoutError/APITimeoutError 类族在
+  // shouldRetryModelError 入口被 isClientRequestTimeout 先拦（#260 语义保留）。
+  const name =
+    (typeof err?.name === 'string' && err.name) || err?.constructor?.name || ''
+  if (name === 'APIConnectionError') return true
+  const cause = err?.cause
+  const causeCode =
+    cause && typeof cause === 'object' && 'code' in cause
+      ? String((cause as { code?: unknown }).code ?? '')
+      : ''
+  const causeMsg =
+    cause && typeof cause === 'object' && 'message' in cause
+      ? String((cause as { message?: unknown }).message ?? '')
+      : ''
+  const msg = `${String(err?.message || err?.code || '')} ${causeCode} ${causeMsg}`
   return /timeout|ECONN|EPIPE|fetch failed|socket|aborted/i.test(msg)
 }
 
