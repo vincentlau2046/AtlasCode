@@ -138,7 +138,8 @@ export function WebFetchPermissionRequest(t0) {
               type: "addRules",
               rules: [ruleValue],
               behavior: "allow",
-              destination: "localSettings"
+              // 2026-10-05 §4b A1：always 规则落 session 域（resume sidecar 恢复）
+              destination: "session"
             }]);
             onDone();
             break bb8;

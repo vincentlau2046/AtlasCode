@@ -21,6 +21,7 @@ import { Select } from '../../CustomSelect/select.js';
 import { ShimmerChar } from '../../Spinner/ShimmerChar.js';
 import { useShimmerAnimation } from '../../Spinner/useShimmerAnimation.js';
 import { type UnaryEvent, usePermissionRequestLogging } from '../hooks.js';
+import { isDangerousShellPrefix } from '../../../utils/permissions/dangerousShellPrefix.js';
 import { PermissionDecisionDebugInfo } from '../PermissionDecisionDebugInfo.js';
 import { PermissionDialog } from '../PermissionDialog.js';
 import { PermissionExplainerContent, usePermissionExplainerUI } from '../PermissionExplanation.js';
@@ -329,7 +330,10 @@ function BashPermissionRequestInner({
       logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
       // 2026-10-04 P0a：用户批准标记（成功卡「为何放行」= 用户裁决）
       setUserApproval(toolUseConfirm.toolUseID);
-      if (!trimmedPrefix) {
+      // 2026-10-05 §4b A1：危险前缀（rm/sudo/cd/单字符/通配）降级为一次性
+      // 批准 —— 不写 session 规则（选项构造面已隐藏 always 选项，此为
+      // 用户手工改写前缀的兜底防线）
+      if (!trimmedPrefix || isDangerousShellPrefix(trimmedPrefix)) {
         toolUseConfirm.onAllow(toolUseConfirm.input, []);
       } else {
         const prefixUpdates: PermissionUpdate[] = [{
@@ -339,7 +343,8 @@ function BashPermissionRequestInner({
             ruleContent: trimmedPrefix
           }],
           behavior: 'allow',
-          destination: 'localSettings'
+          // 2026-10-05 §4b A1：session 域（resume sidecar 恢复）
+          destination: 'session'
         }];
         toolUseConfirm.onAllow(toolUseConfirm.input, prefixUpdates);
       }

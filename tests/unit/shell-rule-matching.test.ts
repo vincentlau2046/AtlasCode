@@ -149,24 +149,24 @@ describe('matchWildcardPattern', () => {
 // ── suggestion 两函数（PermissionUpdate 形状）──────────────────────
 
 describe('suggestionForExactCommand / suggestionForPrefix', () => {
-  test('exact 建议（addRules allow localSettings）', () => {
+  test('exact 建议（addRules allow session —— 2026-10-05 §4b A1 session 域）', () => {
     expect(suggestionForExactCommand('Bash', 'npm install')).toEqual([
       {
         type: 'addRules',
         rules: [{ toolName: 'Bash', ruleContent: 'npm install' }],
         behavior: 'allow',
-        destination: 'localSettings',
+        destination: 'session',
       },
     ])
   })
 
-  test('prefix 建议（ruleContent 归一 `:*` 语法）', () => {
+  test('prefix 建议（ruleContent 归一 `:*` 语法 + session 域）', () => {
     expect(suggestionForPrefix('Bash', 'npm')).toEqual([
       {
         type: 'addRules',
         rules: [{ toolName: 'Bash', ruleContent: 'npm:*' }],
         behavior: 'allow',
-        destination: 'localSettings',
+        destination: 'session',
       },
     ])
   })

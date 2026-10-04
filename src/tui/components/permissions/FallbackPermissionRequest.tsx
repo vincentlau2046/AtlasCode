@@ -84,7 +84,8 @@ export function FallbackPermissionRequest(t0) {
                 toolName: toolUseConfirm.tool.name
               }],
               behavior: "allow",
-              destination: "localSettings"
+              // 2026-10-05 §4b A1：always 规则落 session 域（resume sidecar 恢复）
+              destination: "session"
             }]);
             onDone();
             break bb8;

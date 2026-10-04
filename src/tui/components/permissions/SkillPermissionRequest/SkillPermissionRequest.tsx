@@ -220,7 +220,8 @@ export function SkillPermissionRequest(props) {
                 ruleContent: skill
               }],
               behavior: "allow",
-              destination: "localSettings"
+              // 2026-10-05 §4b A1：always 规则落 session 域（resume sidecar 恢复）
+              destination: "session"
             }]);
             onDone();
             break bb33;
@@ -245,7 +246,8 @@ export function SkillPermissionRequest(props) {
                 ruleContent: `${commandPrefix_0}:*`
               }],
               behavior: "allow",
-              destination: "localSettings"
+              // 2026-10-05 §4b A1：always 规则落 session 域（resume sidecar 恢复）
+              destination: "session"
             }]);
             onDone();
             break bb33;

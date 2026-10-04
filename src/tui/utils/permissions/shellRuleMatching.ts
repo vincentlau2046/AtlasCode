@@ -200,7 +200,9 @@ export function suggestionForExactCommand(
         },
       ],
       behavior: 'allow',
-      destination: 'localSettings',
+      // 2026-10-05 §4b A1：always 规则落 session 域（in-memory，resume 经
+      // session-rules sidecar 恢复、新 session 重置），不再写 localSettings 文件
+      destination: 'session',
     },
   ]
 }
@@ -222,7 +224,9 @@ export function suggestionForPrefix(
         },
       ],
       behavior: 'allow',
-      destination: 'localSettings',
+      // 2026-10-05 §4b A1：always 规则落 session 域（in-memory，resume 经
+      // session-rules sidecar 恢复、新 session 重置），不再写 localSettings 文件
+      destination: 'session',
     },
   ]
 }

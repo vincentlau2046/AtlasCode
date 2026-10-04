@@ -3,6 +3,7 @@ import { extractOutputRedirections } from '../../../utils/bash/commands.js';
 import type { PermissionDecisionReason } from '../../../utils/permissions/PermissionResult.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
+import { isDangerousShellPrefix } from '../../../utils/permissions/dangerousShellPrefix.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 import { generateShellSuggestionsLabel } from '../shellPermissionHelpers.js';
 export type BashToolUseOption = 'yes' | 'yes-apply-suggestions' | 'yes-prefix-edited' | 'yes-classifier-reviewed' | 'yes-auto-mode' | 'no';
@@ -79,8 +80,11 @@ export function bashToolUseOptions({
     });
   }
 
+  // 2026-10-05 §4b A1：危险前缀（rm/sudo/cd/单字符/通配）不出现 always 选项
+  // （editablePrefix 与 shell 建议规则任一命中危险判定即整块隐藏）
+  const alwaysDangerousBlocked = (editablePrefix !== undefined && isDangerousShellPrefix(editablePrefix)) || suggestions.some(s => s.type === 'addRules' && s.rules?.some(r => r.toolName === BASH_TOOL_NAME && r.ruleContent !== undefined && isDangerousShellPrefix(r.ruleContent)));
   // Only show "always allow" options when not restricted by allowManagedPermissionRulesOnly
-  if (shouldShowAlwaysAllowOptions()) {
+  if (shouldShowAlwaysAllowOptions() && !alwaysDangerousBlocked) {
     // Show an editable input for the prefix rule instead of the
     // Haiku-generated suggestion label — but only when the suggestions
     // don't contain non-Bash items (addDirectories, Read rules) that
