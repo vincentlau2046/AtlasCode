@@ -149,7 +149,8 @@ export function PermissionRequest(t0) {
     t1 = () => {
       onDone();
       onReject();
-      toolUseConfirm.onReject();
+      // 2026-10-05 §4b A 波 A2：Ctrl+C 中断 = 取消（abort），非显式 No
+      toolUseConfirm.onAbort();
     };
     $[0] = onDone;
     $[1] = onReject;

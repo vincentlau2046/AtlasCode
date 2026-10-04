@@ -169,6 +169,7 @@ function BashPermissionRequestInner({
     focusedOption,
     handleInputModeToggle,
     handleReject,
+    handleCancel,
     handleFocus
   } = useShellPermissionFeedback({
     toolUseConfirm,
@@ -455,7 +456,7 @@ function BashPermissionRequestInner({
             <Select options={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved ? options.map(o => ({
           ...o,
           disabled: true
-        })) : options : options} isDisabled={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false} inlineDescriptions onChange={onSelect} onCancel={() => handleReject()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
+        })) : options : options} isDisabled={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>

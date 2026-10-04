@@ -30,6 +30,7 @@ export function useShellPermissionFeedback({
   focusedOption: string
   handleInputModeToggle: (option: string) => void
   handleReject: (feedback?: string) => void
+  handleCancel: () => void
   handleFocus: (value: string) => void
 } {
   const setAppState = useSetAppState()
@@ -68,18 +69,6 @@ export function useShellPermissionFeedback({
     const trimmedFeedback = feedback?.trim()
     const hasFeedback = !!trimmedFeedback
 
-    // Log escape if no feedback was provided (user pressed ESC)
-    if (!hasFeedback) {
-      // Increment escape count for attribution tracking
-      setAppState(prev => ({
-        ...prev,
-        attribution: {
-          ...prev.attribution,
-          escapeCount: prev.attribution.escapeCount + 1,
-        },
-      }))
-    }
-
     logUnaryPermissionEvent(
       'tool_use_single',
       toolUseConfirm,
@@ -87,11 +76,40 @@ export function useShellPermissionFeedback({
       hasFeedback,
     )
 
+    // 2026-10-05 §4b A 波 A2：显式 No（可无 feedback）= 拒绝这一次，
+    // 消息送回 agent 继续运行，不 abort（onReject → buildReject）。
     if (trimmedFeedback) {
       toolUseConfirm.onReject(trimmedFeedback)
     } else {
       toolUseConfirm.onReject()
     }
+
+    onReject()
+    onDone()
+  }
+
+  /**
+   * 2026-10-05 §4b A 波 A2：Esc 取消 = abort 本轮（无 feedback 送回 agent），
+   * 与显式 No（handleReject）区分——Esc 走 onAbort。
+   */
+  function handleCancel() {
+    // Increment escape count for attribution tracking
+    setAppState(prev => ({
+      ...prev,
+      attribution: {
+        ...prev.attribution,
+        escapeCount: prev.attribution.escapeCount + 1,
+      },
+    }))
+
+    logUnaryPermissionEvent(
+      'tool_use_single',
+      toolUseConfirm,
+      'reject',
+      false,
+    )
+
+    toolUseConfirm.onAbort()
 
     onReject()
     onDone()
@@ -125,6 +143,7 @@ export function useShellPermissionFeedback({
     focusedOption,
     handleInputModeToggle,
     handleReject,
+    handleCancel,
     handleFocus,
   }
 }

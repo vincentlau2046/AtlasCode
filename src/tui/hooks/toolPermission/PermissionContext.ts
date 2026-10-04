@@ -142,21 +142,38 @@ function createPermissionContext(
       resolve(this.cancelAndAbort(undefined, true))
       return true
     },
-    cancelAndAbort(
-      feedback?: string,
-      isAbort?: boolean,
-      contentBlocks?: ContentBlockParam[],
-    ): PermissionDecision {
+    rejectMessage(feedback?: string): string {
       const sub = !!toolUseContext.agentId
       const baseMessage = feedback
         ? `${sub ? SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX : REJECT_MESSAGE_WITH_REASON_PREFIX}${feedback}`
         : sub
           ? SUBAGENT_REJECT_MESSAGE
           : REJECT_MESSAGE
-      const message = sub ? baseMessage : withMemoryCorrectionHint(baseMessage)
-      if (isAbort || (!feedback && !contentBlocks?.length && !sub)) {
+      return sub ? baseMessage : withMemoryCorrectionHint(baseMessage)
+    },
+    /**
+     * 2026-10-05 §4b A 波 A2：显式拒绝（"No" 选项，可带 feedback）——把拒绝
+     * 消息送回 agent 继续运行，**不 abort**。Esc/外部取消走 cancelAndAbort。
+     */
+    buildReject(
+      feedback?: string,
+      contentBlocks?: ContentBlockParam[],
+    ): PermissionDecision {
+      return {
+        behavior: 'ask',
+        message: this.rejectMessage(feedback),
+        contentBlocks,
+      }
+    },
+    cancelAndAbort(
+      feedback?: string,
+      isAbort?: boolean,
+      contentBlocks?: ContentBlockParam[],
+    ): PermissionDecision {
+      const message = this.rejectMessage(feedback)
+      if (isAbort || (!feedback && !contentBlocks?.length && !toolUseContext.agentId)) {
         logForDebugging(
-          `Aborting: tool=${tool.name} isAbort=${isAbort} hasFeedback=${!!feedback} isSubagent=${sub}`,
+          `Aborting: tool=${tool.name} isAbort=${isAbort} hasFeedback=${!!feedback}`,
         )
         toolUseContext.abortController.abort()
       }

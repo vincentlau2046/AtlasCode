@@ -201,7 +201,9 @@ function handleInteractivePermission(
         },
         { permissionPromptStartTimeMs },
       )
-      resolveOnce(ctx.cancelAndAbort(feedback, undefined, contentBlocks))
+      // 2026-10-05 §4b A 波 A2：显式 No = 拒绝这一次，feedback 送回 agent
+      // 继续运行（buildReject 不 abort）；Esc/取消走 onAbort（cancelAndAbort）。
+      resolveOnce(ctx.buildReject(feedback, contentBlocks))
     },
     async recheckPermission() {
       if (isResolved()) return
@@ -289,7 +291,8 @@ function handleInteractivePermission(
             },
             { permissionPromptStartTimeMs },
           )
-          resolveOnce(ctx.cancelAndAbort(response.message))
+          // 远端显式拒绝 = 用户拒绝（非取消）→ 不 abort（§4b A 波 A2）
+          resolveOnce(ctx.buildReject(response.message))
         }
       },
     )

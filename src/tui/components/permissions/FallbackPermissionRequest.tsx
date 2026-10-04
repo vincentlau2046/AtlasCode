@@ -126,7 +126,9 @@ export function FallbackPermissionRequest(t0) {
           platform: env.platform
         }
       });
-      toolUseConfirm.onReject();
+      // 2026-10-05 §4b A 波 A2：Esc 取消 = abort 无 feedback（显式 No 走
+      // onReject 不 abort，agent 继续）
+      toolUseConfirm.onAbort();
       onReject();
       onDone();
     };

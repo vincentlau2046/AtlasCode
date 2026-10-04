@@ -115,7 +115,9 @@ async function handleSwarmWorkerPermission(
             source: { type: 'user_reject', hasFeedback: !!feedback },
           })
 
-          resolveOnce(ctx.cancelAndAbort(feedback, undefined, contentBlocks))
+          // 2026-10-05 §4b A 波 A2：显式拒绝不 abort（worker 为 sub，本就
+          // 不 abort；与主 agent buildReject 语义对齐）
+          resolveOnce(ctx.buildReject(feedback, contentBlocks))
         },
       })
 

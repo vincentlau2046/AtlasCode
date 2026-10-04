@@ -48,6 +48,9 @@ export type PermissionOption = {
 } | {
   type: 'reject';
 } | {
+  // 2026-10-05 §4b A 波 A2：Esc 取消（合成选项，仅 Select.onCancel 产生）
+  type: 'cancel';
+} | {
   // 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode（门控可见时出现）
   type: 'accept-auto-mode';
 };

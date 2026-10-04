@@ -268,7 +268,8 @@ function AskUserQuestionPermissionRequestBody(t0) {
       }
       onDone();
       onReject();
-      toolUseConfirm.onReject();
+      // 2026-10-05 §4b A 波 A2：Esc 取消 = abort（显式 No 走 onReject 不 abort）
+      toolUseConfirm.onAbort();
     };
     $[25] = isInPlanMode;
     $[26] = metadataSource;

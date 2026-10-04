@@ -288,7 +288,9 @@ export function SkillPermissionRequest(props) {
           platform: env.platform
         }
       });
-      toolUseConfirm.onReject();
+      // 2026-10-05 §4b A 波 A2：Esc 取消 = abort（显式 No 带 feedback 走
+      // onReject 不 abort）
+      toolUseConfirm.onAbort();
       onReject();
       onDone();
     };

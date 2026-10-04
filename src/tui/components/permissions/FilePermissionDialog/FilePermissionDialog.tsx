@@ -189,7 +189,8 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
             onChange(selected.option);
           }
         }} onCancel={() => onChange({
-          type: 'reject'
+          // 2026-10-05 §4b A 波 A2：Esc 取消 = abort（显式 No 走 'reject' 不 abort）
+          type: 'cancel'
         })} onFocus={value_0 => setFocusedOption(value_0)} onInputModeToggle={handleInputModeToggle} />
         </Box>
       </PermissionDialog>

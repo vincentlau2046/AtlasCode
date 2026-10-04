@@ -158,6 +158,30 @@ function handleReject(
 }
 
 /**
+ * 2026-10-05 §4b A 波 A2：Esc 取消（合成的 {type:'cancel'} 选项）= abort
+ * 本轮、无 feedback 送回 agent。与显式 No（reject，agent 继续运行）区分。
+ */
+function handleCancel(
+  params: PermissionHandlerParams,
+  options?: PermissionHandlerOptions,
+): void {
+  const { messageId, toolUseConfirm, onDone, onReject, completionType, languageName } =
+    params
+
+  logPermissionEvent(
+    'reject',
+    completionType,
+    languageName,
+    messageId,
+    options?.hasFeedback,
+  )
+
+  onDone()
+  onReject()
+  toolUseConfirm.onAbort()
+}
+
+/**
  * 2026-10-04 issule 工单 Task A2：第 4 选项 = auto mode。切本 session 到
  * auto（transitionPermissionMode + 危险权限剥离），并把当前这 1 个 pending
  * 请求 re-dispatch 走 auto 门控（recheckPermission）：非危险工具 auto 放行
@@ -183,5 +207,6 @@ export const PERMISSION_HANDLERS: Record<
   'accept-once': handleAcceptOnce,
   'accept-session': handleAcceptSession,
   reject: handleReject,
+  cancel: handleCancel,
   'accept-auto-mode': handleAcceptAutoMode,
 }

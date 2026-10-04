@@ -55,6 +55,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     focusedOption,
     handleInputModeToggle,
     handleReject,
+    handleCancel,
     handleFocus
   } = useShellPermissionFeedback({
     toolUseConfirm,
@@ -216,7 +217,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
                 <Text color="warning">{destructiveWarning}</Text>
               </Box>}
             <Text>Do you want to proceed?</Text>
-            <Select options={options} inlineDescriptions onChange={onSelect} onCancel={() => handleReject()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
+            <Select options={options} inlineDescriptions onChange={onSelect} onCancel={() => handleCancel()} onFocus={handleFocus} onInputModeToggle={handleInputModeToggle} />
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>

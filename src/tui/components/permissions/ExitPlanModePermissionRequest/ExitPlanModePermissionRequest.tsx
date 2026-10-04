@@ -478,7 +478,8 @@ export function ExitPlanModePermissionRequest({
   handleCancelRef.current = () => {
     onDone();
     onReject();
-    toolUseConfirm.onReject();
+    // 2026-10-05 §4b A 波 A2：Esc 取消 = abort（显式 No 走 onReject 不 abort）
+    toolUseConfirm.onAbort();
   };
   const useStickyFooter = !isEmpty && !!setStickyFooter;
   useLayoutEffect(() => {
@@ -549,7 +550,8 @@ export function ExitPlanModePermissionRequest({
           }]} onChange={handleEmptyPlanResponse} onCancel={() => {
             onDone();
             onReject();
-            toolUseConfirm.onReject();
+            // 2026-10-05 §4b A 波 A2：Esc 取消 = abort（显式 No 走 onReject 不 abort）
+            toolUseConfirm.onAbort();
           }} />
           </Box>
         </Box>
