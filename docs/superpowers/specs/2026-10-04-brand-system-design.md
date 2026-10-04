@@ -91,7 +91,7 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 
 ### 3.1 形态规格
 
-5 行实心收敛三角，9 宽 × 5 高（与现有 `Clawd.tsx` `AH_ART` 槽位 9×5 + `logoV2Utils.ts` 布局常量 `MAX_LEFT_WIDTH=50` / clawd art 最小宽 20 兼容，零布局改动）。顶点光心靠颜色 + 脉冲动效传递，不靠字符形状：
+5 行实心收敛三角，9 宽 × 5 高（与现有 `Clawd.tsx` `AH_ART` 槽位 9×5 + `src/tui/utils/logoV2Utils.ts` 布局常量 `MAX_LEFT_WIDTH=50`（L18）/ `calculateOptimalLeftWidth`（L80）"Minimum for clawd art 20"（L89）兼容，零布局改动）。顶点光心靠颜色 + 脉冲动效传递，不靠字符形状：
 
 ```
     █          # amber    #FFB800  顶点光心（聚焦点，脉冲）
@@ -154,23 +154,25 @@ AtlasCode
 
 ### 4.3 主题映射（6 套，替换当前继承 Claude orange 的 brand/clawd_body）
 
-`theme.ts` 现有 6 套主题（default/dark/light/ANSI/deuteranopia/protanopia），全部 `brand` 当前 = `rgb(215,119,87)` "Claude orange"。本 spec 替换：
+`src/tui/utils/theme.ts` 现有 6 套主题（代码实测名，2026-10-05 核对）。`brand` 当前 3 值 ×2：`rgb(215,119,87)` `// Claude orange`（darkTheme:433 / lightTheme:116）、`ansi:redBright`（darkAnsiTheme:275 / lightAnsiTheme:196）、`rgb(255,153,51)` `// Orange adjusted for deuteranopia`（darkDaltonizedTheme:512 / lightDaltonizedTheme:354）——均属 Anthropic 橙族。本 spec 替换：
 
-| 主题 | brand | mark 渐变 | 备注 |
-|---|---|---|---|
-| default | `rgb(255,184,0)` amber | truecolor 5 档 | 主用 |
-| dark | `rgb(255,184,0)` amber | truecolor 5 档（底蓝调暗 `#0050CC`） | 深底对比度校验 |
-| light | `rgb(217,119,6)` amber-deep | truecolor 5 档（底蓝调亮） | 浅底对比度校验 |
-| ANSI | `ansi:yellowBright` | 两档 `blueBright`→`yellowBright` | 16 色终端 |
-| deuteranopia | `rgb(255,184,0)` amber | 蓝→金（色盲安全，绿盲用户可辨） | 已是色盲变体基底 |
-| protanopia | `rgb(255,184,0)` amber | 蓝→金（红盲用户可辨） | 同上 |
+| 主题（代码名 · 位置） | 当前 brand | 新 brand | mark 渐变 | 备注 |
+|---|---|---|---|---|
+| `darkTheme`（:430） | `rgb(215,119,87)` | `rgb(255,184,0)` amber | truecolor 5 档（底蓝调暗 `#0050CC`） | 深底对比度校验 |
+| `lightTheme`（:113） | `rgb(215,119,87)` | `rgb(217,119,6)` amber-deep | truecolor 5 档（底蓝调亮） | 浅底对比度校验（§4.4 AA） |
+| `darkAnsiTheme`（:272） | `ansi:redBright` | `ansi:yellowBright` | 两档 `blueBright`→`yellowBright` | 16 色终端 |
+| `lightAnsiTheme`（:193） | `ansi:redBright` | `ansi:yellowBright` | 同上 | 16 色终端 |
+| `darkDaltonizedTheme`（:509） | `rgb(255,153,51)` | `rgb(255,184,0)` | 蓝→金（色盲安全） | 色盲变体基底 |
+| `lightDaltonizedTheme`（:351） | `rgb(255,153,51)` | `rgb(255,184,0)` | 蓝→金（色盲安全） | 同上 |
+
+**brand 族 key 全量**：除 `brand` 外，`briefLabelAssistant`（theme.ts:172/488，当前 `rgb(215,119,87)` `// Brand orange`）同属品牌色 key，随同主题 brand 值同步映射（漏它会让 assistant 消息标签残留 Claude orange）。`clawd_body`/`clawd_background` 见 §8.1。
 
 **`clawd_body` 重命名** → `brand_mark`（去 Anthropic Clawd 命名残留），6 套主题同步改键名 + 值映射到渐变色板。
 
 ### 4.4 无障碍
 
 - **WCAG 对比度**：amber `#FFB800` 对深底（`#1e1e1e`）对比度 ≈ 10.3:1（AAA）；对浅底（`#ffffff`）≈ 1.8:1（不足）→ light 主题用 `amber-deep #D97706`（对比度 ≈ 4.6:1 AA）。spec 实施时用工具校验所有主题 brand 对 background 的对比度 ≥ AA 4.5:1。
-- **色盲**：deuteranopia/protanopia 变体用蓝→金渐变（蓝金轴对红绿色盲可辨），不依赖红绿区分。
+- **色盲**：2 套 daltonized 主题变体（代码注释标 deuteranopia adjusted，`theme.ts:354/512`）用蓝→金渐变（蓝金轴对红绿色盲可辨），不依赖红绿区分。
 - **动效**：顶点脉冲 + 光扫上爬 + tips 渐入等动效**始终开启**（不做 reduced-motion 探测，详见 §9.1）。
 
 ---
@@ -207,7 +209,7 @@ AtlasCode
 
 **不缩 mark 理由**：光锥 9 宽是设计最小单元，70col 终端留 60+col 给文本仍充足；3×3 mini 光锥会丢渐变层次（3 行承不了 5 档），破坏品牌识别。compact 模式只调布局间距，mark 形态不变。
 
-`logoV2Utils.ts` `calculateOptimalLeftWidth` 的 "Minimum for clawd art 20" 注释改为 "Minimum for beam art 9"（光锥更窄，布局更省）。
+`src/tui/utils/logoV2Utils.ts` `calculateOptimalLeftWidth`（L80）的 "Minimum for clawd art 20"（L89）注释改为 "Minimum for beam art 9"（光锥更窄，布局更省）。
 
 ---
 
@@ -309,11 +311,11 @@ export function buildWebFetchUserAgent(): string {
 
 ### 7.4 Spinner 动词池重写（最高频品牌人格触面 · 每次 LLM 推理显示）
 
-`src/tui/constants/spinnerVerbs.ts` 的 `SPINNER_VERBS`（188 个 whimsical 动词）+ `src/tui/components/Spinner.tsx:139-143` 主 spinner 渲染：每次 LLM 推理随机抽一个动词显示为 `· <verb>… (elapsed · ↓ tokens)` 状态行。
+`src/tui/constants/spinnerVerbs.ts` 的 `SPINNER_VERBS`（**186 个** whimsical 动词，代码实测 2026-10-05）+ `src/tui/components/Spinner.tsx:139`（`randomVerb` useState initializer）主 spinner 渲染：挂载时随机抽一个动词，显示为 `· <verb>… (elapsed · ↓ tokens)` 状态行。
 
 **现状问题**：
 - L45 `'Clauding'` —— Anthropic Claude 品牌串直接混在动词池（用户看到的 `· clauding…` 来源）
-- 整个 188 动词池是 Claude Code fork 的"幽默 whimsical"人格（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting`…）——Anthropic Claude 品牌人格表达，非 AtlasCode 调性
+- 整个 186 动词池是 Claude Code fork 的"幽默 whimsical"人格（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting`…）——Anthropic Claude 品牌人格表达，非 AtlasCode 调性
 - `turnCompletionVerbs.ts` 8 个过去式（`Baked`/`Brewed`/`Cogitated`…）同款 whimsical 调性
 
 **重写方向（已定 · 算力 + 意象混合池）**：
@@ -347,7 +349,7 @@ export const SPINNER_VERBS = [
   'Philosophising', 'Pontificating', 'Deciphering', 'Perusing', 'Mulling',
   // 愿景（承载知识、构想未来——Atlas 权威地图集语义）
   'Envisioning', 'Determining', 'Mustering', 'Musing', 'Discerning',
-  // ── 趣味轴（26）：从 fork 原 188 池保留有算力/构造/物理意象的幽默动词 ──
+  // ── 趣味轴（26）：从 fork 原 186 池保留有算力/构造/物理意象的幽默动词 ──
   // 算力化学/相变意象（加热、结晶、电离——幽默呼应算力升温）
   'Brewing', 'Cooking', 'Crystallizing', 'Caramelizing', 'Fermenting',
   'Ionizing', 'Photosynthesizing', 'Percolating', 'Simmering', 'Stewing',
@@ -369,9 +371,10 @@ export const SPINNER_VERBS = [
 - **算力轴**（45 个）：编译/推理/优化/编排等 coding agent + NPU 算力语义，含 `Tiling`/`Fusing`/`Lowering`/`Quantizing`/`Transpiling` 等 Ascend 算子开发专属动词（AtlasCode 差异化能力）
 - **意象轴**（25 个）：`Ascending`/`Climbing`/`Summiting` 直扣 Ascend 擎天攀升，`Converging`/`Focusing`/`Beaming`/`Illuminating` 呼应光锥收敛聚焦，`Pioneering`/`Catalyzing`/`Amplifying`/`Accelerating` 传递算力加速——纯动势，不混入思辨动词
 - **哲学轴**（20 个）：**Atlas 擎天智者/权威地图集语义**——深度思辨（`Reasoning`/`Pondering`/`Deliberating`/`Reflecting`/`Cerebrating`/`Cogitating`/`Ruminating`/`Contemplating`）、追问本质（`Philosophising`/`Pontificating`/`Deciphering`/`Perusing`/`Mulling`/`Discerning`）、愿景与知识承载（`Envisioning`/`Determining`/`Mustering`/`Musing`/`Imagining`/`Considering`）。与光锥 mark 的一动一静互补——光锥是上升聚焦动势，哲学是沉淀深度思辨；同时诚实表达 LLM 推理时在"思考"
-- **趣味轴**（27 个）：**从 fork 原 188 池保留**有算力/构造/物理意象的幽默动词——算力化学相变（`Crystallizing`/`Caramelizing`/`Ionizing`/`Fermenting`，幽默呼应算力升温）、烹饪数据双关（`Julienning`/`Whisking`/`Kneading`，Tiling/Hashing 的趣味版）、探索执行（`Spelunking` 深挖代码库/`Warping` 算力加速扭曲）。**保留 fork 品牌人格的趣味性，但只留与算力/构造/物理意象同调的**，排除纯荒诞词（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting` 等）和 fork 专属梗（`Clauding`/`Gitifying`/`Hyperspacing`/`Quantumizing`）
+- **趣味轴**（27 个）：**从 fork 原 186 池保留**有算力/构造/物理意象的幽默动词——算力化学相变（`Crystallizing`/`Caramelizing`/`Ionizing`/`Fermenting`，幽默呼应算力升温）、烹饪数据双关（`Julienning`/`Whisking`/`Kneading`，Tiling/Hashing 的趣味版）、探索执行（`Spelunking` 深挖代码库/`Warping` 算力加速扭曲）。**保留 fork 品牌人格的趣味性，但只留与算力/构造/物理意象同调的**，排除纯荒诞词（`Beboppin'`/`Discombobulating`/`Flibbertigibbeting`/`Razzmatazzing`/`Shenaniganing`/`Tomfoolering`/`Whatchamacalliting` 等）和 fork 专属梗（`Clauding`/`Gitifying`/`Hyperspacing`/`Quantumizing`）
 - **通用收尾**（13 个）：`Working`/`Processing`/`Thinking` 等保多样性，避免高频重复显眼
-- **共 ~130 个**（vs fork 188 个）——保 69% 体量，零跨轴重复已校验；四轴覆盖算力硬核（45）+ 光锥动势（25）+ 哲学深度（20）+ 趣味幽默（27）+ 通用（13），品牌人格立体；12s 轮播周期 26min，远超典型会话，用户感知重复率低
+- **共 ~130 个**（vs fork 186 个）——保 70% 体量，零跨轴重复已校验；四轴覆盖算力硬核（45）+ 光锥动势（25）+ 哲学深度（20）+ 趣味幽默（27）+ 通用（13），品牌人格立体
+- **重复率机制澄清**（2026-10-05 代码核对）：spinner 动词**不是 12s 轮播**——`Spinner.tsx:139` 是挂载时 `useState` 一次性 `sample()`，`TeammateSpinnerLine.tsx:80-81` / `spawnInProcess.ts:171-172` 各自挂载/回合时重抽，`SystemTextMessage.tsx:591` 每回合完成时抽过去式。130 池 + 每挂载/每回合重抽，用户感知重复率比轮播更低
 
 **`turnCompletionVerbs.ts` 同步重写**（过去式，`<verb> for <duration>`）：
 ```ts
@@ -389,15 +392,15 @@ export const TURN_COMPLETION_VERBS = [
 
 **核查清单**（实施时验证）：
 - [ ] `grep -rni "clauding" src/` 排除 insights.ts multi-clauding 内部术语后 = 0
-- [ ] `turnCompletionVerbs.ts` 过去式同步重写
-- [ ] 主 spinner + TeammateSpinnerLine + spawnInProcess.ts 三处消费方验证
+- [ ] `turnCompletionVerbs.ts` 过去式同步重写（8 个 → 20 个新池）
+- [ ] 动词池 4 处消费方验证：`Spinner.tsx:139`（主 spinner）/ `TeammateSpinnerLine.tsx:80-81` / `spawnInProcess.ts:171-172` / `SystemTextMessage.tsx:591`（回合完成过去式）
 - [ ] e2e 基线（若含 spinner 动词快照）重生成
 
 ### 7.5 built-in agents Claude 文案去 fork 化（全 6 agent 核查）
 
 **核查范围**：`src/tui/tools/AgentTool/built-in/` 全 6 个 agent 文件。
 
-**① atlasCodeGuideAgent.ts**（重灾区，9 处）：
+**① atlasCodeGuideAgent.ts**（重灾区，9 处改 + 1 处保留）：
 
 | 行 | 当前 | 改为 |
 |---|---|---|
@@ -410,6 +413,7 @@ export const TURN_COMPLETION_VERBS = [
 | L61 | `**Claude API docs** … Claude API (formerly the Anthropic API)` | `**Atlas API docs** … Atlas API` |
 | L63 | `Anthropic-defined tools (computer use, code execution…)` | `vendor-defined tools (computer use, code execution…)` |
 | L95 | `whenToUse: … ("Can Claude...", "Does Claude...") … Claude Agent SDK … Claude API (formerly Anthropic API) … Anthropic SDK usage` | `… ("Can Atlas...", "Does Atlas...") … Atlas Agent SDK … Atlas API … Atlas SDK usage` |
+| L95b | whenToUse 尾部 `check if there is already a running or recently completed claude-code-guide agent`（**stale 内部引用**：`L20 ATLAS_GUIDE_AGENT_TYPE = 'atlas-code-guide'`，agentType 已改 Atlas 名但 L95 仍指旧类型名 `claude-code-guide`，该类型名已不存在于注册表） | `atlas-code-guide`（2026-10-05 代码核对补入；内部 agent 类型名引用非品牌面，随本处一并修正） |
 
 **② exploreAgent.ts:80 + planAgent.ts:90** `omitClaudeMd: true`：
 - flag 名指 CLAUDE.md 记忆文件（AtlasCode 用 ATLAS.md）
@@ -423,7 +427,7 @@ export const TURN_COMPLETION_VERBS = [
 **④ generalPurposeAgent.ts / statuslineSetup.ts**：核查无 Claude 残留（✅ 干净）。
 
 **核查清单**（实施时验证）：
-- [ ] atlasCodeGuideAgent.ts L29/35/37/52/59/61/63/95 共 8 处改 Claude→Atlas
+- [ ] atlasCodeGuideAgent.ts L29/35/37/52/59/61/63/95/95b 共 9 处改 Claude→Atlas（含 L95b `claude-code-guide`→`atlas-code-guide`）
 - [ ] L18 `platform.claude.com` URL 保留（外部文档源）
 - [ ] exploreAgent/planAgent `omitClaudeMd` 保留（内部 flag，归 F 波）
 - [ ] verificationAgent `claude-in-chrome` 保留（外部 MCP 工具名）
@@ -462,13 +466,15 @@ export const TURN_COMPLETION_VERBS = [
 
 ### 8.2 pose 机制废弃（已定 · 重写上爬动效）
 
-现有 `AnimatedClawd.tsx` 支持 `ClawdPose = 'default' | 'arms-up' | 'look-left' | 'look-right'`（Anthropic Clawd 吉祥物的手臂/眼睛动画，仅在 `CondensedLogo.tsx:44` 全屏模式 `isFullscreenEnvEnabled()` 时触发；普通 TUI `<Clawd />` 静态不触发）。光锥是抽象图形无肢体，pose 机制**整体废弃**，重写为单一"光扫上爬"动效（§2.2 loading 动效）——光锥从底向顶逐行点亮即 Ascend 攀升的微缩表演，品牌语义一致。
+现有 `AnimatedClawd.tsx` 支持 `ClawdPose = 'default' | 'arms-up'`（2 态，`Clawd.tsx:5`；`arms-up` 跳动作帧 + `APPLE_EYES` 眼睛帧，仅 `CondensedLogo.tsx:44` 全屏模式 `isFullscreenEnvEnabled()` 时触发；普通 TUI `<Clawd />` 静态不触发）。光锥是抽象图形无肢体，pose 机制**整体废弃**，重写为单一"光扫上爬"动效（§2.2 loading 动效）——光锥从底向顶逐行点亮即 Ascend 攀升的微缩表演，品牌语义一致。
 
 **保留**：react compiler runtime `$[n]` memo cache 结构（性能关键，14KB 缓存逻辑不动）、`AppleTerminalClawd` 分支（Apple Terminal 渲染降级，改名为 `AppleTerminalBeam`，保降级逻辑换 art 内容）。
 
 ### 8.3 AnimatedAsterisk 处理
 
-`src/tui/components/LogoV2/AnimatedAsterisk.tsx`（7.5KB）是 Anthropic Claude ✦ mark 的动画残留。本 spec **删除**（AtlasCode 不用星号 mark，光锥 mark 用 Beam.tsx 统一）。grep 确认无消费方后删。
+`src/tui/components/LogoV2/AnimatedAsterisk.tsx`（7.5KB）是 Anthropic Claude ✦ mark 的动画残留。本 spec **删除**（AtlasCode 不用星号 mark，光锥 mark 用 Beam.tsx 统一）。
+
+**消费方处置**（2026-10-05 代码核对，**有 1 个消费方**，非"零消费"）：`VoiceModeNotice.tsx:9,57`（语音模式通知的 ✦ 动画）。处置：VoiceModeNotice 先改渲染 `▀` 光锥顶点静态色块（brand_mark 色，§7.3 同 prefix 语言），再删 `AnimatedAsterisk.tsx`。实施时 grep `AnimatedAsterisk` 全 src 复核（当前仅此 1 消费方）。
 
 ### 8.4 mark art 数据结构
 
@@ -535,9 +541,9 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | commit/PR 签名 `🤖 Generated with [AtlasHarness]` | AtlasHarness 品牌名 × 3 处 | → `[${PRODUCT_BRAND}]`（§7.2） |
 | 闲时 tips prefix `·` | 中性点，无品牌 | → `▀` 光锥顶点色块（§7.3） |
 | guideAgent `Claude Agent SDK` / `Claude API` 文案 | Anthropic 产品名 × 3 处 | → `Atlas Agent SDK` / `Atlas API`（§7.5） |
-| spinner 动词池 188 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象+哲学+趣味四轴 ~130 个（保 69%，§7.4） |
+| spinner 动词池 186 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象+哲学+趣味四轴 ~130 个（保 70%，§7.4） |
 | spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
-| guideAgent `Claude` × 8 处 + `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 8 处改 Atlas；flag/MCP 名保留（§7.5） |
+| guideAgent `Claude` × 9 处（含 L95b stale `claude-code-guide` 引用）+ `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 9 处改 Atlas；flag/MCP 名保留（§7.5） |
 
 ### 10.3 UA 品牌串标准（请求头识别面）
 
@@ -565,7 +571,7 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 4. **`Atlas-User` 保留**：WebFetch 对外 agent 名（站点 operator robots.txt 匹配串，已文档化），非品牌串标准化对象
 5. **delta ⑥ 版本段缺口收口**：engine ⑤ 恢复版本段（与 ④ 对齐），版本段统一走 identity `getVersion()`（process.argv[1] 上行走算法，dev/npm 两态一致）
 
-**非对象**：billing header `cc_version`（`x-atlas-billing-header`，`constants/system.ts:76`）与 MCP server_name `atlascode`（L7 内部层）不涉及本条。
+**非对象**：billing header `cc_version`（`x-atlas-billing-header`，`constants/system.ts:76`）与 MCP server_name `atlascode`（L7 内部层）不涉及本条。`http.ts:53-57` 的 WebFetch UA 描述注释块（"trailing repo link identifies the product" 等）无字面 `+`，改后描述仍为真，**不改**。
 
 ### 10.4 系统提示词自我认知
 
@@ -689,7 +695,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 ### 14.4 验收 gate
 
 - [ ] `grep -rn "AtlasHarness" --include="*.ts" --include="*.tsx" src/` 排除注释行后 = 0（CI grep 门，charter L8 ③ review 桶加一条）
-- [ ] `grep -rn '+https://github' src/` = 0（UA 品牌串无字面 `+`，§10.3）
+- [ ] `grep -rnF '+https://github' src/` = 0 **且** `grep -rnF '+${REPOSITORY_URL}' src/` = 0（UA 品牌串无字面 `+`，§10.3；后者覆盖 `identity.ts:52` 模板形态，两条都要跑）
 - [ ] repo URL 字面量 src/ 内仅 `shared/identity.ts`（REPOSITORY_URL）一处，UA 4 触面 import 化（§10.3 规则 2）
 - [ ] WebFetch engine 静态串带版本段（delta ⑥ 收口）：`Atlas-User (AtlasCode/<v>; repo)`（§10.3 ⑤）
 - [ ] TUI 启动屏真机截图（≥3 终端）显 AtlasCode + 光锥 mark + 暖金顶点
@@ -698,7 +704,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 - [ ] 闲时 tips prefix 显 `▀` 光锥顶点色块（§7.3）
 - [ ] spinner 动词池无 `Clauding`，动词为算力+意象+哲学+趣味四轴 ~130 个（§7.4）
 - [ ] spinner `· <verb>…` prefix 显 `▀` 光锥顶点色块
-- [ ] atlasCodeGuideAgent 8 处 Claude→Atlas（§7.5）
+- [ ] atlasCodeGuideAgent 9 处 Claude→Atlas（含 L95b `claude-code-guide`→`atlas-code-guide`，§7.5）
 - [ ] compact 模式（<70col）mark 保持完整 9×5 不缩（§5.1）
 - [ ] 6 套主题 brand 色对比度 ≥ AA
 - [ ] 动效始终开启（顶点脉冲/光扫上爬/tips 渐入在所有环境渲染）
