@@ -4,6 +4,34 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.19
+
+P0a 可解释审批波（spec `docs/tui-differentiation-spec.md` §4-P0a；验收单 b8
+lane `user-e2e/tui-diff/PLAN.md` §3）：审批卡默认可见「为什么」一行（零新数据
+零边界——不碰 `src/engine/query/`、`src/tui/utils/permissions/` 主路径）：
+
+- **verdict 一行纯面**（`src/tui/components/permissions/permissionVerdict.ts`
+  新）：对 `PermissionDecisionReason` 判别联合的只读投影。verdict 三态（spec §1
+  钉死）：rule 命中 → `Verdict: hit <behavior> rule "<rule>" from <source>`；
+  auto-mode → `Verdict: <classifier> classifier says: <reason>`；mode/other →
+  `Verdict: no rule matched — <Mode> mode asks you`。数值置信度不出现（真实
+  shape 无此字段，bash classifier 的 high|medium|low 是 ANT-only stub）。
+- **ask 面弹框默认可见 verdict 行**（BashPermissionRequest +
+  PowerShellPermissionRequest）：弹框打开即显示「为何在问你」，无需展开。
+- **allow 面成功卡 verdict 行 + 用户批准标记**（`src/tui/utils/userApprovals.ts`
+  新 + UserToolSuccessMessage）：手动批准 → `✓ Allowed · your decision`（挂载读取
+  + 立即删除防 Map 无界增长，classifierApprovals 同模式）；auto-mode classifier
+  放行 → `Allowed by auto mode classifier: <reason>`（仅 auto/plan 模式，
+  useCanUseTool 门 classifier==='auto-mode'）。
+- **allow 面批准标记行对无结果渲染器工具存活**（b8 第 4 轮 cardAllow 修）：
+  `successCardRenderMode(renderedMessage, userApproved)` 纯判定（full/marker/skip）
+  ——TUI-lane Bash 桥接适配器无 `renderToolResultMessage` 成员时，原
+  `renderedMessage === null` 早退把已 `setUserApproval` 的批准标记行一并跳过；
+  修后 marker 形仅渲染标记行，未批准工具零行为变更。
+
+四件套：tsc 0 / lint 0e·0w / build cli.js 17.55MB / 全量 3411/0·230。b8 PTY
+验收 PASS（hardFail=0，ticket `P0a-1791086138730-9de6`）。
+
 ## v0.1.18
 
 TUI 工单 A1+B+C+A2（issule-analyst 2026-10-04，`docs/2026-10-04-config-skill-automode-implement.md`；
