@@ -26,6 +26,8 @@ import { PermissionDialog } from '../PermissionDialog.js';
 import { PermissionExplainerContent, usePermissionExplainerUI } from '../PermissionExplanation.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
 import { PermissionRuleExplanation } from '../PermissionRuleExplanation.js';
+import { verdictLine } from '../permissionVerdict.js';
+import { setUserApproval } from '../../../utils/userApprovals.js';
 import { SedEditPermissionRequest } from '../SedEditPermissionRequest/SedEditPermissionRequest.js';
 import { useShellPermissionFeedback } from '../useShellPermissionFeedback.js';
 import { logUnaryPermissionEvent } from '../utils.js';
@@ -324,6 +326,8 @@ function BashPermissionRequestInner({
     if (value_0 === 'yes-prefix-edited') {
       const trimmedPrefix = (editablePrefix ?? '').trim();
       logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
+      // 2026-10-04 P0a：用户批准标记（成功卡「为何放行」= 用户裁决）
+      setUserApproval(toolUseConfirm.toolUseID);
       if (!trimmedPrefix) {
         toolUseConfirm.onAllow(toolUseConfirm.input, []);
       } else {
@@ -344,6 +348,8 @@ function BashPermissionRequestInner({
     if (feature('BASH_CLASSIFIER') && value_0 === 'yes-classifier-reviewed') {
       const trimmedDescription = classifierDescription.trim();
       logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
+      // 2026-10-04 P0a：用户批准标记（成功卡「为何放行」= 用户裁决）
+      setUserApproval(toolUseConfirm.toolUseID);
       if (!trimmedDescription) {
         toolUseConfirm.onAllow(toolUseConfirm.input, []);
       } else {
@@ -373,6 +379,8 @@ function BashPermissionRequestInner({
         {
           const trimmedFeedback_0 = acceptFeedback.trim();
           logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
+          // 2026-10-04 P0a：用户批准标记（成功卡「为何放行」= 用户裁决）
+          setUserApproval(toolUseConfirm.toolUseID);
           // Log accept submission with feedback context
           toolUseConfirm.onAllow(toolUseConfirm.input, [], trimmedFeedback_0 || undefined);
           onDone();
@@ -381,6 +389,8 @@ function BashPermissionRequestInner({
       case 'yes-apply-suggestions':
         {
           logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
+          // 2026-10-04 P0a：用户批准标记（成功卡「为何放行」= 用户裁决）
+          setUserApproval(toolUseConfirm.toolUseID);
           // Extract suggestions if present (works for both 'ask' and 'passthrough' behaviors)
           const permissionUpdates_0 = 'suggestions' in toolUseConfirm.permissionResult ? toolUseConfirm.permissionResult.suggestions || [] : [];
           toolUseConfirm.onAllow(toolUseConfirm.input, permissionUpdates_0);
@@ -399,6 +409,9 @@ function BashPermissionRequestInner({
         }
     }
   }
+  // 2026-10-04 P0a 可解释审批：ask 态默认可见 verdict 一行（为何在问你；
+  // 三态 rule/classifier/mode 见 permissionVerdict.ts，零新数据只读投影）
+  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode);
   const classifierSubtitle = feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved ? <Text>
         <Text color="success">{figures.tick} Auto-approved</Text>
         {toolUseConfirm.classifierMatchedRule && <Text dimColor>
@@ -429,6 +442,7 @@ function BashPermissionRequestInner({
             </Box>}
         </> : <>
           <Box flexDirection="column">
+            {verdictLineText !== null && <Text dimColor>{verdictLineText}</Text>}
             <PermissionRuleExplanation permissionResult={toolUseConfirm.permissionResult} toolType="command" />
             {destructiveWarning_0 && <Box marginBottom={1}>
                 <Text color="warning" dimColor={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false}>
