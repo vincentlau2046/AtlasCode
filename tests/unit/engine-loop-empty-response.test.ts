@@ -6,18 +6,32 @@
  * 末轮 emptyTerminated 标识。fake LLM 分「先空后实」（验重试恢复）与「恒空」（验
  * 重试仍空 → empty=true）两种，非 tautology：断言的是 loop 的空判定/重试调度/末轮
  * 标识，非 fake 自证。I/O-free（无盘/无网络/无 PTY）→ unit 层。
+ *
+ * #271 #5（0.1.23，e2e「empty 0-0 有界重试判据」）：网关 0/0 占位响应经
+ * OpenAI 协议映射 = provider 合成占位块（PROVIDER_EMPTY_CONTENT_PLACEHOLDER，
+ * usage 0/0）；旧空判定把占位块当非空 text → 有界重试/空终止提示全不触发
+ * （静默穿越，e2e empty 场景 FAIL）。⑧⑩ 判别（修前红：占位被当非空 → 不重试、
+ * empty=false）；⑨ 占位+实内容共存 → 非空（防「有占位即空」过度修）。
  */
 import { describe, test, expect } from 'bun:test'
 import { queryOneRound, queryAgentLoop } from '../../src/engine'
 import type { AgentLoopDeps } from '../../src/engine'
-import type { ModelProvider, ModelRole } from '../../src/modelprovider'
+import { PROVIDER_EMPTY_CONTENT_PLACEHOLDER, type ModelProvider, type ModelRole } from '../../src/modelprovider'
 import type { Message } from '../../src/shared'
 
 const NOT_EXERCISED = async () => {
   throw new Error('fake ModelProvider: 方法未被 loop 消费')
 }
 
-type Resp = { content: unknown[]; stopReason?: string }
+type Usage = {
+  input_tokens: number
+  output_tokens: number
+  cache_read_input_tokens: number
+  cache_creation_input_tokens: number
+}
+type Resp = { content: unknown[]; stopReason?: string; usage?: Usage }
+
+const DEFAULT_USAGE: Usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 
 /** fake LLM：按调用序返回 responses（超出长度取末条），计数 chat 调用次数。 */
 function makeProvider(responses: Resp[]): { provider: ModelProvider; calls: () => number } {
@@ -36,7 +50,7 @@ function makeProvider(responses: Resp[]): { provider: ModelProvider; calls: () =
           role: 'assistant',
           content: r.content,
           stop_reason: r.stopReason ?? 'end_turn',
-          usage: { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+          usage: r.usage ?? DEFAULT_USAGE,
         },
       }
     },
@@ -54,6 +68,12 @@ function makeProvider(responses: Resp[]): { provider: ModelProvider; calls: () =
 const EMPTY: Resp = { content: [] }
 const TEXT: Resp = { content: [{ type: 'text', text: 'done' }] }
 const THINKING_ONLY: Resp = { content: [{ type: 'thinking', thinking: 'hmm' }] }
+// #271 #5：网关 0/0 占位响应经 provider 映射的合成占位块（usage 0/0 忠实 e2e 场景）
+const USAGE_00: Usage = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
+const PLACEHOLDER_00: Resp = {
+  content: [{ type: 'text', text: PROVIDER_EMPTY_CONTENT_PLACEHOLDER }],
+  usage: USAGE_00,
+}
 
 describe('R1 空内容响应：queryOneRound 有界重试 + empty 标识', () => {
   test('① 先空后实：首次空 → 重试 1 次取实内容，empty=false 且共 2 次 LLM 调用', async () => {
@@ -119,5 +139,36 @@ describe('R1 空内容响应：queryAgentLoop 末轮 emptyTerminated', () => {
     })
     expect(r.terminated).toBe(true)
     expect(r.emptyTerminated).toBe(false)
+  })
+})
+
+describe('#271 #5 网关 0/0 占位响应（provider 合成占位块）走空判定 + 有界重试', () => {
+  test('⑧ 恒占位（usage 0/0）= 空：重试仍空 → empty=true 且共 2 次 LLM 调用（修前红=占位被当非空）', async () => {
+    const { provider, calls } = makeProvider([PLACEHOLDER_00, PLACEHOLDER_00])
+    const deps: AgentLoopDeps = { modelProvider: provider, role: 'small' as ModelRole }
+    const r = await queryOneRound(deps, [], [{ role: 'user', content: 'hi' }] as Message[])
+    expect(r.empty).toBe(true) // 占位 ≠ 模型产出 → 空
+    expect(calls()).toBe(2) // 初调 1 + 有界重试 1（仍占位）
+  })
+
+  test('⑨ 占位 + 实内容共存：真实 text 仍算非空（防「有占位即空」过度修），无重试', async () => {
+    const { provider, calls } = makeProvider([
+      { content: [{ type: 'text', text: PROVIDER_EMPTY_CONTENT_PLACEHOLDER }, { type: 'text', text: 'done' }] },
+    ])
+    const deps: AgentLoopDeps = { modelProvider: provider, role: 'small' as ModelRole }
+    const r = await queryOneRound(deps, [], [{ role: 'user', content: 'hi' }] as Message[])
+    expect(r.empty).toBe(false) // 实内容在 → 非空（占位块只是被忽略，不是「有占位即空」）
+    expect(calls()).toBe(1) // 非空不重试
+  })
+
+  test('⑩ queryAgentLoop 末轮恒占位：emptyTerminated=true 且 lastRound.empty=true（e2e 判据 loop 面）', async () => {
+    const { provider } = makeProvider([PLACEHOLDER_00, PLACEHOLDER_00])
+    const deps: AgentLoopDeps = { modelProvider: provider, role: 'small' as ModelRole }
+    const r = await queryAgentLoop(deps, {
+      messages: [{ role: 'user', content: 'hi' }],
+    })
+    expect(r.terminated).toBe(true)
+    expect(r.emptyTerminated).toBe(true)
+    expect(r.lastRound?.empty).toBe(true)
   })
 })

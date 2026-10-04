@@ -44,6 +44,17 @@ function mapOpenAIUsage(u: any): ModelUsage {
   }
 }
 
+/**
+ * #271 #5（2026-10-04，e2e loop-robustness「empty 0-0 有界重试判据」）：
+ * provider 合成占位块文案——网关 0/0 占位响应（无 text / 无 tool_call /
+ * 无 reasoning）经 OpenAI 协议映射后无真实内容块，合成此占位 text 块供
+ * 渲染面有可见产出。单一定义 = 单一事实源：engine loop 空判定
+ * （queryOneRound isEmptyContent）据此把占位块排除出「非空」判据（占位 ≠
+ * 模型产出），0/0 占位响应走 R1 有界重试 + 空终止提示，不再伪装非空
+ * 内容静默穿过。
+ */
+export const PROVIDER_EMPTY_CONTENT_PLACEHOLDER = '(provider: empty response)'
+
 function isRetryableError(err: any): boolean {
   const status = err?.status ?? err?.response?.status
   if (status) {
@@ -369,7 +380,7 @@ export class OpenAIProvider implements ModelProvider {
           const text = typeof msg?.content === 'string' ? msg.content : ''
           if (text) content.push({ type: 'text', text })
           content.push(...toolUseBlocks)
-          if (content.length === 0) content.push({ type: 'text', text: '(provider: empty response)' })
+          if (content.length === 0) content.push({ type: 'text', text: PROVIDER_EMPTY_CONTENT_PLACEHOLDER })
           const stopReason =
             toolUseBlocks.length > 0
               ? 'tool_use'
@@ -578,7 +589,7 @@ export class OpenAIProvider implements ModelProvider {
       })
     contentBlocks.push(...toolUseBlocks)
     if (contentBlocks.length === 0) {
-      contentBlocks.push({ type: 'text', text: '(provider: empty response)' })
+      contentBlocks.push({ type: 'text', text: PROVIDER_EMPTY_CONTENT_PLACEHOLDER })
     }
 
     const stopReason =

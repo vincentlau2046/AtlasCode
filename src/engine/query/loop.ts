@@ -42,7 +42,7 @@ import {
   type ToolUseBlock,
   type Tools,
 } from '../../shared'
-import type { ModelProvider, ModelRole } from '../../modelprovider'
+import { PROVIDER_EMPTY_CONTENT_PLACEHOLDER, type ModelProvider, type ModelRole } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
 import { withTurnRecovery } from './turnRecovery'
 import { runToolBatch, type PermissionGate } from '../pipeline'
@@ -282,13 +282,22 @@ export async function queryOneRound(
   let assistantContent: unknown[] = resp.message.content ?? []
   // 空内容判据：无非空 text 块且无 tool_use 块（仅 thinking / 全空 = 空响应）。
   // 与 terminal 判据（toolUses 空）同源但更宽：正常 end_turn 含 text 块 → 非空。
+  // #271 #5（0.1.23，e2e「empty 0-0 有界重试判据」）：provider 合成占位块
+  // （PROVIDER_EMPTY_CONTENT_PLACEHOLDER = 网关 0/0 占位响应标记，非模型产出）
+  // 不计入「非空」——否则 0/0 占位响应伪装成非空 text 块 → 空判定 / R1 有界
+  // 重试 / emptyTerminated 用户可见提示全不触发（静默穿越，e2e empty 场景 FAIL）。
+  // 不用 usage 0/0 作独立判据：mapOpenAIUsage 对缺 usage 字段的响应归一 0/0，
+  // 纯 usage 判别会误伤真内容；占位标记才是 provider「真无内容」的精确信号
+  // （仅 content 全空时合成，真实产出路径恒无占位）。
   const isEmptyContent = (content: unknown): boolean => {
     if (!Array.isArray(content)) return true
     return !content.some(block => {
       const b = block as { type?: string; text?: unknown } | null
       if (!b) return false
       if (b.type === 'tool_use') return true
-      return b.type === 'text' && String(b.text ?? '').trim() !== ''
+      if (b.type !== 'text') return false
+      const t = String(b.text ?? '').trim()
+      return t !== '' && t !== PROVIDER_EMPTY_CONTENT_PLACEHOLDER
     })
   }
   // 首次空响应再试 1 次（瞬时 0/0 恢复面；signal aborted 即止，不追加挂起调用）。

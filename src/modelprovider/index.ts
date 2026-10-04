@@ -140,7 +140,7 @@ export {
   getAssistantMessageFromError,
   getErrorMessageIfRefusal,
 } from './modelErrors'
-export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint } from './modelprovider'
+export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
 export { buildOpenAIParams } from './params'
 export { modelToRole, normalizeModelStringForAPI } from './roles'
 
