@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs'
 /** ANSI 剥净（script 捕获含 escape 序列；渲染断言只看可见文本，func 探针先例） */
 export function stripAnsi(s: string): string {
   return s
+    // ink 对带色/加粗 Text 用 CUF（CSI n C）当词间空格（如 verdict 行 / statusline 标签），
+    // 先还原成空格再剥净，否则「Rule "Bash" from user settings」会被折成 Rule"Bash"fromusersettings（0.1.24 探针假阴）
+    .replace(/\x1b\[(\d+)C/g, (_, n) => ' '.repeat(Number(n)))
+    .replace(/\x1b\[C/g, ' ')
     .replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '')
     .replace(/\x1b[=>]/g, '')
     .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '')
