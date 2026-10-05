@@ -113,8 +113,8 @@ export type ThemeSetting = (typeof THEME_SETTINGS)[number]
 const lightTheme: Theme = {
   autoAccept: 'rgb(135,0,255)', // Electric violet
   bashBorder: 'rgb(255,0,135)', // Vibrant pink
-  brand: 'rgb(215,119,87)', // Claude orange
-  brandShimmer: 'rgb(245,149,117)', // Lighter brand orange for shimmer effect
+  brand: 'rgb(180,83,9)', // Atlas-Orange (amber-700, AA 5.02:1 on white)
+  brandShimmer: 'rgb(217,119,6)', // Shimmer glow (decorative, amber-600 3.19:1 on white — 非文本效果不强制 AA)
   spinnerBlue: 'rgb(87,105,247)', // Medium blue for system spinner
   spinnerBlueShimmer: 'rgb(117,135,255)', // Lighter blue for system spinner shimmer
   permission: 'rgb(87,105,247)', // Medium blue
@@ -169,7 +169,7 @@ const lightTheme: Theme = {
   rate_limit_empty: 'rgb(39,47,111)', // Dark blue
   // Brief/assistant mode
   briefLabelYou: 'rgb(37,99,235)', // Blue
-  briefLabelAssistant: 'rgb(215,119,87)', // Brand orange
+  briefLabelAssistant: 'rgb(180,83,9)', // Atlas-Orange (amber-700, AA)
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -193,8 +193,8 @@ const lightTheme: Theme = {
 const lightAnsiTheme: Theme = {
   autoAccept: 'ansi:magenta',
   bashBorder: 'ansi:magenta',
-  brand: 'ansi:redBright',
-  brandShimmer: 'ansi:yellowBright',
+  brand: 'ansi:yellowBright',
+  brandShimmer: 'ansi:yellow',
   spinnerBlue: 'ansi:blue',
   spinnerBlueShimmer: 'ansi:blueBright',
   permission: 'ansi:blue',
@@ -248,7 +248,7 @@ const lightAnsiTheme: Theme = {
   rate_limit_fill: 'ansi:yellow',
   rate_limit_empty: 'ansi:black',
   briefLabelYou: 'ansi:blue',
-  briefLabelAssistant: 'ansi:redBright',
+  briefLabelAssistant: 'ansi:yellowBright',
   rainbow_red: 'ansi:red',
   rainbow_orange: 'ansi:redBright',
   rainbow_yellow: 'ansi:yellow',
@@ -272,8 +272,8 @@ const lightAnsiTheme: Theme = {
 const darkAnsiTheme: Theme = {
   autoAccept: 'ansi:magentaBright',
   bashBorder: 'ansi:magentaBright',
-  brand: 'ansi:redBright',
-  brandShimmer: 'ansi:yellowBright',
+  brand: 'ansi:yellowBright',
+  brandShimmer: 'ansi:yellow',
   spinnerBlue: 'ansi:blueBright',
   spinnerBlueShimmer: 'ansi:blueBright',
   permission: 'ansi:blueBright',
@@ -327,7 +327,7 @@ const darkAnsiTheme: Theme = {
   rate_limit_fill: 'ansi:yellow',
   rate_limit_empty: 'ansi:white',
   briefLabelYou: 'ansi:blueBright',
-  briefLabelAssistant: 'ansi:redBright',
+  briefLabelAssistant: 'ansi:yellowBright',
   rainbow_red: 'ansi:red',
   rainbow_orange: 'ansi:redBright',
   rainbow_yellow: 'ansi:yellow',
@@ -351,8 +351,8 @@ const darkAnsiTheme: Theme = {
 const lightDaltonizedTheme: Theme = {
   autoAccept: 'rgb(135,0,255)', // Electric violet
   bashBorder: 'rgb(0,102,204)', // Blue instead of pink
-  brand: 'rgb(255,153,51)', // Orange adjusted for deuteranopia
-  brandShimmer: 'rgb(255,183,101)', // Lighter orange for shimmer effect
+  brand: 'rgb(180,83,9)', // Amber-700 adjusted for deuteranopia (AA on white)
+  brandShimmer: 'rgb(255,213,74)', // Lighter Atlas-Orange (amber) for shimmer effect
   spinnerBlue: 'rgb(51,102,255)', // Bright blue for system spinner
   spinnerBlueShimmer: 'rgb(101,152,255)', // Lighter bright blue for system spinner shimmer
   permission: 'rgb(51,102,255)', // Bright blue
@@ -406,7 +406,7 @@ const lightDaltonizedTheme: Theme = {
   rate_limit_fill: 'rgb(51,102,255)', // Bright blue
   rate_limit_empty: 'rgb(23,46,114)', // Dark blue
   briefLabelYou: 'rgb(37,99,235)', // Blue
-  briefLabelAssistant: 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches brand)
+  briefLabelAssistant: 'rgb(180,83,9)', // Amber-700 adjusted for deuteranopia (matches brand, AA)
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -430,8 +430,8 @@ const lightDaltonizedTheme: Theme = {
 const darkTheme: Theme = {
   autoAccept: 'rgb(175,135,255)', // Electric violet
   bashBorder: 'rgb(253,93,177)', // Bright pink
-  brand: 'rgb(215,119,87)', // Claude orange
-  brandShimmer: 'rgb(235,159,127)', // Lighter brand orange for shimmer effect
+  brand: 'rgb(255,184,0)', // Atlas-Orange
+  brandShimmer: 'rgb(255,213,74)', // Lighter Atlas-Orange (amber) for shimmer effect
   spinnerBlue: 'rgb(147,165,255)', // Blue for system spinner
   spinnerBlueShimmer: 'rgb(177,195,255)', // Lighter blue for system spinner shimmer
   permission: 'rgb(177,185,249)', // Light blue-purple
@@ -485,7 +485,7 @@ const darkTheme: Theme = {
   rate_limit_fill: 'rgb(177,185,249)', // Light blue-purple
   rate_limit_empty: 'rgb(80,83,112)', // Medium blue-purple
   briefLabelYou: 'rgb(122,180,232)', // Light blue
-  briefLabelAssistant: 'rgb(215,119,87)', // Brand orange
+  briefLabelAssistant: 'rgb(255,184,0)', // Atlas-Orange
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -509,8 +509,8 @@ const darkTheme: Theme = {
 const darkDaltonizedTheme: Theme = {
   autoAccept: 'rgb(175,135,255)', // Electric violet
   bashBorder: 'rgb(51,153,255)', // Bright blue
-  brand: 'rgb(255,153,51)', // Orange adjusted for deuteranopia
-  brandShimmer: 'rgb(255,183,101)', // Lighter orange for shimmer effect
+  brand: 'rgb(255,184,0)', // Amber adjusted for deuteranopia
+  brandShimmer: 'rgb(255,213,74)', // Lighter Atlas-Orange (amber) for shimmer effect
   spinnerBlue: 'rgb(153,204,255)', // Light blue for system spinner
   spinnerBlueShimmer: 'rgb(183,224,255)', // Lighter blue for system spinner shimmer
   permission: 'rgb(153,204,255)', // Light blue
@@ -564,7 +564,7 @@ const darkDaltonizedTheme: Theme = {
   rate_limit_fill: 'rgb(153,204,255)', // Light blue
   rate_limit_empty: 'rgb(69,92,115)', // Dark blue
   briefLabelYou: 'rgb(122,180,232)', // Light blue
-  briefLabelAssistant: 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches brand)
+  briefLabelAssistant: 'rgb(180,83,9)', // Amber-700 adjusted for deuteranopia (matches brand, AA)
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
