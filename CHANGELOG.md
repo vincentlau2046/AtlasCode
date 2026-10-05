@@ -4,6 +4,25 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.29
+
+BR-8 UA 品牌串标准化（品牌序列 0.1.29，用户 2026-10-06 裁定实施移交 Main；
+brand 移交 patch 落地，`6e74ddc`）：
+
+- **UA 五面品牌+版本+repo 三段定式（无字面 `+`，spec §10.3）**：
+  `shared/identity` 单一事实源 —— `buildUserAgent` 去 `+`；新增
+  `buildWebFetchUserAgent`（`Atlas-User (AtlasCode/<v>; repo)`），tui ④
+  `getWebFetchUserAgent` 与 engine ⑤ `WEB_FETCH_USER_AGENT` 共用 builder
+  （零分叉，delta ⑥ 版本段补齐）；`http.ts` ②③④ import 化（MACRO.VERSION
+  硬编码串 → shared 出处）。
+- **判别单测**：`shared-identity-useragent` 扩 `buildWebFetchUserAgent` +
+  五面无字面 `+` 断言（5/5）。品牌 gate：`grep -rnF '+https://github' src/`=0
+  且 `'+${REPOSITORY_URL}'`=0。
+- **e2e 前 gate 5/5 PASS**（e2e 单信号，artifact `UA-1791235800327-786n`，
+  报告 `r-20261006-1913`：UA 五变体 fault-proxy 捕获 / WebFetch 版本段 /
+  grep gate / 硬句 6/6 / 控制面 PASS）。
+- 四件套：tsc 0 / lint 0 / build 17.58MB / 全量 3535/0·247（0.1.28 基线 +1）。
+
 ## v0.1.28
 
 P0 封口 patch（全 6 句 A4 e2e 绿 = P0 封口 Option B 达成；用户裁定 #6 原定
