@@ -80,8 +80,8 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 
 | 版本 | 工单 | 状态 |
 |---|---|---|
-| 0.1.28 | D-279-r1 渲染修（Main） | Main 正在提交（品牌序列前置 gate 之一） |
-| 0.1.29 | BR-8 UA 品牌串 | 已移交 Main 实施（WIP patch 已交 `2026-10-06-brand-br8-wip.patch`）；gate = 0.1.28 + TUI 封口 |
+| 0.1.28 | D-279-r1 渲染修（Main） | ✅ 已发布（release `e1f79d3`，npm latest=0.1.28 + shasum `ae04768a…` e2e 独立验真 MATCH） |
+| 0.1.29 | BR-8 UA 品牌串 | **实施侧四件套 4/4 绿**（Main worktree-0.1.29：`6e74ddc` 实施面 7 文件 + `4b35bcf` tracker docs；tsc 0/lint 0/build 17.58MB/全量 3535/0·247〔较 0.1.28 +1=BR-8 UA 判别单测〕+ 品牌 gate 过 + UA 单测 5/5；对 0.1.28 释放提交 diff 核对零漂移）；**待前置 gate ②（TUI 封口 P0 生产 lane）verdict 绿**（① 0.1.28=e1f79d3 已达成；e2e 对 0.1.28 跑 A4F 全量生产 lane in-flight）→ 我按 §4 发 e2e 验收请求（commit 4b35bcf/实施面 6e74ddc · §3 0.1.29 探针 · 报告 r-…-brand-br8）→ verdict 绿 → Main 发布 0.1.29 |
 | 0.1.30 | BR-4 全量收口 | 排队（Main 实施） |
 | 0.1.31 | BR-1+BR-2 | 排队（Main 实施） |
 | 0.1.32 | BR-9+BR-5 | 排队（Main 实施） |
