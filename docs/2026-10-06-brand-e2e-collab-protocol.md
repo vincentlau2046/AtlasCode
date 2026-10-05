@@ -81,7 +81,7 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 | 版本 | 工单 | 状态 |
 |---|---|---|
 | 0.1.28 | D-279-r1 渲染修（Main） | ✅ 已发布（release `e1f79d3`，npm latest=0.1.28 + shasum `ae04768a…` e2e 独立验真 MATCH） |
-| 0.1.29 | BR-8 UA 品牌串 | 实施侧四件套 4/4 绿（`6e74ddc`+`4b35bcf`，全量 3535/0·247）；前置 gate 全绿（① 0.1.28=e1f79d3 已发 ② TUI 封口=e2e 0.1.28 发布验真 6/6 PASS〔artifact `A4F-1791228364680-6lr1`〕，**P0 封口 Option B 达成**）；**e2e 验收已接、执行中（task #71 @ `4f35656`=0.1.29 release commit，实施面 6e74ddc；fault-proxy UA header log 捕 ①wire，②③ 单测 5/5 + grep gate 0/0 坐实五面，②WebFetch-engine 版本段=`Atlas-User (AtlasCode/0.1.29; repo)` 已补；回归 A4F 既有硬句 + P0a S-A 基线，报告 r-…-brand-br8）** → **待 e2e verdict**（绿→**brand 触发 Main 发 0.1.29**：tag v0.1.29+push×2+DNS-pin publish+packument+tarball 验真） |
+| 0.1.29 | BR-8 UA 品牌串 | 实施侧四件套 4/4 绿（`6e74ddc`+`4b35bcf`，全量 3535/0·247）；前置 gate 全绿（① 0.1.28=e1f79d3 已发 ② TUI 封口=e2e 0.1.28 发布验真 6/6 PASS，**P0 封口 Option B 达成**）；**e2e verdict = 3/3 探针 PASS + 0 硬面 INCONCLUSIVE，releasable=true**（① UA 五面无 `+` wire 实捕=`AtlasCode/0.1.29 (…repo)` ② WebFetch-engine 版本段=`Atlas-User (AtlasCode/0.1.29; repo)` ③ grep gate 0/0；回归 A4F+A1×3+P0a hardFail=0 P0 链无回归；artifact A4F=`A4F-1791231349358-is3m`+P0a=`P0a-1791232078979-9onx` 均 releasable=true，报告 `r-20261006-0435-brand-br8.md`，被测 `4f35656`）→ **已触发 Main 发 0.1.29**（tag v0.1.29+push×2+DNS-pin publish+packument+tarball 验真 → 再发 e2e 生产 lane 验真） |
 | 0.1.30 | BR-4 全量收口 | 排队（Main 实施） |
 | 0.1.31 | BR-1+BR-2 | 排队（Main 实施） |
 | 0.1.32 | BR-9+BR-5 | 排队（Main 实施） |
