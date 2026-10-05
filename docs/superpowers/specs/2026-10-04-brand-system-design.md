@@ -542,7 +542,7 @@ mark 是装饰性图形，TUI 无屏幕阅读器场景（终端），不强制 a
 | CLI 命令 / bin 名 | `atlas` / `atlascode`（lower） | `atlas --help` |
 | npm 包名 | `@atlasharness/atlascode` | `npm install -g @atlasharness/atlascode` |
 | 仓库名 | `AtlasCode` | `github.com/vincentlau2046/AtlasCode` |
-| HTTP User-Agent | `AtlasCode/<version> (repo URL)`（三段定式，**无字面 `+`**，§10.3） | `AtlasCode/0.1.28 (https://github.com/vincentlau2046/AtlasCode)` |
+| HTTP User-Agent | `AtlasCode/<version> (repo URL)`（三段定式，**无字面 `+`**，§10.3） | `AtlasCode/0.1.29 (https://github.com/vincentlau2046/AtlasCode)` |
 | 内部机器标识 | `atlas`（短名） | env `ATLAS_*`、类名 `Atlas*` |
 | 句中提及 | `AtlasCode`（不拆 "Atlas Code"） | "AtlasCode supports Ascend NPU" |
 
@@ -665,17 +665,17 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 当前 (0.1.22) ──> TUI 优化专项 (0.1.23 → 0.1.24) ──> 品牌系统完整方案（多个干净 0.1.x）
    │                    │                          │
    └ spec 设计          └ TUI P0a/P0b/P1a 列车     └ 逐工单拆块、逐版干净落地：
-     （本文件）           （不并轨 · TUI 0.1.24 / P0 封口前置已占位）· 0.1.28 UA 品牌串（BR-8，自包含 · 序列起点）
-                                               · 0.1.29 AtlasHarness leak 全量收口（BR-4，纯机械 · ~80 处 · 自包含）
-                                               · 0.1.30 identity 扩常量 + 主题换值（BR-1 + BR-2）
-                                               · 0.1.31 去 fork 化（BR-9：动词池 + guideAgent + outputStyles）+ 资产（BR-5 wordmark/token）
+     （本文件）           （不并轨 · TUI 0.1.24 / P0 封口前置已占位）· 0.1.29 UA 品牌串（BR-8，自包含 · 序列起点）
+                                               · 0.1.30 AtlasHarness leak 全量收口（BR-4，纯机械 · ~80 处 · 自包含）
+                                               · 0.1.31 identity 扩常量 + 主题换值（BR-1 + BR-2）
+                                               · 0.1.32 去 fork 化（BR-9：动词池 + guideAgent + outputStyles）+ 资产（BR-5 wordmark/token）
                                                · …（BR-6 e2e + BR-7 多终端随视觉版；BR-3 Beam = ⏸ PENDING · 最后 · 待用户审）
                                                （序号随 TUI 列车顺延；全程 0.1.x，不升 0.2.x）
 ```
 
 - **不挂 0.1.23**：0.1.23 是 TUI P0a 回归列车（memory `tui-optimization-division`），品牌不并轨
 - **完整方案 = 多个干净 0.1.x 版本**：TUI 列车之后，把本 spec 全部工单逐块拆成多个干净 0.1.x（每版 diff 聚焦一块：UA / 色板 / mark+Beam / 动词池+资产…），**全程 0.1.x、不升级 0.2.x**——用户 2026-10-05 裁定「通过多个 0.1.x 干净版本落地完整方案，不想升级大版本」
-- **BR-8（UA）为序列起点**：紧跟 P0 封口前置波（品牌序列 **0.1.28 起**；0.1.25 #265 / 0.1.26 #278 A4 / 0.1.27 波 C「分类器拦截→ASK」均已占位），diff 仅 UA 五变体，自包含（不依赖 BR-1），是整条 0.1.x 序列的第一版
+- **BR-8（UA）为序列起点**：紧跟 P0 封口前置波（品牌序列 **0.1.29 起**；0.1.25 #265 / 0.1.26 #278 A4 / 0.1.27 波 C「分类器拦截→ASK」均已占位），diff 仅 UA 五变体，自包含（不依赖 BR-1），是整条 0.1.x 序列的第一版
 - **用户可见变更不升大版本**：品牌色（Claude orange → Atlas-Orange）+ mark（AH → Beam）是用户可见变更，但**随 0.1.x 干净版本落地**（pre-1.0，用户接受 0.1.x 承载用户可见变更，不用 0.2.0 minor-bump 信号）；原「0.2.x breaking 窗口」口径作废
 - **master 不开分支**：所有 0.1.x 版本都直接在 master 上实施，不开 feature 分支；逐版独立发布
 - **feature flag 回退**：不设回退 flag（品牌系统是确定方向，不预留旧视觉回退；若需回退靠 `git revert` 发布补丁）
