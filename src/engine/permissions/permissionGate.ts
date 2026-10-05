@@ -66,7 +66,15 @@ export function createPermissionGate(
       { getToolPermissionContext: () => context, getAppState: opts.getAppState },
     )
     if (decision.behavior === 'allow') {
-      return { allowed: true, updatedInput: decision.updatedInput }
+      // #278 A4 allow 面（0.1.26，e2e A4F R2 根因）：allow 支携带 decisionReason
+      // （rule-allow 2b / mode-bypass 2a / 工具面 1c 的「为何自动放行」结构体）——供
+      // TUI 桥（loopPermissionBridge）在确定性 allow 快路径置 setAllowVerdict，成功卡渲
+      // rule-allow/bypass 可解释句（A4 三 allow 句数据源）。deny/ask 才带 reason 字符串。
+      return {
+        allowed: true,
+        updatedInput: decision.updatedInput,
+        decisionReason: decision.decisionReason,
+      }
     }
     if (decision.behavior === 'deny') {
       return { allowed: false, reason: decision.message }

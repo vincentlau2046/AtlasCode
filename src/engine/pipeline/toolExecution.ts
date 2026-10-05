@@ -34,6 +34,7 @@
  */
 import type {
   AssistantMessage,
+  PermissionDecisionReason,
   Tool,
   ToolResultBlockParam,
   ToolUseBlock,
@@ -124,6 +125,11 @@ export type GateVerdict = {
   reason?: string
   ask?: boolean
   updatedInput?: unknown
+  /** #278 A4 allow 面（0.1.26）：engine 门 allow 判定附带的 decisionReason（rule-allow /
+   *  mode-bypass 等「为何自动放行」结构体），供 TUI 桥（loopPermissionBridge）在确定性
+   *  allow 快路径置 setAllowVerdict → 成功卡渲可解释句。deny/ask 走 reason 字符串，
+   *  未附（工具面 1c 等）= undefined。加性字段：既有 GateVerdict 构造点零改动。 */
+  decisionReason?: PermissionDecisionReason
 }
 
 /**

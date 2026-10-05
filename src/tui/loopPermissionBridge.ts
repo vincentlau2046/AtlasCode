@@ -27,6 +27,11 @@ import type { ToolPermissionContext } from 'src/shared'
 import type { Tool as TuiTool, ToolUseContext } from './Tool'
 import type { AssistantMessage } from './types/message'
 import type { CanUseToolFn } from './hooks/useCanUseTool'
+import { setAllowVerdict } from './utils/allowVerdicts'
+import type {
+  PermissionDecisionReason as TuiPermissionDecisionReason,
+  PermissionMode,
+} from './types/permissions'
 
 /**
  * 活 TPC 窄视图（入参面宽化 = unknown，装配体内部 cast 到 shared TPC）——
@@ -75,7 +80,31 @@ export function buildInteractiveGate(params: InteractiveGateParams): PermissionG
     callContext?: PermissionCallContext,
   ): Promise<GateVerdict> => {
     const verdict = await engineGate(tool, input)
-    if (!verdict.ask) return verdict
+    if (!verdict.ask) {
+      // #278 A4 allow 面（0.1.26，e2e A4F R2 根因）：engine 门确定性 allow 快路径
+      // （rule-allow 2b / bypass 2a / 工具面 allow 1c）不经 canUseTool（其 allow 支才
+      // setAllowVerdict）→ allowVerdicts Map 空 → 成功卡 rule-allow/bypass 可解释句不渲染
+      // （a4rallow/a4bypass 0 命中）。修：门 verdict 携 decisionReason（GateVerdict 加性
+      // 字段）时在此置 setAllowVerdict（跨域 cast 单点：base 7 变体 decisionReason ⊆ TUI
+      // 11 变体，运行态同结构，verdictLine 消费面全覆盖）。mode 活读门 1c 同源（getAppState
+      // 活 TPC 回落构造 TPC）——成功卡 bypass 支据 mode === 'bypassPermissions' 判。
+      // classifier-approved 句不在本路径：engine 门不跑 yolo LLM 分类器（仅 canUseTool 活模型
+      // 支产 classifier decisionReason）→ 该句仍经 setYoloClassifierApproval（活模型可达时），
+      // PTY 不可强制 = INCONCLUSIVE，非本修范围（红线①：engine 门判定零改动，仅加性携带）。
+      if (verdict.allowed && verdict.decisionReason) {
+        const tpc = (
+          params.getAppState?.() ?? {
+            toolPermissionContext: params.toolPermissionContext,
+          }
+        ).toolPermissionContext
+        const tpcMode = (tpc as { mode?: PermissionMode } | undefined)?.mode ?? 'default'
+        setAllowVerdict(callContext?.toolUseId ?? '', {
+          reason: verdict.decisionReason as unknown as TuiPermissionDecisionReason,
+          mode: tpcMode,
+        })
+      }
+      return verdict
+    }
     // ask → TUI 交互弹窗（canUseTool 内部含 hasPermissionsToUseTool 重判 +
     // 弹窗队列/classifier/swarm/coordinator 全交互面；allow/deny remap）。
     const decision = await params.canUseTool(

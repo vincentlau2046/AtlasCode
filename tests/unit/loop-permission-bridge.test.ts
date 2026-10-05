@@ -12,6 +12,11 @@
  *       透传（callContext tu.id/assistantMsg 键控面消费）。
  *   B-4 ask → 用户拒绝：同 ask 落 canUseTool（deny 决策）→ remap
  *       allowed:false + reason 逐字（fail-closed，engine 窄 spine 同语义）。
+ *   B-5 #278 A4 allow 面（0.1.26 R2 根因修）：engine 门 deterministic allow
+ *       携 decisionReason（bypass → {mode}）→ 桥在快路径置 setAllowVerdict
+ *       （成功卡 rule-allow/bypass 可解释句数据源），不落 canUseTool。
+ *   B-6 #278 A4 allow 面 guard：deterministic allow 无 decisionReason（工具面
+ *       1c）→ 桥不置 setAllowVerdict（不伪造 verdict 数据，guard 纪律）。
  *
  * 纯函数面（无 React 无 store 无网络）：engine 门经受控 TPC + 假工具驱动
  * （createPermissionGate 真体消费，非 fake 自证）；canUseTool 假实现记录调用
@@ -27,6 +32,10 @@ import type { ToolPermissionContext } from '../../src/shared'
 import type { Tool } from '../../src/shared'
 import type { ToolUseContext } from '../../src/tui/Tool'
 import type { CanUseToolFn } from '../../src/tui/hooks/useCanUseTool'
+import {
+  clearAllowVerdicts,
+  getAllowVerdict,
+} from '../../src/tui/utils/allowVerdicts'
 
 function makeContext(
   mode: ToolPermissionContext['mode'] = 'default',
@@ -69,6 +78,8 @@ describe('buildInteractiveGate（W3-3b §8.74.15 ④）', () => {
   beforeEach(() => {
     // 假 sandbox 窗口（placeholder 禁用态；非 bash 工具不触 ⑥ 沙箱支）
     resetSandboxAccess()
+    // #278 A4 allow 面：模块级 allowVerdicts Map 隔离（B-5/B-6 断言 setAllowVerdict 置位）
+    clearAllowVerdicts()
   })
 
   test('B-1 allow 快路径：bypass 模式 → 原样透传，不落 canUseTool', async () => {
@@ -141,5 +152,51 @@ describe('buildInteractiveGate（W3-3b §8.74.15 ④）', () => {
     const verdict = await gate({ name: 'AskTool' } as Tool, { file_path: '/x' })
     expect(verdict.allowed).toBe(false)
     expect(verdict.reason).toBe('user declined')
+  })
+
+  // #278 A4 allow 面（0.1.26，e2e A4F R2 根因修）：engine 门确定性 allow 快路径不经
+  // canUseTool（其 allow 支才 setAllowVerdict）→ 修 = 快路径 verdict 携 decisionReason
+  // 时桥置 setAllowVerdict（成功卡 rule-allow/bypass 可解释句数据源）。B-5 = 有 decisionReason
+  // 置位（RED→GREEN 判别：修前恒 undefined）；B-6 = 无 decisionReason 不置位（guard 纪律）。
+  test('B-5 #278 A4 allow 面：deterministic allow 携 decisionReason（bypass→mode）→ 桥置 setAllowVerdict，不落 canUseTool', async () => {
+    const tpc = makeContext('bypassPermissions')
+    const { fn, calls } = fakeCanUseTool({ behavior: 'allow' })
+    const gate = buildInteractiveGate({
+      toolPermissionContext: tpc,
+      canUseTool: fn,
+      toolUseContext: fakeToolUseContext,
+    } satisfies InteractiveGateParams)
+    const verdict = await gate(
+      { name: 'Read' } as Tool,
+      { file_path: '/x' },
+      { toolUseId: 'tu-allow' },
+    )
+    expect(verdict.allowed).toBe(true)
+    expect(calls.length).toBe(0) // 确定性快路径不落 TUI 弹窗（setAllowVerdict 独立于 canUseTool）
+    // 根因修：快路径 verdict 携 decisionReason（bypass → {type:'mode',mode:'bypassPermissions'}）
+    // → 桥置 setAllowVerdict（mode 活读门 1c 同源 TPC，reason 结构体 = 成功卡 verdictLine 数据源）
+    const av = getAllowVerdict('tu-allow')
+    expect(av?.mode).toBe('bypassPermissions')
+    expect(av?.reason?.type).toBe('mode')
+  })
+
+  test('B-6 #278 A4 allow 面 guard：deterministic allow 无 decisionReason（工具面 1c）→ 不置 setAllowVerdict', async () => {
+    const tpc = makeContext('default')
+    const { fn } = fakeCanUseTool({ behavior: 'allow' })
+    const gate = buildInteractiveGate({
+      toolPermissionContext: tpc,
+      canUseTool: fn,
+      toolUseContext: fakeToolUseContext,
+    } satisfies InteractiveGateParams)
+    // 工具面 1c allow（checkPermissions 返 {behavior:'allow'} 无 decisionReason）→ 快路径 allowed
+    // 但 verdict.decisionReason 缺 → guard（verdict.allowed && verdict.decisionReason）不置位
+    // （不伪造 verdict 数据；成功卡无 allowVerdictLine 可渲，回 P0a 早退语义）。
+    const allowTool = {
+      name: 'AllowTool',
+      checkPermissions: async () => ({ behavior: 'allow' }),
+    } as unknown as Tool
+    const verdict = await gate(allowTool, {}, { toolUseId: 'tu-no-reason' })
+    expect(verdict.allowed).toBe(true)
+    expect(getAllowVerdict('tu-no-reason')).toBeUndefined()
   })
 })
