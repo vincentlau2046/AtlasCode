@@ -36,7 +36,7 @@ profileCheckpoint('main_tsx_entry');
 // Keychain // import { ensureKeychainPrefetchCompleted, startKeychainPrefetch } from './utils/secureStorage/keychainPrefetch.js';
 
 // Keychain // startKeychainPrefetch();
-import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
+import { feature, PRODUCT_BRAND } from 'src/shared'; // BR-1（spec §6.2）：stderr 诊断品牌字面改经 shared 单一事实源（F5 stub import 保留：dev source-direct 可翻 TRANSCRIPT_CLASSIFIER，见 src/native-ts/bunBundle.ts）
 import { Command as CommanderCommand, InvalidArgumentError, Option } from '@commander-js/extra-typings';
 import chalk from 'chalk';
 import { readFileSync } from 'fs';
@@ -522,7 +522,7 @@ const _pendingSSH: PendingSSH | undefined = feature('SSH_REMOTE') ? {
   extraCliArgs: []
 } : undefined;
 export async function main() {
-  process.stderr.write('[AtlasCode] main() starting...\n');
+  process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`);
   profileCheckpoint('main_function_start');
 
   // SECURITY: Prevent Windows from executing commands from current directory

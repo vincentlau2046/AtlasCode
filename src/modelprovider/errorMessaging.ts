@@ -25,6 +25,9 @@ import type {
   Message,
   UserMessage,
 } from '../shared'
+// BR-1（spec §6.2）：品牌触面单一事实源——错误文案品牌字面改经 PRODUCT_BRAND
+// （shared 唯一事实源，模型面文案去字面漂移；与 UA 品牌串同一出处纪律）。
+import { PRODUCT_BRAND } from '../shared'
 import type { SDKAssistantMessageError } from './types'
 
 import {
@@ -82,7 +85,7 @@ export const TOKEN_REVOKED_ERROR_MESSAGE =
 export const CCR_AUTH_ERROR_MESSAGE =
   'Authentication error · This may be a temporary network issue, please try again'
 export const OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE =
-  'Your account does not have access to AtlasCode. Please run /login.'
+  `Your account does not have access to ${PRODUCT_BRAND}. Please run /login.`
 
 // ── 文案 getter ───────────────────────────────────────────────────────
 
@@ -120,13 +123,13 @@ export function getRequestTooLargeErrorMessage(): string {
 
 export function getTokenRevokedErrorMessage(): string {
   return isNonInteractive()
-    ? 'Your account does not have access to AtlasCode. Please login again or contact your administrator.'
+    ? `Your account does not have access to ${PRODUCT_BRAND}. Please login again or contact your administrator.`
     : TOKEN_REVOKED_ERROR_MESSAGE
 }
 
 export function getOauthOrgNotAllowedErrorMessage(): string {
   return isNonInteractive()
-    ? 'Your organization does not have access to AtlasCode. Please login again or contact your administrator.'
+    ? `Your organization does not have access to ${PRODUCT_BRAND}. Please login again or contact your administrator.`
     : OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE
 }
 
@@ -377,7 +380,7 @@ export function getErrorMessageIfRefusal(
 
   const baseMessage =
     opt('resolveRefusalMessage')?.(model) ??
-    `${API_ERROR_MESSAGE_PREFIX}: AtlasCode is unable to respond to this request, which appears to violate our Usage Policy. Please double press esc to edit your last message or start a new session for Atlas to assist with a different task.`
+    `${API_ERROR_MESSAGE_PREFIX}: ${PRODUCT_BRAND} is unable to respond to this request, which appears to violate our Usage Policy. Please double press esc to edit your last message or start a new session for Atlas to assist with a different task.`
 
   return createApiErrorMessage({
     content: baseMessage,

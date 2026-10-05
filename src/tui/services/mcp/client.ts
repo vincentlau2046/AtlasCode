@@ -1,4 +1,5 @@
-import { feature } from 'src/shared'
+// BR-1（spec §6.2）：MCP 注册面品牌字面改经 shared 单一事实源（title/description 品牌名 + websiteUrl 收 REPOSITORY_URL；原 tui-local PRODUCT_URL 同值，行为零改动）
+import { feature, PRODUCT_BRAND, REPOSITORY_URL } from 'src/shared'
 import type {
   Base64ImageSource,
   ContentBlockParam,
@@ -43,7 +44,6 @@ import pMap from 'p-map'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
 import { getOauthConfig } from '../../constants/oauth.js'
-import { PRODUCT_URL } from '../../constants/product.js'
 import type { AppState } from '../../state/AppState.js'
 import {
   type Tool,
@@ -910,10 +910,10 @@ export const connectToServer = memoize(
       const client = new Client(
         {
           name: 'claude-code',
-          title: 'AtlasCode',
+          title: PRODUCT_BRAND,
           version: MACRO.VERSION ?? 'unknown',
-          description: "AtlasCode agentic coding tool",
-          websiteUrl: PRODUCT_URL,
+          description: `${PRODUCT_BRAND} agentic coding tool`,
+          websiteUrl: REPOSITORY_URL,
         },
         {
           capabilities: {
@@ -3123,10 +3123,10 @@ export async function setupSdkMcpClients(
       const client = new Client(
         {
           name: 'claude-code',
-          title: 'AtlasCode',
+          title: PRODUCT_BRAND,
           version: MACRO.VERSION ?? 'unknown',
-          description: "AtlasCode agentic coding tool",
-          websiteUrl: PRODUCT_URL,
+          description: `${PRODUCT_BRAND} agentic coding tool`,
+          websiteUrl: REPOSITORY_URL,
         },
         {
           capabilities: {},

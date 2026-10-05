@@ -1,10 +1,12 @@
-import { feature } from 'src/shared'
+// BR-1（spec §6.2）：品牌触面单一事实源——PR/commit 签名品牌字面改经
+// PRODUCT_BRAND + REPOSITORY_URL（shared 唯一事实源；原 tui-local
+// PRODUCT_URL 与 REPOSITORY_URL 同值，替换行为零改动，去字面双源漂移）。
+import { feature, PRODUCT_BRAND, REPOSITORY_URL } from 'src/shared'
 import { stat } from 'fs/promises'
 import { getClientType } from 'src/bootstrap'
 import {
   getRemoteSessionUrl,
   isRemoteSessionLocal,
-  PRODUCT_URL,
 } from '../constants/product.js'
 import { TERMINAL_OUTPUT_TAGS } from '../constants/xml.js'
 import type { AppState } from '../state/AppState.js'
@@ -71,7 +73,7 @@ export function getAttributionTexts(): AttributionTexts {
     isInternalModelRepoCached() || isKnownPublicModel
       ? getPublicModelName(model)
       : 'Atlas Opus 4.6'
-  const defaultAttribution = `🤖 Generated with [AtlasCode](${PRODUCT_URL})`
+  const defaultAttribution = `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})`
   // G-3（§8.74.28 R4）：原 noreply@atlas.ai 虚构邮箱域 → 真实维护者邮箱
   // （用户裁定 2026-09-30，与 git 作者邮箱一致）。
   const defaultCommit = `Co-Authored-By: ${modelName} <vincent.lau2046@gmail.com>`
@@ -318,7 +320,7 @@ export async function getEnhancedPRAttribution(
     return ''
   }
 
-  const defaultAttribution = `🤖 Generated with [AtlasCode](${PRODUCT_URL})`
+  const defaultAttribution = `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})`
 
   // Get AppState first
   const appState = getAppState()
@@ -364,7 +366,7 @@ export async function getEnhancedPRAttribution(
     memoryAccessCount > 0
       ? `, ${memoryAccessCount} ${memoryAccessCount === 1 ? 'memory' : 'memories'} recalled`
       : ''
-  const summary = `🤖 Generated with [AtlasCode](${PRODUCT_URL}) (${atlasPercent}% ${promptCount}-shotted by ${shortModelName}${memSuffix})`
+  const summary = `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL}) (${atlasPercent}% ${promptCount}-shotted by ${shortModelName}${memSuffix})`
 
   // Append trailer lines for squash-merge survival. Only for allowlisted repos
   // (INTERNAL_MODEL_REPOS) and only in builds with COMMIT_ATTRIBUTION enabled —

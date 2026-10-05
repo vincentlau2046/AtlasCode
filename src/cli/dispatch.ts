@@ -23,7 +23,7 @@
  *   - clientType 'claude-vscode' / 'claude-desktop' / 'local-agent' / 'remote'
  *     判定支保留（env 判定数据面，无消费依赖；desktop/CCR 消费面缺席不阻塞）
  */
-import { isEnvTruthy } from '../shared'
+import { isEnvTruthy, PRODUCT_BRAND } from '../shared' // BR-1（spec §6.2）：stderr 诊断品牌字面改经 shared 单一事实源
 import {
   setClientType,
   setQuestionPreviewFormat,
@@ -47,7 +47,7 @@ export async function main(): Promise<void> {
   // 执行前；de-ANT delta 见 entryInit.enforceNoDebugGuard 头注）
   enforceNoDebugGuard()
 
-  process.stderr.write('[AtlasCode] main() starting...\n')
+  process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`)
   // 裁登记：profileCheckpoint（性能剖析面未落盘）
 
   // SECURITY: Prevent Windows from executing commands from current directory

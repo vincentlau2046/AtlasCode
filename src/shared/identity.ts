@@ -1,6 +1,8 @@
 /**
  * 品牌串单一事实源（VERSION / PRODUCT_NAME / PACKAGE_NAME / REPOSITORY_URL +
- * buildUserAgent）——工单 docs/2026-10-04-http-useragent-fix.md §1（A-2 待办落掉）。
+ * 品牌身份扩常量〔BR-1：PRODUCT_FAMILY / PRODUCT_BRAND / FEEDBACK_CHANNEL /
+ * ACCENT_HUE〕+ buildUserAgent）——工单 docs/2026-10-04-http-useragent-fix.md §1
+ * （A-2 待办落掉）+ spec §6.2（BR-1 identity 扩常量）。
  *
  * 层边界：shared 是唯一叶子域（DEP-1 不 import 任何内部模块）。LLM 出站 UA 的
  * 版本段须在此自带「process.argv[1] 上行走定位最近 package.json」同款算法
@@ -18,6 +20,17 @@ import { dirname, join } from 'node:path'
 export const PRODUCT_NAME = 'AtlasCode'
 export const PACKAGE_NAME = '@atlasharness/atlascode'
 export const REPOSITORY_URL = 'https://github.com/vincentlau2046/AtlasCode'
+
+/**
+ * 品牌身份扩常量（BR-1，spec §6.2）——identity 单一事实源落地：
+ * 家族共享名 / 对外品牌名 / 反馈通道 / 强调色相配方。
+ */
+export const PRODUCT_FAMILY = 'Atlas' // 家族共享（atlascode / atlasoffice 配方共用）
+export const PRODUCT_BRAND = 'AtlasCode' // 对外品牌名（与 PRODUCT_NAME 同值、语义独立；未来 atlasoffice 配方可不同）
+export const FEEDBACK_CHANNEL =
+  'https://github.com/vincentlau2046/AtlasCode/issues' // 反馈通道（原触面 undefined 是 bug 症状，此处收口）
+export const ACCENT_HUE = 'compute' // 强调色相配方注入（atlasoffice='neutral'，配方侧消费）
+// FAMILY_MARK_PEAK 不进 identity（视觉常量归 theme/brand 模块，见 spec §6.2）
 
 // 模块级缓存（与 paths.ts 同款，防 async 上下文 define bug）。路径算法 =
 // process.argv[1] 上行走定位最近 package.json 读 version（dev 源树 / npm 安装

@@ -3,7 +3,7 @@ const UltraplanLaunchDialog: any = () => null;
 const launchUltraplan: any = null;
 import { c as _c } from "react/compiler-runtime";
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
-import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
+import { feature, PRODUCT_BRAND } from 'src/shared'; // BR-1（spec §6.2）：terminalTitle 品牌字面改经 shared 单一事实源（F5 stub import 保留：dev source-direct 可翻 TRANSCRIPT_CLASSIFIER，见 src/native-ts/bunBundle.ts）
 // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 超时错误行 remediation 提示面
 import { getCurrentLlmTimeoutMs, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint } from 'src/modelprovider';
 import { spawnSync } from 'child_process';
@@ -1097,7 +1097,7 @@ export function REPL({
   // session from mid-conversation context.
   const haikuTitleAttemptedRef = useRef((initialMessages?.length ?? 0) > 0);
   const agentTitle = mainThreadAgentDefinition?.agentType;
-  const terminalTitle = sessionTitle ?? agentTitle ?? haikuTitle ?? 'AtlasCode';
+  const terminalTitle = sessionTitle ?? agentTitle ?? haikuTitle ?? PRODUCT_BRAND;
   const isWaitingForApproval = toolUseConfirmQueue.length > 0 || promptQueue.length > 0 || pendingWorkerRequest || pendingSandboxRequest;
   // Local-jsx commands (like /plugin, /config) show user-facing dialogs that
   // wait for input. Require jsx != null — if the flag is stuck true but jsx

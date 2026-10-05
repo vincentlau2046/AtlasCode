@@ -22,6 +22,10 @@ import {
   PRODUCT_NAME,
   PACKAGE_NAME,
   REPOSITORY_URL,
+  PRODUCT_FAMILY,
+  PRODUCT_BRAND,
+  FEEDBACK_CHANNEL,
+  ACCENT_HUE,
   getVersion,
   buildUserAgent,
   buildWebFetchUserAgent,
@@ -66,5 +70,18 @@ describe('#272 shared/identity 品牌串 + buildUserAgent', () => {
 
   test('出站 UA 已切品牌串（不再含 SDK 默认 OpenAI/JS 品牌串）', () => {
     expect(buildUserAgent()).not.toContain('OpenAI/JS')
+  })
+})
+
+describe('BR-1 identity 扩常量（spec §6.2，0.1.31）', () => {
+  test('4 扩常量值 + 经 shared 门面导出（单一事实源）', () => {
+    expect(PRODUCT_FAMILY).toBe('Atlas')
+    expect(PRODUCT_BRAND).toBe('AtlasCode')
+    expect(FEEDBACK_CHANNEL).toBe(
+      'https://github.com/vincentlau2046/AtlasCode/issues',
+    )
+    expect(ACCENT_HUE).toBe('compute')
+    // 与既有 PRODUCT_NAME 同值但语义独立（atlasoffice 配方可不同）
+    expect(PRODUCT_BRAND).toBe(PRODUCT_NAME)
   })
 })

@@ -14,10 +14,16 @@ export { feature, FEATURE_ON_BY_DEFAULT } from "./feature"
 // A 波 A-2（工单 #272 HTTP User-Agent）：品牌串单一事实源（VERSION/PRODUCT_NAME/
 // PACKAGE_NAME/REPOSITORY_URL + buildUserAgent）。核 modelprovider 经此门面取
 // buildUserAgent 作 LLM 出站 UA（DEP-3 allow=[shared]），不引 tui/engine。
+// BR-1（spec §6.2）：品牌身份扩常量 4 枚（PRODUCT_FAMILY/PRODUCT_BRAND/
+// FEEDBACK_CHANNEL/ACCENT_HUE）与既有 3 枚同批入门面。
 export {
   PRODUCT_NAME,
   PACKAGE_NAME,
   REPOSITORY_URL,
+  PRODUCT_FAMILY,
+  PRODUCT_BRAND,
+  FEEDBACK_CHANNEL,
+  ACCENT_HUE,
   getVersion,
   buildUserAgent,
   buildWebFetchUserAgent,
