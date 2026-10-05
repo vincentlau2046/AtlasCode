@@ -752,14 +752,32 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           return denialLimitResult
         }
 
+        // 波 C（0.1.27，spec §4 C.1/C.2）：分类器可用且拦截时，拦截不再一律
+        // 静默 deny——
+        //   - 交互面（可弹框）→ ASK：分类器的 objection 现形给用户裁决
+        //     （steerable-trust），ASK 弹框 verdict 行渲染 A4 危险句
+        //     「Auto mode: classifier flagged this as dangerous.」；
+        //   - headless / shouldAvoidPermissionPrompts（不可弹框）→ 仍
+        //     fail-closed 静默 deny（铁闸门语义不变，对齐 transcriptTooLong/
+        //     unavailable 支的 headless 兜底）。
+        if (appState.toolPermissionContext.shouldAvoidPermissionPrompts) {
+          return {
+            behavior: 'deny',
+            decisionReason: {
+              type: 'classifier',
+              classifier: 'auto-mode',
+              reason: classifierResult.reason,
+            },
+            message: buildYoloRejectionMessage(classifierResult.reason),
+          }
+        }
         return {
-          behavior: 'deny',
+          ...result,
           decisionReason: {
             type: 'classifier',
             classifier: 'auto-mode',
             reason: classifierResult.reason,
           },
-          message: buildYoloRejectionMessage(classifierResult.reason),
         }
       }
 
