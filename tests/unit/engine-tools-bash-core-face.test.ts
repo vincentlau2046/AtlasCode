@@ -190,6 +190,18 @@ describe('isReadOnlyCommand', () => {
     expect(isReadOnlyCommand('ls `rm x`')).toBe(false)
     expect(isReadOnlyCommand('echo $(rm x)')).toBe(false)
   })
+
+  // #265 S1：`>` 输出重定向守卫（写副作用命令不得走只读自动放行）
+  test('输出重定向守卫（#265：echo x > f 误判只读自动放行）', () => {
+    expect(isReadOnlyCommand('echo x > f')).toBe(false)
+    expect(isReadOnlyCommand('git status > out.txt')).toBe(false)
+    expect(isReadOnlyCommand('head a >> b')).toBe(false) // `>>` 含 `>`
+    expect(isReadOnlyCommand('ls >&2')).toBe(false) // `>&` 含 `>`
+    // 引号内 `>` = fail-safe 方向（判非只读多弹框，不多放行；与 `;`/`|` 引号假阳性同态）
+    expect(isReadOnlyCommand('grep "a > b" file')).toBe(false)
+    // 输入重定向 `<` 只读不写，不守卫（前缀仍命中 = 只读）
+    expect(isReadOnlyCommand('cat file < other')).toBe(true)
+  })
 })
 
 // ── 本地辅助模块 ──────────────────────────────────────────────────────────

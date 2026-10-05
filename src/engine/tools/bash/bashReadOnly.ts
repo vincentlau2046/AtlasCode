@@ -23,6 +23,11 @@ const READ_ONLY_PREFIXES = [
 // Shell chaining / substitution operators can hide a write command behind a
 // read-only prefix (e.g. `ls && rm -rf /`, `find . -exec rm {} ;`,
 // `echo $(rm x)`). If any of these appear, treat the command as non-read-only.
+// `>` 重定向守卫（#265 S1，2026-10-05）：输出重定向（`>`/`>>`/`>&`/`&>`）带写
+// 副作用——`echo x > f` / `git status > x` 旧匹配 echo/git status 只读前缀被
+// bashToolHasPermission step 7 自动放行（写文件零审批）。同族 includes 守卫
+// 风格（`<` 输入重定向只读不写，不守卫；引号内 `>` 如 `grep "a > b" f` 判
+// 非只读 = fail-safe 方向，多弹框不多放行，与 `;`/`|` 引号假阳性同态）。
 export function isReadOnlyCommand(command: string): boolean {
   const trimmed = command.trim()
   if (
@@ -31,7 +36,8 @@ export function isReadOnlyCommand(command: string): boolean {
     trimmed.includes(';') ||
     trimmed.includes('|') ||
     trimmed.includes('`') ||
-    trimmed.includes('$(')
+    trimmed.includes('$(') ||
+    trimmed.includes('>')
   ) {
     return false
   }
