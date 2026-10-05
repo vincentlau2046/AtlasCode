@@ -1,7 +1,9 @@
-# TUI 专项 · P0 收口状态（2026-10-05 收尾）
+# TUI 专项 · P0 封口状态（2026-10-05）
 
 > 一页恢复入口：任何 session 打开此文件即可接续。判据事实源 = 主计划 §4b/§6 + spec v4；本文件只记「状态 + 挂起项 + 恢复入口」，不重复判据。
-> 收尾裁定（用户 2026-10-05）：**P0 波（0.1.24）干净收口，第二波挂起等启动，就此收尾。**
+> 封口裁定（用户 2026-10-05）：**P0 阶段（P0a 审批行为 A1–A5 + P0b 持续监控 B1/B2）功能/代码 100% 闭环，无未闭环项，正式封口。第二波（P1a-v2 讨论 + P1b）确认不启动，维持挂起。**
+>
+> **P0 无未闭环的判定**：0.1.24 已把 P0 全部子项落地 + 发布 + 生产 lane 验真（§1）。12 项 INCONCLUSIVE 是「P0 做完、验收没强制到」的**验收覆盖**项，归终审/loop-robustness/#263 各管一段，**不属于 P0 阶段未闭环**；#263/#264 是用户裁定的独立收口波，非 P0 的活。
 
 ## 1. 已收口（发布 + 验真 + 生产 lane 全绿）
 
@@ -23,21 +25,31 @@ worktree 卫生：列车 worktree（0.1.24）+ p1a-sidebar / 023·024-prodlane /
 - **P1b 开波**：spec §4 P1b 两门禁；Main ①-④ 决策输入先行；#261 S-F（非 git 项目 skill）复验。
 - **顺带项**：`PermissionRuleExplanation.tsx` 详情面 pre-A4 旧措辞对齐（一行 patch，随波走）。
 
-### 2.2 终审补测（12 项 INCONCLUSIVE，触发 = 全部波收口后终审）
-| 项 | 原因 | 补测方式 |
-|---|---|---|
-| A1×3（always allow-reason / no-dialog / dangerous-no-always） | #263 未修：default 模式 Bash 恒-allow 正常流弹不出框 | **#263 修后**重验 |
-| A4×4（rule-allow / classifier×2 / mode / bypass 句式） | verdictLine 仅 Bash·PowerShell 弹框面，automode/bypass 启动参数 e2e 未跑 | 终审补启动参数 + 场景 |
-| B1×2（↦fast 现形/消失） | 回退难强制 | loop-robustness `fault-proxy.ts` 故障注入（Main 决策输入④已备） |
-| A2-esc / B3-gw-down | 软项 | 终审 |
-全部有单测覆盖（48/48），非缺陷，是「验收没跑到」。
+### 2.2 终审补测（12 项 INCONCLUSIVE，非 P0 未闭环 = 验收覆盖项，归终审/loop-robustness/#263 各管一段）
+| 项 | 原因 | 归属 | 前置 |
+|---|---|---|---|
+| A1×3（always allow-reason / no-dialog / dangerous-no-always） | #263 未修：default 模式 Bash 恒-allow 正常流弹不出框 | 终审 + #263 波 | **依赖 #263 先修**（修后重跑这 3 探针即 PASS，无新 harness） |
+| A4×4（rule-allow / classifier×2 / mode / bypass 句式） | verdictLine 仅 Bash·PowerShell 弹框面，automode/bypass 启动参数 e2e 未跑 | 终审（e2e 补 seed） | **无前置**——可现在单独补（e2e 加 `--permission-mode auto`/`bypassPermissions` seed） |
+| B1×2（↦fast 现形/消失） | 回退难强制 | 终审 + loop-robustness | 需 fault-proxy 注入（跨 loop-robustness 基建） |
+| A2-esc / B3-gw-down | 软项 | 记录 | 无（A2-esc 单测已覆盖；B3 已砍项预期缺席） |
+全部有单测覆盖（48/48），非缺陷，是「验收没跑到」。**唯一现在无前置可补的是 A4×4**；A1×3 待 #263、B1×2 待 fault-proxy。
 
 ### 2.3 #263 / #264 收口波（**用户裁定：专项收口后**随工具本体/engine 只读波）
 - 工单已立：`docs/2026-10-04-permission-gaps.md`（根因/修法方向/验收标准齐全，待 Main 实施）
 - #263 = TUI 车道 `BashTool.checkPermissions` 恒-allow stub（default 模式不设防 bash）；#264 = engine `>` 重定向误判只读
 - 影响：#263 修前 A1「选了 always」在正常流不可触达（已记录，非缺陷）
 
-## 3. 恢复入口（下次启动读这三处）
+### 2.4 P0 封口结论（2026-10-05）
+- **P0 阶段（P0a A1–A5 + P0b B1/B2）= 已封口**：功能/代码全闭环，0.1.24 发布验真 + 生产 lane 全绿，无「P0 没做完」项。
+- **第二波（P1a-v2 讨论 + P1b）= 确认不启动**，挂起（§2.1），任何 session 不预启。
+- **12 项补测 / #263·#264 = 不阻塞 P0 封口**：12 项归终审/loop-robustness/#263（§2.2 逐条归属），#263·#264 是独立收口波（§2.3）。
+- **唯一可现在做的 P0 验收加分项 = A4×4**（e2e 补 automode/bypass 启动参数，无前置）——用户定：补则 P0 验收无空洞（剩 A1×3 待 #263 + 记录项），不补则 P0 按「功能闭环 + 单测覆盖」封口、12 项统一留终审。**（待用户一句话定，见 §4 待定项）**
+
+## 3. 待定项（用户未拍板，不擅动）
+- [ ] **A4×4 现在补 or 留终审**：现在补 = 我发 e2e 加 2 个启动参数 seed 跑 4 条探针（纯 e2e，无产品改动，1 个 e2e 波）；留终审 = P0 按功能闭环封口、验收空洞留终审统一补。
+- [ ] #263/#264 提级 or 维持「专项收口后」：P0 封口后 #263 仍是真安全缺口（default 模式 bash 不设防），可提级为独立小波（0.1.25）现在就修，或维持原裁定等第二波。用户定。
+
+## 4. 恢复入口（下次启动读这三处）
 
 1. `docs/2026-10-04-tui-program-plan.md` §4b（0.1.24 列车全判据）+ §6（状态快照至收口）
 2. `docs/tui-differentiation-spec.md` v4（P0a 行为修复 / P0b 持续监控 / P1a 回退+v2 挂起 / §5 终审含用户面走查层）
