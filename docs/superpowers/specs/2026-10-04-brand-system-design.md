@@ -259,28 +259,47 @@ export function buildWebFetchUserAgent(): string {
 
 ## 7. 触面文件映射（逐文件改动清单）
 
-### 7.1 用户可见 P0 leak 修复（BR-4 · 纯机械字面替换 · **保留**）
+### 7.1 用户可见 AtlasHarness leak 全量收口（BR-4 · 纯机械字面替换 · **全量一次性**）
 
-> **改法（用户 2026-10-05 裁定）**：`AtlasHarness` → `AtlasCode` 纯字面替换，**不碰 mark art、不做 identity 化**（`${PRODUCT_BRAND}` 单一事实源归 BR-1 身份工单后续 sweep），零依赖、最可靠。
+> **改法（用户 2026-10-05 裁定，2026-10-05 复核扩展）**：`AtlasHarness` → `AtlasCode` 纯字面替换，**不碰 mark art、不做 identity 化**（`${PRODUCT_BRAND}` 单一事实源归 BR-1 身份工单后续 sweep），零依赖、最可靠。
+>
+> **范围修正（2026-10-05 代码级复核）**：原「12 处」严重低估——实测全仓用户可见 `AtlasHarness` ~**80 处 / ~40 文件**。BR-4 从「12 处启动屏+错误消息」**扩展为全量用户可见面一次性收口**（用户裁定：扩展为全量一次性收口）。**排除**两类（非本次对象）：① mdm 注册表路径（`mdm/constants.ts:23,25` `HKLM/HKCU\SOFTWARE\Policies\AtlasHarness`，文件系统标识，暂缓同 npm scope 理由，见 §10.5）；② `ascend/*` + `engine/session/*` 的「从 AtlasHarness 移植」迁移溯源注释（~150 处，P2，§7.7）。
+
+**P0 启动屏 + 错误消息子集（每轮启动 / 高频必现，先行核对）**：
 
 | 文件:行 | 当前 | 改为 | 备注 |
 |---|---|---|---|
 | `src/tui/components/LogoV2/LogoV2.tsx:204` | `AtlasHarness` | `AtlasCode` | borderTitle |
 | `src/tui/components/LogoV2/LogoV2.tsx:205` | `AtlasHarness` | `AtlasCode` | compactBorderTitle |
-| `src/tui/components/LogoV2/Clawd.tsx:110` | `AtlasHarness` | `AtlasCode` | wordmark（仅文字；AH_ART mark 不在此列——§8 Beam 属 BR-3 pending） |
+| `src/tui/components/LogoV2/Clawd.tsx:110` | `AtlasHarness` | `AtlasCode` | wordmark 文字（AH_ART 属 BR-3 不碰） |
 | `src/tui/components/LogoV2/Clawd.tsx:136` | `AtlasHarness` | `AtlasCode` | AppleTerminal 分支同款 |
 | `src/tui/components/LogoV2/WelcomeV2.tsx:12` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | AppleTerminalWelcomeV2 |
 | `src/tui/components/LogoV2/WelcomeV2.tsx:31` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | 主分支 |
 | `src/tui/components/LogoV2/WelcomeV2.tsx:116` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | 主分支 |
 | `src/tui/components/LogoV2/CondensedLogo.tsx:51` | `AtlasHarness` | `AtlasCode` | 凝缩 logo |
-| `src/modelprovider/errorMessaging.ts:85` | `access to AtlasHarness` | `access to AtlasCode` | 账号错误 |
-| `src/modelprovider/errorMessaging.ts:123` | `access to AtlasHarness` | `access to AtlasCode` | 账号错误 |
-| `src/modelprovider/errorMessaging.ts:129` | `access to AtlasHarness` | `access to AtlasCode` | 组织错误 |
-| `src/modelprovider/errorMessaging.ts:380` | `AtlasHarness is unable to respond` | `AtlasCode is unable to respond` | 用量政策错误 |
+| `src/modelprovider/errorMessaging.ts:85,123,129,380` | `...to AtlasHarness...`（×3）+ `AtlasHarness is unable...` | `AtlasCode` | 账号/组织/用量错误 ×4 |
 
-**errorMessaging 安全性核查清单**（实施时必须验证）：
-- [ ] 4 处错误消息是否按子串匹配触发（若 LLM 后端返回的错误体含 "AtlasHarness" 子串做条件分支，改品牌名会破坏匹配）→ 实施前 grep `includes('AtlasHarness')` 核查
-- [ ] 错误消息是否有 i18n 多语言版本（若有 zh/en 双语，同步改）
+**全量收口清单（超出 12 处的其余用户可见面，按高频→低频分组，均字面 `AtlasHarness`→`AtlasCode`）**：
+
+| 触面 | 文件 | 处 |
+|---|---|---|
+| 权限弹框（每次权限请求必现） | `src/permissions/filesystem.ts` + `src/tui/utils/permissions/filesystem.ts` | 11+11 |
+| 自动更新 | `src/tui/cli/update.ts` + `src/tui/utils/autoUpdater.ts` | 10+2 |
+| 安装器 | `src/tui/commands/install.tsx` + `localInstaller.ts` + `nativeInstaller/installer.ts` + `pidLock.ts` | 5+1+2+1 |
+| 主循环 / REPL | `src/tui/main.tsx` + `src/tui/screens/REPL.tsx` | 8+3 |
+| 模型 / MCP 界面 | `src/tui/utils/model/model.ts` + `ModelSetup.tsx` + `services/mcp/client.ts` + `MCPRemoteServerMenu.tsx` | 5+1+4+1 |
+| 提交签名（每次 commit 写入） | `src/tui/utils/attribution.ts` | 3 |
+| insights / 状态通知 / onboarding | `src/tui/commands/insights.ts` + `statusNoticeDefinitions.tsx` + `projectOnboardingState.ts` | 4+2+1 |
+| swarm / 遥测 | `src/swarm/constants.ts` | 3 |
+| 其余用户可见（各 1-2 处） | `apiErrors.ts`/`atlasDesktop.ts`/`Shell.ts`/`completionCache.ts`/`commands.ts`/`git.ts`/`preflightChecks.tsx`/`setup.ts`/`HelpV2.tsx`/`Feedback.tsx`/`AddWorkspaceDirectory.tsx`/`FilePermissionDialog/permissionOptions.tsx`/`PluginTrustWarning.tsx`/`marketplacePreset.ts`/`marketplaceManager.ts`/`computerUse/wrapper.tsx`/`WebFetchTool/preapproved.ts`/`SendMessageTool/SendMessageTool.ts`/`engine/tools/team/sendMessageTool.ts`/`engine/tools/web/preapproved.ts`/`permissions/PermissionRule.ts` 等 | ~25 |
+
+> **实施口径（机械替换）**：`grep -rln "AtlasHarness" src/` 得全量文件 → **排除** mdm 注册表 + ascend/engine 迁移注释 → 其余文件每个 `AtlasHarness`→`AtlasCode` 全局替换。文件内注释（如 Clawd.tsx "AH 子母 logo...AtlasHarness" 注释、launcher.ts 注释）随同替换或保留，无行为差异。
+>
+> **⚠️ 编译产物注意**：`LogoV2` 目录 4 个组件（`LogoV2/Clawd/WelcomeV2/CondensedLogo.tsx`）是 **React Compiler 编译产物**（含 `_c` memo cache + 尾部 base64 source map），非手写 JSX。字面替换直接作用于编译产物中的字符串字面量即可（历史上 AtlasHarness rebrand 即如此改编译产物）；尾部 base64 source map 是 stale/dev-only，不进 `dist`，无需同步。
+>
+> **errorMessaging 安全性核查（已复核）**：4 处均为纯字符串字面量，**无 `includes('AtlasHarness')` 子串匹配**，替换安全。无 i18n 双语版本。✅ 无需额外处理。
+
+**验收 gate（扩展后）**：`grep -rn "AtlasHarness" src/` 排除注释行后，**仅剩** mdm 注册表路径（`mdm/constants.ts:23,25`）与 ascend/engine 迁移注释——即「用户可见字符串字面量中的 AtlasHarness = 0」。
 
 ### 7.2 commit/PR 签名行 leak（高频用户可见 · 每次 git commit 写入）
 
@@ -289,11 +308,11 @@ export function buildWebFetchUserAgent(): string {
 | 文件:行 | 当前 | 改为 | 备注 |
 |---|---|---|---|
 | `src/tui/utils/attribution.ts:74` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL})` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})` | PR body 默认签名 |
-| `src/tui/utils/attribution.ts:77` | `Co-Authored-By: ${modelName} <vincentlau2046@gmail.com>` | 保留（邮箱是用户个人 git config，非品牌串） | commit trailer |
+| `src/tui/utils/attribution.ts:77` | `Co-Authored-By: ${modelName} <vincent.lau2046@gmail.com>` | 保留（邮箱是用户个人 git config，非品牌串） | commit trailer |
 | `src/tui/utils/attribution.ts:321` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL})` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL})` | 增强签名 fallback |
 | `src/tui/utils/attribution.ts:367` | `🤖 Generated with [AtlasHarness](${PRODUCT_URL}) (${atlasPercent}% …)` | `🤖 Generated with [${PRODUCT_BRAND}](${REPOSITORY_URL}) (${atlasPercent}% …)` | 增强签名主形态 |
 
-**`PRODUCT_URL` 统一**：`src/tui/constants/product.ts:3` `PRODUCT_URL='https://github.com/vincentlau2046/AtlasCode'` 已正确（URL 对），但 attribution.ts 用 `[AtlasHarness](${PRODUCT_URL})` 是"URL 对、品牌名错"。本 spec 改为 `[${PRODUCT_BRAND}](${REPOSITORY_URL})`——品牌名走 identity 单一事实源，URL 走 `REPOSITORY_URL`（`shared/identity.ts` 已有），去 `PRODUCT_URL` 重复定义（`constants/product.ts` 的 `PRODUCT_URL` 后续归并 identity，非本 spec 强制）。
+**`PRODUCT_URL` 统一**：`src/tui/constants/product.ts:3` `PRODUCT_URL='https://github.com/vincentlau2046/AtlasCode'` 已正确（URL 对），但 attribution.ts 用 `[AtlasHarness](${PRODUCT_URL})` 是"URL 对、品牌名错"。**分层落地（2026-10-05 复核澄清）**：① **BR-4** 只做字面 `AtlasHarness`→`AtlasCode`（3 处 L74/321/367，纯机械，不碰 URL/PRODUCT_URL）；② **BR-1** 可选 refine `[AtlasCode]`→`[${PRODUCT_BRAND}]` + `PRODUCT_URL`→`REPOSITORY_URL`（identity 单一事实源，去 `PRODUCT_URL` 重复定义）。BR-4 不越界到 identity 化。attribution 属 user-visible 面，已并入 §7.1 全量清单。
 
 **模型名 `Atlas Opus 4.6`**（L73）：已用 "Atlas" 短名（L7 合规），但 "Opus" 是 Anthropic 模型族名。AtlasCode 接国产 LLM 后端（Qwen38 等），签名模型名应反映实际后端——本 spec **不硬编码模型族名**，改用 `${shortModelName}` 动态取（attribution.ts L367 已有 `shortModelName` 变量，L74 的 `modelName` 同步改动态）。
 
@@ -546,6 +565,8 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 | spinner 动词池 186 个 whimsical + `Clauding` | Claude Code fork 品牌人格 + L45 brand leak | → 算力+意象+哲学+趣味四轴 ~130 个（保 70%，§7.4） |
 | spinner `· <verb>…` prefix | 中性点 | → `▀` 光锥顶点色块（与闲时 tips 统一） |
 | guideAgent `Claude` × 9 处（含 L95b stale `claude-code-guide` 引用）+ `omitClaudeMd` flag + `claude-in-chrome` MCP | Anthropic 产品名 + 内部 flag + 外部 MCP 名 | guideAgent 9 处改 Atlas；flag/MCP 名保留（§7.5） |
+| `outputStyles.ts:47,60` 「Claude explains…」「Claude pauses…」 | Anthropic 品牌名（输出风格描述，用户可见） | → Atlas（BR-9，2026-10-05 复核补入） |
+| `attribution.ts:67` 注释「Claude Opus 4.6」+ 返回值 `Atlas Opus 4.6` | Anthropic 模型族名（Opus） | 注释→Atlas（值已改 Atlas Opus，注释滞后）；模型族名不硬编码，BR-9 改 `${shortModelName}` 动态取（§7.2） |
 
 ### 10.3 UA 品牌串标准（请求头识别面）
 
@@ -578,6 +599,10 @@ AtlasCode 是 Claude Code fork，视觉系统继承了大量 Clawd 体系。本 
 ### 10.4 系统提示词自我认知
 
 保持 `You are Atlas, a professional coding agent…`（`src/tui/constants/system.ts:18-20`）。理由：L7 第三层"内部机器标识 = atlas"，系统提示词是 LLM 内部指令非对外品牌面，"Atlas" 是合规短名。改 "You are AtlasCode" 会让内部标识与对外品牌混淆，违 L7 分层。
+
+### 10.5 文件系统/注册表标识（暂缓 · 非本次 brand 文本替换对象）
+
+`mdm/constants.ts:23,25`（`HKLM\\SOFTWARE\\Policies\\AtlasHarness` / `HKCU\\SOFTWARE\\Policies\\AtlasHarness`）是 Windows MDM 策略的**注册表读取路径**，非用户可见品牌文本——改它会改变企业 MDM 策略查找位置（breaking + 兼容面）。与 npm scope `@atlasharness` 同性质，属「文件系统标识层」，**暂缓不迁**（用户 2026-10-05 裁定），归 F 波清尾候选。BR-4 全量收口**排除**该文件。
 
 ---
 
@@ -641,11 +666,11 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
    │                    │                          │
    └ spec 设计          └ TUI P0a/P0b/P1a 列车     └ 逐工单拆块、逐版干净落地：
      （本文件）           （不并轨 · 0.1.24 Main 在制）· 0.1.25 UA 品牌串（BR-8，自包含 · 序列起点）
-                                               · 0.1.26 触面 leak（BR-4，纯机械 · 12 处 · 自包含）
+                                               · 0.1.26 AtlasHarness leak 全量收口（BR-4，纯机械 · ~80 处 · 自包含）
                                                · 0.1.27 identity 扩常量 + 主题换值（BR-1 + BR-2）
-                                               · 0.1.28 动词池 + 资产（§7.4 + BR-5 wordmark/token）
-                                               · …（BR-3 Beam mark 重设计 = ⏸ PENDING · 最后 · 待用户审）
-                                               （序号随 0.1.24 发布后顺延；全程 0.1.x，不升 0.2.x）
+                                               · 0.1.28 去 fork 化（BR-9：动词池 + guideAgent + outputStyles）+ 资产（BR-5 wordmark/token）
+                                               · …（BR-6 e2e + BR-7 多终端随视觉版；BR-3 Beam = ⏸ PENDING · 最后 · 待用户审）
+                                               （序号随 TUI 列车顺延；全程 0.1.x，不升 0.2.x）
 ```
 
 - **不挂 0.1.23**：0.1.23 是 TUI P0a 回归列车（memory `tui-optimization-division`），品牌不并轨
@@ -662,7 +687,8 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 | BR-1 identity 扩常量 | `shared/identity.ts` Step 1 + 触面改 import Step 2 | 无 |
 | BR-2 主题换值 | `theme.ts` 6 套 UI 品牌色 3 键（brand/brandShimmer/briefLabelAssistant）橙→暖金纯换值；**clawd_body/clawd_background 键改为 BR-3**（渐变色板随 BR-3 pending） | BR-1 |
 | BR-3 Beam 组件 | ⏸ **PENDING · 最后 · 待用户审**（mark 重设计：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` + pose 废弃重写上爬动效 + BEAM_ART 5 档渐变 + 全部 clawd 术语内容：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 其余 clawd 命名残留）——用户 2026-10-05 判定设计面「不靠谱、未充分审核」，停止、放序列最后重新排期 | 待用户审后另有 writing-plans |
-| BR-4 触面 leak 修复（**保留**） | LogoV2/WelcomeV2/CondensedLogo/errorMessaging 12 处**纯机械 `AtlasHarness`→`AtlasCode` 字面替换**（不碰 mark art；identity 化 `${PRODUCT_BRAND}` 归 BR-1 后续 sweep） | 无（自包含） |
+| BR-4 AtlasHarness leak 全量收口（**扩展**） | **全量用户可见 `AtlasHarness`→`AtlasCode` 字面替换 ~80 处/~40 文件**（启动屏 12 处 + 权限弹框 22 + 更新 12 + 安装器 9 + 模型/MCP 11 + 主循环/REPL 11 + attribution 3 + insights/状态/onboarding/swarm 等；§7.1 全量清单）。**排除** mdm 注册表路径（§10.5）+ ascend/engine 迁移注释。纯机械，不碰 mark art，不 identity 化 | 无（自包含） |
+| BR-9 去 fork 化 · de-Claude（**新增**） | ① spinner 动词池重写（§7.4，186→~130 四轴，去 `Clauding`/whimsical）② guideAgent 9 处 Claude→Atlas（§7.5）③ `outputStyles.ts:47,60` 两处 `Claude explains/pauses`→Atlas（新增，复核发现）④ attribution.ts `Claude Opus 4.6` 注释清理（§7.2） | 无（与前序视觉解耦） |
 | BR-5 资产目录 | `docs/assets/` wordmark.svg + 品牌 token 文档（brand-system-spec.md）+ README 引用；**mark SVG/PNG 随 BR-3 pending** | wordmark/token 随 BR-2，mark 随 BR-3 |
 | BR-6 e2e 基线重生成 | user-e2e/compare + tui-diff 启动屏快照重生成 | BR-4 |
 | BR-7 真机多终端验证 | iTerm2/GNOME/kitty/Windows Terminal/Alacritty 截图校验 | BR-6 |
@@ -697,7 +723,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 
 ### 14.4 验收 gate
 
-- [ ] `grep -rn "AtlasHarness" --include="*.ts" --include="*.tsx" src/` 排除注释行后 = 0（CI grep 门，charter L8 ③ review 桶加一条）
+- [ ] `grep -rn "AtlasHarness" --include="*.ts" --include="*.tsx" src/` 排除注释行 + mdm 注册表（§10.5）+ ascend/engine 迁移注释后，**用户可见字符串字面量 = 0**（CI grep 门，charter L8 ③ review 桶加一条）
 - [ ] `grep -rnF '+https://github' src/` = 0 **且** `grep -rnF '+${REPOSITORY_URL}' src/` = 0（UA 品牌串无字面 `+`，§10.3；后者覆盖 `identity.ts:52` 模板形态，两条都要跑）
 - [ ] repo URL 字面量 src/ 内仅 `shared/identity.ts`（REPOSITORY_URL）一处，UA 4 触面 import 化（§10.3 规则 2）
 - [ ] WebFetch engine 静态串带版本段（delta ⑥ 收口）：`Atlas-User (AtlasCode/<v>; repo)`（§10.3 ⑤）
