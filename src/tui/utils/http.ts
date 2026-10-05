@@ -7,12 +7,17 @@ import {
   getAtlasApiKey,
   getOAuthTokens,
 } from './auth.js'
-import { getDefaultUserAgent } from './userAgent.js'
 import { getWorkload } from './workloadContext.js'
+import {
+  PRODUCT_NAME,
+  REPOSITORY_URL,
+  buildWebFetchUserAgent,
+  getVersion,
+} from 'src/shared'
 
-// G-3（§8.74.28 R4）：品牌串裁定 = AtlasCode + 版本 + repo（repo = AtlasCode
-// repo 链接）。旧 `atlas/` 前缀 + 1P 日志过滤契约（1P 遥测 879 点已随死代码
-// pass 裁除，过滤面不复存在）→ 真实源换血。
+// G-3（§8.74.28 R4）：品牌串裁定 = 品牌 + 版本 + repo（repo = AtlasCode
+// repo 链接，无字面 `+`）。旧 `atlas/` 前缀 + 1P 日志过滤契约（1P 遥测 879 点已随死代码
+// pass 裁除，过滤面不复存在）→ 真实源换血。品牌/版本/repo 段走 shared/identity 单一事实源。
 export function getUserAgent(): string {
   const agentSdkVersion = process.env.ATLAS_AGENT_SDK_VERSION
     ? `, agent-sdk/${process.env.ATLAS_AGENT_SDK_VERSION}`
@@ -30,8 +35,8 @@ export function getUserAgent(): string {
   const workload = getWorkload()
   const workloadSuffix = workload ? `, workload/${workload}` : ''
   // de-ANT: USER_TYPE 透传静态化（Atlas 构建 USER_TYPE 恒未设置，UA 串此前为 "(undefined, ...)"）。
-  // G-3（§8.74.28 R4）：品牌串 = AtlasCode + 版本 + repo（+客户端后缀）。
-  return `AtlasCode/${MACRO.VERSION} (atlascode, ${(process.env.ATLAS_ENTRYPOINT) ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix}, +https://github.com/vincentlau2046/AtlasCode)`
+  // G-3（§8.74.28 R4）：品牌串 = 品牌 + 版本 + repo（+客户端后缀，无字面 `+`）。
+  return `${PRODUCT_NAME}/${getVersion()} (atlascode, ${(process.env.ATLAS_ENTRYPOINT) ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix}, ${REPOSITORY_URL})`
 }
 
 export function getMCPUserAgent(): string {
@@ -46,8 +51,8 @@ export function getMCPUserAgent(): string {
     parts.push(`client-app/${process.env.ATLAS_AGENT_SDK_CLIENT_APP}`)
   }
   const suffix = parts.length > 0 ? ` (${parts.join(', ')})` : ''
-  // G-3（§8.74.28 R4）：品牌串 = AtlasCode + 版本 + repo。
-  return `AtlasCode/${MACRO.VERSION}${suffix} (+https://github.com/vincentlau2046/AtlasCode)`
+  // G-3（§8.74.28 R4）：品牌串 = 品牌 + 版本 + repo（无字面 `+`）。
+  return `${PRODUCT_NAME}/${getVersion()}${suffix} (${REPOSITORY_URL})`
 }
 
 // User-Agent for WebFetch requests to arbitrary sites. `Atlas-User` is
@@ -55,8 +60,9 @@ export function getMCPUserAgent(): string {
 // operators match in robots.txt); the trailing repo link identifies the
 // product (operators can look the agent up at the AtlasCode repo).
 // G-3（§8.74.28 R4）：原 support.atlas.ai 虚构域后缀 → 真实 repo 链接。
+// ④ tui 面与 ⑤ engine 静态面共用 shared/identity buildWebFetchUserAgent（零分叉，§10.3）。
 export function getWebFetchUserAgent(): string {
-  return `Atlas-User (${getDefaultUserAgent()}; +https://github.com/vincentlau2046/AtlasCode)`
+  return buildWebFetchUserAgent()
 }
 
 export type AuthHeaders = {

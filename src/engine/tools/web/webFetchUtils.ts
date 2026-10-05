@@ -65,7 +65,7 @@
  */
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { asSystemPrompt, getAtlasTempDirName, logError, type Message } from '../../../shared'
+import { asSystemPrompt, buildWebFetchUserAgent, getAtlasTempDirName, logError, type Message } from '../../../shared'
 import { modelProvider, buildOpenAIParams } from '../../../modelprovider'
 import { AbortError } from '../bash'
 import { createUserMessage } from '../files'
@@ -226,10 +226,9 @@ const MAX_REDIRECTS = 10
 // Truncate to not spend too many tokens
 export const MAX_MARKDOWN_LENGTH = 100_000
 
-// delta ⑥：旧 getWebFetchUserAgent（utils/http.ts:54，版本构建宏 + env 段）
-// → 域内固定 UA（版本段裁登记）；G-3（§8.74.28 R4 升格）：原 support.atlas.ai
-// 虚构域后缀 → 真实 repo 链接（AtlasCode repo）。
-const WEB_FETCH_USER_AGENT = 'Atlas-User (+https://github.com/vincentlau2046/AtlasCode)'
+// delta ⑥ 收口（BR-8）：engine ⑤ 与 tui ④ 共用 shared/identity `buildWebFetchUserAgent`，
+// 版本段恢复（与 ④ 对齐），repo/版本/品牌段单一事实源（无字面 `+`）。
+const WEB_FETCH_USER_AGENT = buildWebFetchUserAgent()
 
 // ── URL 校验（逐字）──────────────────────────────────────────────────
 

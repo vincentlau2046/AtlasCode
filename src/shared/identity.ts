@@ -47,7 +47,13 @@ export function getVersion(): string {
   return VERSION
 }
 
-/** LLM 出站 User-Agent 品牌串（与 tui/utils/http.ts `AtlasCode/<v> (... +repo)` 语义对齐）。 */
+/** LLM 出站 User-Agent 品牌串（与 tui/utils/http.ts `AtlasCode/<v> (repo)` 语义对齐，无字面 `+`）。 */
 export function buildUserAgent(): string {
-  return `${PRODUCT_NAME}/${getVersion()} (+${REPOSITORY_URL})`
+  return `${PRODUCT_NAME}/${getVersion()} (${REPOSITORY_URL})`
+}
+
+/** WebFetch UA 共用 builder（tui `getWebFetchUserAgent` ④ 与 engine `WEB_FETCH_USER_AGENT` ⑤ 同一出处，零分叉）。
+ *  'Atlas-User' = 家族级 WebFetch agent 名（robots.txt 匹配串，Branded House 共享面，§10.3 spec §12）。 */
+export function buildWebFetchUserAgent(): string {
+  return `Atlas-User (${PRODUCT_NAME}/${getVersion()}; ${REPOSITORY_URL})`
 }

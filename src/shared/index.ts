@@ -20,6 +20,7 @@ export {
   REPOSITORY_URL,
   getVersion,
   buildUserAgent,
+  buildWebFetchUserAgent,
 } from "./identity"
 
 // B 波 S1 + C1：env 解析纯函数（四域 config.ts 共用）
