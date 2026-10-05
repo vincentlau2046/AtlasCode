@@ -4,6 +4,30 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.25
+
+#265 P0 安全修（TUI 车道 Bash 权限面两处缺口，独立 P0 patch 先于 BR-8 品牌车，
+f4 裁定列车归属）：
+
+- **`>` 输出重定向只读守卫**（`69407b8`，#265 S1）：`isReadOnlyCommand`
+  同族 includes 守卫补 `>`——输出重定向（`>`/`>>`/`>&`/`&>`）带写副作用，
+  旧匹配 `echo`/`git status` 等只读前缀被 `bashToolHasPermission` step 7
+  自动放行（写文件零审批）。`<` 输入重定向只读不写不守卫；引号内 `>` 判
+  非只读 = fail-safe 方向（多弹框不多放行）。
+- **Bash checkPermissions 模式门控委托 engine**（`41649ec`，#265 S2）：
+  W2-2b 裁定① 的恒-allow stub 实证为安全洞——gate 1c 拿到 `allow` 后 step 3
+  只转 passthrough → TUI 车道任何 Bash 命令在 default/plan 等模式静默放行、
+  审批卡永不弹（= 0.1.24 残留 A1×3 INCONCLUSIVE 根因；auto 模式同洞绕过
+  AutoModeConfirm）。修订为模式门控委托：非 auto 一线接线 engine
+  `bashToolHasPermission`（单一事实源，非 auto 支不触 speculative 缓存）；
+  auto 返 passthrough（弹窗层 TUI classifier/AutoModeConfirm 权威，tui
+  缓存单源存续）。单点替换 engine gate + TUI 弹窗复检两消费面。
+- **判别单测**：`tui-bashtool-checkpermissions`（7 测）+ `core-face` S1
+  6 断言；四件套绿（worktree 全量 3507/0·244）。
+
+发布后 7 项 e2e 重验（A4×5+A1×3，f4 触发终审，A4F harness 自 INCONCLUSIVE
+翻 PASS 作触发器）归 0.1.25 终审项。
+
 ## v0.1.24
 
 P0a 审批行为定稿（§4b A 波）+ P0b 持续监控收敛（B 波）+ P1a 全量回退（C 波）
