@@ -11,8 +11,10 @@ import type { CompletionType } from '../../../utils/unaryLogging.js';
 import { Select } from '../../CustomSelect/index.js';
 import { ShowInIDEPrompt } from '../../ShowInIDEPrompt.js';
 import { usePermissionRequestLogging } from '../hooks.js';
+import { useAppState } from '../../../state/AppState.js';
 import { PermissionDialog } from '../PermissionDialog.js';
 import { AutoModeConfirm } from '../AutoModeConfirm.js';
+import { verdictLine } from '../permissionVerdict.js';
 import type { ToolUseConfirm } from '../PermissionRequest.js';
 import type { WorkerBadgeProps } from '../WorkerBadge.js';
 import type { IDEDiffSupport } from './ideDiffConfig.js';
@@ -73,6 +75,12 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
     language_name: languageName
   }), [completionType, languageName]);
   usePermissionRequestLogging(toolUseConfirm, unaryEvent);
+  // D-279-r1（渲染层）：文件 ask 弹框此前漏 P0a verdict 行（为何在问你），
+  // A4 分类器危险句（auto-mode）在文件面永不现形。接 verdictLine，镜像
+  // BashPermissionRequest / PowerShellPermissionRequest（零新数据：mode 经
+  // useAppState 活读 toolPermissionContext，只读投影，判定层零改动）。
+  const toolPermissionContext = useAppState(s => s.toolPermissionContext);
+  const verdictLineText = verdictLine(toolUseConfirm.permissionResult.decisionReason, toolPermissionContext.mode, toolUseConfirm.tool.name, toolUseConfirm.classifierAutoApproved === true);
   const symlinkTarget = useMemo(() => {
     if (!path || operationType === 'read') {
       return null;
@@ -192,6 +200,7 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
         {symlinkWarning}
         {content}
         <Box flexDirection="column" paddingX={1}>
+          {verdictLineText !== null && <Text dimColor>{verdictLineText}</Text>}
           {typeof question === 'string' ? <Text>{question}</Text> : question}
           <Select options={options} inlineDescriptions onChange={value => {
           const selected = options.find(opt => opt.value === value);
