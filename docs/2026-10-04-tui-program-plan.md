@@ -29,12 +29,14 @@
 | P0a | 可解释审批一等公民（verdict 一行，零新数据） | 0.1.19 | ✅ PASS（5 轮 + 生产 lane `m2yq`） | 审批卡 verdict 三态 + 用户批准标记 |
 | P0b | 两后端新信号（水平回退 + autoCompact 熔断 + 网关不可达方向性） | 0.1.20 | ✅ PASS（`kbin`/`bck5` 一轮 + 生产 lane） | 三门禁文案探针全绿 |
 | P1a | 多页面侧抽屉（5 页 split + 键位 + `/sidebar` + 信任线直达） | 0.1.21 缺陷版 / 0.1.22 补 R1 双修复 / **0.1.24 全量回退** | ❌ 用户面验收不过（2026-10-05 用户裁定回退）；v2 重设计挂起 | 回退面删净（§7-C）；`/diff`/内联 diff/输入层无回归 |
-| P0a-2 审批行为修复（A 波） | A1 always 生效（session 域）/ A2 No 不退出 / A3 automode 确认门 / A4 why 句式真字段全英文 / A5 标签 `automode enabled` | **0.1.24** | ⏳ 待实施 | 3 新行为探针（A1/A2/A3）+ why 无 CJK + S-A 回归绿 |
-| P0b-2 持续监控（B 波） | B1 回退折入 model 段 `↦fast` / B2 熔断折入 context-bar 色阶 / B3 网关断异常指示（数据源 Main 白盒，无信号则降级砍掉） | **0.1.24** | ⏳ 待实施 | statusline 三态语义探针 + stripAnsi 视觉核 |
+| P0a-2 审批行为修复（A 波） | A1 always 生效（session 域）/ A2 No 不退出 / A3 automode 确认门 / A4 why 句式真字段全英文 / A5 标签 `automode enabled` | **0.1.24** | ✅ 已发布（31 探针 0 FAIL + 生产 lane 全绿） | 3 新行为探针（A1/A2/A3）+ why 无 CJK + S-A 回归绿 |
+| P0b-2 持续监控（B 波） | B1 回退折入 model 段 `↦fast` / B2 熔断折入 context-bar 色阶 / B3 网关断异常指示（已批砍） | **0.1.24** | ✅ 已发布 | statusline 三态语义探针 + stripAnsi 视觉核 |
+| P0a-3 A4 改进波（0.1.26） | A4-mode P0 修（decisionReason 透传）+ allow-face verdict 行（成功卡补 rule-allow/bypass/classifier-approved 三 allow 句）+ BASH_CLASSIFIER no-op 文档（翻它无效=ANT-ONLY stub，真链=TRANSCRIPT_CLASSIFIER+auto+live model）+ R1 skip 早退门 + R2 数据侧（engine gate 快路径 setAllowVerdict）→ 4/6 A4 句 e2e 可达（classifier 2 句 live-model 依赖） | **0.1.26** | ✅ 已发布（`89efabc`+tag v0.1.26+npm 验真，BR-8 顺延 0.1.27）；**生产 lane 回归 in-flight（e2e）** | gate = e2e A4F PASS（4 硬句 a4rallow/a4bypass/A4-mode/a1danger 绿 + classifier 2 句 INCONCLUSIVE + A1×3 + 控制×7 + S-A 不回归，3-round R1 早退门+R2 数据侧核销）+ f4 git 现场核验 → 发布；生产 lane 后 housekeeping 收口 |
+| live-gateway 分类器 e2e 波（P0 封口前置） | 跨 loop-robustness/fault-proxy 基建 + LLM 非确定，让 A4 classifier 2 句（危险 flag/自动放行，唯一产 `decisionReason:{type:'classifier'}` 处=真 yolo 分类器）e2e 可强制 | 未排 | **待用户排期启动**（用户裁定 B：守全 6 句绿→P0 暂封不了） | 全 6 句 e2e 绿 + A1×3 + 控制 → **封 P0（验收完成）** |
 | P1a-v2 | 侧抽屉重设计（基于用户面讨论，**挂起**——0.1.24 回退到干净基线后再议，不叠糙方案） | 未排 | 挂起 | 待用户与 f4 讨论定稿 |
 | P1b | 计划/进度 + 工具结果/diff 可读性收口（**不新造**） | 未排 | 待 0.1.24 收口 | ① 规划期看清「目标 + 还差几步」② diff/工具结果默认可读、展开折叠无数据丢失 |
 | P2 | 可重跑工具（`↻` 改参重跑，高返工后置） | 未排 | 待核心稳定 | 改参重跑成功（新 tool_use 新址，旧结果标「被取代」非删）；前置 = 触发键/命令定稿 |
-| #263/#264 | TUI 车道 Bash 恒-allow + engine `>` 重定向误判只读（真实权限缺口） | 未排 | **用户裁定：等专项收口后**随工具本体/engine 只读波修 | TUI default 模式非只读 Bash 命中内容规则弹 ask + `isReadOnlyCommand('echo x > f')`=false |
+| #263/#264（= #265） | TUI 车道 Bash 恒-allow stub + engine `>` 重定向误判只读（真实权限缺口） | **0.1.25** | ✅ 已修已发布（`69407b8` S1 + `41649ec` S2，用户 #265 收口委托 Main，f4 版本归属 + git 验真） | TUI default 模式非只读 Bash 命中内容规则弹 ask + `isReadOnlyCommand('echo x > f')`=false（0.1.25 后 e2e 7 项重验核） |
 | 终审 | spec §5 四问 | — | 待 P0–P2 全过 | 信任线 ≤1 键 2s 看懂 / 视觉原创 / 全量 tier A/B/C/G 零新增 P0 / 一处大胆成立 |
 
 ---
@@ -64,10 +66,14 @@
 - 用户已授权本专项规划-管理闭环归管理（atlascode-f4）：**0.1.23 起列车开跑/版本自授权归管理**，main 执行 outward publish。
 - main 的 classifier 纪律保留：publish 被阻 / 疑似 scope 越界 → flag 管理，管理裁定；**仅当管理判定超出专项边界**（spec P0–P2 + 工单 + 0.1.x 版本纪律）才 surface 用户裁定。
 - **scope 红线**：列车内容须在 §1 roadmap 内；新项须管理书面（消息）scope 批准，新 feature 波 → 用户裁定。
+- **npm 发布两条裁定（2026-10-05 用户经 f4 核实确认，Main 转述→f4 向用户核实后落此条，peer 转述不直接执行）**：
+  - **① 发布时序 = e2e gate 全绿闭环后，且一个 wave 只发一次**：gate red → Main 在 worktree 修 → 复跑 e2e（迭代中**不 bump、不 npm 发布**）；全绿闭环后才 bump + npm 发布（防「一个 PR 多个版本」）。
+  - **② 回合内 npm 发布无需用户逐次授权，Main 直接发**（作废 0.1.26 消息里的「npm publish 逐次用户放行」不变量②；classifier 安全纪律不变：publish 被阻 / 疑似 scope 越界仍 flag 管理/上浮用户）。
+  - 不变量：f4 gate 权（判 e2e verdict 放行）+ 验收判据 + 「gate 非绿不发布」+ worktree 保留至生产 lane 验真。
 
 ### 2.5 沟通与冲突规则
 - 阶段接口消息逐条带 SHA/artifact 路径；时序/scope 分歧 → 管理裁定，**涉红线或 24h 未决 → surface 用户**。
-- **验收判据单一出口**：回归触发与验收口径由管理统一发出（e2e 不自发），防双头判据。
+- **验收判据单一出口**：回归触发与验收口径由管理统一发出（e2e 不自发），防双头判据。**（2026-10-05 用户裁定移交：A4F 复跑触发权 f4 → Main，防 0.1.26 R1 双跑竞态；「单一出口」仍保持单一——触发=Main 发、gate 权 + 验收判据归属 + npm 发布放行不变归 f4/用户侧，触发与 gate 分离不双头。peer 转述的用户裁定不直接执行，移交经 f4 向用户确认后落此条。）**
 - 每阶段收口：管理更新 §6 状态表 + 记忆。
 
 **main 待输入项（提前约定，可反提）**：
@@ -198,4 +204,8 @@
 - **✅ 0.1.24 已发布（Main 4 项回报 + f4 git 现场核验，2026-10-05）**：master `6be29bd`（chore(release) 0.1.24）+ tag `v0.1.24` 已 push，origin 同步；release 提交面仅 CHANGELOG+package.json（docs 护栏满足），8 列车提交 master 新 SHA = `626e378`C/`a556da2`A2/`410d7bc`A1a/`f30bf37`A1b/`dc8e78a`A3+A4/`5867cfd`A5/`4dcd56e`B1/`fbee6de`B2。packument 双通道验真（npmmirror + 真 registry 直连）latest=0.1.24，shasum `9c915490…` 与 publish 回执逐字一致。四件套（release 树口径）tsc 0/lint 0e·0w/build 17.57MB/全量 3499/0/243。**f4 git 核验**：master=tag=6be29bd、origin 同步、release 面干净。
 - **✅ 0.1.24 生产 lane 全绿 verdict（e2e，npm 产物 / tag v0.1.24 = master 6be29bd，verify worktree-024-prodlane 实测，2026-10-05）**：6 项清单全过——①banner v0.1.24 实测 ②P0 S-A/B/C hardFail=0 ③C 波回退核（SidePanel 0 文件//sidebar 未注册/1-5 删净/双 cede 删净/useDiffData+decodeKittyModifier 保留/`parse-keypress-modifiers.test.ts` 6/0 绿/抽屉 0 残留含模态期/1-5 不开抽屉/`/diff`+内联 diff 无回归）④**用户面走查层**（statusline 三标签英文 default/automode enabled/bypass enabled 各现形 + why 行无 CJK + 无抽屉视觉残留——验收盲区补层首跑即绿）⑤P0b③ 三锚点（`IFF 不可达：已切人工确认 —— /doctor 排查`）不回归 ⑥INCONCLUSIVE 不强制（12 项终审跟进）。P024 = hardFail=0/0 FAIL/19 PASS+12 INCONCLUSIVE，与 worktree 验收一致。
 - **0.1.24 收口（本条目）**：housekeeping 列车外提交（spec v4 + 本计划 + 调研报告增量，docs-only）；列车 worktree `worktree-0.1.24-approval-monitor-p1a-revert` 已令 Main 清理。**残留（终审跟进，不阻塞）**：① 8 hard-INCONCLUSIVE（A1×3 待 #263 修后重验 / A4×4 verdictLine 仅 Bash·PowerShell 面）+ 4 soft（A2-esc/B1×2/B3-gw-down）② `PermissionRuleExplanation.tsx` 详情面 pre-A4 旧措辞（P1a-v2 波候选）③ e2e harness stripAnsi CUF 修（`user-e2e/lib/util.ts`，e2e owner 定入库）。
-- 下一步触发点：**P1a-v2 设计讨论**（回到干净基线后与用户重议，候选方向：无框全宽临时面板 / `/diff` 增强 / 决策面，未定稿）与 **P1b 开波**（Main ①-④ 决策输入先行 + #261 S-F 复验）——两线可并行不占列车。
+- 下一步触发点：**P1a-v2 设计讨论**（回到干净基线后与用户重议，候选方向：无框全宽临时面板 / `/diff` 增强 / 决策面，未定稿）与 **P1b 开波**（Main ①-④ 决策输入先行 + #261 S-F 复验）——两线可并行不占列车（**第二波挂起，用户确认不启动，任何 session 不预启**）。
+- **0.1.25（#265）已发布 + P0 封口时序 = Option 2（用户 2026-10-05 裁定）**：#265（#263+#264 修）用户收口委托 Main 执行 → **0.1.25 已发布**（master/tag `837f72f` + origin sync + npm latest=0.1.25，f4 git 验真通过；版本归属 0.1.25=#265 先于 BR-8）。**P0 封口（字面零空洞）= 等 0.1.25 上 7 项重验转绿**——f4 已触发 e2e A4F。B1×2（↦fast 现形/消失）留 loop-robustness fault-proxy，不阻塞 P0 封口。
+- **A4F 重验 FAIL（2026-10-05）→ 0.1.26 P0 A4 改进波 + P0 封口推迟 live-gateway 波（用户终裁 Option B）**：A4F 对 0.1.25 功能代码实跑——① A1-no-dialog / A1-dangerous-no-always PASS + 控制×5 全绿，**#265 静默放行洞已确认修复**（no-rule `touch`/`rm -rf` default 模式现弹框现形 + Esc 拒绝）② 暴露新 P0：A4-mode verdict 行断裂（`BashTool.checkPermissions` 委托 engine 后 `decisionReason` 未透传 → `verdictLine` 命中 `default→null`）。**Main 白盒 (i)(ii)**：(i) 运行时真开分类器 = `TRANSCRIPT_CLASSIFIER`（ON_BY_DEFAULT）+ mode=auto + live model；`BASH_CLASSIFIER` 门的是 ANT-ONLY stub（`isClassifierPermissionsEnabled` 恒 false → `classifierAutoApproved` 永不 true）→ flip 它=no-op，**Main 已 revert feature.ts + 记 no-op 根因文档**（非「默认开」）；(ii) classifier 2 句（危险 flag/自动放行）唯一产 `decisionReason:{type:'classifier',classifier:'auto-mode'}` 处 = `permissions.ts:755-778` `classifyYoloAction` 真 LLM（需 gateway+live 模型）→ **PTY 不可强制**。**用户裁定终局（逐次：强修 4 句 → 守全 6 句绿）**：P0 **封口推迟到 live-gateway 分类器 e2e 波**（跨 loop-robustness/fault-proxy 基建 + LLM 非确定，让 classifier 2 句 e2e 可强制后才封 P0；version TBD，待用户排期）。**0.1.26 = P0 改进波（非封口，照常发）**：`worktree-278-a4-verdict` 3 提交 = `a59f6d3` decisionReason 透传（修 A4-mode P0）/ `94edd40` allow-face 三 allow 句 / `d991f95` BASH_CLASSIFIER no-op 文档，四件套 3513/0/244 绿，**4/6 A4 句可达**。序列 = f4 触发 e2e A4F gate（4 硬句绿 + classifier 2 INCONCLUSIVE + A1×3 + 控制）→ Main 发布 0.1.26（BR-8 顺延 0.1.27）→ e2e 生产 lane → f4 housekeeping。`worktree-265-bash-perm-fix` 可清（A4-mode 已由 0.1.26 `a59f6d3` 覆盖重验）。
+- **✅ 0.1.26 已发布收口推进中（2026-10-05，f4 gate + git 现场核验）**：3-round 收口 = R1 渲染面（`29316c7` skip 早退门，修对但非根因）→ **R2 数据侧根因命中**（`c1c3b46`：auto-allow 被 engine gate 快路径 `loopPermissionBridge !verdict.ask→return` 短路 → 永不达 useCanUseTool → allowVerdicts 恒空；修 = GateVerdict 加性 `decisionReason?` + permissionGate allow 支附字段（判定体零触碰）+ 桥快路径 guard 式 setAllowVerdict，4 文件 +102/−2 全加性零触红线，f4 逐 diff 核过；setYolo 偏离=证伪式不修〔engine 门不跑 yolo LLM，classifier 句真实链本走 ask 支既有接线〕）→ **e2e A4F R2 复跑 PASS（hardFail=0，4 硬句全绿 + classifier 2 INCONCLUSIVE + A1×3 + 控制×7 + S-A 不回归，artifact `A4F-1791202099591-qoyo`）→ f4 gate 放行 + git 现场核验（origin/local sync、6 提交=5 cherry-pick+release、release `89efabc` 仅 package.json+CHANGELOG、tag `v0.1.26`→`89efabc`）→ Main 发布**（master `89efabc` + tag v0.1.26 + npm latest=0.1.26 packument 验真 shasum `ab2467996851…` MATCH + 四件套 master 口径 3519/0/244）。**残留：生产 lane 回归 in-flight（e2e，npm 0.1.26 产物，Main 触发）→ 绿则 worktree-278 清 + f4 housekeeping 收口**。
+- **协议增量（2026-10-05，用户经 f4 核实确认，§2.4/§2.5 已落）**：① A4F 复跑触发权 f4→Main（单一出口仍单一：触发=Main，gate 权+判据归 f4）② npm 发布时序=e2e 全绿闭环后 + 一 wave 一版 ③ 回合内 npm 免用户逐次授权（Main 直接发，classifier 安全纪律不变）。peer 转述裁定一律经 f4 向用户核实后才落协议（本轮两次执行）。

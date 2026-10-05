@@ -155,10 +155,18 @@
 | 0.1.22 | P1a R1 双修复（`27df1ed` /sidebar 注册 + `d4341a1` kitty 0-based 解码 + Diff 空态标档）发布 `8a21a63` | ⚠️ 含 P0a 回归（1-5 抢弹框数字选）→ 开 0.1.23 |
 | 0.1.23 | P0a 回归修「双 cede」（`0f8de6b`，后随 0.1.24 C 波删除）+ #271 #4/#5（`95a0670`/`ea45461`）；发布 `af9f4c2`，gate 全绿 + 生产 lane 全绿 | ✅ 收口 |
 | 0.1.24 | **用户面重裁定波**：A P0a 审批行为修复（A1 always session 域生效 / A2 No 不退出 / A3 automode 确认门 / A4 why 句式全英文真字段 / A5 标签三态）+ B P0b 持续监控（B1 回退 ↦fast 折 model 段 / B2 熔断折 context-bar 色阶 / B3 砍）+ C P1a 全量回退（抽屉 19 文件+3 接线删净，留 useDiffData/kitty 解码/decisionLog）。8 提交，发布 `6be29bd` + tag v0.1.24 + packument 验真 | ✅ 收口（gate 31 探针 0 FAIL + 生产 lane 6 项全绿） |
+| 0.1.25 | **#265 = #263+#264 修（收口波）**：S1 `>` 输出重定向只读守卫 + S2 TUI BashTool `checkPermissions` 委托 engine 模式门控（堵 default 模式 Bash 恒-allow stub 安全洞）。发布 `837f72f` + tag v0.1.25 + npm latest 验真（shasum `46d216…`） | ✅ 收口（A4F 重验确认静默放行洞已堵：no-rule `touch`/`rm -rf` default 模式现弹框 + Esc 拒绝） |
+| 0.1.26 | **P0 A4 可解释审批全可达（#278，P0 改进波）**：A4-mode P0 修（`decisionReason` 透传，default 无规则 Bash 弹框 verdict 行断裂真缺陷）+ allow-face verdict 行（成功卡补 rule-allow/bypass/classifier-approved 三 allow 句）+ R1 skip 早退门（`hasSuccessCardMarker` 纯面）+ R2 数据侧（engine gate 快路径 `setAllowVerdict`，判定逻辑零改动）+ `BASH_CLASSIFIER` no-op 根因文档（flip 无效=ANT-ONLY stub，真链=TRANSCRIPT_CLASSIFIER+auto+live model）。5 提交，gate = e2e A4F R2 复跑 PASS（3-round：R1 渲染面修对但非根因 → R2 数据侧命中）+ f4 git 现场核验，发布 `89efabc` + tag v0.1.26 + npm latest 验真（shasum `ab2467996851…`） | ⏳ 发布收口中（**生产 lane 回归 in-flight**，worktree-278 保留至验真） |
 
 - 用户面裁定依据（2026-10-05 用户）：抽屉「完全不可用」（割裂圆角灰框/初始页死板/40% 定宽不适配 TUI）+ P0 信任线可发现性=0 → 回退回干净基线（消息流 + /diff + statusline 持续监控），P1a v2 挂起重议；验收补「用户面走查层」补行为探针盲区。
 - 残留：#263/#264 权限缺口（专项收口波）/ 12 INCONCLUSIVE 终审 / `PermissionRuleExplanation.tsx` 旧措辞（P1a-v2 候选）。
 - 判据事实源：`docs/2026-10-04-tui-program-plan.md` §4b（0.1.24 列车）+ `docs/tui-differentiation-spec.md` v4。
+
+## (h) 0.1.25–0.1.26 收口增量（2026-10-05 补记）
+
+- **P0 封口时序（用户裁定链，2026-10-05 逐次递进）**：① Option 2（等 0.1.25 重验转绿再封）→ A4F 重验 FAIL 暴露 A4-mode P0 + A4×4 结构不可达 → ②「强修 4 句再封」开 0.1.26 波 → ③ Main 白盒实证 classifier 2 句（危险 flag/自动放行）live-model 依赖 PTY 不可强制 → **终裁 Option B = 守全 6 句 e2e 绿判据 → P0 暂封不了，封口推迟到 live-gateway 分类器 e2e 波**（跨 loop-robustness/fault-proxy 基建 + LLM 非确定；version TBD，待用户排期）。**0.1.26 = P0 改进波（4/6 A4 句 e2e 可达）独立发布，非封口**。
+- **0.1.26 gate 3-round 轨迹**：R0（a4rallow/a4bypass 0 命中，allow 面未接线）→ R1 渲染早退门修（`29316c7`）复跑仍红 → **R2 数据侧根因**（auto-allow 被 engine gate 快路径短路 → allowVerdicts 恒空，`c1c3b46` 加性修：GateVerdict `decisionReason?` + permissionGate allow 支附字段〔判定体零触碰〕+ 桥 guard 式 setAllowVerdict）→ e2e A4F R2 复跑 PASS（artifact `A4F-1791202099591-qoyo`）。
+- **协议增量（2026-10-05，用户经 f4 核实确认）**：A4F 复跑触发权 f4→Main（§2.5，单一出口仍单一：触发=Main、gate 权+判据归 f4）；npm 发布时序 = e2e 全绿闭环后 + 一 wave 一版（§2.4）；回合内 npm 免用户逐次授权（Main 直接发，classifier 安全纪律不变）。peer 转述的用户裁定一律经 f4 向用户核实后才落协议。
 
 ---
 
