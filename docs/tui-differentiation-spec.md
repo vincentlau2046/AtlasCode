@@ -1,41 +1,39 @@
-# TUI 差异化优化 — 可执行 Spec（v3：信任线 + P0a 可解释审批 + P1 多页面侧栏）
+# TUI 差异化优化 — 可执行 Spec（v4：审批行为修复 + 持续监控 + P1a 回退）
 
 > 交付人：本 session（`atlascode-b8`）＝ 方案总体框架 + 逐阶段验收 + 终审把关 / 最终回归
 > 实施人：Main session（`AtlasCode 架构实施Main`）＝ 唯一实现者
-> 状态：v3 端到端复查完成——真实数据 shape 逐字 pin：信任线 = 复用已建段 + 2 个后端新信号；P0 拆 P0a 展示重排 / P0b 后端新信号
-> 日期：2026-10-03
+> 状态：v4 用户审评定稿（2026-10-05）——P0a 从「展示重排」升级为**审批行为修复**（always 生效 / No 不退出 / automode 确认门 / why 句式全英文真字段 / 标签三态）；P0b 定位修正为**持续健康监控**（连续状态折入既有段，非瞬态事件 banner）；**P1a 多页面侧栏全量回退**（用户面验收不过），v2 重设计挂起
+> 日期：2026-10-05（v3 基线 2026-10-03）
 
 ---
 
-## 0. 一句话（v2）
+## 0. 一句话（v4）
 
 把 TUI 从「Claude Code 复刻」升级为 **可操控的信任台（Steerable Trust）**：
-一处大胆——把状态栏变成「信任线」，一眼看懂 **谁在答 / 为什么放行 / 上下文还差多少**，每个都能一键拨。
+审批行为**可信**（选了 always 真生效、No 不炸 session、进 automode 有确认门、why 说得清），
+状态栏做**持续健康监控**（谁在答 / 什么姿态 / 上下文还差多少——连续状态，不是瞬态 banner），
 其余（消息流 / 工具卡 / diff / 审批 / 输入框）**保持现有 Claude 质量不动**，不做多余的视觉改造。
 
-## 1. 核心签名：信任线（Trust Line）
+## 1. 核心签名：信任线（Trust Line）——v4 定位修正 = 持续健康监控
+
+**v4 原则（用户裁定 2026-10-05）**：statusline 回答「**现在**怎么样」（连续状态），不播报「**发生过**什么」（事件历史归决策面，留未来波）。三槽全部折入**既有段**，不新造独立段、不加 cryptic token：
 
 ```
-┌──────────────── 信任线 Trust Line ───────────────────────────────┐
-│ 谁在答 [fast ▾ · 回退↑(新信号)]   为什么 [自动放行 · allow 规则 ryecurl]   还剩 ████░ 78% · ⚠压缩预警(新信号)
-└──────────────────────────────────────────────────────────────────┘
+ deepseek-v4-pro ↦ fast · default · ctx 42%
+   └谁在答┘└姿态┘  └还剩多少┘
 ```
 
-三件事，各一键拨（**v3 数据 shape 校正：真实字段逐字 pin，真新增 = 2 个后端信号，非展示**）：
+| 槽 | 呈现 | 数据源 | 连续/异常 |
+|---|---|---|---|
+| **谁在答** | `model` 段：正常 = 主模型名；回退活跃 = `deepseek-v4-pro ↦ fast`（黄，恢复即消失） | `ModelSegment` + `getLastRoleFallback()`（既有，零新后端信号） | 连续量，永远在；`↦` 仅回退期显形 |
+| **什么姿态** | `permission-mode` 段三态标签：`default` / `automode enabled` / `bypass enabled`（shift+tab 指示牌，保留） | `PermissionModeSegment`（既有，A5 改标签文案） | 连续量，永远在 |
+| **还剩多少** | `context-bar` 段：占用 % + 色阶（cyan→黄 70%→红 90%）；超 autoCompact 阈值且 isAutoCompactEnabled 尾部 `▲` | `ContextBarSegment` + `calculateTokenWarningState`（既有数据源） | 连续量，永远在；`▲` 阈值区显形 |
 
-| 看什么 | 真实数据源（已落盘，逐字段） | 拨档 |
-|---|---|---|
-| **谁在答**：角色 + 模型名 | `ModelSegment` 已渲染 `input.model.display_name`；三角色池 `roles.ts` 水平回退序 | `/model` |
-| 　↳ 回退↑ 是否发生 | **新信号（Main 0.1.17 落定后）**：`queryWithRoleFallback.ts`(72L leaf，签名 `(opts: RoleQueryOptions)=>Promise<chat>`)。`RoleQueryOptions` 已有 `onPrimaryError/onFallbackError` **失败侧**回调，**成功侧无信号**（fallback 成功与 primary 成功同返回值不可区分）→ 新增面**偏好 result 加字段形**（`servedRole`/`fallbackUsed`，返回值加性扩展、消费者零签名变更；非 `onFallbackSuccess?` 回调——TUI 展示面在 await 点同步可得、无中途回调时序）；动本体 + 门面 `modelprovider/index.ts:196`（STR-1 外域只经门面）；消费者仅 `tui/commands/insights.ts` 3 站点（:718/:870/:1399，premium→small）。爆炸半径小 | `/model` |
-| **为什么放行**：verdict + 命中规则/分类器 | `PermissionDecisionReason` 判别联合（`rule`/`classifier`/`mode`/`hook`/…）+ `PermissionDecisionDebugInfo` 渲染器**已建**；持久形状 `ClassifierApproval{matchedRule,reason}` | `/permissions` + 审批内联 |
-| 　↳ 置信度 | **无数值置信度**。`bashClassifier.confidence:high\|medium\|low` 是 ANT-ONLY stub（`enabled=false`）；真实 auto-mode `YoloClassifierResult` = `reason` 文本 + `shouldBlock`，非数值 → 勿按数值 wiring | — |
-| **还剩多少**：上下文 % | `ContextBarSegment` + `ContextAbsoluteSegment` 已渲染 | `/autocompact` |
-| 　↳ 熔断预警 | **新信号（缺）**：`contextHostWiring` 有 `autoCompactWindow` 档位源（engine 侧），未接 statusline → 属 Main 后端口 | `/autocompact` |
-
-**返工核心结论（v3）**：信任线 = **展示重排（复用已建段）+ 2 个后端新信号**，不是新建引擎面。可解释审批的裁判数据（rule/classifier/mode 判别联合 + 渲染器 + 持久形状）**比 v2 记的更全**——P0 主体应是「把 debug 抽屉里已建的解释，提升为审批卡片默认可见的一等公民」，而非重新采集。AtlasCode 的真差异——Claude 是黑盒（单模型、静默 auto-accept），你是可操控的透明本地 agent。
+**「为什么放行」不在 statusline**（v4 撤回 v3 的 verdict 词槽）：per-command 的 why 是句子级信息（命中哪条规则 + source / 分类器 reason），无法压缩成 token，硬塞 statusline 是噪音。它属于**审批时刻**——审批弹框的 why 行 + 工具结果卡的 allow 原因行（P0a A4，§4）。
+**网关不可达**：不做常显指示（B3 砍：modelprovider 无连接态 store，新造 = 新后端信号面超本列车边界）；保留 0.1.20 既有错误行 `IFF 不可达：已切人工确认 —— /doctor 排查`（P0b③）。
 
 **后置增强（P2，核心稳定后再做）**：可重跑工具（改参 → `↻` 重跑）。
-**删除**：独立预算仪表盘面板、目标带（第二条 bar）——挤占终端行数，预算并入信任线；`#id` 地址前缀——并入现有 `/rewind`，不发明审美改造。
+**删除**：独立预算仪表盘面板、目标带、`#id` 前缀（v3 决定不变）；**v4 追加删除**：`RoleFallbackSegment` / `AutoCompactWarningSegment` 独立段（折入 model / context-bar，B1/B2）。
 
 ## 2. 设计原则（三条，判据式）
 
@@ -60,53 +58,51 @@
 
 验收由本 session 执行：每阶段 Main 落地即验（fixture + PTY e2e + 读 diff 对照本表），出「阶段验收单」。
 
-### P0 — 信任透明层（v3：拆 P0a 展示重排 + P0b 后端新信号）
+### P0 — 审批行为修复 + 持续监控（v4：0.1.24 三波 A+B；判据详见管理主计划 §4b）
 
-#### P0a — 可解释审批一等公民（零新数据，复用 `PermissionDecisionDebugInfo` 已建的裁判判别联合）
-- **交付**：审批卡片默认内联一行「为什么」——`rule`（命中 XX 规则 from source）/ `classifier`（auto-mode: reason）/ `mode` 三态直接可读，不再藏 debug 抽屉
-- **门禁**（每项都是「用户能不能」）：
-  - [ ] 任意一次(自动)放行/拦截，审批卡片直接答「命中哪条规则 / 分类器怎么说 / 什么 mode」，无需展开 debug
-  - [ ] 信任线聚合段把 mode（`PermissionModeSegment` 既有）与最近一次 verdict 概要串起来
-  - [ ] 数值置信度**不出现**（真实 shape = reason 文本 + 规则值），无假字段
-  - [ ] `git diff` 证明主路径零改动；四件套绿
+#### P0a — 审批行为修复（全 session 域：权限选择写 session 记忆，**不写 settings 文件、不改原存储模型**；resume 恢复、新 session 重置）
 
-  **位置与动态（查实：`Messages.tsx` 内联渲染，非弹窗/侧栏）**：
-  - 审批卡片 = 消息流里 tool_use 卡的「待审批态」，四个时刻：① 发起(executing) → ② 待审批(pending) → ③ 裁决 → ④ 结果态
-  - 「为什么」两个方向，按 verdict 来源取 `PermissionDecisionReason`：
-    - **ask 态** → 「为何在问你」：命中 ask 规则 / mode 触发人工确认
-    - **allow 态（自动放行）** → 「为何自动放行」：命中 allow 规则 `ruleValue`+`source` / auto-mode `classifier` reason（复用已有 `UserToolSuccessMessage`，把 reason 拼进去）
-  - 裁决后信任线 `verdict 概要` 随之刷新，其余段不动
+**A1 always 必须生效**（修「选了 don't ask again 下次还问」）
+- 选 `Yes, and don't ask again for <prefix>:*` → 写 **session 域** allow 规则 → 本 session 同前缀命中直接 allow 不再弹框（工具结果卡显示 allow 原因）；写失败显式报错，不静默假装成功
+- 安全护栏：危险前缀（`rm`/`sudo`/`cd`/单字符/`*`）不出现 always 选项
+- **门禁**：① 选 always 后同前缀第二次不弹框 ② 危险前缀无 always 选项 ③ 新 session 不继承
 
-#### P0b — 两个后端新信号（触 `modelprovider`/`contextHostWiring`，由 Main 定或协调，非 TUI 显示）
-- **交付**：① 水平回退发生可见（哪一池成员实际应答）② autoCompact 熔断预警接入 statusline
-- **门禁**：
-  - [ ] 回退发生时信任线可见「已从 X 回退到 Y」（需 modelprovider/query 暴露成功回退信号，当前仅 `onFallbackError` 错误路径）
-  - [ ] 达 autoCompactWindow 阈值前 statusline 提示「将自动压缩，可 `/rewind` 回退」（需 contextHostWiring 档位接 statusline）
-  - [ ] 网关不可达给方向不给 mood：`IFF 不可达：已切人工确认 —— /doctor 排查`
+**A2 No 不退出**（修「选 No 直接退出整个 session」）
+- `No` = 拒绝**这一次**工具调用 + feedback（"tell Atlas what to do differently"）送回 agent → agent 继续运行（换方案/换工具/解释），**session 不退出**；Esc = 取消无 feedback
+- **门禁**：① 选 No 后 session 存活、agent 继续响应 ② Esc 变体同语义
 
-### P1 — 活动可读性 + 多页面侧栏（信任台第二层：信任线一眼 → 侧栏一键钻）
+**A3 automode 确认门**（防误入：auto 模式下命令被分类器自动放行，误入代价高）
+- 弹框选 `Enable automode` → 模态确认视图（4 行：`Entering automode / auto-approved by safety classifier / Switch back: Shift+Tab / 1 Confirm 2 Cancel`）→ **确认后**才切 session state + 当前请求 re-dispatch 走 auto 门控（复用既有 `recheckPermission` 面，不新造判定逻辑）
+- `shift+tab` 手切是用户显式动作，**不加门**；bypass 仅 shift+tab 手切（审批弹框选项枚举无 bypass，不在本波）
+- **门禁**：① 未确认前 statusline 仍 `default`（mode 未切）② Confirm → `automode enabled` ③ Cancel/Esc → 回原选项列表、停留 default
 
-对齐 G1/G2 已做方向接着收口；新增「多页面侧栏」作为活动可读性的统一载体（复用已建组件，主体是搬运+重组，非新建引擎面）。
+**A4 why 句式（全英文、真字段、非空话；与 `"Do you want to proceed?"` 主题一致，无 CJK 混入）**
+| verdict 来源 | 句式 |
+|---|---|
+| rule(ask/deny) | `Rule "<ruleValue>" from <source> requires confirmation.` |
+| rule(allow) | `Allowed by rule "<ruleValue>" (<source>).` |
+| classifier 危险 | `Auto mode: classifier flagged this as dangerous.` |
+| classifier 放行 | `Auto-approved by classifier: <reason>.` |
+| mode | `<modeLabel> mode requires confirmation for <tool>.` |
+| bypass | `Bypass mode — all commands allowed.` |
+- **门禁**：六来源句式各 1 探针 + why 行无 CJK + 无数值置信度假字段（真实 shape = reason 文本 + 规则值，v3 校正不变）
 
-#### P1a — 多页面侧栏（split 抽屉，不覆盖消息流）
-- **交付**：把散落的弹窗（`/diff` DiffDialog、TodoWrite/TaskList）统一进一个**侧开抽屉**（split 布局，与消息流同屏），tab 多页：
+**A5 statusline 姿态标签三态**：`default` / `automode enabled` / `bypass enabled`（shift+tab 指示牌保留，仅 `shortTitle` 文案；Config 屏/title 族不动）
 
-  | 页 | 内容 | 数据源（已建） |
-  |---|---|---|
-  | 变革 Diff | 你改了什么；unified（现有）+ **新增 side-by-side 可选**（唯一纯新增渲染） | DiffDialog/DiffDetailView/StructuredDiff |
-  | 计划 Plan | 目标 + 还差几步 | TodoWrite/TaskListV2 |
-  | 活动 Activity | 本回合工具调用清单 + 结果概览 | 消息流 tool_use 事件 |
-  | 决策 Decisions | 最近 N 次权限判定：放行/拦截 + why | PermissionDecisionReason + ClassifierApproval |
-  | 预算 Budget | 上下文 % / token 分布 / autoCompact 状态 | ContextBar + contextHostWiring |
+#### P0b — 持续健康监控（连续状态折入既有段，非瞬态 banner；事件历史不进 statusline）
+- **B1 回退折入 model 段**：回退活跃时 `deepseek-v4-pro ↦ fast`（黄），恢复即消失；数据源既有 `getLastRoleFallback()`，零新后端信号；`RoleFallbackSegment` 独立段删除
+- **B2 熔断折入 context-bar**：色阶 cyan（<70%）→黄（70–90%）→红（>90%）；超 autoCompact 阈值且 `isAutoCompactEnabled` 尾部 `▲`；`AutoCompactWarningSegment` 独立段删除
+- **B3 网关断指示 → 已砍（管理裁定 2026-10-05）**：modelprovider 无连接态 store，新造 = 新后端信号面超「零新后端信号」边界；保留 0.1.20 既有错误行 `IFF 不可达：已切人工确认 —— /doctor 排查`（P0b③，gate 核不回归）
+- **门禁**：B1 `↦ fast` 现形/消失（不可强制 → INCONCLUSIVE 留终审，同 P0-1a-fallback 口径）；B2 色阶阈值 + `▲`（fixture 可强制 context 用量）；P0b③ 错误行三锚点不回归
 
-- **与信任线联动 = 拨档语义落地**：信任线「为什么」→ Decisions 页；「还剩」→ 预算页；「谁在答」→ 模型摘要（并入预算页第二层）
-- **快捷键**：tab `1–5` 或 `←→` 切换，`Esc` 关；不抢既有键位（红线 3）
-- **页面克制**：只上这 5 页（开发者高频 = Diff/Plan「我改了什么、它现在在干嘛」+ Decisions/Budget「能否信任」）；模型回退历史、会话时间线降为页内第二层或 P2 候选，不占头等页
-- **门禁**（用户能不能）：
-  - [ ] 任一 tab 一键打开对应页，`Esc` 关闭，消息流不被覆盖
-  - [ ] Diff 页 unified 默认可见（延续 G1 #258），side-by-side 可切换且无数据丢失
-  - [ ] 从信任线某段一键直达对应页（为什么→Decisions / 还剩→Budget）
-  - [ ] 页数据均为只读投影，回写主循环为零
+### P1 — 活动可读性（v4：P1a 回退，P1a-v2 挂起，P1b 0.1.24 后）
+
+#### P1a — 多页面侧栏 → **已全量回退（0.1.24，C 波）；v2 重设计挂起**
+- **回退裁定（用户 2026-10-05）**：40% 圆角灰框抽屉用户面验收不过——割裂的白色框（非终端原生）、初始页死板落 Diff 不跟随上下文、40% 定宽不适配终端/CJK；且触发键实际不可达（1-5 打字时被输入框吃掉、弹框时抢权限数字选 = P0a 回归根因；`/sidebar` 0.1.23 生产 lane 实测走 `Unknown skill` fallback，从未可发现）
+- **回退面（C 波，删 19 文件 + 3 接线）**：`SidePanel/` 整目录（15）+ `commands/sidebar/`（2）+ 注册/键位/渲染点 3 处 + 0.1.23 双 cede（随目录删）。**留勿误伤**：`useDiffData`（`/diff` 在用）/ `decodeKittyModifier`（通用输入修复，单测迁 `parse-keypress-modifiers.test.ts`）/ `decisionLog`+`useCanUseTool` 收敛点（零 UI 面，留未来决策面）
+- **回退后基线**：消息流（内联 diff `StructuredDiffList`）+ `/diff` 全屏审查（DiffDialog：文件列表/详情/per-turn 源）+ statusline 持续监控。diff 属消息流与 `/diff`，不另开常驻侧栏
+- **门禁（回退核）**：抽屉残留 0 命中（含模态期）/ `/sidebar` 未注册 / 1-5 不开抽屉 / `/diff` + 内联 diff 无回归 / kitty 单测在 parse-keypress 名下绿
+- **P1a-v2（挂起）**：「第二层钻取面」重新设计（候选方向仅记录，未定稿：无框全宽临时面板 / `/diff` 增强 / 决策面），回到干净基线后与用户讨论定稿，**不在糙方案上叠版本**；P1b 排 0.1.24 收口后
 
 #### P1b — 计划/进度 + 工具结果/diff 可读性收口（不新造）
 - **门禁**：
@@ -118,12 +114,13 @@
 - **门禁**：
   - [ ] 改参重跑成功（新 `tool_use` 事件新地址；旧结果标记「被取代」非删除）
 
-## 5. 终审（TUI 效果把关，本 session）
+## 5. 终审（TUI 效果把关，管理 session；v4 增用户面走查层）
 
-- [ ] 信任线三问是否 ≤1 键可拨、2 秒看懂
-- [ ] 视觉/文案是否踩 Claude 资产（对照红线 4）
-- [ ] 全量回归（user-e2e tier A/B/C/G）零新增 P0
-- [ ] 一处大胆是否成立：用户是否只记住「那条信任线」，其余无感
+- [ ] 信任线持续监控：三槽（谁在答/姿态/还剩）一眼看懂，无 cryptic token
+- [ ] 审批行为：A1-A5 逐项探针全绿（选了 always 真生效 / No 不炸 / automode 有门 / why 说得清全英文）
+- [ ] 视觉/文案是否踩 Claude 资产（对照红线 4）；用户面文案无 CJK 混入
+- [ ] 全量回归（user-e2e tier A/B/C/G + §4b 31 条逐项探针）零新增 P0
+- [ ] **用户面走查层**（v4 新增，补「行为探针全绿 ≠ 用户面可用」验收盲区）：无抽屉视觉残留 / statusline 标签英文可读 / 审批弹框 why 行人话可懂
 
 ## 6. 交接机制
 

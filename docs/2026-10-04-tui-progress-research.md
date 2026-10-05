@@ -148,6 +148,20 @@
 
 ---
 
+## (g) 0.1.22–0.1.24 收口增量（2026-10-05 补记）
+
+| 版本 | 内容 | 收口态 |
+|---|---|---|
+| 0.1.22 | P1a R1 双修复（`27df1ed` /sidebar 注册 + `d4341a1` kitty 0-based 解码 + Diff 空态标档）发布 `8a21a63` | ⚠️ 含 P0a 回归（1-5 抢弹框数字选）→ 开 0.1.23 |
+| 0.1.23 | P0a 回归修「双 cede」（`0f8de6b`，后随 0.1.24 C 波删除）+ #271 #4/#5（`95a0670`/`ea45461`）；发布 `af9f4c2`，gate 全绿 + 生产 lane 全绿 | ✅ 收口 |
+| 0.1.24 | **用户面重裁定波**：A P0a 审批行为修复（A1 always session 域生效 / A2 No 不退出 / A3 automode 确认门 / A4 why 句式全英文真字段 / A5 标签三态）+ B P0b 持续监控（B1 回退 ↦fast 折 model 段 / B2 熔断折 context-bar 色阶 / B3 砍）+ C P1a 全量回退（抽屉 19 文件+3 接线删净，留 useDiffData/kitty 解码/decisionLog）。8 提交，发布 `6be29bd` + tag v0.1.24 + packument 验真 | ✅ 收口（gate 31 探针 0 FAIL + 生产 lane 6 项全绿） |
+
+- 用户面裁定依据（2026-10-05 用户）：抽屉「完全不可用」（割裂圆角灰框/初始页死板/40% 定宽不适配 TUI）+ P0 信任线可发现性=0 → 回退回干净基线（消息流 + /diff + statusline 持续监控），P1a v2 挂起重议；验收补「用户面走查层」补行为探针盲区。
+- 残留：#263/#264 权限缺口（专项收口波）/ 12 INCONCLUSIVE 终审 / `PermissionRuleExplanation.tsx` 旧措辞（P1a-v2 候选）。
+- 判据事实源：`docs/2026-10-04-tui-program-plan.md` §4b（0.1.24 列车）+ `docs/tui-differentiation-spec.md` v4。
+
+---
+
 ## 附：关键一手来源索引
 
 - Spec：`docs/tui-differentiation-spec.md`（工作树 v3；git 版 = `1f0c870` v2）
