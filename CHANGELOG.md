@@ -4,6 +4,27 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.30
+
+BR-4 用户可见面全量收口（品牌序列 0.1.30；Main 实施 worktree-0.1.30，
+`ff817ba` 实施 + `f76f133` 测试逐字断言随切）：
+
+- **用户可见字面量 AtlasHarness→AtlasCode 全量替换**（111 处 / 40 文件 +
+  swarm 混合 2 处）：启动屏 LogoV2 四组件（编译产物字面替换，AH_ART 不碰）/
+  错误消息 / 权限弹框 ×22 / 更新安装 / REPL·模型·MCP / 提交签名
+  [AtlasCode] / insights / swarm / Shell / 桌面 / WebFetch 面。
+- **保留（禁改 keep-set）**：ascend/** 迁移溯源 37 + mdm 注册表 4
+  （`Policies\AtlasHarness` 冻结外部依赖）+ 历史注释族（engine/session·
+  configDir·commitAttribution·releaseNotes·launcher·preapproved×2·
+  mdm/settings·Feedback G-3·PermissionRule·cli/setup）+
+  ascend-official.manifest.yaml（机器面 manifest，记 0.1.33 D-8）。
+  品牌 gate：keep-set 外用户可见字面量 = 0（审计 49 残留全在 keep-set）。
+- **e2e 前 gate R2 6/6 PASS**（e2e 单信号，post-implementation 基线
+  f2d4156≡ff817ba 内容；R1 1/6 为 pre-implementation 基线 4b35bcf 假阴，
+  已核销）。
+- 四件套：tsc 0 / lint 0e·0w / build 17.58MB / 全量 3535/0·247
+  （detached verify worktree，0.1.28/0.1.29 基线持平）。
+
 ## v0.1.29
 
 BR-8 UA 品牌串标准化（品牌序列 0.1.29，用户 2026-10-06 裁定实施移交 Main；
