@@ -152,7 +152,7 @@ AtlasCode
 | 16 色 ANSI | 两档（`blueBright` 底 + `yellowBright` 顶） | `ansi:yellowBright` |
 | 单色 / no-TTY / CI | 纯块字轮廓（光锥形状可辨，无色） | 默认前景 |
 
-### 4.3 主题映射（6 套，替换当前继承 Claude orange 的 brand/clawd_body）
+### 4.3 主题映射（6 套，替换当前继承 Claude orange 的 UI 品牌色 brand 族）
 
 `src/tui/utils/theme.ts` 现有 6 套主题（代码实测名，2026-10-05 核对）。`brand` 当前 3 值 ×2：`rgb(215,119,87)` `// Claude orange`（darkTheme:433 / lightTheme:116）、`ansi:redBright`（darkAnsiTheme:275 / lightAnsiTheme:196）、`rgb(255,153,51)` `// Orange adjusted for deuteranopia`（darkDaltonizedTheme:512 / lightDaltonizedTheme:354）——均属 Anthropic 橙族。本 spec 替换：
 
@@ -165,9 +165,9 @@ AtlasCode
 | `darkDaltonizedTheme`（:509） | `rgb(255,153,51)` | `rgb(255,184,0)` | 蓝→金（色盲安全） | 色盲变体基底 |
 | `lightDaltonizedTheme`（:351） | `rgb(255,153,51)` | `rgb(255,184,0)` | 蓝→金（色盲安全） | 同上 |
 
-**brand 族 key 全量**：除 `brand` 外，`briefLabelAssistant`（theme.ts:172/488，当前 `rgb(215,119,87)` `// Brand orange`）同属品牌色 key，随同主题 brand 值同步映射（漏它会让 assistant 消息标签残留 Claude orange）。`clawd_body`/`clawd_background` 见 §8.1。
+**BR-2 换值范围 = 3 键（纯 UI 品牌色）**：`brand`（上表 6 套）+ `brandShimmer`（theme.ts:117/434/197/276/355/513，当前"Lighter brand orange"，随 brand 换浅一档暖金）+ `briefLabelAssistant`（theme.ts:172/488/251/330/409/567，随 brand 同步映射，漏它会让 assistant 消息标签残留 Claude orange）。
 
-**`clawd_body` 重命名** → `brand_mark`（去 Anthropic Clawd 命名残留），6 套主题同步改键名 + 值映射到渐变色板。
+**`clawd_body`/`clawd_background` 归 BR-3**：mark 主体/背景色（AH_ART 用色），含 `clawd_body`→`brand_mark`、`clawd_background`→`brand_mark_bg` 键改名（去 Anthropic Clawd 命名残留），全部随 §8.1 Clawd→Beam 重构 pending，BR-2 不碰（用户 2026-10-05 裁定：**凡 clawd 术语内容均归 BR-3**）。
 
 ### 4.4 无障碍
 
@@ -660,8 +660,8 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 | 工单 | 范围 | 依赖 |
 |---|---|---|
 | BR-1 identity 扩常量 | `shared/identity.ts` Step 1 + 触面改 import Step 2 | 无 |
-| BR-2 主题换值 | `theme.ts` 6 套 brand 家族 5 键（brand/brandShimmer/clawd_body/clawd_background/briefLabelAssistant）橙→暖金 + clawd 键改名 brand_mark/brand_mark_bg（**渐变色板随 BR-3 pending**） | BR-1 |
-| BR-3 Beam 组件 | ⏸ **PENDING · 最后 · 待用户审**（mark 重设计：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` + pose 废弃重写上爬动效 + BEAM_ART 5 档渐变）——用户 2026-10-05 判定设计面「不靠谱、未充分审核」，停止、放序列最后重新排期 | 待用户审后另有 writing-plans |
+| BR-2 主题换值 | `theme.ts` 6 套 UI 品牌色 3 键（brand/brandShimmer/briefLabelAssistant）橙→暖金纯换值；**clawd_body/clawd_background 键改为 BR-3**（渐变色板随 BR-3 pending） | BR-1 |
+| BR-3 Beam 组件 | ⏸ **PENDING · 最后 · 待用户审**（mark 重设计：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` + pose 废弃重写上爬动效 + BEAM_ART 5 档渐变 + 全部 clawd 术语内容：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 其余 clawd 命名残留）——用户 2026-10-05 判定设计面「不靠谱、未充分审核」，停止、放序列最后重新排期 | 待用户审后另有 writing-plans |
 | BR-4 触面 leak 修复（**保留**） | LogoV2/WelcomeV2/CondensedLogo/errorMessaging 12 处**纯机械 `AtlasHarness`→`AtlasCode` 字面替换**（不碰 mark art；identity 化 `${PRODUCT_BRAND}` 归 BR-1 后续 sweep） | 无（自包含） |
 | BR-5 资产目录 | `docs/assets/` wordmark.svg + 品牌 token 文档（brand-system-spec.md）+ README 引用；**mark SVG/PNG 随 BR-3 pending** | wordmark/token 随 BR-2，mark 随 BR-3 |
 | BR-6 e2e 基线重生成 | user-e2e/compare + tui-diff 启动屏快照重生成 | BR-4 |
