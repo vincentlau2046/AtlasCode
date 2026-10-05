@@ -4,6 +4,45 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.32
+
+BR-9 去 fork + BR-5 资产奠基（品牌序列 0.1.32；Main 实施 worktree-0.1.32，
+`3feee2f` BR-9 + `755d420` BR-5）：
+
+- **BR-9 fork 痕迹清零**：
+  - `spinnerVerbs` 池 186→132 四轴重写（spec §7.4：算力 45 / 意象 25 /
+    哲学 20 / 趣味 27 / 通用 13）——去 Anthropic 品牌串动词/纯荒诞词/
+    fork 专属梗（Gitifying/Hyperspacing/Quantumizing 等）；`getSpinnerVerbs()`
+    用户自定义覆盖机制（settings.spinnerVerbs mode=replace/extend）不变。
+  - `turnCompletionVerbs` 8 whimsical 过去式 → 20 新池
+    （Compiled/Inferred/Synthesized/.../Processed）。
+  - guideAgent 9 处 → Atlas（Atlas Agent SDK / Atlas API；stale
+    `claude-code-guide`→`atlas-code-guide` 对齐 `ATLAS_GUIDE_AGENT_TYPE`）；
+    保留项：CDP_DOCS_MAP_URL（platform.claude.com 外部文档源，小写 URL）/
+    omitClaudeMd flag / claude-in-chrome MCP 工具名（spec §7.5 裁定）。
+  - outputStyles 2 处 → "Atlas explains its implementation choices..." /
+    "Atlas pauses and asks..."。
+  - attribution 注释/JSDoc 3 处 → "Atlas Opus 4.6" / "AI contribution" 措辞。
+  - `brand-spinner-verbs` 判别单测 4 测试（池体量 125–135 + 零跨轴重复 /
+    BANNED 11 词零残留 / 四轴+通用锚点 15 词 / turnCompletion 20 项新池）。
+- **BR-5 资产目录奠基**（docs/assets）：`wordmark.md`（AtlasCode wordmark +
+  `AI Coding Agent` tagline + 命名三层 + mark 现状 AH 块字 = AtlasHarness
+  遗留过渡态，目标光锥 mark 归 BR-3 user-gate）+ `README.md` 目录约定；
+  token/对比度文档 `brand-system-spec.md` 0.1.31 已落。
+- **品牌 gate**：品牌串动词 Clauding 零残留（池已除净，判别单测镜像 BANNED
+  列表）；multi-clauding 内部术语（insights.ts 24 处含 `detectMultiClauding`
+  标识符/`multi_clauding` 数据键/HTML 报告标题 + main.tsx:2058·useVoice.ts:558
+  注释 2 处）= gate 排除内部术语，用户可见 HTML 报告标题归 0.1.33 tracker D-10。
+- 四件套：tsc 0 / lint 0e·0w / build ~17.58MB / 全量 3544/0·249
+  （detached verify worktree，+4 测试/+1 文件 vs 0.1.31 基线）。
+- **e2e 前 gate 4/4 PASS（0 INCONCLUSIVE）**（e2e 单信号，报告
+  `r-20261006-0722-brand-br95.md`；单测镜像 `brand-spinner-verbs` 4/4
+  43 expect @ 755d420 实跑；探针① 池 132+20 禁词=0 + clauding gate
+  实测 21 处全 multi-clauding 内部术语（排除后=0）+ 池文件 4 处命中全
+  // 注释（零用户可见）；探针② stale claude-code-guide=0 / atlas-code-guide
+  在场；探针③ outputStyles 零 Claude（claude+outputstyle 交叉命中仅
+  .claude/output-styles/ 配置路径 keep-set）；探针④ docs/assets 3 件在场）。
+
 ## v0.1.31
 
 BR-1 identity 扩常量 + BR-2 theme 暖金（品牌序列 0.1.31；Main 实施 worktree-0.1.31，
