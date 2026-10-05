@@ -138,7 +138,11 @@ function should1hCacheTTL(querySource?: QuerySource): boolean {
   // mid-session overage flips from changing the cache_control TTL, which
   // would bust the server-side prompt cache (~20K tokens per flip).
   let userEligible = getPromptCache1hEligible()
-  if (userEligible === null) {
+  // 非布尔兜底（P0 分类器崩溃修，#279 波 C 合流）：bootstrapState dev stub
+  // 曾返 `{}`（truthy，绕过下方 `!userEligible` 守）；null=未定。改
+  // `typeof !== 'boolean'` 兜住 null/{}/undefined 等一切非布尔 → 视为不可用
+  // （fail-closed 关 1h TTL），与 allowlist 侧 `!Array.isArray` 守同族。
+  if (typeof userEligible !== 'boolean') {
     userEligible = false
     setPromptCache1hEligible(userEligible)
   }
@@ -147,7 +151,11 @@ function should1hCacheTTL(querySource?: QuerySource): boolean {
   // Cache allowlist in bootstrap state for session stability — prevents mixed
   // TTLs when GrowthBook's disk cache updates mid-request
   let allowlist = getPromptCache1hAllowlist()
-  if (allowlist === null) {
+  // 非数组兜底（P0 分类器崩溃修，#279 波 C 合流）：bootstrapState dev stub
+  // 曾返 `{}`（非数组、非 null），旧 `=== null` 守漏接 → 下方 `allowlist.some`
+  // 抛 TypeError，崩掉 auto-mode 分类器链（querySource:'auto_mode'）。改为
+  // `!Array.isArray` 兜住 null/{}/undefined 等一切非数组 → 回落 config/[]。
+  if (!Array.isArray(allowlist)) {
     const config = getFeatureValue_CACHED_MAY_BE_STALE<{
       allowlist?: string[]
     }>('atlas_prompt_cache_1h_config', {})

@@ -153,8 +153,13 @@ export const getSystemPromptSectionCache: any = (() => _spSectionCache) as any;
 export const setSystemPromptSectionCacheEntry: any = ((name: string, value: string | null) => { _spSectionCache.set(name, value); }) as any;
 export const setCachedClaudeMdContent : any = (() => ({})) as any;
 export const getLastApiCompletionTimestamp : any = (() => ({})) as any;
-export const getPromptCache1hAllowlist : any = (() => ({})) as any;
-export const getPromptCache1hEligible : any = (() => ({})) as any;
+// P0 分类器崩溃修（#279 波 C 合流）：这两枚 getter 的契约 = `string[] | null`
+// （allowlist）/ `boolean | null`（eligible，null = 未定），metadata.ts
+// should1hCacheTTL 的 `=== null` 守按 null=未定设计。旧 stub 返 `{}`（既非
+// 数组也非 null）漏接该守 → `{}.some` 抛 TypeError 崩 auto-mode 分类器链。
+// 改返 `null` = 正确「特性未接线」哨兵（eligible→false / allowlist→[]）。
+export const getPromptCache1hAllowlist : any = (() => null) as any;
+export const getPromptCache1hEligible : any = (() => null) as any;
 export const setPromptCache1hAllowlist : any = (() => ({})) as any;
 export const setPromptCache1hEligible : any = (() => ({})) as any;
 export const setLastApiCompletionTimestamp : any = (() => ({})) as any;
