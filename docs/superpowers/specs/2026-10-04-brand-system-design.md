@@ -259,22 +259,24 @@ export function buildWebFetchUserAgent(): string {
 
 ## 7. 触面文件映射（逐文件改动清单）
 
-### 7.1 用户可见 P0 leak 修复 + identity 化
+### 7.1 用户可见 P0 leak 修复（BR-4 · 纯机械字面替换 · **保留**）
+
+> **改法（用户 2026-10-05 裁定）**：`AtlasHarness` → `AtlasCode` 纯字面替换，**不碰 mark art、不做 identity 化**（`${PRODUCT_BRAND}` 单一事实源归 BR-1 身份工单后续 sweep），零依赖、最可靠。
 
 | 文件:行 | 当前 | 改为 | 备注 |
 |---|---|---|---|
-| `src/tui/components/LogoV2/LogoV2.tsx:204` | `AtlasHarness` | `${PRODUCT_BRAND}` | borderTitle |
-| `src/tui/components/LogoV2/LogoV2.tsx:205` | `AtlasHarness` | `${PRODUCT_BRAND}` | compactBorderTitle |
-| `src/tui/components/LogoV2/Clawd.tsx:110` | `AtlasHarness` | `${PRODUCT_BRAND}` | wordmark（见 §8 重构） |
-| `src/tui/components/LogoV2/Clawd.tsx:136` | `AtlasHarness` | `${PRODUCT_BRAND}` | AppleTerminal 分支同款 |
-| `src/tui/components/LogoV2/WelcomeV2.tsx:12` | `Welcome to AtlasHarness` | `Welcome to ${PRODUCT_BRAND}` | AppleTerminalWelcomeV2 |
-| `src/tui/components/LogoV2/WelcomeV2.tsx:31` | `Welcome to AtlasHarness` | `Welcome to ${PRODUCT_BRAND}` | 主分支 |
-| `src/tui/components/LogoV2/WelcomeV2.tsx:116` | `Welcome to AtlasHarness` | `Welcome to ${PRODUCT_BRAND}` | 主分支 |
-| `src/tui/components/LogoV2/CondensedLogo.tsx:51` | `AtlasHarness` | `${PRODUCT_BRAND}` | 凝缩 logo |
-| `src/modelprovider/errorMessaging.ts:85` | `access to AtlasHarness` | `access to ${PRODUCT_BRAND}` | 账号错误 |
-| `src/modelprovider/errorMessaging.ts:123` | `access to AtlasHarness` | `access to ${PRODUCT_BRAND}` | 账号错误 |
-| `src/modelprovider/errorMessaging.ts:129` | `access to AtlasHarness` | `access to ${PRODUCT_BRAND}` | 组织错误 |
-| `src/modelprovider/errorMessaging.ts:380` | `AtlasHarness is unable to respond` | `${PRODUCT_BRAND} is unable to respond` | 用量政策错误 |
+| `src/tui/components/LogoV2/LogoV2.tsx:204` | `AtlasHarness` | `AtlasCode` | borderTitle |
+| `src/tui/components/LogoV2/LogoV2.tsx:205` | `AtlasHarness` | `AtlasCode` | compactBorderTitle |
+| `src/tui/components/LogoV2/Clawd.tsx:110` | `AtlasHarness` | `AtlasCode` | wordmark（仅文字；AH_ART mark 不在此列——§8 Beam 属 BR-3 pending） |
+| `src/tui/components/LogoV2/Clawd.tsx:136` | `AtlasHarness` | `AtlasCode` | AppleTerminal 分支同款 |
+| `src/tui/components/LogoV2/WelcomeV2.tsx:12` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | AppleTerminalWelcomeV2 |
+| `src/tui/components/LogoV2/WelcomeV2.tsx:31` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | 主分支 |
+| `src/tui/components/LogoV2/WelcomeV2.tsx:116` | `Welcome to AtlasHarness` | `Welcome to AtlasCode` | 主分支 |
+| `src/tui/components/LogoV2/CondensedLogo.tsx:51` | `AtlasHarness` | `AtlasCode` | 凝缩 logo |
+| `src/modelprovider/errorMessaging.ts:85` | `access to AtlasHarness` | `access to AtlasCode` | 账号错误 |
+| `src/modelprovider/errorMessaging.ts:123` | `access to AtlasHarness` | `access to AtlasCode` | 账号错误 |
+| `src/modelprovider/errorMessaging.ts:129` | `access to AtlasHarness` | `access to AtlasCode` | 组织错误 |
+| `src/modelprovider/errorMessaging.ts:380` | `AtlasHarness is unable to respond` | `AtlasCode is unable to respond` | 用量政策错误 |
 
 **errorMessaging 安全性核查清单**（实施时必须验证）：
 - [ ] 4 处错误消息是否按子串匹配触发（若 LLM 后端返回的错误体含 "AtlasHarness" 子串做条件分支，改品牌名会破坏匹配）→ 实施前 grep `includes('AtlasHarness')` 核查
@@ -453,7 +455,7 @@ export const TURN_COMPLETION_VERBS = [
 
 ---
 
-## 8. Clawd → Beam 重构
+## 8. Clawd → Beam 重构（⏸ PENDING · 最后 · 待用户审——BR-3，用户 2026-10-05 判「设计面未充分审核、不靠谱」，停摆放最后）
 
 ### 8.1 文件重命名
 
@@ -639,9 +641,10 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
    │                    │                          │
    └ spec 设计          └ TUI P0a/P0b/P1a 列车     └ 逐工单拆块、逐版干净落地：
      （本文件）           （不并轨 · 0.1.24 Main 在制）· 0.1.25 UA 品牌串（BR-8，自包含 · 序列起点）
-                                               · 0.1.26 色板（BR-1 identity + BR-2 theme）
-                                               · 0.1.27 mark/Beam（BR-3 + BR-4 触面）
-                                               · 0.1.28 动词池 + 资产（§7.4 + BR-5）
+                                               · 0.1.26 触面 leak（BR-4，纯机械 · 12 处 · 自包含）
+                                               · 0.1.27 identity 扩常量 + 主题换值（BR-1 + BR-2）
+                                               · 0.1.28 动词池 + 资产（§7.4 + BR-5 wordmark/token）
+                                               · …（BR-3 Beam mark 重设计 = ⏸ PENDING · 最后 · 待用户审）
                                                （序号随 0.1.24 发布后顺延；全程 0.1.x，不升 0.2.x）
 ```
 
@@ -657,10 +660,10 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 | 工单 | 范围 | 依赖 |
 |---|---|---|
 | BR-1 identity 扩常量 | `shared/identity.ts` Step 1 + 触面改 import Step 2 | 无 |
-| BR-2 theme 色板重构 | `theme.ts` 6 套主题 brand/clawd_body → brand_mark + 渐变色板 | BR-1 |
-| BR-3 Beam 组件 | `Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` | BR-2 |
-| BR-4 触面 leak 修复 | LogoV2/WelcomeV2/CondensedLogo/errorMessaging 全 `${PRODUCT_BRAND}` 化 | BR-1 |
-| BR-5 资产目录 | `docs/assets/` SVG/PNG + README 引用 | BR-3 |
+| BR-2 主题换值 | `theme.ts` 6 套 brand 家族 5 键（brand/brandShimmer/clawd_body/clawd_background/briefLabelAssistant）橙→暖金 + clawd 键改名 brand_mark/brand_mark_bg（**渐变色板随 BR-3 pending**） | BR-1 |
+| BR-3 Beam 组件 | ⏸ **PENDING · 最后 · 待用户审**（mark 重设计：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` + pose 废弃重写上爬动效 + BEAM_ART 5 档渐变）——用户 2026-10-05 判定设计面「不靠谱、未充分审核」，停止、放序列最后重新排期 | 待用户审后另有 writing-plans |
+| BR-4 触面 leak 修复（**保留**） | LogoV2/WelcomeV2/CondensedLogo/errorMessaging 12 处**纯机械 `AtlasHarness`→`AtlasCode` 字面替换**（不碰 mark art；identity 化 `${PRODUCT_BRAND}` 归 BR-1 后续 sweep） | 无（自包含） |
+| BR-5 资产目录 | `docs/assets/` wordmark.svg + 品牌 token 文档（brand-system-spec.md）+ README 引用；**mark SVG/PNG 随 BR-3 pending** | wordmark/token 随 BR-2，mark 随 BR-3 |
 | BR-6 e2e 基线重生成 | user-e2e/compare + tui-diff 启动屏快照重生成 | BR-4 |
 | BR-7 真机多终端验证 | iTerm2/GNOME/kitty/Windows Terminal/Alacritty 截图校验 | BR-6 |
 | BR-8 UA 品牌串标准化（**序列起点 · 干净 0.1.x**） | 五变体去字面 `+`（5 串 + 6 注释）+ repo/版本/品牌段 import 化（现有 `REPOSITORY_URL`/`getVersion`/`PRODUCT_NAME`）+ `shared/identity.ts` 新增 `buildWebFetchUserAgent()`（§6.2 Step 1b）+ delta ⑥ 版本段收口（§10.3）。**完整方案 0.1.x 序列的起点版本，与 BR-1~BR-7 视觉工单解耦** | 无（identity.ts 现有常量已足，不依赖 BR-1） |
@@ -744,7 +747,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 
 1. **tagline**：✅ `算力驱动的 Coding Agent`（§3.4）
 2. **色板**：✅ 暖金 `#FFB800` 顶点 + 冷蓝 `#0066FF` 底渐变（§4.1）
-3. **pose 机制**：✅ 废弃重写上爬动效（§8.2）
+3. **pose 机制**：⏸ 随 BR-3 Clawd→Beam 整体 PENDING（§8.2），待用户审后重定；本轮不实施
 4. **时序**：✅ 完整方案拆**多个干净 0.1.x 版本**落地（不升 0.2.x）+ master 不开分支 + 不设 feature flag（§13.1）
 5. **动效策略**：✅ 不做 reduced-motion，动效始终开（§9.1）
 6. **FEEDBACK_CHANNEL 值**：✅ `https://github.com/vincentlau2046/AtlasCode/issues`（§6.2）
