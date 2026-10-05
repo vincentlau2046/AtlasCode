@@ -4,6 +4,37 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.27
+
+#279 波 C 分类器拦截支 deny→ask + P0 崩修（auto-mode 分类器链复活，P0 封口
+前置；一波一版 = metadata 崩修 + 波 C 合并，用户裁定 #5）：
+
+- **波 C：分类器拦截支 deny→ask**（`d64467c`）：auto-mode yolo 分类器
+  `shouldBlock:true` 拦截支从 `behavior:'deny'` 改 `behavior:'ask'` +
+  `decisionReason:{type:'classifier'}` → ASK 弹框现形，A4 危险句
+  「Auto mode: classifier flagged this as dangerous.」一等可达
+  （steerable-trust：拦截现 objection 给用户裁决）。安全姿态按 spec §4 C.2：
+  available 拦截→ASK；unavailable/headless/shouldAvoidPermissionPrompts
+  → 仍 fail-closed 硬 deny（headless 不变量保留）。判别单测
+  `tui-classifier-intercept-ask` 7/7（C-1 前红→GREEN）。
+- **P0 崩修：prompt-cache-1h 非数组/非布尔兜底**（`1b47c39`）：
+  bootstrapState dev stub `getPromptCache1hAllowlist/Eligible` 曾返 `{}`
+  （非数组/非 null/非布尔），`metadata.ts should1hCacheTTL` 只守 `=== null`
+  漏接 → `getCacheControl({querySource:'auto_mode'})` 在 auto-mode 分类器链
+  上抛 `TypeError: allowlist.some is not a function`，分类器功能死（回落
+  人工弹框）。修 = 双守卫（`!Array.isArray(allowlist)` 回落 GrowthBook
+  `config/[]`；`typeof userEligible!=='boolean'`→false）+ stub 改返 null
+  （未接线哨兵）。加性、零行为副作用、离 TUI 红线条。判别单测
+  `metadata-prompt-cache-1h` 3/3（零网络零模型）。
+- **dist 崩点核验**：build 后 `dist/cli.js` stub 已返 null（:123455）、
+  双守卫在位（:272450 userEligible / :272457 Array.isArray）、
+  `allowlist.some`（:272462）经守保护不再崩——stub 仍留但已防御。
+
+四件套绿（detached verify worktree 全量 3529/0·246，tsc 0 / lint 0e·0w /
+build 17.58MB）。P0 封口（全 6 句 A4 绿 = live-gateway 分类器 e2e）待 e2e
+A4F 复验 S-024N/O（probes→hard）闭环后收口（Option B）；BR-8 品牌波顺延
+0.1.28。
+
 ## v0.1.26
 
 #278 A4 可解释审批全可达波（P0 改进波，e2e A4F gate 全绿闭环：4 硬句全绿
