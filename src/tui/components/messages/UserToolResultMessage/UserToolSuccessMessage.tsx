@@ -6,8 +6,9 @@ import { Box, Text, useTheme } from '../../../ink.js';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
 import type { NormalizedUserMessage, ProgressMessage } from '../../../types/message.js';
 import { deleteClassifierApproval, getClassifierApproval, getYoloClassifierApproval } from '../../../utils/classifierApprovals.js';
-import { successCardRenderMode } from '../../permissions/permissionVerdict.js';
+import { successCardRenderMode, verdictLine } from '../../permissions/permissionVerdict.js';
 import { deleteUserApproval, getUserApproval } from '../../../utils/userApprovals.js';
+import { deleteAllowVerdict, getAllowVerdict } from '../../../utils/allowVerdicts.js';
 import type { buildMessageLookups } from '../../../utils/messages.js';
 import { MessageResponse } from '../../MessageResponse.js';
 import { HookProgressMessage } from '../HookProgressMessage.js';
@@ -43,9 +44,13 @@ export function UserToolSuccessMessage({
   const [yoloReason] = React.useState(() => getYoloClassifierApproval(toolUseID));
   // 2026-10-04 P0a：用户弹框批准标记（同模式：挂载读取 + 立即删除防无界增长）
   const [userApproved] = React.useState(() => getUserApproval(toolUseID));
+  // #278 A4 allow 面（0.1.26）：auto-allow verdict 数据（rule-allow / bypass 渲染源；
+  // classifier-approved 由下方 yoloReason 行覆盖，避免重复）。挂载读取 + 立即删除防无界增长。
+  const [allowVerdict] = React.useState(() => getAllowVerdict(toolUseID));
   React.useEffect(() => {
     deleteClassifierApproval(toolUseID);
     deleteUserApproval(toolUseID);
+    deleteAllowVerdict(toolUseID);
   }, [toolUseID]);
   if (!message.toolUseResult || !tool) {
     return null;
@@ -82,6 +87,21 @@ export function UserToolSuccessMessage({
   // so MarkdownTable's SAFETY_MARGIN=4 (tuned for the assistant-text 2-col
   // dot gutter) holds — otherwise tables wrap their box-drawing chars.
   const rendersAsAssistantText = tool.userFacingName(undefined) === '';
+
+  // #278 A4 allow 面（0.1.26）：rule-allow / bypass 两句（classifier-approved 由下方
+  // yoloReason 行覆盖，单一事实源 = verdictLine，不重复渲染）。bypass 优先判 mode
+  // （auto-allow 的 decisionReason 可能缺省）；rule-allow 须 {type:rule, allow}。
+  let allowVerdictLine: string | null = null;
+  if (allowVerdict) {
+    const vReason = allowVerdict.reason;
+    const vMode = allowVerdict.mode;
+    if (vMode === "bypassPermissions") {
+      allowVerdictLine = verdictLine({ type: "other", reason: "" }, "bypassPermissions", tool.name);
+    } else if (vReason?.type === "rule" && vReason.rule.ruleBehavior === "allow") {
+      allowVerdictLine = verdictLine(vReason, vMode, tool.name);
+    }
+  }
+
   return <Box flexDirection="column">
       <Box flexDirection="column" width={rendersAsAssistantText ? undefined : width}>
         {renderedMessage}
@@ -92,14 +112,19 @@ export function UserToolSuccessMessage({
                   {`"${classifierRule}"`}
                 </Text>
               </MessageResponse> : null}
+        {/* #278 A4：classifier 自动放行句切 A4 定稿句体（Auto-approved by classifier: <reason>.），
+            单一事实源 = verdictLine classifier 支（同句体，此处直出 yoloReason 保持零新数据）。 */}
         {feature('TRANSCRIPT_CLASSIFIER') ? yoloReason && <MessageResponse height={1}>
-                <Text dimColor>{'Allowed by auto mode classifier: '}{yoloReason}</Text>
+                <Text dimColor>{'Auto-approved by classifier: '}{yoloReason}{'.'}</Text>
               </MessageResponse> : null}
         {userApproved && <MessageResponse height={1}>
                 <Text dimColor>
                   <Text color="success">{figures.tick}</Text>
                   {' Allowed · your decision'}
                 </Text>
+              </MessageResponse>}
+        {allowVerdictLine && <MessageResponse height={1}>
+                <Text dimColor>{allowVerdictLine}</Text>
               </MessageResponse>}
       </Box>
       {renderMode === 'full' ? <SentryErrorBoundary>

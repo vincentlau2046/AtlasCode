@@ -28,6 +28,12 @@ import {
   getUserApproval,
   setUserApproval,
 } from '../../src/tui/utils/userApprovals.js'
+import {
+  clearAllowVerdicts,
+  deleteAllowVerdict,
+  getAllowVerdict,
+  setAllowVerdict,
+} from '../../src/tui/utils/allowVerdicts.js'
 
 function rule(
   source: PermissionRule['source'],
@@ -237,5 +243,68 @@ describe('userApprovals（P0a 用户批准标记）', () => {
     expect(getUserApproval('tu-b')).toBe(false)
     deleteUserApproval('tu-a')
     deleteUserApproval('tu-b')
+  })
+})
+
+/**
+ * #278 A4 allow 面（0.1.26 波）：allowVerdicts 存储面（rule-allow / bypass /
+ * classifier-approved 三句的渲染数据源，UserToolSuccessMessage 挂载读即删）。
+ * 判别：存储 round-trip + 按 toolUseID 隔离 + clear 兜底；bypass shape 经
+ * verdictLine 纯函数派生 A4 bypass 句（model-free 断言面，给 e2e 判据）。
+ */
+describe('allowVerdicts（#278 A4 allow 面 verdict 数据：挂载读即删 Map）', () => {
+  it('set → get 圆转（reason + mode 原样）→ delete → 空', () => {
+    expect(getAllowVerdict('av-1')).toBeUndefined()
+    setAllowVerdict('av-1', {
+      reason: {
+        type: 'rule',
+        rule: {
+          source: 'userSettings',
+          ruleBehavior: 'allow',
+          ruleValue: { toolName: 'Bash' },
+        },
+      },
+      mode: 'default',
+    })
+    const v = getAllowVerdict('av-1')
+    expect(v?.reason?.type).toBe('rule')
+    expect(v?.mode).toBe('default')
+    deleteAllowVerdict('av-1')
+    expect(getAllowVerdict('av-1')).toBeUndefined()
+  })
+
+  it('按 toolUseID 隔离 + clear 兜底', () => {
+    setAllowVerdict('av-a', { reason: undefined, mode: 'bypassPermissions' })
+    setAllowVerdict('av-b', { reason: undefined, mode: 'default' })
+    expect(getAllowVerdict('av-a')?.mode).toBe('bypassPermissions')
+    expect(getAllowVerdict('av-b')?.mode).toBe('default')
+    expect(getAllowVerdict('av-c')).toBeUndefined()
+    clearAllowVerdicts()
+    expect(getAllowVerdict('av-a')).toBeUndefined()
+    expect(getAllowVerdict('av-b')).toBeUndefined()
+  })
+
+  it('bypass shape 经 verdictLine 纯函数派生 A4 bypass 句（model-free 断言面）', () => {
+    // 成功卡 allowVerdictLine 分支：mode === 'bypassPermissions' →
+    // verdictLine({type:'other'}, 'bypassPermissions')（单一事实源，零 live 模型）。
+    const v = { reason: undefined, mode: 'bypassPermissions' as const }
+    const line = verdictLine({ type: 'other', reason: '' }, v.mode, 'Bash')
+    expect(line).toBe(`${VERDICT_PREFIX}: Bypass mode — all commands allowed.`)
+  })
+
+  it('rule-allow shape 经 verdictLine 派生 A4 rule-allow 句（model-free 断言面）', () => {
+    const v = {
+      reason: {
+        type: 'rule',
+        rule: {
+          source: 'projectSettings',
+          ruleBehavior: 'allow',
+          ruleValue: { toolName: 'Bash', ruleContent: 'ls:*' },
+        },
+      } as PermissionDecisionReason,
+      mode: 'default' as const,
+    }
+    const line = verdictLine(v.reason, v.mode, 'Bash')
+    expect(line).toBe(`${VERDICT_PREFIX}: Allowed by rule "Bash(ls:*)" (shared project settings).`)
   })
 })

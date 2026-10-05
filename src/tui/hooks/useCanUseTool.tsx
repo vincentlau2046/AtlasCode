@@ -24,6 +24,7 @@ import { handleSwarmWorkerPermission } from './toolPermission/handlers/swarmWork
 import { createPermissionContext, createPermissionQueueOps } from './toolPermission/PermissionContext.js';
 import { logPermissionDecision } from './toolPermission/permissionLogging.js';
 import { recordDecision } from '../utils/decisionLog.js';
+import { setAllowVerdict } from '../utils/allowVerdicts.js';
 export type CanUseToolFn<Input extends Record<string, unknown> = Record<string, unknown>> = (tool: ToolType, input: Input, toolUseContext: ToolUseContext, assistantMessage: AssistantMessage, toolUseID: string, forceDecision?: PermissionDecision<Input>) => Promise<PermissionDecision<Input>>;
 function useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext) {
   const $ = _c(3);
@@ -45,6 +46,14 @@ function useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext) {
           if (feature("TRANSCRIPT_CLASSIFIER") && result.decisionReason?.type === "classifier" && result.decisionReason.classifier === "auto-mode") {
             setYoloClassifierApproval(toolUseID, result.decisionReason.reason);
           }
+          // #278 A4 allow 面（0.1.26）：记 auto-allow verdict 数据（rule-allow /
+          // bypass / classifier-approved 三句渲染源），UserToolSuccessMessage 挂载
+          // 读取即删。只读投影（主路径零改动，红线①；与 recordDecision/setYolo 同层）。
+          const allowAppState = toolUseContext.getAppState();
+          setAllowVerdict(toolUseID, {
+            reason: result.decisionReason,
+            mode: allowAppState.toolPermissionContext?.mode ?? "default",
+          });
           ctx.logDecision({
             decision: "accept",
             source: "config"
