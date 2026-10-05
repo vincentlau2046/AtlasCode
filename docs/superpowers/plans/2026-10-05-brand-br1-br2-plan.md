@@ -1,4 +1,4 @@
-# BR-1 + BR-2 · identity 扩常量 + 主题换值实施计划（0.1.27）
+# BR-1 + BR-2 · identity 扩常量 + 主题换值实施计划（0.1.28）
 
 > **状态**：实施计划（writing-plans）· 对应 spec §6.2（BR-1）+ §4.3（BR-2）
 > **性质**：identity 单一事实源落地 + theme 橙→暖金纯换值
@@ -84,6 +84,6 @@ export const ACCENT_HUE = 'compute'                      // 配方注入（atlas
 
 ## 4. 依赖 / 时序
 
-- **前置**：BR-4（0.1.26）把 `AtlasHarness`→`AtlasCode` 字面先落地；BR-1 在其基础上 import 化
+- **前置**：BR-4（0.1.27）把 `AtlasHarness`→`AtlasCode` 字面先落地；BR-1 在其基础上 import 化
 - **BR-2 依赖 BR-1**（brand 色对齐 `PRODUCT_BRAND` 语义；实际 theme 换值无需 BR-1 先落地，但同版并列干净）
-- **后续**：0.1.28 BR-9 去 fork；BR-5 资产 wordmark.svg 用 BR-2 的 brand 色值（`#FFB800` 暖金 + `#0066FF` 冷蓝）
+- **后续**：0.1.29 BR-9 去 fork；BR-5 资产 wordmark.svg 用 BR-2 的 brand 色值（`#FFB800` 暖金 + `#0066FF` 冷蓝）
