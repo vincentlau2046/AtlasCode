@@ -210,6 +210,9 @@ export {
   // SnipTool/TeamCreateTool/TeamDeleteTool/LSPTool）− G-3 整裁 1
   // （RemoteTriggerTool，§8.74.28 F 类 1P 整裁）；
   // 各体逐字 C-Deep 纵切已落（§8.54-§8.68 各子波头注），本块零行为纯扩面。
+  // #265 S2（2026-10-05）：bashToolHasPermission 入门面（TUI BashTool
+  // checkPermissions 一线接线消费；tools 根门面 396 行既有导出，纯 re-export）
+  bashToolHasPermission,
   BashTool,
   ReadTool,
   EditTool,

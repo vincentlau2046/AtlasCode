@@ -15,6 +15,15 @@
  *    speculative 缓存；engine 链若消费 engine 侧缓存 = 预计算结果失配（auto-mode
  *    投机支行为回归）。engine 升级接缝 = W3 活链路接线 / W-opt（状态一致性裁定后
  *    两缓存合一再切，H6 登记）。
+ *    **#265 S2 修订（2026-10-05）**：恒-allow stub 实证为安全洞（gate 1c 拿到
+ *    'allow' 后 step 3 只转 passthrough → TUI 车道 default 模式全命令静默放行，
+ *    审批卡永不弹 = 0.1.24 残留 A1×3 INCONCLUSIVE 根因）。修订为**模式门控
+ *    委托**：非 auto 模式一线接线 engine bashToolHasPermission（单一事实源 =
+ *    engine；非 auto 分支不触 speculative 缓存 → 原一致性约束不触发）；auto
+ *    模式返 passthrough（→ 弹窗层 TUI 自属 classifier/AutoModeConfirm 权威，
+ *    tui 缓存单源存续 = 原裁定理由保留）。全模式委托 = C 桶 ② engine 分类器
+ *    真族回填 + 两缓存合一后的 H6 接缝（engine 分类器现为 61L stub
+ *    enabled=false 惰性面，双缓存失配风险当前休眠，修订零回归面）。
  *  ② 同 ① 之 2 tui 独占函数 → tui bashPermissions.ts 为**部分 KEEP**（9 外部站点
  *    import 路径不变；辅助模块族 bashSecurity/readOnlyValidation/pathValidation/
  *    sedValidation/sedEditParser/commandSemantics/modeValidation/destructiveCommandWarning
@@ -29,7 +38,7 @@
  */
 import { z } from 'zod/v4'
 import type { ToolResult } from '../../Tool.js'
-import { BashTool as EngineBashTool } from 'src/engine'
+import { bashToolHasPermission, BashTool as EngineBashTool } from 'src/engine'
 import { getSimplePrompt } from './prompt.js'
 import { renderToolUseMessage } from './UI.js'
 import { BASH_TOOL_NAME } from './toolName.js'
@@ -103,9 +112,42 @@ export const BashTool: any = {
   async prompt(): Promise<string> {
     return getSimplePrompt()
   },
-  // 裁定①：旧 buildTool 默认面（委托通用权限系统），零行为
-  async checkPermissions(input: { [key: string]: unknown }): Promise<unknown> {
-    return { behavior: 'allow', updatedInput: input }
+  // 裁定①（#265 S2 修订，2026-10-05）：旧恒-allow stub 是安全洞——gate 1c 鸭子
+  // 分发拿到 'allow' → step 3 只把 passthrough 转 ask → TUI 车道任何 Bash 命令
+  // 在 default 等模式静默放行，审批卡永不弹（0.1.24 残留 A1×3 INCONCLUSIVE
+  // 根因）。修订 = 模式门控委托：
+  //  - 非 auto 模式：一线接线 engine bashToolHasPermission（engine BashTool
+  //    delta ⑤ 先例同款；全规则匹配 + 只读自动放行 + fail-closed ask，单一
+  //    事实源 = engine）。非 auto 分支不进入分类器 speculative 缓存 → 裁定①
+  //    原一致性约束（tui/engine 双缓存失配）不触发。窄 gate context 缺
+  //    abortController/options 时（分类器启用后的 Haiku 支）= 1c catch →
+  //    passthrough → ask，fail-safe 方向（H6 接缝：C 桶 ② 换真族后随两缓存
+  //    合一再扩面）。
+  //  - auto 模式：passthrough（→ gate step 3 ask → 弹窗层 → TUI 自属
+  //    classifier/AutoModeConfirm 权威；tui speculative 缓存保持单源 = 裁定①
+  //    原裁定理由存续；engine 分类器真族回填后 H6 接缝切全模式委托）。
+  //    修前 auto 模式 gate 亦静默放行（stub allow 绕过 AutoModeConfirm 确认门）。
+  async checkPermissions(
+    input: BashToolInput,
+    context: unknown,
+  ): Promise<unknown> {
+    const ctx = context as {
+      getAppState?(): { toolPermissionContext?: { mode?: string } }
+      getToolPermissionContext?(): { mode?: string }
+    }
+    const mode =
+      ctx?.getAppState?.()?.toolPermissionContext?.mode ??
+      ctx?.getToolPermissionContext?.()?.mode
+    if (mode === 'auto') {
+      return {
+        behavior: 'passthrough',
+        message: 'Bash command in auto mode requires confirmation',
+      }
+    }
+    return bashToolHasPermission(
+      input,
+      context as Parameters<typeof bashToolHasPermission>[1],
+    )
   },
   renderToolUseMessage,
   mapToolResultToToolResultBlockParam: EngineBashTool.mapToolResultToToolResultBlockParam,
