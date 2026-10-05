@@ -4,6 +4,42 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.26
+
+#278 A4 可解释审批全可达波（P0 改进波，e2e A4F gate 全绿闭环：4 硬句全绿
+a4rallow/a4bypass/A4-mode/a1danger + classifier 2 句 INCONCLUSIVE（预期）+
+控制×7 + S-A 回归不回归，f4 gate 放行）：
+
+- **A4-mode P0 缺陷修**（`f04182d`，item 1）：default 模式无规则 Bash 弹窗
+  的「为什么」verdict 行断裂——blocked 路径（工作目录外/输出重定向，
+  shared isPathAllowed 无 decisionReason）verdictLine 恒 null 永不渲染。
+  修 = engine bash 两 drop 支（validateCommandPaths/validateOutputRedirections
+  blocked 支）合成 `{type:'other'}` decisionReason（主循环判定零改动，仅加性
+  携带）。
+- **allow 面 verdict 行**（`92f49e8` + R1 早退门 `548eb8c` + R2 数据侧
+  `f61deca`，item 2，e2e A4F R1/R2 两轮 gate 钉死的完整可达链）：
+  auto-allow（rule-allow 2b / bypass 2a）确定性快路径不经 canUseTool →
+  成功卡三 allow 句（Allowed by rule "…" / Bypass mode – all commands
+  allowed / Auto-approved by classifier: …）无数据源、无渲染点。修 =
+  成功卡加 verdictLine 可解释面 + allowVerdicts 数据面（by toolUseID
+  挂载读即删）+ `hasSuccessCardMarker` 早退门（skip 但有 marker 行 →
+  放行 marker-only 渲染，P0a 早退语义不回归）+ GateVerdict 加性
+  decisionReason 字段 + 交互桥快路径 `setAllowVerdict`（engine 门确定性
+  allow 携带判定原因，跨域 cast 单点 base 7 变体 ⊆ TUI 11 变体）。
+- **BASH_CLASSIFIER no-op 根因登记**（`33a88bf`，item 4 重裁）：bash
+  prompt-rule 分类器 = ANT-ONLY stub（isClassifierPermissionsEnabled
+  恒 false）→ flip 默认开零分类结果，改 no-op 根因 doc + 判别单测钉
+  verdictLine 纯函数面；classifier 2 句（a4cls/a4clsa）= 唯一真分类器
+  auto-mode yolo（TRANSCRIPT_CLASSIFIER 门，live LLM）活模型可达时渲染，
+  PTY 不可强制 = INCONCLUSIVE（B1 口径，非代码缺陷）。
+- **判别单测**：`tui-bashtool-checkpermissions` 9/9 +
+  `permission-verdict-line` 27/27（含 hasSuccessCardMarker 4 判别）+
+  `loop-permission-bridge` B-5/B-6（快路径 setAllowVerdict 置位/guard）；
+  四件套绿（worktree 全量 3519/0·244）。
+
+P0 封口（全 6 句 live-gateway 分类器 e2e）推迟专波（f4 开波追踪）；
+BR-8 品牌波顺延 0.1.27。
+
 ## v0.1.25
 
 #265 P0 安全修（TUI 车道 Bash 权限面两处缺口，独立 P0 patch 先于 BR-8 品牌车，
