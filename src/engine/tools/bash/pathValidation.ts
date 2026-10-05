@@ -718,11 +718,27 @@ function validateCommandPaths(
         }
       }
 
+      // #278 A4-mode (2026-10-05): a blocked path that carries no decisionReason
+      // (outside the working directory, no matching rule — shared isPathAllowed
+      // step 5) still needs one for the P0a verdict line (ask 面「为何在问你」):
+      // verdictLine(undefined) → default → null, so the line never renders.
+      // Synthesize a type:'other' reason — verdictLine renders the
+      // 「<mode> requires confirmation for <tool>」sentence. The dialog
+      // `message` above is computed from the ORIGINAL decisionReason, so it is
+      // unchanged (still the helpful 「was blocked … allowed working
+      // directories」text). Red-line ①: engine bash module only, no query
+      // main loop.
+      const effectiveDecisionReason =
+        decisionReason ?? {
+          type: 'other',
+          reason: `${command} target '${resolvedPath}' requires manual approval`,
+        }
+
       return {
         behavior: 'ask',
         message,
         blockedPath: resolvedPath,
-        decisionReason,
+        decisionReason: effectiveDecisionReason,
       }
     }
   }
@@ -1014,11 +1030,21 @@ function validateOutputRedirections(
         }
       }
 
+      // #278 A4-mode (2026-10-05): same synthesis as validateCommandPaths —
+      // a blocked redirect target with no decisionReason (isPathAllowed step 5)
+      // needs one for the P0a verdict line. `message` above already uses the
+      // original decisionReason, so it is unchanged.
+      const effectiveDecisionReason =
+        decisionReason ?? {
+          type: 'other',
+          reason: `Output redirection target '${resolvedPath}' requires manual approval`,
+        }
+
       return {
         behavior: 'ask',
         message,
         blockedPath: resolvedPath,
-        decisionReason,
+        decisionReason: effectiveDecisionReason,
         suggestions: [
           {
             type: 'addDirectories',

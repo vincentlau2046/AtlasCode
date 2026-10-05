@@ -154,3 +154,36 @@ describe('#265 S2：mode 解析鸭子面（两 getter 回落形）', () => {
     expect(r.behavior).toBe('passthrough')
   })
 })
+
+/**
+ * #278 A4-mode（0.1.26 波）：blocked 路径（工作目录外、无规则）现须携带
+ * decisionReason —— 否则 P0a verdict 行 verdictLine(undefined) → default →
+ * null 永不渲染（A4F S-024L hard FAIL 根因）。engine bash 模块在
+ * validateCommandPaths / validateOutputRedirections 的 blocked 支合成
+ * {type:'other'}（红线①：主循环零触碰）。判别：
+ *  - 无规则写命令（touch /tmp/…，工作目录外）→ ask + decisionReason {type:other}
+ *  - `>` 重定向到工作目录外（echo x > /tmp/…）→ ask + decisionReason
+ *  - 红支（回归判据）：若 engine 未合成 decisionReason，则 undefined → 本测红。
+ */
+describe('#278 A4-mode：blocked 路径携带 decisionReason（verdict 行可达）', () => {
+  type WithReason = { behavior: string; decisionReason?: { type: string; reason?: string } }
+
+  test('无规则写命令（touch /tmp/… 工作目录外）→ ask + decisionReason {type:other}', async () => {
+    const r = (await BashTool.checkPermissions(
+      { command: 'touch /tmp/atlas-a4r-mode' },
+      tuiCtx('default'),
+    )) as WithReason
+    expect(r.behavior).toBe('ask')
+    expect(r.decisionReason).toBeDefined()
+    expect(r.decisionReason?.type).toBe('other')
+  })
+
+  test('`>` 重定向到工作目录外（echo x > /tmp/…）→ ask + decisionReason', async () => {
+    const r = (await BashTool.checkPermissions(
+      { command: 'echo x > /tmp/atlas-a4r-redir' },
+      tuiCtx('default'),
+    )) as WithReason
+    expect(r.behavior).toBe('ask')
+    expect(r.decisionReason).toBeDefined()
+  })
+})
