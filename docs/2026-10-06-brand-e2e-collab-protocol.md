@@ -87,7 +87,7 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 |---|---|---|
 | 0.1.28 | D-279-r1 渲染修（Main） | ✅ 已发布（release `e1f79d3`，npm latest=0.1.28 + shasum `ae04768a…` e2e 独立验真 MATCH） |
 | 0.1.29 | BR-8 UA 品牌串 | ✅ **已发布收口**（e2e verdict 3/3 PASS releasable=true〔artifact A4F=`A4F-1791231349358-is3m`+P0a=`P0a-1791232078979-9onx`〕；Main 全链收口 master `f1c34db` + tag v0.1.29 + npm latest=0.1.29 shasum `2d0da16d…` + tarball 独立复验 MATCH + dist BR-8 标记核验绿；e2e 生产 lane 验真信号已发） |
-| 0.1.30 | BR-4 全量收口 | **实施已先行落地**（Main worktree-0.1.30 `0f8f8c8` 实施 + `f2d4156` 判别单测对齐，四件套 4/4 全量 3535/0·247）；**e2e R2 复验中**（其前 gate 1/6 系切在实施前基线、非真缺陷，R2 复验核真实 gate）→ gate 绿即发 0.1.30 |
+| 0.1.30 | BR-4 全量收口 | **e2e R2 verdict = 6/6 PASS + 0 硬面 INCONCLUSIVE，releasable**（报告 `r2-20261006-0530-brand-br4.md`；R1 5FAIL 定因=实施前基线 4b35bcf 未落 BR-4 非真缺陷，R2 对实施后 `f2d4156` 重跑全绿：启动屏 4 组件=AtlasCode / 权限弹框 0 AtlasHarness / 签名 Generated with [AtlasCode] / grep 用户可见 AtlasHarness=0（49 处全 keep-set）/ S-A hardFail=0 / 既有硬句不回归 A4F 6 句全绿 P0 链无回归）→ **已触发 Main 发 0.1.30**（release 干净纪律 + tag v0.1.30 + push×2 + DNS-pin publish〔D-8：tarball 直下用 canonical 无 scope 前缀名〕+ packument 验真 → e2e 生产 lane 验真） |
 | 0.1.31 | BR-1+BR-2 | 排队（Main 实施） |
 | 0.1.32 | BR-9+BR-5 | 排队（Main 实施） |
 | pending | BR-3 | 待用户审（不自动推进） |
