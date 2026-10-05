@@ -102,7 +102,7 @@ describe('U-P2 checkPermissions', () => {
     expect(d).toEqual({
       behavior: 'ask',
       message:
-        'Send a message to Remote Control session bridge:session_1? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasHarness servers.',
+        'Send a message to Remote Control session bridge:session_1? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasCode servers.',
       decisionReason: {
         type: 'safetyCheck',
         reason: 'Cross-machine bridge message requires explicit user consent',
