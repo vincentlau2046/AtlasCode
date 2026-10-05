@@ -1,6 +1,6 @@
 /**
  * Shared auto-install check for "preset" marketplaces — sources that
- * AtlasHarness materializes on startup (Ascend official, OpenAI Codex, and the
+ * AtlasCode materializes on startup (Ascend official, OpenAI Codex, and the
  * Atlas self-built marketplace all converge here). The official
  * claude-plugins-official path keeps its own GCS-mirror + persisted
  * retry/backoff specialization and does NOT use this helper.

@@ -129,7 +129,7 @@ export function ModelSetup({
       </Byline>;
   }
 
-  return <Dialog title="AtlasHarness 模型配置" subtitle={step === 'preset' ? '选择模型提供方预设:' : '填写端点信息（Enter 下一字段，Esc 返回）:'} color="permission" onCancel={handleCancel} inputGuide={renderInputGuide} isCancelActive={step === 'preset'}>
+  return <Dialog title="AtlasCode 模型配置" subtitle={step === 'preset' ? '选择模型提供方预设:' : '填写端点信息（Enter 下一字段，Esc 返回）:'} color="permission" onCancel={handleCancel} inputGuide={renderInputGuide} isCancelActive={step === 'preset'}>
       {step === 'preset' ? <Select options={PRESET_OPTIONS} onChange={(value: string) => handlePresetSelect(value)} onCancel={handleCancel} /> : <Box flexDirection="column" gap={1}>
           <Box flexDirection="row" gap={1}>
             <Text>baseURL（必填）</Text>

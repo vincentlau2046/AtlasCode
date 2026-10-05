@@ -241,18 +241,18 @@ export function renderModelName(model: ModelName): string {
 
 /**
  * Returns a safe author name for public display (e.g., in git commit trailers).
- * Returns "AtlasHarness {ModelName}" for publicly known models, or
- * "AtlasHarness ({model})" for unknown/internal models so the exact model name is preserved.
+ * Returns "AtlasCode {ModelName}" for publicly known models, or
+ * "AtlasCode ({model})" for unknown/internal models so the exact model name is preserved.
  *
  * @param model The full model name
- * @returns "AtlasHarness {ModelName}" for public models, or "AtlasHarness ({model})" for non-public models
+ * @returns "AtlasCode {ModelName}" for public models, or "AtlasCode ({model})" for non-public models
  */
 export function getPublicModelName(model: ModelName): string {
   const publicName = getPublicModelDisplayName(model)
   if (publicName) {
-    return `AtlasHarness ${publicName}`
+    return `AtlasCode ${publicName}`
   }
-  return `AtlasHarness (${model})`
+  return `AtlasCode (${model})`
 }
 
 /**

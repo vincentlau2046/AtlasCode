@@ -71,7 +71,7 @@ export function getAttributionTexts(): AttributionTexts {
     isInternalModelRepoCached() || isKnownPublicModel
       ? getPublicModelName(model)
       : 'Atlas Opus 4.6'
-  const defaultAttribution = `🤖 Generated with [AtlasHarness](${PRODUCT_URL})`
+  const defaultAttribution = `🤖 Generated with [AtlasCode](${PRODUCT_URL})`
   // G-3（§8.74.28 R4）：原 noreply@atlas.ai 虚构邮箱域 → 真实维护者邮箱
   // （用户裁定 2026-09-30，与 git 作者邮箱一致）。
   const defaultCommit = `Co-Authored-By: ${modelName} <vincent.lau2046@gmail.com>`
@@ -318,7 +318,7 @@ export async function getEnhancedPRAttribution(
     return ''
   }
 
-  const defaultAttribution = `🤖 Generated with [AtlasHarness](${PRODUCT_URL})`
+  const defaultAttribution = `🤖 Generated with [AtlasCode](${PRODUCT_URL})`
 
   // Get AppState first
   const appState = getAppState()
@@ -364,7 +364,7 @@ export async function getEnhancedPRAttribution(
     memoryAccessCount > 0
       ? `, ${memoryAccessCount} ${memoryAccessCount === 1 ? 'memory' : 'memories'} recalled`
       : ''
-  const summary = `🤖 Generated with [AtlasHarness](${PRODUCT_URL}) (${atlasPercent}% ${promptCount}-shotted by ${shortModelName}${memSuffix})`
+  const summary = `🤖 Generated with [AtlasCode](${PRODUCT_URL}) (${atlasPercent}% ${promptCount}-shotted by ${shortModelName}${memSuffix})`
 
   // Append trailer lines for squash-merge survival. Only for allowlisted repos
   // (INTERNAL_MODEL_REPOS) and only in builds with COMMIT_ATTRIBUTION enabled —

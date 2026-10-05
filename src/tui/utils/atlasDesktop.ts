@@ -24,7 +24,7 @@ export async function getDesktopConfigPath(): Promise<string> {
       homedir(),
       'Library',
       'Application Support',
-      'AtlasHarness',
+      'AtlasCode',
       'claude_desktop_config.json',
     )
   }
@@ -72,7 +72,7 @@ export async function getDesktopConfigPath(): Promise<string> {
           user.name,
           'AppData',
           'Roaming',
-          'AtlasHarness',
+          'AtlasCode',
           'claude_desktop_config.json',
         )
 

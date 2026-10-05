@@ -131,7 +131,7 @@ import stats from './commands/stats/index.js'
 const usageReport: Command = {
   type: 'prompt',
   name: 'insights',
-  description: 'Generate a report analyzing your AtlasHarness sessions',
+  description: 'Generate a report analyzing your AtlasCode sessions',
   contentLength: 0,
   progressMessage: 'analyzing your sessions',
   source: 'builtin',

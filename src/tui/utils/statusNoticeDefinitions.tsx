@@ -73,7 +73,7 @@ const claudeAiSubscriberExternalTokenNotice: StatusNoticeDefinition = {
     return <Box flexDirection="row" marginTop={1}>
         <Text color="warning">{figures.warning}</Text>
         <Text color="warning">
-          Auth conflict: Using {authTokenInfo.source} instead of AtlasHarness account
+          Auth conflict: Using {authTokenInfo.source} instead of AtlasCode account
           subscription token. Either unset {authTokenInfo.source}, or run
           `atlas /logout`.
         </Text>
@@ -101,7 +101,7 @@ const apiKeyConflictNotice: StatusNoticeDefinition = {
     return <Box flexDirection="row" marginTop={1}>
         <Text color="warning">{figures.warning}</Text>
         <Text color="warning">
-          Auth conflict: Using {apiKeySource} instead of AtlasHarness Console key.
+          Auth conflict: Using {apiKeySource} instead of AtlasCode Console key.
           Either unset {apiKeySource}, or run `atlas /logout`.
         </Text>
       </Box>;

@@ -180,7 +180,7 @@ export function isLockActive(lockFilePath: string): boolean {
   // This helps with PID reuse scenarios
   if (!isClaudeProcess(pid, execPath)) {
     logForDebugging(
-      `Lock PID ${pid} is running but does not appear to be AtlasHarness - treating as stale`,
+      `Lock PID ${pid} is running but does not appear to be AtlasCode - treating as stale`,
     )
     return false
   }

@@ -82,7 +82,7 @@ export const TOKEN_REVOKED_ERROR_MESSAGE =
 export const CCR_AUTH_ERROR_MESSAGE =
   'Authentication error · This may be a temporary network issue, please try again'
 export const OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE =
-  'Your account does not have access to AtlasHarness. Please run /login.'
+  'Your account does not have access to AtlasCode. Please run /login.'
 
 // ── 文案 getter ───────────────────────────────────────────────────────
 
@@ -120,13 +120,13 @@ export function getRequestTooLargeErrorMessage(): string {
 
 export function getTokenRevokedErrorMessage(): string {
   return isNonInteractive()
-    ? 'Your account does not have access to AtlasHarness. Please login again or contact your administrator.'
+    ? 'Your account does not have access to AtlasCode. Please login again or contact your administrator.'
     : TOKEN_REVOKED_ERROR_MESSAGE
 }
 
 export function getOauthOrgNotAllowedErrorMessage(): string {
   return isNonInteractive()
-    ? 'Your organization does not have access to AtlasHarness. Please login again or contact your administrator.'
+    ? 'Your organization does not have access to AtlasCode. Please login again or contact your administrator.'
     : OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE
 }
 
@@ -377,7 +377,7 @@ export function getErrorMessageIfRefusal(
 
   const baseMessage =
     opt('resolveRefusalMessage')?.(model) ??
-    `${API_ERROR_MESSAGE_PREFIX}: AtlasHarness is unable to respond to this request, which appears to violate our Usage Policy. Please double press esc to edit your last message or start a new session for Atlas to assist with a different task.`
+    `${API_ERROR_MESSAGE_PREFIX}: AtlasCode is unable to respond to this request, which appears to violate our Usage Policy. Please double press esc to edit your last message or start a new session for Atlas to assist with a different task.`
 
   return createApiErrorMessage({
     content: baseMessage,

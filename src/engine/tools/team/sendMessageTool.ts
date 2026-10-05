@@ -669,7 +669,7 @@ export const SendMessageTool: SendMessageToolFace = {
     if (isUdsInboxEnabled() && parseAddress(i.to).scheme === 'bridge') {
       return {
         behavior: 'ask' as const,
-        message: `Send a message to Remote Control session ${i.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasHarness servers.`,
+        message: `Send a message to Remote Control session ${i.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasCode servers.`,
         // safetyCheck (not mode) — permissions.ts guards this before both
         // bypassPermissions (step 1g) and auto-mode's allowlist/classifier.
         // Cross-machine prompt injection must stay bypass-immune.

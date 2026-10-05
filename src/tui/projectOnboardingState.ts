@@ -31,7 +31,7 @@ export function getSteps(): Step[] {
     },
     {
       key: 'claudemd',
-      text: 'Run /init to create an ATLAS.md file with instructions for AtlasHarness',
+      text: 'Run /init to create an ATLAS.md file with instructions for AtlasCode',
       isComplete: hasMemoryFile,
       isCompletable: true,
       isEnabled: !isWorkspaceDirEmpty,

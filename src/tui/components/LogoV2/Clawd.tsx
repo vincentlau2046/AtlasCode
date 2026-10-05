@@ -95,7 +95,7 @@ export function Clawd(t0) {
     }
     return t3;
   }
-  // AH 子母 logo: blocky "AH" monogram (母) + "AtlasHarness" + "AI Coding Agent" (子).
+  // AH 子母 logo: blocky "AH" monogram (母) + "AtlasCode" + "AI Coding Agent" (子).
   const AH_ART = [
     ' ▄▄▄▄      ██  ██',
     '██  ██     ██  ██',
@@ -107,7 +107,7 @@ export function Clawd(t0) {
   if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
     t6 = <Box flexDirection="column">
       {AH_ART.map((line) => <Text color="clawd_body">{line}</Text>)}
-      <Text color="brand">AtlasHarness</Text>
+      <Text color="brand">AtlasCode</Text>
       <Text dimColor={true}>AI Coding Agent</Text>
     </Box>;
     $[4] = t6;
@@ -121,7 +121,7 @@ function AppleTerminalClawd(t0) {
   const {
     pose
   } = t0;
-  // AH 子母 logo: blocky "AH" monogram (母) + "AtlasHarness" + "AI Coding Agent" (子).
+  // AH 子母 logo: blocky "AH" monogram (母) + "AtlasCode" + "AI Coding Agent" (子).
   const AH_ART = [
     ' ▄▄▄▄      ██  ██',
     '██  ██     ██  ██',
@@ -133,7 +133,7 @@ function AppleTerminalClawd(t0) {
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t8 = <Box flexDirection="column" alignItems="center">
       {AH_ART.map((line) => <Text color="clawd_body">{line}</Text>)}
-      <Text color="brand">AtlasHarness</Text>
+      <Text color="brand">AtlasCode</Text>
       <Text dimColor={true}>AI Coding Agent</Text>
     </Box>;
     $[0] = t8;

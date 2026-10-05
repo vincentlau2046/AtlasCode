@@ -910,9 +910,9 @@ export const connectToServer = memoize(
       const client = new Client(
         {
           name: 'claude-code',
-          title: 'AtlasHarness',
+          title: 'AtlasCode',
           version: MACRO.VERSION ?? 'unknown',
-          description: "AtlasHarness agentic coding tool",
+          description: "AtlasCode agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },
         {
@@ -3123,9 +3123,9 @@ export async function setupSdkMcpClients(
       const client = new Client(
         {
           name: 'claude-code',
-          title: 'AtlasHarness',
+          title: 'AtlasCode',
           version: MACRO.VERSION ?? 'unknown',
-          description: "AtlasHarness agentic coding tool",
+          description: "AtlasCode agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },
         {

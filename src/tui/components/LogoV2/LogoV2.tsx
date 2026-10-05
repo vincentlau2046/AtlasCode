@@ -201,8 +201,8 @@ export function LogoV2() {
   }
   const layoutMode = getLayoutMode(columns);
   const userTheme = resolveThemeSetting(getGlobalConfig().theme);
-  const borderTitle = ` ${color("brand", userTheme)("AtlasHarness")} ${color("inactive", userTheme)(`v${version}`)} `;
-  const compactBorderTitle = color("brand", userTheme)(" AtlasHarness ");
+  const borderTitle = ` ${color("brand", userTheme)("AtlasCode")} ${color("inactive", userTheme)(`v${version}`)} `;
+  const compactBorderTitle = color("brand", userTheme)(" AtlasCode ");
   if (layoutMode === "compact") {
     let welcomeMessage = formatWelcomeMessage(username);
     if (stringWidth(welcomeMessage) > columns - 4) {

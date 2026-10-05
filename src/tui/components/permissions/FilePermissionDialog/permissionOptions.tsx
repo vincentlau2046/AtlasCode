@@ -112,7 +112,7 @@ export function getFilePermissionOptions({
   // persisted permission rules.
   if ((inClaudeFolder || inGlobalClaudeFolder) && operationType !== 'read') {
     options.push({
-      label: 'Yes, and allow AtlasHarness to edit its own settings for this session',
+      label: 'Yes, and allow AtlasCode to edit its own settings for this session',
       value: 'yes.claude-folder',
       option: {
         type: 'accept-session',

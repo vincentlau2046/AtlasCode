@@ -118,7 +118,7 @@ export async function update() {
     writeToStdout('\n')
 
     if (packageManager === 'homebrew') {
-      writeToStdout('AtlasHarness is managed by Homebrew.\n')
+      writeToStdout('AtlasCode is managed by Homebrew.\n')
       const latest = await getLatestVersion(channel)
       if (latest && !gte(MACRO.VERSION, latest)) {
         writeToStdout(`Update available: ${MACRO.VERSION} → ${latest}\n`)
@@ -126,7 +126,7 @@ export async function update() {
         writeToStdout('To update, run:\n')
         writeToStdout(chalk.bold('  brew upgrade atlas') + '\n')
       } else {
-        writeToStdout('AtlasHarness is up to date!\n')
+        writeToStdout('AtlasCode is up to date!\n')
       }
     } else if (packageManager === 'winget') {
       writeToStdout('Atlas is managed by winget.\n')
@@ -136,13 +136,13 @@ export async function update() {
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
         writeToStdout(
-          chalk.bold('  winget upgrade AtlasHarness') + '\n',
+          chalk.bold('  winget upgrade AtlasCode') + '\n',
         )
       } else {
-        writeToStdout('AtlasHarness is up to date!\n')
+        writeToStdout('AtlasCode is up to date!\n')
       }
     } else if (packageManager === 'apk') {
-      writeToStdout('AtlasHarness is managed by apk.\n')
+      writeToStdout('AtlasCode is managed by apk.\n')
       const latest = await getLatestVersion(channel)
       if (latest && !gte(MACRO.VERSION, latest)) {
         writeToStdout(`Update available: ${MACRO.VERSION} → ${latest}\n`)
@@ -150,13 +150,13 @@ export async function update() {
         writeToStdout('To update, run:\n')
         writeToStdout(chalk.bold('  apk upgrade atlas') + '\n')
       } else {
-        writeToStdout('AtlasHarness is up to date!\n')
+        writeToStdout('AtlasCode is up to date!\n')
       }
     } else {
       // pacman, deb, and rpm don't get specific commands because they each have
       // multiple frontends (pacman: yay/paru/makepkg, deb: apt/apt-get/aptitude/nala,
       // rpm: dnf/yum/zypper)
-      writeToStdout('AtlasHarness is managed by a package manager.\n')
+      writeToStdout('AtlasCode is managed by a package manager.\n')
       writeToStdout('Please use your package manager to update.\n')
     }
 
@@ -223,7 +223,7 @@ export async function update() {
           : ''
         writeToStdout(
           chalk.yellow(
-            `Another AtlasHarness process${pidInfo} is currently running. Please try again in a moment.`,
+            `Another AtlasCode process${pidInfo} is currently running. Please try again in a moment.`,
           ) + '\n',
         )
         await gracefulShutdown(0)
@@ -236,7 +236,7 @@ export async function update() {
 
       if (result.latestVersion === MACRO.VERSION) {
         writeToStdout(
-          chalk.green(`AtlasHarness is up to date (${MACRO.VERSION})`) + '\n',
+          chalk.green(`AtlasCode is up to date (${MACRO.VERSION})`) + '\n',
         )
       } else {
         writeToStdout(
@@ -310,7 +310,7 @@ export async function update() {
   // Check if versions match exactly, including any build metadata (like SHA)
   if (latestVersion === MACRO.VERSION) {
     writeToStdout(
-      chalk.green(`AtlasHarness is up to date (${MACRO.VERSION})`) + '\n',
+      chalk.green(`AtlasCode is up to date (${MACRO.VERSION})`) + '\n',
     )
     await gracefulShutdown(0)
   }

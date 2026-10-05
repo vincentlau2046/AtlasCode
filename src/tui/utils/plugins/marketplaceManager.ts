@@ -1587,7 +1587,7 @@ function resolveMarketplaceManifestPath(repoRoot: string): string {
   // .atlas-plugin/, legacy .claude-plugin/), then a root-level marketplace.json.
   // The legacy .claude-plugin/ dir is the upstream Claude Code plugin repo
   // convention (e.g. anthropics/claude-plugins-official) — a third-party
-  // layout AtlasHarness reads but does not own, so it is probed alongside
+  // layout AtlasCode reads but does not own, so it is probed alongside
   // the new name rather than renamed.
   for (const d of getPluginManifestDirs()) {
     const p = join(repoRoot, d, 'marketplace.json')
