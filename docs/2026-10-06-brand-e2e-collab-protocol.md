@@ -76,13 +76,18 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 - `CHANGELOG.md` 版本段（发布提交内）
 - 异常/定因 → `user-e2e/reports/` 归档路径登记进 `docs/2026-10-05-p0-closure-status.md` 式状态文档（品牌序列状态记本文件 §7）
 
+## 6a. 发布通道备记（housekeeping 事实，后续版本发布须知）
+
+- **D-8（0.1.33 tracker）**：本机 registry 通道 **scoped tarball 带 scope 前缀文件名恒 404**（canonical 无 scope 前缀）。`@atlasharness/atlascode` 发布验真时 tarball 直下须用**无 scope 前缀**的 canonical 文件名，勿按 `@atlasharness/atlascode-<v>.tgz` 取（404）。packument `dist.shasum` 验真不受影响（registry 元数据正常）。
+- **R2 复验基线纪律**：e2e 前 gate 若切在「实施前基线」commit 上，结果（如 1/6）系基线错位、**非真缺陷**——须待实施落地后 R2 复验核真实 gate，勿据错位基线判定 FAIL。
+
 ## 7. 品牌序列状态（随闭环滚动更新）
 
 | 版本 | 工单 | 状态 |
 |---|---|---|
 | 0.1.28 | D-279-r1 渲染修（Main） | ✅ 已发布（release `e1f79d3`，npm latest=0.1.28 + shasum `ae04768a…` e2e 独立验真 MATCH） |
-| 0.1.29 | BR-8 UA 品牌串 | 实施侧四件套 4/4 绿（`6e74ddc`+`4b35bcf`，全量 3535/0·247）；前置 gate 全绿（① 0.1.28=e1f79d3 已发 ② TUI 封口=e2e 0.1.28 发布验真 6/6 PASS，**P0 封口 Option B 达成**）；**e2e verdict = 3/3 探针 PASS + 0 硬面 INCONCLUSIVE，releasable=true**（① UA 五面无 `+` wire 实捕=`AtlasCode/0.1.29 (…repo)` ② WebFetch-engine 版本段=`Atlas-User (AtlasCode/0.1.29; repo)` ③ grep gate 0/0；回归 A4F+A1×3+P0a hardFail=0 P0 链无回归；artifact A4F=`A4F-1791231349358-is3m`+P0a=`P0a-1791232078979-9onx` 均 releasable=true，报告 `r-20261006-0435-brand-br8.md`，被测 `4f35656`）→ **已触发 Main 发 0.1.29**（tag v0.1.29+push×2+DNS-pin publish+packument+tarball 验真 → 再发 e2e 生产 lane 验真） |
-| 0.1.30 | BR-4 全量收口 | 排队（Main 实施） |
+| 0.1.29 | BR-8 UA 品牌串 | ✅ **已发布收口**（e2e verdict 3/3 PASS releasable=true〔artifact A4F=`A4F-1791231349358-is3m`+P0a=`P0a-1791232078979-9onx`〕；Main 全链收口 master `f1c34db` + tag v0.1.29 + npm latest=0.1.29 shasum `2d0da16d…` + tarball 独立复验 MATCH + dist BR-8 标记核验绿；e2e 生产 lane 验真信号已发） |
+| 0.1.30 | BR-4 全量收口 | **实施已先行落地**（Main worktree-0.1.30 `0f8f8c8` 实施 + `f2d4156` 判别单测对齐，四件套 4/4 全量 3535/0·247）；**e2e R2 复验中**（其前 gate 1/6 系切在实施前基线、非真缺陷，R2 复验核真实 gate）→ gate 绿即发 0.1.30 |
 | 0.1.31 | BR-1+BR-2 | 排队（Main 实施） |
 | 0.1.32 | BR-9+BR-5 | 排队（Main 实施） |
 | pending | BR-3 | 待用户审（不自动推进） |
