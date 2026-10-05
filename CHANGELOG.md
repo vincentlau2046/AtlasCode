@@ -4,6 +4,32 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.31
+
+BR-1 identity 扩常量 + BR-2 theme 暖金（品牌序列 0.1.31；Main 实施 worktree-0.1.31，
+`15c54bb` BR-1 + `3d21afe` BR-2）：
+
+- **BR-1 identity 4 扩常量 + 品牌触面单一事实源**（`src/shared/identity.ts` +
+  门面 re-export）：`PRODUCT_FAMILY='Atlas'` / `PRODUCT_BRAND='AtlasCode'` /
+  `FEEDBACK_CHANNEL` / `ACCENT_HUE='compute'`；6 文件品牌触面 import-ization
+  （errorMessaging 4 字面量 / commitAttribution / mcp client / REPL / main /
+  dispatch）+ `shared-identity-useragent` 判别单测扩块 10/10。
+- **BR-2 theme 6 套品牌色 橙→暖金**（18 行锚点替换，3 键 × 6 主题：
+  brand / brandShimmer / briefLabelAssistant）：dark 系 `rgb(255,184,0)`
+  （darkAnsi `ansi:yellowBright` + shimmer `ansi:yellow` / darkDalton 同色）+
+  light 系 amber-700 `#B45309`（浅底 AA 5.02:1）；Anthropic 橙
+  （`rgb(215,119,87)` / `rgb(255,153,51)` / `ansi:redBright`）品牌键零残留；
+  clawd_body/clawd_background 键边界不越界（残 4 处随 0.1.32，tracker 记）；
+  `theme-brand-warm-gold` 判别单测 4/4。
+- **token/对比度记录**：`docs/assets/brand-system-spec.md`（12.11 AAA /
+  5.02 AA / ansi 1.07 定因）。
+- **e2e 前 gate 4/4 PASS**（e2e 单信号，artifact `THEMES-1791240450679-mksx`，
+  报告 `r-20261006-0705-brand-br12.md`；探针④软面 INCONCLUSIVE 定因：ANSI
+  16-color 降级下品牌 SGR 形不可唯一断言 → 断言回落单测② 4/4 + truecolor
+  SGR 指纹 dark=`38;2;255;184;0`×1 / light=`38;2;180;83;9`×1 实捕）。
+- 四件套：tsc 0 / lint 0e·0w / build ~17.58MB / 全量 3540/0·248
+  （detached verify worktree，+5 测试/+1 文件 vs 0.1.30 基线）。
+
 ## v0.1.30
 
 BR-4 用户可见面全量收口（品牌序列 0.1.30；Main 实施 worktree-0.1.30，
