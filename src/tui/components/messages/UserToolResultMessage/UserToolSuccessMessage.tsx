@@ -6,7 +6,7 @@ import { Box, Text, useTheme } from '../../../ink.js';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
 import type { NormalizedUserMessage, ProgressMessage } from '../../../types/message.js';
 import { deleteClassifierApproval, getClassifierApproval, getYoloClassifierApproval } from '../../../utils/classifierApprovals.js';
-import { successCardRenderMode, verdictLine } from '../../permissions/permissionVerdict.js';
+import { hasSuccessCardMarker, successCardRenderMode, verdictLine } from '../../permissions/permissionVerdict.js';
 import { deleteUserApproval, getUserApproval } from '../../../utils/userApprovals.js';
 import { deleteAllowVerdict, getAllowVerdict } from '../../../utils/allowVerdicts.js';
 import type { buildMessageLookups } from '../../../utils/messages.js';
@@ -74,11 +74,31 @@ export function UserToolSuccessMessage({
     input: lookups.toolUseByToolUseID.get(toolUseID)?.input
   }) ?? null;
 
-  // 2026-10-04 P0a allow 面修：工具无结果渲染器（TUI-lane Bash 桥接适配器）时原
-  // renderedMessage === null 早退把用户批准标记行一并跳过（b8 第 4 轮 cardAllow 根因）；
-  // marker 存在时渲染 marker-only 形，否则原语义逐字保持
+  // #278 A4 allow 面（0.1.26）：rule-allow / bypass 两句（classifier-approved 由下方
+  // yoloReason 行覆盖，单一事实源 = verdictLine，不重复渲染）。bypass 优先判 mode
+  // （auto-allow 的 decisionReason 可能缺省）；rule-allow 须 {type:rule, allow}。
+  // 须先于 skip 早退算出（e2e A4F gate FAIL 根因：TUI-lane Bash 桥无结果渲染器 →
+  // renderedMessage=null + auto-allow 无用户弹框 → successCardRenderMode(null,false)
+  // = 'skip' 早退，allowVerdictLine 永不可达 → a4rallow/a4bypass 成功卡 0 命中）。
+  let allowVerdictLine: string | null = null;
+  if (allowVerdict) {
+    const vReason = allowVerdict.reason;
+    const vMode = allowVerdict.mode;
+    if (vMode === 'bypassPermissions') {
+      allowVerdictLine = verdictLine({ type: 'other', reason: '' }, 'bypassPermissions', tool.name);
+    } else if (vReason?.type === 'rule' && vReason.rule.ruleBehavior === 'allow') {
+      allowVerdictLine = verdictLine(vReason, vMode, tool.name);
+    }
+  }
+
+  // 2026-10-04 P0a allow 面修（e2e 第 5 轮）：工具无结果渲染器（TUI-lane Bash 桥接
+  // 适配器）时 renderedMessage === null 早退把 marker 行一并跳过（b8 第 4 轮 cardAllow
+  // 根因）。修：任一 marker 行可见则渲染 marker-only 形，否则早退。userApproved 已折进
+  // renderMode='marker'（不 skip），此处补 allowVerdict + 分类器行（yoloReason 同隐患：
+  // live 模型可达时在早退后不渲染，一并 gate，防未来翻车）。
+  const hasMarkerLine = hasSuccessCardMarker(allowVerdictLine, yoloReason, classifierRule);
   const renderMode = successCardRenderMode(renderedMessage, userApproved);
-  if (renderMode === 'skip') {
+  if (renderMode === 'skip' && !hasMarkerLine) {
     return null;
   }
 
@@ -87,20 +107,6 @@ export function UserToolSuccessMessage({
   // so MarkdownTable's SAFETY_MARGIN=4 (tuned for the assistant-text 2-col
   // dot gutter) holds — otherwise tables wrap their box-drawing chars.
   const rendersAsAssistantText = tool.userFacingName(undefined) === '';
-
-  // #278 A4 allow 面（0.1.26）：rule-allow / bypass 两句（classifier-approved 由下方
-  // yoloReason 行覆盖，单一事实源 = verdictLine，不重复渲染）。bypass 优先判 mode
-  // （auto-allow 的 decisionReason 可能缺省）；rule-allow 须 {type:rule, allow}。
-  let allowVerdictLine: string | null = null;
-  if (allowVerdict) {
-    const vReason = allowVerdict.reason;
-    const vMode = allowVerdict.mode;
-    if (vMode === "bypassPermissions") {
-      allowVerdictLine = verdictLine({ type: "other", reason: "" }, "bypassPermissions", tool.name);
-    } else if (vReason?.type === "rule" && vReason.rule.ruleBehavior === "allow") {
-      allowVerdictLine = verdictLine(vReason, vMode, tool.name);
-    }
-  }
 
   return <Box flexDirection="column">
       <Box flexDirection="column" width={rendersAsAssistantText ? undefined : width}>

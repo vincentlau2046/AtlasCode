@@ -28,6 +28,7 @@
  * asyncAgent/sandboxOverride）保持既有英文句式。toolName / classifierAutoApproved
  * 为加性可选参（旧 2 参调用点与单测全兼容，缺省 tool 回落 'this command'）。
  */
+import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import {
   getSettingSourceDisplayNameLowercase,
 } from '../../utils/settings/constants.js'
@@ -126,4 +127,34 @@ export function successCardRenderMode(
 ): 'full' | 'marker' | 'skip' {
   if (renderedMessage !== null) return 'full'
   return userApproved ? 'marker' : 'skip'
+}
+
+/**
+ * #278 A4 allow 面（0.1.26 e2e gate R1 修）：成功卡 marker 行存在判定（纯面）。
+ *
+ * 根因（e2e A4F gate FAIL：S-024I a4rallow / S-024J a4bypass 0 命中）：
+ * TUI 车道 Bash 桥无 renderToolResultMessage（renderedMessage=null）+ auto-allow
+ * 无用户弹框（userApproved=false）→ successCardRenderMode(null,false)='skip' →
+ * 早退 return null 发生在 allowVerdictLine / yoloReason 行渲染点之前 → A4 三 allow
+ * 句（rule-allow/bypass/classifier-approved）永不渲染。修 = 早退条件加
+ * `!hasSuccessCardMarker(...)`：skip 但有可见 marker 行 → 放行 marker-only 渲染；
+ * 真无可渲染（无结果+无标记+无 verdict）→ 仍 skip（P0a 早退语义不回归）。
+ *
+ * userApproved 不在此（已折进 successCardRenderMode='marker'，非 skip）；本判定只
+ * 覆盖 skip 态（renderedMessage=null 且非 userApproved）下「仍应放行渲染」的三行：
+ *   - allowVerdictLine（rule-allow / bypass，无 feature 门）
+ *   - yoloReason（classifier-approved，TRANSCRIPT_CLASSIFIER 门）
+ *   - classifierRule（bash classifier，BASH_CLASSIFIER 门）
+ * 主路径零改动（红线①）：纯投影判定，只读三参数，不写任何状态。
+ */
+export function hasSuccessCardMarker(
+  allowVerdictLine: string | null,
+  yoloReason: string | undefined,
+  classifierRule: string | undefined,
+): boolean {
+  return (
+    allowVerdictLine !== null ||
+    (feature('TRANSCRIPT_CLASSIFIER') && yoloReason !== undefined) ||
+    (feature('BASH_CLASSIFIER') && classifierRule !== undefined)
+  )
 }

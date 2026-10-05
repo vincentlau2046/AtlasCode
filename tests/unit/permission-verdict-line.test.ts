@@ -16,6 +16,7 @@
 import { describe, expect, it } from 'bun:test'
 import {
   VERDICT_PREFIX,
+  hasSuccessCardMarker,
   successCardRenderMode,
   verdictLine,
 } from '../../src/tui/components/permissions/permissionVerdict.js'
@@ -226,6 +227,63 @@ describe('successCardRenderMode（P0a allow 面修：无结果渲染器工具的
     // 签名仅 (renderedMessage, userApproved)：classifier 态工具若无结果渲染器
     // 且无用户标记，仍 skip（原语义）；有标记则 marker（批准优先于分类器行）。
     expect(successCardRenderMode(null, true)).toBe('marker')
+  })
+})
+
+/**
+ * #278 A4 allow 面（0.1.26 e2e gate R1 修）：skip 态 marker 行存在判定（纯面）。
+ *
+ * 根因：TUI-lane Bash 桥无结果渲染器（renderedMessage=null）+ auto-allow 无用户
+ * 弹框（userApproved=false）→ successCardRenderMode(null,false)='skip' 早退发生在
+ * allowVerdictLine / yoloReason 行渲染点之前 → A4 allow 句（rule-allow/bypass/
+ * classifier-approved）永不渲染（e2e A4F S-024I a4rallow / S-024J a4bypass 0 命中）。
+ * 修 = 早退条件加 !hasSuccessCardMarker(...)：skip 但有可见 marker 行 → 放行
+ * marker-only 渲染；真无可渲染 → 仍 skip。以下 4 判别例（f4 R1 缺陷报告必含）钉死
+ * 早退门：早退 = renderMode==='skip' && !hasSuccessCardMarker(...)。
+ */
+describe('hasSuccessCardMarker（#278 A4 e2e gate R1 修：skip 态 marker 行放行）', () => {
+  it('① skip + allowVerdict → 渲 verdict 行（早退门 false）', () => {
+    // TUI-lane Bash 桥：renderedMessage=null + auto-allow 无用户弹框（userApproved=false）。
+    const renderMode = successCardRenderMode(null, false)
+    expect(renderMode).toBe('skip')
+    const allowLine = `${VERDICT_PREFIX}: Allowed by rule "Bash(ls:*)" (shared project settings).`
+    const hasMarkerLine = hasSuccessCardMarker(allowLine, undefined, undefined)
+    expect(hasMarkerLine).toBe(true)
+    // 早退门 = renderMode==='skip' && !hasMarkerLine → false → 渲 verdict 行（不早退）。
+    expect(renderMode === 'skip' && !hasMarkerLine).toBe(false)
+  })
+
+  it('② skip + 无 verdict 无标记 → 仍早退 return null（早退门 true）', () => {
+    const renderMode = successCardRenderMode(null, false)
+    expect(renderMode).toBe('skip')
+    // 无结果 + 无 verdict + 无任何标记 → 全 false → 早退门 true → return null（P0a 早退语义不回归）。
+    const hasMarkerLine = hasSuccessCardMarker(null, undefined, undefined)
+    expect(hasMarkerLine).toBe(false)
+    expect(renderMode === 'skip' && !hasMarkerLine).toBe(true)
+  })
+
+  it('③ marker 形（用户批准标记）不受本判定门控：renderMode=marker 早退门恒 false', () => {
+    // userApproved=true → renderMode='marker'（非 skip）→ 早退门 renderMode==='skip' 恒 false，
+    // hasSuccessCardMarker 只在 skip 态被咨询；marker 形（用户批准标记行）独立可见。
+    const renderMode = successCardRenderMode(null, true)
+    expect(renderMode).toBe('marker')
+    const hasMarkerLine = hasSuccessCardMarker(null, undefined, undefined) // 全无标记
+    expect(renderMode === 'skip' && !hasMarkerLine).toBe(false)
+  })
+
+  it('④ skip + 仅 yoloReason（classifier-approved）→ 同放行（TRANSCRIPT_CLASSIFIER 开）', () => {
+    // 显式开 TRANSCRIPT_CLASSIFIER（生产 ON_BY_DEFAULT 同态）；yoloReason 非 undefined → 放行。
+    // 同早退根因（classifier-approved 行也在渲染点之前被早退吞掉），一并 gate。
+    process.env['FEATURE_TRANSCRIPT_CLASSIFIER'] = 'true'
+    try {
+      const renderMode = successCardRenderMode(null, false)
+      expect(renderMode).toBe('skip')
+      const hasMarkerLine = hasSuccessCardMarker(null, 'writes to .atlas/ config', undefined)
+      expect(hasMarkerLine).toBe(true)
+      expect(renderMode === 'skip' && !hasMarkerLine).toBe(false)
+    } finally {
+      delete process.env['FEATURE_TRANSCRIPT_CLASSIFIER']
+    }
   })
 })
 
