@@ -4,6 +4,29 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.28
+
+P0 封口 patch（全 6 句 A4 e2e 绿 = P0 封口 Option B 达成；用户裁定 #6 原定
+0.1.27.1 4 段 patch，npm 工具链拒 4 段版（semver 严格校验 null + npm 11 把
+`0.1.27.1` clean 成 `0.1.2-7.1` prerelease 拒发）→ 用户 2026-10-06 改裁
+**0.1.28**，native semver）：
+
+- **D-279-r1 渲染层缺口修**（`6ff4e2b`，源 `dc0b37f`）：
+  `FilePermissionDialog.tsx`（Write/Edit/Notebook/SedEdit 均收敛的共享面）此前漏
+  P0a verdict 行（「为何在问你」一行），A4 分类器危险句
+  「Auto mode: classifier flagged this as dangerous.」在文件面永不现形 →
+  A4 #3（a4cls）不可达（hard-red）。修 = 镜像 BashPermissionRequest /
+  PowerShellPermissionRequest：`useAppState` 活读 `toolPermissionContext` +
+  `verdictLine`（读 `permissionResult.decisionReason` + `tpc.mode` + `tool.name`
+  + `classifierAutoApproved`），非 null 渲 dimColor 一行。零新数据、判定层零改动
+  （红线：permissions.ts 主判定流不动，纯渲染层加性）。判别单测
+  `file-permission-dialog-verdict`（纯面 3 + Ink 渲染面 2；修前 RED / 修后 GREEN）。
+- **P0 封口**：修后 e2e S-024N/O 全 6 句 A4 绿（#3 危险句弹框现形
+  `Verdict: Auto mode: classifier flagged this as dangerous.` + wire
+  `classifier=inject shouldBlock=true`；#4 成功卡 `Auto-approved by classifier:`）
+  + 控制面 + S-A（P0a）零回归 → releasable=true（gate f4 PASS）。
+  本版本仅含 D-279-r1（一 wave 一版，不并其他项）。
+
 ## v0.1.27
 
 #279 波 C 分类器拦截支 deny→ask + P0 崩修（auto-mode 分类器链复活，P0 封口
