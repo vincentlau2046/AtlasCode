@@ -19,6 +19,7 @@ import {
   SPINNER_BEAM_FRAMES_T0,
   beamDividerLine,
   beamTextureLine,
+  dividerLine,
   getProgressBarBlocks,
   getReducedMotionSpinnerGlyph,
   getSpinnerBeamFrames,
@@ -85,6 +86,25 @@ describe('beamTextureLine：空态底纹（░ 重复 + 宽度恒定）', () => 
 
   test('width<=0 → 空串', () => {
     expect(beamTextureLine(0)).toBe('')
+  })
+})
+
+describe('dividerLine：分隔线触面（默认光束串 / 显式 char legacy 重复）', () => {
+  test('char 缺省 → 光束串（= beamDividerLine，█ 与空格交替，宽度恒定）', () => {
+    for (const w of [1, 5, 6, 7, 40, 120]) {
+      expect(dividerLine(w)).toBe(beamDividerLine(w))
+      expect(stringWidth(dividerLine(w))).toBe(w)
+    }
+  })
+
+  test('显式 char → legacy char.repeat（宽度 = char 长 × 重复次数，母题不覆写自定义）', () => {
+    expect(dividerLine(4, '─')).toBe('────')
+    expect(dividerLine(3, '#')).toBe('###')
+  })
+
+  test('width<=0 → 空串（无论 char）', () => {
+    expect(dividerLine(0)).toBe('')
+    expect(dividerLine(0, '─')).toBe('')
   })
 })
 

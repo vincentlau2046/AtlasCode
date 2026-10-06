@@ -4,6 +4,7 @@ import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { stringWidth } from '../../ink/stringWidth.js';
 import { Ansi, Text } from '../../ink.js';
 import type { Theme } from '../../utils/theme.js';
+import { dividerLine } from './beamTheme.js';
 type DividerProps = {
   /**
    * Width of the divider in characters.
@@ -19,7 +20,7 @@ type DividerProps = {
 
   /**
    * Character to use for the divider line.
-   * @default '─'
+   * @default beam string `█ █`（0.1.35 母题：光束串，CJK 1-cell 安全；显式 char → legacy 重复）
    */
   char?: string;
 
@@ -72,7 +73,7 @@ export function Divider(t0) {
     padding: t2,
     title
   } = t0;
-  const char = t1 === undefined ? "\u2500" : t1;
+  const char = t1; // 0.1.35 \u6bcd\u9898\uff1a\u9ed8\u8ba4\uff08char \u7f3a\u7701\uff09\u6e32\u67d3\u5149\u675f\u4e32\uff0c\u663e\u5f0f char \u2192 legacy \u91cd\u590d
   const padding = t2 === undefined ? 0 : t2;
   const {
     columns: terminalWidth
@@ -86,7 +87,7 @@ export function Divider(t0) {
     const t3 = !color;
     let t4;
     if ($[0] !== char || $[1] !== leftWidth) {
-      t4 = char.repeat(leftWidth);
+      t4 = dividerLine(leftWidth, char);
       $[0] = char;
       $[1] = leftWidth;
       $[2] = t4;
@@ -103,7 +104,7 @@ export function Divider(t0) {
     }
     let t6;
     if ($[5] !== char || $[6] !== rightWidth) {
-      t6 = char.repeat(rightWidth);
+      t6 = dividerLine(rightWidth, char);
       $[5] = char;
       $[6] = rightWidth;
       $[7] = t6;
@@ -127,7 +128,7 @@ export function Divider(t0) {
   const t3 = !color;
   let t4;
   if ($[14] !== char || $[15] !== effectiveWidth) {
-    t4 = char.repeat(effectiveWidth);
+    t4 = dividerLine(effectiveWidth, char);
     $[14] = char;
     $[15] = effectiveWidth;
     $[16] = t4;

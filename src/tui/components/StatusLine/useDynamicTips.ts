@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Message } from '../../types/message.js'
+import { LIGHT_CORE } from '../design-system/beamTheme.js'
 
 // ── Tip pool (idle rotation) ────────────────────────────────────
 
@@ -76,7 +77,8 @@ export function useDynamicTip(
 
 // D-3 光核微符号（spec §2.2）：闲时 tips 前缀由旧 `·` 换为光锥母题的光心色块 `▀`，
 // 消费方以 brand_mark 色渲染（母题首次落地）；`formatTip` 纯串契约保留给非着色路径。
-export const TIP_PREFIX = '▀'
+// 0.1.35 母题铺开：光核微符号 `▀` 单一事实源 = beamTheme.LIGHT_CORE（全 UI 复用同一字）。
+export const TIP_PREFIX = LIGHT_CORE
 
 export function formatTip(tip: string | null): string | null {
   if (!tip) return null

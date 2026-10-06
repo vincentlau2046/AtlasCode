@@ -40,6 +40,16 @@ export function beamTextureLine(width: number): string {
   return width > 0 ? '░'.repeat(width) : ''
 }
 
+/**
+ * 分隔线触面渲染串（spec §0.1 分隔线 = `█ █` 光束串，CJK 1-cell 安全）。
+ * 显式 char（非默认）→ legacy `char.repeat(width)`；char 缺省（默认分隔线）→
+ * `█ █` 光束串（宽度恒定，不超宽）。仓内 Divider 20 处调用点均不传 char，仅默认路径生效。
+ */
+export function dividerLine(width: number, char?: string): string {
+  if (char) return char.repeat(width)
+  return beamDividerLine(width)
+}
+
 // ── spinner 光束串帧（spec §0.1 spinner 触面：点状帧 → 光束串，光扫上爬 底→顶）────────
 
 // T0 光束爬帧：2-cell 双列半块，光自底向上逐帧点亮（Ascend 攀升隐喻），镜面对称 8 帧

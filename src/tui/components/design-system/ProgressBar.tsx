@@ -2,6 +2,8 @@ import { c as _c } from "react/compiler-runtime";
 import React from 'react';
 import { Text } from '../../ink.js';
 import type { Theme } from '../../utils/theme.js';
+import { getProgressBarBlocks } from './beamTheme.js';
+import { resolveMarkTierFromEnv } from '../LogoV2/markDegrade.js';
 type Props = {
   /**
    * How much progress to display, between 0 and 1 inclusive
@@ -23,7 +25,11 @@ type Props = {
    */
   emptyColor?: keyof Theme;
 };
-const BLOCKS = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'];
+// 0.1.35 母题铺开（spec §0.1 进度条触面）：光束填充阶 = beamTheme 单一事实源，
+// BR-7 档位感知（resolveMarkTierFromEnv）：T0 = 八分之一块平滑阶 ▏→█ + 空段 ░ 底纹；
+// T1·T2（半块类错位终端）降实心 [░, █]（母题降一档不整版回退，零回归）。
+const MARK_TIER = resolveMarkTierFromEnv();
+const BLOCKS = getProgressBarBlocks(MARK_TIER);
 export function ProgressBar(t0) {
   const $ = _c(13);
   const {
