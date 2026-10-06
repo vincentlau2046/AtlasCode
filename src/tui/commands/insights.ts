@@ -152,8 +152,8 @@ type AggregatedData = {
   days_active: number
   messages_per_day: number
   message_hours: number[] // Hour of day for each user message (for time of day chart)
-  // Parallel-sessions stats (matching Python reference)
-  multi_clauding: {
+  // Parallel-sessions stats (D-10 de-claude: parallel_sessions; logic ported from Python ref)
+  parallel_sessions: {
     overlap_events: number
     sessions_involved: number
     user_messages_during: number
@@ -913,7 +913,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
  * Uses a sliding window to find the pattern: session1 -> session2 -> session1
  * within a 30-minute window.
  */
-export function detectMultiClauding(
+export function detectParallelSessions(
   sessions: Array<{
     session_id: string
     user_message_timestamps: string[]
@@ -939,8 +939,8 @@ export function detectMultiClauding(
 
   allSessionMessages.sort((a, b) => a.ts - b.ts)
 
-  const multiClaudeSessionPairs = new Set<string>()
-  const messagesDuringMulticlaude = new Set<string>()
+  const parallelSessionPairs = new Set<string>()
+  const messagesDuringParallel = new Set<string>()
 
   // Sliding window: sessionLastIndex tracks the most recent index for each session
   let windowStart = 0
@@ -968,12 +968,12 @@ export function detectMultiClauding(
         const between = allSessionMessages[j]!
         if (between.sessionId !== msg.sessionId) {
           const pair = [msg.sessionId, between.sessionId].sort().join(':')
-          multiClaudeSessionPairs.add(pair)
-          messagesDuringMulticlaude.add(
+          parallelSessionPairs.add(pair)
+          messagesDuringParallel.add(
             `${allSessionMessages[prevIndex]!.ts}:${msg.sessionId}`,
           )
-          messagesDuringMulticlaude.add(`${between.ts}:${between.sessionId}`)
-          messagesDuringMulticlaude.add(`${msg.ts}:${msg.sessionId}`)
+          messagesDuringParallel.add(`${between.ts}:${between.sessionId}`)
+          messagesDuringParallel.add(`${msg.ts}:${msg.sessionId}`)
           break
         }
       }
@@ -983,16 +983,16 @@ export function detectMultiClauding(
   }
 
   const sessionsWithOverlaps = new Set<string>()
-  for (const pair of multiClaudeSessionPairs) {
+  for (const pair of parallelSessionPairs) {
     const [s1, s2] = pair.split(':')
     if (s1) sessionsWithOverlaps.add(s1)
     if (s2) sessionsWithOverlaps.add(s2)
   }
 
   return {
-    overlap_events: multiClaudeSessionPairs.size,
+    overlap_events: parallelSessionPairs.size,
     sessions_involved: sessionsWithOverlaps.size,
-    user_messages_during: messagesDuringMulticlaude.size,
+    user_messages_during: messagesDuringParallel.size,
   }
 }
 
@@ -1039,8 +1039,8 @@ function aggregateData(
     days_active: 0,
     messages_per_day: 0,
     message_hours: [],
-    // Parallel-sessions stats (matching Python reference)
-    multi_clauding: {
+    // Parallel-sessions stats (D-10 de-claude: parallel_sessions; logic ported from Python ref)
+    parallel_sessions: {
       overlap_events: 0,
       sessions_involved: 0,
       user_messages_during: 0,
@@ -1171,7 +1171,7 @@ function aggregateData(
   // Store message hours for time-of-day chart
   result.message_hours = allMessageHours
 
-  result.multi_clauding = detectMultiClauding(sessions)
+  result.parallel_sessions = detectParallelSessions(sessions)
 
   return result
 }
@@ -2383,11 +2383,11 @@ function generateHtmlReport(
       </div>
     </div>
 
-    <!-- Parallel Sessions section (matching Python reference) -->
+    <!-- Parallel Sessions section (D-10 de-claude) -->
     <div class="chart-card" style="margin: 24px 0;">
       <div class="chart-title">Parallel Sessions</div>
       ${
-        data.multi_clauding.overlap_events === 0
+        data.parallel_sessions.overlap_events === 0
           ? `
         <p style="font-size: 14px; color: #64748b; padding: 8px 0;">
           No parallel session usage detected. You typically work with one Atlas session at a time.
@@ -2396,15 +2396,15 @@ function generateHtmlReport(
           : `
         <div style="display: flex; gap: 24px; margin: 12px 0;">
           <div style="text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.multi_clauding.overlap_events}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.parallel_sessions.overlap_events}</div>
             <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Overlap Events</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.multi_clauding.sessions_involved}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.parallel_sessions.sessions_involved}</div>
             <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sessions Involved</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.total_messages > 0 ? Math.round((100 * data.multi_clauding.user_messages_during) / data.total_messages) : 0}%</div>
+            <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.total_messages > 0 ? Math.round((100 * data.parallel_sessions.user_messages_during) / data.total_messages) : 0}%</div>
             <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Of Messages</div>
           </div>
         </div>

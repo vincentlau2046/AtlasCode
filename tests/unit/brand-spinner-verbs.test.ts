@@ -4,7 +4,7 @@
  * 被测：SPINNER_VERBS（四轴 ~130，去 Anthropic 品牌串动词 + 纯荒诞词 +
  * fork 专属梗）+ TURN_COMPLETION_VERBS（8 whimsical 过去式 → 20 新池）。
  * 判别点（gate 镜像）：
- *  - 品牌 gate `grep -rni "clauding" src/`（排 insights multi-clauding 内部术语）
+ *  - 品牌 gate `grep -rni "clauding" src/` = 0（D-10 后全量生效：原排 insights 已随 multi_clauding→parallel_sessions 改名消除）
  *    的行为镜像：SPINNER_VERBS 无 Anthropic 品牌串动词（原池 L45 的 C 系梗词）
  *  - 纯荒诞词 / fork 专属梗（Beboppin' / Discombobulating / Flibbertigibbeting /
  *    Razzmatazzing / Shenaniganing / Tomfoolering / Whatchamacalliting /
@@ -30,7 +30,7 @@ describe('BR-9 spinner 动词池四轴重写（0.1.32）', () => {
 
   test('Anthropic 品牌串动词 + 纯荒诞词 + fork 专属梗零残留（gate 镜像）', () => {
     const BANNED = [
-      'Clauding', // 品牌 gate：grep -rni "clauding" src/（排 insights）= 0 的池内镜像
+      'Clauding', // 品牌 gate：grep -rni "clauding" src/ = 0 的池内镜像（D-10 后全量生效）
       "Beboppin'",
       'Discombobulating',
       'Flibbertigibbeting',
