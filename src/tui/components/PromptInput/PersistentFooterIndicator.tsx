@@ -28,6 +28,10 @@ const EFFORT_DISPLAY_MS = 12_000
 
 export function PersistentFooterIndicator({ messagesRef }: Props): React.ReactNode {
   const effortValue = useAppState(s => s.effortValue)
+  // O-11（0.1.34，e2e O-11）：npm 安装提示（15s）在场期间右栏槽位整体让位——
+  // 提示独占 footer 行（消 80 列三通道互挤 + 双色竞争；通道优先级 = 状态段 >
+  // tips > 提示，截断序见 PromptInputFooter），15s 超时后 tips 自复轮播。
+  const npmHintActive = useAppState(s => s.notifications.current?.key === 'npm-deprecation-warning')
   const mainLoopModel = useMainLoopModel()
   const tip = useDynamicTip(messagesRef)
   const effortText = getEffortNotificationText(effortValue, mainLoopModel)
@@ -43,6 +47,12 @@ export function PersistentFooterIndicator({ messagesRef }: Props): React.ReactNo
     const timer = setTimeout(() => setShowEffort(false), EFFORT_DISPLAY_MS)
     return () => clearTimeout(timer)
   }, [effortText])
+
+  // O-11（0.1.34）：npm 提示在场 → 右栏（effort / 闲时 tip）让位，渲 null（不占右栏位；
+  // 所有 hooks 已调完，早返不违 Rules of Hooks）
+  if (npmHintActive) {
+    return null
+  }
 
   // effort 通知优先（dim 单串）；否则闲时 tip = 光核前缀（brand_mark 色）+ dim 正文。
   if (showEffort && effortText) {

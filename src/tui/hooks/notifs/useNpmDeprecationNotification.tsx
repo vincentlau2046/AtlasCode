@@ -21,7 +21,9 @@ async function _temp() {
     timeoutMs: 15000,
     key: "npm-deprecation-warning",
     text: NPM_DEPRECATION_MESSAGE,
-    color: "warning",
+    // O-4（0.1.34，e2e O-4）：安装/升级提示非告警语义，warning 琥珀改 inactive 灰
+    // （颜色语义惯例：warning 色面留给真告警，消 80 列 footer 双色竞争）
+    color: "inactive",
     priority: "high"
   };
 }

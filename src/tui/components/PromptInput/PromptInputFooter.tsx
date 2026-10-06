@@ -135,7 +135,10 @@ function PromptInputFooter({
   }
   return <>
       <Box flexDirection={isNarrow ? 'column' : 'row'} justifyContent={isNarrow ? 'flex-start' : 'space-between'} paddingX={2} gap={isNarrow ? 0 : 1}>
-        <Box flexDirection="column" flexShrink={isNarrow ? 0 : 1}>
+        {/* O-11（0.1.34，e2e O-11）：footer 三通道优先级 = 状态段 > tips > npm 提示，
+            空间不足按序截断——左栏（状态段）flexShrink=0 永不截断，溢出全由右栏
+            通道承担（右栏内 tips 槽 flexShrink=0 保位，npm 提示 wrap=truncate 先截） */}
+        <Box flexDirection="column" flexShrink={0}>
           {mode === 'prompt' && !isShort && !exitMessage.show && !isPasting && statusLineShouldDisplay(settings) && <StatusLine messagesRef={messagesRef} lastAssistantMessageId={lastAssistantMessageId} vimMode={vimMode} />}
           <PromptInputFooterLeftSide exitMessage={exitMessage} vimMode={vimMode} mode={mode} toolPermissionContext={toolPermissionContext} suppressHint={suppressHint} isLoading={isLoading} tasksSelected={pillSelected} teamsSelected={teamsSelected} teammateFooterIndex={teammateFooterIndex} tmuxSelected={tmuxSelected} isPasting={isPasting} isSearching={isSearching} historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} historyFailedMatch={historyFailedMatch} onOpenTasksDialog={onOpenTasksDialog} />
         </Box>
