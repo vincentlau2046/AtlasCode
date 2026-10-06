@@ -20,8 +20,11 @@
 | ③ | P2-①③ 恢复层 | P2（R3 裁定） | ① engine loop provider 错误路径 413/prompt-too-long → `reactiveCompactOnPromptTooLong`（体 `contextBodies/reactiveCompact.ts` 已存在，TUI 端口已接线 `contextHostWiring.ts:191-199`；**engine loop 补 413 消费点**，delta 小；**一次性/回合**：压缩后重试一次仍 413 → 结构化错误行 + 用户面状态，**不循环**；若本仓无 REACTIVE_COMPACT flag 则新增入 `feature.ts` ON_BY_DEFAULT 族，env `FEATURE_REACTIVE_COMPACT=false` 可杀；既有 413 语义单测锁）③ 断路器跳闸（autoCompact.ts:532-535）= TokenWarning 增 "auto-compact 已暂停（N 次失败）" 态 + 行动建议（/compact·换小模型·新会话）+ 模型侧告知 | V4 / V7 |
 | ④ | 廉价同族批 | P4 / P5 / P9 / P12 | P4：`createPermissionGate` TPC 缺失 warn 启动日志 + headless lane 显式注入 dontAsk 语义 TPC（fail-closed）+ 单测锁；P5：`dispatch.ts:82-92` 非 print lane SIGINT 复用 TUI `gracefulShutdown` 装配（abort 在途 turn + session 冲刷 + hook + exit 0，仿 `-p` lane print.ts 先例）；P9：键位模态不变量单测（弹窗打开时侧栏 context 解析优先级低于 Confirmation）+ 侧栏注册模态门（可选加固）；P12：`localShellTask.ts:111` timer 加 unref（一行，对照 TUI 正例 LocalShellTask.tsx:99） | 单测 + V1 |
 | ⑤ | **调研后重裁定**（0.1.37 候选） | R2 清单 | **先调研后写码**（见 §2）；调研通过前不排版本 | — |
+| ⑧【deferred 显式命名 → 切片④/0.1.37】 | pane-worker TUI 真消费面硬化（V3 实证新缺口） | P1 相邻面（非切片① engine 两文件 scope） | TUI `useSwarmPermissionPoller`（pane worker 真消费面）加 **deadline + P6-a drop 审计 + interval unref** = 封 pane-worker 用户面「杀 leader→挂死」（切片① 只硬化了 engine `inProcessRunner`/`permissionPoller` 两文件，pane worker 的 TUI poller 是独立消费面）。**2026-10-07 02:40 e2e 前 gate 裁定 (a)**：0.1.36 按 in-scope engine 侧收口发布，⑧ 显式顺延（不扩 scope 不重 gate，release-governance 支柱① deferred 显式命名）；并入切片④（廉价批，同 unref/审计同族）或 0.1.37 | V3-⑧（pane-worker 杀 leader 真面） |
 
 **每切片实施前**：回源复核本工单引用的 file:line（"问题先闭环再发"，house 纪律）；逐切片四件套（单测/类型/构建/lint）绿。
+
+**进度状态（2026-10-07 04:00 更新）**：切片①（P1 mailbox 硬化）= **code-complete（d5f0614）+ e2e 前 gate PASS 6/6**（报告 `r-20261007-0240-0136-slice1-gate.md`，0 hard FAIL / 0 无定因 INCONCLUSIVE）+ **T3 发布完成**（Main 常设授权自跑：release commit **`a540e49`**（master）+ cherry-pick `4e34fb4`（实施 d5f0614）+ tag **v0.1.36** → GitHub 双 push + npm **@atlasharness/atlascode@0.1.36**（DNS-pin 通道）shasum **`403ec2ac84889dfd970b7f12dee0266ce797f163`** + unpackedSize **17583246** + packument 验真 MATCH；**f4 独立交叉验真全绿**（origin tag/master 指向 + registry shasum/unpackedSize 三项全 MATCH））；⑧ 裁定 = (a) 顺延切片④/0.1.37（见上表，显式命名不丢）；**e2e 接 T4 生产 lane**（报告 `r-20261007-prodlane-036.md`，⑧ 面 2 soft 项按顺延标注不计硬 FAIL）→ 全绿 = **P1 5 段闭环终态**（f4 记档；06:30 终检为明早裁定前基线）。
 
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
