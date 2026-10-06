@@ -89,17 +89,21 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 
 ## 3. mark 形态
 
-### 3.1 形态规格
+### 3.1 形态规格 · 棱镜光锥（定稿 2026-10-06 · 方案 A）
 
-5 行实心收敛三角，9 宽 × 5 高（与现有 `Clawd.tsx` `AH_ART` 槽位 9×5 + `src/tui/utils/logoV2Utils.ts` 布局常量 `MAX_LEFT_WIDTH=50`（L18）/ `calculateOptimalLeftWidth`（L80）"Minimum for clawd art 20"（L89）兼容，零布局改动）。顶点光心靠颜色 + 脉冲动效传递，不靠字符形状：
+**棱镜光锥 = 大写字母 A 剪影的收敛光锥**：底宽冷蓝 → 顶点暖金；中段一道横向**光带（= Beam 本尊，最亮行）**，斜侧 `▓` 晶面高光（该行主色降亮版 = 切割晶面），腿部留**负空间空腔**（不糊实心 = 优雅核心），顶点一颗 **spark 光心**（最亮，脉冲呼吸目标）。字母 A = Atlas 首字母剪影，比匿名实心三角更有记忆锚。5 行 × 9 宽，与现有 `Clawd.tsx` `AH_ART` 槽位 9×5 + `src/tui/utils/logoV2Utils.ts` 布局常量 `MAX_LEFT_WIDTH=50`（L18）/ `calculateOptimalLeftWidth`（L80）兼容，零布局改动：
 
 ```
-    █          # amber    #FFB800  顶点光心（聚焦点，脉冲）
-   ███         # flame    #FF8C42
-  █████        # violet   #9B3A8A
- ███████       # blue-d   #3A4FBF
-█████████      # blue     #0066FF  底（算力冷源/承重）
+   ▄█▄         # apex spark（暖金 #FFB800，最亮，脉冲）
+  ▓███▓        # 上斜面（▓ 晶面 = 上行色降亮）
+ █▓▓▓▓▓█      # beam 光带（最亮行 = 光本尊）
+ ▓█   █▓      # 腿 + 负空间空腔（中部 3 空格）
+█▓█   █▓█     # 底（冷蓝 #0066FF 算力冷源/承重）
 ```
+
+- **3 色收敛**（少 = 优雅，替代旧 5 段渐变）：底 `ascend-blue #0066FF` → 中 `ascend-violet #9B3A8A` → 上/光带/顶点 `ascend-amber #FFB800`（= brand）；`▓` 晶面 = 该行色降亮 ≈40%。
+- **beam 光带**（r3 横贯）= "Beam" 字面化；**负空间空腔**（r4-r5 中部）= 光束通道，优雅感核心。
+- 单色/降级档全塌同色 `█`，**空腔形状保留**（§4.2）。
 
 ### 3.2 字符选择 · CJK 安全（关键工程约束）
 
@@ -107,7 +111,7 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 
 **原因**：`▲` `◆` 是 East Asian **Ambiguous** 宽度字符。仓里 `src/tui/ink/stringWidth.ts` 用 `eastAsianWidth({ambiguousAsWide:false})`（西方标准=测宽 1），但 **CJK 终端按 Unicode 标准 ≈ 2 宽**——AtlasCode 面向国产终端生态（中文 locale 用户多），Ambiguous 字符会导致 mark 错位。`█` U+2588 是 **Neutral 宽度=始终 1**，跨所有终端（含 CJK）稳定，`stringWidth()` 测宽准确，零错位风险。
 
-**这是面向国产终端必须做对的细节**。分隔线/空态底纹同样只用 Neutral 宽度字符（`█▀▄░`，均 U+2580-259F Block Elements 区段）。
+**这是面向国产终端必须做对的细节**。mark 与分隔线/空态底纹同样只用 Neutral 宽度字符（`█▓▒░▄▀`，均 U+2580-259F Block Elements 区段，含 `▓` U+2593 晶面 / `▄` U+2584 顶点 cap，跨 CJK 终端始终 1 宽）。半块 `▄▀` 若个别 CJK 终端宽度异常，落地时回退晶面/顶点为实心 `█`（形状不变、仅少"切割"感，§14.2 多终端矩阵核）。
 
 ### 3.3 wordmark
 
@@ -128,16 +132,16 @@ AtlasCode
 
 ## 4. 色彩系统
 
-### 4.1 AtlasCode 渐变色板（已定 · 独立色系，非昇腾青绿）
+### 4.1 AtlasCode 色板（定稿 2026-10-06 · 3 色收敛，独立色系非昇腾青绿）
+
+**定稿：3 主色收敛**（少 = 优雅；旧 5 段渐变砍为 3 主色 + 1 accent，避免"彩虹廉价"）：
 
 | 色名 | 值 | 角色 |
 |---|---|---|
-| `ascend-blue` | `#0066FF` | 算力冷源（底/承重） |
-| `ascend-blue-dark` | `#3A4FBF` | 蓝过渡 |
+| `ascend-blue` | `#0066FF` | 算力冷源（光锥底/承重） |
 | `ascend-violet` | `#9B3A8A` | 中段过渡 |
-| `ascend-flame` | `#FF8C42` | 焦橙 |
-| `ascend-amber` | `#FFB800` | 聚焦暖顶（顶点光心/主品牌色） |
-| `brand`（主色） | `ascend-amber` `#FFB800` | 承 Claude orange 视觉惯性但换为暖金，全触面单色场景 |
+| `ascend-amber`（= brand 主色） | `#FFB800` | 聚焦暖顶（光带/顶点光心/全触面单色品牌色，承 Claude orange 换为暖金） |
+| `ascend-flame`（accent · 仅 beam 光带最亮行） | `#FF8C42` | 光带高亮 accent（单色/降级档塌为 amber） |
 
 **商标边界**：色板**不含**华为昇腾品牌青绿（`#00C8B3` 系）。冷蓝 `#0066FF` 是通用蓝，不构成商标混淆。算力叙事由光锥形态 + tagline 传递，不由色相传递。
 
@@ -147,8 +151,8 @@ AtlasCode
 
 | 档位 | mark 渐变 | brand 主色 |
 |---|---|---|
-| truecolor | 5 行真渐变（blue→violet→flame→amber + 顶点脉冲） | `rgb(255,184,0)` |
-| 256 色 | 4 档离散（蓝/紫/橙/黄） | `ansi256(220)` 近金 |
+| truecolor | 3 段真渐变（blue→violet→amber，▓ 晶面降亮 + 顶点脉冲） | `rgb(255,184,0)` |
+| 256 色 | 3 档离散（蓝/紫/金） | `ansi256(220)` 近金 |
 | 16 色 ANSI | 两档（`blueBright` 底 + `yellowBright` 顶） | `ansi:yellowBright` |
 | 单色 / no-TTY / CI | 纯块字轮廓（光锥形状可辨，无色） | 默认前景 |
 
@@ -474,7 +478,7 @@ export const TURN_COMPLETION_VERBS = [
 
 ---
 
-## 8. Clawd → Beam 重构（⏸ PENDING · 最后 · 待用户审——BR-3，用户 2026-10-05 判「设计面未充分审核、不靠谱」，停摆放最后）
+## 8. Clawd → Beam 重构（✅ 定稿 2026-10-06 · BR-3 入 0.1.33 · 用户裁定方案 A 棱镜光锥 + 光核微符号，先更换后持续优化）
 
 ### 8.1 文件重命名
 
@@ -497,20 +501,20 @@ export const TURN_COMPLETION_VERBS = [
 
 **消费方处置**（2026-10-05 代码核对，**有 1 个消费方**，非"零消费"）：`VoiceModeNotice.tsx:9,57`（语音模式通知的 ✦ 动画）。处置：VoiceModeNotice 先改渲染 `▀` 光锥顶点静态色块（brand_mark 色，§7.3 同 prefix 语言），再删 `AnimatedAsterisk.tsx`。实施时 grep `AnimatedAsterisk` 全 src 复核（当前仅此 1 消费方）。
 
-### 8.4 mark art 数据结构
+### 8.4 mark art 数据结构（定稿 · 棱镜光锥方案 A）
 
-`Beam.tsx` 的 `BEAM_ART` 替代 `AH_ART`，按行配渐变色（非单色）：
+`Beam.tsx` 的 `BEAM_ART` 替代 `AH_ART`，棱镜 A 形（§3.1），按行配 3 色渐变色（非单色）+ `▓` 晶面（该行色降亮）：
 
 ```tsx
 const BEAM_ART: Array<{ chars: string; color: string }> = [
-  { chars: '    █    ', color: 'ascend-amber' },     // 顶点（脉冲目标）
-  { chars: '   ███   ', color: 'ascend-flame' },
-  { chars: '  █████  ', color: 'ascend-violet' },
-  { chars: ' ███████ ', color: 'ascend-blue-dark' },
-  { chars: '█████████', color: 'ascend-blue' },       // 底
+  { chars: '   ▄█▄   ', color: 'ascend-amber' },  // 顶点 spark（最亮，脉冲目标）
+  { chars: '  ▓███▓  ', color: 'ascend-amber' },  // 上斜面（▓ 晶面）
+  { chars: ' █▓▓▓▓▓█ ', color: 'ascend-flame' },  // beam 光带（最亮行）
+  { chars: ' ▓█   █▓ ', color: 'ascend-violet' }, // 腿 + 负空间空腔
+  { chars: '█▓█   █▓█', color: 'ascend-blue' },   // 底（冷蓝算力冷源）
 ];
-// AppleTerminal 降级：单色 brand_mark，形状同上
-```
+// AppleTerminal 降级：单色 brand_mark，形状同上（空腔保留）
+// 光核微符号（全 UI 母题，0.1.33 先落 tips 前缀）：· → ▀/▄ 光心色块
 
 ---
 
@@ -669,7 +673,8 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
                                                · 0.1.30 AtlasHarness leak 全量收口（BR-4，纯机械 · ~80 处 · 自包含）
                                                · 0.1.31 identity 扩常量 + 主题换值（BR-1 + BR-2）
                                                · 0.1.32 去 fork 化（BR-9：动词池 + guideAgent + outputStyles）+ 资产（BR-5 wordmark/token）
-                                               · …（BR-6 e2e + BR-7 多终端随视觉版；BR-3 Beam = ⏸ PENDING · 最后 · 待用户审）
+                                               · 0.1.33 品牌 mark + 收尾（BR-3 棱镜光锥 Beam 定稿 + clawd 键族 D-9 + tips 光核 D-3 + 编译产物 D-2 + insights 标题 D-10 + 发布 SOP D-8）
+                                               · 0.1.34+ 持续优化（BR-6 e2e 基线重生成 + BR-7 多终端矩阵 + 母题铺开 spinner/进度条/分隔线/空态 + 动效精修）
                                                （序号随 TUI 列车顺延；全程 0.1.x，不升 0.2.x）
 ```
 
@@ -686,7 +691,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 |---|---|---|
 | BR-1 identity 扩常量 | `shared/identity.ts` Step 1 + 触面改 import Step 2 | 无 |
 | BR-2 主题换值 | `theme.ts` 6 套 UI 品牌色 3 键（brand/brandShimmer/briefLabelAssistant）橙→暖金纯换值；**clawd_body/clawd_background 键改为 BR-3**（渐变色板随 BR-3 pending） | BR-1 |
-| BR-3 Beam 组件 | ⏸ **PENDING · 最后 · 待用户审**（mark 重设计：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam` + 删 `AnimatedAsterisk` + pose 废弃重写上爬动效 + BEAM_ART 5 档渐变 + 全部 clawd 术语内容：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 其余 clawd 命名残留）——用户 2026-10-05 判定设计面「不靠谱、未充分审核」，停止、放序列最后重新排期 | 待用户审后另有 writing-plans |
+| BR-3 Beam 组件 | ✅ **定稿 2026-10-06 · 入 0.1.33**（mark 重设计：棱镜光锥 A 形 `BEAM_ART` 3 色 + `▓` 晶面 + 负空间空腔 + 顶点 spark〔§3.1/§8.4〕；`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam`（pose 废弃重写光扫上爬）+ 删 `AnimatedAsterisk`（VoiceModeNotice 消费方→光核静态）+ **3 色色板收敛**〔§4.1〕+ 全部 clawd 术语：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 41 处渲染引用〔= D-9〕+ tips 光核〔D-3〕+ LogoV2 4 编译产物 PRODUCT_BRAND import〔D-2〕。**范围 = 先"更换"（mark/色/wordmark/tagline/改名/tips）；母题铺开 spinner/进度条/分隔线/空态 + 动效精修 + 多终端矩阵 = 0.1.34+ 持续优化**） | 用户 2026-10-06 裁定方案 A，入 0.1.33，writing-plans `docs/superpowers/plans/2026-10-06-brand-br3-beam-0133-plan.md` |
 | BR-4 AtlasHarness leak 全量收口（**扩展**） | **全量用户可见 `AtlasHarness`→`AtlasCode` 字面替换 ~80 处/~40 文件**（启动屏 12 处 + 权限弹框 22 + 更新 12 + 安装器 9 + 模型/MCP 11 + 主循环/REPL 11 + attribution 3 + insights/状态/onboarding/swarm 等；§7.1 全量清单）。**排除** mdm 注册表路径（§10.5）+ ascend/engine 迁移注释。纯机械，不碰 mark art，不 identity 化 | 无（自包含） |
 | BR-9 去 fork 化 · de-Claude（**新增**） | ① spinner 动词池重写（§7.4，186→~130 四轴，去 `Clauding`/whimsical）② guideAgent 9 处 Claude→Atlas（§7.5）③ `outputStyles.ts:47,60` 两处 `Claude explains/pauses`→Atlas（新增，复核发现）④ attribution.ts `Claude Opus 4.6` 注释清理（§7.2） | 无（与前序视觉解耦） |
 | BR-5 资产目录 | `docs/assets/` wordmark.svg + 品牌 token 文档（brand-system-spec.md）+ README 引用；**mark SVG/PNG 随 BR-3 pending** | wordmark/token 随 BR-2，mark 随 BR-3 |
