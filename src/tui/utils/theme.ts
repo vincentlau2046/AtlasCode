@@ -50,8 +50,13 @@ export type Theme = {
   // Chrome colors
   chromeYellow: string
   // TUI V2 colors
-  clawd_body: string
-  clawd_background: string
+  brand_mark: string
+  brand_mark_bg: string
+  // BR-3 棱镜光锥 3 色板（spec §4.1：blue 算力冷源 / violet 中段过渡 / amber 聚焦暖顶 / flame 光带 accent）
+  ascendBlue: string
+  ascendViolet: string
+  ascendAmber: string
+  ascendFlame: string
   userMessageBackground: string
   userMessageBackgroundHover: string
   /** Message-actions selection. Cool shift toward `suggestion` blue; distinct from default AND userMessageBackground. */
@@ -156,8 +161,13 @@ const lightTheme: Theme = {
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'rgb(180,83,9)', // = light brand (amber-700, AA on white)
-  clawd_background: 'rgb(0,0,0)',
+  brand_mark: 'rgb(217,119,6)', // = light brand (amber-deep, AA on white)
+  brand_mark_bg: 'rgb(0,0,0)',
+  // BR-3 棱镜光锥 3 色板（truecolor，spec §4.1）
+  ascendBlue: 'rgb(0,102,255)',
+  ascendViolet: 'rgb(155,58,138)',
+  ascendAmber: 'rgb(255,184,0)',
+  ascendFlame: 'rgb(255,140,66)',
   userMessageBackground: 'rgb(240, 240, 240)', // Slightly darker grey for optimal contrast
   userMessageBackgroundHover: 'rgb(252, 252, 252)', // ≥250 to quantize distinct from base at 256-color level
   messageActionsBackground: 'rgb(232, 236, 244)', // cool gray — darker than userMsg 240 (visible on white), slight blue toward `suggestion`
@@ -236,8 +246,13 @@ const lightAnsiTheme: Theme = {
   // Chrome colors
   chromeYellow: 'ansi:yellow', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'ansi:yellowBright', // = light-ansi brand
-  clawd_background: 'ansi:black',
+  brand_mark: 'ansi:yellowBright', // = light-ansi brand
+  brand_mark_bg: 'ansi:black',
+  // BR-3 棱镜光锥 16 色档（spec §4.2：两档 blueBright 底 + yellowBright 顶）
+  ascendBlue: 'ansi:blueBright',
+  ascendViolet: 'ansi:yellowBright',
+  ascendAmber: 'ansi:yellowBright',
+  ascendFlame: 'ansi:yellowBright',
   userMessageBackground: 'ansi:white',
   userMessageBackgroundHover: 'ansi:whiteBright',
   messageActionsBackground: 'ansi:white',
@@ -315,8 +330,13 @@ const darkAnsiTheme: Theme = {
   // Chrome colors
   chromeYellow: 'ansi:yellowBright', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'ansi:yellowBright', // = dark-ansi brand
-  clawd_background: 'ansi:black',
+  brand_mark: 'ansi:yellowBright', // = dark-ansi brand
+  brand_mark_bg: 'ansi:black',
+  // BR-3 棱镜光锥 16 色档（spec §4.2：两档 blueBright 底 + yellowBright 顶）
+  ascendBlue: 'ansi:blueBright',
+  ascendViolet: 'ansi:yellowBright',
+  ascendAmber: 'ansi:yellowBright',
+  ascendFlame: 'ansi:yellowBright',
   userMessageBackground: 'ansi:blackBright',
   userMessageBackgroundHover: 'ansi:white',
   messageActionsBackground: 'ansi:blackBright',
@@ -394,8 +414,13 @@ const lightDaltonizedTheme: Theme = {
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'rgb(180,83,9)', // = light-daltonized brand (amber-700)
-  clawd_background: 'rgb(0,0,0)',
+  brand_mark: 'rgb(217,119,6)', // = light-daltonized brand (amber-deep，色盲安全蓝金轴)
+  brand_mark_bg: 'rgb(0,0,0)',
+  // BR-3 棱镜光锥 3 色板（truecolor，色盲安全蓝→金轴 spec §4.3）
+  ascendBlue: 'rgb(0,102,255)',
+  ascendViolet: 'rgb(155,58,138)',
+  ascendAmber: 'rgb(255,184,0)',
+  ascendFlame: 'rgb(255,140,66)',
   userMessageBackground: 'rgb(220, 220, 220)', // Slightly darker grey for optimal contrast
   userMessageBackgroundHover: 'rgb(232, 232, 232)', // ≥230 to quantize distinct from base at 256-color level
   messageActionsBackground: 'rgb(210, 216, 226)', // cool gray — darker than userMsg 220, slight blue
@@ -473,8 +498,13 @@ const darkTheme: Theme = {
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'rgb(255,184,0)', // = dark brand (warm gold)
-  clawd_background: 'rgb(0,0,0)',
+  brand_mark: 'rgb(255,184,0)', // = dark brand (warm gold)
+  brand_mark_bg: 'rgb(0,0,0)',
+  // BR-3 棱镜光锥 3 色板（truecolor，spec §4.1）
+  ascendBlue: 'rgb(0,102,255)',
+  ascendViolet: 'rgb(155,58,138)',
+  ascendAmber: 'rgb(255,184,0)',
+  ascendFlame: 'rgb(255,140,66)',
   userMessageBackground: 'rgb(55, 55, 55)', // Lighter grey for better visual contrast
   userMessageBackgroundHover: 'rgb(70, 70, 70)',
   messageActionsBackground: 'rgb(44, 50, 62)', // cool gray, slight blue
@@ -552,8 +582,13 @@ const darkDaltonizedTheme: Theme = {
   // Chrome colors
   chromeYellow: 'rgb(251,188,4)', // Chrome yellow
   // TUI V2 colors
-  clawd_body: 'rgb(255,184,0)', // = dark-daltonized brand (warm gold)
-  clawd_background: 'rgb(0,0,0)',
+  brand_mark: 'rgb(255,184,0)', // = dark-daltonized brand (warm gold)
+  brand_mark_bg: 'rgb(0,0,0)',
+  // BR-3 棱镜光锥 3 色板（truecolor，色盲安全蓝→金轴 spec §4.3）
+  ascendBlue: 'rgb(0,102,255)',
+  ascendViolet: 'rgb(155,58,138)',
+  ascendAmber: 'rgb(255,184,0)',
+  ascendFlame: 'rgb(255,140,66)',
   userMessageBackground: 'rgb(55, 55, 55)', // Lighter grey for better visual contrast
   userMessageBackgroundHover: 'rgb(70, 70, 70)',
   messageActionsBackground: 'rgb(44, 50, 62)', // cool gray, slight blue

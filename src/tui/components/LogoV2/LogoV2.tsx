@@ -9,7 +9,7 @@ import { stringWidth } from '../../ink/stringWidth.js';
 import { getLayoutMode, calculateLayoutDimensions, calculateOptimalLeftWidth, formatWelcomeMessage, truncatePath, getRecentActivitySync, getRecentReleaseNotesSync, getLogoDisplayData } from '../../utils/logoV2Utils.js';
 import { truncate } from '../../utils/format.js';
 import { getDisplayPath } from '../../utils/file.js';
-import { Clawd } from './Clawd.js';
+import { Beam } from './Beam.js';
 import { FeedColumn } from './FeedColumn.js';
 import { createRecentActivityFeed, createWhatsNewFeed, createProjectOnboardingFeed } from './feedConfigs.js';
 import { getGlobalConfig, saveGlobalConfig } from 'src/tui/utils/config.js';
@@ -33,6 +33,7 @@ import { useAppState } from '../../state/AppState.js';
 import { getEffortSuffix } from '../../utils/effort.js';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';
 import { renderModelSetting } from '../../utils/model/model.js';
+import { PRODUCT_BRAND } from 'src/shared';
 const LEFT_PANEL_MAX_WIDTH = 50;
 export function LogoV2() {
   const $ = _c(94);
@@ -201,8 +202,8 @@ export function LogoV2() {
   }
   const layoutMode = getLayoutMode(columns);
   const userTheme = resolveThemeSetting(getGlobalConfig().theme);
-  const borderTitle = ` ${color("brand", userTheme)("AtlasCode")} ${color("inactive", userTheme)(`v${version}`)} `;
-  const compactBorderTitle = color("brand", userTheme)(" AtlasCode ");
+  const borderTitle = ` ${color("brand", userTheme)(PRODUCT_BRAND)} ${color("inactive", userTheme)(`v${version}`)} `;
+  const compactBorderTitle = color("brand", userTheme)(` ${PRODUCT_BRAND} `);
   if (layoutMode === "compact") {
     let welcomeMessage = formatWelcomeMessage(username);
     if (stringWidth(welcomeMessage) > columns - 4) {
@@ -232,7 +233,7 @@ export function LogoV2() {
     }
     let t12;
     if ($[34] === Symbol.for("react.memo_cache_sentinel")) {
-      t12 = <Box marginY={1}><Clawd /></Box>;
+      t12 = <Box marginY={1}><Beam /></Box>;
       $[34] = t12;
     } else {
       t12 = $[34];
@@ -323,7 +324,7 @@ export function LogoV2() {
   }
   let t19;
   if ($[48] === Symbol.for("react.memo_cache_sentinel")) {
-    t19 = <Clawd />;
+    t19 = <Beam />;
     $[48] = t19;
   } else {
     t19 = $[48];

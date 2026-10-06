@@ -7,8 +7,8 @@ import type { Color, TextStyles } from './styles.js'
  * COLORTERM=truecolor. chalk's supports-color doesn't recognize
  * TERM_PROGRAM=vscode (it only knows iTerm.app/Apple_Terminal), so it falls
  * through to the -256color regex → level 2. At level 2, chalk.rgb()
- * downgrades to the nearest 6×6×6 cube color: rgb(215,119,87) → idx 174
- * rgb(215,135,135) — a washed-out salmon (brand-accent example).
+ * downgrades to the nearest 6×6×6 cube color — a saturated brand-accent RGB
+ * becomes a washed-out 6×6×6 cube index (e.g. an accent → desaturated cube color).
  *
  * Gated on level === 2 (not < 3) to respect NO_COLOR / FORCE_COLOR=0 —
  * those yield level 0 and are an explicit "no colors" request. Desktop VS

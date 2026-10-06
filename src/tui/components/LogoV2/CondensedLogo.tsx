@@ -11,8 +11,9 @@ import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';
 import { formatModelAndBilling, getLogoDisplayData, truncatePath } from '../../utils/logoV2Utils.js';
 import { renderModelSetting } from '../../utils/model/model.js';
 import { OffscreenFreeze } from '../OffscreenFreeze.js';
-import { AnimatedClawd } from './AnimatedClawd.js';
-import { Clawd } from './Clawd.js';
+import { AnimatedBeam } from './AnimatedBeam.js';
+import { Beam } from './Beam.js';
+import { PRODUCT_BRAND } from 'src/shared';
 export function CondensedLogo() {
   const $ = _c(29);
   const {
@@ -41,14 +42,14 @@ export function CondensedLogo() {
   const truncatedCwd = truncatePath(cwd, Math.max(cwdAvailableWidth, 10));
   let t4;
   if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = isFullscreenEnvEnabled() ? <AnimatedClawd /> : <Clawd />;
+    t4 = isFullscreenEnvEnabled() ? <AnimatedBeam /> : <Beam />;
     $[7] = t4;
   } else {
     t4 = $[7];
   }
   let t5;
   if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = <Text bold={true}>AtlasCode</Text>;
+    t5 = <Text bold={true}>{PRODUCT_BRAND}</Text>;
     $[8] = t5;
   } else {
     t5 = $[8];
