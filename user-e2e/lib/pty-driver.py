@@ -18,7 +18,10 @@ import struct
 import sys
 import termios
 
-COLS, ROWS = 200, 50
+# 0.1.34-2 C3（O-11 footer 80 列窄屏）：尺寸 env 化，默认 200×50（存量场景零影响）。
+# 场景级注入走 ScenarioSpec.env（accept.ts runScenario 起 Pty.start 前设 process.env）。
+COLS = int(os.environ.get("ATLAS_E2E_COLS", "200"))
+ROWS = int(os.environ.get("ATLAS_E2E_ROWS", "50"))
 
 
 CHILD = 0
