@@ -78,6 +78,9 @@ function sourceToString(
       return 'user_abort'
     case 'user_reject':
       return 'user_reject'
+    case 'unavailable':
+      // ⑧ P1 用户面封口（0.1.37）：approver 不可用（deadline fail-closed）
+      return 'unavailable'
     default:
       return 'unknown'
   }

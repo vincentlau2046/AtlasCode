@@ -49,6 +49,10 @@ type PermissionRejectionSource =
   | { type: 'hook' }
   | { type: 'user_abort' }
   | { type: 'user_reject'; hasFeedback: boolean }
+  // ⑧ P1 用户面封口（0.1.37）：deadline 到期 approver（leader）不可用 ——
+  // swarm worker 侧 mailbox 兜底第 4 终态 fail-closed deny（非用户拒绝，审计
+  // 源独立于 user_reject，P6-a asked/decided 配对 decided 侧真因）。
+  | { type: 'unavailable' }
 
 // Generic interface for permission queue operations, decoupled from React.
 // In the REPL, these are backed by React state.

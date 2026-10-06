@@ -10,7 +10,6 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react'
-import { useInterval } from 'usehooks-ts'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import {
@@ -106,6 +105,14 @@ export function hasPermissionCallback(requestId: string): boolean {
 }
 
 /**
+ * ⑧（0.1.37）：pending 回调计数（func 层判别单测 / 泄漏观测缝）。
+ * 正常生命周期：register →（poller 命中 / deadline / abort 任一终态）→ 0。
+ */
+export function pendingPermissionCallbackCount(): number {
+  return pendingCallbacks.size
+}
+
+/**
  * Clear all pending callbacks (both permission and sandbox).
  * Called from clearSessionCaches() on /clear to reset stale state,
  * and also used in tests for isolation.
@@ -131,8 +138,12 @@ export function processMailboxPermissionResponse(params: {
   const callback = pendingCallbacks.get(params.requestId)
 
   if (!callback) {
+    // ⑧ P6-a（0.1.37）：drop 支结构化审计（与 engine 侧 0.1.36 切片①
+    // permissionPoller decided:unavailable 同型）——承载原则 5 asked/decided
+    // 配对的 decided 侧（如 deadline 已 fail-closed / /clear 后 in-flight）。
     logForDebugging(
-      `[SwarmPermissionPoller] No callback registered for mailbox response ${params.requestId}`,
+      `[SwarmPermissionPoller] approval response dropped (no pending callback, decided:unavailable) request_id=${params.requestId} decision=${params.decision}`,
+      { level: 'warn' },
     )
     return false
   }
@@ -206,8 +217,10 @@ export function processSandboxPermissionResponse(params: {
   const callback = pendingSandboxCallbacks.get(params.requestId)
 
   if (!callback) {
+    // ⑧ P6-a（0.1.37）：sandbox 变体 drop 支结构化审计（同型 decided:unavailable）。
     logForDebugging(
-      `[SwarmPermissionPoller] No sandbox callback registered for request ${params.requestId}`,
+      `[SwarmPermissionPoller] sandbox approval response dropped (no pending callback, decided:unavailable) request_id=${params.requestId} allow=${params.allow}`,
+      { level: 'warn' },
     )
     return false
   }
@@ -232,8 +245,10 @@ function processResponse(response: PermissionResponse): boolean {
   const callback = pendingCallbacks.get(response.requestId)
 
   if (!callback) {
+    // ⑧ P6-a（0.1.37）：磁盘轮询 drop 支结构化审计（同型 decided:unavailable）。
     logForDebugging(
-      `[SwarmPermissionPoller] No callback registered for request ${response.requestId}`,
+      `[SwarmPermissionPoller] approval response dropped (no pending callback, decided:unavailable) request_id=${response.requestId} decision=${response.decision}`,
+      { level: 'warn' },
     )
     return false
   }
@@ -319,7 +334,16 @@ export function useSwarmPermissionPoller(): void {
 
   // Only poll if we're a swarm worker
   const shouldPoll = isSwarmWorker()
-  useInterval(() => void poll(), shouldPoll ? POLL_INTERVAL_MS : null)
+  // ⑧ P1 用户面封口（0.1.37）：500ms poll timer unref（与 engine 侧 0.1.36 切片①
+  // 双 timer unref 同型）——ref'd interval 会阻塞 worker 侧进程干净退出（poller
+  // 活跃时进程挂死不退出）。usehooks-ts useInterval 不暴露 timer 句柄 → 本地
+  // effect 实现（行为等价：shouldPoll=false 不排程；卸载/切换时清 timer）。
+  useEffect(() => {
+    if (!shouldPoll) return
+    const pollTimer = setInterval(() => void poll(), POLL_INTERVAL_MS)
+    pollTimer.unref()
+    return () => clearInterval(pollTimer)
+  }, [poll, shouldPoll])
 
   // Initial poll on mount
   useEffect(() => {
