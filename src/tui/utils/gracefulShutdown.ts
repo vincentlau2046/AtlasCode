@@ -208,6 +208,10 @@ function forceExit(exitCode: number): never {
       throw e
     }
     // Fall back to SIGKILL which doesn't try to flush anything.
+    // SIGKILL 路径 = 终态异常（死 TTY EIO 等，自发退出定因标记，0.1.34-C ①）
+    logForDiagnosticsNoPII('error', 'exit_force_sigkill', {
+      exit_code: exitCode,
+    })
     process.kill(process.pid, 'SIGKILL')
   }
   // In tests, process.exit may be mocked to return instead of exiting.
@@ -384,6 +388,15 @@ export async function gracefulShutdown(
   }
   shutdownInProgress = true
 
+  // exit-reason 日志（0.1.34-C ①，e2e 白盒建议）：每次 graceful 退出记录
+  // exit_code + reason 到诊断日志（仅 ATLAS_DIAGNOSTICS_FILE 在场时真写盘，
+  // 默认零噪声）——自发退出（auto-update / 崩溃兜底 / 孤儿检测 / 对话框拒接）
+  // 可复现定因。reason 为枚举短串（'other'/'prompt_input_exit'/…），无 PII。
+  logForDiagnosticsNoPII('info', 'exit_reason', {
+    exit_code: exitCode,
+    reason: String(reason),
+  })
+
   // Resolve the SessionEnd hook budget before arming the failsafe so the
   // failsafe can scale with it. Without this, a user-configured 10s hook
   // budget is silently truncated by the 5s failsafe (gh-32712 follow-up).
@@ -397,6 +410,10 @@ export async function gracefulShutdown(
   // Budget = max(5s, hook budget + 3.5s headroom for cleanup + analytics flush).
   failsafeTimer = setTimeout(
     code => {
+      // failsafe 触发 = 清理挂起超预算（自发退出定因标记，0.1.34-C ①）
+      logForDiagnosticsNoPII('warn', 'shutdown_failsafe', {
+        exit_code: code,
+      })
       cleanupTerminalModes()
       printResumeHint()
       forceExit(code)

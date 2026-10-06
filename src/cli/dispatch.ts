@@ -68,8 +68,16 @@ export async function main(): Promise<void> {
   // 裁登记：initializeWarningHandler（警告处理器面 = 残留守）
 
   process.on('exit', () => {
-    // 裁登记：旧 resetCursor（TUI 光标面 = 壳波 #152 随迁），此处空 handler
-    // 保留挂载点时序不变
+    // exit-reason 日志（0.1.34-C ①）：headless 车道自然退出终码一行 stderr
+    //（crashBackstop [atlas][*] 诊断族同型；cli 域不 import tui diagLogs，
+    // 边界纪律见 crashBackstop.ts 头注）——headless 自发退出可复现定因。
+    // e2e gate 观察项：本注册处日志在场（源级断言）。
+    try {
+      process.stderr.write(`[atlas][exit] code=${process.exitCode ?? 0}\n`)
+    } catch {
+      // stderr 已断（SIGHUP / PTY 关闭）忽略
+    }
+    // 裁登记：旧 resetCursor（TUI 光标面 = 壳波 #152 随迁），挂载点时序保留
   })
   process.on('SIGINT', () => {
     // In print mode, print.ts 注册自身 SIGINT handler = abort 在途 query
