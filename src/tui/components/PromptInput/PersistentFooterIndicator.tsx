@@ -7,7 +7,8 @@
 // 设计要点：
 // - effort 计时器自包含，不碰通知队列（Notifications.tsx 是 React Compiler
 //   编译产物，不动它；effort 不再进队列，避免双显）。
-// - 复用 useDynamicTip / formatTip / getEffortNotificationText，零逻辑重复。
+// - 复用 useDynamicTip / TIP_PREFIX / getEffortNotificationText，零逻辑重复。
+// - D-3：闲时 tip 前缀 = 光核微符号 TIP_PREFIX（brand_mark 色），tip 正文仍 dim。
 // - effortValue / mainLoopModel 直接从 AppState 读（与 ThinkingLevelSegment 同模式）。
 
 import { useEffect, useState } from 'react'
@@ -16,7 +17,7 @@ import { useAppState } from '../../state/AppState.js'
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js'
 import { Box, Text } from '../../ink.js'
 import { getEffortNotificationText } from '../EffortIndicator.js'
-import { useDynamicTip, formatTip } from '../StatusLine/useDynamicTips.js'
+import { useDynamicTip, TIP_PREFIX } from '../StatusLine/useDynamicTips.js'
 
 type Props = {
   /** 消息 ref（useDynamicTip 据此判断流式中断态） */
@@ -43,11 +44,24 @@ export function PersistentFooterIndicator({ messagesRef }: Props): React.ReactNo
     return () => clearTimeout(timer)
   }, [effortText])
 
-  const text = showEffort && effortText ? effortText : formatTip(tip)
-  if (!text) return null
-  return (
-    <Box flexShrink={0}>
-      <Text dimColor wrap="truncate">{text}</Text>
-    </Box>
-  )
+  // effort 通知优先（dim 单串）；否则闲时 tip = 光核前缀（brand_mark 色）+ dim 正文。
+  if (showEffort && effortText) {
+    return (
+      <Box flexShrink={0}>
+        <Text dimColor wrap="truncate">{effortText}</Text>
+      </Box>
+    )
+  }
+  if (tip) {
+    return (
+      <Box flexShrink={0}>
+        <Text color="brand_mark">{TIP_PREFIX}</Text>
+        <Text dimColor wrap="truncate">
+          {' '}
+          {tip}
+        </Text>
+      </Box>
+    )
+  }
+  return null
 }

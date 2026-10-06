@@ -74,9 +74,11 @@ export function useDynamicTip(
 
 // ── Render helper ───────────────────────────────────────────────
 
-const PREFIX_CHAR = '·'
+// D-3 光核微符号（spec §2.2）：闲时 tips 前缀由旧 `·` 换为光锥母题的光心色块 `▀`，
+// 消费方以 brand_mark 色渲染（母题首次落地）；`formatTip` 纯串契约保留给非着色路径。
+export const TIP_PREFIX = '▀'
 
 export function formatTip(tip: string | null): string | null {
   if (!tip) return null
-  return `${PREFIX_CHAR} ${tip}`
+  return `${TIP_PREFIX} ${tip}`
 }
