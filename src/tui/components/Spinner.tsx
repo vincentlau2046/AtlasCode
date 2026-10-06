@@ -15,7 +15,9 @@ import { useTasksV2 } from '../hooks/useTasksV2.js';
 import type { Task } from '../utils/tasks.js';
 import { useAppState } from '../state/AppState.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { getDefaultCharacters, type SpinnerMode } from './Spinner/index.js';
+import { type SpinnerMode } from './Spinner/index.js';
+import { getReducedMotionSpinnerGlyph, getSpinnerBeamFrames } from './design-system/beamTheme.js';
+import { resolveMarkTierFromEnv } from './LogoV2/markDegrade.js';
 import { SpinnerAnimationRow } from './Spinner/SpinnerAnimationRow.js';
 import { useSettings } from '../hooks/useSettings.js';
 import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js';
@@ -30,8 +32,10 @@ import { TeammateSpinnerTree } from './Spinner/TeammateSpinnerTree.js';
 import { useAnimationFrame } from '../ink.js';
 import { getGlobalConfig } from '../utils/config.js';
 export type { SpinnerMode } from './Spinner/index.js';
-const DEFAULT_CHARACTERS = getDefaultCharacters();
-const SPINNER_FRAMES = [...DEFAULT_CHARACTERS, ...[...DEFAULT_CHARACTERS].reverse()];
+// 0.1.35 母题铺开（spec §0.1）：简易 spinner 同走光束串（BR-7 档位感知，T1/T2 回落点状帧）。
+const MARK_TIER = resolveMarkTierFromEnv();
+const SPINNER_FRAMES = getSpinnerBeamFrames(MARK_TIER);
+const REDUCED_MOTION_GLYPH = getReducedMotionSpinnerGlyph(MARK_TIER);
 type Props = {
   mode: SpinnerMode;
   loadingStartTimeRef: React.RefObject<number>;
@@ -271,7 +275,7 @@ export function Spinner() {
   if (reducedMotion) {
     let t0;
     if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-      t0 = <Text color="text">●</Text>;
+      t0 = <Text color="text">{REDUCED_MOTION_GLYPH}</Text>; // 0.1.35 母题化：档位感知静态字形（T0 ▇▇ / T1·T2 ●）
       $[0] = t0;
     } else {
       t0 = $[0];

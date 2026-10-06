@@ -2,11 +2,16 @@ import { c as _c } from "react/compiler-runtime";
 import * as React from 'react';
 import { Box, Text, useTheme } from '../../ink.js';
 import { getTheme, type Theme } from '../../utils/theme.js';
-import { getDefaultCharacters, interpolateColor, parseRGB, toRGBColor } from './utils.js';
-const DEFAULT_CHARACTERS = getDefaultCharacters();
-const SPINNER_FRAMES = [...DEFAULT_CHARACTERS, ...[...DEFAULT_CHARACTERS].reverse()];
-const REDUCED_MOTION_DOT = '●';
-const REDUCED_MOTION_CYCLE_MS = 2000; // 2-second cycle: 1s visible, 1s dim
+import { interpolateColor, parseRGB, toRGBColor } from './utils.js';
+import { getReducedMotionSpinnerGlyph, getSpinnerBeamFrames } from '../design-system/beamTheme.js';
+import { resolveMarkTierFromEnv } from '../LogoV2/markDegrade.js';
+// 0.1.35 母题铺开（spec §0.1/§0.2）：spinner 点状帧 → 光束串（光扫上爬镜像 8 帧，T0）；
+// BR-7 3 档降级（markDegrade 单一事实源）：T1/T2（Block Elements 错位终端）→ 旧点状帧
+// 回落（母题降一档不整版回退，零回归）；reduced-motion = 静态字形（关动效不留残帧，
+// spec §0.2/§9.1），档位感知静态光束 ▇▇ / 静态点 ●（取代旧 2s 明暗循环）。
+const MARK_TIER = resolveMarkTierFromEnv();
+const SPINNER_FRAMES = getSpinnerBeamFrames(MARK_TIER);
+const REDUCED_MOTION_GLYPH = getReducedMotionSpinnerGlyph(MARK_TIER);
 const ERROR_RED = {
   r: 171,
   g: 43,
@@ -20,29 +25,25 @@ type Props = {
   time?: number;
 };
 export function SpinnerGlyph(t0) {
-  const $ = _c(9);
+  const $ = _c(8);
   const {
     frame,
     messageColor,
     stalledIntensity: t1,
-    reducedMotion: t2,
-    time: t3
+    reducedMotion: t2
   } = t0;
   const stalledIntensity = t1 === undefined ? 0 : t1;
   const reducedMotion = t2 === undefined ? false : t2;
-  const time = t3 === undefined ? 0 : t3;
   const [themeName] = useTheme();
   const theme = getTheme(themeName);
   if (reducedMotion) {
-    const isDim = Math.floor(time / (REDUCED_MOTION_CYCLE_MS / 2)) % 2 === 1;
     let t4;
-    if ($[0] !== isDim || $[1] !== messageColor) {
-      t4 = <Box flexWrap="wrap" height={1} width={2}><Text color={messageColor} dimColor={isDim}>{REDUCED_MOTION_DOT}</Text></Box>;
-      $[0] = isDim;
-      $[1] = messageColor;
-      $[2] = t4;
+    if ($[0] !== messageColor) {
+      t4 = <Box flexWrap="wrap" height={1} width={2}><Text color={messageColor} dimColor={true}>{REDUCED_MOTION_GLYPH}</Text></Box>;
+      $[0] = messageColor;
+      $[1] = t4;
     } else {
-      t4 = $[2];
+      t4 = $[1];
     }
     return t4;
   }
@@ -56,24 +57,24 @@ export function SpinnerGlyph(t0) {
     }
     const color = stalledIntensity > 0.5 ? "error" : messageColor;
     let t4;
-    if ($[3] !== color || $[4] !== spinnerChar) {
+    if ($[2] !== color || $[3] !== spinnerChar) {
       t4 = <Box flexWrap="wrap" height={1} width={2}><Text color={color}>{spinnerChar}</Text></Box>;
-      $[3] = color;
-      $[4] = spinnerChar;
-      $[5] = t4;
+      $[2] = color;
+      $[3] = spinnerChar;
+      $[4] = t4;
     } else {
-      t4 = $[5];
+      t4 = $[4];
     }
     return t4;
   }
   let t4;
-  if ($[6] !== messageColor || $[7] !== spinnerChar) {
+  if ($[5] !== messageColor || $[6] !== spinnerChar) {
     t4 = <Box flexWrap="wrap" height={1} width={2}><Text color={messageColor}>{spinnerChar}</Text></Box>;
-    $[6] = messageColor;
-    $[7] = spinnerChar;
-    $[8] = t4;
+    $[5] = messageColor;
+    $[6] = spinnerChar;
+    $[7] = t4;
   } else {
-    t4 = $[8];
+    t4 = $[7];
   }
   return t4;
 }
