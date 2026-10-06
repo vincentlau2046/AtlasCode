@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { Box, Text } from '../../ink.js'
 import { getInitialSettings } from '../../utils/settings/settings.js'
-import { BEAM_ART } from './Beam.js'
+import { getBeamArt, resolveMarkTierFromEnv } from './markDegrade.js'
 
 // BR-3 光锥 loading 动效（spec §2.2 / plan §1.1）：
 //   - 光扫上爬：loading 时从底向顶逐行点亮（REVEAL_MS × 5 行 ≈ 0.6s），
@@ -10,6 +10,11 @@ import { BEAM_ART } from './Beam.js'
 //   - 顶点 spark 脉冲呼吸：点亮完成后 apex 行按 PULSE_MS（0.8s）周期脉冲。
 // 尊重 prefersReducedMotion（关则渲染静态满亮 mark，与 spec §9.1 差异见 0.1.33 report）。
 // 容器高度固定 = 光锥行数，布局不漂移（同旧 mark 组件固定 footprint 语义）。
+// BR-7（0.1.34-1）：mark 3 档降级（T0 全形态 / T1 半块→实心 / T2 ASCII 骨架）——
+// 按 ③ ATLAS_MARK_DEGRADE env + ① blocklist 解析（默认 T0，见 markDegrade 头注）；
+// 各档均 5 行，ROW_COUNT 恒定，布局零漂移。
+const MARK_TIER = resolveMarkTierFromEnv()
+const BEAM_ART = getBeamArt(MARK_TIER)
 const ROW_COUNT = BEAM_ART.length
 const REVEAL_MS = 120 // 每行 120ms × 5 行 ≈ 0.6s 光扫上爬
 const PULSE_MS = 800 // 顶点 spark 脉冲周期 0.8s
