@@ -4,6 +4,56 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.33
+
+BR-3 棱镜光锥 mark 更换 + D-9/D-10/D-8 收尾（品牌序列 0.1.33；Main 实施
+worktree-0.1.33，`288a9ac` BR-3 swap + `7e2be52` D-3 tips 光核；前序列车
+`17608b9` D-9 键族 + `089c013` D-10 insights + `d135064` D-8 SOP）：
+
+- **BR-3 mark 更换（spec §3.1/§8.4 定稿方案 A 棱镜光锥）**：
+  - 旧 "AH" monogram（`Clawd`/`AnimatedClawd` pose 机制 + `AnimatedAsterisk`
+    整族删除）→ `Beam.tsx` 新增 `BEAM_ART`（大写字母 A 剪影收敛光锥，5 行 × 9 宽
+    仅 Block Elements `█▓▄`，Neutral 宽度 CJK 安全）+ `AnimatedBeam.tsx`（pose 机制
+    废弃 → 光扫上爬单动效：底向顶逐行点亮 0.6s + 顶点 spark 脉冲 0.8s，尊重
+    `prefersReducedMotion`）。
+  - wordmark 双色 `Atlas`（暖金 `brand`）/ `Code`（冷蓝 `ascendBlue`）（spec §3.3）；
+    中文 tagline「算力驱动的 Coding Agent」（英文副标 `AI Coding Agent` 保留，§3.4）。
+  - 消费者 rewiring（LogoV2/CondensedLogo/WelcomeV2/VoiceModeNotice）；Apple Terminal
+    降级分支保单色 `brand_mark`。
+- **theme 键族改名 + 光锥 4 色板（D-9）**：`clawd_body`→`brand_mark` /
+  `clawd_background`→`brand_mark_bg`（6 主题 + 渲染引用全换）+ 新增光锥 4 色板
+  `ascendBlue #0066FF` / `ascendViolet #9B3A8A` / `ascendAmber #FFB800`(=brand) /
+  `ascendFlame #FF8C42` accent（truecolor 4 段 / 256·16 ANSI 塌两档降级链，§4.1/§4.2）；
+  旧 Anthropic 橙 `rgb(215,119,87)` 清零（含 colorize 降级注释示例改中性）。
+- **D-3 tips 光核**：闲时 tips 前缀 `·` → 光锥母题光心色块 `▀`（`brand_mark` 色，
+  母题首次落地，§2.2）；`formatTip` 纯串契约保留给非着色路径。
+- **D-10 insights 用户可见面**：HTML 报告标题 "Multi-Clauding (Parallel Sessions)"
+  → Atlas 化 + `main.tsx`/`useVoice` 2 注释 multi-clauding→multi-session（内部标识符
+  `detectMultiClauding`/`multi_clauding` 数据键留 0.1.34 专审，同 0.1.32 口径）。
+- **D-8 发布验真 SOP 固化**：shasum 比对 + packument `dist.tarball` 直下（**无 scope
+  前缀** canonical 名 `atlascode-<v>.tgz`，勿拼 `@atlasharness/` 前缀恒 404）入
+  `docs/release-governance.md`。
+- **D-2 编译产物品牌字面走 `PRODUCT_BRAND` import**（`src/shared` 门面，不硬编码
+  "AtlasCode"）：LogoV2 4 编译产物字面全换。
+- 判别单测 `theme-brand-warm-gold` 改 `brand_mark`/`brand_mark_bg` + 光锥 4 色板断言
+  （truecolor 4 段 / ansi 塌两档）。
+- **四件套**：tsc 0 / lint 0e·0w / build ~17.58MB / 全量 3546/0·249
+  （detached verify worktree，+2 测试 vs 0.1.32 基线 3544/0·249）。
+- **品牌 gate**：`clawd_*`/`AH_ART`/`AnimatedClawd`/`AnimatedAsterisk`=0 +
+  `Multi-Clauding`=0（用户可见 HTML 标题）+ 旧橙 `rgb(215,119,87)`=0 + `BEAM_ART`
+  棱镜 A 形在场（`▄█▄`/`brand_mark`）。
+- **e2e 前 gate 5/6 PASS + ⑥ INCONCLUSIVE 定因登记（多终端 CJK 宽度归 0.1.34 BR-7，
+  不阻塞）**（e2e 单信号，报告 `r-20261006-1246-brand-br3-0133.md`）：① 光锥 4 色板
+  SGR 全在场（ascendBlue 0,102,255 / Violet 155,58,138 / Amber 255,184,0 / Flame
+  255,140,66，dark+light 双主题）+ wordmark 双色行级 + 中文 tagline「算力驱动」5/5 +
+  旧 AH monogram 6 连块=0；② clawd_* 源+dist 双口径=0 + 旧橙 215,119,87 全 5 场景
+  SGR=0；③ tips 前缀 `[38;2;255;184;0m▀`（brand_mark 色）live 同显；④ "Multi-Clauding"
+  用户可见面=0（新标题 "Parallel Sessions"）；⑤ P0a S-A hardFail=0 + A4F 6 句跨首跑+
+  重跑全绿（P0 封口链 D-279-r1 无回归；L/K 首跑 2 flake 定因=LLM 首跑未发 tool call +
+  环境 TUI 干净退出，非产品回归）。
+- **生产 lane（stage ⑤）**：发布后 e2e 跑 banner v0.1.33 + ①-④ 子集 + A4F/S-A +
+  npm 验真 + 「auto 回合后 session 存活」观一项（e2e 现象观察，0.1.33 闭环报告回填）。
+
 ## v0.1.32
 
 BR-9 去 fork + BR-5 资产奠基（品牌序列 0.1.32；Main 实施 worktree-0.1.32，
