@@ -36,7 +36,7 @@ import { renderModelSetting } from '../../utils/model/model.js';
 import { PRODUCT_BRAND } from 'src/shared';
 const LEFT_PANEL_MAX_WIDTH = 50;
 export function LogoV2() {
-  const $ = _c(94);
+  const $ = _c(95);
   const activities = getRecentActivitySync();
   const username = getGlobalConfig().oauthAccount?.displayName ?? "";
   const {
@@ -292,7 +292,9 @@ export function LogoV2() {
   const optimalLeftWidth = calculateOptimalLeftWidth(welcomeMessage_0, cwdLine, modelLine);
   const {
     leftWidth,
-    rightWidth
+    rightWidth,
+    // O-12 档 A（0.1.35）：宽终端（≥160 列）品牌卡条件居中左 margin（<160 = 0 零回归）
+    leftPad
   } = calculateLayoutDimensions(columns, layoutMode, optimalLeftWidth);
   const T0 = OffscreenFreeze;
   const T1 = Box;
@@ -357,54 +359,57 @@ export function LogoV2() {
     t22 = $[55];
   }
   let t23;
-  if ($[56] !== leftWidth || $[57] !== t18 || $[58] !== t22) {
-    t23 = <Box flexDirection="column" width={leftWidth} justifyContent="space-between" alignItems="center" minHeight={9}>{t18}{t19}{t22}</Box>;
+  if ($[56] !== leftWidth || $[57] !== t18 || $[58] !== t22 || $[59] !== leftPad) {
+    // O-12 档 A（0.1.35）：columns≥160 时品牌卡组合体左 margin=leftPad 居中
+    // （左 margin 在卡外，分隔线/feed 列随之右移；rightWidth 已按剩余空间收缩）
+    t23 = <Box flexDirection="column" width={leftWidth} marginLeft={leftPad} justifyContent="space-between" alignItems="center" minHeight={9}>{t18}{t19}{t22}</Box>;
     $[56] = leftWidth;
     $[57] = t18;
     $[58] = t22;
-    $[59] = t23;
+    $[59] = leftPad;
+    $[60] = t23;
   } else {
-    t23 = $[59];
+    t23 = $[60];
   }
   let t24;
-  if ($[60] !== layoutMode) {
+  if ($[61] !== layoutMode) {
     t24 = layoutMode === "horizontal" && <Box height="100%" borderStyle="single" borderColor="brand" borderDimColor={true} borderTop={false} borderBottom={false} borderLeft={false} />;
-    $[60] = layoutMode;
-    $[61] = t24;
+    $[61] = layoutMode;
+    $[62] = t24;
   } else {
-    t24 = $[61];
+    t24 = $[62];
   }
   const t25 = layoutMode === "horizontal" && <FeedColumn feeds={showOnboarding ? [createProjectOnboardingFeed(getSteps()), createRecentActivityFeed(activities)] : [createRecentActivityFeed(activities), createWhatsNewFeed(changelog)]} maxWidth={rightWidth} />;
   let t26;
-  if ($[62] !== T2 || $[63] !== t15 || $[64] !== t23 || $[65] !== t24 || $[66] !== t25) {
+  if ($[63] !== T2 || $[64] !== t15 || $[65] !== t23 || $[66] !== t24 || $[67] !== t25) {
     t26 = <T2 flexDirection={t15} paddingX={t16} gap={t17}>{t23}{t24}{t25}</T2>;
-    $[62] = T2;
-    $[63] = t15;
-    $[64] = t23;
-    $[65] = t24;
-    $[66] = t25;
-    $[67] = t26;
+    $[63] = T2;
+    $[64] = t15;
+    $[65] = t23;
+    $[66] = t24;
+    $[67] = t25;
+    $[68] = t26;
   } else {
-    t26 = $[67];
+    t26 = $[68];
   }
   let t27;
-  if ($[68] !== T1 || $[69] !== t14 || $[70] !== t26) {
+  if ($[69] !== T1 || $[70] !== t14 || $[71] !== t26) {
     t27 = <T1 flexDirection={t11} borderStyle={t12} borderColor={t13} borderText={t14}>{t26}</T1>;
-    $[68] = T1;
-    $[69] = t14;
-    $[70] = t26;
-    $[71] = t27;
+    $[69] = T1;
+    $[70] = t14;
+    $[71] = t26;
+    $[72] = t27;
   } else {
-    t27 = $[71];
+    t27 = $[72];
   }
   let t28;
-  if ($[72] !== T0 || $[73] !== t27) {
+  if ($[73] !== T0 || $[74] !== t27) {
     t28 = <T0>{t27}</T0>;
-    $[72] = T0;
-    $[73] = t27;
-    $[74] = t28;
+    $[73] = T0;
+    $[74] = t27;
+    $[75] = t28;
   } else {
-    t28 = $[74];
+    t28 = $[75];
   }
   let t29;
   let t30;
@@ -412,72 +417,72 @@ export function LogoV2() {
   let t32;
   let t33;
   let t34;
-  if ($[75] === Symbol.for("react.memo_cache_sentinel")) {
+  if ($[76] === Symbol.for("react.memo_cache_sentinel")) {
     t29 = <VoiceModeNotice />;
     t30 = null /* Opus1mMergeNotice 随 P6-2 B-4 1M 体系删除 */;
     t31 = null;
     t32 = isDebugMode() && <Box paddingLeft={2} flexDirection="column"><Text color="warning">Debug mode enabled</Text><Text dimColor={true}>Logging to: {isDebugToStdErr() ? "stderr" : getDebugLogPath()}</Text></Box>;
     t33 = <EmergencyTip />;
     t34 = (process.env.ATLAS_TMUX_SESSION) && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>tmux session: {(process.env.ATLAS_TMUX_SESSION)}</Text><Text dimColor={true}>{(process.env.ATLAS_TMUX_PREFIX_CONFLICTS) ? `Detach: ${(process.env.ATLAS_TMUX_PREFIX)} ${(process.env.ATLAS_TMUX_PREFIX)} d (press prefix twice - Atlas uses ${(process.env.ATLAS_TMUX_PREFIX)})` : `Detach: ${(process.env.ATLAS_TMUX_PREFIX)} d`}</Text></Box>;
-    $[75] = t29;
-    $[76] = t30;
-    $[77] = t31;
-    $[78] = t32;
-    $[79] = t33;
-    $[80] = t34;
+    $[76] = t29;
+    $[77] = t30;
+    $[78] = t31;
+    $[79] = t32;
+    $[80] = t33;
+    $[81] = t34;
   } else {
-    t29 = $[75];
-    t30 = $[76];
-    t31 = $[77];
-    t32 = $[78];
-    t33 = $[79];
-    t34 = $[80];
+    t29 = $[76];
+    t30 = $[77];
+    t31 = $[78];
+    t32 = $[79];
+    t33 = $[80];
+    t34 = $[81];
   }
   let t35;
-  if ($[81] !== announcement || $[82] !== config) {
+  if ($[82] !== announcement || $[83] !== config) {
     t35 = announcement && <Box paddingLeft={2} flexDirection="column">{!process.env.IS_DEMO && config.oauthAccount?.organizationName && <Text dimColor={true}>Message from {config.oauthAccount.organizationName}:</Text>}<Text>{announcement}</Text></Box>;
-    $[81] = announcement;
-    $[82] = config;
-    $[83] = t35;
+    $[82] = announcement;
+    $[83] = config;
+    $[84] = t35;
   } else {
-    t35 = $[83];
+    t35 = $[84];
   }
   let t36;
-  if ($[84] !== showSandboxStatus) {
+  if ($[85] !== showSandboxStatus) {
     t36 = showSandboxStatus && <Box paddingLeft={2} flexDirection="column"><Text color="warning">Your bash commands will be sandboxed. Disable with /sandbox.</Text></Box>;
-    $[84] = showSandboxStatus;
-    $[85] = t36;
+    $[85] = showSandboxStatus;
+    $[86] = t36;
   } else {
-    t36 = $[85];
+    t36 = $[86];
   }
   let t37;
   let t38;
   let t39;
   let t40;
-  if ($[86] === Symbol.for("react.memo_cache_sentinel")) {
+  if ($[87] === Symbol.for("react.memo_cache_sentinel")) {
     t37 = false && !process.env.DEMO_VERSION && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>Use /issue to report model behavior issues</Text></Box>;
     t38 = false && !process.env.DEMO_VERSION && <Box paddingLeft={2} flexDirection="column"><Text color="warning">[ANT-ONLY] Logs:</Text><Text dimColor={true}>API calls: {getDisplayPath(getDumpPromptsPath())}</Text><Text dimColor={true}>Debug logs: {getDisplayPath(getDebugLogPath())}</Text>{isDetailedProfilingEnabled() && <Text dimColor={true}>Startup Perf: {getDisplayPath(getStartupPerfLogPath())}</Text>}</Box>;
     t39 = false && <GateOverridesWarning />;
     t40 = false && <ExperimentEnrollmentNotice />;
-    $[86] = t37;
-    $[87] = t38;
-    $[88] = t39;
-    $[89] = t40;
+    $[87] = t37;
+    $[88] = t38;
+    $[89] = t39;
+    $[90] = t40;
   } else {
-    t37 = $[86];
-    t38 = $[87];
-    t39 = $[88];
-    t40 = $[89];
+    t37 = $[87];
+    t38 = $[88];
+    t39 = $[89];
+    t40 = $[90];
   }
   let t41;
-  if ($[90] !== t28 || $[91] !== t35 || $[92] !== t36) {
+  if ($[91] !== t28 || $[92] !== t35 || $[93] !== t36) {
     t41 = <>{t28}{t29}{t30}{t31}{t32}{t33}{t34}{t35}{t36}{t37}{t38}{t39}{t40}</>;
-    $[90] = t28;
-    $[91] = t35;
-    $[92] = t36;
-    $[93] = t41;
+    $[91] = t28;
+    $[92] = t35;
+    $[93] = t36;
+    $[94] = t41;
   } else {
-    t41 = $[93];
+    t41 = $[94];
   }
   return t41;
 }

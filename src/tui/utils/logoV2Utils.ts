@@ -20,6 +20,10 @@ const MAX_USERNAME_LENGTH = 20
 const BORDER_PADDING = 4
 const DIVIDER_WIDTH = 1
 const CONTENT_PADDING = 2
+// O-12 档 A（0.1.35，spec §0.4）：宽终端（≥160 列）品牌卡条件居中阈值。
+// columns≥160 时品牌块组合体左 margin=(cols−cardWidth)/2 居中（宽屏仪式感回归）；
+// <160 保持左锚定零回归。
+export const WIDE_CENTRAL_MIN_COLUMNS = 160
 
 export type LayoutMode = 'horizontal' | 'compact'
 
@@ -27,6 +31,8 @@ export type LayoutDimensions = {
   leftWidth: number
   rightWidth: number
   totalWidth: number
+  /** O-12 档 A：品牌卡左 margin（columns≥160 居中时 >0，否则 0；LogoV2 侧以 marginLeft 施加） */
+  leftPad: number
 }
 
 /**
@@ -47,22 +53,34 @@ export function calculateLayoutDimensions(
 ): LayoutDimensions {
   if (layoutMode === 'horizontal') {
     const leftWidth = optimalLeftWidth
+    // O-12 档 A（0.1.35 spec §0.4）：宽终端品牌卡条件居中——columns≥160 时
+    // 品牌块组合体左 margin=(cols−cardWidth)/2（cardWidth=optimalLeftWidth）；
+    // <160 左锚定（leftPad=0，零回归）。居中占用的水平空间计入 usedSpace，
+    // 右栏（feed）按剩余可用宽度收缩，保证整行不溢出屏宽。
+    const leftPad =
+      columns >= WIDE_CENTRAL_MIN_COLUMNS
+        ? Math.floor((columns - leftWidth) / 2)
+        : 0
     const usedSpace =
-      BORDER_PADDING + CONTENT_PADDING + DIVIDER_WIDTH + leftWidth
+      BORDER_PADDING + CONTENT_PADDING + DIVIDER_WIDTH + leftPad + leftWidth
     const availableForRight = columns - usedSpace
 
     let rightWidth = Math.max(30, availableForRight)
     const totalWidth = Math.min(
-      leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING,
+      leftPad + leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING,
       columns - BORDER_PADDING,
     )
 
     // Recalculate right width if we had to cap the total
-    if (totalWidth < leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING) {
-      rightWidth = totalWidth - leftWidth - DIVIDER_WIDTH - CONTENT_PADDING
+    if (
+      totalWidth <
+      leftPad + leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING
+    ) {
+      rightWidth =
+        totalWidth - leftPad - leftWidth - DIVIDER_WIDTH - CONTENT_PADDING
     }
 
-    return { leftWidth, rightWidth, totalWidth }
+    return { leftWidth, rightWidth, totalWidth, leftPad }
   }
 
   // Vertical mode
@@ -71,6 +89,7 @@ export function calculateLayoutDimensions(
     leftWidth: totalWidth,
     rightWidth: totalWidth,
     totalWidth,
+    leftPad: 0,
   }
 }
 
