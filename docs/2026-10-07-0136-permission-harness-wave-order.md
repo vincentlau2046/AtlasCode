@@ -22,6 +22,12 @@
 | ⑤ | **调研后重裁定**（0.1.37 候选） | R2 清单 | **先调研后写码**（见 §2）；调研通过前不排版本 | — |
 | ⑧【deferred 显式命名 → 切片④/0.1.37】 | pane-worker TUI 真消费面硬化（V3 实证新缺口） | P1 相邻面（非切片① engine 两文件 scope） | TUI `useSwarmPermissionPoller`（pane worker 真消费面）加 **deadline + P6-a drop 审计 + interval unref** = 封 pane-worker 用户面「杀 leader→挂死」（切片① 只硬化了 engine `inProcessRunner`/`permissionPoller` 两文件，pane worker 的 TUI poller 是独立消费面）。**2026-10-07 02:40 e2e 前 gate 裁定 (a)**：0.1.36 按 in-scope engine 侧收口发布，⑧ 显式顺延（不扩 scope 不重 gate，release-governance 支柱① deferred 显式命名）；并入切片④（廉价批，同 unref/审计同族）或 0.1.37 | V3-⑧（pane-worker 杀 leader 真面） |
 
+**版本归属（2026-10-07 04:30 f4 拍定，Main 0.1.37 提案对齐）**：
+- **0.1.36 = 仅切片①（P1 引擎侧 settle 第 4 终态）**——今晚 5 段闭环收口（T3 已发 `a540e49`/tag v0.1.36/npm 已验真，T4 生产 lane 执行中）。
+- **0.1.37 = 封口版（P1 完整交付）= ⑧ + ② + ③ + ④〔+ ⑤ 若调研通过〕**，切片序 **⑧ 殿 ②③④ 前**（P1 用户面封口优先于 P11/P2，不拆 0.1.36.x，避免二次生产 lane + 尊重 02:40 ⑧ 裁定 (a) scope）；**封口版 fail-closed = ⑧+②③④（+⑤）全绿方可发布**（release-governance 规则②/③）。
+- **⚠️ ③（P2 恢复层）冻结 = 待用户明早 §7 六问裁定**（用户 2026-10-07 夜指令"明早看 P2 评估完整报告 `docs/2026-10-07-p2-compaction-evaluation.md` 后裁定 P2"；R3 风险预估不可替代用户终裁，防返工）→ **Main 并行可做 = ⑧/②/④（worktree-0.1.36），③ 明早转用户 §7 裁定后再落码并入 0.1.37**。
+- **0.1.37 全量 gate = 0.1.36 T4 终态 + 明早 P2 裁定 + ③ 落码之后**（⑧/②/④ 可先行子集 gate：V3-⑧ + V8 + ④ 廉价批探针；③ 的 V4/V7 随 ③ 落码并入）；⑤（R2 调研）维持调研前置不动。
+
 **每切片实施前**：回源复核本工单引用的 file:line（"问题先闭环再发"，house 纪律）；逐切片四件套（单测/类型/构建/lint）绿。
 
 **进度状态（2026-10-07 04:00 更新）**：切片①（P1 mailbox 硬化）= **code-complete（d5f0614）+ e2e 前 gate PASS 6/6**（报告 `r-20261007-0240-0136-slice1-gate.md`，0 hard FAIL / 0 无定因 INCONCLUSIVE）+ **T3 发布完成**（Main 常设授权自跑：release commit **`a540e49`**（master）+ cherry-pick `4e34fb4`（实施 d5f0614）+ tag **v0.1.36** → GitHub 双 push + npm **@atlasharness/atlascode@0.1.36**（DNS-pin 通道）shasum **`403ec2ac84889dfd970b7f12dee0266ce797f163`** + unpackedSize **17583246** + packument 验真 MATCH；**f4 独立交叉验真全绿**（origin tag/master 指向 + registry shasum/unpackedSize 三项全 MATCH））；⑧ 裁定 = (a) 顺延切片④/0.1.37（见上表，显式命名不丢）；**e2e 接 T4 生产 lane**（报告 `r-20261007-prodlane-036.md`，⑧ 面 2 soft 项按顺延标注不计硬 FAIL）→ 全绿 = **P1 5 段闭环终态**（f4 记档；06:30 终检为明早裁定前基线）。
