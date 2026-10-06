@@ -231,7 +231,7 @@ const BASH_ASK_PROMPT = '请运行 Bash 命令 `touch /tmp/atlas-p0a-probe` 创�
 // ── 场景执行框架 ──────────────────────────────────────────────────────────
 interface ScenarioSpec {
   id: string
-  phase: 'P0' | 'P1' | 'P2' | 'P024' | 'A4F' | 'THEMES' | 'FOOTER80'
+  phase: 'P0' | 'P1' | 'P2' | 'P024' | 'A4F' | 'THEMES' | 'FOOTER80' | 'BR135'
   seed: SeedMode
   wsFiles: Array<[string, string]>
   gitInit: boolean
@@ -876,6 +876,124 @@ const S_060: ScenarioSpec = {
   ],
 }
 
+// ── 0.1.35 Brand 封口终轮 gate（BR135，plan §4 ①–⑨）─────────────────────────
+// 被测体 = worktree-0.1.35 @ 84e3e84（8 提交栈 eddb0ca..84e3e84；工作树版本仍 0.1.34 未 bump →
+//   探针全部版本无关（v0.\d+.\d+ 形），发布 bump 0.1.35 后生产 lane 再核 banner）。
+// 判据面：
+//  ① spinner 光束串+verb 行同屏（S-LOAD：T0 光束爬帧 ▁▁▃▃▅▅██ 替代旧点状帧 ·✢✳✶✻✽ + verb 行）
+//  ② 母题字符在场（S-200 divider 光束串 `█ █` 实捕；进度条/空态/边框角标 BEAM_CORNER 源级——
+//     theme-surface-wiring.test.ts + beam-theme.test.ts〔EAW 锁 11 字符〕e2e 独立复跑，PTP 不可触面定因）
+//  ③ 动效：光扫帧序（S-LOAD 帧首现序 ▁▁<▃▃<▅▅ 升半程，steps 自定义核）+ reduced-motion 静态
+//     （S-LOAD-RM：settings.prefersReducedMotion=true → 静态 ▇▇〔T0 档位感知〕+ 光束帧归零）
+//  ④ tips 渐显非硬切（源级 tips-reveal.test.ts 5 项 e2e 独立复跑 + tips 光核 ▀ 前缀不回归〔S-200〕；
+//     40ms 将显暗态中间帧 = PTY 采样分辨率外软面，raw-log 若在 SGR 实捕则加强，否则定因登记）
+//  ⑤ 残留项判别单测 = 0.1.35 无残留项（plan §0.3 两项已随 0.1.34 核销）→ 无判据面，留痕销项
+//  ⑥ O-12 双档（S-120：左锚定零 padding + 无 rebalance + 次 tagline 卡内；S-200：≥160 居中
+//     leftPad + ≥200 档 C 右侧重平衡〔合并 meta 行 + 次 tagline 右对齐 feed 右缘 + borderTitle 去版本〕；
+//     边框 inactive SGR 复验 = verdict 侧 raw-log grep）
+//  ⑦ O-9 顶部注意元素 ≤1（0.1.34 d0cb6cd 已落，本 gate 只验不验实现：本波 8 提交对注意元素
+//     〔脉冲目标/亮度捕获面〕零改动 diff 证 + 引 0.1.34 闭环）
+//  ⑧ 回归基线 = P0a（S-A）+ A4F 6 句（独立 phase）+ 0.1.33 品牌面（S-200 子集：mark ▄█▄/中文
+//     tagline/tips 光核 ▀/Multi-Clauding 归零；wordmark 双色 + 边框 inactive + O-8 light 4 色
+//     基线不重映射 = verdict 侧 raw-log SGR grep，O-8 基线载体 = S-200L light 场景）
+//  ⑨ 报告 + artifact id（r-YYYYMMDD-HHMM-brand-final-0135.md）
+
+const S_LOAD: ScenarioSpec = {
+  id: 'S-LOAD', phase: 'BR135', seed: 'live', gitInit: true,
+  wsFiles: [['note.txt', NOTE_TXT]],
+  tuiArgs: 'code --permission-mode default',
+  globalConfig: { theme: 'dark' },
+  env: { ATLAS_E2E_COLS: '200', ATLAS_E2E_ROWS: '50' },
+  steps: async pty => {
+    pty.send(READ_PROMPT) // 真 LLM 回合 → loading 期 spinner 光束串旋转（120ms/帧，8 帧 ≈0.96s 周期）
+    await pty.settle(15_000, 150_000)
+    // ③ 帧序核（光扫上爬升半程 ▁▁→▃▃→▅▅→██，首现序断言；T0 镜像 8 帧 f[i]=f[7-i]）
+    const t = pty.sinceText()
+    const iA = t.indexOf('▁▁')
+    const iC = t.indexOf('▃▃')
+    const iE = t.indexOf('▅▅')
+    const seqOk = iA >= 0 && iC > iA && iE > iC
+    process.stderr.write(`[S-LOAD] ③ 帧首现序 ▁▁(${iA}) < ▃▃(${iC}) < ▅▅(${iE}) = ${seqOk ? 'PASS' : 'FAIL'}\n`)
+  },
+  probes: [
+    { id: 'G1-alive', gate: '① loading 场景存活', desc: 'TUI 启动稳定（状态栏 default）', re: /▶\s*default/i, hard: true },
+    { id: 'G1-beam', gate: '① spinner 光束串', desc: 'loading 期 T0 光束爬帧在场（▃▃ 中帧 = 光束串独有字形，旧点状帧 ·✢✳✶✻✽ 无此字符）', re: /▃▃/, hard: true },
+    { id: 'G1-verb', gate: '① verb 行同屏', desc: 'spinner verb 行（<Verb>…，130 动词池随机取一）与光束串同屏在场', re: /[A-Z][a-z]+ing…/, hard: true },
+  ],
+}
+
+const S_LOAD_RM: ScenarioSpec = {
+  id: 'S-LOAD-RM', phase: 'BR135', seed: 'live', gitInit: true,
+  wsFiles: [['note.txt', NOTE_TXT]],
+  tuiArgs: 'code --permission-mode default',
+  globalConfig: { theme: 'dark' },
+  extraSettings: s => { s.prefersReducedMotion = true }, // settings 面（src/tui/utils/settings/types.ts:88）→ Spinner reducedMotion 支
+  env: { ATLAS_E2E_COLS: '200', ATLAS_E2E_ROWS: '50' },
+  steps: async pty => {
+    pty.send(READ_PROMPT) // loading 期 spinner = 静态字形（关动效不留残帧）
+    await pty.settle(15_000, 150_000)
+  },
+  probes: [
+    { id: 'G3-rm-static', gate: '③ reduced-motion 静态', desc: 'prefersReducedMotion=true → T0 静态光束字形 ▇▇（getReducedMotionSpinnerGlyph，取代旧 2s 明暗循环）', re: /▇▇/, hard: true },
+    { id: 'G3-rm-noanim', gate: '③ reduced-motion 无光扫帧', desc: 'reduced-motion 下光束爬帧归零（▃▃/▅▅ 不出现 = 动画关闭，非静帧残留）', re: /▃▃|▅▅/, hard: true, absent: true },
+    { id: 'G3-alive', gate: '③ RM 场景存活', desc: 'TUI 启动稳定（状态栏 default）', re: /▶\s*default/i, hard: true },
+  ],
+}
+
+const S_120: ScenarioSpec = {
+  id: 'S-120', phase: 'BR135', seed: 'live', gitInit: false,
+  wsFiles: [],
+  tuiArgs: 'code --permission-mode default',
+  globalConfig: { theme: 'dark' },
+  env: { ATLAS_E2E_COLS: '120', ATLAS_E2E_ROWS: '24', ATLAS_FORCE_FULL_LOGO: '1' },
+  steps: async pty => { await pty.settle(8_000, 90_000) },
+  probes: [
+    { id: 'O12-alive-120', gate: '⑥ 120 列存活', desc: 'TUI 120×24 full-logo 启动稳定', re: /▶\s*default/i, hard: true },
+    // 探针勘误（首轮定因）：卡内容行均带左侧边框字符 `│` 前缀（round box 边框列），
+    // wordmark/tagline 行 = `│` + 卡内固定 padding（120 列实测 15sp）+ 文本；首轮 `^ {0,10}` 漏 `│` 假阴。
+    { id: 'O12-120-anchor', gate: '⑥ 120 列左锚定零 padding', desc: '120<160 → leftPad=0 左锚定回归断言：wordmark 行 = `│`+小缩进（卡内固定 padding，实测 15sp），非居中（对比 S-200 档 A leftPad≈75+）', re: /^│ {10,40}AtlasCode/, hard: true },
+    { id: 'O12-120-norebal', gate: '⑥ 120 列无档 C', desc: 'rebalance 仅 ≥200：合并 meta 行（v…·model）120 列缺席', re: /v0\.\d+\.\d+\s*·/, hard: true, absent: true },
+    { id: 'O12-120-sectagline', gate: '⑥ 120 列次 tagline 卡内', desc: '<200 英文次 tagline（AI Coding Agent）在卡内左区（`│`+小缩进，实测 15sp），非右对齐', re: /^│ {10,40}AI Coding Agent/, hard: true },
+  ],
+}
+
+const S_200: ScenarioSpec = {
+  id: 'S-200', phase: 'BR135', seed: 'live', gitInit: false,
+  wsFiles: [],
+  tuiArgs: 'code --permission-mode default',
+  globalConfig: { theme: 'dark' },
+  env: { ATLAS_E2E_COLS: '200', ATLAS_E2E_ROWS: '50', ATLAS_FORCE_FULL_LOGO: '1' },
+  steps: async pty => { await pty.settle(8_000, 90_000) },
+  probes: [
+    { id: 'O12-alive-200', gate: '⑥ 200 列存活', desc: 'TUI 200×50 full-logo 启动稳定', re: /▶\s*default/i, hard: true },
+    // 探针勘误（首轮定因）：① 首轮 `^ {40,}` 命中的是卡外 release-note 行（证据弱），收紧到卡内
+    //   wordmark 行（`│`+leftPad 深缩进，实测 ≈111sp）；② 档 C 次 tagline 行 = 复合行
+    //   `│左面板│右对齐 AI Coding Agent│`（tagline 在线尾右对齐 feed 右缘，非纯行首空格行），
+    //   首轮 `^ {150,}` 误设行首纯空格 → 改断言「行尾贴右边框」。
+    { id: 'O12-200-centered', gate: '⑥ ≥160 档 A 居中', desc: '200≥160 → leftPad=floor((200−cardWidth)/2)≈75+：卡内 wordmark 行 = `│`+深缩进（实测 ≈111sp，对比 S-120 左锚定 15sp）', re: /^│ {80,}AtlasCode/, hard: true },
+    { id: 'O12-200-rebal', gate: '⑥ ≥200 档 C 合并 meta 行', desc: 'rebalance=true → 版本号+模型合并行（formatRebalanceMetaLine `v… · model`，低权重右对齐 feed 右缘）在场', re: /v0\.\d+\.\d+\s*·/, hard: true },
+    { id: 'O12-200-secright', gate: '⑥ ≥200 次 tagline 右对齐', desc: '次 tagline（AI Coding Agent）右对齐 feed 列右缘：贴行尾右边框 `│`（复合行 `│左面板│…AI Coding Agent │`，低权重元素右对齐在场）', re: /AI Coding Agent ?│\s*$/, hard: true },
+    { id: 'O12-200-titlenover', gate: '⑥ borderTitle 去版本', desc: '档 C：边框标题去版本号（信息不重复，版本下沉合并 meta 行）→ 「AtlasCode v…」同行形缺席', re: /AtlasCode\s+v0\.\d+/, hard: true, absent: true },
+    { id: 'G2-divider-beam', gate: '② divider 光束串实捕', desc: 'full-logo 横向 divider（LogoV2 无显式 char → beamTheme 默认 `█ ` 光束串，CJK 1-cell 安全）在场', re: /█ █/, hard: true },
+    { id: 'BR3-mark', gate: '⑧ 0.1.33 mark 不回归', desc: '棱镜光锥 mark 顶点行 ▄█▄ 在场（T0 全形态）', re: /▄█▄/, hard: true },
+    { id: 'BR3-tagline', gate: '⑧ 中文主 tagline 不回归', desc: '算力驱动的 Coding Agent（spec §3.3 中文主 tagline）在场', re: /算力驱动的 Coding Agent/, hard: true },
+    { id: 'BR3-clauding0', gate: '⑧ D-10 改名不回归', desc: 'Multi-Clauding 用户可见面归零（0.1.34 547642f multi_clauding→parallel_sessions 全改名）', re: /Multi-Clauding/i, hard: true, absent: true },
+  ],
+}
+
+const S_200L: ScenarioSpec = {
+  id: 'S-200L', phase: 'BR135', seed: 'live', gitInit: false,
+  wsFiles: [],
+  tuiArgs: 'code --permission-mode default',
+  globalConfig: { theme: 'light' }, // O-8 light 基线载体（0.1.34-2 6dc9dbf 重映射值，0.1.35 不重映射仅精修时序/脉冲）
+  env: { ATLAS_E2E_COLS: '200', ATLAS_E2E_ROWS: '50', ATLAS_FORCE_FULL_LOGO: '1' },
+  steps: async pty => { await pty.settle(8_000, 90_000) },
+  probes: [
+    { id: 'O8L-alive', gate: '⑤′ O-8 light 基线场景存活', desc: 'light 主题 200×50 full-logo 启动稳定', re: /▶\s*default/i, hard: true },
+    { id: 'O8L-mark', gate: '⑤′ light mark 渲染', desc: 'light 主题下棱镜 mark 顶点行 ▄█▄ 在场（动效精修未在 light 不可读色上回归）', re: /▄█▄/, hard: true },
+  ],
+}
+
 const ALL: Record<string, ScenarioSpec[]> = {
   P0: [S_A, S_B, S_C], // 别名 = P0a + P0b 全量
   P0a: [S_A], // 审批内联 verdict（零新数据，先做）
@@ -887,6 +1005,7 @@ const ALL: Record<string, ScenarioSpec[]> = {
   A4F: [S_024I, S_024J, S_024K, S_024N, S_024O, S_024L, S_024M], // A4 家族 6 句 + A1×3 实证（0.1.26 波：allow 面 + classifier 面）
   THEMES: [S_024T_DARK, S_024T_LIGHT, S_024T_DARK_ANSI, S_024T_LIGHT_ANSI, S_024T_SWITCH], // 0.1.31 BR-2 theme 启动冒烟（6 主题抽查 4 + /theme 切换；零 LLM）
   FOOTER80: [S_080, S_060], // 0.1.34 C3（O-11 80×24 状态段不截断）+ C2（O-12-B 60×24 compact round 框 inactive SGR 载体）
+  BR135: [S_LOAD, S_LOAD_RM, S_120, S_200, S_200L], // 0.1.35 Brand 封口终轮 gate ①–⑦ 探针面（⑧ 回归 = P0a+A4F 独立 phase；④/② 源级单测 e2e 独立复跑）
 }
 
 // ── 红线核验（spec 红线 1：主循环 + permissions 主路径零改动；无 PTY） ────────
@@ -989,7 +1108,7 @@ async function main() {
 
   const specs = ALL[phaseArg]
   if (!specs) {
-    process.stderr.write(`unknown phase ${phaseArg}；valid: P0 P0a P0b P1a P1 P2 P024 A4F THEMES FOOTER80 redline\n`)
+    process.stderr.write(`unknown phase ${phaseArg}；valid: P0 P0a P0b P1a P1 P2 P024 A4F THEMES FOOTER80 BR135 redline\n`)
     process.exit(2)
   }
   const runDir = join(ART, `${phaseArg}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`)
