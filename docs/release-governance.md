@@ -20,6 +20,32 @@
 - **Main**：发布段核 banner 对齐 + dev stub 打包体取值；四件套绿；版本 bump（一 wave 一版）。
 - **f4**：gate 权 + 版本梯队（一版本一收口）+ 发布 checklist（规则 1–3 + 全绿闭环）+ deferred 显式命名。
 
+## 发布验真 SOP（D-8 固化，0.1.33）
+
+Main 发布段核 npm 产物的固定通道（0.1.30/0.1.31/0.1.32 三版已按此执行，零事故）：
+
+```bash
+# ① 发布（DNS-pin 通道：本机网络下 registry.npmjs.org 需 pin Fastly IP）
+cd <master checkout, 已构建 dist>
+NODE_OPTIONS="--no-network-family-autoselection" \
+  node -r <job-dir>/tmp/pin-npmjs-dns.js \
+  /usr/lib/node_modules/npm/bin/npm-cli.js publish \
+  --registry https://registry.npmjs.org
+
+# ② packument 验真（等传播 2–4min，DNS-pin 直连 Fastly）
+curl -s --resolve registry.npmjs.org:443:104.16.10.34 \
+  "https://registry.npmjs.org/@atlasharness%2fatlascode" \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); v=d['dist-tags']['latest']; e=d['versions'][v]; print(v, e['dist']['tarball'], e['dist']['shasum'])"
+
+# ③ tarball 直下 sha1 比对 packument dist.shasum
+curl -s --resolve registry.npmjs.org:443:104.16.10.34 -o t.tgz "<packument 的 dist.tarball>"
+sha1sum t.tgz   # = packument dist.shasum 即 MATCH
+```
+
+**两个坑（成文固化）**：
+1. **canonical 文件名无 scope 前缀**：registry 上 tarball 存为 `@atlasharness/atlascode/-/atlascode-<v>.tgz`（**不带** `atlasharness-` scope 前缀）；npm publish 输出的本地 staging 文件名带 scope 前缀，直下恒 404（非传播延迟）。**一律取 packument `dist.tarball` 字段直下，勿自行拼 scope 前缀文件名。**
+2. **shasum 字段 = SHA-1**（npm `dist.shasum` 是 sha1，非 sha256）；比对用 `sha1sum`，勿用 `sha256sum`。
+
 ## 首个按规则 3 顺延的实例
 
 **0.1.27**：#3 渲染缺口（`FilePermissionDialog` 缺 verdict 行）在 gate lane 发现但已随 0.1.27 发出去（历史原因：当时 #3 判据软、INCONCLUSIVE-tolerant，未硬门禁）→ 按**规则 3** 顺延 **0.1.27.1** 闭环 + 发（生产 lane 对 0.1.27.1 跑，**不跑 0.1.27**）。**从 0.1.27.1 起规则 1–3 严格套。**
