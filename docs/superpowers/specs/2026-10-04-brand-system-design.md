@@ -69,7 +69,7 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 | **mark** | 5 行渐变三角 + 顶点光心 | 顶点呼吸脉冲 |
 | **spinner** | `█████` 光束串 + `<verb>…` 状态行 | 从底向顶**逐行点亮**（"光扫上爬"= Ascend 上升动效）；verb 池为算力+意象双轴（§7.4） |
 | **进度条** | `███░░░░` 光束填充 | 光束向前推进 |
-| **边框角标** | `╱` 斜线角装饰（U+2572 Neutral） | — |
+| **边框角标** | `╱` 斜线角装饰（U+2571，Ambiguous，全角 CJK 上下 2-cell 风险随 §3.5 降级兜底） | — |
 | **分隔线** | `█ █ █` 光束串（Block Elements，CJK 安全） | — |
 | **空态底纹** | 暗淡 `░` 光锥底纹 | — |
 | **闲时 tips 轮播** | prefix `·` 改 `▀` 光锥顶点色块 | 切换瞬间光扫渐显 |
@@ -107,11 +107,11 @@ Ascend = 攀升。光锥从底宽冷蓝向顶点暖金**收敛上升** = 算力�
 
 ### 3.2 字符选择 · CJK 安全（关键工程约束）
 
-**强制使用 Block Elements `█` U+2588（FULL BLOCK）**，不用 `▲` U+25B2 / `◆` U+25C6。
+**强制使用 Block Elements（`█▓▒░▄▀`，U+2580-259F）**，不用 `▲` U+25B2 / `◆` U+25C6。
 
-**原因**：`▲` `◆` 是 East Asian **Ambiguous** 宽度字符。仓里 `src/tui/ink/stringWidth.ts` 用 `eastAsianWidth({ambiguousAsWide:false})`（西方标准=测宽 1），但 **CJK 终端按 Unicode 标准 ≈ 2 宽**——AtlasCode 面向国产终端生态（中文 locale 用户多），Ambiguous 字符会导致 mark 错位。`█` U+2588 是 **Neutral 宽度=始终 1**，跨所有终端（含 CJK）稳定，`stringWidth()` 测宽准确，零错位风险。
+**原因（2026-10-06 运行时订正，`get-east-asian-width` 实测锁 `tests/unit/mark-cjk-width.test.ts` @ worktree-0.1.34 `5b04973`）**：`▲` `◆` 与 Block Elements 同为 EAW **Ambiguous** 字符，但 Block Elements 几何纯度高（实心/半块，无替换字体歧义），且仓里 `src/tui/ink/stringWidth.ts` 用 `eastAsianWidth({ambiguousAsWide:false})`（**仓模型测宽=1**，Ink 按 1 cell 布局、内部自洽）。**关键订正**：Block Elements 并非"Neutral 宽度=始终 1"——运行时实测 **仅 `░` U+2591 为真 Neutral，`█▓▒▄▀` 与边框 `╱` U+2571 均为 Ambiguous**（仓模型=1 / **全角 CJK 上下文 `ambiguousAsWide:true`=2**）。即全角 CJK 终端下 mark 可能每格画 2 cell 而 Ink 只按 1 cell 排 → **错位风险真实存在**，并非"零错位"。
 
-**这是面向国产终端必须做对的细节**。mark 与分隔线/空态底纹同样只用 Neutral 宽度字符（`█▓▒░▄▀`，均 U+2580-259F Block Elements 区段，含 `▓` U+2593 晶面 / `▄` U+2584 顶点 cap，跨 CJK 终端始终 1 宽）。半块 `▄▀` 若个别 CJK 终端宽度异常，落地时回退晶面/顶点为实心 `█`（形状不变、仅少"切割"感，§14.2 多终端矩阵核）。
+**因此 CJK 安全不靠"字符天然 1 宽"，靠 §3.5 的 3 档降级兜底**（T0 全形态 → T1 半块 `▄▀` 转实心 `█` → T2 ASCII 骨架；触发 = blocklist 命中 / DSR-6 探针 advance≠1 / 手动 `ATLAS_MARK_DEGRADE`）。选 Block Elements 的收益 = 几何纯度高 + 仓内 Ink 布局确定（内部自洽），错位风险由降级兜住而非假设零风险——这是面向国产终端必须做对的细节。半块 `▄▀` 个别 CJK 终端宽度异常（实测 advance≠1）→ 回退晶面/顶点为实心 `█`（形状不变、仅少"切割"感，§3.5-b T1）；连 `█` 都错位走 T2 ASCII 骨架（§14.2 多终端矩阵核）。
 
 ### 3.3 wordmark
 
@@ -131,9 +131,9 @@ AtlasCode
 ### 3.5 BR-7 CJK 宽度矩阵与降级策略（0.1.34-1 spec 侧三要点 · 2026-10-06 brand 侧对确，交 Main 实施）
 
 **a. 宽度矩阵定义（对确项 1）**
-- **受测对象** = 品牌母题字符全集：Block Elements U+2580–U+259F（`█▓▒░▄▀`，EAW=Neutral，§3.2）+ 边框 `╱`（U+2571，Neutral）+ **footer 4 状态 glyph（⚡🧠▶⌂，见 O-10 表）**——mark 与 footer 一起入矩阵（O-10 搭 BR-7 车，边际成本低）。
+- **受测对象** = 品牌母题字符全集：Block Elements U+2580–U+259F（`█▓▒░▄▀`，**EAW 多为 Ambiguous，仅 `░` U+2591 真 Neutral，§3.2**）+ 边框 `╱`（U+2571，Ambiguous）+ **footer 4 状态 glyph（⚡🧠▶⌂，见 O-10 表，含 2 个 Wide emoji）**——mark 与 footer 一起入矩阵（O-10 搭 BR-7 车，边际成本低）。
 - **终端矩阵** = iTerm2 / WezTerm / Windows Terminal / GNOME Terminal / kitty / Alacritty ×（默认字体 + 全角 CJK 字体〔Sarasa Mono / Noto Sans CJK 等〕）。
-- **每格实测 3 项**：① `stringWidth()` 运行时测宽（仓 `src/tui/ink/stringWidth.ts`，`eastAsianWidth({ambiguousAsWide:false})` 西方标准）② **渲染格占**（字体 metrics 是否 advance 1 cell 还是 2 cell——**EAW=Neutral 是 Unicode 标准级保证，但全角 CJK 字体 metrics 仍可能把块字 glyph 画 2 cell = 字体 metrics 问题非 Unicode property 问题，只能实测**）③ 错位信号（mark 块整体对齐 vs 基线 diff）。
+- **每格实测 3 项**：① `stringWidth()` 运行时测宽（仓 `src/tui/ink/stringWidth.ts`，`eastAsianWidth({ambiguousAsWide:false})` 仓模型）② **渲染格占**（真实终端 advance 1 还是 2 cell——**Ambiguous 字符仓模型=1 但全角 CJK 上下文/字体可=2，属 property 级错位风险（非仅字体 metrics），只能真机实测**）③ 错位信号（mark 块整体对齐 vs 基线 diff）。
 - **验真纪律（继承 0.1.29-0.1.33）**：本机终端可验项 = 硬断言；真多终端（本机无 iTerm2/WinTerm 等）= 软面 INCONCLUSIVE 定因登记，不阻塞。
 
 **b. mark 降级策略（对确项 2，3 档 · 形状不变，只减"切割感"/色彩）**
@@ -145,22 +145,22 @@ AtlasCode
 | T2 | 连 `█` 都错位（异形终端/字体） | ASCII 骨架 fallback（A 形剪影保留，宽度风险=0） |
 
 - **触发信号（任一即降级）**：① BR-7 矩阵 blocklist 命中的 terminal+font 组合（实现=静态 blocklist，随矩阵结论滚动加项）② 运行时探针：输出已知 `█` 行，终端支持 DSR-6（cursor position report）则读回列 advance；不支持则回落 blocklist ③ 手动 `ATLAS_MARK_DEGRADE=1|2`（用户长尾自助）。
-- **原则**：默认恒 T0（Neutral 宽度是标准级保证，不过度降级）；T1/T2 仅由显式信号触发，单点降级不整版回退（§15）。
+- **原则**：默认恒 T0（仓模型测宽=1、Ink 按 1 cell 布局内部自洽，不过度降级）；T1/T2 仅由显式信号触发（Ambiguous 字符全角 CJK 上下文可画 2 cell 的风险由降级兜底），单点降级不整版回退（§15）。
 
 **c. 全角字体行为规则（对确项 3）**
-- EAW=Neutral ⇒ 标准宽度 1（§3.2 选 U+2580-259F 的理由）；**字体 metrics 可覆盖之**（全角字体画宽）。规则 = **property 保证 + 字体实测兜底**：测宽正常 → 信任 property；实测错位 → 降 T1/T2。
+- EAW 实测（`mark-cjk-width.test.ts` 锁）：**仅 `░` U+2591 = Neutral（恒 1）；`█▓▒▄▀` + `╱` = Ambiguous（仓模型 1 / 全角 CJK 上下文 2）**。选 Block Elements 的理由 = 几何纯度高 + 仓内 Ink 布局确定（**非"Neutral 零错位"**），全角 CJK 上下文的 2-cell 错位风险靠 3 档降级兜底。规则 = **仓模型信任 + 真机实测兜底**：仓测宽=1 → T0；实测（blocklist/探针）advance≠1 → 降 T1/T2。
 - **识别信号**：终端主字体 = 全角 CJK 字体 + 已知错位 blocklist 命中 + 探针 advance≠1（三源任一）。
 
 **O-10 footer 4 glyph 归类与降级（随 BR-7 矩阵实测，e2e O-10 观察承接）**
 
-| glyph | 代码点 | EAW 初判 | 行为 |
+| glyph | 代码点 | EAW（运行时锁 `mark-cjk-width.test.ts`） | 行为 |
 |---|---|---|---|
-| ⚡ | U+26A1 | Ambiguous（CJK 语境→2 cell） | 彩色/单色四态并存 |
-| 🧠 | U+1F9E0 | Ambiguous | 需彩色 emoji 字体，CJK 终端常全宽/单色 |
-| ▶ | U+25B6 | Ambiguous（CJK 终端经典全角字符） | 部分 CJK 字体全宽 2 cell |
-| ⌂ | U+2302 | Ambiguous（以仓 EAW 表运行时核） | 部分 CJK 字体全宽 |
+| ⚡ | U+26A1 | **Wide**（两模型均 2） | 恒 2 cell，需彩色 emoji 字体，CJK 终端常全宽/单色/豆腐 |
+| 🧠 | U+1F9E0 | **Wide**（两模型均 2） | 恒 2 cell，同上 |
+| ▶ | U+25B6 | **Ambiguous**（仓 1 / CJK 2） | 部分 CJK 字体全宽 2 cell |
+| ⌂ | U+2302 | **Neutral**（两模型均 1） | 恒 1 cell |
 
-- 4 glyph 全 **Ambiguous** = 与 mark 的 Neutral 安全路径**两套宽度哲学并置**（e2e O-10 所点）。**归类以仓 `eastAsianWidth` 包运行时输出为准**（Main 四件套含 EAW 断言单测锁定 4 值），上表为初判供对确。
+- **订正（2026-10-06 运行时）**：4 glyph = **2 Wide（⚡🧠，恒 2 cell）+ 1 Ambiguous（▶）+ 1 Neutral（⌂）**（原初判"全 Ambiguous"已废）。**Wide emoji（⚡🧠）恒 2 cell** = 比 mark 的 Ambiguous 更硬（非 CJK 上下文也 2 cell），与 mark（Ambiguous，仅全角 CJK 才 2）是**两套更宽的宽度行为并置**（e2e O-10 所点）。**归类以仓 `eastAsianWidth` 包运行时输出为准**（已锁 `mark-cjk-width.test.ts` 4 值）。
 - **非 emoji 降级档（矩阵结论后随裁定，不预启）**：推荐 = 纯文本 label（`model/effort/mode/home`，全 ASCII EAW=Neutral 100% 安全，宽度风险=0）；备选 = Neutral 几何档（`*` U+002A / `§` U+00A7 / `>` U+003E / `~` U+007E，均 Neutral）。降级触发 = 与 mark 降级同源（blocklist/探针/opt-in env）。
 
 ---
@@ -230,11 +230,11 @@ AtlasCode
 ```
 
 - 左侧光锥 mark（冷底暖顶渐变，顶点 █ 脉冲高亮 amber）
-- 边框 `╱` 角标（U+2572 Neutral，CJK 安全，与光锥上升斜线呼应）
+- 边框 `╱` 角标（U+2571，Ambiguous，全角 CJK 上下文 2-cell 风险随 §3.5 降级兜底；与光锥上升斜线呼应）
 - wordmark "Atlas"暖金 / "Code"冷蓝（光锥两端色对照）
 - 底栏 `▌ Ready` 光标（U+258C Block Elements，coding agent 明示）
 
-> mockup 中所有非 ASCII 字符（`╭╮╰╯╱█▌`）均属 Box Drawing / Block Elements 区段（U+2500-259F），**Neutral 宽度=1**，CJK 终端零错位。
+> mockup 中非 ASCII 字符分两类：**Box Drawing（`╭╮╰╯` U+2500-257F）= EAW Neutral 恒 1**；**Block Elements（`█▌▓▒░▄▀` U+2580-259F）+ `╱` = EAW Ambiguous**（仓模型 1 / 全角 CJK 上下 2-cell），后者错位风险随 §3.5 3 档降级兜底（**非"零错位"**，2026-10-06 运行时订正）。
 
 **用户每轮启动看到**：暖金顶点光心 + 冷蓝底光锥 + 暖冷对照 wordmark——一眼是 AtlasCode，不是任何通用 agent。
 
@@ -786,7 +786,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 
 | 风险 | 概率 | 影响 | 缓解 |
 |---|---|---|---|
-| 块字符 `█` 在某冷门终端宽度异常 | 低 | mark 错位 | §14.2 真机验证矩阵覆盖主流终端；`stringWidth()` 已校验 Neutral 宽度 |
+| 块字符 `█`（Ambiguous）在全角 CJK 终端画 2 cell | 中 | mark 错位 | §3.5 3 档降级（T0/T1/T2）+ MARK_BLOCKLIST 滚动加项 + DSR-6 探针兜底；§14.2 真机矩阵覆盖主流终端（2026-10-06 运行时订正：`█` 非 Neutral 而是 Ambiguous） |
 | errorMessaging 改品牌名破坏子串匹配 | 中 | 错误分支误判 | §7.1 实施前 grep `includes('AtlasHarness')` 核查清单 |
 | 品牌色变更用户感知 breaking | 高 | 用户困惑 | 随对应 0.1.x 视觉版 release notes 说明 + README 截图更新（不升 0.2.x） |
 | AnimatedClawd 重构引入性能回归 | 中 | TUI 启动卡顿 | 保 react compiler memo 结构；启动性能 profiler 对比（memory `tui-optimization-division` P0a 已有 profiler 基建） |

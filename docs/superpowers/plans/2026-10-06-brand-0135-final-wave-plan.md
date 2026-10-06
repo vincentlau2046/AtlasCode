@@ -17,7 +17,7 @@
 | **spinner** | `█████` 光束串 + `<verb>…` 状态行（verb 四轴池 0.1.32 已去 Claude 化，本波加光束串） | 光扫上爬（底→顶逐行点亮，"光"自底向上 = Ascend 攀升） | 旧式点状 spinner → 光束串 |
 | **进度条** | `███░░░░` 光束填充 | 光束向前推进 | 普通 `▓▒` 条 → 光锥光束 |
 | **分隔线** | `█ █ █` 光束串（Block Elements，CJK 安全） | — | 普通 `-`/`─` → 光束串 |
-| **边框角标** | `╱` 斜线角装饰（U+2572 Neutral） | — | 无 → 光锥角标 |
+| **边框角标** | `╱` 斜线角装饰（U+2571，Ambiguous，全角 CJK 上下 2-cell 风险随 §3.5 降级兜底） | — | 无 → 光锥角标 |
 | **空态底纹** | 暗淡 `░` 光锥底纹 | — | 无 → 光锥底纹 |
 | **tips 光核** | 前缀 `▀`（0.1.33 已落） | 切换瞬间光扫渐显（80ms） | 已落，本波加渐显 |
 | **光核微符号** | `▀`/`·` 光心色块全 UI 复用（watermark/光标等，按需最小集） | 脉冲 | 母题收口 |
@@ -57,28 +57,28 @@
 
 ---
 
-## 1. 0.1.34 BR-7 spec 侧要点（**✅ 已对确 2026-10-06**，事实源 = spec §3.5，Main 实施 0.1.34-1）
+## 1. 0.1.34 BR-7 spec 侧要点（**✅ 已对确 2026-10-06，2026-10-06 运行时 EAW 订正**，事实源 = spec §3.5 + `tests/unit/mark-cjk-width.test.ts` @ worktree-0.1.34 `5b04973`，Main 实施 0.1.34-1）
 
 | 要点 | 对确结论（spec §3.5） | spec 锚点 |
 |---|---|---|
-| **a 宽度矩阵定义** | 品牌母题字符全集（Block Elements U+2580-259F + `╱` + **footer 4 glyph O-10 搭车**）× 终端矩阵（iTerm2/WezTerm/WinTerm/GNOME/kitty/Alacritty × 默认/全角 CJK 字体）；每格实测 3 项：`stringWidth()` 测宽 / **渲染格占（全角字体 metrics 可画 2 cell = 字体 metrics 问题非 EAW property 问题，只能实测）** / 错位 diff | spec §3.5-a |
+| **a 宽度矩阵定义** | 品牌母题字符全集（Block Elements U+2580-259F〔**多为 Ambiguous，仅 `░` U+2591 真 Neutral**〕+ `╱`〔Ambiguous〕+ **footer 4 glyph O-10 搭车〔含 2 Wide emoji〕**）× 终端矩阵（iTerm2/WezTerm/WinTerm/GNOME/kitty/Alacritty × 默认/全角 CJK 字体）；每格实测 3 项：`stringWidth()` 测宽（仓模型）/ **渲染格占（Ambiguous 字符仓模型=1 但全角 CJK 上下文/字体可=2，property 级错位风险，只能真机实测）** / 错位 diff | spec §3.5-a |
 | **b mark 降级策略** | **3 档**：T0 默认全形态+4 色 → T1 半块 `▄▀`→实心 `█`（错位时，形状/空腔保留）→ T2 ASCII 骨架（异形终端）；触发信号 = blocklist 命中（随矩阵滚动加项）/ 运行时探针（DSR-6 列 advance，不支持则回落 blocklist）/ 手动 `ATLAS_MARK_DEGRADE`；原则 = 默认恒 T0 不过度降级，单点降级不整版回退 | spec §3.5-b |
-| **c 全角字体行为规则** | property 保证（EAW=Neutral⇒1 宽）+ **字体实测兜底**（全角字体 metrics 可画宽）；识别信号三源：终端主字体=全角 CJK 字体 / blocklist 命中 / 探针 advance≠1 | spec §3.5-c |
-| **O-10 footer 4 glyph** | ⚡🧠▶⌂ 全 **Ambiguous**（初判，**以仓 `eastAsianWidth` 包运行时 EAW 断言单测为准**）= 与 mark Neutral 路径两套宽度哲学并置；矩阵实测 4 glyph 行为；**非 emoji 降级档**（纯文本 label 推荐 / Neutral 几何 `*/§/>/~` 备选）随矩阵结论后随裁定，不预启 | spec §3.5 O-10 表 |
+| **c 全角字体行为规则** | EAW 实测（`mark-cjk-width.test.ts` 锁：`█▓▒▄▀`+`╱`=Ambiguous〔仓 1/全角 CJK 2〕，仅 `░`=Neutral）；选 Block Elements 理由=几何纯度高+仓内 Ink 布局确定（**非"Neutral 零错位"**），全角 CJK 2-cell 错位风险靠 3 档降级兜底；识别信号三源：终端主字体=全角 CJK 字体 / blocklist 命中 / 探针 advance≠1 | spec §3.5-c |
+| **O-10 footer 4 glyph** | ⚡🧠▶⌂ 运行时锁 = **2 Wide（⚡🧠 恒 2 cell）+ 1 Ambiguous（▶ 仓 1/CJK 2）+ 1 Neutral（⌂ 恒 1）**（原初判"全 Ambiguous"已废，`mark-cjk-width.test.ts` 锁 4 值）= 与 mark（Ambiguous）两套更宽宽度行为并置；**非 emoji 降级档**（纯文本 label 推荐〔全 ASCII Neutral 零风险〕/ Neutral 几何 `*/§/>/~` 备选）随矩阵结论后随裁定，不预启 | spec §3.5 O-10 表 |
 | **e2e 验真纪律** | 本机终端可验项 = 硬断言；真多终端项 = 软面 INCONCLUSIVE 定因登记（不阻塞），纪律同 0.1.29-0.1.33 | 协议 §3 INCONCLUSIVE 纪律 |
 
 ---
 
 ## 2. 逐文件改动清单（Main 实施时细化，实施前对届时 master 重新 diff 核对）
 - spinner：光锥光束串组件（替换现点状 spinner 帧）+ 与 0.1.32 动词池（§7.4）同屏（动词行不变，仅 spinner 字形换光束串）
-- 进度条/分隔线/边框角标/空态底纹：各触面组件换光锥母题字符（全 Neutral 宽度字符，§3.2）
+- 进度条/分隔线/边框角标/空态底纹：各触面组件换光锥母题字符（Block Elements，**Ambiguous，全角 CJK 上下文 2-cell 风险随 §3.5 降级兜底**，§3.2）
 - tips 渐显：`useDynamicTips` 切换 80ms 光扫渐显（现有 12s 轮播 6 条不变）
 - 动效时序：`AnimatedBeam` 光扫上爬 0.6s + 脉冲 0.8s + reduced-motion 回落（§9.1）
 - 残留项（开波裁定后入列）：exit-reason 日志 / multi-clauding 改名专审（各附判别单测）
 
 ## 3. 四件套 + 品牌 gate（Main 自检）
 - `tsc --noEmit` 0 / `eslint src/` 0 / `bun test tests/` 全量 / `bun run build` ✓
-- **品牌 gate**：母题字符面在场（spinner 光束串 / 分隔线 `█ █ █` / 边框 `╱` / 空态 `░`）+ 母题字符全 Neutral 宽度（U+2580-259F / U+2572，无 Ambiguous `▲◆`）+ 0.1.33 既有面不回归（mark 棱镜 A 形 / wordmark 双色 / 中文 tagline / tips 光核前缀）
+- **品牌 gate**：母题字符面在场（spinner 光束串 / 分隔线 `█ █ █` / 边框 `╱` / 空态 `░`）+ 母题字符走 Block Elements/Box Drawing（U+2500-259F / U+2571，**无几何歧义字形 `▲◆`**；Ambiguous 全角 CJK 2-cell 风险随 §3.5 降级 + MARK_BLOCKLIST 兜底，gate 不验"零错位"改验"降级路径在场"）+ 0.1.33 既有面不回归（mark 棱镜 A 形 / wordmark 双色 / 中文 tagline / tips 光核前缀）
 
 ## 4. e2e 前 gate（e2e 验收判据 · 报告命名 `r-YYYYMMDD-HHMM-brand-final-0135.md`）
 - ① spinner 光束串 + verb 行同屏（loading 场景 SGR 实捕）
