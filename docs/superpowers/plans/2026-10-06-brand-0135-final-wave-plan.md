@@ -42,7 +42,7 @@
 
 | 档 | 内容 | 成本 | 建议 |
 |---|---|---|---|
-| **B（核心）** | welcome 全宽亮 brand 边框降为 `inactive`/dim（`LogoV2.tsx:283` `borderColor="brand"`→`"inactive"`，保分组语义、去抢镜；与 O-9 脉冲收敛叠加后 3 注意元素→1〔tips ▀〕） | 1 行 | **默认做**（最低成本、无回归） |
+| **B（核心）** | welcome 全宽亮 brand 边框降为 `inactive`/dim（`LogoV2.tsx:283` `borderColor="brand"`→`"inactive"`，保分组语义、去抢镜；与 O-9 脉冲收敛叠加后 3 注意元素→1〔tips ▀〕） | 1 行 | **Main 0.1.34 开波已裁 = 0.1.34-2 加性先行**（1 行布局层改动口子，2026-10-06 开波裁定登记 master `4d52edd`）；A/C 留 0.1.35 |
 | **A（布局层）** | "品牌卡"条件居中：`columns≥160` 时品牌块组合体 `paddingLeft=(cols−cardWidth)/2` 居中，`<160` 保持左锚定零回归（`cardWidth` 复用 `calculateOptimalLeftWidth`） | 中（布局层，**零行为变化**） | **推荐做**（宽屏仪式感回归） |
 | **C（精修）** | 右侧重平衡：`columns≥200` 时低权重元素右对齐（tagline 第 2 行/版本号）或 meta 3 行压 2 行（version+model 合并，cwd 下沉 footer ⌂ 段）；品牌块 8 行→6 行 | 精修 | 随动效轮，可选 |
 
@@ -57,14 +57,15 @@
 
 ---
 
-## 1. 0.1.34 BR-7 spec 侧要点（brand 侧预留支持 · 0.1.34 开波时与 Main 对确）
+## 1. 0.1.34 BR-7 spec 侧要点（**✅ 已对确 2026-10-06**，事实源 = spec §3.5，Main 实施 0.1.34-1）
 
-| 要点 | 内容 | spec 锚点 |
+| 要点 | 对确结论（spec §3.5） | spec 锚点 |
 |---|---|---|
-| **宽度矩阵定义** | Block Elements U+2580-259F（`█▓▒░▄▀╱`）× 全角字体终端矩阵（iTerm2/WezTerm/Windows Terminal/GNOME/kitty/Alacritty 等）实测宽度行为 | §3.2（CJK 安全约束） |
-| **mark 降级策略** | 半块 `▄▀` 个别终端宽度异常 → 该终端档回退实心 `█`（形状不变、仅少"切割"感），单点降级不整版回退 | §3.2 备记 / §15 回退 |
-| **全角字体行为规则** | 全角 CJK 字体下 Neutral 宽度字符（U+2580-259F 区段）是否仍恒 1 宽；异常终端识别信号（`stringWidth()` 实测 vs 渲染错位）与降级触发条件 | §3.2 / `src/tui/ink/stringWidth.ts` |
-| **e2e 验真纪律** | 本机终端可验项 = 硬项；真多终端项 = 软面定因登记（不阻塞），纪律同 0.1.29-0.1.33 | 协议 §3 INCONCLUSIVE 纪律 |
+| **a 宽度矩阵定义** | 品牌母题字符全集（Block Elements U+2580-259F + `╱` + **footer 4 glyph O-10 搭车**）× 终端矩阵（iTerm2/WezTerm/WinTerm/GNOME/kitty/Alacritty × 默认/全角 CJK 字体）；每格实测 3 项：`stringWidth()` 测宽 / **渲染格占（全角字体 metrics 可画 2 cell = 字体 metrics 问题非 EAW property 问题，只能实测）** / 错位 diff | spec §3.5-a |
+| **b mark 降级策略** | **3 档**：T0 默认全形态+4 色 → T1 半块 `▄▀`→实心 `█`（错位时，形状/空腔保留）→ T2 ASCII 骨架（异形终端）；触发信号 = blocklist 命中（随矩阵滚动加项）/ 运行时探针（DSR-6 列 advance，不支持则回落 blocklist）/ 手动 `ATLAS_MARK_DEGRADE`；原则 = 默认恒 T0 不过度降级，单点降级不整版回退 | spec §3.5-b |
+| **c 全角字体行为规则** | property 保证（EAW=Neutral⇒1 宽）+ **字体实测兜底**（全角字体 metrics 可画宽）；识别信号三源：终端主字体=全角 CJK 字体 / blocklist 命中 / 探针 advance≠1 | spec §3.5-c |
+| **O-10 footer 4 glyph** | ⚡🧠▶⌂ 全 **Ambiguous**（初判，**以仓 `eastAsianWidth` 包运行时 EAW 断言单测为准**）= 与 mark Neutral 路径两套宽度哲学并置；矩阵实测 4 glyph 行为；**非 emoji 降级档**（纯文本 label 推荐 / Neutral 几何 `*/§/>/~` 备选）随矩阵结论后随裁定，不预启 | spec §3.5 O-10 表 |
+| **e2e 验真纪律** | 本机终端可验项 = 硬断言；真多终端项 = 软面 INCONCLUSIVE 定因登记（不阻塞），纪律同 0.1.29-0.1.33 | 协议 §3 INCONCLUSIVE 纪律 |
 
 ---
 
@@ -85,11 +86,11 @@
 - ③ 动效：光扫上爬帧序列（loading 屏 SGR 序）+ reduced-motion 回落静态
 - ④ tips 切换渐显（非硬切）
 - ⑤ 残留项（开波裁定入列者）判别单测绿
-- **⑥ O-12 宽终端双档断言**（e2e lane 已定判据）：harness 120/200 列双档——`≥160` 列品牌卡左 margin=`(cols−cardWidth)/2 ±2`（方案 A 生效）；`120` 列=左锚定零 padding 回归断言；SGR 断言 welcome 边框=`inactive`（**非** brand 琥珀 SGR，方案 B 生效）；用户面走查层双宽度整屏抓屏附报告
+- **⑥ O-12 宽终端双档断言**（e2e lane 已定判据，**B 断言随 0.1.34-2 加性先行部分提前生效**）：harness 120/200 列双档——`≥160` 列品牌卡左 margin=`(cols−cardWidth)/2 ±2`（方案 A 生效，**0.1.35 验**）；`120` 列=左锚定零 padding 回归断言；SGR 断言 welcome 边框=`inactive`（**非** brand 琥珀 SGR，方案 B 生效——**B 入 0.1.34-2 后此断言在 0.1.34-2 gate 先行**，0.1.35 复验持久）；用户面走查层双宽度整屏抓屏附报告（e2e 侧 120/200 列双档 harness 先行补好，ACK 2026-10-06）
 - **⑦ O-9 脉冲收敛**（若 Main 归 0.1.34-2 加性则本 gate 只验"顶部注意元素≤1"，不验实现；若并入本波则验脉冲限拍收敛）
 - ⑧ 回归基线 S-A hardFail=0 + A4F 6 句不回归（P0 封口链无回归）+ 0.1.33 品牌面不回归（mark/wordmark/tagline/tips 前缀）
 - ⑨ 报告 + artifact id
-- **前置依赖**：⑥-⑦ 动效精修以 **0.1.34-2 的 O-8 light 光锥 4 色重映射（P0）** 为前置（避免在 light 不可读色上精修动效）；开波时若 0.1.34-2 未含 O-8，则 0.1.35 需把 O-8 拉入前置波。
+- **前置依赖**：⑥-⑦ 动效精修以 **0.1.34-2 的 O-8 light 光锥 4 色重映射（P0）** 为前置（避免在 light 不可读色上精修动效）；开波时若 0.1.34-2 未含 O-8，则 0.1.35 需把 O-8 拉入前置波。**e2e 已承接 fail-closed 处置（ACK 2026-10-06）**：0.1.34-2 gate 验收输入第一项=核 O-8 是否入列（判据=light 4 色白底对比度断言 ≥3:1 在场 + 保形案①〔同色相加深〕或案②落地 + gate 含 light 场景对比度断言）；未含 = gate 报告显式标记「O-8 未含 = 0.1.35 动效精修前置缺失」并请 Main 裁定，**不静默放行**。
 
 ## 5. 时序与收口（5 段闭环，同口径 0.1.29-0.1.33）
 1. 实施（Main）：四件套 + 品牌 gate 绿 + 实现提交

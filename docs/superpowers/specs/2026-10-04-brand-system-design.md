@@ -128,6 +128,41 @@ AtlasCode
 - 英文副标：保留 `AI Coding Agent`（与现有 Clawd.tsx 副标同，承认知惯性）
 - 中文 tagline（README/官网/发布说明用）：**`算力驱动的 Coding Agent`** —— 直陈差异化双轴（算力 + coding agent），不蹭昇腾商标
 
+### 3.5 BR-7 CJK 宽度矩阵与降级策略（0.1.34-1 spec 侧三要点 · 2026-10-06 brand 侧对确，交 Main 实施）
+
+**a. 宽度矩阵定义（对确项 1）**
+- **受测对象** = 品牌母题字符全集：Block Elements U+2580–U+259F（`█▓▒░▄▀`，EAW=Neutral，§3.2）+ 边框 `╱`（U+2571，Neutral）+ **footer 4 状态 glyph（⚡🧠▶⌂，见 O-10 表）**——mark 与 footer 一起入矩阵（O-10 搭 BR-7 车，边际成本低）。
+- **终端矩阵** = iTerm2 / WezTerm / Windows Terminal / GNOME Terminal / kitty / Alacritty ×（默认字体 + 全角 CJK 字体〔Sarasa Mono / Noto Sans CJK 等〕）。
+- **每格实测 3 项**：① `stringWidth()` 运行时测宽（仓 `src/tui/ink/stringWidth.ts`，`eastAsianWidth({ambiguousAsWide:false})` 西方标准）② **渲染格占**（字体 metrics 是否 advance 1 cell 还是 2 cell——**EAW=Neutral 是 Unicode 标准级保证，但全角 CJK 字体 metrics 仍可能把块字 glyph 画 2 cell = 字体 metrics 问题非 Unicode property 问题，只能实测**）③ 错位信号（mark 块整体对齐 vs 基线 diff）。
+- **验真纪律（继承 0.1.29-0.1.33）**：本机终端可验项 = 硬断言；真多终端（本机无 iTerm2/WinTerm 等）= 软面 INCONCLUSIVE 定因登记，不阻塞。
+
+**b. mark 降级策略（对确项 2，3 档 · 形状不变，只减"切割感"/色彩）**
+
+| 档 | 触发条件 | 形态 |
+|---|---|---|
+| T0（默认） | 无错位信号 | 全形态 `▄█▄/▓███▓/█▓▓▓▓▓█/▓█  █▓/█▓█  █▓█` + 4 色渐变（§3.1） |
+| T1 | 半块 `▄▀` 实测错位（advance≠1） | 半块→实心 `█`（形状/空腔保留，仅 cap 切割感消失） |
+| T2 | 连 `█` 都错位（异形终端/字体） | ASCII 骨架 fallback（A 形剪影保留，宽度风险=0） |
+
+- **触发信号（任一即降级）**：① BR-7 矩阵 blocklist 命中的 terminal+font 组合（实现=静态 blocklist，随矩阵结论滚动加项）② 运行时探针：输出已知 `█` 行，终端支持 DSR-6（cursor position report）则读回列 advance；不支持则回落 blocklist ③ 手动 `ATLAS_MARK_DEGRADE=1|2`（用户长尾自助）。
+- **原则**：默认恒 T0（Neutral 宽度是标准级保证，不过度降级）；T1/T2 仅由显式信号触发，单点降级不整版回退（§15）。
+
+**c. 全角字体行为规则（对确项 3）**
+- EAW=Neutral ⇒ 标准宽度 1（§3.2 选 U+2580-259F 的理由）；**字体 metrics 可覆盖之**（全角字体画宽）。规则 = **property 保证 + 字体实测兜底**：测宽正常 → 信任 property；实测错位 → 降 T1/T2。
+- **识别信号**：终端主字体 = 全角 CJK 字体 + 已知错位 blocklist 命中 + 探针 advance≠1（三源任一）。
+
+**O-10 footer 4 glyph 归类与降级（随 BR-7 矩阵实测，e2e O-10 观察承接）**
+
+| glyph | 代码点 | EAW 初判 | 行为 |
+|---|---|---|---|
+| ⚡ | U+26A1 | Ambiguous（CJK 语境→2 cell） | 彩色/单色四态并存 |
+| 🧠 | U+1F9E0 | Ambiguous | 需彩色 emoji 字体，CJK 终端常全宽/单色 |
+| ▶ | U+25B6 | Ambiguous（CJK 终端经典全角字符） | 部分 CJK 字体全宽 2 cell |
+| ⌂ | U+2302 | Ambiguous（以仓 EAW 表运行时核） | 部分 CJK 字体全宽 |
+
+- 4 glyph 全 **Ambiguous** = 与 mark 的 Neutral 安全路径**两套宽度哲学并置**（e2e O-10 所点）。**归类以仓 `eastAsianWidth` 包运行时输出为准**（Main 四件套含 EAW 断言单测锁定 4 值），上表为初判供对确。
+- **非 emoji 降级档（矩阵结论后随裁定，不预启）**：推荐 = 纯文本 label（`model/effort/mode/home`，全 ASCII EAW=Neutral 100% 安全，宽度风险=0）；备选 = Neutral 几何档（`*` U+002A / `§` U+00A7 / `>` U+003E / `~` U+007E，均 Neutral）。降级触发 = 与 mark 降级同源（blocklist/探针/opt-in env）。
+
 ---
 
 ## 4. 色彩系统
