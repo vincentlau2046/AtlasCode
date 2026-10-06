@@ -150,7 +150,7 @@ import { eagerParseCliFlag } from 'src/tui/utils/cliArgs.js';
 import { createEmptyAttributionState } from 'src/tui/utils/commitAttribution.js';
 import { countConcurrentSessions, registerSession, updateSessionName } from 'src/tui/utils/concurrentSessions.js';
 import { getCwd } from 'src/tui/utils/cwd.js';
-import { logForDebugging, setHasFormattedOutput } from 'src/tui/utils/debug.js';
+import { isDebugMode, logForDebugging, setHasFormattedOutput } from 'src/tui/utils/debug.js';
 import { errorMessage, getErrnoCode, isENOENT, TeleportOperationError, toError } from 'src/tui/utils/errors.js';
 import { getFsImplementation, safeResolvePath } from 'src/tui/utils/fsOperations.js';
 import { gracefulShutdown, gracefulShutdownSync } from 'src/tui/utils/gracefulShutdown.js';
@@ -522,7 +522,11 @@ const _pendingSSH: PendingSSH | undefined = feature('SSH_REMOTE') ? {
   extraCliArgs: []
 } : undefined;
 export async function main() {
-  process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`);
+  // O-5（0.1.34，e2e O-5）：启动首行默认静默，仅 debug 门（--debug / -d / DEBUG 族，
+  // 经 isDebugMode 单一事实源）在场时输出——正常用户面零噪音，排障面可复现定因
+  if (isDebugMode()) {
+    process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`);
+  }
   profileCheckpoint('main_function_start');
 
   // SECURITY: Prevent Windows from executing commands from current directory

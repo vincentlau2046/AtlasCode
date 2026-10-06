@@ -47,7 +47,17 @@ export async function main(): Promise<void> {
   // 执行前；de-ANT delta 见 entryInit.enforceNoDebugGuard 头注）
   enforceNoDebugGuard()
 
-  process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`)
+  // O-5（0.1.34，e2e O-5）：启动首行默认静默，仅 debug 门在场时输出（与 tui 车道
+  // isDebugMode 同门：DEBUG env / --debug / -d / --debug=*；cli 域不 import tui
+  // utils，此处轻量内联同语义门）
+  const debugGate =
+    isEnvTruthy(process.env.DEBUG) ||
+    process.argv.includes('--debug') ||
+    process.argv.includes('-d') ||
+    process.argv.some(arg => arg.startsWith('--debug='))
+  if (debugGate) {
+    process.stderr.write(`[${PRODUCT_BRAND}] main() starting...\n`)
+  }
   // 裁登记：profileCheckpoint（性能剖析面未落盘）
 
   // SECURITY: Prevent Windows from executing commands from current directory
