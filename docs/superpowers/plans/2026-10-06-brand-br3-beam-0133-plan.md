@@ -22,11 +22,9 @@
 | **D-10** | insights HTML 报告标题 "Multi-Clauding (Parallel Sessions)" → Atlas 化（低风险单核销）+ `main.tsx:2058`/`useVoice.ts:558` 2 注释 → multi-session | D-10 |
 | **D-8** | 发布验真 SOP 固化（shasum 比对 + packument `dist.tarball` 直下，**无 scope 前缀 canonical 名** `atlascode-<v>.tgz`，勿拼 scope 前缀恒 404）入 `docs/release-governance.md` 或 dev-loop §3 | D-8 |
 
-**本波不做（0.1.34+ 持续优化，记 spec §13.1 时序，不预启）**：
-- 母题铺开：spinner `█████` 光束串 / 进度条光束推进 / 分隔线 `█ █ █` / 边框角标 `╱` / 空态 `░` 底纹
-- 动效精修（光扫上爬时序 / `prefers-reduced-motion` 节奏 / 脉冲周期）
-- 多终端 CJK 矩阵（半块 `▄▀` 宽度实测：iTerm2/GNOME/kitty/WinTerm/Alacritty）= BR-6/BR-7
-- 光核微符号铺开（spinner 光标 / watermark / favicon）
+**本波不做（用户 2026-10-06 裁定拆分，规划文档 `docs/2026-10-06-0.1.34-0.1.35-version-plan.md`，均不预启）**：
+- **0.1.34 = BR-7 多终端 CJK 宽度矩阵**（Main+e2e，非 Brand 序列；半块 `▄▀` 全角字体实测：iTerm2/WezTerm/Windows Terminal/GNOME/kitty/Alacritty + e2e 用户视角体验报告加性并入）
+- **0.1.35 = Brand 封口终轮**（母题铺开 spinner `█████` 光束串 / 进度条光束推进 / 分隔线 `█ █ █` / 边框角标 `╱` / 空态 `░` 底纹 + 动效精修（光扫上爬时序 / `prefers-reduced-motion` 节奏 / 脉冲周期）+ 光核微符号铺开（spinner 光标 / watermark / favicon）；brand spec + Main 实施，Brand 序列终版）
 
 ---
 
@@ -99,7 +97,7 @@
 3. **缺陷回环**（gate FAIL 时）：3-round 上限（R1 修非根因 → R2 根因 → R3 仍红升级用户裁定，不自行扩 scope）
 4. **发布**（Main）：bump 0.1.33 → tag v0.1.33 → npm publish → packument 验真（**D-8 SOP**）
 5. **生产 lane**（e2e）：banner 实测 v0.1.33 + ①-④ 子集 + 用户面走查层 → 版本闭环
-- **持续优化（0.1.34+）不预启**，待用户启动。
+- **0.1.34（BR-7 + e2e 体验报告）/ 0.1.35（Brand 封口终轮）按用户 2026-10-06 裁定**（规划文档 `docs/2026-10-06-0.1.34-0.1.35-version-plan.md`）：本波不预启；0.1.35 开波 = 0.1.34 闭环后（BR-7 宽度矩阵结论为 0.1.35 CJK 宽度判据输入）。
 
 ---
 

@@ -674,8 +674,9 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
                                                · 0.1.31 identity 扩常量 + 主题换值（BR-1 + BR-2）
                                                · 0.1.32 去 fork 化（BR-9：动词池 + guideAgent + outputStyles）+ 资产（BR-5 wordmark/token）
                                                · 0.1.33 品牌 mark + 收尾（BR-3 棱镜光锥 Beam 定稿 + clawd 键族 D-9 + tips 光核 D-3 + 编译产物 D-2 + insights 标题 D-10 + 发布 SOP D-8）
-                                               · 0.1.34+ 持续优化（BR-6 e2e 基线重生成 + BR-7 多终端矩阵 + 母题铺开 spinner/进度条/分隔线/空态 + 动效精修）
-                                               （序号随 TUI 列车顺延；全程 0.1.x，不升 0.2.x）
+                                               · 0.1.34 BR-7 多终端 CJK 宽度矩阵（Main+e2e，非 Brand 序列；+ e2e 用户视角体验报告加性并入）
+                                               · 0.1.35 Brand 封口终轮（母题铺开 spinner/进度条/分隔线/空态 + 动效精修 + Brand 残留项；brand spec + Main 实施，Brand 序列终版）
+                                               （用户 2026-10-06 裁定拆分，规划文档 `docs/2026-10-06-0.1.34-0.1.35-version-plan.md`；全程 0.1.x，不升 0.2.x）
 ```
 
 - **不挂 0.1.23**：0.1.23 是 TUI P0a 回归列车（memory `tui-optimization-division`），品牌不并轨
@@ -691,7 +692,7 @@ AtlasOffice 同家族光锥母题，但降饱和 + 换顶点字符区分态：
 |---|---|---|
 | BR-1 identity 扩常量 | `shared/identity.ts` Step 1 + 触面改 import Step 2 | 无 |
 | BR-2 主题换值 | `theme.ts` 6 套 UI 品牌色 3 键（brand/brandShimmer/briefLabelAssistant）橙→暖金纯换值；**clawd_body/clawd_background 键改为 BR-3**（渐变色板随 BR-3 pending） | BR-1 |
-| BR-3 Beam 组件 | ✅ **定稿 2026-10-06 · 入 0.1.33**（mark 重设计：棱镜光锥 A 形 `BEAM_ART` 3 色 + `▓` 晶面 + 负空间空腔 + 顶点 spark〔§3.1/§8.4〕；`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam`（pose 废弃重写光扫上爬）+ 删 `AnimatedAsterisk`（VoiceModeNotice 消费方→光核静态）+ **3 色色板收敛**〔§4.1〕+ 全部 clawd 术语：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 41 处渲染引用〔= D-9〕+ tips 光核〔D-3〕+ LogoV2 4 编译产物 PRODUCT_BRAND import〔D-2〕。**范围 = 先"更换"（mark/色/wordmark/tagline/改名/tips）；母题铺开 spinner/进度条/分隔线/空态 + 动效精修 + 多终端矩阵 = 0.1.34+ 持续优化**） | 用户 2026-10-06 裁定方案 A，入 0.1.33，writing-plans `docs/superpowers/plans/2026-10-06-brand-br3-beam-0133-plan.md` |
+| BR-3 Beam 组件 | ✅ **定稿 2026-10-06 · 入 0.1.33**（mark 重设计：棱镜光锥 A 形 `BEAM_ART` 3 色 + `▓` 晶面 + 负空间空腔 + 顶点 spark〔§3.1/§8.4〕；`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd`→`AnimatedBeam`（pose 废弃重写光扫上爬）+ 删 `AnimatedAsterisk`（VoiceModeNotice 消费方→光核静态）+ **3 色色板收敛**〔§4.1〕+ 全部 clawd 术语：theme 键 `clawd_body`/`clawd_background`→`brand_mark`/`brand_mark_bg` 改名换值 + 41 处渲染引用〔= D-9〕+ tips 光核〔D-3〕+ LogoV2 4 编译产物 PRODUCT_BRAND import〔D-2〕。**范围 = 先"更换"（mark/色/wordmark/tagline/改名/tips）；母题铺开 + 动效精修 = 0.1.35 Brand 封口终轮，多终端 CJK 矩阵 = 0.1.34 BR-7（用户 2026-10-06 裁定拆分）**） | 用户 2026-10-06 裁定方案 A，入 0.1.33（已闭环 master `412ca61`），writing-plans `docs/superpowers/plans/2026-10-06-brand-br3-beam-0133-plan.md`；0.1.35 封口终轮 = `docs/superpowers/plans/2026-10-06-brand-0135-final-wave-plan.md` |
 | BR-4 AtlasHarness leak 全量收口（**扩展**） | **全量用户可见 `AtlasHarness`→`AtlasCode` 字面替换 ~80 处/~40 文件**（启动屏 12 处 + 权限弹框 22 + 更新 12 + 安装器 9 + 模型/MCP 11 + 主循环/REPL 11 + attribution 3 + insights/状态/onboarding/swarm 等；§7.1 全量清单）。**排除** mdm 注册表路径（§10.5）+ ascend/engine 迁移注释。纯机械，不碰 mark art，不 identity 化 | 无（自包含） |
 | BR-9 去 fork 化 · de-Claude（**新增**） | ① spinner 动词池重写（§7.4，186→~130 四轴，去 `Clauding`/whimsical）② guideAgent 9 处 Claude→Atlas（§7.5）③ `outputStyles.ts:47,60` 两处 `Claude explains/pauses`→Atlas（新增，复核发现）④ attribution.ts `Claude Opus 4.6` 注释清理（§7.2） | 无（与前序视觉解耦） |
 | BR-5 资产目录 | `docs/assets/` wordmark.svg + 品牌 token 文档（brand-system-spec.md）+ README 引用；**mark SVG/PNG 随 BR-3 pending** | wordmark/token 随 BR-2，mark 随 BR-3 |
