@@ -4,6 +4,56 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.34
+
+BR-7 多终端 CJK 宽度矩阵 + e2e 用户视角体验优化 + 0.1.34-C 收尾（Main 实施
+worktree-0.1.34；BR-7 代码侧 `5b04973`，体验优化 O 项 `6dc9dbf..2ad6974`，
+0.1.34-C exit-reason `f0fbf11` + D-10 改名 `547642f`；全量 suite 3576/0·253）：
+
+- **BR-7 多终端 CJK 宽度矩阵（0.1.34-1，承接 0.1.33 gate ⑥ 定因）**：
+  - mark 3 档降级（`src/tui/components/LogoV2/markDegrade.ts` 单一事实源）：
+    `BEAM_ART_T0/T1/T2`（T0 全形态 / T1 半块 ▄→实心 █ / T2 ASCII A 骨架，各档
+    5 行×9 宽布局零漂移）+ `resolveMarkTier` 纯判定（优先级 ③ 手动
+    `ATLAS_MARK_DEGRADE=1|2` > ① `MARK_BLOCKLIST` 命中 terminal(+font) >
+    ② DSR-6 探针 advance≠1 > 默认 T0）+ `getBeamArt`；接入 `Beam.tsx` /
+    `AnimatedBeam.tsx`（BEAM_ART 改由 markDegrade 定义，re-export 保 import 面）。
+  - EAW 前提订正（运行时 `get-east-asian-width` 实测，订正 spec §3.2 初判）：
+    Block Elements `█▓▒▄▀` + 边框 `╱` 多为 **Ambiguous（非 Neutral）**（仓模型
+    ambiguousAsWide:false 测宽 1，Ink 按 1 cell 布局；全角 CJK 上下文 wide=2
+    = 错位风险根源）；O-10 footer 4 glyph 订正 ⚡🧠=Wide / ▶=Ambiguous /
+    ⌂=Neutral（`tests/unit/mark-cjk-width.test.ts` 锁 4 glyph + Block Elements
+    7 值 + 3 档纯判定，20 pass）。真多终端矩阵（6 终端×2 字体）为软面
+    INCONCLUSIVE 定因登记（禁裸记），登记项滚动加项 `MARK_BLOCKLIST`。
+- **e2e 用户视角体验优化（0.1.34-2，报告 r-20261006-1408 O 项 triage 落地）**：
+  - **O-8 P0（0.1.33 引入的 light 光锥可读性缺陷）**：light/lightDaltonized
+    光锥 4 色出白底安全变体（amber→`rgb(180,83,9)` 5.02:1 / flame→
+    `rgb(194,65,12)` 5.12:1；violet/blue 白底 ≥3:1 不变）+ WCAG 非文本 3:1
+    对比度单测 + e2e gate 补 light 场景对比度断言（堵"只验在场不验可读"缺口）。
+  - O-9：全屏（ATLAS_NO_FLICKER）光锥顶点脉冲限定 4 拍（≈3.2s）后收敛静态
+    全亮 apex（旧"永久 0.8s 脉冲"与防闪烁诉求相悖，且旧 effect 未把 pulseOn
+    入依赖=潜伏 bug）。
+  - O-4+O-11：npm 安装/升级提示色 warning→inactive 灰（颜色语义惯例）+
+    footer 三通道优先级截断（状态段>tips>提示，左栏 flexShrink=0 永不截断，
+    右栏承担溢出）+ 提示在场（15s）期间 tips 让位独占、超时自复（消 80 列
+    三通道互挤 + 双色竞争）。
+  - O-12-B：welcome 全宽 brand 边框 brand→inactive（1 行布局层零行为改动）。
+  - O-3：双 bin 正名（`atlascode` 正名 / `atlas` 别名，与包名/品牌全名一致）。
+  - O-5：启动首行 `[AtlasCode] main() starting...` 默认静默（`--debug`/env 门控）。
+  - O-1：light-ansi 16 色品牌色相内无 ≥3:1 可读色=ANSI 色域固有限制，维持
+    现状（spec §2/§4.4 已知限制定因记录，gate"无橙残留"判据不变）。
+- **0.1.34-C 收尾**：
+  - exit-reason 日志：TUI gracefulShutdown 3 点（入口 exit_reason /
+    failsafe shutdown_failsafe / forceExit exit_force_sigkill）+ headless
+    dispatch `exit` handler `[atlas][exit] code=N` 一行 stderr（使自发退出
+    可复现定因，配 e2e 观察项，不新写 harness）。
+  - D-10 去 claude 化改名专审：`multi_clauding`→`parallel_sessions`（型/默认/
+    赋值/HTML 渲染 7 处）+ `detectMultiClauding`→`detectParallelSessions` +
+    局部 `parallelSessionPairs`/`messagesDuringParallel`（全在
+    `src/tui/commands/insights.ts`，仓外 0 importer；仅存内存 + 一次性 HTML，
+    零数据迁移）。品牌 gate `grep -rni "clauding" src/` 全量生效（原"排
+    insights"排除项退役）；scope 边界：Python 参考镜像 facet 键
+    `claude_helpfulness` 等 D-10 域外保留（登记不自行扩 scope）。
+
 ## v0.1.33
 
 BR-3 棱镜光锥 mark 更换 + D-9/D-10/D-8 收尾（品牌序列 0.1.33；Main 实施
