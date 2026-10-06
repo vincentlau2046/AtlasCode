@@ -87,7 +87,9 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 |---|---|---|
 | 0.1.28 | D-279-r1 渲染修（Main） | ✅ 已发布（release `e1f79d3`，npm latest=0.1.28 + shasum `ae04768a…` e2e 独立验真 MATCH） |
 | 0.1.29 | BR-8 UA 品牌串 | ✅ **已发布收口**（e2e verdict 3/3 PASS releasable=true〔artifact A4F=`A4F-1791231349358-is3m`+P0a=`P0a-1791232078979-9onx`〕；Main 全链收口 master `f1c34db` + tag v0.1.29 + npm latest=0.1.29 shasum `2d0da16d…` + tarball 独立复验 MATCH + dist BR-8 标记核验绿；e2e 生产 lane 验真信号已发） |
-| 0.1.30 | BR-4 全量收口 | **e2e R2 verdict = 6/6 PASS + 0 硬面 INCONCLUSIVE，releasable**（报告 `r2-20261006-0530-brand-br4.md`；R1 5FAIL 定因=实施前基线 4b35bcf 未落 BR-4 非真缺陷，R2 对实施后 `f2d4156` 重跑全绿：启动屏 4 组件=AtlasCode / 权限弹框 0 AtlasHarness / 签名 Generated with [AtlasCode] / grep 用户可见 AtlasHarness=0（49 处全 keep-set）/ S-A hardFail=0 / 既有硬句不回归 A4F 6 句全绿 P0 链无回归）→ **已触发 Main 发 0.1.30**（release 干净纪律 + tag v0.1.30 + push×2 + DNS-pin publish〔D-8：tarball 直下用 canonical 无 scope 前缀名〕+ packument 验真 → e2e 生产 lane 验真） |
-| 0.1.31 | BR-1+BR-2 | 排队（Main 实施） |
-| 0.1.32 | BR-9+BR-5 | 排队（Main 实施） |
-| pending | BR-3 | 待用户审（不自动推进） |
+| 0.1.30 | BR-4 全量收口 | ✅ **闭环**（master `f3f3480`〔`ace84a1` BR-4 + `8e230d3` UDS 判别单测〕+ tag v0.1.30 + npm latest shasum `b028df95…`〔D-8 SOP：`atlascode-0.1.30.tgz` 无 scope 前缀直下 MATCH〕+ dist 核验〔AtlasHarness 残留 2 = 全 keep-set 注册表键，用户可见=0〕；四件套 4/4〔3535/0·247〕+ e2e R2 6/6 PASS + 生产 lane PASS〔banner v0.1.30 + UA 无回归 + BR-4 子集=0 + 报告 `r-20261006-0631-prodlane-030`〕） |
+| 0.1.31 | BR-1+BR-2 | ✅ **闭环**（`562ffb7` BR-1 + `74aabe1` BR-2 + master `098cbd3` + tag v0.1.31 + npm latest shasum `456463cf470c…`；四件套 4/4〔3540/0·248〕+ e2e gate 4/4 PASS〔THEMES `…-mksx`，报告 `r-…-0705`；探针④软面 INCONCLUSIVE 定因=ANSI 16-color 降级 SGR 形不可唯一断言→回落单测+truecolor 指纹实捕〕+ 生产 lane PASS〔报告 `r-…-0742`，暖金 SGR 注入实证 + Anthropic 橙=0〕） |
+| 0.1.32 | BR-9+BR-5 | ✅ **闭环（品牌序列终版）**（`29aef48` BR-9 + `3e26c75` BR-5 资产奠基〔docs/assets 3 件〕+ master `1b06856` + tag v0.1.32 + npm latest shasum `455f61387217…`；四件套 4/4〔3544/0·249〕+ e2e gate **4/4 PASS 0 INCONCLUSIVE**〔报告 `r-…-0722`〕+ 生产 lane PASS〔报告 `r-…-0803`〕；clauding 命中 3=全内部术语〔multi-clauding 排除 + D-10 HTML 标题，spinner 池零残留〕） |
+| **0.1.29–0.1.32 全闭环** | BR-8→BR-4→BR-1+2→BR-9+5 终版 | ✅ **全链闭环达成（2026-10-06）**——四版每版 gate→发布→生产 lane 同口径绿（用户明早交付物达成）；权威事实源 = `docs/2026-10-06-0.1.33-deferred-tracker.md`（master `ee68565` 终态） |
+| 0.1.33 | 遗留/范围异常收口波（**开波中**） | 用户 2026-10-06 裁定范围：**D-9(a)** clawd_body 6 值对齐各主题 brand（6 行值替换，clawd 标识符 41 处留 BR-3 随 mark 重写）+ **D-10** 用户可见面（insights HTML 标题/描述 2 处 + main.tsx:2058 / useVoice.ts:558 两注释改 multi-session）+ **D-8** 发布验真 SOP 固化（release-governance.md） |
+| pending | BR-3（Clawd→Beam + 渐变色板） | **user-gate（用户 2026-10-06 明确挂起）**：D-1/D-2/D-3 不自动推进，等用户审后另行开波 |
