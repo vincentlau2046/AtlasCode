@@ -89,7 +89,7 @@ type SessionMeta = {
   lines_removed: number
   files_modified: number
   message_hours: number[]
-  user_message_timestamps: string[] // ISO timestamps for multi-clauding detection
+  user_message_timestamps: string[] // ISO timestamps for multi-session detection
 }
 
 type SessionFacets = {
@@ -152,7 +152,7 @@ type AggregatedData = {
   days_active: number
   messages_per_day: number
   message_hours: number[] // Hour of day for each user message (for time of day chart)
-  // Multi-clauding stats (matching Python reference)
+  // Parallel-sessions stats (matching Python reference)
   multi_clauding: {
     overlap_events: number
     sessions_involved: number
@@ -320,7 +320,7 @@ function extractToolStats(log: LogOption): {
   linesRemoved: number
   filesModified: Set<string>
   messageHours: number[]
-  userMessageTimestamps: string[] // ISO timestamps for multi-clauding detection
+  userMessageTimestamps: string[] // ISO timestamps for multi-session detection
 } {
   const toolCounts: Record<string, number> = {}
   const languages: Record<string, number> = {}
@@ -341,7 +341,7 @@ function extractToolStats(log: LogOption): {
   let linesRemoved = 0
   const filesModified = new Set<string>()
   const messageHours: number[] = []
-  const userMessageTimestamps: string[] = [] // For multi-clauding detection
+  const userMessageTimestamps: string[] = [] // For multi-session detection
   let usesMcp = false
   let usesWebSearch = false
   let usesWebFetch = false
@@ -445,13 +445,13 @@ function extractToolStats(log: LogOption): {
 
       // Only track message hours and response times for actual human messages
       if (isHumanMessage) {
-        // Track message hour for time-of-day analysis and timestamp for multi-clauding
+        // Track message hour for time-of-day analysis and timestamp for multi-session
         if (msgTimestamp) {
           try {
             const msgDate = new Date(msgTimestamp)
             const hour = msgDate.getHours() // Local hour 0-23
             messageHours.push(hour)
-            // Collect timestamp for multi-clauding detection (matching Python)
+            // Collect timestamp for multi-session detection (matching Python)
             userMessageTimestamps.push(msgTimestamp)
           } catch {
             // Skip invalid timestamps
@@ -909,7 +909,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
 }
 
 /**
- * Detects multi-clauding (using multiple Claude sessions concurrently).
+ * Detects multi-session usage (using multiple Atlas sessions concurrently).
  * Uses a sliding window to find the pattern: session1 -> session2 -> session1
  * within a 30-minute window.
  */
@@ -1039,7 +1039,7 @@ function aggregateData(
     days_active: 0,
     messages_per_day: 0,
     message_hours: [],
-    // Multi-clauding stats (matching Python reference)
+    // Parallel-sessions stats (matching Python reference)
     multi_clauding: {
       overlap_events: 0,
       sessions_involved: 0,
@@ -2383,9 +2383,9 @@ function generateHtmlReport(
       </div>
     </div>
 
-    <!-- Multi-clauding Section (matching Python reference) -->
+    <!-- Parallel Sessions section (matching Python reference) -->
     <div class="chart-card" style="margin: 24px 0;">
-      <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
+      <div class="chart-title">Parallel Sessions</div>
       ${
         data.multi_clauding.overlap_events === 0
           ? `
@@ -2409,7 +2409,7 @@ function generateHtmlReport(
           </div>
         </div>
         <p style="font-size: 13px; color: #475569; margin-top: 12px;">
-          You run multiple Atlas sessions simultaneously. Multi-clauding is detected when sessions
+          You run multiple Atlas sessions simultaneously. Parallel usage is detected when sessions
           overlap in time, suggesting parallel workflows.
         </p>
       `

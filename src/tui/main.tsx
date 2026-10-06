@@ -2055,7 +2055,7 @@ async function run(): Promise<CommanderCommand> {
     logManagedSettings();
 
     // Register PID file for concurrent-session detection (~/.atlas/sessions/)
-    // and fire multi-clauding telemetry. Lives here (not init.ts) so only the
+    // and fire multi-session telemetry. Lives here (not init.ts) so only the
     // REPL path registers — not subcommands like `claude doctor`. Chained:
     // count must run after register's write completes or it misses our own file.
     void registerSession().then(registered => {

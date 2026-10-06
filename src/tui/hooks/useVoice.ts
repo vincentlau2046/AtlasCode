@@ -555,7 +555,7 @@ export function useVoice({
 
   // ── Focus-driven recording ──────────────────────────────────────────
   // In focus mode, start recording when the terminal gains focus and
-  // stop when it loses focus. This enables a "multi-clauding army"
+  // stop when it loses focus. This enables a "multi-session army"
   // workflow where voice input follows window focus.
   useEffect(() => {
     if (!enabled || !focusMode) {
