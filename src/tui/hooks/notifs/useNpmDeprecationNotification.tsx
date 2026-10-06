@@ -5,7 +5,9 @@ import { useStartupNotification } from './useStartupNotification.js';
 // G-3（§8.74.28 R4）：原「npm→native installer 切换」文案为旧产品叙事
 // （本仓无 native installer，`atlas install` 子命令亦未注册）→ 改述为真实
 // 安装/升级通道（npm + git 双通道，见 repo overview.md）。
-const NPM_DEPRECATION_MESSAGE = 'AtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/overview.md for install and update options.';
+// O-3（0.1.34，e2e O-3）：双 bin 正名一句话——`atlascode` 正名（与包名/品牌全名
+// 一致）/ `atlas` 别名（README 安装节同口径）。
+const NPM_DEPRECATION_MESSAGE = 'AtlasCode is installed via npm (npm install -g @atlasharness/atlascode; run `atlascode` or alias `atlas`). See https://github.com/vincentlau2046/AtlasCode/blob/master/docs/reference/overview.md for install and update options.';
 export function useNpmDeprecationNotification() {
   useStartupNotification(_temp as any);
 }
