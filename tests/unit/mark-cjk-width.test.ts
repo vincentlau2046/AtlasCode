@@ -18,18 +18,26 @@
  * 分层纪律：纯函数断言（EAW 包 + markDegrade 纯面，无网络 / 无真实终端 / 无 settings 读取）。
  */
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { eastAsianWidth } from 'get-east-asian-width'
 import {
   BEAM_ART_T0,
   BEAM_ART_T1,
   BEAM_ART_T2,
   getBeamArt,
+  isRegisteredMarkBlocklistEntry,
   resolveMarkTier,
 } from '../../src/tui/components/LogoV2/markDegrade.js'
+import type { MarkBlocklistEntry } from '../../src/tui/components/LogoV2/markDegrade.js'
 
 /** 给定 codepoint 在某 EAW 模型（ambiguousAsWide）下的宽度（1|2）。 */
 function w(cp: number, ambiguousAsWide: boolean): 1 | 2 {
   return eastAsianWidth(cp, { ambiguousAsWide })
+}
+
+function readSrc(rel: string): string {
+  return readFileSync(join(import.meta.dir, '../../src', rel), 'utf8')
 }
 
 describe('BR-7 O-10 footer 4 glyph EAW 归类（spec §3.5 O-10，运行时真值锁 4 值）', () => {
@@ -159,5 +167,53 @@ describe('BR-7 getBeamArt 三档形状（布局 footprint 恒定 5 行×9 宽，
     expect(getBeamArt(0)).toBe(BEAM_ART_T0)
     expect(getBeamArt(1)).toBe(BEAM_ART_T1)
     expect(getBeamArt(2)).toBe(BEAM_ART_T2)
+  })
+})
+
+describe('BR-7 MARK_BLOCKLIST 登记机制（0.1.35，软面定因登记禁裸记，spec §3.5 b）', () => {
+  test('源级在场：MARK_BLOCKLIST 初版 = 空模板（未登记）+ 头注登记协议在场', () => {
+    const src = readSrc('tui/components/LogoV2/markDegrade.ts')
+    expect(src).toContain('export const MARK_BLOCKLIST: ReadonlyArray<MarkBlocklistEntry> = []')
+    // 登记协议头注：每项须附定因（终端 + 字体 + 错位信号 advance≠1 + 复现步骤），非裸记
+    expect(src).toContain('非裸记')
+    expect(src).toContain('advance≠1')
+  })
+
+  test('isRegisteredMarkBlocklistEntry：完整定因登记（terminal + tier + advanceSignal 错位信号）→ true', () => {
+    const entry: MarkBlocklistEntry = {
+      terminal: 'kitty',
+      font: 'Sarasa Mono SC',
+      tier: 1,
+      advanceSignal: { solid: 1, half: 2 }, // 半块 ▄ 错位（≠1 = 错位信号）
+      reproSteps: 'kitty + Sarasa Mono SC，半块 ▄ 画 2 cell',
+    }
+    expect(isRegisteredMarkBlocklistEntry(entry)).toBe(true)
+  })
+
+  test('定因字段仅需其一：advanceSignal 或 reproSteps 在场即完整（非裸记）', () => {
+    expect(
+      isRegisteredMarkBlocklistEntry({ terminal: 'kitty', tier: 2, advanceSignal: { solid: 2, half: 2 } }),
+    ).toBe(true)
+    expect(
+      isRegisteredMarkBlocklistEntry({ terminal: 'alacritty', tier: 1, reproSteps: 'alacritty + 全角 CJK，█ 画 2 cell' }),
+    ).toBe(true)
+  })
+
+  test('裸记（terminal + tier 无定因字段）→ false（软面定因登记禁裸记）', () => {
+    expect(isRegisteredMarkBlocklistEntry({ terminal: 'kitty', tier: 1 })).toBe(false)
+  })
+
+  test('空 terminal / 非法 tier（∉{1,2}）→ false（完整登记前置不满足）', () => {
+    expect(
+      isRegisteredMarkBlocklistEntry({ terminal: '', tier: 1, advanceSignal: { solid: 1, half: 1 } }),
+    ).toBe(false)
+    expect(isRegisteredMarkBlocklistEntry({ terminal: 'kitty', tier: 0 as 1 | 2, reproSteps: 'x' })).toBe(false)
+    expect(
+      isRegisteredMarkBlocklistEntry({ terminal: 'kitty', tier: 3 as 1 | 2, advanceSignal: { solid: 2, half: 2 } }),
+    ).toBe(false)
+  })
+
+  test('reproSteps 空串不算定因（advanceSignal 缺省时须非空 reproSteps）', () => {
+    expect(isRegisteredMarkBlocklistEntry({ terminal: 'kitty', tier: 1, reproSteps: '' })).toBe(false)
   })
 })

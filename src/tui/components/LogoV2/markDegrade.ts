@@ -78,6 +78,9 @@ export function getBeamArt(tier: MarkTier): ReadonlyArray<BeamRow> {
  */
 export const MARK_BLOCKLIST: ReadonlyArray<MarkBlocklistEntry> = []
 
+/** DSR-6 探针读回的列 advance（solid=█ advance / half=▄ advance；null=未探/不支持；≠1 = 错位信号）。 */
+export type MarkAdvanceSignal = Readonly<{ solid: number | null; half: number | null }>
+
 export interface MarkTierInput {
   /** ATLAS_MARK_DEGRADE 原值（'1'/'2' 手动降级，最高优先）。 */
   degradeEnv?: string
@@ -86,10 +89,46 @@ export interface MarkTierInput {
   /** 终端主字体（可选，全角 CJK 字体识别信号之一）。 */
   font?: string
   /** DSR-6 探针读回的列 advance（solid=█ advance / half=▄ advance；null=未探/不支持）。 */
-  probeAdvance?: { solid: number | null; half: number | null } | null
+  probeAdvance?: MarkAdvanceSignal | null
 }
 
-export type MarkBlocklistEntry = Readonly<{ terminal: string; font?: string; tier: 1 | 2 }>
+/**
+ * BR-7 矩阵 blocklist 条目（0.1.35 登记机制，spec §3.5 b「软面定因登记禁裸记」）：
+ * terminal(+font) 组合 → 降对应档。`advanceSignal`（DSR-6 探针读回列 advance，错位信号
+ * ≠1）+ `reproSteps`（复现步骤）= 定因登记字段——**加项须附定因，非裸记**（见
+ * `isRegisteredMarkBlocklistEntry` 判别 + MARK_BLOCKLIST 头注登记协议）。
+ */
+export type MarkBlocklistEntry = Readonly<{
+  terminal: string
+  font?: string
+  tier: 1 | 2
+  /** 定因（非裸记）：DSR-6 探针读回列 advance（solid=█ / half=▄；任一 ≠1 = 错位信号）。 */
+  advanceSignal?: MarkAdvanceSignal
+  /** 定因（非裸记）：该 terminal(+font) 组合的错位复现步骤。 */
+  reproSteps?: string
+}>
+
+/** 完整定因登记条目（terminal+tier 必填 + 定因 advanceSignal 或 reproSteps 至少其一，非裸记）。 */
+export type RegisteredMarkBlocklistEntry = MarkBlocklistEntry & {
+  advanceSignal: MarkAdvanceSignal
+  reproSteps: string
+}
+
+/**
+ * 登记纪律判别（纯）：条目是否「完整定因登记」（非裸记）。
+ * 完整 = terminal 非空 + tier 合法（1|2）+ 定因字段（advanceSignal 或 reproSteps）在场。
+ * 供「软面定因登记禁裸记」纪律兜底：e2e/Brand 侧出登记项经此判别的完整项方可入列。
+ */
+export function isRegisteredMarkBlocklistEntry(
+  entry: MarkBlocklistEntry,
+): entry is RegisteredMarkBlocklistEntry {
+  return (
+    entry.terminal.length > 0 &&
+    (entry.tier === 1 || entry.tier === 2) &&
+    (entry.advanceSignal !== undefined ||
+      (entry.reproSteps !== undefined && entry.reproSteps.length > 0))
+  )
+}
 
 /**
  * 纯判定（供判别单测）：③ 手动 env > ① blocklist 命中 > ② 探针 advance≠1 > 默认 T0。
