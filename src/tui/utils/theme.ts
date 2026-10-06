@@ -163,11 +163,14 @@ const lightTheme: Theme = {
   // TUI V2 colors
   brand_mark: 'rgb(217,119,6)', // = light brand (amber-deep, AA on white)
   brand_mark_bg: 'rgb(0,0,0)',
-  // BR-3 棱镜光锥 3 色板（truecolor，spec §4.1）
+  // BR-3 棱镜光锥 4 色板（truecolor，spec §4.1）
+  // O-8（0.1.34）：light 系白底安全变体 = 同色相加深（WCAG 非文本 3:1 线；实算 5.03/5.18，
+  // 对比度记录 docs/assets/brand-system-spec.md §3）——dark 系白底沿 dark 原值（黑底 ≥3:1）。
+  // blue/violet 白底 4.83/6.24 已达标不变；amber/flame 原值白底 1.73/2.31 不可读（O-8 定因）。
   ascendBlue: 'rgb(0,102,255)',
   ascendViolet: 'rgb(155,58,138)',
-  ascendAmber: 'rgb(255,184,0)',
-  ascendFlame: 'rgb(255,140,66)',
+  ascendAmber: 'rgb(180,83,9)', // amber-700 = light brand（白底 5.03:1，同 token 保叙事）
+  ascendFlame: 'rgb(194,65,12)', // orange-700（白底 5.18:1，焰色同族加深）
   userMessageBackground: 'rgb(240, 240, 240)', // Slightly darker grey for optimal contrast
   userMessageBackgroundHover: 'rgb(252, 252, 252)', // ≥250 to quantize distinct from base at 256-color level
   messageActionsBackground: 'rgb(232, 236, 244)', // cool gray — darker than userMsg 240 (visible on white), slight blue toward `suggestion`
@@ -416,11 +419,12 @@ const lightDaltonizedTheme: Theme = {
   // TUI V2 colors
   brand_mark: 'rgb(217,119,6)', // = light-daltonized brand (amber-deep，色盲安全蓝金轴)
   brand_mark_bg: 'rgb(0,0,0)',
-  // BR-3 棱镜光锥 3 色板（truecolor，色盲安全蓝→金轴 spec §4.3）
+  // BR-3 棱镜光锥 4 色板（truecolor，色盲安全蓝→金轴 spec §4.3）
+  // O-8（0.1.34）：light-daltonized 同 light 白底安全变体（色盲安全轴上同族加深）。
   ascendBlue: 'rgb(0,102,255)',
   ascendViolet: 'rgb(155,58,138)',
-  ascendAmber: 'rgb(255,184,0)',
-  ascendFlame: 'rgb(255,140,66)',
+  ascendAmber: 'rgb(180,83,9)',
+  ascendFlame: 'rgb(194,65,12)',
   userMessageBackground: 'rgb(220, 220, 220)', // Slightly darker grey for optimal contrast
   userMessageBackgroundHover: 'rgb(232, 232, 232)', // ≥230 to quantize distinct from base at 256-color level
   messageActionsBackground: 'rgb(210, 216, 226)', // cool gray — darker than userMsg 220, slight blue

@@ -45,12 +45,22 @@ const ASCEND_PALETTE_KEYS = [
   'ascendFlame',
 ] as const
 
-// truecolor 主题（light / light-daltonized / dark / dark-daltonized）色板值
-const TRUECOLOR_PALETTE: Record<(typeof ASCEND_PALETTE_KEYS)[number], string> = {
+// dark 系 truecolor（dark / dark-daltonized）色板值（黑底，4 色 ≥3:1 不变）
+const DARK_TRUECOLOR_PALETTE: Record<(typeof ASCEND_PALETTE_KEYS)[number], string> = {
   ascendBlue: 'rgb(0,102,255)',
   ascendViolet: 'rgb(155,58,138)',
   ascendAmber: 'rgb(255,184,0)',
   ascendFlame: 'rgb(255,140,66)',
+}
+
+// light 系 truecolor（light / light-daltonized）色板值
+// O-8（0.1.34）：白底安全变体 = 同色相加深（amber→amber-700 5.03:1 / flame→orange-700
+// 5.18:1；blue 4.83:1 / violet 6.24:1 已达标不变）——原 dark 同值白底 1.73/2.31 不可读。
+const LIGHT_TRUECOLOR_PALETTE: Record<(typeof ASCEND_PALETTE_KEYS)[number], string> = {
+  ascendBlue: 'rgb(0,102,255)',
+  ascendViolet: 'rgb(155,58,138)',
+  ascendAmber: 'rgb(180,83,9)',
+  ascendFlame: 'rgb(194,65,12)',
 }
 
 // ansi 主题（dark-ansi / light-ansi）色板值（§4.2 降级链塌到 16 ANSI 两档）
@@ -119,12 +129,23 @@ describe('BR-3 mark 键族改名 + 光锥色板（0.1.33 D-9）', () => {
     expect(getTheme('light-ansi').brand_mark_bg).toBe('ansi:black')
   })
 
-  test('光锥 4 色板：truecolor 4 段 / ansi 塌两档（spec §4.1/§4.2 降级链）', () => {
-    const truecolor = ['light', 'light-daltonized', 'dark', 'dark-daltonized']
-    for (const name of truecolor) {
+  test('光锥 4 色板：truecolor 4 段（dark 原值 / light 白底安全变体）/ ansi 塌两档（spec §4.1/§4.2 降级链）', () => {
+    const darkTruecolor = ['dark', 'dark-daltonized']
+    for (const name of darkTruecolor) {
       const t = getTheme(name as ThemeName)
       for (const key of ASCEND_PALETTE_KEYS) {
-        expect(t[key], `${name}.${key} = truecolor 值`).toBe(TRUECOLOR_PALETTE[key])
+        expect(t[key], `${name}.${key} = dark truecolor 原值（零回归）`).toBe(
+          DARK_TRUECOLOR_PALETTE[key],
+        )
+      }
+    }
+    const lightTruecolor = ['light', 'light-daltonized']
+    for (const name of lightTruecolor) {
+      const t = getTheme(name as ThemeName)
+      for (const key of ASCEND_PALETTE_KEYS) {
+        expect(t[key], `${name}.${key} = light 白底安全变体（O-8）`).toBe(
+          LIGHT_TRUECOLOR_PALETTE[key],
+        )
       }
     }
     const ansi = ['dark-ansi', 'light-ansi']
@@ -132,6 +153,49 @@ describe('BR-3 mark 键族改名 + 光锥色板（0.1.33 D-9）', () => {
       const t = getTheme(name as ThemeName)
       for (const key of ASCEND_PALETTE_KEYS) {
         expect(t[key], `${name}.${key} = ansi 降级值`).toBe(ANSI_PALETTE[key])
+      }
+    }
+  })
+})
+
+describe('O-8 光锥 4 色白底/黑底对比度（0.1.34，WCAG 非文本 3:1 线）', () => {
+  // WCAG 2.x 相对亮度 + 对比度（白底/黑底双向，图形 3:1 线——堵"只验在场不验可读"判据缺口，
+  // 与 e2e gate C1 的 light 场景对比度断言交叉：本单测=源级数值，gate=SGR 实捕）
+  function wcagContrast(rgb: string, bg: 'white' | 'black'): number {
+    const m = /^rgb\((\d+),(\d+),(\d+)\)$/.exec(rgb)
+    if (!m) throw new Error(`non-truecolor value: ${rgb}`)
+    const lin = [Number(m[1]), Number(m[2]), Number(m[3])].map(v => {
+      const c = v / 255
+      return c > 0.03928 ? Math.pow((c + 0.055) / 1.055, 2.4) : c / 12.92
+    })
+    const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+    const Lbg = bg === 'white' ? 1 : 0
+    const [hi, lo] = L > Lbg ? [L, Lbg] : [Lbg, L]
+    return (hi + 0.05) / (lo + 0.05)
+  }
+
+  test('light 系 truecolor 光锥 4 色白底对比度 ≥ 3:1（O-8 保形案①白底安全变体）', () => {
+    for (const name of ['light', 'light-daltonized'] as ThemeName[]) {
+      const t = getTheme(name)
+      for (const key of ASCEND_PALETTE_KEYS) {
+        const ratio = wcagContrast(t[key], 'white')
+        expect(
+          ratio,
+          `${name}.${key} = ${t[key]} 白底 ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(3)
+      }
+    }
+  })
+
+  test('dark 系 truecolor 光锥 4 色黑底对比度 ≥ 3:1（零回归护栏）', () => {
+    for (const name of ['dark', 'dark-daltonized'] as ThemeName[]) {
+      const t = getTheme(name)
+      for (const key of ASCEND_PALETTE_KEYS) {
+        const ratio = wcagContrast(t[key], 'black')
+        expect(
+          ratio,
+          `${name}.${key} = ${t[key]} 黑底 ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(3)
       }
     }
   })

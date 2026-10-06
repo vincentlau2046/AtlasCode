@@ -43,5 +43,13 @@
 | `ansi:yellowBright` on 黑（darkAnsi） | **19.56** | ✅ AAA |
 | `ansi:yellowBright` on 白（lightAnsi） | **1.07** | ⚠️ 已知限制（§2 定因） |
 | （对照）旧 Anthropic 橙 `rgb(215,119,87)` on 黑 | 6.67 | ✅（被替换） |
+| 光锥 4 色 `#FFB800`/`#FF8C42` on 白（light，0.1.33 原值） | 1.73 / 2.31 | ⚠️ O-8 定因记录（<3:1 不可读，0.1.34 替换） |
+| 光锥 4 色 `#B45309` on 白（light light-cone amber，O-8 0.1.34） | **5.02** | ✅ 非文本 3:1 线（mark 图形判据） |
+| 光锥 4 色 `#C2410C` on 白（light light-cone flame，O-8 0.1.34） | **5.18** | ✅ 非文本 3:1 线（mark 图形判据） |
+| 光锥 4 色 `#0066FF` on 白（light light-cone blue，O-8 不变） | **4.83** | ✅ 非文本 3:1 线 |
+| 光锥 4 色 `#9B3A8A` on 白（light light-cone violet，O-8 不变） | **6.24** | ✅ 非文本 3:1 线 |
+| 光锥 4 色 on 黑（dark 系 4 色，O-8 零回归） | 12.11 / 9.08 / 3.37 / 4.34 | ✅ 非文本 3:1 线 |
+
+注：光锥 mark = 非文本图形，判据 = WCAG 非文本 3:1 线（非 AA 文本 4.5）；O-8（0.1.34）= light/lightDaltonized 光锥 4 色白底安全变体（同色相加深，`theme.ts` light 系 2 块 4 键），gate 判据补 light 场景对比度断言（堵"只验在场不验可读"缺口，单测 `tests/unit/theme-brand-warm-gold.test.ts` O-8 节交叉）。
 
 6 主题启动不炸 = TUI 各主题冒烟（e2e gate ②③ 抽查 dark/light + 2 ansi）。
