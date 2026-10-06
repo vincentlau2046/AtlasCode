@@ -17,6 +17,11 @@ import { getBeamArt, resolveMarkTierFromEnv } from './markDegrade.js'
 // 解析档位渲染。BEAM_ART（=T0）re-export 保 AnimatedBeam 等既有 import 面。
 export { BEAM_ART } from './markDegrade.js'
 
+// wordmark 双语 tagline（spec §3.3）：中文主 tagline + 英文次 tagline（低权重，
+// O-12 档 C ≥200 列右侧重平衡时移出卡内、右对齐到 feed 列右缘，单一事实源见下常量）。
+const PRIMARY_TAGLINE = '算力驱动的 Coding Agent'
+export const SECONDARY_TAGLINE = 'AI Coding Agent'
+
 // wordmark 双色（spec §3.3）："Atlas" 暖金（brand）+ "Code" 冷蓝（ascendBlue）。
 // 不硬编码品牌字面（D-2）：family 段取 PRODUCT_FAMILY，suffix 段 = PRODUCT_BRAND 去 family 前缀。
 function wordmarkParts(): { family: string; suffix: string } {
@@ -25,7 +30,7 @@ function wordmarkParts(): { family: string; suffix: string } {
   return { family, suffix }
 }
 
-function WordmarkAndTagline() {
+function WordmarkAndTagline({ omitSecondary }: { omitSecondary?: boolean }) {
   const { family, suffix } = wordmarkParts()
   return (
     <>
@@ -33,15 +38,17 @@ function WordmarkAndTagline() {
         <Text color="brand">{family}</Text>
         <Text color="ascendBlue">{suffix}</Text>
       </Text>
-      <Text dimColor={true}>算力驱动的 Coding Agent</Text>
-      <Text dimColor={true}>AI Coding Agent</Text>
+      <Text dimColor={true}>{PRIMARY_TAGLINE}</Text>
+      {!omitSecondary && <Text dimColor={true}>{SECONDARY_TAGLINE}</Text>}
     </>
   )
 }
 
-export function Beam(): React.ReactNode {
+// O-12 档 C（0.1.35）：rebalance（≥200 列）时英文次 tagline 移出卡内（右对齐列承载），
+// 卡内品牌块让渡一行；既有调用方（CondensedLogo 等）不传 prop = 双 tagline 全渲染，零回归。
+export function Beam({ rebalance }: { rebalance?: boolean }): React.ReactNode {
   if (env.terminal === 'Apple_Terminal') {
-    return <AppleTerminalBeam />
+    return <AppleTerminalBeam rebalance={rebalance} />
   }
   // BR-7：按 ③ ATLAS_MARK_DEGRADE env + ① blocklist 解析 3 档（默认 T0）
   const art = getBeamArt(resolveMarkTierFromEnv())
@@ -50,21 +57,21 @@ export function Beam(): React.ReactNode {
       {art.map((row, i) => (
         <Text key={i} color={row.color}>{row.chars}</Text>
       ))}
-      <WordmarkAndTagline />
+      <WordmarkAndTagline omitSecondary={rebalance} />
     </Box>
   )
 }
 
 // Apple Terminal 不渲染字符间垂直空隙 → 单色 brand_mark，形状同上（空腔保留，spec §8.2）。
 // BR-7：形状降级仍随档位解析（色固定 brand_mark 单色，色彩降级走 §4.2 独立链）。
-function AppleTerminalBeam() {
+function AppleTerminalBeam({ rebalance }: { rebalance?: boolean }) {
   const art = getBeamArt(resolveMarkTierFromEnv())
   return (
     <Box flexDirection="column" alignItems="center">
       {art.map((row, i) => (
         <Text key={i} color="brand_mark">{row.chars}</Text>
       ))}
-      <WordmarkAndTagline />
+      <WordmarkAndTagline omitSecondary={rebalance} />
     </Box>
   )
 }

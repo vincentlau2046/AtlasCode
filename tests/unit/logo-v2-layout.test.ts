@@ -16,8 +16,10 @@
 import { describe, expect, test } from 'bun:test'
 import {
   WIDE_CENTRAL_MIN_COLUMNS,
+  WIDE_REBALANCE_MIN_COLUMNS,
   calculateLayoutDimensions,
   calculateOptimalLeftWidth,
+  formatRebalanceMetaLine,
   getLayoutMode,
 } from '../../src/tui/utils/logoV2Utils.js'
 
@@ -87,6 +89,63 @@ describe('O-12 档 A：非宽终端/紧凑模式零回归', () => {
     expect(d.leftWidth).toBe(56)
     expect(d.rightWidth).toBe(56)
     expect(d.totalWidth).toBe(56)
+  })
+})
+
+describe('O-12 档 C：WIDE_REBALANCE_MIN_COLUMNS 阈值 + rebalance 维度（spec §0.4 档 C）', () => {
+  // 档 C（用户 2026-10-06 裁定，封口版 A+C 同波）：columns≥200 时右侧重平衡——
+  // 低权重元素（tagline 第 2 行 / 版本号+模型合并行）右对齐到 feed 列右缘 +
+  // 卡内 meta 压缩（version+model 合并、cwd 下沉 footer ⌂ 段）。
+  // 纯函数面 = rebalance 布尔维度 + formatRebalanceMetaLine 合并行格式（LogoV2 侧消费）。
+  test('阈值导出 = 200（e2e gate ⑥ 右侧重平衡判据的 200 界）', () => {
+    expect(WIDE_REBALANCE_MIN_COLUMNS).toBe(200)
+  })
+
+  test('200 列（用户常态大窗）= 档 C 开启：rebalance=true，档 A 维度不受影响（leftPad=75 仍居中）', () => {
+    const d = calculateLayoutDimensions(200, 'horizontal', 50)
+    expect(d.rebalance).toBe(true)
+    expect(d.leftPad).toBe(75)
+  })
+
+  test('边界判别：199 列 rebalance=false（未达阈值，档 A 形态）/ 200 列 =true', () => {
+    expect(calculateLayoutDimensions(199, 'horizontal', 50).rebalance).toBe(false)
+    expect(calculateLayoutDimensions(200, 'horizontal', 50).rebalance).toBe(true)
+  })
+
+  test('160 列 = 仅档 A（居中开、右侧重平衡关）：rebalance=false 且 leftPad=55', () => {
+    const d = calculateLayoutDimensions(160, 'horizontal', 50)
+    expect(d.rebalance).toBe(false)
+    expect(d.leftPad).toBe(55)
+  })
+
+  test('120 列 = 双档全关（左锚定 + 无右侧重平衡，零回归）', () => {
+    const d = calculateLayoutDimensions(120, 'horizontal', 50)
+    expect(d.rebalance).toBe(false)
+    expect(d.leftPad).toBe(0)
+  })
+
+  test('compact 模式（<70 列）rebalance 恒 false（CondensedLogo 早退分支不消费右侧重平衡）', () => {
+    expect(calculateLayoutDimensions(60, 'compact', 50).rebalance).toBe(false)
+  })
+
+  test('rebalance 不改变档 A 尺寸公式（200 列 rightWidth/totalWidth 与档 A 同值）', () => {
+    const d = calculateLayoutDimensions(200, 'horizontal', 50)
+    expect(d.rightWidth).toBe(68)
+    expect(d.totalWidth).toBe(196)
+  })
+})
+
+describe('O-12 档 C：formatRebalanceMetaLine version+model 合并行', () => {
+  test('v 前缀 + 全角中点分隔合并（版本号自 welcome 边框标题下沉至此行）', () => {
+    expect(formatRebalanceMetaLine('0.1.35', 'claude-sonnet-5-5 · API Usage Billing')).toBe(
+      'v0.1.35 · claude-sonnet-5-5 · API Usage Billing',
+    )
+  })
+
+  test('modelLine 含 oauth org 段时整体并入（不拆分）', () => {
+    expect(formatRebalanceMetaLine('0.1.35', 'm · billing · org')).toBe(
+      'v0.1.35 · m · billing · org',
+    )
   })
 })
 

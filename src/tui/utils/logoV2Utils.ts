@@ -24,6 +24,10 @@ const CONTENT_PADDING = 2
 // columns≥160 时品牌块组合体左 margin=(cols−cardWidth)/2 居中（宽屏仪式感回归）；
 // <160 保持左锚定零回归。
 export const WIDE_CENTRAL_MIN_COLUMNS = 160
+// O-12 档 C（0.1.35，spec §0.4）：宽终端（≥200 列）右侧重平衡阈值。
+// columns≥200 时低权重元素右对齐（tagline 第 2 行 / 版本号+模型合并行）到 feed 列右缘，
+// 卡内 meta 压缩（version+model 合并、cwd 下沉 footer ⌂ 段）；<200 保持档 A 形态零回归。
+export const WIDE_REBALANCE_MIN_COLUMNS = 200
 
 export type LayoutMode = 'horizontal' | 'compact'
 
@@ -33,6 +37,8 @@ export type LayoutDimensions = {
   totalWidth: number
   /** O-12 档 A：品牌卡左 margin（columns≥160 居中时 >0，否则 0；LogoV2 侧以 marginLeft 施加） */
   leftPad: number
+  /** O-12 档 C：宽终端右侧重平衡（columns≥200 horizontal 时 true；LogoV2 侧右对齐低权重 meta） */
+  rebalance: boolean
 }
 
 /**
@@ -80,7 +86,12 @@ export function calculateLayoutDimensions(
         totalWidth - leftPad - leftWidth - DIVIDER_WIDTH - CONTENT_PADDING
     }
 
-    return { leftWidth, rightWidth, totalWidth, leftPad }
+    // O-12 档 C（0.1.35 spec §0.4）：宽终端（≥200 列）右侧重平衡——
+    // 低权重元素（tagline 第 2 行 / 版本号+模型合并行）右对齐到 feed 列右缘 +
+    // 卡内 meta 压缩（version+model 合并、cwd 下沉 footer ⌂ 段）。
+    // 仅加性布尔维度：右对齐行叠于 feed 列宽度之上，不改变档 A 尺寸公式。
+    const rebalance = columns >= WIDE_REBALANCE_MIN_COLUMNS
+    return { leftWidth, rightWidth, totalWidth, leftPad, rebalance }
   }
 
   // Vertical mode
@@ -90,7 +101,19 @@ export function calculateLayoutDimensions(
     rightWidth: totalWidth,
     totalWidth,
     leftPad: 0,
+    rebalance: false,
   }
+}
+
+/**
+ * O-12 档 C（0.1.35）：version+model 合并 meta 行（低权重，≥200 列右侧重平衡时
+ * 右对齐于 feed 列右缘；版本号自 welcome 边框标题下沉至此，边框标题去版本号）。
+ */
+export function formatRebalanceMetaLine(
+  version: string,
+  modelLine: string,
+): string {
+  return `v${version} · ${modelLine}`
 }
 
 /**
