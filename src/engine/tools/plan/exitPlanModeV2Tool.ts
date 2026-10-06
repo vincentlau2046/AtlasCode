@@ -30,11 +30,16 @@
  *    无该成员；消费面 = loop 确认弹框机制（TUI/loop 波）+ teammate 面
  *    （C 桶 ③ shell·swarm 波域））。
  *  ④ 旧 auto-mode gate 面整族裁（feature('TRANSCRIPT_CLASSIFIER') 新仓无
- *    GB 整砍 + autoModeState/permissionSetup auto-mode 门族：gate-off
- *    fallback 通知支（context.addNotification TUI 面）/ restoring-to-auto
- *    判别支 / strip·restoreDangerousPermissions / setAutoModeActive）→
- *    裁 + 登记归属 C 桶 ② auto-mode 纵切波（~3030L 分类器族消费位；
- *    S-D1 裁定重指）。prePlanMode 恢复链主体保留 = delta ⑤。
+ *    GB 整砍 + autoModeState/permissionSetup auto-mode 门族）→ 裁 + 登记
+ *    归属 C 桶 ② auto-mode 纵切波（~3030L 分类器族消费位；S-D1 裁定
+ *    重指）。prePlanMode 恢复链主体保留 = delta ⑤。
+ *    ★ 0.1.37 ② P11 状态机子集回填（本波，R1 裁定=处置①）：gate-off
+ *    fallback 支 / restoring-to-auto 判别支（finalRestoringAuto +
+ *    autoWasUsedDuringPlan kick-out）/ strip·restoreDangerousPermissions
+ *    （空集支契约形）/ setAutoModeActive —— call 体 kick-out 支逐行对照
+ *    TUI exit 303-383 + CC :1233-1248。仍裁面 = addNotification 用户可见
+ *    通知面（归 TUI/attachment 波，engine 面 = logForDebugging）+ 危险
+ *    规则检测族（findDangerousClassifierPermissions 等 ~400L 归 C 桶 ②）。
  *  ⑤ 旧 4 个 plan-mode bootstrap 状态旗标（setHasExitedPlanMode /
  *    setNeedsAutoModeExitAttachment / setNeedsPlanModeExitAttachment /
  *    hasExitedPlanModeInSession，旧 bootstrap/state.ts:237/248/249/308
@@ -88,7 +93,14 @@ import {
   type ToolResultBlockParam,
   type ValidationResult,
 } from '../../../shared'
-import { logError } from '../../../shared'
+import { feature, logError, logForDebugging } from '../../../shared'
+import {
+  getAutoModeUnavailableReason,
+  isAutoModeGateEnabled,
+  restoreDangerousPermissions,
+  stripDangerousPermissionsForAutoMode,
+} from '../../permissions'
+import { isAutoModeActive, setAutoModeActive } from '../../../permissions'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../toolNames'
 
 export type { AllowedPrompt } from './planToolInput'
@@ -224,14 +236,58 @@ export const ExitPlanModeV2Tool: Tool = {
     // Ensure mode is changed when exiting plan mode.
     // This handles cases where permission flow didn't set the mode
     // (e.g., when PermissionRequest hook auto-approves without providing updatedPermissions).
-    // delta ④⑤⑧：旧 gate-off fallback 通知支 / auto-mode 判别支 /
-    // bootstrap 4 旗标 / 危险权限 strip·restore 族全裁（登记见头注，C 桶 ②）。
-    // delta ⑤ 保留主体 = prePlanMode 恢复链：
+    // delta ⑤ 保留主体 = prePlanMode 恢复链。
+    // 0.1.37 ② P11：plan 退出 kick-out 回填（逐行对照 TUI exit 303-383 +
+    // CC :1233-1248 模式）——gate-off fallback（断路器防御：prePlanMode
+    // auto-like 但 gate 关 → 恢复 'default'，不经由此路绕过断路器）+
+    // finalRestoringAuto / autoWasUsedDuringPlan kick-out + strip·restore 对。
+    // delta ④ 裁面状态机子集订正（见头注 + engine/permissions ② 登记）：
+    // 本波落 gate/strip·restore 状态机面；addNotification 用户可见通知面
+    // 归 TUI/attachment 波（engine 面 = debug 日志）；危险规则检测族仍归
+    // C 桶 ②（strip = 空集支契约形）。
     ctx?.setAppState(prev => {
       const prev_ = prev as ExitPlanModeV2AppState
       if (prev_.toolPermissionContext.mode !== 'plan') return prev_
-      const restoreMode = prev_.toolPermissionContext.prePlanMode ?? 'default'
-      const baseContext = prev_.toolPermissionContext
+      let restoreMode = prev_.toolPermissionContext.prePlanMode ?? 'default'
+      if (feature('TRANSCRIPT_CLASSIFIER')) {
+        // Circuit breaker defense（TUI 303-306 注释逐字语义）：if prePlanMode
+        // was an auto-like mode but the gate is now off (circuit breaker or
+        // settings disable), restore to 'default' instead. Without this,
+        // ExitPlanMode would bypass the circuit breaker by calling
+        // setAutoModeActive(true) directly.
+        if (restoreMode === 'auto' && !isAutoModeGateEnabled()) {
+          logForDebugging(
+            `[auto-mode gate @ ExitPlanModeV2Tool] prePlanMode=auto but gate is off (reason=${getAutoModeUnavailableReason()}) — falling back to default on plan exit`,
+            { level: 'warn' },
+          )
+          restoreMode = 'default'
+        }
+        const finalRestoringAuto = restoreMode === 'auto'
+        // Capture pre-restore state — isAutoModeActive() is the authoritative
+        // signal (prePlanMode/strippedDangerousRules are stale after
+        // transitionPlanAutoMode deactivates mid-plan).（TUI 注释逐字）
+        const autoWasUsedDuringPlan = isAutoModeActive()
+        setAutoModeActive(finalRestoringAuto)
+        if (autoWasUsedDuringPlan && !finalRestoringAuto) {
+          // plan 退出 kick-out 通知（CC :1233-1248 模式；TUI 对应支
+          // setNeedsAutoModeExitAttachment = 旧仓 any-stub no-op（H6）→
+          // 本波 = debug 日志面，用户可见通知归 TUI/attachment 波）
+          logForDebugging(
+            `[auto-mode gate @ ExitPlanModeV2Tool] auto mode kicked out on plan exit (was used during plan, restoring to ${restoreMode})`,
+            { level: 'warn' },
+          )
+        }
+      }
+      // If restoring to a non-auto mode and permissions were stripped (either
+      // from entering plan from auto, or from shouldPlanUseAutoMode),
+      // restore them. If restoring to auto, keep them stripped.（TUI 注释逐字）
+      const restoringToAuto = restoreMode === 'auto'
+      let baseContext = prev_.toolPermissionContext
+      if (restoringToAuto) {
+        baseContext = stripDangerousPermissionsForAutoMode(baseContext)
+      } else if (baseContext.strippedDangerousRules) {
+        baseContext = restoreDangerousPermissions(baseContext)
+      }
       return {
         ...prev_,
         toolPermissionContext: {

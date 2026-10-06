@@ -818,6 +818,17 @@ export {
   createDisabledBypassPermissionsContext,
   prepareContextForPlanMode,
   type DangerousPermissionInfo,
+  // 0.1.37 ② P11 plan×auto 状态机自洽支（engine/permissions ② 回填，
+  // 逐行对照 CC permissionSetup.ts 1446-1495 + TUI exit 303-383；
+  // autoMode state 族 = src/permissions 域根直 import，不经本门面
+  // （门面零父域 re-export 纪律不变））
+  getAutoModeUnavailableReason,
+  getUseAutoModeDuringPlan,
+  hasAutoModeOptIn,
+  isAutoModeGateEnabled,
+  restoreDangerousPermissions,
+  shouldPlanUseAutoMode,
+  stripDangerousPermissionsForAutoMode,
 } from './permissions'
 // E-4 S-4c2（§8.35）：persist 族 + createReadRuleSuggestion（域叶约束 → L3 层）
 export {

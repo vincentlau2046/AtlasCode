@@ -13,22 +13,36 @@
  *   6. shouldDisableBypassPermissions（GB 门裁 → settings 等价面，Promise 签名保留）
  *   7. isBypassPermissionsModeDisabled（GB 缓存裁 → settings 单源）
  *   8. createDisabledBypassPermissionsContext（bypass → default + available=false）
- *   9. prepareContextForPlanMode（plan 入口 prePlanMode 暂存）
+ *   9. prepareContextForPlanMode（plan 入口 prePlanMode 暂存；0.1.37 ② P11
+ *      回填 auto 语义支 + 新名 6：hasAutoModeOptIn / getUseAutoModeDuringPlan /
+ *      isAutoModeGateEnabled / getAutoModeUnavailableReason /
+ *      shouldPlanUseAutoMode / strip·restoreDangerousPermissions，见下 ③ 条目订正）
  *
  * 裁定 ②③④⑤⑨ 裁出面登记（复审勿当遗漏重提）:
  *   - ② GB 门裁：新仓无 GrowthBook（analytics/growthbook 整族未落）→
  *     bypass 门 = settings.permissions.disableBypassPermissionsMode === 'disable'
  *     单源；checkStatsigFeatureGate / checkSecurityRestrictionGate /
  *     getDynamicConfig* / getFlagDualRead 全不随迁
- *   - ③ auto 支裁：TRANSCRIPT_CLASSIFIER 整族（autoModeState / 危险规则检测
- *     isDangerous*Permission / find·strip·restore·remove 危险规则族 /
- *     transitionPermissionMode / verifyAutoModeGateAccess / getAutoMode* /
- *     shouldPlanUseAutoMode / transitionPlanAutoMode / checkAndDisableBypassPermissions
- *     （gracefulShutdown 面）/ isDefaultPermissionModeAuto）→ auto-mode 纵切波；
- *     本文件 dangerousPermissions / overlyBroadBashPermissions 返回字段 ≡ []
- *     （旧仓契约字段保留，值恒空）；settings defaultMode 'auto' 降级 'default'
- *     红线支保留（2026-09-19 裁定逐字，feature 门去掉——降级语义与 auto 未落
- *     前一致：绝不 session 默认进 auto）
+ *   - ③ auto 支裁（2026-10-07 订正）：**plan×auto 状态机自洽子集已回填
+ *     0.1.37 ②（P11 R1 ① 处置）** = prepareContextForPlanMode auto 语义支 +
+ *     谓词面（hasAutoModeOptIn / getUseAutoModeDuringPlan /
+ *     isAutoModeGateEnabled / getAutoModeUnavailableReason /
+ *     shouldPlanUseAutoMode）+ strip·restoreDangerousPermissions 契约形 +
+ *     plan 退出 kick-out（exitPlanModeV2Tool，CC :1233-1248 模式）；engine 面
+ *     适配登记：谓词 = settings 单源（② GB 裁先例，projectSettings 排除
+ *     RCE 红线逐字）/ gate = circuit + settings 双源（模型能力支
+ *     modelSupportsAutoMode 归 C 桶 ②）/ strip = 空集支（危险规则检测族
+ *     findDangerousClassifierPermissions / isDangerous* ~400L 归 C ②，
+ *     本文件 dangerousPermissions 返回字段 ≡ [] 不变）/ bootstrap 旗标族
+ *     （setNeedsAutoModeExitAttachment 等 4 件 = 旧仓 any-stub no-op，H6）
+ *     kick-out 通知 = debug 日志面，用户可见面归 TUI/attachment 波。
+ *     **剩余 auto 纵切仍在 C 桶 ②**：transitionPermissionMode /
+ *     verifyAutoModeGateAccess / getAutoMode*（AutoModeEnabledState 族）/
+ *     transitionPlanAutoMode / checkAndDisableBypassPermissions
+ *     （gracefulShutdown 面）/ isDefaultPermissionModeAuto；
+ *     settings defaultMode 'auto' 降级 'default' 红线支保留（2026-09-19
+ *     裁定逐字，feature 门去掉——降级语义与 auto 未落前一致：绝不 session
+ *     默认进 auto）
  *   - ④ validateDirectoryForWorkspace 裁（旧 commands/add-dir/validation →
  *     E-6 pathValidation 487L 纵切）：addDirs + settings.additionalDirectories
  *     直 apply cliArg（无校验/无 warnings 面，warnings ≡ []）
@@ -57,14 +71,16 @@ import {
   safeResolvePath,
   isEnvTruthy,
   logForDebugging,
+  feature,
   type AdditionalWorkingDirectory,
   type PermissionMode,
   type PermissionRuleSource,
   type PermissionRuleValue,
+  type PermissionUpdateDestination,
   type ToolPermissionContext,
 } from '../../shared'
 import { getOriginalCwd } from '../../bootstrap'
-import { getInitialSettings } from '../config'
+import { getInitialSettings, getSettingsForSource } from '../config'
 import {
   getToolsForDefaultPreset,
   parseToolPreset,
@@ -73,10 +89,12 @@ import {
 import {
   applyPermissionRulesToPermissionContext,
   applyPermissionUpdate,
+  isAutoModeCircuitBroken,
   normalizeLegacyToolName,
   permissionModeFromString,
   permissionRuleValueFromString,
   permissionRuleValueToString,
+  setAutoModeActive,
 } from '../../permissions'
 import { loadAllPermissionRulesFromDisk } from './permissionRulesLoader'
 
@@ -449,17 +467,208 @@ export function createDisabledBypassPermissionsContext(
   }
 }
 
+// ════════════════════════════════════════════════════════════
+// 0.1.37 ② P11 plan×auto 状态机自洽子集（R1 裁定 = 处置①）
+//
+// 逐行对照 CC 参照（restored-src permissionSetup.ts）：
+//   - hasAutoModeOptIn / getUseAutoModeDuringPlan：TUI 侧 settings 谓词
+//     逐字移植（4 可信源 user/local/flag/policy，projectSettings 排除 =
+//     RCE 红线，旧仓注释逐字）
+//   - shouldPlanUseAutoMode（CC 1446-1455）/ prepareContextForPlanMode
+//     auto 语义支（CC 1462-1495）/ strip·restoreDangerousPermissions
+//     （CC 510-584）
+//   - plan 退出 kick-out 落 exitPlanModeV2Tool（TUI exit 303-383 同构 +
+//     CC :1233-1248 模式）
+//
+// engine 面适配（delta 登记，见头注 ③ 条目订正；复审勿当遗漏重提）：
+//   - 谓词 = settings 单源（engine ② GB 裁先例；getSettingsForSource
+//     per-source 面）
+//   - isAutoModeGateEnabled = circuit + settings 双源（模型能力支
+//     modelSupportsAutoMode 归 C 桶 ② 前向接缝）
+//   - strip = CC 空集支（危险规则检测族归 C 桶 ②；契约字段保留，
+//     stash 形状锁定——C ② 回填检测族时换 dangerousPermissions 源，
+//     函数形不变）
+//   - bootstrap 旗标族（setNeedsAutoModeExitAttachment 等 4 件 = 旧仓
+//     any-stub no-op，H6 纪律）→ kick-out 通知 = debug 日志面，
+//     用户可见通知面归 TUI/attachment 波
+// ════════════════════════════════════════════════════════════
+
+/**
+ * Returns true if any trusted settings source has accepted the auto
+ * mode opt-in dialog. projectSettings is intentionally excluded —
+ * a malicious project could otherwise auto-bypass the dialog (RCE risk).
+ * （旧仓注释逐字；TUI 侧谓词移植，settings 单源 = engine ② GB 裁先例）
+ */
+export function hasAutoModeOptIn(): boolean {
+  if (!feature('TRANSCRIPT_CLASSIFIER')) return false
+  const user = getSettingsForSource('userSettings')
+  const local = getSettingsForSource('localSettings')
+  const flag = getSettingsForSource('flagSettings')
+  const policy = getSettingsForSource('policySettings')
+  const result = !!(
+    (user as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt ||
+    (local as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt ||
+    (flag as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt ||
+    (policy as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt
+  )
+  logForDebugging(
+    `[auto-mode] hasAutoModeOptIn=${result} skipAutoPermissionPrompt: user=${(user as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt} local=${(local as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt} flag=${(flag as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt} policy=${(policy as Record<string, unknown> | undefined)?.skipAutoPermissionPrompt}`,
+  )
+  return result
+}
+
+/**
+ * Returns whether plan mode should use auto mode semantics. Default true
+ * (opt-out). Returns false if any trusted source explicitly sets false.
+ * projectSettings is excluded so a malicious project can't control this.
+ * （旧仓注释逐字；TUI 侧谓词移植）
+ */
+export function getUseAutoModeDuringPlan(): boolean {
+  if (!feature('TRANSCRIPT_CLASSIFIER')) return true
+  return (
+    (getSettingsForSource('policySettings') as Record<string, unknown> | undefined)?.useAutoModeDuringPlan !== false &&
+    (getSettingsForSource('flagSettings') as Record<string, unknown> | undefined)?.useAutoModeDuringPlan !== false &&
+    (getSettingsForSource('userSettings') as Record<string, unknown> | undefined)?.useAutoModeDuringPlan !== false &&
+    (getSettingsForSource('localSettings') as Record<string, unknown> | undefined)?.useAutoModeDuringPlan !== false
+  )
+}
+
+/** settings 单源禁用面（TUI isAutoModeDisabledBySettings 逐字语义，
+ * getSettings_DEPRECATED → getInitialSettings engine 等价面）。 */
+function isAutoModeDisabledBySettings(): boolean {
+  const settings = (getInitialSettings() ?? {}) as Record<string, unknown>
+  return (
+    (settings.disableAutoMode as string | undefined) === 'disable' ||
+    ((settings.permissions as Record<string, unknown> | undefined)
+      ?.disableAutoMode as string | undefined) === 'disable'
+  )
+}
+
+/**
+ * Checks if auto mode can be entered: circuit breaker is not active and
+ * settings have not disabled it. Synchronous.
+ * （CC 1283 三源中模型能力支 modelSupportsAutoMode 归 C 桶 ② →
+ * engine 面 = circuit + settings 双源）
+ */
+export function isAutoModeGateEnabled(): boolean {
+  if (isAutoModeCircuitBroken()) return false
+  if (isAutoModeDisabledBySettings()) return false
+  return true
+}
+
+/**
+ * Returns the reason auto mode is currently unavailable, or null if
+ * available. （CC getAutoModeUnavailableReason engine 双源版；TUI 3 源
+ * 'model' 变体随模型能力支归 C 桶 ②）
+ */
+export function getAutoModeUnavailableReason():
+  | 'circuit-breaker'
+  | 'settings'
+  | null {
+  if (isAutoModeCircuitBroken()) return 'circuit-breaker'
+  if (isAutoModeDisabledBySettings()) return 'settings'
+  return null
+}
+
+/**
+ * 逐行对照 CC 1446-1455：plan 入口是否应启用 auto 语义的门链
+ * （opt-in && gate && useAutoModeDuringPlan；feature 关恒 false）。
+ */
+export function shouldPlanUseAutoMode(): boolean {
+  if (feature('TRANSCRIPT_CLASSIFIER')) {
+    return (
+      hasAutoModeOptIn() &&
+      isAutoModeGateEnabled() &&
+      getUseAutoModeDuringPlan()
+    )
+  }
+  return false
+}
+
+/**
+ * 逐行对照 CC 510-539（危险集源 = 空集支）：危险规则检测族（
+ * findDangerousClassifierPermissions / isDangerous* ~400L）归 C 桶 ②
+ * （本文件 ③ 裁定 dangerousPermissions ≡ []）→ 本切片 = CC
+ * `length === 0` 支逐字（契约字段保留，stash 形状锁定）。C ② 回填
+ * 检测族后换 dangerousPermissions 源，函数形不变。
+ */
+export function stripDangerousPermissionsForAutoMode(
+  context: ToolPermissionContext,
+): ToolPermissionContext {
+  return {
+    ...context,
+    strippedDangerousRules: context.strippedDangerousRules ?? {},
+  }
+}
+
+/**
+ * Restores dangerous allow rules previously stashed by
+ * stripDangerousPermissionsForAutoMode. Called when leaving auto mode so
+ * that the user's Bash(python:*), Agent(*), etc. rules work again in
+ * default mode. Clears the stash so a second exit is a no-op.
+ * （CC 561-584 逐字移植；applyPermissionUpdate / permissionRuleValueFromString
+ * 本文件既有 import）
+ */
+export function restoreDangerousPermissions(
+  context: ToolPermissionContext,
+): ToolPermissionContext {
+  const stash = context.strippedDangerousRules
+  if (!stash) {
+    return context
+  }
+  let result = context
+  for (const [source, ruleStrings] of Object.entries(stash)) {
+    if (!ruleStrings || ruleStrings.length === 0) continue
+    result = applyPermissionUpdate(result, {
+      type: 'addRules',
+      rules: ruleStrings.map(permissionRuleValueFromString),
+      behavior: 'allow',
+      destination: source as PermissionUpdateDestination,
+    })
+  }
+  return { ...result, strippedDangerousRules: undefined }
+}
+
 /**
  * Centralized plan-mode entry. Stashes the current mode as prePlanMode so
- * ExitPlanMode can restore it.
- * ③ auto 语义支裁（shouldPlanUseAutoMode / strip·restoreDangerousPermissions /
- * setAutoModeActive）→ auto-mode 纵切波；本切片 = plain plan 入口逐字面。
+ * ExitPlanMode can restore it. When the user has opted in to auto mode,
+ * auto semantics stay active during plan mode.（旧仓注释逐字）
+ *
+ * 0.1.37 ② P11：auto 语义支回填（逐行对照 CC 1462-1495）——planAutoMode
+ * 门链 + setAutoModeActive / strip·restore + prePlanMode 暂存。P11 验收
+ * 锚点①（opt-in auto 用户 EnterPlanMode 后 isAutoModeActive()==true）
+ * = 本函数 `planAutoMode && currentMode !== 'bypassPermissions'` 支。
  */
 export function prepareContextForPlanMode(
   context: ToolPermissionContext,
 ): ToolPermissionContext {
   const currentMode = context.mode
   if (currentMode === 'plan') return context
+  if (feature('TRANSCRIPT_CLASSIFIER')) {
+    const planAutoMode = shouldPlanUseAutoMode()
+    if (currentMode === 'auto') {
+      if (planAutoMode) {
+        return { ...context, prePlanMode: 'auto' }
+      }
+      setAutoModeActive(false)
+      // CC 此处 setNeedsAutoModeExitAttachment(true)（bootstrap 旗标 =
+      // 旧仓 any-stub no-op，H6）→ 本切片 = debug 日志面
+      logForDebugging(
+        `[auto-mode] plan entry from auto without plan×auto opt-in — auto deactivated (prePlanMode=auto)`,
+      )
+      return {
+        ...restoreDangerousPermissions(context),
+        prePlanMode: 'auto',
+      }
+    }
+    if (planAutoMode && currentMode !== 'bypassPermissions') {
+      setAutoModeActive(true)
+      return {
+        ...stripDangerousPermissionsForAutoMode(context),
+        prePlanMode: currentMode,
+      }
+    }
+  }
   logForDebugging(
     `[prepareContextForPlanMode] plain plan entry, prePlanMode=${currentMode}`,
   )
