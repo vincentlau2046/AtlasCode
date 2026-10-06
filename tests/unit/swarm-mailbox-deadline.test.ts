@@ -2,14 +2,18 @@
  * swarm 域 P1（0.1.36 切片①）mailbox 兜底协作式 deadline 判别单测
  * （unit 层：纯面 + 源级在场断言，零模型 / 零真盘 / 零网络）。
  *
- * 测面 = P1 修复两纯面（可 import 单测）：
+ * 测面 = P1 修复两纯面（可 import 单测；0.1.37 ⑧ 起定义收敛
+ * src/shared/permissionDeadline.ts 单一事实源，经 swarm 门面 re-export 消费，
+ * 本测试 import 面不变）：
  *   - resolveMailboxPermissionDeadlineMs：缺省 30_000 / env 合法正整数覆盖 /
  *     非法值（非数字）回落 / 非正值（0、负数）回落缺省。
  *   - approvalUnavailableReason(deadlineMs)：超时终态 fail-closed deny 的
  *     模型可见 reason（deny 措辞非 "confirmation required"，带 Nms 可审计）。
  * + 源级在场断言（readSrc 模式，锁 P1 接线不回归）：
- *   - inProcessRunner：settle 首胜闩 / poller + deadline 双 timer unref /
- *     deadline 消费 approvalUnavailableReason / cleanup 双清 + 释放 pendingCallbacks。
+ *   - shared/permissionDeadline：缺省常量 + env 覆盖 + 解析体在场（单一事实源）。
+ *   - inProcessRunner：shared 纯面消费（无本地重复定义）/ settle 首胜闩 /
+ *     poller + deadline 双 timer unref / deadline 消费 approvalUnavailableReason /
+ *     cleanup 双清 + 释放 pendingCallbacks / gate 第 6 参。
  *   - permissionPoller：P6-a drop 支 decided:unavailable 结构化审计行。
  *
  * 真 mailbox 全路径（杀 leader → N 秒 unavailable deny + 回合继续 + 进程可退）
@@ -92,14 +96,25 @@ describe('P1 源级在场断言（锁接线不回归）', () => {
     expect(cleanupBody).toContain('unregisterPermissionCallback(request.id)')
   })
 
-  test('inProcessRunner：deadline 缺省常量 + env 覆盖 + gate 第 6 参在场', () => {
-    const src = readSrc('swarm/inProcessRunner.ts')
+  test('shared/permissionDeadline：缺省常量 + env 覆盖 + 解析体在场（0.1.37 ⑧ 单一事实源）', () => {
+    const src = readSrc('shared/permissionDeadline.ts')
     expect(src).toContain('PERMISSION_MAILBOX_DEADLINE_MS = 30_000')
     expect(src).toContain('ATLAS_PERM_MAILBOX_DEADLINE_MS')
+    // 解析体语义（parseInt 基 10 + 有限正数判定 + 回落缺省）
+    expect(src).toContain('Number.parseInt(raw, 10)')
+    expect(src).toContain(
+      'Number.isFinite(parsed) && parsed > 0 ? parsed : PERMISSION_MAILBOX_DEADLINE_MS',
+    )
+  })
+
+  test('inProcessRunner：shared 纯面消费（无本地重复定义）+ gate 第 6 参在场', () => {
+    const src = readSrc('swarm/inProcessRunner.ts')
+    // 0.1.37 ⑧：纯面迁 shared 单一事实源（本文件仅消费，不重复定义）
+    expect(src).toContain('deadlineMs ?? resolveMailboxPermissionDeadlineMs()')
+    expect(src).not.toContain('export function resolveMailboxPermissionDeadlineMs')
+    expect(src).not.toContain('export function approvalUnavailableReason')
     // gate 签名第 6 参 deadlineMs（测试注入口，仅 mailbox 回退支消费）
     expect(src).toMatch(/deadlineMs\?:\s*number/)
-    // effDeadlineMs = 注入 deadlineMs ?? 缺省解析（协作式 timer 时长源）
-    expect(src).toContain('deadlineMs ?? resolveMailboxPermissionDeadlineMs()')
   })
 
   test('permissionPoller：P6-a drop 支 decided:unavailable 审计行在场', () => {

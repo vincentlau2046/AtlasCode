@@ -116,3 +116,10 @@ export { EFFORT_LEVELS, asSystemPrompt } from "./types"
 
 // B 波契约冻结：会话级类型（Permission/MCP/Task）
 export type * from "./types-session"
+
+// 0.1.37 ⑧：P1 mailbox 审批兜底 deadline 策略纯面（shared 单一事实源：swarm
+// engine + tui pane-worker 两消费面共享；boundaries tui↛swarm → shared 叶子）
+export {
+  resolveMailboxPermissionDeadlineMs,
+  approvalUnavailableReason,
+} from "./permissionDeadline"

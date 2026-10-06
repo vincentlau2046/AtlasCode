@@ -141,7 +141,9 @@
  */
 import { randomUUID } from 'node:crypto'
 import {
+  approvalUnavailableReason,
   logForDebugging,
+  resolveMailboxPermissionDeadlineMs,
   type Message,
   type PermissionMode,
   type PermissionUpdate,
@@ -237,37 +239,10 @@ type SetAppStateFn = SetAppState
 
 const PERMISSION_POLL_INTERVAL_MS = 500
 
-/**
- * P1（0.1.36 切片①）：mailbox 兜底协作式 deadline 缺省（ms）。
- * 参照 deepseek `guard/timeout-policy`（仅本层 timer 先到期才替换结果）：leader
- * 失响应超 deadline → 第 4 个终态 fail-closed deny（unavailable 语义），回合继续、
- * 进程可退、pendingCallbacks 不泄漏。30s = leader 审批的有界等待上限（超此 = leader
- * 失响应，回合不再无限挂死）。env `ATLAS_PERM_MAILBOX_DEADLINE_MS` 可覆盖（e2e V3
- * 探针设小值加速；非法/非正值回落缺省）。
- */
-const PERMISSION_MAILBOX_DEADLINE_MS = 30_000
-
-/** P1：mailbox 兜底 deadline 解析（env 覆盖 + 缺省回落；纯面 = 判别单测可测）。 */
-export function resolveMailboxPermissionDeadlineMs(): number {
-  const raw = process.env.ATLAS_PERM_MAILBOX_DEADLINE_MS
-  const parsed = raw !== undefined ? Number.parseInt(raw, 10) : NaN
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : PERMISSION_MAILBOX_DEADLINE_MS
-}
-
-/**
- * P1：timeout 终态 fail-closed deny 的模型可见 reason（unavailable 语义，**deny**
- * 措辞——超时场景恰是「无人可确认」，非 "confirmation required"；带 deadline Nms
- * 可审计）。经 toolExecution ask:false 支渲染 `permission denied: <reason>`
- * （is_error tool_result，模型可见、回合继续）。
- */
-export function approvalUnavailableReason(deadlineMs: number): string {
-  return (
-    `approval unavailable: the approver (leader) did not respond within ` +
-    `${deadlineMs}ms, so this tool use was denied (fail-closed) — the permission ` +
-    `request was not granted and the tool did NOT run. Try a different approach that ` +
-    `does not require approval, or retry once the approver is available.`
-  )
-}
+// P1（0.1.37 ⑧ 收敛）：deadline 策略纯面（resolveMailboxPermissionDeadlineMs /
+// approvalUnavailableReason + 缺省常量）迁 shared 单一事实源
+// src/shared/permissionDeadline.ts（engine/TUI 两消费面共享，boundaries tui↛swarm）；
+// 本文件经顶部 '../shared' import 消费，swarm/index.ts 门面 re-export 保 0.1.36 面。
 
 /** 旧 constants/xml.ts:52 逐字（delta ⑨）。 */
 const TEAMMATE_MESSAGE_TAG = 'teammate-message'

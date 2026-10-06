@@ -297,12 +297,17 @@ export {
   resolveTeammateAgentFace,
   createTeammateTpcBuilder,
   createInProcessPermissionGate,
-  // P1（0.1.36 切片①）：mailbox 兜底协作式 deadline 纯面（判别单测可测）。
-  resolveMailboxPermissionDeadlineMs,
-  approvalUnavailableReason,
   type InProcessRunnerConfig,
   type InProcessRunnerResult,
 } from './inProcessRunner'
+// P1（0.1.36 切片①→0.1.37 ⑧ 收敛）：mailbox 兜底协作式 deadline 纯面（判别单测
+// 可测）已迁 shared 单一事实源 src/shared/permissionDeadline.ts（engine/TUI 两
+// 消费面共享，boundaries tui↛swarm）；本门面 re-export 保 0.1.36 公开面（消费端
+// 经 swarm 门面解析不变）。
+export {
+  resolveMailboxPermissionDeadlineMs,
+  approvalUnavailableReason,
+} from '../shared'
 // S-E2d 权限同步族（旧仓 permissionSync 928L 全迁）：目录流（write/read/
 // resolve/cleanup/poll）+ mailbox 变体（send…ViaMailbox 族）+ sandbox
 // 变体（generateSandboxRequestId + sendSandbox…ViaMailbox 族）。
