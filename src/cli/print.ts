@@ -94,6 +94,7 @@ import {
   createAgentLoopDeps,
   createAbortController,
   createCronScheduler,
+  createDontAskTpc,
   createMcpTools,
   createPermissionGate,
   drainSdkEvents,
@@ -504,6 +505,25 @@ export function extractFinalAssistantText(loopResult: AgentLoopResult): string {
 
 // ── 驱动主体 ─────────────────────────────────────────────────────────
 
+/**
+ * P4（0.1.37 ④，trace 分析 P4 [MED]「无 TPC = allow」薄骨架默认硬化）：
+ * headless lane TPC 解析（fail-closed）——TPC 在场 = 原引用透传；缺失时
+ * 显式注入 dontAsk 语义 TPC（createDontAskTpc：无交互应答者 = 确定性
+ * deny，deepseek 'never' 策略模式）+ warn 级启动日志（headless lane 自家
+ * sink 通道真可观测；gate 侧 engine 缺失 TPC warn = shared logging port
+ * 前向接缝（C-4 占位 no-op），port 定案后自动活）。
+ */
+export function resolveHeadlessTpc(
+  tpc: ToolPermissionContext | undefined,
+): ToolPermissionContext {
+  if (tpc) return tpc
+  logForDebugging(
+    '[headless] TPC 缺失 — 以 dontAsk 语义 TPC fail-closed 运行（P4）',
+    { level: 'warn' },
+  )
+  return createDontAskTpc()
+}
+
 export async function runHeadless(
   inputPrompt: string | AsyncIterable<string>,
   options: HeadlessOptions,
@@ -653,7 +673,11 @@ export async function runHeadless(
 
   // 活 TPC ref（allow 支 permission updates 活更新；工具面 1c getAppState
   // 活读不变量——旧 appState.toolPermissionContext 活态语义等价）
-  const tpcRef: { current: ToolPermissionContext } = { current: initialTpc }
+  // P4（0.1.37 ④）：headless lane fail-closed——TPC 缺失时显式注入 dontAsk
+  // 语义 TPC（不回落「无 TPC = allow」薄骨架兼容默认，静默全放行风险）
+  const tpcRef: { current: ToolPermissionContext } = {
+    current: resolveHeadlessTpc(initialTpc),
+  }
 
   // ── canUseTool + 权限门（ask 支 SDK prompt 路由）──
   const onPermissionPrompt = (details: RequiresActionDetails): void => {

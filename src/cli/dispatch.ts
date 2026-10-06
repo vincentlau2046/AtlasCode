@@ -19,7 +19,18 @@
  *     （remote 族波 / 网关波 前向缝登记（§8.74.28 ⑭，#200），§8.71.1.3）
  *   - stopCapturingEarlyInput（早期输入捕获面未落盘，残留守）
  *   - SIGINT 非 -p 支：旧 gracefulShutdown(0) 族缺席（残留守）→ process.exit(0)
- *     逐字落地（headless -p 支由 print.ts 自注册 handler，S-C3 核销）
+ *     逐字落地（headless -p 支由 print.ts 自注册 handler，S-C3 核销）。
+ *     P5（0.1.37 ④）处置 = 零码前向接缝登记：长驻非 print lane（bridge/
+ *     launchRepl）未落盘（壳波 #152 前向接缝，else 支 exit(1) 快速终止），
+ *     现所有非 print lane 均短命，process.exit(0) 行为正确（cli 域无 session
+ *     态需冲刷）；TUI 车道（atlas code 支，atlascode/cli.ts 懒闭包 ui/main）
+ *     不走 dispatch.main()，自有 setupGracefulShutdown（tui/entrypoints/
+ *     init.ts:79，语义不变）。壳波 #152 落长驻 lane 时复用 TUI 装配
+ *     （src/tui/utils/gracefulShutdown.ts 机械已存在）；cli 域 allow 面
+ *     不含 tui（boundaries element-types）+ STR-1 门面收口（跨域仅
+ *     index.ts）双阻 cli→tui import，cli 域内复用装配须产品级边界配置
+ *     变更，④ 廉价批不裁。P5 验收（bridge Ctrl+C session 冲刷 + hook 执行
+ *     + exit 0 + 无半写文件）随壳波 #152 延期。
  *   - clientType 'claude-vscode' / 'claude-desktop' / 'local-agent' / 'remote'
  *     判定支保留（env 判定数据面，无消费依赖；desktop/CCR 消费面缺席不阻塞）
  */
@@ -87,7 +98,9 @@ export async function main(): Promise<void> {
     if (process.argv.includes('-p') || process.argv.includes('--print')) {
       return
     }
-    // 裁登记：旧 gracefulShutdown(0) 族缺席（残留守），process.exit(0) 逐字
+    // P5（0.1.37 ④）裁：现非 print lane 全短命，process.exit(0) 行为正确；
+    // 长驻 lane SIGINT 复用 TUI gracefulShutdown 装配 = 壳波 #152 随长驻
+    // lane 落盘（头注裁登记段 P5 段：边界双阻 + 前向接缝）
     process.exit(0)
   })
 

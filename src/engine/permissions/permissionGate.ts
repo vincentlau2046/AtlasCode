@@ -39,7 +39,7 @@
  */
 import type { PermissionTool } from '../../permissions'
 import { hasPermissionsToUseTool } from '../../permissions'
-import type { ToolPermissionContext } from '../../shared'
+import { logForDebugging, type ToolPermissionContext } from '../../shared'
 import type { GateVerdict, PermissionGate } from '../pipeline'
 
 /**
@@ -53,12 +53,28 @@ import type { GateVerdict, PermissionGate } from '../pipeline'
  * 未注入 = 1c catch 吞 TypeError 回落 passthrough（gate fail-closed），
  * 旧仓不变量失守——组合根（compose.ts ③）以活 TPC 窄视图注入。
  */
+// P4（0.1.37 ④）：TPC 缺失 warn 锁（每进程一次）——headless 热路径单次
+// 重建门（print.ts checkPermission 闭包），无锁则漏供 TPC 的 lane 每次
+// 工具检查刷一条日志。
+let noTpcWarned = false
+
 export function createPermissionGate(
   context: ToolPermissionContext,
   opts: {
     getAppState?(): { toolPermissionContext: ToolPermissionContext }
   } = {},
 ): PermissionGate {
+  // P4（0.1.37 ④）：TPC 缺失可观测化（trace 分析 P4 [MED]）——决策体薄
+  // 骨架「无 TPC = allow」兼容默认 = 静默全放行风险；构造点打 warn 级
+  // 启动日志（可观测化，共享默认不翻转——headless lane 经
+  // createDontAskTpc 显式注入 dontAsk 语义 TPC fail-closed）。
+  if (!context && !noTpcWarned) {
+    noTpcWarned = true
+    logForDebugging(
+      '[permission gate] TPC 缺失 — headless lane 应注入 dontAsk 语义 TPC（createDontAskTpc，fail-closed）；决策体回落「无 TPC = allow」薄骨架兼容默认',
+      { level: 'warn' },
+    )
+  }
   return async (tool, input): Promise<GateVerdict> => {
     const decision = await hasPermissionsToUseTool(
       tool as unknown as PermissionTool,

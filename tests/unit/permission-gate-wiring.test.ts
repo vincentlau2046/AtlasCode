@@ -23,6 +23,7 @@
 import { describe, test, expect } from 'bun:test'
 import {
   AgentTool,
+  createDontAskTpc,
   createPermissionGate,
   executeToolUse,
   GENERAL_PURPOSE_AGENT,
@@ -32,6 +33,11 @@ import {
   runAgent,
   type Tool,
 } from '../../src/engine'
+import { resolveHeadlessTpc } from '../../src/cli/print'
+import {
+  initDebugSink,
+  resetDebugSinkForTesting,
+} from '../../src/cli/debugSink'
 import type { ModelProvider, ModelRole } from '../../src/modelprovider'
 import { APIUserAbortError } from '../../src/modelprovider/types'
 import {
@@ -507,5 +513,69 @@ describe('S-E1 F4 abort 重抛（1c catch 控制流，§8.52 A3）', () => {
       getToolPermissionContext: () => ctx(),
     })
     expect(r).toBeNull()
+  })
+})
+
+/** P4（0.1.37 ④，trace 分析 P4 [MED]）：「无 TPC = allow」薄骨架默认硬化
+ * （静默全放行风险）——headless lane fail-closed 处置三件：
+ *   ① createPermissionGate 缺失 TPC warn 启动日志（gate 侧 shared logging
+ *     port 前向接缝，C-4 占位 no-op，port 定案后自动活）
+ *   ② headless lane 显式注入 dontAsk 语义 TPC（createDontAskTpc，deepseek
+ *     'never' 策略：无交互应答者 = 确定性 deny；域决策体 applyDontAskMode
+ *     将 dontAsk 态 ask 统一转 deny = DONT_ASK_REJECT_MESSAGE）
+ *   ③ resolveHeadlessTpc 缺失支 = dontAsk TPC + 自家 sink warn 启动日志
+ * 本测面 = 行为 ①（dontAsk gate → deny）+ 对照（default gate → ask 不变）
+ * + ③（resolveHeadlessTpc 缺失支 warn + 原引用透传支）。 */
+describe('P4（0.1.37 ④）TPC 缺失 fail-closed（headless dontAsk）', () => {
+  test('P4a dontAsk TPC → ask 决策转 deny（确定性拒绝，don\'t ask 措辞）', async () => {
+    const gate = createPermissionGate(createDontAskTpc())
+    const r = await executeToolUse(tu('p4a', 'Bash'), ASSISTANT, {
+      tools: [makeTool('Bash')],
+      checkPermission: gate,
+    })
+    expect(r.isError).toBe(true)
+    const body = String(r.block.content)
+    expect(body).toContain('permission denied')
+    expect(body).toContain("don't ask mode")
+  })
+
+  test('P4b 对照：default TPC 无规则 → ask fail-closed（交互 lane 语义不变）', async () => {
+    const gate = createPermissionGate(ctx())
+    const r = await executeToolUse(tu('p4b', 'Bash'), ASSISTANT, {
+      tools: [makeTool('Bash')],
+      checkPermission: gate,
+    })
+    expect(r.isError).toBe(true)
+    expect(String(r.block.content)).toContain(
+      'permission confirmation required',
+    )
+  })
+
+  test('P4c resolveHeadlessTpc 缺失支 → dontAsk TPC + warn 启动日志（stderr 同步捕获）；在场支 = 原引用透传 + 零日志', () => {
+    const captured: string[] = []
+    const origStderrWrite = process.stderr.write
+    process.stderr.write = ((s: string | Uint8Array) => {
+      captured.push(String(s))
+      return true
+    }) as typeof process.stderr.write
+    const savedArgv = [...process.argv]
+    process.argv = savedArgv.slice(0, 2).concat(['--debug-to-stderr'])
+    resetDebugSinkForTesting()
+    initDebugSink()
+    try {
+      const tpc = resolveHeadlessTpc(undefined)
+      expect(tpc.mode).toBe('dontAsk')
+      const joined = captured.join('')
+      expect(joined).toContain('[WARN]')
+      expect(joined).toContain('TPC 缺失')
+      // 在场 TPC = 原引用透传 + 不触发 warn（热路径零噪声）
+      const real = ctx()
+      expect(resolveHeadlessTpc(real)).toBe(real)
+      expect(captured.join('')).toBe(joined)
+    } finally {
+      resetDebugSinkForTesting()
+      process.argv = savedArgv
+      process.stderr.write = origStderrWrite
+    }
   })
 })

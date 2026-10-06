@@ -816,6 +816,9 @@ export {
   shouldDisableBypassPermissions,
   isBypassPermissionsModeDisabled,
   createDisabledBypassPermissionsContext,
+  // 0.1.37 ④ P4：headless lane fail-closed TPC 构造器（dontAsk 语义，
+  // createPermissionGate 缺失 TPC warn 的对偶面）
+  createDontAskTpc,
   prepareContextForPlanMode,
   type DangerousPermissionInfo,
   // 0.1.37 ② P11 plan×auto 状态机自洽支（engine/permissions ② 回填，

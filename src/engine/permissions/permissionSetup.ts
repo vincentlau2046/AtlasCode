@@ -674,3 +674,23 @@ export function prepareContextForPlanMode(
   )
   return { ...context, prePlanMode: currentMode }
 }
+
+/**
+ * P4（0.1.37 ④，trace 分析 P4 [MED]「无 TPC = allow」薄骨架默认硬化）：
+ * headless lane fail-closed TPC 构造器——dontAsk 语义（deepseek 'never'
+ * 策略模式：无交互应答者 → 确定性拒绝）。域决策体 applyDontAskMode
+ * （src/permissions/permissions.ts ② 支）将 dontAsk 态下任何 ask 决策转
+ * deny（DONT_ASK_REJECT_MESSAGE）→ headless lane 漏供 TPC 时显式注入本
+ * TPC = 确定性 deny，不静默全放行。零规则池（无 allow/deny/ask 规则、无
+ * 附加工作目录、bypass 不可用）= 除 allow 产点外全 ask→deny。
+ */
+export function createDontAskTpc(): ToolPermissionContext {
+  return {
+    mode: 'dontAsk',
+    additionalWorkingDirectories: new Map(),
+    alwaysAllowRules: {},
+    alwaysDenyRules: {},
+    alwaysAskRules: {},
+    isBypassPermissionsModeAvailable: false,
+  }
+}
