@@ -237,6 +237,38 @@ type SetAppStateFn = SetAppState
 
 const PERMISSION_POLL_INTERVAL_MS = 500
 
+/**
+ * P1（0.1.36 切片①）：mailbox 兜底协作式 deadline 缺省（ms）。
+ * 参照 deepseek `guard/timeout-policy`（仅本层 timer 先到期才替换结果）：leader
+ * 失响应超 deadline → 第 4 个终态 fail-closed deny（unavailable 语义），回合继续、
+ * 进程可退、pendingCallbacks 不泄漏。30s = leader 审批的有界等待上限（超此 = leader
+ * 失响应，回合不再无限挂死）。env `ATLAS_PERM_MAILBOX_DEADLINE_MS` 可覆盖（e2e V3
+ * 探针设小值加速；非法/非正值回落缺省）。
+ */
+const PERMISSION_MAILBOX_DEADLINE_MS = 30_000
+
+/** P1：mailbox 兜底 deadline 解析（env 覆盖 + 缺省回落；纯面 = 判别单测可测）。 */
+export function resolveMailboxPermissionDeadlineMs(): number {
+  const raw = process.env.ATLAS_PERM_MAILBOX_DEADLINE_MS
+  const parsed = raw !== undefined ? Number.parseInt(raw, 10) : NaN
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : PERMISSION_MAILBOX_DEADLINE_MS
+}
+
+/**
+ * P1：timeout 终态 fail-closed deny 的模型可见 reason（unavailable 语义，**deny**
+ * 措辞——超时场景恰是「无人可确认」，非 "confirmation required"；带 deadline Nms
+ * 可审计）。经 toolExecution ask:false 支渲染 `permission denied: <reason>`
+ * （is_error tool_result，模型可见、回合继续）。
+ */
+export function approvalUnavailableReason(deadlineMs: number): string {
+  return (
+    `approval unavailable: the approver (leader) did not respond within ` +
+    `${deadlineMs}ms, so this tool use was denied (fail-closed) — the permission ` +
+    `request was not granted and the tool did NOT run. Try a different approach that ` +
+    `does not require approval, or retry once the approver is available.`
+  )
+}
+
 /** 旧 constants/xml.ts:52 逐字（delta ⑨）。 */
 const TEAMMATE_MESSAGE_TAG = 'teammate-message'
 
@@ -425,6 +457,13 @@ export function createInProcessPermissionGate(
    * 双支零规则面）。
    */
   buildTpc?: () => ToolPermissionContext,
+  /**
+   * P1（0.1.36 切片①）：mailbox 兜底协作式 deadline（ms）。缺省 =
+   * resolveMailboxPermissionDeadlineMs()（env `ATLAS_PERM_MAILBOX_DEADLINE_MS` 覆盖，
+   * 缺省 30s）。仅 mailbox 回退支消费；leader 队列支（有交互 UI）不受影响。
+   * 测试注入口（注入小值驱动 deadline 终态）。
+   */
+  deadlineMs?: number,
 ): PermissionGate {
   const effectiveBuildTpc =
     buildTpc ??
@@ -594,6 +633,18 @@ export function createInProcessPermissionGate(
         teamName: identity.teamName,
       })
 
+      // P1（0.1.36 切片①）：协作式 deadline 的 settle 首胜闩（timeout-policy 参照：
+      // 仅"先 settle 者"生效）——第 4 个终态（超时）与 allow/reject/abort 三支互斥，
+      // 晚到的 mailbox 响应 / deadline 不二次 resolve（settled 闩）。
+      let settled = false
+      const settle = (verdict: GateVerdict) => {
+        if (settled) return
+        settled = true
+        resolve(verdict)
+      }
+      // deadline 缺省（env ATLAS_PERM_MAILBOX_DEADLINE_MS 覆盖）/ 测试注入 deadlineMs。
+      const effDeadlineMs = deadlineMs ?? resolveMailboxPermissionDeadlineMs()
+
       // Register callback to be invoked when the leader responds
       registerPermissionCallback({
         requestId: request.id,
@@ -609,7 +660,7 @@ export function createInProcessPermissionGate(
             updatedInput && Object.keys(updatedInput).length > 0
               ? updatedInput
               : ((input ?? {}) as Record<string, unknown>)
-          resolve({
+          settle({
             allowed: true,
             updatedInput: finalInput,
           })
@@ -619,7 +670,7 @@ export function createInProcessPermissionGate(
           const message = feedback
             ? `${SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX}${feedback}`
             : SUBAGENT_REJECT_MESSAGE
-          resolve({ allowed: false, ask: true, reason: message })
+          settle({ allowed: false, ask: true, reason: message })
         },
       })
 
@@ -631,13 +682,13 @@ export function createInProcessPermissionGate(
         async (
           abortController,
           cleanup,
-          resolve,
+          settle,
           identity,
           request,
         ) => {
           if (abortController.signal.aborted) {
             cleanup()
-            resolve({
+            settle({
               allowed: false,
               ask: true,
               reason: SUBAGENT_REJECT_MESSAGE,
@@ -681,14 +732,25 @@ export function createInProcessPermissionGate(
         PERMISSION_POLL_INTERVAL_MS,
         abortController,
         cleanup,
-        resolve,
+        settle,
         identity,
         request,
       )
+      // P1：poller timer unref（不阻塞进程干净退出；timer 卫生 = P12 localShellTask.ts:163 先例）。
+      pollInterval.unref()
+
+      // P1：协作式 deadline（timeout-policy：仅本层 timer 先到期才替换结果）。到期 →
+      // fail-closed deny（unavailable 语义）+ cleanup（清 poller + 释放 pendingCallbacks +
+      // 摘 abort 监听）；settle 首胜闩保证晚到的 mailbox 响应不二次 resolve。unref 不阻塞退出。
+      const deadlineTimer = setTimeout(() => {
+        cleanup()
+        settle({ allowed: false, reason: approvalUnavailableReason(effDeadlineMs) })
+      }, effDeadlineMs)
+      deadlineTimer.unref()
 
       const onAbortListener = () => {
         cleanup()
-        resolve({ allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE })
+        settle({ allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE })
       }
 
       abortController.signal.addEventListener('abort', onAbortListener, {
@@ -697,6 +759,8 @@ export function createInProcessPermissionGate(
 
       function cleanup() {
         clearInterval(pollInterval)
+        clearTimeout(deadlineTimer)
+        // P1：pendingCallbacks 随 deadline / abort / 任一 settle 失效自动清理（挂死不泄漏）
         unregisterPermissionCallback(request.id)
         abortController.signal.removeEventListener('abort', onAbortListener)
       }

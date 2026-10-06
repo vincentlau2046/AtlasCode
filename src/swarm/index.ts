@@ -297,6 +297,9 @@ export {
   resolveTeammateAgentFace,
   createTeammateTpcBuilder,
   createInProcessPermissionGate,
+  // P1（0.1.36 切片①）：mailbox 兜底协作式 deadline 纯面（判别单测可测）。
+  resolveMailboxPermissionDeadlineMs,
+  approvalUnavailableReason,
   type InProcessRunnerConfig,
   type InProcessRunnerResult,
 } from './inProcessRunner'

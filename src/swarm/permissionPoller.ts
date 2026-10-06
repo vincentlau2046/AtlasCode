@@ -118,8 +118,13 @@ export function processMailboxPermissionResponse(params: {
   const callback = pendingCallbacks.get(params.requestId)
 
   if (!callback) {
+    // P6-a（0.1.36 切片①）：drop 非静默事件——发 `decided:unavailable` 结构化审计行
+    // + debug 日志（post-telemetry 无 audit bus，logForDebugging 结构行承载原则 5
+    // asked/decided 配对的 decided 侧；无 pending 回调 = approval 未送达 = unavailable，
+    // asker 侧有界重试 / P1 deadline 超时后走 fail-closed deny）。
     logForDebugging(
-      `[SwarmPermissionPoller] No callback registered for mailbox response ${params.requestId}`,
+      `[SwarmPermissionPoller] approval response dropped (no pending callback, decided:unavailable) request_id=${params.requestId} decision=${params.decision}`,
+      { level: 'warn' },
     )
     return false
   }
