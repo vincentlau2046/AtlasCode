@@ -47,6 +47,11 @@
 - **全量四件套 @ `fb056b1`（verify worktree）**：tsc 0 / eslint 0e·0w / build 17.59MB / 全量 **3709/0·265 文件**。
 - **f4 已发 ②+④ 先行子集 gate 验收请求（atlas-user-e2e）**（gate 基线 = worktree-0.1.36 @ `fb056b1`〔含 ② 2b94a9e + ④ fb056b1 + ⑧ 已 rebase 到 ebf8ffe/7920beb；⑧ 已单独先行 gate @ 1e1f9e1 基线，rebase 不影响 0.1.37 全量 gate 在发布 commit 重验〕；判据 = **V8（② plan×auto 断言：auto 进 plan gate 关→fallback default+warn / plan 期 auto 用过后退出回落非 auto→kick-out warn）+ V1（④ P4/P9/P12 探针，P5 零码登记不入 gate）** + 回归 S-A/A4F 6 句/P0a 隔离 hardFail=0 + 四件套 3709/0·265 独立复核；**0.1.37 发布 = 明早 P2 §7 裁定 + ③ 落码 + 全量 gate，不在本次先行子集**）。③ 冻结维持。
 
+**07:30 更新：②+④ 先行子集 gate verdict = PASS → 0.1.37 先行子集 gate 全绿（⑧/②/④）**（e2e task #89 单信号，`r-20261007-0730-0137-s24-gate.md` 8/8 判据 + 0 hard FAIL + 0 无定因 INCONCLUSIVE）：
+- **hard 判据全绿**：① 四件套 3709/0·265（e2e 独立复跑 = f4 报值）/ ② V8 P11 plan×auto 源级三面在场（`shouldPlanUseAutoMode` 谓词 + `prepareContextForPlanMode` auto 支 + `exitPlanModeV2Tool` 退出 kick-out〔gate-off fallback→default+warn / autoWasUsedDuringPlan&&!finalRestoringAuto→kick-out warn / strip·restore 对，逐行对照 CC+TUI〕，单测 `engine-plan-auto` 24/24 含 settings cache reset 坑）/ ③ V1 ④ 廉价批（P4 TPC fail-closed 三件 + P9 键位模态不变量 4/4 + P12 unref 零码核销，单测 23/23+4/4）/ ④ P5 零码登记在场 / ⑤ ⑧ rebase 复跑全绿（swarm-mailbox-deadline 10/10 + tui-swarm-worker-deadline 9/9+1/1）/ ⑥⑦⑧ 回归 S-A + A4F 6 句 7/7 + P0a 隔离 hardFail=0
+- **②+④ 子集 gate 绿 → 0.1.37 全量 gate 排期**；**0.1.37 发布仍 = 明早 P2 §7 裁定 + ③（P2 恢复层）落码 + 全量 gate（⑧+②+③+④ 全绿，规则②/③；⑤ 若 R2 调研通过并入）**
+- **0.1.37 先行子集 gate 现态 = 全绿**：⑧（`r-0522` PASS）+ ②（`r-0730` PASS）+ ④（`r-0730` 同报告 PASS）→ 唯一待落码项 = **③（P2 恢复层，冻结中）**；③ 落码后 V4/V7 并入全量 gate
+
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
 | 项 | 调研对象（本地可查） | 产出 |
