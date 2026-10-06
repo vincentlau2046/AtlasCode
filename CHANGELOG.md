@@ -4,6 +4,51 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.35
+
+Brand 专项封口最后一轮（母题铺开 7 触面 + 动效精修 4 项 + O-12 A+C 双档 +
+MARK_BLOCKLIST 登记机制 + O-8 light 基线封口；Main 实施 worktree-0.1.35，
+8 提交 `eddb0ca..84e3e84` + e2e BR135 相位收编 `faae3ec`；全量 suite
+3657/0·259；e2e 前 gate 9/9 PASS，报告 `r-20261006-2204-brand-final-0135.md`）：
+
+- **母题铺开 7 触面（spec §2.2 视觉母题系统，光锥字符面单一事实源）**：
+  - `beamTheme.ts` 纯函数面（Block Elements/Box Drawing U+2500-259F / 边框
+    `╱` U+2571，无几何歧义字形 ▲◆）：光锥角标 `╱` + 光核微符号 `▀` + 分隔线
+    光束串 `█ █` + 空态底纹 `░` + spinner 光束帧 + 进度条填充阶；EAW 锁表
+    扩 11 字符（全 Ambiguous 仓 1 cell / CJK 2 cell，随 §3.5 降级 + MARK_BLOCKLIST
+    兜底，gate 验"降级路径在场"非"零错位"）。
+  - spinner 光束串接线（`Spinner.tsx`/`SpinnerGlyph.tsx`）：T0 镜像 8 帧光扫
+    （▁▁→▃▃→▅▅→██ 上爬再回落，非旧点状帧 ·✢✳✶✻✽）+ BR-7 档位回落
+    （T1·T2 点状 ping-pong）+ reduced-motion 静态字形（T0 ▇▇ / T1·T2 ●）。
+  - 静态字符触面接 beamTheme 单一事实源：进度条档位感知光束填充阶（旧固定 9 阶
+    空格空段 → ░ 底纹）/ 分隔线光束串（默认 `█ █`，显式 char → legacy 重复）/
+    Feed 空态 `░` 底纹 / tips 光核微符号 `▀`（LIGHT_CORE 单一事实源，全 UI 复用）。
+- **动效精修 4 项（spec §0.2/§9.1 always-on + reduced-motion 回落）**：
+  - 光扫上爬：loading 底→顶逐行点亮（`REVEAL_MS=120` × 5 行 ≈ 0.6s，Ascend
+    攀升微缩表演）。
+  - 顶点 spark 脉冲呼吸：`PULSE_MS=800`（0.8s 周期非快闪）+ O-9 4 拍收敛
+    （≈3.2s 后静态全亮 apex，关动效不留残帧）。
+  - tips 切换 80ms 光扫渐显（`useTipReveal` 纯时序面：前 40ms 光核将显暗态
+    → 满亮，非硬切；`prefers-reduced-motion` 静态）——12s 轮播 6 条不变。
+- **O-12 宽终端品牌块右侧重平衡（A+C 双档，spec §0.4；200 列抓屏实证定因）**：
+  - 档 A：`WIDE_CENTRAL_MIN_COLUMNS=160`（≥160 列品牌卡条件居中 leftPad）。
+  - 档 C：`WIDE_REBALANCE_MIN_COLUMNS=200`（≥200 列低权重元素右对齐 + meta
+    3 行压 2 行〔version+model 合并、cwd 下沉 footer ⌂ 段〕，品牌块 8→6 行）。
+- **BR-7 MARK_BLOCKLIST 登记机制（软面定因登记禁裸记，spec §3.5 b）**：
+  - `MarkBlocklistEntry` 扩定因字段 `advanceSignal`（DSR-6 探针列 advance，
+    错位信号 ≠1）+ `reproSteps`（复现步骤）；`isRegisteredMarkBlocklistEntry`
+    判别（纯）= terminal 非空 + tier∈{1,2} + 定因字段（advanceSignal 或
+    reproSteps）在场，否则裸记 → false；e2e/Brand 侧出登记项经此兜底，
+    `resolveMarkTier` 第 2 参 blocklist DI 不变（滚动加列即生效）。
+- **O-8 light 光锥基线封口（0.1.34-2 定稿，0.1.35 动效精修不重映射 light 4 色）**：
+  - light/light-daltonized 光锥 amber `rgb(180,83,9)` / flame `rgb(194,65,12)`
+    （白底 5.02/5.18:1）为封口基线；dark 系黑底原值（amber `rgb(255,184,0)` /
+    flame `rgb(255,140,66)`）不重映射；判别单测锁动效时序 + O-8 基线
+    （`motion-o8-baseline-lock.test.ts` 7 项，gate ③④ 源级 + raw-log 实捕）。
+- **e2e BR135 封口 gate 相位收编**：`user-e2e/tui-diff/accept.ts` 新增 BR135
+  相位（S-LOAD / S-LOAD-RM 等 5 场景，gate ①–⑨）+ O-12 探针勘误（`│` 前缀 /
+  复合行正则；首轮 3 FAIL 定因 = 探针缺陷非产品缺陷，勘误后重跑 PASS）。
+
 ## v0.1.34
 
 BR-7 多终端 CJK 宽度矩阵 + e2e 用户视角体验优化 + 0.1.34-C 收尾（Main 实施
