@@ -51,8 +51,20 @@ worktree-0.1.33，`288a9ac` BR-3 swap + `7e2be52` D-3 tips 光核；前序列车
   用户可见面=0（新标题 "Parallel Sessions"）；⑤ P0a S-A hardFail=0 + A4F 6 句跨首跑+
   重跑全绿（P0 封口链 D-279-r1 无回归；L/K 首跑 2 flake 定因=LLM 首跑未发 tool call +
   环境 TUI 干净退出，非产品回归）。
-- **生产 lane（stage ⑤）**：发布后 e2e 跑 banner v0.1.33 + ①-④ 子集 + A4F/S-A +
-  npm 验真 + 「auto 回合后 session 存活」观一项（e2e 现象观察，0.1.33 闭环报告回填）。
+- **生产 lane 验真 PASS（stage ⑤）**（e2e 2026-10-06，报告
+  `r-20261006-1343-prodlane-033.md`，artifacts `A4F-1791262970452-mok3` /
+  `P0a-1791263264430-rewf` / `THEMES-1791263042630-1vb5` + A/B 对照 `9i3a`/`ue4e`/`z18j`）：
+  prod `atlas update`→0.1.33 banner 实测 + UA wire `AtlasCode/0.1.33 (repo)` 无字面
+  （BR-8 延续）+ ①-④ 子集全绿（光锥 4 色板 SGR dark+light 实捕 / wordmark 双色行级 /
+  中文 tagline 5/5 / clawd 键族+旧橙 215,119,87 全 0 / tips `[38;2;255;184;0m▀` brand_mark
+  色实捕 / "Multi-Clauding" 用户可见面 0）+ A4F 14 条 hard 探针全 PASS（6 句 A4 全绿，P0
+  封口链 D-279-r1 无回归，releasable=true）+ P0a S-A hardFail=0 + npm 独立验真
+  dist.shasum `52f01fb2…b9eb` MATCH + latest=0.1.33 + 发布内容核对（git diff
+  7e2be52..412ca61 -- src/ = 0 行，gate 结论直接适用发布体）；「auto 回合后 session
+  存活」观一项定因闭环=间歇性环境 flake（0.1.33 复跑 7/7 alive + 0.1.32 基线 7/7 alive +
+  K 独立跑 alive + 发布 src 零 diff 无退出路径改动），**非 0.1.33 回归**；低优先白盒建议
+  （gracefulShutdown/signal-exit 加 exit-reason 日志使自发退出可复现定因）入 0.1.34 候选。
+  **0.1.33 版本 5 段闭环达成**（实施→gate→发布→生产 lane→tracker 核销）。
 
 ## v0.1.32
 
