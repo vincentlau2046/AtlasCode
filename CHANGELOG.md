@@ -4,6 +4,37 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.36
+
+权限/harness 硬化 · 切片① P1 mailbox 兜底硬化（Main 实施 worktree-0.1.36，
+cherry-pick 4e34fb4〔实施 commit d5f0614〕；全量 suite 3667/0·261；四件套
+tsc 0 · eslint 0 · build 17.59MB；e2e 前 gate PASS 6/6，报告
+`r-20261007-0240-0136-slice1-gate.md`）：
+
+- **P1 mailbox 兜底第 4 终态（协作式 deadline，fail-closed）**：leader 失响应时
+  in-process teammate 的 mailbox 权限门原只有 allow/reject/abort 3 个 settle 面，
+  缺超时终态 → leader 失响应/被杀时 promise 永不 settle（挂死）+ 500ms 轮询 timer
+  未 unref 阻塞进程干净退出 + pendingCallbacks 泄漏。修 = 参照 deepseek
+  `guard/timeout-policy`「仅本层 timer 先到期才替换结果」加协作式 deadline（缺省 30s，
+  env `ATLAS_PERM_MAILBOX_DEADLINE_MS` 覆盖）：到期 → fail-closed deny（unavailable 语义，
+  `ask:false`，模型可见 `permission denied: approval unavailable: the approver (leader)
+  did not respond within Nms ...` is_error tool_result，回合继续不挂死）+ `settle` 首胜闩
+  （晚到 mailbox 响应 / deadline 不二次 resolve）+ poller/deadline 双 timer `unref()`
+  （不阻塞进程退出）+ `cleanup()` 随任一 settle 清双 timer + 释放 pendingCallbacks
+  （挂死不泄漏）+ gate 签名第 6 参 `deadlineMs`（测试注入口）。
+- **P6-a drop 审计（结构化 decided:unavailable 事件）**：mailbox 权限响应 drop 支
+  （无 pending 回调，如 deadline 已超时 / /clear 后 in-flight）原静默 → 发
+  `decided:unavailable` 结构化审计行（request_id + decision，`{level:'warn'}`），
+  承载原则 5 asked/decided 配对的 decided 侧。
+- **判别单测**：unit `swarm-mailbox-deadline`（纯面 resolveMailboxPermissionDeadlineMs /
+  approvalUnavailableReason + 源级在场）+ func `swarm-mailbox-deadline-fs`（真盘 mailbox
+  杀 leader → deadline 早于 500ms poll 首拍 fail-closed deny + 回合继续不挂死）。
+- **deferred 显式命名（gate 裁定 (a)，不扩 scope 不重 gate）**：⑧ pane-worker TUI
+  真消费面硬化（`useSwarmPermissionPoller` deadline + P6-a 审计 + interval unref =
+  封 pane-worker 用户面「杀 leader→挂死」）不在切片① engine 两文件 scope，顺延
+  切片④（廉价批）/ 0.1.37；V3 的 2 soft INCONCLUSIVE（V3-TURN-CONTINUE/DENY-LINE）
+  定因 = ⑧ 面，engine 侧权威验证 = func 杀 leader 等价 + unit 源级在场已绿，不阻塞本发布。
+
 ## v0.1.35
 
 Brand 专项封口最后一轮（母题铺开 7 触面 + 动效精修 4 项 + O-12 A+C 双档 +
