@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Message } from '../../types/message.js'
+import { getInitialSettings } from '../../utils/settings/settings.js'
 import { LIGHT_CORE } from '../design-system/beamTheme.js'
 
 // ── Tip pool (idle rotation) ────────────────────────────────────
@@ -71,6 +72,50 @@ export function useDynamicTip(
   // Idle: show current rotation tip
   if (idleIndex >= IDLE_TIPS.length) return null
   return IDLE_TIPS[idleIndex].text
+}
+
+// ── 80ms 光扫渐显（0.1.35 动效精修 ③，spec §0.2 tips 切换非硬切）────────
+
+/** tips 切换渐显总时长（80ms，2 步：前 40ms 光核将显暗态 → 40ms 后满显；非硬切）。 */
+export const TIP_FADE_MS = 80
+
+/**
+ * 纯时序面（判别单测可测，spec §0.2）：tip 切换后 elapsed ≥ TIP_FADE_MS/2 → 满显（step 1），
+ * 否则将显暗态（step 0）；reducedMotion 恒 step 1（静态，spec §9.1 关动效不留过渡）。
+ */
+export function tipRevealStep(elapsedMs: number, reducedMotion: boolean): 0 | 1 {
+  if (reducedMotion) return 1
+  return elapsedMs >= TIP_FADE_MS / 2 ? 1 : 0
+}
+
+/**
+ * tip 切换 80ms 光扫渐显 hook（母题化，非硬切）：tip 变化瞬间起 80ms 渐入
+ * （前 40ms 光核处于将显暗态，40ms 后满亮）；reducedMotion 恒满显（静态）。
+ * 仅「切换」触发渐显——初始挂载不渐显（首条 tip 直接落定，无首屏残帧）。
+ * 关动效读一次 settings（同 AnimatedBeam idiom，不订阅 useSettings 避免重渲染）。
+ */
+export function useTipReveal(tip: string | null): 0 | 1 {
+  const [reducedMotion] = useState(
+    () => getInitialSettings().prefersReducedMotion ?? false,
+  )
+  const [step, setStep] = useState<0 | 1>(1)
+  const prevTipRef = useRef(tip)
+
+  useEffect(() => {
+    const changed = prevTipRef.current !== tip
+    prevTipRef.current = tip
+    if (tip == null || reducedMotion) {
+      setStep(1)
+      return
+    }
+    if (!changed) return
+    // tip 切换：80ms 光扫渐显（step 0 将显暗态 40ms → step 1 满显），非硬切
+    setStep(0)
+    const t = setTimeout(() => setStep(1), TIP_FADE_MS / 2)
+    return () => clearTimeout(t)
+  }, [tip, reducedMotion])
+
+  return step
 }
 
 // ── Render helper ───────────────────────────────────────────────

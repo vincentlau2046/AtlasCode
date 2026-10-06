@@ -17,7 +17,7 @@ import { useAppState } from '../../state/AppState.js'
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js'
 import { Box, Text } from '../../ink.js'
 import { getEffortNotificationText } from '../EffortIndicator.js'
-import { useDynamicTip, TIP_PREFIX } from '../StatusLine/useDynamicTips.js'
+import { useDynamicTip, useTipReveal, TIP_PREFIX } from '../StatusLine/useDynamicTips.js'
 
 type Props = {
   /** 消息 ref（useDynamicTip 据此判断流式中断态） */
@@ -34,6 +34,9 @@ export function PersistentFooterIndicator({ messagesRef }: Props): React.ReactNo
   const npmHintActive = useAppState(s => s.notifications.current?.key === 'npm-deprecation-warning')
   const mainLoopModel = useMainLoopModel()
   const tip = useDynamicTip(messagesRef)
+  // 0.1.35 动效精修 ③：tip 切换 80ms 光扫渐显（非硬切；reduced-motion 静态，见 useTipReveal）。
+  // 须在早返（npmHintActive / showEffort）之前调用（Rules of Hooks）。
+  const tipStep = useTipReveal(tip)
   const effortText = getEffortNotificationText(effortValue, mainLoopModel)
 
   // effort 文本变化（启动初始 / /effort 切换）时（重新）点亮 12s 窗口
@@ -63,9 +66,14 @@ export function PersistentFooterIndicator({ messagesRef }: Props): React.ReactNo
     )
   }
   if (tip) {
+    // 0.1.35 动效精修 ③：光核随渐显 step 翻转（step 0 将显暗态 → step 1 满亮 brand_mark），
+    // 正文恒 dim（宽度稳定，防闪烁）；reduced-motion 恒 step 1（静态满亮，无过渡残帧）。
+    const tipLit = tipStep === 1
     return (
       <Box flexShrink={0}>
-        <Text color="brand_mark">{TIP_PREFIX}</Text>
+        <Text color={tipLit ? 'brand_mark' : undefined} dimColor={!tipLit}>
+          {TIP_PREFIX}
+        </Text>
         <Text dimColor wrap="truncate">
           {' '}
           {tip}
