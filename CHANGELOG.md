@@ -4,6 +4,37 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.38
+
+sessionlist P0 正确性波 ①~④（Main 实施 worktree-0.1.38-sessionlist；全量
+suite 3729/0·267；四件套 tsc 0 · eslint 0e·0w · build 17.61MB；gate =
+P0 4 探针 + D1/D2/D3/D5/D6 全绿〔e2e 终稿〕，D4 显式 deferred 归 0.1.39）：
+
+- **P0-A load-all**：`SessionTreeScreen` 切 `loadSameRepoAllMessageLogs`
+  （全量有效 session，无 50 截断；渐进 load-more 路径留给 /resume）。
+- **P0-B 排序键回消息时间戳**（B-lite 纯读侧）：`readLiteMetadata` 抓
+  firstTimestamp/lastTimestamp（head/tail scrape，零写改动）；`enrichLog`
+  覆写 created/modified（无效值回落 stat 兜底）。列表顺序改由最后消息时间
+  戳驱动——静默 append 顶文件 mtime 的顺序错主因失效；`/resume` 共享
+  enrich 路径同获修正（LogSelector 重排行为一致）。
+- **P0-C1 纯读路径**：删「列表打开时回写」整段（deriveAutoTitle +
+  `saveCustomTitle(…, 'auto')` + deriveAutoTitle 函数）——列表打开对
+  session 文件纯读；doFork 的用户动作回写保留。标题显示走
+  getLogDisplayTitle 既有 fallback 链。
+- **P0-C2 isSidechain 首行判定**：整 64KB head 扫描 → 只查首行（镜像
+  listSessionsImpl），head 窗口内嵌 sidechain 内容的普通 session 不再误滤
+  （真 sidechain 首行仍滤，回归守卫）；ctime 脏值键改 birthtime 名实一致。
+- **随车显示面（单行模型内）**：双时间列（「创建」= 首条消息时间戳 M/D/YYYY
+  + 「最近活跃」≤7d 相对 now/5m/2h/6d / >7d 绝对 M/D HH:mm 混合格式）+
+  徽标（coordinator `[C]` chip + tag/agentSetting 行尾 token `#tag` /
+  `@agent`；agentColor 8 值域走 chalk 保守映射 idle 行整体着色——theme
+  精确映射 + 圆点独立着色归 0.1.39-S4）+ 窄终端（<80 列）砍创建/分支/消息列。
+- **回归判别探针**（`tests/func/sessionlist-p0-fs.test.ts`，func 真盘层，
+  B/created/C2/count/C1 五探针，突变已核恰好红）。
+- **D4（colorize 裸色名 fallthrough）显式 deferred**：0.1.38 e2e D4 探针揭
+  既有缺陷（TUI 14 处裸 ANSI 色名无 SGR 产出，0.1.38 仅触发面）；用户裁定
+  归 0.1.39 根修（入口 bare→`ansi:` 前缀归一，单点全 TUI 生效），本版仅登记。
+
 ## v0.1.37
 
 权限/harness 硬化波 · ⑧+②+③+④ 四切片（Main 实施 worktree-0.1.36；全量
