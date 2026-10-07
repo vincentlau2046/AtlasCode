@@ -76,6 +76,8 @@
 
 **~13:3x 更新：#294 全量对照闭环（Main 单信号，登记项终态）→ 3 flaky pre-existing 双重坐实**：Main detached verify worktree（bg2vcxhwo）parent `4458b2e`（pre-③）全量 = **3709/0·265 干净** vs ③ `6079da9` 全量 = **3724/0·266**（= parent 3709 + ③ 增量 15，零回归）→ **3 flaky 在 ③ diff 两侧均不恒现**（两全量跑皆绿）= 非确定测试隔离/时序敏感 flake（`--isolate` 并发全局态泄漏），非产品回归、非可复现恒败 → **#294 pre-existing 坐实闭环**（工单已追记全量对照结论 + detached verify worktree `git worktree remove` 清）。#294 修向维持 0.1.37+ 测试隔离硬化（loop-transcript-fs/ascend-s5-mount 全局态 teardown/时序解耦），非阻塞 0.1.37、不入 ③ 判据。**Main 侧已无未闭环项；唯一推进路径 = e2e 全量 gate（lean）verdict（球在 atlas-user-e2e）→ 绿即 f4 发 T3 单信号 → Main 自跑 0.1.37 发布链**（bump → cherry-pick master ← worktree-0.1.36@6079da9 → tag v0.1.37 → push×2 → DNS-pin npm → packument 验真〔D-8 canonical tarball〕→ 生产 lane〔⑧ 真持久 pane 现形 + UA wire + A4F/P0a 回归〕+ 收编探针 compact413-v47/fault-proxy 3 扩展入仓 + worktree 清理 + #290/#292/#293 核销）
 
+**14:41 链检查点（cron 5b1ddd70）= 全量 gate 执行中，零动作**：e2e 全量 gate（lean @ 6079da9）verdict 报告未落盘（reports 区最新仍 r-c413 ③ 子集 gate）+ **atlas-user-e2e = busy（全量 gate 跑中）**（请求 ~13:2x 发出，至 14:41 ≈75min，含 ③ V4/V7 重验 + ②/④ 回放 + ⑧ rebase 重验 + 回归 S-A/A4F 6 句/P0a 隔离 PTY 串行链 + 四件套 3724/0·266 全量复跑，合理执行区间非挂死）；**f4 T3 未发**（全量 gate 未绿，fail-closed 正确，不预推进）；**Main = idle（等 f4 T3 单信号，正确 hold）**；3 flaky #294 已闭环（Main 双重坐实，非阻塞）。**等 15:47 终态检查点（cron 7b78d1ed）或 e2e 全量 gate verdict 跨 session 信号（快路径）**。
+
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
 | 项 | 调研对象（本地可查） | 产出 |
