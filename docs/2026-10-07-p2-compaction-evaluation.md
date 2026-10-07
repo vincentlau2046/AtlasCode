@@ -102,3 +102,18 @@
 - **WebSearch 本 session 不可用**（本地模型代理缺 web_search 工具 schema，4 次调用 400）→ 学术来源未在线检索；以本地参照实现（A/B 两仓为一线工程实现，证据等级高于论文泛述）+ vault 2026-09-17 Compact 模块评估（含毕业判据）满足"参考源"要求。若裁定后需要论文级引用（如 LLMLingua 提示压缩 / KV-cache 压缩文献），明早裁定时告知，我补在线检索。
 - **未核**：`compactConversation` 体全量（1698 行单体，只核了 PTL 重试调用点与委托关系）；snipRuntime.ts 体（仅核 loop 残留守登记）；deepseek pruner 的 shadow-price 事件全协议（核了 PrunedEntry/事件契约面，未逐行）。
 - **关联**：P8（max_tokens 截断无续写）与 D1 正交（D1 只处理 413/PTL 输入超窗，不处理 max_tokens 输出截断）；P8 维持独立裁定。
+
+---
+
+## §9 裁定记录（用户 2026-10-07 上午，§7 六问逐项拍板）
+
+| Q | 裁定 | 实施映射 |
+|---|---|---|
+| **Q1（D1+D2）** | **做，入 0.1.37 切片③** | ① engine loop 413 反应式消费者（C3 缺口：`isWithheldPromptTooLong \|\| isWithheldMediaSizeError` → `tryReactiveCompact` 一次性门 + 重建 + 本回合重试一次，失败回显原始 413）+ ② TokenWarning 断路器跳闸态（"auto-compact 已暂停（N 次失败）· 可手动 /compact·换小模型·新会话"）+ 模型侧告知（防 futile）；feature 门（ON_BY_DEFAULT 族，env 可杀）+ 既有 413/maxTokens 自修语义单测零回归。**口径订正：本报告「0.1.36 切片③」落盘时 0.1.36 未发，现已过期（0.1.36 收口为仅切片①，release `a540e49`）→ D1+D2 归属 = 0.1.37 切片③（R4 规则③顺延）** |
+| **Q2（D3 无模型剪枝层）** | **0.1.37 spec 先行（实施 0.1.37+）** | spec 内容 = deepseek pruner 参照：无模型确定性剪枝层（DEFAULTS 8192/4096/1024 + PRUNE_MARKER + 发送面操作不改存储 + **tool-pairing 平衡不变量表**（剪枝不断开 tool_use/result 对）+ PrunedEntry 审计 + shadow-price 事件 + **KV-cache 代价披露** + 范围锁「最后防线非热路径」）——**本波只落 spec 文档，不实施** |
+| **Q3（D4 软复位）** | **砍（登记待 soak 数据）** | 不实施；两参照（CC/deepseek）均无时间软复位 + ①③② 已给恢复路径，登记项 |
+| **Q4（D5 reactive-only）** | **不进波（登记 0.1.37+，实验结论后议）** | vault 2026-09-17 裁定保留门控（`atlas_cobalt_raccoon` 实验未结），登记项 |
+| **Q5（413 恢复成功率 telemetry）** | **登记（D3 spec 前置）** | 最小事件登记（本仓无 atlas_* 遥测面；D3 毕业判据「413 恢复成功率 ≥ 阈值」依赖此数据源） |
+| **Q6（C7 context-collapse stub + C8 pre-turn 残留守）** | **登记 0.1.37+（本波不动）** | 版本=收口契约，登记项（C7 `recoverFromOverflow` 等 6 函数全 stub / C8 pre-turn 序 budget→snip→microcompact 未接线） |
+
+**③ 解锁（用户裁定 → Main，2026-10-07 上午）**：0.1.37 切片③ = **D1+D2 代码落地 + D3 spec 文档 + D4/D5/telemetry/C7+C8 登记（登记项零码）**；③ gate = **V4**（3 连败后：413 反应式恢复 + 断路器跳闸态在场 + 一次性门生效）+ **V7**（headless 413 同判据）+ 既有 413/maxTokens 自修语义单测零回归；③ 落码后 → **0.1.37 全量 gate**（⑧ rebase 重验 + ②/④ 已绿〔r-0730〕+ ③ V4/V7 + 回归 S-A/A4F/P0a + 四件套）→ 发布序列（f4 T3 → Main）。收益/风险裁定依据 = f4 两轴分析（Q2 spec 先行/Q5/Q6 = 低风险项；Q1 高收益 MEDIUM 风险单独拍板=做；Q3/Q4 = 不做）。
