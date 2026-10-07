@@ -4080,6 +4080,35 @@ export async function loadSameRepoMessageLogsProgressive(
 }
 
 /**
+ * Loads ALL valid sessions for the given worktree paths — no 50-cap, no
+ * load-more UI — and returns them sorted by last-message timestamp (P0-B).
+ *
+ * /sessionlist (SessionTreeScreen) uses this: it is an admin list that must
+ * show every valid session on disk (P0-A). The progressive path
+ * (loadSameRepoMessageLogsProgressive) stays for /resume's load-more.
+ */
+export async function loadSameRepoAllMessageLogs(
+  worktreePaths: string[],
+): Promise<LogOption[]> {
+  const r = await loadSameRepoMessageLogsProgressive(worktreePaths)
+  let logs = r.logs
+  let nextIndex = r.nextIndex
+  while (nextIndex < r.allStatLogs.length) {
+    const more = await enrichLogs(r.allStatLogs, nextIndex, INITIAL_ENRICH_COUNT)
+    logs = logs.concat(more.logs)
+    nextIndex = more.nextIndex
+  }
+  // Re-sort after enrichment: the initial order is stat-mtime
+  // (getSessionFilesLite) and enrichment does not re-sort; P0-B overwrote
+  // modified with message timestamps, so the final order is computed here.
+  logs = sortLogs(logs)
+  logs.forEach((l, i) => {
+    l.value = i
+  })
+  return logs
+}
+
+/**
  * Gets stat-only logs for worktree paths (no file reads).
  */
 async function getStatOnlyLogsForWorktrees(
@@ -4499,17 +4528,23 @@ export async function findUnresolvedToolUse(
 
 /**
  * Gets all session JSONL files in a project directory with their stats.
- * Returns a map of sessionId → {path, mtime, ctime, size}.
+ * Returns a map of sessionId → {path, mtime, birthtime, size}.
  * Stats are batched via Promise.all to avoid serial syscalls in the hot loop.
+ *
+ * P0-C2: the creation-time stat is named `birthtime` for what it actually is
+ * (st.birthtime, not ctime). It is a pre-enrich fallback for `created` only —
+ * the enriched path overwrites created/modified with scraped message
+ * timestamps (P0-B), so filesystems with bogus birthtime no longer drive
+ * list order.
  */
 export async function getSessionFilesWithMtime(
   projectDir: string,
 ): Promise<
-  Map<string, { path: string; mtime: number; ctime: number; size: number }>
+  Map<string, { path: string; mtime: number; birthtime: number; size: number }>
 > {
   const sessionFilesMap = new Map<
     string,
-    { path: string; mtime: number; ctime: number; size: number }
+    { path: string; mtime: number; birthtime: number; size: number }
   >()
 
   let dirents: Dirent[]
@@ -4535,7 +4570,7 @@ export async function getSessionFilesWithMtime(
         sessionFilesMap.set(sessionId, {
           path: filePath,
           mtime: st.mtime.getTime(),
-          ctime: st.birthtime.getTime(),
+          birthtime: st.birthtime.getTime(),
           size: st.size,
         })
       } catch {
@@ -4569,6 +4604,16 @@ type LiteMetadata = {
   prNumber?: number
   prUrl?: string
   prRepository?: string
+  /** ISO timestamp of the first message entry (P0-B: true created time). */
+  firstTimestamp?: string
+  /** ISO timestamp of the last message entry (P0-B: true modified/active time). */
+  lastTimestamp?: string
+  /** Last mode entry in tail (session mode for coordinator/normal detection). */
+  mode?: 'coordinator' | 'normal'
+  /** Agent's custom name (last agent-name entry in tail; from /rename or swarm). */
+  agentName?: string
+  /** Agent's color (last agent-color entry in tail; 8-value domain or 'default'). */
+  agentColor?: string
 }
 
 /**
@@ -4724,13 +4769,37 @@ async function readLiteMetadata(
   const { head, tail } = await readHeadAndTail(filePath, fileSize, buf)
   if (!head) return { firstPrompt: '', isSidechain: false }
 
-  // Extract stable metadata from the first line via string search.
+  // P0-C2: isSidechain is declared on the file's FIRST entry — check only the
+  // first line (mirroring listSessionsImpl:89). A whole-head scan mis-filtered
+  // a normal session whose 64KB head window contained sidechain content (e.g.
+  // an embedded sidechain entry line), silently dropping it from the list.
   // Works even when the first line is truncated (>64KB message).
+  const firstLine = head.split('\n', 1)[0] ?? ''
   const isSidechain =
-    head.includes('"isSidechain":true') || head.includes('"isSidechain": true')
+    firstLine.includes('"isSidechain":true') ||
+    firstLine.includes('"isSidechain": true')
   const projectPath = extractJsonStringField(head, 'cwd')
   const teamName = extractJsonStringField(head, 'teamName')
   const agentSetting = extractJsonStringField(head, 'agentSetting')
+
+  // P0-B (B-lite): real created/modified from message entries' ISO timestamps
+  // instead of filesystem mtime/birthtime (silent appends keep bumping mtime
+  // to "now", which collapsed the list order). Metadata entries
+  // (last-prompt/custom-title/tag/agent-*/summary/mode) carry no timestamp,
+  // so the last *message* entry's timestamp wins. Residual skew (a
+  // timestamped entry after the last message, or the last message rolling
+  // out of the 64KB tail window) is minute-scale — accepted.
+  const lastTimestamp = extractLastJsonStringField(tail, 'timestamp')
+  const firstTimestamp = extractJsonStringField(head, 'timestamp')
+
+  // Badges (list display): last-wins tail scrapes. `mode` is validated to the
+  // two known values; agentName/agentColor pass through (the display side
+  // falls back on unknown values, e.g. 'default').
+  const modeRaw = extractLastJsonStringField(tail, 'mode')
+  const mode =
+    modeRaw === 'coordinator' || modeRaw === 'normal' ? modeRaw : undefined
+  const agentName = extractLastJsonStringField(tail, 'agentName')
+  const agentColor = extractLastJsonStringField(tail, 'agentColor')
 
   // Prefer the last-prompt tail entry — captured by extractFirstPrompt at
   // write time (filtered, authoritative) and shows what the user was most
@@ -4797,6 +4866,11 @@ async function readLiteMetadata(
     prNumber,
     prUrl,
     prRepository,
+    firstTimestamp,
+    lastTimestamp,
+    mode,
+    agentName,
+    agentColor,
   }
 }
 
@@ -4972,7 +5046,9 @@ export async function getSessionFilesLite(
       isLite: true,
       fullPath: fileInfo.path,
       value: 0,
-      created: new Date(fileInfo.ctime),
+      // P0-C2: stat values are pre-enrich fallbacks only — enrichLog
+      // overwrites created/modified with scraped message timestamps (P0-B).
+      created: new Date(fileInfo.birthtime),
       modified: new Date(fileInfo.mtime),
       firstPrompt: '',
       messageCount: 0,
@@ -4989,6 +5065,17 @@ export async function getSessionFilesLite(
     log.value = i
   })
   return sorted
+}
+
+/**
+ * Parses an ISO timestamp scraped from a JSONL entry; undefined when the
+ * scrape missed or the value is not a parseable date (keeps the stat
+ * fallback instead of an Invalid Date).
+ */
+function parseLiteTimestamp(iso: string | undefined): Date | undefined {
+  if (!iso) return undefined
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? undefined : d
 }
 
 /**
@@ -5015,10 +5102,17 @@ async function enrichLog(
     summary: meta.summary,
     tag: meta.tag,
     agentSetting: meta.agentSetting,
+    mode: meta.mode,
+    agentName: meta.agentName,
+    agentColor: meta.agentColor,
     prNumber: meta.prNumber,
     prUrl: meta.prUrl,
     prRepository: meta.prRepository,
     projectPath: meta.projectPath ?? log.projectPath,
+    // P0-B: overwrite stat-based times with scraped message timestamps
+    // (missing/invalid scrapes keep the stat fallback).
+    created: parseLiteTimestamp(meta.firstTimestamp) ?? log.created,
+    modified: parseLiteTimestamp(meta.lastTimestamp) ?? log.modified,
     worktreeSession: meta.worktreeName
       ? {
           worktreeName: meta.worktreeName,
