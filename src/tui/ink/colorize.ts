@@ -73,7 +73,8 @@ const ANSI_REGEX = /^ansi256\(\s?(\d+)\s?\)$/
  * 裸 ANSI 名全落空）。入口归一化为 `ansi:` 前缀复用既有 switch（纯加性：
  * theme 色板值全走 rgb()/ansi: 通道不经此面；16 名与 ansi: 通道值域同形）。
  */
-const BARE_ANSI_COLOR_NAMES: ReadonlySet<string> = new Set([
+// export 供 ThemedText.resolveColor 消费（gap-A：theme-key 分支 undefined 回落 16 裸名透传）
+export const BARE_ANSI_COLOR_NAMES: ReadonlySet<string> = new Set([
   'black',
   'red',
   'green',

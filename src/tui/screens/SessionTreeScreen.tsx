@@ -192,7 +192,8 @@ function formatCreated(date: Date): string {
 /** 列宽自适应（0.1.39-S2，替换 0.1.38 窄终端 <80 硬砍列）：
  * 固定前缀（光标+图标）与「最近活跃」列恒显；可选列按信息密度从低到高
  * 渐进隐藏（消息 → 分支 → 创建），名称列吃掉剩余宽度（下限 16 可见列）。
- * 纯面（零 I/O），供单测判别 + 渲染段消费。 */
+ * gap-B（0.1.39 gate）：名称列另扣比例 chip 槽 round(budget×0.3)（行尾 chip 段
+ * 预算，砍列阈值不含）。纯面（零 I/O），供单测判别 + 渲染段消费。 */
 export function computeColumnLayout(termCols: number): {
   nameW: number
   showCreated: boolean
@@ -225,7 +226,13 @@ export function computeColumnLayout(termCols: number): {
   if (showCreated) optional += CREATED_SLOT
   if (showBranch) optional += BRANCH_SLOT
   if (showMsg) optional += MSG_SLOT
-  const nameW = Math.max(NAME_MIN, budget - optional)
+  // gap-B（0.1.39 gate）：行尾标志 chip 段（tag/@agent/[C]/[PR #n]/(size)/[wt:]）
+  // 预算随终端宽比例预留（≈30% budget）：wide 200 ≈ 54（全 chip 行最坏 ≈53 容纳，
+  // e2e SL-S5-BADGES-chips）/ 100 列 ≈ 24（名称列仍 ≥25 不塌缩，无 chip 行不浪费死空）/
+  // 窄档钳下限 16。仅收缩 nameW——砍列阈值在上不含此槽（showX 布尔零回归）；
+  // 无预留则 nameW 吃全预算 → fixedW≈termCols → maxFlags≈0 行尾 chip 段恒截断。
+  const flagsSlot = Math.round(budget * 0.3)
+  const nameW = Math.max(NAME_MIN, budget - optional - flagsSlot)
   return { nameW, showCreated, showBranch, showMsg }
 }
 

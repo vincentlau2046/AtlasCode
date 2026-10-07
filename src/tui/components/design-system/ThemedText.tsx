@@ -2,6 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import type { ReactNode } from 'react';
 import React, { useContext } from 'react';
 import Text from '../../ink/components/Text.js';
+import { BARE_ANSI_COLOR_NAMES } from '../../ink/colorize.js';
 import type { Color, Styles } from '../../ink/styles.js';
 import { getTheme, type Theme } from '../../utils/theme.js';
 import { useTheme } from './ThemeProvider.js';
@@ -69,8 +70,19 @@ function resolveColor(color: keyof Theme | Color | undefined, theme: Theme): Col
   if (color.startsWith('rgb(') || color.startsWith('#') || color.startsWith('ansi256(') || color.startsWith('ansi:')) {
     return color as Color;
   }
-  // It's a theme key - resolve it
-  return theme[color as keyof Theme] as Color;
+  // It's a theme key - resolve it. gap-A（0.1.39 gate）：裸 ANSI 色名
+  //（Ink <Text color="red"> 透传形态）无 Theme 同名字段 → 旧码 theme[key] undefined
+  // 静默丢弃（color 到不了 colorize 入口，活屏无 SGR）。theme-key 优先（真 theme 键
+  // 同名时取 theme 值，防未来 theme 加字段被误伤）；undefined 时 16 裸名透传 →
+  // base Text → colorize 入口（D4 bare→ansi: 归一）产 SGR。
+  const themed = theme[color as keyof Theme] as Color | undefined;
+  if (themed !== undefined) {
+    return themed;
+  }
+  if (BARE_ANSI_COLOR_NAMES.has(color)) {
+    return color as Color;
+  }
+  return undefined;
 }
 
 /**

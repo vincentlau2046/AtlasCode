@@ -94,43 +94,47 @@ describe('S1 fork 状态机移底部操作行（buildActionRow 纯面）', () =>
  * 预算模型：budget = termCols - 4(paddingX) - 4(光标+图标) - 12(活跃列含 gap)；
  * 可选列槽位 = 列宽+前导 gap：创建 12 / 分支 13 / 消息 6；名称列下限 16。
  * 砍列序 = 信息密度从低到高：消息 → 分支 → 创建。
+ * gap-B（0.1.39 gate）：行尾 chip 段预算 = round(budget×0.3) 比例预留（随终端宽
+ * 缩放：200 列 ≈54 容纳全 chip 行最坏 ≈53 / 100 列 ≈24 名称列不塌缩 / 窄档钳 16），
+ * 仅收缩 nameW——砍列阈值不含此槽（showX 布尔零回归）；无预留则 nameW 吃全
+ * 预算 → maxFlags≈0 行尾 chip 恒截断。
  */
 describe('S2 列宽自适应（computeColumnLayout 纯面）', () => {
-  it('宽终端（200 列）：全列 + 名称列吃到剩余（149）', () => {
+  it('宽终端（200 列）：全列 + 名称列扣比例 chip 槽（149−54=95）', () => {
     const l = computeColumnLayout(200)
-    expect(l).toEqual({ nameW: 149, showCreated: true, showBranch: true, showMsg: true })
+    expect(l).toEqual({ nameW: 95, showCreated: true, showBranch: true, showMsg: true })
   })
 
-  it('100 列：全列，名称 49', () => {
+  it('100 列：全列（砍列阈值不变），名称 80−31−24=25（chip 槽不塌缩名称列）', () => {
     expect(computeColumnLayout(100)).toEqual({
-      nameW: 49,
+      nameW: 25,
       showCreated: true,
       showBranch: true,
       showMsg: true,
     })
   })
 
-  it('80 列：全列（0.1.38 NARROW 边界 <80 行为兼容），名称 29', () => {
+  it('80 列：全列（0.1.38 NARROW 边界 <80 行为兼容），名称 60−31−18<16 钳下限', () => {
     expect(computeColumnLayout(80)).toEqual({
-      nameW: 29,
+      nameW: 16,
       showCreated: true,
       showBranch: true,
       showMsg: true,
     })
   })
 
-  it('64 列：砍消息列（最低密度），创建/分支保留，名称 19', () => {
+  it('64 列：砍消息列（最低密度），创建/分支保留，名称 16', () => {
     expect(computeColumnLayout(64)).toEqual({
-      nameW: 19,
+      nameW: 16,
       showCreated: true,
       showBranch: true,
       showMsg: false,
     })
   })
 
-  it('56 列：砍消息+分支，仅创建保留，名称 24', () => {
+  it('56 列：砍消息+分支，仅创建保留，名称 16', () => {
     expect(computeColumnLayout(56)).toEqual({
-      nameW: 24,
+      nameW: 16,
       showCreated: true,
       showBranch: false,
       showMsg: false,
@@ -146,9 +150,9 @@ describe('S2 列宽自适应（computeColumnLayout 纯面）', () => {
     })
   })
 
-  it('极窄（44 列）：全砍可选列，名称吃全预算（24 ≥ 下限 16）', () => {
+  it('极窄（44 列）：全砍可选列，名称 24−7=17（chip 槽仅 7，下限 16 之上）', () => {
     expect(computeColumnLayout(44)).toEqual({
-      nameW: 24,
+      nameW: 17,
       showCreated: false,
       showBranch: false,
       showMsg: false,
