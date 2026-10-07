@@ -12,7 +12,7 @@ import { Box, Text, useInput } from '../ink.js'
 import { readFileSync, existsSync } from 'fs'
 import type { LogOption } from '../types/logs.js'
 import type { UUID } from 'crypto'
-import { loadSameRepoMessageLogs, isLiteLog, loadFullLog } from '../utils/sessionStorage.js'
+import { loadSameRepoAllMessageLogs, isLiteLog, loadFullLog } from '../utils/sessionStorage.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getLogDisplayTitle } from '../utils/log.js'
@@ -140,14 +140,48 @@ function padLeftToVisibleWidth(s: string, width: number): string {
   return ' '.repeat(width - cur) + s
 }
 
-/** 会话列表专用时间格式：绝对时间 MM/DD HH:mm（≤11 字符）。
- * 相对时间（1h ago）无法准确找回会话，改为直接显示最后修改的日期时间。 */
+/** 绝对时间 M/D HH:mm（≤11 字符）——「最近活跃」列 >7 天时使用（保定位能力）。 */
 function formatShortActive(date: Date): string {
   const m = date.getMonth() + 1
   const d = date.getDate()
   const h = String(date.getHours()).padStart(2, '0')
   const min = String(date.getMinutes()).padStart(2, '0')
   return `${m}/${d} ${h}:${min}`
+}
+
+/** 「最近活跃」列：≤7 天相对（now/5m/2h/6d，扫新近性），>7 天绝对（≤11 字符）。
+ * 相对时间只用于近 7 天——更老的会话保留绝对日期时间以保准确定位。 */
+function formatActive(date: Date, now: number): string {
+  const ageMs = now - date.getTime()
+  const m = Math.floor(ageMs / 60000)
+  if (m < 1) return 'now'
+  if (m < 60) return `${m}m`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h`
+  const d = Math.floor(h / 24)
+  if (d < 7) return `${d}d`
+  return formatShortActive(date)
+}
+
+/** 「创建」列：绝对 M/D/YYYY（≤10 字符），数据源 = 首条消息时间戳（P0-B）。 */
+function formatCreated(date: Date): string {
+  const m = date.getMonth() + 1
+  const d = date.getDate()
+  return `${m}/${d}/${date.getFullYear()}`
+}
+
+/** 代理配色（8 值域，/rename 或 swarm）→ 行颜色（idle 行整体着色，一眼辨身份；
+ * 焦点/选中态保持 cyan/magenta，状态优先于身份）。chalk 安全映射：
+ * purple/pink→magenta、orange→yellow（近似，0.1.39 走 theme 精确映射）。 */
+const AGENT_ROW_COLOR: Record<string, string | undefined> = {
+  red: 'red',
+  blue: 'blue',
+  green: 'green',
+  yellow: 'yellow',
+  purple: 'magenta',
+  orange: 'yellow',
+  pink: 'magenta',
+  cyan: 'cyan',
 }
 
 export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode {
@@ -177,21 +211,13 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   const loadLogs = React.useCallback(async () => {
     const wt = getCurrentWorktreeSession()
     const paths = wt ? [wt.worktreePath] : [getOriginalCwd()]
-    let l = await loadSameRepoMessageLogs(paths)
-    // 名称规范化：优先 customTitle；缺失时用 firstPrompt 生成
-    // 一个干净的短名称并回写（source:'auto'），后续列表/详情统一显示该名称，
-    // 不再裸显示 prompt 原文（长 prompt 截断混乱、不可读）。
-    // 回写为异步批量进行，不阻塞列表渲染——先用生成值占位显示。
-    for (const log of l) {
-      if (log.customTitle || !log.sessionId) continue
-      const auto = deriveAutoTitle(log)
-      if (auto && log.fullPath) {
-        // 先改内存副本（本屏立即可见）
-        ;(log as { customTitle?: string }).customTitle = auto
-        // 再异步落盘（失败静默，下次进入重试）
-        void saveCustomTitle(log.sessionId as UUID, auto, log.fullPath, 'auto')
-      }
-    }
+    // P0-A：加载全部有效 session（无 50 截断）；P0-B：按最后消息时间戳排序
+    // （非文件 mtime）；P0-C1：纯读路径——列表打开不回写任何 session 文件
+    // （旧 deriveAutoTitle + saveCustomTitle 回写会把每个 session 的 mtime
+    // 顶到"现在"，排序塌成 tie-break）。标题显示走 getLogDisplayTitle 既有
+    // fallback 链（agentName→customTitle→summary→firstPrompt(去 tag)→
+    // sessionId 前 8 位），渲染层已 truncateToVisibleWidth 截断。
+    const l = await loadSameRepoAllMessageLogs(paths)
     // 填充消息计数 + 分支标记。
     // enrichLog 设 isLite=false 但从不填 messageCount（保持 0），
     // 所以不能用 isLite 判断——改为检查 messageCount===0。
@@ -213,19 +239,6 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     setLogs(l)
     setLoading(false)
   }, [])
-
-  /** 从 firstPrompt 派生干净短名称（去 tag、压空白、截 24 可见宽度） */
-  function deriveAutoTitle(log: LogOption): string | null {
-    const raw = log.firstPrompt ?? log.summary ?? ''
-    if (!raw.trim()) return null
-    // 去 XML tag（<command-name> 等）与系统注入内容
-    const cleaned = raw
-      .replace(/<[^>]+>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-    if (!cleaned) return null
-    return truncateToVisibleWidth(cleaned, 24)
-  }
 
   React.useEffect(() => {
     void loadLogs()
@@ -399,14 +412,16 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   const CURSOR_W = 2   // "> " / "  "
   const ICON_W   = 2   // "● " / "○ "
   const NAME_W   = NARROW ? 20 : 28
-  const ACTIVE_W = 11  // formatShortActive: MM/DD HH:mm ≤ 11
+  const CREATED_W = 11  // formatCreated: M/D/YYYY ≤ 10
+  const ACTIVE_W = 11  // formatActive: now/5m/2h/6d 或 M/D HH:mm ≤ 11
   const BRANCH_W = 12
   const MSG_W    = 5   // 右对齐，最多 5 位
   const GAP      = 1
 
-  // 窄终端降级：砍分支列和消息数列
-  const showBranch = !NARROW
-  const showMsg    = !NARROW
+  // 窄终端降级：砍创建列、分支列和消息数列（双时间退化为单「最近活跃」列）
+  const showCreated = !NARROW
+  const showBranch  = !NARROW
+  const showMsg     = !NARROW
 
 
   // ── 虚拟窗口 ──
@@ -424,18 +439,23 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
 
   // 固定列总宽（用于计算标志段剩余宽度）
   let fixedW = CURSOR_W + ICON_W + NAME_W + ACTIVE_W
-  let gapCount = 3  // cursor-icon 不分离，icon-name/name-active 两个 gap
-  if (showBranch) { fixedW += BRANCH_W; gapCount++ }
-  if (showMsg)    { fixedW += MSG_W; gapCount++ }
+  let gapCount = 3  // cursor-icon 不分离，每列一个 gap
+  if (showCreated) { fixedW += CREATED_W; gapCount++ }
+  if (showBranch)  { fixedW += BRANCH_W; gapCount++ }
+  if (showMsg)     { fixedW += MSG_W; gapCount++ }
   fixedW += gapCount * GAP
 
   // 列头行（dim 色，与数据行列宽对齐）
   const headerLine = '  '  // cursor 占位
     + '  '                   // icon 占位
     + padToVisibleWidth('名称', NAME_W) + ' '
+    + (showCreated ? padToVisibleWidth('创建', CREATED_W) + ' ' : '')
     + padToVisibleWidth('最近活跃', ACTIVE_W)
     + (showBranch ? ' ' + padToVisibleWidth('分支', BRANCH_W) : '')
     + (showMsg ? ' ' + padLeftToVisibleWidth('消息', MSG_W) : '')
+
+  // 相对时间基准（一次渲染取一次，各行同基准不抖动）
+  const nowMs = Date.now()
 
   return (
     <Box flexDirection="column" paddingX={2} paddingTop={1}>
@@ -460,7 +480,8 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           // 选中行同时是 current 时圆点保持实心，颜色已随选中变亮 magenta 区分
           const statusIcon = isSelected || isCurrent ? '● ' : '○ '
           const title = truncateToVisibleWidth(getLogDisplayTitle(log) || 'untitled', NAME_W)
-          const active = formatShortActive(log.modified)
+          const created = formatCreated(log.created)
+          const active = formatActive(log.modified, nowMs)
           const branch = log.gitBranch
             ? truncateToVisibleWidth(log.gitBranch, BRANCH_W)
             : '—'
@@ -469,23 +490,24 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           // 拼接固定宽度列 → 单一字符串 → 单个 <Text>，Ink 不会拆行
           let line = cursor + statusIcon
             + padToVisibleWidth(title, NAME_W) + ' '
+            + (showCreated ? padToVisibleWidth(created, CREATED_W) + ' ' : '')
             + padToVisibleWidth(active, ACTIVE_W)
           if (showBranch) line += ' ' + padToVisibleWidth(branch, BRANCH_W)
           if (showMsg)    line += ' ' + padLeftToVisibleWidth(msgCount, MSG_W)
 
-          // 标志段（从左到右追加，超剩余宽度截断）
+          // 标志段：状态机在前（时效性操作提示，3s confirm 窗口不能被截断），
+          // 数据 chip 在后（#tag @agent [C] 从左到右，超剩余宽度截断）
           let flags = ''
-          if (isBranch)        flags += ' (Branch)'
-          if (isCurrent)       flags += ' (current)'
-          if (log.tag)         flags += ` #${log.tag}`
-          if (log.agentSetting) flags += ` @${log.agentSetting}`
-
-          // 行内状态机
           let statusColor: string | undefined
           if (rowState === 'confirm') { flags += ' [f 确认 fork]'; statusColor = 'yellow' }
           else if (rowState === 'forking') { flags += ' → forking…'; statusColor = 'yellow' }
           else if (rowState === 'done') { flags += ' ✓ 已创建分支'; statusColor = 'green' }
           else if (rowState === 'error') { flags += ' ✗ fork 失败'; statusColor = 'red' }
+          if (isBranch)        flags += ' (Branch)'
+          if (isCurrent)       flags += ' (current)'
+          if (log.tag)         flags += ` #${log.tag}`
+          if (log.agentSetting) flags += ` @${log.agentSetting}`
+          if (log.mode === 'coordinator') flags += ' [C]'
 
           // 标志段截断到剩余宽度
           const maxFlags = termCols - 2 /*paddingX*/ - fixedW
@@ -494,10 +516,12 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           }
           line += ' ' + flags
 
+          // idle 行按代理配色着色（身份一眼辨）；焦点/选中态颜色优先于身份
           const color = rowStateObj && rowStateObj.kind !== 'idle'
             ? statusColor
             : isSelected ? 'magentaBright'
-            : isFocused ? 'cyan' : undefined
+            : isFocused ? 'cyan'
+            : AGENT_ROW_COLOR[log.agentColor ?? '']
 
           return (
             <Box
