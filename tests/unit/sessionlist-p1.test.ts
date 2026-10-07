@@ -10,6 +10,8 @@
 import { describe, expect, it } from 'bun:test'
 import {
   SESSION_ROW_HINT,
+  agentColorToThemeColor,
+  agentRowColors,
   buildActionRow,
   clampWindowToCursor,
   computeColumnLayout,
@@ -18,6 +20,19 @@ import {
   slotPrefix,
 } from '../../src/tui/screens/SessionTreeScreen.js'
 import type { LogOption } from '../../src/tui/types/logs.js'
+import type { Theme } from '../../src/tui/utils/theme.js'
+
+/** 伪 theme：8 个代理色板槽位填可判别标记值（精确映射断言不依赖真实 ANSI 值） */
+const FAKE_THEME = {
+  red_FOR_SUBAGENTS_ONLY: 'RED',
+  blue_FOR_SUBAGENTS_ONLY: 'BLUE',
+  green_FOR_SUBAGENTS_ONLY: 'GREEN',
+  yellow_FOR_SUBAGENTS_ONLY: 'YELLOW',
+  purple_FOR_SUBAGENTS_ONLY: 'PURPLE',
+  orange_FOR_SUBAGENTS_ONLY: 'ORANGE',
+  pink_FOR_SUBAGENTS_ONLY: 'PINK',
+  cyan_FOR_SUBAGENTS_ONLY: 'CYAN',
+} as unknown as Theme
 
 function makeLog(over: Partial<LogOption> = {}): LogOption {
   return {
@@ -219,5 +234,53 @@ describe('S3 summary 二级行（变高行模型纯面）', () => {
     expect(SESSION_ROW_HINT).toContain('f fork')
     expect(SESSION_ROW_HINT).toContain('q 返回')
     expect(SESSION_ROW_HINT).not.toContain('\n')
+  })
+})
+
+/**
+ * S4 agentColor theme 精确 8 色映射 + idle 圆点（纯面）。
+ * 判别锚点：映射表/优先级/圆点字形任一突变 → 恰好红。
+ */
+describe('S4 agentColor theme 精确映射 + idle 圆点（纯面）', () => {
+  it('8 色精确映射（purple/pink/orange 不再对撞近似）', () => {
+    expect(agentColorToThemeColor('purple', FAKE_THEME)).toBe('PURPLE')
+    expect(agentColorToThemeColor('pink', FAKE_THEME)).toBe('PINK')
+    expect(agentColorToThemeColor('orange', FAKE_THEME)).toBe('ORANGE')
+    expect(agentColorToThemeColor('cyan', FAKE_THEME)).toBe('CYAN')
+    expect(agentColorToThemeColor('red', FAKE_THEME)).toBe('RED')
+  })
+  it('缺失/域外 agentColor → undefined（行回落默认色）', () => {
+    expect(agentColorToThemeColor(undefined, FAKE_THEME)).toBeUndefined()
+    expect(agentColorToThemeColor('magenta', FAKE_THEME)).toBeUndefined()
+  })
+
+  it('idle 代理行：行色 = theme 身份色 + 实心圆点（同色，身份一眼辨）', () => {
+    const r = agentRowColors(makeLog({ agentColor: 'purple' }), false, false, false, FAKE_THEME)
+    expect(r.rowColor).toBe('PURPLE')
+    expect(r.dotGlyph).toBe('● ')
+    expect(r.dotColor).toBe('PURPLE')
+  })
+  it('选中态：行色 magentaBright + 圆点同色（优先于身份）', () => {
+    const r = agentRowColors(makeLog({ agentColor: 'red' }), true, false, false, FAKE_THEME)
+    expect(r.rowColor).toBe('magentaBright')
+    expect(r.dotGlyph).toBe('● ')
+    expect(r.dotColor).toBe('magentaBright')
+  })
+  it('焦点态：行色 cyan 优先于身份（圆点仍染身份色）', () => {
+    const r = agentRowColors(makeLog({ agentColor: 'red' }), false, true, false, FAKE_THEME)
+    expect(r.rowColor).toBe('cyan')
+    expect(r.dotGlyph).toBe('● ')
+    expect(r.dotColor).toBe('RED')
+  })
+  it('非代理行 idle：空心 ○ 无色，行色默认', () => {
+    const r = agentRowColors(makeLog({}), false, false, false, FAKE_THEME)
+    expect(r.rowColor).toBeUndefined()
+    expect(r.dotGlyph).toBe('○ ')
+    expect(r.dotColor).toBeUndefined()
+  })
+  it('当前行（非代理）：实心圆点 + cyan（0.1.38 current 点亮效果保留）', () => {
+    const r = agentRowColors(makeLog({}), false, false, true, FAKE_THEME)
+    expect(r.dotGlyph).toBe('● ')
+    expect(r.dotColor).toBe('cyan')
   })
 })

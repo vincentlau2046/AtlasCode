@@ -16,6 +16,9 @@ import { Box, Text, useInput } from '../ink.js'
 import { readFileSync, existsSync } from 'fs'
 import type { LogOption } from '../types/logs.js'
 import type { UUID } from 'crypto'
+import { getGlobalConfig } from '../utils/config.js'
+import { resolveThemeSetting } from '../utils/systemTheme.js'
+import { getTheme, type Theme } from '../utils/theme.js'
 import { loadSameRepoAllMessageLogs, isLiteLog, loadFullLog } from '../utils/sessionStorage.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
@@ -215,18 +218,51 @@ export function computeColumnLayout(termCols: number): {
   return { nameW, showCreated, showBranch, showMsg }
 }
 
-/** 代理配色（8 值域，/rename 或 swarm）→ 行颜色（idle 行整体着色，一眼辨身份；
- * 焦点/选中态保持 cyan/magenta，状态优先于身份）。chalk 安全映射：
- * purple/pink→magenta、orange→yellow（近似，0.1.39 走 theme 精确映射）。 */
-const AGENT_ROW_COLOR: Record<string, string | undefined> = {
-  red: 'red',
-  blue: 'blue',
-  green: 'green',
-  yellow: 'yellow',
-  purple: 'magenta',
-  orange: 'yellow',
-  pink: 'magenta',
-  cyan: 'cyan',
+// ── S4 代理身份配色（theme 精确 8 色映射 + idle 圆点，替换 0.1.38 chalk 保守映射）──
+// theme 代理色板字段带 _FOR_SUBAGENTS_ONLY 后缀（8 值域与 agentColor 值一一对应，
+// 精确映射不近似——0.1.38 的 purple/pink→magenta、orange→yellow 对撞色在此消除）。
+
+const AGENT_COLOR_THEME_FIELD: Record<string, keyof Theme> = {
+  red: 'red_FOR_SUBAGENTS_ONLY',
+  blue: 'blue_FOR_SUBAGENTS_ONLY',
+  green: 'green_FOR_SUBAGENTS_ONLY',
+  yellow: 'yellow_FOR_SUBAGENTS_ONLY',
+  purple: 'purple_FOR_SUBAGENTS_ONLY',
+  orange: 'orange_FOR_SUBAGENTS_ONLY',
+  pink: 'pink_FOR_SUBAGENTS_ONLY',
+  cyan: 'cyan_FOR_SUBAGENTS_ONLY',
+}
+
+/** agentColor（8 值域）→ theme 色板精确值（纯面判别锚点；域外/缺失 → undefined
+ * 回落行默认色）。theme 入参注入 → 零 config 访问可单测。 */
+export function agentColorToThemeColor(
+  agentColor: string | undefined,
+  theme: Theme,
+): string | undefined {
+  const field = agentColor ? AGENT_COLOR_THEME_FIELD[agentColor] : undefined
+  return field ? theme[field] : undefined
+}
+
+/** 行配色裁定（S4 纯面）：选中 magentaBright / 焦点 cyan 优先于身份色；
+ * idle 代理行 = 行整体 theme 身份色 + 实心圆点 ●（同色，一眼辨身份）；
+ * 非代理行仅选中/当前行实心（当前行圆点 cyan），其余空心 ○。 */
+export function agentRowColors(
+  log: LogOption,
+  isSelected: boolean,
+  isFocused: boolean,
+  isCurrent: boolean,
+  theme: Theme,
+): { rowColor?: string; dotColor?: string; dotGlyph: string } {
+  const identity = agentColorToThemeColor(log.agentColor, theme)
+  const rowColor = isSelected ? 'magentaBright'
+    : isFocused ? 'cyan'
+    : identity
+  const dotGlyph = identity || isSelected || isCurrent ? '● ' : '○ '
+  const dotColor = isSelected ? 'magentaBright'
+    : identity !== undefined ? identity
+    : isCurrent ? 'cyan'
+    : undefined
+  return { rowColor, dotColor, dotGlyph }
 }
 
 /** 底部操作行（单行固定）缺省提示（0.1.39-S1：fork 状态机从行内移到此处，
@@ -614,6 +650,9 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 相对时间基准（一次渲染取一次，各行同基准不抖动）
   const nowMs = Date.now()
 
+  // S4：代理身份配色走 theme 精确 8 色板（每次渲染取一次，各行共享）
+  const theme = getTheme(resolveThemeSetting(getGlobalConfig().theme))
+
   // ── 底部操作行（S1 单行固定）：取最高优先非 idle 态（forking > confirm >
   // done > error），idle 回落提示行——旧 bottomMessage 错误行已并入，
   // 底部行数恒定，光标-窗口不变量不受条件行破坏 ──
@@ -656,9 +695,11 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           // 感知差异太弱，用户看不到"点亮"。光标符号随选中态变化，
           // 与颜色双重编码，任何主题下都可辨。
           const cursor = isSelected ? '» ' : isFocused ? '> ' : '  '
-          // 选中态圆点空心→实心（原始方案的点亮效果，被误删后恢复）；
-          // 选中行同时是 current 时圆点保持实心，颜色已随选中变亮 magenta 区分
-          const statusIcon = isSelected || isCurrent ? '● ' : '○ '
+          // S4：圆点 = 身份标记（idle 代理行实心 ● 染 theme 身份色；非代理行
+          // 仅选中/当前实心，当前行圆点 cyan），与行文字拆分渲染独立着色
+          const { rowColor, dotColor, dotGlyph } = agentRowColors(
+            log, isSelected, isFocused, isCurrent, theme,
+          )
           const title = truncateToVisibleWidth(getLogDisplayTitle(log) || 'untitled', NAME_W)
           const created = formatCreated(log.created)
           const active = formatActive(log.modified, nowMs)
@@ -667,8 +708,10 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
             : '—'
           const msgCount = String(cached?.messageCount ?? log.messageCount ?? 0)
 
-          // 拼接固定宽度列 → 单一字符串 → 单个 <Text>，Ink 不会拆行
-          let line = cursor + statusIcon
+          // 拼接固定宽度列 → 单一字符串 → 单个 <Text>，Ink 不会拆行。
+          // 前 4 字符 = 光标(2)+圆点(2) 恒 ASCII，渲染段按 slice(0,2)/slice(2,4)
+          // 拆出光标与圆点独立着色（S4），余段整行行色。
+          let line = cursor + dotGlyph
             + padToVisibleWidth(title, NAME_W) + ' '
             + (showCreated ? padToVisibleWidth(created, CREATED_W) + ' ' : '')
             + padToVisibleWidth(active, ACTIVE_W)
@@ -691,10 +734,8 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           }
           line += ' ' + flags
 
-          // idle 行按代理配色着色（身份一眼辨）；焦点/选中态颜色优先于身份
-          const color = isSelected ? 'magentaBright'
-            : isFocused ? 'cyan'
-            : AGENT_ROW_COLOR[log.agentColor ?? '']
+          // S4：行色/圆点色/圆点字形已由上方 agentRowColors 裁定
+          //（选中 magentaBright / 焦点 cyan 优先；idle 代理行 = theme 身份色 + 实心 ●）
 
           // S3：展开行渲染二级摘要行（dim，缩进到名称列起点 4 空格 + └）。
           // 二级行宽 = 终端宽 - paddingX(4) - 缩进+└+gap(6)，wrap=truncate 防溢。
@@ -704,9 +745,17 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           return (
             <React.Fragment key={sid || i}>
               <Box noSelect onClick={() => handleRowClick(i)}>
-                <Text color={color} bold={isFocused || isSelected} wrap="truncate">
-                  {line}
-                </Text>
+                <Box flexDirection="row" noSelect>
+                  <Text color={rowColor} bold={isFocused || isSelected}>
+                    {line.slice(0, 2)}
+                  </Text>
+                  <Text color={dotColor} bold={isFocused || isSelected}>
+                    {line.slice(2, 4)}
+                  </Text>
+                  <Text color={rowColor} bold={isFocused || isSelected} wrap="truncate">
+                    {line.slice(4)}
+                  </Text>
+                </Box>
               </Box>
               {i === expandedIdx && (
                 <Box noSelect>
