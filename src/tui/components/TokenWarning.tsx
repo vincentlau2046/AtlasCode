@@ -6,6 +6,9 @@ import { Box, Text } from '../ink.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js';
 import { calculateTokenWarningState, getEffectiveContextWindowSize, isAutoCompactEnabled } from 'src/tui/engineCompat';
 import { useCompactWarningSuppression } from 'src/tui/engineCompat';
+// D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态订阅 + 跳闸判定（engine store
+// 单源；hook 留 tui 壳，isAutoCompactCircuitTripped 语义单源 engine 域）
+import { useAutoCompactCircuitFailures, isAutoCompactCircuitTripped } from 'src/tui/engineCompat';
 import { getUpgradeMessage } from '../utils/model/contextWindowUpgradeCheck.js';
 type Props = {
   tokenUsage: number;
@@ -105,6 +108,8 @@ export function TokenWarning(t0) {
     isAboveErrorThreshold
   } = t1;
   const suppressWarning = useCompactWarningSuppression();
+  // D2（0.1.37 ③）：断路器跳闸态活订阅（须在早退前无条件调用，hooks 规则）
+  const circuitFailures = useAutoCompactCircuitFailures();
   if (!isAboveWarningThreshold || suppressWarning) {
     return null;
   }
@@ -163,7 +168,14 @@ export function TokenWarning(t0) {
     }
     return t4;
   }
-  const autocompactLabel = reactiveOnlyMode ? `${100 - displayPercentLeft}% context used` : `${displayPercentLeft}% until auto-compact`;
+  // D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态（≥3 连败）——pre-turn
+  // auto-compact 已永久短路，「X% until auto-compact」文案失真（不会触发）→
+  // 跳闸态改渲染暂停提示 + 恢复出口（手动 /compact·换小模型·新会话），纯加性
+  // 渲染零行为面变更；未跳闸（circuitFailures < 阈值）= 原文案零改动。
+  const circuitTripped = isAutoCompactCircuitTripped(circuitFailures);
+  const autocompactLabel = circuitTripped
+    ? `auto-compact paused after ${circuitFailures} consecutive failures · run /compact, switch to a smaller model, or start a new session`
+    : reactiveOnlyMode ? `${100 - displayPercentLeft}% context used` : `${displayPercentLeft}% until auto-compact`;
   let t4;
   if ($[9] !== autocompactLabel || $[10] !== isAboveErrorThreshold || $[11] !== percentLeft) {
     t4 = <Box flexDirection="row">{showAutoCompactWarning ? <Text dimColor={true} wrap="truncate">{upgradeMessage ? `${autocompactLabel} \u00b7 ${upgradeMessage}` : autocompactLabel}</Text> : <Text color={isAboveErrorThreshold ? "error" : "warning"} wrap="truncate">{upgradeMessage ? `Context low (${percentLeft}% remaining) \u00b7 ${upgradeMessage}` : `Context low (${percentLeft}% remaining) \u00b7 Run /compact to compact & continue`}</Text>}</Box>;

@@ -233,6 +233,16 @@ describe('createAgentLoopDeps（S-E2 A4，§8.52）', () => {
     const fast = await createAgentLoopDeps({ role: 'fast' })
     expect(fast.deps.role).toBe('fast')
   })
+
+  // D1（0.1.37 ③，P2 恢复层 C3 缺口）：headless 车道反应式压缩消费者装配在场
+  //（双车道同消费点——本面 = headless V7 面装配断言；消费者体 = engine 窄体
+  // compactConversation 闭包，413/PTL → 压缩重建 + 本回合重试；未注 = 窄 spine）。
+  test('T-5 D1 反应式压缩消费者槽（headless 车道）装配在场', async () => {
+    const bundle = await createAgentLoopDeps({})
+    // 消费者体 = engine 窄体 compactConversation 闭包（413/PTL → 压缩重建 +
+    // 本回合重试）；未注 = 窄 spine 零行为（headless 缺省不变）。
+    expect(typeof bundle.deps.reactiveCompact).toBe('function')
+  })
 })
 
 // ── A5 setSessionEnv 注真值（T-5）──────────────────────────────────────

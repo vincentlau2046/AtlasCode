@@ -19,3 +19,5 @@ export * from 'src/engine'
 
 // tui 独有：压缩警告抑制 React hook（引擎 React-free 红线，留 tui 壳）
 export { useCompactWarningSuppression } from './contextBodies/compactWarningHook.js'
+// D2（0.1.37 ③）：断路器跳闸态 React 订阅 hook（同 React-free 红线，留 tui 壳）
+export { useAutoCompactCircuitFailures } from './contextBodies/autoCompactCircuitHook.js'

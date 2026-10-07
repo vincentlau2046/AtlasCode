@@ -117,3 +117,19 @@
 | **Q6（C7 context-collapse stub + C8 pre-turn 残留守）** | **登记 0.1.37+（本波不动）** | 版本=收口契约，登记项（C7 `recoverFromOverflow` 等 6 函数全 stub / C8 pre-turn 序 budget→snip→microcompact 未接线） |
 
 **③ 解锁（用户裁定 → Main，2026-10-07 上午）**：0.1.37 切片③ = **D1+D2 代码落地 + D3 spec 文档 + D4/D5/telemetry/C7+C8 登记（登记项零码）**；③ gate = **V4**（3 连败后：413 反应式恢复 + 断路器跳闸态在场 + 一次性门生效）+ **V7**（headless 413 同判据）+ 既有 413/maxTokens 自修语义单测零回归；③ 落码后 → **0.1.37 全量 gate**（⑧ rebase 重验 + ②/④ 已绿〔r-0730〕+ ③ V4/V7 + 回归 S-A/A4F/P0a + 四件套）→ 发布序列（f4 T3 → Main）。收益/风险裁定依据 = f4 两轴分析（Q2 spec 先行/Q5/Q6 = 低风险项；Q1 高收益 MEDIUM 风险单独拍板=做；Q3/Q4 = 不做）。
+
+---
+
+## §10 登记项清单（0.1.37 切片③ 零码登记，实施排期各异）
+
+> 本节 = ③ 落码范围中「登记项零码」的**单一事实源**（Q3/Q4/Q5/Q6 裁定落盘）。每项：裁定 + 排期 + 触发/重开条件。本波**零代码**，仅登记。
+
+| 登记项 | 裁定（§9） | 排期 | 触发 / 重开条件 | 落点 |
+|---|---|---|---|---|
+| **D4 软复位**（距上次成功 ≥M 回合） | **砍**（Q3） | 不实施（待 soak 数据再议） | 两参照（CC/deepseek）均无时间软复位 + ①③② 已给恢复路径；M 取值无参照锚点。重开条件 = soak 数据证明「断路器跳闸后需时间性自动复活」 | 本节 |
+| **D5 reactive-only 模式**（`ATLAS_REACTIVE_ONLY`） | **不进波**（Q4） | 0.1.37+（实验结论后议） | vault 2026-09-17 裁定保留门控（`atlas_cobalt_raccoon` A/B 实验未结）；行为变更（全用户抑制主动压缩，413 前窗口更长）。重开条件 = 实验结论 + 用户拍板翻 default | vault `15-功能门控评估-Compact模块.md` + 本节 |
+| **413 恢复成功率 telemetry** | **登记最小事件**（Q5） | D3 实施（0.1.37+）前置 | 本仓无 `atlas_*` 遥测面（遥测死代码 879 点 2026-09-18 已删，无后端）；D3 毕业判据「413 恢复成功率 ≥ 阈值（telemetry 确认）」依赖此数据源。最小事件 = 剪枝/反应式 触发·成功·回显 413 三类计数 | D3 spec §7（`docs/2026-10-07-d3-model-free-pruner-spec.md`） |
+| **C7 context-collapse stub**（`recoverFromOverflow` 等 6 函数全 `as any`） | **登记 0.1.37+**（Q6） | 0.1.37+（本波不动） | 版本=收口契约；`src/tui/services/contextCollapse/index.ts` 全 stub（413 恢复面 `recoverFromOverflow` 即 stub）。重开条件 = context-collapse 域独立排期 | 本节 |
+| **C8 pre-turn 序残留守**（budget→snip→microcompact 未接线） | **登记 0.1.37+**（Q6） | 0.1.37+（本波不动，D6 不预启） | snip 先触发可延缓 LLM 全量压缩（互补策略），但与 context-collapse 竞态未验证（vault 评估）。重开条件 = C7 落地后竞态验证通过 | `src/engine/query/loop.ts:418` 残留守 + 本节 |
+
+**零码声明**：本切片③ 对上述 5 项**仅登记、不落任何代码**；D1+D2 代码 + D3 spec 文档 = ③ 全部代码/文档交付面。

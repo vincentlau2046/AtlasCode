@@ -18,6 +18,14 @@
  *   - 错误恢复（E-1b-full）：回合级有界恢复已落（#262，turnRecovery.ts
  *     withTurnRecovery——queryOneRound 两处 modelProvider.chat 经有界 + 指数退避 +
  *     signal 感知续试穿越 5xx 风暴窗，长跑不中断；非可重试/abort 立即穿透）。
+ *   - D1/D2（0.1.37 ③，P2 恢复层）：413/PTL 反应式压缩消费点（C3 缺口，
+ *     CC query.ts:1119 同构：queryAgentLoop 轮内 provider 413/PTL 类 throw
+ *     （isReactiveCompactRecoverableError 判形）→ DI 槽 deps.reactiveCompact
+ *     （宿主注入消费者）+ isReactiveCompactEnabled 门 + 本回合一次性门 →
+ *     buildPostCompactMessages 重建 + 本回合重试一次；失败回显原错误）+
+ *     断路器跳闸态 store 更新点（C2 缺口，pre-turn 成功复位/失败回灌双支
+ *     → context/autoCompactCircuit store，TUI 渲染 + 模型侧告知消费面）。
+ *     未注入槽 = 窄 spine 零行为（headless 缺省不变）。
  *   - 残留守（后续纵切）：流式 chatStream + 流式 hooks runner 消费面（runHooksStream，
  *     §8.40 S-5b 前向接缝登记，防 H6 死接缝）/
  *     MCP 连接生命周期（连接层纵切，见 mcp.ts 头注；MCP 工具路由本身已按 E-2 闭环）/
@@ -49,9 +57,14 @@ import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
   buildPostCompactMessages,
+  clearAutoCompactCircuitFailures,
+  isReactiveCompactEnabled,
+  reportAutoCompactCircuitFailures,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
+  type CompactionResult,
 } from '../context'
+import { isReactiveCompactRecoverableError } from './reactiveCompactError'
 import type { ContentReplacementRecord } from '../session/types'
 
 /**
@@ -149,6 +162,30 @@ export interface AgentLoopDeps {
   hooks?: LoopHooks
   /** S-E3 A11：transcript 写面（未注入 = 窄 spine 无持久化安全缺省）。 */
   transcript?: LoopTranscriptSink
+  /**
+   * D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 反应式压缩消费者槽（CC
+   * query.ts:1119 同构；P2 报告 §5 D1「delta = 一个消费点 + 一次性门」）。
+   * 消费点（queryAgentLoop 轮内）：provider 抛 413/PTL 类错误
+   * （isReactiveCompactRecoverableError 判形，throw 形态 = 谓词层
+   * isWithheldPromptTooLong/isWithheldMediaSizeError 的 CC stream-withholding
+   * 形等价）且 isReactiveCompactEnabled()（谓词层单源，默认开，
+   * ATLAS_DISABLE_REACTIVE_COMPACT kill-switch）且本回合未尝试过（一次性门，
+   * 防反应式死循环 = V4 判据③）→ 调本槽消费者（宿主注入：TUI 车道 =
+   * 宿主体 tryReactiveCompact 闭包 / headless 车道 = engine 窄体
+   * compactConversation 闭包，两车道同消费点）→ 成功经 buildPostCompactMessages
+   * 重建序列 + 本回合重试一次（重试不占新轮次，CC 同语义）；失败/消费者
+   * 异常/二次 413 = 回显原始错误（宿主体 :130-135 已登记回落）。
+   * 未注入 = 窄 spine 零行为（headless 缺省不变；413 错误按现状穿透）。
+   * 注：既有 413/maxTokens 自修语义（withRetry maxTokensOverride A 类 400）
+   * 零回归——本槽只消费 classifyAPIError 'prompt_too_long'/'image_too_large'
+   * 族（B 类 400 输入超窗，A 类经 withRetry 自修不抵此消费点）。
+   */
+  reactiveCompact?: (params: {
+    /** 当前消息序列（出错前）。 */
+    messages: Message[]
+    /** 当前轮次（遥测/审计面；不参与判定）。 */
+    turn: number
+  }) => Promise<CompactionResult | null>
   /**
    * D-5b（S-4，§8.73.2）：headless 高频 5 选项 + --effort → LLM 调用真消费面
    * （runHeadless 组合根注入；未注入 = 窄 spine 缺省，行为不变）。
@@ -459,6 +496,9 @@ export async function queryAgentLoop(
           // 成功：重置 tracking（turnCounter 0 + 新 turnId + 失败计数清零，旧仓 L485-494）
           tracking = oc.tracking
         }
+        // D2（0.1.37 ③，C2 缺口）：pre-turn 压缩成功 = 断路器复位（跳闸态
+        // store 清零；TUI 跳闸态渲染 + 模型侧告知面随之解除）
+        clearAutoCompactCircuitFailures()
         // S-E3 A11（旧 L607 收敛）：compact 写面 persist post-compact 序列
         // （boundaryMarker 携 subtype 判别式 → JSONL '"compact_boundary"'
         // 标记字节面，scanner 同点 #15 核销；dedup 幂等在内重记安全）。
@@ -497,6 +537,10 @@ export async function queryAgentLoop(
         // 失败：回灌熔断计数（旧仓 loop.ts:504-511 语义）。不回灌则熔断器在 loop 里
         // 永不跳闸——超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用。
         tracking = { ...tracking, consecutiveFailures: oc.consecutiveFailures }
+        // D2（0.1.37 ③，C2 缺口）：失败回灌同步更新断路器跳闸态 store（≥3 =
+        // 跳闸，TUI 渲染「auto-compact 已暂停（N 次失败）」+ 模型侧告知注入；
+        // 静默失能 → 可见 + 有出口，P2 报告 §5 D2）
+        reportAutoCompactCircuitFailures(oc.consecutiveFailures)
       }
       if (oc.wasCompacted && oc.compactionResult) {
         // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
@@ -504,19 +548,66 @@ export async function queryAgentLoop(
       }
     }
     deps.emit?.({ type: 'round_start', turn: turns })
-    const roundInputLen = messages.length
-    lastRound = await queryOneRound(deps, tools, messages)
-    messages = lastRound.messages
-    // W3-3a：轮末事件（assistant 消息 + tool result 消息族，派生不变式 =
-    // queryOneRound 构造序 [...入参, assistantMsg, ...resultMessages]，
-    // resultMessages 长度 = toolResults 长度）。
-    deps.emit?.({
-      type: 'round_end',
-      turn: turns,
-      result: lastRound,
-      assistantMessage: lastRound.messages[roundInputLen] as AssistantMessage,
-      toolResultMessages: lastRound.messages.slice(roundInputLen + 1),
-    })
+    // D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 反应式压缩消费点（CC
+    // query.ts:1119 同构）——provider 抛 413/PTL 类错误时（throw 形态判形
+    // isReactiveCompactRecoverableError；门 = isReactiveCompactEnabled 谓词层
+    // 单源 + DI 槽注入 + 本回合一次性门 reactiveRetried 防反应式死循环，
+    // V4 判据③）→ 消费者（宿主注入）成功经 buildPostCompactMessages 重建
+    // 序列 + 本回合重试一次（重试不占新轮次，CC 同语义；失败轮不发射
+    // round_end）；失败/消费者异常/二次 413 = 回显原始错误（穿透原语义，
+    // 既有 413/maxTokens 自修零回归——本消费点只消费 B 类 400 输入超窗族，
+    // A 类经 withRetry maxTokensOverride 自修不抵此点）。
+    let reactiveRetried = false
+    for (;;) {
+      const roundInputLen = messages.length
+      try {
+        lastRound = await queryOneRound(deps, tools, messages)
+      } catch (err) {
+        if (
+          !reactiveRetried &&
+          deps.reactiveCompact !== undefined &&
+          isReactiveCompactEnabled() &&
+          isReactiveCompactRecoverableError(err)
+        ) {
+          reactiveRetried = true
+          let recovered: Message[] | undefined
+          try {
+            const result = await deps.reactiveCompact({ messages, turn: turns })
+            if (result) recovered = buildPostCompactMessages(result)
+          } catch (compactErr) {
+            // 消费者异常 = 恢复不可用（fail-safe：错误路径零行为变更，回显原错误）
+            logForDebugging(
+              `[reactive-compact] consumer failed: ${errorMessage(compactErr)}`,
+            )
+          }
+          if (recovered && recovered.length > 0) {
+            messages = recovered
+            // S-E3 A11（旧 L607 同型）：compact 写面 persist post-compact 序列
+            if (deps.transcript) {
+              await deps.transcript.record(messages)
+            }
+            // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
+            deps.emit?.({ type: 'compacted', turn: turns, messages })
+            // 一次性重试本回合（reactiveRetried 已置位 → 二次 413 穿透原错误）
+            continue
+          }
+          // 恢复不可用（消费者 null/异常）→ 落回显原始错误
+        }
+        throw err
+      }
+      messages = lastRound.messages
+      // W3-3a：轮末事件（assistant 消息 + tool result 消息族，派生不变式 =
+      // queryOneRound 构造序 [...入参, assistantMsg, ...resultMessages]，
+      // resultMessages 长度 = toolResults 长度）。
+      deps.emit?.({
+        type: 'round_end',
+        turn: turns,
+        result: lastRound,
+        assistantMessage: lastRound.messages[roundInputLen] as AssistantMessage,
+        toolResultMessages: lastRound.messages.slice(roundInputLen + 1),
+      })
+      break
+    }
     if (lastRound.toolResults.length === 0) {
       // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
       // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →

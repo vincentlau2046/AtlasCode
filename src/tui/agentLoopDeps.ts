@@ -33,9 +33,12 @@ import {
   compactConversation,
   createLoopHooks,
   getAutoCompactEnvOverrides,
+  getAutoCompactCircuitFailures,
+  MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES,
   mergeAutoCompactOverrides,
   recordTranscript,
   recordContentReplacement,
+  tryReactiveCompact,
   type AgentLoopArgs,
   type AgentLoopDeps,
   type AutoCompactDeps,
@@ -165,11 +168,50 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
     querySource: m.querySource,
   }
 
+  // D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态模型侧告知（deepseek
+  // NEVER_SENTENCE 模式——跳闸态下注入声明式一句话，告知模型 auto-compact
+  // 不可用，防 futile 请求（模型不再发起注定超窗的长请求）；纯加性，仅
+  // 跳闸态注入，未跳闸 = systemContext 原引用零改动，零行为面变更）。
+  const circuitFailures = getAutoCompactCircuitFailures()
+  const systemContext =
+    circuitFailures >= MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES
+      ? {
+          ...m.systemContext,
+          autoCompactCircuit: `Auto-compact is paused after ${circuitFailures} consecutive failures: respond concisely and avoid requests that expand the context — manual /compact, switching to a smaller model, or starting a new session are the recovery paths.`,
+        }
+      : m.systemContext
+
   const deps: AgentLoopDeps = {
     modelProvider,
     role,
     sessionModel,
     signal: m.signal,
+    // D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 反应式压缩消费者槽
+    // （engine loop 消费点，CC query.ts:1119 同构）——宿主侧经 engine 门面
+    // tryReactiveCompact 委托宿主体（contextBodies/reactiveCompact 全量
+    // compactConversation 委托 + 内置门；highGapPorts port 未注册 = THROW，
+    // 由 loop 消费点 consumer try/catch 兜底为「恢复不可用 → 回显原错误」，
+    // fail-safe 零行为变更）。hasAttempted 恒 false：本回合一次性门在 engine
+    // loop 消费点（reactiveRetried），闭包每至多调用一次（TUI 车道；headless
+    // 车道经 createAgentLoopDeps 同槽注 engine 窄体消费者）。
+    reactiveCompact: (params) =>
+      tryReactiveCompact({
+        hasAttempted: false,
+        querySource: m.querySource,
+        aborted: m.signal?.aborted ?? false,
+        messages: params.messages,
+        cacheSafeParams: {
+          systemPrompt: m.systemPrompt,
+          userContext: m.userContext,
+          systemContext: m.systemContext,
+          toolUseContext: m.toolUseContext,
+          // fork 缓存共享路径读 forkContextMessages（非 messages 参，见
+          // compact.ts:452）——= 本 loop 出错前的活消息序列（params.messages，
+          // 同 REPL compact 支语义；非 m.messages 预 loop 静态序列，loop 内
+          // tool 轮后已分叉）。PTL 截断由 compactConversation 内建重试拥有。
+          forkContextMessages: params.messages,
+        },
+      }),
     // 交互权限桥（engine 门 + ask → canUseTool；子 loop canUseTool = 非交互
     // auto 决策体，同桥 remap 语义）
     checkPermission: buildInteractiveGate({
@@ -204,7 +246,10 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
           recs as unknown as Parameters<typeof recordContentReplacement>[0],
         ),
     },
-    systemPrompt: asSystemPrompt(appendSystemContext(m.systemPrompt, m.systemContext)),
+    // D2（0.1.37 ③）：跳闸态 systemContext 注入面（非跳闸 = 原引用透传）
+    systemPrompt: asSystemPrompt(
+      appendSystemContext(m.systemPrompt, systemContext),
+    ),
     effortValue: m.effort !== undefined ? String(m.effort) : undefined,
   }
 

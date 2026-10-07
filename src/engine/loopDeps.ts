@@ -52,6 +52,10 @@ import { SnipTool } from './tools/team/snipTool'
 import { TeamCreateTool } from './tools/team/teamCreateTool'
 import { TeamDeleteTool } from './tools/team/teamDeleteTool'
 import { type AgentLoopDeps } from './query/loop'
+// D1（0.1.37 ③，P2 恢复层 C3 缺口）：headless 车道 413/PTL 反应式压缩
+// 消费者（engine 窄体 compactConversation 裁剪模式，TUI 车道 autoCompact.compact
+// 同形；消费点/一次性门在 engine loop，本构建器只供消费者体）
+import { compactConversation } from './context'
 
 // ── 壳侧 port 注册窗（W3-3b §8.74.15：engine L3 隔离，未注册 = 窄缺省）──
 
@@ -224,14 +228,63 @@ export async function createAgentLoopDeps(
       ...config.hookOptions,
     },
   })
+  // D1（0.1.37 ③）：反应式压缩消费者车道常量（modelprovider 单例 + role 车道
+  // + session 主模型 pin，同 deps 组装面单源；消费者体下方 reactiveCompact 槽）
+  const modelProvider = getModelProvider()
+  const role: ModelRole = config.role ?? 'premium'
+  const sessionModel = config.sessionModel
   const deps: AgentLoopDeps = {
-    modelProvider: getModelProvider(),
-    role: config.role ?? 'premium',
+    modelProvider,
+    role,
     // W3-3b（§8.74.15）：会话主模型 pin 透传（未设 = 角色池原行为）
-    sessionModel: config.sessionModel,
+    sessionModel,
     signal: config.signal,
     checkPermission,
     hooks,
+    // D1（0.1.37 ③，P2 恢复层 C3 缺口）：headless 车道 413/PTL 反应式压缩
+    // 消费者（V7 判据面）——engine 窄体 compactConversation（裁剪模式）+
+    // summarize 经 modelProvider.chat（同 TUI 车道 autoCompact.compact 模式，
+    // 双车道同 engine loop 消费点）。失败/空 = null（loop 消费点回显原始
+    // 413 错误，既有穿透语义零回归）；一次性门（同回合二次 413 不重压）在
+    // engine loop 消费点（reactiveRetried），本消费者体每至多被调一次。
+    reactiveCompact: async ({ messages }) => {
+      try {
+        return await compactConversation(messages, {
+          summarize: async (compactMsgs, prompt) => {
+            const resp = await modelProvider.chat({
+              messages: [...compactMsgs, prompt],
+              role,
+              sessionModel,
+              signal: config.signal,
+            })
+            const content = (
+              resp as { message?: { content?: unknown } }
+            ).message?.content
+            const blocks = Array.isArray(content) ? content : []
+            return blocks
+              .filter(
+                (b): b is { type: string; text?: string } =>
+                  typeof b === 'object' &&
+                  b !== null &&
+                  (b as { type?: string }).type === 'text',
+              )
+              .map(b => b.text ?? '')
+              .join('')
+          },
+          countTokens: msgs =>
+            modelProvider.countTokens(
+              role,
+              sessionModel,
+              msgs,
+              tools as unknown as any[],
+            ),
+          keepRecent: 0,
+        })
+      } catch {
+        // 压缩失败（不足消息 / summarize 抛错等）= 恢复不可用，回显原错误
+        return null
+      }
+    },
     // W3-3b（§8.74.15）：D-5b 5 槽透传（headless -- 选项真消费面，
     // queryOneRound → modelprovider.chat 逐槽消费，未设 = 窄 spine 缺省）
     systemPrompt: config.systemPrompt,

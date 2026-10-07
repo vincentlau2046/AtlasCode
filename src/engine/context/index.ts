@@ -177,3 +177,14 @@ export {
   isWithheldMediaSizeError,
   isReactiveOnlyMode,
 } from './reactiveCompact'
+// D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态 store（React-free 模块态，
+// compactWarningStore 同款先例；更新点 = engine loop pre-turn 支，消费面 =
+// TUI 跳闸态渲染 + 模型侧告知）
+export {
+  autoCompactCircuitStore,
+  getAutoCompactCircuitFailures,
+  isAutoCompactCircuitTripped,
+  reportAutoCompactCircuitFailures,
+  clearAutoCompactCircuitFailures,
+  resetAutoCompactCircuitForTesting,
+} from './autoCompactCircuit'

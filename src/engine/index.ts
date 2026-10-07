@@ -18,6 +18,9 @@ export {
   queryAgentLoop,
   DEFAULT_AGENT_LOOP_MAX_TURNS,
   ask,
+  // D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 类 provider 错误形判别
+  // （throw 形态，classifyAPIError 单源；loop 反应式压缩消费点判据）
+  isReactiveCompactRecoverableError,
   type AgentLoopDeps,
   type AgentLoopEvent,
   type AgentRoundResult,
@@ -527,6 +530,14 @@ export {
   isWithheldPromptTooLong,
   isWithheldMediaSizeError,
   isReactiveOnlyMode,
+  // D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态 store（React-free；
+  // 更新点 = engine loop pre-turn 支，消费面 = TUI 跳闸态渲染 + 模型侧告知）
+  autoCompactCircuitStore,
+  getAutoCompactCircuitFailures,
+  isAutoCompactCircuitTripped,
+  reportAutoCompactCircuitFailures,
+  clearAutoCompactCircuitFailures,
+  resetAutoCompactCircuitForTesting,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
   type AutoCompactOutcome,

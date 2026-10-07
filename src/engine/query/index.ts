@@ -32,3 +32,7 @@ export {
   type WithTurnRecoveryOptions,
 } from './turnRecovery'
 export { ask, type AskArgs } from './QueryEngine'
+// D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 类 provider 错误形判别
+// （throw 形态，modelprovider classifyAPIError 单源；CC 谓词层 Message 形态
+// 两谓词 = context 门面 isWithheldPromptTooLong/isWithheldMediaSizeError 不变）
+export { isReactiveCompactRecoverableError } from './reactiveCompactError'
