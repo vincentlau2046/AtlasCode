@@ -74,6 +74,8 @@
 - **探针收编 = Main 侧动作**：e2e 工作区 `compact413-v47.ts` + fault-proxy 3 扩展（`ptl` 故障种 / `detectCompact` 请求体 marker / `CompactPlan` 序列态机 + `mainLoopPtlPersist`）随 0.1.37 收编入仓（Main 收编，e2e 零 src/ 产品改动 / 零 master 操作不变）
 - **f4 已单信号 e2e（atlas-user-e2e）0.1.37 全量 gate（lean）验收请求**（gate 基线 worktree-0.1.36 @ `6079da9`；③ V4/V7 + ②/④ 回放 + ⑧ rebase 重验 + 回归 S-A/A4F 6 句/P0a 隔离 hardFail=0 + 四件套 3724/0·266；⑧ 真持久 pane 现形归生产 lane 非全量 gate；fail-closed 封口版无顺延）→ **现段 = 0.1.37 全量 gate（e2e 执行中）→ 全绿 → f4 T3 单信号 → Main 发布序列**；f4 午后链检查 cron（14:41 全量 gate 结果 / 15:47 终态，均 fail-closed 不预推进）
 
+**~13:3x 更新：#294 全量对照闭环（Main 单信号，登记项终态）→ 3 flaky pre-existing 双重坐实**：Main detached verify worktree（bg2vcxhwo）parent `4458b2e`（pre-③）全量 = **3709/0·265 干净** vs ③ `6079da9` 全量 = **3724/0·266**（= parent 3709 + ③ 增量 15，零回归）→ **3 flaky 在 ③ diff 两侧均不恒现**（两全量跑皆绿）= 非确定测试隔离/时序敏感 flake（`--isolate` 并发全局态泄漏），非产品回归、非可复现恒败 → **#294 pre-existing 坐实闭环**（工单已追记全量对照结论 + detached verify worktree `git worktree remove` 清）。#294 修向维持 0.1.37+ 测试隔离硬化（loop-transcript-fs/ascend-s5-mount 全局态 teardown/时序解耦），非阻塞 0.1.37、不入 ③ 判据。**Main 侧已无未闭环项；唯一推进路径 = e2e 全量 gate（lean）verdict（球在 atlas-user-e2e）→ 绿即 f4 发 T3 单信号 → Main 自跑 0.1.37 发布链**（bump → cherry-pick master ← worktree-0.1.36@6079da9 → tag v0.1.37 → push×2 → DNS-pin npm → packument 验真〔D-8 canonical tarball〕→ 生产 lane〔⑧ 真持久 pane 现形 + UA wire + A4F/P0a 回归〕+ 收编探针 compact413-v47/fault-proxy 3 扩展入仓 + worktree 清理 + #290/#292/#293 核销）
+
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
 | 项 | 调研对象（本地可查） | 产出 |
