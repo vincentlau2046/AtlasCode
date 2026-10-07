@@ -153,11 +153,17 @@ export const INTERNAL_ONLY_COMMANDS = [
   agentsPlatform,
 ].filter(Boolean)
 
-// 前向缝登记（2026-10-08 slash 精简波 0.1.40 W2，E-1P 9 项零码登记）：
-// 以下 9 个上游 v2.1.88 有真实现的命令，因依赖 1P 服务（Claude.ai 订阅 / 1P 计费 /
-// 远程环境 / grove+consumer 门），在 de-ANT 世界无意义，**有意不搬**（非丢失、非待补）：
+// 前向缝登记（2026-10-08 slash 精简波 0.1.40 W2 落 9 项 + 0.1.41 封口波补 #10，E-1P 10 项零码登记）：
+// 以下 10 个上游 v2.1.88 有真实现的命令，因依赖 1P 服务（Claude.ai 订阅 / 1P 计费 /
+// 远程环境 / grove+consumer 门 / 1P 服务端工具），在 de-ANT 世界无意义，**有意不搬**（非丢失、非待补）：
 //   chrome · desktop · mobile · install-github-app · extra-usage ·
 //   rate-limit-options · passes · remote-env · privacy-settings
+//   advisor（#10，0.1.41 封口波补登记）：三重 1P 门——① 1P 服务端工具（server_tool_use
+//   block，API 服务端执行，de-ANT 网关无执行面）② 1P growthbook 实验 tengu_sage_compass
+//   ③ 1P 模型表（opus/sonnet-4-6）；且 utils/advisor.ts 已随 D2 波整裁为全 false 墓碑。
+//   只搬 109L 命令体 = isEnabled 恒 false 永禁死命令（违 W2 死码卫生）→ 登记不做。
+//   旁证观察项 O-adv-1：main.tsx `--advisor` CLI flag 现恒 hard-error（D2 残留），
+//   归 0.1.41+ 后续波 triage（裁 flag / 降 no-op 二选一）。
 // 回流 = 对应 1P 服务车道实施波补真实现后再议，不阻塞当前版本。
 
 // Declared as a function so that we don't run this until getCommands is called,
