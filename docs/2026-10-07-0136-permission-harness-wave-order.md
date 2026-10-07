@@ -68,6 +68,12 @@
 - **登记项（非 ③ 阻塞、非 INCONCLUSIVE 缺口）**：全量 bun test 无并发复跑 **3 flaky fail**（`W2-2a-2 注册面名表` / `P-S1 前缀守卫` / `S-E3 A11 loop transcript 写面 F-1`），**定因 = pre-existing 测试隔离/时序 flake 非 ③ 回归**（三测隔离单跑均 4/0 通过 + 失败集跨 run 非确定抖动〔确定性 ③ 回归应每次同一测试恒败，抖动排除〕+ git 证 ③ `6079da9` 未 touch 三测试文件〔`loop-transcript-fs`/`ascend-s5-mount`，末改 pre-③〕及其被测面）→ **路由 Main 独立核 ③ parent `4458b2e` 全量对照坐实 pre-existing + 立测试隔离缺陷工单**（`loop-transcript-fs`/`ascend-s5-mount` 全局态泄漏/时序敏感）；**非阻塞 0.1.37 链**
 - **f4 已单信号 Main**（③ gate PASS 收讫 + 0.1.37 全量 gate 排期 + 3 flaky 工单路由〔4458b2e 对照 + 测试隔离工单〕+ 探针 `compact413-v47.ts` + fault-proxy 3 扩展收编窗口=③ 波）+ **e2e 0.1.37 全量 gate（lean）验收请求**（③ V4/V7 + ②/④ 已绿 r-0730 + 回归 S-A/A4F 6 句/P0a 隔离 hardFail=0 + 四件套 3724/0·266；**⑧ 真持久 pane 现形〔tmux 双 pane〕归生产 lane，非全量 gate**）
 
+**~13:15 更新：Main ACK ③ gate PASS + 3 flaky #294 收讫（pre-existing 坐实）+ 全量 gate 球在 e2e（0.1.37 封口版链现段 = 全量 gate 执行中）**：
+- **Main ACK（单信号回 f4）**：③ gate PASS 收讫 + 0.1.37 = 三子集 gate 全绿（⑧ r-0522 + ②④ r-0730 + ③ r-c413）→ 待 f4 全量 gate 单信号 + T3 即自跑发布链（常设授权，零新授权）
+- **3 flaky = pre-existing 坐实 + 工单 #294 已立（Main 独立核）**：Main git 考古 = 三 flaky 测试文件末改均 pre-③（`194135a`/`dc7e1fc`/`c2e28db`，均 ③ parent `4458b2e` 祖先）+ ③ diff（`4458b2e..6079da9`）未 touch 三文件及被测面（getAllBaseTools / recordTranscript / session 前缀守卫）→ ③ 不可能引入 + 隔离单跑 28/0 全绿（测试体正确，失败=并发/时序环境 flake 非恒败）+ parent `4458b2e` 全量对照 detached verify worktree 后台跑（bg2vcxhwo）。**#294 = 0.1.37+ 测试隔离硬化**（loop-transcript-fs / ascend-s5-mount 全局态泄漏/时序解耦，不阻塞 0.1.37、不入 ③ 判据，与 e2e 定因一致）→ **f4 侧记档：3 flaky 由「登记项待 Main 核」闭环为「#294 已立 + pre-existing 坐实」**
+- **探针收编 = Main 侧动作**：e2e 工作区 `compact413-v47.ts` + fault-proxy 3 扩展（`ptl` 故障种 / `detectCompact` 请求体 marker / `CompactPlan` 序列态机 + `mainLoopPtlPersist`）随 0.1.37 收编入仓（Main 收编，e2e 零 src/ 产品改动 / 零 master 操作不变）
+- **f4 已单信号 e2e（atlas-user-e2e）0.1.37 全量 gate（lean）验收请求**（gate 基线 worktree-0.1.36 @ `6079da9`；③ V4/V7 + ②/④ 回放 + ⑧ rebase 重验 + 回归 S-A/A4F 6 句/P0a 隔离 hardFail=0 + 四件套 3724/0·266；⑧ 真持久 pane 现形归生产 lane 非全量 gate；fail-closed 封口版无顺延）→ **现段 = 0.1.37 全量 gate（e2e 执行中）→ 全绿 → f4 T3 单信号 → Main 发布序列**；f4 午后链检查 cron（14:41 全量 gate 结果 / 15:47 终态，均 fail-closed 不预推进）
+
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
 | 项 | 调研对象（本地可查） | 产出 |
