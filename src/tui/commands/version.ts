@@ -14,7 +14,7 @@ const version = {
   name: 'version',
   description:
     'Print the version this session is running (not what autoupdate downloaded)',
-  isEnabled: () => false,
+  isEnabled: () => true,
   supportsNonInteractive: true,
   load: () => Promise.resolve({ call }),
 } satisfies Command

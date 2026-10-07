@@ -1,11 +1,7 @@
 /* eslint-disable custom-rules/no-process-env-top-level -- W4 全量 lint 复原（§8.74.21）：模块加载期捕获常量（含刻意捕获语义站点），惰性读改写违行为零改动纪律（W-opt 波再议） */
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import addDir from './commands/add-dir/index.js'
-import autofixPr from './commands/autofix-pr/index.js'
-import backfillSessions from './commands/backfill-sessions/index.js'
 import btw from './commands/btw/index.js'
-import goodAtlas from './commands/good-atlas/index.js'
-import issue from './commands/issue/index.js'
 import feedback from './commands/feedback/index.js'
 import clear from './commands/clear/index.js'
 import color from './commands/color/index.js'
@@ -18,7 +14,6 @@ import config from './commands/config/index.js'
 import { context, contextNonInteractive } from './commands/context/index.js'
 import cost from './commands/cost/index.js'
 import diff from './commands/diff/index.js'
-import ctx_viz from './commands/ctx_viz/index.js'
 import doctor from './commands/doctor/index.js'
 import memory from './commands/memory/index.js'
 import help from './commands/help/index.js'
@@ -28,17 +23,12 @@ import initVerifiers from './commands/init-verifiers.js'
 import keybindings from './commands/keybindings/index.js'
 import login from './commands/login/index.js'
 import logout from './commands/logout/index.js'
-import installSlackApp from './commands/install-slack-app/index.js'
-import breakCache from './commands/break-cache/index.js'
 import mcp from './commands/mcp/index.js'
-import onboarding from './commands/onboarding/index.js'
-import pr_comments from './commands/pr_comments/index.js'
 import releaseNotes from './commands/release-notes/index.js'
 import rename from './commands/rename/index.js'
 import resume from './commands/resume/index.js'
 import review from './commands/review.js'
 import session from './commands/session/index.js'
-import share from './commands/share/index.js'
 import skills from './commands/skills/index.js'
 import status from './commands/status/index.js'
 import tasks from './commands/tasks/index.js'
@@ -48,8 +38,6 @@ const IS_ATLAS_DEV = (process.env.ATLAS_DEV) === '1' || (process.env.ATLAS_DEV) 
 const agentsPlatform = IS_ATLAS_DEV
   ? require('src/tui/commands/agents-platform/index.js').default
   : null
-import securityReview from './commands/security-review.js'
-import bughunter from './commands/bughunter/index.js'
 import terminalSetup from './commands/terminalSetup/index.js'
 import usage from './commands/usage/index.js'
 import theme from './commands/theme/index.js'
@@ -70,7 +58,6 @@ const workflowsCmd = feature('WORKFLOW_SCRIPTS')
     ).default
   : null
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：webCmd（CCR_REMOTE_SETUP / remote-setup）+ ultraplan（ULTRAPLAN / CCR 簇）两 1P 命令裁除
-const torch = feature('TORCH') ? require('src/tui/commands/torch.js').default : null
 const peersCmd = feature('UDS_INBOX')
   ? (
       require('./commands/peers/index.js') as typeof import('./commands/peers/index.js')
@@ -94,8 +81,6 @@ import reloadPlugins from './commands/reload-plugins/index.js'
 import rewind from './commands/rewind/index.js'
 import heapDump from './commands/heapdump/index.js'
 import version from './commands/version.js'
-import summary from './commands/summary/index.js'
-import perfIssue from './commands/perf-issue/index.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
 import stickers from './commands/stickers/index.js'
 import { logError } from './utils/log.js'
@@ -116,13 +101,10 @@ import {
 } from './utils/plugins/loadPluginCommands.js'
 import memoize from 'lodash-es/memoize.js'
 import { isFirstPartyGatewayUrl } from './utils/model/providers.js'
-import env from './commands/env/index.js'
 import exit from './commands/exit/index.js'
 import exportCommand from './commands/export/index.js'
 import model from './commands/model/index.js'
 import tag from './commands/tag/index.js'
-import outputStyle from './commands/output-style/index.js'
-import statusline from './commands/statusline.js'
 import { sessionlist } from './commands/sessionlist.js'
 import effort from './commands/effort/index.js'
 import stats from './commands/stats/index.js'
@@ -141,8 +123,6 @@ const usageReport: Command = {
     return real.getPromptForCommand(args, context)
   },
 }
-import oauthRefresh from './commands/oauth-refresh/index.js'
-import debugToolCall from './commands/debug-tool-call/index.js'
 import { getSettingSourceName } from './utils/settings/constants.js'
 import {
   type Command,
@@ -164,28 +144,21 @@ export { getCommandName, isCommandEnabled } from './types/command.js'
 
 // Internal dev/debug commands (gated by ATLAS_DEV at registration)
 export const INTERNAL_ONLY_COMMANDS = [
-  backfillSessions,
-  breakCache,
-  bughunter,
   commit,
   commitPushPr,
-  ctx_viz,
-  goodAtlas,
-  issue,
   initVerifiers,
   ...(forceSnip ? [forceSnip] : []),
   // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridgeKick / ultraplan / teleport 三 1P 命令注册项裁除
   version,
-  onboarding,
-  share,
-  summary,
-  perfIssue,
-  env,
-  oauthRefresh,
-  debugToolCall,
   agentsPlatform,
-  autofixPr,
 ].filter(Boolean)
+
+// 前向缝登记（2026-10-08 slash 精简波 0.1.40 W2，E-1P 9 项零码登记）：
+// 以下 9 个上游 v2.1.88 有真实现的命令，因依赖 1P 服务（Claude.ai 订阅 / 1P 计费 /
+// 远程环境 / grove+consumer 门），在 de-ANT 世界无意义，**有意不搬**（非丢失、非待补）：
+//   chrome · desktop · mobile · install-github-app · extra-usage ·
+//   rate-limit-options · passes · remote-env · privacy-settings
+// 回流 = 对应 1P 服务车道实施波补真实现后再议，不阻塞当前版本。
 
 // Declared as a function so that we don't run this until getCommands is called,
 // since underlying functions read from config, which can't be read at module initialization time
@@ -215,13 +188,10 @@ const COMMANDS = memoize((): Command[] => [
   ide,
   init,
   keybindings,
-  installSlackApp,
   mcp,
   memory,
   model,
-  outputStyle,
   plugin,
-  pr_comments,
   releaseNotes,
   reloadPlugins,
   rename,
@@ -230,7 +200,6 @@ const COMMANDS = memoize((): Command[] => [
   skills,
   stats,
   status,
-  statusline,
   sessionlist,
   stickers,
   tag,
@@ -238,7 +207,6 @@ const COMMANDS = memoize((): Command[] => [
   feedback,
   review,
   rewind,
-  securityReview,
   terminalSetup,
   usage,
   usageReport,
@@ -258,7 +226,6 @@ const COMMANDS = memoize((): Command[] => [
   tasks,
   tasklist,
   ...(workflowsCmd ? [workflowsCmd] : []),
-  ...(torch ? [torch] : []),
   ...(IS_ATLAS_DEV && !process.env.IS_DEMO ? INTERNAL_ONLY_COMMANDS : []),
 ])
 
@@ -539,7 +506,6 @@ export const REMOTE_SAFE_COMMANDS: Set<Command> = new Set([
   feedback, // Send feedback
   plan, // Plan mode toggle
   keybindings, // Keybinding management
-  statusline,
   sessionlist, // /sessionlist session 管理列表
   stickers, // Stickers
 ])
@@ -561,7 +527,6 @@ export const BRIDGE_SAFE_COMMANDS: Set<Command> = new Set(
     compact, // Shrink context — useful mid-session from a phone
     clear, // Wipe transcript
     cost, // Show session cost
-    summary, // Summarize conversation
     releaseNotes, // Show changelog
     files, // List tracked files
   ].filter((c): c is Command => c !== null),

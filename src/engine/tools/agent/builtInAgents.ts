@@ -15,6 +15,9 @@
  *     VERIFICATION_AGENT 内建体 + areExplorePlanAgentsEnabled（feature/growthbook 门）
  *     + 非 SDK 入口判定 → 残留守（本版注册表 = general-purpose 或 coordinator worker；
  *     各内建体随后续纵切落）。
+ *   - 例外（0.1.40 W2 slash 精简波用户裁定）：STATUSLINE_SETUP_AGENT 已终裁移除（TUI 侧
+ *     commands/statusline.tsx + AgentTool/built-in/statuslineSetup.ts 已删，/statusline
+ *     命令删除不联动 TUI StatusLine 组件面），**不再属于「随后续纵切落」项**。
  */
 import { isEnvTruthy } from '../../../shared'
 import { isCoordinatorMode } from '../../coordinator/coordinatorMode'
@@ -25,8 +28,8 @@ import { GENERAL_PURPOSE_AGENT, type AgentDefinition } from './agentDefinition'
  * 内建 agent 注册表（旧仓 getBuiltInAgents 裁剪）。
  *   - ATLAS_AGENT_SDK_DISABLE_BUILTIN_AGENTS 真 → 空注册表（SDK 空白起点）。
  *   - coordinator 模式（isCoordinatorMode）→ 仅内建 worker（getCoordinatorAgents）。
- *   - 其余内建体（statusline/explore/plan/guide/verification）→ 残留守（见头注），
- *     默认返回兜底 general-purpose。
+ *   - 其余内建体（explore/plan/guide/verification）→ 残留守（见头注；statusline 已
+ *     0.1.40 W2 终裁移除，非残留守），默认返回兜底 general-purpose。
  */
 export function getBuiltInAgents(): AgentDefinition[] {
   if (isEnvTruthy(process.env.ATLAS_AGENT_SDK_DISABLE_BUILTIN_AGENTS)) {

@@ -4,7 +4,7 @@ const files = {
   type: 'local',
   name: 'files',
   description: 'List all files currently in context',
-  isEnabled: () => false,
+  isEnabled: () => true,
   supportsNonInteractive: true,
   load: () => import('./files.js'),
 } satisfies Command
