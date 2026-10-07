@@ -4,6 +4,49 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.37
+
+权限/harness 硬化波 · ⑧+②+③+④ 四切片（Main 实施 worktree-0.1.36；全量
+suite 3724/0·266；四件套 tsc 0 · eslint 0e·0w · build 17.60MB；全量 gate
+〔lean〕PASS，报告 `r-20261007-fullgate-0137.md`）：
+
+- **⑧ pane-worker 用户面封口**（V3 定因面；engine 侧 0.1.36 切片① 已封）：
+  deadline 策略收敛 `src/shared/permissionDeadline.ts` 单一事实源（engine/TUI
+  两面共享，`resolveMailboxPermissionDeadlineMs` / `approvalUnavailableReason`
+  + 缺省 30s / env `ATLAS_PERM_MAILBOX_DEADLINE_MS` 覆盖）；TUI pane-worker
+  （swarm worker 侧）权限 promise 补第 4 终态（协作式 deadline，到期 fail-closed
+  deny + 首胜 claim 与 allow/reject/abort 三终态互斥 + 注册表释放 +
+  `deadlineTimer.unref()` 进程可退）；`useSwarmPermissionPoller` 三支 drop 结构化
+  审计（decided:unavailable）+ 500ms poll interval unref；`PermissionRejectionSource`
+  加 `unavailable` 成员（approver 不可用真因独立于 user_reject）。修「杀 leader →
+  worker 权限 promise 永挂 / pendingCallbacks 泄漏 / ref'd interval 阻进程退出」。
+- **② P11 plan×auto 状态机自洽支回填**：engine `permissionSetup` 补 7 函数
+  （`hasAutoModeOptIn` 4 可信源 skipAutoPermissionPrompt / `getUseAutoModeDuringPlan`
+  / `isAutoModeGateEnabled` circuit+settings 双源 / `getAutoModeUnavailableReason` /
+  `shouldPlanUseAutoMode` / `strip·restoreDangerousPermissions` 对）+
+  `prepareContextForPlanMode` auto 语义支（opt-in auto 用户 EnterPlanMode 后
+  `isAutoModeActive()==true`）+ `ExitPlanModeV2Tool` plan 退出 kick-out（gate-off
+  断路器防御 fallback / `finalRestoringAuto` + `autoWasUsedDuringPlan` kick-out）。
+  判别单测 24 全绿。
+- **④ 廉价批 P4/P5/P9/P12**：P4 无 TPC「=allow」薄骨架硬化（`createDontAskTpc()`
+  dontAsk 语义 TPC：无交互应答者 = 确定性 deny + gate 构造点 TPC 缺失一次性
+  warn 锁 + headless lane `resolveHeadlessTpc` 显式注入）；P5 非 print lane SIGINT
+  处置 = 零码前向接缝登记（随壳波 #152 长驻 lane 落盘延期）；P9 键位模态隔离不变量
+  泛化解析层 4 测；P12 `localShellTask.ts:163` timer.unref() 源核销（零码）。
+- **③ P2 压缩恢复层 D1+D2 落码 + D3 spec + 登记项**（用户 P2 §7 六问裁定 R5）：
+  D1 = engine loop 补 413/PTL 反应式压缩消费者（`isReactiveCompactRecoverableError`
+  判形纯函数单源 `classifyAPIError` → 'prompt_too_long'|'image_too_large'；loop 轮内
+  消费点 CC query.ts:1119 同构 + 一次性门 `reactiveRetried` 防反应式死循环 +
+  `ATLAS_DISABLE_REACTIVE_COMPACT` kill-switch；成功 `buildPostCompactMessages`
+  重建 + 本回合重试一次，失败/异常/二次 413 回显原错误 = 既有 413/maxTokens 自修
+  零回归；双车道同消费点 TUI `tryReactiveCompact` 闭包 / headless 窄体
+  `compactConversation` 闭包）。D2 = `autoCompactCircuit` 模块态 store（report/clear/
+  subscribe）+ TUI TokenWarning 跳闸态渲染「auto-compact paused after N ·
+  /compact·换小模型·新会话」（纯加性零行为面）+ 模型侧 NEVER_SENTENCE 一句话防
+  futile。D3 = 无模型剪枝层 spec 文档（deepseek pruner 参照，实施 0.1.37+）。
+  登记项零码（D4 软复位=砍 / D5 reactive-only 不进波 / 413 telemetry / C7
+  context-collapse stub / C8 pre-turn 序残留守 → 均 0.1.37+）。
+
 ## v0.1.36
 
 权限/harness 硬化 · 切片① P1 mailbox 兜底硬化（Main 实施 worktree-0.1.36，
