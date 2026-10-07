@@ -11,6 +11,7 @@ import { describe, expect, it } from 'bun:test'
 import {
   SESSION_ROW_HINT,
   buildActionRow,
+  computeColumnLayout,
 } from '../../src/tui/screens/SessionTreeScreen.js'
 
 describe('S1 fork 状态机移底部操作行（buildActionRow 纯面）', () => {
@@ -52,5 +53,72 @@ describe('S1 fork 状态机移底部操作行（buildActionRow 纯面）', () =>
     expect(r.text).not.toContain('\n')
     expect(SESSION_ROW_HINT).toContain('f fork')
     expect(SESSION_ROW_HINT).toContain('q 返回')
+  })
+})
+
+/**
+ * S2 列宽自适应（computeColumnLayout 纯面）。
+ * 预算模型：budget = termCols - 4(paddingX) - 4(光标+图标) - 12(活跃列含 gap)；
+ * 可选列槽位 = 列宽+前导 gap：创建 12 / 分支 13 / 消息 6；名称列下限 16。
+ * 砍列序 = 信息密度从低到高：消息 → 分支 → 创建。
+ */
+describe('S2 列宽自适应（computeColumnLayout 纯面）', () => {
+  it('宽终端（200 列）：全列 + 名称列吃到剩余（149）', () => {
+    const l = computeColumnLayout(200)
+    expect(l).toEqual({ nameW: 149, showCreated: true, showBranch: true, showMsg: true })
+  })
+
+  it('100 列：全列，名称 49', () => {
+    expect(computeColumnLayout(100)).toEqual({
+      nameW: 49,
+      showCreated: true,
+      showBranch: true,
+      showMsg: true,
+    })
+  })
+
+  it('80 列：全列（0.1.38 NARROW 边界 <80 行为兼容），名称 29', () => {
+    expect(computeColumnLayout(80)).toEqual({
+      nameW: 29,
+      showCreated: true,
+      showBranch: true,
+      showMsg: true,
+    })
+  })
+
+  it('64 列：砍消息列（最低密度），创建/分支保留，名称 19', () => {
+    expect(computeColumnLayout(64)).toEqual({
+      nameW: 19,
+      showCreated: true,
+      showBranch: true,
+      showMsg: false,
+    })
+  })
+
+  it('56 列：砍消息+分支，仅创建保留，名称 24', () => {
+    expect(computeColumnLayout(56)).toEqual({
+      nameW: 24,
+      showCreated: true,
+      showBranch: false,
+      showMsg: false,
+    })
+  })
+
+  it('48 列：砍消息+分支，创建贴名称下限（16）', () => {
+    expect(computeColumnLayout(48)).toEqual({
+      nameW: 16,
+      showCreated: true,
+      showBranch: false,
+      showMsg: false,
+    })
+  })
+
+  it('极窄（44 列）：全砍可选列，名称吃全预算（24 ≥ 下限 16）', () => {
+    expect(computeColumnLayout(44)).toEqual({
+      nameW: 24,
+      showCreated: false,
+      showBranch: false,
+      showMsg: false,
+    })
   })
 })

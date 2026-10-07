@@ -171,6 +171,46 @@ function formatCreated(date: Date): string {
   return `${m}/${d}/${date.getFullYear()}`
 }
 
+/** 列宽自适应（0.1.39-S2，替换 0.1.38 窄终端 <80 硬砍列）：
+ * 固定前缀（光标+图标）与「最近活跃」列恒显；可选列按信息密度从低到高
+ * 渐进隐藏（消息 → 分支 → 创建），名称列吃掉剩余宽度（下限 16 可见列）。
+ * 纯面（零 I/O），供单测判别 + 渲染段消费。 */
+export function computeColumnLayout(termCols: number): {
+  nameW: number
+  showCreated: boolean
+  showBranch: boolean
+  showMsg: boolean
+} {
+  const NAME_MIN = 16
+  // 每列预算 = 列宽 + 前导 gap（名称列后接可选列，活跃列前导 gap 恒占）
+  const ACTIVE_SLOT = 12 // gap + ACTIVE_W(11)
+  const CREATED_SLOT = 12 // gap + CREATED_W(11)
+  const BRANCH_SLOT = 13 // gap + BRANCH_W(12)
+  const MSG_SLOT = 6 // gap + MSG_W(5)
+  const LEFT = 4 // CURSOR_W(2) + ICON_W(2)，无 gap 拼接
+  const PAD = 4 // paddingX 2×2
+  const budget = termCols - PAD - LEFT - ACTIVE_SLOT
+  let showCreated = true
+  let showBranch = true
+  let showMsg = true
+  // 从最低密度列砍起：msg → branch → created
+  if (budget < NAME_MIN + CREATED_SLOT + BRANCH_SLOT + MSG_SLOT) {
+    showMsg = false
+    if (budget < NAME_MIN + CREATED_SLOT + BRANCH_SLOT) {
+      showBranch = false
+      if (budget < NAME_MIN + CREATED_SLOT) {
+        showCreated = false
+      }
+    }
+  }
+  let optional = 0
+  if (showCreated) optional += CREATED_SLOT
+  if (showBranch) optional += BRANCH_SLOT
+  if (showMsg) optional += MSG_SLOT
+  const nameW = Math.max(NAME_MIN, budget - optional)
+  return { nameW, showCreated, showBranch, showMsg }
+}
+
 /** 代理配色（8 值域，/rename 或 swarm）→ 行颜色（idle 行整体着色，一眼辨身份；
  * 焦点/选中态保持 cyan/magenta，状态优先于身份）。chalk 安全映射：
  * purple/pink→magenta、orange→yellow（近似，0.1.39 走 theme 精确映射）。 */
@@ -431,25 +471,27 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
 
   const currentSessionId = getSessionId()
 
-  // ── 表格化布局：固定列宽，每列独立宽度，信息完整不被截断 ──
+  // ── 表格化布局：列宽自适应（0.1.39-S2，替换 0.1.38 窄终端硬砍列）──
+  // 宽度档位由 computeColumnLayout 纯面裁定（msg→branch→created 渐进隐藏 +
+  // 名称列伸缩），e2e 宽/窄两档走查同一实现。
   const termCols = process.stdout.columns ?? 100
   const termRows = process.stdout.rows ?? 24
-  const NARROW = termCols < 80
+  const layout = computeColumnLayout(termCols)
 
   // 列宽定义（gap=1 空格分隔）
   const CURSOR_W = 2   // "> " / "  "
   const ICON_W   = 2   // "● " / "○ "
-  const NAME_W   = NARROW ? 20 : 28
+  const NAME_W   = layout.nameW
   const CREATED_W = 11  // formatCreated: M/D/YYYY ≤ 10
   const ACTIVE_W = 11  // formatActive: now/5m/2h/6d 或 M/D HH:mm ≤ 11
   const BRANCH_W = 12
   const MSG_W    = 5   // 右对齐，最多 5 位
   const GAP      = 1
 
-  // 窄终端降级：砍创建列、分支列和消息数列（双时间退化为单「最近活跃」列）
-  const showCreated = !NARROW
-  const showBranch  = !NARROW
-  const showMsg     = !NARROW
+  // 可选列可见性（S2 自适应，替代 NARROW 硬砍）
+  const showCreated = layout.showCreated
+  const showBranch  = layout.showBranch
+  const showMsg     = layout.showMsg
 
 
   // ── 虚拟窗口 ──
@@ -457,7 +499,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 渲染行数恒 ≤ 视口行数 → 无内容溢出 → 无原生 LF 滚动 →
   // 光标逻辑索引与终端物理行 1:1 对齐，脱轨按构造不可能发生。
   // 列头占 1 行（标题下方 dim 列名行），计入 HEADER_ROWS。
-  const HEADER_ROWS = NARROW ? 4 : 4  // 标题 + 列头 + marginTop×2
+  const HEADER_ROWS = 4  // 标题 + 列头 + marginTop×2
   const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
   const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
   // 确保 scrollOffset 在合法范围（列表刷新后行数可能变少）
