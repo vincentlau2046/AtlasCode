@@ -66,6 +66,32 @@ export type ColorType = 'foreground' | 'background'
 const RGB_REGEX = /^rgb\(\s?(\d+),\s?(\d+),\s?(\d+)\s?\)$/
 const ANSI_REGEX = /^ansi256\(\s?(\d+)\s?\)$/
 
+/**
+ * D4 根修（0.1.39）：裸 ANSI 16 色名。Ink `<Text color="red">` 把 color 值
+ * 原样透传（无 `ansi:` 前缀），旧入口只认 ansi:/#/ansi256()/rgb() 四通道，
+ * 裸名落 `return str` 无 SGR 产出（既有缺陷：TUI 492 处 color= 中 14 处
+ * 裸 ANSI 名全落空）。入口归一化为 `ansi:` 前缀复用既有 switch（纯加性：
+ * theme 色板值全走 rgb()/ansi: 通道不经此面；16 名与 ansi: 通道值域同形）。
+ */
+const BARE_ANSI_COLOR_NAMES: ReadonlySet<string> = new Set([
+  'black',
+  'red',
+  'green',
+  'yellow',
+  'blue',
+  'magenta',
+  'cyan',
+  'white',
+  'blackBright',
+  'redBright',
+  'greenBright',
+  'yellowBright',
+  'blueBright',
+  'magentaBright',
+  'cyanBright',
+  'whiteBright',
+])
+
 export const colorize = (
   str: string,
   color: string | undefined,
@@ -73,6 +99,11 @@ export const colorize = (
 ): string => {
   if (!color) {
     return str
+  }
+
+  // D4：裸 ANSI 色名 → 归一 ansi: 通道（递归一层，归一后值带前缀不再命中集合）
+  if (BARE_ANSI_COLOR_NAMES.has(color)) {
+    return colorize(str, `ansi:${color}`, type)
   }
 
   if (color.startsWith('ansi:')) {
