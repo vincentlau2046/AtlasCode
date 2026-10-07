@@ -16,7 +16,12 @@ import {
   clampWindowToCursor,
   computeColumnLayout,
   computeRenderWindow,
+  filterLogs,
   getSummaryLine,
+  makeLru,
+  nextSortKey,
+  SESSION_SORT_KEYS,
+  sortLogsBy,
   slotPrefix,
 } from '../../src/tui/screens/SessionTreeScreen.js'
 import type { LogOption } from '../../src/tui/types/logs.js'
@@ -282,5 +287,104 @@ describe('S4 agentColor theme 精确映射 + idle 圆点（纯面）', () => {
     const r = agentRowColors(makeLog({}), false, false, true, FAKE_THEME)
     expect(r.dotGlyph).toBe('● ')
     expect(r.dotColor).toBe('cyan')
+  })
+})
+
+/**
+ * S5 搜索/过滤/排序 + LRU（纯面）。
+ * 判别锚点：过滤字段集/大小写、排序方向与键、四键循环序、LRU 淘汰序
+ * 任一突变 → 恰好红。
+ */
+describe('S5 搜索/过滤/排序 + LRU（纯面）', () => {
+  describe('filterLogs', () => {
+    it('空/纯空白 query → 恒等（返回入参数组本身，零拷贝）', () => {
+      const logs = [makeLog({ firstPrompt: 'anything' })]
+      expect(filterLogs(logs, '')).toBe(logs)
+      expect(filterLogs(logs, '   ')).toBe(logs)
+    })
+    it('大小写不敏感子串：命中摘要/首输入/分支/tag/代理/sessionId', () => {
+      const a = makeLog({ firstPrompt: 'Fix LOGIN bug', sessionId: 'aaa' })
+      const b = makeLog({ gitBranch: 'feature/x', sessionId: 'bbb' })
+      const c = makeLog({ tag: 'v2', sessionId: 'ccc' })
+      const d = makeLog({ agentSetting: 'reviewer', sessionId: 'ddd' })
+      const e = makeLog({ firstPrompt: 'unrelated', sessionId: 'eee' })
+      expect(filterLogs([a, b, c, d, e], 'login').map(l => l.sessionId)).toEqual(['aaa'])
+      expect(filterLogs([a, b, c, d, e], 'FEATURE').map(l => l.sessionId)).toEqual(['bbb'])
+      expect(filterLogs([a, b, c, d, e], 'v2').map(l => l.sessionId)).toEqual(['ccc'])
+      expect(filterLogs([a, b, c, d, e], 'reviewer').map(l => l.sessionId)).toEqual(['ddd'])
+      expect(filterLogs([a, b, c, d, e], 'eee').map(l => l.sessionId)).toEqual(['eee'])
+    })
+    it('全字段无命中 → 空数组', () => {
+      const logs = [makeLog({ firstPrompt: 'zzz', sessionId: 'zzz' })]
+      expect(filterLogs(logs, 'nomatch')).toEqual([])
+    })
+  })
+
+  describe('sortLogsBy', () => {
+    const t = (s: string) => new Date(s)
+    const a = makeLog({ sessionId: 'a', modified: t('2026-10-01'), created: t('2026-10-02'), messageCount: 3, firstPrompt: 'beta' })
+    const b = makeLog({ sessionId: 'b', modified: t('2026-10-05'), created: t('2026-10-01'), messageCount: 9, firstPrompt: 'alpha' })
+    const c = makeLog({ sessionId: 'c', modified: t('2026-10-03'), created: t('2026-10-04'), messageCount: 0, firstPrompt: 'mid' })
+
+    it('modified：最近活跃降序（b,c,a）', () => {
+      expect(sortLogsBy([a, b, c], 'modified').map(l => l.sessionId)).toEqual(['b', 'c', 'a'])
+    })
+    it('created：创建时间降序（c,a,b）', () => {
+      expect(sortLogsBy([a, b, c], 'created').map(l => l.sessionId)).toEqual(['c', 'a', 'b'])
+    })
+    it('messages：消息数降序（b,a,c；缺失计 0）', () => {
+      expect(sortLogsBy([a, b, c], 'messages').map(l => l.sessionId)).toEqual(['b', 'a', 'c'])
+    })
+    it('title：显示标题升序（alpha,beta,mid）', () => {
+      expect(sortLogsBy([a, b, c], 'title').map(l => l.sessionId)).toEqual(['b', 'a', 'c'])
+    })
+    it('不 mutate 入参（返回新数组，原序不变）', () => {
+      const input = [a, b, c]
+      const out = sortLogsBy(input, 'modified')
+      expect(out).not.toBe(input)
+      expect(input.map(l => l.sessionId)).toEqual(['a', 'b', 'c'])
+    })
+  })
+
+  describe('nextSortKey', () => {
+    it('四键循环：modified→created→messages→title→回绕 modified', () => {
+      expect(nextSortKey('modified')).toBe('created')
+      expect(nextSortKey('created')).toBe('messages')
+      expect(nextSortKey('messages')).toBe('title')
+      expect(nextSortKey('title')).toBe('modified')
+      // 循环长度 = 键表长度（防漏键/重复键）
+      let k: string = 'modified'
+      for (let i = 0; i < SESSION_SORT_KEYS.length; i++) {
+        k = nextSortKey(k as 'modified')
+      }
+      expect(k).toBe('modified')
+    })
+  })
+
+  describe('makeLru', () => {
+    it('容量满后按插入序淘汰最旧键', () => {
+      const lru = makeLru<number>(2)
+      lru.set('a', 1)
+      lru.set('b', 2)
+      lru.set('c', 3) // a 被淘汰
+      expect(lru.has('a')).toBe(false)
+      expect(lru.get('b')).toBe(2)
+      expect(lru.get('c')).toBe(3)
+    })
+    it('重复 set 同一键刷新新近位（不先被淘汰）', () => {
+      const lru = makeLru<number>(2)
+      lru.set('a', 1)
+      lru.set('b', 2)
+      lru.set('a', 10) // a 刷新到最新
+      lru.set('c', 3) // 淘汰 b（现最旧）
+      expect(lru.has('b')).toBe(false)
+      expect(lru.get('a')).toBe(10)
+      expect(lru.get('c')).toBe(3)
+    })
+    it('缺失键 get/has → undefined/false', () => {
+      const lru = makeLru<number>(2)
+      expect(lru.get('x')).toBeUndefined()
+      expect(lru.has('x')).toBe(false)
+    })
   })
 })

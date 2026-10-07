@@ -17,9 +17,16 @@ import { readFileSync, existsSync } from 'fs'
 import type { LogOption } from '../types/logs.js'
 import type { UUID } from 'crypto'
 import { getGlobalConfig } from '../utils/config.js'
+import { formatFileSize } from '../utils/format.js'
 import { resolveThemeSetting } from '../utils/systemTheme.js'
 import { getTheme, type Theme } from '../utils/theme.js'
-import { loadSameRepoAllMessageLogs, isLiteLog, loadFullLog } from '../utils/sessionStorage.js'
+import {
+  loadSameRepoAllMessageLogs,
+  isLiteLog,
+  loadFullLog,
+  countVisibleMessages,
+} from '../utils/sessionStorage.js'
+import type { TranscriptMessage } from '../types/logs.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getLogDisplayTitle } from '../utils/log.js'
@@ -33,6 +40,10 @@ import {
 type Props = {
   onBack: () => void
   onResume: (sessionId: UUID, log: LogOption, entrypoint: 'slash_command_session_id') => Promise<void>
+  /** 0.1.39-S5 可选键：agentic（LLM）搜索——本地同步过滤零命中且用户按
+   * enter 时调用（调用方传入，屏面保持纯/本地；不传则搜索仅本地）。
+   * 参照 LogSelector 的 onAgenticSearch prop 模式（agenticSessionSearch 接线）。 */
+  onAgenticSearch?: (query: string, logs: LogOption[]) => Promise<LogOption[]>
 }
 
 type RowState =
@@ -369,13 +380,101 @@ export function getSummaryLine(log: LogOption): string {
   return '（无摘要）'
 }
 
+// ── S5 搜索/过滤/排序 + 按需精确计数（纯面） ──
+
+/** 排序键（s 键循环切换）：最近活跃（0.1.38 P0-B 默认）→ 创建 → 消息数 → 名称 */
+export type SessionSortKey = 'modified' | 'created' | 'messages' | 'title'
+export const SESSION_SORT_KEYS: readonly SessionSortKey[] = [
+  'modified',
+  'created',
+  'messages',
+  'title',
+]
+export const SESSION_SORT_LABELS: Record<SessionSortKey, string> = {
+  modified: '最近活跃',
+  created: '创建',
+  messages: '消息数',
+  title: '名称',
+}
+
+export function nextSortKey(current: SessionSortKey): SessionSortKey {
+  const i = SESSION_SORT_KEYS.indexOf(current)
+  return SESSION_SORT_KEYS[(i + 1) % SESSION_SORT_KEYS.length]!
+}
+
+/** 按键排序（返回新数组不 mutate 入参）：时间/消息数降序，名称升序。 */
+export function sortLogsBy(logs: LogOption[], key: SessionSortKey): LogOption[] {
+  const out = [...logs]
+  switch (key) {
+    case 'modified':
+      out.sort((a, b) => b.modified.getTime() - a.modified.getTime())
+      break
+    case 'created':
+      out.sort((a, b) => b.created.getTime() - a.created.getTime())
+      break
+    case 'messages':
+      out.sort((a, b) => (b.messageCount ?? 0) - (a.messageCount ?? 0))
+      break
+    case 'title':
+      out.sort((a, b) =>
+        getLogDisplayTitle(a).localeCompare(getLogDisplayTitle(b)),
+      )
+      break
+  }
+  return out
+}
+
+/** 本地同步过滤（S5 方案 A：零 I/O 零 LLM，输入每击实时过滤）：
+ * 标题链/摘要/首输入/分支/tag/代理/sessionId 大小写不敏感子串命中。 */
+export function filterLogs(logs: LogOption[], query: string): LogOption[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return logs
+  return logs.filter(l =>
+    [
+      getLogDisplayTitle(l),
+      l.summary ?? '',
+      l.firstPrompt ?? '',
+      l.gitBranch ?? '',
+      l.tag ?? '',
+      l.agentSetting ?? '',
+      l.sessionId ?? '',
+    ].join(' ').toLowerCase().includes(q),
+  )
+}
+
+/** LRU 缓存（S5 按需精确消息数消费）：插入序淘汰，重复 set 刷新新近位。
+ * 纯面（零 I/O，单测判别淘汰序）。 */
+export function makeLru<V>(max: number): {
+  get: (k: string) => V | undefined
+  set: (k: string, v: V) => void
+  has: (k: string) => boolean
+} {
+  const m = new Map<string, V>()
+  return {
+    get: k => m.get(k),
+    set: (k, v) => {
+      if (m.has(k)) m.delete(k)
+      m.set(k, v)
+      if (m.size > max) {
+        const oldest = m.keys().next().value
+        if (oldest !== undefined) m.delete(oldest)
+      }
+    },
+    has: k => m.has(k),
+  }
+}
+
 // 顶部/底部固定行预算（输入 handler 与渲染段共用单一事实源——旧输入段用
 // HEADER_ROWS=3 而渲染段用 4，输入侧窗口比渲染侧多 1 行 → 末行不可达，
 // 统一后两侧同预算）。
 const HEADER_ROWS = 4  // 标题 + 列头 + marginTop×2
 const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
 
-export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode {
+export function SessionTreeScreen({
+  onBack,
+  onResume,
+  onAgenticSearch,
+}: Props): React.ReactNode {
   const [logs, setLogs] = React.useState<LogOption[]>([])
   const [loading, setLoading] = React.useState(true)
   const [focusedIdx, setFocusedIdx] = React.useState(0)
@@ -390,6 +489,17 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 焦点行索引，窗口/clamp 全走 S3 纯面（rowSlotCost/slotPrefix/…）。
   const [expanded, setExpanded] = React.useState(false)
   const expandedIdx = expanded ? focusedIdx : null
+  // S5：搜索/过滤/排序态。/ 进搜索模式（输入字符实时本地过滤，零 I/O）；
+  // s 循环切换排序键；本地零命中 + enter + 可选键 onAgenticSearch（LLM 面，
+  // 调用方注入，屏面不直接依赖网关）。
+  const [searchMode, setSearchMode] = React.useState(false)
+  const [query, setQuery] = React.useState('')
+  const [sortKey, setSortKey] = React.useState<SessionSortKey>('modified')
+  const [agenticResults, setAgenticResults] = React.useState<LogOption[] | null>(null)
+  // S5 按需精确消息数：LRU 缓存（焦点行/展开行触发，不预读全量）；
+  // 命中后 re-render 取用（精确值覆盖 getSessionFileMeta 的行数近似值）
+  const exactCountCacheRef = React.useRef(makeLru<number>(64))
+  const [, bumpExactCounts] = React.useReducer((x: number) => x + 1, 0)
   const confirmTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const forkInFlightRef = React.useRef(false)
   // 缓存每条 log 的 { isBranch, messageCount }，loadLogs 时填充，渲染段直接读
@@ -485,6 +595,39 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     setSelectedIdx(null)
   }
 
+  // ── S5 视图派生 + 按需精确计数（state 纯函数，输入 handler 与渲染段共用） ──
+  const computeViewLogs = React.useCallback(
+    (base: LogOption[], q: string, sk: SessionSortKey, agentic: LogOption[] | null): LogOption[] => {
+      const local = q ? filterLogs(base, q) : base
+      // agentic 结果只在「本地零命中」时兜底展示（query 变化会清 agentic 态）
+      const chosen = agentic && local.length === 0 ? agentic : local
+      return sortLogsBy(chosen, sk)
+    },
+    [],
+  )
+
+  /** 按需全读解析可见消息数（deferred 项 0.1.39 落）：lite log 走 loadFullLog
+   * 真盘读，full log 零 I/O；结果进 LRU（重复键刷新新近位），失败静默——
+   * 计数列回落行数近似值，不阻塞交互。 */
+  const ensureExactCount = React.useCallback(
+    async (log: LogOption): Promise<void> => {
+      const sid = log.sessionId ?? ''
+      if (!sid) return
+      if (exactCountCacheRef.current.has(sid)) return
+      try {
+        const full = isLiteLog(log) ? await loadFullLog(log) : log
+        exactCountCacheRef.current.set(
+          sid,
+          countVisibleMessages(full.messages as unknown as TranscriptMessage[]),
+        )
+        bumpExactCounts()
+      } catch {
+        // 按需增强失败 = 保持近似值（行计数），不阻塞
+      }
+    },
+    [bumpExactCounts],
+  )
+
   // ── 光标-窗口不变量（S3 变高版）──
   // 任何光标移动后，clampWindowToCursor（S3 纯面，slot 前缀和）调整
   // scrollOffset 使光标行（含展开二级行成本）完整落在窗口内 → 光标永远可见，
@@ -493,24 +636,88 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
 
   useInput((input, key, event) => {
     if (loading) return
-    const current = logs[focusedIdx]
+    // S5：光标/交互作用于当前视图（过滤+排序后），非全量 logs
+    const view = computeViewLogs(logs, query, sortKey, agenticResults)
+
+    // ── S5 搜索模式（/ 进入）：可打印字符捕获进 query，实时本地过滤 ──
+    // 置于 current guard 之前：本地零命中的空视图无光标行，但搜索模式必须
+    // 仍可达（backspace/esc/enter/字符不可达会卡死用户，无法退出）
+    if (searchMode) {
+      if (key.backspace) {
+        setQuery(q => q.slice(0, -1))
+        setAgenticResults(null)
+        setFocusedIdx(0)
+      } else if (key.escape || input === '/') {
+        setSearchMode(false)
+        setQuery('')
+        setAgenticResults(null)
+        setFocusedIdx(0)
+      } else if (key.return) {
+        // 本地零命中 + 可选键 → LLM 语义搜索（调用方注入，屏面不依赖网关）
+        if (onAgenticSearch && query.trim()) {
+          const localCount = filterLogs(logs, query).length
+          if (localCount === 0) {
+            void onAgenticSearch(query, logs)
+              .then(r => setAgenticResults(r))
+              .catch(() => {
+                /* LLM 面不可达/超时 = 保持本地零命中展示，不阻塞 */
+              })
+          }
+        }
+      } else if (
+        input.length === 1 &&
+        !key.ctrl &&
+        !key.meta &&
+        !key.backspace &&
+        !key.return &&
+        !key.escape &&
+        input >= ' '
+      ) {
+        setQuery(q => q + input)
+        setAgenticResults(null)
+        setFocusedIdx(0)
+      }
+      event.stopImmediatePropagation()
+      return
+    }
+
+    const current = view[focusedIdx]
     if (!current) return
     const state = rowStates.get(current.sessionId ?? '')?.kind ?? 'idle'
     // forking 期间所有操作键忽略（防半写状态退出/重复 fork）
     if (state === 'forking') return
+
+    if (input === '/') {
+      // S5：进搜索模式（清空旧 query，实时过滤随击键生效）
+      setSearchMode(true)
+      setQuery('')
+      setAgenticResults(null)
+      setFocusedIdx(0)
+      event.stopImmediatePropagation()
+      return
+    } else if (input === 's') {
+      // S5：循环切换排序键（视图重排，光标回顶）
+      setSortKey(sk => nextSortKey(sk))
+      setFocusedIdx(0)
+      setScrollOffset(0)
+      event.stopImmediatePropagation()
+      return
+    }
 
     // 虚拟窗口行数：终端行数减去头部（标题+列头）和底部（操作行）——
     // HEADER_ROWS/FOOTER_ROWS 与渲染段共用模块常量（单源，防两侧漂移）
     const termRows = process.stdout.rows ?? 24
     const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
     const clamp = (next: number, off: number) =>
-      clampWindowToCursor(next, off, expandedIdx, visibleRows, logs.length)
+      clampWindowToCursor(next, off, expandedIdx, visibleRows, view.length)
 
     if (key.upArrow || key.wheelUp) {
       setSelectedIdx(null)
       setFocusedIdx(i => {
         const next = Math.max(0, i - 1)
         setScrollOffset(off => clamp(next, off))
+        // S5：焦点行按需精确消息数（LRU 命中即返，未命中触发全读解析）
+        void ensureExactCount(view[next])
         return next
       })
       // 独占按键：ink useInput 是全局 emitter，后续 listener（滚动/翻页等）
@@ -519,8 +726,9 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     } else if (key.downArrow || key.wheelDown) {
       setSelectedIdx(null)
       setFocusedIdx(i => {
-        const next = Math.min(logs.length - 1, i + 1)
+        const next = Math.min(view.length - 1, i + 1)
         setScrollOffset(off => clamp(next, off))
+        void ensureExactCount(view[next])
         return next
       })
       event.stopImmediatePropagation()
@@ -529,14 +737,16 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
       setFocusedIdx(i => {
         const next = Math.max(0, i - visibleRows)
         setScrollOffset(off => clamp(next, off))
+        void ensureExactCount(view[next])
         return next
       })
       event.stopImmediatePropagation()
     } else if (key.pageDown) {
       setSelectedIdx(null)
       setFocusedIdx(i => {
-        const next = Math.min(logs.length - 1, i + visibleRows)
+        const next = Math.min(view.length - 1, i + visibleRows)
         setScrollOffset(off => clamp(next, off))
+        void ensureExactCount(view[next])
         return next
       })
       event.stopImmediatePropagation()
@@ -595,6 +805,9 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
 
   const currentSessionId = getSessionId()
 
+  // ── S5 视图：全量 logs → 本地过滤（query）→ agentic 兜底（本地零命中）→ 排序 ──
+  const viewLogs = computeViewLogs(logs, query, sortKey, agenticResults)
+
   // ── 表格化布局：列宽自适应（0.1.39-S2，替换 0.1.38 窄终端硬砍列）──
   // 宽度档位由 computeColumnLayout 纯面裁定（msg→branch→created 渐进隐藏 +
   // 名称列伸缩），e2e 宽/窄两档走查同一实现。
@@ -624,9 +837,9 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 渲染物理行数恒 ≤ 视口行数 → 无内容溢出 → 无原生 LF 滚动 →
   // 光标逻辑索引与终端物理行 1:1 对齐，脱轨按构造不可能发生。
   const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
-  // 确保 scrollOffset 在合法范围（列表刷新后行数可能变少）
-  const effectiveOffset = Math.min(scrollOffset, Math.max(0, logs.length - visibleRows))
-  const win = computeRenderWindow(logs.length, effectiveOffset, expandedIdx, visibleRows)
+  // 确保 scrollOffset 在合法范围（列表/视图刷新后行数可能变少）
+  const effectiveOffset = Math.min(scrollOffset, Math.max(0, viewLogs.length - visibleRows))
+  const win = computeRenderWindow(viewLogs.length, effectiveOffset, expandedIdx, visibleRows)
   const startIdx = win.start
   const endIdx = win.end
 
@@ -638,14 +851,22 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   if (showMsg)     { fixedW += MSG_W; gapCount++ }
   fixedW += gapCount * GAP
 
-  // 列头行（dim 色，与数据行列宽对齐）
-  const headerLine = '  '  // cursor 占位
+  // 列头行（dim 色，与数据行列宽对齐）。S5：尾部追加排序键/过滤指示
+  //（操作行单行不变量不动，指示面走列头行），整行截断防溢出。
+  const sortIndicator = ` · 排序:${SESSION_SORT_LABELS[sortKey]}`
+  const filterIndicator = query ? ` · 过滤:"${query}"` : ''
+  const headerLine = truncateToVisibleWidth(
+    '  '  // cursor 占位
     + '  '                   // icon 占位
     + padToVisibleWidth('名称', NAME_W) + ' '
     + (showCreated ? padToVisibleWidth('创建', CREATED_W) + ' ' : '')
     + padToVisibleWidth('最近活跃', ACTIVE_W)
     + (showBranch ? ' ' + padToVisibleWidth('分支', BRANCH_W) : '')
     + (showMsg ? ' ' + padLeftToVisibleWidth('消息', MSG_W) : '')
+    + sortIndicator
+    + filterIndicator,
+    Math.max(10, termCols - 4),
+  )
 
   // 相对时间基准（一次渲染取一次，各行同基准不抖动）
   const nowMs = Date.now()
@@ -676,7 +897,16 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     activeState,
     actionLog ? getLogDisplayTitle(actionLog) || 'untitled' : 'untitled',
   )
-  const actionText = truncateToVisibleWidth(actionRow.text, Math.max(10, termCols - 4))
+  // S5：搜索模式时操作行被搜索态行占用（query 回显 + 退出提示 + 可选 LLM 键）。
+  // 搜索态 fork 键不可达（输入段 searchMode 分支独占），状态行无入口，展示无歧义。
+  const searchActionText = searchMode
+    ? `搜索:"${query}"${onAgenticSearch ? ' · enter 触发语义搜索' : ''} · esc 退出`
+    : undefined
+  const actionText = truncateToVisibleWidth(
+    searchActionText ?? actionRow.text,
+    Math.max(10, termCols - 4),
+  )
+  const actionColor = searchMode ? 'cyan' : actionRow.color
 
   return (
     <Box flexDirection="column" paddingX={2} paddingTop={1}>
@@ -706,7 +936,11 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           const branch = log.gitBranch
             ? truncateToVisibleWidth(log.gitBranch, BRANCH_W)
             : '—'
-          const msgCount = String(cached?.messageCount ?? log.messageCount ?? 0)
+          // S5：LRU 精确消息数优先（焦点/翻页触发按需全读解析），回落行数近似
+          const exactCount = exactCountCacheRef.current.get(sid)
+          const msgCount = String(
+            exactCount ?? cached?.messageCount ?? log.messageCount ?? 0,
+          )
 
           // 拼接固定宽度列 → 单一字符串 → 单个 <Text>，Ink 不会拆行。
           // 前 4 字符 = 光标(2)+圆点(2) 恒 ASCII，渲染段按 slice(0,2)/slice(2,4)
@@ -726,6 +960,13 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           if (log.tag)         flags += ` #${log.tag}`
           if (log.agentSetting) flags += ` @${log.agentSetting}`
           if (log.mode === 'coordinator') flags += ' [C]'
+          // 0.1.39-S5 裁定 B 增补显示面：数据层 0.1.38 enrichLog 已接线
+          //（prNumber/fileSize/worktreeSession 进 LogOption），此处补渲染 chip
+          if (log.prNumber) flags += ` [PR #${log.prNumber}]`
+          if (log.fileSize) flags += ` (${formatFileSize(log.fileSize)})`
+          if (log.worktreeSession?.worktreeName) {
+            flags += ` [wt:${log.worktreeSession.worktreeName}]`
+          }
 
           // 标志段截断到剩余宽度
           const maxFlags = termCols - 2 /*paddingX*/ - fixedW
@@ -767,10 +1008,14 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
             </React.Fragment>
           )
         })}
-        {logs.length === 0 && <Text dimColor>No sessions found</Text>}
+        {viewLogs.length === 0 && (
+          <Text dimColor>
+            {query ? `No sessions match "${query}"` : 'No sessions found'}
+          </Text>
+        )}
       </Box>
       <Box marginTop={1}>
-        <Text color={actionRow.color} dimColor={!actionRow.color} wrap="truncate">
+        <Text color={actionColor} dimColor={!actionColor} wrap="truncate">
           {actionText}
         </Text>
       </Box>

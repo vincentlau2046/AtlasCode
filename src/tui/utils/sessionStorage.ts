@@ -2439,7 +2439,8 @@ function hasVisibleAssistantContent(message: TranscriptMessage): boolean {
  * - User messages that only contain tool_result blocks (displayed as collapsed groups)
  * - Assistant messages that only contain tool_use blocks (displayed as collapsed groups)
  */
-function countVisibleMessages(transcript: TranscriptMessage[]): number {
+// 0.1.39-S5：导出供 sessionlist 按需精确计数（LRU 缓存面消费，行为零改动）
+export function countVisibleMessages(transcript: TranscriptMessage[]): number {
   let count = 0
   for (const message of transcript) {
     switch (message.type) {

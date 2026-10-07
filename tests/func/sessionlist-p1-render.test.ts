@@ -177,6 +177,42 @@ describe('S1 fork 状态机移底部操作行（渲染面）', () => {
   })
 })
 
+describe('S5 搜索模式（渲染面）', () => {
+  it('/ 进搜索态（操作行=搜索态行）；击 x 本地零命中空态行；esc 退出回落提示行', async () => {
+    const h = await mountScreen()
+    // 首帧：操作行 = 提示行（非搜索态）
+    const initial = h.text()
+    expect(initial).toContain(HINT)
+    expect(initial).not.toContain('搜索:""')
+
+    // / → 搜索模式：操作行被搜索态行占用
+    const m1 = h.mark()
+    h.push('/')
+    await h.settle(200)
+    let seg = h.textSince(m1)
+    expect(seg).toContain('搜索:""')
+    expect(seg).toContain('esc 退出')
+
+    // 击 'x'：本地同步过滤零命中（fixture 无 'x' 命中字段）→ 空态行
+    const m2 = h.mark()
+    h.push('x')
+    await h.settle(200)
+    seg = h.textSince(m2)
+    expect(seg).toContain('No sessions match "x"')
+    // 数据行被过滤掉
+    expect(seg).not.toContain('render probe session')
+
+    // esc 退出搜索：query 清空，操作行回落提示行
+    const m3 = h.mark()
+    h.push('\x1b')
+    await h.settle(200)
+    seg = h.textSince(m3)
+    expect(seg).toContain(HINT)
+    expect(seg).not.toContain('No sessions match "x"')
+    h.unmount()
+  })
+})
+
 describe('S3 summary 二级行（渲染面）', () => {
   it('推 x → 二级行「└ <firstPrompt 回落>」现形；再推 x → 新帧收起（变高行模型开/合判别）', async () => {
     const h = await mountScreen()
