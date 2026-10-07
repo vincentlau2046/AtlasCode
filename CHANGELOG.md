@@ -4,6 +4,52 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.39
+
+sessionlist P1 交互/UI 波 S1–S5 + D4 根修 + gate 双簇修（Main 实施
+worktree-0.1.39-sessionlist；全量 suite 3789/0·271；四件套 tsc 0 · eslint
+0e·0w · build 17.61MB；gate = e2e tui-diff sessionlist-039 --all +
+sessionlist-038 --all 全绿 @ master b7ef49f，两命令 GATE-PASS）：
+
+- **S1 fork 状态机移底部操作行**：数据行内状态机段（0.1.38 行内「[f 确认
+  fork]」token）离场，行内只留数据 chip；操作行单行固定（提示/状态行，
+  forking > confirm > done > error 优先级，idle 回落提示行 + 3s 自动取消）
+  ——底部行数恒定，光标-窗口不变量不受条件行破坏。
+- **S2 列宽自适应**（替换 0.1.38 窄终端 <80 硬砍列）：`computeColumnLayout`
+  纯面（msg→branch→created 渐进隐藏 + 名称列伸缩下限 16 + 行尾 chip 段
+  比例预算 round(budget×0.3)：wide 200 ≈54 容纳全 chip 行最坏 ≈53 /
+  100 列 ≈24 名称列不塌缩 / 窄档钳 16；砍列阈值不含 chip 槽，窄档 showX
+  布尔零回归）。
+- **S3 summary 二级行**：x 键展开光标行变高行（slot 前缀和单一事实源
+  窗口/钳位，展开行 2 slot 不溢出视口；展开跟随光标）；二级行 = 压缩摘要
+  优先 + firstPrompt 回落，dim 缩进「└」。
+- **S4 agentColor theme 精确 8 色映射**（替换 0.1.38 chalk 保守近似）：
+  theme 代理色板 `*_FOR_SUBAGENTS_ONLY` 精确映射（purple/pink→magenta、
+  orange→yellow 对撞色消除，8 值域两两相异全走 theme 色板通道）+ idle
+  代理行实心 ● 染身份色（非代理 ○，当前行圆点 cyan），选中 magentaBright
+  / 焦点 cyan 优先。
+- **S5 搜索/过滤/排序（方案 A）**：`/` 进搜索态（操作行被搜索态行占用，
+  esc 退出）；逐击键本地同步过滤（零 I/O 零 LLM，零命中空态行
+  `No sessions match "…"`）+ agentic 语义搜索可选键（本地零命中兜底）；
+  s 键排序键循环（最近活跃→创建→消息数→名称，列头「· 排序:<label>」+
+  「· 过滤:"query"」指示）；按需精确消息数 LRU(64)（焦点/翻页触发按需全读
+  解析，回落行数近似）；裁定 B 增补显示面：PR/fileSize/worktree 三类数据
+  chip `[PR #n]` / `(size)` / `[wt:name]`（数据层 0.1.38 enrichLog 已接线，
+  本版补渲染面）。
+- **D4 colorize 裸色名根修**（0.1.38 e2e 显式 deferred，用户裁定归 0.1.39
+  根修）：colorize 入口 bare→`ansi:` 归一（16 名集合，TUI 14 处裸名全收编，
+  纯加性零回归）+ ThemedText.resolveColor theme-key 优先 + 16 裸名透传
+  （gate gap-A：活路径比入口高一层——裸名经 theme-key 分支静默丢弃，
+  color 到不了 colorize 入口；Theme 无 16 裸名同名字段，theme-key 优先
+  零回归）；gate gap-B：S2×S5 预算交互（nameW 吃全预算 → maxFlags≈0 行尾
+  chip 恒截）按上述比例 chip 槽根修。
+- **回归判别探针**：单测 48（S1 5/S2 7/S3 17/S4 8/S5 12）+ colorize-d4 6
+  + themed-text-bare-color 3（gap-A 渲染面）+ func 渲染探针 3（S1 守卫/S3
+  开合/S5 搜索态）= 60 新增（较 0.1.38 基线 3729 → 3789）。
+- **观察项登记（0.1.39+ 裁定面，gate 不阻塞，2 项）**：① 搜索模式产品
+  `input.length===1` 击键守卫整段丢弃多字符/粘贴输入（快速击键面缺口）；
+  ② ag-cyan 行「焦点/选中覆盖身份」优先级走查面（S4 单测族承载）。
+
 ## v0.1.38
 
 sessionlist P0 正确性波 ①~④（Main 实施 worktree-0.1.38-sessionlist；全量
