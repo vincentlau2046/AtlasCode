@@ -83,6 +83,14 @@
 - **现段 = T3 发布序列执行中（Main）→ 生产 lane（e2e）→ 全绿 = 0.1.37 P1 完整交付封口版 5 段闭环终态**（f4 记档 + 用户面交付物）；f4 15:47 终态检查点（cron 7b78d1ed）核全段 ✅/⚠/❌ fail-closed
 - **记档小注（非阻塞）**：全量 gate 报告时间字段「06:15–07:00」与 artifacts 嵌戳（141521/142108/143010 及 P0a/A4F ≈14:0x）矛盾 = 报告模板/时区笔误，实际执行窗 ≈14:00–14:4x；verdict/artifacts/判据链完整，不影响 gate 判据
 
+**~15:5x 更新：T3 发布序列收口（Main 单信号报）+ f4 独立交叉验真全绿 → 已放行 e2e 生产 lane（0.1.37 5 段闭环最后段执行中）**：
+- **T3 发布事实（Main 报，f4 逐项独立验真）**：cherry-pick 6 提交（⑧ `89bc266`/`d2c4847` + ② `0827533` + ④ `6c1ec86` + ③ `dc5b52b` + release `2cdc0bd`，跳过 2 纯 merge）@ master `4a891f4` 之上 + tag **v0.1.37 → `2cdc0bd`**（origin ls-remote 双核 ✓）+ npm **@atlasharness/atlascode@0.1.37**（npmjs.org，npmmirror 坑已避）+ **`12f14bb` 探针收编已推**（compact413-v47.ts+design + fault-proxy 3 扩展 + .gitignore 递归硬化）
+- **f4 独立交叉验真全绿（fail-closed 逐项，非采信 Main 报值）**：① origin/master=`12f14bb` + tag v0.1.37→`2cdc0bd`（ls-remote）② canonical registry（npmjs.org）packument：latest=0.1.37 + SRI `sha512-p7hFqRbp…Ig==` + unpackedSize **17599541** + GPG 签名×2 + 发布 07:27Z ③ canonical tarball 直下（D-8 无 scope 前缀）：**SRI 精确 MATCH**（下载件 sha512 = packument `dist.integrity`）+ **unpackedSize 三方 MATCH**（packument 17599541 = 实测文件尺寸和 17592414+2832+4295）+ **内容指纹**（package.json version=0.1.37 + ③ D2 英文串 `auto-compact paused after` 在场 + ⑧ `approval unavailable` 在场 + UA 品牌串面 28 处）
+- **md5 观测项（f4 裁定 = PASS，登记，非阻塞）**：packument `dist.shasum`（md5 `adce740d…`）≠ 直下实测 md5（`ba39795d…`）= **registry 侧投递 quirk（gzip-repack）**——f4+Main 两次独立下载同向（SRI MATCH + md5 MISMATCH）；npm 客户端安装校验面 = `dist.integrity`（SRI）非 md5 legacy 字段，SRI 已 MATCH + 内容指纹 0.1.37 构建确认 → **发布面验真成立 PASS**；此 quirk 闭环 = 问 npm registry 侧 md5 字段更新路径（registry 运维面，非本波 scope），登记备查
+- **6 artifacts 裁定 = 不入 git（Main 判读正确）**：每 run 沙箱留痕（timestamped scratch）= B0 纪律，`12f14bb` 收编 commit 的 .gitignore 递归硬化（`user-e2e/**/{workspaces,home,artifacts}/`）处置正确；持久交付物（探针码 + design + fault-proxy 3 扩展）已随 `12f14bb` 入仓，无需补提交
+- **f4 已放行 e2e（atlas-user-e2e）0.1.37 生产 lane**（三方核用 **SRI** 口径，非 md5）：⑧ 真持久 pane 现形（tmux 双 pane→杀 leader→⑧ deadline fire→unavailable deny 现形+回合继续）+ ③/②/④ 探针子集 + A4F 6 句 + P0a 隔离 + SRI 三方 MATCH + UA wire `AtlasCode/0.1.37 (repo)` 零污染 + 发布 commit 单测交叉；同 lane 串行防网关 8999 竞争
+- **现段 = 生产 lane（e2e）执行中 → 全绿 = 0.1.37 P1 完整交付封口版 5 段闭环终态**（① ③ code-complete 6079da9 ② 三子集 gate r-0522/r-0730/r-c413 ③ 全量 gate r-fullgate ④ T3 发布 2cdc0bd+v0.1.37+npm ⑤ 生产 lane）→ f4 记档 + 用户面交付物
+
 **14:41 链检查点（cron 5b1ddd70）= 全量 gate 执行中，零动作**：e2e 全量 gate（lean @ 6079da9）verdict 报告未落盘（reports 区最新仍 r-c413 ③ 子集 gate）+ **atlas-user-e2e = busy（全量 gate 跑中）**（请求 ~13:2x 发出，至 14:41 ≈75min，含 ③ V4/V7 重验 + ②/④ 回放 + ⑧ rebase 重验 + 回归 S-A/A4F 6 句/P0a 隔离 PTY 串行链 + 四件套 3724/0·266 全量复跑，合理执行区间非挂死）；**f4 T3 未发**（全量 gate 未绿，fail-closed 正确，不预推进）；**Main = idle（等 f4 T3 单信号，正确 hold）**；3 flaky #294 已闭环（Main 双重坐实，非阻塞）。**等 15:47 终态检查点（cron 7b78d1ed）或 e2e 全量 gate verdict 跨 session 信号（快路径）**。
 
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
