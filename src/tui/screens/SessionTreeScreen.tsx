@@ -5,7 +5,8 @@
 // - 一个界面：浏览/进入/fork 全在此列表
 // - 一条进入路径：enter（包括 fork 产物）
 // - fork 不切换：fork 只刷新列表 + 置顶 + 光标定位
-// - 反馈原位：[f 确认 fork] → → forking… → ✓/✗ 都在被操作的行上
+// - 反馈底部操作行（0.1.39-S1）：[f 再按确认] → forking… → ✓/✗ 收敛在
+//   底部单一固定操作行（行内只剩数据 chip，操作提示不被列宽截断）
 
 import * as React from 'react'
 import { Box, Text, useInput } from '../ink.js'
@@ -184,6 +185,34 @@ const AGENT_ROW_COLOR: Record<string, string | undefined> = {
   cyan: 'cyan',
 }
 
+/** 底部操作行（单行固定）缺省提示（0.1.39-S1：fork 状态机从行内移到此处，
+ * 提示行与错误行合并为单一固定行 → 底部行数恒定，光标-窗口不变量不受
+ * 条件行破坏；「操作行单行」e2e 判据）。 */
+export const SESSION_ROW_HINT =
+  '🖱 点击移动光标 · 滚轮/↑↓ 滚动 · enter 选中/进入 · f fork · q 返回'
+
+/** 操作行纯面（S1 判别锚点）：行内只剩数据 chip，时效性操作提示（3s confirm
+ * 窗口、forking、失败信息）全部收敛到底部操作行——不被列宽截断、不占行高。
+ * idle 回落提示行（与提示合并 = 恒定单行）。 */
+export function buildActionRow(
+  state: RowState,
+  title: string,
+): { text: string; color?: string } {
+  switch (state.kind) {
+    case 'confirm':
+      return { text: `✋ ${title} · [再按 f 确认 fork · 3s 自动取消]`, color: 'yellow' }
+    case 'forking':
+      return { text: `→ forking ${title}…`, color: 'yellow' }
+    case 'done':
+      return { text: `✓ 已创建分支 ${title}`, color: 'green' }
+    case 'error':
+      return { text: `✗ fork 失败 · ${state.message}`, color: 'red' }
+    case 'idle':
+    default:
+      return { text: SESSION_ROW_HINT }
+  }
+}
+
 export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode {
   const [logs, setLogs] = React.useState<LogOption[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -192,7 +221,6 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // null = 未选中。↑↓/点击移动光标时清除选中。
   const [selectedIdx, setSelectedIdx] = React.useState<number | null>(null)
   const [rowStates, setRowStates] = React.useState<Map<string, RowState>>(new Map())
-  const [bottomMessage, setBottomMessage] = React.useState<string | null>(null)
   // 虚拟窗口滚动偏移（根治"光标与显示脱轨"，渲染段说明原理）
   const [scrollOffset, setScrollOffset] = React.useState(0)
   const confirmTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -274,8 +302,8 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
       setTimeout(() => setRowState(sessionId, { kind: 'idle' }), 2000)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
+      // S1：错误信息收敛到操作行（error 态自带 message，旧 bottomMessage 行已废）
       setRowState(target.sessionId, { kind: 'error', message })
-      setBottomMessage(message)
       setTimeout(() => setRowState(target.sessionId, { kind: 'idle' }), 2000)
     } finally {
       forkInFlightRef.current = false
@@ -316,7 +344,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     // 虚拟窗口行数：终端行数减去头部(标题+空行)和底部(提示行)
     const termRows = process.stdout.rows ?? 24
     const HEADER_ROWS = 3  // 标题行 + marginTop + 列表 marginTop
-    const FOOTER_ROWS = 2  // 底部提示行 + marginTop
+    const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
     const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
 
     if (key.upArrow || key.wheelUp) {
@@ -430,7 +458,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 光标逻辑索引与终端物理行 1:1 对齐，脱轨按构造不可能发生。
   // 列头占 1 行（标题下方 dim 列名行），计入 HEADER_ROWS。
   const HEADER_ROWS = NARROW ? 4 : 4  // 标题 + 列头 + marginTop×2
-  const FOOTER_ROWS = 2  // 底部提示行 + marginTop
+  const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
   const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
   // 确保 scrollOffset 在合法范围（列表刷新后行数可能变少）
   const effectiveOffset = Math.min(scrollOffset, Math.max(0, logs.length - visibleRows))
@@ -457,6 +485,31 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   // 相对时间基准（一次渲染取一次，各行同基准不抖动）
   const nowMs = Date.now()
 
+  // ── 底部操作行（S1 单行固定）：取最高优先非 idle 态（forking > confirm >
+  // done > error），idle 回落提示行——旧 bottomMessage 错误行已并入，
+  // 底部行数恒定，光标-窗口不变量不受条件行破坏 ──
+  const STATE_PRIORITY: Record<RowState['kind'], number> = {
+    forking: 4,
+    confirm: 3,
+    done: 2,
+    error: 1,
+    idle: 0,
+  }
+  let activeState: RowState = { kind: 'idle' }
+  let activeSid = ''
+  for (const [sid, s] of rowStates) {
+    if (STATE_PRIORITY[s.kind] > STATE_PRIORITY[activeState.kind]) {
+      activeState = s
+      activeSid = sid
+    }
+  }
+  const actionLog = activeSid ? logs.find(l => l.sessionId === activeSid) : undefined
+  const actionRow = buildActionRow(
+    activeState,
+    actionLog ? getLogDisplayTitle(actionLog) || 'untitled' : 'untitled',
+  )
+  const actionText = truncateToVisibleWidth(actionRow.text, Math.max(10, termCols - 4))
+
   return (
     <Box flexDirection="column" paddingX={2} paddingTop={1}>
       <Text color="cyan" bold>🌲 Sessions</Text>
@@ -470,8 +523,6 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           const isCurrent = sid === currentSessionId
           const cached = fileMetaCacheRef.current.get(sid)
           const isBranch = cached?.isBranch ?? false
-          const rowState = rowStates.get(sid)?.kind ?? 'idle'
-          const rowStateObj = rowStates.get(sid)
           // 选中态需要结构性标记：仅颜色（cyan→magenta）在部分终端主题下
           // 感知差异太弱，用户看不到"点亮"。光标符号随选中态变化，
           // 与颜色双重编码，任何主题下都可辨。
@@ -495,14 +546,9 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           if (showBranch) line += ' ' + padToVisibleWidth(branch, BRANCH_W)
           if (showMsg)    line += ' ' + padLeftToVisibleWidth(msgCount, MSG_W)
 
-          // 标志段：状态机在前（时效性操作提示，3s confirm 窗口不能被截断），
-          // 数据 chip 在后（#tag @agent [C] 从左到右，超剩余宽度截断）
+          // 标志段（0.1.39-S1）：状态机已移底部操作行，行内只留数据 chip
+          //（Branch/current/#tag/@agent/[C] 从左到右，超剩余宽度截断）
           let flags = ''
-          let statusColor: string | undefined
-          if (rowState === 'confirm') { flags += ' [f 确认 fork]'; statusColor = 'yellow' }
-          else if (rowState === 'forking') { flags += ' → forking…'; statusColor = 'yellow' }
-          else if (rowState === 'done') { flags += ' ✓ 已创建分支'; statusColor = 'green' }
-          else if (rowState === 'error') { flags += ' ✗ fork 失败'; statusColor = 'red' }
           if (isBranch)        flags += ' (Branch)'
           if (isCurrent)       flags += ' (current)'
           if (log.tag)         flags += ` #${log.tag}`
@@ -517,9 +563,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
           line += ' ' + flags
 
           // idle 行按代理配色着色（身份一眼辨）；焦点/选中态颜色优先于身份
-          const color = rowStateObj && rowStateObj.kind !== 'idle'
-            ? statusColor
-            : isSelected ? 'magentaBright'
+          const color = isSelected ? 'magentaBright'
             : isFocused ? 'cyan'
             : AGENT_ROW_COLOR[log.agentColor ?? '']
 
@@ -538,13 +582,10 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
         {logs.length === 0 && <Text dimColor>No sessions found</Text>}
       </Box>
       <Box marginTop={1}>
-        <Text dimColor>🖱 点击移动光标 · 滚轮/↑↓ 滚动 · enter 选中/进入 · f fork · q 返回</Text>
+        <Text color={actionRow.color} dimColor={!actionRow.color} wrap="truncate">
+          {actionText}
+        </Text>
       </Box>
-      {bottomMessage && (
-        <Box marginTop={1}>
-          <Text color="red" wrap="truncate">✗ {bottomMessage}</Text>
-        </Box>
-      )}
     </Box>
   )
 }
