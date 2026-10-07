@@ -62,6 +62,12 @@
 - **f4 已发 ③ gate 验收请求（atlas-user-e2e）**：判据 **V4**（3 连败→① TokenWarning 跳闸态在场〔英文措辞〕② 413 反应式压缩触发且回合存活 ③ 一次性门生效〔同回合二次 413 不重压回显原始〕）**+ V7**（headless 413 同判据）+ 既有 413/maxTokens/auto-compact/retry 零回归 + A4F 6 句 + S-A + P0a 隔离 + 四件套 3724/0·266；gate 基线 = worktree-0.1.36 @ `6079da9`
 - **③ gate 绿后 → 0.1.37 全量 gate（lean）→ 全绿 → f4 T3 单信号 → Main 发布序列**（bump 0.1.37 → cherry-pick master → tag v0.1.37 → push×2 → DNS-pin npm → packument 验真 → 生产 lane〔含 ⑧ 真持久 pane 现形〕）
 
+**~13:00 更新：③ gate verdict = PASS（e2e 单信号，`r-20261007-c413-0137-s3-gate.md` ③ 判据全绿 + 0 ③ 相关 INCONCLUSIVE）→ 0.1.37 封口版 gate 全绿（⑧ r-0522 + ②④ r-0730 + ③ r-c413 三子集全绿）→ 推进发布序列**：
+- **③ 核心判据全绿**：V7② headless 窄体反应式恢复（主循环 413→D1 fire→`buildPostCompactMessages` 重建→回合存活，compact success=1）+ V7③ 一次性门（`mainLoopPtlPersist` 持续 413〔mainCalls=2,3〕→ 反应式**恰 1 次**〔reactiveRetried〕→ 回显原始 413，防反应式死循环）+ V7 kill 对照（`ATLAS_DISABLE_REACTIVE_COMPACT=true`→compact 消费者 0 + 413 穿透现形，门控真生效非恒绿）+ V4① D2 断路器跳闸态英文字符串在场（TokenWarning.tsx:177 `auto-compact paused after \d+ consecutive failures`，f4 锚点）+ V4② TUI 车道反应式恢复（compact success=3→回合存活）
+- **③ 相关零回归**：③ 增量 29/0（2 文件）+ ③ 邻域 99/0（8 文件）+ A 类 413/maxTokens 自修（withRetry）源级未 touch + A4F 6 句 PASS + S-A(P0a) PASS + tsc 0
+- **登记项（非 ③ 阻塞、非 INCONCLUSIVE 缺口）**：全量 bun test 无并发复跑 **3 flaky fail**（`W2-2a-2 注册面名表` / `P-S1 前缀守卫` / `S-E3 A11 loop transcript 写面 F-1`），**定因 = pre-existing 测试隔离/时序 flake 非 ③ 回归**（三测隔离单跑均 4/0 通过 + 失败集跨 run 非确定抖动〔确定性 ③ 回归应每次同一测试恒败，抖动排除〕+ git 证 ③ `6079da9` 未 touch 三测试文件〔`loop-transcript-fs`/`ascend-s5-mount`，末改 pre-③〕及其被测面）→ **路由 Main 独立核 ③ parent `4458b2e` 全量对照坐实 pre-existing + 立测试隔离缺陷工单**（`loop-transcript-fs`/`ascend-s5-mount` 全局态泄漏/时序敏感）；**非阻塞 0.1.37 链**
+- **f4 已单信号 Main**（③ gate PASS 收讫 + 0.1.37 全量 gate 排期 + 3 flaky 工单路由〔4458b2e 对照 + 测试隔离工单〕+ 探针 `compact413-v47.ts` + fault-proxy 3 扩展收编窗口=③ 波）+ **e2e 0.1.37 全量 gate（lean）验收请求**（③ V4/V7 + ②/④ 已绿 r-0730 + 回归 S-A/A4F 6 句/P0a 隔离 hardFail=0 + 四件套 3724/0·266；**⑧ 真持久 pane 现形〔tmux 双 pane〕归生产 lane，非全量 gate**）
+
 ## 2. 参照调研清单（R2：切片⑤ 前置，产出 = 对照表）
 
 | 项 | 调研对象（本地可查） | 产出 |
