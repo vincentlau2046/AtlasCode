@@ -21,9 +21,10 @@ coverage/
 embedded64.txt
 
 # user-e2e runtime state (指定才跑的 e2e 套件：工作区/沙箱 HOME/原始留痕)
-user-e2e/workspaces/
-user-e2e/home/
-user-e2e/artifacts/
+# 递归匹配嵌套套件子目录（tui-diff/ loop-robustness/ 等）的沙箱产物，防误提交（B0 纪律）
+user-e2e/**/workspaces/
+user-e2e/**/home/
+user-e2e/**/artifacts/
 
 # B0: 顶层运行时/构建产物（0405 e2e 误提交进历史，防回归）
 .bun/
