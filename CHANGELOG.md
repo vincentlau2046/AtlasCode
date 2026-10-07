@@ -4,6 +4,33 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.40
+
+slash 命令精简波 W1+W2+W3（f4 实施 worktree-0.1.40-slash @ bdf2baa，基线
+9f8df7f=v0.1.39 裁定 a；gate = e2e tui-diff 命令表 27 探针 + StatusLine
+双面 + /help 零增减全绿，四件套 3789/0·271 e2e 独立复跑精确一致）：
+
+- **W1 精简（删 5 命令体 + install-slack-app + 孤儿清理）**：
+  statusline / output-style / pr_comments / security-review / torch 命令体
+  离场 + install-slack-app×2 + createMovedToPluginCommand.ts /
+  AgentTool built-in/statuslineSetup.ts 代理孤儿一并裁（20 删除符号全仓
+  import 残留 = 0，tsc 决定性 + 路径级 grep NONE）。
+- **W2 tombstone 清零 + E-1P 登记（9 项）**：14 tombstone 删净；
+  commands.ts 新增 E-1P 前向缝登记注释——chrome·desktop·mobile·
+  install-github-app·extra-usage·rate-limit-options·passes·remote-env·
+  privacy-settings = 1P 依赖（grove/订阅/远程面）**有意不搬**（登记不删，
+  防未来波误判「可本地」搬入死码）。
+- **W3 三件翻开（isEnabled true）**：files / tag（生产主表）+ version
+  （INTERNAL_ONLY dev 表）；voice 保留确认（VOICE_MODE 注释标注）。
+- **0.1.41 封口版面（零码，同 gate 顺跑全绿）**：E-1P 9 项登记在场 +
+  /help 零增减断言 = 零码封口版预期态（W4 三件 fast/privacy-settings/
+  advisor 渲染集缺席：fast → 0.1.42 具名 deferred / privacy-settings =
+  E-1P 第 9 项 / advisor = E-1P 第 10 项登记不做，复活需用户裁定 +
+  30 秒启用面备料在 worktree-0.1.41-advisor）。
+- **观察项登记（0.1.40+ 裁定面，gate 不阻塞）**：O-adv-1——main.tsx
+  `--advisor` CLI flag 现恒 hard-error（D2 墓碑残留，flag 解析路径未随
+  命令体裁/降级；处置面 ① 裁 flag / ② 降 no-op 二选一归后续波 triage）。
+
 ## v0.1.39
 
 sessionlist P1 交互/UI 波 S1–S5 + D4 根修 + gate 双簇修（Main 实施
