@@ -11,8 +11,21 @@ import { describe, expect, it } from 'bun:test'
 import {
   SESSION_ROW_HINT,
   buildActionRow,
+  clampWindowToCursor,
   computeColumnLayout,
+  computeRenderWindow,
+  getSummaryLine,
+  slotPrefix,
 } from '../../src/tui/screens/SessionTreeScreen.js'
+import type { LogOption } from '../../src/tui/types/logs.js'
+
+function makeLog(over: Partial<LogOption> = {}): LogOption {
+  return {
+    sessionId: 's1',
+    firstPrompt: 'base prompt',
+    ...over,
+  } as unknown as LogOption
+}
 
 describe('S1 fork 状态机移底部操作行（buildActionRow 纯面）', () => {
   it('confirm 态：行内不再有状态机，操作行出「再按 f 确认」+ 3s 自动取消（yellow）', () => {
@@ -120,5 +133,91 @@ describe('S2 列宽自适应（computeColumnLayout 纯面）', () => {
       showBranch: false,
       showMsg: false,
     })
+  })
+})
+
+/**
+ * S3 summary 二级行（变高行模型纯面）。
+ * 不变量：渲染段物理行数 = 窗口 slot 总数 ≤ 视口行数；展开行 = 2 slot。
+ * 判别锚点：窗口/钳位/前缀和任一 slot 计算突变 → 恰好红。
+ */
+describe('S3 summary 二级行（变高行模型纯面）', () => {
+  describe('getSummaryLine', () => {
+    it('压缩摘要优先（log.summary 非空时直接用）', () => {
+      expect(getSummaryLine(makeLog({ summary: 'compact summary' }))).toBe('compact summary')
+    })
+    it('无摘要 → 首个用户输入回落（去展示 tag，与标题链同源）', () => {
+      expect(getSummaryLine(makeLog({ firstPrompt: 'fix the bug' }))).toBe('fix the bug')
+      expect(
+        getSummaryLine(
+          makeLog({ firstPrompt: '<ide_opened_file>main.ts</ide_opened_file> do it' }),
+        ),
+      ).toBe('do it')
+    })
+    it('摘要与 firstPrompt 皆无 → 占位（恒非空，展开行恒 2 slot）', () => {
+      expect(getSummaryLine(makeLog({ firstPrompt: '' }))).toBe('（无摘要）')
+    })
+  })
+
+  describe('slotPrefix / rowSlotCost', () => {
+    it('无展开：前缀和 = 行号', () => {
+      expect(slotPrefix(5, null, 10)).toBe(5)
+    })
+    it('展开行在 idx 前：前缀和 +1；展开行 = idx 或在其后：不加', () => {
+      expect(slotPrefix(5, 2, 10)).toBe(6)
+      expect(slotPrefix(5, 5, 10)).toBe(5)
+      expect(slotPrefix(5, 7, 10)).toBe(5)
+    })
+  })
+
+  describe('computeRenderWindow', () => {
+    it('无展开：窗口 = 预算内连续行', () => {
+      expect(computeRenderWindow(10, 0, null, 5)).toEqual({ start: 0, end: 5 })
+    })
+    it('展开在窗口内：少渲 1 行（物理行数仍 = 预算 5）', () => {
+      // 行成本 1,1,2,1,1 → 5 slot 装到行 3（行 4 装不下）
+      expect(computeRenderWindow(10, 0, 2, 5)).toEqual({ start: 0, end: 4 })
+    })
+    it('展开在窗口外：窗口不变', () => {
+      expect(computeRenderWindow(10, 0, 7, 5)).toEqual({ start: 0, end: 5 })
+    })
+    it('预算边缘：剩余 1 slot，下一行是展开行（2 slot）→ 不渲（不截行防跨视口）', () => {
+      expect(computeRenderWindow(2, 1, 1, 1)).toEqual({ start: 1, end: 1 })
+    })
+    it('offset 超界（列表刷新行变少）→ 钳到最后一行', () => {
+      expect(computeRenderWindow(3, 10, null, 5)).toEqual({ start: 2, end: 3 })
+    })
+    it('空列表 → 空窗口', () => {
+      expect(computeRenderWindow(0, 0, null, 5)).toEqual({ start: 0, end: 0 })
+    })
+  })
+
+  describe('clampWindowToCursor', () => {
+    it('光标在窗口前 → 窗口起点跳到光标', () => {
+      expect(clampWindowToCursor(0, 3, null, 5, 10)).toBe(0)
+    })
+    it('光标（含二级行成本）在窗口内 → offset 不变', () => {
+      // 预算 10：窗口从 0 装 9 行（展开行 2 占 2 slot），slot 端点 10 ≥ 光标端点 4
+      expect(clampWindowToCursor(2, 0, 2, 10, 10)).toBe(0)
+    })
+    it('光标超出窗口尾（无展开）→ 前推窗口至光标落窗', () => {
+      // 预算 3：off=0 窗口 [0,3) 不含行 4；off=2 窗口 [2,5) 含行 4 → 2
+      expect(clampWindowToCursor(4, 0, null, 3, 10)).toBe(2)
+    })
+    it('光标超出窗口尾（带展开行成本）→ 按 slot 前推', () => {
+      // 行 0 展开（成本 2）：off=0 窗口 slot 端点 3 < 光标 2 的 slot 端点 4
+      // → off=1 窗口 [1,4) slot 端点 5 ≥ 4 → 1
+      expect(clampWindowToCursor(2, 0, 0, 3, 10)).toBe(1)
+    })
+    it('极端退化（预算 1 装不下展开光标行）→ 有界收敛不越界', () => {
+      expect(clampWindowToCursor(1, 0, 1, 1, 2)).toBe(1)
+    })
+  })
+
+  it('操作行提示补 x 摘要（S1 提示行扩展，断言不回归既有键提示）', () => {
+    expect(SESSION_ROW_HINT).toContain('x 摘要')
+    expect(SESSION_ROW_HINT).toContain('f fork')
+    expect(SESSION_ROW_HINT).toContain('q 返回')
+    expect(SESSION_ROW_HINT).not.toContain('\n')
   })
 })

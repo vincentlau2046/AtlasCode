@@ -7,6 +7,9 @@
 // - fork 不切换：fork 只刷新列表 + 置顶 + 光标定位
 // - 反馈底部操作行（0.1.39-S1）：[f 再按确认] → forking… → ✓/✗ 收敛在
 //   底部单一固定操作行（行内只剩数据 chip，操作提示不被列宽截断）
+// - summary 二级行（0.1.39-S3）：x 键展开光标行摘要（变高行模型：展开行占
+//   2 个物理行，窗口/clamp 全走 slot 前缀和单一事实源，光标-窗口 1:1 不变量
+//   在变高下依然按构造成立）
 
 import * as React from 'react'
 import { Box, Text, useInput } from '../ink.js'
@@ -17,6 +20,7 @@ import { loadSameRepoAllMessageLogs, isLiteLog, loadFullLog } from '../utils/ses
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getLogDisplayTitle } from '../utils/log.js'
+import { stripDisplayTagsAllowEmpty } from '../utils/displayTags.js'
 import { saveCustomTitle } from '../utils/sessionStorage.js'
 import {
   createFork,
@@ -229,7 +233,7 @@ const AGENT_ROW_COLOR: Record<string, string | undefined> = {
  * 提示行与错误行合并为单一固定行 → 底部行数恒定，光标-窗口不变量不受
  * 条件行破坏；「操作行单行」e2e 判据）。 */
 export const SESSION_ROW_HINT =
-  '🖱 点击移动光标 · 滚轮/↑↓ 滚动 · enter 选中/进入 · f fork · q 返回'
+  '🖱 点击移动光标 · 滚轮/↑↓ 滚动 · enter 选中/进入 · f fork · x 摘要 · q 返回'
 
 /** 操作行纯面（S1 判别锚点）：行内只剩数据 chip，时效性操作提示（3s confirm
  * 窗口、forking、失败信息）全部收敛到底部操作行——不被列宽截断、不占行高。
@@ -253,6 +257,88 @@ export function buildActionRow(
   }
 }
 
+// ── S3 变高行模型（summary 二级行）：行→物理行 slot 的单一事实源 ──
+// 展开行 = 主行 + 二级摘要行 = 2 slot，普通行 = 1 slot。窗口计算与光标
+// clamp 全走 slot 前缀和 → 渲染段物理行数恒 ≤ 视口行数 → 无原生 LF 滚动，
+// 光标-窗口 1:1 不变量在变高下按构造成立。
+
+/** 行 slot 成本（纯面判别锚点）：展开行 2，其余 1。 */
+export function rowSlotCost(idx: number, expandedIdx: number | null): number {
+  return idx === expandedIdx ? 2 : 1
+}
+
+/** 行 idx 之前的 slot 总数（行 idx 的 slot 起点偏移）。
+ * [0,idx) 每行 1 slot，若展开行落在 [0,idx) 内额外 +1。 */
+export function slotPrefix(idx: number, expandedIdx: number | null, count: number): number {
+  const n = Math.min(Math.max(idx, 0), count)
+  let slots = n
+  if (expandedIdx !== null && expandedIdx < n) slots += 1
+  return slots
+}
+
+/** 视口 slot 预算内可容纳的数据行窗口 [start, end)：
+ * 装不下剩余 slot 的行不渲染（不截行——半行跨视口会触发原生 LF 滚动脱轨）。
+ * offset 超界（列表刷新后行变少）钳到最后一行。 */
+export function computeRenderWindow(
+  count: number,
+  offset: number,
+  expandedIdx: number | null,
+  visibleRows: number,
+): { start: number; end: number } {
+  if (count <= 0) return { start: 0, end: 0 }
+  const start = Math.max(0, Math.min(offset, count - 1))
+  let end = start
+  let slots = 0
+  while (end < count) {
+    const cost = rowSlotCost(end, expandedIdx)
+    if (slots + cost > visibleRows) break
+    slots += cost
+    end += 1
+  }
+  return { start, end }
+}
+
+/** 变高窗口光标 clamp：保证光标行（含其二级行成本）完整落在窗口 slot 区间。
+ * 光标在窗口前 → 窗口起点跳到光标；否则逐行前推窗口直至容纳（offset 推过
+ * 光标后由第一分支兜住，终止有界）。 */
+export function clampWindowToCursor(
+  focusedIdx: number,
+  offset: number,
+  expandedIdx: number | null,
+  visibleRows: number,
+  count: number,
+): number {
+  if (count <= 0 || visibleRows <= 0) return 0
+  const cursor = Math.max(0, Math.min(focusedIdx, count - 1))
+  let off = Math.max(0, Math.min(offset, count - 1))
+  for (let guard = 0; guard <= count + 1; guard++) {
+    const cStart = slotPrefix(cursor, expandedIdx, count)
+    if (cStart < slotPrefix(off, expandedIdx, count)) return cursor
+    const win = computeRenderWindow(count, off, expandedIdx, visibleRows)
+    const cEnd = cStart + rowSlotCost(cursor, expandedIdx)
+    if (cEnd <= slotPrefix(win.end, expandedIdx, count)) return off
+    off += 1
+  }
+  return Math.max(0, count - 1)
+}
+
+/** 二级行内容（纯面判别锚点）：压缩摘要（log.summary）优先；缺省回落首个
+ * 用户输入（去展示 tag，与标题链同源）；再无则占位——恒非空，展开行恒
+ * 占 2 slot（窗口不变量稳定，不因内容缺失塌成 1 slot）。 */
+export function getSummaryLine(log: LogOption): string {
+  const s = (log.summary ?? '').trim()
+  if (s) return s
+  const fp = log.firstPrompt ? stripDisplayTagsAllowEmpty(log.firstPrompt) : ''
+  if (fp) return fp
+  return '（无摘要）'
+}
+
+// 顶部/底部固定行预算（输入 handler 与渲染段共用单一事实源——旧输入段用
+// HEADER_ROWS=3 而渲染段用 4，输入侧窗口比渲染侧多 1 行 → 末行不可达，
+// 统一后两侧同预算）。
+const HEADER_ROWS = 4  // 标题 + 列头 + marginTop×2
+const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
+
 export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode {
   const [logs, setLogs] = React.useState<LogOption[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -263,6 +349,11 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   const [rowStates, setRowStates] = React.useState<Map<string, RowState>>(new Map())
   // 虚拟窗口滚动偏移（根治"光标与显示脱轨"，渲染段说明原理）
   const [scrollOffset, setScrollOffset] = React.useState(0)
+  // S3：summary 二级行展开态（x 键切换）。绑定光标行——移动光标时展开跟随
+  // 新焦点行（行级属性语义，不做 per-session 记忆）；expandedIdx = 展开时的
+  // 焦点行索引，窗口/clamp 全走 S3 纯面（rowSlotCost/slotPrefix/…）。
+  const [expanded, setExpanded] = React.useState(false)
+  const expandedIdx = expanded ? focusedIdx : null
   const confirmTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const forkInFlightRef = React.useRef(false)
   // 缓存每条 log 的 { isBranch, messageCount }，loadLogs 时填充，渲染段直接读
@@ -358,20 +449,11 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     setSelectedIdx(null)
   }
 
-  // ── 光标-窗口不变量 ──
-  // 任何光标移动后，调整 scrollOffset 使光标落在 [offset, offset+visible) 内。
-  // 这保证光标永远可见，且只渲染可视区间行 → 无溢出 → 无原生 LF 滚动 →
+  // ── 光标-窗口不变量（S3 变高版）──
+  // 任何光标移动后，clampWindowToCursor（S3 纯面，slot 前缀和）调整
+  // scrollOffset 使光标行（含展开二级行成本）完整落在窗口内 → 光标永远可见，
+  // 只渲染可视区间行且物理行数 ≤ 视口 → 无溢出 → 无原生 LF 滚动 →
   // 光标逻辑索引与终端物理行按构造对齐，脱轨不可能发生。
-  function clampScrollToCursor(
-    idx: number,
-    offset: number,
-    visible: number,
-  ): number {
-    if (visible <= 0) return offset
-    if (idx < offset) return idx
-    if (idx >= offset + visible) return idx - visible + 1
-    return offset
-  }
 
   useInput((input, key, event) => {
     if (loading) return
@@ -381,17 +463,18 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
     // forking 期间所有操作键忽略（防半写状态退出/重复 fork）
     if (state === 'forking') return
 
-    // 虚拟窗口行数：终端行数减去头部(标题+空行)和底部(提示行)
+    // 虚拟窗口行数：终端行数减去头部（标题+列头）和底部（操作行）——
+    // HEADER_ROWS/FOOTER_ROWS 与渲染段共用模块常量（单源，防两侧漂移）
     const termRows = process.stdout.rows ?? 24
-    const HEADER_ROWS = 3  // 标题行 + marginTop + 列表 marginTop
-    const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
     const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
+    const clamp = (next: number, off: number) =>
+      clampWindowToCursor(next, off, expandedIdx, visibleRows, logs.length)
 
     if (key.upArrow || key.wheelUp) {
       setSelectedIdx(null)
       setFocusedIdx(i => {
         const next = Math.max(0, i - 1)
-        setScrollOffset(off => clampScrollToCursor(next, off, visibleRows))
+        setScrollOffset(off => clamp(next, off))
         return next
       })
       // 独占按键：ink useInput 是全局 emitter，后续 listener（滚动/翻页等）
@@ -401,7 +484,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
       setSelectedIdx(null)
       setFocusedIdx(i => {
         const next = Math.min(logs.length - 1, i + 1)
-        setScrollOffset(off => clampScrollToCursor(next, off, visibleRows))
+        setScrollOffset(off => clamp(next, off))
         return next
       })
       event.stopImmediatePropagation()
@@ -409,7 +492,7 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
       setSelectedIdx(null)
       setFocusedIdx(i => {
         const next = Math.max(0, i - visibleRows)
-        setScrollOffset(off => clampScrollToCursor(next, off, visibleRows))
+        setScrollOffset(off => clamp(next, off))
         return next
       })
       event.stopImmediatePropagation()
@@ -417,9 +500,14 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
       setSelectedIdx(null)
       setFocusedIdx(i => {
         const next = Math.min(logs.length - 1, i + visibleRows)
-        setScrollOffset(off => clampScrollToCursor(next, off, visibleRows))
+        setScrollOffset(off => clamp(next, off))
         return next
       })
+      event.stopImmediatePropagation()
+    } else if (input === 'x') {
+      // S3：切换光标行 summary 二级行。退化解守：视口不足 2 行时展开行
+      // （2 slot）放不下 → 忽略展开（只收不放），保窗口不变量。
+      setExpanded(e => (e ? false : visibleRows >= 2))
       event.stopImmediatePropagation()
     } else if (key.escape || input === 'q') {
       onBack()
@@ -494,18 +582,17 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
   const showMsg     = layout.showMsg
 
 
-  // ── 虚拟窗口 ──
-  // 只渲染 [scrollOffset, scrollOffset+visibleRows) 区间的行。
-  // 渲染行数恒 ≤ 视口行数 → 无内容溢出 → 无原生 LF 滚动 →
+  // ── 虚拟窗口（S3 变高版）──
+  // 只渲染视口 slot 预算内能装下的数据行（computeRenderWindow，S3 纯面）。
+  // 展开行占 2 物理行（主行+二级行），窗口按 slot 预算收敛 →
+  // 渲染物理行数恒 ≤ 视口行数 → 无内容溢出 → 无原生 LF 滚动 →
   // 光标逻辑索引与终端物理行 1:1 对齐，脱轨按构造不可能发生。
-  // 列头占 1 行（标题下方 dim 列名行），计入 HEADER_ROWS。
-  const HEADER_ROWS = 4  // 标题 + 列头 + marginTop×2
-  const FOOTER_ROWS = 2  // 底部操作行（S1 单行固定）+ marginTop
   const visibleRows = Math.max(1, termRows - HEADER_ROWS - FOOTER_ROWS)
   // 确保 scrollOffset 在合法范围（列表刷新后行数可能变少）
   const effectiveOffset = Math.min(scrollOffset, Math.max(0, logs.length - visibleRows))
-  const startIdx = effectiveOffset
-  const endIdx = Math.min(logs.length, startIdx + visibleRows)
+  const win = computeRenderWindow(logs.length, effectiveOffset, expandedIdx, visibleRows)
+  const startIdx = win.start
+  const endIdx = win.end
 
   // 固定列总宽（用于计算标志段剩余宽度）
   let fixedW = CURSOR_W + ICON_W + NAME_W + ACTIVE_W
@@ -609,16 +696,26 @@ export function SessionTreeScreen({ onBack, onResume }: Props): React.ReactNode 
             : isFocused ? 'cyan'
             : AGENT_ROW_COLOR[log.agentColor ?? '']
 
+          // S3：展开行渲染二级摘要行（dim，缩进到名称列起点 4 空格 + └）。
+          // 二级行宽 = 终端宽 - paddingX(4) - 缩进+└+gap(6)，wrap=truncate 防溢。
+          const summaryLine =
+            '    └ ' +
+            truncateToVisibleWidth(getSummaryLine(log), termCols - 4 - 6)
           return (
-            <Box
-              key={sid || i}
-              noSelect
-              onClick={() => handleRowClick(i)}
-            >
-              <Text color={color} bold={isFocused || isSelected} wrap="truncate">
-                {line}
-              </Text>
-            </Box>
+            <React.Fragment key={sid || i}>
+              <Box noSelect onClick={() => handleRowClick(i)}>
+                <Text color={color} bold={isFocused || isSelected} wrap="truncate">
+                  {line}
+                </Text>
+              </Box>
+              {i === expandedIdx && (
+                <Box noSelect>
+                  <Text dimColor wrap="truncate">
+                    {summaryLine}
+                  </Text>
+                </Box>
+              )}
+            </React.Fragment>
           )
         })}
         {logs.length === 0 && <Text dimColor>No sessions found</Text>}
