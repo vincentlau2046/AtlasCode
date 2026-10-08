@@ -4,6 +4,42 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.43
+
+多 OS 优化波（**Windows 新装反馈 4 问题处置**，基线 v0.1.42；gate = e2e 六判据
+全绿〔报告 r-20261008-gate-043.md，verdict 6/6·⑤ hardFail=0〕，四件套本侧
+tsc0·eslint0·build3848·单测 3807/0〔3789+18 新〕）：
+
+- **① 分隔线母题改品牌浅金粗直线**（Windows 反馈问题 4：`/plugin` 弹窗满宽
+  `█ █` 光束串观感过重）：`beamTheme.beamDividerLine` 默认 pattern `'█ '` →
+  `'━'`（U+2501 Box Drawing Heavy 重横线，CJK 1-cell 安全，EAW 类不变零回归）；
+  `Divider` 默认色 dimColor → `brandShimmer`（浅金主题色延伸，dark=rgb(255,213,74)，
+  6 主题全在场）。显式 `char` 仍走 legacy 重复；`beam-theme` 单测断言同步。
+- **② Windows git 探测（A 面）**（Windows 反馈问题 3 根因之一：git 已装但不在
+  当前 shell PATH → 三官方源全按 git_unavailable 跳过）：新增
+  `gitAvailability.resolveWindowsGitBinary`（win32-only 平台门，PATH 未命中时探测
+  MSI 双根 cmd/bin、per-user、scoop、chocolatey、MSYS2 六候选）；落点双处 =
+  `checkGitAvailable` 门 + `git.ts` `gitExe` spawn 回退链
+  `whichSync('git') || resolveWindowsGitBinary() || 'git'`（clone 真能找到 git）；
+  `clearGitAvailabilityCache` 一并清探测缓存。非 win32 恒 null 零 Unix 回归
+  （`windows-git-probe` 单测承载；Windows 真机面 = 用户实测观察项）。
+- **③ GCS 镜像可配（B 面）**（CN/企业网络到不了 downloads.claude.ai）：
+  `ATLAS_OFFICIAL_MKT_MIRROR` 覆写 `officialMarketplaceGcs` 的 `GCS_BASE`（尾斜线
+  归一化；空/未设回默认），指内网镜像即可走 GCS 镜像路。
+- **④ 重试门默认 off + 可操作错误面（C 面）**（首败后 backoff 门 1h 窗+10 次上限
+  不再重试 + 失败静默）：`shouldRetryInstallation` 门默认 off（已装/policy_blocked
+  短路面不变，其余每次启动重试，无 backoff 窗/attempts 上限）；opt-in 旧语义 =
+  `ATLAS_ENABLE_OFFICIAL_MKT_RETRY_BACKOFF=1`。三 hook 错误面不再静默：官方源
+  `git_unavailable`/`gcs_unavailable` 各出可操作修复指引（装 Git 加 PATH / 设镜像
+  env），Ascend/Atlas 两源 `git_unavailable` 短行提示（三源预集成 REPL 753-755 已
+  挂载，本波补失败可见性）。`official-marketplace-retry-gate` 单测承载门 off 判据
+  + opt-in 旧语义。
+- **问题 1+2 复核（stale-build 定因，零落码）**：Windows 观察到的 onboarding
+  clawd 小人 + unknown provider 定因为旧构建（clawd 小人仅 < 0.1.33、`█` 分隔线
+  仅 ≥ 0.1.35，两者不同框）；当前 master 品牌面全净（主题屏纯文字 + 启动首屏
+  棱镜光锥 + ModelSetup 预填 127.0.0.1:8999/Qwen38-27B-TXT 可落盘），gate 判据⑥
+  源级+启动首屏复核确认。
+
 ## v0.1.42
 
 内部卫生波（**零用户行为变化**，Main 实施 worktree-0.1.42-fast，基线 9564e63=
