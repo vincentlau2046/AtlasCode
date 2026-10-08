@@ -32,7 +32,7 @@ import {
   getPackageManager,
 } from './nativeInstaller/packageManagers.js'
 import { getPlatform } from './platform.js'
-import { getRipgrepStatus } from './ripgrep.js'
+import { getRipgrepStatus } from 'src/tui/sandboxCompat'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import { getManagedFilePath } from './settings/managedPath.js'
 import { CUSTOMIZATION_SURFACES } from './settings/types.js'
@@ -66,7 +66,8 @@ export type DiagnosticInfo = {
   packageManager?: string
   ripgrepStatus: {
     working: boolean
-    mode: 'system' | 'builtin' | 'embedded'
+    // 0.1.44 A+S3：mode = system（PATH rg）| bundled（@vscode/ripgrep 平台二进制）| missing
+    mode: 'system' | 'bundled' | 'missing'
     systemPath: string | null
   }
 }
@@ -593,8 +594,9 @@ export async function getDoctorDiagnostic(): Promise<DiagnosticInfo> {
   const ripgrepStatus = {
     working: ripgrepStatusRaw.working ?? true, // Assume working if not yet tested
     mode: ripgrepStatusRaw.mode,
+    // 0.1.44 A+S3：mode = system（PATH rg）| bundled（@vscode/ripgrep 平台二进制）| missing
     systemPath:
-      ripgrepStatusRaw.mode === 'system' ? ripgrepStatusRaw.path : null,
+      ripgrepStatusRaw.mode === 'missing' ? null : ripgrepStatusRaw.path,
   }
 
   // Get package manager info if running from package manager

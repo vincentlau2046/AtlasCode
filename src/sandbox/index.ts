@@ -45,9 +45,17 @@ export {
 } from "./sandbox-events"
 export {
   ripGrep,
+  ripGrepStream,
+  countFilesRoundedRg,
+  getRipgrepStatus,
   ripgrepCommand,
   checkRipgrep,
+  setRipgrepResolutionForTest,
   RipgrepTimeoutError,
+  RipgrepMissingError,
+  type ResolvedRg,
+  type RgSource,
+  type RipgrepStatusMode,
 } from "./ripgrep"
 export { createSandboxManager } from "./createSandboxManager"
 export {

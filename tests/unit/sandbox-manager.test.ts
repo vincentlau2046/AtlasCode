@@ -18,6 +18,7 @@ import {
   ripGrep,
   ripgrepCommand,
   RipgrepTimeoutError,
+  setRipgrepResolutionForTest,
   setSandboxRuntimeModule,
   type SandboxViolationEvent,
   type SettingsJson,
@@ -210,10 +211,17 @@ describe("sandbox manager 单测", () => {
   })
 
   test("⑦ ripgrep 纯面：ripgrepCommand 形状 + RipgrepTimeoutError 部分结果", () => {
-    const cmd = ripgrepCommand()
-    expect(cmd.rgPath).toBe("rg")
-    expect(cmd.rgArgs).toEqual([])
-    expect(cmd.argv0).toBeUndefined()
+    // A+S3（0.1.44）：resolver 真解析三级（system/vscode-ripgrep/none），单测
+    // 挂测试钩子强制 path 级保形状断言确定（自然 env 行为面归 sandbox-ripgrep-as3.test.ts）
+    setRipgrepResolutionForTest({ command: "rg", args: [], source: "path" })
+    try {
+      const cmd = ripgrepCommand()
+      expect(cmd.rgPath).toBe("rg")
+      expect(cmd.rgArgs).toEqual([])
+      expect(cmd.argv0).toBeUndefined()
+    } finally {
+      setRipgrepResolutionForTest(null)
+    }
 
     const timeout = new RipgrepTimeoutError("t", ["partial-1"])
     expect(timeout.partialResults).toEqual(["partial-1"])

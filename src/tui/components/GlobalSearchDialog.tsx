@@ -11,7 +11,7 @@ import { truncatePathMiddle, truncateToWidth } from '../utils/format.js';
 import { highlightMatch } from '../utils/highlightMatch.js';
 import { relativePath } from '../utils/permissions/filesystem.js';
 import { readFileInRange } from '../utils/readFileInRange.js';
-import { ripGrepStream } from '../utils/ripgrep.js';
+import { ripGrepStream } from 'src/tui/sandboxCompat';
 import { FuzzyPicker } from './design-system/FuzzyPicker.js';
 import { LoadingState } from './design-system/LoadingState.js';
 type Props = {

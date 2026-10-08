@@ -18,7 +18,7 @@ import {
 import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
 import { matchWildcardPattern } from '../../utils/permissions/shellRuleMatching.js'
 import { getGlobExclusionsForPluginCache } from '../../utils/plugins/orphanedPluginFilter.js'
-import { ripGrep } from '../../utils/ripgrep.js'
+import { ripGrep } from 'src/tui/sandboxCompat'
 import { semanticBoolean } from '../../utils/semanticBoolean.js'
 import { semanticNumber } from '../../utils/semanticNumber.js'
 import { plural } from '../../utils/stringUtils.js'
@@ -433,8 +433,8 @@ export const GrepTool = buildTool({
       args.push('--glob', exclusion)
     }
 
-    // WSL has severe performance penalty for file reads (3-5x slower on WSL2)
     // The timeout is handled by ripgrep itself via execFile timeout option
+    // (20s default, ATLAS_GLOB_TIMEOUT_SECONDS configurable — 0.1.44 统一，WSL 特例裁)
     // We don't use AbortController for timeout to avoid interrupting the agent loop
     // If ripgrep times out, it throws RipgrepTimeoutError which propagates up
     // so Claude knows the search didn't complete (rather than thinking there were no matches)

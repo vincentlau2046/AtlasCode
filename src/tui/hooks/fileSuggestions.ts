@@ -25,7 +25,7 @@ import {
 } from '../utils/hooks.js'
 import { logError } from '../utils/log.js'
 import { expandPath } from '../utils/path.js'
-import { ripGrep } from '../utils/ripgrep.js'
+import { ripGrep } from 'src/tui/sandboxCompat'
 import { getInitialSettings } from '../utils/settings/settings.js'
 import { createSignal } from '../utils/signal.js'
 

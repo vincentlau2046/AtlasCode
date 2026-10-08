@@ -115,6 +115,8 @@ export const SAFE_ENV_VARS = new Set([
   'OTEL_METRICS_INCLUDE_SESSION_ID',
   'OTEL_METRICS_INCLUDE_VERSION',
   'OTEL_RESOURCE_ATTRIBUTES',
+  // 0.1.44 死键登记（E-残余①，见 src/sandbox/ripgrep.ts 头注）：TUI 三模式 ripgrep
+  // resolver 已裁（A+S3 单一事实源），本 env 不再被消费；白名单项保留不删。
   'USE_BUILTIN_RIPGREP',
 ])
 

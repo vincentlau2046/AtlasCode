@@ -15,7 +15,7 @@ import type { FrontmatterData } from './frontmatterParser.js'
 import { parseFrontmatter } from './frontmatterParser.js'
 import { findCanonicalGitRoot, findGitRoot } from './git.js'
 import { parseToolListFromCLI } from './permissions/permissionSetup.js'
-import { ripGrep } from './ripgrep.js'
+import { ripGrep } from 'src/tui/sandboxCompat'
 import {
   isSettingSourceEnabled,
   type SettingSource,

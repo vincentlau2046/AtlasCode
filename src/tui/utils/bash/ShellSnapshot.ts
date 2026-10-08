@@ -15,7 +15,7 @@ import { pathExists } from '../file.js'
 import { getFsImplementation } from '../fsOperations.js'
 import { logError } from '../log.js'
 import { getPlatform } from '../platform.js'
-import { ripgrepCommand } from '../ripgrep.js'
+import { ripgrepCommand } from 'src/tui/sandboxCompat'
 import { subprocessEnv } from '../subprocessEnv.js'
 import { quote } from './shellQuote.js'
 
@@ -68,6 +68,8 @@ export function createRipgrepShellIntegration(): {
   const rgCommand = ripgrepCommand()
 
   // For embedded ripgrep (bun-internal), we need a shell function that sets argv0
+  // 0.1.44 A+S3 残余②（见 src/sandbox/ripgrep.ts 头注）：embedded 面已裁，argv0 恒
+  // undefined → 本分支为死分支（产品 npm-node 不触发），留置不裁；恒走下方 alias 分支。
   if (rgCommand.argv0) {
     return {
       type: 'function',
