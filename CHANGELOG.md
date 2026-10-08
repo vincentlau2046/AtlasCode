@@ -4,6 +4,34 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.42
+
+内部卫生波（**零用户行为变化**，Main 实施 worktree-0.1.42-fast，基线 9564e63=
+v0.1.41；gate = e2e 五判据全绿〔SC-20261008-160257-tgq 等 4 锚，报告
+r-20261008-gate-042.md〕，四件套 3789/0·271 与基线精确一致）：
+
+- **W-B · O-adv-1 `--advisor` 双重死 flag 裁除**（`src/tui/main.tsx` 4 落点：
+  advisor import 5 名 + `normalizeModelStringForAPI` 死名 + advisorModel 链 +
+  headless/interactive 两处死 spread + addOption 注册）。该 flag 从未注册
+  （`canUserConfigureAdvisor≡false`，传参即被 commander unknown option 拒）；
+  即便门开 `modelSupportsAdvisor≡false` 恒 hard-error → 裁除前后用户行为
+  逐字一致（e2e 判据③：`--advisor x` 裁前后同为 exit=1 unknown option 拒）。
+  `advisor.ts` 模块本体不动（tombstone 保留，余 4 消费文件零改动）。
+- **E-1P 前向缝登记 10→11 项**（零码注释，同 0.1.41 #10 形）：**#11 fast/fastMode**
+  ——1P 服务端 fast 变体能力（客户端 /fast 开关 + `fast_mode_state` 协议字段 +
+  429/529 overage 拒 + 1P 计费，均随 D2 波裁除，全仓 11 处墓碑），de-ANT 网关
+  无执行面（同 #10 同构）；**fast 能力由 Atlas P3 fast 角色池承载**（用户 2026-10-08
+  「选项 A · 角色池即承载」裁定）：`settings.json modelRoles.fast` /
+  `ATLAS_FAST_MODEL` / /model「Fast · 快速」行 + auto-mode 三角色池，全部零改动；
+  1P fastMode 有意不搬（回流 = 1P 服务端能力车道，同 #10）；office 场景一等快模式
+  需求（主循环切 fast 角色池、去 1P 化新功能）留场景波立项，不预付。
+- **O-adv-1 观察项注更新**：commands.ts 登记块内「归 0.1.41+ 后续波 triage」
+  改判「0.1.42 W-B 裁除（已执行）」。
+- **行为面零变化**：/help 50 标签集与 v0.1.41 权威集恒等（双向 diff ∅，21 删项
+  零残留 + 完整锚）；fast 角色零改动负向断言（/model Fast 行在场 +
+  `ATLAS_FAST_MODEL` / `modelRoles` / model.ts 解析链源级锚全在场）；
+  0.1.40/0.1.41 波 27 探针零增减回归全绿；四件套 3789/0·271 三独立复跑一致。
+
 ## v0.1.41
 
 封口波（零码，f4 实施 worktree-0.1.41-seal；纯注释零行为变化；四件套 3789/0·271
