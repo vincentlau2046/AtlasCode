@@ -41,6 +41,21 @@ export function useAscendMarketplaceNotification(): void {
         priority: 'immediate',
         timeoutMs: 7000,
       })
+    } else if (result.skipped && result.reason === 'git_unavailable') {
+      // 2026-10-08 多 OS 优化：Windows 新装常见根因（git 缺失/未进 PATH）不再静默；
+      // 短行提示，与官方源提示互补（预集成的三源同一 git 根因）。
+      logForDebugging('Showing Ascend marketplace git_unavailable notification')
+      notifs.push({
+        key: 'ascend-marketplace-git-unavailable',
+        jsx: (
+          <Text color="warning">
+            {ASCEND_OFFICIAL_DISPLAY_LABEL} 源未就绪 · git 缺失（安装 Git 并加入
+            PATH）· 下次启动自动重试
+          </Text>
+        ),
+        priority: 'immediate',
+        timeoutMs: 10000,
+      })
     } else if (result.skipped && result.reason === 'unknown') {
       logForDebugging('Showing Ascend marketplace installation failure notification')
       notifs.push({
@@ -55,7 +70,7 @@ export function useAscendMarketplaceNotification(): void {
         timeoutMs: 8000,
       })
     }
-    // Silent for: disabled, already_installed, policy_blocked, git_unavailable.
+    // Silent for: disabled, already_installed, policy_blocked.
     return notifs
   })
 }

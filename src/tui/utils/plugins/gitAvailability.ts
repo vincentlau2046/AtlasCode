@@ -5,8 +5,61 @@
  * provides a memoized check to determine if git is available on the system.
  */
 
+import { existsSync } from 'fs'
 import memoize from 'lodash-es/memoize.js'
+import { join } from 'path'
 import { which } from '../which.js'
+
+// ── 2026-10-08 多 OS 优化 · Windows git 探测 ─────────────────────────────────
+// Windows 上 git 常「已安装但不在当前 shell 的 PATH」（Git 安装器未勾
+// "Add to PATH"、per-user 安装不在系统 PATH、或终端在 PATH 刷新前打开）。
+// 此时 which('git') 返回 null，官方 / Ascend / Atlas 三条 marketplace
+// 自动安装链全按 git_unavailable 跳过 → 新装 /plugin 全空。PATH 未命中时
+// 追加探测常见安装位置（Unix 零行为变化：平台门 win32 only）。
+
+/** Windows 常见 git 安装位置候选（env 变量可被篡改，逐个 try 兜底）。 */
+export function windowsGitCandidates(): string[] {
+  const candidates: string[] = []
+  const roots = [
+    process.env['ProgramFiles'] ?? 'C:\\Program Files',
+    process.env['ProgramFiles(x86)'] ?? 'C:\\Program Files (x86)',
+  ]
+  for (const root of roots) {
+    candidates.push(join(root, 'Git', 'cmd', 'git.exe')) // MSI 默认
+    candidates.push(join(root, 'Git', 'bin', 'git.exe')) // Git Bash 伴生
+  }
+  if (process.env['LOCALAPPDATA']) {
+    candidates.push(
+      join(process.env['LOCALAPPDATA'], 'Programs', 'Git', 'cmd', 'git.exe'),
+    ) // per-user 安装器
+  }
+  if (process.env['USERPROFILE']) {
+    candidates.push(
+      join(process.env['USERPROFILE'], 'scoop', 'shims', 'git.exe'),
+    ) // scoop
+  }
+  candidates.push('C:\\ProgramData\\chocolatey\\bin\\git.exe') // chocolatey
+  candidates.push('C:\\msys64\\usr\\bin\\git.exe') // MSYS2
+  return candidates
+}
+
+/**
+ * Windows-only：PATH 查找未命中时探测常见安装位置的 git 二进制。
+ * 非 win32 恒返回 null（零回归边界）；win32 返回首个存在的候选，或 null。
+ * 安装位置在 session 内不变 → memoize（与 checkGitAvailable 同生命周期，
+ * 经 clearGitAvailabilityCache 场景可一并重置）。
+ */
+export const resolveWindowsGitBinary = memoize((): string | null => {
+  if (process.platform !== 'win32') return null
+  for (const candidate of windowsGitCandidates()) {
+    try {
+      if (existsSync(candidate)) return candidate
+    } catch {
+      // 畸形 env 路径（非法字符）不应击穿可用性探测。
+    }
+  }
+  return null
+})
 
 /**
  * Check if a command is available in PATH.
@@ -37,10 +90,14 @@ async function isCommandAvailable(command: string): Promise<boolean> {
  * `xcrun: error:` at exec time should call markGitUnavailable() so the rest
  * of the session behaves as though git is absent.
  *
+ * 2026-10-08 多 OS 优化：Windows PATH 未命中时追加安装位置探测
+ * （resolveWindowsGitBinary），非 win32 恒 null 零回归。
+ *
  * @returns True if git is installed and executable
  */
 export const checkGitAvailable = memoize(async (): Promise<boolean> => {
-  return isCommandAvailable('git')
+  if (await isCommandAvailable('git')) return true
+  return resolveWindowsGitBinary() !== null
 })
 
 /**
@@ -62,8 +119,10 @@ export function markGitUnavailable(): void {
 
 /**
  * Clear the git availability cache.
- * Used for testing purposes.
+ * Used for testing purposes. Also clears the Windows install-location probe
+ * memo (2026-10-08 多 OS 优化) so a re-run re-probes.
  */
 export function clearGitAvailabilityCache(): void {
   checkGitAvailable.cache?.clear?.()
+  resolveWindowsGitBinary.cache?.clear?.()
 }

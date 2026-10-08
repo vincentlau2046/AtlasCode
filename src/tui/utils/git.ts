@@ -21,6 +21,7 @@ import {
 } from './git/gitFilesystem.js'
 import { logError } from './log.js'
 import { memoizeWithLRU } from './memoize.js'
+import { resolveWindowsGitBinary } from './plugins/gitAvailability.js'
 import { whichSync } from './which.js'
 
 const GIT_ROOT_NOT_FOUND = Symbol('git-root-not-found')
@@ -213,7 +214,9 @@ function createFindCanonicalGitRoot(): {
 export const gitExe = memoize((): string => {
   // Every time we spawn a process, we have to lookup the path.
   // Let's instead avoid that lookup so we only do it once.
-  return whichSync('git') || 'git'
+  // 2026-10-08 多 OS 优化：Windows PATH 未命中 git 时探测常见安装位置
+  // （非 win32 恒 null → 行为与改前一致）；否则回退裸 'git'。
+  return whichSync('git') || resolveWindowsGitBinary() || 'git'
 })
 
 export const getIsGit = memoize(async (): Promise<boolean> => {

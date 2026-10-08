@@ -21,8 +21,17 @@ import { errorMessage, getErrnoCode } from '../errors.js'
 // `{sha}.zip` is content-addressed so CDN can cache it indefinitely;
 // `latest` has Cache-Control: max-age=300 so CDN staleness is bounded.
 // Backend (anthropic#317037) populates this prefix.
-const GCS_BASE =
+const DEFAULT_GCS_BASE =
   'https://downloads.claude.ai/claude-code-releases/plugins/claude-plugins-official'
+
+// 2026-10-08 多 OS 优化：ATLAS_OFFICIAL_MKT_MIRROR 可覆写 GCS 镜像基址
+// （CN/企业网络到不了 downloads.claude.ai 时指向内网镜像）。取值 = 等价前缀
+// 基址（调用方自行追加 /latest 与 /{sha}.zip），尾斜线归一化；空/未设 = 默认。
+const GCS_BASE = ((): string => {
+  const mirror = (process.env['ATLAS_OFFICIAL_MKT_MIRROR'] ?? '').trim()
+  if (!mirror) return DEFAULT_GCS_BASE
+  return mirror.replace(/\/+$/, '')
+})()
 
 // Zip arc paths are seed-dir-relative (marketplaces/claude-plugins-official/…)
 // so the titanium seed machinery can use the same zip. Strip this prefix when

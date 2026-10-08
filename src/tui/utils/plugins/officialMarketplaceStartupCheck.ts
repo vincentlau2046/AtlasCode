@@ -70,9 +70,28 @@ function calculateNextRetryDelay(retryCount: number): number {
 }
 
 /**
- * Determine if installation should be retried based on failure reason and retry state
+ * 2026-10-08 多 OS 优化：重试退避门默认 OFF（每次启动都重试，无 backoff 跳过）。
+ * Windows 装好 git / 网络恢复后不必等 1h+ 退避窗；opt-in 旧行为 =
+ * ATLAS_ENABLE_OFFICIAL_MKT_RETRY_BACKOFF=1。每次调用读 env（可运行时切换）。
  */
-function shouldRetryInstallation(
+export function isRetryBackoffGateEnabled(): boolean {
+  return isEnvTruthy(
+    (process.env.ATLAS_ENABLE_OFFICIAL_MKT_RETRY_BACKOFF),
+  )
+}
+
+/**
+ * Determine if installation should be retried based on failure reason and retry state.
+ *
+ * Short-circuits (gate-independent):
+ *   - never attempted → try
+ *   - already installed → no
+ *   - policy_blocked → no (enterprise policy won't flip on its own)
+ * Gate-off default (2026-10-08): everything else retries on every startup.
+ * Opt-in backoff gate (ATLAS_ENABLE_OFFICIAL_MKT_RETRY_BACKOFF): the legacy
+ * max-attempts / next-retry-time / fail-reason whitelist below.
+ */
+export function shouldRetryInstallation(
   config: ReturnType<typeof getGlobalConfig>,
 ): boolean {
   // If never attempted, should try
@@ -85,18 +104,23 @@ function shouldRetryInstallation(
     return false
   }
 
-  const failReason = config.officialMarketplaceAutoInstallFailReason
+  // Permanent failure — enterprise policy; never auto-retry (gate-independent)
+  if (config.officialMarketplaceAutoInstallFailReason === 'policy_blocked') {
+    return false
+  }
+
+  // Default: backoff gate OFF → retry on every startup (no skip window).
+  if (!isRetryBackoffGateEnabled()) {
+    return true
+  }
+
+  // Legacy backoff gate (opt-in via env)
   const retryCount = config.officialMarketplaceAutoInstallRetryCount || 0
   const nextRetryTime = config.officialMarketplaceAutoInstallNextRetryTime
   const now = Date.now()
 
   // Check if we've exceeded max attempts
   if (retryCount >= RETRY_CONFIG.MAX_ATTEMPTS) {
-    return false
-  }
-
-  // Permanent failures - don't retry
-  if (failReason === 'policy_blocked') {
     return false
   }
 
@@ -108,10 +132,10 @@ function shouldRetryInstallation(
   // Retry for temporary failures (unknown), semi-permanent (git_unavailable),
   // and legacy state (undefined failReason from before retry logic existed)
   return (
-    failReason === 'unknown' ||
-    failReason === 'git_unavailable' ||
-    failReason === 'gcs_unavailable' ||
-    failReason === undefined
+    config.officialMarketplaceAutoInstallFailReason === 'unknown' ||
+    config.officialMarketplaceAutoInstallFailReason === 'git_unavailable' ||
+    config.officialMarketplaceAutoInstallFailReason === 'gcs_unavailable' ||
+    config.officialMarketplaceAutoInstallFailReason === undefined
   )
 }
 

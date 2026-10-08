@@ -32,16 +32,33 @@ async function _temp() {
       priority: "immediate",
       timeoutMs: 7000
     });
-  } else {
-    if (result.skipped && result.reason === "unknown") {
-      logForDebugging("Showing marketplace installation failure notification");
-      notifs.push({
-        key: "marketplace-install-failed",
-        jsx: <Text color="warning">Failed to install marketplace · Will retry on next startup</Text>,
-        priority: "immediate",
-        timeoutMs: 8000
-      });
-    }
+  } else if (result.skipped && result.reason === "git_unavailable") {
+    // 2026-10-08 多 OS 优化：不再静默（原仅 unknown 提示）。可操作修复指引 +
+    // 门默认 off → 「下次启动自动重试」为真（每次启动都重试，无 backoff 跳过）。
+    logForDebugging("Showing marketplace git_unavailable notification");
+    notifs.push({
+      key: "marketplace-git-unavailable",
+      jsx: <Text color="warning">官方插件源未就绪 · git 缺失或未在 PATH（安装 Git for Windows 并加入 PATH）· 下次启动自动重试</Text>,
+      priority: "immediate",
+      timeoutMs: 10000
+    });
+  } else if (result.skipped && result.reason === "gcs_unavailable") {
+    // GCS 镜像不可达（CN/企业网络）：给内网镜像 env 的修复指引。
+    logForDebugging("Showing marketplace gcs_unavailable notification");
+    notifs.push({
+      key: "marketplace-gcs-unavailable",
+      jsx: <Text color="warning">官方插件源未就绪 · 镜像不可达（设 ATLAS_OFFICIAL_MKT_MIRROR 指向内网镜像，或安装 git 走 git 源）· 下次启动自动重试</Text>,
+      priority: "immediate",
+      timeoutMs: 10000
+    });
+  } else if (result.skipped && result.reason === "unknown") {
+    logForDebugging("Showing marketplace installation failure notification");
+    notifs.push({
+      key: "marketplace-install-failed",
+      jsx: <Text color="warning">Failed to install marketplace · Will retry on next startup</Text>,
+      priority: "immediate",
+      timeoutMs: 8000
+    });
   }
   return notifs;
 }
