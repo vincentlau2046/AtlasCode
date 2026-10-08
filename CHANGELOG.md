@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.41
+
+封口波（零码，f4 实施 worktree-0.1.41-seal；纯注释零行为变化；四件套 3789/0·271
+与 0.1.40 基线 d5c6608 精确一致）：
+
+- **E-1P 前向缝登记 9→10 项**（commands.ts 登记注释块）：#10 advisor 登记不做
+  （三重 1P 门 = ① 1P server-side tool server_tool_use〔API 服务端执行，Atlas
+  网关无执行面〕② 1P growthbook 实验 tengu_sage_compass〔默认 {} → enabled≡false〕
+  ③ 1P 模型表 opus/sonnet-4-6；且 utils/advisor.ts 已被 D2 波整裁为全 false 墓碑
+  → 只搬 109L 命令体 = isEnabled≡false 永禁死命令；复活墓碑 = 越界新造 1P 功能。
+  回流 = 网关获 1P server-side tool 能力车道再议）。W4 三件全登记收口 =
+  advisor→E-1P#10 / fast→0.1.42 具名 deferred / privacy-settings→E-1P#9（0.1.40 波已登记）。
+- **O-adv-1 观察项入代码登记**：main.tsx `--advisor` CLI flag 恒 hard-error
+  （D2 残留，modelSupportsAdvisor≡false → 任何 `--advisor <model>` 启动必
+  process.exit(1)），处置面 = ① 裁 flag / ② 降 no-op 提示 二选一，归后续波 triage。
+- **行为面零变化**：/help 命令集与 0.1.40 精确一致（渲染集 50 标签，双向 diff ∅）；
+  26 探针零增减回归同绿（e2e 0.1.41 gate SC-20261008-072654-ha5）。
+
 ## v0.1.40
 
 slash 命令精简波 W1+W2+W3（f4 实施 worktree-0.1.40-slash @ bdf2baa，基线
