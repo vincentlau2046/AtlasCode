@@ -57,7 +57,6 @@ import type { McpSdkServerConfig, McpServerConfig, ScopedMcpServerConfig } from 
 import type { ToolInputJSONSchema } from './Tool.js';
 import { createSyntheticOutputTool, isSyntheticOutputToolEnabled } from './tools/SyntheticOutputTool/SyntheticOutputTool.js';
 import { getTools } from './tools.js';
-import { canUserConfigureAdvisor, getInitialAdvisorSetting, isAdvisorEnabled, isValidAdvisorModel, modelSupportsAdvisor } from './utils/advisor.js';
 import { isAgentSwarmsEnabled } from './utils/agentSwarmsEnabled.js';
 import { count, uniq } from './utils/array.js';
 import { installAsciicastRecorder } from './utils/asciicast.js';
@@ -117,7 +116,7 @@ import { getGhAuthStatus } from './utils/github/ghAuthStatus.js';
 import { safeParseJSON } from './utils/json.js';
 import { logError } from './utils/log.js';
 import { getDefaultMainLoopModel, getUserSpecifiedModelSetting, parseUserSpecifiedModel } from './utils/model/model.js';
-import { normalizeModelStringForAPI, setEndpointConfigSource } from 'src/modelprovider';
+import { setEndpointConfigSource } from 'src/modelprovider';
 import { createSettingsAdapter } from './config/settings-adapter.js';
 import { PERMISSION_MODES } from './utils/permissions/PermissionMode.js';
 import { checkAndDisableBypassPermissions, getAutoModeEnabledStateIfCached, initializeToolPermissionContext, initialPermissionModeFromCLI, isDefaultPermissionModeAuto, parseToolListFromCLI, stripDangerousPermissionsForAutoMode, verifyAutoModeGateAccess } from './utils/permissions/permissionSetup.js';
@@ -1748,28 +1747,10 @@ async function run(): Promise<CommanderCommand> {
     setInitialMainLoopModel(getUserSpecifiedModelSetting() || null);
     const initialMainLoopModel = getInitialMainLoopModel();
     const resolvedInitialModel = parseUserSpecifiedModel(initialMainLoopModel ?? getDefaultMainLoopModel());
-    let advisorModel: string | undefined;
-    if (isAdvisorEnabled()) {
-      const advisorOption = canUserConfigureAdvisor() ? (options as {
-        advisor?: string;
-      }).advisor : undefined;
-      if (advisorOption) {
-        logForDebugging(`[AdvisorTool] --advisor ${advisorOption}`);
-        if (!modelSupportsAdvisor(resolvedInitialModel)) {
-          process.stderr.write(chalk.red(`Error: The model "${resolvedInitialModel}" does not support the advisor tool.\n`));
-          process.exit(1);
-        }
-        const normalizedAdvisorModel = normalizeModelStringForAPI(parseUserSpecifiedModel(advisorOption));
-        if (!isValidAdvisorModel(normalizedAdvisorModel)) {
-          process.stderr.write(chalk.red(`Error: The model "${advisorOption}" cannot be used as an advisor.\n`));
-          process.exit(1);
-        }
-      }
-      advisorModel = canUserConfigureAdvisor() ? advisorOption ?? getInitialAdvisorSetting() : advisorOption;
-      if (advisorModel) {
-        logForDebugging(`[AdvisorTool] Advisor model: ${advisorModel}`);
-      }
-    }
+
+    // 0.1.42 W-B（O-adv-1 核销）：--advisor flag 链裁除（D2 墓碑残留双重死——
+    // flag 从未注册 + modelSupportsAdvisor≡false 恒 hard-error），零用户行为变化。
+    // 见 commands.ts E-1P#10/#11 前向缝登记。
 
     // For tmux teammates with --agent-type, append the custom agent's prompt
     if (isAgentSwarmsEnabled() && storedTeammateOpts?.agentId && storedTeammateOpts?.agentName && storedTeammateOpts?.teamName && storedTeammateOpts?.agentType) {
@@ -2166,10 +2147,7 @@ async function run(): Promise<CommanderCommand> {
         // CLI --effort 是显式会话选择（effortExplicit），启动继承不算——
         // 选择器显示档在模型无记忆时回退模型默认（med），不被全局值钉住
         effortValue: parseEffortValue(options.effort) ?? getStartupEffortValue(effectiveModel),
-        effortExplicit: parseEffortValue(options.effort) !== undefined,
-        ...(isAdvisorEnabled() && advisorModel && {
-          advisorModel
-        })
+        effortExplicit: parseEffortValue(options.effort) !== undefined
       };
 
       // Init app state
@@ -2528,9 +2506,6 @@ async function run(): Promise<CommanderCommand> {
       effortValue: parseEffortValue(options.effort) ?? getStartupEffortValue(resolvedInitialModel),
       effortExplicit: parseEffortValue(options.effort) !== undefined,
       activeOverlays: new Set<string>(),
-      ...(isAdvisorEnabled() && advisorModel && {
-        advisorModel
-      }),
       // Compute teamContext synchronously to avoid useEffect setState during render.
       teamContext: computeInitialTeamContext?.()
     };
@@ -2803,9 +2778,8 @@ async function run(): Promise<CommanderCommand> {
   // Worktree flags
   program.option('-w, --worktree [name]', 'Create a new git worktree for this session (optionally specify a name)');
   program.option('--tmux', 'Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux.');
-  if (canUserConfigureAdvisor()) {
-    program.addOption(new Option('--advisor <model>', 'Enable the server-side advisor tool with the specified model (alias or full ID).').hideHelp());
-  }
+  // 0.1.42 W-B（O-adv-1 核销）：--advisor addOption 注册裁除（D2 后 canUserConfigureAdvisor
+  // 恒 false，flag 从未注册；传参用户现被 commander unknown option 拒，裁后同拒，零行为变化）。
   // de-ANT: ant-only CLI flags (--delegate-permissions / --afk / --tasks /
   // --agent-teams / --dangerously-skip-permissions-with-classifiers) removed.
   if (feature('TRANSCRIPT_CLASSIFIER')) {
