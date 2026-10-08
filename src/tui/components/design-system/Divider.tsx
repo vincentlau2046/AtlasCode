@@ -14,13 +14,14 @@ type DividerProps = {
 
   /**
    * Theme color for the divider.
-   * If not provided, dimColor is used.
+   * If not provided, the light-gold `brandShimmer` theme color is used
+   * （2026-10-08 多 OS 优化：分隔线改品牌浅色系，主题色延伸；非 dim）。
    */
   color?: keyof Theme;
 
   /**
    * Character to use for the divider line.
-   * @default beam string `█ █`（0.1.35 母题：光束串，CJK 1-cell 安全；显式 char → legacy 重复）
+   * @default `━` 重横线（2026-10-08 多 OS 优化；原 `█ █` 光束串改单字符粗直线；显式 char → legacy 重复）
    */
   char?: string;
 
@@ -113,7 +114,7 @@ export function Divider(t0) {
     }
     let t7;
     if ($[8] !== color || $[9] !== t3 || $[10] !== t4 || $[11] !== t5 || $[12] !== t6) {
-      t7 = <Text color={color} dimColor={t3}>{t4}{" "}{t5}{" "}{t6}</Text>;
+      t7 = <Text color={color ?? "brandShimmer"} dimColor={false}>{t4}{" "}{t5}{" "}{t6}</Text>;
       $[8] = color;
       $[9] = t3;
       $[10] = t4;
@@ -137,7 +138,7 @@ export function Divider(t0) {
   }
   let t5;
   if ($[17] !== color || $[18] !== t3 || $[19] !== t4) {
-    t5 = <Text color={color} dimColor={t3}>{t4}</Text>;
+    t5 = <Text color={color ?? "brandShimmer"} dimColor={false}>{t4}</Text>;
     $[17] = color;
     $[18] = t3;
     $[19] = t4;

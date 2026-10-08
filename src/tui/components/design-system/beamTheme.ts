@@ -26,10 +26,12 @@ export const LIGHT_CORE = '▀'
 export const EMPTY_TEXTURE = '░ ░ ░ ░'
 
 /**
- * 分隔线触面：`█ █` 光束串（Block Elements + 空格，CJK 1-cell 安全）。
- * width = 目标列宽（截断到整串不超宽；低权重元素配 dimColor 渲染）。
+ * 分隔线触面：`━` 重横线（Box Drawing Heavy Horizontal U+2501，CJK 1-cell 安全）。
+ * 2026-10-08 多 OS 优化：原 `█ ` 光束串（0.1.35 母题）在弹窗里满宽 `█ █` 观感太重，
+ * 改单字符重横线 `━`（终端可做粗线的极限；同 U+2500 族 Box Drawing，EAW 类不变零回归）。
+ * width = 目标列宽（截断到整串不超宽）。
  */
-export function beamDividerLine(width: number, pattern = '█ '): string {
+export function beamDividerLine(width: number, pattern = '━'): string {
   if (width <= 0) return ''
   const reps = Math.ceil(width / pattern.length)
   return pattern.repeat(reps).slice(0, width)
@@ -41,9 +43,9 @@ export function beamTextureLine(width: number): string {
 }
 
 /**
- * 分隔线触面渲染串（spec §0.1 分隔线 = `█ █` 光束串，CJK 1-cell 安全）。
+ * 分隔线触面渲染串（2026-10-08 多 OS 优化：默认 = `━` 重横线，CJK 1-cell 安全）。
  * 显式 char（非默认）→ legacy `char.repeat(width)`；char 缺省（默认分隔线）→
- * `█ █` 光束串（宽度恒定，不超宽）。仓内 Divider 20 处调用点均不传 char，仅默认路径生效。
+ * `━` 重横线（宽度恒定，不超宽）。仓内 Divider 调用点大多不传 char，仅默认路径生效。
  */
 export function dividerLine(width: number, char?: string): string {
   if (char) return char.repeat(width)

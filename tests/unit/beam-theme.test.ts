@@ -2,7 +2,7 @@
  * 0.1.35 Brand 封口波 · 母题铺开（spec §2.2 视觉母题系统）判别单测。
  *
  * beamTheme 纯函数面（design-system/beamTheme.ts）：母题字符单一事实源
- * （光锥角标 / 光核微符号 / 分隔线光束串 / 空态底纹 / spinner 光束帧 / 进度条填充阶）。
+ * （光锥角标 / 光核微符号 / 分隔线重横线 / 空态底纹 / spinner 光束帧 / 进度条填充阶）。
  * 判据（gate ② 源级在场）：
  *   - 母题字符走 Block Elements / Box Drawing（U+2500-259F / U+2571），无几何歧义字形（▲◆）
  *   - 仓模型宽度恒 1（Ink 布局确定；全角 CJK 2-cell 风险随 §3.5 降级 + MARK_BLOCKLIST 兜底，
@@ -52,7 +52,7 @@ describe('母题常量单一事实源（光锥角标 / 光核 / 空态底纹）'
   })
 })
 
-describe('beamDividerLine：分隔线光束串（█ █ 排布 + 宽度恒定）', () => {
+describe('beamDividerLine：分隔线触面（━ 重横线 + 宽度恒定）', () => {
   test('宽度恒定：任意 width 输出恰 width 列（CJK 1-cell 安全）', () => {
     for (const w of [1, 2, 3, 5, 40, 120, 200]) {
       const line = beamDividerLine(w)
@@ -61,10 +61,10 @@ describe('beamDividerLine：分隔线光束串（█ █ 排布 + 宽度恒定�
     }
   })
 
-  test('█ 与空格交替（光束串形态，非实心 ─ 线；截断不产生半截单元）', () => {
-    expect(beamDividerLine(5)).toBe('█ █ █') // 恰 5（尾 = 光束不截断）
-    expect(beamDividerLine(6)).toBe('█ █ █ ') // 偶数宽尾留空格（不截断 █）
-    expect(beamDividerLine(7)).toBe('█ █ █ █') // 奇数宽 = 4 光束 + 3 隙
+  test('━ 重横线（单字符满宽，宽度恒定，CJK 1-cell 安全）', () => {
+    expect(beamDividerLine(5)).toBe('━'.repeat(5)) // 恰 5 个 ━
+    expect(beamDividerLine(6)).toBe('━'.repeat(6)) // 偶数宽满 6
+    expect(beamDividerLine(7)).toBe('━'.repeat(7)) // 奇数宽满 7
   })
 
   test('width<=0 → 空串（无渲染）', () => {
@@ -89,8 +89,8 @@ describe('beamTextureLine：空态底纹（░ 重复 + 宽度恒定）', () => 
   })
 })
 
-describe('dividerLine：分隔线触面（默认光束串 / 显式 char legacy 重复）', () => {
-  test('char 缺省 → 光束串（= beamDividerLine，█ 与空格交替，宽度恒定）', () => {
+describe('dividerLine：分隔线触面（默认 ━ 重横线 / 显式 char legacy 重复）', () => {
+  test('char 缺省 → ━ 重横线（= beamDividerLine，单字符满宽，宽度恒定）', () => {
     for (const w of [1, 5, 6, 7, 40, 120]) {
       expect(dividerLine(w)).toBe(beamDividerLine(w))
       expect(stringWidth(dividerLine(w))).toBe(w)
