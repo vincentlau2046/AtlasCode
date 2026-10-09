@@ -6,6 +6,10 @@
  * than 24 hours.
  *
  * Cache location: ~/.atlas/plugins/install-counts-cache.json
+ *
+ * W-opt 可信波 S5（#299）可信清册 D3 豁免注：插件安装数拉取 = 1P 仓只读（/plugin
+ * 打开用户动作 + 24h 缓存，零数据出境），登记豁免（1P stats URL 保留生态兼容；
+ * per-marketplace 可插拔数据源 = 0.1.46 三源波 S4）。
  */
 
 import axios from 'axios'

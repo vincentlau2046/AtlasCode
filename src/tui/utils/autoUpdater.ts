@@ -28,6 +28,12 @@ import { jsonParse } from './slowOperations.js'
 // node 运行器）→ native 版本查询通道裁为 no-op（getLatestVersionFromGcs /
 // getGcsDistTags 返空，消费方 PackageManagerAutoUpdater / Doctor 据此静默不触发
 // native 更新）。native 发行形态 = H6 前向接缝（owner = native-dist 波，未排期）。
+// W-opt 可信波 S5（#299）可信清册 D1 裁定注：AutoUpdater（挂载即查 + 30min 轮询 + 静默
+// 自动安装）= 用户 2026-10-08 终裁「接受诊断结果，D1' 暂不需要；自动升级功能开着、
+// 默认安装无门控」→ 发布通道豁免面原样保留（不加新门、不改行为）。观察项：
+// (a) migrateAutoUpdatesToSettings = 单向迁移（显式 autoUpdates=false 写入 settings.env
+// 后无恢复路径，迁移删 autoUpdates 键无回滚）；(b) settings.env 隐形后门（TUI 隐藏
+// autoUpdates 条目，DISABLE_AUTOUPDATER env 静默禁用，见 Config.tsx autoUpdatesChannel 注）。
 
 class AutoUpdaterError extends ClaudeError {}
 

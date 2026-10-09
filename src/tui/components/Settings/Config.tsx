@@ -520,6 +520,8 @@ export function Config({
     }
   }] : []),
   // autoUpdates setting is hidden - use DISABLE_AUTOUPDATER env var to control
+  // W-opt 可信波 S5（#299）可信清册观察项 (b)：settings.env 隐形后门（TUI 隐藏 autoUpdates
+  // 条目，单向迁移写入的 env 块可静默禁用自动更新，见 autoUpdater.ts D1 裁定注）
   autoUpdaterDisabledReason ? {
     id: 'autoUpdatesChannel',
     label: 'Auto-update channel',

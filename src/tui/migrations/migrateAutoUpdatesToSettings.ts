@@ -8,6 +8,10 @@ import {
  * Migration: Move user-set autoUpdates preference to settings.json env var
  * Only migrates if user explicitly disabled auto-updates (not for protection)
  * This preserves user intent while allowing native installations to auto-update
+ *
+ * W-opt 可信波 S5（#299）可信清册观察项 (a)：单向迁移——显式 autoUpdates=false 写入
+ * settings.env.DISABLE_AUTOUPDATER 后迁移删 ~/.atlas.json autoUpdates 键，无反向恢复
+ * 路径（恢复 = 手动 settings 操作，登记观察项，零行为变化）。
  */
 export function migrateAutoUpdatesToSettings(): void {
   const globalConfig = getGlobalConfig()

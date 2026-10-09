@@ -1,4 +1,7 @@
 // BR-1（spec §6.2）：MCP 注册面品牌字面改经 shared 单一事实源（title/description 品牌名 + websiteUrl 收 REPOSITORY_URL；原 tui-local PRODUCT_URL 同值，行为零改动）
+// W-opt 可信波 S5（#299）可信清册 B-5 豁免注：MCP 外联族（client fetch / auth OAuth
+// 本地 127.0.0.1 回调 / ws transport）= 全用户动作面（用户自配端点 + mcp__ 前缀
+// tool permission 规则），自带许可无缺口（登记）。
 import { feature, PRODUCT_BRAND, REPOSITORY_URL } from 'src/shared'
 import type {
   Base64ImageSource,

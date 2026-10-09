@@ -13,6 +13,9 @@
  * 消费方 = engine/tools/team SendMessageTool 5 站点族（to description /
  * prompt 2 站点 / checkPermissions bridge ask / validate 4 块 / call 2 支）
  * + prompt 模板（门每次访问重读 = env live，测试面 save/set/restore 三态）。
+ *
+ * W-opt 可信波 S5（#299）可信清册 C-7 豁免注：UDS messaging（--messaging-socket-path）
+ * = 本地 Unix domain socket（非外联），登记豁免。
  */
 import { isEnvTruthy } from '../shared'
 

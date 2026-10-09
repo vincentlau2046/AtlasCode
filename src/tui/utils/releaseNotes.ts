@@ -1,3 +1,6 @@
+// W-opt 可信波 S5（#299）可信清册 D3 豁免注：releaseNotes 启动后台抓取 = 自家仓
+// 只读拉取（零数据出境、零外联风险），用户 2026-10-08 终裁 = 登记豁免（无门控、不删）。
+
 import axios from 'axios'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'

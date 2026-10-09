@@ -10,6 +10,9 @@
  * 旧仓 `src/utils/worktree.ts`(1451) 的**真子集**随迁。git 子进程 + .git
  * fs-plumbing 经 `./git`（本域自含 git 执行层）注入。
  *
+ * W-opt 可信波 S5（#299）可信清册 B-6 豁免注：git 子进程族（用户 worktree 流的
+ * git fetch 等）= 用户动作（用户仓操作），登记（无外联缺口）。
+ *
  * 解耦裁定（H6 前向接缝 + 逐处登记，复审勿当遗漏重提）：
  *   - **worktree hooks 面整砍**（hasWorktreeCreateHook / executeWorktreeCreateHook /
  *     executeWorktreeRemoveHook，旧仓 hooks.ts）：新仓无 worktree 用户可配 VCS hook
