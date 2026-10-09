@@ -39,8 +39,7 @@ import {
 import { isSourceAllowedByPolicy } from './marketplaceHelpers.js'
 import {
   getMarketplacesCacheDir,
-  loadKnownMarketplacesConfig,
-  saveKnownMarketplacesConfig,
+  updateKnownMarketplacesConfig,
 } from './marketplaceManager.js'
 import {
   isLocalMarketplaceSource,
@@ -121,13 +120,18 @@ export async function installBuiltinSnapshotFallback(
     // Register (GCS-path precedent: first-party materialization writes the
     // registry directly, bypassing addMarketplaceSource's reserved-name
     // check which would reject a directory source for the reserved keys).
-    const known = await loadKnownMarketplacesConfig()
-    known[marketplaceName] = {
-      source: { source: 'directory', path: snapshotDir },
-      installLocation: snapshotDir,
-      lastUpdated: new Date().toISOString(),
-    }
-    await saveKnownMarketplacesConfig(known)
+    // The registry RMW goes through the in-process mutex
+    // (updateKnownMarketplacesConfig): the 3 startup preset hooks fire
+    // concurrently, and a last-writer-wins whole-file save would clobber
+    // siblings' entries (gate-046 ① hard-fail).
+    await updateKnownMarketplacesConfig(known => {
+      known[marketplaceName] = {
+        source: { source: 'directory', path: snapshotDir },
+        installLocation: snapshotDir,
+        lastUpdated: new Date().toISOString(),
+      }
+      return known
+    })
     logForDebugging(
       `Snapshot fallback: materialized '${marketplaceName}' at ${snapshotDir}`,
     )

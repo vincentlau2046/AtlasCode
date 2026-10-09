@@ -358,6 +358,62 @@ export async function saveKnownMarketplacesConfig(
 }
 
 /**
+ * In-process mutual exclusion for registry read-modify-write (RMW).
+ *
+ * The 3 startup preset hooks (official / atlas / ascend) fire concurrently
+ * (fire-and-forget at REPL mount) and each does a load→mutate→save of
+ * known_marketplaces.json. Without the lock, saves are non-atomic
+ * whole-file writes, so the last writer wins and clobbers the other
+ * writers' entries (0.1.46 gate-046 finding: 4/5 fresh-home runs lost a
+ * marketplace entry). A module-level promise chain gives in-process mutual
+ * exclusion with no new dependency; the whole read-modify-write holds the
+ * lock.
+ */
+let knownMarketplacesRmwChain: Promise<void> = Promise.resolve()
+
+/**
+ * Atomically read-modify-write known_marketplaces.json (in-process).
+ *
+ * The load→mutate→save sequence runs under the module-level lock, so
+ * concurrent RMWs (the 3 startup preset hooks; user actions that overlap a
+ * still-pending startup write) serialize instead of clobbering each other
+ * with last-writer-wins.
+ *
+ * `mutator` receives a FRESHLY loaded config (not the caller's possibly
+ * stale copy) and:
+ *   - returns the (possibly mutated) config → schema-validated + saved
+ *   - returns `undefined` → idempotent no-op, nothing is written
+ *   - throws → nothing is written; the error propagates to the caller
+ *
+ * A failed RMW does not wedge the lock for subsequent writers. Network /
+ * git work belongs OUTSIDE the lock — only the final registry RMW.
+ *
+ * @returns the mutator's result (the saved config, or `undefined`)
+ */
+export function updateKnownMarketplacesConfig(
+  mutator: (
+    config: KnownMarketplacesConfig,
+  ) =>
+    | KnownMarketplacesConfig
+    | undefined
+    | Promise<KnownMarketplacesConfig | undefined>,
+): Promise<KnownMarketplacesConfig | undefined> {
+  const run = knownMarketplacesRmwChain.then(async () => {
+    const config = await loadKnownMarketplacesConfig()
+    const next = await mutator(config)
+    if (next !== undefined) {
+      await saveKnownMarketplacesConfig(next)
+    }
+    return next
+  })
+  knownMarketplacesRmwChain = run.then(
+    () => undefined,
+    () => undefined, // a failed RMW must not wedge subsequent writers
+  )
+  return run
+}
+
+/**
  * Register marketplaces from the read-only seed directories into the primary
  * known_marketplaces.json.
  *
@@ -389,11 +445,10 @@ export async function registerSeedMarketplaces(): Promise<boolean> {
   const seedDirs = getPluginSeedDirs()
   if (seedDirs.length === 0) return false
 
-  const primary = await loadKnownMarketplacesConfig()
   // First-seed-wins across this registration pass. Can't use the isEqual check
   // alone — two seeds with the same name will have different installLocations.
   const claimed = new Set<string>()
-  let changed = 0
+  const desired: Array<{ name: string; desired: KnownMarketplace }> = []
 
   for (const seedDir of seedDirs) {
     const seedConfig = await readSeedKnownMarketplaces(seedDir)
@@ -417,24 +472,32 @@ export async function registerSeedMarketplaces(): Promise<boolean> {
       }
       claimed.add(name)
 
-      const desired: KnownMarketplace = {
+      const entry: KnownMarketplace = {
         source: seedEntry.source,
         installLocation: resolvedLocation,
         lastUpdated: seedEntry.lastUpdated,
         autoUpdate: false,
       }
-
-      // Skip if primary already matches — idempotent no-op, no write.
-      if (isEqual(primary[name], desired)) continue
-
-      // Seed wins — admin-managed. Overwrite any existing primary entry.
-      primary[name] = desired
-      changed++
+      desired.push({ name, desired: entry })
     }
   }
+  if (desired.length === 0) return false
 
+  // RMW under the registry lock (0.1.46 gate-046): the startup preset hooks
+  // write known_marketplaces.json concurrently — the seed sync must re-read
+  // under the lock, or a stale top-of-function copy clobbers a pending write.
+  let changed = 0
+  await updateKnownMarketplacesConfig(primary => {
+    for (const { name, desired: entry } of desired) {
+      // Skip if primary already matches — idempotent no-op, no write.
+      if (isEqual(primary[name], entry)) continue
+      // Seed wins — admin-managed. Overwrite any existing primary entry.
+      primary[name] = entry
+      changed++
+    }
+    return changed > 0 ? primary : undefined
+  })
   if (changed > 0) {
-    await saveKnownMarketplacesConfig(primary)
     logForDebugging(`Synced ${changed} marketplace(s) from seed dir(s)`)
     return true
   }
@@ -2102,68 +2165,72 @@ export async function addMarketplaceSource(
 
   // Name collision with different source: overwrite (settings intent wins).
   // Seed-managed entries are admin-controlled and cannot be overwritten.
-  // Re-read config after clone (may take a while; another process may have written).
-  const config = await loadKnownMarketplacesConfig()
-  const oldEntry = config[marketplace.name]
-  if (oldEntry) {
-    const seedDir = seedDirFor(oldEntry.installLocation)
-    if (seedDir) {
-      throw new Error(
-        `Marketplace '${marketplace.name}' is seed-managed (${seedDir}). ` +
-          `To use a different source, ask your admin to update the seed, ` +
-          `or use a different marketplace name.`,
-      )
-    }
-    logForDebugging(
-      `Marketplace '${marketplace.name}' exists with different source — overwriting`,
-    )
-    // Clean up the old cache if it's not a user-owned local path AND it
-    // actually differs from the new cachePath. loadAndCacheMarketplace writes
-    // to cachePath BEFORE we get here — rm-ing the same dir deletes the fresh
-    // write. Settings sources always land on the same dir (name → path);
-    // git sources hit this latently when the source repo changes but the
-    // fetched marketplace.json declares the same name. Only rm when locations
-    // genuinely differ (the only case where there's a stale dir to clean).
-    //
-    // Defensively validate the stored path before rm: a corrupted
-    // installLocation (gh-32793, gh-32661) could point at the user's project
-    // dir. If it's outside the cache dir, skip cleanup — the stale dir (if
-    // any) is harmless, and blocking the re-add would prevent the user from
-    // fixing the corruption.
-    if (!isLocalMarketplaceSource(oldEntry.source)) {
-      const cacheDir = resolve(getMarketplacesCacheDir())
-      const resolvedOld = resolve(oldEntry.installLocation)
-      const resolvedNew = resolve(cachePath)
-      if (resolvedOld === resolvedNew) {
-        // Same dir — loadAndCacheMarketplace already overwrote in place.
-        // Nothing to clean.
-      } else if (
-        resolvedOld === cacheDir ||
-        resolvedOld.startsWith(cacheDir + sep)
-      ) {
-        const fs = getFsImplementation()
-        await fs.rm(oldEntry.installLocation, { recursive: true, force: true })
-      } else {
-        logForDebugging(
-          `Skipping cleanup of old installLocation (${oldEntry.installLocation}) — ` +
-            `outside ${cacheDir}. The path is corrupted; leaving it alone and ` +
-            `overwriting the config entry.`,
-          { level: 'warn' },
-        )
-      }
-    }
-  }
-
+  // The RMW goes under the registry lock with a FRESH re-read (the clone may
+  // take a while; another writer may have written since). Without the lock,
+  // the 3 concurrent startup preset hooks clobber each other's entries
+  // last-writer-wins (0.1.46 gate-046).
   // Update config using the marketplace's actual name. For git-backed sources,
   // record the resolved HEAD so a later verifier can detect local drift/tamper.
   const resolvedSha = await captureResolvedSha(resolvedSource, cachePath)
-  config[marketplace.name] = {
-    source: resolvedSource,
-    installLocation: cachePath,
-    lastUpdated: new Date().toISOString(),
-    ...(resolvedSha ? { resolvedSha } : {}),
-  }
-  await saveKnownMarketplacesConfig(config)
+  await updateKnownMarketplacesConfig(async config => {
+    const oldEntry = config[marketplace.name]
+    if (oldEntry) {
+      const seedDir = seedDirFor(oldEntry.installLocation)
+      if (seedDir) {
+        throw new Error(
+          `Marketplace '${marketplace.name}' is seed-managed (${seedDir}). ` +
+            `To use a different source, ask your admin to update the seed, ` +
+            `or use a different marketplace name.`,
+        )
+      }
+      logForDebugging(
+        `Marketplace '${marketplace.name}' exists with different source — overwriting`,
+      )
+      // Clean up the old cache if it's not a user-owned local path AND it
+      // actually differs from the new cachePath. loadAndCacheMarketplace writes
+      // to cachePath BEFORE we get here — rm-ing the same dir deletes the fresh
+      // write. Settings sources always land on the same dir (name → path);
+      // git sources hit this latently when the source repo changes but the
+      // fetched marketplace.json declares the same name. Only rm when locations
+      // genuinely differ (the only case where there's a stale dir to clean).
+      //
+      // Defensively validate the stored path before rm: a corrupted
+      // installLocation (gh-32793, gh-32661) could point at the user's project
+      // dir. If it's outside the cache dir, skip cleanup — the stale dir (if
+      // any) is harmless, and blocking the re-add would prevent the user from
+      // fixing the corruption.
+      if (!isLocalMarketplaceSource(oldEntry.source)) {
+        const cacheDir = resolve(getMarketplacesCacheDir())
+        const resolvedOld = resolve(oldEntry.installLocation)
+        const resolvedNew = resolve(cachePath)
+        if (resolvedOld === resolvedNew) {
+          // Same dir — loadAndCacheMarketplace already overwrote in place.
+          // Nothing to clean.
+        } else if (
+          resolvedOld === cacheDir ||
+          resolvedOld.startsWith(cacheDir + sep)
+        ) {
+          const fs = getFsImplementation()
+          await fs.rm(oldEntry.installLocation, { recursive: true, force: true })
+        } else {
+          logForDebugging(
+            `Skipping cleanup of old installLocation (${oldEntry.installLocation}) — ` +
+              `outside ${cacheDir}. The path is corrupted; leaving it alone and ` +
+              `overwriting the config entry.`,
+            { level: 'warn' },
+          )
+        }
+      }
+    }
+
+    config[marketplace.name] = {
+      source: resolvedSource,
+      installLocation: cachePath,
+      lastUpdated: new Date().toISOString(),
+      ...(resolvedSha ? { resolvedSha } : {}),
+    }
+    return config
+  })
 
   logForDebugging(`Added marketplace source: ${marketplace.name}`)
 
@@ -2211,20 +2278,7 @@ export async function adoptOrphanMarketplace(
     PluginMarketplaceSchema(),
   )
 
-  const config = await loadKnownMarketplacesConfig()
   const name = overrideName ?? marketplace.name
-  const existing = config[name]
-  if (existing) {
-    if (resolve(existing.installLocation) === resolve(dirPath)) {
-      // Already adopted — idempotent no-op
-      return { name, source: existing.source, installLocation: dirPath }
-    }
-    throw new Error(
-      `Marketplace name '${name}' is already registered at ` +
-        `${existing.installLocation}. Remove it first ` +
-        `(\`plugin marketplace remove ${name}\`) or adopt under a different name.`,
-    )
-  }
 
   // Reconstruct the source from the checkout's remote. Pure file parse of
   // .git/config (no git binary), so it works even where git is unavailable.
@@ -2259,13 +2313,27 @@ export async function adoptOrphanMarketplace(
   }
 
   const resolvedSha = await captureResolvedSha(source, dirPath)
-  config[name] = {
-    source,
-    installLocation: dirPath,
-    lastUpdated: new Date().toISOString(),
-    ...(resolvedSha ? { resolvedSha } : {}),
-  }
-  await saveKnownMarketplacesConfig(config)
+  await updateKnownMarketplacesConfig(existing => {
+    const prior = existing[name]
+    if (prior) {
+      if (resolve(prior.installLocation) === resolve(dirPath)) {
+        // Already adopted — idempotent no-op (no write)
+        return
+      }
+      throw new Error(
+        `Marketplace name '${name}' is already registered at ` +
+          `${prior.installLocation}. Remove it first ` +
+          `(\`plugin marketplace remove ${name}\`) or adopt under a different name.`,
+      )
+    }
+    existing[name] = {
+      source,
+      installLocation: dirPath,
+      lastUpdated: new Date().toISOString(),
+      ...(resolvedSha ? { resolvedSha } : {}),
+    }
+    return existing
+  })
 
   clearAllCaches()
 
@@ -2287,28 +2355,28 @@ export async function adoptOrphanMarketplace(
  * @throws If marketplace with given name is not found
  */
 export async function removeMarketplaceSource(name: string): Promise<void> {
-  const config = await loadKnownMarketplacesConfig()
+  await updateKnownMarketplacesConfig(config => {
+    const entry = config[name]
+    if (!entry) {
+      throw new Error(`Marketplace '${name}' not found`)
+    }
 
-  if (!config[name]) {
-    throw new Error(`Marketplace '${name}' not found`)
-  }
+    // Seed-registered marketplaces are admin-baked into the container —
+    // removing them is a category error. They'd resurrect on next startup
+    // anyway. Guide the user to the right action instead.
+    const seedDir = seedDirFor(entry.installLocation)
+    if (seedDir) {
+      throw new Error(
+        `Marketplace '${name}' is registered from the read-only seed directory ` +
+          `(${seedDir}) and will be re-registered on next startup. ` +
+          `To stop using its plugins: claude plugin disable <plugin>@${name}`,
+      )
+    }
 
-  // Seed-registered marketplaces are admin-baked into the container — removing
-  // them is a category error. They'd resurrect on next startup anyway. Guide
-  // the user to the right action instead.
-  const entry = config[name]
-  const seedDir = seedDirFor(entry.installLocation)
-  if (seedDir) {
-    throw new Error(
-      `Marketplace '${name}' is registered from the read-only seed directory ` +
-        `(${seedDir}) and will be re-registered on next startup. ` +
-        `To stop using its plugins: claude plugin disable <plugin>@${name}`,
-    )
-  }
-
-  // Remove from config
-  delete config[name]
-  await saveKnownMarketplacesConfig(config)
+    // Remove from config
+    delete config[name]
+    return config
+  })
 
   // Clean up cached files (both directory and JSON formats)
   const fs = getFsImplementation()
@@ -2967,37 +3035,38 @@ export async function setMarketplaceAutoUpdate(
   name: string,
   autoUpdate: boolean,
 ): Promise<void> {
-  const config = await loadKnownMarketplacesConfig()
-  const entry = config[name]
+  await updateKnownMarketplacesConfig(config => {
+    const entry = config[name]
+    if (!entry) {
+      throw new Error(
+        `Marketplace '${name}' not found. Available marketplaces: ${Object.keys(config).join(', ')}`,
+      )
+    }
 
-  if (!entry) {
-    throw new Error(
-      `Marketplace '${name}' not found. Available marketplaces: ${Object.keys(config).join(', ')}`,
-    )
-  }
+    // Seed-managed marketplaces always have autoUpdate: false (read-only,
+    // git-pull would fail). Toggle appears to work but
+    // registerSeedMarketplaces overwrites it on next startup. Error with
+    // guidance instead of silent revert.
+    const seedDir = seedDirFor(entry.installLocation)
+    if (seedDir) {
+      throw new Error(
+        `Marketplace '${name}' is seed-managed (${seedDir}) and ` +
+          `auto-update is always disabled for seed content. ` +
+          `To update: ask your admin to update the seed.`,
+      )
+    }
 
-  // Seed-managed marketplaces always have autoUpdate: false (read-only, git-pull
-  // would fail). Toggle appears to work but registerSeedMarketplaces overwrites
-  // it on next startup. Error with guidance instead of silent revert.
-  const seedDir = seedDirFor(entry.installLocation)
-  if (seedDir) {
-    throw new Error(
-      `Marketplace '${name}' is seed-managed (${seedDir}) and ` +
-        `auto-update is always disabled for seed content. ` +
-        `To update: ask your admin to update the seed.`,
-    )
-  }
+    // Only update if the value is actually changing (no write otherwise)
+    if (entry.autoUpdate === autoUpdate) {
+      return
+    }
 
-  // Only update if the value is actually changing
-  if (entry.autoUpdate === autoUpdate) {
-    return
-  }
-
-  config[name] = {
-    ...entry,
-    autoUpdate,
-  }
-  await saveKnownMarketplacesConfig(config)
+    config[name] = {
+      ...entry,
+      autoUpdate,
+    }
+    return config
+  })
 
   // Also update intent in settings if declared there — write to the SAME
   // source that declared it to avoid creating duplicates at wrong scope

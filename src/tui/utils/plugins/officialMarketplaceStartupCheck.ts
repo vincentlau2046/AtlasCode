@@ -21,7 +21,7 @@ import {
   addMarketplaceSource,
   getMarketplacesCacheDir,
   loadKnownMarketplacesConfig,
-  saveKnownMarketplacesConfig,
+  updateKnownMarketplacesConfig,
 } from './marketplaceManager.js'
 import {
   installBuiltinSnapshotFallback,
@@ -262,13 +262,16 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       cacheDir,
     )
     if (gcsSha !== null) {
-      const known = await loadKnownMarketplacesConfig()
-      known[OFFICIAL_MARKETPLACE_NAME] = {
-        source: OFFICIAL_MARKETPLACE_SOURCE,
-        installLocation,
-        lastUpdated: new Date().toISOString(),
-      }
-      await saveKnownMarketplacesConfig(known)
+      // In-process mutex for the registry RMW (gate-046 ①): this hook
+      // fires concurrently with the preset snapshot fallbacks.
+      await updateKnownMarketplacesConfig(known => {
+        known[OFFICIAL_MARKETPLACE_NAME] = {
+          source: OFFICIAL_MARKETPLACE_SOURCE,
+          installLocation,
+          lastUpdated: new Date().toISOString(),
+        }
+        return known
+      })
       // Live source landed (GCS) — clean up any orphaned snapshot
       // materialization (best-effort).
       await removeBuiltinSnapshotDir(OFFICIAL_MARKETPLACE_NAME)
