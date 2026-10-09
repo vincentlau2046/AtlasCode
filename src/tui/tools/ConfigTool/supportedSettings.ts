@@ -1,5 +1,4 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import { getRemoteControlAtStartup } from '../../utils/config.js'
 import {
   EDITOR_MODES,
   NOTIFICATION_CHANNELS,
@@ -141,17 +140,8 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
         },
       }
     : {}),
-  ...(feature('BRIDGE_MODE')
-    ? {
-        remoteControlAtStartup: {
-          source: 'global' as const,
-          type: 'boolean' as const,
-          description:
-            'Enable Remote Control for all sessions (true | false | default)',
-          formatOnRead: () => getRemoteControlAtStartup(),
-        },
-      }
-    : {}),
+  // W-opt 可信波 S1（C-5，#299）：remoteControlAtStartup 条目裁除（1P remote-control 配置族
+  // §8.74.29 已裁，LLM ConfigTool 面同步离场，零行为变化）
 }
 
 export function isSupported(key: string): boolean {

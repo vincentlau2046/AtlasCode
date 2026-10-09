@@ -62,7 +62,7 @@ import { count, uniq } from './utils/array.js';
 import { installAsciicastRecorder } from './utils/asciicast.js';
 import { isAtlasDev } from './utils/atlasDev.js';
 import { validateForceLoginOrg } from './utils/auth.js';
-import { checkHasTrustDialogAccepted, getGlobalConfig, getRemoteControlAtStartup, isAutoUpdaterDisabled, saveGlobalConfig } from './utils/config.js';
+import { checkHasTrustDialogAccepted, getGlobalConfig, isAutoUpdaterDisabled, saveGlobalConfig } from './utils/config.js';
 import { seedEarlyInput, stopCapturingEarlyInput } from './utils/earlyInput.js';
 import { getStartupEffortValue, parseEffortValue } from './utils/effort.js';
 import { applyConfigEnvironmentVariables } from './utils/managedEnv.js';
@@ -169,7 +169,6 @@ const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/
 import { migrateAutoUpdatesToSettings } from './migrations/migrateAutoUpdatesToSettings.js';
 import { migrateBypassPermissionsAcceptedToSettings } from './migrations/migrateBypassPermissionsAcceptedToSettings.js';
 import { migrateEnableAllProjectMcpServersToSettings } from './migrations/migrateEnableAllProjectMcpServersToSettings.js';
-import { migrateReplBridgeEnabledToRemoteControlAtStartup } from './migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.js';
 import { resetAutoModeOptInForDefaultOffer } from './migrations/resetAutoModeOptInForDefaultOffer.js';
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionManager（1P remote-session
 // 配置面）/ createDirectConnectSession·DirectConnectError（1P direct-connect 客户端）裁除。
@@ -295,7 +294,7 @@ function runMigrations(): void {
     migrateAutoUpdatesToSettings();
     migrateBypassPermissionsAcceptedToSettings();
     migrateEnableAllProjectMcpServersToSettings();
-    migrateReplBridgeEnabledToRemoteControlAtStartup();
+    // W-opt 可信波 S1（C-5，#299）：migrateReplBridgeEnabledToRemoteControlAtStartup 随迁移文件整裁
     if (feature('TRANSCRIPT_CLASSIFIER')) {
       resetAutoModeOptInForDefaultOffer();
     }
@@ -2350,9 +2349,9 @@ async function run(): Promise<CommanderCommand> {
       ...toolPermissionContext,
       mode: isAgentSwarmsEnabled() && getTeammateUtils().isPlanModeRequired() ? 'plan' as const : toolPermissionContext.mode
     };
-    // W-opt 可信波 S1（C-2）：--remote-control/--rc 死 flag 裁除（remoteControl 提取残留离场，
-    // bridge 执行簇 §8.74.29 已裁，replBridge* 状态面恒 false 不变）
-    const fullRemoteControl = getRemoteControlAtStartup();
+    // W-opt 可信波 S1（C-2 + C-5）：--remote-control/--rc 死 flag + remoteControlAtStartup 配置族裁除
+    //（1P remote/bridge 执行簇 §8.74.28 ⑭·#200 与配置族本提交已裁，replBridge* 状态面恒 false 不变）
+    const fullRemoteControl = false;
     // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P CCR 镜像面（CCR_MIRROR 门 +
     // bridgeEnabled.isCcrMirrorEnabled）裁除。CCR_MIRROR 默认关（门恒不进），
     // ccrMirrorEnabled 恒 false（行为保真：原运行时该块本就不执行）。

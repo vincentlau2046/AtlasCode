@@ -346,7 +346,7 @@ export type GlobalConfig = {
   effortCalloutV2Dismissed?: boolean
 
   // Remote callout tracking - shown once before first bridge enable
-  remoteDialogSeen?: boolean
+  // W-opt 可信波 S1（C-5，#299）：remoteDialogSeen 死键随 GLOBAL_CONFIG_KEYS 同裁（零消费方）
 
   // Cross-process backoff for initReplBridge's oauth_expired_unrefreshable skip.
   // `expiresAt` is the dedup key — content-addressed, self-clears when /login
@@ -460,9 +460,8 @@ export type GlobalConfig = {
   // G-3（§8.74.28 ⑧）: startupPrefetchedAt 字段随 1P bootstrap prefetch 块整裁
   // 删除（唯一写入方 main.tsx prefetch 块已删）；磁盘旧键忽略。
 
-  // Run Remote Control at startup (requires BRIDGE_MODE)
-  // undefined = use default (see getRemoteControlAtStartup() for precedence)
-  remoteControlAtStartup?: boolean
+  // W-opt 可信波 S1（C-5，#299）：remoteControlAtStartup 配置键 + getRemoteControlAtStartup 裁除
+  // （1P remote-control 配置族，§8.74.29；唯一消费方 main.tsx fullRemoteControl 改常量 false，磁盘旧键忽略）
 
   // Cached extra usage disabled reason from the last API response
   // undefined = no cache, null = extra usage enabled, string = disabled reason.
@@ -570,8 +569,7 @@ export const GLOBAL_CONFIG_KEYS = [
   'copyOnSelect',
   'permissionExplainerEnabled',
   'prStatusFooterEnabled',
-  'remoteControlAtStartup',
-  'remoteDialogSeen',
+  // W-opt 可信波 S1（C-5，#299）：'remoteControlAtStartup' / 'remoteDialogSeen' 键裁除（1P remote 死配置键，零消费方）
 ] as const
 
 export type GlobalConfigKey = (typeof GLOBAL_CONFIG_KEYS)[number]
@@ -1001,17 +999,8 @@ export function getGlobalConfig(): GlobalConfig {
   }
 }
 
-/**
- * Returns the effective value of remoteControlAtStartup. Precedence:
- *   1. User's explicit config value (always wins — honors opt-out)
- *   2. false (Remote Control must be explicitly opted into)
- * 前向缝登记（§8.74.29 1P 簇裁，#200）：原第 2 档 CCR auto-connect 默认（ccrAutoConnect.getCcrAutoConnectDefault / bridgeEnabled 簇）裁除
- */
-export function getRemoteControlAtStartup(): boolean {
-  const explicit = getGlobalConfig().remoteControlAtStartup
-  if (explicit !== undefined) return explicit
-  return false
-}
+// W-opt 可信波 S1（C-5，#299）：getRemoteControlAtStartup 随 remoteControlAtStartup 配置族整裁（
+// 1P remote-control 执行簇 §8.74.29 已裁，配置族仅剩恒 false 兜底无执行面，零行为变化）
 
 export function getCustomApiKeyStatus(
   truncatedApiKey: string,

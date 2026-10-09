@@ -9,14 +9,13 @@ import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.j
 import figures from 'figures';
 import { type GlobalConfig, saveGlobalConfig, getCurrentProjectConfig, type OutputStyle } from '../../utils/config.js';
 import { normalizeApiKeyForConfig } from '../../utils/authPortable.js';
-import { getGlobalConfig, getAutoUpdaterDisabledReason, formatAutoUpdaterDisabledReason, getRemoteControlAtStartup } from '../../utils/config.js';
+import { getGlobalConfig, getAutoUpdaterDisabledReason, formatAutoUpdaterDisabledReason } from '../../utils/config.js';
 import chalk from 'chalk';
 import { permissionModeTitle, permissionModeFromString, toExternalPermissionMode, isExternalPermissionMode, EXTERNAL_PERMISSION_MODES, PERMISSION_MODES, type ExternalPermissionMode, type PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { getAutoModeEnabledState, hasAutoModeOptInAnySource, transitionPlanAutoMode } from '../../utils/permissions/permissionSetup.js';
 import { logError } from '../../utils/log.js';
-// 前向缝登记（§8.74.29 1P 簇裁，#200）：bridgeEnabled 簇整裁；isBridgeEnabled 恒 false（bridge 永不启用），
-// 就地 no-op stub 承载 remoteControlAtStartup 菜单项门控（该支恒不渲染，H6 不造假绿）
-const isBridgeEnabled = () => false;
+// W-opt 可信波 S1（C-5，#299）：isBridgeEnabled no-op stub + remoteControlAtStartup 菜单项随 C-5 裁除
+//（1P bridgeEnabled 簇 §8.74.29 已裁，stub 唯一消费方=菜单项门控，恒不渲染，零行为变化）
 import { ThemePicker } from '../ThemePicker.js';
 import { useAppState, useSetAppState, useAppStateStore } from '../../state/AppState.js';
 import { ModelPicker } from '../ModelPicker.js';
@@ -739,54 +738,9 @@ export function Config({
       onChange() {}
     }];
   })() : []),
-  // Remote at startup toggle — gated on build flag + GrowthBook + policy
-  ...(feature('BRIDGE_MODE') && isBridgeEnabled() ? [{
-    id: 'remoteControlAtStartup',
-    label: 'Enable Remote Control for all sessions',
-    value: globalConfig.remoteControlAtStartup === undefined ? 'default' : String(globalConfig.remoteControlAtStartup),
-    options: ['true', 'false', 'default'],
-    type: 'enum' as const,
-    onChange(selected_0: string) {
-      if (selected_0 === 'default') {
-        // Unset the config key so it falls back to the platform default
-        saveGlobalConfig(current_20 => {
-          if (current_20.remoteControlAtStartup === undefined) return current_20;
-          const next_0 = {
-            ...current_20
-          };
-          delete next_0.remoteControlAtStartup;
-          return next_0;
-        });
-        setGlobalConfig({
-          ...getGlobalConfig(),
-          remoteControlAtStartup: undefined
-        });
-      } else {
-        const enabled_6 = selected_0 === 'true';
-        saveGlobalConfig(current_21 => {
-          if (current_21.remoteControlAtStartup === enabled_6) return current_21;
-          return {
-            ...current_21,
-            remoteControlAtStartup: enabled_6
-          };
-        });
-        setGlobalConfig({
-          ...getGlobalConfig(),
-          remoteControlAtStartup: enabled_6
-        });
-      }
-      // Sync to AppState so useReplBridge reacts immediately
-      const resolved = getRemoteControlAtStartup();
-      setAppState(prev_20 => {
-        if (prev_20.replBridgeEnabled === resolved && !prev_20.replBridgeOutboundOnly) return prev_20;
-        return {
-          ...prev_20,
-          replBridgeEnabled: resolved,
-          replBridgeOutboundOnly: false
-        };
-      });
-    }
-  }] : []), ...(shouldShowExternalIncludesToggle ? [{
+  // W-opt 可信波 S1（C-5，#299）：remoteControlAtStartup 菜单项裁除（原 feature('BRIDGE_MODE') &&
+  // isBridgeEnabled() 门控恒 false 恒不渲染；1P remote-control 执行簇 §8.74.29 已裁，零行为变化）
+  ...(shouldShowExternalIncludesToggle ? [{
     id: 'showExternalIncludesDialog',
     label: 'External ATLAS.md includes',
     value: (() => {
@@ -962,10 +916,7 @@ export function Config({
     if (globalConfig.showTurnDuration !== initialConfig.current.showTurnDuration) {
       formattedChanges.push(`${globalConfig.showTurnDuration ? 'Enabled' : 'Disabled'} turn duration`);
     }
-    if (globalConfig.remoteControlAtStartup !== initialConfig.current.remoteControlAtStartup) {
-      const remoteLabel = globalConfig.remoteControlAtStartup === undefined ? 'Reset Remote Control to default' : `${globalConfig.remoteControlAtStartup ? 'Enabled' : 'Disabled'} Remote Control for all sessions`;
-      formattedChanges.push(remoteLabel);
-    }
+    // W-opt 可信波 S1（C-5，#299）：remoteControlAtStartup 变更摘要支随配置族裁除（零行为变化）
     if (settingsData?.autoUpdatesChannel !== initialSettingsData.current?.autoUpdatesChannel) {
       formattedChanges.push(`Set auto-update channel to ${chalk.bold(settingsData?.autoUpdatesChannel ?? 'latest')}`);
     }
