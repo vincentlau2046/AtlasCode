@@ -4,6 +4,29 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.47
+
+可信清尾波（基线 v0.1.46；#299 W-opt 可信专项最终核销 + #302——remote
+残留 2 处清尾；纯文本级修零行为变更，用户裁定简化流程：e2e gate 往返
+省略，四件套为验证）：
+
+- **bridge 错误串去 `/remote-control` 悬空引用（engine + tui 双生 + 单测
+  同步）**：engine `tools/team/sendMessageTool.ts` 与 tui
+  `tools/SendMessageTool` 双生的 errorCode 9 错误串指向
+  「Reconnect with /remote-control first」——`/remote-control` 命令 0.1.45
+  S1 已裁（`tests/unit/cli.test.ts` 缺席断言在册），指令指向不存在的命令；
+  本版删悬空指令（guard 判定逻辑不变，peerBridge forward-seam 保留为
+  bridge/CLI 波预留面）。
+- **bootstrapState `getIsRemoteMode` 注释订正**：「only set by main.tsx
+  --remote/--teleport paths」已悬空（两路径随 Remote Control 于 W-opt
+  可信波 S1 §8.74.29 裁除）；订正为「always false in this build」（恒
+  false 语义与 truthy-stub 误触发警示不变）。
+- **残留排查审计结论（不修项登记）**：`createBridgeStatusMessage` 死
+  工厂（零调用方）+ `bridge_status` 渲染支判定为旧会话 jsonl 回放保真
+  面（旧版本 bridge_status 消息可经 --resume 回放），保留；仓内
+  `/remote-control` grep 剩余命中全为注释 / 测试缺席断言 / 回放保真面，
+  无其他用户可见悬空引用。
+
 ## v0.1.46
 
 三源+安装数波（基线 v0.1.45；W-opt 可信专项 #299 / #301——3 源预集成
