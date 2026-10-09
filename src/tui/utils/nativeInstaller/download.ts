@@ -1,55 +1,16 @@
 /**
  * Download functionality for native installer
  *
- * Handles downloading Claude binaries from GCS bucket release storage.
+ * W-opt 可信波 S2（D2 裁定，#299）：1P GCS 下载体裁除。本产品**无 native 发行形态**
+ *（出货 = npm 包 / git 源码，node 运行器；§8.74.23 native 版本查询通道已裁为 no-op）。
+ * 原 GCS 桶 URL + axios 下载体（getLatestVersionFromBinaryRepo /
+ * downloadVersionFromBinaryRepo / StallTimeoutError + stall 重试 / gcloud ci-sentinel 支）
+ * 全裁（零消费方核销）；导出面 downloadVersion / getLatestVersion 保留，休眠调用点
+ *（installer.ts installMethod=native 支，本产品不可达）走明示错误路径，零行为变化。
  */
 
 import { feature } from 'src/shared'
-import axios from 'axios'
-import { createHash } from 'crypto'
-import { chmod, writeFile } from 'fs/promises'
-import { join } from 'path'
 import type { ReleaseChannel } from '../config.js'
-import { logForDebugging } from '../debug.js'
-import { toError } from '../errors.js'
-import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
-import { getFsImplementation } from '../fsOperations.js'
-import { logError } from '../log.js'
-import { sleep } from '../sleep.js'
-import { getBinaryName, getPlatform } from './installer.js'
-
-const GCS_BUCKET_URL =
-  'https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases'
-
-export async function getLatestVersionFromBinaryRepo(
-  channel: ReleaseChannel = 'latest',
-  baseUrl: string,
-  authConfig?: { auth: { username: string; password: string } },
-): Promise<string> {
-  const startTime = Date.now()
-  try {
-    const response = await axios.get(`${baseUrl}/${channel}`, {
-      timeout: 30000,
-      responseType: 'text',
-      ...authConfig,
-    })
-    const latencyMs = Date.now() - startTime
-    return response.data.trim()
-  } catch (error) {
-    const latencyMs = Date.now() - startTime
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    let httpStatus: number | undefined
-    if (axios.isAxiosError(error) && error.response) {
-      httpStatus = error.response.status
-    }
-
-    const fetchError = new Error(
-      `Failed to fetch version from ${baseUrl}/${channel}: ${errorMessage}`,
-    )
-    logError(fetchError)
-    throw fetchError
-  }
-}
 
 export async function getLatestVersion(
   channelOrVersion: string,
@@ -59,7 +20,7 @@ export async function getLatestVersion(
     const normalized = channelOrVersion.startsWith('v')
       ? channelOrVersion.slice(1)
       : channelOrVersion
-    // 99.99.x is reserved for CI smoke-test fixtures on real GCS.
+    // 99.99.x is reserved for CI smoke-test fixtures.
     // feature() is false in all shipped builds — DCE collapses this to an
     // unconditional throw. Only `bun --feature=ALLOW_TEST_VERSIONS` (the
     // smoke test's source-level invocation) bypasses.
@@ -68,7 +29,10 @@ export async function getLatestVersion(
         `Version ${normalized} is not available for installation. Use 'stable' or 'latest'.`,
       )
     }
-    return normalized
+    // W-opt 可信波 S2（#299）：直版本原经 GCS 桶下载，无 native 发行形态 → 明示错误
+    throw new Error(
+      `Version ${normalized} cannot be installed: this product has no native distribution form (npm package / git source only)`,
+    )
   }
 
   // ReleaseChannel validation
@@ -79,238 +43,19 @@ export async function getLatestVersion(
     )
   }
 
-  // Use GCS for all users
-  return getLatestVersionFromBinaryRepo(channel, GCS_BUCKET_URL)
-}
-
-// Stall timeout: abort if no bytes received for this duration
-const DEFAULT_STALL_TIMEOUT_MS = 60000 // 60 seconds
-const MAX_DOWNLOAD_RETRIES = 3
-
-function getStallTimeoutMs(): number {
-  return (
-    Number((process.env.ATLAS_STALL_TIMEOUT_MS_FOR_TESTING)) ||
-    DEFAULT_STALL_TIMEOUT_MS
+  // W-opt 可信波 S2（#299）：GCS latest 查询支裁除 → 明示错误
+  throw new Error(
+    `Channel '${channel}' cannot be resolved: this product has no native distribution form (npm package / git source only)`,
   )
 }
 
-class StallTimeoutError extends Error {
-  constructor() {
-    super('Download stalled: no data received for 60 seconds')
-    this.name = 'StallTimeoutError'
-  }
-}
-
-/**
- * Common logic for downloading and verifying a binary.
- * Includes stall detection (aborts if no bytes for 60s) and retry logic.
- */
-async function downloadAndVerifyBinary(
-  binaryUrl: string,
-  expectedChecksum: string,
-  binaryPath: string,
-  requestConfig: Record<string, unknown> = {},
-) {
-  let lastError: Error | undefined
-
-  for (let attempt = 1; attempt <= MAX_DOWNLOAD_RETRIES; attempt++) {
-    const controller = new AbortController()
-    let stallTimer: ReturnType<typeof setTimeout> | undefined
-
-    const clearStallTimer = () => {
-      if (stallTimer) {
-        clearTimeout(stallTimer)
-        stallTimer = undefined
-      }
-    }
-
-    const resetStallTimer = () => {
-      clearStallTimer()
-      stallTimer = setTimeout(c => c.abort(), getStallTimeoutMs(), controller)
-    }
-
-    try {
-      // Start the stall timer before the request
-      resetStallTimer()
-
-      const response = await axios.get(binaryUrl, {
-        timeout: 5 * 60000, // 5 minute total timeout
-        responseType: 'arraybuffer',
-        signal: controller.signal,
-        onDownloadProgress: () => {
-          // Reset stall timer on each chunk of data received
-          resetStallTimer()
-        },
-        ...requestConfig,
-      })
-
-      clearStallTimer()
-
-      // Verify checksum
-      const hash = createHash('sha256')
-      hash.update(response.data)
-      const actualChecksum = hash.digest('hex')
-
-      if (actualChecksum !== expectedChecksum) {
-        throw new Error(
-          `Checksum mismatch: expected ${expectedChecksum}, got ${actualChecksum}`,
-        )
-      }
-
-      // Write binary to disk
-      await writeFile(binaryPath, Buffer.from(response.data))
-      await chmod(binaryPath, 0o755)
-
-      // Success - return early
-      return
-    } catch (error) {
-      clearStallTimer()
-
-      // Check if this was a stall timeout (axios wraps abort signals in CanceledError)
-      const isStallTimeout = axios.isCancel(error)
-
-      if (isStallTimeout) {
-        lastError = new StallTimeoutError()
-      } else {
-        lastError = toError(error)
-      }
-
-      // Only retry on stall timeouts
-      if (isStallTimeout && attempt < MAX_DOWNLOAD_RETRIES) {
-        logForDebugging(
-          `Download stalled on attempt ${attempt}/${MAX_DOWNLOAD_RETRIES}, retrying...`,
-        )
-        // Brief pause before retry to let network recover
-        await sleep(1000)
-        continue
-      }
-
-      // Don't retry other errors (HTTP errors, checksum mismatches, etc.)
-      throw lastError
-    }
-  }
-
-  // Should not reach here, but just in case
-  throw lastError ?? new Error('Download failed after all retries')
-}
-
-export async function downloadVersionFromBinaryRepo(
-  version: string,
-  stagingPath: string,
-  baseUrl: string,
-  authConfig?: {
-    auth?: { username: string; password: string }
-    headers?: Record<string, string>
-  },
-) {
-  const fs = getFsImplementation()
-
-  // If we get here, we own the lock and can delete a partial download
-  await fs.rm(stagingPath, { recursive: true, force: true })
-
-  // Get platform
-  const platform = getPlatform()
-  const startTime = Date.now()
-
-  // Log download attempt start
-
-  // Fetch manifest to get checksum
-  let manifest
-  try {
-    const manifestResponse = await axios.get(
-      `${baseUrl}/${version}/manifest.json`,
-      {
-        timeout: 10000,
-        responseType: 'json',
-        ...authConfig,
-      },
-    )
-    manifest = manifestResponse.data
-  } catch (error) {
-    const latencyMs = Date.now() - startTime
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    let httpStatus: number | undefined
-    if (axios.isAxiosError(error) && error.response) {
-      httpStatus = error.response.status
-    }
-
-    logError(
-      new Error(
-        `Failed to fetch manifest from ${baseUrl}/${version}/manifest.json: ${errorMessage}`,
-      ),
-    )
-    throw error
-  }
-
-  const platformInfo = manifest.platforms[platform]
-
-  if (!platformInfo) {
-    throw new Error(
-      `Platform ${platform} not found in manifest for version ${version}`,
-    )
-  }
-
-  const expectedChecksum = platformInfo.checksum
-
-  // Both GCS and generic bucket use identical layout: ${baseUrl}/${version}/${platform}/${binaryName}
-  const binaryName = getBinaryName(platform)
-  const binaryUrl = `${baseUrl}/${version}/${platform}/${binaryName}`
-
-  // Write to staging
-  await fs.mkdir(stagingPath)
-  const binaryPath = join(stagingPath, binaryName)
-
-  try {
-    await downloadAndVerifyBinary(
-      binaryUrl,
-      expectedChecksum,
-      binaryPath,
-      authConfig || {},
-    )
-    const latencyMs = Date.now() - startTime
-  } catch (error) {
-    const latencyMs = Date.now() - startTime
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    let httpStatus: number | undefined
-    if (axios.isAxiosError(error) && error.response) {
-      httpStatus = error.response.status
-    }
-
-    logError(
-      new Error(`Failed to download binary from ${binaryUrl}: ${errorMessage}`),
-    )
-    throw error
-  }
-}
-
 export async function downloadVersion(
-  version: string,
-  stagingPath: string,
+  _version: string,
+  _stagingPath: string,
 ): Promise<'npm' | 'binary'> {
-  // Test-fixture versions route to the private sentinel bucket. DCE'd in all
-  // shipped builds — the string 'claude-code-ci-sentinel' and the gcloud call
-  // never exist in compiled binaries. Same gcloud-token pattern as
-  // remoteSkillLoader.ts:175-195.
-  if (feature('ALLOW_TEST_VERSIONS') && /^99\.99\./.test(version)) {
-    const { stdout } = await execFileNoThrowWithCwd('gcloud', [
-      'auth',
-      'print-access-token',
-    ])
-    await downloadVersionFromBinaryRepo(
-      version,
-      stagingPath,
-      'https://storage.googleapis.com/claude-code-ci-sentinel',
-      { headers: { Authorization: `Bearer ${stdout.trim()}` } },
-    )
-    return 'binary'
-  }
-
-  // Use GCS for all users
-  await downloadVersionFromBinaryRepo(version, stagingPath, GCS_BUCKET_URL)
-  return 'binary'
+  // W-opt 可信波 S2（#299）：GCS 下载支 + gcloud ci-sentinel 支全裁（原支休眠不可达，
+  // 裁后明示错误替代 1P 外联，零行为变化）
+  throw new Error(
+    'Native binary download is not available in this product (no native distribution form; npm package / git source only)',
+  )
 }
-
-// Exported for testing
-export { StallTimeoutError, MAX_DOWNLOAD_RETRIES }
-export const STALL_TIMEOUT_MS = DEFAULT_STALL_TIMEOUT_MS
-export const _downloadAndVerifyBinaryForTesting = downloadAndVerifyBinary

@@ -22,13 +22,12 @@ import {
 } from './shellConfig.js'
 import { jsonParse } from './slowOperations.js'
 
-// §8.74.23（旧仓 GCS 残留裁）：旧仓 native 二进制发布走 GCS 桶
-// `storage.googleapis.com/claude-code-dist-…/claude-code-releases`（域外
-// CLAUDE_AI 残留）。本产品**无 native 二进制发布形态**（出货 = npm 包 / git 源码，
+// §8.74.23（旧仓 GCS 残留裁）：旧仓 native 二进制发布走 1P GCS 桶（域外
+// CLAUDE_AI 残留；桶 URL 随 W-opt 可信波 S2（#299）下载体裁除，不 vendor、
+// 不指向旧仓桶）。本产品**无 native 二进制发布形态**（出货 = npm 包 / git 源码，
 // node 运行器）→ native 版本查询通道裁为 no-op（getLatestVersionFromGcs /
 // getGcsDistTags 返空，消费方 PackageManagerAutoUpdater / Doctor 据此静默不触发
 // native 更新）。native 发行形态 = H6 前向接缝（owner = native-dist 波，未排期）。
-// 域外 URL 已删（不 vendor、不指向旧仓桶）。
 
 class AutoUpdaterError extends ClaudeError {}
 
