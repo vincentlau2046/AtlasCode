@@ -160,7 +160,7 @@ import { setCwd } from 'src/tui/utils/Shell.js';
 import { type ProcessedResume, processResumedConversation } from 'src/tui/utils/sessionRestore.js';
 import { parseSettingSourcesFlag } from 'src/tui/utils/settings/constants.js';
 import { plural } from 'src/tui/utils/stringUtils.js';
-import { getIsNonInteractiveSession, getSessionId, setClientType, setCwdState, setFlagSettingsPath, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, setSessionSource, switchSession } from 'src/bootstrap'
+import { getIsNonInteractiveSession, getSessionId, setClientType, setCwdState, setFlagSettingsPath, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, switchSession } from 'src/bootstrap'
 import { getInitialMainLoopModel, getSdkBetas, setAllowedSettingSources, setDirectConnectServerUrl, setInitialMainLoopModel, setInlinePlugins, setSdkBetas } from 'src/tui/bootstrapState.js';
 
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;
@@ -725,8 +725,9 @@ export async function main() {
   const cliArgs = process.argv.slice(2);
   const hasPrintFlag = cliArgs.includes('-p') || cliArgs.includes('--print');
   const hasInitOnlyFlag = cliArgs.includes('--init-only');
-  const hasSdkUrl = cliArgs.some(arg => arg.startsWith('--sdk-url'));
-  const isNonInteractive = hasPrintFlag || hasInitOnlyFlag || hasSdkUrl || !process.stdout.isTTY;
+  // W-opt 可信波 S1（C-3）：--sdk-url 死 flag 裁除（1P 云传输域外裁，§8.74.28 ⑭；
+  // 裁前传参 = print.ts 运行支 throw 明示 / 交互面恒 no-op，裁后 = commander unknown option 拒，拒绝等价）
+  const isNonInteractive = hasPrintFlag || hasInitOnlyFlag || !process.stdout.isTTY;
 
   // Stop capturing early input for non-interactive modes
   if (isNonInteractive) {
@@ -768,10 +769,8 @@ export async function main() {
     setQuestionPreviewFormat('markdown');
   }
 
-  // Tag sessions created via `claude remote-control` so the backend can identify them
-  if ((process.env.ATLAS_ENVIRONMENT_KIND) === 'bridge') {
-    setSessionSource('remote-control');
-  }
+  // W-opt 可信波 S1（C-2）：setSessionSource('remote-control') 死面裁除（1P remote-control 执行簇
+  // 已 §8.74.29 裁净，ATLAS_ENVIRONMENT_KIND='bridge' 门控无写入方恒 false，零行为变化）
   profileCheckpoint('main_client_type_determined');
 
   // Parse and load settings flags early, before init()
@@ -1073,11 +1072,6 @@ async function run(): Promise<CommanderCommand> {
       }
     }
 
-    // Extract remote sdk options
-    const sdkUrl = (options as {
-      sdkUrl?: string;
-    }).sdkUrl ?? undefined;
-
     // Allow env var to enable partial messages (used by sandbox gateway for baku)
     const effectiveIncludePartialMessages = includePartialMessages || isEnvTruthy((process.env.ATLAS_INCLUDE_PARTIAL_MESSAGES));
 
@@ -1088,46 +1082,9 @@ async function run(): Promise<CommanderCommand> {
       setAllHookEventsEnabled(true);
     }
 
-    // Auto-set input/output formats, verbose mode, and print mode when SDK URL is provided
-    if (sdkUrl) {
-      // If SDK URL is provided, automatically use stream-json formats unless explicitly set
-      if (!inputFormat) {
-        inputFormat = 'stream-json';
-      }
-      if (!outputFormat) {
-        outputFormat = 'stream-json';
-      }
-      // Auto-enable verbose mode unless explicitly disabled or already set
-      if (options.verbose === undefined) {
-        verbose = true;
-      }
-      // Auto-enable print mode unless explicitly disabled
-      if (!options.print) {
-        print = true;
-      }
-    }
-
-    // Extract teleport option
-    const teleport = (options as {
-      teleport?: string | true;
-    }).teleport ?? null;
-
-    // Extract remote option (can be true if no description provided, or a string)
-    const remoteOption = (options as {
-      remote?: string | true;
-    }).remote;
-    const remote = remoteOption === true ? '' : remoteOption ?? null;
-
-    // Extract --remote-control / --rc flag (enable bridge in interactive session)
-    const remoteControlOption = (options as {
-      remoteControl?: string | true;
-    }).remoteControl ?? (options as {
-      rc?: string | true;
-    }).rc;
-    // Actual bridge check is deferred to after showSetupScreens() so that
-    // trust is established and GrowthBook has auth headers.
-    let remoteControl = false;
-    const remoteControlName = typeof remoteControlOption === 'string' && remoteControlOption.length > 0 ? remoteControlOption : undefined;
+    // W-opt 可信波 S1（C-1..C-4，#299）：--remote / --teleport / --remote-control·--rc /
+    // --sdk-url 死 flag 族裁除（1P remote/bridge/CCR 执行簇 §8.74.28 ⑭·#200 已裁，
+    // 仅剩 flag 注册 + 提取残留；裁后 = commander unknown option 拒，拒绝等价零行为变化）。
 
     // Validate session ID if provided
     if (sessionId) {
@@ -1139,21 +1096,18 @@ async function run(): Promise<CommanderCommand> {
         process.exit(1);
       }
 
-      // When --sdk-url is provided (bridge/remote mode), the session ID is a
-      // server-assigned tagged ID (e.g. "session_local_01...") rather than a
-      // UUID. Skip UUID validation and local existence checks in that case.
-      if (!sdkUrl) {
-        const validatedSessionId = validateUuid(sessionId);
-        if (!validatedSessionId) {
-          process.stderr.write(chalk.red('Error: Invalid session ID. Must be a valid UUID.\n'));
-          process.exit(1);
-        }
+      // W-opt 可信波 S1（C-3）：--sdk-url 裁除后 session ID 恒走本地 UUID 校验（
+      // 原 sdk-url 云传输 tagged-ID 支随 1P CCR 执行簇裁除，§8.74.28 ⑭）
+      const validatedSessionId = validateUuid(sessionId);
+      if (!validatedSessionId) {
+        process.stderr.write(chalk.red('Error: Invalid session ID. Must be a valid UUID.\n'));
+        process.exit(1);
+      }
 
-        // Check if session ID already exists
-        if (sessionIdExists(validatedSessionId)) {
-          process.stderr.write(chalk.red(`Error: Session ID ${validatedSessionId} is already in use.\n`));
-          process.exit(1);
-        }
+      // Check if session ID already exists
+      if (sessionIdExists(validatedSessionId)) {
+        process.stderr.write(chalk.red(`Error: Session ID ${validatedSessionId} is already in use.\n`));
+        process.exit(1);
       }
     }
 
@@ -1417,11 +1371,13 @@ async function run(): Promise<CommanderCommand> {
     // Headless main sessions without a permission-prompt delegate cannot surface a
     // prompt: convert 'ask' to a clean auto-deny (AUTO_REJECT tool_result +
     // PermissionRequest hooks) instead of hanging on an unanswerable prompt.
-    // Guarded so we never short-circuit an explicit delegate: `--sdk-url` forces
-    // stdio delegation and `--permission-prompt-tool` routes 'ask' to an MCP tool,
-    // both of which must be left to prompt the host/tool.
+    // Guarded so we never short-circuit an explicit delegate:
+    // `--permission-prompt-tool` routes 'ask' to an MCP tool, which must be left
+    // to prompt the tool.
+    // W-opt 可信波 S1（C-3）：--sdk-url 死 flag 裁除（原「--sdk-url forces stdio
+    // delegation」clause 随 1P 云传输支离场，§8.74.28 ⑭）
     const shouldAvoidPermissionPrompts =
-      isNonInteractiveSession && !sdkUrl && !options.permissionPromptTool;
+      isNonInteractiveSession && !options.permissionPromptTool;
     // This await replaces blocking existsSync/statSync calls that were already in
     // the startup path. Wall-clock time is unchanged; we just yield to the event
     // loop during the fs I/O instead of blocking it. See #19661.
@@ -1490,14 +1446,7 @@ async function run(): Promise<CommanderCommand> {
       process.exit(1);
     }
 
-    // Validate sdkUrl is only used with appropriate formats (formats are auto-set above)
-    if (sdkUrl) {
-      if (inputFormat !== 'stream-json' || outputFormat !== 'stream-json') {
-        // biome-ignore lint/suspicious/noConsole:: intentional console output
-        console.error(`Error: --sdk-url requires both --input-format=stream-json and --output-format=stream-json.`);
-        process.exit(1);
-      }
-    }
+    // W-opt 可信波 S1（C-3）：--sdk-url 格式校验支随 flag 裁除（1P 云传输支，§8.74.28 ⑭）
 
     // Validate replayUserMessages is only used with stream-json formats
     if (options.replayUserMessages) {
@@ -2112,12 +2061,14 @@ async function run(): Promise<CommanderCommand> {
       // Kick SessionStart hooks now so the subprocess spawn overlaps with
       // MCP connect + plugin init + print.ts import below. loadInitialMessages
       // joins this at print.ts:4397. Guarded same as loadInitialMessages —
-      // continue/resume/teleport paths don't fire startup hooks (or fire them
+      // continue/resume paths don't fire startup hooks (or fire them
       // conditionally inside the resume branch, where this promise is
       // undefined and the ?? fallback runs). Also skip when setupTrigger is
       // set — those paths run setup hooks first (print.ts:544), and session
       // start hooks must wait until setup completes.
-      const sessionStartHooksPromise = options.continue || options.resume || teleport || setupTrigger ? undefined : processSessionStartHooks('startup');
+      // W-opt 可信波 S1（C-4）：--teleport 死 flag 裁除（1P CCR 会话恢复簇 §8.74.28 ⑭·#200 已裁，
+      // 原 teleport 支仅跳过 startup hooks 无执行面）
+      const sessionStartHooksPromise = options.continue || options.resume || setupTrigger ? undefined : processSessionStartHooks('startup');
       // Suppress transient unhandledRejection if this rejects before
       // loadInitialMessages awaits it. Downstream await still observes the
       // rejection — this just prevents the spurious global handler fire.
@@ -2349,7 +2300,7 @@ async function run(): Promise<CommanderCommand> {
         permissionPromptToolName: options.permissionPromptTool,
         maxTurns: options.maxTurns,
         model: effectiveModel,
-        sdkUrl,
+        // W-opt 可信波 S1（C-3）：--sdk-url 裁除，HeadlessOptions.sdkUrl 透传离场（cli 面字段裁同波提交）
         replayUserMessages: effectiveReplayUserMessages,
         agent: agentCli
       });
@@ -2399,7 +2350,9 @@ async function run(): Promise<CommanderCommand> {
       ...toolPermissionContext,
       mode: isAgentSwarmsEnabled() && getTeammateUtils().isPlanModeRequired() ? 'plan' as const : toolPermissionContext.mode
     };
-    const fullRemoteControl = remoteControl || getRemoteControlAtStartup();
+    // W-opt 可信波 S1（C-2）：--remote-control/--rc 死 flag 裁除（remoteControl 提取残留离场，
+    // bridge 执行簇 §8.74.29 已裁，replBridge* 状态面恒 false 不变）
+    const fullRemoteControl = getRemoteControlAtStartup();
     // 前向缝登记（§8.74.29 1P 簇裁，#200）：1P CCR 镜像面（CCR_MIRROR 门 +
     // bridgeEnabled.isCcrMirrorEnabled）裁除。CCR_MIRROR 默认关（门恒不进），
     // ccrMirrorEnabled 恒 false（行为保真：原运行时该块本就不执行）。
@@ -2443,7 +2396,7 @@ async function run(): Promise<CommanderCommand> {
       remoteConnectionStatus: 'connecting',
       remoteBackgroundTaskCount: 0,
       replBridgeEnabled: fullRemoteControl || ccrMirrorEnabled,
-      replBridgeExplicit: remoteControl,
+      replBridgeExplicit: false,
       replBridgeOutboundOnly: ccrMirrorEnabled,
       replBridgeConnected: false,
       replBridgeSessionActive: false,
@@ -2453,7 +2406,7 @@ async function run(): Promise<CommanderCommand> {
       replBridgeEnvironmentId: undefined,
       replBridgeSessionId: undefined,
       replBridgeError: undefined,
-      replBridgeInitialName: remoteControlName,
+      replBridgeInitialName: undefined,
       showRemoteCallout: false,
       notifications: {
         current: null,
@@ -2609,7 +2562,9 @@ async function run(): Promise<CommanderCommand> {
       // somehow reached at runtime (feature flag overridden), fail gracefully.
       return await exitWithError(root, 'SSH_REMOTE feature not available in this build.', () => gracefulShutdown(1));
     }
-    if (options.resume || options.fromPr || teleport || remote !== null) {
+    // W-opt 可信波 S1（C-1/C-4）：--remote / --teleport 裁除（原 remote !== null 支的 1P remote
+    // 会话创建执行簇已 §8.74.29 裁净，此处仅留 resume/from-pr 入口，零行为变化）
+    if (options.resume || options.fromPr) {
       // Handle resume flow - from file (ant-only), session ID, or interactive selector
 
       // Clear stale caches before resuming to ensure fresh file/skill discovery
@@ -2800,16 +2755,9 @@ async function run(): Promise<CommanderCommand> {
   program.addOption(new Option('--teammate-mode <mode>', 'How to spawn teammates: "tmux", "in-process", or "auto"').choices(['auto', 'tmux', 'in-process']).hideHelp());
   program.addOption(new Option('--agent-type <type>', 'Custom agent type for this teammate').hideHelp());
 
-  // Enable SDK URL for all builds but hide from help
-  program.addOption(new Option('--sdk-url <url>', 'Use remote WebSocket endpoint for SDK I/O streaming (only with -p and stream-json format)').hideHelp());
-
-  // Enable teleport/remote flags for all builds but keep them undocumented until GA
-  program.addOption(new Option('--teleport [session]', 'Resume a teleport session, optionally specify session ID').hideHelp());
-  program.addOption(new Option('--remote [description]', 'Create a remote session with the given description').hideHelp());
-  if (feature('BRIDGE_MODE')) {
-    program.addOption(new Option('--remote-control [name]', 'Start an interactive session with Remote Control enabled (optionally named)').argParser(value => value || true).hideHelp());
-    program.addOption(new Option('--rc [name]', 'Alias for --remote-control').argParser(value => value || true).hideHelp());
-  }
+  // W-opt 可信波 S1（C-1..C-4，#299）：--sdk-url / --teleport / --remote / --remote-control·--rc
+  // 死 flag 族裁除（1P remote/bridge/CCR 执行簇 §8.74.28 ⑭·#200 已裁，仅剩 flag 注册残留；
+  // 裁后 = commander unknown option 拒，拒绝等价零行为变化）
   if (feature('HARD_FAIL')) {
     program.addOption(new Option('--hard-fail', 'Crash on logError calls instead of silently logging').hideHelp());
   }
