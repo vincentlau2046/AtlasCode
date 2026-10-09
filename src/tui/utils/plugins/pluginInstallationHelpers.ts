@@ -23,6 +23,7 @@ import {
   type ResolutionResult,
   resolveDependencyClosure,
 } from './dependencyResolver.js'
+import { reportInstall } from './installCountReporter.js'
 import {
   addInstalledPlugin,
   getGitCommitSha,
@@ -555,6 +556,11 @@ export async function installPluginFromMarketplace({
     // non-official) because dbt external_claude_code_plugin_installs.sql
     // extracts $.plugin_id for official-marketplace install tracking. Other
     // plugin lifecycle events drop the blob key — no downstream consumers.
+
+    // 0.1.46 三源波 S4（#301）：安装数 fire-and-forget 上报。仅
+    // ATLAS_STATS_ENDPOINT 设真时外联（用户自部署计数后端）；缺省 no-op，
+    // 零外联零阻塞（可信清册 D3：上报 = 用户显式配置端点才发生）。
+    reportInstall(pluginId, marketplaceName)
 
     return {
       success: true,

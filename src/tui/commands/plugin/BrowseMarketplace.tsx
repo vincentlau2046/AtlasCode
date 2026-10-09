@@ -16,7 +16,6 @@ import { isPluginGloballyInstalled, isPluginInstalled } from '../../utils/plugin
 import { createPluginId, formatFailureDetails, formatMarketplaceLoadingErrors, getMarketplaceSourceDisplay, loadMarketplacesWithGracefulDegradation } from '../../utils/plugins/marketplaceHelpers.js';
 import { getMarketplaceDisplayName } from '../../utils/plugins/marketplaceDisplayName.js';
 import { getMarketplace, loadKnownMarketplacesConfig } from '../../utils/plugins/marketplaceManager.js';
-import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js';
 import { installPluginFromMarketplace } from '../../utils/plugins/pluginInstallationHelpers.js';
 import { isPluginBlockedByPolicy } from '../../utils/plugins/pluginPolicy.js';
 import { plural } from '../../utils/stringUtils.js';
@@ -274,8 +273,10 @@ export function BrowseMarketplace({
         }
 
         // Fetch install counts and sort by popularity
+        // 0.1.46 S4（#301）：只拉当前市场有 stats 源者（per-marketplace
+        // 注册表；无源市场 = null = 不显数，零额外网络）
         try {
-          const counts = await getInstallCounts();
+          const counts = await getInstallCounts([marketplaceName]);
           if (cancelled) return;
           setInstallCounts(counts);
           if (counts) {
@@ -777,7 +778,8 @@ export function BrowseMarketplace({
                 {plugin_6.entry.category && <Text dimColor> [{plugin_6.entry.category}]</Text>}
                 {plugin_6.entry.tags?.includes('community-managed') && <Text dimColor> [Community Managed]</Text>}
                 {plugin_6.isInstalled && <Text dimColor> (installed)</Text>}
-                {installCounts && selectedMarketplace === OFFICIAL_MARKETPLACE_NAME && <Text dimColor>
+                {/* 0.1.46 S4（#301）：摘官方市场硬门控 → 「有数据即显示」（per-marketplace stats 源注册表） */}
+                {installCounts?.get(plugin_6.pluginId) != null && <Text dimColor>
                       {' · '}
                       {formatInstallCount(installCounts.get(plugin_6.pluginId) ?? 0)}{' '}
                       installs
