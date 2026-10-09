@@ -4,6 +4,44 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.45
+
+W-opt 可信波（基线 v0.1.44；W-opt 可信专项 #299——豁免面 = 模型入口 /
+skill 部署安装 / websearch / webfetch，其余对外通信面 = 须权限申请，
+remote 相关 = 排查 + 删除；e2e gate-045 四判据 GATE-PASS，报告
+`user-e2e/reports/r-20261009-gate-045.md`）：
+
+- **S1 remote 死 flag 族裁除（C-1..C-5，3 提交，main.tsx 43+/95- 等）**：
+  `--remote` / `--remote-control` / `--rc` / `--teleport` 4 flag 注册 +
+  消费支全裁（裁后 = commander unknown option 拒绝，零行为变化）/
+  `sdkUrl` 透传死支 / `setSessionSource('remote-control')` 死面 /
+  C-5 配置族（`remoteControlAtStartup` 字段 + `getRemoteControlAtStartup()`
+  + `remoteDialogSeen` 死键 + Config 菜单/摘要支 + ConfigTool BRIDGE_MODE
+  条目 + migrateReplBridge 迁移文件整删）/ C-3 cli 面（--sdk-url 注册 +
+  校验 + 透传 + 双格式错误支，parse/print/dispatch 三文件）。AppState
+  replBridge* 状态面保留仅改值源（false/undefined）。
+- **S2 GCS 1P 下载体裁除（2 文件，净 −256 行）**：`download.ts` 重写为
+  纯本地版（版本/通道校验保留；下载点改显式 throw「本产品无 native
+  发行形态，仅 npm/git 源」；GCS_BUCKET_URL / axios / stall-timeout /
+  重试族全裁）；`autoUpdater.ts` 头注去 GCS 桶 URL 文本。保留 =
+  `fetchTelemetry.ts` 'storage.googleapis.com' 分类白名单条目（非下载体，
+  S5 登记观察项）。
+- **S5 可信清册登记（8 处前向缝注释，零码零行为变化）**：D1 自动更新
+  豁免（settings.json 单向迁移观察项 a/b）/ D3 1P 仓只读豁免
+  （releaseNotes 自家仓 + installCounts 1P stats URL）/ B-5 用户发起面
+  （mcp client）/ B-6 git 用户动作（worktree）/ C-7 本地 UDS 豁免
+  （udsInboxEnabled）/ 0.1.46 S4 指针（installCounts per-marketplace
+  可插拔数据源）。
+- **测试族随 C-3 重锚（3 红 → 绿）**：S-C2/S-C4 迁移测试族钉裁前
+  --sdk-url 契约 → 重锚裁后契约（缺席断言 + 输入侧判别支 + commander
+  unknown option 拒绝支，gate ② 探针同口径）。
+- **D1 自动更新根因闭环（用户裁定）**：`~/.atlas/settings.json`
+  `env:{"DISABLE_AUTOUPDATER":"1"}` 确认非用户设置（单向迁移残留）→
+  删键；新装默认开四步链核验（本机自动升级终证随 0.1.46 发布后落）。
+
+四件套（gate 口径）：tsc 0 / eslint src/ 0e·0w / build 3846 模块 /
+全量 3814 pass·0 fail·274 files。
+
 ## v0.1.44
 
 Grep ENOENT 根修波（**A+S3 单一事实源**，基线 v0.1.43；用户 2026-10-08 报
