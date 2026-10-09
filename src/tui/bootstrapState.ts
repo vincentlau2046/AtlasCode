@@ -74,10 +74,11 @@ export const getInlinePlugins : any = (() => ({})) as any;
 // so the stub MUST return a Map (not a plain object). Empty Map + the no-op
 // addInvokedSkill stub means skill attachments are skipped in stubbed mode.
 export const getInvokedSkillsForAgent : any = (() => new Map()) as any;
-// Remote mode is only set by main.tsx --remote/--teleport paths. Must default
-// to boolean false — a truthy stub (e.g. `() => ({})`) makes every
-// `if (getIsRemoteMode()) return` guard misfire in local TUI: /session (remote
-// QR command) passes its isEnabled gate and renders "(no content)".
+// Remote mode is always false in this build (the main.tsx --remote/--teleport
+// paths were removed with Remote Control, W-opt 可信波 S1 §8.74.29, #299).
+// Must default to boolean false — a truthy stub (e.g. `() => ({})`) makes
+// every `if (getIsRemoteMode()) return` guard misfire in local TUI: /session
+// (remote QR command) passes its isEnabled gate and renders "(no content)".
 let _isRemoteMode = false
 export const getIsRemoteMode : any = () => _isRemoteMode;
 export const getIsScrollDraining : any = (() => ({})) as any;

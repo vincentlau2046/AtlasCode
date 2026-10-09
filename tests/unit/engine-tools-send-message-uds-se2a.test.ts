@@ -183,7 +183,7 @@ describe('U-P3 validate UDS 4 块', () => {
     ).toEqual({
       result: false,
       message:
-        'Remote Control is not connected — cannot send to a bridge: target. Reconnect with /remote-control first.',
+        'Remote Control is not connected — cannot send to a bridge: target.',
       errorCode: 9,
     })
   })

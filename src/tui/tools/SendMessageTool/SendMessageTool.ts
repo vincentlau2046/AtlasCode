@@ -666,7 +666,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
           return {
             result: false,
             message:
-              'Remote Control is not connected — cannot send to a bridge: target. Reconnect with /remote-control first.',
+              'Remote Control is not connected — cannot send to a bridge: target.',
             errorCode: 9,
           }
         }
