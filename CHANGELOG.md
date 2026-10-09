@@ -4,6 +4,60 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.46
+
+三源+安装数波（基线 v0.1.45；W-opt 可信专项 #299 / #301——3 源预集成
+manifest 兜底 + 安装数计数后端自包含；e2e gate-046 首跑 ① hard-fail 打回
+（S3 引入的 registry 并发写覆盖），修后重 gate GATE-PASS（6 判据全绿，
+① 修验收 fallback×3 终态 3/3 ×3 确定化），报告
+`user-e2e/reports/r-20261009-gate-046-r2.md`（前驱 r1 GATE-OPEN =
+`r-20261009-gate-046.md`）：
+
+- **S3 3 源预集成 manifest 快照兜底（11 文件，3 判别单测文件 20 测）**：
+  3 市场（agent-skills 33 / atlas-plugins 24 / claude-plugins-official 310）
+  插件清单快照 .ts 数据模块打包进 npm（bun 脚本从本地克隆生成，计数基线
+  钉死防再生成漂移，`scripts/generate-marketplace-snapshots.ts`）；preset
+  物化失败（git 缺失 / 克隆失败）回落本地 `source:'directory'` 快照目录源
+  （直写 known_marketplaces.json——保留名反占位校验拒非 GitHub/git 源
+  的先例路径；企业策略闸仍生效，policy 不兜底）→ 新装 / 活源未就绪
+  零网络 /plugin 见 3 源插件清单；快照条目不短路 already_installed
+  （每次启动仍尝试活物化 = git 恢复窗口，活成功清理孤儿快照目录）；
+  保留 0.1.43 失败可见性：通知层 fallback 提示「源未就绪 · 已用内建快照
+  目录（/plugin 可浏览插件清单）· 下次启动自动重试活同步」。
+  - **gate-046 ① hard-fail 修（S3 引入缺陷，首跑 fresh-home 4/5 复现）**：
+    3 启动 preset hook 并发整文件读改写 known_marketplaces.json（非原子、
+    无锁）→ last-writer-wins 冲掉兄弟条目（恒丢 atlas-plugins，/plugin 2/3
+    源 + discover 缺 24 插件）。修 = registry RMW in-process 互斥：
+    marketplaceManager 模块级 promise 链锁 + 导出
+    updateKnownMarketplacesConfig(mutator)（读-改-写全程持锁，mutator 拿
+    新载配置，undefined 返 = 幂等零写，抛错 = 零写且不卡锁）；全部 7 个
+    registry 写点改走互斥（seed 同步 / addMarketplaceSource 活路径（网络
+    工作锁外）/ 快照兜底支 / 官方 GCS 直写 / adoptOrphan / remove /
+    setAutoUpdate）；网络相关 lastUpdated 站点（getMarketplace 重取 /
+    refresh 族）留锁外（裁定：持锁分钟级阻塞启动 hook），跨进程覆盖不在
+    本修范围。判别单测 7（3 并发 3/3 / 兜底 3 源并发 3/3 / 混跑 / 抛错不卡
+    / undefined 零写，链打穿 mutation-red 已验）。
+- **S4 安装数计数后端自包含（6 文件，17 判别单测）**：per-marketplace
+  可插拔 stats 源注册表（摘 1P 硬编码 + 官方市场硬门控）：
+  claude-plugins-official 恒 1P 官方 stats 文件（anthropic 生态兼容，env
+  不覆写）；atlas-plugins/agent-skills = atlas-plugins 仓单文件计数后端
+  （`stats/install-counts.json`，零用户 infra，市场侧 b3baeac 已推；初始
+  plugins=[] 诚实零基线，不伪造社会证明数据）；无源市场 = null（UI 优雅
+  不显数）；`ATLAS_STATS_ENDPOINT` 可覆写（自部署后端基址：显数 GET
+  {base}/stats/install-counts.json + 上报 POST {base}/stats/report 双固定
+  路径），缺省 = 不上报不显自建数，零外联零阻塞（可信清册 D3：上报 =
+  用户显式配置端点才发生）；客户端装成功 fire-and-forget 上报（install-
+  PluginFromMarketplace 成功路径接线，任何失败吞掉永不阻塞安装）；UI 摘
+  官方市场硬门控 →「有数据即显示」（DiscoverPlugins / BrowseMarketplace，
+  后者取数收窄为当前市场源，无源 = 零网络）；缓存升 v2（per-source 条目
+  + 24h TTL，v1 文件版本不符 → 重拉无迁移）；单源失败不拖垮其余源，
+  全挂 = null 不显误导性零值。
+
+- **e2e 定因登记 2 项（不阻 gate，后续波裁）**：① 搜索框激活后输入注册
+  异常（DiscoverPlugins 搜索首字激活支 vs 稳态支分叉，激活后后续字符丢失；
+  既有非本波，S3/S4 变更面不含搜索输入路径 → 建议后续 TUI 输入鲁棒性工单）
+  ② K2 kill-switch 用户面面捕获非确定性（探针面；K1 状态面判据稳定绿）。
+
 ## v0.1.45
 
 W-opt 可信波（基线 v0.1.44；W-opt 可信专项 #299——豁免面 = 模型入口 /
