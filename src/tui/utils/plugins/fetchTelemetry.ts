@@ -10,6 +10,12 @@
  * Volume: these fire at startup (install-counts 24h-TTL)
  * and on explicit user action (install/update). NOT per-interaction. Similar
  * envelope to atlas_binary_download_*.
+ *
+ * W-opt 可信波 S5（#299）可信清册观察项：KNOWN_PUBLIC_HOSTS = 遥测分类 host
+ * 桶白名单（仅对 fetch 来源主机名分类，非下载/数据出境通道；遥测 sink 已
+ * 移除，无传输面）。'storage.googleapis.com' 条目 = GCS 遗留桶分类项，
+ * 在 S2「GCS 1P 下载体裁除」范围外（S2 裁 = nativeInstaller 下载体，非
+ * 分类白名单）→ 登记观察项，零行为变化（e2e gate-045 相邻观察项 1 裁入）。
  */
 
 import { OFFICIAL_MARKETPLACE_NAME } from './officialMarketplace.js'
@@ -38,7 +44,7 @@ const KNOWN_PUBLIC_HOSTS = new Set([
   'codeberg.org',
   'dev.azure.com',
   'ssh.dev.azure.com',
-  'storage.googleapis.com', // GCS — where Dickson's migration points
+  'storage.googleapis.com', // GCS legacy distribution bucket (classification entry only)
 ])
 
 /**
