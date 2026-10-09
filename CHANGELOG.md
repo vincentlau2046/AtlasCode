@@ -4,6 +4,45 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.44
+
+Grep ENOENT 根修波（**A+S3 单一事实源**，基线 v0.1.43；用户 2026-10-08 报
+npm 通道 Grep 工具/文件补全/全局搜索/文件计数/Bash shell 集成/doctor 全
+ENOENT〔潜伏既有缺陷，非近期波回归〕，工单
+`docs/2026-10-08-grep-enent-rootfix.md`）：
+
+- **根因定案**（三方交叉）：npm 包从未携带 `vendor/ripgrep` 二进制（9b78536 起
+  `files=["dist"]`、git 历史无 vendor/、0.1.7~0.1.42 四版 tarball 实测 0 条目）→
+  TUI 三模式 resolver 默认落 builtin 路径 `vendor/ripgrep/<arch>/rg`（ENOENT）；
+  C-Deep 波（c4a3ef5）只迁 engine/sandbox 侧 system-rg 单模式、TUI 侧漏迁
+  = 双实现漂移产物（用户 2026-10-08 20:33 npm 新装 0.1.42 暴露）。
+- **A+S3 单一事实源**（`src/sandbox/ripgrep.ts` 重写）：三级 resolver =
+  ① 系统 rg（`rg --version` 探测，命令名经 $PATH 解析保留反劫持安全语义）
+  ② `@vscode/ripgrep` 平台二进制兜底（12 平台包随 npm/bun install 自动装
+  当前平台、无 postinstall；`createRequire().resolve()` 解析 `bin/rg`，
+  **不**加载 wrapper ESM〔其顶层 throw 会拖垮 CLI 启动〕）③ 双缺 →
+  `RipgrepMissingError`（可操作错误面：明说原因 + 两条修复路径，取代裸 ENOENT）。
+- **10 消费方 rewire** 走 `src/tui/sandboxCompat` 门面（GrepTool /
+  fileSuggestions / GlobalSearchDialog / main.tsx / ShellSnapshot /
+  doctorDiagnostic / glob / api / orphanedPluginFilter / markdownConfigLoader）；
+  `src/tui/utils/ripgrep.ts` 删除（三模式 resolver + vendor/ripgrep 死路径 +
+  codesign/argv0/WSL 60s 特例全裁，头注残余登记 ①~④）；`USE_BUILTIN_RIPGREP`
+  死键登记（engine+tui 双白名单点注，白名单项保留不删）。
+- **`@vscode/ripgrep@1.18.0` 入 dependencies**（MIT / Microsoft；无
+  postinstall；无系统 rg 的新机器经兜底二进制仍可用 Grep = 彻底根除）。
+- doctor 面 mode 值域随 A+S3（`system/bundled/missing`）；语义保留（EAGAIN
+  单线程重试 / code 1=无匹配 / 超时部分结果回收 / `RipgrepTimeoutError`
+  20s 默认 `ATLAS_GLOB_TIMEOUT_SECONDS` 可调 / maxBuffer 20MB / SIGKILL）。
+- 新单测 `tests/unit/sandbox-ripgrep-as3.test.ts`（7 项：none 级错误面 /
+  path 级形状 / 自然 env 三级 / 平台矩阵 / keyed memo / 状态面）；四件套
+  tsc0·eslint0·build3847·全量单测 3814/0·274；bundle 验真：
+  `import.meta.url`/`createRequire`/平台包模板/`RipgrepMissingError` 均留存
+  dist ESM。
+- 功能探针（本侧源级真跑）：G1 系统 rg 面（真结果 59 行）/ G2 PATH 隔离
+  兜底面（`@vscode/ripgrep-linux-x64/bin/rg` 真跑 12 行 = 核心新判据
+  修前红→修后绿）/ G3 双缺错误面 全绿；live-gelu 单跑 25/0（gateway 负载
+  期全量挂起已定因环境非产品，gateway 恢复后独立复跑绿）。
+
 ## v0.1.43
 
 多 OS 优化波（**Windows 新装反馈 4 问题处置**，基线 v0.1.42；gate = e2e 六判据
