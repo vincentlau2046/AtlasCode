@@ -7,11 +7,13 @@
  *    addDir→addDirs / permissionPromptTool→permissionPromptToolName）/
  *    负位选项映射（sessionPersistence=false→disablePersistence）/ 布尔支
  *    （=== true 判真，commander --flag 缺省 undefined 不泄漏）/ 空选项最小面
- *  - commit 6 格式兼容校验 3 支（旧 main.tsx L1500-1535 S-C4 回填）：
- *    stream-json 输入 + 非 stream-json 输出 / --sdk-url / --replay-user-
- *    messages 跨字段约束 → 文案 + exit 1（process.exit stub 断言，H6
- *    防空洞：断言显式校验行为而非能力假绿；支 1 文案 = S-C5 修波 S4 订正
- *    后逐字「requires output-format=stream-json」）
+ *  - commit 6 格式兼容校验支（旧 main.tsx L1500-1535 S-C4 回填）：
+ *    stream-json 输入 + 非 stream-json 输出 / --replay-user-messages 跨字段
+ *    约束 → 文案 + exit 1（process.exit stub 断言，H6 防空洞：断言显式
+ *    校验行为而非能力假绿；支 1 文案 = S-C5 修波 S4 订正后逐字
+ *    「requires output-format=stream-json」）；--sdk-url 支随 W-opt 可信波
+ *    S1（C-3，#299）死 flag 裁除重锚 = commander unknown option 拒绝
+ *    （CommanderError 断言，裁前错误支等价拒绝）
  *  - commit 6 门面显式名块（commands/sessionList/setup）：函数面在场
  *  - S-C5 修波：-p 支前置 runCliSetup（S2 安全门接线）后 -p 主面测试经
  *    setup 前导（hooks 快照 / getCommands 预取），ATLAS_CONFIG_DIR 隔离
@@ -93,6 +95,8 @@ describe('cli 域 S-C4 commit 6 · -p 接线映射面（buildHeadlessOptions）'
       maxTurns: 5,
       model: 'premium',
       dangerouslySkipPermissions: true,
+      // W-opt 可信波 S1（C-3，#299）：sdkUrl 输入键保留 = 判别支（HeadlessOptions
+      // 字段已裁，多传该键不得泄漏进输出；输出侧断言缺席见下）
       sdkUrl: 'ws://example.com',
       replayUserMessages: true,
       agent: 'builder',
@@ -114,7 +118,8 @@ describe('cli 域 S-C4 commit 6 · -p 接线映射面（buildHeadlessOptions）'
       model: 'premium',
       dangerouslySkipPermissions: true,
       addDirs: undefined,
-      sdkUrl: 'ws://example.com',
+      // W-opt 可信波 S1（C-3，#299）：sdkUrl 字段随 HeadlessOptions 裁除离场
+      //（1P 云传输域外；裁前 = 透传字段，裁后 = 输入多传该键不泄漏进输出）
       replayUserMessages: true,
       agent: 'builder',
       disablePersistence: true,
@@ -148,16 +153,30 @@ describe('cli 域 S-C4 commit 6 · -p 格式兼容校验支（旧 main.tsx L1500
     )
   })
 
-  test('--sdk-url + 非 stream-json 双格式 → 错误支 exit 1', async () => {
-    const { exited, stderr } = await runPrintAction([
-      '-p',
-      '--sdk-url',
-      'ws://example.com',
-      'hello',
-    ])
-    expect(exited).toBe(1)
-    expect(stderr).toContain(
-      '--sdk-url requires both --input-format=stream-json and --output-format=stream-json',
+  test('--sdk-url 已裁 → commander unknown option 拒绝（裁前错误支等价拒绝）', async () => {
+    // W-opt 可信波 S1（C-3，#299）：--sdk-url 死 flag 裁除（1P 云传输域外）。
+    // 裁前「双格式错误支 exit 1」随 flag 离场；裁后等价拒绝 = commander
+    // unknown option（exitOverride → CommanderError；gate ② 探针：exit 1 +
+    // stderr 同文案「error: unknown option '--sdk-url'」）。H6：断言真拒绝支
+    // （CommanderError 消息面），非 seam 文案。
+    const program = buildProgram()
+    program.exitOverride()
+    let rejection: unknown
+    try {
+      await program.parseAsync([
+        'node',
+        'atlascode',
+        '-p',
+        '--sdk-url',
+        'ws://example.com',
+        'hello',
+      ])
+    } catch (e) {
+      rejection = e
+    }
+    expect(rejection, '--sdk-url 应为 unknown option 拒绝').toBeInstanceOf(Error)
+    expect((rejection as Error).message).toContain(
+      "unknown option '--sdk-url'",
     )
   })
 

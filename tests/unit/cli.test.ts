@@ -8,7 +8,8 @@
  *  - dev.hasDevFlag（dev 面嗅探面；`--flag=x` 形态不命中 = 旧 commander
  *    boolean 语义）
  *  - parse.buildProgram 结构面：name / 版本 flag / 入域选项面在场 /
- *    域外裁选项面缺席（advisor / teleport / remote / remote-control）/
+ *    域外裁选项面缺席（advisor / teleport / remote / remote-control /
+ *    sdk-url〔W-opt 可信波 S1 C-3 裁〕）/
  *    UDS env 门两态（ATLAS_EXPERIMENTAL_UDS_INBOX opt-in 默认 OFF）/
  *    TRANSCRIPT_CLASSIFIER 门（ON_BY_DEFAULT → --enable-auto-mode 在场）
  *  - 接缝接线断言（H6 防空洞：断言「显式接缝行为」而非能力假绿）：
@@ -241,7 +242,6 @@ describe('cli 域 S-C2 · buildProgram 结构面', () => {
       '--tmux',
       '--agent-id',
       '--teammate-mode',
-      '--sdk-url',
       '--setting-sources',
     ]) {
       expect(longs, `${opt} 缺席`).toContain(opt)
@@ -254,7 +254,14 @@ describe('cli 域 S-C2 · buildProgram 结构面', () => {
 
   test('域外裁选项面缺席（裁登记见 parse.ts 头注）', () => {
     const longs = optionLongs(buildProgram())
-    for (const opt of ['--advisor', '--teleport', '--remote', '--remote-control']) {
+    // W-opt 可信波 S1（C-3，#299）：--sdk-url 随 remote 死 flag 族裁除（CCR 域外）
+    for (const opt of [
+      '--advisor',
+      '--teleport',
+      '--remote',
+      '--remote-control',
+      '--sdk-url',
+    ]) {
       expect(longs, `${opt} 应为域外裁（不注册）`).not.toContain(opt)
     }
   })
