@@ -11,7 +11,8 @@
  *   域外裁（归属波）：
  *   - --advisor（canUserConfigureAdvisor advisor 面域外）/ --teleport·--remote
  *     （remote 族波）/ --remote-control·--rc（BRIDGE_MODE 桥面 前向缝登记（§8.74.28 ⑭，#200））
- *   - --sdk-url 消费支（CCR 域外；选项注册保留为惰性数据，消费裁）
+ *   - --sdk-url（CCR 域外；W-opt 可信波 S1（C-3，#299）：选项注册 + 消费支 +
+ *     HeadlessOptions 字段全裁，裁后 = commander unknown option 拒，拒绝等价零行为变化）
  *   - 子命令域外子集（不注册）：server（remote 族波；旧仓 = cc:// URL 改写
  *     面，无 command('server') 注册）· ssh / open（订正 #27：旧仓 main.tsx
  *     无 command('ssh')/command('open') 注册，仅 L3113 cc:// 注释提及 open，
@@ -267,7 +268,7 @@ export function buildHeadlessOptions(
     dangerouslySkipPermissions:
       options.dangerouslySkipPermissions === true ? true : undefined,
     addDirs: options.addDir as HeadlessOptions['addDirs'],
-    sdkUrl: options.sdkUrl as HeadlessOptions['sdkUrl'],
+    // W-opt 可信波 S1（C-3，#299）：sdkUrl 透传随 HeadlessOptions 字段裁除离场
     replayUserMessages:
       options.replayUserMessages === true ? true : undefined,
     agent: options.agent as HeadlessOptions['agent'],
@@ -361,15 +362,8 @@ async function mainActionSeam(
       )
       process.exit(1)
     }
-    if (
-      options.sdkUrl &&
-      (inputFormat !== 'stream-json' || outputFormat !== 'stream-json')
-    ) {
-      process.stderr.write(
-        'Error: --sdk-url requires both --input-format=stream-json and --output-format=stream-json.\n',
-      )
-      process.exit(1)
-    }
+    // W-opt 可信波 S1（C-3，#299）：--sdk-url 格式校验支随 flag 裁除（裁前传参必走
+    // print.ts 运行支 throw 明示，裁后 commander unknown option 拒，拒绝等价零行为变化）
     if (
       options.replayUserMessages &&
       (inputFormat !== 'stream-json' || outputFormat !== 'stream-json')
@@ -838,17 +832,9 @@ export function buildProgram(): CommanderCommand {
     new Option('--agent-type <type>', 'Custom agent type for this teammate').hideHelp(),
   )
 
-  // Enable SDK URL for all builds but hide from help
-  // 裁登记：消费支 = CCR 域外（选项保留为惰性数据）
-  program.addOption(
-    new Option(
-      '--sdk-url <url>',
-      'Use remote WebSocket endpoint for SDK I/O streaming (only with -p and stream-json format)',
-    ).hideHelp(),
-  )
-
-  // 裁登记：--teleport / --remote（remote 族波）/ --remote-control·--rc
-  // （BRIDGE_MODE 桥面 前向缝登记（§8.74.28 ⑭，#200））不随迁
+  // 裁登记：--teleport / --remote / --remote-control·--rc（remote 族波 / BRIDGE_MODE 桥面
+  // 前向缝登记（§8.74.28 ⑭，#200））+ --sdk-url（W-opt 可信波 S1 C-3，#299：注册 + 消费 +
+  // HeadlessOptions 字段全裁，裁后 = commander unknown option 拒，拒绝等价零行为变化）不随迁
   if (feature('HARD_FAIL')) {
     program.addOption(
       new Option(

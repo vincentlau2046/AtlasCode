@@ -33,7 +33,8 @@
  *
  * 裁 / 接缝登记（H6 防空洞，复审勿当遗漏重提）：
  *   - RemoteIO（旧仓 cli/remoteIO.ts 255L，--sdk-url 云传输）= 域外裁
- *     （remote 族波 前向缝登记（§8.74.28 ⑭，#200））→ sdkUrl 选项校验保留，运行支 throw 明示。
+ *     （remote 族波 前向缝登记（§8.74.28 ⑭，#200））→ W-opt 可信波 S1（C-3，#299）：
+ *     sdkUrl 字段 / 校验支 / 运行 throw 支全裁，零行为变化。
  *   - 旧仓命令队列 + 后台 agent do-while 等待环（getRunningTasks /
  *     isBackgroundTask / heldBackResult 背压）→ drain pump 架构：
  *     后台 for-await 泵（启动即开跑，SDK host control_response 任意
@@ -183,7 +184,7 @@ export interface HeadlessOptions {
   model?: string
   dangerouslySkipPermissions?: boolean
   addDirs?: string[]
-  sdkUrl?: string
+  // W-opt 可信波 S1（C-3，#299）：sdkUrl 字段裁除（1P 云传输域外，--sdk-url flag 同步裁）
   replayUserMessages?: boolean
   agent?: string
   disablePersistence?: boolean
@@ -351,20 +352,15 @@ function extractUserText(message: SdkUserMessage): string {
 
 /**
  * 本地结构化 IO 构造（旧 getStructuredIO L4651 随迁；RemoteIO 支裁——
- * sdkUrl 云传输 = 域外裁〔remote 族波〕，运行支 throw 明示）。
+ * sdkUrl 云传输 = 域外裁〔remote 族波〕；W-opt 可信波 S1（C-3，#299）：
+ * 字段 + throw 支全裁，零行为变化）。
  * 字符串 prompt = 首回合直消费（makeUserMessage 进 messages，不经 stdin 环）；
  * 多回合 stdin 流由 AsyncIterable 入参承载。
  */
 function createStructuredIO(
   inputPrompt: string | AsyncIterable<string>,
-  options: { sdkUrl: string | undefined; replayUserMessages?: boolean },
+  options: { replayUserMessages?: boolean },
 ): StructuredIO {
-  if (options.sdkUrl) {
-    // 域外裁（前向缝登记（§8.74.28 ⑭，#200））：--sdk-url 云传输（RemoteIO 255L）未随迁
-    throw new Error(
-      '--sdk-url is not available in this build (cloud transport cut; see cli 域裁登记)',
-    )
-  }
   const inputStream =
     typeof inputPrompt === 'string' ? fromArray([]) : inputPrompt
   return new StructuredIO(inputStream, options.replayUserMessages)
@@ -557,8 +553,8 @@ export async function runHeadless(
   const hasValidResumeSessionId =
     typeof options.resume === 'string' &&
     (validateUuidLocal(options.resume) || options.resume.endsWith('.jsonl'))
-  const isUsingSdkUrl = Boolean(options.sdkUrl)
-  if (!inputPrompt && !hasValidResumeSessionId && !isUsingSdkUrl) {
+  // W-opt 可信波 S1（C-3，#299）：isUsingSdkUrl 裁除（sdkUrl 字段已裁，原值恒 false，零行为变化）
+  if (!inputPrompt && !hasValidResumeSessionId) {
     process.stderr.write(
       `Error: Input must be provided either through stdin or as a prompt argument when using --print\n`,
     )
@@ -572,7 +568,6 @@ export async function runHeadless(
   }
 
   const structuredIO = createStructuredIO(inputPrompt, {
-    sdkUrl: options.sdkUrl,
     replayUserMessages: options.replayUserMessages,
   })
 
@@ -607,8 +602,7 @@ export async function runHeadless(
 
   // ── 权限上下文 + 工具池 + loop deps（组合根 createAgentLoopDeps，
   // W3-3b §8.74.15：①②③④⑤ 经构建器单入口，headless 行内组装块替换）──
-  const hasPromptRoute =
-    isUsingSdkUrl || options.permissionPromptToolName === 'stdio'
+  const hasPromptRoute = options.permissionPromptToolName === 'stdio'
   const role: ModelRole = options.model
     ? modelToRole(options.model)
     : 'premium'
@@ -708,7 +702,7 @@ export async function runHeadless(
     options: { isNonInteractiveSession: true },
   })
   const canUseTool = getCanUseToolFn(
-    isUsingSdkUrl ? 'stdio' : options.permissionPromptToolName,
+    options.permissionPromptToolName,
     structuredIO,
     () => mcpTools,
     hasPromptRoute ? onPermissionPrompt : undefined,

@@ -4,9 +4,10 @@
  * 裁登记，及 getInputPrompt L773-799 逐字随迁。
  *
  * 随迁：NoDefaultCurrentDirectoryInExePath 安全守卫 / SIGINT -p 特判 /
- * hasPrintFlag·hasInitOnlyFlag·hasSdkUrl·isTTY → setIsInteractive 判定 /
+ * hasPrintFlag·hasInitOnlyFlag·isTTY → setIsInteractive 判定（hasSdkUrl 判定
+ * W-opt 可信波 S1（C-3，#299）随 --sdk-url 死 flag 裁除）/
  * clientType 判定（GITHUB_ACTIONS / ATLAS_ENTRYPOINT 族 / remote ingress）/
- * questionPreviewFormat / ATLAS_ENVIRONMENT_KIND bridge 会话源标记 /
+ * questionPreviewFormat /
  * eagerLoadSettings / runCli 交接 / getInputPrompt（stdin 3s peek 超时支）。
  *
  * 裁登记（不随迁，复审勿当遗漏重提）：
@@ -38,7 +39,6 @@ import { isEnvTruthy, PRODUCT_BRAND } from '../shared' // BR-1（spec §6.2）�
 import {
   setClientType,
   setQuestionPreviewFormat,
-  setSessionSource,
   setIsInteractive,
 } from '../bootstrap'
 import {
@@ -111,9 +111,10 @@ export async function main(): Promise<void> {
   const cliArgs = process.argv.slice(2)
   const hasPrintFlag = cliArgs.includes('-p') || cliArgs.includes('--print')
   const hasInitOnlyFlag = cliArgs.includes('--init-only')
-  const hasSdkUrl = cliArgs.some(arg => arg.startsWith('--sdk-url'))
+  // W-opt 可信波 S1（C-3，#299）：hasSdkUrl 判定裁除（--sdk-url 死 flag 注册已裁，
+  // 裁后 = commander unknown option 拒，拒绝等价零行为变化）
   const isNonInteractive =
-    hasPrintFlag || hasInitOnlyFlag || hasSdkUrl || !process.stdout.isTTY
+    hasPrintFlag || hasInitOnlyFlag || !process.stdout.isTTY
 
   // Stop capturing early input for non-interactive modes
   // 裁登记：stopCapturingEarlyInput（早期输入捕获面未落盘，残留守）
@@ -159,10 +160,8 @@ export async function main(): Promise<void> {
     setQuestionPreviewFormat('markdown')
   }
 
-  // Tag sessions created via `atlascode remote-control` so the backend can identify them
-  if (process.env.ATLAS_ENVIRONMENT_KIND === 'bridge') {
-    setSessionSource('remote-control')
-  }
+  // W-opt 可信波 S1（C-2，#299）：setSessionSource('remote-control') 死面裁除（1P remote-control
+  // 执行簇 §8.74.29 已裁，ATLAS_ENVIRONMENT_KIND='bridge' 门无写入方恒 false，零行为变化）
 
   // Parse and load settings flags early, before init()
   eagerLoadSettings()
