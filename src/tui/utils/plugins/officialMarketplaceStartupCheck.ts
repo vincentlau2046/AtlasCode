@@ -24,6 +24,11 @@ import {
   saveKnownMarketplacesConfig,
 } from './marketplaceManager.js'
 import {
+  installBuiltinSnapshotFallback,
+  isBuiltinSnapshotEntry,
+  removeBuiltinSnapshotDir,
+} from './marketplaceSnapshotFallback.js'
+import {
   OFFICIAL_MARKETPLACE_NAME,
   OFFICIAL_MARKETPLACE_SOURCE,
 } from './officialMarketplace.js'
@@ -151,6 +156,15 @@ export type OfficialMarketplaceCheckResult = {
   reason?: OfficialMarketplaceSkipReason
   /** Whether saving retry metadata to config failed */
   configSaveFailed?: boolean
+  /**
+   * 0.1.46 三源波 S3（#301）：GCS/git 均不可用、已回落内建 manifest
+   * 快照目录源（零网络）。`installed` 同为 true（/plugin 可见），语义 =
+   * 兜底态；通知层保留 0.1.43 失败可见性，重试元数据照常记录 →
+   * 下次启动仍会尝试活物化（快照条目不短路 already_installed）。
+   */
+  fallback?: 'builtin-snapshot'
+  /** The live-failure reason that triggered the snapshot fallback. */
+  fallbackReason?: OfficialMarketplaceSkipReason
 }
 
 /**
@@ -197,19 +211,29 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       return { installed: false, skipped: true, reason: 'policy_blocked' }
     }
 
-    // Check if marketplace is already installed
+    // Check if marketplace is already installed.
+    // 0.1.46 S3: a snapshot entry (previous fallback state) does NOT
+    // short-circuit — the live source still gets a materialization attempt
+    // on this startup (GCS/git/network may have recovered).
     const knownMarketplaces = await loadKnownMarketplacesConfig()
-    if (knownMarketplaces[OFFICIAL_MARKETPLACE_NAME]) {
-      logForDebugging(
-        `Official marketplace '${OFFICIAL_MARKETPLACE_NAME}' already installed, skipping`,
-      )
-      // Mark as attempted so we don't check again
-      saveGlobalConfig(current => ({
-        ...current,
-        officialMarketplaceAutoInstallAttempted: true,
-        officialMarketplaceAutoInstalled: true,
-      }))
-      return { installed: false, skipped: true, reason: 'already_installed' }
+    const existingOfficial = knownMarketplaces[OFFICIAL_MARKETPLACE_NAME]
+    if (existingOfficial) {
+      if (isBuiltinSnapshotEntry(existingOfficial)) {
+        logForDebugging(
+          `Official marketplace is a built-in snapshot entry — attempting live materialization`,
+        )
+      } else {
+        logForDebugging(
+          `Official marketplace '${OFFICIAL_MARKETPLACE_NAME}' already installed, skipping`,
+        )
+        // Mark as attempted so we don't check again
+        saveGlobalConfig(current => ({
+          ...current,
+          officialMarketplaceAutoInstallAttempted: true,
+          officialMarketplaceAutoInstalled: true,
+        }))
+        return { installed: false, skipped: true, reason: 'already_installed' }
+      }
     }
 
     // Check enterprise policy restrictions
@@ -245,6 +269,9 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         lastUpdated: new Date().toISOString(),
       }
       await saveKnownMarketplacesConfig(known)
+      // Live source landed (GCS) — clean up any orphaned snapshot
+      // materialization (best-effort).
+      await removeBuiltinSnapshotDir(OFFICIAL_MARKETPLACE_NAME)
 
       saveGlobalConfig(current => ({
         ...current,
@@ -283,6 +310,8 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         officialMarketplaceAutoInstallLastAttemptTime: now,
         officialMarketplaceAutoInstallNextRetryTime: nextRetryTime,
       }))
+      const fallback = await tryOfficialSnapshotFallback('gcs_unavailable')
+      if (fallback) return fallback
       return { installed: false, skipped: true, reason: 'gcs_unavailable' }
     }
 
@@ -320,6 +349,8 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
           { level: 'error' },
         )
       }
+      const fallback = await tryOfficialSnapshotFallback('git_unavailable')
+      if (fallback) return fallback
       return {
         installed: false,
         skipped: true,
@@ -334,6 +365,9 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
 
     // Success
     logForDebugging('Successfully auto-installed official marketplace')
+    // Live clone landed (git) — clean up any orphaned snapshot
+    // materialization (best-effort).
+    await removeBuiltinSnapshotDir(OFFICIAL_MARKETPLACE_NAME)
     const previousRetryCount =
       config.officialMarketplaceAutoInstallRetryCount || 0
     saveGlobalConfig(current => ({
@@ -363,6 +397,8 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       logForDebugging(
         'Official marketplace auto-install: git is a non-functional macOS xcrun shim, treating as git_unavailable',
       )
+      const fallback = await tryOfficialSnapshotFallback('git_unavailable')
+      if (fallback) return fallback
       return {
         installed: false,
         skipped: true,
@@ -408,11 +444,35 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       // This ensures we report the installation failure correctly
     }
 
+    const fallback = await tryOfficialSnapshotFallback('unknown')
+    if (fallback) return fallback
     return {
       installed: false,
       skipped: true,
       reason: 'unknown',
       configSaveFailed,
     }
+  }
+}
+
+/**
+ * 0.1.46 三源波 S3（#301）：official 市场 live 物化失败（GCS/git/克隆）后
+ * 回落内建 manifest 快照目录源（零网络兜底）。成功返回兜底结果
+ * （installed=true + fallback 标记），无快照/被策略挡时返回 null（调用方
+ * 走原 skip 语义）。
+ */
+async function tryOfficialSnapshotFallback(
+  reason: OfficialMarketplaceSkipReason,
+): Promise<OfficialMarketplaceCheckResult | null> {
+  const result = await installBuiltinSnapshotFallback(OFFICIAL_MARKETPLACE_NAME)
+  if (!result.ok) return null
+  logForDebugging(
+    `Official marketplace: live source unavailable (${reason}) — using built-in snapshot catalog`,
+  )
+  return {
+    installed: true,
+    skipped: false,
+    fallback: 'builtin-snapshot',
+    fallbackReason: reason,
   }
 }

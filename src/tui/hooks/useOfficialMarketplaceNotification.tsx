@@ -24,7 +24,17 @@ async function _temp() {
       timeoutMs: 10000
     });
   }
-  if (result.installed) {
+  if (result.fallback === "builtin-snapshot") {
+    // 0.1.46 三源波 S3（#301）：GCS/git 均不可用 → 已回落内建快照目录源（零网络）。
+    // 保留 0.1.43 失败可见性：提示「源未就绪 + 自动重试」，而非静默成功。
+    logForDebugging("Showing marketplace snapshot-fallback notification");
+    notifs.push({
+      key: "marketplace-snapshot-fallback",
+      jsx: <Text color="warning">官方插件源未就绪 · 已用内建快照目录（/plugin 可浏览插件清单）· 下次启动自动重试活同步</Text>,
+      priority: "immediate",
+      timeoutMs: 10000
+    });
+  } else if (result.installed) {
     logForDebugging("Showing marketplace installation success notification");
     notifs.push({
       key: "marketplace-installed",

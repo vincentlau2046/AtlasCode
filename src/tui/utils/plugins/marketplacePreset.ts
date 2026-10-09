@@ -14,12 +14,25 @@
  *   1. env kill-switch (`config.killSwitchEnv`)
  *   2. already materialized under `config.name` in known_marketplaces
  *      (skipped when `name` is omitted — then source-idempotency inside
- *      `addMarketplaceSource` prevents a re-clone of the same source)
+ *      `addMarketplaceSource` prevents a re-clone of the same source).
+ *      EXCEPTION: a first-party **snapshot entry** (0.1.46 S3 fallback
+ *      state, `isBuiltinSnapshotEntry`) does NOT short-circuit — the live
+ *      source still gets a materialization attempt on this startup (git /
+ *      network may have recovered since the fallback landed).
  *   3. enterprise policy allows the source
  *   4. git is available
  *   5. `addMarketplaceSource` (clone + registry write); a macOS xcrun-shim
  *      failure is treated as git_unavailable and poisons the availability
  *      memo for the rest of the session
+ *
+ * Zero-network fallback (0.1.46 三源波 S3, #301): on any live
+ * materialization failure (git_unavailable / xcrun / unknown), the chain
+ * falls back to materializing the bundled manifest snapshot
+ * (marketplaceSnapshotFallback.ts) as a local directory source, so a fresh
+ * install without git/network still sees the marketplace + plugin list in
+ * `/plugin`. The result carries `fallback: 'builtin-snapshot'` so the
+ * startup notification hooks keep 0.1.43 failure visibility (「源未就绪」
+ * instead of a silent success).
  */
 
 import { logForDebugging } from '../debug.js'
@@ -35,6 +48,11 @@ import {
   addMarketplaceSource,
   loadKnownMarketplacesConfig,
 } from './marketplaceManager.js'
+import {
+  installBuiltinSnapshotFallback,
+  isBuiltinSnapshotEntry,
+  removeBuiltinSnapshotDir,
+} from './marketplaceSnapshotFallback.js'
 import type { MarketplaceSource } from './schemas.js'
 
 /**
@@ -61,6 +79,15 @@ export interface MarketplacePresetCheckResult {
   skipped: boolean
   /** Reason for skipping, if applicable. */
   reason?: MarketplacePresetSkipReason
+  /**
+   * 0.1.46 三源波 S3（#301）：live source 不可用、已回落内建 manifest 快照
+   * 目录源（零网络）。`installed` 同为 true（/plugin 可见），但语义 =
+   * 兜底态 —— 通知层据此保留 0.1.43 失败可见性（「源未就绪」提示），
+   * 且下一次启动仍会尝试活物化（快照条目不短路 already_installed）。
+   */
+  fallback?: 'builtin-snapshot'
+  /** The live-failure reason that triggered the snapshot fallback. */
+  fallbackReason?: MarketplacePresetSkipReason
 }
 
 /** Configuration for one preset marketplace. */
@@ -107,11 +134,25 @@ export async function checkAndInstallMarketplacePreset(
   if (config.name) {
     try {
       const knownMarketplaces = await loadKnownMarketplacesConfig()
-      if (knownMarketplaces[config.name]) {
-        logForDebugging(
-          `${label} marketplace '${config.name}' already installed, skipping`,
-        )
-        return { installed: false, skipped: true, reason: 'already_installed' }
+      const existing = knownMarketplaces[config.name]
+      if (existing) {
+        // 0.1.46 S3: a snapshot entry (previous fallback state) must NOT
+        // short-circuit — the live source still gets a materialization
+        // attempt on this startup (git/network may have recovered).
+        if (isBuiltinSnapshotEntry(existing)) {
+          logForDebugging(
+            `${label} marketplace '${config.name}' is a built-in snapshot entry — attempting live materialization`,
+          )
+        } else {
+          logForDebugging(
+            `${label} marketplace '${config.name}' already installed, skipping`,
+          )
+          return {
+            installed: false,
+            skipped: true,
+            reason: 'already_installed',
+          }
+        }
       }
     } catch (error) {
       // Reading known_marketplaces failed — treat as transient and fall
@@ -138,6 +179,8 @@ export async function checkAndInstallMarketplacePreset(
     logForDebugging(
       `Git not available, skipping ${label} marketplace auto-install`,
     )
+    const fallback = await trySnapshotFallback(config, 'git_unavailable')
+    if (fallback) return fallback
     return { installed: false, skipped: true, reason: 'git_unavailable' }
   }
 
@@ -146,6 +189,11 @@ export async function checkAndInstallMarketplacePreset(
     logForDebugging(`Attempting to auto-install ${label} marketplace`)
     await addMarketplaceSource(config.source)
     logForDebugging(`Successfully auto-installed ${label} marketplace`)
+    // Live clone landed — clean up any orphaned snapshot materialization
+    // (best-effort; never fail the success path over it).
+    if (config.name) {
+      await removeBuiltinSnapshotDir(config.name)
+    }
     return { installed: true, skipped: false }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
@@ -159,6 +207,8 @@ export async function checkAndInstallMarketplacePreset(
       logForDebugging(
         `${label} marketplace auto-install: git is a non-functional macOS xcrun shim, treating as git_unavailable`,
       )
+      const fallback = await trySnapshotFallback(config, 'git_unavailable')
+      if (fallback) return fallback
       return { installed: false, skipped: true, reason: 'git_unavailable' }
     }
 
@@ -167,6 +217,31 @@ export async function checkAndInstallMarketplacePreset(
       { level: 'error' },
     )
     logError(toError(error))
+    const fallback = await trySnapshotFallback(config, 'unknown')
+    if (fallback) return fallback
     return { installed: false, skipped: true, reason: 'unknown' }
+  }
+}
+
+/**
+ * 0.1.46 三源波 S3（#301）：live 物化失败后回落内建 manifest 快照目录源
+ * （零网络兜底）。无 registry key（config.name 省略）或该 key 无 bundle
+ * 快照时返回 null（调用方走原 skip 语义）。
+ */
+async function trySnapshotFallback(
+  config: MarketplacePresetConfig,
+  reason: MarketplacePresetSkipReason,
+): Promise<MarketplacePresetCheckResult | null> {
+  if (!config.name) return null
+  const result = await installBuiltinSnapshotFallback(config.name)
+  if (!result.ok) return null
+  logForDebugging(
+    `${config.displayName} marketplace: live source unavailable (${reason}) — using built-in snapshot catalog`,
+  )
+  return {
+    installed: true,
+    skipped: false,
+    fallback: 'builtin-snapshot',
+    fallbackReason: reason,
   }
 }

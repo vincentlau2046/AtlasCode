@@ -22,7 +22,25 @@ export function useAtlasMarketplaceNotification(): void {
     const result = await checkAndInstallAtlasMarketplace()
     const notifs: Notification[] = []
 
-    if (result.installed) {
+    if (result.fallback === 'builtin-snapshot') {
+      // 0.1.46 三源波 S3（#301）：活源未就绪 → 已回落内建快照目录源（零网络，
+      // /plugin 可见）。保留 0.1.43 失败可见性口径：提示「源未就绪 + 自动重试」，
+      // 而非静默成功。
+      logForDebugging(
+        'Showing Atlas marketplace snapshot-fallback notification',
+      )
+      notifs.push({
+        key: 'atlas-marketplace-snapshot-fallback',
+        jsx: (
+          <Text color="warning">
+            {ATLAS_MARKETPLACE_DISPLAY_LABEL} 源未就绪 · 已用内建快照目录（
+            /plugin 可浏览插件清单）· 下次启动自动重试活同步
+          </Text>
+        ),
+        priority: 'immediate',
+        timeoutMs: 10000,
+      })
+    } else if (result.installed) {
       logForDebugging('Showing Atlas marketplace installation success notification')
       notifs.push({
         key: 'atlas-marketplace-installed',
