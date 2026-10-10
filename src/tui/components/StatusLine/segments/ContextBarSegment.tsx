@@ -50,8 +50,14 @@ export const ContextBarSegment: SegmentComponent = ({ input }) => {
   const total = cw.context_window_size
 
   if (pct == null) {
-    // 无数据时 dim 占位（不固定宽度——数字自解释，无数据段直接隐藏更好）
-    return null
+    // SL-1a（0.1.49 · 用户 2026-10-10 裁定：纯数字式，ctx 统计恒显）：无 usage
+    // 数据时 dim 占位恒显（旧行为 return null = 整段隐藏，使 statusline 看上去
+    // 没有 ctx 统计面——占位恒显，有数据自动切回下方数字式，本支不碰）。
+    // dimColor = 设计系惯用法（ThemedText 解析 → theme.inactive，随主题明暗
+    // 自适应，不硬编码 gray；仓内先例 Divider/KeyboardShortcutHint/LoadingState）。
+    // total = context_window_size（动态：StatusLine.buildSegmentInput 经
+    // getContextWindowForModel 取值链装配，非写死）。
+    return <Text dimColor>▤ —/{formatK(total)} tok</Text>
   }
 
   const color = contextColorForPercentage(pct)
