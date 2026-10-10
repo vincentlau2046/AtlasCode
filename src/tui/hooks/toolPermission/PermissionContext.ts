@@ -20,6 +20,7 @@ import { setClassifierApproval } from '../../utils/classifierApprovals.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { logError } from '../../utils/log.js'
 import { mergeCurrentSessionPermissionRules } from '../../utils/permissions/sessionPermissionRules.js'
+import { checkRuleBasedPermissions } from '../../utils/permissions/permissions.js'
 import { executePermissionRequestHooks } from '../../utils/hooks.js'
 import {
   REJECT_MESSAGE,
@@ -371,7 +372,25 @@ function createPermissionContext(
       finalInput: Record<string, unknown>,
       permissionUpdates: PermissionUpdate[],
       permissionPromptStartTimeMs?: number,
-    ): Promise<PermissionAllowDecision> {
+    ): Promise<PermissionAllowDecision | PermissionDenyDecision> {
+      // FX-27（0.1.48 A-①）：hook 改写入参（updatedInput）可能命中既有 deny 规则 →
+      // buildAllow 前对 finalInput 重跑 rule-based 检查（engine 对照：门在钩子改写后
+      // 的 effective 入参上重判，旧仓 checkRuleBasedPermissions 语义；不变量「hook
+      // allow 不绕过 settings deny」）。命中 deny → 转 buildDeny（decisionReason 指向
+      // 命中的 deny 规则，非 hook）；未命中 deny（ask/null）→ 保持 hook-allow 原路径
+      // （零回归：decisionReason/副作用不变）。
+      const denyCheck = await checkRuleBasedPermissions(
+        tool,
+        finalInput,
+        toolUseContext,
+      )
+      if (denyCheck && denyCheck.behavior === 'deny') {
+        this.logDecision(
+          { decision: 'reject', source: { type: 'hook' } },
+          { input: finalInput, permissionPromptStartTimeMs },
+        )
+        return this.buildDeny(denyCheck.message, denyCheck.decisionReason)
+      }
       const acceptedPermanentUpdates =
         await this.persistPermissions(permissionUpdates)
       this.logDecision(
