@@ -292,6 +292,21 @@ export function buildYoloRejectionMessage(reason: string): string {
 }
 
 /**
+ * AD-47 (CC 2.1.89 TOP #2): classifier rejection variant that carries retry
+ * guidance, used when a PermissionDenied hook returned retry:true (the denial
+ * may be transient, so the model is allowed to try the action again). Plain
+ * `buildYoloRejectionMessage` has no retry surface.
+ *
+ * @param reason - The classifier's reason for denying the action
+ */
+export function buildYoloRejectionMessageWithRetry(reason: string): string {
+  return (
+    buildYoloRejectionMessage(reason) +
+    ' A PermissionDenied hook indicated this action may be retried: you may try the action again.'
+  )
+}
+
+/**
  * Build a message for when the auto mode classifier is temporarily unavailable.
  * Tells the agent to wait and retry, and suggests working on other tasks.
  */

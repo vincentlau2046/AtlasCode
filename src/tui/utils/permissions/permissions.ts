@@ -68,11 +68,15 @@ import {
   clearClassifierChecking,
   setClassifierChecking,
 } from '../classifierApprovals.js'
-import { executePermissionRequestHooks } from '../hooks.js'
+import {
+  executePermissionDeniedHooks,
+  executePermissionRequestHooks,
+} from '../hooks.js'
 import {
   AUTO_REJECT_MESSAGE,
   buildClassifierUnavailableMessage,
   buildYoloRejectionMessage,
+  buildYoloRejectionMessageWithRetry,
   DONT_ASK_REJECT_MESSAGE,
 } from '../messages.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -455,6 +459,61 @@ async function runPermissionRequestHooksForHeadlessAgent(
   return null
 }
 
+/**
+ * AD-47 (CC 2.1.89 TOP #2): run PermissionDenied hooks after the auto-mode
+ * classifier denies a tool call. The event surface (enum/matching/schema/
+ * retry-parse/runner) was fully registered but the emission path was dormant
+ * — this is the emission point. Input contract = the doc'd four fields
+ * (tool_name / tool_input / tool_use_id / reason), built by
+ * executePermissionDeniedHooks.
+ *
+ * Zero-regression: with no PermissionDenied hooks configured the runner's
+ * hasHookForEvent gate yields nothing, so the rejection path is byte-identical
+ * to pre-hook behavior (retry stays false).
+ *
+ * @returns true if any hook returned retry:true (the denial may be transient
+ *   and the model is allowed to retry the action).
+ */
+async function runPermissionDeniedHooks(
+  tool: Tool,
+  input: { [key: string]: unknown },
+  toolUseID: string,
+  reason: string,
+  context: ToolUseContext,
+  permissionMode: string | undefined,
+): Promise<boolean> {
+  let retry = false
+  try {
+    for await (const hookResult of executePermissionDeniedHooks(
+      tool.name,
+      toolUseID,
+      input,
+      reason,
+      context,
+      permissionMode,
+      context.abortController.signal,
+    )) {
+      if (hookResult.retry) {
+        retry = true
+      }
+    }
+  } catch (error) {
+    // If hooks fail, keep the denial rather than crashing the permission path
+    logError(
+      new Error('PermissionDenied hook failed', {
+        cause: toError(error),
+      }),
+    )
+  }
+  if (retry) {
+    logForDebugging(
+      'PermissionDenied hook set retry=true; rejection carries retry guidance',
+      { level: 'info' },
+    )
+  }
+  return retry
+}
+
 export const hasPermissionsToUseTool: CanUseToolFn = async (
   tool,
   input,
@@ -706,6 +765,16 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
               'Auto mode classifier unavailable, denying with retry guidance (fail closed)',
               { level: 'warn' },
             )
+            // AD-47：分类器拒绝面发射 PermissionDenied（观测面；该支文案自带
+            // 「wait and retry」引导，hook retry 面不改变本支消息）
+            await runPermissionDeniedHooks(
+              tool,
+              input,
+              toolUseID,
+              'Classifier unavailable',
+              context,
+              appState.toolPermissionContext.mode,
+            )
             return {
               behavior: 'deny',
               decisionReason: {
@@ -749,6 +818,17 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           context,
         )
         if (denialLimitResult) {
+          // AD-47：超限回退面同为分类器拒绝面——发射 PermissionDenied（仅观测：
+          // 回退是人工 prompting，无模型面拒绝消息可挂 retry 引导；headless 超限
+          // 在 handleDenialLimitExceeded 内抛 AbortError 熔断，走不到此处不发射）
+          await runPermissionDeniedHooks(
+            tool,
+            input,
+            toolUseID,
+            classifierResult.reason,
+            context,
+            appState.toolPermissionContext.mode,
+          )
           return denialLimitResult
         }
 
@@ -761,6 +841,16 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
         //     fail-closed 静默 deny（铁闸门语义不变，对齐 transcriptTooLong/
         //     unavailable 支的 headless 兜底）。
         if (appState.toolPermissionContext.shouldAvoidPermissionPrompts) {
+          // AD-47：headless fail-closed 静默 deny——发射 PermissionDenied；
+          // hook 返 retry:true 时拒绝消息挂「可重试」引导回灌模型
+          const deniedRetry = await runPermissionDeniedHooks(
+            tool,
+            input,
+            toolUseID,
+            classifierResult.reason,
+            context,
+            appState.toolPermissionContext.mode,
+          )
           return {
             behavior: 'deny',
             decisionReason: {
@@ -768,9 +858,21 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
               classifier: 'auto-mode',
               reason: classifierResult.reason,
             },
-            message: buildYoloRejectionMessage(classifierResult.reason),
+            message: deniedRetry
+              ? buildYoloRejectionMessageWithRetry(classifierResult.reason)
+              : buildYoloRejectionMessage(classifierResult.reason),
           }
         }
+        // AD-47：交互 ASK 面同为分类器拦截面——发射 PermissionDenied（仅观测：
+        // ASK 无模型面拒绝消息，retry 消费不挂本支）
+        await runPermissionDeniedHooks(
+          tool,
+          input,
+          toolUseID,
+          classifierResult.reason,
+          context,
+          appState.toolPermissionContext.mode,
+        )
         return {
           ...result,
           decisionReason: {
