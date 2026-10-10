@@ -38,7 +38,7 @@ const ROOT = join(E2E, 'tui-diff')
 const ART = join(ROOT, 'artifacts')
 const FIX_COMPARE = join(E2E, 'compare/fixtures')
 const REAL_SETTINGS = join(process.env.HOME!, '.atlas/settings.json')
-const CMP_MODEL = 'deepseek-v4-pro'
+const CMP_MODEL = 'Qwen38-27B-TXT' // 2026-10-10 用户裁定（f4 转达）：云 Coding Plan 月配额 429 阻塞 → 切本地 Qwen38-27B-TXT（docker 8007，IFF 8999 本地路由，活验 200 无 429）；工作树交付物，不 commit（commit 归 Main）
 const DEAD_GW = 'http://127.0.0.1:9/v1' // port 9 (discard) = 必死端口
 // #278 波 A（live-gateway 分类器 e2e 波，全确定性种子）：IFF 指 fault-proxy，
 // 主循环前 count 次脚本化 tool_use + classify_result 注入 shouldBlock；非脚本化调用转发活网关 8999。
