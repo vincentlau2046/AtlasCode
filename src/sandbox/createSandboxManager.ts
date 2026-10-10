@@ -87,6 +87,7 @@ interface SandboxSettingsView {
     excludedCommands?: string[]
     network?: {
       allowedDomains?: string[]
+      deniedDomains?: string[]
       allowUnixSockets?: string[]
       allowAllUnixSockets?: boolean
       allowLocalBinding?: boolean
@@ -138,6 +139,12 @@ export function createSandboxManager(
     const s = view(settings)
     const allowedDomains: string[] = [
       ...(s?.sandbox?.network?.allowedDomains || []),
+    ]
+    // AD-08：deniedDomains settings 直读（原「恒空 + 由 permissions WebFetch
+    // 规则解析」残余①注消——键接线落定；denied 优先语义判定 =
+    // networkRestriction.decideHostNetwork，真 runtime 规则构建面消费）
+    const deniedDomains: string[] = [
+      ...(s?.sandbox?.network?.deniedDomains || []),
     ]
     const allowWrite: string[] = [".", deps.getAtlasTempDir()]
     const denyWrite: string[] = []
@@ -199,9 +206,7 @@ export function createSandboxManager(
     return {
       network: {
         allowedDomains,
-        // deniedDomains 由 permissions WebFetch 规则解析（残余 ①）；
-        // 最小集恒空
-        deniedDomains: [],
+        deniedDomains,
         allowUnixSockets: s?.sandbox?.network?.allowUnixSockets,
         allowAllUnixSockets: s?.sandbox?.network?.allowAllUnixSockets,
         allowLocalBinding: s?.sandbox?.network?.allowLocalBinding,

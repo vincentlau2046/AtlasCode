@@ -59,6 +59,11 @@ export {
 } from "./ripgrep"
 export { createSandboxManager } from "./createSandboxManager"
 export {
+  decideHostNetwork,
+  domainPatternMatches,
+  type SandboxHostNetworkDecision,
+} from "./networkRestriction"
+export {
   AtlasSandboxBackend,
   createSandboxBackend,
   registerSandboxBackend,

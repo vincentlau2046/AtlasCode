@@ -15,6 +15,10 @@ export const SandboxNetworkConfigSchema = lazySchema(() =>
   z
     .object({
       allowedDomains: z.array(z.string()).optional(),
+      // AD-08：denied-优先语义——命中即拒（即使 allowedDomains 通配也命中）；
+      // 缺省/空 = allowedDomains 行为逐字恒等（零回归）。判定原语 =
+      // src/sandbox/networkRestriction.ts decideHostNetwork（denied 命中即拒）。
+      deniedDomains: z.array(z.string()).optional(),
       allowManagedDomainsOnly: z
         .boolean()
         .optional()
