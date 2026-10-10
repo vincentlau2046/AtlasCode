@@ -144,3 +144,55 @@ describe('B2 ContextBarSegment ▲ 预警谓词（熔断预警折入 context-bar
     expect(flatten(node)).toBe('▤ 0/150k tok (1%)')
   })
 })
+
+/**
+ * SL-1a（0.1.49 · 用户 2026-10-10 裁定：纯数字式，ctx 统计恒显，不恢复进度条）
+ * render fixture 2 件（工单 §2）：
+ * ① 有 usage → 数字式（3 色阶分支断言）—— 零回归（恒绿：数字式逻辑不动，
+ *    setAutoCompactSettingsSource(false) 排除 ▲ 尾标干扰）
+ * ② 无 usage（pct==null）→ dim 占位非 null（`<Text dimColor>▤ —/{total} tok</Text>`）
+ *    —— 修前红（现 return null = 整段隐藏）→ 修后绿
+ */
+describe('SL-1a render fixture（①数字式 3 色阶零回归 / ②dim 占位恒显）', () => {
+  test('① 有 usage → 数字式 3 色阶分支（<70 cyan / 70-90 yellow / >90 red）', () => {
+    setAutoCompactSettingsSource(() => false)
+    const cyan = ContextBarSegment(makeCtx(makeInput(54_000, 36)))
+    expect(flatten(cyan)).toBe('▤ 54k/150k tok (36%)')
+    expect((cyan as { props: { color: string } }).props.color).toBe('cyan')
+    const yellow = ContextBarSegment(makeCtx(makeInput(99_999, 85)))
+    expect(flatten(yellow)).toBe('▤ 100k/150k tok (85%)')
+    expect((yellow as { props: { color: string } }).props.color).toBe(
+      'yellow',
+    )
+    const red = ContextBarSegment(makeCtx(makeInput(142_500, 95)))
+    expect(flatten(red)).toBe('▤ 143k/150k tok (95%)')
+    expect((red as { props: { color: string } }).props.color).toBe('red')
+  })
+
+  test('② 无 usage（pct==null）→ dim 占位非 null（修前红：现 return null 整段隐藏）', () => {
+    const node = ContextBarSegment(
+      makeCtx({
+        model: { id: 'test-model', display_name: 'Test Model' },
+        exceeds_200k_tokens: false,
+        version: '0.0.0',
+        context_window: {
+          total_input_tokens: 0,
+          total_output_tokens: 0,
+          context_window_size: 150_000,
+          current_usage: null,
+          used_percentage: null,
+          remaining_percentage: null,
+        },
+      } as StatusLineCommandInputLike),
+    )
+    expect(node).not.toBeNull()
+    expect(React.isValidElement(node)).toBe(true)
+    const el = node as {
+      props: { dimColor?: boolean; children?: React.ReactNode }
+    }
+    // dimColor 设计系惯用法（ThemedText 解析 → theme.inactive，随主题明暗自适应）
+    expect(el.props.dimColor).toBe(true)
+    // 占位 = `▤ —/{formatK(total)} tok`（total 动态 = context_window_size）
+    expect(flatten(node)).toBe('▤ —/150k tok')
+  })
+})
