@@ -4,6 +4,49 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.48
+
+P0 对齐首车波（基线 v0.1.47；PAC 0.1.48 §2 波序第 1 车 = A-① 安全 + A-② MCP + A-⑤ 分类器硬化
+零码批；gate `r-20261010-regate-048-qwen38.md` = GATE-PASS（@master 26d1674 复 gate [A4F]+[V3]
+attempt1 全绿，hardFail=0×2，429-marker=0 活验；前驱 `r-20261010-gate-048.md` GATE-OPEN 定因 =
+云 Coding Plan 月配额 429，0.1.47 基线同签名红证伪回归，非 0.1.48 代码）：
+
+- **A-① 安全 FX-27（落码，真实缺口，修前红→绿）**：TUI 车道
+  `createPermissionContext().handleHookAllow` 在 `PermissionRequest` hook 改写 `updatedInput` 后
+  缺 `permissions.deny` 重查 → hook 可把入参改写到命中 deny 形态 = 权限绕过。本版在 `buildAllow`
+  前重跑 `checkRuleBasedPermissions(tool, finalInput, toolUseContext)`：命中 deny → 转
+  `buildDeny`（decisionReason 指向命中 deny 规则，非 hook）；未命中 → hook-allow 路径与现恒等
+  （零回归）。coordinator 车道共享同一 handler，一并覆盖。`PermissionContext.ts` + 单测
+  `permission-context-hook-deny-recheck.test.ts`（① 命中 deny 修前红→绿 / ② 未命中零回归）。
+- **A-① 安全 FX-37（验证型，live 已绿，锁不变量，0 码）**：`permissions.deny` 不覆写 hook
+  `permissionDecision:"ask"`——双车道不变量已实现（engine `mergeHookPermission('ask',deny)→deny`
+  已由 `engine-hooks.test.ts`⑩ 锁定；TUI `hasPermissionsToUseToolInner` step 1a
+  `getDenyRuleForTool` 先于 hook/classifier 步，规则序天然保 deny 优先）。本波仅加 TUI 车道
+  step 序回归断言 `fx37-deny-step-order.test.ts`（0 码）。
+- **A-② 鲁棒性 AD-49（落码，3 文件，修前红→绿）**：`MCP_CONNECTION_NONBLOCKING` env（managedEnv
+  白名单）→ `-p` 模式置真时跳过 connect allSettled 等待（慢服务器 → 既有 pending 占位，进程不
+  阻塞）；`mcpConnectionManager.connect` race 超时经 `opts.connectionTimeoutMs` 参数化
+  （`--mcp-config` 源 = 5s 预算，其余源维持 30s 走 `getConnectionTimeoutMs()`）；`--mcp-config`
+  动态源接 headless 车道（`connectMcpStartup` + `parseMcpConfigItemsLocal`），`--strict-mcp-config`
+  = 仅动态源。零回归：`MCP_CONNECTION_NONBLOCKING` 缺省 / 非 `--mcp-config` 源行为逐字恒等。
+  `print.ts` + `mcpConnectionManager.ts` + `managedEnvConstants.ts` + 单测
+  `cli-print-mcp-nonblocking.test.ts`（① NONBLOCKING=1 pending 占位 / ② 动态源 5s / ②b strict /
+  ③ 零回归）+ func `mcp-stdio-server-se2b.test.ts`（connectionTimeoutMs 参覆盖穿透真 spawn）。
+- **A-② 鲁棒性 FX-24（验证型，live 已绿，0 码）**：MCP tool call 中途断连挂死 → 有界拒（非挂死）。
+  机制已完整在场（TUI `client.ts` 终态错误 3 连发 → close → SDK `_onclose()` reject 全部 pending
+  request（hung `callTool()` 以 `McpError -32000 "Connection closed"` fail）+ 清 memo 缓存；终态
+  判定 = 9 子串面）。本波仅加可达判定原语回归断言
+  `fx24-mcp-terminal-bounded-reject.test.ts`（`isTerminalConnectionError` 9 子串面）；完整 SSE
+  断连 in-flight `callTool` 有界拒 `-32000` 端到端探针归 e2e gate（工单 §3「MCP 断连探针」）。
+- **A-⑤ 分类器硬化 PT-20/21/24/10（零码在场断言 ×4）**：auto-mode 分类器提示词面规则全在场
+  （迁仓快照 > 2.1.88 基线；消费点 = `yoloClassifier.ts` + `structuredIO.ts`）。双车道提示词
+  文件（base `src/permissions/autoMode/prompts/` + TUI `yolo-classifier-prompts/`）当前字节恒等
+  → `pt-auto-mode-prompt-presence.test.ts` 两侧锁「两侧都在场」（任一车道被误裁/漂移即红）：
+  PT-20 Memory Poisoning（投毒定义 + 三例 + Memory Directory allow exception）/ PT-21 User Intent
+  双向 authorize/bound（高低证据条 + 边界仅由后续用户消息解除）/ PT-24 不可逆破坏·公共面·本地
+  服务·凭证泄漏·git hooks（五规则）/ PT-10 Sandbox Network Callback（五特征 + 白名单支）。
+  PT-10 TUI-lane `SandboxNetworkAccess` 发射缺口 = 未来项登记（决策⑤，不 gate 本项）。
+
 ## v0.1.47
 
 可信清尾波（基线 v0.1.46；#299 W-opt 可信专项最终核销 + #302——remote
