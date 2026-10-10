@@ -15,7 +15,11 @@ import {
   setAutoCompactSettingsSource,
 } from '../../src/engine'
 
-/** provider 注册表未声明 contextWindow 的测试模型 → 150k 回落（delta ①）。 */
+/**
+ * provider 注册表未声明 contextWindow 的测试模型 → 262144（HARD_DEFAULT_
+ * CONTEXT_WINDOW）回落（SL-1c 单一事实源；原 150k 分叉 0.1.49 已统一，
+ * 本文件断言随重锚）。
+ */
 const UNKNOWN = 'atlas-test-unknown-model'
 
 describe('D-2a S5 model-string 便捷形（TUI 调用点零改动）', () => {
@@ -27,8 +31,8 @@ describe('D-2a S5 model-string 便捷形（TUI 调用点零改动）', () => {
     delete process.env.DISABLE_AUTO_COMPACT
   })
 
-  test('getEffectiveContextWindowSize(model) = 回落窗口 150k − 20k 预留 = 130k', () => {
-    expect(getEffectiveContextWindowSize(UNKNOWN)).toBe(130_000)
+  test('getEffectiveContextWindowSize(model) = 回落窗口 262144 − 20k 预留 = 242144', () => {
+    expect(getEffectiveContextWindowSize(UNKNOWN)).toBe(242_144)
   })
 
   test('env ATLAS_AUTO_COMPACT_WINDOW 窗口 cap', () => {
@@ -37,14 +41,15 @@ describe('D-2a S5 model-string 便捷形（TUI 调用点零改动）', () => {
   })
 
   test('getAutoCompactThreshold(model) = 有效窗口 − 13k（+pct env 覆写）', () => {
-    expect(getAutoCompactThreshold(UNKNOWN)).toBe(117_000)
+    expect(getAutoCompactThreshold(UNKNOWN)).toBe(229_144)
     process.env.ATLAS_AUTOCOMPACT_PCT_OVERRIDE = '50'
-    expect(getAutoCompactThreshold(UNKNOWN)).toBe(65_000)
+    expect(getAutoCompactThreshold(UNKNOWN)).toBe(121_072)
   })
 
   test('calculateTokenWarningState(n, model) 面 + 阈值一致性', () => {
-    const s = calculateTokenWarningState(118_000, UNKNOWN)
-    // 阈值 117k / 警告线 97k / 错误线 97k / blocking 线 127k
+    const s = calculateTokenWarningState(235_000, UNKNOWN)
+    // SL-1c 重锚（262144 基）：阈值 229144 / 警告线 209144 / 错误线 209144 /
+    // blocking 线 239144（used 235k 落 阈值之上 · blocking 之下，原判别形保持）
     expect(s.isAboveAutoCompactThreshold).toBe(true)
     expect(s.isAboveWarningThreshold).toBe(true)
     expect(s.isAboveErrorThreshold).toBe(true)

@@ -37,7 +37,10 @@
  */
 import { randomUUID } from 'crypto'
 import type { Message } from '../../shared'
-import { getProviderContextWindow } from '../../modelprovider'
+import {
+  getProviderContextWindow,
+  HARD_DEFAULT_CONTEXT_WINDOW,
+} from '../../modelprovider'
 import { getAutoCompactEnvOverrides } from '../config'
 import { COMPACT_MAX_OUTPUT_TOKENS, type CompactionResult } from './compact'
 import {
@@ -120,20 +123,18 @@ export interface AutoCompactOutcome {
 // DI 裁剪面）→ 富体不迁（H6 防空洞：迁死体 = 引擎膨胀），S8 随冲突块裁净。
 //
 // delta 登记：
-//   ① MODEL_CONTEXT_WINDOW_DEFAULT = 150k 对齐 tui 常量（provider 注册表
-//      未声明 contextWindow 的回落值，P4 收口后单一来源 = provider 元数据）。
+//   ① 回落窗口单一事实源 = modelprovider HARD_DEFAULT_CONTEXT_WINDOW（262144，
+//      SL-1c 统一：原本地私有 150k 拷贝 + tui 150k 分叉 + 僵尸 FIXME 全删，
+//      provider 注册表未声明 contextWindow 的模型回落至此）。
 //   ② maxOut 不读 tui GB slot-cap（atlas_otk_slot_v1 = host/GB 域）→ 预留恒
 //      min(maxOut ?? 20k, 20k) = 20k（GB cap 关〔3P 缺省〕行为等价；cap 开时
 //      差 12k 归 host 域差异，随 W-opt 宿主注）。
 //   ③ isAutoCompactEnabled() 0 参形 settings 读侧 = setAutoCompactSettingsSource
 //      注入（宿主 settings.json autoCompactEnabled；未注 = 缺省 true，旧 config 缺省一致）。
 
-/** provider 注册表未声明 contextWindow 的模型回落窗口（delta ①）。 */
-const MODEL_CONTEXT_WINDOW_DEFAULT = 150_000
-
-/** model→contextWindow 解析（provider 注册表优先，回落缺省值）。 */
+/** model→contextWindow 解析（provider 注册表优先，回落 = HARD_DEFAULT_CONTEXT_WINDOW 单一事实源，delta ① / SL-1c）。 */
 function resolveModelContextWindow(model: string): number {
-  return getProviderContextWindow(model) ?? MODEL_CONTEXT_WINDOW_DEFAULT
+  return getProviderContextWindow(model) ?? HARD_DEFAULT_CONTEXT_WINDOW
 }
 
 /** settings.autoCompactEnabled 读侧注入（delta ③；宿主 S8 接线，单测 teardown 传 null）。 */

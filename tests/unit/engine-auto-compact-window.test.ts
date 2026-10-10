@@ -12,9 +12,10 @@
  *     isAutoCompactEnabled() 0 参形禁用（手动 /compact 保留语义在调用方）。
  * 纯内存态（process.env 存还 + 源接缝存还，unit 层无磁盘/网络/PTY）。
  *
- * 阈值算例基准（provider 注册表未声明窗口的模型回落 150_000；
- * COMPACT_MAX_OUTPUT_TOKENS = 20_000；AUTOCOMPACT_BUFFER_TOKENS = 13_000）：
- *   缺省 = 150_000 − 20_000 − 13_000 = 117_000。
+ * 阈值算例基准（provider 注册表未声明窗口的模型回落 262_144 = HARD_DEFAULT_
+ * CONTEXT_WINDOW，SL-1c 单一事实源；COMPACT_MAX_OUTPUT_TOKENS = 20_000；
+ * AUTOCOMPACT_BUFFER_TOKENS = 13_000）：
+ *   缺省 = 262_144 − 20_000 − 13_000 = 229_144。
  */
 import {
   describe,
@@ -197,15 +198,16 @@ describe('预设档位单一事实源', () => {
 })
 
 describe('settings 档位接缝合并纪律（model-string / 0 参形）', () => {
-  // 未声明窗口的模型回落 150_000（provider 注册表空 stub）。
+  // 未声明窗口的模型回落 262_144（HARD_DEFAULT_CONTEXT_WINDOW，SL-1c 单一事实源；
+  // provider 注册表空 stub）。
   const MODEL = 'unregistered-model-xyz'
 
   function withWindowSource(setting: AutoCompactWindowSetting | null | undefined) {
     setAutoCompactWindowSettingsSource(() => setting)
   }
 
-  test('无源 = 缺省阈值 117_000（150k − 20k − 13k）', () => {
-    expect(getAutoCompactThreshold(MODEL)).toBe(117_000)
+  test('无源 = 缺省阈值 229_144（262144 − 20k − 13k，SL-1c 重锚）', () => {
+    expect(getAutoCompactThreshold(MODEL)).toBe(229_144)
   })
 
   test('settings window 档 128k：阈值 95_000（128k − 20k − 13k）', () => {
@@ -214,9 +216,9 @@ describe('settings 档位接缝合并纪律（model-string / 0 参形）', () =>
     expect(getEffectiveContextWindowSize(MODEL)).toBe(108_000)
   })
 
-  test('settings pct 档 50：阈值 min(floor(130k×0.5), 117k) = 65_000', () => {
+  test('settings pct 档 50：阈值 min(floor(242144×0.5), 229144) = 121_072（SL-1c 重锚）', () => {
     withWindowSource({ kind: 'pct', pct: 50 })
-    expect(getAutoCompactThreshold(MODEL)).toBe(65_000)
+    expect(getAutoCompactThreshold(MODEL)).toBe(121_072)
   })
 
   test('env 窗口 cap 胜 settings window 档（100k env 压 128k settings）', () => {
@@ -229,7 +231,7 @@ describe('settings 档位接缝合并纪律（model-string / 0 参形）', () =>
   test('env pct 覆写胜 settings pct 档（80 env 压 50 settings）', () => {
     withWindowSource({ kind: 'pct', pct: 50 })
     process.env.ATLAS_AUTOCOMPACT_PCT_OVERRIDE = '80'
-    expect(getAutoCompactThreshold(MODEL)).toBe(104_000) // min(floor(130k×0.8), 117k)
+    expect(getAutoCompactThreshold(MODEL)).toBe(193_715) // min(floor(242144×0.8), 229144)
   })
 
   test('off 档：isAutoCompactEnabled() 0 参形 = false（无源 = true 回归）', () => {

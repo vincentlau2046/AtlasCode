@@ -62,8 +62,8 @@ export function getModelMeta(modelId: string): ModelMeta | undefined {
  * P4: look up the declared context window for a bare model id by scanning
  * every provider's `models[]`. Returns the entry's contextWindow if the
  * model is in a provider pool; undefined otherwise (caller falls back to
- * the hardcoded default). Used by utils/context so autocompact uses the
- * provider-declared window instead of the hardcoded 150_000.
+ * HARD_DEFAULT_CONTEXT_WINDOW, 单一事实源 SL-1c). Used by utils/context so
+ * autocompact uses the provider-declared window instead of the fallback.
  */
 export function getProviderContextWindow(modelId: string): number | undefined {
   if (!modelId) return undefined

@@ -1,10 +1,17 @@
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 // P4 (docs/06): getProviderContextWindow 收口至 core/modelprovider/capabilities.js
-import { getProviderContextWindow, resolveModel } from 'src/modelprovider'
+import {
+  getProviderContextWindow,
+  HARD_DEFAULT_CONTEXT_WINDOW,
+  resolveModel,
+} from 'src/modelprovider'
 
-// Model context window size (200k tokens for all models right now)
-// FIXME: temporary override for qwen38-27b-abliterated (model actual limit is 163840)
-export const MODEL_CONTEXT_WINDOW_DEFAULT = 150_000
+// SL-1c（0.1.49）：窗口兜底单一事实源 = modelprovider HARD_DEFAULT_CONTEXT_WINDOW
+// （262144，roles 层 canonical）。旧 150_000 分叉 + 僵尸 FIXME（qwen38-27b-
+// abliterated 163840 临时覆写，该模型级联 P6-3 已删）一并删除。本导出 =
+// 别名（全仓零外部消费，仅兼容保底；防再分叉守卫 = tests/unit/
+// context-window-unified.test.ts ③）。
+export const MODEL_CONTEXT_WINDOW_DEFAULT = HARD_DEFAULT_CONTEXT_WINDOW
 
 // Maximum output tokens for compact operations
 export const COMPACT_MAX_OUTPUT_TOKENS = 20_000
@@ -33,8 +40,9 @@ export function getContextWindowForModel(
   void betas // 1M 分支已删，betas 不再用于上下文窗口判定（保留签名兼容调用方）
   // P4: the provider owns model capabilities — look up the declared
   // contextWindow in the settings provider registry (entry → provider
-  // default). This takes precedence over the hardcoded 150_000 default so
-  // autocompact uses the real window the provider declared.
+  // default). This takes precedence over the fallback default
+  // (HARD_DEFAULT_CONTEXT_WINDOW, SL-1c 单一事实源) so autocompact uses
+  // the real window the provider declared.
   const providerCtx = getProviderContextWindow(model)
   if (providerCtx !== undefined) {
     return providerCtx
