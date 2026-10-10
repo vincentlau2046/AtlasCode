@@ -121,6 +121,10 @@ export const SAFE_ENV_VARS = new Set([
   'MAX_THINKING_TOKENS',
   'MCP_TIMEOUT',
   'MCP_TOOL_TIMEOUT',
+  // AD-49（0.1.48 A-② MCP）：headless `-p` 模式 MCP 连接非阻塞开关
+  // （print.ts connectMcpStartup 消费；true 时跳过 connect allSettled 等待，
+  // 慢服务器留 pending 占位、进程不阻塞启动；缺省/未设 = 现阻塞行为逐字不变）。
+  'MCP_CONNECTION_NONBLOCKING',
   'OTEL_EXPORTER_OTLP_HEADERS',
   'OTEL_EXPORTER_OTLP_LOGS_HEADERS',
   'OTEL_EXPORTER_OTLP_LOGS_PROTOCOL',

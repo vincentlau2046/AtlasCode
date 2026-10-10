@@ -262,6 +262,34 @@ describe('S-P4 超时面（MCP_TIMEOUT env 短超时）', () => {
       else process.env.FAKE_MCP_HANG = prevHang
     }
   })
+
+  // AD-49（0.1.48 A-② MCP）：connectionTimeoutMs 参真 honor（--mcp-config 源
+  // 5s 预算消费面）。对照 MCP_TIMEOUT=5000（缺省窗口）+ 参 200ms → 超时文案
+  // 200ms（参胜缺省，证参真穿透 connectStdio race 超时）。
+  test('AD-49 connectionTimeoutMs 参覆盖缺省（--mcp-config 源 5s 预算消费面）', async () => {
+    const prev = process.env.MCP_TIMEOUT
+    const prevHang = process.env.FAKE_MCP_HANG
+    process.env.MCP_TIMEOUT = '5000' // 对照缺省窗口（无参 = 5000ms）
+    process.env.FAKE_MCP_HANG = '1'
+    try {
+      const conn = await manager.connect(
+        'budgety',
+        stdioCfg(process.execPath, [serverScript]),
+        { connectionTimeoutMs: 200 },
+      )
+      expect(conn.type).toBe('failed')
+      if (conn.type === 'failed') {
+        expect(conn.error).toBe(
+          'MCP server "budgety" connection timed out after 200ms',
+        )
+      }
+    } finally {
+      if (prev === undefined) delete process.env.MCP_TIMEOUT
+      else process.env.MCP_TIMEOUT = prev
+      if (prevHang === undefined) delete process.env.FAKE_MCP_HANG
+      else process.env.FAKE_MCP_HANG = prevHang
+    }
+  })
 })
 
 describe('S-P5 清理面', () => {

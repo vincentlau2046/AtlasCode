@@ -148,8 +148,15 @@ const FORWARD_SEAM_MESSAGE =
 // ── manager 面 ────────────────────────────────────────────────────────
 
 export type McpConnectionManager = {
-  /** 连接（已 connected 态 = 去重直接返回；失败态重跑生命周期）。 */
-  connect(name: string, config: ScopedMcpServerConfig): Promise<McpServerConnection>
+  /** 连接（已 connected 态 = 去重直接返回；失败态重跑生命周期）。
+   * AD-49（0.1.48 A-②）：`opts.connectionTimeoutMs` 参数化 initialize 握手
+   * 超时预算（`--mcp-config` 源 5s 预算消费面）；缺省 = getConnectionTimeoutMs()
+   * （MCP_TIMEOUT||30000，逐字零回归）。 */
+  connect(
+    name: string,
+    config: ScopedMcpServerConfig,
+    opts?: { connectionTimeoutMs?: number },
+  ): Promise<McpServerConnection>
   /** 取当前 4 态连接（无 → undefined）。 */
   get(name: string): McpServerConnection | undefined
   /** 全量 4 态连接列表。 */
@@ -186,6 +193,7 @@ export function createMcpConnectionManager(): McpConnectionManager {
   async function connectStdio(
     name: string,
     config: ScopedMcpStdioConfig,
+    opts?: { connectionTimeoutMs?: number },
   ): Promise<McpServerConnection> {
     // ATLAS_SHELL_PREFIX 覆盖（旧 L881-887 逐字：prefix 存在时 command+args
     // 折叠为单参 shell 行）
@@ -281,16 +289,20 @@ export function createMcpConnectionManager(): McpConnectionManager {
       },
       clientInfo: { name: 'atlascode', version: '0.0.1' },
     })
+    // AD-49（0.1.48 A-②）：initialize 握手超时预算参数化——`--mcp-config`
+    // 源走 5s 预算（print.ts 传 opts.connectionTimeoutMs），其余源（settings/
+    // .mcp.json）缺省 = getConnectionTimeoutMs()（MCP_TIMEOUT||30000，逐字零回归）。
+    const budgetMs = opts?.connectionTimeoutMs ?? getConnectionTimeoutMs()
     let timeoutId: ReturnType<typeof setTimeout> | undefined
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(
         () =>
           reject(
             new Error(
-              `MCP server "${name}" connection timed out after ${getConnectionTimeoutMs()}ms`,
+              `MCP server "${name}" connection timed out after ${budgetMs}ms`,
             ),
           ),
-        getConnectionTimeoutMs(),
+        budgetMs,
       )
     })
     // Clean up timeout if connect resolves or rejects（旧 L1013-1019 逐字）
@@ -349,6 +361,7 @@ export function createMcpConnectionManager(): McpConnectionManager {
   async function connect(
     name: string,
     config: ScopedMcpServerConfig,
+    opts?: { connectionTimeoutMs?: number },
   ): Promise<McpServerConnection> {
     const existing = connections.get(name)
     if (existing?.type === 'connected') return existing
@@ -364,7 +377,7 @@ export function createMcpConnectionManager(): McpConnectionManager {
       // stdio（type 'stdio' | 缺省 = 旧 `type === 'stdio' || !type` 支逐字；
       // 分发已排除 3 非 stdio 型，union 收窄到 stdio 臂；未知 type 运行时
       // 兜底落此支 → 缺 command 面 failed，schema 解析面保证不产出 4 裁型）
-      return await connectStdio(name, config as ScopedMcpStdioConfig)
+      return await connectStdio(name, config as ScopedMcpStdioConfig, opts)
     } finally {
       pending.delete(name)
     }

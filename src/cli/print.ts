@@ -79,7 +79,8 @@
  *     getRoleModel 角色映射 + getProviderContextWindow 压缩阈值面）。
  */
 import { randomUUID } from 'crypto'
-import { join } from 'path'
+import { readFile } from 'node:fs/promises'
+import { join, resolve } from 'path'
 import {
   type AssistantMessage,
   type Message,
@@ -123,6 +124,7 @@ import {
   getMcpConnectionManager,
   getMcpDiscoveryInput,
   type McpConnectionManager,
+  type McpDiscoveryInput,
   type McpJsonRpcClient,
 } from '../mcp'
 import {
@@ -200,6 +202,11 @@ export interface HeadlessOptions {
   jsonSchema?: Record<string, unknown>
   thinkingConfig?: ThinkingConfig
   effort?: string
+  // AD-49（0.1.48 A-② MCP）：headless 车道 `--mcp-config` 源真接线（此前
+  // headless 不消费该 flag，MCP 仅走 settings/.mcp.json 2 源发现）。dynamic
+  // 源走 5s 连接预算；strict = 仅用 --mcp-config 源（忽略 settings/.mcp.json）。
+  mcpConfig?: string[]
+  strictMcpConfig?: boolean
 }
 
 // 本地窄型（result wire 消息读面；writer 支类型自明，避免与 sdkTypes 循环）
@@ -300,6 +307,122 @@ function syncMcpClientRegistryLocal(
     clients.push({ name, type: 'pending' })
   }
   setMcpClientRegistry({ clients })
+}
+
+/** AD-49（0.1.48 A-② MCP）：MCP_CONNECTION_NONBLOCKING 非阻塞门判定。
+ * 真值（'1'/'true'/'yes'/'on'，大小写不敏感）= headless `-p` 跳过 connect
+ * allSettled 等待（慢服务器留 pending 占位、进程不阻塞启动）；缺省/未设/假值
+ * = 现阻塞行为逐字不变（不默认翻非阻塞）。 */
+function isMcpConnectionNonBlocking(): boolean {
+  const v = (process.env.MCP_CONNECTION_NONBLOCKING ?? '').trim().toLowerCase()
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on'
+}
+
+/** AD-49（0.1.48 A-② MCP）：--mcp-config 源解析（CLI 层 dynamic 源补源；
+ * §8.68 R2 域内 2 源裁定不变，dynamic 源 = CLI 层接线）。每项 = JSON 字符串
+ * 或文件路径（TUI parseMcpConfig 同序：先 JSON.parse，失败当文件路径 readFile）；
+ * 取 `.mcpServers` record 逐台 merge（后项覆盖前项）。坏项 / 无 mcpServers 支
+ * 静默跳过（不沉全果，同 buildMcpServerConfigs 逐台 parse 语义）。env 展开 /
+ * reserved-name / enterprise-policy = TUI 车道专属面（headless 裁登记，不随迁）。 */
+async function parseMcpConfigItemsLocal(
+  items: string[],
+): Promise<Record<string, unknown>> {
+  const out: Record<string, unknown> = {}
+  for (const item of items) {
+    const trimmed = item.trim()
+    if (!trimmed) continue
+    let object: unknown = null
+    try {
+      object = JSON.parse(trimmed)
+    } catch {
+      try {
+        const raw = await readFile(resolve(trimmed), 'utf8')
+        object = JSON.parse(raw)
+      } catch {
+        object = null
+      }
+    }
+    const record = (object as { mcpServers?: Record<string, unknown> } | null)
+      ?.mcpServers
+    if (record && typeof record === 'object') {
+      for (const [name, serverConfig] of Object.entries(record)) {
+        out[name] = serverConfig
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * AD-49（0.1.48 A-② MCP）：headless 启动 MCP 连接编排（从 runHeadless 内联块
+ * 抽出 = 注入 manager 可零 spawn 单测；§8.71.1.4 组合根 initMcpConnections
+ * ①②③ 无壳形态）。
+ *
+ * 源区分：settings/.mcp.json（buildMcpServerConfigs 最小 2 源，30s 预算）+
+ * --mcp-config dynamic 源（CLI 层补源，5s 连接预算；§8.68 R2 域内 2 源裁定不变，
+ * dynamic 源 = CLI 层接线）；MCP_CONNECTION_NONBLOCKING = 非阻塞门（true 时
+ * 跳过 connect allSettled 等待，慢服务器留 pending 占位、进程不阻塞启动；缺省
+ * 未设 = 现阻塞行为逐字不变）。
+ *
+ * 判别单测面（tests/unit/cli-print-mcp-nonblocking）：注入 fake manager 断言
+ * ① 非阻塞门 / ② dynamic 源 5s 预算 / ③ 非 dynamic 源 30s 零回归。
+ */
+export async function connectMcpStartup(args: {
+  manager: McpConnectionManager
+  discoveryInput: McpDiscoveryInput
+  mcpConfig?: string[]
+  strictMcpConfig?: boolean
+}): Promise<{
+  mcpConnections: MCPServerConnection[]
+  mcpTools: ReturnType<typeof createMcpTools>
+  nonBlocking: boolean
+}> {
+  const { manager, discoveryInput, mcpConfig, strictMcpConfig } = args
+  // ① settings/.mcp.json 2 源（域内 buildMcpServerConfigs，30s 缺省预算）
+  const baseConfigs = await buildMcpServerConfigs(discoveryInput)
+  // ② --mcp-config dynamic 源（CLI 层补源；5s 连接预算）
+  const dynamicConfigs = mcpConfig?.length
+    ? await buildMcpServerConfigs({
+        settingsServers: await parseMcpConfigItemsLocal(mcpConfig),
+        projectMcpJsonPath: null,
+      })
+    : {}
+  const dynamicNames = new Set(Object.keys(dynamicConfigs))
+  // ③ strict = 仅 dynamic 源（忽略 settings/.mcp.json）；否则 merge（dynamic
+  //    同名覆盖 settings，TUI 车道后项覆盖前项同序）
+  const allConfigs = strictMcpConfig
+    ? dynamicConfigs
+    : { ...baseConfigs, ...dynamicConfigs }
+  // ④ 连接预算路由：dynamic 源 5s / 其余源缺省（30s 逐字零回归）
+  const connectAll = () =>
+    Promise.allSettled(
+      Object.entries(allConfigs).map(([name, config]) =>
+        manager.connect(
+          name,
+          config,
+          dynamicNames.has(name) ? { connectionTimeoutMs: 5000 } : undefined,
+        ),
+      ),
+    )
+  // ⑤ 非阻塞门（MCP_CONNECTION_NONBLOCKING）：true = 不 await（慢服务器留
+  //    pending 占位、进程不阻塞）；缺省 = await（现行为逐字不变）
+  const nonBlocking = isMcpConnectionNonBlocking()
+  if (nonBlocking) {
+    void connectAll()
+    logForDebugging(
+      `[headless] mcp: non-blocking (MCP_CONNECTION_NONBLOCKING), ${String(
+        Object.keys(allConfigs).length,
+      )} server(s) connecting in background`,
+    )
+  } else {
+    const mcpResults = await connectAll()
+    const mcpOk = mcpResults.filter(r => r.status === 'fulfilled').length
+    logForDebugging(mcpConnectLine(mcpOk, mcpResults.length - mcpOk))
+  }
+  const mcpConnections = await buildMcpEngineConnectionsLocal(manager)
+  const mcpTools = createMcpTools(mcpConnections)
+  syncMcpClientRegistryLocal(manager)
+  return { mcpConnections, mcpTools, nonBlocking }
 }
 
 // ── 本地 IO / 消息构造 ───────────────────────────────────────────────
@@ -587,18 +710,15 @@ export async function runHeadless(
       ).mcpServers,
       projectMcpJsonPath: join(process.cwd(), '.mcp.json'),
     })
-  const mcpConfigs = await buildMcpServerConfigs(discoveryInput)
-  const mcpResults = await Promise.allSettled(
-    Object.entries(mcpConfigs).map(([name, config]) =>
-      mcpManager.connect(name, config),
-    ),
-  )
-  // #240（cli-debug P3）：基线行 ③ MCP 连接汇总（常路径诊断面）
-  const mcpOk = mcpResults.filter(r => r.status === 'fulfilled').length
-  logForDebugging(mcpConnectLine(mcpOk, mcpResults.length - mcpOk))
-  const mcpConnections = await buildMcpEngineConnectionsLocal(mcpManager)
-  const mcpTools = createMcpTools(mcpConnections)
-  syncMcpClientRegistryLocal(mcpManager)
+  // AD-49（0.1.48 A-② MCP）：MCP 启动编排抽 connectMcpStartup（注入 manager
+  // 可零 spawn 单测；--mcp-config dynamic 源 5s 预算 + 非阻塞门 + strict）。
+  // #240（cli-debug P3）：基线行 ③ MCP 连接汇总（常路径诊断面）随编排内聚。
+  const { mcpTools } = await connectMcpStartup({
+    manager: mcpManager,
+    discoveryInput,
+    mcpConfig: options.mcpConfig,
+    strictMcpConfig: options.strictMcpConfig,
+  })
 
   // ── 权限上下文 + 工具池 + loop deps（组合根 createAgentLoopDeps，
   // W3-3b §8.74.15：①②③④⑤ 经构建器单入口，headless 行内组装块替换）──

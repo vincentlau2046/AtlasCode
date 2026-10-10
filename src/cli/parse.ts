@@ -292,6 +292,13 @@ export function buildHeadlessOptions(
       options.maxThinkingTokens as number | undefined,
     ),
     effort: options.effort as HeadlessOptions['effort'],
+    // AD-49（0.1.48 A-② MCP）：--mcp-config（variadic string[]）+
+    // --strict-mcp-config（bool）真映射 headless 车道（此前 headless 不消费
+    // 该 flag，MCP 仅走 settings/.mcp.json 2 源；现接 connectMcpStartup
+    // dynamic 源 + 5s 预算）。
+    mcpConfig: options.mcpConfig as HeadlessOptions['mcpConfig'],
+    strictMcpConfig:
+      options.strictMcpConfig === true ? true : undefined,
   }
 }
 
