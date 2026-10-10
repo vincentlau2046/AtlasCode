@@ -4,6 +4,58 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.49
+
+P0 对齐第二车波（基线 v0.1.48；PAC 0.1.48 §2 波序第 2 车 = AD-47 权限 hook + AD-08 沙箱网络
+deniedDomains + SL-1 statusline ctx 面 + FX-36 LLM 超时 verify；gate `r-20261010-gate-049.md`
+= GATE-PASS @master e8a718d：§2 判别单测全闭环〔修前红 4 提交点实证→绿，14 文件精确 0 fail〕+
+§3 PTY 回归 8/9 绿〔唯一红 C3 timeoutlane = 0.1.47 基线同签名既有行为，定因登记不阻〕+ 四件套
+rc=0×4〔CI 全量 107199 pass/0 fail·7619 files，cli.js 17 764 344 B〕+ A4F --release-gate
+releasable=true + hardFail=0 / 429 计数 0 + SL-1b 双绿 = ③单点闭环〔无需 +1 处数据链〕；
+发布硬门禁 = 0.1.48 npm live e2e 缓补前检双 MATCH 确认〔packument latest=0.1.48 + shasum
+9ccc237d34a7…/integrity sha512-PxXfzj5Q… = 工单留档值〕）：
+
+- **AD-47 PermissionDenied hook 发射点 + retry 消费（落码，CC 2.1.89 TOP #2，修前红①②）**：
+  权限被拒回合（deny 决策）后发射 `PermissionDenied` hook 事件（含 tool_name / tool_input /
+  reason），hook 返回 `permissionDecision` + `updatedInput` 时经 retry 消费链重放该工具调用
+  （retry 回合不再重复发射，防循环）。单测 `permission-denied-hook.test.ts`（①②修前红 ③零回归）。
+- **AD-08 sandbox.network.deniedDomains（落码，CC 2.1.113 TOP #12，修前红①）**：
+  `SandboxNetworkConfigSchema` 新增可选 `deniedDomains` 键 + `createSandboxManager`
+  settings→runtime 纯透传接线（结构性零回归）+ 判定原语 `decideHostNetwork(host, {allowedDomains,
+  deniedDomains})`（denied 命中即拒 > allowed > passthrough，单一决策原语供后续 runtime
+  规则建面消费）+ `domainPatternMatches`（host 精确 / 子域匹配，`*.` 前缀归一化——`*.com` ≡
+  `com`，apex 精确命中与 engine webSearchProvider matchDomain 对齐）。单测
+  `sandbox-network-denied-domains.test.ts`（①原语+pattern+接线修前红 ②③零回归+新键契约校验）。
+- **SL-1a statusline ctx 段 dim 占位恒显（落码，修前红②）**：ContextBarSegment 在
+  `pct == null`（无 usage 数据）时旧行为 = 整段 `return null` 隐藏；本版改 dim 占位恒显
+  `▤ —/{total}k tok`（total = context_window_size 动态取值链，非写死），数字式 3 色阶
+  （cyan/yellow/red）+ ▲ 预警零回归。单测 `statusline-context-bar.test.ts` 扩面
+  （①数字式 3 色阶零回归 ②dim 占位修前红）。活验 = e2e SL-1b 定因探针
+  （statusline-ctx.ts，双断言 (a) dim 占位/(b) 真实数字 + 三分支定因；0.1.49 gate §3[9]
+  双绿 = ③首轮无数据单点闭环，无需条件落码）。
+- **SL-1c 窗口兜底常量统一 = HARD_DEFAULT_CONTEXT_WINDOW（refactor，修前红①）**：
+  删 tui `context.ts` 本地 150_000 分叉 + 僵尸 FIXME + engine `autoCompact.ts` 本地 150_000
+  拷贝，回落窗口单一事实源 = modelprovider `HARD_DEFAULT_CONTEXT_WINDOW`（262_144，roles
+  层 canonical）；`MODEL_CONTEXT_WINDOW_DEFAULT` 降为别名（全仓零外部消费，防再分叉守卫
+  单测 `context-window-unified.test.ts` ③）。重锚：engine-d2a-s5-surface
+  （242_144/229_144/121_072/warning 态 used=235_000）+ engine-auto-compact-window
+  （229_144/121_072/193_715）；settings 128k 档（108_000/95_000）与 env 100k cap
+  （80_000/67_000）断言不变（cap 胜回落）。
+- **FX-36 LLM 超时三态 verify（零码，既有单测全钉）**：`resolveLlmTimeoutMs`
+  （src/modelprovider/index.ts）env 恒胜（有效）> settings int≥1（cap 内）> 缺省
+  `LLM_TIMEOUT_DEFAULT_MS`（600_000）；`LLM_TIMEOUT_CAP_MS` = 1_800_000（30min，裁定⑦
+  锁定）。既有 `modelprovider-llm-timeout.test.ts` 10 测钉死三态（缺省 / env 200_000 胜 /
+  env 9_999_999_999 → cap），本波 0 码 0 提交，gate §2 10/10 记录在案。
+- **测试侧交付物（e2e lane 工作树交付，Main 收编 commit，不混入发布面）**：SL-1b
+  statusline-ctx 探针新件 + loop-robustness verify-fixes MODEL 面 + tui-diff CMP_MODEL
+  const 切换（accept.ts / v3-kill-leader.ts → 本地 Qwen38-27B-TXT，2026-10-10 用户裁定
+  f4 转达：云 Coding Plan 月配额 429 阻塞 → IFF 8999 本地路由 docker 8007；F-1 恢复口径
+  裁定前保留现值，可 env 覆写回切）。
+
+四件套（Main 分支口径 CI PTY-skip：tsc 0 / eslint 0e / build 3850 modules cli.js 17.77MB /
+全量 3891 pass 0 fail·287 files；e2e gate 独立复跑 rc=0×4 见上）。发布：GitHub tag v0.1.49 +
+npm `@atlasharness/atlascode@0.1.49`（registry.npmjs.org；SRI 留档见 gate 报告回填区）。
+
 ## v0.1.48
 
 P0 对齐首车波（基线 v0.1.47；PAC 0.1.48 §2 波序第 1 车 = A-① 安全 + A-② MCP + A-⑤ 分类器硬化
