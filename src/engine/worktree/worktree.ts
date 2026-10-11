@@ -879,7 +879,23 @@ export async function cleanupWorktree(): Promise<void> {
  * getConfigDirName()/worktrees/（即便从 session worktree 内 spawn），否则嵌套在
  * <worktree>/getConfigDirName()/worktrees/ 而周期清理（扫 canonical root）找不到。
  */
-export async function createAgentWorktree(slug: string): Promise<{
+/**
+ * Create (or resume) an agent-isolation worktree.
+ *
+ * FX-06（0.1.51 C-1，CC 2.1.119）：`options.sessionId` = session 作用域
+ * 唯一 slug 支——前 session 遗留的 stale agent worktree（或含其未提交
+ * 工作）不得被跨 session 同 slug 的 fast-resume 复用（getOrCreateWorktree
+ * getOrCreate 语义 = slug 撞车无条件进现存目录，CC bug 面在场）。
+ * 裁定：唯一 session-scoped slug（非清理先行——前 session 目录或含未
+ * 提交工作，清理 = 数据损失；stale 残留走 cleanupStaleAgentWorktrees
+ * age-cutoff 路线）。sessionId 取前 8 位（UUID v4 前 32 bit，目录名
+ * 槽；同 session 内同 slug → 同目录 fast-resume 仍按设计保留）。
+ * 无 sessionId 入参 = 现逐字恒等（legacy getOrCreate 语义不变，零回归）。
+ */
+export async function createAgentWorktree(
+  slug: string,
+  options?: { sessionId?: string },
+): Promise<{
   worktreePath: string
   worktreeBranch?: string
   headCommit?: string
@@ -887,6 +903,10 @@ export async function createAgentWorktree(slug: string): Promise<{
   hookBased?: boolean
 }> {
   validateWorktreeSlug(slug)
+  const effectiveSlug = options?.sessionId
+    ? `${slug}-${options.sessionId.slice(0, 8)}`
+    : slug
+  validateWorktreeSlug(effectiveSlug)
 
   // H6 前向接缝：worktree hooks 面（用户可配 VCS WorktreeCreate/Remove hook）未落 →
   // 无 hook 分支，直接 git 路径（旧仓 hasWorktreeCreateHook 分支裁）。
@@ -900,7 +920,7 @@ export async function createAgentWorktree(slug: string): Promise<{
   }
 
   const { worktreePath, worktreeBranch, headCommit, existed } =
-    await getOrCreateWorktree(gitRoot, slug)
+    await getOrCreateWorktree(gitRoot, effectiveSlug)
 
   if (!existed) {
     logForDebugging(
