@@ -143,6 +143,17 @@ export function gitExe(): string {
   return _gitExe
 }
 
+// Env vars to prevent git/SSH from prompting for credentials (which hangs the CLI).
+// GIT_TERMINAL_PROMPT=0 prevents git from opening /dev/tty for credential prompts.
+// GIT_ASKPASS='' disables askpass GUI programs.
+// stdin: 'ignore' closes stdin so interactive prompts can't block.
+// AD-21（0.1.51 C-1）：自 worktree.ts 升 git.ts 单源（worktree.ts 改 import，
+// 消重；值逐字不变）。
+export const GIT_NO_PROMPT_ENV = {
+  GIT_TERMINAL_PROMPT: '0',
+  GIT_ASKPASS: '',
+}
+
 // ── findGitRoot（上探 .git dir/file；git.ts:27-107 逐字，LRU→Map 缓存登记）──
 const GIT_ROOT_NOT_FOUND = Symbol('git-root-not-found')
 const findGitRootCache = new Map<
@@ -505,6 +516,64 @@ export async function readWorktreeHeadSha(
     return resolveRef(gitDir, `refs/heads/${head.name}`)
   }
   return head.sha
+}
+
+// ── AD-21（0.1.51 C-1）：git worktree list 探针面（EnterWorktree path 参数）──
+export type WorktreeListEntry = {
+  worktreePath: string
+  /** null = detached HEAD（porcelain 输出无 branch 行）。 */
+  branch: string | null
+}
+
+/**
+ * `git worktree list --porcelain` 输出的纯解析器（AD-21，无子进程 / 零真盘）。
+ * 块结构：`worktree <path>` 行开块；`branch refs/heads/<name>` 剥前缀为
+ * `<name>`；`HEAD <sha>` 与标记行（bare/prunable/locked）忽略，空行分块；
+ * detached worktree 无 branch 行 → branch null（不崩不串块）。
+ */
+export function parseWorktreeListPorcelain(out: string): WorktreeListEntry[] {
+  const entries: WorktreeListEntry[] = []
+  let current: WorktreeListEntry | null = null
+  for (const line of out.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('worktree ')) {
+      if (current) entries.push(current)
+      current = { worktreePath: trimmed.slice('worktree '.length), branch: null }
+      continue
+    }
+    if (!current || trimmed === '') continue
+    if (trimmed.startsWith('branch ')) {
+      let ref = trimmed.slice('branch '.length)
+      if (ref.startsWith('refs/heads/')) ref = ref.slice('refs/heads/'.length)
+      current.branch = ref
+    }
+    // HEAD <sha> / bare / prunable / locked 标记行：忽略
+  }
+  if (current) entries.push(current)
+  return entries
+}
+
+/**
+ * 列本仓全部注册 worktree（AD-21：`git worktree list --porcelain`）。
+ * cwd = 仓根（主仓或任一注册 worktree 均可）；非零退出 → throw（stderr
+ * 可操作透传，上层判分支文案）。
+ */
+export async function listWorktrees(
+  repoRoot: string,
+): Promise<WorktreeListEntry[]> {
+  const { code, stdout, stderr } = await execFileNoThrowWithCwd(
+    gitExe(),
+    ['worktree', 'list', '--porcelain'],
+    {
+      cwd: repoRoot,
+      stdin: 'ignore',
+      env: { ...process.env, ...GIT_NO_PROMPT_ENV },
+    },
+  )
+  if (code !== 0) {
+    throw new Error(`git worktree list failed (code ${code}): ${stderr.trim()}`)
+  }
+  return parseWorktreeListPorcelain(stdout)
 }
 
 // ── readRawSymref（旧仓 gitFilesystem.ts:287 逐字，loose symref 只读）────────

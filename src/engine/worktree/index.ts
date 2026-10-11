@@ -33,6 +33,8 @@ export {
   restoreWorktreeSession,
   generateTmuxSessionName,
   createWorktreeForSession,
+  // AD-21（0.1.51 C-1）：EnterWorktree path 入参面（现存 worktree 进入不新建）
+  enterExistingWorktreeForSession,
   keepWorktree,
   cleanupWorktree,
 } from './worktree'
@@ -65,4 +67,9 @@ export {
   parseGitConfigValue,
   parseConfigString,
   resetWorktreeGitCaches,
+  // AD-21（0.1.51 C-1）：git worktree list 探针面（纯解析器 + 子进程列面 + env 单源）
+  GIT_NO_PROMPT_ENV,
+  listWorktrees,
+  parseWorktreeListPorcelain,
+  type WorktreeListEntry,
 } from './git'

@@ -61,6 +61,15 @@
  *    constants·systemPromptSections + utils·memoryFiles + plans 缓存三件套
  *    → ⑨ 裁 / UI renderToolResultMessage JSX 面 → 裁 TUI 波（纯字符串
  *    renderToolUseMessage 保留）。
+ *  ⑪ AD-21（0.1.51 C-1 新增面，非逐字随迁）：入参 schema 加 `path?: string`
+ *    ——现存 worktree 探测进入（不新建）：`git worktree list --porcelain`
+ *    探针（worktree 域 listWorktrees + 纯解析器）确认 path 是本仓注册
+ *    worktree（realpath 归一比较）→ enterExistingWorktreeForSession 装配
+ *    会话（不新建支）；路径不存在 / 存在但非本仓注册 worktree → 可操作
+ *    报错/拒。双给（name+path）= name 优先（零回归语义位：仅 name 入参
+ *    路径逐字恒等，name 校验序不变——slug 校验先于 git 探针）。
+ *    toAutoClassifierInput 面同步 name ?? path ?? ''（旧 def 体 name ?? ''）。
+ *    探针/报错面在 worktree 域（STR-1 门面规则，本工具不 reach 内部文件）。
  */
 import { randomUUID } from 'crypto'
 import {
@@ -78,6 +87,7 @@ import {
 } from '../../../shared'
 import {
   createWorktreeForSession,
+  enterExistingWorktreeForSession,
   findCanonicalGitRoot,
   getCurrentWorktreeSession,
   validateWorktreeSlug,
@@ -96,7 +106,10 @@ export type EnterWorktreeOutput = {
   message: string
 }
 
-/** 旧仓 zod inputSchema 逐字段转写（delta ① 纯 JSON schema，S-B5 先例）。 */
+/**
+ * 旧仓 zod inputSchema 逐字段转写（delta ① 纯 JSON schema，S-B5 先例）。
+ * AD-21（0.1.51 C-1 delta ⑪）：`path` 属性新增（name 属性逐字保留）。
+ */
 export const ENTER_WORKTREE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   type: 'object',
   properties: {
@@ -104,6 +117,11 @@ export const ENTER_WORKTREE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
       type: 'string',
       description:
         'Optional name for the worktree. Each "/"-separated segment may contain only letters, digits, dots, underscores, and dashes; max 64 chars total. A random name is generated if not provided.',
+    },
+    path: {
+      type: 'string',
+      description:
+        'Optional path to an EXISTING git worktree of the current repository to enter without creating a new one (probed via `git worktree list`). If the path does not exist or is not a registered worktree of this repository, the call fails with an actionable error. When both name and path are given, name wins.',
     },
   },
 }
@@ -121,8 +139,11 @@ export const EnterWorktreeTool: Tool = {
   isConcurrencySafe: () => false,
   isReadOnly: () => false,
   isDestructive: () => false,
-  toAutoClassifierInput: (input: unknown) =>
-    (input as EnterWorktreeToolInput).name ?? '',
+  // AD-21（delta ⑪）：path 面回落（旧 def 体 name ?? '' → name ?? path ?? ''）
+  toAutoClassifierInput: (input: unknown) => {
+    const i = input as EnterWorktreeToolInput
+    return i.name ?? i.path ?? ''
+  },
   userFacingName: () => 'Creating worktree',
   // delta ⑤：旧 buildTool 默认显式固化（委托通用权限系统）
   checkPermissions: async (input: unknown) => ({
@@ -135,14 +156,25 @@ export const EnterWorktreeTool: Tool = {
   // （共享 ValidationResult 失败支必带 errorCode——输入校验拒 = 1；
   // Exit 侧会话/探针判别码 1/2/3 独立编号，两工具不混用）
   async validateInput(input: unknown): Promise<ValidationResult> {
-    const { name } = input as EnterWorktreeToolInput
-    if (name === undefined) {
-      return { result: true }
+    const { name, path } = input as EnterWorktreeToolInput
+    // 零回归语义位：name present 的校验序与旧体逐字恒等（slug 校验先于
+    // git 探针，旧 P-W4 守卫不变）
+    if (name !== undefined) {
+      try {
+        validateWorktreeSlug(name)
+      } catch (e) {
+        return { result: false, errorCode: 1, message: (e as Error).message }
+      }
     }
-    try {
-      validateWorktreeSlug(name)
-    } catch (e) {
-      return { result: false, errorCode: 1, message: (e as Error).message }
+    // AD-21（delta ⑪）：path 形状面（盘上探测在 call() 支——validateInput
+    // 零盘 I/O 分层纪律；双给 = name 优先，两形状各验各面）
+    if (path !== undefined && (typeof path !== 'string' || path.length === 0)) {
+      return {
+        result: false,
+        errorCode: 1,
+        message:
+          '`path` must be a non-empty string (an existing git worktree path of this repository)',
+      }
     }
     return { result: true }
   },
@@ -159,6 +191,28 @@ export const EnterWorktreeTool: Tool = {
     if (mainRepoRoot && mainRepoRoot !== getCwdState()) {
       process.chdir(mainRepoRoot)
       setCwd(mainRepoRoot)
+    }
+
+    // AD-21（delta ⑪）：path 入参支——现存 worktree 探测进入（不新建；
+    // 盘上探针/可操作报错面在 worktree 域 enterExistingWorktreeForSession）
+    if (input.path !== undefined) {
+      const entered = await enterExistingWorktreeForSession(
+        getSessionId(),
+        input.path,
+      )
+      process.chdir(entered.worktreePath)
+      setCwd(entered.worktreePath)
+      setOriginalCwd(getCwdState())
+      const enteredBranchInfo = entered.worktreeBranch
+        ? ` on branch ${entered.worktreeBranch}`
+        : ''
+      return {
+        data: {
+          worktreePath: entered.worktreePath,
+          worktreeBranch: entered.worktreeBranch,
+          message: `Entered existing worktree at ${entered.worktreePath}${enteredBranchInfo}. The session is now working in the worktree. Use ExitWorktree to leave mid-session, or exit the session to be prompted.`,
+        },
+      }
     }
 
     // delta ⑦：旧 getPlanSlug() 裁 → randomUUID 本地 slug 兜底位

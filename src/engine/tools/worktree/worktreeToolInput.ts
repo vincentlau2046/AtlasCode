@@ -6,9 +6,15 @@
  * call/validateInput 解构位（自 unknown cast）。
  */
 
-/** EnterWorktree 输入 duck（旧 z.strictObject({ name?: string })）。 */
+/**
+ * EnterWorktree 输入 duck（旧 z.strictObject({ name?: string })）。
+ * AD-21（0.1.51 C-1）：`path?` 面新增——现存 worktree 探测进入（不新建，
+ * `git worktree list --porcelain` 探针）；双给 = name 优先（零回归语义位）。
+ */
 export type EnterWorktreeToolInput = {
   name?: string
+  /** AD-21：本仓现存 git worktree 路径（进入不新建；不存在/非注册 worktree 可操作报错）。 */
+  path?: string
 }
 
 /** ExitWorktree 输入 duck（旧 z.strictObject({ action, discard_changes? })）。 */

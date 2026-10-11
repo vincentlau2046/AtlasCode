@@ -73,8 +73,9 @@
  *     performPostCreationSetup → 会话态装配）/ keepWorktree / cleanupWorktree
  *     （git worktree remove --force + sleep(100) + branch -D）。
  */
+import { realpathSync } from 'fs'
 import { copyFile, mkdir, readdir, stat, symlink, utimes } from 'fs/promises'
-import { basename, dirname, join } from 'path'
+import { basename, dirname, join, resolve } from 'path'
 import {
   containsPathTraversal,
   errorMessage,
@@ -94,7 +95,9 @@ import {
   getDefaultBranch,
   getBranch,
   getCommonDir,
+  GIT_NO_PROMPT_ENV,
   gitExe,
+  listWorktrees,
   parseGitConfigValue,
   readWorktreeHeadSha,
   resolveGitDir,
@@ -209,14 +212,8 @@ function getWorktreeSettings(): {
   ).worktree ?? {}
 }
 
-// Env vars to prevent git/SSH from prompting for credentials (which hangs the CLI).
-// GIT_TERMINAL_PROMPT=0 prevents git from opening /dev/tty for credential prompts.
-// GIT_ASKPASS='' disables askpass GUI programs.
-// stdin: 'ignore' closes stdin so interactive prompts can't block.
-const GIT_NO_PROMPT_ENV = {
-  GIT_TERMINAL_PROMPT: '0',
-  GIT_ASKPASS: '',
-}
+// GIT_NO_PROMPT_ENV 自本地 const 升 ./git 单源（AD-21 0.1.51 C-1，消重；
+// 注释面见 git.ts gitExe 段）。
 
 function worktreesDir(repoRoot: string): string {
   return join(repoRoot, getConfigDirName(), 'worktrees')
@@ -682,6 +679,88 @@ export async function createWorktreeForSession(
   }
 
   // S-D2a 登记 b：saveCurrentProjectConfig 持久化面未落（CLI/持久化波）→ 保存点裁。
+  return currentWorktreeSession
+}
+
+/**
+ * 进入现存注册 worktree（不新建）（AD-21 0.1.51 C-1，EnterWorktree `path`
+ * 入参面）。`git worktree list --porcelain` 探针确认 requestedPath 是本仓
+ * 注册 worktree（realpath 归一比较；主仓 checkout 本身是注册条目）：
+ *   - 命中 → 装配会话（不新建支：worktreeBranch = 列表 branch，detached →
+ *     undefined；creationDurationMs 不设 = resume 信号，与 getOrCreateWorktree
+ *     existed 支同语义）
+ *   - 路径不存在 → 可操作报错（提示 name 入参走新建支）
+ *   - 存在但非本仓注册 worktree → 可操作拒（列举可用 worktree）
+ * 解耦登记 c 同 createWorktreeForSession：process.cwd()（chdir/setCwd 由调用
+ * 方工具主仓根守卫完成）；hook 支 / 保存点裁同 create（头注 a/b）。
+ */
+export async function enterExistingWorktreeForSession(
+  sessionId: string,
+  requestedPath: string,
+  tmuxSessionName?: string,
+): Promise<WorktreeSession> {
+  // S-D2a 登记 c：旧 getCwd()（state cwd）→ process.cwd()。
+  const originalCwd = process.cwd()
+
+  const gitRoot = findGitRoot(process.cwd())
+  if (!gitRoot) {
+    throw new Error(
+      'Cannot enter a worktree: not in a git repository. ' +
+        'Worktree isolation requires a git repository.',
+    )
+  }
+
+  const entries = await listWorktrees(gitRoot)
+  const resolved = resolve(requestedPath)
+  // realpath 归一（tmpdir symlink 面同 sd2b-fs 先例）；不存在的路径 realpath
+  // 抛错 → 回落原形（存在性判别走 stat 支，不进比较）。
+  const norm = (p: string): string => {
+    try {
+      return realpathSync(p)
+    } catch {
+      return p
+    }
+  }
+  const resolvedNorm = norm(resolved)
+  const match = entries.find(e => norm(e.worktreePath) === resolvedNorm)
+
+  if (!match) {
+    let exists = false
+    try {
+      await stat(resolved)
+      exists = true
+    } catch {
+      exists = false
+    }
+    if (!exists) {
+      throw new Error(
+        `Path does not exist: ${requestedPath}. ` +
+          'EnterWorktree "path" must point to an existing git worktree of this ' +
+          'repository. Use the "name" argument to create a new worktree instead.',
+      )
+    }
+    throw new Error(
+      `${requestedPath} is not a registered worktree of this repository. ` +
+        `Registered worktrees: ${entries.map(e => e.worktreePath).join(', ')}. ` +
+        'Use the "name" argument to create a new worktree instead.',
+    )
+  }
+
+  const originalBranch = await getBranch()
+  const headCommit = await readWorktreeHeadSha(match.worktreePath)
+
+  currentWorktreeSession = {
+    originalCwd,
+    worktreePath: match.worktreePath,
+    worktreeName: basename(match.worktreePath),
+    worktreeBranch: match.branch ?? undefined,
+    originalBranch,
+    originalHeadCommit: headCommit ?? undefined,
+    sessionId,
+    tmuxSessionName,
+    // S-D2a 登记：新仓 SettingsJson 无 worktree 字段 → 本地 cast idiom 读旋钮。
+    usedSparsePaths: (getWorktreeSettings().sparsePaths?.length ?? 0) > 0,
+  }
   return currentWorktreeSession
 }
 
