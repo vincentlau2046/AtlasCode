@@ -134,7 +134,7 @@ function interpretHookOutput(p: {
       // PreToolUse / Stop 特定：hookSpecificOutput.permissionDecision（旧仓 L546-571/L588-609）。
       const specific = json.hookSpecificOutput as
         | {
-            permissionDecision?: 'allow' | 'deny' | 'ask'
+            permissionDecision?: 'allow' | 'deny' | 'ask' | 'defer'
             permissionDecisionReason?: string
             additionalContext?: string
             // §8.42 审视 MAJOR-2：旧仓嵌套形载体（coreSchemas
@@ -154,6 +154,16 @@ function interpretHookOutput(p: {
         }
       } else if (specific?.permissionDecision === 'ask') {
         result.permissionBehavior = 'ask'
+        if (specific.permissionDecisionReason) {
+          result.permissionDecisionReason = specific.permissionDecisionReason
+        }
+      } else if (specific?.permissionDecision === 'defer') {
+        // AD-45 0.1.52：挂起裁定（不产 tool_result，会话挂起待 --resume 重评；
+        // rank 4 最严——resume 重评时 deny/ask 钩子会再执行，不丢阻塞意图）。
+        result.permissionBehavior = 'defer'
+        if (specific.permissionDecisionReason) {
+          result.permissionDecisionReason = specific.permissionDecisionReason
+        }
       }
       if (specific?.additionalContext) result.additionalContext = specific.additionalContext
       if (json.additionalContext) result.additionalContext = json.additionalContext
@@ -180,8 +190,13 @@ function interpretHookOutput(p: {
   return result
 }
 
-/** permissionBehavior 最严优先聚合（deny > ask > allow > passthrough）。 */
+/**
+ * permissionBehavior 最严优先聚合（AD-45 0.1.52：defer > deny > ask > allow >
+ * passthrough；defer = 挂起控制值，胜权限裁定值——挂起后 resume 重评再裁决，
+ * 阻塞意图不丢失）。
+ */
 const PERMISSION_RANK: Record<string, number> = {
+  defer: 4,
   deny: 3,
   ask: 2,
   allow: 1,
@@ -205,6 +220,8 @@ export function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void 
       PERMISSION_RANK[r.permissionBehavior] > PERMISSION_RANK[acc.permissionBehavior]
     ) {
       acc.permissionBehavior = r.permissionBehavior
+      // winner 更替语义：理由随 winner 行为更替（winner 无理由时清除陈旧值）。
+      acc.permissionDecisionReason = r.permissionDecisionReason
     }
   }
 }

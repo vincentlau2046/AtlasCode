@@ -76,7 +76,11 @@ export type HookJSONOutput = {
   decision?: 'approve' | 'block'
   reason?: string
   systemMessage?: string
-  permissionDecision?: 'allow' | 'deny' | 'ask'
+  /**
+   * PreToolUse 权限决策（AD-45 0.1.52：'defer' = 挂起裁定，不产 tool_result，
+   * 会话挂起待 --resume 重评；区别于规则面 3 值 PermissionBehavior）。
+   */
+  permissionDecision?: 'allow' | 'deny' | 'ask' | 'defer'
   permissionDecisionReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
@@ -100,7 +104,9 @@ export type HookResult = {
   blockingError?: HookBlockingError
   preventContinuation?: boolean
   stopReason?: string
-  permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough'
+  permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough' | 'defer'
+  /** AD-45 0.1.52：defer（及 deny/ask）理由载体，聚合面透传（mergeAggregated 随 winner 更替）。 */
+  permissionDecisionReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
   aborted?: boolean
@@ -115,6 +121,9 @@ export type AggregatedHookResult = {
   stopReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
-  permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough'
+  /** AD-45 0.1.52：'defer' = 挂起控制值（rank 4 最严，胜权限裁定值）。 */
+  permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough' | 'defer'
+  /** defer/deny 理由（winner 更替语义，mergeAggregated 维护）。 */
+  permissionDecisionReason?: string
   results: HookResult[]
 }
