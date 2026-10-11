@@ -90,12 +90,26 @@ function isRetryableError(err: any): boolean {
  * （SDK 超时类族：本仓 APIConnectionTimeoutError 实例 / openai SDK 命名
  * 变体 APITimeoutError / 类名判别兜底）。仅认 SDK 超时类——连接期错误
  * （ECONN/EPIPE/socket 断）不在其列。
+ *
+ * C3（0.1.50，工单 §2.1）：openai SDK v7 超时实例形状 = 实例 name 属性
+ * 被 SDK APIError 构造函数置为 'Error'，超时类名只在 constructor.name
+ * 上存活（探针实证：name='Error' | ctor.name='APIConnectionTimeoutError'
+ * | message='Request timed out.' | cause=AbortError code 20）。旧门
+ * 只查 instanceof（本仓自有类）+ 实例 name → SDK 生成超时双漏 → 滑入
+ * isRetryableError /timeout/i 正则误判可重试（4 refs × 3 attempts =
+ * 12-call 吸收 ≈96s + 超时终态行 llmTimeoutRemediationHint 不现形，
+ * #260 fail-fast 语义回归）→ 补 constructor.name 类族判别。
  */
 export function isClientRequestTimeout(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false
   const e = err as { name?: string; constructor?: { name?: string } }
   if (err instanceof APIConnectionTimeoutError) return true
   if (e.name === 'APIConnectionTimeoutError' || e.name === 'APITimeoutError') return true
+  // C3：SDK 实例形状下类名的唯一承载位（实例 name 恒 'Error'，见头注）。
+  // 仅认超时类族两个类名——连接类族（APIConnectionError 等）不在此列，
+  // 连接期错误仍归 isRetryableError（#271 #4 cause 链面保留）。
+  const ctorName = e.constructor?.name
+  if (ctorName === 'APIConnectionTimeoutError' || ctorName === 'APITimeoutError') return true
   return false
 }
 
@@ -475,7 +489,10 @@ export class OpenAIProvider implements ModelProvider {
 
     if (lastErr) {
       const message = lastErr instanceof Error ? lastErr.message || lastErr.name : String(lastErr)
-      const code: LLMErrorCode = lastErr?.name === 'TimeoutError' ? 'TIMEOUT' : 'API_ERROR'
+      // C3：超时终态语义对齐——旧 `name === 'TimeoutError'` 字面量对本仓
+      // 自有类（实例 name='APIError'）与 SDK 实例（name='Error'）俱不中
+      // （死判别）→ 门控 isClientRequestTimeout（超时类族 = TIMEOUT 码）。
+      const code: LLMErrorCode = isClientRequestTimeout(lastErr) ? 'TIMEOUT' : 'API_ERROR'
       yield { type: 'error', code, message, retryable: shouldRetryModelError(lastErr, args.signal) }
       return
     }
