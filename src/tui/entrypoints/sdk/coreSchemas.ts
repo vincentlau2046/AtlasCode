@@ -252,6 +252,18 @@ export const PermissionBehaviorSchema = lazySchema(() =>
   z.enum(['allow', 'deny', 'ask']),
 )
 
+/**
+ * AD-45 0.1.52：PreToolUse hook 路径权限决策 4 值枚举（'defer' = 挂起重评）。
+ * 仅 PreToolUseHookSpecificOutputSchema 消费（hook 决策面）；规则面 3 值
+ * PermissionBehaviorSchema（addRules/replaceRules/removeRules 权限规则值集）
+ * 不动——defer 是 hook 决策值，不入规则面。本地定义（z + lazySchema 自包含，
+ * 避免引 PermissionRule 造成循环；与 PermissionRule.preToolUsePermissionDecisionSchema
+ * 双镜像同步维护，同 hooks.ts 双车道先例）。
+ */
+export const PreToolUsePermissionDecisionSchema = lazySchema(() =>
+  z.enum(['allow', 'deny', 'ask', 'defer']),
+)
+
 export const PermissionRuleValueSchema = lazySchema(() =>
   z.object({
     toolName: z.string(),
@@ -805,7 +817,8 @@ export const AsyncHookJSONOutputSchema = lazySchema(() =>
 export const PreToolUseHookSpecificOutputSchema = lazySchema(() =>
   z.object({
     hookEventName: z.literal('PreToolUse'),
-    permissionDecision: PermissionBehaviorSchema().optional(),
+    // AD-45 0.1.52：hook 路径 4 值（含 defer 挂起重评；规则面 3 值不动）
+    permissionDecision: PreToolUsePermissionDecisionSchema().optional(),
     permissionDecisionReason: z.string().optional(),
     updatedInput: z.record(z.string(), z.unknown()).optional(),
     additionalContext: z.string().optional(),

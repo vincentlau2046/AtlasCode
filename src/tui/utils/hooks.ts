@@ -409,11 +409,11 @@ function parseHookOutput(stdout: string): {
         decision: '"approve" | "block" (optional)',
         reason: 'string (optional)',
         systemMessage: 'string (optional)',
-        permissionDecision: '"allow" | "deny" | "ask" (optional)',
+        permissionDecision: '"allow" | "deny" | "ask" | "defer" (optional; defer = 挂起重评, TUI 车道确认等价)',
         hookSpecificOutput: {
           'for PreToolUse': {
             hookEventName: '"PreToolUse"',
-            permissionDecision: '"allow" | "deny" | "ask" (optional)',
+            permissionDecision: '"allow" | "deny" | "ask" | "defer" (optional; defer = 挂起重评, TUI 车道确认等价)',
             permissionDecisionReason: 'string (optional)',
             updatedInput: 'object (optional) - Modified tool input to use',
           },
@@ -474,7 +474,9 @@ function parseHttpHookOutput(body: string): {
   }
 }
 
-function processHookJSONOutput({
+// AD-45 0.1.52：导出（判别单测消费面——双 switch 解析器 + defer 值入
+// union 的 TUI 车道镜像面；纯函数，无导出副作用）。
+export function processHookJSONOutput({
   json,
   command,
   hookName,
@@ -554,10 +556,16 @@ function processHookJSONOutput({
       case 'ask':
         result.permissionBehavior = 'ask'
         break
+      case 'defer':
+        // AD-45 0.1.52：TUI 交互车道 defer = 确认等价 'ask'（交互用户即
+        // 「稍后重评」的人）；headless 车道挂起面走 hooks 域 defer 裁定，
+        // 不经过本车道解析器
+        result.permissionBehavior = 'ask'
+        break
       default:
         // Handle unknown decision types as errors
         throw new Error(
-          `Unknown hook permissionDecision type: ${json.hookSpecificOutput.permissionDecision}. Valid types are: allow, deny, ask`,
+          `Unknown hook permissionDecision type: ${json.hookSpecificOutput.permissionDecision}. Valid types are: allow, deny, ask, defer`,
         )
     }
   }
@@ -596,6 +604,10 @@ function processHookJSONOutput({
               }
               break
             case 'ask':
+              result.permissionBehavior = 'ask'
+              break
+            case 'defer':
+              // AD-45 0.1.52：同 ①（交互车道 defer = 确认等价 'ask'）
               result.permissionBehavior = 'ask'
               break
           }

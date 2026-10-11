@@ -14,7 +14,7 @@ import type {
 } from 'src/tui/entrypoints/agentSdkTypes.js'
 import type { Message } from 'src/tui/types/message.js'
 import type { PermissionResult } from 'src/tui/utils/permissions/PermissionResult.js'
-import { permissionBehaviorSchema } from 'src/tui/utils/permissions/PermissionRule.js'
+import { preToolUsePermissionDecisionSchema } from 'src/tui/utils/permissions/PermissionRule.js'
 import { permissionUpdateSchema } from 'src/tui/utils/permissions/PermissionUpdateSchema.js'
 import type { AppState } from '../state/AppState.js'
 import type { AttributionState } from '../utils/commitAttribution.js'
@@ -71,7 +71,9 @@ export const syncHookResponseSchema = lazySchema(() =>
       .union([
         z.object({
           hookEventName: z.literal('PreToolUse'),
-          permissionDecision: permissionBehaviorSchema().optional(),
+          // AD-45 0.1.52：hook 路径 4 值（含 defer 挂起重评；3 值
+          // permissionBehaviorSchema 规则面枚举不动，见 PermissionRule 头注）
+          permissionDecision: preToolUsePermissionDecisionSchema().optional(),
           permissionDecisionReason: z.string().optional(),
           updatedInput: z.record(z.string(), z.unknown()).optional(),
           additionalContext: z.string().optional(),
