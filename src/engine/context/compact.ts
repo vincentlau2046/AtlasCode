@@ -117,6 +117,14 @@ export interface CompactionResult {
    * 门 = autoCompact.querySource 前缀判据）。
    */
   contentReplacements?: ContentReplacementRecord[]
+  /**
+   * AD-22（0.1.50，CC 2.1.105）：PreCompact hook block 载体——true = 压缩
+   * 被跳过（未执行压缩；本结果为 skip 载体，其余字段为占位值，消费者必须
+   * 以本字段门控、不得据此 buildPostCompactMessages 换消息面）。
+   */
+  compactionSkipped?: boolean
+  /** AD-22：skip 原因（PreCompact hook block 原因：hook 输出 / systemMessage）。 */
+  compactSkipReason?: string
 }
 
 export interface CompactDeps {
@@ -599,6 +607,35 @@ async function richCompactConversation(
       },
       context.abortController.signal,
     )
+    // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block（exit 2 /
+    // decision:block）→ 跳过压缩（不压缩 + 记 skip 原因，skip 载体返回；
+    // 摘要 LLM / PostCompact hook / 附件重建全不执行）；不 block = 下方
+    // 正常压缩路径逐字恒等（零回归约束：无 hook 配置时 blocked 恒
+    // undefined，本支不可达）。
+    if (hookResult.blocked) {
+      const skipReason =
+        hookResult.blockingReason ?? 'PreCompact hook blocked compaction'
+      logForDebugging(
+        `Compact skipped: PreCompact hook blocked (${skipReason})`,
+        { level: 'warn' },
+      )
+      context.setSDKStatus?.(null)
+      context.onCompactProgress?.({ type: 'compact_end' })
+      return {
+        // 占位字段：skip 载体（消费者以 compactionSkipped 门控，不使用）
+        boundaryMarker: createCompactBoundaryMessage(
+          preCompactTokenCount,
+          messages.length,
+        ),
+        summaryMessages: [],
+        attachments: [],
+        hookResults: [],
+        userDisplayMessage: `Compaction skipped: PreCompact hook blocked (${skipReason})`,
+        preCompactTokenCount,
+        compactionSkipped: true,
+        compactSkipReason: skipReason,
+      }
+    }
     customInstructions = mergeHookInstructions(
       customInstructions,
       hookResult.newCustomInstructions,

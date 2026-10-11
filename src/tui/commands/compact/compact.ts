@@ -105,6 +105,18 @@ export const call: LocalCommandCall = async (args, context) => {
       false,
     )
 
+    // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block → 压缩被跳过
+    // （skip 载体）——不换消息面（保留原上下文）、显示 skip 原因、不跑
+    // post-compact 清理（未发生压缩）。
+    if (result.compactionSkipped) {
+      return {
+        type: 'text',
+        value: chalk.dim(
+          `Compaction skipped: PreCompact hook blocked (${result.compactSkipReason ?? 'unknown'})`,
+        ),
+      }
+    }
+
     // Reset lastSummarizedMessageId since legacy compaction replaces all messages
     // and the old message UUID will no longer exist in the new messages array
     setLastSummarizedMessageId(undefined)
@@ -139,11 +151,15 @@ async function compactViaReactive(
   context: ToolUseContext,
   customInstructions: string,
   reactive: NonNullable<typeof reactiveCompact>,
-): Promise<{
-  type: 'compact'
-  compactionResult: CompactionResult
-  displayText: string
-}> {
+): Promise<
+  | {
+      type: 'compact'
+      compactionResult: CompactionResult
+      displayText: string
+    }
+  // AD-22（0.1.50）：PreCompact hook block → 跳过压缩 = 文本面结果（不换消息）
+  | { type: 'text'; value: string }
+> {
   context.onCompactProgress?.({
     type: 'hooks_start',
     hookType: 'pre_compact',
@@ -161,6 +177,20 @@ async function compactViaReactive(
       ),
       getCacheSharingParams(context, messages),
     ])
+
+    // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block（exit 2 /
+    // decision:block）→ 跳过 reactive 压缩（不压缩 + 记 skip 原因）。
+    if (hookResult.blocked) {
+      const skipReason =
+        hookResult.blockingReason ?? 'PreCompact hook blocked compaction'
+      return {
+        type: 'text',
+        value: chalk.dim(
+          `Compaction skipped: PreCompact hook blocked (${skipReason})`,
+        ),
+      }
+    }
+
     const mergedInstructions = mergeHookInstructions(
       customInstructions,
       hookResult.newCustomInstructions,

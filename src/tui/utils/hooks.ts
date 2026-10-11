@@ -3905,7 +3905,11 @@ export async function* executeSubagentStartHooks(
  * @param compactData The compact data to pass to hooks
  * @param signal Optional AbortSignal to cancel hook execution
  * @param timeoutMs Optional timeout in milliseconds for hook execution
- * @returns Object with optional newCustomInstructions and userDisplayMessage
+ * @returns Object with optional newCustomInstructions, userDisplayMessage,
+ *   and (AD-22, 0.1.50) blocked/blockingReason — PreCompact hook block
+ *   signal (raw-layer exit 2 / decision:block, computed per result item in
+ *   executeHooksOutsideREPL) surfaced additively to the engine port
+ *   (PreCompactHookResult) for the compact trigger points to honor.
  */
 export async function executePreCompactHooks(
   compactData: {
@@ -3917,6 +3921,10 @@ export async function executePreCompactHooks(
 ): Promise<{
   newCustomInstructions?: string
   userDisplayMessage?: string
+  /** AD-22（0.1.50，CC 2.1.105）：任一 PreCompact hook block（exit 2 / decision:block）。 */
+  blocked?: boolean
+  /** AD-22：block 原因（hook systemMessage / 输出提取）。 */
+  blockingReason?: string
 }> {
   const hookInput: PreCompactHookInput = {
     ...createBaseHookInput(undefined),
@@ -3965,11 +3973,31 @@ export async function executePreCompactHooks(
     }
   }
 
+  // AD-22（0.1.50，CC 2.1.105）：PreCompact block 消费面——raw 层 blocked
+  // （exit 2 / decision:block，executeHooksOutsideREPL 逐结果项计算，见
+  // HookOutsideReplResult.blocked）此前被本 wrapper 丢弃；现加性透出给
+  // engine 端口面（PreCompactHookResult.blocked/blockingReason），compact
+  // 触发点据此跳过压缩。无 hook 配置（results 空）时上方早退 {} = 零回归。
+  const blockedResults = results.filter(r => r.blocked)
+
   return {
     newCustomInstructions:
       successfulOutputs.length > 0 ? successfulOutputs.join('\n\n') : undefined,
     userDisplayMessage:
       displayMessages.length > 0 ? displayMessages.join('\n') : undefined,
+    ...(blockedResults.length > 0
+      ? {
+          blocked: true as const,
+          blockingReason: blockedResults
+            .map(
+              r =>
+                r.systemMessage?.trim() ||
+                r.output.trim() ||
+                `PreCompact hook '${r.command}' blocked compaction`,
+            )
+            .join('; '),
+        }
+      : {}),
   }
 }
 

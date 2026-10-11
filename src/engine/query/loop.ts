@@ -573,7 +573,13 @@ export async function queryAgentLoop(
           let recovered: Message[] | undefined
           try {
             const result = await deps.reactiveCompact({ messages, turn: turns })
-            if (result) recovered = buildPostCompactMessages(result)
+            // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block → skip 载体
+            // （压缩未执行）= 恢复不可用（穿透回显原 413 错误）——不得以
+            // skip 载体 buildPostCompactMessages 换消息面（占位字段会误丢
+            // 原上下文）。
+            if (result && !result.compactionSkipped) {
+              recovered = buildPostCompactMessages(result)
+            }
           } catch (compactErr) {
             // 消费者异常 = 恢复不可用（fail-safe：错误路径零行为变更，回显原错误）
             logForDebugging(

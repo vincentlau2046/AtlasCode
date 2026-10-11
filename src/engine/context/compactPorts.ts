@@ -95,6 +95,14 @@ export interface RecompactionInfo {
 export interface PreCompactHookResult {
   newCustomInstructions?: string
   userDisplayMessage?: string
+  /**
+   * AD-22（0.1.50，CC 2.1.105）：PreCompact hook block 信号（宿主
+   * executePreCompactHooks 自 executeHooksOutsideREPL 结果项计算——
+   * exit 2 / decision:block；加性字段，无 hook 配置 = undefined 零回归）。
+   */
+  blocked?: boolean
+  /** AD-22：block 原因（hook systemMessage / 输出提取，宿主侧构造）。 */
+  blockingReason?: string
 }
 
 export interface PostCompactHookResult {

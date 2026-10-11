@@ -287,6 +287,14 @@ export interface CompactionResult {
   postCompactTokenCount?: number
   truePostCompactTokenCount?: number
   compactionUsage?: ReturnType<typeof getTokenUsage>
+  /**
+   * AD-22（0.1.50，CC 2.1.105）：PreCompact hook block 载体——true = 压缩
+   * 被跳过（skip 载体，其余字段占位；消费者以本字段门控，不得据此
+   * buildPostCompactMessages 换消息面）。
+   */
+  compactionSkipped?: boolean
+  /** AD-22：skip 原因（PreCompact hook block 原因）。 */
+  compactSkipReason?: string
 }
 
 /**
@@ -396,6 +404,34 @@ export async function compactConversation(
       },
       context.abortController.signal,
     )
+    // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block（exit 2 /
+    // decision:block）→ 跳过压缩（不压缩 + 记 skip 原因，skip 载体返回）；
+    // 不 block = 下方正常压缩路径逐字恒等（零回归）。
+    if (hookResult.blocked) {
+      const skipReason =
+        hookResult.blockingReason ?? 'PreCompact hook blocked compaction'
+      logForDebugging(
+        `Compact skipped: PreCompact hook blocked (${skipReason})`,
+        { level: 'warn' },
+      )
+      context.setSDKStatus?.(null)
+      context.onCompactProgress?.({ type: 'compact_end' })
+      return {
+        // 占位字段：skip 载体（消费者以 compactionSkipped 门控，不使用）
+        boundaryMarker: createCompactBoundaryMessage(
+          isAutoCompact ? 'auto' : 'manual',
+          preCompactTokenCount ?? 0,
+          (messages.at(-1)?.uuid as any),
+        ),
+        summaryMessages: [],
+        attachments: [],
+        hookResults: [],
+        userDisplayMessage: `Compaction skipped: PreCompact hook blocked (${skipReason})`,
+        preCompactTokenCount,
+        compactionSkipped: true,
+        compactSkipReason: skipReason,
+      }
+    }
     customInstructions = mergeHookInstructions(
       customInstructions,
       hookResult.newCustomInstructions,
@@ -723,6 +759,34 @@ export async function partialCompactConversation(
       },
       context.abortController.signal,
     )
+
+    // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block → 跳过 partial
+    // 压缩（同主路径契约：不压缩 + 记 skip 原因，skip 载体返回）。
+    if (hookResult.blocked) {
+      const skipReason =
+        hookResult.blockingReason ?? 'PreCompact hook blocked compaction'
+      logForDebugging(
+        `Partial compact skipped: PreCompact hook blocked (${skipReason})`,
+        { level: 'warn' },
+      )
+      context.setSDKStatus?.(null)
+      context.onCompactProgress?.({ type: 'compact_end' })
+      return {
+        // 占位字段：skip 载体（消费者以 compactionSkipped 门控，不使用）
+        boundaryMarker: createCompactBoundaryMessage(
+          'manual',
+          preCompactTokenCount ?? 0,
+          (allMessages.at(-1)?.uuid as any),
+        ),
+        summaryMessages: [],
+        attachments: [],
+        hookResults: [],
+        userDisplayMessage: `Compaction skipped: PreCompact hook blocked (${skipReason})`,
+        preCompactTokenCount,
+        compactionSkipped: true,
+        compactSkipReason: skipReason,
+      }
+    }
 
     // Merge hook instructions with user feedback
     let customInstructions: string | undefined

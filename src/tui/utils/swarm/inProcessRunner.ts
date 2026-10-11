@@ -1085,28 +1085,38 @@ export async function runInProcessTeammate(
           undefined, // customInstructions
           true, // isAutoCompact
         )
-        contextMessages = buildPostCompactMessages(compactedSummary)
-        // Reset microcompact state since full compact replaces all
-        // messages — old tool IDs are no longer relevant
-        resetMicrocompactState()
-        // Reset content replacement state — compact replaces all messages
-        // so old tool_use_ids are gone. Stale Map entries are harmless
-        // (UUID keys never match) but accumulate memory over long runs.
-        if (teammateReplacementState) {
-          teammateReplacementState = createContentReplacementState()
-        }
-        // Update allMessages in place with compacted version
-        allMessages.length = 0
-        allMessages.push(...contextMessages)
+        // AD-22（0.1.50，CC 2.1.105）：PreCompact hook block → skip 载体
+        // （压缩未执行）——保留原上下文（不做 post-compact 消息面替换），
+        // 记 skip 原因。
+        if (compactedSummary.compactionSkipped) {
+          logForDebugging(
+            `[inProcessRunner] ${identity.agentId} compact skipped: PreCompact hook blocked (${compactedSummary.compactSkipReason ?? 'unknown'})`,
+            { level: 'warn' },
+          )
+        } else {
+          contextMessages = buildPostCompactMessages(compactedSummary)
+          // Reset microcompact state since full compact replaces all
+          // messages — old tool IDs are no longer relevant
+          resetMicrocompactState()
+          // Reset content replacement state — compact replaces all messages
+          // so old tool_use_ids are gone. Stale Map entries are harmless
+          // (UUID keys never match) but accumulate memory over long runs.
+          if (teammateReplacementState) {
+            teammateReplacementState = createContentReplacementState()
+          }
+          // Update allMessages in place with compacted version
+          allMessages.length = 0
+          allMessages.push(...contextMessages)
 
-        // Mirror compaction into task.messages — otherwise the AppState
-        // mirror grows unbounded (500 turns = 500+ messages, 10-50MB).
-        // Replace with the compacted messages, matching allMessages.
-        updateTaskState(
-          taskId,
-          task => ({ ...task, messages: [...contextMessages, userMessage] }),
-          setAppState,
-        )
+          // Mirror compaction into task.messages — otherwise the AppState
+          // mirror grows unbounded (500 turns = 500+ messages, 10-50MB).
+          // Replace with the compacted messages, matching allMessages.
+          updateTaskState(
+            taskId,
+            task => ({ ...task, messages: [...contextMessages, userMessage] }),
+            setAppState,
+          )
+        }
       }
 
       // Pass previous messages as context to preserve conversation history
