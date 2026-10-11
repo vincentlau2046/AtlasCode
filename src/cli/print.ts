@@ -695,6 +695,14 @@ export function findDeferredToolUseState(
  * tool_use 重建：会话内定位持有该 tool_use 的 assistant 消息（input =
  * 原始调用入参）；标记在场而 assistant 消息缺席（极端回放截断）→ 标记
  * 字段最小重建（空 input，schema/validateInput 面自判）。
+ *
+ * 执行 context 桥（0.1.52 生产 lane 回归修，R6 headless 等价）：signal /
+ * toolContext 参 = 调用点（print.ts 重评支）透传 loopDeps 同值面——executeToolUse
+ * 合并 { ...toolContext, signal, checkPermission }（engine 运行字段优先，
+ * toolExecution.ts 同语义）。缺省 = 窄 spine 最小 context（旧形调用零行为
+ * 差）；注入面缺席时文件面工具（Read/Glob/Grep `context.abortController.signal`
+ * 非可选链读点 / Write getAppState 族）抛 TypeError——本波 prod lane 红面
+ * 根因（判别单测 = tests/unit/cli-headless-defer.test.ts 回归修族）。
  */
 export async function reEvaluateDeferredToolCalls(params: {
   conversation: Message[]
@@ -702,12 +710,21 @@ export async function reEvaluateDeferredToolCalls(params: {
   tools: Tools
   toolHooks?: ToolHooks
   checkPermission?: PermissionGate
+  /** 中止信号（调用点 = loopDeps.signal；executeToolUse PipelineDeps 同槽）。 */
+  signal?: AbortSignal
+  /**
+   * 工具调用 context 桥（调用点 = loopDeps.toolContext，R6 同型跨域面；
+   * headless = makeCtx() 面（abortController + 活 TPC getAppState +
+   * options.isNonInteractiveSession））。
+   */
+  toolContext?: object
 }): Promise<{
   suspended: boolean
   deferred?: DeferredToolUsePayload
   messages: Message[]
 }> {
-  const { conversation, toolUseId, tools, toolHooks, checkPermission } = params
+  const { conversation, toolUseId, tools, toolHooks, checkPermission, signal, toolContext } =
+    params
 
   let tu: ToolUseBlock | undefined
   let assistantMsg: AssistantMessage | undefined
@@ -756,6 +773,10 @@ export async function reEvaluateDeferredToolCalls(params: {
     tools,
     hooks: toolHooks,
     checkPermission,
+    // 执行 context 桥（回归修）：同常路径 runToolBatch 透传面（loop.ts L415-425
+    // 同槽）——缺席 = 文件面工具 context 缺面崩溃（prod lane 红面根因）
+    signal,
+    toolContext,
   })
 
   if (outcome.deferred) {
@@ -1093,6 +1114,14 @@ export async function runHeadless(
     // SDK prompt 路由门（createPermissionGate 单次重建 + canUseTool ask 路由，
     // 构建点读活 TPC）——覆写构建器 ③ 缺省体
     checkPermission,
+    // 工具执行 context 桥（0.1.52 生产 lane 回归修，R6 headless 等价）：
+    // 常路径 runToolBatch 透传（loop.ts 同槽）→ tool.call 第 2 参 = 全 context
+    // （abortController + 活 TPC getAppState + isNonInteractiveSession 面）——
+    // 文件面工具（Read/Glob/Grep 非可选链读点 / Write getAppState 族）零崩溃。
+    // 单实例 = 活 TPC getter 调用时读 tpcRef.current（活态语义不变）；
+    // abortController 单跑单例稳定。makeCtx 定义在 canUseTool 块（上方），
+    // 闭包依赖 abortController/tpcRef 均已构建（序合法）。
+    toolContext: makeCtx(),
   }
 
   // autoCompact 构建（AutoCompactDeps 最小面：contextWindow = modelprovider
@@ -1297,6 +1326,11 @@ export async function runHeadless(
         tools,
         toolHooks: loopDeps.hooks?.toolHooks,
         checkPermission,
+        // 执行 context 桥（回归修）：与常路径同值面（loopDeps.signal /
+        // loopDeps.toolContext = makeCtx()）——重评支工具执行零 context 缺面
+        // 崩溃（prod lane 红面根因，判别单测 cli-headless-defer 回归修族）
+        signal: loopDeps.signal,
+        toolContext: loopDeps.toolContext,
       })
       conversation = re.messages
       // 挂起面 / tool_result 持久化（transcript 全量序列 record，loop 轮末 record 同形）

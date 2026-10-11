@@ -36,6 +36,47 @@ import type {
 } from '../../src/shared'
 import type { ModelProvider } from '../../src/modelprovider'
 
+/**
+ * 假文件面工具（prod-lane GATE-OPEN 回归修波）：逐字模拟真文件工具的 context
+ * 读面——readTool.ts L1016 `context.abortController.signal`（非可选链 = 本波
+ * 回归崩溃点，context 无 abortController 时抛 TypeError: reading 'signal'）+
+ * getAppState 活 TPC 读（fileWriteTool 同族）。call 计数 + context 面回读
+ * （signal 身份 / TPC mode → data，供断言 context 桥真透传非恒绿假绿）。
+ */
+function makeFileLikeTool(): {
+  tool: Tool
+  calls: { n: number; lastContext: Record<string, unknown> | undefined }
+} {
+  const calls = { n: 0, lastContext: undefined as Record<string, unknown> | undefined }
+  return {
+    calls,
+    tool: {
+      name: 'Read',
+      isConcurrencySafe: () => true,
+      call: async (_input: unknown, context: unknown) => {
+        calls.n++
+        calls.lastContext = context as Record<string, unknown>
+        const ctx = context as {
+          abortController?: AbortController
+          getAppState?: () => { toolPermissionContext?: { mode?: string } }
+        }
+        // 真 Read 崩溃点逐字形：非可选链读 signal（context 缺 abortController
+        // = TypeError，与 npm 0.1.52 生产 lane 红面同形）
+        const signal = ctx.abortController.signal
+        void signal
+        // getAppState 可选链（活 TPC 面；缺席 = 窄 spine 零崩溃先例）
+        const mode = ctx.getAppState?.()?.toolPermissionContext?.mode
+        return { data: `read-ok:${mode ?? 'no-tpc'}` }
+      },
+      mapToolResultToToolResultBlockParam: (content: unknown, toolUseID: string) => ({
+        type: 'tool_result',
+        tool_use_id: toolUseID,
+        content: String(content),
+      } as ToolResultBlockParam),
+    } as unknown as Tool,
+  }
+}
+
 /** 假工具：call 计数（defer 支必须 0 调用 = 工具不执行）。 */
 function makeSpyTool(name: string, data?: unknown): { tool: Tool; calls: { n: number } } {
   const calls = { n: 0 }
@@ -251,5 +292,135 @@ describe('AD-45 ③ 挂起态检测（findDeferredToolUseState last-wins + 自�
   test('零回归恒等：无标记（正常会话 / 中轮 crash 悬空 tool_use）→ undefined（重评仅由显式标记门控）', () => {
     const s = findDeferredToolUseState(conversationWithMarker().slice(0, 2))
     expect(s).toBeUndefined()
+  })
+})
+
+describe('AD-45 ③ 回归修：工具执行 context 桥（headless R6 等价，prod-lane GATE-OPEN 修波）', () => {
+  /**
+   * 背景（0.1.52 生产 lane 红面）：--resume 重评 allow 后 file tool 抛
+   * `tool error [TypeError]: Cannot read properties of undefined (reading
+   * 'signal')`——重评支 executeToolUse deps 缺 signal/toolContext（且 headless
+   * 常路径 loopDeps 同样未注入 toolContext = 同一 R6 缺口）。修 = 调用点
+   * 透传（print.ts loopDeps.toolContext = makeCtx() + 重评参补 signal/
+   * toolContext）。本族判别式：假文件面工具逐字模拟 Read 崩溃点（非可选链
+   * 读 abortController.signal），全 context 面 = 执行成功零 TypeError；
+   * 缺面 = TypeError 短路（负证，钉死崩溃归因 = context 缺面非工具本体）。
+   */
+  const fileLikeConversation = (): Message[] => {
+    const tu: ToolUseBlock = {
+      type: 'tool_use',
+      id: 'toolu_f',
+      name: 'Read',
+      input: { file_path: '/tmp/x.txt' },
+    }
+    return [
+      USER_MSG,
+      {
+        type: 'assistant',
+        role: 'assistant',
+        uuid: 'af',
+        timestamp: 'tf',
+        message: { role: 'assistant', content: [tu], stop_reason: 'tool_calls' },
+      } as unknown as Message,
+      makeDeferredToolUseMarker({ toolUseId: 'toolu_f', toolName: 'Read' }) as unknown as Message,
+    ]
+  }
+
+  test('重评 allow + 调用点全 deps（signal + toolContext）→ 文件面工具执行成功零 TypeError（修前红）', async () => {
+    const { tool, calls } = makeFileLikeTool()
+    const runSignal = new AbortController().signal
+    const r = await reEvaluateDeferredToolCalls({
+      conversation: fileLikeConversation(),
+      toolUseId: 'toolu_f',
+      tools: [tool],
+      toolHooks: { preToolUse: async () => ({ hookBehavior: 'allow' }) },
+      checkPermission: async () => ({ allowed: true }),
+      // 调用点面（print.ts re-eval 支透传 loopDeps.signal / loopDeps.toolContext）
+      signal: runSignal,
+      toolContext: {
+        abortController: new AbortController(),
+        getAppState: () => ({ toolPermissionContext: { mode: 'bypassPermissions' } }),
+      },
+    })
+    expect(r.suspended).toBe(false)
+    expect(calls.n).toBe(1)
+    const last = r.messages[r.messages.length - 1] as unknown as {
+      message?: { content?: Array<{ type?: string; content?: unknown; is_error?: boolean }> }
+    }
+    const block = last.message?.content?.[0]
+    // 零 TypeError + 活 TPC 面真透传（data 回读 = context 桥非恒绿假绿的判别式）
+    expect(String(block?.content)).toBe('read-ok:bypassPermissions')
+    expect(block?.is_error).toBeUndefined()
+    // engine 运行字段优先（toolCallContext 合并语义）：context.signal = 传入 signal 身份
+    expect(calls.lastContext?.signal).toBe(runSignal)
+  })
+
+  test('负证：旧形最小 deps（缺 signal/toolContext）→ 文件面工具 TypeError 短路（崩溃归因 = context 缺面）', async () => {
+    const { tool, calls } = makeFileLikeTool()
+    const r = await reEvaluateDeferredToolCalls({
+      conversation: fileLikeConversation(),
+      toolUseId: 'toolu_f',
+      tools: [tool],
+      checkPermission: async () => ({ allowed: true }),
+    })
+    expect(r.suspended).toBe(false)
+    expect(calls.n).toBe(1)
+    const last = r.messages[r.messages.length - 1] as unknown as {
+      message?: { content?: Array<{ type?: string; content?: unknown; is_error?: boolean }> }
+    }
+    const block = last.message?.content?.[0]
+    expect(block?.is_error).toBe(true)
+    expect(String(block?.content)).toContain('TypeError')
+  })
+
+  test('常路径恒等（R6 loop 桥 guard）：queryAgentLoop 注入 toolContext → 文件面工具常路径执行成功', async () => {
+    const { tool, calls } = makeFileLikeTool()
+    const tu: ToolUseBlock = {
+      type: 'tool_use',
+      id: 'toolu_f',
+      name: 'Read',
+      input: { file_path: '/tmp/x.txt' },
+    }
+    // 一次性 provider：首轮发 tool_use、二轮 end_turn（防假 provider 恒发
+    // 同 tool_use 致多轮重复执行，calls 计数失真）
+    let rounds = 0
+    const oneShotProvider = {
+      chat: async () => {
+        rounds++
+        return {
+          message: {
+            content:
+              rounds === 1 ? [tu] : [{ type: 'text', text: 'done' }],
+            stop_reason: rounds === 1 ? 'tool_calls' : 'end_turn',
+          },
+          uuid: 'u-llm',
+          timestamp: new Date().toISOString(),
+        }
+      },
+      countTokens: () => 0,
+    } as unknown as ModelProvider
+    const r = await queryAgentLoop(
+      {
+        modelProvider: oneShotProvider,
+        role: 'premium',
+        // R6（P0）：工具调用 context 桥（TUI 面先例；headless 修波同槽注入）
+        toolContext: { abortController: new AbortController() },
+        hooks: { toolHooks: { preToolUse: async () => ({ hookBehavior: 'allow' }) } },
+      } as unknown as AgentLoopDeps,
+      { messages: [USER_MSG], tools: [tool], context: { maxTurns: 2 } },
+    )
+    expect(calls.n).toBe(1)
+    // tool_result 追家族（runToolBatch 产）含执行面内容，无 TypeError
+    const toolResult = r.messages.flatMap(m => {
+      const content = (m as unknown as { message?: { content?: unknown[] } }).message?.content
+      return Array.isArray(content) ? content : []
+    }).find(
+      (b: unknown) =>
+        (b as { type?: string; tool_use_id?: string })?.type === 'tool_result' &&
+        (b as { tool_use_id?: string }).tool_use_id === 'toolu_f',
+    ) as { content?: unknown; is_error?: boolean } | undefined
+    expect(toolResult).toBeDefined()
+    expect(String(toolResult?.content)).toBe('read-ok:no-tpc')
+    expect(toolResult?.is_error).toBeUndefined()
   })
 })
