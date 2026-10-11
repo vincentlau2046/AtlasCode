@@ -4,6 +4,69 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.50
+
+P0 对齐第三车波（基线 v0.1.49；PAC 0.1.49 §3 波序第 3 车 = AD-22 PreCompact block 支 +
+FX-31 transcript 写失败日志 + FX-04/PT-04 invoked-skill 跨压缩保全 + FX-35/FX-30/FX-34
+resume 健壮性 verify + C3 timeoutlane 终态对齐；gate `r-20261011-gate-050.md` =
+GATE-PASS @master d0148d2：§3 修前红 4 提交点 per-commit 实证全吻合〔AD-22 @0030598 1红 /
+FX-31 @93af550 1红 / FX-04·PT-04 @83a25a3 6红 / C3 @8c7ab3d 4红〕+ 绿态 6 判别文件 + 8
+压缩/会话族 @d0148d2 全 0 fail + 四件套 rc=0×4〔CI 全量 111142 pass/0 fail·7918 files，
+cli.js 17 768 552 B〕+ §4 回归 9 步全绿〔0.1.42 cmd 29/29 + /help 50 标签恒等 + P0a
+hardFail=0 + A4F --release-gate target 0.1.50 releasable=true + C1/C2/C3/R3 ALL-PASS +
+V3（F-2 --deadline-ms 3000）PASS〕）：
+
+- **AD-22 PreCompact hook block 消费支（落码，CC 2.1.105，修前红①②）**：PreCompact hook
+  返回 `exit 2` / `decision: block` 时跳过压缩并记 skip 原因（block 语义消费；不 block
+  时正常压缩零回归）。单测 `context-precompact-hook-block.test.ts`（①block→压缩跳过+skip
+  原因 / ②不 block 正常压缩 / ③无 hook 零回归）。
+- **FX-31 transcript 写失败记日志（落码，修前红①）**：transcript append 写盘失败原静默
+  吞掉；本版记 error 日志（路径 + 原因），写语义不变（失败仍不阻断回合，只留痕非静默）。
+  单测 `session-transcript-write-failure.test.ts`（fs 键隔离 mock + 日志缝观测）。
+- **FX-35 resume-load 缺 file_path 容错（verify 已 cover，0 产品码）**：engine 全
+  resume-load 面（convertToLogOption / buildConversationChain / 搜索鸭子类型 /
+  processResumedConversation）+ TUI 双生面（sessionStorage/sessionRestore/queryHelpers/
+  collapseReadSearch/contextAnalysis）均 `input?.file_path` 守护或 Map 查键，缺 file_path
+  三形态（Edit 缺键 / Write input=null / tool_result 缺键）无崩面 → 落回归守卫
+  `engine-session-resume-missing-file-path.test.ts` 钉住现状（工单预期修前红，实证已
+  cover，偏差非静默登记）。
+- **FX-04 invoked-skill 态跨压缩保全 + PT-04 措辞（落码，修前红①-⑥）**：附件重建链
+  （compact.ts createSkillAttachmentIfNeeded → invoked_skills 附件 → post-compact System
+  Reminder）已全接线但状态源为 H6 no-op 占位（注册永不发生 → 恒空 Map → 附件恒 null，
+  压缩后 skill 内容丢失）。本版落 per-agent 真 Map 状态（`bootstrapState` 三件：
+  addInvokedSkill / getInvokedSkillsForAgent / clearInvokedSkillsForAgent；登记 = slash
+  车道 + resume 恢复，消费 = 附件重建 + skillImprovement，释放 = fork 支 finally）+
+  invoked_skills 附件提示词补「context only / do not re-execute … setup … again」措辞
+  （PT-04：防压缩后模型重执行 skill 一次性 setup action）。单测
+  `skill-invoked-state-postcompact.test.ts`（①-⑤状态面 / ⑥⑥b 附件面 / ⑦⑦b 措辞面，
+  修前 6 红 3 过 → 修后 9/9）。
+- **FX-30 / FX-34 resume 链健壮性（verify 已 cover，0 产品码）**：FX-30 自引用
+  message（parentUuid 环）= 读侧 seen 环守卫 ×2（buildConversationChain 环点 break +
+  error 日志 + 叶计算独立 seen 守卫）+ 写侧锚点守卫（record.ts 锚点 guard），终止不死
+  循环、返回可达部分 transcript（partial-transcript 契约，error 日志非静默）；FX-34
+  snip 间隙 + dead-end 侧支 = applySnipRemovals removedUuids 重放 + 悬空父链反向走链
+  重锚 + 时间戳最新叶锚定（dead-end 死支不串入）。落回归守卫
+  `engine-session-resume-ring-and-gap.test.ts`（两 gap 已 cover，不升级重排波，非静默
+  登记）。
+- **C3 timeoutlane 超时终态语义对齐（落码，定因=产品修，修前红①-④）**：openai SDK v7
+  生成超时实例的类名只在 constructor.name 上存活（SDK APIError 构造函数把实例 name 置
+  'Error'，探针实证 name='Error' | ctor='APIConnectionTimeoutError' | message='Request
+  timed out.' | cause=AbortError code 20）→ 本仓 isClientRequestTimeout 旧门
+  （instanceof 本仓自有类 + 实例 name 判别）双漏 → 滑入 isRetryableError /timeout/i
+  正则误判可重试 → 角色池 4 refs × 3 attempts = 12-call 吸收（e2e 观察 90021ms）+
+  超时终态行 llmTimeoutRemediationHint 不现形（#260 fail-fast 语义回归）。本版补
+  constructor.name 超时类族判别（仅认 'APIConnectionTimeoutError'/'APITimeoutError' 两
+  类名，连接类族不在此列，#271 #4 cause 链面保留）→ fail-fast 恢复（每 entry 1 次，
+  4-call 签名）+ 终态行现形；chatStream 错误事件 code 门控由死判别字面量
+  `name === 'TimeoutError'` 改挂 isClientRequestTimeout。gate 活面复实证：timeoutlane
+  1-call ms=8150「Request timed out.」终态现形（对齐 10-04 PASS 签名 8159ms/1 call；
+  0.1.49 12-call 吸收 FAIL 消除）。单测 `modelprovider-sdk-timeout-class.test.ts`
+  （①-④ 修前红 ⑤-⑨ 零回归守卫，修后 9/9；FX-36 三态判据回归族 45/0 绿，resolver cap
+  未动）。
+- **F-1 / F-2 0 码口径（留档）**：F-1 口径闭环「通即行，不探不绑」（gate 用当时可达
+  模型——本轮 deepseek 429 配额耗尽，gate 前自判 Qwen38-27B-TXT）；F-2 e2e 车道 V3
+  加 `--deadline-ms 3000`（探针 deadline 面）。均无产品码。
+
 ## v0.1.49
 
 P0 对齐第二车波（基线 v0.1.48；PAC 0.1.48 §2 波序第 2 车 = AD-47 权限 hook + AD-08 沙箱网络
