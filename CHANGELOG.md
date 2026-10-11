@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.52
+
+P0 对齐独占波（基线 v0.1.51；工单 2026-10-11-p0-wave-0152 §0 AD-45 = "defer" 权限决策 +
+headless 挂起 resume 重评（CC 2.1.89 TOP#1 ★★，鲁棒性大件）；gate `r-20261011-gate-052` =
+GATE-PASS @master 9521f9f：修前红 3 项 worktree @c1395ad 实证（test-first 合法红形）→
+绿态 18 判别/零回归文件 0 fail + 四件套 rc=0×4〔CI 全量 123129 pass/0 fail·8834 files·1104s，
+cli.js 17 791 264 B〕+ §4 回归全绿〔cmd 27 项 + /help 51 基线恒等 + A4F --release-gate
+target 0.1.52 releasable=true（7 场景 hardFail=0）+ C1/C2/C3 ALL-PASS（C3 ms=8145 1-call
+签名延续）〕；唯一红面 P0a run-1 hardFail=2 = 定因模型侧非定式（复跑 run-2 收敛 PASS 三证
+闭环，0.1.46/48/49 先例登记不阻）+ 定因 soft×2 条件型；探针 Qwen38-27B-TXT（F-1 通即行））：
+
+- **AD-45 ① defer 值入 union（落码，CC 2.1.89，修前红）**：PreToolUse hook 权限决策 3 值
+  → 4 值（+ `defer` 挂起重评）：hooks 域解析（interpretHookOutput specific 支）+ rank 最严
+  聚合（PERMISSION_RANK defer:4，挂起控制值胜权限裁定值，重评时 deny/ask 钩子再执行阻塞
+  意图不丢）+ 理由透传 + TUI 双解析器映射 `'ask'`（交互用户 = 稍后重评者，确认等价；3 值
+  零回归）+ schema 镜像（`preToolUsePermissionDecisionSchema` 4 值单一事实源；3 值规则面
+  `permissionBehaviorSchema` 不动——defer 是 hook 决策值，不入规则面）。
+- **AD-45 ② headless 挂起协议（落码）**：PreToolUse hook 返 `defer` → 不产 tool_result +
+  会话挂起 + 挂起态持久化（`system subtype='deferred_tool_use'` 标记，无字符串 content →
+  LLM 映射 params.ts system 支滤除，不进 API）+ subtype `'deferred'` SDK result 干净退出
+  （resume 提示携 sessionId）；批次短路（runToolBatch 首个 deferred outcome）+
+  AgentLoopResult.deferred 载荷（terminated=false，非自然终止/非 maxTurns 截断）。
+- **AD-45 ③ --resume 重评消费支（落码，顶层可测面，零 LLM 调用）**：
+  `findDeferredToolUseState`（last-wins + 自清除 = 挂起态检测；无标记 / 中轮 crash 悬空
+  tool_use = undefined 零回归，crash 态不触发）+ `reEvaluateDeferredToolCalls`（重执行
+  executeToolUse 全链 = pre-hook + 权限门重跑，挂起期间状态变化不丢：再 defer = 幂等再挂起
+  （新标记 last-wins）/ allow = 工具执行 + tool_result 追加（挂起解除 LLM 续跑）/
+  deny·ask = 既有 is_error 决策流逐字恒等）。
+- **AD-45 ④ SDK 面（Main 裁量，零码登记）**：`unstable_v2_resumeSession` 实施体量超独占
+  波 → 登记 0.1.53+ follow-up，不扩本波 scope（工单 §1.1 ④ 裁量条款行使，f4 收口报告知会
+  用户，非新决策项）；throw 语义不变，CLI `--resume` 消费支已落（print.ts ②③）。
+- **挂起协议判别单测（修前红→绿）**：`tests/unit/cli-headless-defer.test.ts`（8）+
+  `tests/unit/hooks-defer.test.ts`（7）+ engine-pipeline AD-45 块（4）；3 值 / 无 hook /
+  正常 --resume 全零回归恒等。
+
 ## v0.1.51
 
 P0 对齐 C 簇波（基线 v0.1.50；工单 2026-10-11-p0-wave-0151 §0 12 件 = worktree 族
