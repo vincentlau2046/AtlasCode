@@ -5,7 +5,7 @@ import { randomBytes } from 'crypto'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
 import { homedir, tmpdir } from 'os'
-import { join, normalize, posix, sep } from 'path'
+import { join, normalize, posix, resolve, sep } from 'path'
 import { hasAutoMemPathOverride, isAutoMemPath } from 'src/tui/memdir/paths.js'
 import { isAgentMemoryPath } from 'src/tui/tools/AgentTool/agentMemory.js'
 import {
@@ -669,13 +669,55 @@ export function checkPathSafetyForAutoEdit(
   return { safe: true }
 }
 
+/**
+ * FX-38b（0.1.51 C-1）活跃 worktree cwd 探针（双拷贝，与
+ * src/permissions/filesystem.ts 同款 marker 口径；同步轻量，per-cwd memo）：
+ * cwd/.git 为 gitdir 指针文件且指针落主仓 `<main>/.git/worktrees/` marker
+ * 下（与 sandbox detectWorktreeMainRepoPath 同款）→ cwd 是主仓注册 git
+ * worktree。主仓正常形态（.git 目录，EISDIR）/ 非 git 目录（ENOENT）→
+ * false（零行为变更）。
+ */
+const worktreeCwdProbeCache = new Map<string, boolean>()
+function isActiveWorktreeCwd(cwd: string): boolean {
+  const cached = worktreeCwdProbeCache.get(cwd)
+  if (cached !== undefined) {
+    return cached
+  }
+  let active = false
+  try {
+    const content = getFsImplementation().readFileSync(join(cwd, '.git'), {
+      encoding: 'utf8',
+    })
+    const gitdirMatch = content.match(/^gitdir:\s*(.+)$/m)
+    if (gitdirMatch?.[1]) {
+      const gitdir = resolve(cwd, gitdirMatch[1].trim())
+      active = gitdir.lastIndexOf(sep + '.git' + sep + 'worktrees' + sep) > 0
+    }
+  } catch {
+    active = false
+  }
+  worktreeCwdProbeCache.set(cwd, active)
+  return active
+}
+
 export function allWorkingDirectories(
   context: ToolPermissionContext,
 ): Set<string> {
-  return new Set([
-    getOriginalCwd(),
+  const originalCwd = getOriginalCwd()
+  const dirs = [
+    originalCwd,
     ...context.additionalWorkingDirectories.keys(),
-  ])
+  ]
+  // FX-38b：cwd 在主仓注册 git worktree 内（子代理继承父进程 cwd 进入自
+  // worktree）→ 补自目录放行支。allow 集原仅锚 originalCwd（不可变），
+  // 活跃 worktree 缺席 = 自目录 Read/Edit workingDir ask（CC 2.1.97 拒访
+  // 面；异步子代理 shouldAvoidPermissionPrompts 下 = 硬拒）。cwd ==
+  // originalCwd 或主仓/非 git 形态（探针 false）→ 零行为变更。
+  const cwd = getCwd()
+  if (cwd !== originalCwd && isActiveWorktreeCwd(cwd)) {
+    dirs.push(cwd)
+  }
+  return new Set(dirs)
 }
 
 // Working directories are session-stable; memoize their resolved forms to

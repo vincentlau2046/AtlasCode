@@ -39,7 +39,7 @@
  *      leaves / ④轻量版，导出仅开域内消费口，不核销残留守）。
  */
 import { tmpdir } from 'os'
-import { join, posix, sep } from 'path'
+import { join, posix, resolve, sep } from 'path'
 import {
   containsPathTraversal,
   containsVulnerableUncPath,
@@ -397,14 +397,56 @@ export function checkPathSafetyForAutoEdit(
   return { safe: true }
 }
 
-/** 全部工作目录 = originalCwd（注入）+ 上下文附加工作目录。 */
+/**
+ * FX-38b（0.1.51 C-1）活跃 worktree cwd 探针（同步轻量，per-cwd memo）：
+ * cwd/.git 为 gitdir 指针文件且指针落主仓 `<main>/.git/worktrees/` marker
+ * 下（与 sandbox detectWorktreeMainRepoPath 同款 marker 口径）→ cwd 是主仓
+ * 注册 git worktree。主仓正常形态（.git 目录，EISDIR）/ 非 git 目录
+ * （ENOENT）→ false（零行为变更）。
+ */
+const worktreeCwdProbeCache = new Map<string, boolean>()
+function isActiveWorktreeCwd(cwd: string): boolean {
+  const cached = worktreeCwdProbeCache.get(cwd)
+  if (cached !== undefined) {
+    return cached
+  }
+  let active = false
+  try {
+    const content = getFsImplementation().readFileSync(
+      join(cwd, '.git'),
+      { encoding: 'utf8' },
+    )
+    const gitdirMatch = content.match(/^gitdir:\s*(.+)$/m)
+    if (gitdirMatch?.[1]) {
+      const gitdir = resolve(cwd, gitdirMatch[1].trim())
+      active = gitdir.lastIndexOf(sep + '.git' + sep + 'worktrees' + sep) > 0
+    }
+  } catch {
+    active = false
+  }
+  worktreeCwdProbeCache.set(cwd, active)
+  return active
+}
+
+/** 全部工作目录 = originalCwd（注入）+ 上下文附加工作目录 + FX-38b 活跃 worktree cwd。 */
 export function allWorkingDirectories(
   context: ToolPermissionContext,
 ): Set<string> {
-  return new Set([
-    getPermissionsBootstrapEnv().getOriginalCwd(),
+  const originalCwd = getPermissionsBootstrapEnv().getOriginalCwd()
+  const dirs = [
+    originalCwd,
     ...context.additionalWorkingDirectories.keys(),
-  ])
+  ]
+  // FX-38b：cwd 在主仓注册 git worktree 内（子代理继承父进程 cwd 进入自
+  // worktree）→ 补自目录放行支。allow 集原仅锚 originalCwd（不可变），
+  // 活跃 worktree 缺席 = 自目录 Read/Edit workingDir ask（CC 2.1.97 拒访
+  // 面；异步子代理 shouldAvoidPermissionPrompts 下 = 硬拒）。cwd ==
+  // originalCwd 或主仓/非 git 形态（探针 false）→ 零行为变更。
+  const cwd = getPermissionsBootstrapEnv().getCwd()
+  if (cwd !== originalCwd && isActiveWorktreeCwd(cwd)) {
+    dirs.push(cwd)
+  }
+  return new Set(dirs)
 }
 
 /**
