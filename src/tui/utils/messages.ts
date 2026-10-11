@@ -3651,7 +3651,10 @@ Read the team config to discover your teammates' names. Check the task list peri
 
       return wrapMessagesInSystemReminder([
         createUserMessage({
-          content: `The following skills were invoked in this session. Continue to follow these guidelines:\n\n${skillsContent}`,
+          // PT-04（0.1.50）：「勿重执行 setup」措辞在场——post-compact 重现的
+          // skill 内容仅作上下文（context only），一次性 setup action 不重执行；
+          // 持续性行为指引仍按相关性沿用。
+          content: `The following skills were previously invoked in this session (their content is re-surfaced here after compaction). They are provided for context only — do not re-execute these skills or perform their one-time setup actions (e.g., scheduling, creating files) again. Continue to apply their ongoing guidelines where still relevant:\n\n${skillsContent}`,
           isMeta: true,
         }),
       ])
