@@ -88,6 +88,8 @@ import {
   type PermissionMode,
   type ThinkingConfig,
   type ToolPermissionContext,
+  type ToolResultBlockParam,
+  type ToolUseBlock,
   type Tools,
 } from '../shared'
 import {
@@ -105,6 +107,10 @@ import {
   getSettingsWithErrors,
   getSessionEnv,
   queryAgentLoop,
+  // AD-45 0.1.52：defer 挂起/resume 重评面（重评 = pipeline executeToolUse
+  // 重执行 pre-hook；挂起标记工厂 + 载荷类型）
+  executeToolUse,
+  makeDeferredToolUseMarker,
   type AgentLoopDeps,
   type AgentLoopResult,
   type AutoCompactDeps,
@@ -115,6 +121,8 @@ import {
   type McpClientEntry,
   type McpResourceContent,
   type PermissionGate,
+  type ToolHooks,
+  type DeferredToolUsePayload,
   setMcpClientRegistry,
 } from '../engine'
 import {
@@ -622,6 +630,164 @@ export function extractFinalAssistantText(loopResult: AgentLoopResult): string {
   return ''
 }
 
+// ── AD-45 0.1.52 ②③：headless 挂起协议可测顶层面（零磁盘纯函数 + 单
+// executeToolUse 调用；extractFinalAssistantText 同型可测顶层面先例）──
+
+/**
+ * AD-45 ③ 挂起态检测（last-wins + 自清除）。
+ *
+ * 挂起态 = 会话内存在 `deferred_tool_use` system 挂起标记（loop 轮末全量序列
+ * record 落盘，--resume 回放重现）且**其后无该 tool_use 的 tool_result**
+ * （重评解决后标记自清除）。last-wins：取最后一个标记（多次挂起 = 末次
+ * 挂起态权威）。无标记（正常会话 / 中轮 crash 悬空 tool_use）→ undefined =
+ * 零回归（重评仅由显式挂起标记门控，crash 态不触发——工单零回归约束 3）。
+ */
+export function findDeferredToolUseState(
+  conversation: Message[],
+): DeferredToolUsePayload | undefined {
+  let markerIdx = -1
+  let marker: Message | undefined
+  for (let i = conversation.length - 1; i >= 0; i--) {
+    const m = conversation[i]
+    if (m.type === 'system' && m.subtype === 'deferred_tool_use') {
+      markerIdx = i
+      marker = m
+      break
+    }
+  }
+  if (!marker) return undefined
+  const toolUseId = marker.tool_use_id
+  const toolName = marker.tool_name
+  if (typeof toolUseId !== 'string' || typeof toolName !== 'string') {
+    return undefined
+  }
+  const deferReason =
+    typeof marker.defer_reason === 'string' ? marker.defer_reason : undefined
+  // 自清除：标记其后出现该 tool_use 的 tool_result = 已解决（正常 resume
+  // 重评 / 后续回放逐字恒等——重评仅针对未解决的挂起态）
+  const resolved = conversation
+    .slice(markerIdx + 1)
+    .some((m) => {
+      const content = (m.message as { content?: unknown } | undefined)?.content
+      return (
+        Array.isArray(content) &&
+        content.some(
+          (b: { type?: string; tool_use_id?: string }) =>
+            b?.type === 'tool_result' && b?.tool_use_id === toolUseId,
+        )
+      )
+    })
+  if (resolved) return undefined
+  return { toolUseId, toolName, deferReason }
+}
+
+/**
+ * AD-45 ③ --resume 重评消费支（顶层可测面，本支零 LLM 调用）。
+ *
+ * 重评 = 对挂起态的 tool_use 重执行 executeToolUse 全链（pre-hook 重跑 +
+ * 权限门重跑——挂起期间 hook/门状态变化不丢，重评取当时最新裁决）：
+ *  - 再 defer → 幂等再挂起（工具不执行、不产 tool_result，新挂起标记
+ *    追加 last-wins；下次 --resume 再入本支）
+ *  - allow → 工具执行 + tool_result 追加（挂起解除，LLM 续跑）
+ *  - deny/ask（门裁定）→ 既有 is_error 决策流逐字（executeToolUse 原样
+ *    产 is_error block，本支零行为改动）
+ *
+ * tool_use 重建：会话内定位持有该 tool_use 的 assistant 消息（input =
+ * 原始调用入参）；标记在场而 assistant 消息缺席（极端回放截断）→ 标记
+ * 字段最小重建（空 input，schema/validateInput 面自判）。
+ */
+export async function reEvaluateDeferredToolCalls(params: {
+  conversation: Message[]
+  toolUseId: string
+  tools: Tools
+  toolHooks?: ToolHooks
+  checkPermission?: PermissionGate
+}): Promise<{
+  suspended: boolean
+  deferred?: DeferredToolUsePayload
+  messages: Message[]
+}> {
+  const { conversation, toolUseId, tools, toolHooks, checkPermission } = params
+
+  let tu: ToolUseBlock | undefined
+  let assistantMsg: AssistantMessage | undefined
+  for (let i = conversation.length - 1; i >= 0; i--) {
+    const m = conversation[i]
+    if (m.role !== 'assistant') continue
+    const content = (m.message as { content?: unknown } | undefined)?.content
+    if (!Array.isArray(content)) continue
+    const block = content.find(
+      (b: { type?: string; id?: string }) =>
+        b?.type === 'tool_use' && b?.id === toolUseId,
+    ) as ToolUseBlock | undefined
+    if (block) {
+      tu = block
+      assistantMsg = m as unknown as AssistantMessage
+      break
+    }
+  }
+  if (!tu) {
+    const marker = conversation.find(
+      (m) =>
+        m.type === 'system' &&
+        m.subtype === 'deferred_tool_use' &&
+        m.tool_use_id === toolUseId,
+    )
+    tu = {
+      type: 'tool_use',
+      id: toolUseId,
+      name: typeof marker?.tool_name === 'string' ? (marker?.tool_name as string) : 'unknown',
+      input: {},
+    }
+  }
+  if (!assistantMsg) {
+    // 最小 assistant 消息重建（executeToolUse 第 2 参透传工具 call context；
+    // 回放截断层无原始消息时兜底，schema 校验/钩子面消费 tu 本体）
+    assistantMsg = {
+      type: 'assistant',
+      role: 'assistant',
+      uuid: randomUUID(),
+      timestamp: new Date().toISOString(),
+      message: { role: 'assistant', content: [tu] },
+    } as unknown as AssistantMessage
+  }
+
+  const outcome = await executeToolUse(tu, assistantMsg, {
+    tools,
+    hooks: toolHooks,
+    checkPermission,
+  })
+
+  if (outcome.deferred) {
+    // 再 defer → 幂等再挂起（新标记 last-wins；本支零 LLM 调用、干净退出，
+    // 挂起标记 record 由调用点（驱动主体 transcript record 支）落盘）
+    const payload: DeferredToolUsePayload = {
+      toolUseId,
+      toolName: tu.name,
+      deferReason: outcome.deferReason,
+    }
+    const marker = makeDeferredToolUseMarker(payload)
+    return {
+      suspended: true,
+      deferred: payload,
+      messages: [...conversation, marker],
+    }
+  }
+
+  // allow / deny / ask：tool_result 追加（成功支 + 错误短路支 block 恒在场——
+  // executeToolUse 不变量；is_error 支 = 既有决策流逐字恒等）→ 挂起解除
+  const now = new Date().toISOString()
+  const resultMsg: Message = {
+    type: 'user',
+    role: 'user',
+    uuid: randomUUID(),
+    timestamp: now,
+    message: { role: 'user', content: [outcome.block as ToolResultBlockParam] },
+    toolUseResult: outcome.toolUseResult,
+  }
+  return { suspended: false, messages: [...conversation, resultMsg] }
+}
+
 // ── 驱动主体 ─────────────────────────────────────────────────────────
 
 /**
@@ -1026,6 +1192,47 @@ export async function runHeadless(
     return resultMessage
   }
 
+  // ── AD-45 0.1.52 ②③：defer 挂起 result（subtype 'deferred'，SDK result
+  // subtype 开放串加性值）——首挂（defer 轮后）与幂等再挂（--resume 重评再
+  // defer）共用：assistant 消息上流（挂起轮 tool_use 块 = harness 证据面）+
+  // 挂起 result（非 success/error_max_turns 常面）+ drain。 ──
+  const writeDeferredSuspendResult = async (
+    p: DeferredToolUsePayload,
+    numTurns: number,
+    /** 挂起轮/会话全量消息（assistant 块上流 = harness 证据面，writeTurnOutputs 同形）。 */
+    conversationMessages: Message[],
+  ): Promise<SDKMessage> => {
+    await drainToOutput()
+    for (const m of conversationMessages) {
+      if (m.role !== 'assistant') continue
+      const content = (
+        m as unknown as { message?: { content?: unknown[] } }
+      ).message?.content
+      if (!content || content.length === 0) continue
+      await writeMessage({
+        type: 'assistant',
+        session_id: sessionId,
+        message: { role: 'assistant', content },
+        uuid: randomUUID(),
+      } as unknown as StdoutMessage)
+    }
+    await drainToOutput()
+    const resultMessage = {
+      type: 'result',
+      subtype: 'deferred',
+      session_id: sessionId,
+      is_error: false,
+      num_turns: numTurns,
+      result:
+        `Deferred tool call ${p.toolName} (${p.toolUseId}) by PreToolUse hook` +
+        (p.deferReason ? `: ${p.deferReason}` : '') +
+        `. Session suspended — resume with: atlas -p --resume ${sessionId}`,
+      uuid: randomUUID(),
+    } as SDKMessage
+    await writeMessage(resultMessage)
+    return resultMessage
+  }
+
   // ── stdin drain pump（启动即开跑）────────────────────────────────
   // structuredIO.read() 生成器须持续驱动：SDK host 的 control_response
   // （权限 prompt 应答）可在任意时点到达——含第 1 回合执行期间（权限
@@ -1075,45 +1282,114 @@ export async function runHeadless(
   cronScheduler.start()
 
   try {
-    // ── 执行 + 输出（旧 runHeadlessStreaming 流式环 → 新引擎阻塞环 + 输出面）──
-    let loopResult = await runTurn(conversation)
-    conversation = loopResult.messages
-    const firstResult = await writeTurnOutputs(loopResult)
-
-    // ── 输出三态 writer（旧仓 L820-860 逐字语义）──
-    switch (options.outputFormat) {
-      case 'json': {
-        if (options.verbose) {
-          // 全量消息数组（json + verbose 独需面；stream-json / text 只读终消息）
-          process.stdout.write(JSON.stringify(conversation) + '\n')
-        } else {
-          process.stdout.write(JSON.stringify(firstResult) + '\n')
-        }
-        break
+    // ── AD-45 0.1.52 ③：--resume 重评消费支（挂起态 = 显式挂起标记门控）──
+    // 正常会话 / 中轮 crash 悬空 tool_use / 已解决标记 = undefined → 零回归
+    // （重评仅由本波挂起标记触发，crash 态不触发 = 工单零回归约束 3）。
+    // 重评 = 重执行该 tool 的 PreToolUse hook（hook + 门重跑）：再 defer =
+    // 幂等再挂（本支零 LLM 调用，干净退出）/ allow = 工具执行 + tool_result
+    // （挂起解除，LLM 续跑）/ deny·ask = 既有 is_error 决策流逐字。
+    const deferredState = findDeferredToolUseState(conversation)
+    let reSuspended = false
+    if (deferredState) {
+      const re = await reEvaluateDeferredToolCalls({
+        conversation,
+        toolUseId: deferredState.toolUseId,
+        tools,
+        toolHooks: loopDeps.hooks?.toolHooks,
+        checkPermission,
+      })
+      conversation = re.messages
+      // 挂起面 / tool_result 持久化（transcript 全量序列 record，loop 轮末 record 同形）
+      if (loopDeps.transcript) {
+        void loopDeps.transcript.record(conversation)
       }
-      case 'stream-json':
-        // 逐消息已上流（writeMessage 支）
-        break
-      default: {
-        const result = firstResult as SdkResultLike
-        switch (result.subtype) {
-          case 'success':
+      if (re.suspended && re.deferred) {
+        await writeDeferredSuspendResult(re.deferred, 0, conversation)
+        reSuspended = true
+      }
+    }
+
+    let loopResult: AgentLoopResult
+    if (reSuspended) {
+      // 幂等再挂起：干净退出（本支零 LLM 调用、不启动新回合；挂起标记已 record，
+      // 下次 --resume 再经消费支重评）
+      queuedUserTurns.length = 0
+      stdinClosed = true
+      cronScheduler.stop()
+      await drainToOutput()
+    } else {
+      // ── 执行 + 输出（旧 runHeadlessStreaming 流式环 → 新引擎阻塞环 + 输出面）──
+      loopResult = await runTurn(conversation)
+      conversation = loopResult.messages
+      if (loopResult.deferred) {
+        // ── AD-45 0.1.52 ②：defer 挂起（pre-hook 'defer' 裁定）──
+        // 挂起 result（subtype 'deferred'，非常面 result）+ 干净退出：
+        // 排队 prompt 不启动新回合（重评 = 下次 --resume 消费支）。
+        const firstResult = await writeDeferredSuspendResult(
+          loopResult.deferred,
+          loopResult.turns,
+          conversation,
+        )
+        switch (options.outputFormat) {
+          case 'json': {
+            if (options.verbose) {
+              process.stdout.write(JSON.stringify(conversation) + '\n')
+            } else {
+              process.stdout.write(JSON.stringify(firstResult) + '\n')
+            }
+            break
+          }
+          case 'stream-json':
+            // 逐消息已上流（writeMessage 支）
+            break
+          default: {
             process.stdout.write(
-              result.result?.endsWith('\n')
-                ? (result.result as string)
-                : (result.result ?? '') + '\n',
+              String((firstResult as SdkResultLike).result ?? '') + '\n',
             )
             break
-          case 'error_during_execution':
-            process.stdout.write(`Execution error`)
+          }
+        }
+        queuedUserTurns.length = 0
+        stdinClosed = true
+      } else {
+        const firstResult = await writeTurnOutputs(loopResult)
+
+        // ── 输出三态 writer（旧仓 L820-860 逐字语义）──
+        switch (options.outputFormat) {
+          case 'json': {
+            if (options.verbose) {
+              // 全量消息数组（json + verbose 独需面；stream-json / text 只读终消息）
+              process.stdout.write(JSON.stringify(conversation) + '\n')
+            } else {
+              process.stdout.write(JSON.stringify(firstResult) + '\n')
+            }
             break
-          case 'error_max_turns':
-            process.stdout.write(
-              `Error: Reached max turns (${String(options.maxTurns)})`,
-            )
+          }
+          case 'stream-json':
+            // 逐消息已上流（writeMessage 支）
             break
-          default:
-            break
+          default: {
+            const result = firstResult as SdkResultLike
+            switch (result.subtype) {
+              case 'success':
+                process.stdout.write(
+                  result.result?.endsWith('\n')
+                    ? (result.result as string)
+                    : (result.result ?? '') + '\n',
+                )
+                break
+              case 'error_during_execution':
+                process.stdout.write(`Execution error`)
+                break
+              case 'error_max_turns':
+                process.stdout.write(
+                  `Error: Reached max turns (${String(options.maxTurns)})`,
+                )
+                break
+              default:
+                break
+            }
+          }
         }
       }
     }
