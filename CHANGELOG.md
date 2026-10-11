@@ -4,6 +4,36 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.53
+
+AD-45 回归修发布（基线 v0.1.52；生产 lane `r-20261011-prodlane-052` GATE-OPEN 红面修波）：
+--resume 重评 allow 后 file tool 工具执行抛 `tool error [TypeError]: Cannot read properties
+of undefined (reading 'signal')`（Write 现场 L4 + Read 现场 L14；Bash 面正常）→ 任务经 Bash
+绕行才完成。
+
+- **根因（executeToolUse 三形态实证复现）**：headless 车道工具执行 context 缺面——
+  ① 重评支 `reEvaluateDeferredToolCalls` 的 executeToolUse deps 缺 `signal`/`toolContext`
+  （本波 0.1.52 回归）② headless 常路径 `loopDeps` 同样未注入 `toolContext`（R6 工具
+  context 桥的 headless 等价缺口——0.1.10 只修了 TUI 面；常路径最小 context
+  `{ signal, checkPermission }` 无 `abortController` → 文件面工具（Read/Glob/Grep 非
+  可选链读点 `context.abortController.signal` / Write getAppState 族）TypeError = 潜伏
+  同族红面，重评支为暴露面）。
+- **修（e2e 修面裁定 = reEvaluate 调用点 deps 补全）**：`print.ts` `loopDeps` 注入
+  `toolContext = makeCtx()`（abortController + 活 TPC getAppState +
+  isNonInteractiveSession 面；常路径 runToolBatch 同槽透传）+ `reEvaluateDeferredToolCalls`
+  参补 `signal`/`toolContext`（executeToolUse 合并 `{ ...toolContext, signal,
+  checkPermission }` engine 字段优先同语义；调用点透传 loopDeps 同值面）。
+- **判别单测（cli-headless-defer 回归修族 3 件，修前红→绿）**：重评 allow + 调用点全
+  deps → 文件面工具执行成功零 TypeError（活 TPC 面回读 `read-ok:bypassPermissions` 防
+  恒绿假绿 + signal 身份 = engine 字段优先判别式）+ 负证（旧形最小 deps → TypeError
+  短路，钉死崩溃归因 = context 缺面非工具本体）+ 常路径恒等 guard（queryAgentLoop 注入
+  toolContext → 常路径执行成功）。
+- 四件套：tsc 0 / eslint 改面 0 / build cli.js 17 800 328 B（worktree 口径；master
+  prepublishOnly 重建为准）/ 全量 4005 pass·0 fail·306 文件（基线 4002+3 新）。
+
+scope 注：本版本仅回归修（无新增功能面）；AD-45 ④ SDK 面（`unstable_v2_resumeSession`
+实装）维持 0.1.53+ follow-up 登记（不入本版）。
+
 ## v0.1.52
 
 P0 对齐独占波（基线 v0.1.51；工单 2026-10-11-p0-wave-0152 §0 AD-45 = "defer" 权限决策 +
