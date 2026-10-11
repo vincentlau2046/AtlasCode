@@ -4,6 +4,58 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.51
+
+P0 对齐 C 簇波（基线 v0.1.50；工单 2026-10-11-p0-wave-0151 §0 12 件 = worktree 族
+AD-21/FX-06/FX-38b + TUI 渲染族 AD-14/AD-46/FX-26 + memory 族 PT-17/PT-02/PT-08 +
+插件源 AD-43 + 权限降噪 AD-11/PT-29 + verify 件 FX-38a；gate
+`r-20261011-gate-051` = GATE-PASS @master 90af46c：§3 修前红 7 项 per-commit 实证
+全吻合〔AD-21 @01366fd 5红/1绿 / FX-06 @34f9da2 2红/2绿 / FX-38b @f0a9cdd 5红+2恒绿 /
+AD-14 @c52e90b unit 4红+func 7红 / C-3 @5ec5a85 3红+5绿 / AD-43 @17a7adf 1红/4绿 /
+AD-11 @40eb0c0 6红/1绿〕+ 绿态 8 判别文件 RED→GREEN + AD-46 7/0 + FX-26 4/0 +
+MCP/插件族 15 文件全 0 fail + 四件套 rc=0×4〔CI 全量 119108 pass/0 fail·8526 files，
+cli.js 17 783 334 B〕+ §4 回归全绿〔0.1.42 cmd 29/29 + /help 51 标签恒等 + P0a
+hardFail=0 + A4F --release-gate target 0.1.51 releasable=true〕）：
+
+- **AD-21 EnterWorktree `path` 入参（落码，CC 2.1.105，修前红①②）**：`path` 指向现存
+  本仓 worktree → 探测进入不新建（git worktree list + realpath 归一匹配）；不存在 →
+  可操作报错（提示 name 入参走新建）；非本仓 worktree → 拒（列举可用 worktree）。
+  仅 `name` 入参路径逐字恒等（零回归）。
+- **FX-06 stale worktree 跨 session 复用（落码，修前红①②）**：agent worktree 隔离面
+  stale 跨 session 同 slug fast-resume 进旧目录（CC bug 面在场）→ session 作用域
+  唯一 slug 支（slug 含 session 标识，清后建不复用前 session 目录）。
+- **FX-38b 子代理自目录拒访（落码，修前红）**：worktree 检测（`.git/worktrees`
+  marker）+ `allowWrite.push(worktreeMainRepoPath)` 下子代理 cwd=自 worktree 时自目录
+  Read/Edit 被拒（CC bug 面在场）→ 补自目录放行支（双拷贝 worktree cwd 探针）。
+- **AD-14 `/tui` 命令 + `tui.fullscreen` setting（落码，CC 2.1.110，修前红）**：
+  复用既有 fullscreen 管线，**in-session 切换**（同会话 alt-screen 切换、状态不丢、
+  进程不重启）；setting 缺省 → env 驱动路径逐字恒等（零回归）。
+- **AD-46 ATLAS_NO_FLICKER env 闭环（verify + 渲染层门控探针）**：0/1 opt out/in 面
+  + tmux -CC 自动禁 + 不可恢复面 auto-disable 已闭环 → 渲染层门控同源回归探针
+  7/7 首轮绿。
+- **FX-26 启动期输入管线（verify）**：重启/切换后输入管线探针 4/4 首轮绿
+  （earlyInput 启动期按键面已备，丢键未证实 → 零码）。
+- **PT-17/PT-02/PT-08 memory 族提示词（双副本同改，纯提示词零行为变更）**：
+  delete-stale 冲突支措辞 + 五要素在场（PT-02 verify 首轮绿 + 双副本一致性）+
+  选择器空结果条款与 user-profile 保守条款（可选 2.1.210 面）。
+- **AD-43 `ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` 保留缓存 env（落码，CC 2.1.90，
+  修前红）**：git pull 失败时 env 开 + 缓存在场 → 保留旧缓存 + warn（瞬时网络失败
+  ≠ 缓存腐坏）；env 关/未设（或首装无缓存）→ 原样 rm+re-clone（现状逐字恒等）。
+- **AD-11+PT-29 `/less-permission-prompts` 降噪 skill（落码，CC 2.1.111，修前红）**：
+  扫描本 session transcript 高频 read-only 调用 → 频次降序 allowlist 提案 → 0.1.36
+  硬化原语写 user settings `permissions.allow`（去重 + 保留既有 + managed-rules-only
+  尊重；只写 allowlist 面）；只读判定单一事实源 = engine 只读前缀族
+  `matchReadOnlyPrefix`（bash 子门面→tools 根门面→engine 根门面三级扩面，与
+  bashToolHasPermission step 7 自动放行同源零漂移）；无候选支提示块零写入；
+  userInvocable 仅显式调用（disableModelInvocation）。**注**：userInvocable bundled
+  skill 不进 /help commands tab 渲染集（gate help-capture 定因登记；可调用面由契约
+  单测覆盖）——/help 标签权威集 = 51（50 + /tui）。
+- **FX-38a MCP 动态继承（verify，0 码）**：主 session 活继承在场（REPL 活态
+  mcp.tools 重算工具池）；子代理 spawn 时从父活池解析 = 下回合重注入支在场（工单
+  允许判据）；在飞 agent 池固定 = 上游同款执行语义（非 CC bug 面）。
+- **四件套发现件**：AD-21 落码遗留 `realpathSync` 同步 fs 调用被 eslint no-sync-fs
+  拦截 → 换 fs/promises `realpath` 收口（语义不变，worktree 族 79 测回归绿）。
+
 ## v0.1.50
 
 P0 对齐第三车波（基线 v0.1.49；PAC 0.1.49 §3 波序第 3 车 = AD-22 PreCompact block 支 +
