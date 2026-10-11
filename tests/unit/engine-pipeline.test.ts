@@ -267,3 +267,103 @@ describe('engine/pipeline classifyToolError（错误分类小件）', () => {
     expect(classifyToolError('string-throw')).toBe('UnknownError')
   })
 })
+
+describe('AD-45（0.1.52，CC 2.1.89 TOP#1）：defer 挂起面 + 3 值零回归恒等', () => {
+  /** defer 探针工具：call 计数（defer 支必须 0 调用 = 工具不执行）。 */
+  function makeSpyTool(name: string, data?: unknown): { tool: Tool; calls: { n: number } } {
+    const calls = { n: 0 }
+    return {
+      calls,
+      tool: {
+        name,
+        isConcurrencySafe: () => true,
+        call: async () => {
+          calls.n++
+          return { data: data ?? `result:${name}` }
+        },
+        mapToolResultToToolResultBlockParam: (content: unknown, toolUseID: string) => ({
+          type: 'tool_result',
+          tool_use_id: toolUseID,
+          content: String(content),
+        }),
+      } as unknown as Tool,
+    }
+  }
+
+  test('defer：pre-hook hookBehavior="defer" → deferred=true（不产 tool_result，工具不执行，非 error 短路）', async () => {
+    const { tool, calls } = makeSpyTool('Bash')
+    const r = await executeToolUse(tu('t-defer', 'Bash'), ASSISTANT, {
+      tools: [tool],
+      hooks: {
+        preToolUse: async () => ({
+          hookBehavior: 'defer',
+          hookPermissionDecisionReason: 'awaiting async approval',
+        }),
+      } as unknown as ToolHooks,
+    })
+    expect(r.deferred).toBe(true)
+    expect(r.deferReason).toBe('awaiting async approval')
+    expect(calls.n).toBe(0)
+    // 挂起面 ≠ 错误短路：无 is_error block（block 缺席，会话挂起由 loop 层消费）
+    expect(r.block).toBeUndefined()
+  })
+
+  test('defer：runToolBatch 短路本轮剩余 tool_use（挂起后不续跑，tool 2 不执行）', async () => {
+    const a = makeSpyTool('t1')
+    const b = makeSpyTool('t2')
+    const outcomes = await runToolBatch([tu('t-a', 't1'), tu('t-b', 't2')], ASSISTANT, {
+      tools: [a.tool, b.tool],
+      hooks: {
+        preToolUse: async (tool) =>
+          tool.name === 't1'
+            ? { hookBehavior: 'defer' }
+            : { hookBehavior: 'allow' },
+      } as unknown as ToolHooks,
+    })
+    expect(outcomes.length).toBe(1)
+    expect(outcomes[0].deferred).toBe(true)
+    expect(outcomes[0].toolUseId).toBe('t-a')
+    expect(a.calls.n).toBe(0)
+    expect(b.calls.n).toBe(0)
+  })
+
+  test('零回归恒等①：无 hook（窄 spine）→ 默认放行执行（行为与 AD-45 前逐字）', async () => {
+    const { tool, calls } = makeSpyTool('echo')
+    const r = await executeToolUse(tu('t-x', 'echo'), ASSISTANT, { tools: [tool] })
+    expect(r.deferred).toBeUndefined()
+    expect(r.isError).toBe(false)
+    expect(String(r.block?.content)).toBe('result:echo')
+    expect(calls.n).toBe(1)
+  })
+
+  test('零回归恒等②：hook 3 值决策流逐字不变（allow 执行 / deny 阻塞 / ask 确认标记）', async () => {
+    const allow = makeSpyTool('echo-a')
+    const rAllow = await executeToolUse(tu('t-a', 'echo-a'), ASSISTANT, {
+      tools: [allow.tool],
+      hooks: { preToolUse: async () => ({ hookBehavior: 'allow' }) } as unknown as ToolHooks,
+    })
+    expect(rAllow.deferred).toBeUndefined()
+    expect(rAllow.isError).toBe(false)
+    expect(allow.calls.n).toBe(1)
+
+    const deny = makeSpyTool('echo-d')
+    const rDeny = await executeToolUse(tu('t-d', 'echo-d'), ASSISTANT, {
+      tools: [deny.tool],
+      hooks: { preToolUse: async () => ({ hookBehavior: 'deny' }) } as unknown as ToolHooks,
+    })
+    expect(rDeny.deferred).toBeUndefined()
+    expect(rDeny.isError).toBe(true)
+    expect(String(rDeny.block?.content)).toContain('blocked by hook')
+    expect(deny.calls.n).toBe(0)
+
+    const ask = makeSpyTool('echo-k')
+    const rAsk = await executeToolUse(tu('t-k', 'echo-k'), ASSISTANT, {
+      tools: [ask.tool],
+      hooks: { preToolUse: async () => ({ hookBehavior: 'ask' }) } as unknown as ToolHooks,
+    })
+    expect(rAsk.deferred).toBeUndefined()
+    expect(rAsk.isError).toBe(true)
+    expect(String(rAsk.block?.content)).toContain('permission confirmation required')
+    expect(ask.calls.n).toBe(0)
+  })
+})
