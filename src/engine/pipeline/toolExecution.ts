@@ -103,6 +103,12 @@ export interface PreToolUseHookOutcome {
   hookBehavior?: HookPermissionBehavior
   preventContinuation?: boolean
   stopReason?: string
+  /**
+   * AD-45 0.1.52：钩子权限裁定理由透传（hooks 域 AggregatedHookResult
+   * .permissionDecisionReason，defer/deny/ask 均可能携带）→ mergeHookPermission
+   * defer 支挂起理由载体（挂起标记 + headless result 文案消费）。
+   */
+  hookPermissionDecisionReason?: string
 }
 
 /** E-5 S-5a：post-hook 结果（additionalContext 回灌 = 消息面残留守，见下前向接缝登记）。 */
@@ -111,8 +117,12 @@ export interface PostToolUseHookOutcome {
   additionalContext?: string
 }
 
-/** 钩子权限裁定四值（hooks 域 AggregatedHookResult.permissionBehavior 值集）。 */
-export type HookPermissionBehavior = 'allow' | 'deny' | 'ask' | 'passthrough'
+/**
+ * 钩子权限裁定值集（hooks 域 AggregatedHookResult.permissionBehavior 值集）。
+ * AD-45 0.1.52：'defer' = 挂起裁定（rank 最严，胜权限裁定值——resume 重评时
+ * deny/ask 钩子再执行，阻塞意图不丢）。区别于规则面 3 值 PermissionBehavior。
+ */
+export type HookPermissionBehavior = 'allow' | 'deny' | 'ask' | 'passthrough' | 'defer'
 
 /**
  * 权限门 verdict 形态（PermissionGate 返回值，mergeHookPermission 参数/返回）。
@@ -130,6 +140,11 @@ export type GateVerdict = {
    *  allow 快路径置 setAllowVerdict → 成功卡渲可解释句。deny/ask 走 reason 字符串，
    *  未附（工具面 1c 等）= undefined。加性字段：既有 GateVerdict 构造点零改动。 */
   decisionReason?: PermissionDecisionReason
+  /**
+   * AD-45 0.1.52：挂起判定（hook 'defer' 裁定无条件胜门——挂起 = 现在不裁决，
+   * 稍后 --resume 重评再跑 hook+门；reason 携带挂起理由文案）。
+   */
+  deferred?: boolean
 }
 
 /**
@@ -146,7 +161,19 @@ export type GateVerdict = {
 export function mergeHookPermission(
   hookBehavior: HookPermissionBehavior | undefined,
   gate: GateVerdict,
+  /** AD-45 0.1.52：钩子裁定理由（defer 支挂起理由载体；加性参，2 参调用点零改动）。 */
+  hookReason?: string,
 ): GateVerdict {
+  if (hookBehavior === 'defer') {
+    // AD-45 0.1.52：挂起 = 现在不裁决（不产 tool_result，工具不执行，会话挂起待
+    // --resume 重评）。defer 无条件胜门 verdict——重评时 hook + 门都会重跑，
+    // 挂起期间的门状态变化不丢（重评取当时最新裁决）。
+    return {
+      allowed: false,
+      deferred: true,
+      reason: hookReason ?? 'deferred by hook',
+    }
+  }
   if (hookBehavior === 'deny') {
     return { allowed: false, reason: 'blocked by hook' }
   }
@@ -204,7 +231,11 @@ export interface PipelineDeps {
 }
 
 export interface ToolExecutionOutcome {
-  block: ToolResultBlockParam
+  /**
+   * tool_result 块（成功 / 各错误短路支产出）。AD-45 0.1.52：defer 挂起支缺席
+   * （不产 tool_result = 挂起面核心；判别式 = 同 outcome 的 deferred 标志）。
+   */
+  block?: ToolResultBlockParam
   isError: boolean
   /**
    * G1（TUI 对比轮，#258）：工具原生 Output（res.data，UI-native tool Out 面）。
@@ -218,6 +249,14 @@ export interface ToolExecutionOutcome {
    * 早退错误支的误计为既有态，deferred）。
    */
   toolUseResult?: unknown
+  /**
+   * AD-45 0.1.52：defer 挂起（pre-hook 'defer' 裁定）：工具未执行、不产 tool_result、
+   * 非 error 短路（isError=false）。消费面 = loop 层挂起标记 + AgentLoopResult.deferred
+   * （headless 挂起协议，--resume 重评）。
+   */
+  deferred?: boolean
+  /** defer 挂起理由（hook permissionDecisionReason 透传；mergeHookPermission defer 支）。 */
+  deferReason?: string
 }
 
 /** 注册表按 name/aliases 查工具（旧仓 findToolByName 的窄 spine 等价物）。 */
@@ -332,7 +371,17 @@ export async function executeToolUse(
         assistantMessage: assistantMsg,
       })
     : { allowed: true }
-  const verdict = mergeHookPermission(preOutcome?.hookBehavior, gateVerdict)
+  const verdict = mergeHookPermission(
+    preOutcome?.hookBehavior,
+    gateVerdict,
+    preOutcome?.hookPermissionDecisionReason,
+  )
+  if (verdict.deferred) {
+    // AD-45 0.1.52：defer 挂起——不产 tool_result（block 缺席）、工具不执行、
+    // 非 error 短路（挂起 ≠ 阻塞；阻塞意图由 rank 最严的 defer 裁定承载，
+    // --resume 重评时 hook + 门重跑再裁决）。
+    return { deferred: true, deferReason: verdict.reason, isError: false }
+  }
   if (!verdict.allowed) {
     // S-4d：ask 支 fail-closed（prompt 面残留守登记，§8.36）；deny 支 message 逐字
     // 不变（engine-pipeline.test.ts 既有断言兼容）

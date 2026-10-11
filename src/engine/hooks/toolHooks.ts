@@ -80,6 +80,9 @@ export function createToolHooks(opts: ToolHooksAdapterOptions = {}): ToolHooks {
         blockingError: r.blockingError?.blockingError,
         updatedInput: r.updatedInput,
         hookBehavior: r.permissionBehavior,
+        // AD-45 0.1.52：裁定理由透传（defer/deny/ask 载体，pipeline mergeHookPermission
+        // defer 支挂起理由 → 挂起标记 / headless result 文案）
+        hookPermissionDecisionReason: r.permissionDecisionReason,
         // §8.42 整波审视 MAJOR-1：turn 终止意图透传（域聚合面已算出，此前
         // 适配器静默丢弃——旧仓 toolHooks.ts:438-446 pre 支消费面补齐）
         preventContinuation: r.preventContinuation,

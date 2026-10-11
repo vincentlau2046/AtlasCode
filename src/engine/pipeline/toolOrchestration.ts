@@ -45,10 +45,15 @@ export function partitionToolCalls(
 export interface ToolBatchOutcome {
   toolUseId: string
   name: string
-  block: ToolResultBlockParam
+  /** AD-45 0.1.52：defer 挂起支缺席（判别式 = 同 outcome 的 deferred 标志）。 */
+  block?: ToolResultBlockParam
   isError: boolean
   /** G1（#258）：工具原生 Output 透传（挂法见 toolExecution ToolExecutionOutcome 头注）。 */
   toolUseResult?: unknown
+  /** AD-45 0.1.52：defer 挂起（工具未执行、不产 tool_result；批次短路剩余 tool_use）。 */
+  deferred?: boolean
+  /** defer 挂起理由（hook permissionDecisionReason 透传）。 */
+  deferReason?: string
 }
 
 /**
@@ -70,7 +75,14 @@ export async function runToolBatch(
         block: r.block,
         isError: r.isError,
         toolUseResult: r.toolUseResult,
+        deferred: r.deferred,
+        deferReason: r.deferReason,
       })
+      if (r.deferred) {
+        // AD-45 0.1.52：挂起 → 本轮剩余 tool_use 不再执行（挂起后不续跑，
+        // 稍后 --resume 重评从挂起点恢复）；部分 outcomes 原样返回。
+        return outcomes
+      }
     }
   }
   return outcomes

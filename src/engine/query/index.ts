@@ -15,6 +15,7 @@
 export {
   queryOneRound,
   queryAgentLoop,
+  makeDeferredToolUseMarker,
   DEFAULT_AGENT_LOOP_MAX_TURNS,
   type AgentLoopDeps,
   type AgentLoopEvent,
@@ -22,6 +23,8 @@ export {
   type AgentLoopContextConfig,
   type AgentLoopArgs,
   type AgentLoopResult,
+  // AD-45 0.1.52：defer 挂起面（挂起载荷 + 轮末挂起标记工厂）
+  type DeferredToolUsePayload,
 } from './loop'
 export {
   withTurnRecovery,

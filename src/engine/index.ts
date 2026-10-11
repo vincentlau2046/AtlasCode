@@ -16,6 +16,7 @@
 export {
   queryOneRound,
   queryAgentLoop,
+  makeDeferredToolUseMarker,
   DEFAULT_AGENT_LOOP_MAX_TURNS,
   ask,
   // D1（0.1.37 ③，P2 恢复层 C3 缺口）：413/PTL 类 provider 错误形判别
@@ -28,6 +29,8 @@ export {
   type AgentLoopArgs,
   type AgentLoopResult,
   type AskArgs,
+  // AD-45 0.1.52：defer 挂起面（挂起载荷类型）
+  type DeferredToolUsePayload,
 } from './query'
 // W3-3b（§8.74.15）：AgentLoopDeps 组合根构建器（自 atlascode/compose 迁入
 // engine 层——cli 公共域不反向依赖壳，壳侧 2 面经 port 注册窗，见 loopDeps

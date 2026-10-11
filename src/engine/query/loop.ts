@@ -235,13 +235,26 @@ export interface AgentLoopArgs {
   tracking?: AutoCompactTrackingState
 }
 
+/**
+ * AD-45 0.1.52：defer 挂起面载荷（CC 2.1.89 TOP#1）——挂起 tool_use 的
+ * 判别信息（resume 重评消费支经标记重建 tool_use 入参，此处携判别面）。
+ */
+export interface DeferredToolUsePayload {
+  toolUseId: string
+  toolName: string
+  deferReason?: string
+}
+
 /** 多轮循环产物（T-4a）：终态消息序列 + 轮次统计。 */
 export interface AgentLoopResult {
   /** 终止时的完整消息序列（含各轮 assistant + tool_result + 压缩边界）。 */
   messages: Message[]
   /** 实际执行的轮次数（LLM 调用次数）。 */
   turns: number
-  /** 是否自然终止（assistant 无 tool_use）；false = 被 maxTurns 截断。 */
+  /**
+   * 是否自然终止（assistant 无 tool_use）；false = 被 maxTurns 截断
+   * （或 AD-45 defer 挂起——挂起非自然终止亦非截断，判别式 = 下方 deferred）。
+   */
   terminated: boolean
   /** 终态 tracking（调用方回填，供续跑/回放/遥测）。 */
   tracking: AutoCompactTrackingState
@@ -253,6 +266,12 @@ export interface AgentLoopResult {
    * false/absent。
    */
   emptyTerminated?: boolean
+  /**
+   * AD-45 0.1.52：defer 挂起（某轮 pre-hook 'defer' 裁定）——不自然终止、
+   * 非 maxTurns 截断；挂起面 = 轮末挂起标记（messages 末位）+ 本载荷
+   * （headless 消费支：print.ts 挂起 result + --resume 重评）。
+   */
+  deferred?: DeferredToolUsePayload
 }
 
 export interface AgentRoundResult {
@@ -270,6 +289,33 @@ export interface AgentRoundResult {
    * 正常 end_turn（含 text）/ 正常工具轮恒 false/absent。
    */
   empty?: boolean
+  /** AD-45 0.1.52：本轮 defer 挂起（批次短路，挂起面消费 = queryAgentLoop break）。 */
+  deferred?: DeferredToolUsePayload
+}
+
+/**
+ * AD-45 0.1.52：defer 挂起标记（system 消息 subtype 判别式，compact_boundary 同形）
+ * ——挂起 tool_use 的持久化面（queryOneRound 轮末经 transcript.record 自动落盘，
+ * JSONL '"deferred_tool_use"' 字节标记）。无字符串 content → LLM 映射
+ * （modelprovider/params.ts system 支）滤除不进 API；resume 重评检测面 =
+ * print.ts findDeferredToolUseState（标记在场 + 其后无对应 tool_result = 挂起态）。
+ */
+export function makeDeferredToolUseMarker(payload: {
+  toolUseId: string
+  toolName: string
+  deferReason?: string
+}): Message {
+  return {
+    type: 'system',
+    subtype: 'deferred_tool_use',
+    role: 'system',
+    tool_use_id: payload.toolUseId,
+    tool_name: payload.toolName,
+    defer_reason: payload.deferReason,
+    isMeta: false,
+    uuid: randomUUID(),
+    timestamp: new Date().toISOString(),
+  }
 }
 
 /**
@@ -377,11 +423,27 @@ export async function queryOneRound(
     // R6（P0）：工具调用 context 桥透传（同上唯一点；未注入 = 窄 spine 最小 context）
     toolContext: deps.toolContext,
   })
-  const toolResults = outcomes.map((o) => ({
-    toolUseId: o.toolUseId,
-    name: o.name,
-    block: o.block,
-  }))
+  // AD-45 0.1.52：defer 挂起 outcome 不产 tool_result（block 缺席）——
+  // toolResults / resultMessages 均排除挂起支（批次已短路，挂起后无后续 outcome）。
+  const deferredOutcome = outcomes.find((o) => o.deferred)
+  const deferredPayload: DeferredToolUsePayload | undefined = deferredOutcome
+    ? {
+        toolUseId: deferredOutcome.toolUseId,
+        toolName: deferredOutcome.name,
+        deferReason: deferredOutcome.deferReason,
+      }
+    : undefined
+  const marker: Message | undefined = deferredPayload
+    ? makeDeferredToolUseMarker(deferredPayload)
+    : undefined
+  const toolResults = outcomes
+    .filter((o) => !o.deferred)
+    .map((o) => ({
+      toolUseId: o.toolUseId,
+      name: o.name,
+      // 非挂起支 block 恒在场（pipeline 不变量；可选化仅为挂起支类型面）
+      block: o.block as ToolResultBlockParam,
+    }))
   // S-E3 审视 M-1 修复（§8.52 双只读 A 路）：result 消息恒戳 uuid/timestamp
   // （旧仓 messages.ts:525-526 createUserMessage 逐字语义：`uuid || randomUUID()`
   // + `timestamp ?? ISO`——旧仓 record 面消息恒带 uuid 是 transcript 不变量）。
@@ -389,17 +451,19 @@ export async function queryOneRound(
   // `uuid: message.uuid as string` 对 undefined 纯透传 → JSONL 条目缺 uuid
   // 字段（dedup miss 重复追加 + 父链 `parentUuid = message.uuid` 断裂）。
   const now = new Date().toISOString()
-  const resultMessages = outcomes.map((o) => ({
-    type: 'user',
-    role: 'user',
-    uuid: randomUUID(),
-    timestamp: now,
-    message: { role: 'user', content: [o.block] },
-    // G1（#258）：toolUseResult 挂入 result user message（旧仓 addToolResult 同语义：
-    // 工具原生 Output 随消息走，TUI 渲染面经 message.toolUseResult 消费；早退支
-    // 此处 = undefined 不挂，见 toolExecution ToolExecutionOutcome 头注）。
-    toolUseResult: o.toolUseResult,
-  }))
+  const resultMessages = outcomes
+    .filter((o) => !o.deferred)
+    .map((o) => ({
+      type: 'user',
+      role: 'user',
+      uuid: randomUUID(),
+      timestamp: now,
+      message: { role: 'user', content: [o.block as ToolResultBlockParam] },
+      // G1（#258）：toolUseResult 挂入 result user message（旧仓 addToolResult 同语义：
+      // 工具原生 Output 随消息走，TUI 渲染面经 message.toolUseResult 消费；早退支
+      // 此处 = undefined 不挂，见 toolExecution ToolExecutionOutcome 头注）。
+      toolUseResult: o.toolUseResult,
+    }))
 
   // S-E3 A11（旧 L722/724/774/828 收敛）：轮末追加面记录——assistant void
   // 语义（fire-and-forget，未注入 = 无操作）；新 spine 无 progress/attachment
@@ -419,16 +483,22 @@ export async function queryOneRound(
   // （result 行不戳）——M-2 全量序列接链不依赖 project.ts 该戳覆写机制
   // （同轮 tool_use/tool_result 同落，前序链参与者 = 正确 assistant，恒走
   // sequential-parent 回落即正确链）；登记防复审当遗漏重提。
+  // AD-45 0.1.52：挂起标记随轮末全量序列 record（transcript 持久化 = 挂起面
+  // 落盘，--resume 回放经 findDeferredToolUseState 检测）。
+  const roundMessages: Message[] = marker
+    ? [...messages, assistantMsg, ...resultMessages, marker]
+    : [...messages, assistantMsg, ...resultMessages]
   if (deps.transcript) {
-    void deps.transcript.record([...messages, assistantMsg, ...resultMessages])
+    void deps.transcript.record(roundMessages)
   }
 
   return {
-    messages: [...messages, assistantMsg, ...resultMessages],
+    messages: roundMessages,
     toolResults,
     assistantContent,
     stopReason: resp.message.stop_reason,
     empty,
+    deferred: deferredPayload,
   }
 }
 
@@ -474,6 +544,9 @@ export async function queryAgentLoop(
   let turns = 0
   let terminated = false
   let lastRound: AgentRoundResult | undefined
+  // AD-45 0.1.52：defer 挂起面（某轮 pre-hook 'defer' 裁定 → 挂起 break，
+  // 非自然终止亦非 maxTurns 截断；terminated 保持 false 判别式）。
+  let deferredToolUse: DeferredToolUsePayload | undefined
 
   // S-E3 A11（旧 L450 收敛）：进 loop 前 persist 入参序列——crash-resumable
   // （旧 L437 注释：进程在首个 API 响应前被杀，transcript 仍可 resume；
@@ -614,6 +687,14 @@ export async function queryAgentLoop(
       })
       break
     }
+    if (lastRound.deferred) {
+      // AD-45 0.1.52：defer 挂起 → 循环挂起 break（不产 tool_result、不走
+      // terminal stop-hooks 支——挂起 ≠ 停止意图）。挂起标记已随轮末序列
+      // record（queryOneRound）；消费支 = headless --resume 重评
+      // （print.ts findDeferredToolUseState / reEvaluateDeferredToolCalls）。
+      deferredToolUse = lastRound.deferred
+      break
+    }
     if (lastRound.toolResults.length === 0) {
       // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
       // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
@@ -644,6 +725,7 @@ export async function queryAgentLoop(
     tracking,
     lastRound,
     emptyTerminated,
+    deferred: deferredToolUse,
   }
   // W3-3a：终态事件（适配层 = generator return 面）
   deps.emit?.({ type: 'loop_end', result })
