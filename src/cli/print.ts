@@ -809,6 +809,77 @@ export async function reEvaluateDeferredToolCalls(params: {
   return { suspended: false, messages: [...conversation, resultMsg] }
 }
 
+/**
+ * AD-45 缺口#2 修（0.1.54，prod lane r3 GATE-OPEN 打回）：deferred_tool_use 挂起
+ * marker 装载面回捞（headless --resume 专用，可测顶层面，同 findDeferredToolUseState /
+ * reEvaluateDeferredToolCalls 族）。
+ *
+ * 背景（定因三角三证齐，e2e r3 红面）：挂起 marker 以「链内消息（叶 assistant）的
+ * child」形态落盘（loop.ts roundMessages 轮末追加 marker + record 序贯 parent 链 →
+ * marker.parentUuid = 前序消息），而 loadTranscriptFile 叶计算排除 system 叶
+ * （load.ts「system 不应锚定会话链」）+ buildConversationChain 仅沿 parentUuid 单向
+ * （leaf→root）走链 → marker 结构性排除出链 → findDeferredToolUseState（仅扫链）恒
+ * undefined → --resume 重评支生产不可达（resume 退化为新 LLM 回合，r3 stage2/3
+ * num_turns=1 非设计 0 幂等零 LLM）。
+ *
+ * 本面（方向 A 装载面最小修）：把 parent 在链内、且未解决（全 transcript 无该
+ * tool_use 的 tool_result）的 deferred_tool_use marker 按其 parent 在链内位置插回其
+ * 后（文档序，保 last-wins + 自清除语义）。零回归约束 3：无 marker 正常会话 = 原数组
+ * 引用零追加（byParent 空 → return chain）；已解决 marker（对应 tool_result 在场）不
+ * 追加（防重复重评）。headless 专用（TUI 走 sessionRestore 独立路径；引擎
+ * buildConversationChain / 叶计算零改动，本面仅在 loadResumedMessages 装载后回捞）。
+ *
+ * 判别单测 = tests/unit/cli-headless-defer-marker-recovery.test.ts（真实写 session
+ * 文件 → loadTranscriptFile → buildConversationChain → 本面 → 断言 marker 在场
+ * conversation + findDeferredToolUseState 回挂起面；gate 判据对齐 e2e r3 红面 + 负证）。
+ */
+export function recoverDeferredToolUseMarkers<T extends {
+  uuid: string
+  type: string
+  subtype?: string
+  parentUuid?: string | null
+  tool_use_id?: string
+  message?: { content?: unknown }
+}>(messages: Map<string, T>, chain: T[]): T[] {
+  const chainUuids = new Set<string>()
+  for (const m of chain) chainUuids.add(m.uuid)
+  // 全 transcript 的 tool_result tool_use_id 集（判 marker 是否已解决，order-independent）
+  const resolvedToolUseIds = new Set<string>()
+  for (const m of messages.values()) {
+    const content = m.message?.content
+    if (Array.isArray(content)) {
+      for (const b of content) {
+        const rec = b as { type?: string; tool_use_id?: string } | null
+        if (rec?.type === 'tool_result' && typeof rec.tool_use_id === 'string') {
+          resolvedToolUseIds.add(rec.tool_use_id)
+        }
+      }
+    }
+  }
+  // 收集 parent 在链内 + 未解决的 marker，按 parent 分组（文档序回捞）
+  const byParent = new Map<string, T[]>()
+  for (const m of messages.values()) {
+    if (m.type !== 'system' || m.subtype !== 'deferred_tool_use') continue
+    // 已在链内（parent 链推进经该 marker，如后续消息 parent 链穿过它）→ 不重复回捞
+    if (chainUuids.has(m.uuid)) continue
+    const pu = m.parentUuid
+    if (!pu || !chainUuids.has(pu)) continue
+    if (typeof m.tool_use_id === 'string' && resolvedToolUseIds.has(m.tool_use_id)) continue
+    const arr = byParent.get(pu)
+    if (arr) arr.push(m)
+    else byParent.set(pu, [m])
+  }
+  if (byParent.size === 0) return chain
+  // 插回：每个链消息后追加其 marker 子（文档序，保 last-wins + 自清除语义）
+  const out: T[] = []
+  for (const m of chain) {
+    out.push(m)
+    const kids = byParent.get(m.uuid)
+    if (kids) for (const k of kids) out.push(k)
+  }
+  return out
+}
+
 // ── 驱动主体 ─────────────────────────────────────────────────────────
 
 /**
@@ -1541,6 +1612,12 @@ async function loadResumedMessages(
     return []
   }
   const chain = buildConversationChain(loaded.messages, leafMessage)
+  // AD-45 缺口#2 修（0.1.54，prod lane r3 打回）：挂起 marker 以「叶 assistant 的
+  // child」形态落盘，叶计算排除 system 叶 + 单向 parent 走链 → 结构性排除出链 →
+  // findDeferredToolUseState 恒 undefined → 重评支生产不可达。装载面回捞（见
+  // recoverDeferredToolUseMarkers 头注）：把未解决 marker 插回 parent 之后；无 marker
+  // 正常会话 = 原链零改动（零回归约束 3）。
+  const conversation = recoverDeferredToolUseMarkers(loaded.messages, chain)
   // P0-B（0405 core-2）：headless 车道 session ID 采纳缺失——不调 switchSession 时
   // 转录写入新 session 文件，--resume 多轮契约断（r2 session_id 漂移：0405 checkpoint
   // r2=ok 但 id 失配 FAIL；2026-10-01 复现 r1 d4aaa9ea… → r2 e0b1d950…）。
@@ -1555,12 +1632,12 @@ async function loadResumedMessages(
       // 边界类型差（shared Message.timestamp: string|number vs engine session
       // Message.timestamp: string）：restore 仅透传 messages（非 fork 分支不消费），
       // 按目标签名回注
-      messages: chain as unknown as Parameters<
+      messages: conversation as unknown as Parameters<
         typeof processResumedConversation
       >[0]['messages'],
       sessionId: resumedId,
     },
     { forkSession: false, sessionIdOverride: resumedId },
   )
-  return chain as unknown as Message[]
+  return conversation as unknown as Message[]
 }
