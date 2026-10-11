@@ -2,6 +2,7 @@ import { feature } from 'src/shared'
 import { registerBatchSkill } from './batch.js'
 import { registerDebugSkill } from './debug.js'
 import { registerKeybindingsSkill } from './keybindings.js'
+import { registerLessPermissionPromptsSkill } from './lessPermissionPrompts.js'
 import { registerLoremIpsumSkill } from './loremIpsum.js'
 import { registerRememberSkill } from './remember.js'
 import { registerSimplifySkill } from './simplify.js'
@@ -41,6 +42,9 @@ export function initBundledSkills(): void {
   registerSimplifySkill()
   registerBatchSkill()
   registerStuckSkill()
+  // AD-11（0.1.51 C-5，CC 2.1.111）：权限提示降噪 skill（transcript 扫描 →
+  // read-only allowlist 提案 → user settings permissions.allow 写入支）
+  registerLessPermissionPromptsSkill()
   registerAscendGenerateSkill()
   registerAscendDebugSkill()
   registerAscendOptimizeSkill()

@@ -207,6 +207,15 @@ export {
   LSPTool,
 } from './tools'
 export {
+  // AD-11（0.1.51 C-5，CC 2.1.111）：只读前缀族单一事实源出口（bashReadOnly
+  // matchReadOnlyPrefix：命中最长只读前缀（git status / ls …），非只读/操作符
+  // 守卫命令返 null；与 bashToolHasPermission step 7 自动放行同源零漂移）。
+  // tui /less-permission-prompts skill 据此构造 `Bash(<prefix>:*)` 前缀规则，
+  // 经本门面取件（STR-1 entry-point 收口；isReadOnlyCommand 谓词不扩面，
+  // 既有消费点走原路径）
+  matchReadOnlyPrefix,
+} from './tools'
+export {
   // W2-2b 基础（§8.74.8/§8.74.12）：注册面单一出口——36 工具本体全量 lift
   // （原仅 6 体 lifted，其余 30 体只经 tools/ 深路径可取 = tui 2b 适配器经
   // STR-1 门面收口无法合法取件）。30 体 = 36 全集 − 已 lift 5（AgentTool/

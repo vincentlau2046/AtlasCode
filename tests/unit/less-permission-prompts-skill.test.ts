@@ -127,7 +127,7 @@ describe('AD-11 /less-permission-prompts skill allowlist 契约', () => {
     const seed = updateSettingsForSource('userSettings', {
       permissions: { allow: ['Grep'] },
     })
-    expect(seed.error).toBeUndefined()
+    expect(seed.error == null).toBe(true) // 成功面 error = null/undefined
 
     const ok = skill.writeAllowlistToSettings?.([
       { toolName: 'Read' },

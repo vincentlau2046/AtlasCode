@@ -28,7 +28,15 @@ const READ_ONLY_PREFIXES = [
 // bashToolHasPermission step 7 自动放行（写文件零审批）。同族 includes 守卫
 // 风格（`<` 输入重定向只读不写，不守卫；引号内 `>` 如 `grep "a > b" f` 判
 // 非只读 = fail-safe 方向，多弹框不多放行，与 `;`/`|` 引号假阳性同态）。
-export function isReadOnlyCommand(command: string): boolean {
+/**
+ * 匹配命中的只读命令前缀（单一事实源）：返回最长匹配的前缀（如
+ * `git status --short` → `git status`），非只读命令返回 null。
+ *
+ * AD-11（0.1.51，CC 2.1.111）：/less-permission-prompts skill 用命中前缀
+ * 构造 `Bash(<prefix>:*)` 前缀规则（legacy :* 语法，shellRuleMatching
+ * 兼容面）——前缀取自本表而非调用方复制（零漂移）。
+ */
+export function matchReadOnlyPrefix(command: string): string | null {
   const trimmed = command.trim()
   if (
     trimmed.includes('&&') ||
@@ -39,7 +47,17 @@ export function isReadOnlyCommand(command: string): boolean {
     trimmed.includes('$(') ||
     trimmed.includes('>')
   ) {
-    return false
+    return null
   }
-  return READ_ONLY_PREFIXES.some(p => trimmed === p || trimmed.startsWith(p + ' '))
+  let best: string | null = null
+  for (const p of READ_ONLY_PREFIXES) {
+    if (trimmed === p || trimmed.startsWith(p + ' ')) {
+      if (best === null || p.length > best.length) best = p
+    }
+  }
+  return best
+}
+
+export function isReadOnlyCommand(command: string): boolean {
+  return matchReadOnlyPrefix(command) !== null
 }

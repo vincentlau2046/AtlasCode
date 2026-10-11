@@ -417,6 +417,9 @@ export {
   stripWrappersFromArgv,
   shouldUseSandbox,
   isReadOnlyCommand,
+  // AD-11（0.1.51 C-5，CC 2.1.111）：只读前缀族单源扩面（命中最长只读
+  // 前缀 / 非只读 null；tui /less-permission-prompts skill 经根门面取件）
+  matchReadOnlyPrefix,
   AbortError,
   type Platform,
   getPlatform,

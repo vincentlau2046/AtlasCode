@@ -164,7 +164,7 @@ export {
   stripWrappersFromArgv,
 } from './pathValidation'
 export { shouldUseSandbox } from './shouldUseSandbox'
-export { isReadOnlyCommand } from './bashReadOnly'
+export { isReadOnlyCommand, matchReadOnlyPrefix } from './bashReadOnly'
 export { AbortError } from './abortError'
 export { type Platform, getPlatform } from './platform'
 export { count } from './arrayUtils'
