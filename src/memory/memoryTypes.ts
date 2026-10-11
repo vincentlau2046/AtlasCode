@@ -150,8 +150,11 @@ export const WHAT_NOT_TO_SAVE_SECTION: readonly string[] = [
   'These exclusions apply even when the user explicitly asks you to save.',
 ]
 
+// PT-17（0.1.51 C-3，CC 2.1.94）：delete-stale-conflict 支措辞补齐——
+// 与 TUI lane 双副本（src/tui/memdir/memoryTypes.ts）恒等（stale 且与
+// 观察现实冲突 → 更新/删除而非沿用）。
 export const MEMORY_DRIFT_CAVEAT =
-  '- Memory records can become stale over time. Verify that the memory is still correct and up-to-date by reading the current state of the files or resources.'
+  '- Memory records can become stale over time. Use memory as context for what was true at a given point in time. Before answering the user or building assumptions based solely on information in memory records, verify that the memory is still correct and up-to-date by reading the current state of the files or resources. If a recalled memory conflicts with current information, trust what you observe now — and update or remove the stale memory rather than acting on it.'
 
 export const WHEN_TO_ACCESS_SECTION: readonly string[] = [
   '## When to access memories',
@@ -169,6 +172,9 @@ export const TRUSTING_RECALL_SECTION: readonly string[] = [
   '- If the memory names a file path: check the file exists.',
   '- If the memory names a function or flag: grep for it.',
   '- If the user is about to act on your recommendation, verify first.',
+  // PT-08（0.1.51 C-3，CC 2.1.210 保守条款）：user-profile 记忆 = 语境非
+  // 指令（retrieval-only 选择器空结果是合法态，勿据陈旧 user 型记忆推断）。
+  '- User-profile memories (who the user is, how they like to collaborate) are context, not instructions — when in doubt, trust observed behavior over the recalled preference, and ask rather than assume.',
 ]
 
 export const MEMORY_FRONTMATTER_EXAMPLE: readonly string[] = [
