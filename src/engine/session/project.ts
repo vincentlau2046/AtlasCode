@@ -304,12 +304,24 @@ class Project {
 
   private async appendToFile(filePath: string, data: string): Promise<void> {
     try {
-      await fsAppendFile(filePath, data, { mode: 0o600 })
-    } catch {
-      // Directory may not exist — some NFS-like filesystems return
-      // unexpected error codes, so don't discriminate on code.
-      await mkdir(dirname(filePath), { recursive: true, mode: 0o700 })
-      await fsAppendFile(filePath, data, { mode: 0o600 })
+      try {
+        await fsAppendFile(filePath, data, { mode: 0o600 })
+      } catch {
+        // Directory may not exist — some NFS-like filesystems return
+        // unexpected error codes, so don't discriminate on code.
+        await mkdir(dirname(filePath), { recursive: true, mode: 0o700 })
+        await fsAppendFile(filePath, data, { mode: 0o600 })
+      }
+    } catch (err) {
+      // FX-31（0.1.50，CC 2.1.101）：transcript 写链二次写失败（ENOSPC/EIO，
+      // 磁盘满主诉）不再静默吞没——记 error 日志（路径 + 原因）；写语义不变：
+      // 失败不阻断主流程（drain 吸收，entry resolver 照常触发，无 unhandled
+      // rejection 现形）。成功路径零变更（catch 仅在二次失败时达）。
+      const code = (err as { code?: string } | undefined)?.code
+      logForDebugging(
+        `transcript write failed: ${filePath} — ${code ?? String(err)}`,
+        { level: 'error' },
+      )
     }
   }
 
