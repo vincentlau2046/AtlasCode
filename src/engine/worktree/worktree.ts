@@ -73,8 +73,15 @@
  *     performPostCreationSetup → 会话态装配）/ keepWorktree / cleanupWorktree
  *     （git worktree remove --force + sleep(100) + branch -D）。
  */
-import { realpathSync } from 'fs'
-import { copyFile, mkdir, readdir, stat, symlink, utimes } from 'fs/promises'
+import {
+  copyFile,
+  mkdir,
+  readdir,
+  realpath,
+  stat,
+  symlink,
+  utimes,
+} from 'fs/promises'
 import { basename, dirname, join, resolve } from 'path'
 import {
   containsPathTraversal,
@@ -714,15 +721,17 @@ export async function enterExistingWorktreeForSession(
   const resolved = resolve(requestedPath)
   // realpath 归一（tmpdir symlink 面同 sd2b-fs 先例）；不存在的路径 realpath
   // 抛错 → 回落原形（存在性判别走 stat 支，不进比较）。
-  const norm = (p: string): string => {
+  const norm = async (p: string): Promise<string> => {
     try {
-      return realpathSync(p)
+      return await realpath(p)
     } catch {
       return p
     }
   }
-  const resolvedNorm = norm(resolved)
-  const match = entries.find(e => norm(e.worktreePath) === resolvedNorm)
+  const resolvedNorm = await norm(resolved)
+  const entryNorms = await Promise.all(entries.map(e => norm(e.worktreePath)))
+  const matchIdx = entryNorms.indexOf(resolvedNorm)
+  const match = matchIdx >= 0 ? entries[matchIdx] : undefined
 
   if (!match) {
     let exists = false
