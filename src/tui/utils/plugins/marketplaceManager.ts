@@ -1136,7 +1136,10 @@ export async function reconcileSparseCheckout(
  *
  * Clones or updates a git repository containing marketplace data.
  * If the repository already exists at cachePath, pulls the latest changes.
- * If pulling fails, removes the directory and re-clones.
+ * If pulling fails, removes the directory and re-clones — UNLESS
+ * ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE is set and a cache exists: a
+ * transient fetch failure keeps the stale cache (with a warning) instead of
+ * discarding it (AD-43, CC 2.1.90).
  *
  * Example repository structure:
  * ```
@@ -1189,6 +1192,32 @@ async function cacheMarketplaceFromGit(
       pullResult.code === 0 ? undefined : classifyFetchError(pullResult.stderr),
     )
     if (pullResult.code === 0) return
+    // AD-43 (CC 2.1.90): fetch-failure resilience dial. When
+    // ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE is on AND an on-disk cache
+    // actually exists, a stale cache is better than none — a transient
+    // network failure is not cache corruption, so keep it and warn instead
+    // of rm+re-clone. Off/unset (or first install with no cache to keep)
+    // falls through verbatim: rm + re-clone, today's behavior.
+    if (isEnvTruthy(process.env.ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE)) {
+      let cacheExists = false
+      try {
+        await fs.stat(cachePath)
+        cacheExists = true
+      } catch {
+        // ENOENT — first install, nothing to keep; fall through to clone
+      }
+      if (cacheExists) {
+        logForDebugging(
+          `ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE set: keeping stale marketplace cache at ${cachePath} after failed pull (${pullResult.stderr}); skipping re-clone`,
+          { level: 'warn' },
+        )
+        safeCallProgress(
+          onProgress,
+          'Marketplace update failed; keeping existing cache (ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE).',
+        )
+        return
+      }
+    }
     logForDebugging(`git pull failed, will re-clone: ${pullResult.stderr}`, {
       level: 'warn',
     })
