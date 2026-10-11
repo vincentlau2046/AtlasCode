@@ -276,7 +276,7 @@ import { FullscreenLayout, useUnseenDivider, computeUnseenDivider } from '../com
 import { SessionTreeScreen } from './SessionTreeScreen.js';
 import { DebugPanel } from '../components/DebugPanel/DebugPanel.js';
 import { useDebugEventTracker } from '../components/DebugPanel/useDebugEventTracker.js';
-import { isFullscreenEnvEnabled, maybeGetTmuxMouseHint, isMouseTrackingEnabled } from '../utils/fullscreen.js';
+import { isFullscreenEnvEnabled, maybeGetTmuxMouseHint, isMouseTrackingEnabled, setFullscreenRuntimeOverride } from '../utils/fullscreen.js';
 import { ENABLE_MOUSE_TRACKING, DISABLE_MOUSE_TRACKING } from '../ink/termio/dec.js';
 import { AlternateScreen } from '../ink/components/AlternateScreen.js';
 import { ScrollKeybindingHandler } from '../components/ScrollKeybindingHandler.js';
@@ -977,6 +977,15 @@ export function REPL({
       });
     }
   }, [autoUpdaterResult, addNotification]);
+
+  // AD-14 (0.1.51 C-2): in-session fullscreen override seed — the /tui
+  // command double-writes the tui.fullscreen setting + the runtime override
+  // slot; re-apply the persisted value (undefined = no seed, the env-driven
+  // path stays authoritative verbatim).
+  const tuiFullscreenSeed = useAppState(s => s.settings.tui?.fullscreen);
+  useEffect(() => {
+    setFullscreenRuntimeOverride(tuiFullscreenSeed);
+  }, [tuiFullscreenSeed]);
 
   // tmux + fullscreen + `mouse off`: one-time hint that wheel won't scroll.
   // We no longer mutate tmux's session-scoped mouse option (it poisoned

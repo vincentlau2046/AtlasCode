@@ -14,6 +14,25 @@ let checkedTmuxMouseHint = false
 let tmuxControlModeProbed: boolean | undefined
 
 /**
+ * AD-14 (0.1.51 C-2): in-session runtime override written by the `/tui`
+ * command (fullscreen switch WITHOUT a restart — 改裁断言面).
+ * undefined = no override, the env-driven path in isFullscreenEnvEnabled()
+ * is authoritative verbatim (zero-regression identity).
+ * Priority: /tui override (explicit session choice) > env opt-in/opt-out.
+ */
+let fullscreenRuntimeOverride: boolean | undefined
+
+export function setFullscreenRuntimeOverride(
+  value: boolean | undefined,
+): void {
+  fullscreenRuntimeOverride = value
+}
+
+export function getFullscreenRuntimeOverride(): boolean | undefined {
+  return fullscreenRuntimeOverride
+}
+
+/**
  * Env-var heuristic for iTerm2's tmux integration mode (`tmux -CC` / `tmux -2CC`).
  *
  * In `-CC` mode, iTerm2 renders tmux panes as native splits — tmux runs
@@ -105,10 +124,16 @@ export function _resetTmuxControlModeProbeForTesting(): void {
 }
 
 /**
- * Runtime env-var check only. Default is off (ATLAS_NO_FLICKER=1 to
- * opt in).
+ * Runtime env-var check. Default is off (ATLAS_NO_FLICKER=1 to opt in).
+ * AD-14: a /tui in-session override (setFullscreenRuntimeOverride) takes
+ * precedence over the env path when set.
  */
 export function isFullscreenEnvEnabled(): boolean {
+  // AD-14: the /tui in-session override (explicit session choice) wins over
+  // the env-driven path below; undefined falls through verbatim.
+  if (fullscreenRuntimeOverride !== undefined) {
+    return fullscreenRuntimeOverride
+  }
   // Explicit user opt-out always wins.
   if (isEnvDefinedFalsy((process.env.ATLAS_NO_FLICKER))) return false
   // Explicit opt-in overrides auto-detection (escape hatch).
@@ -207,4 +232,5 @@ export async function maybeGetTmuxMouseHint(): Promise<string | null> {
 export function _resetForTesting(): void {
   loggedTmuxCcDisable = false
   checkedTmuxMouseHint = false
+  fullscreenRuntimeOverride = undefined
 }

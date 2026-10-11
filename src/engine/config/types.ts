@@ -89,6 +89,12 @@ export const SettingsSchema = () => z.object({
   search: z
     .object({ tavilyApiKey: z.string().optional() })
     .optional(),
+  // --- UI/行为（AD-14 0.1.51 C-2 补声明，原属裁剪 UI 族）：/tui 命令 +
+  //     tui.fullscreen（全屏渲染 in-session 切换）；双拷贝对齐 =
+  //     tui/utils/settings/types.ts 同形 tui 键
+  tui: z
+    .object({ fullscreen: z.boolean().optional() })
+    .optional(),
 }).passthrough()
 
 export type SettingsJson = z.infer<ReturnType<typeof SettingsSchema>>

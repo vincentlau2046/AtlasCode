@@ -70,6 +70,13 @@ export const SettingsSchema = () => z.object({
   outputStyle: z.string().optional(),
   language: z.string().optional(),
   theme: z.string().optional(),
+  // AD-14 (0.1.51 C-2, CC 2.1.110)：/tui 命令 + tui.fullscreen setting
+  // （全屏渲染 in-session 切换不重启；命令双写 userSettings + fullscreen.ts
+  // 运行时覆写槽，REPL 挂载 seed 重启后重新应用）。双拷贝对齐 =
+  // engine/config/types.ts 同形 tui 键。
+  tui: z
+    .object({ fullscreen: z.boolean().optional() })
+    .optional(),
   // #250 concern 2（/autocompact 命令）：autoCompact 窗口档位（命令持久化到
   // userSettings；结构型单源 = engine AutoCompactWindowSetting，本 schema 对齐
   // 该形；消费 = engine 阈值/开关便捷形 + agentLoopDeps DI 注入）
