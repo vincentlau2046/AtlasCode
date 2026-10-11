@@ -8,7 +8,8 @@
  *   2. **TUI 运行态** = 本文件（112 个 TUI 独有导出）：TUI 车道运行态
  *      （scroll drain / LSP 推荐 / mainLoopModelOverride / turn 累加器族 / OTel 计数器等），
  *      域纯度裁定：TUI 运行态不入 engine 侧 bootstrap 域。含少量真状态
- *      （_isRemoteMode / _mainLoopModelOverride / _spSectionCache / turn 累加器）
+ *      （_isRemoteMode / _mainLoopModelOverride / _spSectionCache / turn 累加器
+ *      / FX-04 0.1.50 _invokedSkillsByAgent invoked-skill 三件真状态）
  *      + getInitialMainLoopModel 真实现（De-Claude config 驱动，#202 收口）。
  *   3. **3 个同名分歧**（非重复，类型层不同，L3 边界有意保留——bootstrap/state.ts 头注
  *      "不 import engine SettingSource 型"登记）：
@@ -24,7 +25,10 @@
  *    （= TUI getEnabledSettingSources 丢 userSettings，#203 族误判先例）。
  *
  * 复审勿当遗漏：本文件是 C-7 原样搬 TUI 闭包的重建桥（consumer import analysis 重建），
- * 112 个 no-op 占位 = H6 前向接缝登记（feature 未实现的占位，非死码）。
+ * 109 个 no-op 占位 = H6 前向接缝登记（feature 未实现的占位，非死码）；
+ * invoked-skill 三件（addInvokedSkill / getInvokedSkillsForAgent /
+ * clearInvokedSkillsForAgent）自 FX-04（0.1.50）起为真状态（跨压缩保全链，
+ * 见各件头注）。
  */
 import { getSettings_DEPRECATED } from 'src/tui/utils/settings/settings.js'
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
@@ -33,12 +37,53 @@ import { getRoleModel, type ModelRole } from 'src/modelprovider'
 let _spSectionCache: Map<string, string | null> = new Map()
 let _agentColorMap: Map<string, string> = new Map()
 
-export const addInvokedSkill : any = (() => ({})) as any;
+// FX-04（0.1.50）：invoked-skill 态真状态（H6 no-op 占位三件 → 真 Map 落定，
+// 收口「invoked-skill 态跨压缩未保全」缺口——附件重建链
+// createSkillAttachmentIfNeeded 经 getInvokedSkillsForAgent 取空 Map 恒 null，
+// 压缩后 skill 内容丢失）。链：登记 = processSlashCommand.tsx:663（slash 车道）
+// / conversationRecovery.ts:326（resume 恢复）；消费 = compact.ts
+// createSkillAttachmentIfNeeded（invoked_skills 附件 → post-compact System
+// Reminder）+ skillImprovement.ts:55；释放 = SkillTool.ts:204（fork 支
+// finally）。agentId null = 主会话。TUI 运行态 = 本文件层（M1 三分层裁定）。
+export interface InvokedSkillRecord {
+  skillName: string
+  skillPath: string
+  content: string
+  invokedAt: number
+}
+const _invokedSkillsByAgent = new Map<string, Map<string, InvokedSkillRecord>>()
+const _invokedSkillAgentKey = (agentId: string | null | undefined): string =>
+  agentId ?? '__main__'
+
+export function addInvokedSkill(
+  skillName: string,
+  skillPath: string,
+  content: string,
+  agentId: string | null,
+): void {
+  const key = _invokedSkillAgentKey(agentId)
+  let bySkill = _invokedSkillsByAgent.get(key)
+  if (!bySkill) {
+    bySkill = new Map()
+    _invokedSkillsByAgent.set(key, bySkill)
+  }
+  // 重调 = 刷新（content/invokedAt 更新；createSkillAttachmentIfNeeded 按
+  // invokedAt 降序排 → 最近调用优先，预算超限时最不相关的 skill 被降级）
+  bySkill.set(skillName, {
+    skillName,
+    skillPath,
+    content,
+    invokedAt: Date.now(),
+  })
+}
 export const addSlowOperation : any = (() => ({})) as any;
 export interface AttributedCounter {
   add(value: number, attributes?: Record<string, unknown>): void
 }
-export const clearInvokedSkillsForAgent : any = (() => ({})) as any;
+/** FX-04：fork 支完成后释放该 agent 的 invoked-skill 态（SkillTool.ts:204）。 */
+export function clearInvokedSkillsForAgent(agentId: string | null): void {
+  _invokedSkillsByAgent.delete(_invokedSkillAgentKey(agentId))
+}
 export const flushInteractionTime : any = (() => ({})) as any;
 const _activeTimeCounter: any = {
   add: (_v: any, _tags?: any) => {},
@@ -70,10 +115,16 @@ export const getInitialMainLoopModel: any = () => {
   return getRoleModel(defaultRole) ?? null
 }
 export const getInlinePlugins : any = (() => ({})) as any;
-// Consumer (compact.ts createSkillAttachmentIfNeeded) calls `.size` and `.values()`,
-// so the stub MUST return a Map (not a plain object). Empty Map + the no-op
-// addInvokedSkill stub means skill attachments are skipped in stubbed mode.
-export const getInvokedSkillsForAgent : any = (() => new Map()) as any;
+/**
+ * FX-04：取该 agent 的 invoked-skill 态（compact.ts createSkillAttachmentIfNeeded
+ * 消费 `.size`/`.values()`；未登记 agent 返空 Map——非 undefined、非他 agent 的
+ * Map）。
+ */
+export function getInvokedSkillsForAgent(
+  agentId: string | null | undefined,
+): Map<string, InvokedSkillRecord> {
+  return _invokedSkillsByAgent.get(_invokedSkillAgentKey(agentId)) ?? new Map()
+}
 // Remote mode is always false in this build (the main.tsx --remote/--teleport
 // paths were removed with Remote Control, W-opt 可信波 S1 §8.74.29, #299).
 // Must default to boolean false — a truthy stub (e.g. `() => ({})`) makes
