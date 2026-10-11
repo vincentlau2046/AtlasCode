@@ -137,6 +137,13 @@ export function unstable_v2_createSession(
  * V2 API - UNSTABLE
  * Resume an existing session by ID.
  * @alpha
+ *
+ * AD-45 0.1.52（④ 登记，零码）：SDK 编程面 resume（headless 挂起协议
+ * ②③ 已落 CLI `--resume` 消费支——挂起标记 findDeferredToolUseState +
+ * 重评 reEvaluateDeferredToolCalls，见 src/cli/print.ts 顶层面）。本
+ * stub 的实装（SDK Session 对象经挂起标记重评恢复编程面会话）登记
+ * 0.1.53+ follow-up，不入 0.1.52 独占波 scope（工单 §1.1 ④ 主裁量：
+ * 登记不实施）。throw 语义不变。
  */
 export function unstable_v2_resumeSession(
   _sessionId: string,
