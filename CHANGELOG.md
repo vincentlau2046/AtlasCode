@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.54
+
+AD-45 缺口#2 修波发布（基线 v0.1.53；生产 lane `r-20261011-prodlane-053` GATE-OPEN 打回；
+版本口径裁定 = 0.1.54 新修波〔npm 发布序列严格 0.1.N 整数，0.1.53 已 live 且 r3 收口被
+打回，不开 0.1.53.1 热修〕）：--resume 重评消费支生产不可达——持久化的
+`deferred_tool_use` marker 以「叶 assistant 的 child」形态写入，而装载面叶计算显式排除
+system 叶（「system 叶不应锚定会话链」）+ `buildConversationChain` 仅沿 parentUuid 单向
+（leaf→root）走链 → marker 结构性排除出链 → `findDeferredToolUseState`（仅扫链）恒
+undefined → 重评支恒不触发，resume 退化为新 LLM 回合（r3 stage2/3 均 num_turns=1；
+设计 = 0 幂等零 LLM）。
+
+- **根因（定因三角：码面 × 活装载面 × 行为面，确定性可复现）**：marker 写入形态（loop
+  轮末 `roundMessages` 追加，parent = 叶 assistant）× 装载路径（loadprobe 用产品真实
+  loader 回放真实 session 文件：marker 在 map 但不在链，stage2/stage3 时刻两精确复现）
+  × 行为面（r3 resume 重跑新 LLM 回合，num_turns=1）三证逐字吻合。gate 漏因 = 判别单测
+  对人工构造会话直调重评函数，未过生产装载路径（本波补 = 真盘装载路径判别测试）。
+- **修（方向 A 装载面最小修，headless 专用）**：`print.ts` 新增可测顶层面
+  `recoverDeferredToolUseMarkers(messages, chain)`——未解决 marker（parent 在链内 + 全
+  transcript 无该 tool_use 的 tool_result + 尚未在链内）特判回捞，插回其 parent 之后
+  （文档序，保 last-wins + self-clear）；无 marker 会话返回原数组引用（零回归约束 3 保）。
+  engine `buildConversationChain`/叶计算不动；TUI 走独立 `sessionRestore` 路径。方向 B
+  （findDeferredToolUseState 改扫 loaded map 契约变、调用面 2 处）未采。
+- **判别单测（2 文件 7 件，修前红）**：unit 纯逻辑零磁盘 5 件（unresolved 回捞后在场 +
+  `findDeferredToolUseState` 复原 / 无 marker 同引用零追加 / 已解决 marker 不重评 /
+  已在链内不重复追加 / last-wins 末位权威）+ func 真盘装载路径 2 件（真实写 session 文件
+  → `loadTranscriptFile` → marker 在 map 但不在 raw 链〔修前红〕→ 回捞后在场 + 挂起面
+  复原；无 marker 正常会话同引用零追加）——gate 漏因核销（断言经产品真实 loader，
+  非人工构造会话直调）。
+- 四件套：tsc 0 / eslint src 0e·0w / build cli.js 17 801 644 B（worktree 口径；master
+  prepublishOnly 重建为准）/ 全量 4012 pass·0 fail·308 文件（基线 4005+7 新）。
+
+scope 注：本版本仅回归修（无新增功能面）；AD-45 ④ SDK 面（`unstable_v2_resumeSession`
+实装）维持 0.1.55+ follow-up 登记（不入本版）；下游 = e2e 生产 lane r3 重跑（同判据 +
+SRI/headless/npm-dist 面补跑〔registry 瞬态挂起恢复后补〕）。
+
 ## v0.1.53
 
 AD-45 回归修发布（基线 v0.1.52；生产 lane `r-20261011-prodlane-052` GATE-OPEN 红面修波）：
