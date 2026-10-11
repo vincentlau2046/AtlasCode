@@ -261,8 +261,13 @@ export function computeUnseenDivider(messages: readonly Message[], dividerIndex:
  * Outside fullscreen mode, renders content sequentially so the existing
  * main-screen scrollback rendering works unchanged.
  *
- * Fullscreen mode defaults on for ants (ATLAS_NO_FLICKER=0 to opt out)
- * and off for external users (ATLAS_NO_FLICKER=1 to opt in).
+ * Fullscreen mode defaults off; ATLAS_NO_FLICKER=1 opts in (ATLAS_NO_FLICKER=0
+ * explicitly opts out). AD-14 (0.1.51 C-2): the /tui in-session override
+ * (setFullscreenRuntimeOverride, persisted as settings tui.fullscreen) takes
+ * precedence over the env path. Gating is single-sourced in
+ * isFullscreenEnvEnabled() (this component's L338/L469 gate sites consume it
+ * directly — no raw env reads); the env closed-loop + same-source gate are the
+ * AD-46 regression probe (tests/func/tui-ad46-no-flicker-env-probe.test.ts).
  * The <AlternateScreen> wrapper
  * (alt buffer + mouse tracking + height constraint) lives at REPL's root
  * so nothing can accidentally render outside it.
