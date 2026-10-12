@@ -43,6 +43,9 @@ export const EXTERNAL_PERMISSIONS_TEMPLATE: string = permissionsExternal
 export function getDefaultExternalAutoModeRules(): AutoModeRules {
   return {
     allow: extractTaggedBullets('user_allow_rules_to_replace'),
+    // 0.1.59 C1-1：第 4 类 hard_deny（用户无条件 BLOCK 规则）。模板 tag 缺省
+    // 非 `- ` bullet（"(none configured)"）→ 缺省空数组（hard_deny ∅）。
+    hard_deny: extractTaggedBullets('user_hard_deny_rules_to_replace'),
     soft_deny: extractTaggedBullets('user_deny_rules_to_replace'),
     environment: extractTaggedBullets('user_environment_to_replace'),
   }
@@ -76,6 +79,11 @@ export function buildDefaultExternalSystemPrompt(): string {
     )
     .replace(
       /<user_deny_rules_to_replace>([\s\S]*?)<\/user_deny_rules_to_replace>/,
+      (_m, defaults: string) => defaults,
+    )
+    .replace(
+      // 0.1.59 C1-1：hard_deny 段注入（缺省 "(none configured)" 原样保留）
+      /<user_hard_deny_rules_to_replace>([\s\S]*?)<\/user_hard_deny_rules_to_replace>/,
       (_m, defaults: string) => defaults,
     )
     .replace(

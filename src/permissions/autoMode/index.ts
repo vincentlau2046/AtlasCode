@@ -70,6 +70,10 @@ export {
 // ── classifierShared ─────────────────────────────────────────────────────
 export { extractToolUseBlock, parseClassifierResponse } from './classifierShared'
 
+// ── rank（C1-1 hard_deny 第 4 类 severity 聚合纯逻辑面，0.1.59）────────────
+export type { AutoModeSeverity, AutoModeClassHits } from './rank'
+export { aggregateAutoModeSeverity } from './rank'
+
 // ── state ────────────────────────────────────────────────────────────────
 export {
   setAutoModeActive,

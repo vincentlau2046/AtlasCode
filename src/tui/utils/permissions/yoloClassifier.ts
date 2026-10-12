@@ -69,6 +69,8 @@ function isUsingExternalPermissions(): boolean {
  */
 export type AutoModeRules = {
   allow: string[]
+  // 0.1.59 C1-1：第 4 类 hard_deny（用户无条件 BLOCK，User Intent 不清除）
+  hard_deny: string[]
   soft_deny: string[]
   environment: string[]
 }
@@ -85,6 +87,8 @@ export type AutoModeRules = {
 export function getDefaultExternalAutoModeRules(): AutoModeRules {
   return {
     allow: extractTaggedBullets('user_allow_rules_to_replace'),
+    // 0.1.59 C1-1：第 4 类 hard_deny（缺省空，模板 tag 非 `- ` bullet）
+    hard_deny: extractTaggedBullets('user_hard_deny_rules_to_replace'),
     soft_deny: extractTaggedBullets('user_deny_rules_to_replace'),
     environment: extractTaggedBullets('user_environment_to_replace'),
   }
@@ -118,6 +122,11 @@ export function buildDefaultExternalSystemPrompt(): string {
     )
     .replace(
       /<user_deny_rules_to_replace>([\s\S]*?)<\/user_deny_rules_to_replace>/,
+      (_m, defaults: string) => defaults,
+    )
+    .replace(
+      // 0.1.59 C1-1：hard_deny 段注入（缺省 "(none configured)" 原样保留）
+      /<user_hard_deny_rules_to_replace>([\s\S]*?)<\/user_hard_deny_rules_to_replace>/,
       (_m, defaults: string) => defaults,
     )
     .replace(
@@ -464,6 +473,11 @@ export async function buildYoloSystemPrompt(
   const userDeny = denyDescriptions.length
     ? denyDescriptions.map(d => `- ${d}`).join('\n')
     : undefined
+  // 0.1.59 C1-1：hard_deny 用户段（无条件 BLOCK；无 bash/powershell 贡献支——
+  // 那两支是 soft_deny 的 routine 描述，hard_deny 纯用户配置）。
+  const userHardDeny = autoMode?.hard_deny?.length
+    ? autoMode.hard_deny.map(d => `- ${d}`).join('\n')
+    : undefined
   const userEnvironment = autoMode?.environment?.length
     ? autoMode.environment.map(e => `- ${e}`).join('\n')
     : undefined
@@ -476,6 +490,11 @@ export async function buildYoloSystemPrompt(
     .replace(
       /<user_deny_rules_to_replace>([\s\S]*?)<\/user_deny_rules_to_replace>/,
       (_m, defaults: string) => userDeny ?? defaults,
+    )
+    .replace(
+      // 0.1.59 C1-1：hard_deny 段（非空用户段整段替换缺省 "(none configured)"）
+      /<user_hard_deny_rules_to_replace>([\s\S]*?)<\/user_hard_deny_rules_to_replace>/,
+      (_m, defaults: string) => userHardDeny ?? defaults,
     )
     .replace(
       /<user_environment_to_replace>([\s\S]*?)<\/user_environment_to_replace>/,

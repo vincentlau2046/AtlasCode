@@ -14,9 +14,16 @@
  * 消费，本波仅冻结形状（纯类型，零运行时代码）。
  */
 
-/** settings.autoMode 三节形状（用户可定制的三分类器提示词节，空数组 = 缺省）。 */
+/**
+ * settings.autoMode 四节形状（用户可定制的分类器提示词节，空数组 = 缺省）。
+ * 0.1.59 C1-1（CC 2.1.136）：新增第 4 类 hard_deny（用户无条件 BLOCK 规则，
+ * User Intent Rule 不清除；模板 tag `<user_hard_deny_rules_to_replace>`，缺省
+ * 空）。severity 序 hard_deny > soft_deny > deny > allow，聚合面 =
+ * aggregateAutoModeSeverity（./rank.ts，provider 波前向接缝消费）。
+ */
 export type AutoModeRules = {
   allow: string[]
+  hard_deny: string[]
   soft_deny: string[]
   environment: string[]
 }
