@@ -243,7 +243,7 @@ describe('C4-1 chatStream() mid-stream partial 保留面（fake 流脚本）', (
     streamBehavior = () => {
       throw { status: 503, name: 'APIError', message: 'Service Unavailable' }
     }
-    const { provider, sleeps } = makeProvider(3, { baseMs: 10, capMs: 40, sleeps: undefined })
+    const { provider } = makeProvider(3, { baseMs: 10, capMs: 40, sleeps: undefined })
     const events: any[] = []
     for await (const ev of provider.chatStream(streamArgs())) events.push(ev)
 
