@@ -42,6 +42,9 @@ export interface McpToolDescriptor {
   readOnlyHint?: boolean
   /** 旧仓 annotations.destructiveHint。 */
   destructiveHint?: boolean
+  /** MCP _meta 段（外部服务器开放面，可选；buildMcpTool 从中提取
+   * 'anthropic/alwaysLoad' 严格布尔挂 Tool.alwaysLoad，0.1.57 C5-1）。 */
+  _meta?: Record<string, unknown>
 }
 
 /**

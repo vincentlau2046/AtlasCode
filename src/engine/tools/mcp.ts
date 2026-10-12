@@ -19,7 +19,10 @@
  *     useManageMCPConnections 887L）+ 认证面（auth 2370L + oauth/xaa）/ elicitation /
  *     vscode / xaaIdp → 残留守（归后续纵切，经 ports/mcpClient 注入；本版工具由连接层
  *     预取 tools 描述符后构建，非引擎内动态 tools/list）。
- *   - 旧仓 buildMcpTool 的 _meta `anthropic/searchHint` / `alwaysLoad` 提取 +
+ *   - 旧仓 buildMcpTool 的 _meta `anthropic/alwaysLoad` 提取已兑现（0.1.57 C5-1：
+ *     buildMcpTool 严格布尔提取挂 Tool.alwaysLoad，消费面 = isDeferredTool 首查
+ *     alwaysLoad===true → 跳过 ToolSearch 延迟）；`anthropic/searchHint` 提取仍
+ *     残留守（定因登记 = 后续波观察项）+
  *     `recursivelySanitizeUnicode` + `isIncludedMcpTool` channel 门 + skipPrefix SDK 模式
  *     + progress 事件（mcp_progress started/completed/failed）+ session 重试
  *     （McpSessionExpiredError 重建 client）+ CHICAGO_MCP computer-use override → 残留守。
@@ -150,11 +153,18 @@ function buildMcpTool(
 ): Tool {
   const schema =
     (d.inputJSONSchema as ToolInputJSONSchema | undefined) ?? PERMISSIVE_INPUT_SCHEMA
+  // 0.1.57 C5-1（CC 2.1.121）：_meta['anthropic/alwaysLoad'] 严格布尔提取（=== true；
+  // 宽松真值 string "true" / 1 不挂）→ Tool.alwaysLoad。消费面 = isDeferredTool 首查
+  // （alwaysLoad === true → return false，跳过 ToolSearch 延迟，初始 prompt 全 schema
+  // 在场）；未设 / 非严格布尔 → 不挂字段（undefined）→ MCP 工具维持 always-deferred
+  // 语义（isDeferredTool isMcp 支），零回归。
+  const alwaysLoad = d._meta?.['anthropic/alwaysLoad'] === true
   return {
     name: buildMcpToolName(conn.name, d.name),
     inputSchema: schema,
     inputJSONSchema: schema,
     isMcp: true,
+    ...(alwaysLoad ? { alwaysLoad: true } : {}),
     mcpInfo: { serverName: conn.name, toolName: d.name },
     maxResultSizeChars: MCP_MAX_RESULT_SIZE_CHARS,
     isConcurrencySafe: () => d.readOnlyHint ?? false,

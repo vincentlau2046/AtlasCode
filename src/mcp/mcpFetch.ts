@@ -115,6 +115,9 @@ export type McpToolDescriptor = {
   readOnlyHint?: boolean
   /** 旧 annotations.destructiveHint。 */
   destructiveHint?: boolean
+  /** MCP _meta 段（外部服务器开放面，可选；0.1.57 C5-1 随迁透传，
+   * engine 侧 buildMcpTool 提取 'anthropic/alwaysLoad'）。 */
+  _meta?: Record<string, unknown>
 }
 
 /** MCP 资源条目（旧 SDK ResourcesListItem 最小面 + server 字段）。 */
@@ -243,6 +246,9 @@ export async function fetchToolsForClient(
         ...(tool.annotations?.destructiveHint !== undefined
           ? { destructiveHint: tool.annotations.destructiveHint }
           : {}),
+        // 0.1.57 C5-1：_meta 段透传（经上方 recursivelySanitizeUnicode 已净，
+        // 布尔值 sanitize 恒等）→ engine buildMcpTool alwaysLoad 提取源。
+        ...(tool._meta !== undefined ? { _meta: tool._meta } : {}),
       }))
     } catch (error) {
       logError(error)

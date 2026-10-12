@@ -49,7 +49,9 @@ import { errorMessage } from '../../utils/errors.js'
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
 import { getMcpPrefix } from './mcpStringUtils.js'
+import { McpFailureReminderTracker } from './mcpFailureReminder.js'
 import { commandBelongsToServer, excludeStalePluginClients } from './utils.js'
+import { enqueuePendingNotification } from '../../utils/messageQueueManager.js'
 
 // Constants for reconnection with exponential backoff
 const MAX_RECONNECT_ATTEMPTS = 5
@@ -122,6 +124,31 @@ export function useManageMCPConnections(
 
   // Track active reconnection attempts to allow cancellation
   const reconnectTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
+
+  // C5-2 (0.1.57)：连接失败 reminder 去重状态机（同 server 同错误签名同会话
+  // 至多 1 条；重连成功 clearServer 清签名，恢复后再失败可再提醒）。
+  const mcpFailureTrackerRef = useRef<McpFailureReminderTracker | null>(null)
+
+  // C5-2：failed 态转移 → 注入一条 system-reminder（enqueuePendingNotification
+  // task-notification 车道 → 每轮经 getQueuedCommandAttachments 排空进会话；
+  // 去重命中 → 静默不注入；成功路径零注入）。
+  const notifyMcpConnectionFailure = useCallback(
+    (serverName: string, error: unknown) => {
+      if (mcpFailureTrackerRef.current === null) {
+        mcpFailureTrackerRef.current = new McpFailureReminderTracker()
+      }
+      const reminder = mcpFailureTrackerRef.current.noteFailure(
+        serverName,
+        error,
+      )
+      if (reminder === null) return
+      enqueuePendingNotification({
+        value: reminder,
+        mode: 'task-notification',
+      })
+    },
+    [],
+  )
 
 
   // Batched MCP state updates: queue individual server updates and flush them
@@ -248,6 +275,9 @@ export function useManageMCPConnections(
       // Handle side effects based on client state
       switch (client.type) {
         case 'connected': {
+          // C5-2：重连/连接成功 → 清该 server 失败去重签名（恢复面：后续再失败
+          // 可再提醒；本支零注入——仅 failed 态转移注入 reminder）
+          mcpFailureTrackerRef.current?.clearServer(client.name)
           // Overwrite the default elicitation handler registered in connectToServer
           // with the real one (queues elicitation in AppState for UI). Registering
           // here (once per connect) instead of in a [mcpClients] effect avoids
@@ -363,6 +393,8 @@ export function useManageMCPConnections(
                       )
                       reconnectTimersRef.current.delete(client.name)
                       updateServer({ ...client, type: 'failed' })
+                      // C5-2：重连耗尽（异常面）→ 失败 reminder（去重内）
+                      notifyMcpConnectionFailure(client.name, error)
                       return
                     }
                   }
@@ -387,6 +419,11 @@ export function useManageMCPConnections(
               void reconnectWithBackoff()
             } else {
               updateServer({ ...client, type: 'failed' })
+              // C5-2：onclose 且传输不可自动重连（stdio/sdk）→ 失败 reminder
+              notifyMcpConnectionFailure(
+                client.name,
+                `${configType} connection closed (transport does not support automatic reconnection)`,
+              )
             }
           }
 
@@ -504,14 +541,22 @@ export function useManageMCPConnections(
           break
         }
 
+        case 'failed': {
+          // C5-2：初次连接失败（+ 重连非异常末次经 onConnectionAttempt(result)
+          // 路）→ 失败 reminder（去重内；needs-auth 走独立授权 UX 不提醒）
+          notifyMcpConnectionFailure(
+            client.name,
+            client.error ?? 'connection failed',
+          )
+          break
+        }
         case 'needs-auth':
-        case 'failed':
         case 'pending':
         case 'disabled':
           break
       }
     },
-    [updateServer],
+    [updateServer, notifyMcpConnectionFailure],
   )
 
   // Initialize all servers to pending state if they don't exist in appState.
