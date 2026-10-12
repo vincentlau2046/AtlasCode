@@ -79,6 +79,9 @@ import branch from './commands/branch/index.js'
 import agents from './commands/agents/index.js'
 import plugin from './commands/plugin/index.js'
 import reloadPlugins from './commands/reload-plugins/index.js'
+import reloadSkills from './commands/reload-skills/index.js'
+import cd from './commands/cd/index.js'
+import outputStyle from './commands/output-style/index.js'
 import rewind from './commands/rewind/index.js'
 import heapDump from './commands/heapdump/index.js'
 import version from './commands/version.js'
@@ -184,6 +187,7 @@ const COMMANDS = memoize((): Command[] => [
   autocompact,
   branch,
   btw,
+  cd,
   clear,
   color,
   compact,
@@ -205,9 +209,11 @@ const COMMANDS = memoize((): Command[] => [
   mcp,
   memory,
   model,
+  outputStyle,
   plugin,
   releaseNotes,
   reloadPlugins,
+  reloadSkills,
   rename,
   resume,
   session,

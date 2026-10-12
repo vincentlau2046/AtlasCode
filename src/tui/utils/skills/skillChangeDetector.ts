@@ -165,6 +165,21 @@ export function dispose(): Promise<void> {
  */
 export const subscribe = skillsChanged.subscribe
 
+/**
+ * Manual in-session skill re-scan (consumed by /reload-skills, 0.1.60 TUI-3).
+ * Mirrors the tail of scheduleReload (watcher-triggered reload) minus the
+ * debounce + ConfigChange hook: clear the skill + command caches, reset the sent
+ * skill names, and emit the skillsChanged signal so the REPL's useSkillsChange
+ * (subscribed via subscribe) re-fetches getCommands() and the typeahead/help
+ * list reflects new/removed/changed skills without a restart.
+ */
+export function reloadSkillsNow(): void {
+  clearSkillCaches()
+  clearCommandsCache()
+  resetSentSkillNames()
+  skillsChanged.emit()
+}
+
 async function getWatchablePaths(): Promise<string[]> {
   const fs = getFsImplementation()
   const paths: string[] = []
