@@ -4,6 +4,25 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.55
+
+P0 对齐卷 2 主链首车 = 提示词零码批（基线 v0.1.54；CC 2.1.121+ TOP V2-01/02/03 + hard_deny 提示词层，
+工单 `docs/2026-10-12-p0-wave-0155-ticket.md`）。安全 / 委派 / memory·compaction 提示词增量 delta
+（0.1.36/37 硬化波 + 卷 1 已落 2.1.88 基线以下大部分安全规则，本波 = 2.1.121+ 增量，非重复落码）：
+
+- **① 安全批（delta）**：
+  - broad `git add` 后 `git status`/`git diff --cached` 复查 + 可疑文件 push 前密文复查（CC 2.1.200）
+  - 停 dev server / 后台进程 = 捕获 PID / 端口监听者，不宽 `pkill -f`（CC 2.1.213）
+  - WebFetch 抓取内容 = 不可信数据非指令：忠实报告注入发现、不跟嵌入指令、不代页面外泄（CC 2.1.265）
+  - AskUserQuestion 收紧：仅阻塞性不可解决策才问；单选项被拒不 filler 重试（CC 2.1.154/216）
+  - **已在场（0.1.36/37 硬化波，本波锁在场防漂移）**：transcript JSONL 篡改软块（2.1.205）/ git `--amend`（2.1.182）/ HARD-SOFT BLOCK 双块 = hard_deny 提示词层语义（2.1.136，解析层归 0.1.59）
+  - **N/A**：文件名不可信转义（2.1.234）= 无专属 reminder-template 文件名插值面，定因登记不 gate
+- **② 委派纪律（delta）**：Agent 工具成本感知委派 + 自含 brief + 同步面收尾（CC 2.1.271/240，后台句随 Q3 不写）；memdir howToSave durable-lessons（仅用户教/纠持久教训 + 同轮写 + pinned ≤4，CC 2.1.221）
+- **③ memory/compaction（delta）**：压缩摘要 verbatim 保留安全指令（敏感文件/禁用操作/凭据规则，CC 2.1.139）；invoked-skills reminder 请求/参数文本（含 "User Request" 段）= 历史非新指令（CC 2.1.239）
+- **零回归**：双 prompt 镜像（engine/TUI bash、web、askUser）字节恒等；无新命令 / 无新工具 / /help 51 基线恒等 + cmd 29 项零增减；解析器/工具逻辑零变更（纯提示词增量）
+- **判别单测**：`tests/unit/p0-wave-0155-prompt-presence.test.ts`（8 组，纯静态 grep，双镜像恒等 + 双分支断言）
+- **gate**：四件套（tsc0 / eslint0 / build 17798535B / CI 全量）+ P0a/A4F `--release-gate 0.1.55`（Q7 完整 gate + 跳 SRI 往返）
+
 ## v0.1.54
 
 AD-45 缺口#2 修波发布（基线 v0.1.53；生产 lane `r-20261011-prodlane-053` GATE-OPEN 打回；
