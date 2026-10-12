@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.58
+
+PAC V2-06 loop 鲁棒性（基线 v0.1.57；CC 2.1.199 mid-stream 部分保留 + CC 2.1.198 瞬断退避，
+工单 `docs/2026-10-13-p0-wave-0158-ticket.md`）。两件主循环鲁棒性增强（行为波，完整 gate + SRI 独立复算）：
+
+- **C4-1 · mid-stream 部分响应保留（CC 2.1.199）**：
+  - 流中途服务端错误（5xx/断流）时保留已收 partial 为 assistant 轮次内容——修前 partial 被静默丢弃（mid-stream ∅），模型可见上下文丢已完成段
+  - interrupted 语义标记 = `message.stop_reason='interrupted'` + 事件级 `interrupted: true`（加性字段，不读消费方零影响）；后续错误走既有错误面（error 事件 + retryable 判定，不裸抛吞内容）
+  - 零 partial 面（错误在首 token 前）= 既有行为恒等（整流重试 3 次 + 尾 error 事件）；partial 已作该轮内容 → 不整流重发（防双内容）
+  - 消费面：`streamCompactSummary` 拒收 interrupted partial（截断摘要不入上下文，落整段重试支，既有重试语义恒等）
+- **C4-2 · ECONNRESET/瞬断重试退避（CC 2.1.198）**：
+  - provider 重试循环（chat/chatStream）瞬断类错误（既有 `shouldRetryModelError` 分类面不变）重试间指数退避 `base×2^attempt` 封顶——修前零间隔紧贴重发（hammer 抖动网关）
+  - 缺省 500ms/8s（`MODEL_RETRY_BACKOFF_BASE_MS`/`CAP_MS`）；`modelRetryBackoffMs` 纯函数 + `ModelRetryBackoffOptions` 构造注入面（测试可注 fake sleep/短基封顶）
+  - 重试次数 3 与分类面不变；非瞬断类（403 等）零退避恒等 / 末次 attempt 后不退避
+- **零回归**：/help 51 恒等 + cmd 29 零增减；成功路径无 interrupted/error 事件；零 partial 面行为恒等
+- **判别单测**：`tests/unit/modelprovider-loop-robustness-0158.test.ts`（9 测：C4-1 partial 在场+interrupted 标记+单发终止 / 零 partial 恒等 / 成功路径恒等；C4-2 缺省 500/8000 单调+cap / 注入面时序 / cap 面 / 非瞬断零退避 / ECONNRESET SDK 形状走退避支），修前红→绿闭环
+- **gate**：四件套（tsc0 / build cli.js 17817366B / CI 全量 4054·0·313）+ P0a / A4F `--release-gate 0.1.58` / C4 mock 活探针（C4-1 直接 provider 活面 5/5 hard + C4-2 PTY 主循环退避 [507,1006]ms 活面确证）/ C1/C2/C3/R3 重跑 + SRI 独立复算（r-20261012-gate-058 GATE-PASS）
+
 ## v0.1.57
 
 PAC V2-05 MCP 硬化（基线 v0.1.56；CC 2.1.121 alwaysLoad + CC 2.1.205 连接失败 reminder，
