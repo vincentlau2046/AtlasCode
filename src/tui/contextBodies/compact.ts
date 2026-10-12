@@ -1241,7 +1241,15 @@ export async function streamCompactSummary({
         }
 
         if (event.type === 'assistant') {
-          response = event as any
+          const assistantEvent = event as any
+          // 0.1.58 C4-1（CC 2.1.199）：interrupted 标记的 assistant 事件 = 流中途
+          // 错误切掉的 partial（非完整摘要）→ 不接收，落下方重试支整段再生成
+          // （compact 只接收完整面——截断摘要入上下文劣于整段重试，既有重试语义
+          // 恒等）；partial 本身已由 provider 侧 yield（transcript/UI 消费面），
+          // 非静默丢弃。
+          if (!assistantEvent.interrupted) {
+            response = assistantEvent
+          }
         }
       }
 

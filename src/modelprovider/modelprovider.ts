@@ -187,6 +187,107 @@ export function gatewayUnreachableRemediationHint(error: unknown): string | null
   return 'IFF 不可达：已切人工确认 —— /doctor 排查'
 }
 
+/**
+ * 0.1.58 C4-2（CC 2.1.198）：provider 重试指数退避缺省基/封顶（Main 裁量：
+ * 500ms/8s 量级，避免会话挂起感——3 次重试最坏 500+1000=1.5s）。确定性无
+ * jitter（测试可复现；jitter 归后续波，同 turnRecoveryBackoffMs 先例）。
+ */
+export const MODEL_RETRY_BACKOFF_BASE_MS = 500
+export const MODEL_RETRY_BACKOFF_CAP_MS = 8_000
+
+/**
+ * 0.1.58 C4-2：provider 重试指数退避（base×2^attempt 封顶 cap；deterministic 无
+ * jitter）。attempt = 失败 attempt 序号（0 = 首发失败后首段退避 = base）。
+ * 消费面 = OpenAIProvider 重试循环（chat / chatStream 同面）——仅「仍可重试」
+ * （shouldRetryModelError 单一事实源：ECONNRESET/socket/5xx/429 瞬断族）在重试
+ * 间退避；非可重试（403 等）不重试 = 零退避（既有行为恒等）。
+ */
+export function modelRetryBackoffMs(
+  attempt: number,
+  baseMs: number = MODEL_RETRY_BACKOFF_BASE_MS,
+  capMs: number = MODEL_RETRY_BACKOFF_CAP_MS,
+): number {
+  const base = Math.max(0, baseMs)
+  const cap = Math.max(base, capMs)
+  if (attempt <= 0) return Math.min(base, cap)
+  return Math.min(base * 2 ** attempt, cap)
+}
+
+/** signal 感知退避 sleep：到期 resolve；signal 已/将 aborted → 立即 resolve（不睡满）；ms<=0 = 立即。 */
+function sleepSignalAware(ms: number, signal?: AbortSignal): Promise<void> {
+  if (ms <= 0) return Promise.resolve()
+  return new Promise<void>(resolve => {
+    if (signal?.aborted) {
+      resolve()
+      return
+    }
+    let settled = false
+    const timer = setTimeout(() => {
+      settled = true
+      if (signal) signal.removeEventListener('abort', onAbort)
+      resolve()
+    }, ms)
+    function onAbort() {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolve()
+    }
+    if (signal) signal.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
+/** 0.1.58 C4-2：退避注入面（测试可注录制 fake sleep / 短基封顶；缺省 = 真 signal 感知 sleep）。 */
+export interface ModelRetryBackoffOptions {
+  baseMs?: number
+  capMs?: number
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>
+}
+
+/** 0.1.58 C4-1：streamOneAttempt 终态结果（yield* 返回值捕获面）。 */
+interface StreamAttemptOutcome {
+  /** partial 已作 assistant 轮次内容 yield（interrupted 标记）→ 调用方不再整流重试（防双内容）。 */
+  partialRetained: boolean
+}
+
+/**
+ * 流终态错误事件（chatStream 尾 error 支 + 0.1.58 C4-1 partial 保留支 单一事实源）：
+ * 超时类族 = TIMEOUT 码（C3 门控 isClientRequestTimeout），其余 = API_ERROR；
+ * retryable = shouldRetryModelError 单一事实源（消费方据此决定续接/重试支）。
+ */
+function buildStreamErrorEvent(err: unknown, signal?: AbortSignal): StreamEvent {
+  const message = err instanceof Error ? err.message || err.name : String(err)
+  const code: LLMErrorCode = isClientRequestTimeout(err) ? 'TIMEOUT' : 'API_ERROR'
+  return { type: 'error', code, message, retryable: shouldRetryModelError(err, signal) }
+}
+
+/** 流式 assistant 轮次内容块组装（成功终态 + 0.1.58 C4-1 partial 保留支 共用，防漂移）。 */
+function buildStreamContentBlocks(
+  reasoningText: string,
+  fullText: string,
+  toolCalls: Map<number, { id: string; name: string; args: string }>,
+): any[] {
+  const blocks: any[] = []
+  if (reasoningText) blocks.push({ type: 'thinking', thinking: reasoningText, signature: 'first-party' })
+  if (fullText) blocks.push({ type: 'text', text: fullText })
+  blocks.push(
+    ...[...toolCalls.values()]
+      .filter((t) => t.name)
+      .map((t) => {
+        let input: any = {}
+        if (t.args) {
+          try {
+            input = JSON.parse(t.args)
+          } catch {
+            input = { _raw_arguments: t.args }
+          }
+        }
+        return { type: 'tool_use', id: t.id || `toolu_${randomUUID()}`, name: t.name, input }
+      }),
+  )
+  return blocks
+}
+
 export interface ModelProvider {
 
   /** #260：当前生效请求超时读面（实现 = OpenAIProvider.timeoutMs）。 */
@@ -282,15 +383,24 @@ export class OpenAIProvider implements ModelProvider {
    * 分裂：TUI 提示说 8s 实际 600s；headless 未注源缝 llmTimeoutMs 死键）。
    */
   private readonly timeoutResolver?: () => number
+  /** 0.1.58 C4-2：重试指数退避（瞬断类错误族；base/cap + sleep 注入面，见 ModelRetryBackoffOptions）。 */
+  private readonly retryBackoffBaseMs: number
+  private readonly retryBackoffCapMs: number
+  private readonly retryBackoffSleep: (ms: number, signal?: AbortSignal) => Promise<void>
 
   constructor(
     maxRetriesPerModel: number = 3,
     timeoutMs: number = LLM_TIMEOUT_DEFAULT_MS,
     timeoutResolver?: () => number,
+    retryBackoff?: ModelRetryBackoffOptions,
   ) {
     this.maxRetriesPerModel = maxRetriesPerModel
     this.timeoutMs = timeoutMs
     this.timeoutResolver = timeoutResolver
+    this.retryBackoffBaseMs = retryBackoff?.baseMs ?? MODEL_RETRY_BACKOFF_BASE_MS
+    this.retryBackoffCapMs = retryBackoff?.capMs ?? MODEL_RETRY_BACKOFF_CAP_MS
+    this.retryBackoffSleep =
+      retryBackoff?.sleep ?? ((ms, signal) => sleepSignalAware(ms, signal))
   }
 
   /**
@@ -421,6 +531,16 @@ export class OpenAIProvider implements ModelProvider {
           lastErr = err
           // #260：生成超时 fail-fast（shouldRetryModelError 内判 aborted）
           if (!shouldRetryModelError(err, args.signal)) break
+          // 0.1.58 C4-2（CC 2.1.198）：瞬断类错误（ECONNRESET/socket hang up/5xx/429 族，
+          // 既有 shouldRetryModelError 分类面不变）重试间指数退避（base×2^attempt 封顶）——
+          // 修前 = 重试间零间隔紧贴重发（hammer 抖动网关）；非瞬断类已在上方 break
+          // （零退避，既有行为恒等）。末次 attempt 后无后续 attempt = 不退避。
+          if (attempt < this.maxRetriesPerModel - 1) {
+            await this.retryBackoffSleep(
+              modelRetryBackoffMs(attempt, this.retryBackoffBaseMs, this.retryBackoffCapMs),
+              args.signal,
+            )
+          }
         }
       }
     }
@@ -451,6 +571,9 @@ export class OpenAIProvider implements ModelProvider {
     const attemptRefs: string[] = refs
     let lastErr: any = null
     let succeeded = false
+    // 0.1.58 C4-1：mid-stream partial 已作 assistant 轮次内容 yield（interrupted 标记）→
+    // 终止不重发（整流重试将产第二条 assistant 消息 = 双内容；partial 即该轮内容）。
+    let partialRetained = false
 
     for (const ref of attemptRefs) {
       const entry = resolveModel(ref)
@@ -475,25 +598,34 @@ export class OpenAIProvider implements ModelProvider {
       for (let attempt = 0; attempt < this.maxRetriesPerModel; attempt++) {
         if (args.signal?.aborted) return
         try {
-          yield* this.streamOneAttempt(client, params, entry, args.signal, attempt, this.maxRetriesPerModel)
+          const outcome = yield* this.streamOneAttempt(client, params, entry, args.signal, attempt, this.maxRetriesPerModel)
+          if (outcome.partialRetained) {
+            partialRetained = true
+            break
+          }
           succeeded = true
           break
         } catch (err: any) {
           lastErr = err
           // #260：生成超时 fail-fast（shouldRetryModelError 内判 aborted）
           if (!shouldRetryModelError(err, args.signal)) break
+          // 0.1.58 C4-2（CC 2.1.198）：瞬断类错误重试间指数退避（同 chat() 面，
+          // 流式断连族 = ECONNRESET 主诉面）；非瞬断零退避 / 末次不退避。
+          if (attempt < this.maxRetriesPerModel - 1) {
+            await this.retryBackoffSleep(
+              modelRetryBackoffMs(attempt, this.retryBackoffBaseMs, this.retryBackoffCapMs),
+              args.signal,
+            )
+          }
         }
       }
-      if (succeeded || args.signal?.aborted) return
+      if (succeeded || partialRetained || args.signal?.aborted) return
     }
 
     if (lastErr) {
-      const message = lastErr instanceof Error ? lastErr.message || lastErr.name : String(lastErr)
-      // C3：超时终态语义对齐——旧 `name === 'TimeoutError'` 字面量对本仓
-      // 自有类（实例 name='APIError'）与 SDK 实例（name='Error'）俱不中
-      // （死判别）→ 门控 isClientRequestTimeout（超时类族 = TIMEOUT 码）。
-      const code: LLMErrorCode = isClientRequestTimeout(lastErr) ? 'TIMEOUT' : 'API_ERROR'
-      yield { type: 'error', code, message, retryable: shouldRetryModelError(lastErr, args.signal) }
+      // 尾 error 支（零 partial 面 = 既有行为恒等；partial 保留支的 error 事件在
+      // streamOneAttempt 内已 yield，partialRetained 时上方已 return 不进此支）。
+      yield buildStreamErrorEvent(lastErr, args.signal)
       return
     }
     throw new Error(`No models configured for role '${args.role}'.`)
@@ -506,7 +638,7 @@ export class OpenAIProvider implements ModelProvider {
     signal?: AbortSignal,
     attempt = 0,
     totalRetries = 3,
-  ): AsyncGenerator<StreamEvent | Record<string, unknown>, void> {
+  ): AsyncGenerator<StreamEvent | Record<string, unknown>, StreamAttemptOutcome> {
     const stopWait = startLlmWaitHeartbeat(entry.modelId, attempt, totalRetries)
     let stream: any
     try {
@@ -524,57 +656,109 @@ export class OpenAIProvider implements ModelProvider {
     const toolCalls = new Map<number, { id: string; name: string; args: string }>()
     let finishReason: string | null = null
     let usage: any = null
+    let streamError: unknown = null
 
-    for await (const chunk of stream) {
-      const choice = chunk.choices?.[0]
-      const delta = choice?.delta
-      if (delta?.content) {
-        fullText += delta.content
-        yield { type: 'text_delta', text: delta.content }
-      }
-      if (delta?.reasoning_content) reasoningText += delta.reasoning_content
+    try {
+      for await (const chunk of stream) {
+        const choice = chunk.choices?.[0]
+        const delta = choice?.delta
+        if (delta?.content) {
+          fullText += delta.content
+          yield { type: 'text_delta', text: delta.content }
+        }
+        if (delta?.reasoning_content) reasoningText += delta.reasoning_content
 
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls as any[]) {
-          const idx = tc.index ?? 0
-          const cur = toolCalls.get(idx) ?? { id: '', name: '', args: '' }
-          if (tc.id) cur.id = tc.id
-          if (tc.function?.name) {
-            cur.name = tc.function.name
-            if (currentToolCall) {
-              let input: Record<string, unknown> = {}
-              if (currentToolCall.args) {
-                try { input = JSON.parse(currentToolCall.args) } catch { input = { _raw_arguments: currentToolCall.args } }
+        if (delta?.tool_calls) {
+          for (const tc of delta.tool_calls as any[]) {
+            const idx = tc.index ?? 0
+            const cur = toolCalls.get(idx) ?? { id: '', name: '', args: '' }
+            if (tc.id) cur.id = tc.id
+            if (tc.function?.name) {
+              cur.name = tc.function.name
+              if (currentToolCall) {
+                let input: Record<string, unknown> = {}
+                if (currentToolCall.args) {
+                  try { input = JSON.parse(currentToolCall.args) } catch { input = { _raw_arguments: currentToolCall.args } }
+                }
+                yield { type: 'tool_use_end', id: currentToolCall.id, name: currentToolCall.name, input }
               }
-              yield { type: 'tool_use_end', id: currentToolCall.id, name: currentToolCall.name, input }
+              currentToolCall = { id: cur.id, name: cur.name, args: cur.args }
+              yield { type: 'tool_use_start', id: cur.id, name: cur.name }
             }
-            currentToolCall = { id: cur.id, name: cur.name, args: cur.args }
-            yield { type: 'tool_use_start', id: cur.id, name: cur.name }
-          }
-          if (tc.function?.arguments) {
-            cur.args += tc.function.arguments
-            if (currentToolCall && cur.name) {
-              currentToolCall.args = cur.args
-              yield { type: 'tool_use_delta', id: cur.id, inputJsonDelta: tc.function.arguments }
+            if (tc.function?.arguments) {
+              cur.args += tc.function.arguments
+              if (currentToolCall && cur.name) {
+                currentToolCall.args = cur.args
+                yield { type: 'tool_use_delta', id: cur.id, inputJsonDelta: tc.function.arguments }
+              }
             }
+            toolCalls.set(idx, cur)
           }
-          toolCalls.set(idx, cur)
         }
-      }
 
-      if (choice?.finish_reason) {
-        if (currentToolCall) {
-          let input: Record<string, unknown> = {}
-          if (currentToolCall.args) {
-            try { input = JSON.parse(currentToolCall.args) } catch { input = { _raw_arguments: currentToolCall.args } }
+        if (choice?.finish_reason) {
+          if (currentToolCall) {
+            let input: Record<string, unknown> = {}
+            if (currentToolCall.args) {
+              try { input = JSON.parse(currentToolCall.args) } catch { input = { _raw_arguments: currentToolCall.args } }
+            }
+            yield { type: 'tool_use_end', id: currentToolCall.id, name: currentToolCall.name, input }
+            currentToolCall = null
           }
-          yield { type: 'tool_use_end', id: currentToolCall.id, name: currentToolCall.name, input }
-          currentToolCall = null
+          finishReason = choice.finish_reason
         }
-        finishReason = choice.finish_reason
+        if (chunk.usage) usage = mapOpenAIUsage(chunk.usage as any)
+        if (signal?.aborted) break
       }
-      if (chunk.usage) usage = mapOpenAIUsage(chunk.usage as any)
-      if (signal?.aborted) break
+    } catch (err) {
+      streamError = err
+    }
+
+    if (streamError !== null) {
+      // 0.1.58 C4-1（CC 2.1.199）：流中途错误（5xx / 断流）→ 已产出内容时保留
+      // partial 为 assistant 轮次内容（interrupted 语义标记——模型可见上下文不丢
+      // 已完成段，非整体丢弃 / 裸抛吞内容）；错误处理走既有错误面（error 事件，
+      // 消费方经 retryable 判续接支）。零 partial 面（错误在首 token 前 / 内容块
+      // 为空）= 既有行为恒等（throw → 调用方重试面，不进 partial 保留支）。
+      const partialBlocks = buildStreamContentBlocks(reasoningText, fullText, toolCalls)
+      if (partialBlocks.length === 0) throw streamError
+      yield {
+        type: 'message_stop',
+        stopReason: 'interrupted',
+        usage: usage ? {
+          input_tokens: usage.input_tokens ?? 0,
+          output_tokens: usage.output_tokens ?? 0,
+          cache_creation_input_tokens: usage.cache_creation_input_tokens ?? 0,
+          cache_read_input_tokens: usage.cache_read_input_tokens ?? 0,
+        } : undefined,
+      }
+      const emptyUsage = mapOpenAIUsage(null)
+      const partialMsg = {
+        uuid: randomUUID(),
+        timestamp: new Date().toISOString(),
+        message: {
+          id: randomUUID(),
+          container: null,
+          model: entry.modelId,
+          role: 'assistant',
+          // interrupted 语义标记（工单 §0 C4-1，Main 裁定标记面）：stop_reason =
+          // 'interrupted' + 事件级 interrupted: true（加性字段，不读的消费方零影响）
+          stop_reason: 'interrupted',
+          stop_sequence: '',
+          type: 'message',
+          usage: usage || emptyUsage,
+          content: partialBlocks,
+        },
+      }
+      yield {
+        type: 'assistant',
+        uuid: partialMsg.uuid,
+        timestamp: partialMsg.timestamp,
+        message: partialMsg.message,
+        interrupted: true,
+      }
+      yield buildStreamErrorEvent(streamError, signal)
+      return { partialRetained: true }
     }
 
     yield {
@@ -588,29 +772,13 @@ export class OpenAIProvider implements ModelProvider {
       } : undefined,
     }
 
-    const contentBlocks: any[] = []
-    if (reasoningText) contentBlocks.push({ type: 'thinking', thinking: reasoningText, signature: 'first-party' })
-    if (fullText) contentBlocks.push({ type: 'text', text: fullText })
-    const toolUseBlocks = [...toolCalls.values()]
-      .filter((t) => t.name)
-      .map((t) => {
-        let input: any = {}
-        if (t.args) {
-          try {
-            input = JSON.parse(t.args)
-          } catch {
-            input = { _raw_arguments: t.args }
-          }
-        }
-        return { type: 'tool_use', id: t.id || `toolu_${randomUUID()}`, name: t.name, input }
-      })
-    contentBlocks.push(...toolUseBlocks)
+    const contentBlocks = buildStreamContentBlocks(reasoningText, fullText, toolCalls)
     if (contentBlocks.length === 0) {
       contentBlocks.push({ type: 'text', text: PROVIDER_EMPTY_CONTENT_PLACEHOLDER })
     }
 
     const stopReason =
-      toolUseBlocks.length > 0
+      contentBlocks.some((b) => b.type === 'tool_use')
         ? 'tool_use'
         : finishReason === 'length'
           ? 'max_tokens'
@@ -633,6 +801,7 @@ export class OpenAIProvider implements ModelProvider {
       },
     }
     yield { type: 'assistant', uuid: finalMsg.uuid, timestamp: finalMsg.timestamp, message: finalMsg.message }
+    return { partialRetained: false }
   }
 
   async healthCheck(role: ModelRole): Promise<{ ok: boolean; model: string; latencyMs: number }> {

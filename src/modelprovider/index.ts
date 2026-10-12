@@ -12,7 +12,15 @@ import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { parseBoundedIntEnv } from '../shared'
 export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS } from './constants'
 
-export { OpenAIProvider, type ModelProvider, type ProviderStreamEvent } from './modelprovider'
+export {
+  OpenAIProvider,
+  modelRetryBackoffMs,
+  MODEL_RETRY_BACKOFF_BASE_MS,
+  MODEL_RETRY_BACKOFF_CAP_MS,
+  type ModelProvider,
+  type ProviderStreamEvent,
+  type ModelRetryBackoffOptions,
+} from './modelprovider'
 
 let _provider: ModelProvider | undefined
 
