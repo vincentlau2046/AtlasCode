@@ -4,6 +4,29 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.59
+
+PAC V2-07/08/09 权限/配置语法波（基线 v0.1.58；CC 2.1.178 Tool(param:value) + CC 2.1.259
+--permission-prompts none + CC 2.1.136 hard_deny 解析层 + CC 2.1.166 回合级 fallback 重试，
+工单 `docs/2026-10-13-p0-wave-0159-ticket.md`）。四件权限/配置语法 + 回合级鲁棒性（行为波，
+完整 gate + SRI 独立复算）：
+
+- **C9-1 · `Tool(param:value)` 参数化规则命中面（CC 2.1.178）**：
+  - 权限规则可带参：`Agent(model:premium)` = 仅当工具入参 `input.model==='premium'` 时命中（非全工具命中）；泛化 `param:value` 层——param 须是工具 `inputSchema.properties` 声明入参字段才按入参比对（`input[param]===value`），多参 = 全命中 AND，非声明字段 / 非 `param:value` 形 = 回落既有 content 面（零回归）
+  - 规范示例 = `Agent(model:premium)`（`AgentTool.input.model` 是 `ModelRole` 枚举 `['small','premium','fast']`，非 CC 原文 `model:opus` 模型 id，用户 2026-10-12 裁定）
+  - 落点：`ruleMatching.getParametricRuleForTool`（+`filesystem.PermissionTool.inputSchema` 窄视图）；`hasPermissionsToUseTool` 在整工具 deny/ask 之后、工具本体 checkPermissions 之前接入（1a-p deny / 1b-p ask，ask 经 `applyDontAskMode` 折叠）
+- **C9-3 · `--permission-prompts none`（CC 2.1.259）**：
+  - 新 CLI flag（`--permission-prompts <mode>` choices=['none']，parse.ts 注册 + main.tsx commander 面 + TUI fold）；`'none'` 折入既有 **dontAsk mode**（复用 `applyDontAskMode` ask→deny choke point，零新决策代码）——无人值守/headless 需弹框动作自动 deny（mode 仍裁定，非 bypassPermissions）
+  - 缺省 = 零变更；显式 `--permission-mode` 优先；勿混 `/less-permission-prompts` skill（前缀降噪另一面）
+- **C1-1 · `hard_deny` 第 4 类解析层（CC 2.1.136）**：
+  - `AutoModeRules` 由 3 类（allow/soft_deny/environment）扩 4 类（+hard_deny，用户无条件 BLOCK，User Intent 不清除）；解析层 = 模板新 tag `<user_hard_deny_rules_to_replace>` + 5 处形状（types/yoloClassifier/engine settings/tui settings/autoMode 双 handler）
+  - 新增 severity 最严聚合纯函数 `aggregateAutoModeSeverity`（severity 序 hard_deny>soft_deny>deny>allow，最严命中即定；**hard_deny 命中 = FINAL 无清除支**）；0.1.55 提示词层 HARD/SOFT BLOCK 语义已落，本波 = 解析层（消费点 = 分类器 provider 波前向接缝，本波注册不接线）
+- **回合级 fallback 重试（CC 2.1.166）**：
+  - 新有序槽 `AgentLoopDeps.fallbackModels?: string[]`（≤3 ref）+ 变参 flag `--fallback-models <m...>`（parse→print→loopDeps→loop 5 槽接线）
+  - `queryAgentLoop` 轮内 catch 在 reactive-compact 支后接入：主模型可重试错误（`shouldRetryModelError` 单一事实源，5xx/429）→ 钉下一 ref 为本回合 `sessionModel` 重跑本回合（不占新轮次，每 ref 一次性 `nextFallbackRef` 纯面，落 `turnRecovery`）；区别于 in-request 单串 `fallbackModel`（池末位）；未配置面恒等（catch 原样穿透，零回归）
+- **零回归**：/help 51 恒等 + cmd 29 零增减；无参规则面（exact/`:*`/wildcard）恒等；flag 缺省零变更；无 fallbackModels 面恒等；soft_deny/常规 deny 聚合面不被 hard_deny 破坏（rank 只增不删）
+- **判别单测**：`permission-rule-parametric-0159`（参数命中矩阵）+ `permission-prompts-none-0159`（flag 开/关 + 显式优先 5 例）+ `auto-mode-hard-deny-0159`（rank 聚合 6 例 + 解析层 2 例）+ `turn-fallback-0159`（ref1 全败→ref2 命中 / 全败→throw / 未配置面恒等 3 例），修前红→绿闭环
+
 ## v0.1.58
 
 PAC V2-06 loop 鲁棒性（基线 v0.1.57；CC 2.1.199 mid-stream 部分保留 + CC 2.1.198 瞬断退避，
