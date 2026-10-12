@@ -169,6 +169,8 @@ This summary should be thorough in capturing technical details, code patterns, a
 
 ${DETAILED_ANALYSIS_INSTRUCTION_BASE}
 
+IMPORTANT — preserve security-relevant instructions verbatim: if the conversation established any security-relevant instructions or constraints (rules about sensitive files, forbidden or blocked operations, or how to handle credentials, secrets, or other sensitive data), call them out and reproduce them verbatim in the summary so they remain in effect after compaction. Do not paraphrase, weaken, or omit them.
+
 Your summary should include the following sections:
 
 1. Primary Request and Intent: Capture all of the user's explicit requests and intents in detail

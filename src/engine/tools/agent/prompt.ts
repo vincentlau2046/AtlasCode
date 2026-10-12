@@ -49,7 +49,20 @@ export function getPrompt(agents: readonly AgentDefinition[]): string {
     'Launch a subagent to run a self-contained task in an isolated context. ' +
     'Provide a short description (3-5 words) and a fully self-contained prompt ' +
     '(the subagent cannot see this conversation). ' +
+    'Be cost-aware about delegating: prefer to do the work inline in this ' +
+    'conversation for a small task with a known, bounded target (a single-file ' +
+    'edit, a quick lookup, a change you can finish without broad exploration) — ' +
+    'spawning a subagent has overhead. Delegate when the task is genuinely ' +
+    'parallelizable or would otherwise flood this context with material you do ' +
+    'not need to keep (a broad multi-file search, an isolated multi-step ' +
+    'implementation, or independent work that can run alongside your own). Keep ' +
+    'each delegated brief narrow and evidence-focused: name the exact goal, the ' +
+    'files or area, and the expected deliverable rather than a broad ' +
+    '"figure this out." Because the subagent cannot see this conversation, its ' +
+    'prompt must be fully self-contained — state every constraint, file, and ' +
+    'reporting requirement it needs. ' +
     `Available agent types and the tools they have access to:\n${list}\n` +
-    `The ${AGENT_TOOL_NAME} tool returns the subagent's final result when it completes.`
+    `The ${AGENT_TOOL_NAME} tool runs the subagent and returns its final result ` +
+    'when it completes; act on that result once it is returned.'
   )
 }

@@ -181,6 +181,7 @@ export function buildMemoryLines(
         '- Organize memory semantically by topic, not chronologically',
         '- Update or remove memories that turn out to be wrong or outdated',
         '- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.',
+        '- Durable lessons: save a memory only when the user has taught or corrected you on something durable and reusable (a preference, convention, or rule they stated) — not for facts you merely discovered about the code or the environment, which are re-derivable. Write it in the same turn you learn it; do not defer or hold it for later. Keep always-loaded (pinned/index) memories to at most four, pruning a lower-value entry when adding a new one.',
       ]
     : [
         '## How to save memories',
@@ -198,6 +199,7 @@ export function buildMemoryLines(
         '- Organize memory semantically by topic, not chronologically',
         '- Update or remove memories that turn out to be wrong or outdated',
         '- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.',
+        '- Durable lessons: save a memory only when the user has taught or corrected you on something durable and reusable (a preference, convention, or rule they stated) — not for facts you merely discovered about the code or the environment, which are re-derivable. Write it in the same turn you learn it; do not defer or hold it for later. Keep always-loaded (pinned/index) memories to at most four, pruning a lower-value entry when adding a new one.',
       ]
 
   const lines: string[] = [

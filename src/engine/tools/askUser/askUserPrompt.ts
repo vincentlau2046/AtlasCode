@@ -57,9 +57,11 @@ export const ASK_USER_QUESTION_TOOL_PROMPT = `Use this tool when you need to ask
 4. Offer choices to the user about what direction to take.
 
 Usage notes:
+- Ask only when you are blocked on a decision you cannot resolve from the request, the code, or a sensible default — do not ask to gather information you could determine yourself, and do not ask questions whose answer does not change what you would do.
 - Users will always be able to select "Other" to provide custom text input
 - Use multiSelect: true to allow multiple answers to be selected for a question
 - If you recommend a specific option, make that the first option in the list and add "(Recommended)" at the end of the label
+- If a single-option question is rejected, do not retry it with a filler or placeholder choice — proceed down the one viable path. Re-ask only as a genuinely independent multi-option question whose options each represent a real, distinct choice.
 
 Plan mode note: In plan mode, use this tool to clarify requirements or choose between approaches BEFORE finalizing your plan. Do NOT use this tool to ask "Is my plan ready?" or "Should I proceed?" - use ${EXIT_PLAN_MODE_V2_TOOL_NAME} for plan approval. IMPORTANT: Do not reference "the plan" in your questions (e.g., "Do you have feedback about the plan?", "Does the plan look good?") because the user cannot see the plan in the UI until you call ${EXIT_PLAN_MODE_V2_TOOL_NAME}. If you need plan approval, use ${EXIT_PLAN_MODE_V2_TOOL_NAME} instead.
 `
