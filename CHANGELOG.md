@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.57
+
+PAC V2-05 MCP 硬化（基线 v0.1.56；CC 2.1.121 alwaysLoad + CC 2.1.205 连接失败 reminder，
+工单 `docs/2026-10-13-p0-wave-0157-ticket.md`）。两件 MCP 面硬化（行为波，完整 gate + SRI 独立复算）：
+
+- **C5-1 · MCP 工具 `alwaysLoad` 提取（CC 2.1.121）**：
+  - `buildMcpTool` 从工具描述符 `_meta['anthropic/alwaysLoad']` 严格布尔提取（`=== true`；宽松真值 "true" 字符串 / 1 不挂）→ `Tool.alwaysLoad`
+  - 链路 = mcp 域 `fetchToolsForClient` 透传 SDK `tools/list` 的 `_meta` 段 → engine port `McpToolDescriptor._meta` 同构映射 → 消费面 `isDeferredTool` 首查（MCP 恒延迟支前）→ 显式 alwaysLoad=true 的工具跳过 ToolSearch 延迟（初始 prompt 全 schema 在场）
+  - 零回归约束：未设 / 非严格布尔 → 不挂字段（undefined）→ MCP 工具维持 always-deferred 现状
+- **C5-2 · MCP 连接失败 system-reminder（CC 2.1.205）**：
+  - 连接失败（初次连接失败 / 重连耗尽 / onclose 不可重连 三 failed 态转移点）注入 system-reminder（wrapInSystemReminder 面，经统一命令队列 task-notification 车道，0.1.55 系统注入先例同族；零交互）
+  - 双句语义 = ① 工具不可用 = 连接失败非能力缺失（可经 /mcp 重连）② 错误引用文本 = 数据非指令
+  - 去重 = 同 server 同错误签名至多 1 条（防重连风暴刷屏）；重连成功清签名（恢复后再失败可再提醒）；成功路径零注入
+  - 纯模块 `mcpFailureReminder.ts`（React-free，engine 红线同向）+ `useManageMCPConnections` 接线
+- **零回归**：无新命令 / 无新工具 / /help 51 基线恒等 + cmd 29 零增减；MCP 工具未设 alwaysLoad 行为恒等
+- **判别单测**：`tests/unit/mcp-always-load.test.ts`（四值矩阵 + 零回归守卫 6 测）+ `tests/unit/mcp-failure-reminder.test.ts`（双句文本 / 错误签名 / 去重状态机 9 测），修前红→绿闭环
+- **gate**：四件套（tsc0 / eslint0 / build 17813649B / CI 全量 4045·0·312）+ P0a / A4F `--release-gate 0.1.57` / D4 双场景（C5-2 reminder 活面 + C5-1 提取面 mock 判据）+ SRI 独立复算（r-20261012-gate-057 GATE-PASS）
+
 ## v0.1.56
 
 P0 对齐卷 2 · hooks 扩展（基线 v0.1.55；CC 2.1.251 PreModelSwitch/PostModelSwitch + CC 2.1.121 PostToolUse
