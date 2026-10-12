@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.60
+
+PAC V2-11 C10-2 TUI 小波（基线 v0.1.59；CC 2.1.269 /output-style + CC 2.1.169 /cd +
+CC 2.1.152 /reload-skills，工单 `docs/2026-10-13-p0-wave-0160-ticket.md`）。三件 TUI slash
+命令（行为波，完整 gate + SRI 独立复算）：
+
+- **TUI-1 · `/output-style [name]`（CC 2.1.269）**：
+  - output style 配置面在场、命令 ∅（0.1.40 W1 曾裁除，本波重加）。无参 = 状态面（报当前 style + 可用列表，不改配置）；带 name = 写 userSettings.outputStyle + 失效 output style/系统提示 section 缓存（in-session 切换生效，不重启）；非法 name（不在 getAllOutputStyles 可用集）= 可操作报错面，不写配置
+  - 零回归：既有 outputStyle 配置语义不变（本命令仅新增消费入口，切换后生效路径复用既有 getOutputStyleConfig 消费面）
+- **TUI-2 · `/cd`（CC 2.1.169）**：
+  - 会话内 cwd 移动，**不破 prompt 缓存**：经 Shell.setCwd(path, pwd()) 解析后 setCwdState（**状态面移动，不做 process.chdir**）→ process.cwd() 恒定，SkillTool getCommands(process.cwd()) memo 键 + 系统提示缓存键前缀稳定
+  - 无参 = 报当前 session cwd + 用法；非法/不存在路径 = Shell.setCwd 抛 "Path ... does not exist" 捕获后回报（不移动状态）
+- **TUI-3 · `/reload-skills`（CC 2.1.152）**：
+  - 会话内 skill registry 重扫刷新（skills 目录变更/插件装卸不重启生效）。新导出 skillChangeDetector.reloadSkillsNow()（clearSkillCaches + clearCommandsCache + resetSentSkillNames + skillsChanged.emit，与 watcher scheduleReload 尾部同序）→ REPL useSkillsChange 订阅该信号重取 getCommands() 刷新 typeahead/help 列表
+  - 仅 skill 面（交互安装自动 refresh 不扩 scope）
+- **零回归**：/help 权威集基线 51 → 54（3 新标签）+ cmd 探针集 29 → 32（3 新命令断言）；既有命令行为零变更；outputStyle/cwd/skills 既有配置与消费面零行为变更（新命令仅消费入口）
+- **判别单测**：`tui-small-wave-0160`（三命令无参/带参/非法面 + /cd 破缓存判别 [cwdState 变 + process.cwd() 恒定] + /reload-skills 触发 skillsChanged.emit，ATLAS_CONFIG_DIR 隔离写配置面），修前红 0/8 → 修后绿 8/8 闭环
+
 ## v0.1.59
 
 PAC V2-07/08/09 权限/配置语法波（基线 v0.1.58；CC 2.1.178 Tool(param:value) + CC 2.1.259
