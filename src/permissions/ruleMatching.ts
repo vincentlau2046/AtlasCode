@@ -63,8 +63,14 @@ import {
 } from './permissionRuleParser'
 import { getToolNameForPermissionCheck, mcpInfoFromString } from './mcpRuleNames'
 
-/** 规则匹配工具窄视图（shared Tool 的 name + mcpInfo + 鸭子 checkPermissions 子集）。 */
-export type RuleTool = Pick<PermissionTool, 'name' | 'mcpInfo' | 'checkPermissions'>
+/**
+ * 规则匹配工具窄视图（shared Tool 的 name + mcpInfo + 鸭子 checkPermissions
+ * + 0.1.59 C9-1 参数化命面的 inputSchema.properties 声明入参字段集 子集）。
+ */
+export type RuleTool = Pick<
+  PermissionTool,
+  'name' | 'mcpInfo' | 'checkPermissions' | 'inputSchema'
+>
 
 /**
  * 全部权限规则源（旧仓 [...SETTING_SOURCES, 'cliArg', 'command', 'session']）。
@@ -302,6 +308,100 @@ export function getRuleByContentsForToolName(
     }
   }
   return ruleByContents
+}
+
+// ════════════════════════════════════════════════════════════════
+// 0.1.59 C9-1 参数化规则命中面（CC 2.1.178 Tool(param:value)）
+//
+// 规则串 `Agent(model:premium)` 经 permissionRuleValueFromString 解析为
+// { toolName:'Agent', ruleContent:'model:premium' }。本面 = 参数化命中：
+// toolName 命中后把 ruleContent 解析为 param:value（可多参，AND 全命中），
+// 仅当 param 是该工具 inputSchema 声明的入参字段才按入参比对
+// （input[param] === value），否则回落既有 content 规则面（零回归）。
+// 示例（用户 2026-10-12 裁定 = 泛化 param:value 层，值域 = ModelRole 枚举）：
+//   Agent(model:premium)                  -> input.model==='premium' 才命中
+//   Agent(model:fast, subagent_type:Explore) -> 两参全命中才生效
+//   Bash(npm install)                     -> 'npm' 非声明字段 => 走 content 面
+//   Bash(command:npm install)             -> 'command' 是入参字段 => 入参比对
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * 把参数化规则内容解析为 param→value 表。
+ * - 多参 = 逗号分隔；每参按首个 `:` 切 param / value（value 可含 `:`）。
+ * - 非 param:value 形（任一分段无 `:` 或 param 为空）= null（回落 content 面）。
+ */
+export function parseParametricContent(
+  ruleContent: string,
+): Record<string, string> | null {
+  const params: Record<string, string> = {}
+  for (const segment of ruleContent.split(',')) {
+    const idx = segment.indexOf(':')
+    if (idx <= 0) return null // 无 ':' 或 param 空 = 非参数化形
+    const param = segment.slice(0, idx).trim()
+    if (!param) return null
+    params[param] = segment.slice(idx + 1).trim()
+  }
+  return Object.keys(params).length > 0 ? params : null
+}
+
+/** 工具声明的入参字段集（inputSchema.properties 键；无 schema = 空集）。 */
+function declaredInputFields(tool: RuleTool): Set<string> {
+  const props = tool.inputSchema?.properties
+  if (!props) return new Set()
+  return new Set(Object.keys(props))
+}
+
+/**
+ * 单条参数化规则是否命中给定入参：toolName 命中 + 所有 param 是声明入参字段 +
+ * 入参全命中（AND）。ruleContent 缺省（tool-wide）/ 非 param:value 形 /
+ * 任一 param 非声明字段 = false（回落既有 content 面，零回归）。
+ */
+export function ruleMatchesParametric(
+  rule: PermissionRule,
+  tool: RuleTool,
+  input: Record<string, unknown>,
+): boolean {
+  const ruleContent = rule.ruleValue.ruleContent
+  if (ruleContent === undefined) return false
+  const params = parseParametricContent(ruleContent)
+  if (params === null) return false
+  const fields = declaredInputFields(tool)
+  for (const [param, value] of Object.entries(params)) {
+    if (!fields.has(param)) return false // 非声明字段 => 非参数化
+    if (input[param] !== value) return false // 入参未命中
+  }
+  return true
+}
+
+/**
+ * 取某工具某行为（deny/ask/allow）下命中给定入参的参数化规则（首命中）。
+ * 未命中 / 无参数化规则 = null。toolName 不匹配 + 非参数化形天然排除。
+ */
+export function getParametricRuleForTool(
+  context: ToolPermissionContext,
+  tool: RuleTool,
+  input: Record<string, unknown>,
+  behavior: PermissionBehavior,
+): PermissionRule | null {
+  let rules: PermissionRule[]
+  switch (behavior) {
+    case 'allow':
+      rules = getAllowRules(context)
+      break
+    case 'deny':
+      rules = getDenyRules(context)
+      break
+    case 'ask':
+      rules = getAskRules(context)
+      break
+  }
+  const nameForRuleMatch = getToolNameForPermissionCheck(tool)
+  for (const rule of rules) {
+    if (rule.ruleValue.toolName !== nameForRuleMatch) continue
+    if (rule.ruleBehavior !== behavior) continue
+    if (ruleMatchesParametric(rule, tool, input)) return rule
+  }
+  return null
 }
 
 /**

@@ -69,6 +69,7 @@ import {
   createPermissionRequestMessage,
   getAskRuleForTool,
   getDenyRuleForTool,
+  getParametricRuleForTool,
   isAbortShapedError,
   toolAlwaysAllowedRule,
 } from './ruleMatching'
@@ -151,6 +152,24 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     }
   }
 
+  // 1a-p. 参数化 deny 规则命中（0.1.59 C9-1，ruleContent=param:value，仅入参
+  // 声明字段，多参 AND；如 Agent(model:premium)）——整工具 deny 之后、工具本体
+  // checkPermissions 之前（参数化面工具无关，不依赖 tool 实现；无声明字段 /
+  // 非参数化形 = 回落既有 content 面，零回归）。
+  const parametricDenyRule = permissionContext
+    ? getParametricRuleForTool(permissionContext, tool, input, 'deny')
+    : null
+  if (parametricDenyRule) {
+    return {
+      behavior: 'deny',
+      message: `Permission to use ${tool.name} has been denied.`,
+      decisionReason: {
+        type: 'rule',
+        rule: parametricDenyRule,
+      },
+    }
+  }
+
   // 1b. 整工具 ask 规则命中（⑥ sandbox 自动放行半落：canSandboxAutoAllow
   // 时跳过 ask 规则落 1c 由 Bash 命令特规处理；非沙箱化命令
   // （dangerouslyDisableSandbox）仍尊重 ask 规则）
@@ -180,6 +199,27 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
     }
     // Fall through to let Bash's checkPermissions handle command-specific rules
     //（Bash 工具本体 checkPermissions 实现 = 工具本体波残留守，当前落 1c 空分发）
+  }
+
+  // 1b-p. 参数化 ask 规则命中（0.1.59 C9-1）——整工具 ask 之后、工具本体
+  // checkPermissions 之前；dontAsk 态下经 applyDontAskMode 转 deny（不变式②，
+  // allow 产点不受影响）。
+  const parametricAskRule = permissionContext
+    ? getParametricRuleForTool(permissionContext, tool, input, 'ask')
+    : null
+  if (parametricAskRule) {
+    return applyDontAskMode(
+      {
+        behavior: 'ask',
+        message: createPermissionRequestMessage(tool.name),
+        decisionReason: {
+          type: 'rule',
+          rule: parametricAskRule,
+        },
+      },
+      permissionContext,
+      tool.name,
+    )
   }
 
   // 1c. 问工具实现要权限结果（鸭子可选；旧仓 tool.inputSchema.parse 裁——

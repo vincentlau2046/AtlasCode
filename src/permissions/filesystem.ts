@@ -80,6 +80,13 @@ export type PermissionTool = {
     input: Record<string, unknown>,
     context: unknown,
   ): Promise<PermissionResult>
+  /**
+   * 0.1.59 C9-1 参数化命中面（CC 2.1.178）：工具声明入参字段集（inputSchema
+   * .properties 键）——参数化规则 `Tool(param:value)` 的 param 必须是声明字段
+   * 才按入参比对，否则回落 content 面（零回归）。全可选，既有消费者零影响。
+   * 完整 Tool.inputSchema 泛型归 engine 波；此处仅锁 properties 键集窄视图。
+   */
+  inputSchema?: { properties?: Record<string, unknown> }
 }
 
 /** expandPath 缺省基准 = 注入的 bootstrap cwd（shared 叶子不隐式取 cwd）。 */
