@@ -115,6 +115,12 @@ export interface PreToolUseHookOutcome {
 export interface PostToolUseHookOutcome {
   /** 钩子附加上下文（回灌 LLM 上下文 = message/REPL 波残留守，本版仅透传不硬填）。 */
   additionalContext?: string
+  /**
+   * 0.1.56 B · updatedToolOutput 全工具化（CC 2.1.121）：PostToolUse 钩子改写后的
+   * 工具输出文本。executeToolUse 消费点在场则替换 block content + toolUseResult
+   * （全工具生效，非 MCP 专属）；未返回 = undefined → 零行为变更。
+   */
+  updatedToolOutput?: string
 }
 
 /**
@@ -451,7 +457,14 @@ export async function executeToolUse(
   // additionalContext 上下文回灌 = message/REPL 波前向接缝（§8.39 C-6 登记）：
   // 本版捕获结果不硬填回灌（新仓无消息面）；回灌消费点 = 消息/REPL 波，
   // 登记于 engine/hooks 子门面头注（防 H6 死接缝：接缝有登记 + 有执行效果，非空置）。
-  void postOutcome
+  // 0.1.56 B · updatedToolOutput 全工具化（CC 2.1.121）：PostToolUse 钩子返回
+  // updatedToolOutput 时，替换 tool_result content + 原生 Output 为改写文本（全工具
+  // 生效——消费点在通用 toolExecution，非 MCP 专属）；未返回（无钩子配置 / 未改写）
+  // = undefined → 零行为变更（fail-safe）。
+  if (postOutcome?.updatedToolOutput !== undefined) {
+    block = { ...block, content: postOutcome.updatedToolOutput }
+    toolUseResult = postOutcome.updatedToolOutput
+  }
 
   return { block, isError, toolUseResult }
 }

@@ -34,6 +34,9 @@ export const HOOK_EVENTS = [
   'InstructionsLoaded',
   'CwdChanged',
   'FileChanged',
+  // 0.1.56 A：模型切换生命周期事件（CC 2.1.251，TUI model.tsx 两处切换点触发）。
+  'PreModelSwitch',
+  'PostModelSwitch',
 ] as const
 
 export type HookEvent = (typeof HOOK_EVENTS)[number]

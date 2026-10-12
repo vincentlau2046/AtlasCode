@@ -141,6 +141,9 @@ function interpretHookOutput(p: {
             // PreToolUseHookSpecificOutputSchema.updatedInput；旧仓 hooks.ts:614-616
             // 读取面）——按旧契约写 PreToolUse 钩子的用户输入改写此前在新仓静默丢失
             updatedInput?: Record<string, unknown>
+            // 0.1.56 B：PostToolUse 输出改写嵌套形（CC 2.1.121
+            // PostToolUseHookSpecificOutputSchema.updatedToolOutput 主形）
+            updatedToolOutput?: string
           }
         | undefined
       if (specific?.permissionDecision === 'allow') {
@@ -171,6 +174,10 @@ function interpretHookOutput(p: {
       // 覆盖（顶层 wins，与 additionalContext 双形读取序一致）。
       if (specific?.updatedInput) result.updatedInput = specific.updatedInput
       if (json.updatedInput) result.updatedInput = json.updatedInput
+      // updatedToolOutput 双形（0.1.56 B）：嵌套形（specific）先读，顶层形后读
+      // 覆盖（顶层 wins，与 updatedInput / additionalContext 双形读取序一致）。
+      if (specific?.updatedToolOutput) result.updatedToolOutput = specific.updatedToolOutput
+      if (json.updatedToolOutput) result.updatedToolOutput = json.updatedToolOutput
       if (json.suppressOutput) result.output = ''
       if (json.systemMessage) result.systemMessage = json.systemMessage
     } catch {
@@ -214,6 +221,7 @@ export function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void 
       : r.additionalContext
   }
   if (r.updatedInput) acc.updatedInput = r.updatedInput // last wins
+  if (r.updatedToolOutput) acc.updatedToolOutput = r.updatedToolOutput // last wins
   if (r.permissionBehavior) {
     if (
       !acc.permissionBehavior ||
@@ -339,6 +347,55 @@ export async function runPostToolUseHooks(
     tool_use_id: toolUseID,
   }
   return runHooks('PostToolUse', hookInput, options)
+}
+
+/**
+ * 0.1.56 A · PreModelSwitch：模型切换前（CC 2.1.251）。matchQuery = new_model
+ * （按目标模型过滤，同 PreToolUse→tool_name 语义）。
+ */
+export async function runPreModelSwitchHooks(
+  oldModel: string,
+  newModel: string,
+  source: string,
+  options: HookRunOptions = {},
+): Promise<AggregatedHookResult> {
+  const base = createBaseHookInput(
+    options.permissionMode,
+    options.sessionId,
+    options.agentInfo,
+  )
+  const hookInput: HookInput = {
+    ...base,
+    hook_event_name: 'PreModelSwitch',
+    old_model: oldModel,
+    new_model: newModel,
+    source,
+  }
+  return runHooks('PreModelSwitch', hookInput, options)
+}
+
+/**
+ * 0.1.56 A · PostModelSwitch：模型切换后（CC 2.1.251）。matchQuery = new_model。
+ */
+export async function runPostModelSwitchHooks(
+  oldModel: string,
+  newModel: string,
+  source: string,
+  options: HookRunOptions = {},
+): Promise<AggregatedHookResult> {
+  const base = createBaseHookInput(
+    options.permissionMode,
+    options.sessionId,
+    options.agentInfo,
+  )
+  const hookInput: HookInput = {
+    ...base,
+    hook_event_name: 'PostModelSwitch',
+    old_model: oldModel,
+    new_model: newModel,
+    source,
+  }
+  return runHooks('PostModelSwitch', hookInput, options)
 }
 
 /** SessionStart：会话开始（source 匹配；additionalContext 注入启动上下文）。 */

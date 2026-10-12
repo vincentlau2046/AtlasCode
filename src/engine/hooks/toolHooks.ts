@@ -100,6 +100,9 @@ export function createToolHooks(opts: ToolHooksAdapterOptions = {}): ToolHooks {
       )
       const outcome: PostToolUseHookOutcome = {
         additionalContext: r.additionalContext,
+        // 0.1.56 B：PostToolUse 输出改写透传（CC 2.1.121 updatedToolOutput 全工具化，
+        // pipeline toolExecution 消费点改写 block/toolUseResult）
+        updatedToolOutput: r.updatedToolOutput,
       }
       return outcome
     },

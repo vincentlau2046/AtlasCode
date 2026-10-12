@@ -128,6 +128,11 @@ export async function getMatchingHooks(
     case 'FileChanged':
       matchQuery = basenameOf(hookInput.file_path)
       break
+    // 0.1.56 A：模型切换事件（CC 2.1.251）——matchQuery = new_model（按目标模型过滤）。
+    case 'PreModelSwitch':
+    case 'PostModelSwitch':
+      matchQuery = hookInput.new_model as string | undefined
+      break
     // Stop / UserPromptSubmit / CwdChanged / WorktreeCreate / WorktreeRemove
     // 无 matchQuery（旧仓 default 分支）。
     default:

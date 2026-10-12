@@ -11,6 +11,7 @@ import { MODEL_ALIASES } from '../../utils/model/aliases.js';
 import { getDefaultMainLoopModel, getDefaultMainLoopModelSetting, parseUserSpecifiedModel, renderDefaultModelSetting } from '../../utils/model/model.js';
 import { isModelAllowed } from '../../utils/model/modelAllowlist.js';
 import { validateModel } from '../../utils/model/validateModel.js';
+import { firePostModelSwitch, firePreModelSwitch } from '../../utils/modelSwitchHooks.js';
 function ModelPickerWrapper(t0) {
   const $ = _c(17);
   const {
@@ -37,6 +38,10 @@ function ModelPickerWrapper(t0) {
   let t2;
   if ($[4] !== mainLoopModel || $[5] !== onDone || $[6] !== setAppState) {
     t2 = function handleSelect(model, effort) {
+      // 0.1.56 A：PreModelSwitch 钩子（切换前；picker 支 old_model = 当前
+      // mainLoopModel——组件已读，闭包捕获；null（默认档）→ undefined）。
+      const newModel = model !== null ? model : getDefaultMainLoopModel();
+      firePreModelSwitch(mainLoopModel ?? undefined, newModel, 'picker');
       setAppState(prev => ({
         ...prev,
         mainLoopModel: model,
@@ -56,6 +61,8 @@ function ModelPickerWrapper(t0) {
             }
           : {})
       }));
+      // 0.1.56 A：PostModelSwitch 钩子（切换后）。
+      firePostModelSwitch(mainLoopModel ?? undefined, newModel, 'picker');
       let message = `Set model to ${chalk.bold(renderModelLabel(model))}`;
       if (effort !== undefined) {
         message = message + ` with ${chalk.bold(effort)} effort`;
@@ -153,6 +160,10 @@ function SetModelAndClose({
       }
     }
     function setModel(modelValue: string | null): void {
+      // 0.1.56 A：PreModelSwitch 钩子（切换前，fire-and-forget；命令支 old_model
+      // best-effort undefined——SetModelAndClose 未读当前模型，schema 允许缺省）。
+      const newModel = modelValue !== null ? modelValue : getDefaultMainLoopModel();
+      firePreModelSwitch(undefined, newModel, 'command');
       setAppState(prev => ({
         ...prev,
         mainLoopModel: modelValue,
@@ -170,6 +181,8 @@ function SetModelAndClose({
             }
           : {})
       }));
+      // 0.1.56 A：PostModelSwitch 钩子（切换后）。
+      firePostModelSwitch(undefined, newModel, 'command');
       let message = `Set model to ${chalk.bold(renderModelLabel(modelValue))}`;
       // fastMode / extraUsage 均已删除（D2 / P6-2 B-4）：原"Fast mode / Billed as extra usage"提示移除。
       onDone(message);

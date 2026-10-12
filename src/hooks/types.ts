@@ -84,6 +84,13 @@ export type HookJSONOutput = {
   permissionDecisionReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
+  /**
+   * 0.1.56 B：PostToolUse 输出改写（CC 2.1.121 updatedToolOutput 全工具化）。
+   * 在场则替换 tool_result content（engine toolExecution 消费点改写 block/
+   * toolUseResult）；主形 = hookSpecificOutput.updatedToolOutput（CC 嵌套形），
+   * 顶层形亦读（顶层 wins，与 updatedInput 双形读取序一致）。
+   */
+  updatedToolOutput?: string
   [key: string]: unknown
 }
 
@@ -109,6 +116,8 @@ export type HookResult = {
   permissionDecisionReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
+  /** 0.1.56 B：PostToolUse 输出改写（interpretHookOutput 解析面，聚合透传）。 */
+  updatedToolOutput?: string
   aborted?: boolean
   backgrounded?: boolean
   [key: string]: unknown
@@ -121,6 +130,8 @@ export type AggregatedHookResult = {
   stopReason?: string
   additionalContext?: string
   updatedInput?: Record<string, unknown>
+  /** 0.1.56 B：PostToolUse 输出改写聚合面（last wins，engine 适配器透传）。 */
+  updatedToolOutput?: string
   /** AD-45 0.1.52：'defer' = 挂起控制值（rank 4 最严，胜权限裁定值）。 */
   permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough' | 'defer'
   /** defer/deny 理由（winner 更替语义，mergeAggregated 维护）。 */

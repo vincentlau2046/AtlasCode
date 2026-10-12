@@ -66,6 +66,9 @@ export {
   runHooks,
   runPreToolUseHooks,
   runPostToolUseHooks,
+  // 0.1.56 A · 模型切换生命周期事件（CC 2.1.251）
+  runPreModelSwitchHooks,
+  runPostModelSwitchHooks,
   runSessionStartHooks,
   runStopHooks,
   runSessionEndHooks,

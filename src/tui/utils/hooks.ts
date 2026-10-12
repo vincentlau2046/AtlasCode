@@ -71,6 +71,8 @@ import type {
   PermissionDeniedHookInput,
   PreCompactHookInput,
   PostCompactHookInput,
+  PreModelSwitchHookInput,
+  PostModelSwitchHookInput,
   PreToolUseHookInput,
   SessionStartHookInput,
   SessionEndHookInput,
@@ -1669,6 +1671,11 @@ export async function getMatchingHooks(
         break
       case 'FileChanged':
         matchQuery = basename(hookInput.file_path)
+        break
+      // 0.1.56 A：模型切换事件（CC 2.1.251）——matchQuery = new_model（按目标模型过滤）。
+      case 'PreModelSwitch':
+      case 'PostModelSwitch':
+        matchQuery = hookInput.new_model as string | undefined
         break
       default:
         break
@@ -3849,6 +3856,64 @@ export async function* executeSessionStartHooks(
     signal,
     timeoutMs,
     forceSyncExecution,
+  })
+}
+
+/**
+ * Execute PreModelSwitch hooks if configured（0.1.56 A，CC 2.1.251）。
+ * 模型切换前触发；matchQuery = newModel（按目标模型过滤）。无 toolUseContext
+ * 面（仿 executeSessionStartHooks）——sessionId 经 createBaseHookInput 回退
+ * getSessionId()。fire-and-forget 消费面见 modelSwitchHooks.ts。
+ */
+export async function* executePreModelSwitchHooks(
+  oldModel: string | undefined,
+  newModel: string,
+  source: string,
+  signal?: AbortSignal,
+  timeoutMs: number = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
+): AsyncGenerator<AggregatedHookResult> {
+  const hookInput: PreModelSwitchHookInput = {
+    ...createBaseHookInput(undefined),
+    hook_event_name: 'PreModelSwitch',
+    old_model: oldModel,
+    new_model: newModel,
+    source,
+  }
+
+  yield* executeHooks({
+    hookInput,
+    toolUseID: randomUUID(),
+    matchQuery: newModel,
+    signal,
+    timeoutMs,
+  })
+}
+
+/**
+ * Execute PostModelSwitch hooks if configured（0.1.56 A，CC 2.1.251）。
+ * 模型切换后触发；matchQuery = newModel。
+ */
+export async function* executePostModelSwitchHooks(
+  oldModel: string | undefined,
+  newModel: string,
+  source: string,
+  signal?: AbortSignal,
+  timeoutMs: number = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
+): AsyncGenerator<AggregatedHookResult> {
+  const hookInput: PostModelSwitchHookInput = {
+    ...createBaseHookInput(undefined),
+    hook_event_name: 'PostModelSwitch',
+    old_model: oldModel,
+    new_model: newModel,
+    source,
+  }
+
+  yield* executeHooks({
+    hookInput,
+    toolUseID: randomUUID(),
+    matchQuery: newModel,
+    signal,
+    timeoutMs,
   })
 }
 

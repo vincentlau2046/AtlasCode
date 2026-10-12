@@ -480,9 +480,12 @@ export type PermissionDeniedHookInput = any;
 export type PermissionRequestHookInput = any;
 export type PermissionResult = any;
 export type PostCompactHookInput = any;
+// 0.1.56 A · 模型切换生命周期事件（CC 2.1.251）
+export type PostModelSwitchHookInput = any;
 export type PostToolUseFailureHookInput = any;
 export type PostToolUseHookInput = any;
 export type PreCompactHookInput = any;
+export type PreModelSwitchHookInput = any;
 export type PreToolUseHookInput = any;
 export type RewindFilesResult = any;
 export type SDKToolProgressMessage = any;

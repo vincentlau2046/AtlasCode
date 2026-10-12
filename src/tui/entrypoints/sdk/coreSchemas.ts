@@ -391,6 +391,9 @@ export const HOOK_EVENTS = [
   'InstructionsLoaded',
   'CwdChanged',
   'FileChanged',
+  // 0.1.56 A：模型切换生命周期事件（CC 2.1.251，TUI model.tsx 两处切换点触发）。
+  'PreModelSwitch',
+  'PostModelSwitch',
 ] as const
 
 export const HookEventSchema = lazySchema(() => z.enum(HOOK_EVENTS))
@@ -508,6 +511,31 @@ export const SessionStartHookInputSchema = lazySchema(() =>
       source: z.enum(['startup', 'resume', 'clear', 'compact']),
       agent_type: z.string().optional(),
       model: z.string().optional(),
+    }),
+  ),
+)
+
+// 0.1.56 A · 模型切换生命周期事件（CC 2.1.251）。old_model 可缺省（/model [name]
+// 命令支 best-effort 未必知当前模型）；new_model = 目标模型（matcher 过滤面）；
+// source = 切换来源（'command' = /model [name]，'picker' = 模型选择器）。
+export const PreModelSwitchHookInputSchema = lazySchema(() =>
+  BaseHookInputSchema().and(
+    z.object({
+      hook_event_name: z.literal('PreModelSwitch'),
+      old_model: z.string().optional(),
+      new_model: z.string(),
+      source: z.string(),
+    }),
+  ),
+)
+
+export const PostModelSwitchHookInputSchema = lazySchema(() =>
+  BaseHookInputSchema().and(
+    z.object({
+      hook_event_name: z.literal('PostModelSwitch'),
+      old_model: z.string().optional(),
+      new_model: z.string(),
+      source: z.string(),
     }),
   ),
 )
