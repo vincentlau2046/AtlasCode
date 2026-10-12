@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.56
+
+P0 对齐卷 2 · hooks 扩展（基线 v0.1.55；CC 2.1.251 PreModelSwitch/PostModelSwitch + CC 2.1.121 PostToolUse
+updatedToolOutput，工单 `docs/2026-10-13-p0-wave-0156-ticket.md`）。两件钩子扩展（行为波，完整 gate + SRI）：
+
+- **A · PreModelSwitch/PostModelSwitch 事件（CC 2.1.251）**：
+  - 模型切换生命周期钩子（切换前 / 后各一事件）；matcher 可按目标模型过滤（matchQuery = new_model，同 PreToolUse→tool_name 语义）
+  - 双 HOOK_EVENTS 事实源同步 27→29（SDK `coreSchemas.ts` + engine `hookEvents.ts`，AD-45 双解析器映射先例防漂移）
+  - 双 `getMatchingHooks` matchQuery 支 + 双执行器（TUI `executePreModelSwitchHooks`/`executePostModelSwitchHooks` + engine `runPreModelSwitchHooks`/`runPostModelSwitchHooks`）
+  - TUI 触发点 = `model.tsx` 两处切换点（命令支 source='command' + picker 支 source='picker'），fire-and-forget（不阻塞模型切换主路径 / UI）
+- **B · PostToolUse `updatedToolOutput` 全工具化（CC 2.1.121）**：
+  - PostToolUse 钩子可改写工具输出（替换 tool_result content + 原生 Output）；全工具生效（消费点 = 通用 engine `toolExecution`，非 MCP 专属）
+  - 双形解析（`hookSpecificOutput.updatedToolOutput` 嵌套形为主 + 顶层形次，顶层 wins，与 updatedInput 双形读取序一致）+ `mergeAggregated` last-wins 聚合 + `createToolHooks` 适配器透传 + `toolExecution` 消费点改写 block/toolUseResult
+  - 未返回（无钩子配置 / 未改写）= undefined → 零行为变更（fail-safe）
+- **零回归**：无新命令 / 无新工具 / /help 51 基线恒等 + cmd 29 项零增减；`updatedToolOutput` 仅 PostToolUse 消费（其余事件即便 JSON 带该字段也不改写）
+- **判别单测**：`tests/unit/p0-wave-0156-hooks.test.ts`（10 组：双源事件面恒等 + 执行器触发 + 触发面静态 + updatedToolOutput interpret/merge/consume 全链 + 全工具化）
+- **gate**：四件套（tsc0 / eslint0 / build 17802061B / CI 全量）+ P0a/A4F `--release-gate 0.1.56`（行为波完整 gate + SRI 独立复算）
+
 ## v0.1.55
 
 P0 对齐卷 2 主链首车 = 提示词零码批（基线 v0.1.54；CC 2.1.121+ TOP V2-01/02/03 + hard_deny 提示词层，
