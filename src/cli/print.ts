@@ -207,6 +207,13 @@ export interface HeadlessOptions {
   systemPrompt?: string
   appendSystemPrompt?: string
   fallbackModel?: string
+  /**
+   * 0.1.59 C 簇（CC 2.1.166）：回合级有序 fallback 表（≤3 ref，--fallback-models
+   * variadic）。区别于单串 fallbackModel（in-request 池末位）——本表由
+   * queryAgentLoop 轮内 catch 消费：主模型可重试错误 → 钉下一 ref 为本回合
+   * sessionModel 重跑（每 ref 一次性）。缺省 = 零行为变更。
+   */
+  fallbackModels?: string[]
   jsonSchema?: Record<string, unknown>
   thinkingConfig?: ThinkingConfig
   effort?: string
@@ -1037,6 +1044,9 @@ export async function runHeadless(
       : undefined,
     effortValue: options.effort,
     fallbackModel: options.fallbackModel,
+    // 0.1.59 C 簇（CC 2.1.166）：--fallback-models（≤3 ref 有序表）真透传
+    // 引擎链（queryAgentLoop 轮内 catch 消费；缺省 = 零行为变更）。
+    fallbackModels: options.fallbackModels,
   })
   const { toolPermissionContext: initialTpc, tools, warnings } = bundle
   if (warnings.length > 0) {

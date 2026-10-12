@@ -161,3 +161,29 @@ export async function withTurnRecovery<T>(
   }
   throw lastErr
 }
+
+/**
+ * 0.1.59 C 簇（CC 2.1.166）：回合级跨回合有序 fallback 表「下一 ref」纯选择面。
+ *
+ * 有序表 fallbackModels（≤3 ref）逐 ref **一次性**：tried 记录已试 ref（防重复
+ * 命中同一 ref 造成死循环），返回表内首个未试 ref；表空 / 全部已试 = undefined
+ * （调用方据此穿透原始错误，不再换 ref）。纯函数零副作用，React-free 引擎叶子
+ * （同 withTurnRecovery 族）；消费点 = queryAgentLoop 轮内 catch（确定性重排面，
+ * 本波注册不接线 LLM 闭包）。
+ *
+ * 语义（Main 裁定）：ref1 全败 → ref2 命中 / 全败 → throw / 未配置面恒等。
+ *   nextFallbackRef(['a','b','c'], {})               → 'a'
+ *   nextFallbackRef(['a','b','c'], new Set(['a']))   → 'b'
+ *   nextFallbackRef(['a','b','c'], new Set(['a','b','c'])) → undefined（全试过）
+ *   nextFallbackRef(undefined, new Set())            → undefined（未配置）
+ */
+export function nextFallbackRef(
+  fallbackModels: readonly string[] | undefined,
+  tried: ReadonlySet<string>,
+): string | undefined {
+  if (!fallbackModels) return undefined
+  for (const ref of fallbackModels) {
+    if (!tried.has(ref)) return ref
+  }
+  return undefined
+}

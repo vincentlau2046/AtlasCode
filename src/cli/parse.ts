@@ -260,7 +260,13 @@ export function buildHeadlessOptions(
     allowedTools: options.allowedTools as HeadlessOptions['allowedTools'],
     disallowedTools: options.disallowedTools as HeadlessOptions['disallowedTools'],
     baseTools: options.tools as HeadlessOptions['baseTools'],
-    permissionMode: options.permissionMode as HeadlessOptions['permissionMode'],
+    // 0.1.59 C9-3 --permission-prompts none（CC 2.1.259）：'none' 折入既有
+    // dontAsk mode（ask 全自动 deny，零新决策代码）；显式 --permission-mode
+    // 优先（?? 链），flag 缺省 = 零变更。勿混 /less-permission-prompts skill。
+    permissionMode: (
+      (options.permissionMode as HeadlessOptions['permissionMode']) ??
+      (options.permissionPrompts === 'none' ? 'dontAsk' : undefined)
+    ),
     permissionPromptToolName: options
       .permissionPromptTool as HeadlessOptions['permissionPromptToolName'],
     maxTurns: options.maxTurns as HeadlessOptions['maxTurns'],
@@ -287,6 +293,10 @@ export function buildHeadlessOptions(
       'Append system prompt',
     ),
     fallbackModel: options.fallbackModel as HeadlessOptions['fallbackModel'],
+    // 0.1.59 C 簇（CC 2.1.166）：--fallback-models（variadic string[]）真映射
+    // headless 车道（区别于单串 fallbackModel 的 in-request 池末位）；缺省 =
+    // undefined（AgentLoopDeps.fallbackModels 缺省 = 零行为变更）。
+    fallbackModels: options.fallbackModels as HeadlessOptions['fallbackModels'],
     thinkingConfig: buildHeadlessThinkingConfig(
       options.thinking as 'enabled' | 'adaptive' | 'disabled' | undefined,
       options.maxThinkingTokens as number | undefined,
@@ -620,6 +630,16 @@ export function buildProgram(): CommanderCommand {
         .argParser(String)
         .choices(PERMISSION_MODES),
     )
+    .addOption(
+      // 0.1.59 C9-3（CC 2.1.259）：--permission-prompts none = 无人值守，ask
+      // 全自动 deny（折入 dontAsk mode，零新决策代码）。缺省 = 零变更。
+      new Option(
+        '--permission-prompts <mode>',
+        "Permission prompt policy; 'none' auto-denies prompts that would otherwise ask",
+      )
+        .argParser(String)
+        .choices(['none']),
+    )
     .option(
       '-c, --continue',
       'Continue the most recent conversation in the current directory',
@@ -715,6 +735,10 @@ export function buildProgram(): CommanderCommand {
     .option(
       '--fallback-model <model>',
       'Enable automatic fallback to specified model when default model is overloaded (only works with --print)',
+    )
+    .option(
+      '--fallback-models <m...>',
+      '0.1.59（CC 2.1.166）：回合级有序 fallback 表（≤3 ref，按序逐个一次性重试）——主模型可重试错误时钉下一 ref 为本回合 sessionModel 重跑（区别于单串 --fallback-model 的 in-request 池末位）。缺省 = 零变更（only works with --print)',
     )
     .addOption(
       new Option(

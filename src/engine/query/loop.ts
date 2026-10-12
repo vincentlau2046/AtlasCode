@@ -50,9 +50,14 @@ import {
   type ToolUseBlock,
   type Tools,
 } from '../../shared'
-import { PROVIDER_EMPTY_CONTENT_PLACEHOLDER, type ModelProvider, type ModelRole } from '../../modelprovider'
+import {
+  PROVIDER_EMPTY_CONTENT_PLACEHOLDER,
+  shouldRetryModelError,
+  type ModelProvider,
+  type ModelRole,
+} from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
-import { withTurnRecovery } from './turnRecovery'
+import { nextFallbackRef, withTurnRecovery } from './turnRecovery'
 import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
@@ -203,6 +208,16 @@ export interface AgentLoopDeps {
   responseFormat?: unknown
   effortValue?: string
   fallbackModel?: string
+  /**
+   * 0.1.59 C 簇（CC 2.1.166）：回合级跨回合有序 fallback 表（≤3 ref）。区别于
+   * 单串 fallbackModel（in-request 池末位，getRoleModels 追加）——本表是**跨回合**
+   * 有序重试支：queryAgentLoop 轮内主模型可重试错误（shouldRetryModelError，
+   * 5xx/429 过载，已耗尽 in-request retry 预算）→ 钉下一 ref 为本回合
+   * sessionModel 重跑本回合（不占新轮次，同 reactiveRetried 一次性门；每 ref
+   * 一次性）。未配置面（缺省 undefined）= 零行为变更（catch 原样穿透）。
+   * 判别纯面 = turnRecovery.nextFallbackRef（React-free 叶子）。
+   */
+  fallbackModels?: string[]
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -631,10 +646,16 @@ export async function queryAgentLoop(
     // 既有 413/maxTokens 自修零回归——本消费点只消费 B 类 400 输入超窗族，
     // A 类经 withRetry maxTokensOverride 自修不抵此点）。
     let reactiveRetried = false
+    // 0.1.59 C 簇（CC 2.1.166）：回合级跨回合有序 fallback 表（≤3）。
+    // effectiveDeps 逐 ref 钉 sessionModel 重跑本回合（不占新轮次）；
+    // triedFallbackRefs 每 ref 一次性（防死循环）。未配置面（fallbackModels
+    // 缺省）= effectiveDeps 恒 = deps + 零 fallback 分支，catch 原样穿透。
+    let effectiveDeps: AgentLoopDeps = deps
+    const triedFallbackRefs = new Set<string>()
     for (;;) {
       const roundInputLen = messages.length
       try {
-        lastRound = await queryOneRound(deps, tools, messages)
+        lastRound = await queryOneRound(effectiveDeps, tools, messages)
       } catch (err) {
         if (
           !reactiveRetried &&
@@ -671,6 +692,19 @@ export async function queryAgentLoop(
             continue
           }
           // 恢复不可用（消费者 null/异常）→ 落回显原始错误
+        }
+        // 0.1.59 C 簇（CC 2.1.166）：回合级跨回合有序 fallback 表（≤3）。
+        // 可重试模型错误（shouldRetryModelError 单一事实源，abort 不重试）+ 表内
+        // 下一 ref 未试 → 钉下一 ref 为 sessionModel 重跑本回合（不占新轮次，
+        // 同 reactiveRetried 一次性门语义；triedFallbackRefs 每 ref 一次性防
+        // 死循环）。未配置面（fallbackModels 缺省）= nextFallbackRef 恒
+        // undefined → 原样穿透（catch 原语义零变更）；全表耗尽（≤3 ref 全败）
+        // = 末次错误穿透。
+        const nextRef = nextFallbackRef(deps.fallbackModels, triedFallbackRefs)
+        if (nextRef && shouldRetryModelError(err, deps.signal)) {
+          triedFallbackRefs.add(nextRef)
+          effectiveDeps = { ...deps, sessionModel: nextRef }
+          continue
         }
         throw err
       }

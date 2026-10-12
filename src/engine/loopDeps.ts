@@ -131,6 +131,12 @@ export interface AgentLoopDepsConfig {
   responseFormat?: unknown
   effortValue?: string
   fallbackModel?: string
+  /**
+   * 0.1.59 C 簇（CC 2.1.166）：回合级有序 fallback 表（≤3 ref，headless
+   * --fallback-models variadic）。透传 AgentLoopDeps.fallbackModels（queryAgentLoop
+   * 轮内 catch 消费；缺省 = 零行为变更，区别于单串 fallbackModel 的 in-request 池末位）。
+   */
+  fallbackModels?: string[]
 }
 
 /** loop 依赖装配产物（S-E2 A4）：权限上下文 + 模型可见工具池 + loop deps。 */
@@ -292,6 +298,9 @@ export async function createAgentLoopDeps(
     responseFormat: config.responseFormat,
     effortValue: config.effortValue,
     fallbackModel: config.fallbackModel,
+    // 0.1.59 C 簇（CC 2.1.166）：--fallback-models（≤3 ref 有序表）透传
+    // AgentLoopDeps.fallbackModels（queryAgentLoop 轮内 catch 消费）。
+    fallbackModels: config.fallbackModels,
     // S-E3 A11（§8.52）：transcript 写面 = session 域 record 族（recordTranscript
     // dedup 幂等在内，重记安全；持久化门 = session 写面 shouldSkipPersistence
     // 内部态，本波不加构建器门 = 裁面登记——D 波/CLI persistSession 面）。
