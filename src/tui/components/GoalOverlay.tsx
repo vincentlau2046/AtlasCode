@@ -3,7 +3,11 @@
 // tokens（in+out），叠加 armed goal 条件（未 armed 显示占位行）。
 // 纯展示组件：三要素 + 条件全走 props（cost-tracker getter + 消息计数 +
 // goalState 的组装面在调用方 goal.tsx，组件保持纯展示易判别单测）。
-// 空闲 5Hz 活刷新归 0.1.63 P7——本波仅「面板在场」（渲染当前值快照）。
+//
+// 0.1.63 P7（CC 演化 2.1.173→2.1.295）：空闲 5Hz 零重渲染。未 armed 时
+// 面板内容静态（elapsed/turns/tokens 不变——无活跑），React.memo 按 armed
+// 短路：未 armed 且 props 未变 → 跳过重渲染。armed 时活面板仍 5Hz 刷新
+// （elapsed 实时变化 = 预期行为，非空闲）。
 
 import * as React from 'react'
 import { Box, Text } from '../ink.js'
@@ -26,7 +30,7 @@ export type GoalOverlayProps = {
   outTokens: number
 }
 
-export function GoalOverlay({
+function GoalOverlayInner({
   armed,
   condition,
   turns,
@@ -57,3 +61,10 @@ export function GoalOverlay({
     </Box>
   )
 }
+
+/**
+ * P7：React.memo 空闲零重渲染。未 armed 时 elapsed/turns/tokens 不参与
+ * 用户可见面（面板显示占位行），memo 按 props 浅比较跳过重渲染。armed 时
+ * props 变化（elapsedMs 随 5Hz 递增）→ 正常重渲染（活面板预期行为）。
+ */
+export const GoalOverlay = React.memo(GoalOverlayInner)
