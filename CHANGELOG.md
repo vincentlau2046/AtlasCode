@@ -4,6 +4,39 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.65
+
+0.1.61+ 波池 Q3 subagent 独占波 · 地基波（双波第一波；基线 v0.1.64）。
+**波性质 = 零行为变更**：default = foreground 同步路径字节级恒等；background 经
+`run_in_background:true` opt-in。slash ∅ → /help 55 恒等 + cmd 33 恒等（无新命令）。
+4 件全 TDD RED→GREEN（55 判别单测）：
+
+- **Q3-1 · engine 异步 agent 原语**：`AgentTool` input schema 加回 `run_in_background`
+  + `call()` 异步分支（`run_in_background:true` → `void runAsyncAgentLifecycle` →
+  立即返回 `async_launched`；缺省 = 同步路径字节级恒等）。`runAsyncAgentLifecycle`
+  后台跑子代理到终态 + 投递完成/失败通知（既有通知链消费，零新建队列）。
+  `wrapPermissionGateForBackground` 薄包装（ask → `onNeedsInput` 回调，verdict 原样返回，
+  fail-closed 不变）
+- **Q3-3 · needs-input 信号**：`TaskStatus` 加 `needs_input` 态（非终态——允许恢复，
+  不永驻阻断评估器）。`enqueueAgentNotification` `status` 含 `needs_input` +
+  `inputRequest?` 字段；dedup 跳过 needs_input（`status !== 'needs_input'`）。
+  `runAsyncAgentLifecycle` 经 `wrapPermissionGateForBackground` 包装 `checkPermission`，
+  ask verdict → 投递 needs_input 通知（verdict 原样返回，权限决策不变）
+- **Q3-4 · 委派纪律提示词批**（零码面纯文本）：`AgentTool` prompt.ts 加 usage notes 句
+  （`run_in_background` 用法说明）+ no-predict 句（「勿预测子代理将发现什么——等其返回
+  结果再行动」）。断言单测锁文本在场
+- **Q3-5 · /goal P5 时序守卫回收**：`hasNonTerminalTasks` 纯谓词（`AppState.tasks` 记录面
+  → boolean；非终态 = pending|running|needs_input）。`agentLoopDeps` 注入
+  `hasPendingBackgroundTasks`（0.1.63 P5 仅声明未接线 → 本波接线 TUI 车道）。headless 车道
+  无 `AppState.tasks` 记录面 → 不注入（零回归）。`src/task/task.ts` + `src/tui/Task.ts`
+  双副本同步（tui-local copy 既有模式）
+
+双 Task.ts 同步：`src/task/task.ts`（task 域）+ `src/tui/Task.ts`（tui-local copy）均加
+`needs_input` 态 + `hasNonTerminalTasks` 函数（tui 域 eslint boundaries 禁直 import task 域）。
+
+下一波 0.1.66 翻转波（Q3-2 background-by-default + escape hatch env
+`ATLAS_AGENT_DEFAULT_FOREGROUND=1`），启动条件 = 本波五段终态。
+
 ## v0.1.64
 
 0.1.61+ 波池插入波：慢模型流式显示对齐 + 错误上报去 IFF 硬编码（双 PR 合一波，
