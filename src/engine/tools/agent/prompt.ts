@@ -12,7 +12,11 @@
  *     agent 清单改经 attachment 消息以降低 cache_creation）+ When NOT to use 章节 +
  *     usage notes（run_in_background / SendMessage 续接 / isolation:worktree）+
  *     allowedAgentTypes 过滤（Agent(x,y) 限选）+ isCoordinator slim 分支 → 残留守
- *     （fork 路径接线 / 附件面 / 异步 agent / E-4 权限面未落；本版仅核心委托语义 + 清单）。
+ *     （fork 路径接线 / 附件面 / E-4 权限面未落；本版仅核心委托语义 + 清单）。
+ *     usage notes（run_in_background 后台语义 + no-predict 纪律）→ **Q3-4 已落**
+ *     （0.1.65）：Q3-1 异步原语就位后补提示词面（run_in_background:true → 后台跑
+ *     + task-notification 完成通知 + 不臆测结果）；SendMessage 续接 / isolation:worktree
+ *     残留守（对应能力未落）。
  */
 import { AGENT_TOOL_NAME } from './constants'
 import type { AgentDefinition } from './agentDefinition'
@@ -61,8 +65,14 @@ export function getPrompt(agents: readonly AgentDefinition[]): string {
     '"figure this out." Because the subagent cannot see this conversation, its ' +
     'prompt must be fully self-contained — state every constraint, file, and ' +
     'reporting requirement it needs. ' +
+    'Set run_in_background to true to launch a subagent that runs while you ' +
+    'continue working in this conversation; you will receive a task-notification ' +
+    'when it completes. Use this only for genuinely parallel work, not to defer ' +
+    'a result you need before you can proceed. ' +
     `Available agent types and the tools they have access to:\n${list}\n` +
     `The ${AGENT_TOOL_NAME} tool runs the subagent and returns its final result ` +
-    'when it completes; act on that result once it is returned.'
+    'when it completes; act on that result once it is returned. ' +
+    'Do not predict or assume what the subagent will find — wait for its ' +
+    'returned result and act on what it actually reports.'
   )
 }

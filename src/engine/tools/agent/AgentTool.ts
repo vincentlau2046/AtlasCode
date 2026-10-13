@@ -13,9 +13,11 @@
  *   - 模型 override：input.model（ModelRole）> agentDef.model > parentRole。
  *
  * 裁剪 + 残留守头注释（防「以为已全」）：
- *   - 异步 agent（run_in_background → runAsyncAgentLifecycle / 后台摘要 / 通知队列）
- *     → 残留守（后台任务面未落）；本版仅同步路径，input schema 相应去掉 run_in_background
- *     / name / team_name 字段（不造假能力）。
+ *   - 异步 agent（run_in_background → runAsyncAgentLifecycle / 通知队列）→
+ *     **Q3-1 已落**（0.1.65）：input schema 加回 run_in_background + call() 异步分支
+ *     （run_in_background:true → void runAsyncAgentLifecycle → 立即返回 async_launched；
+ *     默认缺省 = 同步路径字节级恒等）。TUI 侧 React 耦合面（后台摘要 summarization /
+ *     progress tracker / teammate 共享任务面）→ 残留守。
  *   - 内建 agent 注册表已接线（T-5c）：call/description 遍历 getBuiltInAgents()（含
  *     coordinator 分支 T-5d：isCoordinatorMode 真 → 仅内建 worker，见 builtInAgents）；
  *     statusline/explore/plan/guide/verification 内建体 → 残留守（builtInAgents 头注登记）。
@@ -46,11 +48,13 @@ import {
 } from './agentToolUtils'
 import { AGENT_TOOL_NAME, MAX_WORKER_SPAWN_DEPTH } from './constants'
 import { getPrompt } from './prompt'
-import { runAgent } from './runAgent'
+import { runAgent, runAsyncAgentLifecycle } from './runAgent'
 import { isCoordinatorMode } from '../../coordinator'
 import type { PermissionGate } from '../../pipeline'
+import { getTaskOutputPath } from '../../../task'
+import { enqueueAgentNotification } from '../../coordinator/tasks/localAgentTask'
 
-/** 输入 JSON schema（旧仓 zod inputSchema 裁剪；去 run_in_background/name/team_name）。 */
+/** 输入 JSON schema（旧仓 zod inputSchema 裁剪；Q3-1 加回 run_in_background）。 */
 const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   type: 'object',
   properties: {
@@ -71,6 +75,11 @@ const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
       description:
         "Optional model override for this agent. Takes precedence over the agent definition's model. If omitted, inherits from the parent.",
     },
+    run_in_background: {
+      type: 'boolean',
+      description:
+        'Set to true to run this agent in the background. You will be notified when it completes.',
+    },
   },
   required: ['description', 'prompt'],
 }
@@ -80,6 +89,7 @@ interface AgentToolInput {
   prompt: string
   subagent_type?: string
   model?: ModelRole
+  run_in_background?: boolean
 }
 
 /**
@@ -141,7 +151,7 @@ export const AgentTool: Tool = {
     content: unknown,
     toolUseID: string,
   ): ToolResultBlockParam {
-    const c = content as { status?: string; content?: Array<{ text?: string }> } | undefined
+    const c = content as { status?: string; content?: Array<{ text?: string }>; agentId?: string; outputFile?: string } | undefined
     if (c && c.status === 'completed') {
       const text = (c.content ?? [])
         .map((b) => b?.text ?? '')
@@ -150,6 +160,14 @@ export const AgentTool: Tool = {
         type: 'tool_result',
         tool_use_id: toolUseID,
         content: '[agent completed]\n' + text,
+      }
+    }
+    if (c && c.status === 'async_launched') {
+      return {
+        type: 'tool_result',
+        tool_use_id: toolUseID,
+        content:
+          '[agent launched in background] agentId=' + (c.agentId ?? '') + ' output=' + (c.outputFile ?? ''),
       }
     }
     return {
@@ -179,6 +197,45 @@ export const AgentTool: Tool = {
     ).resolvedTools
 
     const agentId = 'agent-' + randomUUID()
+
+    // Q3-1（0.1.65）：异步路径——run_in_background:true → 后台跑 + 立即返回。
+    // 默认缺省（undefined/false）= 同步路径，字节级恒等（零行为变更）。
+    if (input.run_in_background) {
+      const outputFile = getTaskOutputPath(agentId)
+      // 后台跑子代理到终态 + 投递完成/失败通知（既有通知链消费，零新建队列）。
+      void runAsyncAgentLifecycle({
+        agentDefinition,
+        prompt: input.prompt,
+        tools: resolvedTools,
+        modelProvider,
+        parentRole,
+        overrideRole: input.model,
+        agentId,
+        spawnDepth: childSpawnDepth,
+        signal: ctx.signal,
+        checkPermission: ctx.checkPermission,
+        description: input.description,
+      }).catch((err) => {
+        // 最终兜底：runAsyncAgentLifecycle 自身异常（通知构造失败等）→
+        // 再试一次 bare 通知（防静默丢失）。
+        enqueueAgentNotification({
+          taskId: agentId,
+          description: input.description,
+          status: 'failed',
+          error: err instanceof Error ? err.message : String(err),
+        })
+      })
+      return {
+        data: {
+          status: 'async_launched',
+          agentId,
+          description: input.description,
+          prompt: input.prompt,
+          outputFile,
+        },
+      }
+    }
+
     const { result } = await runAgent({
       agentDefinition,
       prompt: input.prompt,

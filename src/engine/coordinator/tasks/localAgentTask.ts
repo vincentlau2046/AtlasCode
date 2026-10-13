@@ -301,6 +301,12 @@ export function drainPendingMessages(
 
 /**
  * Enqueue an agent notification to the message queue.
+ *
+ * Q3-1（0.1.65）：setAppState 改为可选——headless/SDK/-p 路径无 task panel（无
+ * AppState.tasks 记录面）时直接投递通知（跳过 notified 去重）；TUI 车道仍传
+ * setAppState 走去重支（行为恒等）。
+ * Q3-3（0.1.65）：status 加 needs_input 态（非终态——agent 请求输入/权限后可恢复）；
+ * needs_input 不走 notified 去重（允许多次请求输入）。
  */
 export function enqueueAgentNotification({
   taskId,
@@ -313,12 +319,14 @@ export function enqueueAgentNotification({
   toolUseId,
   worktreePath,
   worktreeBranch,
+  inputRequest,
 }: {
   taskId: string
   description: string
-  status: 'completed' | 'failed' | 'killed'
+  status: 'completed' | 'failed' | 'killed' | 'needs_input'
   error?: string
-  setAppState: SetAppState
+  /** Q3-1: 可选——headless 无 task state 时缺省，跳过去重直接投递。 */
+  setAppState?: SetAppState
   finalMessage?: string
   usage?: {
     totalTokens: number
@@ -328,23 +336,27 @@ export function enqueueAgentNotification({
   toolUseId?: string
   worktreePath?: string
   worktreeBranch?: string
+  /** Q3-3: needs_input 时承载请求内容（权限请求 / 提问）。 */
+  inputRequest?: string
 }): void {
-  // Atomically check and set notified flag to prevent duplicate notifications.
-  // If the task was already marked as notified (e.g., by TaskStopTool), skip
-  // enqueueing to avoid sending redundant messages to the model.
-  let shouldEnqueue = false
-  updateTaskState<LocalAgentTaskState>(taskId, setAppState, task => {
-    if (task.notified) {
-      return task
+  // Q3-3: needs_input 非终态——不去重（允许多次请求输入）。
+  // 终态（completed/failed/killed）走 notified 去重（仅当 setAppState 在场时；
+  // headless 无 task state → 直接投递，无去重）。
+  if (setAppState && status !== 'needs_input') {
+    let shouldEnqueue = false
+    updateTaskState<LocalAgentTaskState>(taskId, setAppState, task => {
+      if (task.notified) {
+        return task
+      }
+      shouldEnqueue = true
+      return {
+        ...task,
+        notified: true,
+      }
+    })
+    if (!shouldEnqueue) {
+      return
     }
-    shouldEnqueue = true
-    return {
-      ...task,
-      notified: true,
-    }
-  })
-  if (!shouldEnqueue) {
-    return
   }
 
   // 旧仓 abortSpeculation(setAppState) 裁除（PromptSuggestion 未迁，头注登记）——
@@ -355,7 +367,11 @@ export function enqueueAgentNotification({
       ? `Agent "${escapedDescription}" completed`
       : status === 'failed'
         ? `Agent "${escapedDescription}" failed: ${escapeXml(error || 'Unknown error')}`
-        : `Agent "${escapedDescription}" was stopped`
+        : status === 'killed'
+          ? `Agent "${escapedDescription}" was stopped`
+          : status === 'needs_input'
+            ? `Agent "${escapedDescription}" needs input: ${escapeXml(inputRequest || 'Permission request or question pending')}`
+            : `Agent "${escapedDescription}" ${escapeXml(status)}`
   const outputPath = getTaskOutputPath(taskId)
   const toolUseIdLine = toolUseId
     ? `\n<${TOOL_USE_ID_TAG}>${escapeXml(toolUseId)}</${TOOL_USE_ID_TAG}>`

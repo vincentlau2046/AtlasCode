@@ -23,11 +23,20 @@ import {
   MAX_WORKER_SPAWN_DEPTH,
   resolveAgentTools,
   runAgent,
+  enqueueAgentNotification,
+  wrapPermissionGateForBackground,
+  setTaskNotificationHandler,
+  resetTaskNotificationHandler,
   type AgentDefinition,
+  type PermissionGate,
 } from '../../src/engine'
 import { GENERAL_PURPOSE_AGENT } from '../../src/engine'
 import type { ModelProvider, ModelRole } from '../../src/modelprovider'
 import type { Message, Tool } from '../../src/shared'
+import { setDiskOutputEnv, resetDiskOutputEnv } from '../../src/task'
+import { mkdtempSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 
 // ── fake LLM（可脚本 + 记录每次 chat 的 role；ModelProvider 接口替身，非 mock transport）──
 interface ScriptStep {
@@ -435,5 +444,266 @@ describe('AgentTool.call fan-out call-site（coordinator 门 + ctx.tools 含 Age
     // childSpawnDepth = 1+1 = 2 = MAX(2) → allowFanOut 假 → Agent 命中 ALL_AGENT_DISALLOWED 被剔
     // → 子代理的 Agent tool_use 落 unknown-tool is_error（fake 未被调）
     expect(agentCalls).toEqual([])
+  })
+})
+
+// ── Q3-1 引擎侧异步 agent 原语（run_in_background schema + async 路径 + 通知链）──
+
+describe('AgentTool schema：run_in_background 参数在场', () => {
+  test('① inputSchema.properties.run_in_background 存在（boolean 型）', () => {
+    const schema = AgentTool.inputSchema as { properties: Record<string, { type?: string }> }
+    expect(schema.properties.run_in_background).toBeDefined()
+    expect(schema.properties.run_in_background.type).toBe('boolean')
+  })
+})
+
+describe('AgentTool.call 异步路径（run_in_background:true → async_launched + 通知）', () => {
+  // 通知捕获：setTaskNotificationHandler 注入捕获器，beforeEach 复位
+  let capturedNotifications: { value: string; mode: string }[]
+  const ASYNC_TMP = mkdtempSync(join(tmpdir(), 'atlas-agent-async-unit-'))
+  beforeEach(() => {
+    capturedNotifications = []
+    setTaskNotificationHandler(n => {
+      capturedNotifications.push({ value: n.value, mode: n.mode })
+    })
+    // async 路径 call getTaskOutputPath → diskOutput 注入（组合根在生码注入，单测补）
+    setDiskOutputEnv({
+      getProjectTempDir: () => ASYNC_TMP,
+      getSessionId: () => 'agent-async-unit-sess',
+    })
+  })
+  afterEach(() => {
+    resetTaskNotificationHandler()
+    resetDiskOutputEnv()
+  })
+
+  test('① run_in_background:true → 立即返回 async_launched（不阻塞）', async () => {
+    const { provider } = fakeProvider([{ content: [{ type: 'text', text: 'bg-result' }] }])
+    const res = await AgentTool.call(
+      { description: 'bg task', prompt: 'do bg', run_in_background: true },
+      { modelProvider: provider, parentRole: 'small' },
+      undefined,
+      undefined,
+    )
+    const data = res.data as { status: string; agentId: string; outputFile: string; description: string }
+    expect(data.status).toBe('async_launched')
+    expect(data.agentId).toBeDefined()
+    expect(data.description).toBe('bg task')
+    expect(data.outputFile).toBeDefined()
+  })
+
+  test('② 后台 agent 完成 → 通知注入（<task-notification> + status completed）', async () => {
+    const { provider } = fakeProvider([{ content: [{ type: 'text', text: 'bg-done' }] }])
+    await AgentTool.call(
+      { description: 'bg complete', prompt: 'do it', run_in_background: true },
+      { modelProvider: provider, parentRole: 'small' },
+      undefined,
+      undefined,
+    )
+    // 等待后台 agent 跑完（fake provider 即时返回，microtask 即可）
+    await new Promise(r => setTimeout(r, 50))
+    expect(capturedNotifications.length).toBeGreaterThanOrEqual(1)
+    const notif = capturedNotifications[0]!
+    expect(notif.mode).toBe('task-notification')
+    expect(notif.value).toContain('<task-notification>')
+    expect(notif.value).toContain('completed')
+    expect(notif.value).toContain('bg complete')
+  })
+
+  test('③ 后台 agent 失败 → 通知注入 status failed', async () => {
+    // fake provider 抛错 → runAgent throw → 通知 status=failed
+    const failingProvider: ModelProvider = {
+      ...fakeProvider([]).provider,
+      chat: async () => { throw new Error('LLM boom') },
+    }
+    await AgentTool.call(
+      { description: 'bg fail', prompt: 'fail me', run_in_background: true },
+      { modelProvider: failingProvider, parentRole: 'small' },
+      undefined,
+      undefined,
+    )
+    await new Promise(r => setTimeout(r, 50))
+    expect(capturedNotifications.length).toBeGreaterThanOrEqual(1)
+    const notif = capturedNotifications[0]!
+    expect(notif.value).toContain('failed')
+    expect(notif.value).toContain('LLM boom')
+  })
+
+  test('④ 前景路径恒等守卫：run_in_background 缺省 = 同步 completed（零变更）', async () => {
+    const { provider } = fakeProvider([{ content: [{ type: 'text', text: 'sync-result' }] }])
+    const res = await AgentTool.call(
+      { description: 'sync', prompt: 'do sync' },
+      { modelProvider: provider, parentRole: 'small' },
+      undefined,
+      undefined,
+    )
+    const data = res.data as { status: string; content: { text: string }[] }
+    expect(data.status).toBe('completed')
+    expect(data.content).toEqual([{ type: 'text', text: 'sync-result' }])
+    // 无通知注入（同步路径不走路由通知链）
+    expect(capturedNotifications.length).toBe(0)
+  })
+
+  test('⑤ async_launched 的 mapToolResultToToolResultBlockParam 映射', () => {
+    const b = AgentTool.mapToolResultToToolResultBlockParam(
+      { status: 'async_launched', agentId: 'a-bg1', outputFile: '/tmp/a.output' },
+      'tu-bg',
+    )
+    expect(b.type).toBe('tool_result')
+    expect(b.tool_use_id).toBe('tu-bg')
+    // 映射为人话「agent launched in background」（非裸 status 串），含 agentId
+    expect(b.content).toContain('agent launched in background')
+    expect(b.content).toContain('a-bg1')
+  })
+})
+
+// ── Q3-3 needs-input 信号（状态机 needs_input 态 + 通知构造 + 权限面接线）──
+
+describe('Q3-3: enqueueAgentNotification needs_input 通知构造', () => {
+  let capturedNotifications: { value: string; mode: string }[]
+  const Q3_3_TMP = mkdtempSync(join(tmpdir(), 'atlas-agent-needs-input-unit-'))
+  beforeEach(() => {
+    capturedNotifications = []
+    setTaskNotificationHandler(n => {
+      capturedNotifications.push({ value: n.value, mode: n.mode })
+    })
+    // enqueueAgentNotification 内调 getTaskOutputPath → diskOutput 注入（单测补）
+    setDiskOutputEnv({
+      getProjectTempDir: () => Q3_3_TMP,
+      getSessionId: () => 'agent-needs-input-unit-sess',
+    })
+  })
+  afterEach(() => {
+    resetTaskNotificationHandler()
+    resetDiskOutputEnv()
+  })
+
+  test('① needs_input 通知含「needs input」串 + inputRequest 内容', () => {
+    enqueueAgentNotification({
+      taskId: 'a-needs-input-1',
+      description: 'research task',
+      status: 'needs_input',
+      inputRequest: 'Permission required for Bash: rm -rf',
+    })
+    expect(capturedNotifications.length).toBe(1)
+    const notif = capturedNotifications[0]!
+    expect(notif.value).toContain('needs input')
+    expect(notif.value).toContain('research task')
+    expect(notif.value).toContain('Permission required for Bash: rm -rf')
+    expect(notif.value).toContain('<task-notification>')
+    expect(notif.value).toContain('<status>needs_input</status>')
+  })
+
+  test('② needs_input 不去重（允许多次请求输入——非终态）', () => {
+    enqueueAgentNotification({
+      taskId: 'a-needs-input-2',
+      description: 'multi input',
+      status: 'needs_input',
+      inputRequest: 'first question',
+    })
+    enqueueAgentNotification({
+      taskId: 'a-needs-input-2',
+      description: 'multi input',
+      status: 'needs_input',
+      inputRequest: 'second question',
+    })
+    // needs_input 非终态 → 不走 notified 去重 → 两条均投递
+    expect(capturedNotifications.length).toBe(2)
+    expect(capturedNotifications[0]!.value).toContain('first question')
+    expect(capturedNotifications[1]!.value).toContain('second question')
+  })
+
+  test('③ 三态流转：needs_input → completed（两通知均在场，终态去重不误杀前置 needs_input）', () => {
+    // ① needs_input（非终态，不去重）
+    enqueueAgentNotification({
+      taskId: 'a-flow-1',
+      description: 'flow task',
+      status: 'needs_input',
+      inputRequest: 'need permission for Write',
+    })
+    // ② resolved → completed（终态）
+    enqueueAgentNotification({
+      taskId: 'a-flow-1',
+      description: 'flow task',
+      status: 'completed',
+      finalMessage: 'done after input',
+    })
+    expect(capturedNotifications.length).toBe(2)
+    expect(capturedNotifications[0]!.value).toContain('needs input')
+    expect(capturedNotifications[1]!.value).toContain('completed')
+    expect(capturedNotifications[1]!.value).toContain('done after input')
+  })
+
+  test('④ 三态流转：needs_input → failed（失败终态在场）', () => {
+    enqueueAgentNotification({
+      taskId: 'a-flow-2',
+      description: 'fail flow',
+      status: 'needs_input',
+      inputRequest: 'need input',
+    })
+    enqueueAgentNotification({
+      taskId: 'a-flow-2',
+      description: 'fail flow',
+      status: 'failed',
+      error: 'timeout after input',
+    })
+    expect(capturedNotifications.length).toBe(2)
+    expect(capturedNotifications[0]!.value).toContain('needs input')
+    expect(capturedNotifications[1]!.value).toContain('failed')
+    expect(capturedNotifications[1]!.value).toContain('timeout after input')
+  })
+})
+
+describe('Q3-3: wrapPermissionGateForBackground 权限面接线', () => {
+  test('① gate 返回 ask → onNeedsInput 回调触发（toolName + reason）', async () => {
+    let captured: { toolName: string; reason?: string } | null = null
+    const askGate: PermissionGate = async (tool) => ({
+      allowed: false,
+      ask: true,
+      reason: 'dangerous command',
+    })
+    const wrapped = wrapPermissionGateForBackground(askGate, (req) => {
+      captured = req
+    })
+    expect(wrapped).toBeDefined()
+    const fakeTool = makeFakeTool('Bash', [])
+    const verdict = await wrapped!(fakeTool, { command: 'rm -rf /' })
+    // verdict 原样返回（fail-closed 不变——agent 不挂起，仍收 error tool_result）
+    expect(verdict.ask).toBe(true)
+    expect(verdict.allowed).toBe(false)
+    // needs_input 信号触发
+    expect(captured).not.toBeNull()
+    expect(captured!.toolName).toBe('Bash')
+    expect(captured!.reason).toBe('dangerous command')
+  })
+
+  test('② gate 返回 allow → onNeedsInput 不触发', async () => {
+    let called = false
+    const allowGate: PermissionGate = async () => ({ allowed: true })
+    const wrapped = wrapPermissionGateForBackground(allowGate, () => {
+      called = true
+    })
+    await wrapped!(makeFakeTool('Read', []), { file_path: '/a' })
+    expect(called).toBe(false)
+  })
+
+  test('③ gate 返回 deny（非 ask）→ onNeedsInput 不触发', async () => {
+    let called = false
+    const denyGate: PermissionGate = async () => ({
+      allowed: false,
+      reason: 'blocked by rule',
+    })
+    const wrapped = wrapPermissionGateForBackground(denyGate, () => {
+      called = true
+    })
+    const verdict = await wrapped!(makeFakeTool('Write', []), { file_path: '/a' })
+    expect(verdict.allowed).toBe(false)
+    expect(verdict.ask).toBeUndefined()
+    expect(called).toBe(false)
+  })
+
+  test('④ 未注入 gate → 返回 undefined（前景同步路径零变更）', () => {
+    const wrapped = wrapPermissionGateForBackground(undefined, () => {})
+    expect(wrapped).toBeUndefined()
   })
 })

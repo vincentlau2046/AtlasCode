@@ -277,6 +277,8 @@ export { LEGACY_TOOL_NAME_ALIASES } from './legacyToolNameAliases'
 export {
   AgentTool,
   runAgent,
+  runAsyncAgentLifecycle,
+  wrapPermissionGateForBackground,
   GENERAL_PURPOSE_AGENT,
   isBuiltInAgent,
   isCustomAgent,
@@ -304,6 +306,7 @@ export {
   formatAgentLine,
   type RunAgentArgs,
   type RunAgentResult,
+  type RunAsyncAgentLifecycleArgs,
   type AgentDefinition,
   type AgentToolResult,
   type ResolvedAgentTools,

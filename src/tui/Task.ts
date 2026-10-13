@@ -18,6 +18,7 @@ export type TaskStatus =
   | 'completed'
   | 'failed'
   | 'killed'
+  | 'needs_input'
 
 /**
  * True when a task is in a terminal state and will not transition further.
@@ -26,6 +27,22 @@ export type TaskStatus =
  */
 export function isTerminalTaskStatus(status: TaskStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'killed'
+}
+
+/**
+ * Q3-5（0.1.65）/goal P5 时序守卫回收：检查 AppState.tasks 是否有非终态
+ * 后台任务（LocalShellTask + LocalAgentTask 族统一覆盖——同 TaskStateBase.status 面）。
+ *
+ * 非终态 = pending | running | needs_input（isTerminalTaskStatus 返 false 的态）。
+ * needs_input（Q3-3 新态）= 非终态（允许恢复，不永驻阻断评估器）。
+ *
+ * 消费点 = AgentLoopDeps.hasPendingBackgroundTasks 谓词（TUI 车道 agentLoopDeps
+ * 注入；评估器时序守卫——后台任务运行中 → 评估器零调用，等终态再评估）。
+ */
+export function hasNonTerminalTasks(
+  tasks: Record<string, TaskStateBase>,
+): boolean {
+  return Object.values(tasks).some((t) => !isTerminalTaskStatus(t.status))
 }
 
 export type TaskHandle = {

@@ -45,6 +45,7 @@ import {
   type AutoCompactDeps,
   type Message,
 } from 'src/engine'
+import { hasNonTerminalTasks } from './Task.js'
 import { getInitialSettings } from './utils/settings/settings.js'
 import { asSystemPrompt, type Tools } from 'src/shared'
 import { getSessionId } from 'src/bootstrap'
@@ -234,6 +235,16 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
     // 覆盖 REPL（replLoopDeps 包装）+ 子 loop 族（runAgent/forkedAgent/
     // execAgentHook/LocalMainSessionTask 直接消费本装配体）。
     toolContext: m.toolUseContext,
+    // Q3-5（0.1.65）/goal P5 时序守卫回收：hasPendingBackgroundTasks 注入
+    // （0.1.63 P5 仅声明未接线 → 本波接线）。覆盖 LocalShellTask + LocalAgentTask
+    // 族统一（AppState.tasks 记录面 → hasNonTerminalTasks 纯谓词，非终态 =
+    // pending|running|needs_input）。评估器时序守卫——后台任务运行中 → 评估器
+    // 零调用（不提前触发，等终态再评估）。toolUseContext.getAppState 活读；
+    // tasks 缺省（异步 agent / viewer mode）→ false（零回归）。
+    hasPendingBackgroundTasks: () => {
+      const tasks = m.toolUseContext?.getAppState?.()?.tasks
+      return tasks ? hasNonTerminalTasks(tasks) : false
+    },
     hooks: createLoopHooks({
       options: {
         sessionId: getSessionId(),

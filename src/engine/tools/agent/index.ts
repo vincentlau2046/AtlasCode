@@ -6,7 +6,7 @@
  * builtInAgents / forkSubagent；T-5d 补 coordinator 提示词。
  */
 export { AgentTool } from './AgentTool'
-export { runAgent, type RunAgentArgs, type RunAgentResult } from './runAgent'
+export { runAgent, runAsyncAgentLifecycle, wrapPermissionGateForBackground, type RunAgentArgs, type RunAgentResult, type RunAsyncAgentLifecycleArgs } from './runAgent'
 export {
   GENERAL_PURPOSE_AGENT,
   isBuiltInAgent,

@@ -148,6 +148,8 @@ export {
 export {
   AgentTool,
   runAgent,
+  runAsyncAgentLifecycle,
+  wrapPermissionGateForBackground,
   GENERAL_PURPOSE_AGENT,
   isBuiltInAgent,
   isCustomAgent,
