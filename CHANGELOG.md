@@ -4,6 +4,38 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.62
+
+0.1.61+ 波池次车：/goal 核心+持久化波（基线 v0.1.61；CC 2.1.173 跨回合完成条件
+stop-hook 化，工单 `docs/2026-10-13-p0-wave-0162-ticket.md` + 评估卡
+`docs/2026-10-13-p0-goal-eval-card.md`）。跨回合完成条件新原语：设一个单一可测
+终态条件 → agent 自动持续工作直到条件达成（条件化 Stop hook 的产品内建面，不经
+用户 hooks 配置；上游 2.1.173 实现于 Stop hook 机制之上，本波 = 引擎内建），
+达成为自清除、状态可持久化（session jsonl goal-state 条目，--resume/compact 恢复）：
+
+- **C0-1 · `/goal set <condition>`**：armGoal 状态机（≤500 字符单一可测终态 + one-goal
+  替换 + 空拒绝 fail-closed）；`/goal clear` = 提前清除；无参 = 状态面
+- **C0-2 · 跨回合续跑（核心）**：loop terminal 支 goal 续跑支——small 角色无 tools
+  评估器（仅对话证据，不跑命令不读文件）；未达成 = 注入续跑 reminder 继续，达成 =
+  自清除 + `goal_met` 事件；`maxGoalTurns` 硬守卫（默认 10，防 runaway，超限轮不评估
+  强制终止）；**无 goal = 评估器零调用，terminal 支字节级恒等（恒绿守卫，判别单测
+  常驻）**
+- **C0-3 · overlay 面板**：`/goal` 无参状态面渲染 GoalOverlay（条件 / elapsed / API /
+  turns / tokens 组装面；空闲 5Hz 活更新归 0.1.63 P7，本波 = 面板在场）
+- **C0-4 · footer goal 指示器**：GoalSegment + StatusLine registry 挂载
+- **C0-5 · headless `-p` 行为恒等**：共享 `queryAgentLoop` + 模块级 goalState 单例 +
+  saveGoalState transcript 桥（TUI/headless 行为恒等，零额外挂载面）
+- **C0-6 · `/goal clear` + 达成自清除通知**（2.1.173 纪律：不提示用户 run /goal clear）
+- **P1 · 持久化**：session jsonl `goal-state` 条目（session types/load/restore/record +
+  saveGoalState 桥；clear/达成写 null 快照防旧态泄漏；--resume 恢复重新 arm）
+- **命令面**：双形态注册（local-jsx 交互 + local 非交互，/context 先例；/help 54→55 +
+  cmd 32→33 仅 +goal）
+- **零回归**：非 goal 路径字节级恒等；既有命令/配置/权限/provider/session 行为零变更；
+  前波 6 波特性面精确同值（0.1.56–0.1.61）
+- **判别单测**：`engine-goal-state` 13 + `engine-goal-loop` 4（mock judge 两态
+  canned 零模型非定式；无 goal 恒等守卫 = 评估器零调用 / 无 goal 事件），修前红 →
+  修后绿 17/17 闭环
+
 ## v0.1.61
 
 PAC 0148 §AD-07（CC 2.1.118，☆ 插件作者工具）插件 tag 工具小波——0.1.61+ 波池首车
