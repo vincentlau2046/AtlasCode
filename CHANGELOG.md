@@ -4,6 +4,52 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.64
+
+0.1.61+ 波池插入波：慢模型流式显示对齐 + 错误上报去 IFF 硬编码（双 PR 合一波，
+基线 v0.1.63；工单 `docs/2026-10-13-p0-wave-0164-ticket.md`）。体验面根因定位完成，
+对齐 Claude `Beboppin'… (↓ 2.5k tokens)` 流式进度可见语义 + 去 IFF 硬编码误导。
+
+**PR1 · 慢模型流式显示对齐（G1+G2+G3）**：
+
+- **G2 · TTFT 期间抑制 stall 红**：慢模型 TTFT（首 token 延迟，可达 10s–2min）期间
+  spinner 渐变红（`useStalledAnimation` timer 从挂载计时，TTFT > 3s → `isStalled`），
+  强化「卡死」错觉。修 = 抽 `computeStallState(timeSinceLastToken, currentResponseLength,
+  hasActiveTools)` 纯函数到 `spinnerGates.ts`，`isStalled` 增 `currentResponseLength > 0`
+  守卫——TTFT 期间（未收到任何 token）不报 stall；已开始流式后中断 > 3s 原语义保留
+  （thinking/tool-input 阶段 responseLength > 0 不落抑制分支，已验证）
+- **G1 · TTFT 期间显形流式状态指示**：`SpinnerModeGlyph`（↑/↓ 字形）原仅渲染在
+  `showTokens` 分支内（首 token 前 `totalTokens=0` → `showTokens=false` → 无字形）。
+  修 = `getSpinnerDisplayGates` 增 `wantsStatusIndicator` 门（1s 阈值），
+  `showTokens=false` 但 `mode='requesting'` + `wantsStatusIndicator` 时显 ↑ 字形
+  （请求已发出，等首 token）；首 token 后切既有 ↓ + token 计数分支（零变更）
+- **G3 · 动词省略号**：`mode='requesting'` 时动词尾附 `…`（`displayMessage`，对齐
+  Claude `Beboppin'…` 视觉）；mode 转 responding 后自消
+
+**PR2 · 错误上报去 IFF 硬编码（复合逻辑参数化）**：
+
+- **根因**：`gatewayUnreachableRemediationHint()` 检测连接失败族错误后返回固定串
+  `'IFF 不可达：已切人工确认 —— /doctor 排查'`——IFF 是本机本地网关别名，其他机器
+  用别的 provider/端点时仍报 IFF = 误导
+- **`describeEndpointFailure(baseURL?)` 复合纯函数**（三路分类）：本地 URL
+  （localhost/127.x）→ `本地端口 {port}`（按端口提示本地端口状态）/ 已知云 provider
+  （DeepSeek·OpenAI·阿里百炼·Kimi·MiniMax·百川·零一万物·硅基流动·腾讯混元）→
+  `{Name} 服务`（提示对应 provider 异常）/ 通用端点 → `{host}` / 缺省 → `LLM 端点`
+- **`getCurrentEndpointLabel(modelRef?)`** 读函数（仿 `getCurrentLlmTimeoutMs` 模式）：
+  `resolveModel(ref)?.baseURL ?? getRoleConfig('small').baseURL` → `describeEndpointFailure`
+- **`gatewayUnreachableRemediationHint(error, endpointLabel?)`** 签名参数化：返回
+  `` `${endpointLabel ?? 'LLM 端点'} 不可达：已切人工确认 —— /doctor 排查` ``；
+  S-C 三锚点保留（gwDown 参数化 / gwManual / gwDoctor 不变）；IFF 字面量移除
+- **REPL catch 块传参**：`getCurrentEndpointLabel(mainLoopModelParam)`
+
+**判别单测**：spinner-gates.test.ts 扩 13（computeStallState TTFT 不 stall + wantsStatusIndicator 门）；
+modelprovider-gateway-unreachable.test.ts 参数化 + describeEndpointFailure 复合逻辑 26 新
+（local 端口/cloud provider/generic/缺省 + hint 串组装端到端）。
+
+**gate**：r-20261013-gate-064 GATE-PASS（6 判据全绿：判别单测 50/0·77expect + 四件套
+tsc 0 / eslint src 0e / build cli.js 17863426B / CI 4220·0·326 + P0a + A4F releasable +
+/help 55 + cmd 33 + loop-rob C1/C2/C3/R3 + 0.1.62/0.1.63 goal 活探针 + 新 tui-spinner-0164 10/10）。
+
 ## v0.1.63
 
 0.1.61+ 波池第 3 车：/goal 演化批波（基线 v0.1.62；CC 演化 2.1.173→2.1.295
