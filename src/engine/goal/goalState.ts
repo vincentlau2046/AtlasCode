@@ -44,9 +44,17 @@ export interface GoalStateSnapshot {
 interface GoalRuntimeState {
   armed: boolean
   condition: string | undefined
+  /**
+   * 0.1.63 P2：paused 是 armed 的子态（armed=true 且 paused=true）——
+   * 可恢复错误（5xx/429 配额耗尽）触发 pauseGoal，配额恢复后 resumeGoal
+   * 回到 armed 正常态，条件不丢。paused 标记不跨 session（不持久化，
+   * 每 session 重判）——见 getGoalStateForPersistence 注释。
+   */
+  paused: boolean
+  pausedReason: string | undefined
 }
 
-let goalState: GoalRuntimeState = { armed: false, condition: undefined }
+let goalState: GoalRuntimeState = { armed: false, condition: undefined, paused: false, pausedReason: undefined }
 
 /**
  * Arm a goal condition（CC 2.1.139：one goal at a time — 新设替换旧）。
@@ -63,13 +71,51 @@ export function armGoal(condition: string): { ok: true } | { ok: false; reason: 
       reason: `Goal condition exceeds ${MAX_GOAL_CONDITION_CHARS} characters (got ${trimmed.length}).`,
     }
   }
-  goalState = { armed: true, condition: trimmed }
+  goalState = { armed: true, condition: trimmed, paused: false, pausedReason: undefined }
   return { ok: true }
 }
 
-/** Clear the armed goal（提前清 / 达成自清除两径共用）。 */
+/** Clear the armed goal（提前清 / 达成自清除 / P3 不可恢复清除三径共用）。 */
 export function clearGoal(): void {
-  goalState = { armed: false, condition: undefined }
+  goalState = { armed: false, condition: undefined, paused: false, pausedReason: undefined }
+}
+
+// ── 0.1.63 P2：paused 状态机（armed 子态）─────────────────────────────
+
+/**
+ * P2：可恢复错误 → 暂停 goal（不丢条件，armed 保持 true，paused=true）。
+ * 配额恢复后调 resumeGoal 回到 armed 正常态。reason 入暂停说明行。
+ */
+export function pauseGoal(reason: string): void {
+  if (!goalState.armed) return // 未 armed 无暂停义
+  goalState = { ...goalState, paused: true, pausedReason: reason }
+}
+
+/**
+ * P2：配额恢复后恢复 goal（paused→armed 正常态，条件不丢）。
+ * 未 paused 时 no-op（幂等）。
+ */
+export function resumeGoal(): void {
+  if (!goalState.paused) return
+  goalState = { ...goalState, paused: false, pausedReason: undefined }
+}
+
+/** P2：goal 是否 paused（armed 子态谓词）。 */
+export function isGoalPaused(): boolean {
+  return goalState.armed && goalState.paused
+}
+
+/** P2：暂停原因（未 paused = undefined）。 */
+export function getGoalPausedReason(): string | undefined {
+  return goalState.armed && goalState.paused ? goalState.pausedReason : undefined
+}
+
+/**
+ * P2：暂停说明行（REPL/TUI 渲染面消费）——含原因，用户可见。
+ * 上游语义（CC 演化）：「暂停并说明（含等配额恢复）」。
+ */
+export function goalPausedNotification(reason: string): string {
+  return `Goal paused: ${reason}\nThe goal will resume when the condition recovers.`
 }
 
 /** goal 是否 armed（loop.ts terminal 支消费谓词）。 */
@@ -95,16 +141,59 @@ export function getGoalStateForPersistence(): GoalStateSnapshot {
  * 仅恢复 armed=true 且条件非空的快照；cleared 快照 = no-op。
  */
 export function restoreGoalState(snapshot: GoalStateSnapshot | undefined): void {
+  // paused 不跨 session（不持久化）——恢复后从 armed 正常态起步，每 session 重判
   if (snapshot && snapshot.armed && snapshot.condition.trim() !== '') {
-    goalState = { armed: true, condition: snapshot.condition.trim() }
+    goalState = { armed: true, condition: snapshot.condition.trim(), paused: false, pausedReason: undefined }
   } else {
-    goalState = { armed: false, condition: undefined }
+    goalState = { armed: false, condition: undefined, paused: false, pausedReason: undefined }
   }
 }
 
 /** 测试重置（单测隔离惯例）。 */
 export function resetGoalStateForTesting(): void {
-  goalState = { armed: false, condition: undefined }
+  goalState = { armed: false, condition: undefined, paused: false, pausedReason: undefined }
+}
+
+// ── 0.1.63 P3：不可恢复自清除（错误分类 + 通知）──────────────────────
+
+/**
+ * P3：goal 跑动中错误分类（可恢复/不可恢复二分）。
+ *
+ *   不可恢复（→ clearGoal + 通知，不再 armed）：
+ *     - 401/403 auth 吊销（凭证失效，重试无义）
+ *     - 上下文溢出（context length exceeded / prompt too long——窗满，须 compact 非 retry）
+ *   可恢复（→ pauseGoal + 通知，配额恢复后 resume）：
+ *     - 429 配额耗尽 / 5xx 网关故障 / 连接抖动（ECONNRESET 等）
+ *     - 未知错误 = 可恢复（fail-safe pause，不误清 goal——续跑由 maxGoalTurns 兜底）
+ *
+ * 与 modelprovider shouldRetryModelError（provider 域重试谓词）的关系：
+ * shouldRetryModelError 判「是否重试」（429/5xx=retry，400/401/abort=穿透）；
+ * classifyGoalError 判「goal 状态去向」（unrecoverable→clear，其余→pause）。
+ * 400 bad request = shouldRetryModelError false（不重试穿透）但 classifyGoalError
+ * 'recoverable'（不误清 goal——400 是请求级错误非凭证失效，用户可修后续跑）。
+ * 消费点 = loop.ts terminal 支 catch（turnRecovery 耗尽后判 goal 去向）。
+ */
+export type GoalErrorClass = 'recoverable' | 'unrecoverable'
+
+export function classifyGoalError(err: unknown): GoalErrorClass {
+  const msg = (err instanceof Error ? err.message : String(err ?? '')).toLowerCase()
+  // 不可恢复：auth 吊销 / 上下文溢出
+  if (/\b401\b/.test(msg) || /\b403\b/.test(msg) || msg.includes('unauthorized') || msg.includes('forbidden')) {
+    return 'unrecoverable'
+  }
+  if (msg.includes('context length exceeded') || msg.includes('prompt too long') || msg.includes('context window')) {
+    return 'unrecoverable'
+  }
+  // 其余（429/5xx/连接抖动/未知）= 可恢复（fail-safe pause，不误清 goal）
+  return 'recoverable'
+}
+
+/**
+ * P3：不可恢复清除通知行（REPL/TUI 渲染面消费）——含原因，用户可见。
+ * 上游语义（CC 演化）：「turn 死于不可恢复错误 → goal 自清除+通知（不再 armed）」。
+ */
+export function goalUnrecoverableNotification(reason: string): string {
+  return `Goal cleared (unrecoverable): ${reason}\nThe goal can no longer be pursued. Set a new goal if needed.`
 }
 
 // ── ② evaluateGoal — small 角色无 tools chat 评估器 ──────────────────
@@ -232,4 +321,13 @@ export function goalMetNotification(condition: string): string {
 /** goal clear 通知行（/goal clear 提前清面）。 */
 export function goalClearedNotification(): string {
   return 'Goal cleared.'
+}
+
+/**
+ * P6：hook 门控显式报错通知行（disableAllHooks / allowManagedHooksOnly 时
+ * goal 静默挂起 → 显式报错面）。上游语义（CC 演化）：hooks 禁用时 goal
+ * 续跑机制不可用 → 显式报错（非静默），goal 自清除。
+ */
+export function goalHookGateNotification(): string {
+  return 'Goal cleared: hooks are disabled (disableAllHooks). Goals require hooks to continue.'
 }

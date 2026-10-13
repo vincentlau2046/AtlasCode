@@ -1106,8 +1106,9 @@ export {
 // §8.56 S-D2：agent teams / swarms 总开关（messaging 域内文件，经域门面出）
 export { isAgentSwarmsEnabled } from './messaging'
 
-// 0.1.62 /goal 核心+持久化波（CC 2.1.139）：goal 状态机 + 评估器 + 续跑指令
-// 模板（引擎内建条件化 Stop hook——loop.ts terminal 支消费）。
+// 0.1.62 /goal 核心+持久化波（CC 2.1.139）+ 0.1.63 /goal 演化波 P2/P3
+// （CC 演化 2.1.173→2.1.295：paused 状态机 + 不可恢复自清除分类器）。
+// 引擎内建条件化 Stop hook——loop.ts terminal 支消费。
 export {
   MAX_GOAL_CONDITION_CHARS,
   DEFAULT_MAX_GOAL_TURNS,
@@ -1122,6 +1123,18 @@ export {
   goalContinuationReminder,
   goalMetNotification,
   goalClearedNotification,
+  // 0.1.63 P2：paused 状态机（armed 子态）
+  pauseGoal,
+  resumeGoal,
+  isGoalPaused,
+  getGoalPausedReason,
+  goalPausedNotification,
+  // 0.1.63 P3：不可恢复自清除（错误分类 + 通知）
+  classifyGoalError,
+  goalUnrecoverableNotification,
+  // 0.1.63 P6：hook 门控显式报错
+  goalHookGateNotification,
   type GoalStateSnapshot,
   type GoalEvaluationResult,
+  type GoalErrorClass,
 } from './goal/goalState'

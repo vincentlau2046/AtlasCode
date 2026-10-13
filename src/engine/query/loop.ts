@@ -63,9 +63,15 @@ import {
   clearGoal,
   evaluateGoal,
   getGoalCondition,
+  getGoalStateForPersistence,
   goalContinuationReminder,
   isGoalArmed,
+  isGoalPaused,
+  pauseGoal,
+  classifyGoalError,
+  goalHookGateNotification,
 } from '../goal/goalState'
+import { shouldDisableAllHooksIncludingManaged } from '../config/hooksConfig'
 import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
@@ -153,6 +159,18 @@ export type AgentLoopEvent =
       type: 'goal_continuation'
       condition: string
       turn: number
+      reason: string
+    }
+  | {
+      /** 0.1.63 P2：可恢复错误 → goal paused（配额恢复后 resume）。 */
+      type: 'goal_paused'
+      condition: string
+      reason: string
+    }
+  | {
+      /** 0.1.63 P3：不可恢复错误 → goal cleared（不再 armed）。 */
+      type: 'goal_unrecoverable'
+      condition: string
       reason: string
     }
 
@@ -243,6 +261,14 @@ export interface AgentLoopDeps {
    * 判别纯面 = turnRecovery.nextFallbackRef（React-free 叶子）。
    */
   fallbackModels?: string[]
+  /**
+   * 0.1.63 P5（CC 演化 2.1.173→2.1.295）：后台任务状态查询谓词——评估器
+   * 触发前置守卫。返回 true = 后台任务（LocalShellTask 族）运行中 → 评估器
+   * 零调用（不提前触发，等终态）；返回 false = 终态 → 评估正常进行。
+   * 未注入 = 零回归（无守卫，评估正常触发——headless 缺省无后台任务）。
+   * TUI 车道注入（src/tui/tasks/ LocalShellTask 族状态查询）。
+   */
+  hasPendingBackgroundTasks?: () => boolean
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -743,6 +769,28 @@ export async function queryAgentLoop(
           effectiveDeps = { ...deps, sessionModel: nextRef }
           continue
         }
+        // 0.1.63 P2/P3（CC 演化 2.1.173→2.1.295）：goal 跑动中错误恢复 +
+        // 不可恢复自清除。turnRecovery/reactive-compact/fallback 全耗尽后穿透
+        // 前——若 goal armed 且非 abort（用户主动中断非错误），按 error 分类
+        // 更新 goal 状态（防 armed goal 静默挂死——击穿「coding agent 持续长
+        // 时间不中断」基本要求）：
+        //   unrecoverable（401/403 auth 吊销 / 上下文溢出）→ clearGoal +
+        //     通知（不再 armed，fail-closed）
+        //   recoverable（429/5xx/连接抖动/未知）→ pauseGoal + 通知
+        //     （配额恢复后 /goal resume 续跑，条件不丢）
+        // 错误仍穿透（用户可见错误），goal 状态先行更新防静默挂死。
+        if (isGoalArmed() && !deps.signal?.aborted) {
+          const goalCondition = getGoalCondition()!
+          const errorReason = errorMessage(err)
+          if (classifyGoalError(err) === 'unrecoverable') {
+            clearGoal()
+            deps.transcript?.saveGoalState?.(null)
+            deps.emit?.({ type: 'goal_unrecoverable', condition: goalCondition, reason: errorReason })
+          } else {
+            pauseGoal(errorReason)
+            deps.emit?.({ type: 'goal_paused', condition: goalCondition, reason: errorReason })
+          }
+        }
         throw err
       }
       messages = lastRound.messages
@@ -767,13 +815,15 @@ export async function queryAgentLoop(
       break
     }
     if (lastRound.toolResults.length === 0) {
-      // 0.1.62 /goal C0-2（CC 2.1.139 核心）：terminal 支 goal 续跑支。
-      // goal armed → 评估器（small 角色无 tools）判达成/未达成：
+      // 0.1.62 /goal C0-2（CC 2.1.139 核心）+ 0.1.63 P2 paused 守卫：
+      // goal armed 且未 paused → 评估器（small 角色无 tools）判达成/未达成：
       //   未达成 = 注入续跑指令（2.1.173 reminder 语义）+ 续跑（不终止）；
       //   达成 = 清 goal + 终止事件（自清除，无「run /goal clear」提示）；
       //   maxGoalTurns 超限 = 强制终止（防 runaway 硬守卫）。
+      // goal paused（P2 可恢复错误暂停）→ 不评估不续跑，终止本轮（等配额恢复
+      //   后 /goal resume 续跑；评估器在 paused 态调用会重复触发同一错误）。
       // goal 未 armed = 既有 stopHooks 消费点（字节级恒等——零回归守卫项）。
-      if (isGoalArmed()) {
+      if (isGoalArmed() && !isGoalPaused()) {
         const condition = getGoalCondition()!
         // 硬守卫：goal 续跑计数超限 → 强制终止（防 runaway，同 maxTurns 兜底模式）
         if (goalTurns >= maxGoalTurns) {
@@ -783,13 +833,52 @@ export async function queryAgentLoop(
           terminated = true
           break
         }
+        // 0.1.63 P6（CC 演化）：hook 门控显式报错——disableAllHooks 时 goal
+        // 续跑机制不可用（静默挂起）→ 显式 clearGoal + 报错事件（非静默）。
+        if (shouldDisableAllHooksIncludingManaged()) {
+          clearGoal()
+          deps.transcript?.saveGoalState?.(null)
+          deps.emit?.({
+            type: 'goal_unrecoverable',
+            condition,
+            reason: goalHookGateNotification(),
+          })
+          terminated = true
+          break
+        }
+        // 0.1.63 P5（CC 演化）：评估器时序守卫——后台任务（LocalShellTask 族）
+        // 运行中 → 评估器零调用（不提前触发，等终态再评估）。未注入 = 零回归。
+        if (deps.hasPendingBackgroundTasks?.()) {
+          // 后台任务运行中 = 不评估不续跑，终止本轮（下轮/用户消息后重判）
+          terminated = true
+          break
+        }
         goalTurns++
-        const evalResult = await evaluateGoal({
-          modelProvider: deps.modelProvider,
-          signal: deps.signal,
-          messages,
-          condition,
-        })
+        // 0.1.63 P2/P3：评估器是独立 small-role chat 调用——可独立注障。
+        // 评估器 throw = 按 error 分类更新 goal 状态 + 终止（不穿透——评估器
+        // 是内部机制，用户无需见原始错误；通知行承载原因）。
+        let evalResult
+        try {
+          evalResult = await evaluateGoal({
+            modelProvider: deps.modelProvider,
+            signal: deps.signal,
+            messages,
+            condition,
+          })
+        } catch (evalErr) {
+          if (deps.signal?.aborted) throw evalErr
+          const errorReason = errorMessage(evalErr)
+          if (classifyGoalError(evalErr) === 'unrecoverable') {
+            clearGoal()
+            deps.transcript?.saveGoalState?.(null)
+            deps.emit?.({ type: 'goal_unrecoverable', condition, reason: errorReason })
+          } else {
+            pauseGoal(errorReason)
+            deps.emit?.({ type: 'goal_paused', condition, reason: errorReason })
+          }
+          terminated = true
+          break
+        }
         if (evalResult.met) {
           // 达成 = 自清除 + 终止（2.1.173 纪律：勿提示 run /goal clear）
           clearGoal()
@@ -812,6 +901,11 @@ export async function queryAgentLoop(
           reason: evalResult.reason,
         })
         // 落继续轮末 turnCounter 续跑（不终止，防停——同 preventStop=true 语义）
+      } else if (isGoalPaused()) {
+        // 0.1.63 P2：goal paused = 等配额恢复，不评估不续跑（终止本轮；
+        // 用户可 /goal resume 或发新消息——paused 态评估器会重复触发错误）。
+        terminated = true
+        break
       } else {
         // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
         // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
