@@ -11,7 +11,7 @@
  *
  * 探针锚点（每条断言 = 一接缝消费面，防 H6 空洞等价）：
  *   P-1 工具注册表活体：35 本体全注入（tools 门面单一出口）→ createAgent
- *       LoopDeps 模型可见池（deny 过滤 + isEnabled 尾行）= 29 名精确集
+ *       LoopDeps 模型可见池（deny 过滤 + isEnabled 尾行）= 30 名精确集
  *       （内建 Agent 首位）；6 门控缺席面（LSP 断连 / swarms 关 /
  *       ToolSearch standard / TodoWrite 反向门 / TeamCreate·TeamDelete·
  *       SendMessage swarms 门）= 本体在场而门关的判别（非注册缺失）
@@ -296,7 +296,7 @@ const ALL_BODIES: readonly Tool[] = [
   LSPTool,
 ]
 
-/** 缺省 env 定化下的模型可见池精确集（29 名 = 内建 Agent + 28 启用本体）。 */
+/** 缺省 env 定化下的模型可见池精确集（30 名 = 内建 Agent + 28 启用本体 + ProposeGoal 恒注册）。 */
 const EXPECTED_VISIBLE = [
   'Agent',
   'Bash',
@@ -327,6 +327,7 @@ const EXPECTED_VISIBLE = [
   'ExitWorktree',
   'ListMcpResourcesTool',
   'ReadMcpResourceTool',
+  'ProposeGoal',
 ].sort()
 
 /** 门控缺席面 6 名（本体已注册，门关不进可见池——非注册缺失）。 */
@@ -387,12 +388,12 @@ afterAll(() => {
 
 // ── P-1 工具注册表活体（35 本体全注入 + 门控判别）────────────────────────
 describe('gelu P-1 工具注册表活体（35 本体经组合根构建器注入）', () => {
-  test('P-1a 模型可见池 = 29 名精确集（deny 过滤 + isEnabled 尾行，内建 Agent 首位）', () => {
+  test('P-1a 模型可见池 = 30 名精确集（deny 过滤 + isEnabled 尾行，内建 Agent 首位）', () => {
     const names = bundle.tools.map(t => t.name)
     // 内建 AgentTool 首位（注册表装配序：AgentTool 内建 → baseTools 去重先入为主）
     expect(names[0]).toBe('Agent')
-    // 精确集（防「以为已全」：29 = 1 内建 + 28 启用本体，6 门控缺席见 P-1b）
-    expect(names).toHaveLength(29)
+    // 精确集（防「以为已全」：30 = 1 内建 + 28 启用本体 + ProposeGoal 恒注册，6 门控缺席见 P-1b）
+    expect(names).toHaveLength(30)
     expect([...names].sort()).toEqual(EXPECTED_VISIBLE)
   })
 
@@ -624,8 +625,8 @@ describe('gelu P-5 MCP 供给面复验（1 假 stdio server → 池 +1 mcp__ 名
     })
     const names = bundle5.tools.map(t => t.name)
     expect(names).toContain('mcp__gelufake__echo_tool')
-    // 池 = 29（P-1a 精确集）+ 1 mcp__ 判别
-    expect(names).toHaveLength(30)
+    // 池 = 30（P-1a 精确集）+ 1 mcp__ 判别
+    expect(names).toHaveLength(31)
     const mcpTool = bundle5.tools.find(t => t.name === 'mcp__gelufake__echo_tool')!
     expect(mcpTool.isMcp).toBe(true)
     expect(mcpTool.mcpInfo).toEqual({

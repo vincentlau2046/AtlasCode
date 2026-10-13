@@ -63,7 +63,6 @@ import {
   clearGoal,
   evaluateGoal,
   getGoalCondition,
-  getGoalStateForPersistence,
   goalContinuationReminder,
   isGoalArmed,
   isGoalPaused,
