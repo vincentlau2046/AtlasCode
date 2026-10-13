@@ -58,6 +58,14 @@ import {
 } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
 import { nextFallbackRef, withTurnRecovery } from './turnRecovery'
+import {
+  DEFAULT_MAX_GOAL_TURNS,
+  clearGoal,
+  evaluateGoal,
+  getGoalCondition,
+  goalContinuationReminder,
+  isGoalArmed,
+} from '../goal/goalState'
 import { runToolBatch, type PermissionGate } from '../pipeline'
 import {
   autoCompactIfNeeded,
@@ -104,6 +112,13 @@ export interface LoopTranscriptSink {
    * 接缝登记（fake compact 测试面可 seed）。
    */
   recordContentReplacement?(replacements: readonly ContentReplacementRecord[]): Promise<void>
+  /**
+   * 0.1.62 /goal P1：goal 状态变更持久化面（loop 清 goal 时回写 session
+   * metadata 缓存，防 reAppendSessionMetadata 写陈旧 armed 态）。null = cleared
+   * 快照。producer = loop terminal 支（met/maxTurns 清 goal 时调）；缺省 =
+   * 无持久化（测试面可 stub）。
+   */
+  saveGoalState?(goal: { armed: boolean; condition: string } | null): void
 }
 
 /**
@@ -130,6 +145,16 @@ export type AgentLoopEvent =
       toolResultMessages: Message[]
     }
   | { type: 'loop_end'; result: AgentLoopResult }
+  | {
+      type: 'goal_met'
+      condition: string
+    }
+  | {
+      type: 'goal_continuation'
+      condition: string
+      turn: number
+      reason: string
+    }
 
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
@@ -239,6 +264,13 @@ export interface AgentLoopContextConfig {
    * 置 true 时 maxTurns 参数忽略（循环仅由自然终止 / 压缩熔断 / abort 终止）。
    */
   unboundedTurns?: boolean
+  /**
+   * 0.1.62 /goal（CC 2.1.139）：goal 续跑轮次硬上限（防 runaway——goal armed
+   * 时评估器每判未达成续跑一轮，maxGoalTurns 截断防无限续跑）。缺省 =
+   * DEFAULT_MAX_GOAL_TURNS（10）。REPL unboundedTurns 模式下仍生效（goal
+   * runaway 独立于主循环轮次上限——主循环无上限但 goal 不可无上限）。
+   */
+  maxGoalTurns?: number
 }
 
 /** 多轮循环入参（T-4a）：context 可选（未注入 = 不跑 pre-turn 压缩）。 */
@@ -559,6 +591,11 @@ export async function queryAgentLoop(
   let turns = 0
   let terminated = false
   let lastRound: AgentRoundResult | undefined
+  // 0.1.62 /goal C0-2：goal 续跑计数器（防 runaway 硬守卫；每评估一次未达成
+  // 自增，达 maxGoalTurns 强制终止——独立于主 turns 计数）。
+  const maxGoalTurns =
+    args.context?.maxGoalTurns ?? DEFAULT_MAX_GOAL_TURNS
+  let goalTurns = 0
   // AD-45 0.1.52：defer 挂起面（某轮 pre-hook 'defer' 裁定 → 挂起 break，
   // 非自然终止亦非 maxTurns 截断；terminated 保持 false 判别式）。
   let deferredToolUse: DeferredToolUsePayload | undefined
@@ -730,17 +767,65 @@ export async function queryAgentLoop(
       break
     }
     if (lastRound.toolResults.length === 0) {
-      // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
-      // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
-      // 阻止停止续跑（maxTurns 守卫仍为终止兜底）；blockingErrors/additionalContext
-      // 回灌 = 消息/REPL 波前向接缝（engine/hooks 头注登记）。
-      const stop = deps.hooks?.stopHooks
-      const preventStop = stop ? (await stop(deps.signal)).preventContinuation : false
-      if (!preventStop) {
-        terminated = true
-        break
+      // 0.1.62 /goal C0-2（CC 2.1.139 核心）：terminal 支 goal 续跑支。
+      // goal armed → 评估器（small 角色无 tools）判达成/未达成：
+      //   未达成 = 注入续跑指令（2.1.173 reminder 语义）+ 续跑（不终止）；
+      //   达成 = 清 goal + 终止事件（自清除，无「run /goal clear」提示）；
+      //   maxGoalTurns 超限 = 强制终止（防 runaway 硬守卫）。
+      // goal 未 armed = 既有 stopHooks 消费点（字节级恒等——零回归守卫项）。
+      if (isGoalArmed()) {
+        const condition = getGoalCondition()!
+        // 硬守卫：goal 续跑计数超限 → 强制终止（防 runaway，同 maxTurns 兜底模式）
+        if (goalTurns >= maxGoalTurns) {
+          clearGoal()
+          // P1 持久化：cleared 快照回写缓存（防 reAppend 写陈旧 armed 态）
+          deps.transcript?.saveGoalState?.(null)
+          terminated = true
+          break
+        }
+        goalTurns++
+        const evalResult = await evaluateGoal({
+          modelProvider: deps.modelProvider,
+          signal: deps.signal,
+          messages,
+          condition,
+        })
+        if (evalResult.met) {
+          // 达成 = 自清除 + 终止（2.1.173 纪律：勿提示 run /goal clear）
+          clearGoal()
+          // P1 持久化：cleared 快照回写缓存（防 reAppend 写陈旧 armed 态）
+          deps.transcript?.saveGoalState?.(null)
+          deps.emit?.({ type: 'goal_met', condition })
+          terminated = true
+          break
+        }
+        // 未达成 = 注入续跑指令 + 续跑（不终止；turnCounter 继续轮末自增）
+        const reminder = goalContinuationReminder(condition)
+        messages = [...messages, reminder]
+        if (deps.transcript) {
+          await deps.transcript.record(messages)
+        }
+        deps.emit?.({
+          type: 'goal_continuation',
+          condition,
+          turn: turns,
+          reason: evalResult.reason,
+        })
+        // 落继续轮末 turnCounter 续跑（不终止，防停——同 preventStop=true 语义）
+      } else {
+        // E-5 S-5a：stop hooks 消费点（C-4 归属订正：stop hooks = E-5 非 E-1b，
+        // 旧仓 Stop 事件——continue:false 可阻止停止）：preventContinuation=true →
+        // 阻止停止续跑（maxTurns 守卫仍为终止兜底）；blockingErrors/additionalContext
+        // 回灌 = 消息/REPL 波前向接缝（engine/hooks 头注登记）。
+        // ★ 零回归：goal 未 armed 时本支字节级恒等（既有路径零漂移）。
+        const stop = deps.hooks?.stopHooks
+        const preventStop = stop ? (await stop(deps.signal)).preventContinuation : false
+        if (!preventStop) {
+          terminated = true
+          break
+        }
+        // preventStop=true → 落继续轮末 turnCounter 续跑（不终止，防停）
       }
-      // preventStop=true → 落继续轮末 turnCounter 续跑（不终止，防停）
     }
     // 继续轮末：距上次 compact 的轮数自增（旧仓 loop.ts:1458-1460：仅 tracking.compacted
     // 会话、仅继续轮——terminal 轮不增，语义 = 「距上次 compact 几轮」）。

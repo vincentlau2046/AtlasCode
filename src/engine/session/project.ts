@@ -220,6 +220,9 @@ class Project {
   currentSessionPrNumber: number | undefined
   currentSessionPrUrl: string | undefined
   currentSessionPrRepository: string | undefined
+  // 0.1.62 /goal P1：armed goal 缓存（reAppendSessionMetadata 写盘 +
+  // restore.ts restoreGoalState 恢复运行态；null = cleared 快照）。
+  currentSessionGoal: { armed: boolean; condition: string } | null | undefined
 
   sessionFile: string | null = null
   // Entries buffered while sessionFile is null. Flushed by materializeSessionFile
@@ -505,6 +508,15 @@ class Project {
         sessionId,
       })
     }
+    // 0.1.62 /goal P1：goal-state 写盘（compact 后 goal 不丢——reAppend
+    // 尾部窗 + resume 恢复支）。armed=false = cleared 快照（防旧态泄漏）。
+    if (this.currentSessionGoal !== undefined) {
+      appendEntryToFile(this.sessionFile, {
+        type: 'goal-state',
+        goal: this.currentSessionGoal,
+        sessionId,
+      })
+    }
     if (
       this.currentSessionPrNumber !== undefined &&
       this.currentSessionPrUrl &&
@@ -787,6 +799,9 @@ class Project {
       // Mode entries can always be appended
       void this.enqueueWrite(sessionFile, entry)
     } else if (entry.type === 'worktree-state') {
+      void this.enqueueWrite(sessionFile, entry)
+    } else if (entry.type === 'goal-state') {
+      // 0.1.62 /goal P1：goal-state entries can always be appended
       void this.enqueueWrite(sessionFile, entry)
     } else if (entry.type === 'content-replacement') {
       // Content replacement records can always be appended. Subagent records

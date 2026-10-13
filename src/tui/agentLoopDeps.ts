@@ -38,6 +38,7 @@ import {
   mergeAutoCompactOverrides,
   recordTranscript,
   recordContentReplacement,
+  saveGoalState,
   tryReactiveCompact,
   type AgentLoopArgs,
   type AgentLoopDeps,
@@ -88,6 +89,11 @@ export interface AgentLoopMaterials {
   maxTurns?: number
   /** 无轮次上限（REPL 保真面；子 loop 缺省由 maxTurns 缺省推导）。 */
   unboundedTurns?: boolean
+  /**
+   * 0.1.62 /goal（CC 2.1.139）：goal 续跑轮次硬上限覆写（缺省 =
+   * DEFAULT_MAX_GOAL_TURNS；REPL/子 loop 均透传 args.context.maxGoalTurns）。
+   */
+  maxGoalTurns?: number
 }
 
 /** queryEngineLoopStream 入参（deps + args）。 */
@@ -245,6 +251,8 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
         recordContentReplacement(
           recs as unknown as Parameters<typeof recordContentReplacement>[0],
         ),
+      // 0.1.62 /goal P1：loop 清 goal 时回写 session metadata 缓存
+      saveGoalState: (goal) => saveGoalState(goal),
     },
     // D2（0.1.37 ③）：跳闸态 systemContext 注入面（非跳闸 = 原引用透传）
     systemPrompt: asSystemPrompt(
@@ -266,6 +274,9 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
       autoCompact,
       unboundedTurns,
       ...(m.maxTurns !== undefined ? { maxTurns: m.maxTurns } : {}),
+      // 0.1.62 /goal C0-2：goal 续跑轮次硬上限（DEFAULT_MAX_GOAL_TURNS 缺省兜底；
+      // REPL unboundedTurns 模式下仍生效——goal runaway 独立于主循环轮次上限）。
+      maxGoalTurns: m.maxGoalTurns,
     },
   }
 

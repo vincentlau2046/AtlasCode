@@ -58,6 +58,7 @@ import {
   restoreSessionMetadata,
   saveMode,
 } from './record'
+import { restoreGoalState } from '../goal/goalState'
 import type {
   ContentReplacementRecord,
   Message,
@@ -84,6 +85,12 @@ export type ResumeLoadResult = {
   prNumber?: number
   prUrl?: string
   prRepository?: string
+  /**
+   * 0.1.62 /goal P1：armed goal 快照（LogOption.goal → 本字段 → restoreGoalState
+   * 运行态单例恢复 + restoreSessionMetadata 缓存恢复）。null = cleared 快照（no-op）；
+   * undefined = 从无 goal。fork 路径不恢复（同 worktreeSession fork 剥离语义）。
+   */
+  goal?: { armed: boolean; condition: string } | null
 }
 
 /**
@@ -152,11 +159,22 @@ export async function processResumedConversation(
   // original session's worktree — a "Remove" on the fork's exit dialog
   // would delete a worktree the original session still references — so
   // strip worktreeSession from the fork path so the cache stays unset.
+  // 0.1.62 /goal P1：goal 同剥离（fork 不继承源会话的 armed goal——
+  // fork 应是干净的，且源会话的 goal-state entry 仍在源 jsonl 尾部窗）。
   restoreSessionMetadata(
-    opts.forkSession ? { ...result, worktreeSession: undefined } : result,
+    opts.forkSession
+      ? { ...result, worktreeSession: undefined, goal: undefined }
+      : result,
   )
 
   if (!opts.forkSession) {
+    // 0.1.62 /goal P1：恢复运行态 goal 单例（goalState 模块单例，与
+    // project.currentSessionGoal 缓存分立——缓存供 reAppendSessionMetadata
+    // 写盘，单例供 loop.ts isGoalArmed 续跑判别）。restoreSessionMetadata
+    // 已恢复缓存；此处恢复单例。null/undefined = 不恢复（cleared/no-op）。
+    if (result.goal !== undefined) {
+      restoreGoalState(result.goal)
+    }
     // Cd back into the worktree the session was in when it last exited.
     // Done after restoreSessionMetadata (which caches the worktree state
     // from the transcript) so if the directory is gone we can override

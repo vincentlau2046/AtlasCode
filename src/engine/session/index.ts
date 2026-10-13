@@ -111,6 +111,7 @@ export {
   clearSessionMetadata,
   cacheSessionTitle,
   saveMode,
+  saveGoalState,
   reAppendSessionMetadata,
 } from './record'
 

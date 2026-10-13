@@ -471,6 +471,7 @@ export async function loadTranscriptFromFile(
       leafUuids,
       contentReplacements,
       worktreeStates,
+      goalStates,
     } = await loadTranscriptFile(filePath)
 
     if (messages.size === 0) {
@@ -505,6 +506,9 @@ export async function loadTranscriptFromFile(
       ),
       worktreeSession: worktreeStates.has(sessionId)
         ? worktreeStates.get(sessionId)
+        : undefined,
+      goal: goalStates.has(sessionId)
+        ? goalStates.get(sessionId)
         : undefined,
     }
   }
@@ -685,6 +689,7 @@ const METADATA_TYPE_MARKERS = [
   '"type":"agent-setting"',
   '"type":"mode"',
   '"type":"worktree-state"',
+  '"type":"goal-state"',
   '"type":"pr-link"',
 ]
 const METADATA_MARKER_BUFS = METADATA_TYPE_MARKERS.map(m => Buffer.from(m))
@@ -1004,6 +1009,7 @@ export async function loadTranscriptFile(
   tags: Map<string, string>
   worktreeStates: Map<string, PersistedWorktreeSession | null>
   contentReplacements: Map<string, ContentReplacementRecord[]>
+  goalStates: Map<string, { armed: boolean; condition: string } | null>
   leafUuids: Set<string>
 }> {
   const messages = new Map<string, TranscriptMessage>()
@@ -1012,6 +1018,10 @@ export async function loadTranscriptFile(
   const tags = new Map<string, string>()
   const worktreeStates = new Map<string, PersistedWorktreeSession | null>()
   const contentReplacements = new Map<string, ContentReplacementRecord[]>()
+  const goalStates = new Map<
+    string,
+    { armed: boolean; condition: string } | null
+  >()
 
   try {
     // For large transcripts, avoid materializing megabytes of stale content.
@@ -1089,6 +1099,8 @@ export async function loadTranscriptFile(
           tags.set(entry.sessionId, entry.tag)
         } else if (entry.type === 'worktree-state' && entry.sessionId) {
           worktreeStates.set(entry.sessionId, entry.worktreeSession)
+        } else if (entry.type === 'goal-state' && entry.sessionId) {
+          goalStates.set(entry.sessionId, entry.goal)
         }
       }
     }
@@ -1138,6 +1150,11 @@ export async function loadTranscriptFile(
         tags.set(entry.sessionId, entry.tag)
       } else if (entry.type === 'worktree-state' && entry.sessionId) {
         worktreeStates.set(entry.sessionId, entry.worktreeSession)
+      } else if (entry.type === 'goal-state' && entry.sessionId) {
+        // 0.1.62 /goal P1：last-wins goal 快照（armed=false = cleared 写盘，
+        // 恢复时 restoreGoalState no-op 防旧 cleared 态泄漏；同 worktree-state
+        // last-wins 语义）。
+        goalStates.set(entry.sessionId, entry.goal)
       } else if (entry.type === 'content-replacement' && !entry.agentId) {
         // Subagent decisions key by agentId (sidechain resume); main-thread
         // decisions key by sessionId (/resume). agentId 支 = 裁面登记（AgentTool
@@ -1215,6 +1232,7 @@ export async function loadTranscriptFile(
     tags,
     worktreeStates,
     contentReplacements,
+    goalStates,
     leafUuids,
   }
 }

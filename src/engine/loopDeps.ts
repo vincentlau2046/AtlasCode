@@ -45,6 +45,7 @@ import { createLoopHooks } from './hooks/toolHooks'
 import {
   recordTranscript,
   recordContentReplacement,
+  saveGoalState,
   type ContentReplacementRecord,
   type Message as SessionMessage,
 } from './session'
@@ -301,6 +302,10 @@ export async function createAgentLoopDeps(
     // 0.1.59 C 簇（CC 2.1.166）：--fallback-models（≤3 ref 有序表）透传
     // AgentLoopDeps.fallbackModels（queryAgentLoop 轮内 catch 消费）。
     fallbackModels: config.fallbackModels,
+    // 0.1.62 /goal C0-5（CC 2.1.139 works in -p）：headless -p 模式 goal 同语义
+    // ——queryAgentLoop 共享面（零额外挂面），maxGoalTurns 经 args.context 透传
+    // （DEFAULT_MAX_GOAL_TURNS 缺省兜底，loop 内消费）。goal 状态 = 模块级单例
+    // （isGoalArmed 读面），headless 与 TUI 共享同一 goalState——行为恒等。
     // S-E3 A11（§8.52）：transcript 写面 = session 域 record 族（recordTranscript
     // dedup 幂等在内，重记安全；持久化门 = session 写面 shouldSkipPersistence
     // 内部态，本波不加构建器门 = 裁面登记——D 波/CLI persistSession 面）。
@@ -318,6 +323,9 @@ export async function createAgentLoopDeps(
               recs as unknown as ContentReplacementRecord[],
               config.agentId,
             ),
+          // 0.1.62 /goal P1：loop 清 goal 时回写 session metadata 缓存
+          // （headless -p 与 TUI 行为恒等——goalState 模块单例共享）
+          saveGoalState: goal => saveGoalState(goal),
         },
   }
   return { toolPermissionContext, tools, deps, warnings }

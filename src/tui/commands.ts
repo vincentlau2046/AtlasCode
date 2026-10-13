@@ -82,6 +82,7 @@ import reloadPlugins from './commands/reload-plugins/index.js'
 import reloadSkills from './commands/reload-skills/index.js'
 import cd from './commands/cd/index.js'
 import outputStyle from './commands/output-style/index.js'
+import { goal, goalNonInteractive } from './commands/goal/index.js'
 import rewind from './commands/rewind/index.js'
 import heapDump from './commands/heapdump/index.js'
 import version from './commands/version.js'
@@ -226,6 +227,8 @@ const COMMANDS = memoize((): Command[] => [
   theme,
   tui,
   feedback,
+  goal,
+  goalNonInteractive,
   review,
   rewind,
   terminalSetup,

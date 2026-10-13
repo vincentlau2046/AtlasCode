@@ -783,6 +783,7 @@ export {
   clearSessionMetadata,
   cacheSessionTitle,
   saveMode,
+  saveGoalState,
   reAppendSessionMetadata,
   COMMAND_NAME_TAG,
   getFirstMeaningfulUserMessageTextContent,
@@ -1104,3 +1105,23 @@ export {
 
 // §8.56 S-D2：agent teams / swarms 总开关（messaging 域内文件，经域门面出）
 export { isAgentSwarmsEnabled } from './messaging'
+
+// 0.1.62 /goal 核心+持久化波（CC 2.1.139）：goal 状态机 + 评估器 + 续跑指令
+// 模板（引擎内建条件化 Stop hook——loop.ts terminal 支消费）。
+export {
+  MAX_GOAL_CONDITION_CHARS,
+  DEFAULT_MAX_GOAL_TURNS,
+  armGoal,
+  clearGoal,
+  isGoalArmed,
+  getGoalCondition,
+  getGoalStateForPersistence,
+  restoreGoalState,
+  resetGoalStateForTesting,
+  evaluateGoal,
+  goalContinuationReminder,
+  goalMetNotification,
+  goalClearedNotification,
+  type GoalStateSnapshot,
+  type GoalEvaluationResult,
+} from './goal/goalState'

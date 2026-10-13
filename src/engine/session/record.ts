@@ -308,6 +308,7 @@ export function restoreSessionMetadata(meta: {
   prNumber?: number
   prUrl?: string
   prRepository?: string
+  goal?: { armed: boolean; condition: string } | null
 }): void {
   const project = projectInstance()
   // ??= so --name (cacheSessionTitle) wins over the resumed
@@ -324,6 +325,9 @@ export function restoreSessionMetadata(meta: {
     project.currentSessionPrNumber = meta.prNumber
   if (meta.prUrl) project.currentSessionPrUrl = meta.prUrl
   if (meta.prRepository) project.currentSessionPrRepository = meta.prRepository
+  // 0.1.62 /goal P1：恢复 armed goal 缓存（reAppendSessionMetadata 写盘；
+  // restore.ts 消费 restoreGoalState 恢复运行态）。null/undefined = 不恢复。
+  if (meta.goal !== undefined) project.currentSessionGoal = meta.goal
 }
 
 /**
@@ -344,6 +348,7 @@ export function clearSessionMetadata(): void {
   project.currentSessionPrNumber = undefined
   project.currentSessionPrUrl = undefined
   project.currentSessionPrRepository = undefined
+  project.currentSessionGoal = undefined
 }
 
 /**
@@ -362,6 +367,19 @@ export function cacheSessionTitle(customTitle: string): void {
  */
 export function saveMode(mode: 'coordinator' | 'normal'): void {
   projectInstance().currentSessionMode = mode
+}
+
+/**
+ * 0.1.62 /goal P1：Cache the armed goal state. Written to disk by
+ * materializeSessionFile on the first user message, and re-stamped by
+ * reAppendSessionMetadata on exit / compaction. Cache-only here to avoid
+ * creating metadata-only session files at startup（同 saveMode 先例）。
+ * null = cleared（写盘 armed=false 快照，恢复时 no-op）。
+ */
+export function saveGoalState(
+  goal: { armed: boolean; condition: string } | null,
+): void {
+  projectInstance().currentSessionGoal = goal
 }
 
 /**

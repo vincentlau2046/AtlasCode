@@ -16,6 +16,7 @@ import { CwdSegment } from './CwdSegment.js'
 import { ControlLinkSegment } from './ControlLinkSegment.js'
 import { PermissionModeSegment } from './PermissionModeSegment.js'
 import { SessionDurationSegment } from './SessionDurationSegment.js'
+import { GoalSegment } from './GoalSegment.js'
 import type { SegmentComponent } from './types.js'
 
 export const segmentRegistry = new Map<string, SegmentComponent>([
@@ -35,6 +36,8 @@ export const segmentRegistry = new Map<string, SegmentComponent>([
   ['session-duration', SessionDurationSegment],
   ['cwd', CwdSegment],
   ['control-link', ControlLinkSegment],
+  // 0.1.62 /goal C0-4：footer goal 指示器（armed 时显示，未 armed = null）
+  ['goal', GoalSegment],
 ])
 
 export {

@@ -141,6 +141,12 @@ export type LogOption = {
   mode?: 'coordinator' | 'normal' // Session mode for coordinator/normal detection
   worktreeSession?: PersistedWorktreeSession | null // Worktree state at session end (null = exited, undefined = never entered)
   contentReplacements?: ContentReplacementRecord[] // Replacement decisions for resume reconstruction
+  /**
+   * 0.1.62 /goal P1：armed goal 快照（session metadata goal-state entry 恢复面）。
+   * null = cleared 快照（恢复时 no-op）；undefined = 从无 goal。与 GoalStateEntry.goal
+   * 同形（restoreSessionMetadata + restoreGoalState 双消费：缓存 + 运行态单例）。
+   */
+  goal?: { armed: boolean; condition: string } | null
 }
 
 export type SummaryMessage = {
@@ -262,6 +268,21 @@ export type WorktreeStateEntry = {
 }
 
 /**
+ * 0.1.62 /goal P1 持久化（CC 2.1.139 resume/compact 恢复）：armed goal
+ * 条件持久化（session metadata goal-state entry）。--resume/--continue
+ * 恢复 armed goal；compact 后 goal 不丢（reAppendSessionMetadata 尾部窗）。
+ * armed=false = cleared 快照（恢复时 no-op，防旧 cleared 态泄漏）。
+ */
+export type GoalStateEntry = {
+  type: 'goal-state'
+  sessionId: UUID
+  goal: {
+    armed: boolean
+    condition: string
+  }
+}
+
+/**
  * Records content blocks whose in-context representation was replaced with a
  * smaller stub (the full content was persisted elsewhere). Replayed on resume
  * for prompt cache stability. Written once per enforcement pass that replaces
@@ -331,6 +352,7 @@ export type Entry =
   | PRLinkMessage
   | ModeEntry
   | WorktreeStateEntry
+  | GoalStateEntry
   | ContentReplacementEntry
 
 export function sortLogs(logs: LogOption[]): LogOption[] {

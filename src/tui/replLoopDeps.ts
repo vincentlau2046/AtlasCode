@@ -53,6 +53,11 @@ export interface ReplLoopMaterials {
   toolUseContext: ToolUseContext
   /** querySource（getQuerySourceForREPL()）。 */
   querySource: string
+  /**
+   * 0.1.62 /goal（CC 2.1.139）：goal 续跑轮次硬上限覆写（缺省 =
+   * DEFAULT_MAX_GOAL_TURNS；透传 buildAgentLoopParams → args.context）。
+   */
+  maxGoalTurns?: number
 }
 
 /** queryEngineLoopStream 入参（deps + args）。= AgentLoopParams（通用型）。 */
@@ -78,5 +83,6 @@ export function buildReplLoopParams(m: ReplLoopMaterials): ReplLoopParams {
     toolUseContext: m.toolUseContext,
     querySource: m.querySource,
     unboundedTurns: true,
+    maxGoalTurns: m.maxGoalTurns,
   })
 }
