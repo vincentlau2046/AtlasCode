@@ -4,6 +4,44 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.63
+
+0.1.61+ 波池第 3 车：/goal 演化批波（基线 v0.1.62；CC 演化 2.1.173→2.1.295
+P2–P8 七件，工单 `docs/2026-10-13-p0-wave-0163-ticket.md` + 评估卡
+`docs/2026-10-13-p0-goal-eval-card.md`）。0.1.62 落了 /goal 核心+持久化（跨回合
+完成条件 stop-hook 化），本波 = 全面演化对齐（12 演化项全落），覆盖错误恢复、
+自清除、定时 check-in、时序守卫、hook 门控、空闲性能、ProposeGoal 工具：
+
+- **P2 · goal 跑动中错误恢复**：goal 注障不静默挂起——继承 turnRecovery（0.1.58
+  退避 + 0.1.59 fallback 有序表）；goal 面增量 = paused 状态机 + 暂停说明行 +
+  配额恢复后 resume
+- **P3 · 不可恢复自清除**：不可恢复类错误（auth 吊销/额度耗尽/上下文溢出）→
+  goal cleared + 通知行（不再 armed）；错误分类器 × goal 状态机交叉
+- **P4 · check-in 定时器**：空闲会话 goal 被长后台工作阻塞 → 自动 check-in
+  续跑回合（注入 2.1.246 Autonomous loop check 提示词，国产适配裁剪云 PR/分支
+  扫查语境）；退避 30m→1h→2h；每 goal 至多 3 次，用户下一消息 +3 刷新；
+  `ATLAS_GOAL_CHECKIN_MINUTES` env（0=关断）；gate 测试用秒级短常数 override
+- **P5 · 评估器时序守卫**：评估器在后台 shell/委派任务仍运行时提前触发修复——
+  hasPendingBackgroundTasks DI 槽前置守卫（LocalShellTask 族；subagent 时序面
+  = Q3 独占波，不扩本波 scope）
+- **P6 · hook 门控显式面**：`disableAllHooks`/`allowManagedHooksOnly` 时 /goal
+  不再静默挂起 → 显式报错面
+- **P7 · 空闲 5Hz 性能**：GoalOverlay/GoalSegment 空闲分支零重渲染（React.memo
+  化，0.1.62 面既有组件优化）
+- **P8 · ProposeGoal 工具**（CC 2.1.227）：agent 主动 propose 可验证多回合 goal——
+  `ask_user=true`（默认，单键批准，decline 不通知）/ `ask_user=false`（**仅限用户
+  原话明确要求**硬约束）；评估器仅对话验证（不跑命令不读文件）；条件 ≤500 字符
+  单一可测终态；one goal at a time（新批准替换）；工具描述提示词 2.1.227 全文移植
+  + 国产适配；恒注册非门控入模型可见池（+1 工具）
+- **slash 面**：∅（ProposeGoal = 工具非 slash；check-in = 定时器非命令）→
+  /help 55 恒等 + cmd 33 恒等
+- **gate-open 修波**（10ffc76）：loop.ts P2/P3/P5/P6 遗留未用 import 移除 +
+  gelu-probe 池数同步（29→30 / 30→31，ProposeGoal 恒注册入池）
+
+gate r2 GATE-PASS（6 判据全绿：判别单测 74/0 + 四件套 tsc 0/eslint src 0e/CI
+4188·0 fail + P0a PASS + A4F releasable + /help 55 + cmd 33 + loop-rob C1/C2/C3/R3
+全绿 + 0.1.62 goal 活探针 14/14 + 新活探针 12/12）。
+
 ## v0.1.62
 
 0.1.61+ 波池次车：/goal 核心+持久化波（基线 v0.1.61；CC 2.1.173 跨回合完成条件
