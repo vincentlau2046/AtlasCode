@@ -4,6 +4,22 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.61
+
+PAC 0148 §AD-07（CC 2.1.118，☆ 插件作者工具）插件 tag 工具小波——0.1.61+ 波池首车
+（基线 v0.1.60；工单 `docs/2026-10-13-p0-wave-0161-ticket.md`）。插件作者发布闭环缺的
+最后一环：给已装插件仓库打 **版本校验的 release git tag**（行为波，完整 gate + SRI
+独立复算；slash ∅ → /help 54 基线恒等 + cmd 32 零增减）：
+
+- **AD-07 · `plugin tag <plugin> [--tag <tag>]`（CC 2.1.118）**：
+  - 插件作者发布闭环 = validate → install → 自托管 marketplace publish（git repo + commit/push），本工具补上最后一环：在已装插件的 git 仓库上创建 release git tag
+  - 版本一致性校验（fail-closed）：目标 tag 须与插件 manifest（`.atlas-plugin/plugin.json`，`.claude-plugin/` 旧形 fallback）声明版本一致——缺省 tag = `v<manifest version>`；显式 `--tag` 须 = 版本或 `v`+版本，不符 = 报错拒绝（提示期望版本），不创建
+  - 错误面七码：no-plugin / no-install-path / no-manifest / not-a-git-repo / version-mismatch / tag-exists / git-failed（tag 已存在不覆盖）
+  - 落点：`src/tui/utils/plugins/pluginTag.ts`（createPluginReleaseTag + readPluginManifestVersion + resolveTargetTag 纯函数；git 走既有 execFileNoThrowWithCwd/gitExe 执行面）+ `TagPlugin.tsx` 一次性视图（headless 可完成）+ parseArgs tag 子命令（--tag/-t flag 剥离）+ PluginSettings 分发/帮助面
+  - 隔离面 = 插件作者侧（用户主路径 TUI 主循环/权限/模型 provider/session 零影响；终端用户面 = plugin 菜单多一个 tag 子项 + help 列表 Release 段一行）
+- **零回归**：11 既有 plugin 子命令解析/分发行为恒等（纯增量 + 单测恒等守卫）；插件族既有面（marketplace publish/validate/install）恒等；前波五波特性面精确同值（0.1.56–0.1.60）
+- **判别单测**：`plugin-tag-0161`（tag 创建成功 tag 在场断言 / 版本不符拒绝错误面 / 无 manifest·非 git repo·tag 已存在·未安装错误面 / readPluginManifestVersion 四态 / resolveTargetTag 矩阵 / 11 既有子命令恒等守卫，ATLAS_PLUGIN_CACHE_DIR 沙箱 + 真 git tmp 目录），修前红（模块 ∅ 全族红）→ 修后绿 21/21 闭环
+
 ## v0.1.60
 
 PAC V2-11 C10-2 TUI 小波（基线 v0.1.59；CC 2.1.269 /output-style + CC 2.1.169 /cd +
