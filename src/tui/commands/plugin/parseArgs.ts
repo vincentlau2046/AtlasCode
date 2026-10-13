@@ -9,6 +9,7 @@ export type ParsedCommand =
   | { type: 'enable'; plugin?: string }
   | { type: 'disable'; plugin?: string }
   | { type: 'validate'; path?: string }
+  | { type: 'tag'; plugin?: string; tag?: string }
   | {
       type: 'marketplace'
       action?: 'add' | 'remove' | 'update' | 'list' | 'adopt'
@@ -80,6 +81,20 @@ export function parsePluginArgs(args?: string): ParsedCommand {
     case 'validate': {
       const target = parts.slice(1).join(' ').trim()
       return { type: 'validate', path: target || undefined }
+    }
+
+    case 'tag': {
+      // plugin tag <plugin> [--tag <tag>]
+      const rest = parts.slice(1)
+      const tagIdx = rest.findIndex(p => p === '--tag' || p === '-t')
+      const tagName = tagIdx >= 0 ? rest[tagIdx + 1] : undefined
+      // Drop only the --tag flag + its value (when present); with no flag,
+      // tagIdx is -1 and nothing is dropped.
+      const pluginParts =
+        tagIdx === -1
+          ? rest
+          : rest.filter((_, i) => i !== tagIdx && i !== tagIdx + 1)
+      return { type: 'tag', plugin: pluginParts[0], tag: tagName }
     }
 
     case 'marketplace':
