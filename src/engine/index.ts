@@ -1138,3 +1138,20 @@ export {
   type GoalEvaluationResult,
   type GoalErrorClass,
 } from './goal/goalState'
+
+// 0.1.63 P4：check-in 定时器（2.1.246 Autonomous loop check）
+export {
+  getGoalCheckInMinutes,
+  getCheckInDelayMs,
+  GOAL_CHECKIN_BACKOFF_MULTIPLIERS,
+  MAX_GOAL_CHECKINS,
+  CHECKIN_REFRESH_AMOUNT,
+  DEFAULT_GOAL_CHECKIN_MINUTES,
+  goalCheckInPrompt,
+  resetCheckInState,
+  recordCheckIn,
+  refreshOnUserMessage,
+  getRemainingCheckIns,
+  canCheckIn,
+  getCheckInStateForTesting,
+} from './goal/goalCheckIn'

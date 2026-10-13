@@ -52,6 +52,7 @@ import {
 import { SnipTool } from './tools/team/snipTool'
 import { TeamCreateTool } from './tools/team/teamCreateTool'
 import { TeamDeleteTool } from './tools/team/teamDeleteTool'
+import { ProposeGoalTool } from './tools/proposeGoal/ProposeGoal'
 import { type AgentLoopDeps } from './query/loop'
 // D1（0.1.37 ③，P2 恢复层 C3 缺口）：headless 车道 413/PTL 反应式压缩
 // 消费者（engine 窄体 compactConversation 裁剪模式，TUI 车道 autoCompact.compact
@@ -196,6 +197,8 @@ export async function createAgentLoopDeps(
       SnipTool,
       TeamCreateTool,
       TeamDeleteTool,
+      // 0.1.63 P8：ProposeGoal 工具（CC 2.1.227，恒注册非门控）
+      ProposeGoalTool,
     ],
     mcpTools: [...(config.toolRegistryDeps?.mcpTools ?? []), ...mcpTools],
     // M3-S5：ascend 16 工具经 DomainPackage 挂载面注入（mount.ts 注册 →
