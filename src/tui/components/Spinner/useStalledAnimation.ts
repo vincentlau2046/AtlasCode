@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { computeStallState } from './spinnerGates.js'
 
 // Hook to handle the transition to red when tokens stop flowing.
 // Driven by the parent's animation clock time instead of independent intervals,
@@ -37,12 +38,14 @@ export function useStalledAnimation(
     timeSinceLastToken = time - mountTime.current
   }
 
-  // Calculate stalled intensity based on time since last token
-  // Start showing red after 3 seconds of no new tokens (only when no tools are active)
-  const isStalled = timeSinceLastToken > 3000 && !hasActiveTools
-  const intensity = isStalled
-    ? Math.min((timeSinceLastToken - 3000) / 2000, 1) // Fade over 2 seconds
-    : 0
+  // 0.1.64 G2：stall 检测委托纯函数 computeStallState（spinnerGates.ts）。
+  // 增 currentResponseLength > 0 守卫——TTFT 期间（首 token 前）不报 stall，
+  // 仅「已开始流式后中断 > 3s」触发（原语义保留）。
+  const { isStalled, stalledIntensity: intensity } = computeStallState({
+    timeSinceLastToken,
+    currentResponseLength,
+    hasActiveTools,
+  })
 
   // Smooth intensity transition driven by animation frame ticks
   if (!reducedMotion && (intensity > 0 || stalledIntensityRef.current > 0)) {

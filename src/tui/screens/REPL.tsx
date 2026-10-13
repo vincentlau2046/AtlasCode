@@ -5,7 +5,7 @@ import { c as _c } from "react/compiler-runtime";
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature, PRODUCT_BRAND } from 'src/shared'; // BR-1（spec §6.2）：terminalTitle 品牌字面改经 shared 单一事实源（F5 stub import 保留：dev source-direct 可翻 TRANSCRIPT_CLASSIFIER，见 src/native-ts/bunBundle.ts）
 // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 超时错误行 remediation 提示面
-import { getCurrentLlmTimeoutMs, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint } from 'src/modelprovider';
+import { getCurrentLlmTimeoutMs, getCurrentEndpointLabel, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint } from 'src/modelprovider';
 import { spawnSync } from 'child_process';
 import { getTotalInputTokens } from 'src/bootstrap'
 import { snapshotOutputTokensForTurn, getCurrentTurnTokenBudget, getTurnOutputTokens, getBudgetContinuationCount } from 'src/tui/bootstrapState.js';
@@ -2719,7 +2719,9 @@ export function REPL({
       // settings llmTimeoutMs 修复旋钮；非超时错误提示面 = null 原句不变）
       const llmTimeoutHint = llmTimeoutRemediationHint(error, getCurrentLlmTimeoutMs());
       // P0b③ 网关不可达：给方向不给 mood（已切人工确认 + /doctor 排查；非网关错误 = null 原句不变）
-      const gwHint = gatewayUnreachableRemediationHint(error);
+      // 0.1.64 PR2：去 IFF 硬编码——endpointLabel 复合逻辑（本地端口/云 provider/通用 host）
+      const endpointLabel = getCurrentEndpointLabel(mainLoopModelParam);
+      const gwHint = gatewayUnreachableRemediationHint(error, endpointLabel);
       setMessages(prev => [...prev, createSystemMessage(`本轮执行出错：${errorMessage(error)}。${llmTimeoutHint ? `${llmTimeoutHint} ` : ''}${gwHint ? `${gwHint} ` : ''}请重试。`, 'error')]);
     } finally {
       // queryGuard.end() atomically checks generation and transitions

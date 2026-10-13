@@ -131,9 +131,12 @@ export function SpinnerAnimationRow({
   } = useStalledAnimation(time, currentResponseLength, hasActiveTools || leaderIsIdle, reducedMotion);
   const frame = reducedMotion ? 0 : Math.floor(time / 120);
   const glimmerSpeed = mode === 'requesting' ? 50 : 200;
+  // 0.1.64 G3：requesting 模式动词尾附省略号（对齐 Claude `Beboppin'…`）。
+  // displayMessage 供宽度计算与渲染同源，不漂移；mode 转 responding 后自消。
+  const displayMessage = mode === 'requesting' ? message + '…' : message;
   // message is stable within a turn; stringWidth is expensive enough (Bun native
   // call per code point) to memoize explicitly across the 50ms loop.
-  const glimmerMessageWidth = useMemo(() => stringWidth(message), [message]);
+  const glimmerMessageWidth = useMemo(() => stringWidth(displayMessage), [displayMessage]);
   const cycleLength = glimmerMessageWidth + 20;
   const cyclePosition = Math.floor(time / glimmerSpeed);
   const glimmerIndex = reducedMotion ? -100 : isStalled ? -100 : mode === 'requesting' ? cyclePosition % cycleLength - 10 : glimmerMessageWidth + 10 - cyclePosition % cycleLength;
@@ -177,7 +180,7 @@ export function SpinnerAnimationRow({
   const messageWidth = glimmerMessageWidth + 2;
   const sep = SEP_WIDTH;
   const wantsThinking = thinkingStatus !== null;
-  const { wantsTimer, wantsTokens } = getSpinnerDisplayGates({
+  const { wantsTimer, wantsTokens, wantsStatusIndicator } = getSpinnerDisplayGates({
     verbose,
     hasRunningTeammates,
     effectiveElapsedMs
@@ -195,7 +198,11 @@ export function SpinnerAnimationRow({
   const showTimer = wantsTimer && availableSpace > usedAfterThinking + timerWidth;
   const usedAfterTimer = usedAfterThinking + (showTimer ? timerWidth + sep : 0);
   const showTokens = wantsTokens && totalTokens > 0 && availableSpace > usedAfterTimer + tokensWidth;
-  const thinkingOnly = showThinking && thinkingStatus === 'thinking' && !spinnerSuffix && !showTimer && !showTokens && true;
+  // 0.1.64 G1：TTFT 期间状态指示——showTokens 未开（首 token 前 totalTokens=0）但
+  // wantsStatusIndicator（1s 门）+ mode='requesting' 时，显 ↑ 字形让用户知「请求已
+  // 发出」。width=2（SpinnerModeGlyph）；hasRunningTeammates 时隐（同 showTokens 分支）。
+  const showStatusIndicator = !showTokens && wantsStatusIndicator && mode === 'requesting' && !hasRunningTeammates && availableSpace > usedAfterTimer + 2;
+  const thinkingOnly = showThinking && thinkingStatus === 'thinking' && !spinnerSuffix && !showTimer && !showTokens && !showStatusIndicator && true;
 
   // === Thinking shimmer color (formerly ThinkingShimmerText's own timer) ===
   // Same sine-wave opacity, but derived from our shared `time` instead of a
@@ -212,7 +219,7 @@ export function SpinnerAnimationRow({
           </Text>] : []), ...(showTokens ? [<Box flexDirection="row" key="tokens">
             {!hasRunningTeammates && <SpinnerModeGlyph mode={mode} />}
             <Text dimColor>{tokenCount} tokens</Text>
-          </Box>] : []), ...(showThinking && thinkingText ? [thinkingStatus === 'thinking' && !reducedMotion ? <Text key="thinking" color={thinkingShimmerColor}>
+          </Box>] : []), ...(showStatusIndicator ? [<SpinnerModeGlyph key="statusGlyph" mode={mode} />] : []), ...(showThinking && thinkingText ? [thinkingStatus === 'thinking' && !reducedMotion ? <Text key="thinking" color={thinkingShimmerColor}>
               {thinkingOnly ? `(${thinkingText})` : thinkingText}
             </Text> : <Text dimColor key="thinking">
               {thinkingText}
@@ -230,7 +237,7 @@ export function SpinnerAnimationRow({
         </> : null;
   return <Box ref={viewportRef} flexDirection="row" flexWrap="wrap" marginTop={1} width="100%">
       <SpinnerGlyph frame={frame} messageColor={messageColor} stalledIntensity={overrideColor ? 0 : stalledIntensity} reducedMotion={reducedMotion} time={time} />
-      <GlimmerMessage message={message} mode={mode} messageColor={messageColor} glimmerIndex={glimmerIndex} flashOpacity={flashOpacity} shimmerColor={shimmerColor} stalledIntensity={overrideColor ? 0 : stalledIntensity} />
+      <GlimmerMessage message={displayMessage} mode={mode} messageColor={messageColor} glimmerIndex={glimmerIndex} flashOpacity={flashOpacity} shimmerColor={shimmerColor} stalledIntensity={overrideColor ? 0 : stalledIntensity} />
       {status}
     </Box>;
 }

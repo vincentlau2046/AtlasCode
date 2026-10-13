@@ -145,16 +145,77 @@ export function llmTimeoutRemediationHint(
 }
 
 /**
+ * 0.1.64 PR2（去 IFF 硬编码）：端点失败描述纯函数（复合逻辑）。
+ *
+ * 根据 baseURL 分类产生上下文相关描述（替代旧硬编码 "IFF"）：
+ *   - 本地 URL（localhost/127.x/0.0.0.0/[::1]）→ 按端口提示本地端口状态
+ *     （`本地端口 {port}`；无 port → `本地网关`）
+ *   - 已知云 provider host → 提示对应 provider 异常（`{ProviderName} 服务`）
+ *   - 通用/自定义端点 → 报 host（`{host}`）
+ *   - baseURL 缺失/URL 解析失败 → `LLM 端点`（generic fallback）
+ *
+ * 纯函数（无 config 读取/无网络）：判别单测 tests/unit/modelprovider-gateway-unreachable.test.ts。
+ * `getCurrentEndpointLabel()`（index.ts）读 endpoint config source 取 baseURL 后调本函数。
+ */
+export function describeEndpointFailure(baseURL?: string): string {
+  if (!baseURL) return 'LLM 端点'
+  let host: string
+  let port: string
+  try {
+    const u = new URL(baseURL)
+    host = u.hostname
+    port = u.port
+  } catch {
+    return 'LLM 端点'
+  }
+  // 本地网关：localhost / 127.x / 0.0.0.0 / [::1]
+  if (
+    host === 'localhost' ||
+    host === '0.0.0.0' ||
+    host === '[::1]' ||
+    host.startsWith('127.')
+  ) {
+    return port ? `本地端口 ${port}` : '本地网关'
+  }
+  // 已知云 provider（国产 + 国际常见）→ 提示对应 provider 异常
+  const knownProviders: ReadonlyArray<readonly [RegExp, string]> = [
+    [/api\.deepseek\.com$/i, 'DeepSeek'],
+    [/api\.openai\.com$/i, 'OpenAI'],
+    [/^(dashscope|api)\.aliyuncs\.com$/i, '阿里百炼'],
+    [/api\.moonshot\.cn$/i, 'Kimi'],
+    [/api\.minimax\.chat$/i, 'MiniMax'],
+    [/api\.baichuan-ai\.com$/i, '百川'],
+    [/api\.01\.ai$/i, '零一万物'],
+    [/api\.siliconflow\.cn$/i, '硅基流动'],
+    [/api\.lkeap\.com$/i, '腾讯混元'],
+  ]
+  for (const [re, name] of knownProviders) {
+    if (re.test(host)) return `${name} 服务`
+  }
+  // 通用/自定义端点 → 报 host（经模型配置解析，提示排查或诊断）
+  return host
+}
+
+/**
  * P0b③ 网关不可达错误行的方向性 remediation 提示面（llmTimeoutRemediationHint 姊妹，
  * REPL 错误行消费）。给方向不给 mood：LLM 端点（网关）连接失败 → 指引"已切人工
  * 确认 + /doctor 排查"；其余（超时归 llmTimeout 面 / 用户主动 abort / 拿到 HTTP
  * 状态的业务·鉴权错误 = 网关可达）→ null（零行为变更，不打扰）。
  *
+ * 0.1.64 PR2：去 IFF 硬编码——签名加 endpointLabel（复合逻辑描述，由
+ * getCurrentEndpointLabel() 传入；缺省 → 'LLM 端点'）。S-C 三锚点保留：
+ *   gwDown = `{endpointLabel} 不可达`（参数化，旧 "IFF 不可达" 移除）
+ *   gwManual = `已切人工确认`（不变）
+ *   gwDoctor = `/doctor 排查`（不变 = 排查/诊断提示）
+ *
  * 连接失败族判别：SDK APIConnectionError（openai "Connection error." 固定文案）+
  * 网络层 errno（fetch/undici 连接族；errno 常在 error.cause.code 上——loop-robustness
  * #4 ECONNRESET 链同款盲区，本函数据此覆盖）。
  */
-export function gatewayUnreachableRemediationHint(error: unknown): string | null {
+export function gatewayUnreachableRemediationHint(
+  error: unknown,
+  endpointLabel?: string,
+): string | null {
   if (!error || typeof error !== 'object') return null
   const e = error as {
     name?: string
@@ -182,9 +243,10 @@ export function gatewayUnreachableRemediationHint(error: unknown): string | null
       haystack,
     )
   if (!isSdkConnection && !isNetworkErrno) return null
-  // spec §4 P0b③ 精确串（S-C 三锚点：gwDown「IFF 不可达」/ gwManual「已切人工确认」/
-  // gwDoctor「/doctor 排查」）
-  return 'IFF 不可达：已切人工确认 —— /doctor 排查'
+  // spec §4 P0b③ 精确串（S-C 三锚点：gwDown「{label} 不可达」参数化 / gwManual「已切人工确认」/
+  // gwDoctor「/doctor 排查」）。endpointLabel 由 getCurrentEndpointLabel() 复合逻辑传入
+  //（本地端口 / 云 provider / 通用 host / 缺省 'LLM 端点'）。
+  return `${endpointLabel ?? 'LLM 端点'} 不可达：已切人工确认 —— /doctor 排查`
 }
 
 /**

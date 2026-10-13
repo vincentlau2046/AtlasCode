@@ -7,9 +7,10 @@
 //
 // STR-1 门面规则：外域只经此门面 import，不深导入内部文件。
 
-import { OpenAIProvider, type ModelProvider } from './modelprovider'
+import { OpenAIProvider, type ModelProvider, describeEndpointFailure } from './modelprovider'
 import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { parseBoundedIntEnv } from '../shared'
+import { resolveModel, getRoleConfig } from './roles'
 export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS } from './constants'
 
 export {
@@ -57,6 +58,28 @@ export function setLlmTimeoutSettingsSource(next: LlmTimeoutSettingsSource): voi
 /** 当前生效的 LLM 请求超时（ms）：env 胜 settings 源缝 胜 缺省（纯读，不构造单例）。 */
 export function getCurrentLlmTimeoutMs(): number {
   return resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.())
+}
+
+/**
+ * 0.1.64 PR2（去 IFF 硬编码）：当前端点失败描述（复合逻辑）。
+ *
+ * 读 endpoint config source 取主循环模型 baseURL → describeEndpointFailure 复合分类
+ * （本地端口 / 云 provider / 通用 host / 缺省 'LLM 端点'）。仿 getCurrentLlmTimeoutMs()
+ * 模式（纯读，不构造单例）。REPL catch 块调本函数传参给 gatewayUnreachableRemediationHint。
+ *
+ * modelRef 给定且可解析 → resolveModel(ref).baseURL；不可解析或缺失 →
+ * getRoleConfig('small').baseURL（主循环缺省 small 角色）；仍无 → 'LLM 端点'。
+ */
+export function getCurrentEndpointLabel(modelRef?: string): string {
+  let baseURL: string | undefined
+  if (modelRef) {
+    const resolved = resolveModel(modelRef)
+    if (resolved?.baseURL) baseURL = resolved.baseURL
+  }
+  if (!baseURL) {
+    baseURL = getRoleConfig('small').baseURL
+  }
+  return describeEndpointFailure(baseURL)
 }
 
 /**
@@ -148,7 +171,7 @@ export {
   getAssistantMessageFromError,
   getErrorMessageIfRefusal,
 } from './modelErrors'
-export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
+export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint, describeEndpointFailure, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
 export { buildOpenAIParams } from './params'
 export { modelToRole, normalizeModelStringForAPI } from './roles'
 

@@ -11,8 +11,11 @@
 import { describe, expect, test } from 'bun:test'
 import {
   getSpinnerDisplayGates,
+  computeStallState,
   SHOW_TIMER_AFTER_MS,
   SHOW_TOKENS_AFTER_MS,
+  STALL_AFTER_MS,
+  STALL_FADE_MS,
 } from '../../src/tui/components/Spinner/spinnerGates'
 
 const base = { verbose: false, hasRunningTeammates: false }
@@ -88,5 +91,117 @@ describe('spinnerGates 时间门（#250 concern 3）', () => {
         )
       }
     }
+  })
+})
+
+describe('spinnerGates G1 wantsStatusIndicator（0.1.64 TTFT 状态指示门）', () => {
+  test('常量值锁定：stall 3s / fade 2s', () => {
+    expect(STALL_AFTER_MS).toBe(3_000)
+    expect(STALL_FADE_MS).toBe(2_000)
+  })
+
+  test('静默期（elapsed 0）：wantsStatusIndicator 关', () => {
+    const g = getSpinnerDisplayGates({ ...base, effectiveElapsedMs: 0 })
+    expect(g.wantsStatusIndicator).toBe(false)
+  })
+
+  test('1s 门后：wantsStatusIndicator 开（与 wantsTimer 同阈值）', () => {
+    const g = getSpinnerDisplayGates({ ...base, effectiveElapsedMs: 1_001 })
+    expect(g.wantsStatusIndicator).toBe(true)
+    expect(g.wantsStatusIndicator).toBe(g.wantsTimer)
+  })
+
+  test('verbose 强制开（elapsed 0）', () => {
+    const g = getSpinnerDisplayGates({
+      verbose: true,
+      hasRunningTeammates: false,
+      effectiveElapsedMs: 0,
+    })
+    expect(g.wantsStatusIndicator).toBe(true)
+  })
+
+  test('hasRunningTeammates 强制开（elapsed 0）', () => {
+    const g = getSpinnerDisplayGates({
+      verbose: false,
+      hasRunningTeammates: true,
+      effectiveElapsedMs: 0,
+    })
+    expect(g.wantsStatusIndicator).toBe(true)
+  })
+
+  test('单调性：wantsStatusIndicator 与 wantsTimer 同阈值（任意 elapsed）', () => {
+    for (const t of [0, 500, 1_000, 1_001, 3_000, 5_000, 5_001, 30_000]) {
+      const g = getSpinnerDisplayGates({ ...base, effectiveElapsedMs: t })
+      expect(
+        g.wantsStatusIndicator,
+        `t=${t}ms statusIndicator≠timer`,
+      ).toBe(g.wantsTimer)
+    }
+  })
+})
+
+describe('spinnerGates G2 computeStallState（0.1.64 TTFT stall 守卫）', () => {
+  const noTools = { currentResponseLength: 100, hasActiveTools: false }
+
+  test('TTFT 期间（responseLength=0）不报 stall——修前红、修后绿', () => {
+    // 修前：timeSinceLastToken > 3000 && !hasActiveTools → isStalled=true（误红）
+    // 修后：增 currentResponseLength > 0 守卫 → isStalled=false
+    const s = computeStallState({
+      timeSinceLastToken: 10_000,
+      currentResponseLength: 0,
+      hasActiveTools: false,
+    })
+    expect(s.isStalled).toBe(false)
+    expect(s.stalledIntensity).toBe(0)
+  })
+
+  test('已开始流式后中断 > 3s → stall（原语义保留）', () => {
+    const s = computeStallState({
+      timeSinceLastToken: 5_000,
+      currentResponseLength: 500,
+      hasActiveTools: false,
+    })
+    expect(s.isStalled).toBe(true)
+    // intensity = (5000 - 3000) / 2000 = 1.0（满红）
+    expect(s.stalledIntensity).toBe(1)
+  })
+
+  test('已开始流式但中断 ≤ 3s → 不 stall', () => {
+    const s = computeStallState({
+      timeSinceLastToken: 3_000,
+      ...noTools,
+    })
+    expect(s.isStalled).toBe(false)
+  })
+
+  test('hasActiveTools → 不 stall（原语义，工具运行时不报 stall）', () => {
+    const s = computeStallState({
+      timeSinceLastToken: 10_000,
+      currentResponseLength: 0,
+      hasActiveTools: true,
+    })
+    expect(s.isStalled).toBe(false)
+  })
+
+  test('stall 渐变：3.5s → intensity 0.25 / 4s → 0.5 / 5s → 1.0', () => {
+    expect(
+      computeStallState({ timeSinceLastToken: 3_500, ...noTools })
+        .stalledIntensity,
+    ).toBeCloseTo(0.25, 5)
+    expect(
+      computeStallState({ timeSinceLastToken: 4_000, ...noTools })
+        .stalledIntensity,
+    ).toBeCloseTo(0.5, 5)
+    expect(
+      computeStallState({ timeSinceLastToken: 5_000, ...noTools })
+        .stalledIntensity,
+    ).toBe(1)
+  })
+
+  test('stall 渐变封顶：10s → intensity 1.0（不超过 1）', () => {
+    expect(
+      computeStallState({ timeSinceLastToken: 10_000, ...noTools })
+        .stalledIntensity,
+    ).toBe(1)
   })
 })
