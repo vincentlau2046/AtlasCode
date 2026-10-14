@@ -1056,6 +1056,10 @@ export async function streamCompactSummary({
   context,
   preCompactTokenCount,
   cacheSafeParams,
+  // 0.1.69 D-3：摘要 fallback 模型覆写（宿主 fallback 支经
+  // summarizeFallback.createSummarizeWithFallback 注入 small 角色；缺省 =
+  // 主循环模型，修前行为零回归锚）。
+  modelOverride,
 }: {
   messages: Message[]
   summaryRequest: UserMessage
@@ -1063,6 +1067,7 @@ export async function streamCompactSummary({
   context: ToolUseContext
   preCompactTokenCount: number
   cacheSafeParams: CacheSafeParams
+  modelOverride?: string
 }): Promise<AssistantMessage> {
   // When prompt cache sharing is enabled, use forked agent to reuse the
   // main conversation's cached prefix (system prompt, tools, context messages).
@@ -1092,7 +1097,10 @@ export async function streamCompactSummary({
     : undefined
 
   try {
-    if (promptCacheSharingEnabled) {
+    // 0.1.69 D-3（Main 裁定）：fallback 调用（modelOverride 在场）跳过
+    // cache-share fork 支——cacheSafeParams 绑主模型 cache 键，异模型共享前缀
+    // 不成立，直接走流式支（主模型路径 modelOverride 缺省 = 修前逐字恒等）。
+    if (promptCacheSharingEnabled && !modelOverride) {
       try {
         // DO NOT set maxOutputTokens here. The fork piggybacks on the main thread's
         // prompt cache by sending identical cache-key params (system, tools, model,
@@ -1146,6 +1154,9 @@ export async function streamCompactSummary({
     )
     const maxAttempts = retryEnabled ? MAX_COMPACT_STREAMING_RETRIES : 1
 
+    // 0.1.69 D-3：摘要调用模型（缺省 = 主循环模型；fallback 支 = small 角色）
+    const compactModel = modelOverride ?? context.options.mainLoopModel
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       // Reset state for retry
       let hasStartedStreaming = false
@@ -1155,7 +1166,7 @@ export async function streamCompactSummary({
       // Check if tool search is enabled using the main loop's tools list.
       // context.options.tools includes MCP tools merged via useMergedTools.
       const useToolSearch = await isToolSearchEnabled(
-        context.options.mainLoopModel,
+        compactModel,
         context.options.tools,
         async () => appState.toolPermissionContext,
         context.options.agentDefinitions.activeAgents,
@@ -1190,7 +1201,6 @@ export async function streamCompactSummary({
           ),
           context.options.tools,
         )
-      const compactModel = context.options.mainLoopModel
       const compactRole = modelToRole(compactModel)
       const params = await buildOpenAIParams(
         {

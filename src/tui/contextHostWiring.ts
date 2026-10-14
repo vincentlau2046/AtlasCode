@@ -11,7 +11,8 @@
  *  - CompactPorts.summarize ← orchestrator streamCompactSummary（fork 支 +
  *    流式兜底；GB cache-prefix / streaming-retry 门宿主自读）——单点 cast
  *    （engine CompactContext duck → tui ToolUseContext，运行时实参即 TUI
- *    真实 ToolUseContext）
+ *    真实 ToolUseContext）+ 0.1.69 D-3 fallback 包装（small 角色重试 1 次，
+ *    仅 API 级失败触发；summarizeFallback.ts 纯编排）
  *  - CompactPorts.hook 执行器 ← tui/utils/hooks（Pre/PostCompact）+
  *    utils/sessionStart（session-start 簇）
  *  - CompactPorts.buildPostCompactAttachments ← 旧仓 L493-549 组合配方
@@ -51,7 +52,11 @@
  */
 import { feature } from 'src/shared'
 // #260 P0（2026-10-03）：LLM 请求超时 settings 源缝（modelprovider 域）
-import { setLlmTimeoutSettingsSource, setEffortByModelSource } from 'src/modelprovider'
+import {
+  getRoleModel,
+  setEffortByModelSource,
+  setLlmTimeoutSettingsSource,
+} from 'src/modelprovider'
 import {
   clearPostCompactResetsForTesting,
   registerPostCompactReset,
@@ -98,6 +103,8 @@ import { clearBetaTracingState } from './utils/telemetry/betaSessionTracing.js'
 import { resetContextCollapse } from './services/contextCollapse/index.js'
 // S8 本体仍在 orchestrator 目录（S9 迁 contextBodies/，本文件 import 随迁）
 import { streamCompactSummary } from './contextBodies/compact.js'
+// 0.1.69 D-3：fallback 触发判定消费面（错误消息文本提取）
+import { getAssistantMessageText } from './utils/messages.js'
 import {
   createAsyncAgentAttachmentsIfNeeded,
   createPlanAttachmentIfNeeded,
@@ -106,6 +113,11 @@ import {
   createSkillAttachmentIfNeeded,
   POST_COMPACT_MAX_FILES_TO_RESTORE,
 } from './contextBodies/compact.js'
+// 0.1.69 D-3：摘要 fallback 模型编排（纯函数面，宿主接线单点）
+import {
+  createSummarizeWithFallback,
+  isFallbackEligibleResult,
+} from './contextBodies/summarizeFallback.js'
 import { trySessionMemoryCompaction as sessionMemoryCompactBody } from './contextBodies/sessionMemoryCompact.js'
 import {
   reactiveCompactOnPromptTooLong as reactivePTLBody,
@@ -163,11 +175,30 @@ async function composePostCompactAttachments(
 
 /** 宿主 context 簇端口接线（组合根 createCoreDependencies 调用；幂等）。 */
 export function wireContextHostPorts(): void {
+  // 0.1.69 D-3：摘要 fallback 模型（宿主侧 DI 单点；auto-compact 富 /
+  // reactive 413 / 手动 /compact 三处经 CompactPorts.summarize 单口统一
+  // 受益）。fallback = small 角色（getRoleModel('small')）；未配置或 = 当前
+  // 摘要模型 = 无 fallback（零回归）；触发 = 仅 API 级失败（用户中止 + PTL
+  // 除外）；重试 1 次，双失败才交回调用方（熔断计数语义 = 修前）。
+  const summarizePrimary = (p: Parameters<typeof streamCompactSummary>[0]) =>
+    streamCompactSummary(p)
+  const summarizeWithFallback = createSummarizeWithFallback(summarizePrimary, {
+    resolveFallbackModel: p => {
+      const fb = getRoleModel('small')
+      if (!fb) return undefined
+      // fallback 模型 = 当前摘要模型 = 无意义（失败因大概率模型无关）→ 跳过
+      if (p.context.options.mainLoopModel === fb) return undefined
+      return fb
+    },
+    isEligibleResult: r =>
+      isFallbackEligibleResult(r, getAssistantMessageText(r)),
+  })
+
   setCompactPorts({
     // 单点 cast 三处（engine duck/Message 面 → tui 本体面；运行时实参
-    // = TUI 真实对象，duck 为结构子集）
+    // = TUI 真实对象，duck 为结构子集）+ 0.1.69 D-3 fallback 包装
     summarize: (p) =>
-      streamCompactSummary({
+      summarizeWithFallback({
         messages: p.messages,
         summaryRequest: p.summaryRequest as unknown as UserMessage,
         appState: p.context.getAppState(),
