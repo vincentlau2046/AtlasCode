@@ -111,3 +111,17 @@ export type StreamEvent =
   | MessageStartEvent
   | MessageStopEvent
   | ErrorEvent
+
+/**
+ * 0.1.70 G-1（composing token 回归波）：per-token delta 面 — StreamEvent 的
+ * delta 类 4 事件子集（text_delta / tool_use_start / tool_use_delta /
+ * tool_use_end；message_stop / error / assistant = 终态事件，不转发）。
+ * 消费 = modelProvider.chat onStreamDelta 槽（engine queryOneRound 透传 emit
+ * stream_delta 事件面，TUI stream_delta 分支本波消费 text 面；tool_use 面 +
+ * thinking_delta 面 = 0.1.71 候选，届时到达 G-1 零改动）。
+ */
+export type StreamDelta =
+  | TextDeltaEvent
+  | ToolUseStartEvent
+  | ToolUseDeltaEvent
+  | ToolUseEndEvent

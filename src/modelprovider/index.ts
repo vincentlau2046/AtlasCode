@@ -21,6 +21,8 @@ export {
   MODEL_RETRY_BACKOFF_CAP_MS,
   type ModelProvider,
   type ProviderStreamEvent,
+  type StreamDelta,
+  type StreamEvent,
   type ModelRetryBackoffOptions,
 } from './modelprovider'
 

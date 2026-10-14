@@ -20,7 +20,7 @@ import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
 import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig, type Tools } from '../shared'
 import { buildUserAgent, logForDebugging } from '../shared'
-import type { LLMErrorCode, StreamEvent } from './types'
+import type { LLMErrorCode, StreamDelta, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 import { APIConnectionTimeoutError } from './types'
 import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
@@ -32,7 +32,7 @@ export type ModelUsage = {
   cache_creation_input_tokens: number
 }
 
-export type { StreamEvent }
+export type { StreamDelta, StreamEvent }
 export type ProviderStreamEvent = StreamEvent
 
 function mapOpenAIUsage(u: any): ModelUsage {
@@ -392,6 +392,13 @@ export interface ModelProvider {
     thinkingConfig?: ThinkingConfig
     responseFormat?: unknown
     fallbackModel?: string
+    // 0.1.70 G-1（composing token 回归修，D-2a 切端断 per-token 事件流根修；
+    // 逆转 §8.74.2「streaming chatStream 不入引擎面」裁定——per-token 事件现入
+    // 引擎面，React-free 红线不破：纯数据回调不引 React）。per-token delta
+    // 回调槽：传入 = 流式路径（内部消费 streamOneAttempt，逐 delta 同步转发
+    // delta 类事件，返回完整 assistant message = Promise 契约不变）；未传 =
+    // 非流式路径零行为（headless / 测试 fixture / 非 TUI 调用方恒等锚）。
+    onStreamDelta?: (delta: StreamDelta) => void
   }): Promise<{
     type: 'assistant'
     uuid: string
@@ -509,7 +516,18 @@ export class OpenAIProvider implements ModelProvider {
     thinkingConfig?: ThinkingConfig
     responseFormat?: unknown
     fallbackModel?: string
+    onStreamDelta?: (delta: StreamDelta) => void
   }) {
+    // 0.1.70 G-1：onStreamDelta 传入面 = 流式路径（per-token delta 转发，
+    // 复用 streamOneAttempt 单一事实源）；未传面 = 下方非流式路径原样
+    // （headless / 测试 fixture / 非 TUI 调用方恒等锚，零行为变更）。
+    if (args.onStreamDelta) {
+      return await this.chatWithDelta(args)
+    }
+    // 0.1.70 H-2（de-ant 核验守卫，零行为变更）：attemptRefs = settings 模型池
+    // 水平轮询单一事实源（getRoleModels = modelRoles.<role>.models 池 + providers
+    // 表 normalizeRef，零 anthropic 硬编码 ref 注入；fallbackModel 参数 = 用户显式
+    // --fallback-model CLI 透传，非硬编码）。chatWithDelta（G-1）/ chatStream 同面。
     const refs = getRoleModels(args.role, args.sessionModel, args.fallbackModel)
     if (refs.length === 0) {
       throw new Error(
@@ -617,6 +635,130 @@ export class OpenAIProvider implements ModelProvider {
           // 既有 shouldRetryModelError 分类面不变）重试间指数退避（base×2^attempt 封顶）——
           // 修前 = 重试间零间隔紧贴重发（hammer 抖动网关）；非瞬断类已在上方 break
           // （零退避，既有行为恒等）。末次 attempt 后无后续 attempt = 不退避。
+          if (attempt < this.maxRetriesPerModel - 1) {
+            await this.retryBackoffSleep(
+              modelRetryBackoffMs(attempt, this.retryBackoffBaseMs, this.retryBackoffCapMs),
+              args.signal,
+            )
+          }
+        }
+      }
+    }
+
+    if (lastErr) throw lastErr
+    throw new Error(`No models configured for role '${args.role}'.`)
+  }
+
+  /**
+   * 0.1.70 G-1（composing token 回归波）：onStreamDelta 传入面 = 流式路径。
+   *
+   * 复用 streamOneAttempt 作 per-token 事件面单一事实源（与 chatStream 同源：
+   * delta 类事件 / C4-1 partial 保留语义 / C4-2 瞬断退避）；params 构造与
+   * 非流式路径同款（openaiParams 覆写 / buildOpenAIParams thinkingConfig+tools
+   * +options + responseFormat + 3 参 getRoleModels fallbackModel 池末位）。
+   * 错误契约 = 抛原始错误（与非流式面 create() 抛同族，withTurnRecovery /
+   * shouldRetryModelError 分类语义不变）；C4-1 partial 保留面 = interrupted
+   * assistant 即该轮内容（不整流重发，与 chatStream 同）。
+   */
+  private async chatWithDelta(args: {
+    messages?: Message[]
+    systemPrompt?: SystemPrompt
+    role: ModelRole
+    sessionModel?: string
+    signal?: AbortSignal
+    options?: any
+    openaiParams?: any
+    tools?: Tools
+    thinkingConfig?: ThinkingConfig
+    responseFormat?: unknown
+    fallbackModel?: string
+    onStreamDelta?: (delta: StreamDelta) => void
+  }) {
+    const refs = getRoleModels(args.role, args.sessionModel, args.fallbackModel)
+    if (refs.length === 0) {
+      throw new Error(
+        `No models configured for role '${args.role}' (empty pool). ` +
+          `Add modelRoles/providers to ~/.atlas/settings.json, or set ATLAS_${args.role.toUpperCase()}_MODEL, then restart.`,
+      )
+    }
+    const attemptRefs: string[] = refs
+    let lastErr: any = null
+    // 0.1.70 H-2 同面（G-1 流式路径复用 settings 池轮询 refs，零 anthropic 硬编码 ref）。
+    const onDelta = args.onStreamDelta!
+
+    for (const ref of attemptRefs) {
+      const entry = resolveModel(ref)
+      if (!entry) {
+        lastErr = new Error(`unknown provider/model reference: ${ref}`)
+        continue
+      }
+      const client = getClientForEntry(entry)
+      let params: any
+      if (args.openaiParams) {
+        params = { ...args.openaiParams, model: entry.modelId, stream: true }
+      } else {
+        params = {
+          ...(await buildOpenAIParams(
+            {
+              messages: args.messages ?? [],
+              systemPrompt: (args.systemPrompt ?? asSystemPrompt([])) as SystemPrompt,
+              tools: args.tools,
+              thinkingConfig: args.thinkingConfig,
+              options: args.options,
+            },
+            args.role,
+            entry,
+          )),
+          ...(args.responseFormat ? { response_format: args.responseFormat } : {}),
+          stream: true,
+        }
+      }
+
+      for (let attempt = 0; attempt < this.maxRetriesPerModel; attempt++) {
+        if (args.signal?.aborted) throw args.signal.reason ?? new Error('aborted')
+        let assistant: {
+          type: 'assistant'
+          uuid: string
+          timestamp: string
+          message: {
+            id: string
+            model: string
+            role: 'assistant'
+            content: any[]
+            stop_reason: string
+            usage: ModelUsage
+          }
+        } | null = null
+        try {
+          for await (const ev of this.streamOneAttempt(
+            client,
+            params,
+            entry,
+            args.signal,
+            attempt,
+            this.maxRetriesPerModel,
+          )) {
+            const t = (ev as { type?: string }).type
+            // 0.1.70 G-1 定项②：逐 delta 同步回调（yield 点内调用不阻塞流；
+            // 回调契约 = 同步观察者，抛 = 消费方 bug，传播不 catch 不吞）。
+            if (
+              t === 'text_delta' ||
+              t === 'tool_use_start' ||
+              t === 'tool_use_delta' ||
+              t === 'tool_use_end'
+            ) {
+              onDelta(ev as StreamDelta)
+            } else if (t === 'assistant') {
+              assistant = ev as typeof assistant
+            }
+          }
+          // assistant 在场（正常终态 / C4-1 partial interrupted）= 该轮内容，返回；
+          // 全零 partial（streamOneAttempt throw 面 = 下方 catch）= 进下一 attempt。
+          if (assistant) return assistant
+        } catch (err: any) {
+          lastErr = err
+          // #260 生成超时 fail-fast + 0.1.58 C4-2 瞬断类退避（同非流式面，恒等）。
+          if (!shouldRetryModelError(err, args.signal)) break
           if (attempt < this.maxRetriesPerModel - 1) {
             await this.retryBackoffSleep(
               modelRetryBackoffMs(attempt, this.retryBackoffBaseMs, this.retryBackoffCapMs),
