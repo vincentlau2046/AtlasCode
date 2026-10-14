@@ -46,6 +46,9 @@ import {
   getOauthOrgNotAllowedErrorMessage,
   getAssistantMessageFromError as coreGetAssistantMessageFromError,
   getErrorMessageIfRefusal as coreGetErrorMessageIfRefusal,
+  // 0.1.71 块 A：403 配额耗尽子型 + 池轮询全败聚合（A-1/A-2 单一事实源，提示面复用）
+  ModelPoolExhaustedError,
+  isQuotaExhaustedMessage,
 } from 'src/modelprovider'
 
 // ── PTL / media 谓词（实现留宿主：纯函数，消费 messages 类型，B2b 范围外）────
@@ -217,6 +220,36 @@ registerErrorMessagingPorts({
       return createAssistantAPIErrorMessage({
         error: 'authentication_failed',
         content: getOauthOrgNotAllowedErrorMessage(),
+      })
+    }
+
+    // 0.1.71 A-3：池轮询全败聚合（ModelPoolExhaustedError，A-1 抛出）→ 可行动指引
+    // 行（仅提示面：不改 403 throw 契约 / turnRecovery / 重试集，不加自动重试）。
+    // 配额 vs 鉴权分型给对应处置建议（充值配额 / 切换 provider 或 model）。
+    if (error instanceof ModelPoolExhaustedError) {
+      const hasQuota = error.failures.some(f => f.code === 'quota_exhausted')
+      return createAssistantAPIErrorMessage({
+        error: hasQuota ? 'quota_exhausted' : 'authentication_failed',
+        content: `${API_ERROR_MESSAGE_PREFIX}: ${error.message}`,
+      })
+    }
+
+    // 0.1.71 A-3：单 403 配额签名（raw 错误安全网——非池轮询直调面；duck-type
+    // .status/.message，A-2 isQuotaExhaustedMessage 单一事实源）。泛 403
+    // auth_error（下方）恒等锚保留：非配额签名 403 仍落通用支。
+    const errStatus =
+      (error as { status?: number })?.status ??
+      (error as { response?: { status?: number } })?.response?.status
+    if (
+      errStatus === 403 &&
+      error instanceof Error &&
+      isQuotaExhaustedMessage(error.message)
+    ) {
+      return createAssistantAPIErrorMessage({
+        error: 'quota_exhausted',
+        content: getIsNonInteractiveSession()
+          ? `${API_ERROR_MESSAGE_PREFIX}: provider quota exhausted (403). Top up your provider quota, or switch provider/model via --model, then retry.`
+          : `${API_ERROR_MESSAGE_PREFIX}: provider quota exhausted (403). Top up your provider quota, or run /model to switch provider/model, then retry.`,
       })
     }
 
