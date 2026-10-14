@@ -4,6 +4,39 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.66
+
+0.1.61+ 波池 Q3 subagent 独占波 · 翻转波（双波第二波；基线 v0.1.65）。
+**波性质 = 行为变更**（用户 2026-10-14 终裁）：default = background by default——
+缺省 `run_in_background` → 后台异步（`async_launched`）。逃生舱 env
+`ATLAS_AGENT_DEFAULT_FOREGROUND=1` → 缺省 = 前景同步（**现行为字节级恒等锚**，
+零回归路径）。显式参数跨 on/off 两面恒等：`true`=后台 / `false`=前景。
+15 判别单测（on 面 + off 面 + on 面 variant + 提示词 + 追踪器双面同 gate 闭环）：
+
+- **Q3-2 a1 · shouldRunInBackground 逻辑翻转**（engine + TUI 双车道）：新纯函数
+  `shouldRunInBackground(runInBg)`——on 面（env 缺省/0/非法值 fail-safe）=
+  `runInBg !== false`（undefined→true=后台）；off 面（env=1）= `!!runInBg`
+  （undefined→false=现行为恒等）。`isAgentBackgroundByDefault()` 读 env 经 `isEnvTruthy`
+  （engine 从 `shared`、tui 从 `tui/utils/envUtils` 本副本，eslint boundaries 守）。
+  `AgentTool.call` 条件 `if (input.run_in_background)` → `if (shouldRunInBackground(...))`
+  （engine）；TUI `const isAsync = !!args.run_in_background` → `shouldRunInBackground(...)`
+- **Q3-2 a1 · 提示词默认句翻转**（engine + TUI 双 prompt.ts）：engine 旧「Set
+  run_in_background to true to launch…」→ 新「Subagents run in the background by default;
+  … Set run_in_background to false only when you need the result before you can proceed」；
+  TUI 旧「foreground (default)」→ 新「background by default」+ 显式 foreground 用途说明
+  （results-needed-before-proceeding）。判别单测静态 grep 双面锁句在场/离场 + 零 1P 引用
+- **R4 · headless 进程退出前 drain pending 后台 agent**（裁定：对标上游 -p 语义 = 不静默
+  kill fire-and-forget promise）：新 `backgroundTracker.ts` 模块（`trackBackgroundAgent` /
+  `hasPendingBackgroundAgents` / `drainPendingBackgroundAgents` / `resetBackgroundAgentTracker`，
+  Set<Promise> + allSettled 不阻断 + finally 移除）。`print.ts` 主回合 + stdin drain 完成后、
+  进程退出前 `await drainPendingBackgroundAgents(abortController.signal)`（SIGINT 立即返回；
+  单 agent 失败不阻断退出码——失败经通知链报，非 exit code）
+- **既有测试 off 面重锚**：3 个既有 AgentTool 注册表/工具面/权限门测试加
+  `ATLAS_AGENT_DEFAULT_FOREGROUND=1`（beforeAll/beforeEach）恢复 off 面恒等锚，使同步路径
+  断言无需改写（engine-agent-tool / engine-agent-registry / permission-gate-wiring）
+
+下一波：0.1.67+ 波池排程待用户裁定。
+
 ## v0.1.65
 
 0.1.61+ 波池 Q3 subagent 独占波 · 地基波（双波第一波；基线 v0.1.64）。
