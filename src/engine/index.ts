@@ -431,6 +431,8 @@ export {
   isAutoCompactThresholdPositive,
   calculateTokenWarningState,
   isAutoCompactEnabled,
+  // 0.1.69 D-1：model-aware 启用面（per-model off 档；0 参形 = default 键零回归）
+  isAutoCompactEnabledForModel,
   shouldAutoCompact,
   autoCompactIfNeeded,
   AUTOCOMPACT_BUFFER_TOKENS,
@@ -485,7 +487,11 @@ export {
   parseAutoCompactTierInput,
   parseAutoCompactTierArg,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  isAutoCompactWindowSetting,
+  normalizeAutoCompactWindowSetting,
   type AutoCompactWindowSetting,
+  type AutoCompactWindowPerModel,
+  type AutoCompactWindowSettingLike,
   type AutoCompactWindowResolution,
   mergeAutoCompactOverrides,
   // 0.1.68 F-1：auto-compact 压缩体（富路径消费 + 裁剪 fail-safe 双门面）

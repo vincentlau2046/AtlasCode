@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useSyncExternalStore } from 'react';
 import { Box, Text } from '../ink.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js';
-import { calculateTokenWarningState, getEffectiveContextWindowSize, isAutoCompactEnabled } from 'src/tui/engineCompat';
+import { calculateTokenWarningState, getEffectiveContextWindowSize, isAutoCompactEnabled, isAutoCompactEnabledForModel } from 'src/tui/engineCompat';
 import { useCompactWarningSuppression } from 'src/tui/engineCompat';
 // D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态订阅 + 跳闸判定（engine store
 // 单源；hook 留 tui 壳，isAutoCompactCircuitTripped 语义单源 engine 域）
@@ -118,7 +118,8 @@ export function TokenWarning(t0) {
   }
   let t2;
   if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
-    t2 = isAutoCompactEnabled();
+    // 0.1.69 D-1：per-model off 档现形面（cell 求值语义不变）
+    t2 = isAutoCompactEnabledForModel(model);
     $[3] = t2;
   } else {
     t2 = $[3];

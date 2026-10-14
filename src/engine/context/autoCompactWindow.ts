@@ -27,6 +27,50 @@ export type AutoCompactWindowSetting =
   | { kind: 'window'; tokens: number }
   | { kind: 'pct'; pct: number }
 
+/**
+ * 0.1.69 D-1（每模型 autocompact 窗口）：per-model 键控档面。
+ * `{ [model]: 档位 }` + `default` 兜底键（无该模型档 → default → 缺省）。
+ * 宿主 /autocompact 命令写档键 = 当前主循环模型（getMainLoopModel）。
+ * 根修面：用户 256K + 1M 混配面——单全局档下设 256K 档切 1M 模型仍被
+ * 256K 档封顶（auto-compact 提前触发，1M 窗浪费）；per-model 各取己档。
+ */
+export type AutoCompactWindowPerModel = {
+  default?: AutoCompactWindowSetting
+  [model: string]: AutoCompactWindowSetting | undefined
+}
+
+/**
+ * settings 面 raw 值形：旧单档（#250 期单全局档，遗留持久化数据）|
+ * 0.1.69+ per-model 键控档。判别 = 单档必有 `kind` 字段，键控 map 无。
+ * 兼容策略（Main 裁定，读侧兼容读）：无数据迁移——旧单档面读时经
+ * normalizeAutoCompactWindowSetting 归一为 `default` 键，行为 = 修前精确
+ * 同值（零回归锚）；写侧（/autocompact）读改写（旧单档 → default 键 +
+ * 当前模型键，单点过渡，无批量迁移）。
+ */
+export type AutoCompactWindowSettingLike =
+  | AutoCompactWindowSetting
+  | AutoCompactWindowPerModel
+
+/** 判别器：单档形（kind 字段在场）vs per-model 键控 map。 */
+export function isAutoCompactWindowSetting(
+  x: AutoCompactWindowSettingLike | null | undefined,
+): x is AutoCompactWindowSetting {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    'kind' in (x as Record<string, unknown>)
+  )
+}
+
+/** 旧单档 → `{ default: 单档 }` 归一（读侧兼容读单点；无档 → 空 map）。 */
+export function normalizeAutoCompactWindowSetting(
+  raw: AutoCompactWindowSettingLike | null | undefined,
+): AutoCompactWindowPerModel {
+  if (!raw) return {}
+  if (isAutoCompactWindowSetting(raw)) return { default: raw }
+  return raw
+}
+
 /** 解析结果（喂 engine 阈值/开关面 + agentLoopDeps AutoCompactDeps 注入）。 */
 export interface AutoCompactWindowResolution {
   /** 阈值 pct 覆写（pct 档；有效域 (0,100]，越界忽略）。 */
@@ -46,11 +90,11 @@ export const AUTOCOMPACT_PRESET_WINDOW_TIERS = [
 ] as const
 
 /**
- * 档位 → 覆写 resolver（纯函数）：auto / undefined = 无覆写；off = 禁用；
+ * 单档 → 覆写 resolver（纯函数核）：auto / undefined = 无覆写；off = 禁用；
  * window / pct = 对应覆写槽。越界值不产生覆写（window tokens <1000 /
  * pct 越出 (0,100] → 忽略，raw 注入安全，对齐 env 侧解析 guard 纪律）。
  */
-export function resolveAutoCompactWindow(
+function resolveAutoCompactWindowSingle(
   setting: AutoCompactWindowSetting | null | undefined,
 ): AutoCompactWindowResolution {
   if (!setting || setting.kind === 'auto') {
@@ -70,6 +114,22 @@ export function resolveAutoCompactWindow(
     return { pctOverride: setting.pct }
   }
   return {}
+}
+
+/**
+ * 档位 → 覆写 resolver（纯函数，0.1.69 D-1 扩 model 键入参）：
+ *   - 1 参调用（model 缺省）= 修前单全局档语义精确同值（旧单档面经归一 =
+ *     `default` 键；per-model map 无 model 入参时取 `default` 键）——零回归锚
+ *   - 2 参（model 在场）：按模型键取档，无该模型档 → 回落 `default` 键 →
+ *     缺省 {}（per-model 各取己档；用户 256K+1M 混配面封顶缺陷根修）
+ */
+export function resolveAutoCompactWindow(
+  setting: AutoCompactWindowSettingLike | null | undefined,
+  model?: string,
+): AutoCompactWindowResolution {
+  const perModel = normalizeAutoCompactWindowSetting(setting)
+  const chosen = (model && perModel[model]) || perModel.default
+  return resolveAutoCompactWindowSingle(chosen)
 }
 
 /**

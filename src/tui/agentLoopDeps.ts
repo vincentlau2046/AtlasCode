@@ -135,9 +135,12 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
   // DISABLE_COMPACT / DISABLE_AUTO_COMPACT）——mergeAutoCompactOverrides 纯
   // 合并（env 胜 settings；与 engine model-string 便捷形同一单一事实源，防
   // UI 阈值面与 loop 触发面两车道分裂）。
+  // 0.1.69 D-1：档位按主循环模型键取档（per-model 各取己档；无该模型档 →
+  // default 键 → 修前单全局档面精确同值）。
   const mergedAutoCompact = mergeAutoCompactOverrides(
     getAutoCompactEnvOverrides(),
     getInitialSettings().autoCompactWindow,
+    mainLoopModel,
   )
   const autoCompact: AutoCompactDeps = {
     contextWindow: resolved?.contextWindow ?? HARD_DEFAULT_CONTEXT_WINDOW,

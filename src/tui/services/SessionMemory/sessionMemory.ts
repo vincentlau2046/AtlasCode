@@ -336,6 +336,8 @@ const extractSessionMemory = sequential(async function (
 export function initSessionMemory(): void {
   if (getIsRemoteMode()) return
   // Session memory is used for compaction, so respect auto-compact settings
+  // 0.1.69 D-1：init 面留 default 键（init 点无 per-model 模型面，零回归；
+  // per-model off 档在 loop 触发面 + UI 现形面生效，本面不波及其他模型档）
   const autoCompactEnabled = isAutoCompactEnabled()
 
   // de-ANT: the ant-only init telemetry was removed.

@@ -19,6 +19,8 @@ export {
   isAutoCompactThresholdPositive,
   calculateTokenWarningState,
   isAutoCompactEnabled,
+  // 0.1.69 D-1：model-aware 启用面（per-model off 档；0 参形 = default 键零回归）
+  isAutoCompactEnabledForModel,
   shouldAutoCompact,
   autoCompactIfNeeded,
   // D-2a S5（重裁范围 = 原 S7，M5 切端）：autoCompact 4 活消费名 model-string
@@ -40,7 +42,11 @@ export {
   parseAutoCompactTierInput,
   parseAutoCompactTierArg,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  isAutoCompactWindowSetting,
+  normalizeAutoCompactWindowSetting,
   type AutoCompactWindowSetting,
+  type AutoCompactWindowPerModel,
+  type AutoCompactWindowSettingLike,
   type AutoCompactWindowResolution,
 } from './autoCompactWindow'
 // #250 concern 2：env ⊕ settings 档位合并纯函数（agentLoopDeps DI 注入单点）

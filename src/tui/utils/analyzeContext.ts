@@ -13,6 +13,7 @@ import {
   AUTOCOMPACT_BUFFER_TOKENS,
   getEffectiveContextWindowSize,
   isAutoCompactEnabled,
+  isAutoCompactEnabledForModel,
   MANUAL_COMPACT_BUFFER_TOKENS,
 } from 'src/tui/engineCompat'
 import {
@@ -1005,7 +1006,8 @@ export async function analyzeContextUsage(
   const messageTokens = messageBreakdown.totalTokens
 
   // Check if autocompact is enabled and calculate threshold
-  const isAutoCompact = isAutoCompactEnabled()
+  // 0.1.69 D-1：per-model off 档现形面（当前模型 off 不波及其他模型）
+  const isAutoCompact = isAutoCompactEnabledForModel(model)
   const autoCompactThreshold = isAutoCompact
     ? getEffectiveContextWindowSize(model) - AUTOCOMPACT_BUFFER_TOKENS
     : undefined

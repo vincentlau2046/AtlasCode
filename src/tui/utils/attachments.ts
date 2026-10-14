@@ -160,6 +160,7 @@ import {
 import {
   getEffectiveContextWindowSize,
   isAutoCompactEnabled,
+  isAutoCompactEnabledForModel,
 } from 'src/tui/engineCompat'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
@@ -3433,7 +3434,8 @@ export function getCompactionReminderAttachment(
     return []
   }
 
-  if (!isAutoCompactEnabled()) {
+  // 0.1.69 D-1：per-model off 档现形面
+  if (!isAutoCompactEnabledForModel(model)) {
     return []
   }
 

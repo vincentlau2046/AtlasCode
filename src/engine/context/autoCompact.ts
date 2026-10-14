@@ -45,7 +45,7 @@ import { getAutoCompactEnvOverrides } from '../config'
 import { COMPACT_MAX_OUTPUT_TOKENS, type CompactionResult } from './compact'
 import {
   resolveAutoCompactWindow,
-  type AutoCompactWindowSetting,
+  type AutoCompactWindowSettingLike,
 } from './autoCompactWindow'
 
 /**
@@ -151,10 +151,12 @@ export function setAutoCompactSettingsSource(
 /**
  * settings.autoCompactWindow 档位读侧注入（#250 concern 2：/autocompact 命令
  * 持久化档位，宿主 contextHostWiring 接线 getInitialSettings 面；未注 = 无档位
- * 覆写。单测 teardown 传 null）。
+ * 覆写。单测 teardown 传 null）。0.1.69 D-1：raw 值形扩 per-model 键控
+ * （AutoCompactWindowSettingLike = 旧单档 | { [model]: 档, default? }；读侧
+ * 兼容读单点 = autoCompactWindow.ts normalizeAutoCompactWindowSetting）。
  */
 type AutoCompactWindowSettingsSource =
-  | (() => AutoCompactWindowSetting | null | undefined)
+  | (() => AutoCompactWindowSettingLike | null | undefined)
   | null
 
 let autoCompactWindowSettingsSource: AutoCompactWindowSettingsSource = null
@@ -177,13 +179,16 @@ export function setAutoCompactWindowSettingsSource(
  */
 export function mergeAutoCompactOverrides(
   env: ReturnType<typeof getAutoCompactEnvOverrides>,
-  setting: AutoCompactWindowSetting | null | undefined,
+  setting: AutoCompactWindowSettingLike | null | undefined,
+  model?: string,
 ): {
   pctOverride?: number
   windowOverride?: number
   autoCompactDisabled: boolean
 } {
-  const tier = resolveAutoCompactWindow(setting)
+  // 0.1.69 D-1：档位按模型键取档（无该模型档 → default 键；model 缺省 =
+  // 修前单全局档语义精确同值，零回归锚）。
+  const tier = resolveAutoCompactWindow(setting, model)
   return {
     pctOverride: env.pctOverride ?? tier.pctOverride,
     windowOverride: env.windowOverride ?? tier.windowOverride,
@@ -194,8 +199,12 @@ export function mergeAutoCompactOverrides(
   }
 }
 
-/** 合并覆写（settings 源接缝读侧包装；消费点 = model-string / 0 参便捷形）。 */
-function getMergedAutoCompactOverrides(): {
+/**
+ * 合并覆写（settings 源接缝读侧包装；消费点 = model-string / 0 参便捷形）。
+ * 0.1.69 D-1：model 入参透传档位 per-model 取档（0 参调用 = default 键，
+ * 修前单全局档面精确同值）。
+ */
+function getMergedAutoCompactOverrides(model?: string): {
   pctOverride?: number
   windowOverride?: number
   autoCompactDisabled: boolean
@@ -203,6 +212,7 @@ function getMergedAutoCompactOverrides(): {
   return mergeAutoCompactOverrides(
     getAutoCompactEnvOverrides(),
     autoCompactWindowSettingsSource?.() ?? null,
+    model,
   )
 }
 
@@ -248,9 +258,9 @@ export function getEffectiveContextWindowSize(
   windowOverride?: number,
 ): number {
   if (typeof contextWindowOrModel === 'string') {
-    // #250 concern 2：env 窗口 cap ⊕ settings 档位（getMergedAutoCompactOverrides，
-    // env 胜；off 档不影响窗口面）。
-    const { windowOverride } = getMergedAutoCompactOverrides()
+    // #250 concern 2 + 0.1.69 D-1：env 窗口 cap ⊕ settings per-model 档位
+    // （getMergedAutoCompactOverrides 按模型键取档；env 胜；off 档不影响窗口面）。
+    const { windowOverride } = getMergedAutoCompactOverrides(contextWindowOrModel)
     return getEffectiveContextWindowSizeCore(
       resolveModelContextWindow(contextWindowOrModel),
       undefined,
@@ -316,8 +326,8 @@ export function getAutoCompactThreshold(
   windowOverride?: number,
 ): number {
   if (typeof contextWindowOrModel === 'string') {
-    // #250 concern 2：env 双覆写 ⊕ settings 档位（env 胜）。
-    const o = getMergedAutoCompactOverrides()
+    // #250 concern 2 + 0.1.69 D-1：env 双覆写 ⊕ settings per-model 档位（env 胜）。
+    const o = getMergedAutoCompactOverrides(contextWindowOrModel)
     return getAutoCompactThresholdCore(
       resolveModelContextWindow(contextWindowOrModel),
       undefined,
@@ -436,10 +446,11 @@ export function calculateTokenWarningState(
 ): TokenWarningState {
   if (typeof paramsOrModel === 'string') {
     const env = getAutoCompactEnvOverrides()
-    const o = getMergedAutoCompactOverrides()
+    // 0.1.69 D-1：per-model 档位 + per-model off 档现形（model-aware enabled）。
+    const o = getMergedAutoCompactOverrides(paramsOrModel)
     return calculateTokenWarningStateCore(tokenUsage, {
       contextWindow: resolveModelContextWindow(paramsOrModel),
-      autoCompactEnabled: isAutoCompactEnabled(),
+      autoCompactEnabled: isAutoCompactEnabledForModel(paramsOrModel),
       pctOverride: o.pctOverride,
       windowOverride: o.windowOverride,
       // blocking limit 只走 env（ATLAS_BLOCKING_LIMIT_OVERRIDE），档位面不覆写。
@@ -553,6 +564,22 @@ export function isAutoCompactEnabled(flags?: {
   if (flags.disabled) return false
   if (flags.autoCompactDisabled) return false
   return flags.settingsEnabled !== false
+}
+
+/**
+ * 0.1.69 D-1：model-aware 启用面（per-model off 档 UI 现形）：0 参形同体 +
+ * off 档按模型键取档（无该模型档 → default 键 → 修前单全局档面精确同值）。
+ * 0 参形 isAutoCompactEnabled() 保持不变（仅 default 键 = 旧面零回归锚）。
+ */
+export function isAutoCompactEnabledForModel(model: string): boolean {
+  const o = getAutoCompactEnvOverrides()
+  if (o.disabled) return false
+  if (o.autoCompactDisabled) return false
+  // 0.1.69 D-1：per-model off 档（当前模型 off 不波及其他模型档）。
+  if (getMergedAutoCompactOverrides(model).autoCompactDisabled) {
+    return false
+  }
+  return autoCompactSettingsSource ? (autoCompactSettingsSource() ?? true) : true
 }
 
 

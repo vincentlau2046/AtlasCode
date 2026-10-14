@@ -16,6 +16,7 @@ import { Text } from '../../../ink.js'
 import {
   calculateTokenWarningState,
   isAutoCompactEnabled,
+  isAutoCompactEnabledForModel,
 } from 'src/engine'
 import {
   contextColorForPercentage,
@@ -65,7 +66,8 @@ export const ContextBarSegment: SegmentComponent = ({ input }) => {
   const modelId = input.model?.id
   const showCompactWarning =
     modelId != null &&
-    isAutoCompactEnabled() &&
+    // 0.1.69 D-1：per-model off 档现形面（modelId 经上方 != null 守卫收窄）
+    isAutoCompactEnabledForModel(modelId) &&
     calculateTokenWarningState(used, modelId).isAboveWarningThreshold
   return (
     <Text color={color}>

@@ -7,12 +7,20 @@ import {
 } from '../../components/CustomSelect/index.js'
 import { Text } from '../../ink.js'
 import { useAppState, useSetAppState } from '../../state/AppState.js'
-import { updateSettingsForSource } from '../../utils/settings/settings.js'
+import { getMainLoopModel, renderModelName } from '../../utils/model/model.js'
+import {
+  getInitialSettings,
+  updateSettingsForSource,
+} from '../../utils/settings/settings.js'
+import type { SettingsJson } from '../../utils/settings/types.js'
 import {
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  normalizeAutoCompactWindowSetting,
   parseAutoCompactTierArg,
   parseAutoCompactTierInput,
+  type AutoCompactWindowPerModel,
   type AutoCompactWindowSetting,
+  type AutoCompactWindowSettingLike,
 } from 'src/engine'
 import type { LocalJSXCommandCall } from '../../types/command.js'
 
@@ -26,10 +34,17 @@ import type { LocalJSXCommandCall } from '../../types/command.js'
  *
  * 持久化 = ThemePicker 双写先例：updateSettingsForSource('userSettings',
  * { autoCompactWindow })（settings.json user 车道；mergeWith 语义下切档后旧
- * 兄弟键惰性残留，zod discriminatedUnion 按 kind 判别 + 读侧剥离 → 惰性无害）
+ * 兄弟键惰性残留，zod 按 kind 判别 + 读侧剥离 → 惰性无害）
  * + setAppState 覆写（当 session 立即生效；contextHostWiring 的
  * getInitialSettings 缓存在 updateSettingsForSource 后重置 → 引擎 model-string
  * / agentLoopDeps 两车道同步见新档，env 胜 settings 合并纪律在 engine 侧）。
+ *
+ * 0.1.69 D-1（Main 裁定）：写档键 = 当前主循环模型 getMainLoopModel()
+ * （per-model 键控面；读-改-写整 map——旧单档遗留值经
+ * normalizeAutoCompactWindowSetting 归一 default 键单点过渡，无批量迁移，
+ * 其他模型键原样保留）；UI 现形 = 选择器带当前模型标签（最小面，per-model
+ * 档矩阵 UI 不入境）。写面单点 cast = engine per-model 形（索引签名含
+ * undefined）→ settings schema record 输出形（运行时同构）。
  */
 
 type Props = {
@@ -43,6 +58,18 @@ type Props = {
 type TierOptionValue = 'auto' | 'off' | 'custom' | number
 
 const PRESET_TIERS: readonly number[] = [...AUTOCOMPACT_PRESET_WINDOW_TIERS]
+
+/**
+ * 0.1.69 D-1：现档按模型取档（per-model 键 → default 键 → 缺省；raw 值形
+ * = 旧单档 | per-model map，经 normalizeAutoCompactWindowSetting 归一）。
+ */
+function currentTierFor(
+  raw: AutoCompactWindowSettingLike | undefined,
+  model: string,
+): AutoCompactWindowSetting | undefined {
+  const map = normalizeAutoCompactWindowSetting(raw)
+  return map[model] ?? map.default
+}
 
 /** 现档 → 选项值（预设档命中自身，非预设 window / pct → 自定义框带初值）。 */
 function currentToOptionValue(
@@ -68,30 +95,42 @@ function customInitialValue(
     : `${setting.pct}%`
 }
 
-/** 持久化成功后的 onDone 结果行（用户可见回执）。 */
-function describeTier(setting: AutoCompactWindowSetting): string {
+/** 持久化成功后的 onDone 结果行（用户可见回执；0.1.69 D-1 带模型标签）。 */
+function describeTier(setting: AutoCompactWindowSetting, model: string): string {
+  const label = ` [${renderModelName(model)}]`
   switch (setting.kind) {
     case 'auto':
-      return 'Auto-compact: Auto (default) — compact near the model window limit'
+      return `Auto-compact: Auto (default)${label} — compact near the model window limit`
     case 'off':
-      return 'Auto-compact: Off (manual /compact still works)'
+      return `Auto-compact: Off${label} (manual /compact still works)`
     case 'window':
-      return `Auto-compact window: ${setting.tokens / 1000}k tokens`
+      return `Auto-compact window: ${setting.tokens / 1000}k tokens${label}`
     case 'pct':
-      return `Auto-compact threshold: ${setting.pct}% of the effective window`
+      return `Auto-compact threshold: ${setting.pct}% of the effective window${label}`
   }
 }
 
-/** 双写持久化（ThemePicker 先例）：settings 落盘 + AppState 覆写（当 session
- * 立即生效；引擎 model-string / agentLoopDeps 两车道经 getInitialSettings
- * 缓存重置同步见新档）。 */
+/**
+ * 双写持久化（ThemePicker 先例 + 0.1.69 D-1 per-model 键控）：读-改-写整
+ * map（旧单档遗留值经归一 = default 键单点过渡，其他模型键原样保留）
+ * + settings 落盘 + AppState 覆写（当 session 立即生效；引擎 model-string /
+ * agentLoopDeps 两车道经 getInitialSettings 缓存重置同步见新档）。
+ */
 function persistTier(
   setting: AutoCompactWindowSetting,
+  model: string,
   setAppState: ReturnType<typeof useSetAppState>,
   onDone: Props['onDone'],
 ): void {
+  const map: AutoCompactWindowPerModel = normalizeAutoCompactWindowSetting(
+    getInitialSettings().autoCompactWindow,
+  )
+  map[model] = setting
+  // 单点 cast（engine per-model 形索引签名含 undefined → settings schema
+  // record 输出形；运行时同构，写面唯一 cast 点）
+  const mapForSettings = map as unknown as SettingsJson['autoCompactWindow']
   const { error } = updateSettingsForSource('userSettings', {
-    autoCompactWindow: setting,
+    autoCompactWindow: mapForSettings,
   })
   if (error) {
     onDone(`Failed to persist auto-compact tier: ${error.message}`, {
@@ -101,12 +140,13 @@ function persistTier(
   }
   setAppState(prev => ({
     ...prev,
-    settings: { ...prev.settings, autoCompactWindow: setting },
+    settings: { ...prev.settings, autoCompactWindow: mapForSettings },
   }))
-  onDone(describeTier(setting))
+  onDone(describeTier(setting, model))
 }
 
-/** 参数直用形（/autocompact 128k）：挂载即双写持久化，不渲染选择器。 */
+/** 参数直用形（/autocompact 128k）：挂载即双写持久化（0.1.69 D-1 键 = 当前模型），
+ * 不渲染选择器。 */
 function AutoCompactApply({
   setting,
   onDone,
@@ -116,36 +156,26 @@ function AutoCompactApply({
 }): React.ReactNode {
   const setAppState = useSetAppState()
   const doneRef = React.useRef(false)
+  const model = getMainLoopModel()
   React.useEffect(() => {
     if (doneRef.current) {
       return
     }
     doneRef.current = true
-    persistTier(setting, setAppState, onDone)
-  }, [setting, onDone, setAppState])
+    persistTier(setting, model, setAppState, onDone)
+  }, [setting, model, onDone, setAppState])
   return null
 }
 
 function AutoCompactCommand({ onDone }: Props): React.ReactNode {
   const setAppState = useSetAppState()
+  // 0.1.69 D-1：写档键 + 选择器现形 = 当前主循环模型（各模型各取己档）
+  const model = getMainLoopModel()
   const current = useAppState(s => s.settings.autoCompactWindow)
   const [inputError, setInputError] = React.useState<string | null>(null)
 
   const apply = (setting: AutoCompactWindowSetting) => {
-    const { error } = updateSettingsForSource('userSettings', {
-      autoCompactWindow: setting,
-    })
-    if (error) {
-      onDone(`Failed to persist auto-compact tier: ${error.message}`, {
-        display: 'system',
-      })
-      return
-    }
-    setAppState(prev => ({
-      ...prev,
-      settings: { ...prev.settings, autoCompactWindow: setting },
-    }))
-    onDone(describeTier(setting))
+    persistTier(setting, model, setAppState, onDone)
   }
 
   const options: OptionWithDescription<TierOptionValue>[] = [
@@ -165,7 +195,7 @@ function AutoCompactCommand({ onDone }: Props): React.ReactNode {
       value: 'custom',
       type: 'input',
       placeholder: 'e.g. 150k (window) or 75% (bare number = percent)',
-      initialValue: customInitialValue(current),
+      initialValue: customInitialValue(currentTierFor(current, model)),
       onChange: (raw: string) => {
         const parsed = parseAutoCompactTierInput(raw)
         if (!parsed) {
@@ -187,9 +217,11 @@ function AutoCompactCommand({ onDone }: Props): React.ReactNode {
 
   return (
     <Pane color="permission">
-      <Text bold={true}>Auto-compact window tier</Text>
+      <Text bold={true}>
+        {`Auto-compact window tier — ${renderModelName(model)}`}
+      </Text>
       <Select
-        defaultValue={currentToOptionValue(current)}
+        defaultValue={currentToOptionValue(currentTierFor(current, model))}
         options={options}
         onChange={value => {
           if (value === 'auto') {

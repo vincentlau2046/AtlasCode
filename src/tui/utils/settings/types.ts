@@ -9,6 +9,17 @@ export const isMcpServerUrlEntry : any = (() => ({})) as any;
 // 1. 覆盖全库实际读取的 settings 字段（grep `settings.<field>` 枚举 + tsc 错误定位所得）
 // 2. 全部字段 optional；复杂嵌套结构用 z.any() 兜底，避免过度约束
 // 3. .passthrough() 保留用户自定义/未知字段
+/**
+ * #250 concern 2 + 0.1.69 D-1：autoCompact 窗口档位结构型单源
+ * （engine AutoCompactWindowSetting 对齐形；per-model 键控面复用本单档形）。
+ */
+const autoCompactWindowSettingSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('auto') }),
+  z.object({ kind: z.literal('off') }),
+  z.object({ kind: z.literal('window'), tokens: z.number().int().min(1_000) }),
+  z.object({ kind: z.literal('pct'), pct: z.number().min(1).max(100) }),
+])
+
 // 4. SettingsJson 由 z.infer 推导，替换 `any`
 export const SettingsSchema = () => z.object({
   // --- 模型与角色层（P1 模型角色 / P2 统一模型配置）
@@ -79,13 +90,15 @@ export const SettingsSchema = () => z.object({
     .optional(),
   // #250 concern 2（/autocompact 命令）：autoCompact 窗口档位（命令持久化到
   // userSettings；结构型单源 = engine AutoCompactWindowSetting，本 schema 对齐
-  // 该形；消费 = engine 阈值/开关便捷形 + agentLoopDeps DI 注入）
+  // 该形；消费 = engine 阈值/开关便捷形 + agentLoopDeps DI 注入）。
+  // 0.1.69 D-1：扩 per-model 键控面（z.record(model, 单档) + default 兜底键；
+  // 旧单档形向后兼容 = 读侧归一 default 键〔engine
+  // normalizeAutoCompactWindowSetting 单点，零数据迁移〕；/autocompact 写档
+  // 键 = 当前主循环模型 getMainLoopModel()）。
   autoCompactWindow: z
-    .discriminatedUnion('kind', [
-      z.object({ kind: z.literal('auto') }),
-      z.object({ kind: z.literal('off') }),
-      z.object({ kind: z.literal('window'), tokens: z.number().int().min(1_000) }),
-      z.object({ kind: z.literal('pct'), pct: z.number().min(1).max(100) }),
+    .union([
+      autoCompactWindowSettingSchema,
+      z.record(z.string(), autoCompactWindowSettingSchema),
     ])
     .optional(),
   // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 请求超时持久化档
