@@ -33,7 +33,10 @@ import {
   getAutoCompactThreshold,
   getEffectiveContextWindowSize,
   isAutoCompactEnabled,
+  isAutoCompactEnabledForModel,
   mergeAutoCompactOverrides,
+  normalizeAutoCompactWindowSetting,
+  isAutoCompactWindowSetting,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
   type AutoCompactWindowSetting,
 } from '../../src/engine'
@@ -317,5 +320,88 @@ describe('mergeAutoCompactOverrides 纯合并（agentLoopDeps DI 注入单点）
       mergeAutoCompactOverrides({ ...EMPTY_ENV }, { kind: 'auto' })
         .autoCompactDisabled,
     ).toBe(false)
+  })
+})
+
+describe('0.1.69 D-1：per-model 键控档（每模型各取己档）', () => {
+  // 两个未注册窗口的模型（均回落 262_144 基线 = 缺省阈值 229_144）
+  const MODEL_256K = 'unregistered-model-256k'
+  const MODEL_1M = 'unregistered-model-1m'
+
+  function withPerModelSource(map: Record<string, unknown>) {
+    setAutoCompactWindowSettingsSource(() => map as never)
+  }
+
+  test('双模型 per-model 档：256K 模型封顶 100k，1M 模型 auto 不封顶（修前红：map 被单档形消费恒 {}，1M 面被 256K 档封顶缺陷根修）', () => {
+    withPerModelSource({
+      [MODEL_256K]: { kind: 'window', tokens: 100_000 },
+      [MODEL_1M]: { kind: 'auto' },
+    })
+    expect(getAutoCompactThreshold(MODEL_256K)).toBe(67_000) // 100k − 20k − 13k
+    expect(getAutoCompactThreshold(MODEL_1M)).toBe(229_144) // auto = 缺省
+    expect(getEffectiveContextWindowSize(MODEL_256K)).toBe(80_000)
+    expect(getEffectiveContextWindowSize(MODEL_1M)).toBe(242_144)
+  })
+
+  test('无该模型档 → default 兜底键 → 缺省 {}', () => {
+    withPerModelSource({ default: { kind: 'window', tokens: 128_000 } })
+    expect(getAutoCompactThreshold(MODEL_256K)).toBe(95_000) // default 键 128k
+    // per-model 面 1 参调用（无 model）= 取 default 键（零回归锚语义）
+    expect(resolveAutoCompactWindow({ default: { kind: 'window', tokens: 128_000 } })).toEqual({
+      windowOverride: 128_000,
+    })
+  })
+
+  test('旧单档 = 零回归锚：归一 default 键后 1 参 / 2 参取档精确同值', () => {
+    const legacy = { kind: 'window', tokens: 128_000 }
+    expect(resolveAutoCompactWindow(legacy)).toEqual({ windowOverride: 128_000 })
+    expect(resolveAutoCompactWindow(legacy, MODEL_1M)).toEqual({
+      windowOverride: 128_000,
+    })
+  })
+
+  test('normalizeAutoCompactWindowSetting：单档 → default 键 / map 原样 / null → 空 map', () => {
+    expect(normalizeAutoCompactWindowSetting({ kind: 'off' })).toEqual({
+      default: { kind: 'off' },
+    })
+    expect(normalizeAutoCompactWindowSetting(null)).toEqual({})
+    expect(normalizeAutoCompactWindowSetting(undefined)).toEqual({})
+    const map = { default: { kind: 'auto' as const } }
+    expect(normalizeAutoCompactWindowSetting(map)).toBe(map)
+  })
+
+  test('isAutoCompactWindowSetting：单档 kind 判别器（map / null 非单档）', () => {
+    expect(isAutoCompactWindowSetting({ kind: 'auto' })).toBe(true)
+    expect(isAutoCompactWindowSetting({ default: { kind: 'auto' } })).toBe(false)
+    expect(isAutoCompactWindowSetting(null)).toBe(false)
+  })
+
+  test('mergeAutoCompactOverrides 3 参形（model 键取档，agentLoopDeps DI 面）', () => {
+    const perModel = {
+      [MODEL_256K]: { kind: 'pct', pct: 50 },
+      default: { kind: 'auto' },
+    }
+    expect(
+      mergeAutoCompactOverrides({ ...EMPTY_ENV }, perModel, MODEL_256K),
+    ).toMatchObject({ pctOverride: 50 })
+    // 无己档模型 → default 键（auto = 无覆写）
+    expect(
+      mergeAutoCompactOverrides({ ...EMPTY_ENV }, perModel, MODEL_1M),
+    ).toEqual({
+      pctOverride: undefined,
+      windowOverride: undefined,
+      autoCompactDisabled: false,
+    })
+  })
+
+  test('per-model off 档：仅该模型禁 auto-compact（isAutoCompactEnabledForModel 1 参形）', () => {
+    withPerModelSource({
+      [MODEL_256K]: { kind: 'off' },
+      default: { kind: 'auto' },
+    })
+    expect(isAutoCompactEnabledForModel(MODEL_256K)).toBe(false)
+    expect(isAutoCompactEnabledForModel(MODEL_1M)).toBe(true)
+    // 0 参形回归（无 model 面 = 全局判定）
+    expect(isAutoCompactEnabled()).toBe(true)
   })
 })
