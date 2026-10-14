@@ -5,14 +5,19 @@
 // 组合根 `core/factory.ts` 负责注册本适配器（"injection window"，R5）。
 
 import { getSettings_DEPRECATED } from '../utils/settings/settings.js'
-import { getApiKeyFromConfigOrMacOSKeychain } from '../utils/auth.js'
 import type { EndpointConfigSource } from 'src/modelprovider'
 
 /**
- * 以 settings.json（getSettings_DEPRECATED）+ env + 落盘/keychain 全局 key
- * 为后端的适配器。保留 R3 的 early-throw swallow：config 未就绪时
- * getGlobalApiKey 返回 undefined 而非抛错（memoized getter 会在 config
- * 可读后重跑）。
+ * 以 settings.json（getSettings_DEPRECATED）+ env 为后端的适配器。
+ *
+ * 0.1.70 H-1（de-ant 根除，用户 2026-10-14 裁定）：getGlobalApiKey 断
+ * anthropic keychain/OAuth 读取（旧 getApiKeyFromConfigOrMacOSKeychain →
+ * macOS keychain claude.ai OAuth token → api.anthropic.com 403
+ * "not enough quota to pre-consume" 根因链）——本 adapter 恒返 undefined，
+ * 全局回落链仅存 atlascode 组合根的 env 静态键车道（OPENAI_AUTH_TOKEN ??
+ * OPENAI_API_KEY，非 anthropic）。auth.ts keychain 残留清零 + OAuth 流程面
+ * （constants/oauth.ts BASE_API_URL）= 0.1.71 de-ant 收尾波登记（本波仅断
+ * modelProvider apiKey 回落链，不触 OAuth 流程面，Main 定项②）。
  */
 export function createSettingsAdapter(): EndpointConfigSource {
   return {
@@ -24,14 +29,9 @@ export function createSettingsAdapter(): EndpointConfigSource {
       const settings = getSettings_DEPRECATED() || {}
       return ((settings as any).providers || {}) as Record<string, any>
     },
+    // H-1：恒 undefined（keychain/OAuth 读取已断，见头注）。
     getGlobalApiKey(): string | undefined {
-      try {
-        return getApiKeyFromConfigOrMacOSKeychain()?.key
-      } catch {
-        // R3：early-bootstrap 阶段 config 未就绪会抛 "Config accessed before
-        // allowed"；吞掉返回 undefined（memoized getter 稍后自动重跑）。
-        return undefined
-      }
+      return undefined
     },
   }
 }

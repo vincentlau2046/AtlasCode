@@ -77,7 +77,16 @@ export interface RoleModelConfig {
 
 /**
  * Get the fully-resolved configuration for a model role.
- * THREE SOURCES for the API key: env (per-role) → settings (per-role) → on-disk global.
+ * TWO SOURCES for the API key: env (per-role) → settings (per-role)。
+ *
+ * 0.1.70 H-1（de-ant 根除，用户 2026-10-14 裁定「fallback ant 彻底删除，
+ * 走 modelProvider openai 路径，保持架构一致性」）：全局 apiKey 回落
+ * （getGlobalApiKey → 旧仓 keychain anthropic claude.ai OAuth token →
+ * api.anthropic.com 403 "not enough quota to pre-consume" 根因链）**断链**——
+ * per-role apiKey 缺失 = undefined 显形，由 chat 面 resolveModel(ref).apiKey
+ * （settings providers 表 per-provider apiKey）兜底 = 纯 settings.json 链，
+ * 零 anthropic OAuth 回落。headless --bare OPENAI_API_KEY env 路径保留
+ * （非 anthropic 面，Main 定项③）。
  */
 export function getRoleConfig(role: ModelRole): RoleModelConfig {
   const roleKey = role.toUpperCase()
@@ -92,10 +101,8 @@ export function getRoleConfig(role: ModelRole): RoleModelConfig {
   const model: string | undefined = envModel ?? roleSetting.model
   const baseURL: string | undefined = envBaseUrl ?? roleSetting.baseURL
 
-  let apiKey: string | undefined = envApiKey ?? roleSetting.apiKey
-  if (apiKey === undefined) {
-    apiKey = getEndpointConfigSource().getGlobalApiKey()
-  }
+  // H-1：env (per-role) → settings (per-role) 两源链，无全局回落（见头注）。
+  const apiKey: string | undefined = envApiKey ?? roleSetting.apiKey
 
   return { provider, model, baseURL, apiKey }
 }

@@ -20,7 +20,10 @@ export interface EndpointConfigSource {
    */
   getProviders(): Record<string, any>
   /**
-   * 全局 API key 回退（落盘 config / macOS keychain，不区分角色）。
+   * 全局 API key 回退（不区分角色）。实现面（0.1.70 H-1 de-ant 裁定后）：
+   *   - tui settings-adapter = 恒 undefined（anthropic keychain/OAuth 读取已断——
+   *     旧 getApiKeyFromConfigOrMacOSKeychain 回落链 = 403 根因，0.1.71 收尾清零）
+   *   - atlascode 组合根 adapter = env 静态键车道（OPENAI_AUTH_TOKEN ?? OPENAI_API_KEY）
    * 必须吞掉 early-bootstrap 的 "Config accessed before allowed" 抛错，
    * 返回 undefined。
    */
