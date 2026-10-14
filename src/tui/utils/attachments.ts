@@ -410,6 +410,16 @@ export type Attachment =
       filename: string
       content: FileReadToolOutput
     }
+  /**
+   * 0.1.69 D-5：压缩后当前 git status 重注（取代 session 起始快照；仅当
+   * 相对 session 起始基线有变更时注入——createCurrentGitStatusAttachment
+   * 变更判定锚 = 块 JSON 同一性；TUI 渲染面 = null（NULL_RENDERING_TYPES
+   * 预过滤），API 面 system-reminder 是唯一消费面）。
+   */
+  | {
+      type: 'git_status_refresh'
+      status: string
+    }
   | {
       type: 'directory'
       path: string

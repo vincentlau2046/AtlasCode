@@ -20,6 +20,8 @@ const NULL_RENDERING_TYPES = [
   'critical_system_reminder',
   'edited_image_file',
   'edited_text_file',
+  // 0.1.69 D-5：当前 git status 重注（API 面 system-reminder 消费，TUI 零渲染）
+  'git_status_refresh',
   'opened_file_in_ide',
   'output_style',
   'plan_mode',

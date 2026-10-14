@@ -3538,6 +3538,15 @@ Read the team config to discover your teammates' names. Check the task list peri
           isMeta: true,
         }),
       ])
+    // 0.1.69 D-5：当前 git status 重注（fresh 文案自带 "re-injected after
+    // context compaction" 头注，取代被压缩掉的 session 起始快照）
+    case 'git_status_refresh':
+      return wrapMessagesInSystemReminder([
+        createUserMessage({
+          content: attachment.status,
+          isMeta: true,
+        }),
+      ])
     case 'file': {
       const fileContent = attachment.content as FileReadToolOutput
       switch (fileContent.type) {

@@ -33,7 +33,20 @@ export function setSystemPromptInjection(value: string | null): void {
   getSystemContext.cache.clear?.()
 }
 
-export const getGitStatus = memoize(async (): Promise<string | null> => {
+/**
+ * git status 结构化块（0.1.69 D-5：session 起始快照 / 当前态两文案面共享，
+ * 变更判定锚 = 块 JSON 同一性）。
+ */
+export interface GitStatusBlocks {
+  branch: string
+  mainBranch: string
+  /** git status --short（2k 截断）；空串 = clean。 */
+  status: string
+  log: string
+  userName: string
+}
+
+async function fetchGitStatusBlocks(): Promise<GitStatusBlocks | null> {
   if (process.env.NODE_ENV === 'test') {
     // Avoid cycles in tests
     return null
@@ -93,14 +106,7 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
       truncated: status.length > MAX_STATUS_CHARS,
     })
 
-    return [
-      `This is the git status at the start of the conversation. Note that this status is a snapshot in time, and will not update during the conversation.`,
-      `Current branch: ${branch}`,
-      `Main branch (you will usually use this for PRs): ${mainBranch}`,
-      ...(userName ? [`Git user: ${userName}`] : []),
-      `Status:\n${truncatedStatus || '(clean)'}`,
-      `Recent commits:\n${log}`,
-    ].join('\n\n')
+    return { branch, mainBranch, status: truncatedStatus, log, userName }
   } catch (error) {
     logForDiagnosticsNoPII('error', 'git_status_failed', {
       duration_ms: Date.now() - startTime,
@@ -108,7 +114,54 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
     logError(error)
     return null
   }
+}
+
+/** session 起始快照文案（修前逐字节恒等 = 零回归锚）。 */
+const GIT_STATUS_START_HEADER =
+  'This is the git status at the start of the conversation. Note that this status is a snapshot in time, and will not update during the conversation.'
+
+/** 0.1.69 D-5：当前态重注文案（取代 session 起始快照）。 */
+const GIT_STATUS_FRESH_HEADER =
+  'This is the current git status, re-injected after context compaction. It reflects the working tree as of now and supersedes any earlier session-start snapshot.'
+
+function formatGitStatus(blocks: GitStatusBlocks, header: string): string {
+  return [
+    header,
+    `Current branch: ${blocks.branch}`,
+    `Main branch (you will usually use this for PRs): ${blocks.mainBranch}`,
+    ...(blocks.userName ? [`Git user: ${blocks.userName}`] : []),
+    `Status:\n${blocks.status || '(clean)'}`,
+    `Recent commits:\n${blocks.log}`,
+  ].join('\n\n')
+}
+
+/** 0.1.69 D-5：session 起始快照块（null = 非 git / 测试 env / 尚未抓取）。 */
+let sessionStartGitStatusBlocks: GitStatusBlocks | null = null
+
+export const getGitStatus = memoize(async (): Promise<string | null> => {
+  const blocks = await fetchGitStatusBlocks()
+  if (!blocks) return null
+  // 0.1.69 D-5：留 session 起始快照块（post-compact 重注变更判定锚；
+  // post-compact reset 清单不清 getGitStatus memo → 基线 = 真 session 起始态）
+  sessionStartGitStatusBlocks = blocks
+  return formatGitStatus(blocks, GIT_STATUS_START_HEADER)
 })
+
+/** 0.1.69 D-5：当前态 git status（非 memoized；post-compact 重注面）。 */
+export function getGitStatusFresh(): Promise<
+  { text: string; blocks: GitStatusBlocks } | null
+> {
+  return fetchGitStatusBlocks().then(blocks =>
+    blocks
+      ? { text: formatGitStatus(blocks, GIT_STATUS_FRESH_HEADER), blocks }
+      : null,
+  )
+}
+
+/** 0.1.69 D-5：session 起始快照块读取面（变更判定；未抓取 = null = 不注）。 */
+export function getSessionStartGitStatusBlocks(): GitStatusBlocks | null {
+  return sessionStartGitStatusBlocks
+}
 
 /**
  * This context is prepended to each conversation, and cached for the duration of the conversation.

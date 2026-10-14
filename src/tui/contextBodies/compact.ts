@@ -35,6 +35,11 @@ import {
 } from '../utils/attachments.js'
 import { getMemoryPath } from '../utils/config.js'
 import { COMPACT_MAX_OUTPUT_TOKENS } from '../utils/context.js'
+// 0.1.69 D-5：git status session 起始基线 + 当前态 fresh 取态（tui 顶层 context）
+import {
+  getGitStatusFresh,
+  getSessionStartGitStatusBlocks,
+} from '../context.js'
 import {
   analyzeContext,
   tokenStatsToStatsigMetrics,
@@ -1353,6 +1358,40 @@ export async function createPostCompactFileAttachments(
       return true
     }
     return false
+  })
+}
+
+/**
+ * 0.1.69 D-5：压缩后当前 git status 重注（Main 裁定，记录在码）：
+ *  - 门控 = session 起始基线存在（getSessionStartGitStatusBlocks；非 git /
+ *    测试 env / getSystemContext 从未跑过 = null → 不注，零注入安全向）
+ *  - fresh 取态（getGitStatusFresh 非 memoized；同命令集 + 2k 截断，
+ *    文案 = "current git status, re-injected after context compaction"）
+ *  - 变更判定锚 = 块 JSON 同一性：fresh 块与 session 起始基线逐字段同值
+ *    （branch / mainBranch / status / log / userName）= git 面无变更 →
+ *    不注（session 起始快照在压缩后依然准确，零 token 浪费 = 恒等锚）
+ *  - ctx 入参不入境：git 命令锚 process.cwd（TUI /cd 仅状态面移动不 chdir，
+ *    cwd 全程稳定，与 session 起始快照同锚点）
+ * 返回 createAttachmentMessage({ type: 'git_status_refresh' })；TUI 渲染面
+ * null（NULL_RENDERING_TYPES），API 面 system-reminder 消费。
+ */
+export async function createCurrentGitStatusAttachment(): Promise<
+  AttachmentMessage | null
+> {
+  const baseline = getSessionStartGitStatusBlocks()
+  if (!baseline) {
+    return null
+  }
+  const fresh = await getGitStatusFresh()
+  if (!fresh) {
+    return null
+  }
+  if (JSON.stringify(fresh.blocks) === JSON.stringify(baseline)) {
+    return null
+  }
+  return createAttachmentMessage({
+    type: 'git_status_refresh',
+    status: fresh.text,
   })
 }
 

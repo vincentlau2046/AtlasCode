@@ -18,6 +18,8 @@
  *  - CompactPorts.buildPostCompactAttachments ← 旧仓 L493-549 组合配方
  *    （file+asyncAgent 并行 → plan/planMode/skill 追加 → deferred-tools /
  *    agent-listing / MCP-instructions delta 重宣告）逐字复原
+ *    + 0.1.69 D-5 当前 git status 重注（createCurrentGitStatusAttachment；
+ *    session 起始基线在场 + fresh 块 JSON 变更判定，无变更 = 零注入恒等锚）
  *  - CompactPorts.markPostCompaction/notifyCompaction ← bootstrapState /
  *    promptCacheBreakDetection（旧仓 bootstrapState 本 fork 为 stub，端口
  *    照注 = 行为逐字）
@@ -107,6 +109,7 @@ import { streamCompactSummary } from './contextBodies/compact.js'
 import { getAssistantMessageText } from './utils/messages.js'
 import {
   createAsyncAgentAttachmentsIfNeeded,
+  createCurrentGitStatusAttachment,
   createPlanAttachmentIfNeeded,
   createPlanModeAttachmentIfNeeded,
   createPostCompactFileAttachments,
@@ -145,6 +148,11 @@ async function composePostCompactAttachments(
     createAsyncAgentAttachmentsIfNeeded(ctx),
   ])
   const out: AttachmentMessage[] = [...fileAttachments, ...asyncAgentAttachments]
+  // 0.1.69 D-5：当前 git status 重注（门控 + 变更判定全在 factory 内：
+  // session 起始基线在场 + fresh 块 JSON 异于基线才注；无 git 变更面 =
+  // null 零注入 = 恒等锚）
+  const gitStatusAttachment = await createCurrentGitStatusAttachment()
+  if (gitStatusAttachment) out.push(gitStatusAttachment)
   const planAttachment = createPlanAttachmentIfNeeded(ctx.agentId)
   if (planAttachment) out.push(planAttachment)
   const planModeAttachment = await createPlanModeAttachmentIfNeeded(ctx)
