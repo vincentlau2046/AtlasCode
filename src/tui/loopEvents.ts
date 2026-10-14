@@ -29,6 +29,7 @@ import {
   type AgentLoopEvent,
   type AgentLoopResult,
 } from 'src/engine'
+import type { StreamDelta } from 'src/modelprovider'
 import type { Message } from 'src/shared'
 
 /**
@@ -36,8 +37,17 @@ import type { Message } from 'src/shared'
  * Message = shared 宽形（timestamp string|number）——与 AgentLoopEvent 载荷
  * 同源（loop.ts 经 shared 构造）；engine 根门面 re-export 的 Message = session
  * 域窄形（timestamp string），非本面事实源（不混用，H6 登记）。
+ *
+ * 0.1.70 G-3（composing token 回归波）：stream_delta 事件扩型（定项① = 直接
+ * 扩型不包装 Message——消费侧 switch 更清晰，不与 Message 语义混）。backpressure
+ * 定项② = 本波不微批合并（pending 队列逐消费者轮次同步排空；Ink 16ms throttle
+ * + React 18 自动批吸收渲染；per-token 状态更新 = D-2a 前 legacy 面复原，若
+ * 生产 lane 显渲染风暴 = 0.1.71 text_delta 微批合并定参面）。
  */
-export type EngineLoopStreamEvent = { type: 'stream_request_start' } | Message
+export type EngineLoopStreamEvent =
+  | { type: 'stream_request_start' }
+  | { type: 'stream_delta'; delta: StreamDelta }
+  | Message
 
 // R1（P0 静默终止）：REPL 捕获终态 AgentLoopResult（emptyTerminated 面）经本
 // tui 适配器 re-export（边界面：REPL 只依赖 tui 适配器，不直引 engine 根门面）。
@@ -75,6 +85,10 @@ export async function* queryEngineLoopStream(
           pending.push(event.assistantMessage, ...event.toolResultMessages)
         } else if (event.type === 'compacted') {
           pending.push(event.messages[0])
+        } else if (event.type === 'stream_delta') {
+          // 0.1.70 G-3：per-token 转发（修前落 else 被丢弃 = TUI 永不收
+          // per-token 根因面；TUI for-await 消费，激活既有死代码接线）。
+          pending.push(event)
         }
         notify()
       },
