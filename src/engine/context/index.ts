@@ -11,8 +11,12 @@ export {
   WARNING_THRESHOLD_BUFFER_TOKENS,
   ERROR_THRESHOLD_BUFFER_TOKENS,
   MANUAL_COMPACT_BUFFER_TOKENS,
+  // 0.1.68 F′ C7：auto-compact 近期消息保留定参（keepRecent N=3）
+  AUTOCOMPACT_KEEP_RECENT,
   getAutoCompactThreshold,
   getEffectiveContextWindowSize,
+  // 0.1.68 F-3a：小窗阈值非正可用性谓词（守卫单一事实源）
+  isAutoCompactThresholdPositive,
   calculateTokenWarningState,
   isAutoCompactEnabled,
   shouldAutoCompact,
@@ -41,6 +45,11 @@ export {
 } from './autoCompactWindow'
 // #250 concern 2：env ⊕ settings 档位合并纯函数（agentLoopDeps DI 注入单点）
 export { mergeAutoCompactOverrides } from './autoCompact'
+// 0.1.68 F-1：auto-compact 压缩体（富路径消费 + 裁剪 fail-safe 双门面）
+export {
+  createAutoCompactCompact,
+  type AutoCompactCompactOptions,
+} from './autoCompactRich'
 export {
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
   ERROR_MESSAGE_USER_ABORT,

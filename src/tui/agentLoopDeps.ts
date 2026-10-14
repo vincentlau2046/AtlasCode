@@ -30,7 +30,8 @@ import {
   type ModelRole,
 } from 'src/modelprovider'
 import {
-  compactConversation,
+  AUTOCOMPACT_KEEP_RECENT,
+  createAutoCompactCompact,
   createLoopHooks,
   getAutoCompactEnvOverrides,
   getAutoCompactCircuitFailures,
@@ -43,6 +44,7 @@ import {
   type AgentLoopArgs,
   type AgentLoopDeps,
   type AutoCompactDeps,
+  type CompactContext,
   type Message,
 } from 'src/engine'
 import { hasNonTerminalTasks } from './Task.js'
@@ -144,35 +146,51 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
     enabled: mergedAutoCompact.autoCompactDisabled ? false : undefined,
     pctOverride: mergedAutoCompact.pctOverride,
     windowOverride: mergedAutoCompact.windowOverride,
-    compact: (msgs) =>
-      compactConversation(
-        msgs,
-        {
-          summarize: async (compactMsgs, prompt) => {
-            const resp = await modelProvider.chat({
-              messages: [...compactMsgs, prompt],
-              role,
-              sessionModel,
-              signal: m.signal,
-            })
-            const content = (
-              resp as { message?: { content?: unknown } }
-            ).message?.content
-            const blocks = Array.isArray(content) ? content : []
-            return blocks
-              .filter(
-                (b): b is { type: string; text?: string } =>
-                  typeof b === 'object' &&
-                  b !== null &&
-                  (b as { type?: string }).type === 'text',
-              )
-              .map(b => b.text ?? '')
-              .join('')
-          },
-          countTokens,
-          keepRecent: 0,
-        },
-      ),
+    // 0.1.68 F-1（块 F 根修）：auto-compact 压缩体双门面——TUI 车道经
+    // CompactPorts DI（contextHostWiring setCompactPorts 注册）走富路径
+    // （附件重建 + PTL 截头重试 + hook 簇 = 恢复质量对齐手动 /compact +
+    // reactive 消费面）；port 未注册或 richContext null = 裁剪路径逐字恒等
+    // （修前行为零回归锚；headless 车道无宿主本体 port 未注册 = 自然留裁剪，
+    // 0.1.69 候选面）。
+    compact: createAutoCompactCompact({
+      trimmedSummarize: async (compactMsgs, prompt) => {
+        const resp = await modelProvider.chat({
+          messages: [...compactMsgs, prompt],
+          role,
+          sessionModel,
+          signal: m.signal,
+        })
+        const content = (
+          resp as { message?: { content?: unknown } }
+        ).message?.content
+        const blocks = Array.isArray(content) ? content : []
+        return blocks
+          .filter(
+            (b): b is { type: string; text?: string } =>
+              typeof b === 'object' &&
+              b !== null &&
+              (b as { type?: string }).type === 'text',
+          )
+          .map(b => b.text ?? '')
+          .join('')
+      },
+      countTokens,
+      // 富上下文 = 本 turn 活 ToolUseContext（duck cast 单点，engine React-
+      // free 红线；字段读面见 compactPorts CompactContext 头注）
+      richContext: m.toolUseContext as unknown as CompactContext,
+      // 0.1.68 F′ C7：近期消息保留定参（最近 3 条原文 = 热工具近态不丢，
+      // 模型不必重读；N=3 定参见 autoCompact.ts AUTOCOMPACT_KEEP_RECENT 头注）
+      keepRecent: AUTOCOMPACT_KEEP_RECENT,
+      buildCacheSafeParams: (msgs) => ({
+        systemPrompt: m.systemPrompt,
+        userContext: m.userContext,
+        systemContext: m.systemContext,
+        toolUseContext: m.toolUseContext,
+        // forkContextMessages = 本 loop 触发压缩前的活消息序列（消费点
+        // 当前 messages 参，非 m.messages 预 loop 静态序列，同 reactive 支）
+        forkContextMessages: msgs,
+      }),
+    }),
     querySource: m.querySource,
   }
 

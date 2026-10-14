@@ -333,6 +333,36 @@ export function getAutoCompactThreshold(
   )
 }
 
+/**
+ * 0.1.68 F-3a：阈值正可用性谓词（小窗守卫单一事实源，DI 形）：
+ * 阈值 = getAutoCompactThreshold（有效窗口 − 13k，pct 覆写已应用）> 0。
+ * 非正（例 32K 窗模型 = 32768 − 20k 摘要预留 − 13k = −232）= 该模型
+ * auto-compact 结构性不可用（窗口装不下 20k 摘要输出预留 + 13k 缓冲，
+ * 摘要调用自身近满窗易 413）→ 触发面（shouldAutoCompact）禁用 + 警告面
+ * （calculateTokenWarningState）退化面（负阈值不假警告 + 显形提示）。
+ * 大窗模型（阈值 > 0）= 各面修前精确同值（零回归约束锚）。
+ *
+ * 裁定登记（Main 2026-10-14，工单 F-3a 裁定点 = 禁用非 clamp）：
+ * clamp 到小正值是错误解法——小窗装不下摘要输出预留，clamp 到低阈值
+ * 只把压缩风暴移到更低触发点（更频繁），不救反害；小窗摘要自 413 的
+ * 根修 = D-3 摘要 fallback 模型（0.1.69 候选），本件 = 缓解 + 显形。
+ */
+export function isAutoCompactThresholdPositive(
+  contextWindow: number,
+  maxOutputTokens?: number,
+  pctOverride?: number,
+  windowOverride?: number,
+): boolean {
+  return (
+    getAutoCompactThreshold(
+      contextWindow,
+      maxOutputTokens,
+      pctOverride,
+      windowOverride,
+    ) > 0
+  )
+}
+
 // ── W2-2-pre 缺面先迁①（§8.74.2）：TUI warning 态面三常量（旧仓 :63-65 逐字）──
 
 /** TUI TokenWarning 警告缓冲（旧仓 WARNING_THRESHOLD_BUFFER_TOKENS）。 */
@@ -342,12 +372,29 @@ export const ERROR_THRESHOLD_BUFFER_TOKENS = 20_000
 /** 手动 /compact 缓冲（旧仓 MANUAL_COMPACT_BUFFER_TOKENS；blocking limit 判据）。 */
 export const MANUAL_COMPACT_BUFFER_TOKENS = 3_000
 
+/**
+ * 0.1.68 F′ C7：auto-compact 近期消息保留条数（keepRecent N，Main 定参 = 3）：
+ * post-compact 保留最近 N 条原文（≈ 一个热 API round——最近工具近态/文件态
+ * 不丢，模型不必重读）；N 取小值防 post-compact 上下文仍近阈值再触发压缩
+ * （压缩风暴）。N=0 = 全量压缩（修前行为恒等锚）。消费面 = auto-compact
+ * 富路径（createAutoCompactCompact 透传，compactConversation 第 8 参）；
+ * 手动 /compact + reactive 消费面缺省 0 零回归。
+ */
+export const AUTOCOMPACT_KEEP_RECENT = 3
+
 export interface TokenWarningState {
   percentLeft: number
   isAboveWarningThreshold: boolean
   isAboveErrorThreshold: boolean
   isAboveAutoCompactThreshold: boolean
   isAtBlockingLimit: boolean
+  /**
+   * 0.1.68 F-3a：小窗非正阈值 → auto-compact 禁用显形标志（TUI TokenWarning
+   * 显形行消费：「窗口过小，auto-compact 已禁用；建议手动 /compact 或换小
+   * 上下文模型」）；enabled && 阈值非正 = true，大窗 / 用户禁用面 = undefined
+   * （零回归）。
+   */
+  autoCompactDisabledBySmallWindow?: boolean
 }
 
 export interface TokenWarningParams {
@@ -421,7 +468,18 @@ function calculateTokenWarningStateCore(
     pctOverride,
     windowOverride,
   )
-  const threshold = enabled
+  // 0.1.68 F-3a：小窗非正阈值 = auto-compact 实际不可用（同 disabled 退化
+  // 到有效窗口面 = 负阈值不假警告：percentLeft / warning / error 阈值全按
+  // 有效窗口算真值）；显形提示面 = 下方加性字段。大窗（阈值 > 0）= 修前
+  // 精确同值零回归（thresholdUsable 恒 true，effectivelyEnabled ≡ enabled）。
+  const thresholdUsable = isAutoCompactThresholdPositive(
+    contextWindow,
+    maxOutputTokens,
+    pctOverride,
+    windowOverride,
+  )
+  const effectivelyEnabled = enabled && thresholdUsable
+  const threshold = effectivelyEnabled
     ? autoCompactThreshold
     : getEffectiveContextWindowSize(contextWindow, maxOutputTokens, windowOverride)
 
@@ -435,8 +493,10 @@ function calculateTokenWarningStateCore(
 
   const isAboveWarningThreshold = tokenUsage >= warningThreshold
   const isAboveErrorThreshold = tokenUsage >= errorThreshold
+  // 0.1.68 F-3a：小窗非正阈值面 = 不置位（修前 enabled && usage ≥ 负阈值
+  // 恒真 = 假「已超 auto-compact 阈值」信号，同面失守一并修）
   const isAboveAutoCompactThreshold =
-    enabled && tokenUsage >= autoCompactThreshold
+    effectivelyEnabled && tokenUsage >= autoCompactThreshold
 
   const actualContextWindow = getEffectiveContextWindowSize(
     contextWindow,
@@ -456,6 +516,12 @@ function calculateTokenWarningStateCore(
     isAboveErrorThreshold,
     isAboveAutoCompactThreshold,
     isAtBlockingLimit,
+    // 0.1.68 F-3a：显形面加性字段（enabled && 阈值非正 = true；大窗 / 用户
+    // 禁用 auto-compact 面 = 缺省 undefined 零回归——禁用面不显形「小窗」，
+    // 用户自己关的开关不提示窗口问题）。
+    ...(enabled && !thresholdUsable
+      ? { autoCompactDisabledBySmallWindow: true }
+      : {}),
   }
 }
 
@@ -505,6 +571,22 @@ export async function shouldAutoCompact(
     return false
   }
   if (!deps.countTokens) {
+    return false
+  }
+  // 0.1.68 F-3a：小窗非正阈值守卫——阈值 = 有效窗口 − 13k（pct 已应用）≤ 0
+  // （例 32K 窗 → 有效 12K → 阈值 −232）= auto-compact 结构性不可用：修前
+  // 该判定恒真（tokens ≥ 负阈值恒真）= 每轮触发压缩风暴（每轮一次 LLM 摘要
+  // + 已摘要上下文再摘要 = 信息流失 + 极慢，用户「恢复缓慢」小窗面机制）；
+  // 禁用 + 显形（UI 面见 calculateTokenWarningState autoCompactDisabledBySmallWindow）。
+  // 大窗模型（阈值 > 0）= 修前精确同值零回归（谓词恒 true，本支不可达）。
+  if (
+    !isAutoCompactThresholdPositive(
+      deps.contextWindow,
+      deps.maxOutputTokens,
+      deps.pctOverride,
+      deps.windowOverride,
+    )
+  ) {
     return false
   }
   const tokenCount = await deps.countTokens(messages)

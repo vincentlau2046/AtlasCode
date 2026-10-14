@@ -451,6 +451,8 @@ export function compactConversation(
   customInstructions?: string,
   isAutoCompact?: boolean,
   recompactionInfo?: RecompactionInfo,
+  /** 0.1.68 F′ C7：近期消息保留数（富路径；缺省 0 = 全量压缩零回归）。 */
+  keepRecent?: number,
 ): Promise<CompactionResult>
 export function compactConversation(
   messages: Message[],
@@ -460,6 +462,7 @@ export function compactConversation(
   customInstructions?: string,
   isAutoCompact?: boolean,
   recompactionInfo?: RecompactionInfo,
+  keepRecent?: number,
 ): Promise<CompactionResult> {
   const rich =
     typeof (contextOrDeps as { getAppState?: unknown }).getAppState === 'function'
@@ -472,6 +475,7 @@ export function compactConversation(
       customInstructions,
       isAutoCompact ?? false,
       recompactionInfo,
+      keepRecent ?? 0,
     )
   }
   return trimmedCompactConversation(
@@ -582,6 +586,10 @@ async function richCompactConversation(
   customInstructions: string | undefined,
   isAutoCompact: boolean,
   recompactionInfo: RecompactionInfo | undefined,
+  // 0.1.68 F′ C7（对齐上游恢复组件「近期消息保留」）：保留最近 N 条原文
+  // （post-compact messagesToKeep）；缺省 0 = 全量压缩（手动 /compact +
+  // reactive 消费面零回归锚）。
+  keepRecent: number = 0,
 ): Promise<CompactionResult> {
   const p = getCompactPorts()
   if (!p) {
@@ -743,6 +751,13 @@ async function richCompactConversation(
       }
     }
 
+    // 0.1.68 F′ C7：近期消息保留（keepRecent>0 = post-compact 保留最近 N 条
+    // 原文；N=0 缺省 = 全量压缩零回归）。摘要提示词同步置位
+    // recentMessagesPreserved 标志（getCompactUserSummaryMessage 第 4 参，
+    // 上游文案「Recent messages are preserved verbatim.」）。
+    const messagesToKeep =
+      keepRecent > 0 ? messages.slice(-keepRecent) : undefined
+
     const transcriptPath = getTranscriptPath()
     const summaryMessages: Message[] = [
       {
@@ -756,6 +771,7 @@ async function richCompactConversation(
             summary,
             suppressFollowUpQuestions,
             transcriptPath,
+            messagesToKeep !== undefined,
           ),
         },
       },
@@ -771,6 +787,7 @@ async function richCompactConversation(
     const truePostCompactTokenCount = roughTokenCountEstimationForMessages([
       boundaryMarker,
       ...summaryMessages,
+      ...(messagesToKeep ?? []),
       ...postCompactFileAttachments,
       ...hookMessages,
     ] as never)
@@ -810,6 +827,9 @@ async function richCompactConversation(
       summaryMessages,
       attachments: postCompactFileAttachments,
       hookResults: hookMessages,
+      // 0.1.68 F′ C7：keepRecent>0 时置位（buildPostCompactMessages 消费序
+      // 在 summary 之后、attachments 之前，同裁剪路径 messagesToKeep 语义）
+      ...(messagesToKeep ? { messagesToKeep } : {}),
       userDisplayMessage: combinedUserDisplayMessage || undefined,
       preCompactTokenCount,
       postCompactTokenCount: compactionCallTotalTokens,

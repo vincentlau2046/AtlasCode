@@ -427,6 +427,8 @@ export {
 export {
   getAutoCompactThreshold,
   getEffectiveContextWindowSize,
+  // 0.1.68 F-3a：小窗阈值非正可用性谓词（守卫单一事实源）
+  isAutoCompactThresholdPositive,
   calculateTokenWarningState,
   isAutoCompactEnabled,
   shouldAutoCompact,
@@ -437,6 +439,8 @@ export {
   WARNING_THRESHOLD_BUFFER_TOKENS,
   ERROR_THRESHOLD_BUFFER_TOKENS,
   MANUAL_COMPACT_BUFFER_TOKENS,
+  // 0.1.68 F′ C7：auto-compact 近期消息保留定参（keepRecent N=3）
+  AUTOCOMPACT_KEEP_RECENT,
   type TokenWarningState,
   type TokenWarningParams,
   // F-B3（S-4）：补齐兄弟错误常量 re-export（engine/context 两枚同族常量，
@@ -484,6 +488,9 @@ export {
   type AutoCompactWindowSetting,
   type AutoCompactWindowResolution,
   mergeAutoCompactOverrides,
+  // 0.1.68 F-1：auto-compact 压缩体（富路径消费 + 裁剪 fail-safe 双门面）
+  createAutoCompactCompact,
+  type AutoCompactCompactOptions,
   // D-2a S6（M5 切端）：post-compact 清理注册表 + HIGH GAP 重体端口缝
   registerPostCompactReset,
   clearPostCompactResetsForTesting,

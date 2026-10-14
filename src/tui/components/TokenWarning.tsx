@@ -105,7 +105,10 @@ export function TokenWarning(t0) {
   const {
     percentLeft,
     isAboveWarningThreshold,
-    isAboveErrorThreshold
+    isAboveErrorThreshold,
+    // 0.1.68 F-3a：小窗阈值非正 = auto-compact 禁用（引擎面单源谓词），
+    // 显形面消费（防「X% until auto-compact」文案失真——小窗永不触发）
+    autoCompactDisabledBySmallWindow
   } = t1;
   const suppressWarning = useCompactWarningSuppression();
   // D2（0.1.37 ③）：断路器跳闸态活订阅（须在早退前无条件调用，hooks 规则）
@@ -173,9 +176,14 @@ export function TokenWarning(t0) {
   // 跳闸态改渲染暂停提示 + 恢复出口（手动 /compact·换小模型·新会话），纯加性
   // 渲染零行为面变更；未跳闸（circuitFailures < 阈值）= 原文案零改动。
   const circuitTripped = isAutoCompactCircuitTripped(circuitFailures);
+  // 0.1.68 F-3a 显形面：小窗（auto-compact 阈值非正 = 永不触发）下「X% until
+  // auto-compact」文案失真（暗示会自动压缩）→ 改渲染禁用提示 + 出口（手动
+  // /compact / 换小上下文模型）；大窗面 = 原三态链逐字零改动。优先级：
+  // circuitTripped（跳闸自有恢复出口）> reactiveOnlyMode（中性百分比行）>
+  // 小窗禁用行 > 默认「X% until auto-compact」。
   const autocompactLabel = circuitTripped
     ? `auto-compact paused after ${circuitFailures} consecutive failures · run /compact, switch to a smaller model, or start a new session`
-    : reactiveOnlyMode ? `${100 - displayPercentLeft}% context used` : `${displayPercentLeft}% until auto-compact`;
+    : reactiveOnlyMode ? `${100 - displayPercentLeft}% context used` : autoCompactDisabledBySmallWindow ? `context window too small for auto-compact · auto-compact disabled · run /compact manually or use a smaller-context model` : `${displayPercentLeft}% until auto-compact`;
   let t4;
   if ($[9] !== autocompactLabel || $[10] !== isAboveErrorThreshold || $[11] !== percentLeft) {
     t4 = <Box flexDirection="row">{showAutoCompactWarning ? <Text dimColor={true} wrap="truncate">{upgradeMessage ? `${autocompactLabel} \u00b7 ${upgradeMessage}` : autocompactLabel}</Text> : <Text color={isAboveErrorThreshold ? "error" : "warning"} wrap="truncate">{upgradeMessage ? `Context low (${percentLeft}% remaining) \u00b7 ${upgradeMessage}` : `Context low (${percentLeft}% remaining) \u00b7 Run /compact to compact & continue`}</Text>}</Box>;

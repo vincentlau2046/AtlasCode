@@ -661,7 +661,11 @@ export async function queryAgentLoop(
     // pre-turn 压缩（未注入 context = 跳过，窄 spine 语义）
     if (args.context?.autoCompact) {
       const oc = await autoCompactIfNeeded(messages, tracking, args.context.autoCompact)
-      if (oc.wasCompacted && oc.compactionResult) {
+      // 0.1.68 F-1a：skip 载体门（AD-22 PreCompact hook block → 富路径返回
+      // compactionSkipped 载体，压缩未执行）= 不得以占位字段 buildPostCompactMessages
+      // 换消息面（会误丢原上下文，同 reactive 支 L762 先例）——skip = 本回合
+      // 压缩不可用，序列原样继续（非失败：不回灌熔断计数，tracking 不动）。
+      if (oc.wasCompacted && oc.compactionResult && !oc.compactionResult.compactionSkipped) {
         messages = buildPostCompactMessages(oc.compactionResult)
         if (oc.tracking) {
           // 成功：重置 tracking（turnCounter 0 + 新 turnId + 失败计数清零，旧仓 L485-494）
@@ -718,8 +722,13 @@ export async function queryAgentLoop(
         // 静默失能 → 可见 + 有出口，P2 报告 §5 D2）
         reportAutoCompactCircuitFailures(oc.consecutiveFailures)
       }
-      if (oc.wasCompacted && oc.compactionResult) {
+      if (
+        oc.wasCompacted &&
+        oc.compactionResult &&
+        !oc.compactionResult.compactionSkipped
+      ) {
         // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
+        // 0.1.68 F-1a：skip 载体不发 compacted 事件（压缩未执行，无边界可发）
         deps.emit?.({ type: 'compacted', turn: turns, messages })
       }
     }
