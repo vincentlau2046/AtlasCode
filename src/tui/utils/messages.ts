@@ -47,6 +47,7 @@ import {
   getPdfTooLargeErrorMessage,
   getRequestTooLargeErrorMessage,
 } from 'src/modelprovider'
+import type { StreamDelta } from 'src/modelprovider'
 import type { AnyObject, Progress } from '../Tool.js'
 import { isConnectorTextBlock } from '../types/connectorText.js'
 import type {
@@ -2949,7 +2950,8 @@ export function handleMessageFromStream(
     | TombstoneMessage
     | StreamEvent
     | RequestStartEvent
-    | ToolUseSummaryMessage,
+    | ToolUseSummaryMessage
+    | { type: 'stream_delta'; delta: StreamDelta },
   onMessage: (message: Message) => void,
   onUpdateLength: (newContent: string) => void,
   onSetStreamMode: (mode: SpinnerMode) => void,
@@ -2965,7 +2967,8 @@ export function handleMessageFromStream(
 ): void {
   if (
     message.type !== 'stream_event' &&
-    message.type !== 'stream_request_start'
+    message.type !== 'stream_request_start' &&
+    message.type !== 'stream_delta'
   ) {
     // Handle tombstone messages - remove the targeted message instead of adding
     if (message.type === 'tombstone') {
@@ -2999,6 +3002,23 @@ export function handleMessageFromStream(
 
   if (message.type === 'stream_request_start') {
     onSetStreamMode('requesting')
+    return
+  }
+
+  // 0.1.70 G-4（composing token 回归波）：per-token delta 到达（G-3 engine
+  // stream_delta 转发）→ 激活 W-opt 死代码接线（spinnerGates token 门 /
+  // SpinnerAnimationRow token 动画 / streamingText 渐进显示 / SpinnerModeGlyph
+  // ↑→↓ / stall 检测 currentResponseLength>0 守卫）。定项：① 每 text_delta 调
+  // setStreamMode('responding')（状态未变 React bail，首调后成本 ≈ 0）；② tool_use
+  // delta 面 = 0.1.71 候选（tool_use 经 round_end toolResultMessages 已可见，本波
+  // 仅 text 面）；③ thinking_delta 面 = 同 G-1 定项③（事件型不存在）。恒等锚 =
+  // stream_delta 未到达面：既有各分支逐字节同值。
+  if (message.type === 'stream_delta') {
+    if (message.delta.type === 'text_delta') {
+      onSetStreamMode('responding')
+      onUpdateLength(message.delta.text)
+      onStreamingText?.(text => (text ?? '') + message.delta.text)
+    }
     return
   }
 
