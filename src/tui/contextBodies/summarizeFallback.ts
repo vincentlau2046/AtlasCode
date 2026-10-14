@@ -55,15 +55,27 @@ export function isFallbackEligibleError(err: unknown): boolean {
  * 触发判定（返回消息面）：API 错误前缀摘要（isApiErrorMessage 标记或
  * 'API Error' 前缀）= 可 fallback；PTL / 中止文本 / 正常摘要 = 不触发
  * （前缀天然排除——PTL 文本 = 'Prompt is too long'… 不带 API 错误前缀）。
+ *
+ * gate r1（r-20261014-gate-069-r1 TS2559）修波：首参由窄弱型
+ * `{ isApiErrorMessage?: boolean }` 放宽 unknown——宿主消息面类型（TUI
+ * AssistantMessage 无 isApiErrorMessage 声明）与窄弱型无共享属性 →
+ * 弱型检查红（gate 独立复跑 tsc 铁证；Main 前波自报 tsc 0 = 后台任务
+ * 退出码被尾部 echo 掩蔽的误读，gate 为准）。内联 narrow cast + object
+ * 守卫（调用点零 cast；可达域零行为变更——调用点恒传消息对象，守卫仅
+ * 使不可达的非对象输入落 false 面）。
  */
 export function isFallbackEligibleResult(
-  msg: { isApiErrorMessage?: boolean },
+  msg: unknown,
   text: string | null | undefined,
 ): boolean {
   if (!text) return false
   if (text.includes(PROMPT_TOO_LONG_ERROR_MESSAGE)) return false
   if (text.includes('Request was aborted.')) return false
-  return msg.isApiErrorMessage === true || startsWithApiErrorPrefix(text)
+  const flagged =
+    typeof msg === 'object' &&
+    msg !== null &&
+    (msg as { isApiErrorMessage?: boolean }).isApiErrorMessage === true
+  return flagged || startsWithApiErrorPrefix(text)
 }
 
 /**
