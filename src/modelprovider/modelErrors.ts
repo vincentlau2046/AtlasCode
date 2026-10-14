@@ -45,6 +45,29 @@ export function isValidAPIMessage(value: unknown): value is BetaMessage {
   )
 }
 
+/**
+ * 0.1.71 A-2：403 body 配额耗尽签名判别（quota / pre-consume / insufficient
+ * 资源族）。泛 403 auth_error 的细化子型判定源——classifyAPIError 据此把
+ * 403 配额耗尽从泛 auth_error 拆出（'quota_exhausted' 子型）；TUI 提示面
+ * （apiErrors resolveAuthErrorMessaging，A-3）与 provider 池轮询聚合面
+ * （modelprovider classifyRefFailure，A-1）复用同一签名源（单一事实源，三处
+ * 判别同源，避免文案/子型漂移）。
+ * 纯函数（无 IO）：非 string / 空串 = false；非配额签名 = false（泛 403
+ * auth_error 恒等锚，非 403 零扰动）。
+ */
+export function isQuotaExhaustedMessage(message: unknown): boolean {
+  if (typeof message !== 'string' || message.length === 0) return false
+  const m = message.toLowerCase()
+  if (m.includes('quota')) return true
+  if (m.includes('pre-consume') || m.includes('preconsume')) return true
+  // insufficient 限定资源/余额语境，避免 "insufficient permissions" 误命中
+  // （权限类 403 仍归泛 auth_error 恒等锚）。
+  if (/insufficient/.test(m) && /balance|credit|funds|payment|quota|resource|usage/.test(m)) {
+    return true
+  }
+  return false
+}
+
 export function classifyAPIError(error: unknown): string {
   if (error instanceof Error && error.message === 'Request was aborted.') {
     return 'aborted'
@@ -184,6 +207,17 @@ export function classifyAPIError(error: unknown): string {
     )
   ) {
     return 'oauth_org_not_allowed'
+  }
+
+  // 0.1.71 A-2：403 配额耗尽子型（quota / pre-consume / insufficient 资源族，
+  // isQuotaExhaustedMessage 单一事实源）——拆出泛 403 auth_error 之前（泛 403
+  // auth_error 恒等锚保留；非 403 零扰动；非配额签名 403 仍落下方 auth_error）。
+  if (
+    error instanceof APIError &&
+    error.status === 403 &&
+    isQuotaExhaustedMessage(error.message)
+  ) {
+    return 'quota_exhausted'
   }
 
   if (

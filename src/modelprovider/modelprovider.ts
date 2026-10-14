@@ -24,6 +24,7 @@ import type { LLMErrorCode, StreamDelta, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 import { APIConnectionTimeoutError } from './types'
 import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
+import { isQuotaExhaustedMessage } from './modelErrors'
 
 export type ModelUsage = {
   input_tokens: number
@@ -54,6 +55,73 @@ function mapOpenAIUsage(u: any): ModelUsage {
  * 内容静默穿过。
  */
 export const PROVIDER_EMPTY_CONTENT_PLACEHOLDER = '(provider: empty response)'
+
+/**
+ * 0.1.71 A-1：池轮询单 ref 失败记账。
+ * code = 分类标签（进聚合错误 .message，供 TUI 提示面 A-3 判别）；raw = 原始
+ * 错误文案（仅存 .failures 结构化字段供调试，不进 .message——避免
+ * isRetryableError 的 /timeout|ECONN|EPIPE|fetch failed|socket|aborted/i 正则
+ * 误判可重试，守 403 非重试锚）。
+ */
+export interface ModelPoolRefFailure {
+  ref: string
+  code: string
+  raw?: string
+}
+
+/**
+ * 0.1.71 A-1：模型池全失败聚合可行动错误。
+ *
+ * 池轮询（chat 非流式 / chatWithDelta 流式）逐 ref 重试预算耗尽仍全败时，替代
+ * 旧的 `if (lastErr) throw lastErr`（只抛末 ref 末错，用户只见最后一跳、不知其余
+ * 模型也败 / 败因）→ 聚合「模型列表 + 逐模型失败分类 + 处置建议（充值配额 / 切换
+ * provider 或 model）」（用户主诉①「所有模型额度没有了，但提示有问题」）。
+ *
+ * 判别锚（零回归设计）：
+ *  - 非 APIError（无 .status / 无 .cause）→ shouldRetryModelError 判不可重试
+ *    （isRetryableError 三判据全 miss）→ withTurnRecovery 不重试（守 403 非重试
+ *    锚，不放大 13 次重试）。
+ *  - .message 只含 ref 名 + 分类标签 + 建议（不含原始错误文案）→ 免 /timeout|
+ *    ECONN|.../ 正则命中（原始文案隔离在 .failures[i].raw）。
+ *  - 混合失败（某 ref 成功）= 循环内已 return，不触发本错误（既有行为恒等锚）；
+ *    零模型池（refs.length===0）既有错误零变更（不经过本聚合）。
+ */
+export class ModelPoolExhaustedError extends Error {
+  readonly role: ModelRole
+  readonly failures: readonly ModelPoolRefFailure[]
+  constructor(role: ModelRole, failures: readonly ModelPoolRefFailure[]) {
+    const lines = failures.map(f => `  - ${f.ref}: ${f.code}`).join('\n')
+    const hasQuota = failures.some(f => f.code === 'quota_exhausted')
+    const fix = hasQuota
+      ? 'Top up your provider quota, or switch to another provider/model (settings.json modelRoles/providers, or --model), then retry.'
+      : 'Check provider credentials/quota, or switch to another provider/model (settings.json modelRoles/providers, or --model), then retry.'
+    super(
+      `All ${failures.length} model(s) in pool for role '${role}' failed:\n` +
+        lines +
+        `\nFix: ${fix}`,
+    )
+    this.name = 'ModelPoolExhaustedError'
+    this.role = role
+    this.failures = failures
+  }
+}
+
+/**
+ * 0.1.71 A-1：池轮询单 ref 末错 → 分类标签。duck-type（不依赖 instanceof
+ * APIError——池轮询 catch 到的是 openai SDK 错误 / 本域 APIError 混面，.status /
+ * .message 双通道判别最稳）。403+配额签名 → 'quota_exhausted'（A-2
+ * isQuotaExhaustedMessage 单一事实源）；401/403 → 'auth_error'；未知 ref →
+ * 'unknown_reference'；有 status → 'api_error_<status>'；其余 → 'error'。
+ */
+export function classifyRefFailure(err: any): string {
+  const status = err?.status ?? err?.response?.status
+  const msg: string = typeof err?.message === 'string' ? err.message : ''
+  if (status === 403 && isQuotaExhaustedMessage(msg)) return 'quota_exhausted'
+  if (status === 401 || status === 403) return 'auth_error'
+  if (/^unknown provider\/model reference/.test(msg)) return 'unknown_reference'
+  if (typeof status === 'number') return `api_error_${status}`
+  return 'error'
+}
 
 function isRetryableError(err: any): boolean {
   const status = err?.status ?? err?.response?.status
@@ -536,13 +604,15 @@ export class OpenAIProvider implements ModelProvider {
       )
     }
     const attemptRefs: string[] = refs
-    let lastErr: any = null
+    // 0.1.71 A-1：per-ref 失败记账（全败 → 聚合可行动错误，替代 raw lastErr 抛；
+    // 混合失败 = 某 ref 成功循环内已 return，不触发聚合 = 既有行为恒等锚）。
+    const failures: ModelPoolRefFailure[] = []
     const acc = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 
     for (const ref of attemptRefs) {
       const entry = resolveModel(ref)
       if (!entry) {
-        lastErr = new Error(`unknown provider/model reference: ${ref}`)
+        failures.push({ ref, code: 'unknown_reference', raw: `unknown provider/model reference: ${ref}` })
         continue
       }
       const client = getClientForEntry(entry)
@@ -573,6 +643,7 @@ export class OpenAIProvider implements ModelProvider {
         }
       }
 
+      let refErr: any = null
       for (let attempt = 0; attempt < this.maxRetriesPerModel; attempt++) {
         if (args.signal?.aborted) throw args.signal.reason ?? new Error('aborted')
         try {
@@ -628,7 +699,7 @@ export class OpenAIProvider implements ModelProvider {
             },
           }
         } catch (err: any) {
-          lastErr = err
+          refErr = err
           // #260：生成超时 fail-fast（shouldRetryModelError 内判 aborted）
           if (!shouldRetryModelError(err, args.signal)) break
           // 0.1.58 C4-2（CC 2.1.198）：瞬断类错误（ECONNRESET/socket hang up/5xx/429 族，
@@ -643,9 +714,18 @@ export class OpenAIProvider implements ModelProvider {
           }
         }
       }
+      // 0.1.71 A-1：本 ref 重试预算耗尽（末错 = refErr）→ 记账，进下一 ref
+      // （maxRetriesPerModel=0 边界 = 零 attempt，refErr 恒 null 不记账 = 旧行为恒等）。
+      if (refErr) {
+        failures.push({ ref, code: classifyRefFailure(refErr), raw: refErr.message ?? String(refErr) })
+      }
     }
 
-    if (lastErr) throw lastErr
+    if (failures.length > 0) {
+      // 0.1.71 A-1：全败（无一 ref 成功）→ 聚合可行动错误（替代 raw lastErr 抛；
+      // 零模型池 refs.length===0 既有错误在上方 throw，不经过此支）。
+      throw new ModelPoolExhaustedError(args.role, failures)
+    }
     throw new Error(`No models configured for role '${args.role}'.`)
   }
 
@@ -682,14 +762,16 @@ export class OpenAIProvider implements ModelProvider {
       )
     }
     const attemptRefs: string[] = refs
-    let lastErr: any = null
+    // 0.1.71 A-1：per-ref 失败记账（全败 → 聚合可行动错误；混合失败 = 某 ref
+    // 成功循环内已 return，不触发聚合 = 既有行为恒等锚）。
+    const failures: ModelPoolRefFailure[] = []
     // 0.1.70 H-2 同面（G-1 流式路径复用 settings 池轮询 refs，零 anthropic 硬编码 ref）。
     const onDelta = args.onStreamDelta!
 
     for (const ref of attemptRefs) {
       const entry = resolveModel(ref)
       if (!entry) {
-        lastErr = new Error(`unknown provider/model reference: ${ref}`)
+        failures.push({ ref, code: 'unknown_reference', raw: `unknown provider/model reference: ${ref}` })
         continue
       }
       const client = getClientForEntry(entry)
@@ -714,6 +796,7 @@ export class OpenAIProvider implements ModelProvider {
         }
       }
 
+      let refErr: any = null
       for (let attempt = 0; attempt < this.maxRetriesPerModel; attempt++) {
         if (args.signal?.aborted) throw args.signal.reason ?? new Error('aborted')
         let assistant: {
@@ -756,7 +839,7 @@ export class OpenAIProvider implements ModelProvider {
           // 全零 partial（streamOneAttempt throw 面 = 下方 catch）= 进下一 attempt。
           if (assistant) return assistant
         } catch (err: any) {
-          lastErr = err
+          refErr = err
           // #260 生成超时 fail-fast + 0.1.58 C4-2 瞬断类退避（同非流式面，恒等）。
           if (!shouldRetryModelError(err, args.signal)) break
           if (attempt < this.maxRetriesPerModel - 1) {
@@ -767,9 +850,17 @@ export class OpenAIProvider implements ModelProvider {
           }
         }
       }
+      // 0.1.71 A-1：本 ref 重试预算耗尽（末错 = refErr）→ 记账，进下一 ref。
+      if (refErr) {
+        failures.push({ ref, code: classifyRefFailure(refErr), raw: refErr.message ?? String(refErr) })
+      }
     }
 
-    if (lastErr) throw lastErr
+    if (failures.length > 0) {
+      // 0.1.71 A-1：全败（无一 ref 成功）→ 聚合可行动错误（替代 raw lastErr 抛；
+      // 零模型池 refs.length===0 既有错误在上方 throw，不经过此支）。
+      throw new ModelPoolExhaustedError(args.role, failures)
+    }
     throw new Error(`No models configured for role '${args.role}'.`)
   }
 
