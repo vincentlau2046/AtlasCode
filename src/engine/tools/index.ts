@@ -311,6 +311,11 @@ export {
   type AgentToolResult,
   type ResolvedAgentTools,
   type InjectedAgentFile,
+  // 0.1.66 Q3-2 a1：后台 agent promise 追踪器（R4 drain 面）
+  trackBackgroundAgent,
+  drainPendingBackgroundAgents,
+  hasPendingBackgroundAgents,
+  resetBackgroundAgentTracker,
 } from './agent'
 export {
   type TsNode,

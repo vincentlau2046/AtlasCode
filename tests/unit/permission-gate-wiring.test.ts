@@ -20,7 +20,7 @@
  * I/O-free（无盘 / 无网络 / 无 PTY）→ unit 层。fake 仅 LLM（ModelProvider 替身）
  * + 最小 Tool（shared Tool.call 契约），非 fake 自证。
  */
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import {
   AgentTool,
   createDontAskTpc,
@@ -51,6 +51,19 @@ import type {
   ToolPermissionContext,
   ToolUseBlock,
 } from '../../src/shared'
+
+// 0.1.66 Q3-2 a1 重锚：AgentTool.call 站点（F-1c）测 sync 路径（子 loop 工具执行
+// 可观察）。0.1.66 翻转为后台默认后，缺省 → async_launched（不调 runAgent）。
+// 设 ATLAS_AGENT_DEFAULT_FOREGROUND=1 = off 面恒等锚（现行为字节级恒等）。
+let _savedFgEnv: string | undefined
+beforeAll(() => {
+  _savedFgEnv = process.env.ATLAS_AGENT_DEFAULT_FOREGROUND
+  process.env.ATLAS_AGENT_DEFAULT_FOREGROUND = '1'
+})
+afterAll(() => {
+  if (_savedFgEnv === undefined) delete process.env.ATLAS_AGENT_DEFAULT_FOREGROUND
+  else process.env.ATLAS_AGENT_DEFAULT_FOREGROUND = _savedFgEnv
+})
 
 /** 最小 ToolPermissionContext（域 readonly 版，session 源规则；S-E1 起带 mode 支）。 */
 function ctx(

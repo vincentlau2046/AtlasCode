@@ -65,10 +65,11 @@ export function getPrompt(agents: readonly AgentDefinition[]): string {
     '"figure this out." Because the subagent cannot see this conversation, its ' +
     'prompt must be fully self-contained — state every constraint, file, and ' +
     'reporting requirement it needs. ' +
-    'Set run_in_background to true to launch a subagent that runs while you ' +
-    'continue working in this conversation; you will receive a task-notification ' +
-    'when it completes. Use this only for genuinely parallel work, not to defer ' +
-    'a result you need before you can proceed. ' +
+    'Subagents run in the background by default; you will receive a ' +
+    'task-notification when one completes — do not poll or sleep waiting for ' +
+    'it. Set run_in_background to false only when you need the result before ' +
+    'you can proceed. Use background for genuinely parallel work, not to defer ' +
+    'a result you need immediately. ' +
     `Available agent types and the tools they have access to:\n${list}\n` +
     `The ${AGENT_TOOL_NAME} tool runs the subagent and returns its final result ` +
     'when it completes; act on that result once it is returned. ' +

@@ -41,12 +41,15 @@ const ENV_KEYS = [
   'ATLAS_FORK_SUBAGENT',
   'ATLAS_COORDINATOR_MODE',
   'FEATURE_COORDINATOR_MODE',
+  'ATLAS_AGENT_DEFAULT_FOREGROUND',
 ] as const
 let saved: Record<string, string | undefined>
 beforeEach(() => {
   saved = {}
   for (const k of ENV_KEYS) saved[k] = process.env[k]
   for (const k of ENV_KEYS) delete process.env[k]
+  // 0.1.66 Q3-2 a1 重锚：AgentTool.call 站点测 sync 路径 → off 面恒等锚（env=1）
+  process.env.ATLAS_AGENT_DEFAULT_FOREGROUND = '1'
 })
 afterEach(() => {
   for (const k of ENV_KEYS) {

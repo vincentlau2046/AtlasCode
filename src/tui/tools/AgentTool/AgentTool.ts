@@ -29,6 +29,28 @@ import {
 import { getPrompt } from './prompt.js'
 import { runAgent } from './runAgent.js'
 import { renderToolUseMessage } from './UI.js'
+import { isEnvTruthy } from '../../utils/envUtils.js'
+
+/**
+ * 0.1.66 Q3-2 a1：逃生舱 env——ATLAS_AGENT_DEFAULT_FOREGROUND=1 时回退前景默认
+ * （现行为字节级恒等 = off 面恒等锚）。env 缺省/0/非法值 = 后台默认（on 面）。
+ * engine 侧 AgentTool.ts 同构 helper（TUI 不导入 engine——两车道各自维护）。
+ */
+function isAgentBackgroundByDefault(): boolean {
+  return !isEnvTruthy(process.env.ATLAS_AGENT_DEFAULT_FOREGROUND)
+}
+
+/**
+ * 判定本次委派是否走后台路径（0.1.66 翻转核心位）。
+ * - 后台默认（env 缺省）：undefined→true / false→false / true→true
+ * - 前景默认（env=1）：undefined→false / false→false / true→true（现行为恒等）
+ */
+function shouldRunInBackground(runInBg: boolean | undefined): boolean {
+  if (isAgentBackgroundByDefault()) {
+    return runInBg !== false
+  }
+  return !!runInBg
+}
 
 export const inputSchema = lazySchema(() =>
   z.object({
@@ -157,7 +179,8 @@ export const AgentTool: any = buildTool({
     onProgress?: (progress: any) => void,
   ): Promise<ToolResult<Out>> {
     const agents = getBuiltInAgents()
-    const isAsync = !!args.run_in_background
+    // 0.1.66 Q3-2 a1：翻转为后台默认（env 缺省 = 后台 / env=1 = 前景默认恒等）。
+    const isAsync = shouldRunInBackground(args.run_in_background)
     const agentId = createAgentId(args.description)
     const parentModel =
       (context &&

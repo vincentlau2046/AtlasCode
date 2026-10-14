@@ -102,6 +102,8 @@ import {
   createMcpTools,
   createPermissionGate,
   drainSdkEvents,
+  // 0.1.66 Q3-2 a1 R4：headless 进程退出前 drain pending 后台 agent（防静默 kill）
+  drainPendingBackgroundAgents,
   getCronJitterConfig,
   getSchedulerEnv,
   getSettingsWithErrors,
@@ -1543,6 +1545,10 @@ export async function runHeadless(
     //    session_state_changed 事件先于阻塞下回合上流）──
     cronScheduler.stop()
     await drainToOutput()
+    // 0.1.66 Q3-2 a1 R4：主回合 + stdin drain 完成后，进程退出前 drain 所有
+    // pending 后台 agent（对标上游 -p 语义 = 不静默 kill fire-and-forget promise）。
+    // SIGINT abort 时立即返回（用户中止，不再等）；单个 agent 失败不阻断（allSettled）。
+    await drainPendingBackgroundAgents(abortController.signal)
   } catch (error) {
     cronScheduler.stop()
     // #240（cli-debug P3）：基线行 ⑤ 运行错误（level=error 过级别门）

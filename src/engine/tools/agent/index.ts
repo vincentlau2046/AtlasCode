@@ -42,3 +42,10 @@ export {
 } from './agentToolUtils'
 export { AGENT_TOOL_NAME, MAX_WORKER_SPAWN_DEPTH } from './constants'
 export { getPrompt, formatAgentLine } from './prompt'
+// 0.1.66 Q3-2 a1：后台 agent promise 追踪器（R4 drain 面）
+export {
+  trackBackgroundAgent,
+  drainPendingBackgroundAgents,
+  hasPendingBackgroundAgents,
+  resetBackgroundAgentTracker,
+} from './backgroundTracker'

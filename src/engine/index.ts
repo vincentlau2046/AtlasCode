@@ -181,6 +181,11 @@ export {
   type AgentToolResult,
   type ResolvedAgentTools,
   type InjectedAgentFile,
+  // 0.1.66 Q3-2 a1：后台 agent promise 追踪器（R4 drain 面）
+  trackBackgroundAgent,
+  drainPendingBackgroundAgents,
+  hasPendingBackgroundAgents,
+  resetBackgroundAgentTracker,
   // C 桶 ③ shell·swarm 波 S-E2b 扩 root（teammate 消息面单一出口登记）：
   // 旧 utils/messages.createUserMessage（M-1 uuid/timestamp 不变量随迁，
   // 见 query/loop.ts 头注）——swarm inProcessTeammateTask 注入支 +

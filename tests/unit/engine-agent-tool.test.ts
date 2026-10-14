@@ -12,7 +12,7 @@
  *     + 模型 override（input.model → chat role）+ 子代理真用注入工具（fake tool 被真调）。
  * I/O-free（无盘 / 无网络 / 无 PTY；LLM 经 modelprovider 接口替身）→ unit 层。
  */
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'bun:test'
 import {
   AgentTool,
   computeChildSpawnDepth,
@@ -37,6 +37,20 @@ import { setDiskOutputEnv, resetDiskOutputEnv } from '../../src/task'
 import { mkdtempSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
+
+// 0.1.66 Q3-2 a1 重锚：本文件全部 AgentTool.call 站点测 sync 路径（缺省或显式
+// run_in_background:true）。0.1.66 翻转为后台默认后，缺省 → async_launched。
+// 设 ATLAS_AGENT_DEFAULT_FOREGROUND=1 = off 面恒等锚（现行为字节级恒等），
+// 使本文件 sync 路径测试零变更通过。显式 run_in_background:true 跨 on/off 恒等。
+let _savedFgEnv: string | undefined
+beforeAll(() => {
+  _savedFgEnv = process.env.ATLAS_AGENT_DEFAULT_FOREGROUND
+  process.env.ATLAS_AGENT_DEFAULT_FOREGROUND = '1'
+})
+afterAll(() => {
+  if (_savedFgEnv === undefined) delete process.env.ATLAS_AGENT_DEFAULT_FOREGROUND
+  else process.env.ATLAS_AGENT_DEFAULT_FOREGROUND = _savedFgEnv
+})
 
 // ── fake LLM（可脚本 + 记录每次 chat 的 role；ModelProvider 接口替身，非 mock transport）──
 interface ScriptStep {

@@ -53,6 +53,31 @@ import { isCoordinatorMode } from '../../coordinator'
 import type { PermissionGate } from '../../pipeline'
 import { getTaskOutputPath } from '../../../task'
 import { enqueueAgentNotification } from '../../coordinator/tasks/localAgentTask'
+import { isEnvTruthy } from '../../../shared'
+import { trackBackgroundAgent } from './backgroundTracker'
+
+/**
+ * 0.1.66 Q3-2 a1：逃生舱 env——ATLAS_AGENT_DEFAULT_FOREGROUND=1 时回退前景默认
+ * （现行为字节级恒等 = off 面恒等锚）。env 缺省/0/非法值 = 后台默认（on 面）。
+ * 0.1.63 ATLAS_GOAL_CHECKIN_MINUTES env 门同构先例。
+ */
+function isAgentBackgroundByDefault(): boolean {
+  return !isEnvTruthy(process.env.ATLAS_AGENT_DEFAULT_FOREGROUND)
+}
+
+/**
+ * 判定本次委派是否走后台路径（0.1.66 翻转核心位）。
+ * - 后台默认（env 缺省）：undefined→true / false→false / true→true
+ * - 前景默认（env=1）：undefined→false / false→false / true→true（现行为恒等）
+ */
+function shouldRunInBackground(
+  runInBg: boolean | undefined,
+): boolean {
+  if (isAgentBackgroundByDefault()) {
+    return runInBg !== false
+  }
+  return !!runInBg
+}
 
 /** 输入 JSON schema（旧仓 zod inputSchema 裁剪；Q3-1 加回 run_in_background）。 */
 const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
@@ -198,12 +223,14 @@ export const AgentTool: Tool = {
 
     const agentId = 'agent-' + randomUUID()
 
-    // Q3-1（0.1.65）：异步路径——run_in_background:true → 后台跑 + 立即返回。
-    // 默认缺省（undefined/false）= 同步路径，字节级恒等（零行为变更）。
-    if (input.run_in_background) {
+    // Q3-1（0.1.65）+ Q3-2 a1（0.1.66 翻转）：
+    // 异步路径——shouldRunInBackground 判定（env 缺省=后台默认 / env=1=前景默认恒等）。
+    // 0.1.66 前 = `if (input.run_in_background)`（缺省前景）；0.1.66 后 = 翻转为后台默认。
+    if (shouldRunInBackground(input.run_in_background)) {
       const outputFile = getTaskOutputPath(agentId)
       // 后台跑子代理到终态 + 投递完成/失败通知（既有通知链消费，零新建队列）。
-      void runAsyncAgentLifecycle({
+      // R4：promise 经 trackBackgroundAgent 追踪——headless/-p 进程退出前 drain。
+      const bgPromise = runAsyncAgentLifecycle({
         agentDefinition,
         prompt: input.prompt,
         tools: resolvedTools,
@@ -225,6 +252,8 @@ export const AgentTool: Tool = {
           error: err instanceof Error ? err.message : String(err),
         })
       })
+      // R4：追踪后台 promise——headless/-p 进程退出前 drain（防 fire-and-forget 随进程死亡）。
+      trackBackgroundAgent(bgPromise)
       return {
         data: {
           status: 'async_launched',
