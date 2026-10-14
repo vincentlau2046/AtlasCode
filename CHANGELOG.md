@@ -4,6 +4,73 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.68
+
+autocompact 恢复对齐波（块 F′；基线 v0.1.67；工单 `docs/2026-10-14-p0-wave-0168-ticket.md`）。
+**波性质 = 行为变更**（用户 2026-10-14 两度收敛裁定：「只需要从设计角度对齐 Claude 的
+autocompact 恢复能力，可以做 AB 测试，确定 autocompact 是否有完整的恢复策略」）。
+零回归约束 =「无文件/无工具/无 hook 面 C2–C5 恒 ∅ 恒等锚 + 大窗阈值精确同值 +
+前 12 波 token 精确同值」。3 件：F-1′ 恢复对齐（C1–C7 组件补全）+ F-AB 恢复完整性
+AB 判定 + F-3a 小窗风暴守卫；F-3 崩溃 = 纯登记面（用户确认无现场，不硬门禁不定因）。
+块 D（D-1/D-3/D-5）+ B-4 = 0.1.69 候选登记，不入境。
+
+- **F-1′ · 恢复对齐（富路径恢复组件补全，经 CompactPorts DI 缝，engine React-free
+  红线不破）**：
+  - 根因：REPL 主 loop auto-compact 消费裁剪版 `compactConversation`（keepRecent 0 +
+    attachments/hookResults 硬置空）→ post-compact 上下文仅 [boundary, …summary]，
+    模型失全部文件态/工具近态必须重读 =「重新 session 凭记忆重新读取」直接机制。
+    富路径（手动 /compact + reactive 消费）7 恢复组件 proactive 面缺席。
+  - TUI 车道 auto-compact 压缩体改**富路径消费**（`createAutoCompactCompact` 双门面，
+    `agentLoopDeps` 接线；宿主 `contextHostWiring` 经 `setCompactPorts` 注册真实现）：
+    C2 文件态重建（readFileState 保存→清空→`buildPostCompactAttachments` 附件重注）/
+    C3 已加载工具续发（boundary `compactMetadata.preCompactDiscoveredTools`）/
+    C4 session_start hooks + C5 PostCompact hooks（未配置 = 宿主执行器 no-op 零回归）/
+    PTL 截头重试（小窗自 PTL 链 M1 缓解）
+  - **C7 近期消息保留**：富路径 `compactConversation` 第 8 参 `keepRecent` + 定参
+    `AUTOCOMPACT_KEEP_RECENT=3`（≈ 一个热 API round——最近工具近态/文件态不丢；
+    N 小防 post-compact 上下文仍近阈值再触发压缩风暴；N=0 恒等锚；手动 /compact +
+    reactive 缺省 0 零回归）
+  - **F-1a skip 载体门**：AD-22 PreCompact hook block 返回 `compactionSkipped` 载体，
+    loop 消费点 + 事件双门 `!compactionSkipped`（skip = 本回合压缩不可用，序列原样
+    继续，非失败：不回灌断路器计数；reactive 支 L762 先例）
+  - **port 门控 fail-safe**：port 未注册或 `richContext` null → 裁剪路径逐字恒等
+    （修前行为零回归锚；headless 车道无宿主本体 port 未注册 = 自然留裁剪，0.1.69
+    候选面）
+  - C1 续会话提示（双面在场，恒等）+ C6 元数据重钉（0.1.67 C-1 已补，恒等锚）+
+    C8 会话记忆 = 登记面（0.1.69 候选，非本波硬门）
+- **F-AB · 恢复策略完整性 AB 测试**（A=现状裁剪 vs B=对齐富路径）：
+  - 判定基准：B 面 C1–C7 全在场（C8 登记）= 恢复策略完整；任一缺 = 不完整
+    （GATE-OPEN 打回面 = 单测 F-AB 逐组件断言）
+  - ① 结构性 AB = 判别单测 21 项（逐组件对应测试项，用户裁定「一定要有对应测试项」=
+    C1–C7 每项一行单测缺一 = 判据①不通过）；② 行为性 AB = 生产 lane 观察面
+    （模型不重读已读文件 + 恢复曲线 + 任务延续）
+- **F-3a · 小窗阈值非正守卫（压缩风暴根修，裁定 = 禁用非 clamp）**：
+  - 根因：阈值 = 有效窗口 − 13k 无正数 clamp，32K 窗 = 有效 12K − 13K = −232 →
+    `shouldAutoCompact` 恒真（tokens ≥ 负阈值恒真）= 每轮触发压缩风暴（每轮一次
+    LLM 摘要 + 已摘要再摘要 = 信息流失 + 极慢，用户「恢复缓慢」小窗面机制）
+  - 修复：`isAutoCompactThresholdPositive` 谓词（单一事实源）→ 触发面禁用 +
+    警告面退化（负阈值不假警告，percentLeft 地板 0，`isAboveAutoCompactThreshold`
+    不置假信号）+ 显形字段 `autoCompactDisabledBySmallWindow`（TokenWarning 显形
+    行「context window too small for auto-compact · run /compact manually…」；
+    大窗 / 用户禁用面 undefined 零回归）
+  - 裁定登记：clamp 到小正值是错误解法（只把风暴移到更低触发点）；小窗摘要自
+    413 的根修 = D-3 摘要 fallback 模型（0.1.69 候选）
+- **F-3 · 崩溃 = 纯登记面**（用户确认「崩溃无印象、无现场」→ 未确认症状；M1/M2/M3
+  全降登记性假设）：探针在场 + exit-reason 日志面（b5c4734），未来复现时捕获定因，
+  不硬门禁、不预占。实锤核心 = F-1′ 恢复质量 + F-3a 风暴链根修
+
+判别单测 21 项（`tests/unit/engine-auto-compact-recovery-0168.test.ts`）：C1 双面
+恒等 + transcript 指针 / C2 N 文件重注 + 无文件恒 ∅ 恒等锚 + A 面缺席坐实 / C3
+工具续发 + A 面缺席 / C4·C5 hook 簇在场 + 默认 no-op 恒 ∅ / C6 重钉判别式（A/B
+双路序列头 boundary）/ C7 常量 =3 + N>0 preserved-verbatim + N=0 恒等锚 +
+createAutoCompactCompact 透传 + port 门控 fail-safe 双面 / F-AB 单结果逐项断言
+C1–C7 / F-3a 谓词边界（33000/33001）+ 32K 触发面禁用 + 200K 阈值 167K 边界同值 +
+32K 警告态退化 + 256K·1M 精确同值 + 用户自禁面不显形。
+
+零回归：无文件/无工具/无 hook 面 C2–C5 恒 ∅（不误注）+ 大窗（200K/256K/1M）阈值
+与警告态修前精确同值 + 前 12 波 token 精确同值（0.1.56–0.1.67）+ /help 55 恒等 +
+cmd 33 恒等 + loop-rob C1/C2/C3/R3 + goal 4 件 36 探针 + 0.1.67 探针 15/15。
+
 ## v0.1.67
 
 P0 用户 bug 修插入波（用户 4 bug 闭环：超时族 + 模型会话级记忆 + compact 命名面 +
