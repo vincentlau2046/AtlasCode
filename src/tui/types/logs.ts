@@ -33,6 +33,7 @@ export type LogOption = {
   agentName?: string // Agent's custom name (from /rename or swarm)
   agentColor?: string // Agent's color (from /rename or swarm)
   agentSetting?: string // Agent definition used (from --agent flag or settings.agent)
+  modelSetting?: string // 0.1.67 B-1：会话级模型记忆（退出时所选主循环模型，resume 优先还原）
   isTeammate?: boolean // Whether this session was created by a swarm teammate
   leafUuid?: UUID // If given, this uuid must appear in the DB
   summary?: string // Optional conversation summary
@@ -119,6 +120,19 @@ export type AgentSettingMessage = {
   type: 'agent-setting'
   sessionId: UUID
   agentSetting: string
+}
+
+/**
+ * 0.1.67 B-1：会话级模型记忆（用户 2026-10-14 第三条追加：session 恢复不还原退出
+ * 时所选模型）。与 agent-setting/mode 同族同文件（零新增文件）：退出时所选
+ * 主循环模型持久化进 transcript，resume 优先还原（会话级 > 全局 settings.model
+ * 兜底）。`modelSetting: string` = 用户所显式模型串（如 `iff/Qwen38-27B-TXT` 或
+ * 角色别名）；`mainLoopModel===null`（default）不写此条目（自然落全局/缺省）。
+ */
+export type ModelSettingMessage = {
+  type: 'model-setting'
+  sessionId: UUID
+  modelSetting: string
 }
 
 /**
@@ -305,6 +319,7 @@ export type Entry =
   | AgentNameMessage
   | AgentColorMessage
   | AgentSettingMessage
+  | ModelSettingMessage
   | PRLinkMessage
   | FileHistorySnapshotMessage
   | AttributionSnapshotMessage

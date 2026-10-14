@@ -230,7 +230,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
     }
 
     // Enriched logs didn't find it — try direct file lookup. This handles
-    // sessions filtered out by enrichLogs (e.g., first message >16KB makes
+    // sessions filtered out by enrichLogs (e.g., first message >64KB makes
     // firstPrompt extraction fail, causing the session to be dropped).
     const directLog = await getLastSessionLog(maybeSessionId);
     if (directLog) {

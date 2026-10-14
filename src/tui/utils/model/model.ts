@@ -78,6 +78,22 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
 }
 
 /**
+ * 0.1.67 B-3：全局 settings.model 池外被 allowlist 拒 → 回退 default 的显式提示
+ * （纯函数，双面可测：池外被拒 → 提示句；池内 / 未配置 → undefined = 恒等不提示）。
+ *
+ * 用户把池外 provider 模型（如 deepseek-v4-pro / glm-5.1）经 /model 写进全局
+ * settings.model 后，恢复时 getUserSpecifiedModelSetting 过 isModelAllowed 拒 →
+ * 静默落 default（用户 2026-10-14 报「恢复直接用 default」的直接机制）。本 helper
+ * 供恢复支（sessionRestore.processResumedConversation）消费，把静默回退变成显式提示。
+ * 不阻断（仅提示句），池内模型返回 undefined（恢复恒等锚，零行为变更）。
+ */
+export function globalModelRejectedNotice(): string | undefined {
+  const specified = (getSettings_DEPRECATED() || {}).model
+  if (!specified || isModelAllowed(specified)) return undefined
+  return `已选模型 ${specified} 不在 availableModels 池内，已回退 default`
+}
+
+/**
  * Get the main loop model to use for the current session.
  *
  * Model Selection Priority Order:

@@ -23,7 +23,7 @@ import { buildUserAgent, logForDebugging } from '../shared'
 import type { LLMErrorCode, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 import { APIConnectionTimeoutError } from './types'
-import { LLM_TIMEOUT_CAP_MS } from './constants'
+import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
 
 export type ModelUsage = {
   input_tokens: number
@@ -132,6 +132,19 @@ export function shouldRetryModelError(err: unknown, signal?: AbortSignal): boole
  * settings llmTimeoutMs，上限 30min）。currentTimeoutMs 未给时不造数字
  * （不假绿）。
  */
+/**
+ * 0.1.67 A-2：单位误配提示纯函数（毫秒自明）。有效 LLM 超时 < 60s（阈值
+ * LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS）时返回一句「单位=毫秒，若按秒填写请 ×1000」
+ * 提示（不阻断，调用方 stderr/debug + 错误行面消费）；≥ 阈值 → undefined（不误报）。
+ * 用户「配 1800 极易超时」根因 = 把 1800 当秒（30min=cap）但系统按毫秒解析 = 1.8s。
+ * 纯函数（判别单测直接断言 触发/不触发 双面）。
+ */
+export function llmTimeoutUnitHint(ms: number): string | undefined {
+  // ms > 0 守卫：0（= 未设档 / 回落缺省）非单位误配，不提示；仅真实配置的小值触发。
+  if (!(Number.isFinite(ms) && ms > 0 && ms < LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS)) return undefined
+  return `⚠ llmTimeoutMs/ATLAS_LLM_TIMEOUT 单位是毫秒，当前 ${ms}ms ≈ ${(ms / 1000).toFixed(1)}s；若按秒填写请 ×1000（如 ${ms}s 应填 ${ms * 1000}）`
+}
+
 export function llmTimeoutRemediationHint(
   error: unknown,
   currentTimeoutMs?: number,
@@ -139,9 +152,16 @@ export function llmTimeoutRemediationHint(
   if (!isClientRequestTimeout(error)) return null
   const head =
     typeof currentTimeoutMs === 'number' && currentTimeoutMs > 0
-      ? `当前超时 ${Math.round(currentTimeoutMs / 1000)}s`
+      ? `当前超时 ${Math.round(currentTimeoutMs / 1000)}s（${currentTimeoutMs}ms）`
       : '慢模型长生成可能超过缺省超时'
-  return `LLM 请求超时（${head}）。可调大：env ATLAS_LLM_TIMEOUT=<毫秒> 或 settings.json llmTimeoutMs 键（上限 ${Math.round(LLM_TIMEOUT_CAP_MS / 60000)}min）。`
+  // 0.1.67 A-3：单位显形 + 上限换算 + <1min 误配提示（毫秒自明）。
+  const unitNote = '单位=毫秒'
+  const capNote = `上限 ${Math.round(LLM_TIMEOUT_CAP_MS / 60000)}min（${LLM_TIMEOUT_CAP_MS}ms）`
+  const misconfigNote = llmTimeoutUnitHint(
+    typeof currentTimeoutMs === 'number' && currentTimeoutMs > 0 ? currentTimeoutMs : 0,
+  )
+  const misconfig = misconfigNote ? ` ${misconfigNote}` : ''
+  return `LLM 请求超时（${head}，${unitNote}）。可调大：env ATLAS_LLM_TIMEOUT（${unitNote}）或 settings.json llmTimeoutMs 键（${capNote}）。${misconfig}`.trimEnd()
 }
 
 /**

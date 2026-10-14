@@ -241,6 +241,55 @@ export async function readHeadAndTail(
   }
 }
 
+/**
+ * 0.1.67 C-2：mid-window 定向扫描字节上限（miss 才触发，成本有界 = 至多 1 次读）。
+ */
+export const MID_TITLE_SCAN_SIZE = 512 * 1024
+
+/**
+ * 0.1.67 C-2：定向中部扫描兜底（仅 head+tail 全 miss 时调用）。
+ *
+ * custom-title / ai-title 条目被顶出 64KB 尾窗（post-compact 追加 / 大
+ * replacement 块，C-定因②）时 lite 面两头皆不可见 = /resume 名称面失名。
+ * 本兜底读尾窗**之前**至多 MID_TITLE_SCAN_SIZE 字节的中部区，仅扫
+ * `"type":"custom-title"` / `"type":"ai-title"` 字面行（非全量解析），
+ * 取文件序最后一条（= 最近一次改名，与尾窗 last-wins 语义一致），
+ * custom 优先于 ai（与四路链同面）。
+ *
+ * 任何错误 / 无命中 → undefined（保持「无名」语义，零回归：命中面恒等锚
+ * 不触碰——本函数只在既有四路链全 miss 后才被调用）。
+ */
+export async function scanMidForSessionTitle(
+  filePath: string,
+  fileSize: number,
+): Promise<string | undefined> {
+  const tailOffset = Math.max(0, fileSize - LITE_READ_BUF_SIZE)
+  const scanStart = Math.max(0, tailOffset - MID_TITLE_SCAN_SIZE)
+  const scanLen = tailOffset - scanStart
+  if (scanLen <= 0) return undefined
+  try {
+    const fh = await fsOpen(filePath, 'r')
+    try {
+      const buf = Buffer.allocUnsafe(scanLen)
+      const result = await fh.read(buf, 0, scanLen, scanStart)
+      const chunk = buf.toString('utf8', 0, result.bytesRead)
+      // 反向搜 = 文件序最后一条（距尾最近 = 最新改名 win）
+      const customIdx = chunk.lastIndexOf('"type":"custom-title"')
+      const aiIdx = chunk.lastIndexOf('"type":"ai-title"')
+      const useAi = customIdx < 0
+      const hitIdx = useAi ? aiIdx : customIdx
+      if (hitIdx < 0) return undefined
+      // 条目行 = 单行 JSONL；自命中点截取行尾（字段全在 type 之后）
+      const line = chunk.slice(hitIdx)
+      return extractJsonStringField(line, useAi ? 'aiTitle' : 'customTitle')
+    } finally {
+      await fh.close()
+    }
+  } catch {
+    return undefined
+  }
+}
+
 export type LiteSessionFile = {
   mtime: number
   size: number
@@ -326,8 +375,13 @@ export function getProjectsDir(): string {
   return join(getAtlasConfigHomeDir(), 'projects')
 }
 
+// 0.1.67 C-3：win32 写侧 cwd 先 lowercase 归一（Windows 盘符/路径大小写
+// 不敏感，归一到单一 case 与读侧 caseInsensitive 扫描对齐）；非 win32
+// 文件系统大小写敏感 = 原样透传（零行为变更）。
 export function getProjectDir(projectDir: string): string {
-  return join(getProjectsDir(), sanitizePath(projectDir))
+  const normalized =
+    process.platform === 'win32' ? projectDir.toLowerCase() : projectDir
+  return join(getProjectsDir(), sanitizePath(normalized))
 }
 
 /**

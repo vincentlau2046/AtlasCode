@@ -783,7 +783,7 @@ async function richCompactConversation(
     )
     p.markPostCompaction?.()
 
-    // 压缩后重追加会话元数据（custom title/tag 保 16KB tail 窗口）
+    // 压缩后重追加会话元数据（custom title/tag 保 64KB tail 窗口）
     reAppendSessionMetadata()
 
     context.onCompactProgress?.({

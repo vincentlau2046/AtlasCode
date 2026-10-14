@@ -47,7 +47,8 @@ import {
 } from 'src/engine'
 import { hasNonTerminalTasks } from './Task.js'
 import { getInitialSettings } from './utils/settings/settings.js'
-import { asSystemPrompt, type Tools } from 'src/shared'
+import { reAppendSessionMetadata as reAppendSessionMetadataTui } from './utils/sessionStorage.js'
+import { asSystemPrompt, errorMessage, logForDebugging, type Tools } from 'src/shared'
 import { getSessionId } from 'src/bootstrap'
 import { appendSystemContext, prependUserContext } from './utils/api'
 import { buildInteractiveGate } from './loopPermissionBridge'
@@ -188,6 +189,11 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
         }
       : m.systemContext
 
+  // 0.1.67 C-1：pending replacement 写追踪（transcript sink 的
+  // recordContentReplacement 捕获，reAppendSessionMetadata 重钉前 await 之，
+  // 保证重钉元数据条目落在大 replacement 块**之后** = 64KB 尾窗内）。
+  let pendingReplacement: Promise<void> = Promise.resolve()
+
   const deps: AgentLoopDeps = {
     modelProvider,
     role,
@@ -258,12 +264,30 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
         recordTranscript(
           msgs as unknown as Parameters<typeof recordTranscript>[0],
         ),
-      recordContentReplacement: (recs) =>
-        recordContentReplacement(
+      recordContentReplacement: (recs) => {
+        // 0.1.67 C-1：捕获 pending replacement 写（重钉顺序面消费；promise
+        // 仍传播拒绝——loop 侧 .catch 吞错面不变）。
+        pendingReplacement = recordContentReplacement(
           recs as unknown as Parameters<typeof recordContentReplacement>[0],
-        ),
+        )
+        return pendingReplacement
+      },
       // 0.1.62 /goal P1：loop 清 goal 时回写 session metadata 缓存
       saveGoalState: (goal) => saveGoalState(goal),
+      // 0.1.67 C-1：post-compact 追加完成后元数据重钉（TUI 域 reAppend——
+      // custom-title/mode/model-setting 缓存在 TUI 侧（/rename、onChangeAppState
+      // 写 TUI cache），非 engine 域 cache；与 pending replacement 写异步串行
+      // 保序：大 replacement 记录落盘**之后**才重钉，防重钉条目再被顶出尾窗）。
+      reAppendSessionMetadata: () => {
+        void pendingReplacement
+          .catch(() => undefined) // replacement 写失败不阻断重钉（吞错语义同 loop 侧）
+          .then(() => reAppendSessionMetadataTui())
+          .catch((error) =>
+            logForDebugging(
+              `reAppendSessionMetadata failed: ${errorMessage(error)}`,
+            ),
+          )
+      },
     },
     // D2（0.1.37 ③）：跳闸态 systemContext 注入面（非跳闸 = 原引用透传）
     systemPrompt: asSystemPrompt(

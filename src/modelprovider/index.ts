@@ -9,9 +9,10 @@
 
 import { OpenAIProvider, type ModelProvider, describeEndpointFailure } from './modelprovider'
 import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_DEFAULT_MS } from './constants'
-import { parseBoundedIntEnv } from '../shared'
+import { parseBoundedIntEnv, logForDebugging } from '../shared'
 import { resolveModel, getRoleConfig } from './roles'
-export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS } from './constants'
+import { llmTimeoutUnitHint } from './modelprovider'
+export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
 
 export {
   OpenAIProvider,
@@ -24,24 +25,35 @@ export {
 } from './modelprovider'
 
 let _provider: ModelProvider | undefined
+// 0.1.67 A-2：单位误配提示一次性守卫（每进程至多 warn 一次，不阻断）。
+let _llmTimeoutUnitHintWarned = false
 
 /**
  * The single shared provider instance (lazy). Call sites use this rather than
  * constructing their own OpenAIProvider.
  */
 export function getModelProvider(): ModelProvider {
-  return (
-    _provider ??= new OpenAIProvider(
-      3,
-      // #262 缺口③：第二参仅兜底（resolver 缺省时用）；第三参 = 活态读器，每次
-      // 请求现读 resolveLlmTimeoutMs(env, settings 源缝)——settings 源缝
-      // （TUI wireContextHostPorts / headless createCoreDependencies 注）注入或
-      // 值变 / env 翻转后即时生效，非构造期一次性快照（修 llmTimeoutMs 死键 +
-      // TUI 提示面 getCurrentLlmTimeoutMs 现读 vs provider 快照 两车道分裂）。
-      LLM_TIMEOUT_DEFAULT_MS,
-      () => resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
-    )
+  _provider ??= new OpenAIProvider(
+    3,
+    // #262 缺口③：第二参仅兜底（resolver 缺省时用）；第三参 = 活态读器，每次
+    // 请求现读 resolveLlmTimeoutMs(env, settings 源缝)——settings 源缝
+    // （TUI wireContextHostPorts / headless createCoreDependencies 注）注入或
+    // 值变 / env 翻转后即时生效，非构造期一次性快照（修 llmTimeoutMs 死键 +
+    // TUI 提示面 getCurrentLlmTimeoutMs 现读 vs provider 快照 两车道分裂）。
+    LLM_TIMEOUT_DEFAULT_MS,
+    () => resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
   )
+  // 0.1.67 A-2：构造期一次性单位误配提示（stderr/debug，不阻断）。构造期
+  // settings 源缝可能未注（host 后注）→ 此 warn = best-effort（reactive 面 =
+  // A-3 错误行经 getCurrentLlmTimeoutMs 现读恒正确）。
+  if (!_llmTimeoutUnitHintWarned) {
+    _llmTimeoutUnitHintWarned = true
+    const hint = llmTimeoutUnitHint(
+      resolveLlmTimeoutMs(process.env.ATLAS_LLM_TIMEOUT, llmTimeoutSettingsSource?.()),
+    )
+    if (hint) logForDebugging(hint, { level: 'warn' })
+  }
+  return _provider
 }
 
 // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 请求超时 settings
@@ -171,7 +183,7 @@ export {
   getAssistantMessageFromError,
   getErrorMessageIfRefusal,
 } from './modelErrors'
-export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, gatewayUnreachableRemediationHint, describeEndpointFailure, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
+export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, llmTimeoutUnitHint, gatewayUnreachableRemediationHint, describeEndpointFailure, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
 export { buildOpenAIParams } from './params'
 export { modelToRole, normalizeModelStringForAPI } from './roles'
 
@@ -185,6 +197,8 @@ export {
   getEffortEnvOverride,
   getDefaultEffortForModel,
   resolveAppliedEffort,
+  // 0.1.67 E-2：per-model effort 记忆源注入缝（宿主注 settings.effortByModel 读侧）
+  setEffortByModelSource,
 } from './effort'
 
 export { toResponseFormat } from './params'

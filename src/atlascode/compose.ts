@@ -66,8 +66,11 @@ import {
   getModelProvider,
   setEndpointConfigSource,
   setLlmTimeoutSettingsSource,
+  setEffortByModelSource,
+  isEffortLevel,
   type ModelProvider,
 } from '../modelprovider'
+import type { EffortLevel } from '../shared'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
   setTaskOutputPort,
@@ -384,6 +387,24 @@ export function createCoreDependencies(): CoreDependencies {
     try {
       const v = getInitialSettings().llmTimeoutMs
       return typeof v === 'number' ? v : undefined
+    } catch {
+      return undefined
+    }
+  })
+
+  // 0.1.67 E-2：settings.effortByModel per-model effort 记忆读侧（headless 缝，
+  // 与 TUI wireContextHostPorts 同形）→ modelprovider wire 面 resolveAppliedEffort
+  // 查 per-model 记忆。engine SettingsJson.effortByModel 为原始 z.record(string,
+  // string)，逐值 isEffortLevel 校验（防手改/远程脏值泄漏进发送面）。
+  setEffortByModelSource(() => {
+    try {
+      const raw = getInitialSettings().effortByModel
+      if (!raw) return undefined
+      const out: Record<string, EffortLevel> = {}
+      for (const [k, v] of Object.entries(raw)) {
+        if (isEffortLevel(v)) out[k] = v
+      }
+      return out
     } catch {
       return undefined
     }

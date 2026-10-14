@@ -404,6 +404,7 @@ export async function loadConversationForResume(
   agentName?: string
   agentColor?: string
   agentSetting?: string
+  modelSetting?: string // 0.1.67 B-2：会话级模型记忆（resume 优先还原退出时所选模型）
   customTitle?: string
   tag?: string
   mode?: 'coordinator' | 'normal'
@@ -515,6 +516,7 @@ export async function loadConversationForResume(
       agentName: log?.agentName,
       agentColor: log?.agentColor,
       agentSetting: log?.agentSetting,
+      modelSetting: log?.modelSetting,
       customTitle: log?.customTitle,
       tag: log?.tag,
       mode: log?.mode,

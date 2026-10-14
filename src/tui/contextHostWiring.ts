@@ -35,6 +35,9 @@
  *  - setLlmTimeoutSettingsSource ← getInitialSettings().llmTimeoutMs
  *    （#260 P0：LLM 请求超时档；env 胜 settings 合并纪律在 modelprovider
  *    resolveLlmTimeoutMs 单点）
+ *  - setEffortByModelSource ← getEffortByModel()（userSettings effortByModel
+ *    逐值校验读面）（0.1.67 E-2：per-model effort 记忆注入 modelprovider wire
+ *    面 resolveAppliedEffort，显示/发送双面对齐）
  *  - setTimeBasedMCConfigSource ← GB 'atlas_slate_heron' 读面（旧仓
  *    timeBasedMCConfig.ts 逐字：默认 {enabled:false, 60min, keepRecent:5}）
  *
@@ -48,7 +51,7 @@
  */
 import { feature } from 'src/shared'
 // #260 P0（2026-10-03）：LLM 请求超时 settings 源缝（modelprovider 域）
-import { setLlmTimeoutSettingsSource } from 'src/modelprovider'
+import { setLlmTimeoutSettingsSource, setEffortByModelSource } from 'src/modelprovider'
 import {
   clearPostCompactResetsForTesting,
   registerPostCompactReset,
@@ -70,6 +73,7 @@ import type { ToolUseContext } from './Tool.js'
 import type { AttachmentMessage } from './types/message.js'
 import { getGlobalConfig } from './utils/config.js'
 import { getInitialSettings } from './utils/settings/settings.js'
+import { getEffortByModel } from './utils/effort.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from './services/analytics/growthbook.js'
 import {
   executePostCompactHooks,
@@ -233,6 +237,10 @@ export function wireContextHostPorts(): void {
   // 持久化面；env ATLAS_LLM_TIMEOUT 恒胜此键的合并纪律在 modelprovider 域
   // resolveLlmTimeoutMs 单点，防 UI 读面与 provider 构造面两车道分裂）
   setLlmTimeoutSettingsSource(() => getInitialSettings().llmTimeoutMs)
+  // 0.1.67 E-2：settings.effortByModel per-model effort 记忆读侧（userSettings
+  // 源，getEffortByModel 已做逐值校验）→ modelprovider wire 面 resolveAppliedEffort
+  // 查 per-model 记忆（显示/发送双面对齐，切模型按各模型记忆值发送）
+  setEffortByModelSource(() => getEffortByModel())
   // GB 时间触发配置读面（旧仓 timeBasedMCConfig.ts 逐字）
   setTimeBasedMCConfigSource(() =>
     getFeatureValue_CACHED_MAY_BE_STALE(

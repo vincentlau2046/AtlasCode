@@ -15,7 +15,6 @@ import type { Message, SystemPrompt, ThinkingConfig, Tools } from '../shared'
 import { zodToJsonSchema } from './schema'
 import {
   convertEffortValueToLevel,
-  getDefaultEffortForModel,
   resolveAppliedEffort,
 } from './effort'
 
@@ -257,12 +256,16 @@ export async function buildOpenAIParams(
     : (args.options?.maxOutputTokensOverride ?? 8192)
   const temperature = args.options?.temperatureOverride
   const effortValue = args.options?.effortValue
+  // 0.1.67 E-2：第三支（无会话单值 + 无 thinking 预算）亦经 resolveAppliedEffort
+  // （env → per-model 记忆 → 缺省），而非直落 getDefaultEffortForModel——per-model
+  // 记忆应在无显式会话选择时亦生效（切到某模型按该模型记忆值发送）。显式 thinking
+  // 预算支不变（更显式，优先于 per-model 记忆）。
   const resolvedEffort =
     effortValue !== undefined
       ? resolveAppliedEffort(model, effortValue)
       : args.thinkingConfig && args.thinkingConfig.type === 'enabled'
         ? mapBudgetToEffort((args.thinkingConfig as any).budgetTokens)
-        : getDefaultEffortForModel(model)
+        : resolveAppliedEffort(model, undefined)
   const reasoningEffort =
     resolvedEffort !== undefined ? convertEffortValueToLevel(resolvedEffort) : undefined
 

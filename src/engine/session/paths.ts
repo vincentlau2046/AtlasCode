@@ -37,9 +37,15 @@ const _projectDirCache = new Map<string, string>()
 export const getProjectDir = (projectDir: string): string => {
   const cached = _projectDirCache.get(projectDir)
   if (cached !== undefined) return cached
+  // 0.1.67 C-3：win32 写侧 cwd 先 lowercase 归一（Windows 盘符/路径大小写
+  // 不敏感，归一到单一 case 与读侧 caseInsensitive 扫描对齐）；非 win32
+  // 文件系统大小写敏感 = 原样透传（零行为变更）。缓存键 = 原始入参（映射
+  // 一致性保证，归一只发生在 sanitizePath 之前）。
+  const normalized =
+    process.platform === 'win32' ? projectDir.toLowerCase() : projectDir
   const resolved = join(
     getSessionEnv().getProjectsDir(),
-    sanitizePath(projectDir),
+    sanitizePath(normalized),
   )
   _projectDirCache.set(projectDir, resolved)
   return resolved

@@ -82,6 +82,7 @@ import {
   LITE_READ_BUF_SIZE,
   readHeadAndTail,
   readTranscriptForLoad,
+  scanMidForSessionTitle,
   SKIP_PRECOMPACT_THRESHOLD,
 } from './sessionStoragePortable.js'
 import { getSettings_DEPRECATED } from './settings/settings.js'
@@ -429,8 +430,13 @@ export function isCustomTitleEnabled(): boolean {
 // string; homedir/env/regex are all session-invariant so the result is
 // stable for a given input. Worktree switches just change the key — no
 // cache clear needed.
+// 0.1.67 C-3：win32 写侧 cwd 先 lowercase 归一（Windows 盘符/路径大小写
+// 不敏感，归一到单一 case 与读侧 caseInsensitive 扫描对齐）；非 win32
+// 文件系统大小写敏感 = 原样透传（零行为变更）。
 export const getProjectDir = memoize((projectDir: string): string => {
-  return join(getProjectsDir(), sanitizePath(projectDir))
+  const normalized =
+    process.platform === 'win32' ? projectDir.toLowerCase() : projectDir
+  return join(getProjectsDir(), sanitizePath(normalized))
 })
 
 let project: Project | null = null
@@ -539,6 +545,9 @@ class Project {
   private static readonly METADATA_REWRITE_INTERVAL = 20
   currentSessionAgentSetting: string | undefined
   currentSessionMode: 'coordinator' | 'normal' | undefined
+  /** 0.1.67 B-1：会话级模型记忆（退出时所选主循环模型，resume 优先还原）。
+   *  mainLoopModel===null（default）= undefined，不写不恢复（落全局/缺省）。 */
+  currentSessionModelSetting: string | undefined
   // Tri-state: undefined = never touched (don't write), null = exited worktree,
   // object = currently in worktree. reAppendSessionMetadata writes null so
   // --resume knows the session exited (vs. crashed while inside).
@@ -813,6 +822,14 @@ class Project {
       appendEntryToFile(this.sessionFile, {
         type: 'mode',
         mode: this.currentSessionMode,
+        sessionId,
+      })
+    }
+    // 0.1.67 B-1：会话级模型记忆（退出时所选主循环模型）。null/default 不写。
+    if (this.currentSessionModelSetting) {
+      appendEntryToFile(this.sessionFile, {
+        type: 'model-setting',
+        modelSetting: this.currentSessionModelSetting,
         sessionId,
       })
     }
@@ -1192,6 +1209,9 @@ class Project {
       void this.enqueueWrite(sessionFile, entry)
     } else if (entry.type === 'agent-setting') {
       // Agent settings can always be appended
+      void this.enqueueWrite(sessionFile, entry)
+    } else if (entry.type === 'model-setting') {
+      // 0.1.67 B-1：会话级模型记忆，可总是追加
       void this.enqueueWrite(sessionFile, entry)
     } else if (entry.type === 'pr-link') {
       // PR links can always be appended
@@ -2738,6 +2758,7 @@ export function restoreSessionMetadata(meta: {
   agentName?: string
   agentColor?: string
   agentSetting?: string
+  modelSetting?: string
   mode?: 'coordinator' | 'normal'
   worktreeSession?: PersistedWorktreeSession | null
   prNumber?: number
@@ -2752,6 +2773,8 @@ export function restoreSessionMetadata(meta: {
   if (meta.agentName) project.currentSessionAgentName = meta.agentName
   if (meta.agentColor) project.currentSessionAgentColor = meta.agentColor
   if (meta.agentSetting) project.currentSessionAgentSetting = meta.agentSetting
+  // 0.1.67 B-1：会话级模型记忆（resume 重钉，退出 reAppend 再写盘）。
+  if (meta.modelSetting) project.currentSessionModelSetting = meta.modelSetting
   if (meta.mode) project.currentSessionMode = meta.mode
   if (meta.worktreeSession !== undefined)
     project.currentSessionWorktree = meta.worktreeSession
@@ -2774,6 +2797,7 @@ export function clearSessionMetadata(): void {
   project.currentSessionAgentColor = undefined
   project.currentSessionLastPrompt = undefined
   project.currentSessionAgentSetting = undefined
+  project.currentSessionModelSetting = undefined
   project.currentSessionMode = undefined
   project.currentSessionWorktree = undefined
   project.currentSessionPrNumber = undefined
@@ -2784,7 +2808,7 @@ export function clearSessionMetadata(): void {
 /**
  * Re-append cached session metadata (custom title, tag) to the end of the
  * transcript file. Call this after compaction so the metadata stays within
- * the 16KB tail window that readLiteMetadata reads during progressive loading.
+ * the 64KB tail window that readLiteMetadata reads during progressive loading.
  * Without this, enough post-compaction messages can push the metadata entry
  * out of the window, causing `--resume` to show the auto-generated firstPrompt
  * instead of the user-set session name.
@@ -2850,6 +2874,17 @@ export function cacheSessionTitle(customTitle: string): void {
  */
 export function saveMode(mode: 'coordinator' | 'normal'): void {
   getProject().currentSessionMode = mode
+}
+
+/**
+ * 0.1.67 B-1：缓存会话级模型记忆（退出时所选主循环模型）。写侧由
+ * onChangeAppState 在 mainLoopModel 变更时调用（实时写，避免退出钩子漏写）；
+ * 写盘由 materializeSessionFile（首条用户消息）+ reAppendSessionMetadata（退出/
+ * compact 后重钉）完成，与 saveMode/saveAgentSetting 同族同文件（零新增文件）。
+ * mainLoopModel===null（default）不写此条目（读侧自然落全局/缺省）。
+ */
+export function saveSessionModelSetting(modelSetting: string | null): void {
+  getProject().currentSessionModelSetting = modelSetting ?? undefined
 }
 
 /**
@@ -2939,6 +2974,7 @@ export async function loadFullLog(log: LogOption): Promise<LogOption> {
       agentNames,
       agentColors,
       agentSettings,
+      modelSettings,
       prNumbers,
       prUrls,
       prRepositories,
@@ -2985,6 +3021,7 @@ export async function loadFullLog(log: LogOption): Promise<LogOption> {
       agentName: sessionId ? agentNames.get(sessionId) : log.agentName,
       agentColor: sessionId ? agentColors.get(sessionId) : log.agentColor,
       agentSetting: sessionId ? agentSettings.get(sessionId) : log.agentSetting,
+      modelSetting: sessionId ? modelSettings.get(sessionId) : log.modelSetting,
       mode: sessionId ? (modes.get(sessionId) as LogOption['mode']) : log.mode,
       worktreeSession:
         sessionId && worktreeStates.has(sessionId)
@@ -3452,6 +3489,7 @@ export async function loadTranscriptFile(
   agentNames: Map<string, string>
   agentColors: Map<string, string>
   agentSettings: Map<string, string>
+  modelSettings: Map<string, string>
   prNumbers: Map<string, number>
   prUrls: Map<string, string>
   prRepositories: Map<string, string>
@@ -3472,6 +3510,7 @@ export async function loadTranscriptFile(
   const agentNames = new Map<string, string>()
   const agentColors = new Map<string, string>()
   const agentSettings = new Map<string, string>()
+  const modelSettings = new Map<string, string>()
   const prNumbers = new Map<string, number>()
   const prUrls = new Map<string, string>()
   const prRepositories = new Map<string, string>()
@@ -3571,6 +3610,8 @@ export async function loadTranscriptFile(
           agentColors.set(entry.sessionId, entry.agentColor)
         } else if (entry.type === 'agent-setting' && entry.sessionId) {
           agentSettings.set(entry.sessionId, entry.agentSetting)
+        } else if (entry.type === 'model-setting' && entry.sessionId) {
+          modelSettings.set(entry.sessionId, entry.modelSetting)
         } else if (entry.type === 'mode' && entry.sessionId) {
           modes.set(entry.sessionId, entry.mode)
         } else if (entry.type === 'worktree-state' && entry.sessionId) {
@@ -3639,6 +3680,8 @@ export async function loadTranscriptFile(
         agentColors.set(entry.sessionId, entry.agentColor)
       } else if (entry.type === 'agent-setting' && entry.sessionId) {
         agentSettings.set(entry.sessionId, entry.agentSetting)
+      } else if (entry.type === 'model-setting' && entry.sessionId) {
+        modelSettings.set(entry.sessionId, entry.modelSetting)
       } else if (entry.type === 'mode' && entry.sessionId) {
         modes.set(entry.sessionId, entry.mode)
       } else if (entry.type === 'worktree-state' && entry.sessionId) {
@@ -3768,6 +3811,7 @@ export async function loadTranscriptFile(
     agentNames,
     agentColors,
     agentSettings,
+    modelSettings,
     prNumbers,
     prUrls,
     prRepositories,
@@ -4818,11 +4862,17 @@ async function readLiteMetadata(
   // User titles (customTitle field, from custom-title entries) win over
   // AI titles (aiTitle field, from ai-title entries). The distinct field
   // names mean extractLastJsonStringField naturally disambiguates.
-  const customTitle =
+  let customTitle =
     extractLastJsonStringField(tail, 'customTitle') ??
     extractLastJsonStringField(head, 'customTitle') ??
     extractLastJsonStringField(tail, 'aiTitle') ??
     extractLastJsonStringField(head, 'aiTitle')
+  // 0.1.67 C-2：定向中部扫描兜底（miss 才触发，成本有界）——custom-title
+  // 条目被 post-compact 追加顶出 64KB 尾窗时（C-定因②）lite 面失名，
+  // 中部扫描找回（命中面恒等锚不触碰：四路链全 miss 才走本支）。
+  if (!customTitle) {
+    customTitle = await scanMidForSessionTitle(filePath, fileSize)
+  }
   const summary = extractLastJsonStringField(tail, 'summary')
   const tag = extractLastJsonStringField(tail, 'tag')
   const gitBranch =
@@ -5125,7 +5175,7 @@ async function enrichLog(
   }
 
   // Provide a fallback title for sessions where we couldn't extract the first
-  // prompt (e.g., large first messages that exceed the 16KB read buffer).
+  // prompt (e.g., large first messages that exceed the 64KB read buffer).
   // Previously these sessions were silently dropped, making them inaccessible
   // via /resume after crashes or large-context sessions.
   if (!enriched.firstPrompt && !enriched.customTitle) {

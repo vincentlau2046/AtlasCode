@@ -647,7 +647,7 @@ export async function compactConversation(
     markPostCompaction()
 
     // Re-append session metadata (custom title, tag) so it stays within
-    // the 16KB tail window that readLiteMetadata reads for --resume display.
+    // the 64KB tail window that readLiteMetadata reads for --resume display.
     // Without this, enough post-compaction messages push the metadata entry
     // out of the window, causing --resume to show the auto-generated title
     // instead of the user-set session name.
@@ -973,7 +973,7 @@ export async function partialCompactConversation(
     markPostCompaction()
 
     // Re-append session metadata (custom title, tag) so it stays within
-    // the 16KB tail window that readLiteMetadata reads for --resume display.
+    // the 64KB tail window that readLiteMetadata reads for --resume display.
     reAppendSessionMetadata()
 
     context.onCompactProgress?.({

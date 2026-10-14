@@ -14,6 +14,7 @@ import {
   getEffortEnvOverride,
   getDefaultEffortForModel,
   resolveAppliedEffort,
+  setEffortByModelSource,
 } from "../../src/modelprovider"
 
 const ENV_KEY = "ATLAS_EFFORT_LEVEL"
@@ -22,6 +23,8 @@ const ALWAYS_ENABLE = "ATLAS_ALWAYS_ENABLE_EFFORT"
 afterEach(() => {
   delete process.env[ENV_KEY]
   delete process.env[ALWAYS_ENABLE]
+  // 0.1.67 E-2：per-model 记忆源模块态复位（防跨用例泄漏）
+  setEffortByModelSource(null)
 })
 
 describe("EFFORT_LEVELS + isEffortLevel", () => {
@@ -159,5 +162,58 @@ describe("resolveAppliedEffort", () => {
 
   test("无 env 无 appState → default", () => {
     expect(resolveAppliedEffort("gpt-4", undefined)).toBe("medium")
+  })
+})
+
+describe("resolveAppliedEffort — 0.1.67 E-2 per-model 记忆面", () => {
+  test("per-model 记忆压过会话单值（X 设 high，会话 explicit=medium → 发 high）", () => {
+    setEffortByModelSource(() => ({ "model-x": "high" }))
+    // 会话单值（sticky）= medium，但模型 X 有 per-model 记忆 = high
+    expect(resolveAppliedEffort("model-x", "medium")).toBe("high")
+  })
+
+  test("双模型各发各值（X=high / Y=low，会话 explicit=medium）", () => {
+    setEffortByModelSource(() => ({ "model-x": "high", "model-y": "low" }))
+    expect(resolveAppliedEffort("model-x", "medium")).toBe("high")
+    expect(resolveAppliedEffort("model-y", "medium")).toBe("low")
+  })
+
+  test("case-insensitive 匹配（记忆键大写，模型串小写）", () => {
+    setEffortByModelSource(() => ({ "Qwen38-27B-TXT": "xhigh" }))
+    expect(resolveAppliedEffort("qwen38-27b-txt", "medium")).toBe("xhigh")
+  })
+
+  test("无记忆模型回落会话单值（恒等锚）", () => {
+    setEffortByModelSource(() => ({ "model-x": "high" }))
+    // model-z 无 per-model 记忆 → 回落会话单值
+    expect(resolveAppliedEffort("model-z", "medium")).toBe("medium")
+  })
+
+  test("无记忆模型 + 无会话值 → default（恒等锚）", () => {
+    setEffortByModelSource(() => ({ "model-x": "high" }))
+    expect(resolveAppliedEffort("model-z", undefined)).toBe("medium")
+  })
+
+  test("env 恒胜 per-model 记忆", () => {
+    process.env[ENV_KEY] = "max"
+    setEffortByModelSource(() => ({ "model-x": "high" }))
+    expect(resolveAppliedEffort("model-x", "medium")).toBe("max")
+  })
+
+  test("env=unset → undefined（即使有 per-model 记忆）", () => {
+    process.env[ENV_KEY] = "unset"
+    setEffortByModelSource(() => ({ "model-x": "high" }))
+    expect(resolveAppliedEffort("model-x", "medium")).toBeUndefined()
+  })
+
+  test("未注源（null）→ 行为恒等（回落会话单值/default）", () => {
+    setEffortByModelSource(null)
+    expect(resolveAppliedEffort("model-x", "medium")).toBe("medium")
+    expect(resolveAppliedEffort("model-x", undefined)).toBe("medium")
+  })
+
+  test("源返 undefined（settings 无键）→ 回落会话单值", () => {
+    setEffortByModelSource(() => undefined)
+    expect(resolveAppliedEffort("model-x", "medium")).toBe("medium")
   })
 })

@@ -46,6 +46,7 @@ import {
   recordTranscript,
   recordContentReplacement,
   saveGoalState,
+  reAppendSessionMetadata as reAppendSessionMetadataEngine,
   type ContentReplacementRecord,
   type Message as SessionMessage,
 } from './session'
@@ -243,6 +244,9 @@ export async function createAgentLoopDeps(
   const modelProvider = getModelProvider()
   const role: ModelRole = config.role ?? 'premium'
   const sessionModel = config.sessionModel
+  // 0.1.67 C-1：headless 车道同款 pending replacement 写追踪（TUI 车道
+  // agentLoopDeps 同形）——post-compact 重钉与 replacement 写异步串行保序。
+  let pendingReplacement: Promise<void> = Promise.resolve()
   const deps: AgentLoopDeps = {
     modelProvider,
     role,
@@ -321,14 +325,26 @@ export async function createAgentLoopDeps(
       ? undefined
       : {
           record: msgs => recordTranscript(msgs as unknown as SessionMessage[]),
-          recordContentReplacement: recs =>
-            recordContentReplacement(
+          recordContentReplacement: recs => {
+            // 0.1.67 C-1：捕获 pending replacement 写（重钉顺序面消费；
+            // promise 仍传播拒绝——loop 侧 .catch 吞错面不变）。
+            pendingReplacement = recordContentReplacement(
               recs as unknown as ContentReplacementRecord[],
               config.agentId,
-            ),
+            )
+            return pendingReplacement
+          },
           // 0.1.62 /goal P1：loop 清 goal 时回写 session metadata 缓存
           // （headless -p 与 TUI 行为恒等——goalState 模块单例共享）
           saveGoalState: goal => saveGoalState(goal),
+          // 0.1.67 C-1：post-compact 追加完成后元数据重钉（engine 域 cache 面；
+          // 与 pending replacement 写异步串行：大 replacement 块落盘后重钉，
+          // 元数据条目保 64KB 尾窗内）。
+          reAppendSessionMetadata: () => {
+            void pendingReplacement
+              .catch(() => undefined) // replacement 写失败不阻断重钉
+              .then(() => reAppendSessionMetadataEngine())
+          },
         },
   }
   return { toolPermissionContext, tools, deps, warnings }

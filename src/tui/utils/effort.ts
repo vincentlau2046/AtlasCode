@@ -232,8 +232,13 @@ export function getEffortEnvOverride(): EffortValue | null | undefined {
 
 /**
  * Resolve the effort value that will actually be sent to the API for a given
- * model, following the full precedence chain:
- *   env ATLAS_EFFORT_LEVEL → appState.effortValue → model default
+ * model, following the full precedence chain (0.1.67 E-2 显示/发送双面对齐):
+ *   env ATLAS_EFFORT_LEVEL → effortByModel[model]（per-model 记忆，case-insensitive）
+ *   → appState.effortValue（会话单值）→ 模型缺省
+ *
+ * 0.1.67 E-2：per-model 记忆槽插入 env 与会话单值之间（对齐显示面
+ * getPickerDisplayEffort 先例），切模型即按各模型记忆值发送，消解会话单值
+ * sticky 面（E-定因③）。env 恒胜；无 per-model 记忆模型回落会话单值/缺省。
  *
  * Send-as-is: the resolved level is what the wire layer sends verbatim —
  * there is NO reactive fallback/downgrade here. If the target model doesn't
@@ -251,7 +256,8 @@ export function resolveAppliedEffort(
   if (envOverride === null) {
     return undefined
   }
-  return envOverride ?? appStateEffortValue ?? getDefaultEffortForModel(model)
+  const perModelMemory = getPersistedEffortForModel(model)
+  return envOverride ?? perModelMemory ?? appStateEffortValue ?? getDefaultEffortForModel(model)
 }
 
 /**

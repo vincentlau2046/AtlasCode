@@ -16,6 +16,7 @@ import {
   type SessionExternalMetadata,
 } from '../utils/sessionState.js'
 import { updateSettingsForSource } from '../utils/settings/settings.js'
+import { saveSessionModelSetting } from '../utils/sessionStorage.js'
 import type { AppState } from './AppStateStore.js'
 
 // Inverse of the push below — restore on worker restart.
@@ -97,6 +98,8 @@ export function onChangeAppState({
     // Remove from settings
     updateSettingsForSource('userSettings', { model: undefined })
     setMainLoopModelOverride(null)
+    // 0.1.67 B-1：回到 default（null）→ 清会话级模型记忆（resume 落全局/缺省）
+    saveSessionModelSetting(null)
   }
 
   // mainLoopModel: add it to settings?
@@ -107,6 +110,8 @@ export function onChangeAppState({
     // Save to settings
     updateSettingsForSource('userSettings', { model: newState.mainLoopModel })
     setMainLoopModelOverride(newState.mainLoopModel)
+    // 0.1.67 B-1：写会话级模型记忆（实时写，退出/compact 重钉；resume 优先还原）
+    saveSessionModelSetting(newState.mainLoopModel)
   }
 
   // expandedView → persist as showExpandedTodos + showSpinnerTree for backwards compat

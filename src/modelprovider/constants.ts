@@ -19,16 +19,22 @@ export const API_PDF_MAX_PAGES = 100
 // LLM 请求超时（#260 P0，2026-10-03 斗兽棋 "Request timed out" 修波）
 
 /**
- * LLM 请求缺省超时 120s→600s（#260 裁定，用户 2026-10-03 复核定 600s）：
+ * LLM 请求缺省超时 120s→600s（#260）→ **0.1.67 用户裁 900s（15min）基线**：
  * 国产慢模型基线——用户 profile 实测 27B 模型 xhigh effort 长生成超 120s
- * （斗兽棋回合死，"Worked for 4m5s" = 3×120s 重试放大器）。env
- * ATLAS_LLM_TIMEOUT / settings llmTimeoutMs 覆写；消费点 = OpenAIProvider
- * 构造（index.ts resolveLlmTimeoutMs）+ clients.ts 客户端缺省
+ * （斗兽棋回合死，"Worked for 4m5s" = 3×120s 重试放大器）；用户 2026-10-14
+ * 裁定 600s→15min（0.1.67 用户 bug 修插入波，用户两 PR 之一「模型超时设 15min」）。
+ * env ATLAS_LLM_TIMEOUT / settings llmTimeoutMs 覆写（单位恒=毫秒）；消费点 =
+ * OpenAIProvider 构造（index.ts resolveLlmTimeoutMs）+ clients.ts 客户端缺省
  * （per-request timeout 仍逐请求胜）。
  */
-export const LLM_TIMEOUT_DEFAULT_MS = 600_000
+export const LLM_TIMEOUT_DEFAULT_MS = 900_000
 /** 超时上限 30min（沿用旧语义）：防挂死/排队网关把整个 session 拖挂。 */
 export const LLM_TIMEOUT_CAP_MS = 1_800_000
+/**
+ * 0.1.67 A-2：单位误配提示阈值——有效 LLM 超时 < 60s（60000ms）时给一次性
+ * 单位提示（单位=毫秒，若按秒填写请 ×1000），不阻断（仅 stderr/debug + 错误行面）。
+ */
+export const LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS = 60_000
 
 // ════════════════════════════════════════════════════════════════
 // Beta Headers（旧仓 constants/betas.ts）

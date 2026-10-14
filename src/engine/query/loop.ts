@@ -58,6 +58,7 @@ import {
 } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
 import { nextFallbackRef, withTurnRecovery } from './turnRecovery'
+import { isCompactBoundaryMessage } from '../session'
 import {
   DEFAULT_MAX_GOAL_TURNS,
   clearGoal,
@@ -124,6 +125,20 @@ export interface LoopTranscriptSink {
    * 无持久化（测试面可 stub）。
    */
   saveGoalState?(goal: { armed: boolean; condition: string } | null): void
+  /**
+   * 0.1.67 C-1：post-compact 追加完成后会话元数据重钉面（64KB 尾窗重钉）。
+   * compact 体内的 pre-append reAppend（engine/context/compact.ts）发生在
+   * post-compact 序列落盘**之前**；loop record(messages) +
+   * recordContentReplacement（可达数百 KB）之后，custom-title / mode /
+   * model-setting 等元数据条目被顶出 64KB 尾窗（readLiteMetadata head+tail
+   * 64KB lite 读两头皆不可见 → /resume 名称面回退原名）。本槽 = post-append
+   * 重钉（宿主注入：TUI 车道 = sessionStorage.reAppendSessionMetadata 闭包，
+   * 与 pending replacement 写异步串行保序；headless 车道 = engine/session
+   * reAppendSessionMetadata）。未注入 = 窄 spine 零行为变更。
+   * 消费点 = autoCompact 支（record + replacement 之后）+ 轮间入参
+   * boundary 门控支（手动 /compact 等价位）。
+   */
+  reAppendSessionMetadata?(): void
 }
 
 /**
@@ -630,6 +645,12 @@ export async function queryAgentLoop(
   // 非 bare await 语义，bare fire-and-forget 变体 = D 波/CLI 面裁面登记）。
   if (deps.transcript) {
     await deps.transcript.record(messages)
+    // 0.1.67 C-1：手动 /compact 等价位重钉（post-compact 序列经 loop 入口
+    // 落盘 = 手动 /compact 的追加面；入参序列头 = compact boundary 判别式，
+    // 非 compact 路径恒不触发 = 零变更恒等锚）。
+    if (isCompactBoundaryMessage(messages[0])) {
+      deps.transcript.reAppendSessionMetadata?.()
+    }
   }
 
   // W3-3a（§8.74.14）：loop 事件发射面（未注入 emit = 全 no-op，零行为）
@@ -683,6 +704,11 @@ export async function queryAgentLoop(
             )
           }
         }
+        // 0.1.67 C-1：post-compact 追加完成 → 元数据重钉（compact 体内的
+        // pre-append reAppend 补成 post-append 语义：custom-title / mode /
+        // model-setting 重进 64KB 尾窗；重钉顺序由 sink 侧与 replacement 写
+        // 异步串行保证，本处 fire-and-forget 不阻塞 query 循环）。
+        deps.transcript?.reAppendSessionMetadata?.()
       } else if (oc.consecutiveFailures !== undefined) {
         // 失败：回灌熔断计数（旧仓 loop.ts:504-511 语义）。不回灌则熔断器在 loop 里
         // 永不跳闸——超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用。
@@ -747,6 +773,9 @@ export async function queryAgentLoop(
             // S-E3 A11（旧 L607 同型）：compact 写面 persist post-compact 序列
             if (deps.transcript) {
               await deps.transcript.record(messages)
+              // 0.1.67 C-1：reactive-compact 恢复支 = 第三处 post-compact 追加面，
+              // 同款 post-append 重钉（与 autoCompact 支等价位）。
+              deps.transcript.reAppendSessionMetadata?.()
             }
             // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
             deps.emit?.({ type: 'compacted', turn: turns, messages })

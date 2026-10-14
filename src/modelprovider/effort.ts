@@ -7,7 +7,9 @@
  * 斩断依赖：
  *  - isUltrathinkEnabled 旧仓 = feature('ULTRATHINK') + growthbook；
  *    growthbook 斩断（Port 8），feature('ULTRATHINK') 默认 false → stub false
- *  - settings 依赖（getEffortByModel 等）不被这 3 函数消费，不迁
+ *  - settings 依赖不直接 import：0.1.67 E-2 起 per-model 记忆经注入缝
+ *    setEffortByModelSource（宿主注 settings.effortByModel 读侧，未注 = 无
+ *    记忆）——替代旧「不迁」裁定（wire 发送面须查 per-model，防漏查）
  *  - EffortLevel/EffortValue/EFFORT_LEVELS 从 shared import（契约冻结 + B 波合并值导出）
  *
  * C 波再下沉 shared（effort 全量函数 + settings port）。
@@ -87,6 +89,31 @@ export function getDefaultEffortForModel(
   return 'medium'
 }
 
+// 0.1.67 E-2：per-model thinking-effort 记忆源注入缝（B 方案 wire 面，
+// settings 域不迁的替代——宿主注 settings.effortByModel 读侧，未注 = 无
+// per-model 记忆（回落会话单值/缺省））。对齐 TUI utils/effort.ts 的
+// resolveAppliedEffort 面（双源同形）：modelprovider 直调面（params.ts
+// buildOpenAIParams）亦查 per-model 记忆，防发送面漏查。
+type EffortByModelSource =
+  | (() => Record<string, EffortLevel> | undefined | null)
+  | null
+let effortByModelSource: EffortByModelSource = null
+
+export function setEffortByModelSource(next: EffortByModelSource): void {
+  effortByModelSource = next
+}
+
+/** per-model 记忆查槽（case-insensitive，对齐 TUI getPersistedEffortForModel 先例）。 */
+function lookupEffortByModel(model: string): EffortLevel | undefined {
+  const map = effortByModelSource?.()
+  if (!map) return undefined
+  const wanted = model.toLowerCase()
+  for (const [key, level] of Object.entries(map)) {
+    if (key.toLowerCase() === wanted) return level
+  }
+  return undefined
+}
+
 export function resolveAppliedEffort(
   model: string,
   appStateEffortValue: EffortValue | undefined,
@@ -95,5 +122,8 @@ export function resolveAppliedEffort(
   if (envOverride === null) {
     return undefined
   }
-  return envOverride ?? appStateEffortValue ?? getDefaultEffortForModel(model)
+  // 0.1.67 E-2：per-model 记忆槽插 env 与会话单值之间（显示/发送双面对齐）；
+  // env 恒胜；无 per-model 记忆回落会话单值/缺省。
+  const perModelMemory = lookupEffortByModel(model)
+  return envOverride ?? perModelMemory ?? appStateEffortValue ?? getDefaultEffortForModel(model)
 }

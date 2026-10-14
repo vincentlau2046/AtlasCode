@@ -230,10 +230,11 @@ export function ModelPicker(t0) {
         if (persistable !== undefined) {
           const selectedModelForPersist = resolveOptionModel(value_0);
           if (selectedModelForPersist && modelSupportsEffort(selectedModelForPersist)) {
-            // Per-model memory (B): remember this model's picked tier; the
-            // global slot is written in the same call (last-write fallback).
+            // 0.1.67 E-1：per-model 记忆面（B）——只写该模型 tier 槽
+            // effortByModel[model]；全局 effortLevel 不再同调覆写（它仅作为
+            // 「无 per-model 记忆模型」的兜底槽，设 Y 的 tier 不再让 X/其他
+            // 模型跟着变）。else 支（角色模型无记忆面）保留全局写不变。
             updateSettingsForSource("userSettings", {
-              effortLevel: persistable,
               effortByModel: withEffortForModel(selectedModelForPersist, persistable)
             });
           } else {

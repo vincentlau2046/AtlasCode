@@ -10,7 +10,7 @@
  * 键（env 胜）④ 超时错误行 remediation 提示面。
  *
  * 被测能力：
- *   ① resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 600s；
+ *   ① resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 900s（0.1.67）；
  *     上限 30min 双源 cap；env 显式无效落 settings）
  *   ② settings 源缝 setLlmTimeoutSettingsSource → provider getTimeoutMs()
  *     读面（seam 未注 = 缺省）
@@ -27,13 +27,16 @@ import {
   getModelProvider,
   LLM_TIMEOUT_DEFAULT_MS,
   LLM_TIMEOUT_CAP_MS,
+  llmTimeoutUnitHint,
+  llmTimeoutRemediationHint,
+  APIConnectionTimeoutError,
 } from '../../src/modelprovider'
 import { SettingsSchema } from '../../src/tui/utils/settings/types'
 
-describe('#260 resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 600s）', () => {
-  test('① 无 env + 无 settings → 新缺省 600s（旧 120s 判别点）', () => {
-    expect(LLM_TIMEOUT_DEFAULT_MS).toBe(600_000)
-    expect(resolveLlmTimeoutMs(undefined, undefined)).toBe(600_000)
+describe('#260 resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 900s，0.1.67）', () => {
+  test('① 无 env + 无 settings → 缺省 900s（0.1.67 用户裁 15min；旧 600s 判别点）', () => {
+    expect(LLM_TIMEOUT_DEFAULT_MS).toBe(900_000)
+    expect(resolveLlmTimeoutMs(undefined, undefined)).toBe(900_000)
   })
   test('② env 有效 → env 胜（settings 被压）', () => {
     expect(resolveLlmTimeoutMs('600000', 450_000)).toBe(600_000)
@@ -45,13 +48,13 @@ describe('#260 resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 60
   })
   test('④ env 下界 = 1 有效（0 无效语义保留）', () => {
     expect(resolveLlmTimeoutMs('1', undefined)).toBe(1)
-    expect(resolveLlmTimeoutMs('0', undefined)).toBe(600_000)
+    expect(resolveLlmTimeoutMs('0', undefined)).toBe(900_000)
   })
   test('⑤ env 显式无效（非数字）→ 落 settings 档', () => {
     expect(resolveLlmTimeoutMs('abc', 450_000)).toBe(450_000)
   })
-  test('⑥ env 显式无效 + 无 settings → 缺省 600s', () => {
-    expect(resolveLlmTimeoutMs('abc', undefined)).toBe(600_000)
+  test('⑥ env 显式无效 + 无 settings → 缺省 900s', () => {
+    expect(resolveLlmTimeoutMs('abc', undefined)).toBe(900_000)
   })
   test('⑦ 无 env + settings 有效 → settings 档', () => {
     expect(resolveLlmTimeoutMs(undefined, 450_000)).toBe(450_000)
@@ -59,10 +62,10 @@ describe('#260 resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 60
   test('⑧ settings 超上限 → cap 30min（与 env 同纪律）', () => {
     expect(resolveLlmTimeoutMs(undefined, 9_999_999_999)).toBe(1_800_000)
   })
-  test('⑨ settings 形状无效（0 / 负 / 小数）→ 缺省 600s（合并层校验）', () => {
-    expect(resolveLlmTimeoutMs(undefined, 0)).toBe(600_000)
-    expect(resolveLlmTimeoutMs(undefined, -5)).toBe(600_000)
-    expect(resolveLlmTimeoutMs(undefined, 1.5)).toBe(600_000)
+  test('⑨ settings 形状无效（0 / 负 / 小数）→ 缺省 900s（合并层校验）', () => {
+    expect(resolveLlmTimeoutMs(undefined, 0)).toBe(900_000)
+    expect(resolveLlmTimeoutMs(undefined, -5)).toBe(900_000)
+    expect(resolveLlmTimeoutMs(undefined, 1.5)).toBe(900_000)
   })
 })
 
@@ -71,5 +74,48 @@ describe('#260 settings llmTimeoutMs schema 面（宽容 number；校验在合�
     const s = SettingsSchema()
     expect(s.parse({ llmTimeoutMs: 600_000 }).llmTimeoutMs).toBe(600_000)
     expect(s.parse({}).llmTimeoutMs).toBeUndefined()
+  })
+})
+
+describe('0.1.67 A-2 单位误配提示纯函数 llmTimeoutUnitHint（触发/不触发双面，不阻断）', () => {
+  test('⓵ <60000ms（用户配 1800 误把秒当毫秒）→ 提示在场（单位=毫秒 + ×1000 指引）', () => {
+    const h = llmTimeoutUnitHint(1800)
+    expect(h).toBeDefined()
+    expect(h).toContain('单位是毫秒')
+    expect(h).toContain('1800')
+    expect(h).toContain('×1000')
+  })
+  test('⓶ ≥60000ms（缺省 900000 / 边界 60000）→ 不误报（undefined）', () => {
+    expect(llmTimeoutUnitHint(60_000)).toBeUndefined()
+    expect(llmTimeoutUnitHint(900_000)).toBeUndefined()
+  })
+  test('⓷ 0（=未设档/回落缺省）→ 不提示（ms>0 守卫，非单位误配）', () => {
+    expect(llmTimeoutUnitHint(0)).toBeUndefined()
+  })
+  test('⓸ 不阻断：resolver 仍按 1800ms 执行（提示只旁路，不改值）', () => {
+    expect(resolveLlmTimeoutMs('1800', undefined)).toBe(1800)
+  })
+})
+
+describe('0.1.67 A-3 错误行提示器单位显形（llmTimeoutRemediationHint 纯函数文案）', () => {
+  test('⓹ 超时错误行含 单位=毫秒 + 上限换算 1800000', () => {
+    const h = llmTimeoutRemediationHint(new APIConnectionTimeoutError('Request timed out.'), 900_000)
+    expect(h).not.toBeNull()
+    expect(h).toContain('单位=毫秒')
+    expect(h).toContain('1800000')
+  })
+  test('⓺ 当前值 <1min（如 1800）→ 误配提示在场（×1000 指引）', () => {
+    const h = llmTimeoutRemediationHint(new APIConnectionTimeoutError('Request timed out.'), 1800)
+    expect(h).not.toBeNull()
+    expect(h).toContain('×1000')
+  })
+  test('⓻ 当前值未给（undefined）→ 不误报 0ms 误配（ms>0 守卫），不造 600s 假数字', () => {
+    const h = llmTimeoutRemediationHint({ name: 'APITimeoutError', message: 'Request timed out.' })
+    expect(h).not.toBeNull()
+    expect(h).not.toContain('×1000')
+    expect(h).not.toContain('600s')
+    // 基础面（单位显形 + 双旋钮 + cap）仍在场
+    expect(h).toContain('单位=毫秒')
+    expect(h).toContain('ATLAS_LLM_TIMEOUT')
   })
 })

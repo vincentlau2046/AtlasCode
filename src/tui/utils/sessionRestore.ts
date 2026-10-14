@@ -38,7 +38,7 @@ import { readCurrentSessionPermissionRules } from './permissions/sessionPermissi
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { fileHistoryRestoreStateFromLog } from './fileHistory.js'
 import { createSystemMessage } from './messages.js'
-import { parseUserSpecifiedModel } from './model/model.js'
+import { globalModelRejectedNotice, parseUserSpecifiedModel } from './model/model.js'
 import { getPlansDirectory } from './plans.js'
 import { setCwd } from './Shell.js'
 import {
@@ -300,6 +300,7 @@ type ResumeLoadResult = {
   agentName?: string
   agentColor?: string
   agentSetting?: string
+  modelSetting?: string // 0.1.67 B-2：会话级模型记忆（resume 优先还原）
   customTitle?: string
   tag?: string
   mode?: 'coordinator' | 'normal'
@@ -498,6 +499,25 @@ export async function processResumedConversation(
       result.contextCollapseCommits ?? [],
       result.contextCollapseSnapshot,
     )
+  }
+
+  // 0.1.67 B-2：会话级模型记忆恢复（退出时 /model 所选模型，B-1 写侧）。
+  // 优先级 = CLI --model（已设 override，恒等不压过）> 会话档 result.modelSetting
+  // > 全局 settings.model / 缺省。会话无 model-setting 记录或选 default（缺失）
+  // → 不写 override，自然落全局/缺省（缺省面恒等锚）。置于 restoreAgentFromSession
+  // 前：显式 /model 选择压过 agent 缺省模型（agent 支有 !override 守卫）。
+  if (result.modelSetting && !getMainLoopModelOverride()) {
+    setMainLoopModelOverride(parseUserSpecifiedModel(result.modelSetting))
+  }
+
+  // 0.1.67 B-3：全局 settings.model 池外被 allowlist 拒 → 回退 default 显式提示
+  // （非静默）。仅当无会话级模型记忆（B-2 缺失，此时才落到全局 settings.model）
+  // 且全局 model 被拒时提示；池内 / 有会话记录 / 未配置 → 不提示（恢复恒等锚）。
+  if (!result.modelSetting) {
+    const modelRejected = globalModelRejectedNotice()
+    if (modelRejected) {
+      result.messages.push(createSystemMessage(modelRejected, 'warning'))
+    }
   }
 
   // Restore agent setting from resumed session
