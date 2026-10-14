@@ -11,6 +11,8 @@ import { installOrUpdateClaudePackage, localInstallationExists } from '../utils/
 import { removeInstalledSymlink } from '../utils/nativeInstaller/index.js';
 import { gt, gte } from '../utils/semver.js';
 import { getInitialSettings } from '../utils/settings/settings.js';
+// 0.1.71 块 B-3：opt-in 自动升级门（默认=仅提示零自动）+ B-2 升级命令行（registry 段）
+import { isAutoUpdateOptedIn, buildUpdateUpgradeCommand } from '../utils/updateCheck.js';
 type Props = {
   isUpdating: boolean;
   onChangeIsUpdating: (isUpdating: boolean) => void;
@@ -76,8 +78,12 @@ export function AutoUpdater({
       latest: latestVersion
     });
 
+    // 0.1.71 块 B-3：opt-in 门（ATLAS_AUTO_UPDATE=1 或 settings.autoUpdate）——
+    // 默认（未 opt-in）= 仅提示模式（零自动自更新，恒等锚）；自动装仅在显式 opt-in 后执行。
+    // 「新版本可用」nudge 由 StatusLine UpdateAvailableSegment 承载（updateStore/updateCheck）。
+    const autoUpdateOptedIn = isAutoUpdateOptedIn();
     // Check if update needed and perform update
-    if (!isDisabled && currentVersion && latestVersion && !gte(currentVersion, latestVersion) && !shouldSkipVersion(latestVersion)) {
+    if (autoUpdateOptedIn && !isDisabled && currentVersion && latestVersion && !gte(currentVersion, latestVersion) && !shouldSkipVersion(latestVersion)) {
       const startTime = Date.now();
       onChangeIsUpdating(true);
 
@@ -173,7 +179,8 @@ export function AutoUpdater({
       {(autoUpdaterResult?.status === 'install_failed' || autoUpdaterResult?.status === 'no_permissions') && <Text color="error" wrap="truncate">
           ✗ Auto-update failed &middot; Try <Text bold>atlas doctor</Text> or{' '}
           <Text bold>
-            {hasLocalInstall ? `cd ~/.atlas/local && npm update ${MACRO.PACKAGE_URL}` : `npm i -g ${MACRO.PACKAGE_URL}`}
+            {/* 0.1.71 B-2：全局升级命令恒 npmjs registry（npmmirror CN 只读坑固化） */}
+            {hasLocalInstall ? `cd ~/.atlas/local && npm update ${MACRO.PACKAGE_URL}` : buildUpdateUpgradeCommand()}
           </Text>
         </Text>}
     </Box>;

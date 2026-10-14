@@ -99,6 +99,8 @@ export const DEFAULT_SIMPLE_LINE1: SegmentConfig[] = [
   { type: 'permission-mode' },
   { type: 'context-bar' },
   { type: 'cwd' },
+  // 0.1.71 块 B：行末追加（null 时不留分隔符残余）；有新版才显形
+  { type: 'update-available' },
 ]
 
 export const DEFAULT_DETAILED_LINE1: SegmentConfig[] = [
@@ -107,6 +109,8 @@ export const DEFAULT_DETAILED_LINE1: SegmentConfig[] = [
   { type: 'permission-mode' },
   { type: 'context-bar' },
   { type: 'cwd' },
+  // 0.1.71 块 B：行末追加（null 时不留分隔符残余）；有新版才显形
+  { type: 'update-available' },
 ]
 
 export const DEFAULT_DETAILED_LINE2: SegmentConfig[] = [

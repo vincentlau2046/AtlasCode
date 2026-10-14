@@ -17,6 +17,7 @@ import { ControlLinkSegment } from './ControlLinkSegment.js'
 import { PermissionModeSegment } from './PermissionModeSegment.js'
 import { SessionDurationSegment } from './SessionDurationSegment.js'
 import { GoalSegment } from './GoalSegment.js'
+import { UpdateAvailableSegment } from './UpdateAvailableSegment.js'
 import type { SegmentComponent } from './types.js'
 
 export const segmentRegistry = new Map<string, SegmentComponent>([
@@ -38,6 +39,8 @@ export const segmentRegistry = new Map<string, SegmentComponent>([
   ['control-link', ControlLinkSegment],
   // 0.1.62 /goal C0-4：footer goal 指示器（armed 时显示，未 armed = null）
   ['goal', GoalSegment],
+  // 0.1.71 块 B：状态行「新版本可用」nudge（有新版时显示，无 = null 不占位）
+  ['update-available', UpdateAvailableSegment],
 ])
 
 export {
