@@ -5,8 +5,8 @@
 （OpenAI-protocol 静态键车道，任意 OpenAI-compatible 端点）与国产平台工具链预留
 （Ascend NPU 域包为可插拔叠加层，W6 起接入）。
 
-> 版本现状：G-α 前置阶段（v0.1.0 发布待 W2–W4 闭环 + P-1 远端仓库，见
-> `docs/roadmap-domestic-and-residuals.md`）。
+> 版本现状：v0.1.x 持续发布（npm `@atlasharness/atlascode` live，P-1 远端仓已解除，
+> 见 `docs/roadmap-domestic-and-residuals.md`）。
 
 ## 安装
 
@@ -20,7 +20,22 @@ npm install -g @atlasharness/atlascode
 atlascode --help   # 别名 `atlas` 同效
 ```
 
-**② git 源码**（前置：`git` + [bun](https://bun.sh)（构建）+ `node`（运行））
+**Windows（PowerShell / cmd）**
+
+```powershell
+# npm 通道（与 Unix 同款，仅需 Node ≥ 20）
+npm install -g @atlasharness/atlascode
+atlascode --help   # 别名 `atlas` 同效
+```
+
+> - 装完 `atlascode`/`atlas` 不识别 → 重开终端（或把 npm 全局 bin 目录加入 `PATH`）。
+> - git 源码通道 `./install.sh` 为 Unix shell 脚本，Windows 不可直接用；Windows 走 npm 通道，
+>   或手动 `git clone <repo-url>` + [bun](https://bun.sh)（`bun install && bun run build`）。
+> - 镜像 registry（如 npmmirror）超时/403 时切官方源：
+>   `npm install -g @atlasharness/atlascode --registry https://registry.npmjs.org`
+>   （Windows 多 OS 波 0.1.43 已验 npm 通道安装 + 启动链）。
+
+**② git 源码**（Unix；前置：`git` + [bun](https://bun.sh)（构建）+ `node`（运行））
 
 ```bash
 ./install.sh [repo-url]
