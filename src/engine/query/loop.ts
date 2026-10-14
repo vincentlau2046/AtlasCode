@@ -55,6 +55,7 @@ import {
   shouldRetryModelError,
   type ModelProvider,
   type ModelRole,
+  type StreamDelta,
 } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
 import { nextFallbackRef, withTurnRecovery } from './turnRecovery'
@@ -163,6 +164,18 @@ export type AgentLoopEvent =
       assistantMessage: AssistantMessage
       /** 本轮 tool_result 消息族（顺序 = toolResults 顺序；terminal 轮 = 空族）。 */
       toolResultMessages: Message[]
+    }
+  | {
+      /**
+       * 0.1.70 G-2（composing token 回归波）：per-token delta 事件（逆转 §8.74.2
+       * 「streaming chatStream 不入引擎面」裁定——per-token 现经 emit 槽入引擎
+       * 面，React-free 红线不破：纯数据回调不引 React）。载荷 = modelprovider
+       * StreamDelta（delta 类 4 事件子集；本波 TUI 消费 text 面，tool 面
+       * 0.1.71 候选）。瞬态进度面——不入 transcript record（round_end
+       * assistantMessage 仍是唯一持久化面）。
+       */
+      type: 'stream_delta'
+      delta: StreamDelta
     }
   | { type: 'loop_end'; result: AgentLoopResult }
   | {
@@ -440,6 +453,12 @@ export async function queryOneRound(
     // D-5b（S-4）：headless --effort 真消费透传（options.effortValue → reasoning_effort）。
     options:
       deps.effortValue !== undefined ? { effortValue: deps.effortValue } : undefined,
+    // 0.1.70 G-2（composing token 回归波）：per-token 透传——仅 emit 已注入面
+    // 传 onStreamDelta（TUI 活链）；emit 未注入面（headless / 单轮直调方）=
+    // undefined = chat 非流式路径零回调零开销恒等锚。
+    onStreamDelta: deps.emit
+      ? (delta: StreamDelta) => deps.emit!({ type: 'stream_delta', delta })
+      : undefined,
   }
   // loop-robustness 缺口②（#262）：回合级有界恢复——provider 内部 3 次重试预算
   // 耗尽仍抛「可重试模型错误」（5xx 风暴 / 网关持续抖动）→ withTurnRecovery 有界
