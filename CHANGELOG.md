@@ -4,6 +4,51 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.69
+
+块 D Claude 对齐波（基线 v0.1.68；工单 `docs/2026-10-14-p0-wave-0169-ticket.md`）。
+**波性质 = 行为变更**（对齐 Claude：autocompact 窗口 per-model 键控 + 摘要
+fallback 模型 + 压缩后 git 面现形）。零回归约束 =「旧单档精确同值 +
+fallback 不触发面 1 调用恒等 + 无 git 变更零注入恒等 + 前 13 波零回归」。
+3 件：D-1 每模型 autocompact 窗口 + D-3 摘要 fallback 模型 +
+D-5 压缩后当前 git status 重注；B-4 角色字段错配 = 零码登记件（不修，
+登记面）；README 增 Windows 安装节（纯文档面）。
+
+- **D-1 · 每模型 autocompact 窗口档（用户 256K + 1M 混配面封顶缺陷根修）**：
+  - `settings.autoCompactWindow` 单全局档 → per-model 键控
+    （`{[model]: 档位}` + `default` 兜底键）；单全局档下设 256K 档切 1M 模型
+    仍被 256K 档封顶（auto-compact 提前触发，1M 窗浪费）→ 每模型各取己档
+  - 读侧兼容读：`normalizeAutoCompactWindowSetting` 单点归一（旧单档 →
+    `default` 键，零数据迁移）；1 参调用（无 model）= 修前精确同值 = 零回归锚
+  - 写侧：`/autocompact` 写档键 = 当前主循环模型（`getMainLoopModel()`），
+    读-改-写整 map（旧单档遗留值经归一 default 键单点过渡）；选择器/回执
+    带当前模型标签（最小 UI 面）
+  - engine model-string 形（阈值/有效窗口/警告态/开关）透传 model 键；
+    `isAutoCompactEnabledForModel` 新导出（per-model off 档只禁该模型）
+- **D-3 · 摘要 fallback 模型（主模型摘要拒/429 = 恢复面失能根修）**：
+  - 摘要 LLM 调用（`CompactPorts.summarize` 单口）单模型单调用无 fallback
+    → 主摘要 API 级失败（拒/超时/429/5xx/不完整）经 small 角色重试 1 次，
+    双失败才计熔断（计数语义 = 修前不变）
+  - 触发判别仅 API 级失败：用户中止（APIUserAbortError / aborted 标记）与
+    PTL（截头重试支消费面，小窗模型更糟）不触发；name/message 判别不依赖
+    跨模块类拷贝同一性
+  - 接线 = `contextHostWiring` 宿主侧包装（auto-compact 富 / reactive 413 /
+    手动 /compact 三处经 port 单口统一受益；headless 裁剪车道不变）；
+    不触发面 = 恰好 1 次调用（零额外调用恒等锚）
+- **D-5 · 压缩后当前 git status 重注（session 起始快照被压缩丢掉的盲区根修）**：
+  - `composePostCompactAttachments` 增当前 git status 重注面（`git_status_refresh`
+    附件，system-reminder isMeta 消费；TUI 渲染面零渲染）——工作树变更
+    （新文件/分支切换/提交）在压缩后不再是盲区
+  - 三门控（变更判定锚 = 块 JSON 同一性）：session 起始基线缺 / fresh 取态
+    不可用 / git 面无变更（块逐字段同一）= 零注入恒等锚
+  - fresh 文案「current git status, re-injected after context compaction」
+    取代 session 起始快照语义；git 命令锚 `process.cwd`（与起始快照同锚点）
+- **B-4 · 角色字段错配 = 零码登记件**（`getMainLoopModel` 优先级链
+  `settings.modelRoles.small.model` 错配面，不修，登记面；0.1.70 候选）
+- **README · Windows 安装节**（npm 通道 + 命令不识别→重开终端/PATH +
+  git 源码通道 Unix-only 说明 + 镜像 registry 切官方源）+ 陈旧版本现状行
+  订正（纯文档面，零 gate 影响）
+
 ## v0.1.68
 
 autocompact 恢复对齐波（块 F′；基线 v0.1.67；工单 `docs/2026-10-14-p0-wave-0168-ticket.md`）。
