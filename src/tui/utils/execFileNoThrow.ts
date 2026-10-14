@@ -107,9 +107,14 @@ export function execFileNoThrowWithCwd(
 ): Promise<{ stdout: string; stderr: string; code: number; error?: string }> {
   return new Promise(resolve => {
     // Use execa for cross-platform .bat/.cmd compatibility on Windows
+    // 0.1.71 修波 r2（D-1，gate r-20261015-gate-071-r2）：execa 8+ 把 `signal`
+    // 选项更名 `cancelSignal`（execa 10.0.1 lockfile 钉定）——旧名连 `undefined`
+    // 值（键恒在场）都触发 execa 同步 TypeError（不 spawn）→ 本 wrapper 全调用点
+    // 静默 code=1（AutoUpdater 版本检查 / 块 B 版本检查 nudge / B-3 自动装面潜伏
+    // 死面）。选项名切 cancelSignal（execa 10 Options 类型面 cancelSignal?: AbortSignal）。
     execa(file, args, {
       maxBuffer,
-      signal: abortSignal,
+      cancelSignal: abortSignal,
       timeout: finalTimeout,
       cwd: finalCwd,
       env: finalEnv,

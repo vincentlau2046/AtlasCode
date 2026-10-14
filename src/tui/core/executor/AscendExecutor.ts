@@ -86,7 +86,9 @@ export class AscendExecutor implements Executor, NpuToolchain {
       env: Object.assign({}, process.env, mergedEnv),
     }
     if (opts?.cwd) execaOpts.cwd = opts.cwd
-    if (opts?.signal) execaOpts.signal = opts.signal
+    // 0.1.71 修波 r2（D-1 同源面）：execa 8+ `signal` → `cancelSignal`（旧名
+    // 在 execa 10 运行时 TypeError；此处条件传参 = 仅 opts.signal 在场时中招）
+    if (opts?.signal) execaOpts.cancelSignal = opts.signal
 
     let raw: { exitCode?: number; stdout?: unknown; stderr?: unknown }
     try {

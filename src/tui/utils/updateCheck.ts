@@ -146,7 +146,15 @@ export async function resolveLatestVersion(opts: {
   if (cached && isUpdateCacheFresh(cached.checkedAtMs, now)) {
     return { latest: cached.latest, fromCache: true }
   }
-  const latest = await (opts.fetchLatest ?? defaultFetchLatest)()
+  let latest: string | null
+  try {
+    latest = await (opts.fetchLatest ?? defaultFetchLatest)()
+  } catch {
+    // 0.1.71 修波 r2（D-2，gate r-20261015-gate-071-r2）：fetch 层抛异常面
+    // （execa TypeError / spawn 失败族）→ latest=null 负缓存 + 静默（nudge
+    // 缺席），与 fetch 返回 null 面同形（失败态 < 24h 不反复打网）。
+    latest = null
+  }
   await cache.write({ latest, checkedAtMs: now })
   return { latest, fromCache: false }
 }

@@ -156,6 +156,36 @@ describe('0.1.71 B-1 resolveLatestVersion', () => {
     expect(res.fromCache).toBe(false)
     expect(cache.getEntry()).toEqual({ latest: null, checkedAtMs: now })
   })
+  // ── 修波 r2（D-2，gate r-20261015-gate-071-r2）：fetch 层**抛异常**面 ──
+  test('fetch 抛异常 → latest=null + 负缓存写入 + 静默不抛（与 null 返回面同形）', async () => {
+    const cache = memCache(null)
+    const res = await resolveLatestVersion({
+      fetchLatest: async () => {
+        throw new Error('execa TypeError / spawn 失败族')
+      },
+      cache: cache.port,
+      nowMs: now,
+    })
+    expect(res.latest).toBeNull()
+    expect(res.fromCache).toBe(false)
+    // 负缓存落地（D-2：失败态也写缓存，< 24h 不反复打网）
+    expect(cache.getEntry()).toEqual({ latest: null, checkedAtMs: now })
+  })
+  test('负缓存后续面：失败后 24h 内再查 = 用负缓存不 fetch（fromCache=true，零 fetch）', async () => {
+    let fetchCalls = 0
+    const cache = memCache({ latest: null, checkedAtMs: now - 60_000 })
+    const res = await resolveLatestVersion({
+      fetchLatest: async () => {
+        fetchCalls++
+        return '9.9.9'
+      },
+      cache: cache.port,
+      nowMs: now,
+    })
+    expect(res.latest).toBeNull()
+    expect(res.fromCache).toBe(true)
+    expect(fetchCalls).toBe(0) // 负缓存新鲜 → 不重查
+  })
 })
 
 // ── B-3 opt-in 自动升级门（env 五态 + settings 覆盖；默认=仅提示恒等锚）──
