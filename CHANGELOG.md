@@ -4,6 +4,64 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.67
+
+P0 用户 bug 修插入波（用户 4 bug 闭环：超时族 + 模型会话级记忆 + compact 命名面 +
+effort per-model；基线 v0.1.66；工单 `docs/2026-10-14-p0-wave-0167-ticket.md`）。
+**波性质 = 行为变更**（用户 2026-10-14 三项裁定；零回归约束 =「缺省面恒等锚 + 前波
+精确同值」）。15 件：块 A 超时族 4 + 块 B 模型会话级恢复 4 + 块 C autocompact 命名面
+4 + 块 E thinking effort per-model 3。块 D（D-1/D-3/D-5）= 不入境登记件（0.1.68 候选）。
+
+- **块 A · 超时族（单位自明 + 缺省 15min + 提示器 + 参数总表）**：
+  - A-1 缺省 `LLM_TIMEOUT_DEFAULT_MS` 600_000→**900_000**（15min，用户裁；cap
+    `LLM_TIMEOUT_CAP_MS=1_800_000` 30min 不动；env 恒胜 settings 纪律不变）
+  - A-2 单位误配提示 `llmTimeoutUnitHint`（有效超时 <60000ms 一次性 warn「单位是毫秒，
+    若按秒填请 ×1000」，不阻断；`getModelProvider()` 启动面一次性守卫）
+  - A-3 错误行 `llmTimeoutRemediationHint` 单位显形 + 上限换算 + <1min 误配提示
+    （「当前超时 2s（2000ms）… 如需 15min 请填 900000」，纯函数文案面）
+  - A-4 超时参数总表 `docs/timeout-params-table.md`（模型超时族 + 其余子域只登记不改，
+    零码）
+- **块 B · 模型会话级恢复（退出时所选模型 → resume 还原）**：
+  - B-1 写侧：transcript entry 型 `model-setting`（与 `mode`/`agent-setting` 同族同文件，
+    零新增文件）+ `saveSessionModelSetting(model)` + `onChangeAppState` 模型变更实时写
+    （`mainLoopModel===null`（default）不写档）
+  - B-2 读侧：`loadConversationForResume` 返 `modelSetting` + 恢复支
+    `setMainLoopModelOverride(parseUserSpecifiedModel(...))`（优先级 CLI > 会话 > 全局 >
+    缺省；`--model` 显式压过会话档）+ 无会话记录 → 落全局/缺省（恒等锚）
+  - B-3 allowlist 静默拒绝修复：池外 provider 模型写全局 `settings.model` 被 `isModelAllowed`
+    拒 → 恢复静默落 default 变**显式提示**（`globalModelRejectedNotice` 纯函数，池内/未配置
+    恒等不提示）
+  - B-4 角色层字段形错配（TUI 读 `modelRoles.<role>.model` 单数 vs 引擎 `.models` 数组）
+    = 零码登记（latent，留角色层统一波）
+- **块 C · autocompact 命名面（命名 session compact 后名称回退，用户 Windows 面）**：
+  - C-1 post-compact 追加后重钉：`loop.ts` autoCompact 支 `record`+`recordContentReplacement`
+    后 + 手动 /compact + reactive 恢复支 3 挂点 `reAppendSessionMetadata()`（经 deps 缝
+    注入 + 双车道 `pendingReplacement` 异步串行化），命名 session 造 >64KB post-compact
+    追加后 /resume 名称面 = custom title（非原名）
+  - C-2 `readLiteMetadata` 定向中部扫描兜底（head+tail 全 miss 才触发，512KB 有界）
+  - C-3 Windows 写侧 case 归一：`getProjectDir` 3 写侧点 cwd 先 lowercase（win32；
+    非 win32 零行为变更，与读侧 caseInsensitive 对齐）
+  - C-4 陈旧注释 16KB→64KB（5 处）
+- **块 E · thinking effort per-model 记忆面（设一模型全局/其他 session 跟着变错位）**：
+  - E-1 ModelPicker 写侧去全局覆写（只写 `effortByModel[model]`，全局 `effortLevel` 不再
+    同调覆写；角色模型无记忆面支保留全局写；`/effort auto` 语义不变）
+  - E-2 `resolveAppliedEffort` 加 per-model 记忆槽（优先级 env > per-model 记忆
+    （case-insensitive）> 会话单值 > 模型缺省；modelprovider 注入缝
+    `setEffortByModelSource` TUI `contextHostWiring` + headless `compose` 双宿主注册）
+  - E-3 `params.ts` 第三支（无会话值 + 无 thinking 预算）经 `resolveAppliedEffort`
+    （per-model 记忆在无显式选择时亦生效，sticky 问题自然消解；显式 thinking 预算支不变）
+
+判别单测 23 件（修前红→修后绿）：A `modelprovider-llm-timeout`（6）/ E `effort`
+per-model（9）/ C-3 `session-project-dir-win32`（4）/ B-3 `model-rejected-notice`（4）；
+B-1/B-2/C-1 用户面活行为由 e2e 双面活探针承载（会话 A 选 X 退出→resume 还原 X /
+会话 B 选 Y→resume 还原 Y〔会话级隔离〕/ --model 压过 / 无记录落缺省恒等 / /rename 后
+>64KB post-compact 追加→/resume 名称=custom title）。
+
+零回归：缺省面恒等锚（无会话 `model-setting` 记录恢复 = 现行为）+ `--model` 显式面恒等
++ cap 30min 不变 + env 恒胜纪律不变 + 前波特性面精确同值（0.1.56–0.1.66 全 token，本波
+只动 `LLM_TIMEOUT_DEFAULT_MS` 常量值 + hint 文案 + 新增会话模型面 + compact 重钉面，
+不触既有 token）。
+
 ## v0.1.66
 
 0.1.61+ 波池 Q3 subagent 独占波 · 翻转波（双波第二波；基线 v0.1.65）。
