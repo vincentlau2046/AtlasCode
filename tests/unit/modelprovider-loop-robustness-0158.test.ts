@@ -79,6 +79,7 @@ mock.module('../../src/modelprovider/roles', () => ({
 
 const {
   OpenAIProvider,
+  ModelPoolExhaustedError,
   modelRetryBackoffMs,
   MODEL_RETRY_BACKOFF_BASE_MS,
   MODEL_RETRY_BACKOFF_CAP_MS,
@@ -168,26 +169,39 @@ describe('C4-2 chat() 重试循环退避面（fake client 时序断言）', () =
     expect(sleeps).toEqual([10, 20])
   })
 
-  test('退避 cap 面：base 10/cap 40 × 6 次 → [10,20,40,40,40]（末次不退避）', async () => {
+  test('退避 cap 面：base 10/cap 40 × 6 次 → [10,20,40,40,40]（末次不退避；终抛 = 0.1.71 A-1 聚合）', async () => {
     resetFakeState()
     const sleeps: number[] = []
     streamBehavior = () => {
       throw { status: 503, name: 'APIError', message: 'Service Unavailable' }
     }
     const { provider } = makeProvider(6, { baseMs: 10, capMs: 40, sleeps })
-    await expect(provider.chat(chatArgs())).rejects.toMatchObject({ status: 503 })
+    // A-1 新契约：池全败（单 ref 503 × 6 次重试耗尽）→ 聚合错误（无 .status 面，
+    // 分类标签 api_error_503 进 .failures；退避时序断言不受聚合影响 = C4-2 面不变）
+    const err = await provider.chat(chatArgs()).catch(e => e)
+    expect(err).toBeInstanceOf(ModelPoolExhaustedError)
+    expect(err.failures).toEqual([
+      { ref: 'testprov/test-model', code: 'api_error_503', raw: 'Service Unavailable' },
+    ])
     expect(createCalls.length).toBe(6)
     expect(sleeps).toEqual([10, 20, 40, 40, 40])
   })
 
-  test('非瞬断类 403 零退避（既有行为恒等：1 调用 + 无退避 + 原样抛）', async () => {
+  test('非瞬断类 403 零退避（1 调用 + 无退避恒等；终抛 = 0.1.71 A-1 聚合 auth_error）', async () => {
     resetFakeState()
     const sleeps: number[] = []
     streamBehavior = () => {
       throw { status: 403, name: 'APIError', message: 'Forbidden' }
     }
     const { provider } = makeProvider(3, { baseMs: 10, capMs: 40, sleeps })
-    await expect(provider.chat(chatArgs())).rejects.toMatchObject({ status: 403 })
+    // A-1 新契约：403 非瞬断零重试（1 调用恒等）+ 池全败 → 聚合错误
+    // （泛 403 非配额签名 = auth_error 子型，A-2 单一事实源）
+    const err = await provider.chat(chatArgs()).catch(e => e)
+    expect(err).toBeInstanceOf(ModelPoolExhaustedError)
+    expect(err.role).toBe('fast')
+    expect(err.failures).toEqual([
+      { ref: 'testprov/test-model', code: 'auth_error', raw: 'Forbidden' },
+    ])
     expect(createCalls.length).toBe(1)
     expect(sleeps).toEqual([])
   })

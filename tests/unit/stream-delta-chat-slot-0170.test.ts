@@ -8,8 +8,10 @@
  *    assistant message = Promise 契约不变）。
  *  - onStreamDelta 未传面 = 非流式路径原样（stream: false 单发 = 恒等锚，
  *    headless / 测试 fixture / 非 TUI 调用方零行为）。
- *  - 错误契约 = 抛原始错误（与非流式面 create() 抛同族，withTurnRecovery /
- *    shouldRetryModelError 分类语义不变）。
+ *  - 错误契约 = 池全败抛 ModelPoolExhaustedError 聚合可行动错误（0.1.71 A-1
+ *    双路径契约；原始错误文案隔离在 .failures[i].raw，withTurnRecovery /
+ *    shouldRetryModelError 分类语义不变——聚合错误非 APIError 判不可重试，
+ *    守 403 非重试锚）。
  *  - C4-1 partial 保留面 = interrupted assistant 即该轮内容（不整流重发）。
  *
  * Main 定项（工单 §0 G-1 落码面参考 f4 定因）：① StreamDelta 槽形 = 裸
@@ -80,7 +82,7 @@ mock.module('../../src/modelprovider/roles', () => ({
 }))
 
 import type { StreamDelta } from '../../src/modelprovider'
-const { OpenAIProvider } = await import('../../src/modelprovider')
+const { OpenAIProvider, ModelPoolExhaustedError } = await import('../../src/modelprovider')
 
 // ---- 流脚本助手 ----
 function textChunks(texts: string[]) {
@@ -219,16 +221,29 @@ describe('G-1 onStreamDelta 传入面 = 流式路径（逐 delta 同步转发）
     expect(createCalls.length).toBe(1)
   })
 
-  test('零 partial 错误 = 抛原始错误（错误契约同非流式面，withTurnRecovery 分类语义不变）', async () => {
+  test('零 partial 错误 = 抛 ModelPoolExhaustedError 聚合错误（0.1.71 A-1 双路径契约，原始文案隔离 .failures[i].raw）', async () => {
     resetFakeState()
     const forbidden = Object.assign(new Error('forbidden'), { status: 403 })
     streamScripts.push(() => errorAfterStream([], forbidden))
     const provider = makeProvider()
     const deltas: StreamDelta[] = []
-    await expect(
-      provider.chat({ ...chatBase, onStreamDelta: d => deltas.push(d) }),
-    ).rejects.toBe(forbidden)
+    const err = await provider
+      .chat({ ...chatBase, onStreamDelta: d => deltas.push(d) })
+      .catch(e => e)
+    // A-1 新契约：池全败（单 ref 403）→ 聚合可行动错误（非原始对象恒等）
+    expect(err).toBeInstanceOf(ModelPoolExhaustedError)
+    expect(err.role).toBe('fast')
+    expect(err.failures).toEqual([
+      { ref: 'testprov/test-model', code: 'auth_error', raw: 'forbidden' },
+    ])
+    // 聚合文案面：模型列表 + 分类标签 + 建议行（原始文案不进 .message）
+    expect(err.message).toContain("All 1 model(s) in pool for role 'fast' failed")
+    expect(err.message).toContain('testprov/test-model: auth_error')
+    expect(err.message).toContain('Check provider credentials/quota')
+    expect(err.message).not.toContain('forbidden')
+    // 零 partial 面：零 delta 转发（403 非瞬断零重试，单 ref 单调用）
     expect(deltas).toEqual([])
+    expect(createCalls.length).toBe(1)
   })
 })
 
