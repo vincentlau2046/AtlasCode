@@ -4,6 +4,74 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.71
+
+用户 2026-10-15 双主诉插入波（P0 轨，基线 v0.1.70；工单
+`docs/2026-10-15-p0-wave-0171-ticket.md`）。**波性质 = 行为变更**（块 A
+错误契约变更 + 块 B 新增版本检查新网络面）+ 修波 r2（D-1 execa 10 选项名
+真产品缺陷根修）。命令面零变更（/help 55 + cmd 32 恒等，gate r3 实证）。
+
+### 块 A ·「所有模型额度没有了，但提示有问题」（3 件）
+
+- **A-1 · 池轮询全败聚合**（`src/modelprovider/modelprovider.ts`）：
+  `chat()`（非流式）/ `chatWithDelta()`（流式）双路径——池内 ref 全耗尽
+  （含重试）后不再逐 ref 裸抛原始错误对象，改抛聚合
+  `ModelPoolExhaustedError {role, failures: [{ref, code, raw?}]}`；
+  `.message` = 「All N model(s) in pool for role 'X' failed: - ref: code
+  / Fix: Check provider credentials/quota...」可行动提示。原始错误文案
+  隔离在 `failures[i].raw`（不进 `.message`）；分类/退避/重试语义
+  （`shouldRetryModelError` / C4-2 退避时序）不变；池未耗尽面零行为。
+- **A-2 · 403 配额子型**（`modelErrors.ts` 单一事实源）：
+  `classifyRefFailure` 标签面——403 + 配额签名（quota/limit/insufficient
+  族）→ `quota_exhausted`；其余 401/403 → `auth_error`；unknown ref →
+  `unknown_reference`；有 status → `api_error_<status>`；余 → `error`。
+  `isQuotaExhaustedMessage('Forbidden') = false`（泛 403 ≠ 配额，核销锚）。
+- **A-3 · TUI 403/配额提示行 + 恢复面**（`src/tui/services/api/apiErrors.ts`
+  两支）：用户可见错误面给方向不给 mood——配额族提示「额度/配额已用尽，
+  恢复面 = 切模型（/model）或换 key」；凭据族提示「检查 API key/凭据」。
+  恢复面走既有命令，**不新增 slash 命令**。
+
+### 块 B ·「自动升级的功能依然没有实现」（3 件）
+
+- **B-1 · 版本检查**（`src/tui/utils/updateCheck.ts` 纯核心）：当前版本 vs
+  npm latest（`npm view @atlasharness/atlascode version --registry
+  https://registry.npmjs.org`；registry 恒 npmjs = 0.1.43 npmmirror CN
+  只读坑固化）+ **24h 磁盘缓存** `~/.atlas/update-check.json` + 5s 有界
+  超时 + **检查失败静默**（永不阻塞 session，失败面写负缓存免反复打网）
+  + `ATLAS_UPDATE_CHECK` env 覆盖 registry（gate/沙箱可测面）。新版 →
+  StatusLine 行末 nudge「新版本 X 可用（当前 Y）」（缺席不留分隔符残余）。
+- **B-2 · 升级命令行（提示模式，默认）**：nudge 携带可复制命令
+  `npm install -g @atlasharness/atlascode --registry https://registry.npmjs.org`
+  （registry 段必在场，字符串级判别锚）。
+- **B-3 · opt-in 自动升级（零默认行为）**：`ATLAS_AUTO_UPDATE=1`（env）或
+  `settings.autoUpdate === true` → 才后台自动装；**默认（均未设）= 仅
+  提示**（恒等锚，零自动自更新）。
+
+### 修波 r2 · execa 10 选项名根修（gate r2 活探针定因，D-1/D-2）
+
+- **D-1**：execa 10.0.1（lockfile 钉定）把 `signal` 选项更名
+  `cancelSignal`——旧名连 `undefined` 值（键恒在场）都触发 execa 同步
+  TypeError（不 spawn）→ wrapper 全调用点静默 code=1（块 B 版本检查
+  100% 死面）。3 调用点全切：`execFileNoThrow.ts` wrapper（恒传）+
+  `AscendExecutor`×2（条件传参，`as any` 遮蔽 tsc 面）；node
+  `child_process` 两副本是正确选项名，未动。
+- **D-2**：`resolveLatestVersion` fetch 段无 try/catch（负缓存设计未
+  落地）→ fetch 层抛异常面整函数 reject、缓存恒不写。修 = try/catch →
+  `latest=null` 负缓存 + 静默（与 fetch 返 null 面同形）。
+- **D-3（盲区登记，无码修）**：tsc 类型面/单测 fake 注入/CI 三重绿 ≠
+  运行安全（execa 10 类型/运行 desync，真 execa 路径零覆盖）→ 新增
+  源级锁单测 `execa-cancelsignal-0171.test.ts`（3 调用点选项名字符串
+  锁，零 spawn）+ 负缓存 2 判别单测；真链活验 = gate 探针 (b) 无预缓存
+  4/4（r3 实证 nudge「新版本 99.9.9 可用（当前 0.1.70）」显形 + 零
+  自动动作 = B-1/B-2 活链恢复）。
+
+gate：r1 GATE-OPEN（3 存量断言断言 A-1 前 raw 抛契约 → 修波
+`ea3ec50` 同步新契约）→ r2 GATE-OPEN（活探针 (b) 抓出 D-1 真产品缺陷
+→ 修波 `bb6426d`）→ **r3 GATE-PASS**（四件套 + CI 4408·0·342 /
+判别 61/0 / P0a / A4F + cmd 32 + /help 55 / 前波探针族 8 件 + (a)(b) +
+loop-rob R1/R3 全绿；唯一红面 = 探针侧 harness I2 表达式缺陷，勘误
+复验全场景 I2=true，非产品面）。
+
 ## v0.1.70
 
 块 G composing token 回归 + 块 H de-ant fallback 根除波（基线 v0.1.69；工单
