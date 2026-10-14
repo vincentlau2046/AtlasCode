@@ -188,6 +188,11 @@ export function wireContextHostPorts(): void {
   // 受益）。fallback = small 角色（getRoleModel('small')）；未配置或 = 当前
   // 摘要模型 = 无 fallback（零回归）；触发 = 仅 API 级失败（用户中止 + PTL
   // 除外）；重试 1 次，双失败才交回调用方（熔断计数语义 = 修前）。
+  // 0.1.70 H-2（de-ant 核验守卫，零行为变更）：fallback = settings
+  // modelRoles.small 池（getRoleModel('small') = roleSetting.model ?? 池头
+  // resolveModel(refs[0]).modelId，纯 settings.json 链，零 anthropic 硬编码）；
+  // Main 定项①：D-3 = small 单模型 1 次（工单原设计），池轮询 = 0.1.71 候选
+  // 非本波行为变更。
   const summarizePrimary = (p: Parameters<typeof streamCompactSummary>[0]) =>
     streamCompactSummary(p)
   const summarizeWithFallback = createSummarizeWithFallback(summarizePrimary, {

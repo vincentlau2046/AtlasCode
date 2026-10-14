@@ -155,6 +155,10 @@ export function getRoleModels(
     return (m && typeof m === 'object' && m.model) ? String(m.model) : ''
   }).filter((r: string) => r.length > 0)
 
+  // 0.1.70 H-2（de-ant 核验守卫，零行为变更）：normalizeRef = 纯 settings
+  // providers 表前缀查（裸 model id → 持该 id 的 providers 表项加前缀；未知 ref
+  // 原样透传 → resolveModel undefined → chat "unknown provider" 显形）。零
+  // anthropic default provider 注入——池内 ref 全部来自用户 settings.json。
   const normalizeRef = (ref: string): string => {
     if (ref.includes('/')) return ref
     for (const [pName, pCfg] of Object.entries(providers)) {
