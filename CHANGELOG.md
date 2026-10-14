@@ -4,6 +4,59 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.70
+
+块 G composing token 回归 + 块 H de-ant fallback 根除波（基线 v0.1.69；工单
+`docs/2026-10-14-p0-wave-0170-ticket.md`）。**波性质 = 行为变更**（逆转
+§8.74.2 裁定：composing 面激活 per-token 事件流 + anthropic 全局 apiKey
+回落链断链）。零回归约束 =「onStreamDelta 未传面恒等 + emit 未注入面恒等
++ settings 池充足面精确同值 + 前 14 波探针零回归」。6 件：
+
+- **G-1 · chat 增 onStreamDelta 流式槽**（modelprovider）：
+  - `chat()` args 增 `onStreamDelta?: (delta: StreamDelta) => void`；未传
+    = 非流式路径原样（恒等锚）
+  - 传入 → 私有 `chatWithDelta()` 复用 `streamOneAttempt`（per-token 单一
+    事实源），逐 delta 同步回调；错误契约 = 抛原始错误（retryBackoff
+    语义不变）；C4-1 partial interrupted 面 = 该轮已产内容
+  - `StreamDelta` = 4 事件子集（text_delta / tool_use_start /
+    tool_use_delta / tool_use_end，types.ts），index.ts 扩导出
+- **G-2 · AgentLoopEvent 增 stream_delta 型 + queryOneRound 透传**（engine）：
+  - 联合增 `{ type: 'stream_delta'; delta: StreamDelta }`（瞬态进度事件，
+    零持久化）；queryOneRound chatArgs 经 deps.emit 透传
+  - H6 登记：发射点 = queryAgentLoop 驱动层；单轮直调面 = 仅 stream_delta
+- **G-3 · loopEvents 转发 stream_delta**（tui）：emit 回调 stream_delta 支
+  入 pending 队列（同步观察者契约保持，React-free 红线不动）
+- **G-4 · TUI handleMessageFromStream stream_delta 分支**（composing 显形）：
+  - text_delta → `onSetStreamMode('responding')` + onUpdateLength 累加 +
+    onStreamingText 渐进追加；tool delta 零副作用
+  - 死代码激活链：spinnerGates SHOW_TOKENS_AFTER_MS=5000 +
+    totalTokens = Math.round(len/4) + showTokens 值门全激活——用户主诉
+    「composing 只有箭头没有 token」根修（gate PTY 探针「1 tokens」在场
+    活验收）
+- **H-1 · 全局 apiKey anthropic 回落断链**（de-ant 根除，用户裁定
+  「fallback ant 模型彻底删除掉，fallback settings 模型轮询，走
+  modelProvider openai 路径」）：
+  - autocompact 403 "not enough quota to pre-consume" 根因链 = per-role
+    apiKey 缺失 → getGlobalApiKey → macOS keychain anthropic claude.ai
+    OAuth token → api.anthropic.com 403——**断链**
+  - roles.ts getRoleConfig 删全局回落（THREE SOURCES → TWO SOURCES：
+    env per-role → settings per-role）；缺失 = undefined 显形，由 chat 面
+    resolveModel(ref).apiKey（settings providers 表）兜底 = 纯
+    settings.json 链
+  - tui settings-adapter getGlobalApiKey 恒 undefined（keychain import
+    清零）；atlascode 组合根 env 静态键车道（OPENAI_AUTH_TOKEN ??
+    OPENAI_API_KEY）不动
+  - 0.1.71 收尾面：auth.ts 残留 + OAuth 流程面全清
+- **H-2 · fallback settings 池轮询核验 + de-ant 守卫注释**（零行为变更）：
+  - getRoleModels normalizeRef 纯 settings providers 表前缀查，零
+    anthropic default provider 注入；D-3 摘要 fallback = small 池头
+    （池轮询 = 0.1.71 候选非本波）
+
+判别单测 25 件（stream-delta 3 文件 18 件 + de-ant-apikey-fallback 7 件，
+82 expect）；gate 双面活探针 tui-gh-0170 13/13 + PTY 3/3（composing token
+显形 + anthropic 403 缺席）+ 前 14 波探针零回归（0.1.68 19/19 + 0.1.69
+16/16 + goal 36 + 0.1.67 15/15）。
+
 ## v0.1.69
 
 块 D Claude 对齐波（基线 v0.1.68；工单 `docs/2026-10-14-p0-wave-0169-ticket.md`）。
