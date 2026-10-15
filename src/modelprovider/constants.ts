@@ -40,7 +40,9 @@ export const LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS = 60_000
 // Beta Headers（旧仓 constants/betas.ts）
 // ════════════════════════════════════════════════════════════════
 
-export const ATLAS_20250219_BETA_HEADER = 'claude-code-20250219'
+// de-ant（0.1.73 C-3c）：品牌串中性化（原 1P 品牌 beta 头值 → atlas 品牌，与
+// tui/constants/betas.ts 活副本值一致）。本副本 = 旧仓死面（零 import，随迁登记）。
+export const ATLAS_20250219_BETA_HEADER = 'atlas-code-20250219'
 export const INTERLEAVED_THINKING_BETA_HEADER = 'interleaved-thinking-2025-05-14'
 export const CONTEXT_MANAGEMENT_BETA_HEADER = 'context-management-2026-06-27'
 export const STRUCTURED_OUTPUTS_BETA_HEADER = 'structured-outputs-2025-12-15'

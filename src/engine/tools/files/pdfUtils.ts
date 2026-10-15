@@ -9,10 +9,10 @@
  *  - getMainLoopModel（旧 model/model.ts，新仓无）→ ./modelRef
  *    getMainLoopModelName（S-C1 D 组 ① 裁定：modelprovider
  *    getRoleConfig('small').model ?? ''，旧 getMainLoopModel = modelRoles
- *    小角色池头语义）。isPDFSupported 的 claude-3-haiku 子串判逐字，
- *    新模型名恒不命中 = PDF 块面恒支持（保守等价，登记）。
+ *    小角色池头语义）。de-ant（0.1.73 C-3b）：isPDFSupported 原 1P 老 Haiku 模型
+ *    poppler 回退子串支随 1P 车道 OOS 删除 → 恒 true（国产面恒不命中 = PDF 块面恒
+ *    支持，恒等锚，行为零变更）。
  */
-import { getMainLoopModelName } from './modelRef'
 
 // Document extensions that are handled specially
 export const DOCUMENT_EXTENSIONS = new Set(['pdf'])
@@ -65,13 +65,12 @@ export function parsePDFPageRange(
 
 /**
  * Check if PDF reading is supported with the current model.
- * PDF document blocks work on all providers (1P, Vertex, Bedrock, Foundry).
- * Haiku 3 is the only remaining model that predates PDF support; users on
- * it fall back to the page-extraction path (poppler-utils). Substring match
- * covers all provider ID formats (Bedrock prefixes, Vertex @-dates).
+ * de-ant（0.1.73 C-3b）：原 1P 老 Haiku 模型 poppler 页面渲染回退子串支随 1P 车道 OOS
+ * 删除——国产面（Qwen38/glm/deepseek via IFF）模型名恒不命中该子串 = PDF 块面恒
+ * 支持（恒等锚，行为零变更）。
  */
 export function isPDFSupported(): boolean {
-  return !getMainLoopModelName().toLowerCase().includes('claude-3-haiku')
+  return true
 }
 
 /**

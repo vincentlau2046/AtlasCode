@@ -5,7 +5,7 @@
 // USE_STAGING_OAUTH are not read in this module.
 //
 // The refresh-token / API-key / roles / CLIENT_ID endpoints (TOKEN_URL /
-// API_KEY_URL / ROLES_URL / CLIENT_ID) were removed with the claude.ai
+// API_KEY_URL / ROLES_URL / CLIENT_ID) were removed with the 1P
 // subscription chain (module ⑤) — this build authenticates via the
 // OpenAI-protocol static key (OPENAI_AUTH_TOKEN / OPENAI_API_KEY), so only
 // the 1P REST base, the MCP proxy, and the web origin remain. The OAuth scope
@@ -14,14 +14,12 @@
 // constants/wire.ts (WIRE frozen layer) — import them from there.
 
 type OauthConfig = {
-  BASE_API_URL: string
-  /**
-   * The claude.ai web origin. Retained for live consumers (MCP connectors,
-   * remote-setup deep links).
-   * 前向缝登记（§8.74.28 ⑭，#200）：domain swap pending the gateway。
-   */
-  CLAUDE_AI_ORIGIN: string
-  MCP_PROXY_URL: string
+  // de-ant（0.1.73 C-2a 方案 A）：anthropic/claude URL 字面中性化（值 = undefined，
+  // 消费点 env 显式化 OPENAI_BASE_URL / ATLAS_API_BASE_URL；env 缺 = 跳过/failed 提示）。
+  // 域换前向缝登记（§8.74.28 ⑭，#200）：domain swap pending the gateway。
+  BASE_API_URL: string | undefined
+  CLAUDE_AI_ORIGIN: string | undefined
+  MCP_PROXY_URL: string | undefined
   MCP_PROXY_PATH: string
 }
 
@@ -30,9 +28,13 @@ type OauthConfig = {
 // removed. Only the 1P REST base + MCP proxy + web origin remain. Domain swap
 // 前向缝登记（§8.74.28 ⑭，#200）：domain swap item (gateway).
 const PROD_OAUTH_CONFIG: OauthConfig = {
-  BASE_API_URL: 'https://api.anthropic.com',
-  CLAUDE_AI_ORIGIN: 'https://claude.ai',
-  MCP_PROXY_URL: 'https://mcp-proxy.anthropic.com',
+  // de-ant（0.1.73 C-2a 方案 A）：三活 1P anthropic/claude URL 基址字面中性化
+  // （BASE_API_URL / CLAUDE_AI_ORIGIN / MCP_PROXY_URL 现 undefined），消费点经 env
+  // 显式化；MCP 远端车道（C-3e）+ sessionIngress（C-2b）= 登记不入境 0.1.74+（域换
+  // 前向缝 ⑭ #200）。
+  BASE_API_URL: undefined,
+  CLAUDE_AI_ORIGIN: undefined,
+  MCP_PROXY_URL: undefined,
   MCP_PROXY_PATH: '/v1/mcp/{server_id}',
 }
 
@@ -40,11 +42,11 @@ const PROD_OAUTH_CONFIG: OauthConfig = {
  * Client ID Metadata Document URL for MCP OAuth (CIMD / SEP-991).
  * When an MCP auth server advertises client_id_metadata_document_supported: true,
  * Atlas uses this URL as its client_id instead of Dynamic Client Registration.
- * The URL must point to a JSON document hosted by Anthropic.
- * See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00
+ * de-ant（0.1.73 C-2a）：原 1P MCP OAuth CIMD client-metadata URL 字面中性化，
+ * 值 = undefined（MCP OAuth 远端车道 C-3e，登记不入境 0.1.74+ 域换前向缝 ⑭ #200）。
+ * Spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00
  */
-export const MCP_CLIENT_METADATA_URL =
-  'https://claude.ai/oauth/claude-code-client-metadata'
+export const MCP_CLIENT_METADATA_URL: string | undefined = undefined
 
 /**
  * Return the 1P-REST / OAuth endpoint config. The refresh-token / API-key /

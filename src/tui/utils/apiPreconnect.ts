@@ -52,6 +52,10 @@ export function preconnectAtlasApi(): void {
   const baseUrl =
     (process.env.OPENAI_BASE_URL) || getOauthConfig().BASE_API_URL
 
+  // de-ant（0.1.73 C-2a）：anthropic 基址字面已中性化（BASE_API_URL 现 undefined）。
+  // env 缺（OPENAI_BASE_URL 未设）= 跳过 preconnect（无基址可暖连接池，国产面零扰动）。
+  if (!baseUrl) return
+
   // Fire and forget. HEAD means no response body — the connection is eligible
   // for keep-alive pool reuse immediately after headers arrive. 10s timeout
   // so a slow network doesn't hang the process; abort is fine since the real

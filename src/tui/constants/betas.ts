@@ -1,6 +1,9 @@
 import { feature } from 'src/shared'
  // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-export const ATLAS_20250219_BETA_HEADER = 'claude-code-20250219'
+// de-ant（0.1.73 C-3c）：品牌串值族中性化——原 1P 品牌 beta 头值 → 'atlas-code-20250219'
+// （atlas 内部品牌，BR-8 无字面 `+`）。IFF 面（OpenAI 协议）wire 惰性（1P beta 头无
+// 消费），1P wire 面已裁 = 零行为变更（恒等锚）。
+export const ATLAS_20250219_BETA_HEADER = 'atlas-code-20250219'
 export const INTERLEAVED_THINKING_BETA_HEADER =
   'interleaved-thinking-2025-05-14'
 export const CONTEXT_MANAGEMENT_BETA_HEADER = 'context-management-2025-06-27'

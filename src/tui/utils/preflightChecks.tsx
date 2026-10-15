@@ -26,6 +26,15 @@ async function checkEndpoints(): Promise<PreflightCheckResult> {
       process.env.ATLAS_API_BASE_URL ||
       process.env.OPENAI_BASE_URL ||
       getOauthConfig().BASE_API_URL;
+    // de-ant（0.1.73 C-2a）：anthropic 基址字面已中性化（BASE_API_URL 现 undefined），
+    // env 全缺 = preflight 判 failed 附配置提示（不探空基址）。
+    if (!baseUrl) {
+      return {
+        success: false,
+        error:
+          'No API base URL configured. Set ATLAS_API_BASE_URL or OPENAI_BASE_URL to your gateway endpoint (see docs/reference/network-config.md).'
+      };
+    }
     const endpoints = [baseUrl];
     const checkEndpoint = async (url: string): Promise<PreflightCheckResult> => {
       try {

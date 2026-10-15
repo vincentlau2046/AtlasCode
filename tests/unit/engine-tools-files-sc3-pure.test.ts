@@ -4,8 +4,8 @@
  * 覆盖（零磁盘零网络零 spawn；env 卫生保存/恢复）：
  *  - pdfUtils parsePDFPageRange 全分支（单页 / 区间 / 开端 / 5 类非法）
  *  - pdfUtils isPDFExtension（点前缀归一）
- *  - pdfUtils isPDFSupported（modelRef getMainLoopModelName 面：
- *    ATLAS_SMALL_MODEL env 注入缝；claude-3-haiku 子串判 false 支）
+ *  - pdfUtils isPDFSupported（de-ant 0.1.73 C-3b：原 modelRef claude-3-haiku 子串
+ *    回退面已删，恒 true 恒等锚；ATLAS_SMALL_MODEL env 已不读）
  *  - notebook parseCellId（cell-N 型 + 非匹配）
  *  - notebook mapNotebookCellsToToolResult（相邻 text 块合并 /
  *    image 块透传 / 宽骨架 cast 面）
@@ -89,14 +89,14 @@ describe('pdfUtils isPDFExtension（点前缀归一）', () => {
   })
 })
 
-describe('pdfUtils isPDFSupported（modelRef 面）', () => {
-  test('未配置模型（env 空串 → 确定性空 model 名）→ true（PDF 块面恒支持）', () => {
+describe('pdfUtils isPDFSupported（de-ant 0.1.73 C-3b 恒等锚）', () => {
+  test('未配置模型（env 空串）→ true（PDF 块面恒支持）', () => {
     process.env.ATLAS_SMALL_MODEL = ''
     expect(isPDFSupported()).toBe(true)
   })
-  test('claude-3-haiku 子串命中 → false（页面渲染回退面）', () => {
+  test('de-ant：claude-3-haiku 模型名 → 恒 true（原 poppler 回退面已删，行为零变更恒等锚）', () => {
     process.env.ATLAS_SMALL_MODEL = 'claude-3-haiku-20240307'
-    expect(isPDFSupported()).toBe(false)
+    expect(isPDFSupported()).toBe(true)
   })
 })
 

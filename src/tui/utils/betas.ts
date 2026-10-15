@@ -76,31 +76,20 @@ export function filterAllowedSdkBetas(
   return allowed.length > 0 ? allowed : undefined
 }
 
-// Generally, foundry supports all 1P features;
-// however out of an abundance of caution, we do not enable any which are behind an experiment
-
-export function modelSupportsISP(model: string): boolean {
-  const canonical = getCanonicalName(model)
-  return !canonical.includes('claude-3-')
+// de-ant（0.1.73 C-3a）：以下三模型能力门原为 1P claude 代际模型子串判定族，随 1P
+// 车道 OOS 删除——国产面（Qwen38/glm/deepseek via IFF）逐门恒等：ISP / ContextMgmt
+// 恒 true（旧 1P 老代际子串支恒不命中 = 现国产面行为）、StructuredOutputs 恒 false
+// （IFF 无结构化输出，旧 6 支子串恒不命中 = 现国产面行为）。
+export function modelSupportsISP(_model: string): boolean {
+  return true
 }
 
-// Context management is supported on Claude 4+ models
-export function modelSupportsContextManagement(model: string): boolean {
-  const canonical = getCanonicalName(model)
-  return !canonical.includes('claude-3-')
+export function modelSupportsContextManagement(_model: string): boolean {
+  return true
 }
 
-// @[MODEL LAUNCH]: Add the new model ID to this list if it supports structured outputs.
-export function modelSupportsStructuredOutputs(model: string): boolean {
-  const canonical = getCanonicalName(model)
-  return (
-    canonical.includes('claude-sonnet-4-6') ||
-    canonical.includes('claude-sonnet-4-5') ||
-    canonical.includes('claude-opus-4-1') ||
-    canonical.includes('claude-opus-4-5') ||
-    canonical.includes('claude-opus-4-6') ||
-    canonical.includes('claude-haiku-4-5')
-  )
+export function modelSupportsStructuredOutputs(_model: string): boolean {
+  return false
 }
 
 // 单层判定（用户裁定 2026-09-19:原第 1 层 atlas_auto_mode_config.allowModels

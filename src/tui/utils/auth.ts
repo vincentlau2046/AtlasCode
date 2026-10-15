@@ -7,7 +7,6 @@ const USER_PROFILE_SCOPE = 'user:profile' as const
 
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { preferThirdPartyAuthentication } from 'src/tui/bootstrapState.js'
-import { getOauthProfileFromOauthToken } from '../services/oauth/getOauthProfile.js'
 import type { OAuthTokens } from '../services/oauth/types.js'
 import {
   getApiKeyFromFileDescriptor,
@@ -809,50 +808,10 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
     return { valid: true }
   }
 
-  // Always fetch the authoritative org UUID from the profile endpoint.
-  // Even keychain-sourced tokens verify server-side: the cached org UUID
-  // in ~/.atlas.json is user-writable and cannot be trusted.
-  const { source } = getAuthTokenSource()
-  const isEnvVarToken = source === 'OPENAI_AUTH_TOKEN'
-
-  const profile = await getOauthProfileFromOauthToken(tokens.accessToken)
-  if (!profile) {
-    // Fail closed — we can't verify the org
-    return {
-      valid: false,
-      message:
-        `Unable to verify organization for the current authentication token.\n` +
-        `This machine requires organization ${requiredOrgUuid} but the profile could not be fetched.\n` +
-        `This may be a network error, or the token may lack the user:profile scope required for\n` +
-        `verification (tokens from 'claude setup-token' do not include this scope).\n` +
-        `Try again, or obtain a full-scope token via 'claude auth login'.`,
-    }
-  }
-
-  const tokenOrgUuid = profile.organization.uuid
-  if (tokenOrgUuid === requiredOrgUuid) {
-    return { valid: true }
-  }
-
-  if (isEnvVarToken) {
-    const envVarName = 'OPENAI_AUTH_TOKEN'
-    return {
-      valid: false,
-      message:
-        `The ${envVarName} environment variable provides a token for a\n` +
-        `different organization than required by this machine's managed settings.\n\n` +
-        `Required organization: ${requiredOrgUuid}\n` +
-        `Token organization:   ${tokenOrgUuid}\n\n` +
-        `Remove the environment variable or obtain a token for the correct organization.`,
-    }
-  }
-
-  return {
-    valid: false,
-    message:
-      `Your authentication token belongs to organization ${tokenOrgUuid},\n` +
-      `but this machine requires organization ${requiredOrgUuid}.\n\n` +
-      `Please log in with the correct organization: claude auth login`,
-  }
+  // de-ant（0.1.73 C-2c）：1P OAuth profile 端点车道已断（0.1.72 keychain 函数族清零 +
+  // subscription 链裁除 = 源断根），org 验真面随车道 OOS——经 forceLoginOrgUUID 守卫 +
+  // getOAuthTokens 非空守卫后无活 profile 验真面，恒 fail-open 放行（1P OAuth 车道残登记
+  // 0.1.74+ ⑭ #200 随 gateway；本波 C-2c 核验可达性 = 国产面不可达，故删支）。
+  return { valid: true }
 }
 
