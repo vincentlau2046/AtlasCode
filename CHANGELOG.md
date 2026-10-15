@@ -4,6 +4,53 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.72
+
+de-ant 收尾波（P0 轨，基线 v0.1.71；工单 `docs/2026-10-15-p0-wave-0172-ticket.md`）。
+**波性质 = de-ant 第二断根**（`auth.ts` keychain 函数族清零，收口 0.1.70 H-1 + 0.1.71
+块 C 登记的 de-ant 收尾）。**darwin 行为变更**（macOS 用户 keychain-stored key 不再
+读/写/移除；非 darwin/Linux 行为零变更 = 恒等锚）。命令面零变更（/help 55 + cmd 33 恒等）。
+
+### 块 C-1 · keychain 函数族清零（403 根因链第二断根，唯一落码件）
+
+- **C-1a · getApiKeyFromConfigOrMacOSKeychain 删 darwin keychain 读支**
+  （`src/tui/utils/auth.ts`）：darwin 面 keychain 读支 + keychainPrefetch prefetch
+  消费已清零；`config.primaryApiKey` 为唯一 key 源（恒等锚：非 darwin 行为零变更；
+  darwin 面 = de-ant 预期行为变更）。
+- **C-1b · saveApiKey / removeApiKey 删 keychain 写·移除支**：keychain 写支 +
+  `maybeRemoveApiKeyFromMacOSKeychain` 调用已清零；config-file 为唯一持久化面
+  （`primaryApiKey: apiKey` / `primaryApiKey: undefined`，恒等锚）。
+- **C-1c · keychainPrefetch 死文件清理**：`keychainPrefetch.ts`（no-op stub，零活
+  消费，main.tsx 用本地 no-op stub 非 import）删除 + auth.ts import 面清零 +
+  `authPortable.ts` 死函数 `maybeRemoveApiKeyFromMacOSKeychainThrows` 删除。
+  `macOsKeychainHelpers.ts` / `macOsKeychainStorage.ts` = MCP/通用 secureStorage
+  活消费（OOS）保留（勘误工单 §0：macOsKeychainHelpers 非死文件）。
+- **C-1d · source 枚举收敛**：`'/login managed key'` 现仅由 config 路径产出
+  （keychain 源摘除）；`OPENAI_API_KEY` / `apiKeyHelper` 源零扰动（恒等锚）。
+
+### 块 C-2 / C-3 · 登记核验（零码，不入境）
+
+- **C-2 · 双断根在册**：settings-adapter `getGlobalApiKey` 恒 undefined（0.1.70 H-1
+  第一断根仍在）+ 本波 C-1 断 keychain 函数族（第二断根）= 403 根因链双断根达成。
+  `constants/oauth.ts` `BASE_API_URL` 4 消费点 + `ATLAS_20250219_BETA_HEADER` =
+  登记不删（0.1.73+ 大 de-ant 裁定）。
+- **C-3 · 1P 判定基线（OOS）**：`betas.ts`/`capabilities.ts`/`pdfUtils.ts`
+  anthropic 模型子串判 = 1P 能力门（国产替代 IFF 面 OOS），登记不动码。
+
+### 判别单测 · de-ant-keychain-closure-0172（源级锁，11 断言）
+
+anthropic keychain 读/写/移除支 + 死文件 + prefetch 消费 + keychain 子进程字面 @
+`auth.ts`/`authPortable.ts` 全缺席 + config 恒等锚 + source 枚举四元零扰动 + C-2
+双断根核验。C-1c 判据面重定界：OOS 通用 secureStorage 字面保留，de-ant judge 面 =
+anthropic keychain 路径缺席（非 build 零字面）。
+
+gate：**r-20261015-gate-072 GATE-PASS**（判据 6 项一次全绿，无修波：① 判别单测
+11 pass/0 fail·46expect ↔ 基线 6b46ed6 4/7 → 7 条 anthropic keychain 缺席断言
+红→绿；② 四件套 tsc0 / eslint0 / build cli.js 17892897B / CI 4419·0·343·12368expect；
+③ P0a PASS RELEASABLE（hardFail=0）；④ A4F 6/6 + cmd 32/32 + /help 55 恒等；
+⑤ 前 16 波 token 110/0 零回归 + 新活探针 de-ant 残链缺席 3/3 + loop-rob R1/R3 全绿；
+⑥ 生产 lane 待收口）。SRI 留档见 gate 报告回填区 + Main 自报（D-8 四值）。
+
 ## v0.1.71
 
 用户 2026-10-15 双主诉插入波（P0 轨，基线 v0.1.70；工单
