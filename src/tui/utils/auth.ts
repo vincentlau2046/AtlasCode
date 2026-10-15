@@ -13,10 +13,7 @@ import {
   getApiKeyFromFileDescriptor,
   getOAuthTokenFromFileDescriptor,
 } from './authFileDescriptor.js'
-import {
-  maybeRemoveApiKeyFromMacOSKeychainThrows,
-  normalizeApiKeyForConfig,
-} from './authPortable.js'
+import { normalizeApiKeyForConfig } from './authPortable.js'
 import { AwsAuthStatusManager } from './awsAuthStatusManager.js'
 import {
   type AccountInfo,
@@ -36,15 +33,10 @@ import * as lockfile from './lockfile.js'
 import { logError } from './log.js'
 import { memoizeWithTTLAsync } from './memoize.js'
 import { getSecureStorage } from './secureStorage/index.js'
-import {
-  clearLegacyApiKeyPrefetch,
-  getLegacyApiKeyPrefetchResult,
-} from './secureStorage/keychainPrefetch.js'
-import {
-  clearKeychainCache,
-  getMacOsKeychainStorageServiceName,
-  getUsername,
-} from './secureStorage/macOsKeychainHelpers.js'
+// 0.1.72 块 C-1（de-ant 收尾）：anthropic keychain import 面 + keychain 读写
+// 消费已清零；保留 clearKeychainCache（clearOAuthTokenCache 活消费，MCP 通用
+// secureStorage 面 OOS）
+import { clearKeychainCache } from './secureStorage/macOsKeychainHelpers.js'
 import {
   getSettings_DEPRECATED,
   getSettingsForSource,
@@ -509,32 +501,10 @@ export function prefetchApiKeyFromApiKeyHelperIfSafe(
 export const getApiKeyFromConfigOrMacOSKeychain = memoize(
   (): { key: string; source: ApiKeySource } | null => {
     if (isBareMode()) return null
-    // TODO: migrate to SecureStorage
-    if (process.platform === 'darwin') {
-      // keychainPrefetch.ts fires this read at main.tsx top-level in parallel
-      // with module imports. If it completed, use that instead of spawning a
-      // sync `security` subprocess here (~33ms).
-      const prefetch = getLegacyApiKeyPrefetchResult()
-      if (prefetch) {
-        if (prefetch.stdout) {
-          return { key: prefetch.stdout, source: '/login managed key' }
-        }
-        // Prefetch completed with no key — fall through to config, not keychain.
-      } else {
-        const storageServiceName = getMacOsKeychainStorageServiceName()
-        try {
-          const result = execSyncWithDefaults_DEPRECATED(
-            `security find-generic-password -a $USER -w -s "${storageServiceName}"`,
-          )
-          if (result) {
-            return { key: result, source: '/login managed key' }
-          }
-        } catch (e) {
-          logError(e)
-        }
-      }
-    }
-
+    // 0.1.72 块 C-1a（de-ant 收尾）：darwin keychain 读支已清零——anthropic
+    // keychain 残留 = 403 根因链本体（H-1 断 settings-adapter 链后仅剩本
+    // 函数族）。config.primaryApiKey 为唯一 key 源（恒等锚：非 darwin 行为
+    // 零变更；darwin 面 = de-ant 预期行为变更）。
     const config = getGlobalConfig()
     if (!config.primaryApiKey) {
       return null
@@ -556,35 +526,9 @@ export async function saveApiKey(apiKey: string): Promise<void> {
     )
   }
 
-  // Store as primary API key
-  await maybeRemoveApiKeyFromMacOSKeychain()
-  let savedToKeychain = false
-  if (process.platform === 'darwin') {
-    try {
-      // TODO: migrate to SecureStorage
-      const storageServiceName = getMacOsKeychainStorageServiceName()
-      const username = getUsername()
-
-      // Convert to hexadecimal to avoid any escaping issues
-      const hexValue = Buffer.from(apiKey, 'utf-8').toString('hex')
-
-      // Use security's interactive mode (-i) with -X (hexadecimal) option
-      // This ensures credentials never appear in process command-line arguments
-      // Process monitors only see "security -i", not the password
-      const command = `add-generic-password -U -a "${username}" -s "${storageServiceName}" -X "${hexValue}"\n`
-
-      await execa('security', ['-i'], {
-        input: command,
-        reject: false,
-      })
-
-      savedToKeychain = true
-    } catch (e) {
-      logError(e)
-    }
-  } else {
-  }
-
+  // 0.1.72 块 C-1b（de-ant 收尾）：keychain 写支 + keychain 移除调用已清零。
+  // config-file 为唯一持久化面（恒等锚：非 darwin 行为零变更；darwin 面
+  // 行为变更 = key 恒落 config，keychain 不再写）。
   const normalizedKey = normalizeApiKeyForConfig(apiKey)
 
   // Save config with all updates
@@ -592,8 +536,7 @@ export async function saveApiKey(apiKey: string): Promise<void> {
     const approved = current.customApiKeyResponses?.approved ?? []
     return {
       ...current,
-      // Only save to config if keychain save failed or not on darwin
-      primaryApiKey: savedToKeychain ? current.primaryApiKey : apiKey,
+      primaryApiKey: apiKey,
       customApiKeyResponses: {
         ...current.customApiKeyResponses,
         approved: approved.includes(normalizedKey)
@@ -606,7 +549,6 @@ export async function saveApiKey(apiKey: string): Promise<void> {
 
   // Clear memo cache
   getApiKeyFromConfigOrMacOSKeychain.cache.clear?.()
-  clearLegacyApiKeyPrefetch()
 }
 
 export function isCustomApiKeyApproved(apiKey: string): boolean {
@@ -618,10 +560,8 @@ export function isCustomApiKeyApproved(apiKey: string): boolean {
 }
 
 export async function removeApiKey(): Promise<void> {
-  await maybeRemoveApiKeyFromMacOSKeychain()
-
-  // Also remove from config instead of returning early, for older clients
-  // that set keys before we supported keychain.
+  // 0.1.72 块 C-1b：keychain 移除支已清零——config-file 删除为唯一动作
+  //（恒等锚：非 darwin 行为零变更）。
   saveGlobalConfig(current => ({
     ...current,
     primaryApiKey: undefined,
@@ -629,15 +569,6 @@ export async function removeApiKey(): Promise<void> {
 
   // Clear memo cache
   getApiKeyFromConfigOrMacOSKeychain.cache.clear?.()
-  clearLegacyApiKeyPrefetch()
-}
-
-async function maybeRemoveApiKeyFromMacOSKeychain(): Promise<void> {
-  try {
-    await maybeRemoveApiKeyFromMacOSKeychainThrows()
-  } catch (e) {
-    logError(e)
-  }
 }
 
 // Function to store OAuth tokens in secure storage
