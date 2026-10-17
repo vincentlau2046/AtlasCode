@@ -4,6 +4,73 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.73
+
+大 de-ant 收口波（P0 轨，基线 v0.1.72；工单 `docs/2026-10-15-p0-wave-0173-ticket.md`）。
+**波性质 = de-ant 主线彻底收口**：dist 内 `api.anthropic.com` / `claude.ai` /
+`mcp-proxy.anthropic.com` 活 URL 字面 + claude 品牌串/模型子串判定面清零（C-3e MCP
+远端车道登记项除外），**国产面行为零变更**（IFF 面 wire 惰性 + 删支恒等锚 = 恒等），
+命令面零变更（/help 55 + cmd 33 恒等）。de-ant 主线（0.1.70 H-1 + 0.1.72 C-1
+keychain 清零）在此达成 dist 侧终态。
+
+### C-2a · constants/oauth.ts 三活 1P anthropic/claude URL 基址字面中性化（方案 A）
+
+- `BASE_API_URL` / `CLAUDE_AI_ORIGIN` / `MCP_PROXY_URL` 值改 `undefined`
+  （`string | undefined`），`MCP_CLIENT_METADATA_URL` 值改 `undefined`；消费点
+  `apiPreconnect` / `preflightChecks` 兜底改「env 缺（`OPENAI_BASE_URL` /
+  `ATLAS_API_BASE_URL` 未设）= 跳过 preconnect / preflight 判 failed 附配置提示」。
+  env 已设面 preconnect/preflight **行为恒等**（恒等锚）。
+
+### C-2c · getOauthProfile.ts 删除（1P OAuth profile 端点车道国产面不可达，核验后裁）
+
+- 删 `src/tui/services/oauth/getOauthProfile.ts` 死文件 + `auth.ts` import 面；
+  `validateForceLoginOrg` 死尾（profile fetch + org 比对 + isEnvVarToken 分支）改
+  fail-open `return { valid: true }`（经 `!isAnthropicAuthEnabled()` 国产面早返守卫 +
+  `getOAuthTokens()` 非空守卫后无活 profile 验真面）。**非 OAuth token 面零扰动**
+  （恒等锚）。
+
+### C-3a · tui/utils/betas.ts 三模型能力门 claude 代际子串判定族删支
+
+- `modelSupportsISP` / `modelSupportsContextManagement` → 恒 `true`，
+  `modelSupportsStructuredOutputs` → 恒 `false`（原 `claude-3-` / `claude-sonnet-4-*`
+  / `claude-opus-4-*` / `claude-haiku-4-5` 子串判定支全删）。**国产面（Qwen38/glm/
+  deepseek via IFF）逐门恒等**（旧 1P 老代际子串恒不命中 = 现国产面行为，恒等锚）。
+
+### C-3b · 两 pdfUtils.ts 1P 老 Haiku poppler 回退子串删支
+
+- `src/tui/utils/pdfUtils.ts` + `src/engine/tools/files/pdfUtils.ts` 两处
+  `!model.includes('claude-3-haiku')` 删支 → `isPDFSupported()` 恒 `true`
+  （**国产面恒不命中该子串 = PDF 块面恒支持**，恒等锚，行为零变更）。
+
+### C-3c · constants/betas.ts 品牌串值族中性化（atlas 品牌）
+
+- 两副本（`tui/constants/betas.ts` 活副本 + `modelprovider/constants.ts` 死副本，零
+  import）`ATLAS_20250219_BETA_HEADER` 值族 `claude-code-20250219` →
+  `atlas-code-20250219`（BR-8 无字面 `+` 品牌纪律）。**IFF 面（OpenAI 协议）wire 惰性**
+  （1P beta 头无消费）= 零行为变更（恒等锚）。
+
+### 登记不入境（0.1.74+，token 面不判红，防误伤）
+
+- C-2b `sessionIngress` 1P 远端 session 车道（9 消费文件，整裁非收口波）
+- C-2c 可达 OAuth 车道残
+- C-3e MCP 远端车道（`mcp-proxy.anthropic.com` + CIMD URL = 域换前向缝 ⑭ #200 随 gateway）
+
+### 判别单测 · de-ant-closure-0173（源级字符串锁，12 断言）+ sc3-pure 重锚
+
+anthropic URL 字面 + claude 子串判定族 + 1P 品牌串**缺席** + `atlas-code-20250219`
+在场 + 恒等锚（ISP/CM 恒 true / SO 恒 false / isPDFSupported 恒 true / oauth 基址
+undefined）；修前（基线 f854828）红 → 修后全绿。重新引入任一 anthropic/claude 字面
+= 立即 RED（de-ant 回归守卫）。
+
+gate：**r-20261015-gate-073 GATE-PASS**（判据 ①–⑤ 全绿，无修波：① 判别单测 30/0·66expect
+↔ 基线 1/11 红→绿；② 四件套 tsc0 / eslint 0e0w / build cli.js 17890440B / CI 4431·0·344·12402expect；
+③ P0a PASS RELEASABLE（P0-1792061684660-ynfs，S-A soft×2 非门禁）；④ A4F 6 探针 + cmd 32/32 +
+/help 55 恒等（SC-20261015-190313-ce7/3il）；⑤ 前波探针族 10/10 + 新活探针 de-ant 残链终核
+4/4〔P-DF1 dist api.anthropic.com=0 / claude-code-20250219=0 / atlas 锚=1 / src mcp-proxy=0
++ P-DF3 H-1 场景 IFF 往返零 anthropic + P-DF4 三模型能力门恒等；P-DF2 登记面不判红〕+ 前 17 波
+token 118/0 零回归（072→073：api.anthropic.com 1→0 / mcp-proxy 1→0 / 品牌串 1→0 / 锚 0→1）+
+loop-rob 全绿）。SRI 留档见 Main 自报（D-8 四值）。
+
 ## v0.1.72
 
 de-ant 收尾波（P0 轨，基线 v0.1.71；工单 `docs/2026-10-15-p0-wave-0172-ticket.md`）。
