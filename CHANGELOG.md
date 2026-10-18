@@ -4,6 +4,54 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.77
+
+归整收官波——P-1~P-7 架构终态验收核波（归整波切片③，基线 v0.1.76；f4 工单
+`docs/2026-10-18-p0-wave-0177-ticket.md`）。
+**波性质 = test-only 固化波**（src diff 空 = 零行为变更）：唯一落盘面 = 新文件
+`tests/unit/arch-reorg-closure-0177.test.ts`（G-1~G-7 七断言族，15 测试 /
+56 断言，对应五域 engine / modelprovider / memory / sandbox / executor 的
+P-1~P-7）。本波后主链 0.1.55–0.1.77 收口 = v3 架构规划 Phase 5 归整收官。
+
+### G-1~G-7 断言族（P-1~P-7 验收核）
+
+- **G-1 门面唯一（P-1）**：五域门面文件 5/5 在场；非域代码 → 域深文件
+  import = 0（目录 / index import = 门面 = 合法）。
+- **G-2 依赖方向（P-2）**：五域 → `src/tui` / `src/cli` import = 0
+  （依赖方向单向）。
+- **G-3 组合根唯一（P-3）**：跨域装配调用点文件全集 = 5 文件闭集
+  （`atlascode/compose.ts` / `tui/factory.ts` / `cli/hooksWiring.ts` /
+  `tui/contextHostWiring.ts` / `tui/main.tsx`）+ 各文件窄窗口 scope 断言 +
+  运行时单实例不变式（`getCoreDependencies` 连调 toBe →
+  `resetCoreDependencies` → toNotBe，env 快照/复原）。
+- **G-4 五域契约单向子集（P-4）**：required（基线日 6ca23aa 全量 export
+  名，字面冻结 936/99/52/48/43 名）⊆ actual——删除 / 改名 = 红，
+  新增 = 绿。
+- **G-5 旧路径清零（P-5）**：`sandbox-adapter` / `runCannCommand`
+  非注释活码行 = 0。
+- **G-6 换实现接缝（P-6）**：5 组 required 接缝集整仓定义行在场
+  （modelprovider = {setModelProviderForTesting, setEndpointConfigSource} /
+  memory = {setSessionMemoryPort} / sandbox = {setExecutorSandboxPort} /
+  executor = {setTaskOutputPort} / engine = {setCompactPorts,
+  setReactiveCompactPort}）。
+- **G-7 五域直测在场（P-7）**：5 锚测试文件（engine-coordinator /
+  modelprovider-llm-timeout-retry / memory-fs-store / sandbox-manager /
+  executor-config）+ 计数下限（engine 95 / modelprovider 10 / memory 6 /
+  sandbox 5 / executor 7，只涨不缩）。
+
+### 口径定案（工单裁定项④：以 Main 实测为准，f4 核示全采）
+
+- G-3a 闭集 3→5 文件：+ `tui/contextHostWiring.ts`（D-2a S8 M5 切端，
+  engine context 簇宿主侧端口接线窄窗口，文件头注自登记）+ `tui/main.tsx`
+  （#203 ModelSetup 首启引导 eager `setEndpointConfigSource` 注册）；
+  factory 窄窗口 scope 扩含 `setEndpointConfigSource`（组合根注册注入
+  窗口 R5）。
+- G-7 下限 = Main 实测锚（memory 7→6、sandbox 7→5、executor 8→7；
+  engine 95 / modelprovider 10 与工单一致）。
+- G-3a 排除规则：错误信息字符串字面量（port 文件「…须先 setX()…」提示
+  串）、定义行、import/export 行不计调用点；`setMockPort` = APP-local
+  静态（AscendExecutor mock 端口）不计。
+
 ## v0.1.76
 
 归整切片② per-server oauth 块级 scope-gating 波（归整波切片②，基线
