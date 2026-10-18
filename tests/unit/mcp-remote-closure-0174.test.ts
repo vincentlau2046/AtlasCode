@@ -115,11 +115,16 @@ describe('0.1.74 D-3：per-server oauth.clientMetadataUrl 字段并入', () => {
     expect(src).toContain('clientMetadataUrl must use https://')
     expect(src).toContain("startsWith('https://'")
   })
-  test('auth.ts：getter 优先级链 per-server → env → undefined（DCR 兜底）', () => {
+  test('auth.ts：getter 优先级链 env（部署控制）→ per-server → undefined（DCR 兜底；安全裁定顺序）', () => {
     const src = srcOf(AUTH)
-    expect(src).toContain('this.serverConfig.oauth?.clientMetadataUrl')
-    expect(src).toContain('process.env.MCP_OAUTH_CLIENT_METADATA_URL')
     expect(src).toContain('get clientMetadataUrl(): string | undefined')
+    // 顺序锁：env 部署控制读取必须排在 per-server 读取之前（CIMD URL 承载
+    // OAuth 客户端身份，repo 提交的 per-server 值不得压过 operator 控制）。
+    const getter = src.slice(src.indexOf('get clientMetadataUrl()'))
+    const envIdx = getter.indexOf('process.env.MCP_OAUTH_CLIENT_METADATA_URL')
+    const perIdx = getter.indexOf('this.serverConfig.oauth?.clientMetadataUrl')
+    expect(envIdx).toBeGreaterThan(-1)
+    expect(perIdx).toBeGreaterThan(envIdx)
   })
   test('CLI /mcp 面：oauth client_metadata_url 展示行在场（sse+http 双支）', () => {
     const src = srcOf(CLI_HANDLER)

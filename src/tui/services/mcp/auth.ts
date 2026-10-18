@@ -1360,10 +1360,20 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
    * client_id instead of performing Dynamic Client Registration.
    *
    * 0.1.74 (C-3e 销项): fully config-driven, no built-in 1P default.
-   * Priority: per-server oauth.clientMetadataUrl → MCP_OAUTH_CLIENT_METADATA_URL
-   * env → undefined (SDK falls back to Dynamic Client Registration).
+   * Priority (security ruling, post-review): MCP_OAUTH_CLIENT_METADATA_URL env
+   * (deployment/operator control) → per-server oauth.clientMetadataUrl →
+   * undefined (SDK falls back to Dynamic Client Registration). The env
+   * override wins over per-server values because per-server config may be
+   * repo-committed (project/plugin scope) — the CIMD URL carries the OAuth
+   * client identity, so a repo-planted value must not outrank operator
+   * control (trust-boundary: deployment env > repo-committed config).
    */
   get clientMetadataUrl(): string | undefined {
+    const override = process.env.MCP_OAUTH_CLIENT_METADATA_URL
+    if (override) {
+      logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
+      return override
+    }
     const perServer = this.serverConfig.oauth?.clientMetadataUrl
     if (perServer) {
       logMCPDebug(
@@ -1371,11 +1381,6 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
         `Using CIMD URL from server config: ${perServer}`,
       )
       return perServer
-    }
-    const override = process.env.MCP_OAUTH_CLIENT_METADATA_URL
-    if (override) {
-      logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
-      return override
     }
     return undefined
   }

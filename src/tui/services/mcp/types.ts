@@ -55,7 +55,11 @@ const McpOAuthConfigSchema = lazySchema(() =>
     // server's auth server advertises client_id_metadata_document_supported,
     // this URL is used as client_id (config-driven; no built-in default —
     // the 1P constant default was removed with the 0.1.74 de-ant C-3e
-    // closure). Falls back to MCP_OAUTH_CLIENT_METADATA_URL env.
+    // closure). Precedence (security ruling, post-review): the
+    // MCP_OAUTH_CLIENT_METADATA_URL env (deployment/operator control)
+    // outranks this per-server value, since per-server config may be
+    // repo-committed (project/plugin scope) and the CIMD URL carries the
+    // OAuth client identity; both unset → undefined (SDK DCR fallback).
     clientMetadataUrl: z
       .string()
       .url()
