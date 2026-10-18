@@ -1367,12 +1367,30 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
    * repo-committed (project/plugin scope) — the CIMD URL carries the OAuth
    * client identity, so a repo-planted value must not outrank operator
    * control (trust-boundary: deployment env > repo-committed config).
+   *
+   * 0.1.74 (2nd-review hardening): the env value is deployment-env-only and
+   * https-validated here — it is excluded from every settings-sourced env
+   * merge (utils/managedEnv.ts withoutMcpOauthCimdVars), so only the real
+   * environment (shell/CI) can set it; a planted or malformed value (non-URL
+   * or non-https) is ignored rather than steering the client identity.
    */
   get clientMetadataUrl(): string | undefined {
     const override = process.env.MCP_OAUTH_CLIENT_METADATA_URL
     if (override) {
-      logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
-      return override
+      let valid = false
+      try {
+        valid = new URL(override).protocol === 'https:'
+      } catch {
+        valid = false
+      }
+      if (valid) {
+        logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
+        return override
+      }
+      logMCPDebug(
+        this.serverName,
+        `Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value: ${override}`,
+      )
     }
     const perServer = this.serverConfig.oauth?.clientMetadataUrl
     if (perServer) {

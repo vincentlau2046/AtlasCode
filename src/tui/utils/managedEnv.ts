@@ -79,13 +79,36 @@ function withoutCcdSpawnEnvKeys(
 }
 
 /**
+ * 0.1.74 (MCP 远端车道通用化，2nd-review 安全裁定): MCP_OAUTH_CLIENT_METADATA_URL
+ * pins the OAuth client identity (CIMD / SEP-991) for remote MCP auth. It is a
+ * deployment-level knob settable from the REAL environment (shell/CI) only —
+ * never from settings.env at any scope. The post-trust merged apply below
+ * includes project scope, so without this strip a repo-committed project
+ * settings.env could redirect the client-identity document. (The engine lane
+ * is immune: its cascade excludes project/local scopes (S-3a) and it has no
+ * CIMD consumer; the getter in services/mcp/auth.ts also https-validates.)
+ */
+function withoutMcpOauthCimdVars(
+  env: Record<string, string> | undefined,
+): Record<string, string> {
+  if (!env) return {}
+  const {
+    MCP_OAUTH_CLIENT_METADATA_URL: _cimd,
+    ...rest
+  } = env
+  return rest
+}
+
+/**
  * Compose the strip filters applied to every settings-sourced env object.
  */
 function filterSettingsEnv(
   env: Record<string, string> | undefined,
 ): Record<string, string> {
   return withoutCcdSpawnEnvKeys(
-    withoutHostManagedProviderVars(withoutSSHTunnelVars(env)),
+    withoutMcpOauthCimdVars(
+      withoutHostManagedProviderVars(withoutSSHTunnelVars(env)),
+    ),
   )
 }
 

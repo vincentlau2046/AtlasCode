@@ -51,6 +51,16 @@
   per-server 值可能来自 repo 提交面（project/plugin scope），不得压过
   部署级 env 控制（信任边界：deployment env > repo-committed config；
   原 1P 语义 = 常量 → env override，本波保持 env 胜出方向不变）。
+- **2nd-review 硬化（同波闭环）**：① getter 对 env 值 https-验真
+  （`new URL(...).protocol === 'https:'`，非 URL / 非 https 值忽略 +
+  debug 日志，回落 per-server）——CWE-20 关闭；② `MCP_OAUTH_CLIENT_METADATA_URL`
+  从一切 settings 源 env 剥离（`utils/managedEnv.ts` 新
+  `withoutMcpOauthCimdVars` 挂入 `filterSettingsEnv` 过滤链，
+  `withoutSSHTunnelVars` 先例同型）——repo 提交的 project-scope
+  settings.env 不可种值，此 env = 真环境（shell/CI）部署专用；
+  操作者控制面保留（真 env 不受 settings 合并影响）。engine 车道双免疫
+  （S-3a 级联结构性排除 project/local scope + engine 面无 CIMD 消费点），
+  零改动。
 
 ### D-3 · per-server `oauth.clientMetadataUrl` 字段并入
 
@@ -104,3 +114,9 @@
   时一并批准）；scope 级门禁（untrusted scope 的 oauth 块须显式
   allowlist）= 后续波 f4 评估项（本波已落 env 部署控制优先 = 操作者
   可钉住可信 CIMD URL 覆盖 repo 提交值）。
+- **2nd-review 两发现同波闭环（核销，非残留）**：[HIGH] env 通道
+  repo-可种（TUI 信任后合并 apply 含 project scope）→ 修 =
+  `withoutMcpOauthCimdVars` 从一切 settings 源 env 剥离（repo 不可种；
+  engine 车道 S-3a 结构性免疫 + 无 CIMD 消费点，双保险零改动）；
+  [MEDIUM] CWE-20 env 值未验真 → 修 = getter https-验真（非 URL /
+  非 https 忽略 + 回落 per-server）。判别单测 2 新锚在场。

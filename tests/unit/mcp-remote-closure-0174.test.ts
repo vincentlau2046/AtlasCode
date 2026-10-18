@@ -60,6 +60,7 @@ const CLIENT = 'src/tui/services/mcp/client.ts'
 const CORE_SCHEMAS = 'src/tui/entrypoints/sdk/coreSchemas.ts'
 const OAUTH = 'src/tui/constants/oauth.ts'
 const CLI_HANDLER = 'src/tui/cli/handlers/mcp.tsx'
+const MANAGED_ENV = 'src/tui/utils/managedEnv.ts'
 
 describe('0.1.74 D-1：1P hosted-connector 型面全车道删除', () => {
   test('src/ 全树：活码 z.literal 型面 0 处（注释登记不在判据面）', () => {
@@ -129,6 +130,26 @@ describe('0.1.74 D-3：per-server oauth.clientMetadataUrl 字段并入', () => {
   test('CLI /mcp 面：oauth client_metadata_url 展示行在场（sse+http 双支）', () => {
     const src = srcOf(CLI_HANDLER)
     expect(countOf(src, 'client_metadata_url')).toBe(2)
+  })
+})
+
+describe('0.1.74 2nd-review 硬化：CIMD env 通道（部署 env 专用 + https 验真）', () => {
+  test('auth.ts getter：env 值 https-验真（非 https / 非 URL 值忽略，回落 per-server）', () => {
+    const src = srcOf(AUTH)
+    expect(src).toContain("new URL(override).protocol === 'https:'")
+    expect(src).toContain(
+      'Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value',
+    )
+  })
+  test('managedEnv.ts：MCP_OAUTH_CLIENT_METADATA_URL 从一切 settings 源 env 剥离', () => {
+    const src = srcOf(MANAGED_ENV)
+    // 剥离函数在场 + 剥的是这个键 + 已挂进 filterSettingsEnv 过滤链
+    // （settings.env 任何 scope 均不可种值；仅真环境 shell/CI 可设）。
+    expect(src).toContain('function withoutMcpOauthCimdVars(')
+    expect(src).toContain('MCP_OAUTH_CLIENT_METADATA_URL: _cimd')
+    expect(src).toContain(
+      'withoutMcpOauthCimdVars(\n      withoutHostManagedProviderVars',
+    )
   })
 })
 

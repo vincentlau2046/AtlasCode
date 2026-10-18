@@ -60,6 +60,11 @@ const McpOAuthConfigSchema = lazySchema(() =>
     // outranks this per-server value, since per-server config may be
     // repo-committed (project/plugin scope) and the CIMD URL carries the
     // OAuth client identity; both unset → undefined (SDK DCR fallback).
+    // 0.1.74 (2nd-review hardening): the env override is real-environment
+    // only (excluded from every settings.env merge via managedEnv's
+    // withoutMcpOauthCimdVars) and https-validated in the auth getter, so
+    // neither a repo-planted settings.env value nor a malformed value can
+    // steer the client identity.
     clientMetadataUrl: z
       .string()
       .url()
