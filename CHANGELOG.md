@@ -4,6 +4,61 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.76
+
+归整切片② per-server oauth 块级 scope-gating 波（归整波切片②，基线
+v0.1.75；f4 工单 `docs/2026-10-18-p0-wave-0176-ticket.md`）。
+**波性质 = 0.1.74 登记残项 per-server oauth 块 scope-gating 闭环**（de-ant
+登记面本波后清零：C-2a 0.1.73 / C-2b 0.1.75 / C-2c 0.1.73 / C-3e 0.1.74 /
+切片② 0.1.76 全销项，仅前向缝 ⑭ #200 域换 gateway 项保留）。
+
+**信任单元 = per-server `oauth` 块整体**（clientId / callbackPort /
+authServerMetadataUrl / clientMetadataUrl / xaa）——单字段门控 = 半门控
+假安全（0.1.74 4th-review 裁拒）。门控时全字段同缺席（不劈裂守卫构造性
+成立）；无 oauth 块 / trusted scope / allowlist 在场 = 零扰动恒等。
+
+### S-1 · 块级门控（合并面 choke point + 消费入口门禁）
+
+- 新 `src/tui/services/mcp/oauthScopeGate.ts`（纯谓词 + 合并面整块剥离
+  `applyMcpOauthScopeGate` + `oauthGated` 运行时标记 + 可行动错误文案）。
+- **scope 裁定**：untrusted = `project`（repo 提交值）+ 插件提供
+  （`dynamic` + pluginSource 在场）；trusted = `user` / `local` /
+  `enterprise` + 操作者 `--mcp-config` 面（`dynamic` 无 pluginSource）→
+  恒通过（零变更恒等锚）。
+- 合并面接线：`config.ts` `addScopeToServers`（全 file-scope 附着面）+
+  `getMcpConfigs` 尾循环（插件面兜底，幂等）；`auth.ts`
+  `performMCPOAuthFlow` 函数顶门控 throw——不发起 oauth 流，可行动错误
+  「oauth 块为 untrusted scope，操作者 allowlist 后启用」自动经
+  McpAuthTool catch / MCPRemoteServerMenu setError 显形。
+
+### S-2 · 操作者 allowlist（env 控制面，settings 源不可种）
+
+- env `ATLAS_MCP_OAUTH_TRUSTED_SERVERS`（逗号分隔 server 名，trim +
+  case-insensitive，对齐 0.1.74 CWE-178 Windows env 语义先例）。
+- `managedEnv.ts` 新增 `withoutMcpOauthTrustedServersVars` 挂
+  `filterSettingsEnv` 链（settings.env 任何 scope 均不可种值；仅真
+  环境 shell/CI 计数）——对齐 0.1.74 `withoutMcpOauthCimdVars` 剥离纪律。
+
+### S-3 · 显示面三处（门控态显形；trusted 面显示零变更；命令面零新增）
+
+- `/mcp` CLI 面 oauth 行门控支（sse/http 双支）；TUI 状态行
+  （MCPSettings prepareServers 数据面 + MCPListPanel 状态行 +
+  MCPRemoteServerMenu auth 行门控支）；McpAuthTool 提前返可行动错误。
+  命令面恒等（cmd 32 不新增 slash 命令）。
+
+### S-4 · 判别单测 7 族
+
+- 新 `tests/unit/mcp-oauth-scope-gating-0176.test.ts`：G-1 untrusted
+  块门控红→绿（基线 import 失败实证）/ G-2 allowlist 放行 / G-3 trusted
+  恒等锚 / G-4 单字段不劈裂守卫 / G-5 settings 种值不计数 + env
+  case-insensitive / G-6 无 oauth 块 + sse/http/ws 通用面零回归 /
+  G-7 0.1.74 四硬化面零回归（CIMD env getter 优先级链 + https 验真 +
+  日志描述子 + case-insensitive 剥离）。0174 组合锁 re-anchor 1 处
+  （filterSettingsEnv 链插入剥离层，语义不变）。
+
+**恒等锚（零扰动）**：generic MCP 车道（sse/http/ws + per-server oauth +
+用户级代理）/ 0.1.74 四硬化面 / 全量 CI 4489 测试（347 文件）0 fail。
+
 ## v0.1.75
 
 归整切片① C-2b sessionIngress 1P 远端 session 车道整裁波（归整波
