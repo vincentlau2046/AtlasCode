@@ -92,11 +92,18 @@ function withoutMcpOauthCimdVars(
   env: Record<string, string> | undefined,
 ): Record<string, string> {
   if (!env) return {}
-  const {
-    MCP_OAUTH_CLIENT_METADATA_URL: _cimd,
-    ...rest
-  } = env
-  return rest
+  const out: Record<string, string> = {}
+  for (const [key, value] of Object.entries(env)) {
+    // 0.1.74 (3rd-review, CWE-178): case-insensitive, lockstep with Windows
+    // process.env case-insensitive lookup (Node uppercases env keys there) —
+    // a repo-planted different-case variant must not survive the strip and
+    // be read back through the canonical key. Mirrors the isProviderManagedEnvVar /
+    // SAFE_ENV_VARS toUpperCase() matching convention.
+    if (key.toUpperCase() !== 'MCP_OAUTH_CLIENT_METADATA_URL') {
+      out[key] = value
+    }
+  }
+  return out
 }
 
 /**

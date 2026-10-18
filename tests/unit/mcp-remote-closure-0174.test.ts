@@ -141,12 +141,16 @@ describe('0.1.74 2nd-review 硬化：CIMD env 通道（部署 env 专用 + https
       'Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value',
     )
   })
-  test('managedEnv.ts：MCP_OAUTH_CLIENT_METADATA_URL 从一切 settings 源 env 剥离', () => {
+  test('managedEnv.ts：MCP_OAUTH_CLIENT_METADATA_URL 从一切 settings 源 env 剥离（case-insensitive，CWE-178）', () => {
     const src = srcOf(MANAGED_ENV)
-    // 剥离函数在场 + 剥的是这个键 + 已挂进 filterSettingsEnv 过滤链
-    // （settings.env 任何 scope 均不可种值；仅真环境 shell/CI 可设）。
+    // 剥离函数在场 + case-insensitive 键匹配（Windows process.env 大小写
+    // 不敏感语义锁步；repo 种异大小写变体不可存活）+ 已挂进
+    // filterSettingsEnv 过滤链（settings.env 任何 scope 均不可种值；
+    // 仅真环境 shell/CI 可设）。
     expect(src).toContain('function withoutMcpOauthCimdVars(')
-    expect(src).toContain('MCP_OAUTH_CLIENT_METADATA_URL: _cimd')
+    expect(src).toContain(
+      "key.toUpperCase() !== 'MCP_OAUTH_CLIENT_METADATA_URL'",
+    )
     expect(src).toContain(
       'withoutMcpOauthCimdVars(\n      withoutHostManagedProviderVars',
     )

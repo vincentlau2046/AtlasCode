@@ -61,6 +61,13 @@
   操作者控制面保留（真 env 不受 settings 合并影响）。engine 车道双免疫
   （S-3a 级联结构性排除 project/local scope + engine 面无 CIMD 消费点），
   零改动。
+- **3rd-review 硬化（CWE-178，同波闭环）**：剥离键匹配改 case-insensitive
+  （`key.toUpperCase()`，对齐 codebase `SAFE_ENV_VARS.has(key.toUpperCase())`
+  / `isProviderManagedEnvVar` 匹配惯例）——Windows 上 Node 把 env 键归一
+  为大写（process.env 大小写不敏感参考），repo 种异大小写变体
+  （`mcp_oauth_...`）须不可存活剥离后经 canonical 键被 getter 读回；
+  Linux 上异大小写键 = 另一变量（getter canonical 读天然不命中），
+  语义一致无扰动。
 
 ### D-3 · per-server `oauth.clientMetadataUrl` 字段并入
 
@@ -120,3 +127,7 @@
   engine 车道 S-3a 结构性免疫 + 无 CIMD 消费点，双保险零改动）；
   [MEDIUM] CWE-20 env 值未验真 → 修 = getter https-验真（非 URL /
   非 https 忽略 + 回落 per-server）。判别单测 2 新锚在场。
+- **3rd-review [HIGH/CWE-178] 同波闭环（核销，非残留）**：case-sensitive
+  剥离 vs Windows process.env 大小写不敏感参考（异大小写变体可存活剥离
+  被 getter 读回）→ 修 = 剥离键匹配 case-insensitive（`key.toUpperCase()`
+  惯例对齐）；判别单测锚同步换绑。
