@@ -4,6 +4,60 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.75
+
+归整切片① C-2b sessionIngress 1P 远端 session 车道整裁波（归整波
+切片①，基线 v0.1.74；f4 规划 `docs/2026-10-18-p0-reorg-slice-plan.md`
+§切片①，前置先删后整）。
+**波性质 = de-ant 残项 C-2b 唯一剩余实质大裁剪**（§8.74.29 1P 簇裁 #200
+登记残项）：1P 远端 session 车道（sessionIngress 写入/水合支 + 1P 远端
+认证支 + 各消费文件 1P-remote 分支）整裁——车道双文件整删 + CCR v2
+internalEvent 读写面 + persistToRemote/hydrate 族 + clientType 'remote'
+死判定支（ingress token 两 env 无写入方恒死）+ attribution 1P 支 +
+product.ts 远端 URL 族（base/staging/local + 判定/构造）+ AgentTool
+`remote_launched` 零生产方面。C-2c（getOauthProfile）0.1.73 已裁不重复
+（裁定⑤）。
+**恒等锚（零扰动）**：local session 存储（Project 类 + insertMessageChain
++ flushSessionStorage）/ generic MCP 车道（sse/http/ws + per-server oauth
++ 用户级代理）/ generic OAuth FD 车道（authFileDescriptor 双函数，仅裁
+1P 专属 CCR_SESSION_INGRESS_TOKEN_PATH 常量）/ attribution local 面 /
+P3 远程控制面（agentSdkTypes RemoteControlHandle）/ constants/oauth
+0.1.73 中性化值。
+
+### C-2b · 1P 远端 session 车道整裁（18 文件 +190/−1112）
+
+- 车道文件整删：`sessionIngress.ts`（appendSessionLog/getSessionLogs/
+  getTeleportEvents/clearSession/clearAllSessions）+ `sessionIngressAuth.ts`
+  （getSessionIngressAuthToken/getSessionIngressAuthHeaders/
+  updateSessionIngressAuthToken）。
+- `sessionStorage.ts`：CCR v2 internalEvent writer/reader 面 +
+  REMOTE_FLUSH_INTERVAL_MS + persistToRemote + hydrateRemoteSession/
+  hydrateFromCCRv2InternalEvents + 相关类字段/imports 整裁（local 写面
+  恒等）。
+- `mcp/client.ts`：ws/http 分支 1P ingress token 注入 + hasOAuthTokens
+  覆写判定整裁（generic 车道零扰动）。
+- `main.tsx`/`dispatch.ts`：clientType 'remote' 判定支整裁（两 ingress
+  env 无写入方恒死）+ previewFormat 常量化 + 头注改写。
+- `attribution.ts`：两处 `getClientType() === 'remote'` 1P 支整裁
+  （getAttributionTexts/getEnhancedPRAttribution 回落 local 行为）。
+- `product.ts`：仅留 PRODUCT_URL，远端 URL 族整裁。
+- `bootstrapState.ts` 1P token stub / `caches.ts` clearAllSessions /
+  `MCPSettings.tsx` hasSessionAuth / `AgentTool.ts`·`UI.tsx`
+  RemoteLaunchedOutput·remote_launched 面整裁。
+- 头注/注释含 1P 针脚处改写（engine project.ts⑤ / record.ts /
+  structuredIO / main.tsx / dispatch.ts，判据面=活码纪律）。
+
+### 判别单测
+
+`tests/unit/de-ant-closure-0175.test.ts`（14 件）：缺席族（车道双文件
+缺席 + src/ 全树 1P 车道符号/1P 专属 env/远端 URL 族 0 处）+ 恒等锚族
+（local/generic 面在场字节级锁），改前 RED（6/8）→改后 14/14 GREEN。
+
+### 四件套 / CI（0.1.74 gate 同口径）
+
+tsc 0 / eslint 0e0w / build cli.js 17.87MB / CI=1 bun test --isolate
+346 文件 4460 pass 0 fail。
+
 ## v0.1.74
 
 MCP 远端车道通用化收口波（C-3e 销项，基线 v0.1.73；工单
