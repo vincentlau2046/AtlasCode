@@ -464,9 +464,9 @@ export class StructuredIO {
       }
       if (message.type === 'update_environment_variables') {
         // Apply environment variable updates directly to process.env.
-        // Used by bridge session runner for auth token refresh
-        // (ATLAS_SESSION_ACCESS_TOKEN) which must be readable
-        // by the REPL process itself, not just child Bash commands.
+        // Used by bridge session runner for auth token refresh, which
+        // must be readable by the REPL process itself, not just child
+        // Bash commands.
         const keys = Object.keys(message.variables)
         for (const [key, value] of Object.entries(message.variables)) {
           process.env[key] = value as string

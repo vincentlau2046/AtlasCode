@@ -100,11 +100,6 @@ export const outputSchema = lazySchema(() =>
   ])
 )
 export type Out = z.infer<ReturnType<typeof outputSchema>>
-export type RemoteLaunchedOutput = {
-  status: 'remote_launched'
-  taskId: string
-  sessionUrl: string
-}
 export type Progress =
   | AgentToolProgress
   | { type: 'skill_progress'; skill: string; progress: number }

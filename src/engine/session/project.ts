@@ -20,8 +20,9 @@
  *   ① insertFileHistorySnapshot / ② insertAttributionSnapshot /
  *    ③ insertQueueOperation —— shell 域 fileHistory/attribution/UI 队列面；
  *   ④ removeMessageByUuid —— REPL tombstone，engine 零消费者（grep 确证）；
- *   ⑤ setRemoteIngressUrl + CCR v2 internalEvent writer/reader +
- *    REMOTE_FLUSH_INTERVAL_MS + persistToRemote —— 远程/teleport 波；
+ *   ⑤ 远端 ingress URL + CCR v2 internalEvent writer/reader + 远端 flush
+ *    周期 + 远端持久化 —— 远程/teleport 波（0.1.75 C-2b 整裁，含 CCR v2
+ *    internalEvent 面）；
  *   ⑥ 旧 registerCleanup（coordinator/tasks cleanupRegistry 跨域）→
  *    env.registerCleanup 注入口（scheduler 先例，壳侧接线执行面）。
  *
@@ -848,9 +849,9 @@ class Project {
           // chains its parentUuid to a UUID that only exists in the agent file,
           // and --resume's buildConversationChain terminates at the dangling ref.
           messageSet.add(entry.uuid)
-          // 旧仓此处 `if (isTranscriptMessage(entry)) await
-          // this.persistToRemote(sessionId, entry)` = 裁面 ⑤（远程/teleport 波，
-          // 前向接缝登记：远程持久化接线时在此补调用点）。
+          // 旧仓此处 `if (isTranscriptMessage(entry))` 的远端持久化调用点
+          // = 裁面 ⑤（远程/teleport 波；0.1.75 C-2b 已整裁调用点 + CCR v2
+          // internalEvent 面，无复接线前向缝）。
           // [§8.69 核销] 保裁确认：归属正确（远程/teleport 波，非 analytics 波），核销确认。
         }
       }

@@ -91,7 +91,6 @@ import {
   getWebSocketProxyUrl,
 } from '../../utils/proxy.js'
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js'
-import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js'
 import { subprocessEnv } from '../../utils/subprocessEnv.js'
 import {
   isPersistError,
@@ -513,10 +512,6 @@ export const connectToServer = memoize(
     try {
       let transport
 
-      // If we have the session ingress JWT, we will connect via the session ingress rather than
-      // to remote MCP's directly.
-      const sessionIngressToken = getSessionIngressAuthToken()
-
       if (serverRef.type === 'sse') {
         // Create an auth provider for this server
         const authProvider = new ClaudeAuthProvider(name, serverRef)
@@ -643,9 +638,6 @@ export const connectToServer = memoize(
         const tlsOptions = getWebSocketTLSOptions()
         const wsHeaders = {
           'User-Agent': getMCPUserAgent(),
-          ...(sessionIngressToken && {
-            Authorization: `Bearer ${sessionIngressToken}`,
-          }),
           ...combinedHeaders,
         }
 
@@ -659,7 +651,6 @@ export const connectToServer = memoize(
           `WebSocket transport options: ${jsonStringify({
             url: serverRef.url,
             headers: wsHeadersForLogging,
-            hasSessionAuth: !!sessionIngressToken,
           })}`,
         )
 
@@ -703,13 +694,6 @@ export const connectToServer = memoize(
         // Get combined headers (static + dynamic)
         const combinedHeaders = await getMcpServerHeaders(name, serverRef)
 
-        // Check if this server has stored OAuth tokens. If so, the SDK's
-        // authProvider will set Authorization — don't override with the
-        // session ingress token (SDK merges requestInit AFTER authProvider).
-        // CCR proxy URLs (ccr_shttp_mcp) have no stored OAuth, so they still
-        // get the ingress token. See PR #24454 discussion.
-        const hasOAuthTokens = !!(await authProvider.tokens())
-
         // Use the auth provider with StreamableHTTPClientTransport
         const proxyOptions = getProxyFetchOptions()
         logMCPDebug(
@@ -729,10 +713,6 @@ export const connectToServer = memoize(
             ...proxyOptions,
             headers: {
               'User-Agent': getMCPUserAgent(),
-              ...(sessionIngressToken &&
-                !hasOAuthTokens && {
-                  Authorization: `Bearer ${sessionIngressToken}`,
-                }),
               ...combinedHeaders,
             },
           },

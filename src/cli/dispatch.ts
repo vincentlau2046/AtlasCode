@@ -6,7 +6,7 @@
  * 随迁：NoDefaultCurrentDirectoryInExePath 安全守卫 / SIGINT -p 特判 /
  * hasPrintFlag·hasInitOnlyFlag·isTTY → setIsInteractive 判定（hasSdkUrl 判定
  * W-opt 可信波 S1（C-3，#299）随 --sdk-url 死 flag 裁除）/
- * clientType 判定（GITHUB_ACTIONS / ATLAS_ENTRYPOINT 族 / remote ingress）/
+ * clientType 判定（GITHUB_ACTIONS / ATLAS_ENTRYPOINT 族）/
  * questionPreviewFormat /
  * eagerLoadSettings / runCli 交接 / getInputPrompt（stdin 3s peek 超时支）。
  *
@@ -32,8 +32,8 @@
  *     index.ts）双阻 cli→tui import，cli 域内复用装配须产品级边界配置
  *     变更，④ 廉价批不裁。P5 验收（bridge Ctrl+C session 冲刷 + hook 执行
  *     + exit 0 + 无半写文件）随壳波 #152 延期。
- *   - clientType 'claude-vscode' / 'claude-desktop' / 'local-agent' / 'remote'
- *     判定支保留（env 判定数据面，无消费依赖；desktop/CCR 消费面缺席不阻塞）
+ *   - clientType 'claude-vscode' / 'claude-desktop' / 'local-agent' 判定支保留
+ *     （env 判定数据面，无消费依赖；'remote' 支 0.1.75 C-2b 整裁）
  */
 import { isEnvTruthy, PRODUCT_BRAND } from '../shared' // BR-1（spec §6.2）：stderr 诊断品牌字面改经 shared 单一事实源
 import {
@@ -136,13 +136,6 @@ export async function main(): Promise<void> {
     if (process.env.ATLAS_ENTRYPOINT === 'local-agent') return 'local-agent'
     if (process.env.ATLAS_ENTRYPOINT === 'claude-desktop') return 'claude-desktop'
 
-    // Check if session-ingress token is provided (indicates remote session)
-    const hasSessionIngressToken =
-      process.env.ATLAS_SESSION_ACCESS_TOKEN ||
-      process.env.ATLAS_WEBSOCKET_AUTH_FILE_DESCRIPTOR
-    if (process.env.ATLAS_ENTRYPOINT === 'remote' || hasSessionIngressToken) {
-      return 'remote'
-    }
     return 'cli'
   })()
   setClientType(clientType)
@@ -154,8 +147,7 @@ export async function main(): Promise<void> {
     // Desktop and CCR pass previewFormat via toolConfig; when the feature is
     // gated off they pass undefined — don't override that with markdown.
     clientType !== 'claude-desktop' &&
-    clientType !== 'local-agent' &&
-    clientType !== 'remote'
+    clientType !== 'local-agent'
   ) {
     setQuestionPreviewFormat('markdown')
   }

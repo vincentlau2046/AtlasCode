@@ -44,8 +44,8 @@ import mapValues from 'lodash-es/mapValues.js';
 import pickBy from 'lodash-es/pickBy.js';
 import uniqBy from 'lodash-es/uniqBy.js';
 import React from 'react';
-// 前向缝登记（§8.74.29 1P 簇裁，#200）：1P 常量面 getOauthConfig（oauth 面）/
-// getRemoteSessionUrl（remote-session URL 面，产品面留 attribution 消费）裁除；
+// 前向缝登记（§8.74.29 1P 簇裁，#200；0.1.75 C-2b 收口）：1P 常量面
+// getOauthConfig（oauth 面）/ 远端 session URL 簇（constants/product URL 族）裁除；
 // filesApi（1P Files API 会话文件下载）/ policyLimits（1P 企业策略限额）整簇裁除。
 import { getSystemContext, getUserContext } from './context.js';
 import { init, initializeTelemetryAfterTrust } from './entrypoints/init.js';
@@ -750,11 +750,6 @@ export async function main() {
     if ((process.env.ATLAS_ENTRYPOINT) === 'local-agent') return 'local-agent';
     if ((process.env.ATLAS_ENTRYPOINT) === 'claude-desktop') return 'claude-desktop';
 
-    // Check if session-ingress token is provided (indicates remote session)
-    const hasSessionIngressToken = (process.env.ATLAS_SESSION_ACCESS_TOKEN) || (process.env.ATLAS_WEBSOCKET_AUTH_FILE_DESCRIPTOR);
-    if ((process.env.ATLAS_ENTRYPOINT) === 'remote' || hasSessionIngressToken) {
-      return 'remote';
-    }
     return 'cli';
   })();
   setClientType(clientType);
@@ -764,7 +759,7 @@ export async function main() {
   } else if (!clientType.startsWith('sdk-') &&
   // Desktop and CCR pass previewFormat via toolConfig; when the feature is
   // gated off they pass undefined — don't override that with markdown.
-  clientType !== 'claude-desktop' && clientType !== 'local-agent' && clientType !== 'remote') {
+  clientType !== 'claude-desktop' && clientType !== 'local-agent') {
     setQuestionPreviewFormat('markdown');
   }
 

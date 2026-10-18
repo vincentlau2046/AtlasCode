@@ -22,8 +22,8 @@
  *    保留（旧 JSONL 容错 + reAppend 元数据重尾语义），仅写入口裁剪。
  *   - recordQueueOperation / recordFileHistorySnapshot /
  *    recordAttributionSnapshot / recordContextCollapseCommit /
- *    recordContextCollapseSnapshot / removeTranscriptMessage /
- *    hydrateRemoteSession = 裁面 ①②③④⑤ 族（project.ts 头注同源）。
+ *    recordContextCollapseSnapshot / removeTranscriptMessage =
+ *    裁面 ①②③④ 族（project.ts 头注同源；⑤ 远端水合面 0.1.75 C-2b 整裁）。
  *
  * 解耦登记：getProject → projectInstance（project.ts 单例）/ getSessionId
  * → SessionEnv 注入窗口 / REPL_TOOL_NAME 跨引擎 import（engine/tools/

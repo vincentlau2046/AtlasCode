@@ -229,8 +229,6 @@ export const addSessionCronTask : any = (() => ({})) as any;
 export const getCachedClaudeMdContent : any = (() => ({})) as any;
 export const setLastClassifierRequests : any = (() => ({})) as any;
 export const clearRegisteredPluginHooks : any = (() => ({})) as any;
-export const getSessionIngressToken : any = (() => ({})) as any;
-export const setSessionIngressToken : any = (() => ({})) as any;
 export const getSessionProjectDir : any = () => null;
 export const getLastMainRequestId : any = (() => ({})) as any;
 export const getTokenCounter : any = () => null; // OTel token counter — optional, cost-tracker uses ?.

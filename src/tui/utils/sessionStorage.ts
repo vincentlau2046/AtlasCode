@@ -17,7 +17,7 @@ import {
 } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join } from 'path'
-import { getOriginalCwd, getSessionId, isSessionPersistenceDisabled, switchSession } from 'src/bootstrap'
+import { getOriginalCwd, getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
 import {
   getSessionMessages as engineGetSessionMessages,
   clearSessionMessagesCache as engineClearSessionMessagesCache,
@@ -28,7 +28,6 @@ import { getPlanSlugCache, getPromptId, getSessionProjectDir } from 'src/tui/boo
 import { builtInCommandNames } from '../commands.js'
 import { COMMAND_NAME_TAG } from '../constants/xml.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-import * as sessionIngress from '../services/api/sessionIngress.js'
 import { REPL_TOOL_NAME } from '../tools/REPLTool/constants.js'
 import {
   type AgentId,
@@ -71,7 +70,6 @@ import { formatFileSize } from './format.js'
 import { getFsImplementation } from './fsOperations.js'
 import { getWorktreePaths } from './getWorktreePaths.js'
 import { getBranch } from './git.js'
-import { gracefulShutdownSync, isShuttingDown } from './gracefulShutdown.js'
 import { parseJSONL } from './json.js'
 import { logError } from './log.js'
 import { extractTag, isCompactBoundaryMessage } from './messages.js'
@@ -489,48 +487,6 @@ export function setSessionFileForTesting(path: string): void {
   getProject().sessionFile = path
 }
 
-type InternalEventWriter = (
-  eventType: string,
-  payload: Record<string, unknown>,
-  options?: { isCompaction?: boolean; agentId?: string },
-) => Promise<void>
-
-/**
- * Register a CCR v2 internal event writer for transcript persistence.
- * When set, transcript messages are written as internal worker events
- * instead of going through v1 Session Ingress.
- */
-export function setInternalEventWriter(writer: InternalEventWriter): void {
-  getProject().setInternalEventWriter(writer)
-}
-
-type InternalEventReader = () => Promise<
-  { payload: Record<string, unknown>; agent_id?: string }[] | null
->
-
-/**
- * Register a CCR v2 internal event reader for session resume.
- * When set, hydrateFromCCRv2InternalEvents() can fetch foreground and
- * subagent internal events to reconstruct conversation state on reconnection.
- */
-export function setInternalEventReader(
-  reader: InternalEventReader,
-  subagentReader: InternalEventReader,
-): void {
-  getProject().setInternalEventReader(reader)
-  getProject().setInternalSubagentEventReader(subagentReader)
-}
-
-/**
- * Set the remote ingress URL on the current Project for testing.
- * This simulates what hydrateRemoteSession does in production.
- */
-export function setRemoteIngressUrlForTesting(url: string): void {
-  getProject().setRemoteIngressUrl(url)
-}
-
-const REMOTE_FLUSH_INTERVAL_MS = 10
-
 class Project {
   // Minimal cache for current session only (not all sessions)
   currentSessionTag: string | undefined
@@ -560,10 +516,6 @@ class Project {
   // Entries buffered while sessionFile is null. Flushed by materializeSessionFile
   // on the first user/assistant message — prevents metadata-only session files.
   private pendingEntries: Entry[] = []
-  private remoteIngressUrl: string | null = null
-  private internalEventWriter: InternalEventWriter | null = null
-  private internalEventReader: InternalEventReader | null = null
-  private internalSubagentEventReader: InternalEventReader | null = null
   private pendingWriteCount: number = 0
   private flushResolvers: Array<() => void> = []
   // Per-file write queues. Each entry carries a resolve callback so
@@ -1268,10 +1220,6 @@ class Project {
         // (resume-of-fork loads a 10KB file instead of the full 85KB inherited
         // context).
         //
-        // The sidechain bypass applies ONLY to the local file write — remote
-        // persistence (session-ingress) uses a single Last-Uuid chain per
-        // sessionId, so re-POSTing a UUID it already has 409s and eventually
-        // exhausts retries → gracefulShutdownSync(1). See inc-4718.
         const isNewUuid = !messageSet.has(entry.uuid)
         if (isAgentSidechain || isNewUuid) {
           // Enqueue write — appendToFile handles ENOENT by creating directories
@@ -1284,13 +1232,7 @@ class Project {
             // written to the main session file. The next main-thread message then
             // chains its parentUuid to a UUID that only exists in the agent file,
             // and --resume's buildConversationChain terminates at the dangling ref.
-            // Same constraint for remote (inc-4718 above): sidechain persisting a
-            // UUID the main thread hasn't written yet → 409 when main writes it.
             messageSet.add(entry.uuid)
-
-            if (isTranscriptMessage(entry)) {
-              await this.persistToRemote(sessionId, entry)
-            }
           }
         }
       }
@@ -1332,86 +1274,6 @@ class Project {
     }
   }
 
-  private async persistToRemote(sessionId: UUID, entry: TranscriptMessage) {
-    if (isShuttingDown()) {
-      return
-    }
-
-    // CCR v2 path: write as internal worker event
-    if (this.internalEventWriter) {
-      try {
-        await this.internalEventWriter(
-          'transcript',
-          entry as unknown as Record<string, unknown>,
-          {
-            ...(isCompactBoundaryMessage(entry) && { isCompaction: true }),
-            ...(entry.agentId && { agentId: entry.agentId }),
-          },
-        )
-      } catch {
-        logForDebugging('Failed to write transcript as internal event')
-      }
-      return
-    }
-
-    // v1 Session Ingress path
-    if (
-      !isEnvTruthy(process.env.ENABLE_SESSION_PERSISTENCE) ||
-      !this.remoteIngressUrl
-    ) {
-      return
-    }
-
-    const success = await sessionIngress.appendSessionLog(
-      sessionId,
-      entry,
-      this.remoteIngressUrl,
-    )
-
-    if (!success) {
-      gracefulShutdownSync(1, 'other')
-    }
-  }
-
-  setRemoteIngressUrl(url: string): void {
-    this.remoteIngressUrl = url
-    logForDebugging(`Remote persistence enabled with URL: ${url}`)
-    if (url) {
-      // If using CCR, don't delay messages by any more than 10ms.
-      this.FLUSH_INTERVAL_MS = REMOTE_FLUSH_INTERVAL_MS
-    }
-  }
-
-  setInternalEventWriter(writer: InternalEventWriter): void {
-    this.internalEventWriter = writer
-    logForDebugging(
-      'CCR v2 internal event writer registered for transcript persistence',
-    )
-    // Use fast flush interval for CCR v2
-    this.FLUSH_INTERVAL_MS = REMOTE_FLUSH_INTERVAL_MS
-  }
-
-  setInternalEventReader(reader: InternalEventReader): void {
-    this.internalEventReader = reader
-    logForDebugging(
-      'CCR v2 internal event reader registered for session resume',
-    )
-  }
-
-  setInternalSubagentEventReader(reader: InternalEventReader): void {
-    this.internalSubagentEventReader = reader
-    logForDebugging(
-      'CCR v2 subagent event reader registered for session resume',
-    )
-  }
-
-  getInternalEventReader(): InternalEventReader | null {
-    return this.internalEventReader
-  }
-
-  getInternalSubagentEventReader(): InternalEventReader | null {
-    return this.internalSubagentEventReader
-  }
 }
 
 export type TeamInfo = {
@@ -1613,144 +1475,6 @@ export async function recordContextCollapseSnapshot(snapshot: {
 
 export async function flushSessionStorage(): Promise<void> {
   await getProject().flush()
-}
-
-export async function hydrateRemoteSession(
-  sessionId: string,
-  ingressUrl: string,
-): Promise<boolean> {
-  switchSession(asSessionId(sessionId))
-
-  const project = getProject()
-
-  try {
-    const remoteLogs =
-      (await sessionIngress.getSessionLogs(sessionId, ingressUrl)) || []
-
-    // Ensure the project directory and session file exist
-    const projectDir = getProjectDir(getOriginalCwd())
-    await mkdir(projectDir, { recursive: true, mode: 0o700 })
-
-    const sessionFile = getTranscriptPathForSession(sessionId)
-
-    // Replace local logs with remote logs. writeFile truncates, so no
-    // unlink is needed; an empty remoteLogs array produces an empty file.
-    const content = remoteLogs.map(e => jsonStringify(e) + '\n').join('')
-    await writeFile(sessionFile, content, { encoding: 'utf8', mode: 0o600 })
-
-    logForDebugging(`Hydrated ${remoteLogs.length} entries from remote`)
-    return remoteLogs.length > 0
-  } catch (error) {
-    logForDebugging(`Error hydrating session from remote: ${error}`)
-    logForDiagnosticsNoPII('error', 'hydrate_remote_session_fail')
-    return false
-  } finally {
-    // Set remote ingress URL after hydrating the remote session
-    // to ensure we've always synced with the remote session
-    // prior to enabling persistence
-    project.setRemoteIngressUrl(ingressUrl)
-  }
-}
-
-/**
- * Hydrate session state from CCR v2 internal events.
- * Fetches foreground and subagent events via the registered readers,
- * extracts transcript entries from payloads, and writes them to the
- * local transcript files (main + per-agent).
- * The server handles compaction filtering — it returns events starting
- * from the latest compaction boundary.
- */
-export async function hydrateFromCCRv2InternalEvents(
-  sessionId: string,
-): Promise<boolean> {
-  const startMs = Date.now()
-  switchSession(asSessionId(sessionId))
-
-  const project = getProject()
-  const reader = project.getInternalEventReader()
-  if (!reader) {
-    logForDebugging('No internal event reader registered for CCR v2 resume')
-    return false
-  }
-
-  try {
-    // Fetch foreground events
-    const events = await reader()
-    if (!events) {
-      logForDebugging('Failed to read internal events for resume')
-      logForDiagnosticsNoPII('error', 'hydrate_ccr_v2_read_fail')
-      return false
-    }
-
-    const projectDir = getProjectDir(getOriginalCwd())
-    await mkdir(projectDir, { recursive: true, mode: 0o700 })
-
-    // Write foreground transcript
-    const sessionFile = getTranscriptPathForSession(sessionId)
-    const fgContent = events.map(e => jsonStringify(e.payload) + '\n').join('')
-    await writeFile(sessionFile, fgContent, { encoding: 'utf8', mode: 0o600 })
-
-    logForDebugging(
-      `Hydrated ${events.length} foreground entries from CCR v2 internal events`,
-    )
-
-    // Fetch and write subagent events
-    let subagentEventCount = 0
-    const subagentReader = project.getInternalSubagentEventReader()
-    if (subagentReader) {
-      const subagentEvents = await subagentReader()
-      if (subagentEvents && subagentEvents.length > 0) {
-        subagentEventCount = subagentEvents.length
-        // Group by agent_id
-        const byAgent = new Map<string, Record<string, unknown>[]>()
-        for (const e of subagentEvents) {
-          const agentId = e.agent_id || ''
-          if (!agentId) continue
-          let list = byAgent.get(agentId)
-          if (!list) {
-            list = []
-            byAgent.set(agentId, list)
-          }
-          list.push(e.payload)
-        }
-
-        // Write each agent's transcript to its own file
-        for (const [agentId, entries] of byAgent) {
-          const agentFile = getAgentTranscriptPath(asAgentId(agentId))
-          await mkdir(dirname(agentFile), { recursive: true, mode: 0o700 })
-          const agentContent = entries
-            .map(p => jsonStringify(p) + '\n')
-            .join('')
-          await writeFile(agentFile, agentContent, {
-            encoding: 'utf8',
-            mode: 0o600,
-          })
-        }
-
-        logForDebugging(
-          `Hydrated ${subagentEvents.length} subagent entries across ${byAgent.size} agents`,
-        )
-      }
-    }
-
-    logForDiagnosticsNoPII('info', 'hydrate_ccr_v2_completed', {
-      duration_ms: Date.now() - startMs,
-      event_count: events.length,
-      subagent_event_count: subagentEventCount,
-    })
-    return events.length > 0
-  } catch (error) {
-    // Re-throw epoch mismatch so the worker doesn't race against gracefulShutdown
-    if (
-      error instanceof Error &&
-      error.message === 'CCRClient: Epoch mismatch (409)'
-    ) {
-      throw error
-    }
-    logForDebugging(`Error hydrating session from CCR v2: ${error}`)
-    logForDiagnosticsNoPII('error', 'hydrate_ccr_v2_fail')
-    return false
-  }
 }
 
 function extractFirstPrompt(transcript: TranscriptMessage[]): string {
