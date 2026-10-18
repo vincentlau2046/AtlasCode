@@ -43,6 +43,10 @@ import type { SecureStorageData } from '../../utils/secureStorage/types.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
 import { buildRedirectUri, findAvailablePort } from './oauthPort.js'
+import {
+  isMcpOauthDisplayGated,
+  mcpOauthGatedMessage,
+} from './oauthScopeGate.js'
 import type { McpHTTPServerConfig, McpSSEServerConfig } from './types.js'
 import { getLoggingSafeMcpBaseUrl } from './utils.js'
 import { performCrossAppAccess, XaaTokenExchangeError } from './xaa.js'
@@ -832,6 +836,16 @@ export async function performMCPOAuthFlow(
     onWaitingForCallback?: (submit: (callbackUrl: string) => void) => void
   },
 ): Promise<void> {
+  // 0.1.76 (归整切片②): oauth 消费入口门禁——untrusted scope（project /
+  // 插件）且未 allowlist 的 server，oauth 块在合并面已被整体剥离（
+  // oauthGated 标记在场），或本调用拿到的是未过合并面的原始配置。两条路
+  // 都收敛到同一可行动错误（不发起 oauth 流，XAA 支同裁——块缺席时
+  // oauth?.xaa 必 undefined，但门控态优先于 XAA 判定显形）。trusted 面 /
+  // allowlist 在场 = 恒等零扰动，不进此支。
+  if (isMcpOauthDisplayGated(serverName, serverConfig)) {
+    throw new Error(mcpOauthGatedMessage(serverName))
+  }
+
   // XAA (SEP-990): if configured, bypass the per-server consent dance.
   // If the IdP id_token isn't cached, this pops the browser once at the IdP
   // (shared across all XAA servers for that issuer). Subsequent servers hit

@@ -40,6 +40,14 @@ export const McpStdioServerConfigSchema = lazySchema(() =>
 // oauth config + keychain slot) are for the MCP server's AS.
 const McpXaaConfigSchema = lazySchema(() => z.boolean())
 
+// 0.1.76 (归整切片②): display marker set by the merge-surface gate
+// (oauthScopeGate.applyMcpOauthScopeGate) when an untrusted-scope (project /
+// plugin-provided) server's oauth block is stripped as gated. Runtime-derived
+// only — a repo-committed value is cosmetic at worst (the gate recomputes and
+// never trusts it) and never enables a gated block. Absent on trusted-scope /
+// no-oauth-block / allowlisted servers (zero-perturbation identity anchor).
+const McpOauthGatedMarkerSchema = lazySchema(() => z.boolean().optional())
+
 const McpOAuthConfigSchema = lazySchema(() =>
   z.object({
     clientId: z.string().optional(),
@@ -83,6 +91,10 @@ export const McpSSEServerConfigSchema = lazySchema(() =>
     headers: z.record(z.string(), z.string()).optional(),
     headersHelper: z.string().optional(),
     oauth: McpOAuthConfigSchema().optional(),
+    // 0.1.76 (归整切片②): merge-surface gate marker (see
+    // McpOauthGatedMarkerSchema) — set when this server's oauth block was
+    // stripped as gated (untrusted scope + not allowlisted).
+    oauthGated: McpOauthGatedMarkerSchema(),
   }),
 )
 
@@ -114,6 +126,10 @@ export const McpHTTPServerConfigSchema = lazySchema(() =>
     headers: z.record(z.string(), z.string()).optional(),
     headersHelper: z.string().optional(),
     oauth: McpOAuthConfigSchema().optional(),
+    // 0.1.76 (归整切片②): merge-surface gate marker (see
+    // McpOauthGatedMarkerSchema) — set when this server's oauth block was
+    // stripped as gated (untrusted scope + not allowlisted).
+    oauthGated: McpOauthGatedMarkerSchema(),
   }),
 )
 

@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { Box, color, Link, Text, useTheme } from '../../ink.js';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
+import { MCP_OAUTH_TRUSTED_SERVERS_ENV } from '../../services/mcp/oauthScopeGate.js';
 import type { ConfigScope } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath } from '../../services/mcp/utils.js';
 import { isDebugMode } from '../../utils/debug.js';
@@ -330,6 +331,14 @@ export function MCPListPanel(t0) {
             } else {
               statusIcon = color("error", theme)(figures.cross);
               statusText = "failed";
+            }
+            // 0.1.76 (归整切片②): untrusted scope（project/plugin）oauth 块已被
+            // 合并面门控整体剥离（ServerInfo.oauthGated 标记，prepareServers 计算）
+            // → 状态行显形门控态 + 操作者 allowlist 指引。trusted 面 / 无 oauth
+            // 块面恒不进此支（显示零变更恒等锚）。
+            if (server_3.oauthGated === true) {
+              statusIcon = color("warning", theme)(figures.triangleUpOutline);
+              statusText = "oauth gated (untrusted scope) — operator allowlist to enable: " + MCP_OAUTH_TRUSTED_SERVERS_ENV;
             }
           }
         }

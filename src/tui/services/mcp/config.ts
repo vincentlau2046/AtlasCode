@@ -37,6 +37,7 @@ import {
 import type { ValidationError } from '../../utils/settings/validation.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { expandEnvVarsInString } from './envExpansion.js'
+import { applyMcpOauthScopeGate } from './oauthScopeGate.js'
 import {
   type ConfigScope,
   type McpHTTPServerConfig,
@@ -70,7 +71,10 @@ function addScopeToServers(
   }
   const scopedServers: Record<string, ScopedMcpServerConfig> = {}
   for (const [name, config] of Object.entries(servers)) {
-    scopedServers[name] = { ...config, scope }
+    // 0.1.76 (归整切片②): scope 附着即门控面——project scope（repo 提交
+    // .mcp.json）的 oauth 块整体视为缺席（未 allowlist 时）；user/local/
+    // enterprise = trusted 恒等零扰动。单字段不劈裂：门控时全字段同缺席。
+    scopedServers[name] = applyMcpOauthScopeGate(name, { ...config, scope })
   }
   return scopedServers
 }
@@ -1231,7 +1235,14 @@ export async function getMcpConfigs(
     if (!isMcpServerAllowedByPolicy(name, serverConfig as McpServerConfig)) {
       continue
     }
-    filtered[name] = serverConfig as ScopedMcpServerConfig
+    // 0.1.76 (归整切片②): 插件面门控兜底——插件 server 经
+    // addPluginScopeToServers（scope 'dynamic' + pluginSource）附着，不经过
+    // addScopeToServers，在此统一应用块级门控。对已经门控的 project 面幂等
+    // （oauth 已剥离 → 原样返回），trusted 面恒等（零扰动）。
+    filtered[name] = applyMcpOauthScopeGate(
+      name,
+      serverConfig as ScopedMcpServerConfig,
+    )
   }
 
   return { servers: filtered, errors: mcpErrors }

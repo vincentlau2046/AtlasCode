@@ -165,8 +165,11 @@ describe('0.1.74 2nd-review 硬化：CIMD env 通道（部署 env 专用 + https
     expect(src).toContain(
       "key.toUpperCase() !== 'MCP_OAUTH_CLIENT_METADATA_URL'",
     )
+    // 0.1.76 re-anchor：filterSettingsEnv 链插入 withoutMcpOauthTrustedServersVars
+    // 层（settings 源 allowlist 剥离，归整切片②）→ withoutHostManagedProviderVars
+    // 行缩进 6→8，组合锁同步重锚（语义不变：CIMD 剥离仍挂链）。
     expect(src).toContain(
-      'withoutMcpOauthCimdVars(\n      withoutHostManagedProviderVars',
+      'withoutMcpOauthCimdVars(\n        withoutHostManagedProviderVars',
     )
   })
 })

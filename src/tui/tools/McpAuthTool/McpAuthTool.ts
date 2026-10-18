@@ -9,6 +9,10 @@ import {
   buildMcpToolName,
   getMcpPrefix,
 } from '../../services/mcp/mcpStringUtils.js'
+import {
+  isMcpOauthDisplayGated,
+  mcpOauthGatedMessage,
+} from '../../services/mcp/oauthScopeGate.js'
 import type {
   McpHTTPServerConfig,
   McpSSEServerConfig,
@@ -93,6 +97,20 @@ export function createMcpAuthTool(
           data: {
             status: 'unsupported' as const,
             message: `Server "${serverName}" uses ${transport} transport which does not support OAuth from this tool. Ask the user to run /mcp and authenticate manually.`,
+          },
+        }
+      }
+
+      // 0.1.76 (归整切片②): oauth 块级 scope-gating 显形面——untrusted scope
+      // （project / 插件）且未 allowlist 的 server，oauth 块在合并面已被
+      // 整体剥离（oauthGated 标记）；直接返可行动错误，不发起 oauth 流
+      // （也避免下方后台续作的 logError 噪声）。trusted 面 / allowlist
+      // 在场恒不进此支（行为零变更）。
+      if (isMcpOauthDisplayGated(serverName, config)) {
+        return {
+          data: {
+            status: 'error' as const,
+            message: mcpOauthGatedMessage(serverName),
           },
         }
       }

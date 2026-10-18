@@ -5,6 +5,7 @@ import {
   isProviderManagedEnvVar,
   SAFE_ENV_VARS,
 } from './managedEnvConstants.js'
+import { MCP_OAUTH_TRUSTED_SERVERS_ENV } from '../services/mcp/oauthScopeGate.js'
 import { clearMTLSCache } from './mtls.js'
 import { clearProxyCache, configureGlobalAgents } from './proxy.js'
 import { isSettingSourceEnabled } from './settings/constants.js'
@@ -107,14 +108,40 @@ function withoutMcpOauthCimdVars(
 }
 
 /**
+ * 0.1.76 (归整切片②): ATLAS_MCP_OAUTH_TRUSTED_SERVERS is the operator
+ * allowlist for untrusted-scope (project/plugin) per-server MCP oauth
+ * blocks. It is a deployment/operator control — settable from the REAL
+ * environment (shell/CI) only, never from settings.env at any scope.
+ * Without this strip a repo-committed project settings.env could plant
+ * allowlist entries that silently un-gate the repo's own .mcp.json oauth
+ * blocks (the gate's trust model is "repo content is untrusted; only the
+ * operator's environment can re-trust it"). Mirrors the 0.1.74
+ * withoutMcpOauthCimdVars case-insensitive strip convention (CWE-178).
+ */
+function withoutMcpOauthTrustedServersVars(
+  env: Record<string, string> | undefined,
+): Record<string, string> {
+  if (!env) return {}
+  const out: Record<string, string> = {}
+  for (const [key, value] of Object.entries(env)) {
+    if (key.toUpperCase() !== MCP_OAUTH_TRUSTED_SERVERS_ENV) {
+      out[key] = value
+    }
+  }
+  return out
+}
+
+/**
  * Compose the strip filters applied to every settings-sourced env object.
  */
 function filterSettingsEnv(
   env: Record<string, string> | undefined,
 ): Record<string, string> {
   return withoutCcdSpawnEnvKeys(
-    withoutMcpOauthCimdVars(
-      withoutHostManagedProviderVars(withoutSSHTunnelVars(env)),
+    withoutMcpOauthTrustedServersVars(
+      withoutMcpOauthCimdVars(
+        withoutHostManagedProviderVars(withoutSSHTunnelVars(env)),
+      ),
     ),
   )
 }

@@ -14,6 +14,10 @@ import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { AuthenticationCancelledError, performMCPOAuthFlow, revokeServerTokens } from '../../services/mcp/auth.js';
 import { clearServerCache } from '../../services/mcp/client.js';
 import { useMcpReconnect, useMcpToggleEnabled } from '../../services/mcp/MCPConnectionManager.js';
+import {
+  MCP_OAUTH_TRUSTED_SERVERS_ENV,
+  isMcpOauthDisplayGated,
+} from '../../services/mcp/oauthScopeGate.js';
 import { describeMcpConfigFilePath, excludeCommandsByServer, excludeResourcesByServer, excludeToolsByServer, filterMcpPromptsByServer } from '../../services/mcp/utils.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import { errorMessage } from '../../utils/errors.js';
@@ -84,6 +88,14 @@ export function MCPRemoteServerMenu({
   // 1. It has OAuth tokens (server.isAuthenticated), OR
   // 2. It's connected and has tools (meaning it's working via some auth mechanism)
   const isEffectivelyAuthenticated = server.isAuthenticated || server.client.type === 'connected' && serverToolsCount > 0;
+  // 0.1.76 (归整切片②): untrusted scope（project / 插件）且未 allowlist 的
+  // oauth 块 = 门控态（合并面已整体剥离，oauthGated 标记在场）→ Auth 行显形
+  // 门控态 + 操作者 allowlist 指引；handleAuthenticate 走既有 error 面自动
+  // 显形可行动文案（auth.ts 门控 throw → setError）。trusted 面恒 false
+  // （显示零变更）。
+  const isOauthGated = server.config
+    ? isMcpOauthDisplayGated(server.name, server.config)
+    : false;
   const reconnectMcpServer = useMcpReconnect();
   // G-3（§8.74.28 ⑫）: handleClaudeAIAuthComplete /
   // handleClaudeAIClearAuthComplete 随 claude.ai 两支裁除（见文件头）。
@@ -351,10 +363,14 @@ export function MCPRemoteServerMenu({
           </Box>
 
           {/* 0.1.74 (C-3e 销项): the claudeai-proxy gate was removed; the Auth
-              row now always renders for remote servers. */}
+              row now always renders for remote servers. 0.1.76 (归整切片②):
+              门控态（untrusted scope + 未 allowlist）显形为独立 warning 行，
+              优先于 authenticated / not authenticated 两态。 */}
           <Box>
               <Text bold>Auth: </Text>
-              {isEffectivelyAuthenticated ? <Text>
+              {isOauthGated ? <Text>
+                  {color('warning', theme)(figures.triangleUpOutline)} oauth gated (untrusted scope) — operator allowlist to enable: {MCP_OAUTH_TRUSTED_SERVERS_ENV}
+                </Text> : isEffectivelyAuthenticated ? <Text>
                   {color('success', theme)(figures.tick)} authenticated
                 </Text> : <Text>
                   {color('error', theme)(figures.cross)} not authenticated

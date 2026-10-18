@@ -13,6 +13,10 @@ import { KeybindingSetup } from '../../keybindings/KeybindingProviderSetup.js';
 import { clearMcpClientConfig, clearServerTokensFromLocalStorage, getMcpClientConfig, readClientSecret, saveMcpClientSecret } from '../../services/mcp/auth.js';
 import { connectToServer, getMcpServerConnectionBatchSize } from '../../services/mcp/client.js';
 import { addMcpConfig, getAllMcpConfigs, getMcpConfigByName, getMcpConfigsByScope, removeMcpConfig } from '../../services/mcp/config.js';
+import {
+  MCP_OAUTH_TRUSTED_SERVERS_ENV,
+  isMcpOauthDisplayGated,
+} from '../../services/mcp/oauthScopeGate.js';
 import type { ConfigScope, ScopedMcpServerConfig } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath, ensureConfigScope, getScopeLabel } from '../../services/mcp/utils.js';
 import { AppStateProvider } from '../../state/AppState.js';
@@ -207,7 +211,15 @@ export async function mcpGetHandler(name: string): Promise<void> {
         console.log(`    ${key}: ${value}`);
       }
     }
-    if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
+    if (isMcpOauthDisplayGated(name, server)) {
+      // 0.1.76 (归整切片②): untrusted scope（project/plugin）oauth 块已被
+      // 合并面门控整体剥离（oauthGated 标记）或原始块将被门控 → 显形门控态
+      // + 操作者 allowlist 指引。trusted 面恒不进此支（显示零变更）。
+      // biome-ignore lint/suspicious/noConsole:: intentional console output
+      console.log(
+        `  OAuth: gated (untrusted scope) — operator allowlist to enable: ${MCP_OAUTH_TRUSTED_SERVERS_ENV}`,
+      );
+    } else if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
         parts.push('client_id configured');
@@ -232,7 +244,13 @@ export async function mcpGetHandler(name: string): Promise<void> {
         console.log(`    ${key}: ${value}`);
       }
     }
-    if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
+    if (isMcpOauthDisplayGated(name, server)) {
+      // 0.1.76 (归整切片②): 同 sse 支——门控态显形（trusted 面零变更）。
+      // biome-ignore lint/suspicious/noConsole:: intentional console output
+      console.log(
+        `  OAuth: gated (untrusted scope) — operator allowlist to enable: ${MCP_OAUTH_TRUSTED_SERVERS_ENV}`,
+      );
+    } else if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
         parts.push('client_id configured');

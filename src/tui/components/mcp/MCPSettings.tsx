@@ -2,6 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import React, { useEffect, useMemo } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { ClaudeAuthProvider } from '../../services/mcp/auth.js';
+import { isMcpOauthDisplayGated } from '../../services/mcp/oauthScopeGate.js';
 import type { McpHTTPServerConfig, McpSSEServerConfig, McpStdioServerConfig } from '../../services/mcp/types.js';
 import { extractAgentMcpServers, filterToolsByServer } from '../../services/mcp/utils.js';
 import { useAppState } from '../../state/AppState.js';
@@ -90,6 +91,9 @@ export function MCPSettings(t0) {
               ...baseInfo,
               transport: "sse" as const,
               isAuthenticated,
+              // 0.1.76 (归整切片②): untrusted scope（project/plugin）oauth 块已被
+              // 合并面门控整体剥离（oauthGated 标记）→ TUI 状态行显形门控态
+              oauthGated: isMcpOauthDisplayGated(client_0.name, client_0.config),
               config: client_0.config as McpSSEServerConfig
             };
           } else {
@@ -98,6 +102,8 @@ export function MCPSettings(t0) {
                 ...baseInfo,
                 transport: "http" as const,
                 isAuthenticated,
+                // 0.1.76 (归整切片②): 同 sse 支——oauth 块门控态挂 TUI 数据面
+                oauthGated: isMcpOauthDisplayGated(client_0.name, client_0.config),
                 config: client_0.config as McpHTTPServerConfig
               };
             } else {
