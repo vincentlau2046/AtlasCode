@@ -1375,6 +1375,19 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
    * or non-https) is ignored rather than steering the client identity.
    */
   get clientMetadataUrl(): string | undefined {
+    // 0.1.74 (4th-review, observability hygiene): never log the raw CIMD
+    // URL — a URL may embed userinfo/query (secret-exposure vector) and a
+    // crafted value may carry newlines (log-injection vector). Log only the
+    // non-reversible host+path descriptor (userinfo/query stripped by the
+    // URL parser); an unparseable value yields a length-only descriptor.
+    const describe = (raw: string): string => {
+      try {
+        const u = new URL(raw)
+        return `${u.protocol}//${u.host}${u.pathname}`
+      } catch {
+        return `<invalid url, ${raw.length} chars>`
+      }
+    }
     const override = process.env.MCP_OAUTH_CLIENT_METADATA_URL
     if (override) {
       let valid = false
@@ -1384,19 +1397,24 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
         valid = false
       }
       if (valid) {
-        logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
+        logMCPDebug(
+          this.serverName,
+          `Using CIMD URL from env: ${describe(override)}`,
+        )
         return override
       }
       logMCPDebug(
         this.serverName,
-        `Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value: ${override}`,
+        `Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value: ${describe(
+          override,
+        )}`,
       )
     }
     const perServer = this.serverConfig.oauth?.clientMetadataUrl
     if (perServer) {
       logMCPDebug(
         this.serverName,
-        `Using CIMD URL from server config: ${perServer}`,
+        `Using CIMD URL from server config: ${describe(perServer)}`,
       )
       return perServer
     }

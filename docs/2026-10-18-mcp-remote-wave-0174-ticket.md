@@ -68,6 +68,14 @@
   （`mcp_oauth_...`）须不可存活剥离后经 canonical 键被 getter 读回；
   Linux 上异大小写键 = 另一变量（getter canonical 读天然不命中），
   语义一致无扰动。
+- **4th-review 硬化（同波闭环）**：① getter 三处 CIMD URL 日志行改记
+  不可逆描述子（`protocol//host+path` 模板，URL 解析器剥除
+  userinfo/query；不可解析值 = 长度描述）——URL 可嵌
+  `user:pass@`（秘密泄露向量）+ 构造值可携换行（日志注入向量）关闭；
+  ② per-server scope-gating 发现 = §4 既有登记项再确认（per-server
+  oauth 块整体信任面，非 clientMetadataUrl 单字段——单字段门控会劈裂
+  同一配置块内信任模型；块级 scope-gating = 后续 f4 评估项，本波
+  operator pin（env 覆写优先）已覆盖 repo 提交值压制面）。
 
 ### D-3 · per-server `oauth.clientMetadataUrl` 字段并入
 
@@ -120,7 +128,11 @@
   plugin scope = 既有 per-server oauth 信任面（用户批准项目级 MCP server
   时一并批准）；scope 级门禁（untrusted scope 的 oauth 块须显式
   allowlist）= 后续波 f4 评估项（本波已落 env 部署控制优先 = 操作者
-  可钉住可信 CIMD URL 覆盖 repo 提交值）。
+  可钉住可信 CIMD URL 覆盖 repo 提交值）。**4th-review 于 2026-10-18
+  再确认本项（MEDIUM，非新发现）**：其建议的 clientMetadataUrl 单字段
+  门控被本波裁定拒绝（劈裂同一配置块内 oauth 信任单元：clientId /
+  authServerMetadataUrl 仍无门控 = 半门控假安全面）；正确形态 =
+  oauth 块整体 scope-gating，维持 f4 评估项定性不变。
 - **2nd-review 两发现同波闭环（核销，非残留）**：[HIGH] env 通道
   repo-可种（TUI 信任后合并 apply 含 project scope）→ 修 =
   `withoutMcpOauthCimdVars` 从一切 settings 源 env 剥离（repo 不可种；

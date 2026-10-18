@@ -141,6 +141,20 @@ describe('0.1.74 2nd-review 硬化：CIMD env 通道（部署 env 专用 + https
       'Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value',
     )
   })
+  test('auth.ts getter：4th-review 观测卫生——CIMD URL 日志只记不可逆描述（host+path，userinfo/query 剥除）', () => {
+    const src = srcOf(AUTH)
+    const getter = src.slice(src.indexOf('get clientMetadataUrl()'))
+    // 三处日志行全走 describe()（非裸值）：URL 可嵌 userinfo/query（秘密
+    // 泄露向量）+ 构造值可携换行（日志注入向量）→ 只记 protocol//host+path。
+    expect(getter).toContain('const describe = (raw: string): string =>')
+    // 源文本锚：描述子 = protocol//host+path 模板（userinfo/query 不入日志）。
+    expect(getter).toContain('`${u.protocol}//${u.host}${u.pathname}`')
+    expect(getter).toContain('Using CIMD URL from env: ${describe(override)}')
+    expect(getter).toContain(
+      'Ignoring invalid MCP_OAUTH_CLIENT_METADATA_URL env value: ${describe(',
+    )
+    expect(getter).toContain('Using CIMD URL from server config: ${describe(')
+  })
   test('managedEnv.ts：MCP_OAUTH_CLIENT_METADATA_URL 从一切 settings 源 env 剥离（case-insensitive，CWE-178）', () => {
     const src = srcOf(MANAGED_ENV)
     // 剥离函数在场 + case-insensitive 键匹配（Windows process.env 大小写
