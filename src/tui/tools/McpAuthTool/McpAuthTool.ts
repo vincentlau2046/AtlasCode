@@ -83,18 +83,8 @@ export function createMcpAuthTool(
       return { behavior: 'allow', updatedInput: input }
     },
     async call(_input, context) {
-      // claude.ai connectors use a separate auth flow (handleClaudeAIAuth in
-      // MCPRemoteServerMenu) that we don't invoke programmatically here —
-      // just point the user at /mcp.
-      if (config.type === 'claudeai-proxy') {
-        return {
-          data: {
-            status: 'unsupported' as const,
-            message: `This is a claude.ai MCP connector. Ask the user to run /mcp and select "${serverName}" to authenticate.`,
-          },
-        }
-      }
-
+      // 0.1.74 (C-3e 销项): the claude.ai hosted-connector branch was removed
+      // with the 1P lane. Remote MCP auth is generic per-server OAuth (sse/http).
       // performMCPOAuthFlow only accepts sse/http. needs-auth state is only
       // set on HTTP 401 (UnauthorizedError) so other transports shouldn't
       // reach here, but be defensive.

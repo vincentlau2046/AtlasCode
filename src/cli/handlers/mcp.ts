@@ -20,8 +20,9 @@
  *     --callback-port 选项面 = 惰性数据保留（S-C2 头注同登记），handler 仅
  *     构造 oauth {clientId, callbackPort}（xaa flag 支裁：新仓无 --xaa 选项
  *     / XAA 面域外）；get 面 oauth 行 'client_secret configured' 子支同裁；
- *   - list claudeai-proxy 输出支（OAuth 车道裁）+ ws·ws-ide·sse-ide·sdk 输出
- *     支（旧码同 fall-through 无输出，行为保真）；
+ *   - list claudeai-proxy 输出支（OAuth 车道裁；0.1.74 C-3e 随 1P 车道型删，
+ *     本登记销项）+ ws·ws-ide·sse-ide·sdk 输出支（旧码同 fall-through 无输出，
+ *     行为保真）；
  *   - pMap 并发（3-dep 纪律无 p-map：本地批队列替身，保序 = pMap 语义）+
  *     batch size env MCP_SERVER_CONNECTION_BATCH_SIZE || 3（旧 client.ts
  *     getMcpServerConnectionBatchSize 逐字）；
@@ -274,7 +275,8 @@ export async function mcpListHandler(): Promise<void> {
           `${name}: ${stdioServer.command} ${args.join(' ')} - ${status}\n`,
         )
       }
-      // claudeai-proxy / ws / ws-ide / sse-ide / sdk 输出支裁登记见头注
+      // ws / ws-ide / sse-ide / sdk 输出支裁登记见头注（claudeai-proxy 支已
+      // 随型删，0.1.74 C-3e 销项）
     }
   } finally {
     // 旧 gracefulShutdown(0) → closeAll（裁登记见头注：spawned stdio 子

@@ -51,6 +51,18 @@ const McpOAuthConfigSchema = lazySchema(() =>
         message: 'authServerMetadataUrl must use https://',
       })
       .optional(),
+    // CIMD (SEP-991): per-server client metadata document URL. When the
+    // server's auth server advertises client_id_metadata_document_supported,
+    // this URL is used as client_id (config-driven; no built-in default —
+    // the 1P constant default was removed with the 0.1.74 de-ant C-3e
+    // closure). Falls back to MCP_OAUTH_CLIENT_METADATA_URL env.
+    clientMetadataUrl: z
+      .string()
+      .url()
+      .startsWith('https://', {
+        message: 'clientMetadataUrl must use https://',
+      })
+      .optional(),
     xaa: McpXaaConfigSchema().optional(),
   }),
 )
@@ -112,15 +124,10 @@ export const McpSdkServerConfigSchema = lazySchema(() =>
   }),
 )
 
-// Config type for Claude.ai proxy servers
-export const McpClaudeAIProxyServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('claudeai-proxy'),
-    url: z.string(),
-    id: z.string(),
-  }),
-)
-
+// 0.1.74 (C-3e 销项): the 1P hosted-connector server type schema was removed
+// (token lane cleared in 0.1.72 + proxy base neutralized in 0.1.73 =
+// doubly dead). Remote HTTP MCP = generic config-driven sse/http/ws types
+// (url + headers + per-server oauth), decoupled from any gateway.
 export const McpServerConfigSchema = lazySchema(() =>
   z.union([
     McpStdioServerConfigSchema(),
@@ -130,7 +137,6 @@ export const McpServerConfigSchema = lazySchema(() =>
     McpHTTPServerConfigSchema(),
     McpWebSocketServerConfigSchema(),
     McpSdkServerConfigSchema(),
-    McpClaudeAIProxyServerConfigSchema(),
   ]),
 )
 
@@ -154,9 +160,6 @@ export type McpWebSocketServerConfig = z.infer<
 >
 export type McpSdkServerConfig = z.infer<
   ReturnType<typeof McpSdkServerConfigSchema>
->
-export type McpClaudeAIProxyServerConfig = z.infer<
-  ReturnType<typeof McpClaudeAIProxyServerConfigSchema>
 >
 export type McpServerConfig = z.infer<ReturnType<typeof McpServerConfigSchema>>
 

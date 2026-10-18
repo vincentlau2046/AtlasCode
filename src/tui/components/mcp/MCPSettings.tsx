@@ -2,7 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import React, { useEffect, useMemo } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { ClaudeAuthProvider } from '../../services/mcp/auth.js';
-import type { McpClaudeAIProxyServerConfig, McpHTTPServerConfig, McpSSEServerConfig, McpStdioServerConfig } from '../../services/mcp/types.js';
+import type { McpHTTPServerConfig, McpSSEServerConfig, McpStdioServerConfig } from '../../services/mcp/types.js';
 import { extractAgentMcpServers, filterToolsByServer } from '../../services/mcp/utils.js';
 import { useAppState } from '../../state/AppState.js';
 import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js';
@@ -72,7 +72,8 @@ export function MCPSettings(t0) {
           const scope = client_0.config.scope;
           const isSSE = client_0.config.type === "sse";
           const isHTTP = client_0.config.type === "http";
-          const isClaudeAIProxy = client_0.config.type === "claudeai-proxy";
+          // 0.1.74 (C-3e 销项): the 1P hosted-connector (claudeai-proxy) info
+          // shape is removed; the sse/http/stdio cascade below covers all types.
           let isAuthenticated = undefined;
           if (isSSE || isHTTP) {
             const authProvider = new ClaudeAuthProvider(client_0.name, client_0.config as McpSSEServerConfig | McpHTTPServerConfig);
@@ -86,36 +87,27 @@ export function MCPSettings(t0) {
             client: client_0,
             scope
           };
-          if (isClaudeAIProxy) {
+          if (isSSE) {
             return {
               ...baseInfo,
-              transport: "claudeai-proxy" as const,
-              isAuthenticated: false,
-              config: client_0.config as McpClaudeAIProxyServerConfig
+              transport: "sse" as const,
+              isAuthenticated,
+              config: client_0.config as McpSSEServerConfig
             };
           } else {
-            if (isSSE) {
+            if (isHTTP) {
               return {
                 ...baseInfo,
-                transport: "sse" as const,
+                transport: "http" as const,
                 isAuthenticated,
-                config: client_0.config as McpSSEServerConfig
+                config: client_0.config as McpHTTPServerConfig
               };
             } else {
-              if (isHTTP) {
-                return {
-                  ...baseInfo,
-                  transport: "http" as const,
-                  isAuthenticated,
-                  config: client_0.config as McpHTTPServerConfig
-                };
-              } else {
-                return {
-                  ...baseInfo,
-                  transport: "stdio" as const,
-                  config: client_0.config as McpStdioServerConfig
-                };
-              }
+              return {
+                ...baseInfo,
+                transport: "stdio" as const,
+                config: client_0.config as McpStdioServerConfig
+              };
             }
           }
         }));
@@ -207,7 +199,9 @@ export function MCPSettings(t0) {
           t9 = $[25];
         }
         const serverTools_0 = t9;
-        const defaultTab = viewState.server.transport === "claudeai-proxy" ? "Atlas Web" : "Atlas";
+        // 0.1.74 (C-3e 销项): the hosted-connector default-tab branch is
+        // removed; remote servers surface under the generic tab.
+        const defaultTab = "Atlas";
         if (viewState.server.transport === "stdio") {
           let t10;
           if ($[26] !== viewState.server) {

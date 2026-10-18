@@ -545,8 +545,9 @@ export function extractAgentMcpServers(
         needsAuth: false,
       })
     }
-    // Skip unsupported transport types (sdk, claudeai-proxy, sse-ide, ws-ide)
-    // These are internal types not meant for agent MCP server display
+    // Skip unsupported transport types (sdk, sse-ide, ws-ide). The 1P
+    // claudeai-proxy type was removed in 0.1.74 C-3e. These internal types
+    // are not meant for agent MCP server display
   }
 
   return result.sort((a, b) => a.name.localeCompare(b.name))

@@ -1,10 +1,8 @@
-// G-3（§8.74.28 ⑫ MCP 菜单留通用面裁 claude.ai 2 支）: 本菜单的
-// claude.ai connectors 浏览器认证流（'claudeai-auth' / 'claudeai-clear-auth'
-// 两菜单支 + 对应视图/状态/handler，经 CLAUDE_AI_ORIGIN/settings/connectors）
-// 已整裁——通用面保留（Stdio/Remote/Agent 三菜单、通用 OAuth 流、
-// reconnect、enable/disable、tools 查看）。claudeai-proxy 型仍存于 TUI
-// 型面（⑩ 裁定），但菜单不再为其提供认证选项（守卫 + 前向缝登记，
-// 见 handleAuthenticate / handleClearAuth / menuOptions 注释）。
+// G-3（§8.74.28 ⑫ MCP 菜单留通用面裁 claude.ai 2 支）: 本菜单的 claude.ai
+// connectors 浏览器认证流（'claudeai-auth' / 'claudeai-clear-auth' 两菜单支 +
+// 对应视图/状态/handler）已整裁。0.1.74（C-3e 销项）：1P hosted-connector
+// (claudeai-proxy) 型随 token 车道清零（0.1.72）+ 基址中性化（0.1.73）双死而
+// 自 TUI 型面删除；本菜单现为纯通用远端面（sse/http + 通用 per-server OAuth）。
 import figures from 'figures';
 import React, { useEffect, useRef, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
@@ -139,10 +137,8 @@ export function MCPRemoteServerMenu({
     }
   }, [server.client.type, server.name, toggleMcpServer, onCancel, onComplete]);
   const handleAuthenticate = React.useCallback(async () => {
-    // G-3（§8.74.28 ⑫）: claudeai-proxy 型（⑩ 裁定保留于 TUI 型面）不再走
-    // 通用 OAuth 认证流——菜单不再为其提供认证选项（守卫 + 前向缝登记：
-    // 回流 = claude.ai 账号面随网关恢复）。
-    if (server.config.type === 'claudeai-proxy') return;
+    // 0.1.74 (C-3e 销项): the claudeai-proxy early-return guard was removed with
+    // the 1P hosted-connector lane (the type no longer exists in the schema).
     setIsAuthenticating(true);
     setError(null);
     const controller = new AbortController();
@@ -186,8 +182,8 @@ export function MCPRemoteServerMenu({
     }
   }, [server.isAuthenticated, server.config, server.name, onComplete, reconnectMcpServer, isEffectivelyAuthenticated]);
   const handleClearAuth = async () => {
-    // G-3（§8.74.28 ⑫）: claudeai-proxy 型守卫同 handleAuthenticate（见其注释）。
-    if (server.config.type === 'claudeai-proxy') return;
+    // 0.1.74 (C-3e 销项): the claudeai-proxy guard (mirroring handleAuthenticate)
+    // was removed with the 1P hosted-connector lane.
     if (server.config) {
       // First revoke the authentication tokens and clear all auth state
       await revokeServerTokens(server.name, server.config);
@@ -298,26 +294,23 @@ export function MCPRemoteServerMenu({
       value: 'tools'
     });
   }
-  // G-3（§8.74.28 ⑫）: claudeai-proxy 型不再提供菜单认证支（'claudeai-auth' /
-  // 'claudeai-clear-auth' 已裁，前向缝登记见文件头）；通用认证选项仅
-  // 非 claudeai-proxy 型。
-  if (server.config.type !== 'claudeai-proxy') {
-    if (isEffectivelyAuthenticated) {
-      menuOptions.push({
-        label: 'Re-authenticate',
-        value: 'reauth'
-      });
-      menuOptions.push({
-        label: 'Clear authentication',
-        value: 'clear-auth'
-      });
-    }
-    if (!isEffectivelyAuthenticated) {
-      menuOptions.push({
-        label: 'Authenticate',
-        value: 'auth'
-      });
-    }
+  // 0.1.74 (C-3e 销项): the claudeai-proxy auth-menu gate was removed with the
+  // 1P hosted-connector lane; the generic auth options now always apply.
+  if (isEffectivelyAuthenticated) {
+    menuOptions.push({
+      label: 'Re-authenticate',
+      value: 'reauth'
+    });
+    menuOptions.push({
+      label: 'Clear authentication',
+      value: 'clear-auth'
+    });
+  }
+  if (!isEffectivelyAuthenticated) {
+    menuOptions.push({
+      label: 'Authenticate',
+      value: 'auth'
+    });
   }
   if (server.client.type !== 'disabled') {
     if (server.client.type !== 'needs-auth') {
@@ -357,14 +350,16 @@ export function MCPRemoteServerMenu({
               </Text> : <Text>{color('error', theme)(figures.cross)} failed</Text>}
           </Box>
 
-          {server.transport !== 'claudeai-proxy' && <Box>
+          {/* 0.1.74 (C-3e 销项): the claudeai-proxy gate was removed; the Auth
+              row now always renders for remote servers. */}
+          <Box>
               <Text bold>Auth: </Text>
               {isEffectivelyAuthenticated ? <Text>
                   {color('success', theme)(figures.tick)} authenticated
                 </Text> : <Text>
                   {color('error', theme)(figures.cross)} not authenticated
                 </Text>}
-            </Box>}
+            </Box>
 
           <Box>
             <Text bold>URL: </Text>

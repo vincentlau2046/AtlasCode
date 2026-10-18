@@ -550,11 +550,12 @@ export function resolvePluginMcpEnvironment(
       break
     }
 
-    // For other types (sse-ide, ws-ide, sdk, claudeai-proxy), pass through unchanged
+    // For other types (sse-ide, ws-ide, sdk), pass through unchanged.
+    // 0.1.74 (C-3e 销项): the 1P hosted-connector type case was removed
+    // with the type itself.
     case 'sse-ide':
     case 'ws-ide':
     case 'sdk':
-    case 'claudeai-proxy':
       resolved = config
       break
   }

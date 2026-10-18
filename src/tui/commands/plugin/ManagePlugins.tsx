@@ -18,7 +18,7 @@ import { Box, Text, useInput, useTerminalFocus } from '../../ink.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import { getBuiltinPluginDefinition } from '../../plugins/builtinPlugins.js';
 import { useMcpToggleEnabled } from '../../services/mcp/MCPConnectionManager.js';
-import type { MCPServerConnection, McpClaudeAIProxyServerConfig, McpHTTPServerConfig, McpSSEServerConfig, McpStdioServerConfig } from '../../services/mcp/types.js';
+import type { MCPServerConnection, McpHTTPServerConfig, McpSSEServerConfig, McpStdioServerConfig } from '../../services/mcp/types.js';
 import { filterToolsByServer } from '../../services/mcp/utils.js';
 import { disablePluginOp, enablePluginOp, getPluginInstallationFromV2, isInstallableScope, isPluginEnabledAtProjectScope, uninstallPluginOp, updatePluginOp } from '../../services/plugins/pluginOperations.js';
 import { useAppState } from '../../state/AppState.js';
@@ -2005,18 +2005,10 @@ export function ManagePlugins({
         config: client_3.config as McpHTTPServerConfig
       };
       return <MCPRemoteServerMenu server={server_1} serverToolsCount={serverToolsCount} onViewTools={handleMcpViewTools} onCancel={handleMcpCancel} onComplete={handleMcpComplete} borderless />;
-    } else if (configType === 'claudeai-proxy') {
-      const server_2: ClaudeAIServerInfo = {
-        name: client_3.name,
-        client: client_3,
-        scope: scope_5,
-        transport: 'claudeai-proxy',
-        isAuthenticated: undefined,
-        config: client_3.config as McpClaudeAIProxyServerConfig
-      };
-      return <MCPRemoteServerMenu server={server_2} serverToolsCount={serverToolsCount} onViewTools={handleMcpViewTools} onCancel={handleMcpCancel} onComplete={handleMcpComplete} borderless />;
     }
 
+    // 0.1.74 (C-3e 销项): the claudeai-proxy detail branch was removed with the
+    // 1P hosted-connector lane; non-stdio/sse/http types fall through here.
     // Fallback - shouldn't happen but handle gracefully
     setViewState('plugin-list');
     return null;
@@ -2057,13 +2049,15 @@ export function ManagePlugins({
         config: client_4.config as McpHTTPServerConfig
       };
     } else {
+      // 0.1.74 (C-3e 销项): catch-all re-anchored to the generic remote (http)
+      // shape; the 1P hosted-connector fallback was removed.
       server_3 = {
         name: client_4.name,
         client: client_4,
         scope: scope_6,
-        transport: 'claudeai-proxy',
+        transport: 'http',
         isAuthenticated: undefined,
-        config: client_4.config as McpClaudeAIProxyServerConfig
+        config: client_4.config as unknown as McpHTTPServerConfig
       };
     }
     return <MCPToolListView server={server_3} onSelectTool={(tool: Tool) => {
@@ -2116,13 +2110,15 @@ export function ManagePlugins({
         config: client_5.config as McpHTTPServerConfig
       };
     } else {
+      // 0.1.74 (C-3e 销项): catch-all re-anchored to the generic remote (http)
+      // shape; the 1P hosted-connector fallback was removed.
       server_4 = {
         name: client_5.name,
         client: client_5,
         scope: scope_7,
-        transport: 'claudeai-proxy',
+        transport: 'http',
         isAuthenticated: undefined,
-        config: client_5.config as McpClaudeAIProxyServerConfig
+        config: client_5.config as unknown as McpHTTPServerConfig
       };
     }
     return <MCPToolDetailView tool={tool_0} server={server_4} onBack={() => setViewState({

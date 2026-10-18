@@ -44,9 +44,8 @@ import mapValues from 'lodash-es/mapValues.js'
 import memoize from 'lodash-es/memoize.js'
 import zipObject from 'lodash-es/zipObject.js'
 import pMap from 'p-map'
-import { getOriginalCwd, getSessionId } from 'src/bootstrap'
+import { getOriginalCwd } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
-import { getOauthConfig } from '../../constants/oauth.js'
 import type { AppState } from '../../state/AppState.js'
 import {
   type Tool,
@@ -59,9 +58,6 @@ import { createMcpAuthTool } from '../../tools/McpAuthTool/McpAuthTool.js'
 import { ReadMcpResourceTool } from '../../tools/ReadMcpResourceTool/ReadMcpResourceTool.js'
 import { createAbortController } from '../../utils/abortController.js'
 import { count } from '../../utils/array.js'
-import {
-  getOAuthTokens,
-} from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { detectCodeIndexingFromMcpServerName } from '../../utils/codeIndexing.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -301,19 +297,18 @@ export function clearMcpAuthCache(): void {
 }
 
 /**
- * Shared handler for sse/http/claudeai-proxy auth failures during connect:
+ * Shared handler for sse/http auth failures during connect:
  * emits atlas_mcp_server_needs_auth, caches the needs-auth entry, and returns
  * the needs-auth connection result.
  */
 function handleRemoteAuthFailure(
   name: string,
   serverRef: ScopedMcpServerConfig,
-  transportType: 'sse' | 'http' | 'claudeai-proxy',
+  transportType: 'sse' | 'http',
 ): MCPServerConnection {
   const label: Record<typeof transportType, string> = {
     sse: 'SSE',
     http: 'HTTP',
-    'claudeai-proxy': 'claude.ai proxy',
   }
   logMCPDebug(
     name,
@@ -323,55 +318,10 @@ function handleRemoteAuthFailure(
   return { name, type: 'needs-auth', config: serverRef }
 }
 
-/**
- * Fetch wrapper for claude.ai proxy connections. Attaches the OAuth bearer
- * token and retries once on 401 if the token changed underneath us.
- *
- * The OAuth 401 force-refresh path (handleOAuth401Error) was removed with the
- * claude.ai subscription chain — domestic vendors use a static key, so a 401
- * means the token genuinely needs re-auth (not a stale cache). The concurrent
- * token-change check is retained: if another flow updated the keychain, retry.
- */
-export function createClaudeAiProxyFetch(innerFetch: FetchLike): FetchLike {
-  return async (url, init) => {
-    const doRequest = async () => {
-      const currentTokens = getOAuthTokens()
-      if (!currentTokens) {
-        throw new Error('No claude.ai OAuth token available')
-      }
-      const headers = new Headers(init?.headers)
-      headers.set('Authorization', `Bearer ${currentTokens.accessToken}`)
-      const response = await innerFetch(url, { ...init, headers })
-      // Return the exact token that was sent so the 401-retry path can detect
-      // whether the keychain token changed underneath us (concurrent update).
-      // Same pattern as bridgeApi.ts withOAuthRetry (token passed as fn param).
-      return { response, sentToken: currentTokens.accessToken }
-    }
-
-    const { response, sentToken } = await doRequest()
-    if (response.status !== 401) {
-      return response
-    }
-    // The OAuth 401 force-refresh path was removed (static key, no refresh).
-    // A 401 means the connector genuinely needs auth. Only retry if the
-    // token changed underneath us (concurrent keychain update by another flow).
-    const tokenChanged = false
-    if (!tokenChanged) {
-      // Check if token changed underneath us (concurrent keychain update)
-      const now = getOAuthTokens()?.accessToken
-      if (!now || now === sentToken) {
-        return response
-      }
-    }
-    try {
-      return (await doRequest()).response
-    } catch {
-      // Retry itself failed (network error). Return the original 401 so the
-      // outer handler can classify it.
-      return response
-    }
-  }
-}
+// 0.1.74 (C-3e 销项): the 1P hosted-connector (claude.ai server) connect
+// lane was removed (doubly dead: token lane cleared in 0.1.72 + proxy base
+// neutralized in 0.1.73). Remote MCP auth is per-server config-driven
+// (oauth.clientMetadataUrl / authServerMetadataUrl / DCR).
 
 // Minimal interface for WebSocket instances passed to mcpWebSocketTransport
 type WsClientLike = {
@@ -814,42 +764,6 @@ export const connectToServer = memoize(
         logMCPDebug(name, `HTTP transport created successfully`)
       } else if (serverRef.type === 'sdk') {
         throw new Error('SDK servers should be handled in print.ts')
-      } else if (serverRef.type === 'claudeai-proxy') {
-        logMCPDebug(
-          name,
-          `Initializing claude.ai proxy transport for server ${serverRef.id}`,
-        )
-
-        const tokens = getOAuthTokens()
-        if (!tokens) {
-          throw new Error('No claude.ai OAuth token found')
-        }
-
-        const oauthConfig = getOauthConfig()
-        const proxyUrl = `${oauthConfig.MCP_PROXY_URL}${oauthConfig.MCP_PROXY_PATH.replace('{server_id}', serverRef.id)}`
-
-        logMCPDebug(name, `Using claude.ai proxy at ${proxyUrl}`)
-
-        const fetchWithAuth = createClaudeAiProxyFetch(globalThis.fetch)
-
-        const proxyOptions = getProxyFetchOptions()
-        const transportOptions: StreamableHTTPClientTransportOptions = {
-          // Wrap fetchWithAuth with fresh timeout per request
-          fetch: wrapFetchWithTimeout(fetchWithAuth),
-          requestInit: {
-            ...proxyOptions,
-            headers: {
-              'User-Agent': getMCPUserAgent(),
-              'X-Mcp-Client-Session-Id': getSessionId(),
-            },
-          },
-        }
-
-        transport = new StreamableHTTPClientTransport(
-          new URL(proxyUrl),
-          transportOptions,
-        )
-        logMCPDebug(name, `claude.ai proxy transport created successfully`)
       } else if (
         feature('CHICAGO_MCP') &&
         ((serverRef as any).type === 'stdio' || !(serverRef as any).type) &&
@@ -1050,21 +964,6 @@ export const connectToServer = memoize(
             return handleRemoteAuthFailure(name, serverRef, 'http')
           }
         } else if (
-          serverRef.type === 'claudeai-proxy' &&
-          error instanceof Error
-        ) {
-          logMCPDebug(
-            name,
-            `claude.ai proxy connection failed after ${elapsed}ms: ${error.message}`,
-          )
-          logMCPError(name, error)
-
-          // StreamableHTTPError has a `code` property with the HTTP status
-          const errorCode = (error as Error & { code?: number }).code
-          if (errorCode === 401) {
-            return handleRemoteAuthFailure(name, serverRef, 'claudeai-proxy')
-          }
-        } else if (
           serverRef.type === 'sse-ide' ||
           serverRef.type === 'ws-ide'
         ) {
@@ -1233,10 +1132,7 @@ export const connectToServer = memoize(
         // For HTTP transports, detect session expiry (404 + JSON-RPC -32001)
         // and close the transport so pending tool calls reject and the next
         // call reconnects with a fresh session ID.
-        if (
-          (transportType === 'http' || transportType === 'claudeai-proxy') &&
-          isMcpSessionExpiredError(error)
-        ) {
+        if (transportType === 'http' && isMcpSessionExpiredError(error)) {
           logMCPDebug(
             name,
             `MCP session expired (server returned 404 with session-not-found), triggering reconnection`,
@@ -1250,11 +1146,7 @@ export const connectToServer = memoize(
 
         // For remote transports (SSE/HTTP), track terminal connection errors
         // and trigger reconnection via close if we see repeated failures.
-        if (
-          transportType === 'sse' ||
-          transportType === 'http' ||
-          transportType === 'claudeai-proxy'
-        ) {
+        if (transportType === 'sse' || transportType === 'http') {
           // The SDK's StreamableHTTP transport fires this after exhausting its
           // own SSE reconnect attempts (default maxRetries: 2) — but it never
           // calls onclose, so pending callTool() promises hang indefinitely.
@@ -2188,12 +2080,9 @@ export async function getMcpToolsCommandsAndResources(
       // Each probe is a network round-trip for connect-401 plus OAuth
       // discovery, and print mode awaits the whole batch (main.tsx:3503).
       if (
-        (config.type === 'claudeai-proxy' ||
-          config.type === 'http' ||
-          config.type === 'sse') &&
+        (config.type === 'http' || config.type === 'sse') &&
         ((await isMcpAuthCached(name)) ||
-          ((config.type === 'http' || config.type === 'sse') &&
-            hasMcpDiscoveryButNoToken(name, config)))
+          hasMcpDiscoveryButNoToken(name, config))
       ) {
         logMCPDebug(name, `Skipping connection (cached needs-auth)`)
         onConnectionAttempt({
@@ -3066,7 +2955,7 @@ async function callMCPTool({
         'code' in e &&
         (e as Error & { code?: number }).code === -32000 &&
         e.message.includes('Connection closed') &&
-        (config.type === 'http' || config.type === 'claudeai-proxy')
+        config.type === 'http'
       if (isSessionExpired || isConnectionClosedOnHttp) {
         logMCPDebug(
           name,

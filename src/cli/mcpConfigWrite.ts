@@ -220,10 +220,11 @@ export function expandEnvVarsInString(value: string): {
 
 /**
  * 单服务器 raw 配置 env 展开（旧 config.ts expandEnvVars 8 型支值域收窄：
- * stdio 支 = command/args/env，sse/http/ws 支 = url/headers，ide/sdk/
- * claudeai-proxy 逐字不动。raw unknown 输入（settings 记录 / .mcp.json
- * 未 parse 值），shallow copy 后展开（不污染 settings 缓存对象）——旧
- * expandVars:true 语义（展开值进 schema 校验前）。
+ * stdio 支 = command/args/env，sse/http/ws 支 = url/headers，ide/sdk 逐字
+ * 不动（claudeai-proxy 型 0.1.74 已删；raw 残留记录同落逐字不动支）。raw
+ * unknown 输入（settings 记录 / .mcp.json 未 parse 值），shallow copy 后
+ * 展开（不污染 settings 缓存对象）——旧 expandVars:true 语义（展开值进
+ * schema 校验前）。
  */
 function expandServerConfig(raw: unknown): {
   config: unknown
@@ -262,7 +263,7 @@ function expandServerConfig(raw: unknown): {
       r.headers = expandRecord(r.headers as Record<string, unknown>)
     }
   }
-  // sse-ide / ws-ide / sdk / claudeai-proxy = 旧 switch 逐字不动支
+  // sse-ide / ws-ide / sdk（及 raw claudeai-proxy 残留）= 旧 switch 逐字不动支
   return { config: r, missingVars }
 }
 

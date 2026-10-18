@@ -2,7 +2,6 @@ export type AgentMcpServerInfo = any;
 export type AgentWizardData = any;
 export type BillingType = any;
 export type Chord = any;
-export type ClaudeAIServerInfo = any;
 export const DEFAULT_UPLOAD_CONCURRENCY: any = 5;
 export type FailedPersistence = any;
 export const FILE_COUNT_LIMIT: any = 100;

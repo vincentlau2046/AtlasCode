@@ -163,9 +163,6 @@ export async function mcpListHandler(): Promise<void> {
       } else if (server.type === 'http') {
         // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.log(`${name}: ${server.url} (HTTP) - ${status}`);
-      } else if (server.type === 'claudeai-proxy') {
-        // biome-ignore lint/suspicious/noConsole:: intentional console output
-        console.log(`${name}: ${server.url} - ${status}`);
       } else if (!server.type || server.type === 'stdio') {
         const stdioServer = server as { args?: string[]; command?: string };
         const args = Array.isArray(stdioServer.args) ? stdioServer.args : [];
@@ -210,7 +207,7 @@ export async function mcpGetHandler(name: string): Promise<void> {
         console.log(`    ${key}: ${value}`);
       }
     }
-    if (server.oauth?.clientId || server.oauth?.callbackPort) {
+    if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
         parts.push('client_id configured');
@@ -218,6 +215,7 @@ export async function mcpGetHandler(name: string): Promise<void> {
         if (clientConfig?.clientSecret) parts.push('client_secret configured');
       }
       if (server.oauth.callbackPort) parts.push(`callback_port ${server.oauth.callbackPort}`);
+      if (server.oauth.clientMetadataUrl) parts.push(`client_metadata_url ${server.oauth.clientMetadataUrl}`);
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.log(`  OAuth: ${parts.join(', ')}`);
     }
@@ -234,7 +232,7 @@ export async function mcpGetHandler(name: string): Promise<void> {
         console.log(`    ${key}: ${value}`);
       }
     }
-    if (server.oauth?.clientId || server.oauth?.callbackPort) {
+    if (server.oauth?.clientId || server.oauth?.callbackPort || server.oauth?.clientMetadataUrl) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
         parts.push('client_id configured');
@@ -242,6 +240,7 @@ export async function mcpGetHandler(name: string): Promise<void> {
         if (clientConfig?.clientSecret) parts.push('client_secret configured');
       }
       if (server.oauth.callbackPort) parts.push(`callback_port ${server.oauth.callbackPort}`);
+      if (server.oauth.clientMetadataUrl) parts.push(`client_metadata_url ${server.oauth.clientMetadataUrl}`);
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.log(`  OAuth: ${parts.join(', ')}`);
     }

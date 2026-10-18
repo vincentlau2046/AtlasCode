@@ -49,20 +49,19 @@ export function isToolDetailsLoggingEnabled(): boolean {
  *
  * Per go/taxonomy, MCP names are medium PII. We log them for:
  * - Cowork (entrypoint=local-agent) — no ZDR concept, log all MCPs
- * - claude.ai-proxied connectors — always official (from claude.ai's list)
  * - Servers whose URL matches the official MCP registry — directory
  *   connectors added via `claude mcp add`, not customer-specific config
+ *
+ * (The claude.ai-proxied-connector branch was removed with the 1P
+ * hosted-connector lane in 0.1.74 C-3e.)
  *
  * Custom/user-configured MCPs stay sanitized (toolName='mcp_tool').
  */
 export function isAnalyticsToolDetailsLoggingEnabled(
-  mcpServerType: string | undefined,
-  mcpServerBaseUrl: string | undefined,
+  _mcpServerType: string | undefined,
+  _mcpServerBaseUrl: string | undefined,
 ): boolean {
   if ((process.env.ATLAS_ENTRYPOINT) === 'local-agent') {
-    return true
-  }
-  if (mcpServerType === 'claudeai-proxy') {
     return true
   }
   return false

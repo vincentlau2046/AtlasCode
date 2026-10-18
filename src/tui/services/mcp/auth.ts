@@ -31,7 +31,6 @@ import { createServer, type Server } from 'http'
 import { join } from 'path'
 import { parse } from 'url'
 import xss from 'xss'
-import { MCP_CLIENT_METADATA_URL } from '../../constants/oauth.js'
 import { openBrowser } from '../../utils/browser.js'
 import { getAtlasConfigHomeDir } from '../../utils/envUtils.js'
 import { errorMessage, getErrnoCode } from '../../utils/errors.js'
@@ -1359,15 +1358,26 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
    * CIMD (SEP-991): URL-based client_id. When the auth server advertises
    * client_id_metadata_document_supported: true, the SDK uses this URL as the
    * client_id instead of performing Dynamic Client Registration.
-   * Override via MCP_OAUTH_CLIENT_METADATA_URL env var (e.g. for testing, FedStart).
+   *
+   * 0.1.74 (C-3e 销项): fully config-driven, no built-in 1P default.
+   * Priority: per-server oauth.clientMetadataUrl → MCP_OAUTH_CLIENT_METADATA_URL
+   * env → undefined (SDK falls back to Dynamic Client Registration).
    */
   get clientMetadataUrl(): string | undefined {
+    const perServer = this.serverConfig.oauth?.clientMetadataUrl
+    if (perServer) {
+      logMCPDebug(
+        this.serverName,
+        `Using CIMD URL from server config: ${perServer}`,
+      )
+      return perServer
+    }
     const override = process.env.MCP_OAUTH_CLIENT_METADATA_URL
     if (override) {
       logMCPDebug(this.serverName, `Using CIMD URL from env: ${override}`)
       return override
     }
-    return MCP_CLIENT_METADATA_URL
+    return undefined
   }
 
   setMetadata(

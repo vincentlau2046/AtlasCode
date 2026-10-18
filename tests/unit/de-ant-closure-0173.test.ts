@@ -19,9 +19,10 @@
  * anthropic/claude 字面 = 立即 RED（de-ant 回归守卫）。
  *
  * 登记不入境（token 面不判红，工单 §2/§4，防误伤）：C-2b sessionIngress 1P 远端
- * session 车道 / C-3e MCP 远端车道（MCP connector 的 1P 品牌字面）/ C-2c 可达 OAuth
- * 残 = 0.1.74+ 域换前向缝 ⑭ #200 随 gateway。本文件**仅锚定入境 5 件**，OOS 登记面
- * 不在判据面（不红）。
+ * session 车道 / C-2c 可达 OAuth 残 = 0.1.74+ 域换前向缝 ⑭ #200 随 gateway。
+ * C-3e MCP 远端车道已于 0.1.74 销项（1P hosted-connector 车道 + CIMD 常量整裁，
+ * MCP 远端 = 通用配置驱动 sse/http/ws，见 mcp-remote-closure-0174.test.ts）。
+ * 本文件**仅锚定入境 5 件**，OOS 登记面不在判据面（不红）。
  *
  * 分层纪律：unit 层——**源级字符串锁**（读源文本 = 只读仓库自身，确定性）；
  * auth/settings/modelprovider 重图不入 unit 进程（0.1.72 头注纪律），本文件零 import
@@ -71,12 +72,16 @@ describe('0.1.73 C-2a：oauth.ts anthropic/claude URL 字面中性化（方案 A
     expect(src).not.toContain('claude.ai')
     expect(countOf(src, 'claude-code-20250219')).toBe(0)
   })
-  test('oauth.ts：三活 URL 字段中性化 undefined + CIMD 值 undefined（env 显式化恒等锚）', () => {
+  test('oauth.ts：1P REST 基址字段中性化 undefined（env 显式化恒等锚）', () => {
     const src = srcOf(OAUTH)
     expect(src).toContain('BASE_API_URL: undefined')
     expect(src).toContain('CLAUDE_AI_ORIGIN: undefined')
-    expect(src).toContain('MCP_PROXY_URL: undefined')
-    expect(src).toContain('MCP_CLIENT_METADATA_URL: string | undefined = undefined')
+    // 0.1.74 C-3e 销项：MCP 代理车道（MCP_PROXY_URL/PATH）+ CIMD 常量
+    // （MCP_CLIENT_METADATA_URL）已随 1P hosted-connector 车道整裁而删除
+    // （0.1.72 token 车道清零 + 0.1.73 基址中性化 = 双死），故不再断言在场。
+    expect(src).not.toContain('MCP_PROXY_URL')
+    expect(src).not.toContain('MCP_PROXY_PATH')
+    expect(src).not.toContain('MCP_CLIENT_METADATA_URL')
   })
   test('apiPreconnect：env 缺 = 跳过 preconnect（if !baseUrl return 在场）', () => {
     expect(srcOf(API_PRECONNECT)).toContain('if (!baseUrl) return')

@@ -147,20 +147,12 @@ export const McpServerConfigForProcessTransportSchema = lazySchema(() =>
   ]),
 )
 
-export const McpClaudeAIProxyServerConfigSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('claudeai-proxy'),
-    url: z.string(),
-    id: z.string(),
-  }),
-)
-
-// Broader config type for status responses (includes claudeai-proxy which is output-only)
+// 0.1.74 (C-3e 销项): the 1P hosted-connector (claudeai-proxy) status schema
+// was removed (doubly dead: token lane cleared 0.1.72 + proxy base
+// neutralized 0.1.73). Status responses now describe the generic config-driven
+// transport types only.
 export const McpServerStatusConfigSchema = lazySchema(() =>
-  z.union([
-    McpServerConfigForProcessTransportSchema(),
-    McpClaudeAIProxyServerConfigSchema(),
-  ]),
+  McpServerConfigForProcessTransportSchema(),
 )
 
 export const McpServerStatusSchema = lazySchema(() =>
