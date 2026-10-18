@@ -4,6 +4,64 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.74
+
+MCP 远端车道通用化收口波（C-3e 销项，基线 v0.1.73；工单
+`docs/2026-10-18-mcp-remote-wave-0174-ticket.md`）。
+**波性质 = 两条 1P 死车道整裁 + 1 个通用配置字段并入**：1P
+hosted-connector（claudeai-proxy）连接/显示/守卫车道（token 车道 0.1.72
+清零 + 代理基址 0.1.73 中性化双死）+ CIMD 常量（MCP_CLIENT_METADATA_URL）
+整裁；per-server `oauth.clientMetadataUrl`（https-only）并入，getter 优先级
+env `MCP_OAUTH_CLIENT_METADATA_URL`（部署/operator 控制）→ per-server →
+undefined（SDK DCR 兜底；安全裁定顺序：CIMD URL 承载 OAuth 客户端身份，
+repo 提交面 per-server 值不得压过部署级 env 控制）。**2nd-review 安全硬化
+（同波闭环）**：CIMD env = 真环境（shell/CI）部署专用——从一切 settings
+源 env 剥离（managedEnv 新 `withoutMcpOauthCimdVars` 过滤，repo 提交的
+project-scope settings.env 不可种值，剥离 case-insensitive 键匹配
+（CWE-178：Windows process.env 大小写不敏感语义锁步，异大小写变体
+不可存活））+ getter 值 https-验真（非 URL / 非 https 忽略）；engine
+车道双免疫（S-3a 级联排除 project/local + 无 CIMD 消费点）零改动。
+4th-review 观测卫生：getter CIMD URL 日志只记不可逆描述子
+（host+path，userinfo/query 剥除；防秘密泄露 / 日志注入）；per-server
+oauth 块 scope-gating 维持登记（f4 评估项，单字段门控被拒 = 信任单元
+不劈裂）。
+**通用远端 MCP 面（sse/http/ws + url + headers + headersHelper + per-server
+oauth）零扰动恒等**，远端 MCP 与 LLM gateway 完全解耦（用户级
+HTTPS_PROXY 代理支持保留 = 通用能力）。de-ant 前向缝 ⑭ #200「MCP proxy」
+子项本波注销。
+
+### D-1 · 1P hosted-connector（claudeai-proxy）全车道删除
+
+- 型面：`McpClaudeAIProxyServerConfigSchema` + 型导出 + union 成员删除
+  （union = 7 型 stdio/sse/sse-ide/ws-ide/http/ws/sdk）；SDK 状态 schema
+  同步裁；死 `ClaudeAIServerInfo` stub（all-local-types）删。
+- 连接车道：connect 分发型面 1P 支删 + `createClaudeAiProxyFetch` 整删；
+  远端 auth 失败处理 / 401 session-expired / cached-needs-auth / 连接关闭
+  判别 = sse/http 面。
+- TUI 面：MCPSettings 型分支删（sse/http/stdio 级联恒等重锚）+ defaultTab
+  常量化；MCPRemoteServerMenu 早退守卫/auth 菜单门删（纯通用远端面）；
+  MCPListPanel / useMcpConnectivityStatus claude.ai 分流常量折叠；
+  ManagePlugins 详情/工具视图 1P 支删 + catch-all 重锚通用 http 形。
+- 插件/CLI 面：mcpPluginIntegration switch 裁型 case；raw 残留记录同落
+  逐字不动支（行为保真）。
+
+### D-2 · CIMD 常量删除
+
+- `MCP_CLIENT_METADATA_URL` 整删；`OauthConfig` 现仅 1P REST 基址 +
+  web origin 双字段（0.1.73 中性化 undefined）。
+
+### D-3 · per-server `oauth.clientMetadataUrl` 字段并入
+
+- `McpOAuthConfigSchema` 加 `clientMetadataUrl`（`https://`-only url，与
+  authServerMetadataUrl 同纪律）；`/mcp` OAuth 行展示支（sse+http 双支
+  `client_metadata_url` 行）。
+
+### 验收
+
+- 判别单测 `mcp-remote-closure-0174`（源级锁：1P 型面/常量/车道函数 0 处 +
+  clientMetadataUrl 在场 + 通用远端面恒等锚）+ 0173 C-2a 重锚；四件套绿（gate 终态 d8301a6：4446 pass / 0 fail / 345 文件；
+  tsc 0 / eslint src 0e0w / build cli.js 17886619B）。
+
 ## v0.1.73
 
 大 de-ant 收口波（P0 轨，基线 v0.1.72；工单 `docs/2026-10-15-p0-wave-0173-ticket.md`）。
