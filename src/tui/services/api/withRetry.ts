@@ -290,26 +290,13 @@ export async function* withRetry<T>(
       // Get retry-after header if available
       const retryAfter = getRetryAfter(error)
       let delayMs: number
-      if (persistent && error instanceof APIError && error.status === 429) {
-        persistentAttempt++
-        // Window-based limits (e.g. 5hr Max/Pro) include a reset timestamp.
-        // Wait until reset rather than polling every 5 min uselessly.
-        const resetDelay = getRateLimitResetDelayMs(error)
-        delayMs =
-          resetDelay ??
-          Math.min(
-            getRetryDelay(
-              persistentAttempt,
-              retryAfter,
-              PERSISTENT_MAX_BACKOFF_MS,
-            ),
-            PERSISTENT_RESET_CAP_MS,
-          )
-      } else if (persistent) {
+      if (persistent) {
         persistentAttempt++
         // Retry-After is a server directive and bypasses maxDelayMs inside
         // getRetryDelay (intentional — honoring it is correct). Cap at the
         // 6hr reset-cap here so a pathological header can't wait unbounded.
+        // 0.1.78 W-A (F-2 de-ANT): the 1P 429 rate-limit-reset header read
+        // was removed (dormant on general gateways) — standard backoff.
         delayMs = Math.min(
           getRetryDelay(
             persistentAttempt,
@@ -558,12 +545,6 @@ function getRetryAfterMs(error: APIError): number | null {
   return null
 }
 
-function getRateLimitResetDelayMs(error: APIError): number | null {
-  const resetHeader = error.headers?.get?.('anthropic-ratelimit-unified-reset')
-  if (!resetHeader) return null
-  const resetUnixSec = Number(resetHeader)
-  if (!Number.isFinite(resetUnixSec)) return null
-  const delayMs = resetUnixSec * 1000 - Date.now()
-  if (delayMs <= 0) return null
-  return Math.min(delayMs, PERSISTENT_RESET_CAP_MS)
-}
+// 0.1.78 W-A (F-2 de-ANT): getRateLimitResetDelayMs (1P
+// anthropic-ratelimit-unified-reset header read) was removed — the header is
+// not sent by general gateways; persistent 429 falls back to standard backoff.

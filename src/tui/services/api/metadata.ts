@@ -22,7 +22,7 @@ type JsonValue = string | number | boolean | null | JsonObject | JsonArray
 type JsonObject = { [key: string]: JsonValue }
 type JsonArray = JsonValue[]
 
-export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
+export function getExtraBodyParams(): JsonObject {
   // Parse user's extra body parameters first
   const extraBodyStr = (process.env.ATLAS_EXTRA_BODY)
   let result: JsonObject = {}
@@ -55,20 +55,8 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
   // (feature('ANTI_DISTILLATION_CC') + atlas_anti_distill_fake_tool_injection
   // GB gate) was removed — not a domestic product need.
 
-  // Handle beta headers if provided
-  if (betaHeaders && betaHeaders.length > 0) {
-    if (result.anthropic_beta && Array.isArray(result.anthropic_beta)) {
-      // Add to existing array, avoiding duplicates
-      const existingHeaders = result.anthropic_beta as string[]
-      const newHeaders = betaHeaders.filter(
-        header => !existingHeaders.includes(header),
-      )
-      result.anthropic_beta = [...existingHeaders, ...newHeaders]
-    } else {
-      // Create new array with the beta headers
-      result.anthropic_beta = betaHeaders
-    }
-  }
+  // 0.1.78 W-A (F-2 de-ANT): the anthropic_beta header merge was removed —
+  // beta headers are a 1P wire concept, dormant under the OpenAI protocol.
 
   return result
 }
