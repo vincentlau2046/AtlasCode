@@ -30,7 +30,7 @@ import { getMergedBetas } from './betas.js'
 import { getContextWindowForModel } from './context.js'
 import { logForDebugging } from './debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
-import { isFirstPartyGatewayUrl } from './model/providers.js'
+import { isDefaultGateway } from './model/providers.js'
 import { jsonStringify } from './slowOperations.js'
 import { zodToJsonSchema } from './zodToJsonSchema.js'
 
@@ -290,7 +290,7 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // setup supports it. The falsy check (rather than === undefined) aligns
   // with getToolSearchMode(), which also treats "" as unset.
   // provider 恒为 'firstParty'（网关），原 3P 条件已删。
-  if (!process.env.ENABLE_TOOL_SEARCH && !isFirstPartyGatewayUrl()) {
+  if (!process.env.ENABLE_TOOL_SEARCH && !isDefaultGateway()) {
     if (!loggedOptimistic) {
       loggedOptimistic = true
       logForDebugging(

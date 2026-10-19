@@ -95,8 +95,8 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
         // CommandAvailability 头注：保留字面量 = 穷尽 switch 判别面）
         break
       case 'console':
-        // 一方网关直连用户。头注 ⑦：isFirstPartyGatewayUrl 内联 =
-        // !OPENAI_BASE_URL（first-party 语义）。
+        // 默认网关直连用户（无自定义端点）。头注 ⑦：isDefaultGateway 内联 =
+        // !OPENAI_BASE_URL（0.1.78 W-A 去味改名，逻辑保持）。
         if (!process.env.OPENAI_BASE_URL) {
           return true
         }

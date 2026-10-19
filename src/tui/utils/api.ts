@@ -40,7 +40,7 @@ import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { isEnvTruthy } from './envUtils.js'
 import { createUserMessage } from './messages.js'
-import { isFirstPartyGatewayUrl } from './model/providers.js'
+import { isDefaultGateway } from './model/providers.js'
 import {
   getFileReadIgnorePatterns,
   normalizePatternsToPath,
@@ -191,7 +191,7 @@ export async function toolToAPISchema(
     // with Claude 4.5 reject this field with 400. See GH#32742, PR #21729.
     // provider 恒为 'firstParty'（网关）——冗余 3P 条件已删。
     if (
-      isFirstPartyGatewayUrl() &&
+      isDefaultGateway() &&
       (getFeatureValue_CACHED_MAY_BE_STALE('atlas_fgts', false) ||
         isEnvTruthy((process.env.ATLAS_ENABLE_FINE_GRAINED_TOOL_STREAMING)))
     ) {

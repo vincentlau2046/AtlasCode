@@ -105,7 +105,7 @@ import {
   clearPluginSkillsCache,
 } from './utils/plugins/loadPluginCommands.js'
 import memoize from 'lodash-es/memoize.js'
-import { isFirstPartyGatewayUrl } from './utils/model/providers.js'
+import { isDefaultGateway } from './utils/model/providers.js'
 import exit from './commands/exit/index.js'
 import exportCommand from './commands/export/index.js'
 import model from './commands/model/index.js'
@@ -324,7 +324,7 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
       case 'console':
         // Console API key user = direct 1P API customer (not 3P, not claude.ai).
         // 3P (Bedrock/Vertex/Foundry) removed — only first-party gateway check remains.
-        if (isFirstPartyGatewayUrl())
+        if (isDefaultGateway())
           return true
         break
       case 'vendor':

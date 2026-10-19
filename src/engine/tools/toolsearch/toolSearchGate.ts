@@ -157,7 +157,8 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // setup supports it. The falsy check (rather than === undefined) aligns
   // with getToolSearchMode(), which also treats "" as unset.
   // provider 恒为 'firstParty'（网关），原 3P 条件已删。
-  // delta ②：isFirstPartyGatewayUrl() 内联 = !OPENAI_BASE_URL（first-party 语义）
+  // delta ②：isDefaultGateway() 内联 = !OPENAI_BASE_URL（默认网关语义，
+  // 0.1.78 W-A 去味改名，逻辑保持）
   if (!process.env.ATLAS_ENABLE_TOOL_SEARCH && !!process.env.OPENAI_BASE_URL) {
     if (!loggedOptimistic) {
       loggedOptimistic = true

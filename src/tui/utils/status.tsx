@@ -239,11 +239,11 @@ export function buildAPIProviderProperties(): Property[] {
   const properties: Property[] = [];
   // provider 恒为 'firstParty'（网关）——3P (Vertex/Foundry) 分支已死，
   // 仅保留 first-party 路径。
-  const anthropicBaseUrl = (process.env.OPENAI_BASE_URL);
-  if (anthropicBaseUrl) {
+  const baseUrl = (process.env.OPENAI_BASE_URL);
+  if (baseUrl) {
     properties.push({
       label: 'API base URL',
-      value: anthropicBaseUrl
+      value: baseUrl
     });
   }
   const proxyUrl = getProxyUrl();
