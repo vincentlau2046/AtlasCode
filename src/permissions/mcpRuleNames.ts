@@ -17,20 +17,17 @@
  * TODO PR to shared：本组与 engine/tools/mcp.ts 归一化副本合并入 shared 单一事实源。
  */
 
-// Claude.ai server 名以此前缀开头（旧仓 normalization.ts 逐字常量）。
-const CLAUDEAI_SERVER_PREFIX = 'claude.ai '
-
 /**
- * 归一服务器名到 API 兼容 ^[a-zA-Z0-9_-]{1,64}$（非法字符含点/空格 → 下划线）。
- * claude.ai server（名以 "claude.ai " 开头）另折叠连续下划线并去首尾下划线，
- * 防干扰 MCP 工具名的 __ 分隔符（旧仓逐字）。
+ * 归一服务器名到 API 兼容 ^[a-zA-Z0-9_-]{1,64}$（非法字符含点/空格 → 下划线），
+ * 再折叠连续下划线并去首尾下划线，防干扰 MCP 工具名的 __ 分隔符。
+ * 0.1.78 W-A (F-2 de-ANT)：通用守卫——折叠 + 去首尾对**全部** server 名生效
+ * （原仅 vendor 前缀条件支，用户裁定「功能不丢更中性」）。
  */
 export function normalizeNameForMCP(name: string): string {
-  let normalized = name.replace(/[^a-zA-Z0-9_-]/g, '_')
-  if (name.startsWith(CLAUDEAI_SERVER_PREFIX)) {
-    normalized = normalized.replace(/_+/g, '_').replace(/^_|_$/g, '')
-  }
-  return normalized
+  return name
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
 }
 
 /**

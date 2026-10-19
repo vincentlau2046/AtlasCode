@@ -60,15 +60,13 @@ import type { MCPServerConnection } from '../ports/mcpClient'
 
 // ── MCP 名归一 / 解析（旧仓 normalization.ts + mcpStringUtils.ts 纯函数照抄）──────
 // 归一服务器名到 API 兼容 ^[a-zA-Z0-9_-]{1,64}$（非法字符含点/空格 → 下划线）。
-const CLAUDEAI_SERVER_PREFIX = 'claude.ai '
-
+// 0.1.78 W-A (F-2 de-ANT)：通用守卫——连续下划线折叠 + 去首尾对**全部** server 名
+// 生效（原仅 vendor 前缀条件支，用户裁定「功能不丢更中性」）。
 export function normalizeNameForMCP(name: string): string {
-  let normalized = name.replace(/[^a-zA-Z0-9_-]/g, '_')
-  if (name.startsWith(CLAUDEAI_SERVER_PREFIX)) {
-    // claude.ai 服务器：折叠连续下划线 + 去首尾，防干扰 mcp__ 分隔符
-    normalized = normalized.replace(/_+/g, '_').replace(/^_|_$/g, '')
-  }
-  return normalized
+  return name
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
 }
 
 /**

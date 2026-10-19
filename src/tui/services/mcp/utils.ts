@@ -272,8 +272,8 @@ export function describeMcpConfigFilePath(scope: ConfigScope): string {
       return 'Dynamically configured'
     case 'enterprise':
       return getEnterpriseMcpFilePath()
-    case 'claudeai':
-      return 'claude.ai'
+    // 0.1.78 W-A (F-2 de-ANT)：'claudeai' 分支删（claudeaiPromise 恒空，
+    // org-config 端点不存在，scope 不可达；default 回落 scope 字面量）。
     default:
       return scope
   }
@@ -291,8 +291,7 @@ export function getScopeLabel(scope: ConfigScope): string {
       return 'Dynamic config (from command line)'
     case 'enterprise':
       return 'Enterprise config (managed by your organization)'
-    case 'claudeai':
-      return 'claude.ai config'
+    // 0.1.78 W-A (F-2 de-ANT)：'claudeai' 分支删（同上，scope 不可达）。
     default:
       return scope
   }
@@ -426,12 +425,8 @@ export function getMcpServerScopeFromToolName(
   // Look up server config
   const serverConfig = getMcpConfigByName(mcpInfo.serverName)
 
-  // Fallback: claude.ai servers have normalized names starting with "claude_ai_"
-  // but aren't in getMcpConfigByName (they're fetched async separately)
-  if (!serverConfig && mcpInfo.serverName.startsWith('claude_ai_')) {
-    return 'claudeai'
-  }
-
+  // 0.1.78 W-A (F-2 de-ANT)：claude.ai 归一名前缀 fallback 删——claudeai
+  // promise 恒空（org-config 端点不存在），该支不可达。
   return serverConfig?.scope ?? null
 }
 
