@@ -49,6 +49,9 @@
 > 每波：范围 / 实施要点 / 验收（四件套 + 判别测）。D-9/D-6 依赖 IFF 网关，可并行不阻塞 R1-R3。
 
 ### R1 — E-wave-end 审计 + 架构收敛波（地基，最高优先）
+
+> **执行态索引（2026-10-19 补）**：R1 四残口（双工具面 / 单 loop 切端 / lint 5 真体 / bootstrapState 三分层）已于 2026-09-30 随 `execution-strategy.md §8.74`（W1 设计 #173 → W5 发布通道 #197）全执行闭环；本段"R1 待启动"表述 = 09-29 排波记录，执行态以 §8.74 为准（防误读）。
+
 - **范围**（= §8.73 残口"engine spine vs tui orchestrator 去重" + 全量 lint 复原波）：
   1. **双工具面去重**：**两套完整注册表**——`src/tui/tools/`（**216 文件/49,827 行**〔§8.74 实测订正 181/44k 旧口径〕自带本体 + 真 React 渲染成员，C-7 原样搬，实测 **0 import engine**）vs `src/engine/tools/`（35 真工具对象 + 4 非工具导出，render 成员裁到字符串/null 面，引擎 DI 架构，经 3055 测保真）——裁定**生产单一事实源**（**§8.74 已裁定**：engine 为行为事实源 + tui 27 UI.tsx 渲染路由叠加，删双份），逐文件命运清单见 `execution-strategy.md §8.74.1`。
   2. **engine spine vs tui orchestrator 运行体去重**（12K 行级）：`src/tui/` orchestrator 运行体 vs `src/engine/query+pipeline` 去重，单一 loop 事实源。
