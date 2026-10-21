@@ -4,6 +4,53 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.78
+
+W-A F-2 一方残面清波（基线 v0.1.77；f4 工单
+`docs/2026-10-20-p0-wave-0178-ticket.md`；用户 2026-10-20「开始」触发，
+工单 §0 活码重核 @ eccefe7 + §5 审视记录无报裁项）。
+**波性质 = 去 1P（Anthropic）残面清波**：src 15 文件 281+/101−，判别单测
+`tests/unit/wave0178-deant-closure.test.ts` 锁行为面 + A3-1 恒等锚在场。
+
+### A1 明切 4 件（活码删面）
+
+- `metadata.ts`：`getExtraBodyParams` 签名收窄零参 + `anthropic_beta`
+  头合并块删（1P wire 概念，OpenAI 协议下休眠）。
+- `withRetry.ts`：`anthropic-ratelimit-unified-reset` 头读特判支删
+  （`getRateLimitResetDelayMs` 唯一调用点核后删），429 回标准退避零行为。
+- `coreSchemas.ts`：Rate limit 描述串去 claude.ai subscription 措辞。
+- `outputsScanner.ts`：`EnvironmentKind` 字面 `'anthropic_cloud'→'cloud'`
+  （仓内零写入方，休眠改名）。
+
+### A2 去味 3 件（改名 + 注释）
+
+- `providers.ts`：`isFirstPartyGatewayUrl → isDefaultGateway`
+  （纯改名去味，逻辑保持 `!OPENAI_BASE_URL`）；3 活消费者同步
+  （commands.ts / toolSearch.ts / api.ts）。
+- `status.tsx`：`buildAPIProviderProperties` 内 `anthropicBaseUrl` 变量
+  → `baseUrl`。
+- engine 2 内联注释去味（skill/commands.ts + toolSearchGate.ts 头注 ⑦/②）。
+
+### A3-2 MCP 名归一通用化 + claudeai scope 死码删（4 件）
+
+- `normalizeNameForMCP` 三副本（engine/tools/mcp.ts + mcp/normalization.ts
+  + permissions/mcpRuleNames.ts）删 `CLAUDEAI_SERVER_PREFIX` 条件支：
+  下划线折叠 + 去首尾对**全部** server 名生效（用户裁定「功能不丢更中性」）。
+- `mcp/utils.ts` claudeai scope 三支删（describeMcpConfigFilePath /
+  getScopeLabel / getMcpServerScopeFromToolName fallback）：
+  claudeaiPromise 恒空（org-config 端点不存在）+ 函数零消费者 = 全死码。
+
+### A3-1 官方市场簇不动（用户裁定「带」恒等锚）
+
+- `officialMarketplaceGcs.ts` 的 `downloads.claude.ai` +
+  `claude-plugins-official` 面（~17 文件）零扰动 = 恒等锚判据。
+
+### 已知边界（W-C 0.1.79 池第 20 件候补，f4 裁定非本波红项）
+
+- MCP 名归一空串边界：纯标点 server 名（`'...'` 等）归一空串
+  → `mcp____` 前缀交叉匹配（同配置作者同信任域，非越权）；修面 =
+  三副本 1 行 guard + 判别断言，归 0.1.79。
+
 ## v0.1.77
 
 归整收官波——P-1~P-7 架构终态验收核波（归整波切片③，基线 v0.1.76；f4 工单
