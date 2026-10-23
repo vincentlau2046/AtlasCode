@@ -398,6 +398,31 @@ export async function runPostModelSwitchHooks(
   return runHooks('PostModelSwitch', hookInput, options)
 }
 
+/**
+ * C8-2（0.1.79 W-C）· DirectoryAdded：工作目录加入后（/add-dir 命令面；
+ * SDK register_repo_root 面本仓未迁移）。matchQuery = directory（按加入
+ * 路径过滤）。source = 'session' | 'localSettings'（addDirectories 持久化
+ * 目的地，同 PermissionUpdateDestination 词汇）。
+ */
+export async function runDirectoryAddedHooks(
+  directory: string,
+  source: string,
+  options: HookRunOptions = {},
+): Promise<AggregatedHookResult> {
+  const base = createBaseHookInput(
+    options.permissionMode,
+    options.sessionId,
+    options.agentInfo,
+  )
+  const hookInput: HookInput = {
+    ...base,
+    hook_event_name: 'DirectoryAdded',
+    directory,
+    source,
+  }
+  return runHooks('DirectoryAdded', hookInput, options)
+}
+
 /** SessionStart：会话开始（source 匹配；additionalContext 注入启动上下文）。 */
 export async function runSessionStartHooks(
   source: string,

@@ -133,6 +133,10 @@ export async function getMatchingHooks(
     case 'PostModelSwitch':
       matchQuery = hookInput.new_model as string | undefined
       break
+    // C8-2（0.1.79 W-C）：目录加入事件——matchQuery = directory（按加入路径过滤）。
+    case 'DirectoryAdded':
+      matchQuery = hookInput.directory as string | undefined
+      break
     // Stop / UserPromptSubmit / CwdChanged / WorktreeCreate / WorktreeRemove
     // 无 matchQuery（旧仓 default 分支）。
     default:

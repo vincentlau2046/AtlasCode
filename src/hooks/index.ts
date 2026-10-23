@@ -69,6 +69,8 @@ export {
   // 0.1.56 A · 模型切换生命周期事件（CC 2.1.251）
   runPreModelSwitchHooks,
   runPostModelSwitchHooks,
+  // C8-2（0.1.79 W-C）· /add-dir 后置钩子事件
+  runDirectoryAddedHooks,
   runSessionStartHooks,
   runStopHooks,
   runSessionEndHooks,

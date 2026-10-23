@@ -386,6 +386,9 @@ export const HOOK_EVENTS = [
   // 0.1.56 A：模型切换生命周期事件（CC 2.1.251，TUI model.tsx 两处切换点触发）。
   'PreModelSwitch',
   'PostModelSwitch',
+  // C8-2（0.1.79 W-C）：/add-dir 后置钩子（SDK register_repo_root 面本仓
+  // 未迁移，fire 点 = /add-dir 命令面）。
+  'DirectoryAdded',
 ] as const
 
 export const HookEventSchema = lazySchema(() => z.enum(HOOK_EVENTS))
@@ -527,6 +530,19 @@ export const PostModelSwitchHookInputSchema = lazySchema(() =>
       hook_event_name: z.literal('PostModelSwitch'),
       old_model: z.string().optional(),
       new_model: z.string(),
+      source: z.string(),
+    }),
+  ),
+)
+
+// C8-2（0.1.79 W-C）· /add-dir 后置钩子事件。directory = 加入路径
+// （matcher 过滤面）；source = 持久化目的地（'session' | 'localSettings'，
+// 同 PermissionUpdateDestination 词汇）。
+export const DirectoryAddedHookInputSchema = lazySchema(() =>
+  BaseHookInputSchema().and(
+    z.object({
+      hook_event_name: z.literal('DirectoryAdded'),
+      directory: z.string(),
       source: z.string(),
     }),
   ),

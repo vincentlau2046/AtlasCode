@@ -12,6 +12,8 @@ import { applyPermissionUpdate, persistPermissionUpdate } from '../../utils/perm
 import type { PermissionUpdateDestination } from '../../utils/permissions/PermissionUpdateSchema.js';
 import { getSandboxManager } from 'src/tui/sandboxCompat';
 import { addDirHelpMessage, validateDirectoryForWorkspace } from './validation.js';
+// C8-2（0.1.79 W-C）· /add-dir 后置钩子（fire-and-forget，异常吞并不阻塞命令面）
+import { fireDirectoryAddedHooks } from '../../utils/directoryAddedHooks.js';
 function AddDirError(t0) {
   const $ = _c(10);
   const {
@@ -104,6 +106,9 @@ export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXComma
       message = `Added ${chalk.bold(path)} as a working directory for this session`;
     }
     const messageWithHint = `${message} ${chalk.dim('· /permissions to manage')}`;
+    // C8-2（0.1.79 W-C）· 成功加入后触发 DirectoryAdded 钩子（directory = 加入路径，
+    // source = 持久化目的地，同上方 destination）。
+    fireDirectoryAddedHooks(path, destination);
     onDone(messageWithHint);
   };
 

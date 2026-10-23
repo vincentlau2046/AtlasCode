@@ -619,3 +619,62 @@ describe('wave0179 C6-2 MEMORY.md 接近读限预警 + 立即压实', () => {
     expect(Math.floor(MAX_ENTRYPOINT_BYTES * 0.8)).toBe(20000)
   })
 })
+
+// ════════════════════════════════════════════════════════════════
+// C8-2 DirectoryAdded hook 事件（工单 §1.7：/add-dir 后置钩子新事件）
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C8-2 DirectoryAdded hook 事件', () => {
+  // hooks 域单一事实源直 import（hookEvents.ts 纯常量面，零副作用）。
+  // eslint-disable-next-line
+  const { HOOK_EVENTS } =
+    require('../../src/hooks/hookEvents.js') as typeof import('../../src/hooks/hookEvents.js')
+
+  test('枚举在场：HOOK_EVENTS 含 DirectoryAdded（基线 569aed7 同面红）', () => {
+    expect(HOOK_EVENTS.includes('DirectoryAdded' as never)).toBe(true)
+    // 既有 29 事件零回归（0.1.56 A 尾部两事件仍在场）
+    expect(HOOK_EVENTS.includes('PreModelSwitch' as never)).toBe(true)
+    expect(HOOK_EVENTS.includes('PostModelSwitch' as never)).toBe(true)
+  })
+
+  test('hooks 域执行器 + 域根门面导出（runDirectoryAddedHooks）', () => {
+    const runHooksSrc = srcOf('src/hooks/runHooks.ts')
+    expect(runHooksSrc.includes("hook_event_name: 'DirectoryAdded'")).toBe(true)
+    expect(runHooksSrc.includes('export async function runDirectoryAddedHooks')).toBe(true)
+    const facadeSrc = srcOf('src/hooks/index.ts')
+    expect(facadeSrc.includes('runDirectoryAddedHooks')).toBe(true)
+  })
+
+  test('matcher 面：case DirectoryAdded → matchQuery = directory（按路径过滤）', () => {
+    const src = srcOf('src/hooks/getMatchingHooks.ts')
+    expect(src.includes("case 'DirectoryAdded':")).toBe(true)
+    expect(src.includes('hookInput.directory as string | undefined')).toBe(true)
+  })
+
+  test('SDK schema 面：coreSchemas HOOK_EVENTS 镜像 + DirectoryAddedHookInputSchema', () => {
+    const src = srcOf('src/tui/entrypoints/sdk/coreSchemas.ts')
+    expect(src.includes("'DirectoryAdded',")).toBe(true)
+    expect(src.includes('DirectoryAddedHookInputSchema')).toBe(true)
+    expect(src.includes("hook_event_name: z.literal('DirectoryAdded')")).toBe(true)
+    expect(src.includes('directory: z.string()')).toBe(true)
+  })
+
+  test('agentSdkTypes 占位型 + TUI 执行器（executeDirectoryAddedHooks）', () => {
+    const sdkTypesSrc = srcOf('src/tui/entrypoints/agentSdkTypes.ts')
+    expect(sdkTypesSrc.includes('DirectoryAddedHookInput')).toBe(true)
+    const hooksSrc = srcOf('src/tui/utils/hooks.ts')
+    expect(hooksSrc.includes('export async function* executeDirectoryAddedHooks')).toBe(true)
+    expect(hooksSrc.includes("hook_event_name: 'DirectoryAdded'")).toBe(true)
+  })
+
+  test('触发面：/add-dir 成功路径 fire（add-dir.tsx 后置钩子调用）', () => {
+    const src = srcOf('src/tui/commands/add-dir/add-dir.tsx')
+    expect(src.includes('fireDirectoryAddedHooks')).toBe(true)
+  })
+
+  test('fire 助手模块在场（modelSwitchHooks 先例同型：fire-and-forget + 异常吞并）', () => {
+    const src = srcOf('src/tui/utils/directoryAddedHooks.ts')
+    expect(src.includes('export function fireDirectoryAddedHooks')).toBe(true)
+    expect(src.includes('executeDirectoryAddedHooks')).toBe(true)
+    expect(src.includes('logForDebugging')).toBe(true)
+  })
+})

@@ -73,6 +73,8 @@ import type {
   PostCompactHookInput,
   PreModelSwitchHookInput,
   PostModelSwitchHookInput,
+  // C8-2（0.1.79 W-C）· /add-dir 后置钩子事件
+  DirectoryAddedHookInput,
   PreToolUseHookInput,
   SessionStartHookInput,
   SessionEndHookInput,
@@ -3912,6 +3914,35 @@ export async function* executePostModelSwitchHooks(
     hookInput,
     toolUseID: randomUUID(),
     matchQuery: newModel,
+    signal,
+    timeoutMs,
+  })
+}
+
+/**
+ * Execute DirectoryAdded hooks if configured（C8-2，0.1.79 W-C）。
+ * /add-dir 成功加入工作目录后触发；matchQuery = directory（按加入路径
+ * 过滤）。无 toolUseContext 面（同 executePreModelSwitchHooks）——
+ * sessionId 经 createBaseHookInput 回退 getSessionId()。fire-and-forget
+ * 消费面见 directoryAddedHooks.ts。
+ */
+export async function* executeDirectoryAddedHooks(
+  directory: string,
+  source: string,
+  signal?: AbortSignal,
+  timeoutMs: number = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
+): AsyncGenerator<AggregatedHookResult> {
+  const hookInput: DirectoryAddedHookInput = {
+    ...createBaseHookInput(undefined),
+    hook_event_name: 'DirectoryAdded',
+    directory,
+    source,
+  }
+
+  yield* executeHooks({
+    hookInput,
+    toolUseID: randomUUID(),
+    matchQuery: directory,
     signal,
     timeoutMs,
   })

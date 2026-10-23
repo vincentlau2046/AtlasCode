@@ -465,6 +465,8 @@ export type HookEvent = any;
 export type AsyncHookJSONOutput = any;
 export type ConfigChangeHookInput = any;
 export type CwdChangedHookInput = any;
+// C8-2（0.1.79 W-C）· /add-dir 后置钩子事件
+export type DirectoryAddedHookInput = any;
 export type ElicitationHookInput = any;
 export type ElicitationResultHookInput = any;
 export type ExitReason = any;
