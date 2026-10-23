@@ -95,6 +95,11 @@ export const SettingsSchema = () => z.object({
   tui: z
     .object({ fullscreen: z.boolean().optional() })
     .optional(),
+  // --- 空闲压缩（K1-A，0.1.80 V3-1 @299）：闲置 ≥54min + ≥200K tokens 时
+  //     prompt cache TTL 临近过期先压缩（shouldAutoCompact 空闲 OR 臂）。
+  //     false = 唯一关闭口（默认开）；双拷贝对齐 = tui/utils/settings/types.ts
+  //     同形键；env ATLAS_IDLE_COMPACT_MIN_TOKENS 只覆写 token 下限。
+  idleCompaction: z.boolean().optional(),
   // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件，全仓现状 ∅ 新做）：
   //     skill 与用户命令/其它面同名冲突时的解析策略三档（卷 3 §5 settings key
   //     裁定）。数据契约先行（同 search.tavilyApiKey 先例）：schema 枚举声明 +

@@ -36,6 +36,21 @@ export {
   type TokenWarningState,
   type TokenWarningParams,
 } from './autoCompact'
+// 0.1.80 K1-A（@299 idle compaction）：空闲压缩引擎（闲置 ≥54min + ≥200K
+// tokens，prompt cache TTL 临近过期先压缩；消费点 = shouldAutoCompact OR 臂）
+export {
+  PROMPT_CACHE_TTL_MS,
+  IDLE_COMPACT_TRIGGER_MS,
+  IDLE_COMPACT_MIN_TOKENS,
+  IDLE_COMPACTION_CONFIG_DEFAULTS,
+  resolveIdleCompactionConfig,
+  shouldIdleCompact,
+  getIdleMs,
+  setIdleCompactionSettingsSource,
+  getIdleCompactionConfig,
+  resetIdleCompactionForTesting,
+  type IdleCompactionConfig,
+} from './idleCompaction'
 // #250 concern 2：autoCompact 窗口档位纯面（resolver + 自定义档解析 + 预设档位）
 export {
   resolveAutoCompactWindow,

@@ -65,6 +65,8 @@ import {
   setAutoCompactSettingsSource,
   // #250 concern 2（/autocompact 命令）：settings.autoCompactWindow 档位读侧注入缝
   setAutoCompactWindowSettingsSource,
+  // 0.1.80 K1-A（@299 idle compaction）：settings.idleCompaction 开关读侧注入缝
+  setIdleCompactionSettingsSource,
   setCompactPorts,
   setPartialCompactPort,
   setReactiveCompactPort,
@@ -277,6 +279,10 @@ export function wireContextHostPorts(): void {
   // （userSettings 持久化面；getInitialSettings 会话缓存在 updateSettingsForSource
   // 后重置 → 命令内改档当 session 生效，env 胜 settings 合并纪律在 engine 侧）。
   setAutoCompactWindowSettingsSource(() => getInitialSettings().autoCompactWindow)
+  // 0.1.80 K1-A（@299 idle compaction）：settings.idleCompaction 空闲压缩开关
+  // 读侧（localSettings 持久化面，/config 面板行写；缺席 = 默认开，false = 唯一
+  // 关闭口；env ATLAS_IDLE_COMPACT_MIN_TOKENS 覆写 token 下限在 engine 侧）。
+  setIdleCompactionSettingsSource(() => getInitialSettings().idleCompaction)
   // #260 P0（2026-10-03）：settings.llmTimeoutMs 超时档读侧（userSettings
   // 持久化面；env ATLAS_LLM_TIMEOUT 恒胜此键的合并纪律在 modelprovider 域
   // resolveLlmTimeoutMs 单点，防 UI 读面与 provider 构造面两车道分裂）

@@ -81,10 +81,15 @@
   "terminalTitleFromRename": true,   // 会话改名同步终端标题
   "includeCoAuthoredBy": true,       // commit 尾 Co-Authored-By 行
   "plansDirectory": "~/.atlas/plans", // 计划文件目录
-  "skillOverrides": "off"            // skill 与用户命令同名冲突解析档（0.1.79 C9-5）：
+  "skillOverrides": "off",           // skill 与用户命令同名冲突解析档（0.1.79 C9-5）：
                                      //   off = 不覆盖（缺省）；user-invocable-only = 仅
                                      //   用户可调用命令用该名，skill 需 skill: 前缀完整触发；
                                      //   name-only = skill 独占，同名用户命令不可调用
+  "idleCompaction": true             // 空闲压缩（0.1.80 K1-A）：闲置 ≥54min 且 ≥200K
+                                     //   tokens 时先压缩再请求（prompt cache 1h TTL 临近
+                                     //   过期，压缩不牺牲缓存命中且省 token）；false = 唯一
+                                     //   关闭口（缺省开）；token 下限 env
+                                     //   ATLAS_IDLE_COMPACT_MIN_TOKENS 覆写
 }
 ```
 
@@ -200,6 +205,7 @@
 | `ATLAS_FAST_MODEL` / `ATLAS_SMALL_MODEL` / `ATLAS_SUBAGENT_MODEL` | 快/小/子 agent 角色模型 | 对应 `modelRoles` |
 | `ATLAS_EFFORT_LEVEL` | 推理档位 | 对应 `effortLevel` |
 | `ATLAS_LLM_TIMEOUT` | 单请求超时 | 对应 `llmTimeoutMs` |
+| `ATLAS_IDLE_COMPACT_MIN_TOKENS` | 空闲压缩 token 下限（int ≥1；无效值忽略） | 只覆写 `idleCompaction` 的 token 下限（开关仍由 `idleCompaction` 管） |
 | `ATLAS_MAX_RETRIES` | 重试次数 | （暂仅 env） |
 | `ATLAS_SHELL` | 执行 shell | 对应 `defaultShell` |
 | `ATLAS_CONFIG_DIR_NAME` | 配置目录改名（默认 `.atlas`） | 无文件面对应 |

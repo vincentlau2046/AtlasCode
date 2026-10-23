@@ -47,6 +47,11 @@ import {
   resolveAutoCompactWindow,
   type AutoCompactWindowSettingLike,
 } from './autoCompactWindow'
+import {
+  getIdleCompactionConfig,
+  getIdleMs,
+  shouldIdleCompact,
+} from './idleCompaction'
 
 /**
  * 压缩预留缓冲（旧仓常量，p99.99 摘要输出 17387 token 之上取的安全边）。
@@ -639,12 +644,30 @@ export async function shouldAutoCompact(
     Number.isFinite(deps.thinkingBudgetTokens)
       ? deps.thinkingBudgetTokens
       : 0
-  return tokenCount + thinkingBudget >= getAutoCompactThreshold(
+  const thresholdMet = tokenCount + thinkingBudget >= getAutoCompactThreshold(
     deps.contextWindow,
     deps.maxOutputTokens,
     deps.pctOverride,
     deps.windowOverride,
   )
+  if (thresholdMet) {
+    return true
+  }
+  // 0.1.80 K1-A（@299 idle compaction）：阈值未达时的空闲压缩 OR 臂——闲置
+  // ≥54min（prompt cache 1h TTL 临近过期）且 ≥200K tokens → 先压缩再请求
+  // （cache 已冷，压缩不牺牲缓存命中且省 token）。复用本判定后的整条
+  // autoCompactIfNeeded 路径（熔断/tracking/transcript/buildPostCompactMessages），
+  // 零 loop.ts 改动；上方守卫自动抑制空闲臂（enabled false / 递归守卫 / 小窗
+  // 结构性不可用 = 全局 auto-compact 关时 idle 同关）。token 单源 = 本函数已
+  // 计的 countTokens 真 tokenCount（非 estimateMessageTokens 双估算）。
+  const idleConfig = getIdleCompactionConfig()
+  if (idleConfig.enabled) {
+    const idleMs = getIdleMs(messages)
+    if (shouldIdleCompact(idleConfig, idleMs, tokenCount)) {
+      return true
+    }
+  }
+  return false
 }
 
 /**

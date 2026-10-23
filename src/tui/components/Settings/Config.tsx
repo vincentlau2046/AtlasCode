@@ -275,6 +275,21 @@ export function Config({
       }));
     }
   }, {
+    id: 'idleCompaction',
+    label: 'Idle compaction',
+    value: settingsData?.idleCompaction ?? true,
+    type: 'boolean' as const,
+    onChange(idleCompaction: boolean) {
+      updateSettingsForSource('localSettings', {
+        idleCompaction
+      });
+      // Update local state to reflect the change immediately
+      setSettingsData(prev_3b => ({
+        ...prev_3b,
+        idleCompaction
+      }));
+    }
+  }, {
     id: 'prefersReducedMotion',
     label: 'Reduce motion',
     value: settingsData?.prefersReducedMotion ?? false,
@@ -950,6 +965,7 @@ export function Config({
     const il = initialLocalSettings;
     updateSettingsForSource('localSettings', {
       spinnerTipsEnabled: il?.spinnerTipsEnabled,
+      idleCompaction: il?.idleCompaction,
       prefersReducedMotion: il?.prefersReducedMotion,
       outputStyle: il?.outputStyle
     });

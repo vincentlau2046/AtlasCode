@@ -497,6 +497,20 @@ export {
   type AutoCompactWindowSettingLike,
   type AutoCompactWindowResolution,
   mergeAutoCompactOverrides,
+  // 0.1.80 K1-A（@299 idle compaction）：空闲压缩引擎面（消费点 =
+  // shouldAutoCompact OR 臂；settings.idleCompaction 开关读侧注入缝由宿主
+  // contextHostWiring 接线；env ATLAS_IDLE_COMPACT_MIN_TOKENS 覆写 token 下限）
+  PROMPT_CACHE_TTL_MS,
+  IDLE_COMPACT_TRIGGER_MS,
+  IDLE_COMPACT_MIN_TOKENS,
+  IDLE_COMPACTION_CONFIG_DEFAULTS,
+  resolveIdleCompactionConfig,
+  shouldIdleCompact,
+  getIdleMs,
+  setIdleCompactionSettingsSource,
+  getIdleCompactionConfig,
+  resetIdleCompactionForTesting,
+  type IdleCompactionConfig,
   // 0.1.68 F-1：auto-compact 压缩体（富路径消费 + 裁剪 fail-safe 双门面）
   createAutoCompactCompact,
   type AutoCompactCompactOptions,

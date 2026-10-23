@@ -108,6 +108,9 @@ export const SettingsSchema = () => z.object({
   prefersReducedMotion: z.boolean().optional(),
   syntaxHighlightingDisabled: z.boolean().optional(),
   spinnerTipsEnabled: z.boolean().optional(),
+  // 0.1.80 K1-A（@299 idle compaction）：空闲压缩开关（默认开；false = 唯一
+  // 关闭口。引擎消费 = shouldAutoCompact 空闲 OR 臂，源缝 contextHostWiring）
+  idleCompaction: z.boolean().optional(),
   spinnerTipsOverride: z.any().optional(),
   spinnerVerbs: z.any().optional(),
   statusLine: z.any().optional(),
