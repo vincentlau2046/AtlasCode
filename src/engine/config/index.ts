@@ -23,6 +23,14 @@ export {
   type SettingSource,
   type EditableSettingSource,
 } from './constants'
+// C9-2（0.1.79 W-C）：restricted 模式单一事实源（叶模块）
+export {
+  isRestrictedMode,
+  setRestrictedMode,
+  resetRestrictedMode,
+  isSettingsSourceIgnoredInRestricted,
+  restrictedBypassError,
+} from './restrictedMode'
 export {
   getSessionSettingsCache,
   setSessionSettingsCache,

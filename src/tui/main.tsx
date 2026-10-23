@@ -10,7 +10,7 @@ const ensureKeychainPrefetchCompleted: any = () => Promise.resolve();
 //    sequentially via sync spawn inside applySafeConfigEnvironmentVariables()
 //    (~65ms on every macOS startup)
 import { profileCheckpoint, profileReport } from './utils/startupProfiler.js';
-import { getVersion } from 'src/engine';
+import { getVersion, restrictedBypassError, setRestrictedMode } from 'src/engine';
 // §8.74.23（npm 通道 + 自动更新接线）：PACKAGE_URL 供 tui/utils/autoUpdater 的
 // TUI 自检端点（`npm view ${MACRO.PACKAGE_URL}@<tag> version` + installGlobalPackage
 // `npm i -g ${MACRO.PACKAGE_URL}`）——缺此字段时版本检查静默失败（现补）。
@@ -901,7 +901,7 @@ async function run(): Promise<CommanderCommand> {
       throw new Error('--task-budget must be a positive integer');
     }
     return tokens;
-  }).hideHelp()).option('--replay-user-messages', 'Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)', () => true).addOption(new Option('--enable-auth-status', 'Enable auth status messages in SDK mode').default(false).hideHelp()).option('--allowedTools, --allowed-tools <tools...>', 'Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")').option('--tools <tools...>', 'Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read").').option('--disallowedTools, --disallowed-tools <tools...>', 'Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")').option('--mcp-config <configs...>', 'Load MCP servers from JSON files or strings (space-separated)').addOption(new Option('--permission-prompt-tool <tool>', 'MCP tool to use for permission prompts (only works with --print)').argParser(String).hideHelp()).addOption(new Option('--system-prompt <prompt>', 'System prompt to use for the session').argParser(String)).addOption(new Option('--system-prompt-file <file>', 'Read system prompt from a file').argParser(String).hideHelp()).addOption(new Option('--append-system-prompt <prompt>', 'Append a system prompt to the default system prompt').argParser(String)).addOption(new Option('--append-system-prompt-file <file>', 'Read system prompt from a file and append to the default system prompt').argParser(String).hideHelp()).addOption(new Option('--permission-mode <mode>', 'Permission mode to use for the session').argParser(String).choices(PERMISSION_MODES)).addOption(new Option('--permission-prompts <mode>', "Permission prompt policy; 'none' auto-denies prompts that would otherwise ask").argParser(String).choices(['none'])).option('-c, --continue', 'Continue the most recent conversation in the current directory', () => true).option('-r, --resume [value]', 'Resume a conversation by session ID, or open interactive picker with optional search term', value => value || true).option('--fork-session', 'When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)', () => true).addOption(new Option('--prefill <text>', 'Pre-fill the prompt input with text without submitting it').hideHelp()).addOption(new Option('--deep-link-origin', 'Signal that this session was launched from a deep link').hideHelp()).addOption(new Option('--deep-link-repo <slug>', 'Repo slug the deep link ?repo= parameter resolved to the current cwd').hideHelp()).addOption(new Option('--deep-link-last-fetch <ms>', 'FETCH_HEAD mtime in epoch ms, precomputed by the deep link trampoline').argParser(v => {
+  }).hideHelp()).option('--replay-user-messages', 'Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)', () => true).addOption(new Option('--enable-auth-status', 'Enable auth status messages in SDK mode').default(false).hideHelp()).option('--allowedTools, --allowed-tools <tools...>', 'Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")').option('--tools <tools...>', 'Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read").').option('--disallowedTools, --disallowed-tools <tools...>', 'Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")').option('--mcp-config <configs...>', 'Load MCP servers from JSON files or strings (space-separated)').addOption(new Option('--permission-prompt-tool <tool>', 'MCP tool to use for permission prompts (only works with --print)').argParser(String).hideHelp()).addOption(new Option('--system-prompt <prompt>', 'System prompt to use for the session').argParser(String)).addOption(new Option('--system-prompt-file <file>', 'Read system prompt from a file').argParser(String).hideHelp()).addOption(new Option('--append-system-prompt <prompt>', 'Append a system prompt to the default system prompt').argParser(String)).addOption(new Option('--append-system-prompt-file <file>', 'Read system prompt from a file and append to the default system prompt').argParser(String).hideHelp()).addOption(new Option('--permission-mode <mode>', 'Permission mode to use for the session').argParser(String).choices(PERMISSION_MODES)).addOption(new Option('--permission-prompts <mode>', "Permission prompt policy; 'none' auto-denies prompts that would otherwise ask").argParser(String).choices(['none'])).option('--restricted', 'Run in restricted mode: strips command-execution tools (Bash/PowerShell), WebFetch, and Agent; rejects bypassPermissions and --dangerously-skip-permissions; ignores user/project/local settings (env: ATLAS_RESTRICTED)', () => true).option('-c, --continue', 'Continue the most recent conversation in the current directory', () => true).option('-r, --resume [value]', 'Resume a conversation by session ID, or open interactive picker with optional search term', value => value || true).option('--fork-session', 'When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)', () => true).addOption(new Option('--prefill <text>', 'Pre-fill the prompt input with text without submitting it').hideHelp()).addOption(new Option('--deep-link-origin', 'Signal that this session was launched from a deep link').hideHelp()).addOption(new Option('--deep-link-repo <slug>', 'Repo slug the deep link ?repo= parameter resolved to the current cwd').hideHelp()).addOption(new Option('--deep-link-last-fetch <ms>', 'FETCH_HEAD mtime in epoch ms, precomputed by the deep link trampoline').argParser(v => {
     const n = Number(v);
     return Number.isFinite(n) ? n : undefined;
   }).hideHelp()).option('--from-pr [value]', 'Resume a session linked to a PR by PR number/URL, or open interactive picker with optional search term', value => value || true).option('--no-session-persistence', 'Disable session persistence - sessions will not be saved to disk and cannot be resumed (only works with --print)').addOption(new Option('--resume-session-at <message id>', 'When resuming, only messages up to and including the assistant message with <message.id> (use with --resume in print mode)').argParser(String).hideHelp()).addOption(new Option('--rewind-files <user-message-id>', 'Restore files to state at the specified user message and exit (requires --resume)').hideHelp())
@@ -966,6 +966,25 @@ async function run(): Promise<CommanderCommand> {
     // 优先（?? 链），flag 缺省 = 零变更。勿混 /less-permission-prompts skill。
     const permissionModeCli =
       permissionModeCliRaw ?? (permissionPrompts === 'none' ? 'dontAsk' : undefined);
+    // ── C9-2（0.1.79 W-C，CC 2.1.248 对齐）：--restricted 受限模式 fold。
+    //    真值 fold = setRestrictedMode（engine/config restrictedMode 叶模块
+    //    单一事实源）；须早于 setup()（settings 级联读即受 restricted 剥源
+    //    约束）与工具面组装。bypass 拒门 = 纯决策 restrictedBypassError，
+    //    此层查 options 全量三面（setup.ts 兜底仅收 permissionMode/
+    //    allowDangerouslySkipPermissions 两面）；env-only 车道（ATLAS_RESTRICTED）
+    //    的 bypass 拒归 setup.ts 门兜底。──
+    if (options.restricted === true) {
+      setRestrictedMode(true);
+      const restrictedBypassErr = restrictedBypassError({
+        permissionMode: permissionModeCliRaw,
+        allowDangerouslySkipPermissions,
+        dangerouslySkipPermissions,
+      });
+      if (restrictedBypassErr) {
+        console.error(`Error: ${restrictedBypassErr}`);
+        process.exit(1);
+      }
+    }
     if (options.prefill) {
       seedEarlyInput(options.prefill);
     }

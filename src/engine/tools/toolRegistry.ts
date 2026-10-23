@@ -113,7 +113,12 @@
  */
 import type { Tool, Tools, ToolPermissionContext } from '../../shared'
 import { getDenyRuleForTool } from '../../permissions'
+// C9-2（0.1.79 W-C）：restricted 模式单一事实源（engine/config 叶模块，
+// L3 域边界同 configTool/exitWorktreeTool 先例经域根门面 import）
+import { isRestrictedMode } from '../config'
 import { AgentTool } from './agent/AgentTool'
+import { AGENT_TOOL_NAME } from './agent/constants'
+import { SHELL_TOOL_NAMES, WEB_FETCH_TOOL_NAME } from './toolNames'
 
 /** 注册表注入面（H6：每个字段均有消费点，无死接缝）。 */
 export interface ToolRegistryDeps {
@@ -138,14 +143,32 @@ export function isAscendToolsEnabled(env: NodeJS.ProcessEnv = process.env): bool
 /**
  * 装配工具池（旧仓 getAllBaseTools + assembleToolPool 去重语义裁剪）。
  * 顺序：AgentTool（内建）→ baseTools → ascendTools（门控）→ mcpTools；按名去重先入为主。
+ *
+ * C9-2（0.1.79 W-C）restricted 剥离面（单一收口点，headless/TUI 双 lane 均经此）：
+ *   - 剥命令运行类（Bash/PowerShell）+ WebFetch + Agent（子代理 = 命令执行
+ *     旁路面，Main 裁定剥离）；
+ *   - Ascend 域工具随 restricted 门控出（exec CANN 工具链 = 命令运行面）；
+ *   - MCP 工具残留守（不剥，登记面归 --mcp-config）；
+ *   - cwd 文件工具（Read/Write/Edit/Glob/Grep/…）保留。
  */
 export function getAllBaseTools(deps: ToolRegistryDeps = {}): Tools {
   const env = deps.env ?? process.env
+  const restricted = isRestrictedMode()
   const pool: Tool[] = [AgentTool]
   if (deps.baseTools) pool.push(...deps.baseTools)
-  if (deps.ascendTools && isAscendToolsEnabled(env)) pool.push(...deps.ascendTools)
+  // restricted 门控出：Ascend 工具 = CANN 工具链命令运行面（同剥离向）
+  if (deps.ascendTools && isAscendToolsEnabled(env) && !restricted) {
+    pool.push(...deps.ascendTools)
+  }
   if (deps.mcpTools) pool.push(...deps.mcpTools)
-  return uniqByName(pool)
+  const assembled = uniqByName(pool)
+  if (!restricted) return assembled
+  const stripped = new Set<string>([
+    ...SHELL_TOOL_NAMES,
+    WEB_FETCH_TOOL_NAME,
+    AGENT_TOOL_NAME,
+  ])
+  return assembled.filter((t) => !stripped.has(t.name))
 }
 
 /** 按名去重先入为主（旧仓 uniqBy(name) 语义；新仓无 lodash，本地实现）。 */

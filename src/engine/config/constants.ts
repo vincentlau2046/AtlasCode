@@ -25,6 +25,8 @@
  *   - parseSettingSourcesFlag（--setting-sources CLI 解析）→ 裁剪（新仓无 CLI flag 面）。
  */
 
+import { isRestrictedMode } from './restrictedMode'
+
 /**
  * All possible sources where settings can come from.
  * Order matters - later sources override earlier ones.
@@ -65,6 +67,9 @@ export function getEnabledSettingSources(): SettingSource[] {
   const result = new Set<SettingSource>(ALLOWED_SETTING_SOURCES)
   result.add('policySettings')
   result.add('flagSettings')
+  // C9-2（0.1.79 W-C）：restricted 模式剥 userSettings（受信面收窄；
+  // policySettings = 企业管控通道保留，见 restrictedMode.ts 裁定登记）
+  if (isRestrictedMode()) result.delete('userSettings')
   return Array.from(result)
 }
 

@@ -595,6 +595,13 @@ export {
   isSettingSourceEnabled,
   type SettingSource,
   type EditableSettingSource,
+  // C9-2（0.1.79 W-C）：restricted 模式单一事实源（cli/tui 双 lane flag fold +
+  // bypass 拒门消费；toolRegistry/settings 域内直取 config 子门面）
+  isRestrictedMode,
+  setRestrictedMode,
+  resetRestrictedMode,
+  isSettingsSourceIgnoredInRestricted,
+  restrictedBypassError,
   getSessionSettingsCache,
   setSessionSettingsCache,
   getCachedSettingsForSource,

@@ -86,6 +86,8 @@ import {
   type EditableSettingSource,
   type SettingSource,
 } from './constants'
+// C9-2（0.1.79 W-C）：restricted 模式 settings 忽略面（叶模块，见 restrictedMode.ts）
+import { isSettingsSourceIgnoredInRestricted } from './restrictedMode'
 import { mergeWith, settingsMergeCustomizer } from './merge'
 import { getManagedSettingsDropInDir, getManagedSettingsDir } from './managedPath'
 import {
@@ -338,6 +340,11 @@ export function getSettingsForSource(
 function getSettingsForSourceUncached(
   source: SettingSource,
 ): SettingsJson | null {
+  // C9-2（0.1.79 W-C）：restricted 模式忽略 user/project/local settings
+  // （受信面收窄；policySettings = 企业管控通道保留）。覆盖 permissionsLoader/
+  // hooksSettings/sandbox 按源直读面。
+  if (isSettingsSourceIgnoredInRestricted(source)) return null
+
   // For policySettings: single file branch (managed-settings.json + drop-in).
   // 旧仓 first-source-wins 四链（remote > MDM > file > HKCU）裁剪，见头注。
   if (source === 'policySettings') {
@@ -399,6 +406,15 @@ export function updateSettingsForSource(
   source: EditableSettingSource,
   settings: SettingsJson,
 ): { error: Error | null } {
+  // C9-2（0.1.79 W-C）：restricted 模式拒写回（读面已忽略，写回若放行会以
+  // null 为基合并清掉既有键——读忽略 + 写拒成对，受信面收窄）
+  if (isSettingsSourceIgnoredInRestricted(source)) {
+    return {
+      error: new Error(
+        `Settings source ${source} is ignored in restricted mode (--restricted / ATLAS_RESTRICTED)`,
+      ),
+    }
+  }
   if (
     (source as unknown) === 'policySettings' ||
     (source as unknown) === 'flagSettings'

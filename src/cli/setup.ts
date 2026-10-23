@@ -79,6 +79,7 @@ import {
   findGitRoot,
   generateTmuxSessionName,
   isAgentSwarmsEnabled,
+  restrictedBypassError,
   updateHooksConfigSnapshot,
   worktreeBranchName,
   type WorktreeSession,
@@ -244,6 +245,20 @@ export async function runCliSetup(options: CliSetupOptions): Promise<void> {
     // getCommands 预取 fire-and-forget，吞掉 reject 防 unhandledRejection
     //（-p 支 S-C5 修波接线后，unit 测试经本支，catch 兼作测试面安全网）。
     void getCommands(getProjectRoot()).catch(() => {})
+  }
+
+  // ── C9-2（0.1.79 W-C）：restricted bypass 拒门（env-only 车道 ATLAS_RESTRICTED
+  //    兜底；纯决策 restrictedBypassError，flag 车道 parse.ts 已查 options 全量
+  //    三面。此处 CliSetupOptions 仅 permissionMode/allowDangerouslySkipPermissions
+  //    两面，dangerouslySkipPermissions 面 flag 车道已收）──
+  const restrictedBypassErr = restrictedBypassError({
+    permissionMode: options.permissionMode,
+    allowDangerouslySkipPermissions:
+      options.allowDangerouslySkipPermissions === true,
+  })
+  if (restrictedBypassErr) {
+    process.stderr.write(`Error: ${restrictedBypassErr}\n`)
+    process.exit(1)
   }
 
   // ── bypassPermissions root/sudo 安全门（旧仓逐字；de-ANT 沙箱硬检已裁，

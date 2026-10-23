@@ -11,6 +11,7 @@ import { checkForReleaseNotes } from 'src/tui/utils/releaseNotes.js'
 import { setCwd } from 'src/tui/utils/Shell.js'
 import { initSinks } from 'src/tui/utils/sinks.js'
 import { getIsNonInteractiveSession, getProjectRoot, getSessionId, setOriginalCwd, setProjectRoot, switchSession } from 'src/bootstrap'
+import { restrictedBypassError } from 'src/engine'
 import { getCommands } from './commands.js'
 import { initSessionMemory } from './services/SessionMemory/sessionMemory.js'
 import { asSessionId } from './types/ids.js'
@@ -361,6 +362,19 @@ export async function setup(
     if (hasReleaseNotes) {
       await getRecentActivity()
     }
+  }
+
+  // ── C9-2（0.1.79 W-C）：restricted bypass 拒门（env-only 车道
+  //    ATLAS_RESTRICTED 兜底；纯决策 restrictedBypassError，flag 车道
+  //    main.tsx 已查 options 全量三面）──
+  const restrictedBypassErr = restrictedBypassError({
+    permissionMode,
+    allowDangerouslySkipPermissions,
+  })
+  if (restrictedBypassErr) {
+    // biome-ignore lint/suspicious/noConsole:: intentional console output
+    console.error(`Error: ${restrictedBypassErr}`)
+    process.exit(1)
   }
 
   // If permission mode is set to bypass, verify we're in a safe environment

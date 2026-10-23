@@ -79,6 +79,9 @@ import {
 import { existsSync, readFileSync, realpathSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { setSessionPersistenceDisabled } from '../bootstrap'
+// C9-2（0.1.79 W-C）：--restricted flag fold + bypass 拒门（engine/config
+// restrictedMode 叶模块经域根门面，同 setup.ts 先例）
+import { restrictedBypassError, setRestrictedMode } from '../engine'
 import { PERMISSION_MODES } from '../permissions'
 import { feature, isEnvTruthy, type ThinkingConfig } from '../shared'
 import { isUdsInboxEnabled } from '../remote'
@@ -317,6 +320,25 @@ async function mainActionSeam(
   prompt: string | undefined,
   options: Record<string, unknown>,
 ): Promise<void> {
+  // ── C9-2（0.1.79 W-C）：--restricted fold + bypass 拒门（须在 runCliSetup
+  //    前——setup 读 settings 级联即受 restricted 剥源约束）。headless 面
+  //    dangerouslySkipPermissions 在 options 上而 runCliSetup 只收
+  //    allowDangerouslySkipPermissions，故此层直查 options 全量三面
+  //    （permissionMode / allow* / dangerously*）。env-only 车道（ATLAS_RESTRICTED）
+  //    的 bypass 拒归 setup.ts 双门兜底。──
+  if (options.restricted === true) {
+    setRestrictedMode(true)
+    const bypassErr = restrictedBypassError({
+      permissionMode: options.permissionMode as string | undefined,
+      allowDangerouslySkipPermissions:
+        options.allowDangerouslySkipPermissions === true,
+      dangerouslySkipPermissions: options.dangerouslySkipPermissions === true,
+    })
+    if (bypassErr) {
+      process.stderr.write(`Error: ${bypassErr}\n`)
+      process.exit(1)
+    }
+  }
   if (options.initOnly) {
     // --init-only（S-C4 回填，S-C2 前向接缝核销）：跑 setup 面后退出（旧
     // main.tsx「Run Setup and SessionStart hooks, then exit」语义，不进
@@ -586,6 +608,15 @@ export function buildProgram(): CommanderCommand {
     .option(
       '--disallowedTools, --disallowed-tools <tools...>',
       'Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")',
+    )
+    // C9-2（0.1.79 W-C，CC 2.1.248 对齐）：--restricted 受限模式（env 等价
+    // ATLAS_RESTRICTED）——剥命令运行类工具 + WebFetch + Agent、拒
+    // bypassPermissions/--dangerously-skip-permissions、忽略 user/project/local
+    // settings（安全收紧向）。真值 fold = setRestrictedMode（engine/config
+    // restrictedMode 叶模块单一事实源）。
+    .option(
+      '--restricted',
+      'Run in restricted mode: strips command-execution tools (Bash/PowerShell), WebFetch, and Agent; rejects bypassPermissions and --dangerously-skip-permissions; ignores user/project/local settings (env: ATLAS_RESTRICTED)',
     )
     .option(
       '--mcp-config <configs...>',
