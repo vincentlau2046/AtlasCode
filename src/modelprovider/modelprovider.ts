@@ -17,6 +17,8 @@ import { randomUUID } from 'crypto'
 import OpenAI from 'openai'
 import { getClientForEntry } from './clients'
 import { LLM_TIMEOUT_DEFAULT_MS } from './constants'
+import { STREAM_IDLE_TIMEOUT_MS } from './constants'
+import { withStreamIdleWatchdog } from './streamIdleWatchdog'
 import { getRoleModels, getRoleModel, resolveModel, getRoleConfig, type ModelRole } from './roles'
 import { asSystemPrompt, type Message, type SystemPrompt, type ThinkingConfig, type Tools } from '../shared'
 import { buildUserAgent, logForDebugging } from '../shared'
@@ -974,7 +976,13 @@ export class OpenAIProvider implements ModelProvider {
     let streamError: unknown = null
 
     try {
-      for await (const chunk of stream) {
+      // 0.1.80 K1-E（@299）：流空闲看门狗——chunk 间隔 > STREAM_IDLE_TIMEOUT_MS
+      // （300s）→ StreamIdleTimeoutError → 本 attempt abort 走既有重试面
+      // （shouldRetryModelError；message 含 "timeout" 落 isRetryableError 正则；
+      // 非 SDK 超时类 → buildStreamErrorEvent 编 API_ERROR + retryable，与
+      // #260 生成超时 TIMEOUT fail-fast 有意区分）。包装在本方法内 = 同时
+      // 覆盖 chatStream 与 chat(onStreamDelta) 两个消费面。
+      for await (const chunk of withStreamIdleWatchdog<any>(stream, STREAM_IDLE_TIMEOUT_MS)) {
         const choice = chunk.choices?.[0]
         const delta = choice?.delta
         if (delta?.content) {

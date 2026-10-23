@@ -36,6 +36,15 @@ export const LLM_TIMEOUT_CAP_MS = 1_800_000
  */
 export const LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS = 60_000
 
+/**
+ * 0.1.80 K1-E（@299 流超时件）：流空闲（stall）超时——两次 chunk 之间的最大
+ * 间隔，非整请求上限（整请求上限 = LLM_TIMEOUT_DEFAULT_MS）。自定义 base URL
+ * 网关流 180s 无数据即断（上游 2.1.299 → 300s 放宽）；修前本仓无流空闲看门
+ * 狗（仅整请求 timeout），挂起流要等满 15min 请求超时才回收。消费点 =
+ * streamOneAttempt chunk 循环（withStreamIdleWatchdog 包装）。
+ */
+export const STREAM_IDLE_TIMEOUT_MS = 300_000
+
 // ════════════════════════════════════════════════════════════════
 // Beta Headers（旧仓 constants/betas.ts）
 // ════════════════════════════════════════════════════════════════

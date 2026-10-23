@@ -12,7 +12,9 @@ import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_DEFAULT_MS } from './constants'
 import { parseBoundedIntEnv, logForDebugging } from '../shared'
 import { resolveModel, getRoleConfig } from './roles'
 import { llmTimeoutUnitHint } from './modelprovider'
-export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
+export { LLM_TIMEOUT_DEFAULT_MS, LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS, STREAM_IDLE_TIMEOUT_MS } from './constants'
+// 0.1.80 K1-E：流空闲看门狗（streamOneAttempt chunk 循环消费）
+export { StreamIdleTimeoutError, withStreamIdleWatchdog } from './streamIdleWatchdog'
 
 export {
   OpenAIProvider,
