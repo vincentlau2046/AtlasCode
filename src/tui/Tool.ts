@@ -152,7 +152,15 @@ export type CompactProgressEvent =
       type: 'hooks_start'
       hookType: 'pre_compact' | 'post_compact' | 'session_start'
     }
-  | { type: 'compact_start' }
+  | {
+      type: 'compact_start'
+      /**
+       * 0.1.80 K1-C② 加性字段：本次摘要实际调用的模型（显式化，不"悄悄"
+       * 耗额度 @301——含 K1-C① 切换前模型面）。无值 = 既有发射点，零回归。
+       * （与 engine/context/compactPorts.ts 的 twin 定义保持同字段。）
+       */
+      summaryModel?: string
+    }
   | { type: 'compact_end' }
 
 export type ToolUseContext = {

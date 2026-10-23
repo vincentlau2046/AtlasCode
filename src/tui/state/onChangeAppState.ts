@@ -1,4 +1,6 @@
 import { setMainLoopModelOverride } from 'src/tui/bootstrapState.js'
+// 0.1.80 K1-C①：模型切换 previous-model 记录（压缩摘要先用大窗前模型）
+import { recordMainLoopModelSwitch } from '../contextBodies/compactModelSwitch.js'
 import {
   clearApiKeyHelperCache,
 } from '../utils/auth.js'
@@ -88,6 +90,12 @@ export function onChangeAppState({
       })
     }
     notifyPermissionModeChanged(newMode)
+  }
+
+  // 0.1.80 K1-C①：主循环模型切换单点记录（两分支共用；前模型窗 > 新模型窗
+  // 时压缩摘要先用前模型——sticky-peek store，见 compactModelSwitch.ts 头注）
+  if (newState.mainLoopModel !== oldState.mainLoopModel) {
+    recordMainLoopModelSwitch(oldState.mainLoopModel, newState.mainLoopModel)
   }
 
   // mainLoopModel: remove it from settings?

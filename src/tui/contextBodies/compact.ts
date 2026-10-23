@@ -3,6 +3,8 @@ import type { UUID } from 'crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 
 import { APIUserAbortError } from '../types/atlas.js'
+// 0.1.80 K1-C①：模型切换 previous-model 记录（压缩摘要先用大窗前模型）
+import { resolveSwitchedCompactModel } from './compactModelSwitch.js'
 import { markPostCompaction } from 'src/tui/bootstrapState.js'
 import { getInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
 import type { QuerySource } from '../constants/querySource.js'
@@ -1160,7 +1162,19 @@ export async function streamCompactSummary({
     const maxAttempts = retryEnabled ? MAX_COMPACT_STREAMING_RETRIES : 1
 
     // 0.1.69 D-3：摘要调用模型（缺省 = 主循环模型；fallback 支 = small 角色）
-    const compactModel = modelOverride ?? context.options.mainLoopModel
+    // 0.1.80 K1-C①：模型切换后前模型窗更大 → 摘要先用前（大窗）模型
+    // （sticky-peek store，见 compactModelSwitch.ts 头注设计裁定）
+    const compactModel =
+      modelOverride ??
+      resolveSwitchedCompactModel(context.options.mainLoopModel) ??
+      context.options.mainLoopModel
+
+    // 0.1.80 K1-C②：摘要模型显式化（进度面显示实际调用模型，不"悄悄"
+    // 耗额度 @301；加性字段，旧消费面忽略零回归）
+    context.onCompactProgress?.({
+      type: 'compact_start',
+      summaryModel: compactModel,
+    })
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       // Reset state for retry
