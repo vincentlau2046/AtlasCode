@@ -15,6 +15,10 @@ export {
   type FieldPath,
   type ValidationError,
   type SettingsWithErrors,
+  // C9-5（0.1.79 W-C）：skillOverrides 三档解析面（纯函数，消费缝 = skill 命令域）
+  type SkillOverridesMode,
+  DEFAULT_SKILL_OVERRIDES_MODE,
+  resolveSkillOverrides,
 } from './types'
 export {
   SETTING_SOURCES,

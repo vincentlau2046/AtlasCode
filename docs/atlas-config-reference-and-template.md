@@ -80,7 +80,11 @@
   "cleanupPeriodDays": 30,           // 会话清理周期
   "terminalTitleFromRename": true,   // 会话改名同步终端标题
   "includeCoAuthoredBy": true,       // commit 尾 Co-Authored-By 行
-  "plansDirectory": "~/.atlas/plans" // 计划文件目录
+  "plansDirectory": "~/.atlas/plans", // 计划文件目录
+  "skillOverrides": "off"            // skill 与用户命令同名冲突解析档（0.1.79 C9-5）：
+                                     //   off = 不覆盖（缺省）；user-invocable-only = 仅
+                                     //   用户可调用命令用该名，skill 需 skill: 前缀完整触发；
+                                     //   name-only = skill 独占，同名用户命令不可调用
 }
 ```
 

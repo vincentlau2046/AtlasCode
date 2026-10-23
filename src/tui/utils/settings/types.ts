@@ -149,6 +149,18 @@ export const SettingsSchema = () => z.object({
   agent: z.any().optional(),
   local: z.any().optional(),
   worktree: z.any().optional(),
+  // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件）：skill 与
+  // 用户命令同名冲突时策略三档 off / user-invocable-only / name-only。
+  // 双拷贝对齐 = engine/config/types.ts 同形 skillOverrides 键 + 纯解析面
+  // resolveSkillOverrides；消费缝 = skill 命令域（src/tui/commands/skills/），
+  // 本波登记不接线（行为面 = 后续波）。
+  skillOverrides: z
+    .union([
+      z.literal('off'),
+      z.literal('user-invocable-only'),
+      z.literal('name-only'),
+    ])
+    .optional(),
 }).passthrough();
 // 注：未知字段由 .passthrough() 透传，不影响解析。深层嵌套（如 permissions/hooks/sandbox）暂用 z.any()，后续逐步细化。
 

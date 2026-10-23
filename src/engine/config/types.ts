@@ -95,7 +95,46 @@ export const SettingsSchema = () => z.object({
   tui: z
     .object({ fullscreen: z.boolean().optional() })
     .optional(),
+  // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件，全仓现状 ∅ 新做）：
+  //     skill 与用户命令/其它面同名冲突时的解析策略三档（卷 3 §5 settings key
+  //     裁定）。数据契约先行（同 search.tavilyApiKey 先例）：schema 枚举声明 +
+  //     resolveSkillOverrides 纯解析面；消费缝 = skill 命令域
+  //     （src/tui/commands/skills/），本波登记不接线（行为面 = 后续波）。
+  skillOverrides: z
+    .union([
+      z.literal('off'),
+      z.literal('user-invocable-only'),
+      z.literal('name-only'),
+    ])
+    .optional(),
 }).passthrough()
+
+/**
+ * skillOverrides 档位（C9-5）：同名冲突解析策略。
+ * - off：不覆盖（skill 名优先，缺省档）
+ * - user-invocable-only：仅用户可调用命令使用该名，skill 需完整名（skill: 前缀）触发
+ * - name-only：skill 独占，同名用户命令不可调用
+ */
+export type SkillOverridesMode = 'off' | 'user-invocable-only' | 'name-only'
+
+/** skillOverrides 缺省档（字段缺席 = 不覆盖）。 */
+export const DEFAULT_SKILL_OVERRIDES_MODE: SkillOverridesMode = 'off'
+
+/**
+ * skillOverrides 纯解析面（C9-5）：settings 原值 → 三档枚举。
+ * 合法值直通；缺席/undefined → 'off'；非法值 → 'off'（宽容降级，不抛——
+ * schema 校验面已产出 ValidationError，此处是消费侧兜底，勿 crash）。
+ */
+export function resolveSkillOverrides(raw: unknown): SkillOverridesMode {
+  if (
+    raw === 'off' ||
+    raw === 'user-invocable-only' ||
+    raw === 'name-only'
+  ) {
+    return raw
+  }
+  return DEFAULT_SKILL_OVERRIDES_MODE
+}
 
 export type SettingsJson = z.infer<ReturnType<typeof SettingsSchema>>
 
