@@ -71,6 +71,9 @@ export {
   isTerminalConnectionError,
   getMcpConnectionManager,
   resetMcpConnectionManager,
+  // C5-4（0.1.79 W-C）：能力发现失败退避（纯函数面）
+  getMcpConnectBackoffMs,
+  mcpConnectBackoffDelayMs,
 } from './mcpConnectionManager'
 
 // ── 3 供应商 + LRU + sanitize（mcpFetch.ts）────────────────────────

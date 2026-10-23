@@ -503,3 +503,51 @@ describe('wave0179 D-3/D-5 已落地核验锚', () => {
     ).toBe(true)
   })
 })
+
+// ════════════════════════════════════════════════════════════════
+// C5-4 MCP 能力发现失败退避（item ⑤；unit 层零 spawn → 纯函数矩阵 +
+// 源锚点判别，真 spawn 生命周期面在 tests/func/mcp-stdio-server-se2b）
+// ════════════════════════════════════════════════════════════════
+import {
+  getMcpConnectBackoffMs,
+  mcpConnectBackoffDelayMs,
+} from '../../src/mcp'
+
+describe('wave0179 C5-4 MCP 能力发现失败退避', () => {
+  test('退避表纯函数：指数 + 封顶 + 禁用/零次面', () => {
+    expect(mcpConnectBackoffDelayMs(0, 1000)).toBe(0)
+    expect(mcpConnectBackoffDelayMs(1, 1000)).toBe(1000)
+    expect(mcpConnectBackoffDelayMs(2, 1000)).toBe(2000)
+    expect(mcpConnectBackoffDelayMs(4, 1000)).toBe(8000)
+    // 封顶 MAX_MCP_CONNECT_BACKOFF_MS = 30s
+    expect(mcpConnectBackoffDelayMs(10, 1000)).toBe(30_000)
+    expect(mcpConnectBackoffDelayMs(100, 1000)).toBe(30_000)
+    // base 0 = 退避禁用（恒 0）；负 count 恒 0
+    expect(mcpConnectBackoffDelayMs(3, 0)).toBe(0)
+    expect(mcpConnectBackoffDelayMs(-1, 1000)).toBe(0)
+  })
+
+  test('env 解析：缺省 1s / 合法覆盖 / 非法回落 / 0 与负值 clamp 到 0（禁用）', () => {
+    expect(getMcpConnectBackoffMs({})).toBe(1000)
+    expect(getMcpConnectBackoffMs({ ATLAS_MCP_CONNECT_BACKOFF_MS: '' })).toBe(1000)
+    expect(getMcpConnectBackoffMs({ ATLAS_MCP_CONNECT_BACKOFF_MS: '250' })).toBe(250)
+    expect(getMcpConnectBackoffMs({ ATLAS_MCP_CONNECT_BACKOFF_MS: 'abc' })).toBe(1000)
+    expect(getMcpConnectBackoffMs({ ATLAS_MCP_CONNECT_BACKOFF_MS: '0' })).toBe(0)
+    expect(getMcpConnectBackoffMs({ ATLAS_MCP_CONNECT_BACKOFF_MS: '-5' })).toBe(0)
+  })
+
+  test('源锚点：失败记账 + 窗口短路 + 成功清账接线', () => {
+    const src = srcOf('src/mcp/mcpConnectionManager.ts')
+    // ① 失败记账表在场
+    expect(src.includes('connectFailures')).toBe(true)
+    // ② connect 入口窗口短路（消费退避表 + deferred 文案）
+    expect(src.includes('mcpConnectBackoffDelayMs(record.count)')).toBe(true)
+    expect(src.includes('connect deferred (backoff)')).toBe(true)
+    // ③ connectStdio catch 记账（连败计数递增）
+    expect(src.includes('count: (prev?.count ?? 0) + 1')).toBe(true)
+    // ④ 成功清账（connected 落态 → 失败历史抹除）
+    expect(src.includes('connectFailures.delete(name)')).toBe(true)
+    // ⑤ env 面
+    expect(src.includes('ATLAS_MCP_CONNECT_BACKOFF_MS')).toBe(true)
+  })
+})

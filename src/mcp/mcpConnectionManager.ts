@@ -62,6 +62,38 @@ function getConnectionTimeoutMs(): number {
   return parseInt(process.env.MCP_TIMEOUT || '', 10) || 30000
 }
 
+// ── C5-4（0.1.79 W-C）：能力发现失败退避 ──────────────────────────────
+
+const DEFAULT_MCP_CONNECT_BACKOFF_MS = 1_000
+const MAX_MCP_CONNECT_BACKOFF_MS = 30_000
+
+/**
+ * 退避基值解析：env ATLAS_MCP_CONNECT_BACKOFF_MS（缺省 1s；0 / 负值 =
+ * 退避禁用——每次 connect 都真跑生命周期，恢复 ≤ 基线行为）。
+ */
+export function getMcpConnectBackoffMs(
+  env: Record<string, string | undefined> = process.env,
+): number {
+  const raw = env.ATLAS_MCP_CONNECT_BACKOFF_MS
+  if (raw === undefined || raw === '') return DEFAULT_MCP_CONNECT_BACKOFF_MS
+  const parsed = Number(raw)
+  if (!Number.isFinite(parsed)) return DEFAULT_MCP_CONNECT_BACKOFF_MS
+  return Math.max(0, parsed)
+}
+
+/**
+ * 指数退避表（纯函数）：base·2^(count-1)，封顶 MAX；count ≤ 0 或 base ≤ 0
+ * = 0（不退避）。计数 = 连续能力发现失败次数（成功清零）。
+ */
+export function mcpConnectBackoffDelayMs(
+  failureCount: number,
+  baseMs: number = getMcpConnectBackoffMs(),
+): number {
+  if (failureCount <= 0 || baseMs <= 0) return 0
+  const raw = baseMs * 2 ** (failureCount - 1)
+  return Math.min(raw, MAX_MCP_CONNECT_BACKOFF_MS)
+}
+
 // ── terminal error 判定（旧 L1178-1191 9 子串面逐字）────────────────
 
 /** 终态连接错误判定（旧 isTerminalConnectionError 逐字：ECONNRESET /
@@ -172,6 +204,9 @@ export type McpConnectionManager = {
 export function createMcpConnectionManager(): McpConnectionManager {
   const connections = new Map<string, McpServerConnection>()
   const pending = new Set<string>()
+  // C5-4（0.1.79 W-C）：能力发现失败记账（per-server 连败计数；仅 stdio 支
+  // 记账——seam 支 = 永久配置错误，退避会遮蔽登记文案；成功清账）。
+  const connectFailures = new Map<string, { count: number; lastFailedAt: number }>()
 
   function fail(
     name: string,
@@ -340,6 +375,8 @@ export function createMcpConnectionManager(): McpConnectionManager {
         },
       }
       connections.set(name, connection)
+      // C5-4（0.1.79 W-C）：能力发现成功 → 连败历史清零。
+      connectFailures.delete(name)
       return connection
     } catch (e) {
       // spawn 失败 / 超时 / initialize 错误 → failed（stderr 面同 drop 面）
@@ -354,6 +391,9 @@ export function createMcpConnectionManager(): McpConnectionManager {
         e instanceof McpJsonRpcError || e instanceof Error
           ? e.message
           : String(e)
+      // C5-4（0.1.79 W-C）：连败记账（connect 入口窗口短路消费；成功清账）。
+      const prev = connectFailures.get(name)
+      connectFailures.set(name, { count: (prev?.count ?? 0) + 1, lastFailedAt: Date.now() })
       return fail(name, config, message)
     }
   }
@@ -365,6 +405,24 @@ export function createMcpConnectionManager(): McpConnectionManager {
   ): Promise<McpServerConnection> {
     const existing = connections.get(name)
     if (existing?.type === 'connected') return existing
+
+    // C5-4（0.1.79 W-C）：能力发现失败退避窗口——上次失败至今仍在退避窗内
+    // → 不重跑生命周期，直接 failed 登记（防连环 spawn 重试砸连接预算）。
+    // ATLAS_MCP_CONNECT_BACKOFF_MS=0 / 负值 = 退避禁用（≤ 基线行为）。
+    const record = connectFailures.get(name)
+    const backoffDelayMs = record
+      ? mcpConnectBackoffDelayMs(record.count)
+      : 0
+    if (record !== undefined && backoffDelayMs > 0) {
+      const sinceLastFailure = Date.now() - record.lastFailedAt
+      if (sinceLastFailure < backoffDelayMs) {
+        return fail(
+          name,
+          config,
+          `MCP server "${name}" connect deferred (backoff): ${record.count} consecutive failure(s), retry in ~${Math.ceil((backoffDelayMs - sinceLastFailure) / 1000)}s (set ATLAS_MCP_CONNECT_BACKOFF_MS=0 to disable)`,
+        )
+      }
+    }
 
     pending.add(name)
     try {
