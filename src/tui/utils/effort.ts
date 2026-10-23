@@ -3,6 +3,8 @@ import { getInitialSettings, getSettingsForSource } from './settings/settings.js
 // (isProSubscriber / isMaxSubscriber / isTeamSubscriber removed with D1)
 import { isEnvTruthy } from './envUtils.js'
 import type { EffortLevel } from 'src/tui/entrypoints/sdk/runtimeTypes.js'
+// 0.1.80 K1-B①：前缀名归一单一事实源（modelprovider 门面，TUI 面既有依赖向）
+import { stripProviderPrefix } from 'src/modelprovider'
 
 export type { EffortLevel }
 
@@ -149,6 +151,15 @@ export function getPersistedEffortForModel(
   const wanted = model.toLowerCase()
   for (const [key, level] of Object.entries(getEffortByModel())) {
     if (key.toLowerCase() === wanted) return level
+  }
+  // 0.1.80 K1-B①：精确 miss → basename 回落（`prefix/model` 前缀名请求剥
+  // 前缀取 basename 再查裸名键；stripProviderPrefix 单一事实源，对齐
+  // modelprovider lookupEffortByModel 同面——显示/发送双面同源）
+  const base = stripProviderPrefix(model).toLowerCase()
+  if (base !== wanted) {
+    for (const [key, level] of Object.entries(getEffortByModel())) {
+      if (key.toLowerCase() === base) return level
+    }
   }
   return undefined
 }

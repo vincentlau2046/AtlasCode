@@ -241,7 +241,7 @@ export {
   getTokenRevokedErrorMessage,
   getOauthOrgNotAllowedErrorMessage,
 } from './errorMessaging'
-export { getModelMeta, getProviderContextWindow } from './capabilities'
+export { getModelMeta, getProviderContextWindow, stripProviderPrefix } from './capabilities'
 export type { EndpointConfigSource } from './ports/endpointConfig'
 export { zodToJsonSchema, type JsonSchema7Type } from './schema'
 export {

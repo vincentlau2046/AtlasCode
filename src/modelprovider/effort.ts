@@ -17,6 +17,8 @@
 
 import { EFFORT_LEVELS, isEnvTruthy } from '../shared'
 import type { EffortLevel, EffortValue } from '../shared'
+// 0.1.80 K1-B①：前缀名归一单一事实源（同域 capabilities，直调不经门面）
+import { stripProviderPrefix } from './capabilities'
 
 // Re-export for domain consumers/tests (值定义在 shared，域内透传)
 export { EFFORT_LEVELS }
@@ -103,13 +105,24 @@ export function setEffortByModelSource(next: EffortByModelSource): void {
   effortByModelSource = next
 }
 
-/** per-model 记忆查槽（case-insensitive，对齐 TUI getPersistedEffortForModel 先例）。 */
+/**
+ * per-model 记忆查槽（case-insensitive，对齐 TUI getPersistedEffortForModel 先例）。
+ * 0.1.80 K1-B①：精确 miss → basename 回落（`prefix/model` 前缀名请求剥前缀
+ * 取 basename 再查裸名键，stripProviderPrefix 单一事实源）；无 `/` 时 basename
+ * = 原名，回落与精确同键恒等。
+ */
 function lookupEffortByModel(model: string): EffortLevel | undefined {
   const map = effortByModelSource?.()
   if (!map) return undefined
   const wanted = model.toLowerCase()
   for (const [key, level] of Object.entries(map)) {
     if (key.toLowerCase() === wanted) return level
+  }
+  const base = stripProviderPrefix(model).toLowerCase()
+  if (base !== wanted) {
+    for (const [key, level] of Object.entries(map)) {
+      if (key.toLowerCase() === base) return level
+    }
   }
   return undefined
 }

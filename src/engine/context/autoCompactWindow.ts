@@ -19,6 +19,10 @@
  * 持久化 settings；越界值两侧同纪律（解析 guard 忽略不生效，raw 注入安全）。
  */
 
+// 0.1.80 K1-B①：`prefix/model` 前缀名归一单一事实源（engine → modelprovider
+// 既有依赖向，先例 = autoCompact.ts / compact.ts 同门面导入）
+import { stripProviderPrefix } from '../../modelprovider'
+
 /** settings.autoCompactWindow 值形（宿主 zod schema 输出结构匹配；engine 不依赖
  * tui 类型，结构型单源 = 本定义，宿主 schema 对齐本形）。 */
 export type AutoCompactWindowSetting =
@@ -117,18 +121,36 @@ function resolveAutoCompactWindowSingle(
 }
 
 /**
+ * 0.1.80 K1-B①：per-model 档位查表（裸名键归一，纯函数）。
+ * 查序 = 精确键（修前语义恒等）→ basename 回落（`prefix/model` 前缀名
+ * 请求剥前缀命中裸名键；stripProviderPrefix 单一事实源）→ `default` 键。
+ * 显式前缀键（如 `volc/qwen3-235b` 恰为键名）优先于 basename 回落，
+ * 不被回落遮蔽。resolveAutoCompactWindow 与 /autocompact
+ * currentTierFor 共用本面（读写同源，档位显示/生效一致）。
+ */
+export function lookupAutoCompactWindowSetting(
+  perModel: AutoCompactWindowPerModel,
+  model?: string,
+): AutoCompactWindowSetting | undefined {
+  if (!model) return perModel.default
+  return perModel[model] ?? perModel[stripProviderPrefix(model)] ?? perModel.default
+}
+
+/**
  * 档位 → 覆写 resolver（纯函数，0.1.69 D-1 扩 model 键入参）：
  *   - 1 参调用（model 缺省）= 修前单全局档语义精确同值（旧单档面经归一 =
  *     `default` 键；per-model map 无 model 入参时取 `default` 键）——零回归锚
- *   - 2 参（model 在场）：按模型键取档，无该模型档 → 回落 `default` 键 →
- *     缺省 {}（per-model 各取己档；用户 256K+1M 混配面封顶缺陷根修）
+ *   - 2 参（model 在场）：按模型键取档（0.1.80 K1-B① 经
+ *     lookupAutoCompactWindowSetting 加 basename 回落），无该模型档 →
+ *     回落 `default` 键 → 缺省 {}（per-model 各取己档；用户 256K+1M
+ *     混配面封顶缺陷根修）
  */
 export function resolveAutoCompactWindow(
   setting: AutoCompactWindowSettingLike | null | undefined,
   model?: string,
 ): AutoCompactWindowResolution {
   const perModel = normalizeAutoCompactWindowSetting(setting)
-  const chosen = (model && perModel[model]) || perModel.default
+  const chosen = lookupAutoCompactWindowSetting(perModel, model)
   return resolveAutoCompactWindowSingle(chosen)
 }
 

@@ -486,6 +486,7 @@ export {
   // 合并纯函数（agentLoopDeps DI 注入单点）
   setAutoCompactWindowSettingsSource,
   resolveAutoCompactWindow,
+  lookupAutoCompactWindowSetting,
   parseAutoCompactTierInput,
   parseAutoCompactTierArg,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,

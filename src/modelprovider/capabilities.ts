@@ -15,6 +15,18 @@
 import { getEndpointConfigSource } from './roles'
 
 /**
+ * 0.1.80 K1-B①：`prefix/model` 前缀名归一（单一事实源）。
+ * 网关/自定义端点的请求模型名常带 `provider/model` 前缀形（如
+ * `volc/qwen3-235b`），而配置面（settings 档位键 / provider
+ * models[].id）均以裸名为键。查表面先精确匹配（修前语义恒等），
+ * miss 后经本 helper 剥前缀取 basename 再匹配；无 `/` 时恒等返回。
+ */
+export function stripProviderPrefix(model: string): string {
+  const idx = model.lastIndexOf('/')
+  return idx >= 0 ? model.slice(idx + 1) : model
+}
+
+/**
  * Model capability metadata, populated from provider config.
  * All fields are optional — absent values fall back to the
  * consumer's own heuristic defaults (typically the hardcoded
@@ -44,7 +56,10 @@ export function getModelMeta(modelId: string): ModelMeta | undefined {
   const providers: any = getEndpointConfigSource().getProviders()
   for (const pCfg of Object.values(providers)) {
     const models: any[] = (pCfg as any).models || []
-    const entry = models.find((m: any) => m?.id === modelId)
+    // K1-B①：精确 miss → basename 回落（前缀名请求命中裸名声明）
+    const entry =
+      models.find((m: any) => m?.id === modelId) ??
+      models.find((m: any) => m?.id === stripProviderPrefix(modelId))
     if (entry) {
       return {
         knowledgeCutoff: entry.knowledgeCutoff,
@@ -70,7 +85,11 @@ export function getProviderContextWindow(modelId: string): number | undefined {
   const providers: any = getEndpointConfigSource().getProviders()
   for (const pCfg of Object.values(providers)) {
     const models: any[] = (pCfg as any).models || []
-    const entry = models.find((m: any) => m?.id === modelId)
+    // K1-B①：精确 miss → basename 回落（前缀名请求命中裸名声明窗位，
+    // 防 miss → HARD_DEFAULT_CONTEXT_WINDOW 262144 错窗提前压缩）
+    const entry =
+      models.find((m: any) => m?.id === modelId) ??
+      models.find((m: any) => m?.id === stripProviderPrefix(modelId))
     if (entry?.contextWindow) return entry.contextWindow
   }
   return undefined

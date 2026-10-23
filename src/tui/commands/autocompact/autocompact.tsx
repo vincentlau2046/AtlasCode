@@ -15,6 +15,7 @@ import {
 import type { SettingsJson } from '../../utils/settings/types.js'
 import {
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
+  lookupAutoCompactWindowSetting,
   normalizeAutoCompactWindowSetting,
   parseAutoCompactTierArg,
   parseAutoCompactTierInput,
@@ -62,13 +63,18 @@ const PRESET_TIERS: readonly number[] = [...AUTOCOMPACT_PRESET_WINDOW_TIERS]
 /**
  * 0.1.69 D-1：现档按模型取档（per-model 键 → default 键 → 缺省；raw 值形
  * = 旧单档 | per-model map，经 normalizeAutoCompactWindowSetting 归一）。
+ * 0.1.80 K1-B①：经 engine lookupAutoCompactWindowSetting 单点查表（精确键
+ * → basename 回落 → default 键），与 resolveAutoCompactWindow 读写同源，
+ * 档位显示/生效一致。
  */
 function currentTierFor(
   raw: AutoCompactWindowSettingLike | undefined,
   model: string,
 ): AutoCompactWindowSetting | undefined {
-  const map = normalizeAutoCompactWindowSetting(raw)
-  return map[model] ?? map.default
+  return lookupAutoCompactWindowSetting(
+    normalizeAutoCompactWindowSetting(raw),
+    model,
+  )
 }
 
 /** 现档 → 选项值（预设档命中自身，非预设 window / pct → 自定义框带初值）。 */

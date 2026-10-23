@@ -39,6 +39,9 @@ export {
 // #250 concern 2：autoCompact 窗口档位纯面（resolver + 自定义档解析 + 预设档位）
 export {
   resolveAutoCompactWindow,
+  // 0.1.80 K1-B①：per-model 档位查表单点（/autocompact currentTierFor 共用，
+  // 精确键 → basename 回落 → default 键）
+  lookupAutoCompactWindowSetting,
   parseAutoCompactTierInput,
   parseAutoCompactTierArg,
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
