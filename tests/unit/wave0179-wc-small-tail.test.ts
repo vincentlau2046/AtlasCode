@@ -551,3 +551,71 @@ describe('wave0179 C5-4 MCP 能力发现失败退避', () => {
     expect(src.includes('ATLAS_MCP_CONNECT_BACKOFF_MS')).toBe(true)
   })
 })
+
+// ════════════════════════════════════════════════════════════════
+// C6-2 memory 容量预警（工单 §1.6：接近读限预警 + 立即压实提示）
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C6-2 MEMORY.md 接近读限预警 + 立即压实', () => {
+  // 单测直 import tui/memdir 内部模块先例：memory-c3-prompt-consistency.test.ts
+  // （memdir.ts import 链探针已验：单测环境零副作用加载）。
+  // eslint-disable-next-line
+  const { truncateEntrypointContent, MAX_ENTRYPOINT_LINES, MAX_ENTRYPOINT_BYTES } =
+    require('../../src/tui/memdir/memdir.js') as typeof import('../../src/tui/memdir/memdir.js')
+
+  test('近限（未截断但 ≥ 0.8·上限）→ nearLimit: true + NOTE 压实提醒', () => {
+    // 170 行（0.8·200=160 阈值之上，200 上限之下）× 短行 → 现行为无任何提醒（基线同面红）
+    const nearLines = Array.from({ length: 170 }, (_, i) => `- entry ${i}`).join('\n')
+    const res = truncateEntrypointContent(nearLines)
+    expect(res.wasLineTruncated).toBe(false)
+    expect(res.wasByteTruncated).toBe(false)
+    expect(res.nearLimit).toBe(true)
+    expect(res.content).toContain('> NOTE: MEMORY.md is close to the read limit')
+    expect(res.content).toContain('Compact it now')
+  })
+
+  test('字节面近限（行数远低但字节 ≥ 0.8·25_000）→ 同 NOTE 预警', () => {
+    // 100 行 × ~210B/行 ≈ 21KB：行 100 < 160，字节 ≥ 20_000 → 近限走字节臂
+    const longLines = Array.from({ length: 100 }, (_, i) => `- entry ${i} ${'x'.repeat(205)}`).join('\n')
+    const res = truncateEntrypointContent(longLines)
+    expect(res.wasByteTruncated).toBe(false)
+    expect(res.nearLimit).toBe(true)
+    expect(res.content).toContain('Compact it now')
+  })
+
+  test('常规量级 → nearLimit: false + 内容零附加（零回归面）', () => {
+    const small = ['- entry a', '- entry b'].join('\n')
+    const res = truncateEntrypointContent(small)
+    expect(res.nearLimit).toBe(false)
+    expect(res.content).toBe(small)
+    expect(res.content).not.toContain('> NOTE:')
+    expect(res.content).not.toContain('> WARNING:')
+  })
+
+  test('超限截断面 → WARNING 补「立即压实」指令（原 keep-short 提示保留）', () => {
+    const over = Array.from({ length: MAX_ENTRYPOINT_LINES + 10 }, (_, i) => `- entry ${i}`).join('\n')
+    const res = truncateEntrypointContent(over)
+    expect(res.wasLineTruncated).toBe(true)
+    expect(res.nearLimit).toBe(true)
+    expect(res.content).toContain('> WARNING: MEMORY.md is')
+    expect(res.content).toContain('Only part of it was loaded')
+    // 既有 keep-short 指令保留
+    expect(res.content).toContain('Keep index entries to one line under ~200 chars')
+    // 新补压实指令
+    expect(res.content).toContain('Compact it now')
+  })
+
+  test('源锚点：阈值常量 + nearLimit 计算 + 双消费面单一事实源', () => {
+    const src = srcOf('src/tui/memdir/memdir.ts')
+    // ① 0.8 阈值常量
+    expect(src.includes('NEAR_LIMIT_FRACTION')).toBe(true)
+    // ② 近限判定门（未截断才走 NOTE 支）
+    expect(src.includes('nearLimit')).toBe(true)
+    // ③ 压实指令文案（NOTE / WARNING 两支共用措辞）
+    expect(src.includes('Compact it now')).toBe(true)
+  })
+
+  test('阈值数值面：0.8·上限 = 160 行 / 20_000 字节', () => {
+    expect(Math.floor(MAX_ENTRYPOINT_LINES * 0.8)).toBe(160)
+    expect(Math.floor(MAX_ENTRYPOINT_BYTES * 0.8)).toBe(20000)
+  })
+})

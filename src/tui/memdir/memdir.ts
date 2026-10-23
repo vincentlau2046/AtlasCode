@@ -40,7 +40,16 @@ export const MAX_ENTRYPOINT_LINES = 200
 // ~125 chars/line at 200 lines. At p97 today; catches long-line indexes that
 // slip past the line cap (p100 observed: 197KB under 200 lines).
 export const MAX_ENTRYPOINT_BYTES = 25_000
+// C6-2（0.1.79 W-C）：接近读限阈值（0.8·上限）。未截断但已过阈值 → NOTE
+// 预警 + 立即压实指令（超限前窗口把模型拉回压实，而非截断后丢内容）。
+export const NEAR_LIMIT_FRACTION = 0.8
+export const NEAR_LIMIT_LINES = Math.floor(MAX_ENTRYPOINT_LINES * NEAR_LIMIT_FRACTION)
+export const NEAR_LIMIT_BYTES = Math.floor(MAX_ENTRYPOINT_BYTES * NEAR_LIMIT_FRACTION)
 const AUTO_MEM_DISPLAY_NAME = 'auto memory'
+
+// 压实指令（NOTE 近限支 / WARNING 截断支共用措辞，单一事实源）。
+const COMPACT_NOW_DIRECTIVE =
+  'Compact it now: merge duplicate entries and prune stale ones before adding new lines.'
 
 export type EntrypointTruncation = {
   content: string
@@ -48,6 +57,8 @@ export type EntrypointTruncation = {
   byteCount: number
   wasLineTruncated: boolean
   wasByteTruncated: boolean
+  /** C6-2（0.1.79 W-C）：接近读限（未截断但 ≥ 0.8·上限）或已截断 → true。 */
+  nearLimit: boolean
 }
 
 /**
@@ -69,13 +80,23 @@ export function truncateEntrypointContent(raw: string): EntrypointTruncation {
   // targets, so post-line-truncation size would understate the warning.
   const wasByteTruncated = byteCount > MAX_ENTRYPOINT_BYTES
 
+  // C6-2（0.1.79 W-C）：近限判定（未截断且行/字节任一过 0.8·上限）。
+  const nearLimit =
+    (lineCount >= NEAR_LIMIT_LINES || byteCount >= NEAR_LIMIT_BYTES) &&
+    !wasLineTruncated &&
+    !wasByteTruncated
+
   if (!wasLineTruncated && !wasByteTruncated) {
     return {
-      content: trimmed,
+      content: nearLimit
+        ? trimmed +
+          `\n\n> NOTE: ${ENTRYPOINT_NAME} is close to the read limit (${lineCount} lines / ${formatFileSize(byteCount)}; limits: ${MAX_ENTRYPOINT_LINES} lines / ${formatFileSize(MAX_ENTRYPOINT_BYTES)}). ${COMPACT_NOW_DIRECTIVE}`
+        : trimmed,
       lineCount,
       byteCount,
       wasLineTruncated,
       wasByteTruncated,
+      nearLimit,
     }
   }
 
@@ -98,11 +119,13 @@ export function truncateEntrypointContent(raw: string): EntrypointTruncation {
   return {
     content:
       truncated +
-      `\n\n> WARNING: ${ENTRYPOINT_NAME} is ${reason}. Only part of it was loaded. Keep index entries to one line under ~200 chars; move detail into topic files.`,
+      `\n\n> WARNING: ${ENTRYPOINT_NAME} is ${reason}. Only part of it was loaded. Keep index entries to one line under ~200 chars; move detail into topic files. ${COMPACT_NOW_DIRECTIVE}`,
     lineCount,
     byteCount,
     wasLineTruncated,
     wasByteTruncated,
+    // 截断面必在近限之上（超限 > 0.8·上限）。
+    nearLimit: true,
   }
 }
 
