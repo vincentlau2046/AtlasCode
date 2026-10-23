@@ -97,6 +97,15 @@ export interface AutoCompactDeps {
   /** ATLAS_AUTO_COMPACT_WINDOW（旧仓 autoCompact.ts:40 语义）：有效窗口 cap
    * （contextWindow = min(contextWindow, 本值)）。config 面读侧同上。 */
   windowOverride?: number
+  /**
+   * 0.1.80 K1-F⑤（@296）：预算思考 token 计入兜底——countTokens 为消息面
+   * 估算（chars/4），不含思考模型本轮将要消耗的 reasoning 预算，自适应思考
+   * 模型实际占用被低估 → auto-compact 晚触发（压缩前已 PTL）。注入具体预算
+   * 值时计入阈值比较（tokenCount + thinkingBudgetTokens ≥ 阈值，提前触发）。
+   * 通用化槽（不绑任何一方模型品牌面）；非 finite 值按 0 计（tokenCount 自身
+   * 的 NaN guard 语义不变）；未注入 = 修前行为精确同值（零回归）。
+   */
+  thinkingBudgetTokens?: number
 }
 
 export interface AutoCompactOutcome {
@@ -621,7 +630,16 @@ export async function shouldAutoCompact(
   if (!Number.isFinite(tokenCount)) {
     return false
   }
-  return tokenCount >= getAutoCompactThreshold(
+  // 0.1.80 K1-F⑤（@296）：预算思考 token 计入——countTokens 为消息面估算，
+  // 不含思考模型本轮将消耗的 reasoning 预算；注入具体预算时计入阈值比较
+  // （提前触发）。非 finite 预算按 0 计（兜底不引入新的静默禁用面）；
+  // 未注入 = 修前比较精确同值（零回归）。
+  const thinkingBudget =
+    deps.thinkingBudgetTokens !== undefined &&
+    Number.isFinite(deps.thinkingBudgetTokens)
+      ? deps.thinkingBudgetTokens
+      : 0
+  return tokenCount + thinkingBudget >= getAutoCompactThreshold(
     deps.contextWindow,
     deps.maxOutputTokens,
     deps.pctOverride,

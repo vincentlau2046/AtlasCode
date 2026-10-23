@@ -196,7 +196,38 @@ async function buildOpenAITools(
       })
     }
   }
-  return out
+  // 0.1.80 K1-F①：按 name 稳定排序 + 同名去重保留首现（@302）——工具
+  // 注入序抖动会让 prompt cache 键漂移；同名重复（注册工具 vs
+  // extraToolSchemas）部分 provider 直接 400。首现优先 = 注册工具面
+  // （含权限描述）压过 extra 裸 schema。
+  return stableSortDedupeTools(out)
+}
+
+/**
+ * 0.1.80 K1-F①：工具 schema 列表按 function.name 稳定排序 + 同名去重
+ * （保留首现）。Array.prototype.sort 在各引擎均稳定（ES2019+），同窗内
+ * 原相对序保留——去重后首现即"最早声明者"。
+ */
+export function stableSortDedupeTools(
+  tools: ChatCompletionTool[],
+): ChatCompletionTool[] {
+  // ChatCompletionTool = function 型 ∪ custom 型（openai SDK 判别联合）——
+  // name 提取经 type 窄化；本仓两个 push 点恒造 function 型，custom 支为
+  // 防御面（custom 型 name 在 .custom.name 非顶层）。
+  const nameOf = (t: ChatCompletionTool): string =>
+    t.type === 'function' ? t.function.name : t.custom.name
+  const sorted = [...tools].sort((a, b) => {
+    const an = nameOf(a)
+    const bn = nameOf(b)
+    return an < bn ? -1 : an > bn ? 1 : 0
+  })
+  const seen = new Set<string>()
+  return sorted.filter(t => {
+    const n = nameOf(t)
+    if (seen.has(n)) return false
+    seen.add(n)
+    return true
+  })
 }
 
 export function toResponseFormat(outputFormat: any): any {

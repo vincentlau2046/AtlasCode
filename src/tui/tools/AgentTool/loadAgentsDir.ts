@@ -86,6 +86,10 @@ const AgentJsonSchema = lazySchema(() =>
     mcpServers: z.array(AgentMcpServerSpecSchema()).optional(),
     hooks: HooksSchema().optional(),
     maxTurns: z.number().int().positive().optional(),
+    // 0.1.80 K1-F③（@296）：per-agent 压缩窗位覆写（tokens 绝对值）——子
+    // agent 可声明独立窗（如长任务 agent 提前压缩），消费点 = TUI runAgent
+    // → buildAgentLoopParams autoCompact.windowOverride。
+    autoCompactWindow: z.number().int().positive().optional(),
     skills: z.array(z.string()).optional(),
     initialPrompt: z.string().optional(),
     memory: z.enum(['user', 'project', 'local']).optional(),
@@ -114,6 +118,7 @@ export type BaseAgentDefinition = {
   effort?: EffortValue
   permissionMode?: PermissionMode
   maxTurns?: number // Maximum number of agentic turns before stopping
+  autoCompactWindow?: number // 0.1.80 K1-F③：per-agent 压缩窗位覆写（tokens 绝对值；>0）
   filename?: string // Original filename without .md extension (for user/project/managed agents)
   baseDir?: string
   criticalSystemReminder_EXPERIMENTAL?: string // Short message re-injected at every user turn
@@ -491,6 +496,9 @@ export function parseAgentFromJson(
         : {}),
       ...(parsed.hooks ? { hooks: parsed.hooks } : {}),
       ...(parsed.maxTurns !== undefined ? { maxTurns: parsed.maxTurns } : {}),
+      ...(parsed.autoCompactWindow !== undefined
+        ? { autoCompactWindow: parsed.autoCompactWindow }
+        : {}),
       ...(parsed.skills && parsed.skills.length > 0
         ? { skills: parsed.skills }
         : {}),
@@ -647,6 +655,20 @@ export function parseAgentFromMarkdown(
       )
     }
 
+    // 0.1.80 K1-F③（@296）：per-agent 压缩窗位覆写（tokens 绝对值，正整数；
+    // 消费点 = TUI runAgent → buildAgentLoopParams autoCompact.windowOverride）
+    const autoCompactWindowRaw = frontmatter['autoCompactWindow']
+    const autoCompactWindow =
+      parsePositiveIntFromFrontmatter(autoCompactWindowRaw)
+    if (
+      autoCompactWindowRaw !== undefined &&
+      autoCompactWindow === undefined
+    ) {
+      logForDebugging(
+        `Agent file ${filePath} has invalid autoCompactWindow '${autoCompactWindowRaw}'. Must be a positive integer (tokens).`,
+      )
+    }
+
     // Extract filename without extension
     const filename = basename(filePath, '.md')
 
@@ -735,6 +757,7 @@ export function parseAgentFromMarkdown(
         ? { permissionMode: permissionModeRaw as PermissionMode }
         : {}),
       ...(maxTurns !== undefined ? { maxTurns } : {}),
+      ...(autoCompactWindow !== undefined ? { autoCompactWindow } : {}),
       ...(background ? { background } : {}),
       ...(memory ? { memory } : {}),
       ...(isolation ? { isolation } : {}),

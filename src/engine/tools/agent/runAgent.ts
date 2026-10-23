@@ -29,12 +29,16 @@
  *     → setAppState 缺省直接投递。TUI 侧 React 耦合面（createProgressTracker /
  *     startAgentSummarization / updateAsyncAgentProgress / completeAsyncAgent /
  *     classifyHandoffIfNeeded）→ 残留守（TUI 车道异步 agent + 遥测面）。
- *   - 子代理 pre-turn autoCompact / tokenBudget continuation → 残留守
- *     （queryAgentLoop 未注入 context = 不压缩）。
+ *   - 子代理 pre-turn autoCompact / tokenBudget continuation → **0.1.80 K1-F④
+ *     语义重定为有意裁定**（非未落）：engine/headless 车道窄 spine 零 context 注入
+ *     = headless 子代理永不自动压缩；TUI 车道（tui twin runAgent → buildAgentLoopParams）
+ *     无条件装配 autoCompact，窗位按子代理自己模型独立 + frontmatter autoCompactWindow
+ *     覆写生效（K1-F③）。若未来有意给 engine 车道接 autoCompact，须有意识更新
+ *     wave0180-k1f-agent-window.test.ts 的 ④(b) 源码锚 + 判别测试。
  *   - per-agent maxTurns：T-5b 不暴露该字段（queryAgentLoop 的 maxTurns 只能经
- *     AgentLoopContextConfig 注入，而该配置捆绑 autoCompact 依赖——子代理压缩面未落；
- *     故本版走默认 DEFAULT_AGENT_LOOP_MAX_TURNS，maxTurns 随子代理 context/压缩面
- *     纵切一并接线，避免「声明了却不消费」的死接缝）。
+ *     AgentLoopContextConfig 注入，而该配置捆绑 autoCompact 依赖——K1-F④ 裁定后
+ *     engine 车道仍不注入；故本版走默认 DEFAULT_AGENT_LOOP_MAX_TURNS，避免
+ *     「声明了却不消费」的死接缝）。
  *   - 系统提示词前置为 `type:'system'` 消息，但 modelprovider `toOpenAIMessages` 目前把
  *     系统消息序列化为 `role:'user'`（既有行为，非 T-5b 引入）→ 子代理 system prompt
  *     实际以 user 角色进 API；正解需 modelprovider 支持 `role:'system'`（E-wave-end /

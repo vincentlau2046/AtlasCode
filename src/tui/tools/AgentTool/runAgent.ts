@@ -780,6 +780,12 @@ export async function* runAgent({
       getAppState: () => agentToolUseContext.getAppState(),
       querySource,
       maxTurns: effectiveMaxTurns,
+      // 0.1.80 K1-F③（@296）：per-agent frontmatter/JSON autoCompactWindow
+      // 透传（K1-F④ 独立窗位联动：本装配体按 resolvedAgentModel 自建
+      // AutoCompactDeps，frontmatter 覆写经 windowOverride 生效）。
+      ...(agentDefinition.autoCompactWindow !== undefined
+        ? { autoCompactWindowOverride: agentDefinition.autoCompactWindow }
+        : {}),
       signal: agentAbortController.signal,
     })
     const stream = queryEngineLoopStream({

@@ -705,7 +705,10 @@ export async function queryAgentLoop(
   while (turns < maxTurns) {
     turns++
     // pre-turn 压缩（未注入 context = 跳过，窄 spine 语义）
-    if (args.context?.autoCompact) {
+    // 0.1.80 K1-F②（@302）：signal 已中止 → 本回合不进压缩（压缩调用会
+    // 占住回合出口——用户中止后还要等一次摘要 LLM 往返才返回；scope 严格
+    // 限压缩块，非压缩路径行为不变，后续 LLM 回合走既有 aborted 穿透面）。
+    if (args.context?.autoCompact && !deps.signal?.aborted) {
       const oc = await autoCompactIfNeeded(messages, tracking, args.context.autoCompact)
       // 0.1.68 F-1a：skip 载体门（AD-22 PreCompact hook block → 富路径返回
       // compactionSkipped 载体，压缩未执行）= 不得以占位字段 buildPostCompactMessages
@@ -759,9 +762,11 @@ export async function queryAgentLoop(
         // model-setting 重进 64KB 尾窗；重钉顺序由 sink 侧与 replacement 写
         // 异步串行保证，本处 fire-and-forget 不阻塞 query 循环）。
         deps.transcript?.reAppendSessionMetadata?.()
-      } else if (oc.consecutiveFailures !== undefined) {
+      } else if (oc.consecutiveFailures !== undefined && !deps.signal?.aborted) {
         // 失败：回灌熔断计数（旧仓 loop.ts:504-511 语义）。不回灌则熔断器在 loop 里
         // 永不跳闸——超限不可恢复会话每轮 hammer 一次注定失败的摘要 LLM 调用。
+        // 0.1.80 K1-F②：压缩调用进行中被中止（abort 竞态窗）→ 不回灌不
+        // report——用户中止是用户动作非压缩故障，3 次中止不该跳闸熔断。
         tracking = { ...tracking, consecutiveFailures: oc.consecutiveFailures }
         // D2（0.1.37 ③，C2 缺口）：失败回灌同步更新断路器跳闸态 store（≥3 =
         // 跳闸，TUI 渲染「auto-compact 已暂停（N 次失败）」+ 模型侧告知注入；

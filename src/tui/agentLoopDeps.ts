@@ -98,6 +98,13 @@ export interface AgentLoopMaterials {
    * DEFAULT_MAX_GOAL_TURNS；REPL/子 loop 均透传 args.context.maxGoalTurns）。
    */
   maxGoalTurns?: number
+  /**
+   * 0.1.80 K1-F③（@296）：per-agent 压缩窗位覆写（tokens 绝对值；来源 =
+   * agent frontmatter/JSON autoCompactWindow）。优先级链 = env 覆写 >
+   * frontmatter > settings 档位（env = 操作员硬杠杆保持最高；per-agent
+   * 声明压过全局档位；均缺省 = 修前 merged 档位面精确同值，零回归）。
+   */
+  autoCompactWindowOverride?: number
 }
 
 /** queryEngineLoopStream 入参（deps + args）。 */
@@ -137,18 +144,38 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
   // UI 阈值面与 loop 触发面两车道分裂）。
   // 0.1.69 D-1：档位按主循环模型键取档（per-model 各取己档；无该模型档 →
   // default 键 → 修前单全局档面精确同值）。
+  const envAutoCompact = getAutoCompactEnvOverrides()
   const mergedAutoCompact = mergeAutoCompactOverrides(
-    getAutoCompactEnvOverrides(),
+    envAutoCompact,
     getInitialSettings().autoCompactWindow,
     mainLoopModel,
   )
+  // 0.1.80 K1-F③（@296）：per-agent frontmatter autoCompactWindow 插入
+  // 优先级链 env > frontmatter > settings 档位——env = 操作员硬杠杆保持
+  // 最高（env 胜 settings 既有纪律不推翻）；frontmatter = per-agent 最
+  // 具体声明压过全局档位；均缺省 = 修前 merged 档位面精确同值（零回归）。
+  const autoCompactWindowOverride =
+    envAutoCompact.windowOverride !== undefined
+      ? mergedAutoCompact.windowOverride
+      : (m.autoCompactWindowOverride ?? mergedAutoCompact.windowOverride)
   const autoCompact: AutoCompactDeps = {
     contextWindow: resolved?.contextWindow ?? HARD_DEFAULT_CONTEXT_WINDOW,
     maxOutputTokens: resolved?.maxTokens,
     countTokens,
     enabled: mergedAutoCompact.autoCompactDisabled ? false : undefined,
     pctOverride: mergedAutoCompact.pctOverride,
-    windowOverride: mergedAutoCompact.windowOverride,
+    windowOverride: autoCompactWindowOverride,
+    // 0.1.80 K1-F⑤（@296）：预算思考 token 计入兜底——来源 = 本 loop 活
+    // ToolUseContext.options.thinkingConfig（与 mainLoopModel 缺省同源），
+    // 'enabled' 型取 budgetTokens（--max-thinking-tokens 面）；'adaptive' 在
+    // 本仓配置面无具体预算数（budget→effort 映射后无 token 值）→ 不计入
+    // = 修前行为；'disabled'/缺省 → 不计入。通用化槽，不绑一方模型品牌面。
+    ...(m.toolUseContext.options?.thinkingConfig?.type === 'enabled'
+      ? {
+          thinkingBudgetTokens:
+            m.toolUseContext.options.thinkingConfig.budgetTokens,
+        }
+      : {}),
     // 0.1.68 F-1（块 F 根修）：auto-compact 压缩体双门面——TUI 车道经
     // CompactPorts DI（contextHostWiring setCompactPorts 注册）走富路径
     // （附件重建 + PTL 截头重试 + hook 簇 = 恢复质量对齐手动 /compact +
