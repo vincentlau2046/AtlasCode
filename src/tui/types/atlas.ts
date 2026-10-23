@@ -9,35 +9,21 @@ export type ThinkingBlock = { type: 'thinking'; thinking: string; signature: str
 export type RedactedThinkingBlock = { type: 'redacted_thinking'; data: string; };
 export type MessageParam = { role: string; content: string | ContentBlockParam[]; };
 export type MessageCreateParams = { model: string; messages: MessageParam[]; max_tokens: number; system?: string | any[]; tools?: any[]; temperature?: number; stream?: boolean; metadata?: any; stop_sequences?: string[]; thinking?: any; };
-export class APIError extends Error {
-  status?: number;
-  code?: string;
-  headers?: any;
-  [k: string]: any;
-  constructor(message?: string, opts?: any) {
-    super(message ?? 'API error');
-    this.name = 'APIError';
-    if (opts) {
-      this.status = opts.status;
-      this.code = opts.code;
-      this.headers = opts.headers;
-    }
-  }
-}
-export class RateLimitError extends APIError {
-  retryAfter?: number;
-  constructor(message?: string, opts?: any) {
-    super(message, opts);
-    this.name = 'RateLimitError';
-    if (opts) this.retryAfter = opts.retryAfter;
-  }
-}
-export class AuthenticationError extends APIError {
-  constructor(message?: string, opts?: any) {
-    super(message, opts);
-    this.name = 'AuthenticationError';
-  }
-}
+// 0.1.79 W-C (F-4)：APIError 类族双族合并——本文件原独立 opts 形状定义删除，
+// 归一 modelprovider/types.ts 单一类（双构造形状并集：positional +
+// opts），此处仅 re-export 保持消费面 import 路径不变（tui → modelprovider
+// 域间 import 既有惯例 'src/modelprovider'，见 utils/apiErrors.ts）。
+// 跨族 instanceof 由此修向：tui 抛的 APIUserAbortError 被 modelprovider
+// 侧 errors.ts isAbortError instanceof 检查捕获。
+export {
+  APIError,
+  RateLimitError,
+  AuthenticationError,
+  NotFoundError,
+  APIConnectionError,
+  APIConnectionTimeoutError,
+  APIUserAbortError,
+} from 'src/modelprovider/types'
 
 
 export type Stream<T = any> = any;
@@ -60,10 +46,6 @@ export type BetaToolUnion = any;
 export type BetaUsage = Usage;
 export type BetaWebSearchTool20250305 = any;
 export type ClientOptions = any;
-export class NotFoundError extends APIError { }
-export class APIConnectionError extends APIError { }
-export class APIConnectionTimeoutError extends APIError { }
-export class APIUserAbortError extends APIError { }
 /**
  * De-Anthropic-ification (P1): abstract client interface. Provider
  * SDK clients (now the OpenAI-protocol gateway client) are cast to

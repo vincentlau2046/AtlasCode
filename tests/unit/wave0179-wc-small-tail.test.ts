@@ -103,6 +103,91 @@ describe('wave0179 #20 权限面语义（guard 恢复 ≤0.1.77 身份恒等）'
 })
 
 // ════════════════════════════════════════════════════════════════
+// F-4 APIError 双族合并（工单 §1.2）：modelprovider 归一单类 +
+// tui/types/atlas.ts re-export。基线 569aed7 两族独立（positional
+// `(message, status?, error?)` vs opts `{status, code, headers}`），
+// 跨族 instanceof 断裂（tui 抛的 APIUserAbortError 不被 modelprovider
+// 侧 instanceof 捕获）——判别信号 = 同类引用 + 双构造形状 + 子类 name 语义并。
+// ════════════════════════════════════════════════════════════════
+import {
+  APIError as MpAPIError,
+  RateLimitError as MpRateLimitError,
+  AuthenticationError as MpAuthenticationError,
+  NotFoundError as MpNotFoundError,
+  APIConnectionError as MpAPIConnectionError,
+  APIConnectionTimeoutError as MpAPIConnectionTimeoutError,
+  APIUserAbortError as MpAPIUserAbortError,
+} from '../../src/modelprovider/types'
+import {
+  APIError as TuiAPIError,
+  RateLimitError as TuiRateLimitError,
+  AuthenticationError as TuiAuthenticationError,
+  NotFoundError as TuiNotFoundError,
+  APIConnectionError as TuiAPIConnectionError,
+  APIConnectionTimeoutError as TuiAPIConnectionTimeoutError,
+  APIUserAbortError as TuiAPIUserAbortError,
+} from '../../src/tui/types/atlas.js'
+
+describe('wave0179 F-4 APIError 双族合并（单类 instanceof 判别）', () => {
+  test('tui re-export = modelprovider 定义类（基线 569aed7 同面红：两独立类）', () => {
+    expect(TuiAPIError).toBe(MpAPIError)
+    expect(TuiRateLimitError).toBe(MpRateLimitError)
+    expect(TuiAuthenticationError).toBe(MpAuthenticationError)
+    expect(TuiNotFoundError).toBe(MpNotFoundError)
+    expect(TuiAPIConnectionError).toBe(MpAPIConnectionError)
+    expect(TuiAPIConnectionTimeoutError).toBe(MpAPIConnectionTimeoutError)
+    expect(TuiAPIUserAbortError).toBe(MpAPIUserAbortError)
+  })
+
+  test('跨族 instanceof 修向：tui 侧构造的 abort 被 modelprovider 类检查捕获', () => {
+    // 合并前断裂面：withRetry.ts 抛 new APIUserAbortError()（tui 族），
+    // modelprovider 侧 errors.ts isAbortError 的 instanceof 检查 miss。
+    const abort = new TuiAPIUserAbortError()
+    expect(abort instanceof MpAPIError).toBe(true)
+    expect(abort instanceof MpAPIUserAbortError).toBe(true)
+    const conn = new TuiAPIConnectionTimeoutError('Request timed out.')
+    expect(conn instanceof MpAPIConnectionTimeoutError).toBe(true)
+  })
+
+  test('双构造形状①：positional (message, status?, error?) 恒等（modelprovider 面）', () => {
+    const cause = new Error('boom')
+    const e = new MpAPIError('msg', 403, cause)
+    expect(e.status).toBe(403)
+    expect(e.error).toBe(cause)
+    expect(e.message).toBe('msg')
+    expect(e.name).toBe('APIError')
+    // 既有调用形状不破：单参 / 双参
+    const e2 = new MpAPIConnectionError('Connection error.')
+    expect(e2.message).toBe('Connection error.')
+    expect(e2.status).toBeUndefined()
+  })
+
+  test('双构造形状②：opts {status, code, headers} + 缺省 message（tui 面）', () => {
+    const headers = { 'retry-after': '12' }
+    const e = new TuiAPIError(undefined, { status: 429, code: 'rate_limited', headers })
+    expect(e.status).toBe(429)
+    expect(e.code).toBe('rate_limited')
+    expect(e.headers).toBe(headers)
+    expect(e.message).toBe('API error')
+    expect(e.name).toBe('APIError')
+  })
+
+  test('子类 name 语义并：RateLimit/Authentication 设名 + retryAfter；其余保持 name=APIError', () => {
+    // tui 语义保留（零 src 构造点，行为面纯增益）
+    const rl = new TuiRateLimitError(undefined, { status: 429, retryAfter: 30 })
+    expect(rl.name).toBe('RateLimitError')
+    expect(rl.retryAfter).toBe(30)
+    const auth = new TuiAuthenticationError(undefined, { status: 401 })
+    expect(auth.name).toBe('AuthenticationError')
+    // modelprovider 语义保留：自家实例 name 恒 'APIError'（modelprovider.ts
+    // :316 abort 分类器 / :328 isSdkConnection 按 name 读，name 检查面向
+    // SDK 形状外来错误，自家实例靠 instanceof）
+    expect(new MpAPIUserAbortError('user aborted').name).toBe('APIError')
+    expect(new MpAPIConnectionTimeoutError('Request timed out.').name).toBe('APIError')
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
 // D-3 / D-5 已落地核验锚（0.1.69 块 D 落地，工单 §0 勘误：不重做，探针核在场）
 // ════════════════════════════════════════════════════════════════
 describe('wave0179 D-3/D-5 已落地核验锚', () => {

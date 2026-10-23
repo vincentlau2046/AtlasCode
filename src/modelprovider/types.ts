@@ -4,6 +4,12 @@
  * APIError 类族：旧仓 types/atlas.ts:12-66 自定义错误类（非 openai SDK 原生），
  * modelprovider errorMessaging/errorUtils/modelErrors 依赖 instanceof 判定，
  * 必须保留运行时类定义（不能只做 type）。
+ * 0.1.79 W-C (F-4)：双族合并归一类 — 本文件为单一事实源，tui/types/atlas.ts
+ * re-export（原 tui 侧独立 opts 形状定义删除）；构造函数双形状并集
+ * （positional `(message, status?, error?)` + opts `{status, code, headers,
+ * error}`），子类 name 语义并（RateLimit/Authentication 设名 = tui 语义，
+ * 零 src 构造点纯增益；其余子类保持 name='APIError' = modelprovider 语义，
+ * modelprovider.ts abort/连接分类器按 name 读面向 SDK 形状外来错误）。
  *
  * StreamEvent：旧仓 modelprovider/types.ts:1-77 原生流事件联合类型。
  *
@@ -17,17 +23,54 @@
 
 export class APIError extends Error {
   status?: number
+  code?: string
+  headers?: any
   error?: unknown
-  constructor(message: string, status?: number, error?: unknown) {
-    super(message)
+  [k: string]: any
+  constructor(
+    message?: string,
+    statusOrOpts?: number | { status?: number; code?: string; headers?: any; error?: unknown },
+    error?: unknown,
+  ) {
+    super(message ?? 'API error')
     this.name = 'APIError'
-    if (status !== undefined) this.status = status
-    if (error !== undefined) this.error = error
+    if (typeof statusOrOpts === 'number') {
+      // positional 形状（modelprovider 面：errorMessaging/errorUtils 分类构造）
+      if (statusOrOpts !== undefined) this.status = statusOrOpts
+      if (error !== undefined) this.error = error
+    } else if (statusOrOpts) {
+      // opts 形状（tui 面：SDK 兼容 `{status, code, headers}`）
+      if (statusOrOpts.status !== undefined) this.status = statusOrOpts.status
+      if (statusOrOpts.code !== undefined) this.code = statusOrOpts.code
+      if (statusOrOpts.headers !== undefined) this.headers = statusOrOpts.headers
+      if (statusOrOpts.error !== undefined) this.error = statusOrOpts.error
+    }
   }
 }
 
-export class RateLimitError extends APIError {}
-export class AuthenticationError extends APIError {}
+// tui 语义保留：设名 + retryAfter（零 src 构造点，行为面纯增益）。
+export class RateLimitError extends APIError {
+  retryAfter?: number
+  constructor(
+    message?: string,
+    opts?: { status?: number; code?: string; headers?: any; retryAfter?: number },
+  ) {
+    super(message, opts)
+    this.name = 'RateLimitError'
+    if (opts && opts.retryAfter !== undefined) this.retryAfter = opts.retryAfter
+  }
+}
+
+export class AuthenticationError extends APIError {
+  constructor(
+    message?: string,
+    opts?: { status?: number; code?: string; headers?: any },
+  ) {
+    super(message, opts)
+    this.name = 'AuthenticationError'
+  }
+}
+
 export class NotFoundError extends APIError {}
 export class APIConnectionError extends APIError {}
 export class APIConnectionTimeoutError extends APIConnectionError {}
