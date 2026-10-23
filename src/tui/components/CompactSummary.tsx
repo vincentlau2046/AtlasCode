@@ -45,7 +45,7 @@ export function CompactSummary(t0) {
     }
     let t4;
     if ($[4] !== isTranscriptMode || $[5] !== metadata) {
-      t4 = !isTranscriptMode && <MessageResponse><Box flexDirection="column"><Text dimColor={true}>Summarized {metadata.messagesSummarized} messages{" "}{metadata.direction === "up_to" ? "up to this point" : "from this point"}</Text>{metadata.userContext && <Text dimColor={true}>Context: {"\u201C"}{metadata.userContext}{"\u201D"}</Text>}<Text dimColor={true}><ConfigurableShortcutHint action="app:toggleTranscript" context="Global" fallback="ctrl+o" description="expand history" parens={true} /></Text></Box></MessageResponse>;
+      t4 = !isTranscriptMode && <MessageResponse><Box flexDirection="column"><Text dimColor={true}>Summarized {metadata.messagesSummarized} messages{" "}{metadata.direction === "up_to" ? "up to this point" : "from this point"}</Text>{metadata.userContext && <Text dimColor={true}>Context: {"\u201C"}{metadata.userContext}{"\u201D"}</Text>}<Text dimColor={true}><ConfigurableShortcutHint action="app:toggleTranscript" context="Global" fallback="ctrl+o" description="expand history" parens={true} /></Text><Text dimColor={true}>Summary is saved to the session transcript and restored on resume</Text></Box></MessageResponse>;
       $[4] = isTranscriptMode;
       $[5] = metadata;
       $[6] = t4;
@@ -89,7 +89,7 @@ export function CompactSummary(t0) {
   }
   let t4;
   if ($[16] !== t3) {
-    t4 = <Box flexDirection="row">{t2}<Box flexDirection="column"><Text bold={true}>Compact summary{t3}</Text></Box></Box>;
+    t4 = <Box flexDirection="row">{t2}<Box flexDirection="column"><Text bold={true}>Compact summary{t3}</Text><Text dimColor={true}>Summary is saved to the session transcript and restored on resume</Text></Box></Box>;
     $[16] = t3;
     $[17] = t4;
   } else {
