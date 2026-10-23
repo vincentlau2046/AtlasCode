@@ -280,6 +280,210 @@ describe('wave0179 C4-3 长工具进度心跳', () => {
 })
 
 // ════════════════════════════════════════════════════════════════
+// C5-3 MCP >2min 自动转后台（工单 §1.4）：MCP 工具调用超时转后台继续，
+// 合成 tool_result 早返（非 error）+ 完成后经通知面送达。
+// 语义（工单 §1 分组 = MCP 面，非渲染面）：race 计时器胜 → 回合适早返
+// 「已转后台」tool_result（is_error=false，loop 继续），真 promise 续跑，
+// 完成时 onMcpToolBackgrounded 携 outcome 触发 → TUI enqueuePendingNotification
+// （task-notification 面自动补投 = agent loop 继续）。恒等锚：槽未注入
+// （headless）/ 非 MCP 工具 = 直接调用零行为。Ctrl+B handleBackgroundQuery
+// 不可复用（其 abort('background') 会杀掉本应续跑的 MCP 调用）。
+// 判别信号 = 纯计时面（新模块 mcpAutoBackground.ts）+ executeToolUse race
+// 接线 + loop 透传 + REPL enqueue 活码在场。
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C5-3 MCP >2min 自动转后台', () => {
+  async function loadAutoBackground() {
+    return import('../../src/engine/pipeline/mcpAutoBackground')
+  }
+
+  test('阈值解析：默认 120s / env 覆盖 / 非法回落默认 / 下限 clamp（基线同面红：模块缺）', async () => {
+    const ab = await loadAutoBackground()
+    expect(ab.DEFAULT_MCP_AUTO_BACKGROUND_MS).toBe(120_000)
+    expect(ab.getMcpAutoBackgroundMs({})).toBe(120_000)
+    expect(ab.getMcpAutoBackgroundMs({ ATLAS_MCP_AUTO_BACKGROUND_MS: '5000' })).toBe(5000)
+    // 非法 / 空 → 默认；下限 1000ms 防 misconfig 秒级误转
+    expect(ab.getMcpAutoBackgroundMs({ ATLAS_MCP_AUTO_BACKGROUND_MS: 'abc' })).toBe(120_000)
+    expect(ab.getMcpAutoBackgroundMs({ ATLAS_MCP_AUTO_BACKGROUND_MS: '' })).toBe(120_000)
+    expect(ab.getMcpAutoBackgroundMs({ ATLAS_MCP_AUTO_BACKGROUND_MS: '1' })).toBe(1000)
+  })
+
+  test('callWithMcpAutoBackground：慢调用转后台（计时器胜 → backgrounded 早返 + 完成回调）', async () => {
+    const ab = await loadAutoBackground()
+    const events: { toolUseId: string; toolName: string; outcome: unknown }[] = []
+    const t0 = Date.now()
+    const raced = await ab.callWithMcpAutoBackground(
+      {
+        toolUseId: 'tu_1',
+        toolName: 'mcp__srv__slow',
+        backgroundAfterMs: 30,
+        onBackgrounded: i => events.push(i),
+      },
+      () => new Promise(resolve => setTimeout(() => resolve({ data: 'real' }), 100)),
+    )
+    expect(raced.backgrounded).toBe(true)
+    // 早返 = 不等真 promise（< 真完成 100ms）
+    expect(Date.now() - t0).toBeLessThan(80)
+    // 真完成后 outcome 送达（ok 支携 data 原样）
+    await new Promise(r => setTimeout(r, 130))
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({ toolUseId: 'tu_1', toolName: 'mcp__srv__slow' })
+    expect(events[0].outcome).toEqual({ ok: true, data: { data: 'real' } })
+  })
+
+  test('callWithMcpAutoBackground：快调用不转后台（结果穿透 + 零回调）', async () => {
+    const ab = await loadAutoBackground()
+    const events: unknown[] = []
+    const raced = await ab.callWithMcpAutoBackground(
+      {
+        toolUseId: 'tu_2',
+        toolName: 'mcp__srv__fast',
+        backgroundAfterMs: 80,
+        onBackgrounded: i => events.push(i),
+      },
+      () => Promise.resolve({ data: 42 }),
+    )
+    expect(raced.backgrounded).toBe(false)
+    expect((raced as { result: unknown }).result).toEqual({ data: 42 })
+    await new Promise(r => setTimeout(r, 100))
+    expect(events).toHaveLength(0)
+  })
+
+  test('callWithMcpAutoBackground：快拒绝穿透 / 慢拒绝经回调 ok:false（不吞不漏）', async () => {
+    const ab = await loadAutoBackground()
+    // 快拒绝（计时器前）→ 异常原样穿透（executeToolUse 既有 catch 面消费）
+    await expect(
+      ab.callWithMcpAutoBackground(
+        {
+          toolUseId: 'tu_3',
+          toolName: 'mcp__srv__boom',
+          backgroundAfterMs: 80,
+          onBackgrounded: () => {},
+        },
+        () => Promise.reject(new Error('boom')),
+      ),
+    ).rejects.toThrow('boom')
+    // 慢拒绝（已转后台）→ 不再穿透（race 已返），经回调 ok:false 送达
+    const events: { outcome?: { ok?: boolean; error?: string } }[] = []
+    const raced = await ab.callWithMcpAutoBackground(
+      {
+        toolUseId: 'tu_4',
+        toolName: 'mcp__srv__slowboom',
+        backgroundAfterMs: 20,
+        onBackgrounded: i => events.push(i),
+      },
+      () => new Promise((_, reject) => setTimeout(() => reject(new Error('late boom')), 60)),
+    )
+    expect(raced.backgrounded).toBe(true)
+    await new Promise(r => setTimeout(r, 90))
+    expect(events).toHaveLength(1)
+    expect(events[0].outcome?.ok).toBe(false)
+    expect(String(events[0].outcome?.error)).toContain('late boom')
+  })
+
+  test('executeToolUse：MCP 慢工具 + 注入槽 → 合成后台 tool_result 早返（非 error）；真结果经回调', async () => {
+    const { executeToolUse } = await import('../../src/engine/pipeline/toolExecution')
+    const events: { toolUseId: string; toolName: string; outcome: unknown }[] = []
+    const tool = {
+      name: 'mcp__srv__slow',
+      isMcp: true,
+      maxResultSizeChars: 0,
+      call: () => new Promise(resolve => setTimeout(() => resolve({ data: 'REAL' }), 120)),
+      mapToolResultToToolResultBlockParam: (d: unknown, id: string) => ({
+        type: 'tool_result',
+        tool_use_id: id,
+        content: String(d),
+        is_error: false,
+      }),
+    } as unknown as Parameters<typeof executeToolUse>[2]['tools'][number]
+    const tu = { type: 'tool_use', id: 'tu_bg', name: 'mcp__srv__slow', input: {} }
+    const t0 = Date.now()
+    const outcome = await executeToolUse(
+      tu as never,
+      {} as never,
+      {
+        tools: [tool],
+        onMcpToolBackgrounded: i => events.push(i),
+        mcpAutoBackgroundMs: 40,
+      } as never,
+    )
+    // 早返不等真完成（120ms），合成块非 error 且含 background 语义
+    expect(Date.now() - t0).toBeLessThan(100)
+    expect(outcome.isError).toBe(false)
+    expect(outcome.block?.is_error).toBe(false)
+    expect(String(outcome.block?.content)).toContain('background')
+    expect(String(outcome.block?.tool_use_id)).toBe('tu_bg')
+    // 真结果完成后经回调送达
+    await new Promise(r => setTimeout(r, 140))
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({ toolUseId: 'tu_bg', toolName: 'mcp__srv__slow' })
+    expect(events[0].outcome).toEqual({ ok: true, data: { data: 'REAL' } })
+  })
+
+  test('executeToolUse 恒等锚：非 MCP 工具同槽不转后台 / 槽未注入等待真结果', async () => {
+    const { executeToolUse } = await import('../../src/engine/pipeline/toolExecution')
+    const mkTool = (isMcp: boolean) =>
+      ({
+        name: isMcp ? 'mcp__srv__x' : 'LocalX',
+        isMcp,
+        maxResultSizeChars: 0,
+        call: () => new Promise(resolve => setTimeout(() => resolve({ data: 'REAL' }), 90)),
+        mapToolResultToToolResultBlockParam: (d: unknown, id: string) => ({
+          type: 'tool_result',
+          tool_use_id: id,
+          content: String(d),
+          is_error: false,
+        }),
+      }) as unknown as Parameters<typeof executeToolUse>[2]['tools'][number]
+    const mkTu = (name: string) => ({
+      type: 'tool_use',
+      id: `tu_${name}`,
+      name,
+      input: {},
+    })
+    // ① 非 MCP 工具 + 槽注入 → 不转后台（等真结果）
+    const t1 = Date.now()
+    const o1 = await executeToolUse(
+      mkTu('LocalX') as never,
+      {} as never,
+      {
+        tools: [mkTool(false)],
+        onMcpToolBackgrounded: () => {},
+        mcpAutoBackgroundMs: 20,
+      } as never,
+    )
+    expect(Date.now() - t1).toBeGreaterThanOrEqual(80)
+    expect(o1.isError).toBe(false)
+    expect(String(o1.block?.content)).toBe('REAL')
+    // ② MCP 工具 + 槽未注入（headless 窄 spine）→ 直接调用零行为
+    const t2 = Date.now()
+    const o2 = await executeToolUse(
+      mkTu('mcp__srv__x') as never,
+      {} as never,
+      { tools: [mkTool(true)], mcpAutoBackgroundMs: 20 } as never,
+    )
+    expect(Date.now() - t2).toBeGreaterThanOrEqual(80)
+    expect(o2.isError).toBe(false)
+    expect(String(o2.block?.content)).toBe('REAL')
+  })
+
+  test('接线活码在场：executeToolUse race + loop 透传 + REPL enqueue 通知面', () => {
+    // ① executeToolUse：isMcp 门 + callWithMcpAutoBackground race + 阈值解析
+    const toolExec = srcOf('src/engine/pipeline/toolExecution.ts')
+    expect(toolExec.includes('callWithMcpAutoBackground')).toBe(true)
+    expect(toolExec.includes('getMcpAutoBackgroundMs')).toBe(true)
+    expect(toolExec.includes('tool.isMcp')).toBe(true)
+    // ② loop：AgentLoopDeps 槽透传 pipeline（同 onToolHeartbeat 先例）
+    const loop = srcOf('src/engine/query/loop.ts')
+    expect(loop.includes('onMcpToolBackgrounded')).toBe(true)
+    // ③ REPL：槽注入 + task-notification 入队（补投面 = 后台结果送达 agent loop）
+    const repl = srcOf('src/tui/screens/REPL.tsx')
+    expect(repl.includes('onMcpToolBackgrounded')).toBe(true)
+    expect(repl.includes('【后台 MCP 工具')).toBe(true)
+    expect(repl.includes('enqueuePendingNotification')).toBe(true)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
 // D-3 / D-5 已落地核验锚（0.1.69 块 D 落地，工单 §0 勘误：不重做，探针核在场）
 // ════════════════════════════════════════════════════════════════
 describe('wave0179 D-3/D-5 已落地核验锚', () => {

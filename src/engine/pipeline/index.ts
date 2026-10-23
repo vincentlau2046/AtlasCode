@@ -36,3 +36,8 @@ export {
   buildSchemaNotSentHint,
   type SchemaValidationResult,
 } from './schemaValidation'
+// C5-3（0.1.79 W-C）：MCP 慢调用自动转后台 — race 面 + 阈值解析
+export {
+  getMcpAutoBackgroundMs,
+  type McpToolBackgroundedInfo,
+} from './mcpAutoBackground'

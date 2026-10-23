@@ -74,6 +74,7 @@ import {
 } from '../goal/goalState'
 import { shouldDisableAllHooksIncludingManaged } from '../config/hooksConfig'
 import { runToolBatch, type PermissionGate } from '../pipeline'
+import type { McpToolBackgroundedInfo } from '../pipeline/mcpAutoBackground'
 import type { ToolHeartbeatInfo } from '../pipeline/toolHeartbeat'
 import {
   autoCompactIfNeeded,
@@ -305,6 +306,14 @@ export interface AgentLoopDeps {
    * TUI 车道注入（src/tui/tasks/ LocalShellTask 族状态查询）。
    */
   hasPendingBackgroundTasks?: () => boolean
+  /**
+   * C5-3（0.1.79 W-C）：MCP 慢调用转后台通知槽——透传 runToolBatch →
+   * pipeline PipelineDeps.onMcpToolBackgrounded（isMcp 门 + 超阈值 race，见
+   * mcpAutoBackground 头注）。未注入 = executeToolUse 直接调用零开销恒等锚
+   * （headless 窄 spine）；TUI 车道 REPL 注入（enqueuePendingNotification
+   * task-notification → 回合间再注入 agent loop）。
+   */
+  onMcpToolBackgrounded?: (info: McpToolBackgroundedInfo) => void
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -542,6 +551,10 @@ export async function queryOneRound(
     onToolHeartbeat: deps.emit
       ? (info: ToolHeartbeatInfo) => deps.emit!({ type: 'tool_heartbeat', ...info })
       : undefined,
+    // C5-3（0.1.79 W-C）：MCP 慢调用转后台槽透传（区别于 heartbeat 的 emit 门控——
+    // 本槽回调直达宿主通知面（REPL enqueue），不经 AgentLoopEvent 流；未注入 =
+    // executeToolUse 直接调用恒等锚）
+    onMcpToolBackgrounded: deps.onMcpToolBackgrounded,
   })
   // AD-45 0.1.52：defer 挂起 outcome 不产 tool_result（block 缺席）——
   // toolResults / resultMessages 均排除挂起支（批次已短路，挂起后无后续 outcome）。

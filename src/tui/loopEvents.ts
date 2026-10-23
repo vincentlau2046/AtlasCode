@@ -56,6 +56,10 @@ export type EngineLoopStreamEvent =
 // tui 适配器 re-export（边界面：REPL 只依赖 tui 适配器，不直引 engine 根门面）。
 export type { AgentLoopResult } from 'src/engine'
 
+// C5-3（0.1.79 W-C）：MCP 慢调用转后台回调载荷类型，同 AgentLoopResult 走
+// tui 适配器 re-export（REPL 不直引 engine pipeline 内部模块）。
+export type { McpToolBackgroundedInfo } from 'src/engine'
+
 export interface EngineLoopParams {
   deps: AgentLoopDeps
   args: AgentLoopArgs

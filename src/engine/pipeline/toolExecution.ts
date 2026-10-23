@@ -14,7 +14,9 @@
  *     · 权限门 → deps.checkPermission 接缝（E-4 规则求值树注入；窄 spine 默认放行）
  *     · MCP 路由 → 已按 E-2 裁定以注册表构建形态闭环（createMcpTools 预构建时把连接绑进
  *       call 闭包，MCP tool 经 getAllBaseTools 并入注册表，pipeline 当普通 Tool 执行，
- *       **无** pipeline 分支 / 无 PipelineDeps 字段；不预造无消费点接缝，登记 §8.22 残余 ⑧）。
+ *       **无** pipeline 路由分支；不预造无消费点接缝，登记 §8.22 残余 ⑧）。C5-3（0.1.79
+ *       W-C）增 MCP 慢调用转后台**计时面** PipelineDeps 槽（onMcpToolBackgrounded，
+ *       非路由面——isMcp 门控 race，见 mcpAutoBackground 头注）。
  *       MCP 连接生命周期（connect/reconnect/cache）仍残留守（归连接层纵切，见 mcp.ts 头注）。
  *     · 钩子 → deps.hooks 接缝（E-5 S-5a 落：ToolHooks 返回值类型化 + 消费支
  *       （pre：blockingError 短路 / preventContinuation 短路（§8.42 MAJOR-1）/
@@ -42,6 +44,11 @@ import type {
 } from '../../shared'
 import { classifyToolError } from './errorClassification'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
+import {
+  getMcpAutoBackgroundMs,
+  callWithMcpAutoBackground,
+  type McpToolBackgroundedInfo,
+} from './mcpAutoBackground'
 import {
   getToolHeartbeatIntervalMs,
   runWithToolHeartbeat,
@@ -246,6 +253,20 @@ export interface PipelineDeps {
    * 恒等锚）。瞬态信号不入 transcript。
    */
   onToolHeartbeat?: (info: ToolHeartbeatInfo) => void
+  /**
+   * C5-3（0.1.79 W-C）：MCP 慢调用转后台通知槽（窄 spine 可选注入）。注入且
+   * tool.isMcp 时 tool.call 被 callWithMcpAutoBackground 包裹，超 mcpAutoBackgroundMs
+   * （默认 120s，env ATLAS_MCP_AUTO_BACKGROUND_MS，下限 1s）即合成非 error
+   * 「已转后台」tool_result 早返（跳过 post-hook——后台化 ≠ 完成），真终态经本
+   * 回调送达（REPL task-notification → 回合间再注入）；未注入 / 非 MCP 工具 =
+   * 直接调用零开销恒等锚（headless 窄 spine）。
+   */
+  onMcpToolBackgrounded?: (info: McpToolBackgroundedInfo) => void
+  /**
+   * C5-3（0.1.79 W-C）：转后台阈值覆盖（dep 优先于 env——测试可注入小值，
+   * 避免 process.env 竞态；未注入 = getMcpAutoBackgroundMs() 解析 env）。
+   */
+  mcpAutoBackgroundMs?: number
 }
 
 export interface ToolExecutionOutcome {
@@ -430,6 +451,10 @@ export async function executeToolUse(
   // G1（#258）：toolUseResult 挂法（成功 = res.data / catch = 错误文本串，见
   // ToolExecutionOutcome 头注；早退支不挂）。
   let toolUseResult: unknown
+  // C5-3（0.1.79 W-C）：MCP 慢调用转后台 race——槽注入 + isMcp 双门控 armed；
+  // 未注入（headless 窄 spine）/ 非 MCP 工具 = 不包 race，直接调用恒等。
+  const mcpAutoBackgroundArmed =
+    deps.onMcpToolBackgrounded !== undefined && tool.isMcp === true
   try {
     // signal 经 call 第 2 参 context 透传（T-4c；shared Tool.call 契约 context: unknown 不变，
     // 传最小 context 对象 { signal }，工具实现按需取用）。F1（E-wave-end S-E1）：checkPermission
@@ -437,19 +462,57 @@ export async function executeToolUse(
     // 旧仓子代理共享父会话权限上下文语义；context: unknown 契约不变）。R6（P0）：
     // TUI 桥面注入时 context = 全量 ToolUseContext + engine 运行字段（见 toolCallContext）。
     // C4-3（0.1.79 W-C）：onToolHeartbeat 注入时周期发「进行中」心跳（渲染层
-    // 长工具冻结态消解）；未注入 = 直接调用，零开销恒等。
+    // 长工具冻结态消解）；未注入 = 直接调用，零开销恒等。C5-3 组合：armed 时心跳
+    // 包裹体在 race continuation 内继续跑 → 转后台期间心跳不断（spinner 持「仍在运行」）。
     const callTool = () => tool.call(callInput, toolCallContext, undefined, assistantMsg)
-    const res = await (deps.onToolHeartbeat
-      ? runWithToolHeartbeat(
-          {
-            toolUseId: tu.id,
-            toolName: tool.name,
-            intervalMs: getToolHeartbeatIntervalMs(),
-            onHeartbeat: deps.onToolHeartbeat,
+    const withHeartbeat = () =>
+      deps.onToolHeartbeat
+        ? runWithToolHeartbeat(
+            {
+              toolUseId: tu.id,
+              toolName: tool.name,
+              intervalMs: getToolHeartbeatIntervalMs(),
+              onHeartbeat: deps.onToolHeartbeat,
+            },
+            callTool,
+          )
+        : callTool()
+    let res
+    if (mcpAutoBackgroundArmed) {
+      const raced = await callWithMcpAutoBackground(
+        {
+          toolUseId: tu.id,
+          toolName: tool.name,
+          backgroundAfterMs: deps.mcpAutoBackgroundMs ?? getMcpAutoBackgroundMs(),
+          onBackgrounded: deps.onMcpToolBackgrounded!,
+        },
+        withHeartbeat,
+      )
+      if (raced.backgrounded === true) {
+        // 已转后台：不等真完成即早返。非 error 合成块（LLM 收到「已转后台 + 结果
+        // 稍后送达 + 勿重调」回应，agent loop 继续推进）；真终态经 onMcpToolBackgrounded
+        // 回调 → REPL task-notification → 回合间自动再注入。**跳过 post-hook**
+        // （后台化 ≠ 完成——post-hook 语义是「工具已完成」的消费面，真完成发生在
+        // 回调 continuation，无 post-hook 面）。
+        const backgroundedContent =
+          `[mcp tool ${tool.name} is still running after exceeding the auto-background threshold; ` +
+          'it has been moved to the background and will keep running. ' +
+          'The result will be delivered later as a task notification — do not call this tool again for the same purpose.'
+        return {
+          block: {
+            type: 'tool_result',
+            tool_use_id: tu.id,
+            content: backgroundedContent,
+            is_error: false,
           },
-          callTool,
-        )
-      : callTool())
+          isError: false,
+          toolUseResult: backgroundedContent,
+        }
+      }
+      res = raced.result
+    } else {
+      res = await withHeartbeat()
+    }
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
     // G1（#258）：挂工具原生 Output（res.data）——TUI 渲染面经 message.toolUseResult
     // 消费（UserToolSuccessMessage → tool.renderToolResultMessage）。

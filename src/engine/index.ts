@@ -63,6 +63,8 @@ export {
   type ToolBatch,
   type ToolBatchOutcome,
   type SchemaValidationResult,
+  getMcpAutoBackgroundMs,
+  type McpToolBackgroundedInfo,
 } from './pipeline'
 export { EngineState, type StateUpdater } from './state'
 export {

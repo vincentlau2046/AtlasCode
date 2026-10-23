@@ -157,6 +157,7 @@ import { queryCheckpoint, logQueryProfileReport } from '../utils/queryProfiler.j
 import type { Message as MessageType, UserMessage, ProgressMessage, HookResultMessage, PartialCompactDirection } from '../types/message.js';
 import { queryEngineLoopStream, type AgentLoopResult, type EngineLoopStreamEvent } from 'src/tui/loopEvents';
 import { buildReplLoopParams } from 'src/tui/replLoopDeps';
+import type { McpToolBackgroundedInfo } from 'src/tui/loopEvents';
 import { mergeClients, useMergedClients } from '../hooks/useMergedClients.js';
 import { getQuerySourceForREPL } from '../utils/promptCategory.js';
 import { useMergedTools } from '../hooks/useMergedTools.js';
@@ -212,7 +213,7 @@ import { useIDEIntegration } from '../hooks/useIDEIntegration.js';
 import exit from '../commands/exit/index.js';
 import { ExitFlow } from '../components/ExitFlow.js';
 import { getCurrentWorktreeSession } from '../utils/worktree.js';
-import { popAllEditable, enqueue, type SetAppState, getCommandQueue, getCommandQueueLength, removeByFilter } from '../utils/messageQueueManager.js';
+import { popAllEditable, enqueue, type SetAppState, getCommandQueue, getCommandQueueLength, removeByFilter, enqueuePendingNotification } from '../utils/messageQueueManager.js';
 import { useCommandQueue } from '../hooks/useCommandQueue.js';
 import { SessionBackgroundHint } from '../components/SessionBackgroundHint.js';
 import { startBackgroundSession } from '../tasks/LocalMainSessionTask.js';
@@ -2631,11 +2632,35 @@ export function REPL({
       toolUseContext,
       querySource: getQuerySourceForREPL()
     });
+    // C5-3（0.1.79 W-C）：MCP 慢调用转后台回调 — executeToolUse 在阈值后已合成
+    // 「已转后台」tool_result 早返，真终态在此经 task-notification 队列送达
+    // （非编辑态、回合间自动再注入 agent loop，继续消费结果）。回合已被中断
+    // （signal aborted）时静默丢弃，不产生中断噪音通知。
+    const controller = abortController;
+    const handleMcpToolBackgrounded = (info: McpToolBackgroundedInfo) => {
+      if (controller.signal.aborted) return;
+      let text: string;
+      if (info.outcome.ok === true) {
+        let serialized: string;
+        try {
+          serialized = typeof info.outcome.data === 'string'
+            ? info.outcome.data
+            : JSON.stringify(info.outcome.data, null, 2);
+        } catch {
+          serialized = String(info.outcome.data);
+        }
+        if (serialized.length > 10_000) serialized = `${serialized.slice(0, 10_000)}\n…（结果过长已截断）`;
+        text = `【后台 MCP 工具完成】${info.toolName}（后台运行）已完成，结果如下：\n${serialized}`;
+      } else {
+        text = `【后台 MCP 工具失败】${info.toolName}（后台运行）失败：${info.outcome.error}`;
+      }
+      enqueuePendingNotification({ value: text, mode: 'task-notification' });
+    };
     // R1（P0 静默终止）：手动驱动 engine 生成器以捕获终态 AgentLoopResult
     // （for-await 丢弃生成器 return 值）；末轮空内容（emptyTerminated）→
     // 用户可见警告行（原空回合 = spinner 停、无产出、无提示 = 主诉「无响应」）。
     const loopGen = queryEngineLoopStream({
-      deps: loopDeps,
+      deps: { ...loopDeps, onMcpToolBackgrounded: handleMcpToolBackgrounded },
       args: loopArgs
     });
     let loopResult: AgentLoopResult | undefined;
