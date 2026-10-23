@@ -1679,6 +1679,12 @@ export async function getMatchingHooks(
       case 'PostModelSwitch':
         matchQuery = hookInput.new_model as string | undefined
         break
+      // C8-2（0.1.79 W-C）：目录加入事件——matchQuery = directory（按加入路径过滤）。
+      // 安全修复：缺此 case 时 matchQuery=undefined → 全部 matcher 无差别放行
+      // （matcher 串不被执行）。与 engine 侧 getMatchingHooks.ts 保持同面。
+      case 'DirectoryAdded':
+        matchQuery = hookInput.directory as string | undefined
+        break
       default:
         break
     }

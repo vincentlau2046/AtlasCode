@@ -650,6 +650,15 @@ describe('wave0179 C8-2 DirectoryAdded hook 事件', () => {
     expect(src.includes('hookInput.directory as string | undefined')).toBe(true)
   })
 
+  test('matcher 面双实现同步：TUI getMatchingHooks 亦含 DirectoryAdded case（安全审 MEDIUM 修复）', () => {
+    // /add-dir 实际走 TUI executeHooks → TUI getMatchingHooks（src/tui/utils/hooks.ts），
+    // 非引擎侧 matcher。缺 case 时 matchQuery=undefined → 全部 matcher 无差别放行
+    // （matcher 串不被执行）。锁双实现同面（引擎 + TUI），防单侧漂移。
+    const src = srcOf('src/tui/utils/hooks.ts')
+    expect(src.includes("case 'DirectoryAdded':")).toBe(true)
+    expect(src.includes('hookInput.directory as string | undefined')).toBe(true)
+  })
+
   test('SDK schema 面：coreSchemas HOOK_EVENTS 镜像 + DirectoryAddedHookInputSchema', () => {
     const src = srcOf('src/tui/entrypoints/sdk/coreSchemas.ts')
     expect(src.includes("'DirectoryAdded',")).toBe(true)
