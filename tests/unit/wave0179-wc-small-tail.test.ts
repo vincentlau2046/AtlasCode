@@ -23,6 +23,10 @@ import { describe, expect, test } from 'bun:test'
 import { normalizeNameForMCP as engineNormalize } from '../../src/engine/tools/mcp'
 import { normalizeNameForMCP as tuiNormalize } from '../../src/tui/services/mcp/normalization'
 import { normalizeNameForMCP as ruleNormalize } from '../../src/permissions/mcpRuleNames'
+import {
+  buildMcpToolName,
+  mcpInfoFromString,
+} from '../../src/permissions/mcpRuleNames'
 
 function srcOf(rel: string): string {
   return readFileSync(resolve(import.meta.dir, '../../', rel), 'utf8')
@@ -69,6 +73,32 @@ describe('wave0179 #20 normalizeNameForMCP empty-after-fold guard', () => {
       const live = srcOf(rel).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/gm, '$1')
       expect(live.includes("normalized === '' ? folded : normalized")).toBe(true)
     }
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
+// #20 权限面语义锁（commit 安全审视 2026-10-23 回应）：guard 恢复 ≤0.1.77
+// 身份（'...'→'___'），修复 0.1.78 一版回归（彼时 server 级规则不可达）；
+// 无规则迁移（ruleMatching 原串比对），deny 失配 → passthrough → ask
+// （fail-toward-prompt 非 fail-open）。
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 #20 权限面语义（guard 恢复 ≤0.1.77 身份恒等）', () => {
+  test('全非法名 server 工具名 = ≤0.1.77 逐字一致（0.1.78 空段折叠为另一身份）', () => {
+    // guard 后：'...' server + 'tool' → 'mcp_______tool'（mcp__ + ___ + __ + tool），
+    // 与 ≤0.1.77（replace-only 归一）逐字一致 → ≤0.1.77 写下的 exact-string
+    // deny/allow 规则重新命中；0.1.78 折叠出 'mcp____tool'（4 下划线）为身份漂移。
+    const built = buildMcpToolName('...', 'tool')
+    expect(built).toBe('mcp_______tool')
+    expect(built).not.toBe('mcp____tool')
+  })
+
+  test('下划线-only server 名超出 mcpInfoFromString 可达域（全版本同限，旧仓同注）', () => {
+    // 'mcp' + 7 连续下划线 split('__') 得空 server 段 → null：server 级规则对
+    // 病态名在 ≤0.1.77 / 0.1.78 / 0.1.79 三代均不可达（`__` 歧义固有，非本波
+    // 引入）；唯一匹配面 = exact-string 规则（上测恒等锚）。deny 失配 → MCP
+    // 默认 passthrough → ask（fail-toward-prompt，非 fail-open）。
+    expect(mcpInfoFromString(buildMcpToolName('...', 'tool'))).toBeNull()
+    expect(mcpInfoFromString('mcp____tool')).toBeNull()
   })
 })
 
