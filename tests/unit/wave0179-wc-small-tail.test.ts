@@ -19,7 +19,13 @@
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+// C8-5：hooks 域类型面（type-only import 编译期擦除，运行时仍走 require 门面）
+import type {
+  AggregatedHookResult,
+  HookShellExecution,
+  HookShellPort,
+} from '../../src/hooks/index.js'
 import { normalizeNameForMCP as engineNormalize } from '../../src/engine/tools/mcp'
 import { normalizeNameForMCP as tuiNormalize } from '../../src/tui/services/mcp/normalization'
 import { normalizeNameForMCP as ruleNormalize } from '../../src/permissions/mcpRuleNames'
@@ -739,5 +745,217 @@ describe('wave0179 C8-3 MessageDisplay hook 事件', () => {
     expect(src.includes('export function fireMessageDisplayHooks')).toBe(true)
     expect(src.includes('executeMessageDisplayHooks')).toBe(true)
     expect(src.includes('logForDebugging')).toBe(true)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
+// C8-5 hook terminalSequence + PostToolUse continueOnBlock（工单 §1.4：
+// 上游 2.1.141 对齐件；fail 语义 = hook 显式声明才继续，默认拒绝不变）
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C8-5 hook terminalSequence + PostToolUse continueOnBlock', () => {
+  // hooks 域门面 + 域内导出直 import（require 同 C8-3 先例；注入假 port
+  // 纯内存 canned 返回，零 spawn 零盘写零网络，unit 纪律不破）。
+  // eslint-disable-next-line
+  const facade = require('../../src/hooks/index.js') as typeof import('../../src/hooks/index.js')
+  // eslint-disable-next-line
+  const { mergeAggregated } =
+    require('../../src/hooks/runHooks.js') as typeof import('../../src/hooks/runHooks.js')
+  // eslint-disable-next-line
+  const { syncHookResponseSchema } =
+    require('../../src/tui/types/hooks.js') as typeof import('../../src/tui/types/hooks.js')
+  // eslint-disable-next-line
+  const { processHookJSONOutput } =
+    require('../../src/tui/utils/hooks.js') as typeof import('../../src/tui/utils/hooks.js')
+
+  /** 假 shell 端口（hooks.test.ts 同型：按序返 canned 结果，纯内存）。 */
+  class FakeHookShell implements HookShellPort {
+    queue: HookShellExecution[] = []
+    enqueue(exec: HookShellExecution): void {
+      this.queue.push(exec)
+    }
+    async runCommand(): Promise<HookShellExecution> {
+      return this.queue.shift() ?? { stdout: '', stderr: '', code: 0 }
+    }
+  }
+
+  beforeEach(() => {
+    facade.setHooksBootstrapEnv({
+      getSessionId: () => 'test-session',
+      getCwd: () => '/tmp/proj',
+      getTranscriptPath: (id: string) => `/tmp/transcript-${id}.jsonl`,
+      getMainThreadAgentType: () => 'main',
+      isNonInteractive: () => true,
+      hasTrustAccepted: () => true,
+    })
+  })
+  afterEach(() => {
+    facade.resetHooksBootstrapEnv()
+    facade.resetHookConfigProvider()
+    facade.resetHookShellPort()
+  })
+
+  // ── terminalSequence：hooks 域 ─────────────────────────────────
+  test('行为：interpretHookOutput 解析 hook JSON terminalSequence（基线 569aed7 同面红：字段缺）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({ stdout: '{"terminalSequence":"\\u0007"}', stderr: '', code: 0 })
+    facade.setHookShellPort(port)
+    facade.setHookConfigProvider({
+      getHookMatchersForEvent: event =>
+        event === 'Stop' ? [{ hooks: [{ type: 'command', command: 'bell' }] }] : [],
+    })
+
+    const res = await facade.runStopHooks()
+    expect(res.terminalSequence).toBe('\u0007')
+  })
+
+  test('行为：mergeAggregated terminalSequence 拼接聚合（多钩子全生效，非首胜）', () => {
+    const acc: AggregatedHookResult = { results: [] }
+    mergeAggregated(acc, { succeeded: true, terminalSequence: '\u0007' })
+    mergeAggregated(acc, { succeeded: true, terminalSequence: '\u001b]0;title\u0007' })
+    expect(acc.terminalSequence).toBe('\u0007\u001b]0;title\u0007')
+  })
+
+  test('行为：runHooks 聚合后写 process.stdout（写失败不冒泡）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({ stdout: '{"terminalSequence":"\\u0007"}', stderr: '', code: 0 })
+    facade.setHookShellPort(port)
+    facade.setHookConfigProvider({
+      getHookMatchersForEvent: event =>
+        event === 'Stop' ? [{ hooks: [{ type: 'command', command: 'bell' }] }] : [],
+    })
+
+    const writes: string[] = []
+    const realWrite = process.stdout.write.bind(process.stdout)
+    process.stdout.write = ((chunk: string) => {
+      writes.push(chunk)
+      return true
+    }) as typeof process.stdout.write
+    try {
+      await facade.runStopHooks()
+    } finally {
+      process.stdout.write = realWrite
+    }
+    // toContain 而非 toEqual：patched 窗口内测试框架/域内其他 stdout 写不参与判别
+    expect(writes).toContain('\u0007')
+  })
+
+  // ── terminalSequence：TUI 面（zod strip 险面守卫）──────────────
+  test('行为：syncHookResponseSchema 认 terminalSequence 字段（zod safeParse 剥未知键险面，基线 569aed7 同面红：被剥）', () => {
+    const parsed = syncHookResponseSchema().safeParse({ terminalSequence: '\u0007' })
+    expect(parsed.success).toBe(true)
+    if (parsed.success) {
+      expect((parsed.data as { terminalSequence?: string }).terminalSequence).toBe('\u0007')
+    }
+  })
+
+  test('行为：TUI processHookJSONOutput 透传 terminalSequence 进 HookResult', () => {
+    const out = processHookJSONOutput({
+      json: { terminalSequence: '\u0007' } as never,
+      command: 'bell',
+      hookName: 'bell',
+      toolUseID: 't',
+      hookEvent: 'Stop',
+      stdout: '{"terminalSequence":"\\u0007"}',
+      stderr: '',
+      exitCode: 0,
+      durationMs: 1,
+    })
+    expect(out.terminalSequence).toBe('\u0007')
+  })
+
+  test('源级锁：TUI executeHooks 结果循环写 stdout（双实现同面，防单侧漂移）', () => {
+    const src = srcOf('src/tui/utils/hooks.ts')
+    expect(src.includes('process.stdout.write(result.terminalSequence)')).toBe(true)
+  })
+
+  test('源级锁：TUI schema 字段声明（terminalSequence: z.string().optional()）', () => {
+    const src = srcOf('src/tui/types/hooks.ts')
+    expect(src.includes('terminalSequence: z.string()')).toBe(true)
+  })
+
+  // ── continueOnBlock：声明 + 标记 + 聚合（hooks 域）─────────────
+  test('源级锁：HookCommand/HookResult/AggregatedHookResult continueOnBlock 声明字段在场', () => {
+    const src = srcOf('src/hooks/types.ts')
+    expect(src.includes('continueOnBlock?: boolean')).toBe(true)
+    expect(src.includes('terminalSequence?: string')).toBe(true)
+  })
+
+  test('源级锁：engine 配置面 CommandHookCommand continueOnBlock 声明字段在场（§8.41 R3 先例）', () => {
+    const src = srcOf('src/engine/config/hooksSchema.ts')
+    expect(src.includes('continueOnBlock?: boolean')).toBe(true)
+  })
+
+  test('行为：钩子显式声明 continueOnBlock + block → 聚合面标记（基线 569aed7 同面红）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({ stdout: '{"decision":"block","reason":"格式不符"}', stderr: '', code: 0 })
+    facade.setHookShellPort(port)
+    facade.setHookConfigProvider({
+      getHookMatchersForEvent: event =>
+        event === 'PostToolUse'
+          ? [{ hooks: [{ type: 'command', command: 'lint-check', continueOnBlock: true }] }]
+          : [],
+    })
+
+    const res = await facade.runPostToolUseHooks('Bash', {}, 'ok', 'toolu_1')
+    expect(res.blockingError?.blockingError).toBe('格式不符')
+    expect(res.continueOnBlock).toBe(true)
+  })
+
+  test('行为：未声明 continueOnBlock 的 block → 阻塞照记、标记缺省（默认拒绝语义不变）', async () => {
+    const port = new FakeHookShell()
+    port.enqueue({ stdout: '{"decision":"block","reason":"格式不符"}', stderr: '', code: 0 })
+    facade.setHookShellPort(port)
+    facade.setHookConfigProvider({
+      getHookMatchersForEvent: event =>
+        event === 'PostToolUse'
+          ? [{ hooks: [{ type: 'command', command: 'lint-check' }] }]
+          : [],
+    })
+
+    const res = await facade.runPostToolUseHooks('Bash', {}, 'ok', 'toolu_1')
+    expect(res.blockingError?.blockingError).toBe('格式不符')
+    expect(res.continueOnBlock).toBeUndefined()
+  })
+
+  test('行为：mergeAggregated 首阻塞声明语义（首 blockingError 携声明；后到阻塞不改判）', () => {
+    const acc1: AggregatedHookResult = { results: [] }
+    mergeAggregated(acc1, {
+      succeeded: true,
+      blockingError: { blockingError: 'a', command: 'a' },
+      continueOnBlock: true,
+    })
+    mergeAggregated(acc1, {
+ succeeded: true, blockingError: { blockingError: 'b', command: 'b' } })
+    expect(acc1.blockingError?.blockingError).toBe('a')
+    expect(acc1.continueOnBlock).toBe(true)
+
+    // 反序：首阻塞未声明 → 聚合面标记缺省（fail-closed：声明必须来自胜出阻塞）
+    const acc2: AggregatedHookResult = { results: [] }
+    mergeAggregated(acc2, {
+      succeeded: true,
+      blockingError: { blockingError: 'b', command: 'b' },
+    })
+    mergeAggregated(acc2, {
+      succeeded: true,
+      blockingError: { blockingError: 'a', command: 'a' },
+      continueOnBlock: true,
+    })
+    expect(acc2.blockingError?.blockingError).toBe('b')
+    expect(acc2.continueOnBlock).toBeUndefined()
+  })
+
+  // ── continueOnBlock：engine 适配器 + pipeline 消费 ─────────────
+  test('源级锁：engine toolHooks postToolUse 适配器仅声明时透传 blockingError（Option B：默认丢弃不变）', () => {
+    const src = srcOf('src/engine/hooks/toolHooks.ts')
+    expect(src.includes('r.continueOnBlock')).toBe(true)
+  })
+
+  test('源级锁：PostToolUseHookOutcome.blockingError 字段 + pipeline 消费回喂 is_error tool_result', () => {
+    const src = srcOf('src/engine/pipeline/toolExecution.ts')
+    // 类型面：post-hook 结果新增 blockingError（拒绝理由回喂载体）
+    expect(src.includes('export interface PostToolUseHookOutcome')).toBe(true)
+    // 消费面：post-hook 拒绝 → 改写 block 为 is_error tool_result（拒绝理由回喂 LLM，回合继续）
+    expect(src.includes('postOutcome?.blockingError')).toBe(true)
+    expect(src.includes('is_error: true')).toBe(true)
   })
 })

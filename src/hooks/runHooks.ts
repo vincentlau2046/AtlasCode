@@ -180,6 +180,9 @@ function interpretHookOutput(p: {
       if (json.updatedToolOutput) result.updatedToolOutput = json.updatedToolOutput
       if (json.suppressOutput) result.output = ''
       if (json.systemMessage) result.systemMessage = json.systemMessage
+      // C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——hook JSON 声明即透传，
+      // 写点 = runHooks 聚合收尾（写失败不冒泡）。
+      if (json.terminalSequence) result.terminalSequence = json.terminalSequence
     } catch {
       // 非 JSON / 解析失败 stdout 当 plain text（旧仓：不以 { 开头或 parse 失败 → plainText）。
     }
@@ -212,7 +215,16 @@ const PERMISSION_RANK: Record<string, number> = {
 
 /** 折叠单钩子结果进聚合（旧仓 AggregatedHookResult 主面：首阻塞 / 任续停 / 最严权限）。 */
 export function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void {
-  if (r.blockingError && !acc.blockingError) acc.blockingError = r.blockingError
+  // C8-5（0.1.79 W-C）：terminalSequence 拼接聚合（非首胜——多钩子各写各的序列）。
+  if (r.terminalSequence) {
+    acc.terminalSequence = (acc.terminalSequence ?? '') + r.terminalSequence
+  }
+  // C8-5（0.1.79 W-C）：continueOnBlock 随胜出 blockingError 携带（首阻塞 wins）——
+  // 只有第一个阻塞钩子的显式声明生效，后续阻塞钩子的声明不覆盖。
+  if (r.blockingError && !acc.blockingError) {
+    acc.blockingError = r.blockingError
+    if (r.continueOnBlock) acc.continueOnBlock = true
+  }
   if (r.preventContinuation) acc.preventContinuation = true
   if (r.stopReason && !acc.stopReason) acc.stopReason = r.stopReason
   if (r.additionalContext) {
@@ -250,14 +262,21 @@ export function runOneHook(
   const cmd = m.hook
   const timeoutMs = cmd.timeoutMs ?? options.timeoutMs ?? HOOK_EXECUTION_TIMEOUT_MS
   return port.runCommand(cmd.command, env, signal, timeoutMs).then(
-    (exec) =>
-      interpretHookOutput({
+    (exec) => {
+      const result = interpretHookOutput({
         command: cmd.command,
         stdout: exec.stdout,
         stderr: exec.stderr,
         code: exec.code,
         aborted: exec.aborted,
-      }),
+      })
+      // C8-5（0.1.79 W-C）：仅钩子配置显式声明 continueOnBlock:true 且本钩子
+      // 产出 block 拒绝时置真；缺省 = 默认拒绝语义不变（fail-closed）。
+      if (result.blockingError && cmd.continueOnBlock === true) {
+        result.continueOnBlock = true
+      }
+      return result
+    },
     (e: unknown) => ({
       command: cmd.command,
       status: -1,
@@ -299,6 +318,15 @@ export async function runHooks(
     const result = await runOneHook(m, port, env, signal, options)
     results.push(result)
     mergeAggregated(aggregated, result)
+  }
+  // C8-5（0.1.79 W-C）：聚合收尾写终端转义序列（CC 2.1.141 harness 语义）。
+  // 写失败不冒泡——终端写异常不应使钩子执行整体失败（fail-safe）。
+  if (aggregated.terminalSequence) {
+    try {
+      process.stdout.write(aggregated.terminalSequence)
+    } catch {
+      // 终端写失败不冒泡
+    }
   }
   return aggregated
 }

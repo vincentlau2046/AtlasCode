@@ -103,6 +103,14 @@ export function createToolHooks(opts: ToolHooksAdapterOptions = {}): ToolHooks {
         // 0.1.56 B：PostToolUse 输出改写透传（CC 2.1.121 updatedToolOutput 全工具化，
         // pipeline toolExecution 消费点改写 block/toolUseResult）
         updatedToolOutput: r.updatedToolOutput,
+        // C8-5（0.1.79 W-C）：仅显式声明 continueOnBlock:true 的 block 拒绝才回喂
+        // （CC 2.1.139）；缺省 = 基线不变（blockingError 不透传、静默丢弃，
+        // 默认拒绝语义 = fail-closed 不破——拒绝理由不回喂时 hook 仍可阻止
+        // 后续动作，仅 LLM 看不到原因，与基线行为一致）。
+        blockingError:
+          r.blockingError && r.continueOnBlock
+            ? r.blockingError.blockingError
+            : undefined,
       }
       return outcome
     },

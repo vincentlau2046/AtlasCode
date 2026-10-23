@@ -42,6 +42,11 @@ export type HookCommand = {
   command: string
   shell?: string
   timeoutMs?: number
+  /**
+   * C8-5（0.1.79 W-C）：PostToolUse 钩子配置项（CC 2.1.139）。true = 该钩子
+   * 的 block 拒绝理由回喂 LLM 并继续回合；缺省 = 默认拒绝语义不变（fail-closed）。
+   */
+  continueOnBlock?: boolean
   [key: string]: unknown
 }
 
@@ -91,6 +96,12 @@ export type HookJSONOutput = {
    * 顶层形亦读（顶层 wins，与 updatedInput 双形读取序一致）。
    */
   updatedToolOutput?: string
+  /**
+   * C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）。hook JSON 输出声明 →
+   * harness 聚合后写 process.stdout（如响铃/设终端标题）；解析点 =
+   * interpretHookOutput，写点 = runHooks 聚合收尾（写失败不冒泡）。
+   */
+  terminalSequence?: string
   [key: string]: unknown
 }
 
@@ -118,6 +129,13 @@ export type HookResult = {
   updatedInput?: Record<string, unknown>
   /** 0.1.56 B：PostToolUse 输出改写（interpretHookOutput 解析面，聚合透传）。 */
   updatedToolOutput?: string
+  /** C8-5（0.1.79 W-C）：终端转义序列透传（runOneHook 标记，聚合拼接）。 */
+  terminalSequence?: string
+  /**
+   * C8-5（0.1.79 W-C）：仅当钩子配置显式声明 continueOnBlock:true 且本钩子
+   * 产出 block 拒绝时由 runOneHook 置真；缺省 = 默认拒绝语义不变。
+   */
+  continueOnBlock?: boolean
   aborted?: boolean
   backgrounded?: boolean
   [key: string]: unknown
@@ -136,5 +154,12 @@ export type AggregatedHookResult = {
   permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough' | 'defer'
   /** defer/deny 理由（winner 更替语义，mergeAggregated 维护）。 */
   permissionDecisionReason?: string
+  /** C8-5（0.1.79 W-C）：终端转义序列聚合面（mergeAggregated 拼接，非首胜）。 */
+  terminalSequence?: string
+  /**
+   * C8-5（0.1.79 W-C）：胜出 blockingError 携显式 continueOnBlock 声明时置真
+   * （首阻塞 wins 语义；engine 适配器据此决定拒绝理由是否回喂 LLM）。
+   */
+  continueOnBlock?: boolean
   results: HookResult[]
 }

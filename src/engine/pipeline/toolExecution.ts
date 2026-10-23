@@ -133,6 +133,15 @@ export interface PostToolUseHookOutcome {
    * （全工具生效，非 MCP 专属）；未返回 = undefined → 零行为变更。
    */
   updatedToolOutput?: string
+  /**
+   * C8-5（0.1.79 W-C）：PostToolUse block 拒绝理由回喂（CC 2.1.139
+   * continueOnBlock）。仅当钩子配置显式声明 continueOnBlock:true 时适配器
+   * （toolHooks.ts）才透传（Option B：缺省 = blockingError 不透传，基线
+   * fail-closed 不变）。消费点 = 下方 postOutcome 消费支：非 undefined 时
+   * 改写 tool_result 为 is_error + 拒绝理由，回合继续（LLM 收到拒绝原因
+   * 可调整后续动作，同 catch 支形态）。
+   */
+  blockingError?: string
 }
 
 /**
@@ -547,6 +556,22 @@ export async function executeToolUse(
   if (postOutcome?.updatedToolOutput !== undefined) {
     block = { ...block, content: postOutcome.updatedToolOutput }
     toolUseResult = postOutcome.updatedToolOutput
+  }
+  // C8-5（0.1.79 W-C）：PostToolUse block 拒绝理由回喂（CC 2.1.139
+  // continueOnBlock，仅显式声明钩子的拒绝才到达此处——适配器 Option B 门）：
+  // 改写 tool_result 为 is_error + 拒绝理由，isError 置真，回合继续（同上
+  // catch 支形态——LLM 收到拒绝原因可调整后续动作）。缺省（无声明 / 无钩子）
+  // = undefined → 零行为变更（fail-closed 默认拒绝语义不变）。
+  if (postOutcome?.blockingError !== undefined) {
+    const hookDenyText = `<tool_use_error>blocked by PostToolUse hook: ${postOutcome.blockingError}</tool_use_error>`
+    block = {
+      type: 'tool_result',
+      tool_use_id: tu.id,
+      content: hookDenyText,
+      is_error: true,
+    }
+    isError = true
+    toolUseResult = hookDenyText
   }
 
   return { block, isError, toolUseResult }

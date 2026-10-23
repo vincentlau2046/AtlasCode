@@ -61,6 +61,11 @@ export type CommandHookCommand = {
   once?: boolean
   async?: boolean
   asyncRewake?: boolean
+  /**
+   * C8-5（0.1.79 W-C）：PostToolUse 钩子配置项（CC 2.1.139）。true = 该钩子
+   * 的 block 拒绝理由回喂 LLM 并继续回合；缺省 = 默认拒绝语义不变（fail-closed）。
+   */
+  continueOnBlock?: boolean
   if?: string
   [key: string]: unknown
 }
@@ -132,6 +137,8 @@ const CommandHookSchema = z
     once: z.boolean().optional(),
     async: z.boolean().optional(),
     asyncRewake: z.boolean().optional(),
+    // C8-5（0.1.79 W-C）：PostToolUse block 拒绝理由回喂开关（CC 2.1.139）。
+    continueOnBlock: z.boolean().optional(),
     if: z.string().optional(),
   })
   .passthrough()

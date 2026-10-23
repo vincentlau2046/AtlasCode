@@ -67,6 +67,10 @@ export const syncHookResponseSchema = lazySchema(() =>
       .string()
       .describe('Warning message shown to the user')
       .optional(),
+    // C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——hook JSON 声明 →
+    // TUI 面透传到 executeHooks 结果，写点 = 结果循环 process.stdout.write。
+    // zod safeParse 剥未知键，不声明则 TUI 面静默丢弃（声明为必需面）。
+    terminalSequence: z.string().optional(),
     hookSpecificOutput: z
       .union([
         z.object({

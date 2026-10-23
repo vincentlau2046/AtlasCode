@@ -332,6 +332,12 @@ export type ElicitationResponse = ElicitResult
 export interface HookResult {
   message?: HookResultMessage
   systemMessage?: string
+  /**
+   * C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——hook JSON 声明经
+   * processHookJSONOutput 透传；executeHooks 结果循环写 process.stdout
+   * （写失败不冒泡）。
+   */
+  terminalSequence?: string
   blockingError?: HookBlockingError
   outcome: 'success' | 'blocking' | 'non_blocking_error' | 'cancelled'
   preventContinuation?: boolean
@@ -541,6 +547,12 @@ export function processHookJSONOutput({
   // Handle systemMessage field
   if (json.systemMessage) {
     result.systemMessage = json.systemMessage
+  }
+
+  // C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——透传到结果，
+  // 写点 = executeHooks 结果循环（写失败不冒泡）。
+  if (json.terminalSequence) {
+    result.terminalSequence = json.terminalSequence
   }
 
   // Handle PreToolUse specific
@@ -2742,6 +2754,16 @@ async function* executeHooks({
   // Run all hooks in parallel and wait for all to complete
   for await (const result of all(hookPromises)) {
     outcomes[result.outcome]++
+
+    // C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——写 process.stdout；
+    // 写失败不冒泡（终端写异常不使钩子执行整体失败，fail-safe）。
+    if (result.terminalSequence) {
+      try {
+        process.stdout.write(result.terminalSequence)
+      } catch {
+        // 终端写失败不冒泡
+      }
+    }
 
     // Check for preventContinuation early
     if (result.preventContinuation) {
