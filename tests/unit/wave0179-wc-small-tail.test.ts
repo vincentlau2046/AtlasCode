@@ -687,3 +687,57 @@ describe('wave0179 C8-2 DirectoryAdded hook 事件', () => {
     expect(src.includes('logForDebugging')).toBe(true)
   })
 })
+
+// ════════════════════════════════════════════════════════════════
+// C8-3 MessageDisplay hook 事件（工单 §1.5：新事件；hookInput.message = 文本面）
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C8-3 MessageDisplay hook 事件', () => {
+  // hooks 域单一事实源直 import（hookEvents.ts 纯常量面，零副作用）。
+  // eslint-disable-next-line
+  const { HOOK_EVENTS } =
+    require('../../src/hooks/hookEvents.js') as typeof import('../../src/hooks/hookEvents.js')
+
+  test('枚举在场：HOOK_EVENTS 含 MessageDisplay（基线 569aed7 同面红）', () => {
+    expect(HOOK_EVENTS.includes('MessageDisplay' as never)).toBe(true)
+    // C8-2 同波事件零回归
+    expect(HOOK_EVENTS.includes('DirectoryAdded' as never)).toBe(true)
+  })
+
+  test('hooks 域执行器 + 域根门面导出（runMessageDisplayHooks，message 文本面）', () => {
+    const runHooksSrc = srcOf('src/hooks/runHooks.ts')
+    expect(runHooksSrc.includes("hook_event_name: 'MessageDisplay'")).toBe(true)
+    expect(runHooksSrc.includes('export async function runMessageDisplayHooks')).toBe(true)
+    const facadeSrc = srcOf('src/hooks/index.ts')
+    expect(facadeSrc.includes('runMessageDisplayHooks')).toBe(true)
+  })
+
+  test('SDK 双面：coreSchemas HOOK_EVENTS 镜像 + MessageDisplayHookInputSchema + agentSdkTypes 占位型', () => {
+    const schemasSrc = srcOf('src/tui/entrypoints/sdk/coreSchemas.ts')
+    expect(schemasSrc.includes("'MessageDisplay',")).toBe(true)
+    expect(schemasSrc.includes('MessageDisplayHookInputSchema')).toBe(true)
+    expect(schemasSrc.includes("hook_event_name: z.literal('MessageDisplay')")).toBe(true)
+    expect(schemasSrc.includes('message: z.string()')).toBe(true)
+    const sdkTypesSrc = srcOf('src/tui/entrypoints/agentSdkTypes.ts')
+    expect(sdkTypesSrc.includes('MessageDisplayHookInput')).toBe(true)
+  })
+
+  test('TUI 执行器：executeMessageDisplayHooks generator 在场（无 matchQuery = Stop 同面默认分支）', () => {
+    const hooksSrc = srcOf('src/tui/utils/hooks.ts')
+    expect(hooksSrc.includes('export async function* executeMessageDisplayHooks')).toBe(true)
+    expect(hooksSrc.includes("hook_event_name: 'MessageDisplay'")).toBe(true)
+  })
+
+  test('触发面：messages.ts assistant 完整消息显示 chokepoint fire（空文本不触发）', () => {
+    const src = srcOf('src/tui/utils/messages.ts')
+    expect(src.includes('fireMessageDisplayHooks')).toBe(true)
+    // fire 点在 assistant 分支内（handleMessageFromStream 显示 chokepoint），空文本短路
+    expect(src.includes('if (displayText) fireMessageDisplayHooks(displayText)')).toBe(true)
+  })
+
+  test('fire 助手模块在场（fire-and-forget + 异常吞并，15s 超时档）', () => {
+    const src = srcOf('src/tui/utils/messageDisplayHooks.ts')
+    expect(src.includes('export function fireMessageDisplayHooks')).toBe(true)
+    expect(src.includes('executeMessageDisplayHooks')).toBe(true)
+    expect(src.includes('logForDebugging')).toBe(true)
+  })
+})

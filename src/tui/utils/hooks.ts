@@ -75,6 +75,8 @@ import type {
   PostModelSwitchHookInput,
   // C8-2（0.1.79 W-C）· /add-dir 后置钩子事件
   DirectoryAddedHookInput,
+  // C8-3（0.1.79 W-C）· assistant 完整消息显示事件
+  MessageDisplayHookInput,
   PreToolUseHookInput,
   SessionStartHookInput,
   SessionEndHookInput,
@@ -3949,6 +3951,33 @@ export async function* executeDirectoryAddedHooks(
     hookInput,
     toolUseID: randomUUID(),
     matchQuery: directory,
+    signal,
+    timeoutMs,
+  })
+}
+
+/**
+ * Execute MessageDisplay hooks if configured（C8-3，0.1.79 W-C）。
+ * assistant 完整消息进显示面前触发（handleMessageFromStream 显示
+ * chokepoint）。无 matchQuery（Stop / UserPromptSubmit 先例——
+ * getMatchingHooks default 分支全跑，引擎/TUI 双 switch 零改动）。
+ * fire-and-forget 消费面见 messageDisplayHooks.ts。
+ */
+export async function* executeMessageDisplayHooks(
+  message: string,
+  signal?: AbortSignal,
+  timeoutMs: number = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
+): AsyncGenerator<AggregatedHookResult> {
+  const hookInput: MessageDisplayHookInput = {
+    ...createBaseHookInput(undefined),
+    hook_event_name: 'MessageDisplay',
+    message,
+  }
+
+  yield* executeHooks({
+    hookInput,
+    toolUseID: randomUUID(),
+    matchQuery: undefined,
     signal,
     timeoutMs,
   })

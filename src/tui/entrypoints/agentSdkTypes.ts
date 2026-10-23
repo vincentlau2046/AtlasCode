@@ -474,6 +474,8 @@ export type FileChangedHookInput = any;
 export type HookInput = any;
 export type HookJSONOutput = any;
 export type InstructionsLoadedHookInput = any;
+// C8-3（0.1.79 W-C）· assistant 完整消息显示事件
+export type MessageDisplayHookInput = any;
 export type McpServerConfigForProcessTransport = any;
 export type McpServerStatus = any;
 export type ModelInfo = any;

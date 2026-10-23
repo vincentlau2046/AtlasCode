@@ -112,18 +112,18 @@ afterEach(() => {
   resetHookShellPort()
 })
 
-// ── A · 事件面（双 HOOK_EVENTS 事实源同步 27→29；0.1.79 W-C C8-2 加 DirectoryAdded → 30）──
+// ── A · 事件面（双 HOOK_EVENTS 事实源同步 27→29；0.1.79 W-C C8-2 加 DirectoryAdded → 30、C8-3 加 MessageDisplay → 31）──
 describe('A · PreModelSwitch/PostModelSwitch 事件面（CC 2.1.251）', () => {
-  test('A1 双事实源各含 2 新事件 + 长度 30 + 集合恒等（防漂移）', () => {
+  test('A1 双事实源各含 2 新事件 + 长度 31 + 集合恒等（防漂移）', () => {
     for (const [label, events] of [
       ['engine', ENGINE_EVENTS],
       ['sdk', SDK_EVENTS],
     ] as const) {
       expect(events).toContain('PreModelSwitch')
       expect(events).toContain('PostModelSwitch')
-      expect(events).toHaveLength(30) // 27 + 0.1.56 双事件 + 0.1.79 DirectoryAdded
+      expect(events).toHaveLength(31) // 27 + 0.1.56 双事件 + 0.1.79 DirectoryAdded + MessageDisplay
       const set = new Set(events as readonly string[])
-      expect(set.size).toBe(30) // 无重复
+      expect(set.size).toBe(31) // 无重复
       void label
     }
     // 双源集合恒等（AD-45 双解析器映射先例：防单侧漂移）

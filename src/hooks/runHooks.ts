@@ -423,6 +423,29 @@ export async function runDirectoryAddedHooks(
   return runHooks('DirectoryAdded', hookInput, options)
 }
 
+/**
+ * C8-3（0.1.79 W-C）· MessageDisplay：assistant 完整消息进显示面前触发
+ * （TUI handleMessageFromStream 显示 chokepoint，观察钩子）。无 matchQuery
+ * （Stop / UserPromptSubmit 先例——getMatchingHooks default 分支全跑）。
+ * message = 提取后的文本面（空文本在 fire 点短路，不进钩子）。
+ */
+export async function runMessageDisplayHooks(
+  message: string,
+  options: HookRunOptions = {},
+): Promise<AggregatedHookResult> {
+  const base = createBaseHookInput(
+    options.permissionMode,
+    options.sessionId,
+    options.agentInfo,
+  )
+  const hookInput: HookInput = {
+    ...base,
+    hook_event_name: 'MessageDisplay',
+    message,
+  }
+  return runHooks('MessageDisplay', hookInput, options)
+}
+
 /** SessionStart：会话开始（source 匹配；additionalContext 注入启动上下文）。 */
 export async function runSessionStartHooks(
   source: string,

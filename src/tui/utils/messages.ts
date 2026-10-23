@@ -35,6 +35,8 @@ import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadat
 import type { AgentId } from 'src/tui/types/ids.js'
 import { NO_CONTENT_MESSAGE } from '../constants/messages.js'
 import { OUTPUT_STYLE_CONFIG } from '../constants/outputStyles.js'
+// C8-3（0.1.79 W-C）· assistant 完整消息显示钩子（fire-and-forget，观察钩子）
+import { fireMessageDisplayHooks } from './messageDisplayHooks.js'
 import { isAutoMemoryEnabled } from '../memdir/paths.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
@@ -2996,6 +2998,10 @@ export function handleMessageFromStream(
           streamingEndedAt: Date.now(),
         }))
       }
+      // C8-3（0.1.79 W-C）：assistant 完整消息进显示面前触发 MessageDisplay
+      // 钩子（fire-and-forget 观察钩子；空文本短路不触发）。
+      const displayText = getContentText(message.message.content)
+      if (displayText) fireMessageDisplayHooks(displayText)
     }
     // Clear streaming text NOW so the render can switch displayedMessages
     // from deferredMessages to messages in the same batch, making the

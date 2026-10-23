@@ -71,6 +71,8 @@ export {
   runPostModelSwitchHooks,
   // C8-2（0.1.79 W-C）· /add-dir 后置钩子事件
   runDirectoryAddedHooks,
+  // C8-3（0.1.79 W-C）· assistant 完整消息显示事件
+  runMessageDisplayHooks,
   runSessionStartHooks,
   runStopHooks,
   runSessionEndHooks,

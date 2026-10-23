@@ -389,6 +389,8 @@ export const HOOK_EVENTS = [
   // C8-2（0.1.79 W-C）：/add-dir 后置钩子（SDK register_repo_root 面本仓
   // 未迁移，fire 点 = /add-dir 命令面）。
   'DirectoryAdded',
+  // C8-3（0.1.79 W-C）· assistant 完整消息进显示面前触发（观察钩子）。
+  'MessageDisplay',
 ] as const
 
 export const HookEventSchema = lazySchema(() => z.enum(HOOK_EVENTS))
@@ -544,6 +546,17 @@ export const DirectoryAddedHookInputSchema = lazySchema(() =>
       hook_event_name: z.literal('DirectoryAdded'),
       directory: z.string(),
       source: z.string(),
+    }),
+  ),
+)
+
+// C8-3（0.1.79 W-C）· assistant 完整消息显示事件。message = 提取后的
+// 文本面（空文本不触发——fire 点短路，故 schema 恒非空串约束语义外置）。
+export const MessageDisplayHookInputSchema = lazySchema(() =>
+  BaseHookInputSchema().and(
+    z.object({
+      hook_event_name: z.literal('MessageDisplay'),
+      message: z.string(),
     }),
   ),
 )
