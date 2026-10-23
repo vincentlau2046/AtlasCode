@@ -24,10 +24,12 @@
  * （原仅 vendor 前缀条件支，用户裁定「功能不丢更中性」）。
  */
 export function normalizeNameForMCP(name: string): string {
-  return name
-    .replace(/[^a-zA-Z0-9_-]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
+  // 0.1.79 W-C (#20)：折叠后空串 guard——全非法字符名（'...' 等）折叠+去首尾后
+  // 会得 ''（0.1.78 A3-2 引入），回落折叠前值（'___'，与 0.1.78 前旧行为逐字一致），
+  // 防 MCP 工具名 `mcp______tool` 分隔符被清成 `mcp__tool` 错位解析。
+  const folded = name.replace(/[^a-zA-Z0-9_-]/g, '_')
+  const normalized = folded.replace(/_+/g, '_').replace(/^_|_$/g, '')
+  return normalized === '' ? folded : normalized
 }
 
 /**
