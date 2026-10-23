@@ -4,6 +4,59 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.79
+
+W-C 小件清尾波（基线 v0.1.78；f4 工单
+`docs/2026-10-23-p0-wave-0179-ticket.md`；用户 2026-10-23 持续授权
+「已规划版本自动完成」触发，工单 §0 活码重核 @ 569aed7 含 D-3/D-5
+已落地勘误 + §5 审视记录无报裁项）。
+**波性质 = 20 项登记池清尾**：11 新做 + 2 核验探针 + 2 已落地核销
+（D-3/D-5 勘误转 gate 恒等锚）+ 5 排除维持登记；判别单测
+`tests/unit/wave0179-*.test.ts` 4 文件锁行为面。
+
+### #20 + F-4（修复合并 2 件）
+
+- MCP 归一空名 guard：`normalizeNameForMCP` 三副本（mcpRuleNames /
+  engine tools/mcp / tui normalization）各加折叠后空串 guard——
+  `'...'` 回落折叠前值 `___`，与 0.1.78 前（A3-2 通用化前）旧行为
+  逐字一致；非空名行为不变。附权限面语义锁。
+- F-4 `APIError` 双族合并：`tui/types/atlas.ts` 重复类删，归一
+  `modelprovider/types.ts` 一处 + re-export，跨模块 instanceof 风险消除。
+
+### C 簇工具执行层 4 件（CC 对齐）
+
+- C4-3 长工具进度心跳：长工具调用周期「进行中」信号（渲染层）。
+- C5-3 MCP 慢调用自动转后台：MCP 工具调用超 2 分钟自动转后台继续。
+- C5-4 MCP 能力发现退避：`mcpConnectionManager` capabilities 失败
+  重试退避。
+- C6-2 memory 容量预警：memory index 接近/超读限时预警 + 提示压实。
+
+### C8 hook 事件 3 件（扩既有事件枚举）
+
+- C8-2 `DirectoryAdded`：`/add-dir` 与 SDK register_repo_root 后置钩子
+  （含安全审 MEDIUM 修复）。
+- C8-3 `MessageDisplay` 新 hook 事件。
+- C8-5 `terminalSequence` + PostToolUse `continueOnBlock`（拒绝回喂后
+  继续；hook 显式声明才继续，默认拒绝不变，fail-closed 不破）。
+
+### C9 横切 2 件（卷 3 §5 裁定先行件）
+
+- C9-2 `--restricted` / env `ATLAS_RESTRICTED`：剥离命令运行类内置
+  工具 + WebFetch，保留 cwd 文件工具，拒 bypassPermissions，忽略
+  user/project/local settings。
+- C9-5 `skillOverrides` settings key：三档 `off` / `user-invocable-only` /
+  `name-only`（CC 2.1.129 对齐），双拷贝 schema（engine + tui settings
+  类型源）+ 纯解析面 `resolveSkillOverrides`（非法值宽容降级 off）；
+  消费缝登记不接线（数据契约先行）。
+
+### 核验与勘误
+
+- C4-5 / C10-6 活探针核验（e2e gate ⑤ 登记）：/clear 后 /rewind
+  MessageSelector 未开 = 不可恢复；回合中 /permissions 可开浮现面
+  登记——维持登记不判红。
+- D-3 / D-5 勘误：已 0.1.69 块 D 落地（commit c6bf008 / 4e6b4e0），
+  本波不重做，gate 恒等核验锚关账。
+
 ## v0.1.78
 
 W-A F-2 一方残面清波（基线 v0.1.77；f4 工单
