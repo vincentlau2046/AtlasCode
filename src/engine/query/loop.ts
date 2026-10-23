@@ -74,6 +74,7 @@ import {
 } from '../goal/goalState'
 import { shouldDisableAllHooksIncludingManaged } from '../config/hooksConfig'
 import { runToolBatch, type PermissionGate } from '../pipeline'
+import type { ToolHeartbeatInfo } from '../pipeline/toolHeartbeat'
 import {
   autoCompactIfNeeded,
   buildPostCompactMessages,
@@ -177,6 +178,14 @@ export type AgentLoopEvent =
       type: 'stream_delta'
       delta: StreamDelta
     }
+  | ({
+      /**
+       * C4-3（0.1.79 W-C）：长工具进度心跳——tool.call 运行中每间隔发的瞬态
+       * 「进行中」信号（identity + elapsedMs）。同 stream_delta：瞬态进度面，
+       * 不入 transcript record（round_end 仍是唯一持久化面）。
+       */
+      type: 'tool_heartbeat'
+    } & ToolHeartbeatInfo)
   | { type: 'loop_end'; result: AgentLoopResult }
   | {
       type: 'goal_met'
@@ -528,6 +537,11 @@ export async function queryOneRound(
     hooks: deps.hooks?.toolHooks,
     // R6（P0）：工具调用 context 桥透传（同上唯一点；未注入 = 窄 spine 最小 context）
     toolContext: deps.toolContext,
+    // C4-3（0.1.79 W-C）：长工具进度心跳透传（同 onStreamDelta 门控先例——仅
+    // emit 已注入面接通，headless / 未注入 = pipeline 直接调用零开销恒等锚）
+    onToolHeartbeat: deps.emit
+      ? (info: ToolHeartbeatInfo) => deps.emit!({ type: 'tool_heartbeat', ...info })
+      : undefined,
   })
   // AD-45 0.1.52：defer 挂起 outcome 不产 tool_result（block 缺席）——
   // toolResults / resultMessages 均排除挂起支（批次已短路，挂起后无后续 outcome）。

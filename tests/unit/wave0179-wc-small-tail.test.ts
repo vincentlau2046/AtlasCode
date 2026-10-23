@@ -188,6 +188,98 @@ describe('wave0179 F-4 APIError 双族合并（单类 instanceof 判别）', () 
 })
 
 // ════════════════════════════════════════════════════════════════
+// C4-3 长工具进度心跳（工单 §1.3）：引擎面周期性「进行中」信号。
+// 基线 569aed7 缺口：session keepalive（sessionActivity）与 MCP mcp_progress
+// （TUI MCP client onProgress 第 5 参，engine pipeline 不传）均不覆盖通用工具，
+// 长工具调用在渲染层呈冻结态。判别信号 = 纯计时面（新模块 toolHeartbeat.ts：
+// 间隔解析 + runWithToolHeartbeat 包裹）+ 四点接线活码在场（executeToolUse wrap /
+// loop 事件 / loopEvents 转发 / messages 消费分支）。动态 import = 模块未落时
+// 仅本 describe 红，不污染本文件已绿段。
+// ════════════════════════════════════════════════════════════════
+describe('wave0179 C4-3 长工具进度心跳', () => {
+  async function loadHeartbeat() {
+    return import('../../src/engine/pipeline/toolHeartbeat')
+  }
+
+  test('间隔解析：默认 30s / env 覆盖 / 非法回落默认 / 下限 clamp（基线同面红：模块缺）', async () => {
+    const hb = await loadHeartbeat()
+    expect(hb.DEFAULT_TOOL_HEARTBEAT_INTERVAL_MS).toBe(30_000)
+    expect(hb.getToolHeartbeatIntervalMs({})).toBe(30_000)
+    expect(hb.getToolHeartbeatIntervalMs({ ATLAS_TOOL_HEARTBEAT_MS: '250' })).toBe(250)
+    // 非法 / 空 → 默认；下限 100ms 防 misconfig 紧循环
+    expect(hb.getToolHeartbeatIntervalMs({ ATLAS_TOOL_HEARTBEAT_MS: 'abc' })).toBe(30_000)
+    expect(hb.getToolHeartbeatIntervalMs({ ATLAS_TOOL_HEARTBEAT_MS: '' })).toBe(30_000)
+    expect(hb.getToolHeartbeatIntervalMs({ ATLAS_TOOL_HEARTBEAT_MS: '1' })).toBe(100)
+  })
+
+  test('runWithToolHeartbeat：慢工具周期心跳（identity + elapsed 单调）/ 快工具零心跳', async () => {
+    const hb = await loadHeartbeat()
+    const beats: { toolUseId: string; toolName: string; elapsedMs: number }[] = []
+    await hb.runWithToolHeartbeat(
+      {
+        toolUseId: 'tu_1',
+        toolName: 'SlowTool',
+        intervalMs: 20,
+        onHeartbeat: b => beats.push(b),
+      },
+      () => new Promise(resolve => setTimeout(resolve, 70)),
+    )
+    expect(beats.length).toBeGreaterThanOrEqual(2)
+    expect(beats[0]).toMatchObject({ toolUseId: 'tu_1', toolName: 'SlowTool' })
+    expect(beats[beats.length - 1].elapsedMs).toBeGreaterThanOrEqual(beats[0].elapsedMs)
+    // 快工具（< interval）→ 零心跳
+    const none: unknown[] = []
+    const res = await hb.runWithToolHeartbeat(
+      {
+        toolUseId: 'tu_2',
+        toolName: 'FastTool',
+        intervalMs: 50,
+        onHeartbeat: b => none.push(b),
+      },
+      () => Promise.resolve(42),
+    )
+    expect(res).toBe(42)
+    expect(none.length).toBe(0)
+  })
+
+  test('runWithToolHeartbeat：异常穿透（心跳不吞结果/错误）', async () => {
+    const hb = await loadHeartbeat()
+    const beats: unknown[] = []
+    await expect(
+      hb.runWithToolHeartbeat(
+        {
+          toolUseId: 'tu_3',
+          toolName: 'BoomTool',
+          intervalMs: 1000,
+          onHeartbeat: b => beats.push(b),
+        },
+        () => Promise.reject(new Error('boom')),
+      ),
+    ).rejects.toThrow('boom')
+    expect(beats.length).toBe(0)
+  })
+
+  test('四点接线活码在场：executeToolUse wrap + loop 事件 + loopEvents 转发 + messages 消费', () => {
+    // ① executeToolUse：PipelineDeps.onToolHeartbeat 槽 + runWithToolHeartbeat 包 tool.call
+    const toolExec = srcOf('src/engine/pipeline/toolExecution.ts')
+    expect(toolExec.includes('onToolHeartbeat')).toBe(true)
+    expect(toolExec.includes('runWithToolHeartbeat')).toBe(true)
+    // ② loop：AgentLoopEvent 'tool_heartbeat' 成员 + queryOneRound runToolBatch 注入
+    //    （仅 deps.emit 注入面 = headless 恒等锚）
+    const loop = srcOf('src/engine/query/loop.ts')
+    expect(loop.includes("'tool_heartbeat'")).toBe(true)
+    expect(loop.includes('onToolHeartbeat: deps.emit')).toBe(true)
+    // ③ TUI loopEvents：EngineLoopStreamEvent 转发（pending.push）
+    const loopEvents = srcOf('src/tui/loopEvents.ts')
+    expect(loopEvents.includes("'tool_heartbeat'")).toBe(true)
+    // ④ TUI messages：handleMessageFromStream 消费分支 + guard 放行
+    const messagesSrc = srcOf('src/tui/utils/messages.ts')
+    expect(messagesSrc.includes("message.type === 'tool_heartbeat'")).toBe(true)
+    expect(messagesSrc.includes('onToolHeartbeat')).toBe(true)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
 // D-3 / D-5 已落地核验锚（0.1.69 块 D 落地，工单 §0 勘误：不重做，探针核在场）
 // ════════════════════════════════════════════════════════════════
 describe('wave0179 D-3/D-5 已落地核验锚', () => {

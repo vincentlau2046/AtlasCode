@@ -2951,7 +2951,8 @@ export function handleMessageFromStream(
     | StreamEvent
     | RequestStartEvent
     | ToolUseSummaryMessage
-    | { type: 'stream_delta'; delta: StreamDelta },
+    | { type: 'stream_delta'; delta: StreamDelta }
+    | { type: 'tool_heartbeat'; toolUseId: string; toolName: string; elapsedMs: number },
   onMessage: (message: Message) => void,
   onUpdateLength: (newContent: string) => void,
   onSetStreamMode: (mode: SpinnerMode) => void,
@@ -2964,11 +2965,15 @@ export function handleMessageFromStream(
   ) => void,
   onApiMetrics?: (metrics: { ttftMs: number }) => void,
   onStreamingText?: (f: (current: string | null) => string | null) => void,
+  // C4-3（0.1.79 W-C）：长工具进度心跳消费槽（加性可选参，第二调用方
+  // execAgentHook 不传 = 零行为差）。
+  onToolHeartbeat?: (info: { toolName: string; elapsedMs: number }) => void,
 ): void {
   if (
     message.type !== 'stream_event' &&
     message.type !== 'stream_request_start' &&
-    message.type !== 'stream_delta'
+    message.type !== 'stream_delta' &&
+    message.type !== 'tool_heartbeat'
   ) {
     // Handle tombstone messages - remove the targeted message instead of adding
     if (message.type === 'tombstone') {
@@ -3002,6 +3007,13 @@ export function handleMessageFromStream(
 
   if (message.type === 'stream_request_start') {
     onSetStreamMode('requesting')
+    return
+  }
+
+  // C4-3（0.1.79 W-C）：长工具进度心跳——瞬态「进行中」信号，不进消息面
+  //（消费 = REPL spinnerTip「X 仍在运行 · Ns」；onToolHeartbeat 未传 = 丢弃）。
+  if (message.type === 'tool_heartbeat') {
+    onToolHeartbeat?.({ toolName: message.toolName, elapsedMs: message.elapsedMs })
     return
   }
 

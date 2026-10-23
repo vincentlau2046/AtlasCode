@@ -2392,6 +2392,11 @@ export function REPL({
     onBackgroundQuery: handleBackgroundQuery
   });
   const onQueryEvent = useCallback((event: Parameters<typeof handleMessageFromStream>[0]) => {
+    // C4-3（0.1.79 W-C）：新请求开始即清 stale 心跳 tip（上一回合长工具遗留的
+    // 「仍在运行」提示不跨回合泄漏）。
+    if (event.type === 'stream_request_start') {
+      setAppState(prev => ({ ...prev, spinnerTip: undefined }));
+    }
     handleMessageFromStream(event, (newMessage: any) => {
       if (isCompactBoundaryMessage(newMessage)) {
         // Fullscreen: keep pre-compact messages for scrollback. query.ts
@@ -2452,8 +2457,15 @@ export function REPL({
         responseLengthBaseline: baseline,
         endResponseLength: baseline
       });
-    }, onStreamingText);
-  }, [setMessages, setResponseLength, setStreamMode, setStreamingToolUses, setStreamingThinking, onStreamingText]);
+    }, onStreamingText, info => {
+      // C4-3（0.1.79 W-C）：长工具进度心跳消费——瞬态 tip 挂 spinner（读面 =
+      // SpinnerWithVerb；新回合 stream_request_start 清除，见上）。
+      setAppState(prev => ({
+        ...prev,
+        spinnerTip: `${info.toolName} 仍在运行 · ${Math.round(info.elapsedMs / 1000)}s`,
+      }));
+    });
+  }, [setMessages, setResponseLength, setStreamMode, setStreamingToolUses, setStreamingThinking, onStreamingText, setAppState]);
   const onQueryImpl = useCallback(async (messagesIncludingNewMessages: MessageType[], newMessages: MessageType[], abortController: AbortController, shouldQuery: boolean, additionalAllowedTools: string[], mainLoopModelParam: string, effort?: EffortValue) => {
     // Prepare IDE integration for new prompt. Read mcpClients fresh from
     // store — useManageMCPConnections may have populated it since the

@@ -42,6 +42,11 @@ import type {
 } from '../../shared'
 import { classifyToolError } from './errorClassification'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
+import {
+  getToolHeartbeatIntervalMs,
+  runWithToolHeartbeat,
+  type ToolHeartbeatInfo,
+} from './toolHeartbeat'
 
 /**
  * E-4 接缝：权限门。窄 spine 默认放行；E-4 注入规则求值树后在此做
@@ -234,6 +239,13 @@ export interface PipelineDeps {
    * 崩溃族单点修复，旧仓 toolExecution 双处传全量 toolUseContext 语义复原）。
    */
   toolContext?: object
+  /**
+   * C4-3（0.1.79 W-C）：长工具进度心跳槽（窄 spine 可选注入）。注入时 tool.call
+   * 被 runWithToolHeartbeat 包裹，每 ATLAS_TOOL_HEARTBEAT_MS（默认 30s，下限 100ms）
+   * 发一次 { toolUseId, toolName, elapsedMs }；未注入 = 直接调用零开销（headless
+   * 恒等锚）。瞬态信号不入 transcript。
+   */
+  onToolHeartbeat?: (info: ToolHeartbeatInfo) => void
 }
 
 export interface ToolExecutionOutcome {
@@ -424,12 +436,20 @@ export async function executeToolUse(
     // 同入 context = 子代理门透传接缝（AgentTool 消费 → runAgent 子 loop 同门执行，
     // 旧仓子代理共享父会话权限上下文语义；context: unknown 契约不变）。R6（P0）：
     // TUI 桥面注入时 context = 全量 ToolUseContext + engine 运行字段（见 toolCallContext）。
-    const res = await tool.call(
-      callInput,
-      toolCallContext,
-      undefined,
-      assistantMsg,
-    )
+    // C4-3（0.1.79 W-C）：onToolHeartbeat 注入时周期发「进行中」心跳（渲染层
+    // 长工具冻结态消解）；未注入 = 直接调用，零开销恒等。
+    const callTool = () => tool.call(callInput, toolCallContext, undefined, assistantMsg)
+    const res = await (deps.onToolHeartbeat
+      ? runWithToolHeartbeat(
+          {
+            toolUseId: tu.id,
+            toolName: tool.name,
+            intervalMs: getToolHeartbeatIntervalMs(),
+            onHeartbeat: deps.onToolHeartbeat,
+          },
+          callTool,
+        )
+      : callTool())
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
     // G1（#258）：挂工具原生 Output（res.data）——TUI 渲染面经 message.toolUseResult
     // 消费（UserToolSuccessMessage → tool.renderToolResultMessage）。

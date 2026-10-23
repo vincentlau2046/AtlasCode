@@ -47,6 +47,9 @@ import type { Message } from 'src/shared'
 export type EngineLoopStreamEvent =
   | { type: 'stream_request_start' }
   | { type: 'stream_delta'; delta: StreamDelta }
+  // C4-3（0.1.79 W-C）：长工具进度心跳转发（inline 型——tui 不 import engine
+  // pipeline 模块，同 stream_delta 不包装 Message 约定）。
+  | { type: 'tool_heartbeat'; toolUseId: string; toolName: string; elapsedMs: number }
   | Message
 
 // R1（P0 静默终止）：REPL 捕获终态 AgentLoopResult（emptyTerminated 面）经本
@@ -88,6 +91,10 @@ export async function* queryEngineLoopStream(
         } else if (event.type === 'stream_delta') {
           // 0.1.70 G-3：per-token 转发（修前落 else 被丢弃 = TUI 永不收
           // per-token 根因面；TUI for-await 消费，激活既有死代码接线）。
+          pending.push(event)
+        } else if (event.type === 'tool_heartbeat') {
+          // C4-3（0.1.79 W-C）：长工具心跳转发（同 stream_delta 瞬态面；消费 =
+          // REPL handleMessageFromStream → spinnerTip「仍在运行」）。
           pending.push(event)
         }
         notify()
