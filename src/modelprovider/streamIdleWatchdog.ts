@@ -10,6 +10,12 @@
  * 下一个 chunk → abort 本 attempt（best-effort iterator.return 后 throw
  * StreamIdleTimeoutError）→ 走既有 shouldRetryModelError 重试面。
  *
+ * 形状容忍（gate 打回归修）：修前消费点是 `for await`，会自动包装
+ * sync iterable 流；本模块手动 `stream[Symbol.asyncIterator]()` 曾把
+ * 该形状收紧成 TypeError（0158 fake 流即 sync generator，2 测红）。
+ * 入口守卫：缺 asyncIterator 时先以 async 生成器 `yield*` 包装再进
+ * watchdog 循环——async 流路径零变更，sync 流恢复修前容忍。
+ *
  * 错误分类面（有意设计，非默认落点）：
  *   - message 含 "timeout" → isRetryableError /timeout/i 正则自然命中 →
  *     shouldRetryModelError = true → 既有重试面。
@@ -41,14 +47,21 @@ export class StreamIdleTimeoutError extends Error {
  * 注入面之外的防御）。
  */
 export async function* withStreamIdleWatchdog<T>(
-  stream: AsyncIterable<T>,
+  stream: AsyncIterable<T> | Iterable<T>,
   timeoutMs: number = STREAM_IDLE_TIMEOUT_MS,
 ): AsyncGenerator<T> {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     yield* stream
     return
   }
-  const iterator = stream[Symbol.asyncIterator]()
+  // 形状守卫：sync iterable（无 Symbol.asyncIterator）先经 async 生成器
+  // 包装（恢复修前 for-await 的形状容忍）；async 流直取迭代器，零变更。
+  const iterator: AsyncIterator<T> =
+    typeof (stream as AsyncIterable<T>)[Symbol.asyncIterator] === 'function'
+      ? (stream as AsyncIterable<T>)[Symbol.asyncIterator]()
+      : (async function* wrapSyncIterable() {
+          yield* stream as Iterable<T>
+        })()
   try {
     while (true) {
       // nextPromise 挂 catch 防超时后迟到拒绝成 unhandled rejection。
