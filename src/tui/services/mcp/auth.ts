@@ -42,6 +42,7 @@ import { clearKeychainCache } from '../../utils/secureStorage/macOsKeychainHelpe
 import type { SecureStorageData } from '../../utils/secureStorage/types.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
+import { getMcpServerHeaders } from './headersHelper.js'
 import { buildRedirectUri, findAvailablePort } from './oauthPort.js'
 import {
   isMcpOauthDisplayGated,
@@ -230,6 +231,106 @@ function createAuthFetch(): FetchLike {
   }
 }
 
+// 0.1.81 V3-2 K2 #8：OAuth 三路径（登录/刷新/登出）带配置 headers。
+// 连接面（transport）已经带 server config 的 headers / headersHelper 动态头，
+// 但 OAuth 请求（metadata discovery / token / revoke）此前全裸——网关按头
+// 鉴权的部署里 OAuth 流会被拒。经 getMcpServerHeaders 复用同一解析（trust
+// gate 内建：headersHelper 的 project/local scope gate 于 workspace trust）。
+
+/**
+ * Resolve the configured headers for a server's OAuth requests. Non-fatal:
+ * resolution failure (untrusted helper, helper script error, …) logs and
+ * returns {} — the OAuth flow proceeds without configured headers rather
+ * than failing outright.
+ */
+async function resolveConfiguredMcpHeaders(
+  serverName: string,
+  serverConfig: McpSSEServerConfig | McpHTTPServerConfig,
+): Promise<Record<string, string>> {
+  try {
+    return await getMcpServerHeaders(serverName, serverConfig)
+  } catch (error) {
+    logMCPDebug(
+      serverName,
+      `Failed to resolve configured headers for OAuth: ${errorMessage(error)}`,
+    )
+    return {}
+  }
+}
+
+/**
+ * Normalize a fetch init.headers value (Headers instance / [k,v][] array /
+ * plain object) to a record. The OAuth SDK passes Headers instances —
+ * spreading those directly yields {} (no enumerable own props), which would
+ * silently drop the SDK's protocol headers (Content-Type/Authorization).
+ */
+function headersToRecord(headers: unknown): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (!headers) return out
+  if (headers instanceof Headers) {
+    headers.forEach((v, k) => {
+      out[k] = v
+    })
+    return out
+  }
+  if (Array.isArray(headers)) {
+    for (const [k, v] of headers as [string, string][]) out[k] = v
+    return out
+  }
+  if (typeof headers === 'object') {
+    for (const [k, v] of Object.entries(headers as Record<string, unknown>)) {
+      out[k] = String(v)
+    }
+  }
+  return out
+}
+
+/**
+ * Wrap a FetchLike so every OAuth request carries the server's configured
+ * headers. Merge order: request headers win — configured headers only add
+ * (they must not clobber protocol headers the SDK sets, e.g. Content-Type
+ * or Authorization; case-insensitive duplicate keys also resolve to the
+ * request's value). Empty/failed resolution returns the original fetchLike
+ * reference (no-op wrapper).
+ */
+function mergeConfiguredHeaders(
+  fetchLike: FetchLike,
+  configured: Record<string, string>,
+): FetchLike {
+  if (Object.keys(configured).length === 0) return fetchLike
+  return (url, init) => {
+    const requestHeaders = headersToRecord(init?.headers)
+    const requestKeys = new Set(
+      Object.keys(requestHeaders).map(k => k.toLowerCase()),
+    )
+    const configuredNotOverridden = Object.fromEntries(
+      Object.entries(configured).filter(
+        ([k]) => !requestKeys.has(k.toLowerCase()),
+      ),
+    )
+    return fetchLike(url, {
+      ...init,
+      headers: { ...configuredNotOverridden, ...requestHeaders },
+    })
+  }
+}
+
+/**
+ * Wrap a FetchLike with the server's configured headers (settings headers +
+ * headersHelper dynamic headers, gated on workspace trust via
+ * getMcpServerHeaders). Used by all three OAuth paths — login
+ * (performMCPOAuthFlow), refresh (ClaudeAuthProvider._doRefresh), and
+ * logout (revokeServerTokens). XAA flows (xaa.ts) are out of scope here.
+ */
+export async function withConfiguredHeaders(
+  fetchLike: FetchLike,
+  serverName: string,
+  serverConfig: McpSSEServerConfig | McpHTTPServerConfig,
+): Promise<FetchLike> {
+  const configured = await resolveConfiguredMcpHeaders(serverName, serverConfig)
+  return mergeConfiguredHeaders(fetchLike, configured)
+}
+
 /**
  * Fetches authorization server metadata, using a configured metadata URL if available,
  * otherwise performing RFC 9728 → RFC 8414 discovery via the SDK.
@@ -381,6 +482,7 @@ async function revokeToken({
   clientSecret,
   accessToken,
   authMethod = 'client_secret_basic',
+  extraHeaders,
 }: {
   serverName: string
   endpoint: string
@@ -390,12 +492,17 @@ async function revokeToken({
   clientSecret?: string
   accessToken?: string
   authMethod?: 'client_secret_basic' | 'client_secret_post'
+  /** K2 #8：server 配置 headers（settings + headersHelper），随 revoke POST 发出 */
+  extraHeaders?: Record<string, string>
 }): Promise<void> {
   const params = new URLSearchParams()
   params.set('token', token)
   params.set('token_type_hint', tokenTypeHint)
 
+  // 配置 headers 前置、协议头 Content-Type 后置胜（同合并序裁定：协议头
+  // 不被配置覆写；Authorization 在下方 client-auth 分支再置，保持最高优先）。
   const headers: Record<string, string> = {
+    ...(extraHeaders ?? {}),
     'Content-Type': 'application/x-www-form-urlencoded',
   }
 
@@ -477,10 +584,18 @@ export async function revokeServerTokens(
       // than the MCP URL — use the persisted discoveryState if we have it.
       const asUrl =
         tokenData.discoveryState?.authorizationServerUrl ?? serverConfig.url
+      // K2 #8（落码裁定④）：登出路径的 discovery fetch 与 revoke POST 同样带
+      // server 配置 headers —— metadata fetch 经 wrapped fetch（第 4 参），
+      // revokeToken 经 extraHeaders（协议头 Content-Type 后置胜）。
+      const configuredHeaders = await resolveConfiguredMcpHeaders(
+        serverName,
+        serverConfig,
+      )
       const metadata = await fetchAuthServerMetadata(
         serverName,
         asUrl,
         serverConfig.oauth?.authServerMetadataUrl,
+        mergeConfiguredHeaders(createAuthFetch(), configuredHeaders),
       )
 
       if (!metadata) {
@@ -526,6 +641,7 @@ export async function revokeServerTokens(
                 clientSecret: tokenData.clientSecret,
                 accessToken: tokenData.accessToken,
                 authMethod,
+                extraHeaders: configuredHeaders,
               })
             } catch (error: unknown) {
               // Log but continue
@@ -548,6 +664,7 @@ export async function revokeServerTokens(
                 clientSecret: tokenData.clientSecret,
                 accessToken: tokenData.accessToken,
                 authMethod,
+                extraHeaders: configuredHeaders,
               })
             } catch (error: unknown) {
               logMCPDebug(
@@ -938,13 +1055,21 @@ export async function performMCPOAuthFlow(
       options?.skipBrowserOpen,
     )
 
+    // K2 #8：OAuth 请求（metadata discovery + sdkAuth token 交换）带配置
+    // headers（settings headers + headersHelper，gate 于 workspace trust）。
+    const oauthFetch = await withConfiguredHeaders(
+      createAuthFetch(),
+      serverName,
+      serverConfig,
+    )
+
     // Fetch and store OAuth metadata for scope information
     try {
       const metadata = await fetchAuthServerMetadata(
         serverName,
         serverConfig.url,
         serverConfig.oauth?.authServerMetadataUrl,
-        undefined,
+        oauthFetch,
         wwwAuthParams.resourceMetadataUrl,
       )
       if (metadata) {
@@ -1143,6 +1268,7 @@ export async function performMCPOAuthFlow(
             serverUrl: serverConfig.url,
             scope: wwwAuthParams.scope,
             resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl,
+            fetchFn: oauthFetch,
           })
           logMCPDebug(serverName, `Initial auth result: ${result}`)
 
@@ -1185,6 +1311,7 @@ export async function performMCPOAuthFlow(
       serverUrl: serverConfig.url,
       authorizationCode,
       resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl,
+      fetchFn: oauthFetch,
     })
 
     logMCPDebug(serverName, `Auth result: ${result}`)
@@ -2048,10 +2175,17 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
         `Fetching metadata from configured URL: ${metadataUrl}`,
       )
       try {
+        // K2 #8：discoveryState 的 metadata fetch 同样带配置 headers（刷新
+        // 路径的首个 metadata 请求实际经此发出，须与 _doRefresh 同面）。
         const metadata = await fetchAuthServerMetadata(
           this.serverName,
           this.serverConfig.url,
           metadataUrl,
+          await withConfiguredHeaders(
+            createAuthFetch(),
+            this.serverName,
+            this.serverConfig,
+          ),
         )
         if (metadata) {
           return {
@@ -2173,7 +2307,13 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
         logMCPDebug(this.serverName, `Starting token refresh`)
-        const authFetch = createAuthFetch()
+        // K2 #8：一次包装覆盖本 attempt 的全部三消费点（discovery/
+        // fetchAuthServerMetadata/sdkRefreshAuthorization token POST）。
+        const authFetch = await withConfiguredHeaders(
+          createAuthFetch(),
+          this.serverName,
+          this.serverConfig,
+        )
 
         // Reuse cached metadata from the initial OAuth flow if available,
         // since metadata (token endpoint URL, etc.) is static per auth server.
