@@ -103,7 +103,16 @@ export function getMcpDiscoveryInput(): McpDiscoveryInput | null {
 export async function buildMcpServerConfigs(
   input: McpDiscoveryInput,
 ): Promise<Record<string, ScopedMcpServerConfig>> {
-  const servers: Record<string, ScopedMcpServerConfig> = {}
+  // 0.1.81 K2 #2：null-prototype accumulator——`servers[name] = cfg` 对
+  // 保留名 key（'__proto__'/'constructor' 等）在普通对象上走 [[Set]] 会
+  // 打到原型链（'__proto__' setter 改原型而非定义自有属性，后续同名
+  // project 覆盖/entries 遍历全数错位）；null-proto 走
+  // [[DefineOwnProperty]]，'__proto__' 等同普通自有键。下游
+  // Object.entries/spread 消费面对 null-proto 均安全。
+  const servers = Object.create(null) as Record<
+    string,
+    ScopedMcpServerConfig
+  >
 
   // user 源：settings 记录（逐台 parse，坏台跳过）
   for (const [name, raw] of Object.entries(input.settingsServers ?? {})) {

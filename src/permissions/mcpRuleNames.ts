@@ -33,6 +33,20 @@ export function normalizeNameForMCP(name: string): string {
 }
 
 /**
+ * 权限规则匹配用折半比对名（0.1.81 K2 #4/#9）：非法字符 → 下划线 + 连续
+ * 下划线折叠，**不剥首尾下划线**（与 normalizeNameForMCP 的差异）。
+ *
+ * 动机：normalizeNameForMCP 会剥首尾下划线，导致 server 'a_' 折叠成 'a'
+ * 与规则 `mcp__a` 误命中（#9 收窄根因）；而规则串里含原始 `__` 的 server
+ * 名（`mcp__my__server`）经 mcpInfoFromString 首 `__` 切分会错位（#4）。
+ * 权限匹配改为对**两侧原始串**做本折半（保 `__` 边界可辨）后直接比对，
+ * 不再依赖「先归一再造名」链。
+ */
+export function foldMcpNameForCompare(name: string): string {
+  return name.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_')
+}
+
+/**
  * 从 "mcp__serverName__toolName" 串解析 MCP server/tool 信息。
  * 已知限制（旧仓逐字）：server 名含 "__" 时解析不准
  * （"mcp__my__server__tool" → server="my", tool="server__tool"）——

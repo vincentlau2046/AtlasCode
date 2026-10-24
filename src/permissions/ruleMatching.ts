@@ -61,7 +61,11 @@ import {
   permissionRuleValueFromString,
   permissionRuleValueToString,
 } from './permissionRuleParser'
-import { getToolNameForPermissionCheck, mcpInfoFromString } from './mcpRuleNames'
+import {
+  getToolNameForPermissionCheck,
+  mcpInfoFromString,
+  foldMcpNameForCompare,
+} from './mcpRuleNames'
 
 /**
  * 规则匹配工具窄视图（shared Tool 的 name + mcpInfo + 鸭子 checkPermissions
@@ -154,10 +158,18 @@ export function getAskRules(context: ToolPermissionContext): PermissionRule[] {
  * For example, this matches "Bash" but not "Bash(prefix:*)" for BashTool
  * This also matches MCP tools with a server name, e.g. the rule "mcp__server1"
  *
- * MCP server-level permission: rule "mcp__server1" matches tool
- * "mcp__server1__tool1". Also supports wildcard: rule "mcp__server1__*"
- * matches all tools from server1.（旧仓头注逐字；skip-prefix 环境模式
- * ATLAS_AGENT_SDK_MCP_NO_PREFIX 新仓无 = 残留守面，本面不实现。）
+ * MCP permission matching（0.1.81 K2 #4/#9 重写）：
+ *   - exact 全名（`mcp__server1__tool1`）→ 折半比对（容忍规则串写原始
+ *     未归一名，如 `mcp__My.Server`）；
+ *   - server 级（`mcp__server1`）/ wildcard（`mcp__server1__*`）→ 与
+ *     tool.mcpInfo.serverName 折半比对。
+ *   两侧均用 foldMcpNameForCompare（非法字符→下划线 + 折叠，**不剥首尾**）
+ *   ——旧实现「归一（剥首尾）再造名」链有两个缺口：server 名含 `__` 时
+ *   mcpInfoFromString 首 `__` 切分错位致规则永不命中（#4）；server 'a_'
+ *   归一去尾下划线后与规则 `mcp__a` 误命中（#9 收窄，fail-closed 方向：
+ *   allow 规则须写全名，不再匹配 `a_` / `a__b`）。
+ *   （skip-prefix 环境模式 ATLAS_AGENT_SDK_MCP_NO_PREFIX 新仓无 =
+ *   残留守面，本面不实现。）
  */
 function toolMatchesRule(
   tool: RuleTool,
@@ -177,16 +189,22 @@ function toolMatchesRule(
     return true
   }
 
-  // MCP server-level permission（旧仓逐字）
-  const ruleInfo = mcpInfoFromString(rule.ruleValue.toolName)
-  const toolInfo = mcpInfoFromString(nameForRuleMatch)
-
-  return (
-    ruleInfo !== null &&
-    toolInfo !== null &&
-    (ruleInfo.toolName === undefined || ruleInfo.toolName === '*') &&
-    ruleInfo.serverName === toolInfo.serverName
-  )
+  // MCP 面折半比对（非 MCP 工具或非 mcp__ 规则 → 不匹配）
+  const toolInfo = tool.mcpInfo ?? mcpInfoFromString(nameForRuleMatch)
+  const ruleName = rule.ruleValue.toolName
+  if (!toolInfo || !ruleName.startsWith('mcp__')) {
+    return false
+  }
+  // 折半 exact 全名：容忍规则串写原始（未归一）server/tool 名
+  if (foldMcpNameForCompare(ruleName) === foldMcpNameForCompare(nameForRuleMatch)) {
+    return true
+  }
+  // server 级 / wildcard：取规则 server 段折半比对（server 段含 __ 时
+  // 歧义按「server 名含 __」解释——对面 server 'my' 的歧义工具面已被上方
+  // 折半 exact 分支覆盖，此处不产生额外假阳性）
+  const rest = ruleName.slice('mcp__'.length)
+  const ruleServerRaw = rest.endsWith('__*') ? rest.slice(0, -3) : rest
+  return foldMcpNameForCompare(ruleServerRaw) === foldMcpNameForCompare(toolInfo.serverName)
 }
 
 /**
