@@ -4,6 +4,66 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.80
+
+V3-1 K1 压缩/缓存/网关族 18 件（上游 2.1.296–302 对齐；f4 工单
+`docs/2026-10-24-p0-wave-0180-ticket.md`；卷 3 方案 §2 V3-1 / §3 K1
+逐条账；判别单测 `tests/unit/wave0180-*.test.ts` 9 文件）。
+
+### K1-A 空闲压缩（新特性三件）
+
+- 200K+ 上下文闲置 ~54min（prompt cache TTL 1h 临近过期）先压缩
+  再请求（@299）；查询期惰性判定（先例 microCompact
+  `evaluateTimeBasedTrigger`），消费点 = `shouldAutoCompact` OR 臂。
+- settings `idleCompaction: false` 唯一关闭口（默认开，对齐上游）。
+- env `ATLAS_IDLE_COMPACT_MIN_TOKENS` 严格整数 ≥1 只覆写 token 下限。
+- /config 面板「Idle compaction」行（面板面，零新 slash 命令）。
+
+### K1-B 网关模型名错配（修三件 @299/300/301/302）
+
+- 带前缀网关名（`anthropic/claude-*` 型）档位查找 basename 回落。
+- 压缩判定按**请求名**键控（响应名≠请求名时不再反复压缩）。
+- 近窗压缩失败（prompt is too long）PTL 降级链。
+
+### K1-C 小窗模型/摘要（修/补三件 @299/300/301）
+
+- 小窗切换先由旧（大窗）模型生成摘要再进小窗；sticky-peek store
+  防重试链回落小窗模型。
+- `compact_start` 加性 `summaryModel` 字段，spinner 显形摘要模型。
+- /autocompact 小窗档位用量百分比分母随窗校准。
+
+### K1-D 恢复/resume 压缩面（核验+补三件 @300/301）
+
+- 判别结论：load.ts splice 面**已覆盖**上游 300 两件（RED 探针
+  实证）→ test-only 零码收口（`tests/func` 分层）。
+- TUI 写侧面 `sessionMemoryCompact` →
+  `annotateBoundaryWithPreservedSegment`；压缩行 UI 存储位置 dim 行。
+
+### K1-E 流空闲超时（修一件 @299）
+
+- 流 stall（chunk 间隔）超时 300s：`withStreamIdleWatchdog` 逐
+  next() 与 setTimeout 竞速；超时走 API_ERROR/retryable（非
+  TIMEOUT fail-fast），流中途超时落 C4-1 partial 保留支。
+- gate 打回归修：watchdog 入口形状守卫——缺 `Symbol.asyncIterator`
+  的 sync iterable 流先以 async 生成器包装（恢复修前 for-await
+  形状容忍，async 流零变更）。
+
+### K1-F 缓存/token 计数/子代理（补五件 @296/302）
+
+- ToolSearch/压缩重载后工具集 cache key 稳定化（防缓存 miss）。
+- 压缩中停止回合不再误报 too long（回合停止优先）。
+- subagent frontmatter `autoCompactWindow` + `--agents` 透传；
+  优先级链 env > frontmatter > settings；headless 子代理永不自动
+  压缩（有意重定）；子代理窗位按自己模型独立。
+- 自适应思考模型 token 计数兜底（budgetTokens 计入，通用化无品牌面）。
+
+### 波后订正
+
+- 工单 §0.1 收尾甄别句订正：2× C4-1 chatStream（0158）= 本波 K1-E
+  sync-iterable 真回归（watchdog 形状收紧），已随波修复；3× D4
+  裸色名为环境性 pre-existing。甄别方法论缺陷记录在案（对照跑须在
+  wave 代码上隔离跑失败文件）。
+
 ## v0.1.79
 
 W-C 小件清尾波（基线 v0.1.78；f4 工单
