@@ -1434,6 +1434,14 @@ export function parseMcpConfigFromFilePath(params: {
     }
   }
 
+  // 0.1.81 K2 #17：空 .mcp.json = 合法空配置不报错——0 字节 / 纯空白文件
+  // 与「缺失文件」同权处理（config {mcpServers:{}} + 零 error），不再走
+  // safeParseJSON→null→fatal「not a valid JSON」误报面。坏 JSON / 非对象
+  // JSON 不放宽（既有 fatal 路径保持）。
+  if (!configContent.trim()) {
+    return { config: { mcpServers: {} }, errors: [] }
+  }
+
   const parsedJson = safeParseJSON(configContent)
 
   if (!parsedJson) {
@@ -1456,6 +1464,18 @@ export function parseMcpConfigFromFilePath(params: {
         },
       ],
     }
+  }
+
+  // 0.1.81 K2 #17：空 JSON 对象 {} = 合法空配置（零键 plain object——缺
+  // mcpServers 键时 schema 必 fail，此处提前短路，不产「Does not adhere
+  // to schema」误报）。非空对象仍走 schema 面（mcpServers 必填不变）。
+  if (
+    typeof parsedJson === 'object' &&
+    parsedJson !== null &&
+    !Array.isArray(parsedJson) &&
+    Object.keys(parsedJson).length === 0
+  ) {
+    return { config: { mcpServers: {} }, errors: [] }
   }
 
   return parseMcpConfig({
