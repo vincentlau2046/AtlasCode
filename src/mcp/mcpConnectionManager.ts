@@ -180,7 +180,8 @@ const FORWARD_SEAM_MESSAGE =
 // ── manager 面 ────────────────────────────────────────────────────────
 
 export type McpConnectionManager = {
-  /** 连接（已 connected 态 = 去重直接返回；失败态重跑生命周期）。
+  /** 连接（已 connected 态 = 去重直接返回；失败态重跑生命周期；同 server
+   * 在飞 attempt = 并发去重复用同 promise〔0.1.81 K2 #14：排队不重放〕）。
    * AD-49（0.1.48 A-②）：`opts.connectionTimeoutMs` 参数化 initialize 握手
    * 超时预算（`--mcp-config` 源 5s 预算消费面）；缺省 = getConnectionTimeoutMs()
    * （MCP_TIMEOUT||30000，逐字零回归）。 */
@@ -204,6 +205,11 @@ export type McpConnectionManager = {
 export function createMcpConnectionManager(): McpConnectionManager {
   const connections = new Map<string, McpServerConnection>()
   const pending = new Set<string>()
+  // 0.1.81 K2 #14：在飞连接 attempt 表（并发去重——同 server 并发 connect
+  // 复用同一 promise：排队不重放，防二次 spawn 同名 server 子进程 / 二次
+  // initialize 握手。与 pending Set 分工：Set = 外观态（getPendingServerNames
+  // 消费面），本表 = 去重键）。attempt settle 即清（finally 面）。
+  const pendingConnects = new Map<string, Promise<McpServerConnection>>()
   // C5-4（0.1.79 W-C）：能力发现失败记账（per-server 连败计数；仅 stdio 支
   // 记账——seam 支 = 永久配置错误，退避会遮蔽登记文案；成功清账）。
   const connectFailures = new Map<string, { count: number; lastFailedAt: number }>()
@@ -315,7 +321,12 @@ export function createMcpConnectionManager(): McpConnectionManager {
     // connect settle 即清 timer〔旧 L1013-1019 逐字〕；旧 TelemetrySafeError
     // → 本地 Error 化 delta 登记）
     const initPromise = client.request('initialize', {
-      protocolVersion: '2025-03-26',
+      // 0.1.81 K2 #1：协议协商版本升级 2025-03-26 → 2026-07-28（MCP spec
+      // 现行修订；server 回执旧版 = 协商降级，回执值记入
+      // connection.negotiatedProtocolVersion 可查；result 内 2026-07-28
+      // 新增字段（resultType/ttlMs/cacheScope）容忍——init 消费面只读
+      // capabilities/serverInfo/instructions/protocolVersion，未知字段零接触）
+      protocolVersion: '2026-07-28',
       capabilities: {
         // 空对象声明能力（旧仓同注：发 {form:{},url:{}} 会砸 Spring AI
         // Elicitation 零字段类）
@@ -350,6 +361,7 @@ export function createMcpConnectionManager(): McpConnectionManager {
         capabilities?: { tools?: boolean; resources?: boolean; prompts?: boolean }
         serverInfo?: { name: string; version: string }
         instructions?: string
+        protocolVersion?: string
       }
       client.notify('notifications/initialized')
 
@@ -365,6 +377,9 @@ export function createMcpConnectionManager(): McpConnectionManager {
                 version: init.serverInfo.version,
               },
             }
+          : {}),
+        ...(init.protocolVersion
+          ? { negotiatedProtocolVersion: init.protocolVersion }
           : {}),
         ...(init.instructions ? { instructions: init.instructions } : {}),
         config,
@@ -399,6 +414,29 @@ export function createMcpConnectionManager(): McpConnectionManager {
   }
 
   async function connect(
+    name: string,
+    config: ScopedMcpServerConfig,
+    opts?: { connectionTimeoutMs?: number },
+  ): Promise<McpServerConnection> {
+    const existing = connections.get(name)
+    if (existing?.type === 'connected') return existing
+
+    // 0.1.81 K2 #14：并发连接去重——同 server 在飞 attempt 未落定时，后续
+    // connect 复用同一 promise（排队不重放）。注意 return await：finally 清
+    // 键必须在 attempt settle 之后（return promise 不经 await 会先走 finally
+    // 提前清键，去重窗失效）。
+    const inflight = pendingConnects.get(name)
+    if (inflight) return inflight
+    const attempt = connectOnce(name, config, opts)
+    pendingConnects.set(name, attempt)
+    try {
+      return await attempt
+    } finally {
+      pendingConnects.delete(name)
+    }
+  }
+
+  async function connectOnce(
     name: string,
     config: ScopedMcpServerConfig,
     opts?: { connectionTimeoutMs?: number },

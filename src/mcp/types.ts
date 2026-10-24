@@ -214,6 +214,9 @@ export type ConnectedMcpServer = {
     version: string
   }
   instructions?: string
+  /** initialize 协商结果（server 回执的 protocolVersion；0.1.81 K2 #1 落位：
+   * 客户端请求 2026-07-28，server 可回执旧版 = 协商降级，此处可查）。 */
+  negotiatedProtocolVersion?: string
   config: ScopedMcpServerConfig
   cleanup: () => Promise<void>
 }
