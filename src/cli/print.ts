@@ -133,9 +133,14 @@ import {
   fetchToolsForClient,
   getMcpConnectionManager,
   getMcpDiscoveryInput,
+  // 0.1.81 V3-2 K2 #6：企业策略过滤（策略先行——connect 前过滤）
+  filterMcpServersByPolicy,
+  getMcpPolicyFromSettings,
+  getMcpPolicyInput,
   type McpConnectionManager,
   type McpDiscoveryInput,
   type McpJsonRpcClient,
+  type McpPolicyInput,
 } from '../mcp'
 import {
   getRoleModel,
@@ -340,7 +345,9 @@ function isMcpConnectionNonBlocking(): boolean {
  * 或文件路径（TUI parseMcpConfig 同序：先 JSON.parse，失败当文件路径 readFile）；
  * 取 `.mcpServers` record 逐台 merge（后项覆盖前项）。坏项 / 无 mcpServers 支
  * 静默跳过（不沉全果，同 buildMcpServerConfigs 逐台 parse 语义）。env 展开 /
- * reserved-name / enterprise-policy = TUI 车道专属面（headless 裁登记，不随迁）。 */
+ * reserved-name = TUI 车道专属面（headless 裁登记，不随迁）。enterprise-policy
+ * 原「TUI 车道专属」裁定随 0.1.81 K2 #6 工单废止——三连接车道统一策略先行
+ * （connectMcpStartup connect 前过滤，见下）。 */
 async function parseMcpConfigItemsLocal(
   items: string[],
 ): Promise<Record<string, unknown>> {
@@ -410,10 +417,20 @@ export async function connectMcpStartup(args: {
   const allConfigs = strictMcpConfig
     ? dynamicConfigs
     : { ...baseConfigs, ...dynamicConfigs }
+  // 0.1.81 K2 #6：企业策略先行——connect 前过滤（注入窗优先，未注册回落
+  // merged settings 面；--mcp-config dynamic 源同受策略面）。被封者
+  // markBlocked 登记 failed 态（blockedByPolicy 可查）零 spawn。
+  const policy: McpPolicyInput | null =
+    getMcpPolicyInput() ??
+    getMcpPolicyFromSettings(getSettingsWithErrors().settings)
+  const { allowed, blocked } = filterMcpServersByPolicy(allConfigs, policy)
+  for (const b of blocked) {
+    manager.markBlocked(b.name, allConfigs[b.name]!, b.reason)
+  }
   // ④ 连接预算路由：dynamic 源 5s / 其余源缺省（30s 逐字零回归）
   const connectAll = () =>
     Promise.allSettled(
-      Object.entries(allConfigs).map(([name, config]) =>
+      Object.entries(allowed).map(([name, config]) =>
         manager.connect(
           name,
           config,

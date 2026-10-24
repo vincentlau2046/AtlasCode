@@ -56,9 +56,14 @@
 import { stat } from 'node:fs/promises'
 import {
   createMcpConnectionManager,
+  // 0.1.81 V3-2 K2 #7：企业策略判定（mcp list/get 连接面策略先行）
+  checkMcpServerPolicy,
+  getMcpPolicyFromSettings,
+  getMcpPolicyInput,
   type McpConnectionManager,
   type ScopedMcpServerConfig,
 } from '../../mcp'
+import { getSettingsWithErrors } from '../../engine'
 import { safeParseJSON } from '../entryInit'
 import { cliError, cliOk } from '../exit'
 import {
@@ -129,12 +134,20 @@ async function mapConcurrent<T, R>(
   return results
 }
 
-/** health 态映射（旧 connectToServer 3 态 → 新 4 态，见头注裁定）。 */
-async function checkMcpServerHealth(
+/** health 态映射（旧 connectToServer 3 态 → 新 4 态，见头注裁定）。
+ * 0.1.81 K2 #7：策略先行——被封 server 直接报 blocked 不 connect（零
+ * spawn；注入窗优先，未注册回落 merged settings 面）。 */
+export async function checkMcpServerHealth(
   manager: McpConnectionManager,
   name: string,
   server: ScopedMcpServerConfig,
 ): Promise<string> {
+  // 策略先行（mcpPolicy 车道消费模式：窗设即短路，零 settings 读取）
+  const policy = getMcpPolicyInput() ??
+    getMcpPolicyFromSettings(getSettingsWithErrors().settings)
+  if (checkMcpServerPolicy(name, server, policy).blocked) {
+    return '✗ Blocked by enterprise policy'
+  }
   try {
     const result = await manager.connect(name, server)
     if (result.type === 'connected') {

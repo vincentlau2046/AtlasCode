@@ -92,3 +92,16 @@ export {
   partiallySanitizeUnicode,
   recursivelySanitizeUnicode,
 } from './mcpFetch'
+
+// ── 企业策略过滤（mcpPolicy.ts；0.1.81 V3-2 K2 #6/#7 策略先行）──────
+export type { McpPolicyInput } from './mcpPolicy'
+export {
+  getMcpPolicyFromSettings,
+  // 策略输入注入窗（setMcpDiscoveryInput 先例同型；测试 fake 注入面）
+  setMcpPolicyInput,
+  getMcpPolicyInput,
+  resetMcpPolicyInput,
+  // 判定面（车道消费：checkMcpServerHealth 单查 / compose·print 批量过滤）
+  checkMcpServerPolicy,
+  filterMcpServersByPolicy,
+} from './mcpPolicy'

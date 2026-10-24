@@ -200,6 +200,14 @@ export type McpConnectionManager = {
   closeAll(): Promise<void>
   /** 连接中服务器名（ToolSearch delta ⑤ getPendingServerNames 消费面）。 */
   getPendingServerNames(): string[]
+  /** 0.1.81 K2 #6/#7：策略封禁登记（failed 态 + blockedByPolicy 标记，
+   * 零 spawn 零接触连接生命周期；车道过滤面消费——blocked server 报
+   * failed 可查而非静默吞）。同步（非 async，无生命周期可等）。 */
+  markBlocked(
+    name: string,
+    config: ScopedMcpServerConfig,
+    reason: string,
+  ): FailedMcpServer
 }
 
 export function createMcpConnectionManager(): McpConnectionManager {
@@ -226,6 +234,25 @@ export function createMcpConnectionManager(): McpConnectionManager {
       config,
       error,
       ...(authFailure ? { authFailure: true } : {}),
+    }
+    connections.set(name, conn)
+    return conn
+  }
+
+  // 0.1.81 K2 #6/#7：策略封禁登记（fail() 同型置表，但同步零生命周期——
+  // 不进 pending / 不 spawn / 不计连败退避〔connectFailures 不动：被封
+  // = 配置面拒绝，非能力发现失败〕；blockedByPolicy 标记供 UI/诊断甄别）。
+  function markBlocked(
+    name: string,
+    config: ScopedMcpServerConfig,
+    reason: string,
+  ): FailedMcpServer {
+    const conn: FailedMcpServer = {
+      name,
+      type: 'failed',
+      config,
+      error: `MCP server "${name}" blocked by enterprise policy: ${reason}`,
+      blockedByPolicy: true,
     }
     connections.set(name, conn)
     return conn
@@ -499,6 +526,7 @@ export function createMcpConnectionManager(): McpConnectionManager {
       }
     },
     getPendingServerNames: () => [...pending],
+    markBlocked,
   }
   return manager
 }

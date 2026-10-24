@@ -229,6 +229,9 @@ export type FailedMcpServer = {
   config: ScopedMcpServerConfig
   error?: string
   authFailure?: boolean
+  /** 0.1.81 K2 #6/#7：企业策略封禁标记（markBlocked 落位；策略先行 =
+   * connect 前过滤零 spawn，failed 态可查而非静默吞）。 */
+  blockedByPolicy?: true
 }
 
 export type PendingMcpServer = {

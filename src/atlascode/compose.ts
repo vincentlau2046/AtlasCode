@@ -156,6 +156,11 @@ import {
   getMcpConnectionManager,
   getMcpDiscoveryInput,
   type McpDiscoveryInput,
+  // 0.1.81 V3-2 K2 #6：企业策略过滤（策略先行——connect 前过滤）
+  filterMcpServersByPolicy,
+  getMcpPolicyFromSettings,
+  getMcpPolicyInput,
+  type McpPolicyInput,
 } from '../mcp'
 import {
   buildMcpEngineConnections,
@@ -458,8 +463,18 @@ export async function initMcpConnections(): Promise<void> {
     })
   const configs = await buildMcpServerConfigs(input)
   const manager = getMcpConnectionManager()
+  // 0.1.81 K2 #6：企业策略先行——connect 前过滤（注入窗优先，未注册回落
+  // merged settings 面；被封者 markBlocked 登记 failed 态〔blockedByPolicy
+  // 可查〕零 spawn，放行者照常 connect）
+  const policy: McpPolicyInput | null =
+    getMcpPolicyInput() ??
+    getMcpPolicyFromSettings(getSettingsWithErrors().settings)
+  const { allowed, blocked } = filterMcpServersByPolicy(configs, policy)
+  for (const b of blocked) {
+    manager.markBlocked(b.name, configs[b.name]!, b.reason)
+  }
   await Promise.allSettled(
-    Object.entries(configs).map(([name, config]) =>
+    Object.entries(allowed).map(([name, config]) =>
       manager.connect(name, config),
     ),
   )
