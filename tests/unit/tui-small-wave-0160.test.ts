@@ -110,7 +110,10 @@ describe('TUI-2 /cd（CC 2.1.169）', () => {
     const target = mkdtempSync(join(tmpdir(), 'atlas-cd-'))
     const origProcessCwd = process.cwd()
     try {
-      const res = (await call!(target, {})) as { value?: string }
+      // 0.1.81 K2 #15：成功 cd 会 bump mcp.cwdReconnectKey，context 须带 setAppState
+      const res = (await call!(target, {
+        setAppState: () => {},
+      })) as { value?: string }
       expect(res.value).toContain('Session working directory changed to:')
       // 状态面移动：cwdState = target 的物理路径
       expect(getCwdState()).toBe(realpathSync(target))

@@ -2397,7 +2397,8 @@ async function run(): Promise<CommanderCommand> {
         tools: [],
         commands: [],
         resources: {},
-        pluginReconnectKey: 0
+        pluginReconnectKey: 0,
+        cwdReconnectKey: 0
       },
       plugins: {
         enabled: [],

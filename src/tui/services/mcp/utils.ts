@@ -180,6 +180,12 @@ export function hashMcpConfig(config: ScopedMcpServerConfig): string {
  * config-changed case applies to all scopes — if the config actually changed
  * on disk, reconnecting is what you want.
  *
+ * 0.1.81 V3-2 K2 #15: opts.absentIsStale widens the removal case to all
+ * scopes, for the cwd-change face (/cd) — after the session cwd moved, a
+ * project-scope server from the old directory is genuinely absent from the
+ * new configs (its .mcp.json is not in the new cwd), so it must disconnect.
+ * Plugin reload keeps the narrow rule (same cwd, partial-reload risk).
+ *
  * Returns the stale clients so the caller can disconnect them (clearServerCache).
  */
 export function excludeStalePluginClients(
@@ -190,6 +196,7 @@ export function excludeStalePluginClients(
     resources: Record<string, ServerResource[]>
   },
   configs: Record<string, ScopedMcpServerConfig>,
+  opts?: { absentIsStale?: boolean },
 ): {
   clients: MCPServerConnection[]
   tools: Tool[]
@@ -199,7 +206,7 @@ export function excludeStalePluginClients(
 } {
   const stale = mcp.clients.filter(c => {
     const fresh = configs[c.name]
-    if (!fresh) return c.config.scope === 'dynamic'
+    if (!fresh) return opts?.absentIsStale || c.config.scope === 'dynamic'
     return hashMcpConfig(c.config) !== hashMcpConfig(fresh)
   })
   if (stale.length === 0) {

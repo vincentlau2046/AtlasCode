@@ -7,6 +7,11 @@
  * 恒定、SkillTool 的 getCommands(process.cwd()) memo 键与系统提示缓存键前缀稳定
  * （不破 prompt 缓存）。非法/不存在路径 = Shell.setCwd 抛 "Path ... does not
  * exist"，捕获后回报。
+ *
+ * 0.1.81 V3-2 K2 #15：成功 cd 后 bump AppState.mcp.cwdReconnectKey ——
+ * useManageMCPConnections 两 effect 把它列为 dep，重跑后旧目录 .mcp.json
+ * server 断开（absentIsStale wide rule）、新目录 server 启动。key bump 只
+ * 触发 MCP effect 重跑，不做 process.chdir，不破上方 prompt 缓存裁定。
  */
 import type { LocalCommandCall } from '../../types/command.js'
 import { pwd } from '../../utils/cwd.js'
@@ -14,7 +19,7 @@ import { setCwd } from '../../utils/Shell.js'
 
 const USAGE = 'Usage: /cd [path] (no argument = show current session cwd)'
 
-export const call: LocalCommandCall = async (_args, _context) => {
+export const call: LocalCommandCall = async (_args, context) => {
   const arg = (_args ?? '').trim()
 
   if (arg === '') {
@@ -27,6 +32,11 @@ export const call: LocalCommandCall = async (_args, _context) => {
   try {
     // 状态面移动（setCwdState），不做 process.chdir → prompt 缓存键前缀稳定。
     setCwd(arg, pwd())
+    // K2 #15：bump cwdReconnectKey 触发 MCP 连接面收敛到新目录（见头注）。
+    context.setAppState(prev => ({
+      ...prev,
+      mcp: { ...prev.mcp, cwdReconnectKey: prev.mcp.cwdReconnectKey + 1 },
+    }))
     return {
       type: 'text',
       value: `Session working directory changed to: ${pwd()}`,

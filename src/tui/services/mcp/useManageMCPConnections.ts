@@ -1,6 +1,6 @@
 import { feature } from 'src/shared'
 import { useCallback, useEffect, useRef } from 'react'
-import { getSessionId } from 'src/bootstrap'
+import { getCwd, getSessionId } from 'src/bootstrap'
 import type { Command } from '../../commands.js'
 import type { Tool } from '../../Tool.js'
 import {
@@ -120,7 +120,16 @@ export function useManageMCPConnections(
   // which has been cleared by refreshActivePlugins, so the effects below see
   // fresh plugin data on re-run.
   const _pluginReconnectKey = useAppState(s => s.mcp.pluginReconnectKey)
+  // 0.1.81 V3-2 K2 #15：/cd 成功后 bump（cd.ts）。effect 重跑经 getCwd() 重读
+  // 新目录 .mcp.json → 旧目录 project-scope server 按 absentIsStale wide rule
+  // 断开、新目录 server 补 pending 并连接。
+  const _cwdReconnectKey = useAppState(s => s.mcp.cwdReconnectKey)
   const setAppState = useSetAppState()
+
+  // K2 #15：上次 effect 运行时的 session cwd。null = 首跑（不算 cwd 变更，
+  // 防启动即 wide-rule 全量 stale 清理）。与 _cwdReconnectKey 互补：key bump
+  // 只在 /cd 后发生，比较 ref 则覆盖「cwd 变了但 key 未 bump」的防御面。
+  const lastCwdRef = useRef<string | null>(null)
 
   // Track active reconnection attempts to allow cancellation
   const reconnectTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
@@ -573,6 +582,14 @@ export function useManageMCPConnections(
         : await getMcpConfigs(dynamicMcpConfig)
       const configs = { ...existingConfigs, ...dynamicMcpConfig }
 
+      // K2 #15：session cwd 是否较上次 effect 运行有移动（null = 首跑不算）。
+      // 移动后旧目录 project-scope server 在新 configs 里是真缺席 → 传
+      // absentIsStale 走 wide rule 断开（plugin reload 同 cwd 保持窄规则）。
+      const currentCwd = getCwd()
+      const cwdChanged =
+        lastCwdRef.current !== null && lastCwdRef.current !== currentCwd
+      lastCwdRef.current = currentCwd
+
       // Add MCP errors to plugin errors for UI visibility (deduplicated)
       addErrorsToAppState(setAppState, mcpErrors)
 
@@ -584,6 +601,7 @@ export function useManageMCPConnections(
         const { stale, ...mcpWithoutStale } = excludeStalePluginClients(
           prevState.mcp,
           configs,
+          { absentIsStale: cwdChanged },
         )
         // Clean up stale connections. Fire-and-forget — state updaters must
         // be synchronous. Three hazards to defuse before calling cleanup:
@@ -648,6 +666,7 @@ export function useManageMCPConnections(
     setAppState,
     sessionId,
     _pluginReconnectKey,
+    _cwdReconnectKey,
   ])
 
   // Load MCP configs and connect to servers
@@ -785,6 +804,7 @@ export function useManageMCPConnections(
     _authVersion,
     sessionId,
     _pluginReconnectKey,
+    _cwdReconnectKey,
   ])
 
   // Cleanup all timers on unmount

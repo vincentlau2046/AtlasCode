@@ -178,6 +178,13 @@ export type AppState = DeepImmutable<{
      * as a dependency; the value itself is not consumed.
      */
     pluginReconnectKey: number
+    /**
+     * Incremented by /cd (0.1.81 V3-2 K2 #15) to trigger MCP effects to
+     * re-run after the session cwd moved, so the old directory's .mcp.json
+     * servers disconnect and the new directory's connect. Same dependency
+     * pattern as pluginReconnectKey; the value itself is not consumed.
+     */
+    cwdReconnectKey: number
   }
   plugins: {
     enabled: LoadedPlugin[]
@@ -509,6 +516,7 @@ export function getDefaultAppState(): AppState {
       commands: [],
       resources: {},
       pluginReconnectKey: 0,
+      cwdReconnectKey: 0,
     },
     plugins: {
       enabled: [],
