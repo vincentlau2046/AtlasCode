@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — 本地 AI 产品家族</title>
+<meta name="description" content="AtlasCode、AtlasOffice、AtlasComic 共享同一 Agent 引擎，由 AtlasHarness 内核与 InferFabric 推理层驱动。">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="/">
+    <svg width="26" height="26" viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#38d3c3"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="#0b0f1a" stroke="#243049"/>
+      <path d="M32 12 L52 52 L43 52 L32 28 L21 52 L12 52 Z" fill="url(#lg)"/>
+      <rect x="26" y="40" width="12" height="5" rx="2.5" fill="#0b0f1a"/>
+    </svg>
+    Atlas
+  </a>
+  <div class="links">
+    <a href="/#arch">架构</a>
+    <a href="/code/">AtlasCode</a>
+    <a href="/office/">AtlasOffice</a>
+    <a href="/comic/">AtlasComic</a>
+    <a class="cta" href="https://github.com/vincentlau2046/AtlasCode" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="badge">ATLAS 产品家族 · 本地算力驱动</div>
+  <h1>一套引擎，三个产品</h1>
+  <p class="sub">
+    AtlasCode、AtlasOffice 与 AtlasComic 共享同一个 Agent 引擎：向下由
+    <strong>InferFabric</strong> 接入本地推理与国产算力，向上由 <strong>AtlasHarness</strong>
+    内核（Core + 能力域）统一承载——产品是壳，引擎是脑，算力是根。
+  </p>
+  <div class="actions">
+    <a class="btn primary" href="/code/">了解 AtlasCode</a>
+    <a class="btn" href="#arch">查看架构</a>
+  </div>
+</header>
+
+<section id="arch">
+  <div class="section-head">
+    <div class="kicker">架构</div>
+    <h2>三层分工，层层承重</h2>
+    <p>产品壳坐引擎，引擎跑在推理层上；每层独立演进，互不绑架。</p>
+  </div>
+  <div class="stack">
+    <div class="layer products">
+      <div class="tag">产品层</div>
+      <h3>AtlasCode / AtlasOffice / AtlasComic</h3>
+      <p>三个薄产品壳：各自拥有入口、技能与使用场景，底层引擎 100% 共享。</p>
+      <div class="product-links">
+        <a href="/code/">AtlasCode →</a>
+        <a href="/office/">AtlasOffice →</a>
+        <a href="/comic/">AtlasComic →</a>
+      </div>
+    </div>
+    <div class="flow-arrow"><span class="arrow">▲</span>壳，建在同一引擎上</div>
+    <div class="layer harness">
+      <div class="tag">内核层 · AtlasHarness</div>
+      <h3>Core + 能力域</h3>
+      <p>能力域以端口方式解耦：沙箱、执行、记忆、模型接入，外加装配它们的
+        Orchestrator 智能体循环；Ascend 昇腾扩展域作为可插拔叠加层按需挂载。</p>
+      <div class="chips">
+        <span class="chip">Core</span>
+        <span class="chip">Orchestrator</span>
+        <span class="chip">Sandbox</span>
+        <span class="chip">Executor</span>
+        <span class="chip">Memory</span>
+        <span class="chip">ModelProvider</span>
+        <span class="chip">Ascend 域（可插拔）</span>
+      </div>
+    </div>
+    <div class="flow-arrow"><span class="arrow">▲</span>模型推理，由推理层供给</div>
+    <div class="layer fabric">
+      <div class="tag">推理层 · InferFabric</div>
+      <h3>本地推理与 GPU 管理</h3>
+      <p>vLLM 推理网关与 GPU 资源管理，以 systemd 服务长稳运行，向上输出
+        OpenAI 兼容 API——引擎不问模型在哪，只管开口要。</p>
+      <div class="chips">
+        <span class="chip">vLLM</span>
+        <span class="chip">GPU 管理</span>
+        <span class="chip">OpenAI 兼容 API</span>
+        <span class="chip">systemd</span>
+      </div>
+      <div class="product-links">
+        <a href="/inferfabric/">InferFabric →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="products">
+  <div class="section-head">
+    <div class="kicker">产品</div>
+    <h2>三个入口，一颗大脑</h2>
+  </div>
+  <div class="cards">
+    <a class="card" href="/code/">
+      <div class="icon">⌨️</div>
+      <div class="role">Coding Agent · v0.1</div>
+      <h3>AtlasCode</h3>
+      <p>面向国产计算生态的通用 Coding Agent（CLI + TUI）：代码生成、重构、调试、
+        测试、多智能体编排，深度集成昇腾 NPU 工具链。</p>
+      <span class="more">了解更多 →</span>
+    </a>
+    <a class="card" href="/office/">
+      <div class="icon">📝</div>
+      <div class="role">Office Agent<span class="soon">规划中</span></div>
+      <h3>AtlasOffice</h3>
+      <p>同一引擎的办公形态：文档处理、资料整理、日常事务自动化——
+        无 NPU 依赖，开箱即用。</p>
+      <span class="more">了解更多 →</span>
+    </a>
+    <a class="card" href="/comic/">
+      <div class="icon">🎨</div>
+      <div class="role">Comic Agent<span class="soon">改造中</span></div>
+      <h3>AtlasComic</h3>
+      <p>漫画创作 Agent：从剧本分镜到成页排版的全流程流水线，角色形象跨页
+        稳定如一——本地推理驱动的 ACG 创作。</p>
+      <span class="more">了解更多 →</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-links">
+    <a href="/">首页</a>
+    <a href="/code/">AtlasCode</a>
+    <a href="/office/">AtlasOffice</a>
+    <a href="/comic/">AtlasComic</a>
+    <a href="/inferfabric/">InferFabric</a>
+    <a href="https://github.com/vincentlau2046/AtlasCode" target="_blank">GitHub</a>
+  </div>
+  <div>© 2026 Atlas · atlaswork.cn</div>
+  <!-- ICP 备案号：备案号下发后，取消下一行注释并替换 X 为真实号码 -->
+  <!-- <div class="icp"><a href="https://beian.miit.gov.cn/" target="_blank">X ICP备XXXXXXXXXX号-1</a></div> -->
+</footer>
+
+</body>
+</html>
