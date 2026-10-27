@@ -112,4 +112,38 @@ describe('buildReplLoopParams（W3-3b §8.74.15 ①）', () => {
     // 第 2 参全活面）；断言同引用 = 活态桥（非装配时快照拷贝）
     expect(deps.toolContext).toBe(fakeToolUseContext)
   })
+
+  test('K2 #13 R-7：refreshRoundContext REPL 接线（迟连 MCP 工具入池 + 防抖 null）', () => {
+    // 0.1.81 V3-2 K2 #13：REPL 车道回合前上下文刷新缝——活态 appState.mcp.tools
+    // 迟连工具经 assembleToolPool 重装配即时入池；工具名序无变化 → null 防抖
+    // （不换池引用，保 prompt-cache 稳定）。修前红 = deps.refreshRoundContext
+    // undefined（slot 未接线）。
+    const lateMcpTool = { name: 'mcp__late__ping' } as unknown as Tools[number]
+    const ctx = {
+      getAppState: () => ({
+        toolPermissionContext: { mode: 'default', alwaysDenyRules: {} },
+        mcp: { tools: [lateMcpTool] },
+      }),
+      options: { mcpClients: [] },
+    } as unknown as ToolUseContext
+    const { deps } = buildReplLoopParams(
+      makeMaterials({
+        toolUseContext: ctx,
+        toolPermissionContext: { mode: 'default', alwaysDenyRules: {} },
+      }),
+    )
+    expect(typeof deps.refreshRoundContext).toBe('function')
+    const msgs = [{ role: 'user', content: 'go' }] as unknown as Parameters<
+      NonNullable<typeof deps.refreshRoundContext>
+    >[0]
+    const r1 = deps.refreshRoundContext!(msgs)
+    expect(r1).not.toBeNull()
+    const names = ((r1!.tools ?? []) as unknown as { name: string }[]).map(
+      t => t.name,
+    )
+    expect(names).toContain('mcp__late__ping')
+    // 防抖：同活态二次调用 → null（名序无变化且无 delta 附件）
+    const r2 = deps.refreshRoundContext!(msgs)
+    expect(r2).toBeNull()
+  })
 })

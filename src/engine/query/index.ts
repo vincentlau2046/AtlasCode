@@ -23,6 +23,8 @@ export {
   type AgentLoopContextConfig,
   type AgentLoopArgs,
   type AgentLoopResult,
+  // 0.1.81 V3-2 K2 #13：回合前上下文刷新缝返回面（refreshRoundContext 槽）
+  type RoundContextRefresh,
   // AD-45 0.1.52：defer 挂起面（挂起载荷 + 轮末挂起标记工厂）
   type DeferredToolUsePayload,
 } from './loop'

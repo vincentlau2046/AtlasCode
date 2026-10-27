@@ -315,6 +315,28 @@ export interface AgentLoopDeps {
    * task-notification → 回合间再注入 agent loop）。
    */
   onMcpToolBackgrounded?: (info: McpToolBackgroundedInfo) => void
+  /**
+   * 0.1.81 V3-2 K2 #13：回合前上下文刷新缝——压缩时刻已连 server 无缺口
+   * （三触发面同构走 composePostCompactAttachments 三 delta 重宣告，0.1.68
+   * F-1 已落），残余缝 = loop 中段迟连 server：loop 入口捕获 args.tools
+   * 数组引用（assembleToolPool 每次产新数组）+ system prompt 静态 → 迟连
+   * 工具/指令滞留下一条 user message。宿主每回合经本槽注入活态重建面；
+   * 未注入（headless/单测）= 零行为变更。TUI 车道经 agentLoopDeps 闭包
+   * 接线（工具名序无变化且无 delta → null 防每回合无谓换池）。
+   */
+  refreshRoundContext?: (messages: readonly Message[]) => RoundContextRefresh | null
+}
+
+/**
+ * 0.1.81 V3-2 K2 #13：refreshRoundContext 返回面（React-free DI 载体）。
+ * tools 替换后重套 #12 degradedTools 剥除面（已剥工具不因刷新回池）；
+ * appendedMessages 追加消息尾 + transcript 全量重记（dedup 幂等）。
+ */
+export interface RoundContextRefresh {
+  /** 重建后的模型可见工具池（缺省 = 本回合不换池）。 */
+  tools?: Tools
+  /** 待注入回合上下文的消息族（如 mcp_instructions_delta 附件；缺省 = 无注入）。 */
+  appendedMessages?: Message[]
 }
 
 /** 多轮循环默认轮次上限（防不可终止会话无限续跑；调用方可覆写）。 */
@@ -789,6 +811,35 @@ export async function queryAgentLoop(
         // W3-3a：压缩边界事件（post-compact 全序列；适配层消费 messages[0] 边界面）
         // 0.1.68 F-1a：skip 载体不发 compacted 事件（压缩未执行，无边界可发）
         deps.emit?.({ type: 'compacted', turn: turns, messages })
+      }
+    }
+    // 0.1.81 V3-2 K2 #13：回合前上下文刷新缝（未注入 = 零行为）。fail-safe：
+    // 刷新异常 → logForDebugging + 以当前态继续（迟连工具注入是优化面，
+    // 不因宿主重建失败穿透回合）。tools 替换后重套 #12 degradedTools 剥除面
+    // （宿主活态重装配天然带回已剥工具，loop 必须再剔除，防刷新后每回合
+    // 400 复发）；appendedMessages 追加消息尾 + transcript 全量重记
+    // （dedup 幂等，同 L700 入参先例）。
+    if (deps.refreshRoundContext) {
+      try {
+        const refresh = deps.refreshRoundContext(messages)
+        if (refresh) {
+          if (refresh.tools) {
+            activeTools =
+              degradedTools.size > 0
+                ? refresh.tools.filter(t => !degradedTools.has(t.name))
+                : refresh.tools
+          }
+          if (refresh.appendedMessages && refresh.appendedMessages.length > 0) {
+            messages = [...messages, ...refresh.appendedMessages]
+            if (deps.transcript) {
+              await deps.transcript.record(messages)
+            }
+          }
+        }
+      } catch (refreshErr) {
+        logForDebugging(
+          `[round-context-refresh] failed: ${errorMessage(refreshErr)}`,
+        )
       }
     }
     deps.emit?.({ type: 'round_start', turn: turns })

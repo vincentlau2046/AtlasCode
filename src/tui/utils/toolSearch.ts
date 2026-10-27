@@ -593,6 +593,10 @@ export type DeferredToolsDeltaScanContext = {
     | 'compact_full'
     | 'compact_partial'
     | 'reactive_compact'
+    // 0.1.81 V3-2 K2 #13：REPL 回合前上下文刷新缝（replLoopDeps
+    // refreshRoundContext 闭包消费；本 callSite 仅诊断分桶标签，扫描语义同
+    // attachments_main——messages 全量扫描已宣告集 diff）
+    | 'round_refresh'
   querySource?: string
 }
 

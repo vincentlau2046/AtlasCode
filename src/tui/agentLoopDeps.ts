@@ -105,6 +105,16 @@ export interface AgentLoopMaterials {
    * 声明压过全局档位；均缺省 = 修前 merged 档位面精确同值，零回归）。
    */
   autoCompactWindowOverride?: number
+  /**
+   * 0.1.81 V3-2 K2 #13：回合前上下文刷新缝宿主闭包（engine
+   * AgentLoopDeps.refreshRoundContext 透传）。**仅 REPL 车道注入**
+   * （replLoopDeps 构造：assembleToolPool 活态重装配 + delta 附件）——
+   * 子 loop 族（runAgent per-agent 受限域池 #10 / forked / hook agent）不
+   * 注入 = 缺省零行为（受限域池不做活态重建，防越权扩池）。闭包落
+   * replLoopDeps 而非本装配体 = 防 agentLoopDeps → tools.ts → AgentTool →
+   * runAgent → agentLoopDeps 模块环（baseToolEntities TDZ 先例）。
+   */
+  refreshRoundContext?: AgentLoopDeps['refreshRoundContext']
 }
 
 /** queryEngineLoopStream 入参（deps + args）。 */
@@ -342,6 +352,9 @@ export function buildAgentLoopParams(m: AgentLoopMaterials): AgentLoopParams {
       appendSystemContext(m.systemPrompt, systemContext),
     ),
     effortValue: m.effort !== undefined ? String(m.effort) : undefined,
+    // 0.1.81 V3-2 K2 #13：回合前上下文刷新缝（仅 REPL 车道注入；子 loop 族
+    // 未传 = undefined = engine 侧零行为恒等锚）
+    refreshRoundContext: m.refreshRoundContext,
   }
 
   // 轮次语义（旧 loop.ts:1617 逐字：maxTurns 未设 = 无上限）
