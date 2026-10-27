@@ -62,8 +62,16 @@ export const SettingsSchema = () => z.object({
   mcpServers: z.record(z.string(), z.any()).optional(),
   allowedMcpServers: z.any().optional(),
   deniedMcpServers: z.any().optional(),
-  enabledMcpjsonServers: z.array(z.string()).optional(),
-  disabledMcpjsonServers: z.array(z.string()).optional(),
+  // 0.1.81 V3-2 K2 #11：纯字符串宽容（union + transform 归一 [string]，
+  // 不因单 server 笔误拒整段 settings；非 string 标量仍拒 fail-closed）
+  enabledMcpjsonServers: z
+    .union([z.string(), z.array(z.string())])
+    .transform(v => (Array.isArray(v) ? v : [v]))
+    .optional(),
+  disabledMcpjsonServers: z
+    .union([z.string(), z.array(z.string())])
+    .transform(v => (Array.isArray(v) ? v : [v]))
+    .optional(),
   // --- 沙箱 / 权限（sandbox 域 + E-4 规则树消费）
   sandbox: z.any().optional(),
   permissions: z.any().optional(),

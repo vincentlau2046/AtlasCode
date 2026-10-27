@@ -208,8 +208,23 @@ const DEFAULT_MCP_TOOL_TIMEOUT_MS = 100_000_000
  * Cap on MCP tool descriptions and server instructions sent to the model.
  * OpenAPI-generated MCP servers have been observed dumping 15-60KB of endpoint
  * docs into tool.description; this caps the p95 tail without losing the intent.
+ * 0.1.81 V3-2 K2 #16：2048 → 4096（上游对齐放宽；C 类条「1P server 描述不
+ * 截」不落）。
  */
-const MAX_MCP_DESCRIPTION_LENGTH = 2048
+const MAX_MCP_DESCRIPTION_LENGTH = 4096
+
+/**
+ * 0.1.81 V3-2 K2 #16：截断面抽纯函数（server instructions 与 tool
+ * description 两消费站共用 + 判别单测 4096 边界面）。
+ */
+export function truncateMcpDescriptionText(
+  text: string | undefined,
+): string | undefined {
+  if (!text) return text
+  return text.length > MAX_MCP_DESCRIPTION_LENGTH
+    ? text.slice(0, MAX_MCP_DESCRIPTION_LENGTH) + '… [truncated]'
+    : text
+}
 
 /**
  * Gets the timeout for MCP tool calls in milliseconds.
@@ -872,13 +887,9 @@ export const connectToServer = memoize(
       const capabilities = client.getServerCapabilities()
       const serverVersion = client.getServerVersion()
       const rawInstructions = client.getInstructions()
-      let instructions = rawInstructions
-      if (
-        rawInstructions &&
-        rawInstructions.length > MAX_MCP_DESCRIPTION_LENGTH
-      ) {
-        instructions =
-          rawInstructions.slice(0, MAX_MCP_DESCRIPTION_LENGTH) + '… [truncated]'
+      // K2 #16：截断面经纯函数 truncateMcpDescriptionText（4096 上限）
+      const instructions = truncateMcpDescriptionText(rawInstructions)
+      if (instructions !== rawInstructions) {
         logMCPDebug(
           name,
           `Server instructions truncated from ${rawInstructions.length} to ${MAX_MCP_DESCRIPTION_LENGTH} chars`,
@@ -1462,10 +1473,8 @@ export const fetchToolsForClient = memoizeWithLRU(
               return tool.description ?? ''
             },
             async prompt() {
-              const desc = tool.description ?? ''
-              return desc.length > MAX_MCP_DESCRIPTION_LENGTH
-                ? desc.slice(0, MAX_MCP_DESCRIPTION_LENGTH) + '… [truncated]'
-                : desc
+              // K2 #16：截断面经纯函数 truncateMcpDescriptionText（4096 上限）
+              return truncateMcpDescriptionText(tool.description ?? '')
             },
             isConcurrencySafe() {
               return tool.annotations?.readOnlyHint ?? false

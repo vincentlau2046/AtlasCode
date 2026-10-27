@@ -54,8 +54,16 @@ export const SettingsSchema = () => z.object({
   // 条目为对象：{serverName, serverCommand, serverUrl}，配合 isMcpServer*Entry 守卫
   allowedMcpServers: z.any().optional(),
   deniedMcpServers: z.any().optional(),
-  enabledMcpjsonServers: z.array(z.string()).optional(),
-  disabledMcpjsonServers: z.array(z.string()).optional(),
+  // 0.1.81 V3-2 K2 #11：纯字符串宽容（union + transform 归一 [string]，
+  // 不因单 server 笔误拒整段 settings；非 string 标量仍拒 fail-closed）
+  enabledMcpjsonServers: z
+    .union([z.string(), z.array(z.string())])
+    .transform(v => (Array.isArray(v) ? v : [v]))
+    .optional(),
+  disabledMcpjsonServers: z
+    .union([z.string(), z.array(z.string())])
+    .transform(v => (Array.isArray(v) ? v : [v]))
+    .optional(),
   // --- 插件 / marketplace
   enabledPlugins: z.record(z.string(), z.any()).optional(),
   pluginConfigs: z.any().optional(),
