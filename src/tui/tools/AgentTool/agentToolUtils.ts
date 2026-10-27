@@ -44,6 +44,9 @@ import {
 } from '../../utils/messages.js'
 import type { PermissionMode } from '../../utils/permissions/PermissionMode.js'
 import { permissionRuleValueFromString } from '../../utils/permissions/permissionRuleParser.js'
+// 0.1.81 V3-2 K2 #10：server 级 MCP spec 取域（TUI 本地 twin mcpStringUtils，
+// 同域本地路径惯例——permissionRuleParser 亦 tui/utils/permissions 本地副本）
+import { getMcpPrefix, mcpInfoFromString } from '../../services/mcp/mcpStringUtils.js'
 import {
   buildTranscriptForClassifier,
   classifyYoloAction,
@@ -128,6 +131,25 @@ export function computeChildSpawnDepth(
   parentOptions: { spawnDepth?: number } | undefined,
 ): number {
   return (parentOptions?.spawnDepth ?? 0) + 1
+}
+
+/**
+ * 0.1.81 V3-2 K2 #10：server 级 MCP spec（`mcp__server`，无工具段）→ 取该
+ * server 全部可用工具。非 server 级 spec（非 mcp 名 / 含工具段 `mcp__s__t`）
+ * → null（走精确匹配支，缺席不展开）；取域前缀 = getMcpPrefix(解析后
+ * serverName)（归一名 + 尾随 `__`），非裸 string-prefix——防 `mcp__my` 误
+ * 命中 server `my_server` 域工具（工具池内 server 名经 normalizeNameForMCP
+ * 折叠连续下划线，不含 `__`，前缀取域无歧义）。
+ * 双胞胎对齐 = engine/tools/agent/agentToolUtils.ts 同名 helper。
+ */
+export function resolveMcpServerDomainTools(
+  toolName: string,
+  available: readonly Tool[],
+): Tool[] | null {
+  const info = mcpInfoFromString(toolName)
+  if (!info || info.toolName !== undefined) return null
+  const prefix = getMcpPrefix(info.serverName)
+  return available.filter(t => t.name.startsWith(prefix))
 }
 
 /**
@@ -228,7 +250,21 @@ export function resolveAgentTools(
         resolvedToolsSet.add(tool)
       }
     } else {
-      invalidTools.push(toolSpec)
+      // 0.1.81 V3-2 K2 #10：精确未命中 + server 级 MCP spec（`mcp__server`，
+      // 无工具段）→ 按 server 取域（修前整条落 invalidTools，agent 拿不到该
+      // server 任何 MCP 工具）；域空（该 server 无可用工具）仍 invalidTools
+      const domain = resolveMcpServerDomainTools(toolName, allowedAvailableTools)
+      if (domain && domain.length > 0) {
+        validTools.push(toolSpec)
+        for (const t of domain) {
+          if (!resolvedToolsSet.has(t)) {
+            resolved.push(t)
+            resolvedToolsSet.add(t)
+          }
+        }
+      } else {
+        invalidTools.push(toolSpec)
+      }
     }
   }
 
