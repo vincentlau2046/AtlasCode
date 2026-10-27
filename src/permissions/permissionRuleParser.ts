@@ -23,11 +23,17 @@ import type { PermissionRuleValue } from '../shared'
  * LEGACY alias 表注入窗口（engine 侧模块加载注册单一事实源；
  * 未注入 = 空 map → normalize = identity，getLegacyToolNames = []）。
  * 单进程多测文件连跑场景用 resetLegacyToolNameAliases() 隔离模块态。
+ *
+ * 0.1.81 K2 review I-1：map 恒 null-proto（Object.create(null)）——plain
+ * object 字面量（含空 `{}` 缺省）下 `map['constructor']` 命中
+ * Object.prototype.constructor（函数非字符串），经 normalizeLegacyToolName
+ * 泄入下游（agent tools 面 mcpInfoFromString(fn).split TypeError）。setter
+ * 防御拷贝防调用方传入 plain object 复活原型链。
  */
-let legacyToolNameAliases: Record<string, string> = {}
+let legacyToolNameAliases: Record<string, string> = Object.create(null)
 
 export function setLegacyToolNameAliases(map: Record<string, string>): void {
-  legacyToolNameAliases = map
+  legacyToolNameAliases = Object.assign(Object.create(null), map)
 }
 
 export function getLegacyToolNameAliases(): Record<string, string> {
@@ -35,7 +41,7 @@ export function getLegacyToolNameAliases(): Record<string, string> {
 }
 
 export function resetLegacyToolNameAliases(): void {
-  legacyToolNameAliases = {}
+  legacyToolNameAliases = Object.create(null)
 }
 
 /**

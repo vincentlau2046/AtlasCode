@@ -107,6 +107,9 @@ export function resolveMcpServerDomainTools(
   toolName: string,
   available: readonly Tool[],
 ): Tool[] | null {
+  // I-1 纵深防御：非 string（原型链泄漏/上游污染）→ null 走精确匹配支，
+  // 缺席落 invalidTools 不炸（alias map 已 null-proto，此处兜底）。
+  if (typeof toolName !== 'string') return null
   const info = mcpInfoFromString(toolName)
   if (!info || info.toolName !== undefined) return null
   const prefix = getMcpPrefix(info.serverName)

@@ -146,6 +146,8 @@ export function resolveMcpServerDomainTools(
   toolName: string,
   available: readonly Tool[],
 ): Tool[] | null {
+  // I-1 纵深防御（双胞胎对齐 engine twin）：非 string → null 走精确匹配支。
+  if (typeof toolName !== 'string') return null
   const info = mcpInfoFromString(toolName)
   if (!info || info.toolName !== undefined) return null
   const prefix = getMcpPrefix(info.serverName)

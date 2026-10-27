@@ -6,12 +6,21 @@ import type { PermissionRuleValue } from './PermissionRule.js'
 // Maps legacy tool names to their current canonical names.
 // When a tool is renamed, add old → new here so permission rules,
 // hooks, and persisted wire names resolve to the canonical name.
-const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = {
-  Task: AGENT_TOOL_NAME,
-  KillShell: TASK_STOP_TOOL_NAME,
-  AgentOutputTool: TASK_OUTPUT_TOOL_NAME,
-  BashOutputTool: TASK_OUTPUT_TOOL_NAME,
-}
+// 0.1.81 K2 review I-1: null-proto — a plain object literal makes
+// LEGACY_TOOL_NAME_ALIASES['constructor'] hit Object.prototype.constructor
+// (a function, not a string), which leaks through normalizeLegacyToolName
+// into downstream consumers (agent tools face: mcpInfoFromString(fn).split
+// TypeError). Kept in sync with engine twin
+// src/permissions/permissionRuleParser.ts + engine/tools/legacyToolNameAliases.ts.
+const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = Object.assign(
+  Object.create(null),
+  {
+    Task: AGENT_TOOL_NAME,
+    KillShell: TASK_STOP_TOOL_NAME,
+    AgentOutputTool: TASK_OUTPUT_TOOL_NAME,
+    BashOutputTool: TASK_OUTPUT_TOOL_NAME,
+  },
+)
 
 export function normalizeLegacyToolName(name: string): string {
   return LEGACY_TOOL_NAME_ALIASES[name] ?? name

@@ -24,13 +24,22 @@ import { TASK_OUTPUT_TOOL_NAME, TASK_STOP_TOOL_NAME } from './toolNames'
  * 旧工具名 → 现正规名（旧仓逐字 4 项）。
  * 工具改名时在此加 old → new，使权限规则、hooks 与持久化 wire 名
  * 解析到正规名。
+ *
+ * 0.1.81 K2 review I-1：null-proto（Object.assign(Object.create(null))）——
+ * plain 字面量下 `map['constructor']` 命中 Object.prototype.constructor
+ * （函数非字符串）经 normalizeLegacyToolName 泄入下游（agent tools 面
+ * mcpInfoFromString(fn).split TypeError）。permissions 域 setter 另有
+ * 防御拷贝（双保险）。
  */
-export const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = {
-  Task: AGENT_TOOL_NAME,
-  KillShell: TASK_STOP_TOOL_NAME,
-  AgentOutputTool: TASK_OUTPUT_TOOL_NAME,
-  BashOutputTool: TASK_OUTPUT_TOOL_NAME,
-}
+export const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = Object.assign(
+  Object.create(null),
+  {
+    Task: AGENT_TOOL_NAME,
+    KillShell: TASK_STOP_TOOL_NAME,
+    AgentOutputTool: TASK_OUTPUT_TOOL_NAME,
+    BashOutputTool: TASK_OUTPUT_TOOL_NAME,
+  },
+)
 
 // 模块加载注册（门面 re-export 触发 side-effect import）：permissions 域
 // 解析函数组的 alias 表以此为准（H6 消费点实挂，非预声明死接缝）。

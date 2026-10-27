@@ -110,6 +110,19 @@ describe.each([
     ])
   })
 
+  test("保留原型键 spec 'constructor'/'toString' 降级 invalidTools 不炸（I-1 修前红 = TypeError）", async () => {
+    const resolve = await load()
+    // 修前：plain-object alias map 原型链泄漏——normalizeLegacyToolName
+    // ('constructor') 命中 Object.prototype.constructor（函数非字符串）→
+    // #10 分支 mcpInfoFromString(fn).split('__') TypeError。
+    // 修后：alias map null-proto + resolveMcpServerDomainTools 入口 string
+    // guard → 原名原样返回，非 mcp 名落 invalidTools（与普通未知名一致）。
+    const r = resolve({ source: 'built-in', tools: ['constructor', 'toString'] }, pool())
+    expect(r.invalidTools).toEqual(['constructor', 'toString'])
+    expect(r.resolvedTools).toEqual([])
+    expect(r.hasWildcard).toBe(false)
+  })
+
   test('域展开尊重 disallowedTools 剔除（域内被禁工具不进 resolved）', async () => {
     const resolve = await load()
     const r = resolve(
