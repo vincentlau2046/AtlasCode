@@ -52,6 +52,7 @@ import {
 } from '../../shared'
 import {
   PROVIDER_EMPTY_CONTENT_PLACEHOLDER,
+  parseToolSchemaRejectionError,
   shouldRetryModelError,
   type ModelProvider,
   type ModelRole,
@@ -677,6 +678,13 @@ export async function queryAgentLoop(
   let turns = 0
   let terminated = false
   let lastRound: AgentRoundResult | undefined
+  // 0.1.81 V3-2 K2 #12：schema 被拒工具剥除面——网关 400 拒某工具 input
+  // schema 时每回合必 400（会话卡死），有效恢复 = 剥该工具参数（不进 chat
+  // tools 槽）后续跑。activeTools = 当前回合实发工具面（剥除后逐回合收敛）；
+  // degradedTools 每 tool 一次性（剥过的工具不重进 = 不会反复 400，亦不会
+  // 因剥除后仍 400 死循环——已剥工具不在 activeTools，二次同错穿透）。
+  let activeTools = tools
+  const degradedTools = new Set<string>()
   // 0.1.62 /goal C0-2：goal 续跑计数器（防 runaway 硬守卫；每评估一次未达成
   // 自增，达 maxGoalTurns 强制终止——独立于主 turns 计数）。
   const maxGoalTurns =
@@ -803,7 +811,7 @@ export async function queryAgentLoop(
     for (;;) {
       const roundInputLen = messages.length
       try {
-        lastRound = await queryOneRound(effectiveDeps, tools, messages)
+        lastRound = await queryOneRound(effectiveDeps, activeTools, messages)
       } catch (err) {
         if (
           !reactiveRetried &&
@@ -843,6 +851,25 @@ export async function queryAgentLoop(
             continue
           }
           // 恢复不可用（消费者 null/异常）→ 落回显原始错误
+        }
+        // 0.1.81 V3-2 K2 #12：400 工具 input schema 拒绝剥除支。谓词命中
+        // （APIError 400 + 显式点名 "Invalid schema for tool/function <name>"）
+        // + 工具在当前 activeTools + 未剥过 → 剥除该工具参数后重跑本回合
+        // （不占新轮次；degradedTools 每 tool 一次性——已剥工具不在
+        // activeTools，同错二次穿透，无死循环）。未命中/工具不在池（网关
+        // 点名的不是本会话工具）= 原穿透语义零变更（400 fail-fast 恒等锚）。
+        const rejectedTool = parseToolSchemaRejectionError(err)
+        if (
+          rejectedTool &&
+          !degradedTools.has(rejectedTool) &&
+          activeTools.some(t => t.name === rejectedTool)
+        ) {
+          degradedTools.add(rejectedTool)
+          activeTools = activeTools.filter(t => t.name !== rejectedTool)
+          logForDebugging(
+            `[tool-schema-strip] 网关拒绝工具 '${rejectedTool}' 的 input schema，本会话剥除其参数后续跑（tools ${activeTools.length} 个）`,
+          )
+          continue
         }
         // 0.1.59 C 簇（CC 2.1.166）：回合级跨回合有序 fallback 表（≤3）。
         // 可重试模型错误（shouldRetryModelError 单一事实源，abort 不重试）+ 表内

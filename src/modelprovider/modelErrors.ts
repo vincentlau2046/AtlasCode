@@ -68,6 +68,24 @@ export function isQuotaExhaustedMessage(message: unknown): boolean {
   return false
 }
 
+/**
+ * 0.1.81 V3-2 K2 #12：400 工具 input schema 拒绝谓词——APIError 400 +
+ * "Invalid schema for tool/function <name>" 显式点名文案 → 被拒工具名；
+ * 其余 → null。保守：只认显式点名的 schema 拒绝（tools.N.input_schema 类
+ * 无名字面不猜索引，剥错工具比不剥更糟）。
+ * 消费面：shouldRetryModelError 收窄（schema 拒绝型 400 不可重试——同工具
+ * 同 schema 重试必然同败，纯空耗）+ queryAgentLoop 回合 catch 剥除支
+ * （剥该工具参数后重跑本回合，防每回合 400 卡死会话）。
+ * 纯函数（无 IO）：非 APIError / 非 400 / 文案不点名 = null。
+ */
+export function parseToolSchemaRejectionError(err: unknown): string | null {
+  if (!(err instanceof APIError) || err.status !== 400) return null
+  const m = /invalid schema for (?:tool|function) [`'"]?([A-Za-z0-9_.\-]+)[`'"]?/i.exec(
+    err.message,
+  )
+  return m ? m[1] : null
+}
+
 export function classifyAPIError(error: unknown): string {
   if (error instanceof Error && error.message === 'Request was aborted.') {
     return 'aborted'

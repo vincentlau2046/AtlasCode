@@ -188,6 +188,8 @@ export {
   getErrorMessageIfRefusal,
   // 0.1.71 A-2：403 配额耗尽签名判别（单一事实源，TUI 提示面 / 池轮询聚合面复用）
   isQuotaExhaustedMessage,
+  // 0.1.81 V3-2 K2 #12：400 工具 input schema 拒绝谓词（loop 剥除支消费）
+  parseToolSchemaRejectionError,
 } from './modelErrors'
 export { isClientRequestTimeout, shouldRetryModelError, llmTimeoutRemediationHint, llmTimeoutUnitHint, gatewayUnreachableRemediationHint, describeEndpointFailure, PROVIDER_EMPTY_CONTENT_PLACEHOLDER } from './modelprovider'
 // 0.1.71 A-1：池轮询全败聚合可行动错误 + 单 ref 失败记账/分类（TUI 提示面 A-3 消费）

@@ -26,7 +26,7 @@ import type { LLMErrorCode, StreamDelta, StreamEvent } from './types'
 import { buildOpenAIParams } from './params'
 import { APIConnectionTimeoutError } from './types'
 import { LLM_TIMEOUT_CAP_MS, LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS } from './constants'
-import { isQuotaExhaustedMessage } from './modelErrors'
+import { isQuotaExhaustedMessage, parseToolSchemaRejectionError } from './modelErrors'
 
 export type ModelUsage = {
   input_tokens: number
@@ -193,6 +193,9 @@ export function isClientRequestTimeout(err: unknown): boolean {
 export function shouldRetryModelError(err: unknown, signal?: AbortSignal): boolean {
   if (signal?.aborted) return false
   if (isClientRequestTimeout(err)) return false
+  // 0.1.81 V3-2 K2 #12：schema 拒绝型 400 不可重试——同工具同 schema 重试
+  // 必然同败（泛 400 可重试面恒等保留；有效恢复 = loop 层剥工具参数，非重试）。
+  if (parseToolSchemaRejectionError(err)) return false
   return isRetryableError(err as any)
 }
 
