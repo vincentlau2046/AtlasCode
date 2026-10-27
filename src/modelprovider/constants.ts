@@ -45,6 +45,16 @@ export const LLM_TIMEOUT_UNIT_WARN_THRESHOLD_MS = 60_000
  */
 export const STREAM_IDLE_TIMEOUT_MS = 300_000
 
+/**
+ * 0.1.81 V3-2 K2 #18（P-804s）：watchdog teardown 宽限上限——finally 释放
+ * 底层迭代器时 return() 与本上限竞速。挂起型 async generator（suspended
+ * mid-await）的 return() 按规范排在当前 await 之后，await 永不结算则
+ * return() 永不结算——无界 await 会把超时 throw 吞成消费方无限挂死（绕过
+ * 整请求 timeout 兜底，比不装看门狗更糟）。良好行为迭代器 return() 结算
+ * 快于本上限 → teardown 保序不变（零回归面）。
+ */
+export const STREAM_IDLE_RETURN_GRACE_MS = 1_000
+
 // ════════════════════════════════════════════════════════════════
 // Beta Headers（旧仓 constants/betas.ts）
 // ════════════════════════════════════════════════════════════════

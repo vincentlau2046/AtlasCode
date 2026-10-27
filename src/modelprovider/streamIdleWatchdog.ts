@@ -27,7 +27,10 @@
  *     0.1.58 C4-1 partial 保留支（已有内容 → partialRetained；零内容 →
  *     throw 走重试）。
  */
-import { STREAM_IDLE_TIMEOUT_MS } from './constants'
+import {
+  STREAM_IDLE_TIMEOUT_MS,
+  STREAM_IDLE_RETURN_GRACE_MS,
+} from './constants'
 
 /** 流空闲超时错误（chunk 间隔超上限）。message 含 "timeout" 以落既有重试正则。 */
 export class StreamIdleTimeoutError extends Error {
@@ -49,6 +52,7 @@ export class StreamIdleTimeoutError extends Error {
 export async function* withStreamIdleWatchdog<T>(
   stream: AsyncIterable<T> | Iterable<T>,
   timeoutMs: number = STREAM_IDLE_TIMEOUT_MS,
+  returnGraceMs: number = STREAM_IDLE_RETURN_GRACE_MS,
 ): AsyncGenerator<T> {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     yield* stream
@@ -87,8 +91,29 @@ export async function* withStreamIdleWatchdog<T>(
   } finally {
     // 超时 throw / 消费方提前 break → best-effort 释放底层迭代器
     // （finally 覆盖两支；return 抛错吞掉——释放失败不掩盖原错误）。
+    // 0.1.81 K2 #18（P-804s）：挂起型 async generator（suspended mid-await）
+    // 的 return() 按规范排在当前 await 之后——await 永不结算则 return() 永
+    // 不结算，无界 await 会把超时 throw 吞成消费方无限挂死。修 = return()
+    // 与有界宽限竞速：良好行为迭代器（return 结算快于宽限）照常等待释放
+    // 完成 = teardown 保序零回归；挂起型到宽限上限放行原错误/返回。
     try {
-      await iterator.return?.()
+      const ret = iterator.return?.()
+      if (ret) {
+        let graceTimer: ReturnType<typeof setTimeout> | undefined
+        const grace = new Promise<void>((resolve) => {
+          graceTimer = setTimeout(resolve, returnGraceMs)
+          if (
+            typeof graceTimer === 'object' &&
+            graceTimer !== null &&
+            'unref' in graceTimer
+          ) {
+            graceTimer.unref()
+          }
+        })
+        // ret 拒绝吞掉（释放失败不掩盖原错误）；迟到拒绝经此分支已处理
+        // （无 unhandled rejection）。
+        await Promise.race([ret.then(() => undefined, () => {}), grace])
+      }
     } catch {
       /* best-effort */
     }
