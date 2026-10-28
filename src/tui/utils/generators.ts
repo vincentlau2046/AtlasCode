@@ -86,3 +86,27 @@ export async function* fromArray<T>(values: T[]): AsyncGenerator<T, void> {
     yield value
   }
 }
+
+/**
+ * Run promise-producing thunks with a bounded worker pool, preserving input
+ * order in the results array (0.1.82 K3-A1: hooks concurrency-cap consumers
+ * that need Promise.all's ordered-results semantics, e.g.
+ * executeHooksOutsideREPL). Thunks are lazy — no task starts until a worker
+ * slot picks it up.
+ */
+export async function runWithConcurrencyLimit<T>(
+  tasks: Array<() => Promise<T>>,
+  limit: number,
+): Promise<T[]> {
+  const results = new Array<T>(tasks.length)
+  let next = 0
+  const worker = async (): Promise<void> => {
+    while (next < tasks.length) {
+      const index = next++
+      results[index] = await tasks[index]()
+    }
+  }
+  const workers = Math.max(1, Math.min(limit, tasks.length))
+  await Promise.all(Array.from({ length: workers }, worker))
+  return results
+}

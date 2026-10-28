@@ -39,6 +39,14 @@ import type {
   MatchedHook,
 } from './types'
 
+/**
+ * 钩子执行并发上限（0.1.82 K3-A1，上游 CC 2.1.302 同值 12）。
+ * 执行面同时在跑的钩子数 ≤ 此值：runHooksStream 启动侧有界池（streaming.ts）、
+ * TUI executeHooks all(..., cap) 与 executeHooksOutsideREPL 有序工作池共用本常量；
+ * runHooks 顺序执行面天然 ≤1 并发，不受影响（落码裁定：不改）。
+ */
+export const MAX_HOOK_CONCURRENCY = 12
+
 /** 旧仓 TOOL_HOOK_EXECUTION_TIMEOUT_MS（src/utils/hooks.ts L162，10min）。 */
 const HOOK_EXECUTION_TIMEOUT_MS = 10 * 60 * 1000
 /** 旧仓 SESSION_END_HOOK_TIMEOUT_MS_DEFAULT（L171，1500ms —— 会话收尾不挂起）。 */

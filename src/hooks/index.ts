@@ -78,6 +78,8 @@ export {
   runSessionEndHooks,
   // ATLAS_SIMPLE 执行期钩子守卫（§8.42 MINOR-2，旧仓 hooks.ts:1983/2984 移植）
   isSimpleModeHooksSkipped,
+  // 0.1.82 K3-A1 · 钩子执行并发上限（12；三执行面共用，TUI 侧经本门面消费）
+  MAX_HOOK_CONCURRENCY,
 } from './runHooks'
 export type { HookRunOptions } from './runHooks'
 // 流式执行核心（E-5 S-5b §8.40：旧仓 executeHooks 执行循环移植，解耦 message/attachment；

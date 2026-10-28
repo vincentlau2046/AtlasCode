@@ -137,7 +137,8 @@ import {
   startHookProgressInterval,
 } from './hooks/hookEvents.js'
 import { createAttachmentMessage } from './attachments.js'
-import { all } from './generators.js'
+import { all, runWithConcurrencyLimit } from './generators.js'
+import { MAX_HOOK_CONCURRENCY } from 'src/engine'
 import { findToolByName, type Tools, type ToolUseContext } from '../Tool.js'
 import { execPromptHook } from './hooks/execPromptHook.js'
 import type { Message, AssistantMessage } from '../types/message.js'
@@ -2751,8 +2752,8 @@ async function* executeHooks({
 
   let permissionBehavior: PermissionResult['behavior'] | undefined
 
-  // Run all hooks in parallel and wait for all to complete
-  for await (const result of all(hookPromises)) {
+  // Run all hooks in parallel (bounded, 0.1.82 K3-A1) and wait for completion
+  for await (const result of all(hookPromises, MAX_HOOK_CONCURRENCY)) {
     outcomes[result.outcome]++
 
     // C8-5（0.1.79 W-C）：终端转义序列（CC 2.1.141）——写 process.stdout；
@@ -3078,9 +3079,11 @@ async function executeHooksOutsideREPL({
     return []
   }
 
-  // Run all hooks in parallel with individual timeouts
-  const hookPromises = matchingHooks.map(
-    async ({ hook, pluginRoot, pluginId }, hookIndex) => {
+  // Run hooks with individual timeouts; bounded concurrency, lazy thunks
+  // (0.1.82 K3-A1: eager map would start every hook at once — the pool keeps
+  // in-flight ≤ MAX_HOOK_CONCURRENCY while preserving input-order results)
+  const hookTasks = matchingHooks.map(
+    ({ hook, pluginRoot, pluginId }, hookIndex) => async () => {
       // Handle callback hooks
       if (hook.type === 'callback') {
         const callbackTimeoutMs = hook.timeout ? hook.timeout * 1000 : timeoutMs
@@ -3374,8 +3377,8 @@ async function executeHooksOutsideREPL({
     },
   )
 
-  // Wait for all hooks to complete and collect results
-  return await Promise.all(hookPromises)
+  // Wait for all hooks to complete and collect results (ordered, ≤12 in flight)
+  return await runWithConcurrencyLimit(hookTasks, MAX_HOOK_CONCURRENCY)
 }
 
 /**

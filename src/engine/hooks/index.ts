@@ -29,3 +29,5 @@ export {
 } from './toolHooks'
 // E-5 S-5b（§8.40）：流式执行核心 re-export 面（执行循环在域叶，与 runHooks 共享单一事实源）
 export { runHooksStream, type HookStreamYield } from '../../hooks'
+// 0.1.82 K3-A1：钩子执行并发上限（12；TUI 执行面消费，经 engine 根门面）
+export { MAX_HOOK_CONCURRENCY } from '../../hooks'

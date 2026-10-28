@@ -930,6 +930,8 @@ export {
 // E-5 S-5b（§8.40）：流式执行核心（执行循环在域叶 src/hooks/streaming.ts；L3 re-export 面；
 // 消费面 = loop 流式 chatStream E-1b-full 前向接缝，loop.ts 头注登记）
 export { runHooksStream, type HookStreamYield } from './hooks'
+// 0.1.82 K3-A1：钩子执行并发上限（12；TUI 执行面经本 L3 门面消费，boundaries tui→engine）
+export { MAX_HOOK_CONCURRENCY } from './hooks'
 // E-3 S-3c（§8.28）：hooks 字段族 + snapshot/provider + managedEnv
 export {
   HookCommandSchema,

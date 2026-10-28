@@ -43,6 +43,7 @@ import type {
 import {
   buildHookEnv,
   isSimpleModeHooksSkipped,
+  MAX_HOOK_CONCURRENCY,
   mergeAggregated,
   runOneHook,
   type HookRunOptions,
@@ -93,11 +94,24 @@ export async function* runHooksStream(
     }
   }
 
-  // 全钩子并行（旧仓 all()：per-hook 超时，总墙钟 = max 非 sum）；
-  // yield 取确定性 match 序（§8.40 裁定 4 订正，非旧仓 completion-order）。
-  const started = matched.map((m) => runOneHook(m, port, env, signal, options))
-  for (const pending of started) {
-    const result = await pending
+  // 并行执行 + per-hook 超时（总墙钟 = max 非 sum），启动侧有界
+  // （0.1.82 K3-A1：≤ MAX_HOOK_CONCURRENCY=12，每完成一钩子补位一个）；
+  // yield 取确定性 match 序（§8.40 裁定 4 订正，非旧仓 completion-order）——
+  // match 序 await 天然满足：逐槽位 await，槽位 = match 序。
+  const slots: Array<Promise<HookResult>> = []
+  let nextStart = 0
+  const startNext = (): void => {
+    if (nextStart < matched.length) {
+      slots[nextStart] = runOneHook(matched[nextStart]!, port, env, signal, options)
+      nextStart++
+    }
+  }
+  for (let i = 0; i < Math.min(MAX_HOOK_CONCURRENCY, matched.length); i++) {
+    startNext()
+  }
+  for (let i = 0; i < matched.length; i++) {
+    const result = await slots[i]!
+    startNext()
     results.push(result)
     yield { kind: 'hook_result', result }
     mergeAggregated(aggregated, result)
