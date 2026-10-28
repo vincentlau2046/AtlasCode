@@ -145,9 +145,106 @@ export async function processUserInput({
     setUserInputOnProcessing?.(inputString)
   }
 
-  queryCheckpoint('query_process_user_input_base_start')
-
   const appState = context.getAppState()
+
+  // K3-A3/A4（0.1.82，上游 300 对齐）：UserPromptSubmit 钩子先于 slash/skill
+  // 展开执行——blocking 钩子拦截即停（slash 命令不再执行）；skill frontmatter
+  // 注册的 UserPromptSubmit 钩子首跑 = 调用该 skill 的**下一条**提示（修前
+  // 展开先行使当轮即触发）。钩子产出的消息仍追加在展开产物之后（消息序不变）。
+  // 裁定记录：本地命令（shouldQuery:false）面钩子同样先行执行（与上游一致，
+  // 钩子可拦截任意输入）；非阻塞输出（additionalContext/hook_success）对本地
+  // 命令丢弃（无查询可附加）；preventContinuation 仅对 shouldQuery 面生效
+  // （本地命令无查询可停，不追停止消息）。
+  queryCheckpoint('query_hooks_start')
+  const inputMessage = getContentText(input) || ''
+
+  let hookBlockingMessage: string | null = null
+  let hookStopped = false
+  let hookStopReason: string | undefined
+  const hookMessages: ProcessUserInputBaseResult['messages'] = []
+
+  for await (const hookResult of executeUserPromptSubmitHooks(
+    inputMessage,
+    appState.toolPermissionContext.mode,
+    context,
+    context.requestPrompt,
+  )) {
+    // We only care about the result
+    if ((hookResult.message?.type as any) === 'progress') {
+      continue
+    }
+
+    // 拦截即停：只返回系统级错误消息，原输入不执行、不入上下文
+    if (hookResult.blockingError) {
+      hookBlockingMessage = getUserPromptSubmitHookBlockingMessage(
+        hookResult.blockingError,
+      )
+      break
+    }
+
+    // If preventContinuation is set, stop processing but keep the original
+    // prompt in context (applied after expansion below).
+    if (hookResult.preventContinuation) {
+      hookStopped = true
+      hookStopReason = hookResult.stopReason
+      continue
+    }
+
+    // Collect additional contexts
+    if (
+      hookResult.additionalContexts &&
+      hookResult.additionalContexts.length > 0
+    ) {
+      hookMessages.push(
+        createAttachmentMessage({
+          type: 'hook_additional_context',
+          content: hookResult.additionalContexts.map(applyTruncation),
+          hookName: 'UserPromptSubmit',
+          toolUseID: `hook-${randomUUID()}`,
+          hookEvent: 'UserPromptSubmit',
+        }),
+      )
+    }
+
+    // TODO: Clean this up
+    if (hookResult.message) {
+      switch (hookResult.message.attachment.type) {
+        case 'hook_success':
+          if (!hookResult.message.attachment.content) {
+            // Skip if there is no content
+            break
+          }
+          hookMessages.push({
+            ...hookResult.message,
+            attachment: {
+              ...hookResult.message.attachment,
+              content: applyTruncation(hookResult.message.attachment.content),
+            },
+          })
+          break
+        default:
+          hookMessages.push(hookResult.message)
+          break
+      }
+    }
+  }
+  queryCheckpoint('query_hooks_end')
+
+  if (hookBlockingMessage !== null) {
+    return {
+      messages: [
+        // TODO: Make this an attachment message
+        createSystemMessage(
+          `${hookBlockingMessage}\n\nOriginal prompt: ${input}`,
+          'warning',
+        ),
+      ],
+      shouldQuery: false,
+      allowedTools: [],
+    }
+  }
+
+  queryCheckpoint('query_process_user_input_base_start')
 
   const result = await processUserInputBase(
     input,
@@ -170,101 +267,33 @@ export async function processUserInput({
   )
   queryCheckpoint('query_process_user_input_base_end')
 
-  if (!result.shouldQuery) {
+  // preventContinuation：停止查询但保留原提示在上下文（语义与修前一致；
+  // 本地命令面无查询可停，不追停止消息）
+  if (hookStopped && result.shouldQuery) {
+    const message = hookStopReason
+      ? `Operation stopped by hook: ${hookStopReason}`
+      : 'Operation stopped by hook'
+    result.messages.push(
+      createUserMessage({
+        content: message,
+      }),
+    )
+    result.shouldQuery = false
     return result
   }
 
-  // Execute UserPromptSubmit hooks and handle blocking
-  queryCheckpoint('query_hooks_start')
-  const inputMessage = getContentText(input) || ''
-
-  for await (const hookResult of executeUserPromptSubmitHooks(
-    inputMessage,
-    appState.toolPermissionContext.mode,
-    context,
-    context.requestPrompt,
-  )) {
-    // We only care about the result
-    if ((hookResult.message?.type as any) === 'progress') {
-      continue
-    }
-
-    // Return only a system-level error message, erasing the original user input
-    if (hookResult.blockingError) {
-      const blockingMessage = getUserPromptSubmitHookBlockingMessage(
-        hookResult.blockingError,
-      )
-      return {
-        messages: [
-          // TODO: Make this an attachment message
-          createSystemMessage(
-            `${blockingMessage}\n\nOriginal prompt: ${input}`,
-            'warning',
-          ),
-        ],
-        shouldQuery: false,
-        allowedTools: result.allowedTools,
-      }
-    }
-
-    // If preventContinuation is set, stop processing but keep the original
-    // prompt in context.
-    if (hookResult.preventContinuation) {
-      const message = hookResult.stopReason
-        ? `Operation stopped by hook: ${hookResult.stopReason}`
-        : 'Operation stopped by hook'
-      result.messages.push(
-        createUserMessage({
-          content: message,
-        }),
-      )
-      result.shouldQuery = false
-      return result
-    }
-
-    // Collect additional contexts
-    if (
-      hookResult.additionalContexts &&
-      hookResult.additionalContexts.length > 0
-    ) {
-      result.messages.push(
-        createAttachmentMessage({
-          type: 'hook_additional_context',
-          content: hookResult.additionalContexts.map(applyTruncation),
-          hookName: 'UserPromptSubmit',
-          toolUseID: `hook-${randomUUID()}`,
-          hookEvent: 'UserPromptSubmit',
-        }),
-      )
-    }
-
-    // TODO: Clean this up
-    if (hookResult.message) {
-      switch (hookResult.message.attachment.type) {
-        case 'hook_success':
-          if (!hookResult.message.attachment.content) {
-            // Skip if there is no content
-            break
-          }
-          result.messages.push({
-            ...hookResult.message,
-            attachment: {
-              ...hookResult.message.attachment,
-              content: applyTruncation(hookResult.message.attachment.content),
-            },
-          })
-          break
-        default:
-          result.messages.push(hookResult.message)
-          break
-      }
-    }
+  if (!result.shouldQuery) {
+    // 本地命令：钩子已先行执行（blocking 已在上面拦截）；无查询可附加
+    // → 钩子非阻塞输出丢弃
+    return result
   }
-  queryCheckpoint('query_hooks_end')
 
-  // Happy path: onQuery will clear userInputOnProcessing via startTransition
-  // so it resolves in the same frame as deferredMessages (no flicker gap).
-  // Error paths are handled by handlePromptSubmit's finally block.
+  // Happy path: hook messages append after the expanded messages (order
+  // unchanged from pre-K3-A3). onQuery will clear userInputOnProcessing via
+  // startTransition so it resolves in the same frame as deferredMessages
+  // (no flicker gap). Error paths are handled by handlePromptSubmit's
+  // finally block.
+  result.messages.push(...hookMessages)
   return result
 }
 
