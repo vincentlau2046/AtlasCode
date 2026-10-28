@@ -43,6 +43,7 @@ import type {
   Tools,
 } from '../../shared'
 import { classifyToolError } from './errorClassification'
+import { sanitizeUpdatedInput } from './sanitizeUpdatedInput'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
 import {
   getMcpAutoBackgroundMs,
@@ -406,8 +407,14 @@ export async function executeToolUse(
       isError: true,
     }
   }
-  // 钩子改写输入（last wins）→ effective 入参（权限门 + tool.call 均消费）
-  const effectiveInput = preOutcome?.updatedInput ?? tu.input
+  // 钩子改写输入（last wins）→ effective 入参（权限门 + tool.call 均消费）。
+  // K3-A2（0.1.82）：消费面键白名单——hook 只能改写已知键的值，不得注入
+  // 原入参中不存在的键（未知键丢弃；未提及键保原值；非 plain object
+  // fail-safe 保原入参）。门改写 verdict.updatedInput（内部全决策体）不经过此面。
+  const effectiveInput =
+    preOutcome?.updatedInput !== undefined
+      ? sanitizeUpdatedInput(tu.input, preOutcome.updatedInput)
+      : tu.input
 
   // E-4 接缝：权限门（旧仓序：pre-hook 后、call 前——hook 权限裁定在此合流；
   // 门在钩子改写后的 effective 入参上重判，旧仓 checkRuleBasedPermissions 语义）。
