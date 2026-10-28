@@ -4,6 +4,51 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.81
+
+V3-2 K2 MCP 面 18 件（上游 2.1.296–302 对齐；f4 工单
+`docs/2026-10-25-p0-wave-0181-ticket.md`；卷 3 方案 §2 V3-2 / §3 K2
+逐条账；判别单测 `tests/unit/wave0181-*.test.ts` 12 文件）。
+
+### 协商/连接面
+
+- #1 MCP 协商请求升级 2026-07-28，缺 resultType/ttlMs/cacheScope
+  容忍降级（不致无工具/全调用失败）。
+- #14 同 server 并发连接共享单飞 promise（不重放）。
+- #17 空 `.mcp.json` = 合法空配置（非 JSON/错误结构仍拒）。
+- #5 非 SSE HTTP 回复 body 改用回复到达起算的总期限（防无结束/
+  慢滴灌无限挂死；SSE 长连不套此期限）。
+- #18 P-804s watchdog finally `iterator.return()` 与 1000ms 宽限
+  竞速（挂起型 async generator 超时错误不再被吞）。
+
+### 策略/权限面
+
+- #6/#7 被封 server 策略先行：动态配置、`mcp list`/`get`、subagent
+  启动路径统一报 blocked 不连接。
+- #2/#3/#4/#9 规则匹配折半比对重写；保留原型键名
+  （`constructor`/`__proto__` 等）server 连接防撞与权限一致；双下划线
+  归一名 deny/ask 生效；allow 规则收窄（**破坏性**：`mcp__a` 不再
+  放行 `a__b`/`a_`，须写全名 `mcp__<server>__*`）。
+- #10 agent `tools:` server 级 spec（`mcp__server`）精确取该 server
+  可用工具域，防跨 server 扩池。
+
+### 工具面/配置面
+
+- #8 OAuth 登录/刷新/登出三路径带 settings 配置 headers +
+  headersHelper（代理兼容）。
+- #11 enabled/disabledMcpjsonServers 纯字符串宽容归一成数组。
+- #12 每回合 schema 400 工具剥除后重跑本回合（防每回合 400）。
+- #13 迟连 MCP server 工具/指令即时注入（`refreshRoundContext`；
+  delta 门 OFF 时指令待下一 user turn）。
+- #15 `/cd` cwdReconnectKey：启停态随目录/插件重载收敛。
+- #16 工具描述与 server 指令上限 2048→4096。
+
+### review 修复
+
+- 整分支 fresh-context review（opus）I-1（Important）：legacy alias
+  map plain-object 原型链泄漏致保留原型键 tool spec 崩溃——alias map
+  全链 null-proto + engine/TUI 双 twin 入口 string guard（9a0d409）。
+
 ## v0.1.80
 
 V3-1 K1 压缩/缓存/网关族 18 件（上游 2.1.296–302 对齐；f4 工单
