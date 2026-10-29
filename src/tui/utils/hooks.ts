@@ -128,6 +128,7 @@ import {
   exceedsMaxNestingDepth,
 } from './hooks/hookInputDepth.js'
 import { stringifyWithGetterFallback } from './hooks/hookInputMaterialize.js'
+import { isReentrantHook, runWithHookReentrancy } from './hooks/hookReentrancy.js'
 import type { PermissionResult } from './permissions/PermissionResult.js'
 import { registerPendingAsyncHook } from './hooks/AsyncHookRegistry.js'
 import { enqueuePendingNotification } from './messageQueueManager.js'
@@ -2182,6 +2183,17 @@ async function* executeHooks({
     { hook, pluginRoot, pluginId, skillRoot },
     hookIndex,
   ): AsyncGenerator<HookResult> {
+    // K3-A8（0.1.82，上游 299）：重入守卫——同一 hook 在自身执行子树内再次
+    // 分派（hook 内触发工具/事件回到同一 hook，上游「等另一 mod 名词死循环
+    // 重跑」形状）不再重跑。ALS 键控：仅嵌套调用链可见，并行兄弟分派不受
+    // 影响（hookReentrancy.ts）。
+    if (isReentrantHook(hookEvent, hook, pluginRoot)) {
+      logForDebugging(
+        `Hooks: ${hookName}: skipping re-entrant execution of ${getHookDisplayText(hook)}`,
+      )
+      yield { outcome: 'success', hook }
+      return
+    }
     if (hook.type === 'callback') {
       const callbackTimeoutMs = hook.timeout ? hook.timeout * 1000 : timeoutMs
       const { signal: abortSignal, cleanup } = createCombinedAbortSignal(
@@ -2192,34 +2204,36 @@ async function* executeHooks({
       // ——转 hook_non_blocking_error 结果（镜像下方 command 分支 catch 形状），
       // 不再穿透 async generator 崩掉消费方（processUserInput 等 for-await 无
       // try/catch）。.catch 仅 reject 路径跑，成功路径零变更。
-      yield executeHookCallback({
-        toolUseID,
-        hook,
-        hookEvent,
-        hookInput,
-        signal: abortSignal,
-        hookIndex,
-        toolUseContext,
-      })
-        .catch((error: unknown): HookResult => {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error)
-          return {
-            message: createAttachmentMessage({
-              type: 'hook_non_blocking_error',
-              hookName: `${hookEvent}:Callback`,
-              toolUseID,
-              hookEvent,
-              stderr: `Failed to run: ${errorMessage}`,
-              stdout: '',
-              exitCode: 1,
-              command: 'callback',
-            }),
-            outcome: 'non_blocking_error',
-            hook,
-          }
+      yield runWithHookReentrancy(hookEvent, hook, pluginRoot, () =>
+        executeHookCallback({
+          toolUseID,
+          hook,
+          hookEvent,
+          hookInput,
+          signal: abortSignal,
+          hookIndex,
+          toolUseContext,
         })
-        .finally(cleanup)
+          .catch((error: unknown): HookResult => {
+            const errorMessage =
+              error instanceof Error ? error.message : String(error)
+            return {
+              message: createAttachmentMessage({
+                type: 'hook_non_blocking_error',
+                hookName: `${hookEvent}:Callback`,
+                toolUseID,
+                hookEvent,
+                stderr: `Failed to run: ${errorMessage}`,
+                stdout: '',
+                exitCode: 1,
+                command: 'callback',
+              }),
+              outcome: 'non_blocking_error',
+              hook,
+            }
+          })
+          .finally(cleanup),
+      )
       return
     }
 
@@ -2240,15 +2254,17 @@ async function* executeHooks({
       }
 
       // Function hooks only come from session storage with callback embedded
-      yield executeFunctionHook({
-        hook,
-        messages,
-        hookName,
-        toolUseID,
-        hookEvent,
-        timeoutMs,
-        signal,
-      })
+      yield runWithHookReentrancy(hookEvent, hook, pluginRoot, () =>
+        executeFunctionHook({
+          hook,
+          messages,
+          hookName,
+          toolUseID,
+          hookEvent,
+          timeoutMs,
+          signal,
+        }),
+      )
       return
     }
 
@@ -2288,15 +2304,21 @@ async function* executeHooks({
             'ToolUseContext is required for prompt hooks. This is a bug.',
           )
         }
-        const promptResult = await execPromptHook(
-          hook,
-          hookName,
+        const promptResult = await runWithHookReentrancy(
           hookEvent,
-          jsonInput,
-          abortSignal,
-          toolUseContext,
-          messages,
-          toolUseID,
+          hook,
+          pluginRoot,
+          () =>
+            execPromptHook(
+              hook,
+              hookName,
+              hookEvent,
+              jsonInput,
+              abortSignal,
+              toolUseContext,
+              messages,
+              toolUseID,
+            ),
         )
         // Inject timing fields for hook visibility
         if ((promptResult.message?.type as any) === 'attachment') {
@@ -2325,18 +2347,24 @@ async function* executeHooks({
             'Messages are required for agent hooks. This is a bug.',
           )
         }
-        const agentResult = await execAgentHook(
-          hook,
-          hookName,
+        const agentResult = await runWithHookReentrancy(
           hookEvent,
-          jsonInput,
-          abortSignal,
-          toolUseContext,
-          toolUseID,
-          messages,
-          'agent_type' in hookInput
-            ? (hookInput.agent_type as string)
-            : undefined,
+          hook,
+          pluginRoot,
+          () =>
+            execAgentHook(
+              hook,
+              hookName,
+              hookEvent,
+              jsonInput,
+              abortSignal,
+              toolUseContext,
+              toolUseID,
+              messages,
+              'agent_type' in hookInput
+                ? (hookInput.agent_type as string)
+                : undefined,
+            ),
         )
         // Inject timing fields for hook visibility
         if ((agentResult.message?.type as any) === 'attachment') {
@@ -2360,11 +2388,11 @@ async function* executeHooks({
         // execHttpHook manages its own timeout internally via hook.timeout or
         // DEFAULT_HTTP_HOOK_TIMEOUT_MS, so pass the parent signal directly
         // to avoid double-stacking timeouts with abortSignal.
-        const httpResult = await execHttpHook(
-          hook,
+        const httpResult = await runWithHookReentrancy(
           hookEvent,
-          jsonInput,
-          signal,
+          hook,
+          pluginRoot,
+          () => execHttpHook(hook, hookEvent, jsonInput, signal),
         )
         cleanup?.()
 
@@ -2506,19 +2534,25 @@ async function* executeHooks({
 
       emitHookStarted(hookId, hookName, hookEvent)
 
-      const result = await execCommandHook(
-        hook,
+      const result = await runWithHookReentrancy(
         hookEvent,
-        hookName,
-        jsonInput,
-        abortSignal,
-        hookId,
-        hookIndex,
+        hook,
         pluginRoot,
-        pluginId,
-        skillRoot,
-        forceSyncExecution,
-        boundRequestPrompt,
+        () =>
+          execCommandHook(
+            hook,
+            hookEvent,
+            hookName,
+            jsonInput,
+            abortSignal,
+            hookId,
+            hookIndex,
+            pluginRoot,
+            pluginId,
+            skillRoot,
+            forceSyncExecution,
+            boundRequestPrompt,
+          ),
       )
       cleanup?.()
       const durationMs = Date.now() - hookStartMs
@@ -3157,6 +3191,20 @@ export async function executeHooksOutsideREPL({
   // in-flight ≤ MAX_HOOK_CONCURRENCY while preserving input-order results)
   const hookTasks = matchingHooks.map(
     ({ hook, pluginRoot, pluginId }, hookIndex) => async () => {
+      // K3-A8（0.1.82）：重入守卫（同 face-1 per-hook generator 起始检查）——
+      // hook 执行子树内再次分派回同一 hook 时跳过，返回 skip 结果不报错。
+      if (isReentrantHook(hookEvent, hook, pluginRoot)) {
+        logForDebugging(
+          `Hooks: ${hookName}: skipping re-entrant execution of ${getHookDisplayText(hook)}`,
+        )
+        return {
+          command: getHookDisplayText(hook),
+          succeeded: true,
+          output:
+            'Skipped: re-entrant hook execution (already running in this call chain)',
+          blocked: false,
+        }
+      }
       // Handle callback hooks
       if (hook.type === 'callback') {
         const callbackTimeoutMs = hook.timeout ? hook.timeout * 1000 : timeoutMs
@@ -3167,11 +3215,12 @@ export async function executeHooksOutsideREPL({
 
         try {
           const toolUseID = randomUUID()
-          const json: any = await hook.callback(
-            hookInput,
-            toolUseID,
-            abortSignal,
-            hookIndex,
+          const json: any = await runWithHookReentrancy(
+            hookEvent,
+            hook,
+            pluginRoot,
+            () =>
+              hook.callback(hookInput, toolUseID, abortSignal, hookIndex),
           )
 
           cleanup?.()
@@ -3264,11 +3313,11 @@ export async function executeHooksOutsideREPL({
       // DEFAULT_HTTP_HOOK_TIMEOUT_MS, so we pass signal directly.
       if (hook.type === 'http') {
         try {
-          const httpResult = await execHttpHook(
-            hook,
+          const httpResult = await runWithHookReentrancy(
             hookEvent,
-            jsonInput,
-            signal,
+            hook,
+            pluginRoot,
+            () => execHttpHook(hook, hookEvent, jsonInput, signal),
           )
 
           if (httpResult.aborted) {
@@ -3357,16 +3406,22 @@ export async function executeHooksOutsideREPL({
         { timeoutMs: commandTimeoutMs },
       )
       try {
-        const result = await execCommandHook(
-          hook,
+        const result = await runWithHookReentrancy(
           hookEvent,
-          hookName,
-          jsonInput,
-          abortSignal,
-          randomUUID(),
-          hookIndex,
+          hook,
           pluginRoot,
-          pluginId,
+          () =>
+            execCommandHook(
+              hook,
+              hookEvent,
+              hookName,
+              jsonInput,
+              abortSignal,
+              randomUUID(),
+              hookIndex,
+              pluginRoot,
+              pluginId,
+            ),
         )
 
         // Clear timeout if hook completes
