@@ -80,6 +80,22 @@ import { DONT_ASK_REJECT_MESSAGE } from './denialMessages'
 // 域不 import engine 域（L2 叶约束），单一事实源 = engine/tools/toolNames.ts
 const BASH_TOOL_NAME = 'Bash'
 
+// 0.1.82 K3-B6：plan 模式写门豁免工具名域内本地镜像（同 BASH_TOOL_NAME
+// 惯例，L2 叶约束不 import engine；单一事实源 = engine/tools/toolNames.ts
+// ENTER_PLAN_MODE_TOOL_NAME / EXIT_PLAN_MODE_V2_TOOL_NAME，漂移防 =
+// wave0182-plan-mode-write-gate.test.ts ⑥ 用 engine 常量锁一致）。
+// ExitPlanModeV2 isReadOnly=false（写盘 plan 文件）但必须放行——plan 模式
+// 唯一逃生口，拦 = plan 态死锁。
+const PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES = new Set([
+  'EnterPlanMode',
+  'ExitPlanMode',
+])
+
+/** K3-B6：plan 模式写拒绝文案（fail-closed 收紧，上游 299 对齐）。 */
+const PLAN_MODE_WRITE_DENIED_MESSAGE = (toolName: string) =>
+  `Plan mode is active — ${toolName} is not allowed to make changes. ` +
+  `Present your plan and use ExitPlanMode, or ask the user to change the permission mode.`
+
 /**
  * 规则支 + 工具面分发 CanUseToolFn 窄视图（旧仓全量 CanUseToolFn 的
  * name/mcpInfo/checkPermissions 子集 + 窄 context）。context 可选
@@ -112,11 +128,14 @@ export type CanUseToolFn<
 
 /**
  * 决策主体（§8.33 规则支 + §8.43 工具面分发）：
- * forceDecision 优先 → 1a deny → 1b ask（⑥ 半落）→ 1c 鸭子分发 → 1d →
+ * forceDecision 优先 → 0 plan 写门（K3-B6 fail-closed）→ 1a deny →
+ * 1b ask（⑥ 半落）→ 1c 鸭子分发 → 1d →
  * 1f → 1g → 2a bypass → 2b allow 规则 → 薄骨架兼容（无上下文 = allow）→
  * 3 passthrough → ask。判别信号（tests/unit/permissions.test.ts 工具面
  * 扩展）：1c deny 透传 / 1f 内容 ask bypass-immune / 1g safetyCheck /
- * 2a updatedInput 采纳 + 回落 / ⑥ 三态 / 3 落 ask（gate fail-closed）。
+ * 2a updatedInput 采纳 + 回落 / ⑥ 三态 / 3 落 ask（gate fail-closed）；
+ * plan 写门（wave0182-plan-mode-write-gate.test.ts）：写 deny / 只读零
+ * 触碰 / bypass 起步不拦 / ExitPlanMode 豁免。
  */
 export const hasPermissionsToUseTool: CanUseToolFn = async (
   tool,
@@ -136,6 +155,31 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
   }
 
   const sandbox = getSandboxAccess()
+
+  // 0. K3-B6（0.1.82，上游 299 收紧）：plan 模式写拦截 fail-closed。
+  // plan 态下写工具不得经任何放行产点（tool.check allow / 2b allow 规则 /
+  // PreToolUse hook allow——hook 在 pipeline mergeHookPermission 合流，
+  // 「hook allow 不绕过 deny」不变量保本门不被回绕）执行：
+  //  - 非只读（isReadOnly ?? false，缺省=写 fail-closed）→ deny；
+  //  - 豁免：EnterPlanMode / ExitPlanMode（plan 逃生口，见镜像注释）；
+  //  - bypass 起步（isBypassPermissionsModeAvailable）不拦——2a 直放语义
+  //    保持（用户以 bypass 起步 = 显式越过权限面意图）；
+  //  - 只读工具零触碰（原链不变）。
+  if (
+    permissionContext?.mode === 'plan' &&
+    !permissionContext.isBypassPermissionsModeAvailable &&
+    !PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES.has(tool.name) &&
+    !(tool.isReadOnly?.(input) ?? false)
+  ) {
+    return {
+      behavior: 'deny',
+      message: PLAN_MODE_WRITE_DENIED_MESSAGE(tool.name),
+      decisionReason: {
+        type: 'mode',
+        mode: 'plan',
+      },
+    }
+  }
 
   // 1a. 整工具 deny 规则命中（含 mcp__server 前缀 / __* 通配，toolMatchesRule）
   const denyRule = permissionContext

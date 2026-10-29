@@ -87,6 +87,12 @@ export type PermissionTool = {
    * 完整 Tool.inputSchema 泛型归 engine 波；此处仅锁 properties 键集窄视图。
    */
   inputSchema?: { properties?: Record<string, unknown> }
+  /**
+   * 0.1.82 K3-B6 plan 模式写拦截面（上游 299 收紧）：工具只读声明
+   * （完整 Tool.isReadOnly 窄视图；Bash = 命令级判定，MCP = readOnlyHint）。
+   * 全可选；缺省 = 写（fail-closed，见 permissions.ts plan 写门）。
+   */
+  isReadOnly?(input: Record<string, unknown>): boolean
 }
 
 /** expandPath 缺省基准 = 注入的 bootstrap cwd（shared 叶子不隐式取 cwd）。 */
