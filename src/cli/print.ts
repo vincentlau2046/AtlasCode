@@ -182,6 +182,8 @@ import {
 // P0 headless「hooks bootstrap 未注入」回归修：hooks 三窗口 cli 域侧接线
 // （壳 compose ⑤ 步等价；hooksWiring 头注 = 根因 + 逐字同形裁定）
 import { wireCliHooksDeps } from './hooksWiring'
+// K3-B1（0.1.82，上游 300 对齐）：headless 退出面 SessionEnd hooks（engine 面）
+import { runHeadlessSessionEndHooks } from './headlessSessionEnd'
 
 // ── 选项面（dispatch 侧 program.args 映射 = S-C4 回填；本文件定契约）────
 
@@ -1566,6 +1568,10 @@ export async function runHeadless(
     // pending 后台 agent（对标上游 -p 语义 = 不静默 kill fire-and-forget promise）。
     // SIGINT abort 时立即返回（用户中止，不再等）；单个 agent 失败不阻断（allSettled）。
     await drainPendingBackgroundAgents(abortController.signal)
+    // K3-B1（0.1.82，上游 300 对齐）：退出前触发 SessionEnd hooks（engine
+    // 面，fail-open + 1.5s 预算）——后台命令/agent drain 完后、进程退出前
+    // 最后收尾面；SIGINT abort unwind 也经此支（reason 同 TUI 正常退出）。
+    await runHeadlessSessionEndHooks('prompt_input_exit')
   } catch (error) {
     cronScheduler.stop()
     // #240（cli-debug P3）：基线行 ⑤ 运行错误（level=error 过级别门）
@@ -1589,6 +1595,9 @@ export async function runHeadless(
       // 错误 result 也写不出 → 继续关断
     }
     abortController.abort()
+    // K3-B1（0.1.82）：错误退出同样触发 SessionEnd hooks（TUI gracefulShutdown
+    // 全 reason 覆盖的对齐；fail-open 不改写 exitCode）
+    await runHeadlessSessionEndHooks('other')
     process.exitCode = 1
   }
   // N9-debug：debug 面异步写队列等齐（防进程退出丢尾行；成功/错误支后位）
