@@ -28,6 +28,15 @@ const READ_ONLY_PREFIXES = [
 // bashToolHasPermission step 7 自动放行（写文件零审批）。同族 includes 守卫
 // 风格（`<` 输入重定向只读不写，不守卫；引号内 `>` 如 `grep "a > b" f` 判
 // 非只读 = fail-safe 方向，多弹框不多放行，与 `;`/`|` 引号假阳性同态）。
+// 0.1.82 K3-B6 security review round-2 finding #1 补守卫（2026-10-30）：
+//  - `\n`/`\r`：newline 分隔命令 = 隐式 `;`（`ls -la\ntouch x` 命中
+//    `ls ` 前缀被判只读——plan 写门（K3-B6）以 isReadOnly 为豁免 oracle，
+//    误判 = 写命令免拦）；
+//  - find 写动作族字面（`-delete`/`-exec`/`-ok`/`-fprint`/`-fls`；
+//    `-execdir`/`-okdir`/`-fprint0`/`-fprintf` 经子串覆盖）：`find` 在
+//    READ_ONLY_PREFIXES 内但 `-delete` / `-exec rm {} +`（无 `;` 形）带写
+//    副作用。同 fail-safe 方向（其他命令含这些字面误判非只读 = 多弹框，
+//    不多放行）。
 /**
  * 匹配命中的只读命令前缀（单一事实源）：返回最长匹配的前缀（如
  * `git status --short` → `git status`），非只读命令返回 null。
@@ -45,7 +54,14 @@ export function matchReadOnlyPrefix(command: string): string | null {
     trimmed.includes('|') ||
     trimmed.includes('`') ||
     trimmed.includes('$(') ||
-    trimmed.includes('>')
+    trimmed.includes('>') ||
+    trimmed.includes('\n') ||
+    trimmed.includes('\r') ||
+    trimmed.includes('-delete') ||
+    trimmed.includes('-exec') ||
+    trimmed.includes('-ok') ||
+    trimmed.includes('-fprint') ||
+    trimmed.includes('-fls')
   ) {
     return null
   }

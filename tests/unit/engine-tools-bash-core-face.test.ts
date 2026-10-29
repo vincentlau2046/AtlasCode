@@ -202,6 +202,28 @@ describe('isReadOnlyCommand', () => {
     // 输入重定向 `<` 只读不写，不守卫（前缀仍命中 = 只读）
     expect(isReadOnlyCommand('cat file < other')).toBe(true)
   })
+
+  // 0.1.82 K3-B6 security review round-2 finding #1：newline 分隔写命令与
+  // find 写动作族绕过守卫——`ls -la\ntouch x` 命中 `ls ` 前缀被判只读
+  // （plan 写门以 isReadOnly 为豁免 oracle → 写命令免拦）；`find . -delete` /
+  // `find . -exec rm {} +`（无 `;` 形）命中 `find` 前缀。修 = 守卫集补
+  // `\n`/`\r` + find 写动作字面（-delete/-exec），fail-safe 方向（多弹框
+  // 不多放行）。
+  test('newline 分隔写命令守卫（round-2 #1：ls -la\\ntouch x 误判只读）', () => {
+    expect(isReadOnlyCommand('ls -la\ntouch x')).toBe(false)
+    expect(isReadOnlyCommand('git status --short\nrm -rf /')).toBe(false)
+    expect(isReadOnlyCommand('cat f\r\nrm x')).toBe(false)
+    // 恒等锚：无换行常规只读零变更
+    expect(isReadOnlyCommand('ls -la')).toBe(true)
+  })
+
+  test('find 写动作族守卫（round-2 #1：find -delete / -exec 无分号形）', () => {
+    expect(isReadOnlyCommand('find . -delete')).toBe(false)
+    expect(isReadOnlyCommand('find . -exec rm {} +')).toBe(false)
+    expect(isReadOnlyCommand('find . -fprint /tmp/x')).toBe(false)
+    // 恒等锚：只读 find 零变更
+    expect(isReadOnlyCommand('find . -name "*.ts"')).toBe(true)
+  })
 })
 
 // ── 本地辅助模块 ──────────────────────────────────────────────────────────
