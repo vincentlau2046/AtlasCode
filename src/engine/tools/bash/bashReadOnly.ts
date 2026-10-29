@@ -33,9 +33,62 @@ const FIND_WRITE_ACTION_TOKENS = new Set([
 ])
 
 /**
+ * glob 模式保守匹配写动作集（round-4）：glob 在 shell 运行时按 cwd 展开，
+ * `-del?te` 在 cwd 含名为 -delete 的文件时展开为写动作 token。模式经
+ * glob→regex 转换（* → .*、? → .、[...] 字符类保留、! 否定头转 ^）后
+ * 与 FIND_WRITE_ACTION_TOKENS 逐一匹配，任一可命中即视为危险。
+ * 无法编译/形状异常 = 保守拒绝（fail-safe）。
+ */
+function globPatternCouldMatchWriteAction(pattern: string): boolean {
+  let regex = '^'
+  let i = 0
+  while (i < pattern.length) {
+    const c = pattern[i]
+    if (c === '*') {
+      regex += '.*'
+      i++
+      continue
+    }
+    if (c === '?') {
+      regex += '.'
+      i++
+      continue
+    }
+    if (c === '[') {
+      const close = pattern.indexOf(']', i + 1)
+      if (close > i) {
+        // 字符类：glob 否定头 ! 转 regex ^；其余内容直用（类内字面语义
+        // 两边一致，范围 a-z 同形）
+        let cls = pattern.slice(i + 1, close)
+        if (cls.startsWith('!')) cls = `^${cls.slice(1)}`
+        regex += `[${cls}]`
+        i = close + 1
+        continue
+      }
+      // 不闭合 [ 按字面
+    }
+    regex += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    i++
+  }
+  regex += '$'
+  let re: RegExp
+  try {
+    re = new RegExp(regex)
+  } catch {
+    return true
+  }
+  for (const action of FIND_WRITE_ACTION_TOKENS) {
+    if (re.test(action)) return true
+  }
+  return false
+}
+
+/**
  * argv 复核中允许通过的非字符串 token（shell-quote ParseEntry 对象形）：
  *  - {op:'<'}   输入重定向（只读不写，既有测试恒等锚 cat file < other）
- *  - {op:'glob'} 未引号 glob 展开（ls *.ts 只读形；展开结果不改变命令动作）
+ *  - {op:'glob'} 未引号 glob 展开——仅当模式保守不可命中写动作集
+ *    （round-4：find . -del?te 可展开 -delete；引号形 "*.ts" 是字符串
+ *    token 不经此门）
  *  - {comment}   注释 token（ls # foo）
  * 其余 op token（&&/||/;/|/>/>& 等）= 组合/重定向/替换语义 → 非只读。
  */
@@ -43,7 +96,13 @@ function isAllowedNonStringToken(token: unknown): boolean {
   if (typeof token !== 'object' || token === null) return false
   const t = token as Record<string, unknown>
   if (t.comment !== undefined) return true
-  return t.op === '<' || t.op === 'glob'
+  if (t.op === '<') return true
+  if (t.op === 'glob') {
+    // 形状异常（无 pattern）= 无法静态判读 → 拒
+    if (typeof t.pattern !== 'string') return false
+    return !globPatternCouldMatchWriteAction(t.pattern)
+  }
+  return false
 }
 
 // Shell chaining / substitution operators can hide a write command behind a
@@ -114,6 +173,13 @@ export function matchReadOnlyPrefix(command: string): string | null {
   for (const token of parsed.tokens) {
     if (typeof token === 'string') {
       if (FIND_WRITE_ACTION_TOKENS.has(token)) return null
+      // round-4 补：class-only glob（find . -[d]elete）在 shell-quote 里是
+      // 字符串 token（无 */? 不产 glob op），但 [...] 在 shell 运行时是
+      // glob 元字符（cwd 含 -delete 即展开为写动作）→ 含字符类的 token
+      // 同过保守匹配
+      if (token.includes('[') && globPatternCouldMatchWriteAction(token)) {
+        return null
+      }
     } else if (!isAllowedNonStringToken(token)) {
       return null
     }

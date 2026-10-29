@@ -243,6 +243,22 @@ describe('isReadOnlyCommand', () => {
     expect(isReadOnlyCommand('cat a< b')).toBe(true)
     expect(isReadOnlyCommand('git diff HEAD~1')).toBe(true)
   })
+
+  // 0.1.82 K3-B6 security review round-4：glob 运行时展开微分——
+  // find . -del?te 在 cwd 含名为 -delete 的文件时展开为写动作 token；
+  // round-3 把 {op:'glob'} 一律放行 = 可回绕。修 = glob 模式保守匹配
+  // 写动作集（glob→regex，任一可命中即拒；引号形 "*.ts" 是字符串 token
+  // 不经此门，恒等锚保住）。
+  test('glob 展开写动作守卫（round-4：find . -del?te 可展开 -delete）', () => {
+    expect(isReadOnlyCommand('find . -del?te')).toBe(false)
+    expect(isReadOnlyCommand('find . -[d]elete')).toBe(false)
+    expect(isReadOnlyCommand('find . -ex*')).toBe(false)
+    // 裸 * 可展开任意文件名（含 -delete）→ 保守拒
+    expect(isReadOnlyCommand('find . -name *')).toBe(false)
+    // 恒等锚：模式不可命中写动作集的 glob 零变更
+    expect(isReadOnlyCommand('ls *.ts')).toBe(true)
+    expect(isReadOnlyCommand('grep foo *.md')).toBe(true)
+  })
 })
 
 // ── 本地辅助模块 ──────────────────────────────────────────────────────────
