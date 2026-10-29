@@ -33,6 +33,11 @@ export type FunctionHook = {
 type SessionHookMatcher = {
   matcher: string
   skillRoot?: string
+  // K3-A10（0.1.82）：插件来源溯源透传（可选；现无生产写入方——插件 hook
+  // 注册走 registerHookCallbacks 面，session 面经此字段保来源不丢）。
+  pluginRoot?: string
+  pluginName?: string
+  pluginId?: string
   hooks: Array<{
     hook: HookCommand | FunctionHook
     onHookSuccess?: OnHookSuccess
@@ -272,12 +277,17 @@ export type SessionDerivedHookMatcher = {
   matcher: string
   hooks: HookCommand[]
   skillRoot?: string
+  // K3-A10（0.1.82）：插件来源溯源透传（getMatchingHooks 按 pluginRoot
+  // 提取 → 投递失败 fail-closed 判别；未携带时恒 undefined，行为不变）。
+  pluginRoot?: string
+  pluginName?: string
+  pluginId?: string
 }
 
 /**
  * Convert session hook matchers to regular hook matchers
  * @param sessionMatchers The session hook matchers to convert
- * @returns Regular hook matchers (with optional skillRoot preserved)
+ * @returns Regular hook matchers (with optional skillRoot/plugin provenance preserved)
  */
 function convertToHookMatchers(
   sessionMatchers: SessionHookMatcher[],
@@ -285,6 +295,9 @@ function convertToHookMatchers(
   return sessionMatchers.map(sm => ({
     matcher: sm.matcher,
     skillRoot: sm.skillRoot,
+    pluginRoot: sm.pluginRoot,
+    pluginName: sm.pluginName,
+    pluginId: sm.pluginId,
     // Filter out function hooks - they can't be persisted to HookMatcher format
     hooks: sm.hooks
       .map(h => h.hook)

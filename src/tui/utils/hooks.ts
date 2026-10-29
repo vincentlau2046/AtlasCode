@@ -129,6 +129,7 @@ import {
 } from './hooks/hookInputDepth.js'
 import { stringifyWithGetterFallback } from './hooks/hookInputMaterialize.js'
 import { isReentrantHook, runWithHookReentrancy } from './hooks/hookReentrancy.js'
+import { shouldFailClosePluginHook } from './hooks/hookFailClosed.js'
 import type { PermissionResult } from './permissions/PermissionResult.js'
 import { registerPendingAsyncHook } from './hooks/AsyncHookRegistry.js'
 import { enqueuePendingNotification } from './messageQueueManager.js'
@@ -2280,6 +2281,10 @@ async function* executeHooks({
     try {
       const jsonInputRes = getJsonInput()
       if (!jsonInputRes.ok) {
+        // K3-A10（0.1.82，上游 300）：插件来源 × 门事件的输入投递失败
+        // fail-closed——hook 从未跑，其门控的动作拒收而非放行；settings/
+        // session 面与非门事件维持 fail-soft（non_blocking_error 放行）。
+        const failClosed = shouldFailClosePluginHook(hookEvent, pluginRoot)
         yield {
           message: createAttachmentMessage({
             type: 'hook_error_during_execution',
@@ -2290,7 +2295,15 @@ async function* executeHooks({
             command: hookCommand,
             durationMs: Date.now() - hookStartMs,
           }),
-          outcome: 'non_blocking_error',
+          ...(failClosed
+            ? {
+                blockingError: {
+                  blockingError: `Plugin hook input could not be prepared; blocking gated action (fail-closed): ${errorMessage((jsonInputRes as any).error)}`,
+                  command: hookCommand,
+                },
+              }
+            : {}),
+          outcome: failClosed ? 'blocking' : 'non_blocking_error',
           hook,
         }
         cleanup()
@@ -3159,11 +3172,13 @@ export async function executeHooksOutsideREPL({
   if (exceedsMaxNestingDepth(hookInput)) {
     const message = `Hook input nesting depth exceeds MAX_HOOK_INPUT_NESTING_DEPTH (${MAX_HOOK_INPUT_NESTING_DEPTH}); refusing to run hooks`
     logForDebugging(`Hooks: ${hookName}: ${message}`)
-    return matchingHooks.map(({ hook }) => ({
+    // K3-A10（0.1.82，上游 300）：插件来源 × 门事件 fail-closed（blocked
+    // 拒收）；其余面 blocked:false 不拦截（A6 语义不变）。
+    return matchingHooks.map(({ hook, pluginRoot }) => ({
       command: getHookDisplayText(hook),
       succeeded: false,
       output: message,
-      blocked: false,
+      blocked: shouldFailClosePluginHook(hookEvent, pluginRoot),
     }))
   }
   // K3-A7（0.1.82，上游 299）：序列化抛错（getter/circular）不再整值拒收
@@ -3172,11 +3187,12 @@ export async function executeHooksOutsideREPL({
   const serialized = stringifyWithGetterFallback(hookInput)
   if (serialized.ok !== true) {
     logError(serialized.error)
-    return matchingHooks.map(({ hook }) => ({
+    // K3-A10：同深嵌套面——插件来源 × 门事件 fail-closed（blocked 拒收）。
+    return matchingHooks.map(({ hook, pluginRoot }) => ({
       command: getHookDisplayText(hook),
       succeeded: false,
       output: `Failed to serialize hook input: ${errorMessage(serialized.error)}`,
-      blocked: false,
+      blocked: shouldFailClosePluginHook(hookEvent, pluginRoot),
     }))
   }
   if (serialized.droppedKeys.length > 0) {
