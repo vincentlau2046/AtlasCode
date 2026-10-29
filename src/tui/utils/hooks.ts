@@ -127,6 +127,7 @@ import {
   MAX_HOOK_INPUT_NESTING_DEPTH,
   exceedsMaxNestingDepth,
 } from './hooks/hookInputDepth.js'
+import { stringifyWithGetterFallback } from './hooks/hookInputMaterialize.js'
 import type { PermissionResult } from './permissions/PermissionResult.js'
 import { registerPendingAsyncHook } from './hooks/AsyncHookRegistry.js'
 import { enqueuePendingNotification } from './messageQueueManager.js'
@@ -2155,14 +2156,25 @@ async function* executeHooks({
       logError(Error(`Failed to stringify hook ${hookName} input`, { cause: error }))
       return (jsonInputResult = { ok: false, error })
     }
-    try {
-      return (jsonInputResult = { ok: true, value: jsonStringify(hookInput) })
-    } catch (error) {
+    // K3-A7（0.1.82，上游 299）：序列化抛错（getter/circular）不再整值拒收
+    // ——物化回退只拒抛错键（droppedKeys 记名），克隆可序列化则照常跑钩子。
+    // 注：否定支用 `!== true` 显式比较——本仓 strict:false 下 `!s.ok` 真值
+    // 窄化不生效（undefined 落双侧）。
+    const serialized = stringifyWithGetterFallback(hookInput)
+    if (serialized.ok !== true) {
       logError(
-        Error(`Failed to stringify hook ${hookName} input`, { cause: error }),
+        Error(`Failed to stringify hook ${hookName} input`, {
+          cause: serialized.error,
+        }),
       )
-      return (jsonInputResult = { ok: false, error })
+      return (jsonInputResult = { ok: false, error: serialized.error })
     }
+    if (serialized.droppedKeys.length > 0) {
+      logForDebugging(
+        `Hooks: ${hookName}: dropped input keys with throwing getters: ${serialized.droppedKeys.join(', ')}`,
+      )
+    }
+    return (jsonInputResult = { ok: true, value: serialized.value })
   }
 
   // Run all hooks in parallel with individual timeouts
@@ -3120,18 +3132,25 @@ export async function executeHooksOutsideREPL({
       blocked: false,
     }))
   }
-  let jsonInput: string
-  try {
-    jsonInput = jsonStringify(hookInput)
-  } catch (error) {
-    logError(error)
+  // K3-A7（0.1.82，上游 299）：序列化抛错（getter/circular）不再整值拒收
+  // ——物化回退只拒抛错键，克隆可序列化则照常跑钩子（cyclic 以 '[Circular]'
+  // 占位）。
+  const serialized = stringifyWithGetterFallback(hookInput)
+  if (serialized.ok !== true) {
+    logError(serialized.error)
     return matchingHooks.map(({ hook }) => ({
       command: getHookDisplayText(hook),
       succeeded: false,
-      output: `Failed to serialize hook input: ${errorMessage(error)}`,
+      output: `Failed to serialize hook input: ${errorMessage(serialized.error)}`,
       blocked: false,
     }))
   }
+  if (serialized.droppedKeys.length > 0) {
+    logForDebugging(
+      `Hooks: ${hookName}: dropped input keys with throwing getters: ${serialized.droppedKeys.join(', ')}`,
+    )
+  }
+  const jsonInput: string = serialized.value
 
   // Run hooks with individual timeouts; bounded concurrency, lazy thunks
   // (0.1.82 K3-A1: eager map would start every hook at once — the pool keeps

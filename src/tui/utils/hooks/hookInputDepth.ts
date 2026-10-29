@@ -31,9 +31,16 @@ export function exceedsMaxNestingDepth(value: unknown): boolean {
     if (v === null || typeof v !== 'object') continue
     if (visited.has(v)) continue
     visited.add(v)
-    const children = Array.isArray(v)
-      ? v
-      : Object.values(v as Record<string, unknown>)
+    // K3-A7（0.1.82）：枚举 getter 安全——Object.values 会触发 enumerable
+    // getter，抛错时不可判定深度 ≠ 拒收（该键由序列化面物化回退只拒该键）。
+    let children: unknown[]
+    try {
+      children = Array.isArray(v)
+        ? v
+        : Object.values(v as Record<string, unknown>)
+    } catch {
+      continue
+    }
     for (const child of children) {
       stack.push([child, depth + 1])
     }
