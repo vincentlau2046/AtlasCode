@@ -3149,7 +3149,15 @@ export function handleMessageFromStream(
 }
 
 export function wrapInSystemReminder(content: string): string {
-  return `<system-reminder>\n${content}\n</system-reminder>`
+  // K3-A9（0.1.82，上游 296 对齐）：hook 输出（command stdout / callback /
+  // http body——不可信面）含字面 <system-reminder> 开/闭标签时，朴素包裹
+  // 会被提前终结（标签后内容逃出 meta-reminder 以用户面文本注入）或被伪
+  // 造嵌套。收口在此（5 调用文件全经此函数）：content 内的字面标签实体
+  // 转义，包裹结构不可被内容破坏；内部可信调用方从不产生字面标签 → 恒等。
+  const neutralized = content
+    .replaceAll('</system-reminder>', '&lt;/system-reminder&gt;')
+    .replaceAll('<system-reminder>', '&lt;system-reminder&gt;')
+  return `<system-reminder>\n${neutralized}\n</system-reminder>`
 }
 
 export function wrapMessagesInSystemReminder(
