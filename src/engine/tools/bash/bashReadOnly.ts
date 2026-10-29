@@ -12,13 +12,39 @@
  *  - **接缝已消费**（§8.54 S-B5，2026-09-26）：bashTool.ts 本体已落，其
  *    `isReadOnly: (input) => isReadOnlyCommand(...)` 消费本域函数（单一
  *    事实源，本体文件不复制 READ_ONLY_PREFIXES）。
+ *  - 0.1.82 K3-B6 round-3 起 import ./shellQuote（同子域，round-3 argv
+ *    复核用；「纯函数零依赖」口径更新为「零跨域依赖」）。
  */
+import { tryParseShellCommand } from './shellQuote'
 
 const READ_ONLY_PREFIXES = [
   'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'pwd', 'which',
   'git status', 'git log', 'git diff', 'git branch', 'git show', 'echo',
   'file', 'stat', 'du', 'df', 'whoami', 'env', 'printenv', 'type',
 ]
+
+// 0.1.82 K3-B6 security review round-3：find 写动作 token 集（argv 精确匹配）。
+// 文本 includes 守卫可被 quote 拼接/反斜杠转义拆分绕过（find . -"delete" 的
+// 源文本不含 '-delete' 字面，shell argv = -delete）→ 前缀命中后追加 argv
+// 复核（shell-quote 解析出的 token 与本集精确比对，拼接/转义已由 parser 解析）。
+const FIND_WRITE_ACTION_TOKENS = new Set([
+  '-delete', '-exec', '-execdir', '-ok', '-okdir',
+  '-fprint', '-fprint0', '-fprintf', '-fls',
+])
+
+/**
+ * argv 复核中允许通过的非字符串 token（shell-quote ParseEntry 对象形）：
+ *  - {op:'<'}   输入重定向（只读不写，既有测试恒等锚 cat file < other）
+ *  - {op:'glob'} 未引号 glob 展开（ls *.ts 只读形；展开结果不改变命令动作）
+ *  - {comment}   注释 token（ls # foo）
+ * 其余 op token（&&/||/;/|/>/>& 等）= 组合/重定向/替换语义 → 非只读。
+ */
+function isAllowedNonStringToken(token: unknown): boolean {
+  if (typeof token !== 'object' || token === null) return false
+  const t = token as Record<string, unknown>
+  if (t.comment !== undefined) return true
+  return t.op === '<' || t.op === 'glob'
+}
 
 // Shell chaining / substitution operators can hide a write command behind a
 // read-only prefix (e.g. `ls && rm -rf /`, `find . -exec rm {} ;`,
@@ -69,6 +95,27 @@ export function matchReadOnlyPrefix(command: string): string | null {
   for (const p of READ_ONLY_PREFIXES) {
     if (trimmed === p || trimmed.startsWith(p + ' ')) {
       if (best === null || p.length > best.length) best = p
+    }
+  }
+  if (best === null) return null
+
+  // 0.1.82 K3-B6 security review round-3：argv 复核（shell-parser 微分收口）。
+  // 文本守卫与前缀匹配之后、返回前，用 shell-quote 解析 argv 复核——
+  //  - 解析失败 = 无法静态判读 → 非只读（fail-closed，多弹框不多放行）；
+  //  - 非字符串 op token（&&/||/;/|/> 等，'<'/glob/comment 例外）→ 非只读；
+  //  - 字符串 token 精确命中 find 写动作集（quote 拼接/转义已由 parser
+  //    解析，find . -"delete" / -del\ete / -e"xec" 拦下）→ 非只读。
+  // 严格收紧不变式：本复核只在前缀已命中（best ≠ null）时做减法，恒等锚
+  // （ls -la / cat a< b / ls *.ts / git diff HEAD~1）零变更。
+  const parsed = tryParseShellCommand(trimmed, key => `$${key}`)
+  if (!parsed.success) {
+    return null
+  }
+  for (const token of parsed.tokens) {
+    if (typeof token === 'string') {
+      if (FIND_WRITE_ACTION_TOKENS.has(token)) return null
+    } else if (!isAllowedNonStringToken(token)) {
+      return null
     }
   }
   return best

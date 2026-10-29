@@ -224,6 +224,25 @@ describe('isReadOnlyCommand', () => {
     // 恒等锚：只读 find 零变更
     expect(isReadOnlyCommand('find . -name "*.ts"')).toBe(true)
   })
+
+  // 0.1.82 K3-B6 security review round-3：shell-parser 微分——quote 拼接/
+  // 反斜杠转义拆分写动作名，源文本不含守卫字面（find . -"delete" 的 argv
+  // = -delete），round-2 文本守卫漏。修 = 文本守卫后加 argv 复核
+  // （shell-quote 解析 token 精确匹配写动作；解析失败/非字符串 op token
+  // （&&/;/|/> 等_REDIRECT 例外）→ fail-closed 非只读）。
+  test('quote/escape 拼接写动作守卫（round-3：find . -"delete" 文本守卫漏）', () => {
+    expect(isReadOnlyCommand('find . -"delete"')).toBe(false)
+    expect(isReadOnlyCommand('find . -del\\ete')).toBe(false)
+    expect(isReadOnlyCommand('find . -e"xec" rm {} +')).toBe(false)
+    expect(isReadOnlyCommand('find . -"fprint" /tmp/x')).toBe(false)
+  })
+
+  test('argv 复核恒等锚：glob/comment/输入重定向只读形零变更', () => {
+    expect(isReadOnlyCommand('ls *.ts')).toBe(true)
+    expect(isReadOnlyCommand('grep foo *.md')).toBe(true)
+    expect(isReadOnlyCommand('cat a< b')).toBe(true)
+    expect(isReadOnlyCommand('git diff HEAD~1')).toBe(true)
+  })
 })
 
 // ── 本地辅助模块 ──────────────────────────────────────────────────────────
