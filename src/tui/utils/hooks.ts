@@ -123,6 +123,10 @@ import {
 } from './permissions/permissionRuleParser.js'
 import { logError } from './log.js'
 import { createCombinedAbortSignal } from './combinedAbortSignal.js'
+import {
+  MAX_HOOK_INPUT_NESTING_DEPTH,
+  exceedsMaxNestingDepth,
+} from './hooks/hookInputDepth.js'
 import type { PermissionResult } from './permissions/PermissionResult.js'
 import { registerPendingAsyncHook } from './hooks/AsyncHookRegistry.js'
 import { enqueuePendingNotification } from './messageQueueManager.js'
@@ -2141,6 +2145,16 @@ async function* executeHooks({
     if (jsonInputResult !== undefined) {
       return jsonInputResult
     }
+    // K3-A6（0.1.82，上游 300）：深嵌套输入先于 stringify 显式拒收并报
+    // 上限名（不依赖平台栈深的泛化 RangeError）。仅超限路径跑，浅输入
+    // 恒等（O(n) 单遍检查）。
+    if (exceedsMaxNestingDepth(hookInput)) {
+      const error = Error(
+        `Hook input nesting depth exceeds MAX_HOOK_INPUT_NESTING_DEPTH (${MAX_HOOK_INPUT_NESTING_DEPTH}); refusing to serialize`,
+      )
+      logError(Error(`Failed to stringify hook ${hookName} input`, { cause: error }))
+      return (jsonInputResult = { ok: false, error })
+    }
     try {
       return (jsonInputResult = { ok: true, value: jsonStringify(hookInput) })
     } catch (error) {
@@ -3035,7 +3049,7 @@ export function hasBlockingResult(results: HookOutsideReplResult[]): boolean {
  * @param timeoutMs Optional timeout in milliseconds for hook execution
  * @returns Array of HookOutsideReplResult objects containing command, succeeded, and output
  */
-async function executeHooksOutsideREPL({
+export async function executeHooksOutsideREPL({
   getAppState,
   hookInput,
   matchQuery,
@@ -3093,13 +3107,30 @@ async function executeHooksOutsideREPL({
     const hookTypeCounts = getHookTypeCounts(userHooks)
   }
 
-  // Validate and stringify the hook input
+  // K3-A6（0.1.82，上游 299/300）：深嵌套/不可序列化输入不再**静默跳过**
+  // 全部钩子（修前 catch → return []）——逐匹配钩子返回可见失败结果
+  // （succeeded:false + output 报上限名/序列化错误，blocked:false 不拦截）。
+  if (exceedsMaxNestingDepth(hookInput)) {
+    const message = `Hook input nesting depth exceeds MAX_HOOK_INPUT_NESTING_DEPTH (${MAX_HOOK_INPUT_NESTING_DEPTH}); refusing to run hooks`
+    logForDebugging(`Hooks: ${hookName}: ${message}`)
+    return matchingHooks.map(({ hook }) => ({
+      command: getHookDisplayText(hook),
+      succeeded: false,
+      output: message,
+      blocked: false,
+    }))
+  }
   let jsonInput: string
   try {
     jsonInput = jsonStringify(hookInput)
   } catch (error) {
     logError(error)
-    return []
+    return matchingHooks.map(({ hook }) => ({
+      command: getHookDisplayText(hook),
+      succeeded: false,
+      output: `Failed to serialize hook input: ${errorMessage(error)}`,
+      blocked: false,
+    }))
   }
 
   // Run hooks with individual timeouts; bounded concurrency, lazy thunks
