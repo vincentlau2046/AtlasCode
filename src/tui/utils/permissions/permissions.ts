@@ -55,6 +55,21 @@ import {
   shouldAllowManagedPermissionRulesOnly,
 } from './permissionsLoader.js'
 
+// 0.1.82 K3-B6：plan 模式写门豁免工具名（twin 域内直 import TUI 工具
+// constants——叶模块纯常量，无环；EnterPlanMode/ExitPlanMode = plan 逃生口，
+// 拦 = plan 态死锁。与 engine 侧 src/permissions/permissions.ts
+// PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES 双体同步，判别 =
+// wave0182-plan-mode-write-gate-tui.test.ts ⑤ 用 TUI 常量锁一致）。
+const PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES = new Set<string>([
+  'EnterPlanMode',
+  'ExitPlanMode',
+])
+
+/** K3-B6：plan 模式写拒绝文案（与 engine 侧 PLAN_MODE_WRITE_DENIED_MESSAGE 双体同步）。 */
+const PLAN_MODE_WRITE_DENIED_MESSAGE = (toolName: string) =>
+  `Plan mode is active — ${toolName} is not allowed to make changes. ` +
+  `Present your plan and use ExitPlanMode, or ask the user to change the permission mode.`
+
 const classifierDecisionModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('./classifierDecision.js') as typeof import('./classifierDecision.js'))
   : null
@@ -1123,6 +1138,35 @@ async function hasPermissionsToUseToolInner(
   }
 
   let appState = context.getAppState()
+
+  // 0. K3-B6（0.1.82，上游 299 收紧）：plan 模式写拦截 fail-closed（TUI twin
+  // 面，与 permissions 域 src/permissions/permissions.ts 链首同门对齐）。
+  // twin 是活决策路径——promptShellExecution（skill 内联 !`shell` 执行）/
+  // swarm inProcessRunner / execAgentHook 直调本函数，不经 engine gate，
+  // 故 twin 必须自带同门（security review finding #3）。语义同 engine 侧：
+  //  - 非只读（isReadOnly ?? false，缺省=写 fail-closed；TUI Tool.isReadOnly
+  //    为必选契约成员，可选调用 = 防假件/duck 面缺省）→ deny；
+  //  - 豁免：EnterPlanMode / ExitPlanMode（plan 逃生口——ExitPlanModeV2
+  //    isReadOnly=false（写盘 plan 文件）但必须放行，拦 = plan 态死锁；
+  //    常量直 import TUI 工具 constants，twin 域内无 L2 叶约束）；
+  //  - bypass 起步（isBypassPermissionsModeAvailable）不拦——2a 直放语义
+  //    保持（用户以 bypass 起步 = 显式越过权限面意图）；
+  //  - 只读工具零触碰（原链不变）。
+  if (
+    appState.toolPermissionContext.mode === 'plan' &&
+    !appState.toolPermissionContext.isBypassPermissionsModeAvailable &&
+    !PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES.has(tool.name) &&
+    !(tool.isReadOnly?.(input) ?? false)
+  ) {
+    return {
+      behavior: 'deny',
+      message: PLAN_MODE_WRITE_DENIED_MESSAGE(tool.name),
+      decisionReason: {
+        type: 'mode',
+        mode: 'plan',
+      },
+    }
+  }
 
   // 1. Check if the tool is denied
   // 1a. Entire tool is denied
