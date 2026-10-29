@@ -65,6 +65,7 @@ export {
   parseArgumentNames,
   parseArguments,
   substituteArguments,
+  substituteArgumentsStrict,
 } from './argumentSubstitution'
 
 // --- model 解析族 ---

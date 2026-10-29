@@ -91,42 +91,117 @@ export function generateProgressiveArgumentHint(
 export const MAX_SUBSTITUTION_OUTPUT_CHARS = 1_000_000
 
 /**
- * 预点 content 中的占位符总数（命名 / $ARGUMENTS[n] / $n / 裸 $ARGUMENTS
- * 四形态，与 substituteArguments 替换遍同口径）——预算用的上界估计。
+ * 模板某位的占位符匹配（预算预点与替换遍共用的形状单一事实源，两口径
+ * 不可能漂移）：
+ *  - named:     $foo（边界 = 后继字符既非 '[' 非字字符；重名按声明序先到
+ *              先得，与旧顺序遍语义一致）
+ *  - indexed:   $ARGUMENTS[0]
+ *  - bare:      $ARGUMENTS
+ *  - shorthand: $0（边界 = 后继字符非字字符）
+ */
+interface PlaceholderMatch {
+  length: number
+  kind: 'named' | 'indexed' | 'bare' | 'shorthand'
+  nameIndex?: number
+  argIndex?: number
+}
+
+const INDEXED_PLACEHOLDER_RE = /\$ARGUMENTS\[(\d+)\]/y
+const SHORTHAND_PLACEHOLDER_RE = /\$(\d+)/y
+
+function isWordChar(c: string | undefined): boolean {
+  return c !== undefined && /[A-Za-z0-9_]/.test(c)
+}
+
+function matchPlaceholderAt(
+  content: string,
+  i: number,
+  argumentNames: string[],
+): PlaceholderMatch | null {
+  if (content[i] !== '$') return null
+  // 1) 命名参（字面 startsWith——含正则元字符的名按字面匹配，不再经
+  //    RegExp 构造（旧实现会抛/错配））
+  for (let n = 0; n < argumentNames.length; n++) {
+    const name = argumentNames[n]
+    if (!name) continue
+    if (content.startsWith(`$${name}`, i)) {
+      const after = content[i + 1 + name.length]
+      if (after !== '[' && !isWordChar(after)) {
+        return { length: 1 + name.length, kind: 'named', nameIndex: n }
+      }
+    }
+  }
+  // 2) 索引参 $ARGUMENTS[n]
+  INDEXED_PLACEHOLDER_RE.lastIndex = i
+  const indexed = INDEXED_PLACEHOLDER_RE.exec(content)
+  if (indexed) {
+    return {
+      length: indexed[0].length,
+      kind: 'indexed',
+      argIndex: parseInt(indexed[1], 10),
+    }
+  }
+  // 3) 裸 $ARGUMENTS
+  if (content.startsWith('$ARGUMENTS', i)) {
+    return { length: '$ARGUMENTS'.length, kind: 'bare' }
+  }
+  // 4) 简写 $n
+  SHORTHAND_PLACEHOLDER_RE.lastIndex = i
+  const shorthand = SHORTHAND_PLACEHOLDER_RE.exec(content)
+  if (shorthand && !isWordChar(content[i + shorthand[0].length])) {
+    return {
+      length: shorthand[0].length,
+      kind: 'shorthand',
+      argIndex: parseInt(shorthand[1], 10),
+    }
+  }
+  return null
+}
+
+/**
+ * 预点 content 中的占位符总数（与替换遍同一 matcher 单遍扫描）——
+ * 预算用的上界估计。
  */
 function countPlaceholderOccurrences(
   content: string,
   argumentNames: string[],
 ): number {
   let count = 0
-  for (const name of argumentNames) {
-    if (!name) continue
-    count += (content.match(new RegExp(`\\$${name}(?![\\[\\w])`, 'g')) ?? [])
-      .length
+  let i = 0
+  while (i < content.length) {
+    const m = matchPlaceholderAt(content, i, argumentNames)
+    if (m) {
+      count++
+      i += m.length
+    } else {
+      i++
+    }
   }
-  count += (content.match(/\$ARGUMENTS\[\d+\]/g) ?? []).length
-  count += (content.match(/\$\d+(?!\w)/g) ?? []).length
-  // 裸 $ARGUMENTS：剥去 $ARGUMENTS[n] 形后计数（避免双计）
-  count += (
-    content.replace(/\$ARGUMENTS\[\d+\]/g, '').match(/\$ARGUMENTS/g) ?? []
-  ).length
   return count
 }
 
 /**
  * 用实际参数值替换内容中的 $ARGUMENTS 占位符。
  *
+ * K3-C2 round-5（security review）：替换改为**对原模板的单遍扫描**，
+ * 参数值按字面输出。旧多遍正则实现有两条绕过预算的放大路径：
+ * (a) string replacement 解释 `$&`/`` $' ``/`` $` ``/`$$`——`$'` 值拼接
+ * 匹配点之后的全部文本，密集模板 × 2 字 args 可展开 ~content²/12；
+ * (b) 各遍跑在已替换文本上，值内含的占位符被后续遍重展开。单遍字面
+ * 输出后下方投影成为真上界，钳制精确。
+ *
  * @param content - 含占位符的内容
  * @param args - 原始参数字符串（undefined/null = 无参，原样返回）
  * @param appendIfNoPlaceholder - true 且无占位符命中时追加 "ARGUMENTS: {args}"
  * @param argumentNames - 命名参（映射到索引位）
  */
-export function substituteArguments(
+function substituteArgumentsImpl(
   content: string,
   args: string | undefined,
-  appendIfNoPlaceholder = true,
-  argumentNames: string[] = [],
-): string {
+  appendIfNoPlaceholder: boolean,
+  argumentNames: string[],
+  strict: boolean,
+): string | null {
   // undefined/null = 未提供参数 — 原样返回；空串是合法输入（占位符替空）
   if (args === undefined || args === null) {
     return content
@@ -143,6 +218,9 @@ export function substituteArguments(
     content.length + placeholderCount * args.length >
       MAX_SUBSTITUTION_OUTPUT_CHARS
   ) {
+    // K3-C2 round-5 #2：strict 模式超预算显式拒绝（返 null）而非钳制——
+    // 门控 hook 的决策输入绝不静默截断（调用方拒掉被门控动作）
+    if (strict) return null
     const budgetPerReplacement = Math.max(
       0,
       Math.floor(
@@ -153,38 +231,78 @@ export function substituteArguments(
   }
 
   const parsedArgs = parseArguments(effectiveArgs)
-  const originalContent = content
 
-  // 命名参（$foo/$bar）→ 按位置映射。匹配 $name 但不含 $name[...] / $nameXxx
-  for (let i = 0; i < argumentNames.length; i++) {
-    const name = argumentNames[i]
-    if (!name) continue
-
-    content = content.replace(
-      new RegExp(`\\$${name}(?![\\[\\w])`, 'g'),
-      parsedArgs[i] ?? '',
-    )
+  // 单遍扫描：模板字符原样透传；替换值字面追加、永不回扫。appendValue
+  // 对替换值做累计预算防御性钳制（上方预点在数学上已保证；模板字面
+  // 永不截断——无占位符内容保持原透传语义）。
+  let out = ''
+  const appendValue = (value: string): void => {
+    if (out.length + value.length > MAX_SUBSTITUTION_OUTPUT_CHARS) {
+      value = value.slice(
+        0,
+        Math.max(0, MAX_SUBSTITUTION_OUTPUT_CHARS - out.length),
+      )
+    }
+    out += value
   }
-
-  // 索引参（$ARGUMENTS[0] / $ARGUMENTS[1] …）
-  content = content.replace(/\$ARGUMENTS\[(\d+)\]/g, (_, indexStr: string) => {
-    const index = parseInt(indexStr, 10)
-    return parsedArgs[index] ?? ''
-  })
-
-  // 简写索引参（$0 / $1 …）
-  content = content.replace(/\$(\d+)(?!\w)/g, (_, indexStr: string) => {
-    const index = parseInt(indexStr, 10)
-    return parsedArgs[index] ?? ''
-  })
-
-  // $ARGUMENTS → 全参串（K3-C2：用钳制后的 effectiveArgs）
-  content = content.replaceAll('$ARGUMENTS', effectiveArgs)
+  let matched = false
+  let i = 0
+  while (i < content.length) {
+    const m = matchPlaceholderAt(content, i, argumentNames)
+    if (m) {
+      matched = true
+      if (m.kind === 'bare') appendValue(effectiveArgs)
+      else if (m.kind === 'named') appendValue(parsedArgs[m.nameIndex!] ?? '')
+      else appendValue(parsedArgs[m.argIndex!] ?? '')
+      i += m.length
+    } else {
+      out += content[i]
+      i++
+    }
+  }
 
   // 无占位符命中且 appendIfNoPlaceholder 且 args 非空 → 追加
-  if (content === originalContent && appendIfNoPlaceholder && args) {
-    content = content + `\n\nARGUMENTS: ${args}`
+  //（按命中标志而非文本等价——替换值恰复现占位符文本时也算命中；
+  // 旧等价代理在该病态边沿会双重输出）
+  if (!matched && appendIfNoPlaceholder && args) {
+    out = out + `\n\nARGUMENTS: ${args}`
   }
 
-  return content
+  return out
+}
+
+export function substituteArguments(
+  content: string,
+  args: string | undefined,
+  appendIfNoPlaceholder = true,
+  argumentNames: string[] = [],
+): string {
+  return (
+    substituteArgumentsImpl(
+      content,
+      args,
+      appendIfNoPlaceholder,
+      argumentNames,
+      false,
+    ) ?? content
+  )
+}
+
+/**
+ * strict 变体（喂门控决策的输入专用）：展开超预算时返 null 而非钳制，
+ * 调用方据此拒掉被门控动作（fail-closed），绝不基于未标记前缀放行。
+ */
+export function substituteArgumentsStrict(
+  content: string,
+  args: string | undefined,
+  appendIfNoPlaceholder = true,
+  argumentNames: string[] = [],
+): string | null {
+  return substituteArgumentsImpl(
+    content,
+    args,
+    appendIfNoPlaceholder,
+    argumentNames,
+    true,
+  )
 }

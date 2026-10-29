@@ -105,31 +105,109 @@ export function generateProgressiveArgumentHint(
 export const MAX_SUBSTITUTION_OUTPUT_CHARS = 1_000_000
 
 /**
- * Count placeholder occurrences in content (named / $ARGUMENTS[n] / $n /
- * bare $ARGUMENTS — same shapes as the substitution passes) for the budget
- * upper-bound estimate.
+ * Placeholder match at a position in the template (single source of shape
+ * truth for BOTH the budget pre-count and the substitution pass — the two can
+ * never drift apart).
+ *  - named:     $foo   (boundary: next char is neither '[' nor a word char;
+ *              declaration order wins for duplicate names, same as the old
+ *              sequential passes)
+ *  - indexed:   $ARGUMENTS[0]
+ *  - bare:      $ARGUMENTS
+ *  - shorthand: $0      (boundary: next char is not a word char)
+ */
+interface PlaceholderMatch {
+  length: number
+  kind: 'named' | 'indexed' | 'bare' | 'shorthand'
+  nameIndex?: number
+  argIndex?: number
+}
+
+const INDEXED_PLACEHOLDER_RE = /\$ARGUMENTS\[(\d+)\]/y
+const SHORTHAND_PLACEHOLDER_RE = /\$(\d+)/y
+
+function isWordChar(c: string | undefined): boolean {
+  return c !== undefined && /[A-Za-z0-9_]/.test(c)
+}
+
+function matchPlaceholderAt(
+  content: string,
+  i: number,
+  argumentNames: string[],
+): PlaceholderMatch | null {
+  if (content[i] !== '$') return null
+  // 1) named (literal startsWith — names with regex metacharacters are
+  //    matched literally instead of throwing in a RegExp constructor)
+  for (let n = 0; n < argumentNames.length; n++) {
+    const name = argumentNames[n]
+    if (!name) continue
+    if (content.startsWith(`$${name}`, i)) {
+      const after = content[i + 1 + name.length]
+      if (after !== '[' && !isWordChar(after)) {
+        return { length: 1 + name.length, kind: 'named', nameIndex: n }
+      }
+    }
+  }
+  // 2) indexed $ARGUMENTS[n]
+  INDEXED_PLACEHOLDER_RE.lastIndex = i
+  const indexed = INDEXED_PLACEHOLDER_RE.exec(content)
+  if (indexed) {
+    return {
+      length: indexed[0].length,
+      kind: 'indexed',
+      argIndex: parseInt(indexed[1], 10),
+    }
+  }
+  // 3) bare $ARGUMENTS
+  if (content.startsWith('$ARGUMENTS', i)) {
+    return { length: '$ARGUMENTS'.length, kind: 'bare' }
+  }
+  // 4) shorthand $n
+  SHORTHAND_PLACEHOLDER_RE.lastIndex = i
+  const shorthand = SHORTHAND_PLACEHOLDER_RE.exec(content)
+  if (shorthand && !isWordChar(content[i + shorthand[0].length])) {
+    return {
+      length: shorthand[0].length,
+      kind: 'shorthand',
+      argIndex: parseInt(shorthand[1], 10),
+    }
+  }
+  return null
+}
+
+/**
+ * Count placeholder occurrences in content (single scanner over the same
+ * matcher the substitution pass uses) for the budget upper-bound estimate.
  */
 function countPlaceholderOccurrences(
   content: string,
   argumentNames: string[],
 ): number {
   let count = 0
-  for (const name of argumentNames) {
-    if (!name) continue
-    count += (content.match(new RegExp(`\\$${name}(?![\\[\\w])`, 'g')) ?? [])
-      .length
+  let i = 0
+  while (i < content.length) {
+    const m = matchPlaceholderAt(content, i, argumentNames)
+    if (m) {
+      count++
+      i += m.length
+    } else {
+      i++
+    }
   }
-  count += (content.match(/\$ARGUMENTS\[\d+\]/g) ?? []).length
-  count += (content.match(/\$\d+(?!\w)/g) ?? []).length
-  // Bare $ARGUMENTS: count after stripping $ARGUMENTS[n] forms (no double count)
-  count += (
-    content.replace(/\$ARGUMENTS\[\d+\]/g, '').match(/\$ARGUMENTS/g) ?? []
-  ).length
   return count
 }
 
 /**
  * Substitute $ARGUMENTS placeholders in content with actual argument values.
+ *
+ * K3-C2 round-5 (security review): substitution runs as a SINGLE pass over
+ * the original template, emitting argument values literally. The previous
+ * multi-pass regex implementation had two amplification paths that bypassed
+ * the budget: (a) string replacements interpret `$&`/`` $' ``/`` $` ``/`$$`
+ * — a `$'` value spliced in the entire text following the match, so a dense
+ * template with a 2-char arg expanded to ~content²/12; (b) passes ran over
+ * already-substituted text, so values containing further placeholders were
+ * re-expanded by later passes. With single-pass literal emission the
+ * projection below is a true upper bound, and the clamp is exact.
  *
  * @param content - The content containing placeholders
  * @param args - The raw arguments string (may be undefined/null)
@@ -137,12 +215,13 @@ function countPlaceholderOccurrences(
  * @param argumentNames - Optional array of named arguments (e.g., ["foo", "bar"]) that map to indexed positions
  * @returns The content with placeholders substituted
  */
-export function substituteArguments(
+function substituteArgumentsImpl(
   content: string,
   args: string | undefined,
-  appendIfNoPlaceholder = true,
-  argumentNames: string[] = [],
-): string {
+  appendIfNoPlaceholder: boolean,
+  argumentNames: string[],
+  strict: boolean,
+): string | null {
   // undefined/null means no args provided - return content unchanged
   // empty string is a valid input that should replace placeholders with empty
   if (args === undefined || args === null) {
@@ -162,6 +241,10 @@ export function substituteArguments(
     content.length + placeholderCount * args.length >
       MAX_SUBSTITUTION_OUTPUT_CHARS
   ) {
+    // K3-C2 round-5 #2: strict mode refuses instead of clamping — hook
+    // prompts gate tool use / stop conditions, so a silently truncated input
+    // must never reach the deciding model (callers block the gated action)
+    if (strict) return null
     const budgetPerReplacement = Math.max(
       0,
       Math.floor(
@@ -172,42 +255,84 @@ export function substituteArguments(
   }
 
   const parsedArgs = parseArguments(effectiveArgs)
-  const originalContent = content
 
-  // Replace named arguments (e.g., $foo, $bar) with their values
-  // Named arguments map to positions: argumentNames[0] -> parsedArgs[0], etc.
-  for (let i = 0; i < argumentNames.length; i++) {
-    const name = argumentNames[i]
-    if (!name) continue
-
-    // Match $name but not $name[...] or $nameXxx (word chars)
-    // Also ensure we match word boundaries to avoid partial matches
-    content = content.replace(
-      new RegExp(`\\$${name}(?![\\[\\w])`, 'g'),
-      parsedArgs[i] ?? '',
-    )
+  // Single pass: template chars pass through untouched; replacement values
+  // are appended literally and never rescanned. appendValue enforces the
+  // cumulative budget as a defensive bound (the pre-count clamp above already
+  // guarantees it mathematically; template literals are never truncated —
+  // placeholder-free content keeps its original pass-through semantics).
+  let out = ''
+  const appendValue = (value: string): void => {
+    if (out.length + value.length > MAX_SUBSTITUTION_OUTPUT_CHARS) {
+      value = value.slice(
+        0,
+        Math.max(0, MAX_SUBSTITUTION_OUTPUT_CHARS - out.length),
+      )
+    }
+    out += value
+  }
+  let matched = false
+  let i = 0
+  while (i < content.length) {
+    const m = matchPlaceholderAt(content, i, argumentNames)
+    if (m) {
+      matched = true
+      if (m.kind === 'bare') appendValue(effectiveArgs)
+      else if (m.kind === 'named') appendValue(parsedArgs[m.nameIndex!] ?? '')
+      else appendValue(parsedArgs[m.argIndex!] ?? '')
+      i += m.length
+    } else {
+      out += content[i]
+      i++
+    }
   }
 
-  // Replace indexed arguments ($ARGUMENTS[0], $ARGUMENTS[1], etc.)
-  content = content.replace(/\$ARGUMENTS\[(\d+)\]/g, (_, indexStr: string) => {
-    const index = parseInt(indexStr, 10)
-    return parsedArgs[index] ?? ''
-  })
-
-  // Replace shorthand indexed arguments ($0, $1, etc.)
-  content = content.replace(/\$(\d+)(?!\w)/g, (_, indexStr: string) => {
-    const index = parseInt(indexStr, 10)
-    return parsedArgs[index] ?? ''
-  })
-
-  // Replace $ARGUMENTS with the full arguments string (K3-C2: clamped effectiveArgs)
-  content = content.replaceAll('$ARGUMENTS', effectiveArgs)
-
-  // If no placeholders were found and appendIfNoPlaceholder is true, append
+  // If no placeholder was found and appendIfNoPlaceholder is true, append.
+  // (tracked by the match flag rather than textual equality — an argument
+  // value that happens to reproduce its placeholder text was still a match;
+  // the old equality proxy double-appended in that pathological case)
   // But only if args is non-empty (empty string means command invoked with no args)
-  if (content === originalContent && appendIfNoPlaceholder && args) {
-    content = content + `\n\nARGUMENTS: ${args}`
+  if (!matched && appendIfNoPlaceholder && args) {
+    out = out + `\n\nARGUMENTS: ${args}`
   }
 
-  return content
+  return out
+}
+
+export function substituteArguments(
+  content: string,
+  args: string | undefined,
+  appendIfNoPlaceholder = true,
+  argumentNames: string[] = [],
+): string {
+  return (
+    substituteArgumentsImpl(
+      content,
+      args,
+      appendIfNoPlaceholder,
+      argumentNames,
+      false,
+    ) ?? content
+  )
+}
+
+/**
+ * Strict variant for inputs that feed gating decisions (hook prompts):
+ * returns null instead of clamping when the expansion would exceed the
+ * budget, so callers can refuse the gated action (fail-closed) rather than
+ * let a decision be made on an unmarked prefix of the input.
+ */
+export function substituteArgumentsStrict(
+  content: string,
+  args: string | undefined,
+  appendIfNoPlaceholder = true,
+  argumentNames: string[] = [],
+): string | null {
+  return substituteArgumentsImpl(
+    content,
+    args,
+    appendIfNoPlaceholder,
+    argumentNames,
+    true,
+  )
 }

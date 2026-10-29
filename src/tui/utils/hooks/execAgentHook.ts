@@ -60,6 +60,23 @@ export async function execAgentHook(
   try {
     // Replace $ARGUMENTS with the JSON input
     const processedPrompt = addArgumentsToPrompt(hook.prompt, jsonInput)
+    // K3-C2 round-5: over-budget hook input is never silently truncated —
+    // refuse the gated action instead of verifying on a prefix (fail-closed;
+    // mirrors the condition-not-met blocking shape below)
+    if (processedPrompt === null) {
+      logForDebugging(
+        `Hooks: hook input exceeds substitution budget — blocking (fail-closed)`,
+      )
+      return {
+        hook,
+        outcome: 'blocking',
+        blockingError: {
+          blockingError:
+            'Hook input exceeds substitution budget; refusing to verify on truncated input',
+          command: hook.prompt,
+        },
+      }
+    }
     logForDebugging(
       `Hooks: Processing agent hook with prompt: ${processedPrompt}`,
     )

@@ -4,7 +4,7 @@ import {
   SYNTHETIC_OUTPUT_TOOL_NAME,
   SyntheticOutputTool,
 } from '../../tools/SyntheticOutputTool/SyntheticOutputTool.js'
-import { substituteArguments } from '../argumentSubstitution.js'
+import { substituteArgumentsStrict } from '../argumentSubstitution.js'
 import { lazySchema } from '../lazySchema.js'
 import type { SetAppState } from '../messageQueueManager.js'
 import { hasSuccessfulToolCall } from '../messages.js'
@@ -26,12 +26,18 @@ export const hookResponseSchema = lazySchema(() =>
 /**
  * Add hook input JSON to prompt, either replacing $ARGUMENTS placeholder or appending.
  * Also supports indexed arguments like $ARGUMENTS[0], $ARGUMENTS[1], or shorthand $0, $1, etc.
+ *
+ * Returns null when the expanded prompt would exceed the substitution budget
+ * (K3-C2 round-5): hook prompts gate tool use / stop conditions, so a
+ * silently truncated input must never reach the deciding model — callers
+ * treat null as an input-preparation failure and block the gated action
+ * (fail-closed).
  */
 export function addArgumentsToPrompt(
   prompt: string,
   jsonInput: string,
-): string {
-  return substituteArguments(prompt, jsonInput)
+): string | null {
+  return substituteArgumentsStrict(prompt, jsonInput)
 }
 
 /**
