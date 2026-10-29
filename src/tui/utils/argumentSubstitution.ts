@@ -39,6 +39,15 @@ export function parseArguments(args: string): string[] {
   )
 }
 
+// 0.1.82 K3-C1 (upstream 301 tightening): argument-name dual caps — more than
+// 64 frontmatter argument names are truncated to the first 64, names longer
+// than 64 chars are truncated to 64. The 64×64 bound constrains both the
+// named substitution and generateProgressiveArgumentHint.
+// Sync twin: src/engine/skill/argumentSubstitution.ts (判别 =
+// wave0182-skill-param-caps.test.ts runs both copies with the same cases).
+export const MAX_ARGUMENT_NAMES = 64
+export const MAX_ARGUMENT_NAME_CHARS = 64
+
 /**
  * Parse argument names from the frontmatter 'arguments' field.
  * Accepts either a space-separated string or an array of strings.
@@ -58,11 +67,16 @@ export function parseArgumentNames(
   const isValidName = (name: string): boolean =>
     typeof name === 'string' && name.trim() !== '' && !/^\d+$/.test(name)
 
+  // K3-C1: truncate each name to 64 chars, keep the first 64 names;
+  // ≤64 names ≤64 chars pass through unchanged
+  const cap = (names: string[]): string[] =>
+    names.map(name => name.slice(0, MAX_ARGUMENT_NAME_CHARS)).slice(0, MAX_ARGUMENT_NAMES)
+
   if (Array.isArray(argumentNames)) {
-    return argumentNames.filter(isValidName)
+    return cap(argumentNames.filter(isValidName))
   }
   if (typeof argumentNames === 'string') {
-    return argumentNames.split(/\s+/).filter(isValidName)
+    return cap(argumentNames.split(/\s+/).filter(isValidName))
   }
   return []
 }
@@ -80,6 +94,38 @@ export function generateProgressiveArgumentHint(
   const remaining = argNames.slice(typedArgs.length)
   if (remaining.length === 0) return undefined
   return remaining.map(name => `[${name}]`).join(' ')
+}
+
+// 0.1.82 K3-C2 (upstream 301 tightening): substitution output budget —
+// placeholder density × args length expands unboundedly (2000 × $ARGUMENTS ×
+// 5000-char args ≈ 10MB); malicious/corrupt skill frontmatter can blow up
+// memory through it. Over budget, clamp the replacement value per position
+// (budgetPerReplacement = floor((cap - content.length) / count)).
+// Sync twin: src/engine/skill/argumentSubstitution.ts.
+export const MAX_SUBSTITUTION_OUTPUT_CHARS = 1_000_000
+
+/**
+ * Count placeholder occurrences in content (named / $ARGUMENTS[n] / $n /
+ * bare $ARGUMENTS — same shapes as the substitution passes) for the budget
+ * upper-bound estimate.
+ */
+function countPlaceholderOccurrences(
+  content: string,
+  argumentNames: string[],
+): number {
+  let count = 0
+  for (const name of argumentNames) {
+    if (!name) continue
+    count += (content.match(new RegExp(`\\$${name}(?![\\[\\w])`, 'g')) ?? [])
+      .length
+  }
+  count += (content.match(/\$ARGUMENTS\[\d+\]/g) ?? []).length
+  count += (content.match(/\$\d+(?!\w)/g) ?? []).length
+  // Bare $ARGUMENTS: count after stripping $ARGUMENTS[n] forms (no double count)
+  count += (
+    content.replace(/\$ARGUMENTS\[\d+\]/g, '').match(/\$ARGUMENTS/g) ?? []
+  ).length
+  return count
 }
 
 /**
@@ -103,7 +149,29 @@ export function substituteArguments(
     return content
   }
 
-  const parsedArgs = parseArguments(args)
+  // K3-C2: budget pre-count — if the projection exceeds the budget, clamp
+  // args per position (all replacement values derive from effectiveArgs:
+  // parsedArgs re-parsed + bare $ARGUMENTS uses it directly). Per-placeholder
+  // cost uses args.length as upper bound (parsedArgs[i] ⊆ args); zero
+  // placeholders (count=0) never clamps (append path bypasses the budget,
+  // preserving the original semantics).
+  const placeholderCount = countPlaceholderOccurrences(content, argumentNames)
+  let effectiveArgs = args
+  if (
+    placeholderCount > 0 &&
+    content.length + placeholderCount * args.length >
+      MAX_SUBSTITUTION_OUTPUT_CHARS
+  ) {
+    const budgetPerReplacement = Math.max(
+      0,
+      Math.floor(
+        (MAX_SUBSTITUTION_OUTPUT_CHARS - content.length) / placeholderCount,
+      ),
+    )
+    effectiveArgs = args.slice(0, budgetPerReplacement)
+  }
+
+  const parsedArgs = parseArguments(effectiveArgs)
   const originalContent = content
 
   // Replace named arguments (e.g., $foo, $bar) with their values
@@ -132,8 +200,8 @@ export function substituteArguments(
     return parsedArgs[index] ?? ''
   })
 
-  // Replace $ARGUMENTS with the full arguments string
-  content = content.replaceAll('$ARGUMENTS', args)
+  // Replace $ARGUMENTS with the full arguments string (K3-C2: clamped effectiveArgs)
+  content = content.replaceAll('$ARGUMENTS', effectiveArgs)
 
   // If no placeholders were found and appendIfNoPlaceholder is true, append
   // But only if args is non-empty (empty string means command invoked with no args)
