@@ -252,6 +252,19 @@ function substituteArgumentsImpl(
       ),
     )
     effectiveArgs = args.slice(0, budgetPerReplacement)
+  } else if (strict) {
+    // K3-C2 round-6: strict preflight covers every output-producing branch.
+    // With no placeholders the output is either the bare template or the
+    // append branch (template + "ARGUMENTS: " + args) — both linear, nothing
+    // is ever truncated, but an over-budget prompt must still be refused
+    // rather than fed to the deciding model.
+    const appendLen =
+      appendIfNoPlaceholder && args
+        ? '\n\nARGUMENTS: '.length + args.length
+        : 0
+    if (content.length + appendLen > MAX_SUBSTITUTION_OUTPUT_CHARS) {
+      return null
+    }
   }
 
   const parsedArgs = parseArguments(effectiveArgs)

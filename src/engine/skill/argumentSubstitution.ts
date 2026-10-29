@@ -228,6 +228,17 @@ function substituteArgumentsImpl(
       ),
     )
     effectiveArgs = args.slice(0, budgetPerReplacement)
+  } else if (strict) {
+    // K3-C2 round-6：strict 预检覆盖所有产输出分支。无占位符时输出 =
+    // 纯模板透传或追加分支（模板 + "ARGUMENTS: " + args）——两者均线性、
+    // 永不截断，但超预算的提示同样必须拒绝而非喂给决策模型。
+    const appendLen =
+      appendIfNoPlaceholder && args
+        ? '\n\nARGUMENTS: '.length + args.length
+        : 0
+    if (content.length + appendLen > MAX_SUBSTITUTION_OUTPUT_CHARS) {
+      return null
+    }
   }
 
   const parsedArgs = parseArguments(effectiveArgs)

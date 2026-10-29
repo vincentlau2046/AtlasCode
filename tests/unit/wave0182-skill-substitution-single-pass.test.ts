@@ -121,10 +121,18 @@ describe('K3-C2 round-5 #2：strict 模式 + 门控 hook fail-closed（双体）
         expect(mod.substituteArgumentsStrict('a $ARGUMENTS b', 'X')).toBe(
           'a X b',
         )
-        // 无占位符（追加路径）不经预算 → 恒可用
+        // 无占位符（追加路径）预算内恒可用
         expect(mod.substituteArgumentsStrict('plain', 'A')).toBe(
           'plain\n\nARGUMENTS: A',
         )
+      })
+
+      test(`round-6：无占位符 + 追加分支超预算 → null [${label}]`, () => {
+        expect(mod.substituteArgumentsStrict('plain', 'z'.repeat(1_000_000))).toBeNull()
+      })
+
+      test(`round-6：超大字面模板 → null（不喂超预算提示）[${label}]`, () => {
+        expect(mod.substituteArgumentsStrict('x'.repeat(1_000_100), 'a')).toBeNull()
       })
     })
   }
@@ -133,6 +141,8 @@ describe('K3-C2 round-5 #2：strict 模式 + 门控 hook fail-closed（双体）
     expect(
       addArgumentsToPrompt('$ARGUMENTS $ARGUMENTS', 'z'.repeat(600_000)),
     ).toBeNull()
+    // round-6：无占位符的追加分支同样预检
+    expect(addArgumentsToPrompt('plain', 'z'.repeat(1_000_000))).toBeNull()
   })
 
   test('hookHelpers.addArgumentsToPrompt 预算内 → 常规替换', () => {
