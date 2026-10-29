@@ -2162,6 +2162,10 @@ async function* executeHooks({
         signal,
         { timeoutMs: callbackTimeoutMs },
       )
+      // K3-A5（0.1.82）：callback 钩子 reject（抛错/失能 signal 中止）fail-soft
+      // ——转 hook_non_blocking_error 结果（镜像下方 command 分支 catch 形状），
+      // 不再穿透 async generator 崩掉消费方（processUserInput 等 for-await 无
+      // try/catch）。.catch 仅 reject 路径跑，成功路径零变更。
       yield executeHookCallback({
         toolUseID,
         hook,
@@ -2170,7 +2174,26 @@ async function* executeHooks({
         signal: abortSignal,
         hookIndex,
         toolUseContext,
-      }).finally(cleanup)
+      })
+        .catch((error: unknown): HookResult => {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error)
+          return {
+            message: createAttachmentMessage({
+              type: 'hook_non_blocking_error',
+              hookName: `${hookEvent}:Callback`,
+              toolUseID,
+              hookEvent,
+              stderr: `Failed to run: ${errorMessage}`,
+              stdout: '',
+              exitCode: 1,
+              command: 'callback',
+            }),
+            outcome: 'non_blocking_error',
+            hook,
+          }
+        })
+        .finally(cleanup)
       return
     }
 
