@@ -4,6 +4,73 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.82
+
+V3-3 K3 hooks/插件/skills 30 件（上游 2.1.296–302 对齐；f4 工单
+`docs/2026-10-28-p0-wave-0182-ticket.md`；卷 3 方案 §2 V3-3 / §3 K3
+逐条账；判别单测 `tests/unit/wave0182-*.test.ts` 26 文件）。
+
+### K3-A hook 执行语义（9 件）
+
+- A1 单事件 hook 执行 12 并发上限（三执行面有界池，余者排队）。
+- A2 PreToolUse hook `updatedInput` 未知键丢弃（passthrough 语义不变）。
+- A3+A4 UserPromptSubmit hooks 前置于 slash/skill 展开（同根移序；
+  拦截即停不嵌入）。
+- A5 callback hook reject fail-soft（`.catch` 仅抛/超时路径跑）。
+- A6 hook 输入深嵌套防护（28000 上限，报上限名，去静默跳过）。
+- A7 hook 输入 getter 抛错只拒该键（物化回退 + 枚举 getter 安全）。
+- A8 hook 重入死循环断根（ALS 键控重入守卫）。
+- A9 hook 输出类提示标签文本中和（包裹不可被内容破坏）。
+- A10 插件 hook 输入不可达 fail-closed（门事件拒收优先）。
+
+### K3-B hooks 面（4 修 + 3 排除候补登记）
+
+- B1 headless 退出面 SessionEnd hooks 接线。
+- B2 agent 定义 `model` 面判别固化（上游 300 语义已在场，零码）。
+- B5-1 PreToolUse 钩子拒调用不结束回合（判别固化，语义已在场）。
+- B6 plan 模式写拦截 fail-closed（engine + TUI twin 面；
+  bashReadOnly 守卫集三轮 review 修：newline/find 写动作族 + argv
+  复核 + glob 展开保守匹配）。
+- 排除候补（判别留痕非静默）：B3/B4 managed hooks 概念缺席（硬造
+  = 引入 1P 面）；B5-2 运行时 hook 注册面无同名排除（上游前提
+  结构性不存在）。与死 store 发现绑定，复活须重判别。
+
+### K3-C skills 面（6 件）
+
+- C1+C2 skill/command 参数名 64×64 双上限 + 占位符展开 1M 预算
+  （超预算 fail-closed；两轮 review 修：单遍字面替换 + strict 预检
+  覆盖全部产输出分支）。
+- L43+L44 Unknown skill 附可用名单 + `/reload-skills` 回执补
+  列表重发语义。
+- L20 名字消毒：坏名（隐藏/方向/尖括）技能命令静默不提供
+  （frontmatter display-name 门 + skillSearch resolvedName 目录派生）。
+- L21 rm 提示非字面面补拼接/脚本调用两族；新 env
+  `ATLAS_STRICT_INLINE_SHELL_RM_PROMPT=1` 强制。
+
+### K3-D 插件市场（2 修 + 2 判别关账）
+
+- D1 判别关账：刷新重 clone 结构性不存在（pull-first 单点）；新装
+  git 插件版本解析链 5 级优先、三消费面全接（单测钉桩）。
+- D2 hook `ask` 权限提示来源归附（四段链：HookResult.source →
+  permissionDecisionSource → hookSource → mergeHookPermission 第 4
+  参；`(from plugin:foo)` / `(from skill:foo)`；settings/缺省字面
+  逐字不变）。
+- D3 同名插件排除 `/plugin` 可见提示（session 覆盖滤除此前静默 →
+  generic-error；大小写敏感不误排除）。
+- D4 跨 OS 陈旧绝对路径容错判别关账（九面 fail-fast/自愈；refresh
+  remote 守卫验收锁）。
+
+### K3-E C-lite（2 件核验关账）
+
+- sync 域 claude.ai 活字面 = 0（106 hits 全分类）；本地 skill
+  装载路径健康（63 测试绿）。
+
+### 勘误候补与新发现登记
+
+- /ultrareview 命令缺席且无等价上传建议面 → 排除登记（cmd 32 恒等）。
+- `src/engine/prompts.ts:595` `web app (claude.ai/code)` 域外
+  brand 残面候补（非 sync 域，留下波处置）。
+
 ## v0.1.81
 
 V3-2 K2 MCP 面 18 件（上游 2.1.296–302 对齐；f4 工单
