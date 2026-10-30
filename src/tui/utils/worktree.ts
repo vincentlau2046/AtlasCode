@@ -4,15 +4,17 @@ import chalk from 'chalk'
 import { spawnSync } from 'child_process'
 import {
   copyFile,
+  lstat,
   mkdir,
   readdir,
   readFile,
   stat,
   symlink,
+  unlink,
   utimes,
 } from 'fs/promises'
 import ignore from 'ignore'
-import { basename, dirname, join } from 'path'
+import { basename, dirname, join, resolve } from 'path'
 import { saveCurrentProjectConfig } from './config.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
@@ -228,6 +230,84 @@ function worktreePathFor(repoRoot: string, slug: string): string {
 }
 
 /**
+ * K4-1（0.1.83）：判 worktreePath 是否为本仓已注册的 worktree（fast-resume
+ * 门槛）。`.git` pointer → gitdir → admin entry 的 `gitdir` backlink 文件
+ * 内容解析后须指回 worktreePath 本身；任一步缺失/不匹配 = 未注册。伪
+ * pointer（如指向主仓 .git）readWorktreeHeadSha 也能读出 HEAD 假命中，
+ * 但无 backlink —— 不得当「已注册可恢复」静默复用（把非隔离目录当
+ * worktree 返回 = 隔离破口），落入 target 预检 occupied 拒绝保全。
+ */
+async function isRegisteredWorktreeTarget(
+  worktreePath: string,
+): Promise<boolean> {
+  try {
+    const ptr = (await readFile(join(worktreePath, '.git'), 'utf-8')).trim()
+    if (!ptr.startsWith('gitdir:')) return false
+    const gitDir = resolve(worktreePath, ptr.slice('gitdir:'.length).trim())
+    const backlink = (await readFile(join(gitDir, 'gitdir'), 'utf-8')).trim()
+    // git 的 backlink 指向 `<worktreePath>/.git` 指针文件本身（git 2.53 真盘
+    // 验证），剥尾段后与 worktreePath 比对
+    return resolve(dirname(backlink)) === resolve(worktreePath)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * K4-1（0.1.83）：worktree target 预检三态（fast-resume miss 后、add 前）。
+ *   - clear：不存在 / 空目录 → 照常 add。
+ *   - repair-dangling-pointer：目录内唯一内容是一个 dangling `.git` pointer
+ *     （gitdir 目标已不存在 —— 上次创建中途失败的残骸）→ 安全修复（仅
+ *     unlink 该指针文件后照常 add）。现状 `worktree add` 对此 fatal
+ *     「已经存在」= 永久卡死无自愈。
+ *   - occupied：其余一切（有用户文件 / `.git` 为目录或 symlink（lstat 判别
+ *     不跟随）/ 损坏 pointer / 读失败 / gitdir 指向现存目录（外部·伪
+ *     commondir））→ 明确拒绝且保全 —— 不能证明安全就不动。
+ */
+async function inspectWorktreeTarget(
+  worktreePath: string,
+): Promise<'clear' | 'repair-dangling-pointer' | 'occupied'> {
+  let entries: string[]
+  try {
+    const st = await stat(worktreePath)
+    if (!st.isDirectory()) return 'occupied'
+    entries = await readdir(worktreePath)
+  } catch (e) {
+    // ENOENT = 可建；其余读失败（EACCES 等）= 不能证明安全 → 保全
+    return getErrnoCode(e) === 'ENOENT' ? 'clear' : 'occupied'
+  }
+  if (entries.length === 0) return 'clear'
+  if (entries.length > 1 || entries[0] !== '.git') return 'occupied'
+  const dotGit = join(worktreePath, '.git')
+  try {
+    const st = await lstat(dotGit)
+    // symlink / 目录形态一律不动（lstat 不跟随）
+    if (!st.isFile()) return 'occupied'
+  } catch {
+    return 'occupied'
+  }
+  let content: string
+  try {
+    content = (await readFile(dotGit, 'utf-8')).trim()
+  } catch {
+    return 'occupied' // 权限拒绝（chmod 000 等）/ 读失败 → 保全
+  }
+  if (!content.startsWith('gitdir:')) return 'occupied'
+  const gitdirTarget = resolve(
+    worktreePath,
+    content.slice('gitdir:'.length).trim(),
+  )
+  try {
+    await stat(gitdirTarget)
+    return 'occupied' // 目标现存（外部/伪 commondir）→ 不能证明是我们的残骸
+  } catch {
+    // 目标不存在（ENOENT；stat 其他失败同理 —— unlink 只触碰已枚举确认
+    // 的指针文件，不触 gitdir 目标）= dangling 残骸，目录内仅此一个文件
+    return 'repair-dangling-pointer'
+  }
+}
+
+/**
  * Creates a new git worktree for the given slug, or resumes it if it already exists.
  * Named worktrees reuse the same path across invocations, so the existence check
  * prevents unconditionally running `git fetch` (which can hang waiting for credentials)
@@ -245,14 +325,29 @@ async function getOrCreateWorktree(
   // Read the .git pointer file directly (no subprocess, no upward walk) — a
   // subprocess `rev-parse HEAD` burns ~15ms on spawn overhead even for a 2ms
   // task, and the await yield lets background spawnSyncs pile on (seen at 55ms).
+  // K4-1（0.1.83）：HEAD 可读 ≠ 已注册 —— 伪 pointer（指主仓 .git 等外部
+  // 现存 gitdir）也会假命中，须过 isRegisteredWorktreeTarget（admin entry
+  // backlink 指回本路径）才 resume；未注册形态落入下方 target 预检。
   const existingHead = await readWorktreeHeadSha(worktreePath)
-  if (existingHead) {
+  if (existingHead && (await isRegisteredWorktreeTarget(worktreePath))) {
     return {
       worktreePath,
       worktreeBranch,
       headCommit: existingHead,
       existed: true,
     }
+  }
+
+  // K4-1（0.1.83）：target 预检。dangling `.git` 残骸安全修复（自愈非卡死）；
+  // occupied 明确拒绝且保全（不能证明安全就不动，不把用户数据当残骸删）。
+  const targetState = await inspectWorktreeTarget(worktreePath)
+  if (targetState === 'repair-dangling-pointer') {
+    // 仅删已枚举确认的 dangling 指针文件（有界），目录其余内容零触碰
+    await unlink(join(worktreePath, '.git'))
+  } else if (targetState === 'occupied') {
+    throw new Error(
+      `Worktree path "${worktreePath}" already exists and is not a safe-to-repair worktree leftover; refusing to overwrite it (data preserved)`,
+    )
   }
 
   // New worktree: fetch base branch then add

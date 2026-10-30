@@ -319,6 +319,20 @@ export async function resolveGitDir(
       if (content.startsWith('gitdir:')) {
         const rawDir = content.slice('gitdir:'.length).trim()
         const resolved = resolve(root, rawDir)
+        // K4-1（0.1.83）：dangling gitdir 存在性校验 —— pointer 目标不存在
+        // （或非目录）时不得把 nonexistent 路径当有效 gitdir 缓存返回
+        // （消费方会误认仓库在场：fast-resume 假命中 / 空读）；与
+        // findGitRoot miss 同语义 → null（不把错误缓存成有效仓库）。
+        try {
+          const dirStat = await stat(resolved)
+          if (!dirStat.isDirectory()) {
+            resolveGitDirCache.set(cwd, null)
+            return null
+          }
+        } catch {
+          resolveGitDirCache.set(cwd, null)
+          return null
+        }
         resolveGitDirCache.set(cwd, resolved)
         return resolved
       }
