@@ -350,6 +350,14 @@ export function isSafeRefName(name: string): boolean {
   if (name.split('/').some(c => c === '.' || c === '')) {
     return false
   }
+  // K4-4（0.1.83，上游 300）：拒首点分量与 `.lock` 尾分量（git check-ref-format
+  // 规则）。reftable 仓 HEAD 文件恒为 `ref: refs/heads/.invalid` 占位——git 刻意
+  // 选非法 ref 名保证永不与真分支冲突；旧守卫未拒首点分量，占位值穿透为「分支
+  // 名」被 getBranch 等上层消费。`.lock` 是 git 自身锁文件命名空间，永不属于
+  // 用户 ref。
+  if (name.split('/').some(c => c.startsWith('.') || c.endsWith('.lock'))) {
+    return false
+  }
   // Allowlist-only：字母数字 / . _ + - @。拒 shell 元字符/空白/NUL/非 ASCII；
   // git 禁的 `@{` 因 `{` 不在 allowlist 而拒。
   if (!/^[a-zA-Z0-9/._+@-]+$/.test(name)) {
@@ -374,6 +382,25 @@ export function isValidGitSha(s: string): boolean {
  *   - `<hex-sha>\n`                — detached HEAD（如 rebase）
  */
 export async function readGitHead(
+  gitDir: string,
+): Promise<
+  { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
+> {
+  const head = await readGitHeadFromFiles(gitDir)
+  if (head) {
+    return head
+  }
+  // K4-4（0.1.83，上游 300）：reftable storage——HEAD 文件恒为 `.invalid` 占位
+  //（真实 symref 在 reftable 二进制表里，detached 也不变），fs 直读恒 null
+  //（占位已被 isSafeRefName 硬化结构性拒绝）。改走 git plumbing（显式
+  // --git-dir，不依赖进程 cwd，不自己解码二进制表）。
+  if (await isReftableStorage(gitDir)) {
+    return readGitHeadViaGit(gitDir)
+  }
+  return null
+}
+
+async function readGitHeadFromFiles(
   gitDir: string,
 ): Promise<
   { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
@@ -406,6 +433,74 @@ export async function readGitHead(
   }
 }
 
+/**
+ * 探测仓库 ref storage 是否为 reftable（K4-4）：config `[extensions]
+ * refstorage = reftable`。先查 gitDir（worktree 本体无 config），再查
+ * commonDir（extensions 配置在主仓 config）。纯 fs 读，无子进程。
+ */
+async function isReftableStorage(gitDir: string): Promise<boolean> {
+  const dirs = [gitDir]
+  const commonDir = await getCommonDir(gitDir)
+  if (commonDir && commonDir !== gitDir) {
+    dirs.push(commonDir)
+  }
+  for (const dir of dirs) {
+    if (
+      (await parseGitConfigValue(dir, 'extensions', null, 'refstorage')) ===
+      'reftable'
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * reftable readGitHead（K4-4）：`symbolic-ref -q HEAD` rc=0 → 在分支（含
+ * unborn——git 对 unborn HEAD 的 symbolic-ref 同样返 rc=0 真分支名，真盘探针
+ * 证实）；rc=1 → detached → `rev-parse --verify --quiet HEAD` 取 SHA。plumbing
+ * 失败（spawn 失败/超时/输出非法）→ null（fail-closed，不折成占位值）。
+ */
+async function readGitHeadViaGit(
+  gitDir: string,
+): Promise<
+  { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
+> {
+  const sym = await execFileNoThrowWithCwd(
+    gitExe(),
+    ['--git-dir', gitDir, 'symbolic-ref', '-q', 'HEAD'],
+    { stdin: 'ignore', env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+  )
+  if (sym.code === 0) {
+    const ref = sym.stdout.trim()
+    if (ref.startsWith('refs/heads/')) {
+      const name = ref.slice('refs/heads/'.length)
+      return isSafeRefName(name) ? { type: 'branch', name } : null
+    }
+    // 异常 symref（非本地分支）—— 与 files 路径 parity：解析为 SHA
+    if (!isSafeRefName(ref)) {
+      return null
+    }
+    const sha = await resolveRef(gitDir, ref)
+    return sha ? { type: 'detached', sha } : { type: 'detached', sha: '' }
+  }
+  // rc=1 = detached HEAD；其余 rc（含 git 不可用折成的 code）为真失败。
+  // detached 判定再经 rev-parse 确认——spawn 失败在两步都折 code≠成功 → null。
+  if (sym.code !== 1) {
+    return null
+  }
+  const rev = await execFileNoThrowWithCwd(
+    gitExe(),
+    ['--git-dir', gitDir, 'rev-parse', '--verify', '--quiet', 'HEAD'],
+    { stdin: 'ignore', env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+  )
+  if (rev.code !== 0) {
+    return null
+  }
+  const sha = rev.stdout.trim()
+  return isValidGitSha(sha) ? { type: 'detached', sha } : null
+}
+
 // ── resolveRef / getCommonDir（gitFilesystem:203-280 逐字）──────────────────
 /**
  * 解析 git ref（如 `refs/heads/main`）到 commit SHA。先查 loose ref 文件，再回落
@@ -425,7 +520,27 @@ export async function resolveRef(
   // worktree：试 common gitdir（共享 ref 所在）
   const commonDir = await getCommonDir(gitDir)
   if (commonDir && commonDir !== gitDir) {
-    return resolveRefInDir(commonDir, ref)
+    const common = await resolveRefInDir(commonDir, ref)
+    if (common) {
+      return common
+    }
+  }
+
+  // K4-4（0.1.83，上游 300）：reftable storage——ref 在二进制表里，loose/packed
+  // 均不可见 → git plumbing 兜底。先 isSafeRefName 防参数注入（ref 可能来自
+  // 攻击者可控的 .git 文件内容，`--verify` 后的位置参数拒前导 `-`）；不剥 tag
+  //（保持 files 路径 parity：ref 指向对象原样返回）。plumbing 失败仍 null。
+  if ((await isReftableStorage(gitDir)) && isSafeRefName(ref)) {
+    const rev = await execFileNoThrowWithCwd(
+      gitExe(),
+      ['--git-dir', gitDir, 'rev-parse', '--verify', '--quiet', ref],
+      { stdin: 'ignore', env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+    )
+    if (rev.code !== 0) {
+      return null
+    }
+    const sha = rev.stdout.trim()
+    return isValidGitSha(sha) ? sha : null
   }
 
   return null

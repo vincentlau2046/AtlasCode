@@ -19,8 +19,22 @@ import { join, resolve } from 'path'
 import { waitForScrollIdle } from 'src/tui/bootstrapState.js'
 import { registerCleanup } from '../cleanupRegistry.js'
 import { getCwd } from '../cwd.js'
+import { execFileNoThrow } from '../execFileNoThrow.js'
 import { findGitRoot } from '../git.js'
 import { parseGitConfigValue } from './gitConfigParser.js'
+
+// K4-4 (0.1.83, upstream 300): reftable plumbing constants. Mirrors engine
+// worktree/git.ts GIT_NO_PROMPT_ENV; the git executable is read from env on
+// every call (no module-level capture — the file header's lazy-read
+// discipline) so tests can inject ATLAS_GIT_EXE.
+const GIT_NO_PROMPT_ENV = {
+  GIT_TERMINAL_PROMPT: '0',
+  GIT_ASKPASS: '',
+}
+
+function gitExePath(): string {
+  return process.env.ATLAS_GIT_EXE ?? 'git'
+}
 
 // ---------------------------------------------------------------------------
 // resolveGitDir — find the actual .git directory
@@ -110,6 +124,16 @@ export function isSafeRefName(name: string): boolean {
   if (name.split('/').some(c => c === '.' || c === '')) {
     return false
   }
+  // K4-4 (0.1.83, upstream 300): reject components starting with '.' and
+  // components ending in '.lock' (git check-ref-format rules). A reftable
+  // repo's HEAD file is permanently `ref: refs/heads/.invalid` — git
+  // deliberately picks an illegal ref name so the placeholder can never
+  // collide with a real branch; without the leading-dot rejection the
+  // placeholder leaked through as a "branch name". `.lock` is git's own
+  // lock-file namespace and never belongs to a user ref.
+  if (name.split('/').some(c => c.startsWith('.') || c.endsWith('.lock'))) {
+    return false
+  }
   // Allowlist-only: alphanumerics, /, ., _, +, -, @. Rejects all shell
   // metacharacters, whitespace, NUL, and non-ASCII. Git's forbidden @{
   // sequence is blocked because { is not in the allowlist.
@@ -152,6 +176,28 @@ export async function readGitHead(
 ): Promise<
   { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
 > {
+  const head = await readGitHeadFromFiles(gitDir)
+  if (head) {
+    return head
+  }
+  // K4-4 (0.1.83, upstream 300): reftable storage — the HEAD file is
+  // permanently the `.invalid` placeholder (the real symref lives in the
+  // reftable binary table; it never changes even when detached), so the fs
+  // read is always null (the placeholder is now structurally rejected by
+  // the hardened isSafeRefName). Fall back to git plumbing with an explicit
+  // --git-dir (never depends on process cwd, never decodes the binary
+  // table ourselves). Mirrors engine worktree/git.ts readGitHead.
+  if (await isReftableStorage(gitDir)) {
+    return readGitHeadViaGit(gitDir)
+  }
+  return null
+}
+
+async function readGitHeadFromFiles(
+  gitDir: string,
+): Promise<
+  { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
+> {
   try {
     const content = (await readFile(join(gitDir, 'HEAD'), 'utf-8')).trim()
     if (content.startsWith('ref:')) {
@@ -181,6 +227,79 @@ export async function readGitHead(
   } catch {
     return null
   }
+}
+
+/**
+ * Detect whether the repo's ref storage is reftable (K4-4): config
+ * `[extensions] refstorage = reftable`. Check gitDir first (worktree gitdirs
+ * have no config), then commonDir (the extensions config lives in the main
+ * repo). Pure fs reads, no subprocess. Mirrors engine isReftableStorage.
+ */
+async function isReftableStorage(gitDir: string): Promise<boolean> {
+  const dirs = [gitDir]
+  const commonDir = await getCommonDir(gitDir)
+  if (commonDir && commonDir !== gitDir) {
+    dirs.push(commonDir)
+  }
+  for (const dir of dirs) {
+    if (
+      (await parseGitConfigValue(dir, 'extensions', null, 'refstorage')) ===
+      'reftable'
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * reftable readGitHead (K4-4): `symbolic-ref -q HEAD` rc=0 → on a branch
+ * (including unborn — git returns rc=0 with the real branch name for an
+ * unborn HEAD, probe-verified); rc=1 → detached → `rev-parse --verify
+ * --quiet HEAD` for the SHA. Plumbing failure (spawn failure / timeout /
+ * illegal output) → null (fail-closed, never the placeholder value).
+ * useCwd:false — the --git-dir flag makes process cwd irrelevant and avoids
+ * re-entering getCwd() paths. Mirrors engine readGitHeadViaGit.
+ */
+async function readGitHeadViaGit(
+  gitDir: string,
+): Promise<
+  { type: 'branch'; name: string } | { type: 'detached'; sha: string } | null
+> {
+  const sym = await execFileNoThrow(
+    gitExePath(),
+    ['--git-dir', gitDir, 'symbolic-ref', '-q', 'HEAD'],
+    { stdin: 'ignore', useCwd: false, env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+  )
+  if (sym.code === 0) {
+    const ref = sym.stdout.trim()
+    if (ref.startsWith('refs/heads/')) {
+      const name = ref.slice('refs/heads/'.length)
+      return isSafeRefName(name) ? { type: 'branch', name } : null
+    }
+    // Unusual symref (not a local branch) — parity with the files path
+    if (!isSafeRefName(ref)) {
+      return null
+    }
+    const sha = await resolveRef(gitDir, ref)
+    return sha ? { type: 'detached', sha } : { type: 'detached', sha: '' }
+  }
+  // rc=1 = detached HEAD; any other rc (including spawn failures folded to
+  // a non-success code) is a real failure. The detached verdict is confirmed
+  // by rev-parse — a spawn failure folds to failure in both steps → null.
+  if (sym.code !== 1) {
+    return null
+  }
+  const rev = await execFileNoThrow(
+    gitExePath(),
+    ['--git-dir', gitDir, 'rev-parse', '--verify', '--quiet', 'HEAD'],
+    { stdin: 'ignore', useCwd: false, env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+  )
+  if (rev.code !== 0) {
+    return null
+  }
+  const sha = rev.stdout.trim()
+  return isValidGitSha(sha) ? { type: 'detached', sha } : null
 }
 
 // ---------------------------------------------------------------------------
@@ -213,7 +332,30 @@ export async function resolveRef(
   // For worktrees: try the common gitdir where shared refs live
   const commonDir = await getCommonDir(gitDir)
   if (commonDir && commonDir !== gitDir) {
-    return resolveRefInDir(commonDir, ref)
+    const common = await resolveRefInDir(commonDir, ref)
+    if (common) {
+      return common
+    }
+  }
+
+  // K4-4 (0.1.83, upstream 300): reftable storage — refs live in the binary
+  // table, invisible to loose/packed reads → git plumbing fallback.
+  // isSafeRefName first: the ref may come from attacker-controlled .git
+  // file content and is passed as a positional argument after --verify
+  // (reject leading `-`). Don't peel tags (files-path parity: return the
+  // object the ref points at). Plumbing failure still → null. Mirrors
+  // engine resolveRef.
+  if ((await isReftableStorage(gitDir)) && isSafeRefName(ref)) {
+    const rev = await execFileNoThrow(
+      gitExePath(),
+      ['--git-dir', gitDir, 'rev-parse', '--verify', '--quiet', ref],
+      { stdin: 'ignore', useCwd: false, env: { ...process.env, ...GIT_NO_PROMPT_ENV } },
+    )
+    if (rev.code !== 0) {
+      return null
+    }
+    const sha = rev.stdout.trim()
+    return isValidGitSha(sha) ? sha : null
   }
 
   return null
@@ -318,6 +460,9 @@ export async function readRawSymref(
 //   .git/HEAD          — branch switches, detached HEAD
 //   .git/config        — remote URL changes
 //   .git/refs/heads/<branch> — new commits on the current branch
+//   .git/reftable/     — reftable repos only (K4-4): branch switches + new
+//                        commits (HEAD is a placeholder there and loose refs
+//                        don't exist; the dir mtime bumps on every ref write)
 //
 // When HEAD changes (branch switch), the branch ref watcher is updated
 // to track the new branch's ref file.
@@ -371,6 +516,18 @@ class GitFileWatcher {
     this.watchPath(join(this.commonDir ?? this.gitDir, 'config'), () => {
       this.invalidate()
     })
+
+    // K4-4 (0.1.83, upstream 300): reftable storage — HEAD is a permanent
+    // placeholder file and loose refs don't exist, so the watches above
+    // never fire on branch switches or new commits. Watch the reftable
+    // directory (in commonDir) instead: every ref write creates/rewrites a
+    // table file, so the directory mtime changes (probe-verified; watchFile
+    // works on directories).
+    if (await isReftableStorage(this.gitDir)) {
+      this.watchPath(join(this.commonDir ?? this.gitDir, 'reftable'), () => {
+        this.invalidate()
+      })
+    }
 
     // Watch the current branch's ref file for commit changes
     await this.watchCurrentBranchRef()
