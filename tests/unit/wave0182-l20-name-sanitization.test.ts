@@ -43,6 +43,17 @@ const BAD_NAMES = [
   'nb sp', // NBSP（隐藏空白）
 ]
 
+// Review 补强红例（2026-10-30 security review）：默认可忽略 / 双向控制
+// / 空白分隔补面。fromCodePoint 构造——源文件不落字面不可见字符。
+const REVIEW_BAD_NAMES = [
+  `cg${String.fromCodePoint(0x034f)}j`, // CGJ 组合字素连接符（默认可忽略）
+  `ar${String.fromCodePoint(0x061c)}b`, // ALM 阿拉伯字母标记（双向控制）
+  `mo${String.fromCodePoint(0x180e)}n`, // 蒙古元音分隔符（默认可忽略）
+  `wide${String.fromCodePoint(0x3000)}sp`, // 表意空格（Zs 空白分隔）
+  `vs${String.fromCodePoint(0xfe0f)}`, // 变体选择符 16（默认可忽略）
+  `a${String.fromCodePoint(0xe0101)}b`, // 星面变体选择符补充（默认可忽略）
+]
+
 const COPIES = [
   { label: 'engine', isUnsafe: engineIsUnsafe },
   { label: 'tui', isUnsafe: tuiSafety.isUnsafeCommandName },
@@ -64,6 +75,10 @@ describe('K3-C L20：isUnsafeCommandName 谓词（双体）', () => {
         expect(isUnsafe('iso⁦lit')).toBe(true)
         // 空名
         expect(isUnsafe('')).toBe(true)
+        // Review 补强（2026-10-30）：默认可忽略 / 双向控制 / 空白分隔
+        for (const name of REVIEW_BAD_NAMES) {
+          expect(isUnsafe(name)).toBe(true)
+        }
       })
 
       test(`良性名全放行（含 ASCII 空格 / 命名空间 / CJK）[${label}]`, () => {
@@ -133,6 +148,57 @@ describe('K3-C L20：装载器静默过滤坏名技能（双体）', () => {
         expect(names).not.toContain('zw​sp')
         expect(names).not.toContain('nb sp')
         expect(names).toHaveLength(1)
+      } finally {
+        clearCache()
+      }
+    })
+  }
+})
+
+// ── Review 补强：frontmatter display-name 覆盖门（双体装载器）─────────
+// security review finding：装载器门只校验目录/文件派生的规范名；
+// frontmatter `name`（display-name 覆盖）若不消毒，坏名经
+// userFacingName() 直达技能列表与提示词（L43 名单消费同一面）。
+// 修 = 不安全覆盖弃用回落规范名（§101 静默过滤同款裁定）。
+
+describe('K3-C L20 review 补强：frontmatter display name 门（双体）', () => {
+  for (const { label, getSkillDirCommands: load, clearCache } of LOADERS) {
+    test(`不安全 frontmatter display name 弃用回落目录名 [${label}]`, async () => {
+      const root = await mkdtemp(join(tmpdir(), `atlas-l20r-${label}-`))
+      roots.push(root)
+      const dir = join(root, '.atlas', 'skills', 'good-name')
+      await mkdir(dir, { recursive: true })
+      const rlo = String.fromCodePoint(0x202e)
+      await writeFile(
+        join(dir, 'SKILL.md'),
+        `---\nname: bad${rlo}\ndescription: l20 review skill\n---\n\nbody\n`,
+        'utf-8',
+      )
+      try {
+        const commands = await load(root)
+        const cmd = commands.find(c => c.name === 'good-name')
+        expect(cmd).toBeDefined()
+        // 修前：frontmatter name 原样直达 userFacingName()（绕过消毒）
+        expect(cmd?.userFacingName?.()).toBe('good-name')
+      } finally {
+        clearCache()
+      }
+    })
+
+    test(`良性 frontmatter display name 保留 [${label}]`, async () => {
+      const root = await mkdtemp(join(tmpdir(), `atlas-l20r2-${label}-`))
+      roots.push(root)
+      const dir = join(root, '.atlas', 'skills', 'good-name')
+      await mkdir(dir, { recursive: true })
+      await writeFile(
+        join(dir, 'SKILL.md'),
+        '---\nname: My Nice Name\ndescription: l20 review skill\n---\n\nbody\n',
+        'utf-8',
+      )
+      try {
+        const commands = await load(root)
+        const cmd = commands.find(c => c.name === 'good-name')
+        expect(cmd?.userFacingName?.()).toBe('My Nice Name')
       } finally {
         clearCache()
       }

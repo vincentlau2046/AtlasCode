@@ -9,7 +9,7 @@ import {
   substituteArguments,
 } from '../argumentSubstitution.js'
 import { logForDebugging } from '../debug.js'
-import { isUnsafeCommandName } from '../commandNameSafety.js'
+import { isUnsafeCommandName, sanitizeDisplayName } from '../commandNameSafety.js'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import { isBareMode } from '../envUtils.js'
 import { isENOENT } from '../errors.js'
@@ -272,7 +272,10 @@ function createPluginCommand(
     const whenToUse = (frontmatter['when-to-use'] ??
       frontmatter.when_to_use) as string | undefined
     const version = frontmatter.version as string | undefined
-    const displayName = frontmatter.name as string | undefined
+    const displayName = sanitizeDisplayName(
+      frontmatter.name as string | undefined,
+      commandName,
+    )
 
     // Handle model configuration, resolving role aliases like 'fast', 'small', 'premium'
     const model =

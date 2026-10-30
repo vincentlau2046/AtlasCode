@@ -48,6 +48,7 @@ import {
   parseSlashCommandToolsFromFrontmatter,
 } from './markdownLoader'
 import { parseUserSpecifiedModel } from './skillModel'
+import { sanitizeDisplayName } from './commandNameSafety.js'
 import { executeShellCommandsInPrompt } from './promptShellExecution'
 import type {
   Command,
@@ -191,8 +192,10 @@ export function parseSkillFrontmatterFields(
   }
 
   return {
-    displayName:
+    displayName: sanitizeDisplayName(
       frontmatter.name != null ? String(frontmatter.name) : undefined,
+      resolvedName,
+    ),
     description,
     hasUserSpecifiedDescription: validatedDescription !== null,
     allowedTools: parseSlashCommandToolsFromFrontmatter(

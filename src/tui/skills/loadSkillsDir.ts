@@ -18,7 +18,7 @@ import {
   parseArgumentNames,
   substituteArguments,
 } from '../utils/argumentSubstitution.js'
-import { isUnsafeCommandName } from '../utils/commandNameSafety.js'
+import { isUnsafeCommandName, sanitizeDisplayName } from '../utils/commandNameSafety.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   EFFORT_LEVELS,
@@ -232,8 +232,10 @@ export function parseSkillFrontmatterFields(
   }
 
   return {
-    displayName:
+    displayName: sanitizeDisplayName(
       frontmatter.name != null ? String(frontmatter.name) : undefined,
+      resolvedName,
+    ),
     description,
     hasUserSpecifiedDescription: validatedDescription !== null,
     allowedTools: parseSlashCommandToolsFromFrontmatter(
