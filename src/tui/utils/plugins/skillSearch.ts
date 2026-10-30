@@ -18,6 +18,7 @@
 import { readdir, readFile, stat } from 'fs/promises'
 import type { Dirent } from 'fs'
 import { join } from 'path'
+import { isUnsafeCommandName } from '../commandNameSafety.js'
 import { parseFrontmatter } from '../frontmatterParser.js'
 import { parseSkillFrontmatterFields } from '../../skills/loadSkillsDir.js'
 import { createPluginId } from './marketplaceHelpers.js'
@@ -106,6 +107,10 @@ export async function searchSkillsAcrossMarketplaces(
         }
         for (const d of dirEntries) {
           if (!d.isDirectory()) continue
+          // L20 gate (2026-10-30 review round 2): d.name is the canonical
+          // name on this path — unsafe directory names make the entry not
+          // offered at all (silent-filter ruling, same as the loaders).
+          if (isUnsafeCommandName(d.name)) continue
           const skillFile = join(skillDir, d.name, 'SKILL.md')
           if (seen.has(skillFile)) continue
           seen.add(skillFile)
@@ -117,10 +122,16 @@ export async function searchSkillsAcrossMarketplaces(
             continue
           }
           const { frontmatter, content: markdown } = parseFrontmatter(content)
-          const resolvedName =
-            typeof frontmatter.name === 'string'
-              ? frontmatter.name
-              : d.name
+          // resolvedName is ALWAYS the directory-derived (fs-derived)
+          // canonical name, same as loadSkillsDir/skillCommand. It used to
+          // prefer frontmatter `name` — the only frontmatter-derived call
+          // site, which bypassed name sanitization: sanitizeDisplayName
+          // discards an unsafe override and falls back to this same bad
+          // name, delivering it verbatim to marketplace search results.
+          // Benign frontmatter names still surface via parsed.displayName
+          // (parseSkillFrontmatterFields sanitizes the override against
+          // this canonical name).
+          const resolvedName = d.name
           const parsed = parseSkillFrontmatterFields(
             frontmatter,
             markdown,
