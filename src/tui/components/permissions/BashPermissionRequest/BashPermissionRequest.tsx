@@ -9,7 +9,7 @@ import { useAppState, useSetAppState } from '../../../state/AppState.js';
 import { applyAutoModePermissionOption, isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
 import { BashTool } from '../../../tools/BashTool/BashTool.js';
 import { getFirstWordPrefix, getSimpleCommandPrefix } from '../../../tools/BashTool/bashPermissions.js';
-import { getDestructiveCommandWarning } from '../../../tools/BashTool/destructiveCommandWarning.js';
+import { getDestructiveCommandWarning, getStrictInlineShellRmWarning, isStrictInlineShellRmPromptEnabled } from '../../../tools/BashTool/destructiveCommandWarning.js';
 import { parseSedEditCommand } from '../../../tools/BashTool/sedEditParser.js';
 import { shouldUseSandbox } from '../../../tools/BashTool/shouldUseSandbox.js';
 import { getCompoundCommandPrefixesStatic } from '../../../utils/bash/prefix.js';
@@ -280,7 +280,10 @@ function BashPermissionRequestInner({
     sandboxingEnabled: sandboxingEnabled_0,
     isSandboxed: isSandboxed_0
   } = useMemo(() => {
-    const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('atlas_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
+    // L21 (upstream 299, 0.1.82 K3-C): strict env adds the non-literal rm face
+    // (concatenated rm / script invocations); `??` keeps the literal face's
+    // wording first. Purely informational.
+    const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('atlas_destructive_command_warning', false) ? getDestructiveCommandWarning(command) ?? (isStrictInlineShellRmPromptEnabled() ? getStrictInlineShellRmWarning(command) : null) : null;
     const sandboxingEnabled = getSandboxManager().isSandboxingEnabled();
     const isSandboxed = sandboxingEnabled && shouldUseSandbox(toolUseConfirm.input);
     return {
