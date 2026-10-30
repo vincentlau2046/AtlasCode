@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import type { CommandResultDisplay } from 'src/tui/commands.js';
 import { logForDebugging } from 'src/tui/utils/debug.js';
 import { Box, Text } from '../ink.js';
-import { execFileNoThrow } from '../utils/execFileNoThrow.js';
 import { getPlansDirectory } from '../utils/plans.js';
 import { setCwd } from '../utils/Shell.js';
 import { cleanupWorktree, getCurrentWorktreeSession, keepWorktree, killTmuxSession } from '../utils/worktree.js';
+import { inspectWorktreeChanges } from '../utils/worktreeChangeSummary.js';
 import { Select } from './CustomSelect/select.js';
 import { Dialog } from './design-system/Dialog.js';
 import { Spinner } from './Spinner.js';
@@ -28,50 +28,49 @@ export function WorktreeExitDialog({
   onCancel
 }: Props): React.ReactNode {
   const [status, setStatus] = useState<'loading' | 'asking' | 'keeping' | 'removing' | 'done'>('loading');
-  const [changes, setChanges] = useState<string[]>([]);
+  const [changedFiles, setChangedFiles] = useState<number>(0);
   const [commitCount, setCommitCount] = useState<number>(0);
+  // fail-closed：检查链任一环节失败（status/rev-list 非零、无基线、非数字输出、
+  // 抛错）→ 状态未知。绝不把 unknown 折成 0/0 静默清理（会删含未推提交的
+  // worktree，数据丢失）；未知一律进询问、默认 keep。
+  const [stateUnknown, setStateUnknown] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | undefined>();
   const worktreeSession = getCurrentWorktreeSession();
   useEffect(() => {
     async function loadChanges() {
-      let changeLines: string[] = [];
-      const gitStatus = await execFileNoThrow('git', ['status', '--porcelain']);
-      if (gitStatus.stdout) {
-        changeLines = gitStatus.stdout.split('\n').filter(_ => _.trim() !== '');
-        setChanges(changeLines);
+      if (!worktreeSession) {
+        return;
       }
+      const summary = await inspectWorktreeChanges(worktreeSession.worktreePath, worktreeSession.originalHeadCommit);
+      if (summary === null) {
+        setStateUnknown(true);
+        setStatus('asking');
+        return;
+      }
+      setChangedFiles(summary.changedFiles);
+      setCommitCount(summary.commits);
 
-      // Check for commits to eject
-      if (worktreeSession) {
-        // Get commits in worktree that are not in original branch
-        const {
-          stdout: commitsStr
-        } = await execFileNoThrow('git', ['rev-list', '--count', `${worktreeSession.originalHeadCommit}..HEAD`]);
-        const count = parseInt(commitsStr.trim()) || 0;
-        setCommitCount(count);
-
-        // If no changes and no commits, clean up silently
-        if (changeLines.length === 0 && count === 0) {
-          setStatus('removing');
-          void cleanupWorktree().then(() => {
-            process.chdir(worktreeSession.originalCwd);
-            setCwd(worktreeSession.originalCwd);
-            recordWorktreeExit();
-            getPlansDirectory.cache.clear?.();
-            setResultMessage('Worktree removed (no changes)');
-          }).catch(error => {
-            logForDebugging(`Failed to clean up worktree: ${error}`, {
-              level: 'error'
-            });
-            setResultMessage('Worktree cleanup failed, exiting anyway');
-          }).then(() => {
-            setStatus('done');
+      // Trusted baseline + both checks succeeded + clean: clean up silently.
+      // Unknown never reaches here (null above), so this is provably-safe only.
+      if (summary.changedFiles === 0 && summary.commits === 0) {
+        setStatus('removing');
+        void cleanupWorktree().then(() => {
+          process.chdir(worktreeSession.originalCwd);
+          setCwd(worktreeSession.originalCwd);
+          recordWorktreeExit();
+          getPlansDirectory.cache.clear?.();
+          setResultMessage('Worktree removed (no changes)');
+        }).catch(error => {
+          logForDebugging(`Failed to clean up worktree: ${error}`, {
+            level: 'error'
           });
-          return;
-        } else {
-          setStatus('asking');
-        }
+          setResultMessage('Worktree cleanup failed, exiting anyway');
+        }).then(() => {
+          setStatus('done');
+        });
+        return;
       }
+      setStatus('asking');
     }
     void loadChanges();
     // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
@@ -138,11 +137,14 @@ export function WorktreeExitDialog({
         return;
       }
       const tmuxNote = hasTmux ? ' Tmux session terminated.' : '';
-      if (commitCount > 0 && changes.length > 0) {
+      if (stateUnknown) {
+        // 状态未知下的显式 remove：只报事实（已删 + 未验证），不声称 no changes/0 commits
+        setResultMessage(`Worktree removed. Worktree state could not be verified before removal.${tmuxNote}`);
+      } else if (commitCount > 0 && changedFiles > 0) {
         setResultMessage(`Worktree removed. ${commitCount} ${commitCount === 1 ? 'commit' : 'commits'} and uncommitted changes were discarded.${tmuxNote}`);
       } else if (commitCount > 0) {
         setResultMessage(`Worktree removed. ${commitCount} ${commitCount === 1 ? 'commit' : 'commits'} on ${worktreeSession.worktreeBranch} ${commitCount === 1 ? 'was' : 'were'} discarded.${tmuxNote}`);
-      } else if (changes.length > 0) {
+      } else if (changedFiles > 0) {
         setResultMessage(`Worktree removed. Uncommitted changes were discarded.${tmuxNote}`);
       } else {
         setResultMessage(`Worktree removed.${tmuxNote}`);
@@ -163,13 +165,16 @@ export function WorktreeExitDialog({
       </Box>;
   }
   const branchName = worktreeSession.worktreeBranch;
-  const hasUncommitted = changes.length > 0;
+  const hasUncommitted = changedFiles > 0;
   const hasCommits = commitCount > 0;
   let subtitle = '';
-  if (hasUncommitted && hasCommits) {
-    subtitle = `You have ${changes.length} uncommitted ${changes.length === 1 ? 'file' : 'files'} and ${commitCount} ${commitCount === 1 ? 'commit' : 'commits'} on ${branchName}. All will be lost if you remove.`;
+  if (stateUnknown) {
+    // 未知态：不声称 no changes / 0 commits，提示无法验证
+    subtitle = `Could not verify the worktree state at ${worktreeSession.worktreePath}. Keep it to stay safe, or remove it only if you are certain it holds no work.`;
+  } else if (hasUncommitted && hasCommits) {
+    subtitle = `You have ${changedFiles} uncommitted ${changedFiles === 1 ? 'file' : 'files'} and ${commitCount} ${commitCount === 1 ? 'commit' : 'commits'} on ${branchName}. All will be lost if you remove.`;
   } else if (hasUncommitted) {
-    subtitle = `You have ${changes.length} uncommitted ${changes.length === 1 ? 'file' : 'files'}. These will be lost if you remove the worktree.`;
+    subtitle = `You have ${changedFiles} uncommitted ${changedFiles === 1 ? 'file' : 'files'}. These will be lost if you remove the worktree.`;
   } else if (hasCommits) {
     subtitle = `You have ${commitCount} ${commitCount === 1 ? 'commit' : 'commits'} on ${branchName}. The branch will be deleted if you remove the worktree.`;
   } else {
@@ -184,7 +189,7 @@ export function WorktreeExitDialog({
     // Fallback: treat Escape as "keep" if no onCancel provided
     void handleSelect('keep');
   }
-  const removeDescription = hasUncommitted || hasCommits ? 'All changes and commits will be lost.' : 'Clean up the worktree directory.';
+  const removeDescription = stateUnknown ? 'Unverified worktree — removal may discard work.' : hasUncommitted || hasCommits ? 'All changes and commits will be lost.' : 'Clean up the worktree directory.';
   const hasTmuxSession = Boolean(worktreeSession.tmuxSessionName);
   const options = hasTmuxSession ? [{
     label: 'Keep worktree and tmux session',
