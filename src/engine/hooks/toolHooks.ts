@@ -83,6 +83,9 @@ export function createToolHooks(opts: ToolHooksAdapterOptions = {}): ToolHooks {
         // AD-45 0.1.52：裁定理由透传（defer/deny/ask 载体，pipeline mergeHookPermission
         // defer 支挂起理由 → 挂起标记 / headless result 文案）
         hookPermissionDecisionReason: r.permissionDecisionReason,
+        // K3-D D2（0.1.82，上游 301）：胜出钩子来源透传（ask 提示归附文案
+        // 消费——pipeline mergeHookPermission 第 4 参）。
+        hookSource: r.permissionDecisionSource,
         // §8.42 整波审视 MAJOR-1：turn 终止意图透传（域聚合面已算出，此前
         // 适配器静默丢弃——旧仓 toolHooks.ts:438-446 pre 支消费面补齐）
         preventContinuation: r.preventContinuation,

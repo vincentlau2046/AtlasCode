@@ -122,6 +122,13 @@ export interface PreToolUseHookOutcome {
    * defer 支挂起理由载体（挂起标记 + headless result 文案消费）。
    */
   hookPermissionDecisionReason?: string
+  /**
+   * K3-D D2（0.1.82，上游 301）：胜出权限裁定钩子的来源标签
+   * （AggregatedHookResult.permissionDecisionSource，'plugin:<名>' /
+   * 'skill:<名>' / 'settings'）→ mergeHookPermission ask 支归附文案载体
+   * （`(from plugin:foo)`）；settings/缺省不归附（字面逐字不变）。
+   */
+  hookSource?: string
 }
 
 /** E-5 S-5a：post-hook 结果（additionalContext 回灌 = 消息面残留守，见下前向接缝登记）。 */
@@ -191,6 +198,12 @@ export function mergeHookPermission(
   gate: GateVerdict,
   /** AD-45 0.1.52：钩子裁定理由（defer 支挂起理由载体；加性参，2 参调用点零改动）。 */
   hookReason?: string,
+  /**
+   * K3-D D2（0.1.82，上游 301）：胜出钩子来源标签（ask 支归附文案载体；
+   * 加性参，3 参既有调用点零改动）。'settings' 与缺省不归附（字面逐字
+   * 不变——settings 钩子零行为差，既有断言兼容）。
+   */
+  hookSource?: string,
 ): GateVerdict {
   if (hookBehavior === 'defer') {
     // AD-45 0.1.52：挂起 = 现在不裁决（不产 tool_result，工具不执行，会话挂起待
@@ -207,7 +220,13 @@ export function mergeHookPermission(
   }
   if (!gate.allowed) return gate
   if (hookBehavior === 'ask') {
-    return { allowed: false, ask: true, reason: 'hook requested confirmation' }
+    // K3-D D2：插件/skill 来源归附（上游 301——用户须能分辨是哪个插件/skill
+    // 的钩子要求确认）；settings 面不归附保字面恒等。
+    const reason =
+      hookSource && hookSource !== 'settings'
+        ? `hook requested confirmation (from ${hookSource})`
+        : 'hook requested confirmation'
+    return { allowed: false, ask: true, reason }
   }
   return gate
 }
@@ -430,6 +449,8 @@ export async function executeToolUse(
     preOutcome?.hookBehavior,
     gateVerdict,
     preOutcome?.hookPermissionDecisionReason,
+    // K3-D D2（0.1.82，上游 301）：胜出钩子来源（ask 支归附文案）。
+    preOutcome?.hookSource,
   )
   if (verdict.deferred) {
     // AD-45 0.1.52：defer 挂起——不产 tool_result（block 缺席）、工具不执行、

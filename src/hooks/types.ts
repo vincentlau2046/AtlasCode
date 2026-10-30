@@ -136,6 +136,13 @@ export type HookResult = {
    * 产出 block 拒绝时由 runOneHook 置真；缺省 = 默认拒绝语义不变。
    */
   continueOnBlock?: boolean
+  /**
+   * K3-D D2（0.1.82，上游 301）：钩子来源标签（MatchedHook.source，
+   * 'plugin:<名>' / 'skill:<名>' / 'settings'），runOneHook 从匹配层写入；
+   * 聚合面随权限 winner 更替（permissionDecisionSource）→ ask 权限提示
+   * 归附文案消费。settings 钩子不归附（消费端过滤，字面逐字不变）。
+   */
+  source?: string
   aborted?: boolean
   backgrounded?: boolean
   [key: string]: unknown
@@ -154,6 +161,13 @@ export type AggregatedHookResult = {
   permissionBehavior?: 'ask' | 'deny' | 'allow' | 'passthrough' | 'defer'
   /** defer/deny 理由（winner 更替语义，mergeAggregated 维护）。 */
   permissionDecisionReason?: string
+  /**
+   * K3-D D2（0.1.82，上游 301）：胜出权限裁定的钩子来源（winner 更替语义，
+   * 同 permissionDecisionReason——winner 无来源则清陈旧值）。engine 适配器
+   * 透传（PreToolUseHookOutcome.hookSource）→ mergeHookPermission ask 支
+   * 归附文案 `(from plugin:foo)`；settings/缺省不归附。
+   */
+  permissionDecisionSource?: string
   /** C8-5（0.1.79 W-C）：终端转义序列聚合面（mergeAggregated 拼接，非首胜）。 */
   terminalSequence?: string
   /**

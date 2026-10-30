@@ -250,6 +250,9 @@ export function mergeAggregated(acc: AggregatedHookResult, r: HookResult): void 
       acc.permissionBehavior = r.permissionBehavior
       // winner 更替语义：理由随 winner 行为更替（winner 无理由时清除陈旧值）。
       acc.permissionDecisionReason = r.permissionDecisionReason
+      // K3-D D2（0.1.82，上游 301）：来源同 winner 更替语义（ask 提示归附
+      // 文案消费；winner 无来源时清除陈旧值，防串源）。
+      acc.permissionDecisionSource = r.source
     }
   }
 }
@@ -283,6 +286,9 @@ export function runOneHook(
       if (result.blockingError && cmd.continueOnBlock === true) {
         result.continueOnBlock = true
       }
+      // K3-D D2（0.1.82，上游 301）：匹配层来源透传（两路同写——失败路
+      // 无 permissionBehavior 不进权限聚合，但记录面保持完整可溯）。
+      result.source = m.source
       return result
     },
     (e: unknown) => ({
@@ -290,6 +296,7 @@ export function runOneHook(
       status: -1,
       succeeded: false,
       stderr: e instanceof Error ? e.message : String(e),
+      source: m.source,
     }),
   )
 }
