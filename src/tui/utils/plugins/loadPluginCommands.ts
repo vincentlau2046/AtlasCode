@@ -9,6 +9,7 @@ import {
   substituteArguments,
 } from '../argumentSubstitution.js'
 import { logForDebugging } from '../debug.js'
+import { isUnsafeCommandName } from '../commandNameSafety.js'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import { isBareMode } from '../envUtils.js'
 import { isENOENT } from '../errors.js'
@@ -687,8 +688,20 @@ export const getPluginCommands = memoize(async (): Promise<Command[]> => {
   )
 
   const allCommands = perPluginCommands.flat()
-  logForDebugging(`Total plugin commands loaded: ${allCommands.length}`)
-  return allCommands
+  // K3-C L20 (upstream 296): unsafe names (hidden/directional/whitespace/
+  // angle) are not offered. Single aggregate chokepoint covers the default
+  // directory, custom directory/file, and inline branches.
+  const safeCommands = allCommands.filter(cmd => {
+    if (isUnsafeCommandName(cmd.name)) {
+      logForDebugging(
+        `Skipping unsafe plugin command name: ${JSON.stringify(cmd.name)}`,
+      )
+      return false
+    }
+    return true
+  })
+  logForDebugging(`Total plugin commands loaded: ${safeCommands.length}`)
+  return safeCommands
 })
 
 export function clearPluginCommandCache(): void {
@@ -952,8 +965,19 @@ export const getPluginSkills = memoize(async (): Promise<Command[]> => {
   )
 
   const allSkills = perPluginSkills.flat()
-  logForDebugging(`Total plugin skills loaded: ${allSkills.length}`)
-  return allSkills
+  // K3-C L20 (upstream 296): same unsafe-name silent filter as
+  // getPluginCommands above
+  const safeSkills = allSkills.filter(cmd => {
+    if (isUnsafeCommandName(cmd.name)) {
+      logForDebugging(
+        `Skipping unsafe plugin skill name: ${JSON.stringify(cmd.name)}`,
+      )
+      return false
+    }
+    return true
+  })
+  logForDebugging(`Total plugin skills loaded: ${safeSkills.length}`)
+  return safeSkills
 })
 
 export function clearPluginSkillsCache(): void {

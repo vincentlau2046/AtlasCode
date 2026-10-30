@@ -18,6 +18,7 @@ import {
   parseArgumentNames,
   substituteArguments,
 } from '../utils/argumentSubstitution.js'
+import { isUnsafeCommandName } from '../utils/commandNameSafety.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   EFFORT_LEVELS,
@@ -420,6 +421,15 @@ async function loadSkillsFromSkillsDir(
           return null
         }
 
+        // K3-C L20 (upstream 296): unsafe names (hidden/directional/angle)
+        // are not offered — silent filter
+        if (isUnsafeCommandName(entry.name)) {
+          logForDebugging(
+            `[skills] skipping unsafe skill directory name: ${JSON.stringify(entry.name)}`,
+          )
+          return null
+        }
+
         const skillDirPath = join(basePath, entry.name)
         const skillFilePath = join(skillDirPath, 'SKILL.md')
 
@@ -582,6 +592,15 @@ async function loadSkillsFromCommandsDir(
           content,
           source,
         })
+
+        // K3-C L20 (upstream 296): unsafe names are not offered — silent
+        // filter
+        if (isUnsafeCommandName(cmdName)) {
+          logForDebugging(
+            `[skills] skipping unsafe command name: ${JSON.stringify(cmdName)}`,
+          )
+          continue
+        }
 
         const parsed = parseSkillFrontmatterFields(
           frontmatter,

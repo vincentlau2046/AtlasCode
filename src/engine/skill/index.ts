@@ -40,6 +40,7 @@ export type {
   PromptCommand,
   SkillCommandContext,
 } from './types'
+export { isUnsafeCommandName } from './commandNameSafety'
 export { getCommandName, isCommandEnabled } from './types'
 
 // --- 常量面 ---

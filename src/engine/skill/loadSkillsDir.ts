@@ -56,6 +56,7 @@ import {
   type SettingSource,
 } from '../config'
 import { createSignal } from '../messaging'
+import { isUnsafeCommandName } from './commandNameSafety'
 import { isPathGitignored } from './gitignore'
 import {
   getProjectDirsUpToHome,
@@ -123,6 +124,14 @@ async function loadSkillsFromSkillsDir(
         // 仅目录形态：skill-name/SKILL.md
         if (!entry.isDirectory() && !entry.isSymbolicLink()) {
           // 单 .md 文件在 /skills/ 目录不支持
+          return null
+        }
+
+        // K3-C L20（上游 296）：坏名（隐藏/方向/尖括）不提供——静默过滤
+        if (isUnsafeCommandName(entry.name)) {
+          logForDebugging(
+            `[skills] skipping unsafe skill directory name: ${JSON.stringify(entry.name)}`,
+          )
           return null
         }
 
@@ -285,6 +294,14 @@ async function loadSkillsFromCommandsDir(
           content,
           source,
         })
+
+        // K3-C L20（上游 296）：坏名不提供——静默过滤
+        if (isUnsafeCommandName(cmdName)) {
+          logForDebugging(
+            `[skills] skipping unsafe command name: ${JSON.stringify(cmdName)}`,
+          )
+          continue
+        }
 
         const parsed = parseSkillFrontmatterFields(
           frontmatter,
