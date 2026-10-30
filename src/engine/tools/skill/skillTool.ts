@@ -152,6 +152,24 @@ async function getAllCommands(): Promise<Command[]> {
   return getCommands(process.cwd())
 }
 
+// 0.1.82 K3-C L43（上游 299）：Unknown skill 提示附有上限的可用 skill
+// 名单——模型拼错名时能自纠（recover aid）。名单只收模型可调用面
+//（isHidden / disableModelInvocation 过滤）；池空保持裸消息零变更。
+export const MAX_UNKNOWN_SKILL_SUGGESTIONS = 10
+
+export function buildUnknownSkillMessage(
+  skillName: string,
+  commands: Command[],
+): string {
+  const available = commands
+    .filter(c => !c.isHidden && !c.disableModelInvocation)
+    .map(c => c.userFacingName?.() ?? c.name)
+  if (available.length === 0) return `Unknown skill: ${skillName}`
+  const listed = available.slice(0, MAX_UNKNOWN_SKILL_SUGGESTIONS)
+  const more = available.length - listed.length
+  return `Unknown skill: ${skillName}. Available skills: ${listed.join(', ')}${more > 0 ? ` (and ${more} more)` : ''}`
+}
+
 /**
  * 旧 tools/utils.ts getToolUseIDFromParentMessage 本地等价（delta ⑩：
  * 新仓消息块面 = message.content（agentToolUtils.messageBlocks 先例：
@@ -505,7 +523,8 @@ export const SkillTool: SkillToolFace = {
     if (!foundCommand) {
       return {
         result: false,
-        message: `Unknown skill: ${normalizedCommandName}`,
+        // K3-C L43：附有上限的可用名单（池空 = 裸消息，恒等锚零变更）
+        message: buildUnknownSkillMessage(normalizedCommandName, commands),
         errorCode: 2,
       }
     }

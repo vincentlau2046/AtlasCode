@@ -13,7 +13,10 @@ export const call: LocalCommandCall = async (_args, _context) => {
   reloadSkillsNow()
   return {
     type: 'text',
+    // K3-C L44（上游 299）：补 skill 列表重发语义——reloadSkillsNow 内含
+    // resetSentSkillNames，下一条用户提示会把完整 skill 列表重发给模型
+    //（registry 刷新对模型可见，不只是 TUI 面）。
     value:
-      'Re-scanned skill directories; in-session skill registry refreshed (new/removed/changed skills now active without restart).',
+      'Re-scanned skill directories; in-session skill registry refreshed (new/removed/changed skills now active without restart). The complete skill list will be re-sent to the model with your next message.',
   }
 }
