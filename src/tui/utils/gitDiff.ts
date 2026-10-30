@@ -51,8 +51,9 @@ export async function fetchGitDiff(): Promise<GitDiffResult | null> {
   if (!isGit) return null
 
   // Skip diff calculation during transient git states since the
-  // working tree contains incoming changes, not user-intentional edits
-  if (await isInTransientGitState()) {
+  // working tree contains incoming changes, not user-intentional edits.
+  // unknown（检查失败）同样不放行：不能证明无冲突就不展示（K4-3 fail-closed）
+  if ((await checkTransientGitState()) !== 'none') {
     return null
   }
 
@@ -117,7 +118,7 @@ export async function fetchGitDiffHunks(): Promise<
   const isGit = await getIsGit()
   if (!isGit) return new Map()
 
-  if (await isInTransientGitState()) {
+  if ((await checkTransientGitState()) !== 'none') {
     return new Map()
   }
 
@@ -298,31 +299,71 @@ export function parseGitDiff(
 }
 
 /**
+ * Transient git 状态伪 ref 名单（merge/rebase/cherry-pick/revert）。
+ * 期间跳过 diff 计算：工作树含 incoming changes，非用户有意编辑。
+ */
+const TRANSIENT_GIT_REFS = [
+  'MERGE_HEAD',
+  'REBASE_HEAD',
+  'CHERRY_PICK_HEAD',
+  'REVERT_HEAD',
+] as const
+
+type TransientGitState = 'none' | 'transient' | 'unknown'
+
+/**
  * Check if we're in a transient git state (merge, rebase, cherry-pick, or revert).
  * During these operations, we skip diff calculation since the working
  * tree contains incoming changes that weren't intentionally made.
  *
- * Uses fs.access to check for transient ref files, avoiding process spawns.
+ * 双件套双通道三态（wave0183 K4-3，上游 300）：
+ *   - 通道 1（files 快路径，零 spawn）：伪 ref 文件 fs.access 直查；
+ *   - 通道 2（storage-aware）：reftable 后端伪 ref 进 reftable 表不落
+ *     .git/ 文件（Git 2.53.0 真盘已证：cherry-pick/revert 冲突态无
+ *     CHERRY_PICK_HEAD 文件而 `git rev-parse --verify` 命中）——经 git
+ *     plumbing 查询，不自己解码二进制表。exit 0 = 伪 ref 在场；exit 1 =
+ *     合法不存在；其余（128/超时/抛错）= unknown，与合法缺失可区分。
+ *
+ * 聚合语义：任一通道证实 → 'transient'（单通道失败不掩盖另一通道的证实）；
+ * 无证实但有 unknown → 'unknown'（不伪装「无冲突」）；全合法缺失 → 'none'。
+ * 消费方对 'transient' 与 'unknown' 均不放行展示（识别 = 跳过展示，
+ * 不改成展示冲突 patch）。
  */
-async function isInTransientGitState(): Promise<boolean> {
+async function checkTransientGitState(): Promise<TransientGitState> {
+  // 通道 1：files 快路径（gitDir 解析失败不提前定论，交通道 2 自解析）
   const gitDir = await getGitDir(getCwd())
-  if (!gitDir) return false
+  if (gitDir) {
+    const fileHits = await Promise.all(
+      TRANSIENT_GIT_REFS.map(file =>
+        access(join(gitDir, file))
+          .then(() => true)
+          .catch(() => false),
+      ),
+    )
+    if (fileHits.some(Boolean)) return 'transient'
+  }
 
-  const transientFiles = [
-    'MERGE_HEAD',
-    'REBASE_HEAD',
-    'CHERRY_PICK_HEAD',
-    'REVERT_HEAD',
-  ]
-
-  const results = await Promise.all(
-    transientFiles.map(file =>
-      access(join(gitDir, file))
-        .then(() => true)
-        .catch(() => false),
+  // 通道 2：rev-parse plumbing（files/reftable 双 storage 通用）
+  const outcomes = await Promise.all(
+    TRANSIENT_GIT_REFS.map(ref =>
+      execFileNoThrow(
+        gitExe(),
+        ['--no-optional-locks', 'rev-parse', '--verify', '--quiet', ref],
+        { timeout: GIT_TIMEOUT_MS, preserveOutputOnError: false },
+      )
+        .then(result =>
+          result.code === 0
+            ? 'transient'
+            : result.code === 1
+              ? 'none'
+              : 'unknown',
+        )
+        .catch(() => 'unknown' as const),
     ),
   )
-  return results.some(Boolean)
+  if (outcomes.some(o => o === 'transient')) return 'transient'
+  if (outcomes.some(o => o === 'unknown')) return 'unknown'
+  return 'none'
 }
 
 /**
