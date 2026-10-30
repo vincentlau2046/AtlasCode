@@ -3051,6 +3051,16 @@ export function mergePluginSources(sources: {
       logForDebugging(
         `Plugin "${p.name}" from --plugin-dir overrides installed version`,
       )
+      // K3-D D3（0.1.82，上游 296）：同名排除提示——session 覆盖滤除已装版
+      // 时留 error 记录（/plugin errors 面渲染，先例 = managed 冲突
+      // generic-error）。此前仅 debug log：用户在 /plugin 看不到「已装版
+      // 为何不生效」（其 hooks/commands/MCP 全部静默失效）。
+      errors.push({
+        type: 'generic-error',
+        source: p.source,
+        plugin: p.name,
+        error: `Installed plugin "${p.name}" excluded (hooks and commands inactive) — overridden by --plugin-dir copy of the same name`,
+      })
       return false
     }
     return true
