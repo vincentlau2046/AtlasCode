@@ -90,6 +90,7 @@ import {
   enterExistingWorktreeForSession,
   findCanonicalGitRoot,
   getCurrentWorktreeSession,
+  readCheckoutHeadSha,
   validateWorktreeSlug,
 } from '../../worktree'
 import { ENTER_WORKTREE_TOOL_NAME } from '../toolNames'
@@ -188,7 +189,17 @@ export const EnterWorktreeTool: Tool = {
 
     // Resolve to main repo root so worktree creation works from within a worktree
     const mainRepoRoot = findCanonicalGitRoot(getCwdState())
+    // K4-6（0.1.83）：chdir-first 调用方 —— chdir canonical 前捕获调用 checkout
+    // 的 HEAD（'HEAD' 回落支以它钉基点，不静默错基 canonical HEAD）；捕获 null
+    // （非 git / HEAD 不可解析）→ 不传，getOrCreateWorktree 保留旧 rev-parse
+    // HEAD 回落。cwd === canonical 根时不捕获（源即 canonical）。
+    let sourceCheckout: { cwd: string; headCommit: string } | undefined
     if (mainRepoRoot && mainRepoRoot !== getCwdState()) {
+      const callingCwd = getCwdState()
+      const headCommit = await readCheckoutHeadSha(callingCwd)
+      if (headCommit) {
+        sourceCheckout = { cwd: callingCwd, headCommit }
+      }
       process.chdir(mainRepoRoot)
       setCwd(mainRepoRoot)
     }
@@ -221,6 +232,8 @@ export const EnterWorktreeTool: Tool = {
     const worktreeSession = await createWorktreeForSession(
       getSessionId(),
       slug,
+      undefined,
+      sourceCheckout ? { sourceCheckout } : undefined,
     )
 
     process.chdir(worktreeSession.worktreePath)

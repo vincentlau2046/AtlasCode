@@ -23,6 +23,7 @@ import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
 import { parseGitConfigValue } from './git/gitConfigParser.js'
 import {
   getCommonDir,
+  readCheckoutHeadSha,
   readWorktreeHeadSha,
   resolveGitDir,
   resolveRef,
@@ -316,7 +317,11 @@ async function inspectWorktreeTarget(
 async function getOrCreateWorktree(
   repoRoot: string,
   slug: string,
-  options?: { prNumber?: number },
+  options?: {
+    prNumber?: number
+    /** K4-6（0.1.83）：调用 checkout 上下文（chdir-first 调用方 chdir 前捕获透传）。 */
+    sourceCheckout?: { cwd: string; headCommit: string }
+  },
 ): Promise<WorktreeCreateResult> {
   const worktreePath = worktreePathFor(repoRoot, slug)
   const worktreeBranch = worktreeBranchName(slug)
@@ -348,6 +353,22 @@ async function getOrCreateWorktree(
     throw new Error(
       `Worktree path "${worktreePath}" already exists and is not a safe-to-repair worktree leftover; refusing to overwrite it (data preserved)`,
     )
+  }
+
+  // K4-6（0.1.83）：调用 checkout 上下文惰性捕获 —— 无显式 sourceCheckout 的调用
+  // 方（createAgentWorktree：TUI 状态 cwd 即调用 checkout，无 chdir canonical）。
+  // 'HEAD' 回落支（origin 缺席）经它钉调用 checkout 的 HEAD，bare canonical
+  // HEAD ≠ 调用 checkout HEAD 时不再静默错基；cwd === repoRoot（主 checkout 调用）
+  // 时源即 canonical 无需捕获；捕获 null（detached 畸形等）→ 保留旧 rev-parse
+  // HEAD 回落。TUI 体 cwd 源 = getCwd()（bootstrap 状态 cwd，engine 体 =
+  // process.cwd()，双体唯一差异位）。
+  let sourceCheckout = options?.sourceCheckout ?? null
+  if (!sourceCheckout && resolve(getCwd()) !== resolve(repoRoot)) {
+    const callingCwd = getCwd()
+    const headCommit = await readCheckoutHeadSha(callingCwd)
+    if (headCommit) {
+      sourceCheckout = { cwd: callingCwd, headCommit }
+    }
   }
 
   // New worktree: fetch base branch then add
@@ -401,17 +422,35 @@ async function getOrCreateWorktree(
   // For the fetch/PR-fetch paths we still need the SHA — the fs-only resolveRef
   // above only covers the "origin/<branch> already exists locally" case.
   if (!baseSha) {
-    const { stdout, code: shaCode } = await execFileNoThrowWithCwd(
-      gitExe(),
-      ['rev-parse', baseBranch],
-      { cwd: repoRoot },
-    )
-    if (shaCode !== 0) {
-      throw new Error(
-        `Failed to resolve base branch "${baseBranch}": git rev-parse failed`,
+    if (baseBranch === 'HEAD' && sourceCheckout) {
+      // K4-6（0.1.83）：'HEAD' 回落支（origin 缺席）以调用 checkout 上下文钉基点
+      // —— verify 失败 = 对象不在本仓 → throw 非静默回落 canonical HEAD（错基）。
+      const { code: verifyCode } = await execFileNoThrowWithCwd(
+        gitExe(),
+        ['rev-parse', '--verify', `${sourceCheckout.headCommit}^{commit}`],
+        { cwd: repoRoot },
       )
+      if (verifyCode !== 0) {
+        throw new Error(
+          `Failed to resolve source checkout HEAD ${sourceCheckout.headCommit} as a commit in the repository; refusing to silently fall back to the canonical HEAD`,
+        )
+      }
+      baseSha = sourceCheckout.headCommit
+    } else {
+      // K4-5（0.1.83）：--verify + `^{commit}` —— rev 目标一次解析为 commit object
+      // 身份（拒 DWIM ref 序歧义；判别 = func 真盘双碰撞）。
+      const { stdout, code: shaCode } = await execFileNoThrowWithCwd(
+        gitExe(),
+        ['rev-parse', '--verify', `${baseBranch}^{commit}`],
+        { cwd: repoRoot },
+      )
+      if (shaCode !== 0) {
+        throw new Error(
+          `Failed to resolve base branch "${baseBranch}": git rev-parse failed`,
+        )
+      }
+      baseSha = stdout.trim()
     }
-    baseSha = stdout.trim()
   }
 
   const sparsePaths = getInitialSettings().worktree?.sparsePaths
@@ -421,12 +460,32 @@ async function getOrCreateWorktree(
   }
   // -B (not -b): reset any orphan branch left behind by a removed worktree dir.
   // Saves a `git branch -D` subprocess (~15ms spawn overhead) on every create.
-  addArgs.push('-B', worktreeBranch, worktreePath, baseBranch)
+  // K4-5（0.1.83）：末参传 `${baseSha}^{commit}`（commit object 身份）非 ref 名 ——
+  // `worktree add` 对 ref 名的二次解析不可靠（DWIM `refs/heads/origin/main`
+  // 碰撞劫持 / 类 SHA branch·tag 碰撞劫持，dwim-check 探针定谳：现码 -B 形态
+  // fatal 歧义、裸 add 形态静默错建）；`^{commit}` 强制 object 语义。
+  addArgs.push('-B', worktreeBranch, worktreePath, `${baseSha}^{commit}`)
 
   const { code: createCode, stderr: createStderr } =
     await execFileNoThrowWithCwd(gitExe(), addArgs, { cwd: repoRoot })
   if (createCode !== 0) {
     throw new Error(`Failed to create worktree: ${createStderr}`)
+  }
+
+  // K4-5（0.1.83）：建后恒等核验 —— 实建 HEAD 须 === 选定 baseSha；背离不得
+  // 静默返回错基 worktree（fast-resume 会把现存态当合法 resume 假恢复，错基
+  // 从此固化）。背离 → 有界回收（仅本 worktree 路径 + --force，非全局 prune，
+  // 同 K4-8 tearDown 模式）+ throw。
+  const actualHead = await readWorktreeHeadSha(worktreePath)
+  if (actualHead !== baseSha) {
+    await execFileNoThrowWithCwd(
+      gitExe(),
+      ['worktree', 'remove', '--force', worktreePath],
+      { cwd: repoRoot },
+    )
+    throw new Error(
+      `Worktree base divergence: created worktree HEAD ${actualHead ?? '<unreadable>'} does not match the selected base ${baseSha}; the worktree was removed`,
+    )
   }
 
   if (sparsePaths?.length) {
@@ -799,7 +858,11 @@ export async function createWorktreeForSession(
   sessionId: string,
   slug: string,
   tmuxSessionName?: string,
-  options?: { prNumber?: number },
+  options?: {
+    prNumber?: number
+    /** K4-6（0.1.83）：调用 checkout 上下文（chdir-first 调用方 chdir 前捕获透传）。 */
+    sourceCheckout?: { cwd: string; headCommit: string }
+  },
 ): Promise<WorktreeSession> {
   // Must run before the hook branch below — hooks receive the raw slug as an
   // argument, and the git branch builds a path from it via path.join.

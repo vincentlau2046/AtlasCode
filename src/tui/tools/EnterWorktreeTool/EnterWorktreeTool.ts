@@ -6,6 +6,9 @@ import { buildTool, type ToolDef } from '../../Tool.js'
 import { clearMemoryFileCaches } from '../../utils/memoryFiles.js'
 import { getCwd } from '../../utils/cwd.js'
 import { findCanonicalGitRoot } from '../../utils/git.js'
+// K4-6（0.1.83）：任意 checkout HEAD 读取（fs-only 泛化面；worktree.js 门面未
+// 导出，TUI 无 STR-1 等效限制，本文件与 utils/worktree.ts 同走内部文件）
+import { readCheckoutHeadSha } from '../../utils/git/gitFilesystem.js'
 import { lazySchema } from '../../utils/lazySchema.js'
 import { getPlanSlug, getPlansDirectory } from '../../utils/plans.js'
 import { setCwd } from '../../utils/Shell.js'
@@ -81,14 +84,29 @@ export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
 
     // Resolve to main repo root so worktree creation works from within a worktree
     const mainRepoRoot = findCanonicalGitRoot(getCwd())
+    // K4-6（0.1.83）：chdir-first 调用方 —— chdir canonical 前捕获调用 checkout
+    // 的 HEAD（'HEAD' 回落支以它钉基点，不静默错基 canonical HEAD）；捕获 null
+    // （非 git / HEAD 不可解析）→ 不传，getOrCreateWorktree 保留旧 rev-parse
+    // HEAD 回落。cwd === canonical 根时不捕获（源即 canonical）。
+    let sourceCheckout: { cwd: string; headCommit: string } | undefined
     if (mainRepoRoot && mainRepoRoot !== getCwd()) {
+      const callingCwd = getCwd()
+      const headCommit = await readCheckoutHeadSha(callingCwd)
+      if (headCommit) {
+        sourceCheckout = { cwd: callingCwd, headCommit }
+      }
       process.chdir(mainRepoRoot)
       setCwd(mainRepoRoot)
     }
 
     const slug = input.name ?? getPlanSlug()
 
-    const worktreeSession = await createWorktreeForSession(getSessionId(), slug)
+    const worktreeSession = await createWorktreeForSession(
+      getSessionId(),
+      slug,
+      undefined,
+      sourceCheckout ? { sourceCheckout } : undefined,
+    )
 
     process.chdir(worktreeSession.worktreePath)
     setCwd(worktreeSession.worktreePath)

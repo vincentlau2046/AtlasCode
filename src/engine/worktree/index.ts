@@ -62,6 +62,8 @@ export {
   getCommonDir,
   readGitHead,
   readWorktreeHeadSha,
+  // K4-6（0.1.83）：任意 checkout（主/worktree）HEAD 读取（fs-only 泛化面）
+  readCheckoutHeadSha,
   isSafeRefName,
   isValidGitSha,
   parseGitConfigValue,

@@ -19,11 +19,19 @@
  * resolveRef 全 fs-only）；settings 经 ATLAS_CONFIG_DIR 注入 user 级
  * sparsePaths（engine 级联排除 projectSettings，S-3a 裁定，同 lifecycle
  * 测试）。本文件全部判别为既有满足锁定（工单：不硬造清理逻辑）。
+ *
+ * K4-5 后置核验适配（0.1.83）：getOrCreateWorktree 建后恒等核验经真
+ * readWorktreeHeadSha 读回新 worktree HEAD —— mock `worktree add` 须写 fs
+ * 注册形状（<wt>/.git 指针 + gitdir 三件 + 分支 ref，同 start-context 测试），
+ * mock `worktree remove` 须真删该形状（faithful：真 remove 清 worktree 目录
+ * + admin 条目；否则 retry 测试的第二次调用会假命中 fast-resume 而非真重建，
+ * 「失败不留死状态」判别失真）。rev-parse mock arg-agnostic 恒 FAKE_SHA，
+ * 兼容 `--verify HEAD^{commit}` / `--verify <sha>^{commit}` 新形态。
  */
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
-import { join } from 'path'
+import { basename, join } from 'path'
 
 const GIT_PATH = '../../src/engine/worktree/git.js'
 const SETTINGS_CACHE_PATH = '../../src/engine/config/settingsCache.js'
@@ -42,6 +50,7 @@ const gitMock: Record<string, unknown> = { ...realGit }
 gitMock.execFileNoThrowWithCwd = async (
   _file: string,
   args: string[],
+  opts?: { cwd?: string },
 ): Promise<{ stdout: string; stderr: string; code: number }> => {
   execCalls.push({ args: [...args] })
   const out = (o: ExecOutcome) => ({
@@ -52,9 +61,36 @@ gitMock.execFileNoThrowWithCwd = async (
   if (args.includes('sparse-checkout')) return out(sparseOutcome)
   if (args.includes('checkout')) return out(checkoutOutcome)
   if (args.includes('worktree') && args.includes('add')) {
+    // fs 注册形状模拟（K4-5 恒等核验经真 readWorktreeHeadSha 读回）：
+    // <wt>/.git 指针 + gitdir 三件 + 分支 ref，HEAD 取 add 末参 SHA。
+    const bi = args.indexOf('-B')
+    const branch = args[bi + 1] ?? ''
+    const wtPath = args[bi + 2] ?? ''
+    const base = args[bi + 3] ?? ''
+    const m = /^([0-9a-f]{40})\^\{commit\}$/.exec(base)
+    const head = m ? m[1]! : FAKE_SHA
+    const repoRoot = opts?.cwd ?? process.cwd()
+    const gitdir = join(repoRoot, '.git', 'worktrees', basename(wtPath))
+    mkdirSync(wtPath, { recursive: true })
+    writeFileSync(join(wtPath, '.git'), `gitdir: ${gitdir}\n`)
+    mkdirSync(gitdir, { recursive: true })
+    writeFileSync(join(gitdir, 'HEAD'), `ref: refs/heads/${branch}\n`)
+    writeFileSync(join(gitdir, 'gitdir'), `${join(wtPath, '.git')}\n`)
+    writeFileSync(join(gitdir, 'commondir'), '../..\n')
+    mkdirSync(join(repoRoot, '.git', 'refs', 'heads'), { recursive: true })
+    writeFileSync(join(repoRoot, '.git', 'refs', 'heads', branch), `${head}\n`)
     return out({ code: 0 })
   }
   if (args.includes('worktree') && args.includes('remove')) {
+    // faithful 清理：真 `worktree remove --force` 删 worktree 目录 + admin
+    // 条目（retry 判别须走真重建而非残留形状上的假 fast-resume）
+    const wtPath = args[args.length - 1] ?? ''
+    const repoRoot = opts?.cwd ?? process.cwd()
+    rmSync(wtPath, { recursive: true, force: true })
+    rmSync(join(repoRoot, '.git', 'worktrees', basename(wtPath)), {
+      recursive: true,
+      force: true,
+    })
     return out({ code: 0 })
   }
   if (args.includes('fetch')) return out({ code: 128, stderr: 'no remote' })

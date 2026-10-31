@@ -26,6 +26,8 @@ import { envDynamic } from './utils/envDynamic.js'
 import { isBareMode, isEnvTruthy } from './utils/envUtils.js'
 import { errorMessage } from './utils/errors.js'
 import { findCanonicalGitRoot, findGitRoot, getIsGit } from './utils/git.js'
+// K4-6（0.1.83）：任意 checkout HEAD 读取（fs-only 泛化面，chdir 前捕获用）
+import { readCheckoutHeadSha } from './utils/git/gitFilesystem.js'
 import { initializeFileChangedWatcher } from './utils/hooks/fileChangedWatcher.js'
 import {
   captureHooksConfigSnapshot,
@@ -190,6 +192,11 @@ export async function setup(
     // configured — so --tmux keeps working for git users who also have a
     // WorktreeCreate hook. Only hook-only (non-git) mode skips it.
     let tmuxSessionName: string | undefined
+    // K4-6（0.1.83）：chdir-first 调用方 —— chdir canonical 前捕获调用 checkout
+    // 的 HEAD（'HEAD' 回落支以它钉基点，不静默错基 canonical HEAD）；捕获 null
+    // → 不传，getOrCreateWorktree 保留旧 rev-parse HEAD 回落。声明在 inGit 块
+    // 外（下方 createWorktreeForSession 调用点在块外）。
+    let sourceCheckout: { cwd: string; headCommit: string } | undefined
     if (inGit) {
       // Resolve to main repo root (handles being invoked from within a worktree).
       // findCanonicalGitRoot is sync/filesystem-only/memoized; the underlying
@@ -206,6 +213,12 @@ export async function setup(
 
       // If we're inside a worktree, switch to the main repo for worktree creation
       if (mainRepoRoot !== (findGitRoot(getCwd()) ?? getCwd())) {
+        // 捕获在 chdir 前（chdir 后读到的是 canonical HEAD，非调用 checkout 基点）
+        const callingCwd = getCwd()
+        const headCommit = await readCheckoutHeadSha(callingCwd)
+        if (headCommit) {
+          sourceCheckout = { cwd: callingCwd, headCommit }
+        }
         logForDiagnosticsNoPII('info', 'worktree_resolved_to_main_repo')
         process.chdir(mainRepoRoot)
         setCwd(mainRepoRoot)
@@ -228,7 +241,12 @@ export async function setup(
         getSessionId(),
         slug,
         tmuxSessionName,
-        worktreePRNumber ? { prNumber: worktreePRNumber } : undefined,
+        worktreePRNumber || sourceCheckout
+          ? {
+              ...(worktreePRNumber ? { prNumber: worktreePRNumber } : {}),
+              ...(sourceCheckout ? { sourceCheckout } : {}),
+            }
+          : undefined,
       )
     } catch (error) {
       process.stderr.write(

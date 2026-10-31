@@ -647,6 +647,33 @@ export async function readWorktreeHeadSha(
   return head.sha
 }
 
+// ── readCheckoutHeadSha（K4-6，0.1.83，上游 300；TUI gitFilesystem 同构）────
+/**
+ * 读任意 checkout（主 checkout 或 worktree）的 HEAD SHA。readWorktreeHeadSha
+ * 的泛化：后者只认 `.git` 指针文件形态（主 checkout 的 `.git` 目录 → readFile
+ * EISDIR → null），本助手经 resolveGitDir 统一两形态（`.git` 目录 / worktree
+ * 指针文件）；非 git 目录 / HEAD 不可解析 → null。零子进程（resolveGitDir /
+ * readGitHead / resolveRef 全 fs）。消费方 = getOrCreateWorktree 'HEAD' 回落支
+ * 的调用 checkout 上下文（K4-6：chdir-first 调用方 chdir canonical 前捕获，
+ * 透传 sourceCheckout；createAgentWorktree 面经函数入口惰性捕获）。
+ */
+export async function readCheckoutHeadSha(
+  checkoutPath: string,
+): Promise<string | null> {
+  const gitDir = await resolveGitDir(checkoutPath)
+  if (!gitDir) {
+    return null
+  }
+  const head = await readGitHead(gitDir)
+  if (!head) {
+    return null
+  }
+  if (head.type === 'branch') {
+    return resolveRef(gitDir, `refs/heads/${head.name}`)
+  }
+  return head.sha
+}
+
 // ── AD-21（0.1.51 C-1）：git worktree list 探针面（EnterWorktree path 参数）──
 export type WorktreeListEntry = {
   worktreePath: string

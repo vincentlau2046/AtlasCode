@@ -812,6 +812,33 @@ export async function readWorktreeHeadSha(
 }
 
 /**
+ * Read the HEAD SHA of any checkout (main checkout or worktree) — K4-6
+ * (0.1.83, upstream 300). Generalizes readWorktreeHeadSha, which only accepts
+ * the `.git` pointer-file form (a main checkout's `.git` directory → readFile
+ * EISDIR → null); this helper goes through resolveGitDir to cover both forms
+ * (`.git` directory / worktree pointer file). Non-git directory / unreadable
+ * HEAD → null. Zero subprocesses (resolveGitDir/readGitHead/resolveRef are
+ * all fs-only). Consumer = the calling-checkout context of
+ * getOrCreateWorktree's 'HEAD' fallback branch (engine worktree/git.ts twin).
+ */
+export async function readCheckoutHeadSha(
+  checkoutPath: string,
+): Promise<string | null> {
+  const gitDir = await resolveGitDir(checkoutPath)
+  if (!gitDir) {
+    return null
+  }
+  const head = await readGitHead(gitDir)
+  if (!head) {
+    return null
+  }
+  if (head.type === 'branch') {
+    return resolveRef(gitDir, `refs/heads/${head.name}`)
+  }
+  return head.sha
+}
+
+/**
  * Read the remote origin URL for an arbitrary directory via .git/config.
  */
 export async function getRemoteUrlForDir(cwd: string): Promise<string | null> {
