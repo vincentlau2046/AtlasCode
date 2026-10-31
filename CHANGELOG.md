@@ -4,6 +4,42 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.83
+
+V3-4 K4 worktree/git 8 件（f4 工单
+`docs/2026-10-31-p0-wave-0183-ticket.md`；判别测试
+`tests/*/wave0183-*.test.ts(x)` 11 文件；e2e gate GATE-PASS
+`user-e2e/reports/r-20261031-gate-083.md`，Git 2.56 专项经
+docker git 2.56.0 真 fixture 双 leg 覆盖）。
+
+### worktree 生命周期（5 件）
+
+- K4-1 dangling gitdir 校验 + worktree 目标注册判别/三态预检
+  （双体同构；resolveGitDir 误认 nonexistent 路径断根，
+  docker git 2.56.0 真 fixture 双 leg：fixed GREEN 11/11 /
+  base RED-AS-EXPECTED 6/6）。
+- K4-2 WorktreeExitDialog 退出检查 fail-closed（null=unknown
+  绝非 0/0；新增 `src/tui/utils/worktreeChangeSummary.ts`）。
+- K4-5 worktree 基点钉死建后恒等核验（建后 readWorktreeHeadSha
+  读回比对，防 add 落在漂移基点）。
+- K4-6 sourceCheckout 调用 checkout 上下文（双体）。
+- K4-8 sparse/checkout 失败 tearDown 双分支 mock 判别（既有
+  满足锁定：失败即 `worktree remove --force`，不留注册空树
+  假 fast-resume）。
+
+### git refs 与 /diff（2 件）
+
+- K4-4 storage-aware refs——reftable `.invalid` 占位穿透修复
+  （双体）。
+- K4-3 `/diff` transient 冲突识别 storage-aware 双通道三态。
+
+### session 持久化（1 件）
+
+- K4-7 transcript 截断尾写边界——crash 留无 LF 截断尾时，resume
+  后首条新 entry 不再粘行丢失（engine/TUI 四写入口写前有界
+  末字节检查，尾非 LF 补恰一 `\n` 分隔；不修历史不截断不猜
+  末行有效 JSON；8MB 前缀恒等 + 巨文件构造性 O(1) 读钉住）。
+
 ## v0.1.82
 
 V3-3 K3 hooks/插件/skills 30 件（上游 2.1.296–302 对齐；f4 工单
