@@ -130,6 +130,7 @@ import {
   getFsImplementation,
   isEnvTruthy,
   isENOENT,
+  readBoundedImageBytes,
   roughTokenCountEstimationForFileType,
 } from '../../../shared'
 import {
@@ -374,11 +375,17 @@ const EXT_MEDIA_TYPE: Record<
  * readFileBytes 1 参面，旧 2 参 maxBytes 调用点实传 undefined → 零行为差）
  * + 原始 base64 + ext→MIME 映射。无 resize/downsample/压缩（token 预算超支
  * 面 = D 波前向接缝），无 dimensions（createImageMetadataText 面随之裁）。
+ *
+ * K5-1（0.1.84）：单读换 shared 有界读（readBoundedImageBytes：O_NONBLOCK
+ * 打开 + fstat 类型/大小双验 + 读累计帽）——带 image 扩展名的 FIFO/字符
+ * 设备别名（BLOCKED_DEVICE_PATHS 路径名单外）拒、>128MiB 读前拒、读中
+ * 增长累计帽拒；abort signal 贯通读循环（chunk 间查）。
  */
 async function readImageWithTokenBudget(
   filePath: string,
+  signal?: AbortSignal,
 ): Promise<ImageResult> {
-  const imageBuffer = await getFsImplementation().readFileBytes(filePath)
+  const imageBuffer = await readBoundedImageBytes(filePath, signal)
   const originalSize = imageBuffer.length
 
   if (originalSize === 0) {
@@ -858,6 +865,20 @@ async function callInner(
   data: ReadOutput
   newMessages?: ReturnType<typeof createUserMessage>[]
 }> {
+  // --- K5-2 call 面守卫（validateInput 同条件镜像，errorCode 4 同文案）：
+  // call 直调（不经 validate）二进制后缀同样拒读，不落文本支按 UTF-8 转码
+  // （.xlsm/.parquet/.epub/.heic 误读面随本波双表闭合）。
+  const dottedExt = path.extname(resolvedFilePath).toLowerCase()
+  if (
+    hasBinaryExtension(resolvedFilePath) &&
+    !isPDFExtension(dottedExt) &&
+    !IMAGE_EXTENSIONS.has(ext)
+  ) {
+    throw new Error(
+      `This tool cannot read binary files. The file appears to be a binary ${dottedExt} file. Please use appropriate tools for binary file analysis.`,
+    )
+  }
+
   // --- Notebook ---
   if (ext === 'ipynb') {
     const cells = await readNotebook(resolvedFilePath)
@@ -900,7 +921,11 @@ async function callInner(
     // Images have their own size limits (token budget + compression) —
     // don't apply the text maxSizeBytes cap.
     // delta ⑫：D-3 裁剪形（无 resize/downsample/压缩/dimensions）
-    const data = await readImageWithTokenBudget(resolvedFilePath)
+    // K5-1：abort signal 贯通有界读（读循环 chunk 间查）。
+    const data = await readImageWithTokenBudget(
+      resolvedFilePath,
+      context.abortController.signal,
+    )
     context.nestedMemoryAttachmentTriggers?.add(fullFilePath)
 
     // delta ⑫：dimensions/createImageMetadataText 面裁 → newMessages 恒不产生

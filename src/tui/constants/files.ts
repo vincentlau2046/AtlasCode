@@ -13,6 +13,9 @@ export const BINARY_EXTENSIONS = new Set([
   '.webp',
   '.tiff',
   '.tif',
+  // K5-2（0.1.84）：.heic 按二进制拒读——无原生视觉渲染面
+  // （不在 Read 图片支可解码集合），不得冒称可视觉读取。
+  '.heic',
   // Videos
   '.mp4',
   '.mov',
@@ -65,11 +68,15 @@ export const BINARY_EXTENSIONS = new Set([
   '.docx',
   '.xls',
   '.xlsx',
+  // K5-2（0.1.84）：.xlsm 宏工作簿 = zip 容器二进制，误读文本面同 .xlsx。
+  '.xlsm',
   '.ppt',
   '.pptx',
   '.odt',
   '.ods',
   '.odp',
+  // K5-2（0.1.84）：.epub = zip 容器电子书，按二进制拒读。
+  '.epub',
   // Fonts
   '.ttf',
   '.otf',
@@ -92,6 +99,8 @@ export const BINARY_EXTENSIONS = new Set([
   '.db',
   '.mdb',
   '.idx',
+  // K5-2（0.1.84）：.parquet 列存二进制，误读文本面同 .db。
+  '.parquet',
   // Design / 3D
   '.psd',
   '.ai',

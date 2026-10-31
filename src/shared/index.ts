@@ -59,6 +59,17 @@ export {
   isFsInaccessible,
 } from "./errors"
 export { formatFileSize } from "./format"
+// 0.1.84 V3-5 K5-1：图片源有界读（O_NONBLOCK + fstat 类型/大小双验 + 读
+// 累计帽；engine ReadTool 图片支 + TUI FileReadTool/attachments 消费）
+export {
+  MAX_IMAGE_SOURCE_BYTES,
+  NonRegularFileError,
+  ImageSourceTooLargeError,
+  readBoundedFileBytes,
+  readBoundedFromHandle,
+  readBoundedImageBytes,
+  type BoundedReadHandle,
+} from "./boundedImageRead"
 // C-Deep 切片 3 T3：task 输出磁盘上限（task diskOutput cap + executor
 // ShellCommand size watchdog 跨域共线，单一事实源）
 export { MAX_TASK_OUTPUT_BYTES } from "./constants"

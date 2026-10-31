@@ -8,6 +8,10 @@ import {
   PDF_MAX_PAGES_PER_READ,
 } from '../../constants/apiLimits.js'
 import { hasBinaryExtension } from '../../constants/files.js'
+import {
+  MAX_IMAGE_SOURCE_BYTES,
+  readBoundedFileBytes,
+} from 'src/shared'
 import { memoryFreshnessNote } from '../../memdir/memoryAge.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import {
@@ -471,6 +475,20 @@ export const FileReadTool = buildTool({
     // Use expandPath for consistent path normalization with FileEditTool/FileWriteTool
     // (especially handles whitespace trimming and Windows path separators)
     const fullFilePath = expandPath(file_path)
+
+    // K5-2（0.1.84）call 面守卫（validateInput 同条件镜像，errorCode 4 同
+    // 文案）：call 直调（不经 validate）二进制后缀同样拒读，不落文本支按
+    // UTF-8 转码（.xlsm/.parquet/.epub/.heic 误读面随本波双表闭合）。
+    const dottedExt = path.extname(fullFilePath).toLowerCase()
+    if (
+      hasBinaryExtension(fullFilePath) &&
+      !isPDFExtension(dottedExt) &&
+      !IMAGE_EXTENSIONS.has(ext)
+    ) {
+      throw new Error(
+        `This tool cannot read binary files. The file appears to be a binary ${dottedExt} file. Please use appropriate tools for binary file analysis.`,
+      )
+    }
 
     // Dedup: if we've already read this exact range and the file hasn't
     // changed on disk, return a stub instead of re-sending the full content.
@@ -979,10 +997,16 @@ export async function readImageWithTokenBudget(
   maxTokens: number = getDefaultFileReadingLimits().maxTokens,
   maxBytes?: number,
 ): Promise<ImageResult> {
-  // Read file ONCE — capped to maxBytes to avoid OOM on huge files
-  const imageBuffer = await getFsImplementation().readFileBytes(
+  // Read file ONCE — capped to maxBytes to avoid OOM on huge files.
+  // K5-1（0.1.84）：换 shared 有界读（O_NONBLOCK + fstat 类型/大小双验 +
+  // 读累计帽）——FIFO/字符设备别名拒、超 MAX_IMAGE_SOURCE_BYTES（128MiB）
+  // 读前拒、读中增长累计帽拒；显式 maxBytes 更小时取 min（@image 附着面
+  // 1 参调用 = 128MiB 上限，签名不变第二消费面零适配）。
+  const imageBuffer = await readBoundedFileBytes(
     filePath,
-    maxBytes,
+    maxBytes
+      ? Math.min(maxBytes, MAX_IMAGE_SOURCE_BYTES)
+      : MAX_IMAGE_SOURCE_BYTES,
   )
   const originalSize = imageBuffer.length
 
