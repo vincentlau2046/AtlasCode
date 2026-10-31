@@ -60,7 +60,9 @@
 import {
   appendFile as fsAppendFile,
   mkdir,
+  open as fsOpen,
   stat,
+  type FileHandle,
 } from 'fs/promises'
 import { appendFileSync, closeSync, fstatSync, mkdirSync, openSync, readSync } from 'fs'
 import { dirname } from 'path'
@@ -308,13 +310,21 @@ class Project {
 
   private async appendToFile(filePath: string, data: string): Promise<void> {
     try {
+      // K4-7（0.1.83，工单 300）：写前有界末字节检查——上一进程 crash 留下
+      // 无 LF 截断尾时，首条新 entry 会粘进截断行、被 loader 整行丢弃。尾非
+      // LF → 同一写序列前补 '\n' 分隔；已LF尾/空文件/不存在零多余字节。
+      const needsSeparator = await transcriptTailNeedsSeparator(filePath)
+      const payload = needsSeparator ? '\n' + data : data
       try {
-        await fsAppendFile(filePath, data, { mode: 0o600 })
+        await fsAppendFile(filePath, payload, { mode: 0o600 })
       } catch {
         // Directory may not exist — some NFS-like filesystems return
         // unexpected error codes, so don't discriminate on code.
+        // Retry 写同一 payload：dir 不存在则文件必不存在、分隔检查已返
+        // false（payload 即原 data）；其余失败重试保持同字节序列——多余
+        // 空行 loader 跳过无害，缺分隔粘行才是数据丢失。
         await mkdir(dirname(filePath), { recursive: true, mode: 0o700 })
-        await fsAppendFile(filePath, data, { mode: 0o600 })
+        await fsAppendFile(filePath, payload, { mode: 0o600 })
       }
     } catch (err) {
       // FX-31（0.1.50，CC 2.1.101）：transcript 写链二次写失败（ENOSPC/EIO，
@@ -908,11 +918,14 @@ function appendEntryToFile(
   entry: Record<string, unknown>,
 ): void {
   const line = jsonStringify(entry) + '\n'
+  // K4-7（0.1.83）：同 async appendToFile 的写前有界末字节检查（sync 面，
+  // openSync/fstatSync/readSync，readFileTailSync 同径）——截断尾补 '\n'。
+  const payload = transcriptTailNeedsSeparatorSync(fullPath) ? '\n' + line : line
   try {
-    appendFileSync(fullPath, line, { mode: 0o600 })
+    appendFileSync(fullPath, payload, { mode: 0o600 })
   } catch {
     mkdirSync(dirname(fullPath), { mode: 0o700 })
-    appendFileSync(fullPath, line, { mode: 0o600 })
+    appendFileSync(fullPath, payload, { mode: 0o600 })
   }
 }
 
@@ -942,6 +955,59 @@ function readFileTailSync(fullPath: string): string {
         closeSync(fd)
       } catch {
         // closeSync can throw; swallow to preserve return '' contract
+      }
+    }
+  }
+}
+
+/**
+ * K4-7（0.1.83，工单 300）：写前有界末字节检查（async 面）。
+ * 上一进程 crash 可留下无 LF 的截断尾——直接 append 会把首条新 entry 粘进
+ * 截断行，loader parseJSONL 整行丢弃（`before\n + 截断JSON + 首条新entry\n`
+ * 仅剩 before）。本检查 = stat + 1 字节 read（构造性 O(1) 读，无整文件
+ * 读取）：末字节非 0x0A → true（写序列前须补 '\n' 分隔）。不猜末行是否
+ * 有效 JSON——有效无LF末行同样补分隔（原样保留、不修不截不重排）。
+ * 空文件 / 不存在 / 任何读错误 → false（正常创建 / 原样追加，零多余字节）。
+ */
+async function transcriptTailNeedsSeparator(fullPath: string): Promise<boolean> {
+  let fh: FileHandle | undefined
+  try {
+    const st = await stat(fullPath)
+    if (!st.isFile() || st.size === 0) return false
+    fh = await fsOpen(fullPath, 'r')
+    const buf = Buffer.alloc(1)
+    const { bytesRead } = await fh.read(buf, 0, 1, st.size - 1)
+    return bytesRead === 1 && buf[0] !== 0x0a
+  } catch {
+    return false
+  } finally {
+    // 可选链短路整链：fh 未开时整表达式 undefined，无 .catch 可达
+    await fh?.close().catch(() => {})
+  }
+}
+
+/**
+ * K4-7（0.1.83）：sync 面同构检查（openSync/fstatSync/readSync，
+ * readFileTailSync 同径直用 node:fs）。语义同 async 版：末字节非 0x0A →
+ * true；空文件 / 不存在 / 读错误 → false。
+ */
+function transcriptTailNeedsSeparatorSync(fullPath: string): boolean {
+  let fd: number | undefined
+  try {
+    fd = openSync(fullPath, 'r')
+    const st = fstatSync(fd)
+    if (st.size === 0) return false
+    const buf = Buffer.alloc(1)
+    const bytesRead = readSync(fd, buf, 0, 1, st.size - 1)
+    return bytesRead === 1 && buf[0] !== 0x0a
+  } catch {
+    return false
+  } finally {
+    if (fd !== undefined) {
+      try {
+        closeSync(fd)
+      } catch {
+        // closeSync can throw; swallow to preserve return false contract
       }
     }
   }

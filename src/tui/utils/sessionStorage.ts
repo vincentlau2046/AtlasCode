@@ -14,6 +14,7 @@ import {
   stat,
   unlink,
   writeFile,
+  type FileHandle,
 } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join } from 'path'
@@ -594,13 +595,21 @@ class Project {
   }
 
   private async appendToFile(filePath: string, data: string): Promise<void> {
+    // K4-7（0.1.83，工单 300）：写前有界末字节检查——上一进程 crash 留下
+    // 无 LF 截断尾时，首条新 entry 会粘进截断行、被 loader 整行丢弃。尾非
+    // LF → 同一写序列前补 '\n' 分隔（同 engine project.ts）；已LF尾/空
+    // 文件/不存在零多余字节。
+    const needsSeparator = await transcriptTailNeedsSeparator(filePath)
+    const payload = needsSeparator ? '\n' + data : data
     try {
-      await fsAppendFile(filePath, data, { mode: 0o600 })
+      await fsAppendFile(filePath, payload, { mode: 0o600 })
     } catch {
       // Directory may not exist — some NFS-like filesystems return
       // unexpected error codes, so don't discriminate on code.
+      // Retry 写同一 payload：dir 不存在则文件必不存在、分隔检查已返
+      // false（payload 即原 data）。
       await mkdir(dirname(filePath), { recursive: true, mode: 0o700 })
-      await fsAppendFile(filePath, data, { mode: 0o600 })
+      await fsAppendFile(filePath, payload, { mode: 0o600 })
     }
   }
 
@@ -2302,11 +2311,15 @@ function appendEntryToFile(
 ): void {
   const fs = getFsImplementation()
   const line = jsonStringify(entry) + '\n'
+  // K4-7（0.1.83）：写前有界末字节检查（同 engine project.ts sync 面）——
+  // 截断尾补 '\n' 分隔。写面仍走 getFsImplementation seam（有界读面直用
+  // node:fs，readFileTailSync 同径）。
+  const payload = transcriptTailNeedsSeparatorSync(fullPath) ? '\n' + line : line
   try {
-    fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    fs.appendFileSync(fullPath, payload, { mode: 0o600 })
   } catch {
     fs.mkdirSync(dirname(fullPath), { mode: 0o700 })
-    fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    fs.appendFileSync(fullPath, payload, { mode: 0o600 })
   }
 }
 
@@ -2335,6 +2348,59 @@ function readFileTailSync(fullPath: string): string {
         closeSync(fd)
       } catch {
         // closeSync can throw; swallow to preserve return '' contract
+      }
+    }
+  }
+}
+
+/**
+ * K4-7（0.1.83，工单 300）：写前有界末字节检查（async 面，同 engine
+ * project.ts 逐字同构）。上一进程 crash 可留下无 LF 的截断尾——直接
+ * append 会把首条新 entry 粘进截断行，loader parseJSONL 整行丢弃。
+ * 本检查 = stat + 1 字节 read（构造性 O(1) 读，无整文件读取）：末字节非
+ * 0x0A → true（写序列前须补 '\n' 分隔）。不猜末行是否有效 JSON——有效
+ * 无LF末行同样补分隔（原样保留、不修不截）。空文件 / 不存在 / 任何读
+ * 错误 → false。
+ */
+async function transcriptTailNeedsSeparator(fullPath: string): Promise<boolean> {
+  let fh: FileHandle | undefined
+  try {
+    const st = await stat(fullPath)
+    if (!st.isFile() || st.size === 0) return false
+    fh = await fsOpen(fullPath, 'r')
+    const buf = Buffer.alloc(1)
+    const { bytesRead } = await fh.read(buf, 0, 1, st.size - 1)
+    return bytesRead === 1 && buf[0] !== 0x0a
+  } catch {
+    return false
+  } finally {
+    // 可选链短路整链：fh 未开时整表达式 undefined，无 .catch 可达
+    await fh?.close().catch(() => {})
+  }
+}
+
+/**
+ * K4-7（0.1.83）：sync 面同构检查（openSync/fstatSync/readSync，
+ * readFileTailSync 同径直用 node:fs）。语义同 async 版：末字节非 0x0A →
+ * true；空文件 / 不存在 / 读错误 → false。
+ */
+function transcriptTailNeedsSeparatorSync(fullPath: string): boolean {
+  let fd: number | undefined
+  try {
+    fd = openSync(fullPath, 'r')
+    const st = fstatSync(fd)
+    if (st.size === 0) return false
+    const buf = Buffer.alloc(1)
+    const bytesRead = readSync(fd, buf, 0, 1, st.size - 1)
+    return bytesRead === 1 && buf[0] !== 0x0a
+  } catch {
+    return false
+  } finally {
+    if (fd !== undefined) {
+      try {
+        closeSync(fd)
+      } catch {
+        // closeSync can throw; swallow to preserve return false contract
       }
     }
   }
