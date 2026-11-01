@@ -16,6 +16,11 @@
  *    session 域）→ 域内最小形 = getAtlasTempDirName() 基 + 子目录
  *    常量（shared/tempDir 域常量面）。前向接缝：session/CLI 波物化
  *    真 session 目录面后恢复（E-wave-end 已登记）。
+ *    0.1.84 K5-6 修正：getAtlasTempDirName() 只返回目录名（.atlas-UID），
+ *    相对 mkdir 挂 process.cwd()，UID≠0 + 只读 cwd 下 EACCES；改为共享
+ *    getAtlasTempDir()（ATLAS_TMPDIR || /tmp，绝对根 + realpath，见
+ *    permissions/filesystem.ts）。判别测试
+ *    tests/func/wave0184-pdf-unprivileged.test.ts。
  *  - errorMessage / formatFileSize / getFsImplementation /
  *    getAtlasTempDirName → shared（facade）。
  */
@@ -29,15 +34,17 @@ import {
 import {
   errorMessage,
   formatFileSize,
-  getAtlasTempDirName,
   getFsImplementation,
 } from '../../../shared'
+import { getAtlasTempDir } from '../../../permissions'
 import { execFileNoThrow } from './execFileNoThrow'
 
-// delta（§8.55 S-C3）：旧 getToolResultsDir 域内最小形，见头注登记
+// delta（§8.55 S-C3）：旧 getToolResultsDir 域内最小形，见头注登记；
+// 0.1.84 K5-6：相对目录名基（getAtlasTempDirName）→ 绝对安全根
+// （getAtlasTempDir，ATLAS_TMPDIR 遵从），只读 cwd 下不再 EACCES
 const TOOL_RESULTS_SUBDIR = 'tool-results'
 function getToolResultsDir(): string {
-  return join(getAtlasTempDirName(), TOOL_RESULTS_SUBDIR)
+  return join(getAtlasTempDir(), TOOL_RESULTS_SUBDIR)
 }
 
 export type PDFError = {
