@@ -21,11 +21,17 @@
  *    getAtlasTempDir()（ATLAS_TMPDIR || /tmp，绝对根 + realpath，见
  *    permissions/filesystem.ts）。判别测试
  *    tests/func/wave0184-pdf-unprivileged.test.ts。
+ *    0.1.84 K5-6 安全复审硬化（MEDIUM「Insecure temporary-directory
+ *    handling」）：绝对根之上再验证 —— 共享可写区 root 预占（symlink/
+ *    他人属主）明确拒绝不穿透，root/tool-results 0700，输出叶改
+ *    mkdtemp（恒 0700 不受 umask 影响）；getToolResultsDir 域内最小形
+ *    撤销，统一走 engine/tools/toolResultsDir.ts getSecureToolResultsDir
+ *    （web/webFetchUtils.ts 同根因第二站点同接）。判别面同测试文件
+ *    「安全硬化」族。
  *  - errorMessage / formatFileSize / getFsImplementation /
  *    getAtlasTempDirName → shared（facade）。
  */
-import { randomUUID } from 'crypto'
-import { mkdir, readdir, readFile } from 'fs/promises'
+import { mkdtemp, readdir, readFile } from 'fs/promises'
 import { join } from 'path'
 import {
   PDF_MAX_EXTRACT_SIZE,
@@ -36,16 +42,9 @@ import {
   formatFileSize,
   getFsImplementation,
 } from '../../../shared'
-import { getAtlasTempDir } from '../../../permissions'
 import { execFileNoThrow } from './execFileNoThrow'
+import { getSecureToolResultsDir } from '../toolResultsDir'
 
-// delta（§8.55 S-C3）：旧 getToolResultsDir 域内最小形，见头注登记；
-// 0.1.84 K5-6：相对目录名基（getAtlasTempDirName）→ 绝对安全根
-// （getAtlasTempDir，ATLAS_TMPDIR 遵从），只读 cwd 下不再 EACCES
-const TOOL_RESULTS_SUBDIR = 'tool-results'
-function getToolResultsDir(): string {
-  return join(getAtlasTempDir(), TOOL_RESULTS_SUBDIR)
-}
 
 export type PDFError = {
   reason:
@@ -250,9 +249,11 @@ export async function extractPDFPages(
       }
     }
 
-    const uuid = randomUUID()
-    const outputDir = join(getToolResultsDir(), `pdf-${uuid}`)
-    await mkdir(outputDir, { recursive: true })
+    // 0.1.84 K5-6 安全复审硬化：输出叶 = mkdtemp（恒 0700，不受环境
+    // umask 影响）位于验证过的安全根下（symlink/他人属主预占已拒绝）
+    const outputDir = await mkdtemp(
+      join(await getSecureToolResultsDir(), 'pdf-'),
+    )
 
     // pdftoppm produces files like <prefix>-01.jpg, <prefix>-02.jpg, etc.
     const prefix = join(outputDir, 'page')

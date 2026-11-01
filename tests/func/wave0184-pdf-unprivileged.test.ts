@@ -20,6 +20,10 @@
  * 真实二进制门控：poppler 缺失整文件 skip（同 files-pdf-notebook-real 惯例）；
  * gs 仅密码面需要，缺失时该面单独 skip。fixture 全部 mkdtemp 自清理；仅清理
  * 自己的输出根（不扩大到全用户 tool-results）。
+ *
+ * 安全硬化族（安全复审 MEDIUM）：/tmp 共享可写区 root 预占面——首建
+ * 0700 + mkdtemp 私有叶（不信 umask）；symlink 预占明确拒绝不穿透；
+ * 同根因第二站点 webFetchUtils.persistBinaryContent 同判别。
  */
 import { spawnSync } from 'child_process'
 import {
@@ -30,6 +34,8 @@ import {
   readdirSync,
   realpathSync,
   rmSync,
+  statSync,
+  symlinkSync,
   writeFileSync,
 } from 'fs'
 import { tmpdir } from 'os'
@@ -44,6 +50,7 @@ import {
   getAtlasTempDir,
 } from '../../src/permissions/filesystem'
 import { getToolResultsDir as getTuiToolResultsDir } from '../../src/tui/utils/toolResultStorage'
+import { persistBinaryContent } from '../../src/engine/tools/web/webFetchUtils'
 
 // ── 夹具 ─────────────────────────────────────────────────────────────────
 
@@ -309,6 +316,77 @@ describe('K5-6 TUI 面：getToolResultsDir 锚定启动 cwd（基线登记）', 
     } finally {
       chmodSync(ro, 0o755)
       rmSync(ro, { recursive: true, force: true })
+    }
+  })
+})
+
+// ── K5-6 安全硬化（安全复审 MEDIUM）：验证根 + 私有输出 ──────────────────
+
+describe('K5-6 安全硬化：tool-results 根验证 + 私有输出（安全复审）', () => {
+  // POSIX mode/属主语义面（Windows per-user %TEMP% 不适用）
+  const pT =
+    hasPdftoppm && typeof process.getuid === 'function' ? test : test.skip
+
+  pT('首次创建 root 0700 + PDF 输出叶 mkdtemp 恒 0700（不信环境 umask）', async () => {
+    const freshRoot = mkdtempSync(join(tmpdir(), 'wave0184-pdf-secure-'))
+    const prevTmp = process.env.ATLAS_TMPDIR
+    process.env.ATLAS_TMPDIR = freshRoot
+    _resetAtlasTempDirForTest()
+    const oldUmask = process.umask(0o000)
+    try {
+      const p = join(srcDir, 'secure.pdf')
+      writeFileSync(p, buildPdf(1))
+      const r = await extractPDFPages(p)
+      expect(r.success).toBe(true)
+      const { outputDir } = unwrap(r)
+      const root = getAtlasTempDir().replace(/\/+$/, '')
+      expect(statSync(root).mode & 0o777).toBe(0o700)
+      expect(statSync(outputDir).mode & 0o777).toBe(0o700)
+    } finally {
+      process.umask(oldUmask)
+      process.env.ATLAS_TMPDIR = prevTmp ?? outRoot
+      _resetAtlasTempDirForTest()
+      rmSync(freshRoot, { recursive: true, force: true })
+    }
+  })
+
+  pT('root 被 symlink 预占 → 明确失败，不穿透写入诱饵目录', async () => {
+    const root = getAtlasTempDir().replace(/\/+$/, '')
+    const decoy = mkdtempSync(join(tmpdir(), 'wave0184-pdf-decoy-'))
+    rmSync(root, { recursive: true, force: true })
+    symlinkSync(decoy, root)
+    try {
+      const p = join(srcDir, 'preoccupied.pdf')
+      writeFileSync(p, buildPdf(1))
+      const r = await extractPDFPages(p)
+      expect(r.success).toBe(false)
+      if (!r.success) {
+        expect(r.error.message).toMatch(/unsafe|not a real directory/i)
+      }
+      expect(readdirSync(decoy)).toEqual([])
+    } finally {
+      rmSync(root, { force: true })
+      rmSync(decoy, { recursive: true, force: true })
+    }
+  })
+
+  pT('同根因第二站点：webFetchUtils persistBinaryContent 只读 cwd 下成功（旧码 {error}）', async () => {
+    const prev = process.cwd()
+    process.chdir(roCwd)
+    try {
+      const r = await persistBinaryContent(
+        Buffer.from('wave0184-blob-bytes'),
+        'application/pdf',
+        'wave0184-secure',
+      )
+      expect('error' in r && typeof r.error === 'string').toBe(false)
+      if (!('error' in r)) {
+        expect(isAbsolute(r.filepath)).toBe(true)
+        expect(readFileSync(r.filepath).toString()).toBe('wave0184-blob-bytes')
+        expect(r.ext).toBe('pdf')
+      }
+    } finally {
+      process.chdir(prev)
     }
   })
 })

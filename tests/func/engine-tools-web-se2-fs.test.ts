@@ -24,8 +24,11 @@
  *    0 命中反爬页 → results[0] 错误串结果面，B8 语义随迁）。
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { rmSync } from 'fs'
+import { mkdtempSync, rmSync } from 'fs'
 import { stat } from 'fs/promises'
+import { tmpdir } from 'os'
+import { join } from 'path'
+import { _resetAtlasTempDirForTest } from '../../src/permissions/filesystem'
 import {
   WebFetchTool,
   WebSearchTool,
@@ -177,11 +180,19 @@ const WEB_SEARCH_ENV_KEYS = [
   'TAVILY_API_KEY',
 ] as const
 const savedWebSearchEnv: Record<(typeof WEB_SEARCH_ENV_KEYS)[number], string | undefined> = {}
+// 0.1.84 K5-6：persistBinaryContent 输出根改绝对安全根
+// （getSecureToolResultsDir）→ 钉 ATLAS_TMPDIR 到自有沙箱，不写真实
+// /tmp/.atlas-<uid>（getAtlasTempDir 模块级缓存须随 env 复位）
+const savedTmpdir = process.env.ATLAS_TMPDIR
+let tmpSandbox = ''
 beforeAll(() => {
   for (const k of WEB_SEARCH_ENV_KEYS) {
     savedWebSearchEnv[k] = process.env[k]
     delete process.env[k]
   }
+  tmpSandbox = mkdtempSync(join(tmpdir(), 'atlas-web-func-'))
+  process.env.ATLAS_TMPDIR = tmpSandbox
+  _resetAtlasTempDirForTest()
   setModelProviderForTesting(createFakeModelProvider())
   clearWebFetchCache()
 })
@@ -190,12 +201,16 @@ afterAll(() => {
     if (savedWebSearchEnv[k] === undefined) delete process.env[k]
     else process.env[k] = savedWebSearchEnv[k]
   }
+  if (savedTmpdir === undefined) delete process.env.ATLAS_TMPDIR
+  else process.env.ATLAS_TMPDIR = savedTmpdir
+  _resetAtlasTempDirForTest()
   setWebFetchTransportForTesting(null)
   setWebSearchTransportForTesting(null)
   resetModelProviderForTesting()
   for (const f of persistedFiles) {
     rmSync(f, { force: true })
   }
+  if (tmpSandbox) rmSync(tmpSandbox, { recursive: true, force: true })
 })
 
 describe('F-W1 WebFetch.call 二级模型摘要支', () => {

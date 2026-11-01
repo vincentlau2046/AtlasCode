@@ -63,9 +63,9 @@
  *    modelprovider setModelProviderForTesting / plan 域 slugGenerator
  *    缝族）。
  */
-import { mkdir, writeFile } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import { join } from 'path'
-import { asSystemPrompt, buildWebFetchUserAgent, getAtlasTempDirName, logError, type Message } from '../../../shared'
+import { asSystemPrompt, buildWebFetchUserAgent, logError, type Message } from '../../../shared'
 import { modelProvider, buildOpenAIParams } from '../../../modelprovider'
 import { AbortError } from '../bash'
 import { createUserMessage } from '../files'
@@ -580,19 +580,12 @@ export type PersistBinaryResult =
   | { error: string }
 
 // delta ⑦：旧 getToolResultsDir = 会话目录 + 'tool-results'（session/
-// project 目录面）→ 域内最小形 = ATLAS 临时目录（files/pdf.ts 先例）
-const TOOL_RESULTS_SUBDIR = 'tool-results'
-function getToolResultsDir(): string {
-  return join(getAtlasTempDirName(), TOOL_RESULTS_SUBDIR)
-}
-
-async function ensureToolResultsDir(): Promise<void> {
-  try {
-    await mkdir(getToolResultsDir(), { recursive: true })
-  } catch {
-    // Directory may already exist
-  }
-}
+// project 目录面）→ 0.1.84 K5-6 安全复审硬化改接共享安全根
+// engine/tools/toolResultsDir.ts getSecureToolResultsDir（同根因第二
+// 站点：files/pdf.ts 先例；相对目录名基只读 cwd 下 EACCES + 共享区
+// 预占不验证两条同修）。本地 getToolResultsDir/ensureToolResultsDir
+// 撤销。
+import { getSecureToolResultsDir } from '../toolResultsDir'
 
 /**
  * Write raw binary bytes to the tool-results directory with a mime-derived
@@ -605,9 +598,17 @@ export async function persistBinaryContent(
   mimeType: string | undefined,
   persistId: string,
 ): Promise<PersistBinaryResult> {
-  await ensureToolResultsDir()
   const ext = extensionForMimeType(mimeType)
-  const filepath = join(getToolResultsDir(), `${persistId}.${ext}`)
+  // 0.1.84 K5-6：安全根建立失败（预占/只读 cwd 等）→ {error} 契约不变
+  let dir: string
+  try {
+    dir = await getSecureToolResultsDir()
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
+    logError(err)
+    return { error: err.message }
+  }
+  const filepath = join(dir, `${persistId}.${ext}`)
 
   try {
     await writeFile(filepath, bytes)

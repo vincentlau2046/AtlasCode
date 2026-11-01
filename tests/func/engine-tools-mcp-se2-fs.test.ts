@@ -3,15 +3,18 @@
  * 拦截面的 persistBinaryContent 成功/错误 2 面（裸 fs 写，unit 不可覆写，
  * plan/web func 先例）。
  *
- * 目录戳策略（§8.63.1.5 登记）：getToolResultsDir 相对名面 =
- * `${ATLAS_CONFIG_DIR_NAME|'.atlas'}-${uid}/tool-results`（cwd 相对，
- * shared/tempDir.ts Unix 面）→ per-file 进程隔离下 chdir(mkdtemp) 安全
- * + ATLAS_CONFIG_DIR_NAME = 唯一名戳（不触真实 .atlas 数据）。
+ * 目录戳策略（§8.63.1.5 登记；0.1.84 K5-6 安全复审硬化重锚）：
+ * 输出根 = getSecureToolResultsDir（engine/tools/toolResultsDir.ts）=
+ * `${ATLAS_TMPDIR}/${ATLAS_CONFIG_DIR_NAME|'.atlas'}-${uid}/tool-results`
+ * （绝对安全根，0700，symlink/他人属主预占拒绝）→ 本文件 per-file 进程
+ * 隔离下 ATLAS_TMPDIR = chdir(mkdtemp) 自有目录 + ATLAS_CONFIG_DIR_NAME
+ * = 唯一名戳（不触真实 .atlas 数据，路径形状与旧 cwd 相对面同形）。
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtempSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { _resetAtlasTempDirForTest } from '../../src/permissions/filesystem'
 import {
   ReadMcpResourceTool,
   resetMcpClientRegistry,
@@ -27,6 +30,14 @@ const BLOB_B64 = BLOB_BYTES.toString('base64')
 function restoreConfigDirName(orig: string | undefined): void {
   if (orig === undefined) delete process.env.ATLAS_CONFIG_DIR_NAME
   else process.env.ATLAS_CONFIG_DIR_NAME = orig
+}
+
+// ATLAS_TMPDIR 同坑（Bun env 赋 undefined 成 "undefined" 字符串）；
+// 恢复后须 _resetAtlasTempDirForTest()（getAtlasTempDir 模块级缓存）
+function restoreTmpdir(orig: string | undefined): void {
+  if (orig === undefined) delete process.env.ATLAS_TMPDIR
+  else process.env.ATLAS_TMPDIR = orig
+  _resetAtlasTempDirForTest()
 }
 
 function blobClient(blob: string): void {
@@ -66,6 +77,7 @@ describe('F-M1 blob 持久化成功面', () => {
   let origCwd: string
   let stamp: string
   let origEnv: string | undefined
+  let origTmp: string | undefined
 
   beforeAll(() => {
     origCwd = process.cwd()
@@ -74,11 +86,16 @@ describe('F-M1 blob 持久化成功面', () => {
     stamp = `atlas-mcp-func-${Date.now()}`
     origEnv = process.env.ATLAS_CONFIG_DIR_NAME
     process.env.ATLAS_CONFIG_DIR_NAME = stamp
+    // 0.1.84 K5-6：输出根改绝对安全根 → ATLAS_TMPDIR 钉到自有 cwd
+    origTmp = process.env.ATLAS_TMPDIR
+    process.env.ATLAS_TMPDIR = cwd
+    _resetAtlasTempDirForTest()
     resetMcpClientRegistry()
   })
 
   afterAll(() => {
     restoreConfigDirName(origEnv)
+    restoreTmpdir(origTmp)
     process.chdir(origCwd)
     rmSync(cwd, { recursive: true, force: true })
   })
@@ -89,7 +106,8 @@ describe('F-M1 blob 持久化成功面', () => {
 
     expect(out.blobSavedTo).toBeDefined()
     expect(out.blobSavedTo?.endsWith('.png')).toBe(true)
-    // 目录戳面：`<cwd>/<stamp>-<uid>/tool-results/`
+    // 目录戳面：`<atlas-tmp>/<stamp>-<uid>/tool-results/`（本文件
+    // ATLAS_TMPDIR = 自有 cwd，与旧 cwd 相对面同形）
     expect(out.blobSavedTo).toContain(
       `${stamp}-${UID}/tool-results/mcp-resource-`,
     )
@@ -102,11 +120,12 @@ describe('F-M1 blob 持久化成功面', () => {
   })
 })
 
-describe('F-M2 blob 错误面（tool-results 预造为文件 → ENOTDIR）', () => {
+describe('F-M2 blob 错误面（tool-results 预造为文件 → 持久化明确失败）', () => {
   let cwd: string
   let origCwd: string
   let stamp: string
   let origEnv: string | undefined
+  let origTmp: string | undefined
 
   beforeAll(() => {
     origCwd = process.cwd()
@@ -115,8 +134,13 @@ describe('F-M2 blob 错误面（tool-results 预造为文件 → ENOTDIR）', ()
     stamp = `atlas-mcp-func-err-${Date.now()}`
     origEnv = process.env.ATLAS_CONFIG_DIR_NAME
     process.env.ATLAS_CONFIG_DIR_NAME = stamp
-    // 预造 `<stamp>-<uid>/tool-results` 为**文件** → mkdir 静默失败 +
-    // writeFile ENOTDIR → persistBinaryContent {error} 面
+    // 0.1.84 K5-6：输出根改绝对安全根 → ATLAS_TMPDIR 钉到自有 cwd
+    origTmp = process.env.ATLAS_TMPDIR
+    process.env.ATLAS_TMPDIR = cwd
+    _resetAtlasTempDirForTest()
+    // 预造 `<stamp>-<uid>/tool-results` 为**文件**：旧码 mkdir 静默失败 +
+    // writeFile ENOTDIR；0.1.84 K5-6 硬化 helper mkdir 早失败 EEXIST →
+    // persistBinaryContent {error} 面（契约不变：明确失败非静默成功）
     const parent = join(cwd, `${stamp}-${UID}`)
     mkdirSync(parent)
     writeFileSync(join(parent, 'tool-results'), 'blocker')
@@ -125,6 +149,7 @@ describe('F-M2 blob 错误面（tool-results 预造为文件 → ENOTDIR）', ()
 
   afterAll(() => {
     restoreConfigDirName(origEnv)
+    restoreTmpdir(origTmp)
     process.chdir(origCwd)
     rmSync(cwd, { recursive: true, force: true })
   })
@@ -136,7 +161,8 @@ describe('F-M2 blob 错误面（tool-results 预造为文件 → ENOTDIR）', ()
     expect(out.blobSavedTo).toBeUndefined()
     expect(out.text).toBeDefined()
     expect(out.text!.startsWith('Binary content could not be saved to disk: ')).toBe(true)
-    // ENOTDIR 面（目录被文件遮蔽）
-    expect(out.text).toContain('ENOTDIR')
+    // 目录被文件遮蔽 → mkdir 明确失败（0.1.84 K5-6 helper 早失败
+    // EEXIST；旧码静默穿透到 writeFile ENOTDIR——errno 非契约面）
+    expect(out.text).toMatch(/EEXIST|ENOTDIR/)
   })
 })
