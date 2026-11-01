@@ -4,6 +4,59 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.84
+
+V3-5 K5 Read/文件/编码 8 件（上游 2.1.296/299/300/301/302 对齐；f4 工单
+`docs/2026-11-01-p0-wave-0184-ticket.md`；卷 3 方案 §3 K5 逐条账；判别
+测试 `tests/*/wave0184-*.test.ts` 11 文件；含安全复审两轮硬化
+56b3b64/7ccd33b）。
+
+### 图片与二进制后缀（2 件）
+
+- K5-1 图片有界读：实际读/解码前 128MB 上限 + FIFO/字符设备/
+  symlink 守卫（engine readTool + TUI FileReadTool 双体；不因
+  size 单独拒绝，超 134217728B 拒绝且不在拒绝前整图分配）。
+- K5-2 .xlsm/.parquet/.epub/.heic 补入双 binary 扩展表（engine
+  binaryExtensions + TUI constants/files），Read validate/call
+  拒绝不再误作文本。
+
+### 无损文本编码（2 件）
+
+- K5-3 UTF-16LE BOM Read 正确解码（不再乱码）+ 支持的 BOM 写回
+  保持（UTF8 BOM efbbbf / UTF16LE BOM fffe 不再静默丢失）；
+  非法 UTF8 / 显式 UTF-16BE 变更明确拒绝零写，不猜测传统编码。
+- K5-4 Edit/NotebookEdit 写边界无损守卫：全相关字节无损判别
+  （validate 与 call 之间文件变化的 mutation 面含），非 ASCII
+  损坏拒绝且原文件逐字节不变；notebook BOM JSON 拒绝一致性
+  契约保持。
+
+### Read 大文本 opt-in（1 件）
+
+- K5-5 allow_large 布尔 opt-in 贯通 schema/prompt/call/cache
+  （双体）：越过普通文本大小/输出 token 门槛的显式单次读取；
+  不绕 context/权限/非文本安全；cache dedup 键含模式，受限读
+  不冒充首次全量。
+
+### PDF 输出根与安全（1 件）
+
+- K5-6 engine PDF 输出根绝对化：getAtlasTempDirName() 目录名
+  误用修复（非特权 cwd 下 EACCES 断根）+ 安全复审两轮硬化
+  （共享区 root 预占 symlink/他人属主明确拒绝不穿透、
+  root/tool-results 0700 首建与显式收紧、输出叶 mkdtemp 恒
+  0700、persistBinaryContent 文件 0600；webFetchUtils 同根因
+  第二站点同修）。
+
+### @PDF 引用化与提示（2 件）
+
+- K5-7 @PDF 全量引用化：撤 10 页阈值门——小/大/页数未知一律
+  metadata 引用（旧码小 PDF 全文读取后 bytes 即弃）；pageCount
+  改 null 未知语义（pdfinfo 失败不估算冒充）；deny 先判零
+  metadata 泄漏；compact 模式与历史内联 normalizer 不变。
+- K5-8 通用引用提示四要素：内容未附上 / 回答前必须 Read /
+  pages ≤20 页每次 / 页数多或未知优先小范围逐页；不虚报
+  too large、不称无-pages-必失败（≤10 页 PDF 无 pages Read
+  本就成功）、不声称已读、无 provider 分支词（模型无关）。
+
 ## v0.1.83
 
 V3-4 K4 worktree/git 8 件（f4 工单
