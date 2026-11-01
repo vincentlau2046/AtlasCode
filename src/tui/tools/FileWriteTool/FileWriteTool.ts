@@ -17,12 +17,17 @@ import { logForDebugging } from '../../utils/debug.js'
 import { countLinesChanged, getPatchForDisplay } from '../../utils/diff.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { isENOENT } from '../../utils/errors.js'
-import { getFileModificationTime, writeTextContent } from '../../utils/file.js'
+import {
+  getFileModificationTime,
+  withSingleBomPrefix,
+  writeTextContent,
+} from '../../utils/file.js'
 import {
   fileHistoryEnabled,
   fileHistoryTrackEdit,
 } from '../../utils/fileHistory.js'
 import { readFileSyncWithMetadata } from '../../utils/fileRead.js'
+import { UndecodableTextError } from 'src/shared'
 import { getFsImplementation } from '../../utils/fsOperations.js'
 import {
   fetchSingleFileGitDiff,
@@ -230,6 +235,26 @@ export const FileWriteTool = buildTool({
       }
     }
 
+    // K5-3/4（0.1.84）：解码探针——validate 与 call 同一判别。既有文件必须
+    // 可无损解码才允许覆写：非法 UTF-8 / UTF-16BE / 坏 LE 码元从「validate
+    // 放行、call 才炸」变为验证入口 fail-closed（可操作错误 + 文件未修改）。
+    // stat 后并发删除（ENOENT）→ call 侧按新文件路径处理，不误拒。
+    try {
+      readFileSyncWithMetadata(fullFilePath)
+    } catch (e) {
+      if (isENOENT(e)) {
+        return { result: true }
+      }
+      if (e instanceof UndecodableTextError) {
+        return {
+          result: false,
+          message: `${e.message} The file was not modified.`,
+          errorCode: 5,
+        }
+      }
+      throw e
+    }
+
     return { result: true }
   },
   async call(
@@ -307,6 +332,9 @@ export const FileWriteTool = buildTool({
     }
 
     const enc = meta?.encoding ?? 'utf8'
+    // K5-4：BOM 往返以读入的原文件 bom 标记为准——模型是否回传 U+FEFF
+    // 不影响标记；新文件（meta=null）无自动 BOM。
+    const bom = meta?.bom ?? false
     const oldContent = meta?.content ?? null
 
     // Write is a full content replacement — the model sent explicit line endings
@@ -314,7 +342,7 @@ export const FileWriteTool = buildTool({
     // the old file's line endings (or sampled the repo via ripgrep for new
     // files), which silently corrupted e.g. bash scripts with \r on Linux when
     // overwriting a CRLF file or when binaries in cwd poisoned the repo sample.
-    writeTextContent(fullFilePath, content, enc, 'LF')
+    writeTextContent(fullFilePath, content, enc, 'LF', bom)
 
     // Notify LSP servers about file modification (didChange) and save (didSave)
     const lspManager = getLspServerManager()
@@ -340,9 +368,12 @@ export const FileWriteTool = buildTool({
     // Notify VSCode about the file change for diff view
     notifyVscodeFileUpdated(fullFilePath, oldContent, content)
 
-    // Update read timestamp, to invalidate stale writes
+    // Update read timestamp, to invalidate stale writes. K5-4：state 存归一
+    // 后内容（bom=true 含单 BOM 头）——下次 Write 的 stale 内容比对按
+    // readFileSyncWithMetadata 语义（content 含 BOM 头），不归一会把每次
+    // BOM 文件连续写误判成外部修改。
     readFileState.set(fullFilePath, {
-      content,
+      content: withSingleBomPrefix(content, bom),
       timestamp: getFileModificationTime(fullFilePath),
       offset: undefined,
       limit: undefined,

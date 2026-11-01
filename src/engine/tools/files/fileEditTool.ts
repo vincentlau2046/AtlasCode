@@ -87,6 +87,7 @@ import {
   formatFileSize,
   getFsImplementation,
   isENOENT,
+  UndecodableTextError,
 } from '../../../shared'
 import {
   checkWritePermissionForTool,
@@ -102,6 +103,7 @@ import {
   getFileModificationTime,
   getDisplayPath,
   suggestPathUnderCwd,
+  withSingleBomPrefix,
   writeTextContent,
 } from './fileUtils'
 import {
@@ -287,22 +289,22 @@ export const EditTool: EditToolFace = {
       }
     }
 
-    // Read the file as bytes first so we can detect encoding from the buffer
-    // instead of calling detectFileEncoding (which does its own sync readSync
-    // and would fail with a wasted ENOENT when the file doesn't exist).
+    // K5-3/4（0.1.84）：validate 与 call 同一判别——直接走 readFileSyncWithMetadata
+    // 严格解码链（旧链 = readFileBytes + 2 字节 LE BOM 采样 + 宽容 toString，
+    // 非法 UTF-8/UTF-16BE/坏 LE 码元被静默放行成 U+FFFD 乱码参与比对）。
+    // 无法无损解码 → 验证入口 fail-closed（可操作错误 + 文件未修改）。
     let fileContent: string | null
     try {
-      const fileBuffer = await fs.readFileBytes(fullFilePath)
-      const encoding: BufferEncoding =
-        fileBuffer.length >= 2 &&
-        fileBuffer[0] === 0xff &&
-        fileBuffer[1] === 0xfe
-          ? 'utf16le'
-          : 'utf8'
-      fileContent = fileBuffer.toString(encoding).replaceAll('\r\n', '\n')
+      fileContent = readFileSyncWithMetadata(fullFilePath).content
     } catch (e) {
       if (isENOENT(e)) {
         fileContent = null
+      } else if (e instanceof UndecodableTextError) {
+        return {
+          result: false,
+          message: `${e.message} The file was not modified.`,
+          errorCode: 11,
+        }
       } else {
         throw e
       }
@@ -462,6 +464,7 @@ export const EditTool: EditToolFace = {
       fileExists,
       encoding,
       lineEndings: endings,
+      bom,
     } = readFileForEdit(absoluteFilePath)
 
     if (fileExists) {
@@ -504,14 +507,18 @@ export const EditTool: EditToolFace = {
       replaceAll: replaceAll,
     })
 
-    // 5. Write to disk
-    writeTextContent(absoluteFilePath, updatedFile, encoding, endings)
+    // 5. Write to disk. K5-4：BOM 以读入的原文件标记往返（content 里的
+    // U+FEFF 头不被视为标记来源——writeTextContent 内部归一为恰好一个）。
+    writeTextContent(absoluteFilePath, updatedFile, encoding, endings, bom)
 
     // delta ⑦：LSP didChange/didSave + vscode diff notify 裁（域面无）
 
-    // 6. Update read timestamp, to invalidate stale writes
+    // 6. Update read timestamp, to invalidate stale writes. K5-4：state 存
+    // withSingleBomPrefix 归一内容——常规单 BOM 下为 no-op（updatedFile 头
+    // 已含 ﻿），双 BOM 边缘归一；与 readFileSyncWithMetadata 的 stale
+    // 内容比对口径（content 含 BOM 头）一致。
     ctx.readFileState?.set(absoluteFilePath, {
-      content: updatedFile,
+      content: withSingleBomPrefix(updatedFile, bom),
       timestamp: getFileModificationTime(absoluteFilePath),
       offset: undefined,
       limit: undefined,
@@ -570,6 +577,7 @@ function readFileForEdit(absoluteFilePath: string): {
   fileExists: boolean
   encoding: BufferEncoding
   lineEndings: LineEndingType
+  bom: boolean
 } {
   try {
     const meta = readFileSyncWithMetadata(absoluteFilePath)
@@ -578,6 +586,7 @@ function readFileForEdit(absoluteFilePath: string): {
       fileExists: true,
       encoding: meta.encoding,
       lineEndings: meta.lineEndings,
+      bom: meta.bom,
     }
   } catch (e) {
     if (isENOENT(e)) {
@@ -586,6 +595,7 @@ function readFileForEdit(absoluteFilePath: string): {
         fileExists: false,
         encoding: 'utf8',
         lineEndings: 'LF',
+        bom: false,
       }
     }
     throw e

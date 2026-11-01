@@ -1,4 +1,4 @@
-import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
+import { feature, UndecodableTextError } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import { extname, isAbsolute, resolve } from 'path'
 import {
   fileHistoryEnabled,
@@ -245,6 +245,15 @@ export const NotebookEditTool = buildTool({
           result: false,
           message: 'Notebook file does not exist.',
           errorCode: 1,
+        }
+      }
+      // K5-3/4（0.1.84）：解码层失败先于 JSON 解析面拒绝（旧代码裸 throw
+      // → 上层 500；validate/call 同一判别 = call 的 broad catch 同消息）。
+      if (e instanceof UndecodableTextError) {
+        return {
+          result: false,
+          message: `${e.message} The file was not modified.`,
+          errorCode: 11,
         }
       }
       throw e

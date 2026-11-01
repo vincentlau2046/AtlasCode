@@ -116,17 +116,41 @@ export async function getFileModificationTimeAsync(
   return Math.floor(s.mtimeMs)
 }
 
+/**
+ * K5-4（0.1.84）：BOM 有且仅有一次——头部多余 U+FEFF 归一剥除后前置恰好
+ * 一个。bom 标志来自读入文件的元数据（readFileSyncWithMetadata），不让
+ * 模型是否回传 U+FEFF 决定原编码标记；bom=false 原样返回（不加不剥）。
+ * 写面与 readFileState 归一面共用本助手，保证盘上字节与 stale 比对口径
+ * （下次 readFileSyncWithMetadata content 含 BOM 头）一致。
+ */
+export function withSingleBomPrefix(content: string, bom: boolean): string {
+  if (!bom) {
+    return content
+  }
+  let out = content
+  while (out.startsWith('﻿')) {
+    out = out.slice(1)
+  }
+  return '﻿' + out
+}
+
 export function writeTextContent(
   filePath: string,
   content: string,
   encoding: BufferEncoding,
   endings: LineEndingType,
+  bom?: boolean,
 ): void {
   let toWrite = content
   if (endings === 'CRLF') {
     // Normalize any existing CRLF to LF first so a new_string that already
     // contains \r\n (raw model output) doesn't become \r\r\n after the join.
     toWrite = content.replaceAll('\r\n', '\n').split('\n').join('\r\n')
+  }
+  if (bom) {
+    // K5-4：bom=true → BOM 有且仅有一次（调用方 = Write/Edit 携带读入的
+    // 原文件 bom 标志）；缺省/false → 不加不剥（既有调用者零改动）。
+    toWrite = withSingleBomPrefix(toWrite, true)
   }
 
   writeFileSyncAndFlush_DEPRECATED(filePath, toWrite, { encoding })
