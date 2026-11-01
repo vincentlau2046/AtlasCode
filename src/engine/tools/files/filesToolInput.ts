@@ -78,6 +78,11 @@ export interface ReadToolInput {
   offset?: number
   limit?: number
   pages?: string
+  /**
+   * K5-5（0.1.84）：仅普通文本读显式解除 byte/token 限制。缺省 false
+   * （默认行为不变）；call 入口严格 `=== true` 判定（字符串/数字不冒充）。
+   */
+  allow_large?: boolean
 }
 
 /**

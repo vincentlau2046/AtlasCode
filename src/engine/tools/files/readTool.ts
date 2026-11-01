@@ -154,7 +154,10 @@ import {
   OFFSET_INSTRUCTION_TARGETED,
   renderPromptTemplate,
 } from './readPrompt'
-import { getDefaultFileReadingLimits } from './readFileLimits'
+import {
+  ALLOW_LARGE_MAX_BYTES,
+  getDefaultFileReadingLimits,
+} from './readFileLimits'
 import {
   addLineNumbers,
   FILE_NOT_FOUND_CWD_NOTE,
@@ -292,6 +295,12 @@ export const READ_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
     pages: {
       type: 'string',
       description: `Page range for PDF files (e.g., "1-5", "3", "10-20"). Only applicable to PDF files. Maximum ${PDF_MAX_PAGES_PER_READ} pages per request.`,
+    },
+    // K5-5（0.1.84）：仅普通文本读的显式解除面；缺省 false 默认不变。
+    allow_large: {
+      type: 'boolean',
+      description:
+        'Set to true only when you explicitly need the entire plain text file in one read and still have context space for it. This lifts the size and output-token limits for that full plain text read; providing offset and limit still selects the range, and the normal limits then apply to it. It does not affect images, PDFs, or notebooks.',
     },
   },
   required: ['file_path'],
@@ -600,6 +609,9 @@ export const ReadTool: ReadToolFace = {
     // delta ②：semantic 字符串数字容忍 = 入口运行时转换（S-C1/S-C4 先例）
     const offset = (semanticToNumber(raw.offset) as number | undefined) ?? 1
     const limit = semanticToNumber(raw.limit) as number | undefined
+    // K5-5（0.1.84）：严格 === true 判定 —— 字符串 'true'/数字 1 静默按
+    // 缺省 false 处理（不冒充），与 TUI zod 拒非法类型互补（call 直调面）。
+    const allowLarge = raw.allow_large === true
     const ctx = (context ?? {}) as FilesToolUseContext
     const { readFileState, fileReadingLimits } = ctx
 
@@ -627,9 +639,12 @@ export const ReadTool: ReadToolFace = {
     // Default: killswitch off = dedup enabled. Client-side only — no
     // server support needed.
     // P-C2 探针锚点：dedup 命中返 file_unchanged / env 设真后返全量内容。
+    // K5-5：allow_large:true 消费面禁 dedup（不读普通模式的 cache stub——
+    // 该请求的意义就是取回全量内容）；成功后照常登记 readFileState，
+    // read-before-edit 前置不受影响。
     const dedupKillswitch = isEnvTruthy(process.env.ATLAS_DISABLE_READ_DEDUP)
     const existingState =
-      dedupKillswitch || !readFileState
+      dedupKillswitch || !readFileState || allowLarge
         ? undefined
         : readFileState.get(fullFilePath)
     // Only dedup entries that came from a prior Read (offset is always set
@@ -671,6 +686,7 @@ export const ReadTool: ReadToolFace = {
         offset,
         limit,
         pages,
+        allowLarge,
         maxSizeBytes,
         maxTokens,
         readFileState,
@@ -693,6 +709,7 @@ export const ReadTool: ReadToolFace = {
               offset,
               limit,
               pages,
+              allowLarge,
               maxSizeBytes,
               maxTokens,
               readFileState,
@@ -857,6 +874,7 @@ async function callInner(
   offset: number,
   limit: number | undefined,
   pages: string | undefined,
+  allowLarge: boolean,
   maxSizeBytes: number,
   maxTokens: number,
   readFileState: ReadFileState | undefined,
@@ -1032,16 +1050,31 @@ async function callInner(
   }
 
   // --- Text file (single async read via readFileInRange) ---
+  // K5-5（0.1.84）：allow_large:true 仅作用于文本支的**全量读**
+  // （limit === undefined）——byte 帽从 maxSizeBytes 抬到
+  // ALLOW_LARGE_MAX_BYTES 绝对上界（防 OOM，非无界读；fast path stat
+  // 先行抛 / 流式累积中抛，分配受帽约束），output-token 检查跳过。
+  // 安全复审硬化：显式 offset/limit 的 range 读**不受 flag 影响**——
+  // byte 帽保持既有 undefined（流式路径为算 totalLines 扫全文件，若施
+  // 帽会误伤大文件小 range 分页），token 门无条件保留（否则 range 读
+  // cap=undefined + token 检查跳过 = 无界读）。不变量：任何 range 读
+  // 行为与不带 flag 完全一致。notebook/image/PDF 支不接线。
   const lineOffset = offset === 0 ? 0 : offset - 1
   const { content, lineCount, totalLines, mtimeMs } = await readFileInRange(
     resolvedFilePath,
     lineOffset,
     limit,
-    limit === undefined ? maxSizeBytes : undefined,
+    limit === undefined
+      ? allowLarge
+        ? ALLOW_LARGE_MAX_BYTES
+        : maxSizeBytes
+      : undefined,
     context.abortController.signal,
   )
 
-  await validateContentTokens(content, ext, maxTokens)
+  if (!(allowLarge && limit === undefined)) {
+    await validateContentTokens(content, ext, maxTokens)
+  }
 
   readFileState?.set(fullFilePath, {
     content,

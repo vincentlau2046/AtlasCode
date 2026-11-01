@@ -51,6 +51,7 @@ Usage:
 - By default, it reads up to ${MAX_LINES_TO_READ} lines starting from the beginning of the file${maxSizeInstruction}
 ${offsetInstruction}
 ${lineFormat}
+- For plain text files that exceed the default size or output-token limits, allow_large: true reads the complete file in one call. Use it only when you explicitly need the entire file and still have context space for it; when provided, offset and limit still select the range and the normal limits apply to that range. Images, PDFs, and notebooks are not affected by this parameter.
 - This tool allows Atlas to read images (eg PNG, JPG, etc). When reading an image file the contents are presented visually as Atlas is a multimodal LLM.${
     isPDFSupported()
       ? '\n- This tool can read PDF files (.pdf). For large PDFs (more than 10 pages), you MUST provide the pages parameter to read specific page ranges (e.g., pages: "1-5"). Reading a large PDF without the pages parameter will fail. Maximum 20 pages per request.'

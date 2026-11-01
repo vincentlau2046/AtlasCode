@@ -28,9 +28,18 @@
  *    逐字保留（用户态 override 优先级 = env > 默认；memoize 语义 = 首次
  *    调用固化，旧 GB 头注「fixed at first call」同源）。
  */
+import { MAX_IMAGE_SOURCE_BYTES } from '../../../shared'
 import { MAX_OUTPUT_SIZE } from './fileUtils'
 
 export const DEFAULT_MAX_OUTPUT_TOKENS = 25000
+
+/**
+ * K5-5（0.1.84）：allow_large:true 普通**文本**读的绝对上界（防 OOM）。
+ * 对齐 MAX_IMAGE_SOURCE_BYTES（128MiB）——超过此量级的内容已超出任何
+ * 上下文窗口的可工作范围。仅文本支接线（readFileInRange 第 4 参）；
+ * image / PDF / notebook 各自的限额面不受 allow_large 影响。
+ */
+export const ALLOW_LARGE_MAX_BYTES = MAX_IMAGE_SOURCE_BYTES
 
 /** 无参 memoize（旧 lodash-es/memoize，delta ①）。 */
 function memoizeNoArg<T>(fn: () => T): () => T {

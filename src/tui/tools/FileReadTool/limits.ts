@@ -13,9 +13,18 @@
  * tool-result while truncation yields ~25K tokens of content at the cap.
  */
 import memoize from 'lodash-es/memoize.js'
+import { MAX_IMAGE_SOURCE_BYTES } from 'src/shared'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/tui/services/analytics/growthbook.js'
 import { MAX_OUTPUT_SIZE } from 'src/tui/utils/file.js'
 export const DEFAULT_MAX_OUTPUT_TOKENS = 25000
+
+/**
+ * K5-5（0.1.84）：allow_large:true 普通**文本**读的绝对上界（防 OOM）。
+ * 对齐 MAX_IMAGE_SOURCE_BYTES（128MiB）——engine readFileLimits.ts
+ * ALLOW_LARGE_MAX_BYTES 双体同值。仅文本支接线；image / PDF / notebook
+ * 各自的限额面不受 allow_large 影响。
+ */
+export const ALLOW_LARGE_MAX_BYTES = MAX_IMAGE_SOURCE_BYTES
 
 /**
  * Env var override for max output tokens. Returns undefined when unset/invalid

@@ -4,7 +4,7 @@
  * unit 层（零磁盘——同 S-C4 core-face 纪律：permissions bootstrap-env 双戳
  * 不存在目录 FAKE_CWD + bootstrap cwd 双戳，无 fixture 无写）：
  *  - ReadTool 对象面（新仓 shared Tool 契约 = 纯对象，非 buildTool；
- *    S-B5/S-C4 先例）：name / JSON schema 4 字段面 / maxResultSizeChars
+ *    S-B5/S-C4 先例）：name / JSON schema 5 字段面（K5-5 +allow_large）/ maxResultSizeChars
  *    Infinity / strict / TOOL_DEFAULTS 成员逐值（delta ④）/ userFacingName
  *    'Read'（delta ④ UI 3 支裁最小形）/ toAutoClassifierInput 逐字 /
  *    getPath 逐字（旧 L341-343 原样 file_path || getCwd()，非 expand）/
@@ -164,7 +164,9 @@ describe('ReadTool 对象面', () => {
     expect(ReadTool.userFacingName(null)).toBe('Read')
   })
 
-  test('JSON schema 4 字段 + required 单一必填 + pages 描述含 20 页上限', () => {
+  test('JSON schema 5 字段 + required 单一必填 + pages 描述含 20 页上限', () => {
+    // K5-5（0.1.84）：+allow_large 第 5 字段（形状锁 4→5；新面细粒度契约
+    // 在 tests/unit/wave0184-read-large-contract.test.ts）
     expect(READ_TOOL_INPUT_SCHEMA.type).toBe('object')
     const props = READ_TOOL_INPUT_SCHEMA.properties as Record<
       string,
@@ -175,6 +177,7 @@ describe('ReadTool 对象面', () => {
       'offset',
       'limit',
       'pages',
+      'allow_large',
     ])
     expect(READ_TOOL_INPUT_SCHEMA.required).toEqual(['file_path'])
     expect(props.pages?.description).toContain('Maximum 20 pages per request')

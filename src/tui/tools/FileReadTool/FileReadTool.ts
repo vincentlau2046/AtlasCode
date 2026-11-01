@@ -71,7 +71,10 @@ import { readFileInRange } from '../../utils/readFileInRange.js'
 import { semanticNumber } from '../../utils/semanticNumber.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { BASH_TOOL_NAME } from '../BashTool/toolName.js'
-import { getDefaultFileReadingLimits } from './limits.js'
+import {
+  ALLOW_LARGE_MAX_BYTES,
+  getDefaultFileReadingLimits,
+} from './limits.js'
 import {
   DESCRIPTION,
   FILE_READ_TOOL_NAME,
@@ -198,6 +201,14 @@ const inputSchema = lazySchema(() =>
       .optional()
       .describe(
         `Page range for PDF files (e.g., "1-5", "3", "10-20"). Only applicable to PDF files. Maximum ${PDF_MAX_PAGES_PER_READ} pages per request.`,
+      ),
+    // K5-5（0.1.84）：仅普通文本读的显式解除面；strictObject 拒非法类型
+    // （'true'/1/null），缺省 false 默认不变（engine JSON schema 双体同步）。
+    allow_large: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true only when you explicitly need the entire plain text file in one read and still have context space for it. This lifts the size and output-token limits for that full plain text read; providing offset and limit still selects the range, and the normal limits then apply to it. It does not affect images, PDFs, or notebooks.',
       ),
   }),
 )
@@ -454,12 +465,15 @@ export const FileReadTool = buildTool({
     return { result: true }
   },
   async call(
-    { file_path, offset = 1, limit = undefined, pages },
+    { file_path, offset = 1, limit = undefined, pages, allow_large },
     context,
     _canUseTool?,
     parentMessage?,
   ) {
     const { readFileState, fileReadingLimits } = context
+    // K5-5（0.1.84）：严格 === true 判定 —— call 直调面字符串 'true'/数字 1
+    // 不冒充（与 zod strictObject 拒非法类型互补）。
+    const allowLarge = allow_large === true
 
     const defaults = getDefaultFileReadingLimits()
     const maxSizeBytes =
@@ -507,7 +521,10 @@ export const FileReadTool = buildTool({
       'atlas_read_dedup_killswitch',
       false,
     )
-    const existingState = dedupKillswitch
+    // K5-5：allow_large:true 消费面禁 dedup（不读普通模式的 cache stub——
+    // 该请求的意义就是取回全量内容）；成功后照常登记 readFileState，
+    // read-before-edit 前置不受影响。
+    const existingState = dedupKillswitch || allowLarge
       ? undefined
       : readFileState.get(fullFilePath)
     // Only dedup entries that came from a prior Read (offset is always set
@@ -565,6 +582,7 @@ export const FileReadTool = buildTool({
         offset,
         limit,
         pages,
+        allowLarge,
         maxSizeBytes,
         maxTokens,
         readFileState,
@@ -588,6 +606,7 @@ export const FileReadTool = buildTool({
               offset,
               limit,
               pages,
+              allowLarge,
               maxSizeBytes,
               maxTokens,
               readFileState,
@@ -775,6 +794,7 @@ async function callInner(
   offset: number,
   limit: number | undefined,
   pages: string | undefined,
+  allowLarge: boolean,
   maxSizeBytes: number,
   maxTokens: number,
   readFileState: ToolUseContext['readFileState'],
@@ -940,17 +960,32 @@ async function callInner(
   }
 
   // --- Text file (single async read via readFileInRange) ---
+  // K5-5（0.1.84）：allow_large:true 仅作用于文本支的**全量读**
+  // （limit === undefined）——byte 帽从 maxSizeBytes 抬到
+  // ALLOW_LARGE_MAX_BYTES 绝对上界（防 OOM，非无界读；fast path stat
+  // 先行抛 / 流式累积中抛，分配受帽约束），output-token 检查跳过。
+  // 安全复审硬化：显式 offset/limit 的 range 读**不受 flag 影响**——
+  // byte 帽保持既有 undefined（流式路径为算 totalLines 扫全文件，若施
+  // 帽会误伤大文件小 range 分页），token 门无条件保留（否则 range 读
+  // cap=undefined + token 检查跳过 = 无界读）。不变量：任何 range 读
+  // 行为与不带 flag 完全一致。notebook/image/PDF 支不接线。
   const lineOffset = offset === 0 ? 0 : offset - 1
   const { content, lineCount, totalLines, totalBytes, readBytes, mtimeMs } =
     await readFileInRange(
       resolvedFilePath,
       lineOffset,
       limit,
-      limit === undefined ? maxSizeBytes : undefined,
+      limit === undefined
+        ? allowLarge
+          ? ALLOW_LARGE_MAX_BYTES
+          : maxSizeBytes
+        : undefined,
       context.abortController.signal,
     )
 
-  await validateContentTokens(content, ext, maxTokens)
+  if (!(allowLarge && limit === undefined)) {
+    await validateContentTokens(content, ext, maxTokens)
+  }
 
   readFileState.set(fullFilePath, {
     content,
