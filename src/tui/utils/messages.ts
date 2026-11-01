@@ -3649,14 +3649,23 @@ Read the team config to discover your teammates' names. Check the task list peri
       ])
     }
     case 'pdf_reference': {
+      // 0.1.84 K5-8 通用引用提示：内容未附上（小 PDF 也是引用，非「太大
+      // 才引用」）/ 回答前必读 / 可 pages 且 ≤20 页每次 / 页数多或未知优先
+      // 小范围逐页。不虚报（无 too large、无「无 pages 必失败」—— ≤10 页
+      // PDF 无 pages 的 Read 本就成功），不声称已读，无 provider 分支词。
+      const pagesText =
+        attachment.pageCount === null
+          ? 'page count unknown'
+          : `${attachment.pageCount} pages`
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content:
-            `PDF file: ${attachment.filename} (${attachment.pageCount} pages, ${formatFileSize(attachment.fileSize)}). ` +
-            `This PDF is too large to read all at once. You MUST use the ${FILE_READ_TOOL_NAME} tool with the pages parameter ` +
-            `to read specific page ranges (e.g., pages: "1-5"). Do NOT call ${FILE_READ_TOOL_NAME} without the pages parameter ` +
-            `or it will fail. Start by reading the first few pages to understand the structure, then read more as needed. ` +
-            `Maximum 20 pages per request.`,
+            `PDF file: ${attachment.filename} (${pagesText}, ${formatFileSize(attachment.fileSize)}). ` +
+            `The content of this PDF is not attached to this message — only this reference is. ` +
+            `Before answering any question about its content, you MUST use the ${FILE_READ_TOOL_NAME} tool to read it. ` +
+            `You may read a page range with the pages parameter (e.g., pages: "1-5"); up to 20 pages per request. ` +
+            `When the page count is large or unknown, start with a small range such as pages: "1-3" and read further ` +
+            `page by page as needed. Do not answer questions about this PDF's content from assumptions.`,
           isMeta: true,
         }),
       ])

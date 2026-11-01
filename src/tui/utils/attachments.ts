@@ -173,7 +173,6 @@ import { jsonStringify } from './slowOperations.js'
 import { isPDFExtension } from './pdfUtils.js'
 import { getLocalISODate } from '../constants/common.js'
 import { getPDFPageCount } from './pdf.js'
-import { PDF_AT_MENTION_INLINE_THRESHOLD } from '../constants/apiLimits.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'
 import { findRelevantMemories } from '../memdir/findRelevantMemories.js'
 import { memoryAge, memoryFreshnessText } from '../memdir/memoryAge.js'
@@ -266,7 +265,8 @@ export type CompactFileReferenceAttachment = {
 export type PDFReferenceAttachment = {
   type: 'pdf_reference'
   filename: string
-  pageCount: number
+  /** pdfinfo 页数；pdfinfo 不可用 → null（页数未知，不以 size 估算冒充） */
+  pageCount: number | null
   fileSize: number
   /** Path relative to CWD at creation time, for stable display */
   displayPath: string
@@ -2800,9 +2800,14 @@ export async function* getAttachmentMessages(
  * @returns A new_file attachment or null if the file couldn't be read
  */
 /**
- * Check if a PDF file should be represented as a lightweight reference
- * instead of being inlined. Returns a PDFReferenceAttachment for large PDFs
- * (more than PDF_AT_MENTION_INLINE_THRESHOLD pages), or null otherwise.
+ * Represent an @-mentioned PDF as a lightweight reference instead of
+ * inlining its bytes (0.1.84 K5-7). Every PDF gets a reference — small ones
+ * too: the old threshold gate inlined small PDFs by reading the full file
+ * only to drop the bytes from the request later. pageCount is null when
+ * pdfinfo cannot determine it (unknown, not a size estimate). The deny
+ * check in generateFileAttachment runs before this, so a denied file
+ * yields no reference metadata; the call site gates on mode ===
+ * 'at-mention' only — the compact path never takes a reference.
  */
 export async function tryGetPDFReference(
   filename: string,
@@ -2816,16 +2821,12 @@ export async function tryGetPDFReference(
       getFsImplementation().stat(filename),
       getPDFPageCount(filename),
     ])
-    // Use page count if available, otherwise fall back to size heuristic (~100KB per page)
-    const effectivePageCount = pageCount ?? Math.ceil(stats.size / (100 * 1024))
-    if (effectivePageCount > PDF_AT_MENTION_INLINE_THRESHOLD) {
-      return {
-        type: 'pdf_reference',
-        filename,
-        pageCount: effectivePageCount,
-        fileSize: stats.size,
-        displayPath: relative(getCwd(), filename),
-      }
+    return {
+      type: 'pdf_reference',
+      filename,
+      pageCount,
+      fileSize: stats.size,
+      displayPath: relative(getCwd(), filename),
     }
   } catch {
     // If we can't stat the file, return null to proceed with normal reading

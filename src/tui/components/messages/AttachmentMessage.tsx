@@ -127,7 +127,10 @@ export function AttachmentMessage({
     case 'pdf_reference':
       return <Line>
           Referenced PDF <Text bold>{attachment.displayPath}</Text> (
-          {attachment.pageCount} pages)
+          {attachment.pageCount === null
+            ? 'page count unknown'
+            : `${attachment.pageCount} pages`}
+          )
         </Line>;
     case 'selected_lines_in_ide':
       return <Line>
