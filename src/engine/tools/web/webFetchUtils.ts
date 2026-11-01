@@ -611,7 +611,9 @@ export async function persistBinaryContent(
   const filepath = join(dir, `${persistId}.${ext}`)
 
   try {
-    await writeFile(filepath, bytes)
+    // v2：文件 0600（umask 只会再收紧）；文件级 symlink 跟随不设防
+    // （同 UID 信任域 + persistId 调用方生成，见 toolResultsDir 头注）
+    await writeFile(filepath, bytes, { mode: 0o600 })
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error))
     logError(err)

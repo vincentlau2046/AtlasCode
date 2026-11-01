@@ -24,6 +24,10 @@
  * 安全硬化族（安全复审 MEDIUM）：/tmp 共享可写区 root 预占面——首建
  * 0700 + mkdtemp 私有叶（不信 umask）；symlink 预占明确拒绝不穿透；
  * 同根因第二站点 webFetchUtils.persistBinaryContent 同判别。
+ * 安全硬化族 v2（复审第二轮）：内部 tool-results 同验证（单层 mkdir +
+ * lstat 拒 symlink，recursive mkdir 对 symlink-to-dir 静默 no-op 是洞）；
+ * 既有目录 0755（旧版 recursive mkdir umask 遗留）显式 chmod 收紧 0700；
+ * persistBinaryContent 文件 0600。
  */
 import { spawnSync } from 'child_process'
 import {
@@ -39,7 +43,7 @@ import {
   writeFileSync,
 } from 'fs'
 import { tmpdir } from 'os'
-import { isAbsolute, join } from 'path'
+import { dirname, isAbsolute, join } from 'path'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import {
   extractPDFPages,
@@ -252,12 +256,16 @@ describe('K5-6 engine PDF 输出根（非特权 cwd + 绝对安全根）', () =>
     }
   })
 
-  t('输出目录权限拒绝（tool-results 0555）→ 明确 EACCES 失败非空成功', async () => {
+  // v2 语义重锚：本 UID 属主的 0555 tool-results 会被显式收紧 0700 后
+  // 正常写入（复审「验证属主后安全收紧」），不再是失败面；真正的
+  // 「输出根不可建立」面 = 父目录只读 + 根缺失 → mkdir EACCES 上抛。
+  roT('输出根不可建（父目录 0555 + 根缺失）→ 明确 EACCES 失败非空成功', async () => {
     const p = join(srcDir, 'perm.pdf')
     writeFileSync(p, buildPdf(1))
-    const toolResults = join(getAtlasTempDir(), 'tool-results')
-    mkdirSync(toolResults, { recursive: true })
-    chmodSync(toolResults, 0o555)
+    const root = getAtlasTempDir().replace(/\/+$/, '')
+    const parent = dirname(root)
+    rmSync(root, { recursive: true, force: true })
+    chmodSync(parent, 0o555)
     try {
       const r = await extractPDFPages(p)
       expect(r.success).toBe(false)
@@ -265,7 +273,7 @@ describe('K5-6 engine PDF 输出根（非特权 cwd + 绝对安全根）', () =>
         expect(r.error.message).toMatch(/EACCES|permission/i)
       }
     } finally {
-      chmodSync(toolResults, 0o755)
+      chmodSync(parent, 0o755)
     }
   })
 
@@ -341,6 +349,7 @@ describe('K5-6 安全硬化：tool-results 根验证 + 私有输出（安全复�
       const { outputDir } = unwrap(r)
       const root = getAtlasTempDir().replace(/\/+$/, '')
       expect(statSync(root).mode & 0o777).toBe(0o700)
+      expect(statSync(join(root, 'tool-results')).mode & 0o777).toBe(0o700)
       expect(statSync(outputDir).mode & 0o777).toBe(0o700)
     } finally {
       process.umask(oldUmask)
@@ -387,6 +396,71 @@ describe('K5-6 安全硬化：tool-results 根验证 + 私有输出（安全复�
       }
     } finally {
       process.chdir(prev)
+    }
+  })
+
+  // ── 安全复审 v2：内部目录验证 + 既有目录收紧 + 文件 0600 ─────────────
+
+  pT('tool-results 被 symlink 预占 → 明确失败，不穿透写入诱饵目录', async () => {
+    const root = getAtlasTempDir().replace(/\/+$/, '')
+    const toolResults = join(root, 'tool-results')
+    const decoy = mkdtempSync(join(tmpdir(), 'wave0184-pdf-decoy2-'))
+    rmSync(toolResults, { recursive: true, force: true })
+    symlinkSync(decoy, toolResults)
+    try {
+      const p = join(srcDir, 'preoccupied-sub.pdf')
+      writeFileSync(p, buildPdf(1))
+      const r = await extractPDFPages(p)
+      expect(r.success).toBe(false)
+      if (!r.success) {
+        expect(r.error.message).toMatch(/unsafe|not a real directory/i)
+      }
+      expect(readdirSync(decoy)).toEqual([])
+    } finally {
+      rmSync(toolResults, { force: true })
+      rmSync(decoy, { recursive: true, force: true })
+    }
+  })
+
+  pT('root/tool-results 预存在 0755（旧版遗留）→ 收紧 0700（mkdir mode 不修复既有）', async () => {
+    const freshRoot = mkdtempSync(join(tmpdir(), 'wave0184-pdf-tighten-'))
+    const prevTmp = process.env.ATLAS_TMPDIR
+    process.env.ATLAS_TMPDIR = freshRoot
+    _resetAtlasTempDirForTest()
+    try {
+      const root = getAtlasTempDir().replace(/\/+$/, '')
+      // 模拟旧版 recursive mkdir + umask 022 遗留的宽松权限
+      mkdirSync(root, { mode: 0o755 })
+      chmodSync(root, 0o755)
+      mkdirSync(join(root, 'tool-results'), { mode: 0o755 })
+      chmodSync(join(root, 'tool-results'), 0o755)
+      const p = join(srcDir, 'tighten.pdf')
+      writeFileSync(p, buildPdf(1))
+      const r = await extractPDFPages(p)
+      expect(r.success).toBe(true)
+      expect(statSync(root).mode & 0o777).toBe(0o700)
+      expect(statSync(join(root, 'tool-results')).mode & 0o777).toBe(0o700)
+    } finally {
+      process.env.ATLAS_TMPDIR = prevTmp ?? outRoot
+      _resetAtlasTempDirForTest()
+      rmSync(freshRoot, { recursive: true, force: true })
+    }
+  })
+
+  pT('persistBinaryContent 文件 0600（umask 0 下不信缺省 0666）', async () => {
+    const oldUmask = process.umask(0o000)
+    try {
+      const r = await persistBinaryContent(
+        Buffer.from('wave0184-private-bytes'),
+        'application/pdf',
+        'wave0184-priv',
+      )
+      expect('error' in r && typeof r.error === 'string').toBe(false)
+      if (!('error' in r)) {
+        expect(statSync(r.filepath).mode & 0o777).toBe(0o600)
+      }
+    } finally {
+      process.umask(oldUmask)
     }
   })
 })

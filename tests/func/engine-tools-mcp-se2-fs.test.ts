@@ -161,8 +161,9 @@ describe('F-M2 blob 错误面（tool-results 预造为文件 → 持久化明确
     expect(out.blobSavedTo).toBeUndefined()
     expect(out.text).toBeDefined()
     expect(out.text!.startsWith('Binary content could not be saved to disk: ')).toBe(true)
-    // 目录被文件遮蔽 → mkdir 明确失败（0.1.84 K5-6 helper 早失败
-    // EEXIST；旧码静默穿透到 writeFile ENOTDIR——errno 非契约面）
-    expect(out.text).toMatch(/EEXIST|ENOTDIR/)
+    // 目录被文件遮蔽 → helper 明确失败（0.1.84 K5-6：mkdir EEXIST 早失败；
+    // v2 硬化：lstat 验证非目录 → 语义错误串 Unsafe/not a real directory；
+    // 旧码静默穿透到 writeFile ENOTDIR——errno 非契约面，语义串是契约）
+    expect(out.text).toMatch(/EEXIST|ENOTDIR|Unsafe|not a real directory/i)
   })
 })
