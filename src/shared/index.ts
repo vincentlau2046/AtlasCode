@@ -70,6 +70,16 @@ export {
   readBoundedImageBytes,
   type BoundedReadHandle,
 } from "./boundedImageRead"
+// 0.1.84 V3-5 K5-3：无损文本编码判别（UTF-8 严格验证全输入 + UTF-16LE 仅
+// 明确 BOM 识别 + 码元验证；BE/传统编码明确拒绝不转码）。消费面 = 双体
+// fileRead（mutation 编码元数据）+ 双体 readFileInRange（Read LE 支）——
+// 4096B 前缀探测仅提示，本模块是唯一解码事实源。
+export {
+  decodeTextLosslessly,
+  hasUtf16LeBom,
+  UndecodableTextError,
+  type DecodedText,
+} from "./textEncoding"
 // C-Deep 切片 3 T3：task 输出磁盘上限（task diskOutput cap + executor
 // ShellCommand size watchdog 跨域共线，单一事实源）
 export { MAX_TASK_OUTPUT_BYTES } from "./constants"

@@ -144,6 +144,12 @@ function makeNotebookFs(files: Record<string, string> = {}) {
     readFileBytes: async () => {
       throw enoent('mock')
     },
+    // K5-3：readFileSyncWithMetadata 改全量字节解码消费（shared 加法成员）
+    readFileBytesSync: p => {
+      const c = fileMap.get(p)
+      if (c === undefined) throw enoent(p)
+      return Buffer.from(c, 'utf8')
+    },
     readSync: p => {
       const c = fileMap.get(p)
       if (c === undefined) throw enoent(p)
@@ -516,7 +522,9 @@ describe('P-N4 call 错误面（零盘）', () => {
     const m = makeNotebookFs({})
     setFsImplementation({
       ...m.ops,
-      readSync: () => {
+      // K5-3：读链入口从 readSync（BOM 探测）迁至 readFileBytesSync（全量
+      // 字节解码）——非 Error 抛出点的 override 语义跟随迁移
+      readFileBytesSync: () => {
         throw 'boom'
       },
     })

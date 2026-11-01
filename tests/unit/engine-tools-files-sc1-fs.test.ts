@@ -236,6 +236,9 @@ describe('fileRead readFileSyncWithMetadata（单 pass 编码 + 行尾 + CRLF �
           buffer: Buffer.from([0x61, 0x0d, 0x0a, 0x62]),
           bytesRead: 4,
         }),
+        // K5-3：readFileSyncWithMetadata 改全量字节解码（readFileBytesSync
+        // → decodeTextLosslessly）——stub 补字节面（readFileSync 成员已不消费）
+        readFileBytesSync: () => Buffer.from([0x61, 0x0d, 0x0a, 0x62]),
         readFileSync: () => 'a\r\nb',
       }),
     )
@@ -243,6 +246,7 @@ describe('fileRead readFileSyncWithMetadata（单 pass 编码 + 行尾 + CRLF �
     expect(meta.content).toBe('a\nb')
     expect(meta.encoding).toBe('utf8')
     expect(meta.lineEndings).toBe('CRLF')
+    expect(meta.bom).toBe(false)
   })
 })
 

@@ -10,6 +10,17 @@
 // 两条路径都剥 UTF-8 BOM 和 \r（CRLF → LF）。
 // mtime 来自已打开 fd 的 fstat/stat——无额外 open()。
 //
+// K5-3（0.1.84）：UTF-16LE（FF FE BOM）识别与正确解码（上游 303：两路径
+// 原先一律按 UTF-8 解码，LE 文件整篇 mojibake、字节口径源/输出混淆）。
+//  - 快路径：全字节 decodeTextLosslessly 严格解码（LE 是新能力，无既有
+//    容错可保——坏码元明确 throw）；UTF-8 面既有宽容语义保持（非法 →
+//    U+FFFD，不顺带收紧普通 UTF-8 Read）。
+//  - 流路径：Node 流解码器宽容解码 LE（跨 chunk 码元/代理项原生正确；
+//    不验合法性——快路径 <10MB 覆盖绝大多数 LE 文件，不对称如实登记）。
+//  - 字节口径：totalBytes = 源字节（含 BOM；LE 按码元 ×2 累计）、
+//    readBytes = 输出 UTF-8 字节；byte 上限一律按源字节。
+//  - fastPathMaxBytes/streamChunkBytes = 测试 seam（生产缺省 10MB/512KB）。
+//
 // maxBytes 行为取决于 options.truncateOnByteLimit：
 //   false（默认）：FILE 大小/流总字节超 maxBytes 抛 FileTooLargeError。
 //   true：SELECTED OUTPUT 截到 maxBytes，在最后一个完整行停；设 truncatedByBytes。永不抛。
@@ -19,8 +30,12 @@
 // ---------------------------------------------------------------------------
 
 import { createReadStream, fstat } from 'fs'
-import { stat as fsStat, readFile } from 'fs/promises'
-import { formatFileSize } from '../shared'
+import { open as fsOpen, stat as fsStat, readFile } from 'fs/promises'
+import {
+  decodeTextLosslessly,
+  formatFileSize,
+  hasUtf16LeBom,
+} from '../shared'
 
 const FAST_PATH_MAX_SIZE = 10 * 1024 * 1024 // 10 MB
 
@@ -57,7 +72,13 @@ export async function readFileInRange(
   maxLines?: number,
   maxBytes?: number,
   signal?: AbortSignal,
-  options?: { truncateOnByteLimit?: boolean },
+  options?: {
+    truncateOnByteLimit?: boolean
+    /** 测试 seam：压快路径门（生产缺省 10MB）。 */
+    fastPathMaxBytes?: number
+    /** 测试 seam：压流 chunk 尺寸（生产缺省 512KB）。 */
+    streamChunkBytes?: number
+  },
 ): Promise<ReadFileRangeResult> {
   signal?.throwIfAborted()
   const truncateOnByteLimit = options?.truncateOnByteLimit ?? false
@@ -70,7 +91,10 @@ export async function readFileInRange(
     )
   }
 
-  if (stats.isFile() && stats.size < FAST_PATH_MAX_SIZE) {
+  if (
+    stats.isFile() &&
+    stats.size < (options?.fastPathMaxBytes ?? FAST_PATH_MAX_SIZE)
+  ) {
     if (
       !truncateOnByteLimit &&
       maxBytes !== undefined &&
@@ -79,9 +103,20 @@ export async function readFileInRange(
       throw new FileTooLargeError(stats.size, maxBytes)
     }
 
-    const text = await readFile(filePath, { encoding: 'utf8', signal })
+    // K5-3：全字节读入后按 BOM 分流解码（见文件头注口径）。
+    const bytes = await readFile(filePath, { signal })
+    let text: string
+    if (hasUtf16LeBom(bytes)) {
+      text = decodeTextLosslessly(bytes).content
+    } else {
+      text = bytes.toString('utf8')
+      if (text.charCodeAt(0) === 0xfeff) {
+        text = text.slice(1)
+      }
+    }
     return readFileInRangeFast(
       text,
+      bytes.length,
       stats.mtimeMs,
       offset,
       maxLines,
@@ -91,11 +126,13 @@ export async function readFileInRange(
 
   return readFileInRangeStreaming(
     filePath,
+    stats.isFile(),
     offset,
     maxLines,
     maxBytes,
     truncateOnByteLimit,
     signal,
+    options,
   )
 }
 
@@ -104,7 +141,8 @@ export async function readFileInRange(
 // ---------------------------------------------------------------------------
 
 function readFileInRangeFast(
-  raw: string,
+  text: string,
+  totalBytes: number,
   mtimeMs: number,
   offset: number,
   maxLines: number | undefined,
@@ -112,8 +150,8 @@ function readFileInRangeFast(
 ): ReadFileRangeResult {
   const endLine = maxLines !== undefined ? offset + maxLines : Infinity
 
-  // Strip BOM.
-  const text = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw
+  // （K5-3：BOM 剥离移至调用方——LE 由 decodeTextLosslessly 剥、UTF-8 由
+  // 调用方 toString 后剥；text 已是无 BOM 正文，totalBytes 已是源字节。）
 
   // Split lines, strip \r, select range.
   const selectedLines: string[] = []
@@ -164,7 +202,7 @@ function readFileInRangeFast(
     content,
     lineCount: selectedLines.length,
     totalLines: lineIndex,
-    totalBytes: Buffer.byteLength(text, 'utf8'),
+    totalBytes,
     readBytes: Buffer.byteLength(content, 'utf8'),
     mtimeMs,
     ...(truncatedByBytes ? { truncatedByBytes: true } : {}),
@@ -177,6 +215,7 @@ function readFileInRangeFast(
 
 type StreamState = {
   stream: ReturnType<typeof createReadStream>
+  encoding: 'utf8' | 'utf16le'
   offset: number
   endLine: number
   maxBytes: number | undefined
@@ -202,12 +241,17 @@ function streamOnOpen(this: StreamState, fd: number): void {
 function streamOnData(this: StreamState, chunk: string): void {
   if (this.isFirstChunk) {
     this.isFirstChunk = false
-    if (chunk.charCodeAt(0) === 0xfeff) {
+    // LE 的 BOM 已由 createReadStream start:2 跳过（双 BOM 的第二层是内容
+    // U+FEFF，保留）；UTF-8 BOM 解码为 ﻿ 首字符，既有剥离语义保持。
+    if (this.encoding === 'utf8' && chunk.charCodeAt(0) === 0xfeff) {
       chunk = chunk.slice(1)
     }
   }
 
-  this.totalBytesRead += Buffer.byteLength(chunk)
+  // 源字节记账：LE chunk 是解码后字符串，按码元 ×2（BOM 2B 在流初始值）；
+  // UTF-8 按解码后字符串的 UTF-8 字节数（既有口径）。byte 上限一律按源字节。
+  this.totalBytesRead +=
+    this.encoding === 'utf16le' ? chunk.length * 2 : Buffer.byteLength(chunk)
   if (
     !this.truncateOnByteLimit &&
     this.maxBytes !== undefined &&
@@ -309,27 +353,53 @@ function streamOnEnd(this: StreamState): void {
   })
 }
 
-function readFileInRangeStreaming(
+/**
+ * 预读文件头 2 字节判 LE BOM。仅 regular file 消费（FIFO/设备的预读会吞掉
+ * 生产者数据——非 regular file 保持 utf8 流既有行为）。
+ */
+async function sniffUtf16LeBom(filePath: string): Promise<boolean> {
+  const handle = await fsOpen(filePath, 'r')
+  try {
+    const buffer = Buffer.alloc(2)
+    const { bytesRead } = await handle.read(buffer, 0, 2, 0)
+    return bytesRead >= 2 && buffer[0] === 0xff && buffer[1] === 0xfe
+  } finally {
+    await handle.close()
+  }
+}
+
+async function readFileInRangeStreaming(
   filePath: string,
+  isRegularFile: boolean,
   offset: number,
   maxLines: number | undefined,
   maxBytes: number | undefined,
   truncateOnByteLimit: boolean,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  options: { streamChunkBytes?: number } | undefined,
 ): Promise<ReadFileRangeResult> {
+  signal?.throwIfAborted()
+  const isLe = isRegularFile ? await sniffUtf16LeBom(filePath) : false
+  signal?.throwIfAborted()
   return new Promise((resolve, reject) => {
     const state: StreamState = {
       stream: createReadStream(filePath, {
-        encoding: 'utf8',
-        highWaterMark: 512 * 1024,
+        // LE 宽容解码：Node 流解码器原生处理跨 chunk 码元/代理项（奇数尾
+        // 字节静默丢——快路径严格面覆盖 <10MB 绝大多数 LE 文件，不对称如
+        // 实登记，见文件头注）；start:2 跳过 BOM 字节。
+        encoding: isLe ? 'utf16le' : 'utf8',
+        ...(isLe ? { start: 2 } : {}),
+        highWaterMark: options?.streamChunkBytes ?? 512 * 1024,
         ...(signal ? { signal } : undefined),
       }),
+      encoding: isLe ? 'utf16le' : 'utf8',
       offset,
       endLine: maxLines !== undefined ? offset + maxLines : Infinity,
       maxBytes,
       truncateOnByteLimit,
       resolve,
-      totalBytesRead: 0,
+      // LE 初始值 = 已跳过的 2B BOM（onData 按码元 ×2 累计正文源字节）
+      totalBytesRead: isLe ? 2 : 0,
       selectedBytes: 0,
       truncatedByBytes: false,
       currentLineIndex: 0,

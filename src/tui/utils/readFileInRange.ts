@@ -30,6 +30,20 @@
 //
 // mtime comes from fstat/stat on the already-open fd — no extra open().
 //
+// K5-3 (0.1.84): UTF-16LE (FF FE BOM) detection and correct decoding
+// (upstream 303: both paths previously always decoded as UTF-8 — LE files
+// came back as mojibake and byte accounting conflated source/output sizes).
+//  - Fast path: full-byte decodeTextLosslessly, strict (LE is a new
+//    capability with no legacy leniency to preserve — bad code units throw);
+//    the UTF-8 surface keeps its legacy leniency (invalid → U+FFFD).
+//  - Streaming path: Node stream decoder, lenient LE (cross-chunk code
+//    units/surrogates handled natively; no validity check — the strict fast
+//    path covers <10MB, the vast majority of LE files; asymmetry noted).
+//  - Byte accounting: totalBytes = SOURCE bytes (BOM included; LE counted
+//    as code units × 2), readBytes = output UTF-8 bytes; byte caps count
+//    source bytes.
+//  - fastPathMaxBytes/streamChunkBytes = test seams (prod defaults 10MB/512KB).
+//
 // maxBytes behavior depends on options.truncateOnByteLimit:
 //   false (default): legacy semantics — throws FileTooLargeError if the FILE
 //     size (fast path) or total streamed bytes (streaming) exceed maxBytes.
@@ -38,7 +52,8 @@
 // ---------------------------------------------------------------------------
 
 import { createReadStream, fstat } from 'fs'
-import { stat as fsStat, readFile } from 'fs/promises'
+import { open as fsOpen, stat as fsStat, readFile } from 'fs/promises'
+import { decodeTextLosslessly, hasUtf16LeBom } from 'src/shared'
 import { formatFileSize } from './format.js'
 
 const FAST_PATH_MAX_SIZE = 10 * 1024 * 1024 // 10 MB
@@ -76,7 +91,13 @@ export async function readFileInRange(
   maxLines?: number,
   maxBytes?: number,
   signal?: AbortSignal,
-  options?: { truncateOnByteLimit?: boolean },
+  options?: {
+    truncateOnByteLimit?: boolean
+    /** Test seam: lower the fast-path gate (prod default 10MB). */
+    fastPathMaxBytes?: number
+    /** Test seam: shrink stream chunks (prod default 512KB). */
+    streamChunkBytes?: number
+  },
 ): Promise<ReadFileRangeResult> {
   signal?.throwIfAborted()
   const truncateOnByteLimit = options?.truncateOnByteLimit ?? false
@@ -92,7 +113,10 @@ export async function readFileInRange(
     )
   }
 
-  if (stats.isFile() && stats.size < FAST_PATH_MAX_SIZE) {
+  if (
+    stats.isFile() &&
+    stats.size < (options?.fastPathMaxBytes ?? FAST_PATH_MAX_SIZE)
+  ) {
     if (
       !truncateOnByteLimit &&
       maxBytes !== undefined &&
@@ -101,9 +125,20 @@ export async function readFileInRange(
       throw new FileTooLargeError(stats.size, maxBytes)
     }
 
-    const text = await readFile(filePath, { encoding: 'utf8', signal })
+    // K5-3: read full bytes, then branch on BOM (see file header).
+    const bytes = await readFile(filePath, { signal })
+    let text: string
+    if (hasUtf16LeBom(bytes)) {
+      text = decodeTextLosslessly(bytes).content
+    } else {
+      text = bytes.toString('utf8')
+      if (text.charCodeAt(0) === 0xfeff) {
+        text = text.slice(1)
+      }
+    }
     return readFileInRangeFast(
       text,
+      bytes.length,
       stats.mtimeMs,
       offset,
       maxLines,
@@ -113,11 +148,13 @@ export async function readFileInRange(
 
   return readFileInRangeStreaming(
     filePath,
+    stats.isFile(),
     offset,
     maxLines,
     maxBytes,
     truncateOnByteLimit,
     signal,
+    options,
   )
 }
 
@@ -126,7 +163,8 @@ export async function readFileInRange(
 // ---------------------------------------------------------------------------
 
 function readFileInRangeFast(
-  raw: string,
+  text: string,
+  totalBytes: number,
   mtimeMs: number,
   offset: number,
   maxLines: number | undefined,
@@ -134,8 +172,9 @@ function readFileInRangeFast(
 ): ReadFileRangeResult {
   const endLine = maxLines !== undefined ? offset + maxLines : Infinity
 
-  // Strip BOM.
-  const text = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw
+  // (K5-3: BOM stripping moved to the caller — LE is stripped by
+  // decodeTextLosslessly, UTF-8 by the caller after toString; text is the
+  // BOM-free body and totalBytes is already the source byte count.)
 
   // Split lines, strip \r, select range.
   const selectedLines: string[] = []
@@ -186,7 +225,7 @@ function readFileInRangeFast(
     content,
     lineCount: selectedLines.length,
     totalLines: lineIndex,
-    totalBytes: Buffer.byteLength(text, 'utf8'),
+    totalBytes,
     readBytes: Buffer.byteLength(content, 'utf8'),
     mtimeMs,
     ...(truncatedByBytes ? { truncatedByBytes: true } : {}),
@@ -199,6 +238,7 @@ function readFileInRangeFast(
 
 type StreamState = {
   stream: ReturnType<typeof createReadStream>
+  encoding: 'utf8' | 'utf16le'
   offset: number
   endLine: number
   maxBytes: number | undefined
@@ -224,12 +264,20 @@ function streamOnOpen(this: StreamState, fd: number): void {
 function streamOnData(this: StreamState, chunk: string): void {
   if (this.isFirstChunk) {
     this.isFirstChunk = false
-    if (chunk.charCodeAt(0) === 0xfeff) {
+    // LE's BOM was skipped via createReadStream start:2 (a double BOM's
+    // second layer is content U+FEFF and is kept); the UTF-8 BOM decodes to
+    // a leading ﻿ — legacy stripping semantics preserved.
+    if (this.encoding === 'utf8' && chunk.charCodeAt(0) === 0xfeff) {
       chunk = chunk.slice(1)
     }
   }
 
-  this.totalBytesRead += Buffer.byteLength(chunk)
+  // Source-byte accounting: an LE chunk is a decoded string, counted as
+  // code units × 2 (the 2-byte BOM is in the stream's initial value);
+  // UTF-8 keeps the legacy Buffer.byteLength accounting.  Byte caps always
+  // count source bytes.
+  this.totalBytesRead +=
+    this.encoding === 'utf16le' ? chunk.length * 2 : Buffer.byteLength(chunk)
   if (
     !this.truncateOnByteLimit &&
     this.maxBytes !== undefined &&
@@ -341,27 +389,56 @@ function streamOnEnd(this: StreamState): void {
   })
 }
 
-function readFileInRangeStreaming(
+/**
+ * Pre-read the first 2 bytes to detect an LE BOM.  Only consumed for
+ * regular files (pre-reading a FIFO/device would swallow producer data —
+ * non-regular files keep the legacy utf8 stream behavior).
+ */
+async function sniffUtf16LeBom(filePath: string): Promise<boolean> {
+  const handle = await fsOpen(filePath, 'r')
+  try {
+    const buffer = Buffer.alloc(2)
+    const { bytesRead } = await handle.read(buffer, 0, 2, 0)
+    return bytesRead >= 2 && buffer[0] === 0xff && buffer[1] === 0xfe
+  } finally {
+    await handle.close()
+  }
+}
+
+async function readFileInRangeStreaming(
   filePath: string,
+  isRegularFile: boolean,
   offset: number,
   maxLines: number | undefined,
   maxBytes: number | undefined,
   truncateOnByteLimit: boolean,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  options: { streamChunkBytes?: number } | undefined,
 ): Promise<ReadFileRangeResult> {
+  signal?.throwIfAborted()
+  const isLe = isRegularFile ? await sniffUtf16LeBom(filePath) : false
+  signal?.throwIfAborted()
   return new Promise((resolve, reject) => {
     const state: StreamState = {
       stream: createReadStream(filePath, {
-        encoding: 'utf8',
-        highWaterMark: 512 * 1024,
+        // Lenient LE decode: the Node stream decoder handles cross-chunk
+        // code units/surrogates natively (a trailing odd byte is silently
+        // dropped — the strict fast path covers <10MB LE files; asymmetry
+        // noted in the file header); start:2 skips the BOM bytes.
+        encoding: isLe ? 'utf16le' : 'utf8',
+        ...(isLe ? { start: 2 } : {}),
+        highWaterMark: options?.streamChunkBytes ?? 512 * 1024,
         ...(signal ? { signal } : undefined),
       }),
+      encoding: isLe ? 'utf16le' : 'utf8',
       offset,
       endLine: maxLines !== undefined ? offset + maxLines : Infinity,
       maxBytes,
       truncateOnByteLimit,
       resolve,
-      totalBytesRead: 0,
+      // LE initial value = the 2 skipped BOM bytes (onData accumulates the
+      // body's source bytes as code units × 2)
+      totalBytesRead: isLe ? 2 : 0,
       selectedBytes: 0,
       truncatedByBytes: false,
       currentLineIndex: 0,

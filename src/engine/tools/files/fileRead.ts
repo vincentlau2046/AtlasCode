@@ -26,6 +26,7 @@
  *    + S-C4/S-C5 FileEdit/FileWrite（readFileSyncWithMetadata）。
  */
 import {
+  decodeTextLosslessly,
   getFsImplementation,
   logForDebugging,
   safeResolvePath,
@@ -87,11 +88,21 @@ export function detectLineEndingsForString(content: string): LineEndingType {
  * FileEditTool) can reuse these instead of calling detectFileEncoding /
  * detectLineEndings separately, which would each redo safeResolvePath +
  * readSync(4KB).
+ *
+ * K5-3（0.1.84）：解码改全量字节 + decodeTextLosslessly 无损判别——4096B
+ * 前缀探测（detectEncodingForResolvedPath）仅提示，非法字节晚于采样窗必
+ * 漏检，不能认证写回。失败模式 fail-closed：非法 UTF-8 / UTF-16BE / 坏
+ * LE 码元从静默 mojibake 变为明确 throw（UndecodableTextError）。
+ *
+ * content 语义保持：BOM 字符（﻿）保留在头部，与旧 readFileSync
+ * {encoding} 行为逐字节等价（notebook 裸 jsonParse 的 BOM 拒绝依赖此行
+ * 为）；写回面（Write/Edit/NotebookEdit）消费新增 bom 标志做 BOM 往返。
  */
 export function readFileSyncWithMetadata(filePath: string): {
   content: string
   encoding: BufferEncoding
   lineEndings: LineEndingType
+  bom: boolean
 } {
   const fs = getFsImplementation()
   const { resolvedPath, isSymlink } = safeResolvePath(fs, filePath)
@@ -100,8 +111,10 @@ export function readFileSyncWithMetadata(filePath: string): {
     logForDebugging(`Reading through symlink: ${filePath} -> ${resolvedPath}`)
   }
 
-  const encoding = detectEncodingForResolvedPath(resolvedPath)
-  const raw = fs.readFileSync(resolvedPath, { encoding })
+  const { content, encoding, bom } = decodeTextLosslessly(
+    fs.readFileBytesSync(resolvedPath),
+  )
+  const raw = bom ? `﻿${content}` : content
   // Detect line endings from the raw head before CRLF normalization erases
   // the distinction. 4096 code units is ≥ detectLineEndings's 4096-byte
   // readSync sample (line endings are ASCII, so the unit mismatch is moot).
@@ -110,6 +123,7 @@ export function readFileSyncWithMetadata(filePath: string): {
     content: raw.replaceAll('\r\n', '\n'),
     encoding,
     lineEndings,
+    bom,
   }
 }
 

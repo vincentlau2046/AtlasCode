@@ -54,6 +54,13 @@ import {
  * 存量 setFsImplementation 测试 stub（9 文件字面实现）不补新成员：
  * tests/ 不在 tsconfig include（tsc 0 基线实证）+ 各 stub 消费面
  * 零调用新成员（运行时安全）——E-4 lstatSync 加法同款裁定先例。
+ *
+ * 0.1.84 V3-5 K5-3 加法（readFileSyncWithMetadata 全量字节无损判别消费）：
+ * - readFileBytesSync（fs.readFileSync 无 encoding → Buffer；readFileBytes
+ *   的同步 twin，readFileSync 强制 encoding 成员不复用——同款先例；命名对齐
+ *   TUI 本地 twin 既有同名成员，fileRead 双体逐字同构）
+ *   例外登记：sc1-fs/notebook-se2 两 stub 消费面非零（驱动
+ *   readFileSyncWithMetadata 链），已补成员；其余 stub 维持零消费。
  */
 export type FsOperations = {
   cwd(): string
@@ -66,6 +73,8 @@ export type FsOperations = {
   mkdir(path: string, options?: { mode?: number }): Promise<void>
   readFile(path: string, options: { encoding: BufferEncoding }): Promise<string>
   readFileSync(path: string, options: { encoding: BufferEncoding }): string
+  // 0.1.84 V3-5 K5-3 加法（readFileSyncWithMetadata 全量字节解码消费，见头注）
+  readFileBytesSync(path: string): Buffer
   statSync(path: string): fs.Stats
   realpathSync(path: string): string
   open(path: string, flags: number): Promise<FileHandle>
@@ -121,6 +130,12 @@ export const NodeFsOperations: FsOperations = {
 
   readFileSync(fsPath, options) {
     return fs.readFileSync(fsPath, { encoding: options.encoding })
+  },
+
+  // 0.1.84 V3-5 K5-3 加法（fs.readFileSync 无 encoding → Buffer；readFileBytes
+  // 的同步 twin，readFileSyncWithMetadata 全量字节解码消费）
+  readFileBytesSync(fsPath) {
+    return fs.readFileSync(fsPath)
   },
 
   statSync(fsPath) {
