@@ -4,6 +4,53 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.85
+
+K5 端到端最小补闭环（插入波；f4 工单
+`docs/2026-11-02-p0-wave-0185-ticket.md`；补闭合 0.1.84 K5-8 原硬契约：
+@PDF 引用的路径与必读说明到达 provider，Read pages 页图实际到达模型，
+恢复/压缩后仍可按权限重读；判别测试 `tests/*/wave0185-*.test.ts` +
+084 断言面显式变更）。K6 顺延 0.1.86。
+
+### PDF 引用 → provider 活链（2 件）
+
+- **C85-A @PDF 引用纯投影接 params**：新增 shared 纯叶子
+  `src/shared/pdfReference.ts`（`formatPDFReferenceForModel` 四要素必读
+  文本：真实绝对路径 + 未附正文 + MUST Read + pages ≤20 逐页指引），
+  `modelprovider/params.ts` toOpenAIMessages 新增 attachment 型
+  pdf_reference 支——此前 attachment 整体落空（真实请求投影为 []），
+  现 engine 现役请求链实收必读说明；TUI 既有 normalizer 同叶子同文本，
+  双面恒等。
+- **C85-D 引用恢复/压缩仍保引用**：JSONL 落盘白名单化——双 record
+  车道（engine session/record.ts + tui utils/sessionStorage.ts）放行
+  pdf_reference，经 shared `projectPDFReferenceForRecord` 五字段投影
+  （type/filename/pageCount/fileSize/displayPath；不 spread 原对象，
+  base64/Buffer/content 等正文形字段一律剥除，内联 bytes 仍必不落盘）。
+  resume 后 attachment entry 经 isTranscriptMessage 回恢复链，由 C85-A
+  params 支投影必读说明，零 normalizer；compact 按 filename 去重重建
+  引用（后值覆盖），模型按本次权限重读。**行为变更**：0.1.84「全部
+  pdf_reference 必不落盘」断言本波显式变更（引用 metadata 在场）。
+
+### 工具补充消息交付链（1 件）
+
+- **C85-B newMessages 真正交付**：engine pipeline 三层接通
+  （execution 合法化 user+isMeta 补充 → batch 加性透传 → loop 追加至
+  roundMessages，顺序 = tool_result 之后、defer 标记之前）。拒绝/失败/
+  defer/后台早返保守不交付；MCP/AskUser/Task 全族回归。**旁支行为
+  变化**：Skill 交付子集选择 `selectSkillDeliverableMessages`——技能
+  正文（isMeta 主内容）首次实际到达模型，非 isMeta metadata 回显不
+  交付；allowedTools/model/contextModifier 仍不被消费，权限不扩张。
+
+### PDF pages 媒体双入口（1 件）
+
+- **C85-C 页图双路径**：engine Read pages 支返回页图 image 块补充
+  （pdftoppm 真执行，128MiB 有界）；TUI 车道原始 JPEG 最小路径（不引
+  原生 resize 模块）。**行为变更**：full-PDF 无 pages 内联读整裁 →
+  显式 `FullPDFReadUnsupportedError`（指引 pages 车道；document 块过
+  不了补充合法化门 + params 零消费 = 死交付，header-only 虚报根除）；
+  params tool_result 内嵌 document 块显式指引不静默丢弃。compact 模式
+  小 PDF 同整裁 → `compact_file_reference` 引用保底。
+
 ## v0.1.84
 
 V3-5 K5 Read/文件/编码 8 件（上游 2.1.296/299/300/301/302 对齐；f4 工单
