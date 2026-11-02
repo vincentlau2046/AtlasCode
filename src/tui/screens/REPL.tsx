@@ -10,6 +10,7 @@ import { spawnSync } from 'child_process';
 import { getTotalInputTokens } from 'src/bootstrap'
 import { snapshotOutputTokensForTurn, getCurrentTurnTokenBudget, getTurnOutputTokens, getBudgetContinuationCount } from 'src/tui/bootstrapState.js';
 import { parseTokenBudget } from '../utils/tokenBudget.js';
+import { shouldShowIdleReturnHint } from '../utils/idleReturnHint.js';
 import { count } from '../utils/array.js';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
@@ -3738,7 +3739,15 @@ export function REPL({
     const elapsed = Date.now() - lastQueryCompletionTime;
     const remaining = idleThresholdMs - elapsed;
     const timer = setTimeout((lqct, addNotif, msgsRef, mode, hintRef) => {
-      if (msgsRef.current.length === 0) return;
+      // K6-8: fire-time interaction gate — interrupts (esc) and input during
+      // the idle window bump lastInteractionTime (App.tsx key events), so a
+      // stale lastQueryCompletionTime must not fire the hint (see
+      // utils/idleReturnHint.ts; mirrors the idle_notification sibling path).
+      if (!shouldShowIdleReturnHint({
+        lastQueryCompletionTime: lqct,
+        lastInteractionTime: getLastInteractionTime(),
+        messageCount: msgsRef.current.length,
+      })) return;
       const totalTokens = getTotalInputTokens();
       const formattedTokens = formatTokens(totalTokens);
       const idleMinutes = (Date.now() - lqct) / 60_000;
