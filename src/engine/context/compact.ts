@@ -33,7 +33,10 @@
  */
 import { randomUUID } from 'crypto'
 import type { Message, Usage } from '../../shared'
-import { logForDebugging } from '../../shared'
+import {
+  collectPDFReferenceAttachmentsForCompact,
+  logForDebugging,
+} from '../../shared'
 import { PROMPT_TOO_LONG_ERROR_MESSAGE, startsWithApiErrorPrefix } from '../../modelprovider'
 import { getTranscriptPath, reAppendSessionMetadata } from '../session'
 import { createUserMessage } from '../tools'
@@ -426,6 +429,30 @@ export function buildPostCompactMessages(result: CompactionResult): Message[] {
 }
 
 /**
+ * R-085-1（0.1.86 H，工单 §H 修法 A）：compact 时从压缩输入消息重建 @PDF
+ * 引用为边界后 attachment 记录（shared 收集器五字段白名单投影，同 C85-D
+ * 落盘纪律，白名单面零放宽；filename 去重）。压缩吃掉全部历史附件后，
+ * 引用记录经 buildPostCompactMessages attachments 槽位落盘 → resume 边界
+ * 截断（sessionStoragePortable in-stream truncate）不再消灭唯一投影来源
+ * → params attachment 支（C85-A）投影。不重建正文——模型按本次权限
+ * Read（文件替换→新内容；删除/deny→显式失败，无旧页图假答面）。消息
+ * 形状对齐 tui/utils/attachments createAttachmentMessage（type 'attachment'
+ * + randomUUID + ISO timestamp）。keepRecent 窗内同文件引用 kept 原文 +
+ * 重建并存 = 至多 +1 有界重复（TUI reactive 同语义，登记 b 不修）。
+ */
+function rebuildPdfReferenceAttachments(messages: Message[]): Message[] {
+  return collectPDFReferenceAttachmentsForCompact(messages).map(
+    pdfRef =>
+      ({
+        attachment: pdfRef,
+        type: 'attachment',
+        uuid: randomUUID(),
+        timestamp: new Date().toISOString(),
+      }) as Message,
+  )
+}
+
+/**
  * 压缩体（D-2a S3，M5 切端）双模式重载——
  *  - 裁剪模式（DI deps，E-1b T-4b 真核心）：guard → 计数 → 摘要调用 → 结果构造
  *  - 富模式（CompactContext，旧仓 orchestrator 300L 真体移植）：PreCompact
@@ -538,12 +565,14 @@ async function trimmedCompactConversation(
     messages.length,
   )
 
-  // D-2a S2：attachments/hookResults 必填字段先立——裁剪 producer 置空数组
-  // （空 spread = 旧 3 段 ordering 零变更），富放置归 S3 富体回填。
+  // D-2a S2：attachments/hookResults 必填字段先立。R-085-1（0.1.86 H 修法
+  // A）：裁剪面同样重建 PDF 引用（headless autoCompact / agentLoop / swarm
+  // 车道）——此前置空数组（空 spread = 旧 3 段 ordering 零变更），现仅 PDF
+  // 引用面入 attachments 槽位（无 PDF 输入恒空 = 零回归）。
   const result: CompactionResult = {
     boundaryMarker,
     summaryMessages,
-    attachments: [],
+    attachments: rebuildPdfReferenceAttachments(messages),
     hookResults: [],
     ...(messagesToKeep ? { messagesToKeep } : {}),
     ...(preCompactTokenCount !== undefined
@@ -733,6 +762,14 @@ async function richCompactConversation(
       context,
     )
 
+    // R-085-1（0.1.86 H 修法 A）：PDF 引用重建与文件附件合并（文件/agent/
+    // mcp delta 附件在前，PDF refs 最后——与 TUI reactiveCompact push 顺序
+    // 一致）。
+    const postCompactAttachments = [
+      ...postCompactFileAttachments,
+      ...rebuildPdfReferenceAttachments(messages),
+    ]
+
     const boundaryMarker = createCompactBoundaryMessage(
       isAutoCompact ? 'auto' : 'manual',
       preCompactTokenCount ?? 0,
@@ -788,7 +825,7 @@ async function richCompactConversation(
       boundaryMarker,
       ...summaryMessages,
       ...(messagesToKeep ?? []),
-      ...postCompactFileAttachments,
+      ...postCompactAttachments,
       ...hookMessages,
     ] as never)
 
@@ -825,7 +862,7 @@ async function richCompactConversation(
     const result: CompactionResult = {
       boundaryMarker,
       summaryMessages,
-      attachments: postCompactFileAttachments,
+      attachments: postCompactAttachments,
       hookResults: hookMessages,
       // 0.1.68 F′ C7：keepRecent>0 时置位（buildPostCompactMessages 消费序
       // 在 summary 之后、attachments 之前，同裁剪路径 messagesToKeep 语义）

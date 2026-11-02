@@ -101,3 +101,33 @@ export function projectPDFReferenceForRecord(
     displayPath: a.displayPath,
   }
 }
+
+/**
+ * R-085-1（0.1.86 H，工单 §H「修法 A」）：从压缩输入消息收集 @PDF 引用
+ * 附件（projectPDFReferenceForRecord 五字段白名单投影——与落盘同源，恶意
+ * 额外字段剥除；按 filename 去重防重复膨胀，后值覆盖 = 更近的引用获胜）。
+ * 压缩吃掉全部历史附件后，post-compact 重建引用（不重建正文），模型按
+ * 本次权限 Read（文件替换→新内容；删除/deny→显式失败，无旧页图假答面）。
+ *
+ * 0.1.85-D 起源 = TUI contextBodies/compact（reactiveCompact 消费面）；
+ * R-085-1 迁入 shared 单一事实源：ENGINE compactConversation（富体 manual
+ * /compact + auto-compact rich，裁剪 headless）同样在 compact 时重建为
+ * 边界后 attachment 记录（buildPostCompactMessages attachments 槽位），
+ * JSONL 边界后落盘 → resume 边界截断（sessionStoragePortable in-stream
+ * truncate）不再消灭唯一投影来源 → params attachment 支（C85-A）投影。
+ * 参数取结构最小形（type/attachment 可选读），TUI/engine 双 Message 并存
+ * 面均天然可传入。
+ */
+export function collectPDFReferenceAttachmentsForCompact(
+  messages: readonly { type?: unknown; attachment?: unknown }[],
+): PDFReferenceMetadata[] {
+  const byFilename = new Map<string, PDFReferenceMetadata>()
+  for (const m of messages) {
+    if (m.type !== 'attachment') continue
+    const projected = projectPDFReferenceForRecord(m.attachment)
+    if (projected) {
+      byFilename.set(projected.filename, projected)
+    }
+  }
+  return [...byFilename.values()]
+}

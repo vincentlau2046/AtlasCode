@@ -158,8 +158,11 @@ export {
 // 消费同一叶子，双面文本恒等；不引 tui/engine）。C85-C 加 full-PDF 显式
 // 错误类（双体 FileReadTool throw + tui attachments 引用车道回落判据）。
 // C85-D 加落盘白名单投影（双 record 车道落盘前唯一通道，恶意额外字段
-// 剥除的单一事实源 + compact 重建收集同源）。
+// 剥除的单一事实源 + compact 重建收集同源）。R-085-1（0.1.86 H）加 compact
+// 重建收集器（TUI contextBodies 起源迁入 = 单一事实源；ENGINE
+// compactConversation 富体/裁剪同源消费）。
 export {
+  collectPDFReferenceAttachmentsForCompact,
   formatPDFReferenceForModel,
   FullPDFReadUnsupportedError,
   projectPDFReferenceForRecord,
