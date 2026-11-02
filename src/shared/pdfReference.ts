@@ -28,6 +28,21 @@ export type PDFReferenceMetadata = {
   displayPath: string
 }
 
+/**
+ * full-PDF 原生 document 读不支持（0.1.85-B/C，工单 §1-B/§1-C）：provider
+ * 无 document 块映射且过不了补充合法化门（text/image 允许面）——双体
+ * FileReadTool 无 pages 读 PDF 整支显式错误。附件/压缩消费面以此判定
+ * 回落引用车道（compact → compact_file_reference；at-mention 本就经
+ * tryGetPDFReference 分流），不静默丢附件、不虚报已读。message 与 Task B
+ * 显式指引文案一致（'current provider' + 'pages parameter'）。
+ */
+export class FullPDFReadUnsupportedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FullPDFReadUnsupportedError'
+  }
+}
+
 export function formatPDFReferenceForModel(reference: PDFReferenceMetadata): string {
   const pagesText =
     reference.pageCount === null

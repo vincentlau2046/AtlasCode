@@ -70,6 +70,14 @@ export {
   readBoundedImageBytes,
   type BoundedReadHandle,
 } from "./boundedImageRead"
+// 0.1.85-C（C85-C）：PDF 页图有界读取（顺序读 + 每图/累计 128MiB 硬上限 +
+// 页号数值排序；engine readTool pages 支 + TUI FileReadTool pages 支共用，
+// 层界依据 = tui 不 import engine/tools，shared 承载双面共享 helper）
+export {
+  PDF_PAGE_IMAGE_MAX_BYTES,
+  readPDFPageImages,
+  type PDFPageImageBlock,
+} from "./pdfPageImages"
 // 0.1.84 V3-5 K5-3：无损文本编码判别（UTF-8 严格验证全输入 + UTF-16LE 仅
 // 明确 BOM 识别 + 码元验证；BE/传统编码明确拒绝不转码）。消费面 = 双体
 // fileRead（mutation 编码元数据）+ 双体 readFileInRange（Read LE 支）——
@@ -147,8 +155,10 @@ export {
 
 // 0.1.85 Task A（C85-A）：@PDF 引用 provider 投影叶子（纯函数零 I/O；
 // modelprovider params attachment 支 + TUI messages pdf_reference 支双面
-// 消费同一叶子，双面文本恒等；不引 tui/engine）
+// 消费同一叶子，双面文本恒等；不引 tui/engine）。C85-C 加 full-PDF 显式
+// 错误类（双体 FileReadTool throw + tui attachments 引用车道回落判据）。
 export {
   formatPDFReferenceForModel,
+  FullPDFReadUnsupportedError,
   type PDFReferenceMetadata,
 } from "./pdfReference"

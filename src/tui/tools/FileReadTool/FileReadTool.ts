@@ -1,5 +1,4 @@
 import type { Base64ImageSource } from '../../types/atlas.js'
-import { readdir, readFile as readFileAsync } from 'fs/promises'
 import * as path from 'path'
 import { z } from 'zod/v4'
 import {
@@ -8,9 +7,13 @@ import {
   PDF_MAX_PAGES_PER_READ,
 } from '../../constants/apiLimits.js'
 import { hasBinaryExtension } from '../../constants/files.js'
+// 0.1.85-C（C85-C）：共享页图读取 helper（engine/TUI 双入口同一交付路径；
+// shared 层承载——tui 不 import engine/tools 层界）
 import {
+  FullPDFReadUnsupportedError,
   MAX_IMAGE_SOURCE_BYTES,
   readBoundedFileBytes,
+  readPDFPageImages,
 } from 'src/shared'
 import { memoryFreshnessNote } from '../../memdir/memoryAge.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
@@ -55,7 +58,7 @@ import {
   readNotebook,
 } from '../../utils/notebook.js'
 import { expandPath } from '../../utils/path.js'
-import { extractPDFPages, getPDFPageCount, readPDF } from '../../utils/pdf.js'
+import { extractPDFPages, getPDFPageCount } from '../../utils/pdf.js'
 import {
   isPDFExtension,
   isPDFSupported,
@@ -873,35 +876,22 @@ async function callInner(
       if (!extractResult.success) {
         throw new Error((extractResult as any).error.message)
       }
-      const entries = await readdir(extractResult.data.file.outputDir)
-      const imageFiles = entries.filter(f => f.endsWith('.jpg')).sort()
-      const imageBlocks = await Promise.all(
-        imageFiles.map(async f => {
-          const imgPath = path.join(extractResult.data.file.outputDir, f)
-          const imgBuffer = await readFileAsync(imgPath)
-          const resized = await maybeResizeAndDownsampleImageBuffer(
-            imgBuffer,
-            imgBuffer.length,
-            'jpeg',
-          )
-          return {
-            type: 'image' as const,
-            source: {
-              type: 'base64' as const,
-              media_type:
-                `image/${resized.mediaType}` as Base64ImageSource['media_type'],
-              data: resized.buffer.toString('base64'),
-            },
-          }
-        }),
+      // 0.1.85-C（C85-C）：与 engine readTool 同一原始 JPEG 交付路径——
+      // 共享 readPDFPageImages（顺序有界读取：每图 + 累计 128MiB 硬上限，
+      // stat 前置判定 + readBoundedFileBytes 读取期双验），页号数值排序
+      // （跨 9/10 正序），零页图明确失败（此前为静默无补充）。本支不再
+      // 依赖 sharp resize（原生模块硬依赖裁除——发布包等效无原生模块条
+      // 件）。行为变化面：超限/零页图从「部分/空交付」改明确错误（工单
+      // 硬判据，非回归）。
+      const { blocks: imageBlocks } = await readPDFPageImages(
+        extractResult.data.file.outputDir,
+        { signal: context?.abortController?.signal },
       )
       return {
         data: extractResult.data,
-        ...(imageBlocks.length > 0 && {
-          newMessages: [
-            createUserMessage({ content: imageBlocks, isMeta: true }),
-          ],
-        }),
+        newMessages: [
+          createUserMessage({ content: imageBlocks, isMeta: true }),
+        ],
       }
     }
 
@@ -926,37 +916,19 @@ async function callInner(
       }
     }
 
-    if (!isPDFSupported()) {
-      throw new Error(
-        'Reading full PDFs is not supported with this model. Use a newer model (Sonnet 3.5 v2 or later), ' +
-          `or use the pages parameter to read specific page ranges (e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request). ` +
-          'Page extraction requires poppler-utils: install with `brew install poppler` on macOS or `apt-get install poppler-utils` on Debian/Ubuntu.',
-      )
-    }
-
-    const readResult = await readPDF(resolvedFilePath)
-    if (!readResult.success) {
-      throw new Error((readResult as any).error.message)
-    }
-    const pdfData = readResult.data
-    return {
-      data: pdfData,
-      newMessages: [
-        createUserMessage({
-          content: [
-            {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: 'application/pdf',
-                data: pdfData.file.base64,
-              },
-            },
-          ],
-          isMeta: true,
-        }),
-      ],
-    }
+    // 0.1.85-C（C85-C）：full-PDF native document 支整裁，对齐 engine
+    // readTool 显式错误（Task B 同口径）。TUI 车道经 loopPermissionBridge
+    // 走 executeToolUse → 补充合法化门（text/image 允许面），document 块
+    // 本就过不了门——与其静默拒交付，不如入口即显式指引（full-PDF 不支
+    // 持分支明确而非静默）。
+    // C85-C：类型化 FullPDFReadUnsupportedError（shared 单源，对齐 engine
+    // readTool）——compact 附件消费面以此判定回落 compact_file_reference
+    // 引用车道（不静默丢附件、不虚报已读），message 文案不变。
+    throw new FullPDFReadUnsupportedError(
+      `Reading full PDFs natively is not supported by the current provider. ` +
+        `Use the pages parameter to read specific page ranges as page images ` +
+        `(e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request).`,
+    )
   }
 
   // --- Text file (single async read via readFileInRange) ---

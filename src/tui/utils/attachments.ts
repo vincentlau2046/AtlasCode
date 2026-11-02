@@ -151,7 +151,9 @@ import {
 } from './messages.js'
 import { isHumanTurn } from './messagePredicates.js'
 import { isEnvTruthy, getAtlasConfigHomeDir } from './envUtils.js'
-import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
+// C85-C：FullPDFReadUnsupportedError = full-PDF 内联读整裁后的显式错误——
+// compact 模式特判回落 compact_file_reference（引用保底，不静默丢附件）
+import { feature, FullPDFReadUnsupportedError } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import { hasUltrathinkKeyword, isUltrathinkEnabled } from './thinking.js'
 import {
   tokenCountFromLastAPIResponse,
@@ -2993,9 +2995,14 @@ export async function generateFileAttachment(
         displayPath: relative(getCwd(), filename),
       }
     } catch (error) {
+      // C85-C：full-PDF 内联读整裁（双体 FileReadTool 显式错误）后，compact
+      // 模式不再 null（附件静默丢弃）而是引用保底——readTruncatedFile 的
+      // compact 支零读纯引用（不读 PDF 二进制，无乱码面）。at-mention 不受
+      // 影响（tryGetPDFReference 无门先分流，从不到达内联读）。
       if (
         error instanceof MaxFileReadTokenExceededError ||
-        error instanceof FileTooLargeError
+        error instanceof FileTooLargeError ||
+        error instanceof FullPDFReadUnsupportedError
       ) {
         return await readTruncatedFile()
       }

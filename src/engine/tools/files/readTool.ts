@@ -112,7 +112,6 @@
  * skills 域面 / imageResizer 面 / countTokensWithAPI 面 / readFileState LRU
  * 缓存实例 = 残留守（D 波/TUI 波/skills 域波）。
  */
-import { readdir, readFile as readFileAsync } from 'fs/promises'
 import * as path from 'path'
 import type {
   Tool,
@@ -126,11 +125,15 @@ import type {
 import {
   expandPath,
   formatFileSize,
+  FullPDFReadUnsupportedError,
   getErrnoCode,
   getFsImplementation,
   isEnvTruthy,
   isENOENT,
   readBoundedImageBytes,
+  // 0.1.85-C（C85-C）：共享页图读取 helper（engine/TUI 双入口同一交付
+  // 路径；shared 层承载——tui 不 import engine/tools 层界）
+  readPDFPageImages,
   roughTokenCountEstimationForFileType,
 } from '../../../shared'
 import {
@@ -963,31 +966,20 @@ async function callInner(
       if (extractResult.success === false) {
         throw new Error(extractResult.error.message)
       }
-      const entries = await readdir(extractResult.data.file.outputDir)
-      const imageFiles = entries.filter(f => f.endsWith('.jpg')).sort()
-      // delta ⑫：imageResizer 不随迁 → image 块无 downsample（原始
-      // jpg buffer base64，media_type 恒 image/jpeg）
-      const imageBlocks = await Promise.all(
-        imageFiles.map(async f => {
-          const imgPath = path.join(extractResult.data.file.outputDir, f)
-          const imgBuffer = await readFileAsync(imgPath)
-          return {
-            type: 'image' as const,
-            source: {
-              type: 'base64' as const,
-              media_type: 'image/jpeg' as const,
-              data: imgBuffer.toString('base64'),
-            },
-          }
-        }),
+      // 0.1.85-C（C85-C）：共享页图读取 helper（工单 §1-C）——顺序有界
+      // 读取（每图+累计 128MiB 硬上限，stat 前置判定），页号数值排序
+      // （跨 9/10 正序），原始 JPEG base64（media_type 恒 image/jpeg）；
+      // 零页图输出明确失败（此前为静默无补充）。行为变化面：超限/零页图
+      // 从「部分/空交付」改明确错误（工单硬判据，非回归）。
+      const { blocks: imageBlocks } = await readPDFPageImages(
+        extractResult.data.file.outputDir,
+        { signal: context.abortController?.signal },
       )
       return {
         data: extractResult.data,
-        ...(imageBlocks.length > 0 && {
-          newMessages: [
-            createUserMessage({ content: imageBlocks, isMeta: true }),
-          ],
-        }),
+        newMessages: [
+          createUserMessage({ content: imageBlocks, isMeta: true }),
+        ],
       }
     }
 
@@ -1022,7 +1014,10 @@ async function callInner(
     // （text/image 允许面，S⑧ 口径 = 明确工具错误）。本波不新增 native document
     // 协议：整支改显式可操作错误，指引 pages 参读（Task C 页图媒体路径为 PDF
     // 读取唯一活车道）。
-    throw new Error(
+    // C85-C：类型化 FullPDFReadUnsupportedError（shared 单源）——compact
+    // 附件消费面以此判定回落 compact_file_reference 引用车道（不静默丢
+    // 附件、不虚报已读），message 文案不变。
+    throw new FullPDFReadUnsupportedError(
       `Reading full PDFs natively is not supported by the current provider. ` +
         `Use the pages parameter to read specific page ranges as page images ` +
         `(e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request).`,

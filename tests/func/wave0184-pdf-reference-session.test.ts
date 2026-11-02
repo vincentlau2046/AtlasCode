@@ -319,7 +319,7 @@ describe('K5-7 @PDF 引用化（真实 at-mention 生成路径）', () => {
     }
   })
 
-  t('compact 模式不变：小 PDF 照旧真读内联 file，不返回 pdf_reference（mode 门）', async () => {
+  t('compact 模式：小 PDF full-PDF 内联读整裁 → compact_file_reference（引用保底）', async () => {
     const p = join(tmp, 'compact.pdf')
     writeFileSync(p, buildPdf(2))
     const att = await generateFileAttachment(
@@ -329,10 +329,15 @@ describe('K5-7 @PDF 引用化（真实 at-mention 生成路径）', () => {
       'wave0184-test-error',
       'compact',
     )
-    // 既有行为：compact 模式小 PDF 走真 FileReadTool.call 内联（真读）；
-    // compact_file_reference 仅截断路径。K5-7 不变量 = compact 模式
-    // 永不经 at-mention 引用支（tryGetPDFReference mode 门）
-    expect(att?.type).toBe('file')
+    // ⚠️ 0.1.85-C 显式行为变更（工单 §1-D，非无行为差）：compact 模式小
+    // PDF 此前「真读内联 file」——但 document 块过不了补充合法化门 +
+    // params 零消费（Task B 证）= 死交付；本波 full-PDF 内联读整裁后经
+    // FullPDFReadUnsupportedError 特判回落 readTruncatedFile compact 支 =
+    // compact_file_reference（纯路径引用，零读不虚报已读）。K5-7 不变量
+    // 保持 = compact 模式永不经 at-mention 引用支（tryGetPDFReference
+    // mode 门）——仍是引用车道语义（恢复/压缩仍保引用，不保自动正文）。
+    expect(att?.type).toBe('compact_file_reference')
+    expect(att?.type).not.toBe('file')
     expect(att?.type).not.toBe('pdf_reference')
   })
 })
