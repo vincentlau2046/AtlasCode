@@ -462,7 +462,12 @@ function getOperatorRange(
     } else {
       to = nextNewline + 1
     }
-  } else if (isInclusiveMotion(motion) && cursor.offset <= target.offset) {
+  } else if (
+    isInclusiveMotion(motion) &&
+    // `%` jumps may be backward (cursor on a closer); either way both bracket
+    // ends are included, so `to` extends symmetrically (K6-1).
+    (cursor.offset <= target.offset || motion === '%')
+  ) {
     to = cursor.measuredText.nextOffset(to)
   }
 

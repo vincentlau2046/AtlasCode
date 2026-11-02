@@ -4,7 +4,8 @@
  * Pure functions for resolving vim motions to cursor positions.
  */
 
-import type { Cursor } from '../utils/Cursor.js'
+import { Cursor } from '../utils/Cursor.js'
+import { findMatchingBracket } from './bracketMatch.js'
 
 /**
  * Resolve a motion to a target cursor position.
@@ -61,6 +62,10 @@ function applySingleMotion(key: string, cursor: Cursor): Cursor {
       return cursor.endOfLogicalLine()
     case 'G':
       return cursor.startOfLastLine()
+    case '%': {
+      const target = findMatchingBracket(cursor.text, cursor.offset)
+      return target === null ? cursor : new Cursor(cursor.measuredText, target, 0)
+    }
     default:
       return cursor
   }
@@ -68,9 +73,11 @@ function applySingleMotion(key: string, cursor: Cursor): Cursor {
 
 /**
  * Check if a motion is inclusive (includes character at destination).
+ * `%` is inclusive for operators (d%/c%/y% include the matching bracket on
+ * both ends — the operator range handler extends `to` for it).
  */
 export function isInclusiveMotion(key: string): boolean {
-  return 'eE$'.includes(key)
+  return 'eE$%'.includes(key)
 }
 
 /**

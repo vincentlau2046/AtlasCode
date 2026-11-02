@@ -146,6 +146,7 @@ export const SIMPLE_MOTIONS = new Set([
   '0',
   '^',
   '$', // Line positions
+  '%', // Bracket matching (K6-1)
 ])
 
 export const FIND_KEYS = new Set(['f', 'F', 't', 'T'])
