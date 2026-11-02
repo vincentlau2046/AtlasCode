@@ -68,7 +68,13 @@ export const Ansi = React.memo(function Ansi(t0: any) {
       if ($[7] !== dimColor) {
         t3 = (span, i) => {
           const hyperlink = span.props.hyperlink;
-          if (dimColor) {
+          // K6-14件1 (wave 0.1.86): dimColor dims every span, but bold and dim
+          // are mutually exclusive in ink's Text (WeightProps) — forcing dim on
+          // a bold span DROPS the bold (SGR 1 swallowed, probe-verified). Bold
+          // wins: emphasis stays emphasized inside dim blocks (e.g. **bold**
+          // markdown inside thinking blocks); plain/colored/italic spans still
+          // get SGR 2.
+          if (dimColor && !span.props.bold) {
             span.props.dim = true;
           }
           const hasTextProps = hasAnyTextProps(span.props);

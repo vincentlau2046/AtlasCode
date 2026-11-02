@@ -302,9 +302,14 @@ const darkAnsiTheme: Theme = {
   promptBorderShimmer: 'ansi:whiteBright',
   text: 'ansi:whiteBright',
   inverseText: 'ansi:black',
-  inactive: 'ansi:white',
+  // K6-14件2 (wave 0.1.86): SGR 37 (ansi:white) is near-identical to the
+  // terminal default foreground on 16-color dark palettes — dim text was
+  // indistinguishable from normal text. ansi:blackBright (SGR 90, gray) is
+  // the standard dim color and matches the 16-color downgrade of the
+  // truecolor dark theme's inactive rgb(153,153,153).
+  inactive: 'ansi:blackBright',
   inactiveShimmer: 'ansi:whiteBright',
-  subtle: 'ansi:white',
+  subtle: 'ansi:blackBright',
   suggestion: 'ansi:blueBright',
   remember: 'ansi:blueBright',
   background: 'ansi:cyanBright',
