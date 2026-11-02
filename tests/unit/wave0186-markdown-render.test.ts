@@ -141,3 +141,118 @@ describe('K6-13② · emoji 起始链接换行占宽正确（wrap 车道锚，�
     }
   })
 })
+
+/**
+ * K6-13③ · 表头-only 超宽表仍渲染（cell 层 RED→GREEN）。
+ *
+ * 组件级实证（Main 锁面探针 k613-probe4）：ink render + 假 WriteStream 真渲染
+ * MarkdownTable——修前 header-only 表（rows=[]）经垂直降级（maxRowLines>4 或
+ * safety check）输出空帧（仅同步标记），静默消失；对照正常表正常渲染。
+ * 修复 = renderVerticalFormat 空 rows 兜底：表头-only 时输出 bold 列标签行。
+ * （bun test 自动 NODE_ENV=test，绕过 config 读取门。）
+ */
+import { render } from '../../src/tui/ink.js'
+import { MarkdownTable } from '../../src/tui/components/MarkdownTable.js'
+import { marked } from 'marked'
+import sliceAnsi from '../../src/tui/utils/sliceAnsi.js'
+import { truncateToWidth } from '../../src/tui/utils/truncate.js'
+
+async function renderTable(md: string, forceWidth: number): Promise<string> {
+  const chunks: string[] = []
+  const fake = new PassThrough() as any
+  fake.columns = forceWidth
+  fake.rows = 24
+  fake.write = (chunk: unknown) => {
+    if (typeof chunk === 'string') chunks.push(chunk)
+  }
+  const token = marked.lexer(md)[0]!
+  const inst = await render(
+    React.createElement(MarkdownTable, {
+      token: token as any,
+      highlight: null,
+      forceWidth,
+    }),
+    fake as any,
+  )
+  await new Promise(r => setTimeout(r, 80))
+  inst.unmount?.()
+  // 剥 ink 同步标记（\x1b[?2026h/l），保留其余内容与样式
+  return chunks.join('').replace(/\x1b\[\?2026[hl]/g, '')
+}
+
+describe('K6-13③ · 表头-only 超宽表仍渲染（cell 层）', () => {
+  test('RED→GREEN：header-only 6 列超宽表（w=20）不再静默消失，输出列标签', async () => {
+    const md = [
+      '| averyverylongheaderword1 | averyverylongheaderword2 | averyverylongheaderword3 | averyverylongheaderword4 | averyverylongheaderword5 | averyverylongheaderword6 |',
+      '| --- | --- | --- | --- | --- | --- |',
+    ].join('\n')
+    const out = await renderTable(md, 20)
+    expect(out.length).toBeGreaterThan(0)
+    // 长标签被 ink 在 w=20 处硬换行（'averyverylongheaderw\nord1:'）——
+    // 内容断言对换行容忍（拼接后仍在）。bold 标签样式由与数据行同源的
+    // ANSI_BOLD_START 常量路径保证（测试 harness 非 TTY 剥 SGR，验不了）。
+    const flat = out.replace(/\n/g, '')
+    expect(flat).toContain('averyverylongheaderword1:')
+    expect(flat).toContain('averyverylongheaderword6:')
+  })
+
+  test('RED→GREEN：header-only 2 列窄表（w=20）不再静默消失', async () => {
+    const md = [
+      '| averyverylongheaderword41chars-aaaaaaaaaaaaaaaa | averyverylongheaderword42chars-bbbbbbbbbbbbbbbb |',
+      '| --- | --- |',
+    ].join('\n')
+    const out = await renderTable(md, 20)
+    expect(out.length).toBeGreaterThan(0)
+    const flat = out.replace(/\n/g, '')
+    expect(flat).toContain('averyverylongheaderword41chars-')
+    expect(flat).toContain('averyverylongheaderword42chars-')
+  })
+
+  test('锚（修前即真）：正常表（有数据行）组件渲染正常', async () => {
+    const md = ['| Name | Value |', '| --- | --- |', '| foo | bar |'].join('\n')
+    const out = await renderTable(md, 20)
+    expect(out).toContain('Name')
+    expect(out).toContain('foo')
+  })
+})
+
+describe('K6-13⑥ · 宽字符中段截断/emoji 样式变化（cell 裁切面锚，修前即真）', () => {
+  test('sliceAnsi CJK 中段截断整字切（不双切、无替换符）', () => {
+    // token 粒度逐字切：end=4 显示列 = 恰好中+文（各占 2 列），无半字
+    const out = sliceAnsi('中文测试', 0, 4)
+    expect(out).toBe('中文')
+    expect(out).not.toContain('�')
+  })
+
+  test('sliceAnsi emoji 不半切（grapheme 完整，边界宽字符整字保留）', () => {
+    // 跨 end 边界的宽 emoji 整字保留而非切半（'a'0 + 🦊1-2 + 🦊3-4）
+    const out = sliceAnsi('a🦊🦊', 0, 4)
+    expect(out).toBe('a🦊🦊')
+    expect(out).not.toContain('�')
+  })
+
+  test('sliceAnsi VS16 序列不与基底字符分离', () => {
+    const out = sliceAnsi('a‼️b', 0, 3)
+    expect(out).not.toContain('�')
+    expect(out.startsWith('a')).toBe(true)
+    expect(out).toContain('️')
+  })
+
+  test('truncateToWidth 无双切（宽字符边界整字截断）', () => {
+    const out = truncateToWidth('中文中文', 5)
+    expect(out).not.toContain('�')
+    expect(stringWidth(out)).toBeLessThanOrEqual(5)
+    expect(stringWidth(out)).toBeGreaterThanOrEqual(4)
+  })
+
+  test('⑥b emoji 在样式变化 wrap 边界不消失（双实现本就正确）', () => {
+    // 样式切换恰落在换行边界（w=3：红 a🦊 / 绿 b🦊）
+    const out = wrapAnsi('\x1b[31ma🦊\x1b[39m\x1b[32mb🦊\x1b[39m', 3, HARD)
+    const lines = out.split('\n')
+    expect(lines.length).toBe(2)
+    expect(lines[0]).toContain('a🦊')
+    expect(lines[0]).toContain('\x1b[31m')
+    expect(lines[1]).toContain('b🦊')
+    expect(lines[1]).toContain('\x1b[32m')
+  })
+})

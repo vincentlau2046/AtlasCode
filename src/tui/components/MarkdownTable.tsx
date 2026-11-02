@@ -245,6 +245,16 @@ export function MarkdownTable({
     const separator = '─'.repeat(separatorWidth);
     // Small indent for wrapped lines (just 2 spaces)
     const wrapIndent = '  ';
+    // K6-13③ (wave 0.1.86): a header-only table (rows = []) that lands in
+    // vertical format emitted zero lines — the table silently vanished from
+    // the transcript. Emit the column labels so the header still shows;
+    // there are no data rows to render by design. Long labels over-wrap
+    // downstream via the <Ansi> ink wrapper (same as the horizontal path).
+    if (token.rows.length === 0) {
+      return headers
+        .map((label, i) => `${ANSI_BOLD_START}${label || `Column ${i + 1}`}:${ANSI_BOLD_END}`)
+        .join('\n');
+    }
     token.rows.forEach((row_2, rowIndex) => {
       if (rowIndex > 0) {
         lines_2.push(separator);
