@@ -144,3 +144,11 @@ export {
   resolveMailboxPermissionDeadlineMs,
   approvalUnavailableReason,
 } from "./permissionDeadline"
+
+// 0.1.85 Task A（C85-A）：@PDF 引用 provider 投影叶子（纯函数零 I/O；
+// modelprovider params attachment 支 + TUI messages pdf_reference 支双面
+// 消费同一叶子，双面文本恒等；不引 tui/engine）
+export {
+  formatPDFReferenceForModel,
+  type PDFReferenceMetadata,
+} from "./pdfReference"

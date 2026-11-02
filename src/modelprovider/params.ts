@@ -12,6 +12,8 @@
 import { getRoleModel, type ModelRole, type ResolvedModel } from './roles'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { Message, SystemPrompt, ThinkingConfig, Tools } from '../shared'
+// 0.1.85 Task A（C85-A）：@PDF 引用投影叶子（shared 纯函数，不引 tui/engine）
+import { formatPDFReferenceForModel } from '../shared'
 import { zodToJsonSchema } from './schema'
 import {
   convertEffortValueToLevel,
@@ -114,6 +116,20 @@ export function toOpenAIMessages(messages: any[]): any[] {
       // role，既有行为——正解需 provider 支持 role:'system'，残留守见 runAgent 头注）。
       const content = (m as any).message?.content ?? (m as any).content
       if (typeof content === 'string') out.push({ role: 'user', content })
+    } else if (m?.type === 'attachment') {
+      // 0.1.85 Task A（C85-A）：attachment 型此前无支整体落空被丢（084 Gap A
+      // 根——f4 新鲜探针证真实 pdf_reference 投影为 []，K5-8 四要素 0/3 不可达）。
+      // 本波仅显式消费 pdf_reference 族：投影 = shared 纯叶子（K5-8 四要素
+      // 文本，与 TUI normalizeAttachmentForAPI 同叶子双面恒等，零 I/O、不绕
+      // Read 授权）。其它 attachment 族仍丢弃，逐族登记（不随 PDF 修复放行）。
+      const att = (m as any).attachment
+      if (
+        att?.type === 'pdf_reference' &&
+        typeof att.filename === 'string' &&
+        att.filename.length > 0
+      ) {
+        out.push({ role: 'user', content: formatPDFReferenceForModel(att) })
+      }
     }
   }
   return out
