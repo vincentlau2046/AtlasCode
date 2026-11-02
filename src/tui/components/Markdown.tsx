@@ -1,12 +1,14 @@
 import { c as _c } from "react/compiler-runtime";
 import { marked, type Token, type Tokens } from 'marked';
-import React, { Suspense, use, useMemo, useRef } from 'react';
+import React, { Suspense, use, useContext, useMemo, useRef } from 'react';
 import { useSettings } from '../hooks/useSettings.js';
 import { Ansi, Box, useTheme } from '../ink.js';
 import { type CliHighlight, getCliHighlightPromise } from '../utils/cliHighlight.js';
 import { hashContent } from '../utils/hash.js';
 import { configureMarked, formatToken } from '../utils/markdown.js';
 import { stripPromptXMLTags } from '../utils/messages.js';
+import { underlineOsc8Links } from '../utils/hyperlink.js';
+import { LinkHoverContext } from './design-system/ThemedText.js';
 import { MarkdownTable } from './MarkdownTable.js';
 type Props = {
   children: string;
@@ -121,22 +123,28 @@ function MarkdownWithHighlight(props) {
   return t1;
 }
 function MarkdownBody(t0) {
-  const $ = _c(7);
+  const $ = _c(8);
   const {
     children,
     dimColor,
     highlight
   } = t0;
   const [theme] = useTheme();
+  // K6-5 (wave 0.1.86): item-level hover — underline markdown links while the
+  // containing transcript item is hovered (LinkHoverContext, supplied by
+  // VirtualMessageList with the same hovered && !expanded gate as
+  // TextHoverColorContext).
+  const linkHover = useContext(LinkHoverContext);
   configureMarked();
   let elements;
-  if ($[0] !== children || $[1] !== dimColor || $[2] !== highlight || $[3] !== theme) {
+  if ($[0] !== children || $[1] !== dimColor || $[2] !== highlight || $[3] !== theme || $[4] !== linkHover) {
     const tokens = cachedLexer(stripPromptXMLTags(children));
     elements = [];
     let nonTableContent = "";
     const flushNonTableContent = function flushNonTableContent() {
       if (nonTableContent) {
-        elements.push(<Ansi key={elements.length} dimColor={dimColor}>{nonTableContent.trim()}</Ansi>);
+        const content = linkHover ? underlineOsc8Links(nonTableContent) : nonTableContent;
+        elements.push(<Ansi key={elements.length} dimColor={dimColor}>{content.trim()}</Ansi>);
         nonTableContent = "";
       }
     };
@@ -154,18 +162,19 @@ function MarkdownBody(t0) {
     $[1] = dimColor;
     $[2] = highlight;
     $[3] = theme;
-    $[4] = elements;
+    $[4] = linkHover;
+    $[5] = elements;
   } else {
-    elements = $[4];
+    elements = $[5];
   }
   const elements_0 = elements;
   let t1;
-  if ($[5] !== elements_0) {
+  if ($[6] !== elements_0) {
     t1 = <Box flexDirection="column" gap={1}>{elements_0}</Box>;
-    $[5] = elements_0;
-    $[6] = t1;
+    $[6] = elements_0;
+    $[7] = t1;
   } else {
-    t1 = $[6];
+    t1 = $[7];
   }
   return t1;
 }

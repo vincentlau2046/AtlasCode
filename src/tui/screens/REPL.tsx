@@ -2972,9 +2972,6 @@ export function REPL({
     fromKeybinding?: boolean;
   }) => {
         logForDebugging('[REPL] onSubmit invoked, input=' + JSON.stringify(input?.slice(0, 40)) + (options?.fromKeybinding ? ' (keybinding)' : ' (direct)'));
-    // Re-pin scroll to bottom on submit so the user always sees the new
-    // exchange (matches OpenCode's auto-scroll behavior).
-    repinScroll();
 
     // Handle immediate commands - these bypass the queue and execute right away
     // even while Claude is processing. Commands opt-in via `immediate: true`.
@@ -3086,6 +3083,16 @@ export function REPL({
         return; // Always return early - don't add to history or queue
       }
     }
+
+    // K6-16b (wave 0.1.86): re-pin scroll to bottom on submit so the user
+    // always sees the new exchange — but ONLY on the real submit paths, after
+    // the immediate-command branch above. Immediate local-jsx commands (/btw
+    // etc.) open an overlay without adding messages, so repinning here used to
+    // yank a scrolled-up fullscreen transcript back to the bottom. The main
+    // send path still repins (below); the lastMsgIsHuman backstop effect also
+    // covers it. /clear through this path sees an empty transcript where top
+    // and bottom coincide, so skipping repin is visually identical.
+    repinScroll();
 
     // Remote mode: skip empty input early before any state mutations
     if (activeRemote.isRemoteMode && !input.trim()) {

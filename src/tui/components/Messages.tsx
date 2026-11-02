@@ -27,6 +27,7 @@ import { getGlobalConfig } from '../utils/config.js';
 import { isEnvTruthy } from '../utils/envUtils.js';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { applyGrouping } from '../utils/groupToolUses.js';
+import { applyFoldClick, type FoldClickChainState } from '../utils/foldClickChain.js';
 import { buildMessageLookups, createAssistantMessage, deriveUUID, getMessagesAfterCompactBoundary, getToolUseID, getToolUseIDs, hasUnresolvedHooksFromLookup, isNotEmptyMessage, normalizeMessages, reorderMessagesInUI, type StreamingThinking, type StreamingToolUse, shouldShowUserMessage } from '../utils/messages.js';
 import { plural } from '../utils/stringUtils.js';
 import { renderableSearchText } from '../utils/transcriptSearch.js';
@@ -420,12 +421,21 @@ const MessagesImpl = ({
   // rows) expand together; falls back to uuid for groups/thinking. Stale keys
   // are harmless — they never match anything in renderableMessages.
   const [expandedKeys, setExpandedKeys] = useState<ReadonlySet<string>>(() => new Set());
+  // K6-4 (wave 0.1.86): the DOM click fires on ink's FIRST release, before its
+  // press-side multi-click detection can suppress it — so a double-click would
+  // toggle the fold before being classified as word-select. applyFoldClick
+  // tracks the chain and reverts the toggle on the second click inside ink's
+  // multi-click window (double-click = select word, not fold); clicks 3+ in the
+  // chain are no-ops. setExpandedKeys' only mutator is this callback, so the
+  // chain flag always mirrors the real net effect on the fold state.
+  const foldClickRef = useRef<FoldClickChainState>({ key: '', time: 0, chainNetToggled: false });
   const onItemClick = useCallback((msg_4: RenderableMessage) => {
-    const k = expandKey(msg_4);
-    setExpandedKeys(prev => {
-      const next = new Set(prev);
-      if (next.has(k)) next.delete(k);else next.add(k);
-      return next;
+    applyFoldClick(foldClickRef.current, expandKey(msg_4), Date.now(), k => {
+      setExpandedKeys(prev => {
+        const next = new Set(prev);
+        if (next.has(k)) next.delete(k);else next.add(k);
+        return next;
+      });
     });
   }, []);
   const isItemExpanded = useCallback((msg_5: RenderableMessage) => expandedKeys.size > 0 && expandedKeys.has(expandKey(msg_5)), [expandedKeys]);

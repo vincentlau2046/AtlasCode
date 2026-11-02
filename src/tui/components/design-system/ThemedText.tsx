@@ -10,6 +10,14 @@ import { useTheme } from './ThemeProvider.js';
 /** Colors uncolored ThemedText in the subtree. Precedence: explicit `color` >
  *  this > dimColor. Crosses Box boundaries (Ink's style cascade doesn't). */
 export const TextHoverColorContext = React.createContext<keyof Theme | undefined>(undefined);
+
+/** True while the pointer is over the item's visible (non-expanded) surface.
+ *  K6-5 (wave 0.1.86): Markdown link spans add an SGR 4 underline while the
+ *  containing item is hovered — the hover affordance for "this link opens".
+ *  Item-level approximation by design: the markdown pipeline renders links as
+ *  inline OSC 8 inside one Ansi string, so per-span hover tracking would need
+ *  node-splitting (breaks block layout). */
+export const LinkHoverContext = React.createContext<boolean>(false);
 export type Props = {
   /**
    * Change text color. Accepts a theme key or raw color value.

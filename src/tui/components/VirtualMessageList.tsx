@@ -8,7 +8,7 @@ import type { DOMElement } from '../ink/dom.js';
 import type { MatchPosition } from '../ink/render-to-screen.js';
 import { Box } from '../ink.js';
 import type { RenderableMessage } from '../types/message.js';
-import { TextHoverColorContext } from './design-system/ThemedText.js';
+import { LinkHoverContext, TextHoverColorContext } from './design-system/ThemedText.js';
 import { ScrollChromeContext } from './FullscreenLayout.js';
 
 // Rows of breathing room above the target when we scrollTo.
@@ -263,7 +263,9 @@ function VirtualItem(t0) {
   }
   let t9;
   if ($[19] !== t7 || $[20] !== t8) {
-    t9 = <TextHoverColorContext.Provider value={t7}>{t8}</TextHoverColorContext.Provider>;
+    // K6-5 (wave 0.1.86): LinkHoverContext shares the hovered && !expanded gate
+    // (t7 !== undefined ⟺ hovered && !expanded) — zero extra memo slots.
+    t9 = <LinkHoverContext.Provider value={t7 !== undefined}><TextHoverColorContext.Provider value={t7}>{t8}</TextHoverColorContext.Provider></LinkHoverContext.Provider>;
     $[19] = t7;
     $[20] = t8;
     $[21] = t9;

@@ -10,6 +10,35 @@ import { logForDebugging } from './debug.js'
 import { createHyperlink } from './hyperlink.js'
 import { stripPromptXMLTags } from './messages.js'
 import type { ThemeName } from './theme.js'
+import { hashContent } from './hash.js'
+
+// K6-6 (wave 0.1.86): module-level cache for cli-highlight results. formatToken's
+// code branch runs the highlighter on every call (no internal cache), which makes
+// full-transcript rebuilds (e.g. /compact re-render, ctrl+o scroll-back) pay the
+// highlight cost again for unchanged code blocks. Keyed by language + content
+// hash (mirrors Markdown.tsx tokenCache); NOT keyed by width — highlight output
+// width is content-determined, wrapping happens at frame time (heightCache/
+// columns layer owns width invalidation). MRU-promoted, capped at 500 entries.
+const HIGHLIGHT_CACHE_MAX = 500
+const highlightCache = new Map<string, string>()
+
+function cachedHighlight(text: string, language: string, highlight: CliHighlight): string {
+  const key = `${language}\0${hashContent(text)}`
+  const hit = highlightCache.get(key)
+  if (hit !== undefined) {
+    // MRU promote: re-insert to move to most-recently-used position.
+    highlightCache.delete(key)
+    highlightCache.set(key, hit)
+    return hit
+  }
+  const value = highlight.highlight(text, { language })
+  if (highlightCache.size >= HIGHLIGHT_CACHE_MAX) {
+    const oldest = highlightCache.keys().next().value
+    if (oldest !== undefined) highlightCache.delete(oldest)
+  }
+  highlightCache.set(key, value)
+  return value
+}
 
 // Use \n unconditionally — os.EOL is \r\n on Windows, and the extra \r
 // breaks the character-to-segment mapping in applyStylesToWrappedText,
@@ -87,7 +116,7 @@ export function formatToken(
           )
         }
       }
-      return highlight.highlight(token.text, { language }) + EOL
+      return cachedHighlight(token.text, language, highlight) + EOL
     }
     case 'codespan': {
       // K6-13① (wave 0.1.86): a URL wrapped in backticks is still a URL —
