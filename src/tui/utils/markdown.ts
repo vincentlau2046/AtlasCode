@@ -16,6 +16,10 @@ import type { ThemeName } from './theme.js'
 // causing styled text to shift right.
 const EOL = '\n'
 
+// K6-13① (wave 0.1.86): codespans whose entire text is an http(s) URL are
+// rendered as clickable hyperlinks (see the codespan case in formatToken).
+const CODESPAN_URL_RE = /^https?:\/\/\S+$/i
+
 let markedConfigured = false
 
 export function configureMarked(): void {
@@ -86,6 +90,15 @@ export function formatToken(
       return highlight.highlight(token.text, { language }) + EOL
     }
     case 'codespan': {
+      // K6-13① (wave 0.1.86): a URL wrapped in backticks is still a URL —
+      // render it as a single clickable hyperlink (OSC 8) so that long URLs
+      // survive hard wraps as ONE link (the wrap layer re-emits the OSC 8
+      // open/close per continuation line). Display text keeps the
+      // permission color; terminals without hyperlink support get the bare
+      // URL from createHyperlink (same visible text, no codes).
+      if (CODESPAN_URL_RE.test(token.text)) {
+        return createHyperlink(token.text, color('permission', theme)(token.text))
+      }
       // inline code
       return color('permission', theme)(token.text)
     }

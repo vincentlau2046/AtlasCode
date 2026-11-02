@@ -21,7 +21,7 @@
  * ⑦ 经 cell 车道复现但归因 wrap 层（修一处双车道受益）。
  * 渲染基建：ink render(node, WriteStream) + NODE_ENV=test（bun test 自动）+ forceWidth override。
  */
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test, beforeAll, afterAll } from 'bun:test'
 import { PassThrough } from 'node:stream'
 import React from 'react'
 import { wrapAnsi } from '../../src/tui/ink/wrapAnsi.js'
@@ -254,5 +254,79 @@ describe('K6-13⑥ · 宽字符中段截断/emoji 样式变化（cell 裁切面�
     expect(lines[0]).toContain('\x1b[31m')
     expect(lines[1]).toContain('b🦊')
     expect(lines[1]).toContain('\x1b[32m')
+  })
+})
+
+/**
+ * K6-13① · 反引号内 URL 换行后仍整条可点单链接（markdown token 层 RED→GREEN）。
+ *
+ * 定因（Main 锁面探针）：codespan case 一律走 color('permission')——TTY 下是
+ * 带色裸文本、无 OSC 8；wrap 层对无 OSC 8 的长 URL 逐字符硬换行后终端不认
+ * 链接。修复 = URL 形 codespan 走 createHyperlink（OSC 8 + permission 色
+ * display text；无 hyperlink 支持终端回落裸 URL，headless 视觉零变化）。
+ *
+ * 测试面：chalk.level=3（本文件隔离进程，afterAll 恢复）让 permission 色路径
+ * 在两种状态下都可观测——修前 URL codespan 输出带色码（无 OSC 8），
+ * 修后 headless 车道输出裸 URL（createHyperlink 不支持时丢弃 display text）。
+ * 非 URL codespan 仍走色码路径（inline code 语义不变）。token 面零变化：
+ * lexer token 结构不受渲染层修复影响（codespan token 仍原样产出）。
+ */
+import chalk from 'chalk'
+import { formatToken, applyMarkdown } from '../../src/tui/utils/markdown.js'
+import type { Token, Tokens } from 'marked'
+
+const URL_TEXT = 'https://example.com/very/long/path/here'
+
+function codespanToken(text: string): Tokens.Codespan {
+  return { type: 'codespan', raw: `\`${text}\``, text, escaped: false } as Tokens.Codespan
+}
+
+describe('K6-13① · URL codespan 单链接（markdown token 层）', () => {
+  let savedLevel: number
+  beforeAll(() => {
+    savedLevel = chalk.level
+    chalk.level = 3
+  })
+  afterAll(() => {
+    chalk.level = savedLevel
+  })
+
+  test('RED→GREEN：URL codespan 修后 headless 输出裸 URL（无色码残留）', () => {
+    const out = formatToken(codespanToken(URL_TEXT), 'dark')
+    expect(out).toBe(URL_TEXT)
+    expect(out).not.toContain('\x1b[')
+  })
+
+  test('RED→GREEN（applyMarkdown 车道）：`url` 内联码渲染为裸 URL', () => {
+    const md = `see \`${URL_TEXT}\` now`
+    const out = applyMarkdown(md, 'dark')
+    expect(out).toContain(URL_TEXT)
+    // URL 段不再包 permission 色码（headless）；前后缀普通文本保留
+    expect(out.startsWith('see ')).toBe(true)
+    expect(out.endsWith(' now')).toBe(true)
+  })
+
+  test('锚：非 URL codespan 仍走 permission 色码路径（inline code 语义不变）', () => {
+    const out = formatToken(codespanToken('npm run build'), 'dark')
+    expect(out).toContain('\x1b[')
+    expect(out).toContain('npm run build')
+  })
+
+  test('锚：URL 形判定收窄——www./裸域/含空格不命中', () => {
+    // www. 开头非 http(s) scheme：维持 inline code 色码
+    expect(formatToken(codespanToken('www.example.com/docs'), 'dark')).toContain('\x1b[')
+    // 含空白：非单一 URL token
+    expect(formatToken(codespanToken('https://example.com/a b'), 'dark')).toContain('\x1b[')
+    // https:// 前缀且无空白：命中（大写 scheme 也算 URL）
+    expect(formatToken(codespanToken('HTTPS://EXAMPLE.COM/PATH'), 'dark')).toBe('HTTPS://EXAMPLE.COM/PATH')
+  })
+
+  test('token 面零变化：codespan token 结构不受渲染层修复影响', () => {
+    const tokens = marked.lexer('see `https://example.com/x` ok') as Token[]
+    const paragraph = tokens[0] as any
+    expect(paragraph.type).toBe('paragraph')
+    const inline = paragraph.tokens.find((t: any) => t.type === 'codespan')
+    expect(inline).toBeDefined()
+    expect(inline.text).toBe('https://example.com/x')
   })
 })
