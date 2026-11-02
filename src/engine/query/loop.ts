@@ -641,9 +641,18 @@ export async function queryOneRound(
   // sequential-parent 回落即正确链）；登记防复审当遗漏重提。
   // AD-45 0.1.52：挂起标记随轮末全量序列 record（transcript 持久化 = 挂起面
   // 落盘，--resume 回放经 findDeferredToolUseState 检测）。
+  // 0.1.85-B（C85-B）：补充消息收集（工单 §1-B 追加协议）——已完成 outcome 的
+  // newMessages 按工具序展开（各工具内部按页序，工具侧产出序保持）；挂起支自然无
+  // （deferred 工具未执行不产补充）。追加位置 = 全部 tool_result 之后、defer 标记
+  // 之前——OpenAI tool-call 邻接协议：同 assistant 所有待回应 tool_call 的 tool_result
+  // 不得被新 user 消息夹断，故补充整体后置。toolResults 计数不含补充（仍只计实际
+  // 工具回应）；terminal 判断（toolResults.length === 0）不按补充数。
+  const supplementalMessages: Message[] = outcomes
+    .filter((o) => !o.deferred && Array.isArray(o.newMessages))
+    .flatMap((o) => o.newMessages as Message[])
   const roundMessages: Message[] = marker
-    ? [...messages, assistantMsg, ...resultMessages, marker]
-    : [...messages, assistantMsg, ...resultMessages]
+    ? [...messages, assistantMsg, ...resultMessages, ...supplementalMessages, marker]
+    : [...messages, assistantMsg, ...resultMessages, ...supplementalMessages]
   if (deps.transcript) {
     void deps.transcript.record(roundMessages)
   }
@@ -963,6 +972,11 @@ export async function queryAgentLoop(
       // W3-3a：轮末事件（assistant 消息 + tool result 消息族，派生不变式 =
       // queryOneRound 构造序 [...入参, assistantMsg, ...resultMessages]，
       // resultMessages 长度 = toolResults 长度）。
+      // 0.1.85-B（C85-B）：toolResultMessages 尾切片现在**包含补充 meta-user**
+      // （构造序 [..., ...resultMessages, ...supplementalMessages, marker?]——
+      // 追加协议 tool_result 之后、defer 标记之前）。补充不计入 toolResults
+      // （仍只计实际工具回应）；消费方按消息形判别（isMeta + sourceToolUseId
+      // 关联面）区别于 tool_result 回应族。
       deps.emit?.({
         type: 'round_end',
         turn: turns,

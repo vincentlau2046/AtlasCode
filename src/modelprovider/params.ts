@@ -36,6 +36,11 @@ function toolResultContentToString(content: unknown): string {
         if (b?.type === 'text') return b.text ?? ''
         if (b?.type === 'image') return '[image]'
         if (b?.type === 'tool_result') return toolResultContentToString(b.content)
+        // 0.1.85-B（C85-B）防线二（工单 L88/L165）：document 块无 provider 映射，
+        // 不静默丢弃——显式提示指引 pages 参读（与 readTool full-PDF 支显式错误
+        // 同口径；本波不新增 native document 协议）。
+        if (b?.type === 'document')
+          return '[document: native document input is not supported by this provider — use Read with the pages parameter to read PDF pages as images]'
         return ''
       })
       .filter(Boolean)

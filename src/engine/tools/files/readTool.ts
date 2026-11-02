@@ -171,7 +171,7 @@ import {
   isPDFSupported,
   parsePDFPageRange,
 } from './pdfUtils'
-import { extractPDFPages, getPDFPageCount, readPDF } from './pdf'
+import { extractPDFPages, getPDFPageCount } from './pdf'
 import {
   mapNotebookCellsToToolResult,
   readNotebook,
@@ -1015,38 +1015,18 @@ async function callInner(
       }
     }
 
-    if (!isPDFSupported()) {
-      throw new Error(
-        'Reading full PDFs is not supported with this model. Use a newer model (Sonnet 3.5 v2 or later), ' +
-          `or use the pages parameter to read specific page ranges (e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request). ` +
-          'Page extraction requires poppler-utils: install with `brew install poppler` on macOS or `apt-get install poppler-utils` on Debian/Ubuntu.',
-      )
-    }
-
-    const readResult = await readPDF(resolvedFilePath)
-    // 同 L913 注：非严格 tsconfig 下负支须显式 === false 比较
-    if (readResult.success === false) {
-      throw new Error(readResult.error.message)
-    }
-    const pdfData = readResult.data
-    return {
-      data: pdfData,
-      newMessages: [
-        createUserMessage({
-          content: [
-            {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: 'application/pdf',
-                data: pdfData.file.base64,
-              },
-            },
-          ],
-          isMeta: true,
-        }),
-      ],
-    }
+    // 0.1.85-B（C85-B）：full-PDF native document 支整裁（工单 §1-B L88/L165）。
+    // 当前 provider（OpenAI 协议）无 document 块映射——此前 newMessages 被
+    // pipeline 零消费 + params 静默丢弃 = tool_result 仅 header 文本虚报已读
+    // （「不得 header-only 称已读」）；恢复交付后 document 块也过不了补充合法化
+    // （text/image 允许面，S⑧ 口径 = 明确工具错误）。本波不新增 native document
+    // 协议：整支改显式可操作错误，指引 pages 参读（Task C 页图媒体路径为 PDF
+    // 读取唯一活车道）。
+    throw new Error(
+      `Reading full PDFs natively is not supported by the current provider. ` +
+        `Use the pages parameter to read specific page ranges as page images ` +
+        `(e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request).`,
+    )
   }
 
   // --- Text file (single async read via readFileInRange) ---

@@ -1022,6 +1022,7 @@ export {
   getLimitedSkillToolCommands,
   clearPromptCache,
   getSkillInfo,
+  selectSkillDeliverableMessages,
   type SkillToolInput,
   type SkillToolInlineOutput,
   type SkillToolForkedOutput,

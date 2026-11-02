@@ -209,6 +209,43 @@ function tagMessagesWithToolUseID(
 }
 
 /**
+ * 0.1.85-B（C85-B）Skill 旁支（工单 L87/L147）：Skill newMessages 交付子集选择。
+ *
+ * 通用补充交付（pipeline ToolResult.newMessages 消费）使 Skill 文字首次到达
+ * 模型。只放行 isMeta:true 主内容（技能正文 / coordinator 摘要——
+ * processPromptSlashCommand 两活路径同形：[metadata 非 isMeta, 主内容 isMeta]）。
+ * 非 isMeta metadata 回显消息为死消费面（旧消息/REPL 渲染波已裁）的显示残留，
+ * 不放行补充合法化门（user + isMeta 形契约，坏形 = 明确工具错误）。
+ *
+ * 行为变化记录（工单 L87）：技能指令文本经通用链首次交付；allowedTools /
+ * model / contextModifier 仍不被 pipeline 消费（权限不扩张）——Skill 上下文
+ * 闭合不宣称完整（临时边界；权限扩张须随权限波单独裁定，不悄加新权限能力）。
+ */
+export function selectSkillDeliverableMessages(
+  messages: InDomainUserMessage[],
+): InDomainUserMessage[] {
+  return messages.filter(m => {
+    // 旧 Message 'progress' 型过滤支 = 新 InDomainUserMessage 单形死支（逐字保留）
+    if ((m as { type: string }).type === 'progress') {
+      return false
+    }
+    // C85-B：非 isMeta（metadata 回显）不交付——过不了补充合法化门
+    if (m.isMeta !== true) {
+      return false
+    }
+    // Filter out command-message since SkillTool handles display
+    const content = m.message?.content
+    if (
+      typeof content === 'string' &&
+      content.includes(`<${COMMAND_MESSAGE_TAG}>`)
+    ) {
+      return false
+    }
+    return true
+  })
+}
+
+/**
  * 在 forked 子代理上下文执行技能（delta ⑤⑥⑦⑮⑯；旧 executeForkedSkill
  * 生成器 → 新 runAgent 单 Promise）。
  */
@@ -633,24 +670,11 @@ export const SkillTool: SkillToolFace = {
       SKILL_TOOL_NAME,
     )
 
-    // Tag user messages with sourceToolUseID so they stay transient until this tool resolves
+    // Tag user messages with sourceToolUseID so they stay transient until this
+    // tool resolves. C85-B：交付子集经 selectSkillDeliverableMessages（isMeta:true
+    // 主内容；非 isMeta metadata 回显不交付——见该函数头注行为变化记录）。
     const newMessages = tagMessagesWithToolUseID(
-      processedCommand.messages.filter(m => {
-        // 旧 Message 'progress' 型过滤支 = 新 InDomainUserMessage 单形死支
-        // 保留逐字（delta ⑩）
-        if ((m as { type: string }).type === 'progress') {
-          return false
-        }
-        // Filter out command-message since SkillTool handles display
-        const content = m.message?.content
-        if (
-          typeof content === 'string' &&
-          content.includes(`<${COMMAND_MESSAGE_TAG}>`)
-        ) {
-          return false
-        }
-        return true
-      }),
+      selectSkillDeliverableMessages(processedCommand.messages),
       toolUseID,
     )
 

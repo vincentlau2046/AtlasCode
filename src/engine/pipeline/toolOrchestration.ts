@@ -12,6 +12,7 @@
  *   - MCP 路由接缝（E-2）/ 工具级流式（E-1b）不在批量层，见 toolExecution 残留守。
  */
 import type { AssistantMessage, ToolResultBlockParam, ToolUseBlock } from '../../shared'
+import type { InDomainUserMessage } from '../tools/files/userMessage'
 import { executeToolUse, findTool, type PipelineDeps } from './toolExecution'
 
 export type ToolBatch = { isConcurrencySafe: boolean; blocks: ToolUseBlock[] }
@@ -54,6 +55,13 @@ export interface ToolBatchOutcome {
   deferred?: boolean
   /** defer 挂起理由（hook permissionDecisionReason 透传）。 */
   deferReason?: string
+  /**
+   * 0.1.85-B（C85-B）：补充消息透传（合法化形 + 源 tool_use 关联已在
+   * executeToolUse 完成，批次层原样携带；语义与清空面见 toolExecution
+   * ToolExecutionOutcome.newMessages 头注）。消费面 = queryOneRound 追加进
+   * roundMessages（tool_result 之后、defer 标记之前）。
+   */
+  newMessages?: InDomainUserMessage[]
 }
 
 /**
@@ -77,6 +85,7 @@ export async function runToolBatch(
         toolUseResult: r.toolUseResult,
         deferred: r.deferred,
         deferReason: r.deferReason,
+        ...(r.newMessages ? { newMessages: r.newMessages } : {}),
       })
       if (r.deferred) {
         // AD-45 0.1.52：挂起 → 本轮剩余 tool_use 不再执行（挂起后不续跑，

@@ -31,6 +31,11 @@ export interface InDomainUserMessage {
   uuid: string
   timestamp: string
   isMeta?: boolean
+  /**
+   * 0.1.85-B（C85-B）加性字段：补充消息关联源 tool_use（工单 §1-B 合法化面——
+   * 溯源面；由 pipeline sanitizeSupplementalMessages 投影时挂，工具侧产出不要求带）。
+   */
+  sourceToolUseId?: string
   message: {
     role: 'user'
     content: string | unknown[]

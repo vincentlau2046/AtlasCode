@@ -42,6 +42,10 @@ import type {
   ToolUseBlock,
   Tools,
 } from '../../shared'
+// 0.1.85-B（C85-B）：工具补充消息合法化 — 域内 UserMessage 最小形 + 戳 helper
+// （engine/tools/files/userMessage.ts 单一事实源；InDomainUserMessage 加性扩面
+// sourceToolUseId 关联源 tool_use）。
+import { createUserMessage, type InDomainUserMessage } from '../tools/files/userMessage'
 import { classifyToolError } from './errorClassification'
 import { sanitizeUpdatedInput } from './sanitizeUpdatedInput'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
@@ -325,6 +329,87 @@ export interface ToolExecutionOutcome {
   deferred?: boolean
   /** defer 挂起理由（hook permissionDecisionReason 透传；mergeHookPermission defer 支）。 */
   deferReason?: string
+  /**
+   * 0.1.85-B（C85-B）：工具补充消息（工单 §1-B）。ToolResult.newMessages 此前对
+   * pipeline 零消费（Gap B 主断点——Read pages 页图补充在执行边界被丢弃，永不交付）。
+   * 语义：仅成功支提取 + 合法化（user + isMeta=true + 稳定 uuid/timestamp 保留/补全 +
+   * sourceToolUseId 关联源 tool_use；content 限 string 或 text/image 块数组）；
+   * 坏形态 = 明确工具错误（is_error）且不交付，不静默忽略后报成功。清空面（保守）：
+   * call/map 失败（catch 支）、is_error block、post updatedToolOutput（输出替换不得
+   * 旁路原媒体）、post blockingError；拒绝支（deny/ask/defer/unknown/schema/validate/
+   * pre-hook）工具未执行自然无；MCP 后台早返发生在提取前（未完成补充不交付）。
+   * 消费面 = runToolBatch 携带 → queryOneRound 追加进 roundMessages（tool_result 之后、
+   * defer 标记之前）；toolResults 计数不含补充（仍只计实际工具回应）。
+   */
+  newMessages?: InDomainUserMessage[]
+}
+
+/**
+ * 0.1.85-B（C85-B）：补充消息执行边界合法化（工单 §1-B 合法化面）。
+ *
+ * 输入 = ToolResult.newMessages（工具侧原始产出，unknown[]）。逐条校验：
+ *  - user 消息形（type:'user' + message.role:'user'；content 双形态读取
+ *    message.content ?? content，同 params T-5c F-1 加固先例）
+ *  - isMeta === true（补充 = 对模型不可见的上下文注入，非用户回合）
+ *  - content 限 string（非空）或块数组且每块仅 text/image（tool_result 伪回应块、
+ *    document 等其它块形 = 坏形态——补充面禁止工具伪造回合结构）
+ *  - uuid/timestamp：字符串在场则保留（稳定面——重试不重复 stamp），缺席补 stamp
+ * 投影 = InDomainUserMessage + sourceToolUseId（加性字段，关联源 tool_use）。
+ * 任一条目坏形 → 整批不交付（ok:false + reason；调用方转 is_error 工具错误）。
+ */
+function sanitizeSupplementalMessages(
+  raw: unknown,
+  sourceToolUseId: string,
+): { ok: true; messages: InDomainUserMessage[] } | { ok: false; reason: string } {
+  if (!Array.isArray(raw)) {
+    return { ok: false, reason: `supplemental newMessages must be an array, got ${typeof raw}` }
+  }
+  const out: InDomainUserMessage[] = []
+  for (let i = 0; i < raw.length; i++) {
+    const m = raw[i] as Record<string, unknown> | null | undefined
+    if (typeof m !== 'object' || m === null) {
+      return { ok: false, reason: `supplemental newMessages[${i}] is not an object` }
+    }
+    if (m.type !== 'user') {
+      return { ok: false, reason: `supplemental newMessages[${i}] type must be 'user', got ${String(m.type)}` }
+    }
+    if (m.isMeta !== true) {
+      return { ok: false, reason: `supplemental newMessages[${i}] must be isMeta:true` }
+    }
+    const inner = m.message as Record<string, unknown> | undefined
+    if (typeof inner !== 'object' || inner === null || inner.role !== 'user') {
+      return { ok: false, reason: `supplemental newMessages[${i}] message.role must be 'user'` }
+    }
+    const content = (inner.content ?? m.content) as unknown
+    const blockOk = (b: unknown): boolean =>
+      typeof b === 'object' &&
+      b !== null &&
+      ((b as Record<string, unknown>).type === 'text' || (b as Record<string, unknown>).type === 'image')
+    if (typeof content === 'string') {
+      if (content.length === 0) {
+        return { ok: false, reason: `supplemental newMessages[${i}] has empty content` }
+      }
+    } else if (Array.isArray(content)) {
+      if (content.length === 0 || !content.every(blockOk)) {
+        return {
+          ok: false,
+          reason: `supplemental newMessages[${i}] content blocks must be non-empty text/image (tool_result and other block types are not deliverable as supplemental media)`,
+        }
+      }
+    } else {
+      return { ok: false, reason: `supplemental newMessages[${i}] content must be a string or a text/image block array` }
+    }
+    const msg = createUserMessage({
+      content: content as string | unknown[],
+      isMeta: true,
+    })
+    // 稳定面：工具侧已带 uuid/timestamp 则保留（重试不重复 stamp），缺席用新 stamp。
+    if (typeof m.uuid === 'string' && m.uuid.length > 0) msg.uuid = m.uuid
+    if (typeof m.timestamp === 'string' && m.timestamp.length > 0) msg.timestamp = m.timestamp
+    msg.sourceToolUseId = sourceToolUseId
+    out.push(msg)
+  }
+  return { ok: true, messages: out }
 }
 
 /** 注册表按 name/aliases 查工具（旧仓 findToolByName 的窄 spine 等价物）。 */
@@ -488,6 +573,8 @@ export async function executeToolUse(
   // G1（#258）：toolUseResult 挂法（成功 = res.data / catch = 错误文本串，见
   // ToolExecutionOutcome 头注；早退支不挂）。
   let toolUseResult: unknown
+  // 0.1.85-B（C85-B）：补充消息槽（成功支提取；catch/清空支保持 undefined）。
+  let supplemental: InDomainUserMessage[] | undefined
   // C5-3（0.1.79 W-C）：MCP 慢调用转后台 race——槽注入 + isMcp 双门控 armed；
   // 未注入（headless 窄 spine）/ 非 MCP 工具 = 不包 race，直接调用恒等。
   const mcpAutoBackgroundArmed =
@@ -554,6 +641,28 @@ export async function executeToolUse(
     // G1（#258）：挂工具原生 Output（res.data）——TUI 渲染面经 message.toolUseResult
     // 消费（UserToolSuccessMessage → tool.renderToolResultMessage）。
     toolUseResult = res.data
+    // 0.1.85-B（C85-B）：补充消息提取 + 合法化（工单 §1-B）。仅 map 后块非
+    // is_error 时交付（is_error 面 = 清空语义，S⑤——工具侧 map 标错误的调用
+    // 不交付补充，与 catch 支同口径）；坏形态 = 明确工具错误且不交付
+    // （不静默忽略后报成功——LLM 收到 tool_use_error 可自纠）。
+    if (res.newMessages !== undefined && block.is_error !== true) {
+      const sup = sanitizeSupplementalMessages(res.newMessages, tu.id)
+      // 非严格 tsconfig（strictNullChecks:false）：布尔判别式真值窄化退化
+      //（else 支不消 true 臂，readTool L913 同坑）→ 显式 === true 判别
+      if (sup.ok === true) {
+        supplemental = sup.messages.length > 0 ? sup.messages : undefined
+      } else {
+        block = {
+          type: 'tool_result',
+          tool_use_id: tu.id,
+          content: `<tool_use_error>${sup.reason}</tool_use_error>`,
+          is_error: true,
+        }
+        isError = true
+        toolUseResult = sup.reason
+        supplemental = undefined
+      }
+    }
   } catch (error) {
     // 旧仓 detailedError 挂法（toolExecution.ts:423-441）：toolUseResult = block
     // content 内文同串（错误面 UI 消费 block.content，此处保语义面一致，零渲染回归）。
@@ -584,6 +693,9 @@ export async function executeToolUse(
   if (postOutcome?.updatedToolOutput !== undefined) {
     block = { ...block, content: postOutcome.updatedToolOutput }
     toolUseResult = postOutcome.updatedToolOutput
+    // 0.1.85-B（C85-B）：输出替换保守清空原补充（工单清空面——改写后的工具输出
+    // 语义上替换了整次调用结果，原补充媒体不得旁路交付造成图文错位）。
+    supplemental = undefined
   }
   // C8-5（0.1.79 W-C）：PostToolUse block 拒绝理由回喂（CC 2.1.139
   // continueOnBlock，仅显式声明钩子的拒绝才到达此处——适配器 Option B 门）：
@@ -600,7 +712,14 @@ export async function executeToolUse(
     }
     isError = true
     toolUseResult = hookDenyText
+    // 0.1.85-B（C85-B）：post blocking = 工具结果被拒（清空面——拒绝面不交付补充）。
+    supplemental = undefined
   }
 
-  return { block, isError, toolUseResult }
+  return {
+    block,
+    isError,
+    toolUseResult,
+    ...(supplemental ? { newMessages: supplemental } : {}),
+  }
 }
