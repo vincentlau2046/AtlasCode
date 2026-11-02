@@ -1,5 +1,6 @@
 /**
  * 0.1.86 K6 · 任务 A · K6-2：vim 慢机 Escape 卡 INSERT（工单 §A）。
+ * 0.1.86 K6 · 任务 A · K6-3：vim Esc 丢 AskUserQuestion 答案（工单 §A，下方 K6-3 区块）。
  *
  * 定因（Main 锁面探针实证）：慢机 PTY 读端落后时，OS tty 缓冲把连续按键合并为
  * 一个 read chunk——Esc 与下一键合并为 `\x1b`+letter。parse 层（parse-keypress.ts
@@ -86,5 +87,53 @@ describe('K6-2 · isCoalescedEscape 门矩阵（新增出口；hook 接线消费
   test('多字符 input（粘贴/序列尾）不命中', () => {
     expect(isCoalescedEscape('INSERT', base, 'jj')).toBe(false)
     expect(isCoalescedEscape('INSERT', base, '\x1bj')).toBe(false)
+  })
+})
+
+/**
+ * K6-3 · AskUserQuestion 自由文本框 vim Esc 门（工单 §A：INSERT 模式 Esc 清空
+ * 已填答案 → 仅 NORMAL 模式 Esc 取消，答案草稿保留）。
+ *
+ * 定因（Main 全链实证）：取消支真路径不在 useTextInput 的 Esc 双击（不调
+ * onExit），而在 Select 上下文键位 `escape: 'select:cancel'`（defaultBindings
+ * L332）→ use-select-input.ts L150-152 **无条件注册**（isInInput 只排除
+ * navigation/accept，不排除 cancel）→ 自由文本框聚焦时按 Esc 一次即取消整个
+ * 问答、丢弃全部草稿。上游 302 语义 = 两件套：自由文本框 vim-aware（VimTextInput）
+ * + 仅从 NORMAL 取消（shouldConsumeSelectCancel 门 + select:cancel 拦截器）。
+ *
+ * 分层纪律：纯函数门（escResolve.ts shouldConsumeSelectCancel）+ 机制实证。
+ * hook 接线（VimAwareTextInput 薄封装 + SelectInputOption 标签替换）为薄胶水，
+ * 用户可见行为（Esc#1 留对话草稿保留、Esc#2 才取消、非 vim Esc 零回归）由
+ * e2e gate 的 PTY 探针复验。新增出口基线 import-error 另列（K6-1 先例），
+ * 不冒充行为红。
+ */
+import { shouldConsumeSelectCancel } from '../../src/tui/vim/escResolve.js'
+import { DEFAULT_BINDINGS } from '../../src/tui/keybindings/defaultBindings.js'
+
+describe('K6-3 · shouldConsumeSelectCancel 门矩阵（新增出口；hook 接线消费）', () => {
+  test("INSERT → true（消费 select:cancel：Esc 语义 = 退 NORMAL，不取消问答）", () => {
+    expect(shouldConsumeSelectCancel('INSERT')).toBe(true)
+  })
+
+  test('NORMAL → false（放行 select:cancel：仅 NORMAL 取消，上游 302 语义）', () => {
+    expect(shouldConsumeSelectCancel('NORMAL')).toBe(false)
+  })
+
+  test('undefined（非 vim 模式车道）→ false（取消支零回归）', () => {
+    expect(shouldConsumeSelectCancel(undefined)).toBe(false)
+  })
+})
+
+describe('K6-3 · 取消链机制实证（修前即真——为什么 Esc 会丢答案）', () => {
+  test("Select 上下文 escape → select:cancel 绑定在场（取消问答的机制源）", () => {
+    const select = DEFAULT_BINDINGS.find(b => b.context === 'Select')
+    expect(select).toBeDefined()
+    expect(select!.bindings['escape']).toBe('select:cancel')
+  })
+
+  test('Select 上下文 j/k 绑定在场（isInInput 必须排除它们的实证——自由文本框里要能打字）', () => {
+    const select = DEFAULT_BINDINGS.find(b => b.context === 'Select')
+    expect(select!.bindings['j']).toBe('select:next')
+    expect(select!.bindings['k']).toBe('select:previous')
   })
 })

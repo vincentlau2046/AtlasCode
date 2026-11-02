@@ -8,7 +8,7 @@ import type { ImageDimensions } from '../../utils/imageResizer.js';
 import { ClickableImageRef } from '../ClickableImageRef.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline } from '../design-system/Byline.js';
-import TextInput from '../TextInput.js';
+import { VimAwareTextInput } from './VimAwareTextInput.js';
 import type { OptionWithDescription } from './select.js';
 import { SelectOption } from './select-option.js';
 type Props<T> = {
@@ -374,7 +374,7 @@ export function SelectInputOption(t0) {
   }
   let t32;
   if ($[59] !== cursorOffset || $[60] !== imagesSelected || $[61] !== inputValue || $[62] !== isFocused || $[63] !== onExit || $[64] !== onImagePaste || $[65] !== onInputChange || $[66] !== onSubmit || $[67] !== option || $[68] !== showLabel) {
-    t32 = showLabel ? <><Text color={isFocused ? "suggestion" : undefined}>{option.label}</Text>{isFocused ? <><Text color="suggestion">{option.labelValueSeparator ?? ", "}</Text><TextInput value={inputValue} onChange={value => {
+    t32 = showLabel ? <><Text color={isFocused ? "suggestion" : undefined}>{option.label}</Text>{isFocused ? <><Text color="suggestion">{option.labelValueSeparator ?? ", "}</Text><VimAwareTextInput value={inputValue} onChange={value => {
           isUserEditing.current = true;
           onInputChange(value);
           option.onChange(value);
@@ -386,7 +386,7 @@ export function SelectInputOption(t0) {
           onInputChange(newValue);
           option.onChange(newValue);
           setCursorOffset(before.length + pastedText.length);
-        }} /></> : inputValue && <Text>{option.labelValueSeparator ?? ", "}{inputValue}</Text>}</> : isFocused ? <TextInput value={inputValue} onChange={value_0 => {
+        }} /></> : inputValue && <Text>{option.labelValueSeparator ?? ", "}{inputValue}</Text>}</> : isFocused ? <VimAwareTextInput value={inputValue} onChange={value_0 => {
       isUserEditing.current = true;
       onInputChange(value_0);
       option.onChange(value_0);

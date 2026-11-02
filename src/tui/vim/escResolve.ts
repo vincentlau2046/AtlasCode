@@ -46,3 +46,27 @@ export function isCoalescedEscape(
     /[a-zA-Z0-9]/.test(input)
   )
 }
+
+/**
+ * AskUserQuestion cancel gating (K6-3, wave 0.1.86 task A).
+ *
+ * The Select-rendered AskUserQuestion free-text box is a plain TextInput:
+ * pressing Esc once cancelled the whole dialog and discarded every typed
+ * answer. Root cause: the cancel path is the Select-context keybinding
+ * `escape: 'select:cancel'` (defaultBindings.ts), which use-select-input.ts
+ * registers UNCONDITIONALLY — the isInInput exclusion list only filters
+ * navigation/accept, not cancel. Upstream 302 resolution is a two-piece
+ * fix: make the free-text box vim-aware (VimTextInput) and only allow
+ * cancellation from NORMAL mode. This predicate IS that gate: the
+ * select:cancel interceptor (VimAwareTextInput, inside the Select tree)
+ * consumes the keybinding while the user is still in INSERT — Esc #1
+ * exits INSERT and preserves the draft — and passes it through in NORMAL,
+ * where a second Esc is an explicit cancel. `undefined` = non-vim lane:
+ * the interceptor is never registered there, so legacy Esc behavior is
+ * untouched.
+ */
+export function shouldConsumeSelectCancel(
+  mode: 'INSERT' | 'NORMAL' | undefined,
+): boolean {
+  return mode === 'INSERT'
+}
