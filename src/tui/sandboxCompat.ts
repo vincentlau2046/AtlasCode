@@ -91,12 +91,19 @@ export function addToExcludedCommands(
     return commandPattern
   }
 
-  updateSettingsForSource('localSettings', {
+  // K6-7: surface save failures instead of silently succeeding — the caller
+  // (sandbox-toggle) catches this and reports the error to the user.
+  // (Deviation from the old-repo compat.ts verbatim copy: the return value
+  // of updateSettingsForSource was previously discarded.)
+  const { error } = updateSettingsForSource('localSettings', {
     sandbox: {
       ...existingSettings?.sandbox,
       excludedCommands: [...existingExcludedCommands, commandPattern],
     },
   })
+  if (error) {
+    throw new Error(`Failed to save sandbox settings: ${error.message}`)
+  }
 
   return commandPattern
 }

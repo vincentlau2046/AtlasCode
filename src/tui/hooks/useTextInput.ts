@@ -36,6 +36,30 @@ function mapInput(input_map: Array<[string, InputHandler]>): InputMapper {
   }
 }
 
+/**
+ * Normalization shared by the keystroke path (mapKey default branch) and the
+ * raw-DEL paste path (K6-12 sequential replay below): SSH/tmux coalesces
+ * Enter into the chunk tail, and terminals without bracketed paste (DEC
+ * 2004) send multi-line paste with embedded \r.
+ *
+ * - Trailing \r after text is SSH-coalesced Enter ("o\r") — strip it so the
+ *   Enter isn't inserted as content. Lone \r here is Alt+Enter leaking
+ *   through (META_KEY_CODE_RE doesn't match \x1b\r) — leave it for the
+ *   \r→\n below. Backslash+\r is a stale VS Code Shift+Enter binding
+ *   (pre-#8991 /terminal-setup wrote args.text "\\\r\n" to
+ *   keybindings.json); keep the \r so it becomes \n below
+ *   (anthropics/claude-code#31316).
+ * - Embedded \r is multi-line paste — convert to \n.
+ */
+function normalizeCoalescedInput(input: string): string {
+  return (
+    stripAnsi(input)
+      // eslint-disable-next-line custom-rules/no-lookbehind-regex -- .replace(re, str) on 1-2 char keystrokes: no-match returns same string (Object.is), regex never runs
+      .replace(/(?<=[^\\\r\n])\r$/, '')
+      .replace(/\r/g, '\n')
+  )
+}
+
 export type UseTextInputProps = {
   value: string
   onChange: (value: string) => void
@@ -390,19 +414,10 @@ export function useTextInput({
             case input === '\x1b[F' || input === '\x1b[4~':
               return cursor.endOfLine()
             default: {
-              // Trailing \r after text is SSH-coalesced Enter ("o\r") —
-              // strip it so the Enter isn't inserted as content. Lone \r
-              // here is Alt+Enter leaking through (META_KEY_CODE_RE doesn't
-              // match \x1b\r) — leave it for the \r→\n below. Embedded \r
-              // is multi-line paste from a terminal without bracketed
-              // paste — convert to \n. Backslash+\r is a stale VS Code
-              // Shift+Enter binding (pre-#8991 /terminal-setup wrote
-              // args.text "\\\r\n" to keybindings.json); keep the \r so
-              // it becomes \n below (anthropics/claude-code#31316).
-              const text = stripAnsi(input)
-                // eslint-disable-next-line custom-rules/no-lookbehind-regex -- .replace(re, str) on 1-2 char keystrokes: no-match returns same string (Object.is), regex never runs
-                .replace(/(?<=[^\\\r\n])\r$/, '')
-                .replace(/\r/g, '\n')
+              // SSH-coalesced Enter / non-2004 multi-line paste handling
+              // lives in normalizeCoalescedInput (shared with the raw-DEL
+              // paste path — K6-12).
+              const text = normalizeCoalescedInput(input)
               if (cursor.isAtStart() && isInputModeCharacter(input)) {
                 return cursor.insert(text).left()
               }
@@ -444,16 +459,33 @@ export function useTextInput({
 
     // Fix Issue #1853: Filter DEL characters that interfere with backspace in SSH/tmux
     // In SSH/tmux environments, backspace generates both key events and raw DEL chars
+    // K6-12: without bracketed paste (DEC 2004), a long paste arrives as one
+    // chunk with bare DEL backspaces interleaved with its text ("de\x7ff").
+    // The old count-only loop dropped every non-DEL character in the chunk
+    // ("abc" + "de\x7ff" → "ab"). Replay the chunk sequentially instead:
+    // accumulate text runs and insert them, apply each DEL as
+    // deleteTokenBefore() ?? backspace() at the current cursor.
     if (!key.backspace && !key.delete && input.includes('\x7f')) {
-      const delCount = (input.match(/\x7f/g) || []).length
+      const text = normalizeCoalescedInput(input)
 
-      // Apply all DEL characters as backspace operations synchronously
-      // Try to delete tokens first, fall back to character backspace
       let currentCursor = cursor
-      for (let i = 0; i < delCount; i++) {
-        currentCursor =
-          currentCursor.deleteTokenBefore() ?? currentCursor.backspace()
+      let run = ''
+      const flushRun = () => {
+        if (run.length > 0) {
+          currentCursor = currentCursor.insert(run)
+          run = ''
+        }
       }
+      for (const ch of text) {
+        if (ch === '\x7f') {
+          flushRun()
+          currentCursor =
+            currentCursor.deleteTokenBefore() ?? currentCursor.backspace()
+        } else {
+          run += ch
+        }
+      }
+      flushRun()
 
       // Update state once with the final result
       if (!cursor.equals(currentCursor)) {

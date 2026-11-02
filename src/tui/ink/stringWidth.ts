@@ -112,6 +112,16 @@ function getEmojiWidth(grapheme: string): number {
     return count === 1 ? 1 : 2
   }
 
+  // K6-15: complete keycap sequence (base ∈ [0-9#*] + optional VS16 +
+  // U+20E3) — terminals render keycaps in 1 cell; measuring 2 desyncs
+  // truncation/wrapping of permission-reason lines. The incomplete form
+  // (base + VS16, no U+20E3) below already returns 1.
+  if (grapheme.includes('\u20E3')) {
+    if ((first >= 0x30 && first <= 0x39) || first === 0x23 || first === 0x2a) {
+      return 1
+    }
+  }
+
   // Incomplete keycap: digit/symbol + VS16 without U+20E3
   if (grapheme.length === 2) {
     const second = grapheme.codePointAt(1)
@@ -217,6 +227,24 @@ const bunStringWidth =
 
 const BUN_STRING_WIDTH_OPTS = { ambiguousIsNarrow: true } as const
 
+// K6-15: Bun.stringWidth measures complete keycap sequences (base in
+// [0-9#*] + optional VS16 + U+20E3) as 2 cells, but terminals render them
+// in 1 — permission-reason lines truncate/wrap too early. Subtract one
+// cell per keycap sequence. Guard is zero-cost for keycap-free strings
+// (the overwhelmingly common case). Non-standard bases followed by U+20E3
+// are out of scope (upstream fix scope = the standard keycap set).
+const KEYCAP_SEQ_RE = /[#*0-9]\uFE0F?\u20E3/g
+
 export const stringWidth: (str: string) => number = bunStringWidth
-  ? str => bunStringWidth(str, BUN_STRING_WIDTH_OPTS)
+  ? str => {
+      const w = bunStringWidth(str, BUN_STRING_WIDTH_OPTS)
+      if (w === 0 || !str.includes('\u20E3')) return w
+      let keycaps = 0
+      for (const _ of str.matchAll(KEYCAP_SEQ_RE)) keycaps++
+      return w - keycaps
+    }
   : stringWidthJavaScript
+
+// Test-enablement export: the production node path (bunStringWidth = null)
+// runs stringWidthJavaScript; unit tests pin its behavior directly.
+export { stringWidthJavaScript }

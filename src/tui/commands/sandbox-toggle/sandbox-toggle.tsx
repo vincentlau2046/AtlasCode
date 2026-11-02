@@ -60,8 +60,15 @@ export async function call(onDone: (result?: string) => void, _context: unknown,
       // Remove quotes if present
       const cleanPattern = commandPattern.replace(/^["']|["']$/g, '');
 
-      // Add to excludedCommands
-      addToExcludedCommands(cleanPattern);
+      // Add to excludedCommands — surface save failures instead of
+      // always reporting success (K6-7)
+      try {
+        addToExcludedCommands(cleanPattern);
+      } catch (e) {
+        const message = color('error', themeName)(`Error: Failed to save sandbox settings: ${e instanceof Error ? e.message : String(e)}`);
+        onDone(message);
+        return null;
+      }
 
       // Get the local settings path and make it relative to cwd
       const localSettingsPath = getSettingsFilePathForSource('localSettings');
