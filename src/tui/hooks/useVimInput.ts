@@ -15,6 +15,7 @@ import {
   executeX,
   type OperatorContext,
 } from '../vim/operators.js'
+import { isCoalescedEscape } from '../vim/escResolve.js'
 import { type TransitionContext, transition } from '../vim/transitions.js'
 import {
   createInitialPersistentState,
@@ -197,6 +198,18 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
     // Escape in NORMAL mode cancels any pending command (replace, operator, etc.)
     if (key.escape && state.mode === 'NORMAL') {
       vimStateRef.current = { mode: 'NORMAL', command: { type: 'idle' } }
+      return
+    }
+
+    // K6-2: slow machines coalesce Esc with the next keypress into one read
+    // chunk (`\x1b` + letter); the parser resolves that as legacy Alt+letter
+    // (meta=true, name=''), which used to strand the user in INSERT with a
+    // stray letter. In INSERT, resolve toward the Escape: switch to NORMAL
+    // and replay the letter as a NORMAL-mode command. See
+    // vim/escResolve.ts for the full rationale.
+    if (isCoalescedEscape(state.mode, key, input)) {
+      switchToNormalMode()
+      handleVimInput(input, { ...key, meta: false })
       return
     }
 
