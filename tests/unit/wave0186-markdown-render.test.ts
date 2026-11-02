@@ -190,8 +190,10 @@ describe('K6-13③ · 表头-only 超宽表仍渲染（cell 层）', () => {
     expect(out.length).toBeGreaterThan(0)
     // 长标签被 ink 在 w=20 处硬换行（'averyverylongheaderw\nord1:'）——
     // 内容断言对换行容忍（拼接后仍在）。bold 标签样式由与数据行同源的
-    // ANSI_BOLD_START 常量路径保证（测试 harness 非 TTY 剥 SGR，验不了）。
-    const flat = out.replace(/\n/g, '')
+    // ANSI_BOLD_START 常量路径保证；FORCE_COLOR=3（四件套口径）下 SGR 在
+    // 场且 ink 每个续行重发样式（K6-13⑦），故拼接前必须 stripAnsi（同
+    // L59/L109 文件惯例；0.1.86 归因补修：FORCE_COLOR=0 假绿）。
+    const flat = stripAnsi(out).replace(/\n/g, '')
     expect(flat).toContain('averyverylongheaderword1:')
     expect(flat).toContain('averyverylongheaderword6:')
   })
@@ -203,7 +205,8 @@ describe('K6-13③ · 表头-only 超宽表仍渲染（cell 层）', () => {
     ].join('\n')
     const out = await renderTable(md, 20)
     expect(out.length).toBeGreaterThan(0)
-    const flat = out.replace(/\n/g, '')
+    // 同上：FORCE_COLOR=3 下 SGR 在场，拼接前 stripAnsi（0.1.86 归因补修）
+    const flat = stripAnsi(out).replace(/\n/g, '')
     expect(flat).toContain('averyverylongheaderword41chars-')
     expect(flat).toContain('averyverylongheaderword42chars-')
   })
