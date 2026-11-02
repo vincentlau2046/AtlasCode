@@ -7,7 +7,8 @@
  * range 重读 → file_unchanged / env ATLAS_DISABLE_READ_DEDUP 设真 → 全
  * 量内容，恰 1 红集）/ notebook（readNotebook + cells 面）/ image（D-3
  * 最小形：原始 base64 + ext→MIME，delta ⑫ newMessages 恒不产生）/ PDF
- * （readPDF document 块 newMessages + pages 参 extractPDFPages parts 面，
+ * （0.1.85-C 起 full-PDF 内联读整裁 → FullPDFReadUnsupportedError 显式
+ * 失败【工单 §1-C 行为变更】；pages 参 extractPDFPages parts 面保留，
  * poppler 门控）。限额面：maxSizeBytes 256KB 字节帽（FileTooLargeError）
  * + maxTokens 25000 estimate 帽（MaxFileReadTokenExceededError，delta ⑪
  * estimate-only）+ ENOENT 友好消息面（FILE_NOT_FOUND_CWD_NOTE + cwd）。
@@ -25,7 +26,10 @@ import {
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, beforeAll, describe, expect, test } from 'bun:test'
-import type { ToolPermissionContext } from '../../src/shared'
+import {
+  FullPDFReadUnsupportedError,
+  type ToolPermissionContext,
+} from '../../src/shared'
 import {
   ReadTool,
   MaxFileReadTokenExceededError,
@@ -299,23 +303,31 @@ describe('ReadTool notebook / image 支真盘', () => {
 })
 
 describe('ReadTool PDF 支真盘（poppler 门控）', () => {
-  tPdf('全量 PDF：data pdf 面 + document 块 newMessages（isMeta 面）', async () => {
-    const raw = Buffer.from(PDF_MINI_B64, 'base64')
-    const res = await ReadTool.call({ file_path: pdfPath }, makeCtx())
-    expect(res.data.type).toBe('pdf')
-    if (res.data.type === 'pdf') {
-      expect(res.data.file.originalSize).toBe(raw.length)
-      expect(Buffer.from(res.data.file.base64, 'base64')).toEqual(raw)
-    }
-    expect(res.newMessages).toHaveLength(1)
-    const msg = res.newMessages![0] as {
-      isMeta?: boolean
-      message: { content: Array<{ type: string; source?: { media_type?: string } }> }
-    }
-    expect(msg.isMeta).toBe(true)
-    expect(msg.message.content[0].type).toBe('document')
-    expect(msg.message.content[0].source?.media_type).toBe('application/pdf')
-    const block = ReadTool.mapToolResultToToolResultBlockParam(res.data, 'tu-pdf')
+  // 0.1.85-C 显式行为变更（工单 §1-C，非回归弱化）：全量 PDF 无 pages 的
+  // 「data pdf + document 块 newMessages」内联读整裁——document 块过不了
+  // params 补充合法化门 + params 零消费（死交付），本波起 ReadTool.call
+  // 显式抛 FullPDFReadUnsupportedError（message 指引 pages 参数车道），
+  // 不再静默内联整份 PDF bytes。旧断言（base64 环回 + document isMeta）
+  // 随死交付路径一并移除；合成 data 的 mapToolResultToToolResultBlockParam
+  // 'PDF file read:' 文本面保留（mapToolResult 纯函数与车道无关）。
+  tPdf('全量 PDF：full-PDF 内联读整裁 → FullPDFReadUnsupportedError（0.1.85-C）', async () => {
+    const call = ReadTool.call({ file_path: pdfPath }, makeCtx())
+    expect(call).rejects.toBeInstanceOf(FullPDFReadUnsupportedError)
+    await expect(call).rejects.toThrow(/Use the pages parameter/)
+  })
+
+  tPdf('data pdf 文本面：mapToolResultToToolResultBlockParam（纯函数，与调用车道无关）', async () => {
+    const block = ReadTool.mapToolResultToToolResultBlockParam(
+      {
+        type: 'pdf',
+        file: {
+          filePath: pdfPath,
+          base64: PDF_MINI_B64,
+          originalSize: 606,
+        },
+      } as any,
+      'tu-pdf',
+    )
     expect(block.content).toContain('PDF file read:')
   })
 
