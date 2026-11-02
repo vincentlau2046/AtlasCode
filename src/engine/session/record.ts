@@ -32,6 +32,10 @@
  * 避免 record↔load 环依赖）。
  */
 import { isEnvTruthy } from '../../shared'
+// 0.1.85-D（C85-D）：pdf_reference 五字段白名单落盘投影（工单 §1-D「恢复/
+// 压缩仍保引用」——引用≠正文，零 PDF bytes 落盘，恶意额外字段剥除单一
+// 事实源；tui utils/sessionStorage.ts 同款消费，两车道同源恒等）。
+import { projectPDFReferenceForRecord } from '../../shared'
 import type { ContentBlock, ContentBlockParam, ToolResultBlockParam, ToolUseBlock } from '../../shared'
 import { REPL_TOOL_NAME } from '../tools/toolNames'
 import { getSessionMessages } from './load'
@@ -74,6 +78,16 @@ export function isLoggableMessage(m: Message): boolean {
       m.attachment?.type === 'hook_additional_context' &&
       isEnvTruthy(process.env.ATLAS_SAVE_HOOK_ADDITIONAL_CONTEXT)
     ) {
+      return true
+    }
+    // 0.1.85-D（C85-D，工单 §1-D「恢复/压缩仍保引用」）：@PDF 引用
+    // metadata 五字段白名单落盘——引用≠正文，落盘仅文件位置 + 页数/大小
+    // 元数据（零 PDF bytes，cleanMessagesForLogging 内经 shared
+    // projectPDFReferenceForRecord 白名单强制）。resume 后 params
+    // attachment 支（Task A）投影四要素必读说明，模型按本次权限重读。
+    // 084「全部 pdf_reference 必不落盘」断言本波明确变更（引用 metadata
+    // 在场、内联 bytes 仍必不落盘）。
+    if (m.attachment?.type === 'pdf_reference') {
       return true
     }
     return false
@@ -169,14 +183,29 @@ function transformMessagesForExternalTranscript(
   }) as Transcript
 }
 
+/**
+ * 0.1.85-D（C85-D）单消息投影（engine 车道）：attachment 消息携带
+ * pdf_reference → 替换为五字段白名单形（insertMessageChain `...message`
+ * spread 整体入盘 → 投影必须发生在过滤后、落盘前）；其余原样返回。
+ */
+function projectPDFReferenceAttachmentForRecord(m: Message): Message {
+  if (m.type !== 'attachment') return m
+  const projected = projectPDFReferenceForRecord(m.attachment)
+  return projected ? ({ ...m, attachment: projected } as Message) : m
+}
+
 export function cleanMessagesForLogging(
   messages: Message[],
   allMessages: readonly Message[] = messages,
 ): Transcript {
   const filtered = messages.filter(isLoggableMessage) as Transcript
+  // 0.1.85-D（C85-D）：pdf_reference 五字段白名单投影（过滤后、落盘前
+  // 唯一通道；恶意额外字段剥除的单一事实源 = shared projectPDFReference
+  // ForRecord，tui 车道同源）。
+  const projected = filtered.map(projectPDFReferenceAttachmentForRecord)
   // de-ANT: `getUserType() !== 'ant'` 恒真（ant 分支已死），坍缩为外部转录变换。
   return transformMessagesForExternalTranscript(
-    filtered,
+    projected as Transcript,
     collectReplIds(allMessages),
   )
 }

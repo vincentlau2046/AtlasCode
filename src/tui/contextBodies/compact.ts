@@ -1,4 +1,7 @@
-import { feature } from 'src/shared'
+// 0.1.85-D（C85-D）：pdf_reference 压缩后保引用（工单 §1-D「恢复/压缩仍
+// 保引用，不保自动正文」）——shared 白名单投影叶子（落盘单一事实源同源）。
+import { feature, projectPDFReferenceForRecord } from 'src/shared'
+import type { PDFReferenceMetadata } from 'src/shared'
 import type { UUID } from 'crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 
@@ -207,6 +210,30 @@ export function stripReinjectedAttachments(messages: Message[]): Message[] {
     )
   }
   return messages
+}
+
+/**
+ * 0.1.85-D（C85-D，工单 §1-D「恢复/压缩仍保引用，不保自动正文」）：从
+ * 压缩输入消息收集 @PDF 引用附件（shared projectPDFReferenceForRecord
+ * 五字段白名单投影——与落盘同源，恶意额外字段剥除；按 filename 去重防
+ * 重复膨胀，后值覆盖 = 更近的引用获胜）。压缩吃掉全部历史附件后，
+ * post-compact 重建引用（不重建正文），模型按本次权限 Read（文件替换→
+ * 新内容；删除/deny→显式失败，无旧页图假答面）。
+ */
+export function collectPDFReferenceAttachmentsForCompact(
+  messages: readonly Message[],
+): PDFReferenceMetadata[] {
+  const byFilename = new Map<string, PDFReferenceMetadata>()
+  for (const m of messages) {
+    if (m.type !== 'attachment') continue
+    const projected = projectPDFReferenceForRecord(
+      (m as { attachment?: unknown }).attachment,
+    )
+    if (projected) {
+      byFilename.set(projected.filename, projected)
+    }
+  }
+  return [...byFilename.values()]
 }
 
 export const ERROR_MESSAGE_NOT_ENOUGH_MESSAGES =
@@ -578,6 +605,15 @@ export async function compactConversation(
       [],
     )) {
       postCompactFileAttachments.push(createAttachmentMessage(att))
+    }
+
+    // 0.1.85-D（C85-D）：压缩吃掉的 @PDF 引用按 filename 去重重建（五字段
+    // 白名单形，正文零交付，模型按本次权限 Read——不虚报已读）。挂
+    // postCompactFileAttachments 同位（buildPostCompactMessages 顺序：
+    // boundary → summary → keep → attachments → hooks）。keep 窗内同文件
+    // 引用至多 +1 条重复，与 delta 附件重宣告语义同位（有界非膨胀）。
+    for (const pdfRef of collectPDFReferenceAttachmentsForCompact(messages)) {
+      postCompactFileAttachments.push(createAttachmentMessage(pdfRef))
     }
 
     context.onCompactProgress?.({

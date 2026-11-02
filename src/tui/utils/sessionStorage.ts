@@ -65,6 +65,10 @@ import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
+// 0.1.85-D（C85-D）：pdf_reference 五字段白名单落盘投影（工单 §1-D「恢复/
+// 压缩仍保引用」）——与 engine 车道 session/record.ts 同源同款（shared
+// 单一事实源），isLoggableMessage 放行 + cleanMessagesForLogging 投影。
+import { projectPDFReferenceForRecord } from 'src/shared'
 import { isFsInaccessible } from './errors.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { formatFileSize } from './format.js'
@@ -4205,6 +4209,13 @@ export function isLoggableMessage(m: Message): boolean {
     ) {
       return true
     }
+    // 0.1.85-D（C85-D，工单 §1-D「恢复/压缩仍保引用」）：@PDF 引用
+    // metadata 五字段白名单落盘——引用≠正文，零 PDF bytes（cleanMessages
+    // ForLogging 内经 shared projectPDFReferenceForRecord 白名单强制）；
+    // 与 engine 车道同款例外，resume 后 params Task A 支投影必读说明。
+    if (m.attachment?.type === 'pdf_reference') {
+      return true
+    }
     return false
   }
   return true
@@ -4291,14 +4302,27 @@ function transformMessagesForExternalTranscript(
   }) as Transcript
 }
 
+/**
+ * 0.1.85-D（C85-D）单消息投影（TUI 车道，与 engine 车道 record.ts 同款）：
+ * attachment 消息携带 pdf_reference → 替换为五字段白名单形；其余原样返回。
+ */
+function projectPDFReferenceAttachmentForRecord(m: Message): Message {
+  if (m.type !== 'attachment') return m
+  const projected = projectPDFReferenceForRecord(m.attachment)
+  return projected ? ({ ...m, attachment: projected } as Message) : m
+}
+
 export function cleanMessagesForLogging(
   messages: Message[],
   allMessages: readonly Message[] = messages,
 ): Transcript {
   const filtered = messages.filter(isLoggableMessage) as Transcript
+  // 0.1.85-D（C85-D）：pdf_reference 五字段白名单投影（过滤后、落盘前
+  // 唯一通道；shared projectPDFReferenceForRecord 单一事实源）。
+  const projected = filtered.map(projectPDFReferenceAttachmentForRecord)
   // de-ANT: `getUserType() !== 'ant'` 恒真（ant 分支已死），坍缩为外部转录变换。
   return transformMessagesForExternalTranscript(
-    filtered,
+    projected as Transcript,
     collectReplIds(allMessages),
   )
 }

@@ -20,9 +20,14 @@
  * 指令在场即证明真实 TUI @file 提交 → engine 请求可见。
  *
  * JSONL 面（record 真写真读，session-double-write 惯例）：@自动附件
- * 消息（含历史内联 PDF base64 形）经 cleanMessagesForLogging → 不落
- * JSONL（isLoggableMessage 既有过滤 = 磁盘既有满足判别，不硬造基线红）；
- * user 消息 @path 文本持久化 → resume 重读线索不丢。不放宽附件白名单。
+ * 消息（含历史内联 PDF base64 形）经 cleanMessagesForLogging → 内联
+ * bytes 不落 JSONL；user 消息 @path 文本持久化 → resume 重读线索不丢。
+ * 【0.1.85-D 显式行为变更（工单 §1-D「恢复/压缩仍保引用」）】本文件原
+ * 断言「全部 pdf_reference 必不落盘」本波起不再成立：引用 metadata 五
+ * 字段白名单（type/filename/pageCount/fileSize/displayPath，shared
+ * projectPDFReferenceForRecord 单一事实源，两 record 车道同款）落盘，
+ * 引用≠正文（零 PDF bytes），resume 后 params Task A 支投影四要素必读
+ * 说明。白名单之外附件族仍维持过滤（不全局放宽）。
  *
  * 既有边界如实登记（工单要求）：
  *  - headless print.ts 无 @ 自动展开（grep 零命中 getAttachmentMessages/
@@ -435,7 +440,7 @@ describe('JSONL 面：@自动附件 bytes 不落盘 + user @path 持久化', () 
     }
   })
 
-  t('真 record/flush：内联 PDF base64 与 pdf_reference 均不进 JSONL；user @path 文本在', async () => {
+  t('真 record/flush：内联 PDF base64 不进 JSONL；pdf_reference 五字段白名单落盘（0.1.85-D 显式行为变更）；user @path 文本在', async () => {
     resetProjectForTesting()
     clearSessionMessagesCache()
     const sid = 'wave0184-pdfref-session'
@@ -473,10 +478,29 @@ describe('JSONL 面：@自动附件 bytes 不落盘 + user @path 持久化', () 
     const jsonlPath = getTranscriptPath(sid)
     expect(existsSync(jsonlPath)).toBe(true)
     const raw = readFileSync(jsonlPath, 'utf8')
-    // 磁盘既有满足判别（isLoggableMessage 既有过滤，非本波基线红）：
-    // raw PDF bytes（base64 形）与引用 metadata 均不落盘
+    // 磁盘判别（0.1.85-D 显式行为变更，工单 §1-D「恢复/压缩仍保引用」）：
+    // raw PDF bytes（base64 形）仍必不落盘；引用 metadata 五字段白名单
+    // 落盘（引用≠正文——文件位置 + 页数/大小元数据，零 PDF bytes）。
+    // 白名单之外附件族维持过滤（file 型内联不落盘），不全局放宽。
     expect(raw).not.toContain(marker)
-    expect(raw).not.toContain('pdf_reference')
+    expect(raw).toContain('pdf_reference')
+    expect(raw).toContain('"pageCount":30')
+    expect(raw).toContain('"fileSize":1234567')
+    // 五字段白名单且仅五字段（不 spread 原对象铁证）
+    const attEntry = raw
+      .split('\n')
+      .filter(Boolean)
+      .map(l => JSON.parse(l) as Record<string, any>)
+      .find(e => e.type === 'attachment')
+    expect(attEntry).toBeDefined()
+    expect(Object.keys(attEntry!.attachment).sort()).toEqual([
+      'displayPath',
+      'fileSize',
+      'filename',
+      'pageCount',
+      'type',
+    ])
+    expect(attEntry!.attachment.filename).toBe('/abs/path/report.pdf')
     // user 消息 @path 文本持久化 → resume 后重读线索不丢
     expect(raw).toContain('@/abs/path/report.pdf')
     resetProjectForTesting()

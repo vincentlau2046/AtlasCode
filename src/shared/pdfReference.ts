@@ -57,3 +57,47 @@ export function formatPDFReferenceForModel(reference: PDFReferenceMetadata): str
     `page by page as needed. Do not answer questions about this PDF's content from assumptions.`
   )
 }
+
+/**
+ * D 波（0.1.85-D，工单 §1-D「恢复/压缩仍保引用」）落盘白名单投影：任意
+ * attachment 值 → 五字段 PDFReferenceMetadata | null。双 record 车道
+ * （engine session/record.ts + tui utils/sessionStorage.ts）落盘前的唯一
+ * 通道——**不 spread 原对象**：恶意/意外额外字段（base64/Buffer/content
+ * 等正文形字段）一律剥除不落盘；五字段缺一或类型不符 → null（不落盘，
+ * 不放宽）。引用≠正文：落盘的只有文件位置与页数/大小元数据，零 PDF
+ * bytes；resume 后 params attachment 支（Task A）据此投影四要素必读文本，
+ * 模型按本次权限重读（文件替换→新内容；删除/deny→Read 显式失败，无旧
+ * 页图假答面）。
+ */
+export function projectPDFReferenceForRecord(
+  att: unknown,
+): PDFReferenceMetadata | null {
+  if (typeof att !== 'object' || att === null) return null
+  const a = att as Record<string, unknown>
+  if (a.type !== 'pdf_reference') return null
+  if (typeof a.filename !== 'string' || a.filename.length === 0) return null
+  // 赋值式窄化（非严格 tsconfig 判别式显式惯例）：复合守卫下 CFA 不收窄，
+  // 用赋值支显式定形（null=页数未知；number 须有限值，NaN/±Infinity 拒收）。
+  const rawPageCount = a.pageCount
+  let pageCount: number | null
+  if (rawPageCount === null) {
+    pageCount = null
+  } else if (
+    typeof rawPageCount === 'number' &&
+    Number.isFinite(rawPageCount)
+  ) {
+    pageCount = rawPageCount
+  } else {
+    return null
+  }
+  const fileSize = a.fileSize
+  if (typeof fileSize !== 'number' || !Number.isFinite(fileSize)) return null
+  if (typeof a.displayPath !== 'string') return null
+  return {
+    type: 'pdf_reference',
+    filename: a.filename,
+    pageCount,
+    fileSize,
+    displayPath: a.displayPath,
+  }
+}
