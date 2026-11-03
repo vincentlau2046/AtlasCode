@@ -80,3 +80,24 @@ sources:
     status: active
     local_clone: null
     note: "marketplace 源；auto-installed 为 ascend-official 插件（含 CANNBot submodule）；World B 验真锚顶层 HEAD（resolvedSha）"
+
+  # ---------------------------------------------------------------------------
+  # ms-agent（ModelScope）pin 快照引用（0.1.87 任务 C）。github.com/modelscope/ms-agent
+  # 仓库的 ms-agent-skills/ 子路径 = 单 skill 包 `ms-agent`（Capability Gateway）。
+  #   license: Apache-2.0（GitHub API license.spdx_id + PyPI ms-agent 1.6.0 元数据双源核验）。
+  #   pinned_sha: main commit 锚（release tag 全不含 ms-agent-skills/——v1.6.0 早于该
+  #               目录新增，不能锚 tag）；快照内容 2026-11-03 实核 clone 定性 =
+  #               SKILL.md（30 MCP 工具能力索引）+ 9 references/ SOP + 3 scripts。
+  #   零运行时 fetch / 不 vendor 内容 / 不引入 ms-agent 框架依赖（工单 §1.C 信任边界）；
+  #   本条不被 World A/B 消费（officialVerify 只取 agent-skills）——check/update
+  #   验真走任务 F AscendSkillSourceCheck（工单 §125 Interfaces）。
+  - repo: ms-agent
+    host: github
+    url: https://github.com/modelscope/ms-agent.git
+    pinned_sha: 6d90d84e55d508fcb52ea19f3912de6f6a477e38
+    upstream_head: null                    # 任务 F AscendSkillSourceCheck 填
+    subpath: ms-agent-skills/
+    license: Apache-2.0
+    status: active
+    local_clone: null
+    note: "ModelScope ms-agent pin 快照（Capability Gateway 单 skill 包：30 MCP 工具索引 + 9 references SOP + 3 scripts）；仅 skill 参考，不 vendor/零 fetch/零框架依赖；验真走任务 F AscendSkillSourceCheck"

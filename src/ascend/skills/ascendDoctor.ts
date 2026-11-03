@@ -107,9 +107,9 @@ export const ASCEND_DOCTOR: AscendUmbrellaDefinition = {
     },
     {
       skill: 'ms-agent-skills',
-      note: 'pinned diagnostic snapshot',
+      note: 'pinned capability snapshot',
       trigger:
-        'Deep diagnostic playbooks from the ms-agent diagnostic family (pinned snapshot reference; suggest install when absent).',
+        'ms-agent Capability Gateway skill: 30-tool MCP capability SOPs (deep research, doc research, code-genesis, agent delegation). Agentic-capability support alongside triage — not an Ascend diagnostic playbook (pinned snapshot; suggest install when absent).',
       status: 'suggest-install',
       source: 'ms-agent-skills',
     },

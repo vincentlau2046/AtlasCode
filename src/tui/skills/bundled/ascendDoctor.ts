@@ -41,7 +41,7 @@ const SKILL_MD = [
   "| common-infra-skills | Environment/infrastructure fault: driver/firmware, CANN component install, container setup, npu-smi device visibility. | preinstalled |",
   "| common-ops-skills | Ops-level diagnosis: fault_diagnose, profiling anomaly triage, HCCL communication test, large-scale deploy issues. | preinstalled |",
   "| ascend-test-design | The fault needs a reproducing test case (ST/UT/whitebox/golden) before root-cause work or to prove a fix. | preinstalled |",
-  "| ms-agent-skills (pinned diagnostic snapshot) | Deep diagnostic playbooks from the ms-agent diagnostic family (pinned snapshot reference; suggest install when absent). | suggest install |",
+  "| ms-agent-skills (pinned capability snapshot) | ms-agent Capability Gateway skill: 30-tool MCP capability SOPs (deep research, doc research, code-genesis, agent delegation). Agentic-capability support alongside triage — not an Ascend diagnostic playbook (pinned snapshot; suggest install when absent). | suggest install |",
   "",
   "## Optional live evidence: msprof-mcp MCP server",
   "",
