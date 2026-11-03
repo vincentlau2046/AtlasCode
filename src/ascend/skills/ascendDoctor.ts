@@ -9,7 +9,7 @@
  * SKILL_MD 由路由表渲染生成（umbrella.ts renderUmbrellaSkillMd）——本文件不手抄
  * 第二份正文。
  */
-import { renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
+import { ASCEND_UMBRELLA_STEP0_SECTION, renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
 
 export const ASCEND_DOCTOR: AscendUmbrellaDefinition = {
   name: 'ascend-doctor',
@@ -26,6 +26,8 @@ export const ASCEND_DOCTOR: AscendUmbrellaDefinition = {
     'AscendProfileAnalyzer',
     'AscendRealHWBridge',
     'AscendGoldenTest',
+    // 任务 F Step 0 源新鲜度检查/更新（工具仅 TUI 注册、shouldDefer，非 ascend 16 工具面）。
+    'AscendSkillSourceCheck',
   ],
   enterWhen: 'A fault or anomaly appeared and no specialized skill is obviously right yet.',
   routesSummary: 'Classify the fault from evidence, then route to the matching specialized skill.',
@@ -114,6 +116,7 @@ export const ASCEND_DOCTOR: AscendUmbrellaDefinition = {
       source: 'ms-agent-skills',
     },
   ],
+  step0Section: ASCEND_UMBRELLA_STEP0_SECTION,
   extraSections: [
     [
       '## Optional live evidence: msprof-mcp MCP server',

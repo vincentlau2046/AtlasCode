@@ -8,7 +8,7 @@
  *
  * SKILL_MD 由路由表渲染生成（umbrella.ts renderUmbrellaSkillMd）。
  */
-import { renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
+import { ASCEND_UMBRELLA_STEP0_SECTION, renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
 
 export const ASCEND_OPTIMISM: AscendUmbrellaDefinition = {
   name: 'ascend-optimism',
@@ -24,9 +24,12 @@ export const ASCEND_OPTIMISM: AscendUmbrellaDefinition = {
     'AscendTilingPlanner',
     'AscendRealHWBridge',
     'AscendGoldenTest',
+    // 任务 F Step 0 源新鲜度检查/更新（工具仅 TUI 注册、shouldDefer，非 ascend 16 工具面）。
+    'AscendSkillSourceCheck',
   ],
   enterWhen: 'The optimization goal spans layers (model-level, serving, training) or the right level is unclear.',
   routesSummary: 'Route to the operator / model / implementation level, then orchestrate across layers.',
+  step0Section: ASCEND_UMBRELLA_STEP0_SECTION,
   routes: [
     {
       skill: 'ascend-optimize',

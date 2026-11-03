@@ -59,10 +59,7 @@ export interface AscendUmbrellaDefinition {
   routes: readonly AscendUmbrellaRoute[]
   /** 追加正文段（doctor 的 msprof-mcp MCP 预设段等），拼在路由表之后、Rules 之前。 */
   extraSections?: readonly string[]
-  /**
-   * 任务 F Step 0 段（三总纲统一措辞，渲染在正文尾部；任务 A 不设 —— 任务 F
-   * 落 AscendSkillSourceCheck 时统一填充）。
-   */
+  /** 任务 F Step 0 段（三总纲统一引用 ASCEND_UMBRELLA_STEP0_SECTION，渲染在正文尾部）。 */
   step0Section?: string
 }
 
@@ -128,3 +125,20 @@ export function renderUmbrellaSkillMd(def: AscendUmbrellaDefinition): string {
 export function renderUmbrellaPromptLine(def: AscendUmbrellaDefinition): string {
   return `- /${def.name} — ${def.enterWhen} ${def.routesSummary}`
 }
+
+/**
+ * 任务 F（0.1.87）：三总纲统一的 Step 0 段（单一事实源，三 def step0Section 同
+ * 引用，工单 §F「三总纲 SKILL_MD Step 0 段统一措辞」）。措辞契约（工单 §139-141）：
+ * check → drift 则 update → fresh/更新成功后才路由；禁止跳过 Step 0 直接路由；
+ * unreachable/killed/验真败 = fail-visible 暂缓，不静默旧快照作答；用户明示后
+ * stale 续行须声明 + 再调 check 落漂移登记；路由边界句（远端内容不换路由逻辑）。
+ */
+export const ASCEND_UMBRELLA_STEP0_SECTION = [
+  '## Step 0 — Skill source freshness check',
+  '',
+  'Before routing anywhere below, call the AscendSkillSourceCheck tool (action "check", source "agent-skills") and act on its verdict:',
+  '- fresh — proceed to route.',
+  '- drift — call AscendSkillSourceCheck again with action "update" (source "agent-skills"); route only after the update succeeds (updatedTo present). Never rewrite the manifest pinned_sha yourself — re-pinning belongs to the maintainers\' sync/verify flow.',
+  '- unreachable, killed, or an update refused (non-fast-forward / integrity failure) — do NOT route on the local snapshot: report "could not complete the skill-source freshness check/update" together with the tool\'s error, and defer execution (fail-visible). Continue on the old snapshot only if the user explicitly approves; then state that the answer is based on the stale snapshot, and register the stale continuation by calling AscendSkillSourceCheck (check) again so the drift is logged.',
+  '- Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.',
+].join('\n')

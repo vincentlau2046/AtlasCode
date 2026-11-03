@@ -9,7 +9,7 @@
  *
  * SKILL_MD 由路由表渲染生成（umbrella.ts renderUmbrellaSkillMd）。
  */
-import { renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
+import { ASCEND_UMBRELLA_STEP0_SECTION, renderUmbrellaSkillMd, type AscendUmbrellaDefinition } from './umbrella'
 
 export const ASCEND_OPDEV: AscendUmbrellaDefinition = {
   name: 'ascend-opdev',
@@ -24,9 +24,12 @@ export const ASCEND_OPDEV: AscendUmbrellaDefinition = {
     'AscendCodeGen',
     'AscendCompilerBridge',
     'AscendGoldenTest',
+    // 任务 F Step 0 源新鲜度检查/更新（工具仅 TUI 注册、shouldDefer，非 ascend 16 工具面）。
+    'AscendSkillSourceCheck',
   ],
   enterWhen: 'A NEW operator is requested and the language/framework matters or is unspecified.',
   routesSummary: 'Decide the language/framework route first, then hand off to that workflow\'s skills.',
+  step0Section: ASCEND_UMBRELLA_STEP0_SECTION,
   routes: [
     {
       skill: 'ascend-generate',

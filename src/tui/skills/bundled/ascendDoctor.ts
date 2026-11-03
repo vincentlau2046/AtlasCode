@@ -9,13 +9,16 @@ import { applyToolchainPlaceholders } from '../../core/executor/toolchain.js'
 // userInvocable:false —— 模型经 skill_listing 仍可见（getSkillToolCommands
 // 不滤 isHidden），slash 面不注册（cmd32 // /help55 命令面零变化）。
 // 路由表 = 域内单一事实源；本副本只承载渲染产物，不承载路由逻辑。
+// 0.1.87 任务 F：Step 0 段（AscendSkillSourceCheck 源新鲜度检查/更新）统一由域内
+// ASCEND_UMBRELLA_STEP0_SECTION 渲染进 SKILL_MD 尾部，allowed-tools 同步 +1；
+// 本副本随任务 F 再生成（⑩ 字节全等锁守卫）。
 
 const SKILL_MD = [
   "---",
   "name: ascend-doctor",
   "description: Umbrella triage router for Ascend NPU faults — classify the fault (compile / precision / runtime / performance / deployment / environment) from evidence, then route to the matching specialized skill. Includes an optional msprof-mcp MCP preset for live profiling evidence.",
   "when_to_use: Use when a fault or anomaly appears and no specialized skill is obviously right yet — this umbrella classifies first, then routes. It does not replace the specialized skills.",
-  "allowed-tools: AscendDiagnoser, AscendFaultCollector, AscendErrorClassifier, AscendProfileReportParser, AscendProfileAnalyzer, AscendRealHWBridge, AscendGoldenTest",
+  "allowed-tools: AscendDiagnoser, AscendFaultCollector, AscendErrorClassifier, AscendProfileReportParser, AscendProfileAnalyzer, AscendRealHWBridge, AscendGoldenTest, AscendSkillSourceCheck",
   "---",
   "",
   "# Ascend Fault Triage Router (Doctor)",
@@ -69,6 +72,14 @@ const SKILL_MD = [
   "- If a routed skill is missing (marketplace entry not installed / install failed), follow its \"suggest install\" guidance (install via the plugin marketplace) and never fabricate its content.",
   "- Route targets are a fixed table in code; remote content updates never rewrite this routing logic.",
   "- Tools return evidence, not decisions — classification comes from evidence (logs, error codes, profiling, golden mismatches), not guesses.",
+  "",
+  "## Step 0 — Skill source freshness check",
+  "",
+  "Before routing anywhere below, call the AscendSkillSourceCheck tool (action \"check\", source \"agent-skills\") and act on its verdict:",
+  "- fresh — proceed to route.",
+  "- drift — call AscendSkillSourceCheck again with action \"update\" (source \"agent-skills\"); route only after the update succeeds (updatedTo present). Never rewrite the manifest pinned_sha yourself — re-pinning belongs to the maintainers' sync/verify flow.",
+  "- unreachable, killed, or an update refused (non-fast-forward / integrity failure) — do NOT route on the local snapshot: report \"could not complete the skill-source freshness check/update\" together with the tool's error, and defer execution (fail-visible). Continue on the old snapshot only if the user explicitly approves; then state that the answer is based on the stale snapshot, and register the stale continuation by calling AscendSkillSourceCheck (check) again so the drift is logged.",
+  "- Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.",
 ].join('\n')
 
 export const UMBRELLA_DOCTOR_SKILL_MD = SKILL_MD
@@ -85,7 +96,8 @@ export function registerAscendDoctorSkill(): void {
       "AscendProfileReportParser",
       "AscendProfileAnalyzer",
       "AscendRealHWBridge",
-      "AscendGoldenTest"
+      "AscendGoldenTest",
+      "AscendSkillSourceCheck",
     ],
     userInvocable: false,
     context: 'inline',

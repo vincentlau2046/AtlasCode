@@ -22,6 +22,7 @@
  */
 import { toolMatchesName, type Tool, type Tools } from './Tool.js'
 import { AgentTool } from './tools/AgentTool/AgentTool.js'
+import { AscendSkillSourceCheckTool } from './tools/AscendSkillSourceCheck/AscendSkillSourceCheckTool.js'
 import { SkillTool } from './tools/SkillTool/SkillTool.js'
 import { BashTool } from './tools/BashTool/BashTool.js'
 import { FileEditTool } from './tools/FileEditTool/FileEditTool.js'
@@ -199,6 +200,12 @@ export function getAllBaseTools(): Tools {
     ...(AscendBridge ? [AscendBridge.FaultCollector, AscendBridge.ErrorClassifier, AscendBridge.ProfileAnalyzer] : []),
     ...(AscendBridge ? [AscendBridge.BenchmarkRunner, AscendBridge.ProfileReportParser] : []),
     ...(AscendBridge ? [AscendBridge.ModelConverter, AscendBridge.OnnxOptimizer, AscendBridge.DataPrepTool, AscendBridge.InferValidator] : []),
+    // ── 任务 F：三总纲 Step 0 源新鲜度检查（0.1.87）── shouldDefer:true（deferred
+    //    池 + ToolSearch 发现 + discoveredToolNames 豁免授予），非 always-on：不进
+    //    默认模型工具表权限授予（仅三总纲 allowedTools/TPC alwaysAllowRules）、不在
+    //    feature('ASCEND_TOOLS') 门内、不进 engine ascendTools 槽（车道零 defer 消费）
+    //    —— ascend 域包 16 工具面与 L16 计数（prompt.ts "You have 16 tools"）不受扰。
+    AscendSkillSourceCheckTool,
     // ── 组 A（续）──
     TodoWriteTool,
     WebSearchTool,

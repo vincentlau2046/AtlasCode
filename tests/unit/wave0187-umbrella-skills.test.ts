@@ -207,6 +207,9 @@ describe('① 三总纲域定义 + ASCEND_UMBRELLA_SKILLS 聚合', () => {
       'AscendOnnxOptimizer',
       'AscendDataPrepTool',
       'AscendInferValidator',
+      // 工单 §3 唯一例外：任务 F 单工具 AscendSkillSourceCheck（Step 0 源新鲜度
+      // 检查/更新；shouldDefer + 仅三总纲 allowedTools 授予，非 ascend 16 工具面）。
+      'AscendSkillSourceCheck',
     ]
     for (const def of ascend.ASCEND_UMBRELLA_SKILLS ?? []) {
       for (const t of def.allowedTools) {

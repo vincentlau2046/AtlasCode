@@ -20,6 +20,8 @@
  *    无 URL = first-party 语义缺省 true）→ ToolSearch optimistic ON 入（门控实现
  *    utils/toolSearch.ts isToolSearchEnabledOptimistic 尾支，2026-09-30 实测锁定）
  *  - hasEmbeddedSearchTools 关（EMBEDDED_SEARCH_TOOLS 未设）→ Glob/Grep 入
+ *  - 0.1.87 任务 F：AscendSkillSourceCheck 无条件裸行注册（非 feature 门、非 dev 门；
+ *    shouldDefer:true → deferred 池，不进默认模型工具表权限授予）→ 恒入缺省表
  */
 import { describe, test, expect } from 'bun:test'
 
@@ -82,6 +84,8 @@ const EXPECTED_BASE_TOOLS = [
   'ListMcpResourcesTool',
   'ReadMcpResourceTool',
   'ToolSearch', // optimistic ON（firstParty 缺省，见头注门控基线）
+  // 0.1.87 任务 F：三总纲 Step 0 源新鲜度检查工具（无条件注册，shouldDefer —— 见头注基线）
+  'AscendSkillSourceCheck',
 ]
 
 describe('tui 注册面名表（W2-2a-2）', () => {
