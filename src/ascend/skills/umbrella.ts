@@ -59,7 +59,7 @@ export interface AscendUmbrellaDefinition {
   routes: readonly AscendUmbrellaRoute[]
   /** 追加正文段（doctor 的 msprof-mcp MCP 预设段等），拼在路由表之后、Rules 之前。 */
   extraSections?: readonly string[]
-  /** 任务 F Step 0 段（三总纲统一引用 ASCEND_UMBRELLA_STEP0_SECTION，渲染在正文尾部）。 */
+  /** 任务 F Step 0 段（三总纲统一引用 ASCEND_UMBRELLA_STEP0_SECTION，渲染在正文头部——Routing table 之前，0.1.88 R-087-3 位置硬化）。 */
   step0Section?: string
 }
 
@@ -69,8 +69,12 @@ const STATUS_LABEL: Record<AscendUmbrellaRouteStatus, string> = {
 }
 
 /**
- * 渲染总纲 SKILL_MD（frontmatter + Goal + 路由表 + extraSections + Rules
- * [+ step0Section]）。路由表行 1:1 来自 routes（单一事实源直证）。
+ * 渲染总纲 SKILL_MD（frontmatter + Goal + [step0Section] + 路由表 +
+ * extraSections + Rules）。路由表行 1:1 来自 routes（单一事实源直证）。
+ * Step 0 段（若 def.step0Section）渲染在正文头部（Routing table 之前）——
+ * 0.1.88 R-087-3 位置硬化：正文尾部指令遵循度低（跨模型 adherence 2/10 基线，
+ * glm-5 2/7 + gpt-6.1-sol 0/1；工单 docs/2026-11-04-p0-wave-0188-ticket.md
+ * §1.A，组合变更归因不拆分）。
  */
 export function renderUmbrellaSkillMd(def: AscendUmbrellaDefinition): string {
   const lines: string[] = [
@@ -86,6 +90,8 @@ export function renderUmbrellaSkillMd(def: AscendUmbrellaDefinition): string {
     def.enterWhen,
     '',
     def.routesSummary,
+    '',
+    ...(def.step0Section ? [def.step0Section] : []),
     '',
     '## Routing table',
     '',
@@ -110,9 +116,6 @@ export function renderUmbrellaSkillMd(def: AscendUmbrellaDefinition): string {
     '- Route targets are a fixed table in code; remote content updates never rewrite this routing logic.',
     '- Tools return evidence, not decisions — classification comes from evidence (logs, error codes, profiling, golden mismatches), not guesses.',
   )
-  if (def.step0Section) {
-    lines.push('', def.step0Section)
-  }
   return lines.join('\n')
 }
 
@@ -132,13 +135,20 @@ export function renderUmbrellaPromptLine(def: AscendUmbrellaDefinition): string 
  * check → drift 则 update → fresh/更新成功后才路由；禁止跳过 Step 0 直接路由；
  * unreachable/killed/验真败 = fail-visible 暂缓，不静默旧快照作答；用户明示后
  * stale 续行须声明 + 再调 check 落漂移登记；路由边界句（远端内容不换路由逻辑）。
+ *
+ * 0.1.88 R-087-3 措辞硬化：verdict-bullet（名词标签）→ 编号祈使清单
+ * （1. Run check / 2. drift→update / 3. fresh 后 route / 4. unreachable→defer），
+ * 语义零变化（verdict 分支/stale 声明/deferred-unavailable 支全保留）——
+ * 位置硬化（尾→头）在 renderUmbrellaSkillMd；组合变更归因不拆分
+ * （工单 docs/2026-11-04-p0-wave-0188-ticket.md §1.A + Review Focus 1）。
  */
 export const ASCEND_UMBRELLA_STEP0_SECTION = [
-  '## Step 0 — Skill source freshness check',
+  '## Step 0 — Skill source freshness check (run FIRST, before the routing table)',
   '',
-  'Before routing anywhere below, call the AscendSkillSourceCheck tool (action "check", source "agent-skills") and act on its verdict:',
-  '- fresh — proceed to route.',
-  '- drift — call AscendSkillSourceCheck again with action "update" (source "agent-skills"); route only after the update succeeds (updatedTo present). Never rewrite the manifest pinned_sha yourself — re-pinning belongs to the maintainers\' sync/verify flow.',
-  '- unreachable, killed, or an update refused (non-fast-forward / integrity failure) — do NOT route on the local snapshot: report "could not complete the skill-source freshness check/update" together with the tool\'s error, and defer execution (fail-visible). Continue on the old snapshot only if the user explicitly approves; then state that the answer is based on the stale snapshot, and register the stale continuation by calling AscendSkillSourceCheck (check) again so the drift is logged.',
-  '- Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.',
+  'Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.',
+  '',
+  '1. Run AscendSkillSourceCheck (action "check", source "agent-skills") FIRST, before routing anywhere below.',
+  '2. If the verdict is drift: run AscendSkillSourceCheck again with action "update" (source "agent-skills"); route only after the update succeeds (updatedTo present). Never rewrite the manifest pinned_sha yourself — re-pinning belongs to the maintainers\' sync/verify flow.',
+  '3. If the verdict is fresh (or the step-2 update succeeded): proceed to route.',
+  '4. If the verdict is unreachable or killed, or the update is refused (non-fast-forward / integrity failure): do NOT route on the local snapshot. Report "could not complete the skill-source freshness check/update" together with the tool\'s error, and defer execution (fail-visible). Continue on the old snapshot only if the user explicitly approves; then state that the answer is based on the stale snapshot, and register the stale continuation by calling AscendSkillSourceCheck (check) again so the drift is logged.',
 ].join('\n')
