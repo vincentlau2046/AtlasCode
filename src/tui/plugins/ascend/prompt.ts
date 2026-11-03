@@ -5,11 +5,16 @@
  * No fixed "Typical workflow" is prescribed here — the agent picks the next tool
  * from the previous tool's evidence (coding-agent contract). Step order lives in
  * the goal+gates skills, not in the system prompt.
+ *
+ * 0.1.87 任务 B：本文件 = 域单一事实源 src/ascend/prompt.ts 的自含镜像副本
+ * （boundaries 约束 tui 不可 import ascend）。总纲分组行 = 域
+ * renderUmbrellaPromptLine 的渲染产物静态化；字节全等由
+ * tests/unit/wave0187-prompt-routing.test.ts ⑨ 守卫——改域必镜像。
  */
 export const ASCEND_TOOL_USAGE_GUIDE = [
   "## Ascend NPU Operator Tools (Huawei CANN 8.x)",
   "",
-  "You have 16 tools and 11 skills for Ascend NPU operator development, fault triage, performance optimization, inference deployment, and precision debugging. Use them when the user asks to develop, compile, debug, profile, benchmark, optimize, convert, deploy, or debug the precision of a model/operator on Huawei Ascend hardware.",
+  "You have 16 tools and 14 skills for Ascend NPU operator development, fault triage, performance optimization, inference deployment, and precision debugging. Use them when the user asks to develop, compile, debug, profile, benchmark, optimize, convert, deploy, or debug the precision of a model/operator on Huawei Ascend hardware.",
   "",
   "### Tools — when to use each",
   "- AscendSpecParser — parse an operator spec (file or inline JSON) to extract name, dtypes, tensor shapes, and tiling constraints. Use when the user provides a spec file or asks you to understand an operator definition.",
@@ -41,6 +46,11 @@ export const ASCEND_TOOL_USAGE_GUIDE = [
   "- /ascend-perf-optimize — optimize operator/model performance: three-layer pipeline (card/inter-core/intra-core) + four-step flow + msprof collection (7 aic-metrics) + 10 bound types (VEC/MTE2/CUBE/SCALAR/inter-core/Bank Conflict/DoubleBuffer/pipeline bubble/L2 Cache/cross-correlation) + tiling recorrection. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to optimize performance, locate a bottleneck, or interpret msprof profiling data.",
   "- /ascend-code-review — review/audit Ascend C operator code: hypothesis-testing methodology (5-step evidence scoring + confidence HIGH/MED/LOW) + 5 workflow routing (file/quick/pr/design-consistency/extend) + red-lines (Host 6 + Kernel SIMT 5) + PR cross-validation + fix routing to AscendCodeGen. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to review code, audit a PR, or check design-implementation consistency.",
   "- /ascend-test-design — design tests for an Ascend operator: four test types (ST aclnn L0/L1/L2 / UT opapi-ophost-opkernel coverage / whitebox path+TilingKey / golden correctness gate) + ST 9-step + UT Step 1-5 + whitebox 6+TTK + strategy decision tree + AscendGoldenTest correctness gate. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to design tests, design test cases, or verify operator correctness.",
+  "",
+  "### Umbrella skills — domain routing",
+  "- /ascend-doctor — A fault or anomaly appeared and no specialized skill is obviously right yet. Classify the fault from evidence, then route to the matching specialized skill.",
+  "- /ascend-optimism — The optimization goal spans layers (model-level, serving, training) or the right level is unclear. Route to the operator / model / implementation level, then orchestrate across layers.",
+  "- /ascend-opdev — A NEW operator is requested and the language/framework matters or is unspecified. Decide the language/framework route first, then hand off to that workflow's skills.",
   "",
   "Tools run in mock mode when no real NPU is attached (mocked: true in output). Set ATLAS_ASCEND_MOCK=0 to use real hardware.",
 ].join("\n")

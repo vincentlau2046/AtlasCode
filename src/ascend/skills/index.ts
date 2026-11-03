@@ -69,7 +69,7 @@ export {
   ASCEND_OPDEV_WHEN_TO_USE,
   ASCEND_OPDEV_ALLOWED_TOOLS,
 } from './ascendOpdev'
-export { renderUmbrellaSkillMd } from './umbrella'
+export { renderUmbrellaSkillMd, renderUmbrellaPromptLine } from './umbrella'
 export type {
   AscendUmbrellaDefinition,
   AscendUmbrellaRoute,

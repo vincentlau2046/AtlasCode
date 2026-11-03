@@ -1,19 +1,27 @@
 /**
  * ASCEND_TOOL_USAGE_GUIDE（systemPromptSection 内容）— 单一事实源。
  *
- * M3-S4（D-3 Ascend 独立实施波）：guide 内容收进 ascend 域（旧仓
- * src/plugins/ascend/prompt.ts 逐字同源；现 tui 壳 src/tui/plugins/ascend/prompt.ts
- * 改为本域 re-export 去重）。注入点 = 壳侧 systemPromptSection('ascend_agent')
- * （tui/constants/prompts.ts，env ATLAS_ASCEND_PROMPT=0 关闭，与旧仓一致）。
+ * M3-S4（D-3 Ascend 独立实施波）：guide 内容收进 ascend 域。注入点 = 壳侧
+ * systemPromptSection('ascend_agent')（tui/constants/prompts.ts，env
+ * ATLAS_ASCEND_PROMPT=0 关闭，与旧仓一致）。
+ *
+ * 0.1.87 任务 B：总纲分组（### Umbrella skills — domain routing）由任务 A 路由
+ * 表定义（ASCEND_UMBRELLA_SKILLS + renderUmbrellaPromptLine）渲染生成，L16 计数
+ * 行 11→14（= 11 + 聚合长度推导，工单唯一例外行）。壳侧
+ * src/tui/plugins/ascend/prompt.ts 为自含镜像副本（boundaries 约束 tui 不可
+ * import ascend，非 re-export），字节全等由 wave0187-prompt-routing.test.ts ⑨
+ * 守卫。
  *
  * No fixed "Typical workflow" is prescribed here — the agent picks the next tool
  * from the previous tool's evidence (coding-agent contract). Step order lives in
  * the goal+gates skills, not in the system prompt.
  */
+import { ASCEND_UMBRELLA_SKILLS, renderUmbrellaPromptLine } from './skills'
+
 export const ASCEND_TOOL_USAGE_GUIDE = [
   "## Ascend NPU Operator Tools (Huawei CANN 8.x)",
   "",
-  "You have 16 tools and 11 skills for Ascend NPU operator development, fault triage, performance optimization, inference deployment, and precision debugging. Use them when the user asks to develop, compile, debug, profile, benchmark, optimize, convert, deploy, or debug the precision of a model/operator on Huawei Ascend hardware.",
+  `You have 16 tools and ${11 + ASCEND_UMBRELLA_SKILLS.length} skills for Ascend NPU operator development, fault triage, performance optimization, inference deployment, and precision debugging. Use them when the user asks to develop, compile, debug, profile, benchmark, optimize, convert, deploy, or debug the precision of a model/operator on Huawei Ascend hardware.`,
   "",
   "### Tools — when to use each",
   "- AscendSpecParser — parse an operator spec (file or inline JSON) to extract name, dtypes, tensor shapes, and tiling constraints. Use when the user provides a spec file or asks you to understand an operator definition.",
@@ -45,6 +53,9 @@ export const ASCEND_TOOL_USAGE_GUIDE = [
   "- /ascend-perf-optimize — optimize operator/model performance: three-layer pipeline (card/inter-core/intra-core) + four-step flow + msprof collection (7 aic-metrics) + 10 bound types (VEC/MTE2/CUBE/SCALAR/inter-core/Bank Conflict/DoubleBuffer/pipeline bubble/L2 Cache/cross-correlation) + tiling recorrection. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to optimize performance, locate a bottleneck, or interpret msprof profiling data.",
   "- /ascend-code-review — review/audit Ascend C operator code: hypothesis-testing methodology (5-step evidence scoring + confidence HIGH/MED/LOW) + 5 workflow routing (file/quick/pr/design-consistency/extend) + red-lines (Host 6 + Kernel SIMT 5) + PR cross-validation + fix routing to AscendCodeGen. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to review code, audit a PR, or check design-implementation consistency.",
   "- /ascend-test-design — design tests for an Ascend operator: four test types (ST aclnn L0/L1/L2 / UT opapi-ophost-opkernel coverage / whitebox path+TilingKey / golden correctness gate) + ST 9-step + UT Step 1-5 + whitebox 6+TTK + strategy decision tree + AscendGoldenTest correctness gate. Reads verified references on demand. Goal + gates + tool catalog; YOU decide the step order. Use when the user asks to design tests, design test cases, or verify operator correctness.",
+  "",
+  "### Umbrella skills — domain routing",
+  ...ASCEND_UMBRELLA_SKILLS.map(renderUmbrellaPromptLine),
   "",
   "Tools run in mock mode when no real NPU is attached (mocked: true in output). Set ATLAS_ASCEND_MOCK=0 to use real hardware.",
 ].join("\n")

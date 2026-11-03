@@ -118,3 +118,13 @@ export function renderUmbrellaSkillMd(def: AscendUmbrellaDefinition): string {
   }
   return lines.join('\n')
 }
+
+/**
+ * 系统提示词分组行渲染（0.1.87 任务 B）：每行 = 总纲名 + 一句何时进总纲
+ * （enterWhen）+ 由总纲再路由的说明（routesSummary），与 SKILL_MD 同一
+ * AscendUmbrellaDefinition 单一事实源（不手抄第二份）。预算契约：≤40 词/行
+ * （工单 Review Focus 2，wave0187-prompt-routing.test.ts ⑥ 守卫）。
+ */
+export function renderUmbrellaPromptLine(def: AscendUmbrellaDefinition): string {
+  return `- /${def.name} — ${def.enterWhen} ${def.routesSummary}`
+}
