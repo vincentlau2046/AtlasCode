@@ -15,6 +15,12 @@ import { registerAscendDebugSkill } from './ascendDebug.js'
 import { registerAscendOptimizeSkill } from './ascendOptimize.js'
 import { registerAscendModelAdaptSkill } from './ascendModelAdapt.js'
 import { registerAscendValidateSkill } from './ascendValidate.js'
+// 0.1.87 任务 A：三总纲（薄路由，userInvocable:false——模型经 skill_listing
+// 可见，slash 面不注册；域单一事实源 src/ascend/skills/ascend{Doctor,Optimism,
+// Opdev}.ts，壳侧自含副本字节全等由 wave0187-umbrella-skills.test.ts ⑩ 守卫）
+import { registerAscendDoctorSkill } from './ascendDoctor.js'
+import { registerAscendOptimismSkill } from './ascendOptimism.js'
+import { registerAscendOpdevSkill } from './ascendOpdev.js'
 // The 6-domain knowledge layer (tiling-design / precision-debug / runtime-debug
 // / perf-optimize / code-review / test-design) no longer ships here: it lives
 // in the self-hosted atlas-plugins marketplace as six single-skill plugin
@@ -50,6 +56,9 @@ export function initBundledSkills(): void {
   registerAscendOptimizeSkill()
   registerAscendModelAdaptSkill()
   registerAscendValidateSkill()
+  registerAscendDoctorSkill()
+  registerAscendOptimismSkill()
+  registerAscendOpdevSkill()
   if (feature('REVIEW_ARTIFACT')) {
     const { registerHunterSkill } = require('src/tui/skills/bundled/hunter.js')
     registerHunterSkill()

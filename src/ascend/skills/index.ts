@@ -48,6 +48,34 @@ export {
   ASCEND_MODEL_ADAPT_WHEN_TO_USE,
   ASCEND_MODEL_ADAPT_ALLOWED_TOOLS,
 } from './ascendModelAdapt'
+export {
+  ASCEND_DOCTOR_SKILL_MD,
+  ASCEND_DOCTOR_NAME,
+  ASCEND_DOCTOR_DESCRIPTION,
+  ASCEND_DOCTOR_WHEN_TO_USE,
+  ASCEND_DOCTOR_ALLOWED_TOOLS,
+} from './ascendDoctor'
+export {
+  ASCEND_OPTIMISM_SKILL_MD,
+  ASCEND_OPTIMISM_NAME,
+  ASCEND_OPTIMISM_DESCRIPTION,
+  ASCEND_OPTIMISM_WHEN_TO_USE,
+  ASCEND_OPTIMISM_ALLOWED_TOOLS,
+} from './ascendOptimism'
+export {
+  ASCEND_OPDEV_SKILL_MD,
+  ASCEND_OPDEV_NAME,
+  ASCEND_OPDEV_DESCRIPTION,
+  ASCEND_OPDEV_WHEN_TO_USE,
+  ASCEND_OPDEV_ALLOWED_TOOLS,
+} from './ascendOpdev'
+export { renderUmbrellaSkillMd } from './umbrella'
+export type {
+  AscendUmbrellaDefinition,
+  AscendUmbrellaRoute,
+  AscendUmbrellaRouteSource,
+  AscendUmbrellaRouteStatus,
+} from './umbrella'
 
 import {
   ASCEND_GENERATE_SKILL_MD,
@@ -84,6 +112,10 @@ import {
   ASCEND_MODEL_ADAPT_WHEN_TO_USE,
   ASCEND_MODEL_ADAPT_ALLOWED_TOOLS,
 } from './ascendModelAdapt'
+import { ASCEND_DOCTOR } from './ascendDoctor'
+import { ASCEND_OPTIMISM } from './ascendOptimism'
+import { ASCEND_OPDEV } from './ascendOpdev'
+import type { AscendUmbrellaDefinition } from './umbrella'
 
 /** 单个运行时 skill 的内容面（纯数据；getPromptForCommand 由壳侧注入）。 */
 export interface AscendBundledSkillContent {
@@ -135,4 +167,18 @@ export const ASCEND_BUNDLED_SKILLS: readonly AscendBundledSkillContent[] = [
     allowedTools: ASCEND_MODEL_ADAPT_ALLOWED_TOOLS,
     skillMd: ASCEND_MODEL_ADAPT_SKILL_MD,
   },
+]
+
+/**
+ * 三总纲聚合（0.1.87 任务 A：doctor / optimism / opdev，薄路由）。
+ *
+ * **不进** ASCEND_BUNDLED_SKILLS：① 回归契约锁 5 运行时 skill 名单与序
+ * （ascend-skills-prompt.test.ts）；② 总纲 userInvocable:false，只走壳侧
+ * registerBundledSkill 面（不进 DomainPackage.skills 挂载面，避免双注册）。
+ * 顺序 = doctor（排障入口）→ optimism（性能跨层）→ opdev（新算子路由）。
+ */
+export const ASCEND_UMBRELLA_SKILLS: readonly AscendUmbrellaDefinition[] = [
+  ASCEND_DOCTOR,
+  ASCEND_OPTIMISM,
+  ASCEND_OPDEV,
 ]
