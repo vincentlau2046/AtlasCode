@@ -44,7 +44,14 @@ import {
 } from '../../utils/forkedAgent.js'
 import { parseFrontmatter } from '../../utils/frontmatterParser.js'
 import { lazySchema } from '../../utils/lazySchema.js'
-import { createUserMessage, normalizeMessages } from '../../utils/messages.js'
+import {
+  createUserMessage,
+  normalizeAttachmentForAPI,
+  normalizeMessages,
+} from '../../utils/messages.js'
+import type { Attachment } from '../../utils/attachments.js'
+import type { Output as FileReadToolOutput } from '../FileReadTool/FileReadTool.js'
+import { FILE_READ_TOOL_NAME } from '../FileReadTool/prompt.js'
 import type { ModelAlias } from '../../utils/model/aliases.js'
 import { resolveSkillModelOverride } from '../../utils/model/model.js'
 import { recordSkillUsage } from '../../utils/suggestions/skillUsageTracking.js'
@@ -245,6 +252,63 @@ export const outputSchema = lazySchema(() => {
 type OutputSchema = ReturnType<typeof outputSchema>
 
 export type Output = z.input<OutputSchema>
+
+// R-087-1（0.1.87 插入件 II）：attachment 型消息产方合形。engine 侧 C85-B
+// sanitizer（toolExecution sanitizeSupplementalMessages）只收 user+isMeta
+// 补充消息——processSlashCommand 构造的 attachment 型（command_permissions
+// 无条件追加 + SKILL.md @-mention 抽取）直通即整批拒交付（gate-087 实证：
+// tool_use_error: supplemental newMessages[1] type must be 'user', got
+// attachment；0.1.85 起模型发起 Skill 全族不可用）。投影纪律与 wire 面
+// normalizeAttachmentForAPI 同叶子：
+// - command_permissions → 零条（wire 面 case 恒 []，messages.ts 同叶子锚；
+//   权限授予由本工具 contextModifier + data.allowedTools 承载 = 权限零扩张）；
+// - 'file'/'directory' → seam 局部 text 形逐型投影（wire 面产物含 tool_result
+//   伪回应块、sanitizer 契约禁；文本全量内联；image/pdf/notebook 等非文本
+//   不内联 base64，显式指引重读）；
+// - 其余型 → 委派 normalizeAttachmentForAPI（逐型注册单一事实源；未知型
+//   logAntError+[]，与 wire 面同纪律）。
+// 投影先于 filter/tag 管线，使投影出的 user 消息被 sourceToolUseID 打标；
+// 残余坏形态由 sanitizer backstop fail-visible（不静默）。
+function projectSkillAttachmentForSupplemental(
+  attachment: Attachment,
+): UserMessage[] {
+  switch (attachment.type) {
+    case 'file': {
+      const fileContent = attachment.content as FileReadToolOutput
+      if (fileContent.type === 'text') {
+        return [
+          createUserMessage({
+            content: `@-mentioned file ${attachment.filename}:\n\n${fileContent.file.content}`,
+            isMeta: true,
+          }),
+          ...(attachment.truncated
+            ? [
+                createUserMessage({
+                  content: `Note: The file ${attachment.filename} was truncated. Use ${FILE_READ_TOOL_NAME} to read more of the file if you need.`,
+                  isMeta: true,
+                }),
+              ]
+            : []),
+        ]
+      }
+      return [
+        createUserMessage({
+          content: `@-mentioned ${fileContent.type} file ${attachment.filename}: content is not inlined here; use ${FILE_READ_TOOL_NAME} to view it.`,
+          isMeta: true,
+        }),
+      ]
+    }
+    case 'directory':
+      return [
+        createUserMessage({
+          content: `@-mentioned directory ${attachment.path}:\n\n${attachment.content}`,
+          isMeta: true,
+        }),
+      ]
+    default:
+      return normalizeAttachmentForAPI(attachment)
+  }
+}
 
 export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
   name: SKILL_TOOL_NAME,
@@ -531,9 +595,21 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
       SKILL_TOOL_NAME,
     )
 
+    // R-087-1：attachment 型先产方合形（见 projectSkillAttachmentForSupplemental
+    // 头注——command_permissions 零条 + file/directory text 形 + 其余委派 wire
+    // 叶子），再进既有 filter/tag 管线，使投影出的 user 消息被
+    // sourceToolUseID 打标。投影后无 attachment 型残留（残余坏形态由
+    // sanitizer backstop fail-visible）。
+    const supplementalSourceMessages: Message[] = processedCommand.messages.flatMap(
+      m =>
+        m.type === 'attachment'
+          ? projectSkillAttachmentForSupplemental(m.attachment)
+          : [m],
+    )
+
     // Tag user messages with sourceToolUseID so they stay transient until this tool resolves
     const newMessages = tagMessagesWithToolUseID(
-      processedCommand.messages.filter(
+      supplementalSourceMessages.filter(
         (m): m is UserMessage | AttachmentMessage | SystemMessage => {
           if (m.type === 'progress') {
             return false
