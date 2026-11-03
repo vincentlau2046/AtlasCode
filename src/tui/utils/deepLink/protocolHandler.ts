@@ -98,8 +98,13 @@ export async function handleUrlSchemeLaunch(): Promise<number | null> {
       return null
     }
     return await handleDeepLinkUri(url)
-  } catch {
-    // NAPI module not available, or handleDeepLinkUri rejected — not a URL launch
+  } catch (error) {
+    // NAPI module not available, or handleDeepLinkUri rejected — not a URL launch.
+    // 0.1.88 R-087-2-FAMILY：url-handler-napi 降级（缺包/ABI 败）与 deepLink 业务
+    // 错误落 debug log——显式降级可见（最低 log 面），不再静默吞错。
+    logForDebugging(
+      `url-handler-napi/deepLink launch degraded to null: ${String(error)}`,
+    )
     return null
   }
 }
