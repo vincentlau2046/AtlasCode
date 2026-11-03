@@ -84,7 +84,25 @@ export interface AttributedCounter {
 export function clearInvokedSkillsForAgent(agentId: string | null): void {
   _invokedSkillsByAgent.delete(_invokedSkillAgentKey(agentId))
 }
-export const flushInteractionTime : any = (() => ({})) as any;
+// ── 交互时间三件（0.1.87 插入件 I，R-086-1 销项；上游 78624e4 移植占位补真实现）──
+// 契约（ink.tsx onRender 注释原样锚 + 消费点实核）：
+//  - getLastInteractionTime(): number —— K6-8 门（idleReturnHint 严格 >）、姊妹
+//    idle_notification 门（REPL.tsx:3708 严格 >）、backgroundHousekeeping（60s
+//    近交互支）、usePrStatus（变化检测）按数值比较消费；stub 的 {} 在数值比较中
+//    NaN 化 → 四面恒失效。初值 = 模块加载时 Date.now()。
+//  - updateLastInteractionTime(force?) —— keypress 支（App.tsx 中央输入处理器
+//    processKeysInBatch）无 force = 只标 dirty（每帧至多一次 Date.now()，
+//    flushInteractionTime 在 ink onRender render 前统一结算）；force=true
+//    （REPL effect / useNotifyAfterTimeout mount effect——useEffect 运行晚于
+//    Ink render flush，延迟会留 stale 时间戳致提前通知）立即置时并清 pending dirty。
+//  - flushInteractionTime() —— dirty 才结算（干净 flush = no-op，防每帧触碰状态）。
+let _lastInteractionTime = Date.now()
+let _interactionTimeDirty = false
+export const flushInteractionTime : any = () => {
+  if (!_interactionTimeDirty) return
+  _lastInteractionTime = Date.now()
+  _interactionTimeDirty = false
+};
 const _activeTimeCounter: any = {
   add: (_v: any, _tags?: any) => {},
   observe: (_v: any, _tags?: any) => {},
@@ -134,7 +152,7 @@ let _isRemoteMode = false
 export const getIsRemoteMode : any = () => _isRemoteMode;
 export const getIsScrollDraining : any = (() => ({})) as any;
 export const getLastAPIRequest : any = (() => ({})) as any;
-export const getLastInteractionTime : any = (() => ({})) as any;
+export const getLastInteractionTime : any = () => _lastInteractionTime;
 const _locCounter: any = {
   add: (_v: any, _tags?: any) => {},
   _total: 0,
@@ -194,7 +212,14 @@ export const snapshotOutputTokensForTurn : any = (_budget: number | null) => {
   // no-op snapshot until that feature lands. Keeping the signature so the
   // REPL call sites stay valid.
 };
-export const updateLastInteractionTime : any = (() => ({})) as any;
+export const updateLastInteractionTime : any = (force?: boolean) => {
+  if (force) {
+    _lastInteractionTime = Date.now()
+    _interactionTimeDirty = false
+    return
+  }
+  _interactionTimeDirty = true
+};
 export const waitForScrollIdle : any = (() => ({})) as any;
 export const getFlagSettingsInline: any = () => null;
 export const setLastEmittedDate : any = (() => ({})) as any;
