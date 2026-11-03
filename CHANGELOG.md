@@ -4,6 +4,58 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.86
+
+V3-6 K6 TUI/渲染/vim 波（28 件锁面口径；工单
+`docs/2026-11-03-p0-wave-0186-ticket.md`；判别测试
+`tests/*/wave0186-*.test.ts`）+ R-085-1 compact→resume PDF 引用重建
+（0.1.85 遗留缝核销，修法 A）。gate r-20261103-gate-086（master@1cbe911，
+基线 2bd81c0）判据①–⑥ 满足。
+
+### vim
+
+- **K6-1 `%` 括号跳转**：`bracketMatch` 纯函数（行内 + 跨行配对）接入
+  motions `%` case，operator（`d%`/`c%`/`y%`）inclusive 对齐。
+- **K6-2 慢机 Escape 卡 INSERT**：合并分片 `Esc`+letter 按键序列按 Esc
+  语义解析，Esc 不再被字面前缀吞进 INSERT。
+- **K6-3 AskUserQuestion 自由文本框 Esc 门**：仅 NORMAL 态 Esc 取消作答，
+  INSERT 态 Esc 保留草稿退回 NORMAL。
+
+### Markdown / 渲染
+
+- **K6-13⑦⑤ wrapAnsi 双实现分流**：含 CSI 输入与极窄列宽走 npm
+  wrap-ansi 参考实现，常规路径保留内置实现。
+- **K6-13③ 表头-only 表垂直降级兜底**：`rows=[]` 不再静默消失，输出
+  bold 列标签（与数据行同源 ANSI_BOLD 路径）。
+- **K6-13① URL codespan 单条可点链接**：渲染为 createHyperlink 单条
+  OSC-8 链接。
+- **K6-14 dim/ANSI 弱化 2 件**：dimColor 不吞 bold；dark-ansi inactive
+  行与正文可区分。
+
+### 全屏 transcript / 选择（任务 D）
+
+- foldClickChain 折叠链追踪 + LinkHover 悬停下划线 + 高亮缓存 + repin
+  移位（详见工单 §D）。
+
+### 输入行 / 状态提示（任务 E/F）
+
+- **K6-8 idle-return-hint 触发收窄**（K6-9/K6-10 锁面登记，gate-off
+  勘误）。
+- **K6-12 输入行 DEL 回放** + **K6-15 keycap 宽度** + **K6-7 sandbox
+  保存显式报错**（K6-11 锚登记，详见工单 §E/§F）。
+
+### R-085-1 compact→resume PDF 引用重建（修法 A）
+
+- ENGINE `compactConversation` 双模式（富体 manual /compact +
+  auto-compact rich；裁剪 headless autoCompact / agentLoop / swarm）
+  compact 时以 shared 收集器 `collectPDFReferenceAttachmentsForCompact`
+  （五字段白名单投影，同 C85-D 纪律）重建 PDF 引用为边界后 attachment
+  记录 → `buildPostCompactMessages` attachments 槽位（ordering 单源
+  不动）→ JSONL 边界后落盘 → resume 边界截断幸存 → params attachment
+  支投影。收集器迁 `src/shared/pdfReference.ts` 单一事实源（TUI
+  re-export）；gate lifecycle full P-L5 fixed GREEN（15 探针
+  hardFail=0）。
+
 ## v0.1.85
 
 K5 端到端最小补闭环（插入波；f4 工单
