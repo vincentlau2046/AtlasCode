@@ -4,6 +4,77 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.87
+
+Ascend 三总纲波（doctor / optimism / opdev 薄路由，工单
+`docs/2026-11-02-p0-wave-0187-ticket.md`）+ 插入件 I（0.1.86 复核收口
+defer 件：R-086-1 K6-8 交互时间接线补件）+ 插入件 II（gate-087 阻断
+销项：R-087-1 模型发起 Skill 调用 attachment 直通断交付修）+ 插入件
+III（R-087-2 销项：proxy/mTLS 环境启动崩溃修）。gate
+r-20261103-gate-087（判定行终态见报告 §十三：GATE-OPEN → re-gate →
+GATE-OPEN（第二次）→ 窄复跑全绿 → GATE-PASS；窄复跑对象
+master@df42ecf，基线 7b8a59d）判据①–⑦ + E′ 增补两支满足。
+
+### Ascend 三总纲（bundled 薄路由）
+
+- **三总纲 bundled skill（doctor / optimism / opdev）**：域单一事实源
+  `src/ascend/skills/umbrella.ts`（39 路由：bundled 5 / atlas-plugins 6
+  知识 / agent-skills 市场 33 pack 枚举 / ms-agent pin 快照 suggest-install /
+  外部 4 条建议安装），壳侧三自含副本 `userInvocable:false`——skill_listing
+  模型可见、slash 面不注册（cmd32/help55 零变化）；doctor 含 msprof-mcp
+  MCP 预设文档模板（不写用户 settings、不放宽 mcpPolicy）。
+- **系统提示词分组衔接**：`### Umbrella skills — domain routing` 分组
+  3 行由路由表同源渲染（≤40 词/行，无手抄第二份）；L16 计数 11→14
+  为工单唯一例外行（16 tools 计数不动），壳镜像 ⑨ 字节全等锁守卫。
+- **ms-agent pin 快照进 manifest**：ModelScope ms-agent source 条目
+  （pinned_sha 6d90d84e，main commit 锚；release tag 全不含
+  ms-agent-skills/）+ Apache-2.0 双源核验；零运行时 fetch / 零 vendor。
+  doctor 路由描述实核订正（diagnostic → Capability Gateway 实文）。
+- **Step 0 源新鲜度检查工具 AscendSkillSourceCheck**：check（ls-remote
+  对比本地锚：fresh/drift/unreachable/killed 四支）+ update（FF 门 +
+  submodule 刷新 + integrity 验真 + 失败回退 pinned_sha 快照）；仅 TUI
+  face 裸行 + `shouldDefer:true`（deferred 工具，不进默认模型工具表，
+  L16/fam 计数基线不受扰）；kill-switch 复用
+  ATLAS_DISABLE_ASCEND_MARKETPLACE_AUTOINSTALL 单一事实源。三总纲
+  Step 0 段单一事实源 ASCEND_UMBRELLA_STEP0_SECTION。
+
+### TUI 修复（插入件 I，R-086-1 销项）
+
+- **交互时间三 stub 落真实现**（`getLastInteractionTime` /
+  `updateLastInteractionTime` / `flushInteractionTime`，起源 78624e4
+  移植占位）：stub `{}` 在数值比较中 NaN 化 → K6-8 中断后
+  idle-return-hint 门与姊妹 idle_notification 门双门恒失效（中断后
+  hint 照冒）。修法：keypress 支无 force 只标 dirty（每帧至多一次
+  Date.now()，ink onRender render 前统一结算）、force 立即置时并清
+  pending dirty；REPL.tsx 零改动，消费四面（双门 + housekeeping 60s
+  近交互支 + usePrStatus 变化检测）恢复数值语义。
+
+### TUI 修复（插入件 II，R-087-1 销项）
+
+- **模型发起 Skill 工具调用全族恢复可用**（0.1.85 起不可用）：
+  skill 命令消息构造无条件追加 `command_permissions` attachment +
+  SKILL.md @-mention 抽取附件 → SkillTool 补充消息含 attachment 型
+  直通 → engine C85-B 合法化门整批拒交付（`tool_use_error:
+  supplemental newMessages[1] type must be 'user', got attachment`）。
+  修法 = 产方合形（sanitizer 零改动）：`projectSkillAttachmentForSupplemental`
+  显式逐型白名单投影——`command_permissions` 零条（与 wire 面同叶子；
+  权限授予走既有 allowedTools 授权链，零扩张）、`file`/`directory`
+  文本内联（非文本指引重读）、其余委派 wire 面单一事实源投影；投影
+  先于打标管线，残余坏形态仍由合法化门 fail-visible。
+- **接线级测试**：真 TUI SkillTool 全链 × 真 engine 合法化门 3 件
+  （RED witness 与 gate 双面 RED 银行同串）；Skill 全族回归 69/69，
+  全量隔离 5540 pass / 0 fail。
+
+### TUI 修复（插入件 III，R-087-2 销项）
+
+- **修复 proxy/mTLS 环境启动即崩**（既有缺陷，0.1.86 起同现）：
+  https_proxy / mTLS 环境下 CLI 启动报 `Cannot find module 'undici'`
+  —— proxy/mTLS 调度器按 lazy require 设计延迟加载 undici，但
+  undici 从未在 dependencies 声明（build `--external undici` → dist
+  运行时解析 → 全新安装树必然缺包）。修法 = dependencies 增显式声明
+  `"undici": "^7.30.1"`（版本锁 sub-major）；lazy require 设计保留，
+  dist/cli.js 零字节变。
+
 ## v0.1.86
 
 V3-6 K6 TUI/渲染/vim 波（28 件锁面口径；工单
