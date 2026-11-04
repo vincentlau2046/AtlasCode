@@ -29,6 +29,8 @@ const SKILL_MD = [
   "",
   "## Step 0 — Skill source freshness check (run FIRST, before the routing table)",
   "",
+  "Your FIRST tool call in this skill must be AscendSkillSourceCheck (action \"check\", source \"agent-skills\"). Do not call any routed skill, and do not answer from the routing table, until Step 0 returns a verdict.",
+  "",
   "Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.",
   "",
   "1. Run AscendSkillSourceCheck (action \"check\", source \"agent-skills\") FIRST, before routing anywhere below.",

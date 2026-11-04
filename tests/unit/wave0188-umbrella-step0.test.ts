@@ -121,6 +121,19 @@ describe('② Step 0 措辞祈使清单化（硬化目标）', () => {
       expect(md).toContain('3. If the verdict is')
     }
   })
+
+  test('iter2 first-tool-call 绑定句（gate ①A 打回回灌：miss 形态 = 路由动作完成但 Step 0 零执行）', () => {
+    for (const [md] of PAIRS) {
+      // iter2 杠杆：check 绑定为本 skill 第一个工具调用 + 点名禁止 routed skill
+      // 调用 until verdict（§7.3 迭代纪律 iter2，位置不动）。
+      expect(md).toContain(
+        'Your FIRST tool call in this skill must be AscendSkillSourceCheck',
+      )
+      expect(md).toContain(
+        'Do not call any routed skill, and do not answer from the routing table, until Step 0 returns a verdict',
+      )
+    }
+  })
 })
 
 // ---------------------------------------------------------------------------

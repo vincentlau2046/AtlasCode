@@ -141,9 +141,18 @@ export function renderUmbrellaPromptLine(def: AscendUmbrellaDefinition): string 
  * 语义零变化（verdict 分支/stale 声明/deferred-unavailable 支全保留）——
  * 位置硬化（尾→头）在 renderUmbrellaSkillMd；组合变更归因不拆分
  * （工单 docs/2026-11-04-p0-wave-0188-ticket.md §1.A + Review Focus 1）。
+ *
+ * 0.1.88 iter2（gate ①A 打回后措辞二次迭代，§7.3 迭代纪律）：iter1 对比轮
+ * 4/10 < 6/10（glm-5 1/5 与 base 同型 + gpt-6.1-sol 3/5 方向性改善；miss 形态 =
+ * 路由动作完成但 Step 0 零执行）→ 新增 first-tool-call 绑定句：check 必须是
+ * 本 skill 的第一个工具调用 + 显式点名禁止动作（routed skill 调用/路由表作答）
+ * + 时间条件（until Step 0 returns a verdict）。语义零新增（既有语义复述），
+ * 位置不动（位置假说单轮已锁）；iter2 仍 <6/10 → 显式登记呈用户。
  */
 export const ASCEND_UMBRELLA_STEP0_SECTION = [
   '## Step 0 — Skill source freshness check (run FIRST, before the routing table)',
+  '',
+  'Your FIRST tool call in this skill must be AscendSkillSourceCheck (action "check", source "agent-skills"). Do not call any routed skill, and do not answer from the routing table, until Step 0 returns a verdict.',
   '',
   'Never skip Step 0 and route straight away. Route targets are a fixed table in code — remote content updates never rewrite this routing logic. In environments where deferred tools are unavailable (e.g. experimental betas disabled), Step 0 cannot pass: defer and never silently answer from the stale snapshot.',
   '',
