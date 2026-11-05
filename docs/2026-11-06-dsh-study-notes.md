@@ -49,3 +49,33 @@
 - [ ] compaction-tool-result-pruner 331L 细读
 - [ ] `spill` 包与 compaction 关系（同域？）
 - [ ] C-1 provider 面 tools/system 奇偶直证（抓摘要请求 wire 对比末轮请求）
+
+## ② subagent（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+
+**包结构**（`packages/subagent/`，9 子包共 ~9548L src）：
+- `subagent/` 核心缝：registry（`ctx.subagents`，多命名 provider 共存，镜像 LLM adapter registry 非 bash 单例）+ `start` / `startContinuable` / `followup` 三操作（index.ts 头注）
+- provider 族：`subagent-in-process-driver` / `subagent-fork-in-process` / `subagent-acp` / `subagent-codex`（wire.ts 744L）/ `subagent-claude-code`（run.ts 594L）/ `subagent-dsh-sdk`——同一缝多后端
+- 模型面消费：`tool-subagent`（476L）+ `tool-subagent-control` + `tool-subagent-report`
+
+**continuation.ts 1545L（最大件）**：continuable child = **一条持久 Session + 至多一个进程内 Activation**（一次 residency epoch）；Activation 非请求/结果/取消边界，可执行多 FIFO 回合，descendant 存活期间保持驻留；Agent inbox 是唯一回合队列（manager 只管驻留，loop 管全部回合序）；cold resume（从持久 descriptor 重建 child Agent）；child-first disposal；settlement 投递给 parent 由 manager 负责（`subagent/end` 外部监听者**不可能正确做**——payload 无 parent 名、handle 已 dispose）。descriptor 持久化 fold/snapshot（descriptor.ts 314L）。
+
+**depth 守**（depth.ts）：委托深度 = parent+1；**持久化 session header 为权威且单调——runtime options 只可加深不可降低**（resumed child 带新 options 若从零计则「冒充顶层再委托」逃逸）。显式列为此洞的防御。
+
+### AtlasCode 同域现状
+
+- `tui/tools/AgentTool/`：`computeChildSpawnDepth`（parentOptions.spawnDepth ?? 0 + 1，纯函数）+ runAgent.ts:320-333 线程化到 child options（嵌套 async→async 面有显式处理）；fan-out 门（coordinator 模式 + depth cap 下 allowFanOut）。
+- `engine/tools/agent/AgentTool.ts`：无 resume/persist/continu 命中（grep 零）——**child 深度在 resume 后是否保持未证**（AtlasCode 子代理会话恢复面：0.1.83 K4 波做了 session resume 持久化，child options 重建路径待核）。
+- swarm/teammate 面：mailbox 硬化 0.1.36；teammate_shutdown_batch（0.1.89 §6.2 已核=渲染折叠产物）。
+
+### 对照 → 替代方案候选
+
+| # | DSH 机制 | AtlasCode 现状 | 候选价值 |
+|---|---|---|---|
+| S-1 | **深度单调持久守**（resume 不得归零重委托） | spawnDepth 运行时线程化在场；resume 路径深度来源待核——若 options 重建即归零 = 同洞 | **待核定级**（一单测即可定：resume child 再 spawn 是否受 cap） |
+| S-2 | **durable continuable children**（一条 Session 一 Activation，cold resume，descendant 驻留保持） | 子代理 = 一次性 run（结果返回即弃）；长任务 child 无跨进程续命 | 高但**体量大**（continuation manager 1545L 语义面）——登记不排首波，W-opt 中期件 |
+| S-3 | 多后端 provider registry（acp/codex/claude-code/sdk 同缝） | 单 AgentTool 缝 | 低优先（当前无多后端需求） |
+| S-4 | settlement 投递归 manager（外部监听不可能正确） | agentDisplay/UI 面自有 | 参考语义，不独立成件 |
+
+**待核（下轮）**：S-1 resume 深度直证（构造 resumed child spawn 场景）。
