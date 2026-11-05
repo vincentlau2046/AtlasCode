@@ -4,6 +4,35 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.88
+
+R-087-3 Step 0 硬化 + R-087-2-FAMILY 13 项依赖闭包波（工单
+`docs/2026-11-04-p0-wave-0188-ticket.md`）。gate
+r-20261105-gate-088-tier1：①A（Step 0 adherence）按 Tier 1 paired
+interleaved A/B 非劣性协议终判——判据 v2（无效率臂差分 Fisher 精确检验
++ 有效对 ≥4 信息下限）机械再判 GREEN，最新 pass / union 敏感性双口径
+一致（工单 §8–§10 全档）；Tier 2（硬化有效性判定）具名 defer，重入
+触发 = 真强面回归（补 5 轮对照 087 强面锚），不阻发布。
+
+### R-087-3 Ascend skill Step 0 硬化
+
+- **段位置+措辞硬化**（`34418a6`）：Step 0 段尾→头迁移 + 祈使清单化
+  （语义零变化，5 bundled skill 同批）。
+- **iter2 措辞二次迭代**（`cd007e4`）：first-tool-call 绑定句强化
+  （gate ①A 打回回灌）。
+
+### R-087-2-FAMILY 依赖闭包 13 项
+
+- **deps2 + optional6 + 死面3 + 降级log**（`aab9b62`）：fresh-install
+  探针验真，依赖声明面与真实 import 面闭合并（含 optional 依赖降级
+  日志面）。
+
+### 其他
+
+- **项目主页站点挂接**（`c501916`）：README 头部主页行 +
+  `package.json` homepage 字段（<https://www.atlaswork.cn/>），npm
+  packument 随本版生效。
+
 ## v0.1.87
 
 Ascend 三总纲波（doctor / optimism / opdev 薄路由，工单
