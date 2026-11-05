@@ -4,6 +4,45 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.89
+
+登记缺口整理波（工单 `docs/2026-11-05-p0-wave-0189-ticket.md`）。gate
+r-20261106-gate-089：六判据全绿（①A R1-delay 判据面修正后新基线重跑
+2/2 GREEN + ①B face 17/17 ↔ base RED 银行同形 + ②四件套 CI 5568/0
+Δ+10 恰合 + ③ P0a RELEASABLE + A4F + ④ cmd/help55/prompt 字节锚零
+diff + ⑤ fam 16/16 + token 307 项 diffs=5 全归因波面 GONE=0）。
+
+### 任务 A：R1-delay「loop 无回合级错误恢复」定谳（零产品修复）
+
+- **定谳 = 判据面假阳性**（`8861c43b`）：086/088 银行 RED（completed=
+  false tools=6）根因 = harness diskCheck 精确文件名判据 vs 弱模型两条
+  合法自适配路径（`.cjs` 改名 / 种 commonjs package.json）——repo 链内
+  `.js` 按 ESM 解析（根 package.json `"type":"module"`）使 `require` 失
+  败诱发改名；loop 全程零错误（exit=0 / 四超时门全未触发 / delay 注障
+  被 in-request 流式等待自然吸收）。四候选逐一核销，loop 产品面零缺陷
+  零修复；判据面修正（e2e lane Option 2：四个 loop-robustness 探针
+  workspace 种 commonjs，治本）已落，R1-delay 新基线重跑 2/2 GREEN。
+- 候选④残留（abort/timeout 类错误在未配 fallbackModels 时结构性绕过
+  回合级重试表，loop.ts:941-943）维持既有登记（500-storm 预期缺口形态
+  E-1b-full），随工单边界不混入。
+
+### 任务 B：084 Gap A 余面 — attachment 族三段登记式处置
+
+- **64 族全覆盖禁静默**（`0375e27e`）：`toOpenAIMessages` attachment 支
+  此前仅认 pdf_reference（C85-A），其余族无支静默落空（084 Gap A
+  根）。新建 `src/modelprovider/attachmentProjection.ts`（engine 车道
+  处置单一事实源，本域自含零 engine→TUI import）：投影白名单 13 族
+  （字段登记式，核心文本与 TUI wire 叶子逐字恒等；file/directory 指针
+  式投影不内联内容）+ 显式 skip 50 族（8 组逐组理由）+ 未知型/畸形载荷
+  fail-visible marker（user role in-band）。C85-A pdf_reference 恒等锚
+  支原位不动；sanitizer（C85-B）零改动直证。
+- **死面删除条件不成立定谳**：bagel_console / max_turns_reached /
+  current_session_memory 有渲染 tombstone 消费 + 旧 JSONL resume 可达 →
+  登记 skip 不删除；teammate_shutdown_batch = 渲染面折叠产物引擎不可
+  达，登记 skip 防御。
+- 判别：RED 银行（`1487cf34`，8 测试静默丢弃直证）↔ GREEN 10 测试
+  （wave0189-attachment-families）；token 对账 12 新锚登记 0.1.89。
+
 ## v0.1.88
 
 R-087-3 Step 0 硬化 + R-087-2-FAMILY 13 项依赖闭包波（工单
