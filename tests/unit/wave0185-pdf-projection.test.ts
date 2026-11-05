@@ -104,14 +104,26 @@ describe('C85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判�
     expect(tui).toContain(prov)
   })
 
-  test('⑥ 其它 attachment 族仍丢弃（逐族登记，不随 PDF 修复放行）', () => {
+  test('⑥ 其它 attachment 族处置（0.1.89 任务 B 三段登记式更新本断言：pdf_reference 外非全弃——显式[] 族零产物维持，未知型改 fail-visible marker，禁静默）', () => {
     const out = toOpenAIMessages([
       attachMsg({ type: 'pdf', filename: '/x/a.pdf' }),
       attachMsg({ type: 'already_read_file', filename: '/y.txt', content: {} }),
       attachMsg({ type: 'compact_file_reference', filename: '/z.md' }),
       attachMsg({ type: 'unknown_future_family' }),
     ] as any)
-    expect(out).toEqual([])
+    // 已知显式[] 族（TUI 同叶子决策）：零产物维持
+    const dropped = out.filter((m: any) => {
+      const t = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+      return !t.includes('[attachment ')
+    })
+    expect(dropped).toEqual([])
+    // 未知型（'pdf' / 'unknown_future_family'）：0.1.89 起 fail-visible marker
+    const markers = out.filter((m: any) => {
+      const t = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+      return t.includes('[attachment ')
+    })
+    expect(markers.length).toBe(2)
+    expect(JSON.stringify(markers)).toContain('unknown_future_family')
   })
 
   test('⑦ 既有面回归：user 文本/system 降级/assistant tool_calls/tool_result/裸 role 恒等', () => {

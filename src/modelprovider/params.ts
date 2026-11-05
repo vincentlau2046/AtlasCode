@@ -14,6 +14,11 @@ import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { Message, SystemPrompt, ThinkingConfig, Tools } from '../shared'
 // 0.1.85 Task A（C85-A）：@PDF 引用投影叶子（shared 纯函数，不引 tui/engine）
 import { formatPDFReferenceForModel } from '../shared'
+// 0.1.89 任务 B（Gap A 余面）：attachment 族登记式处置（本域自含，不引 tui/engine）
+import {
+  engineAttachmentRejectionMarker,
+  resolveEngineAttachmentProjection,
+} from './attachmentProjection'
 import { zodToJsonSchema } from './schema'
 import {
   convertEffortValueToLevel,
@@ -124,9 +129,13 @@ export function toOpenAIMessages(messages: any[]): any[] {
     } else if (m?.type === 'attachment') {
       // 0.1.85 Task A（C85-A）：attachment 型此前无支整体落空被丢（084 Gap A
       // 根——f4 新鲜探针证真实 pdf_reference 投影为 []，K5-8 四要素 0/3 不可达）。
-      // 本波仅显式消费 pdf_reference 族：投影 = shared 纯叶子（K5-8 四要素
-      // 文本，与 TUI normalizeAttachmentForAPI 同叶子双面恒等，零 I/O、不绕
-      // Read 授权）。其它 attachment 族仍丢弃，逐族登记（不随 PDF 修复放行）。
+      // pdf_reference 支 = 恒等锚：投影 = shared 纯叶子（K5-8 四要素文本，与
+      // TUI normalizeAttachmentForAPI 同叶子双面恒等，零 I/O、不绕 Read 授权）。
+      // 0.1.89 任务 B（Gap A 余面，工单 2026-11-05-p0-wave-0189 §1.B/§6.2）：
+      // 余族改三段登记式处置（attachmentProjection.ts 单一事实源）——
+      // ① 白名单投影（字段登记式，同叶子文本）② 显式 skip（登记零产物）
+      // ③ 未知型/畸形载荷 fail-visible marker（禁静默、禁 spread）。
+      // 真集合 = resume JSONL 持久化族 × engine 直达（工单 §6.2 矩阵）。
       const att = (m as any).attachment
       if (
         att?.type === 'pdf_reference' &&
@@ -134,6 +143,25 @@ export function toOpenAIMessages(messages: any[]): any[] {
         att.filename.length > 0
       ) {
         out.push({ role: 'user', content: formatPDFReferenceForModel(att) })
+      } else if (att?.type === 'pdf_reference') {
+        // C85-A 守卫不过（畸形载荷）→ fail-visible（禁静默）。
+        out.push({
+          role: 'user',
+          content: engineAttachmentRejectionMarker('pdf_reference'),
+        })
+      } else {
+        const d = resolveEngineAttachmentProjection(att)
+        if (d.kind === 'project') {
+          out.push({ role: 'user', content: d.text })
+        } else if (d.kind === 'unknown') {
+          out.push({
+            role: 'user',
+            content: engineAttachmentRejectionMarker(
+              (att as { type?: unknown } | null | undefined)?.type,
+            ),
+          })
+        }
+        // skip = 登记零产物（attachmentProjection.ts 显式 skip 集，逐组理由）。
       }
     }
   }
