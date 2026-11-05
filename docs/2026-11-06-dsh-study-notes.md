@@ -79,3 +79,31 @@
 | S-4 | settlement 投递归 manager（外部监听不可能正确） | agentDisplay/UI 面自有 | 参考语义，不独立成件 |
 
 **待核（下轮）**：S-1 resume 深度直证（构造 resumed child spawn 场景）。
+
+## ③ sandbox（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+
+**包结构**（共 ~6563L）：`sandbox/sandbox` 719L（缝 + escalation）+ `sandbox-local` 567L（本机 OS 级执行后端）+ `sandbox-windows-acl` ~1580L（Win32 ACL FFI/spawn）+ `e2b/subprocess-e2b` 698L + `e2b/fs-e2b` 582L（远端执行后端族）。
+
+**缝形态**（sandbox/src/index.ts 头注）：「同世界进程禁闭」——wrap 精确 argv 于 host-path file policy 下；容器/microVM/远端是**替换外层缝**而非本缝（本缝共享 host kernel/fs）。模式词汇封闭三元：`read-only | workspace-write | danger-full-access`；**fail-safe 默认 = read-only**（policy/index.ts:56 显式）。
+
+**escalation 编排**（escalation.ts 189L）：`sandbox_permissions` + `justification` 成对校验在**执行时**（明确不进 tool schema——schema 表达不了）；`WIDER_MODES`（可升往何处）与 `ESCALATION_TARGETS`（封闭目标词汇，read-only 是地板不可升达）；denial marker + 同回合 escalation hint（nudge 落在决策点）。
+
+**durable 模式事件**（sandbox-policy/index.ts 头注）：`sandbox/mode` 事件落 session 持久层，fold 进模型历史 → **replay 重建与执行面同一 mode+root**（mode 变更跨 resume 一致）。
+
+### AtlasCode 同域现状
+
+- `tui/sandboxCompat`（getSandboxManager）+ BashTool `bashPermissions.ts`：sandbox auto-allow（autoAllowBashIfSandboxed，尊重显式 deny/ask 规则）+ sandbox.excludedCommands（自注「非安全边界」）+ escalate-to-leader（**分类器转发语义**，非 mode 升级词汇）。
+- config settings.ts sandbox 按源直读面；无 `sandbox_permissions`/`workspace-write` 词汇（grep 零命中 src 产品码）。
+
+### 对照 → 替代方案候选
+
+| # | DSH 机制 | AtlasCode 现状 | 候选价值 |
+|---|---|---|---|
+| SB-1 | **执行时 escalation 编排**（permissions+justification 成对、封闭目标词汇、denial marker+同回合 hint） | auto-allow + excludedCommands；无 per-call 升级词汇 | 中——对齐 Claude 商用版 sandbox_permissions 面（对齐区间内存在此面）+ 安全语义更完整 |
+| SB-2 | **durable session-mode 事件**（replay 重建 mode+root） | 模式为进程内存态 | 中——resume 后沙箱模式漂移风险消除（0.1.83 K4 resume 族同域） |
+| SB-3 | read-only fail-safe 默认 | 现状默认面待核 | 低-中（默认语义变更须用户裁定） |
+| SB-4 | OS 级本机后端（landlock/bwrap 类）+ Win ACL + e2b 远端 | sandboxCompat 现状（实现层待核） | 待核——若现实现无 OS 级禁闭则价值升 |
+
+**待核（下轮）**：sandboxCompat 现实现禁闭层级（进程级？命名空间级？）；SB-3 现默认值。
