@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","object":"chat.completion.chunk","created":1793857768,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-acf2be4e487f410f","function":{"arguments":"{\"activeForm\": \"","name":"TaskCreate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Writing optimized mat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"mul kernel"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" optimized"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end C mat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"mul kernel ("},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"L"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1/L"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0 pingpong +"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" MTE2 preload per"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" verified"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" design docs) into"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":1793857768,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" ws/mat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b111565b-0cc5-43d9-8e2e-8796360409eb","created":17938

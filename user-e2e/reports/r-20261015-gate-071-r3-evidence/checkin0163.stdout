@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] C1-env-parse [PASS] C2-backoff [PASS] C3-budget-refresh [PASS] C5-env-disable [PASS] C6-prompt [PASS] C7-wiring"
+}
+TUI-GOAL-CHECKIN-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/checkin-probe

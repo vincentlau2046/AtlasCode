@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","object":"chat.completion.chunk","created":1793868975,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a0e6f5e5d90dd25b","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"completed"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"3\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-98a3cdfa87f23a06","function":{"arguments":"{\"status\": \"in","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_progress\", \"taskId\": \""},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"4\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a0c7c1648e604404","function":{"arguments":"{\"command\": \"command","name":"Bash"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -v b"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"isheng &&"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" b"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"isheng --version;"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" ls /usr"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/local/"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Ascend 2>/dev"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-ae5517d7-ebcb-45a6-a7ab-07a2cf7f3018","created":1793868975,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/null

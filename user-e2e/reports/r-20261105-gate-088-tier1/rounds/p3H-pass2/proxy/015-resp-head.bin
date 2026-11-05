@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","object":"chat.completion.chunk","created":1793860683,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end MCP"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools aren't appearing"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" via"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ToolSearch. Maybe"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they need"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" m"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"cp__ prefix"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" are"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" simply"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" unavailable"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me check what"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tool"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" names exist —"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the system"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" prompt listed"}}]}
+
+data: {"id":"chatcmpl-c15c0aec-8be7-46dd-98c0-9e42f47bc978","created":1793860683,"model":"glm-5","object":"chat.completion.chunk",

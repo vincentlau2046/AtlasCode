@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","object":"chat.completion.chunk","created":1793857781,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a76fe4646ab15e7d","function":{"arguments":"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/ws/matmul_optimized"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/matmul_e2e_t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iling.h"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"content\": \"// Tiling header for"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" MatMul_e2e ("},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"fp16 in / fp16"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" out), consumed on-device via"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\n// 4-byte-aligned"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aee589fb-a2ef-42c5-9152-ddcbe9375873","created":1793857781,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" scalar reads from GM to stack"},"type":"function","index":0}]}

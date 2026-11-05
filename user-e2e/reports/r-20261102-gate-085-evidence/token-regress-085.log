@@ -1,0 +1,21 @@
+bytes: gate84=17918599 gate85=17922279 delta=3680
+--- 前 29 波（0.1.56–0.1.84）token 零回归 gate84↔gate85 ---
+DIFF 0.1.84 pdf_reference                                gate84=3    gate85=8   
+total prior tokens=288 diffs=1
+  DIFF-TO-CLASSIFY: ('0.1.84', 'pdf_reference', 3, 8) （逐项对波内 diff 定因：波面合法变更 vs 回归判红）
+--- 0.1.85 本波面 @ gate85（工单 §6.5 4 类 + B 新出口；gate84 预期 0/少）---
+085-A 投影 helper            formatPDFReferenceForModel                           gate84=0    gate85=3   
+085-A 四要素未附正文              not attached to this message                         gate84=1    gate85=1     INVARIANT
+085-A 页数未知                 page count unknown                                   gate84=2    gate85=2     INVARIANT
+085-A pages 上限             up to 20 pages per request                           gate84=1    gate85=1     INVARIANT
+085-B 补充合法化                sanitizeSupplementalMessages                         gate84=0    gate85=2   
+085-B Skill 交付             selectSkillDeliverableMessages                       gate84=0    gate85=2   
+085-C 页图 helper            readPDFPageImages                                    gate84=0    gate85=3   
+085-C 页图模块                 pdfPageImages                                        gate84=0    gate85=3   
+085-C full-PDF 错误类         FullPDFReadUnsupportedError                          gate84=0    gate85=7   
+085-C full-PDF 错误文案        Reading full PDFs natively is not supported by the current provider gate84=0    gate85=2   
+085-D compact 收集器          collectPDFReferenceAttachmentsForCompact             gate84=0    gate85=2   
+085-D 五字段投影                projectPDFReferenceForRecord                         gate84=0    gate85=4   
+085-D compact 引用型          compact_file_reference                               gate84=3    gate85=3     INVARIANT
+085-D compact 挂载           postCompactFileAttachments                           gate84=20   gate85=21  
+wave-face total=14 missing=0

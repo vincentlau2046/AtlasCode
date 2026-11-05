@@ -1,0 +1,8 @@
+version 0.1.80 present: True
+dist.tarball: https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.80.tgz
+dist.shasum: 8a4570299ed70788f77c1591848db7cfcc345945
+dist.integrity: sha512-2A9Hf57mCkxMxssUjEwIBtCpo3qZy3niHHOdfOQg/S9cHVHV9zQ3zqlSGuqoFpmcKt08c7iYXhadzx99ssCbRQ==
+unpackedSize: 17900549 fileCount: 3
+latest tag: 0.1.80
+-rw-rw-r-- 1 vince vince 3783794 10月 24 10:08 atlasharness-atlascode-0.1.80.tgz
+=== FETCH-080-DONE ===

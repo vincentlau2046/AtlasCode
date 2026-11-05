@@ -1,0 +1,21 @@
+/home/vince/.claude/jobs/09264df0/tmp/prodlane-078/sri-078.py:46: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  t.extractall(ext)
+{
+  "tgzBytes": 3777460,
+  "sha1": "965a8e230b6c22579086e5503731055eb7d99162",
+  "sha512": "sha512-zGxIbb4yU0Iu51e3O7Y/NMow9D1h0u3ynnX/Akklhw5Hi3OIzpAp64n3a4UqGIirqcr2xscMhajpvPgxhOCKYA==",
+  "unpackedSize": 17874947,
+  "cliJs": 17867027,
+  "registry": {
+    "shasum": "965a8e230b6c22579086e5503731055eb7d99162",
+    "integrity": "sha512-zGxIbb4yU0Iu51e3O7Y/NMow9D1h0u3ynnX/Akklhw5Hi3OIzpAp64n3a4UqGIirqcr2xscMhajpvPgxhOCKYA==",
+    "unpackedSize": 17874947,
+    "fileCount": 3
+  }
+}
+--- 三方对照（独立 × registry × Main 自报[报告内对照]）---
+sha1  : 独立=965a8e230b6c22579086e5503731055eb7d99162 registry=965a8e230b6c22579086e5503731055eb7d99162
+sha512: 独立=sha512-zGxIbb4yU0Iu51e3O7Y/NMow9D1h0u3ynnX/Akklhw5Hi3OIzpAp64n3a4UqGIirqcr2xscMhajpvPgxhOCKYA== registry=sha512-zGxIbb4yU0Iu51e3O7Y/NMow9D1h0u3ynnX/Akklhw5Hi3OIzpAp64n3a4UqGIirqcr2xscMhajpvPgxhOCKYA==
+unpck : 独立=17874947 registry=17874947
+cli.js: 独立=17867027
+extracted -> /home/vince/.claude/jobs/09264df0/tmp/prodlane-078/extracted

@@ -1,0 +1,31 @@
+{
+  "numStartups": 1,
+  "firstStartTime": "2026-10-09T14:15:22.156Z",
+  "hasResetAutoModeOptInForDefaultOffer": true,
+  "migrationVersion": 11,
+  "lastReleaseNotesSeen": "0.1.45",
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": false,
+  "officialMarketplaceAutoInstallFailReason": "policy_blocked",
+  "projects": {
+    "/home/vince/projects/AtlasCode": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasMdExternalIncludesApproved": false,
+      "hasMdExternalIncludesWarningShown": false,
+      "exampleFiles": [
+        "index.ts",
+        "loop.ts",
+        "capability-matrix.test.ts",
+        "compose.ts",
+        "main.tsx"
+      ],
+      "exampleFilesGeneratedAt": 1791555322409
+    }
+  }
+}

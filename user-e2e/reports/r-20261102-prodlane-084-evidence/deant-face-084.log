@@ -1,0 +1,67 @@
+--- de-ant canonical 锚 @ npm84 package/dist/cli.js (cmp 全等 gate84) ---
+api.anthropic.com            npm84=0
+anthropic_beta               npm84=0
+anthropic-ratelimit          npm84=0
+anthropic_cloud              npm84=0
+claude.ai subscription       npm84=0
+isFirstPartyGatewayUrl       npm84=0
+CLAUDEAI_SERVER_PREFIX       npm84=0
+--- A3-1 锚 ---
+downloads.claude.ai        npm84=1
+claude-plugins-official    npm84=30
+--- 裸子串 anthropic 形态分类（既有插件市场 manifest 元数据面，非 de-ant 锚）---
+     39 support@anthropic.com
+      3 anthropic
+      2 github.com/anthropics
+      2 anthropics/claude-plugins-official
+      2 anthropic/searchHint
+      2 anthropic/alwaysLoad
+      2 anthropic-plugins
+      2 anthropic-marketplace
+      1 formatter@anthropic-tools
+      1 anthropics/claude-code
+      1 anthropics
+      1 anthropic/netsuite-suitecloud
+      1 anthropic/netsuite-finance-analyst
+      1 anthropic/netsuite-ai-companion
+      1 @anthropic-ai
+      1 //raw.githubusercontent.com/anthropics/claude-plugins-official/refs/heads/stats/stats/plugin-installs.json
+      1 //github.com/oracle/netsuite-suitecloud-sdk/tree/ai-plugins-dist/anthropic/netsuite-suitecloud
+      1 //github.com/oracle/netsuite-suitecloud-sdk/tree/ai-plugins-dist/anthropic/netsuite-finance-analyst
+      1 //github.com/oracle/netsuite-suitecloud-sdk/tree/ai-plugins-dist/anthropic/netsuite-ai-companion
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/ralph-loop
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/project-artifact
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/pr-review-toolkit
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/plugin-dev
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/learning-output-style
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/hookify
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/frontend-design
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/feature-dev
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/explanatory-output-style
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/commit-commands
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/code-review
+      1 //github.com/anthropics/claude-plugins-public/tree/main/plugins/agent-sdk-dev
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/terraform
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/serena
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/playwright
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/linear
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/laravel-boost
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/gitlab
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/github
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/firebase
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/context7
+      1 //github.com/anthropics/claude-plugins-public/tree/main/external_plugins/asana
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/session-report
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/security-guidance
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/receipts
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/playground
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-tunnels
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/math-olympiad
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-security
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-md-management
+      1 //github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-code-setup
+      1 //anthropic.com/claude-code/marketplace.schema.json

@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","object":"chat.completion.chunk","created":1793856996,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill isn't available despite"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the docs"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let me check the workspace"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" again"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — it"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s empty. No"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel files."}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should ask the user where"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel source is, or"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" just"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" explain"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check for"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" hidden files /"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" other"}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dirs."}}]}
+
+data: {"id":"chatcmpl-1a919282-5475-425a-81b4-b0668354207a","created":1793856996,"model

@@ -1,0 +1,47 @@
+bun test v1.4.2 (744846f84)
+
+tests/unit/p0-wave-0156-hooks.test.ts:
+119 |       ['engine', ENGINE_EVENTS],
+120 |       ['sdk', SDK_EVENTS],
+121 |     ] as const) {
+122 |       expect(events).toContain('PreModelSwitch')
+123 |       expect(events).toContain('PostModelSwitch')
+124 |       expect(events).toHaveLength(31) // 27 + 0.1.56 双事件 + 0.1.79 DirectoryAdded + MessageDisplay
+                           ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 31
+Received length: 29
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-079-base078/tests/unit/p0-wave-0156-hooks.test.ts:124:22)
+(fail) A · PreModelSwitch/PostModelSwitch 事件面（CC 2.1.251） > A1 双事实源各含 2 新事件 + 长度 31 + 集合恒等（防漂移） [0.23ms]
+
+tests/unit/wave0179-wc-small-tail.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'getMcpConnectBackoffMs' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-gate-079-base078/src/mcp/index.ts'.
+-------------------------------
+
+
+tests/unit/wave0179-restricted-mode.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../../src/engine/config/restrictedMode' from '/home/vince/projects/AtlasCode/worktrees/worktree-gate-079-base078/tests/unit/wave0179-restricted-mode.test.ts'
+-------------------------------
+
+
+tests/unit/wave0179-skill-overrides.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'resolveSkillOverrides' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-gate-079-base078/src/engine/config/index.ts'.
+-------------------------------
+
+
+ 9 pass
+ 4 fail
+ 3 errors
+ 28 expect() calls
+Ran 13 tests across 4 files. [102.00ms]

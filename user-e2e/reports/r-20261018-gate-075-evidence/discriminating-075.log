@@ -1,0 +1,2 @@
+wave 面 @2d98f91: 14 pass / 0 fail / 54 expect (de-ant-closure-0175)
+基线面 @4d007bd: 6 pass / 8 fail / 27 expect (同测试 cp 入 scratch, C-2b 缺席族红面)

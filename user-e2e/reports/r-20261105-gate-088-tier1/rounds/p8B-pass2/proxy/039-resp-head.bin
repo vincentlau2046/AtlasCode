@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","object":"chat.completion.chunk","created":1793869054,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a4c39ee0dc853e3f","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"grep -n \\\"compile"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\" /home/vince/projects"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/AtlasHarness/AtlasHarness"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/src/core/executor/Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endExecutor.ts | head -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"20; echo"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" ---; grep -n \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"shouldMock\\\\|AT"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"LAS_ASCEND_MOCK\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/projects/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"AtlasHarness/AtlasHarness/src"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/core/executor/Ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Executor.ts | head"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-773e81d7-b230-4bbe-80d4-e77edad243be","created":1793869054,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"descriptio

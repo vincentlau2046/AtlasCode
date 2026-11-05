@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","object":"chat.completion.chunk","created":1793865785,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Fresh"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Route: Triton requested"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" explicitly"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Two candidates"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": cannbot-tr"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-op-generator-skills or"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" community-triton-op-skills"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The user wants"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"write a brand-new RMSNorm"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel in Triton from"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" scratch\" — task"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" extraction, algorithm design, code"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" generation, verification, latency optimization"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" fits"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" well"}}]}
+
+data: {"id":"chatcmpl-35ec2a34-3b34-47ca-bf50-f259a3d09285","created":1793865785,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+da

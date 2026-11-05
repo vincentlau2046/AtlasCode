@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","object":"chat.completion.chunk","created":1793857262,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-bbfabff49e24bdcf","function":{"arguments":"{\"status\": \"completed","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b06a1db849e3aa79","function":{"arguments":"","name":"mcp__msprof-mcp__get_profiler_config"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"json_path\": \"/home/vince"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1H/pro"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"f/PROF_000"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1/ASCEND_PROFILER"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_OUTPUT/op_statistic.csv"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","object":"chat.completion.chunk","created":1793857262,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-7e3dd116-77bd-4f73-aba6-45de94e19e97","created":1793857262,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":82,"prompt_tokens":29154,"total_tokens":29236,"completion_to

@@ -1,0 +1,21 @@
+{
+  "tgzBytes": 3781658,
+  "sha1": "bab5ccd0b9dcacbac3031e9520cab2122f0ef355",
+  "sha512": "sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==",
+  "unpackedSize": 17890954,
+  "cliJs": 17883034,
+  "registry": {
+    "shasum": "bab5ccd0b9dcacbac3031e9520cab2122f0ef355",
+    "integrity": "sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==",
+    "unpackedSize": 17890954,
+    "fileCount": 3
+  }
+}
+--- 三方对照（独立 × registry × Main 自报[报告内对照]）---
+sha1  : 独立=bab5ccd0b9dcacbac3031e9520cab2122f0ef355 registry=bab5ccd0b9dcacbac3031e9520cab2122f0ef355
+sha512: 独立=sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng== registry=sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==
+unpck : 独立=17890954 registry=17890954
+cli.js: 独立=17883034
+--- Δ8910B 双口径（byte 口径主判）---
+byte delta = 17891944 - 17883034 = 8910 (预期 8910)
+extracted -> /home/vince/.claude/jobs/09264df0/tmp/prodlane-079/extracted

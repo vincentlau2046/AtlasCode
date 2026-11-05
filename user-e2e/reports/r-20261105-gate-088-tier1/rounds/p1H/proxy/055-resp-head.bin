@@ -1,0 +1,32 @@
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","object":"chat.completion.chunk","created":1793857298,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b0920370a7458a5c","function":{"arguments":"{\"db_path\": \"","name":"mcp__msprof-mcp__execute_sql_to_csv"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/home/vince/.claude"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/jobs/09264"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"df0/tmp/gate-"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"088/tier1/p"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1H/prof/PRO"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"F_0001/ASC"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"END_PROFILER_OUTPUT/op_stat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"istic.csv"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"output_csv_path\": \"/home/v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ince/.claude/jobs"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/09264df0"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tmp/gate-088"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tier1/p1H"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f90df5b5-6228-4985-9cff-488d111974d2","created":1793857298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ws/matmul_op_detail"},"type":"function","index":0}]}}]}
+

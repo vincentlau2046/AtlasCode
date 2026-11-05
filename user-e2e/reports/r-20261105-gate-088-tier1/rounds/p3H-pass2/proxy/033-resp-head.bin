@@ -1,0 +1,43 @@
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"**"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Status: project"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" implemented"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":";"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" compile gate blocked by environment ("}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"no CANN/b"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"isheng/N"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"PU available"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" here"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":").**\n\n## What was"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" built"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" — SwiGLU custom"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" operator (Ascend C)\n\n"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Project directory"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":": `"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"swiglu_ascend/"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":"` — four"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" pieces"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":":\n\n|"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.completion.chunk","created":1793860788,"model":"glm-5","choices":[{"index":0,"delta":{"content":" File | Role"}}]}
+
+data: {"id":"chatcmpl-2cf9cfa9-788b-4c75-b83c-d66d93d30300","object":"chat.compl

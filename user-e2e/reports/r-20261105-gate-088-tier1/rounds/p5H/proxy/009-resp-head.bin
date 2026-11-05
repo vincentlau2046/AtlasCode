@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","object":"chat.completion.chunk","created":1793863448,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" answer"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" came back empty — the"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" answers object"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is empty. I should ask"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" again or proceed"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" result"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" says \"User"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has answered your questions:"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" .\" with no content"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Best"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to note"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the answers"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" didn"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t come"}}]}
+
+data: {"id":"chatcmpl-3716a17a-3594-45f8-a074-cc2bfa929a3e","created":1793863448,"model":"glm-5","ob

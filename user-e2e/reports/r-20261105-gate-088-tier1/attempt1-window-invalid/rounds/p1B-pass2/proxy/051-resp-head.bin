@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","object":"chat.completion.chunk","created":1793854870,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-828196916e39258a","function":{"arguments":"","name":"Glob"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"path\": \"/home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"claude/jobs/09"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"264df0/tmp/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ate-088/tier"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1/p1B-pass2"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/home/.atlas/projects"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/-home-vince--cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude-jobs-092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0-tmp-g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ate-088-tier1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-p1B-pass2-w"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"s/memory"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"pattern\": \"*\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","object":"chat.completion.chunk","created":1793854870,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-397b3389-cd89-4e2b-a1b5-c0761633612f","created":1793854870,"model":"g

@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","object":"chat.completion.chunk","created":1793858818,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to implement a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator for Ascend NPU"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" using Ascend C."}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" This is the"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-opdev or"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-generate workflow"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The request"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is generic"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — \"a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator\" — I could"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ask"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" what"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", but the instruction"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" seems"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to be"}}]}
+
+data: {"id":"chatcmpl-474489cc-09ee-47c3-93e7-2767858ceb56","created":1793858818,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a benchmark"}}]}
+
+data: {"id":"chatcmpl-474489cc-0

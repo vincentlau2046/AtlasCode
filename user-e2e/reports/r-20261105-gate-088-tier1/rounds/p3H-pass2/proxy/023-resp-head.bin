@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","object":"chat.completion.chunk","created":1793860745,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b33d995dcd8c4b5a","function":{"arguments":"{\"content\": \"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\"\\\"\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Build script for the Swi"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"GLU Ascend C operator"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".\\n\\nEntr"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ypoint:"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" `python3 setup.py build"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_ext`\\nsetup"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py owns the bisheng"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -x asc invocation, N"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"PU arch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" probe, and include"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/lib paths.\\n\\\"\\\"\\\"\\nimport os"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\nimport subprocess\\nimport sys"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-211195fc-76e3-49d4-9e93-25f6813e5f50","created":1793860745,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\n\\nfrom setuptools"},"type":"

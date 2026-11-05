@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","object":"chat.completion.chunk","created":1793859104,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-864288a016011457","function":{"arguments":"","name":"ToolSearch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"max_results\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"5, \"query\": \"select"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":":AscendSpecParser"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","object":"chat.completion.chunk","created":1793859104,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ecc8df80-5b14-4de5-b8f2-1bd5e0491b41","created":1793859104,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":24,"prompt_tokens":17008,"total_tokens":17032,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":16128}}}
+
+data: [DONE]
+

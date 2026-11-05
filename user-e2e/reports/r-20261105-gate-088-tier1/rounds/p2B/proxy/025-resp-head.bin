@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","object":"chat.completion.chunk","created":1793858436,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-93df59a3804c365a","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"R \\\"/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"home/vince/模板/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ascend-agent-skills-y"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Hk0Lb/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"official/CANNBot/plugins-off"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"icial/triton-op-generator\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" | head -60"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"List Trit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"on op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" generator skill"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":" package contents\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","object":"chat.completion.chunk","created":1793858436,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-89b10bfc-ebbf-464a-aaf5-3db038ecee5c","created":1793858436,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":62,"prompt_tokens":18741,"total_tokens":18803,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_det

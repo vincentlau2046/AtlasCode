@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","object":"chat.completion.chunk","created":1793854790,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9559e3615c0cba07","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/r"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"oute-iter1/g5"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-6/prof/PRO"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"F_0001/ASC"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"END_PROFILER_OUTPUT/;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" echo ===; ls /home"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/.claude/j"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"obs/09264df"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0/tmp/gate-08"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"8/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","created":1793854790,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f7f000a2-88e2-488d-a976-c53b466e3a36","c

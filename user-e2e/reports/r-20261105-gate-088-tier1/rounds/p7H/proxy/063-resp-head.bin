@@ -1,0 +1,37 @@
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Now loading the coding references"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" (fund"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":"amentals, examples"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":", reduce)"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" to"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" generate"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the kernel"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" per"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Trit"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":"on-Ascend API"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","object":"chat.completion.chunk","created":1793866065,"model":"glm-5","choices":[{"index":0,"delta":{"content":" constraints"}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":".","tool_calls":[{"id":"chatcmpl-tool-8319f5020b7afa3d","function":{"arguments":"","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"claude/plugins/cache/asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end-agent-skills/cann"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"bot-triton-op-generator-sk"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ills/1.0."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-4b89064f-b294-49ca-97d9-77764da9abbf","created":1793866065,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"argume

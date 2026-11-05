@@ -1,0 +1,6 @@
+--- 0.1.85 gate build 面对账（2026-11-02 e2e 独立构建）---
+gate worktree (98d45c8, 本地完整 node_modules) build: 17970618B sha256 e5b03d2838bfd180b41902ff3015b68c98052b87f340dfdc467ad4bd960f40df
+Main worktree (723f7c1, node_modules 不存在→上级解析) build: 17979528B sha256 18f4d6fee93adb90ed7075408ef7a22d7de9e0aafafc25643281a66b6dd2de52
+delta = 8910B（恰为历史 Δ8910B 常数值——本波定因 = bundler 注释相对路径前缀：Main 面每条 '// ../../node_modules/'（1485 条）vs gate 面 '// node_modules/'，每条注释路径含 2 处 ../.. 前缀 = +6B × 1485 条 = 8910B）
+归一化对账：../../→ 本地前缀替换后 Main build 与 gate build **字节级全等**（python replace 后 a==bn True）→ 零代码差异
+结论：非产品红；Main §6.4 build 17,979,528B 为其 worktree 环境伪影（无本地 node_modules）；canonical gate build = 17,970,618B sha256 e5b03d28…f40df；生产 lane npm cmp 时若见 Δ=8910 同型差按本定因解释，不套常数

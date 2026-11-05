@@ -1,0 +1,35 @@
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","object":"chat.completion.chunk","created":1793858041,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory is empty. No"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" files to"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" optimize. Let"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check the parent"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dirs"}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" maybe."}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8b0bd6bc81236f6f","function":{"arguments":"{\"command\": \"ls","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -la /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1H-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/ws/ "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>&"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-79e84391-7af3-4320-bc77-ce2b863380d3","created":1793858041,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1; ls"},"type":"function","index

@@ -1,0 +1,34 @@
+== 0.1.83 生产 lane SRI/翻号 复核（e2e 独立重算，2026-11-01) ==
+== ① registry packument 权威值 ==
+dist-tags.latest = 0.1.83
+gitHead          = 05ec0bcc16a329e0495c2f46be935d0cb1e32279
+integrity        = sha512-MmwfHl7sI3rOiIIrq/OuYyUdtqnu3IqPlSbTdRtTx4aWy5fIQH/aCGsg8ZI9sO/meQPZ8iH4p2mAFIKI7FPo7w==
+shasum           = be89308c3ebf1f551e4ab34ac97a398ceb5f614a
+unpackedSize     = 17959941
+tarball          = https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.83.tgz
+0.1.84 未在场（npm view 404）
+== ② tgz 本地实测（三方第三面） ==
+be89308c3ebf1f551e4ab34ac97a398ceb5f614a  atlascode-0.1.83.tgz   (= dist.shasum MATCH)
+tgz bytes = 3796583
+tgz sha256 = fcce9e2288f00c3410cd6051bde4d7c1239abc3db28114f22302f9b8d48ae558 (= Main 自报直下口径 MATCH)
+tgz sha512 b64 = MmwfHl7sI3rOiIIrq/OuYyUdtqnu3IqPlSbTdRtTx4aWy5fIQH/aCGsg8ZI9sO/meQPZ8iH4p2mAFIKI7FPo7w== (= dist.integrity MATCH)
+== ③ 提取面 ==
+unpackedSize file-sum = 17959941 (= registry MATCH)
+包内文件 = dist/cli.js + package.json + README.md（3 件同 072+ 口径）
+cli.js bytes  = 17952021
+cli.js chars  = 17903692
+cli.js sha256 = 7c87cbbc0c0ed9f1a0c713e26122b098ec1fc6e50e86c8aae9211b8306258e3f (= Main 自报 MATCH)
+gate build    = 17952021B / 17903692c / sha256 7c87cbbc…（worktree-gate-083-face @ 65743ce）
+cmp gate↔npm  = 字节级全等（delta bytes = 0，delta chars = 0）
+Δ8910B 处置   = 本波未显现（079 同型零 delta；081/082 的 8910B =彼两波 publish build 与 gate build 的
+                build 元数据剥离差，本波 Main publish build 与 gate build 同路径零剥离差）
+版本串机制定因 = dist 内 0.1.82/0.1.83 字面计数均 0；版本运行时读相邻 package.json
+                （readFileSync(join(root,"package.json"))）；Main 信号「sha 差 solely 来自版本串等长替换」
+                不成立——gate build 与 npm build 无 sha 差，为同一字节序列；翻号由包内 package.json 0.1.83 承载
+== ④ 翻号 + headless 启动链（published 包直跑, HOME=seeded pong-home）==
+0.1.83 (AtlasCode)
+--version rc=0
+--help rc=0
+== ⑤ PONG-083 活轮（--model Qwen38-27B-VL + seeded 沙箱 HOME）==
+pong rc=0, marker=1, [atlas][exit] code=0
+anthropic 可达核 = 0（H-1）

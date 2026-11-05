@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","object":"chat.completion.chunk","created":1793865877,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8a9f11de2e102dc9","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"/home/vince/minicon"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"da3/bin/python3 -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"c \\\"import torch,"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" torch_npu; print('"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"torch', torch.__version__,"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 'torch_npu', torch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_npu.__version__)\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 2>&1 | tail"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -2"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; /home/vince/min"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iconda3/bin/python3"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -c \\\"import triton"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; print('triton',"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8a056103-1e07-4f3f-a744-13b6d7f666e2","created":1793865877,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" triton.__version__)\\\""},"type":"function","index":0

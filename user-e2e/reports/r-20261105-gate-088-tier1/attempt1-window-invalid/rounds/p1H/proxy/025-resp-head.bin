@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","object":"chat.completion.chunk","created":1793854397,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b6818660b12d93a4","function":{"arguments":"","name":"mcp__msprof-mcp__analyze_op_statistic"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"csv_path\": \"/home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"claude/jobs/09"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"264df0/tmp/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ate-088/tier"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1/p1H/prof"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/PROF_0001"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ASCEND_PROFILER_OUTPUT"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/op_statistic.csv\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b807ea61f5e21801","function":{"arguments":"","name":"mcp__msprof-mcp__get_op_type_details"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"csv_path\": \"/home/vince/.cla"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-f897be92-d0c1-4d63-a8c5-486ed2bf3434","created":1793854397,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"functi

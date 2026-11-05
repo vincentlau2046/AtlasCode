@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Task"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" accepted. Loading the required references"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" for sketch"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" design ("}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Unified"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Sketch DSL spec,"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" N"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":"PU hardware"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" guide"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":", and"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the most relevant reduction cases"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" —"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" RMSNorm is a row"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-reduce +"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" fused"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":" elementwise op"}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","object":"chat.completion.chunk","created":1793866000,"model":"glm-5","choices":[{"index":0,"delta":{"content":")."}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","created":1793866000,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-abd14465695667cc","function":{"arguments":"{\"command\": \"ls","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","created":1793866000,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c7e1c367-2e25-4de1-9eaa-1f55c24541d8","created":1793866000,"model":"

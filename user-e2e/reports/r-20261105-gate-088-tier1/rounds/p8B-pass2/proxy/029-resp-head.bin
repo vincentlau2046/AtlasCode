@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","object":"chat.completion.chunk","created":1793869030,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-be8618c2f717503f","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/projects/AtlasHarness/Atlas"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Harness/src/tools/ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>/dev/null; ls"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/projects/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"AtlasHarness/op-examples "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>/dev/null | head"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Inspect"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" harness ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" tools and op examples"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","object":"chat.completion.chunk","created":1793869030,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-8f2a4e5b-d5e2-4d8b-94f0-b2e60fd214f4","created":1793869030,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":66,"prompt_tokens":20578,"total_tokens":20644,"completion_tokens_details":{"reasoning_tokens":

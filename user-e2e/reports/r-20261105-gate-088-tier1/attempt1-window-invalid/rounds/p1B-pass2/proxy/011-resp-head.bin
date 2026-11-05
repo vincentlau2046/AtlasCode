@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","object":"chat.completion.chunk","created":1793854728,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8bfafe2704c851bf","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" ~/.atlas/plugins;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" find /"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -maxdepth 6"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -iname \\\"*ascend*\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -not -path \\\"*/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"proc/*\\\" -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"not -path \\\"*/sys"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/*\\\" 2>/dev"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/null | head -40"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Search"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" filesystem for ascend skill resources"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","created":1793854728,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e44801","object":"chat.completion.chunk","created":1793854728,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-134d45cd-1378-4c3c-918c-21e3f2e448

@@ -1,0 +1,11 @@
+=== tsc ===
+tsc-rc=0
+=== eslint ===
+eslint-rc=0
+=== build ===
+$ bun build src/atlascode/cli.ts --outfile dist/cli.js --target node --external modifiers-napi --external url-handler-napi --external audio-capture-napi --external audio-capture.node --external image-processor-napi --external plist --external sharp --external fflate --external cli-highlight --external undici --external vscode-languageserver-protocol --external vscode-languageserver-types --external @ant/computer-use-input --external @ant/computer-use-swift
+Bundled 3877 modules in 144ms
+
+  cli.js  17.89 MB  (entry point)
+
+cli.js bytes=17886619

@@ -1,0 +1,37 @@
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","object":"chat.completion.chunk","created":1793867384,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end tools are"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not available"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as searchable"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools. Maybe"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they're MCP"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools with"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" different names."}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let me try"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" searching"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for m"}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"cp."}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9618c81b3e6d9a5a","function":{"arguments":"","name":"ToolSearch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"max_results\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"20, \"query\": \"m"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"cp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ec25ecf7-2d28-477e-ad1c-3323cf0e2443","created":1793867384,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}

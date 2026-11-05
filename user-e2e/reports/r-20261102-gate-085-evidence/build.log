@@ -1,0 +1,5 @@
+$ bun build src/atlascode/cli.ts --outfile dist/cli.js --target node --external modifiers-napi --external url-handler-napi --external audio-capture-napi --external audio-capture.node --external image-processor-napi --external plist --external sharp --external fflate --external cli-highlight --external undici --external vscode-languageserver-protocol --external vscode-languageserver-types --external @ant/computer-use-input --external @ant/computer-use-swift
+Bundled 3899 modules in 192ms
+
+  cli.js  17.97 MB  (entry point)
+

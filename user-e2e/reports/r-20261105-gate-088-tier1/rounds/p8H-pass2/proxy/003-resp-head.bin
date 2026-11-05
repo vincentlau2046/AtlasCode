@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","object":"chat.completion.chunk","created":1793867588,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to implement a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator for Ascend NPU"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" using Ascend C DSL."}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-op"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"dev skill matches"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"A NEW operator is"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" requested and the language/framework matters"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or is unspecified."}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Decide the language/framework route first"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", then hand off.\""}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\n\nThe"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" language is specified"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend C."}}]}
+
+data: {"id":"chatcmpl-60bc1ef2-7279-46bb-9b80-3b036baa34d0","created":1793867588,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" So mayb

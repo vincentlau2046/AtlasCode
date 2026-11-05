@@ -1,0 +1,16 @@
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{"content":"##"}}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Phase 4 — Rec"}}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{"content":"ompile &"}}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{"content":" validate"}}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","object":"chat.completion.chunk","created":1793864157,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"id":"chatcmpl-e8b6338d-23e3-4571-8bfe-86ea193f42a7","created":1793864157,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":33,"prompt_tokens":43451,"total_tokens":43484,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":42624}}}
+
+data: [DONE]
+

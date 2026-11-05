@@ -1,0 +1,5 @@
+[0m[2m[35m$[0m [2m[1mbun build src/atlascode/cli.ts --outfile dist/cli.js --target node --external modifiers-napi --external url-handler-napi --external audio-capture-napi --external audio-capture.node --external image-processor-napi --external plist --external sharp --external fflate --external cli-highlight --external undici --external vscode-languageserver-protocol --external vscode-languageserver-types --external @ant/computer-use-input --external @ant/computer-use-swift[0m
+[32mBundled 3893 modules in 163ms[0m
+
+  [34mcli.js[33m  17.94 MB  [2m(entry point)[0m
+

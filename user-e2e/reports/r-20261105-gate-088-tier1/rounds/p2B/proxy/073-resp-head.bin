@@ -1,0 +1,29 @@
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","object":"chat.completion.chunk","created":1793858736,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-845d66081d29d19b","function":{"arguments":"{\"status\": \"completed","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"3"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0},{"id":"chatcmpl-tool-93399edf83a0702b","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"in_progress"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"4"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":1},{"id":"chatcmpl-tool-823195fff07bfe76","function":{"arguments":"","name":"Write"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"content\": \"{\\n  \\\"success\\\":"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" false,\\n  \\\"gen"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_iterations\\\": 1"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":",\\n  \\\"failure"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_phase\\\": \\\"verification"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\",\\n  \\\"failure_reason\\\":"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\"B类"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-0e232137-d666-4222-817e-a3e10a2f3e5d","created":1793858736,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"环境错误："},"type":"function","index":2}]}}

@@ -1,0 +1,22 @@
+== 0.1.82 生产 lane SRI/翻号 复核（e2e 独立重算，2026-10-31T00:24:08+08:00) ==
+== ① registry packument 权威值 ==
+dist-tags.latest = 0.1.82
+gitHead          = c105e1de3088fc6f1b38a1f83b228a002307124f
+integrity        = sha512-JgbvpkzvdoYp5Q61g1nVMUscIxwfcjuolCz2ZyF0WzRenFUfGqAPkvXzHOmu0NiahUBXbs0iIl6lrn87zguo0g==
+shasum           = 9b4ae4996fa31113d093ddcda1ec29fc0c5efa5e
+unpackedSize     = 17942571
+tarball          = https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.82.tgz
+== ② tgz 本地实测（三方第三面） ==
+9b4ae4996fa31113d093ddcda1ec29fc0c5efa5e  atlascode-0.1.82.tgz
+tgz bytes = 3793157
+JgbvpkzvdoYp5Q61g1nVMUscIxwfcjuolCz2ZyF0WzRenFUfGqAPkvXzHOmu0NiahUBXbs0iIl6lrn87zguo0g==
+== ③ 提取面 ==
+unpackedSize file-sum = 17942571
+cli.js bytes  = 17934651
+cli.js chars  = 17886324
+gate build    = 17943561B / 17895234c (worktree-gate-082-face @ bba8fb5)
+delta bytes   = 8910 (expect 8910)
+delta chars   = 8910 (expect 8910)
+== ④ 翻号（published 包直跑） ==
+0.1.82 (AtlasCode)
+--version rc=0

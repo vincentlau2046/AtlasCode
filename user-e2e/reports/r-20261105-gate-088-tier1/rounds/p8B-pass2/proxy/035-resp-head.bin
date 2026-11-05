@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","object":"chat.completion.chunk","created":1793869044,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-aadb9506f2551dc0","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"grep -rn \\\"compile"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\" /home/vince/projects"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/AtlasHarness/AtlasHarness"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/src/tools/ascend/constants"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".ts 2>/dev/null"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" | head; grep -r"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ln \\\"Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endExecutor\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/projects/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"AtlasHarness/AtlasHarness/src"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" --include=\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"*.ts\\\" | head -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"5\", \"description\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2406c961-1a9a-427d-9c2a-f6ec4adac2d4","created":1793869044,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Find AscendExecutor im

@@ -1,0 +1,68 @@
+######## FAM-16 START 15:17:28 ########
+=== START bugfix0167 15:17:28 ===
+=== DONE bugfix0167 rc=0 verdict=NO-RESULT 15:17:28 ===
+=== START compact0168 15:17:28 ===
+=== DONE compact0168 rc=0 verdict=NO-RESULT 15:17:29 ===
+=== START blockd0169 15:17:29 ===
+=== DONE blockd0169 rc=0 verdict=NO-RESULT 15:17:29 ===
+=== START gh0170 15:17:29 ===
+=== DONE gh0170 rc=0 verdict=NO-RESULT 15:17:30 ===
+=== START goal0162 15:17:30 ===
+=== DONE goal0162 rc=0 verdict=NO-RESULT 15:17:30 ===
+=== START checkin0163 15:17:30 ===
+=== DONE checkin0163 rc=0 verdict=NO-RESULT 15:17:30 ===
+=== START prop0163 15:17:30 ===
+=== DONE prop0163 rc=0 verdict=NO-RESULT 15:17:30 ===
+=== START spin0164 15:17:30 ===
+=== DONE spin0164 rc=0 verdict=NO-RESULT 15:17:30 ===
+=== START quota403-0171 15:17:30 ===
+=== DONE quota403-0171 rc=0 verdict=NO-RESULT 15:18:09 ===
+=== START updatenudge-0171 15:18:09 ===
+=== DONE updatenudge-0171 rc=0 verdict=NO-RESULT 15:23:00 ===
+=== START mcp0174 15:23:00 ===
+=== DONE mcp0174 rc=0 verdict=PASS 15:23:00 ===
+=== START deant0175 15:23:00 ===
+=== DONE deant0175 rc=0 verdict=PASS 15:23:00 ===
+=== START oauth0176 15:23:00 ===
+=== DONE oauth0176 rc=0 verdict=PASS 15:23:00 ===
+=== START deant0178 15:23:00 ===
+=== DONE deant0178 rc=0 verdict=PASS 15:23:21 ===
+=== START wc0179 15:23:21 ===
+=== DONE wc0179 rc=0 verdict=hardFail=0 15:24:46 ===
+=== START k1080 15:24:46 ===
+=== DONE k1080 rc=0 verdict=PASS 15:24:46 ===
+######## FAM-16 DONE 15:24:46 ########
+######## SERIAL-34 START 15:24:46 ########
+=== START p0a 15:24:46 ===
+=== DONE p0a rc=0 15:34:19 ===
+=== START a4f 15:34:19 ===
+=== DONE a4f rc=0 15:34:19 ===
+=== START cmd 15:34:19 ===
+=== DONE cmd rc=0 15:34:19 ===
+=== START help 15:34:19 ===
+=== DONE help rc=0 15:34:26 ===
+######## SERIAL-34 DONE 15:34:26 ########
+######## LOOPROB START 15:34:26 ########
+=== DONE looprob rc=0 15:36:15 ===
+[R1-nominal] 无故障基线：多步任务应完成（其他场景的对照组）
+  [R1-nominal] completed=true exit=0 ms=22861 tools=19 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-500-transient] 前 2 次 500（在 provider 3 次重试预算内）→ 应恢复并完成
+  [R1-500-transient] completed=true exit=0 ms=11441 tools=7 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-drop-transient] 第 1 次断连（ECONN，可重试）→ 应恢复并完成
+  [R1-drop-transient] completed=true exit=0 ms=10720 tools=7 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-empty-bounded] 第 2 次空 0-0（R1 有界 1 次重试面）→ 应不崩、非静默
+  [R1-empty-bounded] completed=true exit=0 ms=25226 tools=20 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-delay] 每次 +2s（模拟慢模型，post-#260 不应提前 fail-fast）→ 应完成
+  [R1-delay] completed=true exit=0 ms=25299 tools=8 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-500-storm] 40 次连续 500（超 3 次重试预算）→ 暴露「loop 无回合级错误恢复」缺口（预期：任务不完成，非静默）
+  [R1-500-storm] completed=false exit=1 ms=1675 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true
+[R3-resume] ① SIGKILL@call4∨25000ms → sessionId=4863403d-300f-407b-92b1-922450e4bf81 killed=true ms=6780 calls=4
+[R3-resume] ② --resume 后 completed=false (test 输出无 PASS: "1:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.1")
+
+[all] 完成 → /home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1793432066233-aj4e
+######## LOOPROB DONE 15:36:15 ########
+CHAIN-083-ALL-DONE

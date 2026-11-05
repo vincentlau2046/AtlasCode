@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","object":"chat.completion.chunk","created":1793859086,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" answer"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" field"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" seems empty but"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" presumably"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" selected"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" something"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" result says"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"User"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has answered your questions:"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" .\" with no content"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ambiguous. I'll proceed"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with \"You decide\" default"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"? The"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" safest"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-65d4d009-8988-4e0a-9668-e387ce0363b7","created":1793859086,"model":"glm-5","obj

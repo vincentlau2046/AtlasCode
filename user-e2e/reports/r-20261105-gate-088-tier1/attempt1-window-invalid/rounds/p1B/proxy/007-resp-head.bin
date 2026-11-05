@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","object":"chat.completion.chunk","created":1793853614,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory is empty. There"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no kernel code"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the working"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory. Let"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" if"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" there's anything"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" anywhere"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The user"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" says \"my"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend matmul kernel\""}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — but"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory is empty. Hmm"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".\n\nWait"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" maybe I"}}]}
+
+data: {"id":"chatcmpl-11a549f7-b9ef-49b4-9bc2-989d597bef11","created":1793853614

@@ -1,0 +1,44 @@
+[
+  {
+    "tui": "atlas",
+    "scenario": "S2-edit",
+    "alive": true,
+    "turnSettle": false,
+    "disk": false,
+    "signals": {
+      "chars": 5243,
+      "nonEmptyLines": 44,
+      "read": 0,
+      "edit": 0,
+      "write": 0,
+      "bash": 0,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 0,
+      "skill": 0,
+      "finalAnswer": false
+    }
+  },
+  {
+    "tui": "claude",
+    "scenario": "S2-edit",
+    "alive": true,
+    "turnSettle": true,
+    "disk": false,
+    "signals": {
+      "chars": 1813,
+      "nonEmptyLines": 22,
+      "read": 0,
+      "edit": 0,
+      "write": 0,
+      "bash": 0,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 0,
+      "skill": 0,
+      "finalAnswer": false
+    }
+  }
+]

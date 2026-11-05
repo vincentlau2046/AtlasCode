@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","object":"chat.completion.chunk","created":1793868896,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend tools"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"AscendSpecParser, Asc"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"endTilingPlanner,"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" AscendCodeGen, Ascend"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"CompilerBridge, AscendDi"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"agnoser) are listed"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the system prompt but Tool"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Search finds"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" nothing and"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'re not exposed"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as callable"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" functions in"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" my available"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools list. Only"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ms"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-4109-937b-0783fe4c257a","created":1793868896,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof-mcp tools are"}}]}
+
+data: {"id":"chatcmpl-abcc9b69-4957-

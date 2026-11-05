@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","object":"chat.completion.chunk","created":1793859062,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants me"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to implement a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator for Ascend NPU"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" using Ascend C."}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" This matches"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-opdev or"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-generate skill"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The user asked"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a \""}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"brand-new custom operator\" —"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" language specified"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend C."}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me use the"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill tool with ascend"}}]}
+
+data: {"id":"chatcmpl-186c304e-7f78-46c2-ac85-6bbfac592610","created":1793859062,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-opdev or"}}]}
+
+data: {"id":"chatcmpl-186c304e-7

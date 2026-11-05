@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","object":"chat.completion.chunk","created":1793867333,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants a brand"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-new custom operator for Ascend"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" NPU using Ascend C"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" There"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s the"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-opdev umbrella"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill for a"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" NEW operator request"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Should"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" invoke the"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill tool? The skill"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-opdev\" is"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed as a user-invoc"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"able skill for"}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","created":1793867333,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-d6c5ca42-191a-469c-8898-8334411ef4d7","cr

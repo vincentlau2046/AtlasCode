@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","object":"chat.completion.chunk","created":1793864152,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-860cec06581a09ac","function":{"arguments":"{\"status\": \"completed","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"2"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0},{"id":"chatcmpl-tool-91dae3055f97676b","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"in_progress"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"3"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","object":"chat.completion.chunk","created":1793864152,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-c5d294dd-a199-4235-9099-90694400faa8","created":1793864152,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":35,"prompt_tokens":43400,"total_tokens":43435,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":42624}}}
+
+data: [DONE]
+

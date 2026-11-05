@@ -1,0 +1,4 @@
+[R3-resume] ① SIGKILL@call4∨25000ms → sessionId=06c55721-4228-4a9f-a43b-779cf1294fbc killed=true ms=5277 calls=4
+[R3-resume] ② --resume 后 completed=true (ALL TESTS PASSED (实跑通过))
+
+[R3] 完成 → /home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/R3-1793433193437-8lqy

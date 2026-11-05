@@ -1,0 +1,23 @@
+bytes: gate75=17824402 npm74=17829643 npm75=17815492
+--- 本波 token @ npm75（gate75 对照，逐项同值）---
+C-2b/absent      appendSessionLog                       gate75=0    npm74=4    npm75=0   
+C-2b/absent      getSessionIngressAuthToken             gate75=0    npm74=4    npm75=0   
+C-2b/absent      persistToRemote                        gate75=0    npm74=2    npm75=0   
+C-2b/absent      InternalEventWriter                    gate75=0    npm74=1    npm75=0   
+C-2b/absent      ATLAS_SESSION_ACCESS_TOKEN             gate75=0    npm74=3    npm75=0   
+C-2b/absent      SESSION_INGRESS_URL                    gate75=0    npm74=2    npm75=0   
+C-2b/absent      sessionIngressToken                    gate75=0    npm74=6    npm75=0   
+identity/present class Project                          gate75=3    npm74=3    npm75=3   
+identity/present insertMessageChain                     gate75=6    npm74=6    npm75=6   
+identity/present getMcpServerHeaders                    gate75=4    npm74=4    npm75=4   
+identity/present getOAuthTokenFromFileDescriptor        gate75=2    npm74=2    npm75=2   
+identity/present atlas-code-20250219                    gate75=1    npm74=1    npm75=1   
+mismatch(gate75 vs npm75)=0
+--- 前 19 波（0.1.56–0.1.74）token 零回归 npm74↔npm75 ---
+DIFF 0.1.73 claude.ai                                  npm74=20   npm75=19  
+total prior tokens=132 diffs=1
+  DIFF: ('0.1.73', 'claude.ai', 20, 19)
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm74=0    npm75=0   
+foreground (default)                       npm74=0    npm75=0   
+Set run_in_background to true to launch    npm74=0    npm75=0   

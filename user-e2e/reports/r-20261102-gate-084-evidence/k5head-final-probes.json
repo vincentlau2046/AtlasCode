@@ -1,0 +1,73 @@
+{
+  "probe": "k5-headless-rounds-0184",
+  "hardFail": 0,
+  "total": 11,
+  "probes": [
+    {
+      "id": "P-H0-proxy",
+      "hard": true,
+      "ok": true,
+      "detail": "8997 日志代理就绪"
+    },
+    {
+      "id": "P-H0-rh1-exit",
+      "hard": true,
+      "ok": true,
+      "detail": "R-H1 退出码 0"
+    },
+    {
+      "id": "P-H1-utf16le-answer",
+      "hard": true,
+      "ok": true,
+      "detail": "模型答含 MARKER-9917（K5-3 decodeTextLosslessly 活读）"
+    },
+    {
+      "id": "P-H1-utf16le-wire",
+      "hard": true,
+      "ok": true,
+      "detail": "provider 请求体含解码后文本（MARKER-9917 + 中文达线 = utf16le→utf8 无 BOM 直证）"
+    },
+    {
+      "id": "P-H0-rh2-exit",
+      "hard": true,
+      "ok": true,
+      "detail": "R-H2 退出码 0"
+    },
+    {
+      "id": "P-H2-large-answer",
+      "hard": true,
+      "ok": true,
+      "detail": "模型答含末行 K5-LARGE-END-MARKER-3350（K5-5 allow_large 全量活读）"
+    },
+    {
+      "id": "P-H2-large-wire",
+      "hard": true,
+      "ok": true,
+      "detail": "provider 请求体含 K5-LARGE-END-MARKER-3350（全量内容达线非截断）"
+    },
+    {
+      "id": "P-H0-rh3-exit",
+      "hard": true,
+      "ok": true,
+      "detail": "R-H3 退出码 0"
+    },
+    {
+      "id": "P-H3-pdf-toolface",
+      "hard": true,
+      "ok": true,
+      "detail": "会话 JSONL 含「PDF pages extracted: 1 page(s)」（pdftoppm 实跑工具面）"
+    },
+    {
+      "id": "P-H3-pdf-secureroot",
+      "hard": true,
+      "ok": true,
+      "detail": "本轮新叶目录 /tmp/.atlas-1000/tool-results/pdf-X50uj9 页图在场=true mode0700=true（mkdtemp 安全根活面）"
+    },
+    {
+      "id": "P-H3-pdf-content",
+      "hard": false,
+      "ok": null,
+      "detail": "模型答含 ORION-7742（soft：页图→image blocks 既有 Gap B 断链，模型只得 header；未见（登记非本波回归））"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","object":"chat.completion.chunk","created":1793854757,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says the"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline is"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the bottleneck per"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" msprof op_summary. They"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" want me to optimize the kernel"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" itself. The kernel appears"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to be at /home/v"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ince/work/gemm_ascend"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"c (csrc/G"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"emm_custom.asc, py"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"bind11.asc, setup.py"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", test_Gemm.py)."}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Note"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the working directory is empty though"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me look"}}]}
+
+data: {"id":"chatcmpl-abdb9422-a2eb-4d07-a0c3-01dbf5ed7b72","created":1793854757,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at the kernel c

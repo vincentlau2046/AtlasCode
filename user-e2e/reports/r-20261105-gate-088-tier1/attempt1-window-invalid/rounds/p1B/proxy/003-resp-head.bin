@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","object":"chat.completion.chunk","created":1793853583,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline of their"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend matmul kernel is"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the bottleneck according to msprof"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" op_summary,"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and asks to optimize the"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel itself. They want me"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to finish the"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" reply with the token ROUTE"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-DONE-4 on its"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" own line.\n\nThis"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" matches the /"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-perf-optimize"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill (in"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"tra-core pipeline optimization, ms"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof op"}}]}
+
+data: {"id":"chatcmpl-d04c7dd2-0cef-4dd3-a36c-d3768a0675ef","created":1793853583,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reason

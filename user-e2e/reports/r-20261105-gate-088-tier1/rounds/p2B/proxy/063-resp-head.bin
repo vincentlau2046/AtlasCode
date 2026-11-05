@@ -1,0 +1,35 @@
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Now run the AST pre-check"}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":" (3"}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":".2) and"}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":" set"}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":" up the verify dir"}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","object":"chat.completion.chunk","created":1793858679,"model":"glm-5","choices":[{"index":0,"delta":{"content":"."}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b3afc11ef2f43aeb","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"cd /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p2B/ws"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/triton_ascend_output/op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_rmsnorm_2026"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1105_1402_"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"9069 && python3"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-091f792b-5bd0-4d1e-86bd-81513822b2ef","created":1793858679,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"functio

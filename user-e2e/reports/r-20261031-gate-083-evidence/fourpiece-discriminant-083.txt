@@ -1,0 +1,32 @@
+=== 判别双面 + CI + 四件套摘要（log 尾）===
+--- 判别 gate face（65743ce）
+ 141 pass
+ 0 fail
+ 399 expect() calls
+Ran 141 tests across 11 files. [7.86s]
+GATE-RC=0
+--- 判别 baseline face（c105e1d）
+ 72 fail
+ 1 error
+ 249 expect() calls
+Ran 134 tests across 11 files. [8.74s]
+BASE-RC=1
+--- CI gate（顶层 tests/）
+ 0 fail
+ 14294 expect() calls
+Ran 5111 tests across 413 files. [145.00s]
+CI-RC=0
+--- CI baseline 同码复跑
+ 0 fail
+ 13895 expect() calls
+Ran 4970 tests across 402 files. [101.30s]
+BASEFULL-RC=0
+--- tsc（bun 口径 3 跑 + node 3 跑）
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-bun-run1.log
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-bun-run2.log
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-bun-run3.log
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-node-run1.log
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-node-run2.log
+0 /home/vince/.claude/jobs/09264df0/tmp/gate-083/tsc-node-run3.log
+--- headless smoke
+--version → 0.1.82 (AtlasCode) rc=0; --help rc=0

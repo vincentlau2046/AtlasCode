@@ -1,0 +1,13 @@
+=== [1] --version ===
+0.1.81 (AtlasCode)
+=== [2] PONG-081 活轮（H-1 场景 IFF 往返）===
+rc=0
+--- log 尾部 ---
+Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+PONG-081
+[atlas][exit] code=0
+--- marker 核 ---
+1
+--- anthropic 可达核（应 0）---
+0
+0

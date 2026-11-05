@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","object":"chat.completion.chunk","created":1793865899,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend N"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"PU hardware, no torch"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_npu, no CANN"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", no triton-"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend installed on"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this machine. The Trit"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"on-Ascend tool"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"chain ("}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"triton-ascend package"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", torch_npu)"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is not present"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Verification"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" on"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" real hardware is"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" impossible here"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Tools"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":1793865899,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" available"}}]}
+
+data: {"id":"chatcmpl-cbcc5aca-e27e-4c48-855b-95be110f0fea","created":17

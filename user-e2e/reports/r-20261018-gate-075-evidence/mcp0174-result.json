@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "hardFail": 0,
+  "inconclusive": 0,
+  "probes": "[PASS] P-MR1-claudeai-proxy-live-code-absent: src/ 全树 1P hosted-connector 活码 0 处（型面/车道函数/常量 7 锁全 0；注释登记面不判红） || [PASS] P-MR2-client-metadata-url-https: types.ts McpOAuthConfigSchema clientMetadataUrl 在场 + https-only 纪律（startsWith https:// + 校验消息） || [PASS] P-MR3-getter-priority-chain: getter 顺序锁核销：env MCP_OAUTH_CLIENT_METADATA_URL 读取在前（部署控制）→ per-server 在后（repo 值不压 operator）→ undefined DCR 兜底 || [PASS] P-MR4-mcp-oauth-display-both: CLI /mcp 面 oauth client_metadata_url 展示行 sse+http 双支在场（count=2） || [PASS] P-MR5-gateway-decoupled: 通用远端 MCP 面零扰动恒等：7 型 union 完整（stdio/sse/sse-ide/ws-ide/http/ws/sdk）+ 用户级 HTTPS_PROXY 通用能力在场（3 函数）= 与 LLM gateway 解耦 || [PASS] P-MR6-security-hardening: 修波三连击活码面核销：managedEnv withoutMcpOauthCimdVars 全源剥离在场 + 键匹配 case-insensitive（CWE-178 对齐 Windows env 语义）+ getter env 值 https 验真（畸形/非 https 忽略）",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-075-final"
+}

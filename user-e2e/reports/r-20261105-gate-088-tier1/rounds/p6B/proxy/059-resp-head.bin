@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","object":"chat.completion.chunk","created":1793864083,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a4640306335e6626","function":{"arguments":"","name":"Edit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/work/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"emm_ascendc/csrc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/Gemm_custom.asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"new_string\": \"       "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" this->pipe.InitBuffer(this"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"->inQueueX, BUFFER"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_NUM, this->tileLength"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" * sizeof(half));\\n       "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" this->pipe.InitBuffer(this"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"->outQueueZ, BUFFER"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_NUM, this->tileLength"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" * sizeof(half));"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"old_string\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-e6ae23a5-0e6c-418f-9159-fdee80e85e88","created":1793864083,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 

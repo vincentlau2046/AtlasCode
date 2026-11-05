@@ -1,0 +1,30 @@
+ "verdict": "PASS",
+ "probes": "[PASS] T1-default-900s [PASS] T2-misconfig-hint-tri-state [PASS] T3-error-line-unit-display [PASS] G1-cap-identity-anchor [PASS] M1-save-null-not-written [PASS] M2-session-model-restore-chain [PASS] M3-pool-reject-explicit-notice [PASS] M4-no-record-identity-anchor [PASS] C1-reappend-reding-source [PASS] C2-win32-case-mock-carry [PASS] E1-picker-no-global-overwrite [PASS] E2-wire-per-model-memory [PASS] E3-sticky-verify-dual-source [PASS] G2-effort-cmd-global-semantics [PASS] G3-role-model-effort-untouched"
+TUI-BUGFIX-0167 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-067/bugfix0167
+ "verdict": "PASS",
+ "probes": "[PASS] B1-C1-resume-prompt [PASS] B2-C2-file-state-rebuild [PASS] B2b-C2-no-file-empty-anchor [PASS] B3-C3-tool-continuation [PASS] B4-C4-session-start-hooks [PASS] B5-C5-post-compact-hooks [PASS] B7-C7-keep-recent-n [PASS] B7b-C7-zero-identity-anchor [PASS] S1-f1a-skip-carrier [PASS] A1-trimmed-failsafe-identity [PASS] A2-port-gate-failsafe [PASS] B6-C6-metadata-repin [PASS] F-AB-recovery-completeness [PASS] S2-loop-skip-gate [PASS] T1-f3a-small-window-disable [PASS] T2-f3a-warning-degrade [PASS] T3-f3a-large-window-identity [PASS] T4-f3a-surface-explicit [PASS] G4-C7-keeprecent-const"
+TUI-COMPACT-RECOVERY-0168 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-068/compact0168
+ "verdict": "PASS",
+ "probes": "[PASS] D1-1-per-model-tiers [PASS] D1-2-default-fallback [PASS] D1-3-legacy-single-anchor [PASS] D1-4-no-setting-anchor [PASS] D1-5-per-model-off-tier [PASS] D3-1-fallback-on-api-failure [PASS] D3-2-ptl-no-trigger-anchor [PASS] D3-3-abort-no-trigger-anchor [PASS] D3-4-return-apierr-fallback [PASS] D3-5-success-no-extra-call-anchor [PASS] D3-6-no-fallback-model-anchor [PASS] D3-7-eligible-result-fixed-surface [PASS] D5-1-gate-baseline-missing [PASS] D5-2-gate-unchanged-anchor [PASS] D5-3-changed-face [PASS] D5-4-api-consumer"
+TUI-BLOCKD-0169 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-069/blockd-0169
+ "verdict": "PASS",
+ "probes": "[PASS] G1-src-chat-with-delta [PASS] G2-src-loop-stream-delta [PASS] G3-src-loop-events-forward [PASS] G4-beh-stream-delta-branch [PASS] G4-tool-delta-no-side-effect [PASS] G4-anchor-assistant-identity [PASS] G-anchor-spinner-gates [PASS] H1-roles-src-fallback-cut [PASS] H1-adapter-src-keychain-cut [PASS] H1-beh-global-fallback-zero-calls [PASS] H1-env-priority-anchor [PASS] H1-adapter-beh-undefined [PASS] H2-beh-pool-rotation-verify"
+TUI-GH-0170 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-070/gh-0170
+ "verdict": "PASS",
+ "probes": "[PASS] G1a-set-armed [PASS] G1b-status-armed [PASS] G1c-one-goal-replace [PASS] G1d-clear [PASS] G1e-clear-not-armed [PASS] G1f-set-missing-condition [PASS] G1g-set-oversize-reject [PASS] G2a-judge-unmet-1 [PASS] G2b-judge-unmet-2 [PASS] G2c-judge-met [PASS] G2d-judge-request-log [PASS] G3a-overlay-source [PASS] G3b-footer-registry [PASS] G3c-p7-zero-rerender"
+TUI-GOAL-0162 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-062/goal-probe
+ "verdict": "PASS",
+ "probes": "[PASS] C1-env-parse [PASS] C2-backoff [PASS] C3-budget-refresh [PASS] C5-env-disable [PASS] C6-prompt [PASS] C7-wiring"
+TUI-GOAL-CHECKIN-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/checkin-probe
+ "verdict": "PASS",
+ "probes": "[PASS] P1a-tool-surface [PASS] P1b-schema [PASS] P1c-ask-user-branches [PASS] P1d-call-armgoal [PASS] P1e-prompt [PASS] P1f-cleanup"
+TUI-PROPOSE-GOAL-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/propose-goal-probe
+ "verdict": "PASS",
+ "probes": "[PASS] S1-wants-status-indicator-gate [PASS] S2-compute-stall-guard [PASS] S3-hook-delegation [PASS] S4-g1-render-source [PASS] S5-g3-ellipsis [PASS] S6-time-gates-zero-regression [PASS] E1-endpoint-label-parameterized [PASS] E2-hint-label-parameterized [PASS] E3-discrimination-identity [PASS] E4-export-and-repl-wiring"
+TUI-SPINNER-0164 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-064/spinner-probe
+ "verdict": "PASS",
+ "probes": "[PASS] P-A1-aggregate-header [PASS] P-A2-quota-classification [PASS] P-A3-quota-actionable [PASS] P-A4-plain403-control"
+TUI-QUOTA403-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/quota403-0171
+ "verdict": "PASS",
+ "probes": "[PASS] P-B1-nudge-visible [PASS] P-B2-registry-segment [PASS] P-B3-default-no-autoupdate [PASS] P-B4-same-version-absent"
+TUI-UPDATENUDGE-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/updatenudge-0171

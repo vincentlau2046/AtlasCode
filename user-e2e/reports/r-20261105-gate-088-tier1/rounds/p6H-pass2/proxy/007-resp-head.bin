@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","object":"chat.completion.chunk","created":1793864934,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Working"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory is empty. No"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel source"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" provided. The user says"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"Opt"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize this kernel itself\" but"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" there's no kernel file."}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Hmm"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" task"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" setup"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" suggests"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a routing"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" exercise"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" —"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should decide"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the right route"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The user"}}]}
+
+data: {"id":"chatcmpl-7932c879-52c0-45af-b1ce-2806d7d791fd","created":1793864934,"mod

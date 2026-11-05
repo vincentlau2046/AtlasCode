@@ -1,0 +1,59 @@
+{
+  "runId": "smoke-2026-10-03T00-1",
+  "at": "2026-10-03T00:18:02.496Z",
+  "atlas": {
+    "alive": true,
+    "len": 898,
+    "tail": [
+      "[AtlasHarness] main() starting...",
+      " ▄▄▄▄████",
+      "████████",
+      "████████████AtlasHarnessv0.1.14",
+      "████████ ·APIUsageBilling",
+      "████████/home/vince/projects/AtlasCode/user-e2e/compare/runs/smoke-2026-10-03T00-1/atlas/atlas/ws",
+      "AtlasHarness",
+      "AICodingAgent",
+      "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────",
+      "❯  ",
+      "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────",
+      "⚡ ·🧠med ·⏭Bypass ·⌂/home/vince/projects/AtlasCode/user-e2e/compare/runs/smoke-2026-10-03T00-1/atlas/atlas/ws◐medium·/effort",
+      "[>0q◐ mdim · /effortAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://github.com/vincentlau2…"
+    ]
+  },
+  "claude": {
+    "alive": true,
+    "len": 1946,
+    "tail": [
+      "*███▓░░░",
+      "░░░░░░███▓░",
+      "░░░░░░░░░░░░░███▓░",
+      "░░░░░░░░░░░░░░░░░░░*██▓░░▓",
+      "░▓▓███▓▓░",
+      " *░░░░",
+      " ░░░░░░░░",
+      " ░░░░░░░░░░░░░░░░",
+      " █████████*",
+      "██▄█████▄██*",
+      " █████████*",
+      ".......████..........................................",
+      "Let'sgetstarted.",
+      "Choosethetextstylethatlooksbestwithyourterminal",
+      "Tochangethislater,run/theme",
+      "Auto(matchterminal)",
+      "❯✔Darkmode",
+      "Lightmode",
+      "Darkmode(colorblind-friendly)",
+      "Lightmode(colorblind-friendly)",
+      "Darkmode(ANSIcolorsonly)",
+      "Lightmode(ANSIcolorsonly)",
+      "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌",
+      " 1 function greet(){",
+      " 2 -  console.log(\"Hello, World!\");                                                                                                                                                               ",
+      " 2 +  console.log(\"Hello, Claude!\");                                                                                                                                                              ",
+      " 3 }",
+      "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌",
+      " Syntaxtheme:MonokaiExtended(ctrl+ttodisable)",
+      "[>0q"
+    ]
+  }
+}

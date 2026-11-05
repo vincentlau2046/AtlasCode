@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","object":"chat.completion.chunk","created":1793857836,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-ade0669a5963d17d","function":{"arguments":"{\"content\": \"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"# Golden test for MatMul"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_e2e optimized kernel:"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" numpy fp32 reference vs\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"# simulated fp16-input mat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"mul output, np.allclose"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" gate.\\n# (Ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"GoldenTest bridge is not inv"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ocable in this session;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" this script is\\n# the"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" drop-in test it consumes once"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" a toolchain/device is available"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".)\\nimport numpy as np\\n\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"M, N, K ="},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-18d2cc75-737a-4562-a93b-deeaf6bee7bd","created":1793857836,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_ca

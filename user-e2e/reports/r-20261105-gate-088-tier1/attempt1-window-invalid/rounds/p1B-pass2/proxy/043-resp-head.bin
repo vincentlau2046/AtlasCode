@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","object":"chat.completion.chunk","created":1793854814,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8f884ac0fca1d3be","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/ws"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"la;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" find /home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"claude/jobs/09"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"264df0/tmp/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ate-088/tier"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1/p1B-pass2"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ws"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-00ea5a50-e807-4627-ae3c-8981e1007cda","created":1793854814,"model":"glm-5","obj

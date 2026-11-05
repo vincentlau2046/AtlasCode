@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","object":"chat.completion.chunk","created":1793855076,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9da30c48e117ade1","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /usr/local/Ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 2>/dev/null;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" echo"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\"exit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"=$?\\\"; command"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -v np"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"u-smi;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" command -v bisheng"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Check"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" for Ascend toolkit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" and N"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"PU tools"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","created":1793855076,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6ed690df-4f84-4ad6-9756-f8cb38be6d43","objec

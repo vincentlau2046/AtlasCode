@@ -1,0 +1,8 @@
+version 0.1.79 present: True
+dist.tarball: https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.79.tgz
+dist.shasum: bab5ccd0b9dcacbac3031e9520cab2122f0ef355
+dist.integrity: sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==
+unpackedSize: 17890954 fileCount: 3
+latest tag: 0.1.79
+-rw-rw-r-- 1 vince vince 3781658 10月 24 02:57 atlasharness-atlascode-0.1.79.tgz
+=== FETCH-079-DONE ===

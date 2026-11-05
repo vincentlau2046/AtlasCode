@@ -1,0 +1,19 @@
+[S-A] alive=true hardFail=0 soft?= 2
+  P0-1b-verdict=✅ (Verdict: Rule "Bash" from user settings requires confirmation.)
+  P0-1b-rule=✅ (Verdict: Rule "Bash" from user settings requires confirmation.)
+  P0a-no-conf=✅ ((未命中)（PASS：应为 0 次）)
+  P0-3-allow=✅ (∴ Thinking The user is asking me to run the bash command "touch /tmp/atlas-p0a-probe" to c)
+  P0-3-deny=? ((触发未达 → INCONCLUSIVE))
+  P0-1a-who=✅ (❯ /model fast                                                                             )
+  P0-2-fast=✅ (❯ /model fast                                                                             )
+  P0-1c-ctx=✅ (⚡ Qwen38-27B-TXT · 🧠 xhigh · ▶ default · ▤ 14k/256k tok (5%) · ⌂ /home/vince/projects/Atl)
+  P0-1a-fallback=? ((触发未达 → INCONCLUSIVE))
+[S-B] alive=true hardFail=0 soft?= 0
+  P0-1c-ctx=✅ (⚡ Qwen38-27B-TXT · 🧠 xhigh · ⏭ bypass enabled · ▤ 14k/256k tok (5%) ▲ · ⌂ /home/vince/pro)
+  P0-1c-fuse=✅ (⚡ Qwen38-27B-TXT · 🧠 xhigh · ⏭ bypass enabled · ▤ 14k/256k tok (5%) ▲ · ⌂ /home/vince/pro)
+[S-C] alive=true hardFail=0 soft?= 0
+  P0-5-gw=✅ (● 本轮执行出错：All 2 model(s) in pool for role 'fast' failed:    - iff/Qwen38-27B-TXT: error    )
+  P0-5-manual=✅ (● 本轮执行出错：All 2 model(s) in pool for role 'fast' failed:    - iff/Qwen38-27B-TXT: error    )
+  P0-5-doctor=✅ (● 本轮执行出错：All 2 model(s) in pool for role 'fast' failed:    - iff/Qwen38-27B-TXT: error    )
+
+[P0] 判定=PASS（hardFail=0 hardInconclusive=0） 发布门禁=RELEASABLE（无） → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/P0-1792315064405-hqfe

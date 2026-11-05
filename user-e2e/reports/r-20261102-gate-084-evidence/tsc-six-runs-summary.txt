@@ -1,0 +1,6 @@
+== tsc-bun-run1: 0 error TS ==
+== tsc-bun-run2: 0 error TS ==
+== tsc-bun-run3: 0 error TS ==
+== tsc-node-run1: 0 error TS ==
+== tsc-node-run2: 0 error TS ==
+== tsc-node-run3: 0 error TS ==

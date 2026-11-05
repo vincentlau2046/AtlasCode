@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","object":"chat.completion.chunk","created":1793854940,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" task"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": \"The"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline of my Asc"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel is the"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bottleneck according to ms"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof op_summary. Optimize"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this kernel itself.\"\n\nThere"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" are"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" two candidate kernels: /home"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"/vince/work/gemm_op"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"GEMM_custom"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", tileNum=8,"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" blockDim=8) and /"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"home/vince/work/gemm"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_ascendc (Gemm"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_custom, tile"}}]}
+
+data: {"id":"chatcmpl-2d06253b-8c4d-4d61-a4a8-5aa04997c2be","created":1793854940,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Num=16, blockDim="}}

@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","object":"chat.completion.chunk","created":1793863584,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-88eae3c6df42c641","function":{"arguments":"","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/p6H/agent-sk"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ills/official/CANNBot"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ops/ascendc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-perf-optimize/references"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tiling/matmul/f"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"allback/tiling-flow.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0},{"id":"chatcmpl-tool-b6ce98cce30cca13","function":{"arguments":"","name":"Read"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-db24f959-ace5-42e3-b762-de3ff1743277","created":1793863584,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"too

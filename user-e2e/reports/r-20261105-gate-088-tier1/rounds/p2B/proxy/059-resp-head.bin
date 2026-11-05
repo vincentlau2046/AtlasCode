@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","object":"chat.completion.chunk","created":1793858635,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-bd06410ec1e61bae","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"completed"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"1\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a35141411bc0523d","function":{"arguments":"{\"status\": \"in","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_progress\", \"taskId\": \""},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2\"}"},"type":"function","index":1},{"id":"chatcmpl-tool-ba6f33d4dfa51d56","function":{"arguments":"","name":"Write"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"content\": \"R"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"MSNorm"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 算法设计"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"草图 (tr"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iton-op"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-designer, arch"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"=ascend910b"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-868d705a-f1ba-4c42-9be6-96c147ffa066","created":1793858635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0

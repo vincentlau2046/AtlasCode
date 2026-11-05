@@ -1,0 +1,139 @@
+{
+  "phase": "P0a",
+  "baseline": false,
+  "ms": 404357,
+  "verdict": "PASS",
+  "releasable": true,
+  "releaseGate": {
+    "enabled": true,
+    "targetVersion": "0.1.85",
+    "e2eChecked": {
+      "verdict": "PASS",
+      "openInconclusive": 0,
+      "hardFail": 0,
+      "regressionNonRegressed": true
+    },
+    "pendingOwner": {
+      "bannerAligned": "Main/f4（packument 验真 / 生产 lane banner 实测）",
+      "prodStubBehavior": "Main（build-time 声明 + dist 探针）",
+      "noOpenDeferred": "f4（收口契约卡）"
+    },
+    "releasable": true,
+    "blockedReasons": []
+  },
+  "scenarios": [
+    {
+      "id": "S-A",
+      "alive": true,
+      "hardFail": 0,
+      "softInconclusive": 2,
+      "probes": [
+        {
+          "id": "P0-1b-verdict",
+          "gate": "为什么(自动)放行",
+          "desc": "审批 verdict 三态（Verdict: hit rule / classifier says / no rule matched … mode）",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "Verdict: Rule \"Bash\" from user settings requires confirmation."
+          ]
+        },
+        {
+          "id": "P0-1b-rule",
+          "gate": "为什么(自动)放行",
+          "desc": "命中规则行（0.1.24 A4 句式：Rule \"<v>\" from <source> requires confirmation / Allowed by rule）",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "Verdict: Rule \"Bash\" from user settings requires confirmation."
+          ]
+        },
+        {
+          "id": "P0a-no-conf",
+          "gate": "数值置信度不出现",
+          "desc": "无数值置信度（置信度/confidence 词 + 数值相邻；版本号 0.1.x 不计数）",
+          "hard": true,
+          "absent": true,
+          "ok": true,
+          "evidence": [
+            "(未命中)（PASS：应为 0 次）"
+          ]
+        },
+        {
+          "id": "P0-3-allow",
+          "gate": "审批卡片内联 why",
+          "desc": "default 模式手动批准行（✓ Allowed · your decision；auto-mode classifier 行属 auto/plan 模式另测）",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "∴ Thinking The user is asking me to run the Bash command `touch /tmp/atlas-p0a-probe` to cr… (ctrl+o to expand)● Bash(touch /tmp/atlas-p0a-probe)               "
+          ]
+        },
+        {
+          "id": "P0-3-deny",
+          "gate": "审批卡片内联 why",
+          "desc": "deny 面（需 deny fixture；S-A 走批准面 → INCONCLUSIVE）",
+          "hard": false,
+          "absent": false,
+          "ok": null,
+          "evidence": [
+            "(触发未达 → INCONCLUSIVE)"
+          ]
+        },
+        {
+          "id": "P0-1a-who",
+          "gate": "现在谁在答",
+          "desc": "信任线含角色（premium|fast|small）",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "❯ /model fast                                                                                                                                                   ",
+            "● 本轮执行出错：All 2 model(s) in pool for role 'fast' failed:    - iff/Qwen38-27B-TXT: api_error_409    - iff/Qwen38-27B-TXT: api_error_409                           "
+          ]
+        },
+        {
+          "id": "P0-2-fast",
+          "gate": "换档一键",
+          "desc": "/model fast 后信任线即时显示 fast 角色",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "❯ /model fast                                                                                                                                                   ",
+            "● 本轮执行出错：All 2 model(s) in pool for role 'fast' failed:    - iff/Qwen38-27B-TXT: api_error_409    - iff/Qwen38-27B-TXT: api_error_409                           "
+          ]
+        },
+        {
+          "id": "P0-1c-ctx",
+          "gate": "上下文还够吗",
+          "desc": "上下文剩余 %（回归护底：基线 context-bar 已有，P0 不得降级）",
+          "hard": true,
+          "absent": false,
+          "ok": true,
+          "evidence": [
+            "⚡ Qwen38-27B-TXT · 🧠 xhigh · ▶ default · ▤ 14k/256k tok (6%) · ⌂ /home/vince/projects/AtlasCode/user-e2e/tui-diff/workspaces/S-A AtlasCode is installed via npm",
+            "⚡ Qwen38-27B-TXT · 🧠 xhigh · ▶ default · ▤ 28k/256k tok (11%) · ⌂ /home/vince/projects/AtlasCode/user-e2e/tui-diff/workspaces/S-A AtlasCode is installed via np",
+            "⚡ Qwen38-27B-TXT · 🧠 xhigh · ▶ default · ▤ 28k/256k tok (11%) · ⌂ /home/vince/projects/AtlasCode/user-e2e/tui-diff/workspaces/S-A                              "
+          ]
+        },
+        {
+          "id": "P0-1a-fallback",
+          "gate": "现在谁在答",
+          "desc": "水平回退标记（0.1.24 B1：折入 model 段 ↦ fast；回退难强制 → 常 INCONCLUSIVE）",
+          "hard": false,
+          "absent": false,
+          "ok": null,
+          "evidence": [
+            "(触发未达 → INCONCLUSIVE)"
+          ]
+        }
+      ],
+      "notes": [],
+      "log": "/home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/P0a-1793629798802-7m17/S-A.log"
+    }
+  ]
+}

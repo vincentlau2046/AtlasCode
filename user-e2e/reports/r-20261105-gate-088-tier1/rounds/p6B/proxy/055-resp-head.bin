@@ -1,0 +1,35 @@
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":"## Phase 3"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":" — Kernel"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":" edits\n\nFix"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":"es applied"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":" to `"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","object":"chat.completion.chunk","created":1793864064,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Gemm_custom.asc`:"}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8d2607ddc369c81c","function":{"arguments":"{\"file_path\": \"/home","name":"Edit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/work/gemm_asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endc/csrc/Gemm"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_custom.asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"new_string\": \"constexpr"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" uint32_t BUFFER_NUM ="},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 2;  // 双"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"缓冲\\nconstexpr uint32_t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" MIN"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_TILE"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-421c9f83-9843-4793-ba2d-362fe792f5f2","created":1793864064,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index

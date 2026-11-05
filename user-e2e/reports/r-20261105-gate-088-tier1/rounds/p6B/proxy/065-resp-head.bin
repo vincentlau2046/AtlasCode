@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","object":"chat.completion.chunk","created":1793864142,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-923a8f6077064587","function":{"arguments":"","name":"Edit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/work/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"emm_ascendc/csrc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/Gemm_custom.asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"new_string\": \"    __"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"aicore__ inline void Compute"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"(int32_t progress"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":", int32_t n)\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"    {\\n        AscendC"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"::LocalTensor<half>"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" xLocal = this->in"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"QueueX.DeQue<half"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":">();\\n        AscendC::"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"LocalTensor<half> z"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-367f48fe-cc0c-4057-9216-780db9b96c28","created":1793864142,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Local = this->outQueue"

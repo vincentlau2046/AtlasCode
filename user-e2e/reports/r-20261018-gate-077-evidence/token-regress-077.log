@@ -1,0 +1,11 @@
+bytes(char): g76(npm 0.1.76)=17819528 g77(0.1.77 gate)=17828438
+total prior tokens=154 diffs=0
+--- 0.1.77 波面核（test-only 零行为：P-5 旧路径活字面 0 + 零漂移预期）---
+runCannCommand                       076=0    077=0   
+sandbox-adapter                      076=0    077=0   
+--- P-1 五域门面 export 面抽验 @ dist（恒等同值）---
+getCoreDependencies                  076=30   077=30  
+resetCoreDependencies                076=0    077=0   
+getMcpClientRegistry                 076=5    077=5   
+setEndpointConfigSource              076=4    077=4   
+setExecutorSandboxPort               076=4    077=4   

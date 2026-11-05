@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","object":"chat.completion.chunk","created":1793860700,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" CANN toolchain,"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no bisheng, no"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" torch. This"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is a mock"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"/s"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imulation"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" environment. I'll"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" still"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" write the complete"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" correct Ascend C operator project"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (the"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" four pieces"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":")"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with real compute"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bodies"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and attempt"}}]}
+
+data: {"id":"chatcmpl-b9876517-454f-44a5-95b5-f649b0ed33d5","created":1793860700,"model":"glm-5","object":"

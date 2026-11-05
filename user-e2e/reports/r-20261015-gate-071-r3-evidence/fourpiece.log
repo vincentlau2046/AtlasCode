@@ -1,0 +1,8 @@
+=== tsc ===
+tsc rc=0
+=== eslint ===
+$ eslint src/
+=== build ===
+  cli.js  17.89 MB  (entry point)
+
+17894531

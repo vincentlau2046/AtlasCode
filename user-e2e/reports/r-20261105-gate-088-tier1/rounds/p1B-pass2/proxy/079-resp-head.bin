@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","object":"chat.completion.chunk","created":1793857882,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a8bac468d0c8e62e","function":{"arguments":"","name":"ToolSearch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"max_results\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"5, \"query\": \"til"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ing golden"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" test operator"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","object":"chat.completion.chunk","created":1793857882,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-6a012930-4860-4b1c-a623-4f4429f5035c","created":1793857882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":23,"prompt_tokens":55763,"total_tokens":55786,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":55296}}}
+
+data: [DONE]
+

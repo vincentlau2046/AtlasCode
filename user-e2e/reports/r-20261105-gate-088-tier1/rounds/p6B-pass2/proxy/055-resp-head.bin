@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","object":"chat.completion.chunk","created":1793865343,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a380dced36df6c7c","function":{"arguments":"","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/p6B-pass2/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"agent-skills/community/Op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ascendc-operator-code"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-gen/references/matmul-com"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"pute-api.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"limit\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"120, \"offset\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"250}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","object":"chat.completion.chunk","created":1793865343,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-a90efae5-cda1-4c9a-a3e4-52a513724060","created":1793865343,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":73,"prompt_tokens":50655,"total_tokens":50728,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cach

@@ -1,0 +1,37 @@
+[SC SC-20261018-172607-7yk] modes=cmd repo=/home/vince/projects/AtlasCode/worktrees/worktree-gate-075-final
+
+=== cmd ===  PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261018-172607-7yk/cmd
+  [PASS] cmd-del-statusline: W1 删项 statusline：specifier + 文件均不在（已删）
+  [PASS] cmd-del-pr-comments: W1 删项 pr-comments：specifier + 文件均不在（已删）
+  [PASS] cmd-del-security-review: W1 删项 security-review：specifier + 文件均不在（已删）
+  [PASS] cmd-del-torch: W1 删项 torch：specifier + 文件均不在（已删）
+  [PASS] cmd-del-autofix-pr: W2 删项 autofix-pr：specifier + 文件均不在（已删）
+  [PASS] cmd-del-backfill-sessions: W2 删项 backfill-sessions：specifier + 文件均不在（已删）
+  [PASS] cmd-del-break-cache: W2 删项 break-cache：specifier + 文件均不在（已删）
+  [PASS] cmd-del-bughunter: W2 删项 bughunter：specifier + 文件均不在（已删）
+  [PASS] cmd-del-ctx_viz: W2 删项 ctx_viz：specifier + 文件均不在（已删）
+  [PASS] cmd-del-debug-tool-call: W2 删项 debug-tool-call：specifier + 文件均不在（已删）
+  [PASS] cmd-del-env: W2 删项 env：specifier + 文件均不在（已删）
+  [PASS] cmd-del-good-atlas: W2 删项 good-atlas：specifier + 文件均不在（已删）
+  [PASS] cmd-del-issue: W2 删项 issue：specifier + 文件均不在（已删）
+  [PASS] cmd-del-oauth-refresh: W2 删项 oauth-refresh：specifier + 文件均不在（已删）
+  [PASS] cmd-del-onboarding: W2 删项 onboarding：specifier + 文件均不在（已删）
+  [PASS] cmd-del-perf-issue: W2 删项 perf-issue：specifier + 文件均不在（已删）
+  [PASS] cmd-del-share: W2 删项 share：specifier + 文件均不在（已删）
+  [PASS] cmd-del-summary: W2 删项 summary：specifier + 文件均不在（已删）
+  [PASS] cmd-del-install-slack-app: W2 删项 install-slack-app：specifier + 文件均不在（已删）
+  [PASS] cmd-add-output-style: 0.1.60 新项 output-style：import specifier + 文件 + COMMANDS 注册绑定（outputStyle）全在场（重加/新增已落）
+  [PASS] cmd-add-cd: 0.1.60 新项 cd：import specifier + 文件 + COMMANDS 注册绑定（cd）全在场（重加/新增已落）
+  [PASS] cmd-add-reload-skills: 0.1.60 新项 reload-skills：import specifier + 文件 + COMMANDS 注册绑定（reloadSkills）全在场（重加/新增已落）
+  [PASS] cmd-add-goal: 0.1.62 新项 goal：import specifier + 文件 + COMMANDS 注册绑定（goal）全在场（重加/新增已落）
+  [PASS] cmd-flip-files: W3 files：文件在场 + isEnabled: () => true（已翻开）
+  [PASS] cmd-flip-tag: W3 tag：文件在场 + isEnabled: () => true（已翻开）
+  [PASS] cmd-flip-version: W3 version：文件在场 + isEnabled: () => true + 仍在 INTERNAL_ONLY（ATLAS_DEV 门）（已翻开）
+  [PASS] cmd-voice-kept: voice 保留（feature('VOICE_MODE') 声明 + voiceCommand 展开项 + 文件均在场，W1 未误删）
+  [PASS] cmd-e1p-registered: E-1P 11 项零码登记注释块在场（E-1P 专属前向缝头 + 11 项全命名：chrome·desktop·mobile·install-github-app·extra-usage·rate-limit-options·passes·remote-env·privacy-settings·advisor·fast/fastMode + #11 fast/fastMode 选项 A 裁定〔1P fastMode 有意不搬，fast 能力由 Atlas P3 fast 角色池承载〕+ O-adv-1 执行注「0.1.42 W-B 裁除」）= 1P 依赖有意不搬（0.1.42 封口登记面）
+  [PASS] cmd-advisor-flag-removed: W-B --advisor 裁除核销（main.tsx 源级：0 活动 addOption/option('--advisor') 行 + advisor import 裁除；残留仅 O-adv-1 注释 2 处）= flag 从未注册，裁前/裁后均 commander unknown option 拒（行为面 = flag-advisor 场景承载）
+  [PASS] cmd-fast-role-unchanged: fast 角色零改动负向断言（ATLAS_FAST_MODEL 在 managedEnvConstants + model.ts 解析链 'process.env.ATLAS_FAST_MODEL || getRoleModel(fast)' 完好 + modelRoles schema 在场）= fast 角色池未受 0.1.42 波影响（/model Fast 行 user-face = 报告 corroboration，2 提交不碰 model selector）
+  [PASS] cmd-engine-statuslineagent-file: engine 侧残留面核销：AgentTool/built-in/statuslineSetup.ts 已删（孤儿代理文件未留）
+  [PASS] cmd-engine-builtinagent-reg: engine 侧注册清零：TUI 侧 AgentTool/builtInAgents 零 STATUSLINE_SETUP_AGENT 活动引用 + engine 侧 builtInAgents 仅注释行残留（2 注释行，零活动注册）
+
+GATE-PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261018-172607-7yk

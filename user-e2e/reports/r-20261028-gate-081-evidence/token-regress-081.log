@@ -1,0 +1,42 @@
+bytes: npm80=17844356 gate81=17868850 delta=24494
+--- 前 25 波（0.1.56–0.1.80）token 零回归 npm80↔gate81 ---
+DIFF 0.1.75 getMcpServerHeaders                          npm80=4    gate81=5   
+DIFF 0.1.79 APIError                                     npm80=80   gate81=81  
+total prior tokens=194 diffs=2
+  DIFF-TO-CLASSIFY: ('0.1.75', 'getMcpServerHeaders', 4, 5) （逐项对波内 diff 定因：波面合法变更 vs 回归判红）
+  DIFF-TO-CLASSIFY: ('0.1.79', 'APIError', 80, 81) （逐项对波内 diff 定因：波面合法变更 vs 回归判红）
+--- 0.1.81 本波面 @ gate81（K2+P-804s 新做 token 在场核）---
+K2 #1 协商版本                   2026-07-28                       npm80=0    gate81=1   
+K2 #1 协商结果字段                 negotiatedProtocolVersion        npm80=0    gate81=1   
+K2 #2/#9 折半归一比对              foldMcpNameForCompare            npm80=0    gate81=5   
+K2 I-1 旧名 alias 表            LEGACY_TOOL_NAME_ALIASES         npm80=9    gate81=9   
+K2 #10 agent 取域              resolveMcpServerDomainTools      npm80=0    gate81=4   
+K2 #5 fetch 总期限              wrapFetchWithTimeout             npm80=3    gate81=3   
+K2 #5 期限常量                   MCP_REQUEST_TIMEOUT_MS           npm80=3    gate81=3   
+K2 #5 SSE 豁免                 MCP_STREAMABLE_HTTP_ACCEPT       npm80=2    gate81=2   
+K2 #6/#7 策略先行                checkMcpServerPolicy             npm80=0    gate81=3   
+K2 #6/#7 策略过滤                filterMcpServersByPolicy         npm80=4    gate81=6   
+K2 #6/#7 策略源                 getMcpPolicyFromSettings         npm80=0    gate81=3   
+K2 #6/#7 阻断标记                blockedByPolicy                  npm80=0    gate81=1   
+K2 #8 OAuth headers          withConfiguredHeaders            npm80=0    gate81=4   
+K2 #12 400 剥参                parseToolSchemaRejectionError    npm80=0    gate81=3   
+K2 #13 迟连刷新缝                 refreshRoundContext              npm80=0    gate81=6   
+K2 #13 诊断标签                  round_refresh                    npm80=0    gate81=1   
+K2 #13 剥除重套                  degradedTools                    npm80=0    gate81=5   
+K2 #14 并发去重                  pendingConnects                  npm80=0    gate81=4   
+K2 #15 /cd 启停键               cwdReconnectKey                  npm80=0    gate81=10  
+K2 #16 描述截断纯函数               truncateMcpDescriptionText       npm80=0    gate81=3   
+K2 #18 P-804s 宽限常量           STREAM_IDLE_RETURN_GRACE_MS      npm80=0    gate81=2   
+wave-face missing=0
+--- de-ant 零一方活字面恒等锚 @ gate81（0.1.78 清零面不回归）---
+anthropic_beta               gate81=0   
+anthropic-ratelimit          gate81=0   
+anthropic_cloud              gate81=0   
+claude.ai subscription       gate81=0   
+isFirstPartyGatewayUrl       gate81=0   
+CLAUDEAI_SERVER_PREFIX       gate81=0   
+de-ant regression=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm80=0    gate81=0   
+foreground (default)                         npm80=0    gate81=0   
+Set run_in_background to true to launch      npm80=0    gate81=0   

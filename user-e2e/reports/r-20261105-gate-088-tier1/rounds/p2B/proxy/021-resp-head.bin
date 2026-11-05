@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","object":"chat.completion.chunk","created":1793858410,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Trit"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"on skill files found on"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" disk —"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the Skill tool reports"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"Unknown skill\"."}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Per"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the umbrella"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" rules: if"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a routed skill is missing ("}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"marketplace entry not installed /"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" install failed), follow its \""}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"suggest install\" guidance and"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" never fabricate its"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" content. The"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" routing table marks"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" cann"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"bot-triton-op-generator-sk"}}]}
+
+data: {"id":"chatcmpl-be953abf-b0c7-4b15-9930-07e5241558e8","created":1793858410,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"

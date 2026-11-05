@@ -1,0 +1,9 @@
+bytes: g71(0.1.71 wave build)=17846465 g72(0.1.72 worktree)=17844831
+total prior tokens=110 diffs=0
+--- 0.1.72 波体 keychain 清零面 @ dist（anthropic 路径应减/0，OOS secureStorage 保留）---
+find-generic-password                071=3    072=2   
+add-generic-password                 071=2    072=2   
+delete-generic-password              071=2    072=1   
+keychainPrefetch                     071=1    072=0   
+getLegacyApiKeyPrefetchResult        071=2    072=0   
+maybeRemoveApiKeyFromMacOSKeychain   071=4    072=0   

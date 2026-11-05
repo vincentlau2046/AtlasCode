@@ -1,0 +1,86 @@
+=== [1] fetch（registry packument + tgz 独立拉取）===
+version 0.1.79 present: True
+dist.tarball: https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.79.tgz
+dist.shasum: bab5ccd0b9dcacbac3031e9520cab2122f0ef355
+dist.integrity: sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==
+unpackedSize: 17890954 fileCount: 3
+latest tag: 0.1.79
+-rw-rw-r-- 1 vince vince 3781658 10月 24 02:57 atlasharness-atlascode-0.1.79.tgz
+=== FETCH-079-DONE ===
+=== [2] SRI 独立复算 + 解包 ===
+/home/vince/.claude/jobs/09264df0/tmp/prodlane-079/sri-079.py:50: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  t.extractall(ext)
+{
+  "tgzBytes": 3781658,
+  "sha1": "bab5ccd0b9dcacbac3031e9520cab2122f0ef355",
+  "sha512": "sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==",
+  "unpackedSize": 17890954,
+  "cliJs": 17883034,
+  "registry": {
+    "shasum": "bab5ccd0b9dcacbac3031e9520cab2122f0ef355",
+    "integrity": "sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==",
+    "unpackedSize": 17890954,
+    "fileCount": 3
+  }
+}
+--- 三方对照（独立 × registry × Main 自报[报告内对照]）---
+sha1  : 独立=bab5ccd0b9dcacbac3031e9520cab2122f0ef355 registry=bab5ccd0b9dcacbac3031e9520cab2122f0ef355
+sha512: 独立=sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng== registry=sha512-nu18Cxu8ijnTyh8snl1mYF7WXBMjJmEIRT9aU25w+094F0NcWOgG8sb2fsvYi9kAqWU4nDBhIL81J1Ale8OCng==
+unpck : 独立=17890954 registry=17890954
+cli.js: 独立=17883034
+--- Δ8910B 双口径（byte 口径主判）---
+byte delta = 17891944 - 17883034 = 8910 (预期 8910)
+extracted -> /home/vince/.claude/jobs/09264df0/tmp/prodlane-079/extracted
+=== [3] --version + PONG-079 活轮 ===
+=== [1] --version ===
+0.1.79 (AtlasCode)
+=== [2] PONG-079 活轮（H-1 场景 IFF 往返）===
+rc=0
+--- log 尾部 ---
+Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+PONG-079
+[atlas][exit] code=0
+--- marker 核 ---
+1
+--- anthropic 可达核（应 0）---
+0
+0
+=== [4] token gate==npm + 前 23 波零回归 + Δ8910B ===
+chars: npm78=17818865 npm79=17834761
+--- Δ8910B 双口径（gate79 = 17891944B/17843671char）---
+byte delta = 17891944 - 17883034 = 8910（预期 8910）
+char delta = 17843671 - 17834761 = 8910（预期 8910，char 口径互证）
+--- 前 23 波（0.1.56–0.1.78）token 零回归 npm78↔npm79 ---
+DIFF 0.1.65 task-notification                            npm78=55   npm79=56  
+total prior tokens=169 diffs=1
+  KNOWN-DIFF: ('0.1.65', 'task-notification', 55, 56) → C5-3 新增 emit 定因（gate token-regress-079 已源级核）
+UNEXPLAINED=0
+--- 0.1.79 本波面 gate==npm 逐项同值 ---
+ATLAS_RESTRICTED           npm79=4    gate79=4   
+restrictedMode             npm79=5    gate79=5   
+skillOverrides             npm79=2    gate79=2   
+resolveSkillOverrides      npm79=0    gate79=0   
+getMcpConnectBackoffMs     npm79=2    gate79=2   
+toolHeartbeat              npm79=1    gate79=1   
+DirectoryAdded             npm79=13   gate79=13  
+MessageDisplay             npm79=11   gate79=11  
+terminalSequence           npm79=15   gate79=15  
+continueOnBlock            npm79=6    gate79=6   
+APIError                   npm79=80   gate79=80  
+wave-face gate==npm mismatch=0
+resolveSkillOverrides 消名核：gate79=0 npm79=0（承载 skillOverrides npm79=2 ≥1）
+--- de-ant 零一方活字面恒等锚 @ npm79 ---
+anthropic_beta               npm79=0   
+anthropic-ratelimit          npm79=0   
+anthropic_cloud              npm79=0   
+claude.ai subscription       npm79=0   
+isFirstPartyGatewayUrl       npm79=0   
+CLAUDEAI_SERVER_PREFIX       npm79=0   
+downloads.claude.ai          npm79=1   
+claude-plugins-official      npm79=30  
+de-ant/A3-1 mismatch=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                    npm78=0    npm79=0   
+foreground (default)                       npm78=0    npm79=0   
+Set run_in_background to true to launch    npm78=0    npm79=0   
+=== PRODLANE-079-DONE ===

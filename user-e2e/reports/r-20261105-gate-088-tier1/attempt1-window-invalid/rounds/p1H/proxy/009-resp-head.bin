@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","object":"chat.completion.chunk","created":1793854090,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"There"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s a `prof/PRO"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"F_0001/ASC"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"END_PROFILER_OUTPUT` directory"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — that's the msprof"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dump. Also"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" `arm"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-cli.txt` and `probe"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-stdout.log` might"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" contain context"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" about"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" where"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel project"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" lives ("}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"maybe on a remote ARM machine"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"?). The"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" `proxy/` directory"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" suggests"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8-d1c9314a1758","created":1793854090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" network"}}]}
+
+data: {"id":"chatcmpl-a4ecf270-9e7a-4b6c-94c8

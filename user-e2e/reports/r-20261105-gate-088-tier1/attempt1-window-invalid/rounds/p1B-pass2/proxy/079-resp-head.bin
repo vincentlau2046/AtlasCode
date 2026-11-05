@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","object":"chat.completion.chunk","created":1793855087,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9daff3d1cbc859cf","function":{"arguments":"","name":"ToolSearch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"max_results\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"10, \"query\": \"ascend compile"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" golden benchmark"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" bridge"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","object":"chat.completion.chunk","created":1793855087,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-5871dd76-e412-4e51-a252-3705c232be8f","created":1793855087,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":24,"prompt_tokens":37238,"total_tokens":37262,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":36864}}}
+
+data: [DONE]
+

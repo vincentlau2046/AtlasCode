@@ -1,0 +1,6 @@
+error: unknown option '--sdk-url'
+
+[0m[32m 4446 pass[0m
+[0m[2m 0 fail[0m
+ 12445 expect() calls
+Ran 4446 tests across 345 files. [0m[2m[[1m44.80s[0m[2m][0m

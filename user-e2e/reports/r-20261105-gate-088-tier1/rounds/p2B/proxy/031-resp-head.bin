@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","object":"chat.completion.chunk","created":1793858452,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tr"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-op-generator plugin"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" isn"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t installed in"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this environment"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (the Skill tool doesn"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t know it). I"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" found its"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" local definition"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"AGENTS.md) in a"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" template repo"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The plugin"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" expects"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" sub"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-skills ("}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"triton-task-extractor,"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":1793858452,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton-op-designer,"}}]}
+
+data: {"id":"chatcmpl-916694b6-d236-4a43-b3f7-4c04cd60e20a","created":17

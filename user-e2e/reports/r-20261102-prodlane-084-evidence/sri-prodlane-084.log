@@ -1,0 +1,12 @@
+--- 0.1.84 生产 lane SRI 四值 D-8（e2e 独立复算，2026-11-02）---
+tgz bytes: 3800803
+tgz sha256: 522e6c0b174ff01ec385ba8a6f70f5bc0147931baf3afcfdb82b6e17cd224aa4
+packument dist.integrity (npm view 实取): sha512-Jf6oZTcL6LbMUSsEC9iLtvlHAWOKOWQo9C1jSHpAB8LkrzyC1/pelQvMQQsQ+Uki+fN+J1O45F2iJR6FHiu/9Q==
+本地 tgz 重算 sha512: sha512-Jf6oZTcL6LbMUSsEC9iLtvlHAWOKOWQo9C1jSHpAB8LkrzyC1/pelQvMQQsQ+Uki+fN+J1O45F2iJR6FHiu/9Q==
+npm 缓存包重算 sha512: sha512-Jf6oZTcL6LbMUSsEC9iLtvlHAWOKOWQo9C1jSHpAB8LkrzyC1/pelQvMQQsQ+Uki+fN+J1O45F2iJR6FHiu/9Q==
+三方 MATCH: YES
+unpacked bytes: 17974850
+version: 0.1.84
+cli.js bytes: 17966930
+cli.js sha256: 3f1bcd8cfa6e48b1f8ac7dc5d0683ee24cd1e67680a6fd88c3ef50538370eaf7
+cmp npm84 vs gate84 worktree build: IDENTICAL

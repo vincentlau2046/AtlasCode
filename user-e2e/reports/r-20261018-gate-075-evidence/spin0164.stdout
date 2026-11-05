@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] S1-wants-status-indicator-gate [PASS] S2-compute-stall-guard [PASS] S3-hook-delegation [PASS] S4-g1-render-source [PASS] S5-g3-ellipsis [PASS] S6-time-gates-zero-regression [PASS] E1-endpoint-label-parameterized [PASS] E2-hint-label-parameterized [PASS] E3-discrimination-identity [PASS] E4-export-and-repl-wiring"
+}
+TUI-SPINNER-0164 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-064/spinner-probe

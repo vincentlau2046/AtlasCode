@@ -1,0 +1,31 @@
+bytes: npm79=17834761 gate80=17853266 delta=18505
+--- 前 24 波（0.1.56–0.1.79）token 零回归 npm79↔gate80 ---
+total prior tokens=180 diffs=0
+--- 0.1.80 本波面 @ gate80（K1 新做 token 在场核）---
+K1-A idleCompaction 模块     idleCompaction                       npm79=0    gate80=18  
+K1-A env 覆写                ATLAS_IDLE_COMPACT_MIN_TOKENS        npm79=0    gate80=1   
+K1-A 谓词                    shouldIdleCompact                    npm79=0    gate80=4   
+K1-A 闲置量                   getIdleMs                            npm79=0    gate80=4   
+K1-B 前缀剥除                  stripProviderPrefix                  npm79=0    gate80=6   
+K1-C sticky-peek record    recordMainLoopModelSwitch            npm79=0    gate80=2   
+K1-C sticky-peek resolve   resolveSwitchedCompactModel          npm79=0    gate80=2   
+K1-C spinner 显形            Compacting conversation (summary:    npm79=0    gate80=1   
+K1-E watchdog 包装           withStreamIdleWatchdog               npm79=0    gate80=2   
+K1-E 错误类                   StreamIdleTimeoutError               npm79=0    gate80=5   
+K1-F 稳定序去重                 stableSortDedupeTools                npm79=0    gate80=2   
+K1-F 预算思考                  thinkingBudgetTokens                 npm79=0    gate80=4   
+K1-F③ frontmatter 键        autoCompactWindow                    npm79=18   gate80=38  
+K1-D 保留段                   preservedSegment                     npm79=5    gate80=5   
+wave-face missing=0
+--- de-ant 零一方活字面恒等锚 @ gate80（0.1.78 清零面不回归）---
+anthropic_beta               gate80=0   
+anthropic-ratelimit          gate80=0   
+anthropic_cloud              gate80=0   
+claude.ai subscription       gate80=0   
+isFirstPartyGatewayUrl       gate80=0   
+CLAUDEAI_SERVER_PREFIX       gate80=0   
+de-ant regression=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm79=0    gate80=0   
+foreground (default)                         npm79=0    gate80=0   
+Set run_in_background to true to launch      npm79=0    gate80=0   

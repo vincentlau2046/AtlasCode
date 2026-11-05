@@ -1,0 +1,30 @@
+bytes: npm78=17818865 gate79=17843671
+--- 前 23 波（0.1.56–0.1.78）token 零回归 npm78↔gate79 ---
+DIFF 0.1.65 task-notification                            npm78=55   gate79=56  
+total prior tokens=169 diffs=1
+  UNEXPLAINED-DIFF: ('0.1.65', 'task-notification', 55, 56) （未定因 = 潜在回归面，判红）
+--- 0.1.79 本波面 @ gate79（11 件新做 token 在场核）---
+C9-2 --restricted env      ATLAS_RESTRICTED             npm78=0    gate79=4   
+C9-2 restrictedMode 面      restrictedMode               npm78=0    gate79=5   
+C9-5 skillOverrides key    skillOverrides               npm78=0    gate79=2   
+C9-5 resolveSkillOverrides resolveSkillOverrides        npm78=0    gate79=0     MISSING
+C5-4 MCP 退避                getMcpConnectBackoffMs       npm78=0    gate79=2   
+C4-3 心跳                    toolHeartbeat                npm78=0    gate79=1   
+C8-2 DirectoryAdded        DirectoryAdded               npm78=0    gate79=13  
+C8-3 MessageDisplay        MessageDisplay               npm78=0    gate79=11  
+C8-5 terminalSequence      terminalSequence             npm78=0    gate79=15  
+C8-5 continueOnBlock       continueOnBlock              npm78=0    gate79=6   
+F-4 APIError 单类            APIError                     npm78=85   gate79=80  
+wave-face missing=1
+--- de-ant 零一方活字面恒等锚 @ gate79（0.1.78 清零面不回归）---
+anthropic_beta               gate79=0   
+anthropic-ratelimit          gate79=0   
+anthropic_cloud              gate79=0   
+claude.ai subscription       gate79=0   
+isFirstPartyGatewayUrl       gate79=0   
+CLAUDEAI_SERVER_PREFIX       gate79=0   
+de-ant regression=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm78=0    gate79=0   
+foreground (default)                         npm78=0    gate79=0   
+Set run_in_background to true to launch      npm78=0    gate79=0   

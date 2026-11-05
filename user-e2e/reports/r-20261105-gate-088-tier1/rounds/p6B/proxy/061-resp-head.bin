@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","object":"chat.completion.chunk","created":1793864090,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Wait"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", that edit just"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" removed a newline."}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" That was pointless"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — I"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" revert"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Actually it removed"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the trailing blank"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" line after"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" InitBuffer. Let me check"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the file state"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\n\nActually the old"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_string had a trailing newline difference"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Minor"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48c","created":1793864090,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me now"}}]}
+
+data: {"id":"chatcmpl-8dd23c77-cd9c-467b-aa3d-56c8a99ba48

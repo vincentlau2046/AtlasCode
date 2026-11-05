@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","object":"chat.completion.chunk","created":1793862088,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory is empty. The"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"my custom Ascend operator"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" fails to compile with a syntax"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" error in the tiling code"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\" but no"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" project files exist here"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". I should"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ask the"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user where"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the project/log"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is, or the"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" error details"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","created":1793862088,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","object":"chat.completion.chunk","created":1793862088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"The working directory is empty —"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","object":"chat.completion.chunk","created":1793862088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" I"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","object":"chat.completion.chunk","created":1793862088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" can"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b6163c16","object":"chat.completion.chunk","created":1793862088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"'t find the operator"}}]}
+
+data: {"id":"chatcmpl-ac08f223-1db1-483c-a714-c692b61

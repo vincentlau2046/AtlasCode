@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","object":"chat.completion.chunk","created":1793865305,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a8104a74437972a0","function":{"arguments":"{\"activeForm\": \"","name":"TaskCreate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Loc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ating intra-core pipeline bottleneck"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Analyze"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" the"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" msprof dump"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" (op_statistic.csv in"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" PROF_0001) to"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" confirm the"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" MatMul intra"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-core pipeline"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" bottleneck stage"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".\", \"subject\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Locate intra-core pipeline bottleneck"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c08f9fb2-cf71-41fc-acb7-36478428b93f","created":1793865305,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" from profiling"},"type":"function","inde

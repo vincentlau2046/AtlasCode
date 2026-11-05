@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Compile gate is"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" blocked by"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the environment: no"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" CANN toolkit,"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" no `"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":"bisheng`"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" compiler, no torch, and"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" no NPU attached"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":". Installing"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the Asc"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":"end CANN toolkit is a"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" large"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" external"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" dependency I"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" can't fetch"}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","object":"chat.completion.chunk","created":1793860784,"model":"glm-5","choices":[{"index":0,"delta":{"content":" here."}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","created":1793860784,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a6be79bfd872b3fa","function":{"arguments":"{\"status\": \"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","created":1793860784,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"pending"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-9518e7e3-46dc-4f0e-98a3-2b78626b0d59","created":1793860784,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"4"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatc

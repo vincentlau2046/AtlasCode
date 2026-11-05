@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","object":"chat.completion.chunk","created":1793865714,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton/t"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"orch in this environment —"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" cannot"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compile"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"/run"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" golden test here"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". That"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s expected;"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" sandbox"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has no triton-asc"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end tool"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"chain. Be"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" honest: code"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is written,"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" correctness"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" gate not"}}]}
+
+data: {"id":"chatcmpl-dd26c970-715c-4b88-9510-d197faa1cc53","created":1793865714,"model":"glm-5","object":"chat.comp

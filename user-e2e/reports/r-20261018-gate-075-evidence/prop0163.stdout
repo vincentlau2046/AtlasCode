@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] P1a-tool-surface [PASS] P1b-schema [PASS] P1c-ask-user-branches [PASS] P1d-call-armgoal [PASS] P1e-prompt [PASS] P1f-cleanup"
+}
+TUI-PROPOSE-GOAL-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/propose-goal-probe

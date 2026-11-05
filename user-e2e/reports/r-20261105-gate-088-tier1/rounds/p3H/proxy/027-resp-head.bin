@@ -1,0 +1,43 @@
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"**"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Spec (parsed"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"):"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"** `Sil"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"uScale` — input"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `x` (FP"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"16/"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"FP32, arbitrary"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" "}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"1-D"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":".."}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"4"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-D,"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" last"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-d"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"im size"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" N), scalar"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `alpha` (FP32"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":"),"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" output `y`"}}]}
+
+data: {"id":"chatcmpl-eaa4f839-86ae-44b5-bdf3-f4877e9516d6","object":"chat.completion.chunk","created":1793859234,"model":"glm-5","choices":[{"index":0,"delta":{"content":" same shape/d"}}]}

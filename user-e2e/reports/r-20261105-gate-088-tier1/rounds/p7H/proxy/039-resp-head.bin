@@ -1,0 +1,32 @@
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","object":"chat.completion.chunk","created":1793865933,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-bc69cb9524d101ef","function":{"arguments":"{\"command\": \"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"for"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" e in $("},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ls /home/vince/min"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iconda3/envs);"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" do /"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"home/vince/miniconda"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3/envs/$e/bin"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/python -c \\\"import torch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\" 2>/dev/null"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" && echo \\\"$e has"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" torch\\\"; done"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Find"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" any conda env with torch"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fff90a1c-972d-43a0-863e-fc68796f5244","created":1793865933,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":" installed\"}"},"type":"function","index":0}]}}]}
+

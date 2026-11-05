@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","object":"chat.completion.chunk","created":1793859348,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Compile"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failed because"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bisheng doesn"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t exist. Per"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the skill,"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" on compile"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failure call AscendDiagn"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"oser — but that"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tool isn"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t available either. The"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failure"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is un"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ambiguous: tool"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"chain not"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" installed. No"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" fix"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" possible"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" locally"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","created":1793859348,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"; report honestly. Mark"}}]}
+
+data: {"id":"chatcmpl-02a98377-4ad7-445b-9320-51ed98c8857b","crea

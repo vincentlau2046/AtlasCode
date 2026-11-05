@@ -1,0 +1,43 @@
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"##"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Report\n\nImplemented"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" a brand"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-new Asc"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"end C operator: **Scaled"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"SiLU** — a fused"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" elementwise op computing"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `out = x * scale"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" * sigmoid(x)` ("}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"scale"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" default"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" 1.702),"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" f"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"using exp"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"/s"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":"igmoid/mul into"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" a"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" single kernel instead"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" of three"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.completion.chunk","created":1793869088,"model":"glm-5","choices":[{"index":0,"delta":{"content":" separate host"}}]}
+
+data: {"id":"chatcmpl-0d4685fb-9fd8-4e12-9bbc-f52f9794f052","object":"chat.complet

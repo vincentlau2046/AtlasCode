@@ -1,0 +1,73 @@
+{
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-085-face",
+  "model": "Qwen38-27B-TXT",
+  "probes": [
+    {
+      "id": "P-791-#20-guard",
+      "hard": true,
+      "ok": true,
+      "detail": "三副本 '...'→'___' + 非空名恒等 + 活码 guard 在场"
+    },
+    {
+      "id": "P-792-F4-apierror-single-class",
+      "hard": true,
+      "ok": true,
+      "detail": "7 类同引用 + instanceof 修向 + 双构造形状"
+    },
+    {
+      "id": "P-793-C8-hook-events-dual-source",
+      "hard": true,
+      "ok": true,
+      "detail": "HOOK_EVENTS 31 + DirectoryAdded/MessageDisplay 双源在场"
+    },
+    {
+      "id": "P-794-C92-restricted",
+      "hard": true,
+      "ok": true,
+      "detail": "真值/剥离/ascend 门控/MCP 残留/bypass 拒/settings 忽略全绿"
+    },
+    {
+      "id": "P-795-C95-skill-overrides",
+      "hard": true,
+      "ok": true,
+      "detail": "三档恒等 + 缺席/非法宽容降级 'off'"
+    },
+    {
+      "id": "P-796-C54-mcp-backoff",
+      "hard": true,
+      "ok": true,
+      "detail": "env 解析（1s 缺省/0 禁用）+ 指数 30s 封顶"
+    },
+    {
+      "id": "P-797-wave-presence-faces",
+      "hard": true,
+      "ok": true,
+      "detail": "C4-3 心跳/C5-3 转后台/C6-2 容量预警/C8-5 双语义在场"
+    },
+    {
+      "id": "P-798-deant-dist-identity",
+      "hard": true,
+      "ok": true,
+      "detail": "一方字面 6 件全 0 + A3-1 锚在场"
+    },
+    {
+      "id": "P-799-D3D5-anchor",
+      "hard": true,
+      "ok": true,
+      "detail": "compact.ts 活码注 + 0.1.69 块 D 双单测在场"
+    },
+    {
+      "id": "P-C45-rewind-across-clear",
+      "hard": false,
+      "ok": null,
+      "detail": "活轮 HELLO-0179 达成；/clear 后 /rewind → MessageSelector 未开或空态（sel.found=null）；pre-/clear 轮 文本仍在日志（含 echo）；marker=CLEAR-CUT-1793631075278"
+    },
+    {
+      "id": "P-C106-permissions-mid-round",
+      "hard": false,
+      "ok": null,
+      "detail": "回合中 /permissions → PermissionRuleList 面浮现〔命中 Ask〕（含 Recently denied tab）"
+    }
+  ],
+  "hardFail": 0
+}

@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","object":"chat.completion.chunk","created":1793854780,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-ae42c4516598470a","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/work/gemm_op; find"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/work"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iname"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"op_summary*\\\" "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>/dev/null | head"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Inspect"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" gemm_op dir"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" and find op_summary files"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" in"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":" work\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","object":"chat.completion.chunk","created":1793854780,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-c768527c-1994-4cba-bc9f-223a66d25e43","created":1793854780,"model":"gl

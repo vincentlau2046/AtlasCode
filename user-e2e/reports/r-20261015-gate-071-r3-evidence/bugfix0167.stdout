@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] T1-default-900s [PASS] T2-misconfig-hint-tri-state [PASS] T3-error-line-unit-display [PASS] G1-cap-identity-anchor [PASS] M1-save-null-not-written [PASS] M2-session-model-restore-chain [PASS] M3-pool-reject-explicit-notice [PASS] M4-no-record-identity-anchor [PASS] C1-reappend-reding-source [PASS] C2-win32-case-mock-carry [PASS] E1-picker-no-global-overwrite [PASS] E2-wire-per-model-memory [PASS] E3-sticky-verify-dual-source [PASS] G2-effort-cmd-global-semantics [PASS] G3-role-model-effort-untouched"
+}
+TUI-BUGFIX-0167 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-067/bugfix0167

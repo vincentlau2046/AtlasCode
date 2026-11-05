@@ -1,0 +1,16 @@
+[R1-nominal] 无故障基线：多步任务应完成（其他场景的对照组）
+  [R1-nominal] completed=true exit=0 ms=67570 tools=26 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-500-transient] 前 2 次 500（在 provider 3 次重试预算内）→ 应恢复并完成
+  [R1-500-transient] completed=true exit=0 ms=40138 tools=8 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-drop-transient] 第 1 次断连（ECONN，可重试）→ 应恢复并完成
+  [R1-drop-transient] completed=true exit=0 ms=115912 tools=18 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-empty-bounded] 第 2 次空 0-0（R1 有界 1 次重试面）→ 应不崩、非静默
+  [R1-empty-bounded] completed=true exit=0 ms=17038 tools=7 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-delay] 每次 +2s（模拟慢模型，post-#260 不应提前 fail-fast）→ 应完成
+  [R1-delay] completed=true exit=0 ms=36126 tools=7 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-500-storm] 40 次连续 500（超 3 次重试预算）→ 暴露「loop 无回合级错误恢复」缺口（预期：任务不完成，非静默）
+  [R1-500-storm] completed=false exit=1 ms=1672 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true
+[R3-resume] ① SIGKILL@25000ms → sessionId=fb206bbb-e080-4054-a868-ba8c7f6e30af killed=false
+[R3-resume] ② --resume 后 completed=true (ALL TESTS PASSED (实跑通过))
+
+[all] 完成 → /home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792039958457-sbcp

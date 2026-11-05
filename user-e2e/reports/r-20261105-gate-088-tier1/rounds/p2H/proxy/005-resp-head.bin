@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","object":"chat.completion.chunk","created":1793858213,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton, no"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" torch."}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check what's available"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"maybe"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" torch exists"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" but"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" import"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failed at"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton first"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"?)."}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" first"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" import"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failed at tr"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton, so torch may"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" exist. torch"}}]}
+
+data: {"id":"chatcmpl-d3c73568-0a65-4990-a1bf-850aba547c77","created":1793858213,"model":"glm-5","object":"chat.completion.chunk","choices"

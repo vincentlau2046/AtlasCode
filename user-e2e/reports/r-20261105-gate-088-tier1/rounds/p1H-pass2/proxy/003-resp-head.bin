@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","object":"chat.completion.chunk","created":1793858036,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to optimize an Asc"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel's intra"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core pipeline. This matches"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-perf-opt"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize skill. But"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" first I should"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" look at the working"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory to find the kernel"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me check the workspace"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" invoke the skill."}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\n\nThe instruction says finish"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" reply"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with ROUTE-DONE-"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"4 on its own"}}]}
+
+data: {"id":"chatcmpl-4a331fe2-24f2-42d7-8371-3a1dd3811d7f","created":1793858036,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" line. Let m

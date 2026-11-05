@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","object":"chat.completion.chunk","created":1793858471,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9aad911c8ca8ca22","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.local/share/ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-agent-skills/official/C"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ANNBot/ops/tr"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iton-op-coding/ /"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"home/vince/.local/share"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ascend-agent-skills"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/official/CANNBot/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ops/triton-op-ver"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ifier/ /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.local/share/ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-agent-skills/official/C"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ANNBot/ops/triton"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-c1838bbe-64a3-434b-8ceb-f3a425062d01","created":1793858471,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-op-designer/ 2"},"type":"function","i

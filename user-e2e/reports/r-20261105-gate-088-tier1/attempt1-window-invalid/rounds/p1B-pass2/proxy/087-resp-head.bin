@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","object":"chat.completion.chunk","created":1793855105,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"That"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" was"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dead"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" end ("}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"proxy logs of"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" conversation"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" itself"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"). The ascend"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bridge"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools (AscendCompilerBridge"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" etc.) are named"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the system prompt but not"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" exposed as"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" callable functions in my"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tool list — only"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" msprof-mcp MCP"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63","created":1793855105,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools are available. Tool"}}]}
+
+data: {"id":"chatcmpl-ffcd3d10-ebf8-44e3-9feb-939bc94fba63"

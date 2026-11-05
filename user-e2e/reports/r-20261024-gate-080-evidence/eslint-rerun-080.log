@@ -1,0 +1,2 @@
+$ eslint src/
+eslint-rc=0

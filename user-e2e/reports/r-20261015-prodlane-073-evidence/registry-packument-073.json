@@ -1,0 +1,13 @@
+{
+  "dist-tags": {
+    "latest": "0.1.73"
+  },
+  "publish": "2026-10-17T18:24:59.676Z",
+  "dist": {
+    "shasum": "709e03c72b7bed5c71b897cab1bc2a15f718228f",
+    "integrity": "sha512-eUkmK0EsLfUZi0vAtLHPg0mI8ShbMx3HM0HioV+oyJULBn1eYd1+FquIInH6WaR6s7U5DNMT6vYc0u7zR1d8Og==",
+    "unpackedSize": 17889450,
+    "fileCount": 3,
+    "tarball": "https://registry.npmjs.org/@atlasharness/atlascode/-/atlascode-0.1.73.tgz"
+  }
+}

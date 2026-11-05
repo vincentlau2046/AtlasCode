@@ -1,0 +1,18 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@11.13.0
+2 info using node@v24.17.0
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/vince/projects/AtlasCode/.npmrc
+5 silly config load:file:/home/vince/projects/AtlasCode/user-e2e/tui-diff/home-046-A/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm config get prefix
+8 verbose argv "config" "get" "prefix"
+9 verbose logfile logs-max:10 dir:/home/vince/projects/AtlasCode/user-e2e/tui-diff/home-046-A/.npm/_logs/2026-10-09T14_28_30_028Z-
+10 verbose logfile /home/vince/projects/AtlasCode/user-e2e/tui-diff/home-046-A/.npm/_logs/2026-10-09T14_28_30_028Z-debug-0.log
+11 silly logfile start cleaning logs, removing 5 files
+12 verbose cwd /home/vince/projects/AtlasCode/user-e2e/tui-diff/workspaces-046/stats
+13 verbose os Linux 7.0.0-34-generic
+14 verbose node v24.17.0
+15 verbose npm  v11.13.0
+16 verbose exit 0
+17 info ok

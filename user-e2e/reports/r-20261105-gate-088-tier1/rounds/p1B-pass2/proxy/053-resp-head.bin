@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","object":"chat.completion.chunk","created":1793857655,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a full"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" picture now"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The current"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace `"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ws` is empty;"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the previous"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" pass created"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" an"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" optimized kernel in a"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" different location"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The task:"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"Optimize this kernel itself"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\" — intra"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core pipeline of"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793857655,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel. The"}}]}
+
+data: {"id":"chatcmpl-4c3480a1-d610-4eed-a4c3-adcd7c2fef53","created":1793

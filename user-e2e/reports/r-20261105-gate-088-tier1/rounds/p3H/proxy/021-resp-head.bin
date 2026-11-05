@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","object":"chat.completion.chunk","created":1793859130,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Tool"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Search is"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" returning nothing for the"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend tools,"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" yet"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they were"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed in the"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" system prompt as available tools"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (\""}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"You"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have 16 tools and"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 14 skills\"). But in"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" actual functions"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" list provided"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the top,"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I only see:"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Agent"}}]}
+
+data: {"id":"chatcmpl-622a29aa-e643-4718-83a9-983dbe546173","created":1793859130,"

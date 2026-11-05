@@ -1,0 +1,12 @@
+=== 081 波内 D4 裸色名双面隔离 parity（新鲜自证，不赖 080 旧证）===
+--- gate 面 @9965206 隔离 ---
+ 3 pass
+ 3 fail
+ 42 expect() calls
+Ran 6 tests across 1 file. [18.00ms]
+--- base 面 @d39b4f5 隔离 ---
+ 3 pass
+ 3 fail
+ 42 expect() calls
+Ran 6 tests across 1 file. [20.00ms]
+--- 结论：双面同红 3/3 = 环境性（本机 colorize 裸文），parity 核销 ---

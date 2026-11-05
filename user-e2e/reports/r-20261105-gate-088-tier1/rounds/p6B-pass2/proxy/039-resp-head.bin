@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","object":"chat.completion.chunk","created":1793865298,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" pty.log is a"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" recording"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" of this"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" session"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" itself — not useful."}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The environment"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has only the op"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_statistic.csv and"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" references;"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no kernel source code exists"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the workspace. There"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no actual"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" optimize. I"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" could"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865298,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" use"}}]}
+
+data: {"id":"chatcmpl-ce3d6562-9f05-4b26-b6db-bb76a922e2a3","created":1793865

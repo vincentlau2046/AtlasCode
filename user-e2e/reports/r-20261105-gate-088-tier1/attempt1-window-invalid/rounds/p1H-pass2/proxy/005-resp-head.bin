@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","object":"chat.completion.chunk","created":1793855197,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" files"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in working"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory,"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and skill"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not available. Check"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" what"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skills exist"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" —"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the Skill tool says"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" only use skills"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed in its user-invoc"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"able section"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ascend"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skills"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" were"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" described"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in system prompt but"}}]}
+
+data: {"id":"chatcmpl-030a87a2-ad85-48a1-80d5-a007ebbeb2d7","created":1793855197,"model":"glm-5"

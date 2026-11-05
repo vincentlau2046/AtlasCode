@@ -1,0 +1,44 @@
+{
+  "runId": "r-20261002-2052",
+  "generatedAt": "2026-10-02T12:53:52.186Z",
+  "totals": {
+    "PASS": 5
+  },
+  "cases": [
+    {
+      "id": "gate",
+      "tier": "gate",
+      "verdict": "PASS",
+      "ms": 1239,
+      "note": "网关 200/2ms models=Qwen38-27B-TXT,bge-m3,deepseek-v4-flash,deepseek-v4-pro,glm-5,glm-5.1；settings roles=small,fast,premium；LLM 单轮 OK"
+    },
+    {
+      "id": "core-1",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 28901,
+      "note": "4/4 轮 marker 渲染（基本多轮通）"
+    },
+    {
+      "id": "core-2",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 3136,
+      "note": "headless --resume 同 session 2 轮通过（539afe2d）"
+    },
+    {
+      "id": "core-3",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 9650,
+      "note": "工具回合通（渲染 + 磁盘产物双证）"
+    },
+    {
+      "id": "core-4",
+      "tier": "core",
+      "verdict": "PASS",
+      "ms": 21442,
+      "note": "流式中排队输入正常（w2 入队 → w1 完成后渲染）"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","object":"chat.completion.chunk","created":1793858660,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-aef78e6f2097e08c","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"completed"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"2\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b90f4401d4074460","function":{"arguments":"{\"status\": \"in","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_progress\", \"taskId\": \""},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3\"}"},"type":"function","index":1},{"id":"chatcmpl-tool-a570b46e5a8812a7","function":{"arguments":"","name":"Write"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"content\": \"\\\"\\\"\\\"RMS"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Norm Triton-Ascend"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" implementation (generated"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" by"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" triton-op-coding).\\n\\n"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Pure"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Triton Asc"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end kernel: all core"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-98b21465-cc88-4750-8052-ba13f4a79502","created":1793858660,"model":"glm

@@ -1,0 +1,9 @@
+=== K4-7 活探针 transcript 字节级复核（resume#2 后复检，session 06c55721）===
+last-byte-is-LF: True
+records: 23 unparseable: 0 chain-breaks: 0
+
+=== resume#2（二次加载：crash 后全部新增记录可再加载）===
+2026-10-31T08:44:30.443Z [DEBUG] [headless] session start: id=06c55721-4228-4a9f-a43b-779cf1294fbc resume=06c55721-4228-4a9f-a43b-779cf1294fbc
+2026-10-31T08:44:30.444Z [DEBUG] [headless] turn 1 start (messages=22)
+      1 "is_error":false
+      1 "subtype":"success"

@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] M1-hard-deny-not-cleared [PASS] M2-rank-identity [PASS] M3-parametric-parse [PASS] M4-hit-matrix [PASS] M5-default-identity [PASS] M7-dontask-fold"
+}
+AUTO-MODE-059 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-081/a4f

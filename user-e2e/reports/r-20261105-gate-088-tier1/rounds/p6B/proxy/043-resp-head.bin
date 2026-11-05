@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","object":"chat.completion.chunk","created":1793863872,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-929195f9e474c5e7","function":{"arguments":"","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/projects/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ascendc_gemm/c"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"src/unnamed_op_custom"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":".asc\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","object":"chat.completion.chunk","created":1793863872,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-b1073455-cc95-4141-b74f-1c45e10aeaa3","created":1793863872,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":29,"prompt_tokens":36515,"total_tokens":36544,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":35712}}}
+
+data: [DONE]
+

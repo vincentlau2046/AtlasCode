@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","object":"chat.completion.chunk","created":1793857206,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a50c5d41d7a15182","function":{"arguments":"{\"args\": \"","name":"Skill"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Optimize the Ascend mat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"mul kernel itself"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":". msprof op_summary shows"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" the intra-core pipeline is the"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" bottleneck (MatMul_e2"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"e: 12"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" calls, avg 400us"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":", AI Core time 480"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0us total). Profiling"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" data at /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b952b5f9-0d17-405f-81e0-7ef9f5eaab6d","created":1793857206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1H/pro"},"type":"function","index":0}]}}]}

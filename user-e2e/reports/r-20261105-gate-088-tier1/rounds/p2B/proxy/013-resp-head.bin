@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","object":"chat.completion.chunk","created":1793858386,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill tool is"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directly"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" available."}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The skill"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" name \"cannbot-tr"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-op-generator-skills\""}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" was"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" rejected. Maybe the"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill is"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" inv"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ocable by"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a different name. The"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" routing table is"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a fixed table in code —"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the route"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" target"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is `cannbot-tr"}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9901631b8405","created":1793858386,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-op-generator-skills`."}}]}
+
+data: {"id":"chatcmpl-340f2e1a-dbeb-4137-9f9b-9

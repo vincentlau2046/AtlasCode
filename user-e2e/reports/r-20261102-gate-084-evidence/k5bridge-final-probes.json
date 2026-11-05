@@ -1,0 +1,55 @@
+{
+  "probe": "tui-k5-pdfbridge-0184",
+  "hardFail": 0,
+  "total": 8,
+  "probes": [
+    {
+      "id": "P-B0-proxy",
+      "hard": true,
+      "ok": true,
+      "detail": "8998 日志代理就绪"
+    },
+    {
+      "id": "P-B0-tui",
+      "hard": true,
+      "ok": true,
+      "detail": "TUI REPL 就绪"
+    },
+    {
+      "id": "P-B0-round",
+      "hard": true,
+      "ok": true,
+      "detail": "回合 settle=true bytes=30325"
+    },
+    {
+      "id": "P-B1-render",
+      "hard": true,
+      "ok": true,
+      "detail": "TUI 渲染「Referenced PDF marker.pdf (3 pages)」= pdf_reference 活生成（K5-7 活面，零内联）"
+    },
+    {
+      "id": "P-B2-jsonl",
+      "hard": true,
+      "ok": true,
+      "detail": ".atlas 树零 PDF 原始字节 + user @path 在场 + 零 pdf_reference 落盘（isLoggableMessage 设计过滤边界）"
+    },
+    {
+      "id": "P-B3-gap-provider",
+      "hard": false,
+      "ok": false,
+      "detail": "provider 请求含 K5-8 四要素 0/3——恒红登记：toOpenAIMessages 丢弃 attachment（既有缺口，git 05ec0bc..9438d91 零触碰；双面报 Main/用户）"
+    },
+    {
+      "id": "P-B4-noinline",
+      "hard": true,
+      "ok": true,
+      "detail": "provider 请求零内联 PDF bytes（无 %PDF base64 前缀；缺口修复后防内联退回护栏）"
+    },
+    {
+      "id": "P-B5-vlread",
+      "hard": false,
+      "ok": null,
+      "detail": "VL 活轮回读页 3 marker（soft：ORION-7742 未见（采样面，桥断言不依赖））"
+    }
+  ]
+}

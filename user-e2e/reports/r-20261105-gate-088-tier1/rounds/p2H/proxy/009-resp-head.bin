@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","object":"chat.completion.chunk","created":1793858276,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b2da1c80c8584242","function":{"arguments":"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"content\": \"#"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Triton RMS"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Norm for Ascend NPU"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\n\\nBrand"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-new Trit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"on RMSNorm kernel written"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" for the Triton-Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end backend ("},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"not"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end C).\\n\\n## Files\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"- `rmsnorm_triton"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_ascend.py` — `"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4","created":1793858276,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"@triton.jit`"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-aad133d0-10f4-4aa6-9b4c-11f39a7b85a4"

@@ -1,0 +1,48 @@
+chars: npm80=17844356 npm81=17859940
+--- Δ8910B 双口径（gate81 = 17917167B/17868850char）---
+byte delta = 17917167 - 17908257 = 8910（预期 8910，sri-081 已核）
+char delta = 17868850 - 17859940 = 8910（预期 8910，char 口径互证）
+--- 前 25 波（0.1.56–0.1.80）token 零回归 npm80↔npm81 ---
+DIFF 0.1.75 getMcpServerHeaders                          npm80=4    npm81=5   
+DIFF 0.1.79 APIError                                     npm80=80   npm81=81  
+total prior tokens=194 diffs=2
+  KNOWN-DIFF: ('0.1.75', 'getMcpServerHeaders', 4, 5) → K2 #8 withConfiguredHeaders 新调用点（gate npm80↔gate81 已源级定因）
+  KNOWN-DIFF: ('0.1.79', 'APIError', 80, 81) → K2 #12 parseToolSchemaRejectionError 新引用（gate npm80↔gate81 已源级定因）
+UNEXPLAINED=0
+--- 0.1.81 本波面 gate==npm 逐项同值 ---
+K2 #1 协商版本               2026-07-28                           npm81=1    gate81=1   
+K2 #1 协商结果字段             negotiatedProtocolVersion            npm81=1    gate81=1   
+K2 #2/#9 折半归一            foldMcpNameForCompare                npm81=5    gate81=5   
+K2 I-1 旧名 alias 表        LEGACY_TOOL_NAME_ALIASES             npm81=9    gate81=9   
+K2 #10 agent 取域          resolveMcpServerDomainTools          npm81=4    gate81=4   
+K2 #5 fetch 总期限          wrapFetchWithTimeout                 npm81=3    gate81=3   
+K2 #5 期限常量               MCP_REQUEST_TIMEOUT_MS               npm81=3    gate81=3   
+K2 #5 SSE 豁免             MCP_STREAMABLE_HTTP_ACCEPT           npm81=2    gate81=2   
+K2 #6/#7 策略先行            checkMcpServerPolicy                 npm81=3    gate81=3   
+K2 #6/#7 策略过滤            filterMcpServersByPolicy             npm81=6    gate81=6   
+K2 #6/#7 策略源             getMcpPolicyFromSettings             npm81=3    gate81=3   
+K2 #6/#7 阻断标记            blockedByPolicy                      npm81=1    gate81=1   
+K2 #8 OAuth headers      withConfiguredHeaders                npm81=4    gate81=4   
+K2 #12 400 剥参            parseToolSchemaRejectionError        npm81=3    gate81=3   
+K2 #13 迟连刷新缝             refreshRoundContext                  npm81=6    gate81=6   
+K2 #13 诊断标签              round_refresh                        npm81=1    gate81=1   
+K2 #13 剥除重套              degradedTools                        npm81=5    gate81=5   
+K2 #14 并发去重              pendingConnects                      npm81=4    gate81=4   
+K2 #15 /cd 启停键           cwdReconnectKey                      npm81=10   gate81=10  
+K2 #16 描述截断              truncateMcpDescriptionText           npm81=3    gate81=3   
+K2 #18 P-804s 宽限         STREAM_IDLE_RETURN_GRACE_MS          npm81=2    gate81=2   
+wave-face gate==npm mismatch=0
+--- de-ant 零一方活字面恒等锚 @ npm81 ---
+anthropic_beta               npm81=0   
+anthropic-ratelimit          npm81=0   
+anthropic_cloud              npm81=0   
+claude.ai subscription       npm81=0   
+isFirstPartyGatewayUrl       npm81=0   
+CLAUDEAI_SERVER_PREFIX       npm81=0   
+downloads.claude.ai          npm81=1   
+claude-plugins-official      npm81=30  
+de-ant/A3-1 mismatch=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm80=0    npm81=0   
+foreground (default)                         npm80=0    npm81=0   
+Set run_in_background to true to launch      npm80=0    npm81=0   

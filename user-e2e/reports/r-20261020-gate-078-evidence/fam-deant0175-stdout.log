@@ -1,0 +1,8 @@
+{
+  "verdict": "PASS",
+  "hardFail": 0,
+  "inconclusive": 0,
+  "probes": "[PASS] P-C2B1-1p-lane-files-absent: sessionIngress.ts / sessionIngressAuth.ts 车道本体文件双缺席（整删） || [PASS] P-C2B2-1p-symbols-absent: src/ 全树 1P 远端 session 车道活码 0 处（车道函数族+1P env/远端 URL 族+AgentTool 1P 面+import 行 24 锁全 0；注释登记面不判红） || [PASS] P-C2B3-local-session-identity: sessionStorage local 面在场（Project 类+本地写面+flush 面+agent transcript path）= local session 存储零扰动 || [PASS] P-C2B4-generic-mcp-identity: generic MCP 车道零扰动（sse/http/ws 头+per-server oauth+用户级代理 4 函数 + MCPSettings generic 认证显示面） || [PASS] P-C2B5-multi-anchor-identity: 恒等锚族 6 件全在场（attribution local/product 仅 URL/OAuth FD 车道/caches /clear/oauth 中性化 undefined/P3 远程控制面）",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-078-final"
+}
+PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-078/fam/deant0175

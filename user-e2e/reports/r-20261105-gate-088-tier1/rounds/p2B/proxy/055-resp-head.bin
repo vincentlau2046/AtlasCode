@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","object":"chat.completion.chunk","created":1793858573,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have everything"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" needed"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" code"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" generation. Environment"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" status"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": no torch"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"/t"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"orch_npu/triton installed"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no npu-smi —"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" so Phase"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 3 verification"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (real N"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"PU run"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":") is"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not possible."}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Per the workflow,"}}]}
+
+data: {"id":"chatcmpl-8f142149-64ad-42d6-b7a3-7a814d6592dc","created":1793858573,"model":"glm-5","object":"chat.comp

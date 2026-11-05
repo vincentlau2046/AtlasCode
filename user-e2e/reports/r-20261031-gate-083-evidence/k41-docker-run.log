@@ -1,0 +1,48 @@
+=== ENV ===
+git version 2.56.0
+1.4.2
+=== LEG fixed ===
+LEG: fixed
+codeRoot: /code-fixed
+git-version: git version 2.56.0
+code-commit: 
+bun-version: 1.4.2
+fixture-repo-head: bc29ec76f01d527a13860204e6cebd0485e9509a
+raw rev-parse --git-dir (dangling target): {"code":128,"out":"","err":"fatal: gitfile does not point to a valid repository: /k41/fixtures/fixed/repo/.atlas/worktrees/raw/.git"}
+raw status --porcelain (dangling target): {"code":128,"out":"","err":"fatal: gitfile does not point to a valid repository: /k41/fixtures/fixed/repo/.atlas/worktrees/raw/.git"}
+raw worktree add (dangling target): {"code":128,"out":"","err":"Preparing worktree (new branch 'k41raw')\nfatal: '/k41/fixtures/fixed/repo/.atlas/worktrees/raw' already exists"}
+resolveGitDir(dangling-target): null
+  [PASS] resolveGitDir dangling → null（不返回 nonexistent 路径） | got=null
+createAgentWorktree ok: {"worktreePath":"/k41/fixtures/fixed/repo/.atlas/worktrees/probe","worktreeBranch":"worktree-probe","headCommit":"bc29ec76f01d527a13860204e6cebd0485e9509a","gitRoot":"/k41/fixtures/fixed/repo"}
+  [PASS] 创建成功（自愈非卡死）
+  [PASS] worktreePath === target
+  [PASS] pointer → 本仓 admin entry | gitdir: /k41/fixtures/fixed/repo/.git/worktrees/probe
+  [PASS] worktree 内 rev-parse HEAD rc=0 | head=bc29ec76f01d527a13860204e6cebd0485e9509a
+  [PASS] headCommit 恒等 repo HEAD | headCommit=bc29ec76f01d527a13860204e6cebd0485e9509a
+  [PASS] removeAgentWorktree → true
+  [PASS] remove 后 admin entries 空（无残，K4-8 邻接面） | entries=[]
+  [PASS] 守卫：dangling + 用户文件 → 拒绝
+  [PASS] 守卫：note.txt 保全
+  [PASS] 守卫：.git 保全
+K41-PROBE-LEG=fixed CHECKS=11 FAILS=0 VERDICT=GREEN
+=== LEG base ===
+LEG: base
+codeRoot: /code-base
+git-version: git version 2.56.0
+code-commit: 
+bun-version: 1.4.2
+fixture-repo-head: bc29ec76f01d527a13860204e6cebd0485e9509a
+raw rev-parse --git-dir (dangling target): {"code":128,"out":"","err":"fatal: gitfile does not point to a valid repository: /k41/fixtures/base/repo/.atlas/worktrees/raw/.git"}
+raw status --porcelain (dangling target): {"code":128,"out":"","err":"fatal: gitfile does not point to a valid repository: /k41/fixtures/base/repo/.atlas/worktrees/raw/.git"}
+raw worktree add (dangling target): {"code":128,"out":"","err":"Preparing worktree (new branch 'k41raw')\nfatal: '/k41/fixtures/base/repo/.atlas/worktrees/raw' already exists"}
+resolveGitDir(dangling-target): "/k41/fixtures/base/repo/gone-nonexistent"
+  [PASS] BASE-RED resolveGitDir 误认（返回 nonexistent 路径） | got="/k41/fixtures/base/repo/gone-nonexistent"
+createAgentWorktree THREW: Error: Failed to create worktree: Preparing worktree (new branch 'worktree-probe')
+fatal: '/k41/fixtures/base/repo/.atlas/worktrees/probe' already exists
+
+  [PASS] BASE-RED 创建失败（现状卡死无自愈） | Error: Failed to create worktree: Preparing worktree (new branch 'worktree-probe')
+  [PASS] BASE target 保全（dangling .git 原样，非数据损失）
+  [PASS] 守卫：dangling + 用户文件 → 拒绝
+  [PASS] 守卫：note.txt 保全
+  [PASS] 守卫：.git 保全
+K41-PROBE-LEG=base CHECKS=6 FAILS=0 VERDICT=RED-AS-EXPECTED

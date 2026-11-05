@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","object":"chat.completion.chunk","created":1793858074,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to optimize their"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" matmul kernel. But there"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no kernel source in the"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace —"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" only"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" prof"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with op_statistic.csv."}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" pipeline reference"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" doc"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"stage 5,"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra"}}]}
+
+data: {"id":"chatcmpl-5f305064-3746-4393-aabc-7b75e95ac53d","created":1793858074,"model":"glm-5","object":"cha

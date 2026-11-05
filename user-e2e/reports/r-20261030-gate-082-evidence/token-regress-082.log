@@ -1,0 +1,43 @@
+bytes: npm81=17859940 gate82=17895234 delta=35294
+--- 前 26 波（0.1.56–0.1.81）token 零回归 npm81↔gate82 ---
+total prior tokens=215 diffs=0
+--- 0.1.82 本波面 @ gate82（K3 新做 token 在场核；A3+A4 顺序/A5 .catch 语义由判别单测承载）---
+K3-A1 12 并发池                 MAX_HOOK_CONCURRENCY                     npm81=0    gate82=6   
+K3-A2 未知键丢弃                  sanitizeUpdatedInput                     npm81=0    gate82=3   
+K3-A6 28000 深嵌套              MAX_HOOK_INPUT_NESTING_DEPTH             npm81=0    gate82=6   
+K3-A7 getter 单键拒             materializeHookInput                     npm81=0    gate82=2   
+K3-A7 getter 串化回退            stringifyWithGetterFallback              npm81=0    gate82=3   
+K3-A8 重入守卫                   runWithHookReentrancy                    npm81=0    gate82=10  
+K3-A9 标签中和                   wrapInSystemReminder                     npm81=16   gate82=16  
+K3-A10 fail-closed           shouldFailClosePluginHook                npm81=0    gate82=4   
+K3-B1 headless SessionEnd    runHeadlessSessionEndHooks               npm81=0    gate82=3   
+K3-B1 超时 env                 ATLAS_SESSIONEND_HOOKS_TIMEOUT_MS        npm81=1    gate82=2   
+K3-B6 plan 写门豁免表             PLAN_MODE_WRITE_EXEMPT_TOOL_NAMES        npm81=0    gate82=6   
+K3-B6 plan 写门文案              PLAN_MODE_WRITE_DENIED_MESSAGE           npm81=0    gate82=4   
+K3-C1 参数名 64 上限              MAX_ARGUMENT_NAMES                       npm81=0    gate82=4   
+K3-C1 参数名长 64 上限             MAX_ARGUMENT_NAME_CHARS                  npm81=0    gate82=4   
+K3-C2 占位符 1M 预算              MAX_SUBSTITUTION_OUTPUT_CHARS            npm81=0    gate82=12  
+K3-L20 名字消毒                  isUnsafeCommandName                      npm81=0    gate82=11  
+K3-L20 display 消毒            sanitizeDisplayName                      npm81=0    gate82=5   
+K3-L21 rm strict env         ATLAS_STRICT_INLINE_SHELL_RM_PROMPT      npm81=0    gate82=1   
+K3-L43 unknown 名单            MAX_UNKNOWN_SKILL_SUGGESTIONS            npm81=0    gate82=2   
+K3-D2 来源归附                   permissionDecisionSource                 npm81=0    gate82=2   
+K3-D2 hookSource 透传          hookSource                               npm81=15   gate82=21  
+K3-D2 归附文案                   hook requested confirmation (from        npm81=0    gate82=1   
+K3-D3 同名排除提示                 excluded (hooks and commands inactive)   npm81=0    gate82=1   
+wave-face missing=0
+--- de-ant 零一方活字面恒等锚 @ gate82（0.1.78 清零面不回归）---
+anthropic_beta               gate82=0   
+anthropic-ratelimit          gate82=0   
+anthropic_cloud              gate82=0   
+claude.ai subscription       gate82=0   
+isFirstPartyGatewayUrl       gate82=0   
+CLAUDEAI_SERVER_PREFIX       gate82=0   
+de-ant regression=0
+--- A3-1 锚在场恒等（downloads.claude.ai / claude-plugins-official）---
+downloads.claude.ai          npm81=1    gate82=1   
+claude-plugins-official      npm81=30   gate82=30  
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm81=0    gate82=0   
+foreground (default)                         npm81=0    gate82=0   
+Set run_in_background to true to launch      npm81=0    gate82=0   

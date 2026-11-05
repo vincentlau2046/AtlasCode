@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","object":"chat.completion.chunk","created":1793865821,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" now"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the workflow. Steps"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":\n\n1. Task"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" extraction: build"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a task"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" file `rmsnorm.py"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"` ("}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"single"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" case mode"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":") with Model, get_inputs"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", get_init_inputs."}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Validate with validate_task.py from"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tr"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-task-extractor skill"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".\n2. User"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" confirmation ("}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca2bf5ab8e0","created":1793865821,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"AskUserQuestion) — the"}}]}
+
+data: {"id":"chatcmpl-4037893a-661e-49e1-8b3a-2ca

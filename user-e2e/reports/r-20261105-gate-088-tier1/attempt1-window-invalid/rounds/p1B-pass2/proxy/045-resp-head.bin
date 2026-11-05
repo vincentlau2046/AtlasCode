@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","object":"chat.completion.chunk","created":1793854820,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9a27842061d09a21","function":{"arguments":"{\"file_path\": \"/home","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/.atlas/plugins"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/marketplaces/atlas-plugins"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/plugins/ascend-perf"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-optimize/skills/asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end-perf-optimize/re"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ferences/bottleneck-location.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9122633cfdc7d39e","function":{"arguments":"{\"file_path\": \"","name":"Read"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/home/vince/.atlas"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/plugins/marketplaces/atlas"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-plugins/plugins/ascend-per"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"f-optimize/skills/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ascend-perf-optimize"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-733326e4-e9b9-4d35-a64f-9bab33ac3b19","created":1793854820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"de

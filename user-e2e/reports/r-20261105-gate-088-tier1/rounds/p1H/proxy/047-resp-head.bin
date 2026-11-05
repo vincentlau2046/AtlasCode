@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","object":"chat.completion.chunk","created":1793857274,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-93b71a84756b3797","function":{"arguments":"","name":"mcp__msprof-mcp__execute_sql_query"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"sql_query\": \"SELECT"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Op Name\\\","},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Type"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":", Count, \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Total Time (us)\\\", \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Avg Time (us)\\\", \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Max Time (us)\\\", \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Min Time (us)\\\", \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"AI Core Time (us)\\\","},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\"AI CPU Time (us"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":")\\\" FROM op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_statistic ORDER"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-90642b70-804d-4079-bf72-c9c4cacba47a","created":1793857274,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" BY \\\"Total Time (us"},"type":"function","i

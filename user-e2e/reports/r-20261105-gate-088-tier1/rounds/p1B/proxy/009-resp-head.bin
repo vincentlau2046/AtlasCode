@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","object":"chat.completion.chunk","created":1793857002,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace is empty —"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no mat"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"mul kernel, no op"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_summary files."}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The user says \"my"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend mat"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"mul kernel\" but"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" there's nothing"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" here"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". I should ask"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user where"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel source /"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" op_summary data"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is,"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or whether"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they want"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":1793857002,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me to scaffold"}}]}
+
+data: {"id":"chatcmpl-49d2efb7-9be5-4354-be15-d50399af5783","created":

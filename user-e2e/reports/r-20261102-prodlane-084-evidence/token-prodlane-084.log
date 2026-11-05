@@ -1,0 +1,55 @@
+bytes: npm83=17903692 gate84=17918599 delta=14907
+--- 前 28 波（0.1.56–0.1.83）token 零回归 npm83↔gate84 ---
+total prior tokens=254 diffs=0
+--- 0.1.84 本波面 @ gate84（K5 新做 token 在场核；npm83 预期 0）---
+K5-1 有界读上限常量                 MAX_IMAGE_SOURCE_BYTES                                       npm83=0    gate84=7   
+K5-1 有界读 helper              readBoundedImageBytes                                        npm83=0    gate84=2   
+K5-1 非常规文件错误                 NonRegularFileError                                          npm83=0    gate84=5   
+K5-1 超限错误                    ImageSourceTooLargeError                                     npm83=0    gate84=6   
+K5-1 中止守卫                    Bounded image read aborted                                   npm83=0    gate84=1   
+K5-1 128MiB 字面               134217728                                                    npm83=10   gate84=10  
+K5-2 后缀 xlsm                 .xlsm                                                        npm83=0    gate84=2   
+K5-2 后缀 parquet              .parquet                                                     npm83=0    gate84=2   
+K5-2 后缀 epub                 .epub                                                        npm83=0    gate84=2   
+K5-2 后缀 heic                 .heic                                                        npm83=0    gate84=2   
+K5-3 无损判别叶子                  decodeTextLosslessly                                         npm83=0    gate84=5   
+K5-3 不可解码错误                  UndecodableTextError                                         npm83=0    gate84=19  
+K5-3 BOM 单次写回                withSingleBomPrefix                                          npm83=0    gate84=8   
+K5-3 全量字节读 seam              readFileBytesSync                                            npm83=5    gate84=8   
+K5-3 BE 拒绝文案                 UTF-16BE encoded text is not supported                       npm83=0    gate84=1   
+K5-3 代理项拒绝定因                 surrogate code point (U+D800..U+DFFF) is not valid UTF-8     npm83=0    gate84=1   
+K5-4 零写保证文案                  The file was not modified.                                   npm83=0    gate84=6   
+K5-5 schema 字段               allow_large                                                  npm83=0    gate84=7   
+K5-5 内部名                     allowLarge                                                   npm83=0    gate84=14  
+K5-5 模型说明                    Set to true only when you explicitly need the entire plain text file npm83=0    gate84=2   
+K5-6 安全输出根                   getSecureToolResultsDir                                      npm83=0    gate84=3   
+K5-6 属主真目录校验                 validateOwnedRealDir                                         npm83=0    gate84=3   
+K5-6 拒绝伪根文案                  not a real directory                                         npm83=0    gate84=1   
+K5-7 引用提示正文未附                The content of this PDF is not attached to this message      npm83=0    gate84=1   
+K5-7 页数未知不虚报                 page count unknown                                           npm83=0    gate84=2   
+K5-8 pages 上限指令              up to 20 pages per request                                   npm83=0    gate84=1   
+K5-8 必读指令                    you MUST use the                                             npm83=4    gate84=5   
+wave-face total=27 missing=0
+--- K5 不变量锚（双面恒等，既有能力不回归）---
+utf16le                      npm83=11   gate84=17    DIFF-TO-CLASSIFY
+pdf_reference                npm83=3    gate84=3   
+extractPDFPages              npm83=6    gate84=6   
+writeTextContent             npm83=8    gate84=8   
+tryGetPDFReference           npm83=2    gate84=2   
+TOOL_RESULTS_SUBDIR          npm83=7    gate84=5     DIFF-TO-CLASSIFY
+isLoggableMessage            npm83=10   gate84=10  
+--- de-ant 零一方活字面恒等锚 @ gate84（0.1.78 清零面不回归）---
+anthropic_beta               gate84=0   
+anthropic-ratelimit          gate84=0   
+anthropic_cloud              gate84=0   
+claude.ai subscription       gate84=0   
+isFirstPartyGatewayUrl       gate84=0   
+CLAUDEAI_SERVER_PREFIX       gate84=0   
+de-ant regression=0
+--- A3-1 锚在场恒等（downloads.claude.ai / claude-plugins-official）---
+downloads.claude.ai          npm83=1    gate84=1   
+claude-plugins-official      npm83=30   gate84=30  
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm83=0    gate84=0   
+foreground (default)                         npm83=0    gate84=0   
+Set run_in_background to true to launch      npm83=0    gate84=0   

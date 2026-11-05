@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","object":"chat.completion.chunk","created":1793855192,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks to optimize an"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel based"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" on ms"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof op_summary showing"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline bottleneck"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". This matches"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-perf-opt"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize skill. Let"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check the working"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory for"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel project"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" first,"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and invoke the skill.\n\nLet"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me look"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at the workspace"}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-40fc259e-ca04-44af-8a0c-8026794a364c","created":1793855192,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a59db80cd53f5ab4","fun

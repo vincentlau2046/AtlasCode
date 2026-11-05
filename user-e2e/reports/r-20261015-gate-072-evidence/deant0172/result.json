@@ -1,0 +1,8 @@
+{
+  "verdict": "PASS",
+  "hardFail": 0,
+  "inconclusive": 0,
+  "probes": "[PASS] P-DA1-residual-chain-absent [PASS] P-DA2-iff-main-route-no-anthropic [PASS] P-DA3-non-darwin-identity",
+  "platform": "linux",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-0.1.72-de-ant-closure"
+}

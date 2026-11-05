@@ -1,0 +1,36 @@
+bytes: npm82=17886324 gate83=17903692 delta=17368
+--- 前 27 波（0.1.56–0.1.82）token 零回归 npm82↔gate83 ---
+total prior tokens=238 diffs=0
+--- 0.1.83 本波面 @ gate83（K4 新做 token 在场核）---
+K4-1 注册判别 backlink           isRegisteredWorktreeTarget               npm82=0    gate83=4   
+K4-1 三态预检                    inspectWorktreeTarget                    npm82=0    gate83=4   
+K4-1 修复态字面                   repair-dangling-pointer                  npm82=0    gate83=4   
+K4-1 occupied 拒绝文案           safe-to-repair worktree leftover         npm82=0    gate83=2   
+K4-2 检查 helper               inspectWorktreeChanges                   npm82=0    gate83=2   
+K4-2 退出询问文案                  All will be lost if you remove           npm82=1    gate83=1   
+K4-3 transient 三态检查          checkTransientGitState                   npm82=0    gate83=3   
+K4-3 伪 ref 名单                TRANSIENT_GIT_REFS                       npm82=0    gate83=4   
+K4-4 reftable 识别             isReftableStorage                        npm82=0    gate83=7   
+K4-4 files 快路径               readGitHeadFromFiles                     npm82=0    gate83=4   
+K4-4 git plumbing 读          readGitHeadViaGit                        npm82=0    gate83=4   
+K4-5 基点钉死                    ^{commit}                                npm82=0    gate83=6   
+K4-6 调用 checkout 上下文         sourceCheckout                           npm82=0    gate83=29  
+K4-6 checkout HEAD 读         readCheckoutHeadSha                      npm82=0    gate83=7   
+K4-7 写边界 async               transcriptTailNeedsSeparator             npm82=0    gate83=8   
+K4-7 写边界 sync                transcriptTailNeedsSeparatorSync         npm82=0    gate83=4   
+wave-face total=16 missing=0
+--- de-ant 零一方活字面恒等锚 @ gate83（0.1.78 清零面不回归）---
+anthropic_beta               gate83=0   
+anthropic-ratelimit          gate83=0   
+anthropic_cloud              gate83=0   
+claude.ai subscription       gate83=0   
+isFirstPartyGatewayUrl       gate83=0   
+CLAUDEAI_SERVER_PREFIX       gate83=0   
+de-ant regression=0
+--- A3-1 锚在场恒等（downloads.claude.ai / claude-plugins-official）---
+downloads.claude.ai          npm82=1    gate83=1   
+claude-plugins-official      npm82=30   gate83=30  
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm82=0    gate83=0   
+foreground (default)                         npm82=0    gate83=0   
+Set run_in_background to true to launch      npm82=0    gate83=0   

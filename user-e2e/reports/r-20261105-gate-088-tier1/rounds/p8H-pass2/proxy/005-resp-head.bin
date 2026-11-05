@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","object":"chat.completion.chunk","created":1793867608,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator in Ascend C."}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill says I decide step"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" order. Since"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no spec"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" was provided"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", I need"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to pick an"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator. The"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user said \"brand"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-new custom operator\" — I"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" could ask"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" what"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" want, but the request"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25d-9a9d8319b189","created":1793867608,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is essentially"}}]}
+
+data: {"id":"chatcmpl-f312c86d-4ed5-49f6-b25

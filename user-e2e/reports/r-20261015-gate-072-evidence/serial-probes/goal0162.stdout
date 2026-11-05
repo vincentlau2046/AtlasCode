@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] G1a-set-armed [PASS] G1b-status-armed [PASS] G1c-one-goal-replace [PASS] G1d-clear [PASS] G1e-clear-not-armed [PASS] G1f-set-missing-condition [PASS] G1g-set-oversize-reject [PASS] G2a-judge-unmet-1 [PASS] G2b-judge-unmet-2 [PASS] G2c-judge-met [PASS] G2d-judge-request-log [PASS] G3a-overlay-source [PASS] G3b-footer-registry [PASS] G3c-p7-zero-rerender"
+}
+TUI-GOAL-0162 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-062/goal-probe

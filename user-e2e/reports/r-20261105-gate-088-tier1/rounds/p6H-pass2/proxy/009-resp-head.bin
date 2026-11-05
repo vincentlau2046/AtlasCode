@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","object":"chat.completion.chunk","created":1793864956,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ask"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"UserQuestion returned"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" an empty answer —"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" useful"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" selection. The"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user's"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" original instruction"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"The"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline of my Asc"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel is the"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bottleneck according to msprof op"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_summary. Optimize this kernel"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" itself.\" with"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" required ending"}}]}
+
+data: {"id":"chatcmpl-c739b8ca-bb3c-4e96-9f40-593db54e2393","created":1793864956,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" token ROUTE-DONE-"}}]}
+
+data: {"id":"chatcmpl-c739b8ca

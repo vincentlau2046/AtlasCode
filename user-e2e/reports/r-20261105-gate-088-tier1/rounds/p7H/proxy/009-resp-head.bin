@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" isn't registered"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as inv"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ocable via"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the Skill tool. Let"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check if"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" it exists"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as a plugin/m"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"arketplace skill —"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" maybe I should"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" search"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for it on"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","created":1793865796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" disk.","content":"The"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"content":" routed"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"content":" skill isn't directly"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"content":" invocable via the Skill"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"content":" tool. Let me check whether"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","created":1793865796,"model":"glm-5","choices":[{"index":0,"delta":{"content":" it exists"}}]}
+
+data: {"id":"chatcmpl-f8bd2abb-b8c0-4f39-b389-d936093f590e","object":"chat.completion.chunk","c

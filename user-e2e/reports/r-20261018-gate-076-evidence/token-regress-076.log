@@ -1,0 +1,25 @@
+bytes(char): g75(npm 0.1.75)=17815492 g76(0.1.76 gate)=17828438
+total prior tokens=144 diffs=0
+--- 0.1.76 波体 scope-gating 新引入面 @ dist（075→076 对照，0→阳性）---
+ATLAS_MCP_OAUTH_TRUSTED_SERVERS      075=0    076=1   
+applyMcpOauthScopeGate               075=0    076=3   
+isMcpOauthBlockGated                 075=0    076=3   
+isMcpOauthUntrustedScope             075=0    076=2   
+isMcpOauthDisplayGated               075=0    076=8   
+getMcpOauthTrustedServers            075=0    076=2   
+parseMcpOauthTrustedServersEnv       075=0    076=2   
+mcpOauthGatedMessage                 075=0    076=3   
+withoutMcpOauthTrustedServersVars    075=0    076=2   
+oauth gated (untrusted scope)        075=0    076=2   
+--- 恒等锚面 @ dist（075/076 同值，0.1.72–0.1.74 销项面守成）---
+class Project                        075=3    076=3   
+insertMessageChain                   075=6    076=6   
+getMcpServerHeaders                  075=4    076=4   
+getOAuthTokenFromFileDescriptor      075=2    076=2   
+withoutMcpOauthCimdVars              075=2    076=2   
+MCP_OAUTH_CLIENT_METADATA_URL        075=3    076=3   
+client_metadata_url                  075=2    076=2   
+atlas-code-20250219                  075=1    076=1   
+claude.ai                            075=19   076=19  
+api.anthropic.com                    075=0    076=0   
+mcp-proxy.anthropic.com              075=0    076=0   

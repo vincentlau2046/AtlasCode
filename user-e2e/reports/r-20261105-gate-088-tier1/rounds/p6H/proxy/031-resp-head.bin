@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","object":"chat.completion.chunk","created":1793863601,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" now"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have the full"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" methodology. The user's workspace"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is empty —"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" there"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no actual"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel code or"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" op_summary CSV"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" provided"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The scenario"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": user"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" says ms"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof op_summary shows intra-core"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" pipeline is the bottleneck for"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" their"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" matmul kernel and"}}]}
+
+data: {"id":"chatcmpl-385da278-c718-4442-ad02-b675fbec7ddd","created":1793863601,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" asks to optimize the kernel itself"}}]}
+
+data: {"id":"chatcmpl-385da2

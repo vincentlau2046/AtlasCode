@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","object":"chat.completion.chunk","created":1793863352,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ask"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"UserQuestion returned no actual"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" answers ("}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"empty). That"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" means"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user selected nothing /"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" it"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" returned"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" empty. I should handle"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this gracefully — maybe proceed"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with defaults or ask"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" inline"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The result"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" says \"User"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has answered your questions:"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" .\" with no content"}}]}
+
+data: {"id":"chatcmpl-0b6d08ab-8818-4ea7-a640-71acd88c52b9","created":1793863352,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". I'll proceed with a"}}]}
+
+data: {"id":"chatcmpl-

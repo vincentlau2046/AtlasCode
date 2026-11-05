@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","object":"chat.completion.chunk","created":1793863314,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Fresh"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Now"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" classify"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernels tuned"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", suspects"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" model-level parallelism +"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" serving framework configuration"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". So"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" primary"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" route: v"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"llm-ascend-sk"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ills (s"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"erving)"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" +"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" cannbot-model-infer-sk"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ills (model-level"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" inference"}}]}
+
+data: {"id":"chatcmpl-91570e2e-8879-4a39-bedd-a4ff9bde03cf","created":1793863314,"model":"glm-5

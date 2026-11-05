@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","object":"chat.completion.chunk","created":1793858446,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a8cfbac637adea0d","function":{"arguments":"{\"file_path\": \"/home","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/模板/asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end-agent-skills-yH"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"k0Lb/official"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/CANNBot/plugins-official"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/triton-op-generator/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"quick"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"start.md\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-bdcf68744c202420","function":{"arguments":"{\"file_path\": \"/home","name":"Read"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/模板/asc"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"end-agent-skills-yH"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"k0Lb/official"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/CANNBot/plugins-official"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/triton-op-generator/AG"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-ecab553a-3872-4e7c-a92b-96d011b47f50","created":1793858446,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls"

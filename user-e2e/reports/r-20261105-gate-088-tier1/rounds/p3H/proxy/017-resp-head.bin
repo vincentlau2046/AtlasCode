@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","object":"chat.completion.chunk","created":1793859119,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Tool"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Search returns"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" nothing —"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" perhaps"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the Asc"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end tools are actually"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" available directly"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" under"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" m"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"cp__ names"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"? Looking"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at my"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" function list, the Asc"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end tools ("}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"AscendSpecParser, etc"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".) are not in"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the provided"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" function"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" schemas"}}]}
+
+data: {"id":"chatcmpl-004d22e3-6abb-4185-abc1-17fc6cbd079b","created":1793859119,"model":

@@ -1,0 +1,22 @@
+bun test v1.4.2 (744846f84)
+
+tests/unit/engine-taskstore.test.ts:
+209 |     const out = 'y'.repeat(200)
+210 |     const { content, wasTruncated } = formatTaskOutput(out, 't-9')
+211 |     expect(wasTruncated).toBe(true)
+212 |     const header = `[Truncated. Full output: ${getTaskOutputPath('t-9')}]\n\n`
+213 |     expect(content.startsWith(header)).toBe(true)
+214 |     expect(content.length).toBe(100)
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: 100
+Received: 300
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/gate/tests/unit/engine-taskstore.test.ts:214:28)
+(fail) task/outputFormatting（纯支） > 截断 = 头注 + 尾部（总长恰 maxLen） [0.16ms]
+
+ 19 pass
+ 1 fail
+ 42 expect() calls
+Ran 20 tests across 1 file. [82.00ms]

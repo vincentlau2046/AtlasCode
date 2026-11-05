@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","object":"chat.completion.chunk","created":1793853635,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-923151a435fe537e","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"find /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B/pro"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"f -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"type f | head -30"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; echo \\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"===\\\"; cat /home/v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ince/.claude/jobs"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/09264df0"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tmp/gate-088"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tier1/p1B"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created":1793853635,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/prof/PROF_"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5e201385-c979-4c06-bee4-3969099c50d3","created"

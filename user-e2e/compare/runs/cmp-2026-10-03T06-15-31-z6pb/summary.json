@@ -1,0 +1,44 @@
+[
+  {
+    "tui": "atlas",
+    "scenario": "S4-skill",
+    "alive": true,
+    "turnSettle": false,
+    "disk": null,
+    "signals": {
+      "chars": 15305,
+      "nonEmptyLines": 403,
+      "read": 2,
+      "edit": 0,
+      "write": 0,
+      "bash": 2,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 6,
+      "skill": 7,
+      "finalAnswer": true
+    }
+  },
+  {
+    "tui": "claude",
+    "scenario": "S4-skill",
+    "alive": true,
+    "turnSettle": true,
+    "disk": null,
+    "signals": {
+      "chars": 4983,
+      "nonEmptyLines": 114,
+      "read": 2,
+      "edit": 0,
+      "write": 0,
+      "bash": 0,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 0,
+      "skill": 4,
+      "finalAnswer": true
+    }
+  }
+]

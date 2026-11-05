@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","object":"chat.completion.chunk","created":1793859294,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-949dd780913f96fe","function":{"arguments":"{\"content\": \"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"# setup.py — build"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" entry for the SiluScale"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Ascend C custom"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" operator.\\n#"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Faithful form:"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" setup"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py owns the `"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"bisheng -x asc`"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" invocation, arch probe,\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"# and"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" include/lib paths.\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"import os\\nimport subprocess"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\nimport sys\\n\\nfrom setuptools"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-b94c3a66-7193-4a35-9cf2-4758705f2dd5","created":1793859294,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" import setup"},"type":"function","index"

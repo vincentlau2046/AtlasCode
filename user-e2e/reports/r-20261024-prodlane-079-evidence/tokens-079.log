@@ -1,0 +1,37 @@
+chars: npm78=17818865 npm79=17834761
+--- Δ8910B 双口径（gate79 = 17891944B/17843671char）---
+byte delta = 17891944 - 17883034 = 8910（预期 8910）
+char delta = 17843671 - 17834761 = 8910（预期 8910，char 口径互证）
+--- 前 23 波（0.1.56–0.1.78）token 零回归 npm78↔npm79 ---
+DIFF 0.1.65 task-notification                            npm78=55   npm79=56  
+total prior tokens=169 diffs=1
+  KNOWN-DIFF: ('0.1.65', 'task-notification', 55, 56) → C5-3 新增 emit 定因（gate token-regress-079 已源级核）
+UNEXPLAINED=0
+--- 0.1.79 本波面 gate==npm 逐项同值 ---
+ATLAS_RESTRICTED           npm79=4    gate79=4   
+restrictedMode             npm79=5    gate79=5   
+skillOverrides             npm79=2    gate79=2   
+resolveSkillOverrides      npm79=0    gate79=0   
+getMcpConnectBackoffMs     npm79=2    gate79=2   
+toolHeartbeat              npm79=1    gate79=1   
+DirectoryAdded             npm79=13   gate79=13  
+MessageDisplay             npm79=11   gate79=11  
+terminalSequence           npm79=15   gate79=15  
+continueOnBlock            npm79=6    gate79=6   
+APIError                   npm79=80   gate79=80  
+wave-face gate==npm mismatch=0
+resolveSkillOverrides 消名核：gate79=0 npm79=0（承载 skillOverrides npm79=2 ≥1）
+--- de-ant 零一方活字面恒等锚 @ npm79 ---
+anthropic_beta               npm79=0   
+anthropic-ratelimit          npm79=0   
+anthropic_cloud              npm79=0   
+claude.ai subscription       npm79=0   
+isFirstPartyGatewayUrl       npm79=0   
+CLAUDEAI_SERVER_PREFIX       npm79=0   
+downloads.claude.ai          npm79=1   
+claude-plugins-official      npm79=30  
+de-ant/A3-1 mismatch=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                    npm78=0    npm79=0   
+foreground (default)                       npm78=0    npm79=0   
+Set run_in_background to true to launch    npm78=0    npm79=0   

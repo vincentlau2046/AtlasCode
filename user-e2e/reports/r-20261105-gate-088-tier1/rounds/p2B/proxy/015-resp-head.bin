@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","object":"chat.completion.chunk","created":1793858394,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9cba9b3610a045c9","function":{"arguments":"{\"pattern\": \"**","name":"Glob"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/*triton*"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b172179e7d3fc400","function":{"arguments":"{\"pattern\": \"","name":"Glob"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"**/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"SKILL.md\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","object":"chat.completion.chunk","created":1793858394,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-d92cf6ef-a980-4757-9525-12d8c5deed23","created":1793858394,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":30,"prompt_tokens":17101,"total_tokens":17131,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":16128}}}
+
+data: [DONE]
+

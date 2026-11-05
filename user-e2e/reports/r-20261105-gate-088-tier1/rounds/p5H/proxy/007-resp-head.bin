@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","object":"chat.completion.chunk","created":1793863426,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Fresh"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" verdict. Now"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" route. The user says"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": kernels"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" already tuned, suspect model-level"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" parallelism AND"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" serving framework configuration"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". So"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" two relevant"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" routes: model level"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — cannbot-model-infer"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-skills (whole"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-model inference speedup:"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" parallel strategies)"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and vllm-asc"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end-skills (s"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"erving framework config). Since"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-9f66d137-e882-478b-84ed-7e1ec5922073","created":1793863426,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 

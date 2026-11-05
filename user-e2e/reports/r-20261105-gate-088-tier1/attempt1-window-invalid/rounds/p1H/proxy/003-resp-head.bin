@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","object":"chat.completion.chunk","created":1793854047,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants me to optimize an"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend matmul kernel where"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the intra-core pipeline is the"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bottleneck according to msprof op"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_summary. This"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" matches"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the /"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-perf-optimize"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-optimize skill"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The user says \"optimize"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this kernel itself\" -"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline optimization"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".\n\nLet me first"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" look at the working directory to"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" find"}}]}
+
+data: {"id":"chatcmpl-5bac635e-7bcb-4c02-9226-b5672f3699f4","created":1793854047,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delt

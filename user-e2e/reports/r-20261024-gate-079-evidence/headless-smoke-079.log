@@ -1,0 +1,5 @@
+--- --version（发布前号预期：0.1.79 号由 Main release chore bump）---
+0.1.78 (AtlasCode)
+version-rc=0
+--- --help rc ---
+help-rc=0（headless-help-079.log 同目录）

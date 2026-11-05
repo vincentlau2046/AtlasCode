@@ -1,0 +1,292 @@
+$ bun test --isolate tests/
+bun test v1.4.2 (744846f84)
+
+tests/func/atlascode-tui-live-gelu.test.ts:
+[live-gelu] 路径命中: native=true text=false turns=2
+准备工作区（新分支 'wt-a'）
+准备工作区（新分支 'wt-b'）
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-fx06-Q2jVbd/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-fx06-h7sjD6/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-fx06-gi7Hxo/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-fx06-un66Jb/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-NWcyIj/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-X4Ppa0/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-defbranch-NzyzSk/origin.git
+ * [new branch]      main -> main
+正克隆到 '/tmp/atlas-wt-defbranch-NzyzSk/clone'...
+完成。
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+切换到一个新分支 'feature'
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-zDLFfR/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-hATLTf/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-XiI03Y/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-nH0QsN/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-Jq2Ywn/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-NeYhOU/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-EadkXU/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-5GiMgB/origin.git
+ * [new branch]      main -> main
+提示：使用 'master' 作为初始分支的名称。这个默认分支名称可能会更改。要在新仓库中
+提示：配置使用初始分支名，并消除这条警告，请执行：
+提示：
+提示：	git config --global init.defaultBranch <名称>
+提示：
+提示：除了 'master' 之外，通常选定的名字有 'main'、'trunk' 和 'development'。
+提示：可以通过以下命令重命名刚创建的分支：
+提示：
+提示：	git branch -m <name>
+To /tmp/atlas-wt-func-as53C6/origin.git
+ * [new branch]      main -> main
+
+tests/func/atlascode-tui-pty-probe.test.ts:
+[pty-probe] skip: CI/平台门
+
+tests/func/atlascode-skill-auto-trigger.test.ts:
+[auto-trigger] 路径命中: native=true text=false turns=2
+error: unknown option '--sdk-url'
+
+tests/unit/modelprovider-loop-robustness-0158.test.ts:
+234 |     const { provider } = makeProvider()
+235 |     const events: any[] = []
+236 |     for await (const ev of provider.chatStream(streamArgs())) events.push(ev)
+237 | 
+238 |     const types = events.map((e) => e.type)
+239 |     expect(types).toEqual(['text_delta', 'text_delta', 'message_stop', 'assistant', 'error'])
+                        ^
+error: expect(received).toEqual(expected)
+
+@@ -1,6 +1,2 @@
+  [
+-   "text_delta",
+-   "text_delta",
+-   "message_stop",
+-   "assistant",
+    "error",
+
+- Expected  - 4
++ Received  + 0
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/modelprovider-loop-robustness-0158.test.ts:239:19)
+(fail) C4-1 chatStream() mid-stream partial 保留面（fake 流脚本） > mid-stream 错误 → partial 保留（assistant 轮次内容 + interrupted 标记 + 既有错误面）+ 单发终止 [1.07ms]
+273 |     streamBehavior = () => fullStream([textChunk('Hi '), textChunk('there'), finishChunk])
+274 |     const { provider } = makeProvider()
+275 |     const events: any[] = []
+276 |     for await (const ev of provider.chatStream(streamArgs())) events.push(ev)
+277 | 
+278 |     expect(events.map((e) => e.type)).toEqual([
+                                            ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "text_delta",
+-   "text_delta",
+-   "message_stop",
+-   "assistant",
++   "error",
+  ]
+
+- Expected  - 4
++ Received  + 1
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/modelprovider-loop-robustness-0158.test.ts:278:39)
+(fail) C4-1 chatStream() mid-stream partial 保留面（fake 流脚本） > 成功路径恒等（无 interrupted 标记 / 无 error 事件 / 完整终态） [0.63ms]
+
+tests/unit/colorize-d4.test.ts:
+55 | })
+56 | 
+57 | describe('D4 裸色名根修（入口 bare→ansi: 归一）', () => {
+58 |   it('裸名 foreground：SGR 在场且恰红（red → \\u001b[31m）', () => {
+59 |     const out = colorize('x', 'red', 'foreground')
+60 |     expect(out).toContain('\u001b[31m')
+                     ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "\u001B[31m"
+Received: "x"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/colorize-d4.test.ts:60:17)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 裸名 foreground：SGR 在场且恰红（red → \u001b[31m） [0.16ms]
+61 |     expect(out).toBe(chalk.red('x'))
+62 |   })
+63 | 
+64 |   it('裸名 background：SGR 在场且背景码（red → \\u001b[41m）', () => {
+65 |     const out = colorize('x', 'red', 'background')
+66 |     expect(out).toContain('\u001b[41m')
+                     ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "\u001B[41m"
+Received: "x"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/colorize-d4.test.ts:66:17)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 裸名 background：SGR 在场且背景码（red → \u001b[41m） [0.05ms]
+68 |   })
+69 | 
+70 |   it('16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红）', () => {
+71 |     for (const name of ALL_16) {
+72 |       const out = colorize('x', name, 'foreground')
+73 |       expect(out.startsWith('\u001b['), `${name} 无 SGR 前缀`).toBe(true)
+                                                                 ^
+error: black 无 SGR 前缀
+
+Expected: true
+Received: false
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/colorize-d4.test.ts:73:61)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红） [0.06ms]
+
+ 4691 pass
+ 5 fail
+ 13145 expect() calls
+Ran 4696 tests across 362 files. [84.11s]
+error: script "test" exited with code 1
+ci-rc=1
+=== GATE-CI-080-DONE ===

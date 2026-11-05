@@ -1,0 +1,3 @@
+SYNC-ITER: THROW: TypeError - stream[Symbol.asyncIterator] is not a function. (In 'stream[Symbol.asyncIterator]()', 'stream[Symbol.asyncIterator]' is undefined)
+ASYNC-ITER: ok [1,2,3]
+BARE-FOR-AWAIT-SYNC: ok [1,2,3]

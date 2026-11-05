@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","object":"chat.completion.chunk","created":1793865396,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'ve"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" now loaded"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" all"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 5 stage"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" references. There"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no user kernel"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" source in the workspace — only"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the profiling dump"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and the"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill reference"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" library. The op"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_statistic.csv confirms"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" MatMul dominates"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (4800us"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" of 6000us,"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" avg"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 400us/c"}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865396,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"all)."}}]}
+
+data: {"id":"chatcmpl-fd71001e-395f-47c8-a1da-e9f680b1d9de","created":1793865

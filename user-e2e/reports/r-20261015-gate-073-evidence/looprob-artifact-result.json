@@ -1,0 +1,168 @@
+{
+  "phase": "all",
+  "model": "Qwen38-27B-TXT",
+  "target": "http://127.0.0.1:8999",
+  "results": [
+    {
+      "scenario": "R1-nominal",
+      "note": "无故障基线：多步任务应完成（其他场景的对照组）",
+      "plan": {
+        "kind": "nominal"
+      },
+      "exitCode": 0,
+      "killed": false,
+      "ms": 56853,
+      "toolUses": 21,
+      "zeroContent": false,
+      "crashed": false,
+      "resultSubtype": "success",
+      "isError": false,
+      "completed": true,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": true
+      }
+    },
+    {
+      "scenario": "R1-500-transient",
+      "note": "前 2 次 500（在 provider 3 次重试预算内）→ 应恢复并完成",
+      "plan": {
+        "kind": "firstN",
+        "n": 2,
+        "fault": "500"
+      },
+      "exitCode": 0,
+      "killed": false,
+      "ms": 34910,
+      "toolUses": 10,
+      "zeroContent": false,
+      "crashed": false,
+      "resultSubtype": "success",
+      "isError": false,
+      "completed": true,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": true
+      }
+    },
+    {
+      "scenario": "R1-drop-transient",
+      "note": "第 1 次断连（ECONN，可重试）→ 应恢复并完成",
+      "plan": {
+        "kind": "firstN",
+        "n": 1,
+        "fault": "drop"
+      },
+      "exitCode": 0,
+      "killed": false,
+      "ms": 41517,
+      "toolUses": 17,
+      "zeroContent": false,
+      "crashed": false,
+      "resultSubtype": "success",
+      "isError": false,
+      "completed": true,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": true
+      }
+    },
+    {
+      "scenario": "R1-empty-bounded",
+      "note": "第 2 次空 0-0（R1 有界 1 次重试面）→ 应不崩、非静默",
+      "plan": {
+        "kind": "at",
+        "at": 2,
+        "fault": "empty"
+      },
+      "exitCode": 0,
+      "killed": false,
+      "ms": 379,
+      "toolUses": 7,
+      "zeroContent": false,
+      "crashed": false,
+      "resultSubtype": "success",
+      "isError": false,
+      "completed": true,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": true
+      }
+    },
+    {
+      "scenario": "R1-delay",
+      "note": "每次 +2s（模拟慢模型，post-#260 不应提前 fail-fast）→ 应完成",
+      "plan": {
+        "kind": "always",
+        "fault": "delay",
+        "delayMs": 2000
+      },
+      "exitCode": 0,
+      "killed": false,
+      "ms": 16671,
+      "toolUses": 7,
+      "zeroContent": false,
+      "crashed": false,
+      "resultSubtype": "success",
+      "isError": false,
+      "completed": true,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": true
+      }
+    },
+    {
+      "scenario": "R1-500-storm",
+      "note": "40 次连续 500（超 3 次重试预算）→ 暴露「loop 无回合级错误恢复」缺口（预期：任务不完成，非静默）",
+      "plan": {
+        "kind": "firstN",
+        "n": 40,
+        "fault": "500"
+      },
+      "exitCode": 1,
+      "killed": false,
+      "ms": 1706,
+      "toolUses": 0,
+      "zeroContent": true,
+      "crashed": false,
+      "resultSubtype": "error_during_execution",
+      "isError": true,
+      "completed": false,
+      "diskCheck": "missing: lib/math.js, lib/stats.js, lib/app.js, lib/run.test.js",
+      "invariants": {
+        "I1_noCrash": true,
+        "I2_noSilentDrop": true,
+        "I3_noHang": true,
+        "completed": false
+      }
+    },
+    {
+      "scenario": "R3-resume",
+      "stage": "resume-ok",
+      "sessionId": "8b05de91-e1c4-4ede-afe6-3043a7c28839",
+      "killAtMs": 25000,
+      "completed": true,
+      "resumeMs": 3316,
+      "resumeToolUses": 10,
+      "diskCheck": "ALL TESTS PASSED (实跑通过)",
+      "invariant": {
+        "I4_recoverable": true
+      }
+    }
+  ]
+}

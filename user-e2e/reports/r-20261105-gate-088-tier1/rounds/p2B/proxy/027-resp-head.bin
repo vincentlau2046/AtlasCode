@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","object":"chat.completion.chunk","created":1793858441,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-828f0b2df6b8c259","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"R \\\"/home/vince/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"模板/ascend-agent-sk"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ills-yHk0L"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"b\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" | head -100"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":";"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" echo ===; ls"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\"/home/vince/模板"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ascend-agent-skills"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-yHk0Lb"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/official/CANNBot/plugins"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","created":1793858441,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-official/\\\" 2>/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5f7a0fa8-da5d-434a-a406-9f7aa93c611f","create

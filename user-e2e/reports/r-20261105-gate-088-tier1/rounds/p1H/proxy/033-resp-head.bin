@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","object":"chat.completion.chunk","created":1793857245,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-864d93a326f3c985","function":{"arguments":"","name":"mcp__msprof-mcp__search_csv_by_field"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"csv_path\": \"/home/v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ince/.claude/jobs"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/09264df0"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tmp/gate-088"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tier1/p1H"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/prof/PROF_"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0001/ASCEND_PROF"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ILER_OUTPUT/op_statistic.csv"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"field_name\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Op Name"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"field_value\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"MatMul\", \"match_mode\": \"contains"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","created":1793857245,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c0ce-42ab-9955-569e40868f14","object":"chat.completion.chunk","created":1793857245,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-fb3faa2e-c

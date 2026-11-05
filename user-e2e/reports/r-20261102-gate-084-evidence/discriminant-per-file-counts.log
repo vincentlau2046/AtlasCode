@@ -1,0 +1,22 @@
+worktree-gate-084-face|tests/func/wave0184-image-bounds.test.ts|[0m[32m 8 pass[0m [0m[2m 0 fail[0m  17 expect() calls Ran 8 tests across 1 file. [0m[2m[[1m98.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/func/wave0184-mutation-encoding.test.ts|[0m[32m 43 pass[0m [0m[2m 0 fail[0m  177 expect() calls Ran 43 tests across 1 file. [0m[2m[[1m131.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/func/wave0184-pdf-reference-session.test.ts|[0m[32m 11 pass[0m [0m[2m 0 fail[0m  35 expect() calls Ran 11 tests across 1 file. [0m[2m[[1m524.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/func/wave0184-pdf-unprivileged.test.ts|[0m[32m 14 pass[0m [0m[2m 0 fail[0m  73 expect() calls Ran 14 tests across 1 file. [0m[2m[[1m577.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/func/wave0184-read-large.test.ts|[0m[32m 27 pass[0m [0m[2m 0 fail[0m  65 expect() calls Ran 27 tests across 1 file. [0m[2m[[1m474.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/func/wave0184-read-utf16.test.ts|[0m[32m 13 pass[0m [0m[2m 0 fail[0m  37 expect() calls Ran 13 tests across 1 file. [0m[2m[[1m115.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/unit/wave0184-binary-read.test.ts|[0m[32m 9 pass[0m [0m[2m 0 fail[0m  57 expect() calls Ran 9 tests across 1 file. [0m[2m[[1m494.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/unit/wave0184-mutation-guards.test.ts|[0m[32m 33 pass[0m [0m[2m 0 fail[0m  88 expect() calls Ran 33 tests across 1 file. [0m[2m[[1m94.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/unit/wave0184-pdf-reference.test.ts|[0m[32m 6 pass[0m [0m[2m 0 fail[0m  26 expect() calls Ran 6 tests across 1 file. [0m[2m[[1m495.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/unit/wave0184-read-large-contract.test.ts|[0m[32m 13 pass[0m [0m[2m 0 fail[0m  32 expect() calls Ran 13 tests across 1 file. [0m[2m[[1m441.00ms[0m[2m][0m 
+worktree-gate-084-face|tests/unit/wave0184-text-encoding.test.ts|[0m[32m 20 pass[0m [0m[2m 0 fail[0m  35 expect() calls Ran 20 tests across 1 file. [0m[2m[[1m10.00ms[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-image-bounds.test.ts|[0m[32m 2 pass[0m [0m[31m 6 fail[0m  10 expect() calls Ran 8 tests across 1 file. [0m[2m[[1m5.17s[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-mutation-encoding.test.ts|[0m[32m 19 pass[0m [0m[31m 24 fail[0m  81 expect() calls Ran 43 tests across 1 file. [0m[2m[[1m127.00ms[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-pdf-reference-session.test.ts|[0m[32m 6 pass[0m [0m[31m 5 fail[0m  21 expect() calls Ran 11 tests across 1 file. [0m[2m[[1m510.00ms[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-pdf-unprivileged.test.ts|[0m[32m 4 pass[0m [0m[31m 10 fail[0m  23 expect() calls Ran 14 tests across 1 file. [0m[2m[[1m540.00ms[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-read-large.test.ts|[0m[32m 16 pass[0m [0m[31m 11 fail[0m  32 expect() calls Ran 27 tests across 1 file. [0m[2m[[1m487.00ms[0m[2m][0m 
+worktree-parity-083|tests/func/wave0184-read-utf16.test.ts|[0m[32m 5 pass[0m [0m[31m 8 fail[0m  16 expect() calls Ran 13 tests across 1 file. [0m[2m[[1m117.00ms[0m[2m][0m 
+worktree-parity-083|tests/unit/wave0184-binary-read.test.ts|[0m[32m 2 pass[0m [0m[31m 7 fail[0m  15 expect() calls Ran 9 tests across 1 file. [0m[2m[[1m454.00ms[0m[2m][0m 
+worktree-parity-083|tests/unit/wave0184-mutation-guards.test.ts|[0m[32m 1 pass[0m [0m[31m 32 fail[0m  44 expect() calls Ran 33 tests across 1 file. [0m[2m[[1m80.00ms[0m[2m][0m 
+worktree-parity-083|tests/unit/wave0184-pdf-reference.test.ts|[0m[32m 3 pass[0m [0m[31m 3 fail[0m  17 expect() calls Ran 6 tests across 1 file. [0m[2m[[1m506.00ms[0m[2m][0m 
+worktree-parity-083|tests/unit/wave0184-read-large-contract.test.ts| 0 pass[0m [0m[31m 1 fail[0m  [0m[31m1 error[0m Ran 1 test across 1 file. [0m[2m[[1m430.00ms[0m[2m][0m 
+worktree-parity-083|tests/unit/wave0184-text-encoding.test.ts| 0 pass[0m [0m[31m 1 fail[0m  [0m[31m1 error[0m Ran 1 test across 1 file. [0m[2m[[1m10.00ms[0m[2m][0m 

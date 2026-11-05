@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","object":"chat.completion.chunk","created":1793869068,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" harness"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s own"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Compiler"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Bridge would"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" run mock"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-mode"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" There"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no real"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bisheng on"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this machine ("}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"no C"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ANN install). The"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" asked to"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"implement\""}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the operator —"}}]}
+
+data: {"id":"chatcmpl-ddcd4ed8-9daa-4a29-9b14-c4ea61cb4aa4","created":1793869068,"model":"glm-5","object":"chat.completion.chunk","choices":[{"ind

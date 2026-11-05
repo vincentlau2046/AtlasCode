@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","object":"chat.completion.chunk","created":1793853603,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill tool says"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Unknown skill: ascend-perf"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-optimize\". The skill list"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" said"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" invoke via /skill-name."}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Maybe the skill"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" name needs to be exactly"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed. Let me check available"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skills. The system prompt said"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Skills — invoke via /skill"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-name\" with"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" names like"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-per"}}]}
+
+data: {"id":"chatcmpl-50be063a-b0c2-47e5-ad79-1614a8be2ffd","created":1793853603,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"f-optimize. But the"}}]}
+
+data: {"i

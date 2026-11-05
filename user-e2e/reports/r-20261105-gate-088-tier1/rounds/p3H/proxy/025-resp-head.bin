@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","object":"chat.completion.chunk","created":1793859155,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"No"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bisheng, no C"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ANN toolkit, no torch,"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" empty"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace. The environment"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no Asc"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end toolchain. The"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dedicated"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend tools are"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" absent"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" too"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". I"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should still do"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" my"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" best: build"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the complete"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" four-piece project with"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" real,"}}]}
+
+data: {"id":"chatcmpl-3138506f-d956-481a-bddc-e4e89563bf2c","created":1793859155,"model":"gl

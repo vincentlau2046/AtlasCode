@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","object":"chat.completion.chunk","created":1793858162,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a brand-new RMSNorm kernel"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in Triton for Ascend"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" NPU from scratch. This"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is a request"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" about"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" writing"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" code"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Triton language"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" targeting Ascend NPU."}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Trit"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"on-"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Ascend is"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a thing"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (tr"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-ascend project"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" from"}}]}
+
+data: {"id":"chatcmpl-bb40d42d-93bb-48d9-ab69-11eb8bf4c9d9","created":1793858162,"model":"glm-5"

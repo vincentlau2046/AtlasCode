@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","object":"chat.completion.chunk","created":1793858349,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks to"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" write a brand-new RMSNorm"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel in Triton for Asc"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end NPU from scratch."}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" This matches"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-opdev — a"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" NEW operator requested"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and language/framework matters ("}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Triton on"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend). The"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" umbrella skill says:"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" decide the language/framework route first"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", then hand off to that"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workflow's skills.\n\nI should"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" invoke the Skill tool with ascend"}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-opdev."}}]}
+
+data: {"id":"chatcmpl-8a9317e4-17b8-4e2b-bc6c-95d06fc6353e","created":1793858349,"model":"glm-5","object":"chat.completion.chunk","choices"

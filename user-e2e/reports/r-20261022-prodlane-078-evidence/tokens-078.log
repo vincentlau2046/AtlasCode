@@ -1,0 +1,20 @@
+bytes: npm77=17819528 npm78=17818865
+--- 本波面 @ npm78（红→绿：A1/A2/A3-2 清零 + A3-1 恒等锚在场）---
+anthropic_beta               npm77=0    npm78=0   
+anthropic-ratelimit          npm77=0    npm78=0   
+anthropic_cloud              npm77=1    npm78=0   
+claude.ai subscription       npm77=1    npm78=0   
+isFirstPartyGatewayUrl       npm77=4    npm78=0   
+CLAUDEAI_SERVER_PREFIX       npm77=6    npm78=0   
+isDefaultGateway             npm77=0    npm78=4   
+downloads.claude.ai          npm77=1    npm78=1   
+claude-plugins-official      npm77=30   npm78=30  
+mismatch(npm78 本波面)=0
+--- 前 22 波（0.1.56–0.1.77）token 零回归 npm77↔npm78 ---
+DIFF 0.1.73 claude.ai                                  npm77=19   npm78=13  
+total prior tokens=160 diffs=1
+  KNOWN-DELETE: ('0.1.73', 'claude.ai', 19, 13) （0.1.78 本波 A1/A3-2 删面定因，非回归）
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm77=0    npm78=0   
+foreground (default)                       npm77=0    npm78=0   
+Set run_in_background to true to launch    npm77=0    npm78=0   

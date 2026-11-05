@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","object":"chat.completion.chunk","created":1793855206,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9926d2e58759c3a1","function":{"arguments":"{\"path\": \"/home","name":"Glob"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/.claude/j"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"obs/09264df"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0/tmp/gate-08"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"8/tier1/p1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"H-pass2/pro"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"f"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"pattern\": \"**/*"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0},{"id":"chatcmpl-tool-9f1d5d59c7991559","function":{"arguments":"","name":"Glob"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"path\": \"/home/vince"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1H-pass"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-495ba4a5-ac18-455c-bd8d-cc1d270ae05b","created":1793855206,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/ws"},"t

@@ -1,0 +1,6 @@
+[0m[1mbun test [0m[2mv1.4.2 (744846f84)[0m
+
+[0m[32m 74 pass[0m
+[0m[2m 0 fail[0m
+ 380 expect() calls
+Ran 74 tests across 8 files. [0m[2m[[1m2.27s[0m[2m][0m

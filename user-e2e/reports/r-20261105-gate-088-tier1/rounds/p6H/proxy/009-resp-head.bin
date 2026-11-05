@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","object":"chat.completion.chunk","created":1793863531,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory is empty. There"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no kernel,"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no op"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_summary CSV"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The user claims"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" their"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" mat"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"mul kernel is the bottleneck per"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ms"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof op_summary,"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" but nothing"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" exists here"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check if"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" there's an"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" op_summary anywhere"}}]}
+
+data: {"id":"chatcmpl-32242ecf-81d7-49d7-bcfe-e11663362f7f","created":1793863531,"model":

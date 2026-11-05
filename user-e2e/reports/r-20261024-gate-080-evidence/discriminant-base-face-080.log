@@ -1,0 +1,231 @@
+bun test v1.4.2 (744846f84)
+
+tests/func/wave0180-k1d-resume-preserved-fs.test.ts:
+339 |     // 两支各一（metadata 支 description="expand history" / 默认支 "expand"）
+340 |     expect(src.match(/fallback="ctrl\+o"/g)?.length).toBe(2)
+341 |   })
+342 | 
+343 |   test('⑧ 存储位置说明（两支 dim 行在场）', () => {
+344 |     expect(src.match(/Summary is saved to the session transcript and restored on resume/g)?.length).toBe(2)
+                                                                                                          ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/func/wave0180-k1d-resume-preserved-fs.test.ts:344:101)
+(fail) K1-D 压缩行 UI 三件（ctrl+o 可达 + 存储位置说明 + 全屏显示） > ⑧ 存储位置说明（两支 dim 行在场） [0.10ms]
+
+tests/unit/wave0180-k1f-tools-abort.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'stableSortDedupeTools' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/src/modelprovider/params.ts'.
+-------------------------------
+
+
+tests/unit/wave0180-k1e-stream-idle.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../../src/modelprovider/streamIdleWatchdog' from '/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1e-stream-idle.test.ts'
+-------------------------------
+
+
+tests/unit/wave0180-k1b-model-prefix.test.ts:
+58 |     [`other/${BARE}`]: { kind: 'off' },
+59 |   }
+60 | 
+61 |   test('前缀名请求 → 命中裸名键档位（修前红：回落 default/缺省）', () => {
+62 |     const res = resolveAutoCompactWindow(map, PREFIXED)
+63 |     expect(res.windowOverride).toBe(100_000)
+                                    ^
+error: expect(received).toBe(expected)
+
+Expected: 100000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1b-model-prefix.test.ts:63:32)
+(fail) K1-B① /autocompact 档位键（resolveAutoCompactWindow） > 前缀名请求 → 命中裸名键档位（修前红：回落 default/缺省） [0.13ms]
+92 |   test('前缀名请求 → 命中声明窗位（修前红：miss → 262144 错窗）', async () => {
+93 |     withDeclaredProvider()
+94 |     const { getProviderContextWindow } = await import(
+95 |       '../../src/modelprovider/capabilities'
+96 |     )
+97 |     expect(getProviderContextWindow(PREFIXED)).toBe(DECLARED_WINDOW)
+                                                    ^
+error: expect(received).toBe(expected)
+
+Expected: 300000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1b-model-prefix.test.ts:97:48)
+(fail) K1-B① 压缩窗位计算（getProviderContextWindow basename 回落） > 前缀名请求 → 命中声明窗位（修前红：miss → 262144 错窗） [0.12ms]
+116 | })
+117 | 
+118 | describe('K1-B① /effort 档位键（resolveAppliedEffort per-model 记忆）', () => {
+119 |   test('前缀名请求 → 命中裸名键档位（修前红：记忆失忆回落 appState/default）', () => {
+120 |     setEffortByModelSource(() => ({ [BARE]: 'high' }))
+121 |     expect(resolveAppliedEffort(PREFIXED, undefined)).toBe('high')
+                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "high"
+Received: "medium"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1b-model-prefix.test.ts:121:55)
+(fail) K1-B① /effort 档位键（resolveAppliedEffort per-model 记忆） > 前缀名请求 → 命中裸名键档位（修前红：记忆失忆回落 appState/default） [0.11ms]
+126 |     expect(resolveAppliedEffort(BARE, undefined)).toBe('high')
+127 |   })
+128 | 
+129 |   test('前缀名大小写不敏感（existing case-insensitive 语义在 basename 面保留）', () => {
+130 |     setEffortByModelSource(() => ({ [BARE]: 'high' }))
+131 |     expect(resolveAppliedEffort('Volc/Qwen3-235B', undefined)).toBe('high')
+                                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "high"
+Received: "medium"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1b-model-prefix.test.ts:131:64)
+(fail) K1-B① /effort 档位键（resolveAppliedEffort per-model 记忆） > 前缀名大小写不敏感（existing case-insensitive 语义在 basename 面保留） [0.03ms]
+
+tests/unit/wave0180-k1c-compact-model-switch.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../../src/tui/contextBodies/compactModelSwitch' from '/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1c-compact-model-switch.test.ts'
+-------------------------------
+
+
+tests/unit/wave0180-k1f-thinking-budget.test.ts:
+88 |     // 220_000 < 阈值 229_144；+10_000 预算 = 230_000 ≥ 229_144 → 触发
+89 |     const withBudget = await shouldAutoCompact(
+90 |       MESSAGES,
+91 |       compactDeps(220_000, 10_000),
+92 |     )
+93 |     expect(withBudget).toBe(true)
+                            ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-thinking-budget.test.ts:93:24)
+(fail) K1-F⑤ shouldAutoCompact thinkingBudgetTokens 计入 > a) 预算计入后跨阈值触发（修前红：修前比较不含预算恒 false） [0.22ms]
+126 | describe('K1-F⑤ buildAgentLoopParams thinkingBudgetTokens 装配', () => {
+127 |   test('e) enabled 型 budgetTokens 透传（--max-thinking-tokens 面）', () => {
+128 |     const { args } = buildAgentLoopParams(
+129 |       makeMaterials({ type: 'enabled', budgetTokens: 16_384 }),
+130 |     )
+131 |     expect(args.context?.autoCompact?.thinkingBudgetTokens).toBe(16_384)
+                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 16384
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-thinking-budget.test.ts:131:61)
+(fail) K1-F⑤ buildAgentLoopParams thinkingBudgetTokens 装配 > e) enabled 型 budgetTokens 透传（--max-thinking-tokens 面） [5.49ms]
+
+tests/unit/wave0180-k1c-token-warning-tier.test.ts:
+ 97 |       [BARE]: { kind: 'window', tokens: 60_000 },
+ 98 |     }))
+ 99 |     const bare = calculateTokenWarningState(20_000, BARE)
+100 |     const prefixed = calculateTokenWarningState(20_000, PREFIXED)
+101 |     // 前缀名经 basename 命中裸名键档位 + 裸名声明窗位 → 全态同值
+102 |     expect(prefixed.percentLeft).toBe(bare.percentLeft)
+                                       ^
+error: expect(received).toBe(expected)
+
+Expected: 26
+Received: 91
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1c-token-warning-tier.test.ts:102:34)
+(fail) K1-C③ 用量百分比分母随窗校准（calculateTokenWarningState model-string 形） > b) 前缀名请求 → basename 回落取同档同分母（K1-B① 联动锁） [0.09ms]
+
+tests/unit/wave0180-k1f-agent-window.test.ts:
+115 |       errors: [],
+116 |     })
+117 |     const { args } = buildAgentLoopParams(
+118 |       makeMaterials({ autoCompactWindowOverride: 222_000 }),
+119 |     )
+120 |     expect(args.context?.autoCompact?.windowOverride).toBe(222_000)
+                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: 222000
+Received: 128000
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-agent-window.test.ts:120:55)
+(fail) K1-F③ buildAgentLoopParams windowOverride 优先级链 > b) frontmatter > settings 档位（per-agent 声明压过全局档位；修前红：修前装配体吞 frontmatter 值恒回 settings 档） [0.14ms]
+152 |       name: 'demo',
+153 |       description: 'd',
+154 |       autoCompactWindow: 150_000,
+155 |     })!
+156 |     expect(a.agentType).toBe('demo')
+157 |     expect(a.autoCompactWindow).toBe(150_000)
+                                      ^
+error: expect(received).toBe(expected)
+
+Expected: 150000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-agent-window.test.ts:157:33)
+(fail) K1-F③ autoCompactWindow 解析面（loadAgentsDir tui twin） > e) markdown frontmatter 数字 150000 → agentDef.autoCompactWindow 透传 [0.35ms]
+161 |     const a = md({
+162 |       name: 'demo',
+163 |       description: 'd',
+164 |       autoCompactWindow: '150000',
+165 |     })!
+166 |     expect(a.autoCompactWindow).toBe(150_000)
+                                      ^
+error: expect(received).toBe(expected)
+
+Expected: 150000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-agent-window.test.ts:166:33)
+(fail) K1-F③ autoCompactWindow 解析面（loadAgentsDir tui twin） > f) 字符串形 "150000" 同样有效（YAML 宽容面，maxTurns 同款 parser） [0.04ms]
+187 |     const withWindow = parseAgentFromJson('demo', {
+188 |       description: 'd',
+189 |       prompt: 'You are a demo agent.',
+190 |       autoCompactWindow: 99_000,
+191 |     })!
+192 |     expect(withWindow.autoCompactWindow).toBe(99_000)
+                                               ^
+error: expect(received).toBe(expected)
+
+Expected: 99000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-agent-window.test.ts:192:42)
+(fail) K1-F③ autoCompactWindow 解析面（loadAgentsDir tui twin） > i) JSON 定义透传（--agents 面同字段；缺省不带键） [5.32ms]
+210 |     expect(deps.sessionModel).toBe(SUBAGENT_MODEL)
+211 |     // autoCompact 无条件入 args.context（TUI 子代理车道 = 独立压缩面）
+212 |     expect(args.context?.autoCompact).toBeDefined()
+213 |     expect(args.context?.autoCompact?.contextWindow).toBeGreaterThan(0)
+214 |     // frontmatter 窗位覆写生效（长任务 agent 声明 100k → 提前压缩）
+215 |     expect(args.context?.autoCompact?.windowOverride).toBe(100_000)
+                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: 100000
+Received: undefined
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1f-agent-window.test.ts:215:55)
+(fail) K1-F④ 子代理独立窗位（双面现状锚） > a) TUI 车道：autoCompact 无条件装配 + 窗位按子代理自己模型独立 + frontmatter 覆写生效 [0.11ms]
+
+tests/unit/wave0180-k1a-idle-compaction.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../../src/engine/context/idleCompaction' from '/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-base079/tests/unit/wave0180-k1a-idle-compaction.test.ts'
+-------------------------------
+
+
+ 34 pass
+ 17 fail
+ 4 errors
+ 112 expect() calls
+Ran 51 tests across 10 files. [1387.00ms]

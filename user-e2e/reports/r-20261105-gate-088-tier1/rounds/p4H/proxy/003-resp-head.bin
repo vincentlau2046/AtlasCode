@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","object":"chat.completion.chunk","created":1793860839,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants fault"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triage for"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a compile failure"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" —"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" syntax"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" error in tiling code."}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-debug skill is"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the match"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me invoke the"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill tool. Actually"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", the instruction"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" says use"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skills via"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tool. This"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":1793860839,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is a compile error"}}]}
+
+data: {"id":"chatcmpl-9137fc9d-f02c-46b0-bb25-c48f0d3f7170","created":17938

@@ -1,0 +1,42 @@
+=== tsc ===
+$ tsc --noEmit
+tsc-rc=0
+=== eslint ===
+$ eslint src/
+error: script "lint" was terminated by signal SIGSEGV (Address boundary error)
+/home/vince/.claude/jobs/09264df0/tmp/gate-080/fourpiece-080.sh: 第 7 行： 1135097 段错误               （核心已转储） bun run lint 2>&1
+     1135098 已完成               | tail -3
+eslint-rc=139
+=== build ===
+  cli.js  17.90 MB  (entry point)
+
+build-rc=0
+cli.js=17901539 bytes
+=== CI 全量 ===
+Expected to contain: "\u001B[41m"
+Received: "x"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/colorize-d4.test.ts:66:17)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 裸名 background：SGR 在场且背景码（red → \u001b[41m） [0.05ms]
+68 |   })
+69 | 
+70 |   it('16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红）', () => {
+71 |     for (const name of ALL_16) {
+72 |       const out = colorize('x', name, 'foreground')
+73 |       expect(out.startsWith('\u001b['), `${name} 无 SGR 前缀`).toBe(true)
+                                                                 ^
+error: black 无 SGR 前缀
+
+Expected: true
+Received: false
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-080-final/tests/unit/colorize-d4.test.ts:73:61)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红） [0.06ms]
+
+ 4693 pass
+ 3 fail
+ 13160 expect() calls
+Ran 4696 tests across 362 files. [447.45s]
+error: script "test" exited with code 1
+ci-rc=1
+=== FOURPIECE-080-DONE ===

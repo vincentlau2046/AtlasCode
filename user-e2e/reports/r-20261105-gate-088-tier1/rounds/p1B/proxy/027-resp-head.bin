@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","object":"chat.completion.chunk","created":1793857096,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Wrap"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" up."}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Note honestly"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" that"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compile/g"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"olden validation"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" could"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not run —"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"endCompilerBridge/Ascend"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"GoldenTest tools are not available"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in this session's"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" registry"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", and no"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" real NPU. Keep"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" it"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" short"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" end with the"}}]}
+
+data: {"id":"chatcmpl-7d80b65f-3aa6-4ce3-bb58-628c36a7a853","created":1793857096,"model":"glm-5","

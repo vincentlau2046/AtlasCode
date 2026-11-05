@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","object":"chat.completion.chunk","created":1793863805,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b4c6292538f06823","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls -la /home"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/work/gemm_asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endc/csrc/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; echo ==="},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; cat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/work"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gemm_ascendc/test"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_Gemm"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py\", \"description\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Check"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" gemm_ascendc contents"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","object":"chat.completion.chunk","created":1793863805,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-594606bc-3659-4678-a3ae-00ca2dc5e3d9","created":1793863805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":58,"prompt_tokens":30032,"total_tokens":30090,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":28800}}}
+
+data: [DONE

@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","object":"chat.completion.chunk","created":1793857890,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end tools are"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the system prompt but Tool"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Search doesn't find"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" them —"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they're"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" MCP tools,"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" maybe directly"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" inv"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ocable?"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The available"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" functions list"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at top"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" only"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" includes ms"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof-mcp tools"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" plus"}}]}
+
+data: {"id":"chatcmpl-7f08741a-1550-4a7d-ae1f-83317b86f4d0","created":1793857890,"model":"glm-5","object"

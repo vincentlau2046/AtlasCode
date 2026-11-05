@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","object":"chat.completion.chunk","created":1793854796,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8c2c0b7a6106ee12","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; ls /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/prof "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>/dev/null; cat"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":1793854796,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-71945b72-1181-4c80-8c97-6136c563e8a8","created":179

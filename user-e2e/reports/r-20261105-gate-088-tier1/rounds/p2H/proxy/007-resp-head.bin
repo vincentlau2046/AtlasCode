@@ -1,0 +1,43 @@
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"No"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Trit"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"on/torch installed"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" ("}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"numpy only"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":")."}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" I'll write the kernel so"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" it imports"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Trit"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"on lazily and"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" ships"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" a pure"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-numpy golden"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" reference"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":", then"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" syntax"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-validate"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" with"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"delta":{"content":"ast`/"}}]}
+
+data: {"id":"chatcmpl-8b4b506f-6d3c-4b8a-91c0-9217c9eed5cb","object":"chat.completion.chunk","created":1793858220,"model":"glm-5","choices":[{"index":0,"de

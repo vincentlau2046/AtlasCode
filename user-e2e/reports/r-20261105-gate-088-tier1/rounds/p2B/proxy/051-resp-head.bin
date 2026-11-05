@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","object":"chat.completion.chunk","created":1793858561,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b1ff90339e6c1bd4","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"python"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3 -c \\\"import datetime"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":",random; ts"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"=datetime.datetime.now().strftime('%"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Y%m%d_%H%M"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"'); rid=random.randint(100"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0,9999); print"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"(f'{ts}_{rid}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"')\\\"\", \"description\": \""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Get"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" timestamp and random id"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" for work dir"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ed3d04d3-6ac9-41ac-a6a8-e026bb6b81d2","created":1793858561,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b281409bdcceb9b5","function":{"arguments":"{\"file_path\": \"","name":"Read"

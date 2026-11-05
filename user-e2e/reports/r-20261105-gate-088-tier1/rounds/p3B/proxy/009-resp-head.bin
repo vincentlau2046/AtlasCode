@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","object":"chat.completion.chunk","created":1793858861,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools aren't deferred —"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" they should"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" be available directly"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". But"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" looking"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" at my"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" function list, I don't"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" see"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" AscendSpecParser etc"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". in the"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" provided"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" functions. The available"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" MCP"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools are ms"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof ones"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Hmm"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the tools"}}]}
+
+data: {"id":"chatcmpl-9ce8d8fa-e8cc-429e-9e11-6a57589abcee","created":1793858861,"model":"glm

@@ -1,0 +1,4 @@
+outcome=hung
+thrownIsStreamIdleTimeout=false
+seen=[1]
+returnCalled=true

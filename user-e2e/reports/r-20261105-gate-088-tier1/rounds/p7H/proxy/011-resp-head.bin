@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","object":"chat.completion.chunk","created":1793865805,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" routed skill exists on disk as"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" `"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"cannbot-triton-op"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-generator-skills/1."}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"0.0`"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with sub-skills:"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton-task-extractor,"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton-op-designer,"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton-op-coding,"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triton-op"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-verifier, tr"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton-latency-optimizer."}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The Skill tool can"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t invoke it by"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" name;"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I'll read the sub"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-skill files"}}]}
+
+data: {"id":"chatcmpl-c50144ae-6f93-48ce-8a14-d82cc12d6315","created":1793865805,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directly and follow the workflow"}}]}
+
+dat

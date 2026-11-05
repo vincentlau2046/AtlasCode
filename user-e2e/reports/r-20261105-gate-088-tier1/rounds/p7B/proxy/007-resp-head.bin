@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","object":"chat.completion.chunk","created":1793865614,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Fresh"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Route"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": Triton requested"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" explicitly"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" → cannbot-triton-op"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-generator-skills (pre"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"installed)"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or community-triton-op-sk"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ills. The user says"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"brand-new RMSNorm kernel"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in Triton from"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" scratch\". The"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" cann"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"bot-triton-op-generator-sk"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ills is"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the Trit"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"on-Ascend flow"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": task extraction, algorithm design"}}]}
+
+data: {"id":"chatcmpl-b2ad63cb-06c8-4b72-97dd-ecadb8f0169f","created":1793865614,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", code generation, ve

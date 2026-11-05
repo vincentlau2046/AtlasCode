@@ -1,0 +1,16 @@
+=== domain1: K3-A1 12-concurrency pool ===
+  peak=12 results-in-order=true
+DOMAIN1-GREEN
+=== domain2: K3-L20 name sanitization ===
+  unsafe-set rejected, safe-set passthrough, display-fallback ok
+DOMAIN2-GREEN
+=== domain3: K3-B6 plan-mode write gate ===
+  ① check-allow write → deny
+  ② allow-rule write → deny
+  ③ read-only → ask
+  ④ undeclared isReadOnly → deny (fail-closed)
+  ⑤ EnterPlanMode → ask (not plan-denied)
+  ⑤ ExitPlanMode → ask (not plan-denied)
+  ⑥ bypass-start → allow
+DOMAIN3-GREEN
+K3-PROBE-ALL-GREEN

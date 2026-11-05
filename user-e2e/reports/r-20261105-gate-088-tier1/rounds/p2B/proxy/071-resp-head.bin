@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","object":"chat.completion.chunk","created":1793858721,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"As"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" expected:"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" `"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ModuleNotFoundError: No module named"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 'torch'` — B"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-class environment error (no torch"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"/t"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"orch_npu/tr"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iton, no NPU hardware"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"). Per workflow"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": B-class →"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" terminate with"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failure report. Phase"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 4 ("}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"benchmark"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":") can"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t run either"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":1793858721,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\n\nThe"}}]}
+
+data: {"id":"chatcmpl-fcfc21bd-4539-4a2f-b15d-9da26e83308c","created":

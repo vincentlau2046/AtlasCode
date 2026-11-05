@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","object":"chat.completion.chunk","created":1793866032,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"I"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" have enough to"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" design the sketch. RMS"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Norm: shape"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" [32,128"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":",1024] fp16"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" → flatten to M"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"=4096 rows,"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" N=1024. Reduce"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" axis N=1024 fits"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" entirely"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in one block"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (BLOCK"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_N"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"=1024),"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" so each"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" program handles one row ("}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"or a few rows). Grid"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" = M"}}]}
+
+data: {"id":"chatcmpl-45b05c80-797e-4b62-933f-ae8e6242ef0d","created":1793866032,"

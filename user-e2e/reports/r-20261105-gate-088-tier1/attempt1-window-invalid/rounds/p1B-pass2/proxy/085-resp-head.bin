@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","object":"chat.completion.chunk","created":1793855099,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a1c3275aad916399","function":{"arguments":"","name":"Grep"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"-i\": "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"true, \"output_mode\": \"content"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"path\": \"/home/v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ince/.claude/jobs"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/09264df0"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tmp/gate-088"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/tier1/p1B"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-pass2/proxy"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"pattern\": \"Asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endCompilerBridge|Ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"GoldenTest"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","object":"chat.completion.chunk","created":1793855099,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-d1aa8076-b323-4464-97f7-ab23aaccb881","created":1793855099,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":68,"prompt_tokens":37321,"total_tokens":37389,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":36864}

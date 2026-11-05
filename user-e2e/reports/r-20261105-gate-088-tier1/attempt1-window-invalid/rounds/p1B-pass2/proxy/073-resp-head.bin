@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","object":"chat.completion.chunk","created":1793855071,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-84cd8a909573e655","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"ls /"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"home/vince/miniconda"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3/envs"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"List con"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"da environments\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","object":"chat.completion.chunk","created":1793855071,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ce8a47b4-6554-4eda-9c4c-95996050da1d","created":1793855071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":31,"prompt_tokens":36970,"total_tokens":37001,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":36864}}}
+
+data: [DONE]
+

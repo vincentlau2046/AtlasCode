@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","object":"chat.completion.chunk","created":1793857511,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"This"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" README describes"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a completed"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" prior"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" pass"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" but the files"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" listed"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" (matmul_pipeline_kernel"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".cpp, golden_test.py)"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" don't exist —"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" only README.md."}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" My"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory is `"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"p1B-pass2/ws"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"` which is empty."}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" So"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this"}}]}
+
+data: {"id":"chatcmpl-58d6000b-fbcb-477f-96c9-20ddd41ea408","created":1793857511,"model":"glm-5","obj

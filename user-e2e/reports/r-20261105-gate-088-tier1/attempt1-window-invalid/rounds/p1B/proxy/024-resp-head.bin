@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","object":"chat.completion.chunk","created":1793853686,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-846d834017e4ac85","function":{"arguments":"","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/p1B/agent-sk"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ills/official/CANNBot"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ops/ascendc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-perf-optimize/references"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/single-core-pipeline/index.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0},{"id":"chatcmpl-tool-9a2152954c443841","function":{"arguments":"","name":"Read"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-28150780-583e-4443-a572-2e089b9f8052","created":1793853686,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{

@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","object":"chat.completion.chunk","created":1793865973,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b8fccc33466c8bb0","function":{"arguments":"{\"command\": \"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/home/vince/miniconda"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3/envs/qwen36"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-35b-vllm"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/bin/python /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/plugins/cache/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ascend-agent-skills/c"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"annbot-triton-op-generator"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-skills/1.0"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".0/triton-task-ex"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"tractor/scripts/validate_task.py"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-018efeab-1ca5-43a4-affe-7f5fafcdad39","created":1793865973,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":0}]}}

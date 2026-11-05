@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","object":"chat.completion.chunk","created":1793854802,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a4be564d7379f735","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"find /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B-pass"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2/prof/PROF"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_0001 -type f"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" | head -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"20"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"List files"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" in the p"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1B-pass2 PROF dump"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","object":"chat.completion.chunk","created":1793854802,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-0b236250-6b02-4d5e-b158-21c359743aa4","created":1793854802,"model":"glm-5","objec

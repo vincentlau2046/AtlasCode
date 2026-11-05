@@ -1,0 +1,19 @@
+bytes: gate76=17828438 npm75=17815492 npm76=17819528
+--- 本波 token @ npm76（gate76 对照，逐项同值）---
+scope-gating/present ATLAS_MCP_OAUTH_TRUSTED_SERVERS        gate76=1    npm75=0    npm76=1   
+scope-gating/present applyMcpOauthScopeGate                 gate76=3    npm75=0    npm76=3   
+scope-gating/present isMcpOauthBlockGated                   gate76=3    npm75=0    npm76=3   
+scope-gating/present isMcpOauthUntrustedScope               gate76=2    npm75=0    npm76=2   
+scope-gating/present isMcpOauthDisplayGated                 gate76=8    npm75=0    npm76=8   
+scope-gating/present getMcpOauthTrustedServers              gate76=2    npm75=0    npm76=2   
+scope-gating/present parseMcpOauthTrustedServersEnv         gate76=2    npm75=0    npm76=2   
+scope-gating/present mcpOauthGatedMessage                   gate76=3    npm75=0    npm76=3   
+scope-gating/present withoutMcpOauthTrustedServersVars      gate76=2    npm75=0    npm76=2   
+scope-gating/present oauth gated (untrusted scope)          gate76=2    npm75=0    npm76=2   
+mismatch(gate76 vs npm76)=0
+--- 前 20 波（0.1.56–0.1.75）token 零回归 npm75↔npm76 ---
+total prior tokens=144 diffs=0
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm75=0    npm76=0   
+foreground (default)                       npm75=0    npm76=0   
+Set run_in_background to true to launch    npm75=0    npm76=0   

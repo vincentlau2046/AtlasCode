@@ -1,0 +1,18 @@
+LOOPROB-RC=0
+[R1-nominal] 无故障基线：多步任务应完成（其他场景的对照组）
+  [R1-nominal] completed=true exit=0 ms=47385 tools=20 crashed=false zeroContent=false | I1=true I2=true I3=true
+[R1-500-transient] 前 2 次 500（在 provider 3 次重试预算内）→ 应恢复并完成
+  [R1-500-transient] completed=true exit=1 ms=23485 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true
+[R1-drop-transient] 第 1 次断连（ECONN，可重试）→ 应恢复并完成
+  [R1-drop-transient] completed=false exit=1 ms=649 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true | GAP: 任务未完成且静默空内容（I2 击穿：可能空 0-0 反复 emptyTerminated 或静默丢弃）
+[R1-empty-bounded] 第 2 次空 0-0（R1 有界 1 次重试面）→ 应不崩、非静默
+  [R1-empty-bounded] completed=false exit=1 ms=281 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true | GAP: 任务未完成且静默空内容（I2 击穿：可能空 0-0 反复 emptyTerminated 或静默丢弃）
+[R1-delay] 每次 +2s（模拟慢模型，post-#260 不应提前 fail-fast）→ 应完成
+  [R1-delay] completed=false exit=1 ms=2217 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true | GAP: 任务未完成且静默空内容（I2 击穿：可能空 0-0 反复 emptyTerminated 或静默丢弃）
+[R1-500-storm] 40 次连续 500（超 3 次重试预算）→ 暴露「loop 无回合级错误恢复」缺口（预期：任务不完成，非静默）
+  [R1-500-storm] completed=false exit=1 ms=1671 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true
+[R3-resume] ① SIGKILL@25000ms → sessionId=2fa1a07a-dbf6-4d8c-aa14-b66199db2436 killed=false
+[R3-resume] ② --resume 后 completed=false (missing: lib/math.js, lib/stats.js, lib/app.js, lib/run.test.js)
+
+[all] 完成 → /home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792780093879-e0ps
+=== LOOPROB-079-DONE ===

@@ -1,0 +1,20 @@
+
+Expected: [0m[32m"[0m[32mdeny[0m[32m"[0m
+Received: [0m[31m"[0m[31mask[0m[31m"[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-081/[0m[36mtests/unit/wave0182-plan-mode-write-gate.test.ts[0m[2m:[0m[33m139[0m[2m:[33m31[0m[2m)[0m
+[0m[31m✗[0m [0mK3-B6 plan 模式写拦截 fail-closed（上游 299 收紧）[2m >[0m[1m ⑤ 未声明 isReadOnly 的工具 → fail-closed 缺省=写，plan 态被拦[0m [0m[2m[0.06ms[0m[2m][0m
+[0m
+tests/unit/wave0182-l20-name-sanitization.test.ts:
+[0m
+[1m[2m#[0m [31m[1mUnhandled error[0m[2m between tests[0m
+[2m-------------------------------[0m
+[31merror[0m[2m: [0m[1mCannot find module '../../src/engine/skill/commandNameSafety.js' from '/home/vince/projects/AtlasCode/worktrees/worktree-parity-081/tests/unit/wave0182-l20-name-sanitization.test.ts'[0m
+[0m[2m-------------------------------[0m
+
+
+[0m[32m 54 pass[0m
+[0m[31m 109 fail[0m
+ [0m[31m2 errors[0m
+ 196 expect() calls
+Ran 163 tests across 26 files. [0m[2m[[1m1.96s[0m[2m][0m

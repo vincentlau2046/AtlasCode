@@ -1,0 +1,26 @@
+bytes(char): g74(npm 0.1.74)=17829643 g75(0.1.75 gate)=17824402
+DIFF 0.1.73 claude.ai                                  074=20   075=19  
+total prior tokens=132 diffs=1
+  DIFF: ('0.1.73', 'claude.ai', 20, 19)
+--- 0.1.75 波体 C-2b 销项面 @ dist（074→075 对照）---
+appendSessionLog                     074=4    075=0   
+getTeleportEvents                    074=0    075=0   
+getSessionIngressAuthToken           074=4    075=0   
+persistToRemote                      074=2    075=0   
+hydrateRemoteSession                 074=0    075=0   
+InternalEventWriter                  074=1    075=0   
+remote_launched                      074=0    075=0   
+RemoteLaunchedOutput                 074=0    075=0   
+ATLAS_SESSION_ACCESS_TOKEN           074=3    075=0   
+SESSION_INGRESS_URL                  074=2    075=0   
+CLAUDE_AI_BASE_URL                   074=2    075=0   
+sessionIngressToken                  074=6    075=0   
+--- 恒等锚面 @ dist（应在场）---
+class Project                        074=3    075=3   
+insertMessageChain                   074=6    075=6   
+flushSessionStorage                  074=3    075=3   
+getMcpServerHeaders                  074=4    075=4   
+ClaudeAuthProvider                   074=5    075=5   
+getOAuthTokenFromFileDescriptor      074=2    075=2   
+RemoteControlHandle                  074=0    075=0   
+atlas-code-20250219                  074=1    075=1   

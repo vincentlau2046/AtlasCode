@@ -1,0 +1,12 @@
+TUI-BLOCKD-0169 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-069/blockd-0169
+TUI-BUGFIX-0167 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-067/bugfix0167
+TUI-GOAL-CHECKIN-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/checkin-probe
+TUI-COMPACT-RECOVERY-0168 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-068/compact0168
+TUI-GH-0170 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-070/gh-0170
+TUI-GOAL-0162 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-062/goal-probe
+TUI-PROPOSE-GOAL-0163 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-063/propose-goal-probe
+TUI-QUOTA403-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/quota403-0171
+TUI-SPINNER-0164 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-064/spinner-probe
+TUI-UPDATENUDGE-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/updatenudge-0171
+WC0179 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-084/fam/wc0179
+verdict=PASS

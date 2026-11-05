@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] B1-C1-resume-prompt [PASS] B2-C2-file-state-rebuild [PASS] B2b-C2-no-file-empty-anchor [PASS] B3-C3-tool-continuation [PASS] B4-C4-session-start-hooks [PASS] B5-C5-post-compact-hooks [PASS] B7-C7-keep-recent-n [PASS] B7b-C7-zero-identity-anchor [PASS] S1-f1a-skip-carrier [PASS] A1-trimmed-failsafe-identity [PASS] A2-port-gate-failsafe [PASS] B6-C6-metadata-repin [PASS] F-AB-recovery-completeness [PASS] S2-loop-skip-gate [PASS] T1-f3a-small-window-disable [PASS] T2-f3a-warning-degrade [PASS] T3-f3a-large-window-identity [PASS] T4-f3a-surface-explicit [PASS] G4-C7-keeprecent-const"
+}
+TUI-COMPACT-RECOVERY-0168 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-068/compact0168

@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","object":"chat.completion.chunk","created":1793857450,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants me"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to optimize the kernel itself."}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" But there's no kernel source"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the workspace. I"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should use"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-perf-optimize"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill or /ascend-opt"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize?"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The user says"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline is the bottleneck"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The relevant"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill is /ascend-per"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"f-optimize (three"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-layer pipeline, intra"}}]}
+
+data: {"id":"chatcmpl-434d38ee-51bb-4d94-a82c-0042ddcfe742","created":1793857450,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core optimization"}}]}
+
+da

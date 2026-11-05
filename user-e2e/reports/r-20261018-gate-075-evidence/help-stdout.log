@@ -1,0 +1,10 @@
+[SC SC-20261018-172607-6vn] modes=help repo=/home/vince/projects/AtlasCode/worktrees/worktree-gate-075-final
+
+=== help ===  PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261018-172607-6vn/help
+  [PASS] help-present-files: /files 在场（W3 翻开，渲染集跟随命令表）
+  [PASS] help-present-tag: /tag 在场（W3 翻开，渲染集跟随命令表）
+  [PASS] help-control: 控制集（/help|/model|/clear）在场（列表真渲染）
+  [PASS] help-absent-deleted: 19 删项 + version 均不在渲染集（W1/W2 删项离场〔output-style = 0.1.60 重加，出缺席面〕+ version ATLAS_DEV 门 + W2 dev 表门）= /help 零增减缺席面（列表完整 = Space to cancel footer 在场）
+  [PASS] help-set-identity-062: /help 55 标签集恒等 = 0.1.62 权威集（54 + goal，工单 §3 基线 54→55，双形态注册 name 去重计 1 项；双向 diff ∅：缺 0 / 多 0）= /goal 命令标签在场 + 0.1.60 基线 54 标签零增减
+
+GATE-PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261018-172607-6vn

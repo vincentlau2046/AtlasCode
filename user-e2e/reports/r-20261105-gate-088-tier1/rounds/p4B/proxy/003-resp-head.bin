@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","object":"chat.completion.chunk","created":1793862071,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants triage of"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a compile fault ("}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"syntax error in tiling code"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"). The"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-debug skill is"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for triage. But there"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no actual"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" project"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" content"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" given. Let me check the"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory first"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" files"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" instruction says to"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" use"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72ae4d","created":1793862071,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skills"}}]}
+
+data: {"id":"chatcmpl-f2e4c141-9bc2-4389-bb5c-3271bc72a

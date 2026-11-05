@@ -1,0 +1,43 @@
+{
+  "ts": "2026-11-01T20:38:03.540Z",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-084-face",
+  "probes": [
+    {
+      "id": "M1-hard-deny-not-cleared",
+      "hard": true,
+      "ok": true,
+      "detail": "aggregateAutoModeSeverity({hard_deny,allow})（用户「do it」意图面 = allow 在场仍 hard_deny，无清除支；单测同形 M1）"
+    },
+    {
+      "id": "M2-rank-identity",
+      "hard": true,
+      "ok": true,
+      "detail": "rank 恒等（{soft_deny,allow}→soft_deny / {deny,allow}→allow 清除 / 无命中→allow 中性）= 既有 3 类聚合零回归"
+    },
+    {
+      "id": "M3-parametric-parse",
+      "hard": true,
+      "ok": true,
+      "detail": "parseParametricContent 活面（'model:premium'→{model:'premium'} / 非形 null / 空 param null）"
+    },
+    {
+      "id": "M4-hit-matrix",
+      "hard": true,
+      "ok": true,
+      "detail": "命中矩阵（Agent(model:premium) × input model=premium 命中 / fast 不命中 / 非声明字段不命中 = 全参 AND 语义活面）"
+    },
+    {
+      "id": "M5-default-identity",
+      "hard": true,
+      "ok": true,
+      "detail": "缺省/无参面恒等（content 形 null 不误判 + 多参 AND 表形）"
+    },
+    {
+      "id": "M7-dontask-fold",
+      "hard": false,
+      "ok": true,
+      "detail": "C9-3 flag 面（buildHeadlessOptions permissionPrompts:'none'→dontAsk + 缺省零变更；导出面缺席时 = 单测面承载定因登记不 gate）"
+    }
+  ],
+  "verdict": "PASS"
+}

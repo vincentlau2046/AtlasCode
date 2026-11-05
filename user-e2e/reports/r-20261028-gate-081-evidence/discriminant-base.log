@@ -1,0 +1,690 @@
+bun test v1.4.2 (744846f84)
+
+tests/func/mcp-config-k2-0181.test.ts:
+39 |       filePath: path,
+40 |       expandVars: true,
+41 |       scope: 'project',
+42 |     })
+43 |     // 旧实现：safeParseJSON('') → null → fatal「MCP config is not a valid JSON」→ 红
+44 |     expect(config).toEqual({ mcpServers: {} })
+                        ^
+error: expect(received).toEqual(expected)
+
+- {
+-   "mcpServers": {},
+- }
++ null
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/func/mcp-config-k2-0181.test.ts:44:20)
+(fail) K2 #17：空 .mcp.json = 合法空配置不报错（TUI parse 面） > 0 字节文件 → {mcpServers:{}} + 零 error [1.31ms]
+50 |     const { config, errors } = parseMcpConfigFromFilePath({
+51 |       filePath: path,
+52 |       expandVars: true,
+53 |       scope: 'project',
+54 |     })
+55 |     expect(config).toEqual({ mcpServers: {} })
+                        ^
+error: expect(received).toEqual(expected)
+
+- {
+-   "mcpServers": {},
+- }
++ null
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/func/mcp-config-k2-0181.test.ts:55:20)
+(fail) K2 #17：空 .mcp.json = 合法空配置不报错（TUI parse 面） > 纯空白文件（\n / 空格）→ {mcpServers:{}} + 零 error [1.98ms]
+62 |       filePath: path,
+63 |       expandVars: true,
+64 |       scope: 'project',
+65 |     })
+66 |     // 旧实现：schema 缺 mcpServers → fatal「Does not adhere to schema」→ 红
+67 |     expect(config).toEqual({ mcpServers: {} })
+                        ^
+error: expect(received).toEqual(expected)
+
+- {
+-   "mcpServers": {},
+- }
++ null
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/func/mcp-config-k2-0181.test.ts:67:20)
+(fail) K2 #17：空 .mcp.json = 合法空配置不报错（TUI parse 面） > 空 JSON 对象 {} → {mcpServers:{}} + 零 error [1.65ms]
+
+tests/func/mcp-stdio-k2-0181.test.ts:
+112 |       stdioCfg(process.execPath, [serverScript], { FAKE_K2_COUNT_FILE: countFile }),
+113 |     )
+114 |     expect(conn.type).toBe('connected')
+115 |     if (conn.type === 'connected') {
+116 |       // 回显面：旧实现发 '2025-03-26' → 此断言红
+117 |       expect(conn.serverInfo?.name).toBe('2026-07-28')
+                                          ^
+error: expect(received).toBe(expected)
+
+Expected: "2026-07-28"
+Received: "2025-03-26"
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/func/mcp-stdio-k2-0181.test.ts:117:37)
+(fail) K2 #1：协议协商版本 2026-07-28 + init 新字段容忍 > initialize 携带 2026-07-28（回显面）+ 新字段不致 failed + negotiatedProtocolVersion 落位 [16.31ms]
+135 |     const p1 = manager.connect('dedup', cfg)
+136 |     const p2 = manager.connect('dedup', cfg)
+137 |     const [r1, r2] = await Promise.all([p1, p2])
+138 |     expect(r1.type).toBe('connected')
+139 |     // 去重：两调用复用同一 attempt → 同结果对象（旧实现 2 次 spawn 两对象 → 红）
+140 |     expect(r1).toBe(r2)
+                     ^
+error: expect(received).toBe(expected)
+
+Expected: {
+  name: "dedup",
+  type: "connected",
+  client: {
+    request: [Function: request],
+    notify: [Function: notify],
+    onNotification: [Function: onNotification],
+    onRequest: [Function: onRequest],
+    onError: [Function: onError],
+    reportError: [Function: reportError],
+    onClose: [Function: onClose],
+    close: [Function: close],
+  },
+  capabilities: {
+    tools: true,
+  },
+  serverInfo: {
+    name: "2025-03-26",
+    version: "2",
+  },
+  instructions: "k2 fixture",
+  config: {
+    type: "stdio",
+    command: "/home/vince/.bun/bin/bun",
+    args: [ "/home/vince/.claude/jobs/09264df0/tmp/gate-081/tmp/atlas-mcp-k2-0181-bcMj3g/fake-k2-server.mjs" ],
+    env: {
+      FAKE_K2_COUNT_FILE: "/home/vince/.claude/jobs/09264df0/tmp/gate-081/tmp/atlas-mcp-k2-0181-bcMj3g/init-count.txt",
+      FAKE_K2_DELAY_MS: "200",
+    },
+    scope: "user",
+  },
+  cleanup: [AsyncFunction: cleanup],
+}
+Received: {
+  name: "dedup",
+  type: "connected",
+  client: {
+    request: [Function: request],
+    notify: [Function: notify],
+    onNotification: [Function: onNotification],
+    onRequest: [Function: onRequest],
+    onError: [Function: onError],
+    reportError: [Function: reportError],
+    onClose: [Function: onClose],
+    close: [Function: close],
+  },
+  capabilities: {
+    tools: true,
+  },
+  serverInfo: {
+    name: "2025-03-26",
+    version: "3",
+  },
+  instructions: "k2 fixture",
+  config: {
+    type: "stdio",
+    command: "/home/vince/.bun/bin/bun",
+    args: [ "/home/vince/.claude/jobs/09264df0/tmp/gate-081/tmp/atlas-mcp-k2-0181-bcMj3g/fake-k2-server.mjs" ],
+    env: {
+      FAKE_K2_COUNT_FILE: "/home/vince/.claude/jobs/09264df0/tmp/gate-081/tmp/atlas-mcp-k2-0181-bcMj3g/init-count.txt",
+      FAKE_K2_DELAY_MS: "200",
+    },
+    scope: "user",
+  },
+  cleanup: [AsyncFunction: cleanup],
+}
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/func/mcp-stdio-k2-0181.test.ts:140:16)
+(fail) K2 #14：并发连接去重（排队不重放） > 并发 2 connect → 同结果对象 + 底层 initialize 只发一次 [212.94ms]
+
+tests/unit/wave0181-k2-mcp-round-context-refresh.test.ts:
+162 |     const r = await queryAgentLoop(deps, {
+163 |       messages: [{ role: 'user', content: 'go' }] as Message[],
+164 |       tools: [makeEchoTool(), mkTool('OldTool')],
+165 |     })
+166 |     expect(r.terminated).toBe(true)
+167 |     expect(refreshCalls).toBe(2)
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-round-context-refresh.test.ts:167:26)
+(fail) K2 #13：refreshRoundContext 回合前上下文刷新缝 > per-round 刷新：round 2 见刷新工具池 + 注入附件消息（修前红：slot 缺席） [0.22ms]
+(fail) K2 #13：refreshRoundContext 回合前上下文刷新缝 > 刷新重套 #12 剥除面：已剥工具不因刷新回池（修前红） [5000.06ms]
+  ^ this test timed out after 5000ms.
+274 |       messages: [{ role: 'user', content: 'go' }] as Message[],
+275 |       tools: [makeEchoTool()],
+276 |     })
+277 |     // 刷新被调用两次（修前 slot 缺席 = 0 红）且异常未穿透：loop 存活、
+278 |     // 工具保持当前态（异常回合无换池）
+279 |     expect(refreshCalls).toBe(2)
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-round-context-refresh.test.ts:279:26)
+(fail) K2 #13：refreshRoundContext 回合前上下文刷新缝 > fail-safe：刷新异常 → 以当前态继续不穿透（修前红：断言刷新确被调用） [0.40ms]
+
+tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:
+53 |       parseToolSchemaRejectionError?: (err: unknown) => string | null
+54 |     }
+55 |     expect(
+56 |       parseToolSchemaRejectionError,
+57 |       'parseToolSchemaRejectionError 导出缺席（修前红）',
+58 |     ).toBeTypeOf('function')
+           ^
+error: parseToolSchemaRejectionError 导出缺席（修前红）
+
+Expected type: "function"
+Received type: "undefined"
+Received value: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:58:7)
+(fail) K2 #12：400 工具 schema 拒绝谓词 parseToolSchemaRejectionError > 显式点名 schema 拒绝 → 工具名（tool/function 两措辞） [0.21ms]
+72 |   test('非匹配面 → null（其他 400 / 非 400 同文案 / 非 APIError）', async () => {
+73 |     const { parseToolSchemaRejectionError } = (await import(ERRORS_SPEC)) as {
+74 |       parseToolSchemaRejectionError: (err: unknown) => string | null
+75 |     }
+76 |     expect(
+77 |       parseToolSchemaRejectionError(new APIError('some other bad request', 400)),
+           ^
+TypeError: parseToolSchemaRejectionError is not a function. (In 'parseToolSchemaRejectionError(new APIError("some other bad request", 400))', 'parseToolSchemaRejectionError' is undefined)
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:77:7)
+(fail) K2 #12：400 工具 schema 拒绝谓词 parseToolSchemaRejectionError > 非匹配面 → null（其他 400 / 非 400 同文案 / 非 APIError） [0.13ms]
+91 |   test('schema 拒绝型 400 → 不可重试（修前红：泛 400 可重试）', () => {
+92 |     expect(
+93 |       shouldRetryModelError(
+94 |         new APIError("Invalid schema for tool 'BadTool': extra properties not allowed", 400),
+95 |       ),
+96 |     ).toBe(false)
+           ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:96:7)
+(fail) K2 #12：shouldRetryModelError 收窄（schema 拒绝型 400 不可重试） > schema 拒绝型 400 → 不可重试（修前红：泛 400 可重试） [0.08ms]
+126 |       chat: async (args: { tools?: { name: string }[] }) => {
+127 |         n++
+128 |         const names = (args.tools ?? []).map(t => t.name)
+129 |         seen.push(names)
+130 |         if (names.includes('BadTool')) {
+131 |           throw new APIError(
+                      ^
+APIError: Invalid schema for tool 'BadTool': extra properties not allowed
+  status: 400,
+    code: undefined,
+ headers: undefined,
+   error: undefined,
+
+      at chat (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:131:17)
+      at withTurnRecovery (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/src/engine/query/turnRecovery.ts:146:20)
+      at queryOneRound (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/src/engine/query/loop.ts:486:20)
+      at queryAgentLoop (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/src/engine/query/loop.ts:806:27)
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-400-tool-strip.test.ts:164:21)
+(fail) K2 #12：queryAgentLoop 400 剥工具参数后续回合恢复 > 400 剥 BadTool 后本回合重跑恢复：call 2 tools 不含 BadTool、会话完成（修前红：穿透 throw） [0.60ms]
+
+tests/unit/wave0181-k2-mcp-config.test.ts:
+23 |     const settingsServers = JSON.parse(
+24 |       '{"__proto__": {"type": "stdio", "command": "node-x"}}',
+25 |     )
+26 |     const out = await buildMcpServerConfigs({ settingsServers })
+27 |     // 自有键可见（旧实现 []：[[Set]] 打原型 setter，自有键不产生）
+28 |     expect(Object.keys(out)).toEqual(['__proto__'])
+                                  ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "__proto__",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-config.test.ts:28:30)
+(fail) K2 #2：保留名 server（__proto__）不撞字典原型链 > settings 含 '__proto__' server 名 → 普通自有键（非原型污染） [2.14ms]
+
+tests/unit/wave0181-k2-mcp-policy-first.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'filterMcpServersByPolicy' not found in module '/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/src/mcp/index.ts'.
+-------------------------------
+
+
+tests/unit/wave0181-k2-mcp-cd-reconnect.test.ts:
+76 |       { name: 'old-dynamic', scope: 'dynamic' },
+77 |     ])
+78 |     const { stale, clients } = excludeStalePluginClients(mcp, {}, {
+79 |       absentIsStale: true,
+80 |     })
+81 |     expect(stale.map(c => c.name)).toEqual([
+                                        ^
+error: expect(received).toEqual(expected)
+
+@@ -1,4 +1,2 @@
+  [
+-   "old-project",
+-   "old-user",
+    "old-dynamic",
+
+- Expected  - 2
++ Received  + 0
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-cd-reconnect.test.ts:81:36)
+(fail) K2 #15：excludeStalePluginClients 窄/宽 stale rule > 宽规则（absentIsStale，cwd 变更面）：缺席全 scope 算 stale [0.12ms]
+131 |       )(dir, context as never)
+132 |       expect(result).toEqual({
+133 |         type: 'text',
+134 |         value: expect.stringContaining('changed to'),
+135 |       })
+136 |       expect(updates.length).toBeGreaterThanOrEqual(1)
+                                   ^
+error: expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 1
+Received: 0
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-cd-reconnect.test.ts:136:30)
+(fail) K2 #15：/cd bump cwdReconnectKey > 成功 cd → setAppState updater bump cwdReconnectKey（保 pluginReconnectKey） [1.98ms]
+
+tests/unit/wave0181-k2-mcp-fetch-timeout.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../../src/tui/services/mcp/fetchTimeout' from '/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-fetch-timeout.test.ts'
+-------------------------------
+
+
+tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:
+215 |   test('导出在场 + sentinel 注入 + 合并序 = request headers 胜（协议头不覆写）', async () => {
+216 |     const auth = (await import(AUTH_SPEC)) as Record<string, unknown>
+217 |     const withConfiguredHeaders = auth.withConfiguredHeaders as
+218 |       | ((fetchLike: unknown, serverName: string, serverConfig: unknown) => Promise<unknown>)
+219 |       | undefined
+220 |     expect(withConfiguredHeaders, 'withConfiguredHeaders 导出缺席（修前红）').toBeTypeOf('function')
+                                                                           ^
+error: withConfiguredHeaders 导出缺席（修前红）
+
+Expected type: "function"
+Received type: "undefined"
+Received value: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:220:70)
+(fail) K2 #8 纯 helper 面：withConfiguredHeaders > 导出在场 + sentinel 注入 + 合并序 = request headers 胜（协议头不覆写） [214.96ms]
+243 |       serverName: string,
+244 |       serverConfig: unknown,
+245 |     ) => Promise<unknown>
+246 |     headersMockState.shouldThrow = true
+247 |     const { fn } = makeRecordingFetch()
+248 |     const wrapped = await withConfiguredHeaders(fn, 'wave0181-helper', serverConfig)
+                                ^
+TypeError: withConfiguredHeaders is not a function. (In 'withConfiguredHeaders(fn, "wave0181-helper", serverConfig)', 'withConfiguredHeaders' is undefined)
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:248:27)
+(fail) K2 #8 纯 helper 面：withConfiguredHeaders > headersHelper 解析失败非致命（落码裁定③）：passthrough 原引用 [0.17ms]
+256 |       serverName: string,
+257 |       serverConfig: unknown,
+258 |     ) => Promise<unknown>
+259 |     headersMockState.headers = {}
+260 |     const { fn } = makeRecordingFetch()
+261 |     const wrapped = await withConfiguredHeaders(fn, 'wave0181-helper', serverConfig)
+                                ^
+TypeError: withConfiguredHeaders is not a function. (In 'withConfiguredHeaders(fn, "wave0181-helper", serverConfig)', 'withConfiguredHeaders' is undefined)
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:261:27)
+(fail) K2 #8 纯 helper 面：withConfiguredHeaders > 空配置 headers = passthrough 原引用（不包空层） [0.07ms]
+283 | 
+284 |     const tokenPost = fetchCalls.find(
+285 |       c => c.url.includes('/token') && c.method === 'POST',
+286 |     )
+287 |     expect(tokenPost, 'token POST 未发生（刷新链未走通）').toBeDefined()
+288 |     expect(getHeader(tokenPost!.headers, 'X-Atlas-Probe')).toBe('wave0181')
+                                                                 ^
+error: expect(received).toBe(expected)
+
+Expected: "wave0181"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:288:60)
+(fail) K2 #8 刷新路径：refreshAuthorization token POST 带配置 headers > configuredMetadataUrl 分支 → POST /token 头含 sentinel + Content-Type + Basic [7.93ms]
+358 |         serverConfig,
+359 |       )
+360 | 
+361 |       const revokeReq = recorded.find(r => r.url.includes('/revoke'))
+362 |       expect(revokeReq, 'revoke POST 未到达 loopback（登出链未走通）').toBeDefined()
+363 |       expect(getHeader(revokeReq!.headers, 'x-atlas-probe')).toBe('wave0181')
+                                                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "wave0181"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:363:62)
+(fail) K2 #8 登出路径：revokeServerTokens revoke POST 带配置 headers > loopback discovery + axios revoke POST 头含 sentinel + Content-Type [20.54ms]
+409 |       await waitUntil(() => fetchCalls.some(c => c.url.includes('as.example.com')))
+410 |       const metadataCall = fetchCalls.find(c =>
+411 |         c.url.includes('.well-known/oauth-authorization-server'),
+412 |       )
+413 |       expect(metadataCall, 'metadata fetch 未发生（登录链未走通）').toBeDefined()
+414 |       expect(getHeader(metadataCall!.headers, 'X-Atlas-Probe')).toBe('wave0181')
+                                                                      ^
+error: expect(received).toBe(expected)
+
+Expected: "wave0181"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-oauth-headers.test.ts:414:65)
+(fail) K2 #8 登录路径：performMCPOAuthFlow metadata fetch 带配置 headers > plain config（oauth 无 scope → display gate 恒过）→ metadata fetch 头含 sentinel [12.57ms]
+
+tests/unit/wave0181-k2-mcp-mcpjson-strings.test.ts:
+ZodError: [
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "enabledMcpjsonServers"
+    ],
+    "message": "Invalid input: expected array, received string"
+  },
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "disabledMcpjsonServers"
+    ],
+    "message": "Invalid input: expected array, received string"
+  }
+]
+(fail) K2 #11：enabled/disabledMcpjsonServers 纯字符串宽容（tui 双胞胎） > 纯字符串 'srv' → 归一 ['srv'] 不拒整段（修前红） [8.89ms]
+ZodError: [
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "enabledMcpjsonServers"
+    ],
+    "message": "Invalid input: expected array, received string"
+  },
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "disabledMcpjsonServers"
+    ],
+    "message": "Invalid input: expected array, received string"
+  }
+]
+(fail) K2 #11：enabled/disabledMcpjsonServers 纯字符串宽容（engine 双胞胎） > 纯字符串 'srv' → 归一 ['srv'] 不拒整段（修前红） [1.71ms]
+
+tests/unit/wave0181-k2-mcp-desc-limit.test.ts:
+25 |     }
+26 |     const truncate = mod.truncateMcpDescriptionText
+27 |     expect(
+28 |       truncate,
+29 |       'truncateMcpDescriptionText 导出缺席（修前红）',
+30 |     ).toBeTypeOf('function')
+           ^
+error: truncateMcpDescriptionText 导出缺席（修前红）
+
+Expected type: "function"
+Received type: "undefined"
+Received value: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-desc-limit.test.ts:30:7)
+(fail) K2 #16：MCP 描述/指令上限 2048 → 4096 > truncateMcpDescriptionText 导出在场 + 4096 边界（恰不截）+ 4097 截 [331.36ms]
+39 |   test('2049 长文本不再截（旧 2048 上限行为变更面）+ 短文本/undefined 恒等', async () => {
+40 |     const mod = (await import(CLIENT_SPEC)) as {
+41 |       truncateMcpDescriptionText?: (text: string | undefined) => string | undefined
+42 |     }
+43 |     const truncate = mod.truncateMcpDescriptionText
+44 |     expect(truncate).toBeTypeOf('function')
+                          ^
+error: expect(received).toBeTypeOf()
+
+Expected type: "function"
+Received type: "undefined"
+Received value: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-desc-limit.test.ts:44:22)
+(fail) K2 #16：MCP 描述/指令上限 2048 → 4096 > 2049 长文本不再截（旧 2048 上限行为变更面）+ 短文本/undefined 恒等 [0.40ms]
+
+tests/unit/wave0181-k2-mcp-rule-matching.test.ts:
+64 |   test('deny 规则 mcp__my__server 拒绝 server my__server 的工具', () => {
+65 |     const ctx = makeContext({
+66 |       deny: { userSettings: ['mcp__my__server'] },
+67 |     })
+68 |     const tool = mcpTool('my__server', 'tool1')
+69 |     expect(getDenyRuleForTool(ctx, tool)?.ruleValue.toolName).toBe(
+                                                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "mcp__my__server"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:69:63)
+(fail) K2 #4：双下划线 server 名 deny/ask 规则生效 > deny 规则 mcp__my__server 拒绝 server my__server 的工具 [0.79ms]
+74 |   test('ask 规则 mcp__my__server 命中 server my__server 的工具', () => {
+75 |     const ctx = makeContext({
+76 |       ask: { userSettings: ['mcp__my__server'] },
+77 |     })
+78 |     const tool = mcpTool('my__server', 'tool1')
+79 |     expect(getAskRuleForTool(ctx, tool)?.ruleValue.toolName).toBe(
+                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "mcp__my__server"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:79:62)
+(fail) K2 #4：双下划线 server 名 deny/ask 规则生效 > ask 规则 mcp__my__server 命中 server my__server 的工具 [0.08ms]
+84 |   test('wildcard 规则 mcp__my__server__* 命中 server my__server 的工具', () => {
+85 |     const ctx = makeContext({
+86 |       deny: { userSettings: ['mcp__my__server__*'] },
+87 |     })
+88 |     const tool = mcpTool('my__server', 'tool1')
+89 |     expect(getDenyRuleForTool(ctx, tool)?.ruleValue.toolName).toBe(
+                                                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "mcp__my__server__*"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:89:63)
+(fail) K2 #4：双下划线 server 名 deny/ask 规则生效 > wildcard 规则 mcp__my__server__* 命中 server my__server 的工具 [0.04ms]
+104 |   test('allow 规则 mcp__a 不再匹配 server a_（归一去尾下划线误命中修）', () => {
+105 |     const ctx = makeContext({
+106 |       allow: { userSettings: ['mcp__a'] },
+107 |     })
+108 |     const tool = mcpTool('a_', 'tool1')
+109 |     expect(toolAlwaysAllowedRule(ctx, tool)).toBeNull()
+                                                   ^
+error: expect(received).toBeNull()
+
+Received: {
+  source: "userSettings",
+  ruleBehavior: "allow",
+  ruleValue: {
+    toolName: "mcp__a",
+  },
+}
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:109:46)
+(fail) K2 #9：allow 规则收窄（fail-closed 方向，破坏性变更） > allow 规则 mcp__a 不再匹配 server a_（归一去尾下划线误命中修） [0.09ms]
+131 |     test(`deny 规则 mcp__${reserved} 命中该 server 工具`, () => {
+132 |       const ctx = makeContext({
+133 |         deny: { userSettings: [`mcp__${reserved}`] },
+134 |       })
+135 |       const tool = mcpTool(reserved, 'tool1')
+136 |       expect(getDenyRuleForTool(ctx, tool)?.ruleValue.toolName).toBe(
+                                                                      ^
+error: expect(received).toBe(expected)
+
+Expected: "mcp____proto__"
+Received: undefined
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:136:65)
+(fail) K2 #3：保留名 server 权限判定与普通名一致 > deny 规则 mcp____proto__ 命中该 server 工具 [0.04ms]
+176 |   test('规则串含点的 server 名折叠比对（mcp__My.Server ↔ My.Server）', () => {
+177 |     const ctx = makeContext({
+178 |       deny: { userSettings: ['mcp__My.Server'] },
+179 |     })
+180 |     const tool = mcpTool('My.Server', 'tool1')
+181 |     expect(getDenyRuleForTool(ctx, tool)).not.toBeNull()
+                                                    ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-rule-matching.test.ts:181:47)
+(fail) 恒等锚：普通名语义零回归 > 规则串含点的 server 名折叠比对（mcp__My.Server ↔ My.Server） [0.03ms]
+
+tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:
+69 | 
+70 |   test("server 级 spec 'mcp__srv' → 取该 server 全域 2 工具（修前红）", async () => {
+71 |     const resolve = await load()
+72 |     const r = resolve({ source: 'built-in', tools: ['mcp__srv'] }, pool())
+73 |     expect(r.hasWildcard).toBe(false)
+74 |     expect(r.validTools).toEqual(['mcp__srv'])
+                              ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "mcp__srv",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:74:26)
+(fail) K2 #10：agent tools server 级 spec 取域（engine 双胞胎） > server 级 spec 'mcp__srv' → 取该 server 全域 2 工具（修前红） [9.21ms]
+100 |     const resolve = await load()
+101 |     const r = resolve(
+102 |       { source: 'built-in', tools: ['Read', 'mcp__srv'] },
+103 |       pool(),
+104 |     )
+105 |     expect(r.invalidTools).toEqual([])
+                                 ^
+error: expect(received).toEqual(expected)
+
+- []
++ [
++   "mcp__srv",
++ ]
+
+- Expected  - 1
++ Received  + 3
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:105:28)
+(fail) K2 #10：agent tools server 级 spec 取域（engine 双胞胎） > 非 mcp 精确名恒等 + server 级与精确名混排（零回归） [0.07ms]
+131 |         tools: ['mcp__srv'],
+132 |         disallowedTools: ['mcp__srv__tool1'],
+133 |       },
+134 |       pool(),
+135 |     )
+136 |     expect(r.validTools).toEqual(['mcp__srv'])
+                               ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "mcp__srv",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:136:26)
+(fail) K2 #10：agent tools server 级 spec 取域（engine 双胞胎） > 域展开尊重 disallowedTools 剔除（域内被禁工具不进 resolved） [0.07ms]
+69 | 
+70 |   test("server 级 spec 'mcp__srv' → 取该 server 全域 2 工具（修前红）", async () => {
+71 |     const resolve = await load()
+72 |     const r = resolve({ source: 'built-in', tools: ['mcp__srv'] }, pool())
+73 |     expect(r.hasWildcard).toBe(false)
+74 |     expect(r.validTools).toEqual(['mcp__srv'])
+                              ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "mcp__srv",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:74:26)
+(fail) K2 #10：agent tools server 级 spec 取域（tui 双胞胎） > server 级 spec 'mcp__srv' → 取该 server 全域 2 工具（修前红） [371.87ms]
+100 |     const resolve = await load()
+101 |     const r = resolve(
+102 |       { source: 'built-in', tools: ['Read', 'mcp__srv'] },
+103 |       pool(),
+104 |     )
+105 |     expect(r.invalidTools).toEqual([])
+                                 ^
+error: expect(received).toEqual(expected)
+
+- []
++ [
++   "mcp__srv",
++ ]
+
+- Expected  - 1
++ Received  + 3
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:105:28)
+(fail) K2 #10：agent tools server 级 spec 取域（tui 双胞胎） > 非 mcp 精确名恒等 + server 级与精确名混排（零回归） [0.05ms]
+131 |         tools: ['mcp__srv'],
+132 |         disallowedTools: ['mcp__srv__tool1'],
+133 |       },
+134 |       pool(),
+135 |     )
+136 |     expect(r.validTools).toEqual(['mcp__srv'])
+                               ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "mcp__srv",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/tests/unit/wave0181-k2-mcp-agent-tools-domain.test.ts:136:26)
+(fail) K2 #10：agent tools server 级 spec 取域（tui 双胞胎） > 域展开尊重 disallowedTools 剔除（域内被禁工具不进 resolved） [0.05ms]
+
+tests/unit/wave0181-k2-p804s-watchdog-return-hang.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'STREAM_IDLE_RETURN_GRACE_MS' not found in module '/home/vince/.claude/jobs/09264df0/tmp/gate-081/base/src/modelprovider/constants.ts'.
+-------------------------------
+
+
+ 29 pass
+ 40 fail
+ 3 errors
+ 102 expect() calls
+Ran 69 tests across 14 files. [7.27s]

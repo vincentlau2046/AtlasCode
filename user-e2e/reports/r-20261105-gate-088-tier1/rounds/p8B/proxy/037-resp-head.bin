@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","object":"chat.completion.chunk","created":1793867515,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b8e8bb9750e08d9b","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"cd /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p8B/ws"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/silu_ascendc &&"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" python3 setup.py build_ext"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 2>&1;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" echo \\\"exit=$?\\\""},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Compile the"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" SiLU operator via setup"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py build_ext\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","object":"chat.completion.chunk","created":1793867515,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-03d98353-89b9-4a38-a818-c8f338d592db","created":1793867515,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":77,"prompt_tokens":20797,"total_tokens":20874,"completion_tokens_details":{"reasoning_tokens":0},"prompt_t

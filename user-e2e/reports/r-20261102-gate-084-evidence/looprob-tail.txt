@@ -1,0 +1,6 @@
+[R1-500-storm] 40 次连续 500（超 3 次重试预算）→ 暴露「loop 无回合级错误恢复」缺口（预期：任务不完成，非静默）
+  [R1-500-storm] completed=false exit=1 ms=1685 tools=0 crashed=false zeroContent=true | I1=true I2=true I3=true
+[R3-resume] ① SIGKILL@call4∨25000ms → sessionId=cc9df465-abc0-4969-bfb2-9aaf6ede463d killed=true ms=9491 calls=4
+[R3-resume] ② --resume 后 completed=true (ALL TESTS PASSED (实跑通过))
+
+[all] 完成 → /home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1793565490154-le9l

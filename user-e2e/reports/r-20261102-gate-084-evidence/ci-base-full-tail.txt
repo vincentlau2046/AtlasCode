@@ -1,0 +1,4 @@
+[0m[32m 5111 pass[0m
+[0m[2m 0 fail[0m
+ 14294 expect() calls
+Ran 5111 tests across 413 files. [0m[2m[[1m96.33s[0m[2m][0m

@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","object":"chat.completion.chunk","created":1793857033,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend tools aren't available"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" as deferred tools via"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ToolSearch. They"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" may"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" be MCP"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tools ("}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"mcp__ prefix"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":")."}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Let"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" me check —"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the listed"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" functions include mcp__ms"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"prof-mcp__ tools"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" only"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The Ascend tools"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" named"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the system prompt ("}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":1793857033,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"AscendSpec"}}]}
+
+data: {"id":"chatcmpl-d1c2f41c-7a31-42d1-a304-8b44211a9308","created":

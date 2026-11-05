@@ -1,0 +1,36 @@
+=== START p0a 18:54:44 ===
+=== DONE p0a rc=0 19:03:13 ===
+[S-A] alive=true hardFail=0 soft?= 2
+  P0-1b-verdict=✅ (Verdict: Rule "Bash" from user settings requires confirmation.)
+  P0a-no-conf=✅ ((未命中)（PASS：应为 0 次）)
+[S-B] alive=true hardFail=0 soft?= 0
+[S-C] alive=true hardFail=0 soft?= 0
+[P0] 判定=PASS（hardFail=0 hardInconclusive=0） 发布门禁=RELEASABLE（无） → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/P0-1792061684660-ynfs
+=== START a4f 19:03:13 ===
+=== DONE a4f rc=0 19:03:13 ===
+ "verdict": "PASS",
+ "probes": "[PASS] M1-hard-deny-not-cleared [PASS] M2-rank-identity [PASS] M3-parametric-parse [PASS] M4-hit-matrix [PASS] M5-default-identity [PASS] M7-dontask-fold"
+AUTO-MODE-059 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-073/a4f
+=== START cmd 19:03:13 ===
+=== DONE cmd rc=0 19:03:13 ===
+  [PASS] cmd-flip-version: W3 version：文件在场 + isEnabled: () => true + 仍在 INTERNAL_ONLY（ATLAS_DEV 门）（已翻开）
+  [PASS] cmd-voice-kept: voice 保留（feature('VOICE_MODE') 声明 + voiceCommand 展开项 + 文件均在场，W1 未误删）
+  [PASS] cmd-e1p-registered: E-1P 11 项零码登记注释块在场（E-1P 专属前向缝头 + 11 项全命名：chrome·desktop·mobile·install-github-app·extra-usage·rate-limit-options·passes·remote-env·privacy-settings·advisor·fast/fastMode + #11 fast/fastMode 选项 A 裁定〔1P fastMode 有意不搬，fast 能力由 Atlas P3 fast 角色池承载〕+ O-adv-1 执行注「0.1.42 W-B 裁除」）= 1P 依赖有意不搬（0.1.42 封口登记面）
+  [PASS] cmd-advisor-flag-removed: W-B --advisor 裁除核销（main.tsx 源级：0 活动 addOption/option('--advisor') 行 + advisor import 裁除；残留仅 O-adv-1 注释 2 处）= flag 从未注册，裁前/裁后均 commander unknown option 拒（行为面 = flag-advisor 场景承载）
+  [PASS] cmd-fast-role-unchanged: fast 角色零改动负向断言（ATLAS_FAST_MODEL 在 managedEnvConstants + model.ts 解析链 'process.env.ATLAS_FAST_MODEL || getRoleModel(fast)' 完好 + modelRoles schema 在场）= fast 角色池未受 0.1.42 波影响（/model Fast 行 user-face = 报告 corroboration，2 提交不碰 model selector）
+  [PASS] cmd-engine-statuslineagent-file: engine 侧残留面核销：AgentTool/built-in/statuslineSetup.ts 已删（孤儿代理文件未留）
+  [PASS] cmd-engine-builtinagent-reg: engine 侧注册清零：TUI 侧 AgentTool/builtInAgents 零 STATUSLINE_SETUP_AGENT 活动引用 + engine 侧 builtInAgents 仅注释行残留（2 注释行，零活动注册）
+GATE-PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261015-190313-ce7
+=== START help 19:03:13 ===
+=== DONE help rc=0 19:03:20 ===
+[SC SC-20261015-190313-3il] modes=help repo=/home/vince/projects/AtlasCode/worktrees/worktree-0.1.73-de-ant-closure
+=== help ===  PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261015-190313-3il/help
+  [PASS] help-present-files: /files 在场（W3 翻开，渲染集跟随命令表）
+  [PASS] help-present-tag: /tag 在场（W3 翻开，渲染集跟随命令表）
+  [PASS] help-control: 控制集（/help|/model|/clear）在场（列表真渲染）
+  [PASS] help-absent-deleted: 19 删项 + version 均不在渲染集（W1/W2 删项离场〔output-style = 0.1.60 重加，出缺席面〕+ version ATLAS_DEV 门 + W2 dev 表门）= /help 零增减缺席面（列表完整 = Space to cancel footer 在场）
+  [PASS] help-set-identity-062: /help 55 标签集恒等 = 0.1.62 权威集（54 + goal，工单 §3 基线 54→55，双形态注册 name 去重计 1 项；双向 diff ∅：缺 0 / 多 0）= /goal 命令标签在场 + 0.1.60 基线 54 标签零增减
+GATE-PASS → /home/vince/projects/AtlasCode/user-e2e/tui-diff/artifacts/SC-20261015-190313-3il
+=== ALL-073-34-DONE 19:03:20 ===
+
+[exited with code 0]

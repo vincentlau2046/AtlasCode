@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","object":"chat.completion.chunk","created":1793862079,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" fault"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" triage for a compile failure"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with a syntax error in t"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iling code. Per"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": compile"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" failure"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" → AscendDiagnoser"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" with"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bisheng logs. But"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" we"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" need"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the log"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" project"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". We"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" don't have a"}}]}
+
+data: {"id":"chatcmpl-498028fb-abf7-4a5b-a66f-4012abcb7536","created":1793862079,"model":"glm-5","object":"c

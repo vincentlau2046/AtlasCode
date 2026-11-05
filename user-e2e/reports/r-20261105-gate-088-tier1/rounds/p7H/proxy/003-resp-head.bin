@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","object":"chat.completion.chunk","created":1793865769,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user asks:"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"Write a brand-new RMS"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Norm kernel in Triton for"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend NPU from scratch"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Finish your reply with the token"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ROUTE-DONE-5"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"a on its own line.\""}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"\n\nThere"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s an umbrella skill /"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-opdev:"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"A NEW operator is requested"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and the language/framework matters or"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is unspecified. Decide"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the language/framework route first,"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" then hand off to that workflow"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s skills.\"\n\nThis"}}]}
+
+data: {"id":"chatcmpl-cb38d5f0-d203-4044-8717-3f2e54908f5b","created":1793865769,"model":"glm-5","object":"chat.completi

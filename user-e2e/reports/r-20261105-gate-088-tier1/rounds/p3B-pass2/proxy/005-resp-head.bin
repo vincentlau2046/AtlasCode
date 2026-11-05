@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","object":"chat.completion.chunk","created":1793859415,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants me"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to implement a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator for"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ascend NPU using Asc"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end C."}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'m now"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the ascend-generate skill"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" context. Let me proceed"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" parse spec → tiling →"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" codegen → fill"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compute body → compile → golden"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" test.\n\nLet me create the"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" spec inline and"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" call AscendSpecParser first"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","created":1793859415,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".","content":"I"}}]}
+
+data: {"id":"chatcmpl-601c420c-56c0-4d37-b7b7-8cb81f8a773d","object":"chat.completion.chunk","created":1793859415,"model":"glm-5","choices":[{"index":0,"delta":{"content":"'ll impl

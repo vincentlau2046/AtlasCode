@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","object":"chat.completion.chunk","created":1793865967,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9b68a3943f2a005e","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"/home/vince/minicon"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"da3/envs/qwen"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"36-35b-vll"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"m/bin/python /home/v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ince/.claude/plugins/cache"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/ascend-agent-skills"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/cannbot-triton-op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-generator-skills/1."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0.0/triton-task"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-extractor/scripts/validate_task"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py /home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"claude/jobs/09"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"264df0/tmp/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-586dc4cb-5a8c-488e-a8e2-ea0b2c36572c","created":1793865967,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ate-088/tier"},"type":"function","index":0}]}}]

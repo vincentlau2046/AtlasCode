@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","object":"chat.completion.chunk","created":1793865882,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-928ee925677209ca","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"for e in qwen"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-v"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"l-4"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"b-vllm qwen"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"36-35"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"b-vllm x"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"lerobot Q"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"wen3."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"8-27B-VL"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"; do p"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"=/home/vince/minicon"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"da3/envs/$e"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/bin/python;"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-464cf168-2150-4388-9784-3fb8b88d281b","created":1793865882,"model":"glm-5","object":"chat.completion.chunk","

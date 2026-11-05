@@ -1,0 +1,28 @@
+bytes: gate74=17838553 npm73=17835921 npm74=17829643
+--- 本波 token @ npm74（gate74 对照，逐项同值）---
+C-3e/absent    MCP_PROXY_URL                      gate74=0    npm73=2    npm74=0   
+C-3e/absent    MCP_PROXY_PATH                     gate74=0    npm73=2    npm74=0   
+C-3e/absent    MCP_CLIENT_METADATA_URL            gate74=0    npm73=2    npm74=0   
+C-3e/absent    McpClaudeAIProxyServerConfig       gate74=0    npm73=6    npm74=0   
+C-3e/absent    createClaudeAiProxyFetch           gate74=0    npm73=2    npm74=0   
+D-3/present    clientMetadataUrl                  gate74=18   npm73=9    npm74=18  
+D-3/present    MCP_OAUTH_CLIENT_METADATA_URL      gate74=3    npm73=1    npm74=3   
+D-3/present    client_metadata_url                gate74=2    npm73=0    npm74=2   
+sec/present    withoutMcpOauthCimdVars            gate74=2    npm73=0    npm74=2   
+mismatch(gate74 vs npm74)=0
+--- 前 18 波（0.1.56–0.1.73）token 零回归 npm73↔npm74 ---
+DIFF 0.1.73 api.anthropic.com                          npm73=1    npm74=0   
+DIFF 0.1.73 mcp-proxy.anthropic.com                    npm73=1    npm74=0   
+DIFF 0.1.73 claude-code-20250219                       npm73=1    npm74=0   
+DIFF 0.1.73 atlas-code-20250219                        npm73=0    npm74=1   
+DIFF 0.1.73 claude.ai                                  npm73=30   npm74=20  
+total prior tokens=123 diffs=5
+  DIFF: ('0.1.73', 'api.anthropic.com', 1, 0)
+  DIFF: ('0.1.73', 'mcp-proxy.anthropic.com', 1, 0)
+  DIFF: ('0.1.73', 'claude-code-20250219', 1, 0)
+  DIFF: ('0.1.73', 'atlas-code-20250219', 0, 1)
+  DIFF: ('0.1.73', 'claude.ai', 30, 20)
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm73=0    npm74=0   
+foreground (default)                       npm73=0    npm74=0   
+Set run_in_background to true to launch    npm73=0    npm74=0   

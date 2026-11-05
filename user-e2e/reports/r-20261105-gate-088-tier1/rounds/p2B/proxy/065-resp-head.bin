@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","object":"chat.completion.chunk","created":1793858691,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-86c705cc1328befc","function":{"arguments":"","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"command\": \"python"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3 /home/vince/."},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"local/share/ascend-agent"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-skills/official/CANN"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Bot/ops/triton-op"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-verifier/scripts/validate_tr"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"iton_impl.py --json output"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/iter_0/generated_code"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py; echo \\\"exit=$"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"?"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\"; mkdir -p output"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/iter_0/verify"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" && cp rms"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-19bd3488-5025-4469-8dec-e078d2ace1ec","created":1793858691,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"norm.py output/iter_"},"type":"function","index":0}]}}]}

@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","object":"chat.completion.chunk","created":1793854710,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" name"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" may"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not exist"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this session"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me check what"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the working directory first"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and find"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" code"}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-937f30dd02ab58a2","function":{"arguments":"{\"pattern\": \"**","name":"Glob"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","created":1793854710,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/*\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-84295506-cc90-4f01-84c8-5497f1c1c985","object":"chat.completion.chunk","created":1793854710,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason

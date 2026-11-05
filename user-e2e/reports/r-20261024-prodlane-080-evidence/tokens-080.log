@@ -1,0 +1,37 @@
+chars: npm79=17834761 npm80=17844356
+--- Δ8910B 双口径（gate80 = 17901539B/17853266char）---
+byte delta = 17901539 - 17892629 = 8910（预期 8910）
+char delta = 17853266 - 17844356 = 8910（预期 8910，char 口径互证）
+--- 前 24 波（0.1.56–0.1.79）token 零回归 npm79↔npm80 ---
+total prior tokens=180 diffs=0
+UNEXPLAINED=0
+--- 0.1.80 本波面 gate==npm 逐项同值 ---
+K1-A idleCompaction 模块     idleCompaction                       npm80=18   gate80=18  
+K1-A env 覆写                ATLAS_IDLE_COMPACT_MIN_TOKENS        npm80=1    gate80=1   
+K1-A 谓词                    shouldIdleCompact                    npm80=4    gate80=4   
+K1-A 闲置量                   getIdleMs                            npm80=4    gate80=4   
+K1-B 前缀剥除                  stripProviderPrefix                  npm80=6    gate80=6   
+K1-C sticky-peek record    recordMainLoopModelSwitch            npm80=2    gate80=2   
+K1-C sticky-peek resolve   resolveSwitchedCompactModel          npm80=2    gate80=2   
+K1-C spinner 显形            Compacting conversation (summary:    npm80=1    gate80=1   
+K1-E watchdog 包装           withStreamIdleWatchdog               npm80=2    gate80=2   
+K1-E 错误类                   StreamIdleTimeoutError               npm80=5    gate80=5   
+K1-F 稳定序去重                 stableSortDedupeTools                npm80=2    gate80=2   
+K1-F 预算思考                  thinkingBudgetTokens                 npm80=4    gate80=4   
+K1-F③ frontmatter 键        autoCompactWindow                    npm80=38   gate80=38  
+K1-D 保留段                   preservedSegment                     npm80=5    gate80=5   
+wave-face gate==npm mismatch=0
+--- de-ant 零一方活字面恒等锚 @ npm80 ---
+anthropic_beta               npm80=0   
+anthropic-ratelimit          npm80=0   
+anthropic_cloud              npm80=0   
+claude.ai subscription       npm80=0   
+isFirstPartyGatewayUrl       npm80=0   
+CLAUDEAI_SERVER_PREFIX       npm80=0   
+downloads.claude.ai          npm80=1   
+claude-plugins-official      npm80=30  
+de-ant/A3-1 mismatch=0
+--- IFF 离场 + 0.1.66 旧句离场恒等 ---
+IFF 不可达                                      npm79=0    npm80=0   
+foreground (default)                         npm79=0    npm80=0   
+Set run_in_background to true to launch      npm79=0    npm80=0   

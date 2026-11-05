@@ -1,0 +1,303 @@
+$ bun test --isolate tests/
+bun test v1.4.2 (744846f84)
+准备工作区（新分支 'wt-a'）
+准备工作区（新分支 'wt-b'）
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-fx06-PBqLCq/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-fx06-5xrZt1/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-fx06-UTiH56/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-fx06-02ChO5/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-9knbpL/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-HJh2AV/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-defbranch-DFKUD3/origin.git
+ * [new branch]      main -> main
+正克隆到 '/tmp/atlas-wt-defbranch-DFKUD3/clone'...
+完成。
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+切换到一个新分支 'feature'
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-VftSH8/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-gfR2ND/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-cqpbjo/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-SdfcUN/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-zrdgXp/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-5dIssi/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-ytvgOT/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-iLF9dy/origin.git
+ * [new branch]      main -> main
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/atlas-wt-func-O4YKMf/origin.git
+ * [new branch]      main -> main
+
+tests/func/atlascode-tui-pty-probe.test.ts:
+[pty-probe] skip: CI/平台门
+error: unknown option '--sdk-url'
+
+tests/unit/colorize-d4.test.ts:
+55 | })
+56 | 
+57 | describe('D4 裸色名根修（入口 bare→ansi: 归一）', () => {
+58 |   it('裸名 foreground：SGR 在场且恰红（red → \\u001b[31m）', () => {
+59 |     const out = colorize('x', 'red', 'foreground')
+60 |     expect(out).toContain('\u001b[31m')
+                     ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "\u001B[31m"
+Received: "x"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-081-face/tests/unit/colorize-d4.test.ts:60:17)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 裸名 foreground：SGR 在场且恰红（red → \u001b[31m） [0.14ms]
+61 |     expect(out).toBe(chalk.red('x'))
+62 |   })
+63 | 
+64 |   it('裸名 background：SGR 在场且背景码（red → \\u001b[41m）', () => {
+65 |     const out = colorize('x', 'red', 'background')
+66 |     expect(out).toContain('\u001b[41m')
+                     ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "\u001B[41m"
+Received: "x"
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-081-face/tests/unit/colorize-d4.test.ts:66:17)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 裸名 background：SGR 在场且背景码（red → \u001b[41m） [0.04ms]
+68 |   })
+69 | 
+70 |   it('16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红）', () => {
+71 |     for (const name of ALL_16) {
+72 |       const out = colorize('x', name, 'foreground')
+73 |       expect(out.startsWith('\u001b['), `${name} 无 SGR 前缀`).toBe(true)
+                                                                 ^
+error: black 无 SGR 前缀
+
+Expected: true
+Received: false
+
+      at <anonymous> (/home/vince/projects/AtlasCode/worktrees/worktree-gate-081-face/tests/unit/colorize-d4.test.ts:73:61)
+(fail) D4 裸色名根修（入口 bare→ansi: 归一） > 16 裸色名全部 SGR 在场（输出 ≠ 原文，突变即恰好红） [0.06ms]
+
+ 4783 pass
+ 6 skip
+ 3 fail
+ 13382 expect() calls
+Ran 4792 tests across 376 files. [48.62s]
+error: script "test" exited with code 1

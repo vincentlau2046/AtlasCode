@@ -1,0 +1,20 @@
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","object":"chat.completion.chunk","created":1793867511,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b89dd8f448f42806","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"completed"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"2\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-bdb77f29cb415fa8","function":{"arguments":"{\"status\": \"in","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_progress\", \"taskId\": \""},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"3\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","object":"chat.completion.chunk","created":1793867511,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-610ba511-e660-422e-941d-7925d5f0acd5","created":1793867511,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":35,"prompt_tokens":20746,"total_tokens":20781,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":19584}}}
+
+data: [DONE]
+

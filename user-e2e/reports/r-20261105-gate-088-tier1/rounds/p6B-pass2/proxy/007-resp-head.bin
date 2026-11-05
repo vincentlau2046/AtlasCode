@@ -1,0 +1,36 @@
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","object":"chat.completion.chunk","created":1793865197,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" optimize an Ascend matmul"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel with an"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline bottleneck. First"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":","}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I need to find the kernel"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" project in the working"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory. Let me look at"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace."}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-ba04d9fe50c07d7c","function":{"arguments":"{\"pattern\": \"**","name":"Glob"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"stop_reason":154829,"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/*\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","object":"chat.completion.chunk","created":1793865197,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-293dca72-f759-46be-bcd7-4a4dac634e7f","created":1793865197,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":52,"prompt_tokens":16718,"total_tokens":16770,"completion_tokens_details":{"reasoning_tokens":39},"prompt_tokens_details":{"cached_tokens":14976}}}
+
+data: [DONE]
+

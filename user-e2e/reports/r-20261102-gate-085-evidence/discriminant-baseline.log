@@ -1,0 +1,200 @@
+[0m[1mbun test [0m[2mv1.4.2 (744846f84)[0m
+[0m
+tests/func/wave0184-pdf-reference-session.test.ts:
+[0m[1m339 |[0m     // params 零消费（Task B 证）= 死交付；本波 full-PDF 内联读整裁后经
+[0m[1m340 |[0m     // FullPDFReadUnsupportedError 特判回落 readTruncatedFile compact 支 =
+[0m[1m341 |[0m     // compact_file_reference（纯路径引用，零读不虚报已读）。K5-7 不变量
+[0m[1m342 |[0m     // 保持 = compact 模式永不经 at-mention 引用支（tryGetPDFReference
+[0m[1m343 |[0m     // mode 门）——仍是引用车道语义（恢复/压缩仍保引用，不保自动正文）。
+[0m[1m344 |[0m     expect(att?.[0m[34mtype[0m)[0m[3m[1m.toBe[0m([0m[32m'compact_file_reference'[0m)
+                            [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoBe[2m([0m[32mexpected[0m[2m)[0m
+
+Expected: [0m[32m"compact_file_reference"[0m
+Received: [0m[31m"file"[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/func/wave0184-pdf-reference-session.test.ts[0m[2m:[0m[33m344[0m[2m:[33m23[0m[2m)[0m
+[0m[31m✗[0m [0mK5-7 @PDF 引用化（真实 at-mention 生成路径）[2m >[0m[1m compact 模式：小 PDF full-PDF 内联读整裁 → compact_file_reference（引用保底）[0m [0m[2m[8.74ms[0m[2m][0m
+[0m[1m481 |[0m     // 磁盘判别（0.1.85-D 显式行为变更，工单 §1-D「恢复/压缩仍保引用」）：
+[0m[1m482 |[0m     // raw PDF bytes（base64 形）仍必不落盘；引用 metadata 五字段白名单
+[0m[1m483 |[0m     // 落盘（引用≠正文——文件位置 + 页数/大小元数据，零 PDF bytes）。
+[0m[1m484 |[0m     // 白名单之外附件族维持过滤（file 型内联不落盘），不全局放宽。
+[0m[1m485 |[0m     expect(raw).not[0m[3m[1m.toContain[0m(marker)
+[0m[1m486 |[0m     expect(raw)[0m[3m[1m.toContain[0m([0m[32m'pdf_reference'[0m)
+                      [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoContain[2m([0m[32mexpected[0m[2m)[0m
+
+Expected to contain: [32m"pdf_reference"[0m
+Received: [31m"{\"parentUuid\":null,\"isSidechain\":false,\"uuid\":\"u-1\",\"type\":\"user\",\"timestamp\":\"2026-11-01T00:00:00Z\",\"message\":{\"content\":\"summarize @/abs/path/report.pdf for me\"},\"userType\":\"atlas\",\"entrypoint\":\"cli\",\"cwd\":\"/home/vince/projects/AtlasCode/worktrees/worktree-parity-085\",\"sessionId\":\"fa31173f-32b8-41e2-90f5-dab51b55876e\",\"version\":\"0.1.84\"}\n"[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/func/wave0184-pdf-reference-session.test.ts[0m[2m:[0m[33m486[0m[2m:[33m17[0m[2m)[0m
+[0m[31m✗[0m [0mJSONL 面：@自动附件 bytes 不落盘 + user @path 持久化[2m >[0m[1m 真 record/flush：内联 PDF base64 不进 JSONL；pdf_reference 五字段白名单落盘（0.1.85-D 显式行为变更）；user @path 文本在[0m [0m[2m[5.15ms[0m[2m][0m
+[0m
+tests/func/wave0185-pdf-page-delivery.test.ts:
+[0m
+[1m[2m#[0m [31m[1mUnhandled error[0m[2m between tests[0m
+[2m-------------------------------[0m
+[0m[31mSyntaxError[0m[2m:[0m [1mExport named 'readPDFPageImages' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/src/shared/index.ts'.[0m
+[0m[2m-------------------------------[0m
+
+[0m
+tests/func/wave0185-pdf-full-read-error.test.ts:
+[0m[1m55 |[0m     [0m[35mtry[0m {
+[0m[1m56 |[0m       [0m[35mawait[0m ReadTool[0m[3m[1m.call[0m({ file_path: pdfPath } [0m[34mas[0m [0m[34mnever[0m, makeCtx())
+[0m[1m57 |[0m     } [0m[35mcatch[0m (e) {
+[0m[1m58 |[0m       err = e
+[0m[1m59 |[0m     }
+[0m[1m60 |[0m     expect(err)[0m[3m[1m.toBeInstanceOf[0m(Error)
+                     [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoBeInstanceOf[2m([0m[32mexpected[0m[2m)[0m
+
+Expected constructor: [32m[class Error][0m
+Received value: [31mundefined[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/func/wave0185-pdf-full-read-error.test.ts[0m[2m:[0m[33m60[0m[2m:[33m17[0m[2m)[0m
+[0m[31m✗[0m [0mC85-B full-PDF 显式错误（无 pages 读 PDF）[2m >[0m[1m F① 无 pages Read PDF → throw 含 pages 指引 + provider 定性（非文件损坏措辞）[0m [0m[2m[[1m10.17ms[0m[2m][0m
+[0m[1m76 |[0m         makeCtx(),
+[0m[1m77 |[0m       )
+[0m[1m78 |[0m     } [0m[35mcatch[0m (e) {
+[0m[1m79 |[0m       err = e
+[0m[1m80 |[0m     }
+[0m[1m81 |[0m     expect(err)[0m[3m[1m.toBeInstanceOf[0m(Error)
+                     [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoBeInstanceOf[2m([0m[32mexpected[0m[2m)[0m
+
+Expected constructor: [32m[class Error][0m
+Received value: [31mundefined[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/func/wave0185-pdf-full-read-error.test.ts[0m[2m:[0m[33m81[0m[2m:[33m17[0m[2m)[0m
+[0m[31m✗[0m [0mC85-B full-PDF 显式错误（无 pages 读 PDF）[2m >[0m[1m F② 空间参数组合：offset/limit 不改变 full-PDF 错误支（PDF 支不吃文本参数）[0m [0m[2m[8.14ms[0m[2m][0m
+[0m
+tests/func/wave0185-pdf-reference-recovery.test.ts:
+[0m
+[1m[2m#[0m [31m[1mUnhandled error[0m[2m between tests[0m
+[2m-------------------------------[0m
+[0m[31mSyntaxError[0m[2m:[0m [1mExport named 'collectPDFReferenceAttachmentsForCompact' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/src/tui/contextBodies/compact.ts'.[0m
+[0m[2m-------------------------------[0m
+
+[0m
+tests/func/files-read-real.test.ts:
+[0m
+[1m[2m#[0m [31m[1mUnhandled error[0m[2m between tests[0m
+[2m-------------------------------[0m
+[0m[31mSyntaxError[0m[2m:[0m [1mExport named 'FullPDFReadUnsupportedError' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/src/shared/index.ts'.[0m
+[0m[2m-------------------------------[0m
+
+[0m
+tests/unit/wave0185-supplemental-loop.test.ts:
+[0m[1m130 |[0m       { modelProvider: provider, role: [0m[32m'small'[0m [0m[34mas[0m ModelRole },
+[0m[1m131 |[0m       tools,
+[0m[1m132 |[0m       [{ role: [0m[32m'user'[0m, content: [0m[32m'look at pdfs'[0m }] [0m[34mas[0m Message[],
+[0m[1m133 |[0m     )
+[0m[1m134 |[0m     // 序列 = 入参 1 + assistant 1 + tool_result 3 + 补充 3（1 + 2）= 8
+[0m[1m135 |[0m     expect(round.messages)[0m[3m[1m.toHaveLength[0m([0m[33m8[0m)
+                                 [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoHaveLength[2m([0m[32mexpected[0m[2m)[0m
+
+Expected length: [32m8[0m
+Received length: [31m5[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-supplemental-loop.test.ts[0m[2m:[0m[33m135[0m[2m:[33m28[0m[2m)[0m
+[0m[31m✗[0m [0mC85-B queryOneRound 补充交付与追加协议[2m >[0m[1m L① 序列协议：assistant → tool_result（原序）→ 补充（工具序/页序）；toolResults 不计补充[0m [0m[2m[1.23ms[0m[2m][0m
+[0m[1m177 |[0m       },
+[0m[1m178 |[0m     )
+[0m[1m179 |[0m     // provider 第 2 轮收到的序列：user + assistant + tool_result + 补充
+[0m[1m180 |[0m     expect(seen)[0m[3m[1m.toHaveLength[0m([0m[33m1[0m)
+[0m[1m181 |[0m     [0m[35mconst[0m requested = seen[[0m[33m0[0m]
+[0m[1m182 |[0m     expect(requested)[0m[3m[1m.toHaveLength[0m([0m[33m4[0m)
+                            [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoHaveLength[2m([0m[32mexpected[0m[2m)[0m
+
+Expected length: [32m4[0m
+Received length: [31m3[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-supplemental-loop.test.ts[0m[2m:[0m[33m182[0m[2m:[33m23[0m[2m)[0m
+[0m[31m✗[0m [0mC85-B queryOneRound 补充交付与追加协议[2m >[0m[1m L② 下一轮 fakeProvider 所见含补充 + 真实 toOpenAIMessages 投影含 image_url[0m [0m[2m[0.70ms[0m[2m][0m
+[0m[1m216 |[0m       ] [0m[34mas[0m Tools,
+[0m[1m217 |[0m       [] [0m[34mas[0m Message[],
+[0m[1m218 |[0m     )
+[0m[1m219 |[0m     // 序列 = assistant + tool_result(tu-1) + 补充(supA) + defer marker（入参空 messages）
+[0m[1m220 |[0m     expect(round.deferred)[0m[3m[1m.toMatchObject[0m({ toolUseId: [0m[32m'tu-2'[0m })
+[0m[1m221 |[0m     expect(round.messages)[0m[3m[1m.toHaveLength[0m([0m[33m4[0m)
+                                 [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoHaveLength[2m([0m[32mexpected[0m[2m)[0m
+
+Expected length: [32m4[0m
+Received length: [31m3[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-supplemental-loop.test.ts[0m[2m:[0m[33m221[0m[2m:[33m28[0m[2m)[0m
+[0m[31m✗[0m [0mC85-B queryOneRound 补充交付与追加协议[2m >[0m[1m L③ 混合批次：失败工具不产补充；无图工具位置正确；defer 短路后已完成工具补充仍交付[0m [0m[2m[0.18ms[0m[2m][0m
+[0m
+tests/unit/wave0185-tool-supplemental.test.ts:
+[0m
+[1m[2m#[0m [31m[1mUnhandled error[0m[2m between tests[0m
+[2m-------------------------------[0m
+[0m[31mSyntaxError[0m[2m:[0m [1mExport named 'selectSkillDeliverableMessages' not found in module '/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/src/engine/tools/skill/index.ts'.[0m
+[0m[2m-------------------------------[0m
+
+[0m
+tests/unit/wave0185-pdf-projection.test.ts:
+[0m[1m55 |[0m }
+[0m[1m56 |[0m 
+[0m[1m57 |[0m describe('C85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判别）', () => {
+[0m[1m58 |[0m   test('① 真实 attachment 型 pdf_reference 投影为恰一 user 文本（绝对路径在正文）', () => {
+[0m[1m59 |[0m     [0m[35mconst[0m out = toOpenAIMessages([attachMsg(makeRef())] [0m[34mas[0m [0m[34many[0m)
+[0m[1m60 |[0m     expect(out.length)[0m[3m[1m.toBe[0m([0m[33m1[0m)
+                            [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoBe[2m([0m[32mexpected[0m[2m)[0m
+
+Expected: [32m1[0m
+Received: [31m0[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-pdf-projection.test.ts[0m[2m:[0m[33m60[0m[2m:[33m24[0m[2m)[0m
+[0m[31m✗[0m [0mC85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判别）[2m >[0m[1m ① 真实 attachment 型 pdf_reference 投影为恰一 user 文本（绝对路径在正文）[0m [0m[2m[0.23ms[0m[2m][0m
+[0m[1m65 |[0m     expect(text)[0m[3m[1m.toContain[0m([0m[32m'/abs/path/report.pdf'[0m)
+[0m[1m66 |[0m   })
+[0m[1m67 |[0m 
+[0m[1m68 |[0m   test('② 四要素：内容未附上 / 必读 Read / pages≤20 / 页数多或未知小范围逐页', () => {
+[0m[1m69 |[0m     [0m[35mconst[0m text = firstProjectionText([attachMsg(makeRef())] [0m[34mas[0m [0m[34many[0m)
+[0m[1m70 |[0m     expect(text)[0m[3m[1m.toMatch[0m(/not attached to [0m[33mthis[0m message/i)
+                      [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoMatch[2m([0m[32mexpected[0m[2m)[0m
+
+Expected substring or pattern: [32m/not attached to this message/i[0m
+Received: [31m""[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-pdf-projection.test.ts[0m[2m:[0m[33m70[0m[2m:[33m18[0m[2m)[0m
+[0m[31m✗[0m [0mC85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判别）[2m >[0m[1m ② 四要素：内容未附上 / 必读 Read / pages≤20 / 页数多或未知小范围逐页[0m [0m[2m[0.10ms[0m[2m][0m
+[0m[1m76 |[0m 
+[0m[1m77 |[0m   test('③ pageCount null → unknown 文案；小 PDF 同投影且无 too-large 虚报', () => {
+[0m[1m78 |[0m     [0m[35mconst[0m [0m[34munknown[0m = firstProjectionText(
+[0m[1m79 |[0m       [attachMsg(makeRef({ pageCount: [0m[33mnull[0m }))] [0m[34mas[0m [0m[34many[0m,
+[0m[1m80 |[0m     )
+[0m[1m81 |[0m     expect([0m[34munknown[0m)[0m[3m[1m.toMatch[0m(/page count [0m[34munknown[0m/i)
+                         [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mtoMatch[2m([0m[32mexpected[0m[2m)[0m
+
+Expected substring or pattern: [32m/page count unknown/i[0m
+Received: [31m""[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-pdf-projection.test.ts[0m[2m:[0m[33m81[0m[2m:[33m21[0m[2m)[0m
+[0m[31m✗[0m [0mC85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判别）[2m >[0m[1m ③ pageCount null → unknown 文案；小 PDF 同投影且无 too-large 虚报[0m [0m[2m[0.06ms[0m[2m][0m
+ [0m[1m97 |[0m   })
+ [0m[1m98 |[0m 
+ [0m[1m99 |[0m   test('⑤ 双面文本恒等：params 投影文本在 TUI normalizeAttachmentForAPI 展开文本中逐字在场', () => {
+[0m[1m100 |[0m     [0m[35mconst[0m att = makeRef()
+[0m[1m101 |[0m     [0m[35mconst[0m prov = firstProjectionText([attachMsg(att)] [0m[34mas[0m [0m[34many[0m)
+[0m[1m102 |[0m     expect(prov).not[0m[3m[1m.toBe[0m([0m[32m''[0m)
+                           [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m[2mexpect([0m[31mreceived[0m[2m).[0mnot[2m.[0mtoBe[2m([0m[32mexpected[0m[2m)[0m
+
+Expected: not [32m""[0m
+[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/home/vince/projects/AtlasCode/worktrees/worktree-parity-085/[0m[36mtests/unit/wave0185-pdf-projection.test.ts[0m[2m:[0m[33m102[0m[2m:[33m22[0m[2m)[0m
+[0m[31m✗[0m [0mC85-A toOpenAIMessages pdf_reference 投影（0.1.85 Task A 行为判别）[2m >[0m[1m ⑤ 双面文本恒等：params 投影文本在 TUI normalizeAttachmentForAPI 展开文本中逐字在场[0m [0m[2m[0.03ms[0m[2m][0m
+
+[0m[32m 13 pass[0m
+[0m[31m 15 fail[0m
+ [0m[31m4 errors[0m
+ 57 expect() calls
+Ran 28 tests across 8 files. [0m[2m[[1m1.73s[0m[2m][0m

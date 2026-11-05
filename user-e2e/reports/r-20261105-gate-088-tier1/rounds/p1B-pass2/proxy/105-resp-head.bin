@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","object":"chat.completion.chunk","created":1793857971,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" environment"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" has"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" no CANN toolchain —"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compile"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" hardware"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" profiling"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" aren"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t possible here. I've"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" done what"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s possible: analysis confirmed"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bottleneck, methodology"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" loaded from"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" verified reference"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" docs ("}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":1793857971,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"pingpong_design.md, m"}}]}
+
+data: {"id":"chatcmpl-1a39dca6-473f-4905-bff9-b030d1512838","created":179385

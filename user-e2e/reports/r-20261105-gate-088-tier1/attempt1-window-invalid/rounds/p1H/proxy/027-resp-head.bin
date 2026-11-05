@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","object":"chat.completion.chunk","created":1793854402,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" evidence"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" extraction"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is complete. Summary"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" of baseline"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":\n\n**Baseline (from"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" PROF_0001/ASC"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"END_PROFILER_OUTPUT/op_stat"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"istic.csv):**\n- Total"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" AI Core time: 600"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"0 µs across"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 84 calls\n- Mat"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Mul_e2e:"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 12 calls,"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 4800 µs total,"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" avg"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 400 µs,"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" min"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5d","created":1793854402,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" 360, max 520"}}]}
+
+data: {"id":"chatcmpl-948cdaf8-e2de-4b42-9cc2-900349af7e5

@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] P-B1-nudge-visible [PASS] P-B2-registry-segment [PASS] P-B3-default-no-autoupdate [PASS] P-B4-same-version-absent"
+}
+TUI-UPDATENUDGE-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/updatenudge-0171

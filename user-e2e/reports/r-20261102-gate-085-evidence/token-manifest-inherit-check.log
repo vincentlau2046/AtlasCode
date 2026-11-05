@@ -1,0 +1,14 @@
+084 prior keys: 28  tokens: 254
+085 prior keys: 29  tokens: 287
+verbatim inheritance: FAIL [] extra=['0.1.84']
+084 wave_face tokens: 54
+K5 face coverage in 085 0.1.84 entry: MISSING ['K5-1 有界读上限常量', 'K5-1 有界读 helper', 'K5-1 非常规文件错误', 'K5-1 超限错误', 'K5-1 中止守卫', 'K5-1 128MiB 字面', 'K5-2 后缀 xlsm', 'K5-2 后缀 parquet', 'K5-2 后缀 epub', 'K5-2 后缀 heic', 'K5-3 无损判别叶子', 'K5-3 不可解码错误', 'K5-3 BOM 单次写回', 'K5-3 全量字节读 seam', 'K5-3 BE 拒绝文案', 'K5-3 代理项拒绝定因', 'K5-4 零写保证文案', 'K5-5 schema 字段', 'K5-5 内部名', 'K5-5 模型说明', 'K5-6 安全输出根', 'K5-6 属主真目录校验', 'K5-6 拒绝伪根文案', 'K5-7 引用提示正文未附', 'K5-7 页数未知不虚报', 'K5-8 pages 上限指令', 'K5-8 必读指令', 'you MUST use the']
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+IndexError: list index out of range
+084 wave_face tuples: 27 tokens: 27
+tokens in my 0.1.84 entry: 33
+K5 084 face coverage: MISSING: ['you MUST use the']
+prior(0.1.56–0.1.83) tokens: 254 | K5 face tokens: 27 | 085 新增 wave-face tokens: 14
+manifest 分组口径: 254 prior + 27 K5 face（062 处 repeated 同名核重叠） + 14 085 face
+K5 27 face coverage after fix: FULL

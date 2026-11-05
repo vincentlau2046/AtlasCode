@@ -1,0 +1,43 @@
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Done. A brand-new Trit"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"on RMSNorm kernel for"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Ascend is"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" written"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" and"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" validated in `rms"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"norm_triton_ascend/"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"`:\n\n- **"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"`rmsnorm_triton_asc"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"end.py`** — `_"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"rms_norm_fwd_kernel` (`"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"@triton.jit`"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"): one program per row,"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"BLOCK"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"_N = next_power_of_"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":"2(hidden"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":")` with masked tail,"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" fp32 accumulation via"}}]}
+
+data: {"id":"chatcmpl-78116724-bcd1-401c-b531-a40bdd52fa35","object":"chat.completion.chunk","created":1793858298,"model":"glm-5","choices":[{"index":0,"delta":{"content":" `tl.sum(x*x)/"}}]}
+
+data: {"id":"chatcmpl-7

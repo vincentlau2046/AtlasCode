@@ -1,0 +1,86 @@
+[
+  {
+    "tui": "atlas",
+    "scenario": "S2-edit",
+    "alive": true,
+    "turnSettle": false,
+    "disk": true,
+    "signals": {
+      "chars": 13429,
+      "nonEmptyLines": 232,
+      "read": 2,
+      "edit": 2,
+      "write": 0,
+      "bash": 1,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 2,
+      "skill": 0,
+      "finalAnswer": true
+    }
+  },
+  {
+    "tui": "claude",
+    "scenario": "S2-edit",
+    "alive": true,
+    "turnSettle": true,
+    "disk": true,
+    "signals": {
+      "chars": 14539,
+      "nonEmptyLines": 287,
+      "read": 0,
+      "edit": 2,
+      "write": 0,
+      "bash": 2,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 2,
+      "skill": 0,
+      "finalAnswer": false
+    }
+  },
+  {
+    "tui": "atlas",
+    "scenario": "S4-skill",
+    "alive": true,
+    "turnSettle": false,
+    "disk": null,
+    "signals": {
+      "chars": 13130,
+      "nonEmptyLines": 265,
+      "read": 2,
+      "edit": 0,
+      "write": 0,
+      "bash": 1,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 8,
+      "skill": 13,
+      "finalAnswer": true
+    }
+  },
+  {
+    "tui": "claude",
+    "scenario": "S4-skill",
+    "alive": true,
+    "turnSettle": true,
+    "disk": null,
+    "signals": {
+      "chars": 5673,
+      "nonEmptyLines": 142,
+      "read": 0,
+      "edit": 0,
+      "write": 0,
+      "bash": 0,
+      "addedLines": 0,
+      "removedLines": 0,
+      "plusMinus": true,
+      "thinking": 0,
+      "skill": 4,
+      "finalAnswer": true
+    }
+  }
+]

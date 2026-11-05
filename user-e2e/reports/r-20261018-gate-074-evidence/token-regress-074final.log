@@ -1,0 +1,14 @@
+bytes(char): g73(0.1.73 gate)=17842374 g74(0.1.74 终态 d8301a6)=17838553
+DIFF 0.1.73 claude.ai                                  073=28   074=20  
+total prior tokens=123 diffs=1
+  DIFF: ('0.1.73', 'claude.ai', 28, 20)
+--- 0.1.74 波体 C-3e 销项面 @ dist（073→074 对照，含安全修波+4th-review 面）---
+MCP_PROXY_URL                        073=2    074=0   
+MCP_PROXY_PATH                       073=2    074=0   
+MCP_CLIENT_METADATA_URL              073=2    074=0   
+McpClaudeAIProxyServerConfig         073=6    074=0   
+createClaudeAiProxyFetch             073=2    074=0   
+clientMetadataUrl                    073=9    074=18  
+MCP_OAUTH_CLIENT_METADATA_URL        073=1    074=3   
+client_metadata_url                  073=0    074=2   
+withoutMcpOauthCimdVars              073=0    074=2   

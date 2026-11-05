@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","object":"chat.completion.chunk","created":1793860645,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator in Ascend C."}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill workflow"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" parse spec → tiling →"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" codegen → fill"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compute body → compile."}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I need"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to pick an"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator. The"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user said \"brand"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-new\""}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" without"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" specifying which"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I could ask,"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234d824bf","created":1793860645,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" but the request"}}]}
+
+data: {"id":"chatcmpl-9abdaac8-f2d7-457d-a965-87f234

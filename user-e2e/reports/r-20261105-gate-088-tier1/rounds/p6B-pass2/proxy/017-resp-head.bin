@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","object":"chat.completion.chunk","created":1793865220,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" workspace is empty. There"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s a PROF_0001"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dump with only"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" op_statistic.csv. The"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says intra"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core pipeline is"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the bottleneck per msprof op"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"_summary. There"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s no kernel source in ws"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Hmm"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" — the prof"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" dir exists"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" outside ws"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me check if there"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s a kernel project"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" somewhere nearby"}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ("}}]}
+
+data: {"id":"chatcmpl-f0c4f2c7-86f8-4784-b624-cdd94cf11b0b","created":1793865220,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"home"}}]}
+
+data: {"id":"chatcmp

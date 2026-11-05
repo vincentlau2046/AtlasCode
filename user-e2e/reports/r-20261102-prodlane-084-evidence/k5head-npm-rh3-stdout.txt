@@ -1,0 +1,5 @@
+The Read tool returned exactly this:
+
+```
+PDF pages extracted: 1 page(s) from /home/vince/.claude/jobs/09264df0/tmp/prodlane-084/k5head-npm/work/marker.pdf (1.1KB)
+```

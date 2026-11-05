@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","object":"chat.completion.chunk","created":1793864920,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core pipeline is"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the bottleneck for"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" their Asc"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel. This"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" matches"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-perf-opt"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize skill."}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should check"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the working directory for"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel project"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" first,"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" invoke the skill. The skill"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","created":1793864920,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" description says:"}}]}
+
+data: {"id":"chatcmpl-1decaaab-c729-4359-86e3-03f72e202396","c

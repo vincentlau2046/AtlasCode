@@ -1,0 +1,22 @@
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","object":"chat.completion.chunk","created":1793858567,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b660dfe33dd47d1c","function":{"arguments":"{\"file_path\": \"/home","name":"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/.local/share/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ascend-agent-skills/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"official/CANNBot/ops"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/triton-op-coding/re"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ferences/triton-ascend"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-fundamentals.md\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","object":"chat.completion.chunk","created":1793858567,"model":"glm-5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ac79117a-bfa0-45fb-a7fc-c357afc752b6","created":1793858567,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{}}],"usage":{"completion_tokens":46,"prompt_tokens":46162,"total_tokens":46208,"completion_tokens_details":{"reasoning_tokens":0},"prompt_tokens_details":{"cached_tokens":44928}}}
+
+data: [DONE]
+

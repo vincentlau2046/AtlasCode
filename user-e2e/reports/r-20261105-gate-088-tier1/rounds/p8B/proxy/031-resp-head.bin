@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","object":"chat.completion.chunk","created":1793867464,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-ad6e2e19b3e7b607","function":{"arguments":"{\"content\": \"","name":"Write"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"# setup"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":".py — builds the SiLU"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Ascend C operator via"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" bisheng ("},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"Ascend C compiler"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":")\\n#"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Entry: python3 setup.py"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" build_ext\\nimport os\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"import subprocess\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"import sys\\n\\nfrom setuptools"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" import Extension"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":", setup\\n"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"from setuptools.command.build_ext import"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ab6496b5-17bc-4f9f-89a0-028bcba4b541","created":1793867464,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" build_ext\\n\\n\\n"},"type":"f

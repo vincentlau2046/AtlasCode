@@ -1,0 +1,24 @@
+=== loop-rob run1（409 碰撞定因面：7 段同因 api_error_409，R1-nominal 绿）===
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-500-storm.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-drop-transient.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-500-transient.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-500-transient.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-delay.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-drop-transient.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-500-storm.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R3-resume.kill.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-empty-bounded.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-empty-bounded.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-delay.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R3-resume.resume.log:2
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R3-resume.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-nominal.proxy.log:0
+/home/vince/projects/AtlasCode/user-e2e/loop-robustness/artifacts/all-1792805436303-k61l/R1-nominal.log:0
+
+[2026-10-24T01:31:16.615Z] fault proxy UP on :8998 → http://127.0.0.1:8999 plan={"kind":"firstN","n":2,"fault":"500"}
+[2026-10-24T01:31:16.789Z] POST /v1/chat/completions REQ model=Qwen38-27B-TXT tool_choice=none toolsHasClassifyResult=false ua="AtlasCode/0.1.79 (https://github.com/vincentlau2046/AtlasCode)"
+[2026-10-24T01:31:16.789Z] POST /v1/chat/completions call=1 fault=500 (firstN<=2) bodyBytes=33429
+[2026-10-24T01:31:17.298Z] POST /v1/chat/completions REQ model=Qwen38-27B-TXT tool_choice=none toolsHasClassifyResult=false ua="AtlasCode/0.1.79 (https://github.com/vincentlau2046/AtlasCode)"
+[2026-10-24T01:31:17.298Z] POST /v1/chat/completions call=2 fault=500 (firstN<=2) bodyBytes=33429
+[2026-10-24T01:31:18.307Z] POST /v1/chat/completions REQ model=Qwen38-27B-TXT tool_choice=none toolsHasClassifyResult=false ua="AtlasCode/0.1.79 (https://github.com/vincentlau2046/AtlasCode)"
+[2026-10-24T01:31:18.307Z] POST /v1/chat/completions call=3 fault=none (after-firstN) bodyBytes=33429

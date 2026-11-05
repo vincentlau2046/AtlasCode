@@ -1,0 +1,17 @@
+bugfix0167       PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+compact0168      PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+blockd0169       PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+gh0170           PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+goal0162         PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+checkin0163      PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+prop0163         PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+spin0164         PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:13 
+quota403-0171    PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:14 
+updatenudge-0171 PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:19 
+mcp0174          PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:19 
+deant0175        PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:19 
+oauth0176        PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:19 
+deant0178        PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:19 
+wc0179           hardFail=0   repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:21 
+k1080            PASS         repo=AtlasCode/worktrees/worktree-gate-082-face mtime=10-30 20:21 
+fam fails=0 / 16

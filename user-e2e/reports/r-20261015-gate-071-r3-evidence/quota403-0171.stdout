@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] P-A1-aggregate-header [PASS] P-A2-quota-classification [PASS] P-A3-quota-actionable [PASS] P-A4-plain403-control"
+}
+TUI-QUOTA403-0171 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-071r2/quota403-0171

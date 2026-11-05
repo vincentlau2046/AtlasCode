@@ -1,0 +1,2 @@
+wave 面 @d8301a6: 27 pass / 0 fail / 77 expect (2 files: mcp-remote-closure-0174 + de-ant-closure-0173)
+基线面 @5d8a809: 13 pass / 14 fail / 63 expect (同 2 测试文件 cp 入 scratch, 判别红面)

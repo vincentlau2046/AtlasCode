@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","object":"chat.completion.chunk","created":1793854701,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user says"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" their"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel's"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra-core pipeline is the bottleneck"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" per msprof op_summary,"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" and asks to optimize the"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" kernel itself. This matches"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-per"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"f-optimize skill ("}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"intra-core optimization"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", four"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-step flow,"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bound"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" types). I"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should invoke the Skill tool for"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ascend"}}]}
+
+data: {"id":"chatcmpl-ae3ea8ca-0951-4dea-b121-8d2bee633531","created":1793854701,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-perf-optimize.\n\nBut"}}]}
+
+dat

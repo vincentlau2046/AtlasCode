@@ -1,0 +1,57 @@
+{
+  "probe": "tui-k1-waves-0180",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-084-face",
+  "date": "2026-11-01T20:28:27.326Z",
+  "probes": [
+    {
+      "id": "P-801-K1A-idle-compaction",
+      "hard": true,
+      "ok": true,
+      "detail": "常量+合并+谓词+epoch-0+源缝+门面 STR-1+idle OR 臂行为面（4h/220K 触发·近期/低量/关面不触发）"
+    },
+    {
+      "id": "P-802-K1B-prefix-normalization",
+      "hard": true,
+      "ok": true,
+      "detail": "stripProviderPrefix + 档位查序（精确>basename>default）+ resolve 带模型 + 声明窗 basename 回落"
+    },
+    {
+      "id": "P-803-K1C-sticky-peek",
+      "hard": true,
+      "ok": true,
+      "detail": "大→小换摘要模型+sticky 非 one-shot+小→大不换+清记录语义+spinner 显形"
+    },
+    {
+      "id": "P-804-K1E-stream-idle-watchdog",
+      "hard": true,
+      "ok": true,
+      "detail": "300s 常量+错误形状+分类面（retryable 非 fail-fast）+sync/async 透传+stall 抛（产品形状）+非法透传+消费点锚"
+    },
+    {
+      "id": "P-804s-K1E-generator-stall-edge",
+      "hard": false,
+      "ok": null,
+      "detail": "generator 挂起流形状 timeout throw 被 finally await return() 吞（非产品形状，soft 登记候补裁定）"
+    },
+    {
+      "id": "P-805-K1F-count-stability",
+      "hard": true,
+      "ok": true,
+      "detail": "稳定序去重（保首现+custom 窄化）+预算计数（±5K 阈界+NaN 按 0）+frontmatter 活码+K1-F④ 注锚"
+    },
+    {
+      "id": "P-806-deant-dist-identity",
+      "hard": true,
+      "ok": true,
+      "detail": "一方字面 6 件 dist 全 0 + A3-1 官方市场锚在场（清零面不回归）"
+    },
+    {
+      "id": "P-807-K1D-resume-ui-anchors",
+      "hard": true,
+      "ok": true,
+      "detail": "k1d 判别在场 + sessionMemoryCompact/compact.ts 写侧锚 + CompactSummary dim 行双支在场"
+    }
+  ],
+  "hardFail": 0,
+  "verdict": "PASS"
+}

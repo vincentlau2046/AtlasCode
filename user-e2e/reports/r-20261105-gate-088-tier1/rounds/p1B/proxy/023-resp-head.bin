@@ -1,0 +1,37 @@
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":"The MAC"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" body"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" has a bug"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" ("}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":"a"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" stray placeholder"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" line"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" and an"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":" unallocated scratch tensor"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":"). Fix"}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","object":"chat.completion.chunk","created":1793857081,"model":"glm-5","choices":[{"index":0,"delta":{"content":"ing it properly."}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-86f035e74f264452","function":{"arguments":"{\"file_path\": \"/home","name":"Edit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/vince/.claude/j"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"obs/09264df"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"0/tmp/gate-08"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"8/tier1/p1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"B/ws/matmul_opt"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-1236c8df-b7a1-4b1f-a1d6-07dd66261bbe","created":1793857081,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/csrc/matmul.cpp.asc"},"type":"function","index":0

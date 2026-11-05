@@ -1,0 +1,20 @@
+bytes: gate78=17827775 npm77=17819528
+--- 本波面 @ gate78（红→绿：A1/A2/A3-2 活码面应 0）+ A3-1 恒等锚在场 ---
+anthropic_beta               gate78=0    npm77=0   
+anthropic-ratelimit          gate78=0    npm77=0   
+anthropic_cloud              gate78=0    npm77=1   
+claude.ai subscription       gate78=0    npm77=1   
+isFirstPartyGatewayUrl       gate78=0    npm77=4   
+CLAUDEAI_SERVER_PREFIX       gate78=0    npm77=6   
+isDefaultGateway             gate78=4    npm77=0   
+downloads.claude.ai          gate78=1    npm77=1   
+claude-plugins-official      gate78=30   npm77=30  
+mismatch(gate78 本波面)=0
+--- 前 22 波（0.1.56–0.1.77）token 零回归 gate78↔npm77 ---
+DIFF 0.1.73 claude.ai                                  npm77=19   gate78=13  
+total prior tokens=160 diffs=1
+  DIFF: ('0.1.73', 'claude.ai', 19, 13)
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm77=0    gate78=0   
+foreground (default)                       npm77=0    gate78=0   
+Set run_in_background to true to launch    npm77=0    gate78=0   

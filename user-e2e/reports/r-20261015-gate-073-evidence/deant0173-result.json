@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "hardFail": 0,
+  "inconclusive": 0,
+  "probes": "[PASS] P-DF1-neut-literals-zero: dist api.anthropic.com=0 + claude-code-20250219=0 + atlas-code-20250219=1（锚在场）+ src mcp-proxy.anthropic.com=0（C-2a 值中性化） || [PASS] P-DF2-registered-surface-baseline: 登记面基线（不判红）：dist claude.ai=28〔C-3e MCP 远端车道 + C-2b sessionIngress + 文档串〕+ mcp-proxy.anthropic.com=0〔C-3e 值中性化=0〕（prodlane 对照锚） || [PASS] P-DF3-iff-live-no-anthropic: H-1 场景（per-role 无 key→providers 表兜底）IFF 往返通 rc=0 + PONG-DEANT0173 marker + 零 anthropic 可达（api.anthropic.com=0 + quota403 族=0） || [PASS] P-DF4-model-gate-identity: 三模型（Qwen38-27B-TXT/glm-5.1/deepseek-v3.2）× 能力门恒等全过：ISP=true / ContextMgmt=true / StructuredOutputs=false / isPDFSupported(tui+engine)=true（C-3a/C-3b 删支恒等锚行为复验）",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-0.1.73-de-ant-closure"
+}

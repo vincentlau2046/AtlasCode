@@ -1,0 +1,640 @@
+[AtlasHarness] main() starting...
+[?2004h[?1004h[?25l]0;✳ AtlasHarness[?2026h[38;2;215;119;87m ▄▄▄▄[6C██[2C██[39m
+[38;2;215;119;87m██[2C██[5C██[2C██[39m
+[38;2;215;119;87m██████[5C██████[2C[39m[1mAtlasHarness[1C[22m[38;2;153;153;153mv0.1.14[39m
+[38;2;215;119;87m██[2C██[5C██[2C██[2C[38;2;153;153;153mdeepseek-v4-pro[1Cwith[1Cmedium[1Ceffort[1C·[1CAPI[1CUsage[1CBilling[39m
+[38;2;215;119;87m██[2C██[5C██[2C██[2C[38;2;153;153;153m/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[39m
+[38;2;215;119;87mAtlasHarness[39m
+[38;2;153;153;153mAI[1CCoding[1CAgent[39m
+
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+❯ [7m [27m
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+[2C⚡[1Cdeepseek-v4-pro[38;2;153;153;153m ·[1C[39m🧠[1Cmed[38;2;153;153;153m ·[1C[38;2;255;107;128m⏭[1CBypass[38;2;153;153;153m ·[1C⌂[1C/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[35C◐[1Cmedium[1C·[1C/effort[39m
+[2C[3A[?2026l[>0q[c[?2026h[2D[3B[82C[1A[38;2;153;153;153m◐ medium · /effort[1C[38;2;255;193;7mAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://github.com/vi…[39m
+
+[2C[4A[?2026l]0;⠂ AtlasHarness[?2026h[2D[4B[5A[48;2;55;55;55m[38;2;80;80;80m❯ [38;2;255;255;255mThink through the tradeoffs carefully before answering: for a small team of 3 maintaining two tightly-related services (a web API and a background worker), is a single monorepo or two separate [39m     [1B[38;2;255;255;255mrepositories better? Then give a one-line recommendation and the two most important reasons.[39m                                                                                                            [1B[49m                                                                                                                                                                                                        [1B[38;2;215;119;87m✽[1CWa[38;2;235;159;127mddl[38;2;215;119;87ming… [39m             [1C                                                                                                                                                                              
+
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+[38;2;153;153;153m❯ [39m[7m [27m
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+[2C⚡[1Cdeepseek-v4-pro[38;2;153;153;153m ·[1C[39m🧠[1Cmed[38;2;153;153;153m ·[1C[38;2;255;107;128m⏭[1CBypass[38;2;153;153;153m ·[1C⌂[1C/home/vince/projects/AtlasCode/user-e◐[1Cmedium[1C·[1C/effortp[38;2;255;193;7mAtlasCode[1Cis[1Cinstalled[1Cvia[1Cnpm[1C(npm[1Cinstall[1C-g[1C@atlasharness/atlascode).[1CSee[1Chttps://github.com/vi…[39m
+
+[2C[4A[?2026l[?2026h[2D[4B[4C[7A[38;2;215;119;87md[2C[38;2;235;159;127mi[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[5C[7A[38;2;215;119;87md[2C[38;2;235;159;127mn[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✻[5Cli[1C[38;2;235;159;127mg…[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[8C[7A[38;2;215;119;87mn[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✶[8Cg[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[10C[7A[38;2;215;119;87m…[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m*[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✢[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m·[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✢[39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠐ AtlasHarness[?2026h[2D[4B[7A[38;2;215;119;87m*[11C[38;2;153;153;153m(1s)[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✶[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✻[1C[38;2;235;159;127mW[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[3C[7A[38;2;235;159;127mad[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✽[1CW[2C[38;2;235;159;127md[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[3C[7A[38;2;215;119;87ma[2C[38;2;235;159;127ml[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[4C[7A[38;2;215;119;87mdd[1C[38;2;235;159;127min[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[6C[7A[38;2;215;119;87ml[2C[38;2;235;159;127mg[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✻[6Ci[2C[38;2;235;159;127m…[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[8C[7A[38;2;215;119;87mn[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✶[8Cg[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[10C[7A[38;2;215;119;87m…[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m*[39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠂ AtlasHarness[?2026h[2D[4B[7A[38;2;215;119;87m✢[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[13C[7A[38;2;153;153;153m2[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m·[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✢[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m*[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✶[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✻[1C[38;2;235;159;127mWa[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[4C[7A[38;2;235;159;127md[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✽[1CW[2C[38;2;235;159;127md[39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠐ AtlasHarness[?2026h[2D[4B[3C[7A[38;2;215;119;87ma[2C[38;2;235;159;127ml[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[4C[7A[38;2;215;119;87mddl[6C[38;2;153;153;153m3[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;215;119;87m✻[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;214;118;87m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;214;117;87m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;214;117;86m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;213;116;86m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;212;114;86m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;212;113;85m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;211;112;85m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;210;110;84m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;209;109;84m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;208;107;83m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;207;105;83m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;206;104;82m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠂ AtlasHarness[?2026h[2D[4B[7A[38;2;205;102;82m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;204;100;81m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;203;98;80m✶[1CWaddling… [1C[38;2;153;153;153m4[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;202;96;80m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;200;94;79m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;199;92;78m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;198;89;78m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;197;87;77m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;195;85;76m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;194;83;76m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;193;81;75m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;191;78;74m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;190;76;73m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;189;74;73m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;188;72;72m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠐ AtlasHarness[?2026h[2D[4B[7A[38;2;186;69;71m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;185;67;71m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;184;65;70m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;182;63;69m·[1CWaddling… [1C[38;2;153;153;153m5[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;181;61;69m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;180;59;68m·[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[127C[2A[38;2;153;153;153m◐ medium · /effort[39m [38;2;78;186;101m✓ Atlas marketplace installed · /plugin to browse Atl…[39m
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;179;57;67m✢[1CWaddling… [82C[5B[38;2;153;153;153m2e/compare/runs/cm[1C-2026-10-03T00-54-09-vz5y/[39m
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;178;56;67m✢[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;178;55;67m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;177;53;66m*[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;176;52;66m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;176;51;66m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;175;51;65m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;175;50;65m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;⠂ AtlasHarness[?2026h[2D[4B[7A[38;2;175;49;65m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;174;49;65m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;174;48;65m✽[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;174;47;64m✻[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;173;47;64m✻[1CWaddling… [1C[38;2;153;153;153m6[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;173;47;64m✶[39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;173;46;64m✶[1CWaddling… [39m
+
+
+
+
+
+
+[2C[4A[?2026l[?2026h[2D[4B[7A[38;2;173;46;64m*[39m
+
+
+
+
+
+
+[2C[4A[?2026l]0;✳ AtlasHarness[?2026h[2D[4B[7A[38;2;153;153;153m[3m∴ Thinking The user asks a thinking question, no tools needed. Just answer concisely. (ctrl+o to expand)[2B[23m[38;2;255;255;255m●[39m [1mMonorepo[22m is the better fit for this team and setup.                                                                                                                                                   [1B   [1B  [1mOne-line recommendation:[22m Use a single monorepo — two tightly-related services maintained by the same 3-person team should live in one repository.                                                     [2C[1B  [1C                    [1C                                                                                                                       [1C                                                      [2C[1B[1mTwo most important reasons:[22m
+
+[2C[1mAtomic[1Ccross-service[1Cchanges.[1C[22mWhen[1Cthe[1CAPI[1Cand[1Cworker[1Cshare[1Cschemas,[1Cmessage[1Ccontracts,[1Cor[1Cprotobuf/type[1Cdefinitions,[1Ca[1Cmonorepo[1Clets[1Ca[1Csingle[1Ccommit[1Cchange[1Cboth[1Csides[1Cand[1Cstay[1Cconsistent[1C—[1Ctwo
+[2Crepos[1Cforce[1Cyou[1Cto[1Ccoordinate[1Cversions,[1CPRs,[1Cand[1Cmerge[1Corder[1Cacross[1Cboundaries[1Cthat[1Cchange[1Ctogether[1Canyway.
+[2C[1mShared[1Ctooling,[1CCI,[1Cand[1Ccontext[1Cwith[1Czero[1Coverhead.[1C[22mOne[1CCI[1Cpipeline,[1Cone[1Clint/build[1Cconfig,[1Cone[1Cdependency[1Cmanifest,[1Cand[1Cone[1Creview[1Csurface[1Cfor[1Ca[1Cteam[1Cof[1C3[1C—[1Cinstead[1Cof[1Cduplicating[1Cand[1Ckeeping[1Ctwo
+[2Ccopies[1Cof[1Ceverything[1Cin[1Csync.[1CThe[1Ccoordination[1Ccost[1Cthat[1Cmonorepos[1Cadd[1Cat[1Cscale[1C(ownership,[1Cisolation,[1Crelease[1Ccadence)[1Cis[1Cexactly[1Cwhat[1Cthis[1Cteam[1C[3mdoesn't[1C[23myet[1Chave.
+
+[2CThe[1Cmain[1Ccase[1Cwhere[1Ctwo[1Crepos[1Cwin[1Cis[1Cif[1Cthe[1Cservices[1Chad[1C[3mdifferent[1C[23mowners,[1Clifecycles,[1Cor[1Cdeployment[1Ccadences[1C—[1Cnone[1Cof[1Cwhich[1Capply[1Cto[1Ca[1C3-person[1Cteam[1Cthat[1Calready[1Cknows[1Cthey're[1Ctightly[1Crelated.
+
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+❯ [7m [27m
+[38;2;136;136;136m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+[2C⚡[1Cdeepseek-v4-pro[38;2;153;153;153m ·[1C[39m🧠[1Cmed[38;2;153;153;153m ·[1C[38;2;255;107;128m⏭[1CBypass[38;2;153;153;153m ·[1C[39m▤[1C16k/1000k[1Ctok[1C(2%)[38;2;153;153;153m ·[1C⌂[66C◐[1Cmedium[1C·[1C/effort[1C[38;2;78;186;101m✓[1CAtlas[1Cmarketplace[1Cinstalled[1C·[1C/plugin[1Cto[1Cbrow…[39m
+[2C[38;2;153;153;153m/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[39m
+[2C[4A[?2026l[?2026h[2D[4B[132C[2A[38;2;153;153;153m· /h[1Clp 查看全部命令[39m [38;2;78;186;101m✓ Atlas marketplace insta[1Cled · /plugin to bro[39m
+
+[2C[4A[?2026l[?2026h[2D[4B[68C[2A[38;2;153;153;153m/home/vince/projects· /help 查看全部命令c[38;2;255;193;7mAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://githu…[2C[1B[39m                                                                                                   
+[2C[4A[?2026l[?2026h[2D[4B[68C[2A                                                          [38;2;153;153;153m· /help 查看全部命令[39m [38;2;78;186;101m✓ Ascend official marketplace installed · /plugin to…[2C[1B[38;2;153;153;153m/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[39m
+[2C[4A[?2026l[?2026h[2D[4B[68C[2A[38;2;153;153;153m/home/vince/projects· /help 查看全部命令c[38;2;255;193;7mAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://githu…[2C[1B[39m                                                                                                   
+[2C[4A[?2026l[?2026h[2D[4B[68C[2A                                                                   [38;2;153;153;153m· /help 查看全部命令[39m [38;2;78;186;101m✓ Marketplace installed · /plugin to see av…[2C[1B[38;2;153;153;153m/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[39m
+[2C[4A[?2026l[?2026h[2D[4B[68C[2A[38;2;153;153;153m/home/vince/projects/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-· /clear 清屏-[38;2;78;186;101m✓ Marketplace installed · /plugin to[1Csee avail[2C[1B[39m                                                                                                   
+[2C[4A[?2026l]0;✳ Monorepo vs separate repositories for small team[?2026h[2D[4B[88C[2A  [38;2;153;153;153m· /clear 清屏[39m [38;2;255;193;7mAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://github.com…[2C[1B[38;2;153;153;153m/AtlasCode/user-e2e/compare/runs/cmp-2026-10-03T00-54-09-vz5y/S3-think/atlas/ws[39m
+[2C[4A[?2026l[?2026h[2D[4B[88C[2A[38;2;153;153;153m· /sessionlist 会话列表p[38;2;255;193;7mAtlasCode is inst[1Clled[1Cvia npm (npm[1Cinst[1Cl[1C -g @atlasharness/atlascode). See ht[1Cps://gi[2C[1B[39m                                                                               
+[2C[4A[?2026l[?2026h[2D[4B[2K[G[1A[167C[1A       [38;2;153;153;153m· /sessionlist 会话列表[39m   [1B                                                                                                                                                                                                        [2C[3A[?2026l[?2026h[2D[3B[174C[1A          [38;2;153;153;153m· c[1Crl+d 退出[39m
+[2C[3A[?2026l[?2026h[2D[3B[179C[1A[38;2;153;153;153m· Esc Esc 清空输入[39m
+[2C[3A[?2026l[?2026h[2D[3B[179C[1A [38;2;153;153;153m· /model[1C切换模型[39m
+[2C[3A[?2026l[?2026h[2D[3B[177C[1A[38;2;153;153;153m· /help 查看全部命令[39m
+[2C[3A[?2026l[?2026h[2D[3B[177C[1A       [38;2;153;153;153m· /clear 清屏[39m
+[2C[3A[?2026l[?2026h[2D[3B[174C[1A[38;2;153;153;153m· /sessionlist 会话列表[39m
+[2C[3A[?2026l[?2026h[2D[3B[174C[1A          [38;2;153;153;153m· c[1Crl+d 退出[39m
+[2C[3A[?2026l[?2026h[2D[3B[179C[1A[38;2;153;153;153m· Esc Esc 清空输入[39m
+[2C[3A[?2026l[?2026h[2D[3B[179C[1A [38;2;153;153;153m· /model[1C切换模型[39m
+[2C[3A[?2026l

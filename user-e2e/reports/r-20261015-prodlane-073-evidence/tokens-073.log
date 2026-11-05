@@ -1,0 +1,13 @@
+bytes: gate73=17842374 npm72=17835921 npm73=17833464
+--- 本波 token @ npm73（gate73 对照）---
+C-2a/absent                  api.anthropic.com          gate73=0    npm72=1    npm73=0   
+C-2a/absent                  mcp-proxy.anthropic.com    gate73=0    npm72=1    npm73=0   
+C-3c/absent                  claude-code-20250219       gate73=0    npm72=1    npm73=0   
+C-3c/anchor                  atlas-code-20250219        gate73=1    npm72=0    npm73=1   
+C-3e-registered              claude.ai                  gate73=28   npm72=30   npm73=28  
+--- 前 17 波（0.1.56–0.1.72）token 零回归 npm72↔npm73 ---
+total prior tokens=118 diffs=0
+--- IFF 离场 + 0.1.66 旧句离场 ---
+IFF 不可达                                    npm72=0    npm73=0   
+foreground (default)                       npm72=0    npm73=0   
+Set run_in_background to true to launch    npm72=0    npm73=0   

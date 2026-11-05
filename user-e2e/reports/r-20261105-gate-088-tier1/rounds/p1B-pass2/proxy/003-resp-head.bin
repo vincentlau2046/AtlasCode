@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","object":"chat.completion.chunk","created":1793857400,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants to optimize an"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"end matmul kernel where"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" intra"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-core pipeline is the bottleneck."}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" They"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ask"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" to \""}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"optimize this kernel itself\" and"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" finish with ROUT"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"E-DONE-4."}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" This looks"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" like a"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" routing task — I"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" should check"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" what"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'s"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c41ab","created":1793857400,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in the working directory,"}}]}
+
+data: {"id":"chatcmpl-29a09f2f-8a8e-4b61-8a9b-02fef58c4

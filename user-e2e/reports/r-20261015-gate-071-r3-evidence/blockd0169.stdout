@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] D1-1-per-model-tiers [PASS] D1-2-default-fallback [PASS] D1-3-legacy-single-anchor [PASS] D1-4-no-setting-anchor [PASS] D1-5-per-model-off-tier [PASS] D3-1-fallback-on-api-failure [PASS] D3-2-ptl-no-trigger-anchor [PASS] D3-3-abort-no-trigger-anchor [PASS] D3-4-return-apierr-fallback [PASS] D3-5-success-no-extra-call-anchor [PASS] D3-6-no-fallback-model-anchor [PASS] D3-7-eligible-result-fixed-surface [PASS] D5-1-gate-baseline-missing [PASS] D5-2-gate-unchanged-anchor [PASS] D5-3-changed-face [PASS] D5-4-api-consumer"
+}
+TUI-BLOCKD-0169 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-069/blockd-0169

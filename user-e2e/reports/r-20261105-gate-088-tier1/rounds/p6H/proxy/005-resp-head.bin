@@ -1,0 +1,35 @@
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","object":"chat.completion.chunk","created":1793863522,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Skill"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" not available"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" this session"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Let me check the"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" working directory for"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the kernel project"}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-885ba5db752c2b03","function":{"arguments":"{\"command\": \"find","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/.cla"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/p6H/ws -max"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"depth 3 -type f"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" | head -50"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-ef3908c2-0d06-4ed3-ab02-461744d69bb2","created":1793863522,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"descripti

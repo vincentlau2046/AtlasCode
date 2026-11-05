@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":"Done. Summary"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" of what was produced"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" and where"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":":\n\n"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":"**Routing**"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" — ascend-opdev routed"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" Triton request to the `"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":"triton-op-generator`"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" workflow (skill source check"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" passed"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":": fresh). The plugin"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" isn't registered as an"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" invocable Skill here"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":", so"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" I executed its 6-phase"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" workflow"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" directly using"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":" the installed sub"}}]}
+
+data: {"id":"chatcmpl-3056d7af-8b00-4892-acb5-cad3741fb6d1","object":"chat.completion.chunk","created":1793858765,"model":"glm-5","choices":[{"index":0,"delta":{"content":"-skill definitions"}}]}

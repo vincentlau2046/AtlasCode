@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","object":"chat.completion.chunk","created":1793863553,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"This"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" doesn"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t seem to be the"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" ascend"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-perf-opt"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize skill. The system"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" prompt lists skills available"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":":"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-perf-opt"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"imize,"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" but"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Skill"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" tool said"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"Unknown skill\". Maybe"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the skills directory"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is somewhere"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" else. Let me search for"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \""}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863553,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"perf"}}]}
+
+data: {"id":"chatcmpl-13088c88-848f-471b-b0d9-2ca6a1a455fb","created":1793863

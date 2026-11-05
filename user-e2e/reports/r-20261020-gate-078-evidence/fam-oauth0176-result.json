@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "hardFail": 0,
+  "inconclusive": 0,
+  "probes": "[PASS] P-OG1-gate-module-present: oauthScopeGate.ts 在场 + 8 导出面全在场（env 单一事实源常量 + 解析/allowlist/判定/门控/显示谓词/可行动错误文案） || [PASS] P-OG2-untrusted-block-gated: untrusted 块级门控判定面在场（project+plugin 判定 + 块级谓词 + 整块剥离 applyMcpOauthScopeGate + oauthGated 标记 + 显示谓词 = 块级语义非单字段门控） || [PASS] P-OG3-allowlist-true-env-only: allowlist 真 env 专用面核销：managedEnv withoutMcpOauthTrustedServersVars 全源剥离在场 + 键匹配 case-insensitive（CWE-178 对齐 0.1.74 先例）+ env 名单一事实源常量 = settings 种值到不了计数面 || [PASS] P-OG4-gate-enforcement-points: 门控 choke point 接线核销：config.ts addScopeToServers 附着面 + getMcpConfigs 插件面兜底（applyMcpOauthScopeGate 调用 ≥3）+ auth.ts performMCPOAuthFlow 函数顶门禁 throw 可行动错误 + 显示面 3 处显形（MCPListPanel/MCPRemoteServerMenu 门控态文案 + MCPSettings oauthGated 数据面 ≥2 + /mcp CLI 门控支） || [PASS] P-OG5-0174-hardening-identity: 0.1.74 四硬化面零回归恒等锚：CIMD getter 优先级链（env 部署控制在前）+ env https 验真 + 日志不可逆描述子 + managedEnv CIMD case-insensitive 剥离 + types https-only 锚——0.1.76 门控先于 CIMD 链且不破 0.1.74 面",
+  "repo": "/home/vince/projects/AtlasCode/worktrees/worktree-gate-078-final"
+}

@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","object":"chat.completion.chunk","created":1793865837,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-add79de5800e6ed9","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"in_progress"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"1\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a3ab07c1bfc465b9","function":{"arguments":"{\"command\": \"","name":"Bash"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"python3 -c \\\"import"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" torch;"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" print(torch.__version__"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":")\\\" 2>&1;"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" python3 -c \\\"import"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" torch_npu; print('"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"torch_npu',"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" torch_npu.__version__"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":")\\\" 2>&1;"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" python3 -c \\\"import"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-5223890e-d9fe-42c1-a128-9986daf3ac5d","created":1793865837,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" triton

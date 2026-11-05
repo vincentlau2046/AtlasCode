@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","object":"chat.completion.chunk","created":1793860850,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Working"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" directory is empty. The user"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" hasn"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"'t provided the"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator project or the"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compile log. The"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Asc"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"endDiagnoser tool consumes"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" bisheng logs —"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" I need"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the log"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" output"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" Ask"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the user for the failing"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" materials"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","created":1793860850,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":".","content":"The tri"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","object":"chat.completion.chunk","created":1793860850,"model":"glm-5","choices":[{"index":0,"delta":{"content":"age route"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","object":"chat.completion.chunk","created":1793860850,"model":"glm-5","choices":[{"index":0,"delta":{"content":" is clear —"}}]}
+
+data: {"id":"chatcmpl-3bc79af0-5075-4d41-9071-addc51e782f6","object":"chat.com

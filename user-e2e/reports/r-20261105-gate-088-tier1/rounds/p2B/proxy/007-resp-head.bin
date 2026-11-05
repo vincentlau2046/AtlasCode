@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","object":"chat.completion.chunk","created":1793858364,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Fresh"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Route: Triton →"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" two"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" candidates"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":": cannbot-triton-op"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-generator-skills (Trit"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"on-Ascend:"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" task extraction, algorithm design,"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" code generation"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", verification, latency optimization)"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or community-triton-op-sk"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ills."}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" The user wants"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a brand-new RMSNorm kernel"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" in Triton from scratch."}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" cannbot-triton-op-generator"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-skills is the pre"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"installed Trit"}}]}
+
+data: {"id":"chatcmpl-84bcb120-bbac-4d54-a9ef-f864f7751890","created":1793858364,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":

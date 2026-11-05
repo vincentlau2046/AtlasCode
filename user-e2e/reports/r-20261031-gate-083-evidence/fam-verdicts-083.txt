@@ -1,0 +1,21 @@
+=== 0.1.83 gate 判据③④⑤ fam/serial 收账（harvest from stdout/result.json/probes.json）===
+bugfix0167: verdict=PASS
+compact0168: verdict=PASS
+blockd0169: verdict=PASS
+gh0170: verdict=PASS
+goal0162: verdict=PASS
+checkin0163: verdict=PASS
+prop0163: verdict=PASS
+spin0164: verdict=PASS
+quota403-0171: verdict=PASS
+updatenudge-0171: verdict=PASS
+mcp0174: verdict=PASS
+deant0175: verdict=PASS
+oauth0176: verdict=PASS
+deant0178: verdict=PASS
+wc0179: hardFail=0 probes=11 ok=9 not-ok(soft)=['P-C45-rewind-across-clear', 'P-C106-permissions-mid-round']
+k1080: verdict=PASS probes=8 not-ok(soft)=['P-804s-K1E-generator-stall-edge']
+P0a: verdict=PASS releasable=True
+A4F: verdict=PASS probes=6 all-ok=True
+cmd: 32 PASS / 0 FAIL（恒等 32）
+help: PASS（55 标签集恒等 0.1.62 权威集，缺 0 多 0）

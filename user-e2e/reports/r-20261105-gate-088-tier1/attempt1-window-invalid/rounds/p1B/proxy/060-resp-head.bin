@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","object":"chat.completion.chunk","created":1793853820,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b03f8f648b686fad","function":{"arguments":"{\"command\": \"sed","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -n '1"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":",120"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"p' /home/vince"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/.claude/jobs/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"09264df0/tmp"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/gate-088/t"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ier1/p1B/"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"agent-skills/official/C"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ANNBot/ops/asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"endc-performance-best-practices"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/reference/matmul/m"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"te2_preload_design.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"description\": \"Read"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-6c9d3192-7932-48bc-af7c-140493561f9e","created":1793853820,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" mte2_preload design"},"type":"function","index":0}]}}]}
+
+data: {"id":"chat

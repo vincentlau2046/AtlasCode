@@ -1,0 +1,31 @@
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","object":"chat.completion.chunk","created":1793858987,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-a5177976531cf667","function":{"arguments":"","name":"TaskUpdate"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"status\": \"completed"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"3\"}"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-b3e92afd3e1967cb","function":{"arguments":"{\"status\": \"completed","name":"TaskUpdate"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"taskId\": \"4"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\"}"},"type":"function","index":1}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-8f3b37d4c9c2edb6","function":{"arguments":"{\"command\": \"cd","name":"Bash"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" /home/vince/.cla"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"ude/jobs/092"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"64df0/tmp/gate"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-088/tier1"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/p3B/ws/silu"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"_op && python3 -"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"c \\\"import ast; ast"},"type":"function","index":2}]}}]}
+
+data: {"id":"chatcmpl-2aec8e35-3dad-45b8-905f-3f238be23eb8","created":1793858987,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls

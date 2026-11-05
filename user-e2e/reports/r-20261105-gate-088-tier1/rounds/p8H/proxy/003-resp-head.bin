@@ -1,0 +1,39 @@
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","object":"chat.completion.chunk","created":1793866100,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user wants a brand"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"-new custom operator for Ascend"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" NPU using Ascend C"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"."}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" This matches"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-opdev or"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /ascend-generate umbrella"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill. The task"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" generic"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" —"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" \"implement a brand-new custom"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" operator\". The"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" /"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"ascend-opdev skill is"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" for \"A NEW operator is"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" requested and the language/framework matters"}}]}
+
+data: {"id":"chatcmpl-fe7b5ccf-d660-4df8-8552-b0468d7e8c9c","created":1793866100,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" or is unspecif

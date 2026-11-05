@@ -1,0 +1,5 @@
+outcome=threw
+thrownIsStreamIdleTimeout=true
+seen=[1]
+returnCalled=true
+PROBE_GREEN

@@ -1,0 +1,5 @@
+{
+ "verdict": "PASS",
+ "probes": "[PASS] G1-src-chat-with-delta [PASS] G2-src-loop-stream-delta [PASS] G3-src-loop-events-forward [PASS] G4-beh-stream-delta-branch [PASS] G4-tool-delta-no-side-effect [PASS] G4-anchor-assistant-identity [PASS] G-anchor-spinner-gates [PASS] H1-roles-src-fallback-cut [PASS] H1-adapter-src-keychain-cut [PASS] H1-beh-global-fallback-zero-calls [PASS] H1-env-priority-anchor [PASS] H1-adapter-beh-undefined [PASS] H2-beh-pool-rotation-verify"
+}
+TUI-GH-0170 PASS → /home/vince/.claude/jobs/09264df0/tmp/gate-070/gh-0170

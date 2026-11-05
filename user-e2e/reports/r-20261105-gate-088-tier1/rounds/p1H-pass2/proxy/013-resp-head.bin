@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","object":"chat.completion.chunk","created":1793858060,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-ad3e8ffada57ad24","function":{"arguments":"{\"command\": \"grep","name":"Bash"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -ril"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" \\\"matmul\\\" /"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"home/vince/.claude"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/jobs/09264"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"df0/tmp/gate-"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"088/tier1/p"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"1H-pass2/agent"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"-skills --"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"include=\\\"*.md"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\\\" "},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"2>/dev/null | grep"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" -i -"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"E \\\"optim"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":1793858060,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"|perf|pipeline"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-f63ea5b3-8d88-40e4-8c95-23cec55b1b6e","created":179

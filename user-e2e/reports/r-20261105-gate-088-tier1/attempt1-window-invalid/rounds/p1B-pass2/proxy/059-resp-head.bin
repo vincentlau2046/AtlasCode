@@ -1,0 +1,33 @@
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","object":"chat.completion.chunk","created":1793855013,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"id":"chatcmpl-tool-9b529b203138ebf1","function":{"arguments":"","name":"Edit"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"{\"file_path\": \"/home/vince/work/g"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"emm_ascendc/csrc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"/Gemm_custom.asc"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"\", \"new_string\": \"    __"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"aicore__ inline void Process"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"()\\n    {\\n        //"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" 不再覆盖"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" Init 中"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"推导"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"出的"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":" tileNum（"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"原代码"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"硬"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81827bef2592","created":1793855013,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"function":{"arguments":"编码回"},"type":"function","index":0}]}}]}
+
+data: {"id":"chatcmpl-a5d4437c-cbb3-4f6f-a18e-81

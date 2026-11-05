@@ -1,0 +1,15 @@
+[AtlasHarness] main() starting...
+ ▄▄▄▄████
+████████
+████████████AtlasHarnessv0.1.14
+████████ ·APIUsageBilling
+████████/home/vince/projects/AtlasCode/user-e2e/compare/runs/smoke-2026-10-03T00-25-46-uzcst/atlas/atlas/ws
+AtlasHarness
+AICodingAgent
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯  
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+⚡ ·🧠med ·⏭Bypass ·⌂/home/vince/projects/AtlasCode/user-e2e/compare/runs/smoke-2026-10-03T00-25-46-uzcst/atlas/atlas/ws◐medium·/effort
+[>0q◐ medium · /effortAtlasCode is installed via npm (npm install -g @atlasharness/atlascode). See https://github.com/vincentl…
+

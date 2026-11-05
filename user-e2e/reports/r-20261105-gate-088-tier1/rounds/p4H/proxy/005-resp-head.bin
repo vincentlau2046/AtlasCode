@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","object":"chat.completion.chunk","created":1793860846,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" user has"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" a compile failure with a syntax"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" error in t"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"iling code. This is a"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" compile error"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":", not an"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" AICore runtime"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" fault"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". The"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" right"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" path: AscendDi"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"agnoser on"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the compile"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" log"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". But I don't have"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the compile"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" log or project"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created":1793860846,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" path. Let me check the"}}]}
+
+data: {"id":"chatcmpl-9e020e76-d686-4ed6-9356-e481407d35f6","created

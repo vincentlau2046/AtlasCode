@@ -1,0 +1,41 @@
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"index":0,"delta":{"role":"assistant","content":""}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"The"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" plan"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" is"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" already"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" clear: Si"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"LU fp"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"16"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" [4096]. The"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" skill user"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" request specifies"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" everything"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":". Proceed with"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" the flow. Start with Asc"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"endSpecParser with"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","created":1793858844,"model":"glm-5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" inline JSON.","content":"The"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"index":0,"delta":{"content":" spec"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"index":0,"delta":{"content":" is un"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"index":0,"delta":{"content":"ambiguous ("}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"index":0,"delta":{"content":"SiLU,"}}]}
+
+data: {"id":"chatcmpl-df4b9cb1-29ce-4ca7-85f0-f85a3a5a74fa","object":"chat.completion.chunk","created":1793858844,"model":"glm-5","choices":[{"ind
