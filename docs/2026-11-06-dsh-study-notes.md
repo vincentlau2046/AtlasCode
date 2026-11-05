@@ -1,0 +1,51 @@
+# W-opt 国产轨 · DSH rc.8 模块研读笔记（f4 零码）— 2026-11-06 起
+
+事实源：本机 `~/projects/deepseek-harness` @ `09d38feb8a`（= dsh-v0.1.0-rc.8 + 1 examples）。逐模块追加；替代方案落点 = AtlasCode port/deps 注入架构内（禁 engine→TUI import），非 vendor 照搬。
+
+## ① compaction（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+
+**包结构**（`packages/compaction/`，四子包共 2880L src）：
+- `compaction/` 792L = 服务缝定义（abstract `CompactionEngine` extends cordis Service，`ctx.compaction`）
+- `compaction-basic/` 1621L = 默认实现（replay-aware）
+- `compaction-tool-result-pruner/` 331L = 伴生裁剪器
+- `command-compact/` 136L = 命令面
+
+**三入口**（`compaction/src/index.ts`）：
+1. `compactIfNeeded(agent, trigger, signal)` — 自动触发，`trigger: 'pressure' | 'context-overflow'`（后者 = provider 确认的 `CONTEXT_WINDOW_EXCEEDED_CODE`，独立于阈值判定）
+2. `compactNow(agent, signal, sourceCommandId)` — 显式压缩，经 `runMaintenance` 空闲串行化（withholding later waking input），FIFO 排队
+3. `compactRegion(start, end, …)` — 强制区间，两端须 tool-pairing balanced
+
+**触发策略**（`compaction-basic/src/config.ts`）：per-routed-model target policy，`thresholdRatio` 默认 **0.8** × contextWindow；retention 预算独立；`retainTokens >= thresholdTokens` 拒绝（不可修面）。
+
+**区间选择**（`region.ts:98` `selectCompactableRange`）：token-meter 定价节点从尾部累加至 retainTokens → 向前回退至 `toolPairingBalancedBefore` 平衡边（assistant tool_calls 与 result 恒成对，两端同查）→ 零安全区间返 null。meter/session 表面不一致 = throw（防陈旧定价）。
+
+**事务/锁模型**（`region.ts:152` `compactSurfaceRegion`）：durable `compaction/start` 标记 = 压缩锁（同步相邻于 idle/log 校验，先于 summarization yield）；每次失败**恰一次** `compaction/end` 尝试，失败关闭**故意留下未配对 start 可检测**；`assertNoActiveCompaction` 入口断言。伴生 `invariant.ts`（306L）= 日志流不变式插件（start/summary/end 状态机 + checkpoint 品牌校验 + sourceCommandId 跨事务稳定）。
+
+**摘要器 KV-cache 设计**（`compaction-basic/src/summarizer.ts:27-32` 头注）：压缩指令作为 **replay 对话后的最后一条 user 消息**（非独立 system prompt）→ 辅助调用是最后一条 routed request 的**真前缀** → provider KV cache 复用而非失效。结构化 markdown checkpoint（`<compacted-summary>` 标签包裹落盘）。失败分类 `ManualCompactionError`（busy/cancelled/changed/summary/commit/persistence 六码）。
+
+### AtlasCode 同域现状
+
+- `engine/context/autoCompact.ts`：阈值 = contextWindow − min(maxOutput,20k) − 13k buffer（非 ratio 制）；tracking 语义（compacted/turnCounter/consecutiveFailures）；连续 3 败熔断（`autoCompactCircuit.ts`）；env 覆写收拢 config 面；无 countTokens fail-safe。
+- `engine/context/compact.ts` 1007L：`<analysis>/<summary>` 九段摘要 prompt（安全指令逐字保留条款）；`formatCompactSummary`；boundaryMarker + summaryMessages + messagesToKeep 结果面。
+- 登记残留守（autoCompact.ts 头注）：sessionMemoryCompact / promptCacheBreakDetection（**cache 面归 modelprovider 域，未做**）/ reactive compact / collapse。
+
+### 对照 → 替代方案候选（按价值排序）
+
+| # | DSH 机制 | AtlasCode 现状 | 候选价值 |
+|---|---|---|---|
+| C-1 | **KV-cache 保真摘要**（指令=最后 user 消息真前缀，同模型时 cache 复用） | **已核（print.ts:1190 + loopDeps.ts:267 双车道）：指令后置形已在**（`[...msgs, prompt]`）；真 delta = ① 路由 role:'small'（非同模型则 cache 池不同，复用前提破）；② system prompt/tools 线格式奇偶未证（DSH 明言「保留对话自身 system+tools 使真前缀成立」，AtlasCode 辅调用是否带同 tools 待 provider 面核） | 中→**待核**——单模型池（如现 glm-5 单面）下 small=main 时价值升高；核 ② 后定 |
+| C-2 | **tool-pairing 平衡边选择** | **已核（compact.ts:549）：`messages.slice(-keepRecent)` 无 pairing 平衡检查**——切点可落 tool_use/tool_result 中间（keepRecent>0 时） | **高**——孤儿 tool_result 边是 provider 拒绝/resume 兼容硬伤族（085 R-085-1 同族缝）；修法小（切点回退至平衡边，沿 DSH toolPairingBalancedBefore 语义） |
+| C-3 | **provider 确认 overflow 触发**（第二触发类） | 仅阈值判定 + 熔断；overflow 时每轮 hammer doomed 压缩靠熔断兜 | 中——overflow 确认码直触一次压缩，少 3 轮废轮 |
+| C-4 | **durable 事务标记 + 不变式插件**（压缩锁落盘可恢复） | 内存熔断 + 内存 tracking（crash 即失） | 中——crash 后压缩中断可检测可续；体量较大 |
+| C-5 | 失败六码分类 + tool-result-pruner 伴生 | 失败面笼统 | 低（顺带） |
+
+**首波建议形态**（C-2 已坐实）：**C-2 单件入首波**（小面高价值、判别清晰）；C-1 待 tools/system 奇偶核后定（若奇偶成立且单模型池 → 同波或紧随波）；C-3/C-4/C-5 登记候补。判别单测要求：① 区间边 tool_use/result 配对断言（RED = keepRecent 构造跨界切点 → 现 slice 产孤儿 tool_result 直证，GREEN = 切点回退平衡边）；② （若 C-1 入波）摘要调用请求体与末轮 routed request 前缀恒等断言（cache 复用直证）。
+
+### 待核（下轮补）
+- [x] AtlasCode 切点 tool-pairing 核（**缺口坐实**，C-2）
+- [x] C-1 指令后置形核（已在；余 tools/system 奇偶 + small 路由前提）
+- [ ] compaction-tool-result-pruner 331L 细读
+- [ ] `spill` 包与 compaction 关系（同域？）
+- [ ] C-1 provider 面 tools/system 奇偶直证（抓摘要请求 wire 对比末轮请求）
