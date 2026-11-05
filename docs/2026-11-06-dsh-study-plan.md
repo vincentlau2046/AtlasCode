@@ -41,7 +41,8 @@
 
 - [x] DSH checkout 状态实核（rc.8 + 1，55 包）
 - [x] 本计划落盘
-- [ ] 模块① compaction 研读
-- [ ] 模块② subagent 研读
-- [ ] 模块③–⑧ 研读
+- [x] 模块① compaction 研读（C-2 切点缺口坐实；C-2 建议首波单件）
+- [x] 模块② subagent 研读（S-1 深度单调 resume 待核；S-2 中期件）
+- [x] 模块③ sandbox 研读（SB-1/SB-2 中值候选；SB-4 待核禁闭层级）
+- [ ] 模块④–⑧ 研读
 - [ ] 汇总取舍 → 首波工单
