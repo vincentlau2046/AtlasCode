@@ -5,6 +5,8 @@
 （OpenAI-protocol 静态键车道，任意 OpenAI-compatible 端点）与国产平台工具链预留
 （Ascend NPU 域包为可插拔叠加层，W6 起接入）。
 
+> 项目主页：<https://www.atlaswork.cn/>（Atlas 全栈 AI 工作站）
+
 > 版本现状：v0.1.x 持续发布（npm `@atlasharness/atlascode` live，P-1 远端仓已解除，
 > 见 `docs/roadmap-domestic-and-residuals.md`）。
 
