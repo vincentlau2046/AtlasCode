@@ -19,6 +19,8 @@ import {
   engineAttachmentRejectionMarker,
   resolveEngineAttachmentProjection,
 } from './attachmentProjection'
+// wave0190 任务 A 层 2（锁面批注 §5.1）：wire 终态数组出口 tool-pairing 防御
+import { ensureToolResultPairing } from './toolPairing'
 import { zodToJsonSchema } from './schema'
 import {
   convertEffortValueToLevel,
@@ -165,7 +167,11 @@ export function toOpenAIMessages(messages: any[]): any[] {
       }
     }
   }
-  return out
+  // wave0190 层 2（锁面批注 §5.1）：出口 = 终态数组检查点（上游 claude.ts:1136 同为
+  // API 发送前终态数组检查）——attachment 三段处置等下游变换有再破配对绕行风险，
+  // 出口对全源孤儿统一兜底。合法全配对零修复零扰动（ensureToolResultPairing 引用
+  // 恒等直通）；修复发生由 toolPairing 内部 logForDebugging 留痕（禁静默）。
+  return ensureToolResultPairing(out).messages
 }
 
 /** Build OpenAI function-tool schemas from Atlas Tool objects. */

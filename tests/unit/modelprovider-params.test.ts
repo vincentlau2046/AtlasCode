@@ -39,8 +39,21 @@ describe('toOpenAIMessages（F-1 双形态消息）', () => {
     expect(out).toHaveLength(2)
   })
 
+  // wave0190 层 2（出口 tool-pairing 防御）后：⑤⑥ 由孤立片段改为配对全形——
+  // tool_result 无前驱 assistant tool_calls / tool_calls 缺 result 在终态数组上会被
+  // 防御层有意修复（剥除/合成，见 wave0190-projection-pairing.test.ts）。F-1 双形态
+  // 关注面（块数组 text+tool_result 混合投影）不受影响：配对全形下防御层 no-op，
+  // 投影断言逐字节不变。
   test('⑤ user 块数组（text + tool_result）→ text 合并 + tool role 分离', () => {
     const out = toOpenAIMessages([
+      {
+        type: 'assistant',
+        role: 'assistant',
+        message: {
+          role: 'assistant',
+          content: [{ type: 'tool_use', id: 't1', name: 'Read', input: { path: 'a' } }],
+        },
+      },
       {
         type: 'user',
         role: 'user',
@@ -54,6 +67,13 @@ describe('toOpenAIMessages（F-1 双形态消息）', () => {
       },
     ])
     expect(out).toEqual([
+      {
+        role: 'assistant',
+        content: null,
+        tool_calls: [
+          { id: 't1', type: 'function', function: { name: 'Read', arguments: '{"path":"a"}' } },
+        ],
+      },
       { role: 'user', content: 'saw it' },
       { role: 'tool', tool_call_id: 't1', content: 'file-contents' },
     ])
@@ -72,6 +92,14 @@ describe('toOpenAIMessages（F-1 双形态消息）', () => {
           ],
         },
       },
+      {
+        type: 'user',
+        role: 'user',
+        message: {
+          role: 'user',
+          content: [{ type: 'tool_result', tool_use_id: 't1', content: 'file-contents' }],
+        },
+      },
     ])
     expect(out).toEqual([
       {
@@ -81,6 +109,7 @@ describe('toOpenAIMessages（F-1 双形态消息）', () => {
           { id: 't1', type: 'function', function: { name: 'Read', arguments: '{"path":"a"}' } },
         ],
       },
+      { role: 'tool', tool_call_id: 't1', content: 'file-contents' },
     ])
   })
 })
