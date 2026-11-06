@@ -54,6 +54,7 @@ import {
   tokenCountFromLastAPIResponse,
   tokenCountWithEstimation,
 } from './compactTokens'
+import { resolvePairedKeepWindow } from './keepWindow'
 import {
   getCompactPorts,
   type CacheSafeParams,
@@ -545,8 +546,17 @@ async function trimmedCompactConversation(
   }
 
   // 近期消息保留（keepRecent>0 时；默认 0 = 全量压缩）。
+  // wave0190 层 1：切点 tool-pairing 平衡——切点落 tool_use→tool_result 之间时回退
+  // 扩至所属 assistant 回合（扩大语义，整组并入；畸形孤儿交层 2 出口防御）。
   const keepRecent = deps.keepRecent ?? 0
-  const messagesToKeep = keepRecent > 0 ? messages.slice(-keepRecent) : undefined
+  const keepWindow = resolvePairedKeepWindow(messages, keepRecent)
+  if (keepWindow.revertedFrom !== undefined) {
+    logForDebugging(
+      `compaction keepRecent cut reverted to assistant round boundary: slice start ${keepWindow.revertedFrom} → ${messages.length - keepWindow.window!.length} (kept ${keepWindow.window!.length} messages)`,
+      { level: 'info' },
+    )
+  }
+  const messagesToKeep = keepWindow.window
 
   const summaryMessages: Message[] = [
     {
@@ -792,8 +802,16 @@ async function richCompactConversation(
     // 原文；N=0 缺省 = 全量压缩零回归）。摘要提示词同步置位
     // recentMessagesPreserved 标志（getCompactUserSummaryMessage 第 4 参，
     // 上游文案「Recent messages are preserved verbatim.」）。
-    const messagesToKeep =
-      keepRecent > 0 ? messages.slice(-keepRecent) : undefined
+    // wave0190 层 1：切点 tool-pairing 平衡（lean 切点同语义，§5.4）——切点落
+    // tool_use→tool_result 之间时回退扩至所属 assistant 回合；回退留痕（禁静默）。
+    const keepWindow = resolvePairedKeepWindow(messages, keepRecent)
+    if (keepWindow.revertedFrom !== undefined) {
+      logForDebugging(
+        `compaction keepRecent cut reverted to assistant round boundary: slice start ${keepWindow.revertedFrom} → ${messages.length - keepWindow.window!.length} (kept ${keepWindow.window!.length} messages)`,
+        { level: 'info' },
+      )
+    }
+    const messagesToKeep = keepWindow.window
 
     const transcriptPath = getTranscriptPath()
     const summaryMessages: Message[] = [
