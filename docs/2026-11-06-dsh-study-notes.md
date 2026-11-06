@@ -174,5 +174,6 @@
 3. S-1 深度单调 resume 守：先一单测直证（f4 下步），坐实则并入首波第三件；不坐实则零动作
 
 **登记候补（不入首波）**：C-1（待 tools/system 奇偶直证）/ C-3 / C-4 / SB-1 / SB-2 / SB-4 / CR-1 / G-2 / SC-1 / SQ-1；PL-1 不排。
+**C-6（0.1.90 生产 lane 勘误转 f4 裁定新增，2026-11-06）**：headless -p 车道 autoCompact 结构性禁用——print.ts:1231 最小面 deps 无 countTokens → shouldAutoCompact fail-safe false，-p 长会话不自动压缩（既有车道形态非 0.1.90 回归）；补注入须先做压缩风暴风险面重估（激活 -p 压缩路径非平凡），与 C-3 overflow 触发同域横排。
 
 **首波工单前置**：S-1 直证 + C-2 切点精确行为快核（keepRecent 与 boundary 的切点组合矩阵）→ 工单落盘 → Atlas-reveiw 审计 → 双信号。
