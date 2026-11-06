@@ -550,6 +550,13 @@ async function trimmedCompactConversation(
   // 扩至所属 assistant 回合（扩大语义，整组并入；畸形孤儿交层 2 出口防御）。
   const keepRecent = deps.keepRecent ?? 0
   const keepWindow = resolvePairedKeepWindow(messages, keepRecent)
+  if (keepWindow.fellBackToFull) {
+    // wave0190 row F 预注册形（f4 2026-11-06 裁定）：全畸形序列回落全量压缩，禁静默。
+    logForDebugging(
+      'compaction keepRecent cut fell back to full compaction: whole sequence is malformed (orphan tool_result at sequence head, tool_use unresolvable) — messagesToKeep=undefined per pre-registered §5.5 row F',
+      { level: 'warn' },
+    )
+  }
   if (keepWindow.revertedFrom !== undefined) {
     logForDebugging(
       `compaction keepRecent cut reverted to assistant round boundary: slice start ${keepWindow.revertedFrom} → ${messages.length - keepWindow.window!.length} (kept ${keepWindow.window!.length} messages)`,
@@ -805,6 +812,13 @@ async function richCompactConversation(
     // wave0190 层 1：切点 tool-pairing 平衡（lean 切点同语义，§5.4）——切点落
     // tool_use→tool_result 之间时回退扩至所属 assistant 回合；回退留痕（禁静默）。
     const keepWindow = resolvePairedKeepWindow(messages, keepRecent)
+    if (keepWindow.fellBackToFull) {
+      // wave0190 row F 预注册形（f4 2026-11-06 裁定）：全畸形序列回落全量压缩，禁静默。
+      logForDebugging(
+        'compaction keepRecent cut fell back to full compaction: whole sequence is malformed (orphan tool_result at sequence head, tool_use unresolvable) — messagesToKeep=undefined per pre-registered §5.5 row F',
+        { level: 'warn' },
+      )
+    }
     if (keepWindow.revertedFrom !== undefined) {
       logForDebugging(
         `compaction keepRecent cut reverted to assistant round boundary: slice start ${keepWindow.revertedFrom} → ${messages.length - keepWindow.window!.length} (kept ${keepWindow.window!.length} messages)`,

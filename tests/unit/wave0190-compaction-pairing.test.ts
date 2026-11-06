@@ -9,8 +9,10 @@
  * 修复（锁面批注 §5.4）：`resolvePairedKeepWindow` —— assistant API 回合边界回退
  * （上游 2.1.88 grouping.ts 语义），**扩大语义不收缩**：切点回退扩至所属回合的
  * assistant 消息（整组并入，并行多 tool_call / 多 tool_result 分离消息 / 夹内容消息
- * 随回合整组天然覆盖）；畸形输入（孤儿 tool_use 无处可寻）不硬造合法边 → 原样保留
- * 窗口交层 2 出口防御（wave0190-projection-pairing.test.ts）。
+ * 随回合整组天然覆盖）；全畸形输入（孤儿 tool_use 无处可寻）按 row F 预注册形
+ * （锁面 §5.5，f4 2026-11-06 裁定）回落 messagesToKeep=undefined 全量压缩
+ * （fellBackToFull=true 供调用方留痕）——层 2 出口防御（
+ * wave0190-projection-pairing.test.ts）只兜变换过程中产生的孤儿。
  *
  * 硬约束直证面：keepRecent=0 恒等（无切点即无平衡面）；合法全配对序列零回退
  * （切点零扰动）；摘要 prompt 逐字节零 diff（回退不触摘要面）。
@@ -207,13 +209,15 @@ describe('wave0190 层1 resolvePairedKeepWindow 切点矩阵', () => {
     expect(r.revertedFrom).toBeUndefined()
   })
 
-  test('⑧ 全畸形：孤儿 tool_result 的 tool_use 无处可寻 → 不硬造合法边，窗口扩至序列头原样保留（交层 2 剥除）', () => {
-    // 孤儿在窗口内且其 tool_use 全序列不存在：扩至序列头也无从配对 → break 不硬扩
+  test('⑧ 全畸形（row F 预注册形）：孤儿 tool_result 的 tool_use 无处可寻 → 回落 messagesToKeep=undefined 全量压缩（fellBackToFull 留痕）', () => {
+    // 孤儿在窗口内且其 tool_use 全序列不存在：扩至序列头也无从配对 → row F 预注册
+    // 形（锁面 §5.5，f4 2026-11-06 裁定）= window=undefined 全量压缩——选择层不主动
+    // 保留畸形（window=full 抵消压缩目的 + 持久层 resume relink 面不被污染）。
     const msgs = [userToolResults(['ghost-id']), userText('q'), assistantText('a')]
     const r = resolvePairedKeepWindow(msgs, 3)
-    expect(r.window).toEqual(msgs) // 全量保留（序列头即达，不可再扩）
-    expect(r.revertedFrom).toBeUndefined() // 原切点已 = 0，无回退位移
-    expect(orphanToolResultIds(r.window!)).toEqual(['ghost-id']) // 畸形孤儿交层 2
+    expect(r.window).toBeUndefined() // 全量压缩回落（messagesToKeep=undefined）
+    expect(r.revertedFrom).toBeUndefined()
+    expect(r.fellBackToFull).toBe(true) // 调用方留痕信号
   })
 
   test('⑨ 深回退距离（尾部为长单回合 tool 序列）→ 回退跨多消息整组并入（回退距离无上界形）', () => {
