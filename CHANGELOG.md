@@ -4,6 +4,42 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.90
+
+W-opt-1 波：compaction 切点两层收口 + repeat-tool 连击建议守（工单
+`docs/2026-11-06-p0-wave-0190-ticket.md` @ 0bfb7601）。gate
+r-20261106-gate-090 + scoped re-gate：判别探针 17/17（base-RED 孤儿直通
+↔ face-GREEN 剥除+合成+留痕）+ row F RED↔GREEN 8/8 + wave0190 40/40 +
+四件套 CI 5608/0 Δ+40 恰合 + P0a RELEASABLE + A4F + sysprompt 字节锚零
+diff + fam-16 + de-ant 0 + token 前 34 波 GONE=0。锁面分歧 1 条（矩阵 F
+全畸形行）经 f4 裁定改形回预注册形（90b6db24）后 scoped re-gate 闭合。
+
+### 任务 A：compaction 切点 tool-pairing 两层收口
+
+- **层 1（选择时，`405d4e4f`）**：`engine/context/keepWindow.ts`
+  `resolvePairedKeepWindow` —— `slice(-keepRecent)` 切点落
+  tool_use→tool_result 之间时回退扩至所属 assistant 回合（扩大语义整组
+  并入，上游 2.1.88 grouping.ts 对齐）；compact.ts rich/lean 两调用点接线
+  + 回退 logForDebugging 留痕。
+- **层 2（API 时，`c078f456`）**：`modelprovider/toolPairing.ts`
+  `ensureToolResultPairing` 接 params.ts `toOpenAIMessages` 终态数组出口
+  ——正向合成 error result 紧随 assistant / 反向剥孤儿 role:'tool'（含空
+  tool_use_id 残面），合法全配对引用恒等零扰动，修复留痕禁静默。
+- **row F 预注册形（`90b6db24`，f4 裁定）**：全畸形序列（孤儿 tool_use
+  全序列无处可寻）回落 messagesToKeep=undefined 全量压缩 + fellBackToFull
+  留痕——选择层不主动保留畸形（window=full 抵消压缩目的 + 持久层不被
+  污染）；层 2 只兜变换过程中产生的孤儿。
+
+### 任务 B：repeat-tool 连击建议守（`13e0a28b`）
+
+- `engine/pipeline/repeatToolReminder.ts`：计数键 = [toolName,
+  canonicalize(arguments)]（deep key-sort）；阈值 [3,5,8]，首阈 gentle /
+  后续阈 detailed 含 args 预览（500 头截断）；配置 fail-loud。
+- executeToolUse 成功支产出非 error tool_result 后以 in-band user+isMeta
+  走 C85-B newMessages 既有交付链（sourceToolUseId 关联）；失败支计数不
+  注入；AgentLoopDeps.repeatToolTracker 槽 run 生命周期一次（per-agent
+  隔离），单轮直调未注入 = 零提醒恒等锚。
+
 ## v0.1.89
 
 登记缺口整理波（工单 `docs/2026-11-05-p0-wave-0189-ticket.md`）。gate
