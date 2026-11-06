@@ -107,3 +107,30 @@
 | SB-4 | OS 级本机后端（landlock/bwrap 类）+ Win ACL + e2b 远端 | sandboxCompat 现状（实现层待核） | 待核——若现实现无 OS 级禁闭则价值升 |
 
 **待核（下轮）**：sandboxCompat 现实现禁闭层级（进程级？命名空间级？）；SB-3 现默认值。
+
+## ④ code-runtime（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+三子包共 2696L：`code-runtime` 137L 缝定义（「run one model-written program against host async bindings」，runtimes 无 tool/session 概念）+ `code-runtime-worker-thread` 1611L（JS 后端：worker 线程 + log 捕获）+ `code-runtime-python` 656L protocol + bootstrap（CPython 子进程，**JSON-lines 走 fd 3**，stdio 三管留程序自有输出；host 侧把每个入站帧当敌意输入——模型代码可经同 fd 投递任意内容）。
+关键设计：**可移植标识符缝**——跨后端共享的 binding globals 拒绝集（console/__dsh_main__/__name__/__debug__），保证一个后端合法的命名空间清单在所有后端合法（跨语言 mirror 测试钉 PROTOCOL_FD=3 常量双侧一致，漂移即响）。
+
+### AtlasCode 同域现状
+无对应能力（grep 零命中 binding/code-runtime 面）；Bash 工具 = 任意执行但非 binding 注入式编程接口。
+
+### 对照 → 候选
+| CR-1 | binding 注入式代码执行（模型写程序调 host API，双后端可移植） | 无 | **新能力**非修复——体量中-大，价值取决于产品方向（agent 编程接口 vs Bash 即可）；**登记 W-opt 中期，不入首波** |
+
+## ⑤ guard（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+两小包 374L：
+- `timeout-policy` 111L：**协作式工具超时强制器**——工具声明 `timeoutMs` 并承诺遵守 `exec.signal`；包装器 arm deadline，到期映射为结构化 `TOOL_TIMEOUT` 错误结果（content=模型可见消息 + error.code）；**嵌套 deadline 消歧**（外层 wrapper 先触发的 timer 读作普通上游 cancel，不误记本插件超时）。
+- `repeat-tool-reminder` 233L：**建议性连击检测器**——连续同工具调用计数达阈值（默认 [3,5,8]）注入提醒 user 消息；不否决不改写；`*` 通配 include/exclude（模式零命中合法——exclude mcp_* 须在无 MCP 部署仍合法）；**配置错误 load 时响亮失败**（空 thresholds/非整数/<2/重复 = throw，禁静默回落）。
+
+### AtlasCode 同域现状
+- 连击检测：**无**（loop.ts consecutive 仅 autocompact 熔断面；grep 零命中 repeat-reminder 类）。
+- 工具超时：#260 600s 门族（主请求路径超时）+ W-C C4-3 长工具心跳；无 per-tool `timeoutMs` 协作式结构化超时面。
+
+### 对照 → 候选
+| G-1 | repeat-tool-reminder（连击提醒） | 无 | **中-高**——弱模型循环打转正是 loop-robustness 观察到的真实失败族（R1-delay 086 事件同族观察面）；建议性注入零 veto 风险；小件 |
+| G-2 | per-tool 协作式超时（TOOL_TIMEOUT 结构化码 + 嵌套 deadline 消歧） | #260 门族部分覆盖 | 低-中——登记；#260 族收口后评估增量 |
