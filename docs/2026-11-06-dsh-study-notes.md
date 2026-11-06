@@ -134,3 +134,45 @@
 ### 对照 → 候选
 | G-1 | repeat-tool-reminder（连击提醒） | 无 | **中-高**——弱模型循环打转正是 loop-robustness 观察到的真实失败族（R1-delay 086 事件同族观察面）；建议性注入零 veto 风险；小件 |
 | G-2 | per-tool 协作式超时（TOOL_TIMEOUT 结构化码 + 嵌套 deadline 消歧） | #260 门族部分覆盖 | 低-中——登记；#260 族收口后评估增量 |
+
+## ⑥ schedule（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+单包 2003L：**agent 作用域持久 one-shot/fixed-rate 提醒，落于 session 事件日志**（domain.ts 807L fold 语义——SCHEDULE_CHANGE_VERSION 变更编解码 + foldScheduleEvents 重建）；runtime.ts 324L 活定时器投影（`MAX_TIMER_DELAY_MS` 钳制 Node timer 上限；DueDecision 一次性/每 occurrence 决策）；changes 走 `runScheduleTransaction`（事务化）；every 触发批量 framing（`renderEveryReminderBatchFraming`——同 tick 多 occurrence 合一帧防模型面洪泛）。
+
+### AtlasCode 同域现状
+`engine/scheduler/` 1697L（cron.ts + cronTasks 460L + cronTasksLock 214L + cronJitterConfig + cronEnv）：**文件持久化**（lastFiredAt 落盘 + missed-task prompt 补发 + cwd 共享防双发锁）+ jitter 面。成熟度相当，模型不同：文件/cwd 共享 vs DSH agent 作用域事件日志。
+
+### 对照 → 候选
+| SC-1 | every 批量 framing（同 tick 多 occurrence 合帧） | 逐发 | 低-中（多任务用户面） |
+| SC-2 | 事件日志 fold 持久化（替代文件） | 文件已够用 | 低（重架构无行为收益，不排） |
+
+## ⑦ session-query（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+两包 5215L：`tool-session-query` = **模型面 workspace 授权会话历史搜索/读取工具**（DEFAULT_MAX_SEARCH_RESULTS=100 + 协作式 deadline）；后端 `session-query-sqlite`（FTS 全文索引 1103L + query 477L）；corpus.ts 会话语料装配。
+
+### AtlasCode 同域现状
+会话列表面（sessionlist 0.1.38/39 收口：50 截断/mtime/回写/isSidechain）+ /resume；**模型面会话历史搜索工具无**。
+
+### 对照 → 候选
+| SQ-1 | 模型面会话历史搜索工具（FTS 授权检索） | 无 | 中——跨会话记忆检索能力（「上周怎么改的」类工作流）；体量中；SQLite FTS 引入须供应链评估。登记 W-opt 中期 |
+
+## ⑧ 插件市场 / boot+core（研读完成 2026-11-06）
+
+### DSH 侧形态（引证）
+`boot/app-boot` 829L + profile 420L + cmdline 172L：**「一切皆插件」= 全应用 Cordis 插件树**（cordis.yml leaf → Loader 驱动至树稳定；include/group/HMR 插件；fail-loud Loader 守卫；~/.dsh 用户 patch 层；launch env snapshot）。core 13497L = 系统提示/agent-loop/tools 等皆以 Cordis 服务缝形态存在。**无独立「市场」件**——市场语义在 AtlasCode 侧为官方 marketplace（A3-1 用户裁定保留）。
+
+### 对照 → 候选
+| PL-1 | Cordis 全插件化架构 | AtlasCode 自有 plugin/skill + marketplace 体系 | **不排**——架构级重写，风险/体量远超收益；仅作参考架构留档（缝定义风格 = 本笔记各模块已吸收的真正可移植部分） |
+
+## ⑨ 汇总取舍（2026-11-06，8 模块研读齐）
+
+**首波（0.1.90 候选，W-opt-1）建议组成**：
+1. **C-2 compaction 切点 tool-pairing 平衡**（坐实缺口，小面高价值，判别清晰）——主件
+2. **G-1 repeat-tool-reminder 连击提醒**（弱模型循环族直接对策，建议性零 veto，小件）——同波副件
+3. S-1 深度单调 resume 守：先一单测直证（f4 下步），坐实则并入首波第三件；不坐实则零动作
+
+**登记候补（不入首波）**：C-1（待 tools/system 奇偶直证）/ C-3 / C-4 / SB-1 / SB-2 / SB-4 / CR-1 / G-2 / SC-1 / SQ-1；PL-1 不排。
+
+**首波工单前置**：S-1 直证 + C-2 切点精确行为快核（keepRecent 与 boundary 的切点组合矩阵）→ 工单落盘 → Atlas-reveiw 审计 → 双信号。
