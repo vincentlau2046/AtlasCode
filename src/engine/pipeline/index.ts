@@ -41,3 +41,11 @@ export {
   getMcpAutoBackgroundMs,
   type McpToolBackgroundedInfo,
 } from './mcpAutoBackground'
+// wave0190 任务 B：repeat-tool 连击建议守（工厂 + 纯面 + token 锚导出）
+export {
+  REPEAT_TOOL_REMINDER_THRESHOLDS,
+  canonicalizeArguments,
+  createRepeatToolCallTracker,
+  type RepeatToolCallTracker,
+  type RepeatToolReminderConfig,
+} from './repeatToolReminder'

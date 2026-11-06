@@ -47,6 +47,8 @@ import type {
 // sourceToolUseId 关联源 tool_use）。
 import { createUserMessage, type InDomainUserMessage } from '../tools/files/userMessage'
 import { classifyToolError } from './errorClassification'
+// wave0190 任务 B：repeat-tool 连击建议守（锁面批注 §5.2；型 + 工厂）
+import type { RepeatToolCallTracker } from './repeatToolReminder'
 import { sanitizeUpdatedInput } from './sanitizeUpdatedInput'
 import { buildSchemaNotSentHint, validateInputBySchema } from './schemaValidation'
 import {
@@ -300,6 +302,14 @@ export interface PipelineDeps {
    * 避免 process.env 竞态；未注入 = getMcpAutoBackgroundMs() 解析 env）。
    */
   mcpAutoBackgroundMs?: number
+  /**
+   * wave0190 任务 B（锁面批注 §5.2）：repeat-tool 连击建议守 tracker（run 生命周期
+   * 注入一次 = per-agent 隔离）。注入时 executeToolUse 逐调用 observe（成功/失败均
+   * 计数），跨阈且本调用成功支产出非 error tool_result 时以 in-band user + isMeta
+   * 提醒追加进 newMessages（走 C85-B 既有交付链，零新投递面）；未注入 = 零行为
+   * 恒等锚（单轮 queryOneRound 直调 / 窄 spine 不受影响）。
+   */
+  repeatToolTracker?: RepeatToolCallTracker
 }
 
 export interface ToolExecutionOutcome {
@@ -714,6 +724,22 @@ export async function executeToolUse(
     toolUseResult = hookDenyText
     // 0.1.85-B（C85-B）：post blocking = 工具结果被拒（清空面——拒绝面不交付补充）。
     supplemental = undefined
+  }
+
+  // wave0190 任务 B（锁面批注 §5.2）：repeat-tool 连击建议守——逐调用 observe
+  // （成功/失败均计数，DSH observe post-execute 同口径）；跨阈且本调用产出非
+  // error tool_result（成功支）时以 in-band user + isMeta 提醒追加进 newMessages
+  // （C85-B 既有交付链；失败支无成功块不投递）。构造形已合法（createUserMessage
+  // stamp + isMeta），不重过 sanitizeSupplementalMessages。置于 post-hook 分支后
+  // = 保守清空面（updatedToolOutput/blocking）之后追加，连击提醒是调用频次事实，
+  // 不属被替换的工具输出语义。
+  if (deps.repeatToolTracker) {
+    const reminder = deps.repeatToolTracker.observe(tu.name, callInput)
+    if (reminder && block.is_error !== true) {
+      const notice = createUserMessage({ content: reminder, isMeta: true })
+      notice.sourceToolUseId = tu.id
+      supplemental = [...(supplemental ?? []), notice]
+    }
   }
 
   return {

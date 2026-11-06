@@ -429,6 +429,16 @@ describe('C85-B Skill 旁支回归（工单 L87/L147）', () => {
 describe('C85-B params 防线二（document 块投影）', () => {
   test('P① tool_result content 含 document 块 → 投影文本显式指引 pages', () => {
     const out = toOpenAIMessages([
+      // wave0190 层 2 出口防御：孤儿 tool_result（无前驱 tool_use）会被剥除——
+      // 本测关注 document 块投影（防线二），fixture 用配对全形（前置 assistant
+      // tool_use 'x-doc'）避开剥除面（同 modelprovider-params ⑤⑥ 配对全形先例）。
+      {
+        type: 'assistant',
+        message: {
+          role: 'assistant',
+          content: [{ type: 'tool_use', id: 'x-doc', name: 'Read', input: {} }],
+        },
+      },
       {
         type: 'user',
         message: {

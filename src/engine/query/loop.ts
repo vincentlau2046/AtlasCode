@@ -75,6 +75,11 @@ import {
 } from '../goal/goalState'
 import { shouldDisableAllHooksIncludingManaged } from '../config/hooksConfig'
 import { runToolBatch, type PermissionGate } from '../pipeline'
+// wave0190 任务 B：repeat-tool 连击建议守（run 生命周期 tracker）
+import {
+  createRepeatToolCallTracker,
+  type RepeatToolCallTracker,
+} from '../pipeline/repeatToolReminder'
 import type { McpToolBackgroundedInfo } from '../pipeline/mcpAutoBackground'
 import type { ToolHeartbeatInfo } from '../pipeline/toolHeartbeat'
 import {
@@ -325,6 +330,13 @@ export interface AgentLoopDeps {
    * 接线（工具名序无变化且无 delta → null 防每回合无谓换池）。
    */
   refreshRoundContext?: (messages: readonly Message[]) => RoundContextRefresh | null
+  /**
+   * wave0190 任务 B（锁面批注 §5.2）：repeat-tool 连击建议守 tracker——
+   * queryAgentLoop run 生命周期创建一次（per-agent 隔离 = 实例即链状态）经本槽
+   * 逐轮透传 queryOneRound → PipelineDeps.repeatToolTracker；单轮 queryOneRound
+   * 直调未注入 = 零提醒 fail-safe（零行为恒等锚）。
+   */
+  repeatToolTracker?: RepeatToolCallTracker
 }
 
 /**
@@ -578,6 +590,9 @@ export async function queryOneRound(
     // 本槽回调直达宿主通知面（REPL enqueue），不经 AgentLoopEvent 流；未注入 =
     // executeToolUse 直接调用恒等锚）
     onMcpToolBackgrounded: deps.onMcpToolBackgrounded,
+    // wave0190 任务 B：连击守 tracker 透传（queryAgentLoop run 生命周期实例经
+    // AgentLoopDeps 槽注入；单轮直调未注入 = undefined = 零提醒恒等锚）
+    repeatToolTracker: deps.repeatToolTracker,
   })
   // AD-45 0.1.52：defer 挂起 outcome 不产 tool_result（block 缺席）——
   // toolResults / resultMessages 均排除挂起支（批次已短路，挂起后无后续 outcome）。
@@ -724,6 +739,11 @@ export async function queryAgentLoop(
   // AD-45 0.1.52：defer 挂起面（某轮 pre-hook 'defer' 裁定 → 挂起 break，
   // 非自然终止亦非 maxTurns 截断；terminated 保持 false 判别式）。
   let deferredToolUse: DeferredToolUsePayload | undefined
+  // wave0190 任务 B（锁面批注 §5.2）：repeat-tool 连击建议守——run 生命周期创建
+  // 一次 = per-agent 隔离（链状态随 run 存活）；经 AgentLoopDeps.repeatToolTracker
+  // 槽逐轮透传 queryOneRound → PipelineDeps → executeToolUse。单轮 queryOneRound
+  // 直调不经此处 = 无 tracker 零提醒 fail-safe。
+  deps = { ...deps, repeatToolTracker: createRepeatToolCallTracker() }
 
   // S-E3 A11（旧 L450 收敛）：进 loop 前 persist 入参序列——crash-resumable
   // （旧 L437 注释：进程在首个 API 响应前被杀，transcript 仍可 resume；
