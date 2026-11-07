@@ -24,12 +24,13 @@
 
 | # | 标准 | 判据形态 |
 |---|---|---|
-| S1 | 产品特有面提取完成 | 品牌/提示词/工具子集/HELP_SET/锚五面均有 per-product 配置接口，kernel 零产品字面（grep 判别：kernel 域无 atlascode 品牌串/提示词字面） |
-| S2 | 组合根可复制 | atlasoffice compose.ts 能装配同一组域启动至 headless 一轮（活探针：office 壳 PONG 类最小往返） |
+| S1a | 产品特有面接口提取（接口面） | 品牌/提示词/工具子集/HELP_SET/锚五面 per-product 配置接口 + **字面清单制**（五类字面单一事实源清单，grep 对清单执行，禁探针散落——http-useragent-brand 先例）+ 白名单 fail-visible（合法共字显式表逐项注释，禁静默豁免——A3-1 分账先例）；判别 = **src 域级 grep**（S4 前可测，e2e 判据化裁定） |
+| S1b | 产品字面实证（dist 面，S4 后才可测） | 拆包后 dist 级 kernel/产品字面分账 grep（S4 前单 bundle 混编无法分账——e2e 依赖倒挂预警） |
+| S2 | 组合根可复制 | atlasoffice compose.ts 装配同一组域至 headless 一轮；**三支判别**（e2e 裁定）：① office PONG（prodlane-pong 通用化复用：换入口+marker+office seeded settings）② **S2×S1 交叉**——office wire 零 atlascode 系统提示词字面（k5-bridge-proxy 落盘直证）③ 工具子集判别——office wire tools 含 office 工具、不含 atlascode 专有 schema；+静态面「零 atlascode 壳 import」（S4 lint 边界先例）；双产品对照同窗跑（fam 预算 ×2 时长，网关串行纪律） |
 | S3 | TUI 分域盘点完成且耦合面清零 | 盘点清单落盘 + 盘点标「应在 kernel」的耦合项归位/登记（诊断风险 #5 收口） |
 | S4 | 拆包完成（L4.5 触发器兑现） | packages/ monorepo：kernel + atlascode（+atlasoffice 壳）；kernel 独立版本线；lint 边界照旧强制 |
-| S5 | 治理扩展完成 | release-governance 多产品 lane：kernel gate（跑一次全员受益）+ 产品 gate（各跑各）分离；锚产品化实例表 |
-| S6 | headless 车道成熟 | SDK/headless 面支撑非 TUI 前端接入（WebUI/app 的合同面），判别探针在档 |
+| S5 | 治理扩展完成 | release-governance 多产品 lane：kernel gate（≈现 gate ②③ 子集，e2e 量级约一半弱）+ 产品 gate（各跑各全保）；**锚实例表结构化先行 = S5 第一工单件**（e2e 裁定：现探针硬编码 HELP_SET=062/cmd 32 常量 → 表化 JSON/YAML per-product〔cmd/help/prompt 锚哈希/token 基线/品牌 UA/de-ant 锚/网关模型〕，探针读表执行，表化先于第二产品 gate）；继承 vs 实例化显式分账（每锚标继承 kernel〔CI/tsc/build〕或实例化〔per-product 独立取证，禁套 atlascode 值假绿——084「不套常数」教训；de-ant/A3-1 判定逻辑可参数化复用但判定值 per-product 重定义〕）；漂移检测 = 每次 release 三方对账（实测==表登记==上版 diff 可解释，token-regress 34 波方法学推广） |
+| S6 | headless 车道成熟 | SDK/headless 面支撑非 TUI 前端接入；**判据形态 = headless ≡ TUI 车道行为对齐表**（e2e 裁定：逐行为面〔autoCompact/resume/attachment 投影/工具面/token 计数〕双车道判别，l1-tui-090/att-089/resume 链资产双车道化）；**C-6 = 对齐表第一行已知红行**（0.1.90 直证 -p 车道 autoCompact 结构性禁用，修后翻绿——C-6 修不修决定 S6 首行红绿） |
 
 **达标即可并行**：S1–S6 全绿 = 启动第二产品；S4 前置 S1/S3；S5 可与 S4 并行；S6 与 S3 并行。
 
@@ -55,6 +56,7 @@
 2. **kernel 抽象漏/焊死**：第二产品接入时才暴露的边界错误——dogfood 步 3 是验收而非保险，步 1 硬化时判据须含「双消费者推演」（每提一个接口问 office 用不用得上）。
 3. **锚产品化漂移**：cmd32/help55/token 对账是 atlascode 口径，office 复刻时锚面错用 = 假绿——S5 实例表防。
 4. **tui 427k 盘点体量**：盘点本身零码但量不小；产出粒度以「归位清单」为限，不做全景重构方案（YAGNI）。
+5. **gate 资源量级**（e2e 量级口径）：第二产品稳态 = 1×kernel + 2×产品 ≈ **1.5× 现 gate 资源，波次时长 +50%**——本机单网关串行纪律下可行，波速预期须在 S5 治理波向用户明示（并行产品的真实成本面）。
 
 ## 7. 头脑风暴分发面
 
