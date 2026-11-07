@@ -168,3 +168,13 @@ export {
   projectPDFReferenceForRecord,
   type PDFReferenceMetadata,
 } from "./pdfReference"
+
+// 0.1.93 W-D-A（f4 批复五(c)）：agent teams 总门 + swarm 扩参字段 wire
+// 投影过滤面单源（modelprovider/params.ts print+TUI 双车道与 tui/utils/api.ts
+// 同消费；纯函数零 I/O，表键 = 'Agent'/'ExitPlanMode' 字面量——engine 工具名
+// 常量不可 import 进 shared，值逐字同源见 swarmSchemaFilter.ts 头注）。
+export { isAgentSwarmsEnabled } from "./agentSwarmsEnabled"
+export {
+  SWARM_FIELDS_BY_TOOL,
+  filterSwarmFieldsFromSchema,
+} from "./swarmSchemaFilter"

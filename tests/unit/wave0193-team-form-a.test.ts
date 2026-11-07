@@ -1,0 +1,146 @@
+/**
+ * wave0193 W-D-A：临时小组（Form A）——spawn 触发点（扩参形）+ idle/wake
+ * 补全 + 角色模板注册 + 终止条件组（工单 docs/2026-11-08-p0-wave-0193-ticket.md；
+ * f4 锁面批复 2026-11-08 五定谳全认可 + 待批 2 项批准）。
+ *
+ * 分段（每切片 RED→GREEN→小提交，工单 §1 串行）：
+ *   段 A：engine 单源 swarm 字段过滤（f4 批复五(c)）——filterSwarmFieldsFromSchema
+ *         落 shared 单源，modelprovider/params.ts（print+TUI 双车道 wire 投影）
+ *         与 tui/utils/api.ts 同消费；门 OFF 缺省不可见（判据④载体）。
+ *         判别 RED 锚 = 合成 'Agent' 名工具（schema 含 name/team_name/mode）
+ *         经 buildOpenAIParams 投影：修前无过滤面 → 字段穿透（RED）；
+ *         修后门 OFF 剥除（GREEN）。
+ *
+ * 锁面定谳锚（f4 批复原文摘要，防漂移）：
+ *   - RF2：idle/wake 循环已在盘（inProcessRunner.ts:948/:1246/:1477），
+ *     补全非重建；设计稿 §8① premise 过时归档勘误（W-D-B 工单化时改）。
+ *   - ④：Form A 门掉 writeTeamFileAsync/registerTeamForSessionCleanup；
+ *     handleBroadcast 成员发现切 teamContext 双源（组态优先，team file 回落
+ *     fail-soft——缺席返空成员集不崩）。
+ *   - 五(a)：基座定谳 = AgentTool 扩 name/team_name/mode 三字段（上游 2.1.319
+ *     契约，SWARM_FIELDS_BY_TOOL 对偶实锤）；ExitPlanModeV2 launchSwarm/
+ *     teammateCount Form A 不入（归 W-D-B）。
+ *   - 六（判据口径修订）：「Form A 零写盘」= 零新增持久面（team file 写入/
+ *     成员注册表/durable 队列零新增）；既有域盘面（tasks ensureTasksDir /
+ *     mailbox lockfile）沿 0.1.36 既有行为不变更、不新增。
+ */
+import { describe, expect, test } from 'bun:test'
+
+import { buildOpenAIParams } from '../../src/modelprovider'
+
+const GATE_ENV = 'ATLAS_EXPERIMENTAL_AGENT_TEAMS'
+
+/** 合成 'Agent' 名工具（schema 携带 Form A 扩参三字段 + 常规字段）。 */
+function fakeAgentTool(): Parameters<
+  typeof buildOpenAIParams
+>[0]['tools'][number] {
+  return {
+    name: 'Agent',
+    description: async () => 'fake agent desc',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        description: { type: 'string' },
+        prompt: { type: 'string' },
+        name: { type: 'string', description: 'Teammate name' },
+        team_name: { type: 'string', description: 'Team name' },
+        mode: { type: 'string', description: 'Teammate mode' },
+      },
+      required: ['description', 'prompt'],
+    },
+  } as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'][number]
+}
+
+/** 非 swarm 表工具（Bash 名，字段恒不被剥）。 */
+function fakeBashTool(): Parameters<
+  typeof buildOpenAIParams
+>[0]['tools'][number] {
+  return {
+    name: 'Bash',
+    description: async () => 'fake bash desc',
+    inputSchema: {
+      type: 'object',
+      properties: { command: { type: 'string' } },
+    },
+  } as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'][number]
+}
+
+async function projectTools(tools: unknown[]): Promise<Record<string, any>> {
+  const params = await buildOpenAIParams({
+    messages: [{ role: 'user', content: 'hi' }] as Parameters<
+      typeof buildOpenAIParams
+    >[0]['messages'],
+    systemPrompt: [],
+    tools: tools as Parameters<typeof buildOpenAIParams>[0]['tools'],
+    options: {
+      model: 'test-model',
+      getToolPermissionContext: async () => ({
+        mode: 'default',
+        additionalWorkingDirectories: new Map(),
+        alwaysAllowRules: {},
+        alwaysDenyRules: {},
+        isBypassPermissionsModeAvailable: false,
+      }),
+    },
+  })
+  const out: Record<string, any> = {}
+  for (const t of (params.tools ?? []) as Array<{
+    function: { name: string; parameters: any }
+  }>) {
+    out[t.function.name] = t.function.parameters
+  }
+  return out
+}
+
+describe('wave0193 段 A：engine 单源 swarm 字段过滤（f4 批复五(c)，判据④载体）', () => {
+  const savedEnv = process.env[GATE_ENV]
+
+  test('门 OFF：Agent wire schema 剥 name/team_name/mode，常规字段保留', async () => {
+    delete process.env[GATE_ENV]
+    const projected = await projectTools([fakeAgentTool(), fakeBashTool()])
+    const agentProps = projected['Agent']?.properties ?? {}
+    expect(agentProps.name).toBeUndefined()
+    expect(agentProps.team_name).toBeUndefined()
+    expect(agentProps.mode).toBeUndefined()
+    // 常规字段不受过滤面影响
+    expect(agentProps.description).toBeDefined()
+    expect(agentProps.prompt).toBeDefined()
+    // 非 swarm 表工具字段恒保留
+    expect(projected['Bash']?.properties?.command).toBeDefined()
+  })
+
+  test('门 ON：Agent wire schema 三字段全保留（扩参可见）', async () => {
+    process.env[GATE_ENV] = '1'
+    try {
+      const projected = await projectTools([fakeAgentTool()])
+      const agentProps = projected['Agent']?.properties ?? {}
+      expect(agentProps.name).toBeDefined()
+      expect(agentProps.team_name).toBeDefined()
+      expect(agentProps.mode).toBeDefined()
+    } finally {
+      if (savedEnv === undefined) delete process.env[GATE_ENV]
+      else process.env[GATE_ENV] = savedEnv
+    }
+  })
+
+  test('ExitPlanMode 名工具同在剥除表（launchSwarm/teammateCount，Form A 不入但过滤面就位）', async () => {
+    delete process.env[GATE_ENV]
+    const exitTool = {
+      name: 'ExitPlanMode',
+      description: async () => 'fake exit desc',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          allowedPrompts: { type: 'array' },
+          launchSwarm: { type: 'boolean' },
+          teammateCount: { type: 'number' },
+        },
+      },
+    } as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'][number]
+    const projected = await projectTools([exitTool])
+    const props = projected['ExitPlanMode']?.properties ?? {}
+    expect(props.launchSwarm).toBeUndefined()
+    expect(props.teammateCount).toBeUndefined()
+    expect(props.allowedPrompts).toBeDefined()
+  })
+})

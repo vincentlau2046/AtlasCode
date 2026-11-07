@@ -14,6 +14,11 @@ import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { Message, SystemPrompt, ThinkingConfig, Tools } from '../shared'
 // 0.1.85 Task A（C85-A）：@PDF 引用投影叶子（shared 纯函数，不引 tui/engine）
 import { formatPDFReferenceForModel } from '../shared'
+// 0.1.93 W-D-A（f4 批复五(c)）：swarm 扩参字段 wire 过滤面 + 门（shared 单源）
+import {
+  filterSwarmFieldsFromSchema,
+  isAgentSwarmsEnabled,
+} from '../shared'
 // 0.1.89 任务 B（Gap A 余面）：attachment 族登记式处置（本域自含，不引 tui/engine）
 import {
   engineAttachmentRejectionMarker,
@@ -241,9 +246,22 @@ async function buildOpenAITools(
     } catch {
       desc = tool.name
     }
+    // 0.1.93 W-D-A（f4 批复五(c)）：swarm 扩参字段 wire 投影过滤——门 OFF
+    // 时剥除 Agent(name/team_name/mode) / ExitPlanMode(launchSwarm/
+    // teammateCount)（判据④「门 OFF 缺省不可见」载体；shared 单源，
+    // tui/utils/api.ts 同消费）。print + TUI 双车道同经本函数，单点收口。
+    const filteredSchema = filterSwarmFieldsFromSchema(
+      tool.name,
+      schema as Record<string, unknown>,
+      isAgentSwarmsEnabled(),
+    )
     out.push({
       type: 'function',
-      function: { name: tool.name, description: desc, parameters: schema },
+      function: {
+        name: tool.name,
+        description: desc,
+        parameters: filteredSchema as typeof schema,
+      },
     })
   }
   for (const s of options?.extraToolSchemas ?? []) {

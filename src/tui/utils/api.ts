@@ -26,7 +26,6 @@ import type { z } from 'zod/v4'
 import { CLI_SYSPROMPT_PREFIXES } from '../constants/system.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { Tool, ToolPermissionContext, Tools } from '../Tool.js'
-import { AGENT_TOOL_NAME } from '../tools/AgentTool/constants.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../tools/ExitPlanModeTool/constants.js'
 import { TASK_OUTPUT_TOOL_NAME } from '../tools/TaskOutputTool/constants.js'
@@ -76,11 +75,13 @@ export type SystemPromptBlock = {
   cacheScope: CacheScope | null
 }
 
-// Fields to filter from tool schemas when swarms are not enabled
-const SWARM_FIELDS_BY_TOOL: Record<string, string[]> = {
-  [EXIT_PLAN_MODE_V2_TOOL_NAME]: ['launchSwarm', 'teammateCount'],
-  [AGENT_TOOL_NAME]: ['name', 'team_name', 'mode'],
-}
+// 0.1.93 W-D-A（f4 批复五(c)）：swarm 字段过滤面下移 shared 单源——本文件
+// 原 SWARM_FIELDS_BY_TOOL 表 + filterSwarmFieldsFromSchema 本地副本删除，
+// 改消费 shared 同名面（modelprovider/params.ts print+TUI 双车道 wire 投影
+// 同源；表键 'Agent'/'ExitPlanMode' 与本文件原 AGENT_TOOL_NAME/
+// EXIT_PLAN_MODE_V2_TOOL_NAME 常量值逐字同源）。门判读本文件仍走 tui 本地
+// isAgentSwarmsEnabled（tui 域既有门面，语义同 shared 单源）。
+import { filterSwarmFieldsFromSchema as filterSwarmFieldsFromSchemaShared } from '../../shared'
 
 /**
  * Filter swarm-related fields from a tool's input schema.
@@ -90,23 +91,11 @@ function filterSwarmFieldsFromSchema(
   toolName: string,
   schema: ToolInputSchema,
 ): ToolInputSchema {
-  const fieldsToRemove = SWARM_FIELDS_BY_TOOL[toolName]
-  if (!fieldsToRemove || fieldsToRemove.length === 0) {
-    return schema
-  }
-
-  // Clone the schema to avoid mutating the original
-  const filtered = { ...schema }
-  const props = filtered.properties
-  if (props && typeof props === 'object') {
-    const filteredProps = { ...(props as Record<string, unknown>) }
-    for (const field of fieldsToRemove) {
-      delete filteredProps[field]
-    }
-    filtered.properties = filteredProps
-  }
-
-  return filtered
+  return filterSwarmFieldsFromSchemaShared(
+    toolName,
+    schema as unknown as Record<string, unknown>,
+    !isAgentSwarmsEnabled(),
+  ) as ToolInputSchema
 }
 
 export async function toolToAPISchema(

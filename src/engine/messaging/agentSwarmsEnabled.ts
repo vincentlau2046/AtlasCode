@@ -1,6 +1,10 @@
 /**
- * messaging 域 — agent teams / swarms 总开关（§8.56 S-D2 依赖闭包层，旧仓
- * utils/agentSwarmsEnabled.ts 44L 随迁；TaskUpdate 3 站点消费面）。
+ * messaging 域 — agent teams / swarms 总开关（§8.56 S-D2 依赖闭包层）。
+ *
+ * 0.1.93 W-D-A（f4 批复五(c)）：门面下移 shared/agentSwarmsEnabled.ts 单源
+ * （modelprovider/params.ts wire 投影需门判读而 engine→modelprovider 单向，
+ * 反向 import 成环；shared 底层两侧皆可消费）。本模块保留 = engine 门面
+ * re-export 槽，消费面（engine/index.ts:1155 + team 工具 isEnabled 族）零变。
  *
  * 旧仓来源（a8af45b）：src/utils/agentSwarmsEnabled.ts（isAgentTeamsFlagSet
  * + isAgentSwarmsEnabled；import 重指：isEnvTruthy → shared 门面单一事实源）。
@@ -11,29 +15,4 @@
  *   默认值 true = 无远端配置态恒放行 → 裁后恒放行与旧缺省态行为等价，
  *   仅失「远端拉闸」能力，登记为前向接缝）。
  */
-import { isEnvTruthy } from '../../shared'
-
-/**
- * Check if --agent-teams flag is provided via CLI.
- * Checks process.argv directly to avoid import cycles with bootstrap/state.
- * Note: The flag is only shown in help for ant users, but if external users
- * pass it anyway, it will work (subject to the killswitch).
- */
-function isAgentTeamsFlagSet(): boolean {
-  return process.argv.includes('--agent-teams')
-}
-
-/**
- * Centralized runtime check for agent teams/teammate features.
- * This is the single gate that should be checked everywhere teammates
- * are referenced (prompts, code, tools isEnabled, UI, etc.).
- *
- * Opt-in: ATLAS_EXPERIMENTAL_AGENT_TEAMS env var OR --agent-teams flag
- * （growthbook killswitch 支裁，见头注 delta ①）。
- */
-export function isAgentSwarmsEnabled(): boolean {
-  return (
-    isEnvTruthy(process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS) ||
-    isAgentTeamsFlagSet()
-  )
-}
+export { isAgentSwarmsEnabled } from '../../shared/agentSwarmsEnabled'
