@@ -84,6 +84,23 @@ shared/                    team-file schema + 角色模板注册（单一事实�
 - 通用：cmd/help 恒等 + token 对账照旧；**形态 A 零持久判据**（Atlas-reveiw ①：A 路径全程零写盘〔seeded 探针 HOME 除外〕、不建注册表——共享原语带 durable 档实现，A 须证不落盘）。
 - **T8 升格**（Atlas-reveiw ②）：形态 A 基座设计定谳步（新工具 vs 既有 Agent 工具扩参），W-D-A 工单化前置；形态真伪判据①随之锚定基座裁定结果。
 
-## 8. 本稿遗留（锁面必答候补）
+## 8. 遗留面（Main 实读回执后更新 2026-11-07）
 
-① T8 spawn 链真伪直证（teamCreateTool 现形态 spawn 什么）；② team file schema 与 0.1.36 swarm TeamFile 遗产的关系；③ 上游 2.1.319 工具契约插桩直证（卷 4 范围，落码前必做——禁凭搜索摘要锁契约）；④ 形态 B 成员 session 的权限面来源。
+**① T8 已定谳（Main 实读 @ master）**：TeamCreateTool 现形态 = **不 spawn 任何东西**（call 体 teamCreateTool.ts:194-289 = 写 team file `~/.atlas/teams/<name>/config.json` + resetTaskList + 内存 teamContext）；成员拉起链本体在盘且完备（InProcessBackend.spawn → startInProcessTeammate @ swarm/inProcessRunner.ts:1669 fire-and-forget 完整 agent loop；compose.ts:334 已接线）但**全链零生产调用方**，AgentCreate 工具不存在。**W-D-A 核心落码面 = 补「lead 拉起成员」触发点 + idle/wake 循环支**（后者更大：runInProcessTeammate 的逐消息消费族在 S-E2d 迁移时整裁，idle→mailbox 到达→唤醒重跑循环不在盘，须重建）。锁面隐藏面登记：② teammate ask 支 headless 车道形态未定（与 C-6 同族）；③ tui/utils/swarm 双副本同步纪律入工单；④ spawn 触发点工具面（扩参 vs 新 AgentCreate）**须等 2.1.319 契约插桩后锁**（Atlas-reveiw ② 基座定谳步同点）；⑤ modelprovider teammateModel 窄面已接，role/goal/backstory 模板注册 = 加性低险。旧遗留②（team file schema 与 0.1.36 swarm TeamFile 遗产关系）并入 W-D-B-1 schema 面。
+
+**② W-D-B 拆二（Main+e2e 共识）**：持久化面（schema 扩展+member registry+durable inbox/task store）与 UDS+TUI 面（F6/F7 换真+F10 组件+重连 resume）风险不同质，拆二各自独立 gate；UDS 面另压 F1/F2 双门统一裁定。
+
+**③ Q3 边界**（Main）：teammate（长生命周期 mailbox 成员）≠ AgentTool 异步子代理（runAsyncAgentLifecycle 一次性 fork）——共用 runAgent 引擎但生命周期语义不同，不合并不双轨，锁面写明防误收敛。
+
+**④ W-D-B 权限机制预注册**（Main+Atlas-reveiw 共识）：独立 session TPC 不天然继承 lead 权限——「成员 ≤ lead」须显式机制（权限快照随 team file 传递 vs ask 回 lead UDS 通道二选一），W-D-B 工单化时预注册判据面。
+
+**⑤ 卷 4 契约插桩 = W-D-B 硬前置**（三方共识）：2.1.319 工具契约直证前 W-D-B 不锁工具面、e2e 不预跑。
+
+## 9. 优先级平衡结论（三方口径收敛 2026-11-07，待用户终裁）
+
+| 序 | 波 | 理由（三方汇） |
+|---|---|---|
+| 1 | **W-opt compaction 域收尾**（C-6 趁热 scoped 小波先行〔0.1.90 热登记+判定面新鲜+defer 重判别成本，K6-8 defer 先例〕；C-1 奇偶直证后视结果入波；C-3 视横排） | e2e：C 族探针资产现成边际成本极低（l1-tui-090 改窗位复用+scoped re-gate 先例）；Main：用户当前优先面 = compact 核心，W-D-A 不宜抢前 |
+| 2 | **W-D-A 临时小组**（中体量 8-12 文件；先基座定谳步〔§8 ①④〕后落码：spawn 触发点 + idle/wake 循环支〔最大件〕+ 角色三元组 + 终止条件组 + stall 计数 + graceful shutdown） | Main：价值密度高、无跨进程面风险低 + 为 W-D-B 验证统一原语闭环（mailbox/tasks 原语 in-process 跑通后 durable 化才是纯加性）；e2e：单 gate 可载 |
+| 3 | **W-D-B-1 持久化面**（team file schema+member registry+durable inbox/task store） | schema 演进/resume relink 风险域独立 gate |
+| 4 | **W-D-B-2 UDS+TUI 面**（F6/F7 换真+F10 组件+重连/resume） | **硬前置 = 卷 4 契约插桩直证（2.1.319）**+ F1/F2 双门统一 + S-2 参照面 + 权限机制预注册 |
