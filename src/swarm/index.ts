@@ -300,6 +300,21 @@ export {
   type InProcessRunnerConfig,
   type InProcessRunnerResult,
 } from './inProcessRunner'
+// 0.1.93 W-D-A A6：teammate 终止条件组 + stall 计数（工单审计 F2/F5；
+// 纯模块零 I/O，runner 轮末单一评估点）。
+export {
+  validateTerminationSpec,
+  createInitialTerminationLoopState,
+  advanceTerminationLoopState,
+  evaluateTerminationSpec,
+  extractFinalAssistantText,
+  type TerminationCondition,
+  type TerminationSpec,
+  type TerminationLoopState,
+  type TerminationEvaluationState,
+  type TerminationReason,
+  type TerminationVerdict,
+} from './teammateTermination'
 // P1（0.1.36 切片①→0.1.37 ⑧ 收敛）：mailbox 兜底协作式 deadline 纯面（判别单测
 // 可测）已迁 shared 单一事实源 src/shared/permissionDeadline.ts（engine/TUI 两
 // 消费面共享，boundaries tui↛swarm）；本门面 re-export 保 0.1.36 公开面（消费端

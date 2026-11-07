@@ -31,6 +31,7 @@
 import type { Message, PermissionMode } from '../../shared'
 import type { SetAppState, TaskStateBase } from '../../task'
 import type { TeammateContext } from '../teammateContext'
+import type { TerminationSpec } from '../teammateTermination'
 
 /** tmux/it2 pane 标识（旧 PaneId = any stub → 消费端 string 形：killPane('-t', paneId) 全链）。 */
 export type PaneId = string
@@ -113,6 +114,11 @@ export type TeammateSpawnConfig = {
   cwd?: string
   /** Leader session ID 透传（缺省 = 当前 sessionId） */
   parentSessionId?: string
+  /**
+   * 0.1.93 W-D-A A6：终止条件组 spec（可选；absent = 零评估恒等；
+   * InProcessBackend 透传 runInProcessTeammate 轮末评估）。
+   */
+  termination?: TerminationSpec
 }
 
 /**

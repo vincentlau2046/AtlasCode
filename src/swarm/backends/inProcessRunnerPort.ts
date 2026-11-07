@@ -22,6 +22,7 @@ import type { AgentDefinition } from '../../engine'
 import type { Message } from '../../shared'
 import type { TeammateIdentity } from '../../task'
 import type { TeammateContext } from '../teammateContext'
+import type { TerminationSpec } from '../teammateTermination'
 import type { TeammateExecutorContext } from './types'
 
 /** startInProcessTeammate 输入面（旧 inProcessRunner.ts:107-129 调用面逐字）。 */
@@ -75,6 +76,12 @@ export type StartInProcessTeammateArgs = {
     AgentDefinition,
     'getSystemPrompt' | 'tools' | 'disallowedTools' | 'model'
   >
+  /**
+   * 0.1.93 W-D-A A6（工单审计 F2/F5）：终止条件组 spec——可选；absent =
+   * 零评估（现行为字节级恒等）。runner 轮末单一评估点（graceful 退出，
+   * 不发 kill）；per-member stall 计数落 runner 循环态。
+   */
+  termination?: TerminationSpec
 }
 
 export type StartInProcessTeammateFn = (args: StartInProcessTeammateArgs) => void

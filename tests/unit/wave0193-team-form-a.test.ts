@@ -602,3 +602,190 @@ describe('wave0193 段 E：handleBroadcast 成员发现双源 + fail-soft（A5�
     expect(peekTeamContext()).toBeUndefined()
   })
 })
+
+// ── 段 F：终止条件组 + stall 计数（A6；工单审计 F2/F5；判别格 ≥4 预注册：
+//    max-turns / 文本确认 / 外部 kill / OR-AND 组合各一格 + stall 计数格；
+//    G-1 RepeatToolCallTracker 同族：纯模块 + 配置 fail-loud）──────────────
+import {
+  advanceTerminationLoopState,
+  createInitialTerminationLoopState,
+  evaluateTerminationSpec,
+  extractFinalAssistantText,
+  validateTerminationSpec,
+  type TerminationCondition,
+  type TerminationSpec,
+} from '../../src/swarm'
+
+describe('wave0193 段 F：终止条件组判别格（A6，工单审计 F2 ≥4 格预注册）', () => {
+  test('F1 max-turns 格：turns < max 不终止 / turns >= max 终止（reason 逐字段）', () => {
+    const spec: TerminationSpec = {
+      op: 'or',
+      conditions: [{ kind: 'max-turns', maxTurns: 3 }],
+    }
+    const below = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      turns: 2,
+      aborted: false,
+    })
+    expect(below.terminate).toBe(false)
+    const at = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      turns: 3,
+      aborted: false,
+    })
+    expect(at.terminate).toBe(true)
+    expect(at.reason).toEqual({ type: 'max-turns', turns: 3 })
+  })
+
+  test('F2 文本确认格：终轮文本含确认短语（大小写不敏感）→ 终止 / 不含 → 不终止', () => {
+    const spec: TerminationSpec = {
+      op: 'or',
+      conditions: [{ kind: 'text-confirm', phrases: ['TASK COMPLETE'] }],
+    }
+    const hit = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      lastFinalText: 'All done — task complete, handing back.',
+      aborted: false,
+    })
+    expect(hit.terminate).toBe(true)
+    expect(hit.reason).toEqual({
+      type: 'text-confirm',
+      matched: 'TASK COMPLETE',
+    })
+    const miss = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      lastFinalText: 'still working',
+      aborted: false,
+    })
+    expect(miss.terminate).toBe(false)
+  })
+
+  test('F3 外部 kill 格：lifecycle abort → 终止（graceful，不发 kill——F3 态机语义）', () => {
+    const spec: TerminationSpec = {
+      op: 'or',
+      conditions: [{ kind: 'external-kill' }],
+    }
+    const killed = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      aborted: true,
+    })
+    expect(killed.terminate).toBe(true)
+    expect(killed.reason).toEqual({ type: 'external-kill' })
+    const alive = evaluateTerminationSpec(spec, {
+      ...createInitialTerminationLoopState(),
+      aborted: false,
+    })
+    expect(alive.terminate).toBe(false)
+  })
+
+  test('F4 OR-AND 组合格：or 任一命中即终止 / and 全命中才终止 / and 缺一不终止', () => {
+    const maxTurnsMet = { turns: 5, aborted: false }
+    const textMet = { lastFinalText: 'TASK COMPLETE', aborted: false }
+    const orSpec: TerminationSpec = {
+      op: 'or',
+      conditions: [
+        { kind: 'max-turns', maxTurns: 3 },
+        { kind: 'text-confirm', phrases: ['TASK COMPLETE'] },
+      ],
+    }
+    const orHit = evaluateTerminationSpec(orSpec, {
+      ...createInitialTerminationLoopState(),
+      ...textMet,
+    })
+    expect(orHit.terminate).toBe(true)
+    expect(orHit.reason?.type).toBe('or')
+    expect((orHit.reason as { satisfied: unknown[] }).satisfied).toHaveLength(1)
+
+    const andSpec: TerminationSpec = {
+      op: 'and',
+      conditions: [
+        { kind: 'max-turns', maxTurns: 3 },
+        { kind: 'text-confirm', phrases: ['TASK COMPLETE'] },
+      ],
+    }
+    const andHit = evaluateTerminationSpec(andSpec, {
+      ...createInitialTerminationLoopState(),
+      ...maxTurnsMet,
+      ...textMet,
+    })
+    expect(andHit.terminate).toBe(true)
+    expect(andHit.reason?.type).toBe('and')
+    expect((andHit.reason as { satisfied: unknown[] }).satisfied).toHaveLength(2)
+    const andMiss = evaluateTerminationSpec(andSpec, {
+      ...createInitialTerminationLoopState(),
+      ...maxTurnsMet,
+      aborted: false,
+    })
+    expect(andMiss.terminate).toBe(false)
+  })
+
+  test('F5 stall 计数格（F5 锁面：per-member 连击同文计数；同文连击到阈终止 / 异文复位 / 组级打转 = stall 条件入词汇表）', () => {
+    let st = createInitialTerminationLoopState()
+    // 同文连击：A → stall 0，A → 1，A → 2，A → 3
+    for (const _ of [1, 2, 3, 4]) {
+      st = advanceTerminationLoopState(st, { finalText: 'same answer' })
+    }
+    expect(st.turns).toBe(4)
+    expect(st.stallConsecutive).toBe(3)
+    const stallSpec: TerminationSpec = {
+      op: 'or',
+      conditions: [{ kind: 'stall', maxConsecutive: 3 }],
+    }
+    const stalled = evaluateTerminationSpec(stallSpec, {
+      ...st,
+      aborted: false,
+    })
+    expect(stalled.terminate).toBe(true)
+    expect(stalled.reason).toEqual({ type: 'stall', consecutive: 3 })
+    // 异文复位 + undefined 复位
+    st = advanceTerminationLoopState(st, { finalText: 'different now' })
+    expect(st.stallConsecutive).toBe(0)
+    st = advanceTerminationLoopState(st, { finalText: undefined })
+    expect(st.stallConsecutive).toBe(0)
+  })
+
+  test('F6 配置 fail-loud（G-1 090-09 同族）：空条件 / maxTurns<1 / stall<2 / 空短语 / 非法 op → 构造期抛', () => {
+    expect(() => validateTerminationSpec({ op: 'or', conditions: [] })).toThrow()
+    expect(() =>
+      validateTerminationSpec({
+        op: 'or',
+        conditions: [{ kind: 'max-turns', maxTurns: 0 }],
+      }),
+    ).toThrow()
+    expect(() =>
+      validateTerminationSpec({
+        op: 'or',
+        conditions: [{ kind: 'stall', maxConsecutive: 1 }],
+      }),
+    ).toThrow()
+    expect(() =>
+      validateTerminationSpec({
+        op: 'or',
+        conditions: [{ kind: 'text-confirm', phrases: [] }],
+      }),
+    ).toThrow()
+    expect(() =>
+      validateTerminationSpec({
+        op: 'xor' as 'or',
+        conditions: [{ kind: 'external-kill' }],
+      }),
+    ).toThrow()
+  })
+
+  test('F7 extractFinalAssistantText：末位 assistant 文本块拼接 / 无 assistant → undefined', () => {
+    expect(
+      extractFinalAssistantText([
+        { role: 'user', content: 'q' },
+        {
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'part1 ' },
+            { type: 'text', text: 'part2' },
+          ],
+        },
+        { role: 'user', content: 'follow-up' },
+      ]),
+    ).toBe('part1 part2')
+    expect(extractFinalAssistantText([{ role: 'user', content: 'q' }])).toBeUndefined()
+  })
+})

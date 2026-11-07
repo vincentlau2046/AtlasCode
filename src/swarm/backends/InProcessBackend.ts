@@ -147,6 +147,9 @@ export class InProcessBackend implements TeammateExecutor {
         // 路径亦零设值，注册表输入面 = port 字段保留，消费端 = hub，登记）。
         allowedTools: config.permissions,
         allowPermissionPrompts: config.allowPermissionPrompts,
+        // 0.1.93 W-D-A A6：终止条件组透传（absent = 零评估恒等；runner
+        // 轮末单一评估点，graceful 退出）。
+        ...(config.termination ? { termination: config.termination } : {}),
       })
 
       logForDebugging(

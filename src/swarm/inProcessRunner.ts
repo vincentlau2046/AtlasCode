@@ -230,6 +230,16 @@ import {
 } from './permissionSync'
 import { TEAM_LEAD_NAME } from './constants'
 import { TEAMMATE_SYSTEM_PROMPT_ADDENDUM } from './teammatePromptAddendum'
+// 0.1.93 W-D-A A6：终止条件组 + stall 计数（工单审计 F2/F5；f4 批复 F5
+// 层级定谳 = per-member 计数落本循环态，组级打转以 stall 条件入词汇表）。
+import {
+  advanceTerminationLoopState,
+  createInitialTerminationLoopState,
+  evaluateTerminationSpec,
+  extractFinalAssistantText,
+  validateTerminationSpec,
+  type TerminationReason,
+} from './teammateTermination'
 import type { TeammateToolState } from './backends/types'
 import type { StartInProcessTeammateArgs } from './backends/inProcessRunnerPort'
 // delta ⑧ 回填（S-E3 A 路 blocker）：teammate 工具池 deps 注入窗。
@@ -792,6 +802,11 @@ export type InProcessRunnerResult = {
   error?: string
   /** Messages produced by the agent */
   messages: Message[]
+  /**
+   * 0.1.93 W-D-A A6：终止条件命中原因（仅 termination spec 在场且命中时
+   * 设值；graceful 退出留痕面——e2e probe 断言锚）。
+   */
+  terminationReason?: TerminationReason
 }
 
 /**
@@ -1232,6 +1247,15 @@ export async function runInProcessTeammate(
     turnId: 'turn-0',
   }
 
+  // 0.1.93 W-D-A A6：终止条件组（可选；absent = 零评估现行为恒等）。
+  // spec 构造期 fail-loud 校验（G-1 090-09 同族）；per-member stall 计数
+  // 落本循环态（跨轮持久），轮末统一评估（单一评估点）。
+  let termState = createInitialTerminationLoopState()
+  let terminationReason: TerminationReason | undefined
+  if (config.termination) {
+    validateTerminationSpec(config.termination)
+  }
+
   try {
     // Add initial prompt to task.messages for display (wrapped with XML)
     updateTaskState<InProcessTeammateTaskState>(taskId, setAppState, task => ({
@@ -1375,6 +1399,12 @@ export async function runInProcessTeammate(
         const newMessages = agentResult.messages.slice(prefixLen)
         allMessages.push(...newMessages)
 
+        // 0.1.93 W-D-A A6：per-member stall 计数推进（终轮文本同文连击
+        // 计数，跨轮持久；F5 锁面）。
+        termState = advanceTerminationLoopState(termState, {
+          finalText: extractFinalAssistantText(newMessages),
+        })
+
         // delta ②：轮末 task.messages 镜像（等价旧 per-message appendCappedMessage
         // 连添语义：末 100 截断）。
         updateTaskState<InProcessTeammateTaskState>(
@@ -1467,6 +1497,23 @@ export async function runInProcessTeammate(
         logForDebugging(
           `[inProcessRunner] Skipping duplicate idle notification for ${identity.agentName}`,
         )
+      }
+
+      // 0.1.93 W-D-A A6：轮末终止评估（单一评估点；absent spec = 零评估
+      // 恒等）。命中 → graceful 退出（不发 kill，走轮末既有 completed 收
+      // 尾 + idle 通知已发——F3 态机语义），reason 留痕入 result。
+      if (config.termination) {
+        const verdict = evaluateTerminationSpec(config.termination, {
+          ...termState,
+          aborted: abortController.signal.aborted,
+        })
+        if (verdict.terminate) {
+          logForDebugging(
+            `[inProcessRunner] ${identity.agentId} termination condition met (${JSON.stringify(verdict.reason)}) — graceful exit`,
+          )
+          terminationReason = verdict.reason
+          shouldExit = true
+        }
       }
 
       logForDebugging(
@@ -1585,7 +1632,11 @@ export async function runInProcessTeammate(
       })
     }
 
-    return { success: true, messages: allMessages }
+    return {
+      success: true,
+      messages: allMessages,
+      ...(terminationReason ? { terminationReason } : {}),
+    }
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
