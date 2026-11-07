@@ -4,6 +4,61 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.92
+
+W-opt-3 波：C-1 KV-cache 保真摘要——三车道摘要请求 system/tools 与主车道
+同源对齐 + C-3 overflow 触发登记收口（工单
+`docs/2026-11-07-p0-wave-0192-ticket.md`，DC-1 wire 捕获直证先行）。gate
+r-20261107-gate-092（row F 双块：原轮 @98a91028 + gate 轮薄化根因修
+scoped re-gate 终态 @479172da，f4 修订判据 ①–⑤ 全满足）。**用户可感行为
+变化登记 2 条（均属修复本意，非回归）**：① 摘要（压缩）请求携带主车道
+同源 system + 全量 tools（修前 system 专用串/缺失 + tools 降采样/缺失）
+——同模型池场景 KV-cache 前缀复用成立，摘要请求 input tokens 增量为对齐
+本意；② 主车道请求 tools 描述由 name-fallback 薄形恢复全量（print/TUI
+双车道同根因事故面根修）——全车道 input tokens 增量（token manifest 新
+锚：print 主车道描述载荷 556B→60,621B / TUI 220B→20,322B，逐件 sha256
+见 gate 报告 dc1-regate/tui-regate tools-sha.txt）。
+
+### C-1：KV-cache 保真摘要——三车道同源对齐（`cacad372` + `98a91028`）
+
+- `src/cli/print.ts` summarize 补 `systemPrompt: bundle.deps.systemPrompt`
+  + 主车道同源 tools；`src/engine/loopDeps.ts` reactiveCompact 窄体同补
+  （同函数作用域主池 + loop.ts 主车道同形门）；TUI `compact.ts` 流式兜底
+  支专用 system 串裁除 → `cacheSafeParams` 主源同构造 + tools 全池同源
+  （`context.options.tools`，f4 裁 A）。
+- 摘要指令保持末位 user 消息后置形；role 路由三形态保留（TUI
+  compactModelSwitch 优先级链 / print `'small'` / engine 主 role）——
+  模型选择与 system/tools 对齐解耦，差模型场景仅增量成本不破正确性。
+- TUI 默认路径 = cache-share fork 支本就真前缀对齐；本波对齐对象 = 流式
+  兜底支（fork 失败/feature off/modelOverride fallback 时走）。
+
+### C-1 后续：gate 轮薄化根因修（`479172da`）
+
+- e2e gate 轮 wire 直证发现 print 车道主车道 tools 描述仍薄形 →
+  probe-092 两轮插桩定谳：**print 与 TUI 双车道同根因**——buildOpenAIParams
+  主车道调用方 options=undefined → buildOpenAITools 读
+  `options.isNonInteractiveSession` 抛 TypeError 被 catch 吞 → desc 静默
+  回落 tool.name（「薄形」为事故面非设计面；首轮「TUI 设计预薄」解释基于
+  stderr 零行假象，作废）。
+- 修形 = `options?.` 兜底（根因处 fail-safe，不把 bug 传播进摘要支）→
+  两车道主请求 description() 恢复全量，摘要支同函数同形自动字节恒等
+  （gate 判据① GREEN 形：摘要 tools ≡ 主车道 wire tools 全量↔全量）。
+- 判别单测：wave0192 段 A options=undefined → desc 全量非 name-fallback
+  （RED→GREEN 7/7）。
+
+### C-3：overflow 触发登记收口（零码）
+
+- 活码重核证伪 DSH 笔记口径：413/PTL 反应式压缩 0.1.37 D1 已双车道实现
+  （`isReactiveCompactRecoverableError` 判形 + DI 槽 + 全 loop 一次性
+  重试；阈值路径三败熔断独立）——本波只做判形覆盖小核单测（IFF 413/PTL
+  变体 + B 类 400 超窗族 5 件）+ 登记收口，零行为变更。
+
+gate 证据：双车道 GREEN（print pair system 1038B/tools 44 件字节恒等 +
+前缀 1/1；TUI pair system 37764B/tools 25 件字节恒等 + dangling=0，thin=[]
+无薄化形）+ CI canon（FC=3 --isolate）5637 pass/0 fail/454 文件 + P0a
+RELEASABLE + A4F 6/6 + cmd32///help55 双向零 diff + sysprompt 零 diff 锚
+保留 + fam 16/16 + looprob R1×5 + R3 kill→resume + de-ant 0。
+
 ## v0.1.91
 
 W-opt-2 scoped 小波：C-6 headless `-p` 车道 autoCompact 激活（工单
