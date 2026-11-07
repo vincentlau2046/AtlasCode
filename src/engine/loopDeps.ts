@@ -269,6 +269,14 @@ export async function createAgentLoopDeps(
               messages: [...compactMsgs, prompt],
               role,
               sessionModel,
+              // 0.1.92 W-opt-3 C-1（KV-cache 保真摘要，DSH 语义）：摘要请求 =
+              // 末轮主车道 routed request 真前缀——system/tools 与主车道同源
+              // （config.systemPrompt = deps 主车道透传同一构造源；tools =
+              // 本作用域 getTools 主池，loop.ts 主车道 `tools.length > 0`
+              // 同形门）。同模型时 cache 前缀复用成立；空池 = undefined 键
+              // 不出现（C1-4 缺省面）。
+              systemPrompt: config.systemPrompt,
+              tools: tools.length > 0 ? tools : undefined,
               signal: config.signal,
             })
             const content = (

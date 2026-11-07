@@ -7,7 +7,10 @@
 import { collectPDFReferenceAttachmentsForCompact, feature } from 'src/shared'
 export { collectPDFReferenceAttachmentsForCompact } from 'src/shared'
 import type { UUID } from 'crypto'
-import uniqBy from 'lodash-es/uniqBy.js'
+
+// 0.1.92 W-opt-3 C-1：摘要 tools 降采样集裁除（f4 裁 A = 全池同源），
+// uniqBy / FileReadTool / ToolSearchTool / isToolSearchEnabled 摘要支消费随裁。
+import { appendSystemContext } from '../utils/api.js'
 
 import { APIUserAbortError } from '../types/atlas.js'
 // 0.1.80 K1-C①：模型切换 previous-model 记录（压缩摘要先用大窗前模型）
@@ -18,12 +21,10 @@ import type { QuerySource } from '../constants/querySource.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { Tool, ToolUseContext } from '../Tool.js'
 import type { LocalAgentTaskState } from '../tasks/LocalAgentTask/LocalAgentTask.js'
-import { FileReadTool } from '../tools/FileReadTool/FileReadTool.js'
 import {
   FILE_READ_TOOL_NAME,
   FILE_UNCHANGED_STUB,
 } from '../tools/FileReadTool/prompt.js'
-import { ToolSearchTool } from '../tools/ToolSearchTool/ToolSearchTool.js'
 import type { AgentId } from '../types/ids.js'
 import type {
   AssistantMessage,
@@ -89,16 +90,14 @@ import {
 import { sleep } from '../utils/sleep.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import { asSystemPrompt } from '../utils/systemPromptType.js'
+import type { SystemPrompt } from '../utils/systemPromptType.js'
 import { getTaskOutputPath } from '../utils/task/diskOutput.js'
 import {
   getTokenUsage,
   tokenCountFromLastAPIResponse,
   tokenCountWithEstimation,
 } from '../utils/tokens.js'
-import {
-  extractDiscoveredToolNames,
-  isToolSearchEnabled,
-} from '../utils/toolSearch.js'
+import { extractDiscoveredToolNames } from '../utils/toolSearch.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { modelProvider } from 'src/modelprovider'
 import { buildOpenAIParams } from 'src/modelprovider'
@@ -1203,35 +1202,12 @@ export async function streamCompactSummary({
       let response: AssistantMessage | undefined
       context.setResponseLength?.(() => 0)
 
-      // Check if tool search is enabled using the main loop's tools list.
-      // context.options.tools includes MCP tools merged via useMergedTools.
-      const useToolSearch = await isToolSearchEnabled(
-        compactModel,
-        context.options.tools,
-        async () => appState.toolPermissionContext,
-        context.options.agentDefinitions.activeAgents,
-        'compact',
-      )
-
-      // When tool search is enabled, include ToolSearchTool and MCP tools. They get
-      // defer_loading: true and don't count against context - the API filters them out
-      // of system_prompt_tools before token counting (see api/token_count_api/counting.py:188
-      // and api/public_api/messages/handler.py:324).
-      // Filter MCP tools from context.options.tools (not appState.mcp.tools) so we
-      // get the permission-filtered set from useMergedTools — same source used for
-      // isToolSearchEnabled above and normalizeMessagesForAPI below.
-      // Deduplicate by name to avoid API errors when MCP tools share names with built-in tools.
-      const tools: Tool[] = useToolSearch
-        ? uniqBy(
-            [
-              FileReadTool,
-              ToolSearchTool,
-              ...context.options.tools.filter(t => t.isMcp),
-            ],
-            'name',
-          )
-        : [FileReadTool]
-
+      // 0.1.92 W-opt-3 C-1（KV-cache 保真摘要，f4 裁 A）：摘要 tools = 主车道
+      // 全池同源（context.options.tools，下方 normalizeMessagesForAPI /
+      // buildOpenAIParams 同参源；cache-share fork 支 isolatedToolUseContext
+      // .options.tools 同源）。修前降采样集（[FileReadTool] ± ToolSearch/MCP）
+      // 同样破 tools 段前缀 parity（DSH 语义）；defer_loading 语义由主车道
+      // buildOpenAITools 面承担（fork 支既定行为），摘要请求不特判。
       const compactMessages = normalizeMessagesForAPI(
           stripImagesFromMessages(
             stripReinjectedAttachments([
@@ -1245,12 +1221,22 @@ export async function streamCompactSummary({
       const params = await buildOpenAIParams(
         {
           messages: compactMessages,
-          systemPrompt: asSystemPrompt([
-            'You are a helpful AI assistant tasked with summarizing conversations.',
-          ]),
+          // 0.1.92 W-opt-3 C-1（KV-cache 保真摘要，DSH 语义）：摘要请求 system =
+          // 主车道同源——cacheSafeParams.systemPrompt/systemContext = 主车道
+          // m.systemPrompt/m.systemContext 同一对象（fork 支同源变量，经
+          // buildAgentLoopParams 同构造消费）+ 主车道同一构造器
+          // appendSystemContext（agentLoopDeps 主 lane 同形）；修前摘要专用
+          // 串裁除（f4 锁面裁定④，cache 前缀分歧根源）。
+          systemPrompt: asSystemPrompt(
+            appendSystemContext(
+              cacheSafeParams.systemPrompt as SystemPrompt,
+              cacheSafeParams.systemContext,
+            ),
+          ),
           thinkingConfig: { type: 'disabled' as const },
-          // tui 类型边界（C-7）：闭包 tui Tool[] → 新 modelprovider Tools 面
-          tools: tools as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'],
+          // tui 类型边界（C-7）：主车道全池 tui Tool[] → 新 modelprovider Tools
+          // 面（tools 变量 = context.options.tools 同一引用，上方锚）
+          tools: context.options.tools as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'],
           options: {
             model: compactModel,
             async getToolPermissionContext() {

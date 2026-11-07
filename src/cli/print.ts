@@ -1200,6 +1200,15 @@ export async function runHeadless(
       const resp = await modelProvider.chat({
         messages: [...msgs, prompt],
         role: 'small',
+        // 0.1.92 W-opt-3 C-1（KV-cache 保真摘要，DSH 语义）：摘要请求 = 末轮
+        // 主车道 routed request 真前缀——system/tools 与主车道同源对齐（
+        // bundle.deps.systemPrompt = 主车道 deps.systemPrompt 同一构造源；
+        // tools = bundle 解构的同一变量，queryAgentLoop 主车道同参源）。
+        // 同模型时 KV-cache 前缀复用成立；差模型（role 'small' 链保留，
+        // f4 锁面裁定）时仅为摘要 input tokens 增量（system+tools 在场，
+        // 登记面见工单 §3）。指令仍为末位 user 消息后置形（prompt 未动）。
+        systemPrompt: bundle.deps.systemPrompt,
+        tools,
         signal: abortController.signal,
       })
       return (
