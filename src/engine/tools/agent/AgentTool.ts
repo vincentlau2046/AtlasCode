@@ -239,6 +239,8 @@ async function spawnTeammateFromRoster(args: {
     name: args.name,
     agentId: result.agentId,
     agentType: rosterEntry?.role,
+    // A7：taskId 留痕（TeamDelete active-member 守卫 task 态查表锚）。
+    ...(result.taskId ? { taskId: result.taskId } : {}),
   })
   return result
 }

@@ -789,3 +789,125 @@ describe('wave0193 段 F：终止条件组判别格（A6，工单审计 F2 ≥4 
     expect(extractFinalAssistantText([{ role: 'user', content: 'q' }])).toBeUndefined()
   })
 })
+
+// ── 段 G：组散 shutdown 残留面（A7；工单 Review Focus 5：TeamDelete
+//    active-member 守卫 teamContext 化——Form A 无 team file 守卫跳过
+//    = 孤儿循环破口；fail-closed：task 态未知 = 视为活；graceful 优先）──
+import { registerSpawnedTeammate } from '../../src/engine/tools/team/teamServices'
+
+/** appState duck（task 态查表面；status: running=活 / completed|killed|failed=终）。 */
+function deleteCtx(tasks?: Record<string, { status?: string }>): unknown {
+  return {
+    getAppState: () => ({ tasks: tasks ?? {} }),
+  }
+}
+
+describe('wave0193 段 G：TeamDelete 守卫 teamContext 化 + 组散残留（A7）', () => {
+  const savedEnv = process.env[GATE_ENV]
+
+  function setupGate() {
+    process.env[GATE_ENV] = '1'
+    resetDefaultTeamContextStore()
+  }
+
+  function teardownGate() {
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    if (savedEnv === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedEnv
+  }
+
+  test('G1 组内有活成员（task running）→ TeamDelete 拒（守卫 teamContext 化，消息含成员名）', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      await TeamCreateTool.call({ team_name: 'del-guard' }, {})
+      registerSpawnedTeammate({ name: 'w1', agentId: 'w1@del-guard', taskId: 'task-1' })
+      const r = await TeamDeleteTool.call({}, deleteCtx({ 'task-1': { status: 'running' } }))
+      const data = r.data as { success: boolean; message: string }
+      expect(data.success).toBe(false)
+      expect(data.message).toContain('active member')
+      expect(data.message).toContain('w1')
+      // 组态保留（拒散不注销）
+      expect(peekTeamContext()).toBeDefined()
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('G2 task 态未知（缺 appState / 缺 task 条目）→ fail-closed 拒（禁孤儿循环）', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      await TeamCreateTool.call({ team_name: 'del-guard' }, {})
+      registerSpawnedTeammate({ name: 'w1', agentId: 'w1@del-guard', taskId: 'task-1' })
+      // 无 getAppState（context 空对象）
+      const rNoState = await TeamDeleteTool.call({}, {})
+      expect((rNoState.data as { success: boolean }).success).toBe(false)
+      // 有 appState 但无该 task 条目
+      const rNoEntry = await TeamDeleteTool.call({}, deleteCtx({}))
+      expect((rNoEntry.data as { success: boolean }).success).toBe(false)
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('G3 成员已 graceful shutdown（task completed）→ 散组放行全链（cleanup + 组态注销）', async () => {
+    setupGate()
+    try {
+      const { services, calls } = makeMemoryServices()
+      setTeamServices(services)
+      resetDefaultTeamContextStore()
+      await TeamCreateTool.call({ team_name: 'del-guard' }, {})
+      registerSpawnedTeammate({ name: 'w1', agentId: 'w1@del-guard', taskId: 'task-1' })
+      const r = await TeamDeleteTool.call(
+        {},
+        deleteCtx({ 'task-1': { status: 'completed' } }),
+      )
+      const data = r.data as { success: boolean; team_name?: string }
+      expect(data.success).toBe(true)
+      expect(data.team_name).toBe('del-guard')
+      expect(calls).toContain('cleanupTeamDirectories')
+      // mailbox 队列清面 = cleanupTeamDirectories 真 rm teams/<team>/（inboxes
+      // 含）——真实接线由 swarm teamHelpers 承担；此处断言清面调用在场。
+      expect(services.getTeamContext()).toBeUndefined()
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('G4 成员 killed（外部 kill 终态）→ 散组放行（非活成员不阻散）', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      await TeamCreateTool.call({ team_name: 'del-guard' }, {})
+      registerSpawnedTeammate({ name: 'w1', agentId: 'w1@del-guard', taskId: 'task-1' })
+      const r = await TeamDeleteTool.call(
+        {},
+        deleteCtx({ 'task-1': { status: 'killed' } }),
+      )
+      expect((r.data as { success: boolean }).success).toBe(true)
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('G5 registerSpawnedTeammate 记 taskId（守卫查表面；additive 字段）', () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      resetDefaultTeamContextStore()
+      // 无组 = 抛（既有 fail-fast 面回归锚）
+      let threw = false
+      try {
+        registerSpawnedTeammate({ name: 'x', agentId: 'x@t', taskId: 'tk' })
+      } catch {
+        threw = true
+      }
+      expect(threw).toBe(true)
+    } finally {
+      teardownGate()
+    }
+  })
+})

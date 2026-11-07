@@ -55,7 +55,9 @@ export type TeamServicesFile = {
   }>
 }
 
-/** 旧 AppStateStore TeamMemberState 逐字段镜像（teammates record 值形）。 */
+/** 旧 AppStateStore TeamMemberState 逐字段镜像（teammates record 值形）。
+ * taskId = 0.1.93 W-D-A A7 加性（Form A spawn 注册面：成员 task 态查表
+ * 锚——TeamDelete active-member 守卫 teamContext 化消费）。 */
 export type TeamMemberStateShape = {
   name: string
   agentType?: string
@@ -64,6 +66,7 @@ export type TeamMemberStateShape = {
   tmuxPaneId: string
   cwd: string
   spawnedAt: number
+  taskId?: string
 }
 
 /** 旧 AppStateStore teamContext 逐字段镜像（本工具消费字段）。 */
@@ -179,12 +182,14 @@ export function resetDefaultTeamContextStore(): void {
 /** spawn 成员注册入组态（agentId 键 = swarm InProcessBackend.spawn 返回的
  * formatAgentId 产物；重复 spawn 同名成员 = 覆盖写（重启重启面 fail-soft，
  * 与 lead 条目同 record 语义）。无活跃组 = 抛（spawn 前置 TeamCreate 的
- * 编程错误早暴露，与 requireTeamServices fail-fast 同型）。 */
+ * 编程错误早暴露，与 requireTeamServices fail-fast 同型）。taskId = A7
+ * 加性（TeamDelete 守卫 task 态查表锚）。 */
 export function registerSpawnedTeammate(input: {
   name: string
   agentId: string
   agentType?: string
   cwd?: string
+  taskId?: string
 }): void {
   const services = requireTeamServices()
   const ctx = services.getTeamContext()
@@ -201,6 +206,7 @@ export function registerSpawnedTeammate(input: {
     tmuxPaneId: '',
     cwd: input.cwd ?? '',
     spawnedAt: Date.now(),
+    ...(input.taskId ? { taskId: input.taskId } : {}),
   }
   services.setTeamContext(ctx)
 }

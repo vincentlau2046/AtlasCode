@@ -127,11 +127,12 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
 
   async call(
     _args: unknown,
-    _context: unknown,
+    context: unknown,
   ): Promise<ToolResult<TeamDeleteOutput>> {
     const services = requireTeamServices()
     // delta ②：旧 getAppState().teamContext → 接缝读面
-    const teamName = services.getTeamContext()?.teamName
+    const teamContext = services.getTeamContext()
+    const teamName = teamContext?.teamName
 
     if (teamName) {
       // Read team config to check for active members
@@ -152,6 +153,42 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
             data: {
               success: false,
               message: `Cannot cleanup team with ${activeMembers.length} active member(s): ${memberNames}. Use requestShutdown to gracefully terminate teammates first.`,
+              team_name: teamName,
+            },
+          }
+        }
+      }
+
+      // 0.1.93 W-D-A A7：active-member 守卫 teamContext 化（Form A 无 team
+      // file，旧守卫跳过 = 孤儿循环破口——Review Focus 5）。组内 in-process
+      // 成员以 task 态查表判定（taskId 锚 = registerSpawnedTeammate 注册
+      // 面）；fail-closed：task 态未知（无 appState / 缺条目）= 视为活
+      // ——graceful shutdown 优先（不发 kill，F3 态机语义）。mailbox 队列
+      // 清面 = 下方 cleanupTeamDirectories 真 rm teams/<team>/（inboxes 含）。
+      // Lead 条目不计入（TeamCreate 组态种子 teammates[leadAgentId] = lead，
+      // 与上方 team-file 守卫 m.name !== TEAM_LEAD_NAME 同义镜像）。
+      const teammateEntries = Object.entries(
+        teamContext?.teammates ?? {},
+      ).filter(([, member]) => member.name !== TEAM_LEAD_NAME)
+      if (teammateEntries.length > 0) {
+        const appState = (
+          context as { getAppState?: () => unknown } | undefined
+        )?.getAppState?.()
+        const tasks = (
+          appState as {
+            tasks?: Record<string, { status?: unknown }>
+          } | undefined
+        )?.tasks
+        const alive = teammateEntries.filter(([, member]) => {
+          const status = tasks?.[member.taskId ?? '']?.status
+          return status === undefined || status === 'running'
+        })
+        if (alive.length > 0) {
+          const memberNames = alive.map(([, member]) => member.name).join(', ')
+          return {
+            data: {
+              success: false,
+              message: `Cannot cleanup team with ${alive.length} active member(s): ${memberNames}. Use requestShutdown to gracefully terminate teammates first.`,
               team_name: teamName,
             },
           }
