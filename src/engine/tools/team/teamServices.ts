@@ -141,6 +141,13 @@ export function requireTeamServices(): TeamServices {
   return active
 }
 
+/** 0.1.93 W-D-A A5（f4 批复④）：组态软读——未注入/无组态 = undefined 不抛。
+ * 与 requireTeamServices 分面：装配面 fail-fast（编程错误早暴露），发现面
+ * （handleBroadcast 成员枚举）须走回落（team file / 空集 fail-soft），不抛。 */
+export function peekTeamContext(): TeamContextShape | undefined {
+  return active?.getTeamContext()
+}
+
 // ── 团队上下文态内存缺省 store ───────────────────────────────────────
 // 旧 appState.teamContext 的进程内承载（TUI 波 appState 全量面落位后经
 // 组合根整换真 appState 读写，同一 setTeamServices 注入窗）。

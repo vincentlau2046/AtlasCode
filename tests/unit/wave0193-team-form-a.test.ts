@@ -162,6 +162,14 @@ import {
   resetAgentRoleTemplates,
 } from '../../src/shared'
 
+// ── 段 E：handleBroadcast 成员发现 teamContext 双源 + fail-soft
+//    （A5；f4 批复④：组态优先 / team file 回落 / 缺席返空成员集不崩）──
+import { SendMessageTool, resetTeamFileLoader, setTeamFileLoader } from '../../src/engine'
+import { peekTeamContext } from '../../src/engine/tools/team/teamServices'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 // ── 段 B：TeamCreate Form A 零持久改形 + members 名册（f4 批复④）────────
 import { TeamCreateTool, TeamDeleteTool } from '../../src/engine'
 import {
@@ -485,5 +493,112 @@ describe('wave0193 段 D：角色模板注册表消费面（A4，工单 T-7 shar
     expect(rendered).toContain('"solo"')
     expect(rendered).toContain('任务原文')
     expect(rendered).not.toContain('Role:')
+  })
+})
+
+describe('wave0193 段 E：handleBroadcast 成员发现双源 + fail-soft（A5，f4 批复④）', () => {
+  const savedEnv = process.env[GATE_ENV]
+  let tmpRoot: string | undefined
+
+  function setupGate() {
+    process.env[GATE_ENV] = '1'
+    resetDefaultTeamContextStore()
+    tmpRoot = mkdtempSync(join(tmpdir(), 'wave0193-e-'))
+    process.env.ATLAS_CONFIG_DIR = tmpRoot
+  }
+
+  function teardownGate() {
+    resetTeamFileLoader()
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    delete process.env[GATE_ENV]
+    if (savedEnv !== undefined) process.env[GATE_ENV] = savedEnv
+    if (tmpRoot) {
+      rmSync(tmpRoot, { recursive: true, force: true })
+      tmpRoot = undefined
+    }
+  }
+
+  function sendCtx(teamName?: string): unknown {
+    return {
+      getAppState: () => ({
+        teamContext: teamName
+          ? { teamName, leadAgentId: `team-lead@${teamName}` }
+          : undefined,
+        toolPermissionContext: { mode: 'default' },
+      }),
+    }
+  }
+
+  test('E1 组态优先：Form A 建组（零 team file）→ broadcast recipients = roster ∪ teammates − sender', async () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      await TeamCreateTool.call(
+        {
+          team_name: 'bc-team',
+          members: [
+            { name: 'tiling-dev', role: 'op-developer' },
+            { name: 'debug-dev' },
+          ],
+        },
+        {},
+      )
+      // RED 锚（工单 T-8 链）：组态在场 + team file 缺席 → 旧 throw
+      // does-not-exist；修后 = 组态成员发现（roster ∪ teammates − lead）
+      const r = await SendMessageTool.call(
+        { to: '*', message: '开工', summary: 'kickoff' },
+        sendCtx(),
+      )
+      const data = r.data as { success: boolean; recipients: string[] }
+      expect(data.success).toBe(true)
+      expect([...data.recipients].sort()).toEqual(['debug-dev', 'tiling-dev'])
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('E2 fail-soft：组态空 + 回落叶 team file 缺席 → 返空成员集不崩（旧 throw 面裁除）', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      const r = await SendMessageTool.call(
+        { to: '*', message: 'hi', summary: 's' },
+        sendCtx('t1'),
+      )
+      const data = r.data as { success: boolean; recipients: string[] }
+      expect(data.success).toBe(true)
+      expect(data.recipients).toEqual([])
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('E3 回落仍生效：组态空 + team file 在场（W-D-B durable 兼容）→ file 成员', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      setTeamFileLoader(async () => ({
+        members: [
+          { name: 'team-lead', agentId: 'team-lead@t1', joinedAt: 0, tmuxPaneId: '', cwd: '', subscriptions: [] },
+          { name: 'legacy-w1', agentId: 'legacy-w1@t1', joinedAt: 0, tmuxPaneId: '', cwd: '', subscriptions: [] },
+        ],
+      }) as never)
+      const r = await SendMessageTool.call(
+        { to: '*', message: 'hi', summary: 's' },
+        sendCtx('t1'),
+      )
+      const data = r.data as { success: boolean; recipients: string[] }
+      expect(data.success).toBe(true)
+      expect(data.recipients).toEqual(['legacy-w1'])
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('E4 peekTeamContext 软读：未注入 = undefined 不抛（发现面与 requireTeamServices fail-fast 分面）', () => {
+    resetTeamServices()
+    expect(peekTeamContext()).toBeUndefined()
   })
 })

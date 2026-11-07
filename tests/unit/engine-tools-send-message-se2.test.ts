@@ -305,13 +305,14 @@ describe('P-S7 call broadcast 错误面', () => {
     )
   })
 
-  test('默认接缝（team-file-missing）→ throw 逐字（delta ⑤）', async () => {
-    await expect(
-      SendMessageTool.call(
-        { to: '*', message: 'hi', summary: 's' },
-        ctx('t1'),
-      ),
-    ).rejects.toThrow('Team "t1" does not exist')
+  test('默认接缝（team-file-missing）→ fail-soft 空成员集（0.1.93 W-D-A A5：旧 throw 逐字 delta ⑤ 面随 f4 批复④ 裁除——Form A 文件缺席 = 常态非错误；判别直证 tests/unit/wave0193-team-form-a.test.ts 段 E）', async () => {
+    const r = await SendMessageTool.call(
+      { to: '*', message: 'hi', summary: 's' },
+      ctx('t1'),
+    )
+    const data = r.data as { success: boolean; recipients: string[] }
+    expect(data.success).toBe(true)
+    expect(data.recipients).toEqual([])
   })
 })
 
@@ -333,17 +334,18 @@ describe('P-S8 TeamFileLoader 接缝面', () => {
     expect((data as { recipients: string[] }).recipients).toEqual([])
   })
 
-  test('reset 恢复默认 null 面（team-file-missing 错误面回归）', async () => {
+  test('reset 恢复默认 null 面（0.1.93 W-D-A A5：team-file-missing → fail-soft 空成员集，旧 throw 面回归锚随 f4 批复④ 同步重锚）', async () => {
     setTeamFileLoader(async () => ({
       members: [{ name: 'w1' }],
     }))
     resetTeamFileLoader()
-    await expect(
-      SendMessageTool.call(
-        { to: '*', message: 'hi', summary: 's' },
-        ctx('t1'),
-      ),
-    ).rejects.toThrow('Team "t1" does not exist')
+    const r = await SendMessageTool.call(
+      { to: '*', message: 'hi', summary: 's' },
+      ctx('t1'),
+    )
+    const data = r.data as { success: boolean; recipients: string[] }
+    expect(data.success).toBe(true)
+    expect(data.recipients).toEqual([])
   })
 })
 

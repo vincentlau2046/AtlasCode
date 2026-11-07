@@ -132,6 +132,8 @@ import {
 import { jsonStringify } from '../../session/json'
 import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
 import { getSendMessagePrompt } from './sendMessagePrompt'
+// 0.1.93 W-D-A A5（f4 批复④）：组态软读（成员发现双源主源；未注入不抛）
+import { peekTeamContext } from './teamServices'
 
 /** 结构化协议消息（旧 zod discriminatedUnion 3 型转写，delta ①：
  * semanticBoolean → boolean）。 */
@@ -352,7 +354,12 @@ async function handleBroadcast(
   context: SendMessageToolUseContext,
 ): Promise<ToolResult<BroadcastOutput>> {
   const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
+  // 0.1.93 W-D-A A5（f4 批复④）：teamName 解析双源——appState.teamContext
+  // 既有支优先，组态（TeamServices 软读）补源（Form A 零持久承载 =
+  // teamServices store；SessionSnapshot 无 teamContext 字段，prod 主链
+  // 组态唯一定位面）。
+  const teamName =
+    getTeamName(appState.teamContext) ?? peekTeamContext()?.teamName
 
   if (!teamName) {
     throw new Error(
@@ -360,9 +367,60 @@ async function handleBroadcast(
     )
   }
 
-  const teamFile = await teamFileLoader(teamName) // delta ⑤（旧 readTeamFileAsync）
-  if (!teamFile) {
-    throw new Error(`Team "${teamName}" does not exist`)
+  // 0.1.93 W-D-A A5（f4 批复④）：成员发现 teamContext 双源——
+  //   ① 组态优先：teamContext（teammates ∪ roster；services store 主源，
+  //      appState duck 回落）= Form A 零持久承载（A2 roster + A3 spawn
+  //      注册面写入点）
+  //   ② team file 回落：组态空 → 既有 readTeamFileAsync 车道（W-D-B
+  //      durable 兼容）
+  //   ③ fail-soft：两源皆空/回落叶缺席 → 返空成员集不崩（旧 throw
+  //      does-not-exist 面随 f4 批复④ 裁除——Form A 文件缺席 = 常态，
+  //      非错误；空成员集走既有「only team member」早退支）。
+  const memberNames: string[] = []
+  const seenNames = new Set<string>()
+  const pushMember = (raw?: string) => {
+    if (!raw) return
+    const key = raw.toLowerCase()
+    if (!seenNames.has(key)) {
+      seenNames.add(key)
+      memberNames.push(raw)
+    }
+  }
+  const servicesCtx = peekTeamContext()
+  if (servicesCtx && servicesCtx.teamName === teamName) {
+    for (const [agentId, m] of Object.entries(servicesCtx.teammates ?? {})) {
+      pushMember(m.name || agentId)
+    }
+    for (const r of servicesCtx.roster ?? []) {
+      pushMember(r.name)
+    }
+  } else if (
+    appState.teamContext &&
+    appState.teamContext.teamName === teamName
+  ) {
+    for (const [agentId, m] of Object.entries(
+      appState.teamContext.teammates ?? {},
+    )) {
+      pushMember(m.name || agentId)
+    }
+  }
+  let teamFile: Awaited<ReturnType<typeof teamFileLoader>> | null = null
+  if (memberNames.length === 0) {
+    teamFile = await teamFileLoader(teamName) // 回落叶（delta ⑤ 旧 readTeamFileAsync）
+    if (!teamFile) {
+      // fail-soft（f4 批复④）：回落叶缺席 + 组态空 → 空成员集不崩
+      return {
+        data: {
+          success: true,
+          message:
+            'No teammates to broadcast to (team has no members yet)',
+          recipients: [],
+        },
+      }
+    }
+    for (const member of teamFile.members) {
+      pushMember(member.name)
+    }
   }
 
   const senderName =
@@ -376,11 +434,11 @@ async function handleBroadcast(
   const senderColor = getTeammateColor()
 
   const recipients: string[] = []
-  for (const member of teamFile.members) {
-    if (member.name.toLowerCase() === senderName.toLowerCase()) {
+  for (const name of memberNames) {
+    if (name.toLowerCase() === senderName.toLowerCase()) {
       continue
     }
-    recipients.push(member.name)
+    recipients.push(name)
   }
 
   if (recipients.length === 0) {
