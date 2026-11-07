@@ -98,6 +98,12 @@ import {
   // 0.1.91 C-6 锁面裁定①：keepRecent 保留段定参单一事实源（TUI agentLoopDeps
   // 同参；N=3，autoCompact.ts 定参面）
   AUTOCOMPACT_KEEP_RECENT,
+  // 0.1.91 锁面修订裁定（cd2062cc）：禁用 kill-switch 接线单一事实源（TUI
+  // agentLoopDeps 同链——env DISABLE_COMPACT/DISABLE_AUTO_COMPACT ⊕ settings
+  // autoCompactWindow off 档位 → merged.autoCompactDisabled → enabled 门）
+  getAutoCompactEnvOverrides,
+  getInitialSettings,
+  mergeAutoCompactOverrides,
   createAgentLoopDeps,
   createAbortController,
   createCronScheduler,
@@ -1238,14 +1244,24 @@ export async function runHeadless(
   // fail-safe false（autoCompact.ts）→ -p 长会话结构性不压缩 = 0.1.90 生产
   // lane 勘误 2。countTokens 车道 = 'small'（与 compactDeps.summarize 同源，
   // -p 主车道角色）；keepRecent 车道对齐见 compactDeps 锁面裁定①。
-  // 其余 AutoCompactDeps optional 面（maxOutputTokens/enabled/pct/window/
+  // 其余 AutoCompactDeps optional 面（maxOutputTokens/pct/window/
   // thinkingBudgetTokens/querySource）= 有意差登记（对齐表见
   // tests/unit/wave0191-headless-autocompact.test.ts 头注），归序 2 波。
+  // enabled = 锁面修订裁定（cd2062cc）本波接线 fail-closed：激活活压缩车道
+  // 而 kill-switch 不接 = fail-open config gate（用户显式关闭仍被压缩，非
+  // 阈值调优差）——TUI agentLoopDeps 同链（env 胜 settings 既有纪律随
+  // merge 面继承）。
+  const mergedAutoCompact = mergeAutoCompactOverrides(
+    getAutoCompactEnvOverrides(),
+    getInitialSettings().autoCompactWindow,
+    roleModel,
+  )
   const autoCompact: AutoCompactDeps = {
     contextWindow:
       (roleModel ? getProviderContextWindow(roleModel) : undefined) ??
       200_000,
     countTokens: msgs => modelProvider.countTokens('small', undefined, msgs),
+    enabled: mergedAutoCompact.autoCompactDisabled ? false : undefined,
     compact: (msgs: Message[]): Promise<CompactionResult> =>
       compactConversation(msgs, compactDeps),
   }

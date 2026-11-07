@@ -24,9 +24,16 @@
  *                          无宿主 port 未注册自然留裁剪——归序 2 独立件
  *  - maxOutputTokens       有意差登记（保守向）：print 未传 = 摘要预留满额
  *                          20k → 阈值更低更晚触发；-p 既有形，归序 2
- *  - enabled/pct/window    有意差登记：print 未接 getAutoCompactEnvOverrides
+ *  - enabled               本波接线 fail-closed（锁面修订裁定 cd2062cc）：激活
+ *                          活压缩车道而 kill-switch 不接 = fail-open config
+ *                          gate——TUI 同链 mergeAutoCompactOverrides(
+ *                          getAutoCompactEnvOverrides(), settings.autoCompactWindow,
+ *                          roleModel) → enabled: autoCompactDisabled ? false :
+ *                          undefined；判据 = 禁用直证（DISABLE_COMPACT=1 →
+ *                          shouldAutoCompact false；settings off 档位同）
+ *  - pct/window            有意差登记：print 未接 getAutoCompactEnvOverrides
  *                          档位链（env 覆写/settings autoCompactWindow 在 -p
- *                          无效）；归序 2
+ *                          无效）；归序 2（阈值调优非 kill-switch）
  *  - thinkingBudgetTokens  有意差登记：-p 无 thinkingConfig 源
  *  - querySource           有意差（小）：-p 无 compact fork 车道，守卫缺省
  *  - tracking              非 deps 字段（engine loop 层回灌），车道无关
@@ -43,9 +50,11 @@ import type { Message } from '../../src/shared'
 import {
   AUTOCOMPACT_KEEP_RECENT,
   autoCompactIfNeeded,
+  mergeAutoCompactOverrides,
   shouldAutoCompact,
   type AutoCompactDeps,
 } from '../../src/engine/context/autoCompact'
+import { getAutoCompactEnvOverrides } from '../../src/engine/config/autoCompactOverrides'
 import { compactConversation } from '../../src/engine/context/compact'
 
 // ─────────────────────────── 构造器 ───────────────────────────
@@ -115,6 +124,17 @@ describe('wave0191 print.ts autoCompact deps 接线源级锚', () => {
     // 保留段定参单一事实源（禁止 print.ts 本地魔数复刻）
     expect(s).toContain('AUTOCOMPACT_KEEP_RECENT')
   })
+
+  test('enabled kill-switch 接线（锁面修订裁定 cd2062cc）：autoCompact 块 enabled 门 + TUI 同链三件 import（fail-closed 判据本体）', () => {
+    const s = src()
+    // enabled 门现形（TUI agentLoopDeps:175 同形）
+    expect(s).toMatch(
+      /const autoCompact: AutoCompactDeps = \{[\s\S]*?enabled:\s*mergedAutoCompact\.autoCompactDisabled \? false : undefined/,
+    )
+    // 单一事实源链（env 读侧 + settings 读侧 + merge 面；禁本地重实现）
+    expect(s).toMatch(/mergeAutoCompactOverrides\(\s*getAutoCompactEnvOverrides\(\)/)
+    expect(s).toMatch(/getInitialSettings\(\)\.autoCompactWindow/)
+  })
 })
 
 // ───────────────── C6-2 DI 核车道判定语义 ────────────────
@@ -175,6 +195,55 @@ describe('wave0191 keepRecent=3 车道对齐装配语义', () => {
       keepRecent: AUTOCOMPACT_KEEP_RECENT,
     })
     expect(r.messagesToKeep).toHaveLength(3)
+  })
+})
+
+// ───────────── 锁面修订裁定（cd2062cc）禁用 kill-switch 直证 ─────────────
+
+describe('wave0191 禁用直证（fail-closed 判据：kill-switch 在 -p 生效）', () => {
+  test('DI 核：enabled:false + 压窗计数 → shouldAutoCompact false（用户显式关闭不被压缩）', async () => {
+    const deps = fixedDeps(199_000)
+    deps.enabled = false
+    expect(await shouldAutoCompact(pressuring(), deps)).toBe(false)
+  })
+
+  test('DI 核：enabled 缺省（undefined）→ 判定不受影响（未关闭面恒等）', async () => {
+    const deps = fixedDeps(199_000)
+    deps.enabled = undefined
+    expect(await shouldAutoCompact(pressuring(), deps)).toBe(true)
+  })
+
+  test('merge 链：DISABLE_COMPACT=1 env → autoCompactDisabled true（env 总开关在 -p 生效）', () => {
+    const prev = process.env['DISABLE_COMPACT']
+    try {
+      process.env['DISABLE_COMPACT'] = '1'
+      const env = getAutoCompactEnvOverrides()
+      expect(env.disabled).toBe(true)
+      expect(mergeAutoCompactOverrides(env, undefined, 'any-model').autoCompactDisabled).toBe(true)
+    } finally {
+      if (prev === undefined) delete process.env['DISABLE_COMPACT']
+      else process.env['DISABLE_COMPACT'] = prev
+    }
+  })
+
+  test('merge 链：settings off 档位 → autoCompactDisabled true（/autocompact off 持久化在 -p 生效）', () => {
+    const merged = mergeAutoCompactOverrides(
+      {},
+      { default: { kind: 'off' } },
+      'small-model',
+    )
+    expect(merged.autoCompactDisabled).toBe(true)
+  })
+
+  test('merge 链：env 胜 settings 既有纪律——env 关 + settings 开档 → disabled；均未设 → false', () => {
+    // env 关 + settings 无 off 档 → 关（env 杠杆）
+    expect(
+      mergeAutoCompactOverrides({ disabled: true }, { default: { kind: 'auto' } }, 'm').autoCompactDisabled,
+    ).toBe(true)
+    // 均未设 → false（enabled undefined → 不显式禁用，与 TUI 形精确同值）
+    expect(
+      mergeAutoCompactOverrides({}, undefined, 'm').autoCompactDisabled,
+    ).toBe(false)
   })
 })
 

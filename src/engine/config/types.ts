@@ -38,6 +38,20 @@ import { z } from 'zod'
 import { HooksSchema } from './hooksSchema'
 
 /**
+ * autoCompactWindow 单档形（0.1.91 锁面修订裁定补声明：headless -p enabled
+ * 接线消费 settings.autoCompactWindow → engine schema 须类型化该键，禁靠
+ * passthrough unknown 面消费——providers 补声明同纪律）。双拷贝对齐 =
+ * tui/utils/settings/types.ts 同形 discriminatedUnion（结构型单源 =
+ * engine AutoCompactWindowSetting，本 schema 对齐该形）。
+ */
+const autoCompactWindowSettingSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('auto') }),
+  z.object({ kind: z.literal('off') }),
+  z.object({ kind: z.literal('window'), tokens: z.number().int().min(1_000) }),
+  z.object({ kind: z.literal('pct'), pct: z.number().min(1).max(100) }),
+])
+
+/**
  * Settings 数据契约（settings.json 全层共用：user/project/local/flag/policy）。
  * 全字段 optional + .passthrough()：未知字段透传不报错（用户文件向前兼容）。
  */
@@ -108,6 +122,17 @@ export const SettingsSchema = () => z.object({
   //     false = 唯一关闭口（默认开）；双拷贝对齐 = tui/utils/settings/types.ts
   //     同形键；env ATLAS_IDLE_COMPACT_MIN_TOKENS 只覆写 token 下限。
   idleCompaction: z.boolean().optional(),
+  // --- autoCompact 窗口档位（#250 c2-S1）：单档 | per-model 键控 map（default
+  //     兜底键）。0.1.91 锁面修订裁定补 engine 侧声明（headless -p enabled 接线
+  //     消费 getInitialSettings().autoCompactWindow，禁 passthrough unknown 面）；
+  //     双拷贝对齐 = tui/utils/settings/types.ts 同形键（含 0.1.69 D-1 per-model
+  //     扩面注释）；读侧归一 = engine normalizeAutoCompactWindowSetting 单点。
+  autoCompactWindow: z
+    .union([
+      autoCompactWindowSettingSchema,
+      z.record(z.string(), autoCompactWindowSettingSchema),
+    ])
+    .optional(),
   // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件，全仓现状 ∅ 新做）：
   //     skill 与用户命令/其它面同名冲突时的解析策略三档（卷 3 §5 settings key
   //     裁定）。数据契约先行（同 search.tavilyApiKey 先例）：schema 枚举声明 +
