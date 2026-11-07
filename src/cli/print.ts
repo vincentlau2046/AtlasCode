@@ -95,6 +95,9 @@ import {
 import {
   getBaseToolEntities,
   compactConversation,
+  // 0.1.91 C-6 锁面裁定①：keepRecent 保留段定参单一事实源（TUI agentLoopDeps
+  // 同参；N=3，autoCompact.ts 定参面）
+  AUTOCOMPACT_KEEP_RECENT,
   createAgentLoopDeps,
   createAbortController,
   createCronScheduler,
@@ -1206,6 +1209,10 @@ export async function runHeadless(
     // token 计数注入（modelprovider 门面 countTokens；未注入 = fail-safe
     // 不压缩面——本处实注入，压缩阈值真判）
     countTokens: msgs => modelProvider.countTokens('small', undefined, msgs),
+    // 0.1.91 C-6 锁面裁定①：keepRecent 车道对齐 TUI（AUTOCOMPACT_KEEP_RECENT
+    // N=3，agentLoopDeps 同参单一事实源）——保留段只影响 messagesToKeep，不进
+    // 摘要主体（成本≈0），与阈值判定/压缩频率无关（风暴面零增量）。
+    keepRecent: AUTOCOMPACT_KEEP_RECENT,
   }
   const loopDeps: AgentLoopDeps = {
     // 组合根产物（①③④⑤ + 7 槽配置面 + transcript disablePersistence 门，
@@ -1226,12 +1233,19 @@ export async function runHeadless(
     toolContext: makeCtx(),
   }
 
-  // autoCompact 构建（AutoCompactDeps 最小面：contextWindow = modelprovider
-  // capabilities 面 + 缺省 200k；compact = compactConversation 绑定）
+  // autoCompact 构建（0.1.91 C-6 激活：countTokens 实注入 = 压缩阈值真判；
+  // 修前最小面 {contextWindow, compact} 无 countTokens → shouldAutoCompact
+  // fail-safe false（autoCompact.ts）→ -p 长会话结构性不压缩 = 0.1.90 生产
+  // lane 勘误 2。countTokens 车道 = 'small'（与 compactDeps.summarize 同源，
+  // -p 主车道角色）；keepRecent 车道对齐见 compactDeps 锁面裁定①。
+  // 其余 AutoCompactDeps optional 面（maxOutputTokens/enabled/pct/window/
+  // thinkingBudgetTokens/querySource）= 有意差登记（对齐表见
+  // tests/unit/wave0191-headless-autocompact.test.ts 头注），归序 2 波。
   const autoCompact: AutoCompactDeps = {
     contextWindow:
       (roleModel ? getProviderContextWindow(roleModel) : undefined) ??
       200_000,
+    countTokens: msgs => modelProvider.countTokens('small', undefined, msgs),
     compact: (msgs: Message[]): Promise<CompactionResult> =>
       compactConversation(msgs, compactDeps),
   }
