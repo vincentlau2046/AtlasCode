@@ -84,6 +84,31 @@ describe('wave0192 段 A：buildOpenAIParams system/tools 投影机制（f4 定�
     })
     expect(noTools.tools).toBeUndefined()
   })
+
+  test('print 事故面（0.1.92 小修）：options 缺省 undefined → description() 正常执行（desc 全量，非 name-fallback 薄化）', async () => {
+    // RED 锚（probe-092 定谳）：print 车道 chat() 未透传 options →
+    // buildOpenAITools 读 options.isNonInteractiveSession 抛 TypeError 被
+    // catch 吞 → desc 静默回落 tool.name（wire 44/44 薄形 5,22,15,4…）。
+    // 修形 = `options?.` 兜底 → description() 正常返回全量描述。
+    const fnTool = {
+      name: 'Read',
+      description: async () => 'read a file (full description text)',
+      inputSchema: { type: 'object', properties: {} },
+    } as unknown as Parameters<typeof buildOpenAIParams>[0]['tools'][number]
+    const params = await buildOpenAIParams({
+      messages: [
+        { role: 'user', content: 'hi' },
+      ] as Parameters<typeof buildOpenAIParams>[0]['messages'],
+      systemPrompt: asSystemPrompt([]),
+      tools: [fnTool],
+      options: undefined,
+    } as unknown as Parameters<typeof buildOpenAIParams>[0])
+    const wire = (
+      params.tools as { function: { name: string; description: string } }[]
+    )[0]
+    expect(wire.function.name).toBe('Read')
+    expect(wire.function.description).toBe('read a file (full description text)')
+  })
 })
 
 describe('wave0192 段 B：三车道摘要请求 system/tools 主车道同源锚（RED→GREEN）', () => {

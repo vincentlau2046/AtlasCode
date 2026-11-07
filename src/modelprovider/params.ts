@@ -221,11 +221,19 @@ async function buildOpenAITools(
               : (tool.inputSchema as unknown as Record<string, unknown>))
           : { type: 'object', properties: {} }
     let desc: string
+    // 0.1.92（W-opt-3 后续小修）：options 缺省防御——print 车道 chat() 未透传
+    // options 实参（undefined）时，此处读 options.isNonInteractiveSession 抛
+    // TypeError 被 catch 吞掉 → desc 静默回落 tool.name（wire 描述全量→名字的
+    // 「薄化」实为吞异常事故面，非设计面；probe-092 插桩 44/44 证）。
+    // `options?.` 兜底后 description() 正常执行，print 车道 wire 恢复全量描述；
+    // 摘要侧同函数同形，字节恒等保持（summary ≡ main 车道内恒等不破）。
+    // 行为变化登记：print 车道 wire tools 描述由名字 → 全量（摘要请求 input
+    // tokens 增量同理，归 CHANGELOG 登记面）。
     try {
       desc = await tool.description(
         {},
         {
-          isNonInteractiveSession: options.isNonInteractiveSession,
+          isNonInteractiveSession: options?.isNonInteractiveSession,
           toolPermissionContext,
           tools: (tools ?? []) as Tools,
         },
