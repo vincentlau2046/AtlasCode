@@ -72,6 +72,19 @@ export type TeamContextShape = {
   teamFilePath: string
   leadAgentId: string
   teammates: Record<string, TeamMemberStateShape>
+  /** 0.1.93 W-D-A（f4 批复④）：Form A 角色化成员名册（role/goal/backstory
+   * 三元组，CrewAI 词汇吸收）——TeamCreate members 参数直存内存组态；
+   * spawn 触发点（Agent 扩参）按 name 检索渲染 prompt。零持久面（不写
+   * team file，durable 化归 W-D-B-1）。 */
+  roster?: TeamRosterEntry[]
+}
+
+/** Form A 角色化成员名册条目（TeamCreate members 参数消费形）。 */
+export type TeamRosterEntry = {
+  name: string
+  role?: string
+  goal?: string
+  backstory?: string
 }
 
 /** 组合根注入面（swarm 门面真实现绑定；未注入 fail-fast）。

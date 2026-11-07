@@ -144,3 +144,148 @@ describe('wave0193 段 A：engine 单源 swarm 字段过滤（f4 批复五(c)，
     expect(props.allowedPrompts).toBeDefined()
   })
 })
+
+// ── 段 B：TeamCreate Form A 零持久改形 + members 名册（f4 批复④）────────
+import { TeamCreateTool, TeamDeleteTool } from '../../src/engine'
+import {
+  resetTeamServices,
+  setTeamServices,
+  type TeamServices,
+} from '../../src/engine/tools/team/teamServices'
+import { resetDefaultTeamContextStore } from '../../src/engine/tools/team/teamServices'
+
+/** 全内存 TeamServices fake（零真盘；spy 记录文件面调用）。 */
+function makeMemoryServices() {
+  const calls: string[] = []
+  let ctx: Record<string, unknown> | undefined
+  const services: TeamServices = {
+    readTeamFile: () => null,
+    writeTeamFileAsync: async () => {
+      calls.push('writeTeamFileAsync')
+    },
+    getTeamFilePath: (name: string) => `/fake/atlas/teams/${name}/config.json`,
+    registerTeamForSessionCleanup: () => {
+      calls.push('registerTeamForSessionCleanup')
+    },
+    unregisterTeamForSessionCleanup: () => {
+      calls.push('unregisterTeamForSessionCleanup')
+    },
+    cleanupTeamDirectories: async () => {
+      calls.push('cleanupTeamDirectories')
+    },
+    assignTeammateColor: () => '#fake',
+    clearTeammateColors: () => {
+      calls.push('clearTeammateColors')
+    },
+    sanitizeName: (n: string) => n,
+    getTeamContext: () => ctx as never,
+    setTeamContext: c => {
+      ctx = c as Record<string, unknown>
+    },
+  }
+  return { services, calls }
+}
+
+describe('wave0193 段 B：TeamCreate Form A 零持久 + members 名册（f4 批复④）', () => {
+  const savedEnv = process.env[GATE_ENV]
+
+  function setupGate() {
+    process.env[GATE_ENV] = '1'
+    resetDefaultTeamContextStore()
+  }
+
+  function teardownGate() {
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    if (savedEnv === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedEnv
+  }
+
+  test('B1 门 ON 创建组：零 team file 写入（writeTeamFileAsync/registerForCleanup 不调用）', async () => {
+    setupGate()
+    try {
+      const { services, calls } = makeMemoryServices()
+      setTeamServices(services)
+      const result = await TeamCreateTool.call(
+        { team_name: 'form-a-team' },
+        {},
+      )
+      expect(calls).not.toContain('writeTeamFileAsync')
+      expect(calls).not.toContain('registerTeamForSessionCleanup')
+      expect(result.data.team_name).toBe('form-a-team')
+      expect(result.data.team_file_path).toContain('form-a-team')
+      expect(result.data.lead_agent_id).toBe('team-lead@form-a-team')
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('B2 members 名册（role/goal/backstory 三元组）入 teamContext.roster', async () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      await TeamCreateTool.call(
+        {
+          team_name: 'roster-team',
+          members: [
+            {
+              name: 'tiling-dev',
+              role: 'op-developer',
+              goal: '实现 gelu 算子',
+              backstory: 'Ascend C 老手',
+            },
+          ],
+        },
+        {},
+      )
+      const ctx = services.getTeamContext() as unknown as {
+        teamName: string
+        roster?: Array<{ name: string; role?: string }>
+      }
+      expect(ctx.teamName).toBe('roster-team')
+      expect(ctx.roster).toHaveLength(1)
+      expect(ctx.roster?.[0]).toEqual({
+        name: 'tiling-dev',
+        role: 'op-developer',
+        goal: '实现 gelu 算子',
+        backstory: 'Ascend C 老手',
+      })
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('B3 members 名成员缺 name → validateInput 拒（errorCode 9）', async () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      const v = await TeamCreateTool.validateInput(
+        { team_name: 't', members: [{ role: 'x' }] },
+        {},
+      )
+      expect(v.result).toBe(false)
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('B4 TeamDelete 文件缺席 fail-soft（Form A 常态）：建组→组散全链', async () => {
+    setupGate()
+    try {
+      const { services, calls } = makeMemoryServices()
+      setTeamServices(services)
+      // Form A 建组（零文件写入）→ 组散：teamContext 在场 → cleanup 走
+      // fail-soft 路径（team file 缺席 → readTeamFile null → 守卫跳过）
+      await TeamCreateTool.call({ team_name: 'del-team' }, {})
+      const result = await TeamDeleteTool.call({}, {})
+      expect(result.data.success).toBe(true)
+      expect(calls).toContain('cleanupTeamDirectories')
+      expect(calls).not.toContain('writeTeamFileAsync')
+      expect(services.getTeamContext()).toBeUndefined()
+    } finally {
+      teardownGate()
+    }
+  })
+})

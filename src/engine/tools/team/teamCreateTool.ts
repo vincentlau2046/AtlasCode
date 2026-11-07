@@ -50,8 +50,7 @@ import {
   type ToolResultBlockParam,
   type ValidationResult,
 } from '../../../shared'
-import { getCwd, getSessionId } from '../../../bootstrap'
-import { getRoleModel } from '../../../modelprovider'
+import { getCwd } from '../../../bootstrap'
 import { ensureTasksDir, resetTaskList, setLeaderTeamName } from '../../tasks'
 import {
   TEAM_LEAD_NAME,
@@ -63,11 +62,12 @@ import { generateWordSlug } from '../plan'
 import { TEAM_CREATE_TOOL_NAME } from '../toolNames'
 import {
   requireTeamServices,
-  type TeamServicesFile,
+  type TeamRosterEntry,
 } from './teamServices'
 import { PROMPT } from './teamCreatePrompt'
 
-/** 输入面（旧 zod strictObject 3 字段转写，delta ①）。 */
+/** 输入面（旧 zod strictObject 3 字段转写，delta ①；0.1.93 W-D-A 加性
+ * members 名册——角色三元组 role/goal/backstory，f4 批复④）。 */
 export const TEAM_CREATE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
   type: 'object',
   properties: {
@@ -85,6 +85,36 @@ export const TEAM_CREATE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
         'Type/role of the team lead (e.g., "researcher", "test-runner"). ' +
         'Used for team file and inter-agent coordination.',
     },
+    members: {
+      type: 'array',
+      description:
+        'Optional roster of team members to plan for this team. Each entry ' +
+        'carries an optional role/goal/backstory triplet used to compose the ' +
+        "member's prompt when spawned via Agent(name, team_name).",
+      items: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: 'Member name (used as the spawn identity).',
+          },
+          role: {
+            type: 'string',
+            description: 'Role label resolved against the role template registry.',
+          },
+          goal: {
+            type: 'string',
+            description: "This member's goal for the team's current task.",
+          },
+          backstory: {
+            type: 'string',
+            description: "This member's background/context for prompt composition.",
+          },
+        },
+        required: ['name'],
+        additionalProperties: false,
+      },
+    },
   },
   required: ['team_name'],
   // delta ①：旧 z.strictObject 双字段（configTool L113 先例）
@@ -96,6 +126,7 @@ export type TeamCreateInput = {
   team_name: string
   description?: string
   agent_type?: string
+  members?: TeamRosterEntry[]
 }
 
 /** 输出面（旧 Output 型转写）。 */
@@ -166,6 +197,18 @@ export const TeamCreateTool: TeamCreateToolFace = {
         errorCode: 9,
       }
     }
+    // 0.1.93 W-D-A：members 名册校验（条目 name 必填非空）
+    if (i.members) {
+      for (const m of i.members) {
+        if (!m || typeof m !== 'object' || !m.name || m.name.trim().length === 0) {
+          return {
+            result: false,
+            message: 'each team member requires a non-empty name',
+            errorCode: 9,
+          }
+        }
+      }
+    }
     return { result: true }
   },
 
@@ -213,35 +256,22 @@ export const TeamCreateTool: TeamCreateToolFace = {
     // Generate a deterministic agent ID for the team lead
     const leadAgentId = formatAgentId(TEAM_LEAD_NAME, finalTeamName)
     const leadAgentType = input.agent_type || TEAM_LEAD_NAME
-    // delta ③：主模型车道 3 面 0-hit → getRoleModel('premium')
-    const leadModel = getRoleModel('premium')
+    // delta ③（0.1.93 W-D-A 注）：leadModel 旧仅入 teamFile 成员记录，
+    // Form A 零持久改形后无消费 → getRoleModel('premium') 调用随之裁；
+    // W-D-B-1 durable 面恢复时随 TeamServicesFile 回填。
 
     const teamFilePath = services.getTeamFilePath(finalTeamName)
 
-    const teamFile: TeamServicesFile = {
-      name: finalTeamName,
-      description: input.description,
-      createdAt: Date.now(),
-      leadAgentId,
-      leadSessionId: getSessionId(), // Store actual session ID for team discovery
-      members: [
-        {
-          agentId: leadAgentId,
-          name: TEAM_LEAD_NAME,
-          agentType: leadAgentType,
-          model: leadModel,
-          joinedAt: Date.now(),
-          tmuxPaneId: '',
-          cwd: getCwd(),
-          subscriptions: [],
-        },
-      ],
-    }
+    // 0.1.93 W-D-A（f4 批复④，审计 F1 裁定）：Form A 零持久——team file
+    // 写入 + session-end cleanup 注册两写入点门掉（门 ON 亦不落盘；无
+    // Form A 回读者则写入=孤儿破口；durable 化归 W-D-B-1）。组态唯一
+    // 承载 = teamContext 内存态（本文件尾 + members 名册 roster）。
+    // 旧 teamFile 对象构造随之裁除（唯一消费 = writeTeamFileAsync）。
 
-    await services.writeTeamFileAsync(finalTeamName, teamFile)
-    // Track for session-end cleanup — teams were left on disk forever
-    // unless explicitly TeamDelete'd (gh-32730).
-    services.registerTeamForSessionCleanup(finalTeamName)
+    // 0.1.93 W-D-A：members 名册（角色三元组）入组态——Form A spawn 触发点
+    //（Agent 扩参）按 name 检索渲染 prompt。
+    const roster: TeamRosterEntry[] | undefined =
+      input.members && input.members.length > 0 ? input.members : undefined
 
     // Reset and create the corresponding task list directory
     // (Team = Project = TaskList). This ensures task numbering starts
@@ -255,11 +285,13 @@ export const TeamCreateTool: TeamCreateToolFace = {
     // tasks to a different directory than tmux/iTerm2 teammates expect.
     setLeaderTeamName(taskListId)
 
-    // Update team context state（delta ②：旧 setAppState teamContext 面）
+    // Update team context state（delta ②：旧 setAppState teamContext 面；
+    // 0.1.93 W-D-A 加 roster 名册）
     services.setTeamContext({
       teamName: finalTeamName,
       teamFilePath,
       leadAgentId,
+      roster,
       teammates: {
         [leadAgentId]: {
           name: TEAM_LEAD_NAME,
