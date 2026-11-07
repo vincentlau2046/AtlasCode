@@ -292,6 +292,10 @@ export { wireBackends } from './backends/wireBackends'
 export {
   startInProcessTeammate,
   runInProcessTeammate,
+  // 0.1.93 W-D-A 补测面 export：idle/wake 轮询循环（工单 GREEN 判据
+  // 「idle→mailbox 到达→唤醒重跑单测」；运行时唯一消费点 = 主循环）。
+  waitForNextPromptOrShutdown,
+  type WaitResult,
   // delta ⑭ 接缝回填（S-E2d）：agent 注册表 + TPC/gate 消费端面。
   buildTeammateSystemPrompt,
   resolveTeammateAgentFace,

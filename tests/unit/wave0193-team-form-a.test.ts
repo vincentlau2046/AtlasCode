@@ -24,7 +24,7 @@
  *     成员注册表/durable 队列零新增）；既有域盘面（tasks ensureTasksDir /
  *     mailbox lockfile）沿 0.1.36 既有行为不变更、不新增。
  */
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test, beforeAll, afterAll } from 'bun:test'
 
 import { buildOpenAIParams } from '../../src/modelprovider'
 
@@ -612,7 +612,6 @@ import {
   evaluateTerminationSpec,
   extractFinalAssistantText,
   validateTerminationSpec,
-  type TerminationCondition,
   type TerminationSpec,
 } from '../../src/swarm'
 
@@ -909,5 +908,159 @@ describe('wave0193 段 G：TeamDelete 守卫 teamContext 化 + 组散残留（A7
     } finally {
       teardownGate()
     }
+  })
+})
+
+// ── 段 H：idle→mailbox 到达→唤醒重跑（工单 GREEN 判据补测；RF2 实核
+//    收口 = 循环在盘补全不需要，本段补判别单测）。waitForNextPromptOrShutdown
+//    依赖全为参数注入（mailbox 读面经 ATLAS_CONFIG_DIR 落盘）→ 真盘 tmp
+//    inbox 判别（engine-tools-send-message-se2 真盘先例；零写真实 ~/.atlas）。
+//    判别格：peer 唤醒 / lead 优先 / shutdown 优先 / abort 先置 / abort 中途
+//    （keep-alive 轮询真在转）。
+import { mkdtempSync, rmSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
+import { waitForNextPromptOrShutdown } from '../../src/swarm'
+import { writeToMailbox } from '../../src/engine/messaging/mailbox'
+import { TEAM_LEAD_NAME } from '../../src/engine/messaging'
+
+const savedConfigDir = process.env.ATLAS_CONFIG_DIR
+
+describe('wave0193 段 H：idle/wake 循环（mailbox 到达→唤醒重跑，A 补测）', () => {
+  let tmpHome: string
+  beforeAll(() => {
+    tmpHome = mkdtempSync(join(tmpdir(), 'wave0193-wake-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHome
+  })
+  afterAll(() => {
+    if (savedConfigDir === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDir
+    rmSync(tmpHome, { recursive: true, force: true })
+  })
+
+  function makeWaiter(agentName = 'w1') {
+    const identity = {
+      agentId: `${agentName}@wake`,
+      agentName,
+      teamName: 'wake-team',
+      color: 'blue' as const,
+      planModeRequired: false,
+      parentSessionId: 'sess-wake',
+    }
+    const appState = {
+      toolPermissionContext: { mode: 'default' },
+      tasks: {},
+    }
+    return {
+      identity,
+      abortController: new AbortController(),
+      getAppState: () => appState,
+      setAppState: () => {},
+      taskListId: 'list-wake',
+    }
+  }
+
+  test('H1 peer 消息到达 → new_message 唤醒（from=发送者，FIFO）', async () => {
+    const w = makeWaiter()
+    await writeToMailbox(
+      'w1',
+      { text: 'hello from peer', from: 'peer-1' },
+      'wake-team',
+    )
+    const result = await waitForNextPromptOrShutdown(
+      w.identity,
+      w.abortController,
+      'task-1',
+      w.getAppState,
+      w.setAppState,
+      w.taskListId,
+    )
+    expect(result.type).toBe('new_message')
+    if (result.type === 'new_message') {
+      expect(result.message).toBe('hello from peer')
+      expect(result.from).toBe('peer-1')
+    }
+  })
+
+  test('H2 lead 消息优先于 peer 消息（leader=用户意图协调面优先）', async () => {
+    const w = makeWaiter('w2')
+    await writeToMailbox('w2', { text: 'peer chatter', from: 'peer-1' }, 'wake-team')
+    await writeToMailbox(
+      'w2',
+      { text: 'lead directive', from: TEAM_LEAD_NAME },
+      'wake-team',
+    )
+    const result = await waitForNextPromptOrShutdown(
+      w.identity,
+      w.abortController,
+      'task-1',
+      w.getAppState,
+      w.setAppState,
+      w.taskListId,
+    )
+    expect(result.type).toBe('new_message')
+    if (result.type === 'new_message') {
+      expect(result.from).toBe(TEAM_LEAD_NAME)
+      expect(result.message).toBe('lead directive')
+    }
+  })
+
+  test('H3 shutdown 请求优先于未读 peer 消息（防 peer 洪泛饿死 shutdown）', async () => {
+    const w = makeWaiter('w3')
+    await writeToMailbox('w3', { text: 'peer chatter', from: 'peer-1' }, 'wake-team')
+    const shutdownJson = JSON.stringify({
+      type: 'shutdown_request',
+      requestId: 'req-1',
+      from: TEAM_LEAD_NAME,
+      timestamp: new Date().toISOString(),
+    })
+    await writeToMailbox(
+      'w3',
+      { text: shutdownJson, from: TEAM_LEAD_NAME },
+      'wake-team',
+    )
+    const result = await waitForNextPromptOrShutdown(
+      w.identity,
+      w.abortController,
+      'task-1',
+      w.getAppState,
+      w.setAppState,
+      w.taskListId,
+    )
+    expect(result.type).toBe('shutdown_request')
+    if (result.type === 'shutdown_request') {
+      expect(result.request?.type).toBe('shutdown_request')
+      expect(result.request?.from).toBe(TEAM_LEAD_NAME)
+    }
+  })
+
+  test('H4 abort 先置 → 立即 aborted（不进轮询）', async () => {
+    const w = makeWaiter('w4')
+    w.abortController.abort()
+    const result = await waitForNextPromptOrShutdown(
+      w.identity,
+      w.abortController,
+      'task-1',
+      w.getAppState,
+      w.setAppState,
+      w.taskListId,
+    )
+    expect(result.type).toBe('aborted')
+  })
+
+  test('H5 空 inbox keep-alive 轮询真在转：中途 abort → aborted（非挂死）', async () => {
+    const w = makeWaiter('w5')
+    const waitPromise = waitForNextPromptOrShutdown(
+      w.identity,
+      w.abortController,
+      'task-1',
+      w.getAppState,
+      w.setAppState,
+      w.taskListId,
+    )
+    // 首轮 poll 空读 → sleep 500ms → 二轮前 abort 观测面
+    setTimeout(() => w.abortController.abort(), 650)
+    const result = await waitPromise
+    expect(result.type).toBe('aborted')
   })
 })

@@ -933,7 +933,7 @@ async function tryClaimNextTask(
 /**
  * Result of waiting for messages.
  */
-type WaitResult =
+export type WaitResult =
   | {
       type: 'shutdown_request'
       request: ReturnType<typeof isShutdownRequest>
@@ -959,8 +959,13 @@ type WaitResult =
  *
  * This keeps the teammate alive in 'idle' state instead of terminating.
  * Does NOT auto-approve shutdown - the model should make that decision.
+ *
+ * 0.1.93 W-D-A 补测面 export（工单 GREEN 判据「idle→mailbox 到达→唤醒重跑
+ * 单测」）：依赖全为参数注入（mailbox 读面经 ATLAS_CONFIG_DIR 落盘），可
+ * 真盘 tmp inbox 判别单测；运行时唯一消费点 = runInProcessTeammate 主循环
+ * （L1524），export 不改行为。
  */
-async function waitForNextPromptOrShutdown(
+export async function waitForNextPromptOrShutdown(
   identity: TeammateIdentity,
   abortController: AbortController,
   taskId: string,
