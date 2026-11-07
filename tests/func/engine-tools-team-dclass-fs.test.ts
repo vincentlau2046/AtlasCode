@@ -19,8 +19,9 @@
  *    isEnabled false + Snip true；'1' → 三者 true（--agent-teams argv 支
  *    测试进程不可驱动，登记不测）
  *  - TeamCreate：validateInput ec9 三态 / call 既有上下文 throw 逐字 /
- *    成功面 3 字段 + 团队文件写面 + register 登记 + 上下文设面 + tasks
- *    目录真盘面 / 撞名 word-slug 支 / renderToolUseMessage 防御支
+ *    成功面 3 字段 + Form A 零持久（写面/register 门掉，0.1.93 W-D-A
+ *    审计 F1）+ members 名册入组态 + 上下文设面 + tasks 目录真盘面 /
+ *    撞名 word-slug 支 / renderToolUseMessage 防御支
  *  - TeamDelete：call 三分（无上下文 / 活成员拒清理逐字 / 全 idle 清理
  *    + 清面链 4 面）+ 文件缺位亦清理支 + 缺省面显化
  *  - requireTeamServices 未注入 fail-fast throw 逐字
@@ -222,7 +223,7 @@ describe('F-DC2 isEnabled 门三态', () => {
 // ── F-DC3 TeamCreate/TeamDelete inputSchema 面 ───────────────────────
 
 describe('F-DC3 TeamCreate/TeamDelete inputSchema 面', () => {
-  test('TeamCreate：required [team_name] + strict 双字段 + 3 属性', () => {
+  test('TeamCreate：required [team_name] + strict 双字段 + 4 属性（0.1.93 W-D-A A2 members 名册）', () => {
     expect(TeamCreateTool.name).toBe('TeamCreate')
     expect(TEAM_CREATE_TOOL_INPUT_SCHEMA.required).toEqual(['team_name'])
     expect(TEAM_CREATE_TOOL_INPUT_SCHEMA.additionalProperties).toBe(false)
@@ -230,6 +231,7 @@ describe('F-DC3 TeamCreate/TeamDelete inputSchema 面', () => {
       'team_name',
       'description',
       'agent_type',
+      'members',
     ])
     expect(TeamCreateTool.strict).toBe(true)
     expect(TeamCreateTool.inputJSONSchema).toBe(TEAM_CREATE_TOOL_INPUT_SCHEMA)
@@ -305,7 +307,7 @@ describe('F-DC6 TeamCreateTool call 体', () => {
     )
   })
 
-  test('成功面（3 字段 + 团队文件写面 + register 登记 + 上下文设面 + tasks 目录真盘）', async () => {
+  test('成功面（3 字段 + Form A 零持久：写面/register 门掉 + 上下文设面 + tasks 目录真盘）', async () => {
     const f = makeFakeServices()
     const r = await TeamCreateTool.call(
       { team_name: 'my team', description: 'd', agent_type: 'researcher' },
@@ -316,18 +318,39 @@ describe('F-DC6 TeamCreateTool call 体', () => {
       team_file_path: '/fake/teams/my team/config.json',
       lead_agent_id: 'team-lead@my team',
     })
-    const file = f.teamFiles.get('my team')!
-    expect(file.members).toHaveLength(1)
-    expect(file.members[0].name).toBe('team-lead')
-    expect(file.members[0].agentType).toBe('researcher')
-    expect(file.leadAgentId).toBe('team-lead@my team')
-    expect(f.calls).toContain('register:my team')
+    // 0.1.93 W-D-A（审计 F1）：Form A 零持久——team file 写入 + register
+    // 两写入点门掉（门 ON 亦不落盘）；组态唯一承载 = teamContext 内存态。
+    expect(f.teamFiles.size).toBe(0)
+    expect(f.calls).not.toContain('register:my team')
     const ctx = f.services.getTeamContext()!
     expect(ctx.teamName).toBe('my team')
+    expect(ctx.roster).toBeUndefined()
+    expect(ctx.teammates['team-lead@my team'].agentType).toBe('researcher')
     expect(ctx.teammates['team-lead@my team'].color).toBe('red')
     // engine/tasks 非注入闭包真盘面（resetTaskList 锁 + ensureTasksDir mkdir，
     // swarm sanitizeName('my team') = 'my-team'）
     expect(existsSync(join(dir, 'tasks', 'my-team'))).toBe(true)
+  })
+
+  test('成功面 members 名册：roster 入组态（零持久内存态，f4 批复④）', async () => {
+    const f = makeFakeServices()
+    const r = await TeamCreateTool.call(
+      {
+        team_name: 'roster team',
+        members: [
+          { name: 'w1', role: 'researcher', goal: 'g', backstory: 'b' },
+          { name: 'w2' },
+        ],
+      },
+      undefined,
+    )
+    expect(r.data.team_name).toBe('roster team')
+    expect(f.teamFiles.size).toBe(0)
+    const ctx = f.services.getTeamContext()!
+    expect(ctx.roster).toEqual([
+      { name: 'w1', role: 'researcher', goal: 'g', backstory: 'b' },
+      { name: 'w2' },
+    ])
   })
 
   test('撞名支：已存在团队 → word slug 新名（非确定性，仅验改面）', async () => {
@@ -338,9 +361,10 @@ describe('F-DC6 TeamCreateTool call 体', () => {
     )
     const r = await TeamCreateTool.call({ team_name: 'taken' }, undefined)
     expect(r.data.team_name).not.toBe('taken')
-    expect(f.teamFiles.has(r.data.team_name)).toBe(true)
     expect(r.data.lead_agent_id).toBe(`team-lead@${r.data.team_name}`)
-    expect(f.calls).toContain(`register:${r.data.team_name}`)
+    // Form A 零持久：新名不写盘、不 register（读面撞名检测仍走 readTeamFile）
+    expect(f.teamFiles.has(r.data.team_name)).toBe(false)
+    expect(f.calls).not.toContain(`register:${r.data.team_name}`)
   })
 
   test('mapToolResult jsonStringify 落盘面', () => {
