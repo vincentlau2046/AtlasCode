@@ -16,7 +16,8 @@
 | 模型接入 | modelprovider（fallback 池/网关面） | 模型池配置/角色路由偏好 |
 | 组合根 | **组合根模式与 port 注入框架**（各域 set*Port 面） | 每产品一个 compose.ts（atlascode 现形为第一实例） |
 | 工具 | 工具执行框架 + 通用工具族 | **工具注册子集**（office/comic 各自的工具清单与专有工具） |
-| UI | headless/SDK 车道（print.ts 同构面 = WebUI/app 接入面） | TUI（atlascode 壳）/ WebUI / app 壳 |
+| UI | headless/SDK 车道（print.ts 同构面 = WebUI/app 接入面） | TUI（atlascode 壳）/ WebUI / app 壳 / **家族 portal 层**（用户 2026-11-07 裁定：atlaswork 统一 portal 复合主页对接全部产品——自建 TS 壳消费 S6 headless 合同；Open WebUI 深度参考不直接使用〔其 License 品牌条款：去品牌或 >50 用户须 Enterprise License，正中我们场景；且 Svelte+Python 栈错配+chat-centric 缺 agent 交互面〕；agent 交互面〔web 审批流/diff 审阅/终端〕= engine web 交互缺口，步 0 盘点） |
+| 发布包 | — | **单包多 bin 形态为默认**（用户 2026-11-07 终裁）：一个 npm 包、每产品一个 bundle（IDN-1 构建配方独立编译）、bin 各自独立命令（atlas/atlas-office…）；产品边界在命令层完整保留；**家族调度器单命令派裁定不做**（cmd32/help55/上游对齐锚重基线成本不成比例；未来可加薄壳别名纯加性）；形态二（产品独立 npm 包）触发 = 独立节奏/外部消费者/体积需求（charter L1 机械操作，kernel 仍不发包以源码编译进各 bundle） |
 | 品牌/文案 | — | identity.ts 品牌令牌 / text-assets 系统提示词 / HELP_SET / de-ant 锚 / cmd 面 |
 | 持久化/配置 | 配置框架与 schema 机制 | **per-product 配置目录与数据分域**（~/.atlas 命名空间产品化：settings/session/teams/tasks 目录，Atlas-reveiw ①+Main 同点合流） |
 | 遥测/实验配置 | FeatureConfigPort 框架（charter port 8） | analytics/GrowthBook A/B 面按产品分 or 共享（Atlas-reveiw ② 登记未答，步 0 定） |
@@ -70,3 +71,22 @@
 - Main：步 1 硬化体量口径 + S2 可复制性现障碍清单
 - e2e：S 标准判据化可行面 + 双 gate（kernel/产品）的资源模型
 - 收敛后 v1.x → 呈用户终裁 → 并入排序终稿
+
+## 10. 技术债全景排序终稿（2026-11-07 用户终裁采纳，主线合并路线）
+
+| 序 | 项 | 债性质 | 主线归属 | 备注 |
+|---|---|---|---|---|
+| 1 | **C-6 headless -p autoCompact 激活**（scoped 小波） | 功能债（-p 长会话不压缩，0.1.90 登记） | ③能力波 + **S6 对齐表首行翻绿** | 趁热先行；压缩风暴风险重估为波内前置 |
+| 2 | **C-1 KV-cache 摘要**（tools/system 奇偶直证先行）+ **C-3 overflow 触发** | 功能债（compaction 域收尾） | ③能力波 | 用户裁定优先面收尾 |
+| 3 | **W-D-A 临时小组**（基座定谳步先行） | 能力债（骨架零调用方） | ③能力波 | 设计稿 v1.2 就绪 |
+| 4 | **S1a 硬化波**（六面提取，≈1 中波） | 架构债（产品面焊在 kernel） | ②基建波 | **可与 2/3 交叉**（移位活不压语义面）；IDN-1 归一锁面必答 |
+| 5 | **Gap B sharp/image-processor-napi 未随包**（PDF 页图断链，0.1.84 登记） | 供应链债（用户可感） | ①改造波 | 候补插入位：C 族收尾后视体量插波 |
+| 6 | **W-D-B-1 持久化面** | 能力债 | ③能力波 | — |
+| 7 | **S3 归位波**（等步 0 盘点产出） | 架构债（tui 427k 耦合） | ②基建波 | 归位项 >20 则再拆 |
+| 8 | **W-D-B-2 UDS+TUI** | 能力债 | ③能力波 | 硬前置 = 卷 4 契约插桩（2.1.319） |
+| 9 | **卷 4 分析卡**（2.1.304–319，15 版 + agent teams 契约插桩） | 对齐债（drift 窗口） | ②基建波 | 分析卡可提前做；落码随各波 |
+| 10 | 登记债（不排，按机缘） | — | — | 500-storm E-1b-full（须用户裁默认语义）/@ant×2/K6-2/7 活面+K6-9/10/11 锚/R1-delay loop 回合级错误恢复/iff 前缀剥离/C4-5 /rewind/compact 残留守（sessionMemoryCompact/promptCacheBreakDetection/cache 面）/E-1P+OOS 长尾 |
+
+**步 0 f4 零码盘点**并行不占序（port 归属/遥测/市场清单/task#154/portal 需求面 + engine web 交互缺口）。
+
+**达标线**：序 1–4 + 7 完成后，S1a/S2/S3/S4/S5/S6 达标评估 → 第二产品（atlasoffice）启动决策点呈用户。
