@@ -4,6 +4,31 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.91
+
+W-opt-2 scoped 小波：C-6 headless `-p` 车道 autoCompact 激活（工单
+`docs/2026-11-07-p0-wave-0191-ticket.md`，终态 `78386274`）。gate
+r-20261107-gate-091（双块：原轮 6c85544e RED 侧旁证 + 终态 scoped
+re-gate 全绿）：禁用直证 6/6（settings off 档 / DISABLE_COMPACT 双支
+RED↔GREEN）+ 判别复核 + 四件套绿 + scoped token new=1/gone=0 + 点名
+回归 171/0。**用户可感行为变化登记：-p 长会话开始自动压缩——属修复本意
+（0.1.90 生产 lane 勘误 2 销项），非回归**；禁用控制（DISABLE_COMPACT /
+DISABLE_AUTO_COMPACT env + `/autocompact` off 档位）现于 -p 生效。
+
+### C-6：headless -p autoCompact 激活（`6c85544e` + `78386274`）
+
+- `src/cli/print.ts` autoCompact deps 补 `countTokens` 实注入（修前最小面
+  fail-safe false → -p 长会话结构性不自动压缩）+ `keepRecent` 车道对齐
+  TUI N=3（保留段只影响 messagesToKeep，不进摘要主体）。
+- **锁面修订（`cd2062cc`）**：外部安全审查 MEDIUM——激活压缩车道而禁用
+  kill-switch 不接 = fail-open config gate → enabled 接线 fail-closed
+  （`78386274`）：`mergeAutoCompactOverrides(getAutoCompactEnvOverrides(),
+  getInitialSettings().autoCompactWindow, roleModel)` → `enabled` 门，与
+  TUI agentLoopDeps 同一单一事实源（env 胜 settings 纪律继承）。
+- `engine/config/types.ts`：settings schema 补 `autoCompactWindow` 声明
+  （数据契约先行，禁 passthrough unknown 面消费；双拷贝对齐 tui 同形）。
+- 兼 **S6 headless≡TUI 对齐表首行翻绿**（多产品纲要 §10 序 1）。
+
 ## v0.1.90
 
 W-opt-1 波：compaction 切点两层收口 + repeat-tool 连击建议守（工单
