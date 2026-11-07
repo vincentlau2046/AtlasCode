@@ -50,7 +50,12 @@ shared/                    team-file schema + 角色模板注册（单一事实�
 - **门控**：`ATLAS_EXPERIMENTAL_AGENT_TEAMS` 维持默认 OFF 至 gate 闭环；形态 B 另需 `ATLAS_EXPERIMENTAL_UDS_INBOX`（F1/F2 双门激活时统一为单门——10-09 底稿 §4 裁定）。
 - **角色面**：role/goal/backstory 三元组（CrewAI 词汇吸收）→ `shared/` 角色模板注册表；固定角色支持项目级定义文件（`.atlas/teams/*.md` 类，锁面定形）。
 - **消息语义**（沿用上游可证语义 + AutoGen 吸收点）：排队不插队（收方下一工具回合消费）；回信 = from 拷 to；纯文本跨进程（禁结构化）；broadcast = 直发多份非共享总线（f4-call：与 mailbox 现形一致）；终止条件组合词汇（max-turns/文本确认/外部终止 OR/AND）落形态 A 组运行参数；stall 计数（Magentic-One）复用 G-1 连击守机制做组级打转对策。
-- **权限 fail-closed**：成员权限 ≤ lead；跨进程消息纯文本；seeded 探针纪律适用于组面 e2e。
+- **权限 fail-closed**（Atlas-reveiw ③ 补强）：成员权限 ≤ lead 须有**技术载体**（形态 B 成员=独立 session 自带权限配置 → 启动期校验 fail-loud，spawn 参数/env/team file 记录三选一，锁面定；登记面弱约束不够）；明写红线「**禁借成员绕过 lead 已拒权限**（permission laundering）」；跨进程消息纯文本；seeded 探针纪律适用于组面 e2e。
+- **禁静默面补充**（Atlas-reveiw ③）：durable inbox 须有**上界与满载策略**（无界=磁盘填满；满载 fail-visible 拒收/告警，禁静默丢最旧）；UDS 送达语义=「**持久化后 ack**」完整性口径（防 F7 反例以新形态回归）。
+- **门 OFF 残留态**（Atlas-reveiw ③）：team file 已落盘后门被关（降级/回滚）→ 孤儿文件/进程处理 fail-visible 提示，禁静默残留。
+- **漂移检测机制**（Atlas-reveiw ③）：schema 含 version 字段 + resume 时组态校验（角色/模式 hash 对比，漂移=显式留痕+告警）——Anti-goal ③ 落地抓手。
+- **形态 B schema 审计四条**（Atlas-reveiw ④）：(a) 落盘文件=**不可信输入**（resume 时 schema 校验+字段白名单，0187 manifest 验真同纪律，禁 code 执行类字段直通成员 prompt）；(b) PID 注册表须**启动时间/唯一 instance id 二次验证**（防 PID 复用误投递/误杀）；(c) 并发写 = lockfile（骨架既有）+ 原子写（tmp+rename）入 schema 面；(d) 跨进程消息**来源标注+「非用户批准」防伪**（durable 重放同口径）。
+- **S-2 合流边界**（Atlas-reveiw ④）：S-2=run 的 durable child sessions，形态 B member=peer teammate——**参照非合并**，工单化时明写，防 W-D-B 体量失控。
 
 ## 5. 备选取舍记录（头脑风暴弃案，留档防复活无据）
 
@@ -60,6 +65,7 @@ shared/                    team-file schema + 角色模板注册（单一事实�
 | 两套系统（临时组独立轻实现 + 固定组独立重实现） | 原语重复，消息/角色面双倍维护 |
 | broadcast 共享总线（聊天室模型） | 偏离 mailbox 现形 + 消息洪泛（DSH every-batch framing 教训同族） |
 | 组间嵌套 | 上游亦未做；体量失控，登记不做 |
+| 复用/扩参既有 Agent(subagent) 工具作形态 A 基座（Atlas-reveiw ⑥ 补登记） | 既有 Agent tool 已覆盖「拉 worker 带角色 prompt 回收结果」——**增量边界（共享任务板/组内互发/角色注册表）不澄清则双套弃案以其变体复活**；T8 升格为「形态 A 基座裁定：新工具 vs 既有工具扩参」设计定谳步（W-D-A 工单化前置），裁定前不排除复活 |
 | 形态 B 成员用子进程内嵌引擎（非独立 session） | 丢跨 session 隔离（上下文/权限独立面），与「固定工作小组」语义不符 |
 
 ## 6. 分波（优先级平衡待团队输入）
@@ -71,10 +77,12 @@ shared/                    team-file schema + 角色模板注册（单一事实�
 
 体量预估：W-D-A 中（0.1.9x 一波）；W-D-B 大（或拆两波：持久化面 / UDS+TUI 面）。
 
-## 7. 判据面预告（e2e 输入用，工单化时细化）
+## 7. 判据面预告（e2e 输入已吸收 2026-11-07，工单化时细化）
 
-- 形态 A：组创建→成员 spawn→消息往返→任务板协作→shutdown 摘要回收，全链 RED↔GREEN（基线 = 门 OFF 时工具不可见）；token 预算锚；权限不放大判别。
-- 形态 B：跨 session 消息直证（真双进程 seeded）；durable 面三证（kill 成员 → resume → 离线消息达 + 组态/角色不漂移）；禁静默（F7 反例探针常驻）；cmd/help 恒等 + token 对账照旧。
+- **形态 A**：**判据① = T8 spawn 链形态真伪直证**（门 OFF 工具不可达 ↔ 门 ON 真 spawn 留痕可断言；e2e 升格裁定：先证形态真再证行为绿）→ 组创建→消息往返→任务板协作→graceful shutdown 全链 RED↔GREEN；**shutdown 残留断言**（组散后 mailbox 队列清空 + 消息不泄漏后续会话，禁静默反面）；token 预算锚；权限不放大判别；**门 OFF/ON 双态判别预登记**（组探针双态跑；T1 组命令门 OFF 缺省不可见 → cmd 32/help 55 基线不翻新须工单写死，防恒等判据失锚）。
+- **形态 B**：**四支探针禁合并**（S-A 脆性教训）——支 0 形态真伪（/proc/<pid> + UDS socket 文件 + PID 注册表命中，先于一切行为断言）；支 1 离线消息达三段（kill 前投递 durable 队列字节级 → SIGKILL（R3 killWhen 先例）→ 独立 CLI resume → 成员下一轮 **wire 出现消息原文**（k5-bridge-proxy 落盘请求体）+ `<cross-session-message>` 语义形态）；支 2 组态不漂移（resume 前后 team file + member registry **字节级 snapshot diff**，角色/模式/权限档三面，漂移留痕禁静默）；支 3 崩溃组态标记（kill 后 lead 侧组态可见标记）；**+第四证 重连幂等**（resume 两次不重复投递离线消息，durable inbox 消费即删/去重——0.1.89 resume 链高发区）；F7 反例探针常驻（dead socket 投递 → fail-visible 错误留痕，非 200-空——R5 同族）；seeded 双进程独立 HOME + **网关错峰串行化**（双进程并发 LLM 轮撞串行纪律/409 面）。
+- 通用：cmd/help 恒等 + token 对账照旧；**形态 A 零持久判据**（Atlas-reveiw ①：A 路径全程零写盘〔seeded 探针 HOME 除外〕、不建注册表——共享原语带 durable 档实现，A 须证不落盘）。
+- **T8 升格**（Atlas-reveiw ②）：形态 A 基座设计定谳步（新工具 vs 既有 Agent 工具扩参），W-D-A 工单化前置；形态真伪判据①随之锚定基座裁定结果。
 
 ## 8. 本稿遗留（锁面必答候补）
 
