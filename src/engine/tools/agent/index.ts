@@ -6,6 +6,15 @@
  * builtInAgents / forkSubagent；T-5d 补 coordinator 提示词。
  */
 export { AgentTool } from './AgentTool'
+// 0.1.93 W-D-A（f4 批复五(a)）：spawn 触发点 seam（组合根接线面；PRT-2）
+export {
+  setTeammateSpawnTrigger,
+  resetTeammateSpawnTrigger,
+  requireTeammateSpawnTrigger,
+  type TeammateSpawnTrigger,
+  type TeammateSpawnTriggerConfig,
+  type TeammateSpawnTriggerResult,
+} from './teammateSpawnPort'
 export { runAgent, runAsyncAgentLifecycle, wrapPermissionGateForBackground, type RunAgentArgs, type RunAgentResult, type RunAsyncAgentLifecycleArgs } from './runAgent'
 export {
   GENERAL_PURPOSE_AGENT,

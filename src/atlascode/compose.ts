@@ -120,6 +120,10 @@ import {
   setTeamServices,
   createDefaultTeamContextStore,
   setTeamFileLoader,
+  // 0.1.93 W-D-A（f4 批复五(a)/④）：spawn 触发点 seam 接线 + 嵌套 spawn
+  // 守卫谓词（isTeammate——成员不得再 spawn 成员）
+  setTeammateSpawnTrigger,
+  isTeammate,
 } from '../engine'
 import {
   startInProcessTeammate,
@@ -136,6 +140,10 @@ import {
   clearTeammateColors,
   sanitizeName,
   setTeammateToolRegistryDeps,
+  // 0.1.93 W-D-A：InProcessBackend 单例（spawn 触发点真实现消费面）+
+  // TeammateExecutorContext 组态窄视图型（setContext 适配 cast 面）
+  getInProcessBackend,
+  type TeammateToolState,
 } from '../swarm'
 import {
   getIsNonInteractiveSession,
@@ -352,6 +360,51 @@ export function createCoreDependencies(): CoreDependencies {
   //    loop 池 ≡ teammate 池，旧仓 options.tools 等价面）。
   setTeammateToolRegistryDeps({
     baseTools: [SnipTool, TeamCreateTool, TeamDeleteTool],
+  })
+  // 0.1.93 W-D-A（f4 批复五(a)/④）：spawn 触发点真实现接线——
+  //    AgentTool teammate 分支（name/team_name 扩参）→ 本 trigger →
+  //    InProcessBackend.spawn（真 spawn 链；headless 形态定谳：
+  //    allowPermissionPrompts 恒 false 透传）。两段：
+  //    ① setContext = TeammateExecutorContext 组态窄视图（appState get/set
+  //       适配；跨域 duck cast = compose session Message 双 cast 先例同型）
+  //    ② trigger = 嵌套 spawn 守卫（isTeammate——成员不得再 spawn 成员，
+  //       fail-closed 返 failure 不放大）+ duck → TeammateSpawnConfig 映射
+  getInProcessBackend().setContext({
+    getAppState: () => appState.get() as unknown as TeammateToolState,
+    setAppState: f => {
+      // 运行时面：task 域 updater 只读写 .tasks（TaskAppState 窄视图），
+      // SessionSnapshot.tasks ⊇ TaskStateBase 字段 → 结构适配；型面跨域
+      // cast（窄视图先例，compose session Message 双 cast 同型）。
+      void appState.set(f as unknown as Parameters<typeof appState.set>[0])
+    },
+    messages: [],
+  })
+  setTeammateSpawnTrigger(async config => {
+    if (isTeammate()) {
+      return {
+        success: false,
+        agentId: `${config.name}@${config.teamName}`,
+        error: 'nested teammate spawn is not supported (a teammate cannot spawn teammates)',
+      }
+    }
+    const result = await getInProcessBackend().spawn({
+      name: config.name,
+      teamName: config.teamName,
+      prompt: config.prompt,
+      ...(config.model ? { model: config.model } : {}),
+      ...(config.allowedTools ? { permissions: config.allowedTools } : {}),
+      allowPermissionPrompts: config.allowPermissionPrompts ?? false,
+      ...(config.systemPrompt ? { systemPrompt: config.systemPrompt } : {}),
+      ...(config.systemPromptMode
+        ? { systemPromptMode: config.systemPromptMode }
+        : {}),
+    })
+    return {
+      success: result.success,
+      agentId: result.agentId,
+      ...(result.taskId ? { taskId: result.taskId } : {}),
+      ...(result.error ? { error: result.error } : {}),
+    }
   })
 
   // W3-3b（§8.74.15）：engine 层构建器（engine/loopDeps）壳侧 port 注册——

@@ -178,3 +178,13 @@ export {
   SWARM_FIELDS_BY_TOOL,
   filterSwarmFieldsFromSchema,
 } from "./swarmSchemaFilter"
+// 0.1.93 W-D-A（f4 批复五(a)）：Form A 角色模板注册表 + renderTeammatePrompt
+// 纯函数（spawn 触发点 prompt 组装；engine AgentTool 消费，TUI 预览面预留）。
+export {
+  type AgentRoleTemplate,
+  registerAgentRoleTemplate,
+  getAgentRoleTemplate,
+  resetAgentRoleTemplates,
+  type TeammatePromptParts,
+  renderTeammatePrompt,
+} from "./agentRoleTemplates"

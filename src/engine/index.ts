@@ -195,6 +195,13 @@ export {
   // 见 query/loop.ts 头注）——swarm inProcessTeammateTask 注入支 +
   // S-E2d inProcessRunner 消费。
   createUserMessage,
+  // 0.1.93 W-D-A（f4 批复五(a)）：spawn 触发点 seam（组合根接线面；PRT-2）
+  setTeammateSpawnTrigger,
+  resetTeammateSpawnTrigger,
+  requireTeammateSpawnTrigger,
+  type TeammateSpawnTrigger,
+  type TeammateSpawnTriggerConfig,
+  type TeammateSpawnTriggerResult,
 } from './tools'
 export {
   // C 桶 ③ S-E2d（§8.66）：D 类 3 工具本体 + TeamServices 注入接缝 +

@@ -145,6 +145,15 @@ describe('wave0193 段 A：engine 单源 swarm 字段过滤（f4 批复五(c)，
   })
 })
 
+// ── 段 C：spawn 触发点（A3；f4 批复五(a) 基座定谳闭环：AgentTool 扩
+//    name/team_name/mode 三字段 + teammateSpawnPort seam + 成员注册面）──
+import { AgentTool } from '../../src/engine'
+import {
+  resetTeammateSpawnTrigger,
+  setTeammateSpawnTrigger,
+  type TeammateSpawnTriggerConfig,
+} from '../../src/engine'
+
 // ── 段 B：TeamCreate Form A 零持久改形 + members 名册（f4 批复④）────────
 import { TeamCreateTool, TeamDeleteTool } from '../../src/engine'
 import {
@@ -284,6 +293,147 @@ describe('wave0193 段 B：TeamCreate Form A 零持久 + members 名册（f4 批
       expect(calls).toContain('cleanupTeamDirectories')
       expect(calls).not.toContain('writeTeamFileAsync')
       expect(services.getTeamContext()).toBeUndefined()
+    } finally {
+      teardownGate()
+    }
+  })
+})
+
+describe('wave0193 段 C：spawn 触发点（A3，f4 批复五(a) 基座定谳闭环）', () => {
+  const savedEnv = process.env[GATE_ENV]
+
+  function setupGate() {
+    process.env[GATE_ENV] = '1'
+    resetDefaultTeamContextStore()
+  }
+
+  function teardownGate() {
+    resetTeammateSpawnTrigger()
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    if (savedEnv === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedEnv
+  }
+
+  test('C1 门 ON spawn 链：Agent(name, team_name) → trigger 调用 + roster 渲染 + 成员注册面', async () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      const triggerCalls: TeammateSpawnTriggerConfig[] = []
+      setTeammateSpawnTrigger(async cfg => {
+        triggerCalls.push(cfg)
+        return { success: true, agentId: 'tiling-dev@roster-team', taskId: 'task-1' }
+      })
+      await TeamCreateTool.call(
+        {
+          team_name: 'roster-team',
+          members: [
+            {
+              name: 'tiling-dev',
+              role: 'op-developer',
+              goal: '实现 gelu 算子',
+              backstory: 'Ascend C 老手',
+            },
+          ],
+        },
+        {},
+      )
+      const result = await AgentTool.call(
+        {
+          description: 'spawn teammate',
+          prompt: '干这件事',
+          name: 'tiling-dev',
+          team_name: 'roster-team',
+        },
+        {},
+      )
+      // trigger 被调 + duck 配置逐字段
+      expect(triggerCalls).toHaveLength(1)
+      expect(triggerCalls[0].name).toBe('tiling-dev')
+      expect(triggerCalls[0].teamName).toBe('roster-team')
+      // roster 渲染：goal/backstory 入 prompt + 任务 prompt 原文保留
+      expect(triggerCalls[0].prompt).toContain('实现 gelu 算子')
+      expect(triggerCalls[0].prompt).toContain('Ascend C 老手')
+      expect(triggerCalls[0].prompt).toContain('干这件事')
+      // headless 形态定谳：成员 spawn 恒 allowPermissionPrompts=false
+      expect(triggerCalls[0].allowPermissionPrompts).toBe(false)
+      // 输出面
+      const data = result.data as Record<string, unknown>
+      expect(data.status).toBe('teammate_spawned')
+      expect(data.agentId).toBe('tiling-dev@roster-team')
+      // 成员注册面：teamContext.teammates 增成员（spawn 成员注册面补入组态）
+      const ctx = services.getTeamContext() as unknown as {
+        teammates: Record<string, { name: string; agentType?: string }>
+      }
+      expect(ctx.teammates['tiling-dev@roster-team']).toBeDefined()
+      expect(ctx.teammates['tiling-dev@roster-team'].name).toBe('tiling-dev')
+      expect(ctx.teammates['tiling-dev@roster-team'].agentType).toBe('op-developer')
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('C2 门 OFF：Agent 传 name/team_name → validateInput 拒（fail-closed）', async () => {
+    delete process.env[GATE_ENV]
+    try {
+      const v = await AgentTool.validateInput?.(
+        { description: 'd', prompt: 'p', name: 'x', team_name: 't' },
+        {},
+      )
+      // 无 validateInput 成员 = 面缺失（RED 期望：实现后存在且拒）
+      expect(v).toBeDefined()
+      expect(v!.result).toBe(false)
+    } finally {
+      if (savedEnv === undefined) delete process.env[GATE_ENV]
+      else process.env[GATE_ENV] = savedEnv
+    }
+  })
+
+  test('C3 trigger 未接线 → call fail-fast（编程错误早暴露，PRT-2 先例同型）', async () => {
+    setupGate()
+    try {
+      const { services } = makeMemoryServices()
+      setTeamServices(services)
+      await TeamCreateTool.call(
+        { team_name: 'ff-team', members: [{ name: 'm1' }] },
+        {},
+      )
+      let threw = false
+      try {
+        await AgentTool.call(
+          { description: 'd', prompt: 'p', name: 'm1', team_name: 'ff-team' },
+          {},
+        )
+      } catch (e) {
+        threw = true
+        expect(String(e)).toContain('TeammateSpawnTrigger not wired')
+      }
+      expect(threw).toBe(true)
+    } finally {
+      teardownGate()
+    }
+  })
+
+  test('C4 无活跃组（teamContext 缺席）→ call 拒（spawn 前置 TeamCreate）', async () => {
+    setupGate()
+    try {
+      setTeamServices(makeMemoryServices().services)
+      setTeammateSpawnTrigger(async () => ({
+        success: true,
+        agentId: 'x@t',
+      }))
+      let threw = false
+      try {
+        await AgentTool.call(
+          { description: 'd', prompt: 'p', name: 'm1', team_name: 'ghost-team' },
+          {},
+        )
+      } catch (e) {
+        threw = true
+        expect(String(e)).toContain('TeamCreate')
+      }
+      expect(threw).toBe(true)
     } finally {
       teardownGate()
     }

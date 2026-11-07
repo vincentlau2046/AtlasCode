@@ -316,6 +316,13 @@ export {
   drainPendingBackgroundAgents,
   hasPendingBackgroundAgents,
   resetBackgroundAgentTracker,
+  // 0.1.93 W-D-A（f4 批复五(a)）：spawn 触发点 seam（组合根接线面；PRT-2）
+  setTeammateSpawnTrigger,
+  resetTeammateSpawnTrigger,
+  requireTeammateSpawnTrigger,
+  type TeammateSpawnTrigger,
+  type TeammateSpawnTriggerConfig,
+  type TeammateSpawnTriggerResult,
 } from './agent'
 export {
   type TsNode,

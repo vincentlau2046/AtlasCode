@@ -38,6 +38,7 @@ import type {
   ToolInputJSONSchema,
   ToolResultBlockParam,
   Tools,
+  ValidationResult,
 } from '../../../shared'
 import { getModelProvider, type ModelProvider, type ModelRole } from '../../../modelprovider'
 import { GENERAL_PURPOSE_AGENT, type AgentDefinition } from './agentDefinition'
@@ -55,6 +56,19 @@ import { getTaskOutputPath } from '../../../task'
 import { enqueueAgentNotification } from '../../coordinator/tasks/localAgentTask'
 import { isEnvTruthy } from '../../../shared'
 import { trackBackgroundAgent } from './backgroundTracker'
+// 0.1.93 W-D-A（f4 批复五(a)）：Form A teammate spawn 链
+import {
+  isAgentSwarmsEnabled,
+  renderTeammatePrompt,
+} from '../../../shared'
+import {
+  requireTeammateSpawnTrigger,
+  type TeammateSpawnTriggerResult,
+} from './teammateSpawnPort'
+import {
+  registerSpawnedTeammate,
+  requireTeamServices,
+} from '../team/teamServices'
 
 /**
  * 0.1.66 Q3-2 a1：逃生舱 env——ATLAS_AGENT_DEFAULT_FOREGROUND=1 时回退前景默认
@@ -105,6 +119,26 @@ const AGENT_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
       description:
         'Set to true to run this agent in the background. You will be notified when it completes.',
     },
+    // 0.1.93 W-D-A（f4 批复五(a)，上游 2.1.319 契约 SWARM_FIELDS_BY_TOOL
+    // 对偶实锤）：Form A 临时小组扩参——name + team_name 携手 = teammate
+    // spawn（TeamCreate members 名册按 name 检索渲染 prompt）；mode =
+    // 上游对偶保留面（Form A 消费 name/team_name，mode 透传保留）。
+    // 门 OFF 由 shared 过滤面在 wire 投影剥除（f4 批复五(c)），本 schema
+    // 静态恒有；validateInput 门 OFF fail-closed 拒（C2 直证）。
+    name: {
+      type: 'string',
+      description:
+        'Teammate name for team-based delegation. Provide together with team_name to spawn a teammate into that team (TeamCreate first).',
+    },
+    team_name: {
+      type: 'string',
+      description:
+        'Name of the team to spawn the teammate into (must match an active TeamCreate team).',
+    },
+    mode: {
+      type: 'string',
+      description: 'Teammate mode (upstream contract field).',
+    },
   },
   required: ['description', 'prompt'],
 }
@@ -115,6 +149,10 @@ interface AgentToolInput {
   subagent_type?: string
   model?: ModelRole
   run_in_background?: boolean
+  /** 0.1.93 W-D-A：Form A teammate spawn 扩参。 */
+  name?: string
+  team_name?: string
+  mode?: string
 }
 
 /**
@@ -150,6 +188,61 @@ function resolveAgentDefinition(
   }
 }
 
+/** Form A teammate spawn 内核（AgentTool.call teammate 分支消费）：
+ * 组态检索 → prompt 组装 → trigger → 成员注册。roster 缺成员 = 退化面
+ * （名册未建仍可 spawn，prompt 只带身份行 + 任务原文；renderTeammatePrompt
+ * 纯函数保证）。 */
+async function spawnTeammateFromRoster(args: {
+  name: string
+  teamName: string
+  prompt: string
+  model?: ModelRole
+}): Promise<TeammateSpawnTriggerResult> {
+  const services = requireTeamServices()
+  const teamCtx = services.getTeamContext()
+  if (!teamCtx) {
+    throw new Error(
+      `No active team — call TeamCreate before spawning teammates (wanted team "${args.teamName}")`,
+    )
+  }
+  if (teamCtx.teamName !== args.teamName) {
+    throw new Error(
+      `Team "${args.teamName}" is not the active team (leading "${teamCtx.teamName}") — one team per leader`,
+    )
+  }
+  if (!args.name || args.name.trim().length === 0) {
+    throw new Error('name (the teammate identity) is required for team-based delegation')
+  }
+  const rosterEntry = teamCtx.roster?.find(r => r.name === args.name)
+  const composedPrompt = renderTeammatePrompt({
+    name: args.name,
+    role: rosterEntry?.role,
+    goal: rosterEntry?.goal,
+    backstory: rosterEntry?.backstory,
+    prompt: args.prompt,
+  })
+  const trigger = requireTeammateSpawnTrigger()
+  const result = await trigger({
+    name: args.name,
+    teamName: args.teamName,
+    prompt: composedPrompt,
+    ...(args.model ? { model: args.model } : {}),
+    // headless 形态定谳（f4 批复）：成员 spawn 恒 allowPermissionPrompts=
+    // false → TPC.shouldAvoidPermissionPrompts → gate ask 支 auto-deny
+    //（fail-closed 权限不放大，delta ⑭ 既有面）。
+    allowPermissionPrompts: false,
+  })
+  if (!result.success) {
+    throw new Error(result.error ?? `teammate spawn failed for "${args.name}"`)
+  }
+  registerSpawnedTeammate({
+    name: args.name,
+    agentId: result.agentId,
+    agentType: rosterEntry?.role,
+  })
+  return result
+}
+
 export const AgentTool: Tool = {
   name: AGENT_TOOL_NAME,
   inputSchema: AGENT_TOOL_INPUT_SCHEMA,
@@ -164,6 +257,33 @@ export const AgentTool: Tool = {
     behavior: 'passthrough',
     message: 'Agent tool requires permission.',
   }),
+  // 0.1.93 W-D-A（f4 批复五(a)）：Form A teammate 扩参校验——门 OFF 携带
+  // name/team_name/mode = fail-closed 拒（schema 静态恒有，wire 投影由
+  // shared 过滤面剥除；直接构造 tool call 的旁路由此守住）；team_name 缺
+  // name 无效（无身份的组指向 = 输入错误）。常规路径零新增约束（恒过）。
+  async validateInput(
+    input: unknown,
+    _context: unknown,
+  ): Promise<ValidationResult> {
+    const i = (input ?? {}) as AgentToolInput
+    const hasTeammateFields = !!(i.name || i.team_name || i.mode)
+    if (hasTeammateFields && !isAgentSwarmsEnabled()) {
+      return {
+        result: false,
+        message:
+          'Agent teammate parameters (name/team_name/mode) require the agent-teams gate (ATLAS_EXPERIMENTAL_AGENT_TEAMS=1 or --agent-teams)',
+        errorCode: 9,
+      }
+    }
+    if (i.team_name && !i.name) {
+      return {
+        result: false,
+        message: 'team_name requires name (the teammate identity) for team-based delegation',
+        errorCode: 9,
+      }
+    }
+    return { result: true }
+  },
   toAutoClassifierInput: (input: unknown) => input,
   description: async () => getPrompt(getBuiltInAgents()),
   userFacingName: (input: unknown) => {
@@ -204,6 +324,40 @@ export const AgentTool: Tool = {
   async call(args: unknown, context: unknown): Promise<{ data: unknown }> {
     const input = (args ?? {}) as AgentToolInput
     const ctx = (context ?? {}) as AgentToolCallContext
+
+    // ── 0.1.93 W-D-A A3：Form A teammate spawn 分支（f4 批复五(a)）──
+    // name(+team_name) 携手 → 组态（teamContext.roster，TeamCreate members
+    // 名册）按 name 检索 → renderTeammatePrompt 组装 → teammateSpawnPort
+    // 触发真 spawn（组合根接线 InProcessBackend.spawn + 嵌套守卫）→ 成员
+    // 注册入 teamContext.teammates。门 OFF 已被 validateInput fail-closed
+    // 拒；此分支双保险再拒（直接调 call 的旁路）。
+    if (input.name || input.team_name) {
+      if (!isAgentSwarmsEnabled()) {
+        throw new Error(
+          'Agent teammate spawn requires the agent-teams gate (ATLAS_EXPERIMENTAL_AGENT_TEAMS=1 or --agent-teams)',
+        )
+      }
+      const teamName = input.team_name
+      if (!teamName) {
+        throw new Error('team_name is required when spawning a teammate (name alone is ambiguous)')
+      }
+      const spawnResult = await spawnTeammateFromRoster({
+        name: input.name ?? '',
+        teamName,
+        prompt: input.prompt,
+        model: input.model,
+      })
+      return {
+        data: {
+          status: 'teammate_spawned',
+          agentId: spawnResult.agentId,
+          ...(spawnResult.taskId ? { taskId: spawnResult.taskId } : {}),
+          name: input.name,
+          team_name: teamName,
+        },
+      }
+    }
+
     const parentRole: ModelRole = ctx.parentRole ?? 'small'
     const modelProvider: ModelProvider = ctx.modelProvider ?? getModelProvider()
 

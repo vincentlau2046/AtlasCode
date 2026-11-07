@@ -164,3 +164,36 @@ export function createDefaultTeamContextStore(): Pick<
 export function resetDefaultTeamContextStore(): void {
   teamContext = undefined
 }
+
+// ── 0.1.93 W-D-A（f4 批复④）：spawn 成员注册面 ─────────────────────────
+// spawn 触发点（Agent teammate 分支）成功后把成员补入 teamContext.teammates
+// （零持久：Form A 成员注册表 = 组态内存态，durable 化归 W-D-B-1）。
+
+/** spawn 成员注册入组态（agentId 键 = swarm InProcessBackend.spawn 返回的
+ * formatAgentId 产物；重复 spawn 同名成员 = 覆盖写（重启重启面 fail-soft，
+ * 与 lead 条目同 record 语义）。无活跃组 = 抛（spawn 前置 TeamCreate 的
+ * 编程错误早暴露，与 requireTeamServices fail-fast 同型）。 */
+export function registerSpawnedTeammate(input: {
+  name: string
+  agentId: string
+  agentType?: string
+  cwd?: string
+}): void {
+  const services = requireTeamServices()
+  const ctx = services.getTeamContext()
+  if (!ctx) {
+    throw new Error(
+      'registerSpawnedTeammate: no active team — call TeamCreate before spawning teammates',
+    )
+  }
+  ctx.teammates[input.agentId] = {
+    name: input.name,
+    agentType: input.agentType,
+    color: services.assignTeammateColor(input.agentId),
+    tmuxSessionName: '',
+    tmuxPaneId: '',
+    cwd: input.cwd ?? '',
+    spawnedAt: Date.now(),
+  }
+  services.setTeamContext(ctx)
+}
