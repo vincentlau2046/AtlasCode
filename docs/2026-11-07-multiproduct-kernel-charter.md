@@ -24,9 +24,9 @@
 
 | # | 标准 | 判据形态 |
 |---|---|---|
-| S1a | 产品特有面接口提取（接口面） | 品牌/提示词/工具子集/HELP_SET/锚五面 per-product 配置接口 + **字面清单制**（五类字面单一事实源清单，grep 对清单执行，禁探针散落——http-useragent-brand 先例）+ 白名单 fail-visible（合法共字显式表逐项注释，禁静默豁免——A3-1 分账先例）；判别 = **src 域级 grep**（S4 前可测，e2e 判据化裁定） |
+| S1a | 产品特有面接口提取（接口面） | 品牌/提示词/工具子集/HELP_SET/锚五面 per-product 配置接口 + **字面清单制**（五类字面单一事实源清单，grep 对清单执行，禁探针散落——http-useragent-brand 先例）+ 白名单 fail-visible（合法共字显式表逐项注释，禁静默豁免——A3-1 分账先例）；判别 = **src 域级 grep + 注释排除策略先行裁定**（Main 实锤：engine 域注释含 "AtlasCode" 10+ 文件〔loopDeps/keepWindow/goalState 等，多为迁移注释合法引用〕——判据正则剥注释或注释统一改措辞，二选一锁面，否则 S1 永假红）；**已知焊点清单（Main 实读 @ master）**：① `engine/coordinator/coordinatorMode.ts:323` 提示词字面含 repo URL（engine 域产品串，提取为产品注入参数）② 系统提示词已是 per-product 接口形（tui/constants/prompts.ts 壳域 + AgentLoopDeps 注入，S1 亮点）③ **工具子集 = 五面唯一需新接口形状**：现编译期 feature() 门撑不起 per-product 运行时差异 → ProductDefinition 级运行时注册清单（Ascend DomainPackage 插挂先例为模板）④ headless 车道物理归位（print.ts 现 src/cli/ → kernel 可引位，S1/S3 交界）⑤ HELP_SET/cmd 均在壳域，提取成本低 |
 | S1b | 产品字面实证（dist 面，S4 后才可测） | 拆包后 dist 级 kernel/产品字面分账 grep（S4 前单 bundle 混编无法分账——e2e 依赖倒挂预警） |
-| S2 | 组合根可复制 | atlasoffice compose.ts 装配同一组域至 headless 一轮；**三支判别**（e2e 裁定）：① office PONG（prodlane-pong 通用化复用：换入口+marker+office seeded settings）② **S2×S1 交叉**——office wire 零 atlascode 系统提示词字面（k5-bridge-proxy 落盘直证）③ 工具子集判别——office wire tools 含 office 工具、不含 atlascode 专有 schema；+静态面「零 atlascode 壳 import」（S4 lint 边界先例）；双产品对照同窗跑（fam 预算 ×2 时长，网关串行纪律） |
+| S2 | 组合根可复制 | atlasoffice compose.ts 装配同一组域至 headless 一轮；**四支判别**（e2e 三支 + Main 补一支）：① office PONG（prodlane-pong 通用化复用）② S2×S1 交叉——office wire 零 atlascode 系统提示词字面（k5-bridge-proxy 落盘直证）③ 工具子集判别——office wire tools 含 office 工具、不含 atlascode 专有 schema ④ **配置目录隔离**（Main 补强：`~/.atlas` 单一命名空间同机双产品必撞〔settings/模型池/marketplaces/teams/tasks 全共享〕——S2 最小探针不触配置面会假绿，per-product 配置目录〔如 `~/.atlas-office`〕或键命名空间须先裁定，**否则 S2 通过 ≠ 可启动**）；+ **ProductDefinition 配置对象**（Main：identity/提示词源/工具子集/锚集现内联硬选在 atlascode/compose.ts 各装配语句——先收敛为产品配置参数集，S2 判据含「office compose 与 atlascode compose diff 仅限产品配置对象」，防复制 509L 手改 N 处漂移）；+静态面「零 atlascode 壳 import」；双产品对照同窗跑（fam ×2 时长）；**port 实现归属 = 步 0 盘点专项列**（sessionContextPort/teammatePoolSync/TeamServices 真实现现居 atlascode/state 与 swarm——下沉 kernel 或 office 自带，盘点定）；进程单例（bootstrapState/modelprovider）一产品一进程无害，登记即可 |
 | S3 | TUI 分域盘点完成且耦合面清零 | 盘点清单落盘 + 盘点标「应在 kernel」的耦合项归位/登记（诊断风险 #5 收口） |
 | S4 | 拆包完成（L4.5 触发器兑现） | packages/ monorepo：kernel + atlascode（+atlasoffice 壳）；kernel 独立版本线；lint 边界照旧强制 |
 | S5 | 治理扩展完成 | release-governance 多产品 lane：kernel gate（≈现 gate ②③ 子集，e2e 量级约一半弱）+ 产品 gate（各跑各全保）；**锚实例表结构化先行 = S5 第一工单件**（e2e 裁定：现探针硬编码 HELP_SET=062/cmd 32 常量 → 表化 JSON/YAML per-product〔cmd/help/prompt 锚哈希/token 基线/品牌 UA/de-ant 锚/网关模型〕，探针读表执行，表化先于第二产品 gate）；继承 vs 实例化显式分账（每锚标继承 kernel〔CI/tsc/build〕或实例化〔per-product 独立取证，禁套 atlascode 值假绿——084「不套常数」教训；de-ant/A3-1 判定逻辑可参数化复用但判定值 per-product 重定义〕）；漂移检测 = 每次 release 三方对账（实测==表登记==上版 diff 可解释，token-regress 34 波方法学推广） |
@@ -38,8 +38,8 @@
 
 | 步 | 波形态 | 内容 |
 |---|---|---|
-| **步 0（零码，立即可并行）** | f4 盘点 | **内核/产品分域盘点**：tui 427k 行分域清单（哪些该下沉 kernel）+ 产品特有面提取清单 + L4.5 触发器核验 + office/comic 工具链差异面调研（工具注册子集接口形状）→ 产出归入主线排序 |
-| **步 1 边界硬化** | 中波×1–2 | S1/S3 落码（产品面提取 + TUI 耦合归位）——**与 AtlasCode 既定改造（C 族/W-D）串行或交叉，盘点后定** |
+| **步 0（零码，立即可并行）** | f4 盘点 | **内核/产品分域盘点**：tui 427k 行分域清单（哪些该下沉 kernel）+ 产品特有面提取清单 + L4.5 触发器核验 + office/comic 工具链差异面调研（工具注册子集接口形状）+ **port 实现归属专项列**（Main 补：sessionContextPort/teammatePoolSync/TeamServices 等真实现现居 atlascode/state 与 swarm，office 复用时下沉 kernel 还是自带）+ autoMode prompts（permissions/）kernel/产品归属 → 产出归入主线排序 |
+| **步 1 边界硬化** | **拆二波（Main 裁定）**：「S1 硬化波」先行（≈1 中波 10-15 文件，多数移位/注入化非新逻辑：coordinator 字面提取 + headless 归位 + 注释策略 + 工具子集运行时清单接口）＋「S3 归位波」等步 0 盘点产出（31MB/1851 文件，归位项 >20 则超中波口径须拆）；**S1 可与 C 族/W-D 交叉**（移位活不压引擎语义面——Main 排序意见），S3 归位必须等盘点；S2/dogfood 硬序在 S1+S3 后 |
 | **步 2 拆包+治理** | 机械波+治理波 | S4/S5（charter 纪律：拆包 = 机械操作不预付；包名/版本策略届时定） |
 | **步 3 第二产品 dogfood** | 探索波 | atlasoffice 三面相激活（命令注册表/UI 壳/入口）+ S2 验收 = **内核边界的最终测试**；atlascomic 循环同径 |
 
