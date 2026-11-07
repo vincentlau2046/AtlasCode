@@ -154,6 +154,14 @@ import {
   type TeammateSpawnTriggerConfig,
 } from '../../src/engine'
 
+// ── 段 D：角色模板注册表消费面（A4；工单 T-7，shared 加性）──────────
+import {
+  getAgentRoleTemplate,
+  registerAgentRoleTemplate,
+  renderTeammatePrompt,
+  resetAgentRoleTemplates,
+} from '../../src/shared'
+
 // ── 段 B：TeamCreate Form A 零持久改形 + members 名册（f4 批复④）────────
 import { TeamCreateTool, TeamDeleteTool } from '../../src/engine'
 import {
@@ -437,5 +445,45 @@ describe('wave0193 段 C：spawn 触发点（A3，f4 批复五(a) 基座定谳�
     } finally {
       teardownGate()
     }
+  })
+})
+
+describe('wave0193 段 D：角色模板注册表消费面（A4，工单 T-7 shared 加性）', () => {
+  test('D1 named 模板注册 → render 注入 systemPromptFragment + 三元组共存', () => {
+    resetAgentRoleTemplates()
+    try {
+      registerAgentRoleTemplate({
+        role: 'op-developer',
+        systemPromptFragment: 'You follow the CANN four-piece workflow.',
+      })
+      expect(getAgentRoleTemplate('op-developer')?.systemPromptFragment).toContain(
+        'four-piece',
+      )
+      const rendered = renderTeammatePrompt({
+        name: 'tiling-dev',
+        role: 'op-developer',
+        goal: '实现 gelu 算子',
+        backstory: 'Ascend C 老手',
+        prompt: '干这件事',
+      })
+      expect(rendered).toContain('four-piece')
+      expect(rendered).toContain('Role: op-developer')
+      expect(rendered).toContain('Goal: 实现 gelu 算子')
+      expect(rendered).toContain('Backstory: Ascend C 老手')
+      expect(rendered).toContain('干这件事')
+    } finally {
+      resetAgentRoleTemplates()
+    }
+  })
+
+  test('D2 未注册 role → render 退化面（身份行 + 三元组 + 任务原文，零模板注入）', () => {
+    resetAgentRoleTemplates()
+    const rendered = renderTeammatePrompt({
+      name: 'solo',
+      prompt: '任务原文',
+    })
+    expect(rendered).toContain('"solo"')
+    expect(rendered).toContain('任务原文')
+    expect(rendered).not.toContain('Role:')
   })
 })
