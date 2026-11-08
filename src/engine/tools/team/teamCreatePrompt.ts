@@ -6,6 +6,12 @@
  * 支结果，sendMessageTool delta ⑧ 同款口径）；旧 def description() 短描述
  * 文案 = DESCRIPTION（经 team/ 子门面 TEAM_CREATE_DESCRIPTION 别名 re-export，
  * web 族口径）。
+ *
+ * 0.1.93 W-D-A（f4 gate 打回修复③）：Form A 零持久改形两段同步——
+ *「This creates」team file 行 +「Discovering Team Members」config.json
+ * 读面段改写为 roster 名册面（无 config.json 可读，读面指引=死胡同 +
+ * 潜在敏感文件权限对话框入口）。TUI 车道 prompt.ts（tui/tools/
+ * TeamCreateTool）模板体与本文件逐字节同形（双副本同步纪律）。
  */
 
 /** 旧 def description() 逐字。 */
@@ -45,7 +51,7 @@ Create a new team to coordinate multiple agents working on a project. Teams have
 \`\`\`
 
 This creates:
-- A team file at \`~/.atlas/teams/{team-name}/config.json\`
+- An in-memory team context on the leader (Form A is zero-persistence — no team file is written to \`~/.atlas/teams/\`; the member roster lives in the leader's team context)
 - A corresponding task list directory at \`~/.atlas/tasks/{team-name}/\`
 
 ## Team Workflow
@@ -87,22 +93,13 @@ Teammates go idle after every turn—this is completely normal and expected. A t
 
 ## Discovering Team Members
 
-Teammates can read the team config file to discover other team members:
-- **Team config location**: \`~/.atlas/teams/{team-name}/config.json\`
-
-The config file contains a \`members\` array with each teammate's:
+Form A teams are zero-persistence: no team config file is written to disk. Team members come from the \`members\` roster passed to TeamCreate (carried in the leader's team context). Each roster entry has:
 - \`name\`: Human-readable name (**always use this** for messaging and task assignment)
-- \`agentId\`: Unique identifier (for reference only - do not use for communication)
-- \`agentType\`: Role/type of the agent
+- \`role\`/\`goal\`/\`backstory\`: Role triplet used to compose the member's prompt when spawned via Agent(name, team_name)
 
 **IMPORTANT**: Always refer to teammates by their NAME (e.g., "team-lead", "researcher", "tester"). Names are used for:
 - \`to\` when sending messages
 - Identifying task owners
-
-Example of reading team config:
-\`\`\`
-Use the Read tool to read ~/.atlas/teams/{team-name}/config.json
-\`\`\`
 
 ## Task List Coordination
 

@@ -113,6 +113,11 @@ import {
   drainSdkEvents,
   // 0.1.66 Q3-2 a1 R4：headless 进程退出前 drain pending 后台 agent（防静默 kill）
   drainPendingBackgroundAgents,
+  // 0.1.93 W-D-A f4 gate 打回修复①：max-turns 缺省有界（loop 内部既有
+  // DEFAULT 兜底；context/显示面同源解析，禁 "(undefined)" 显示）
+  DEFAULT_AGENT_LOOP_MAX_TURNS,
+  // 0.1.93 W-D-A f4 gate 打回修复②：headless 终态 teammate graceful drain
+  getSessionContextPort,
   getCronJitterConfig,
   getSchedulerEnv,
   getSettingsWithErrors,
@@ -136,6 +141,9 @@ import {
   type DeferredToolUsePayload,
   setMcpClientRegistry,
 } from '../engine'
+// 0.1.93 W-D-A f4 gate 打回修复②：headless 终态 teammate graceful drain
+//（cli→swarm 直 import 先例 = cli/setup.ts）
+import { gracefulShutdownInProcessTeammates } from '../swarm'
 import {
   buildMcpServerConfigs,
   fetchResourcesForClient,
@@ -1289,7 +1297,12 @@ export async function runHeadless(
     return queryAgentLoop(loopDeps, {
       messages: turnMessages,
       tools,
-      context: { autoCompact, maxTurns: options.maxTurns },
+      context: {
+        autoCompact,
+        // f4 gate 打回修复①：缺省有界（loop 内部同 DEFAULT 兜底——context
+        // 面显式解析，评估/显示面禁消费 undefined）
+        maxTurns: options.maxTurns ?? DEFAULT_AGENT_LOOP_MAX_TURNS,
+      },
     })
       .then(r => {
         logForDebugging(turnEndLine(n, r))
@@ -1557,8 +1570,9 @@ export async function runHeadless(
                 process.stdout.write(`Execution error`)
                 break
               case 'error_max_turns':
+                // f4 gate 打回修复①：缺省解析（非 "(undefined)" 字面）
                 process.stdout.write(
-                  `Error: Reached max turns (${String(options.maxTurns)})`,
+                  `Error: Reached max turns (${String(options.maxTurns ?? DEFAULT_AGENT_LOOP_MAX_TURNS)})`,
                 )
                 break
               default:
@@ -1607,6 +1621,30 @@ export async function runHeadless(
     // pending 后台 agent（对标上游 -p 语义 = 不静默 kill fire-and-forget promise）。
     // SIGINT abort 时立即返回（用户中止，不再等）；单个 agent 失败不阻断（allSettled）。
     await drainPendingBackgroundAgents(abortController.signal)
+    // 0.1.93 W-D-A f4 gate 打回修复②（2026-11-08）：headless 终态 graceful
+    // shutdown in-process teammates——runner 为 fire-and-forget 循环，不
+    // drain 则 keep-alive 轮询挂住进程退出（⑤ shutdown 残留根因）。mailbox
+    // shutdown request + 有界等待（F3 态机语义，不发 kill）；组合根未接线
+    //（SessionContextPort 缺席）或零 running teammate = 零开销跳过。
+    {
+      const sessionPort = getSessionContextPort()
+      if (sessionPort) {
+        // SessionSnapshot.tasks（shared TaskStateBase）↔ task 域 TaskStateBase
+        // 双型结构适配（compose.ts setContext 窄视图 cast 同型先例）
+        const drain = await gracefulShutdownInProcessTeammates({
+          getAppState: () => sessionPort.get(),
+          setAppState: f =>
+            sessionPort.set(
+              f as unknown as Parameters<typeof sessionPort.set>[0],
+            ),
+        } as unknown as Parameters<typeof gracefulShutdownInProcessTeammates>[0])
+        if (drain.requested > 0) {
+          logForDebugging(
+            `[headless] graceful shutdown: requested=${drain.requested} drained=${drain.drained}`,
+          )
+        }
+      }
+    }
     // K3-B1（0.1.82，上游 300 对齐）：退出前触发 SessionEnd hooks（engine
     // 面，fail-open + 1.5s 预算）——后台命令/agent drain 完后、进程退出前
     // 最后收尾面；SIGINT abort unwind 也经此支（reason 同 TUI 正常退出）。

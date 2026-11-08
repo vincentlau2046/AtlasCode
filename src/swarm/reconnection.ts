@@ -42,6 +42,18 @@ export type TeamMemberState = {
   spawnedAt: number
 }
 
+/**
+ * Form A 角色化成员名册条目（0.1.93 W-D-A f4 gate 打回修复③：TUI 车道
+ * A2 改形同步）。engine/tools/team teamServices TeamRosterEntry 同形镜像
+ *（engine↛swarm L3 隔离双源，字段变更同步改）。
+ */
+export type TeamRosterEntry = {
+  name: string
+  role?: string
+  goal?: string
+  backstory?: string
+}
+
 /** 旧 AppState['teamContext'] 本地镜像（AppStateStore.ts:313-332 逐字段）。 */
 export type TeamContextShape = {
   teamName: string
@@ -54,6 +66,10 @@ export type TeamContextShape = {
   isLeader?: boolean // True if this swarm member is the team leader
   selfAgentColor?: string // Assigned color for UI (used by dynamically joined sessions)
   teammates: Record<string, TeamMemberState>
+  /** 0.1.93 W-D-A（f4 批复④ + gate 打回修复③）：Form A 角色化成员名册
+   *（role/goal/backstory 三元组）——TUI 车道与 engine 车道同形零持久
+   *（不写 team file，durable 化归 W-D-B-1）。 */
+  roster?: TeamRosterEntry[]
 }
 
 /** 最小 AppState 窄面（仅 teamContext 字段；全量面 = TUI 波）。 */

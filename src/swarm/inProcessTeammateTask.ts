@@ -36,8 +36,15 @@ import {
   appendCappedMessage,
 } from '../task'
 import { logForDebugging } from '../shared'
-import { createUserMessage, updateTaskState } from '../engine'
+import {
+  createShutdownRequestMessage,
+  createUserMessage,
+  jsonStringify,
+  updateTaskState,
+  writeToMailbox,
+} from '../engine'
 import { killInProcessTeammate } from './spawnInProcess'
+import { TEAM_LEAD_NAME } from './constants'
 
 /**
  * InProcessTeammateTask - Handles in-process teammate execution.
@@ -171,4 +178,70 @@ export function getRunningTeammatesSorted(
   return getAllInProcessTeammateTasks(tasks)
     .filter(t => t.status === 'running')
     .sort((a, b) => a.identity.agentName.localeCompare(b.identity.agentName))
+}
+
+/**
+ * 0.1.93 W-D-A f4 gate 打回修复②（2026-11-08 裁定）：headless 终态 graceful
+ * shutdown 收尾。对全部 running 的 in-process teammate 两段式发 shutdown
+ *（mailbox request + shutdownRequested 标志，镜像 InProcessBackend.terminate，
+ * from = TEAM_LEAD_NAME——F3 态机语义，不发 kill），随后有界轮询等成员走
+ * graceful 退出（runner 轮末 completed 收尾）。超时 = 放弃等待照常返回
+ *（不 kill 不抛；headless 退出链不因单成员挂起而永久阻塞——有界性由
+ * timeoutMs 保证）。
+ *
+ * 消费点 = print.ts headless 尾部（drainPendingBackgroundAgents 之后、
+ * SessionEnd hooks 之前）；零 running teammate 零开销直返。appState 访问
+ * 经 SessionContextPort 注入（组合根 compose.ts setSessionContextPort 接线；
+ * swarm 域不直依赖 engine port——依赖方向边界）。
+ */
+export const TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS = 15_000
+const TEAMMATE_GRACEFUL_SHUTDOWN_POLL_MS = 250
+
+export async function gracefulShutdownInProcessTeammates(deps: {
+  getAppState: () => { tasks?: Record<string, TaskStateBase> }
+  setAppState: SetAppState
+  timeoutMs?: number
+}): Promise<{ requested: number; drained: number }> {
+  const running = getAllInProcessTeammateTasks(
+    deps.getAppState().tasks ?? {},
+  ).filter(t => t.status === 'running')
+  const toRequest = running.filter(t => !t.shutdownRequested)
+  if (running.length === 0) {
+    return { requested: 0, drained: 0 }
+  }
+  const requestIdBase = Date.now()
+  for (const teammate of toRequest) {
+    const shutdownRequest = createShutdownRequestMessage({
+      requestId: `shutdown-${teammate.identity.agentId}-session-end-${requestIdBase}`,
+      from: TEAM_LEAD_NAME,
+      reason: 'session end (headless terminal state)',
+    })
+    await writeToMailbox(
+      teammate.identity.agentName,
+      {
+        from: TEAM_LEAD_NAME,
+        text: jsonStringify(shutdownRequest),
+        timestamp: new Date().toISOString(),
+      },
+      teammate.identity.teamName,
+    )
+    requestTeammateShutdown(teammate.id, deps.setAppState)
+  }
+  const timeoutMs = deps.timeoutMs ?? TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS
+  const deadline = Date.now() + timeoutMs
+  let drained = 0
+  for (;;) {
+    const current = getAllInProcessTeammateTasks(
+      deps.getAppState().tasks ?? {},
+    )
+    drained = running.filter(prev => {
+      const now = current.find(t => t.id === prev.id)
+      return now !== undefined && now.status !== 'running'
+    }).length
+    if (drained === running.length || Date.now() >= deadline) break
+    await new Promise(resolve =>
+      setTimeout(resolve, TEAMMATE_GRACEFUL_SHUTDOWN_POLL_MS),
+    )
+  }
+  return { requested: toRequest.length, drained }
 }

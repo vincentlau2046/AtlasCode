@@ -166,7 +166,7 @@ import {
 //    （A5；f4 批复④：组态优先 / team file 回落 / 缺席返空成员集不崩）──
 import { SendMessageTool, resetTeamFileLoader, setTeamFileLoader } from '../../src/engine'
 import { peekTeamContext } from '../../src/engine/tools/team/teamServices'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -1062,5 +1062,268 @@ describe('wave0193 段 H：idle/wake 循环（mailbox 到达→唤醒重跑，A 
     setTimeout(() => w.abortController.abort(), 650)
     const result = await waitPromise
     expect(result.type).toBe('aborted')
+  })
+})
+
+// ── 段 I：f4 gate 打回修复两格（2026-11-08 裁定；预注册 4 格外追加）──
+//    ①「缺省路径有界」：resolveTerminationSpec 缺席 → DEFAULT spec
+//      （max-turns 200；validate 过；200 轮终止 / 199 不终止；显式透传同
+//      引用不包默认）。旧「absent = 零评估恒等」裁定废止锚。
+//    ②「终态退出」：gracefulShutdownInProcessTeammates 真盘 tmp mailbox
+//      （段 H 同法，零写真实 ~/.atlas）——running 成员收 mailbox shutdown
+//      request + shutdownRequested 置位 + 终态后 drained 计数；无成员零
+//      开销直返；超时支有界返回（不 kill 不抛）。
+import {
+  gracefulShutdownInProcessTeammates,
+  resolveTerminationSpec,
+  DEFAULT_TEAMMATE_TERMINATION_SPEC,
+  DEFAULT_TEAMMATE_MAX_TURNS,
+} from '../../src/swarm'
+import {
+  isShutdownRequest,
+  readMailbox,
+} from '../../src/engine/messaging/mailbox'
+import type {
+  InProcessTeammateTaskState,
+  TaskStateBase,
+} from '../../src/task'
+
+describe('wave0193 段 I：f4 gate 打回修复（缺省有界 + 终态退出，2026-11-08）', () => {
+  let tmpHome: string
+  const savedConfigDirI = process.env.ATLAS_CONFIG_DIR
+  beforeAll(() => {
+    tmpHome = mkdtempSync(join(tmpdir(), 'wave0193-gatefix-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHome
+  })
+  afterAll(() => {
+    if (savedConfigDirI === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDirI
+    rmSync(tmpHome, { recursive: true, force: true })
+  })
+
+  function makeTeammateTask(taskId: string, agentName: string): InProcessTeammateTaskState {
+    return {
+      id: taskId,
+      type: 'in_process_teammate',
+      status: 'running',
+      description: 'wave0193 段 I',
+      startTime: Date.now(),
+      outputFile: '/tmp/wave0193-seg-i.out',
+      outputOffset: 0,
+      notified: false,
+      identity: {
+        agentId: `${agentName}@gatefix`,
+        agentName,
+        teamName: 'gatefix-team',
+        planModeRequired: false,
+        parentSessionId: 'sess-gatefix',
+      },
+      prompt: 'p',
+      awaitingPlanApproval: false,
+      permissionMode: 'default',
+      isIdle: false,
+      shutdownRequested: false,
+      lastReportedToolCount: 0,
+      lastReportedTokenCount: 0,
+      pendingUserMessages: [],
+    }
+  }
+
+  test('I1 缺省路径有界：缺席 → DEFAULT spec（validate 过 + 200 终止 / 199 不终止）', () => {
+    const resolved = resolveTerminationSpec(undefined)
+    expect(resolved).toBe(DEFAULT_TEAMMATE_TERMINATION_SPEC)
+    expect(DEFAULT_TEAMMATE_TERMINATION_SPEC.conditions[0]).toEqual({
+      kind: 'max-turns',
+      maxTurns: DEFAULT_TEAMMATE_MAX_TURNS,
+    })
+    expect(() => validateTerminationSpec(resolved)).not.toThrow()
+    const at = evaluateTerminationSpec(resolved, {
+      ...createInitialTerminationLoopState(),
+      turns: DEFAULT_TEAMMATE_MAX_TURNS,
+      aborted: false,
+    })
+    expect(at.terminate).toBe(true)
+    expect(at.reason).toEqual({
+      type: 'max-turns',
+      turns: DEFAULT_TEAMMATE_MAX_TURNS,
+    })
+    const below = evaluateTerminationSpec(resolved, {
+      ...createInitialTerminationLoopState(),
+      turns: DEFAULT_TEAMMATE_MAX_TURNS - 1,
+      aborted: false,
+    })
+    expect(below.terminate).toBe(false)
+  })
+
+  test('I2 显式 spec 原样透传（同一引用，不包默认）', () => {
+    const explicit: TerminationSpec = {
+      op: 'or',
+      conditions: [{ kind: 'max-turns', maxTurns: 5 }],
+    }
+    expect(resolveTerminationSpec(explicit)).toBe(explicit)
+  })
+
+  test('I3 running 成员 → mailbox shutdown request + 标志置位 + 终态后 drained', async () => {
+    let state: { tasks: Record<string, InProcessTeammateTaskState> } = {
+      tasks: { 'task-i3': makeTeammateTask('task-i3', 'w-i3') },
+    }
+    let completionScheduled = false
+    const setAppState = (f: (prev: typeof state) => typeof state) => {
+      state = f(state)
+      const t = state.tasks['task-i3']
+      // 模拟 runner graceful 退出：标志置位后 100ms 走轮末 completed 收尾
+      if (t?.shutdownRequested && !completionScheduled) {
+        completionScheduled = true
+        setTimeout(() => {
+          state = {
+            tasks: {
+              'task-i3': {
+                ...state.tasks['task-i3']!,
+                status: 'completed',
+                endTime: Date.now(),
+              },
+            },
+          }
+        }, 100)
+      }
+    }
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: () => state,
+      setAppState: setAppState as unknown as (
+        f: (prev: { tasks: Record<string, TaskStateBase> }) => {
+          tasks: Record<string, TaskStateBase>
+        },
+      ) => void,
+      timeoutMs: 3000,
+    })
+    expect(r.requested).toBe(1)
+    expect(r.drained).toBe(1)
+    expect(state.tasks['task-i3']!.shutdownRequested).toBe(true)
+    // mailbox 真盘：成员 inbox 收到 shutdown request（from = team-lead）
+    const msgs = await readMailbox('w-i3', 'gatefix-team')
+    const shutdownMsg = msgs.map(m => isShutdownRequest(m.text)).find(Boolean)
+    expect(shutdownMsg).not.toBeNull()
+    expect(shutdownMsg?.from).toBe(TEAM_LEAD_NAME)
+  })
+
+  test('I4 零 running 成员 → 零开销直返（requested 0，不写 mailbox）', async () => {
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: () => ({ tasks: {} }),
+      setAppState: () => {},
+      timeoutMs: 300,
+    })
+    expect(r).toEqual({ requested: 0, drained: 0 })
+  })
+
+  test('I5 超时支有界返回（不 kill 不抛；timeoutMs 300 → drained 0）', async () => {
+    const state = {
+      tasks: { 'task-i5': makeTeammateTask('task-i5', 'w-i5') },
+    }
+    const start = Date.now()
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: () => state,
+      setAppState: () => {},
+      timeoutMs: 300,
+    })
+    const elapsed = Date.now() - start
+    expect(r.requested).toBe(1)
+    expect(r.drained).toBe(0)
+    expect(elapsed).toBeLessThan(2500)
+  })
+})
+
+// ── 段 J：TUI 车道 TeamCreate A2 零持久改形判别（f4 gate 打回修复③，
+//    2026-11-08；与 print 侧段 I 同族）——真盘 tmp 断言零 config.json 写
+//    + roster 入 AppState.teamContext + 双副本 prompt 面逐字节同形 +
+//    prompt 零 config.json 读指引（读面指引=死胡同 + 敏感文件对话框入口）。
+import { TeamCreateTool as TuiTeamCreateTool } from '../../src/tui/tools/TeamCreateTool/TeamCreateTool'
+
+describe('wave0193 段 J：TUI 车道 TeamCreate 零写盘（f4 gate 打回修复③）', () => {
+  const savedEnvJ = process.env[GATE_ENV]
+  const savedConfigDirJ = process.env.ATLAS_CONFIG_DIR
+  let tmpHomeJ: string
+
+  beforeAll(() => {
+    tmpHomeJ = mkdtempSync(join(tmpdir(), 'wave0193-tui-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHomeJ
+  })
+  afterAll(() => {
+    if (savedEnvJ === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedEnvJ
+    if (savedConfigDirJ === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDirJ
+    rmSync(tmpHomeJ, { recursive: true, force: true })
+  })
+
+  function makeTuiContext() {
+    const state: { teamContext?: Record<string, unknown> } = {}
+    return {
+      state,
+      getAppState: () => state,
+      setAppState: (f: (prev: typeof state) => typeof state) => {
+        Object.assign(state, f(state))
+      },
+    }
+  }
+
+  test('J1 门 ON 创建组：真盘零 config.json 写 + roster 入 teamContext', async () => {
+    process.env[GATE_ENV] = '1'
+    try {
+      const ctx = makeTuiContext()
+      const r = await TuiTeamCreateTool.call(
+        {
+          team_name: 'tui-zero',
+          members: [
+            { name: 'm1', role: 'dev', goal: 'g', backstory: 'b' },
+          ],
+        },
+        ctx,
+      )
+      // 真 teams 目录零 config.json（无 Form A 回读者 → 写入=孤儿破口，
+      // 审计 F1；tasks 目录盘面沿既有域盘面不变更——六判据口径）
+      const teamsDir = join(tmpHomeJ, 'teams')
+      const files = existsSync(teamsDir)
+        ? readdirSync(teamsDir, { recursive: true })
+        : []
+      expect(
+        files.filter(f => String(f).endsWith('config.json')),
+      ).toEqual([])
+      expect(r.data.team_name).toBe('tui-zero')
+      const tc = ctx.state.teamContext as {
+        roster?: Array<{ name: string; role?: string }>
+        teammates: Record<string, unknown>
+      }
+      expect(tc.roster).toHaveLength(1)
+      expect(tc.roster?.[0]?.name).toBe('m1')
+      expect(tc.roster?.[0]?.role).toBe('dev')
+      expect(tc.teammates['team-lead@tui-zero']).toBeDefined()
+    } finally {
+      if (savedEnvJ === undefined) delete process.env[GATE_ENV]
+      else process.env[GATE_ENV] = savedEnvJ
+    }
+  })
+
+  test('J2 members 缺 name → validateInput 拒（TUI 车道同形 errorCode 9）', async () => {
+    process.env[GATE_ENV] = '1'
+    try {
+      const v = await TuiTeamCreateTool.validateInput(
+        { team_name: 't', members: [{ role: 'x' }] },
+        {},
+      )
+      expect(v.result).toBe(false)
+      expect(v.errorCode).toBe(9)
+    } finally {
+      if (savedEnvJ === undefined) delete process.env[GATE_ENV]
+      else process.env[GATE_ENV] = savedEnvJ
+    }
+  })
+
+  test('J3 双副本 prompt 面逐字节同形 + 零 config.json 指引（读面=死胡同裁除）', async () => {
+    const tuiPrompt = await TuiTeamCreateTool.prompt()
+    const enginePrompt = await TeamCreateTool.description()
+    expect(tuiPrompt).toBe(enginePrompt)
+    expect(tuiPrompt).not.toContain('config.json')
+    expect(tuiPrompt).toContain('zero-persistence')
+    expect(tuiPrompt).toContain('members')
   })
 })

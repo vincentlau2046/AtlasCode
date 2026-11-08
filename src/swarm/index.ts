@@ -167,6 +167,10 @@ export {
   findTeammateTaskByAgentId,
   getAllInProcessTeammateTasks,
   getRunningTeammatesSorted,
+  // 0.1.93 W-D-A f4 gate 打回修复②：headless 终态 graceful shutdown 收尾
+  //（消费点 = print.ts 尾部；mailbox request + 有界等待，不发 kill）。
+  gracefulShutdownInProcessTeammates,
+  TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS,
 } from './inProcessTeammateTask'
 export {
   findInProcessTeammateTaskId,
@@ -312,6 +316,10 @@ export {
   advanceTerminationLoopState,
   evaluateTerminationSpec,
   extractFinalAssistantText,
+  // 0.1.93 W-D-A f4 gate 打回修复①：缺省有界 fail-closed（缺席 → 有界默认）。
+  resolveTerminationSpec,
+  DEFAULT_TEAMMATE_TERMINATION_SPEC,
+  DEFAULT_TEAMMATE_MAX_TURNS,
   type TerminationCondition,
   type TerminationSpec,
   type TerminationLoopState,

@@ -1,25 +1,17 @@
 import { z } from 'zod/v4'
-import { getSessionId } from 'src/bootstrap'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { formatAgentId } from '../../utils/agentId.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
 import { getCwd } from '../../utils/cwd.js'
 import { lazySchema } from '../../utils/lazySchema.js'
-import {
-  getDefaultMainLoopModel,
-  parseUserSpecifiedModel,
-} from '../../utils/model/model.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { getResolvedTeammateMode } from '../../utils/swarm/backends/registry.js'
 import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
-import type { TeamFile } from '../../utils/swarm/teamHelpers.js'
 import {
   getTeamFilePath,
   readTeamFile,
-  registerTeamForSessionCleanup,
   sanitizeName,
-  writeTeamFileAsync,
 } from '../../utils/swarm/teamHelpers.js'
 import { assignTeammateColor } from '../../utils/swarm/teammateLayoutManager.js'
 import {
@@ -42,6 +34,39 @@ const inputSchema = lazySchema(() =>
       .describe(
         'Type/role of the team lead (e.g., "researcher", "test-runner"). ' +
           'Used for team file and inter-agent coordination.',
+      ),
+    // 0.1.93 W-D-A（f4 批复④ + gate 打回修复③）：members 角色名册——
+    // 与 engine 车道 teamCreateTool.ts 同形（双副本同步纪律；角色三元组
+    // role/goal/backstory 渲染进成员 prompt，spawn 触发点按 name 检索）。
+    members: z
+      .array(
+        z.strictObject({
+          name: z
+            .string()
+            .describe('Member name (used as the spawn identity).'),
+          role: z
+            .string()
+            .optional()
+            .describe(
+              'Role label resolved against the role template registry.',
+            ),
+          goal: z
+            .string()
+            .optional()
+            .describe("This member's goal for the team's current task."),
+          backstory: z
+            .string()
+            .optional()
+            .describe(
+              "This member's background/context for prompt composition.",
+            ),
+        }),
+      )
+      .optional()
+      .describe(
+        'Optional roster of team members to plan for this team. Each entry ' +
+          'carries an optional role/goal/backstory triplet used to compose the ' +
+          "member's prompt when spawned via Agent(name, team_name).",
       ),
   }),
 )
@@ -99,6 +124,18 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
         errorCode: 9,
       }
     }
+    // 0.1.93 W-D-A：members 名册校验（条目 name 必填非空；engine 车道同形）
+    if (input.members) {
+      for (const m of input.members) {
+        if (!m || typeof m !== 'object' || !m.name || m.name.trim().length === 0) {
+          return {
+            result: false,
+            message: 'each team member requires a non-empty name',
+            errorCode: 9,
+          }
+        }
+      }
+    }
     return { result: true }
   },
 
@@ -125,7 +162,7 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
 
   async call(input, context) {
     const { setAppState, getAppState } = context
-    const { team_name, description: _description, agent_type } = input
+    const { team_name, agent_type } = input
 
     // Check if already in a team - restrict to one team per leader
     const appState = getAppState()
@@ -143,39 +180,22 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
     // Generate a deterministic agent ID for the team lead
     const leadAgentId = formatAgentId(TEAM_LEAD_NAME, finalTeamName)
     const leadAgentType = agent_type || TEAM_LEAD_NAME
-    // Get the team lead's current model from AppState (handles session model, settings, CLI override)
-    const leadModel = parseUserSpecifiedModel(
-      appState.mainLoopModelForSession ??
-        appState.mainLoopModel ??
-        getDefaultMainLoopModel(),
-    )
 
     const teamFilePath = getTeamFilePath(finalTeamName)
 
-    const teamFile: TeamFile = {
-      name: finalTeamName,
-      description: _description,
-      createdAt: Date.now(),
-      leadAgentId,
-      leadSessionId: getSessionId(), // Store actual session ID for team discovery
-      members: [
-        {
-          agentId: leadAgentId,
-          name: TEAM_LEAD_NAME,
-          agentType: leadAgentType,
-          model: leadModel,
-          joinedAt: Date.now(),
-          tmuxPaneId: '',
-          cwd: getCwd(),
-          subscriptions: [],
-        },
-      ],
-    }
+    // 0.1.93 W-D-A（f4 批复④ + gate 打回修复③，审计 F1 裁定）：Form A
+    // 零持久——team file 写入（writeTeamFileAsync）+ session-end cleanup
+    // 注册（registerTeamForSessionCleanup）两写入点门掉（门 ON 亦不落盘；
+    // 无 Form A 回读者则写入=孤儿破口；durable 化归 W-D-B-1，恢复时随
+    // TeamServicesFile 回填）。组态唯一承载 = AppState.teamContext 内存态
+    //（本文件尾 + members 名册 roster）。leadModel 旧仅入 teamFile 成员
+    // 记录，零持久改形后无消费 → parseUserSpecifiedModel 链随之裁。
+    // 与 engine 车道 teamCreateTool.ts 同形（双副本同步纪律）。
 
-    await writeTeamFileAsync(finalTeamName, teamFile)
-    // Track for session-end cleanup — teams were left on disk forever
-    // unless explicitly TeamDelete'd (gh-32730).
-    registerTeamForSessionCleanup(finalTeamName)
+    // 0.1.93 W-D-A：members 名册（角色三元组）入组态——Form A spawn 触发点
+    //（Agent 扩参）按 name 检索渲染 prompt。
+    const roster =
+      input.members && input.members.length > 0 ? input.members : undefined
 
     // Reset and create the corresponding task list directory (Team = Project = TaskList)
     // This ensures task numbering starts fresh at 1 for each new swarm
@@ -195,6 +215,7 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
         teamName: finalTeamName,
         teamFilePath,
         leadAgentId,
+        roster,
         teammates: {
           [leadAgentId]: {
             name: TEAM_LEAD_NAME,

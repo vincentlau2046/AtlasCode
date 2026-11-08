@@ -237,6 +237,7 @@ import {
   createInitialTerminationLoopState,
   evaluateTerminationSpec,
   extractFinalAssistantText,
+  resolveTerminationSpec,
   validateTerminationSpec,
   type TerminationReason,
 } from './teammateTermination'
@@ -1252,14 +1253,16 @@ export async function runInProcessTeammate(
     turnId: 'turn-0',
   }
 
-  // 0.1.93 W-D-A A6：终止条件组（可选；absent = 零评估现行为恒等）。
-  // spec 构造期 fail-loud 校验（G-1 090-09 同族）；per-member stall 计数
-  // 落本循环态（跨轮持久），轮末统一评估（单一评估点）。
+  // 0.1.93 W-D-A A6：终止条件组。f4 gate 打回修复①（2026-11-08）：缺省
+  // fail-closed 有界——config.termination 缺席时 resolveTerminationSpec 注入
+  // DEFAULT_TEAMMATE_TERMINATION_SPEC（max-turns 200；旧「absent = 零评估
+  // 恒等」裁定废止，termination 评估器禁消费 undefined）。spec 构造期
+  // fail-loud 校验（G-1 090-09 同族）；per-member stall 计数落本循环态
+  //（跨轮持久），轮末统一评估（单一评估点）。
   let termState = createInitialTerminationLoopState()
   let terminationReason: TerminationReason | undefined
-  if (config.termination) {
-    validateTerminationSpec(config.termination)
-  }
+  const effectiveTermination = resolveTerminationSpec(config.termination)
+  validateTerminationSpec(effectiveTermination)
 
   try {
     // Add initial prompt to task.messages for display (wrapped with XML)
@@ -1504,21 +1507,21 @@ export async function runInProcessTeammate(
         )
       }
 
-      // 0.1.93 W-D-A A6：轮末终止评估（单一评估点；absent spec = 零评估
-      // 恒等）。命中 → graceful 退出（不发 kill，走轮末既有 completed 收
-      // 尾 + idle 通知已发——F3 态机语义），reason 留痕入 result。
-      if (config.termination) {
-        const verdict = evaluateTerminationSpec(config.termination, {
-          ...termState,
-          aborted: abortController.signal.aborted,
-        })
-        if (verdict.terminate) {
-          logForDebugging(
-            `[inProcessRunner] ${identity.agentId} termination condition met (${JSON.stringify(verdict.reason)}) — graceful exit`,
-          )
-          terminationReason = verdict.reason
-          shouldExit = true
-        }
+      // 0.1.93 W-D-A A6：轮末终止评估（单一评估点）。f4 gate 打回修复①：
+      // 消费缺省解析后的 effectiveTermination（缺席 = 有界默认 max-turns
+      // 200，见上方构造期注）。命中 → graceful 退出（不发 kill，走轮末
+      // 既有 completed 收尾 + idle 通知已发——F3 态机语义），reason 留痕
+      // 入 result。
+      const terminationVerdict = evaluateTerminationSpec(effectiveTermination, {
+        ...termState,
+        aborted: abortController.signal.aborted,
+      })
+      if (terminationVerdict.terminate) {
+        logForDebugging(
+          `[inProcessRunner] ${identity.agentId} termination condition met (${JSON.stringify(terminationVerdict.reason)}) — graceful exit`,
+        )
+        terminationReason = terminationVerdict.reason
+        shouldExit = true
       }
 
       logForDebugging(

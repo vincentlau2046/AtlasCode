@@ -16,7 +16,9 @@
  * 连续两轮产出完全相同的非空终轮文本 = 打转一轮（stallConsecutive+1）；
  * 异文/空/缺文本复位。计数器由 advanceTerminationLoopState 在每轮 runAgent
  * 后推进（inProcessRunner 循环态，跨轮持久），评估由 evaluateTerminationSpec
- * 在轮末统一进行（absent spec = 零评估，现行为字节级恒等）。
+ * 在轮末统一进行（0.1.93 f4 gate 打回修复① 2026-11-08：absent spec 的旧
+ *「零评估恒等」裁定废止 → resolveTerminationSpec 缺省注入有界默认，
+ * fail-closed 有界——成员跨轮累计不再无界）。
  *
  * 配置 fail-loud（G-1 090-09 同族）：validateTerminationSpec 构造期抛，
  * 禁静默降级。本模块零 I/O 零依赖（swarm 域内纯函数）。
@@ -57,6 +59,27 @@ export type TerminationReason =
 export type TerminationVerdict = {
   terminate: boolean
   reason?: TerminationReason
+}
+
+/**
+ * 0.1.93 W-D-A f4 gate 打回修复①（2026-11-08 裁定）：缺省有界 fail-closed。
+ * TeamCreate/扩参未显式传 termination spec 时注入有界默认——termination
+ * 评估器禁消费 undefined（成员跨轮累计无界 = 孤儿循环破口）。
+ *
+ * 界值锁定（Main 锁面，登记工单）：DEFAULT_TEAMMATE_MAX_TURNS = 200。
+ * leader 主 loop 缺省 DEFAULT_AGENT_LOOP_MAX_TURNS = 20 是 per-run 面；
+ * teammate 跨轮累计取 10× 宽容界（runaway 守卫非工作预算）。
+ */
+export const DEFAULT_TEAMMATE_MAX_TURNS = 200
+
+export const DEFAULT_TEAMMATE_TERMINATION_SPEC: TerminationSpec = {
+  op: 'or',
+  conditions: [{ kind: 'max-turns', maxTurns: DEFAULT_TEAMMATE_MAX_TURNS }],
+}
+
+/** 缺省解析单一事实源：显式 spec 原样透传（同一引用）；缺席 → 有界默认。 */
+export function resolveTerminationSpec(spec?: TerminationSpec): TerminationSpec {
+  return spec ?? DEFAULT_TEAMMATE_TERMINATION_SPEC
 }
 
 /** 配置 fail-loud 校验（G-1 090-09 同型错误串族；构造期抛，禁静默降级）。 */

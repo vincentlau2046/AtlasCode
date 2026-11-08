@@ -346,6 +346,16 @@ export type AppState = DeepImmutable<{
         spawnedAt: number
       }
     }
+    // 0.1.93 W-D-A（f4 批复④ + gate 打回修复③）：Form A 角色化成员名册
+    //（role/goal/backstory 三元组）。与 src/swarm/reconnection.ts
+    // TeamRosterEntry / engine/tools/team teamServices 同形镜像（双源
+    // 同步纪律）；Form A 零持久——roster 仅入内存态，不写 team file。
+    roster?: Array<{
+      name: string
+      role?: string
+      goal?: string
+      backstory?: string
+    }>
   }
   // Standalone agent context for non-swarm sessions with custom name/color
   standaloneAgentContext?: {
