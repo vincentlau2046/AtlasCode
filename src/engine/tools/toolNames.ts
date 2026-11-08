@@ -40,6 +40,8 @@ export const ENTER_WORKTREE_TOOL_NAME = 'EnterWorktree'
 export const EXIT_WORKTREE_TOOL_NAME = 'ExitWorktree'
 export const TEAM_CREATE_TOOL_NAME = 'TeamCreate'
 export const TEAM_DELETE_TOOL_NAME = 'TeamDelete'
+// 0.1.93 W-D-A round 5 收敛原语（案 B，f4 锁面批复）：lead 等成员收敛。
+export const WAIT_FOR_TEAMMATES_TOOL_NAME = 'WaitForTeammates'
 // C 桶 ③ shell·swarm 波 S-E2d 补差（§8.66.1.4 ⑨ HISTORY_SNIP materialize；
 // 值逐一验真旧仓 SnipTool.ts:5）。
 export const SNIP_TOOL_NAME = 'Snip'

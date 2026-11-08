@@ -1859,3 +1859,178 @@ describe('wave0193 段 M：round-3 RED-C/D 判别格（路由 fail-closed + 指�
     }
   })
 })
+
+// ── 段 N：round 5 收敛原语判别格（案 B WaitForTeammates；f4 锁面批复
+// 2026-11-08 全认可 + 预注册四格 N1-N4）。锁面：engine-only（TUI 不接线，
+// f4 回裁）+ SessionContextPort 缝 + 事件面阻塞 + Promise.race 单 timer
+// 有界 + 结构化超时非 fail-open。RED 形 = 工具不存在/超时无限阻塞/忙等
+// 轮询/端口缺失 TypeError；GREEN = 下列四格全绿。────────────────────────
+import { afterEach } from 'bun:test'
+import { WaitForTeammatesTool } from '../../src/engine'
+import {
+  setSessionContextPort,
+  resetSessionContextPort,
+  type SessionContextPort,
+} from '../../src/engine'
+import { createRepeatToolCallTracker } from '../../src/engine/pipeline'
+import type { InProcessTeammateTaskState } from '../../src/task/inProcessTeammate'
+
+/** 成员 task 态工厂（InProcessTeammateTaskState 最小运行形）。 */
+function nTeammateTask(name: string): InProcessTeammateTaskState {
+  return {
+    id: `${name}-task`,
+    type: 'in_process_teammate',
+    status: 'running',
+    description: name,
+    identity: {
+      agentId: `${name}@t1`,
+      agentName: name,
+      teamName: 't1',
+    },
+    prompt: '',
+    awaitingPlanApproval: false,
+    permissionMode: 'default',
+    isIdle: false,
+    shutdownRequested: false,
+    lastReportedToolCount: 0,
+    lastReportedTokenCount: 0,
+    pendingUserMessages: [],
+    messages: [],
+  } as unknown as InProcessTeammateTaskState
+}
+
+/** 内存 SessionContextPort fake（tasks 可变 + set 调用计数——零忙等直证锚）。 */
+function nFakePort(initialTasks: Record<string, unknown>) {
+  let tasks = initialTasks
+  let setCallCount = 0
+  const port: SessionContextPort = {
+    get: () =>
+      ({
+        tasks,
+        toolPermissionContext: {},
+        mcp: { tools: [], clients: [] },
+        effortValue: 'medium',
+        advisorModel: undefined,
+      }) as unknown as Parameters<SessionContextPort['get']>[0],
+    set: f => {
+      setCallCount++
+      const next = f({
+        tasks,
+        toolPermissionContext: {},
+        mcp: { tools: [], clients: [] },
+        effortValue: 'medium',
+        advisorModel: undefined,
+      } as unknown as Parameters<SessionContextPort['get']>[0])
+      tasks = next.tasks
+    },
+  }
+  return { port, getSetCallCount: () => setCallCount, getTasks: () => tasks }
+}
+
+describe('wave0193 段 N：round 5 收敛原语判别格（WaitForTeammates，案 B）', () => {
+  afterEach(() => {
+    // 端口复位（模块级单例——跨格泄漏守，sessionContextPort 头注同款纪律）
+    resetSessionContextPort()
+  })
+
+  test('N1 超时格：成员持续 running → timeout 结构化 + still_working + 有界返回', async () => {
+    const { port } = nFakePort({ 'tk-scout': nTeammateTask('scout') })
+    setSessionContextPort(port)
+    const started = Date.now()
+    const result = await WaitForTeammatesTool.call({ timeout: 200 }, {})
+    const elapsed = Date.now() - started
+    const data = (result as { data: { status: string; still_working: string[] } })
+      .data
+    expect(data.status).toBe('timeout')
+    expect(data.still_working).toEqual(['scout'])
+    // 有界：不显著超出 timer 预算（禁 fail-open 无限阻塞的耗时上界断言）
+    expect(elapsed).toBeGreaterThanOrEqual(150)
+    expect(elapsed).toBeLessThan(3000)
+  })
+
+  test('N2 零忙等格：事件回调注册（set 恰 1 次）+ idle 转换唤醒 + 回调被消费', async () => {
+    const fake = nFakePort({ 'tk-scout': nTeammateTask('scout') })
+    setSessionContextPort(fake.port)
+    // call 同步段（至首个 await）完成回调注册——不 await 先观测
+    const pending = WaitForTeammatesTool.call({ timeout: 5000 }, {})
+    // 零忙等直证：注册期 port.set 恰 1 次（回调注册），无轮询重复 set
+    expect(fake.getSetCallCount()).toBe(1)
+    // 事件面直证：成员 task 态挂上 onIdleCallbacks
+    const registered = fake.getTasks()['tk-scout'] as InProcessTeammateTaskState
+    expect(registered.onIdleCallbacks?.length).toBe(1)
+    // 模拟 runner idle 转换（isIdle 置位 + forEach + 清——inProcessRunner L1488 同形）
+    fake.port.set(prev => {
+      const t = prev.tasks['tk-scout'] as InProcessTeammateTaskState
+      t.onIdleCallbacks?.forEach(cb => cb())
+      return {
+        ...prev,
+        tasks: {
+          ...prev.tasks,
+          'tk-scout': { ...t, isIdle: true, onIdleCallbacks: [] },
+        },
+      }
+    })
+    const result = await pending
+    const data = (result as { data: { status: string; idle: string[]; waited_ms: number } })
+      .data
+    expect(data.status).toBe('idle')
+    expect(data.idle).toEqual(['scout'])
+    expect(data.waited_ms).toBeGreaterThanOrEqual(0)
+  })
+
+  test('N3 stall 不误触格：零运行成员立即 idle（waited_ms=0）+ 连击 2 次无提醒', async () => {
+    const { port } = nFakePort({})
+    setSessionContextPort(port)
+    const started = Date.now()
+    const r1 = await WaitForTeammatesTool.call({}, {})
+    const elapsed = Date.now() - started
+    const d1 = (r1 as { data: { status: string; waited_ms: number } }).data
+    expect(d1.status).toBe('idle')
+    expect(d1.waited_ms).toBe(0)
+    expect(elapsed).toBeLessThan(500)
+    // 同参连击 2 次：正常返回 + repeat-tool tracker 阈值 3 之下零提醒注入
+    const r2 = await WaitForTeammatesTool.call({}, {})
+    expect((r2 as { data: { status: string } }).data.status).toBe('idle')
+    const tracker = createRepeatToolCallTracker()
+    // 低于阈值 [3,5,8] 首阈 = 无提醒（observe 返空）
+    expect(tracker.observe('WaitForTeammates', {})).toBeFalsy()
+    expect(tracker.observe('WaitForTeammates', {})).toBeFalsy()
+  })
+
+  test('N4 fail-closed 格：SessionContextPort 未注入 → 结构化错误（RED-B 同形）', async () => {
+    resetSessionContextPort()
+    let err: unknown
+    try {
+      await WaitForTeammatesTool.call({}, {})
+    } catch (e) {
+      err = e
+    }
+    expect(err).toBeInstanceOf(Error)
+    const msg = (err as Error).message
+    expect(msg).toContain('SessionContextPort is not injected')
+    expect(msg).toContain('TeamCreate')
+  })
+
+  test('N5 门控槽：engine 单源注册 + isAgentSwarmsEnabled 同槽（TUI 不接线负断言锚）', () => {
+    // 单源：engine barrel 导出真身（TUI 车道不含本工具 = f4 回裁预期形态，
+    // e2e TUI 腿负断言「TUI 工具池不含 WaitForTeammates」的单元侧锚）
+    expect(WaitForTeammatesTool.name).toBe('WaitForTeammates')
+    expect(WaitForTeammatesTool.isEnabled).toBeFunction()
+    // 门 OFF 缺省不可见（判据④载体，段 A GATE_ENV 同款翻转）
+    const saved = process.env[GATE_ENV]
+    delete process.env[GATE_ENV]
+    try {
+      expect(WaitForTeammatesTool.isEnabled()).toBe(false)
+    } finally {
+      if (saved !== undefined) process.env[GATE_ENV] = saved
+    }
+    // 门 ON 可见
+    process.env[GATE_ENV] = '1'
+    try {
+      expect(WaitForTeammatesTool.isEnabled()).toBe(true)
+    } finally {
+      if (saved === undefined) delete process.env[GATE_ENV]
+      else process.env[GATE_ENV] = saved
+    }
+  })
+})

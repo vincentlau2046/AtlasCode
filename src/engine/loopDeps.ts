@@ -53,6 +53,7 @@ import {
 import { SnipTool } from './tools/team/snipTool'
 import { TeamCreateTool } from './tools/team/teamCreateTool'
 import { TeamDeleteTool } from './tools/team/teamDeleteTool'
+import { WaitForTeammatesTool } from './tools/team/waitForTeammatesTool'
 import { ProposeGoalTool } from './tools/proposeGoal/ProposeGoal'
 import { type AgentLoopDeps } from './query/loop'
 // D1（0.1.37 ③，P2 恢复层 C3 缺口）：headless 车道 413/PTL 反应式压缩
@@ -198,6 +199,9 @@ export async function createAgentLoopDeps(
       SnipTool,
       TeamCreateTool,
       TeamDeleteTool,
+      // 0.1.93 W-D-A round 5 收敛原语（案 B，f4 锁面批）：lead 等成员
+      // 收敛——一工具一轮替 N 轮轮询；engine-only（TUI 不接线，f4 回裁）。
+      WaitForTeammatesTool,
       // 0.1.63 P8：ProposeGoal 工具（CC 2.1.227，恒注册非门控）
       ProposeGoalTool,
     ],

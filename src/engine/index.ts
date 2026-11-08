@@ -212,6 +212,8 @@ export {
   SnipTool,
   TeamCreateTool,
   TeamDeleteTool,
+  // 0.1.93 W-D-A round 5 收敛原语（案 B，engine-only）
+  WaitForTeammatesTool,
   setTeamServices,
   resetTeamServices,
   createDefaultTeamContextStore,

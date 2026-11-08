@@ -75,6 +75,20 @@ export {
   DESCRIPTION as TEAM_DELETE_DESCRIPTION,
   PROMPT as TEAM_DELETE_PROMPT,
 } from './teamDeletePrompt'
+// 0.1.93 W-D-A round 5 收敛原语（案 B）：WaitForTeammates（engine-only，
+// f4 回裁 TUI 不接线；头注 = waitForTeammatesTool.ts 单一事实源）。
+export {
+  WAIT_FOR_TEAMMATES_TOOL_INPUT_SCHEMA,
+  WaitForTeammatesTool,
+  WAIT_FOR_TEAMMATES_DEFAULT_TIMEOUT_MS,
+  WAIT_FOR_TEAMMATES_MAX_TIMEOUT_MS,
+  type WaitForTeammatesInput,
+  type WaitForTeammatesOutput,
+} from './waitForTeammatesTool'
+export {
+  DESCRIPTION as WAIT_FOR_TEAMMATES_DESCRIPTION,
+  PROMPT as WAIT_FOR_TEAMMATES_PROMPT,
+} from './waitForTeammatesPrompt'
 export {
   requireTeamServices,
   setTeamServices,
