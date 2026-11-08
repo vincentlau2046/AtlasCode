@@ -166,6 +166,39 @@ export type SendMessageInput = {
   message: string | StructuredMessage
 }
 
+/**
+ * 窄口 tolerant dispatch 解析 helper（0.1.93 W-D-A round 7，f4 批复 =
+ * (iii) 组合形；解析单源，禁第二实现）：string 形态先嗅探——JSON.parse
+ * 成功且 type ∈ 三结构化协议字面才返回结构化对象（转结构化分派）；其余
+ * （非 JSON / 无 type / 未知 type / 非 object JSON）返回 undefined 维持
+ * 纯文本现行为（fail-safe 回落零扰，不额外放宽 = JSON.parse 语义原样）。
+ * 定性：现状 string-JSON 静默走纯文本支 = 静默误投（比容忍解析更差的
+ * 面，round 6 O4 直证 70 次 ack 零触达）；入站 mailbox 已 tolerant，
+ * 本 helper = 出站对称化。
+ */
+export function tryParseStructuredMessage(
+  text: string,
+): StructuredMessage | undefined {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return undefined
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return undefined
+  }
+  const type = (parsed as { type?: unknown }).type
+  if (
+    type === 'shutdown_request' ||
+    type === 'shutdown_response' ||
+    type === 'plan_approval_response'
+  ) {
+    return parsed as StructuredMessage
+  }
+  return undefined
+}
+
 export type MessageRouting = {
   sender: string
   senderColor?: string
@@ -751,6 +784,37 @@ async function handlePlanRejection(
 // Tool 契约非参数化（readTool face 先例）；face 扩型 = checkPermissions
 // 返回型收窄（web face 先例；落盘面 = allow 单支 + UDS bridge ask 支
 // §8.68 S-E2a 门复活，delta ②）。
+/**
+ * 结构化分派单路径（round 7）：对象形态与嗅探形态（string-JSON 转支）
+ * 共用同一 switch——P4 对象形态回归不变的结构保证（单一事实源，禁第二
+ * dispatch 实现）。行为 = 原 call() 内 switch 逐支转写（零语义变更）。
+ */
+async function dispatchStructuredMessage(
+  message: StructuredMessage,
+  to: string,
+  ctx: SendMessageToolUseContext,
+): Promise<ToolResult<SendMessageToolOutput>> {
+  switch (message.type) {
+    case 'shutdown_request':
+      return handleShutdownRequest(to, message.reason, ctx)
+    case 'shutdown_response':
+      if (message.approve) {
+        return handleShutdownApproval(message.request_id, ctx)
+      }
+      return handleShutdownRejection(message.request_id, message.reason!)
+    case 'plan_approval_response':
+      if (message.approve) {
+        return handlePlanApproval(to, message.request_id, ctx)
+      }
+      return handlePlanRejection(
+        to,
+        message.request_id,
+        message.feedback ?? 'Plan needs revision',
+        ctx,
+      )
+  }
+}
+
 type SendMessageToolFace = Tool & {
   checkPermissions(
     input: unknown,
@@ -818,6 +882,16 @@ export const SendMessageTool: SendMessageToolFace = {
     _context: unknown,
   ): Promise<ValidationResult> {
     const i = input as SendMessageInput
+    // 0.1.93 round 7（f4 批复 (iii)）：窄口嗅探归一——string-JSON 三协议
+    // 字面按对象形态同一验证路径（P4 面恒等：summary 豁免 / broadcast 拒 /
+    // 非 lead 拒 / reject reason 必填对两形态同权）；其余 string 维持纯
+    // 文本面。UDS 跨会话结构化拒绝对嗅探形态同权（嗅探命中 = 结构化语义，
+    // 不借 string 形态绕过 cross-session 约束）。
+    const sniffedMessage =
+      typeof i.message === 'string'
+        ? tryParseStructuredMessage(i.message)
+        : undefined
+    const message: string | StructuredMessage = sniffedMessage ?? i.message
     if (i.to.trim().length === 0) {
       return {
         result: false,
@@ -852,7 +926,7 @@ export const SendMessageTool: SendMessageToolFace = {
       // Structured-message rejection first — it's the permanent constraint.
       // Showing "not connected" first would make the user reconnect only to
       // hit this error on retry.
-      if (typeof i.message !== 'string') {
+      if (typeof message !== 'string') {
         return {
           result: false,
           message:
@@ -874,18 +948,19 @@ export const SendMessageTool: SendMessageToolFace = {
       }
       return { result: true }
     }
-    // §8.68 S-E2a：UDS string 早放行（旧 L658 门控面逐字）
+    // §8.68 S-E2a：UDS string 早放行（旧 L658 门控面逐字；round 7 归一 =
+    // 嗅探命中形态不借此放行，落入下方结构化拒绝）
     if (
       isUdsInboxEnabled() &&
       parseAddress(i.to).scheme === 'uds' &&
-      typeof i.message === 'string'
+      typeof message === 'string'
     ) {
       // UDS cross-session send: summary isn't rendered (UI.tsx returns null
       // for string messages), so don't require it. Structured messages fall
       // through to the rejection below.
       return { result: true }
     }
-    if (typeof i.message === 'string') {
+    if (typeof message === 'string') {
       if (!i.summary || i.summary.trim().length === 0) {
         return {
           result: false,
@@ -913,7 +988,7 @@ export const SendMessageTool: SendMessageToolFace = {
       }
     }
 
-    if (i.message.type === 'shutdown_response' && i.to !== TEAM_LEAD_NAME) {
+    if (message.type === 'shutdown_response' && i.to !== TEAM_LEAD_NAME) {
       return {
         result: false,
         message: `shutdown_response must be sent to "${TEAM_LEAD_NAME}"`,
@@ -922,9 +997,9 @@ export const SendMessageTool: SendMessageToolFace = {
     }
 
     if (
-      i.message.type === 'shutdown_response' &&
-      !i.message.approve &&
-      (!i.message.reason || i.message.reason.trim().length === 0)
+      message.type === 'shutdown_response' &&
+      !message.approve &&
+      (!message.reason || message.reason.trim().length === 0)
     ) {
       return {
         result: false,
@@ -1015,6 +1090,22 @@ export const SendMessageTool: SendMessageToolFace = {
       }
     }
     // delta ③：in-process 名路由块裁 → C 桶 ③ shell·swarm 波
+    // 0.1.93 round 7（f4 批复 (iii)）：窄口 tolerant dispatch——string 先经
+    // tryParseStructuredMessage 嗅探（解析 helper 单源），三协议字面转结构
+    // 化分派（与对象形态同一 dispatchStructuredMessage 路径，P4 面恒等）；
+    // 其余（非 JSON / 无 type / 未知 type / 非 object JSON）维持纯文本现
+    // 行为（fail-safe 回落零扰）。定性：现状 string-JSON 静默走纯文本支 =
+    // 静默误投（round 6 O4 直证 70 次 ack 零触达）。
+    const sniffed =
+      typeof input.message === 'string'
+        ? tryParseStructuredMessage(input.message)
+        : undefined
+    if (sniffed !== undefined) {
+      if (input.to === '*') {
+        throw new Error('structured messages cannot be broadcast')
+      }
+      return dispatchStructuredMessage(sniffed, input.to, ctx)
+    }
     if (typeof input.message === 'string') {
       if (input.to === '*') {
         return handleBroadcast(input.message, input.summary, ctx)
@@ -1026,32 +1117,7 @@ export const SendMessageTool: SendMessageToolFace = {
       throw new Error('structured messages cannot be broadcast')
     }
 
-    switch (input.message.type) {
-      case 'shutdown_request':
-        return handleShutdownRequest(input.to, input.message.reason, ctx)
-      case 'shutdown_response':
-        if (input.message.approve) {
-          return handleShutdownApproval(input.message.request_id, ctx)
-        }
-        return handleShutdownRejection(
-          input.message.request_id,
-          input.message.reason!,
-        )
-      case 'plan_approval_response':
-        if (input.message.approve) {
-          return handlePlanApproval(
-            input.to,
-            input.message.request_id,
-            ctx,
-          )
-        }
-        return handlePlanRejection(
-          input.to,
-          input.message.request_id,
-          input.message.feedback ?? 'Plan needs revision',
-          ctx,
-        )
-    }
+    return dispatchStructuredMessage(input.message, input.to, ctx)
   },
 
   renderToolUseMessage(input: unknown) {

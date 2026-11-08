@@ -425,3 +425,160 @@ describe('F-S6 call plan 拒绝面', () => {
     )
   })
 })
+
+// ── F-P round 7 窄口 tolerant dispatch 判别格（f4 §7.14 段 P 预注册）────
+//    P1 string-JSON approve → handleShutdownApproval 触达（L1018 嗅探转支
+//    直证 + O1 直证复用）；P2 非 JSON string 纯文本不变；P3 JSON 无 type/
+//    未知 type 纯文本不变；P4 对象形态回归不变（同一 dispatch 路径）。
+describe('F-P round 7 窄口 tolerant dispatch（真盘 + fake port + ALS）', () => {
+  afterEach(() => {
+    resetSessionContextPort()
+  })
+
+  test('P1-1 string-JSON approve（带 summary）→ handleShutdownApproval 触达（嗅探转支直证）', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+
+    const r = await runWithTeammateContext(
+      {
+        agentId: 'w9@t1',
+        agentName: 'w9',
+        teamName: 't1',
+        planModeRequired: false,
+        parentSessionId: 's1',
+        isInProcess: true,
+        abortController: new AbortController(),
+      },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: JSON.stringify({
+              type: 'shutdown_response',
+              request_id: 'shutdown-1@w9',
+              approve: true,
+            }),
+            summary: 'ack shutdown',
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    // 触达直证：双态文案之「已触发」（round 6 修形点经嗅探转支可达）
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    expect(memberAbort.signal.aborted).toBe(true)
+    const inner = JSON.parse(readInbox('t1', 'team-lead')[0].text as string)
+    expect(inner).toMatchObject({
+      type: 'shutdown_approved',
+      requestId: 'shutdown-1@w9',
+      from: 'w9',
+    })
+  })
+
+  test('P1-2 string-JSON approve（无 summary）→ 同触达（validate summary 门嗅探豁免）', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+
+    // round 6 e2e 直证该形态先被 InputValidationError 吞（summary is required）
+    // ——修后嗅探命中 = 结构化语义，免 summary 要求，直达 handleShutdownApproval
+    const r = await runWithTeammateContext(
+      {
+        agentId: 'w9@t1',
+        agentName: 'w9',
+        teamName: 't1',
+        planModeRequired: false,
+        parentSessionId: 's1',
+        isInProcess: true,
+        abortController: new AbortController(),
+      },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: JSON.stringify({
+              type: 'shutdown_response',
+              request_id: 'shutdown-2@w9',
+              approve: true,
+            }),
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    expect(memberAbort.signal.aborted).toBe(true)
+  })
+
+  test('P2 非 JSON string → 纯文本支不变（handleMessage 面）', async () => {
+    const r = await SendMessageTool.call(
+      { to: 'w1', message: 'plain hello', summary: 'greet' },
+      ctx('t1'),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    expect(data.message).toBe("Message sent to w1's inbox")
+    const box = readInbox('t1', 'w1')
+    expect(box[0].text).toBe('plain hello')
+  })
+
+  test('P3 JSON 无 type / 未知 type → 纯文本不变（fail-safe 回落）', async () => {
+    const r1 = await SendMessageTool.call(
+      { to: 'w1', message: '{"foo":1}', summary: 'jsonish' },
+      ctx('t1'),
+    )
+    expect((r1.data as SendMessageToolOutput).message).toBe(
+      "Message sent to w1's inbox",
+    )
+    expect(readInbox('t1', 'w1')[0].text).toBe('{"foo":1}')
+
+    const r2 = await SendMessageTool.call(
+      { to: 'w1', message: '{"type":"custom_note","x":1}', summary: 'unknown' },
+      ctx('t1'),
+    )
+    expect((r2.data as SendMessageToolOutput).message).toBe(
+      "Message sent to w1's inbox",
+    )
+    expect(readInbox('t1', 'w1')[1].text).toBe('{"type":"custom_note","x":1}')
+  })
+
+  test('P4 对象形态回归不变（与嗅探形态同一 dispatch 路径）', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+
+    const r = await runWithTeammateContext(
+      {
+        agentId: 'w9@t1',
+        agentName: 'w9',
+        teamName: 't1',
+        planModeRequired: false,
+        parentSessionId: 's1',
+        isInProcess: true,
+        abortController: new AbortController(),
+      },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: {
+              type: 'shutdown_response',
+              request_id: 'shutdown-3@w9',
+              approve: true,
+            },
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    expect(memberAbort.signal.aborted).toBe(true)
+  })
+})

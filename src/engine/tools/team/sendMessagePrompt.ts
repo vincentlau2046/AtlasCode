@@ -62,7 +62,9 @@ If you receive a JSON message with \`type: "shutdown_request"\` or \`type: "plan
 {"to": "researcher", "message": {"type": "plan_approval_response", "request_id": "...", "approve": false, "feedback": "add error handling"}}
 \`\`\`
 
-Approving shutdown terminates your process. Rejecting plan sends the teammate back to revise. Don't originate \`shutdown_request\` unless asked. Don't send structured JSON status messages — use TaskUpdate.`.trim()
+Approving shutdown terminates your process. Rejecting plan sends the teammate back to revise. Don't originate \`shutdown_request\` unless asked. Don't send structured JSON status messages — use TaskUpdate.
+
+Always send protocol responses as JSON **objects** in the \`message\` field, exactly as shown above — never stringify them into a string. (String-encoded JSON of the three protocol types is tolerated as a fallback, but the object form is authoritative.)`.trim()
 }
 
 // 旧 getPrompt() gate-off 模板 .trim() 结果逐字（S-E2 §8.62 落盘锚点 =

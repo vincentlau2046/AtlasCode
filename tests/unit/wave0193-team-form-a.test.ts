@@ -2150,3 +2150,64 @@ describe('wave0193 段 O3：三处同源结构断言（禁第二终态 notion）
     expect(src).not.toContain('is now exiting')
   })
 })
+
+// ── 段 P-A：窄口 tolerant dispatch 解析 helper 单格（round 7，f4 批复 (iii)）──
+// helper 单源（禁第二实现）：string → JSON.parse → type ∈ 三协议字面才
+// 返结构化；其余（非 JSON / 无 type / 未知 type / 非 object JSON）undefined
+// = 纯文本回落。修前 RED = export 不存在（import 红）。
+import { tryParseStructuredMessage } from '../../src/engine/tools/team/sendMessageTool'
+
+describe('P-A 窄口嗅探 helper 单格（round 7）', () => {
+  test('PA1 三协议字面逐一解析为结构化对象', () => {
+    const a = tryParseStructuredMessage(
+      '{"type":"shutdown_request","reason":"done"}',
+    )
+    expect(a).toEqual({ type: 'shutdown_request', reason: 'done' })
+    const b = tryParseStructuredMessage(
+      '{"type":"shutdown_response","request_id":"shutdown-1@w9","approve":true}',
+    )
+    expect(b).toEqual({
+      type: 'shutdown_response',
+      request_id: 'shutdown-1@w9',
+      approve: true,
+    })
+    const c = tryParseStructuredMessage(
+      '{"type":"plan_approval_response","request_id":"plan-1@w1","approve":false,"feedback":"x"}',
+    )
+    expect(c).toEqual({
+      type: 'plan_approval_response',
+      request_id: 'plan-1@w1',
+      approve: false,
+      feedback: 'x',
+    })
+  })
+
+  test('PA2 非 JSON string → undefined（纯文本回落）', () => {
+    expect(tryParseStructuredMessage('hello worker')).toBeUndefined()
+    expect(tryParseStructuredMessage('')).toBeUndefined()
+  })
+
+  test('PA3 JSON 无 type / 未知 type → undefined（纯文本回落）', () => {
+    expect(tryParseStructuredMessage('{"foo":1}')).toBeUndefined()
+    expect(
+      tryParseStructuredMessage('{"type":"custom_note","x":1}'),
+    ).toBeUndefined()
+  })
+
+  test('PA4 非 object JSON（数组/标量）→ undefined', () => {
+    expect(tryParseStructuredMessage('[1,2,3]')).toBeUndefined()
+    expect(tryParseStructuredMessage('"just a string"')).toBeUndefined()
+    expect(tryParseStructuredMessage('42')).toBeUndefined()
+    expect(tryParseStructuredMessage('null')).toBeUndefined()
+  })
+
+  test('PA5 外层 JSON 包裹空白/前后缀容忍面 = JSON.parse 语义（不额外放宽）', () => {
+    // 窄口裁定：不额外放宽——JSON.parse 接受的前后空白可，其他前后缀文本不可
+    expect(
+      tryParseStructuredMessage('  {"type":"shutdown_request"}  '),
+    ).toEqual({ type: 'shutdown_request' })
+    expect(
+      tryParseStructuredMessage('note {"type":"shutdown_request"}'),
+    ).toBeUndefined()
+  })
+})
