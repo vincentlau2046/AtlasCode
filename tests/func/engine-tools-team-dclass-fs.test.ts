@@ -392,7 +392,7 @@ describe('F-DC7 TeamDeleteTool call 体', () => {
     expect(f.calls).toEqual([])
   })
 
-  test('活成员拒清理（逐字文案 + 成员名序 + 不清理支 + 上下文保留）', async () => {
+  test('活成员拒清理（逐字文案 0.1.93 RED-D 改形 + 成员名序 + 不清理支 + 上下文保留）', async () => {
     const f = makeFakeServices()
     f.services.setTeamContext(makeContext('t1'))
     f.teamFiles.set(
@@ -406,8 +406,13 @@ describe('F-DC7 TeamDeleteTool call 体', () => {
     )
     const r = await TeamDeleteTool.call({}, undefined)
     expect(r.data.success).toBe(false)
+    // 0.1.93 round-4 修测（RED-D 指引改形同步）：旧文案引用不存在的
+    // requestShutdown 工具 → 改指 SendMessage shutdown_request 真实机制面
     expect(r.data.message).toBe(
-      'Cannot cleanup team with 2 active member(s): w1, w2. Use requestShutdown to gracefully terminate teammates first.',
+      'Cannot cleanup team with 2 active member(s): w1, w2. ' +
+        'Send each active member a shutdown request via SendMessage first ' +
+        '(message: {"type":"shutdown_request","request_id":"<id>","reason":"<why>"}), ' +
+        'and wait for their shutdown approval and exit before retrying TeamDelete.',
     )
     expect(r.data.team_name).toBe('t1')
     expect(f.calls).not.toContain('cleanup:t1')

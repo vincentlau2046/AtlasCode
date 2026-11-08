@@ -157,7 +157,18 @@ describe('F-S3 call shutdown_request 面', () => {
 // ── F-S4 shutdown_response 批准面 ─────────────────────────────────────
 
 describe('F-S4 call shutdown_response 批准面', () => {
-  test("team-lead mailbox 'default' team 面 + paneId/backendType 缺省", async () => {
+  test("team-lead mailbox 路由（dynamic team 解析）+ paneId/backendType 缺省", async () => {
+    // 0.1.93 round-4 修测（RED-C fail-closed 同步）：旧断言依赖
+    // getTeamName() 无参 → undefined → 'default' 黑洞桶路由——该分支已随
+    // RED-C fail-closed 裁除（f4 §7.9/§7.10）。成员审批链真身 = dynamic
+    // team 身份（tmux/CLI 面同一来源）→ 路由 t1，delta ④ paneId/backendType
+    // 缺省锚原样保留。
+    setDynamicTeamContext({
+      agentId: 'w9@t1',
+      agentName: 'teammate',
+      teamName: 't1',
+      planModeRequired: false,
+    })
     const r = await SendMessageTool.call(
       {
         to: 'team-lead',
@@ -176,8 +187,8 @@ describe('F-S4 call shutdown_response 批准面', () => {
     )
     expect((data as { request_id?: string }).request_id).toBe('shutdown-1@w9')
 
-    // getTeamName() 无参（无 ALS/dynamic）→ undefined → 'default' team 面
-    const inner = JSON.parse(readInbox('default', 'team-lead')[0].text as string)
+    // dynamic 身份解析 → t1 team 面（旧 'default' 黑洞路由已裁除，fail-closed）
+    const inner = JSON.parse(readInbox('t1', 'team-lead')[0].text as string)
     expect(inner).toMatchObject({
       type: 'shutdown_approved',
       requestId: 'shutdown-1@w9',
