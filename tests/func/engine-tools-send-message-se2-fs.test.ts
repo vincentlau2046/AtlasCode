@@ -182,8 +182,11 @@ describe('F-S4 call shutdown_response 批准面', () => {
     )
     const data = r.data as SendMessageToolOutput
     expect(data.success).toBe(true)
+    // 0.1.93 round 6 文案不谎面（f4 根因锁面）：本格无 SessionContextPort
+    // = 触发段缺席（现行为保留），文案不再断言 "is now exiting"（旧文案
+    // 谎——handleShutdownApproval 零终态动作）；触发腿见 F-O1-1。
     expect(data.message).toBe(
-      'Shutdown approved. Sent confirmation to team-lead. Agent teammate is now exiting.',
+      'Shutdown approved. Confirmation sent to team-lead; agent teammate will exit on its next lifecycle check.',
     )
     expect((data as { request_id?: string }).request_id).toBe('shutdown-1@w9')
 
@@ -197,6 +200,128 @@ describe('F-S4 call shutdown_response 批准面', () => {
     // delta ④：in-process 支裁 = paneId/backendType 旧 team-file-missing 面
     expect(inner.paneId).toBeUndefined()
     expect(inner.backendType).toBeUndefined()
+  })
+})
+
+// ── F-O1 round 6 member 侧闭合格（真盘 + fake port + abort 直证）──────
+//    f4 根因锁面批复：handleShutdownApproval 保序修形——approved 消息先写
+//    （lead 可达）再触发既有 abort 通道（F3 stage3 同一 lifecycle
+//    controller），runner 主循环 break → 既有 completed 收尾块写终态
+//    （单一终态写点，不新造）。
+import {
+  setSessionContextPort,
+  resetSessionContextPort,
+  type SessionContextPort,
+} from '../../src/engine'
+import type {
+  InProcessTeammateTaskState,
+  TeammateIdentity,
+} from '../../src/task'
+import { waitForNextPromptOrShutdown } from '../../src/swarm/inProcessRunner'
+import { runWithTeammateContext } from '../../src/engine/messaging'
+
+function oFakePort(initialTasks: Record<string, unknown>): SessionContextPort {
+  let tasks = initialTasks
+  return {
+    get: () => ({ tasks }) as unknown as ReturnType<SessionContextPort['get']>,
+    set: f => {
+      const next = f({ tasks } as unknown as ReturnType<SessionContextPort['get']>)
+      tasks = (next as { tasks?: Record<string, unknown> }).tasks ?? {}
+    },
+  } as unknown as SessionContextPort
+}
+
+function oMemberTask(
+  abortController: AbortController,
+): InProcessTeammateTaskState {
+  return {
+    id: 'w9-task',
+    type: 'in_process_teammate',
+    status: 'running',
+    description: 'w9',
+    identity: { agentId: 'w9@t1', agentName: 'w9', teamName: 't1' },
+    prompt: '',
+    awaitingPlanApproval: false,
+    permissionMode: 'default',
+    isIdle: false,
+    shutdownRequested: false,
+    lastReportedToolCount: 0,
+    lastReportedTokenCount: 0,
+    pendingUserMessages: [],
+    messages: [],
+    abortController,
+  } as unknown as InProcessTeammateTaskState
+}
+
+describe('F-O1 round 6 member 侧闭合格（真盘 mailbox + abort 直证）', () => {
+  afterEach(() => {
+    resetSessionContextPort()
+  })
+
+  test('O1-1 in-process 成员 ack → abort 触发 + approved 消息已落 lead inbox（保序）+ 触发文案', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+
+    const r = await runWithTeammateContext(
+      {
+        agentId: 'w9@t1',
+        agentName: 'w9',
+        teamName: 't1',
+        planModeRequired: false,
+        parentSessionId: 's1',
+        isInProcess: true,
+        abortController: new AbortController(),
+      },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: {
+              type: 'shutdown_response',
+              request_id: 'shutdown-1@w9',
+              approve: true,
+            },
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    // 触发文案两态之「已触发」（f4 修 1：不谎面）
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    // 终态转换触发点直证：lifecycle controller abort（runner 主循环
+    // turn 后 break → 既有 completed 收尾块；收尾块行为 = 段 O1-2 顶）
+    expect(memberAbort.signal.aborted).toBe(true)
+    // 保序直证：approved 消息先写（lead 可达）
+    const inner = JSON.parse(readInbox('t1', 'team-lead')[0].text as string)
+    expect(inner).toMatchObject({
+      type: 'shutdown_approved',
+      requestId: 'shutdown-1@w9',
+      from: 'w9',
+    })
+  })
+
+  test('O1-2 lifecycle abort → waitForNextPromptOrShutdown 即返 aborted（loop 退出直证）', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const identity = {
+      agentId: 'w9@t1',
+      agentName: 'w9',
+      teamName: 't1',
+      planModeRequired: false,
+      parentSessionId: 's1',
+    } as TeammateIdentity
+    const r = await waitForNextPromptOrShutdown(
+      identity,
+      controller,
+      'w9-task',
+      (() => ({ tasks: {} })) as never,
+      (() => {}) as never,
+      'list-1',
+    )
+    expect(r.type).toBe('aborted')
   })
 })
 

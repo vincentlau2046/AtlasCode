@@ -56,7 +56,7 @@ import {
 import { getSessionContextPort } from '../../session/sessionContextPort'
 import type { SessionSnapshot } from '../../ports/sessionContext'
 import type { SetAppState, TaskAppState } from '../../../task'
-import { isInProcessTeammateTask } from '../../../task'
+import { isInProcessTeammateWorking } from '../../../task'
 
 import { jsonStringify } from '../../session/json'
 import { WAIT_FOR_TEAMMATES_TOOL_NAME } from '../toolNames'
@@ -110,11 +110,13 @@ function sessionStateUnavailableError(): Error {
   )
 }
 
-/** 当前仍在工作的成员名（running 且非 idle 的 in-process teammate）。 */
+/** 当前仍在工作的成员名（working 谓词单源 = live 且非轮间 idle）。 */
 function listWorkingTeammateNames(appState: TaskAppState): string[] {
   const names: string[] = []
   for (const task of Object.values(appState.tasks)) {
-    if (isInProcessTeammateTask(task) && task.status === 'running' && !task.isIdle) {
+    // 0.1.93 W-D-A round 6（f4 修 2）：working 判定谓词单源（src/task/
+    // inProcessTeammate，与 TeamDelete 守卫/runner 收尾块同读一状态机）。
+    if (isInProcessTeammateWorking(task)) {
       names.push(task.identity.agentName)
     }
   }

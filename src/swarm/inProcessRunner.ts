@@ -165,6 +165,7 @@ import { getIsNonInteractiveSession } from '../bootstrap'
 import {
   evictTaskOutput,
   MAX_TEAMMATE_DISPLAY_MESSAGES,
+  isInProcessTeammateLive,
   isInProcessTeammateTask,
   type InProcessTeammateTaskState,
   type SetAppState,
@@ -1617,7 +1618,7 @@ export async function runInProcessTeammate(
         // killInProcessTeammate may have already set status:killed +
         // notified:true + cleared fields. Don't overwrite (would flip
         // killed → completed and double-emit the SDK bookend).
-        if (task.status !== 'running') {
+        if (!isInProcessTeammateLive(task)) {
           alreadyTerminal = true
           return task
         }
@@ -1672,7 +1673,7 @@ export async function runInProcessTeammate(
       taskId,
       setAppState,
       task => {
-        if (task.status !== 'running') {
+        if (!isInProcessTeammateLive(task)) {
           alreadyTerminal = true
           return task
         }

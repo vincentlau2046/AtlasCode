@@ -1527,7 +1527,7 @@ import {
   SendMessageTool,
   TaskOutputTool,
 } from '../../src/engine'
-import type { ModelProvider, ModelRole } from '../../src/modelprovider'
+import type { ModelProvider } from '../../src/modelprovider'
 import type { Message, Tool } from '../../src/shared'
 import { readMailbox } from '../../src/engine/messaging/mailbox'
 
@@ -2032,5 +2032,121 @@ describe('wave0193 段 N：round 5 收敛原语判别格（WaitForTeammates，�
       if (saved === undefined) delete process.env[GATE_ENV]
       else process.env[GATE_ENV] = saved
     }
+  })
+})
+
+// ── 段 O：round 6 member 侧终态缝判别格（f4 根因锁面批复）──────────────
+//    根因 = handleShutdownApproval 只写 mailbox 零终态动作（「发消息即
+//    退出」文案语义 = 真第二 notion）；三消费点同读 task.status，分叉在
+//    写面缺口非读面。修形 = 触发既有 abort 通道 → 既有 completed 收尾块
+//    （单一终态写点）+ 终止态谓词单源（src/task/inProcessTeammate）。
+//    O-A 谓词族直测；O2 = 段 G G1-G4 回归（守卫三态谓词化零变更）；
+//    O3 三处同源结构断言；O1 = func 层（mailbox 写面 unit 零盘禁）；
+//    O4 = e2e 名义形锚判定轮。
+import {
+  findInProcessTeammateTaskByAgentId,
+  isInProcessTeammateActiveOrUnknown,
+  isInProcessTeammateLive,
+  isInProcessTeammateWorking,
+} from '../../src/task'
+import { readFileSync as oReadFileSync } from 'node:fs'
+import { join as oJoin } from 'node:path'
+
+describe('wave0193 段 O-A：终止态单源谓词族直测', () => {
+  test('OA1 live 谓词（F3 running 词汇）：running 真 / completed·非 teammate·undefined 假', () => {
+    expect(isInProcessTeammateLive(nTeammateTask('scout'))).toBe(true)
+    expect(
+      isInProcessTeammateLive({ ...nTeammateTask('scout'), status: 'completed' }),
+    ).toBe(false)
+    expect(
+      isInProcessTeammateLive({ type: 'local_agent', status: 'running' }),
+    ).toBe(false)
+    expect(isInProcessTeammateLive(undefined)).toBe(false)
+  })
+
+  test('OA2 working 谓词（WaitForTeammates 消费）：live 且非轮间 idle', () => {
+    expect(isInProcessTeammateWorking(nTeammateTask('scout'))).toBe(true)
+    expect(
+      isInProcessTeammateWorking({ ...nTeammateTask('scout'), isIdle: true }),
+    ).toBe(false)
+    expect(
+      isInProcessTeammateWorking({
+        ...nTeammateTask('scout'),
+        status: 'completed',
+      }),
+    ).toBe(false)
+  })
+
+  test('OA3 activeOrUnknown 谓词（TeamDelete 守卫 fail-closed 语义）：终态非活 / 未知活', () => {
+    expect(isInProcessTeammateActiveOrUnknown(nTeammateTask('scout'))).toBe(true)
+    expect(
+      isInProcessTeammateActiveOrUnknown({
+        ...nTeammateTask('scout'),
+        status: 'completed',
+      }),
+    ).toBe(false)
+    expect(
+      isInProcessTeammateActiveOrUnknown({
+        ...nTeammateTask('scout'),
+        status: 'killed',
+      }),
+    ).toBe(false)
+    // 未知面 fail-closed（旧守卫逐字：status undefined → 活）
+    expect(isInProcessTeammateActiveOrUnknown(undefined)).toBe(true)
+    expect(isInProcessTeammateActiveOrUnknown({})).toBe(true)
+    // 非 teammate 窄形（守卫旧读面回落）：status 字段同判（G3/G4 fixture 形）
+    expect(isInProcessTeammateActiveOrUnknown({ status: 'running' })).toBe(true)
+    expect(isInProcessTeammateActiveOrUnknown({ status: 'completed' })).toBe(false)
+  })
+
+  test('OA4 find by agentId（触发段定位面）：命中 / 错 id / 空表', () => {
+    const tasks = { 'tk-scout': nTeammateTask('scout') }
+    expect(
+      findInProcessTeammateTaskByAgentId(tasks, 'scout@t1')?.identity.agentName,
+    ).toBe('scout')
+    expect(findInProcessTeammateTaskByAgentId(tasks, 'nobody@t1')).toBeUndefined()
+    expect(findInProcessTeammateTaskByAgentId(undefined, 'scout@t1')).toBeUndefined()
+  })
+})
+
+describe('wave0193 段 O3：三处同源结构断言（禁第二终态 notion）', () => {
+  const repoRoot = oJoin(import.meta.dir, '../..')
+
+  test('O3-1 TeamDelete 守卫 import 守卫谓词 + 本地 status 字面比较清零', () => {
+    const src = oReadFileSync(
+      oJoin(repoRoot, 'src/engine/tools/team/teamDeleteTool.ts'),
+      'utf8',
+    )
+    expect(src).toContain('isInProcessTeammateActiveOrUnknown')
+    expect(src).not.toContain("status === 'running'")
+    expect(src).not.toContain('status === undefined')
+  })
+
+  test('O3-2 WaitForTeammates import working 谓词 + 无 running 字面', () => {
+    const src = oReadFileSync(
+      oJoin(repoRoot, 'src/engine/tools/team/waitForTeammatesTool.ts'),
+      'utf8',
+    )
+    expect(src).toContain('isInProcessTeammateWorking')
+    expect(src).not.toContain("'running'")
+  })
+
+  test('O3-3 inProcessRunner 收尾块防重入谓词化（两处 task.status !== running 清零）', () => {
+    const src = oReadFileSync(
+      oJoin(repoRoot, 'src/swarm/inProcessRunner.ts'),
+      'utf8',
+    )
+    expect(src).toContain('isInProcessTeammateLive')
+    expect(src).not.toContain("task.status !== 'running'")
+  })
+
+  test('O3-4 sendMessageTool 触发段在场（member 侧闭合：abort 通道触发）', () => {
+    const src = oReadFileSync(
+      oJoin(repoRoot, 'src/engine/tools/team/sendMessageTool.ts'),
+      'utf8',
+    )
+    expect(src).toContain('findInProcessTeammateTaskByAgentId')
+    expect(src).toContain('.abort()')
+    expect(src).not.toContain('is now exiting')
   })
 })

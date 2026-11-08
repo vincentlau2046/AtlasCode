@@ -47,6 +47,8 @@ import {
 import { clearLeaderTeamName } from '../../tasks'
 import { TEAM_LEAD_NAME, isAgentSwarmsEnabled } from '../../messaging'
 import { jsonStringify } from '../../session/json'
+// 0.1.93 W-D-A round 6（f4 修 2）：终止态单源谓词（守卫读面）。
+import { isInProcessTeammateActiveOrUnknown } from '../../../task'
 import { TEAM_DELETE_TOOL_NAME } from '../toolNames'
 import { requireTeamServices } from './teamServices'
 import { PROMPT } from './teamDeletePrompt'
@@ -175,14 +177,14 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
           context as { getAppState?: () => unknown } | undefined
         )?.getAppState?.()
         const tasks = (
-          appState as {
-            tasks?: Record<string, { status?: unknown }>
-          } | undefined
+          appState as { tasks?: Record<string, unknown> } | undefined
         )?.tasks
-        const alive = teammateEntries.filter(([, member]) => {
-          const status = tasks?.[member.taskId ?? '']?.status
-          return status === undefined || status === 'running'
-        })
+        // 0.1.93 W-D-A round 6（f4 修 2）：守卫读面谓词单源（src/task/
+        // inProcessTeammate，判读逐字 = 旧「status undefined || running」
+        // fail-closed 形；终态词汇与 WaitForTeammates/runner 收尾块同源）。
+        const alive = teammateEntries.filter(([, member]) =>
+          isInProcessTeammateActiveOrUnknown(tasks?.[member.taskId ?? '']),
+        )
         if (alive.length > 0) {
           const memberNames = alive.map(([, member]) => member.name).join(', ')
           return {

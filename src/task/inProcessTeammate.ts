@@ -92,6 +92,79 @@ export function isInProcessTeammateTask(
   return task.type === 'in_process_teammate'
 }
 
+// ── 终止态单源谓词（0.1.93 W-D-A round 6，f4 根因锁面批复）──────────────
+// TeamDelete A7 守卫 / WaitForTeammates working 判定 / inProcessRunner
+// 生命周期收尾防重入三消费点经本组谓词读同一 task.status 状态机——禁
+// 第二 idle/终态 notion（round 5 缝 = handleShutdownApproval「发消息即
+// 退出」并行文案语义，member 侧闭合见 engine sendMessageTool 触发段）。
+
+/** unknown → in-process teammate 收窄（类型判定单源 = isInProcessTeammateTask）。 */
+function asInProcessTeammate(
+  task: unknown,
+): InProcessTeammateTaskState | undefined {
+  if (
+    typeof task === 'object' &&
+    task !== null &&
+    isInProcessTeammateTask(task as TaskStateBase)
+  ) {
+    return task as InProcessTeammateTaskState
+  }
+  return undefined
+}
+
+/**
+ * F3 live 词汇谓词（单源）：in-process teammate 且生命周期态 = 'running'。
+ * 消费点：inProcessRunner 收尾块防重入（completed/failed/killed 均终态）。
+ */
+export function isInProcessTeammateLive(
+  task: unknown,
+): task is InProcessTeammateTaskState {
+  const t = asInProcessTeammate(task)
+  return t !== undefined && t.status === 'running'
+}
+
+/**
+ * working 谓词（WaitForTeammates 消费）：live 且非轮间 idle（isIdle =
+ * 轮间标志非终态 notion，round 6 定性入档）。type guard：true 时调用点
+ * 可直取 identity 窄形。
+ */
+export function isInProcessTeammateWorking(
+  task: unknown,
+): task is InProcessTeammateTaskState {
+  const t = asInProcessTeammate(task)
+  return t !== undefined && t.status === 'running' && !t.isIdle
+}
+
+/**
+ * TeamDelete 守卫 fail-closed 谓词（判读逐字 = 旧守卫「status undefined
+ * || status === 'running'」）：已知 in-process teammate 终态（completed/
+ * killed）= 非活；其余（条目缺失 / 非 teammate 形态 / status 未知 /
+ * running）= 活。status 字面比较单点收敛于本文件。
+ */
+export function isInProcessTeammateActiveOrUnknown(task: unknown): boolean {
+  const t = asInProcessTeammate(task)
+  const status =
+    t !== undefined
+      ? t.status
+      : (task as { status?: unknown } | undefined)?.status
+  return status === undefined || status === 'running'
+}
+
+/**
+ * 按 agentId 定位成员 task（handleShutdownApproval 触发段消费；
+ * findTeammateTaskByAgentId 等价面——旧支 delta ④ 裁除的定位腿复立）。
+ */
+export function findInProcessTeammateTaskByAgentId(
+  tasks: Record<string, unknown> | undefined,
+  agentId: string,
+): InProcessTeammateTaskState | undefined {
+  for (const task of Object.values(tasks ?? {})) {
+    const t = asInProcessTeammate(task)
+    if (t !== undefined && t.identity.agentId === agentId) return t
+  }
+  return undefined
+}
+
 /**
  * 上限追加消息（重建 ①：cap = 100 命名常量；消费端 = teammate 会话
  * 展示历史，防无界增长）。

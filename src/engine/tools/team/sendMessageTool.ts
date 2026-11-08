@@ -130,6 +130,13 @@ import {
   writeToMailbox,
 } from '../../messaging'
 import { jsonStringify } from '../../session/json'
+// 0.1.93 W-D-A round 6（f4 根因锁面批复）：member 侧闭合触发段——SessionContextPort
+// 单源缝（WaitForTeammates/gracefulShutdown 同缝）+ 终止态谓词单源（src/task）。
+import { getSessionContextPort } from '../../session/sessionContextPort'
+import {
+  findInProcessTeammateTaskByAgentId,
+  isInProcessTeammateLive,
+} from '../../../task'
 import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
 import { getSendMessagePrompt } from './sendMessagePrompt'
 // 0.1.93 W-D-A A5（f4 批复④）：组态软读（成员发现双源主源；未注入不抛）
@@ -561,9 +568,19 @@ async function handleShutdownApproval(
     `[SendMessageTool] handleShutdownApproval: teamName=${teamName}, agentId=${agentId}, agentName=${agentName}`,
   )
 
-  // delta ④：in-process 支（own-pane teamFile 查 + findTeammateTaskByAgentId
-  // abort + gracefulShutdown 尾 + fallback 早退文案）裁 → C 桶 ③ shell·swarm
-  // 波；paneId/backendType = 旧 team-file-missing 面 undefined
+  // delta ④：in-process 支（own-pane teamFile 查 + gracefulShutdown 尾 +
+  // fallback 早退文案）裁 → C 桶 ③ shell·swarm 波——该支的 **abort 定位腿
+  // 于 round 6 复立**（下方触发段；pane 形态/teamFile 面不复辟，本波锁面
+  // 外）。paneId/backendType = 旧 team-file-missing 面 undefined。
+  // round 6 member 侧闭合（f4 根因锁面批复）：round 5 e2e 腿 G 直证本
+  // handler 只写 mailbox 零终态动作 → ack 后成员恒 'running'，TeamDelete
+  // 守卫恒拦（"2 active member(s)"）+ lead 轮耗 forced。修形 = 保序两段：
+  // ① approved 消息先写（lead 可达）；② 经 SessionContextPort 单源按
+  // agentId 定位本成员 task，触发既有 lifecycle abort 通道（F3 stage3
+  // 同一 controller）→ runner 主循环 turn 后 break / wait 'aborted' 支 →
+  // 既有 completed 收尾块写终态（status:'completed'，F3 stopped 语义，
+  // 单一终态写点不新造）。端口未注入/条目缺失/非 running = 触发段缺席
+  // （现行为保留），文案两态不谎面。
   const approvedMessage = createShutdownApprovedMessage({
     requestId,
     from: agentName,
@@ -580,10 +597,27 @@ async function handleShutdownApproval(
     teamName,
   )
 
+  let exitTriggered = false
+  try {
+    const port = getSessionContextPort()
+    const memberTask = port
+      ? findInProcessTeammateTaskByAgentId(port.get().tasks, agentId ?? '')
+      : undefined
+    if (isInProcessTeammateLive(memberTask) && memberTask.abortController) {
+      memberTask.abortController.abort()
+      exitTriggered = true
+    }
+  } catch {
+    // 触发段失败不阻断 ack 返回（消息已发出；runner 终止阶梯/轮末收尾
+    // 兜底仍在）
+  }
+
   return {
     data: {
       success: true,
-      message: `Shutdown approved. Sent confirmation to team-lead. Agent ${agentName} is now exiting.`,
+      message: exitTriggered
+        ? `Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent ${agentName}.`
+        : `Shutdown approved. Confirmation sent to team-lead; agent ${agentName} will exit on its next lifecycle check.`,
       request_id: requestId,
     },
   }
