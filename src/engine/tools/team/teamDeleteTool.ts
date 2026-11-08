@@ -152,7 +152,7 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
           return {
             data: {
               success: false,
-              message: `Cannot cleanup team with ${activeMembers.length} active member(s): ${memberNames}. Use requestShutdown to gracefully terminate teammates first.`,
+              message: `Cannot cleanup team with ${activeMembers.length} active member(s): ${memberNames}. Send each active member a shutdown request via SendMessage first (message: {"type":"shutdown_request","request_id":"<id>","reason":"<why>"}), and wait for their shutdown approval and exit before retrying TeamDelete.`,
               team_name: teamName,
             },
           }
@@ -188,7 +188,7 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
           return {
             data: {
               success: false,
-              message: `Cannot cleanup team with ${alive.length} active member(s): ${memberNames}. Use requestShutdown to gracefully terminate teammates first.`,
+              message: `Cannot cleanup team with ${alive.length} active member(s): ${memberNames}. Send each active member a shutdown request via SendMessage first (message: {"type":"shutdown_request","request_id":"<id>","reason":"<why>"}), and wait for their shutdown approval and exit before retrying TeamDelete.`,
               team_name: teamName,
             },
           }

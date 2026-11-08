@@ -299,6 +299,31 @@ export function resetTeamFileLoader(): void {
   teamFileLoader = async () => null
 }
 
+/**
+ * 0.1.93 W-D-A round-3 RED-C（f4 §7.9 裁定）：出站路由 team 解析单源——
+ * 双源同款（A5 handleBroadcast 先例）：getTeamName（ALS > dynamicTeamContext >
+ * appState.teamContext）→ peekTeamContext（TeamCreate 组态 store）回落；
+ * 禁各站旁路第二实现。双源皆缺 = undefined → 调用站 fail-closed
+ *（结构化 Error → pipeline error tool_result，run 不中止），禁
+ * writeToMailbox(recipient, msg, undefined) 静默落 teams/default/ 黑洞桶
+ *（round 3 e2e 直证：lead→member 9-14 体滞留 default read:false 零消费者）。
+ */
+function resolveOutgoingTeamName(teamContext?: {
+  teamName: string
+}): string | undefined {
+  return getTeamName(teamContext) ?? peekTeamContext()?.teamName
+}
+
+/** RED-C fail-closed 结构化错误面（路由不可解析 = 消息不投递，禁静默落桶）。 */
+function unresolvedTeamMailboxError(recipient: string): Error {
+  return new Error(
+    `Cannot route message to "${recipient}": no team mailbox is resolvable ` +
+      '(no teamContext in appState, no in-process teammate context, and no team ' +
+      'registered via TeamCreate). Create a team with TeamCreate first; the ' +
+      'message was NOT delivered.',
+  )
+}
+
 /** §8.68 delta ②：旧 utils truncate（width-aware '…' 尾标）→ 本地 ASCII 面
  * （skillPrompt delta ② 先例同型：超宽 = slice(0, maxWidth - 1) + '…'）。 */
 function truncatePreview(text: string, maxWidth: number): string {
@@ -313,7 +338,9 @@ async function handleMessage(
   context: SendMessageToolUseContext,
 ): Promise<ToolResult<MessageOutput>> {
   const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源同款 + fail-closed（禁 default 黑洞落桶）
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
+  if (!teamName) throw unresolvedTeamMailboxError(recipientName)
   const senderName =
     getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
   const senderColor = getTeammateColor()
@@ -358,8 +385,8 @@ async function handleBroadcast(
   // 既有支优先，组态（TeamServices 软读）补源（Form A 零持久承载 =
   // teamServices store；SessionSnapshot 无 teamContext 字段，prod 主链
   // 组态唯一定位面）。
-  const teamName =
-    getTeamName(appState.teamContext) ?? peekTeamContext()?.teamName
+  // 0.1.93 W-D-A round-3 RED-C：解析收拢单源 helper（同款语义，禁旁路第二实现）
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
 
   if (!teamName) {
     throw new Error(
@@ -487,7 +514,9 @@ async function handleShutdownRequest(
   context: SendMessageToolUseContext,
 ): Promise<ToolResult<RequestOutput>> {
   const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源同款 + fail-closed（禁 default 黑洞落桶）
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
+  if (!teamName) throw unresolvedTeamMailboxError(targetName)
   const senderName = getAgentName() || TEAM_LEAD_NAME
   const requestId = generateRequestId('shutdown', targetName)
 
@@ -522,7 +551,9 @@ async function handleShutdownApproval(
   requestId: string,
   _context: SendMessageToolUseContext,
 ): Promise<ToolResult<ResponseOutput>> {
-  const teamName = getTeamName()
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源 + fail-closed（成员侧 ALS 主源，缺则禁落 default）
+  const teamName = resolveOutgoingTeamName()
+  if (!teamName) throw unresolvedTeamMailboxError(TEAM_LEAD_NAME)
   const agentId = getAgentId()
   const agentName = getAgentName() || 'teammate'
 
@@ -562,7 +593,9 @@ async function handleShutdownRejection(
   requestId: string,
   reason: string,
 ): Promise<ToolResult<ResponseOutput>> {
-  const teamName = getTeamName()
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源 + fail-closed（成员侧 ALS 主源，缺则禁落 default）
+  const teamName = resolveOutgoingTeamName()
+  if (!teamName) throw unresolvedTeamMailboxError(TEAM_LEAD_NAME)
   const agentName = getAgentName() || 'teammate'
 
   const rejectedMessage = createShutdownRejectedMessage({
@@ -597,7 +630,9 @@ async function handlePlanApproval(
   context: SendMessageToolUseContext,
 ): Promise<ToolResult<ResponseOutput>> {
   const appState = context.getAppState()
-  const teamName = appState.teamContext?.teamName
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源 + fail-closed（禁 default 黑洞落桶）
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
+  if (!teamName) throw unresolvedTeamMailboxError(recipientName)
 
   if (!isTeamLead(appState.teamContext)) {
     throw new Error(
@@ -642,7 +677,9 @@ async function handlePlanRejection(
   context: SendMessageToolUseContext,
 ): Promise<ToolResult<ResponseOutput>> {
   const appState = context.getAppState()
-  const teamName = appState.teamContext?.teamName
+  // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源 + fail-closed（禁 default 黑洞落桶）
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
+  if (!teamName) throw unresolvedTeamMailboxError(recipientName)
 
   if (!isTeamLead(appState.teamContext)) {
     throw new Error(

@@ -1735,3 +1735,127 @@ describe('wave0193 段 L：round-2 RED-A/B 修复判别格（同源贯通 + fail
     expect(ok.result).toBe(true)
   })
 })
+// ── 段 M：round-3 RED-C/D 修复判别格（f4 §7.9 裁定；round 4 = 最后轮 前置）——
+//    M1「lead→member 运行中消息达成员 inbox + 零 default 落桶」（f4 点名格）：
+//      lead 侧 TPC 窄视图（无 teamContext）+ TeamCreate 组态 store →
+//      resolveOutgoingTeamName 双源（A5 同款）路由 m1-team；RED-C 修前
+//      writeToMailbox(recipient, msg, undefined) 静默落 teams/default/ 黑洞。
+//    M2「双源皆缺 fail-closed」：无组态上下文 → 结构化 Error（消息不投递）+
+//      零 default 写（黑洞分支裁除）。
+//    M3「RED-D 指引改形」：TeamDelete active-member 守卫消息指向真实机制面
+//      （SendMessage shutdown_request），零悬空 requestShutdown 引用；
+//      engine 行为格 + TUI 双副本文本锚。
+import { TeamDeleteTool } from '../../src/engine'
+import { clearDynamicTeamContext } from '../../src/engine/messaging/teammate'
+import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
+
+describe('wave0193 段 M：round-3 RED-C/D 判别格（路由 fail-closed + 指引改形）', () => {
+  let tmpHomeM: string
+  const savedConfigDirM = process.env.ATLAS_CONFIG_DIR
+  const savedGateM = process.env[GATE_ENV]
+  beforeAll(() => {
+    tmpHomeM = mkdtempSync(join(tmpdir(), 'wave0193-redcd-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHomeM
+    process.env[GATE_ENV] = '1'
+    clearDynamicTeamContext()
+  })
+  afterAll(() => {
+    if (savedConfigDirM === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDirM
+    if (savedGateM === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedGateM
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    clearDynamicTeamContext()
+    rmSync(tmpHomeM, { recursive: true, force: true })
+  })
+
+  /** lead 侧 TPC 窄视图（headless makeCtx 同形：无 teamContext / 无 tasks）。 */
+  function tpcOnlyCtx(): unknown {
+    return {
+      getAppState: () => ({ toolPermissionContext: { mode: 'default' } }),
+    }
+  }
+
+  test('M1 lead→member 运行中消息达成员 inbox + 零 default 落桶（f4 点名格）', async () => {
+    resetDefaultTeamContextStore()
+    setTeamServices(makeMemoryServices().services)
+    try {
+      await TeamCreateTool.call(
+        { team_name: 'm1-team', members: [{ name: 'scout' }] },
+        {},
+      )
+      // RED-C 复现面：lead ctx 无 teamContext（TPC 窄视图）——修前
+      // writeToMailbox(recipient, msg, undefined) 静默落 teams/default/
+      const r = await SendMessageTool.call(
+        { to: 'scout', message: 'route me to member', summary: 'route' },
+        tpcOnlyCtx(),
+      )
+      const data = r.data as { success: boolean; message: string }
+      expect(data.success).toBe(true)
+      // 成员 inbox 收达（组态双源解析 → m1-team）
+      const msgs = await readMailbox('scout', 'm1-team')
+      expect(msgs.some(m => m.text === 'route me to member')).toBe(true)
+      // 零 default 黑洞落桶
+      expect(existsSync(join(tmpHomeM, 'teams', 'default'))).toBe(false)
+    } finally {
+      resetTeamServices()
+      resetDefaultTeamContextStore()
+    }
+  })
+
+  test('M2 双源皆缺 → 结构化 Error + 零 default 写（fail-closed 黑洞分支裁除）', async () => {
+    resetTeamServices()
+    resetDefaultTeamContextStore()
+    clearDynamicTeamContext()
+    let caught: unknown
+    try {
+      await SendMessageTool.call(
+        { to: 'scout', message: 'lost message', summary: 'lost' },
+        tpcOnlyCtx(),
+      )
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toContain('no team mailbox is resolvable')
+    expect((caught as Error).message).toContain('NOT delivered')
+    // 黑洞面零残留：default 桶未建
+    expect(existsSync(join(tmpHomeM, 'teams', 'default'))).toBe(false)
+  })
+
+  test('M3 RED-D 指引改形：TeamDelete 守卫消息指向 shutdown_request 真实机制面', async () => {
+    resetDefaultTeamContextStore()
+    const { services } = makeMemoryServices()
+    setTeamServices(services)
+    try {
+      services.setTeamContext({
+        teamName: 'm3-team',
+        teammates: { 'scout@m3-team': { name: 'scout', taskId: 'tk1' } },
+        roster: [],
+      } as never)
+      const ctx = {
+        getAppState: () => ({ tasks: { tk1: { status: 'running' } } }),
+      }
+      const r = await TeamDeleteTool.call({ team_name: 'm3-team' }, ctx)
+      const data = r.data as { success: boolean; message: string }
+      expect(data.success).toBe(false)
+      // 改形后：指向真实机制面（SendMessage shutdown_request JSON）
+      expect(data.message).toContain('SendMessage')
+      expect(data.message).toContain('shutdown_request')
+      // 零悬空引用（修前 'Use requestShutdown...' 引用不存在的工具）
+      expect(data.message).not.toContain('requestShutdown')
+      // TUI 双副本文本锚（J3 同形纪律：3 处同步）
+      const tuiSrc = await readFile(
+        join('src', 'tui', 'tools', 'TeamDeleteTool', 'TeamDeleteTool.ts'),
+        'utf-8',
+      )
+      expect(tuiSrc).not.toContain('requestShutdown to gracefully')
+      expect(tuiSrc).toContain('shutdown_request')
+    } finally {
+      resetTeamServices()
+      resetDefaultTeamContextStore()
+    }
+  })
+})
