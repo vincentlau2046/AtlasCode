@@ -181,34 +181,57 @@ export function getRunningTeammatesSorted(
 }
 
 /**
- * 0.1.93 W-D-A f4 gate 打回修复②（2026-11-08 裁定）：headless 终态 graceful
- * shutdown 收尾。对全部 running 的 in-process teammate 两段式发 shutdown
- *（mailbox request + shutdownRequested 标志，镜像 InProcessBackend.terminate，
- * from = TEAM_LEAD_NAME——F3 态机语义，不发 kill），随后有界轮询等成员走
- * graceful 退出（runner 轮末 completed 收尾）。超时 = 放弃等待照常返回
- *（不 kill 不抛；headless 退出链不因单成员挂起而永久阻塞——有界性由
- * timeoutMs 保证）。
+ * 0.1.93 W-D-A f4 gate 打回修复②（2026-11-08 裁定）+ RED #3 升级阶梯改形
+ *（2026-11-08 f4 打回单）：旧 15s 超时「放弃不 kill 不抛」= fail-open——
+ * 超时放弃即孤儿豁免，⑤ hard 判据「无孤儿循环」下不可豁免，该设计面废除。
+ *
+ * 对全部 running 的 in-process teammate 四段升级阶梯（F3 graceful 语义优先，
+ * 超时后 hard 收尾 = F3 态机 stopped/evicted 语义，不冲突）：
+ *   stage1 graceful request——mailbox shutdown request + shutdownRequested
+ *     标志（镜像 InProcessBackend.terminate，from = TEAM_LEAD_NAME，不发 kill）
+ *   stage2 bounded wait——有界轮询等成员走 graceful 退出（runner 轮末
+ *     completed 收尾）；超时 = 进入下一级，不再是放弃返回
+ *   stage3 forced abort——对仍 running 且持有 abortController 的成员
+ *     abort()（F3 外部终止语义；runner 'aborted' 支 → 循环退出 → completed
+ *     收尾），再给有界等待窗
+ *   stage4 hard kill——仍 running → killInProcessTeammate（status killed +
+ *     abort + cleanup 注销，F3 evicted 语义）：成员状态必达终态，⑤
+ *     「无孤儿循环」fail-closed 收口
+ *
+ * 返回计数语义：requested = 发 shutdown request 数；drained = graceful /
+ * forced-abort 后观测到终态的成员数（hard-terminated 不计入）；forced =
+ * stage3 abort 数；hardTerminated = stage4 hard kill 成功数。
  *
  * 消费点 = print.ts headless 尾部（drainPendingBackgroundAgents 之后、
- * SessionEnd hooks 之前）；零 running teammate 零开销直返。appState 访问
- * 经 SessionContextPort 注入（组合根 compose.ts setSessionContextPort 接线；
- * swarm 域不直依赖 engine port——依赖方向边界）。
+ * SessionEnd hooks 之前；错误退出支同接线——⑤ 残留覆盖全部 headless 退出
+ * 路径）；零 running teammate 零开销直返。appState 访问经 SessionContextPort
+ * 注入（组合根 compose.ts setSessionContextPort 接线；swarm 域不直依赖
+ * engine port——依赖方向边界）。
  */
 export const TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS = 15_000
+export const TEAMMATE_FORCED_SHUTDOWN_TIMEOUT_MS = 5_000
 const TEAMMATE_GRACEFUL_SHUTDOWN_POLL_MS = 250
+
+export type InProcessTeammateDrainResult = {
+  requested: number
+  drained: number
+  forced: number
+  hardTerminated: number
+}
 
 export async function gracefulShutdownInProcessTeammates(deps: {
   getAppState: () => { tasks?: Record<string, TaskStateBase> }
   setAppState: SetAppState
   timeoutMs?: number
-}): Promise<{ requested: number; drained: number }> {
+  forcedTimeoutMs?: number
+}): Promise<InProcessTeammateDrainResult> {
   const running = getAllInProcessTeammateTasks(
     deps.getAppState().tasks ?? {},
   ).filter(t => t.status === 'running')
-  const toRequest = running.filter(t => !t.shutdownRequested)
   if (running.length === 0) {
-    return { requested: 0, drained: 0 }
+    return { requested: 0, drained: 0, forced: 0, hardTerminated: 0 }
   }
+  const toRequest = running.filter(t => !t.shutdownRequested)
   const requestIdBase = Date.now()
   for (const teammate of toRequest) {
     const shutdownRequest = createShutdownRequestMessage({
@@ -227,21 +250,59 @@ export async function gracefulShutdownInProcessTeammates(deps: {
     )
     requestTeammateShutdown(teammate.id, deps.setAppState)
   }
-  const timeoutMs = deps.timeoutMs ?? TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS
-  const deadline = Date.now() + timeoutMs
-  let drained = 0
-  for (;;) {
-    const current = getAllInProcessTeammateTasks(
-      deps.getAppState().tasks ?? {},
-    )
-    drained = running.filter(prev => {
-      const now = current.find(t => t.id === prev.id)
-      return now !== undefined && now.status !== 'running'
-    }).length
-    if (drained === running.length || Date.now() >= deadline) break
-    await new Promise(resolve =>
-      setTimeout(resolve, TEAMMATE_GRACEFUL_SHUTDOWN_POLL_MS),
-    )
+
+  const freshTasks = () =>
+    getAllInProcessTeammateTasks(deps.getAppState().tasks ?? {})
+  const countStillRunning = () =>
+    freshTasks().filter(
+      t => t.status === 'running' && running.some(prev => prev.id === t.id),
+    ).length
+  const waitForDrain = async (timeoutMs: number): Promise<void> => {
+    const deadline = Date.now() + timeoutMs
+    for (;;) {
+      if (countStillRunning() === 0 || Date.now() >= deadline) return
+      await new Promise(resolve =>
+        setTimeout(resolve, TEAMMATE_GRACEFUL_SHUTDOWN_POLL_MS),
+      )
+    }
   }
-  return { requested: toRequest.length, drained }
+
+  // stage2: bounded graceful wait（超时 = 升级，不再放弃返回）
+  await waitForDrain(deps.timeoutMs ?? TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS)
+  let drained = running.length - countStillRunning()
+  if (drained === running.length) {
+    return { requested: toRequest.length, drained, forced: 0, hardTerminated: 0 }
+  }
+
+  // stage3: forced abort（F3 外部终止语义——runner 'aborted' 支退出循环）
+  let forced = 0
+  for (const prev of running) {
+    const now = freshTasks().find(t => t.id === prev.id)
+    if (now?.status === 'running' && now.abortController) {
+      now.abortController.abort()
+      forced++
+    }
+  }
+  if (forced > 0) {
+    await waitForDrain(
+      deps.forcedTimeoutMs ?? TEAMMATE_FORCED_SHUTDOWN_TIMEOUT_MS,
+    )
+    drained = running.length - countStillRunning()
+    if (drained === running.length) {
+      return { requested: toRequest.length, drained, forced, hardTerminated: 0 }
+    }
+  }
+
+  // stage4: hard kill（F3 evicted 语义——状态必达终态，fail-closed 收口）
+  let hardTerminated = 0
+  for (const prev of running) {
+    const now = freshTasks().find(t => t.id === prev.id)
+    if (
+      now?.status === 'running' &&
+      killInProcessTeammate(now.id, deps.setAppState)
+    ) {
+      hardTerminated++
+    }
+  }
+  return { requested: toRequest.length, drained, forced, hardTerminated }
 }

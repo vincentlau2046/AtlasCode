@@ -169,8 +169,11 @@ export {
   getRunningTeammatesSorted,
   // 0.1.93 W-D-A f4 gate 打回修复②：headless 终态 graceful shutdown 收尾
   //（消费点 = print.ts 尾部；mailbox request + 有界等待，不发 kill）。
+  // RED #3 改形（同日 f4 打回单）：四段升级阶梯 graceful → bounded →
+  // forced abort → hard kill，fail-closed 收口（返回型 InProcessTeammateDrainResult）。
   gracefulShutdownInProcessTeammates,
   TEAMMATE_GRACEFUL_SHUTDOWN_TIMEOUT_MS,
+  TEAMMATE_FORCED_SHUTDOWN_TIMEOUT_MS,
 } from './inProcessTeammateTask'
 export {
   findInProcessTeammateTaskId,

@@ -1464,6 +1464,11 @@ export async function runHeadless(
   })
   cronScheduler.start()
 
+  // 0.1.93 W-D-A f4 RED #3（2026-11-08 打回单）：组生命周期 headless 退出
+  // 兜底旗标——正常/错误两退出支凡发过 teammate shutdown request，函数尾
+  //（debug sink 落盘后）强制收进程；⑤ hard 判据「无孤儿循环」fail-closed。
+  let teammateDrainRequested = 0
+
   try {
     // ── AD-45 0.1.52 ③：--resume 重评消费支（挂起态 = 显式挂起标记门控）──
     // 正常会话 / 中轮 crash 悬空 tool_use / 已解决标记 = undefined → 零回归
@@ -1623,8 +1628,10 @@ export async function runHeadless(
     await drainPendingBackgroundAgents(abortController.signal)
     // 0.1.93 W-D-A f4 gate 打回修复②（2026-11-08）：headless 终态 graceful
     // shutdown in-process teammates——runner 为 fire-and-forget 循环，不
-    // drain 则 keep-alive 轮询挂住进程退出（⑤ shutdown 残留根因）。mailbox
-    // shutdown request + 有界等待（F3 态机语义，不发 kill）；组合根未接线
+    // drain 则 keep-alive 轮询挂住进程退出（⑤ shutdown 残留根因）。
+    // RED #3 改形（同日 f4 打回单）：旧「15s 超时放弃返回」fail-open 废除，
+    // 改四段升级阶梯 graceful request → bounded wait → forced abort →
+    // hard kill（见 inProcessTeammateTask.ts 头注）；组合根未接线
     //（SessionContextPort 缺席）或零 running teammate = 零开销跳过。
     {
       const sessionPort = getSessionContextPort()
@@ -1638,9 +1645,10 @@ export async function runHeadless(
               f as unknown as Parameters<typeof sessionPort.set>[0],
             ),
         } as unknown as Parameters<typeof gracefulShutdownInProcessTeammates>[0])
+        teammateDrainRequested = drain.requested
         if (drain.requested > 0) {
           logForDebugging(
-            `[headless] graceful shutdown: requested=${drain.requested} drained=${drain.drained}`,
+            `[headless] teammate shutdown ladder: requested=${drain.requested} drained=${drain.drained} forced=${drain.forced} hardTerminated=${drain.hardTerminated}`,
           )
         }
       }
@@ -1672,13 +1680,54 @@ export async function runHeadless(
       // 错误 result 也写不出 → 继续关断
     }
     abortController.abort()
+    // 0.1.93 W-D-A f4 RED #3（2026-11-08 打回单）：错误退出支同接线升级
+    // 阶梯 drain——⑤「无孤儿循环」覆盖全部 headless 退出路径（错误支同样
+    // 有 fire-and-forget 成员 keep-alive 挂进程的面）。
+    {
+      const sessionPort = getSessionContextPort()
+      if (sessionPort) {
+        try {
+          const drain = await gracefulShutdownInProcessTeammates({
+            getAppState: () => sessionPort.get(),
+            setAppState: f =>
+              sessionPort.set(
+                f as unknown as Parameters<typeof sessionPort.set>[0],
+              ),
+          } as unknown as Parameters<typeof gracefulShutdownInProcessTeammates>[0])
+          teammateDrainRequested = drain.requested
+          if (drain.requested > 0) {
+            logForDebugging(
+              `[headless] teammate shutdown ladder (error path): requested=${drain.requested} drained=${drain.drained} forced=${drain.forced} hardTerminated=${drain.hardTerminated}`,
+            )
+          }
+        } catch {
+          // 错误支 drain 失败不遮蔽原错误——继续关断
+        }
+      }
+    }
     // K3-B1（0.1.82）：错误退出同样触发 SessionEnd hooks（TUI gracefulShutdown
     // 全 reason 覆盖的对齐；fail-open 不改写 exitCode）
     await runHeadlessSessionEndHooks('other')
     process.exitCode = 1
   }
   // N9-debug：debug 面异步写队列等齐（防进程退出丢尾行；成功/错误支后位）
+  // 0.1.93 W-D-A f4 RED #3：兜底退出旗标先记日志再落盘（flushDebugSink 前）。
+  if (teammateDrainRequested > 0) {
+    logForDebugging(
+      `[headless] teammate lifecycle exit guard: forcing process exit after drain (requested=${teammateDrainRequested})`,
+    )
+  }
   await flushDebugSink()
+  // 0.1.93 W-D-A f4 RED #3（2026-11-08 打回单）：组生命周期 headless 强制
+  // 退出兜底——升级阶梯（graceful → forced abort → hard kill）把成员状态
+  // 收进终态后，仍可能残留不响应 abort 的孤儿事件循环持有者（RED #3 直证
+  // lead 进程 TEAM-OK 后 2h15m 不退出）；⑤ hard 判据「无孤儿循环」
+  // fail-closed：有组 run 的 headless 终态不再依赖自然退出。有界 grace
+  // 2s 让 abort 后的 runner 轮末收尾/微任务落盘，随后按 exitCode 收进程。
+  if (teammateDrainRequested > 0) {
+    await new Promise(resolve => setTimeout(resolve, 2_000))
+    process.exit(process.exitCode ?? 0)
+  }
 }
 
 // ── session 域 resume 面（旧 loadInitialMessages 核心支 + 裁登记）────

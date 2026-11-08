@@ -1212,10 +1212,13 @@ describe('wave0193 段 I：f4 gate 打回修复（缺省有界 + 终态退出，
       setAppState: () => {},
       timeoutMs: 300,
     })
-    expect(r).toEqual({ requested: 0, drained: 0 })
+    expect(r).toEqual({ requested: 0, drained: 0, forced: 0, hardTerminated: 0 })
   })
 
-  test('I5 超时支有界返回（不 kill 不抛；timeoutMs 300 → drained 0）', async () => {
+  // I5 随 RED #3 升级阶梯改形重写（旧「超时放弃不 kill」契约废止——f4
+  // 打回单裁定 fail-open 不可豁免）：无 abortController 且 kill 面 no-op
+  //（setAppState 不落地）时阶梯走满仍有界返回、不抛。
+  test('I5 阶梯有界返回（graceful 超时→升级；无 controller + kill no-op → forced/hard 0，不抛）', async () => {
     const state = {
       tasks: { 'task-i5': makeTeammateTask('task-i5', 'w-i5') },
     }
@@ -1224,11 +1227,186 @@ describe('wave0193 段 I：f4 gate 打回修复（缺省有界 + 终态退出，
       getAppState: () => state,
       setAppState: () => {},
       timeoutMs: 300,
+      forcedTimeoutMs: 300,
     })
     const elapsed = Date.now() - start
     expect(r.requested).toBe(1)
     expect(r.drained).toBe(0)
+    expect(r.forced).toBe(0)
+    expect(r.hardTerminated).toBe(0)
     expect(elapsed).toBeLessThan(2500)
+  })
+})
+
+// ── 段 K：RED #3 升级阶梯判别格（2026-11-08 f4 打回单追加；旧 fail-open
+//    「超时放弃不 kill」废除的直接判别面）——
+//    K1「drain 超时强制收尾」：graceful 超时 → stage3 forced abort →
+//      成员响应 abort 走终态 → drained 收敛（强制收尾生效直证）。
+//    K2「hard kill 终态必达」：连 abort 都不响应的成员 → stage4
+//      killInProcessTeammate → status killed（F3 evicted 语义；⑤ 无孤儿
+//      循环 fail-closed）。
+describe('wave0193 段 K：drain 超时强制收尾（RED #3 升级阶梯判别格）', () => {
+  let tmpHome: string
+  const savedConfigDirK = process.env.ATLAS_CONFIG_DIR
+  beforeAll(() => {
+    tmpHome = mkdtempSync(join(tmpdir(), 'wave0193-ladder-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHome
+  })
+  afterAll(() => {
+    if (savedConfigDirK === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDirK
+    rmSync(tmpHome, { recursive: true, force: true })
+  })
+
+  type DrainState = { tasks: Record<string, TaskStateBase> }
+
+  function makeLadderTask(
+    taskId: string,
+    agentName: string,
+    abortController?: AbortController,
+  ): InProcessTeammateTaskState {
+    return {
+      id: taskId,
+      type: 'in_process_teammate',
+      status: 'running',
+      description: 'wave0193 段 K',
+      startTime: Date.now(),
+      outputFile: '/tmp/wave0193-seg-k.out',
+      outputOffset: 0,
+      notified: false,
+      identity: {
+        agentId: `${agentName}@ladder`,
+        agentName,
+        teamName: 'ladder-team',
+        planModeRequired: false,
+        parentSessionId: 'sess-ladder',
+      },
+      prompt: 'p',
+      awaitingPlanApproval: false,
+      permissionMode: 'default',
+      isIdle: false,
+      shutdownRequested: false,
+      lastReportedToolCount: 0,
+      lastReportedTokenCount: 0,
+      pendingUserMessages: [],
+      abortController,
+    }
+  }
+
+  function makeDrainContext(initial: DrainState) {
+    let state = initial
+    const setAppState = (f: (prev: DrainState) => DrainState) => {
+      state = f(state)
+    }
+    return {
+      getAppState: () => state,
+      setAppState: setAppState as unknown as (
+        f: (prev: { tasks: Record<string, TaskStateBase> }) => {
+          tasks: Record<string, TaskStateBase>
+        },
+      ) => void,
+      get state() {
+        return state
+      },
+    }
+  }
+
+  test('K1 graceful 超时 → forced abort 后成员走终态（drain 超时强制收尾判别格）', async () => {
+    const controller = new AbortController()
+    const ctx = makeDrainContext({
+      tasks: {
+        'task-k1': makeLadderTask('task-k1', 'w-k1', controller),
+      },
+    })
+    // 成员对 graceful request 不响应（无 completed 调度），仅响应 abort：
+    // abort 后 50ms 走轮末 completed 收尾（模拟 runner 'aborted' 支退出）
+    controller.signal.addEventListener('abort', () => {
+      setTimeout(() => {
+        ctx.setAppState(prev => ({
+          tasks: {
+            'task-k1': {
+              ...(prev.tasks['task-k1'] as InProcessTeammateTaskState),
+              status: 'completed',
+              endTime: Date.now(),
+            },
+          },
+        }))
+      }, 50)
+    })
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: ctx.getAppState,
+      setAppState: ctx.setAppState,
+      timeoutMs: 300,
+      forcedTimeoutMs: 2000,
+    })
+    expect(r.requested).toBe(1)
+    expect(r.forced).toBe(1)
+    expect(r.drained).toBe(1)
+    expect(r.hardTerminated).toBe(0)
+    expect(
+      (ctx.state.tasks['task-k1'] as InProcessTeammateTaskState).status,
+    ).toBe('completed')
+  })
+
+  test('K2 连 abort 都不响应 → hard kill 终态必达（stage4，F3 evicted 语义）', async () => {
+    const controller = new AbortController()
+    const ctx = makeDrainContext({
+      tasks: {
+        'task-k2': makeLadderTask('task-k2', 'w-k2', controller),
+      },
+    })
+    // 成员对 graceful request 与 abort 全部不响应（无任何 completed 调度）
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: ctx.getAppState,
+      setAppState: ctx.setAppState,
+      timeoutMs: 300,
+      forcedTimeoutMs: 300,
+    })
+    expect(r.requested).toBe(1)
+    expect(r.forced).toBe(1)
+    expect(r.drained).toBe(0)
+    expect(r.hardTerminated).toBe(1)
+    expect(
+      (ctx.state.tasks['task-k2'] as InProcessTeammateTaskState).status,
+    ).toBe('killed')
+  })
+
+  test('K3 graceful 响应成员零升级（阶梯不误伤：forced/hard 全 0）', async () => {
+    let state: DrainState = {
+      tasks: { 'task-k3': makeLadderTask('task-k3', 'w-k3') },
+    }
+    let completionScheduled = false
+    const setAppState = (f: (prev: DrainState) => DrainState) => {
+      state = f(state)
+      const t = state.tasks['task-k3'] as InProcessTeammateTaskState
+      if (t?.shutdownRequested && !completionScheduled) {
+        completionScheduled = true
+        setTimeout(() => {
+          state = {
+            tasks: {
+              'task-k3': {
+                ...(state.tasks['task-k3'] as InProcessTeammateTaskState),
+                status: 'completed',
+                endTime: Date.now(),
+              },
+            },
+          }
+        }, 100)
+      }
+    }
+    const r = await gracefulShutdownInProcessTeammates({
+      getAppState: () => state,
+      setAppState: setAppState as unknown as (
+        f: (prev: { tasks: Record<string, TaskStateBase> }) => {
+          tasks: Record<string, TaskStateBase>
+        },
+      ) => void,
+      timeoutMs: 3000,
+    })
+    expect(r.requested).toBe(1)
+    expect(r.drained).toBe(1)
+    expect(r.forced).toBe(0)
+    expect(r.hardTerminated).toBe(0)
   })
 })
 
