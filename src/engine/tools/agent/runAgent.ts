@@ -82,6 +82,18 @@ export interface RunAgentArgs {
    * 窄 spine 默认放行（与父 loop 未注门语义对齐）。
    */
   checkPermission?: PermissionGate
+  /**
+   * 0.1.93 W-D-A round-2 RED-A（f4 裁定「同源贯通」）：工具执行 context
+   * 透传槽——pipeline 合并 { ...toolContext, signal, checkPermission }
+   * （engine 字段优先）后作为工具 call/validateInput 的 context。消费点 =
+   * in-process teammate runner（runInProcessTeammate 透传自身 toolUseContext
+   * 的 app state accessor 同源对，成员工具 SendMessageTool/Task 域经此可达
+   * 组态——RED-A 直证：未注入时成员 SendMessage 100% `context.getAppState
+   * is not a function`）。未注入 = 现状窄 spine 恒等（普通子代理零回归；
+   * K1-F④「engine 车道窄 spine」裁定不动——本槽只透传调用点显式给的值，
+   * 不装配 autoCompact 等引擎行为）。
+   */
+  toolContext?: object
 }
 
 export interface RunAgentResult {
@@ -119,6 +131,7 @@ export async function runAgent(args: RunAgentArgs): Promise<RunAgentResult> {
     signal,
     forkContextMessages,
     checkPermission,
+    toolContext,
   } = args
 
   const role = resolveRole(overrideRole, agentDefinition, parentRole)
@@ -133,7 +146,7 @@ export async function runAgent(args: RunAgentArgs): Promise<RunAgentResult> {
   ]
 
   const loopResult: AgentLoopResult = await queryAgentLoop(
-    { modelProvider, role, signal, checkPermission },
+    { modelProvider, role, signal, checkPermission, toolContext },
     { messages, tools },
   )
 

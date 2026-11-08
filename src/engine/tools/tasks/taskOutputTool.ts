@@ -296,6 +296,22 @@ export const TaskOutputTool: Tool<
       }
     }
     const appState = ctx.getAppState()
+    // 0.1.93 W-D-A round-2 RED-B（f4 裁定 fail-closed 校验形）：appState 无
+    // .tasks 注册表面（headless lead makeCtx = TPC 窄视图）时返结构化校验
+    // 错误（指引组内通信走 mailbox/SendMessage 面），禁 TypeError 崩溃
+    //（re-gate round 2 直证：spawn result taskId 诱导模型 TaskOutput →
+    // `appState.tasks[task_id]` TypeError → 整 run RC=1 fail-fast）。
+    if (!appState?.tasks) {
+      return {
+        result: false,
+        message:
+          `No task registry is available in the current context ` +
+          `(task_id: ${task_id}). For in-process teammates, communicate via ` +
+          'SendMessage (the mailbox is the coordination channel) instead of ' +
+          'polling TaskOutput.',
+        errorCode: 2,
+      }
+    }
     const task = appState.tasks[task_id] as TaskState | undefined
     if (!task) {
       return {
@@ -318,6 +334,17 @@ export const TaskOutputTool: Tool<
     const { task_id, block = true, timeout = 30000 } = args as TaskOutputToolInput
     const ctx = context as TaskOutputToolUseContext
     const appState = ctx.getAppState()
+    // 0.1.93 W-D-A round-2 RED-B（fail-closed 校验形，同 validateInput）：
+    // 无 .tasks 注册表面 → 结构化 Error（工具错误结果，run 不中止），禁
+    // TypeError fail-fast。
+    if (!appState?.tasks) {
+      throw new Error(
+        `No task registry is available in the current context ` +
+          `(task_id: ${task_id}). For in-process teammates, communicate via ` +
+          'SendMessage (the mailbox is the coordination channel) instead of ' +
+          'polling TaskOutput.',
+      )
+    }
     const task = appState.tasks[task_id] as TaskState | undefined
     if (!task) {
       throw new Error(`No task found with ID: ${task_id}`)

@@ -1505,3 +1505,233 @@ describe('wave0193 段 J：TUI 车道 TeamCreate 零写盘（f4 gate 打回修�
     expect(tuiPrompt).toContain('members')
   })
 })
+
+// ── 段 L：round-2 RED-A/B 修复判别格（2026-11-08 f4 裁定；round 3 终判轮
+//    前置）——
+//    L1「成员 run 内 SendMessageTool 可达 getAppState」（f4 点名格）：
+//      runAgent + toolContext 同源 accessor + 真 SendMessageTool（engine
+//      team 域单源 = 成员池真身，resolveTeammateAgentFace Set-union 7 件
+//      之一；TUI 副本非成员车道，勿引——模块加载有副作用污染段 E 模块态）
+//      + fake LLM 脚本（SendMessage tool_use → 终文）→ 真盘 tmp mailbox
+//      收到消息、零 `getAppState is not a function`（RED-A 修前 100% 崩）。
+//    L2「透传恒等双面」：probe 工具记录 context.getAppState 型——注入
+//      toolContext = 'function'；未注入 = 'undefined'（窄 spine 恒等，
+//      普通子代理零回归锚）。两 run 各用独立 fake provider 实例
+//      （steps 索引闭包耗尽坑：共用实例第二次 run 恒返末步文本，probe 不达）。
+//    L3「TaskOutput fail-closed 校验形」（RED-B）：无 .tasks 注册表面 →
+//      validateInput 结构化错误（不 throw）+ call 结构化 Error（指引
+//      SendMessage mailbox 面）；有 tasks 面 → 既有行为保留。
+import {
+  runAgent,
+  GENERAL_PURPOSE_AGENT,
+  SendMessageTool,
+  TaskOutputTool,
+} from '../../src/engine'
+import type { ModelProvider, ModelRole } from '../../src/modelprovider'
+import type { Message, Tool } from '../../src/shared'
+import { readMailbox } from '../../src/engine/messaging/mailbox'
+
+interface LScriptStep {
+  content: unknown[]
+  stopReason?: string
+}
+
+function fakeLlmProvider(steps: LScriptStep[]): ModelProvider {
+  let i = 0
+  const unused = async () => {
+    throw new Error('fake ModelProvider: 方法未被消费')
+  }
+  return {
+    chat: async () => {
+      const step = steps[Math.min(i, steps.length - 1)]
+      i++
+      return {
+        type: 'assistant',
+        uuid: 'u' + i,
+        timestamp: '2026-11-08T00:00:00Z',
+        message: {
+          id: 'm' + i,
+          model: 'fake',
+          role: 'assistant',
+          content: step.content,
+          stop_reason: step.stopReason ?? 'end_turn',
+          usage: {
+            input_tokens: 1,
+            output_tokens: 1,
+            cache_read_input_tokens: 0,
+            cache_creation_input_tokens: 0,
+          },
+        },
+      } as unknown as Message
+    },
+    chatStream: unused as unknown as ModelProvider['chatStream'],
+    healthCheck: unused as unknown as ModelProvider['healthCheck'],
+    countTokens: unused as unknown as ModelProvider['countTokens'],
+    listModels: async () => [],
+    transcribeAudio: unused as unknown as ModelProvider['transcribeAudio'],
+    synthesizeSpeech: unused as unknown as ModelProvider['synthesizeSpeech'],
+    verifyKey: async () => true,
+  } as unknown as ModelProvider
+}
+
+describe('wave0193 段 L：round-2 RED-A/B 修复判别格（同源贯通 + fail-closed）', () => {
+  let tmpHome: string
+  const savedConfigDirL = process.env.ATLAS_CONFIG_DIR
+  const savedGateL = process.env[GATE_ENV]
+  beforeAll(() => {
+    tmpHome = mkdtempSync(join(tmpdir(), 'wave0193-redab-'))
+    process.env.ATLAS_CONFIG_DIR = tmpHome
+    process.env[GATE_ENV] = '1'
+  })
+  afterAll(() => {
+    if (savedConfigDirL === undefined) delete process.env.ATLAS_CONFIG_DIR
+    else process.env.ATLAS_CONFIG_DIR = savedConfigDirL
+    if (savedGateL === undefined) delete process.env[GATE_ENV]
+    else process.env[GATE_ENV] = savedGateL
+    rmSync(tmpHome, { recursive: true, force: true })
+  })
+
+  test('L1 成员 run 内 SendMessageTool 可达 getAppState（f4 点名格：真盘 mailbox 收到消息）', async () => {
+    const state: Record<string, unknown> = {
+      toolPermissionContext: { mode: 'default' },
+      teamContext: { teamName: 'l1-team' },
+      tasks: {},
+    }
+    const getAppState = () => state
+    const setAppState = (f: (prev: Record<string, unknown>) => Record<string, unknown>) => {
+      Object.assign(state, f(state))
+    }
+    const provider = fakeLlmProvider([
+      {
+        content: [{
+          type: 'tool_use',
+          id: 't1',
+          name: 'SendMessage',
+          input: { to: 'peer-1', message: 'hello from member', summary: 'greeting' },
+        }],
+        stopReason: 'tool_calls',
+      },
+      { content: [{ type: 'text', text: 'sent greeting' }] },
+    ])
+    const r = await runAgent({
+      agentDefinition: GENERAL_PURPOSE_AGENT,
+      prompt: 'greet peer-1',
+      tools: [SendMessageTool as unknown as Tool],
+      modelProvider: provider,
+      parentRole: 'small',
+      agentId: 'a-l1',
+      // RED-A 同源贯通：toolContext 与 runner 同源 accessor（inProcessRunner
+      // 落码同形——runInProcessTeammate 解构对直通）
+      toolContext: { getAppState, setAppState },
+    })
+    expect(r.terminated).toBe(true)
+    expect(r.result.content).toEqual([{ type: 'text', text: 'sent greeting' }])
+    // 真盘 mailbox：消息达 peer-1 inbox（SendMessageTool.call 真执行）
+    const msgs = await readMailbox('peer-1', 'l1-team')
+    expect(msgs.some(m => m.text === 'hello from member')).toBe(true)
+    // tool_result 面零 getAppState 崩溃（RED-A 修前 100% TypeError）
+    const toolResults = r.messages.filter(
+      m => m.type === 'user' && JSON.stringify(m).includes('tool_result'),
+    )
+    expect(JSON.stringify(toolResults)).not.toContain('getAppState is not a function')
+  })
+
+  test('L2 toolContext 透传恒等双面（注入=function / 未注入=undefined 窄 spine）', async () => {
+    const seen: (string | undefined)[] = []
+    const probe: Tool = {
+      name: 'Probe',
+      inputSchema: { type: 'object', properties: {} },
+      maxResultSizeChars: 1000,
+      isConcurrencySafe: () => true,
+      isEnabled: () => true,
+      isReadOnly: () => true,
+      checkPermissions: async () => ({ behavior: 'passthrough', message: '' }),
+      description: async () => 'probe',
+      userFacingName: () => 'Probe',
+      toAutoClassifierInput: (i: unknown) => i,
+      renderToolUseMessage: () => null,
+      mapToolResultToToolResultBlockParam: (content: unknown, toolUseID: string) => ({
+        type: 'tool_result',
+        tool_use_id: toolUseID,
+        content: String(content),
+      }),
+      call: async (_args, context) => {
+        seen.push(typeof (context as { getAppState?: unknown } | undefined)?.getAppState)
+        return { data: 'probed' }
+      },
+    } as unknown as Tool
+    // 两 run 各用独立 provider 实例（steps 索引闭包耗尽坑）
+    const providerA = fakeLlmProvider([
+      {
+        content: [{ type: 'tool_use', id: 't1', name: 'Probe', input: {} }],
+        stopReason: 'tool_calls',
+      },
+      { content: [{ type: 'text', text: 'done' }] },
+    ])
+    const withCtx = await runAgent({
+      agentDefinition: GENERAL_PURPOSE_AGENT,
+      prompt: 'x',
+      tools: [probe],
+      modelProvider: providerA,
+      parentRole: 'small',
+      agentId: 'a-l2a',
+      toolContext: { getAppState: () => ({}), setAppState: () => {} },
+    })
+    expect(withCtx.terminated).toBe(true)
+    expect(seen).toEqual(['function'])
+    const providerB = fakeLlmProvider([
+      {
+        content: [{ type: 'tool_use', id: 't2', name: 'Probe', input: {} }],
+        stopReason: 'tool_calls',
+      },
+      { content: [{ type: 'text', text: 'done' }] },
+    ])
+    const withoutCtx = await runAgent({
+      agentDefinition: GENERAL_PURPOSE_AGENT,
+      prompt: 'x',
+      tools: [probe],
+      modelProvider: providerB,
+      parentRole: 'small',
+      agentId: 'a-l2b',
+    })
+    expect(withoutCtx.terminated).toBe(true)
+    expect(seen).toEqual(['function', 'undefined'])
+  })
+
+  test('L3 TaskOutput 无 .tasks 注册表面 → 结构化校验错误（禁 TypeError；指引 mailbox 面）', async () => {
+    // RED-B 复现面：headless lead makeCtx TPC 窄视图（无 .tasks）
+    const tpcOnlyCtx = {
+      getAppState: () => ({ toolPermissionContext: { mode: 'default' } }),
+    }
+    const v = await TaskOutputTool.validateInput(
+      { task_id: 't6914iqk8' },
+      tpcOnlyCtx as unknown as never,
+    )
+    expect(v.result).toBe(false)
+    if (v.result === false) {
+      expect(v.message).toContain('No task registry is available')
+      expect(v.message).toContain('SendMessage')
+    }
+    // call() 支：结构化 Error（非 TypeError fail-fast，run 不中止）
+    let caught: unknown
+    try {
+      await TaskOutputTool.call({ task_id: 't6914iqk8' }, tpcOnlyCtx as unknown as never)
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).constructor.name).not.toBe('TypeError')
+    expect((caught as Error).message).toContain('SendMessage')
+    // 既有行为保留：有 tasks 面 + 命中 task → validate 过
+    const taskCtx = {
+      getAppState: () => ({
+        tasks: { t1: { id: 't1', type: 'local_agent', status: 'completed' } },
+      }),
+    }
+    const ok = await TaskOutputTool.validateInput(
+      { task_id: 't1' },
+      taskCtx as unknown as never,
+    )
+    expect(ok.result).toBe(true)
+  })
+})

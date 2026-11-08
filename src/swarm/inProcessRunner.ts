@@ -1400,6 +1400,15 @@ export async function runInProcessTeammate(
             // 预合并 TPC 工厂（gate ask 支 auto-deny 消费点）。
             buildTeammateTpc,
           ),
+          // 0.1.93 W-D-A round-2 RED-A（f4 裁定「同源贯通」）：成员工具执行
+          // context 与 runner 同源拿 app state accessor——runInProcessTeammate
+          // 自身解构的 {setAppState, getAppState}（toolUseContext = compose
+          // InProcessBackend.setContext 全量 appState 适配，含 tasks/teamContext）
+          // 直通 runAgent.toolContext 槽 → pipeline 合并后成员工具
+          //（SendMessageTool/Task 域）call/validateInput 可达。禁旁路第二实现
+          //（双副本纪律同款）。messages 不透传（teammate 不读父会话，同
+          // InProcessBackend spawn 的 strip 语义）。
+          toolContext: { getAppState, setAppState },
         })
 
         // delta ②：新消息段 = 全序列去掉 [system, ...fork, user] 前缀。
