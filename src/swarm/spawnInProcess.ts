@@ -54,6 +54,7 @@ import {
   type InProcessTeammateTaskState,
   type SetAppState,
   type TeammateIdentity,
+  probeStampAbortController,
 } from '../task'
 import {
   createAbortController,
@@ -144,6 +145,12 @@ export async function spawnInProcessTeammate(
     // Create independent AbortController for this teammate
     // Teammates should not be aborted when the leader's query is interrupted
     const abortController = createAbortController()
+
+    // 0.1.93b 段 R-① 探针（工单 @c22716f6；非修形）：spawn 创建点打
+    // controller 对象标识（R-① 三点第一点；WeakMap stamp）。
+    logForDebugging(
+      `[probe-R1][spawn] agent=${agentId} taskId=${taskId} controller=${probeStampAbortController(abortController)}`,
+    )
 
     // Get parent session ID for transcript correlation
     const parentSessionId = getSessionId()

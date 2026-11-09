@@ -24,7 +24,9 @@ import { appendFile, mkdir } from 'fs/promises'
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { isEnvTruthy } from 'src/shared'
+import { isEnvTruthy, setDebugSink } from 'src/shared'
+// 0.1.93b 段 R-aux：类型引用（setDebugSink 注入窗签名面）
+import type { DebugSink } from 'src/shared'
 
 export type DebugLogLevel = 'verbose' | 'debug' | 'info' | 'warn' | 'error'
 
@@ -113,9 +115,23 @@ function shouldShow(message: string): boolean {
  * 初始化 sink（幂等；组合入口 runHeadless 显式调用，单测亦可经
  * resetDebugSinkForTesting 重置后重入）。
  */
+// 段 R-aux：注入 shared 窗的转发体 = 本文件 logForDebugging（签名对齐；
+// 窗回调闭包持引用避免循环 self-init 递归——本函数体内 initDebugSink 已
+// initialized 幂等，直接引用具名函数即可）。注册态旗标仅测试复位用。
+let sharedDebugSinkRegistered = false
+const sharedLogForDebugging: DebugSink = (message, options) => {
+  logForDebugging(message, options)
+}
+
 export function initDebugSink(): void {
   if (initialized) return
   initialized = true
+  // 0.1.93b 段 R-aux（f4 裁定锁面①）：shared/debug.ts 可注入窗启动期注册——
+  // swarm/engine 域 logForDebugging（~30 处判别格行）自此经本 sink 落盘。
+  // 无条件注册（窗口仅转发；本文件 logForDebugging 内部 enabled/filters
+  // 门控不变）——缺省未启用 lane 零输出零 I/O（锁面②）。
+  sharedDebugSinkRegistered = true
+  setDebugSink(sharedLogForDebugging)
   toStderr = argvHas('--debug-to-stderr') || argvHas('-d2e')
   const file = argvValue('--debug-file')
   if (file) sinkFile = file
@@ -150,6 +166,11 @@ export function initDebugSink(): void {
 /** 测试钩子：重置全部状态（下一用例可重入 init）。 */
 export function resetDebugSinkForTesting(): void {
   initialized = false
+  // 段 R-aux：跨用例泄漏守卫（mock.module 全局泄漏同族教训）——复位清窗
+  if (sharedDebugSinkRegistered) {
+    sharedDebugSinkRegistered = false
+    setDebugSink(null)
+  }
   enabled = false
   toStderr = false
   sinkFile = null

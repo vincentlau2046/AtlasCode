@@ -165,6 +165,33 @@ export function findInProcessTeammateTaskByAgentId(
   return undefined
 }
 
+// ── 0.1.93b 段 R 判别探针（工单 @c22716f6 §3 R-①；非修形，零行为变更）──
+// controller 对象标识 stamp/read：WeakMap 模块级持有（非侵入对象面，免
+// AppState 序列化泄漏）。判别性质：若 sessionContextPort/store 模块在
+// bundle 双实例（RF-1），spawn 侧 stamp 与触发段 read 落不同 WeakMap →
+// 触发段 read = 'untagged' —— 探针自身兼作 RF-1 分型直证信号。
+const probeControllerIds = new WeakMap<object, string>()
+let probeControllerSeq = 0
+
+/** spawn 创建点调用：给 controller 打唯一标识并返回（幂等重入）。 */
+export function probeStampAbortController(ac: AbortController): string {
+  let id = probeControllerIds.get(ac)
+  if (id === undefined) {
+    probeControllerSeq += 1
+    id = `ac-${probeControllerSeq}`
+    probeControllerIds.set(ac, id)
+  }
+  return id
+}
+
+/** 触发段/runner 侧调用：读标识（跨实例 = 'untagged'；空值 = 'none'）。 */
+export function probeReadAbortControllerId(
+  ac: AbortController | undefined | null,
+): string {
+  if (!ac) return 'none'
+  return probeControllerIds.get(ac) ?? 'untagged'
+}
+
 /**
  * 上限追加消息（重建 ①：cap = 100 命名常量；消费端 = teammate 会话
  * 展示历史，防无界增长）。

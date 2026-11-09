@@ -112,6 +112,8 @@ export { containsVulnerableUncPath } from "./unc"
 export { djb2Hash } from "./hash"
 export { lazySchema } from "./lazySchema"
 export { logForDebugging, type DebugLogLevel } from "./debug"
+// 0.1.93b 段 R-aux：最小 debug sink 注入窗（f4 裁定 2026-11-09；cli/debugSink 启动期注册）
+export { setDebugSink, getDebugSink, type DebugSink } from "./debug"
 // §8.55 S-C1：logError 跨域叶子（自 engine/tools/bash 域内 shim 提升，
 // shared = 唯一跨域叶子汇，C-Deep T5 提升先例）
 export { logError } from "./log"

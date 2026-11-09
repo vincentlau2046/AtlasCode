@@ -167,6 +167,7 @@ import {
   MAX_TEAMMATE_DISPLAY_MESSAGES,
   isInProcessTeammateLive,
   isInProcessTeammateTask,
+  probeReadAbortControllerId,
   type InProcessTeammateTaskState,
   type SetAppState,
   type TeammateIdentity,
@@ -977,8 +978,11 @@ export async function waitForNextPromptOrShutdown(
 ): Promise<WaitResult> {
   const POLL_INTERVAL_MS = 500
 
+  // 0.1.93b 段 R 探针：anchor3 = poll 首条日志（R-② 三态判读锚；同行带
+  // controller 标识 = R-① 第三点）+ 既有 `poll #N: checking mailbox` 行 =
+  // R-⑤ poll 活性计数面（工单 @c22716f6）。
   logForDebugging(
-    `[inProcessRunner] ${identity.agentName} starting poll loop (abort=${abortController.signal.aborted})`,
+    `[probe-R2][anchor3-poll-start] [inProcessRunner] ${identity.agentName} starting poll loop (abort=${abortController.signal.aborted}, controller=${probeReadAbortControllerId(abortController)})`,
   )
 
   let pollCount = 0
@@ -1192,6 +1196,11 @@ export async function runInProcessTeammate(
 
   logForDebugging(
     `[inProcessRunner] Starting agent loop for ${identity.agentId}`,
+  )
+  // 0.1.93b 段 R-① 探针（工单 @c22716f6；非修形）：runner 侧 controller
+  // 标识（R-① 第三点载体；与 spawn/触发段标识比对 = 三点同对象直证）。
+  logForDebugging(
+    `[probe-R1][runner] agent=${identity.agentId} taskId=${taskId} controller=${probeReadAbortControllerId(abortController)}`,
   )
 
   // Build system prompt based on systemPromptMode（delta ①/⑭ 登记）。
@@ -1412,6 +1421,12 @@ export async function runInProcessTeammate(
           toolContext: { getAppState, setAppState },
         })
 
+        // 0.1.93b 段 R-② 探针：anchor1 = runAgent 返回点（三态判读锚；
+        // lifecycleAborted 在此即 true = abort 消费于轮内 = RF-2 面）。
+        logForDebugging(
+          `[probe-R2][anchor1-runagent-returned] agent=${identity.agentId} lifecycleAborted=${abortController.signal.aborted}`,
+        )
+
         // delta ②：新消息段 = 全序列去掉 [system, ...fork, user] 前缀。
         const prefixLen = 2 + (forkContextMessages?.length ?? 0)
         const newMessages = agentResult.messages.slice(prefixLen)
@@ -1497,6 +1512,11 @@ export async function runInProcessTeammate(
 
       // Only send idle notification on transition to idle (not if already idle)
       if (!wasAlreadyIdle) {
+        // 0.1.93b 段 R-② 探针：anchor2 进入点（收尾段悬挂判读锚——
+        // anchor2-in 后无 out 且 poll 未入 = RF-12 轮末收尾段悬挂实锤）。
+        logForDebugging(
+          `[probe-R2][anchor2-idle-in] agent=${identity.agentName} lifecycleAborted=${abortController.signal.aborted}`,
+        )
         await sendIdleNotification(
           identity.agentName,
           identity.color,
@@ -1510,6 +1530,12 @@ export async function runInProcessTeammate(
               allMessages as unknown as SessionMessage[],
             ),
           },
+        )
+        // 0.1.93b 段 R-② 探针：anchor2 返回点（与 anchor3 poll 首条夹出
+        // 收尾段剩余段面——idle 通知返回后卡死 = evaluateTerminationSpec
+        // 与 poll 入口之间，同样归 RF-12 收尾段悬挂）。
+        logForDebugging(
+          `[probe-R2][anchor2-idle-out] agent=${identity.agentName} lifecycleAborted=${abortController.signal.aborted}`,
         )
       } else {
         logForDebugging(

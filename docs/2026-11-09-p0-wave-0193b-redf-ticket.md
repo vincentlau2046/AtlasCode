@@ -195,3 +195,35 @@ f4 逐条吸收（本文件已修订）：
    （L1447-1450 / L1598-1604 / L1614-1651）。
 7. **焦点⑤ 版本口径**：一致无意见（0.1.93 复用 = 版本收口契约，0.1.91 scoped re-gate 先例背书）。
    审计明示无需二审（改动均在判据面非波定义面）。
+
+## §7 Main 执行记录：段 R 探针 + 段 R-aux 落码（2026-11-09）
+
+**范围纪律**：本节仅登记判别 instrumentation + R-aux 最小接线（f4 裁定锁面），零修形码（修形仍禁至 R-④ f4 批复）。
+
+### 段 R-aux（f4 裁定 2026-11-09 四条锁面逐条执行）
+
+1. **①单一事实源接线**：`src/shared/debug.ts` 加可注入 sink 窗（`setDebugSink`/`getDebugSink` + 模块级持有缺省 `null` = 纯 no-op，Port 5/1 set/get 窗先例同型）；`src/cli/debugSink.ts` `initDebugSink()` 启动期无条件注册（窗口仅转发；输出仍经本文件 `enabled`/filter/level 门控）；`resetDebugSinkForTesting()` 同步清窗（跨用例泄漏守卫，mock.module 教训）。禁每域复制维持。charter C-4 前向兼容注记入 shared/debug.ts 头注（port 定案整文件替换、窗口随替换面删除）。
+2. **②缺省零行为变更**：sink 仅经既有 `--debug-file`/`--debug`/env DEBUG 启用链激活；未启用 lane 输出经 `if (!enabled) return` 早退，零输出零 I/O。判别单测：`tests/unit/cli-debug-sink.test.ts` 新 describe「段 R-aux」3 格（注册后 shared 行落 --debug-file / 复位清窗零输出 / 未启用 lane 零文件）。
+3. **③charter C-4 扩格登记**：`docs/architecture-charter.md` C-4 节加扩格批注（非静默；注记 swarm 判别格收证驱动 + logging port 定案整换）。
+4. **④范围纪律**：仅此最小窗，logging port 全量落地不属本波。
+
+### 段 R 探针落码（判别格，非修形）
+
+- **R-① 三点 controller 同对象直证**：探针 helpers `probeStampAbortController`/`probeReadAbortControllerId`（`src/task/inProcessTeammate.ts`，WeakMap 模块级持有——**模块双实例时跨实例 read 落 'untagged'，探针自身兼作 RF-1 分型直证信号**）。三点插桩：
+  - spawn 创建点（`src/swarm/spawnInProcess.ts`）：`[probe-R1][spawn] agent= taskId= controller=ac-N`（stamp）；
+  - 触发段（`src/engine/tools/team/sendMessageTool.ts` handleShutdownApproval）：`[probe-R1][trigger]` 带 **任务记录唯一性断言面**（同 agentId 全条目枚举含陈旧记录：`taskEntries=N sameAgentId=key:status|... firstHit= controller= live=`；条目>1 = RF-4A 分型直证）；
+  - poll 检查点（`src/swarm/inProcessRunner.ts`）：runner 入口 `[probe-R1][runner]`（read）+ poll 起始行 `[probe-R2][anchor3-poll-start] ... controller=ac-N`（read）。
+- **R-② 三态三锚**：anchor1 = runAgent 返回点（`[probe-R2][anchor1-runagent-returned]`，含 lifecycleAborted 面）；anchor2 = sendIdleNotification 进入+返回点（`[probe-R2][anchor2-idle-in]`/`[probe-R2][anchor2-idle-out]`）；anchor3 = poll 首条日志（anchor3-poll-start）。三态判读：anchor1→anchor2-in 之间卡死 = 轮内/收尾段分界；anchor2-in 后无 out 且 poll 未入 = RF-12 收尾段悬挂实锤；anchor3 后不消费 = RF-1/RF-4A。
+- **R-⑤ poll 活性直证**：既有 `[inProcessRunner] ... poll #N: checking mailbox` 行（500ms 周期）为计数面，零行为变更。
+- **R-③ store/port 单实例结构断言**（Q1 手法）：新 `tests/unit/wave0193b-r3-port-singleton.test.ts` 6 格——sessionContextPort.ts 恰 1 份 / EngineState.ts 恰 1 份 / 触发段+waitForTeammates import 车道收敛同一 port 模块 / setSessionContextPort 声明唯一 / 探针 helpers 声明面唯一 / stamp 幂等 + read 'none'/'untagged' 语义运行时抽验。bundle 期真双实例 func 层不可复现（0.1.93 方法论勘误）——e2e 腿由 probe-R1 'untagged' 信号兜底。
+
+### 四件套
+
+- `npx tsc --noEmit` = 0
+- `eslint src/` = 0e 0w
+- `bun run build` = 0（dist/cli.js 18110722B）
+- canon `FORCE_COLOR=3 CI=true bun test --isolate tests/` = **5730 pass / 0 fail / 457 files / 120.5s，exit 0**（基线 5721/0/456 → Δ+9 测试 = 段 R-③ 6 格 + 段 R-aux 3 格，Δ+1 文件 = wave0193b-r3-port-singleton.test.ts，恰合）
+
+### 探针 marker 清单（e2e 腿 grep 面，--debug-file 收证）
+
+`[probe-R1][spawn]` / `[probe-R1][runner]` / `[probe-R1][trigger]` / `[probe-R2][anchor1-runagent-returned]` / `[probe-R2][anchor2-idle-in]` / `[probe-R2][anchor2-idle-out]` / `[probe-R2][anchor3-poll-start]` / `[inProcessRunner] ... poll #N: checking mailbox`（R-⑤ 计数）。marker 均为代码侧 debug 行，不入 prompt 字面（§2 硬约束 4）。

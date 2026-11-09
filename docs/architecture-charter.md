@@ -618,6 +618,8 @@ C1 下沉 225 处叶子，shared 是最大膨胀风险点。三硬判据（L8 �
 
 实证：P6 删的是 telemetry 孤儿链；活 logging = `src/utils/log.ts`（console 包装，8 文件在用）；错误文案面已有 **Port 2**（errorMessaging）。**不加 logging port**（远程日志是 Web GUI Phase 3 需求）。裁定：shared 开**有限 I/O 叶子例外名单**（feature.ts / identity.ts / log.ts，零项目内依赖，不构成耦合点）——log.ts 写 console/debug 文件有副作用，不属「纯叶子」主体，进例外名单而非违反纯度判据。**远程日志（Phase 3）= 演进 port**（对齐既有 MCP 动态注册 / Executor 签名门控的演进 port 模式），显式 out-of-scope（L6 §8）。
 
+> **C-4 扩格批注（0.1.93b 段 R-aux，2026-11-09 f4 裁定，工单 @c22716f6）**：shared/debug.ts 占位**部分激活**——加最小可注入 sink 窗（set/get 双函数 + 模块级持有缺省 null = 纯 no-op，Port 5/1 窗口先例同型），cli/debugSink 启动期（initDebugSink）注册注入。驱动 = 0.1.93 W-D-A e2e 缺口回执：RED-F 判别格（R-①/②/⑤）依赖的 swarm 域 `[inProcessRunner]` debug 行 import 自本文件 = no-op → 判别格零输出空转。缺省零行为变更（sink 仅经既有 --debug/--debug-file/env DEBUG 启用链激活）；单一事实源维持（禁每域复制）。本批注为非静默登记面；logging port 定案时整文件替换，窗口随替换面一并删除。
+
 ### C-5 · 配置优先级（审视后修正，翻原序）
 
 单一优先级链：**企业策略（MDM managed settings）> env（`ATLAS_*`）> settings.json（用户）> 代码默认**。翻序理由：MDM 的存在意义是合规最高权威，env 能压过企业策略违背 MDM 设计（原「env > 策略」是反的）。每域 `config.ts`（AUT-2）只实现自己那一片，内部解析顺序统一 policy→env→settings→default，域外不直读。**默认层（链底）单一事实源 = `docs/env-defaults-decision.md`**（103 行：①保持开 6 / ②预设值 28 / ③保持关 69；上游输入 = `docs/env-defaults-triage.md` 202 变量来源初筛，T2 22 个全进 F 池，2026-09-21 用户裁定）。⚠️ **不做「启动注入默认值进 process.env」的 seed 脚本**（把代码默认抬进 env 层、冒充用户设置，违反本链）；要有效配置可见性 → 只读 `--env-dump` 命令。

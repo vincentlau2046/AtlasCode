@@ -136,6 +136,7 @@ import { getSessionContextPort } from '../../session/sessionContextPort'
 import {
   findInProcessTeammateTaskByAgentId,
   isInProcessTeammateLive,
+  probeReadAbortControllerId,
 } from '../../../task'
 import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
 import { getSendMessagePrompt } from './sendMessagePrompt'
@@ -636,6 +637,21 @@ async function handleShutdownApproval(
     const memberTask = port
       ? findInProcessTeammateTaskByAgentId(port.get().tasks, agentId ?? '')
       : undefined
+    // 0.1.93b 段 R-① 探针（工单 @c22716f6；非修形）：触发段 controller
+    // 标识（R-① 第二点）+ 任务记录唯一性断言面——同 agentId 全条目枚举
+    //（含陈旧/非 running 记录扫描；条目数>1 = RF-4A 分型直证；标识
+    // 'untagged' = 模块双实例 RF-1 分型直证）。只读零行为变更。
+    if (port) {
+      const tasksAll: Record<string, unknown> = port.get().tasks ?? {}
+      const sameAgentEntries = Object.entries(tasksAll).filter(
+        ([, t]) =>
+          (t as { identity?: { agentId?: string } } | undefined)?.identity
+            ?.agentId === agentId,
+      )
+      logForDebugging(
+        `[probe-R1][trigger] agent=${agentId} taskEntries=${Object.keys(tasksAll).length} sameAgentId=${sameAgentEntries.map(([k, t]) => `${k}:${(t as { status?: string }).status ?? 'unknown'}`).join('|') || 'none'} firstHit=${memberTask ? 'yes' : 'no'} controller=${probeReadAbortControllerId(memberTask?.abortController)} live=${isInProcessTeammateLive(memberTask)}`,
+      )
+    }
     if (isInProcessTeammateLive(memberTask) && memberTask.abortController) {
       memberTask.abortController.abort()
       exitTriggered = true

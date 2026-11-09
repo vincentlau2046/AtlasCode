@@ -19,6 +19,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { getSessionId } from '../../src/bootstrap'
+import { logForDebugging as sharedLogForDebugging } from '../../src/shared'
 import {
   flushDebugSink,
   getDebugSinkTarget,
@@ -209,5 +210,50 @@ describe('级别门 + 类别过滤', () => {
     await flushDebugSink()
     const body = readFileSync(f, 'utf8')
     expect(body).toContain('file: wrote tmp')
+  })
+})
+
+describe('0.1.93b 段 R-aux：shared 可注入窗接线', () => {
+  test('initDebugSink 注册后，shared logForDebugging 行经 sink 落 --debug-file（判别格收证路径）', async () => {
+    const f = join(tmpRoot, 'shared-window.txt')
+    tmpFiles.push(f)
+    process.env.NODE_ENV = 'production'
+    withArgv(['--debug-file', f])
+    initDebugSink()
+    // swarm/engine 域判别格行（src/swarm/inProcessRunner 等 ~30 处 import
+    // 自 src/shared/debug.ts）自此经本 sink 落盘——R-①/②/⑤ 收证面。
+    sharedLogForDebugging('[probe-R1][runner] agent=w1@t1 taskId=t controller=ac-1')
+    sharedLogForDebugging('[probe-R2][anchor2-idle-in] agent=w1', { level: 'debug' })
+    await flushDebugSink()
+    const body = readFileSync(f, 'utf8')
+    expect(body).toContain('[probe-R1][runner] agent=w1@t1')
+    expect(body).toContain('[probe-R2][anchor2-idle-in] agent=w1')
+  })
+
+  test('复位清窗：resetDebugSinkForTesting 后 shared 行零输出（跨用例泄漏守卫）', async () => {
+    const f = join(tmpRoot, 'shared-window-reset.txt')
+    tmpFiles.push(f)
+    process.env.NODE_ENV = 'production'
+    withArgv(['--debug-file', f])
+    initDebugSink()
+    sharedLogForDebugging('window-registered-line')
+    await flushDebugSink()
+    const before = readFileSync(f, 'utf8')
+    expect(before).toContain('window-registered-line')
+    resetDebugSinkForTesting()
+    sharedLogForDebugging('post-reset-must-not-appear')
+    await flushDebugSink()
+    expect(readFileSync(f, 'utf8')).not.toContain('post-reset-must-not-appear')
+  })
+
+  test('未启用 lane 缺省零输出（锁面②：注册无条件、输出经 enabled 门控）', async () => {
+    const f = join(tmpRoot, 'shared-window-default.txt')
+    tmpFiles.push(f)
+    process.env.NODE_ENV = 'production'
+    withArgv([]) // 无 --debug / --debug-file / env DEBUG → enabled=false，sink 仍注册
+    initDebugSink()
+    sharedLogForDebugging('disabled-lane-must-not-appear')
+    await flushDebugSink()
+    expect(existsSync(f)).toBe(false)
   })
 })
