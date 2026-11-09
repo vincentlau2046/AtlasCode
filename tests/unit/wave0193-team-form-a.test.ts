@@ -793,12 +793,25 @@ describe('wave0193 段 F：终止条件组判别格（A6，工单审计 F2 ≥4 
 //    active-member 守卫 teamContext 化——Form A 无 team file 守卫跳过
 //    = 孤儿循环破口；fail-closed：task 态未知 = 视为活；graceful 优先）──
 import { registerSpawnedTeammate } from '../../src/engine/tools/team/teamServices'
+import {
+  resetSessionContextPort,
+  setSessionContextPort,
+} from '../../src/engine/session/sessionContextPort'
 
-/** appState duck（task 态查表面；status: running=活 / completed|killed|failed=终）。 */
+/**
+ * task 态查表面（status: running=活 / completed|killed|failed=终）。
+ * 0.1.93b RF-T1 供态迁移（f4 §11 批复 2026-11-09）：branch-2 守卫读面
+ * 单源改走 sessionContextPort（旧 context.getAppState = lead lane makeCtx
+ * TPC 窄视图恒 undefined = RED-F 终形），供态方式随读面迁移——port 注入
+ * + 空 context。port 缺席 = fail-closed 不放宽（G2 rNoState 支锚定）。
+ */
 function deleteCtx(tasks?: Record<string, { status?: string }>): unknown {
-  return {
-    getAppState: () => ({ tasks: tasks ?? {} }),
-  }
+  const t = tasks ?? {}
+  setSessionContextPort({
+    get: () => ({ tasks: t }) as never,
+    set: () => {},
+  } as never)
+  return {}
 }
 
 describe('wave0193 段 G：TeamDelete 守卫 teamContext 化 + 组散残留（A7）', () => {
@@ -812,6 +825,7 @@ describe('wave0193 段 G：TeamDelete 守卫 teamContext 化 + 组散残留（A7
   function teardownGate() {
     resetTeamServices()
     resetDefaultTeamContextStore()
+    resetSessionContextPort() // 0.1.93b RF-T1：port 供态随段 G teardown 复位
     if (savedEnv === undefined) delete process.env[GATE_ENV]
     else process.env[GATE_ENV] = savedEnv
   }

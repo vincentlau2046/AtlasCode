@@ -51,6 +51,7 @@ import { jsonStringify } from '../../session/json'
 import { isInProcessTeammateActiveOrUnknown } from '../../../task'
 import { TEAM_DELETE_TOOL_NAME } from '../toolNames'
 import { requireTeamServices } from './teamServices'
+import { getSessionContextPort } from '../../session/sessionContextPort'
 import { PROMPT } from './teamDeletePrompt'
 
 /** 输入面（旧 zod strictObject({}) 空对象转写，delta ①）。 */
@@ -129,7 +130,9 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
 
   async call(
     _args: unknown,
-    context: unknown,
+    // 0.1.93b RF-T1：branch-2 读面改走 sessionContextPort 后 context
+    // （getAppState 窄视图）不再消费——参数保留（接口签名位），下划线口径。
+    _context: unknown,
   ): Promise<ToolResult<TeamDeleteOutput>> {
     const services = requireTeamServices()
     // delta ②：旧 getAppState().teamContext → 接缝读面
@@ -173,12 +176,20 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
         teamContext?.teammates ?? {},
       ).filter(([, member]) => member.name !== TEAM_LEAD_NAME)
       if (teammateEntries.length > 0) {
-        const appState = (
-          context as { getAppState?: () => unknown } | undefined
-        )?.getAppState?.()
-        const tasks = (
-          appState as { tasks?: Record<string, unknown> } | undefined
-        )?.tasks
+        // 0.1.93b RF-T1（f4 §11 批复 2026-11-09）：branch-2 读面单点改走
+        // sessionContextPort——旧读面 context.getAppState().tasks 在 lead
+        // lane 恒 undefined（工具 context getAppState = makeCtx TPC 窄视图
+        // cli/print.ts，S-E3 有意设计无 tasks 字段）→
+        // isInProcessTeammateActiveOrUnknown(undefined) fail-closed 恒判活
+        // = 结构性恒拦（RED-F 终形；R-⑥ 收证腿 t8-reddf-r6 定谳：completed
+        // apply 63s 前已生效仍拦）。port = appState.port 全店窗（drain
+        // ladder `getAppState: () => sessionPort.get()` 同款先例 print.ts）；
+        // port 缺席 = tasks undefined → 谓词维持 fail-closed 归活，守卫
+        // 语义不放宽。判别格 = tests/unit/wave0193b-rft1-teamdelete-port-read.
+        // test.ts（F1 修前红）。
+        const tasks = getSessionContextPort()?.get().tasks as
+          | Record<string, unknown>
+          | undefined
         // 0.1.93 W-D-A round 6（f4 修 2）：守卫读面谓词单源（src/task/
         // inProcessTeammate，判读逐字 = 旧「status undefined || running」
         // fail-closed 形；终态词汇与 WaitForTeammates/runner 收尾块同源）。
