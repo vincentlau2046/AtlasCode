@@ -1,4 +1,5 @@
 import { z } from 'zod/v4'
+import { getSdkAgentProgressSummariesEnabled } from 'src/tui/bootstrapState.js'
 import type { ToolResult } from '../../Tool.js'
 import { buildTool } from '../../Tool.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -7,6 +8,7 @@ import { createUserMessage } from '../../utils/messages.js'
 import { getAgentModel } from '../../utils/model/agent.js'
 import type { ModelAlias } from '../../utils/model/aliases.js'
 import { createAgentId } from '../../utils/uuid.js'
+import { registerAsyncAgent } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js'
 import type { AgentToolProgress } from '../../types/tools.js'
 import { lazySchema } from '../../utils/lazySchema.js'
@@ -25,6 +27,7 @@ import {
   agentToolResultSchema,
   computeChildSpawnDepth,
   finalizeAgentTool,
+  runAsyncAgentLifecycle,
 } from './agentToolUtils.js'
 import { getPrompt } from './prompt.js'
 import { runAgent } from './runAgent.js'
@@ -213,52 +216,72 @@ export const AgentTool: any = buildTool({
     if (isAsync) {
       const outputFile = getTaskOutputPath(agentId)
       const startTime = Date.now()
-      const runInBackground = async () => {
-        const gen = runAgent({
-          agentDefinition,
-          promptMessages,
-          toolUseContext: context,
-          canUseTool,
-          isAsync: true,
-          querySource: 'repl',
-          model: resolvedModel as ModelAlias,
-          availableTools,
-          useExactTools,
-          description: args.description,
-          override: { agentId },
-          spawnDepth: childSpawnDepth,
-          allowFanOut,
-          onQueryProgress: onProgress
-            ? () => {
-                onProgress({ type: 'agent_progress', agentId, message: null })
-              }
-            : undefined,
-        })
-        const agentMessages: any[] = []
-        try {
-          for await (const m of gen) {
-            if (m && m.type !== 'attachment') agentMessages.push(m)
-          }
-        } catch (err) {
-          logError(err)
-        }
-        try {
-          if (agentMessages.length > 0) {
-            finalizeAgentTool(agentMessages, agentId, {
-              prompt: args.prompt,
-              resolvedAgentModel: resolvedModel,
-              isBuiltInAgent: agentDefinition.source === 'built-in',
-              startTime,
-              agentType: agentDefinition.agentType,
-              isAsync: true,
-            })
-            logForDebugging('[AGENT] background agent ' + agentId + ' finalized')
-          }
-        } catch (e: any) {
-          logForDebugging('[AGENT] finalize failed: ' + String(e && e.message))
-        }
+      // 0.1.94 C-2（f4 §9③ TaskOutput agentId 契约缝附带修 + §11④ 批复）：
+      // async spawn 路径补 registerAsyncAgent（对齐 resume 链
+      // resumeAgent.ts:198 先例）——appState.tasks[agentId] 在场 =
+      // TaskOutput task 态读面 + SendMessage 名路由 running/stopped 支正形
+      //（裁 evicted 兜底支的前提补齐）。补注册须取 resume 链全形
+      //（registerAsyncAgent + runAsyncAgentLifecycle）：lifecycle 托管
+      // completed/failed/killed 终态写点 + finalize + 通知（裸
+      // registerAsyncAgent 会把 task 永久钉在 running = 回归面）。
+      const rootSetAppState =
+        context.setAppStateForTasks ?? context.setAppState
+      const agentBackgroundTask = registerAsyncAgent({
+        agentId,
+        description: args.description,
+        prompt: args.prompt,
+        selectedAgent: agentDefinition,
+        setAppState: rootSetAppState,
+        toolUseId: context.toolUseId,
+      })
+      const metadata = {
+        prompt: args.prompt,
+        resolvedAgentModel: resolvedModel,
+        isBuiltInAgent: agentDefinition.source === 'built-in',
+        startTime,
+        agentType: agentDefinition.agentType,
+        isAsync: true,
       }
-      void runInBackground().catch(err => {
+      void runAsyncAgentLifecycle({
+        taskId: agentBackgroundTask.agentId,
+        abortController: agentBackgroundTask.abortController!,
+        makeStream: onCacheSafeParams =>
+          runAgent({
+            agentDefinition,
+            promptMessages,
+            toolUseContext: context,
+            canUseTool,
+            isAsync: true,
+            querySource: 'repl',
+            model: resolvedModel as ModelAlias,
+            availableTools,
+            useExactTools,
+            description: args.description,
+            override: { agentId },
+            spawnDepth: childSpawnDepth,
+            allowFanOut,
+            onQueryProgress: onProgress
+              ? () => {
+                  onProgress({
+                    type: 'agent_progress',
+                    agentId,
+                    message: null,
+                  })
+                }
+              : undefined,
+            onCacheSafeParams,
+          }),
+        metadata,
+        description: args.description,
+        toolUseContext: context,
+        rootSetAppState,
+        agentIdForCleanup: agentId,
+        enableSummarization:
+          isCoordinatorMode() ||
+          isForkSubagentEnabled() ||
+          getSdkAgentProgressSummariesEnabled(),
+        getWorktreeResult: async () => ({}),
+      }).catch(err => {
         logError(err)
       })
       return {

@@ -907,6 +907,11 @@ export {
   SEND_MESSAGE_TOOL_INPUT_SCHEMA,
   setTeamFileLoader,
   resetTeamFileLoader,
+  setNameRouterPort,
+  resetNameRouterPort,
+  setSelfTerminatePort,
+  resetSelfTerminatePort,
+  type SendMessageNameRouterPort,
   // 重名登记：同 config/askUser/notebook 面 DESCRIPTION 别名重出（web 块
   // WEB_FETCH_DESCRIPTION 别名先例）
   DESCRIPTION as SEND_MESSAGE_DESCRIPTION,

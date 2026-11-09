@@ -26,6 +26,12 @@ export {
   SendMessageTool,
   setTeamFileLoader,
   resetTeamFileLoader,
+  // 0.1.94 C-2 名路由/自退 port 注入接缝（TUI 组合根消费面）
+  setNameRouterPort,
+  resetNameRouterPort,
+  setSelfTerminatePort,
+  resetSelfTerminatePort,
+  type SendMessageNameRouterPort,
   type SendMessageInput,
   type StructuredMessage,
   type MessageRouting,

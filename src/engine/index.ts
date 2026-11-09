@@ -219,7 +219,30 @@ export {
   createDefaultTeamContextStore,
   setTeamFileLoader,
   resetTeamFileLoader,
+  // 0.1.94 C-2 名路由/自退 port 注入接缝（TUI 组合根消费面）
+  setNameRouterPort,
+  resetNameRouterPort,
+  setSelfTerminatePort,
+  resetSelfTerminatePort,
+  type SendMessageNameRouterPort,
+  // 0.1.94 C-2：SendMessage duck 型族经根门面（TUI 薄 wrapper 消费面；
+  // 泛名 5 型族留 team/ 子门面直出 = tools/ 根门面 namespaced 政策不变）
+  type SendMessageInput,
+  type SendMessageToolOutput,
+  type SendMessageToolUseContext,
 } from './tools'
+export {
+  // 0.1.94 C-2：泛名 Output 5 型族（tools/ 根门面 namespaced 政策外，
+  // 经 team/ 子门面直出——boundaries entry-point 纪律下 TUI 消费面唯一
+  // 合法门）
+  type MessageRouting,
+  type MessageOutput,
+  type BroadcastOutput,
+  type RequestOutput,
+  type ResponseOutput,
+  type StructuredMessage,
+  type TeamFile,
+} from './tools/team'
 export {
   // §8.67 D 波 S-E2c（LSP 域 + LSPTool 本体子波）：LSPTool 本体（9 操作
   // 代码智能面；LSP 域 src/lsp/ 门面 = client 域 + 配置注入窗 + manager

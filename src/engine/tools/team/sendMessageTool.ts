@@ -342,6 +342,68 @@ export function resetTeamFileLoader(): void {
 }
 
 /**
+ * 0.1.94 C-2 名路由支并集承载（f4 §10① 收窄并集 + §11 port 注入批复）：
+ * engine↛tui 依赖硬边界（boundaries）——名路由支的 tui 域符号
+ *（agentNameRegistry/toAgentId/isLocalAgentTask/isMainSessionTask/
+ * queuePendingMessage/resumeAgentBackground）不可直 import，沿
+ * setTeamFileLoader 注入先例做 port 承载。**判定与文案逻辑本体留在本文件
+ * call 内**（port 只承载符号面）；TUI 组合根注入，headless 不注入 =
+ * 名路由支整体缺席 = engine lane 零变更（较「窄视图门恒不触发」更净）。
+ * 收窄形（f4 §10①）：evicted-transcript-resume 兜底支已裁（spawn 补注册
+ * 后前提消失），保留 running→queuePendingMessage / stopped→resume 两支。
+ */
+export interface SendMessageNameRouterPort {
+  /** 名→agentId 解析并集：appState.agentNameRegistry 查 + toAgentId 裸 ID 形
+   *（context 形参 = TUI 侧经 context.getAppState() 取活态；TUI store 无模块
+   * 单例，appState 只能从工具 context 可达）。 */
+  resolveAgentId(name: string, context: unknown): string | undefined
+  /** appState.tasks[agentId] 读面（context 形参同上）。 */
+  getTaskState(agentId: string, context: unknown): unknown
+  /** 可路由谓词：isLocalAgentTask(task) && !isMainSessionTask(task)。 */
+  isRoutableAgentTask(task: unknown): boolean
+  /** running 态 pending 队列投递（setAppState 由调用侧从 context 提取传入）。 */
+  queuePendingMessage(
+    agentId: string,
+    message: string,
+    setAppState: (f: (prev: never) => never) => void,
+  ): void
+  /** stopped 态后台 resume（resume 链先例形）。 */
+  resumeAgent(args: {
+    agentId: string
+    prompt: string
+    toolUseContext: unknown
+    canUseTool: unknown
+    invokingRequestId?: string
+  }): Promise<{ outputFile: string }>
+}
+
+let nameRouterPort: SendMessageNameRouterPort | undefined
+
+export function setNameRouterPort(port: SendMessageNameRouterPort): void {
+  nameRouterPort = port
+}
+
+export function resetNameRouterPort(): void {
+  nameRouterPort = undefined
+}
+
+/**
+ * 0.1.94 C-2 分叉 1 并集（f4 §9③/§11）：非 in-process backend 车道（tmux
+ * 成员）的进程级自退兜底——**动作经 port**（gracefulShutdown 为 tui 域符号），
+ * 触发逻辑（status 判 + backendType 判）留本文件。headless 不注入 = 支缺席
+ * = engine lane 零变更。
+ */
+let selfTerminatePort: (() => void) | undefined
+
+export function setSelfTerminatePort(port: () => void): void {
+  selfTerminatePort = port
+}
+
+export function resetSelfTerminatePort(): void {
+  selfTerminatePort = undefined
+}
+
+/**
  * 0.1.93 W-D-A round-3 RED-C（f4 §7.9 裁定）：出站路由 team 解析单源——
  * 双源同款（A5 handleBroadcast 先例）：getTeamName（ALS > dynamicTeamContext >
  * appState.teamContext）→ peekTeamContext（TeamCreate 组态 store）回落；
@@ -399,8 +461,10 @@ async function handleMessage(
     teamName,
   )
 
-  // delta ⑥：findTeammateColor 裁（teammates 色映射 C 桶 ③ 归属），
-  // targetColor = 旧 teammates 缺面 undefined
+  // 0.1.94 C-2 并集（f4 §9③ UX 观测面保留适配）：delta ⑥ 恒 undefined 面
+  // → findTeammateColor 实查恢复（纯函数，teammates 色映射读面在 duck
+  // teamContext 内——headless teammates 缺席 = undefined 恒等，TUI lane 实值）。
+  const recipientColor = findTeammateColor(appState.teamContext, recipientName)
   return {
     data: {
       success: true,
@@ -409,12 +473,28 @@ async function handleMessage(
         sender: senderName,
         senderColor,
         target: `@${recipientName}`,
-        targetColor: undefined,
+        targetColor: recipientColor,
         summary,
         content,
       },
     },
   }
+}
+
+/** C-2 并集：teammates 色映射查（旧 TUI 副本 findTeammateColor 逐字移植——
+ * 纯函数零 tui 域依赖）。 */
+function findTeammateColor(
+  teamContext?: { teammates?: Record<string, { name?: string; color?: string }> },
+  name?: string,
+): string | undefined {
+  const teammates = teamContext?.teammates
+  if (!teammates || !name) return undefined
+  for (const teammate of Object.values(teammates)) {
+    if (teammate?.name === name) {
+      return teammate.color
+    }
+  }
+  return undefined
 }
 
 async function handleBroadcast(
@@ -591,7 +671,7 @@ async function handleShutdownRequest(
 
 async function handleShutdownApproval(
   requestId: string,
-  _context: SendMessageToolUseContext,
+  context: SendMessageToolUseContext,
 ): Promise<ToolResult<ResponseOutput>> {
   // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源 + fail-closed（成员侧 ALS 主源，缺则禁落 default）
   const teamName = resolveOutgoingTeamName()
@@ -603,10 +683,7 @@ async function handleShutdownApproval(
     `[SendMessageTool] handleShutdownApproval: teamName=${teamName}, agentId=${agentId}, agentName=${agentName}`,
   )
 
-  // delta ④：in-process 支（own-pane teamFile 查 + gracefulShutdown 尾 +
-  // fallback 早退文案）裁 → C 桶 ③ shell·swarm 波——该支的 **abort 定位腿
-  // 于 round 6 复立**（下方触发段；pane 形态/teamFile 面不复辟，本波锁面
-  // 外）。paneId/backendType = 旧 team-file-missing 面 undefined。
+  // delta ④：in-process abort 定位腿于 round 6 复立（下方触发段）。
   // round 6 member 侧闭合（f4 根因锁面批复）：round 5 e2e 腿 G 直证本
   // handler 只写 mailbox 零终态动作 → ack 后成员恒 'running'，TeamDelete
   // 守卫恒拦（"2 active member(s)"）+ lead 轮耗 forced。修形 = 保序两段：
@@ -616,9 +693,32 @@ async function handleShutdownApproval(
   // 既有 completed 收尾块写终态（status:'completed'，F3 stopped 语义，
   // 单一终态写点不新造）。端口未注入/条目缺失/非 running = 触发段缺席
   // （现行为保留），文案两态不谎面。
+  // 0.1.94 C-2 并集（f4 §9③ 分叉 1）：own-pane teamFile 查恢复
+  //（paneId/backendType 富化——teamFileLoader 注入面既有；headless 缺省
+  // null → undefined 恒等）+ 非 in-process backend 车道 selfTerminate 兜底
+  //（动作经 port，status 判补消陈旧 abort 面）。
+  let ownPaneId: string | undefined
+  let ownBackendType: BackendType | undefined
+  if (teamName) {
+    try {
+      const teamFile = await teamFileLoader(teamName)
+      if (teamFile && agentId) {
+        const selfMember = teamFile.members.find(m => m.agentId === agentId)
+        if (selfMember) {
+          ownPaneId = selfMember.tmuxPaneId
+          ownBackendType = selfMember.backendType
+        }
+      }
+    } catch {
+      // team-file 读失败 = 富化缺席（paneId/backendType undefined），不阻断 ack
+    }
+  }
+
   const approvedMessage = createShutdownApprovedMessage({
     requestId,
     from: agentName,
+    paneId: ownPaneId,
+    backendType: ownBackendType,
   })
 
   await writeToMailbox(
@@ -656,10 +756,36 @@ async function handleShutdownApproval(
     if (isInProcessTeammateLive(memberTask) && memberTask.abortController) {
       memberTask.abortController.abort()
       exitTriggered = true
+    } else if (nameRouterPort) {
+      // 0.1.94 C-2 并集（f4 §9③ 分叉 1）：engine sessionContextPort 未产出
+      // 定位（headless 窄视图无 tasks / TUI lane 端口缺接线）→ 名路由 port
+      // 的 getTaskState 原语回落读 task 态。**status 判补（isInProcessTeammateLive
+      // 谓词）消旧 TUI 副本陈旧 abort 面**（终态 task 不再误 abort）。
+      const portTask = nameRouterPort.getTaskState(agentId ?? '', context)
+      const portAbort = (portTask as { abortController?: AbortController })
+        .abortController
+      if (isInProcessTeammateLive(portTask) && portAbort) {
+        portAbort.abort()
+        exitTriggered = true
+      }
     }
   } catch {
     // 触发段失败不阻断 ack 返回（消息已发出；runner 终止阶梯/轮末收尾
     // 兜底仍在）
+  }
+
+  // 0.1.94 C-2 并集（f4 §9③ 分叉 1）：非 in-process backend 车道（tmux
+  // 成员，含 teamFile 缺席 undefined 面 = 旧 TUI else 支同形）进程级自退
+  // 兜底——动作经 selfTerminatePort（gracefulShutdown tui 域符号），
+  // backendType 判在本文件。port 缺席（headless）= 支缺席 = engine lane
+  // 零变更；文案两态诚实（selfTerminate 已触发 = exit sequence 支）。
+  if (!exitTriggered && ownBackendType !== 'in-process' && selfTerminatePort) {
+    try {
+      selfTerminatePort()
+      exitTriggered = true
+    } catch {
+      // 自退失败不阻断 ack 返回（文案回落 lifecycle check 支，不谎面）
+    }
   }
 
   return {
@@ -837,6 +963,9 @@ type SendMessageToolFace = Tool & {
     input: unknown,
     context: unknown,
   ): Promise<PermissionDecision<SendMessageInput>>
+  // 0.1.94 C-2 并集：TUI 可观测输入回填槽（shared Tool 契约无该成员槽，
+  // face 级扩面；TUI 车道 tool pipeline 消费，engine lane 零消费零影响）
+  backfillObservableInput?(input: Record<string, unknown>): void
 }
 
 export const SendMessageTool: SendMessageToolFace = {
@@ -856,6 +985,40 @@ export const SendMessageTool: SendMessageToolFace = {
     typeof (input as SendMessageInput).message === 'string',
   isDestructive: () => false,
   userFacingName: () => 'SendMessage',
+
+  // 0.1.94 C-2 并集（f4 §9③ UX 观测面保留适配）：TUI 可观测输入回填
+  //（旧 TUI 副本 backfillObservableInput 逐字移植——纯函数零域依赖；
+  // 结构化分派前的 transcript 观测投影，不进 API 面）
+  backfillObservableInput(input: Record<string, unknown>) {
+    if ('type' in input) return
+    if (typeof input.to !== 'string') return
+
+    if (input.to === '*') {
+      input.type = 'broadcast'
+      if (typeof input.message === 'string') input.content = input.message
+    } else if (typeof input.message === 'string') {
+      input.type = 'message'
+      input.recipient = input.to
+      input.content = input.message
+    } else if (
+      typeof input.message === 'object' &&
+      input.message !== null
+    ) {
+      const msg = input.message as {
+        type?: string
+        request_id?: string
+        approve?: boolean
+        reason?: string
+        feedback?: string
+      }
+      input.type = msg.type
+      input.recipient = input.to
+      if (msg.request_id !== undefined) input.request_id = msg.request_id
+      if (msg.approve !== undefined) input.approve = msg.approve
+      const content = msg.reason ?? msg.feedback
+      if (content !== undefined) input.content = content
+    }
+  },
 
   toAutoClassifierInput(input: unknown) {
     const { message, to } = input as SendMessageInput
@@ -1050,7 +1213,12 @@ export const SendMessageTool: SendMessageToolFace = {
     }
   },
 
-  async call(args: unknown, context: unknown) {
+  async call(
+    args: unknown,
+    context: unknown,
+    canUseTool?: unknown,
+    parentMessage?: { requestId?: string },
+  ) {
     const input = args as SendMessageInput
     const ctx = context as SendMessageToolUseContext
     // §8.68 S-E2a：UDS bridge/uds 2 支（旧 L742 门控面逐字；懒 require →
@@ -1122,6 +1290,70 @@ export const SendMessageTool: SendMessageToolFace = {
         throw new Error('structured messages cannot be broadcast')
       }
       return dispatchStructuredMessage(sniffed, input.to, ctx)
+    }
+    // 0.1.94 C-2 名路由支并集（f4 §10① 收窄并集 + §11 port 注入批复）：
+    // 纯文本定向消息先经名路由（port 注入制——headless 不注入 = 支整体缺席，
+    // 落 ambient-team mailbox 解析 = 旧 engine 行为恒等）。判定与文案逻辑
+    // 本体在本文件；port 只承载 tui 域符号面。
+    // 收窄形：evicted-transcript-resume 兜底支已裁（spawn 补注册后前提
+    // 消失）；非 routable（task 缺席/非 local_agent/main-session）落
+    // ambient 解析。保两支：running→queuePendingMessage / stopped→resume。
+    if (
+      nameRouterPort &&
+      typeof input.message === 'string' &&
+      input.to !== '*'
+    ) {
+      const agentId = nameRouterPort.resolveAgentId(input.to, context)
+      if (agentId) {
+        const task = nameRouterPort.getTaskState(agentId, context)
+        if (nameRouterPort.isRoutableAgentTask(task)) {
+          const taskStatus = (task as { status?: string }).status
+          if (taskStatus === 'running') {
+            // setAppState 提取沿旧 TUI 副本形：setAppStateForTasks 优先
+            //（root store 通道），setAppState 回落（in-process 成员 no-op 面）
+            const ctxState = context as {
+              setAppStateForTasks?: unknown
+              setAppState?: unknown
+            }
+            const setAppState =
+              ctxState.setAppStateForTasks ?? ctxState.setAppState
+            nameRouterPort.queuePendingMessage(
+              agentId,
+              input.message,
+              setAppState as (f: (prev: never) => never) => void,
+            )
+            return {
+              data: {
+                success: true,
+                message: `Message queued for delivery to ${input.to} at its next tool round.`,
+              },
+            }
+          }
+          // task 在场但已停 — 后台 resume
+          try {
+            const result = await nameRouterPort.resumeAgent({
+              agentId,
+              prompt: input.message,
+              toolUseContext: context,
+              canUseTool,
+              invokingRequestId: parentMessage?.requestId,
+            })
+            return {
+              data: {
+                success: true,
+                message: `Agent "${input.to}" was stopped (${taskStatus}); resumed it in the background with your message. You'll be notified when it finishes. Output: ${result.outputFile}`,
+              },
+            }
+          } catch (e) {
+            return {
+              data: {
+                success: false,
+                message: `Agent "${input.to}" is stopped (${taskStatus}) and could not be resumed: ${errorMessage(e)}`,
+              },
+            }
+          }
+        }
+      }
     }
     if (typeof input.message === 'string') {
       if (input.to === '*') {

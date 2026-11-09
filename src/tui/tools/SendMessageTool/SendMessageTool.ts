@@ -1,65 +1,50 @@
+/**
+ * 0.1.94 C-2 薄 wrapper（f4 §11③ 批复，W-D-B 工具契约统一波）：
+ * SendMessageTool 逻辑实现体单源 = src/engine/tools/team/sendMessageTool.ts
+ *（经 engine 门面消费，boundaries entry-point 纪律；旧 TUI 927L 副本裁除，
+ * 实现体实例数 = 1 由判别格钉住）。本文件只承载 TUI 契约胶水面：
+ *
+ *   - zod inputSchema（TUI Tool 契约面；engine 面 = SEND_MESSAGE_TOOL_INPUT_SCHEMA
+ *     纯 JSON，engine 车道消费）
+ *   - prompt() 槽 = engine description() = getSendMessagePrompt（§8.68
+ *     env-live 门统一形；旧 prompt.ts feature() 编译门面随 C-2 裁除）
+ *   - 短描述 description() = 旧 DESCRIPTION 常量面（TUI 工具列表消费）
+ *   - renderToolResultMessage（UI.tsx 渲染面移留 TUI 职责）
+ *   - nameRouterPort / selfTerminatePort 注入（f4 §11①②：tui 域符号经
+ *     port 承载，engine↛tui 硬边界；本文件 = TUI 组合根注入点，headless
+ *     不 import 本文件 = port 缺席 = engine lane 名路由/自退支整体缺席
+ *     零变更）
+ *
+ * 收窄形（f4 §10①）：名路由 evicted-transcript-resume 兜底支已裁（判定
+ * 逻辑本体在 engine 单源 call 内，非本文件）。
+ */
 import { feature } from 'src/shared'
 import { z } from 'zod/v4'
-import { isReplBridgeActive } from 'src/tui/bootstrapState.js'
-// 前向缝登记（§8.74.29 1P 簇裁，#200）：1P bridge/ 簇（REPL-bridge handle + 跨 session
-// 消息 postInterClaudeMessage + UDS socket 发送 sendToUdsSocket）裁除。本 tui 工具的
-// bridge/uds 发送支均 1P 且不可达（UDS_INBOX 门默认关 + 1P bridge 已裁）→ 诚实 no-op：
-// getReplBridgeHandle 恒 null（guard 命中 "Remote Control is not connected" 支）、
-// postInterClaudeMessage/sendToUdsSocket 空操作。国产 UDS/remote 门面（src/remote）是
-// engine 域出口，tui 域不直接依赖 remote（DEP allow 面不含 remote），故此处不接线、
-// 仅 no-op 保真（行为保真：1P 远程发送路径本即死码）。
-const getReplBridgeHandle = () => null
-const postInterClaudeMessage = async (
-  _target: string,
-  _message: string,
-): Promise<{ ok: boolean; error?: string }> => ({
-  ok: false,
-  error: '1P bridge cluster cut (§8.74.29, #200)',
-})
-const sendToUdsSocket = async (
-  _socketPath: string,
-  _message: string,
-): Promise<void> => {}
+import {
+  SendMessageTool as EngineSendMessageTool,
+  resetNameRouterPort,
+  resetSelfTerminatePort,
+  setSelfTerminatePort,
+  setNameRouterPort,
+  type SendMessageToolOutput,
+} from 'src/engine'
 import type { Tool, ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { findTeammateTaskByAgentId } from '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import {
   isLocalAgentTask,
-  queuePendingMessage,
+  queuePendingMessage as queuePendingMessageTask,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { isMainSessionTask } from '../../tasks/LocalMainSessionTask.js'
 import { toAgentId } from '../../types/ids.js'
-import { generateRequestId } from '../../utils/agentId.js'
-import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { errorMessage } from '../../utils/errors.js'
-import { truncate } from '../../utils/format.js'
 import { gracefulShutdown } from '../../utils/gracefulShutdown.js'
 import { lazySchema } from '../../utils/lazySchema.js'
-import { parseAddress } from '../../utils/peerAddress.js'
 import { semanticBoolean } from '../../utils/semanticBoolean.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
-import type { BackendType } from '../../utils/swarm/backends/types.js'
-import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
-import { readTeamFileAsync } from '../../utils/swarm/teamHelpers.js'
-import {
-  getAgentId,
-  getAgentName,
-  getTeammateColor,
-  getTeamName,
-  isTeamLead,
-  isTeammate,
-} from 'src/engine'
-import {
-  createShutdownApprovedMessage,
-  createShutdownRejectedMessage,
-  createShutdownRequestMessage,
-  writeToMailbox,
-} from '../../utils/teammateMailbox.js'
 import { resumeAgentBackground } from '../AgentTool/resumeAgent.js'
 import { SEND_MESSAGE_TOOL_NAME } from './constants.js'
-import { DESCRIPTION, getPrompt } from './prompt.js'
-import { renderToolResultMessage, renderToolUseMessage } from './UI.js'
+import { renderToolResultMessage } from './UI.js'
+
+const DESCRIPTION = 'Send a message to another agent'
 
 const StructuredMessage = lazySchema(() =>
   z.discriminatedUnion('type', [
@@ -107,432 +92,60 @@ type InputSchema = ReturnType<typeof inputSchema>
 
 export type Input = z.infer<InputSchema>
 
-export type MessageRouting = {
-  sender: string
-  senderColor?: string
-  target: string
-  targetColor?: string
-  summary?: string
-  content?: string
-}
+// Output 型族单源 engine（旧 TUI 副本本地 duck 型随 C-2 裁除）
+export type {
+  BroadcastOutput,
+  MessageOutput,
+  MessageRouting,
+  RequestOutput,
+  ResponseOutput,
+  SendMessageToolOutput,
+} from 'src/engine'
+export type { SendMessageInput, StructuredMessage } from 'src/engine'
 
-export type MessageOutput = {
-  success: boolean
-  message: string
-  routing?: MessageRouting
-}
-
-export type BroadcastOutput = {
-  success: boolean
-  message: string
-  recipients: string[]
-  routing?: MessageRouting
-}
-
-export type RequestOutput = {
-  success: boolean
-  message: string
-  request_id: string
-  target: string
-}
-
-export type ResponseOutput = {
-  success: boolean
-  message: string
-  request_id?: string
-}
-
-export type SendMessageToolOutput =
-  | MessageOutput
-  | BroadcastOutput
-  | RequestOutput
-  | ResponseOutput
-
-function findTeammateColor(
-  appState: {
-    teamContext?: { teammates: { [id: string]: { color?: string } } }
+// ── 0.1.94 C-2 port 注入（f4 §11①②；本文件 = TUI 组合根注入点）──
+// TUI store 无模块单例（main.tsx 创建经 context 传递）→ port 原语经
+// context.getAppState() 取活态。headless 车道不 import 本文件 = port 缺席。
+setNameRouterPort({
+  resolveAgentId(name, context) {
+    const appState = (context as ToolUseContext).getAppState()
+    return appState.agentNameRegistry.get(name) ?? toAgentId(name) ?? undefined
   },
-  name: string,
-): string | undefined {
-  const teammates = appState.teamContext?.teammates
-  if (!teammates) return undefined
-  for (const teammate of Object.values(teammates)) {
-    if ('name' in teammate && (teammate as { name: string }).name === name) {
-      return teammate.color
-    }
-  }
-  return undefined
-}
-
-async function handleMessage(
-  recipientName: string,
-  content: string,
-  summary: string | undefined,
-  context: ToolUseContext,
-): Promise<{ data: MessageOutput }> {
-  const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
-  const senderName =
-    getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
-  const senderColor = getTeammateColor()
-
-  await writeToMailbox(
-    recipientName,
-    {
-      from: senderName,
-      text: content,
-      summary,
-      timestamp: new Date().toISOString(),
-      color: senderColor,
-    },
-    teamName,
-  )
-
-  const recipientColor = findTeammateColor(appState, recipientName)
-
-  return {
-    data: {
-      success: true,
-      message: `Message sent to ${recipientName}'s inbox`,
-      routing: {
-        sender: senderName,
-        senderColor,
-        target: `@${recipientName}`,
-        targetColor: recipientColor,
-        summary,
-        content,
-      },
-    },
-  }
-}
-
-async function handleBroadcast(
-  content: string,
-  summary: string | undefined,
-  context: ToolUseContext,
-): Promise<{ data: BroadcastOutput }> {
-  const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
-
-  if (!teamName) {
-    throw new Error(
-      'Not in a team context. Create a team with Teammate spawnTeam first, or set ATLAS_TEAM_NAME.',
+  getTaskState(agentId, context) {
+    const appState = (context as ToolUseContext).getAppState()
+    return appState.tasks[agentId]
+  },
+  isRoutableAgentTask: task =>
+    isLocalAgentTask(task) && !isMainSessionTask(task),
+  queuePendingMessage(agentId, message, setAppState) {
+    queuePendingMessageTask(
+      agentId,
+      message,
+      setAppState as unknown as (f: (prev: never) => never) => void,
     )
-  }
-
-  const teamFile = await readTeamFileAsync(teamName)
-  if (!teamFile) {
-    throw new Error(`Team "${teamName}" does not exist`)
-  }
-
-  const senderName =
-    getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
-  if (!senderName) {
-    throw new Error(
-      'Cannot broadcast: sender name is required. Set ATLAS_AGENT_NAME.',
-    )
-  }
-
-  const senderColor = getTeammateColor()
-
-  const recipients: string[] = []
-  for (const member of teamFile.members) {
-    if (member.name.toLowerCase() === senderName.toLowerCase()) {
-      continue
-    }
-    recipients.push(member.name)
-  }
-
-  if (recipients.length === 0) {
-    return {
-      data: {
-        success: true,
-        message: 'No teammates to broadcast to (you are the only team member)',
-        recipients: [],
-      },
-    }
-  }
-
-  for (const recipientName of recipients) {
-    await writeToMailbox(
-      recipientName,
-      {
-        from: senderName,
-        text: content,
-        summary,
-        timestamp: new Date().toISOString(),
-        color: senderColor,
-      },
-      teamName,
-    )
-  }
-
-  return {
-    data: {
-      success: true,
-      message: `Message broadcast to ${recipients.length} teammate(s): ${recipients.join(', ')}`,
-      recipients,
-      routing: {
-        sender: senderName,
-        senderColor,
-        target: '@team',
-        summary,
-        content,
-      },
-    },
-  }
-}
-
-async function handleShutdownRequest(
-  targetName: string,
-  reason: string | undefined,
-  context: ToolUseContext,
-): Promise<{ data: RequestOutput }> {
-  const appState = context.getAppState()
-  const teamName = getTeamName(appState.teamContext)
-  const senderName = getAgentName() || TEAM_LEAD_NAME
-  const requestId = generateRequestId('shutdown', targetName)
-
-  const shutdownMessage = createShutdownRequestMessage({
-    requestId,
-    from: senderName,
-    reason,
-  })
-
-  await writeToMailbox(
-    targetName,
-    {
-      from: senderName,
-      text: jsonStringify(shutdownMessage),
-      timestamp: new Date().toISOString(),
-      color: getTeammateColor(),
-    },
-    teamName,
-  )
-
-  return {
-    data: {
-      success: true,
-      message: `Shutdown request sent to ${targetName}. Request ID: ${requestId}`,
-      request_id: requestId,
-      target: targetName,
-    },
-  }
-}
-
-async function handleShutdownApproval(
-  requestId: string,
-  context: ToolUseContext,
-): Promise<{ data: ResponseOutput }> {
-  const teamName = getTeamName()
-  const agentId = getAgentId()
-  const agentName = getAgentName() || 'teammate'
-
-  logForDebugging(
-    `[SendMessageTool] handleShutdownApproval: teamName=${teamName}, agentId=${agentId}, agentName=${agentName}`,
-  )
-
-  let ownPaneId: string | undefined
-  let ownBackendType: BackendType | undefined
-  if (teamName) {
-    const teamFile = await readTeamFileAsync(teamName)
-    if (teamFile && agentId) {
-      const selfMember = teamFile.members.find(m => m.agentId === agentId)
-      if (selfMember) {
-        ownPaneId = selfMember.tmuxPaneId
-        ownBackendType = selfMember.backendType
-      }
-    }
-  }
-
-  const approvedMessage = createShutdownApprovedMessage({
-    requestId,
-    from: agentName,
-    paneId: ownPaneId,
-    backendType: ownBackendType,
-  })
-
-  await writeToMailbox(
-    TEAM_LEAD_NAME,
-    {
-      from: agentName,
-      text: jsonStringify(approvedMessage),
-      timestamp: new Date().toISOString(),
-      color: getTeammateColor(),
-    },
-    teamName,
-  )
-
-  if (ownBackendType === 'in-process') {
-    logForDebugging(
-      `[SendMessageTool] In-process teammate ${agentName} approving shutdown - signaling abort`,
-    )
-
-    if (agentId) {
-      const appState = context.getAppState()
-      const task = findTeammateTaskByAgentId(agentId, appState.tasks)
-      if (task?.abortController) {
-        task.abortController.abort()
-        logForDebugging(
-          `[SendMessageTool] Aborted controller for in-process teammate ${agentName}`,
-        )
-      } else {
-        logForDebugging(
-          `[SendMessageTool] Warning: Could not find task/abortController for ${agentName}`,
-        )
-      }
-    }
-  } else {
-    if (agentId) {
-      const appState = context.getAppState()
-      const task = findTeammateTaskByAgentId(agentId, appState.tasks)
-      if (task?.abortController) {
-        logForDebugging(
-          `[SendMessageTool] Fallback: Found in-process task for ${agentName} via AppState, aborting`,
-        )
-        task.abortController.abort()
-
-        return {
-          data: {
-            success: true,
-            message: `Shutdown approved (fallback path). Agent ${agentName} is now exiting.`,
-            request_id: requestId,
-          },
-        }
-      }
-    }
-
-    setImmediate(async () => {
-      await gracefulShutdown(0, 'other')
+  },
+  async resumeAgent(args) {
+    const result = await resumeAgentBackground({
+      agentId: args.agentId,
+      prompt: args.prompt,
+      toolUseContext: args.toolUseContext as ToolUseContext,
+      canUseTool: args.canUseTool as CanUseToolFn,
+      invokingRequestId: args.invokingRequestId,
     })
-  }
+    return { outputFile: result.outputFile }
+  },
+})
 
-  return {
-    data: {
-      success: true,
-      message: `Shutdown approved. Sent confirmation to team-lead. Agent ${agentName} is now exiting.`,
-      request_id: requestId,
-    },
-  }
-}
+// 非 in-process backend 车道（tmux 成员）进程级自退兜底——动作经 port
+//（f4 §11②），触发逻辑（backendType 判 + status 判补）在 engine 单源。
+setSelfTerminatePort(() => {
+  void gracefulShutdown(0, 'other')
+})
 
-async function handleShutdownRejection(
-  requestId: string,
-  reason: string,
-): Promise<{ data: ResponseOutput }> {
-  const teamName = getTeamName()
-  const agentName = getAgentName() || 'teammate'
-
-  const rejectedMessage = createShutdownRejectedMessage({
-    requestId,
-    from: agentName,
-    reason,
-  })
-
-  await writeToMailbox(
-    TEAM_LEAD_NAME,
-    {
-      from: agentName,
-      text: jsonStringify(rejectedMessage),
-      timestamp: new Date().toISOString(),
-      color: getTeammateColor(),
-    },
-    teamName,
-  )
-
-  return {
-    data: {
-      success: true,
-      message: `Shutdown rejected. Reason: "${reason}". Continuing to work.`,
-      request_id: requestId,
-    },
-  }
-}
-
-async function handlePlanApproval(
-  recipientName: string,
-  requestId: string,
-  context: ToolUseContext,
-): Promise<{ data: ResponseOutput }> {
-  const appState = context.getAppState()
-  const teamName = appState.teamContext?.teamName
-
-  if (!isTeamLead(appState.teamContext)) {
-    throw new Error(
-      'Only the team lead can approve plans. Teammates cannot approve their own or other plans.',
-    )
-  }
-
-  const leaderMode = appState.toolPermissionContext.mode
-  const modeToInherit = leaderMode === 'plan' ? 'default' : leaderMode
-
-  const approvalResponse = {
-    type: 'plan_approval_response',
-    requestId,
-    approved: true,
-    timestamp: new Date().toISOString(),
-    permissionMode: modeToInherit,
-  }
-
-  await writeToMailbox(
-    recipientName,
-    {
-      from: TEAM_LEAD_NAME,
-      text: jsonStringify(approvalResponse),
-      timestamp: new Date().toISOString(),
-    },
-    teamName,
-  )
-
-  return {
-    data: {
-      success: true,
-      message: `Plan approved for ${recipientName}. They will receive the approval and can proceed with implementation.`,
-      request_id: requestId,
-    },
-  }
-}
-
-async function handlePlanRejection(
-  recipientName: string,
-  requestId: string,
-  feedback: string,
-  context: ToolUseContext,
-): Promise<{ data: ResponseOutput }> {
-  const appState = context.getAppState()
-  const teamName = appState.teamContext?.teamName
-
-  if (!isTeamLead(appState.teamContext)) {
-    throw new Error(
-      'Only the team lead can reject plans. Teammates cannot reject their own or other plans.',
-    )
-  }
-
-  const rejectionResponse = {
-    type: 'plan_approval_response',
-    requestId,
-    approved: false,
-    feedback,
-    timestamp: new Date().toISOString(),
-  }
-
-  await writeToMailbox(
-    recipientName,
-    {
-      from: TEAM_LEAD_NAME,
-      text: jsonStringify(rejectionResponse),
-      timestamp: new Date().toISOString(),
-    },
-    teamName,
-  )
-
-  return {
-    data: {
-      success: true,
-      message: `Plan rejected for ${recipientName} with feedback: "${feedback}"`,
-      request_id: requestId,
-    },
-  }
+// 测试隔离面（判别格消费；与 engine reset 面对偶）
+export function resetSendMessagePortsForTest(): void {
+  resetNameRouterPort()
+  resetSelfTerminatePort()
 }
 
 export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
@@ -542,7 +155,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
     maxResultSizeChars: 100_000,
 
     userFacingName() {
-      return 'SendMessage'
+      return EngineSendMessageTool.userFacingName(undefined)
     },
 
     get inputSchema(): InputSchema {
@@ -551,188 +164,35 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
     shouldDefer: true,
 
     isEnabled() {
-      return isAgentSwarmsEnabled()
+      return EngineSendMessageTool.isEnabled()
     },
 
     isReadOnly(input) {
-      return typeof input.message === 'string'
+      return EngineSendMessageTool.isReadOnly(input)
     },
 
     backfillObservableInput(input) {
-      if ('type' in input) return
-      if (typeof input.to !== 'string') return
-
-      if (input.to === '*') {
-        input.type = 'broadcast'
-        if (typeof input.message === 'string') input.content = input.message
-      } else if (typeof input.message === 'string') {
-        input.type = 'message'
-        input.recipient = input.to
-        input.content = input.message
-      } else if (typeof input.message === 'object' && input.message !== null) {
-        const msg = input.message as {
-          type?: string
-          request_id?: string
-          approve?: boolean
-          reason?: string
-          feedback?: string
-        }
-        input.type = msg.type
-        input.recipient = input.to
-        if (msg.request_id !== undefined) input.request_id = msg.request_id
-        if (msg.approve !== undefined) input.approve = msg.approve
-        const content = msg.reason ?? msg.feedback
-        if (content !== undefined) input.content = content
-      }
+      EngineSendMessageTool.backfillObservableInput?.(
+        input as unknown as Record<string, unknown>,
+      )
     },
 
     toAutoClassifierInput(input) {
-      if (typeof input.message === 'string') {
-        return `to ${input.to}: ${input.message}`
-      }
-      switch (input.message.type) {
-        case 'shutdown_request':
-          return `shutdown_request to ${input.to}`
-        case 'shutdown_response':
-          return `shutdown_response ${input.message.approve ? 'approve' : 'reject'} ${input.message.request_id}`
-        case 'plan_approval_response':
-          return `plan_approval ${input.message.approve ? 'approve' : 'reject'} to ${input.to}`
-      }
+      return EngineSendMessageTool.toAutoClassifierInput(input)
     },
 
-    async checkPermissions(input, _context) {
-      if (feature('UDS_INBOX') && parseAddress(input.to).scheme === 'bridge') {
-        return {
-          behavior: 'ask' as const,
-          message: `Send a message to Remote Control session ${input.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via AtlasCode servers.`,
-          // safetyCheck (not mode) — permissions.ts guards this before both
-          // bypassPermissions (step 1g) and auto-mode's allowlist/classifier.
-          // Cross-machine prompt injection must stay bypass-immune.
-          decisionReason: {
-            type: 'safetyCheck',
-            reason:
-              'Cross-machine bridge message requires explicit user consent',
-            classifierApprovable: false,
-          },
-        }
-      }
-      return { behavior: 'allow' as const, updatedInput: input }
+    async checkPermissions(input, context) {
+      return (await EngineSendMessageTool.checkPermissions(
+        input,
+        context,
+      )) as never
     },
 
-    async validateInput(input, _context) {
-      if (input.to.trim().length === 0) {
-        return {
-          result: false,
-          message: 'to must not be empty',
-          errorCode: 9,
-        }
-      }
-      const addr = parseAddress(input.to)
-      if (
-        (addr.scheme === 'bridge' || addr.scheme === 'uds') &&
-        addr.target.trim().length === 0
-      ) {
-        return {
-          result: false,
-          message: 'address target must not be empty',
-          errorCode: 9,
-        }
-      }
-      if (input.to.includes('@')) {
-        return {
-          result: false,
-          message:
-            'to must be a bare teammate name or "*" — there is only one team per session',
-          errorCode: 9,
-        }
-      }
-      if (feature('UDS_INBOX') && parseAddress(input.to).scheme === 'bridge') {
-        // Structured-message rejection first — it's the permanent constraint.
-        // Showing "not connected" first would make the user reconnect only to
-        // hit this error on retry.
-        if (typeof input.message !== 'string') {
-          return {
-            result: false,
-            message:
-              'structured messages cannot be sent cross-session — only plain text',
-            errorCode: 9,
-          }
-        }
-        // postInterClaudeMessage derives from= via getReplBridgeHandle() —
-        // check handle directly for the init-timing window. Also check
-        // isReplBridgeActive() to reject outbound-only (CCR mirror) mode
-        // where the bridge is write-only and peer messaging is unsupported.
-        if (!getReplBridgeHandle() || !isReplBridgeActive()) {
-          return {
-            result: false,
-            message:
-              'Remote Control is not connected — cannot send to a bridge: target.',
-            errorCode: 9,
-          }
-        }
-        return { result: true }
-      }
-      if (
-        feature('UDS_INBOX') &&
-        parseAddress(input.to).scheme === 'uds' &&
-        typeof input.message === 'string'
-      ) {
-        // UDS cross-session send: summary isn't rendered (UI.tsx returns null
-        // for string messages), so don't require it. Structured messages fall
-        // through to the rejection below.
-        return { result: true }
-      }
-      if (typeof input.message === 'string') {
-        if (!input.summary || input.summary.trim().length === 0) {
-          return {
-            result: false,
-            message: 'summary is required when message is a string',
-            errorCode: 9,
-          }
-        }
-        return { result: true }
-      }
-
-      if (input.to === '*') {
-        return {
-          result: false,
-          message: 'structured messages cannot be broadcast (to: "*")',
-          errorCode: 9,
-        }
-      }
-      if (feature('UDS_INBOX') && parseAddress(input.to).scheme !== 'other') {
-        return {
-          result: false,
-          message:
-            'structured messages cannot be sent cross-session — only plain text',
-          errorCode: 9,
-        }
-      }
-
-      if (
-        input.message.type === 'shutdown_response' &&
-        input.to !== TEAM_LEAD_NAME
-      ) {
-        return {
-          result: false,
-          message: `shutdown_response must be sent to "${TEAM_LEAD_NAME}"`,
-          errorCode: 9,
-        }
-      }
-
-      if (
-        input.message.type === 'shutdown_response' &&
-        !input.message.approve &&
-        (!input.message.reason || input.message.reason.trim().length === 0)
-      ) {
-        return {
-          result: false,
-          message: 'reason is required when rejecting a shutdown request',
-          errorCode: 9,
-        }
-      }
-
-      return { result: true }
+    async validateInput(input, context) {
+      return (await EngineSendMessageTool.validateInput?.(
+        input,
+        context,
+      )) as never
     },
 
     async description() {
@@ -740,188 +200,31 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
     },
 
     async prompt() {
-      return getPrompt()
+      // §8.68 env-live 统一形：engine description() = getSendMessagePrompt
+      //（门 face 每次访问重读 env-live；gate-off = PROMPT 逐字锚点不变）
+      return EngineSendMessageTool.description(undefined, undefined)
     },
 
     mapToolResultToToolResultBlockParam(data, toolUseID) {
-      return {
-        tool_use_id: toolUseID,
-        type: 'tool_result' as const,
-        content: [
-          {
-            type: 'text' as const,
-            text: jsonStringify(data),
-          },
-        ],
-      }
+      return EngineSendMessageTool.mapToolResultToToolResultBlockParam(
+        data as never,
+        toolUseID,
+      )
     },
 
     async call(input, context, canUseTool, assistantMessage) {
-      if (feature('UDS_INBOX') && typeof input.message === 'string') {
-        const addr = parseAddress(input.to)
-        if (addr.scheme === 'bridge') {
-          // Re-check handle — checkPermissions blocks on user approval (can be
-          // minutes). validateInput's check is stale if the bridge dropped
-          // during the prompt wait; without this, from="unknown" ships.
-          // Also re-check isReplBridgeActive for outbound-only mode.
-          if (!getReplBridgeHandle() || !isReplBridgeActive()) {
-            return {
-              data: {
-                success: false,
-                message: `Remote Control disconnected before send — cannot deliver to ${input.to}`,
-              },
-            }
-          }
-          const result = await postInterClaudeMessage(
-            addr.target,
-            input.message,
-          )
-          const preview = input.summary || truncate(input.message, 50)
-          return {
-            data: {
-              success: result.ok,
-              message: result.ok
-                ? `“${preview}” → ${input.to}`
-                : `Failed to send to ${input.to}: ${result.error ?? 'unknown'}`,
-            },
-          }
-        }
-        if (addr.scheme === 'uds') {
-          try {
-            await sendToUdsSocket(addr.target, input.message)
-            const preview = input.summary || truncate(input.message, 50)
-            return {
-              data: {
-                success: true,
-                message: `“${preview}” → ${input.to}`,
-              },
-            }
-          } catch (e) {
-            return {
-              data: {
-                success: false,
-                message: `Failed to send to ${input.to}: ${errorMessage(e)}`,
-              },
-            }
-          }
-        }
-      }
-
-      // Route to in-process subagent by name or raw agentId before falling
-      // through to ambient-team resolution. Stopped agents are auto-resumed.
-      if (typeof input.message === 'string' && input.to !== '*') {
-        const appState = context.getAppState()
-        const registered = appState.agentNameRegistry.get(input.to)
-        const agentId = registered ?? toAgentId(input.to)
-        if (agentId) {
-          const task = appState.tasks[agentId]
-          if (isLocalAgentTask(task) && !isMainSessionTask(task)) {
-            if (task.status === 'running') {
-              queuePendingMessage(
-                agentId,
-                input.message,
-                context.setAppStateForTasks ?? context.setAppState,
-              )
-              return {
-                data: {
-                  success: true,
-                  message: `Message queued for delivery to ${input.to} at its next tool round.`,
-                },
-              }
-            }
-            // task exists but stopped — auto-resume
-            try {
-              const result = await resumeAgentBackground({
-                agentId,
-                prompt: input.message,
-                toolUseContext: context,
-                canUseTool,
-                invokingRequestId: assistantMessage?.requestId,
-              })
-              return {
-                data: {
-                  success: true,
-                  message: `Agent "${input.to}" was stopped (${task.status}); resumed it in the background with your message. You'll be notified when it finishes. Output: ${result.outputFile}`,
-                },
-              }
-            } catch (e) {
-              return {
-                data: {
-                  success: false,
-                  message: `Agent "${input.to}" is stopped (${task.status}) and could not be resumed: ${errorMessage(e)}`,
-                },
-              }
-            }
-          } else {
-            // task evicted from state — try resume from disk transcript.
-            // agentId is either a registered name or a format-matching raw ID
-            // (toAgentId validates the createAgentId format, so teammate names
-            // never reach this block).
-            try {
-              const result = await resumeAgentBackground({
-                agentId,
-                prompt: input.message,
-                toolUseContext: context,
-                canUseTool,
-                invokingRequestId: assistantMessage?.requestId,
-              })
-              return {
-                data: {
-                  success: true,
-                  message: `Agent "${input.to}" had no active task; resumed from transcript in the background with your message. You'll be notified when it finishes. Output: ${result.outputFile}`,
-                },
-              }
-            } catch (e) {
-              return {
-                data: {
-                  success: false,
-                  message: `Agent "${input.to}" is registered but has no transcript to resume. It may have been cleaned up. (${errorMessage(e)})`,
-                },
-              }
-            }
-          }
-        }
-      }
-
-      if (typeof input.message === 'string') {
-        if (input.to === '*') {
-          return handleBroadcast(input.message, input.summary, context)
-        }
-        return handleMessage(input.to, input.message, input.summary, context)
-      }
-
-      if (input.to === '*') {
-        throw new Error('structured messages cannot be broadcast')
-      }
-
-      switch (input.message.type) {
-        case 'shutdown_request':
-          return handleShutdownRequest(input.to, input.message.reason, context)
-        case 'shutdown_response':
-          if (input.message.approve) {
-            return handleShutdownApproval(input.message.request_id, context)
-          }
-          return handleShutdownRejection(
-            input.message.request_id,
-            input.message.reason!,
-          )
-        case 'plan_approval_response':
-          if (input.message.approve) {
-            return handlePlanApproval(
-              input.to,
-              input.message.request_id,
-              context,
-            )
-          }
-          return handlePlanRejection(
-            input.to,
-            input.message.request_id,
-            input.message.feedback ?? 'Plan needs revision',
-            context,
-          )
-      }
+      return EngineSendMessageTool.call(
+        input,
+        context,
+        canUseTool,
+        assistantMessage,
+      ) as never
     },
 
-    renderToolUseMessage,
+    renderToolUseMessage: ((input, options) =>
+      EngineSendMessageTool.renderToolUseMessage(
+        input,
+        options,
+      )) as ToolDef<InputSchema, SendMessageToolOutput>['renderToolUseMessage'],
     renderToolResultMessage,
   } satisfies ToolDef<InputSchema, SendMessageToolOutput>)
