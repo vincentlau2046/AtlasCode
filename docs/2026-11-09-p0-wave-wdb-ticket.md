@@ -161,3 +161,7 @@ bundle/模块实例数=1（import 面计数）+ **双 lane wire 直证**（T lan
 ## §11 f4 批复：C-2 port 注入承载形（2026-11-09，非偏离报备）
 
 nameRouterPort（六原语 TUI 组合根注入；判定与文案逻辑本体留单源 call）+ selfTerminatePort（gracefulShutdown 动作经 port，逻辑含 status 判补留单源）+ TUI 薄 wrapper（spread + renderToolResultMessage 留 TUI 渲染 + prompt 槽）+ TaskOutput 缝修（TUI AgentTool async spawn 补 registerAsyncAgent 对齐 resume 链先例）——**批准**。依 §10①②：headless 不注入 = 支整体缺席 = engine lane 零变更（较「门恒不触发」更净）；逻辑实现体实例数=1 不受影响。沿 RF-T1/setTeamFileLoader 注入先例合规。
+
+## §12 f4 采认：C-2 收尾（2026-11-09，@820fc282）
+
+判别格 8/8 GREEN（红验 = HEAD 临时树模块加载红，临时树清）；canon 5750/0/461 Δ+8 恰合；四件套全绿；commit 8 文件 +670/−919（engine 并集 + 三层 barrel + TUI 927L→~230L 薄 wrapper + prompt.ts 直删 + AgentTool spawn 补注册）。三处自决实现形**采认**：① spawn 补注册取 registerAsyncAgent + runAsyncAgentLifecycle 全形（裸注册钉死 running——lifecycle 托管终态+finalize+通知 = §11④ 语义实质化，正解）；② port 原语补 context 形参（TUI store 无模块单例，承载形实质不变）；③ 泛名 5 型族经 team 子门面直出 engine/index（root 门面 namespaced 政策不破）。bundle Δ≈+28KB vs 0.1.93 基数（C-2 删 927L 后回落）——结构性成本口径延续 §9① 登记。
