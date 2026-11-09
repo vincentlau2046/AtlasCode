@@ -112,6 +112,21 @@ RF-2 实锤，禁二分判读。
 | R-⑤ | **poll 活性直证格**（审计补）：长窗内 `[inProcessRunner] ... poll #N` debug 行计数 | 计数增长 = poll 活直证（兼作 §0.2 ② 勘误闭环）；零增长 = poll 未入（支持 RF-12） |
 | R-④ | 根因 lock-face 报 f4 批复（含判别格证据），f4 出修形锁面 | f4 批复后方可修形 |
 
+### 段 R-aux：最小 debug sink 接线（f4 裁定 2026-11-09，e2e 缺口回执触发）
+
+**缺口（e2e 实核成立，f4 复核确认）**：R-①/②/⑤ 依赖的 swarm 域 `[inProcessRunner]` debug 行
+（~30 处）import 自 `src/shared/debug.ts` = charter C-4 纯 no-op 占位（空体）；`cli/debugSink.ts`
+完整 sink（`--debug-file` 落盘 + ISO 时间戳）仅绑 cli 域三文件 → 任何 lane 零输出，判别格空转。
+
+**裁定：批准最小接线，随段 R 判别格落码同步实施**，约束锁面：
+1. **单一事实源维持（C1）**：接线点 = `shared/debug.ts` 本体（加可注入 sink 窗，set/get 双函数 +
+   模块级持有缺省 no-op——Port 5/Port 1 窗口先例同型），**禁每域复制**；cli/debugSink 启动期注册注入。
+   与 charter C-4 自注「logging port 定案后整文件替换为 port 实现（签名不变，调用点零改动）」前向兼容。
+2. **缺省零行为变更**：sink 仅经既有 `--debug-file`/`--debug`/env DEBUG 任一启用；缺省 lane 零输出零 I/O。
+3. **charter C-4 扩格登记**：占位部分激活须在 charter 登记面落格（非静默），注记「swarm 判别格收证驱动，
+   logging port 定案时整换」。
+4. 范围纪律：仅此最小窗，logging port 全量落地不属本波（仍属 charter C-4 待案）。
+
 ### 段 F：RED-F 修形（Main，按批复锁面；依审计焦点②补强 2026-11-09）
 
 - 候选修形向（按 §0.2 排序，以 R 段定谳为准，禁在定谳前落码）：
