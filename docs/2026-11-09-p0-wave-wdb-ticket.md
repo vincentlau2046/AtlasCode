@@ -212,3 +212,7 @@ f4 亲验判别格 wdb-m-makectx-port.test.ts = **7 pass / 0 fail**（worktree �
 - **E canon**：FORCE_COLOR=3 CI=true bun test --isolate tests/ 全绿，Δ 恰合口径（基线 5770）。
 - 探针纪律 §2.6 regex 形锚 / §2.7 specifier 解析全程；row F 预注册；gate 由 e2e 执行（角色矩阵），Main 判据面照此预注册后发信号。
 - **F gate 后段 L**：release 0.1.94 标准链（SRI 四值 + npm --registry npmjs.org + 生产 lane 含 O4 复验）。
+
+## §16 链路记录：合 master + gate 启动（2026-11-09，Main 报 @cb6ba972）
+
+worktree 七提交 cherry-pick 合 master 零冲突（C-1 8906169f / C-2 b74766d5 / C-3 21e8b35c / 段 M 落码 6b4c3455 + lock-face 两文书 + gate 工单 cb6ba972）；push origin master ALIGNED（f4 §8-§15 随波出仓）。e2e gate 信号已发（基线 cb6ba972，判据面 §15 A-F，版本 0.1.94）。待 e2e gate 报 → PASS 后段 L release。
