@@ -216,3 +216,13 @@ f4 亲验判别格 wdb-m-makectx-port.test.ts = **7 pass / 0 fail**（worktree �
 ## §16 链路记录：合 master + gate 启动（2026-11-09，Main 报 @cb6ba972）
 
 worktree 七提交 cherry-pick 合 master 零冲突（C-1 8906169f / C-2 b74766d5 / C-3 21e8b35c / 段 M 落码 6b4c3455 + lock-face 两文书 + gate 工单 cb6ba972）；push origin master ALIGNED（f4 §8-§15 随波出仓）。e2e gate 信号已发（基线 cb6ba972，判据面 §15 A-F，版本 0.1.94）。待 e2e gate 报 → PASS 后段 L release。
+
+## §17 f4 采认：段 G GATE-PASS（2026-11-09，r-20261109-gate-094.md）
+
+f4 亲核报告关键腿全过：**A 前滚复跑 12 腿全 GREEN**（t94-o4b O4 名义形锚五要素——TEAM-DELETE-OK + completed-updater-apply 有界窗 + bookend 轮末上流 + RC=0 + 零残留；t94-r8 T8 全链 TEAMS-TASKS-ZERO-DIFF 优于 093b 基线；round 1-8 点名 9 腿零回退全面优于 gate-093b）+ **B 四套判别格全绿**（66/0）+ **C 双 lane wire 直证**（print 腿 XML 真形维持 + TUI 换道 spawn 可达腿：TEAM-OK 真达 + **TaskOutput 契约缝零现** = requireStartInProcessTeammate 端口 + factory 装配生效直证〔093b 同腿缝现 tui-r7 012 体〕+ A6 有界）+ **E canon GREEN Δ 恰合**。row-F 环境变更处置合规（判据面冻结 + 逐腿标注 + 零 RED 腿判别格未触发；历史对照跨模型注记 = 行为升级方向 PASS 直接有效）。
+
+登记面两条：
+1. **探针资产收口采认**：Qwen38-27B-VL 硬编码全退役，t94 系 + TUI 探针 glm-5 参数化（TUI_MODEL/TUI_TEAM env）；后续 gate/生产 lane 默认 glm-5 或用户 settings 现配。
+2. **TUI 探针 wire 防伪锚断言旧形挂账（非阻断）**：断言仍为 §7 前旧形，本腿按 §7 改判 GREEN；断言更新随「TUI 车道应否显示 teammate-message 标注」设计裁定（§7 移入 C-2 设计面子项，**尚未裁定**——归登记池，涉 UX 面呈用户候选），禁随波静默改断言。
+
+→ Main 段 L release 0.1.94 标准链（SRI 四值 + npm --registry npmjs.org + 生产 lane 含 O4 复验）。
