@@ -227,3 +227,25 @@ f4 逐条吸收（本文件已修订）：
 ### 探针 marker 清单（e2e 腿 grep 面，--debug-file 收证）
 
 `[probe-R1][spawn]` / `[probe-R1][runner]` / `[probe-R1][trigger]` / `[probe-R2][anchor1-runagent-returned]` / `[probe-R2][anchor2-idle-in]` / `[probe-R2][anchor2-idle-out]` / `[probe-R2][anchor3-poll-start]` / `[inProcessRunner] ... poll #N: checking mailbox`（R-⑤ 计数）。marker 均为代码侧 debug 行，不入 prompt 字面（§2 硬约束 4）。
+
+## §8 f4 批复：R-④ 根因 lock-face + R-⑥ 补格裁定（2026-11-09）
+
+### R-④ 定谳采纳
+
+四候选排除（R-① ac-1 三点同对象+taskEntries=1 → RF-1/RF-4A 排除；R-② 第一轮收尾段 2ms → RF-12 排除、第二轮 lifecycle break L1463 点火后零输出 → RF-2 排除）；R-⑤ poll #1-5 活直证（round-8「轮询活」勘误闭环）。**第五根因形采纳：break 后静默丢失**——悬挂窗口 = lifecycle-abort break 之后、completed 收尾写点生效之前。证据源 e2e 腿 t8-reddf-r（DIAGNOSTIC.md，基面 c7d4c1ee 未修形）。
+
+### R-⑥ 补格批准（附两处 f4 补强）
+
+Main 三探针全批（completed-in / updater-enter·notlive·apply / completed-out + record stamp 第二 WeakMap）+ f4 补强：
+- **补强①（M-A 精钉）**：completed updater 体内 try/catch，catch 打 `[probe-R6][completed-updater-throw]` 后原样 rethrow（语义零变）。
+- **补强②（M-D 第四机制分型）**：Main「悬挂不可能」未证 **EngineState 丢唤醒竞态**（drain 退出循环→finally 前 window 内 enqueue 的 item 永久搁浅，除非后续恰有 set() 再触发；本腿 runner 退出后成员侧零后续写 → 搁浅成立同样复现全签名）。补 EngineState.process 侧两行探针 `[probe-R6][es-enqueue] q=<len> processing=<bool>` / `[probe-R6][es-apply] q=<len>`——enter 缺席时 es-apply 有本件 = M-C（他店）、无 = M-D（搁浅实锤）。
+
+**判读矩阵**：completed-in 缺席 = 第六机制（break 后控制流未达尾段，Main「纯同步零 await」静态读被证伪须重新锁面）；in 有 enter 无 = M-C/M-D（es 探针分型）；enter 有 notlive 现 = M-B；enter 有 apply 无 = M-A（throw 探针定位）；全链现 = 观察面矛盾重审。
+
+**机制先验（f4，不预判）**：M-A/M-D 强（M-A 抛源薄弱：onIdleCallbacks 轮 1 已清空、unregisterCleanup 弱抛面；M-D 竞态窗窄但写序吻合）；M-C 弱（round-8 idle 面④ = WaitForTeammates 观测到 runner 侧写的 isIdle=true → 单店旁证）。
+
+### 附裁定
+
+- **.lock 残留**：不入本波判别格（与终态提交面无既证因果）；登记 W-D-B 观察池（mailbox/team-file 写链，round-8+本腿两现）。
+- **修形向对号（段 F 预注册清单映射）**：M-A → updater 抛错 fail-visible；M-B → 谓词/读面收紧；M-C → 单源化；M-D → EngineState 唤醒面修复（**共享基座警示：修形影响面全产品，锁面须含回归评估**）。
+- 流程：R-⑥ 落码（仍零修形）→ e2e 同场景复跑 → 终定谳（出第六机制再报 f4）→ 段 F 修形锁面报批。
