@@ -136,3 +136,24 @@ diff 定谳采纳（身份段 11 函数逐字零 delta 仅 import 面 / 尾 3 Ap
 - **分叉 3（plain 投递通道）**：名路由支并集进单源 tool 保 TUI 车道现行为（零 UX 变更）采纳；**engine lane 触发面先实证后裁**——Main 须先实核 headless 是否注册 agentNameRegistry：若不注册 = engine lane 行为零变更零裁定；若注册 = 涉 UX 面，两选项（统一纯文本 vs 保持分叉登记）面呈用户裁定，禁静默择一。
 - **TaskOutput agentId 契约缝**：本波附带修（C-2 同域契约缝，spawn 补注册对齐 resume 链先例），判别格随 C-2 冻结。
 - 判据面待分叉 3 实证结果随下批批复冻结（bundle 实例数=1 + 双 lane wire 直证 + canon + §2.6 regex 形锚 + §2.7 specifier 解析）。
+
+## §10 f4 裁处：分叉 3 + C-3 反向面原则 + 第四对 + 判据面冻结（2026-11-09）
+
+### ① 分叉 3 处置：**选项 2 收窄并集批准**
+
+实证采认（registry 全仓零 .set() 写入 = 恒空死态；名路由实触发腿 = toAgentId a-形 pattern + evicted-resume；TUI spawn 不写 appState.tasks）。裁 evicted-transcript-resume 兜底支（= spawn 不注册的补丁面，C-2 附带修 spawn 补注册后前提消失），保留 running→queuePendingMessage / stopped→resume 两支（tasks 在场才触发）→ headless 窄视图无 tasks = 门恒不触发 = engine lane 零变更**无需面呈用户**；TUI lane spawn 补注册后 running/stopped 支从恒 evicted 兜底改善为正形。附带登记：agentNameRegistry 恒空死态（UI 遍历组件恒见空）入观察池非本波。
+
+### ② C-3 反向面 disposition 原则：**采纳 Main 三分原则，主系统提示词项改判「机制/策略分离」**
+
+- UX 观测面（progress tracker 逐消息镜像 / currentWorkAbortController task 态存取 / onPermissionWaitMs 记账 / per-iteration permissionMode）：**保留适配进单源**（单源 runner 须承载这些钩子面）。
+- 旧语义缺陷伴随面（P1 mailbox 无 deadline /「is now exiting」谎面 / 字面 status 比较）：**随 E 正形裁除**。
+- **主系统提示词基底差异改判：机制/策略分离**——runner 机制收敛 E 形（buildTeammateSystemPrompt 参数化构造）；TUI lane 成员提示词基底 = 调用侧策略，由 TUI 调用点显式传参保持现行为（零成员行为变更）。**若调用侧无法等价传参，该子项面呈用户裁定禁静默择一**（报批文书须含两侧成员 prompt 实文对照）。
+- TUI lane round-3/6/7 修形语义升级（fail-closed/ack 两态/窄口嗅探）= **既定修形传播非新行为面**（用户已裁波次），gate 报告作 behavior-upgrade face 登记不另呈。
+
+### ③ 第四对 InProcessBackend：**不入本波，C-3 最小改道**
+
+C-3 范围 = runner 单源化 + TUI InProcessBackend **import 面最小换道**（指向 E runner，保持 TUI backend 现行为）。InProcessBackend 对完整收敛（src/swarm/backends + src/tui/utils/swarm/backends）登记 W-D-B 池后续（scope 纪律：防收敛链无界蔓延）。
+
+### ④ C-2/C-3 判据面冻结（随本批复）
+
+bundle/模块实例数=1（import 面计数）+ **双 lane wire 直证**（T lane 判别格以修形后语义为准：round-3 fail-closed / round-6 ack 两态 / round-7 窄口嗅探 + A6 有界终止 TUI 探针格 + TaskOutput spawn 补注册格）+ 反向面保留项行为锚 + canon + 四件套 + §2.6 regex 形锚 + §2.7 specifier 解析。C-2、C-3 依序落码。
