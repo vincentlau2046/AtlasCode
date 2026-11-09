@@ -328,3 +328,15 @@ f4 §9 RF-T1「engine lane 补 setMemberActive(false) 写点」**定位错位**�
 ### ③ 流程
 
 段 F 落码两面（RF-T1 port 读面 + drain flush 时序）→ 四件套 → e2e 段 G gate（O4 全要素对表，completed 通知按既设通道判读 + row-F 亮明）→ 段 L。
+
+## §12 f4 批复：RF-T2 flush 修形锁面（2026-11-09）
+
+**主案批准**：AgentLoopDeps 增可选 awaited 槽 `afterRound?: () => Promise<void>`，round_end 发射点（emit 后、下轮 round_start 前）`await deps.afterRound?.()`；print.ts loopDeps 注入 `afterRound: () => drainToOutput()`（惰性箭头避 TDZ）。保序论证采纳（队列单实例 / 回合 N 事件含 teammate completed bookend 于回合 N 末先于 N+1 LLM 与消息写上流 / 站点①-④不动、②转幂等 no-op / 轮粒度与 emit 既有契约同粒度；sub-round 前向接缝登记维持）。备选 A 否决采纳（emit 同步契约 + async drain 并发 = write 交错无保序）；备选 B 不入。
+
+**附带条件（两条）**：
+1. **afterRound 错误 fail-visible**：drainToOutput 拒绝须沿 await 传播（禁 catch 吞——静默面纪律；与 writeTurnOutputs 写错传播同权）。
+2. TUI lane 不注入面维持 + 段 G 探针 TUI 负断言照旧（afterRound 为 headless 唯一消费）。
+
+**判别格批准**：unit 三断言（次数=回合数 / round1 内 enqueue 事件于 afterRound#1 可 drain 且早于 round2 round_start / 未注入零行为）+ 修复前红（现码无 per-round flush 点断言②红）。
+
+RF-T1 落盘 afae2d19 采信（判别格 F1 修前红/F2-F4 恒绿设计合理；cherry-pick 误落 AtlasHarness cwd 插曲已 --abort 干净恢复无损，登记备档）。流程：落码 → 两面合并四件套 → 段 F 收尾 → 段 G gate 单信号。
