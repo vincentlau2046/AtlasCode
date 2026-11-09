@@ -226,3 +226,15 @@ f4 亲核报告关键腿全过：**A 前滚复跑 12 腿全 GREEN**（t94-o4b O4
 2. **TUI 探针 wire 防伪锚断言旧形挂账（非阻断）**：断言仍为 §7 前旧形，本腿按 §7 改判 GREEN；断言更新随「TUI 车道应否显示 teammate-message 标注」设计裁定（§7 移入 C-2 设计面子项，**尚未裁定**——归登记池，涉 UX 面呈用户候选），禁随波静默改断言。
 
 → Main 段 L release 0.1.94 标准链（SRI 四值 + npm --registry npmjs.org + 生产 lane 含 O4 复验）。
+
+## §18 f4 终态收口：0.1.94 W-D-B 五段闭环（2026-11-09）
+
+**全链终态**：工单 §0 → Atlas-reveiw 审计（§6 有修改通过）→ §7 段 X' 前提溶解改判 → 段 C-1/C-2/C-3 + 段 M 落码闭环（§8-§15）→ 合 master cb6ba972（§16）→ 段 G GATE-PASS（§17，r-20261109-gate-094）→ **release 0.1.94**（6376326a / tag v0.1.94 / npm @atlasharness/atlascode@0.1.94）→ **生产 lane ⑦ PASS**（r-20261109-prodlane-094，Main 单点报用户）。
+
+f4 侧三重独立核验全 MATCH/GREEN：SRI 四值（f4 registry 直取实算 ≡ 留档 ≡ e2e 安装树 du 精确同值）；O4 生产复验 GREEN（npm 安装品 TEAM-DELETE-OK 首试 + completed-updater-apply=1 + bookend 3/5 + 零残留；gate dist 腿 ↔ 生产安装品腿同形全绿 = 测的=发布的在 O4 锚闭环）；逐腿 glm-5 基面标注（§17 条款执行，reqlog 12/12 直证）。
+
+**波成果**：双副本收敛三对（teammate.ts / SendMessageTool 927L→薄 wrapper / runInProcessTeammate 1546L TUI twin 直删换道 src/swarm 单源）+ InProcessBackend 最小换道（requireStartInProcessTeammate 端口 + factory 组合根装配）+ SDK lane makeCtx 双重 fail-silent 修复（TodoWrite todos port，§14 双通道 + fail-visible 构建期前移）+ exiting 谎面一行销项。0.1.93 修形全族经换道传播 TUI lane（gate C 腿直证）。
+
+**登记池移交（后续波/用户裁定候选）**：requestShutdown 工具化 disposition（用户未裁）；TUI 标注面应否显示（§7 设计子项，涉 UX 呈用户候选，探针断言更新随裁）；InProcessBackend 第四对全收敛；窄门面 bundle 回收评估；agentNameRegistry 恒空死态；变体轮经济 parity；.lock 残留观察（round-8/0.1.93b 两现后本波零现）。**下波方向待用户定夺**（纲要 §10 序 4+ / 登记池项 / requestShutdown），f4 不自动起新方向波。
+
+**方法论增补（本波）**：§2.6 子串 grep → 形锚 regex（勘误族第二例）；§2.7 importer 枚举 specifier 解析禁路径子串（同族第三例）；row-F 环境变更模型方差纪律（RED 腿同模型 A/B 判别 + 逐腿基面标注——网关轮换首例入波）；判据面冻结时点 = 各段 lock-face 批复文书（§6④ 硬约束全程零违例）。
