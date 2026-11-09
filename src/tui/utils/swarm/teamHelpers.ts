@@ -13,7 +13,7 @@ import { lazySchema } from '../lazySchema.js'
 import type { PermissionMode } from '../permissions/PermissionMode.js'
 import { jsonParse, jsonStringify } from '../slowOperations.js'
 import { getTasksDir, notifyTasksUpdated } from '../tasks.js'
-import { getAgentName, getTeamName, isTeammate } from '../teammate.js'
+import { getAgentName, getTeamName, isTeammate } from 'src/engine'
 import { type BackendType, isPaneBackend } from './backends/types.js'
 import { TEAM_LEAD_NAME } from './constants.js'
 

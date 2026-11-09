@@ -10,7 +10,7 @@ import { logForDebugging } from '../debug.js'
 import { addFunctionHook } from '../hooks/sessionHooks.js'
 import { applyPermissionUpdate } from '../permissions/PermissionUpdate.js'
 import { jsonStringify } from '../slowOperations.js'
-import { getTeammateColor } from '../teammate.js'
+import { getTeammateColor } from 'src/engine'
 import {
   createIdleNotification,
   getLastPeerDmSummary,

@@ -10,7 +10,7 @@ import { errorMessage, isFsInaccessible } from './errors.js'
 import { isProcessRunning } from './genericProcessUtils.js'
 import { getPlatform } from './platform.js'
 import { jsonParse, jsonStringify } from './slowOperations.js'
-import { getAgentId } from './teammate.js'
+import { getAgentId } from 'src/engine'
 
 export type SessionKind = 'interactive' | 'bg' | 'daemon' | 'daemon-worker'
 export type SessionStatus = 'busy' | 'idle' | 'waiting'

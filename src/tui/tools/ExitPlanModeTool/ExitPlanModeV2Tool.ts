@@ -33,7 +33,7 @@ import {
   getTeamName,
   isPlanModeRequired,
   isTeammate,
-} from '../../utils/teammate.js'
+} from 'src/engine'
 import { writeToMailbox } from '../../utils/teammateMailbox.js'
 import { AGENT_TOOL_NAME } from '../AgentTool/constants.js'
 import { TEAM_CREATE_TOOL_NAME } from '../TeamCreateTool/constants.js'

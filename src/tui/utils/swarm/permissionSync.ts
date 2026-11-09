@@ -33,7 +33,7 @@ import {
   getAgentName,
   getTeammateColor,
   getTeamName,
-} from '../teammate.js'
+} from 'src/engine'
 import {
   createPermissionRequestMessage,
   createPermissionResponseMessage,

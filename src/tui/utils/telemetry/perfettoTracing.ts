@@ -37,7 +37,7 @@ import {
 import { errorMessage } from '../errors.js'
 import { djb2Hash } from '../hash.js'
 import { jsonStringify } from '../slowOperations.js'
-import { getAgentId, getAgentName, getParentSessionId } from '../teammate.js'
+import { getAgentId, getAgentName, getParentSessionId } from 'src/engine'
 
 /**
  * Chrome Trace Event format types

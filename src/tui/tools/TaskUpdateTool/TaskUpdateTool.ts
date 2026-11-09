@@ -24,7 +24,7 @@ import {
   getAgentName,
   getTeammateColor,
   getTeamName,
-} from '../../utils/teammate.js'
+} from 'src/engine'
 import { writeToMailbox } from '../../utils/teammateMailbox.js'
 import { VERIFICATION_AGENT_TYPE } from '../AgentTool/constants.js'
 import { TASK_UPDATE_TOOL_NAME } from './constants.js'

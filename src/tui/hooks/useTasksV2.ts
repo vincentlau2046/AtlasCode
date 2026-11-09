@@ -11,7 +11,7 @@ import {
   onTasksUpdated,
   resetTaskList,
 } from '../utils/tasks.js'
-import { isTeamLead } from '../utils/teammate.js'
+import { isTeamLead } from 'src/engine'
 
 const HIDE_DELAY_MS = 5000
 const DEBOUNCE_MS = 50

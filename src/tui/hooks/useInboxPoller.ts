@@ -46,7 +46,7 @@ import {
   isPlanModeRequired,
   isTeamLead,
   isTeammate,
-} from '../utils/teammate.js'
+} from 'src/engine'
 import { isInProcessTeammate } from 'src/shared'
 import {
   isModeSetRequest,

@@ -29,7 +29,7 @@ import {
 import {
   clearDynamicTeamContext,
   setDynamicTeamContext,
-} from '../../src/tui/utils/teammate.js'
+} from 'src/engine'
 import type { PermissionDecision } from '../../src/tui/utils/permissions/PermissionResult.js'
 import { writeTeamFileAsync } from '../../src/swarm'
 

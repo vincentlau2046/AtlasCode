@@ -26,7 +26,7 @@ import { jsonParse, jsonStringify } from './slowOperations.js'
 import type { BackendType } from './swarm/backends/types.js'
 import { TEAM_LEAD_NAME } from './swarm/constants.js'
 import { sanitizePathComponent } from './tasks.js'
-import { getAgentName, getTeammateColor, getTeamName } from './teammate.js'
+import { getAgentName, getTeammateColor, getTeamName } from 'src/engine'
 
 // Lock options: retry with backoff so concurrent callers (multiple Claudes
 // in a swarm) wait for the lock instead of failing immediately. The sync

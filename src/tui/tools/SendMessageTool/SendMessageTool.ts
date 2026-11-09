@@ -49,7 +49,7 @@ import {
   getTeamName,
   isTeamLead,
   isTeammate,
-} from '../../utils/teammate.js'
+} from 'src/engine'
 import {
   createShutdownApprovedMessage,
   createShutdownRejectedMessage,

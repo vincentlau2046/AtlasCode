@@ -11,7 +11,7 @@ import {
   saveAgentName,
   saveCustomTitle,
 } from '../../utils/sessionStorage.js'
-import { isTeammate } from '../../utils/teammate.js'
+import { isTeammate } from 'src/engine'
 import { generateSessionName } from './generateSessionName.js'
 
 export async function call(

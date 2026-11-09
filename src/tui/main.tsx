@@ -76,8 +76,8 @@ import { computeInitialTeamContext } from './utils/swarm/reconnection.js';
 import { initializeWarningHandler } from './utils/warningHandler.js';
 import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js';
 
-// Lazy require to avoid circular dependency: teammate.ts -> AppState.tsx -> ... -> main.tsx
-const getTeammateUtils = () => require('./utils/teammate.js') as typeof import('./utils/teammate.js');
+// Lazy require（0.1.94 C-1 单源化：身份链单源 src/engine/messaging/teammate，环已不存在）
+const getTeammateUtils = () => require('src/engine') as typeof import('src/engine');
 const getTeammatePromptAddendum = () => require('./utils/swarm/teammatePromptAddendum.js') as typeof import('./utils/swarm/teammatePromptAddendum.js');
 const getTeammateModeSnapshot = () => require('./utils/swarm/backends/teammateModeSnapshot.js') as typeof import('./utils/swarm/backends/teammateModeSnapshot.js');
 // Dead code elimination: conditional import for COORDINATOR_MODE

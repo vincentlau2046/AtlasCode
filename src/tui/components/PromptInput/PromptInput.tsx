@@ -80,7 +80,7 @@ import { findSlackChannelPositions, getKnownChannelsVersion, hasSlackMcpServer, 
 import { isInProcessEnabled } from '../../utils/swarm/backends/registry.js';
 import { syncTeammateMode } from '../../utils/swarm/teamHelpers.js';
 import type { TeamSummary } from '../../utils/teamDiscovery.js';
-import { getTeammateColor } from '../../utils/teammate.js';
+import { getTeammateColor } from 'src/engine';
 import { isInProcessTeammate } from 'src/shared';
 import { writeToMailbox } from '../../utils/teammateMailbox.js';
 import type { TextHighlight } from '../../utils/textHighlighting.js';

@@ -46,7 +46,7 @@ import { consumeEarlyInput } from '../utils/earlyInput.js';
 import { setMemberActive } from '../utils/swarm/teamHelpers.js';
 import { isSwarmWorker, generateSandboxRequestId, sendSandboxPermissionRequestViaMailbox, sendSandboxPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js';
 import { registerSandboxPermissionCallback } from '../hooks/useSwarmPermissionPoller.js';
-import { getTeamName, getAgentName } from '../utils/teammate.js';
+import { getTeamName, getAgentName } from 'src/engine';
 import { WorkerPendingPermission } from '../components/permissions/WorkerPendingPermission.js';
 import { injectUserMessageToTeammate, getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
 import { isLocalAgentTask, queuePendingMessage, appendMessageToLocalAgent, type LocalAgentTaskState } from '../tasks/LocalAgentTask/LocalAgentTask.js';

@@ -199,7 +199,7 @@ import {
   getAgentId,
   getTeamName,
   isTeamLead,
-} from './teammate.js'
+} from 'src/engine'
 import { isInProcessTeammate } from 'src/shared'
 import { removeTeammateFromTeamFile } from './swarm/teamHelpers.js'
 import { unassignTeammateTasks } from './tasks.js'

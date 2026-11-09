@@ -27,7 +27,7 @@ import {
 import {
   getAgentId as tuiGetAgentId,
   getAgentName as tuiGetAgentName,
-} from '../../src/tui/utils/teammate'
+} from 'src/engine'
 
 const SRC_ROOT = join(import.meta.dir, '..', '..', 'src')
 

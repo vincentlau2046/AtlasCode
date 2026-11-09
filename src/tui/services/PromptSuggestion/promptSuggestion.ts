@@ -17,7 +17,7 @@ import {
   getLastAssistantMessage,
 } from '../../utils/messages.js'
 import { getInitialSettings } from '../../utils/settings/settings.js'
-import { isTeammate } from '../../utils/teammate.js'
+import { isTeammate } from 'src/engine'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { isSpeculationEnabled, startSpeculation } from './speculation.js'
 

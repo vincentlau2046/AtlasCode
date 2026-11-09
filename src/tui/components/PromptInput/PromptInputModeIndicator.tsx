@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Box, Text } from 'src/tui/ink.js';
 import { AGENT_COLOR_TO_THEME_COLOR, AGENT_COLORS, type AgentColorName } from 'src/tui/tools/AgentTool/agentColorManager.js';
 import type { PromptInputMode } from 'src/tui/types/textInputTypes.js';
-import { getTeammateColor } from 'src/tui/utils/teammate.js';
+import { getTeammateColor } from 'src/engine';
 import type { Theme } from 'src/tui/utils/theme.js';
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js';
 type Props = {

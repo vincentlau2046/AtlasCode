@@ -11,7 +11,7 @@ import * as lockfile from './lockfile.js'
 import { logError } from './log.js'
 import { createSignal } from './signal.js'
 import { jsonParse, jsonStringify } from './slowOperations.js'
-import { getTeamName } from './teammate.js'
+import { getTeamName } from 'src/engine'
 import { getTeammateContext } from 'src/shared'
 
 // Listeners for task list updates (used for immediate UI refresh in same process)

@@ -11,7 +11,7 @@ import {
   getTaskListId,
   isTodoV2Enabled,
 } from '../../utils/tasks.js'
-import { getAgentName, getTeamName } from '../../utils/teammate.js'
+import { getAgentName, getTeamName } from 'src/engine'
 import { TASK_CREATE_TOOL_NAME } from './constants.js'
 import { DESCRIPTION, getPrompt } from './prompt.js'
 

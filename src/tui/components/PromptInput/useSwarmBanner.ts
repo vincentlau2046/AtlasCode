@@ -22,7 +22,7 @@ import {
   getTeammateColor,
   getTeamName,
   isTeammate,
-} from '../../utils/teammate.js'
+} from 'src/engine'
 import { isInProcessTeammate } from 'src/shared'
 import type { Theme } from '../../utils/theme.js'
 

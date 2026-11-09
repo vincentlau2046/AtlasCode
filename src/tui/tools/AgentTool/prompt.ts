@@ -1,7 +1,7 @@
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { hasEmbeddedSearchTools } from '../../utils/embeddedTools.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from '../../utils/envUtils.js'
-import { isTeammate } from '../../utils/teammate.js'
+import { isTeammate } from 'src/engine'
 import { isInProcessTeammate } from 'src/shared'
 import { FILE_READ_TOOL_NAME } from '../FileReadTool/prompt.js'
 import { FILE_WRITE_TOOL_NAME } from '../FileWriteTool/prompt.js'
