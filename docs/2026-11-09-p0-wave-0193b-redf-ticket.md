@@ -313,3 +313,18 @@ f4 §9 RF-T1「engine lane 补 setMemberActive(false) 写点」**定位错位**�
 - **旧仓**（`src/utils/swarm/inProcessRunner.ts:1403-1447`）completed 收尾 = 状态写（completed+notified:true+字段清理）+ **内联 `emitTaskTerminatedSdk`（SDK task_notification bookend）**；**无 lead inbox/mailbox 通知**（旧仓 inbox 通知面仅 idle_notification）。
 - **新仓已对齐**：completed 块内联 `emitTaskTerminatedSdk` 在场（`src/swarm/inProcessRunner.ts:1699`）。→ f4 初裁「completed 尾补发 idle notification」若指 inbox 通知 = **旧仓亦无，非语义保真恢复**——按 f4 §9.三 预判呈用户裁定（不得静默自定）。
 - **wire 观测缺口（新增机制面）**：内联 emit 23.443 入队（`engine/coordinator/tasks/sdkEventQueue.ts` 模块级 queue，headless drain）但 e2e wire task_notification 仅进程退出出现——emit→drain 站点 flush 时序断（drain 4 站点 = cli/print.ts）为段 F 落码时的判别/回归面，不入定谳阻塞。
+
+## §11 f4 批复：终 lock-face（2026-11-09，对 §9 两处实质修正全采纳）
+
+### ① RF-T1 修形向改判（row F 报批采纳）
+
+「补 setMemberActive(false)」**废弃**（branch-1 从未执行——readTeamFile 纯磁盘读 + seeded HOME 无 config.json，e2e branch-1 判读与其自身持久面观测矛盾）。真拦截面采纳 Main 源码定谳：**lead 工具 context makeCtx（print.ts:1122-1128）getAppState = TPC 窄视图无 tasks 字段（S-E3 有意设计）→ branch-2 `tasks?.[member.taskId]` 恒 undefined → isInProcessTeammateActiveOrUnknown(undefined)=alive fail-closed 恒拦**；与 completed 写点无关（时序 63s 假说排除）。round-8「status 恒 running」终勘误 = 谓词读点窄视图，非写点丢失。
+**修形批准：TeamDelete branch-2 读面单点改走 sessionContextPort**（`getSessionContextPort()?.get().tasks ?? {}` 替换 `context.getAppState()?.tasks`；print.ts:1642 drain ladder 同店同款先例；port 缺席维持现 fail-closed，守卫语义不放宽）。备选「makeCtx 扩面」否决（动全工具消费面契约）。makeCtx setAppState tasks 丢弃缺陷登记 W-D-B。
+
+### ② RF-T2 处置裁定
+
+旧仓实核采纳：completed 收尾无 lead inbox 通知（仅 SDK task_notification bookend）→「补发 idle notification」非保真恢复，废弃。**裁定：段 F 做 emit→drain flush 时序修复**（内联 emit 23.443 入队而 wire task_notification 仅进程退出现 = 时序断，产品缺陷面，无论 O4 定义如何均修）；**O4 要素「completed 通知达 lead」判读面 = 产品既设通知通道（task_notification bookend 达 s.out）**——旧仓保真口径，非目标位移；非静默处置：本裁定显式登记于此 + gate 报告 row-F 亮明，呈用户-visible，用户可于 gate 面前否决。
+
+### ③ 流程
+
+段 F 落码两面（RF-T1 port 读面 + drain flush 时序）→ 四件套 → e2e 段 G gate（O4 全要素对表，completed 通知按既设通道判读 + row-F 亮明）→ 段 L。
