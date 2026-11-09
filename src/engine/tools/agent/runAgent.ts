@@ -94,6 +94,13 @@ export interface RunAgentArgs {
    * 不装配 autoCompact 等引擎行为）。
    */
   toolContext?: object
+  /**
+   * 0.1.94 C-3（f4 §13①）：逐消息观测钩子（缺省 undefined = 既有调用方
+   * 零变更）。实现 = round_end 事件派生（queryAgentLoop 每轮 emit 的
+   * assistantMessage + toolResultMessages 按序逐条回调——TUI lane 成员
+   * loop 换道后 progress tracker 镜像消费点；UX 观测面保留适配进单源）。
+   */
+  onMessage?: (message: Message) => void
 }
 
 export interface RunAgentResult {
@@ -132,6 +139,7 @@ export async function runAgent(args: RunAgentArgs): Promise<RunAgentResult> {
     forkContextMessages,
     checkPermission,
     toolContext,
+    onMessage,
   } = args
 
   const role = resolveRole(overrideRole, agentDefinition, parentRole)
@@ -146,7 +154,23 @@ export async function runAgent(args: RunAgentArgs): Promise<RunAgentResult> {
   ]
 
   const loopResult: AgentLoopResult = await queryAgentLoop(
-    { modelProvider, role, signal, checkPermission, toolContext },
+    {
+      modelProvider,
+      role,
+      signal,
+      checkPermission,
+      toolContext,
+      // 0.1.94 C-3（f4 §13①）：onMessage 经 round_end 事件派生逐条回调
+      //（assistant 先、tool_result 族按序；未设 = emit 缺省 no-op 零变更）。
+      emit: onMessage
+        ? event => {
+            if (event.type === 'round_end') {
+              if (event.assistantMessage) onMessage(event.assistantMessage)
+              for (const m of event.toolResultMessages ?? []) onMessage(m)
+            }
+          }
+        : undefined,
+    },
     { messages, tools },
   )
 

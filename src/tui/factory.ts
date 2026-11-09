@@ -49,6 +49,16 @@ import {
 } from 'src/executor'
 import type { Executor, AscendConfig } from 'src/executor'
 import { shouldUseSandbox, type AgentLoopDeps } from 'src/engine'
+// 0.1.94 C-3（f4 §13③）：swarm 换道 seam 窗组合根装配——teammate 工具池
+// deps 3 工具 materialize 面（compose.ts:361 同形）。
+import { SnipTool, TeamCreateTool, TeamDeleteTool } from 'src/engine'
+// 0.1.94 C-3（f4 §13③）：swarm 换道 seam 窗——TUI 进程注入窗接线
+//（PRT-2 显式装配语句，非模块顶层自注册；compose.ts:342 同形）。
+import {
+  startInProcessTeammate,
+  setStartInProcessTeammate,
+  setTeammateToolRegistryDeps,
+} from 'src/swarm'
 
 import { AscendExecutor } from './core/executor/AscendExecutor'
 import { DefaultAscendMockPort } from './core/executor/AscendMockPort'
@@ -165,6 +175,15 @@ export function createCoreDependencies(
   // D-2a S8（M5 切端）：engine context 簇宿主端口接线（compact/SM/reactive/
   // partial 富体 + post-compact reset 注册表 + settings/GB 读面；幂等）
   wireContextHostPorts()
+
+  // 0.1.94 C-3（f4 §13③）：swarm 换道 seam 窗接线（compose.ts:342/361
+  // 同形，PRT-2 显式装配）——单 spawn 入口不变量：InProcessBackend.spawn
+  // 经 requireStartInProcessTeammate 端口消费 src/swarm 单源 runner；
+  // teammate 工具池 deps 注入窗 ⑬（registry 3 工具 materialize 面）。
+  setStartInProcessTeammate(startInProcessTeammate)
+  setTeammateToolRegistryDeps({
+    baseTools: [SnipTool, TeamCreateTool, TeamDeleteTool],
+  })
 
   // 默认 mock port 注册（委托 process.env）；测试在此单行替换。
   AscendExecutor.setMockPort(new DefaultAscendMockPort())

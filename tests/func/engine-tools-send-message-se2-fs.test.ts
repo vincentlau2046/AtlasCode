@@ -634,7 +634,7 @@ describe('F-Q round 8 跨车道写读点火格（swarm/TUI 写手 → engine 读
     expect(memberAbort.signal.aborted).toBe(true)
   })
 
-  test('Q4b TUI twin 写手（tui/utils/swarm/inProcessRunner L85 同源路径）→ 触发段点火', async () => {
+  test('Q4b TUI twin 写手（0.1.94 C-3 收敛：twin 副本已删，写手 = shared 单源第二点火）→ 触发段点火', async () => {
     const memberAbort = new AbortController()
     setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
     const r = await tuiRunWith(

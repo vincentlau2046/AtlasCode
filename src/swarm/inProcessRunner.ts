@@ -298,12 +298,25 @@ export async function buildTeammateSystemPrompt(opts: {
   systemPrompt?: string
   systemPromptMode?: 'default' | 'replace' | 'append'
   agentDefinition?: InProcessRunnerConfig['agentDefinition']
+  /**
+   * 0.1.94 C-3（f4 §13⑤）：主系统提示词策略分离——TUI 调用点显式传参
+   *（getSystemPrompt 全量主提示词计算面留 TUI 域，engine 不依赖 TUI 提示
+   * 词面，delta ① 裁定不变）。default/append 支头部插入，拼装序
+   * main→ADDENDUM→custom→append ≡ 旧 TUI 副本 L931-953 逐字。不传 =
+   * ADDENDUM-only 缺省（engine/compose lane 恒等）。
+   */
+  mainSystemPrompt?: string
 }): Promise<string> {
-  const { systemPrompt, systemPromptMode, agentDefinition } = opts
+  const { systemPrompt, systemPromptMode, agentDefinition, mainSystemPrompt } =
+    opts
   if (systemPromptMode === 'replace' && systemPrompt) {
     return systemPrompt
   }
-  const systemPromptParts = [TEAMMATE_SYSTEM_PROMPT_ADDENDUM]
+  const systemPromptParts: string[] = []
+  if (mainSystemPrompt) {
+    systemPromptParts.push(mainSystemPrompt)
+  }
+  systemPromptParts.push(TEAMMATE_SYSTEM_PROMPT_ADDENDUM)
   if (agentDefinition) {
     // delta ⑭（旧 L937-947 逐字；新面可异步 → await）。
     const customPrompt = await agentDefinition.getSystemPrompt({})
@@ -453,6 +466,14 @@ export function createInProcessPermissionGate(
    * 测试注入口（注入小值驱动 deadline 终态）。
    */
   deadlineMs?: number,
+  /**
+   * 0.1.94 C-3（f4 §13①）：权限等待时长回调——leader 队列支各 settle 点
+   * （onAbortListener / onAbort / onAllow / onReject / recheckPermission-allow）
+   * 调用（waitMs = settle 时刻 − permissionStartMs）。mailbox 回退支不调用
+   *（旧 TUI 副本同形：canUseTool 第 3 参仅 leader 队列支）。TUI 调用点接线
+   * task.totalPausedMs 记账（UI elapsed 扣除）。
+   */
+  onPermissionWaitMs?: (waitMs: number) => void,
 ): PermissionGate {
   const effectiveBuildTpc =
     buildTpc ??
@@ -508,10 +529,15 @@ export function createInProcessPermissionGate(
       return new Promise<GateVerdict>(resolve => {
         let decisionMade = false
         const permissionStartMs = Date.now()
+        // 0.1.94 C-3（f4 §13①）：settle 点统一记账（waitMs = settle − start）。
+        const settleWithWait = () => {
+          onPermissionWaitMs?.(Date.now() - permissionStartMs)
+        }
 
         const onAbortListener = () => {
           if (decisionMade) return
           decisionMade = true
+          settleWithWait()
           resolve({ allowed: false, ask: true, reason: SUBAGENT_REJECT_MESSAGE })
           setToolUseConfirmQueue(queue =>
             queue.filter(item => item.toolUseID !== toolUseKey),
@@ -545,6 +571,7 @@ export function createInProcessPermissionGate(
           onAbort() {
             if (decisionMade) return
             decisionMade = true
+            settleWithWait()
             abortController.signal.removeEventListener(
               'abort',
               onAbortListener,
@@ -558,6 +585,7 @@ export function createInProcessPermissionGate(
           onAllow(updatedInput?: unknown, _feedback?: string) {
             if (decisionMade) return
             decisionMade = true
+            settleWithWait()
             abortController.signal.removeEventListener('abort', onAbortListener)
             // delta ④：旧 onAllow permissionUpdates/contentBlocks 两参裁除（桥镜像头注）。
             resolve({
@@ -568,6 +596,7 @@ export function createInProcessPermissionGate(
           onReject(feedback?: string) {
             if (decisionMade) return
             decisionMade = true
+            settleWithWait()
             abortController.signal.removeEventListener('abort', onAbortListener)
             const message = feedback
               ? `${SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX}${feedback}`
@@ -585,6 +614,7 @@ export function createInProcessPermissionGate(
             )
             if (freshResult.behavior === 'allow') {
               decisionMade = true
+              settleWithWait()
               abortController.signal.removeEventListener(
                 'abort',
                 onAbortListener,
@@ -1205,10 +1235,13 @@ export async function runInProcessTeammate(
   )
 
   // Build system prompt based on systemPromptMode（delta ①/⑭ 登记）。
+  // 0.1.94 C-3（f4 §13⑤）：mainSystemPrompt 策略面透传（TUI 调用点显式
+  // 传参；engine lane 不传 = ADDENDUM-only 缺省恒等）。
   const teammateSystemPrompt = await buildTeammateSystemPrompt({
     systemPrompt,
     systemPromptMode,
     agentDefinition,
+    mainSystemPrompt: config.mainSystemPrompt,
   })
 
   // delta ⑭ 消费端（旧 L1178 逐字）：canShowPermissionPrompts =
@@ -1295,6 +1328,14 @@ export async function runInProcessTeammate(
       // This allows Escape to stop current work without killing the whole teammate.
       // The lifecycle abortController still kills the whole teammate if needed.
       const currentWorkAbortController = createAbortController()
+
+      // 0.1.94 C-3（f4 §13① C-1#2）：task 态镜像（UI Escape 停当前轮消费
+      // 点）——创建后存 / 轮末清（≡ 旧 TUI 副本 L1043-1047/L1274-1278）。
+      updateTaskState<InProcessTeammateTaskState>(
+        taskId,
+        setAppState,
+        task => ({ ...task, currentWorkAbortController }),
+      )
 
       // Prepare prompt message for this iteration（上下文经
       // contextMessages = allMessages 累积支传递；旧 promptMessages 本地
@@ -1402,6 +1443,9 @@ export async function runInProcessTeammate(
           agentId: identity.agentId,
           signal: currentWorkAbortController.signal,
           forkContextMessages,
+          // 0.1.94 C-3（f4 §13①）：逐消息观测钩子透传（TUI 调用点接线
+          // progress tracker 镜像；engine lane 不传 = undefined 恒等）。
+          onMessage: config.onMessage,
           checkPermission: createInProcessPermissionGate(
             identity,
             currentWorkAbortController,
@@ -1409,7 +1453,22 @@ export async function runInProcessTeammate(
             getAppState,
             // delta ⑭ 消费端注入：session 规则 / shouldAvoidPermissionPrompts
             // 预合并 TPC 工厂（gate ask 支 auto-deny 消费点）。
-            buildTeammateTpc,
+            // 0.1.94 C-3（f4 §13② 案 1）：per-iteration permissionMode
+            // 覆盖钩子——getPermissionMode() 返回值覆盖 TPC.mode 后传 gate
+            //（leader Shift+Tab cycle 面保真；undefined = 不覆盖恒等）。
+            config.getPermissionMode
+              ? () => {
+                  const tpc = buildTeammateTpc()
+                  const mode = config.getPermissionMode?.()
+                  return mode
+                    ? { ...tpc, mode: mode as ToolPermissionContext['mode'] }
+                    : tpc
+                }
+              : buildTeammateTpc,
+            undefined,
+            // 0.1.94 C-3（f4 §13① C-1#3）：权限等待记账钩子（gate leader
+            // 队列支 settle 点调用 → TUI 调用点接线 totalPausedMs）。
+            config.onPermissionWaitMs,
           ),
           // 0.1.93 W-D-A round-2 RED-A（f4 裁定「同源贯通」）：成员工具执行
           // context 与 runner 同源拿 app state accessor——runInProcessTeammate
@@ -1458,6 +1517,14 @@ export async function runInProcessTeammate(
           workWasAborted = true
         }
       })
+
+      // 0.1.94 C-3（f4 §13① C-1#2）：轮末清 task 态镜像（≡ 旧 TUI 副本
+      // L1274-1278；本轮 work controller 生命周期随轮结束）。
+      updateTaskState<InProcessTeammateTaskState>(
+        taskId,
+        setAppState,
+        task => ({ ...task, currentWorkAbortController: undefined }),
+      )
 
       // Check if lifecycle aborted during agent run (kills whole teammate)
       if (abortController.signal.aborted) {

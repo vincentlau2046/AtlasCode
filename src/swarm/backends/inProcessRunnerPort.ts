@@ -82,6 +82,32 @@ export type StartInProcessTeammateArgs = {
    * 不发 kill）；per-member stall 计数落 runner 循环态。
    */
   termination?: TerminationSpec
+  // ── 0.1.94 C-3 换道反向面（f4 §13 批复：UX 观测面保留适配进单源，
+  // 四钩子全部可选、缺省 undefined = engine lane 既有调用方零变更）──
+  /**
+   * §13⑤：主系统提示词策略分离——TUI 调用点显式传参（getSystemPrompt
+   * 全量主提示词计算面留 TUI 域），default/append 支头部插入（拼装序
+   * main→ADDENDUM→custom→append ≡ 旧 TUI 副本 L931-953 逐字）。engine/
+   * compose lane 不传 = ADDENDUM-only 缺省恒等。
+   */
+  mainSystemPrompt?: string
+  /**
+   * §13①：逐消息观测钩子（透传 engine runAgent onMessage）——TUI 调用点
+   * 接线 progress tracker 镜像 + task.messages 逐消息 appendCappedMessage +
+   * inProgressToolUseIDs 维护（旧 TUI 副本 for-await 体逐字消费形）。
+   */
+  onMessage?: (message: Message) => void
+  /**
+   * §13①：权限等待时长回调（gate leader 队列支各 settle 点调用）——TUI
+   * 调用点接线 task.totalPausedMs 记账（UI elapsed 扣除）。
+   */
+  onPermissionWaitMs?: (waitMs: number) => void
+  /**
+   * §13②：per-iteration permissionMode 覆盖钩子（TPC mode 覆盖保真，案 1）
+   * ——TUI 调用点读 task.permissionMode（leader Shift+Tab cycle 面）；返回
+   * undefined = 不覆盖（TPC 基形 mode 恒等）。
+   */
+  getPermissionMode?: () => string | undefined
 }
 
 export type StartInProcessTeammateFn = (args: StartInProcessTeammateArgs) => void

@@ -1,8 +1,21 @@
 import type { ToolUseContext } from '../../../Tool.js'
+import { getSystemPrompt } from '../../../constants/prompts.js'
 import {
   findTeammateTaskByAgentId,
   requestTeammateShutdown,
 } from '../../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+// 0.1.94 C-3（f4 §13①）：onMessage 钩子消费面——progress tracker +
+// task.messages 逐消息镜像 + inProgressToolUseIDs 维护（旧 TUI 副本
+// for-await 体逐字消费形，随换道改由 engine 单源 onMessage 回调驱动）。
+import { appendCappedMessage } from '../../../tasks/InProcessTeammateTask/types.js'
+import type { InProcessTeammateTaskState } from '../../../tasks/InProcessTeammateTask/types.js'
+import {
+  createActivityDescriptionResolver,
+  createProgressTracker,
+  getProgressUpdate,
+  updateProgressFromMessage,
+} from '../../../tasks/LocalAgentTask/LocalAgentTask.js'
+import type { Message as TuiMessage } from '../../../types/message.js'
 import { parseAgentId } from '../../../utils/agentId.js'
 import { logForDebugging } from '../../../utils/debug.js'
 import { jsonStringify } from '../../../utils/slowOperations.js'
@@ -10,7 +23,9 @@ import {
   createShutdownRequestMessage,
   writeToMailbox,
 } from '../../../utils/teammateMailbox.js'
-import { startInProcessTeammate } from '../inProcessRunner.js'
+// 0.1.94 C-3（f4 §13③）：换道 seam——src/swarm 单源 runner（fail-fast
+// 端口；tui/factory 组合根 setStartInProcessTeammate 接线）。
+import { requireStartInProcessTeammate } from '../../../../swarm/index.js'
 import {
   killInProcessTeammate,
   spawnInProcessTeammate,
@@ -102,9 +117,57 @@ export class InProcessBackend implements TeammateExecutor {
       result.teammateContext &&
       result.abortController
     ) {
+      const taskId = result.taskId
+      const ctx = this.context
+
+      // 0.1.94 C-3（f4 §13① C-1#2）：task 态更新（镜像旧 TUI 副本本地
+      // updateTaskState 形：in_process_teammate 守卫 + 引用不变短路）。
+      const updateTask = (
+        updater: (task: InProcessTeammateTaskState) => InProcessTeammateTaskState,
+      ): void => {
+        ctx.setAppState(prev => {
+          const task = prev.tasks[taskId]
+          if (!task || task.type !== 'in_process_teammate') {
+            return prev
+          }
+          const updated = updater(task)
+          if (updated === task) {
+            return prev
+          }
+          return {
+            ...prev,
+            tasks: {
+              ...prev.tasks,
+              [taskId]: updated,
+            },
+          }
+        })
+      }
+
+      // 0.1.94 C-3（f4 §13⑤）：主系统提示词策略面——TUI 域内显式计算
+      //（≡ 旧 TUI 副本 inline L924-929 getSystemPrompt 全量主提示词）；
+      // replace 模式不传（单源 runner replace 支直用 systemPrompt）。
+      const mainSystemPrompt =
+        config.systemPromptMode === 'replace'
+          ? undefined
+          : (
+              await getSystemPrompt(
+                ctx.options.tools,
+                ctx.options.mainLoopModel,
+                undefined,
+                ctx.options.mcpClients,
+              )
+            ).join('\n')
+
+      // 0.1.94 C-3（f4 §13① C-1#1）：progress tracker（单 tracker per
+      // spawn——调用点无法感知单源 runner 的 prompt 迭代边界，progress
+      // 跨 prompt 累积而非逐 prompt 重置 = 已登记 minor UX 偏差）。
+      const tracker = createProgressTracker()
+      const resolveActivity = createActivityDescriptionResolver(ctx.options.tools)
+
       // Start the agent loop in the background (fire-and-forget)
       // The prompt is passed through the task state and config
-      startInProcessTeammate({
+      requireStartInProcessTeammate()({
         identity: {
           agentId: result.agentId,
           agentName: config.name,
@@ -113,19 +176,86 @@ export class InProcessBackend implements TeammateExecutor {
           planModeRequired: config.planModeRequired ?? false,
           parentSessionId: result.teammateContext.parentSessionId,
         },
-        taskId: result.taskId,
+        taskId,
         prompt: config.prompt,
         teammateContext: result.teammateContext,
         // Strip messages: the teammate never reads toolUseContext.messages
         // (runAgent overrides it via createSubagentContext). Passing the
         // parent's conversation would pin it for the teammate's lifetime.
-        toolUseContext: { ...this.context, messages: [] },
+        toolUseContext: { ...ctx, messages: [] },
         abortController: result.abortController,
         model: config.model,
         systemPrompt: config.systemPrompt,
         systemPromptMode: config.systemPromptMode,
         allowedTools: config.permissions,
         allowPermissionPrompts: config.allowPermissionPrompts,
+        // ── 0.1.94 C-3 换道反向面四钩子（f4 §13①②⑤）──
+        mainSystemPrompt,
+        // §13①：逐消息观测（≡ 旧 TUI 副本 for-await 体 L1218-1266 逐字
+        // 消费形：tracker 镜像 + inProgressToolUseIDs 维护 + 逐消息
+        // appendCappedMessage；engine Message → TUI Message 投影 cast）。
+        onMessage: message => {
+          const tuiMessage = message as unknown as TuiMessage
+          updateProgressFromMessage(
+            tracker,
+            tuiMessage,
+            resolveActivity,
+            ctx.options.tools,
+          )
+          const progress = getProgressUpdate(tracker)
+          updateTask(task => {
+            // Track in-progress tool use IDs for animation in transcript view
+            let inProgressToolUseIDs = task.inProgressToolUseIDs
+            if (tuiMessage.type === 'assistant') {
+              for (const block of tuiMessage.message.content) {
+                if (block.type === 'tool_use') {
+                  inProgressToolUseIDs = new Set([
+                    ...(inProgressToolUseIDs ?? []),
+                    block.id,
+                  ])
+                }
+              }
+            } else if (tuiMessage.type === 'user') {
+              const content = tuiMessage.message.content
+              if (Array.isArray(content)) {
+                for (const block of content) {
+                  if (
+                    typeof block === 'object' &&
+                    'type' in block &&
+                    block.type === 'tool_result'
+                  ) {
+                    if (inProgressToolUseIDs) {
+                      inProgressToolUseIDs = new Set(inProgressToolUseIDs)
+                      inProgressToolUseIDs.delete(block.tool_use_id)
+                    }
+                  }
+                }
+              }
+            }
+            return {
+              ...task,
+              progress,
+              messages: appendCappedMessage(task.messages, tuiMessage),
+              inProgressToolUseIDs,
+            }
+          })
+        },
+        // §13① C-1#3：权限等待记账（gate leader 队列支 settle 点回调）。
+        onPermissionWaitMs: waitMs => {
+          updateTask(task => ({
+            ...task,
+            totalPausedMs: (task.totalPausedMs ?? 0) + waitMs,
+          }))
+        },
+        // §13② 案 1：per-iteration permissionMode（leader Shift+Tab cycle
+        // 面；TPC 构建点活读 task 态，fresh 读 ≡ 旧每轮读取语义）。
+        getPermissionMode: () => {
+          const st = ctx.getAppState()
+          const t = st.tasks[taskId]
+          return t && t.type === 'in_process_teammate'
+            ? t.permissionMode
+            : undefined
+        },
       })
 
       logForDebugging(

@@ -12,7 +12,7 @@
  * 恒失配（exitTriggered 0 体）→ 成员零终态 → TeamDelete 恒拦 → forced=2。
  * 修形 = 单一 src/shared/teammateContext.ts（三域共同可达），副本直删。
  */
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 
@@ -66,18 +66,18 @@ describe('wave0193 round 8 段 Q：teammateContext 单源化判别格', () => {
   })
 
   test('Q1-2 RED-E 分裂点（双 runner）不再 import 域内副本，改走 shared', () => {
-    // e2e round 7 定谳的写手分裂点：swarm/inProcessRunner L217 与其 TUI
-    // twin（tui/utils/swarm/inProcessRunner L85）——两处都不得再 import
-    // 域内 teammateContext（副本已删）；src 侧走 shared 门面（STR-1
-    // folder-mode entry-point），tui 侧走 'src/shared' 别名。
+    // 0.1.94 C-3 收敛：TUI twin 副本（tui/utils/swarm/inProcessRunner.ts）
+    // 已直删（InProcessBackend 换道 src/swarm 单源，双副本纪律终态）——
+    // 路径存在性 = false（存在性断言取代旧 twin import 形断言）；swarm
+    // runner 走 shared 门面断言保留。
     const swarmRunner = readSrc('swarm/inProcessRunner.ts')
     expect(swarmRunner).not.toMatch(/from '\.{1,2}\/teammateContext'/)
     expect(swarmRunner).toContain(
       "import { runWithTeammateContext } from '../shared'",
     )
-    const tuiRunner = readSrc('tui/utils/swarm/inProcessRunner.ts')
-    expect(tuiRunner).not.toMatch(/from '\.{1,2}\/teammateContext(\.js)?'/)
-    expect(tuiRunner).toContain("from 'src/shared'")
+    expect(
+      existsSync(join(SRC_ROOT, 'tui', 'utils', 'swarm', 'inProcessRunner.ts')),
+    ).toBe(false)
   })
 
   test('Q1-3 ALS 声明单点：new AsyncLocalStorage<TeammateContext> 全仓唯一', () => {

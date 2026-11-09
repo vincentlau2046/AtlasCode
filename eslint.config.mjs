@@ -252,6 +252,10 @@ export default tseslint.config(
                 // 单一事实源；142 消费文件 import 边登记；tui 本地
                 // bootstrapState.ts 残留守归 2e 删净）
                 "bootstrap",
+                // 0.1.94 C-3（f4 §13③）：swarm 换道 seam 窗——TUI InProcessBackend
+                // 经 requireStartInProcessTeammate 端口消费 src/swarm 单源
+                // runner（双副本收敛；cli 域 S-C4 扩 allow 先例同型，头注登记）
+                "swarm",
               ],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend

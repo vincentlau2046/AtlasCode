@@ -121,7 +121,10 @@ export function getShutdownMessageSummary(content: string): string | null {
   }
   const approved = isShutdownApproved(content);
   if (approved) {
-    return `[Shutdown Approved] ${approved.from} is now exiting`;
+    // 0.1.94 C-3（f4 §13④）：去 exiting 谎面——approved 不必然立即退出
+    //（单源诚实两态见 engine sendMessageTool：确认已发 team-lead / 下一
+    // lifecycle check 退出），summary 面只陈述已批准事实。
+    return `[Shutdown Approved] ${approved.from} approved shutdown`;
   }
   const rejected = isShutdownRejected(content);
   if (rejected) {
