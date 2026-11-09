@@ -367,3 +367,15 @@ canon `FORCE_COLOR=3 CI=true bun test --isolate tests/` 5737 pass 0 fail 459 文
 
 **插曲登记**：一次 cherry-pick 误落 AtlasHarness 主仓 cwd（rename 检测撞车），`--abort`
 干净恢复无损；真落 AtlasCode master。流程：段 G gate 单信号已发 e2e（基面 095f6ce3）。
+
+## §13 f4 裁定：段 G gate 终判采纳 + 出门登记面归属（2026-11-09）
+
+**GATE-PASS 采纳**：⑤ O4 名义形锚 0.1.93 系列首次 GREEN（五要素全过，bookend 轮末 flush 直证 RF-T2 修效）；① T8 原形 GREEN + r8 变体腿轮经济 parity（wire 定谳 lead 未向 scribe 发 shutdown = 案 B 既登记面非回归）；canon 17082/0/362s；round 1-8 判别格全量复跑零回退 + 四腿优于基线（r8b TEAM-DELETE-OK 首试即过 = RED-F 修效 wire 直证）；TUI A2 负断言 GREEN。报告 `user-e2e/reports/r-20261109-gate-093b.md`。
+
+**出门登记面裁定**：
+1. **T8 2 成员变体轮经济 parity**（max-turns+drain 兜底，案 B 面）：归 W-D-B 登记池（收敛原语扩展族，非本波判据面）。
+2. **TUI 车道 teammate-message XML 标注缺席**（tui-r5 8 体 → tui-r6/r7 起 0 体）：归 **W-D-B「TUI/print 收敛形差异」族扩格**，附**回归嫌疑注记**——时间窗与 round 6-8 修形链（tolerant dispatch/member 终态缝/teammateContext 单源化）重合，0.1.93b 未触该路径不排除上游波引入；W-D-B 起波时须先 root-cause（禁当既有形态静默收编）。
+3. **TUI 探针脚本硬编码队名 research-pair-j**：e2e 侧自修项（队名轮换纪律，缓存假阳性风险面），下波 gate 前完成。
+4. **faceon base-ON 腿未复跑**（61cd0f87 历史 RED 锚构建随 worktree 清理）：登记观察项不阻塞（历史锚构建非现役基面）；下波 gate 若需 base-ON 对照按当版重建。
+
+**段 L 移交**：release 0.1.93 归 Main（前滚条款两面已闭合；CHANGELOG 含 W-D-A 五行为面 + 单源化结构收口 + RED-F 两面修形 + 段 R-aux charter C-4 扩格）。
