@@ -165,3 +165,15 @@ nameRouterPort（六原语 TUI 组合根注入；判定与文案逻辑本体留�
 ## §12 f4 采认：C-2 收尾（2026-11-09，@820fc282）
 
 判别格 8/8 GREEN（红验 = HEAD 临时树模块加载红，临时树清）；canon 5750/0/461 Δ+8 恰合；四件套全绿；commit 8 文件 +670/−919（engine 并集 + 三层 barrel + TUI 927L→~230L 薄 wrapper + prompt.ts 直删 + AgentTool spawn 补注册）。三处自决实现形**采认**：① spawn 补注册取 registerAsyncAgent + runAsyncAgentLifecycle 全形（裸注册钉死 running——lifecycle 托管终态+finalize+通知 = §11④ 语义实质化，正解）；② port 原语补 context 形参（TUI store 无模块单例，承载形实质不变）；③ 泛名 5 型族经 team 子门面直出 engine/index（root 门面 namespaced 政策不破）。bundle Δ≈+28KB vs 0.1.93 基数（C-2 删 927L 后回落）——结构性成本口径延续 §9① 登记。
+
+## §13 f4 批复：段 C-3 lock-face 五点（2026-11-09，@83141163）
+
+diff 定谳采纳（语义差非漂移：loop 形不同构 T=for-await/E=Promise 形；单源基座 = E；T 不可纯直删）；换道影响面两点新实证采纳（TUI 组合根不跑 compose → 注入窗须 TUI 侧补接线；换道 = T lane 获 0.1.93 修形全族）。**主系统提示词：等价传参可达确认采纳——buildTeammateSystemPrompt 增可选 mainSystemPrompt，TUI InProcessBackend.spawn 显式计算 getSystemPrompt 传入，compose lane 缺省恒等（无须面呈用户，§10② 条款闭合）**。五点裁处：
+
+1. **progress tracker = 案 1（engine runAgent 增可选 onMessage 参）**——§10②「UX 观测面保留适配进单源」直接适用：轮末映射 = TUI UX 降级，违保留原则。可选参缺省 undefined = 既有调用方零变更。
+2. **per-iteration permissionMode = 案 1（TPC mode 覆盖钩子保真）**——同为 UX 观测面（成员轮间 permission mode 变更传播）；案 2 顺延 = TUI 行为回归窗口，违保留原则。若落码揭示钩子非小 diff，可回落案 2 但须先报 f4（row F）。
+3. **换道 import 形 = 复用既有 seam 窗**：tui/factory 组合根补显式装配（setStartInProcessTeammate + setTeammateToolRegistryDeps，PRT-2 同款；E runner 窗未设 fail-soft 缩水面随接线消除）——InProcessBackend 换道经既有 requireStartInProcessTeammate 端口，**禁新建第二承载**；单 spawn 入口不变量维持。
+4. **exiting 谎面 = C-3 内一行顺带改**：ShutdownMessage.tsx:124 与 C-2 两态诚实文案直接矛盾，同域登记缺陷销项非蔓延；判别格 = 文案与单源诚实文案对表。
+5. **mainSystemPrompt = 单串**：拼装序（main→ADDENDUM→custom→append ≡ T 形逐字）固化于 buildTeammateSystemPrompt 单点；parts 数组 YAGNI 不取。
+
+判据面冻结（E 节五项全准）：结构断言（实现体实例数=1 且在 src/swarm + T 副本路径存在性=false）/ round-3/6/7 修形形锚 + 换道 import 形锚 / A6 有界终止 TUI 探针格（termination 缺省 fail-closed max-turns 200 经换道 TUI lane 可达）/ buildTeammateSystemPrompt 两态 + gate 钩子行为单测 / canon Δ 恰合 + 四件套。批复后依序落码，D 节 bundle Δ 实测登记随收尾报。
