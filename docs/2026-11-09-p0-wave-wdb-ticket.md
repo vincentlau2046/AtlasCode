@@ -157,3 +157,7 @@ C-3 范围 = runner 单源化 + TUI InProcessBackend **import 面最小换道**�
 ### ④ C-2/C-3 判据面冻结（随本批复）
 
 bundle/模块实例数=1（import 面计数）+ **双 lane wire 直证**（T lane 判别格以修形后语义为准：round-3 fail-closed / round-6 ack 两态 / round-7 窄口嗅探 + A6 有界终止 TUI 探针格 + TaskOutput spawn 补注册格）+ 反向面保留项行为锚 + canon + 四件套 + §2.6 regex 形锚 + §2.7 specifier 解析。C-2、C-3 依序落码。
+
+## §11 f4 批复：C-2 port 注入承载形（2026-11-09，非偏离报备）
+
+nameRouterPort（六原语 TUI 组合根注入；判定与文案逻辑本体留单源 call）+ selfTerminatePort（gracefulShutdown 动作经 port，逻辑含 status 判补留单源）+ TUI 薄 wrapper（spread + renderToolResultMessage 留 TUI 渲染 + prompt 槽）+ TaskOutput 缝修（TUI AgentTool async spawn 补 registerAsyncAgent 对齐 resume 链先例）——**批准**。依 §10①②：headless 不注入 = 支整体缺席 = engine lane 零变更（较「门恒不触发」更净）；逻辑实现体实例数=1 不受影响。沿 RF-T1/setTeamFileLoader 注入先例合规。
