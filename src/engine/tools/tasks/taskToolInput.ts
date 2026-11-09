@@ -100,14 +100,26 @@ export interface TodoWriteAppState {
 }
 
 /**
+ * 0.1.94 W-D-B 段 M（f4 §14 批复，双通道裁点）：TodoWrite todos 读写
+ * port——SDK lane（makeCtx 窄 setAppState 形）注入的活载体读写面。
+ * port 注入优先；缺席回落 setAppState（合法性前提 = 上下文非 makeCtx
+ * 窄形，即 TUI lane 全量 store）。
+ */
+export interface TodoWriteTodosPort {
+  readTodos: (key: string) => TodoList
+  writeTodos: (key: string, todos: TodoList) => void
+}
+
+/**
  * TodoWrite context 消费子集（duck）：getAppState/setAppState（todos
  * 读写）+ agentId?（todoKey = agentId ?? getSessionId()，S-D1 §8.56.3
- * context duck 裁定）。
+ * context duck 裁定）+ todosPort?（0.1.94 段 M 双通道 port 支）。
  */
 export interface TodoWriteToolUseContext {
   getAppState: () => TodoWriteAppState
   setAppState: (f: (prev: TodoWriteAppState) => TodoWriteAppState) => void
   agentId?: string
+  todosPort?: TodoWriteTodosPort
 }
 
 // ── S-D5（§8.56）：TaskOutput 末件 duck 型 ──

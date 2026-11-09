@@ -28,6 +28,9 @@ import type {
   ToolPermissionContext,
 } from '../shared'
 import type { HookJSONOutput } from '../hooks'
+// 0.1.94 W-D-B 段 M（f4 §14 硬条件 1）：todos port 型面（cli→engine allow
+// 在场；经 engine 根门面 re-export，STR-1 门面收口）。
+import type { TodoWriteTodosPort } from '../engine'
 
 // ── SDK wire 消息（旧仓 coreTypes any-stub 最小面）──────────────────────
 
@@ -237,7 +240,9 @@ export interface SdkToolView {
 /**
  * SDK 协议消费的窄 ToolUseContext 视图（旧仓富 ToolUseContext → structuredIO /
  * createCanUseTool 消费的 4 字段；全字段面 = 残留守，交互路径由壳波 #152
- * 消费）。
+ * 消费）。todosPort（0.1.94 W-D-B 段 M，f4 §14 硬条件 1）：required ——
+ * SDK lane TodoWrite 消费 port 活载体（makeCtx 窄 setAppState 双重
+ * fail-silent 修复）；类型级 fail-loud，构造点缺字段 = tsc 红。
  */
 export interface SdkToolUseContext {
   abortController: AbortController
@@ -249,6 +254,7 @@ export interface SdkToolUseContext {
     }) => { toolPermissionContext: ToolPermissionContext },
   ): void
   options?: { isNonInteractiveSession?: boolean }
+  todosPort: TodoWriteTodosPort
 }
 
 /**

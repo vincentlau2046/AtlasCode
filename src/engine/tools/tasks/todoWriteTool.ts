@@ -145,19 +145,29 @@ export const TodoWriteTool: Tool = {
   ): Promise<ToolResult<TodoWriteOutput>> {
     const { todos } = args as TodoWriteToolInput
     const ctx = context as TodoWriteToolUseContext
-    const appState = ctx.getAppState()
     const todoKey = ctx.agentId ?? getSessionId()
-    const oldTodos = appState.todos?.[todoKey] ?? []
     const allDone = todos.every(_ => _.status === 'completed')
     const newTodos = allDone ? [] : todos
 
-    ctx.setAppState(prev => ({
-      ...prev,
-      todos: {
-        ...prev.todos,
-        [todoKey]: newTodos,
-      },
-    }))
+    // 0.1.94 W-D-B 段 M（f4 §14 双通道裁点）：port 注入优先——读写全走
+    // port 活载体（SDK lane makeCtx 窄 setAppState 形的 fail-silent 修复；
+    // 写入期禁静默回落到窄 updater，否则旧 fail-silent 换形复辟）。
+    // 回落支合法性前提 = 上下文非 makeCtx 窄形（TUI lane 全量 store）。
+    let oldTodos: TodoList
+    if (ctx.todosPort) {
+      oldTodos = ctx.todosPort.readTodos(todoKey)
+      ctx.todosPort.writeTodos(todoKey, newTodos)
+    } else {
+      const appState = ctx.getAppState()
+      oldTodos = appState.todos?.[todoKey] ?? []
+      ctx.setAppState(prev => ({
+        ...prev,
+        todos: {
+          ...prev.todos,
+          [todoKey]: newTodos,
+        },
+      }))
+    }
 
     return {
       data: {

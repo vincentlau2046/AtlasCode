@@ -140,6 +140,10 @@ import {
   type ToolHooks,
   type DeferredToolUsePayload,
   setMcpClientRegistry,
+  // 0.1.94 W-D-B 段 M（f4 §14 硬条件 1）：todos port 型面（SDK lane
+  // TodoWrite 活载体；经 engine 根门面 re-export）
+  type TodoWriteTodosPort,
+  type TodoList,
 } from '../engine'
 // 0.1.93 W-D-A f4 gate 打回修复②：headless 终态 teammate graceful drain
 //（cli→swarm 直 import 先例 = cli/setup.ts）
@@ -1118,6 +1122,26 @@ export async function runHeadless(
       abortController.abort()
     }
   })
+  // 0.1.94 W-D-B 段 M（f4 §14 硬条件 1，fail-visible 前移构建期）：todos
+  // port 组装——本地 Map 内存载体（SDK lane 无全量 store 可挂，闭包载体
+  // 即单源）。组装失败 = 构建期显式 throw（禁静默降级到窄 updater，否则
+  // 旧 fail-silent 换形复辟）；SdkToolUseContext.todosPort required =
+  // 类型级 fail-loud，构造点缺字段 tsc 红。
+  const todosStore = new Map<string, TodoList>()
+  const todosPort: TodoWriteTodosPort = {
+    readTodos: key => todosStore.get(key) ?? [],
+    writeTodos: (key, todos) => {
+      todosStore.set(key, todos)
+    },
+  }
+  if (!(todosPort && todosStore instanceof Map)) {
+    throw new Error(
+      'todos port assembly failed in src/cli/print.ts makeCtx — SDK lane ' +
+        'TodoWrite requires a live todos port (f4 §14 hard condition 1: ' +
+        'no silent fallback to the narrow setAppState updater). Fix the ' +
+        'assembly above this guard in makeCtx.',
+    )
+  }
   const makeCtx = (): SdkToolUseContext => ({
     abortController,
     getAppState: () => ({ toolPermissionContext: tpcRef.current }),
@@ -1126,6 +1150,7 @@ export async function runHeadless(
         updater({ toolPermissionContext: tpcRef.current }).toolPermissionContext
     },
     options: { isNonInteractiveSession: true },
+    todosPort,
   })
   const canUseTool = getCanUseToolFn(
     options.permissionPromptToolName,

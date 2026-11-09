@@ -1186,6 +1186,11 @@ export {
 // §8.56 S-D2：agent teams / swarms 总开关（messaging 域内文件，经域门面出）
 export { isAgentSwarmsEnabled } from './messaging'
 
+// 0.1.94 W-D-B 段 M（f4 §14 双通道裁点）：TodoWrite todos port 型面门面
+// re-export——cli 域 SdkToolUseContext required todosPort 消费（STR-1
+// 门面收口，禁深路径直取）。
+export type { TodoWriteTodosPort } from './tools/tasks/taskToolInput'
+
 // 0.1.62 /goal 核心+持久化波（CC 2.1.139）+ 0.1.63 /goal 演化波 P2/P3
 // （CC 演化 2.1.173→2.1.295：paused 状态机 + 不可恢复自清除分类器）。
 // 引擎内建条件化 Stop hook——loop.ts terminal 支消费。

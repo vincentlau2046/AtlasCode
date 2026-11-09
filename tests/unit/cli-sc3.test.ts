@@ -63,6 +63,8 @@ function makeTpc(): ToolPermissionContext {
 function makeCtx(): { ctx: SdkToolUseContext; abort: AbortController } {
   const tpcRef = { tpc: makeTpc() }
   const abort = new AbortController()
+  // 0.1.94 段 M：todosPort required（makeCtx 同形——Map 内存载体）
+  const todosStore = new Map()
   const ctx: SdkToolUseContext = {
     abortController: abort,
     getAppState: () => ({ toolPermissionContext: tpcRef.tpc }),
@@ -70,6 +72,12 @@ function makeCtx(): { ctx: SdkToolUseContext; abort: AbortController } {
       tpcRef.tpc = updater({
         toolPermissionContext: tpcRef.tpc,
       }).toolPermissionContext
+    },
+    todosPort: {
+      readTodos: key => todosStore.get(key) ?? [],
+      writeTodos: (key, todos) => {
+        todosStore.set(key, todos)
+      },
     },
   }
   return { ctx, abort }
