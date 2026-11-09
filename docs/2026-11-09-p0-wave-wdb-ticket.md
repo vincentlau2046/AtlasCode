@@ -196,3 +196,19 @@ diff 定谳采纳（语义差非漂移：loop 形不同构 T=for-await/E=Promise
 2. **判别格补一格**：makeCtx 产出 ctx 结构断言恒含 port（SDK lane 回落支不可达证明）——「回落存在但 SDK lane 永不可达」须判别格钉死，禁口头保证。
 
 判据面冻结（§6④ 三点 + 本批复）：RED=SDK lane TodoWrite 写后读不回 → GREEN=port 落点可观测（oldTodos 回读正确）/ TPC 域权限门零回归格（plan 族 setAppState + checkPermission gate tpcRef 活读修前后恒等）/ port 组装失败构建期 throw fail-visible / makeCtx ctx 恒含 port 结构断言 / 四件套 + canon Δ 恰合 + §2.6 regex 形锚 + §2.7 specifier 解析。批复后落码段 M，随后段 G gate（含 §6① 0.1.93 前滚判据面复跑：①T8 全链 + ⑤ O4 名义形锚 + Q1-Q4 + round 1-8 判别格）。
+
+## §15 f4 批复：段 M 收尾采认 + 段 G gate 判据面冻结（2026-11-09，@8f3a32d2）
+
+### ① 段 M 收尾采认
+
+f4 亲验判别格 wdb-m-makectx-port.test.ts = **7 pass / 0 fail**（worktree 实跑）。§14 两硬条件落实核验：构建期 fail-visible 守卫（错误含落点指引 + 禁令引用）✓；SDK lane 回落支不可达 = `SdkToolUseContext.todosPort` required 字段形锚（tsc 红门槛，构造点实测 2 处补齐）+ port-first 分支形锚 ✓。三点必答判别格（RED 5 红→GREEN 7/7 / TPC+TUI 回落支恒等全程绿 / fail-visible regex 形锚）采认。⑤ 深路径改门面 re-export 自决**采认**（cli→engine STR-1 entry-point 纪律遵守，零行为差异，恰属「正确形免批复」类）。四件套 + canon 5770/0 Δ+7 恰合采认。
+
+### ② 段 G gate 判据面冻结（预注册，禁临跑拼凑）
+
+- **A 前滚复跑（§6① 审计必改①，硬）**：①T8 全链（含 r8b TEAM-DELETE-OK 腿）+ ⑤ O4 名义形锚五要素 + 段 Q Q1-Q4 + **0.1.93b round 1-8 判别格点名复跑**（回归格口径同 r-20261109-gate-093b：11 腿零回退、四腿优于基线）。
+- **B 本波判别格四套全绿**：wdb-c1（teammate.ts 结构断言）/ wdb-c2（SendMessageTool 8 格）/ wdb-c3（runner 单源 13 格）/ wdb-m（makeCtx port 7 格）——gate 报告逐套引用。
+- **C e2e 双 lane wire 直证**：成员执行走 engine 副本（round-7 手法）+ **TUI backend 换道后 spawn 可达腿**（in-process spawn 经 requireStartInProcessTeammate 端口 + factory 组合根装配实证）+ A6 有界终止 TUI 探针格（termination fail-closed）。
+- **D 结构断言**：T 副本三路径 existsSync=false + 模块实例数=1（已在 unit 套，gate 报告引用）。
+- **E canon**：FORCE_COLOR=3 CI=true bun test --isolate tests/ 全绿，Δ 恰合口径（基线 5770）。
+- 探针纪律 §2.6 regex 形锚 / §2.7 specifier 解析全程；row F 预注册；gate 由 e2e 执行（角色矩阵），Main 判据面照此预注册后发信号。
+- **F gate 后段 L**：release 0.1.94 标准链（SRI 四值 + npm --registry npmjs.org + 生产 lane 含 O4 复验）。
