@@ -86,3 +86,16 @@ func 单副本绿 ≠ e2e 双副本真环境绿；探针 marker 禁入 prompt �
 ## §5 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段定谳/lock-face（逐段报批）→ 段 G gate → 段 L。row F 预注册纪律全程。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-09，有修改通过）+ f4 修订
+
+审计锚点全实锚（四文件体量逐字节吻合/孤儿零引用/teammate.ts 双副本 10545/9254 体量不等 → C-1 预期语义差并集径/makeCtx 双重 fail-silent 实锤——updater 收合成态且回读只取 TPC 字段，越域写两次丢弃）。f4 逐条吸收：
+
+1. **【必改①】段 G 补 0.1.93 前滚判据面复跑（实质缺漏采纳）**：前滚条款原文覆盖「0.1.93/下版 release gate」，段 C 动 T8/O4 同域文件 = 活回归面。段 G 判据面补：**①T8 全链 + ⑤ O4 名义形锚 + 段 Q 四格（Q1-Q4）+ 0.1.93b round 1-8 判别格点名复跑**。
+2. **【必改②】硬冻结条款**：**段 X-①（时间窗定位）闭环前三对副本全部冻结禁删改**——TUI 副本异构行为文本 = 段 X 判别证据面，先并集=先改证据；C-3 孤儿直删同受约束（孤儿副本 = TUI 车道历史行为面唯一直接代码证据）。
+3. **【吸收】段 X-① 嫌疑清单点名化**：嫌疑面不止 SendMessageTool——formatAsTeammateMessage 消费在 runner（engine 副本 shutdown_request 支，round-8 Q2 已证结构化投递形）；时间窗与 round-6 RED-C member-side 闭合修形重合 → X-① 嫌疑提交清单**点名 round-6 RED-C 修形提交**，非泛化 round 6-8。
+4. **【吸收】段 M lock-face 三点必答**：影响枚举预勘采纳（TodoWrite/Task 族 = SDK lane 直接可达用户可感 = 主体；team 族门 OFF 不可达 = 登记级；plan 族核）；**真题 = 双 store 归一**（TPC 读面 tpcRef.current vs port 写面 EngineState——越域写改 port 后读面仍 tpcRef 即写读分裂换形）→ lock-face 必附 per-domain 读写单源归一表；判据三点：RED=SDK TodoWrite 写后读不回→GREEN=port 落点可观测 / TPC 域权限门零回归格 / port 缺席写失败 fail-visible 禁新静默换旧静默。
+5. **【吸收】判据面补注册时点硬约束**：各段 lock-face 报批复文书内冻结（f4 批复即判据面冻结），先于该段任何落码；gate 开跑前全量冻结；段 X 双分支判据面在 X-③ 批复文书分别预注册。
+6. **【吸收】requestShutdown 裁出恰当 + TeamDelete 指引面不回退**：0.1.93 RED-D 修后指引面在 0.1.94 段 C 动 SendMessageTool/team 域时判别格顺带覆盖（非目标≠可回归）。
+
+审计明示无需二审。工单 §1/§3 相应条款以本节为准。→ f4 发双信号。
