@@ -4,6 +4,68 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.93
+
+W-D-A 波（0.1.93 + 0.1.93b 插入波合并发布）：**临时小组（Form A）——
+TeamCreate 角色化成员 + in-process spawn 链真实现 + 组内 mailbox 闭环**。
+门控 `ATLAS_EXPERIMENTAL_AGENT_TEAMS` 默认 OFF 不变；Form A 零新增持久
+面（team file 门掉、零注册表/零 durable 队列）。工单
+`docs/2026-11-08-p0-wave-0193-ticket.md`（round 1-8）+
+`docs/2026-11-09-p0-wave-0193b-redf-ticket.md`（插入波）；gate
+r-20261109-gate-093b（O4 名义形锚 0.1.93 系列首次 GREEN + T8 全链 +
+canon 17082/0；round-8 无条件 stop 收口后的前滚条款执行 = 本 gate 硬
+判据两面满足）。
+
+### 新特性（门 ON 面）
+
+- **spawn 链真实现**：TeamCreate 角色化成员（role/goal/backstory →
+  shared 角色模板注册表，加性）经 Agent 工具扩参 → InProcessBackend
+  spawn → startInProcessTeammate 既有链；组内直接互发消息 + 共享任务板
+  协作；任务完成组散（graceful shutdown，零持久负担）。
+- **idle/wake 循环支**：mailbox 到达 → 唤醒重跑消费循环（inProcessRunner
+  消费族锁面实核重建）；终止条件组 + stall 计数（G-1 连击守同族）。
+
+### 行为变化面（f4 批复累计 5 条 + 插入波 2 条，均属修复本意非回归）
+
+1. **孤儿循环 fail-closed 兜底**：headless 终态 graceful shutdown
+   in-process teammates 四段升级阶梯（graceful → bounded 15s 超时 =
+   升级非放弃 → forced abort → hard kill evicted 终态）+ print.ts 两
+   退出支 process.exit 兜底（keep-alive 轮询不再挂住进程退出）。
+2. **成员工具 context 同源贯通**：runAgent toolContext 透传槽（成员 run
+   直通自身 {getAppState,setAppState} 同源对）；未注入窄 spine 恒等
+   零回归。
+3. **组内消息路由 fail-closed**：六站收拴（handleMessage /
+   handleShutdownRequest / Approval / Rejection / PlanApproval /
+   PlanRejection）+ resolveOutgoingTeamName 单源；双源皆缺 →
+   unresolvedTeamMailboxError 结构化 tool_result（writeToMailbox 静默
+   default 分支裁除）。
+4. **shutdown approved 状态机闭合**：handleShutdownApproval 经
+   SessionContextPort 单源定位本成员 task → abortController.abort() →
+   既有 completed 收尾块写终态（终态写点唯一性保持）；文案两态不谎面
+   （"is now exiting" 字面清零）。
+5. **结构化消息窄口容忍分派**：string-JSON 可解析且 type ∈ 已知
+   subtype 枚举 → 结构化分派（tryParseStructuredMessage 单源）；UDS
+   跨会话拒绝对两形态同权（比修前更严非扩权）。
+6. **（0.1.93b RF-T1）TeamDelete branch-2 守卫读面修**：lead lane
+   makeCtx TPC 窄视图无 tasks 字段 → isInProcessTeammateActiveOrUnknown
+   fail-closed 结构性恒拦（RED-F 终形）→ branch-2 读面单点改走
+   sessionContextPort（port 缺席维持 fail-closed 不放宽）——成员终态后
+   TeamDelete 可达（gate TEAM-DELETE-OK 首试即过）。
+7. **（0.1.93b RF-T2）headless 通知上流时序修**：阻塞 runTurn 整回合内
+   无 per-round flush → task_notification 等SDK 事件滞留至回合末/退出前
+   → AgentLoopDeps 新增可选 afterRound awaited 槽（round_end 后逐轮
+   flush；未注入零行为；拒绝沿 await 传播 fail-visible）——completed
+   通知达 lead 提前至轮末上流（gate bookend s.out line 3/5 直证）。
+
+### 结构收口（零行为变更）
+
+- **teammateContext 身份单源化**（round 8 RED-E）：三物理副本
+  （swarm/engine/messaging 三域 AsyncLocalStorage）收敛单实例（shared
+  落点 + bundle 结构断言钉住）；sender 恒回落 team-lead 销项 + 触发段
+  真环境点火首证（exitTriggered=true）。
+- 终止态谓词单源（isInProcessTeammateActiveOrUnknown 等，判读逐字
+  fail-closed 形）；requestShutdown 字面 3 文件清零。
+
 ## v0.1.92
 
 W-opt-3 波：C-1 KV-cache 保真摘要——三车道摘要请求 system/tools 与主车道
