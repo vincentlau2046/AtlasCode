@@ -268,3 +268,27 @@ Main 三探针全批（completed-in / updater-enter·notlive·apply / completed-
 - **修形向对号（段 F 预注册清单映射）**：M-A → updater 抛错 fail-visible；M-B → 谓词/读面收紧；M-C → 单源化；M-D → EngineState 唤醒面修复（**共享基座警示：修形影响面全产品，锁面须含回归评估**）。
 - 流程：R-⑥ 落码（仍零修形）→ e2e 同场景复跑 → 终定谳（出第六机制再报 f4）→ 段 F 修形锁面报批。
 
+
+## §9 f4 裁定：R-⑥ 终证 + RED-F 终形分解（2026-11-09）
+
+### R-⑥ 终证采纳
+
+completed 块整链活（in/enter/apply/out 全现、notlive=0、throw=0、es 9/9 平衡，同毫秒 23.443）→ **M-A/M-B/M-C/M-D 四机制全排除，「break 后静默丢失」第五形溶解**——终态写机械真环境跑通。§8 判读矩阵「全链现=矛盾重审」格触发，矛盾部分解如下。
+
+### recordId=untagged 判读键勘误（f4 裁定，非 RF-1 复燃）
+
+WeakMap stamp 盖在 spawn 原 record 对象；`updateTaskState` 不可变更新模式每次 `{...task, ...}` 产生**新对象**，stamp 不随 spread 传递 → trigger/updater 读点读到的必然是未盖章后继对象。'untagged' = 探针盖章面缺口（stamp 应置随行字段而非 WeakMap 对象身份），非店面分裂。M-C 排除结论不变。
+
+### RED-F 终形分解（两个独立致命面，段 F 修形对象改列）
+
+- **RF-T1（TeamDelete branch-1 isActive 结构拦）**：roster isActive!==false 检查结构性恒拦 engine lane——`setMemberActive(false)` 全仓唯一写点在 TUI lane（teammateInit.ts:105），engine 路径零写点 → engine lane 成员终态后 roster active 永真 → branch 1 恒拦。lane 覆盖缺口（移植面）。修形向 = engine lane 成员终态时同步 roster active 写点（落点/时机归 Main lock-face；禁动 branch-1 判读语义本身）。
+- **RF-T2（completed 通知写链缺）**：lead inbox 仅 greeting/idle/shutdown_approved 三条，无 completed 通知——O4 锚要素「completed 通知达 lead」当前设计不可满足（completed 尾零 mailbox 通知面）。f4 初裁：**O4 该要素 = completed 尾补发 idle notification（completedStatus:'completed'）**，定性 = 旧仓语义保真恢复（非新能力；旧仓 completed 收尾是否含该通知由 Main lock-face 依旧仓实核定谳，若旧仓亦无则该要素定义面呈用户裁定）。
+- H1/H2（branch 1 vs branch 2 终拦源码定谳）+ RF-T1 修形落点 = Main 终 lock-face 一并报批。
+
+### 状态面勘误链
+
+round-8「status 恒 running」观测与本腿「completed 已提交」并存 → 拦截面在 TeamDelete 谓词读点而非写点（branch-1 先于 branch-2 结构性短路）。round-8 记录面以本腿 wire 直证为准修订。
+
+### 流程
+
+Main 终 lock-face（H1/H2 + RF-T1 落点 + RF-T2 旧仓实核）→ f4 批复 → 段 F 落码（RF-T1+RF-T2 两面）→ 段 G gate（O4 锚全要素）→ 段 L。e2e 候 gate 单信号。
