@@ -55,6 +55,7 @@ import {
   type SetAppState,
   type TeammateIdentity,
   probeStampAbortController,
+  probeStampTaskRecord,
 } from '../task'
 import {
   createAbortController,
@@ -202,6 +203,13 @@ export async function spawnInProcessTeammate(
       pendingUserMessages: [],
       messages: [], // Initialize to empty array so getDisplayedMessages works immediately
     }
+
+    // 0.1.93b 段 R-⑥（f4 批复）：task record 对象标识 stamp（R-⑥ 分型面：
+    // trigger/completed-updater 读 id 比对——异 id = 记录换写；untagged =
+    // 模块双实例）。
+    logForDebugging(
+      `[probe-R6][spawn-record] agent=${agentId} taskId=${taskId} record=${probeStampTaskRecord(taskState)}`,
+    )
 
     // Register cleanup handler for graceful shutdown
     const unregisterCleanup = registerCleanup(async () => {

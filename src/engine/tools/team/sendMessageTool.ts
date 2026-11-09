@@ -136,6 +136,7 @@ import { getSessionContextPort } from '../../session/sessionContextPort'
 import {
   findInProcessTeammateTaskByAgentId,
   isInProcessTeammateLive,
+  probeReadTaskRecordId,
   probeReadAbortControllerId,
 } from '../../../task'
 import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
@@ -649,7 +650,7 @@ async function handleShutdownApproval(
             ?.agentId === agentId,
       )
       logForDebugging(
-        `[probe-R1][trigger] agent=${agentId} taskEntries=${Object.keys(tasksAll).length} sameAgentId=${sameAgentEntries.map(([k, t]) => `${k}:${(t as { status?: string }).status ?? 'unknown'}`).join('|') || 'none'} firstHit=${memberTask ? 'yes' : 'no'} controller=${probeReadAbortControllerId(memberTask?.abortController)} live=${isInProcessTeammateLive(memberTask)}`,
+        `[probe-R1][trigger] agent=${agentId} taskEntries=${Object.keys(tasksAll).length} sameAgentId=${sameAgentEntries.map(([k, t]) => `${k}:${(t as { status?: string }).status ?? 'unknown'}`).join('|') || 'none'} firstHit=${memberTask ? 'yes' : 'no'} controller=${probeReadAbortControllerId(memberTask?.abortController)} live=${isInProcessTeammateLive(memberTask)} recordId=${probeReadTaskRecordId(memberTask)}`,
       )
     }
     if (isInProcessTeammateLive(memberTask) && memberTask.abortController) {

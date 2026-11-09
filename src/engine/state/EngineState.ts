@@ -20,6 +20,8 @@
  *   - 残留守：批处理合并策略（与 React 差异已原型验证为「不合并」，中间态可观测）/
  *     具体字段挂载（后续纵切）/ 可选 subscribe 观测 API（暂无消费方，不加）。
  */
+import { logForDebugging } from '../../shared'
+
 export type StateUpdater<S> = (prev: S) => S
 
 export class EngineState<S> {
@@ -46,6 +48,12 @@ export class EngineState<S> {
   set(f: StateUpdater<S>): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.queue.push({ f, resolve, reject })
+      // 0.1.93b 段 R-⑥（f4 批复补强②，M-D 分型面）：enqueue 时刻队列长 +
+      // drain 活性旗标——搁浅件 = enqueue 落在 processing=true 早退之后
+      // 且后继无 set() 再触发 drain → es-apply 永不见本件。
+      logForDebugging(
+        `[probe-R6][es-enqueue] q=${this.queue.length} processing=${this.processing}`,
+      )
       void this.process()
     })
   }
@@ -56,6 +64,9 @@ export class EngineState<S> {
     try {
       while (this.queue.length > 0) {
         const item = this.queue.shift()!
+        // 段 R-⑥（补强②）：逐件 apply 面——es-enqueue 有而 es-apply 无本件
+        // = M-D 搁浅实锤；es-apply 有而 updater-enter 无 = M-C（他店跑的）。
+        logForDebugging(`[probe-R6][es-apply] q=${this.queue.length}`)
         // 微任务边界：每次 apply 是独立 async 提交（不合并，与 React 批处理差异）。
         await Promise.resolve()
         try {

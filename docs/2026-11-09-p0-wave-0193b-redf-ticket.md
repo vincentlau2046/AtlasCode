@@ -228,6 +228,24 @@ f4 逐条吸收（本文件已修订）：
 
 `[probe-R1][spawn]` / `[probe-R1][runner]` / `[probe-R1][trigger]` / `[probe-R2][anchor1-runagent-returned]` / `[probe-R2][anchor2-idle-in]` / `[probe-R2][anchor2-idle-out]` / `[probe-R2][anchor3-poll-start]` / `[inProcessRunner] ... poll #N: checking mailbox`（R-⑤ 计数）。marker 均为代码侧 debug 行，不入 prompt 字面（§2 硬约束 4）。
 
+### 段 R-⑥ 补格落码（f4 批复 2026-11-09「R-④ 批复 + R-⑥ 批准附两处补强」；零修形）
+
+**背景**：段 R 收证腿（t8-reddf-r，基面 c7d4c1ee）定谳 = **预注册四候选全排除，第五根因形「lifecycle-abort break（L1463）后、completed 写点生效前静默丢失」**（break 后零输出/status 恒 running/completed 仅 cleanup 发；Main 静态实读收窄：break→completed 纯同步零悬挂可能、catch failed 日志未现、EngineState.process 队列机制无停滞可能 → 剩 M-A updater 同步抛错被吞 / M-B notlive 早退支无声 no-op / M-C store 读面分裂）。R-①—⑤ 不足以分型 → R-⑥ 补格批复（审计焦点③预言命中）。
+
+**R-⑥ 落码清单（判别 instrumentation，零修形；f4 批复三探针 + 补强①②逐条）**：
+1. **completed 块三探针 + throw-wrap**（`src/swarm/inProcessRunner.ts`）：`[probe-R6][completed-in]` / updater 体内 `[probe-R6][completed-updater-enter] status= recordId=` + notlive 早退支 `[probe-R6][completed-updater-notlive]` + 应用支尾 `[probe-R6][completed-updater-apply]` / `[probe-R6][completed-out]`；**补强①** = updater 体内 try/catch，catch 支 `[probe-R6][completed-updater-throw] <error.stack>` 后原样 rethrow（语义零变）。
+2. **task record 对象标识 stamp**（`src/task/inProcessTeammate.ts` WeakMap 第二用 `probeStampTaskRecord`/`probeReadTaskRecordId`）：spawn 创建点 `[probe-R6][spawn-record] record=task-N`；trigger 行扩 `recordId=`；completed-updater enter/apply 行带 `recordId=`——异 id = 记录换写，untagged = M-C 模块双实例实锤。
+3. **补强②（M-D 分型面）**（`src/engine/state/EngineState.ts`）：`[probe-R6][es-enqueue] q=<len> processing=<bool>`（set 入队时刻）+ `[probe-R6][es-apply] q=<len>`（逐件 apply）。判读：completed-in 有 enter 无 → es-apply 有本件 = M-C（他店跑的）/ 无 = M-D EngineState 丢唤醒搁浅实锤。
+4. **判读矩阵（f4 入档）**：completed-in 缺席 = 第六机制（Main 静态读被证伪，重新锁面）；in 有 enter 无 = M-C/M-D（es 探针分型）；notlive 现 = M-B；enter 有 apply 无 = M-A（throw 行定位）；全链现 = 观察面矛盾重审。
+5. **.lock 残留裁定**：不入本波判别格（f4 裁定），登记 W-D-B 观察池（mailbox/team-file 写链，round-8+本腿两现）。
+6. **段 F 修形向对号（f4 预批）**：M-A → updater 抛错 fail-visible；M-B → 谓词/读面收紧；M-C → 单源化；M-D → EngineState 唤醒面修复（共享基座，锁面须含全产品回归评估）。
+
+### 四件套（R-⑥）
+
+- `npx tsc --noEmit` = 0；`eslint src/`（改面 5 文件）= 0e 0w
+- 定向：r3-port-singleton 6 格 + cli-debug-sink（含 R-aux 3 格）+ wave0193-team-q + engine-state = 31/31 绿
+- canon `FORCE_COLOR=3 CI=true bun test --isolate tests/` = **5730 pass / 0 fail / 457 files / 132.64s，exit 0**（Δ+0 测试与预期恰合——R-⑥ 为纯探针零新测试，基线 5730/0/457 不变）
+
 ## §8 f4 批复：R-④ 根因 lock-face + R-⑥ 补格裁定（2026-11-09）
 
 ### R-④ 定谳采纳
@@ -249,3 +267,4 @@ Main 三探针全批（completed-in / updater-enter·notlive·apply / completed-
 - **.lock 残留**：不入本波判别格（与终态提交面无既证因果）；登记 W-D-B 观察池（mailbox/team-file 写链，round-8+本腿两现）。
 - **修形向对号（段 F 预注册清单映射）**：M-A → updater 抛错 fail-visible；M-B → 谓词/读面收紧；M-C → 单源化；M-D → EngineState 唤醒面修复（**共享基座警示：修形影响面全产品，锁面须含回归评估**）。
 - 流程：R-⑥ 落码（仍零修形）→ e2e 同场景复跑 → 终定谳（出第六机制再报 f4）→ 段 F 修形锁面报批。
+

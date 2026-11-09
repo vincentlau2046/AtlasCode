@@ -192,6 +192,29 @@ export function probeReadAbortControllerId(
   return probeControllerIds.get(ac) ?? 'untagged'
 }
 
+// R-⑥（f4 批复 2026-11-09 补强）：task record 对象标识 stamp/read——
+// completed updater 读到的 record 与 spawn 创建 record 异 id = 记录被换写；
+// 'untagged' = 模块双实例（M-C 实锤面）。
+const probeTaskRecordIds = new WeakMap<object, string>()
+let probeTaskRecordSeq = 0
+
+/** spawn 创建点调用：给 task record 打唯一标识并返回（幂等重入）。 */
+export function probeStampTaskRecord(record: object): string {
+  let id = probeTaskRecordIds.get(record)
+  if (id === undefined) {
+    probeTaskRecordSeq += 1
+    id = `task-${probeTaskRecordSeq}`
+    probeTaskRecordIds.set(record, id)
+  }
+  return id
+}
+
+/** 任意面调用：读 record 标识（非对象 = 'none'；跨实例/未 stamp = 'untagged'）。 */
+export function probeReadTaskRecordId(record: unknown): string {
+  if (typeof record !== 'object' || record === null) return 'none'
+  return probeTaskRecordIds.get(record) ?? 'untagged'
+}
+
 /**
  * 上限追加消息（重建 ①：cap = 100 命名常量；消费端 = teammate 会话
  * 展示历史，防无界增长）。

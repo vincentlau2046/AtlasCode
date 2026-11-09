@@ -168,6 +168,7 @@ import {
   isInProcessTeammateLive,
   isInProcessTeammateTask,
   probeReadAbortControllerId,
+  probeReadTaskRecordId,
   type InProcessTeammateTaskState,
   type SetAppState,
   type TeammateIdentity,
@@ -1637,33 +1638,58 @@ export async function runInProcessTeammate(
     // alreadyTerminal，非残留）。
     let alreadyTerminal = false
     let toolUseId: string | undefined
+    // 0.1.93b 段 R-⑥（f4 批复 2026-11-09）：completed 写点三探针 + updater
+    // throw-wrap（补强①）——第五形「break 后静默丢失」分型面：in 缺席 =
+    // 第六机制（控制流未达尾段）；in 有 enter 无 = M-C/M-D（es 探针分型）；
+    // notlive 现 = M-B；enter 有 apply 无 = M-A（throw 行定位抛点）。
+    // 判别 instrumentation，零行为变更（catch 原样 rethrow）。
+    logForDebugging(`[probe-R6][completed-in] agent=${identity.agentId} taskId=${taskId}`)
     updateTaskState<InProcessTeammateTaskState>(
       taskId,
       setAppState,
       task => {
-        // killInProcessTeammate may have already set status:killed +
-        // notified:true + cleared fields. Don't overwrite (would flip
-        // killed → completed and double-emit the SDK bookend).
-        if (!isInProcessTeammateLive(task)) {
-          alreadyTerminal = true
-          return task
-        }
-        toolUseId = task.toolUseId
-        task.onIdleCallbacks?.forEach(cb => cb())
-        task.unregisterCleanup?.()
-        return {
-          ...task,
-          status: 'completed',
-          notified: true,
-          endTime: Date.now(),
-          messages: task.messages?.length ? [task.messages.at(-1)!] : undefined,
-          pendingUserMessages: [],
-          abortController: undefined,
-          unregisterCleanup: undefined,
-          onIdleCallbacks: [],
+        logForDebugging(
+          `[probe-R6][completed-updater-enter] agent=${identity.agentId} status=${task.status} recordId=${probeReadTaskRecordId(task)}`,
+        )
+        try {
+          // killInProcessTeammate may have already set status:killed +
+          // notified:true + cleared fields. Don't overwrite (would flip
+          // killed → completed and double-emit the SDK bookend).
+          if (!isInProcessTeammateLive(task)) {
+            // enter 行已带 status/recordId（此处取反守卫窄化 never 不可再取字段）
+            logForDebugging(
+              `[probe-R6][completed-updater-notlive] agent=${identity.agentId}`,
+            )
+            alreadyTerminal = true
+            return task
+          }
+          toolUseId = task.toolUseId
+          task.onIdleCallbacks?.forEach(cb => cb())
+          task.unregisterCleanup?.()
+          const completed = {
+            ...task,
+            status: 'completed' as const,
+            notified: true,
+            endTime: Date.now(),
+            messages: task.messages?.length ? [task.messages.at(-1)!] : undefined,
+            pendingUserMessages: [],
+            abortController: undefined,
+            unregisterCleanup: undefined,
+            onIdleCallbacks: [],
+          }
+          logForDebugging(
+            `[probe-R6][completed-updater-apply] agent=${identity.agentId} recordId=${probeReadTaskRecordId(completed)}`,
+          )
+          return completed
+        } catch (error) {
+          logForDebugging(
+            `[probe-R6][completed-updater-throw] agent=${identity.agentId} ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+          )
+          throw error
         }
       },
     )
+    logForDebugging(`[probe-R6][completed-out] agent=${identity.agentId}`)
     void evictTaskOutput(taskId)
     // delta ②：evictTerminalTask（task 域无驱逐面）/ unregisterPerfettoAgent
     // （perfetto 面）裁除；emitTaskTerminatedSdk 已落（analytics 波 §8.69）。
