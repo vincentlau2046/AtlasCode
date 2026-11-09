@@ -340,3 +340,30 @@ f4 §9 RF-T1「engine lane 补 setMemberActive(false) 写点」**定位错位**�
 **判别格批准**：unit 三断言（次数=回合数 / round1 内 enqueue 事件于 afterRound#1 可 drain 且早于 round2 round_start / 未注入零行为）+ 修复前红（现码无 per-round flush 点断言②红）。
 
 RF-T1 落盘 afae2d19 采信（判别格 F1 修前红/F2-F4 恒绿设计合理；cherry-pick 误落 AtlasHarness cwd 插曲已 --abort 干净恢复无损，登记备档）。流程：落码 → 两面合并四件套 → 段 F 收尾 → 段 G gate 单信号。
+
+## §13 Main 段 F 落盘记录（2026-11-09）
+
+两面修形全链落 master（origin/master ALIGNED，worktree wave-0193b-redf 已对齐）：
+
+- **RF-T1 @ afae2d19**：`src/engine/tools/team/teamDeleteTool.ts` branch-2 读面单点改走
+  `getSessionContextPort()?.get().tasks`（f4 §11 批复；port 缺席维持 fail-closed 不放宽，无
+  context 回落支；call context 参数退役 `_context` 下划线口径）。判别格
+  `tests/unit/wave0193b-rft1-teamdelete-port-read.test.ts` 4 格（F1 修前红窄视图恒拦复现 /
+  F2 port 缺席 / F3 running / F4 status 未知 fail-closed 恒绿）。
+  **form-a 段 G 供态迁移**（回归红处置）：`deleteCtx` 由 context.getAppState duck 改为
+  `setSessionContextPort` 注入 + 空 context（f4 批复 port-only 形随读面迁移）；teardownGate
+  增 `resetSessionContextPort()`；G2 rNoState 支改锚 port 缺席面，G1-G4 测试意图不变。
+- **RF-T2 @ 095f6ce3**：`src/engine/query/loop.ts` AgentLoopDeps 增可选 `afterRound?:
+  () => Promise<void>`（round_end emit 后逐轮 await；未注入 = await undefined 恒等锚；拒绝沿
+  await 传播 fail-visible）+ `src/cli/print.ts` loopDeps 接 `afterRound: () => drainToOutput()`
+  （惰性箭头避 TDZ）。判别格 `tests/unit/wave0193b-rft2-afterround-flush.test.ts` 3 格
+  （①次数=回合数 + round1 事件 afterRound#1 可 drain 且早于 round2 round_start / ②未注入
+  零行为锚 / ③fail-visible；①③修前红、②修前绿=零行为锚）。
+
+**四件套（worktree 口径）**：tsc 0 / eslint src 0e·0w（注：tests/ 39 问题 = master 预存
+基线逐条同值，非本波引入，登记备档）/ `bun run build` 0（package.json script 口径）/
+canon `FORCE_COLOR=3 CI=true bun test --isolate tests/` 5737 pass 0 fail 459 文件（RF-T1
+单面时 5734/0/458 亦绿）。定向：rft1 4 格 + form-a + team-q + r3-port-singleton = 84 pass。
+
+**插曲登记**：一次 cherry-pick 误落 AtlasHarness 主仓 cwd（rename 检测撞车），`--abort`
+干净恢复无损；真落 AtlasCode master。流程：段 G gate 单信号已发 e2e（基面 095f6ce3）。
