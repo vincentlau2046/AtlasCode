@@ -177,3 +177,22 @@ diff 定谳采纳（语义差非漂移：loop 形不同构 T=for-await/E=Promise
 5. **mainSystemPrompt = 单串**：拼装序（main→ADDENDUM→custom→append ≡ T 形逐字）固化于 buildTeammateSystemPrompt 单点；parts 数组 YAGNI 不取。
 
 判据面冻结（E 节五项全准）：结构断言（实现体实例数=1 且在 src/swarm + T 副本路径存在性=false）/ round-3/6/7 修形形锚 + 换道 import 形锚 / A6 有界终止 TUI 探针格（termination 缺省 fail-closed max-turns 200 经换道 TUI lane 可达）/ buildTeammateSystemPrompt 两态 + gate 钩子行为单测 / canon Δ 恰合 + 四件套。批复后依序落码，D 节 bundle Δ 实测登记随收尾报。
+
+## §14 f4 批复：C-3 收尾采认 + 段 M lock-face（2026-11-09，@29de9e74/b3a380aa）
+
+### ① C-3 收尾采认
+
+五点批复落码全形采认（A-I 十四目）；f4 亲验判别格 wdb-c3-runner-single-source.test.ts = **13 pass / 0 fail**（worktree 实跑）。附带改判采纳（twin 判别格两处同步：Q1-2 T twin import 断言 → existsSync=false 单源断言；Q4b 仅标题订正——机械随单源化，行为断言不变）。bundle Δ 实测 −53,372B 源裁除登记，终值以段 L release SRI 四值口径为准。
+
+**minor UX 偏差两点采认登记观察池（非静默，合规）**：① progress tracker 跨 prompt 累积非逐 prompt 重置（调用点无法感知单源 runner prompt 迭代边界的结构性成本；task.messages 逐消息实时镜像不受影响）；② E 轮末 allMessages 全量覆盖与 onMessage 逐消息镜像并存（最终态一致 E② 锚保底）。不新增波面。
+
+### ② 段 M lock-face 批复
+
+缺陷实锚（双重 fail-silent）/ SDK lane 消费面枚举表（TodoWrite 主体 + plan 族 TPC 域内零影响 + task 族已单源 + team 族门 OFF 登记级）/ per-domain 读写单源归一表（TPC 域零变更 + todos 域 port 双向 + tasks 域 engine services）——全采纳。
+
+**裁点：TodoWrite 通道形 = 双通道批准（port 注入优先 / setAppState 回落）**，理由：缺陷面仅 makeCtx 窄 updater（SDK lane）；TUI 全量 store 的 setAppState 面本就正确，单通道强行扩入 TUI = 零收益回归面，违最小 scope。**附带两条件（硬）**：
+
+1. **fail-visible 落点前移 makeCtx 构建期**：port 组装失败 = 构建期显式 throw（错误含落点指引）；**TodoWrite 写入期禁静默回落到窄 updater**——否则旧 fail-silent 换形复辟（回落支合法性前提 = 上下文非 makeCtx 窄形，即 TUI lane）。
+2. **判别格补一格**：makeCtx 产出 ctx 结构断言恒含 port（SDK lane 回落支不可达证明）——「回落存在但 SDK lane 永不可达」须判别格钉死，禁口头保证。
+
+判据面冻结（§6④ 三点 + 本批复）：RED=SDK lane TodoWrite 写后读不回 → GREEN=port 落点可观测（oldTodos 回读正确）/ TPC 域权限门零回归格（plan 族 setAppState + checkPermission gate tpcRef 活读修前后恒等）/ port 组装失败构建期 throw fail-visible / makeCtx ctx 恒含 port 结构断言 / 四件套 + canon Δ 恰合 + §2.6 regex 形锚 + §2.7 specifier 解析。批复后落码段 M，随后段 G gate（含 §6① 0.1.93 前滚判据面复跑：①T8 全链 + ⑤ O4 名义形锚 + Q1-Q4 + round 1-8 判别格）。
