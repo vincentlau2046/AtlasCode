@@ -235,6 +235,19 @@ export interface AgentLoopDeps {
    * 适配层注入；headless print.ts 不注入 = 现状零变化。
    */
   emit?: (event: AgentLoopEvent) => void
+  /**
+   * 0.1.93b RF-T2（f4 §11 批复 2026-11-09 + §12 修形批复 @98c7e34d）：轮末
+   * awaited 钩子——round_end emit 之后、下轮 round_start 之前逐轮 await。
+   * 背景 = headless drain 站点族全在回合边界（writeTurnOutputs/环顶/idle），
+   * 阻塞 runTurn 整回合内无 per-round flush，SDK 事件（如临时小组 completed
+   * 的 task_notification bookend）滞留至回合末。消费方 = headless print.ts
+   * 接 drainToOutput（惰性箭头）；未注入 = `await undefined` 零开销恒等锚
+   * （TUI lane 不注入面维持；单轮 queryOneRound 直调方不发射不受影响）。
+   * 错误面（f4 §12 附带条件①）：拒绝沿 await 传播禁吞（与 writeTurnOutputs
+   * 写错传播同权，fail-visible）。粒度 = 轮粒度（emit 面既设契约同粒度）；
+   * sub-round 前向接缝登记（writeTurnOutputs print.ts 注释同缝）。
+   */
+  afterRound?: () => Promise<void>
   /** E-4 S-4d：权限门（createPermissionGate 产物；未注入 = 窄 spine 默认放行）。 */
   checkPermission?: PermissionGate
   /**
@@ -1004,6 +1017,12 @@ export async function queryAgentLoop(
         assistantMessage: lastRound.messages[roundInputLen] as AssistantMessage,
         toolResultMessages: lastRound.messages.slice(roundInputLen + 1),
       })
+      // 0.1.93b RF-T2：站点⑤ per-round flush——轮末 awaited 钩子（f4 §11/§12
+      // 批复）。回合 N 内入队的 SDK 事件（task_notification bookend 族）在此
+      // 上流，早于下轮 round_start 与回合末 writeTurnOutputs 任何消息写
+      // ——「SDK 事件先于后续消息上流」既有语义保持。拒绝沿 await 传播
+      // （fail-visible，禁吞）。未注入 = await undefined 零开销恒等锚。
+      await deps.afterRound?.()
       break
     }
     if (lastRound.deferred) {

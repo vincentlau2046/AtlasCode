@@ -1243,6 +1243,15 @@ export async function runHeadless(
     ...bundle.deps,
     // abortController 创建在 canUseTool 块（序依赖）：构建后赋值
     signal: abortController.signal,
+    // 0.1.93b RF-T2 站点⑤ per-round flush（f4 §11/§12 批复 @98c7e34d）：
+    // afterRound = loop round_end 后逐轮 awaited 钩子——回合内入队的 SDK 事件
+    // （task_notification bookend 族）不再滞留至回合末 writeTurnOutputs 站点②。
+    // 惰性箭头规避 TDZ（drainToOutput 定义于下方 L1338s，晚于本字面量）；
+    // 拒绝沿 await 传播（fail-visible，f4 §12 附带条件①，禁吞）。
+    // 保序：drainSdkEvents splice 全清 + afterRound await 于回合 N 末 = 事件
+    // 先于回合 N+1 LLM 调用与回合末消息写；站点①②③④ flush 不动（站点②
+    // 变空队列幂等 no-op）。TUI lane 不注入面维持（f4 §12 附带条件②）。
+    afterRound: () => drainToOutput(),
     // SDK prompt 路由门（createPermissionGate 单次重建 + canUseTool ask 路由，
     // 构建点读活 TPC）——覆写构建器 ③ 缺省体
     checkPermission,
