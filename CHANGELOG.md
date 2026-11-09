@@ -4,6 +4,35 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.94
+
+W-D-B 波：**工具契约统一——三对双副本收敛 + SDK lane TodoWrite todos
+port**。工单 `docs/2026-11-09-p0-wave-wdb-ticket.md`；gate
+r-20261109-gate-094（A-F 判据面全绿：前滚复跑 T8 全链 + O4 五要素 +
+round 1-8 零回退 + 段 Q 四格；本波四套判别格全绿；canon 17148/0）。
+
+### 收敛面（行为零变更，单源化）
+
+- **C-1 teammate.ts 双副本单源化**：`tui/utils/teammate.ts` 直删，
+  22+10 消费点改道 engine 门面单源。
+- **C-2 SendMessageTool 单源化**：engine 副本单源基座，TUI 927L 副本
+  裁除为薄 wrapper（port 注入承载形：nameRouterPort / selfTerminatePort）。
+- **C-3 runInProcessTeammate 双副本收敛**：TUI twin 副本（tui/utils/swarm/
+  inProcessRunner.ts，1546L/53,372B）直删，InProcessBackend 换道 src/swarm
+  单源 runner（requireStartInProcessTeammate seam 端口 + tui/factory
+  组合根装配）；反向面四钩子（mainSystemPrompt / onMessage /
+  onPermissionWaitMs / getPermissionMode）保持 TUI 消费形逐字等价；
+  ShutdownMessage 去 exiting 谎面一行顺带销项。
+
+### 修复面
+
+- **段 M makeCtx setAppState 双重 fail-silent 修复**（f4 §14 双通道
+  批复）：headless SDK lane TodoWrite todos 域读恒 undefined + 写静默
+  丢弃。修形 = TodoWriteTodosPort 双通道（port 注入优先 / setAppState
+  回落）；SdkToolUseContext.todosPort required（类型级 fail-loud）；
+  makeCtx 构建期 fail-visible 守卫（组装失败显式 throw 含落点指引）。
+  TUI lane 全量 store 面零回归。
+
 ## v0.1.93
 
 W-D-A 波（0.1.93 + 0.1.93b 插入波合并发布）：**临时小组（Form A）——
