@@ -64,7 +64,7 @@ export {
   runWithTeammateContext,
   isInProcessTeammate,
   createTeammateContext,
-} from './teammateContext'
+} from '../shared/teammateContext'
 export {
   setStandaloneAgentContext,
   getStandaloneAgentName,

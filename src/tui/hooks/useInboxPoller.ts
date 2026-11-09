@@ -47,7 +47,7 @@ import {
   isTeamLead,
   isTeammate,
 } from '../utils/teammate.js'
-import { isInProcessTeammate } from '../utils/teammateContext.js'
+import { isInProcessTeammate } from 'src/shared'
 import {
   isModeSetRequest,
   isPermissionRequest,

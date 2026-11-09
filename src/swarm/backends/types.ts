@@ -30,7 +30,7 @@
  */
 import type { Message, PermissionMode } from '../../shared'
 import type { SetAppState, TaskStateBase } from '../../task'
-import type { TeammateContext } from '../teammateContext'
+import type { TeammateContext } from '../../shared'
 import type { TerminationSpec } from '../teammateTermination'
 
 /** tmux/it2 pane 标识（旧 PaneId = any stub → 消费端 string 形：killPane('-t', paneId) 全链）。 */

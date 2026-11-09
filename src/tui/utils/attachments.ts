@@ -200,7 +200,7 @@ import {
   getTeamName,
   isTeamLead,
 } from './teammate.js'
-import { isInProcessTeammate } from './teammateContext.js'
+import { isInProcessTeammate } from 'src/shared'
 import { removeTeammateFromTeamFile } from './swarm/teamHelpers.js'
 import { unassignTeammateTasks } from './tasks.js'
 

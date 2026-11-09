@@ -34,7 +34,7 @@ import {
   registerTask,
   STOPPED_DISPLAY_MS,
 } from '../task/framework.js'
-import { createTeammateContext } from '../teammateContext.js'
+import { createTeammateContext } from 'src/shared'
 import {
   isPerfettoTracingEnabled,
   registerAgent as registerPerfettoAgent,

@@ -63,7 +63,7 @@ import {
   STOPPED_DISPLAY_MS,
 } from '../engine'
 import { logForDebugging } from '../shared'
-import { createTeammateContext } from './teammateContext'
+import { createTeammateContext } from '../shared'
 import { formatAgentId } from './agentId'
 import { registerCleanup } from './cleanupRegistry'
 import { removeMemberByAgentId } from './teamHelpers'

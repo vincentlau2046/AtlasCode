@@ -81,7 +81,7 @@ import { isInProcessEnabled } from '../../utils/swarm/backends/registry.js';
 import { syncTeammateMode } from '../../utils/swarm/teamHelpers.js';
 import type { TeamSummary } from '../../utils/teamDiscovery.js';
 import { getTeammateColor } from '../../utils/teammate.js';
-import { isInProcessTeammate } from '../../utils/teammateContext.js';
+import { isInProcessTeammate } from 'src/shared';
 import { writeToMailbox } from '../../utils/teammateMailbox.js';
 import type { TextHighlight } from '../../utils/textHighlighting.js';
 import type { Theme } from '../../utils/theme.js';

@@ -23,7 +23,7 @@ import {
   getTeamName,
   isTeammate,
 } from '../../utils/teammate.js'
-import { isInProcessTeammate } from '../../utils/teammateContext.js'
+import { isInProcessTeammate } from 'src/shared'
 import type { Theme } from '../../utils/theme.js'
 
 type SwarmBannerInfo = {

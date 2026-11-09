@@ -30,7 +30,7 @@ export {
   isInProcessTeammate,
   runWithTeammateContext,
   type TeammateContext,
-} from './teammateContext'
+} from '../../shared/teammateContext'
 
 import { isEnvTruthy } from '../../shared'
 import {
@@ -39,7 +39,7 @@ import {
   type SetAppState,
   type TaskAppState,
 } from '../../task'
-import { getTeammateContext } from './teammateContext'
+import { getTeammateContext } from '../../shared'
 
 /**
  * Returns the parent session ID for this teammate.

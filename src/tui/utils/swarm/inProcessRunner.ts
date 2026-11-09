@@ -81,8 +81,8 @@ import { sleep } from '../sleep.js'
 import { jsonStringify } from '../slowOperations.js'
 import { asSystemPrompt } from '../systemPromptType.js'
 import { claimTask, listTasks, type Task, updateTask } from '../tasks.js'
-import type { TeammateContext } from '../teammateContext.js'
-import { runWithTeammateContext } from '../teammateContext.js'
+import type { TeammateContext } from 'src/shared'
+import { runWithTeammateContext } from 'src/shared'
 import {
   createIdleNotification,
   getLastPeerDmSummary,

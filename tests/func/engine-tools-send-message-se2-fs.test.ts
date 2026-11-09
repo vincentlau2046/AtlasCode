@@ -582,3 +582,81 @@ describe('F-P round 7 窄口 tolerant dispatch（真盘 + fake port + ALS）', (
     expect(memberAbort.signal.aborted).toBe(true)
   })
 })
+
+// ── F-Q round 8 段 Q4：跨车道写读点火格（RED-E 分裂直证）───────────────
+//    e2e round 7 定谳 RED-E：bundle 内 swarm/inProcessRunner 写 swarm 副本
+//    ALS，成员工具链经 engine 门面读 engine 副本 → 身份失联 → 触发段
+//    agentId '' 恒失配（exitTriggered 0 体）。func 层既有格（F-O1）写读同
+//    走 engine 副本，无法暴露分裂 → 本段用 RED-E 同源写手路径（swarm 副本
+//    + TUI twin 副本）点火 round-6 触发段：分裂态必 RED（文案回落
+//    'will exit on its next lifecycle check' + abort 不触发），单源后 GREEN。
+import { runWithTeammateContext as swarmRunWith } from '../../src/shared/teammateContext'
+import { runWithTeammateContext as tuiRunWith } from '../../src/shared/teammateContext.js'
+
+describe('F-Q round 8 跨车道写读点火格（swarm/TUI 写手 → engine 读手）', () => {
+  afterEach(() => {
+    resetSessionContextPort()
+  })
+
+  const memberCtxBase = {
+    agentId: 'w9@t1',
+    agentName: 'w9',
+    teamName: 't1',
+    planModeRequired: false,
+    parentSessionId: 's1',
+    isInProcess: true as const,
+  }
+
+  test('Q4a swarm 写手（inProcessRunner L217 同源路径）→ 触发段点火', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+    const r = await swarmRunWith(
+      { ...memberCtxBase, abortController: new AbortController() },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: {
+              type: 'shutdown_response',
+              request_id: 'shutdown-1@w9',
+              approve: true,
+            },
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    // 触发段真环境点火（exitTriggered=true 文案两态之「已触发」）
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    expect(memberAbort.signal.aborted).toBe(true)
+  })
+
+  test('Q4b TUI twin 写手（tui/utils/swarm/inProcessRunner L85 同源路径）→ 触发段点火', async () => {
+    const memberAbort = new AbortController()
+    setSessionContextPort(oFakePort({ 'w9-task': oMemberTask(memberAbort) }))
+    const r = await tuiRunWith(
+      { ...memberCtxBase, abortController: new AbortController() },
+      () =>
+        SendMessageTool.call(
+          {
+            to: 'team-lead',
+            message: {
+              type: 'shutdown_response',
+              request_id: 'shutdown-1@w9',
+              approve: true,
+            },
+          },
+          ctx('t1'),
+        ),
+    )
+    const data = r.data as SendMessageToolOutput
+    expect(data.success).toBe(true)
+    expect(data.message).toBe(
+      'Shutdown approved. Confirmation sent to team-lead; exit sequence triggered for agent w9.',
+    )
+    expect(memberAbort.signal.aborted).toBe(true)
+  })
+})

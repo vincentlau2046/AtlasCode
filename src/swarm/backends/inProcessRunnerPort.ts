@@ -21,7 +21,7 @@
 import type { AgentDefinition } from '../../engine'
 import type { Message } from '../../shared'
 import type { TeammateIdentity } from '../../task'
-import type { TeammateContext } from '../teammateContext'
+import type { TeammateContext } from '../../shared'
 import type { TerminationSpec } from '../teammateTermination'
 import type { TeammateExecutorContext } from './types'
 

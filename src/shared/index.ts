@@ -188,3 +188,15 @@ export {
   type TeammatePromptParts,
   renderTeammatePrompt,
 } from "./agentRoleTemplates"
+
+// 0.1.93 round 8 RED-E 单源化（§7.17）：in-process 队友 ALS 身份面唯一物理
+// 副本（三副本直删二留一）；域内 import 一律走本门面（STR-1 folder-mode
+// entry-point），re-export 门面（swarm/index · engine/messaging/teammate ·
+// tui/utils/teammate）原样保留。
+export {
+  type TeammateContext,
+  getTeammateContext,
+  runWithTeammateContext,
+  isInProcessTeammate,
+  createTeammateContext,
+} from "./teammateContext"

@@ -52,7 +52,7 @@ import {
   classifyYoloAction,
 } from '../../utils/permissions/yoloClassifier.js'
 import { emitTaskProgress as emitTaskProgressEvent } from '../../utils/task/sdkProgress.js'
-import { isInProcessTeammate } from '../../utils/teammateContext.js'
+import { isInProcessTeammate } from 'src/shared'
 import { getTokenCountFromUsage } from '../../utils/tokens.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../ExitPlanModeTool/constants.js'
 import { AGENT_TOOL_NAME } from './constants.js'

@@ -214,7 +214,7 @@ import {
   type Task,
 } from '../engine'
 import { hasPermissionsToUseTool, type PermissionTool } from '../permissions'
-import { runWithTeammateContext } from './teammateContext'
+import { runWithTeammateContext } from '../shared'
 import { appendTeammateMessage } from './inProcessTeammateTask'
 import {
   processMailboxPermissionResponse,
