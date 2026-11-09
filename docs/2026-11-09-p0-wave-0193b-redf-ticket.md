@@ -1,6 +1,6 @@
 # 0.1.93 补闭环插入波工单（RED-F 修形 + O4 锚 + release 门禁前滚全验）
 
-> 状态：`draft → 待 Atlas-reveiw 审计 → 双信号`。f4 工单（2026-11-09）。
+> 状态：`审计闭环（有修改通过）→ 双信号`。f4 工单（2026-11-09）。
 > 上游：`docs/2026-11-08-p0-wave-0193-ticket.md` §7-§8（0.1.93 W-D-A 八轮 stop 收口 @4335693c）。
 > 用户终裁（2026-11-09）：**A：RED-F 插入波优先**（W-D-B 与纲要 §10 序 4+ 顺延）。
 
@@ -18,9 +18,10 @@
 
 **消费段**（engine runner `src/swarm/inProcessRunner.ts`，compose 自 `../swarm` 接线实证为活副本）：
 - 主循环 `while (!abortController.signal.aborted && !shouldExit)`（L1279，监听 `config.abortController`）；
-- turn 后 lifecycle 检查 `if (abortController.signal.aborted) break`（L1439-1443）；
-- 轮末 `waitForNextPromptOrShutdown`（L970-1146）同参轮询 500ms，`'aborted'` 支 → shouldExit → break（L1604-1608）；
-- completed 收尾块（L1615-1650）：`isInProcessTeammateLive` 守卫 → status:'completed' + 通知，唯一终态写点。
+- turn 后 lifecycle 检查 `if (abortController.signal.aborted) break`（L1447-1450；L1438-1443 为 currentWork Escape 检，行号勘误据审计）；
+- 轮末收尾段（第三消费面，审计焦点①4 补）：isIdle 置位（L1490）→ `await sendIdleNotification`（L1500-1515，sendMessageToLeader 写链）→ `evaluateTerminationSpec`（L1522-1527，**读 `aborted: abortController.signal.aborted`**——若 spec 语义消费 aborted 则 turn 末即 graceful exit，既可能改变判读也是修形候选面）→ poll 入口（L1542）；
+- 轮末 `waitForNextPromptOrShutdown`（L970-1146）同参轮询 500ms，`'aborted'` 支 → shouldExit → break（L1598-1604）；
+- completed 收尾块（L1614-1651）：`isInProcessTeammateLive` 守卫 → status:'completed' + 通知，唯一终态写点。
 
 **同源链静态实读（全成立）**：
 - 单创建点：`spawnInProcess.ts:146` 唯一 `createAbortController()` → 同对象进 taskState（L170）+ 返回值（L188）；
@@ -30,25 +31,39 @@
 - store 单例：`SessionContextPort` = 模块级持有（`src/engine/session/sessionContextPort.ts:17`）；
   `EngineState.get()` 返回原引用无克隆（`src/engine/state/EngineState.ts:75-77`）；SessionSnapshot 型面含 `tasks`（ports/sessionContext.ts:32）。
 
-### 0.2 矛盾面（RED-F 判读收紧）
+### 0.2 矛盾面（RED-F 判读收紧；依审计焦点①修订 2026-11-09）
 
-e2e round-8 实证三元组（gate-093 块 J）：**① exitTriggered=true 直证**（两腿 tool_result 文案）+
-**② 轮询活**（500ms 即达）+ **③ 不消费**（45-65s 长窗 status 恒 running、completed 仅进程退出 cleanup 发）+
-**④ 不取后续 mailbox 消息**。若同源链如静态所读，②+③ 不可能并存（500ms 内 poll 必见 aborted）；④ 与
-"poll 活"亦张力（活 poll 应取 new_message 起新轮）。⇒ **存在静态读不可见的运行时分裂**。
+**硬证据集（gate-093 块 J，经审计勘误后口径）**：
+**① exitTriggered=true 直证**（两腿 tool_result 文案）+ **② 不消费**（45-65s 长窗 status 恒 running、
+completed 仅进程退出 cleanup 发）+ **③ 不取后续 mailbox 消息** + **④ WaitForTeammates「零运行成员」idle 面**
+（live && 轮间 isIdle=true，块 J 第 4 点原文）。
+~~轮询活（500ms 即达）~~ = **机制推断非观测直证**（audit 勘误：原表述系 poll 周期 500ms 故"应达"的推断）；
+初版工单误将其作观测事实入硬证据——已降级，直证责任转 R-⑤ 补格。
 
-**主候选（按解释力排序）**：
-- **RF-2（首选）：成员卡轮内**——approve 后 turn 不返回（runAgent 内悬挂），两个消费站（turn-end break / poll）
-  皆不可达。④（不处理新消息）强支持此向：卡轮内则新消息不入。修形向 = lifecycle abort 的轮内可见性
-  （abort listener 打断 currentWork / 轮内检查点），而非仅"同源化"（同源静态已成立，纯同源化修不动）。
+**主候选（按解释力排序；审计后重排）**：
+- **RF-12（首选，审计新增）：轮末收尾段悬挂（第三执行态）**——runAgent 返回 → lifecycle break 检（L1447）→
+  isIdle 置位（L1490）→ `await sendIdleNotification`（L1500-1515，sendMessageToLeader 写链）→
+  evaluateTerminationSpec（L1522）→ poll 入口（L1542）之间卡死：poll 永不入、abort 永不消费、**isIdle 已 true**
+  → 与全部四项硬证据相容且**唯一同时解释 idle 面（④）**。mailbox lock 有界（10 retries×≤100ms）+ writeToMailbox
+  吞错削弱了 lock 分支，但 sendMessageToLeader/team-file 面未逐界，且 .lock 残留在 round 证据中多次出现。
+  修形向 = 收尾段 await 有界化 / fail-visible。
+- **RF-4A（次选，审计新增）：触发段命中异对象——陈旧/重复任务记录**——`findInProcessTeammateTaskByAgentId`
+  （src/task/inProcessTeammate.ts:157-166）按 identity.agentId **首个命中**，无 status/teamName 过滤、无唯一性前提；
+  多记录时 abort 落在非 runner 持有对象 → exitTriggered=true 而真 controller 活而不消费。与 idle 面相容。
+  修形向 = 记录唯一性/谓词收紧。
+- **RF-2（第三，初版首选被审计削弱）**：成员卡轮内（runAgent 不返回）——③ 支持但 **④ idle 面与之张力**
+  （卡轮内则 isIdle=false，与「零运行成员」矛盾）；RF-2 修形向（currentWork 桥接）对 RF-12/RF-4A 无效
+  （够不着收尾段/异对象）。保留为候选，判别定谳前不排码。
 - **RF-1：模块双实例族**——RED-E 同族教训（bundle 模块多实例）：若 `sessionContextPort.ts` 或 store 模块在
   bundle 成双实例，成员工具读的 port 单例与 runner 侧 store 分裂。但 exitTriggered=true 要求成员侧 store
   **有**该任务记录且有活 controller——双实例下难成立，除非 store 共享而 controller 对象在序列化边界分离。
-  判别手法 = Q1 同款 bundle 结构断言（模块实例数=1）。
-- RF-3：poll while-condition 与 sleep 竞态——500ms 上界排除（45-65s 窗口），仅列备档。
+  判别手法 = Q1 同款 bundle 结构断言（模块实例数=1）；R-① 加记录唯一性断言与 RF-4A 分型。
+- RF-3：poll while-condition 与 sleep 竞态——45-65s 窗口排除，仅列备档。
 
-**f4 审视自决**：修形指令不预设单一根因——Main 落码前先以 R-①/②/③ 判别格定谳（见 §3 段 R），
+**f4 审视自决（修订版）**：修形指令不预设单一根因——Main 落码前先以 R-①/②/③/⑤ 判别格定谳（见 §3 段 R），
 Root-cause lock-face 报 f4 批复后修形（0.1.93 主波 round-6/7 先例：先根因锁面后修形）。
+**R-② 判读纪律（审计焦点③1）**：执行态三分 = 轮内 / **轮末收尾段** / 轮间——二分会把收尾段悬挂两头不靠误归
+RF-2 实锤，禁二分判读。
 
 ### 0.3 附带发现（登记，不入本波修形范围）
 
@@ -87,21 +102,32 @@ Root-cause lock-face 报 f4 批复后修形（0.1.93 主波 round-6/7 先例：�
 
 ## §3 工作段（预注册判别格）
 
-### 段 R：根因定谳（Main，先于修形）
+### 段 R：根因定谳（Main，先于修形；依审计焦点③补强 2026-11-09）
 
 | 格 | 内容 | 判据 |
 |---|---|---|
-| R-① | 三点 controller 同对象直证：spawn 创建点 / 触发段 abort 点 / poll 检查点，debug 日志带对象标识（hash/uuid），e2e 腿收证 | 三点同标识 = 同源实锤；异标识 = RF-1 分裂实锤 |
-| R-② | approve 后成员执行态钉死：轮内（runAgent 未返）vs 轮间（poll 内），日志直证 | 轮内悬挂 = RF-2 实锤 |
+| R-① | 三点 controller 同对象直证：spawn 创建点 / 触发段 abort 点 / poll 检查点，debug 日志带对象标识（hash/uuid），e2e 腿收证；**附任务记录唯一性断言**（同 agentId 在 port.get().tasks 条目数=1，含陈旧记录扫描） | 三点同标识+记录唯一 = 同源实锤；异标识 → **分型**：模块双实例 = RF-1；记录多杀 = RF-4A（两亚型修形向不同，禁混判） |
+| R-② | approve 后成员执行态**三态**钉死：轮内（runAgent 未返）/ **轮末收尾段**（isIdle 已置位、poll 未入——三锚：runAgent 返回点 / sendIdleNotification 进入+返回点 / poll 首条日志）/ 轮间（poll 内）；l 腿 wire 附「approve 后成员请求有无」面 | 收尾段卡死 = RF-12 实锤；轮内 = RF-2（受 idle 面④约束弱先验）；轮间不消费 = RF-1/RF-4A |
 | R-③ | store/port 单实例 bundle 结构断言（Q1 手法）：sessionContextPort 模块实例数=1、EngineState 实例数=1 | 实例>1 = RF-1 实锤 |
+| R-⑤ | **poll 活性直证格**（审计补）：长窗内 `[inProcessRunner] ... poll #N` debug 行计数 | 计数增长 = poll 活直证（兼作 §0.2 ② 勘误闭环）；零增长 = poll 未入（支持 RF-12） |
 | R-④ | 根因 lock-face 报 f4 批复（含判别格证据），f4 出修形锁面 | f4 批复后方可修形 |
 
-### 段 F：RED-F 修形（Main，按批复锁面）
+### 段 F：RED-F 修形（Main，按批复锁面；依审计焦点②补强 2026-11-09）
 
 - 候选修形向（按 §0.2 排序，以 R 段定谳为准，禁在定谳前落码）：
-  - RF-2 向：lifecycle abort 轮内可见性——abort listener 桥接 currentWork / turn 内检查点，保证 approve 后
-    有界窗内 turn 终止 → 既有双消费站可达；零新终态写点（completed 尾单点不变）。
-  - RF-1 向：分裂单源化（RED-E 手法同款：双实例直删归一 / 边界对象传递修正）。
+  - **RF-12 向（首选对应）**：轮末收尾段 await 有界化 / fail-visible——sendIdleNotification→sendMessageToLeader
+    写链逐界核（mailbox lock 之外的 team-file 面未逐界），悬挂面转显式失败或有限等待；零新终态写点
+    （completed 尾单点不变）。
+  - **RF-4A 向**：任务记录唯一性/谓词收紧——findInProcessTeammateTaskByAgentId 加 status/teamName 过滤或
+    唯一性前提 fail-loud。
+  - **RF-2 向**：lifecycle abort 轮内可见性——**实现形态锁面（审计预注册）：listener 形**（lifecycle signal 挂
+    一次性 listener abort currentWork，per-turn 注册/解除防泄漏），**禁轮询形**（busy-wait 红线）；
+    **单向性锁面：lifecycle ⇒ currentWork 单向**，禁反向（反向 = Escape 误杀成员，破 0.1.93 主波锁面
+    L1383「Escape stops this turn only, not the teammate」）；**Escape 回归判别格必配**：Escape 中断单轮后
+    成员仍 isIdle/poll 续活/不进终态。副作用批注：桥接后 turn-end currentWork 检会以「(Escape pressed)」
+    文案记录 lifecycle abort（log 语义漂移，分流或批注）；workWasAborted=true 插 ERROR_MESSAGE_USER_ABORT
+    属 teardown 噪声面（completed 收尾 messages:[last] 覆盖）。
+  - **RF-1 向**：分裂单源化（RED-E 手法同款：双实例直删归一 / 边界对象传递修正）。
   - 兜底纪律：不改 TeamDelete fail-closed 守卫语义；不放宽 forced 阶梯；exitTriggered=false 静默面按
     「静默误投族」处置评估（文案两态不谎面维持）。
 - func 判别格：修前复现 RED-F 症状的 func 格（先红后绿，Q4 先例）；wire 层断言直证（0.1.92 wire 断言先例）。
@@ -111,7 +137,10 @@ Root-cause lock-face 报 f4 批复后修形（0.1.93 主波 round-6/7 先例：�
 - O4 名义形锚（硬判据⑤）：spawn → shutdown_request → 成员 approve → 有界窗内成员终态（status completed）→
   completed 通知达 lead → TeamDelete 无守卫拦截 → graceful 全链 GREEN。
 - 前滚硬判据①：T8 全链复跑 GREEN。
-- 前轮点名回归：round 1-8 各修形判别格 + 段 Q 四格（Q1 ALS=1 / Q2 贯通 / Q3 销项 / Q4 点火）全复验。
+- 前轮点名回归（审计焦点④扩格）：round 1-8 **各轮判别格全量复跑**（兜底句式，防「修形判别格」解释窄化）；
+  点名补：⑤ 进程退出升级阶梯/exit guard（round 1-2）、RED-B TaskOutput(teammate) 判别格、RED-C inbox
+  分裂判别格、RED-D 指引悬空、段 N 56/56 与段 P、A6 收敛+spawn 防伪（round 1）+ 段 Q 四格（Q1 ALS=1 /
+  Q2 贯通 / Q3 销项 / Q4 点火）。TUI A2 由负断言覆盖；round-4 修测面随 canon 覆盖。
 - 负断言维持（TUI engine-only 钉探针）；canon 判据②护栏内绿；SRI/npm 面按 release 链标准。
 
 ### 段 L：release 0.1.93 + 生产 lane
@@ -132,3 +161,22 @@ Root-cause lock-face 报 f4 批复后修形（0.1.93 主波 round-6/7 先例：�
 
 本工单 → Atlas-reveiw 审计 → f4 双信号（Main 工单 + e2e gate 工单）→ Main 段 R 定谳 → f4 批复 → 段 F 落码 →
 段 G gate → 段 L release/生产 lane。全程 row F 预注册纪律：偏离预注册范围须先报 f4 裁定。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-09，有修改通过）
+
+审计结论：工单结构合规，**可进双信号，附 1 条实质判读修正 + 判别格/清单补强**；§0 锚点三方活码复核全 ✓
+（触发段 L590-657 / spawn 单创建点+同对象 / 全仓无非 undefined 赋值 / port 模块单例 / InProcessBackend:139）。
+f4 逐条吸收（本文件已修订）：
+
+1. **判读依据勘误（实质，已采）**：「轮询活 500ms」降级为机制推断非观测直证（§0.2 ② 勘误）；
+   硬证据集改四元组（+WaitForTeammates 零运行成员 idle 面）；候选重排 **RF-12 首选**（唯一全证据相容）
+   > RF-4A > RF-2（被 idle 面削弱）；R-② 二分判读禁令（三态）。
+2. **RF-4A/RF-12 双新候选（已采）**：异对象命中（首个命中无过滤）/ 轮末收尾段悬挂；对应修形向两格入段 F。
+3. **判别格补强（已采）**：R-① 记录唯一性断言+分型；R-② 三态三锚；R-⑤ poll 活性直证格。
+4. **段 F 预注册补强（已采）**：listener 形禁轮询形；lifecycle⇒currentWork 单向性锁面；Escape 回归判别格；
+   log 语义漂移/teardown 噪声两条副作用批注。
+5. **段 G 复跑清单（已采）**：round 1-8 判别格全量复跑兜底句 + 6 项点名补。
+6. **§0.1 消费站三面（已采）**：evaluateTerminationSpec aborted 消费面入轮末收尾段；行号三处勘误
+   （L1447-1450 / L1598-1604 / L1614-1651）。
+7. **焦点⑤ 版本口径**：一致无意见（0.1.93 复用 = 版本收口契约，0.1.91 scoped re-gate 先例背书）。
+   审计明示无需二审（改动均在判据面非波定义面）。
