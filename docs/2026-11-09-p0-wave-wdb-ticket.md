@@ -117,3 +117,22 @@ diff 定谳采纳（身份段 11 函数逐字零 delta 仅 import 面 / 尾 3 Ap
 **附带条件（一条）**：改道 import 面须走 **engine 门面/barrel**（boundaries entry-point 纪律：外域禁 leaf 直引——round-8 先例「import 站点走 barrel 别名」；tui→engine 先例 contextHostWiring 等均 `from 'src/engine'` 门面形）。若 boundaries 校验对 deep path 放行亦以门面形为准，落码前 boundaries checker 实核 exit=0。
 
 判据面冻结（随本批复）：① 结构断言（身份段实现体实例数=1 修前红/修后绿 + `src/tui/utils/teammate.ts` src 引用面=0，import 面计数非文本 grep——§2.6 纪律）；② 行为恒等格（身份函数行为锚单测修前后同绿 + ATLAS_PLAN_MODE_REQUIRED 两态）；③ 四件套全绿 + canon Δ 恰合。
+
+## §9 f4 裁处：C-1 收尾采认 + C-3 改判 + C-2 disposition（2026-11-09）
+
+### ① C-1 收尾采认
+
+32 消费点改道（首轮「15+1」漏计 = .tsx 后缀 + 短相对路径两批）、boundaries checker 当场抓 10 漏网点（有效性实证）、判别格 RED→GREEN（红验中现形并修正判别格自身两处路径 bug = 红验有效性实证）、四件套 canon 5742/0 Δ+5 恰合——全部采认。**bundle Δ=+43,917B 采信为门面形条件的结构性成本**（barrel 扩大可达性面；18MB 基数上可忽略，正确性 > 体量），窄门面回收（engine/messaging/index 若 boundaries 放行）登记后续波评估面非本波。
+
+### ② C-3 改判：活双副本收敛（孤儿判假阴采纳）
+
+`InProcessBackend.ts:13` 短相对路径 import 实证 = TUI runner 副本**活**（TUI 车道 in-process backend spawn 入口）。工单 §0.1「零 import 孤儿」与审计「孤儿实证」双双假阴——**同族第三例**（XML 子串回声假阳 / C-1「15+1」漏计 / C-3 路径子串假阴）。**方法论硬约束升格 §2.7：importer/consumer 枚举必须经 module specifier 解析（ts 模式串或边界 checker），禁路径子串 grep**；工单 §0/审计锚点面以本实证为准修订。C-3 改归「活双副本收敛」与 C-2 同序列（先 diff 定谳再收敛，engine swarm 副本为修形活态基座）；Main 补 diff 定谳报批。注意面：两副本各在不同 lane 活（e2e round-7 实证成员执行 engine 副本 + 本实证 TUI backend 走 TUI 副本）——收敛判别格必须双 lane wire 直证。
+
+### ③ C-2 disposition 裁定
+
+- **收敛基座 = engine 副本**：采纳（活态修形落点 + fail-closed 纪律 + setTeamFileLoader 接线闭合）。
+- **分叉 1（handleShutdownApproval）**：并集方案采纳——in-process 支以 engine 正形为基（SessionContextPort + live 谓词 + status 判）；tmux 成员车道保留 TUI 进程级 gracefulShutdown 兜底支但**补 status 判**（消陈旧任务 abort 面）；两态诚实文案维持。
+- **分叉 2（team 解析）**：engine 形胜（fail-closed），采纳——定性 fail-silent 修形非行为回归。
+- **分叉 3（plain 投递通道）**：名路由支并集进单源 tool 保 TUI 车道现行为（零 UX 变更）采纳；**engine lane 触发面先实证后裁**——Main 须先实核 headless 是否注册 agentNameRegistry：若不注册 = engine lane 行为零变更零裁定；若注册 = 涉 UX 面，两选项（统一纯文本 vs 保持分叉登记）面呈用户裁定，禁静默择一。
+- **TaskOutput agentId 契约缝**：本波附带修（C-2 同域契约缝，spawn 补注册对齐 resume 链先例），判别格随 C-2 冻结。
+- 判据面待分叉 3 实证结果随下批批复冻结（bundle 实例数=1 + 双 lane wire 直证 + canon + §2.6 regex 形锚 + §2.7 specifier 解析）。
