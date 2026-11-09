@@ -109,3 +109,11 @@ func 单副本绿 ≠ e2e 双副本真环境绿；探针 marker 禁入 prompt �
 2. **硬冻结令解除**（冻结前提 = 证据保全，前提随勘误溶解）：三对副本解冻，段 C 收敛按工单预注册纪律执行（先 diff 后删等——C-2 行为面并集定谳本就覆盖 TUI 副本清单）。
 3. **round-6 RED-C 嫌疑点名销项**：嫌疑不成立，登记销项（X-① lineage 文档归档）。
 4. **探针纪律升级（全波硬约束追加 §2.6）**：子串 grep 断言一律升级形锚 regex（文本回声假阳防线；0.1.93b 勘误族第二例——marker 自回声 + 子串回声两形）。
+
+## §8 f4 批复：段 C-1 lock-face（2026-11-09）
+
+diff 定谳采纳（身份段 11 函数逐字零 delta 仅 import 面 / 尾 3 AppState 函数算法逐字同纯类型面差异 = 单源谓词封装语义等价 / TUI 尾 3 零活消费者 / setDynamicTeamContext 零活跃调用点——单源化消除双副本模块态分裂隐患）。**方案 A 批准：TUI 副本整文件直删，15+1 消费点改道 engine 单源**；备选 B 否决采纳（尾 3 依赖 task 域类型不能进 shared，收敛不彻底）。
+
+**附带条件（一条）**：改道 import 面须走 **engine 门面/barrel**（boundaries entry-point 纪律：外域禁 leaf 直引——round-8 先例「import 站点走 barrel 别名」；tui→engine 先例 contextHostWiring 等均 `from 'src/engine'` 门面形）。若 boundaries 校验对 deep path 放行亦以门面形为准，落码前 boundaries checker 实核 exit=0。
+
+判据面冻结（随本批复）：① 结构断言（身份段实现体实例数=1 修前红/修后绿 + `src/tui/utils/teammate.ts` src 引用面=0，import 面计数非文本 grep——§2.6 纪律）；② 行为恒等格（身份函数行为锚单测修前后同绿 + ATLAS_PLAN_MODE_REQUIRED 两态）；③ 四件套全绿 + canon Δ 恰合。
