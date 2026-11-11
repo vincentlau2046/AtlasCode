@@ -2379,7 +2379,6 @@ async function run(): Promise<CommanderCommand> {
     const initialState: AppState = {
       settings: getInitialSettings(),
       tasks: {},
-      agentNameRegistry: new Map(),
       verbose: verbose ?? getGlobalConfig().verbose ?? false,
       mainLoopModel: initialMainLoopModel,
       mainLoopModelForSession: null,

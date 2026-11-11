@@ -108,8 +108,10 @@ export type { SendMessageInput, StructuredMessage } from 'src/engine'
 // context.getAppState() 取活态。headless 车道不 import 本文件 = port 缺席。
 setNameRouterPort({
   resolveAgentId(name, context) {
-    const appState = (context as ToolUseContext).getAppState()
-    return appState.agentNameRegistry.get(name) ?? toAgentId(name) ?? undefined
+    // W-D-C R3：agent 名注册表死态裁除（全仓零写面恒空，首查恒
+    // undefined）——toAgentId 兜底链直查（零行为变更；lock-face
+    // docs/2026-11-11-wdc-r3-lockface.md §2.1）。
+    return toAgentId(name) ?? undefined
   },
   getTaskState(agentId, context) {
     const appState = (context as ToolUseContext).getAppState()

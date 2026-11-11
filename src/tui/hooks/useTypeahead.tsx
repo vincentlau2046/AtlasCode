@@ -609,16 +609,8 @@ export function useTypeahead({
           });
         }
       }
-      for (const [name, agentId] of state.agentNameRegistry) {
-        if (seen.has(name)) continue;
-        if (!name.toLowerCase().startsWith(partialName)) continue;
-        const status = state.tasks[agentId]?.status;
-        members.push({
-          id: `dm-${name}`,
-          displayText: `@${name}`,
-          description: status ? `send message · ${status}` : 'send message'
-        });
-      }
+      // W-D-C R3：agent 名注册表死态裁除（全仓零写面恒空，迭代体恒零
+      // 贡献）——@名补全来源仅 teamContext.teammates 循环（上方，行为不变）。
       if (members.length > 0) {
         debouncedFetchFileSuggestions.cancel();
         setSuggestionsState(prev => ({

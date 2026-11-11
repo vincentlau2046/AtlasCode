@@ -34,7 +34,6 @@ export function getVisibleAgentTasks(tasks: AppState['tasks']): LocalAgentTaskSt
 export function CoordinatorTaskPanel(): React.ReactNode {
   const tasks = useAppState(s => s.tasks);
   const viewingAgentTaskId = useAppState(s_0 => s_0.viewingAgentTaskId);
-  const agentNameRegistry = useAppState(s_1 => s_1.agentNameRegistry);
   const coordinatorTaskIndex = useAppState(s_2 => s_2.coordinatorTaskIndex);
   const tasksSelected = useAppState(s_3 => s_3.footerSelection === 'tasks');
   const selectedIndex = tasksSelected ? coordinatorTaskIndex : undefined;
@@ -61,17 +60,15 @@ export function CoordinatorTaskPanel(): React.ReactNode {
     }, 1000, tasksRef, setAppState, setTick);
     return () => clearInterval(interval);
   }, [hasTasks, setAppState]);
-  const nameByAgentId = React.useMemo(() => {
-    const inv = new Map<string, string>();
-    for (const [n, id] of agentNameRegistry) inv.set(id, n);
-    return inv;
-  }, [agentNameRegistry]);
+  // W-D-C R3：agent 名注册表死态裁除（全仓零写面恒空，反查 inv 恒空
+  // → name prop 恒 undefined，空态行为恒等；lock-face §2.4）。
+
   if (visibleTasks.length === 0) {
     return null;
   }
   return <Box flexDirection="column" marginTop={1}>
       <MainLine isSelected={selectedIndex === 0} isViewed={viewingAgentTaskId === undefined} onClick={() => exitTeammateView(setAppState)} />
-      {visibleTasks.map((task, i) => <AgentLine key={task.id} task={task} name={nameByAgentId.get(task.id)} isSelected={selectedIndex === i + 1} isViewed={viewingAgentTaskId === task.id} onClick={() => enterTeammateView(task.id, setAppState)} />)}
+      {visibleTasks.map((task, i) => <AgentLine key={task.id} task={task} name={undefined} isSelected={selectedIndex === i + 1} isViewed={viewingAgentTaskId === task.id} onClick={() => enterTeammateView(task.id, setAppState)} />)}
     </Box>;
 }
 

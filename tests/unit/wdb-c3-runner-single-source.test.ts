@@ -101,14 +101,19 @@ describe('W-D-B 段 C-3 判别格 E②：修形族在单源在场 + 换道形锚
     expect(runner).toMatch(/probeReadTaskRecordId\(/)
   })
 
-  test('TUI InProcessBackend 换道 import 形锚（requireStartInProcessTeammate seam 端口）', () => {
-    const backend = readSrc('tui/utils/swarm/backends/InProcessBackend.ts')
-    expect(backend).toContain(
-      "import { requireStartInProcessTeammate } from '../../../../swarm/index.js'",
+  test('InProcessBackend 换道 import 形锚（requireStartInProcessTeammate seam 端口）', () => {
+    // 0.1.95 W-D-C 段 R1（f4 批复 2026-11-11）：backends 双目录全收敛——
+    // tui/utils/swarm/backends/ 副本整裁，单源 = src/swarm/backends/。
+    // 本形锚自 tui 副本改锚单源（seam 同目录 port import 形不变）。
+    const backend = readSrc('swarm/backends/InProcessBackend.ts')
+    expect(backend).toMatch(
+      /import\s*\{\s*requireStartInProcessTeammate\s*\}\s*from\s*'\.\/inProcessRunnerPort(\.js)?'/,
     )
     expect(backend).toMatch(/requireStartInProcessTeammate\(\)\(\{/)
-    // 旧 T 副本直 import 引用面 = 0（换道后不留悬挂）
-    expect(backend).not.toMatch(/from '\.\.\/inProcessRunner(\.js)?'/)
+    // 旧 TUI 副本已整裁（双目录收敛后 tui 侧无 backends 目录）
+    expect(existsSync(join(SRC_ROOT, 'tui', 'utils', 'swarm', 'backends'))).toBe(
+      false,
+    )
   })
 
   test('tui/factory 组合根装配形锚（setStartInProcessTeammate + setTeammateToolRegistryDeps）', () => {

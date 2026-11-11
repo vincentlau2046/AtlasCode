@@ -45,15 +45,15 @@
  *    remote 域 stub 面〔H6：stub 非真行为，真实现新旧仓均 0-hit〕；call
  *    bridge 支 success = result.ok ?? false 归一（旧 any stub {} →
  *    undefined JSON 缺键面 → 新显式 false；message 面逐字）。
- *  ③ in-process 名路由块（旧 call L800-874：appState.agentNameRegistry +
+ *  ③ in-process 名路由块（旧 call L800-874：appState 名注册表 +
  *    queuePendingMessage + resumeAgentBackground + isLocalAgentTask/
  *    isMainSessionTask + toAgentId + appState.tasks）裁 → C 桶 ③ shell·swarm
  *    波（裁面 = 本工具 in-process 名路由接线；queuePendingMessage /
  *    isLocalAgentTask / isMainSessionTask 新仓 coordinator 域在位〔E 波既有
  *    迁移，非 0-hit〕，S-E3 A 路 F2 注；S-E2d 核销 ③ 补差：parseAddress 依赖
  *    件已落 swarm 域 peerAddress.ts 叶（S-E2a，swarm 门面导出），名路由消费
- *    块本体残留守——appState.agentNameRegistry 状态面归 TUI 波，接线点随
- *    appState 全量面浮现重裁）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
+ *    块本体残留守——appState 名注册表状态面已随 W-D-C R3 死态裁除（恒空
+ *    零写面，2026-11-11）；appState 全量面浮现时无遗留接线点）；call 4 参（canUseTool/assistantMessage = 该块 + UDS
  *    块唯一消费）→ 2 参（S-C5 delta ⑧ 先例）；旧 backfillObservableInput 面
  *    （TUI 可观测输入回填）随裁 = 新 Tool 契约无该成员槽（TUI 波）。
  *  ④ handleShutdownApproval in-process 支（own-pane teamFile 查 +
@@ -85,7 +85,7 @@
  *    文件新）：getAppState().teamContext? 3 字段 intra-duck 必填（新 getTeamName
  *    参面 { teamName: string } + 新 isTeamLead 参面 { leadAgentId: string }
  *    结构满足）+ toolPermissionContext.mode（plan 审批 mode 继承面）；旧
- *    appState.agentNameRegistry/tasks 成员 = delta ③ 裁面，不进 duck。
+ *    appState 名注册表（W-D-C R3 已裁）/tasks 成员 = delta ③ 裁面，不进 duck。
  *  ⑩ isReadOnly 逐字（旧 L539-541：string message = read-only，mailbox 写不
  *    计写面）；isConcurrencySafe = false（mailbox 串行写面，旧 def 缺成员 →
  *    新契约缺省 false，writeTool delta ④ 先例值）；isDestructive = false；
@@ -344,7 +344,7 @@ export function resetTeamFileLoader(): void {
 /**
  * 0.1.94 C-2 名路由支并集承载（f4 §10① 收窄并集 + §11 port 注入批复）：
  * engine↛tui 依赖硬边界（boundaries）——名路由支的 tui 域符号
- *（agentNameRegistry/toAgentId/isLocalAgentTask/isMainSessionTask/
+ *（名注册表［W-D-C R3 已裁恒空死态］/toAgentId/isLocalAgentTask/isMainSessionTask/
  * queuePendingMessage/resumeAgentBackground）不可直 import，沿
  * setTeamFileLoader 注入先例做 port 承载。**判定与文案逻辑本体留在本文件
  * call 内**（port 只承载符号面）；TUI 组合根注入，headless 不注入 =
@@ -353,9 +353,10 @@ export function resetTeamFileLoader(): void {
  * 后前提消失），保留 running→queuePendingMessage / stopped→resume 两支。
  */
 export interface SendMessageNameRouterPort {
-  /** 名→agentId 解析并集：appState.agentNameRegistry 查 + toAgentId 裸 ID 形
-   *（context 形参 = TUI 侧经 context.getAppState() 取活态；TUI store 无模块
-   * 单例，appState 只能从工具 context 可达）。 */
+  /** 名→agentId 解析并集：toAgentId 裸 ID 形（原 appState 名注册表首查随
+   * W-D-C R3 死态裁除——注册表恒空零写面，首查恒 undefined；context 形参 =
+   * TUI 侧经 context.getAppState() 取活态；TUI store 无模块单例，appState
+   * 只能从工具 context 可达）。 */
   resolveAgentId(name: string, context: unknown): string | undefined
   /** appState.tasks[agentId] 读面（context 形参同上）。 */
   getTaskState(agentId: string, context: unknown): unknown

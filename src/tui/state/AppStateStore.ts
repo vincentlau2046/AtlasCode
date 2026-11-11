@@ -159,9 +159,9 @@ export type AppState = DeepImmutable<{
 }> & {
   // Unified task state - excluded from DeepImmutable because TaskState contains function types
   tasks: { [taskId: string]: TaskState }
-  // Name → AgentId registry populated by Agent tool when `name` is provided.
-  // Latest-wins on collision. Used by SendMessage to route by name.
-  agentNameRegistry: Map<string, AgentId>
+  // W-D-C R3（lock-face docs/2026-11-11-wdc-r3-lockface.md，f4 批复
+  // 2026-11-11）：agent 名注册表死态裁除——全仓零写面（上游 Agent tool
+  // 注册链未接，恒空 Map），4 读面空态即现行为，字段整裁（零行为变更）。
   // Task ID that has been foregrounded - its messages are shown in main view
   foregroundedTaskId?: string
   // Task ID of in-process teammate whose transcript is being viewed (undefined = leader's view)
@@ -481,7 +481,6 @@ export function getDefaultAppState(): AppState {
   return {
     settings: getInitialSettings(),
     tasks: {},
-    agentNameRegistry: new Map(),
     verbose: false,
     mainLoopModel: null, // alias, full name (as with --model or env var), or null (default)
     mainLoopModelForSession: null,

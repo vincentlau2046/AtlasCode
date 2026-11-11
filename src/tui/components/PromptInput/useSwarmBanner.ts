@@ -104,20 +104,14 @@ export function useSwarmBanner(): SwarmBannerInfo {
   }
 
   // Viewing a background agent (CoordinatorTaskPanel): local_agent tasks aren't
-  // InProcessTeammates, so getViewedTeammateTask misses them. Reverse-lookup the
-  // name from agentNameRegistry the same way CoordinatorAgentStatus does.
+  // InProcessTeammates, so getViewedTeammateTask misses them.
+  // W-D-C R3：agent 名注册表死态裁除（全仓零写面恒空，反查 name 恒
+  // undefined）——直接回落 task.description（原空态行为恒等）。
   const active = getActiveAgentForInput(state)
   if (active.type === 'named_agent') {
     const task = active.task
-    let name: string | undefined
-    for (const [n, id] of state.agentNameRegistry) {
-      if (id === task.id) {
-        name = n
-        break
-      }
-    }
     return {
-      text: name ? `@${name}` : task.description,
+      text: task.description,
       bgColor: getAgentColor(task.agentType) ?? 'cyan_FOR_SUBAGENTS_ONLY',
     }
   }
