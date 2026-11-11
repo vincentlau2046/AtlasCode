@@ -77,3 +77,13 @@
 4. **【吸收②注记】低险注记采认**：runner passwordless sudo 直用 apt；③ 仅断言 command==="rg" 版本差无判别影响；CI 装系统 rg 与 0.1.44 根修设计同向（system rg 优先正是达真值条件）；node 24 固定大版本即可不必 pin 小版本。
 
 f4 修订后判据面终形：修后 CI 首绿（D4×3 + ③ PASS 非 skip 显式核）+ 0.1.97 release SRI 四值对表不豁免 + 主通道首用以 trusted publisher 配置确认为条件（否则本地通道，首用顺延）。
+
+## §6 f4 裁处：段 V row F 修订批准——Install ripgrep 双腿形（2026-11-11，@e851eb77 CI run 43043441803）
+
+**定因采信**：apt 步 `Temporary failure resolving 'azure.archive.ubuntu.com'` 两 run 相隔 30 分钟同错（非瞬时）+ 同 run npm/github 全可达（bun install 绿）= runner 对 ubuntu apt 镜像持续网络故障面，修形逻辑无缺陷。
+
+**修订批准：Install ripgrep 双腿形**，附带条件两条（硬）：
+1. **版本 + sha256 双 pin**：BurntSushi/ripgrep 14.1.1 musl tarball URL 固定 + Main 落码时实算 sha256 钉入 workflow 注释 + `echo` 校验步（SRI 纪律同族——外部二进制入 CI 供应链面可审计；ripgrep release 无官方 checksum，自算一次钉死）。
+2. **腿选择可见性**：两腿均 echo 实际采用腿（`rg-leg: apt` / `rg-leg: gh-release-static`）——CI log 判读可直证哪腿供 rg，防 fallback 静默生效判读混淆。
+
+判据面不变（rg 在 PATH + ③ PASS 非 skip + 腿可见）。批准后落码复跑 CI。
