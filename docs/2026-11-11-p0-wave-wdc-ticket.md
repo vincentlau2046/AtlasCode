@@ -83,3 +83,14 @@ func 单副本绿 ≠ e2e 双副本真环境绿；§2.6 子串 grep 断言一律
 ## §5 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 lock-face（逐段报批）→ 段 G gate → 段 L。row F 预注册纪律全程。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-11，有修改通过）+ f4 修订
+
+审计锚点全实锚（backends 12vs9 逐字节/agentNameRegistry 无别名写点·无 delete·clear/messaging 216L）。**必改 1 + 吸收 3，均判据面修订不动波定义，吸收后直接双信号**：
+
+1. **【必改】段 R1 判别格可达性分层预注册（防不可达腿假绿）**：backends 选择系环境门控（detection.ts 模块级缓存 / TMUX env / registry placeholder 形）。分层取证形：**in-process = 活面 wire 直证**（0.1.94 C-3 判别格回归）；**tmux = 探针环境可置 TMUX env 则直证，否则 detection/registry 选择逻辑单测判别格**；**iterm2/it2Setup = Linux 平台结构性不可达 → 单测/结构判别格替代，禁以「环境不可达」冒充直证绿**。各层取证形随 R1 lock-face 定。
+2. **【吸收】R1 拆分裁定 = 不拆**（判别格按 backend 类型非按文件，8 行 diff 表一次报批内含分批效果）；**per-file 方向禁惯性预判**：基座预判 src/swarm/backends 仅默认倾向，lock-face 逐文件 diff 表中 per-file 方向允许与基座预判相反（InProcessBackend TUI 侧为 C-3 后端口调用新形，明示防惯性取 engine 侧）。
+3. **【吸收】R2 否决闭环硬条件**：否决结论须 boundaries checker **exit 实码留档入工单执行段**（非口头否决）；放行但 Δ 不可回收/负收益同径自决；无论何支 R2 结论（实码+Δ 数值 或 否决实码）入收口报告——防评估段静默蒸发。
+4. **【吸收】R3 分账 + 状态形判别**：引用面按 **活读 4**（CoordinatorAgentStatus/useSwarmBanner/useTypeahead/TUI SendMessageTool 兜底链——均「空态即现行为」零行为变更成立）**+ init 2**（AppStateStore.ts:484/main.tsx:2382）**+ 注释 1**（engine sendMessageTool 5 处全注释级）分账禁混计；registry 本体 = AppStateStore 状态字段（:164/:484），判别格加 **AppStateStore 状态形判别**（序列化/持久化/快照含该字段须同清，防 dangling schema）；TUI SendMessageTool 读面 fate 按收敛后当时活码为准。
+
+审计明示无需二审。工单 §3 相应条款以本节为准。→ f4 发双信号（Main=段 R1 lock-face 起步，e2e=判据预告）。
