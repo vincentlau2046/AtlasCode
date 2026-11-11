@@ -217,10 +217,18 @@ export const RequestShutdownTool: RequestShutdownToolFace = {
     }
     try {
       const leadMessages = await readMailbox(TEAM_LEAD_NAME, teamName)
+      // 0.1.96 §9 安全硬化（f4 批复 23588bfc 修③）：身份以 envelope m.from
+      // 为准——body req.from 仅展示用途（防伪造他人名占用唯一在途名额）。
       const ownUnread = leadMessages.some(
-        m =>
-          !m.read &&
-          (isShutdownRequestFromMember(m.text)?.from ?? '') === memberName,
+        m => {
+          const req = isShutdownRequestFromMember(m.text)
+          return (
+            !m.read &&
+            !!req &&
+            m.from.toLowerCase() === req.from.toLowerCase() &&
+            m.from.toLowerCase() === memberName.toLowerCase()
+          )
+        },
       )
       if (ownUnread) {
         return {

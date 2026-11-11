@@ -661,6 +661,14 @@ async function handleShutdownRequest(
   // 0.1.93 W-D-A round-3 RED-C（f4 §7.9）：双源同款 + fail-closed（禁 default 黑洞落桶）
   const teamName = resolveOutgoingTeamName(appState.teamContext)
   if (!teamName) throw unresolvedTeamMailboxError(targetName)
+  // 0.1.96 A1 §9 安全硬化（f4 批复 23588bfc 修②）：approve = lead 专属动作
+  //（plan 审批 L944 sibling parity 同款 fail-closed 门——成员发 shutdown
+  // request 即越权处置他人退出请求）。
+  if (!isTeamLead(appState.teamContext)) {
+    throw new Error(
+      'Only the team lead can approve member shutdown requests. Teammates cannot approve their own or other shutdown requests.',
+    )
+  }
   const senderName = getAgentName() || TEAM_LEAD_NAME
   const requestId = generateRequestId('shutdown', targetName)
 
@@ -683,15 +691,16 @@ async function handleShutdownRequest(
 
   // 0.1.96 A1 approve 核销（f4 硬条件 2 read 态推进点）：lead 批准成员
   // 退出 = 发既有 shutdown_request 时核销 lead inbox 该成员的 unread
-  // 成员退出请求（member-name 关联——成员至多一在途请求，lock-face 判别
-  // 域），保证「裁定后 pending 不再现」（WaitForTeammates 扫描不 mark read）。
+  // 成员退出请求，保证「裁定后 pending 不再现」（WaitForTeammates 扫描不
+  // mark read）。0.1.96 §9 安全硬化（f4 修③）：身份以 envelope m.from
+  // 为准（mailbox 契约面 body 身份字段仅展示用途——弃 req.from 比对，
+  // 防 body 伪造吞他人请求）。
   try {
     await markMessagesAsReadByPredicate(
       TEAM_LEAD_NAME,
-      m => {
-        const req = isShutdownRequestFromMember(m.text)
-        return !!req && req.from.toLowerCase() === targetName.toLowerCase()
-      },
+      m =>
+        !!isShutdownRequestFromMember(m.text) &&
+        m.from.toLowerCase() === targetName.toLowerCase(),
       teamName,
     )
   } catch {
@@ -723,6 +732,14 @@ async function handleShutdownRequestDenied(
   const appState = context.getAppState()
   const teamName = resolveOutgoingTeamName(appState.teamContext)
   if (!teamName) throw unresolvedTeamMailboxError(targetName)
+  // 0.1.96 A1 §9 安全硬化（f4 批复 23588bfc 修②）：deny = lead 专属动作
+  //（plan 审批 L991 sibling parity 同款 fail-closed 门——成员发 deny 回执
+  // 即越权锁存他人退出请求权）。
+  if (!isTeamLead(appState.teamContext)) {
+    throw new Error(
+      'Only the team lead can deny member shutdown requests. Teammates cannot deny their own or other shutdown requests.',
+    )
+  }
   const senderName = getAgentName() || TEAM_LEAD_NAME
 
   const deniedMessage = createShutdownRequestDeniedMessage({
@@ -742,14 +759,15 @@ async function handleShutdownRequestDenied(
     teamName,
   )
 
-  // deny 核销（f4 硬条件 2）：发回执即 mark read（member-name 关联）。
+  // deny 核销（f4 硬条件 2）：发回执即 mark read。0.1.96 §9 安全硬化
+  //（f4 修③）：身份以 envelope m.from 为准（弃 req.from 比对，防 body
+  // 伪造吞他人请求）。
   try {
     await markMessagesAsReadByPredicate(
       TEAM_LEAD_NAME,
-      m => {
-        const req = isShutdownRequestFromMember(m.text)
-        return !!req && req.from.toLowerCase() === targetName.toLowerCase()
-      },
+      m =>
+        !!isShutdownRequestFromMember(m.text) &&
+        m.from.toLowerCase() === targetName.toLowerCase(),
       teamName,
     )
   } catch {

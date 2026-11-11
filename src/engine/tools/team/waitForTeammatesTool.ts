@@ -153,9 +153,11 @@ export async function collectPendingMemberRequests(
   for (const m of messages) {
     if (m.read) continue
     const req = isShutdownRequestFromMember(m.text)
-    if (req) {
+    // 0.1.96 §9 安全硬化（f4 批复 23588bfc 修③）：身份以 envelope m.from
+    // 为准——body req.from ≠ envelope 的消息不呈（防伪造 pending）。
+    if (req && m.from.toLowerCase() === req.from.toLowerCase()) {
       pending.push({
-        from: req.from,
+        from: m.from,
         reason: req.reason,
         request_id: req.requestId,
       })

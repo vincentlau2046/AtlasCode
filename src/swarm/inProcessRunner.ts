@@ -1137,14 +1137,24 @@ export async function waitForNextPromptOrShutdown(
       //（紧随 shutdown_request 扫描）：mark read + 登记 deny 锁存（跨轮
       // 有界，防环补强 1）→ 主循环 deny echo 支呈文案给成员模型。回执
       // 本身不解锁（新输入枚举 = new_message / shutdown_request 事件）。
+      // 0.1.96 §9 安全硬化（f4 批复 23588bfc 修①·HIGH）：发送方双验——
+      // envelope m.from 必须 = lead 且回执 parsed.to 必须 = 本成员，验讫
+      // 才 mark read + 锁存（否则伪造 deny 可锁死成员退出请求权）；return
+      // from 用验证过的 envelope 值，不硬编码。
       let deniedIndex = -1
+      let deniedFrom = ''
       let deniedParsed: ReturnType<typeof isShutdownRequestDenied> = null
       for (let i = 0; i < allMessages.length; i++) {
         const m = allMessages[i]
         if (m && !m.read) {
           const parsed = isShutdownRequestDenied(m.text)
-          if (parsed) {
+          if (
+            parsed &&
+            m.from.toLowerCase() === TEAM_LEAD_NAME.toLowerCase() &&
+            parsed.to.toLowerCase() === identity.agentName.toLowerCase()
+          ) {
             deniedIndex = i
+            deniedFrom = m.from
             deniedParsed = parsed
             break
           }
@@ -1152,7 +1162,7 @@ export async function waitForNextPromptOrShutdown(
       }
       if (deniedIndex !== -1) {
         logForDebugging(
-          `[inProcessRunner] ${identity.agentName} received shutdown request denial (${deniedParsed?.requestId}) from ${deniedParsed && 'from' in deniedParsed ? deniedParsed.from : 'team-lead'}`,
+          `[inProcessRunner] ${identity.agentName} received shutdown request denial (${deniedParsed?.requestId}) from ${deniedFrom}`,
         )
         await markMessageAsReadByIndex(
           identity.agentName,
@@ -1167,7 +1177,7 @@ export async function waitForNextPromptOrShutdown(
           type: 'shutdown_request_denied',
           requestId: deniedParsed!.requestId,
           reason: deniedParsed!.reason,
-          from: TEAM_LEAD_NAME,
+          from: deniedFrom,
         }
       }
 
