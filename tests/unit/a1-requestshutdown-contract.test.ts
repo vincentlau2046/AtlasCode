@@ -31,6 +31,11 @@ import {
   getToolsForDefaultPreset,
 } from '../../src/engine/tools/toolRegistry'
 import { resolveAgentTools } from '../../src/engine/tools/agent/agentToolUtils'
+import { resetTeamServices, setTeamServices } from '../../src/engine/tools/team/teamServices'
+import {
+  createTeammateContext,
+  runWithTeammateContext,
+} from '../../src/shared'
 
 /**
  * 0.1.96 A1 requestShutdown 段 I 判别格（lock-face
@@ -465,5 +470,151 @@ describe('A1 §10 组合根真池面（baseToolEntities 装配实测）', () => 
     expect(
       getTools(emptyCtx, deps).map(t => t.name),
     ).not.toContain(REQUEST_SHUTDOWN_TOOL_NAME)
+  })
+})
+
+describe('A1 §11 gate-096c 双 RED 修形判别格', () => {
+  let prevTeamsEnv: string | undefined
+
+  beforeEach(() => {
+    prevTeamsEnv = process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = '1'
+  })
+
+  afterEach(() => {
+    if (prevTeamsEnv === undefined)
+      delete process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    else process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = prevTeamsEnv
+    setDynamicTeamContext(null)
+    resetTeamServices()
+  })
+
+  // 空权限上下文（三规则源全空 = deny 过滤支零剔除）
+  const emptyCtx = {
+    mode: 'default',
+    additionalWorkingDirectories: new Map(),
+    alwaysAllowRules: {},
+    alwaysDenyRules: {},
+    alwaysAskRules: {},
+    isBypassPermissionsModeAvailable: false,
+  } as unknown as Parameters<typeof getTools>[0]
+
+  test('面 1 升格格：真池面格在上下文激活后实测——窗外缺（盲区形）/ 窗内含（in-process ALStorage 实路）', () => {
+    setDynamicTeamContext(null)
+    const deps = { baseTools: getBaseToolEntities() }
+
+    // 激活前（gate-096c 面 1 RED 盲区形）：池构造时 isTeammate() 恒 false
+    expect(getToolsForDefaultPreset(deps)).not.toContain(
+      REQUEST_SHUTDOWN_TOOL_NAME,
+    )
+
+    // 激活后（in-process 上下文窗，wire 实路 = ALStorage 优先级链）：
+    // 名单面 + wire 池面均含 RequestShutdown
+    const teammateContext = createTeammateContext({
+      agentId: 'worker-w@t-w',
+      agentName: 'worker-w',
+      teamName: 't-w',
+      planModeRequired: false,
+      parentSessionId: 'sess-w',
+      abortController: new AbortController(),
+    })
+    const inWindowPreset = runWithTeammateContext(teammateContext, () =>
+      getToolsForDefaultPreset(deps),
+    )
+    expect(inWindowPreset).toContain(REQUEST_SHUTDOWN_TOOL_NAME)
+    const inWindowPool = runWithTeammateContext(teammateContext, () =>
+      getTools(emptyCtx, deps),
+    )
+    expect(inWindowPool.map(t => t.name)).toContain(REQUEST_SHUTDOWN_TOOL_NAME)
+  })
+
+  test('面 1 static 排序格：runner 池构造在 runWithTeammateContext 窗内（激活后求值）', () => {
+    const runnerSrc = readFileSync(
+      join(import.meta.dir, '..', '..', 'src', 'swarm', 'inProcessRunner.ts'),
+      'utf8',
+    )
+    const windowIdx = runnerSrc.indexOf(
+      'await runWithTeammateContext(teammateContext',
+    )
+    const poolIdx = runnerSrc.indexOf('const basePool')
+    expect(windowIdx).toBeGreaterThan(0)
+    expect(poolIdx).toBeGreaterThan(windowIdx)
+  })
+
+  test('面 2 双源门：headless lane（appState.teamContext 缺 leadAgentId + teamServices store）lead 直发不再恒拦', async () => {
+    const { SendMessageTool } = await import(
+      '../../src/engine/tools/team/sendMessageTool'
+    )
+    setDynamicTeamContext(null)
+    setTeamServices({
+      readTeamFile: () => null,
+      writeTeamFileAsync: async () => {},
+      getTeamContext: () => ({
+        teamName: 't-h',
+        teamFilePath: '/tmp/t-h.json',
+        leadAgentId: 'lead-h',
+        teammates: {},
+      }),
+      setTeamContext: () => {},
+    } as never)
+
+    // headless 引擎 lane 装配缺口形：appState.teamContext = undefined
+    //（gate-096c 面 2 RED：单源判别 isTeamLead(undefined) 恒 false → 恒拦）
+    const leadCtx = {
+      getAppState: () => ({
+        teamContext: undefined,
+        toolPermissionContext: { mode: 'default' },
+      }),
+    }
+    const result = await SendMessageTool.call(
+      { to: 'worker-h', message: { type: 'shutdown_request', reason: 'wrap' } },
+      leadCtx as never,
+    )
+    expect(result.data.success).toBe(true)
+
+    // fail-closed 保留：成员（in-process ALStorage agentId ≠ leadAgentId）
+    // 双源全 false → 仍拦
+    const memberContext = createTeammateContext({
+      agentId: 'worker-m@t-h',
+      agentName: 'worker-m',
+      teamName: 't-h',
+      planModeRequired: false,
+      parentSessionId: 'sess-h',
+      abortController: new AbortController(),
+    })
+    await expect(
+      runWithTeammateContext(memberContext, () =>
+        SendMessageTool.call(
+          {
+            to: 'worker-other',
+            message: { type: 'shutdown_request', reason: 'nope' },
+          },
+          leadCtx as never,
+        ),
+      ),
+    ).rejects.toThrow(
+      'Only the team lead can approve member shutdown requests.',
+    )
+  })
+
+  test('调用点核对记录：4 处 lead 门全走双源 helper，无单源残留（static）', () => {
+    const src = readFileSync(
+      join(
+        import.meta.dir,
+        '..',
+        '..',
+        'src',
+        'engine',
+        'tools',
+        'team',
+        'sendMessageTool.ts',
+      ),
+      'utf8',
+    )
+    // 4 处调用点：handleShutdownRequest / handleShutdownRequestDenied /
+    // handlePlanApproval / handlePlanRejection（f4 扩大令全同修）
+    expect(src.match(/isLeadDualSource\(appState\)/g)).toHaveLength(4)
+    // 单源残留守：无 `if (!isTeamLead(appState.teamContext))` 门残留
+    expect(src).not.toMatch(/if \(!isTeamLead\(appState\.teamContext\)\)/)
   })
 })

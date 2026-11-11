@@ -440,6 +440,23 @@ function resolveOutgoingTeamName(teamContext?: {
   return getTeamName(teamContext) ?? peekTeamContext()?.teamName
 }
 
+/**
+ * 0.1.96 §11（f4 批复 1225f69d 面 2 + 调用点面扩大令）：lead 门判别双源化——
+ * appState.teamContext（TUI lane）∪ peekTeamContext()（headless 引擎 lane
+ * TeamCreate 经 services.setTeamContext 落 teamServices 内存 store，该 lane
+ * AppState.teamContext 面 leadAgentId 缺失，gate-096c 面 2 RED：单源判别
+ * fail-closed 恒拦 lead 直发 shutdown_request，0.1.95 O4 锚 GREEN→回归）。
+ * resolveOutgoingTeamName 双源同款先例（0.1.93 round-3 RED-C）。fail-closed
+ * 语义保留：双源全 false 才拦；成员双源均 false（ALStorage getAgentId() ≠
+ * leadAgentId）。调用点（4 处全同修，禁单点漏网）：handleShutdownRequest /
+ * handleShutdownRequestDenied / handlePlanApproval / handlePlanRejection。
+ */
+function isLeadDualSource(appState: {
+  teamContext?: { leadAgentId: string }
+}): boolean {
+  return isTeamLead(appState.teamContext) || isTeamLead(peekTeamContext())
+}
+
 /** RED-C fail-closed 结构化错误面（路由不可解析 = 消息不投递，禁静默落桶）。 */
 function unresolvedTeamMailboxError(recipient: string): Error {
   return new Error(
@@ -664,7 +681,7 @@ async function handleShutdownRequest(
   // 0.1.96 A1 §9 安全硬化（f4 批复 23588bfc 修②）：approve = lead 专属动作
   //（plan 审批 L944 sibling parity 同款 fail-closed 门——成员发 shutdown
   // request 即越权处置他人退出请求）。
-  if (!isTeamLead(appState.teamContext)) {
+  if (!isLeadDualSource(appState)) {
     throw new Error(
       'Only the team lead can approve member shutdown requests. Teammates cannot approve their own or other shutdown requests.',
     )
@@ -735,7 +752,7 @@ async function handleShutdownRequestDenied(
   // 0.1.96 A1 §9 安全硬化（f4 批复 23588bfc 修②）：deny = lead 专属动作
   //（plan 审批 L991 sibling parity 同款 fail-closed 门——成员发 deny 回执
   // 即越权锁存他人退出请求权）。
-  if (!isTeamLead(appState.teamContext)) {
+  if (!isLeadDualSource(appState)) {
     throw new Error(
       'Only the team lead can deny member shutdown requests. Teammates cannot deny their own or other shutdown requests.',
     )
@@ -959,7 +976,7 @@ async function handlePlanApproval(
   const teamName = resolveOutgoingTeamName(appState.teamContext)
   if (!teamName) throw unresolvedTeamMailboxError(recipientName)
 
-  if (!isTeamLead(appState.teamContext)) {
+  if (!isLeadDualSource(appState)) {
     throw new Error(
       'Only the team lead can approve plans. Teammates cannot approve their own or other plans.',
     )
@@ -1006,7 +1023,7 @@ async function handlePlanRejection(
   const teamName = resolveOutgoingTeamName(appState.teamContext)
   if (!teamName) throw unresolvedTeamMailboxError(recipientName)
 
-  if (!isTeamLead(appState.teamContext)) {
+  if (!isLeadDualSource(appState)) {
     throw new Error(
       'Only the team lead can reject plans. Teammates cannot reject their own or other plans.',
     )

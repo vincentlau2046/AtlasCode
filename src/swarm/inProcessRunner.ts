@@ -1325,16 +1325,10 @@ export async function runInProcessTeammate(
   // resolveTeammateAgentFace（旧 L966-984 + runAgent L510-517 消费端逐字：
   // 自定义 def tools ∪ team-essential 7 件 Set-union / 无 def → 通配全量池 /
   // model 传播 / 禁用集剔除）。
-  const basePool: Tools = getTools(
-    buildTeammateToolPermissionContext(getAppState().toolPermissionContext),
-    getTeammateToolRegistryDeps(),
-  )
-  const { def: resolvedAgentDefinition, tools } = resolveTeammateAgentFace({
-    identity,
-    teammateSystemPrompt,
-    agentDefinition,
-    basePool,
-  })
+  // 0.1.96 §11（f4 批复 1225f69d 面 1 修形 a）：构造移入 runWithTeammateContext
+  // 上下文窗——isEnabled 求值时点对齐成员身份在场时点（gate-096c 面 1 RED：
+  // 窗外构造时 isTeammate() 恒 false，成员 wire 池 42 件独缺 RequestShutdown）。
+  // 构造在窗内回调顶部（下方 runWithTeammateContext 处）。
 
   // All messages across all prompts
   const allMessages: Message[] = []
@@ -1491,6 +1485,22 @@ export async function runInProcessTeammate(
           setAppState,
           task => ({ ...task, status: 'running', isIdle: false }),
         )
+
+        // 0.1.96 §11（f4 批复 1225f69d 面 1 修形 a）：Agent 定义 + 工具池构造
+        // 移入本上下文窗——isEnabled 门（RequestShutdownTool = isAgentSwarms
+        // Enabled() && isTeammate()）在窗内求值时成员身份（ALStorage/dynamic）
+        // 已在场，成员 wire 池含全 team 面。每轮重建（构造为纯读，窗内值
+        // 循环不变量；消费点 runAgent + permission gate 均在本回调内）。
+        const basePool: Tools = getTools(
+          buildTeammateToolPermissionContext(getAppState().toolPermissionContext),
+          getTeammateToolRegistryDeps(),
+        )
+        const { def: resolvedAgentDefinition, tools } = resolveTeammateAgentFace({
+          identity,
+          teammateSystemPrompt,
+          agentDefinition,
+          basePool,
+        })
 
         // Run the normal agent loop - same runAgent() used by AgentTool/subagents.
         // In-process teammates are async but run in the same process as the leader,
