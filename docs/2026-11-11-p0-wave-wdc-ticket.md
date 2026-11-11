@@ -122,3 +122,19 @@ it2SetupPersistencePort 批准（todosPort 同族；null 缺省 = engine 进程�
 四层取证形 + 防假绿条款全准；补充确认：tmux 降级单测须头注登记降级原因（已含）；R1-D4 capture 传参形锚（main.tsx 调用点带实参）入 TUI lane 装配面直证。判据面随本批复冻结：§3 全表 + 四件套 + canon Δ 恰合 + 收敛后结构三证（实例数=1 / tui backends 目录 existsSync=false / specifier 解析零命中）。
 
 批复后依序落码：R1 修形 → 判别格 RED→GREEN → 四件套 → 报段 R2。
+
+## §8 f4 批复：段 R1 收尾采认 + R2 否决归档确认 + 段 R3 lock-face 批复（2026-11-11，@a3edd4e3/1718e12c）
+
+### ① R1 收尾采认
+
+f4 亲验判别格 wdc-r1-backends-single-source.test.ts = **21/21 GREEN**（worktree 实跑）+ `src/tui/utils/swarm/backends/` 目录已删实核（existsSync=false）。35 文件 +807/−2929；四件套采认。三处自决/随行修形采认：① 判别格测试侧修形 2 处（H③ regex whitespace 容忍 / E③ export class 容忍——红验期 0 命中同因，测试形修非实现侧，先例同族）；② tui/factory 装配增量（teammateLayoutManager/teamHelpers requireBackendModule 面接线 wireBackends）——属 lock-face「接线点=tui/factory 组合根」预注册域内同族装配语句，采纳；③ R1-D1 fail-visible 落实（spawn 支无 try/catch）核验采认。
+
+### ② R2 评估否决归档——确认闭环
+
+boundaries/entry-point exit 1 实码已入 R3 文书 §0（§6.3 硬条件满足：实码非口头否决）；「tui→engine/messaging 窄门面结构性不放行」= 评估否决成立，零落码，§6.3「R2 结论入收口报告」条款已在案（本节即登记）。C-1 Δ+43.9KB 维持登记债。
+
+### ③ 段 R3 lock-face——批准
+
+分账复核（活读 4 + init 2 + 本体 1 + 注释 1 + tests 1）/ 恒空写面实证（零 set/delete/clear/下标赋值；「populated by Agent tool」= 上游残留语义）/ 活读 4 空态即现行为逐个复核（无条件分支例外）/ AppStateStore 无持久化/序列化/快照面（dangling schema 排除 + AgentId import 不孤儿）——全采纳。落码清单 §4 七文件批准。判别格三点批准，一点注记：符号零命中断言用字段字面级（registry 系 AppState 字段非模块 specifier，落地形正确）；**字面 grep 零命中方向 fail-safe**（回声假阳只会误报红不会假绿，§2.6 假绿防线天然满足，无须升级形锚——登记注记备后波引）。裁除零行为变更定性维持（工单 §3 R3 预判成立）。
+
+批复后依序落码：R3 修形 → 判别格 RED→GREEN → 四件套 → 段 G gate（判据面已冻结：§3 段 G + R1 §3 分层表）→ 段 L release 0.1.95。
