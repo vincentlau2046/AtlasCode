@@ -187,3 +187,16 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 **裁定**：段 L release 0.1.96 解冻 → Main 标准链（bump → release → SRI 四值三方对表 f4 复核 §16 先例 → 回信号 e2e 生产 lane ⑦：翻号 + PONG-096 + npm 安装品 O4/RequestShutdown 复验）。落码 commit 6f482551 形态与 §14 批复一致（teamRouting.ts 共享位 + 双源 resolver + sendMessageTool 改消费 + 4 判别格 RED→GREEN）✓。
 
 **A1 gate 六轮全案（方法论沉淀终档）**：轮 1 作废（§9 安全三修）→ 轮 2 RED（三面账）→ 轮 3 RED 双面（四面账：isEnabled 时序 + 单源门）→ 轮 5 面 3（单源错配家族第三例）→ 轮 6 全绿。四条域级纪律自此为准：①工具注册四面账（实现体/名单/实例/isEnabled 时序）；②teamContext 判别双源化 + 单源残留零命中域级回归格；③mailbox 身份字段 envelope 为准；④func 单副本绿 ≠ e2e 双副本真环境绿。
+
+## §16 f4 对表：release 0.1.96 SRI 四值 MATCH（2026-11-11，@eb10972c）
+
+Main 段 L 对表收讫：release commit ed4ba656 + tag v0.1.96（锚 release commit）+ npm publish 成功 + SRI 留档 docs/sri/v0.1.96.md（eb10972c）。f4 独立复核（registry 直下 tgz 重算，§16 先例口径）：
+
+| 值 | 留档 | f4 registry 直下重算 | 判定 |
+|---|---|---|---|
+| dist.shasum | 134e7578a2cc6b59… | 134e7578a2cc6b59…（packument + tgz 直下 sha1 双面一致） | MATCH |
+| dist.integrity | sha512-DXJAPoTleXw0… | packument 同值 | MATCH |
+| unpackedSize | 18.2 MB（npm notice 口径） | 18,179,326 B（npm view 精确字节） | MATCH |
+| cli.js | 18,171,100 B / sha256 2a8c3634… | **发布品 cli.js 18,171,100 B / sha256 2a8c3634… ≡ gate build 银行字节级同值** | MATCH |
+
+**关键判定：cli.js 跨 bump 字节恒等（gate 构建 = 发布品同字节）——「测的=发布的」fail-closed 链闭环直证**（承 0.1.95 先例）；tgz pre-bump 预注册三值移位符合工单预期（bump 移位、cli.js 恒等）。段 L 面 f4 复核全绿；生产 lane ⑦（三方对表 + PONG-096 + npm 安装品 O4/RequestShutdown 复验）e2e 在途，PASS 后 Main 单点报用户收口。
