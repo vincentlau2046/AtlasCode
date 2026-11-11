@@ -123,3 +123,13 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 加性防御不触契约形状 ✓；判别测试补 3 支（伪造 envelope 不锁存 / 非 lead deny/approve throw / body.from ≠ envelope 不呈不核销）批准入判据面。
 
 **gate 裁定：现行在途 gate 作废重跑全套**——三修动 inProcessRunner/sendMessageTool/waitForTeammatesTool 活域（wdb-c2/c3 + wdc-r1/r3 同域 = 活回归面），「测的=发布的」禁 pre-fix gate PASS 直放 post-fix release；重跑面 = 全判据面（前滚 standing + 六套回归 + 新腿两格 + 时窗格 + 本三格）。落码 → 判别格 RED→GREEN → 四件套 → gate 重跑 → 段 L。
+
+## §10 f4 裁处：gate RED 打回采认 + 真池面修形批复（2026-11-11，r 分型 @e2e）
+
+**RED 采认**：RequestShutdown wire 池缺席（t97 双腿 42 件池独缺）——baseToolEntities（getAllBaseTools 本体数组）漏装配实例，工具体/union 名单/toolNames 齐备但注册表本体无实例 → resolveAgentTools 静默剔除。自段 I 起即漏（非 §9 三修引入）✓；判读纪律先例再证（contract 14/0 func 绿 vs 真环境组合根断——「func 单副本绿 ≠ e2e 双副本真环境绿」又添一例）。
+
+**修形批复**：baseToolEntities 补 RequestShutdownTool 实例装配（组合根注册表本体，加性一行级）+ **判别格补「真池面」格**（e2e 建议采纳：getTools/resolveAgentTools 实测含 RequestShutdown——fixture 组合根实测，非名单直测）。修后四件套 + **gate 全套重跑**（第二次；前滚 12 腿作废读数随归档）。
+
+**方法论登记（入纪律）**：**工具注册三面账**——工具体实现 / union 名单 / 注册表本体实例，三面齐备才可达；名单齐备 ≠ 实例在场（静默剔除旧机制自证）；新工具判别格必含组合根真池面实测格。func 单副本盲区家族第四例（func 单副本/回声假阳/路径子串假阴/名单-实例分裂）。
+
+已收绿面采认：canon 5807/0 Δ 恰合（5804+3）、六套 56/0、build 银行 3145d03c…。
