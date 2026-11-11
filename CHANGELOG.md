@@ -4,6 +4,34 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.96
+
+A1 requestShutdown 插入波：**成员自发退出请求全链**（lock-face
+`docs/2026-11-11-a1-requestshutdown-lockface.md` + 工单
+`docs/2026-11-11-p0-wave-a1-requestshutdown-ticket.md`；gate
+r-20261111-gate-096e 六轮 gate 首次全绿 @6f482551）。
+
+### 行为新增（成员退出请求协议第 4 臂）
+
+- **RequestShutdown 工具**（组合根装配 35 件）：成员 `shutdown_request`
+  → lead inbox；防环有界（deny 锁存跨轮，plain 输入解锁；在途唯一性
+  fail-visible）；身份以 envelope `m.from` 为准（防伪造 pending）。
+- **SendMessage 第 4 臂 `shutdown_request_denied`**：lead 拒绝回执；
+  approve/deny handler 走 `isLeadDualSource` 双源 lead 门（§11 修形，
+  headless lane appState.teamContext 缺 leadAgentId 不再恒拦）。
+- **WaitForTeammates 扩格 `pending_requests`**：lead inbox 过滤 unread
+  成员请求（不 mark read——裁定权留 lead，处置动作推进 read 态）。
+- **§14 face 3 修形**：pending 扫描 team 源改双源 resolver
+  `resolveOutgoingTeamName`（三源链 ∪ TeamCreate 组态 store，共享位
+  `teamRouting.ts`）——headless lead lane 三源全空旧码静默落
+  `teams/default/` 假目录 → 发现路径死面销项（gate-096d e2e 直证）。
+- **runner poll 感知 denied**：成员锁存解锁接线；idle/wake 全链。
+
+### 判别格
+
+a1 contract 24 test（20→24，§13/§14 face 3 双源格 4 件 RED→GREEN
+实证）；engine-tool-registry ⑳ 计数守 34→35；canon 5817/0（5813+4）。
+
 ## v0.1.95
 
 W-D-C 收尾波：**swarm 装配单源化收尾**。工单
