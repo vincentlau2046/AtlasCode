@@ -159,3 +159,13 @@ f4 亲核报告关键腿全过：**A 前滚 12 腿全 GREEN 零回退**（t95-o4
 **R2 否决实码引用闭环**（§6.3 条款 gate 报告引用）；SRI 预注册 pre-bump 四值在案（cli.js 18,154,596B / sha256 a7c245a1… 为生产 lane cmp 锚，bump 后 cli.js 跨 bump 恒等先例适用）。
 
 → Main 段 L release 0.1.95 标准链；e2e 生产 lane ⑦ 待单信号（SRI 四值三方 + PONG-095 + npm 安装品 O4 复验，glm-5 逐腿标注）。
+
+## §11 f4 终态收口：0.1.95 W-D-C 五段闭环（2026-11-11）
+
+**全链终态**：工单 §0（用户 11-11 裁 B 波）→ Atlas-reveiw 审计（§6 有修改通过）→ 段 R1 lock-face/落码（§7/§8，21/21）→ 段 R2 评估否决归档（§8②，exit 1 实码）→ 段 R3 lock-face/落码（§8③/§9，15 pass）→ 合 master df40e39d → 段 G GATE-PASS（§10，r-20261111-gate-095，canon 口径勘误两纪律）→ **release 0.1.95**（5f60bb09 / tag v0.1.95 / npm @atlasharness/atlascode@0.1.95）→ **生产 lane ⑦ PASS**（r-20261111-prodlane-095，Main 单点报用户）。
+
+f4 侧核验：SRI 四值 registry 直取实算全 MATCH + **cli.js sha256 a7c245a1… ≡ gate build 银行字节级恒等（跨 bump 恒等先例兑现）** + O4 生产复验 GREEN（npm 安装品 TEAM-DELETE-OK 首试 + glm-5 逐腿标注 12/12 直证）+ PONG-095 真达 anthropic-refs=0。
+
+**波成果**：R1 backends 双目录收敛（9 对全收敛 + TUI backends 目录整删 + inProcessSpawnHooksPort/it2SetupPersistencePort 两 seam + teammateModeSnapshot 状态分叉消除）+ R2 窄门面否决归档（boundaries 结构性不放行实码，Δ+43.9KB 维持登记债）+ R3 agentNameRegistry 死态裁除（零行为变更，AppStateStore 状态形同清）。**方法论三条入档**：R1 判别格可达性分层（防不可达腿假绿）；副本枚举 specifier 全仓解析（目录域清单仅作起点，第 9 对同族第四例）；canon `./tests/` 净域冻结 + test() 直数（worktrees 膨胀勘误，历史 PASS 不回溯改判）。
+
+**波池下一波 = A1 requestShutdown 工具化插入波**（用户 11-11 已裁做，W-D-C 后下一位；f4 起工单，纲要 §10 序 4+ 具体条目随呈）。观察池余项：窄门面登记债（随 boundaries 演化再评）/ faceon base-ON 腿 / 变体轮经济 / .lock（本波零现）。
