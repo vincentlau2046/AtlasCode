@@ -98,11 +98,11 @@ export async function setup(
   }
 
   // Teammate snapshot — SIMPLE-only gate (no escape hatch, swarm not used in bare)
+  // W-D-C 段 R1 R1-D4 改道：单源 src/swarm 模块态 + config 显式传参
+  //（消除模块态双份状态分叉；headless 不经此支 = 'auto' 恒等）。
   if (!isBareMode() && isAgentSwarmsEnabled()) {
-    const { captureTeammateModeSnapshot } = await import(
-      './utils/swarm/backends/teammateModeSnapshot.js'
-    )
-    captureTeammateModeSnapshot()
+    const { captureTeammateModeSnapshot } = await import('src/swarm')
+    captureTeammateModeSnapshot(getGlobalConfig().teammateMode)
   }
 
   // Terminal backup restoration — interactive only. Print mode doesn't

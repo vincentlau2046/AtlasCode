@@ -1,7 +1,7 @@
 import type { AgentColorName } from '../../tools/AgentTool/agentColorManager.js'
 import { AGENT_COLORS } from '../../tools/AgentTool/agentColorManager.js'
-import { detectAndGetBackend } from './backends/registry.js'
-import type { PaneBackend } from './backends/types.js'
+import { detectAndGetBackend } from 'src/swarm'
+import type { PaneBackend } from 'src/swarm'
 
 // Track color assignments for teammates (persisted per session)
 const teammateColorAssignments = new Map<string, AgentColorName>()
@@ -52,10 +52,12 @@ export function clearTeammateColors(): void {
 
 /**
  * Checks if we're currently running inside a tmux session.
- * Uses the detection module directly for this check.
+ * W-D-C 段 R1 改道：tui backends 副本删除，委托 src/swarm 单源门面
+ *（engine teammateLayoutManager port 委托面；wireBackends 已在
+ * tui/factory 组合根装配）。
  */
 export async function isInsideTmux(): Promise<boolean> {
-  const { isInsideTmux: checkTmux } = await import('./backends/detection.js')
+  const { isInsideTmux: checkTmux } = await import('src/swarm')
   return checkTmux()
 }
 

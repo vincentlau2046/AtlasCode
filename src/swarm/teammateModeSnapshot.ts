@@ -55,17 +55,21 @@ export function clearCliTeammateModeOverride(newMode: TeammateMode): void {
 
 /**
  * 捕获 session 启动时的 teammate mode（CLI 解析后早期调用）。
- * CLI override 优先于 config（裁面：globalConfig 支未落 → 缺省 'auto'）。
+ * CLI override 优先于 config。
+ * （W-D-C R1-D4 扩面：configMode 可选参——TUI 组合根（setup.ts capture
+ * 调用点）读 getGlobalConfig().teammateMode 后显式传参（engine 域不直接
+ * 依赖 config 面）；headless/引擎直调不传 = 'auto' 恒等。随收敛消除
+ * 模块态双份状态分叉（TUI capture 与 engine 读点同落本模块态）。）
  */
-export function captureTeammateModeSnapshot(): void {
+export function captureTeammateModeSnapshot(configMode?: TeammateMode): void {
   if (cliTeammateModeOverride) {
     initialTeammateMode = cliTeammateModeOverride
     logForDebugging(
       `[TeammateModeSnapshot] Captured from CLI override: ${initialTeammateMode}`,
     )
   } else {
-    // globalConfig 面未落（裁面登记见头注）→ 缺省 'auto'
-    initialTeammateMode = 'auto'
+    // R1-D4：config 读取由调用点显式传参（见头注扩面登记）；缺省 'auto'
+    initialTeammateMode = configMode ?? 'auto'
     logForDebugging(
       `[TeammateModeSnapshot] Captured default (no CLI override): ${initialTeammateMode}`,
     )

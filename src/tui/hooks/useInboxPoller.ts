@@ -27,12 +27,13 @@ import {
 } from '../utils/permissions/PermissionMode.js'
 import { applyPermissionUpdate } from '../utils/permissions/PermissionUpdate.js'
 import { jsonStringify } from '../utils/slowOperations.js'
-import { isInsideTmux } from '../utils/swarm/backends/detection.js'
+// W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
 import {
+  isInsideTmux,
   ensureBackendsRegistered,
   getBackendByType,
-} from '../utils/swarm/backends/registry.js'
-import type { PaneBackendType } from '../utils/swarm/backends/types.js'
+  type PaneBackendType,
+} from 'src/swarm'
 import { TEAM_LEAD_NAME } from '../utils/swarm/constants.js'
 import { getLeaderToolUseConfirmQueue } from '../utils/swarm/leaderPermissionBridge.js'
 import { sendPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js'

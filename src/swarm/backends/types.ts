@@ -171,6 +171,19 @@ export interface TeammateExecutorContext {
   setAppState: SetAppState
   toolUseId?: string
   messages: Message[]
+  /**
+   * W-D-C R1-D1 四钩子消费形扩面（lock-face §2；f4 批复 2026-11-11）：
+   * TUI hooks 工厂（inProcessSpawnHooksPort）经窄视图读 spawn 观测所需
+   * options 面。可选——engine lane 窄对象构造点零变更；TUI lane 传全量
+   * ToolUseContext（tui/Tool.ts，结构性满足本窄视图：Tools ⊆ readonly
+   * unknown[] / mainLoopModel: string ⊆ string? / MCPServerConnection[]
+   * ⊆ readonly unknown[]）。
+   */
+  options?: {
+    tools: readonly unknown[]
+    mainLoopModel?: string
+    mcpClients?: readonly unknown[]
+  }
 }
 
 /**

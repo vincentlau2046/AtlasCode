@@ -19,12 +19,18 @@
  *       markIt2SetupComplete = 仅置进程内标志（持久化支裁除）。
  *     消费端 = 本进程内 setup 提示流（TUI 波）；跨进程持久化随 config 面
  *     落位后回填（登记，勿当遗漏重提）。
+ *   - 【W-D-C R1-D3 核销（2026-11-11，f4 批复）】上项裁面回填：标志持久化
+ *     经 it2SetupPersistencePort 注入窗（tui/factory 组合根接 globalConfig
+ *     适配器，恢复 TUI 跨进程持久行为）；未接线 = 进程内标志（上项恒等）。
+ *     适配器异常向上传播（f4 批复硬条件禁吞错）。
  */
 import { homedir } from 'os'
 
 import { execFileNoThrowWithCwd } from '../../engine'
 import { logForDebugging, logError } from '../../shared'
 import { execFileNoThrow } from '../exec'
+// W-D-C R1-D3：标志持久化注入窗（tui/factory 组合根接线；未接线 = 进程内标志）。
+import { getIt2SetupPersistencePort } from './it2SetupPersistencePort'
 
 /**
  * Package manager types for installing it2.
@@ -242,9 +248,19 @@ export function getPythonApiInstructions(): string[] {
 /**
  * Marks that it2 setup has been completed successfully.
  * This prevents showing the setup prompt again.
- * （持久化支裁除：仅进程内标志，登记见头注。）
+ * （W-D-C R1-D3：持久化 port 接线则写经 port（跨进程持久，TUI 现行为）；
+ * 未接线 = 进程内标志（engine 裁面恒等）。异常向上传播（f4 批复硬条件
+ * 禁吞错，无 try/catch）。）
  */
 export function markIt2SetupComplete(): void {
+  const persistence = getIt2SetupPersistencePort()
+  if (persistence) {
+    if (persistence.getFlags().it2SetupComplete !== true) {
+      persistence.setFlag('it2SetupComplete', true)
+      logForDebugging('[it2Setup] Marked it2 setup as complete (persisted)')
+    }
+    return
+  }
   if (iterm2It2SetupComplete !== true) {
     iterm2It2SetupComplete = true
     logForDebugging('[it2Setup] Marked it2 setup as complete')
@@ -254,9 +270,18 @@ export function markIt2SetupComplete(): void {
 /**
  * Marks that the user prefers to use tmux over iTerm2 split panes.
  * This prevents showing the setup prompt when in iTerm2.
- * （持久化支裁除：仅进程内标志，登记见头注。）
+ * （W-D-C R1-D3：port 接线则写经 port；未接线 = 进程内标志。异常向上
+ * 传播（f4 批复硬条件禁吞错，无 try/catch）。）
  */
 export function setPreferTmuxOverIterm2(prefer: boolean): void {
+  const persistence = getIt2SetupPersistencePort()
+  if (persistence) {
+    if (persistence.getFlags().preferTmuxOverIterm2 !== prefer) {
+      persistence.setFlag('preferTmuxOverIterm2', prefer)
+      logForDebugging(`[it2Setup] Set preferTmuxOverIterm2 = ${prefer} (persisted)`)
+    }
+    return
+  }
   if (preferTmuxOverIterm2 !== prefer) {
     preferTmuxOverIterm2 = prefer
     logForDebugging(`[it2Setup] Set preferTmuxOverIterm2 = ${prefer}`)
@@ -265,8 +290,13 @@ export function setPreferTmuxOverIterm2(prefer: boolean): void {
 
 /**
  * Checks if the user prefers tmux over iTerm2 split panes.
- * （registry detectAndGetBackend 优先级 2 消费；默认 false = 旧 config 缺省逐字。）
+ * （registry detectAndGetBackend 优先级 2 消费；W-D-C R1-D3：port 接线
+ * 读经 port，未接线 = 进程内标志；默认 false = 旧 config 缺省逐字。）
  */
 export function getPreferTmuxOverIterm2(): boolean {
+  const persistence = getIt2SetupPersistencePort()
+  if (persistence) {
+    return persistence.getFlags().preferTmuxOverIterm2 === true
+  }
   return preferTmuxOverIterm2 === true
 }

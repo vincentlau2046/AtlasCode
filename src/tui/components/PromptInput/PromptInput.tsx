@@ -77,7 +77,7 @@ import { findBtwTriggerPositions } from '../../utils/sideQuestion.js';
 import { findSlashCommandPositions } from '../../utils/suggestions/commandSuggestions.js';
 import { shouldHoldSubmitForSuggestions } from './submitGate.js';
 import { findSlackChannelPositions, getKnownChannelsVersion, hasSlackMcpServer, subscribeKnownChannels } from '../../utils/suggestions/slackChannelSuggestions.js';
-import { isInProcessEnabled } from '../../utils/swarm/backends/registry.js';
+import { isInProcessEnabled } from 'src/swarm';
 import { syncTeammateMode } from '../../utils/swarm/teamHelpers.js';
 import type { TeamSummary } from '../../utils/teamDiscovery.js';
 import { getTeammateColor } from 'src/engine';

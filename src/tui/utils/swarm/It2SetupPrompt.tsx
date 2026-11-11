@@ -6,7 +6,7 @@ import { Spinner } from '../../components/Spinner.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Text, useInput } from '../../ink.js';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
-import { detectPythonPackageManager, getPythonApiInstructions, installIt2, markIt2SetupComplete, type PythonPackageManager, setPreferTmuxOverIterm2, verifyIt2Setup } from './backends/it2Setup.js';
+import { detectPythonPackageManager, getPythonApiInstructions, installIt2, markIt2SetupComplete, type PythonPackageManager, setPreferTmuxOverIterm2, verifyIt2Setup } from 'src/swarm';
 type SetupStep = 'initial' | 'installing' | 'install-failed' | 'verify-api' | 'api-instructions' | 'verifying' | 'success' | 'failed';
 type Props = {
   onDone: (result: 'installed' | 'use-tmux' | 'cancelled') => void;

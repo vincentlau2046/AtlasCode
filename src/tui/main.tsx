@@ -79,7 +79,7 @@ import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js';
 // Lazy require（0.1.94 C-1 单源化：身份链单源 src/engine/messaging/teammate，环已不存在）
 const getTeammateUtils = () => require('src/engine') as typeof import('src/engine');
 const getTeammatePromptAddendum = () => require('./utils/swarm/teammatePromptAddendum.js') as typeof import('./utils/swarm/teammatePromptAddendum.js');
-const getTeammateModeSnapshot = () => require('./utils/swarm/backends/teammateModeSnapshot.js') as typeof import('./utils/swarm/backends/teammateModeSnapshot.js');
+const getTeammateModeSnapshot = () => require('src/swarm') as typeof import('src/swarm');
 // Dead code elimination: conditional import for COORDINATOR_MODE
 const coordinatorModeModule = feature('COORDINATOR_MODE') ? require('./coordinator/coordinatorMode.js') as typeof import('./coordinator/coordinatorMode.js') : null;
 import { resolve } from 'path';

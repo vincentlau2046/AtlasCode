@@ -14,7 +14,7 @@ import type { PermissionMode } from '../permissions/PermissionMode.js'
 import { jsonParse, jsonStringify } from '../slowOperations.js'
 import { getTasksDir, notifyTasksUpdated } from '../tasks.js'
 import { getAgentName, getTeamName, isTeammate } from 'src/engine'
-import { type BackendType, isPaneBackend } from './backends/types.js'
+import { type BackendType, isPaneBackend } from 'src/swarm'
 import { TEAM_LEAD_NAME } from './constants.js'
 
 export const inputSchema = lazySchema(() =>
@@ -609,11 +609,11 @@ async function killOrphanedTeammatePanes(teamName: string): Promise<void> {
   )
   if (paneMembers.length === 0) return
 
-  const [{ ensureBackendsRegistered, getBackendByType }, { isInsideTmux }] =
-    await Promise.all([
-      import('./backends/registry.js'),
-      import('./backends/detection.js'),
-    ])
+  // W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面
+  //（isInsideTmux = engine teammateLayoutManager port 委托面，wireBackends
+  // 已在 tui/factory 组合根装配）。
+  const { ensureBackendsRegistered, getBackendByType, isInsideTmux } =
+    await import('src/swarm')
   await ensureBackendsRegistered()
   const useExternalSession = !(await isInsideTmux())
 

@@ -6,7 +6,7 @@ import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
 import { getCwd } from '../../utils/cwd.js'
 import { lazySchema } from '../../utils/lazySchema.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { getResolvedTeammateMode } from '../../utils/swarm/backends/registry.js'
+import { getResolvedTeammateMode } from 'src/swarm'
 import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
 import {
   getTeamFilePath,

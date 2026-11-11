@@ -58,7 +58,17 @@ import {
   startInProcessTeammate,
   setStartInProcessTeammate,
   setTeammateToolRegistryDeps,
+  // W-D-C 段 R1（lock-face §2，f4 批复 2026-11-11）：R1-D1 观测钩子工厂 +
+  // R1-D3 it2Setup 标志持久化 port（null 缺省=进程内标志恒等）。
+  setInProcessSpawnHooksFactory,
+  setIt2SetupPersistencePort,
+  // W-D-C 段 R1：backends port seam ② 装配（TUI 消费端改道 engine 单源后，
+  // teammateLayoutManager/teamHelpers 的 requireBackendModule 面需本接线；
+  // compose.ts:341 同形，幂等 last-wins）。
+  wireBackends,
 } from 'src/swarm'
+import { createInProcessSpawnHooks } from './utils/swarm/inProcessSpawnHooks'
+import { getGlobalConfig, saveGlobalConfig } from './utils/config'
 
 import { AscendExecutor } from './core/executor/AscendExecutor'
 import { DefaultAscendMockPort } from './core/executor/AscendMockPort'
@@ -183,6 +193,29 @@ export function createCoreDependencies(
   setStartInProcessTeammate(startInProcessTeammate)
   setTeammateToolRegistryDeps({
     baseTools: [SnipTool, TeamCreateTool, TeamDeleteTool],
+  })
+  // W-D-C 段 R1：backends 族 port 注入窗接线（registry/detection 4 面 →
+  // setBackendModule；PRT-2 显式装配语句）。
+  wireBackends()
+  // W-D-C 段 R1（lock-face §2，f4 批复 2026-11-11，两处均禁吞错）：
+  // R1-D1 —— in-process spawn 观测钩子工厂（四钩子闭包体归 TUI 域，
+  // 经窄视图注入窗传入 engine 单源 runner；factory 调用期异常 fail-visible
+  // 向上传播，InProcessBackend 调用点无 try/catch）。
+  setInProcessSpawnHooksFactory(createInProcessSpawnHooks)
+  // R1-D3 —— it2Setup 标志持久化 port（恢复 TUI 跨进程持久行为：读写
+  // globalConfig；适配器读写异常维持 TUI 现行为 = globalConfig 抛错向上
+  // 传播，不包 try/catch）。不接线 = 进程内标志恒等（headless 语义）。
+  setIt2SetupPersistencePort({
+    getFlags: () => {
+      const config = getGlobalConfig()
+      return {
+        it2SetupComplete: config.iterm2It2SetupComplete === true,
+        preferTmuxOverIterm2: config.preferTmuxOverIterm2 === true,
+      }
+    },
+    setFlag: (name, value) => {
+      saveGlobalConfig(current => ({ ...current, [name]: value }))
+    },
   })
 
   // 默认 mock port 注册（委托 process.env）；测试在此单行替换。

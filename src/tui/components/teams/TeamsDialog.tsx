@@ -18,9 +18,8 @@ import { truncateToWidth } from '../../utils/format.js';
 import { getNextPermissionMode } from '../../utils/permissions/getNextPermissionMode.js';
 import { getModeColor, type PermissionMode, permissionModeFromString, permissionModeSymbol } from '../../utils/permissions/PermissionMode.js';
 import { jsonStringify } from '../../utils/slowOperations.js';
-import { IT2_COMMAND, isInsideTmuxSync } from '../../utils/swarm/backends/detection.js';
-import { ensureBackendsRegistered, getBackendByType, getCachedBackend } from '../../utils/swarm/backends/registry.js';
-import type { PaneBackendType } from '../../utils/swarm/backends/types.js';
+// W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
+import { IT2_COMMAND, isInsideTmuxSync, ensureBackendsRegistered, getBackendByType, getCachedBackend, type PaneBackendType } from 'src/swarm';
 import { getSwarmSocketName, TMUX_COMMAND } from '../../utils/swarm/constants.js';
 import { addHiddenPaneId, removeHiddenPaneId, removeMemberFromTeam, setMemberMode, setMultipleMemberModes } from '../../utils/swarm/teamHelpers.js';
 import { listTasks, type Task, unassignTeammateTasks } from '../../utils/tasks.js';

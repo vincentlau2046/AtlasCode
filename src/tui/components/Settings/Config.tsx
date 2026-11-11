@@ -40,7 +40,7 @@ import { isEnvTruthy, isRunningOnHomespace } from 'src/tui/utils/envUtils.js';
 import type { LocalJSXCommandContext, CommandResultDisplay } from '../../commands.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js';
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js';
-import { getCliTeammateModeOverride, clearCliTeammateModeOverride } from '../../utils/swarm/backends/teammateModeSnapshot.js';
+import { getCliTeammateModeOverride, clearCliTeammateModeOverride } from 'src/swarm';
 import { getHardcodedTeammateModelFallback } from '../../utils/swarm/teammateModel.js';
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 import { getRoleModel } from 'src/modelprovider';

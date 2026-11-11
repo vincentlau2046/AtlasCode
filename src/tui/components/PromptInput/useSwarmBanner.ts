@@ -11,11 +11,12 @@ import {
   getAgentColor,
 } from '../../tools/AgentTool/agentColorManager.js'
 import { getStandaloneAgentName } from '../../utils/standaloneAgent.js'
-import { isInsideTmux } from '../../utils/swarm/backends/detection.js'
+// W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
 import {
+  isInsideTmux,
   getCachedDetectionResult,
   isInProcessEnabled,
-} from '../../utils/swarm/backends/registry.js'
+} from 'src/swarm'
 import { getSwarmSocketName } from '../../utils/swarm/constants.js'
 import {
   getAgentName,

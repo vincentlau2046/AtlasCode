@@ -29,6 +29,10 @@ import { logForDebugging } from '../../shared'
 import { findTeammateTaskByAgentId, requestTeammateShutdown } from '../inProcessTeammateTask'
 import { killInProcessTeammate, spawnInProcessTeammate } from '../spawnInProcess'
 import { parseAgentId } from '../agentId'
+// W-D-C R1-D1（lock-face §2，f4 批复）：观测钩子注入窗——TUI 四钩子闭包
+// 体（C-3 换道反向面）经组合根工厂注入；未接线 = 零钩子 engine lane 恒等；
+// 已接线后 factory 异常向上传播（fail-visible 硬条件，本调用无 try/catch）。
+import { getInProcessSpawnHooksFactory } from './inProcessSpawnHooksPort'
 import { requireStartInProcessTeammate } from './inProcessRunnerPort'
 import type {
   TeammateExecutor,
@@ -118,6 +122,17 @@ export class InProcessBackend implements TeammateExecutor {
       result.teammateContext &&
       result.abortController
     ) {
+      const taskId = result.taskId
+
+      // W-D-C R1-D1：观测钩子工厂（TUI lane 接线；未接线 = 零钩子恒等）。
+      // fail-visible：factory 调用直呼不包 try/catch（f4 批复硬条件）——
+      // 抛错向上传播，禁降级为零钩子静默继续。
+      const hooks = await getInProcessSpawnHooksFactory()?.({
+        config,
+        ctx: this.context,
+        taskId,
+      })
+
       // Start the agent loop in the background (fire-and-forget)
       // The prompt is passed through the task state and config
       requireStartInProcessTeammate()({
@@ -129,7 +144,7 @@ export class InProcessBackend implements TeammateExecutor {
           planModeRequired: config.planModeRequired ?? false,
           parentSessionId: result.teammateContext.parentSessionId,
         },
-        taskId: result.taskId,
+        taskId,
         prompt: config.prompt,
         teammateContext: result.teammateContext,
         // Strip messages: the teammate never reads context.messages
@@ -150,6 +165,17 @@ export class InProcessBackend implements TeammateExecutor {
         // 0.1.93 W-D-A A6：终止条件组透传（absent = 零评估恒等；runner
         // 轮末单一评估点，graceful 退出）。
         ...(config.termination ? { termination: config.termination } : {}),
+        // ── W-D-C R1-D1 四钩子透传（TUI 工厂产面；缺省 undefined = 恒等）──
+        ...(hooks?.mainSystemPrompt !== undefined
+          ? { mainSystemPrompt: hooks.mainSystemPrompt }
+          : {}),
+        ...(hooks?.onMessage ? { onMessage: hooks.onMessage } : {}),
+        ...(hooks?.onPermissionWaitMs
+          ? { onPermissionWaitMs: hooks.onPermissionWaitMs }
+          : {}),
+        ...(hooks?.getPermissionMode
+          ? { getPermissionMode: hooks.getPermissionMode }
+          : {}),
       })
 
       logForDebugging(

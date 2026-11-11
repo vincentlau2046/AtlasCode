@@ -292,6 +292,24 @@ export {
   getTeammateToolRegistryDeps,
 } from './backends/teammateToolRegistryDeps'
 export { wireBackends } from './backends/wireBackends'
+// W-D-C 段 R1（lock-face §2，f4 批复 2026-11-11）：R1-D1 观测钩子注入窗 +
+// R1-D3 it2Setup 标志持久化注入窗（tui/factory 组合根装配；null 缺省恒等）。
+export {
+  type InProcessSpawnHooks,
+  type InProcessSpawnHooksFactory,
+  type InProcessSpawnHooksFactoryArgs,
+  setInProcessSpawnHooksFactory,
+  resetInProcessSpawnHooksFactory,
+  getInProcessSpawnHooksFactory,
+} from './backends/inProcessSpawnHooksPort'
+export {
+  type It2SetupFlagName,
+  type It2SetupFlags,
+  type It2SetupPersistencePort,
+  setIt2SetupPersistencePort,
+  resetIt2SetupPersistencePort,
+  getIt2SetupPersistencePort,
+} from './backends/it2SetupPersistencePort'
 // S-E2d hub（§8.66.1.5 切片 4）：inProcessRunner hub 1536L（R2/R4/R7
 // 裁剪）落位——seam ②（inProcessRunnerPort）真实现供体；组合根
 // setStartInProcessTeammate 接线（compose.ts），本模块零顶层副作用
