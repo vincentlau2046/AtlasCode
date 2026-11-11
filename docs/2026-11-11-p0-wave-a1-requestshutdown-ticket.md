@@ -94,3 +94,20 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 5. **【吸收】候选 B 终裁前置条款**：B 自带批准权弱化倾向——若终裁 B，批准权判据加「runner 扫描仅注入提示、批准动作恒经 lead 模型工具调用」结构断言；A 形态批准链零新终态写点天然满足 §2.2。
 
 判据面前滚面确认齐备（T8/O4 standing + wdb 四套 + wdc r1/r3 + round 1-8 点名 + 新腿 RequestShutdown→批准→TEAM-DELETE-OK 复用 O4 骨架 + deny 有界格 + glm-5 row-F + canon 净域）。审计明示无需二审。→ f4 发双信号（Main=段 D lock-face 七点，e2e=探针面预告）。
+
+## §8 f4 批复：段 D 契约 lock-face 七点（2026-11-11，@worktree 75633b36）
+
+七点全批准，两附带条件（硬）：
+
+1. **工具形/消息契约（①②）批准**：两新 schema 单源 mailbox.ts + isStructuredProtocolMessage 白名单同步；approve 复用既有 shutdown_request（两端 bookend 零新面）✓；deny 回执新类型与既有 shutdown_rejected 方向区分清晰 ✓。
+2. **lead 发现路径 = WaitForTeammates 扩格（③）批准**——F1 勘码坐实审计必改前提（engine 车道 lead inbox 零 poll，候选 A 纯信箱写 = headless 不可达）；发现面与会合点天然重合 + engine 单源双 lane 零增量 + 不 mark read 非破坏读 ✓。时窗观测格（lead 下次 WaitForTeammates 即在场）入 e2e 腿 ✓。
+3. **消费形态候选 A 维持（④）批准**：pending 经 ③ 面呈 lead 模型裁定，runner 零新终态写点，批准链 = lead 发既有 shutdown_request → 成员既有 approve 链，§2.2 天然满足。
+4. **防环四补强落形（⑤）批准**：模块级 Map 按 request_id（跨成员键唯一）跨轮持久 / 在途唯一性双查 / 双向竞态「lead 请求覆盖自发在途自动失效」定谳清晰 / deny 两态均 fail-visible。
+5. **注入点（⑥）批准**：engine 独立 requestShutdownTool.ts（一工具一文件惯例）零 port 面；team-essential 7→8。
+6. **tmux 覆盖（⑦）批准**：同 inbox 文件 + lockfile 互斥 + engine 读面双车道同源；schema 双写 + poller 透传支登记债采纳（C-1 未收敛面延续，后续波）。
+
+**附带条件两条（硬，入落码清单）**：
+1. **lead 行为指引面同步**：WaitForTeammates 工具描述扩格（pending_requests 语义 + 批准/拒绝动作指引）+ SendMessage prompt 面新类型文档（lead 模型处置知识全依工具/prompt 描述，缺指引 = pending 呈现后不知如何裁定）——落码清单补 2 项。
+2. **read 态推进点显式定谳**：pending_requests 不 mark read ⇒ 处置动作须推进 read 态（deny = 发 denied 时 mark read；approve = 发 shutdown_request 时以 request_id 关联核销）——禁 pending 永久重现噪声面（每次 WaitForTeammates 重复呈报已裁定请求）；定谳形入判别格（裁定后 pending 不再现格）。
+
+判据面随本批复冻结：lock-face 判据面前滚确认节全项 + 工具体副作用白名单 static+func 双面 + 两附带条件判别格（指引面在场格 + 裁定后 pending 不再现格）。批复后依序落码段 I。
