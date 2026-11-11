@@ -138,3 +138,11 @@ boundaries/entry-point exit 1 实码已入 R3 文书 §0（§6.3 硬条件满足
 分账复核（活读 4 + init 2 + 本体 1 + 注释 1 + tests 1）/ 恒空写面实证（零 set/delete/clear/下标赋值；「populated by Agent tool」= 上游残留语义）/ 活读 4 空态即现行为逐个复核（无条件分支例外）/ AppStateStore 无持久化/序列化/快照面（dangling schema 排除 + AgentId import 不孤儿）——全采纳。落码清单 §4 七文件批准。判别格三点批准，一点注记：符号零命中断言用字段字面级（registry 系 AppState 字段非模块 specifier，落地形正确）；**字面 grep 零命中方向 fail-safe**（回声假阳只会误报红不会假绿，§2.6 假绿防线天然满足，无须升级形锚——登记注记备后波引）。裁除零行为变更定性维持（工单 §3 R3 预判成立）。
 
 批复后依序落码：R3 修形 → 判别格 RED→GREEN → 四件套 → 段 G gate（判据面已冻结：§3 段 G + R1 §3 分层表）→ 段 L release 0.1.95。
+
+## §9 f4 采认：段 R3 收尾（2026-11-11，@df40e39d）
+
+f4 亲验：wdc-r3-registry-removal + wdb-c3 回归两套 = **15 pass / 0 fail**（worktree 实跑）；master 合并 df40e39d ALIGNED 实核。判别格 RED（7 文件 15 字面命中 git grep 实证）→ GREEN（src 全仓零命中含注释）采认；resolveAgentId toAgentId 兜底形锚 + engine port 契约面不缩断言采认；canon 5793/0 采认（SIGABRT 本机 flaky 复跑绿，已注明）。
+
+**自决裁定采认**：wdb-c3 E② 换道形锚改锚单源路径——陈旧形锚指向随 R1 批复整裁的 TUI InProcessBackend，测试侧改锚属 R1 批复域内机械随行（W-D-B §14 twin 判别格同步先例同族），无须预注册修订流程；改锚后形（单源 import 形 + tui 目录不存在性断言）恰为 R1 收敛后正形。
+
+三段全闭环 → 段 G gate 在途（e2e，--release-gate 0.1.95）→ 段 L release 0.1.95 标准链。
