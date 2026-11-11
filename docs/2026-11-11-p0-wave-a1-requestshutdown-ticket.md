@@ -82,3 +82,15 @@ lock-face 必答六点：
 ## §6 D 项随呈：纲要 §10 序 4+ 具体条目（用户裁定用，随本波双信号一并列）
 
 charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六面产品面提取 ≈1 中波，可与能力波交叉）｜**序 5 Gap B sharp/image-processor-napi 未随包**（PDF 页图断链，候补插入）｜**序 6 W-D-B-1 持久化面**｜**序 7 S3 归位波**（硬前置 = 步 0 f4 零码盘点产出——盘点状态本波呈报时核）｜**序 8 W-D-B-2 UDS+TUI**（硬前置 = 卷 4 契约插桩）｜**序 9 卷 4 分析卡**（2.1.304-319 drift 窗口，分析卡可提前）｜序 10 登记债不排。达标线注记：序 4+7 完成后 = 第二产品启动决策点。
+
+## §7 Atlas-reveiw 审计闭环（2026-11-11，有修改通过）+ f4 修订
+
+审计锚点全实锚（requestShutdown 全仓零命中 / selfTerminatePort 双副本 / teammateMailbox 33KB / poll 高优扫描 L1035+）。**必改 1 + 吸收 4，均设计/判据面修订不动波定义，吸收后直接双信号**：
+
+1. **【必改】段 D 六点扩七点——lead 发现路径必答**：sendMessageToLeader = 纯 mailbox 写，lead 无 poll 机械 → 候选 A 隐含未答前提「lead 经哪个既有读面发现请求」（task_notification 不承载任意 mailbox 消息 / WaitForTeammates 返回面不含 pending / lead 自主查箱无保证发现）——不答则请求无界滞留（看似已送达，比 fail-silent 更坏）。三候选：task_notification 扩面 / WaitForTeammates 返回面扩格（顺带回包 pending_requests）/ lead 查箱工具面；lock-face 须配「请求入箱→lead 裁定」时窗观测格。
+2. **【吸收】消息契约预注册「新类型优先」**：新类型 `shutdown_request_from_member` 优于方向判复用——(a) 成员 poll 对 shutdown_request 高优扫描，回声/broadcast 路径回成员信箱 = 自指循环面，新类型整类消灭；(b) 方向判要求每个解析点记得查方向（§2.7 隐式约定教训同族），举证负担在复用方。
+3. **【吸收】防环四补强入 lock-face**：锁存载体+持久性写死（deny 落成员 taskState 跨轮不 reset，新输入判定义枚举）/ 在途唯一性（pending 期重复请求 fail-visible）/ 双向并发态（lead shutdown_request 在途 + 成员同时请求的竞态定谳）/ deny 面形态（显式拒绝 vs 不作为两态均 fail-visible 到成员模型）。多成员并发风暴：A 形态天然有界于成员数 + 在途唯一性即足。
+4. **【吸收】工具体副作用白名单判别（§2.2 技术载体）**：RequestShutdown 执行 = 仅 mailbox 写 + 返回文案；零 abortController 触达 / 零 taskState 终态写 / 零 selfTerminatePort 调用——static 断言 + func 测试双面钉死。
+5. **【吸收】候选 B 终裁前置条款**：B 自带批准权弱化倾向——若终裁 B，批准权判据加「runner 扫描仅注入提示、批准动作恒经 lead 模型工具调用」结构断言；A 形态批准链零新终态写点天然满足 §2.2。
+
+判据面前滚面确认齐备（T8/O4 standing + wdb 四套 + wdc r1/r3 + round 1-8 点名 + 新腿 RequestShutdown→批准→TEAM-DELETE-OK 复用 O4 骨架 + deny 有界格 + glm-5 row-F + canon 净域）。审计明示无需二审。→ f4 发双信号（Main=段 D lock-face 七点，e2e=探针面预告）。
