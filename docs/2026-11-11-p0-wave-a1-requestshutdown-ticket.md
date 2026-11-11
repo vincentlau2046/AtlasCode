@@ -200,3 +200,19 @@ Main 段 L 对表收讫：release commit ed4ba656 + tag v0.1.96（锚 release co
 | cli.js | 18,171,100 B / sha256 2a8c3634… | **发布品 cli.js 18,171,100 B / sha256 2a8c3634… ≡ gate build 银行字节级同值** | MATCH |
 
 **关键判定：cli.js 跨 bump 字节恒等（gate 构建 = 发布品同字节）——「测的=发布的」fail-closed 链闭环直证**（承 0.1.95 先例）；tgz pre-bump 预注册三值移位符合工单预期（bump 移位、cli.js 恒等）。段 L 面 f4 复核全绿；生产 lane ⑦（三方对表 + PONG-096 + npm 安装品 O4/RequestShutdown 复验）e2e 在途，PASS 后 Main 单点报用户收口。
+
+## §17 f4 终局收口：A1 requestShutdown 插入波（0.1.96）五段闭环终态（2026-11-11）
+
+生产 lane ⑦ PASS 报审采认（r-20261111-prodlane-096.md；f4 核实与 §16 独立复核同值互证）：
+
+- **⑦-1 SRI 四值三方全 MATCH**：cli.js registry 直下 = 安装树 = gate dist 三点字节恒等（sha256 2a8c3634… = gate 银行）；tgz Δ7B = bump 移位预注册预期兑现；双 signature 在场。
+- **⑦-2 翻号 GREEN**：fresh install 286 包，installed version 0.1.96，安装树 cli.js = gate 银行。
+- **⑦-3 PONG-096 GREEN**（glm-5 基面）。
+- **⑦-4a O4 名义形锚生产复验 GREEN**：TEAM-DELETE-OK + completed-updater-apply=1 + 零持久残留。
+- **⑦-4b RequestShutdown 成员发起链生产复验 GREEN（0.1.96 新能力首验）**：wire 铁证 pending_requests 非空（request_id rs-…-qdomuz 唯一无循环）→ lead 模型裁定批准 → TeamDelete 首试 OK 零残留 + `team=default` 0（面 3 销项生产面确认）。
+
+**五段闭环终态**：段 D lock-face 七点（§8）→ 段 I 落码（§9-§14 六轮 gate 迭代收敛）→ 段 G gate-096e GATE-PASS（§15）→ 段 L release ed4ba656/tag v0.1.96/npm 0.1.96 + SRI 四值 MATCH（§16）→ 生产 lane ⑦ PASS（本节）。收口单信号归 Main（单点报用户）。
+
+**波终方法论资产（后续波继承）**：①工具注册四面账（实现体/union 名单/注册表实例/isEnabled 判别时序——四面齐备才可达，新工具判别格必含组合根真池面激活后实测格）；②teamContext 判别源双源化域级纪律（禁裸单源 appState.teamContext 作 lane 判据，「单源残留零命中」为域级回归格，后续 team 域波顺带复跑）；③mailbox 契约身份字段一律 envelope 为准；④func 单副本绿 ≠ e2e 双副本真环境绿（盲区家族第五例，六轮 gate 三次复验实证纪律价值）；⑤SRI pre-bump 预注册 + post-bump 三值移位/cli.js 恒等预期对表形（两波连续兑现）。
+
+**登记债流转**：isTeamLead backwards-compat 身份语义债（§12）入登记池候选硬化小波；tmux poller 透传支（§8⑦）承 C-1 未收敛面延续；工单归档终态。
