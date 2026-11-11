@@ -23,6 +23,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # 0.1.97 CI 告警清零波（工单 docs/2026-11-11-p0-wave-0197-ci-alerts-ticket.md
+      # @d60fd3a2）：装系统 rg——sandbox 纵切 smoke ③ 断言 config.ripgrep.command
+      # === "rg"（同套件 ④ 自证 rg 缺失按 skip 不红，③ 缺同款门即 CI 恒红根因
+      # 之一；装 rg 后 ③ 走真断言，与 0.1.44 根修设计同向 = system rg 优先达真值）。
+      - name: Install ripgrep
+        run: sudo apt-get install -y ripgrep
+
       # 四件套（typecheck / lint / test（含 tests/ci 防腐门）/ build）
       - name: Typecheck
         run: bun run typecheck
@@ -30,8 +37,15 @@ jobs:
       - name: Lint
         run: bun run lint
 
+      # 0.1.97：FORCE_COLOR=3 对齐冻结 canon 口径（0.1.95 §10：canon =
+      # FORCE_COLOR=3 CI=true bun test --isolate ./tests/；CI=true 由 runner
+      # 自带）——D4 裸色名族 ×3 断言 SGR 在场，无此 env 即环境性恒红
+      # （0.1.87 登记的 flake 根因，本波根修）。canon 口径不冻结变更：
+      # CI 向 canon 对齐，反向禁。
       - name: Test (unit + ci gates)
         run: bun test --isolate tests/
+        env:
+          FORCE_COLOR: "3"
 
       - name: Build
         run: bun run build

@@ -5,6 +5,12 @@
 # Run workflow。runner（非国内网络）直连 registry.npmjs.org，免本地 token：
 # OIDC 免密 + `--provenance` 供应链 attestation（包 ↔ 本 run 绑定）。
 # 本地 ~/.npmrc registry 域 token 发布降为应急 fallback（网络双通道容灾）。
+# 0.1.97 发布主通道定谳（lock-face，工单 @d60fd3a2 §5 吸收③）：OIDC workflow
+# = 主通道；本地 publish 仅在 workflow run 终态失败后启动（禁并发）——tag 时序
+# = push tag → 等 workflow 终态 → 失败才本地。幂等守（下方 check 步）保证
+# workflow 先发、本地后发单向 409 面；concurrency group npm-publish 串行多 tag。
+# 主通道首用前置腿 = npm 侧 trusted publisher 配置确认（repo admin 操作面）；
+# 未确认则该版走本地通道（本 workflow 修形照落），首用顺延。
 name: Publish to npm
 
 on:
@@ -27,8 +33,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
+        # 0.1.97 CI 告警清零波（工单 @d60fd3a2）：node 20 → 24——node 20 载
+        # npm 10，不支持 OIDC trusted publishing（须 npm ≥11.5.1）→ publish 步
+        # ENEEDAUTH 每推 tag 必红（v0.1.96 触发实据）。node 24 内载 npm 11
+        # ≥11.5.1（大版本固定即可，不 pin 小版本）；build 步 bun 独立于 node，
+        # 升级零影响。
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install bun（构建面仅依赖 bun build）
         run: npm i -g bun
