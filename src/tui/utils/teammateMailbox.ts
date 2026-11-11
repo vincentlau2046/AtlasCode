@@ -732,6 +732,43 @@ export type ShutdownRequestMessage = z.infer<
 >
 
 /**
+ * Member-initiated shutdown request (0.1.96 A1, f4 lock-face ②; 双写债
+ * 登记：engine/messaging/mailbox.ts 单源 schema 的 tui twin 副本——
+ * 0.1.94 C-1 未收敛面，本波双写、收敛登记后续波）
+ */
+export const ShutdownRequestFromMemberMessageSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('shutdown_request_from_member'),
+    requestId: z.string(),
+    from: z.string(),
+    reason: z.string().optional(),
+    timestamp: z.string(),
+  }),
+)
+
+export type ShutdownRequestFromMemberMessage = z.infer<
+  ReturnType<typeof ShutdownRequestFromMemberMessageSchema>
+>
+
+/**
+ * Lead's denial receipt for a member-initiated shutdown request
+ * (0.1.96 A1; engine twin 双写债同上)
+ */
+export const ShutdownRequestDeniedMessageSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('shutdown_request_denied'),
+    requestId: z.string(),
+    to: z.string(),
+    reason: z.string().optional(),
+    timestamp: z.string(),
+  }),
+)
+
+export type ShutdownRequestDeniedMessage = z.infer<
+  ReturnType<typeof ShutdownRequestDeniedMessageSchema>
+>
+
+/**
  * Shutdown approved message sent from teammate to leader via mailbox
  */
 export const ShutdownApprovedMessageSchema = lazySchema(() =>
@@ -870,6 +907,43 @@ export function isShutdownRequest(
 ): ShutdownRequestMessage | null {
   try {
     const result = ShutdownRequestMessageSchema().safeParse(
+      jsonParse(messageText),
+    )
+    if (result.success) return result.data
+  } catch {
+    // Not JSON
+  }
+  return null
+}
+
+/**
+ * Checks if a message text is a member-initiated shutdown request
+ * (0.1.96 A1: member → lead; lead inbox consumer = WaitForTeammates
+ * pending_requests scan)
+ */
+export function isShutdownRequestFromMember(
+  messageText: string,
+): ShutdownRequestFromMemberMessage | null {
+  try {
+    const result = ShutdownRequestFromMemberMessageSchema().safeParse(
+      jsonParse(messageText),
+    )
+    if (result.success) return result.data
+  } catch {
+    // Not JSON
+  }
+  return null
+}
+
+/**
+ * Checks if a message text is a lead's denial receipt for a member-initiated
+ * shutdown request (0.1.96 A1: lead → member)
+ */
+export function isShutdownRequestDenied(
+  messageText: string,
+): ShutdownRequestDeniedMessage | null {
+  try {
+    const result = ShutdownRequestDeniedMessageSchema().safeParse(
       jsonParse(messageText),
     )
     if (result.success) return result.data
@@ -1084,6 +1158,9 @@ export function isStructuredProtocolMessage(messageText: string): boolean {
       type === 'sandbox_permission_response' ||
       type === 'shutdown_request' ||
       type === 'shutdown_approved' ||
+      // 0.1.96 A1：成员自发退出请求 + lead 拒绝回执（tui twin 白名单同步）
+      type === 'shutdown_request_from_member' ||
+      type === 'shutdown_request_denied' ||
       type === 'team_permission_update' ||
       type === 'mode_set_request' ||
       type === 'plan_approval_request' ||

@@ -50,7 +50,11 @@ import {
   type ToolResultBlockParam,
 } from '../../../shared'
 import {
+  TEAM_LEAD_NAME,
   isAgentSwarmsEnabled,
+  getTeamName,
+  isShutdownRequestFromMember,
+  readMailbox,
   waitForTeammatesToBecomeIdle,
 } from '../../messaging'
 import { getSessionContextPort } from '../../session/sessionContextPort'
@@ -93,6 +97,14 @@ export type WaitForTeammatesOutput = {
   idle: string[]
   /** 仍在工作的成员名（仅 timeout 态非空）。 */
   still_working: string[]
+  /** 0.1.96 A1（f4 lock-face ③ 候选 B）：待 lead 裁定的成员退出请求
+   * （lead inbox unread 的 shutdown_request_from_member；read 态由 lead
+   * 处置动作推进——本扫描不 mark read，裁定后 pending 不再现）。 */
+  pending_requests?: Array<{
+    from: string
+    reason?: string
+    request_id: string
+  }>
 }
 
 /** 缺省超时（LLM 120s 超时先例对齐）。 */
@@ -121,6 +133,51 @@ function listWorkingTeammateNames(appState: TaskAppState): string[] {
     }
   }
   return names
+}
+
+/**
+ * 0.1.96 A1（f4 lock-face ③ 候选 B）：读 lead inbox 过滤 unread 的
+ * 成员退出请求（shutdown_request_from_member），呈 pending_requests。
+ * 刻意不 mark read——消息 read 态由 lead 处置动作推进（deny = 发
+ * shutdown_request_denied 时核销；approve = 发 shutdown_request 时核销，
+ * sendMessageTool 侧），保证「裁定后 pending 不再现」判别格。
+ */
+export async function collectPendingMemberRequests(
+  teamName?: string,
+): Promise<
+  Array<{ from: string; reason?: string; request_id: string }>
+> {
+  const messages = await readMailbox(TEAM_LEAD_NAME, teamName)
+  const pending: Array<{ from: string; reason?: string; request_id: string }> =
+    []
+  for (const m of messages) {
+    if (m.read) continue
+    const req = isShutdownRequestFromMember(m.text)
+    if (req) {
+      pending.push({
+        from: req.from,
+        reason: req.reason,
+        request_id: req.requestId,
+      })
+    }
+  }
+  return pending
+}
+
+/** pending 扩格填充（call 返回面统一挂载；best-effort——lead 无团队
+ * 上下文时 pending_requests 留缺省，零扰既有两态）。 */
+async function attachPendingRequests(
+  data: WaitForTeammatesOutput,
+): Promise<WaitForTeammatesOutput> {
+  try {
+    const pending = await collectPendingMemberRequests(getTeamName())
+    if (pending.length > 0) {
+      return { ...data, pending_requests: pending }
+    }
+  } catch {
+    // 无团队上下文 = 非 lead 车道，pending_requests 缺省
+  }
+  return data
 }
 
 // Tool 契约非参数化（TeamDeleteToolFace 先例）；mapToolResult 返回型收窄。
@@ -206,7 +263,12 @@ export const WaitForTeammatesTool: WaitForTeammatesToolFace = {
     const workingNames = listWorkingTeammateNames(appState)
     if (workingNames.length === 0) {
       return {
-        data: { status: 'idle', waited_ms: 0, idle: [], still_working: [] },
+        data: await attachPendingRequests({
+          status: 'idle',
+          waited_ms: 0,
+          idle: [],
+          still_working: [],
+        }),
       }
     }
 
@@ -246,32 +308,32 @@ export const WaitForTeammatesTool: WaitForTeammatesToolFace = {
       // status:'timeout' 配 still_working:[] 的语义矛盾面）。
       if (outcome === 'timeout' && nowWorking.length === 0) {
         return {
-          data: {
+          data: await attachPendingRequests({
             status: 'idle',
             waited_ms: waitedMs,
             idle: idleNames,
             still_working: [],
-          },
+          }),
         }
       }
 
       if (outcome === 'idle') {
         return {
-          data: {
+          data: await attachPendingRequests({
             status: 'idle',
             waited_ms: waitedMs,
             idle: idleNames,
             still_working: [],
-          },
+          }),
         }
       }
       return {
-        data: {
+        data: await attachPendingRequests({
           status: 'timeout',
           waited_ms: waitedMs,
           idle: idleNames,
           still_working: nowWorking,
-        },
+        }),
       }
     } finally {
       if (timer) clearTimeout(timer)

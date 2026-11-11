@@ -5,7 +5,7 @@
 
 /** 短描述（searchHint / web 族口径别名单源；模块名约定 = DESCRIPTION/PROMPT，族前缀别名在 barrel）。 */
 export const DESCRIPTION =
-  'Wait for all working in-process teammates to become idle (bounded)'
+  'Wait for all working in-process teammates to become idle (bounded); also surfaces pending member shutdown requests'
 
 /** 唯一 prompt 面（description() 消费；TeamDelete delta ④ 先例）。 */
 export const PROMPT = `Wait for all currently working in-process teammates to become idle, then return.
@@ -16,6 +16,11 @@ The call blocks (event-driven, no busy-waiting) until every working teammate is 
 
 - On success it returns { status: 'idle', waited_ms, idle }.
 - On timeout it returns { status: 'timeout', waited_ms, still_working } listing the teammates that are still working — it never blocks forever. You may call again with a longer timeout, or proceed without those teammates.
+
+Pending member shutdown requests (0.1.96 A1): teammates can ask YOU (the lead) for permission to shut down by calling RequestShutdown. Every result therefore also carries pending_requests — an array of { from, reason, request_id } entries for members whose shutdown requests are awaiting your decision. For each entry you must decide:
+- Approve: send the member a shutdown_request via SendMessage (type: 'shutdown_request') — the member will run its existing approval path and exit.
+- Deny: send the member a shutdown_request_denied via SendMessage (type: 'shutdown_request_denied', request_id = the entry's request_id) — the member is told to wait for new input before requesting again.
+Deciding (either way) clears the entry from pending_requests; do not ignore pending requests — a member that asked to leave and got no answer stays idle forever.
 
 This tool never aborts or kills teammates; it only waits. Graceful termination is driven by shutdown requests via SendMessage, and cleanup remains TeamDelete's responsibility. When no teammates are working, it returns immediately with status 'idle'.
 

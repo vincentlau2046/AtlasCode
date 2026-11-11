@@ -109,9 +109,9 @@ describe('工具名集（单一事实源，值逐一验真旧仓）', () => {
   test('⑫ CUSTOM ≡ ALL（同源，内容一致）', () => {
     expect([...CUSTOM_AGENT_DISALLOWED_TOOLS].sort()).toEqual([...ALL_AGENT_DISALLOWED_TOOLS].sort())
   })
-  test('⑬ IN_PROCESS_TEAMMATE = 5 项（crons feature-gated 不入静态集，残留守）', () => {
-    expect(IN_PROCESS_TEAMMATE_ALLOWED_TOOLS).toHaveLength(5)
-    for (const n of ['TaskCreate', 'TaskGet', 'TaskList', 'TaskUpdate', 'SendMessage']) {
+  test('⑬ IN_PROCESS_TEAMMATE = 6 项（crons feature-gated 不入静态集，残留守；0.1.96 A1 ∪ RequestShutdown）', () => {
+    expect(IN_PROCESS_TEAMMATE_ALLOWED_TOOLS).toHaveLength(6)
+    for (const n of ['TaskCreate', 'TaskGet', 'TaskList', 'TaskUpdate', 'SendMessage', 'RequestShutdown']) {
       expect(IN_PROCESS_TEAMMATE_ALLOWED_TOOLS.has(n)).toBe(true)
     }
     expect(IN_PROCESS_TEAMMATE_ALLOWED_TOOLS.has('CronCreate')).toBe(false)

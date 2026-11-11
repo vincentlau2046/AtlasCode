@@ -134,6 +134,7 @@ describe('名集单源核验（constants/tools.ts 切 engine toolNames）', () =
       'TaskStop',
     ])
     expect(toArr(tui.IN_PROCESS_TEAMMATE_ALLOWED_TOOLS as Set<string>)).toEqual([
+      'RequestShutdown',
       'SendMessage',
       'TaskCreate',
       'TaskGet',

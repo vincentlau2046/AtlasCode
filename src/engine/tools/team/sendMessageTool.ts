@@ -119,14 +119,17 @@ import {
   createShutdownApprovedMessage,
   createShutdownRejectedMessage,
   createShutdownRequestMessage,
+  createShutdownRequestDeniedMessage,
   generateRequestId,
   getAgentId,
   getAgentName,
   getTeammateColor,
   getTeamName,
   isAgentSwarmsEnabled,
+  isShutdownRequestFromMember,
   isTeamLead,
   isTeammate,
+  markMessagesAsReadByPredicate,
   writeToMailbox,
 } from '../../messaging'
 import { jsonStringify } from '../../session/json'
@@ -145,7 +148,8 @@ import { getSendMessagePrompt } from './sendMessagePrompt'
 import { peekTeamContext } from './teamServices'
 
 /** 结构化协议消息（旧 zod discriminatedUnion 3 型转写，delta ①：
- * semanticBoolean → boolean）。 */
+ * semanticBoolean → boolean；0.1.96 A1 加第 4 臂 shutdown_request_denied
+ * —— lead 拒绝成员自发退出请求的回执面，f4 lock-face ②/④）。 */
 export type StructuredMessage =
   | { type: 'shutdown_request'; reason?: string }
   | {
@@ -159,6 +163,11 @@ export type StructuredMessage =
       request_id: string
       approve: boolean
       feedback?: string
+    }
+  | {
+      type: 'shutdown_request_denied'
+      request_id: string
+      reason?: string
     }
 
 /** 输入 duck 型（旧 zod InputSchema 3 字段转写，delta ①）。 */
@@ -194,7 +203,8 @@ export function tryParseStructuredMessage(
   if (
     type === 'shutdown_request' ||
     type === 'shutdown_response' ||
-    type === 'plan_approval_response'
+    type === 'plan_approval_response' ||
+    type === 'shutdown_request_denied'
   ) {
     return parsed as StructuredMessage
   }
@@ -279,7 +289,7 @@ export const SEND_MESSAGE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
     },
     message: {
       description:
-        'Plain text message content, or a structured protocol message (shutdown_request / shutdown_response / plan_approval_response)',
+        'Plain text message content, or a structured protocol message (shutdown_request / shutdown_response / shutdown_request_denied / plan_approval_response)',
       anyOf: [
         { type: 'string' },
         {
@@ -309,6 +319,17 @@ export const SEND_MESSAGE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
             feedback: { type: 'string' },
           },
           required: ['type', 'request_id', 'approve'],
+        },
+        {
+          // 0.1.96 A1 第 4 臂：lead 拒绝成员自发退出请求（to = 提请求的
+          // 成员名；request_id = pending_requests 呈现的 request_id）
+          type: 'object',
+          properties: {
+            type: { const: 'shutdown_request_denied' },
+            request_id: { type: 'string' },
+            reason: { type: 'string' },
+          },
+          required: ['type', 'request_id'],
         },
       ],
     },
@@ -660,10 +681,85 @@ async function handleShutdownRequest(
     teamName,
   )
 
+  // 0.1.96 A1 approve 核销（f4 硬条件 2 read 态推进点）：lead 批准成员
+  // 退出 = 发既有 shutdown_request 时核销 lead inbox 该成员的 unread
+  // 成员退出请求（member-name 关联——成员至多一在途请求，lock-face 判别
+  // 域），保证「裁定后 pending 不再现」（WaitForTeammates 扫描不 mark read）。
+  try {
+    await markMessagesAsReadByPredicate(
+      TEAM_LEAD_NAME,
+      m => {
+        const req = isShutdownRequestFromMember(m.text)
+        return !!req && req.from.toLowerCase() === targetName.toLowerCase()
+      },
+      teamName,
+    )
+  } catch {
+    // 核销失败不阻断批准主链（下次 WaitForTeammates 扫描仍会呈现 pending）
+  }
+
   return {
     data: {
       success: true,
       message: `Shutdown request sent to ${targetName}. Request ID: ${requestId}`,
+      request_id: requestId,
+      target: targetName,
+    },
+  }
+}
+
+/**
+ * 0.1.96 A1：lead 拒绝成员自发退出请求（SendMessageTool 结构化分派第 4
+ * 支，f4 lock-face ②/④）。动作 = 成员信箱写 shutdown_request_denied 回执
+ * （成员 runner poll 感知 → deny 锁存）+ lead inbox 该成员的 pending 成员
+ * 请求 mark read（read 态推进点，pending_requests 不再现）。
+ */
+async function handleShutdownRequestDenied(
+  targetName: string,
+  requestId: string,
+  reason: string | undefined,
+  context: SendMessageToolUseContext,
+): Promise<ToolResult<RequestOutput>> {
+  const appState = context.getAppState()
+  const teamName = resolveOutgoingTeamName(appState.teamContext)
+  if (!teamName) throw unresolvedTeamMailboxError(targetName)
+  const senderName = getAgentName() || TEAM_LEAD_NAME
+
+  const deniedMessage = createShutdownRequestDeniedMessage({
+    requestId,
+    to: targetName,
+    reason,
+  })
+
+  await writeToMailbox(
+    targetName,
+    {
+      from: senderName,
+      text: jsonStringify(deniedMessage),
+      timestamp: new Date().toISOString(),
+      color: getTeammateColor(),
+    },
+    teamName,
+  )
+
+  // deny 核销（f4 硬条件 2）：发回执即 mark read（member-name 关联）。
+  try {
+    await markMessagesAsReadByPredicate(
+      TEAM_LEAD_NAME,
+      m => {
+        const req = isShutdownRequestFromMember(m.text)
+        return !!req && req.from.toLowerCase() === targetName.toLowerCase()
+      },
+      teamName,
+    )
+  } catch {
+    // 核销失败不阻断 deny 主链
+  }
+
+  return {
+    data: {
+      success: true,
+      message: `Shutdown request ${requestId} from ${targetName} denied. The member has been told to wait for new input before requesting again.`,
       request_id: requestId,
       target: targetName,
     },
@@ -941,6 +1037,15 @@ async function dispatchStructuredMessage(
   switch (message.type) {
     case 'shutdown_request':
       return handleShutdownRequest(to, message.reason, ctx)
+    case 'shutdown_request_denied':
+      // 0.1.96 A1 第 4 支：lead 拒绝成员自发退出请求（发回执 + 核销
+      // lead inbox 该成员的 pending——read 态推进点，f4 硬条件 2）
+      return handleShutdownRequestDenied(
+        to,
+        message.request_id,
+        message.reason,
+        ctx,
+      )
     case 'shutdown_response':
       if (message.approve) {
         return handleShutdownApproval(message.request_id, ctx)

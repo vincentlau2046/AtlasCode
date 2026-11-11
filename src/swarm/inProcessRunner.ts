@@ -207,6 +207,11 @@ import {
   TASK_GET_TOOL_NAME,
   TASK_LIST_TOOL_NAME,
   TASK_UPDATE_TOOL_NAME,
+  // 0.1.96 A1：成员退出请求面注入（team-essential 8 件）+ deny 感知契约
+  REQUEST_SHUTDOWN_TOOL_NAME,
+  isShutdownRequestDenied,
+  recordMemberShutdownRequestDenied,
+  clearMemberShutdownRequestState,
   type AgentDefinition,
   type AutoCompactDeps,
   type AutoCompactTrackingState,
@@ -366,6 +371,8 @@ export function resolveTeammateAgentFace(params: {
             TASK_GET_TOOL_NAME,
             TASK_LIST_TOOL_NAME,
             TASK_UPDATE_TOOL_NAME,
+            // 0.1.96 A1：成员退出请求面（team-essential 8 件，f4 lock-face ⑥）
+            REQUEST_SHUTDOWN_TOOL_NAME,
           ]),
         ]
       : undefined,
@@ -974,6 +981,15 @@ export type WaitResult =
       originalMessage: string
     }
   | {
+      // 0.1.96 A1（f4 lock-face ⑤-1）：lead 拒绝成员退出请求的回执——
+      // poll 感知即登记 deny 锁存（recordMemberShutdownRequestDenied），
+      // 回执本身不自解锁（主循环 deny echo 支不触锁存态）。
+      type: 'shutdown_request_denied'
+      requestId: string
+      reason?: string
+      from: string
+    }
+  | {
       type: 'new_message'
       message: string
       from: string
@@ -1114,6 +1130,44 @@ export async function waitForNextPromptOrShutdown(
           type: 'shutdown_request',
           request: shutdownParsed,
           originalMessage: msg.text,
+        }
+      }
+
+      // 0.1.96 A1（f4 lock-face ⑤-1）：deny 回执感知支——次高优先级
+      //（紧随 shutdown_request 扫描）：mark read + 登记 deny 锁存（跨轮
+      // 有界，防环补强 1）→ 主循环 deny echo 支呈文案给成员模型。回执
+      // 本身不解锁（新输入枚举 = new_message / shutdown_request 事件）。
+      let deniedIndex = -1
+      let deniedParsed: ReturnType<typeof isShutdownRequestDenied> = null
+      for (let i = 0; i < allMessages.length; i++) {
+        const m = allMessages[i]
+        if (m && !m.read) {
+          const parsed = isShutdownRequestDenied(m.text)
+          if (parsed) {
+            deniedIndex = i
+            deniedParsed = parsed
+            break
+          }
+        }
+      }
+      if (deniedIndex !== -1) {
+        logForDebugging(
+          `[inProcessRunner] ${identity.agentName} received shutdown request denial (${deniedParsed?.requestId}) from ${deniedParsed && 'from' in deniedParsed ? deniedParsed.from : 'team-lead'}`,
+        )
+        await markMessageAsReadByIndex(
+          identity.agentName,
+          identity.teamName,
+          deniedIndex,
+        )
+        recordMemberShutdownRequestDenied(
+          identity.agentName,
+          deniedParsed!.requestId,
+        )
+        return {
+          type: 'shutdown_request_denied',
+          requestId: deniedParsed!.requestId,
+          reason: deniedParsed!.reason,
+          from: TEAM_LEAD_NAME,
         }
       }
 
@@ -1644,6 +1698,10 @@ export async function runInProcessTeammate(
 
       switch (waitResult.type) {
         case 'shutdown_request':
+          // 0.1.96 A1（f4 lock-face ⑤-3）：lead 直接下发请求 = 意图覆盖，
+          // 成员自发在途请求自动失效（pending 清理）；同时清 deny 锁存
+          //（新输入解锁枚举成员，防环补强 1）。
+          clearMemberShutdownRequestState(identity.agentName)
           // Pass shutdown request to model for decision
           // Format as teammate-message for consistency with how tmux teammates receive it
           // The model will use approveShutdown or rejectShutdown tool
@@ -1662,11 +1720,35 @@ export async function runInProcessTeammate(
           )
           break
 
+        case 'shutdown_request_denied':
+          // 0.1.96 A1（f4 lock-face ⑤-1/⑤-4）：deny echo——锁存已在 poll
+          // 支登记（recordMemberShutdownRequestDenied）；回执本身**不得
+          // 自解锁**（防自指环，锁存保持至下一条 new_message /
+          // shutdown_request），仅呈 fail-visible 文案给成员模型。
+          logForDebugging(
+            `[inProcessRunner] ${identity.agentId} shutdown request denied - latch held until next input`,
+          )
+          currentPrompt = formatAsTeammateMessage(
+            waitResult.from,
+            `Your shutdown request (${waitResult.requestId}) was denied by the team lead${waitResult.reason ? `: ${waitResult.reason}` : ''}. Stay in your current role; wait for new input before requesting shutdown again.`,
+          )
+          // Add to task.messages for transcript display
+          appendTeammateMessage(
+            taskId,
+            createUserMessage({ content: currentPrompt }),
+            setAppState,
+          )
+          break
+
         case 'new_message':
           // New prompt from leader or teammate
           logForDebugging(
             `[inProcessRunner] ${identity.agentId} received new message from ${waitResult.from}`,
           )
+          // 0.1.96 A1（f4 lock-face ⑤-1）：新输入 = deny 锁存解锁枚举
+          //（unlock 面恰两处：本支 + shutdown_request 支；deny echo 不在
+          // 枚举内）。
+          clearMemberShutdownRequestState(identity.agentName)
           // Messages from the user should be plain text (not wrapped in XML)
           // Messages from other teammates get XML wrapper for identification
           if (waitResult.from === 'user') {

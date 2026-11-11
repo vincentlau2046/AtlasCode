@@ -126,6 +126,8 @@ export {
   TEAM_CREATE_TOOL_NAME,
   TEAM_DELETE_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
+  // 0.1.96 A1：成员退出请求工具名（tools 域 toolNames 单一源同口径）
+  REQUEST_SHUTDOWN_TOOL_NAME,
   // C 桶 ③ S-E2d（§8.66）：SNIP_TOOL_NAME seed（与 tools 根门面同口径）
   SNIP_TOOL_NAME,
   TASK_STOP_TOOL_NAME,
@@ -214,6 +216,14 @@ export {
   TeamDeleteTool,
   // 0.1.93 W-D-A round 5 收敛原语（案 B，engine-only）
   WaitForTeammatesTool,
+  // 0.1.96 A1：成员退出请求工具 + deny 锁存面（runner 消费）
+  RequestShutdownTool,
+  isMemberShutdownRequestPending,
+  peekPendingMemberShutdownRequest,
+  recordMemberShutdownRequestDenied,
+  clearMemberShutdownRequestState,
+  clearMemberPendingShutdownRequest,
+  resetRequestShutdownStateForTest,
   setTeamServices,
   resetTeamServices,
   createDefaultTeamContextStore,
@@ -1056,6 +1066,8 @@ export {
   createShutdownRejectedMessage,
   sendShutdownRequestToMailbox,
   isShutdownRequest,
+  // 0.1.96 A1：deny 回执判别（runner poll 感知支消费）
+  isShutdownRequestDenied,
   isPlanApprovalRequest,
   isShutdownApproved,
   isShutdownRejected,

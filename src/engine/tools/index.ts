@@ -263,6 +263,8 @@ export {
   TEAM_CREATE_TOOL_NAME,
   TEAM_DELETE_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
+  // 0.1.96 A1：成员退出请求工具名（toolNames 单一源同口径）
+  REQUEST_SHUTDOWN_TOOL_NAME,
   TASK_STOP_TOOL_NAME,
   // C 桶 ③ S-E2d（§8.66）：SNIP_TOOL_NAME seed 补入（D 类块注释同口径）
   SNIP_TOOL_NAME,
@@ -950,6 +952,16 @@ export {
   WaitForTeammatesTool,
   WAIT_FOR_TEAMMATES_DESCRIPTION,
   WAIT_FOR_TEAMMATES_PROMPT,
+  collectPendingMemberRequests,
+  // 0.1.96 A1：成员退出请求工具（engine 单源）
+  REQUEST_SHUTDOWN_TOOL_INPUT_SCHEMA,
+  RequestShutdownTool,
+  isMemberShutdownRequestPending,
+  peekPendingMemberShutdownRequest,
+  recordMemberShutdownRequestDenied,
+  clearMemberShutdownRequestState,
+  clearMemberPendingShutdownRequest,
+  resetRequestShutdownStateForTest,
   setTeamServices,
   resetTeamServices,
   requireTeamServices,

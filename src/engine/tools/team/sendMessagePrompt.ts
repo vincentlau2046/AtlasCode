@@ -64,7 +64,16 @@ If you receive a JSON message with \`type: "shutdown_request"\` or \`type: "plan
 
 Approving shutdown terminates your process. Rejecting plan sends the teammate back to revise. Don't originate \`shutdown_request\` unless asked. Don't send structured JSON status messages — use TaskUpdate.
 
-Always send protocol responses as JSON **objects** in the \`message\` field, exactly as shown above — never stringify them into a string. (String-encoded JSON of the three protocol types is tolerated as a fallback, but the object form is authoritative.)`.trim()
+## Member shutdown requests (as lead)
+
+Teammates can ask you to approve their exit via the RequestShutdown tool. WaitForTeammates surfaces these as \`pending_requests\` entries ({ from, reason, request_id }). Decide each one via this tool (0.1.96 A1):
+
+- **Approve**: \`{"to": "<member>", "message": {"type": "shutdown_request", "reason": "..."}}\` — the member runs its existing approval path and exits.
+- **Deny**: \`{"to": "<member>", "message": {"type": "shutdown_request_denied", "request_id": "<request_id from pending_requests>", "reason": "..."}}\` — the member is told to wait for new input before requesting again.
+
+Deciding either way clears the entry from \`pending_requests\`. Don't leave member shutdown requests unanswered — a member that asked to leave and got no reply stays idle.
+
+Always send protocol responses as JSON **objects** in the \`message\` field, exactly as shown above — never stringify them into a string. (String-encoded JSON of the protocol types is tolerated as a fallback, but the object form is authoritative.)`.trim()
 }
 
 // 旧 getPrompt() gate-off 模板 .trim() 结果逐字（S-E2 §8.62 落盘锚点 =

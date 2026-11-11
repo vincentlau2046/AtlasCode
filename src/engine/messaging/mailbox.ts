@@ -899,6 +899,82 @@ export function createShutdownApprovedMessage(params: {
 }
 
 /**
+ * Member-initiated shutdown request (0.1.96 A1, f4 lock-face ②):
+ * a teammate asks the team lead to approve its exit. Approval authority
+ * stays with the lead — this message only carries the request; the lead
+ * approves by sending the existing shutdown_request (member high-priority
+ * scan + handleShutdownApproval reuse), or denies with
+ * shutdown_request_denied.
+ */
+export const ShutdownRequestFromMemberMessageSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('shutdown_request_from_member'),
+    requestId: z.string(),
+    from: z.string(),
+    reason: z.string().optional(),
+    timestamp: z.string(),
+  }),
+)
+
+export type ShutdownRequestFromMemberMessage = z.infer<
+  ReturnType<typeof ShutdownRequestFromMemberMessageSchema>
+>
+
+/**
+ * Lead's denial receipt for a member-initiated shutdown request
+ * (0.1.96 A1). Direction: lead → member (the existing shutdown_rejected
+ * is the member's response to a lead-issued request — opposite direction,
+ * not interchangeable).
+ */
+export const ShutdownRequestDeniedMessageSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('shutdown_request_denied'),
+    requestId: z.string(),
+    to: z.string(),
+    reason: z.string().optional(),
+    timestamp: z.string(),
+  }),
+)
+
+export type ShutdownRequestDeniedMessage = z.infer<
+  ReturnType<typeof ShutdownRequestDeniedMessageSchema>
+>
+
+/**
+ * Creates a member-initiated shutdown request message (member → lead)
+ */
+export function createShutdownRequestFromMemberMessage(params: {
+  requestId: string
+  from: string
+  reason?: string
+}): ShutdownRequestFromMemberMessage {
+  return {
+    type: 'shutdown_request_from_member',
+    requestId: params.requestId,
+    from: params.from,
+    reason: params.reason,
+    timestamp: new Date().toISOString(),
+  }
+}
+
+/**
+ * Creates a shutdown request denial receipt (lead → member)
+ */
+export function createShutdownRequestDeniedMessage(params: {
+  requestId: string
+  to: string
+  reason?: string
+}): ShutdownRequestDeniedMessage {
+  return {
+    type: 'shutdown_request_denied',
+    requestId: params.requestId,
+    to: params.to,
+    reason: params.reason,
+    timestamp: new Date().toISOString(),
+  }
+}
+
+/**
  * Creates a shutdown rejected message to send to the team leader
  */
 export function createShutdownRejectedMessage(params: {
@@ -966,6 +1042,43 @@ export function isShutdownRequest(
 ): ShutdownRequestMessage | null {
   try {
     const result = ShutdownRequestMessageSchema().safeParse(
+      jsonParse(messageText),
+    )
+    if (result.success) return result.data
+  } catch {
+    // Not JSON
+  }
+  return null
+}
+
+/**
+ * Checks if a message text is a member-initiated shutdown request
+ * (0.1.96 A1: member → lead, lead inbox consumer = WaitForTeammates
+ * pending_requests scan)
+ */
+export function isShutdownRequestFromMember(
+  messageText: string,
+): ShutdownRequestFromMemberMessage | null {
+  try {
+    const result = ShutdownRequestFromMemberMessageSchema().safeParse(
+      jsonParse(messageText),
+    )
+    if (result.success) return result.data
+  } catch {
+    // Not JSON
+  }
+  return null
+}
+
+/**
+ * Checks if a message text is a lead's denial receipt for a member-initiated
+ * shutdown request (0.1.96 A1: lead → member, member poll deny-aware branch)
+ */
+export function isShutdownRequestDenied(
+  messageText: string,
+): ShutdownRequestDeniedMessage | null {
+  try {
+    const result = ShutdownRequestDeniedMessageSchema().safeParse(
       jsonParse(messageText),
     )
     if (result.success) return result.data
@@ -1180,6 +1293,10 @@ export function isStructuredProtocolMessage(messageText: string): boolean {
       type === 'sandbox_permission_response' ||
       type === 'shutdown_request' ||
       type === 'shutdown_approved' ||
+      // 0.1.96 A1：成员自发退出请求 + lead 拒绝回执（双方 poll 路由专用，
+      // 不得作 raw LLM context 消费）
+      type === 'shutdown_request_from_member' ||
+      type === 'shutdown_request_denied' ||
       type === 'team_permission_update' ||
       type === 'mode_set_request' ||
       type === 'plan_approval_request' ||

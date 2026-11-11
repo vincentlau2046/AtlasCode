@@ -10,7 +10,7 @@
  *      Instructions\n${customPrompt}`，同步/异步 getSystemPrompt 双面）/
  *      append 支次序 / 空自定义支不进 parts。
  *   2. resolveTeammateAgentFace（旧 L966-984 + runAgent L510-517）：
- *      def.tools ∪ team-essential 7 件 Set-union 保底（旧 L966-980 逐字）/
+ *      def.tools ∪ team-essential 8 件 Set-union 保底（旧 L966-980 逐字 + 0.1.96 A1 ∪ RequestShutdown）/
  *      无 def → undefined ≡ 通配全量池 / model 传播（旧 L984 条件 spread）/
  *      disallowedTools 禁用集剔除 / 无效 spec 静默落 invalidTools。
  *   3. createTeammateTpcBuilder（旧 runAgent L475-488 session 规则 +
@@ -35,6 +35,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
+  REQUEST_SHUTDOWN_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
   TEAM_CREATE_TOOL_NAME,
   TEAM_DELETE_TOOL_NAME,
@@ -59,7 +60,8 @@ import {
   type TeammateToolState,
 } from '../../src/swarm'
 
-const TEAM_ESSENTIALS_7 = [
+// 0.1.96 A1：team-essential 保底 7→8 件（∪ REQUEST_SHUTDOWN_TOOL_NAME）。
+const TEAM_ESSENTIALS_8 = [
   SEND_MESSAGE_TOOL_NAME,
   TEAM_CREATE_TOOL_NAME,
   TEAM_DELETE_TOOL_NAME,
@@ -67,6 +69,7 @@ const TEAM_ESSENTIALS_7 = [
   TASK_GET_TOOL_NAME,
   TASK_LIST_TOOL_NAME,
   TASK_UPDATE_TOOL_NAME,
+  REQUEST_SHUTDOWN_TOOL_NAME,
 ]
 
 /** 最小假工具（gate 消费面 = name/userFacingName/description；决策体 = name + checkPermissions 鸭子支）。 */
@@ -82,7 +85,7 @@ function fakeTool(name: string): Tool {
   } as unknown as Tool
 }
 
-/** 基础池：2 普通工具 + 2 team-essential 工具（其余 5 件不在池 → 无效 spec 剔除支）。 */
+/** 基础池：2 普通工具 + 2 team-essential 工具（其余 6 件不在池 → 无效 spec 剔除支）。 */
 const BASE_POOL: Tools = [
   fakeTool('Read'),
   fakeTool('Write'),
@@ -191,7 +194,7 @@ describe('S-E2d S2 resolveTeammateAgentFace', () => {
     )
   })
 
-  test('def.tools Set-union 保底：∪ team-essential 7 件 + 无效 spec 剔除', () => {
+  test('def.tools Set-union 保底：∪ team-essential 8 件 + 无效 spec 剔除', () => {
     const { def, tools } = resolveTeammateAgentFace({
       identity: IDENTITY,
       teammateSystemPrompt: 'SP',
@@ -201,9 +204,9 @@ describe('S-E2d S2 resolveTeammateAgentFace', () => {
       },
       basePool: BASE_POOL,
     })
-    // Set-union 逐字：def.tools 含 2 显式 + 7 保底（9 件，Set 去重）
-    expect(def.tools?.length).toBe(9)
-    for (const name of TEAM_ESSENTIALS_7) {
+    // Set-union 逐字：def.tools 含 2 显式 + 8 保底（10 件，Set 去重）
+    expect(def.tools?.length).toBe(10)
+    for (const name of TEAM_ESSENTIALS_8) {
       expect(def.tools).toContain(name)
     }
     expect(def.tools).toContain('Read')
@@ -218,8 +221,8 @@ describe('S-E2d S2 resolveTeammateAgentFace', () => {
     )
   })
 
-  test('def.tools 为 team-essential 子集 → Set 去重（7 件非 8 件）', () => {
-    // SendMessage 本就在 7 件保底集内 → [SendMessage] ∪ 7 件 = 7 件（Set 去重支验真）。
+  test('def.tools 为 team-essential 子集 → Set 去重（8 件非 10 件）', () => {
+    // SendMessage 本就在 8 件保底集内 → [SendMessage] ∪ 8 件 = 8 件（Set 去重支验真）。
     const { def } = resolveTeammateAgentFace({
       identity: IDENTITY,
       teammateSystemPrompt: 'SP',
@@ -229,7 +232,7 @@ describe('S-E2d S2 resolveTeammateAgentFace', () => {
       },
       basePool: BASE_POOL,
     })
-    expect(def.tools?.length).toBe(7)
+    expect(def.tools?.length).toBe(8)
   })
 
   test('model 传播（旧 L984 条件 spread）+ disallowedTools 禁用集剔除', () => {

@@ -59,6 +59,7 @@ import {
   isSandboxPermissionResponse,
   isShutdownApproved,
   isShutdownRequest,
+  isShutdownRequestDenied,
   isTeamPermissionUpdate,
   markMessagesAsRead,
   readUnreadMessages,
@@ -208,6 +209,7 @@ export function useInboxPoller({
     const sandboxPermissionRequests: TeammateMessage[] = []
     const sandboxPermissionResponses: TeammateMessage[] = []
     const shutdownRequests: TeammateMessage[] = []
+    const shutdownRequestDenials: TeammateMessage[] = []
     const shutdownApprovals: TeammateMessage[] = []
     const teamPermissionUpdates: TeammateMessage[] = []
     const modeSetRequests: TeammateMessage[] = []
@@ -220,6 +222,8 @@ export function useInboxPoller({
       const sandboxReq = isSandboxPermissionRequest(m.text)
       const sandboxResp = isSandboxPermissionResponse(m.text)
       const shutdownReq = isShutdownRequest(m.text)
+      // 0.1.96 A1：成员退出请求的 deny 回执（tmux 车道成员侧感知）
+      const shutdownDenial = isShutdownRequestDenied(m.text)
       const shutdownApproval = isShutdownApproved(m.text)
       const teamPermUpdate = isTeamPermissionUpdate(m.text)
       const modeSetReq = isModeSetRequest(m.text)
@@ -235,6 +239,8 @@ export function useInboxPoller({
         sandboxPermissionResponses.push(m)
       } else if (shutdownReq) {
         shutdownRequests.push(m)
+      } else if (shutdownDenial) {
+        shutdownRequestDenials.push(m)
       } else if (shutdownApproval) {
         shutdownApprovals.push(m)
       } else if (teamPermUpdate) {
@@ -671,6 +677,18 @@ export function useInboxPoller({
       // Pass through shutdown requests - the UI component will render them nicely
       // and the model will receive instructions via the tool prompt documentation
       for (const m of shutdownRequests) {
+        regularMessages.push(m)
+      }
+    }
+
+    // Handle shutdown request denials (teammate side) - 0.1.96 A1: pass
+    // through so the tmux-lane member model sees the lead's denial receipt
+    // (in-process lane has its own runner poll deny branch)
+    if (shutdownRequestDenials.length > 0 && isTeammate()) {
+      logForDebugging(
+        `[InboxPoller] Found ${shutdownRequestDenials.length} shutdown request denial(s)`,
+      )
+      for (const m of shutdownRequestDenials) {
         regularMessages.push(m)
       }
     }

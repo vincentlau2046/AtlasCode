@@ -67,8 +67,8 @@ describe('P-S1 对象面（静态成员 + face 收窄）', () => {
 
 // ── P-S2 schema 面 ─────────────────────────────────────────────────────
 
-describe('P-S2 schema 面（3 属性 + required + anyOf 4 臂 + gate-off 描述）', () => {
-  test('shape 逐字（delta ① 纯 JSON 化 + delta ② gate-off to 描述）', () => {
+describe('P-S2 schema 面（3 属性 + required + anyOf 5 臂 + gate-off 描述）', () => {
+  test('shape 逐字（delta ① 纯 JSON 化 + delta ② gate-off to 描述 + 0.1.96 A1 第 5 臂 shutdown_request_denied）', () => {
     const s = SEND_MESSAGE_TOOL_INPUT_SCHEMA
     expect(s.type).toBe('object')
     expect(s.additionalProperties).toBe(false)
@@ -82,7 +82,7 @@ describe('P-S2 schema 面（3 属性 + required + anyOf 4 臂 + gate-off 描述�
     })
     expect(typeof props.summary.type).toBe('string')
     const arms = props.message.anyOf as Array<Record<string, unknown>>
-    expect(arms).toHaveLength(4)
+    expect(arms).toHaveLength(5)
     expect(arms[0]).toEqual({ type: 'string' })
     expect(arms[1].required).toEqual(['type'])
     expect((arms[1].properties as Record<string, unknown>).type).toEqual({
@@ -93,6 +93,14 @@ describe('P-S2 schema 面（3 属性 + required + anyOf 4 臂 + gate-off 描述�
     expect((arms[3].properties as Record<string, unknown>).type).toEqual({
       const: 'plan_approval_response',
     })
+    // 0.1.96 A1：deny 回执臂（required [type, request_id]，reason optional）
+    expect(arms[4].required).toEqual(['type', 'request_id'])
+    expect((arms[4].properties as Record<string, unknown>).type).toEqual({
+      const: 'shutdown_request_denied',
+    })
+    const denyProps = arms[4].properties as Record<string, unknown>
+    expect(denyProps.request_id).toEqual({ type: 'string' })
+    expect(denyProps.reason).toEqual({ type: 'string' })
   })
 })
 

@@ -88,9 +88,24 @@ export {
   WaitForTeammatesTool,
   WAIT_FOR_TEAMMATES_DEFAULT_TIMEOUT_MS,
   WAIT_FOR_TEAMMATES_MAX_TIMEOUT_MS,
+  collectPendingMemberRequests,
   type WaitForTeammatesInput,
   type WaitForTeammatesOutput,
 } from './waitForTeammatesTool'
+// 0.1.96 A1（f4 lock-face ⑥）：成员主动退出请求工具（engine 单源，
+// 副效应白名单 = 仅 mailbox 写；头注 = requestShutdownTool.ts 事实源）。
+export {
+  REQUEST_SHUTDOWN_TOOL_INPUT_SCHEMA,
+  RequestShutdownTool,
+  isMemberShutdownRequestPending,
+  peekPendingMemberShutdownRequest,
+  recordMemberShutdownRequestDenied,
+  clearMemberShutdownRequestState,
+  clearMemberPendingShutdownRequest,
+  resetRequestShutdownStateForTest,
+  type RequestShutdownInput,
+  type RequestShutdownOutput,
+} from './requestShutdownTool'
 export {
   DESCRIPTION as WAIT_FOR_TEAMMATES_DESCRIPTION,
   PROMPT as WAIT_FOR_TEAMMATES_PROMPT,

@@ -46,6 +46,8 @@ export const WAIT_FOR_TEAMMATES_TOOL_NAME = 'WaitForTeammates'
 // 值逐一验真旧仓 SnipTool.ts:5）。
 export const SNIP_TOOL_NAME = 'Snip'
 export const SEND_MESSAGE_TOOL_NAME = 'SendMessage'
+// 0.1.96 A1（f4 lock-face ①）：成员主动请求退出（批准权在 lead）。
+export const REQUEST_SHUTDOWN_TOOL_NAME = 'RequestShutdown'
 export const TASK_STOP_TOOL_NAME = 'TaskStop'
 // ── T-5e 补全（注册表机制 + 工具名集消费，值逐一验真旧仓）──
 export const TASK_OUTPUT_TOOL_NAME = 'TaskOutput'
@@ -141,6 +143,8 @@ export const IN_PROCESS_TEAMMATE_ALLOWED_TOOLS = new Set<string>([
   TASK_LIST_TOOL_NAME,
   TASK_UPDATE_TOOL_NAME,
   SEND_MESSAGE_TOOL_NAME,
+  // 0.1.96 A1：成员可见的退出请求面（RequestShutdown）
+  REQUEST_SHUTDOWN_TOOL_NAME,
 ])
 
 /**
