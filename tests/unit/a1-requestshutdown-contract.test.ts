@@ -25,6 +25,12 @@ import {
   IN_PROCESS_TEAMMATE_ALLOWED_TOOLS,
 } from '../../src/engine/tools/toolNames'
 import { setDynamicTeamContext } from '../../src/engine/messaging/teammate'
+import { getBaseToolEntities } from '../../src/engine/tools/baseToolEntities'
+import {
+  getTools,
+  getToolsForDefaultPreset,
+} from '../../src/engine/tools/toolRegistry'
+import { resolveAgentTools } from '../../src/engine/tools/agent/agentToolUtils'
 
 /**
  * 0.1.96 A1 requestShutdown 段 I 判别格（lock-face
@@ -394,5 +400,70 @@ describe('A1 §9 安全硬化三修', () => {
     expect(pending).toHaveLength(1)
     expect(pending[0]!.from).toBe('worker-true')
     expect(pending[0]!.request_id).not.toBe('rs-spoof-1')
+  })
+})
+
+describe('A1 §10 组合根真池面（baseToolEntities 装配实测）', () => {
+  let prevTeamsEnv: string | undefined
+
+  beforeEach(() => {
+    prevTeamsEnv = process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = '1'
+  })
+
+  afterEach(() => {
+    if (prevTeamsEnv === undefined)
+      delete process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    else process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = prevTeamsEnv
+    setDynamicTeamContext(null)
+  })
+
+  // 空权限上下文（三规则源全空 = deny 过滤支零剔除）
+  const emptyCtx = {
+    mode: 'default',
+    additionalWorkingDirectories: new Map(),
+    alwaysAllowRules: {},
+    alwaysDenyRules: {},
+    alwaysAskRules: {},
+    isBypassPermissionsModeAvailable: false,
+  } as unknown as Parameters<typeof getTools>[0]
+
+  test('成员身份：组合根真池（getToolsForDefaultPreset / getTools / resolveAgentTools）含 RequestShutdown', () => {
+    setDynamicTeamContext({
+      agentId: 'agent-pool-1',
+      agentName: 'worker-pool',
+      teamName: 't-pool',
+      planModeRequired: false,
+    })
+    // 组合根镜像：print.ts createAgentLoopDeps 同款 baseTools 注入位
+    const deps = { baseTools: getBaseToolEntities() }
+
+    // ① 名单面：default 预设工具名名单含 RequestShutdown
+    expect(getToolsForDefaultPreset(deps)).toContain(REQUEST_SHUTDOWN_TOOL_NAME)
+
+    // ② wire 池面：getTools（deny 过滤 + isEnabled 尾滤）含 RequestShutdown 实体
+    const pool = getTools(emptyCtx, deps)
+    expect(pool.map(t => t.name)).toContain(REQUEST_SHUTDOWN_TOOL_NAME)
+
+    // ③ 子 agent 解析面：wildcard spec 经 resolveAgentTools 真池解析仍在场
+    //   （gate RED 缺陷面：名单齐备 ≠ 实例在场——组合根漏装配时本组三格全红）
+    const resolved = resolveAgentTools(
+      { tools: undefined, disallowedTools: undefined, source: 'built-in' },
+      pool,
+    )
+    expect(resolved.resolvedTools.map(t => t.name)).toContain(
+      REQUEST_SHUTDOWN_TOOL_NAME,
+    )
+  })
+
+  test('非成员身份：真池不含 RequestShutdown（isEnabled 门，判别格非恒真）', () => {
+    setDynamicTeamContext(null)
+    const deps = { baseTools: getBaseToolEntities() }
+    expect(getToolsForDefaultPreset(deps)).not.toContain(
+      REQUEST_SHUTDOWN_TOOL_NAME,
+    )
+    expect(
+      getTools(emptyCtx, deps).map(t => t.name),
+    ).not.toContain(REQUEST_SHUTDOWN_TOOL_NAME)
   })
 })

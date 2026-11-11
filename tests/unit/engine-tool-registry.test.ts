@@ -166,8 +166,8 @@ describe('filterToolsForAgent（T-5e 全量禁用集接线判别）', () => {
 describe('getBaseToolEntities()（headless 基础工具全集契约）', () => {
   const base = getBaseToolEntities()
   const names = () => base.map((t) => t.name)
-  test('⑳ 名称唯一 + 全 34 件（单一事实源，防重构静默丢工具）', () => {
-    expect(names()).toHaveLength(34)
+  test('⑳ 名称唯一 + 全 35 件（单一事实源，防重构静默丢工具；0.1.96 A1 ∪ RequestShutdown 组合根装配）', () => {
+    expect(names()).toHaveLength(35)
     expect(new Set(names()).size).toBe(base.length)
   })
   test('㉑ 覆盖 headless 编码必需面（0405 fabrication 根因：文件/Shell/搜索工具在场）', () => {

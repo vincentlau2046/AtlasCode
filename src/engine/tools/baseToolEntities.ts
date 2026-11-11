@@ -33,6 +33,7 @@ import {
 import { ListMcpResourcesTool, ReadMcpResourceTool } from './mcp/index'
 import { NotebookEditTool } from './notebook'
 import {
+  RequestShutdownTool,
   SendMessageTool,
   SnipTool,
   TeamCreateTool,
@@ -59,7 +60,7 @@ import { EnterWorktreeTool, ExitWorktreeTool } from './worktree'
 import type { Tools } from '../../shared'
 
 /**
- * 基础工具本体全集（34 件，AgentTool 内建除外）——调用方
+ * 基础工具本体全集（35 件，AgentTool 内建除外；0.1.96 A1 ∪ RequestShutdown）——调用方
  * toolRegistryDeps.baseTools 注入位（headless 车道 print.ts createAgentLoopDeps
  * 调用点；组合根现不硬接 = 窄 spine 缺省面，见 engine/loopDeps.ts 头注）。
  * loopDeps 构建器对 baseTools 的 Snip/TeamCreate/TeamDelete 追加经注册表
@@ -106,6 +107,7 @@ export function getBaseToolEntities(): Tools {
     SendMessageTool,
     TeamCreateTool,
     TeamDeleteTool,
+    RequestShutdownTool,
     SnipTool,
   ]
 }
