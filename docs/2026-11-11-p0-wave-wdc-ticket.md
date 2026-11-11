@@ -94,3 +94,31 @@ func 单副本绿 ≠ e2e 双副本真环境绿；§2.6 子串 grep 断言一律
 4. **【吸收】R3 分账 + 状态形判别**：引用面按 **活读 4**（CoordinatorAgentStatus/useSwarmBanner/useTypeahead/TUI SendMessageTool 兜底链——均「空态即现行为」零行为变更成立）**+ init 2**（AppStateStore.ts:484/main.tsx:2382）**+ 注释 1**（engine sendMessageTool 5 处全注释级）分账禁混计；registry 本体 = AppStateStore 状态字段（:164/:484），判别格加 **AppStateStore 状态形判别**（序列化/持久化/快照含该字段须同清，防 dangling schema）；TUI SendMessageTool 读面 fate 按收敛后当时活码为准。
 
 审计明示无需二审。工单 §3 相应条款以本节为准。→ f4 发双信号（Main=段 R1 lock-face 起步，e2e=判据预告）。
+
+## §7 f4 批复：段 R1 lock-face（2026-11-11，@worktree 8c48a374）
+
+### ① 工单勘误采纳 + 方法论注记
+
+teammateModeSnapshot 第 9 对采纳（engine 副本在 backends **目录外** → 工单 §0.1 目录域清单漏计）——**同族第四例**（枚举面又一形：目录域清单 ≠ 全对枚举，§2.7 specifier 解析纪律本可捕获；登记入方法论：副本枚举必须 specifier 全仓解析，目录域清单仅作起点）。engine-only 4 文件定性「接缝装配件非副本」采纳（收敛后保留基座）。
+
+### ② R1-D1 InProcessBackend = TUI 消费形为准（反基座预判）——批准
+
+inProcessSpawnHooksPort 承载形批准（RF-T1/todosPort 同族先例；四钩子闭包体 TUI 域所有 engine 不可 import = port 为唯一合法形）；fail-soft null 缺省 = 「未接线」语义 engine lane 恒等 ✓；接线点 tui/factory 与 setStartInProcessTeammate 同批（PRT-2）✓；types.ts 窄视图按消费形扩面 ✓。**附带条件一条（硬）**：hooks factory **调用期异常 fail-visible 禁吞**——缺省 null 恒等仅适用「未接线」，已接线后 factory 抛错须向上传播，禁降级为零钩子静默继续。
+
+### ③ R1-D2 detection 裁面维持——批准
+
+第三指标不回填：Linux 结构性不可达 iTerm2，为不可达平台引 terminal 识别面进 engine/shared 域违最小面；前 2 指标覆盖主识别路径；macOS TERM_PROGRAM 缺省边缘 = 理论面无活证据，登记足矣。f4 不裁回填（回填另切片条款备而不用）。
+
+### ④ R1-D3 it2Setup 持久化 port——批准
+
+it2SetupPersistencePort 批准（todosPort 同族；null 缺省 = engine 进程内标志恒等；tui/factory 接 globalConfig 适配恢复跨进程持久行为）。**附带条件**：适配器读写异常面维持 TUI 现行为（globalConfig 抛错向上传播），禁新增吞错。备选（维持进程内标志 = TUI 行为回归）不取。
+
+### ⑤ R1-D4 teammateModeSnapshot engine 单源 + capture(configMode?)——批准
+
+状态分叉实证采纳（TUI 活面走 tui 模块态 / engine lane 恒走 init-bug 兜底支 + capture 裁面丢 config 读取）——「状态面分叉 = 判读分叉」登记面再添实证。单源 + 可选参（main.tsx 显式传参；不传 = 'auto' 恒等）批准，消分叉 + 恢复 config 行为双赢。**观察注记（不阻断）**：headless 无 capture 调用 → 读点仍走兜底支（现行为恒等维持）；其 logError 噪声面若需治理另登记不入本波。
+
+### ⑥ 判别格 §3 分层表——批准（审计必改①落形合规）
+
+四层取证形 + 防假绿条款全准；补充确认：tmux 降级单测须头注登记降级原因（已含）；R1-D4 capture 传参形锚（main.tsx 调用点带实参）入 TUI lane 装配面直证。判据面随本批复冻结：§3 全表 + 四件套 + canon Δ 恰合 + 收敛后结构三证（实例数=1 / tui backends 目录 existsSync=false / specifier 解析零命中）。
+
+批复后依序落码：R1 修形 → 判别格 RED→GREEN → 四件套 → 报段 R2。
