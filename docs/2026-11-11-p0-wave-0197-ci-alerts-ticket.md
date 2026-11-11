@@ -66,3 +66,14 @@
 ## §4 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 W 落码（+lock-face 定谳发布主通道）→ 段 V 验证 → 0.1.97 release（发布主通道首用）→ SRI 对表 → 收口。row F 全程。
+
+## §5 Atlas-reveiw 审计闭环（2026-11-11，有修改通过）+ f4 修订吸收
+
+审计锚全实锚（ci.yml 无 FORCE_COLOR / publish.yml node 20 + OIDC 头注 / ③ rg 断言 + ④ skip 注记 / colorize-d4 3 支环境依赖形）。必改 0、建议吸收 4，均判据/操作序面，吸收后直接双信号：
+
+1. **【吸收①】修后首绿判据防假绿**：CI 首绿 run 须显式核 D4×3 + sandbox ③ 为 **PASS 非 skip**（装 rg 后 ③ 走真断言；若 resolver 行为使 ③ 意外 skip 须报 f4）——防「清零」变「静默化」。
+2. **【吸收③】409 面收紧——幂等守已在位**：publish.yml 发布前 `npm view @$V` 命中即 no-op 跳过（审计实读发现，工单高估冲突面）；409 实际单向（workflow 先发、本地后发）。**定谳形收紧 = 串行 fallback 纪律**：主通道 workflow 采认（provenance + 免本地网络 + 头注本意，f4 预判认可）；本地 publish 仅在 workflow run 终态失败后启动（禁并发）；tag 时序操作序入 lock-face（push tag → 等 workflow 终态 → 失败才本地）。concurrency group `npm-publish` 串行已保证多 tag。
+3. **【吸收⑤】主通道首用前置腿显式化**：0.1.97 发布走主通道 **以 npm 侧 trusted publisher 配置确认为前置腿**（repo admin 操作面非会话内可验）；未确认则 0.1.97 仍走本地通道发布（workflow 修形照落、不作主通道首用），首用顺延下版——防「发布卡未验通道」与「清零波自己出红发布」双败。
+4. **【吸收②注记】低险注记采认**：runner passwordless sudo 直用 apt；③ 仅断言 command==="rg" 版本差无判别影响；CI 装系统 rg 与 0.1.44 根修设计同向（system rg 优先正是达真值条件）；node 24 固定大版本即可不必 pin 小版本。
+
+f4 修订后判据面终形：修后 CI 首绿（D4×3 + ③ PASS 非 skip 显式核）+ 0.1.97 release SRI 四值对表不豁免 + 主通道首用以 trusted publisher 配置确认为条件（否则本地通道，首用顺延）。
