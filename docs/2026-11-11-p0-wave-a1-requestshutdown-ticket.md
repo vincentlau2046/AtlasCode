@@ -133,3 +133,16 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 **方法论登记（入纪律）**：**工具注册三面账**——工具体实现 / union 名单 / 注册表本体实例，三面齐备才可达；名单齐备 ≠ 实例在场（静默剔除旧机制自证）；新工具判别格必含组合根真池面实测格。func 单副本盲区家族第四例（func 单副本/回声假阳/路径子串假阴/名单-实例分裂）。
 
 已收绿面采认：canon 5807/0 Δ 恰合（5804+3）、六套 56/0、build 银行 3145d03c…。
+
+## §11 f4 裁处：gate-096c 双 RED 面定谳（2026-11-11，@7fbe2731）
+
+**① 两修形方向均批准（Main 裁择实现形）**：
+
+- **面 1【isEnabled 时序】=「工具注册三面账」第四层**：源码核实成立（basePool=getTools @1328 构造期 isEnabled 求值，teammateContext 激活 @1487 之后 → isTeammate() 恒 false → 静默剔除）。修形两形均可：**优先池构造移入上下文激活窗**（时序面根修；若移位牵动他工具语义面则用 isEnabled 判别双源 + 头注登记时序依据）。**判别格升格：真池面格须在上下文激活后实测**（激活前 fixture 取池 = 本 RED 的盲区形，格自升）。
+- **面 2【§9 修②门判别源错配】批准改双源 peekTeamContext()**（resolveOutgoingTeamName 0.1.93 round-3 RED-C 同款先例）：headless 引擎 lane teamContext 落 teamServices 内存 store，appState.teamContext 缺席 → 单源判别恒 fail-closed 误拦 lead。**修形面扩大令：全 SendMessageTool/team 域 isTeamLead(appState.teamContext) 调用点逐一核对判别源**（plan approve/reject L944/L991 两点同风险——若 headless 活面可达须同修双源，禁只修新 handler 留同款地雷）。
+
+**② §9 批复不回溯改判**：修②门形本身正确（fail-closed 方向 + sibling parity），错在判别源装配面（单源假设）；§9 批复批的是「补门」非「门判别源形」——定性 = 实现形随 lane 事实修正，非批复缺陷。登记面：**新契约门判别源双源先例自此为准**（teamContext 类判据禁单源 appState 假设）。
+
+**③ 判据面维持冻结 + 扩格**：rs1/rs2 真池面格（升格激活后实测）+ O4 五要素原样 + §9 三格 + 时窗格 + 前滚 standing + 六套——t99 全套重跑（第四次）。O4 0.1.95→0.1.96 回归由面 2 修复自证（前滚 standing 格原样即覆盖）。
+
+**方法论登记（终形）**：**工具注册四面账** = 实现体 / 名单 / 注册表本体实例 / **isEnabled 判别环境时序**（构造期 vs 激活期）——四面齐备才可达；func 单副本盲区家族第五例（本波三次复验 = 纪律价值实证）。
