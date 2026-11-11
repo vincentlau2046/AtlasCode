@@ -174,3 +174,16 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 调用点扫描令预核记档采认：waitForTeammatesTool:150（随修）/ requestShutdownTool:219（member lane，身份三源可解析恒等不动）/ permissionSync.ts 11 处（member-lane 同步面，域外记档）——普查清单归档面满足 §13 要求。补充确认：**共享位落点若涉跨域消费走 engine 门面 re-export 纪律**（本波消费点同在 engine 域内，直引即可）。
 
 落码 → 判别格 → 四件套 → 合 master → t100 第六次全套信号。
+
+## §15 f4 裁处：gate-096e GATE-PASS 采认（2026-11-11，@6f482551）——段 L 解冻
+
+**GATE-PASS 采认，A1 六轮 gate 首次全绿**（报告 r-20261111-gate-096e.md，e2e 报审）。f4 直证抽查（非仅采信报告）：
+
+1. **rs1 发现路径链活证**：lead WF `tool_result` 直证 `pending_requests:[{from:"scout",reason:"work-complete",request_id:"rs-1794405591595-qybyjz"}]` → lead 批准 → TEAM-DELETE-OK 首试 + 零持久残留——lock-face ③「请求入箱→lead 发现」链 e2e 真环境闭合（gate-096d 面 3 死面销项）。
+2. **F4 零命中直证**：rs1/rs2/o4b 三腿 `team=default` 假目录 grep 全零（gate-096d 同位 rs1×2/rs2×4 → 0）；「单源残留零命中」增格 e2e 面 GREEN。
+3. **canon Δ 恰合**：5817/0 = 5813 + 4（§14 判别格 face 3 行为格/TUI 恒等回归/static 改道格/域级零命中+禁旁路第二实现格）；a1 contract 24/0 与 Main 信号一致。
+4. rs2 deny 有界格全直证：恰两 distinct request_id 锁存无循环 + 时窗格 + 解锁格；O4 锚 standing（o4b/r8b TEAM-DELETE-OK 零残留）；前滚 9 腿零回退；build 银行 18,171,100B sha256 2a8c3634…（pack↔dist Δ=0）；SRI pre-bump 四值预注册在案；glm-5 基面 row-F 合规。
+
+**裁定**：段 L release 0.1.96 解冻 → Main 标准链（bump → release → SRI 四值三方对表 f4 复核 §16 先例 → 回信号 e2e 生产 lane ⑦：翻号 + PONG-096 + npm 安装品 O4/RequestShutdown 复验）。落码 commit 6f482551 形态与 §14 批复一致（teamRouting.ts 共享位 + 双源 resolver + sendMessageTool 改消费 + 4 判别格 RED→GREEN）✓。
+
+**A1 gate 六轮全案（方法论沉淀终档）**：轮 1 作废（§9 安全三修）→ 轮 2 RED（三面账）→ 轮 3 RED 双面（四面账：isEnabled 时序 + 单源门）→ 轮 5 面 3（单源错配家族第三例）→ 轮 6 全绿。四条域级纪律自此为准：①工具注册四面账（实现体/名单/实例/isEnabled 时序）；②teamContext 判别双源化 + 单源残留零命中域级回归格；③mailbox 身份字段 envelope 为准；④func 单副本绿 ≠ e2e 双副本真环境绿。
