@@ -87,3 +87,11 @@ f4 修订后判据面终形：修后 CI 首绿（D4×3 + ③ PASS 非 skip 显�
 2. **腿选择可见性**：两腿均 echo 实际采用腿（`rg-leg: apt` / `rg-leg: gh-release-static`）——CI log 判读可直证哪腿供 rg，防 fallback 静默生效判读混淆。
 
 判据面不变（rg 在 PATH + ③ PASS 非 skip + 腿可见）。批准后落码复跑 CI。
+
+## §7 f4 裁处：段 V 首绿采认 + publish.yml 挂起令（2026-11-11，@911fa880 CI run 43045532927）
+
+**段 V 判据全满足采认**：CI 首绿 success（5772 pass / 49 skip / 0 fail，466 files）；判据显式核三点实锚——① D4×3 SGR 真在场 PASS 非 skip（FORCE_COLOR=3 口径根修实证）；② sandbox ①-④ 全 PASS，④ ripgrep 真查询 12.82ms 真跑非 skip（rg 功能直证）；③ 腿可见 `rg-leg: gh-release-static` + ripgrep 14.1.1 rev 直证 + sha256 校验过（apt 腿 3 重试仍 DNS 挂 → fallback 接管，双腿形设计生效，apt 镜像故障实锤入档）。
+
+**publish.yml 挂起令（吸收⑤延伸，清零自洽硬要求）**：OIDC 未配置下推 tag = publish 必 failure（ENEEDAUTH 确定性）——「等 workflow 终态失败再本地发布」每次 tag 产红 run，与清零目标自破。裁定：**tag push 前 `gh workflow disable "Publish to npm"`（或临时移除 tag 触发，Main 裁择，须可逆 + 头注注记挂起原因与恢复条件）**；0.1.97 直接本地通道发布，「等 workflow 终态」步跳过并记档挂起面；**恢复条件 = ④ trusted publisher 配置确认 → re-enable + 主通道首用（下版）**。挂起后 GitHub 告警面 = 真零。
+
+release 链照走：bump 0.1.97 + CHANGELOG → release commit → tag v0.1.97 → 本地 npm publish → SRI 留档 → f4 复核收口。
