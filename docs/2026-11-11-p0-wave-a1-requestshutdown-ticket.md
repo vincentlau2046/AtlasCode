@@ -166,3 +166,11 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 **② 方法论升格（e2e 提议采纳）**：「**teamContext 判别源单源错配**」正式立条——三例（0.1.93 round-3 RED-C resolveOutgoingTeamName → §11 面 2 lead 门 → 本面 3 WF 扫描）+ 结构性根因 = headless 引擎 lane teamContext 存储面（teamServices 内存 store）与 getTeamName 三源面的错位。**域级纪律：新增代码禁裸 `appState.teamContext` 作 lane 判据，一律经双源 resolver**；判别格「单源残留零命中」为域级回归格（后续波 team 域改动顺带复跑）。
 
 **③ 判据面维持冻结 + 增格**：t100 第六次全套重跑（前滚 standing + 七套 + 新腿两格 + 时窗格 + §9 三格 + 真池面升格 + **单源残留零命中格**）。已收绿面采认（§11 两面修形 e2e 翻绿直证：成员池 43 件 + O4 锚恢复 GREEN；canon 5813/0 Δ 恰合）。
+
+## §14 f4 批复：面 3 实现形确认（2026-11-11，承 §13）
+
+实现形批准：resolveOutgoingTeamName 提共享至 team 域共享位（team/index 或新 teamRouting.ts）——恰消 0.1.93「禁各站旁路第二实现」裁定下的私有实现面，sendMessageTool 改消费同一实现 ✓；waitForTeammatesTool:175 改 `collectPendingMemberRequests(resolveOutgoingTeamName())` ✓。判别格两点批准（headless 组态形 collectPendingMemberRequests 实读呈 pending RED→GREEN + TUI/member lane 恒等回归）。
+
+调用点扫描令预核记档采认：waitForTeammatesTool:150（随修）/ requestShutdownTool:219（member lane，身份三源可解析恒等不动）/ permissionSync.ts 11 处（member-lane 同步面，域外记档）——普查清单归档面满足 §13 要求。补充确认：**共享位落点若涉跨域消费走 engine 门面 re-export 纪律**（本波消费点同在 engine 域内，直引即可）。
+
+落码 → 判别格 → 四件套 → 合 master → t100 第六次全套信号。
