@@ -146,3 +146,16 @@ f4 亲验：wdc-r3-registry-removal + wdb-c3 回归两套 = **15 pass / 0 fail**
 **自决裁定采认**：wdb-c3 E② 换道形锚改锚单源路径——陈旧形锚指向随 R1 批复整裁的 TUI InProcessBackend，测试侧改锚属 R1 批复域内机械随行（W-D-B §14 twin 判别格同步先例同族），无须预注册修订流程；改锚后形（单源 import 形 + tui 目录不存在性断言）恰为 R1 收敛后正形。
 
 三段全闭环 → 段 G gate 在途（e2e，--release-gate 0.1.95）→ 段 L release 0.1.95 标准链。
+
+## §10 f4 采认：段 G GATE-PASS + canon 口径勘误裁处（2026-11-11，r-20261111-gate-095.md）
+
+f4 亲核报告关键腿全过：**A 前滚 12 腿全 GREEN 零回退**（t95-o4b O4 五要素 + t95-r8 T8 全链 max-turns 0 无 forced 兜底；r2c/r4/r5 三腿历史 max-turns parity 翻绿 = 优于 0.1.94 基线，模型升级方向 PASS 直接有效）+ **判别格六套 56/0** + **R1 分层表无假绿**（tmux 子进程直证未降级 / iterm2 单测替代合规 / bundle 三证 + A①-A③ 装配形锚）+ **canon 净口径 5793/0 Δ 恰合 23**（5770+21+2）。
+
+**两条方法论勘误裁处——均采纳，入纪律**：
+
+1. **runner 计数膨胀勘误**：bun 显式路径 filter 子串全树匹配 worktrees/ → 同名测试文件多树重复计数（×2-×3）；真 def = 源码 test() 直数。0.1.94 B 块「10/16/26/14」同为膨胀读数（真 def 33）。**纪律登记**：gate/canon 计数一律 test() 直数；显式路径 filter 须 `./` 锚定。
+2. **canon 口径冻结**：自 0.1.95 起 canon = `FORCE_COLOR=3 CI=true bun test --isolate ./tests/`（`./` 锚定排除 worktrees/*/tests/）；历史读数 17082（0.1.93b）/17148（0.1.94）为 worktree 膨胀读数——**判读面以格为准、全副本同绿，历史 PASS 有效性不变**（读数勘误非判定勘误，不回溯改判）。0.1.94 真净基线 5770 与该波 gate ticket §2 E 冻结值吻合（当时恰合判定成立）。
+
+**R2 否决实码引用闭环**（§6.3 条款 gate 报告引用）；SRI 预注册 pre-bump 四值在案（cli.js 18,154,596B / sha256 a7c245a1… 为生产 lane cmp 锚，bump 后 cli.js 跨 bump 恒等先例适用）。
+
+→ Main 段 L release 0.1.95 标准链；e2e 生产 lane ⑦ 待单信号（SRI 四值三方 + PONG-095 + npm 安装品 O4 复验，glm-5 逐腿标注）。
