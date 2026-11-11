@@ -158,3 +158,11 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 **登记面两项（随裁定入池）**：
 1. **isTeamLead backwards-compat 支 = 既有身份语义债**（agentless 调用者 ≡ lead 的隐式假设，§2.7 隐式约定同族）——入登记池候选后续**身份语义硬化小波**（agentless 判定显式化/身份令牌化 + (a) team 名绑定 defense-in-depth 一并评估）；非 A1 scope，禁本波顺手改（动 isTeamLead = 全 lead 工具面语义变更，须独立工单呈用户）。
 2. 判读注记：安全审查 finding 的「新引入 vs 既有横延」分型成立即记录不采纳的合法路径——非静默吞 finding（本节即留档）。
+
+## §13 f4 裁处：gate-096d 面 3 + 错配家族升格（2026-11-11，@4f1b69db）
+
+**① 面 3 修形批准 + 普查令升级**：WaitForTeammates pending 扫描改双源（resolveOutgoingTeamName round-3 RED-C 先例正解形）。**面扩大令升格为域级普查令（一次性清尾，禁继续逐面打地鼠）**：Main 对 team 域全量枚举 `getTeamName(...)` / `appState.teamContext` 直接读面消费点（specifier 解析 + 符号形锚，§2.7 纪律），凡 lane 敏感判据面（headless 引擎 lane 可达者）一律改 canonical 双源 resolver；**判别格新增「单源残留零命中」格**（普查清单 + 修后形锚钉死），普查清单随收尾报归档。
+
+**② 方法论升格（e2e 提议采纳）**：「**teamContext 判别源单源错配**」正式立条——三例（0.1.93 round-3 RED-C resolveOutgoingTeamName → §11 面 2 lead 门 → 本面 3 WF 扫描）+ 结构性根因 = headless 引擎 lane teamContext 存储面（teamServices 内存 store）与 getTeamName 三源面的错位。**域级纪律：新增代码禁裸 `appState.teamContext` 作 lane 判据，一律经双源 resolver**；判别格「单源残留零命中」为域级回归格（后续波 team 域改动顺带复跑）。
+
+**③ 判据面维持冻结 + 增格**：t100 第六次全套重跑（前滚 standing + 七套 + 新腿两格 + 时窗格 + §9 三格 + 真池面升格 + **单源残留零命中格**）。已收绿面采认（§11 两面修形 e2e 翻绿直证：成员池 43 件 + O4 锚恢复 GREEN；canon 5813/0 Δ 恰合）。
