@@ -4,6 +4,44 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.95
+
+W-D-C 收尾波：**swarm 装配单源化收尾**。工单
+`docs/2026-11-11-p0-wave-wdc-ticket.md`；gate
+r-20261111-gate-095（A 前滚 12 腿全 GREEN 零回退 + O4 五要素 + T8 全链 +
+round 1-8 点名；B 判别格六套 56/0；canon 净口径 5793/0 = 0.1.94 真净基线
+5770 + 23）。
+
+### 收敛面（行为零变更，单源化）
+
+- **段 R1 backends 双目录全收敛**：`tui/utils/swarm/backends/` 副本 9 文件
+  整裁，单源 = `src/swarm/backends/`；TUI 消费面（useSwarmBanner /
+  useInboxPoller / TeamsDialog / teamHelpers / teammateLayoutManager 等）
+  全量改道 `src/swarm` 门面。新 port 面（R1-D1~D4）：inProcessSpawnHooksPort
+  （spawn 四钩子 seam，factory 组合根装配 + fail-visible）、
+  it2SetupPersistencePort（iTerm2 setup 标志持久化 seam，globalConfig
+  适配器）、isInsideTmux 委托（teammateLayoutManager port 化）、
+  teammateModeSnapshot capture 单源化；tui/factory 补 `wireBackends()`
+  装配接线。
+- **段 R3 agent 名注册表死态裁除**：AppState `agentNameRegistry` 全仓零写面
+  （恒空 Map）→ 字段整裁零行为变更；SendMessageTool resolveAgentId 改
+  toAgentId 兜底直查；useTypeahead @名补全 / useSwarmBanner 反查 /
+  CoordinatorAgentStatus selector 同步裁除；判别格
+  `wdc-r3-registry-removal.test.ts`（src 字面零命中 RED→GREEN）。
+
+### 评估归档
+
+- **段 R2 窄门面回收评估否决**：`src/swarm` 门面收敛为回 re-export 聚合面
+  将引入 boundaries/entry-point 违规（exit 1 实码归档
+  `docs/2026-11-11-wdc-r3-lockface.md` §0）；Δ+43.9KB 维持登记债。
+
+### 口径勘误（自本波冻结）
+
+- canon 净口径 = `bun test --isolate ./tests/`（`./` 锚定发现域，防
+  `tests/` 子串扫入 `worktrees/*/tests/` 读数膨胀）；wdb 历史判别格读数
+  以 test() 直数为真 def（0.1.94 报告 10/16/26/14 为 runner 膨胀值，真
+  33；历史 PASS 判定不变）。
+
 ## v0.1.94
 
 W-D-B 波：**工具契约统一——三对双副本收敛 + SDK lane TodoWrite todos
