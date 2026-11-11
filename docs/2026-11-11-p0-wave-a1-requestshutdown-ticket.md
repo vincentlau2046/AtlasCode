@@ -146,3 +146,15 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 **③ 判据面维持冻结 + 扩格**：rs1/rs2 真池面格（升格激活后实测）+ O4 五要素原样 + §9 三格 + 时窗格 + 前滚 standing + 六套——t99 全套重跑（第四次）。O4 0.1.95→0.1.96 回归由面 2 修复自证（前滚 standing 格原样即覆盖）。
 
 **方法论登记（终形）**：**工具注册四面账** = 实现体 / 名单 / 注册表本体实例 / **isEnabled 判别环境时序**（构造期 vs 激活期）——四面齐备才可达；func 单副本盲区家族第五例（本波三次复验 = 纪律价值实证）。
+
+## §12 f4 裁定：安全审查 MEDIUM finding 处置（2026-11-11，@4f1b69db）
+
+**裁定 = 选项 A（记录不采纳），t99 无须因本 finding 重跑**。依据（Main 事实链核实采信）：
+
+1. **(b) 非 §11 新增 widen**：`!myAgentId → true` 系 isTeamLead 既有 backwards-compat 语义（0.1.93 前在案，注释自证「original session created the team」）；§11 前该支已对 TUI lane appState 源生效——§11 是同一身份语义延到 headless store 源，暴露面等级不变（横向延展非纵向扩大）。
+2. **(a) 架构不可达**：teamServices store 进程单例 + 旧成员 ALStorage agentId ≠ 新 leadAgentId 仍 false——team 错配场景 fail-closed 已覆盖，绑定 (a) 为零增量收紧。
+3. 成员双源全 false 不变，门形 fail-closed 主语义无松动。
+
+**登记面两项（随裁定入池）**：
+1. **isTeamLead backwards-compat 支 = 既有身份语义债**（agentless 调用者 ≡ lead 的隐式假设，§2.7 隐式约定同族）——入登记池候选后续**身份语义硬化小波**（agentless 判定显式化/身份令牌化 + (a) team 名绑定 defense-in-depth 一并评估）；非 A1 scope，禁本波顺手改（动 isTeamLead = 全 lead 工具面语义变更，须独立工单呈用户）。
+2. 判读注记：安全审查 finding 的「新引入 vs 既有横延」分型成立即记录不采纳的合法路径——非静默吞 finding（本节即留档）。
