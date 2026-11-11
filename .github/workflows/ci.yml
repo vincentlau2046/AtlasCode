@@ -27,8 +27,34 @@ jobs:
       # @d60fd3a2）：装系统 rg——sandbox 纵切 smoke ③ 断言 config.ripgrep.command
       # === "rg"（同套件 ④ 自证 rg 缺失按 skip 不红，③ 缺同款门即 CI 恒红根因
       # 之一；装 rg 后 ③ 走真断言，与 0.1.44 根修设计同向 = system rg 优先达真值）。
-      - name: Install ripgrep
-        run: sudo apt-get install -y ripgrep
+      #
+      # row F 修订双腿形（f4 批复，工单 §6 @3eeca71a）：runner 对 azure apt 镜像
+      # 持续 DNS 故障（双 run 同错 30 分钟间隔，同 run github/npm 可达）→
+      # 腿 1 apt 重试 + 腿 2 GitHub releases 静态二进制 fallback。腿 2 版本+
+      # sha256 双 pin：BurntSushi/ripgrep 14.1.1 x86_64 musl tarball
+      # sha256 = 4cf9f2741e6c465ffdb7c26f38056a59e2a2544b51f7cc128ef28337eeae4d8e
+      # （2,566,310 B；Main 2026-11-11 自算钉死——release 不附官方 checksum，
+      # 外部二进制入 CI 供应链面须可审计，本仓 SRI 纪律同族）。
+      # 判据面不变：rg 在 PATH + ③ PASS 非 skip + 腿选择可见（rg-leg echo）。
+      - name: Install ripgrep (apt leg w/ retry, gh-release-static fallback)
+        run: |
+          for i in 1 2 3; do
+            if sudo apt-get install -y ripgrep; then
+              echo "rg-leg: apt"
+              rg --version | head -1
+              exit 0
+            fi
+            echo "apt leg attempt $i failed, retrying in 30s"
+            sleep 30
+          done
+          echo "rg-leg: gh-release-static"
+          curl -fsSL -o /tmp/rg.tar.gz \
+            https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz
+          echo "4cf9f2741e6c465ffdb7c26f38056a59e2a2544b51f7cc128ef28337eeae4d8e  /tmp/rg.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/rg.tar.gz -C /tmp
+          sudo install -m 0755 \
+            /tmp/ripgrep-14.1.1-x86_64-unknown-linux-musl/rg /usr/local/bin/rg
+          rg --version | head -1
 
       # 四件套（typecheck / lint / test（含 tests/ci 防腐门）/ build）
       - name: Typecheck
