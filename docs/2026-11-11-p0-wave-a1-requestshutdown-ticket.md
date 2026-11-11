@@ -111,3 +111,15 @@ charter §10 排序现状（序 1-3 已闭环）：**序 4 S1a 硬化波**（六
 2. **read 态推进点显式定谳**：pending_requests 不 mark read ⇒ 处置动作须推进 read 态（deny = 发 denied 时 mark read；approve = 发 shutdown_request 时以 request_id 关联核销）——禁 pending 永久重现噪声面（每次 WaitForTeammates 重复呈报已裁定请求）；定谳形入判别格（裁定后 pending 不再现格）。
 
 判据面随本批复冻结：lock-face 判据面前滚确认节全项 + 工具体副作用白名单 static+func 双面 + 两附带条件判别格（指引面在场格 + 裁定后 pending 不再现格）。批复后依序落码段 I。
+
+## §9 f4 批复：段 I 安全审查三修形（2026-11-11，row F 改形报批）
+
+三 finding f4 源码核实成立（deny 感知支无 envelope 认证 + from 硬编码回退 / plan handler L944/L991 双 isTeamLead 门先例坐实 deny/approve handler sibling parity 违例 / body.from 盖过 envelope 三站点）。**三修形全批准，裁定 = 0.1.96 发布前必改（非后随波）**：
+
+1. **【HIGH】deny 回执双验**：`m.from === TEAM_LEAD_NAME && parsed.to === identity.agentName`（大小写不敏感）验讫才 mark read + 锁存；return from 用验证值。防环补强 1 的认证前提修复。
+2. **【MEDIUM】deny/approve handler 补 isTeamLead fail-closed 门**：与 plan handler 同款文案形（sibling parity 归位）。
+3. **【MEDIUM】三站点 envelope 绑定**：collect/ownUnread 加 `req.from === m.from` 前置；两核销谓词改按 envelope m.from 匹配弃 body 字段——**方法论注记：mailbox 契约面身份字段一律以 envelope 为准，body 身份字段仅展示用途**（§2.7 隐式约定教训同族第五例，入纪律）。
+
+加性防御不触契约形状 ✓；判别测试补 3 支（伪造 envelope 不锁存 / 非 lead deny/approve throw / body.from ≠ envelope 不呈不核销）批准入判据面。
+
+**gate 裁定：现行在途 gate 作废重跑全套**——三修动 inProcessRunner/sendMessageTool/waitForTeammatesTool 活域（wdb-c2/c3 + wdc-r1/r3 同域 = 活回归面），「测的=发布的」禁 pre-fix gate PASS 直放 post-fix release；重跑面 = 全判据面（前滚 standing + 六套回归 + 新腿两格 + 时窗格 + 本三格）。落码 → 判别格 RED→GREEN → 四件套 → gate 重跑 → 段 L。
