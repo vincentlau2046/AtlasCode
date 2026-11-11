@@ -52,12 +52,12 @@ import {
 import {
   TEAM_LEAD_NAME,
   isAgentSwarmsEnabled,
-  getTeamName,
   isShutdownRequestFromMember,
   readMailbox,
   waitForTeammatesToBecomeIdle,
 } from '../../messaging'
 import { getSessionContextPort } from '../../session/sessionContextPort'
+import { resolveOutgoingTeamName } from './teamRouting'
 import type { SessionSnapshot } from '../../ports/sessionContext'
 import type { SetAppState, TaskAppState } from '../../../task'
 import { isInProcessTeammateWorking } from '../../../task'
@@ -172,7 +172,12 @@ async function attachPendingRequests(
   data: WaitForTeammatesOutput,
 ): Promise<WaitForTeammatesOutput> {
   try {
-    const pending = await collectPendingMemberRequests(getTeamName())
+    // 0.1.96 §14（f4 批复 3c509ebd）：face 3 修形——pending 扫描 team 源
+    // 改双源 resolver（getTeamName 三源链 ∪ peekTeamContext 组态 store）。
+    // headless 引擎 lane 三源全空时旧码静默落 'default' 假目录 → 死面；
+    // 双源皆缺仍为 undefined → readMailbox 兜底行为不变（域级纪律见
+    // teamRouting.ts 头注）。
+    const pending = await collectPendingMemberRequests(resolveOutgoingTeamName())
     if (pending.length > 0) {
       return { ...data, pending_requests: pending }
     }

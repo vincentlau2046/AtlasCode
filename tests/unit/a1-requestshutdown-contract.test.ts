@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -32,6 +39,7 @@ import {
 } from '../../src/engine/tools/toolRegistry'
 import { resolveAgentTools } from '../../src/engine/tools/agent/agentToolUtils'
 import { resetTeamServices, setTeamServices } from '../../src/engine/tools/team/teamServices'
+import { resolveOutgoingTeamName } from '../../src/engine/tools/team/teamRouting'
 import {
   createTeammateContext,
   runWithTeammateContext,
@@ -616,5 +624,146 @@ describe('A1 §11 gate-096c 双 RED 修形判别格', () => {
     expect(src.match(/isLeadDualSource\(appState\)/g)).toHaveLength(4)
     // 单源残留守：无 `if (!isTeamLead(appState.teamContext))` 门残留
     expect(src).not.toMatch(/if \(!isTeamLead\(appState\.teamContext\)\)/)
+  })
+})
+
+/**
+ * A1 §13/§14 face 3 修形判别格（f4 批复 3c509ebd，gate-096d 面 3）：
+ * WaitForTeammates pending 扫描单源 getTeamName() 在 headless 引擎 lane
+ * 三源全空 → mailbox.ts:147 兜底 'default' 假目录 → pending_requests
+ * 恒空 → lock-face ③ 发现路径死。修形 = 双源 resolver
+ * resolveOutgoingTeamName（三源链 ∪ TeamCreate 组态 store）提共享位
+ * teamRouting.ts（f4 §7.9 禁旁路第二实现裁定下的落地面）。
+ */
+describe('A1 §13/§14 face 3 双源 resolver 判别格', () => {
+  let prevTeamsEnv: string | undefined
+
+  beforeEach(() => {
+    prevTeamsEnv = process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = '1'
+  })
+
+  afterEach(() => {
+    if (prevTeamsEnv === undefined)
+      delete process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS
+    else process.env.ATLAS_EXPERIMENTAL_AGENT_TEAMS = prevTeamsEnv
+    setDynamicTeamContext(null)
+    resetTeamServices()
+  })
+
+  test('面 3 headless 行为格：成员真盘写入 + lead 三源全空组态命中 → pending 呈现（旧单源 = default 死面）', async () => {
+    // 成员 lane 真盘链路：in-process 上下文窗内 getTeamName() = 't-f3'，
+    // RequestShutdown 写 teams/t-f3/inboxes/team-lead.json
+    const memberContext = createTeammateContext({
+      agentId: 'worker-f3@t-f3',
+      agentName: 'worker-f3',
+      teamName: 't-f3',
+      planModeRequired: false,
+      parentSessionId: 'sess-f3',
+      abortController: new AbortController(),
+    })
+    await runWithTeammateContext(memberContext, () =>
+      RequestShutdownTool.call({ reason: 'stuck' }, {} as never),
+    )
+
+    // lead headless lane：三源全空（无 in-process / 无 dynamic /
+    // appState.teamContext undefined）+ 组态 store 命中 't-f3'
+    setDynamicTeamContext(null)
+    setTeamServices({
+      readTeamFile: () => null,
+      writeTeamFileAsync: async () => {},
+      getTeamContext: () => ({
+        teamName: 't-f3',
+        teamFilePath: '/tmp/t-f3.json',
+        leadAgentId: 'lead-f3',
+        teammates: {},
+      }),
+      setTeamContext: () => {},
+    } as never)
+
+    // 旧单源（getTeamName()）→ undefined → readMailbox 兜底 'default' →
+    // pending 恒空（gate-096d 死面）；双源 resolver → 命中组态 't-f3'
+    const pending = await collectPendingMemberRequests(resolveOutgoingTeamName())
+    expect(pending).toHaveLength(1)
+    expect(pending[0]!.from).toBe('worker-f3')
+    expect(pending[0]!.reason).toBe('stuck')
+  })
+
+  test('TUI/member 恒等回归：dynamic 上下文在场时 resolver 恒等；显式 teamContext 参恒等', () => {
+    // tmux member / TUI lane：dynamicTeamContext 在场 → 恒等返回
+    setDynamicTeamContext({
+      agentId: 'a-dyn',
+      agentName: 'worker-dyn',
+      teamName: 't-dyn',
+      planModeRequired: false,
+    })
+    expect(resolveOutgoingTeamName()).toBe('t-dyn')
+    // 出站路由形（sendMessageTool 显式 teamContext 参）：三源链优先级不变
+    expect(resolveOutgoingTeamName({ teamName: 't-explicit' })).toBe('t-dyn')
+
+    // 三源全空时显式参直达（getTeamName 第三支）
+    setDynamicTeamContext(null)
+    expect(resolveOutgoingTeamName({ teamName: 't-explicit' })).toBe(
+      't-explicit',
+    )
+  })
+
+  test('面 3 static 改道格：pending 扫描走双源 resolver，无单源 getTeamName 残留', () => {
+    const src = readFileSync(
+      join(
+        import.meta.dir,
+        '..',
+        '..',
+        'src',
+        'engine',
+        'tools',
+        'team',
+        'waitForTeammatesTool.ts',
+      ),
+      'utf8',
+    )
+    expect(src).toMatch(
+      /collectPendingMemberRequests\(resolveOutgoingTeamName\(\)\)/,
+    )
+    expect(src).not.toMatch(/collectPendingMemberRequests\(getTeamName\(\)\)/)
+  })
+
+  test('域级零命中格 + 禁旁路第二实现：team 域禁式样清单零命中（f4 §13 立条）', () => {
+    const dir = join(
+      import.meta.dir,
+      '..',
+      '..',
+      'src',
+      'engine',
+      'tools',
+      'team',
+    )
+    const files = readdirSync(dir).filter(f => f.endsWith('.ts'))
+    // 禁式样清单（mailbox.ts sink 兜底为例外，不在 team/ 域）：
+    //   单源 pending 扫描 / 单源 lead 门 / 单源 readMailbox 路由
+    const forbidden: Array<[RegExp, string]> = [
+      [/collectPendingMemberRequests\(getTeamName\(\)\)/, '单源 pending 扫描'],
+      [/if \(!isTeamLead\(appState\.teamContext\)\)/, '单源 lead 门'],
+      [/readMailbox\([^)]*getTeamName\(\)/, '单源 readMailbox 路由'],
+    ]
+    const violations: string[] = []
+    for (const f of files) {
+      const src = readFileSync(join(dir, f), 'utf8')
+      for (const [pattern, label] of forbidden) {
+        if (pattern.test(src)) violations.push(`${f}: ${label}`)
+      }
+    }
+    expect(violations).toEqual([])
+
+    // 禁旁路第二实现（f4 §7.9）：resolveOutgoingTeamName 定义全域恰 1 处
+    const defs = files
+      .map(f => ({
+        f,
+        n: readFileSync(join(dir, f), 'utf8').match(
+          /export function resolveOutgoingTeamName/g,
+        )?.length,
+      }))
+      .filter(x => (x.n ?? 0) > 0)
+    expect(defs).toEqual([{ f: 'teamRouting.ts', n: 1 }])
   })
 })

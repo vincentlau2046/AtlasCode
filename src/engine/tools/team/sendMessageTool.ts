@@ -124,7 +124,6 @@ import {
   getAgentId,
   getAgentName,
   getTeammateColor,
-  getTeamName,
   isAgentSwarmsEnabled,
   isShutdownRequestFromMember,
   isTeamLead,
@@ -146,6 +145,7 @@ import { SEND_MESSAGE_TOOL_NAME } from '../toolNames'
 import { getSendMessagePrompt } from './sendMessagePrompt'
 // 0.1.93 W-D-A A5（f4 批复④）：组态软读（成员发现双源主源；未注入不抛）
 import { peekTeamContext } from './teamServices'
+import { resolveOutgoingTeamName } from './teamRouting'
 
 /** 结构化协议消息（旧 zod discriminatedUnion 3 型转写，delta ①：
  * semanticBoolean → boolean；0.1.96 A1 加第 4 臂 shutdown_request_denied
@@ -425,20 +425,12 @@ export function resetSelfTerminatePort(): void {
   selfTerminatePort = undefined
 }
 
-/**
- * 0.1.93 W-D-A round-3 RED-C（f4 §7.9 裁定）：出站路由 team 解析单源——
- * 双源同款（A5 handleBroadcast 先例）：getTeamName（ALS > dynamicTeamContext >
- * appState.teamContext）→ peekTeamContext（TeamCreate 组态 store）回落；
- * 禁各站旁路第二实现。双源皆缺 = undefined → 调用站 fail-closed
- *（结构化 Error → pipeline error tool_result，run 不中止），禁
- * writeToMailbox(recipient, msg, undefined) 静默落 teams/default/ 黑洞桶
- *（round 3 e2e 直证：lead→member 9-14 体滞留 default read:false 零消费者）。
- */
-function resolveOutgoingTeamName(teamContext?: {
-  teamName: string
-}): string | undefined {
-  return getTeamName(teamContext) ?? peekTeamContext()?.teamName
-}
+// 0.1.93 W-D-A round-3 RED-C（f4 §7.9 裁定）：出站路由 team 解析单源双源
+// resolver——0.1.96 §14（f4 批复 3c509ebd）提共享 teamRouting.ts（禁旁路
+// 第二实现落地面），本模块改消费同一实现；判据面语义零 delta。
+// 旧实现注释档：getTeamName（ALS > dynamicTeamContext > appState.teamContext）
+// → peekTeamContext（TeamCreate 组态 store）回落；双源皆缺 = undefined →
+// 调用站 fail-closed（禁 writeToMailbox 静默落 teams/default/ 黑洞桶）。
 
 /**
  * 0.1.96 §11（f4 批复 1225f69d 面 2 + 调用点面扩大令）：lead 门判别双源化——
