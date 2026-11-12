@@ -95,3 +95,20 @@ f4 修订后判据面终形：修后 CI 首绿（D4×3 + ③ PASS 非 skip 显�
 **publish.yml 挂起令（吸收⑤延伸，清零自洽硬要求）**：OIDC 未配置下推 tag = publish 必 failure（ENEEDAUTH 确定性）——「等 workflow 终态失败再本地发布」每次 tag 产红 run，与清零目标自破。裁定：**tag push 前 `gh workflow disable "Publish to npm"`（或临时移除 tag 触发，Main 裁择，须可逆 + 头注注记挂起原因与恢复条件）**；0.1.97 直接本地通道发布，「等 workflow 终态」步跳过并记档挂起面；**恢复条件 = ④ trusted publisher 配置确认 → re-enable + 主通道首用（下版）**。挂起后 GitHub 告警面 = 真零。
 
 release 链照走：bump 0.1.97 + CHANGELOG → release commit → tag v0.1.97 → 本地 npm publish → SRI 留档 → f4 复核收口。
+
+## §8 f4 终局收口：0.1.97 CI 告警清零波五段闭环终态（2026-11-12，@e9f709cc）
+
+**release + 挂起链全闭环采认**：release commit 680ccd9e（bump + CHANGELOG）+ tag v0.1.97 + tag push 无 publish run（挂起生效实证）+ npm publish 0.1.97 本地通道 + SRI 留档 docs/sri/v0.1.97.md（e9f709cc）。
+
+**f4 独立对表（registry 直下重算，§16 先例口径）——四值全 MATCH**：
+
+| 值 | 留档 | f4 重算 | 判定 |
+|---|---|---|---|
+| dist.shasum | 76253775d32959f9… | packument + tgz 直下 sha1 双面同值 | MATCH |
+| dist.integrity | sha512-WuscqiV/5IPHK… | packument 同值 | MATCH |
+| unpackedSize | 18,179,326 B | 18,179,326 B 精确字节 | MATCH |
+| cli.js | 18,171,100 B / sha256 2a8c3634… | **发布品与 v0.1.96 gate 银行字节级同值 Δ=0 = 零产品代码波的最强实证**（三版连续恒等：2a8c3634…） | MATCH |
+
+**波终态**：CI 红叉 30+ 连败 → 绿（run 43045532927，判据显式核 PASS 非 skip）；publish ENEEDAUTH 根修（node 24）+ workflow 挂起（恢复条件 = ④ trusted publisher 确认）；GitHub 告警面 = 真零。**执行面挂起项两项（呈用户）**：① npm trusted publisher 配置（下版 OIDC 主通道首用 + workflow enable）；② GitCode Atlaswork 填仓（Main lane 安全分类器拦 + f4 lane 分类器同拦——两 lane 均持用户一手裁定仍被拦，解除 = 用户自执行 `git push gitcode master --tags` 或加 permission 规则后任一 lane 补推）。
+
+**登记注记**：row F 双腿形（apt 镜像 DNS 故障 → gh-release-static fallback + sha256 双 pin + 腿可见）为本波唯一计划外修形，已 §6 批复产档；apt 腿保留作主腿（重试 3×），GitHub releases 静态二进制作 fallback。
