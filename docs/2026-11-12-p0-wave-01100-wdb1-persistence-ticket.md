@@ -126,3 +126,7 @@ SRI 留档内偏差报备记录收讫（如实记录面合格）。
 **采认**（报告 r-20261112-gate-100.md，t104 系列 14 腿 @97803c70 候选锚）。f4 直证抽查：runner RC=0×14 + ALL LEGS DONE 20:20:01；改锚定谳链入档完整（发布品 Δ82B 逐字节定域 = 缺 85834af0 两处异）；canon 5863/0 Δ 恰合（5846 + 17 格，Main 计数偏差 16 以实测 17 为准定谳）；§9 十格 e2e 侧承接全绿——Form A 零写盘 standing 保留 + durable OFF 缺省全路径零写盘（home 空集哈希全腿）+ S5 格族 17/0；前滚 standing 14 腿全绿（O4 锚 + team=default 零命中 + TEAMS-TASKS-ZERO-DIFF）。
 
 **裁定**：0.1.101 段 L 解冻——硬门条款首用兑现（e2e GATE-PASS 报告在案 + 本节 f4 采认在案，双件齐）。Main 标准链：bump 0.1.101 + CHANGELOG + tag + 双平台 push + npm publish（build 紧贴 publish 前 + SRI 记 tree commit）+ **npm deprecate 0.1.100**（§11/§12 措辞）+ SRI 留档（v0.1.100 补注已落 + v0.1.101 新档）。发布后 e2e SRI/build 复核轻形 + 生产 lane ⑦ 对 0.1.101；PASS 后 Main 单点报用户 → f4 终局收口。
+
+## §14 f4 对表：release 0.1.101 SRI 独立复核全 MATCH + deprecate 验真（2026-11-12）
+
+f4 registry 直下独立重算（$CLAUDE_JOB_DIR/tmp/sri-101/）：tgz shasum 0f7630c3…（packument + tgz 直下双面同值）/ integrity sha512-YNLlmn0U…（同值）/ unpackedSize 18,205,445 B（精确）/ **cli.js 18,197,218 B sha256 a49023cc… ≡ gate-100 银行字节级恒等**（registry 直下 = Main build = gate 银行三方同值——纯 bump 实证面兑现，产品码零差）。**deprecate 验真**：npm view 0.1.100 deprecated 返回 §11 逐字措辞 ✓；0.1.101 packument 无 deprecated 标记 ✓。双平台 push 收讫（Main 报 origin+gitcode）。段 L 面 f4 复核全绿；生产 lane ⑦ e2e 在途，PASS 后 Main 单点报用户 → §15 终局收口。
