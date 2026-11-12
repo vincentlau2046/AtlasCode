@@ -4,6 +4,50 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.98
+
+S1a 硬化波（工单 `docs/2026-11-12-p0-wave-0198-s1a-ticket.md`；lock-face
+八点全批 @e3f1b047）。架构债硬化性质——多数为移位/注入化，atlascode 产品
+行为**字节级零变更**（ProductDefinition 两维度缺省 undefined = 全量恒等；
+configDir 缺省恒 `.atlas`）。
+
+### ProductDefinition 接口（lock-face ①④ 批复形）
+
+- **`src/shared/ProductDefinition.ts`**：per-product 运行时差异唯一接口面
+  （`{ id, toolSubset?, configDirName? }`）。解析一次性（ACTIVE_PRODUCT 模块级
+  冻结引用，消费方读引用不重解析）。不参数化清单 5 项冻结锚入头注
+  （wire beta 头 / coordinator MONITOR_TOOL / FEATURE_* 行为门 / 项目级
+  `.atlas/skills` 约定 / prompt 文案字面——改动 = row F 回 f4）。
+- **toolRegistry 装配层过滤支**：`productToolSubset` 过滤静态装配段
+  （Agent/base/ascend）；mcpTools 动态面不参 subset（defer/ToolSearch 消费
+  registry 产物，subset 外不可见）。loopDeps 一次性注入。
+- **焊点①**：`REPOSITORY_SLUG` 自 REPOSITORY_URL 单源派生（owner/repo），
+  coordinatorMode 提示词示例串字面消（模板插值）。
+
+### configDir 步 1 单源化（lock-face ⑤ 批复形，行为中性）
+
+- `tui/utils/configDir` 删本地 `getConfigDirName` 副本改 re-export
+  `shared/configDir`（双副本同形归一，8+ import 文件零 diff 消费）。
+- `cli/debugSink` / `atlascode/sandboxDeps` 两个 `.atlas` 字面活构造点归一
+  （缺省恒 `.atlas`；`ATLAS_CONFIG_DIR_NAME` 显式覆盖自此同路）。步 2
+  （configDirName 维度激活）= 0.1.99 独立波。
+
+### 字面清单制 + headless boundaries（fail-visible 守）
+
+- `docs/literal-inventory.json`：六类字面（repoSlug/repoUrl/brandName/
+  configDir/envPrefix/packageName）结构化落盘 +
+  `tests/unit/literal-inventory.test.ts` 非注释行执行（白名单 fail-visible，
+  新漂移须回工单改表）。
+- `tests/unit/headless-boundaries.test.ts`：cli/engine/shared 零 tui import
+  守（零物理搬移声明固化，防「归位」名下偷运）。
+
+### 判别格
+
+`tests/unit/s1a-product-definition.test.ts` 10 格（ProductDefinition 缺省/
+解析一次性格 + toolSubset 过滤四格 + configDir 单源四格），RED→GREEN 双验。
+canon 5838 pass（基线 5817 + 新增 21 对账吻合）；gate-098 standing 前滚
+14 腿 RC=0×14。
+
 ## v0.1.97
 
 CI 告警清零插入波（工单 `docs/2026-11-11-p0-wave-0197-ci-alerts-ticket.md`
