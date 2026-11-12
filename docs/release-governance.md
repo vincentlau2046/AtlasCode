@@ -91,3 +91,9 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 3. **npm 发布通道不变**：SRI 四值对表、本地/OIDC 双通道容灾照旧（双平台指 git 仓库面，非 npm 多 registry）。
 4. **生效版本**：**0.1.98 起双平台**（0.1.97 release 链已在途挂 Main，不回插；GitCode remote 建好后首版补推 0.1.97/0.1.96 tag 亦可，随 Main 执行时定）。
 5. **登记项（2026-11-12 用户定，同日填仓完成）**：GitCode 仓库 = `gitcode.com/vincentlau2046/Atlaswork`；remote `gitcode` = **SSH**（`git@gitcode.com:vincentlau2046/Atlaswork.git`——HTTPS 推需凭据非交互无解，Main 切 SSH id_ed25519 直通，后续零配置）；**填仓完成（用户直认授权，2026-11-12）**：master e0c0cfdb + 全量 128 tags 镜像，f4 实核三面 ALIGNED（local/GitHub/GitCode master 同值；tag v0.1.97 锚 release commit 680ccd9e ✓）；0.1.98 起双平台步 = release 后 `git push gitcode master --tags`；GitCode CI 候选不排。
+
+## 共享 checkout 破坏性 git 操作纪律（f4 登记 2026-11-13，S3a codemod 回滚事故定谳）
+
+**事故面**：Main S3a codemod 回滚 `reset --hard` 清掉 e2e lane 长期未提交的 harness/docs 修改（10 文件；S3a 码面零损失，恢复责任移交 e2e 自恢复）。
+
+**纪律（全 lane 适用，自登记起）**：共享 checkout 内执行破坏性 git 操作（`reset --hard`/`checkout -- .`/`clean`/`rebase` 落工作树面等）前，**必须**先 `git status` 全量排查他 lane 未提交改动并对该等改动 stash 保护（或逐文件备份），禁直接落破坏性操作。stash 前须注记归属 lane（stash message 带 lane 名），防误清他 lane 在途面。违反即事故报备链（责任 lane → 受损 lane → f4 备案）。
