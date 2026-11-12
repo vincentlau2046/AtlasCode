@@ -94,7 +94,13 @@ export {
 export { MAX_TASK_OUTPUT_BYTES } from "./constants"
 // C-Deep 切片 3 T5：permissions 薄骨架跨域纯叶子（permissions + sandbox +
 // shell 共线，L3 四域互不 import → shared 唯一跨域叶子汇）
-export { getConfigDirName } from "./configDir"
+export {
+  getConfigDirName,
+  getConfigDirNameForProject,
+  setConfigDirNameProvider,
+  resetConfigDirNameProvider,
+  type ConfigDirNameProvider,
+} from "./configDir"
 // C-Deep 切片 3 T5：用户专属 Atlas 临时目录名（跨域纯叶子，permissions +
 // executor Shell 共线；§8.16 偏差：由 permissions 最小面提升 shared）
 export { getAtlasTempDirName } from "./tempDir"

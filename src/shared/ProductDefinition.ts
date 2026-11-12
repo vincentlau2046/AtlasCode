@@ -29,8 +29,11 @@ export interface ProductDefinition {
    */
   readonly toolSubset?: readonly string[]
   /**
-   * 配置目录名维度（0.1.99 步 2 激活；0.1.98 仅占位声明）。
-   * 激活后解析序 = ATLAS_CONFIG_DIR 显式 > 本值 > 缺省 '.atlas'（lock-face ③）。
+   * 配置目录名维度（0.1.99 步 2 激活）：部署期产品默认层。
+   * env 四层次序（0.1.99 lock-face 必改① 钉死）= ATLAS_CONFIG_DIR（全路径
+   * 显式）> ATLAS_CONFIG_DIR_NAME（用户显式）> 本值（部署期默认）> '.atlas'
+   * ——显式用户意图恒压部署期产品默认。消费经 shared/configDir provider
+   * 槽惰性读（倒置 getter 形，shared 零 import 纯度）。
    */
   readonly configDirName?: string
 }

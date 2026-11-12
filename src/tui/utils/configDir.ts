@@ -5,7 +5,10 @@ import { join } from 'path'
 // 单一事实源 = shared/configDir（行为中性：两副本同形，tui 8+ import 文件经本
 // 门面 re-export 零 diff 消费）。tui 特有导出（plugin manifest / memory file
 // 面）留在本文件（tui 域面，非跨域叶子）。
-export { getConfigDirName } from '../../shared/configDir'
+export {
+  getConfigDirName,
+  getConfigDirNameForProject,
+} from '../../shared/configDir'
 
 export const PLUGIN_MANIFEST_DIR = 'atlas-plugin';
 

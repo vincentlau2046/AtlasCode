@@ -71,6 +71,10 @@ import {
   type ModelProvider,
 } from '../modelprovider'
 import type { EffortLevel } from '../shared'
+import {
+  getActiveProductDefinition,
+  setConfigDirNameProvider,
+} from '../shared'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
   setTaskOutputPort,
@@ -222,6 +226,12 @@ export function createCoreDependencies(): CoreDependencies {
     getCwd: getCwdState,
   })
   setSettingsPathsProvider(getSettingsPaths)
+  // 0.1.99 S1a 步 2：configDirName 维度激活——shared/configDir 倒置惰性
+  // getter 槽注入（读 activeProduct.configDirName 部署期默认层；env 四层序
+  // ATLAS_CONFIG_DIR > ATLAS_CONFIG_DIR_NAME > 本值 > '.atlas'，显式用户
+  // 意图恒压产品默认）。atlascode 缺省 configDirName=undefined → 恒 '.atlas'
+  // 行为字节级不变。
+  setConfigDirNameProvider(() => getActiveProductDefinition().configDirName)
 
   // ④ task ← permissions+bootstrap（D11，permissions 之后）
   setDiskOutputEnv(createDiskOutputEnv())
