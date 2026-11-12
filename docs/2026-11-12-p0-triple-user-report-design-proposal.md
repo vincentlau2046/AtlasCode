@@ -95,3 +95,62 @@
 | ⑤ 版本号 | 插入波 = 0.1.102（S3a 顺延 0.1.103） | 插入波插 0.1.102 前（S3a 已占号则插入波 0.1.103） |
 
 **裁定后动作**：f4 按裁定立工单（工单 = 本稿 §1-§3 推荐 + 判据格）→ Atlas-reveiw 审计 → 双信号 → Main 落码 → gate → release。S3a lock-face 六项终裁顺延至排波裁定后一并处理（Main 侧已同步挂起等待，不空转）。
+
+---
+
+# v2 修订（用户裁定吸收 + DSH 引证 + 需求分类排期，f4 2026-11-12）
+
+> 用户裁定：① 同意（排波 = P0 插入波先于 S3a）；② A+B+C 批准但**须核最新 DSH 源码**的循环故障处理形；③ 批准但**修正**：「并不是全盘没事，所有模式都没有钉底」——严肃对待，全模式钉底完备性为要求本体；④ 新增专项：**ENV 配置全量梳理**（默认值反转评估，positive 取向统一处理）。
+
+## §2-v2 DSH（deepseek-harness @09d38feb8a = rc.8）循环故障处理引证
+
+f4 实读三面（与 A+B+C 对照）：
+
+| DSH 机制 | 形态（引证） | 对照 AtlasCode |
+|---|---|---|
+| **installFailLoud**（boot/app-boot/src/index.ts:610-654） | unhandledRejection = **fail-loud**：stderr fatal 行 + **终端 release（恢复终端）有界竞速**（FAIL_LOUD_RELEASE_TIMEOUT_MS）+ exit(1)；latch 保首个 rejection 为报告主体 | 与切片 A 同域但**哲学更烈**——DSH 选「响亮地死」，我们 REPL 可更好：可见错误行 + **可重入**（不退进程）。A 采认，形 = fail-loud 可见面 + queryGuard 复位（超集） |
+| **timeout-policy guard**（guard/timeout-policy/src/index.ts） | **per-tool 声明预算**：tool 声明 `timeoutMs` → wrapper arm deadline → 到期替换为结构化 `TOOL_TIMEOUT` isError tool_result（模型可见可路由重试）；无声明 = 无限期（cooperative） | 与切片 B 同域但**粒度不同**——DSH 无 loop 级 no-event watchdog，靠工具声明预算。B（loop watchdog）仍采认作兜底（桥面/网关/defer 面 DSH 同样裸奔）；**per-tool timeoutMs 声明面登记候补**（工具域增强，非本波） |
+| **model-request failure 监听缝**（extensions/tool-cordis/api-catalog.ts:2356） | 「failed model-request attempt → 监听器返 `{kind:'retry'}` 自持恢复，否则 next() 委托」——恢复 = 插件缝 | turnRecovery（0.1.17/0.1.23 波）已同构（有界重试 + shouldRetryModelError 判别源）；**无需改**，引证自证现形正确 |
+
+**§2 结论（不变更推荐，形校准）**：A+B+C 维持；A 参照 installFailLoud 补「终态保全/终端恢复」意识；B 维持 loop 级 watchdog（DSH 无此层 = 我们超集点）；per-tool timeoutMs 声明面登记候补波。
+
+## §3-v2 输入框钉底——需求重分类（用户修正吸收：「所有模式都没有钉底」）
+
+用户修正定性：**不以全屏翻转为治本**；钉底完备性按模式分类核查，全模式全场景为要求本体。
+
+| 需求项 | 范围 | 形 | 优先 |
+|---|---|---|---|
+| **R3-A 默认 inline 模式钉底** | 用户实际所见形态（默认关全屏） | 视口压缩器：动态渲染面强制 ≤ 视口高度（消息区按剩余行数预算截断 + 「N 条已入滚动区」提示行 + 渲染前高度预算防流式一帧超限）——输入框恒在视口内 | **P0 本波主交付** |
+| **R3-B 全屏模式钉底完备性核查** | alt-screen stickyScroll 形全场景探针 | 结构面已在（FullscreenLayout.tsx:413 bottom `flexShrink=0` + stickyScroll）——**核全场景缝**：流式长块/permission overlay/modal/小终端行数（<20 行）/teammate view hideSticky 面；RED 缝即修 | P0 本波核查切片（探针先行，缝修随判） |
+| **R3-C 全屏翻转缺省评估** | 默认形态决策 | A 案（翻转缺省）降为**独立评估项呈用户**（不捆绑本波）：翻转 = 行为定位选择（虚拟滚动接管 vs 原生 scrollback 习惯） | 排期后置，用户终裁 |
+
+R3-A 实现要点（头脑风暴收敛）：高度预算器以 yoga 实测高度为准（Ink dom 面可测）；预算分配序 = 输入框/提示行全保 → 流式块限高 → 消息区自尾截断；截断锚 = 既有 UUID 锚面延伸（CC-941/1174 教训域）。
+
+## §5 新增专项：ENV 配置全量梳理与缺省反转评估（用户 2026-11-12 指令）
+
+**需求定性**（用户原话归纳）：ENV 开关 = 开发者功能预留/不成熟功能翻转面——**普通用户不设 env**；凡默认值反转为更强/更友好/更 positive 的，统一梳理处理一遍。
+
+**f4 盘点基数**：`process.env` 读取 **352 个唯一变量名**（grep 实测 @ca19ea86）。
+
+**梳理方法（分型评估矩阵）**：
+1. **分型**：A `FEATURE_*` 门类（feature.ts ON_BY_DEFAULT 面）／B `ATLAS_DISABLE_*` 负向类（disable-语义 = 缺省应开的能力面）／C `ATLAS_ENABLE_*` 正向类（enable-语义 = 缺省应关的预留面）／D `ATLAS_MOCK/DEMO/DEV/TEST` 测试态类／E 值配置类（timeout/路径/模型等——非开关，仅缺省值合理性评估）／F 上游透传类（OPENAI_*/NODE_* 等——禁动）。
+2. **评估维度**（逐变量行项）：正向价值（更强/更友好）× 成熟度（活面 validated?）× 风险（回退面/兼容面）× 判据可行性 → 三裁：**翻转缺省**（入波）/ **退役**（删面+收编缺省）/ **维持**（注记理由）。
+3. **统一处理纪律**：翻转 = 行为变更 → 逐项判据格 + row F；退役 = 清 literal-inventory 面；全表归档（评估矩阵 = 工单 §0 主体）。
+
+**排期提议**：独立专项波（不挤 P0 插入波体量），列 **0.1.104 候位**（P0 插入波与 S3a 之间或之后随用户排期裁定）；波前 f4 出全量 352 项分型评估矩阵 = 工单 §0（零码梳理先行，与 P0 插入波并行不冲突——f4 串行处理，插入波工单先出）。
+
+## §4-v2 需求分类与排期总表（用户指令「分类和排期」）
+
+| # | 需求 | 波 | 排期 | 状态 |
+|---|---|---|---|---|
+| 1 | 主题分层检测（T1-T6 根因面全修 + WCAG 判据格） | P0 插入波（0.1.102）切片 1 | 立即（用户已批 ①②） | 工单待立 |
+| 2a | 循环自恢复 A+B+C（fail-loud 可见化 + loop watchdog + defer 可视化；DSH 形校准） | P0 插入波（0.1.102）切片 2 | 立即 | 工单待立 |
+| 2b | per-tool timeoutMs 声明面（DSH timeout-policy 形） | 登记候补波 | 后置 | 登记池 |
+| 3a | R3-A inline 视口压缩钉底 | P0 插入波（0.1.102）切片 3 | 立即 | 工单待立 |
+| 3b | R3-B 全屏钉底完备性核查（探针 + 缝修） | P0 插入波（0.1.102）切片 3 内 | 立即（探针先行） | 工单待立 |
+| 3c | R3-C 全屏翻转缺省 | 独立评估项 | 用户终裁后 | 挂起待裁 |
+| 4 | ENV 全量梳理 + 缺省反转 | 独立专项波（0.1.104 候位） | P0 插入波工单后 f4 起矩阵 | 本节 |
+| 5 | S3a 归位（lock-face 六项终裁 + 落码） | 0.1.103（顺延） | P0 插入波收口后 | lock-face 冻结等待 |
+| 6 | 自动回合重建（重放语义） | 登记候补 | 独立设计审视后 | 登记池 |
+
+**执行序**：用户对 §3-v2 分类与 §5 排期确认后 → f4 立 0.1.102 P0 插入波工单（三切片 + 判据格预注册）→ Atlas-reveiw 审计 → 双信号。
