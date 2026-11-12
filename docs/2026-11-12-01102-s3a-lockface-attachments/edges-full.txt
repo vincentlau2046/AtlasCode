@@ -1,0 +1,794 @@
+=== 落点分类汇总（边数）===
+{"EXTERNAL":240,"MOVED":253,"TUI":451}
+
+=== 逃逸边（TUI/PRODUCT，按文件聚合）===
+
+# tui/utils/auth.ts (16)
+  [from] ../services/oauth/types.js  →  tui/services/oauth/types.ts
+  [from] ./authFileDescriptor.js  →  tui/utils/authFileDescriptor.ts
+  [from] ./authPortable.js  →  tui/utils/authPortable.ts
+  [from] ./awsAuthStatusManager.js  →  tui/utils/awsAuthStatusManager.ts
+  [from] ./config.js  →  tui/utils/config.ts
+  [from] ./debug.js  →  tui/utils/debug.ts
+  [from] ./envUtils.js  →  tui/utils/envUtils.ts
+  [from] ./errors.js  →  tui/utils/errors.ts
+  [from] ./execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ./lockfile.js  →  tui/utils/lockfile.ts
+  [from] ./log.js  →  tui/utils/log.ts
+  [from] ./memoize.js  →  tui/utils/memoize.ts
+  [from] ./secureStorage/index.js  →  tui/utils/secureStorage/index.ts
+  [from] ./secureStorage/macOsKeychainHelpers.js  →  tui/utils/secureStorage/macOsKeychainHelpers.ts
+  [from] ./sleep.js  →  tui/utils/sleep.ts
+  [from] ./slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/bash/ShellSnapshot.ts (10)
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../embeddedTools.js  →  tui/utils/embeddedTools.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../file.js  →  tui/utils/file.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+  [from] ../subprocessEnv.js  →  tui/utils/subprocessEnv.ts
+
+# tui/utils/bash/parser.ts (1)
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/bash/registry.ts (1)
+  [from] ../memoize.js  →  tui/utils/memoize.ts
+
+# tui/utils/bash/shellCompletion.ts (3)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../localInstaller.js  →  tui/utils/localInstaller.ts
+  [from] ../Shell.js  →  tui/utils/Shell.ts
+
+# tui/utils/bash/shellQuote.ts (2)
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/effort.ts (2)
+  [from] ./thinking.js  →  tui/utils/thinking.ts
+  [from] ./envUtils.js  →  tui/utils/envUtils.ts
+
+# tui/utils/git.ts (11)
+  [from] ../constants/files.js  →  tui/constants/files.ts
+  [from] ./cwd.js  →  tui/utils/cwd.ts
+  [from] ./debug.js  →  tui/utils/debug.ts
+  [from] ./diagLogs.js  →  tui/utils/diagLogs.ts
+  [from] ./execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ./fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ./log.js  →  tui/utils/log.ts
+  [from] ./memoize.js  →  tui/utils/memoize.ts
+  [from] ./plugins/gitAvailability.js  →  tui/utils/plugins/gitAvailability.ts
+  [from] ./which.js  →  tui/utils/which.ts
+  [import()] ./detectRepository.js  →  tui/utils/detectRepository.ts
+
+# tui/utils/git/gitFilesystem.ts (3)
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+
+# tui/utils/git/gitignore.ts (4)
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ../log.js  →  tui/utils/log.ts
+
+# tui/utils/gitDiff.ts (4)
+  [from] ./cwd.js  →  tui/utils/cwd.ts
+  [from] ./detectRepository.js  →  tui/utils/detectRepository.ts
+  [from] ./execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ./file.js  →  tui/utils/file.ts
+
+# tui/utils/hooks/AsyncHookRegistry.ts (4)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../ShellCommand.js  →  tui/utils/ShellCommand.ts
+  [from] ../sessionEnvironment.js  →  tui/utils/sessionEnvironment.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/hooks/apiQueryHookHelper.ts (7)
+  [from] ../../constants/querySource.js  →  tui/constants/querySource.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../../utils/abortController.js  →  tui/utils/abortController.ts
+  [from] ../../utils/log.js  →  tui/utils/log.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/hooks/execAgentHook.ts (16)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tools/SyntheticOutputTool/SyntheticOutputTool.js  →  tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts
+  [from] ../../tools.js  →  tui/tools.ts
+  [from] ../../types/ids.js  →  tui/types/ids.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../abortController.js  →  tui/utils/abortController.ts
+  [from] ../attachments.js  →  tui/utils/attachments.ts
+  [from] ../combinedAbortSignal.js  →  tui/utils/combinedAbortSignal.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../sessionStorage.js  →  tui/utils/sessionStorage.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/hooks/execHttpHook.ts (3)
+  [from] ../combinedAbortSignal.js  →  tui/utils/combinedAbortSignal.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+
+# tui/utils/hooks/execPromptHook.ts (10)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../attachments.js  →  tui/utils/attachments.ts
+  [from] ../combinedAbortSignal.js  →  tui/utils/combinedAbortSignal.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+  [from] ../json.js  →  tui/utils/json.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/hooks/fileChangedWatcher.ts (5)
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+  [from] ../sessionEnvironment.js  →  tui/utils/sessionEnvironment.ts
+
+# tui/utils/hooks/hookEvents.ts (1)
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/hooks/hookHelpers.ts (6)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tools/SyntheticOutputTool/SyntheticOutputTool.js  →  tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts
+  [from] ../argumentSubstitution.js  →  tui/utils/argumentSubstitution.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../messageQueueManager.js  →  tui/utils/messageQueueManager.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+
+# tui/utils/hooks/hookInputMaterialize.ts (1)
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/hooks/hooksConfigManager.ts (1)
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+
+# tui/utils/hooks/hooksSettings.ts (1)
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+
+# tui/utils/hooks/postSamplingHooks.ts (6)
+  [from] ../../constants/querySource.js  →  tui/constants/querySource.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/hooks/registerFrontmatterHooks.ts (1)
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/hooks/registerSkillHooks.ts (1)
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/hooks/sessionHooks.ts (2)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+
+# tui/utils/hooks/skillImprovement.ts (12)
+  [from] ../configDir.js  →  tui/utils/configDir.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../abortController.js  →  tui/utils/abortController.ts
+  [from] ../array.js  →  tui/utils/array.ts
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/model/agent.ts (1)
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+
+# tui/utils/model/maxOutputTokens.ts (3)
+  [from] ../context.js  →  tui/utils/context.ts
+  [from] ../envValidation.js  →  tui/utils/envValidation.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+
+# tui/utils/model/model.ts (1)
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+
+# tui/utils/model/modelOptions.ts (1)
+  [from] ../config.js  →  tui/utils/config.ts
+
+# tui/utils/model/validateModel.ts (2)
+  [from] ../sideQuery.js  →  tui/utils/sideQuery.ts
+  [from] ../../types/atlas.js  →  tui/types/atlas.ts
+
+# tui/utils/nativeInstaller/download.ts (1)
+  [from] ../config.js  →  tui/utils/config.ts
+
+# tui/utils/nativeInstaller/installer.ts (18)
+  [from] ../configDir.js  →  tui/utils/configDir.ts
+  [from] ../autoUpdater.js  →  tui/utils/autoUpdater.ts
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../config.js  →  tui/utils/config.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../doctorDiagnostic.js  →  tui/utils/doctorDiagnostic.ts
+  [from] ../env.js  →  tui/utils/env.ts
+  [from] ../envDynamic.js  →  tui/utils/envDynamic.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ../localInstaller.js  →  tui/utils/localInstaller.ts
+  [from] ../lockfile.js  →  tui/utils/lockfile.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../semver.js  →  tui/utils/semver.ts
+  [from] ../shellConfig.js  →  tui/utils/shellConfig.ts
+  [from] ../sleep.js  →  tui/utils/sleep.ts
+  [from] ../xdg.js  →  tui/utils/xdg.ts
+
+# tui/utils/nativeInstaller/packageManagers.ts (3)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+
+# tui/utils/nativeInstaller/pidLock.ts (8)
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../genericProcessUtils.js  →  tui/utils/genericProcessUtils.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/permissions/PermissionMode.ts (3)
+  [from] ../../constants/figures.js  →  tui/constants/figures.ts
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+
+# tui/utils/permissions/PermissionPromptToolResultSchema.ts (2)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+
+# tui/utils/permissions/PermissionResult.ts (1)
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+
+# tui/utils/permissions/PermissionRule.ts (2)
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+
+# tui/utils/permissions/PermissionUpdate.ts (4)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/permissions/PermissionUpdateSchema.ts (2)
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+
+# tui/utils/permissions/autoModePermissionOption.ts (2)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+
+# tui/utils/permissions/classifierDecision.ts (19)
+  [from] ../../tools/AskUserQuestionTool/prompt.js  →  tui/tools/AskUserQuestionTool/prompt.ts
+  [from] ../../tools/EnterPlanModeTool/constants.js  →  tui/tools/EnterPlanModeTool/constants.ts
+  [from] ../../tools/ExitPlanModeTool/constants.js  →  tui/tools/ExitPlanModeTool/constants.ts
+  [from] ../../tools/FileReadTool/prompt.js  →  tui/tools/FileReadTool/prompt.ts
+  [from] ../../tools/GlobTool/prompt.js  →  tui/tools/GlobTool/prompt.ts
+  [from] ../../tools/GrepTool/prompt.js  →  tui/tools/GrepTool/prompt.ts
+  [from] ../../tools/ListMcpResourcesTool/prompt.js  →  tui/tools/ListMcpResourcesTool/prompt.ts
+  [from] ../../tools/LSPTool/prompt.js  →  tui/tools/LSPTool/prompt.ts
+  [from] ../../tools/SendMessageTool/constants.js  →  tui/tools/SendMessageTool/constants.ts
+  [from] ../../tools/TaskCreateTool/constants.js  →  tui/tools/TaskCreateTool/constants.ts
+  [from] ../../tools/TaskGetTool/constants.js  →  tui/tools/TaskGetTool/constants.ts
+  [from] ../../tools/TaskListTool/constants.js  →  tui/tools/TaskListTool/constants.ts
+  [from] ../../tools/TaskOutputTool/constants.js  →  tui/tools/TaskOutputTool/constants.ts
+  [from] ../../tools/TaskStopTool/prompt.js  →  tui/tools/TaskStopTool/prompt.ts
+  [from] ../../tools/TaskUpdateTool/constants.js  →  tui/tools/TaskUpdateTool/constants.ts
+  [from] ../../tools/TeamCreateTool/constants.js  →  tui/tools/TeamCreateTool/constants.ts
+  [from] ../../tools/TeamDeleteTool/constants.js  →  tui/tools/TeamDeleteTool/constants.ts
+  [from] ../../tools/TodoWriteTool/constants.js  →  tui/tools/TodoWriteTool/constants.ts
+  [from] ../../tools/ToolSearchTool/prompt.js  →  tui/tools/ToolSearchTool/prompt.ts
+
+# tui/utils/permissions/classifierShared.ts (1)
+  [from] ../../types/atlas.js  →  tui/types/atlas.ts
+
+# tui/utils/permissions/filesystem.ts (13)
+  [from] ../configDir.js  →  tui/utils/configDir.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tools/FileReadTool/prompt.js  →  tui/tools/FileReadTool/prompt.ts
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../path.js  →  tui/utils/path.ts
+  [from] ../plans.js  →  tui/utils/plans.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+  [from] ../sessionStorage.js  →  tui/utils/sessionStorage.ts
+  [from] ../toolResultStorage.js  →  tui/utils/toolResultStorage.ts
+  [from] ../windowsPaths.js  →  tui/utils/windowsPaths.ts
+
+# tui/utils/permissions/getNextPermissionMode.ts (2)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/permissions/pathValidation.ts (4)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../utils/platform.js  →  tui/utils/platform.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../path.js  →  tui/utils/path.ts
+
+# tui/utils/permissions/permissionExplainer.ts (9)
+  [from] ../../services/analytics/metadata.js  →  tui/services/analytics/metadata.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../config.js  →  tui/utils/config.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../sideQuery.js  →  tui/utils/sideQuery.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/permissions/permissionRuleParser.ts (3)
+  [from] ../../tools/AgentTool/constants.js  →  tui/tools/AgentTool/constants.ts
+  [from] ../../tools/TaskOutputTool/constants.js  →  tui/tools/TaskOutputTool/constants.ts
+  [from] ../../tools/TaskStopTool/prompt.js  →  tui/tools/TaskStopTool/prompt.ts
+
+# tui/utils/permissions/permissionSetup.ts (12)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../cwd.js  →  tui/utils/cwd.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../../commands/add-dir/validation.js  →  tui/commands/add-dir/validation.ts
+  [from] ../../tools/AgentTool/constants.js  →  tui/tools/AgentTool/constants.ts
+  [from] ../../tools/BashTool/toolName.js  →  tui/tools/BashTool/toolName.ts
+  [from] ../../tools/PowerShellTool/toolName.js  →  tui/tools/PowerShellTool/toolName.ts
+  [from] ../../tools.js  →  tui/tools.ts
+  [from] ../../utils/fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../betas.js  →  tui/utils/betas.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../gracefulShutdown.js  →  tui/utils/gracefulShutdown.ts
+
+# tui/utils/permissions/permissions.ts (19)
+  [from] ../../types/atlas.js  →  tui/types/atlas.ts
+  [from] ../../hooks/useCanUseTool.js  →  tui/hooks/useCanUseTool.tsx
+  [from] ../../services/mcp/mcpStringUtils.js  →  tui/services/mcp/mcpStringUtils.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tools/AgentTool/constants.js  →  tui/tools/AgentTool/constants.ts
+  [from] ../../tools/BashTool/shouldUseSandbox.js  →  tui/tools/BashTool/shouldUseSandbox.ts
+  [from] ../../tools/BashTool/toolName.js  →  tui/tools/BashTool/toolName.ts
+  [from] ../../tools/PowerShellTool/toolName.js  →  tui/tools/PowerShellTool/toolName.ts
+  [from] ../../tools/REPLTool/constants.js  →  tui/tools/REPLTool/constants.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../classifierApprovals.js  →  tui/utils/classifierApprovals.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/permissions/permissionsLoader.ts (4)
+  [from] ../fileRead.js  →  tui/utils/fileRead.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../json.js  →  tui/utils/json.ts
+  [from] ../log.js  →  tui/utils/log.ts
+
+# tui/utils/permissions/sessionPermissionRules.ts (2)
+  [from] ../sessionStorage.js  →  tui/utils/sessionStorage.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/permissions/shadowedRuleDetection.ts (2)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tools/BashTool/toolName.js  →  tui/tools/BashTool/toolName.ts
+
+# tui/utils/permissions/yoloClassifier.ts (17)
+  [from] ../../types/atlas.js  →  tui/types/atlas.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../../services/api/metadata.js  →  tui/services/api/metadata.ts
+  [from] ../../utils/apiErrors.js  →  tui/utils/apiErrors.ts
+  [from] ../../services/api/withRetry.js  →  tui/services/api/withRetry.ts
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../../types/permissions.js  →  tui/types/permissions.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../sideQuery.js  →  tui/utils/sideQuery.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../tokens.js  →  tui/utils/tokens.ts
+  [require()] ./yolo-classifier-prompts/auto_mode_system_prompt.txt  →  tui/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt
+  [require()] ./yolo-classifier-prompts/permissions_external.txt  →  tui/utils/permissions/yolo-classifier-prompts/permissions_external.txt
+
+# tui/utils/powershell/parser.ts (3)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../memoize.js  →  tui/utils/memoize.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/powershell/staticPrefix.ts (1)
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+
+# tui/utils/proxy.ts (4)
+  [from] ./caCerts.js  →  tui/utils/caCerts.ts
+  [from] ./debug.js  →  tui/utils/debug.ts
+  [from] ./envUtils.js  →  tui/utils/envUtils.ts
+  [from] ./mtls.js  →  tui/utils/mtls.ts
+
+# tui/utils/settings/allErrors.ts (1)
+  [from] ../../services/mcp/config.js  →  tui/services/mcp/config.ts
+
+# tui/utils/settings/applySettingsChange.ts (2)
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+  [from] ../debug.js  →  tui/utils/debug.ts
+
+# tui/utils/settings/changeDetector.ts (6)
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../hooks.js  →  tui/utils/hooks.ts
+  [from] ../signal.js  →  tui/utils/signal.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/settings/managedPath.ts (1)
+  [from] ../platform.js  →  tui/utils/platform.ts
+
+# tui/utils/settings/mdm/settings.ts (6)
+  [from] ../../debug.js  →  tui/utils/debug.ts
+  [from] ../../diagLogs.js  →  tui/utils/diagLogs.ts
+  [from] ../../fileRead.js  →  tui/utils/fileRead.ts
+  [from] ../../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../../json.js  →  tui/utils/json.ts
+  [from] ../../startupProfiler.js  →  tui/utils/startupProfiler.ts
+
+# tui/utils/settings/permissionValidation.ts (3)
+  [from] ../../services/mcp/mcpStringUtils.js  →  tui/services/mcp/mcpStringUtils.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+
+# tui/utils/settings/schemaOutput.ts (1)
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/settings/settings.ts (14)
+  [from] ../configDir.js  →  tui/utils/configDir.ts
+  [from] ../array.js  →  tui/utils/array.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../diagLogs.js  →  tui/utils/diagLogs.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../file.js  →  tui/utils/file.ts
+  [from] ../fileRead.js  →  tui/utils/fileRead.ts
+  [from] ../fsOperations.js  →  tui/utils/fsOperations.ts
+  [from] ../json.js  →  tui/utils/json.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../startupProfiler.js  →  tui/utils/startupProfiler.ts
+
+# tui/utils/settings/types.ts (1)
+  [from] ../../types/all-local-types.js  →  tui/types/all-local-types.ts
+
+# tui/utils/settings/validation.ts (2)
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../stringUtils.js  →  tui/utils/stringUtils.ts
+
+# tui/utils/shell/bashProvider.ts (6)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+  [from] ../sessionEnvironment.js  →  tui/utils/sessionEnvironment.ts
+  [from] ../sessionEnvVars.js  →  tui/utils/sessionEnvVars.ts
+  [from] ../tmuxSocket.js  →  tui/utils/tmuxSocket.ts
+  [from] ../windowsPaths.js  →  tui/utils/windowsPaths.ts
+
+# tui/utils/shell/outputLimits.ts (1)
+  [from] ../envValidation.js  →  tui/utils/envValidation.ts
+
+# tui/utils/shell/powershellDetection.ts (2)
+  [from] ../platform.js  →  tui/utils/platform.ts
+  [from] ../which.js  →  tui/utils/which.ts
+
+# tui/utils/shell/powershellProvider.ts (1)
+  [from] ../sessionEnvVars.js  →  tui/utils/sessionEnvVars.ts
+
+# tui/utils/shell/prefix.ts (6)
+  [from] ../../constants/querySource.js  →  tui/constants/querySource.ts
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../memoize.js  →  tui/utils/memoize.ts
+  [from] ../messages.js  →  tui/utils/messages.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../systemPromptType.js  →  tui/utils/systemPromptType.ts
+
+# tui/utils/shell/readOnlyCommandValidation.ts (1)
+  [from] ../platform.js  →  tui/utils/platform.ts
+
+# tui/utils/shell/shellToolUtils.ts (4)
+  [from] ../../tools/BashTool/toolName.js  →  tui/tools/BashTool/toolName.ts
+  [from] ../../tools/PowerShellTool/toolName.js  →  tui/tools/PowerShellTool/toolName.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../platform.js  →  tui/utils/platform.ts
+
+# tui/utils/swarm/It2SetupPrompt.tsx (6)
+  [from] ../../components/CustomSelect/index.js  →  tui/components/CustomSelect/index.ts
+  [from] ../../components/design-system/Pane.js  →  tui/components/design-system/Pane.tsx
+  [from] ../../components/Spinner.js  →  tui/components/Spinner.tsx
+  [from] ../../hooks/useExitOnCtrlCDWithKeybindings.js  →  tui/hooks/useExitOnCtrlCDWithKeybindings.ts
+  [from] ../../ink.js  →  tui/ink.ts
+  [from] ../../keybindings/useKeybinding.js  →  tui/keybindings/useKeybinding.ts
+
+# tui/utils/swarm/inProcessSpawnHooks.ts (6)
+  [from] ../../Tool.js  →  tui/Tool.ts
+  [from] ../../tasks/InProcessTeammateTask/types.js  →  tui/tasks/InProcessTeammateTask/types.ts
+  [from] ../../tasks/InProcessTeammateTask/types.js  →  tui/tasks/InProcessTeammateTask/types.ts
+  [from] ../../tasks/LocalAgentTask/LocalAgentTask.js  →  tui/tasks/LocalAgentTask/LocalAgentTask.tsx
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../../constants/prompts.js  →  tui/constants/prompts.ts
+
+# tui/utils/swarm/leaderPermissionBridge.ts (2)
+  [from] ../../components/permissions/PermissionRequest.js  →  tui/components/permissions/PermissionRequest.tsx
+  [from] ../../Tool.js  →  tui/Tool.ts
+
+# tui/utils/swarm/permissionSync.ts (6)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../lockfile.js  →  tui/utils/lockfile.ts
+  [from] ../log.js  →  tui/utils/log.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/swarm/reconnection.ts (3)
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../log.js  →  tui/utils/log.ts
+
+# tui/utils/swarm/spawnInProcess.ts (12)
+  [from] ../../constants/spinnerVerbs.js  →  tui/constants/spinnerVerbs.ts
+  [from] ../../constants/turnCompletionVerbs.js  →  tui/constants/turnCompletionVerbs.ts
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+  [from] ../../Task.js  →  tui/Task.ts
+  [from] ../../tasks/InProcessTeammateTask/types.js  →  tui/tasks/InProcessTeammateTask/types.ts
+  [from] ../abortController.js  →  tui/utils/abortController.ts
+  [from] ../agentId.js  →  tui/utils/agentId.ts
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../sdkEventQueue.js  →  tui/utils/sdkEventQueue.ts
+  [from] ../task/diskOutput.js  →  tui/utils/task/diskOutput.ts
+  [from] ../task/framework.js  →  tui/utils/task/framework.ts
+
+# tui/utils/swarm/spawnUtils.ts (1)
+  [from] ../bundledMode.js  →  tui/utils/bundledMode.ts
+
+# tui/utils/swarm/teamHelpers.ts (7)
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ../lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ../tasks.js  →  tui/utils/tasks.ts
+
+# tui/utils/swarm/teammateInit.ts (3)
+  [from] ../../state/AppState.js  →  tui/state/AppState.tsx
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/swarm/teammateLayoutManager.ts (2)
+  [from] ../../tools/AgentTool/agentColorManager.js  →  tui/tools/AgentTool/agentColorManager.ts
+  [from] ../../tools/AgentTool/agentColorManager.js  →  tui/tools/AgentTool/agentColorManager.ts
+
+# tui/utils/teammateMailbox.ts (14)
+  [from] ../constants/xml.js  →  tui/constants/xml.ts
+  [from] ../entrypoints/sdk/coreSchemas.js  →  tui/entrypoints/sdk/coreSchemas.ts
+  [from] ../tools/SendMessageTool/constants.js  →  tui/tools/SendMessageTool/constants.ts
+  [from] ../types/message.js  →  tui/types/message.ts
+  [from] ./agentId.js  →  tui/utils/agentId.ts
+  [from] ./array.js  →  tui/utils/array.ts
+  [from] ./debug.js  →  tui/utils/debug.ts
+  [from] ./envUtils.js  →  tui/utils/envUtils.ts
+  [from] ./errors.js  →  tui/utils/errors.ts
+  [from] ./lazySchema.js  →  tui/utils/lazySchema.ts
+  [from] ./lockfile.js  →  tui/utils/lockfile.ts
+  [from] ./log.js  →  tui/utils/log.ts
+  [from] ./slowOperations.js  →  tui/utils/slowOperations.ts
+  [from] ./tasks.js  →  tui/utils/tasks.ts
+
+# tui/utils/telemetry/betaSessionTracing.ts (5)
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../../services/analytics/metadata.js  →  tui/services/analytics/metadata.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/telemetry/perfettoTracing.ts (6)
+  [from] ../cleanupRegistry.js  →  tui/utils/cleanupRegistry.ts
+  [from] ../debug.js  →  tui/utils/debug.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../errors.js  →  tui/utils/errors.ts
+  [from] ../hash.js  →  tui/utils/hash.ts
+  [from] ../slowOperations.js  →  tui/utils/slowOperations.ts
+
+# tui/utils/telemetry/sessionTracing.ts (4)
+  [from] ../../services/analytics/growthbook.js  →  tui/services/analytics/growthbook.ts
+  [from] ../../types/message.js  →  tui/types/message.ts
+  [from] ../envUtils.js  →  tui/utils/envUtils.ts
+  [from] ../telemetryAttributes.js  →  tui/utils/telemetryAttributes.ts
+
+# tui/utils/telemetry/skillLoadedEvent.ts (2)
+  [from] ../../commands.js  →  tui/commands.ts
+  [from] ../../tools/SkillTool/prompt.js  →  tui/tools/SkillTool/prompt.ts
+
+# tui/utils/worktree.ts (11)
+  [from] ./configDir.js  →  tui/utils/configDir.ts
+  [from] ./config.js  →  tui/utils/config.ts
+  [from] ./cwd.js  →  tui/utils/cwd.ts
+  [from] ./debug.js  →  tui/utils/debug.ts
+  [from] ./errors.js  →  tui/utils/errors.ts
+  [from] ./execFileNoThrow.js  →  tui/utils/execFileNoThrow.ts
+  [from] ./hooks.js  →  tui/utils/hooks.ts
+  [from] ./path.js  →  tui/utils/path.ts
+  [from] ./platform.js  →  tui/utils/platform.ts
+  [from] ./sleep.js  →  tui/utils/sleep.ts
+  [import()] ./postCommitAttribution.js  →  tui/utils/postCommitAttribution.ts
+
+逃逸边总计: 451（文件数 92）
+
+=== UNRESOLVED（人工复核）===
+
+=== 字符串构造路径面（非字面 import/require，人工复核）===
+tui/utils/bash/registry.ts: dynamic import non-literal → import(`@withfig/autocomplete/build/${command}.js`
+
+=== 逃逸靶点排行（resolved → 边数）===
+  40	tui/utils/debug.ts
+  23	tui/utils/slowOperations.ts
+  21	tui/utils/errors.ts
+  17	tui/utils/log.ts
+  17	tui/Tool.ts
+  15	tui/utils/envUtils.ts
+  12	tui/types/message.ts
+  11	tui/utils/platform.ts
+  11	tui/utils/lazySchema.ts
+  9	tui/utils/cwd.ts
+  9	tui/utils/fsOperations.ts
+  9	tui/services/analytics/growthbook.ts
+  9	tui/utils/execFileNoThrow.ts
+  8	tui/utils/messages.ts
+  7	tui/utils/cleanupRegistry.ts
+  7	tui/state/AppState.tsx
+  7	tui/utils/hooks.ts
+  6	tui/types/permissions.ts
+  6	tui/utils/config.ts
+  6	tui/utils/stringUtils.ts
+  6	tui/utils/systemPromptType.ts
+  5	tui/utils/memoize.ts
+  5	tui/utils/configDir.ts
+  4	tui/tools/BashTool/toolName.ts
+  4	tui/types/atlas.ts
+  4	tui/utils/json.ts
+  4	tui/utils/abortController.ts
+  4	tui/utils/lockfile.ts
+  3	tui/utils/file.ts
+  3	tui/tools/AgentTool/constants.ts
+  3	tui/tools/PowerShellTool/toolName.ts
+  3	tui/utils/sideQuery.ts
+  3	tui/utils/path.ts
+  3	tui/utils/fileRead.ts
+  3	tui/utils/sessionStorage.ts
+  3	tui/utils/array.ts
+  3	tui/constants/querySource.ts
+  3	tui/utils/combinedAbortSignal.ts
+  3	tui/utils/sessionEnvironment.ts
+  3	tui/utils/diagLogs.ts
+  3	tui/tasks/InProcessTeammateTask/types.ts
+  3	tui/utils/sleep.ts
+  2	tui/utils/localInstaller.ts
+  2	tui/tools.ts
+  2	tui/tools/FileReadTool/prompt.ts
+  2	tui/tools/SendMessageTool/constants.ts
+  2	tui/tools/TaskOutputTool/constants.ts
+  2	tui/tools/TaskStopTool/prompt.ts
+  2	tui/services/analytics/metadata.ts
+  2	tui/utils/windowsPaths.ts
+  2	tui/services/mcp/mcpStringUtils.ts
+  2	tui/utils/attachments.ts
+  2	tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts
+  2	tui/utils/startupProfiler.ts
+  2	tui/utils/which.ts
+  2	tui/utils/sessionEnvVars.ts
+  2	tui/utils/envValidation.ts
+  2	tui/tools/AgentTool/agentColorManager.ts
+  2	tui/utils/tasks.ts
+  2	tui/utils/agentId.ts
+  2	tui/utils/detectRepository.ts
+  1	tui/utils/embeddedTools.ts
+  1	tui/utils/subprocessEnv.ts
+  1	tui/utils/Shell.ts
+  1	tui/commands/add-dir/validation.ts
+  1	tui/utils/betas.ts
+  1	tui/utils/gracefulShutdown.ts
+  1	tui/tools/AskUserQuestionTool/prompt.ts
+  1	tui/tools/EnterPlanModeTool/constants.ts
+  1	tui/tools/ExitPlanModeTool/constants.ts
+  1	tui/tools/GlobTool/prompt.ts
+  1	tui/tools/GrepTool/prompt.ts
+  1	tui/tools/ListMcpResourcesTool/prompt.ts
+  1	tui/tools/LSPTool/prompt.ts
+  1	tui/tools/TaskCreateTool/constants.ts
+  1	tui/tools/TaskGetTool/constants.ts
+  1	tui/tools/TaskListTool/constants.ts
+  1	tui/tools/TaskUpdateTool/constants.ts
+  1	tui/tools/TeamCreateTool/constants.ts
+  1	tui/tools/TeamDeleteTool/constants.ts
+  1	tui/tools/TodoWriteTool/constants.ts
+  1	tui/tools/ToolSearchTool/prompt.ts
+  1	tui/constants/figures.ts
+  1	tui/utils/plans.ts
+  1	tui/utils/toolResultStorage.ts
+  1	tui/services/api/metadata.ts
+  1	tui/utils/apiErrors.ts
+  1	tui/services/api/withRetry.ts
+  1	tui/utils/tokens.ts
+  1	tui/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt
+  1	tui/utils/permissions/yolo-classifier-prompts/permissions_external.txt
+  1	tui/hooks/useCanUseTool.tsx
+  1	tui/tools/BashTool/shouldUseSandbox.ts
+  1	tui/tools/REPLTool/constants.ts
+  1	tui/utils/classifierApprovals.ts
+  1	tui/types/ids.ts
+  1	tui/utils/ShellCommand.ts
+  1	tui/utils/argumentSubstitution.ts
+  1	tui/utils/messageQueueManager.ts
+  1	tui/services/mcp/config.ts
+  1	tui/utils/signal.ts
+  1	tui/types/all-local-types.ts
+  1	tui/utils/tmuxSocket.ts
+  1	tui/utils/bundledMode.ts
+  1	tui/components/permissions/PermissionRequest.tsx
+  1	tui/tasks/LocalAgentTask/LocalAgentTask.tsx
+  1	tui/constants/prompts.ts
+  1	tui/constants/spinnerVerbs.ts
+  1	tui/constants/turnCompletionVerbs.ts
+  1	tui/Task.ts
+  1	tui/utils/sdkEventQueue.ts
+  1	tui/utils/task/diskOutput.ts
+  1	tui/utils/task/framework.ts
+  1	tui/components/CustomSelect/index.ts
+  1	tui/components/design-system/Pane.tsx
+  1	tui/components/Spinner.tsx
+  1	tui/hooks/useExitOnCtrlCDWithKeybindings.ts
+  1	tui/ink.ts
+  1	tui/keybindings/useKeybinding.ts
+  1	tui/utils/hash.ts
+  1	tui/utils/telemetryAttributes.ts
+  1	tui/commands.ts
+  1	tui/tools/SkillTool/prompt.ts
+  1	tui/utils/genericProcessUtils.ts
+  1	tui/utils/autoUpdater.ts
+  1	tui/utils/doctorDiagnostic.ts
+  1	tui/utils/env.ts
+  1	tui/utils/envDynamic.ts
+  1	tui/utils/semver.ts
+  1	tui/utils/shellConfig.ts
+  1	tui/utils/xdg.ts
+  1	tui/utils/context.ts
+  1	tui/constants/files.ts
+  1	tui/utils/plugins/gitAvailability.ts
+  1	tui/utils/postCommitAttribution.ts
+  1	tui/services/oauth/types.ts
+  1	tui/utils/authFileDescriptor.ts
+  1	tui/utils/authPortable.ts
+  1	tui/utils/awsAuthStatusManager.ts
+  1	tui/utils/secureStorage/index.ts
+  1	tui/utils/secureStorage/macOsKeychainHelpers.ts
+  1	tui/utils/caCerts.ts
+  1	tui/utils/mtls.ts
+  1	tui/utils/thinking.ts
+  1	tui/constants/xml.ts
+  1	tui/entrypoints/sdk/coreSchemas.ts

@@ -1,0 +1,153 @@
+target	selfLines	closureFiles	closureLines	fakeKernelSelf	fakeKernelClosure	class	disposition
+tui/Task.ts	143	1446	332609	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/Tool.ts	839	1446	331913	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/commands.ts	652	1446	332100	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/commands/add-dir/validation.ts	111	1446	332641	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/components/CustomSelect/index.ts	4	1446	332748	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/components/Spinner.tsx	325	1446	332427	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/components/design-system/Pane.tsx	77	177	33929	1	41	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/components/permissions/PermissionRequest.tsx	208	1446	332544	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/constants/figures.ts	47	17	2726	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/constants/files.ts	166	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/constants/prompts.ts	739	1446	332013	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/constants/querySource.ts	3	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/constants/spinnerVerbs.ts	63	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/constants/system.ts	99	60	12233	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/constants/turnCompletionVerbs.ts	28	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/constants/xml.ts	83	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/entrypoints/sdk/coreSchemas.ts	1948	1	9	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/hooks/useCanUseTool.tsx	214	1446	332538	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/hooks/useExitOnCtrlCDWithKeybindings.ts	25	177	34283	0	41	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/ink.ts	86	167	32967	1	36	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/keybindings/useKeybinding.ts	197	174	33927	1	38	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/services/analytics/growthbook.ts	264	58	11911	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/services/analytics/metadata.ts	362	19	2811	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/services/api/metadata.ts	249	63	12547	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/services/api/withRetry.ts	551	61	12396	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/services/mcp/config.ts	1591	1446	331161	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/services/mcp/mcpStringUtils.ts	107	1	21	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/services/oauth/types.ts	4	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/services/tokenEstimation.ts	351	1446	332401	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/state/AppState.tsx	197	1446	332555	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/tasks/InProcessTeammateTask/types.ts	6	1	53	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/tasks/LocalAgentTask/LocalAgentTask.tsx	696	1446	332056	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools.ts	378	1446	332374	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools/AgentTool/agentColorManager.ts	67	18	3396	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/tools/AgentTool/constants.ts	13	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/AgentTool/loadAgentsDir.ts	773	1446	331979	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools/AskUserQuestionTool/prompt.ts	47	1	3	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/tools/BashTool/shouldUseSandbox.ts	125	1446	332627	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools/BashTool/toolName.ts	6	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/EnterPlanModeTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/ExitPlanModeTool/constants.ts	3	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/FileReadTool/prompt.ts	51	2	74	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/tools/GlobTool/prompt.ts	8	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/GrepTool/prompt.ts	19	2	19	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/tools/LSPTool/prompt.ts	22	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/ListMcpResourcesTool/prompt.ts	21	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/PowerShellTool/toolName.ts	3	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/REPLTool/constants.ts	44	11	392	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/tools/SendMessageTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/SkillTool/prompt.ts	227	27	4143	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts	164	1446	332588	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/tools/TaskCreateTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TaskGetTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TaskListTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TaskOutputTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TaskStopTool/prompt.ts	9	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TaskUpdateTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TeamCreateTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TeamDeleteTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/TodoWriteTool/constants.ts	2	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/tools/ToolSearchTool/prompt.ts	82	1446	332670	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/types/all-local-types.ts	53	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/types/atlas.ts	79	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/types/ids.ts	45	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/types/message.ts	55	1	79	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/types/permissions.ts	442	1	79	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/Shell.ts	462	1446	332290	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/ShellCommand.ts	466	1446	332286	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/abortController.ts	100	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/agentId.ts	100	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/agentSwarmsEnabled.ts	40	59	12175	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/apiErrors.ts	324	1447	332752	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/argumentSubstitution.ts	352	0	0	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/array.ts	14	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/attachments.ts	3514	1446	329238	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/utils/authFileDescriptor.ts	200	12	2210	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/authPortable.ts	9	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/autoUpdater.ts	507	1446	332245	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/awsAuthStatusManager.ts	82	1	44	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/betas.ts	280	3	225	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/bundledMode.ts	23	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/caCerts.ts	114	12	2210	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/classifierApprovals.ts	89	1	44	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/cleanupRegistry.ts	26	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/combinedAbortSignal.ts	48	1	100	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/config.ts	1709	58	10466	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/configDir.ts	62	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/context.ts	118	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/cwd.ts	10	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/debug.ts	272	11	1938	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/detectRepository.ts	179	13	2220	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/diagLogs.ts	96	12	2210	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/doctorDiagnostic.ts	629	1446	332123	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/embeddedTools.ts	30	2	192	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/env.ts	354	16	2372	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/envDynamic.ts	152	31	4273	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/envUtils.ts	130	1	62	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/envValidation.ts	39	12	2210	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/errors.ts	239	1	79	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/execFileNoThrow.ts	156	24	3390	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/file.ts	601	58	11574	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/fileRead.ts	118	12	2210	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/fsOperations.ts	772	11	1438	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/genericProcessUtils.ts	211	25	3546	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/gracefulShutdown.ts	512	1446	332240	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/utils/hash.ts	45	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/hooks.ts	5312	1446	327440	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/utils/json.ts	278	24	3577	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/lazySchema.ts	9	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/localInstaller.ts	166	61	12421	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/lockfile.ts	43	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/log.ts	356	21	2934	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/memoize.ts	270	22	3290	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/messageQueueManager.ts	540	1446	332212	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/utils/messages.ts	5510	1446	327242	1	567	C-壳靶点	禁随迁（壳性态）→ 消费边逐条裁：排除留壳(导入方) 或 type 重定位 或 改写→S3b
+tui/utils/mtls.ts	179	13	2324	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/path.ts	156	29	4810	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt	138	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/permissions/yolo-classifier-prompts/permissions_external.txt	152	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/plans.ts	399	1446	332353	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/platform.ts	151	22	3290	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/plugins/gitAvailability.ts	129	14	2331	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/postCommitAttribution.ts	3	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/sdkEventQueue.ts	135	1	25	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/secureStorage/index.ts	18	31	4128	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/secureStorage/macOsKeychainHelpers.ts	117	4	248	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/semver.ts	59	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/sessionEnvVars.ts	23	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/sessionEnvironment.ts	167	23	3441	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/sessionStorage.ts	5049	1446	327703	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/shellConfig.ts	168	62	12587	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/sideQuery.ts	223	68	13045	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/signal.ts	44	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/sleep.ts	84	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/slowOperations.ts	289	11	1921	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/startupProfiler.ts	187	17	3095	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/stringUtils.ts	236	0	0	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/subprocessEnv.ts	98	2	192	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/systemPromptType.ts	15	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/task/diskOutput.ts	452	22	3290	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/task/framework.ts	309	1446	332443	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/tasks.ts	849	26	3400	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/telemetryAttributes.ts	52	64	12839	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/thinking.ts	137	59	12175	0	1	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/tmuxSocket.ts	428	26	3697	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/tokens.ts	262	1446	332490	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/toolResultStorage.ts	1088	1446	331664	0	568	C-闭包含壳	随迁将拖壳入 kernel → 消费边逐条裁：排除留壳 或 改写→S3b
+tui/utils/toolSchemaCache.ts	27	1	79	0	0	A-净随迁	机械随迁（自身+闭包零假kernel，闭包≤2000 行）
+tui/utils/which.ts	82	13	2249	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/windowsPaths.ts	174	26	3760	0	0	D-重闭包	净但闭包>2000 行 → f4 逐靶点终裁（随迁扩集 / 边级排除 / 改写→S3b）
+tui/utils/xdg.ts	66	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
+tui/utils/zodToJsonSchema.ts	9	0	0	0	0	B-轻随迁	机械随迁（零闭包/轻量，含 type-only 重定位）
