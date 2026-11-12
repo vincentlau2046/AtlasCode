@@ -15,6 +15,7 @@ import type {
   SettingSource,
   SettingsJson,
 } from '../sandbox'
+import { getConfigDirName } from '../shared'
 
 const SETTING_SOURCES: readonly SettingSource[] = [
   'userSettings',
@@ -56,7 +57,9 @@ export function createInMemorySandboxDeps(): SandboxDependencies {
     getPlatform: () => resolvePlatform(),
     getAdditionalDirectories: () => [],
     onSettingsChange: () => () => {},
-    getConfigDirName: () => '.atlas',
+    // 0.1.98 S1a 步 1：注入值归一 shared/configDir 单源（行为中性：缺省恒
+    // '.atlas'，ATLAS_CONFIG_DIR_NAME 显式覆盖同路——lock-face ⑤ 归一形）。
+    getConfigDirName: () => getConfigDirName(),
     getAtlasTempDir: () => tempDir,
     getManagedSettingsDropInDir: () => '/etc/atlas/managed_settings.json',
     updateSettingsForSource: (source, values) => {

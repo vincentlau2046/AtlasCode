@@ -24,7 +24,7 @@ import { appendFile, mkdir } from 'fs/promises'
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { isEnvTruthy, setDebugSink } from 'src/shared'
+import { getConfigDirName, isEnvTruthy, setDebugSink } from 'src/shared'
 // 0.1.93b 段 R-aux：类型引用（setDebugSink 注入窗签名面）
 import type { DebugSink } from 'src/shared'
 
@@ -157,8 +157,11 @@ export function initDebugSink(): void {
     sinkFile = null
   }
   if (sinkFile === null && !toStderr) {
+    // 0.1.98 S1a 步 1：'.atlas' 字面活构造点归一 shared/configDir 单源
+    // （行为中性：缺省恒 '.atlas'；ATLAS_CONFIG_DIR_NAME 显式覆盖自此同路——
+    // lock-face ③ env 优先序 knob 语义）。
     const configDir =
-      process.env.ATLAS_CONFIG_DIR ?? join(homedir(), '.atlas')
+      process.env.ATLAS_CONFIG_DIR ?? join(homedir(), getConfigDirName())
     sinkFile = join(configDir, 'debug', `${getSessionId()}.txt`)
   }
 }

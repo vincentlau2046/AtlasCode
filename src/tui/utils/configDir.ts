@@ -1,23 +1,11 @@
 import { existsSync } from 'fs'
 import { join } from 'path'
 
-const NEW_CONFIG_DIR = '.atlas'
-
-/**
- * Config directory name. Clean migration: always `.atlas` — no legacy
- * `~/.claude` fallback, so a second agent platform can coexist on the same
- * machine without the two cross-writings into each other's config dir.
- *
- * Resolution order:
- * 1. ATLAS_CONFIG_DIR_NAME env var — explicit override.
- * 2. Default: `.atlas` (no disk probe; a stale `~/.claude` no longer
- *    pulls the runtime back to the legacy dir).
- */
-export function getConfigDirName(): string {
-  const override = process.env.ATLAS_CONFIG_DIR_NAME;
-  if (override) return override;
-  return NEW_CONFIG_DIR;
-}
+// 0.1.98 S1a 步 1（lock-face ⑤ 批复形）：双 configDir 归一——getConfigDirName
+// 单一事实源 = shared/configDir（行为中性：两副本同形，tui 8+ import 文件经本
+// 门面 re-export 零 diff 消费）。tui 特有导出（plugin manifest / memory file
+// 面）留在本文件（tui 域面，非跨域叶子）。
+export { getConfigDirName } from '../../shared/configDir'
 
 export const PLUGIN_MANIFEST_DIR = 'atlas-plugin';
 
