@@ -49,8 +49,7 @@
 
 ## §6 task #154 状态核对（Atlas-reveiw ④）
 
-- e2e 回执（2026-11-12）：其 task store 查无 #154（TaskList 空，近期编号段 225-228 系 0.1.96 波临时项已收口）——「未在本 lane 登记」口径。
-- f4 侧 task store 同查无 #154。源头核对已发 Atlas-reveiw（登记出处侧），回执后本节终记；若三侧均无账面 = #154 登记失效定谳（office 激活前置以 charter 现行登记面为准，#154 不作阻塞项）。
+- **终记（Atlas-reveiw 回执 + f4 三处引证实锚，2026-11-12）**：#154 = execution-strategy.md 账面波编号（§8.71.1:5202，非 task store 编号——e2e/f4 两 store 查无属正常）；**状态 = 已闭环**（product-status.md §8.73:28 ✅，3055/0/7318/182 + gate 6·0·5·2 终态，wave-f tag 已切）；三残口（engine spine vs tui orchestrator 去重 / bootstrapState 双份 / 全量 lint 复原）已吸收国产轨 R1（roadmap-domestic-and-residuals.md:89）。**office 激活前置审视项 = 已完成，#154 不作阻塞项，charter ④ 号登记销项。**
 
 ## §7 portal 需求面 + engine web 交互缺口
 
