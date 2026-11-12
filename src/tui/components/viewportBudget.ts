@@ -65,6 +65,33 @@ export function computeViewportPlan(
   return { mode: 'compress', messageBudgetRows, streamingCapRows }
 }
 
+/**
+ * 实测收缩环有界重试上限（gate-102 RED 修形，f4 冻结判据 2：建议 ≤2 次）。
+ * 同一溢出 episode（连续溢出帧）内至多收缩 2 次；耗尽仍溢出 → surrender
+ * （锁 fallback 保底形），禁无限 setState 自激。
+ */
+export const MAX_SHRINK_ATTEMPTS = 2
+
+/** 实测收缩环单步决策（resolveShrinkDecision 产出）。 */
+export type ShrinkDecision =
+  | { action: 'hold' }
+  | { action: 'shrink'; shrinkRows: number }
+  | { action: 'surrender' }
+
+/**
+ * 收缩环单步决策（gate-102 RED 修形，f4 冻结判据 1+2）：
+ * - 无溢出 → hold（episode 清零）；
+ * - 溢出且 episode 内收缩次数未耗尽 → shrink，收缩量钳制 = 实测溢出行数
+ *   （禁 +1 盲加；是否真消除由下一次测量验证，不在本步盲断）；
+ * - episode 内收缩 ≥ MAX_SHRINK_ATTEMPTS 次仍溢出 → surrender（不可收敛
+ *   降级：调用方落 fallback 保底形并停止 setState，禁无限自激）。
+ */
+export function resolveShrinkDecision(overflowRows: number, attempts: number): ShrinkDecision {
+  if (!(overflowRows > 0)) return { action: 'hold' }
+  if (attempts >= MAX_SHRINK_ATTEMPTS) return { action: 'surrender' }
+  return { action: 'shrink', shrinkRows: overflowRows }
+}
+
 /** Messages 消费形：capRows 传 computeSliceStart；streamingCapRows = 流式块
  *  实际帽（plan 已按视口二次限高；不在场时 Messages 用 STREAMING_BLOCK_CAP_ROWS
  *  常数帽）；suppressStreaming 仅保底集（fallback）置真——保底集 = 输入框 +
