@@ -4,6 +4,41 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.99
+
+S1a 步 2 维度激活波（工单 `docs/2026-11-12-p0-wave-0199-s1a-step2-ticket.md`；
+row F 双出口批复 @f4 §8 b8a55c40，§9 附带发现裁处 @86ea0d12）。
+
+### configDir 双出口（row F 批复形）
+
+- **`src/shared/configDir.ts`**：`getConfigDirName()` = **homedir 锚**
+  （用户配置目录，四层全序 ATLAS_CONFIG_DIR > ATLAS_CONFIG_DIR_NAME >
+  product.configDirName > `.atlas`）；新增 **`getConfigDirNameForProject()`**
+  = **项目根锚/名字标签**（repo 内 `.atlas` 点目录、managed 子路径、tmp
+  名标签、权限 pattern 串，剥 L1 三层）。恒等判据：ATLAS_CONFIG_DIR 未设
+  时两出口同值（现网行为字节级不变）。
+- 32 文件消费点按锚定分型切换（KEEP 12 文件 homedir/XDG 锚不动；SWITCH
+  31 文件切 ForProject；全量清册
+  `docs/2026-11-12-0199-configdir-anchor-enumeration.md`）。定因：L1 全路径
+  对项目点目录 = 维度错配（`join(repoRoot, 全路径)` 绝对段重置 → 项目点
+  目录漂移，canon 19 fail 单根因实证修复）。
+- 接口不动点：`SandboxDependencies.getConfigDirName()` 方法名不变（签名面
+  冻结），两个 provider 注入值切 ForProject。
+
+### de-Anthropic 字符串误伤复原（f4 §9 附带发现）
+
+- 3 真伤：installer 原生安装符号链接路径 `~/.local/bin/atlas`（此前已坏）、
+  Doctor.tsx 项目 agents 目录字面量 join → ForProject 真函数调用、
+  doctorDiagnostic 探测路径；同族注释 4 文件机械复原。
+- 判别格 2 支（`tests/unit/0199-deant-artifact-restore.test.ts`）：全树粘连
+  token 零残留 + Doctor.tsx ForProject 真函数调用。
+
+### 判别格（条件③，4→6 格）
+
+`tests/unit/s1a-step2-configdir-dims.test.ts` 六格：①默认恒等 ②product 直判
+③四层序双出口各验 ④office 探针隔离 ⑤ForProject L1 剥离 ⑥两出口同值恒等。
+gate-099 v2 PASS（canon 5846/0；前滚 t103 14 腿全绿）。
+
 ## v0.1.98
 
 S1a 硬化波（工单 `docs/2026-11-12-p0-wave-0198-s1a-ticket.md`；lock-face
