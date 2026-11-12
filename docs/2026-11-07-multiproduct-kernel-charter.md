@@ -87,6 +87,6 @@
 | 9 | **卷 4 分析卡**（2.1.304–319，15 版 + agent teams 契约插桩） | 对齐债（drift 窗口） | ②基建波 | 分析卡可提前做；落码随各波 |
 | 10 | 登记债（不排，按机缘） | — | — | 500-storm E-1b-full（须用户裁默认语义）/@ant×2/K6-2/7 活面+K6-9/10/11 锚/R1-delay loop 回合级错误恢复/iff 前缀剥离/C4-5 /rewind/compact 残留守（sessionMemoryCompact/promptCacheBreakDetection/cache 面）/E-1P+OOS 长尾 |
 
-**步 0 f4 零码盘点**并行不占序（port 归属/遥测/市场清单/task#154/portal 需求面 + engine web 交互缺口）。
+**步 0 f4 零码盘点 ✅ 已完成（2026-11-12，docs/2026-11-12-step0-zero-code-inventory.md @83f2f984）**：tui 分域实数（422,047 行；utils/services/tools 三混合域 = S3 拆二波预案）/port 专项列（五件走「接口 kernel/实现 office 自带」）/遥测零基线/marketplace 参数化/task#154 已闭环销项/portal 缺口归需求池/L1 口径确认/工具子集接口形状（ProductDefinition 运行时清单）。S1a 输入齐备，序 7 硬前置解除。
 
 **达标线**：序 1–4 + 7 完成后，S1a/S2/S3/S4/S5/S6 达标评估 → 第二产品（atlasoffice）启动决策点呈用户。
