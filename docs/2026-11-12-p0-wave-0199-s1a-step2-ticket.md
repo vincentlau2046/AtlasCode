@@ -39,3 +39,18 @@
 ## §5 流程
 
 本工单 → Atlas-reveiw 复核 → f4 双信号 → Main 段 D → 段 I → 段 G → 段 L → f4 收口。row F 全程。
+
+## §6 Atlas-reveiw 复核闭环（2026-11-12，核可通过）+ f4 修订吸收
+
+拆分条款兑现核可（步 1 单源化实锚 re-export 归一 / 步 2 体量合理 / 三判据已列）。**必改 1 + 建议 2 吸收**：
+
+1. **【必改】env 四层次序钉死**：`ATLAS_CONFIG_DIR（全路径显式）> ATLAS_CONFIG_DIR_NAME（用户显式）> product.configDirName（部署期默认）> '.atlas'`——NAME 与 DIR 同为用户显式 env，显式意图恒压部署期产品默认（§2.2 同构）；工单并层歧义 + ProductDefinition.ts:36-38 字段注释漏 NAME 层 = **同步勘误**（落码清单）。
+2. **【吸收·四格】判据三格升四格**：补 **product 层判别格**（注入 configDirName='.atlas-office' 的 ProductDefinition → getConfigDirName 返回 '.atlas-office'）——office 真注册缺位下探针格只判 env 层，步 2 核心维度须有直接判据，四格齐 = 全层覆盖。
+3. **【吸收·依赖方向】二选一定谳 = 倒置惰性 getter 形（provider 槽 + compose 注入，setSettingsPathsProvider 同款先例）**——shared/configDir 保零 import 纯度 + 天然兼任 product 层判别格测试注入口；静态 import 形否决理由 = 须另开测试覆写口。
+
+判据面终形（四格）：office 目录探针隔离格 + atlascode 默认恒等格 + env 优先序格（四层钉死）+ **product 层判别格**。f4 采认后双信号。
+
+## §7 f4 双信号（2026-11-12）
+
+- **Main**：段 D lock-face 轻量（必改①次序四层落 configDir + 注释勘误 / 依赖方向 provider 形落定）→ 段 I 落码（~4 文件：configDir.ts + ProductDefinition 注释勘误 + provider 注入点 + 判别格四格套件）→ 段 G（四格 + 前滚 standing 0.1.98 面 + canon 净域）→ 段 L（本地通道或 OIDC 视确认态；gitcode 双平台例行步）。
+- **e2e**：判据面四格预登记（office 探针隔离格自此启用——0.1.98 顺延项兑现）+ standing 前滚 + canon 净域；gate 信号照旧。
