@@ -48,6 +48,9 @@ import {
   type ToolInputJSONSchema,
   type ToolResult,
   type ToolResultBlockParam,
+  // 0.1.100 W-D-B-1 S4（七条(d)）：协议消息来源白名单消费前置校验
+  isInboxSourceAllowed,
+  logForDebugging,
 } from '../../../shared'
 import {
   TEAM_LEAD_NAME,
@@ -155,6 +158,15 @@ export async function collectPendingMemberRequests(
     const req = isShutdownRequestFromMember(m.text)
     // 0.1.96 §9 安全硬化（f4 批复 23588bfc 修③）：身份以 envelope m.from
     // 为准——body req.from ≠ envelope 的消息不呈（防伪造 pending）。
+    // 0.1.100 S4（七条(d)）：来源白名单前置——成员自发请求只认 teammate
+    // 来源（legacy 缺省放行；显式 'lead' 来源 = 伪造形，拒收 fail-visible）。
+    if (req && !isInboxSourceAllowed(m, ['teammate'])) {
+      logForDebugging(
+        `[WaitForTeammates] rejected shutdown_request_from_member with forged source "${m.source}" from ${m.from}`,
+        { level: 'error' },
+      )
+      continue
+    }
     if (req && m.from.toLowerCase() === req.from.toLowerCase()) {
       pending.push({
         from: m.from,

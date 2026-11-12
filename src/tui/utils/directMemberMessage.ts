@@ -31,7 +31,7 @@ type WriteToMailboxFn = (
   recipientName: string,
   message: { from: string; text: string; timestamp: string },
   teamName: string,
-) => Promise<void>
+) => Promise<{ ok: boolean; warning?: string }> | Promise<void>
 
 /**
  * Send a direct message to a team member, bypassing the model.

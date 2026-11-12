@@ -48,7 +48,7 @@ import {
   isTeamLead,
   isTeammate,
 } from 'src/engine'
-import { isInProcessTeammate } from 'src/shared'
+import { isInProcessTeammate, isInboxSourceAllowed } from 'src/shared'
 import {
   isModeSetRequest,
   isPermissionRequest,
@@ -228,6 +228,28 @@ export function useInboxPoller({
       const teamPermUpdate = isTeamPermissionUpdate(m.text)
       const modeSetReq = isModeSetRequest(m.text)
       const planApprovalReq = isPlanApprovalRequest(m.text)
+
+      // 0.1.100 W-D-B-1 S4（七条(d)）：permission/shutdown 协议消息来源
+      // 白名单消费前置校验——方向性判别（legacy 缺省放行；显式反方向来源
+      // = 伪造形，拒收 fail-visible，禁静默路由）。汇报形（member→lead）
+      // 只认 teammate；指令形（lead→member）只认 lead。
+      const isReportFromTeammate = isInboxSourceAllowed(m, ['teammate'])
+      const isDirectiveFromLead = isInboxSourceAllowed(m, ['lead'])
+      const forged =
+        (permReq && !isReportFromTeammate) ||
+        (permResp && !isDirectiveFromLead) ||
+        (sandboxReq && !isReportFromTeammate) ||
+        (sandboxResp && !isDirectiveFromLead) ||
+        (shutdownReq && !isDirectiveFromLead) ||
+        (shutdownDenial && !isDirectiveFromLead) ||
+        (shutdownApproval && !isReportFromTeammate)
+      if (forged) {
+        logForDebugging(
+          `[InboxPoller] rejected protocol message with forged source "${m.source}" from ${m.from}`,
+          { level: 'error' },
+        )
+        continue
+      }
 
       if (permReq) {
         permissionRequests.push(m)

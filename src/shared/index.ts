@@ -126,6 +126,23 @@ export {
   type TeamFile,
   type ParsedTeamFileV2,
 } from "./teamFileSchema"
+// 0.1.100 W-D-B-1 S4：team inbox schema 单源（lock-face §4 D-④；engine
+// messaging/mailbox.ts + tui utils/teammateMailbox.ts 双车道同源消费，
+// 禁第三副本）。
+export {
+  INBOX_SCHEMA_VERSION,
+  MAX_INBOX_MESSAGES,
+  inboxMessageSchema,
+  inboxEnvelopeSchema,
+  readInboxFile,
+  writeInboxFileAtomic,
+  isInboxSourceAllowed,
+  inboxFullWarning,
+  type InboxMessageSource,
+  type SharedInboxMessage,
+  type InboxEnvelope,
+  type ReadInboxResult,
+} from "./teamInboxSchema"
 // C-Deep 切片 3 T5：用户专属 Atlas 临时目录名（跨域纯叶子，permissions +
 // executor Shell 共线；§8.16 偏差：由 permissions 最小面提升 shared）
 export { getAtlasTempDirName } from "./tempDir"

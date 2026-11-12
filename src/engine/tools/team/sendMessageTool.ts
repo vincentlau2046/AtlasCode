@@ -480,7 +480,9 @@ async function handleMessage(
     getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
   const senderColor = getTeammateColor()
 
-  await writeToMailbox(
+  // 0.1.100 W-D-B-1 S4（七条(e)）：满载拒收 fail-visible 呈面——sender
+  // 侧直接见拒收（禁静默黑洞；信箱满 = 消息未投递，不是 success）。
+  const writeResult = await writeToMailbox(
     recipientName,
     {
       from: senderName,
@@ -491,6 +493,22 @@ async function handleMessage(
     },
     teamName,
   )
+  if (!writeResult.ok) {
+    return {
+      data: {
+        success: false,
+        message: writeResult.warning || 'Message was not delivered',
+        routing: {
+          sender: senderName,
+          senderColor,
+          target: `@${recipientName}`,
+          targetColor: findTeammateColor(appState.teamContext, recipientName),
+          summary,
+          content,
+        },
+      },
+    }
+  }
 
   // 0.1.94 C-2 并集（f4 §9③ UX 观测面保留适配）：delta ⑥ 恒 undefined 面
   // → findTeammateColor 实查恢复（纯函数，teammates 色映射读面在 duck

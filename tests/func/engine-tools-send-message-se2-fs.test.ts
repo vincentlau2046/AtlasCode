@@ -45,8 +45,14 @@ function inboxPath(team: string, agent: string): string {
   return join(process.env.ATLAS_CONFIG_DIR!, 'teams', team, 'inboxes', `${agent}.json`)
 }
 
+// 0.1.100 W-D-B-1 S4：inbox 文件已升级信封形 { schemaVersion, messages }；
+// helper 兼容解包（legacy 裸数组兜底）。
 function readInbox(team: string, agent: string): Array<Record<string, unknown>> {
-  return JSON.parse(readFileSync(inboxPath(team, agent), 'utf8'))
+  const parsed = JSON.parse(readFileSync(inboxPath(team, agent), 'utf8')) as
+    | { messages?: Array<Record<string, unknown>> }
+    | Array<Record<string, unknown>>
+  if (Array.isArray(parsed)) return parsed
+  return parsed.messages ?? []
 }
 
 function ctx(teamName?: string, mode = 'default'): unknown {

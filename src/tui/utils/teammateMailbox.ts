@@ -10,6 +10,15 @@
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod/v4'
+// 0.1.100 W-D-B-1 S4（lock-face §4）：inbox schema 单源消费（与 engine
+// messaging/mailbox.ts 同源，禁第三副本；§9 格 8 import 面断言锚）。
+import {
+  MAX_INBOX_MESSAGES,
+  inboxFullWarning,
+  readInboxFile,
+  writeInboxFileAtomic,
+  type SharedInboxMessage,
+} from 'src/shared'
 import { TEAMMATE_MESSAGE_TAG } from '../constants/xml.js'
 import { PermissionModeSchema } from '../entrypoints/sdk/coreSchemas.js'
 import { SEND_MESSAGE_TOOL_NAME } from '../tools/SendMessageTool/constants.js'
@@ -40,14 +49,9 @@ const LOCK_OPTIONS = {
   },
 }
 
-export type TeammateMessage = {
-  from: string
-  text: string
-  timestamp: string
-  read: boolean
-  color?: string // Sender's assigned color (e.g., 'red', 'blue', 'green')
-  summary?: string // 5-10 word summary shown as preview in the UI
-}
+// 0.1.100 W-D-B-1 S4：记录形收编 shared 单源（type alias = 消费面 API
+// 零变更；source 白名单字段见 SharedInboxMessage）。
+export type TeammateMessage = SharedInboxMessage
 
 /**
  * Get the path to a teammate's inbox file
@@ -88,23 +92,21 @@ export async function readMailbox(
   const inboxPath = getInboxPath(agentName, teamName)
   logForDebugging(`[TeammateMailbox] readMailbox: path=${inboxPath}`)
 
-  try {
-    const content = await readFile(inboxPath, 'utf-8')
-    const messages = jsonParse(content) as TeammateMessage[]
+  // 0.1.100 W-D-B-1 S4：schema 单源读原语（信封 + legacy 裸数组识别；
+  // 拒读 fail-visible → 调用方仍见 []（现网签名不变），error 走 error 级
+  // 日志呈面，禁静默半解析）。
+  const result = await readInboxFile(inboxPath)
+  if (result.ok === false) {
     logForDebugging(
-      `[TeammateMailbox] readMailbox: read ${messages.length} message(s)`,
+      `[TeammateMailbox] readMailbox REJECTED for ${agentName}: ${result.error}`,
+      { level: 'error' },
     )
-    return messages
-  } catch (error) {
-    const code = getErrnoCode(error)
-    if (code === 'ENOENT') {
-      logForDebugging(`[TeammateMailbox] readMailbox: file does not exist`)
-      return []
-    }
-    logForDebugging(`Failed to read inbox for ${agentName}: ${error}`)
-    logError(error)
     return []
   }
+  logForDebugging(
+    `[TeammateMailbox] readMailbox: read ${result.messages.length} message(s)`,
+  )
+  return result.messages
 }
 
 /**
@@ -130,12 +132,14 @@ export async function readUnreadMessages(
  * @param recipientName - The recipient's agent name (not UUID)
  * @param message - The message to write
  * @param teamName - Optional team name
+ * @returns ok=false + warning on 满载拒收（七条(e)：MAX_INBOX_MESSAGES
+ * 上界 fail-visible 拒收，禁静默丢最旧；调用方应呈面 warning）
  */
 export async function writeToMailbox(
   recipientName: string,
   message: Omit<TeammateMessage, 'read'>,
   teamName?: string,
-): Promise<void> {
+): Promise<{ ok: boolean; warning?: string }> {
   await ensureInboxDir(teamName)
 
   const inboxPath = getInboxPath(recipientName, teamName)
@@ -156,7 +160,7 @@ export async function writeToMailbox(
         `[TeammateMailbox] writeToMailbox: failed to create inbox file: ${error}`,
       )
       logError(error)
-      return
+      return { ok: false, warning: `Failed to create inbox file: ${error}` }
     }
   }
 
@@ -170,6 +174,16 @@ export async function writeToMailbox(
     // Re-read messages after acquiring lock to get the latest state
     const messages = await readMailbox(recipientName, teamName)
 
+    // 0.1.100 W-D-B-1 S4（七条(e)）：满载拒收 fail-visible——禁静默丢最旧。
+    if (messages.length >= MAX_INBOX_MESSAGES) {
+      const warning = inboxFullWarning(recipientName, messages.length)
+      logForDebugging(
+        `[TeammateMailbox] writeToMailbox REJECTED for ${recipientName}: ${warning}`,
+        { level: 'error' },
+      )
+      return { ok: false, warning }
+    }
+
     const newMessage: TeammateMessage = {
       ...message,
       read: false,
@@ -177,13 +191,16 @@ export async function writeToMailbox(
 
     messages.push(newMessage)
 
-    await writeFile(inboxPath, jsonStringify(messages, null, 2), 'utf-8')
+    // 0.1.100 S4：原子写 tmp+rename（信封格式；ack 持久化 F7 回归防同源）
+    await writeInboxFileAtomic(inboxPath, messages)
     logForDebugging(
       `[TeammateMailbox] Wrote message to ${recipientName}'s inbox from ${message.from}`,
     )
+    return { ok: true }
   } catch (error) {
     logForDebugging(`Failed to write to inbox for ${recipientName}: ${error}`)
     logError(error)
+    return { ok: false, warning: `Failed to write to inbox: ${error}` }
   } finally {
     if (release) {
       await release()
@@ -244,7 +261,8 @@ export async function markMessageAsReadByIndex(
 
     messages[messageIndex] = { ...message, read: true }
 
-    await writeFile(inboxPath, jsonStringify(messages, null, 2), 'utf-8')
+    // 0.1.100 S4：ack 持久化走原子写（F7 回归防 = 写中 kill 不撕 ack 态）
+    await writeInboxFileAtomic(inboxPath, messages)
     logForDebugging(
       `[TeammateMailbox] markMessageAsReadByIndex: marked message at index ${messageIndex} as read`,
     )
@@ -317,7 +335,8 @@ export async function markMessagesAsRead(
     // messages comes from jsonParse — fresh, unshared objects safe to mutate
     for (const m of messages) m.read = true
 
-    await writeFile(inboxPath, jsonStringify(messages, null, 2), 'utf-8')
+    // 0.1.100 S4：ack 持久化走原子写（F7 回归防 = 写中 kill 不撕 ack 态）
+    await writeInboxFileAtomic(inboxPath, messages)
     logForDebugging(
       `[TeammateMailbox] markMessagesAsRead: WROTE ${unreadCount} message(s) as read to ${inboxPath}`,
     )
@@ -892,6 +911,12 @@ export async function sendShutdownRequestToMailbox(
       text: jsonStringify(shutdownMessage),
       timestamp: new Date().toISOString(),
       color: getTeammateColor(),
+      // 0.1.100 S4（七条(d)）：来源白名单标注——lead 发出的 shutdown 指令
+      // 标 'lead'，成员自发请求标 'teammate'（消费前置校验的判别面）。
+      source:
+        senderName.toLowerCase() === TEAM_LEAD_NAME.toLowerCase()
+          ? 'lead'
+          : 'teammate',
     },
     resolvedTeamName,
   )
@@ -1200,7 +1225,8 @@ export async function markMessagesAsReadByPredicate(
       !m.read && predicate(m) ? { ...m, read: true } : m,
     )
 
-    await writeFile(inboxPath, jsonStringify(updatedMessages, null, 2), 'utf-8')
+    // 0.1.100 S4：ack 持久化走原子写（F7 回归防 = 写中 kill 不撕 ack 态）
+    await writeInboxFileAtomic(inboxPath, updatedMessages)
   } catch (error) {
     const code = getErrnoCode(error)
     if (code === 'ENOENT') {

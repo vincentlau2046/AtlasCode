@@ -142,6 +142,8 @@
 import { randomUUID } from 'node:crypto'
 import {
   approvalUnavailableReason,
+  // 0.1.100 W-D-B-1 S4（七条(d)）：协议消息来源白名单消费前置校验
+  isInboxSourceAllowed,
   logForDebugging,
   resolveMailboxPermissionDeadlineMs,
   type Message,
@@ -1105,6 +1107,16 @@ export async function waitForNextPromptOrShutdown(
         const m = allMessages[i]
         if (m && !m.read) {
           const parsed = isShutdownRequest(m.text)
+          // 0.1.100 S4（七条(d)）：来源白名单前置——shutdown 指令只认
+          // lead 来源（legacy 缺省放行；显式 'teammate' 来源 = 伪造形，
+          // 拒收 fail-visible，不进入 0.1.96 语义处置链）。
+          if (parsed && !isInboxSourceAllowed(m, ['lead'])) {
+            logForDebugging(
+              `[inProcessRunner] ${identity.agentName} rejected shutdown_request with forged source "${m.source}" from ${m.from}`,
+              { level: 'error' },
+            )
+            continue
+          }
           if (parsed) {
             shutdownIndex = i
             shutdownParsed = parsed
