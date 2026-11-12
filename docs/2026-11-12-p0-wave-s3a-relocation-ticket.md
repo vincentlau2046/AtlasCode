@@ -1,4 +1,4 @@
-# 序 7 S3 归位波工单（拆二波：S3a 0.1.102 整域搬移 + S3b 0.1.103 逐文件判定）——tui 三混域 kernel/壳归位
+# 序 7 S3 归位波工单（拆二波：S3a 0.1.103 整域搬移 + S3b 0.1.104 逐文件判定（2026-11-12 顺延勘误：0.1.102 让位 P0 插入波，账面见 P0 工单 §6.5））——tui 三混域 kernel/壳归位
 
 > 状态：`draft → 波前审视 → Atlas-reveiw 审计 → f4 双信号`。f4 工单（2026-11-12）。
 > 上游：步 0 零码盘点 `docs/2026-11-12-step0-zero-code-inventory.md` @83f2f984（§1 三混合域 >20 项风险成立）；0.1.101 五段闭环终态（序 6 ✅）。
@@ -50,7 +50,7 @@ f4 双轮 grep 实锚（basename 宽匹配 144 命中 → 严格跨域 specifier
 
 ### 0.4 体量与拆分裁定（承 step-0 预案）
 
-- **S3a（本波 0.1.102）**：0.2 表初判 kernel 的**整目录/整文件机械搬移**（bash/permissions/hooks/settings/shell/swarm+teammateMailbox/telemetry/nativeInstaller/powershell/git 族/model 邻接族 ≈ **48,000 行 ≈ 11 子域**）——纯结构搬移零语义变更，逐文件清单随 lock-face 冻结。
+- **S3a（本波 0.1.103，2026-11-12 顺延勘误——0.1.102 让位 P0 插入波）**：0.2 表初判 kernel 的**整目录/整文件机械搬移**（bash/permissions/hooks/settings/shell/swarm+teammateMailbox/telemetry/nativeInstaller/powershell/git 族/model 邻接族 ≈ **48,000 行 ≈ 11 子域**）——纯结构搬移零语义变更，逐文件清单随 lock-face 冻结。
 - **S3b（0.1.103）**：plugins 拆分域 + tools/ 可下沉 + services 疑域（mcp/lsp/api）+ 顶层 45k 逐文件 + 0.3 双实现核对销项——判定密集需 per-file 审视，独立波。
 - 归位判定标准（两波同规）：① 语义无壳依赖（无 React/Ink/终端渲染引用）；② 多产品同需（非 atlascode 性态面）；③ 拆包后 kernel 必带。三判据全过 = 归位；任一不过 = 留壳并在清单注记理由。
 
@@ -66,7 +66,7 @@ f4 双轮 grep 实锚（basename 宽匹配 144 命中 → 严格跨域 specifier
 
 ## §1 波定义
 
-- **波名**：S3a 整域机械归位。**版本**：0.1.102。
+- **波名**：S3a 整域机械归位。**版本**：0.1.103（顺延勘误 2026-11-12：原 0.1.102 让位 P0 插入波，S3b 随之 0.1.104，ENV 专项 0.1.105 候位）。
 - **范围**：§0.4 S3a 清单 11 子域目录级搬移（tui/utils/{bash,permissions,hooks,settings,shell,swarm,telemetry,nativeInstaller,powershell,git→git 族,model 邻接族} → kernel 目标目录，目标树随 lock-face 定形）+ import 路径全量重写 + tui 内 re-export 兼容面裁定 + 判据格（归位快照格：定义点全域恰 1 + 反向依赖零回归格 + 字面清单零漂移格）。
 - **非目标**：S3b 全部（plugins 拆分/tools 下沉/services 疑域/逐文件）；任何语义变更（函数签名/行为/文案零改）；0.3 双实现合并（仅核对登记，合并归 S3b 或独立波）。
 - **性质**：⑤结构波（机械搬移，零行为变更——同 0.1.98 步 1 行为中性先例）。
