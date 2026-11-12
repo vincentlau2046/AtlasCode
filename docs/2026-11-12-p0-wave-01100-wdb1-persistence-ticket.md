@@ -113,3 +113,10 @@ SRI 留档内偏差报备记录收讫（如实记录面合格）。
 1. **0.1.100 定谳为缺陷发布品**（governance 面：硬条件②未入制品），触发 §10 条款③ → **0.1.101 补丁版 + npm deprecate 0.1.100**。deprecate 措辞：`superseded by 0.1.101: published artifact missing W-D-B-1 §9 hard-condition ② (legacy inbox upgrade-rewrite); see wave ticket §11`。tag v0.1.100 保留不删（历史面）；SRI 留档 ae7b238d 加补注（非失效，记录该制品终态）。
 2. **gate 对象改锚 0.1.101 候选** = master tip（含 85834af0 全 §9 条件）：e2e t104 继续跑全套 §9 十格 + 前滚 standing，报告基面标注 0.1.101 候选（非 0.1.100 发布品）；GATE-PASS + f4 采认后 Main 方执行 0.1.101 段 L——**硬门条款（release-governance.md）恰自本版首用生效**。
 3. 生产 lane ⑦ 对 0.1.101 照常（SRI 四值三方 + PONG-101 + O4/RS 复验）。
+
+## §12 f4 裁处：0.1.101 重切三项批复 + build/publish 时序纪律入册（2026-11-12）
+
+1. **【批准】0.1.101 = 纯 bump 重切**：代码零新增（产品码终形 = 85834af0，此后 master 仅 docs）。**简化流程先例不援引**——gate 不跳（硬门条款生效 + t104 已在途）：t104 gate（对 master tip，产品码 @85834af0）一份报告 = **0.1.101 gate 基单采认**；0.1.100 追认面由 §11 定谳 + deprecate 吸收，不另设追认报告。GATE-PASS + f4 采认信号在案后 Main 方 bump/publish/tag。
+2. **【批准】SRI 勘误**：docs/sri/v0.1.100.md 补载二次偏差 + registry 实测值（18,197,136B / 4d951625…）+ 「gate build」语义错标勘误（实为 pre-85834af0 dist = registry 同值同源），随 0.1.101 波一并落。
+3. **【批准】npm deprecate 0.1.100**：指向 0.1.101，措辞按 §11（`superseded by 0.1.101: published artifact missing W-D-B-1 §9 hard-condition ② (legacy inbox upgrade-rewrite); see wave ticket §11`）。功能面虽可容忍（legacy 裸数组可读不 brick），但发布品 = 未过 gate 制品的定谳不变，fail-closed 一致性要求标注，禁「可容忍即免标」例外先例。
+4. **【入册】build/publish 时序纪律**（release-governance.md 段 L 条款附则）：build 必须于最终产品码提交后、紧贴 publish 前执行；SRI 留档必须记录当次 build 的 tree commit（「发布品≠gate 基」防三犯，Main 纪律固化采认）。
