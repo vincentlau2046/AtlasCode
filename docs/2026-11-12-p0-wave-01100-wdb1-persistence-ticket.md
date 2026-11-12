@@ -130,3 +130,15 @@ SRI 留档内偏差报备记录收讫（如实记录面合格）。
 ## §14 f4 对表：release 0.1.101 SRI 独立复核全 MATCH + deprecate 验真（2026-11-12）
 
 f4 registry 直下独立重算（$CLAUDE_JOB_DIR/tmp/sri-101/）：tgz shasum 0f7630c3…（packument + tgz 直下双面同值）/ integrity sha512-YNLlmn0U…（同值）/ unpackedSize 18,205,445 B（精确）/ **cli.js 18,197,218 B sha256 a49023cc… ≡ gate-100 银行字节级恒等**（registry 直下 = Main build = gate 银行三方同值——纯 bump 实证面兑现，产品码零差）。**deprecate 验真**：npm view 0.1.100 deprecated 返回 §11 逐字措辞 ✓；0.1.101 packument 无 deprecated 标记 ✓。双平台 push 收讫（Main 报 origin+gitcode）。段 L 面 f4 复核全绿；生产 lane ⑦ e2e 在途，PASS 后 Main 单点报用户 → §15 终局收口。
+
+## §15 f4 终局收口：0.1.100→0.1.101 W-D-B-1 持久化面五段闭环终态（2026-11-12）
+
+生产 lane ⑦ PASS 报审采认（r-20261112-prodlane-101.md；与 §14 f4 独立复核同值互证）：SRI 轻形全 MATCH（cli.js 三点恒等 = registry 直下/安装树/gate 银行 a49023cc…，纯 bump 实证面）+ 翻号 0.1.101 + PONG-101 + O4/RequestShutdown 双 GREEN 首试零残留 + **⑦-5 legacy 升格回写生产首验 GREEN**（wire 铁证 reqlog 014-body.bin：裸数组→磁盘信封形 schemaVersion:1 + read:true，legacy 识别/升格回写/mark-read 原子持久化三面一次落盘直证——§9 追认硬条件②生产级兑现）。
+
+**本波完整链条（含偏差处置链，全在档）**：工单（§1-§5）→ 审计吸收（§6）→ 双信号（§7）→ lock-face 批复（§8）→ 实施裁定追认（§9）→ **段 L 提前执行偏差定谳**（§10，流程违规记档 + 硬门条款入册）→ **追认链前提破定谳**（§11，发布品缺 85834af0 → 0.1.101 补丁版）→ 三项批复（§12，纯 bump 重切/SRI 勘误/deprecate）→ gate-100 GATE-PASS 采认（§13，硬门首用）→ release 0.1.101 SRI 对表（§14）→ 本节。
+
+**波终交付**：TeamFileV2 schema 单源（演进拒读）+ durable 分档门（OFF 缺省零写盘现网锚）+ relink 三判据 + inbox 信封单源双车道收敛（legacy 升格回写）+ task store 不 durable 裁定 + 判据格族 17 格。
+
+**波终资产（方法论沉淀）**：① **段 L 硬门条款**（release-governance.md：e2e GATE-PASS 报告 + f4 采认双在案，四件套禁替代 gate 本体）——0.1.101 首用即兑现；② **build-publish 时序附则**（build 紧贴 publish + SRI 记 tree commit）——首用即拦住二次偏差复发；③ **deprecate 纪律**（功能可容忍 ≠ 免标）；④ reqlog wire 直证权威面再证（屏面取证误报勘误入档）。
+
+**charter §10 排位更新**：序 6 W-D-B-1 ✅ → 下位 = **序 7 S3 归位波**（盘点就绪 @de7cb27c，拆二波预案：utils 163k / services 24.7k / tools 48k 三混域；归位清单细列 = 首步）→ 序 8/9。登记债随波更新：tmux poller 透传支部分核销（双车道 schema 收敛）；eslint tests/ 34 存量候选清尾。f4 依自动推进裁定起序 7 工单（波前审视 §0 活码重核先行）。
