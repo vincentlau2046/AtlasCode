@@ -1,4 +1,4 @@
-import { getConfigDirName } from '../../../utils/configDir.js'
+import { getConfigDirName, getConfigDirNameForProject } from '../../../utils/configDir.js'
 import { homedir } from 'os';
 import { basename, join, sep } from 'path';
 import React, { type ReactNode } from 'react';
@@ -16,7 +16,7 @@ import type { OptionWithDescription } from '../../CustomSelect/select.js';
  */
 export function isInClaudeFolder(filePath: string): boolean {
   const absolutePath = expandPath(filePath);
-  const claudeFolderPath = expandPath(`${getOriginalCwd()}/${getConfigDirName()}`);
+  const claudeFolderPath = expandPath(`${getOriginalCwd()}/${getConfigDirNameForProject()}`);
 
   // Check if the path is within the project's getConfigDirName() folder
   const normalizedAbsolutePath = normalizeCaseForComparison(absolutePath);

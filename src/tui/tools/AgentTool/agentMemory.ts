@@ -1,4 +1,4 @@
-import { getConfigDirName } from '../../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../utils/configDir.js'
 import { join, normalize, sep } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
 import {
@@ -41,7 +41,7 @@ function getLocalAgentMemoryDir(dirName: string): string {
       ) + sep
     )
   }
-  return join(getCwd(), getConfigDirName(), 'agent-memory-local', dirName) + sep
+  return join(getCwd(), getConfigDirNameForProject(), 'agent-memory-local', dirName) + sep
 }
 
 /**
@@ -57,7 +57,7 @@ export function getAgentMemoryDir(
   const dirName = sanitizeAgentTypeForPath(agentType)
   switch (scope) {
     case 'project':
-      return join(getCwd(), getConfigDirName(), 'agent-memory', dirName) + sep
+      return join(getCwd(), getConfigDirNameForProject(), 'agent-memory', dirName) + sep
     case 'local':
       return getLocalAgentMemoryDir(dirName)
     case 'user':
@@ -78,7 +78,7 @@ export function isAgentMemoryPath(absolutePath: string): boolean {
 
   // Project scope: always cwd-based (not redirected)
   if (
-    normalizedPath.startsWith(join(getCwd(), getConfigDirName(), 'agent-memory') + sep)
+    normalizedPath.startsWith(join(getCwd(), getConfigDirNameForProject(), 'agent-memory') + sep)
   ) {
     return true
   }
@@ -95,7 +95,7 @@ export function isAgentMemoryPath(absolutePath: string): boolean {
     }
   } else if (
     normalizedPath.startsWith(
-      join(getCwd(), getConfigDirName(), 'agent-memory-local') + sep,
+      join(getCwd(), getConfigDirNameForProject(), 'agent-memory-local') + sep,
     )
   ) {
     return true
@@ -121,7 +121,7 @@ export function getMemoryScopeDisplay(
     case 'user':
       return `User (${join(getMemoryBaseDir(), 'agent-memory')}/)`
     case 'project':
-      return 'Project (getConfigDirName()/agent-memory/)'
+      return 'Project (getConfigDirNameForProject()/agent-memory/)'
     case 'local':
       return `Local (${getLocalAgentMemoryDir('...')})`
     default:

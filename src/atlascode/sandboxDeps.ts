@@ -15,7 +15,7 @@ import type {
   SettingSource,
   SettingsJson,
 } from '../sandbox'
-import { getConfigDirName } from '../shared'
+import { getConfigDirNameForProject } from '../shared'
 
 const SETTING_SOURCES: readonly SettingSource[] = [
   'userSettings',
@@ -59,7 +59,9 @@ export function createInMemorySandboxDeps(): SandboxDependencies {
     onSettingsChange: () => () => {},
     // 0.1.98 S1a 步 1：注入值归一 shared/configDir 单源（行为中性：缺省恒
     // '.atlas'，ATLAS_CONFIG_DIR_NAME 显式覆盖同路——lock-face ⑤ 归一形）。
-    getConfigDirName: () => getConfigDirName(),
+    // 0.1.99 row F：sandbox denyWrite 消费点 = cwd 项目根锚 → ForProject 出口
+    // （剥 L1 全路径，防项目点目录漂移到用户配置目录）。
+    getConfigDirName: () => getConfigDirNameForProject(),
     getAtlasTempDir: () => tempDir,
     getManagedSettingsDropInDir: () => '/etc/atlas/managed_settings.json',
     updateSettingsForSource: (source, values) => {

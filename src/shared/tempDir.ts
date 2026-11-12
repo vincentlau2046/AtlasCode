@@ -15,13 +15,13 @@
  * Windows: {configDir}（tmpdir() 已按用户隔离）。
  */
 import { getPlatform } from './platform'
-import { getConfigDirName } from './configDir'
+import { getConfigDirNameForProject } from './configDir'
 
 export function getAtlasTempDirName(): string {
   if (getPlatform() === 'windows') {
-    return getConfigDirName()
+    return getConfigDirNameForProject()
   }
   // 用 UID 建 per-user 目录，防多用户共享同一 /tmp 时权限冲突
   const uid = process.getuid?.() ?? 0
-  return `${getConfigDirName()}-${uid}`
+  return `${getConfigDirNameForProject()}-${uid}`
 }

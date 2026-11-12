@@ -92,7 +92,7 @@ import {
   containsPathTraversal,
   errorMessage,
   getErrnoCode,
-  getConfigDirName,
+  getConfigDirNameForProject,
   getPlatform,
   logForDebugging,
 } from '../../shared'
@@ -229,7 +229,7 @@ function getWorktreeSettings(): {
 // 注释面见 git.ts gitExe 段）。
 
 function worktreesDir(repoRoot: string): string {
-  return join(repoRoot, getConfigDirName(), 'worktrees')
+  return join(repoRoot, getConfigDirNameForProject(), 'worktrees')
 }
 
 // Flatten nested slugs (`user/feature` → `user+feature`) for both the branch

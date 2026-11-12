@@ -76,7 +76,7 @@ import {
   getFsImplementation,
   isENOENT,
   logForDebugging,
-  getConfigDirName,
+  getConfigDirNameForProject,
 } from '../../shared'
 import { z } from 'zod'
 import { getAtlasConfigHomeDir } from './configRoot'
@@ -321,9 +321,9 @@ export function getRelativeSettingsFilePathForSource(
 ): string {
   switch (source) {
     case 'projectSettings':
-      return join(getConfigDirName(), 'settings.json')
+      return join(getConfigDirNameForProject(), 'settings.json')
     case 'localSettings':
-      return join(getConfigDirName(), 'settings.local.json')
+      return join(getConfigDirNameForProject(), 'settings.local.json')
   }
 }
 

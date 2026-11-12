@@ -26,7 +26,7 @@
  * - Non-existent files are silently ignored
  */
 
-import { findMemoryFile, getConfigDirName } from './configDir.js'
+import { findMemoryFile, getConfigDirNameForProject } from './configDir.js'
 import { feature } from 'src/shared'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
@@ -885,7 +885,7 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading getConfigDirName()/ATLAS.md (Project)
-        const dotClaudePath = findMemoryFile(join(dir, getConfigDirName()))
+        const dotClaudePath = findMemoryFile(join(dir, getConfigDirNameForProject()))
         result.push(
           ...(await processMemoryFile(
             dotClaudePath,
@@ -896,7 +896,7 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading getConfigDirName()/rules/*.md files (Project)
-        const rulesDir = join(dir, getConfigDirName(), 'rules')
+        const rulesDir = join(dir, getConfigDirNameForProject(), 'rules')
         result.push(
           ...(await processMdRules({
             rulesDir,
@@ -941,7 +941,7 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading getConfigDirName()/ATLAS.md from the additional directory
-        const dotClaudePath = findMemoryFile(join(dir, getConfigDirName()))
+        const dotClaudePath = findMemoryFile(join(dir, getConfigDirNameForProject()))
         result.push(
           ...(await processMemoryFile(
             dotClaudePath,
@@ -952,7 +952,7 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading getConfigDirName()/rules/*.md files from the additional directory
-        const rulesDir = join(dir, getConfigDirName(), 'rules')
+        const rulesDir = join(dir, getConfigDirNameForProject(), 'rules')
         result.push(
           ...(await processMdRules({
             rulesDir,
@@ -1240,7 +1240,7 @@ export async function getMemoryFilesForNestedDirectory(
         false,
       )),
     )
-    const dotClaudePath = findMemoryFile(join(dir, getConfigDirName()))
+    const dotClaudePath = findMemoryFile(join(dir, getConfigDirNameForProject()))
     result.push(
       ...(await processMemoryFile(
         dotClaudePath,
@@ -1259,7 +1259,7 @@ export async function getMemoryFilesForNestedDirectory(
     )
   }
 
-  const rulesDir = join(dir, getConfigDirName(), 'rules')
+  const rulesDir = join(dir, getConfigDirNameForProject(), 'rules')
 
   // Process project unconditional getConfigDirName()/rules/*.md files, which were not eagerly loaded
   // Use a separate processedPaths set to avoid marking conditional rule files as processed
@@ -1307,7 +1307,7 @@ export async function getConditionalRulesForCwdLevelDirectory(
   targetPath: string,
   processedPaths: Set<string>,
 ): Promise<MemoryFileInfo[]> {
-  const rulesDir = join(dir, getConfigDirName(), 'rules')
+  const rulesDir = join(dir, getConfigDirNameForProject(), 'rules')
   return processConditionedMdRules(
     targetPath,
     rulesDir,
@@ -1352,7 +1352,7 @@ export async function processConditionedMdRules(
     // For Managed/User rules: glob patterns are relative to the original CWD
     const baseDir =
       type === 'Project'
-        ? dirname(dirname(rulesDir)) // Parent of getConfigDirName()
+        ? dirname(dirname(rulesDir)) // Parent of getConfigDirNameForProject()
         : getOriginalCwd() // Project root for managed/user rules
 
     const relativePath = isAbsolute(targetPath)
@@ -1424,7 +1424,7 @@ export function isMemoryFilePath(filePath: string): boolean {
   // .md files in <configDir>/rules/ directories
   if (
     name.endsWith('.md') &&
-    filePath.includes(`${sep}${getConfigDirName()}${sep}rules${sep}`)
+    filePath.includes(`${sep}${getConfigDirNameForProject()}${sep}rules${sep}`)
   ) {
     return true
   }

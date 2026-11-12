@@ -16,7 +16,7 @@ import { join } from 'path'
 
 import {
   EFFORT_LEVELS,
-  getConfigDirName,
+  getConfigDirNameForProject,
   logForDebugging,
   roughTokenCountEstimation,
   type ContentBlockParam,
@@ -65,11 +65,11 @@ export function getSkillsPath(
 ): string {
   switch (source) {
     case 'policySettings':
-      return join(getManagedSettingsDir(), getConfigDirName(), dir)
+      return join(getManagedSettingsDir(), getConfigDirNameForProject(), dir)
     case 'userSettings':
       return join(getAtlasConfigHomeDir(), dir)
     case 'projectSettings':
-      return `${getConfigDirName()}/${dir}`
+      return `${getConfigDirNameForProject()}/${dir}`
     case 'plugin':
       return 'plugin'
     default:

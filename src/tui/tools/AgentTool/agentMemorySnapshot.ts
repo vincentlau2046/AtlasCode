@@ -1,4 +1,4 @@
-import { getConfigDirName } from '../../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../utils/configDir.js'
 import { mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod/v4'
@@ -30,7 +30,7 @@ type SyncedMeta = z.infer<ReturnType<typeof syncedMetaSchema>>
  * e.g., <cwd>/getConfigDirName()/agent-memory-snapshots/<agentType>/
  */
 export function getSnapshotDirForAgent(agentType: string): string {
-  return join(getCwd(), getConfigDirName(), SNAPSHOT_BASE, agentType)
+  return join(getCwd(), getConfigDirNameForProject(), SNAPSHOT_BASE, agentType)
 }
 
 function getSnapshotJsonPath(agentType: string): string {

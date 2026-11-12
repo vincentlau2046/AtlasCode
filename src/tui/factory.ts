@@ -95,7 +95,7 @@ import { getManagedSettingsDropInDir } from './utils/settings/managedPath'
 import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { getPlatform } from './utils/platform'
-import { getConfigDirName } from './utils/configDir'
+import { getConfigDirNameForProject } from './utils/configDir'
 import { getAtlasTempDir } from './utils/permissions/filesystem'
 
 // ============================================================================
@@ -163,7 +163,7 @@ function defaultSandboxDeps() {
     getPlatform,
     getAdditionalDirectories: getAdditionalDirectoriesForClaudeMd,
     onSettingsChange: (cb: (ev: unknown) => void) => settingsChangeDetector.subscribe(cb),
-    getConfigDirName,
+    getConfigDirName: getConfigDirNameForProject,
     getAtlasTempDir: () => getAtlasTempDir(),
     getManagedSettingsDropInDir: () => getManagedSettingsDropInDir(),
     updateSettingsForSource,

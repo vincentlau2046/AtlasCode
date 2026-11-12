@@ -1,6 +1,6 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { findMemoryFile, getConfigDirName } from './configDir.js'
+import { findMemoryFile, getConfigDirNameForProject } from './configDir.js'
 import { randomBytes } from 'crypto'
 import { unwatchFile, watchFile } from 'fs'
 import memoize from 'lodash-es/memoize.js'
@@ -118,7 +118,7 @@ export type ProjectConfig = {
     sessionId: string
     hookBased?: boolean
   }
-  /** Spawn mode for getConfigDirName() remote-control` multi-session. Set by first-run dialog or `w` toggle. */
+  /** Spawn mode for getConfigDirNameForProject() remote-control` multi-session. Set by first-run dialog or `w` toggle. */
   remoteControlSpawnMode?: 'same-dir' | 'worktree'
 }
 
@@ -1109,7 +1109,7 @@ function saveConfigWithLock<A extends object>(
     const currentConfig = getConfig(file, createDefault)
     if (file === getGlobalClaudeFile() && wouldLoseAuthState(currentConfig)) {
       logForDebugging(
-        'saveConfigWithLock: re-read config is missing auth that cache has; refusing to write to avoid wiping ~/getConfigDirName().json. See GH #3117.',
+        'saveConfigWithLock: re-read config is missing auth that cache has; refusing to write to avoid wiping ~/getConfigDirNameForProject().json. See GH #3117.',
         { level: 'error' },
       )
       return false
@@ -1690,7 +1690,7 @@ export function getMemoryPath(memoryType: MemoryType): string {
 }
 
 export function getManagedClaudeRulesDir(): string {
-  return join(getManagedFilePath(), getConfigDirName(), 'rules')
+  return join(getManagedFilePath(), getConfigDirNameForProject(), 'rules')
 }
 
 export function getUserClaudeRulesDir(): string {

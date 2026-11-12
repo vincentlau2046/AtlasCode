@@ -33,7 +33,7 @@ import { homedir } from 'os'
 import { dirname, join, resolve } from 'path'
 
 import {
-  getConfigDirName,
+  getConfigDirNameForProject,
   isFsInaccessible,
   logForDebugging,
 } from '../../shared'
@@ -206,7 +206,7 @@ export function getProjectDirsUpToHome(
       break
     }
 
-    const configSubdir = join(current, getConfigDirName(), subdir)
+    const configSubdir = join(current, getConfigDirNameForProject(), subdir)
     // 过滤到存在目录（native walk 的 perf 过滤 + worktree fallback 依赖
     // 此存在性信号）。statSync + 显式错误处理：非 FS 不可达错误重抛
     // （不静默吞；下游 loadMarkdownFiles 处理 TOCTOU 窗口）。
@@ -249,7 +249,7 @@ export const loadMarkdownFilesForSubdir = memoize(
     cwd: string,
   ): Promise<MarkdownFile[]> {
     const userDir = join(getAtlasConfigHomeDir(), subdir)
-    const managedDir = join(getManagedSettingsDir(), getConfigDirName(), subdir)
+    const managedDir = join(getManagedSettingsDir(), getConfigDirNameForProject(), subdir)
     const projectDirs = getProjectDirsUpToHome(subdir, cwd)
 
     // worktree fallback（见头注）
@@ -257,13 +257,13 @@ export const loadMarkdownFilesForSubdir = memoize(
     const canonicalRoot = findCanonicalGitRoot(cwd)
     if (gitRoot && canonicalRoot && canonicalRoot !== gitRoot) {
       const worktreeSubdir = normalizePathForComparison(
-        join(gitRoot, getConfigDirName(), subdir),
+        join(gitRoot, getConfigDirNameForProject(), subdir),
       )
       const worktreeHasSubdir = projectDirs.some(
         dir => normalizePathForComparison(dir) === worktreeSubdir,
       )
       if (!worktreeHasSubdir) {
-        const mainConfigSubdir = join(canonicalRoot, getConfigDirName(), subdir)
+        const mainConfigSubdir = join(canonicalRoot, getConfigDirNameForProject(), subdir)
         if (!projectDirs.includes(mainConfigSubdir)) {
           projectDirs.push(mainConfigSubdir)
         }

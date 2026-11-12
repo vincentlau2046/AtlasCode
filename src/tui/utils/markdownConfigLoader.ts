@@ -1,6 +1,6 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { getConfigDirName } from './configDir.js'
+import { getConfigDirNameForProject } from './configDir.js'
 import { statSync } from 'fs'
 import { lstat, readdir, readFile, realpath, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
@@ -248,7 +248,7 @@ export function getProjectDirsUpToHome(
       break
     }
 
-    const claudeSubdir = join(current, getConfigDirName(), subdir)
+    const claudeSubdir = join(current, getConfigDirNameForProject(), subdir)
     // Filter to existing dirs. This is a perf filter (avoids spawning
     // ripgrep on non-existent dirs downstream) and the worktree fallback
     // in loadMarkdownFilesForSubdir relies on it. statSync + explicit error
@@ -299,7 +299,7 @@ export const loadMarkdownFilesForSubdir = memoize(
   ): Promise<MarkdownFile[]> {
     const searchStartTime = Date.now()
     const userDir = join(getAtlasConfigHomeDir(), subdir)
-    const managedDir = join(getManagedFilePath(), getConfigDirName(), subdir)
+    const managedDir = join(getManagedFilePath(), getConfigDirNameForProject(), subdir)
     const projectDirs = getProjectDirsUpToHome(subdir, cwd)
 
     // For git worktrees where the worktree does NOT have getConfigDirName()/<subdir> checked
@@ -319,13 +319,13 @@ export const loadMarkdownFilesForSubdir = memoize(
     const canonicalRoot = findCanonicalGitRoot(cwd)
     if (gitRoot && canonicalRoot && canonicalRoot !== gitRoot) {
       const worktreeSubdir = normalizePathForComparison(
-        join(gitRoot, getConfigDirName(), subdir),
+        join(gitRoot, getConfigDirNameForProject(), subdir),
       )
       const worktreeHasSubdir = projectDirs.some(
         dir => normalizePathForComparison(dir) === worktreeSubdir,
       )
       if (!worktreeHasSubdir) {
-        const mainClaudeSubdir = join(canonicalRoot, getConfigDirName(), subdir)
+        const mainClaudeSubdir = join(canonicalRoot, getConfigDirNameForProject(), subdir)
         if (!projectDirs.includes(mainClaudeSubdir)) {
           projectDirs.push(mainClaudeSubdir)
         }

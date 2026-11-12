@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path'
-import { getConfigDirName } from '../configDir.js'
+import { getConfigDirNameForProject } from '../configDir.js'
 import type { z } from 'zod/v4'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { parseSettingsFile } from '../settings/settings.js'
@@ -38,7 +38,7 @@ export function getAddDirEnabledPlugins(): NonNullable<
   const result: NonNullable<SettingsJson['enabledPlugins']> = {}
   for (const dir of getAdditionalDirectoriesForClaudeMd()) {
     for (const file of SETTINGS_FILES) {
-      const { settings } = parseSettingsFile(join(dir, getConfigDirName(), file))
+      const { settings } = parseSettingsFile(join(dir, getConfigDirNameForProject(), file))
       if (!settings?.enabledPlugins) {
         continue
       }
@@ -61,7 +61,7 @@ export function getAddDirExtraMarketplaces(): Record<
   const result: Record<string, ExtraKnownMarketplace> = {}
   for (const dir of getAdditionalDirectoriesForClaudeMd()) {
     for (const file of SETTINGS_FILES) {
-      const { settings } = parseSettingsFile(join(dir, getConfigDirName(), file))
+      const { settings } = parseSettingsFile(join(dir, getConfigDirNameForProject(), file))
       if (!settings?.extraKnownMarketplaces) {
         continue
       }

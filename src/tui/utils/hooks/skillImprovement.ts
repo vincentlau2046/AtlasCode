@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import { getConfigDirName } from '../configDir.js'
+import { getConfigDirNameForProject } from '../configDir.js'
 import { getInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
@@ -183,7 +183,7 @@ export async function applySkillImprovement(
   const fs = await import('fs/promises')
 
   // Skills live at getConfigDirName()/skills/<name>/SKILL.md relative to CWD
-  const filePath = join(getCwd(), getConfigDirName(), 'skills', skillName, 'SKILL.md')
+  const filePath = join(getCwd(), getConfigDirNameForProject(), 'skills', skillName, 'SKILL.md')
 
   let currentContent: string
   try {

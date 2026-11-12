@@ -46,7 +46,7 @@ import {
   expandPath,
   getAtlasTempDirName,
   getFsImplementation,
-  getConfigDirName,
+  getConfigDirNameForProject,
   getPlatform,
   sanitizePath,
 } from '../shared'
@@ -125,7 +125,7 @@ export const DANGEROUS_DIRECTORIES = [
   '.git',
   '.vscode',
   '.idea',
-  getConfigDirName(),
+  getConfigDirNameForProject(),
 ] as const
 
 // ════════════════════════════════════════════════════════════════
@@ -167,7 +167,7 @@ export function isAtlasSettingsPath(filePath: string): boolean {
   // ⚠️ 偏差（§8.16）：旧仓此处为字面串 `getConfigDirName()`（de-Anthropic 全局
   // 替换误伤——把函数调用也替换成了字符串），endsWith 恒不命中；此处改回真调用
   // 插值 getConfigDirName()（= `.atlas` 或 ATLAS_CONFIG_DIR_NAME 覆盖值），语义正确。
-  const configDir = getConfigDirName()
+  const configDir = getConfigDirNameForProject()
   if (
     normalizedPath.endsWith(`${sep}${configDir}${sep}settings.json`) ||
     normalizedPath.endsWith(
@@ -190,7 +190,7 @@ function isClaudeConfigFilePath(filePath: string): boolean {
     return true
   }
   // 检查 {configDir}/commands、/agents、/skills 目录（proper 路径段校验）
-  const configDir = getConfigDirName()
+  const configDir = getConfigDirNameForProject()
   const originalCwd = getPermissionsBootstrapEnv().getOriginalCwd()
   const commandsDir = join(originalCwd, configDir, 'commands')
   const agentsDir = join(originalCwd, configDir, 'agents')
@@ -282,7 +282,7 @@ function isDangerousFilePathToAutoEdit(path: string): boolean {
 
       // 特例：{configDir}/worktrees/ 是结构路径（git worktrees 存放处），
       // 非用户创建的敏感目录；其后跟 'worktrees' 时跳过该 {configDir} 段
-      if (dir === getConfigDirName()) {
+      if (dir === getConfigDirNameForProject()) {
         const nextSegment = pathSegments[i + 1]
         if (
           nextSegment &&

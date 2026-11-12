@@ -4,7 +4,7 @@ import { Box } from '../../../../ink.js';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { isAutoMemoryEnabled } from '../../../../memdir/paths.js';
 import { type AgentMemoryScope, loadAgentMemoryPrompt } from '../../../../tools/AgentTool/agentMemory.js';
-import { getConfigDirName } from '../../../../utils/configDir.js';
+import { getConfigDirNameForProject } from '../../../../utils/configDir.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
 import { Byline } from '../../../design-system/Byline.js';
@@ -35,7 +35,7 @@ export function MemoryStep() {
   }
   useKeybinding("confirm:no", goBack, t0);
   const isUserScope = wizardData.location === "userSettings";
-  const configDirName = getConfigDirName();
+  const configDirName = getConfigDirNameForProject();
   let t1;
   if ($[1] !== isUserScope) {
     t1 = isUserScope ? [{

@@ -12,13 +12,13 @@
  *    engine」未落，gate 波前向接缝）→ 本体保留（纯常量零成本），消费面
  *    随 gate 波落。
  */
-import { getConfigDirName } from '../../../shared'
+import { getConfigDirNameForProject } from '../../../shared'
 
 // Permission pattern for granting session-level access to the project's .atlas/ folder
-export const ATLAS_FOLDER_PERMISSION_PATTERN = `/${getConfigDirName()}/**`
+export const ATLAS_FOLDER_PERMISSION_PATTERN = `/${getConfigDirNameForProject()}/**`
 
 // Permission pattern for granting session-level access to the global ~/.atlas/ folder
-export const GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN = `~/${getConfigDirName()}/**`
+export const GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN = `~/${getConfigDirNameForProject()}/**`
 
 export const FILE_UNEXPECTEDLY_MODIFIED_ERROR =
   'File has been unexpectedly modified. Read it again before attempting to write it.'

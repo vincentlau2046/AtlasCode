@@ -24,7 +24,7 @@ import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import {
   getErrnoCode,
-  getConfigDirName,
+  getConfigDirNameForProject,
   lazySchema,
   logForDebugging,
 } from '../../shared'
@@ -36,7 +36,7 @@ import {
   getSchedulerEnv,
 } from './cronEnv'
 
-const LOCK_FILE_REL = join(getConfigDirName(), 'scheduled_tasks.lock')
+const LOCK_FILE_REL = join(getConfigDirNameForProject(), 'scheduled_tasks.lock')
 
 const schedulerLockSchema = lazySchema(() =>
   z.object({

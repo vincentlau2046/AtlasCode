@@ -1,6 +1,6 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { getConfigDirName } from '../configDir.js'
+import { getConfigDirNameForProject } from '../configDir.js'
 import { randomBytes } from 'crypto'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
@@ -79,7 +79,7 @@ export const DANGEROUS_DIRECTORIES = [
   '.git',
   '.vscode',
   '.idea',
-  getConfigDirName(),
+  getConfigDirNameForProject(),
 ] as const
 
 /**
@@ -108,7 +108,7 @@ export function getClaudeSkillScope(
   const absolutePath = expandPath(filePath)
   const absolutePathLower = normalizeCaseForComparison(absolutePath)
 
-  const configDir = getConfigDirName()
+  const configDir = getConfigDirNameForProject()
   const bases = [
     {
       dir: expandPath(join(getOriginalCwd(), configDir, 'skills')),
@@ -213,8 +213,8 @@ export function isAtlasSettingsPath(filePath: string): boolean {
 
   // Use platform separator so endsWith checks work on both Unix (/) and Windows (\)
   if (
-    normalizedPath.endsWith(`${sep}getConfigDirName()${sep}settings.json`) ||
-    normalizedPath.endsWith(`${sep}getConfigDirName()${sep}settings.local.json`)
+    normalizedPath.endsWith(`${sep}getConfigDirNameForProject()${sep}settings.json`) ||
+    normalizedPath.endsWith(`${sep}getConfigDirNameForProject()${sep}settings.local.json`)
   ) {
     // Include getConfigDirName()/settings.json even for other projects
     return true
@@ -235,9 +235,9 @@ function isClaudeConfigFilePath(filePath: string): boolean {
   // Check if file is within getConfigDirName()/commands or getConfigDirName()/agents directories
   // using proper path segment validation (not string matching with includes())
   // pathInWorkingPath now handles case-insensitive comparison to prevent bypasses
-  const commandsDir = join(getOriginalCwd(), getConfigDirName(), 'commands')
-  const agentsDir = join(getOriginalCwd(), getConfigDirName(), 'agents')
-  const skillsDir = join(getOriginalCwd(), getConfigDirName(), 'skills')
+  const commandsDir = join(getOriginalCwd(), getConfigDirNameForProject(), 'commands')
+  const agentsDir = join(getOriginalCwd(), getConfigDirNameForProject(), 'agents')
+  const skillsDir = join(getOriginalCwd(), getConfigDirNameForProject(), 'skills')
 
   return (
     pathInWorkingPath(filePath, commandsDir) ||
@@ -311,12 +311,12 @@ export function isScratchpadEnabled(): boolean {
  */
 export function getAtlasTempDirName(): string {
   if (getPlatform() === 'windows') {
-    return getConfigDirName();
+    return getConfigDirNameForProject();
   }
   // Use UID to create per-user directories, preventing permission conflicts
   // when multiple users share the same /tmp directory
   const uid = process.getuid?.() ?? 0
-  return `${getConfigDirName()}-${uid}`
+  return `${getConfigDirNameForProject()}-${uid}`
 }
 
 /**
@@ -462,13 +462,13 @@ function isDangerousFilePathToAutoEdit(path: string): boolean {
       // git worktrees), not a user-created dangerous directory. Skip the getConfigDirName()
       // segment when it's followed by 'worktrees'. Any nested getConfigDirName() directories
       // within the worktree (not followed by 'worktrees') are still blocked.
-      if (dir === getConfigDirName()) {
+      if (dir === getConfigDirNameForProject()) {
         const nextSegment = pathSegments[i + 1]
         if (
           nextSegment &&
           normalizeCaseForComparison(nextSegment) === 'worktrees'
         ) {
-          break // Skip this getConfigDirName(), continue checking other segments
+          break // Skip this getConfigDirNameForProject(), continue checking other segments
         }
       }
 
@@ -1636,7 +1636,7 @@ export function checkEditableInternalPath(
   // getConfigDirName()/ only (not ~/getConfigDirName()/) since launch.json is per-project.
   if (
     normalizeCaseForComparison(normalizedPath) ===
-    normalizeCaseForComparison(join(getOriginalCwd(), getConfigDirName(), 'launch.json'))
+    normalizeCaseForComparison(join(getOriginalCwd(), getConfigDirNameForProject(), 'launch.json'))
   ) {
     return {
       behavior: 'allow',

@@ -9,7 +9,7 @@ import { getDisplayPath } from '../../utils/file.js';
 import { formatTokens } from '../../utils/format.js';
 import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants.js';
 import { plural } from '../../utils/stringUtils.js';
-import { getConfigDirName } from '../../utils/configDir.js';
+import { getConfigDirNameForProject } from '../../utils/configDir.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Dialog } from '../design-system/Dialog.js';
 
@@ -99,7 +99,7 @@ export function SkillsMenu(t0) {
     t2 = $[5];
   }
   const handleCancel = t2;
-  const configDirName = getConfigDirName();
+  const configDirName = getConfigDirNameForProject();
   if (skills.length === 0) {
     let t3;
     if ($[6] === Symbol.for("react.memo_cache_sentinel")) {

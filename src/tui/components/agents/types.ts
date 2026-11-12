@@ -1,9 +1,9 @@
-import { getConfigDirName } from '../../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../utils/configDir.js'
 import type { SettingSource } from 'src/tui/utils/settings/constants.js'
 import type { AgentDefinition } from '../../tools/AgentTool/loadAgentsDir.js'
 
 export const AGENT_PATHS = {
-  FOLDER_NAME: getConfigDirName(),
+  FOLDER_NAME: getConfigDirNameForProject(),
   AGENTS_DIR: 'agents',
 } as const
 

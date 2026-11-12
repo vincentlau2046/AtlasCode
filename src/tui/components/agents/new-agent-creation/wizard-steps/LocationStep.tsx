@@ -9,7 +9,7 @@ import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHin
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import type { AgentWizardData } from '../types.js';
-import { getConfigDirName } from '../../../../utils/configDir.js';
+import { getConfigDirNameForProject } from '../../../../utils/configDir.js';
 export function LocationStep() {
   const $ = _c(11);
   const {
@@ -17,7 +17,7 @@ export function LocationStep() {
     updateWizardData,
     cancel
   } = useWizard();
-  const configDirName = getConfigDirName();
+  const configDirName = getConfigDirNameForProject();
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = {

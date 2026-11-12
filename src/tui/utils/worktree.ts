@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import { getConfigDirName } from './configDir.js'
+import { getConfigDirNameForProject } from './configDir.js'
 import chalk from 'chalk'
 import { spawnSync } from 'child_process'
 import {
@@ -206,7 +206,7 @@ const GIT_NO_PROMPT_ENV = {
 }
 
 function worktreesDir(repoRoot: string): string {
-  return join(repoRoot, getConfigDirName(), 'worktrees')
+  return join(repoRoot, getConfigDirNameForProject(), 'worktrees')
 }
 
 // Flatten nested slugs (`user/feature` → `user+feature`) for both the branch
