@@ -94,3 +94,19 @@ f4 双轮 grep 实锚（basename 宽匹配 144 命中 → 严格跨域 specifier
 ## §5 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 D lock-face → 段 I → 段 G → 段 L → f4 收口。row F 全程。S3b 工单随 S3a 收口起（判定密集波，§0.2 表为输入）。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-12，有修改通过）+ f4 修订吸收
+
+**焦点⑤ 反向定谳独立复核通过**（三面：静态 0 / 动态 0 / 唯一跨顶层命中 = atlascode/ui→tui/main 壳→壳非违例）。
+
+**【必改 1·吸收】假 kernel 扫描口径漏相对逃逸面——137 条实量**（permissions 68/swarm 23/hooks 22/settings 10/telemetry 7/shell 4/model 2/nativeInstaller 1；bash/powershell/git 全净；高频靶点 growthbook/Tool.js/tools constants/types atlas；顶层单文件族 4/10 抽样中）。f4 裁处：
+
+1. **全量逃逸扫描入段 D 硬前置**：口径 = 候选集每文件所有 import（静态+type+动态+字符串构造路径 `import(${...})`/路径 join 字面）解析落点 ∈ 移动集∪shared；137 条逐条处置表随 lock-face 呈。
+2. **三分法资格规则（f4 裁定）**：S3a 定性 = 纯机械零语义变更，故——**排除留壳**（壳性态文件）/ **依赖随迁**（机械扩移动集）/ **type 重定位**（机械）三属实机械 = S3a 资格；**依赖改写类（接口新造，如 growthbook→FeatureConfigPort）一律归 S3b**（接口工作破 S3a 定性，禁混入）。随迁扩集失控（新增随迁面 >3k 行）→ 收缩至零逃逸子域整搬（预案 (b)）。lock-face 呈表定谳，f4 终裁。
+3. **§1 范围修订**（触发审计条件②回审一次）：S3a 范围 = 「11 子域 ∩ 逃逸处置余集（随迁+type 重定位可机械闭合）」，非无条件整搬；排除/改写/失控三出口均使实际集 ≠ 11 子域全集。
+
+**【必改 2·吸收】断言格升级**：「kernel 目标树内 react/ink/tui import = 0」废止，改**解析落点式**——kernel 树内每文件全部 import 解析落点 ∈ kernel 树∪shared，逃逸 = 0（逃逸扫描器入判据面 = 判据格本体，非字面 grep）；扫描器同时覆盖字符串构造路径面。
+
+**建议吸收**：① **直改全量**（re-export 若锁面选用须带除役期限，禁长期双路）；② **处置表闭环先于直改**（防 kernel→tui 残边 + tui→kernel 消费 bundle 循环依赖）；③ **tsconfig paths 表全量核对**（baseUrl+paths 含 tui 路径须同步重映射）；④ **字面清单零漂移格增列**：路径面 diff 恰合搬移映射表断言（禁清单与实际落点漂移）；⑤ 搬移顺序 = 一次搬 + canon 中断面一次（前提 = 处置表先冻结）；⑥ 0.3 双实现 S3a 只核对登记不合并 ✓ 维持。
+
+§6 修订落档后回 Atlas-reveiw 复核一次（§1 结构性修订条款），复核通过后发双信号。
