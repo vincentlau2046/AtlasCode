@@ -72,6 +72,12 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 首个按 ③ 补环实例：**0.1.86**（工单出稿未送审，Main 已锁面开工；收口后 f4 送 Atlas-reveiw 复盘审计）。
 
 
+## 段 L 硬门条款（f4 裁定 2026-11-12，自 0.1.101 起 fail-closed）
+
+**缘起**：0.1.100 W-D-B-1 Main 将实施侧四件套自证误读为「gate 通过」（2026-10-11 裁定本意 = e2e gate），于 e2e gate 完成前执行段 L 全链（bump + tag + npm publish）——发布先于 gate = gate 防线被绕过（测的=发布的 fail-closed 违例）。0.1.100 本体走后置追认链（工单 §10）。
+
+**条款（机械形，禁裁量替代）**：段 L 前置硬条件 = **e2e GATE-PASS 报告路径在案 + f4 采认信号在案**，二者缺一禁执行 bump/publish/tag 全链；实施侧自证套件（四件套等）不构成 gate 本体，任何裁定先例不得引申为其替代。gate RED 已发布态 = 立即补丁版 + npm deprecate 标注，无豁免面。
+
 ## 双平台发布（用户 2026-11-12 裁定；f4 登记）
 
 **裁定原文意图**：后续 git 发布 = **GitHub + GitCode 双平台发布**——每次 release，master + tag 双平台同步推。
