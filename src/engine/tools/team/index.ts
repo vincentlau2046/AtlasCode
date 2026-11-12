@@ -128,5 +128,7 @@ export {
   writeTeamFileDurable,
   checkDurableResidual,
   persistSpawnedTeammateDurable,
+  relinkTeamFromDurable,
   logDurableWrite,
+  type RelinkResult,
 } from './teamDurable'

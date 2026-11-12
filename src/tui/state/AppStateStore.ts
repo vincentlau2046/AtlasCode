@@ -344,6 +344,9 @@ export type AppState = DeepImmutable<{
         cwd: string
         worktreePath?: string
         spawnedAt: number
+        // 0.1.100 S3 D-③ 加性（engine TeamMemberStateShape 同形镜像）：
+        // relink 回填条目 halfAttached 内存态标记（禁静默当作活着）。
+        halfAttached?: boolean
       }
     }
     // 0.1.93 W-D-A（f4 批复④ + gate 打回修复③）：Form A 角色化成员名册

@@ -63,7 +63,9 @@ export type TeamServicesFile = {
 
 /** 旧 AppStateStore TeamMemberState 逐字段镜像（teammates record 值形）。
  * taskId = 0.1.93 W-D-A A7 加性（Form A spawn 注册面：成员 task 态查表
- * 锚——TeamDelete active-member 守卫 teamContext 化消费）。 */
+ * 锚——TeamDelete active-member 守卫 teamContext 化消费）。
+ * halfAttached = 0.1.100 S3 D-③ 加性（内存态标记，禁静默当作活着）：
+ * relink 回填条目恒 true；TeamDelete 守卫跳过 + 输出面列出。 */
 export type TeamMemberStateShape = {
   name: string
   agentType?: string
@@ -73,6 +75,7 @@ export type TeamMemberStateShape = {
   cwd: string
   spawnedAt: number
   taskId?: string
+  halfAttached?: boolean
 }
 
 /** 旧 AppStateStore teamContext 逐字段镜像（本工具消费字段）。 */

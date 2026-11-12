@@ -81,6 +81,12 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
     const { setAppState, getAppState } = context
     const appState = getAppState()
     const teamName = appState.teamContext?.teamName
+    // S3 判据①：组态 teammates 面显式收窄（tool context getAppState 宽型；
+    // halfAttached = relink 回填内存态标记，AppStateStore 同形镜像）。
+    const teammates = (appState.teamContext?.teammates ?? {}) as Record<
+      string,
+      { name: string; halfAttached?: boolean }
+    >
 
     // 0.1.100 W-D-B-1 durable 支（D-③）输出面载体（if 块外声明 = 成功
     // 返回面 spread 可达；engine 车道同形）。
@@ -89,6 +95,14 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
       // 0.1.100 W-D-B-1 durable 支（D-③）：halfAttached 判据前置（与
       // engine 车道 teamDeleteTool.ts 同形；禁静默 = 名单进输出面）。
       let skipFileGuard = false
+      // S3 判据①（relink 回填面；engine 车道同形）：组态 halfAttached 标记
+      // 名单先取（文件面名单并集用）。
+      const halfAttachedCtxNames = Object.entries(teammates)
+        .filter(
+          ([, member]) =>
+            member.name !== TEAM_LEAD_NAME && member.halfAttached === true,
+        )
+        .map(([, member]) => member.name)
       if (resolveTeamPersistenceMode() === 'durable') {
         let v2File: Awaited<ReturnType<typeof readTeamFileV2>>
         try {
@@ -106,9 +120,14 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
           }
         }
         if (v2File && v2File.leadInstanceId !== getLeadInstanceId()) {
-          const halfNames = v2File.members
-            .filter(m => m.name !== TEAM_LEAD_NAME)
-            .map(m => m.name)
+          const halfNames = [
+            ...new Set([
+              ...v2File.members
+                .filter(m => m.name !== TEAM_LEAD_NAME)
+                .map(m => m.name),
+              ...halfAttachedCtxNames,
+            ]),
+          ]
           skipFileGuard = true
           half_attached_warning =
             `Durable team file was written by a previous lead instance ` +
@@ -130,9 +149,22 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
           m => m.name !== TEAM_LEAD_NAME,
         )
 
+        // 0.1.100 S3 D-③ 判据①：relink 回填的 halfAttached 内存标记条目跳过
+        // 活判（不当活着；engine 车道同形）+ 名单已并入 half_attached_warning。
         // Separate truly active members from idle/dead ones
         // Members with isActive === false are idle (finished their turn or crashed)
-        const activeMembers = nonLeadMembers.filter(m => m.isActive !== false)
+        const halfAttachedNames = new Set(
+          Object.entries(teammates)
+            .filter(
+              ([, member]) =>
+                member.name !== TEAM_LEAD_NAME &&
+                member.halfAttached === true,
+            )
+            .map(([, member]) => member.name),
+        )
+        const activeMembers = nonLeadMembers.filter(
+          m => m.isActive !== false && !halfAttachedNames.has(m.name),
+        )
 
         if (activeMembers.length > 0) {
           const memberNames = activeMembers.map(m => m.name).join(', ')

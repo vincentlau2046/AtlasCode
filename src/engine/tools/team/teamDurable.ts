@@ -25,6 +25,10 @@ import {
   type TeamFileV2,
   type TeamMemberV2,
 } from '../../../shared'
+import {
+  requireTeamServices,
+  type TeamMemberStateShape,
+} from './teamServices'
 
 /** 门 resolver：settings teams.persistence > ProductDefinition 缺省回落 >
  * 'memory'（F1 分档形缺省 = 现网零持久逐字不变）。 */
@@ -130,4 +134,77 @@ export async function persistSpawnedTeammateDurable(input: {
   }
   await writeTeamFileV2Atomic(input.teamName, existing)
   logDurableWrite(input.teamName, existing.members.length)
+}
+
+// ── 0.1.100 S3：member registry relink（D-③ 三判据，lock-face §3）──────
+
+/** relink 结果（fail-visible 文案随行；调用方负责输出面呈现）。 */
+export type RelinkResult = {
+  teamName: string
+  /** 判据②：文件 leadInstanceId ≠ 本进程 instance（kill→resume 恒真）。 */
+  instanceMismatch: boolean
+  /** 判据①：半挂接成员名清单（内存态标记已随 teamContext 回填）。 */
+  halfAttachedNames: string[]
+  /** fail-visible 提示文案（可判读，禁 log-only 静默形——f4 硬要求②）。 */
+  note: string
+}
+
+/** relink 探测 + teamContext 回填（回读点 = lead 启动 + resume；预注册形
+ * 「teamName 来自 lead 会话态，无会话态不探测」——本原语要求显式 teamName
+ * 参数，调用方无会话态不调用，禁目录扫描兜底）。
+ *
+ * 三判据落码：
+ *  ① 半挂接标记 fail-visible：文件成员条目 → `halfAttached: true` 内存态
+ *     标记（禁静默重建、禁静默当作活着；TeamDelete 守卫跳过 + 输出面列出）；
+ *  ② instance 二次验证前置：readTeamFileV2 白名单回读 + leadInstanceId
+ *     比对（mismatch → 全员 halfAttached，含 lead 自身条目重挂接）；
+ *  ③ kill→resume→标记可见格：判据格 = S5（写文件 → 新进程 relink →
+ *     断言标记可达且输出面可见）。
+ * Form A in-process 成员无独立 PID：halfAttached 判据 = task registry
+ * 查表——文件成员无 taskId 面（D-⑤ task store 不 durable），不在本进程
+ * taskState = 半挂接，不引入伪 PID。
+ *
+ * 幂等门：本进程已有活跃组态 = 不重复回填（relink 只服务回读点；TeamCreate
+ * 正常建组路径不经此函数）。OFF 支 / 无文件 = null（不探测不写盘）。 */
+export async function relinkTeamFromDurable(
+  teamName: string,
+): Promise<RelinkResult | null> {
+  if (resolveTeamPersistenceMode() !== 'durable') return null
+  const services = requireTeamServices()
+  if (services.getTeamContext()) return null
+  const file = await readTeamFileV2(teamName)
+  if (!file) return null
+  const instanceMismatch = file.leadInstanceId !== getLeadInstanceId()
+  const halfAttachedNames = file.members.map(m => m.name)
+  // teamContext 回填（roster + members 全量；成员条目全量带 halfAttached
+  // 内存态标记——禁静默当作活着，消费面 = TeamDelete 守卫跳过 + 列出）。
+  const teammates: Record<string, TeamMemberStateShape> = {}
+  for (const m of file.members) {
+    teammates[m.agentId] = {
+      name: m.name,
+      ...(m.agentType ? { agentType: m.agentType } : {}),
+      ...(m.color ? { color: m.color } : {}),
+      tmuxSessionName: '',
+      tmuxPaneId: m.tmuxPaneId,
+      cwd: m.cwd,
+      spawnedAt: m.joinedAt,
+      halfAttached: true,
+    }
+  }
+  services.setTeamContext({
+    teamName: file.name,
+    teamFilePath: getTeamFilePathShared(teamName),
+    leadAgentId: file.leadAgentId,
+    roster: file.roster,
+    teammates,
+  })
+  const note =
+    `Relinked team "${file.name}" from durable file ` +
+    `(${getTeamFilePathShared(teamName)}): ${halfAttachedNames.length} ` +
+    `member entr${halfAttachedNames.length === 1 ? 'y' : 'ies'} marked ` +
+    `half-attached (previous lead instance ${file.leadInstanceId}${instanceMismatch ? '' : ', same instance'}). ` +
+    `They are NOT treated as active; TeamDelete will skip them and list ` +
+    `them in its output.`
+  logForDebugging(`[teamDurable] ${note}`, { level: 'warn' })
+  return { teamName: file.name, instanceMismatch, halfAttachedNames, note }
 }

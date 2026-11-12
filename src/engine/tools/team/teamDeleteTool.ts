@@ -160,6 +160,16 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
       // instance = 本进程写面，file 守卫照常。v2 拒读（foreign/legacy）=
       // fail-visible 终止（禁半解析回落，演进策略判据）。
       let skipFileGuard = false
+      // S3 判据①（relink 回填面）：组态 halfAttached 标记名单先取（文件面
+      // 名单并集用；判定与输出两消费）。
+      const halfAttachedCtxNames = Object.entries(
+        teamContext?.teammates ?? {},
+      )
+        .filter(
+          ([, member]) =>
+            member.name !== TEAM_LEAD_NAME && member.halfAttached === true,
+        )
+        .map(([, member]) => member.name)
       if (resolveTeamPersistenceMode() === 'durable') {
         let v2File: Awaited<ReturnType<typeof readTeamFileV2>>
         try {
@@ -177,9 +187,14 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
           }
         }
         if (v2File && v2File.leadInstanceId !== getLeadInstanceId()) {
-          const halfNames = v2File.members
-            .filter(m => m.name !== TEAM_LEAD_NAME)
-            .map(m => m.name)
+          const halfNames = [
+            ...new Set([
+              ...v2File.members
+                .filter(m => m.name !== TEAM_LEAD_NAME)
+                .map(m => m.name),
+              ...halfAttachedCtxNames,
+            ]),
+          ]
           skipFileGuard = true
           half_attached_warning =
             `Durable team file was written by a previous lead instance ` +
@@ -228,7 +243,14 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
       const teammateEntries = Object.entries(
         teamContext?.teammates ?? {},
       ).filter(([, member]) => member.name !== TEAM_LEAD_NAME)
-      if (teammateEntries.length > 0) {
+      // 0.1.100 S3 D-③ 判据①：relink 回填的 halfAttached 内存标记条目跳过
+      // 活判（不当活着——旧 lead 进程已死，task 查表恒 fail-closed 归活会
+      // 结构性恒拦）+ 名单已并入 half_attached_warning（上方 durable 支
+      // halfNames 并集）。
+      const inProcessEntries = teammateEntries.filter(
+        ([, member]) => member.halfAttached !== true,
+      )
+      if (inProcessEntries.length > 0) {
         // 0.1.93b RF-T1（f4 §11 批复 2026-11-09）：branch-2 读面单点改走
         // sessionContextPort——旧读面 context.getAppState().tasks 在 lead
         // lane 恒 undefined（工具 context getAppState = makeCtx TPC 窄视图
@@ -246,7 +268,7 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
         // 0.1.93 W-D-A round 6（f4 修 2）：守卫读面谓词单源（src/task/
         // inProcessTeammate，判读逐字 = 旧「status undefined || running」
         // fail-closed 形；终态词汇与 WaitForTeammates/runner 收尾块同源）。
-        const alive = teammateEntries.filter(([, member]) =>
+        const alive = inProcessEntries.filter(([, member]) =>
           isInProcessTeammateActiveOrUnknown(tasks?.[member.taskId ?? '']),
         )
         if (alive.length > 0) {
