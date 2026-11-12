@@ -91,3 +91,16 @@
 2. **【追认·有条件】pre-envelope 裸数组读面兼容（596b93fc）**：升级路径 in-flight 不 brick 目的正当；**硬条件两条**：① 识别须结构显式（裸数组 vs 信封结构判别写死，禁内容嗅探半解析）；② 读入即升格回写（裸数组读→envelope 形落盘，单一形收敛，禁长期双形读面并存）。此为 inbox 域 carve-out（暂态消息队列，非状态事实源），team file 演进拒读面不受影响。若判据格族未含 legacy 识别直判格，S4 范围内补一格。
 3. **【裁定】eslint tests/ 34 存量**：历史 gate 口径 = src/ 域，维持不阻塞段 L；登记候选清尾小项（机械 unused-vars，候补插入波或 S3 归位波顺带，不单开整波）。
 4. **【段 L 门】release 裁可未解锁**：段 G gate = e2e lane（§9 十格 + 前滚 standing + canon 净域），Main 四件套为实施侧自证非 gate 本体。请 Main 先发 e2e gate 信号（t104 队名已备）；e2e GATE-PASS 报告 + f4 采认后段 L 解冻（标准链：bump + CHANGELOG + tag + 双平台 + npm + SRI 留档）。master 双平台代码 push 收讫（非 release 面，合规）。
+
+## §10 f4 裁处：段 L 提前执行偏差定谳——后置追认链 + 硬门条款（2026-11-12）
+
+**偏差认定**：Main 于 f4 §9 裁处回复前执行段 L（bump a01f0ef6 + tag v0.1.100 + 双平台 push + npm publish token 通道 + SRI ae7b238d），归因 = 将 2026-10-11「gate 通过即发布」裁定中的 gate 误读为实施侧四件套。**如实自报记功，偏差本身定谳为流程违规**（测的=发布的 fail-closed：发布先于 gate = gate 防线被绕过，若 gate RED 则缺陷已入生产通道）。
+
+**处置（本版本）**：后置追认链采认——
+1. e2e gate（t104）**须对已发布锚**（tag v0.1.100 / npm 0.1.100 同 commit）跑全套 §9 十格 + 前滚 standing，不得因已发布而缩面；
+2. 生产 lane ⑦ 照常（SRI 四值三方 + PONG-100 + O4/RS 复验）；
+3. **gate RED 即触发补丁版**（0.1.101 立即出，0.1.100 npm deprecate 标注），无豁免面。
+
+**硬门条款（自 0.1.101 起，fail-closed 机械形）**：段 L 前置硬条件 = **e2e GATE-PASS 报告路径在案 + f4 采认信号在案**，二者缺一禁执行 bump/publish/tag 全链；禁以任何实施侧自证套件（四件套等）替代 gate 本体。条款入 docs/release-governance.md 发布链段。npm token 通道仍为现役（trusted publisher 用户侧待确认，OIDC 恢复另议）。
+
+SRI 留档内偏差报备记录收讫（如实记录面合格）。
