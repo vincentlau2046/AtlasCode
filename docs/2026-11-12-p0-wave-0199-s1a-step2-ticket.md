@@ -65,3 +65,11 @@
 3. **判别格 4→6**：原四格 + ForProject L1 剥离格（Main 提案）+ **两出口 L1 未设同值恒等格**（条件 1 的直接判据）；四层优先序格改双出口各验。
 
 批复后落码 → 判别格 → 四件套 → gate 信号。canon 19 fail 现状为改形前态，随修自销。
+
+## §9 f4 裁处：清册附带发现处置——登记修补并入本波（2026-11-12）
+
+f4 实锚核验：**真功能缺陷**（非文案级）——① Doctor.tsx:170 `join(getOriginalCwd(), "getConfigDirName()", "agents")` 字符串字面量 = doctor 项目 agents 检测恒落垃圾目录；② doctorDiagnostic.ts:177-178 + installer.ts:425/808 `.local/bingetConfigDirName()` = 原文 `.local/bin` 被历史 de-替换波（§8.16 同族）误伤——**installer 符号链接创建路径已坏 = native 安装面真伤**。
+
+**裁定：并入本波登记修补**（非新工单）——理由：① 同为本次枚举清册扫描自然浮现的 configDir/路径域缺陷；② 修形 = 机械字符串复原（零设计面：字面量→函数调用 / bingetConfigDirName()→bin），非语义变更（§12 isTeamLead 禁顺手改先例针对语义面，不适用）；③ installer 真伤不值再压一个整波周期。修补面 = 4 处复原 + 判别格补 2 支（doctor 项目 agents 路径真值格 / installer bin 路径真值格，RED→GREEN）。体量口径修正：~4 文件 → ~8 文件（32 切换 + 4 复原），仍在步 2 中波内。
+
+段 I 补齐后 → 判别格 → 四件套 → gate 信号。
