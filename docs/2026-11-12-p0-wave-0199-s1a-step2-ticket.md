@@ -85,3 +85,13 @@ f4 实锚核验：**真功能缺陷**（非文案级）——① Doctor.tsx:170 
 ## §11 f4 对表：release 0.1.99 SRI 四值 MATCH + 双平台例行步兑现（2026-11-12，@cf963a3f）
 
 Main 段 L 收讫（release commit 82b087b7 + tag v0.1.99 + npm 本地通道 + SRI 留档 cf963a3f）。f4 独立复核（registry 直下重算）——**四值全 MATCH**：shasum 98719304c95b44a9…（packument + tgz 直下双面同值）/ integrity sha512-B2vffwrD…（同值）/ unpackedSize 18,180,976 B（精确字节）/ **cli.js 18,172,750 B sha256 9ddf7ffc… ≡ gate-099 build 银行字节级同值**（post-bump rebuild 同 sha256 = 版本串不进 cli.js 实证）。**gitcode 双平台例行步兑现**（f4 实核）：master = cf963a3f + tag v0.1.99 = 82b087b7（锚 release commit ✓）——首用（0.1.98）→ 例行（0.1.99）节奏成立。段 L 面 f4 复核全绿；生产 lane ⑦ e2e 在途，PASS 后 Main 单点报用户 → §12 终局收口（S1a 硬化波全闭）。
+
+## §12 f4 终局收口：0.1.99 五段闭环终态——S1a 硬化波全闭（2026-11-12）
+
+生产 lane ⑦ PASS 报审采认（r-20261112-prodlane-099.md；与 §11 f4 独立复核同值互证）：SRI 四值三方 MATCH（cli.js 四点恒等 = registry 直下/安装树/gate dist/Main post-bump rebuild）+ 翻号 0.1.99 + PONG-099（glm-5 reqlog 直证）+ O4 GREEN + RequestShutdown 成员链 npm 安装品复验 GREEN（首试零残留，team=default 0）。派生纪律兑现核：prodlane 脚本 Write 全量生成 + 双 grep 残留零命中（连续第二波零事故）。
+
+**0.1.99 五段闭环终态**：复核（§6 核可通过 + env 四层次序钉死 + provider 形）→ row F 双出口改形（§8，canon 19 fail 单根因定谳）→ §9 附带发现登记修补（de-替换真功能缺陷 4 处复原）→ gate-099 v2 GATE-PASS（§10）→ 段 L release + gitcode 例行步（§11）→ 本节。
+
+**S1a 硬化波全闭（序 4 完成）**：步 1（0.1.98 单源化行为中性）+ 步 2（0.1.99 产品维度激活）双波终态。charter 六面产品面提取落地：品牌/提示词焊点①/工具子集 ProductDefinition/HELP_SET 确认面/锚面/配置目录分域机制（office 真注册随 S2 波）。**波终资产**：字面清单制读表执行 / configDir 双出口（四层+三层锚分维）/ ProductDefinition 运行时清单 / 派生双替换纪律（连续两波零事故）/ de-替换 artifact 全清。
+
+**charter §10 主线排位更新**：序 4 ✅ → 下位 = 序 5 Gap B sharp/image-processor-napi（候补插入）→ 序 6 W-D-B-1 持久化面 → 序 7 S3 归位波（盘点就绪，拆二波预案）→ 序 8/9。f4 依自动推进裁定起下波工单。
