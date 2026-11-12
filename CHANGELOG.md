@@ -4,6 +4,24 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.101
+
+补丁版：0.1.100 发布品缺陷定谳重切（f4 工单 §11 @d7efd33d / §12 @97803c70 /
+§13 @80757d22；gate-100 GATE-PASS `user-e2e/reports/r-20261112-gate-100.md`
++ f4 采认双在案——release-governance.md 硬门条款首用生效）。
+
+### 缺陷定谳与处置
+
+- 0.1.100 发布品构建自 pre-`85834af0` 树（release 先于 f4 §9 硬条件②
+  修形落地），缺 legacy inbox **读入即升格回写**终形（裸数组文件停留
+  legacy 形不收敛信封）。已 `npm deprecate` 标注；tag v0.1.100 保留。
+- 本版 = master tip 产品码纯 bump（相对 0.1.100 gate 判据面零代码差，
+  cli.js 与 gate-100 build 银行 18,197,218B / `a49023cc…` 字节级对照为
+  纯 bump 实证面）。
+- 流程教训（release-governance.md 附则 @5e88b471）：gate 本体 = e2e
+  gate（四件套仅为实施侧自证）；build 于最终产品码提交后紧贴 publish
+  前执行，SRI 留档记录 build tree commit。
+
 ## v0.1.100
 
 W-D-B-1 持久化面波（工单 `docs/2026-11-12-01100-wdb1-lockface-main.md`
