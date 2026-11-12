@@ -72,3 +72,27 @@
 1. watchdog 挂点定 engine 侧（①的定形）vs TUI 桥——Main 判 engine 侧（豁免信息视野在 engine：permission 未决/在途集/backoff 窗均 engine 内观测，TUI 桥看不到）。
 2. OSC 超时 2s / OS 读超时 500ms / 流式块帽 24 行三个常数——f4 认可或改值。
 3. 小终端 <5 行完全退化规则（钉②）——接受「极端终端不做手术」或须另形。
+
+## ⑥ 段 I 落码核销（2026-11-13，段 G 附页）
+
+切片序 1→2→3 全部落码，commit 面：
+
+| 切片 | commit | 内容 |
+|---|---|---|
+| 1 主题 | `21199f14` | watcher 真实现替入 + OS 外观第四源 + AUTO_THEME 缺省开 |
+| 2-A 崩溃可见化 | `b77c9657` | crashRecovery 聚合窗恰一次 dispatch + REPL 错误行复位可重入 + headless abort 面 |
+| 2-B 看门狗 | `c87b8621` | 回合内 120s 无事件自恢复 abort（四豁免 + outer 镜像 + env 可调） |
+| 2-C defer 提示行 | `5eebb92f` | 常驻提示行「等待权限裁定，Esc 中止」+ 超时注记 |
+| 3 钉底 | `b8a3c850` | inline 视口压缩器（钉①②③ 全钉 + 测量收缩环） |
+
+**判据面测试**：`p0-theme-layered-detection` / `p0-crash-recovery` / `p0-loop-watchdog` / `p0-defer-suspend-hint` / `p0-viewport-compressor`（17 测）。
+
+**钉①②③ 落码对表（切片 3）**：
+- 钉①：`computeSliceStart` cap 参动态化（剩余行数预算，动态 cap 配 step=1），Messages.tsx 单源调用，无第二截断实现；「N 条已入滚动区」提示行 = `scrollbackHiddenCount`（start 之前被截消息数）。
+- 钉②：`computeViewportPlan` 三态边界（<5 degraded / <20 fallback / ≥20 compress）+ 具名常数 `MIN_SURGERY_ROWS=5` / `MIN_COMPRESS_ROWS=20`；fallback = cap 0 保底集 + 流式块抑制。
+- 钉③：`STREAMING_BLOCK_CAP_ROWS=24` 具名 + `capStreamingText` 截尾保尾 + 溢出行折叠入提示行计数；预算分配序单帧总高恒 ≤ 视口（第二重限高：窄视口下帽让位于输入框全保）。
+- 测量收缩环：`InlineViewportCompressor` useLayoutEffect 实测整帧（measureElement）→ 溢出收缩 shrinkRows → resize 归零不回涨。
+
+**canon 净域**：`FORCE_COLOR=3 CI=true bun test --isolate ./tests/` = **5924 pass / 0 fail**（125.6s，2026-11-13；Δ 容许面 = 本波新格族 17 测 + 切片 1/2 新测）。首轮 canon 静默挂死 2h14m（主进程 100% CPU + git 僵尸子进程未 reap）定谳为 runner 环境偶发事件，非测试面缺陷——重跑即绿，附此存照。
+
+**R3-B 五场景 pty 探针**：归 e2e gate lane（标准链），Main 侧 = 纯判据面单测已覆盖（plan 边界 / 帽联动 / 锚不变式）。

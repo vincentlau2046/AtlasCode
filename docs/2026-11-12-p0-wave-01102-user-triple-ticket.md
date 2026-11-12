@@ -65,3 +65,19 @@
 3. **<5 行完全退化规则批准**——退化态 = 既有行为（无压缩），探针腿断言口径 = 退化不崩溃 + 不误截输入框；<20 行保底集规则照批。
 
 批复后段 I 落码（切片序 1→2→3），row F 全程。
+
+## §8 段 G 核销（Main，2026-11-13 @b8a3c850）
+
+**段 I 落码**：切片 1 `21199f14` / 2-A `b77c9657` / 2-B `c87b8621` / 2-C `5eebb92f` / 3 `b8a3c850`，已推 gitcode master（ALIGNED）。核销明细见 lock-face 文档 §⑥。
+
+**§6 审计增补三格——Main 侧判据面核验**（e2e 侧 pty 格留 gate 承接）：
+
+| 增补格 | Main 侧证据 |
+|---|---|
+| 空闲不触发格（§6.1） | `tests/unit/p0-loop-watchdog.test.ts:69`「未 armed（disarmed）不 fire —— 轮间空闲不触发格」+ arm/disarm 事件驱动面（round_start arm / round_end·loop_end disarm） |
+| 恰一次格（§6.3） | `tests/unit/p0-crash-recovery.test.ts:30`（首错主体 + 窗内折叠 additionalCount + 恰一次 dispatch）+ `:62`（窗关后新错误开新窗重新恰一次） |
+| 流式单帧不破钉底格（§6.4） | `tests/unit/p0-viewport-compressor.test.ts:54`（预算分配序单帧总高恒 ≤ 视口三重循环）+ capStreamingText 任意输入输出 ≤ 24 行联动断言 |
+
+**canon 净域**：5924 pass / 0 fail（2026-11-13，125.6s；首轮挂死为 runner 环境偶发，重跑即绿，lock-face §⑥ 存照）。前滚 standing 0.1.101 面（O4 锚/Form A 零写盘/durable OFF 零写盘/team=default 零命中/TEAMS-TASKS-ZERO-DIFF/TypeError 0）由 canon 全量含测承接，全绿。
+
+**下一步**：signal e2e gate（t106，含 R3-B 五场景 pty 探针 + §4 判据格 e2e 侧）→ 硬门条款双在案后段 L。
