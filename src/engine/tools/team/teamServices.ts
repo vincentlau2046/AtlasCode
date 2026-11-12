@@ -34,7 +34,13 @@
 
 /** swarm teamHelpers TeamFile 字段镜像（成员面 = TeamCreate 写面 + TeamDelete
  * 读面消费字段并集；prompt/sessionId/backendType/mode 等兄弟成员不在
- * 本工具消费面 = 镜像省略，漂移防登记见头注）。 */
+ * 本工具消费面 = 镜像省略，漂移防登记见头注）。
+ *
+ * 0.1.100 W-D-B-1 收敛边界：TeamRosterEntry 已单源收编 shared/
+ * teamFileSchema（下方 re-export）；TeamServicesFile 鸭子镜像保留——收敛
+ * 为 shared TeamFile 别名会引入 member backendType string/BackendType
+ * 双向型变不兼容（compose.ts setTeamServices 绑定 swarm impl 参数面
+ * contravariance），members 字段漂移防 = 本头注登记维持。 */
 export type TeamServicesFile = {
   name: string
   description?: string
@@ -82,13 +88,11 @@ export type TeamContextShape = {
   roster?: TeamRosterEntry[]
 }
 
-/** Form A 角色化成员名册条目（TeamCreate members 参数消费形）。 */
-export type TeamRosterEntry = {
-  name: string
-  role?: string
-  goal?: string
-  backstory?: string
-}
+/** Form A 角色化成员名册条目（TeamCreate members 参数消费形）。
+ * 0.1.100 W-D-B-1 副本收敛（lock-face D-①）：单源 = shared/teamFileSchema
+ * TeamRosterEntry（本 re-export 保持消费面 import 路径不变）。 */
+import type { TeamRosterEntry } from '../../../shared'
+export type { TeamRosterEntry }
 
 /** 组合根注入面（swarm 门面真实现绑定；未注入 fail-fast）。
  * 标号订正（S-E3 A 路 minor 4）：9 团队文件面成员注的行号 = 新仓

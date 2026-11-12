@@ -101,6 +101,31 @@ export {
   resetConfigDirNameProvider,
   type ConfigDirNameProvider,
 } from "./configDir"
+// 0.1.100 W-D-B-1：team file schema + durable IO 单源（副本收敛锚；F1 分档
+// 形 durable 支专用原语，OFF 支不可达）。
+export {
+  TEAM_FILE_SCHEMA_VERSION,
+  STALE_LOCK_MS,
+  LOCK_RETRY_MAX,
+  teamFileV2Schema,
+  parseTeamFileV2,
+  getLeadInstanceId,
+  resetLeadInstanceId,
+  getTeamsDirShared,
+  getTeamFilePathShared,
+  decideStaleLock,
+  writeTeamFileV2Atomic,
+  readTeamFileV2,
+  sweepTmpOrphans,
+  type TeamPersistenceMode,
+  type TeamAllowedPath,
+  type TeamRosterEntry,
+  type TeamMemberV2,
+  type TeamFileV2,
+  type TeamFileLegacyExtras,
+  type TeamFile,
+  type ParsedTeamFileV2,
+} from "./teamFileSchema"
 // C-Deep 切片 3 T5：用户专属 Atlas 临时目录名（跨域纯叶子，permissions +
 // executor Shell 共线；§8.16 偏差：由 permissions 最小面提升 shared）
 export { getAtlasTempDirName } from "./tempDir"

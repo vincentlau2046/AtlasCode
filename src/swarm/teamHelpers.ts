@@ -97,39 +97,19 @@ export type CleanupOutput = {
   team_name?: string
 }
 
-export type TeamAllowedPath = {
-  path: string // Directory path (absolute)
-  toolName: string // The tool this applies to (e.g., "Edit", "Write")
-  addedBy: string // Agent name who added this rule
-  addedAt: number // Timestamp when added
-}
+// 0.1.100 W-D-B-1 副本收敛（lock-face D-①）：TeamAllowedPath / TeamFile
+// 单源 = shared/teamFileSchema（swarm 与 tui 双副本消解）。本域保留
+// backendType 判别窄化（BackendType 3 值域 = swarm 域类型面，shared 成员
+// 为 string 宽形）；TeamFile = v2 剥持久面字段（0.1.36 遗产形，弃置定谳
+// —— 禁新增消费点，durable 支经 shared parseTeamFileV2/writeTeamFileV2Atomic）。
+export type { TeamAllowedPath } from '../shared'
+import type { TeamFileV2, TeamMemberV2 } from '../shared'
 
-export type TeamFile = {
-  name: string
-  description?: string
-  createdAt: number
-  leadAgentId: string
-  leadSessionId?: string // Actual session UUID of the leader (for discovery)
-  hiddenPaneIds?: string[] // Pane IDs that are currently hidden from the UI
-  teamAllowedPaths?: TeamAllowedPath[] // Paths all teammates can edit without asking
-  members: Array<{
-    agentId: string
-    name: string
-    agentType?: string
-    model?: string
-    prompt?: string
-    color?: string
-    planModeRequired?: boolean
-    joinedAt: number
-    tmuxPaneId: string
-    cwd: string
-    worktreePath?: string
-    sessionId?: string
-    subscriptions: string[]
-    backendType?: BackendType
-    isActive?: boolean // false when idle, undefined/true when active
-    mode?: PermissionMode // Current permission mode for this teammate
-  }>
+export type TeamFile = Omit<
+  TeamFileV2,
+  'schemaVersion' | 'persistence' | 'leadInstanceId' | 'roster' | 'members'
+> & {
+  members: Array<TeamMemberV2 & { backendType?: BackendType }>
 }
 
 export type Input = z.infer<ReturnType<typeof inputSchema>>
