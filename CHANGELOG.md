@@ -4,6 +4,39 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.97
+
+CI 告警清零插入波（工单 `docs/2026-11-11-p0-wave-0197-ci-alerts-ticket.md`
+@d60fd3a2；§6 row F 双腿形修订 @3eeca71a/911fa880；§7 段 V 首绿采认 +
+挂起令 @5a959f34）。**零产品代码**——全波仅 `.github/workflows/` 两文件。
+
+### CI 修形（ci.yml）
+
+- **Test 步 `FORCE_COLOR: "3"`**：对齐 canon 口径——CI 顶层无 FORCE_COLOR
+  时 colorize-d4 等 SGR 在场断言测试族假 skip/假绿（FC=0 本地裸跑假绿同族坑）。
+- **新增 Install ripgrep 步（双腿形）**：apt 腿（3 重试 ×30s）→
+  gh-release-static fallback 腿（ripgrep 14.1.1 musl tarball，URL + sha256
+  双 pin `4cf9f2741e6c…` + `sha256sum -c` 校验；ripgrep release 无官方
+  checksum，自算钉死）。两腿均 `rg-leg:` echo 实际采用腿（row F 腿可见性
+  条件）。首绿 run 43045532927 实证：apt 镜像 DNS 持续故障（3 重试仍挂）→
+  fallback 腿接管真跑，sandbox 纵切 ④ ripgrep 真查询 12.82ms PASS 非 skip。
+- **判据显式核**：D4×3 SGR 在场断言 PASS 非 skip；sandbox ①-④ 全 PASS。
+
+### 发布通道修形（publish.yml）
+
+- **node 20 → 24**：node 20 载 npm 10，不支持 OIDC trusted publishing
+  （须 npm ≥11.5.1）→ publish 步 ENEEDAUTH 每推 tag 必红（v0.1.96 触发实据）。
+  node 24 内载 npm 11；build 步 bun 独立零影响。
+- **发布主通道定谳（lock-face）**：OIDC workflow = 主通道（provenance
+  attestation）；本地 publish 仅在 workflow run 终态失败后启动（串行
+  fallback，禁并发）；幂等守 + concurrency group 既有面不变。
+- **tag 触发挂起（§7 f4 拦截面裁定）**：trusted publisher 未配置期间推
+  tag = OIDC 确定性红 run，与清零目标自破 → 本版发布走**本地通道**（串行
+  fallback「等 workflow 终态」步跳过）；tag 触发经 `gh workflow disable`
+  挂起（可逆）。**恢复条件 = npm 侧 trusted publisher 配置确认**（repo
+  admin 操作面，provider=GitHub Actions，repo=vincentlau2046/AtlasCode，
+  workflow=publish.yml）→ `gh workflow enable` + 主通道首用（下版起）。
+
 ## v0.1.96
 
 A1 requestShutdown 插入波：**成员自发退出请求全链**（lock-face
