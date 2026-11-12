@@ -46,3 +46,22 @@
 ## §5 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 D lock-face → 段 I → 段 G → 段 L → f4 收口。row F 全程。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-12，有修改通过）+ f4 修订吸收
+
+锚全实锚（Form A 注记原文 / teamDeletePrompt:22 文案漂移 / Gap B 销项）。**必改 2 + 建议 4 族全吸收**：
+
+1. **【必改·F1 冲突显式裁定】= f4 采审计推荐支 (a) 分档形**：Form A 门 ON/OFF 语义与「A 全程零写盘」standing 判据**全不变**；durable 面挂**独立 durable 档**（独立门/参数，OFF 为缺省）——本波交付 = schema 定形 + durable 基座 + durable 档激活探针判据，Form A e2e 面零变更；禁实现形默变（(b) 支废止 F1 = 设计稿 A/B 分档语义变更，不采，无须呈用户）。§2.1 措辞勘正：「atlascode 默认身份字节级不变」（config 域）与「Form A 零持久」（team 域 standing 断言）两格分列，禁混写。
+2. **【必改·预注册面并入】段 D 六点扩「六点+七条」**：设计稿 §4 schema 审计四条全入——(a) 落盘文件=不可信输入（resume schema 校验+字段白名单，禁 code 执行类字段直通 prompt）；(b) PID 启动时间/instance id 二次验证；(c) lockfile+原子写 tmp+rename 入 schema 面；(d) 跨进程消息来源标注+非用户批准防伪；+ durable inbox 上界/满载策略（满载 fail-visible 拒收告警，禁静默丢最旧）+ 门 OFF 残留态 fail-visible + ack 完整性口径（防 F7 durable 形回归）。
+3. **【吸收②】schema 演进 = 拒读 fail-visible 默认**（版本缺失/不匹配 = 显式错误面含版本与指引，禁静默降级半解析）；0.1.36 TeamFile 遗产**弃置定谳倾向**（旧文件作 foreign 拒读零迁移风险；归一须另立迁移判据，lock-face 论证后单列迁移格）。
+4. **【吸收③】resume relink 三判据**：半挂接标记 fail-visible（禁静默重建/禁静默当作活着）+ PID 二次验证前置 + kill→resume→标记可见判据格（设计稿支 3 现成格）。
+5. **【吸收④】durable inbox 单源 + tmux 禁第三副本**：schema 单源 shared 新模块，tmux 车道（teammateMailbox.ts 33KB）经 schema 单源消费写死。
+6. **【吸收⑤】崩溃窗口两定形**：原子写 tmp+rename（写中 kill reader 见旧态）+ tmp 孤儿清扫面 fail-visible + **stale lock 恢复策略必答**（.lock 残留观察池两现〔round-8/0.1.93b〕，durable 化放大锁面——proper-lockfile stale 检测参数/夺锁语义 lock-face 写死，不定则观察项升级生产缺陷）。
+7. **【吸收①】provider 槽交互**：durable 面读写点禁 product-conditional 旁路（产品差异经 ProductDefinition 字段消费，与 toolSubset/configDirName 同构）。
+
+段 D 终形 = 六点+七条+F1 分档裁定+②⑤定形。审计明示吸收后可发双信号。
+
+## §7 f4 双信号（2026-11-12）
+
+- **Main**：段 D lock-face 终形呈批（§6 全条目）→ 段 I 落码 → 段 G gate（前滚 standing 0.1.99 面 + 本波判据：durable 档激活探针格 + durable 往返/孤儿清理/schema 演进拒读/半挂接标记/崩溃窗口原子写+stale lock/tmux 同源/atlascode config 域恒等 + **Form A 零写盘 standing 断言不变**）+ canon 净域 → 段 L release 0.1.100。
+- **e2e**：判据面预告——**Form A 零写盘 standing 断言原样保留**（teamCreate Form A 门 ON 亦零写盘，本波零变更面）+ durable 档 OFF 缺省探针格 + 上述新格族随 lock-face 冻结时点启用 + standing 前滚 + canon 净域。
