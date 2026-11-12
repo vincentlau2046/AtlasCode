@@ -49,11 +49,16 @@ export type SharedInboxMessage = {
   source?: InboxMessageSource
 }
 
-/** 记录 schema（白名单 + 未知字段剥除；zod strip 缺省行为）。 */
+/**
+ * 记录 schema（白名单 + 未知字段剥除；zod strip 缺省行为）。
+ * timestamp 容忍缺省（default ''）：写面存在不携带 timestamp 的调用形
+ * （waitForNextPromptOrShutdown H 判据格实伤 2026-11-12；pre-S4 裸读面
+ * 无校验故容忍），必填判 = legacy in-flight 记录整体拒读 brick。
+ */
 export const inboxMessageSchema = z.object({
   from: z.string(),
   text: z.string(),
-  timestamp: z.string(),
+  timestamp: z.string().default(''),
   read: z.boolean(),
   color: z.string().optional(),
   summary: z.string().optional(),
