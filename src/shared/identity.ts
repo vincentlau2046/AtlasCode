@@ -20,6 +20,12 @@ import { dirname, join } from 'node:path'
 export const PRODUCT_NAME = 'AtlasCode'
 export const PACKAGE_NAME = '@atlasharness/atlascode'
 export const REPOSITORY_URL = 'https://github.com/vincentlau2046/AtlasCode'
+/**
+ * 仓库 slug（owner/repo 形，0.1.98 S1a 焊点① 派生自 REPOSITORY_URL 单一事实源
+ * ——coordinatorMode 提示词示例产品串注入消费；禁 engine 域字面回归，判据 =
+ * literal-inventory 域级 grep）。
+ */
+export const REPOSITORY_SLUG = REPOSITORY_URL.replace(/^https:\/\/[^/]+\//, '')
 
 /**
  * 品牌身份扩常量（BR-1，spec §6.2）——identity 单一事实源落地：

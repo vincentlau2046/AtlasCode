@@ -21,7 +21,7 @@
  *     生产消费点（coordinator/index.ts 门面 re-export 等待组合根 compose.ts，E-wave-end
  *     残留守⑦）→ 组合根消费（本版无 compose 装配，头注登记防「以为已全」）。
  */
-import { isEnvTruthy } from '../../shared'
+import { isEnvTruthy, REPOSITORY_SLUG } from '../../shared'
 import { AGENT_TOOL_NAME } from '../tools/agent/constants'
 import {
   ASYNC_AGENT_ALLOWED_TOOLS,
@@ -320,7 +320,7 @@ ${SEND_MESSAGE_TOOL_NAME}({ to: "xyz-456", message: "Two tests still failing at 
 
 1. Implementation: "Fix the null pointer in src/auth/validate.ts:42. The user field can be undefined when the session expires. Add a null check and return early with an appropriate error. Commit and report the hash."
 
-2. Precise git operation: "Create a new branch from main called 'fix/session-expiry'. Cherry-pick only commit abc123 onto it. Push and create a draft PR targeting main. Add vincentlau2046/AtlasCode as reviewer. Report the PR URL."
+2. Precise git operation: "Create a new branch from main called 'fix/session-expiry'. Cherry-pick only commit abc123 onto it. Push and create a draft PR targeting main. Add ${REPOSITORY_SLUG} as reviewer. Report the PR URL."
 
 3. Correction (continued worker, short): "The tests failed on the null check you added — validate.test.ts:58 expects 'Invalid session' but you changed it to 'Session expired'. Fix the assertion. Commit and report the hash."
 
