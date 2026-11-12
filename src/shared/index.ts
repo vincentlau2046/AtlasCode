@@ -20,6 +20,7 @@ export {
   PRODUCT_NAME,
   PACKAGE_NAME,
   REPOSITORY_URL,
+  REPOSITORY_SLUG, // 0.1.98 S1a 焊点①（owner/repo 派生，coordinatorMode 提示词消费）
   PRODUCT_FAMILY,
   PRODUCT_BRAND,
   FEEDBACK_CHANNEL,
@@ -202,3 +203,10 @@ export {
   isInProcessTeammate,
   createTeammateContext,
 } from "./teammateContext"
+
+// 0.1.98 S1a（lock-face ①④ 批复形）：ProductDefinition 运行时清单参数接口
+// （工具子集 / 配置目录维度）+ 不参数化清单冻结锚（本体头注）。
+export {
+  getActiveProductDefinition,
+  type ProductDefinition,
+} from "./ProductDefinition"

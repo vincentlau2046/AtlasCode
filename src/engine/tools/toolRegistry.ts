@@ -128,6 +128,12 @@ export interface ToolRegistryDeps {
   mcpTools?: readonly Tool[]
   /** Ascend 域 16 工具（域包挂载面注入；ASCEND_TOOLS 域门控，见下）。 */
   ascendTools?: readonly Tool[]
+  /**
+   * 产品工具子集（0.1.98 S1a：ProductDefinition.toolSubset 经 loopDeps 一次性
+   * 冻结注入；undefined = 全量装配恒等。过滤段 = Agent/base/ascend，mcpTools
+   * 动态面不参 subset——lock-face ④ (a)(c)：解析一次性 + isEnabled 同路禁旁路 env）。
+   */
+  productToolSubset?: readonly string[]
   /** 可注入 env（默认 process.env；单测用 fake env 不触真实环境）。 */
   env?: NodeJS.ProcessEnv
 }
@@ -159,6 +165,15 @@ export function getAllBaseTools(deps: ToolRegistryDeps = {}): Tools {
   // restricted 门控出：Ascend 工具 = CANN 工具链命令运行面（同剥离向）
   if (deps.ascendTools && isAscendToolsEnabled(env) && !restricted) {
     pool.push(...deps.ascendTools)
+  }
+  // 0.1.98 S1a：产品工具子集过滤（ProductDefinition.toolSubset，undefined =
+  // 全量恒等）。过滤段 = 静态装配面（Agent/base/ascend）；mcpTools 动态面不参
+  // subset（lock-face ④：defer/ToolSearch 消费 registry 产物，subset 外不可见）。
+  if (deps.productToolSubset) {
+    const subset = new Set(deps.productToolSubset)
+    const filtered = pool.filter((t) => subset.has(t.name))
+    pool.length = 0
+    pool.push(...filtered)
   }
   if (deps.mcpTools) pool.push(...deps.mcpTools)
   const assembled = uniqByName(pool)

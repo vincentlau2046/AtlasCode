@@ -35,6 +35,7 @@ import type {
   ToolPermissionContext,
   Tools,
 } from '../shared'
+import { getActiveProductDefinition } from '../shared'
 import type { MCPServerConnection } from './ports/mcpClient'
 import { getDomainMount } from './ports/domainMount'
 import { getTools, type ToolRegistryDeps } from './tools/toolRegistry'
@@ -209,6 +210,9 @@ export async function createAgentLoopDeps(
     // M3-S5：ascend 16 工具经 DomainPackage 挂载面注入（mount.ts 注册 →
     // getDomainMount()?.tools；未挂载 = AtlasOffice 形态 → undefined → 门控跳过）
     ascendTools: getDomainMount()?.tools,
+    // 0.1.98 S1a：产品工具子集（ProductDefinition.toolSubset，解析一次性——
+    // getActiveProductDefinition 返回模块级冻结引用；undefined = 全量恒等）
+    productToolSubset: getActiveProductDefinition().toolSubset,
   }
   // S-E3 修波（A 路 blocker，§8.66 delta ⑧ 回填）：teammate 工具池窗
   // 以全量 deps 重建（= 本构建器模型可见池，旧仓 options.tools 等价面；
