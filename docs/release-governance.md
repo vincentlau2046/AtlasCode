@@ -78,6 +78,8 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 
 **条款（机械形，禁裁量替代）**：段 L 前置硬条件 = **e2e GATE-PASS 报告路径在案 + f4 采认信号在案**，二者缺一禁执行 bump/publish/tag 全链；实施侧自证套件（四件套等）不构成 gate 本体，任何裁定先例不得引申为其替代。gate RED 已发布态 = 立即补丁版 + npm deprecate 标注，无豁免面。
 
+**附则（0.1.100 二次偏差后增，2026-11-12）**：build 必须于最终产品码提交后、**紧贴 publish 前**执行（禁 build 先行后落码再消费旧 dist）；SRI 留档必须记录当次 build 的 **tree commit**（「发布品≠gate 基」防三犯）。
+
 ## 双平台发布（用户 2026-11-12 裁定；f4 登记）
 
 **裁定原文意图**：后续 git 发布 = **GitHub + GitCode 双平台发布**——每次 release，master + tag 双平台同步推。
