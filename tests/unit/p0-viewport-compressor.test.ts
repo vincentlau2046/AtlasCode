@@ -90,7 +90,7 @@ describe('resolveRenderCap（plan → Messages 消费形）', () => {
     })
   })
 
-  test('compress → 预算 − 收缩量（不低于 0）+ 流式块放行 + 行级帽', () => {
+  test('compress → 预算 − 收缩量（下限钳 1，禁零渲染吸引子）+ 流式块放行 + 行级帽', () => {
     expect(
       resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24, messageTailCapRows: 12 }, 0),
     ).toEqual({
@@ -103,10 +103,19 @@ describe('resolveRenderCap（plan → Messages 消费形）', () => {
       resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24, messageTailCapRows: 12 }, 5)
         .capRows,
     ).toBe(7)
+  })
+
+  test('compress capRows 下限格（t108 RED 残面）：shrink 累加超预算 → 恒 ≥1', () => {
+    // shrink 累加越过预算：capRows 钳 1（可见性底线，与 fallback 支同语义）
     expect(
-      resolveRenderCap({ mode: 'compress', messageBudgetRows: 3, streamingCapRows: 24, messageTailCapRows: 3 }, 100)
+      resolveRenderCap({ mode: 'compress', messageBudgetRows: 3, streamingCapRows: 0, messageTailCapRows: 1 }, 100)
         .capRows,
-    ).toBe(0)
+    ).toBe(1)
+    // budget 0（流式吃满预算）也在底线：恒渲染最新 1 条
+    expect(
+      resolveRenderCap({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 24, messageTailCapRows: 1 }, 0)
+        .capRows,
+    ).toBe(1)
   })
 
   test('窄视口二次限高：流式帽让位于「输入框全保 + 视口本身」', () => {
@@ -209,6 +218,15 @@ describe('resolveShrinkDecision（gate-102 RED 修形：有界收缩环）', () 
   test('收缩量钳制 = 实测溢出（禁 +1 盲加；f4 冻结判据 1）', () => {
     expect(resolveShrinkDecision(7, 0)).toEqual({ action: 'shrink', shrinkRows: 7 })
     expect(resolveShrinkDecision(1200, 0)).toEqual({ action: 'shrink', shrinkRows: 1200 })
+  })
+
+  test('收缩触底边界（t108 修形指令 2）：overflow ≥ headroom → surrender，禁 capRows < 1 中间态', () => {
+    // headroom = budget − 已收缩量：预算 10 已收缩 4 → headroom 6
+    expect(resolveShrinkDecision(6, 0, 6)).toEqual({ action: 'surrender' })
+    expect(resolveShrinkDecision(7, 0, 6)).toEqual({ action: 'surrender' })
+    expect(resolveShrinkDecision(5, 0, 6)).toEqual({ action: 'shrink', shrinkRows: 5 })
+    // budget 0（capRows 已在底线）→ 任何溢出直接 surrender（安全形接管）
+    expect(resolveShrinkDecision(1, 0, 0)).toEqual({ action: 'surrender' })
   })
 
   test('溢出不可消除 → 有界重试耗尽 surrender（降级不崩溃格）', () => {

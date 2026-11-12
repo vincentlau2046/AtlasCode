@@ -110,16 +110,25 @@ export type ShrinkDecision =
   | { action: 'surrender' }
 
 /**
- * 收缩环单步决策（gate-102 RED 修形，f4 冻结判据 1+2）：
+ * 收缩环单步决策（gate-102 RED 修形，f4 冻结判据 1+2；t108 修形指令 2 增
+ * capHeadroom 触底边界）：
  * - 无溢出 → hold（episode 清零）；
  * - 溢出且 episode 内收缩次数未耗尽 → shrink，收缩量钳制 = 实测溢出行数
  *   （禁 +1 盲加；是否真消除由下一次测量验证，不在本步盲断）；
  * - episode 内收缩 ≥ MAX_SHRINK_ATTEMPTS 次仍溢出 → surrender（不可收敛
- *   降级：调用方落 fallback 保底形并停止 setState，禁无限自激）。
+ *   降级：调用方落 fallback 保底形并停止 setState，禁无限自激）；
+ * - overflow ≥ capHeadroom（= budget − 已收缩量）→ 本次收缩将使 capRows
+ *   跌破 1 → 直接 surrender（禁 capRows < 1 中间态；surrender 形已是
+ *   安全形，f4 t108 修形指令 2）。
  */
-export function resolveShrinkDecision(overflowRows: number, attempts: number): ShrinkDecision {
+export function resolveShrinkDecision(
+  overflowRows: number,
+  attempts: number,
+  capHeadroom = Number.POSITIVE_INFINITY,
+): ShrinkDecision {
   if (!(overflowRows > 0)) return { action: 'hold' }
   if (attempts >= MAX_SHRINK_ATTEMPTS) return { action: 'surrender' }
+  if (overflowRows >= capHeadroom) return { action: 'surrender' }
   return { action: 'shrink', shrinkRows: overflowRows }
 }
 
@@ -140,7 +149,10 @@ export type ViewportRenderCap = {
  * plan → 消费形（compress 支叠加测量环收缩量 shrinkRows——实测溢出
  * 收缩只作用于消息区预算，不回改 plan 本身）。fallback 形（重冻判据 2
  * 可见性底线格）：capRows 1 = 恒渲染最新 1 条消息（行级帽 tail），禁
- * 零渲染全盲；流式块抑制照旧。
+ * 零渲染全盲；流式块抑制照旧。compress 支同判据钳下限 ≥1（t108 RED
+ * 修形）：capRows 0 是稳定吸引子（空帧恰放下 → hold → 零渲染永驻，
+ * re-gate t108 G5d 1 绿 1 红的根因）——钳 1 后极端域（bottom 槽超视口
+ * 等）收缩不可消除 → 有界耗尽 → surrender 落 fallback，结构收敛。
  */
 export function resolveRenderCap(plan: ViewportPlan, shrinkRows = 0): ViewportRenderCap | undefined {
   switch (plan.mode) {
@@ -150,7 +162,9 @@ export function resolveRenderCap(plan: ViewportPlan, shrinkRows = 0): ViewportRe
       return { capRows: 1, streamingCapRows: 0, suppressStreaming: true, messageTailCapRows: plan.messageTailCapRows }
     case 'compress':
       return {
-        capRows: Math.max(0, plan.messageBudgetRows - Math.max(0, shrinkRows)),
+        // 下限钳 1（重冻判据 2「任何 plan 形态恒渲染最近回合内容」）：
+        // 禁零渲染吸引子（t108 RED 残面）。
+        capRows: Math.max(1, plan.messageBudgetRows - Math.max(0, shrinkRows)),
         streamingCapRows: plan.streamingCapRows,
         suppressStreaming: false,
         messageTailCapRows: plan.messageTailCapRows,

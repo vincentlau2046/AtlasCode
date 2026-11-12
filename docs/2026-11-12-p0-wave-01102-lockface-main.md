@@ -105,3 +105,17 @@
 - **措辞分域**：行级头折 = 「… N 行已折叠」（未渲染不称滚动区）；条数真滚动区 = 「N 条已入滚动区，↑ 翻看」保留。⚠️ t107 G5a 断言的流式行级提示文本随之变更（「行已入滚动区」→「行已折叠」），t108 判读账面同步。
 - **生效域**：viewportRenderCap 在场车道；全屏支 / degraded / 缺省 200 路径零行为变更。
 - **验证面**：单测 26/26（+4 新格：compress 收敛格〔1200 行单条 → 帽 24 < 预算 → hold 不 surrender〕/ surrender → 最近内容可见格〔重冻判据 2 直证〕/ fallbackTailCapRows 边界 / 窄视口 fallback 同形统一）；canon 5933 pass 0 fail（144.1s，Δ = +4 新格恰合）。
+
+## ⑧ t108 GATE-RED 修形——compress capRows 残面（f4 修形指令 2026-11-13 @be84fb10 后）
+
+- **定谳**：判据 2 重冻落了 fallback 面漏 compress 面——compress 支
+  `capRows = max(0, budget − shrinkRows)` 下限 0；shrinkRows 流式帧间累加
+  ≥ 预算 → capRows 0 → 空帧零渲染，且空帧恰放下 → hold → **零渲染稳定
+  吸引子**（re-gate t108 G5d 1 绿 1 红 race 面根因）。
+- **修形（f4 指令三项全落）**：① compress capRows 下限钳 1（与 fallback
+  支同底线语义，吸引子废止）；② 收缩触底边界 = resolveShrinkDecision 增
+  capHeadroom 参（= budget − 已收缩量），overflow ≥ headroom → 直接
+  surrender（禁 capRows < 1 中间态；surrender 形已是安全形）；③ unit
+  补格两面（compress capRows 下限格 + 收缩触底 surrender 边界格）。
+- **验证面**：t109 = G5 场景 ×3 连跑稳定性格（f4 采认 e2e 建议形）+ G6
+  回归 + standing 抽查 + canon。
