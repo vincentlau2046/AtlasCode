@@ -1,6 +1,6 @@
 {
   "name": "@atlasharness/atlascode",
-  "version": "0.1.101",
+  "version": "0.1.102",
   "description": "AtlasCode — Coding Agent for the domestic computing ecosystem (Ascend NPU + domestic LLM backends)",
   "homepage": "https://www.atlaswork.cn/",
   "bin": {
