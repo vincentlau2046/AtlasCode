@@ -247,7 +247,8 @@
       "tui/components/LogoV2/markDegrade.ts": 2,
       "tui/screens/Doctor.tsx": 1,
       "tui/tools/BashTool/destructiveCommandWarning.ts": 1,
-      "tui/services/mcp/oauthScopeGate.ts": 1
+      "tui/services/mcp/oauthScopeGate.ts": 1,
+      "engine/query/loopWatchdog.ts": 1
     },
     "packageNameLiteral": {
       "tui/utils/updateCheck.ts": 1,

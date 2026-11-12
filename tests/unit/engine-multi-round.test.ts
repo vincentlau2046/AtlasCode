@@ -234,9 +234,16 @@ describe('engine/query 多轮 loop（queryAgentLoop）fixture 回放', () => {
       { modelProvider: provider, role: 'small' as ModelRole, signal: controller.signal },
       { messages: [{ role: 'user', content: 'go' }], tools: [tool] },
     )
-    // tool.call 第 2 参 context.signal 必须是 loop deps 传入的同一 signal 实例
+    // tool.call 第 2 参 context.signal 必须传导 loop 的中止链。0.1.102 切片
+    // 2-B 起 deps.signal = watchdog 镜像 signal（实例身份换形，lock-face ①
+    // f4 批 2026-11-12）——中止语义恒等格：abort 外部 controller 必传导到
+    // tool.call 所见 signal（镜像不受 dispose 封锁）。
     expect(seen).toHaveLength(1)
-    expect(seen[0]).toBe(controller.signal)
+    const seenSignal = seen[0] as AbortSignal
+    expect(seenSignal).toBeInstanceOf(AbortSignal)
+    expect(seenSignal.aborted).toBe(false)
+    controller.abort(new Error('透传验真'))
+    expect(seenSignal.aborted).toBe(true)
   })
 })
 
