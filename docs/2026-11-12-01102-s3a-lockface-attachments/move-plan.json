@@ -1,0 +1,1446 @@
+{
+  "moveMap": {
+    "tui/constants/betas.ts": "src/kernel/constants/betas.ts",
+    "tui/constants/files.ts": "src/kernel/constants/files.ts",
+    "tui/constants/querySource.ts": "src/kernel/constants/querySource.ts",
+    "tui/constants/turnCompletionVerbs.ts": "src/kernel/constants/turnCompletionVerbs.ts",
+    "tui/constants/xml.ts": "src/kernel/constants/xml.ts",
+    "tui/entrypoints/sdk/coreSchemas.ts": "src/kernel/entrypoints/sdk/coreSchemas.ts",
+    "tui/services/mcp/mcpStringUtils.ts": "src/kernel/services/mcp/mcpStringUtils.ts",
+    "tui/services/mcp/normalization.ts": "src/kernel/services/mcp/normalization.ts",
+    "tui/services/oauth/types.ts": "src/kernel/services/oauth/types.ts",
+    "tui/tasks/InProcessTeammateTask/types.ts": "src/kernel/tasks/InProcessTeammateTask/types.ts",
+    "tui/tools/AgentTool/constants.ts": "src/kernel/tools/AgentTool/constants.ts",
+    "tui/tools/AskUserQuestionTool/prompt.ts": "src/kernel/tools/AskUserQuestionTool/prompt.ts",
+    "tui/tools/BashTool/toolName.ts": "src/kernel/tools/BashTool/toolName.ts",
+    "tui/tools/EnterPlanModeTool/constants.ts": "src/kernel/tools/EnterPlanModeTool/constants.ts",
+    "tui/tools/ExitPlanModeTool/constants.ts": "src/kernel/tools/ExitPlanModeTool/constants.ts",
+    "tui/tools/FileEditTool/constants.ts": "src/kernel/tools/FileEditTool/constants.ts",
+    "tui/tools/FileReadTool/prompt.ts": "src/kernel/tools/FileReadTool/prompt.ts",
+    "tui/tools/FileWriteTool/prompt.ts": "src/kernel/tools/FileWriteTool/prompt.ts",
+    "tui/tools/GlobTool/prompt.ts": "src/kernel/tools/GlobTool/prompt.ts",
+    "tui/tools/GrepTool/prompt.ts": "src/kernel/tools/GrepTool/prompt.ts",
+    "tui/tools/LSPTool/prompt.ts": "src/kernel/tools/LSPTool/prompt.ts",
+    "tui/tools/ListMcpResourcesTool/prompt.ts": "src/kernel/tools/ListMcpResourcesTool/prompt.ts",
+    "tui/tools/NotebookEditTool/constants.ts": "src/kernel/tools/NotebookEditTool/constants.ts",
+    "tui/tools/PowerShellTool/toolName.ts": "src/kernel/tools/PowerShellTool/toolName.ts",
+    "tui/tools/REPLTool/constants.ts": "src/kernel/tools/REPLTool/constants.ts",
+    "tui/tools/SendMessageTool/constants.ts": "src/kernel/tools/SendMessageTool/constants.ts",
+    "tui/tools/TaskCreateTool/constants.ts": "src/kernel/tools/TaskCreateTool/constants.ts",
+    "tui/tools/TaskGetTool/constants.ts": "src/kernel/tools/TaskGetTool/constants.ts",
+    "tui/tools/TaskListTool/constants.ts": "src/kernel/tools/TaskListTool/constants.ts",
+    "tui/tools/TaskOutputTool/constants.ts": "src/kernel/tools/TaskOutputTool/constants.ts",
+    "tui/tools/TaskStopTool/prompt.ts": "src/kernel/tools/TaskStopTool/prompt.ts",
+    "tui/tools/TaskUpdateTool/constants.ts": "src/kernel/tools/TaskUpdateTool/constants.ts",
+    "tui/tools/TeamCreateTool/constants.ts": "src/kernel/tools/TeamCreateTool/constants.ts",
+    "tui/tools/TeamDeleteTool/constants.ts": "src/kernel/tools/TeamDeleteTool/constants.ts",
+    "tui/tools/TodoWriteTool/constants.ts": "src/kernel/tools/TodoWriteTool/constants.ts",
+    "tui/types/all-local-types.ts": "src/kernel/types/all-local-types.ts",
+    "tui/types/atlas.ts": "src/kernel/types/atlas.ts",
+    "tui/types/ids.ts": "src/kernel/types/ids.ts",
+    "tui/types/message.ts": "src/kernel/types/message.ts",
+    "tui/types/permissions.ts": "src/kernel/types/permissions.ts",
+    "tui/types/tools.ts": "src/kernel/types/tools.ts",
+    "tui/utils/abortController.ts": "src/kernel/utils/abortController.ts",
+    "tui/utils/agentId.ts": "src/kernel/utils/agentId.ts",
+    "tui/utils/array.ts": "src/kernel/utils/array.ts",
+    "tui/utils/atlasDev.ts": "src/kernel/utils/atlasDev.ts",
+    "tui/utils/authPortable.ts": "src/kernel/utils/authPortable.ts",
+    "tui/utils/awsAuthStatusManager.ts": "src/kernel/utils/awsAuthStatusManager.ts",
+    "tui/utils/bash/ast.ts": "src/kernel/shell/bash/ast.ts",
+    "tui/utils/bash/bashParser.ts": "src/kernel/shell/bash/bashParser.ts",
+    "tui/utils/bash/heredoc.ts": "src/kernel/shell/bash/heredoc.ts",
+    "tui/utils/bash/parser.ts": "src/kernel/shell/bash/parser.ts",
+    "tui/utils/bash/specs/alias.ts": "src/kernel/shell/bash/specs/alias.ts",
+    "tui/utils/bash/specs/index.ts": "src/kernel/shell/bash/specs/index.ts",
+    "tui/utils/bash/specs/nohup.ts": "src/kernel/shell/bash/specs/nohup.ts",
+    "tui/utils/bash/specs/pyright.ts": "src/kernel/shell/bash/specs/pyright.ts",
+    "tui/utils/bash/specs/sleep.ts": "src/kernel/shell/bash/specs/sleep.ts",
+    "tui/utils/bash/specs/srun.ts": "src/kernel/shell/bash/specs/srun.ts",
+    "tui/utils/bash/specs/time.ts": "src/kernel/shell/bash/specs/time.ts",
+    "tui/utils/bash/specs/timeout.ts": "src/kernel/shell/bash/specs/timeout.ts",
+    "tui/utils/bash/treeSitterAnalysis.ts": "src/kernel/shell/bash/treeSitterAnalysis.ts",
+    "tui/utils/bufferedWriter.ts": "src/kernel/utils/bufferedWriter.ts",
+    "tui/utils/bundledMode.ts": "src/kernel/utils/bundledMode.ts",
+    "tui/utils/classifierApprovals.ts": "src/kernel/utils/classifierApprovals.ts",
+    "tui/utils/cleanupRegistry.ts": "src/kernel/utils/cleanupRegistry.ts",
+    "tui/utils/combinedAbortSignal.ts": "src/kernel/utils/combinedAbortSignal.ts",
+    "tui/utils/configDir.ts": "src/kernel/utils/configDir.ts",
+    "tui/utils/context.ts": "src/kernel/utils/context.ts",
+    "tui/utils/cwd.ts": "src/kernel/utils/cwd.ts",
+    "tui/utils/debug.ts": "src/kernel/utils/debug.ts",
+    "tui/utils/debugFilter.ts": "src/kernel/utils/debugFilter.ts",
+    "tui/utils/embeddedTools.ts": "src/kernel/utils/embeddedTools.ts",
+    "tui/utils/envUtils.ts": "src/kernel/utils/envUtils.ts",
+    "tui/utils/errors.ts": "src/kernel/utils/errors.ts",
+    "tui/utils/fsOperations.ts": "src/kernel/utils/fsOperations.ts",
+    "tui/utils/git/gitConfigParser.ts": "src/kernel/git/gitConfigParser.ts",
+    "tui/utils/hash.ts": "src/kernel/utils/hash.ts",
+    "tui/utils/hooks/hookEvents.ts": "src/kernel/agenthooks/hookEvents.ts",
+    "tui/utils/hooks/hookFailClosed.ts": "src/kernel/agenthooks/hookFailClosed.ts",
+    "tui/utils/hooks/hookInputDepth.ts": "src/kernel/agenthooks/hookInputDepth.ts",
+    "tui/utils/hooks/hookInputMaterialize.ts": "src/kernel/agenthooks/hookInputMaterialize.ts",
+    "tui/utils/hooks/hookReentrancy.ts": "src/kernel/agenthooks/hookReentrancy.ts",
+    "tui/utils/hooks/ssrfGuard.ts": "src/kernel/agenthooks/ssrfGuard.ts",
+    "tui/utils/lazySchema.ts": "src/kernel/utils/lazySchema.ts",
+    "tui/utils/lockfile.ts": "src/kernel/utils/lockfile.ts",
+    "tui/utils/model/aliases.ts": "src/kernel/model/aliases.ts",
+    "tui/utils/model/contextWindowUpgradeCheck.ts": "src/kernel/model/contextWindowUpgradeCheck.ts",
+    "tui/utils/model/providers.ts": "src/kernel/model/providers.ts",
+    "tui/utils/nativeInstaller/download.ts": "src/kernel/nativeInstaller/download.ts",
+    "tui/utils/pdfUtils.ts": "src/kernel/utils/pdfUtils.ts",
+    "tui/utils/permissions/PermissionResult.ts": "src/kernel/permissions/PermissionResult.ts",
+    "tui/utils/permissions/PermissionRule.ts": "src/kernel/permissions/PermissionRule.ts",
+    "tui/utils/permissions/autoModeState.ts": "src/kernel/permissions/autoModeState.ts",
+    "tui/utils/permissions/bashClassifier.ts": "src/kernel/permissions/bashClassifier.ts",
+    "tui/utils/permissions/classifierShared.ts": "src/kernel/permissions/classifierShared.ts",
+    "tui/utils/permissions/dangerousPatterns.ts": "src/kernel/permissions/dangerousPatterns.ts",
+    "tui/utils/permissions/dangerousShellPrefix.ts": "src/kernel/permissions/dangerousShellPrefix.ts",
+    "tui/utils/permissions/denialTracking.ts": "src/kernel/permissions/denialTracking.ts",
+    "tui/utils/permissions/permissionRuleParser.ts": "src/kernel/permissions/permissionRuleParser.ts",
+    "tui/utils/permissions/shellRuleMatching.ts": "src/kernel/permissions/shellRuleMatching.ts",
+    "tui/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt": "src/kernel/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt",
+    "tui/utils/permissions/yolo-classifier-prompts/permissions_external.txt": "src/kernel/utils/permissions/yolo-classifier-prompts/permissions_external.txt",
+    "tui/utils/postCommitAttribution.ts": "src/kernel/utils/postCommitAttribution.ts",
+    "tui/utils/process.ts": "src/kernel/utils/process.ts",
+    "tui/utils/sdkEventQueue.ts": "src/kernel/utils/sdkEventQueue.ts",
+    "tui/utils/secureStorage/macOsKeychainHelpers.ts": "src/kernel/utils/secureStorage/macOsKeychainHelpers.ts",
+    "tui/utils/secureStorage/types.ts": "src/kernel/utils/secureStorage/types.ts",
+    "tui/utils/semver.ts": "src/kernel/utils/semver.ts",
+    "tui/utils/sessionEnvVars.ts": "src/kernel/utils/sessionEnvVars.ts",
+    "tui/utils/settings/constants.ts": "src/kernel/settings/constants.ts",
+    "tui/utils/settings/internalWrites.ts": "src/kernel/settings/internalWrites.ts",
+    "tui/utils/settings/mdm/constants.ts": "src/kernel/settings/mdm/constants.ts",
+    "tui/utils/settings/mdm/rawRead.ts": "src/kernel/settings/mdm/rawRead.ts",
+    "tui/utils/settings/permissionValidation.ts": "src/kernel/settings/permissionValidation.ts",
+    "tui/utils/settings/schemaOutput.ts": "src/kernel/settings/schemaOutput.ts",
+    "tui/utils/settings/settingsCache.ts": "src/kernel/settings/settingsCache.ts",
+    "tui/utils/settings/toolValidationConfig.ts": "src/kernel/settings/toolValidationConfig.ts",
+    "tui/utils/settings/types.ts": "src/kernel/settings/types.ts",
+    "tui/utils/settings/validation.ts": "src/kernel/settings/validation.ts",
+    "tui/utils/settings/validationTips.ts": "src/kernel/settings/validationTips.ts",
+    "tui/utils/shell/powershellProvider.ts": "src/kernel/shell/provider/powershellProvider.ts",
+    "tui/utils/shell/shellProvider.ts": "src/kernel/shell/provider/shellProvider.ts",
+    "tui/utils/shell/specPrefix.ts": "src/kernel/shell/provider/specPrefix.ts",
+    "tui/utils/signal.ts": "src/kernel/utils/signal.ts",
+    "tui/utils/sleep.ts": "src/kernel/utils/sleep.ts",
+    "tui/utils/slowOperations.ts": "src/kernel/utils/slowOperations.ts",
+    "tui/utils/stringUtils.ts": "src/kernel/utils/stringUtils.ts",
+    "tui/utils/subprocessEnv.ts": "src/kernel/utils/subprocessEnv.ts",
+    "tui/utils/systemPromptType.ts": "src/kernel/utils/systemPromptType.ts",
+    "tui/utils/telemetry/events.ts": "src/kernel/telemetry/events.ts",
+    "tui/utils/telemetry/perfettoTracing.ts": "src/kernel/telemetry/perfettoTracing.ts",
+    "tui/utils/toolSchemaCache.ts": "src/kernel/utils/toolSchemaCache.ts",
+    "tui/utils/xdg.ts": "src/kernel/utils/xdg.ts",
+    "tui/utils/zodToJsonSchema.ts": "src/kernel/utils/zodToJsonSchema.ts"
+  },
+  "exited": {
+    "tui/constants/spinnerVerbs.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../utils/settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/argumentSubstitution.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./bash/shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/ParsedCommand.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./commands.js",
+          "resolved": "tui/utils/bash/commands.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/ShellSnapshot.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../file.js",
+          "resolved": "tui/utils/file.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "src/tui/sandboxCompat",
+          "resolved": "tui/sandboxCompat.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/bashPipeCommand.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/commands.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../shell/prefix.js",
+          "resolved": "tui/utils/shell/prefix.ts"
+        },
+        {
+          "spec": "./shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/prefix.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./commands.js",
+          "resolved": "tui/utils/bash/commands.ts"
+        },
+        {
+          "spec": "./registry.js",
+          "resolved": "tui/utils/bash/registry.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/registry.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../memoize.js",
+          "resolved": "tui/utils/memoize.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/shellCompletion.ts": {
+      "reason": "①壳耦合留壳",
+      "edges": [
+        {
+          "spec": "../localInstaller.js",
+          "resolved": "tui/utils/localInstaller.ts"
+        },
+        {
+          "spec": "../Shell.js",
+          "resolved": "tui/utils/Shell.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/shellPrefix.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/shellQuote.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        }
+      ]
+    },
+    "tui/utils/bash/shellQuoting.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        }
+      ]
+    },
+    "tui/utils/betas.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./model/model.js",
+          "resolved": "tui/utils/model/model.ts"
+        },
+        {
+          "spec": "./model/modelAllowlist.js",
+          "resolved": "tui/utils/model/modelAllowlist.ts"
+        },
+        {
+          "spec": "./settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/effort.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./thinking.js",
+          "resolved": "tui/utils/thinking.ts"
+        },
+        {
+          "spec": "./settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/git.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./diagLogs.js",
+          "resolved": "tui/utils/diagLogs.ts"
+        },
+        {
+          "spec": "./execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "./git/gitFilesystem.js",
+          "resolved": "tui/utils/git/gitFilesystem.ts"
+        },
+        {
+          "spec": "./log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "./memoize.js",
+          "resolved": "tui/utils/memoize.ts"
+        },
+        {
+          "spec": "./plugins/gitAvailability.js",
+          "resolved": "tui/utils/plugins/gitAvailability.ts"
+        },
+        {
+          "spec": "./which.js",
+          "resolved": "tui/utils/which.ts"
+        },
+        {
+          "spec": "./detectRepository.js",
+          "resolved": "tui/utils/detectRepository.ts"
+        }
+      ]
+    },
+    "tui/utils/git/gitFilesystem.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        }
+      ]
+    },
+    "tui/utils/git/gitignore.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        }
+      ]
+    },
+    "tui/utils/gitDiff.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./detectRepository.js",
+          "resolved": "tui/utils/detectRepository.ts"
+        },
+        {
+          "spec": "./execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "./file.js",
+          "resolved": "tui/utils/file.ts"
+        },
+        {
+          "spec": "./git.js",
+          "resolved": "tui/utils/git.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/AsyncHookRegistry.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../sessionEnvironment.js",
+          "resolved": "tui/utils/sessionEnvironment.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/apiQueryHookHelper.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../utils/log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/execAgentHook.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "src/tui/loopEvents",
+          "resolved": "tui/loopEvents.ts"
+        },
+        {
+          "spec": "src/tui/agentLoopDeps",
+          "resolved": "tui/agentLoopDeps.ts"
+        },
+        {
+          "spec": "../../tools/SyntheticOutputTool/SyntheticOutputTool.js",
+          "resolved": "tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts"
+        },
+        {
+          "spec": "../../tools.js",
+          "resolved": "tui/tools.ts"
+        },
+        {
+          "spec": "../attachments.js",
+          "resolved": "tui/utils/attachments.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        },
+        {
+          "spec": "../permissions/permissions.js",
+          "resolved": "tui/utils/permissions/permissions.ts"
+        },
+        {
+          "spec": "../sessionStorage.js",
+          "resolved": "tui/utils/sessionStorage.ts"
+        },
+        {
+          "spec": "./sessionHooks.js",
+          "resolved": "tui/utils/hooks/sessionHooks.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/execHttpHook.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "src/tui/sandboxCompat",
+          "resolved": "tui/sandboxCompat.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/execPromptHook.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../attachments.js",
+          "resolved": "tui/utils/attachments.ts"
+        },
+        {
+          "spec": "../json.js",
+          "resolved": "tui/utils/json.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/fileChangedWatcher.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../hooks.js",
+          "resolved": "tui/utils/hooks.ts"
+        },
+        {
+          "spec": "../sessionEnvironment.js",
+          "resolved": "tui/utils/sessionEnvironment.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/hookHelpers.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../tools/SyntheticOutputTool/SyntheticOutputTool.js",
+          "resolved": "tui/tools/SyntheticOutputTool/SyntheticOutputTool.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        },
+        {
+          "spec": "./sessionHooks.js",
+          "resolved": "tui/utils/hooks/sessionHooks.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/hooksConfigSnapshot.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/postSamplingHooks.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        }
+      ]
+    },
+    "tui/utils/hooks/skillImprovement.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../../Tool.js",
+          "resolved": "tui/Tool.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        }
+      ]
+    },
+    "tui/utils/model/agent.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./model.js",
+          "resolved": "tui/utils/model/model.ts"
+        }
+      ]
+    },
+    "tui/utils/model/maxOutputTokens.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../envValidation.js",
+          "resolved": "tui/utils/envValidation.ts"
+        },
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        }
+      ]
+    },
+    "tui/utils/model/model.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        },
+        {
+          "spec": "./modelAllowlist.js",
+          "resolved": "tui/utils/model/modelAllowlist.ts"
+        }
+      ]
+    },
+    "tui/utils/model/modelAllowlist.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/model/modelOptions.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        },
+        {
+          "spec": "../config.js",
+          "resolved": "tui/utils/config.ts"
+        }
+      ]
+    },
+    "tui/utils/model/validateModel.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./modelAllowlist.js",
+          "resolved": "tui/utils/model/modelAllowlist.ts"
+        },
+        {
+          "spec": "../sideQuery.js",
+          "resolved": "tui/utils/sideQuery.ts"
+        }
+      ]
+    },
+    "tui/utils/nativeInstaller/index.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./installer.js",
+          "resolved": "tui/utils/nativeInstaller/installer.ts"
+        }
+      ]
+    },
+    "tui/utils/nativeInstaller/installer.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../autoUpdater.js",
+          "resolved": "tui/utils/autoUpdater.ts"
+        },
+        {
+          "spec": "../config.js",
+          "resolved": "tui/utils/config.ts"
+        },
+        {
+          "spec": "../doctorDiagnostic.js",
+          "resolved": "tui/utils/doctorDiagnostic.ts"
+        },
+        {
+          "spec": "../env.js",
+          "resolved": "tui/utils/env.ts"
+        },
+        {
+          "spec": "../envDynamic.js",
+          "resolved": "tui/utils/envDynamic.ts"
+        },
+        {
+          "spec": "../execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "../localInstaller.js",
+          "resolved": "tui/utils/localInstaller.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../shellConfig.js",
+          "resolved": "tui/utils/shellConfig.ts"
+        },
+        {
+          "spec": "./pidLock.js",
+          "resolved": "tui/utils/nativeInstaller/pidLock.ts"
+        }
+      ]
+    },
+    "tui/utils/nativeInstaller/packageManagers.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        }
+      ]
+    },
+    "tui/utils/nativeInstaller/pidLock.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../genericProcessUtils.js",
+          "resolved": "tui/utils/genericProcessUtils.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/PermissionMode.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../constants/figures.js",
+          "resolved": "tui/constants/figures.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/PermissionPromptToolResultSchema.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./PermissionUpdate.js",
+          "resolved": "tui/utils/permissions/PermissionUpdate.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/PermissionUpdate.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./filesystem.js",
+          "resolved": "tui/utils/permissions/filesystem.ts"
+        },
+        {
+          "spec": "./permissionsLoader.js",
+          "resolved": "tui/utils/permissions/permissionsLoader.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/PermissionUpdateSchema.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./PermissionMode.js",
+          "resolved": "tui/utils/permissions/PermissionMode.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/autoModePermissionOption.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./permissionSetup.js",
+          "resolved": "tui/utils/permissions/permissionSetup.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/classifierDecision.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../tools/ToolSearchTool/prompt.js",
+          "resolved": "tui/tools/ToolSearchTool/prompt.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/filesystem.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../path.js",
+          "resolved": "tui/utils/path.ts"
+        },
+        {
+          "spec": "../plans.js",
+          "resolved": "tui/utils/plans.ts"
+        },
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "../sessionStorage.js",
+          "resolved": "tui/utils/sessionStorage.ts"
+        },
+        {
+          "spec": "../toolResultStorage.js",
+          "resolved": "tui/utils/toolResultStorage.ts"
+        },
+        {
+          "spec": "../windowsPaths.js",
+          "resolved": "tui/utils/windowsPaths.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/getNextPermissionMode.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./permissionSetup.js",
+          "resolved": "tui/utils/permissions/permissionSetup.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/pathValidation.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../utils/platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "../path.js",
+          "resolved": "tui/utils/path.ts"
+        },
+        {
+          "spec": "src/tui/sandboxCompat",
+          "resolved": "tui/sandboxCompat.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/permissionExplainer.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/metadata.js",
+          "resolved": "tui/services/analytics/metadata.ts"
+        },
+        {
+          "spec": "../config.js",
+          "resolved": "tui/utils/config.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../sideQuery.js",
+          "resolved": "tui/utils/sideQuery.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/permissionSetup.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../commands/add-dir/validation.js",
+          "resolved": "tui/commands/add-dir/validation.ts"
+        },
+        {
+          "spec": "../../tools.js",
+          "resolved": "tui/tools.ts"
+        },
+        {
+          "spec": "../gracefulShutdown.js",
+          "resolved": "tui/utils/gracefulShutdown.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/permissions.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../tools/BashTool/shouldUseSandbox.js",
+          "resolved": "tui/tools/BashTool/shouldUseSandbox.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "src/tui/sandboxCompat",
+          "resolved": "tui/sandboxCompat.ts"
+        },
+        {
+          "spec": "./PermissionMode.js",
+          "resolved": "tui/utils/permissions/PermissionMode.ts"
+        },
+        {
+          "spec": "./PermissionUpdate.js",
+          "resolved": "tui/utils/permissions/PermissionUpdate.ts"
+        },
+        {
+          "spec": "./permissionsLoader.js",
+          "resolved": "tui/utils/permissions/permissionsLoader.ts"
+        },
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../hooks.js",
+          "resolved": "tui/utils/hooks.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        },
+        {
+          "spec": "./yoloClassifier.js",
+          "resolved": "tui/utils/permissions/yoloClassifier.ts"
+        },
+        {
+          "spec": "./classifierDecision.js",
+          "resolved": "tui/utils/permissions/classifierDecision.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/permissionsLoader.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../fileRead.js",
+          "resolved": "tui/utils/fileRead.ts"
+        },
+        {
+          "spec": "../json.js",
+          "resolved": "tui/utils/json.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/sessionPermissionRules.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../sessionStorage.js",
+          "resolved": "tui/utils/sessionStorage.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/shadowedRuleDetection.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./permissions.js",
+          "resolved": "tui/utils/permissions/permissions.ts"
+        }
+      ]
+    },
+    "tui/utils/permissions/yoloClassifier.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../../services/api/metadata.js",
+          "resolved": "tui/services/api/metadata.ts"
+        },
+        {
+          "spec": "../../utils/apiErrors.js",
+          "resolved": "tui/utils/apiErrors.ts"
+        },
+        {
+          "spec": "../../services/api/withRetry.js",
+          "resolved": "tui/services/api/withRetry.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        },
+        {
+          "spec": "../sideQuery.js",
+          "resolved": "tui/utils/sideQuery.ts"
+        },
+        {
+          "spec": "../tokens.js",
+          "resolved": "tui/utils/tokens.ts"
+        },
+        {
+          "spec": "./filesystem.js",
+          "resolved": "tui/utils/permissions/filesystem.ts"
+        }
+      ]
+    },
+    "tui/utils/powershell/dangerousCmdlets.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./parser.js",
+          "resolved": "tui/utils/powershell/parser.ts"
+        }
+      ]
+    },
+    "tui/utils/powershell/parser.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../memoize.js",
+          "resolved": "tui/utils/memoize.ts"
+        },
+        {
+          "spec": "../shell/powershellDetection.js",
+          "resolved": "tui/utils/shell/powershellDetection.ts"
+        }
+      ]
+    },
+    "tui/utils/powershell/staticPrefix.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../bash/registry.js",
+          "resolved": "tui/utils/bash/registry.ts"
+        },
+        {
+          "spec": "./dangerousCmdlets.js",
+          "resolved": "tui/utils/powershell/dangerousCmdlets.ts"
+        },
+        {
+          "spec": "./parser.js",
+          "resolved": "tui/utils/powershell/parser.ts"
+        }
+      ]
+    },
+    "tui/utils/proxy.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./caCerts.js",
+          "resolved": "tui/utils/caCerts.ts"
+        },
+        {
+          "spec": "./mtls.js",
+          "resolved": "tui/utils/mtls.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/allErrors.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/mcp/config.js",
+          "resolved": "tui/services/mcp/config.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/applySettingsChange.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../permissions/permissionSetup.js",
+          "resolved": "tui/utils/permissions/permissionSetup.ts"
+        },
+        {
+          "spec": "../permissions/permissions.js",
+          "resolved": "tui/utils/permissions/permissions.ts"
+        },
+        {
+          "spec": "../permissions/permissionsLoader.js",
+          "resolved": "tui/utils/permissions/permissionsLoader.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/changeDetector.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../hooks.js",
+          "resolved": "tui/utils/hooks.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/managedPath.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/mdm/settings.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../diagLogs.js",
+          "resolved": "tui/utils/diagLogs.ts"
+        },
+        {
+          "spec": "../../fileRead.js",
+          "resolved": "tui/utils/fileRead.ts"
+        },
+        {
+          "spec": "../../json.js",
+          "resolved": "tui/utils/json.ts"
+        },
+        {
+          "spec": "../../startupProfiler.js",
+          "resolved": "tui/utils/startupProfiler.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/pluginOnlyPolicy.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/settings.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../diagLogs.js",
+          "resolved": "tui/utils/diagLogs.ts"
+        },
+        {
+          "spec": "../file.js",
+          "resolved": "tui/utils/file.ts"
+        },
+        {
+          "spec": "../fileRead.js",
+          "resolved": "tui/utils/fileRead.ts"
+        },
+        {
+          "spec": "../json.js",
+          "resolved": "tui/utils/json.ts"
+        },
+        {
+          "spec": "../log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "../startupProfiler.js",
+          "resolved": "tui/utils/startupProfiler.ts"
+        },
+        {
+          "spec": "./managedPath.js",
+          "resolved": "tui/utils/settings/managedPath.ts"
+        },
+        {
+          "spec": "./mdm/settings.js",
+          "resolved": "tui/utils/settings/mdm/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/settings/validateEditTool.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../permissions/filesystem.js",
+          "resolved": "tui/utils/permissions/filesystem.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/bashProvider.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../bash/ShellSnapshot.js",
+          "resolved": "tui/utils/bash/ShellSnapshot.ts"
+        },
+        {
+          "spec": "../bash/shellQuote.js",
+          "resolved": "tui/utils/bash/shellQuote.ts"
+        },
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "../sessionEnvironment.js",
+          "resolved": "tui/utils/sessionEnvironment.ts"
+        },
+        {
+          "spec": "../tmuxSocket.js",
+          "resolved": "tui/utils/tmuxSocket.ts"
+        },
+        {
+          "spec": "../windowsPaths.js",
+          "resolved": "tui/utils/windowsPaths.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/outputLimits.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../envValidation.js",
+          "resolved": "tui/utils/envValidation.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/powershellDetection.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "../which.js",
+          "resolved": "tui/utils/which.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/prefix.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../memoize.js",
+          "resolved": "tui/utils/memoize.ts"
+        },
+        {
+          "spec": "../messages.js",
+          "resolved": "tui/utils/messages.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/readOnlyCommandValidation.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/resolveDefaultShell.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    },
+    "tui/utils/shell/shellToolUtils.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../platform.js",
+          "resolved": "tui/utils/platform.ts"
+        }
+      ]
+    },
+    "tui/utils/teammateMailbox.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./log.js",
+          "resolved": "tui/utils/log.ts"
+        },
+        {
+          "spec": "./swarm/constants.js",
+          "resolved": "tui/utils/swarm/constants.ts"
+        },
+        {
+          "spec": "./tasks.js",
+          "resolved": "tui/utils/tasks.ts"
+        }
+      ]
+    },
+    "tui/utils/telemetry/betaSessionTracing.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../../services/analytics/metadata.js",
+          "resolved": "tui/services/analytics/metadata.ts"
+        }
+      ]
+    },
+    "tui/utils/telemetry/sessionTracing.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../services/analytics/growthbook.js",
+          "resolved": "tui/services/analytics/growthbook.ts"
+        },
+        {
+          "spec": "../telemetryAttributes.js",
+          "resolved": "tui/utils/telemetryAttributes.ts"
+        }
+      ]
+    },
+    "tui/utils/telemetry/skillLoadedEvent.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "../../commands.js",
+          "resolved": "tui/commands.ts"
+        },
+        {
+          "spec": "../../tools/SkillTool/prompt.js",
+          "resolved": "tui/tools/SkillTool/prompt.ts"
+        }
+      ]
+    },
+    "tui/utils/worktree.ts": {
+      "reason": "③S3b挂账留壳",
+      "edges": [
+        {
+          "spec": "./config.js",
+          "resolved": "tui/utils/config.ts"
+        },
+        {
+          "spec": "./execFileNoThrow.js",
+          "resolved": "tui/utils/execFileNoThrow.ts"
+        },
+        {
+          "spec": "./git/gitFilesystem.js",
+          "resolved": "tui/utils/git/gitFilesystem.ts"
+        },
+        {
+          "spec": "./git.js",
+          "resolved": "tui/utils/git.ts"
+        },
+        {
+          "spec": "./hooks.js",
+          "resolved": "tui/utils/hooks.ts"
+        },
+        {
+          "spec": "./path.js",
+          "resolved": "tui/utils/path.ts"
+        },
+        {
+          "spec": "./platform.js",
+          "resolved": "tui/utils/platform.ts"
+        },
+        {
+          "spec": "./settings/settings.js",
+          "resolved": "tui/utils/settings/settings.ts"
+        }
+      ]
+    }
+  },
+  "typeEdgesPending": [
+    {
+      "from": "tui/utils/bash/specs/alias.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/sleep.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/timeout.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/index.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/srun.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/pyright.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/nohup.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/bash/specs/time.ts",
+      "spec": "../registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/permissions/shellRuleMatching.ts",
+      "spec": "./PermissionUpdateSchema.js",
+      "resolved": "tui/utils/permissions/PermissionUpdateSchema.ts"
+    },
+    {
+      "from": "tui/utils/shell/specPrefix.ts",
+      "spec": "../bash/registry.js",
+      "resolved": "tui/utils/bash/registry.ts"
+    },
+    {
+      "from": "tui/utils/nativeInstaller/download.ts",
+      "spec": "../config.js",
+      "resolved": "tui/utils/config.ts"
+    }
+  ],
+  "abClosure": {
+    "tui/entrypoints/sdk/coreSchemas.ts": [],
+    "tui/services/mcp/mcpStringUtils.ts": [
+      "tui/services/mcp/normalization.ts"
+    ],
+    "tui/tasks/InProcessTeammateTask/types.ts": [],
+    "tui/tools/AskUserQuestionTool/prompt.ts": [],
+    "tui/tools/FileReadTool/prompt.ts": [
+      "tui/utils/pdfUtils.ts"
+    ],
+    "tui/tools/GrepTool/prompt.ts": [],
+    "tui/tools/REPLTool/constants.ts": [
+      "tui/tools/FileEditTool/constants.ts",
+      "tui/tools/FileWriteTool/prompt.ts",
+      "tui/tools/NotebookEditTool/constants.ts"
+    ],
+    "tui/types/message.ts": [],
+    "tui/types/permissions.ts": [],
+    "tui/utils/awsAuthStatusManager.ts": [],
+    "tui/utils/betas.ts": [
+      "tui/constants/betas.ts"
+    ],
+    "tui/utils/classifierApprovals.ts": [],
+    "tui/utils/combinedAbortSignal.ts": [],
+    "tui/utils/debug.ts": [
+      "tui/utils/atlasDev.ts",
+      "tui/utils/bufferedWriter.ts",
+      "tui/utils/debugFilter.ts",
+      "tui/utils/process.ts"
+    ],
+    "tui/utils/embeddedTools.ts": [],
+    "tui/utils/envUtils.ts": [],
+    "tui/utils/errors.ts": [],
+    "tui/utils/fsOperations.ts": [],
+    "tui/utils/sdkEventQueue.ts": [
+      "tui/types/tools.ts"
+    ],
+    "tui/utils/secureStorage/macOsKeychainHelpers.ts": [
+      "tui/utils/secureStorage/types.ts"
+    ],
+    "tui/utils/slowOperations.ts": [
+      "tui/utils/atlasDev.ts"
+    ],
+    "tui/utils/subprocessEnv.ts": [],
+    "tui/utils/toolSchemaCache.ts": []
+  },
+  "stats": {
+    "seedsTotal": 127,
+    "seedsExited": 75,
+    "seedsMoved": 52,
+    "movedFiles": 133,
+    "movedLines": 21213,
+    "abNewTargets": 81,
+    "abNewLines": 7237,
+    "typePendingEdges": 11
+  }
+}
