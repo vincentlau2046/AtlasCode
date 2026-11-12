@@ -120,3 +120,9 @@ SRI 留档内偏差报备记录收讫（如实记录面合格）。
 2. **【批准】SRI 勘误**：docs/sri/v0.1.100.md 补载二次偏差 + registry 实测值（18,197,136B / 4d951625…）+ 「gate build」语义错标勘误（实为 pre-85834af0 dist = registry 同值同源），随 0.1.101 波一并落。
 3. **【批准】npm deprecate 0.1.100**：指向 0.1.101，措辞按 §11（`superseded by 0.1.101: published artifact missing W-D-B-1 §9 hard-condition ② (legacy inbox upgrade-rewrite); see wave ticket §11`）。功能面虽可容忍（legacy 裸数组可读不 brick），但发布品 = 未过 gate 制品的定谳不变，fail-closed 一致性要求标注，禁「可容忍即免标」例外先例。
 4. **【入册】build/publish 时序纪律**（release-governance.md 段 L 条款附则）：build 必须于最终产品码提交后、紧贴 publish 前执行；SRI 留档必须记录当次 build 的 tree commit（「发布品≠gate 基」防三犯，Main 纪律固化采认）。
+
+## §13 f4 采认：gate-100 GATE-PASS（0.1.101 候选锚）——0.1.101 段 L 解冻（2026-11-12）
+
+**采认**（报告 r-20261112-gate-100.md，t104 系列 14 腿 @97803c70 候选锚）。f4 直证抽查：runner RC=0×14 + ALL LEGS DONE 20:20:01；改锚定谳链入档完整（发布品 Δ82B 逐字节定域 = 缺 85834af0 两处异）；canon 5863/0 Δ 恰合（5846 + 17 格，Main 计数偏差 16 以实测 17 为准定谳）；§9 十格 e2e 侧承接全绿——Form A 零写盘 standing 保留 + durable OFF 缺省全路径零写盘（home 空集哈希全腿）+ S5 格族 17/0；前滚 standing 14 腿全绿（O4 锚 + team=default 零命中 + TEAMS-TASKS-ZERO-DIFF）。
+
+**裁定**：0.1.101 段 L 解冻——硬门条款首用兑现（e2e GATE-PASS 报告在案 + 本节 f4 采认在案，双件齐）。Main 标准链：bump 0.1.101 + CHANGELOG + tag + 双平台 push + npm publish（build 紧贴 publish 前 + SRI 记 tree commit）+ **npm deprecate 0.1.100**（§11/§12 措辞）+ SRI 留档（v0.1.100 补注已落 + v0.1.101 新档）。发布后 e2e SRI/build 复核轻形 + 生产 lane ⑦ 对 0.1.101；PASS 后 Main 单点报用户 → f4 终局收口。
