@@ -153,6 +153,7 @@ import { BASH_INPUT_TAG, COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG, LOCAL_COMMAND_ST
 import { escapeXml } from '../utils/xml.js';
 import type { ThinkingConfig } from '../utils/thinking.js';
 import { gracefulShutdownSync } from '../utils/gracefulShutdown.js';
+import { onCrashReport, type CrashReport } from '../utils/crashRecovery.js';
 import { handlePromptSubmit, type PromptInputHelpers } from '../utils/handlePromptSubmit.js';
 import { useQueueProcessor } from '../hooks/useQueueProcessor.js';
 import { useMailboxBridge } from '../hooks/useMailboxBridge.js';
@@ -1558,6 +1559,31 @@ export function REPL({
     setInputValue,
     setToolJSX
   });
+
+  // 0.1.102 P0 切片 2-A：逃逸异常升格——错误行上屏 + queryGuard 强制复位可重入。
+  // 升格处理器在 gracefulShutdown（既有注册点同链扩展）；本 effect 只挂消费
+  // hook（恰一次格由 crashRecovery 聚合窗保证：窗口关闭时恰一次 dispatch）。
+  // 复位清单（lock-face ③ 写死）：queryGuard.forceEnd / 在途工具 abort /
+  // 流状态清 / mrOnTurnComplete(aborted=true)（镜像 onCancel 收尾形）。
+  const crashRecoveryHandlerRef = useRef<(info: CrashReport) => void>(() => {});
+  crashRecoveryHandlerRef.current = info => {
+    logForDebugging(`[crash-recovery] REPL reset after ${info.kind} ${info.errorName}`);
+    setMessages(prev => [...prev, createSystemMessage(
+      `内部错误已复位：${info.errorName}: ${info.message}` +
+      (info.additionalCount > 0 ? `（窗口内聚合 ${info.additionalCount + 1} 个异常）` : '') +
+      `。循环已复位，请重试。`, 'error')]);
+    queryGuard.forceEnd();
+    skipIdleCheckRef.current = false;
+    abortControllerRef.current?.abort('crash-recovery');
+    setAbortController(null);
+    setStreamingToolUses([]);
+    setStreamingText(null);
+    if (feature('TOKEN_BUDGET')) {
+      snapshotOutputTokensForTurn(null);
+    }
+    void mrOnTurnComplete(messagesRef.current, true);
+  };
+  useEffect(() => onCrashReport(info => crashRecoveryHandlerRef.current(info)), []);
   const showSpinner = (!toolJSX || toolJSX.showSpinner === true) && toolUseConfirmQueue.length === 0 && promptQueue.length === 0 && (
   // Show spinner during input processing, API call, while teammates are running,
   // or while pending task notifications are queued (prevents spinner bounce between consecutive notifications)

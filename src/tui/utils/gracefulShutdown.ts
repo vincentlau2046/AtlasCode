@@ -7,6 +7,7 @@ import type { ExitReason } from 'src/tui/entrypoints/agentSdkTypes.js'
 import { getIsInteractive, getSessionId, isSessionPersistenceDisabled } from 'src/bootstrap'
 import { getIsScrollDraining, getLastMainRequestId } from 'src/tui/bootstrapState.js'
 import instances from '../ink/instances.js'
+import { reportCrash } from './crashRecovery.js'
 import {
   DISABLE_KITTY_KEYBOARD,
   DISABLE_MODIFY_OTHER_KEYS,
@@ -291,11 +292,14 @@ export const setupGracefulShutdown = memoize(() => {
 
   // Log uncaught exceptions for container observability and analytics
   // Error names (e.g., "TypeError") are not sensitive - safe to log
+  // 0.1.102 P0 切片 2-A：log-only 升格——同链 dispatch 到 crashRecovery 聚合
+  // 窗（错误行上屏 + queryGuard 强制复位可重入；挂既有注册点扩展，禁第三注册）。
   process.on('uncaughtException', error => {
     logForDiagnosticsNoPII('error', 'uncaught_exception', {
       error_name: error.name,
       error_message: error.message.slice(0, 2000),
     })
+    reportCrash('uncaughtException', error)
   })
 
   // Log unhandled promise rejections for container observability and analytics
@@ -315,6 +319,7 @@ export const setupGracefulShutdown = memoize(() => {
           }
         : { error_message: String(reason).slice(0, 2000) }
     logForDiagnosticsNoPII('error', 'unhandled_rejection', errorInfo)
+    reportCrash('unhandledRejection', reason)
   })
 })
 
