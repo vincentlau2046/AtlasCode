@@ -15,11 +15,13 @@ import { describe, expect, test } from 'bun:test'
 
 import {
   MAX_SHRINK_ATTEMPTS,
+  MESSAGE_TAIL_CAP_ROWS,
   MIN_COMPRESS_ROWS,
   MIN_SURGERY_ROWS,
   STREAMING_BLOCK_CAP_ROWS,
   capStreamingText,
   computeViewportPlan,
+  fallbackTailCapRows,
   resolveRenderCap,
   resolveShrinkDecision,
 } from 'src/tui/components/viewportBudget'
@@ -30,8 +32,9 @@ function makeCollapsed(n: number): Array<{ uuid: string }> {
 }
 
 describe('computeViewportPlan（钉② 退化边界 + 钉③ 预算分配序）', () => {
-  test('常量定形：流式帽 24 / 退化阈 5 / 保底阈 20', () => {
+  test('常量定形：流式帽 24 / 行级帽 24 / 退化阈 5 / 保底阈 20', () => {
     expect(STREAMING_BLOCK_CAP_ROWS).toBe(24)
+    expect(MESSAGE_TAIL_CAP_ROWS).toBe(24)
     expect(MIN_SURGERY_ROWS).toBe(5)
     expect(MIN_COMPRESS_ROWS).toBe(20)
   })
@@ -45,12 +48,12 @@ describe('computeViewportPlan（钉② 退化边界 + 钉③ 预算分配序）'
 
   test('预算分配序：输入框/提示行全保 → 流式块限高 → 消息区自尾截断', () => {
     const plan = computeViewportPlan(30, 5, 10)
-    expect(plan).toEqual({ mode: 'compress', messageBudgetRows: 15, streamingCapRows: 10 })
+    expect(plan).toEqual({ mode: 'compress', messageBudgetRows: 15, streamingCapRows: 10, messageTailCapRows: 15 })
     // 流式超帽：100 行流式截到 24，预算扣 24
     const capped = computeViewportPlan(30, 5, 100)
-    expect(capped).toEqual({ mode: 'compress', messageBudgetRows: 1, streamingCapRows: STREAMING_BLOCK_CAP_ROWS })
-    // 预留吃满预算 → 消息区 0（不低于 0）
-    expect(computeViewportPlan(30, 40, 0)).toEqual({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 0 })
+    expect(capped).toEqual({ mode: 'compress', messageBudgetRows: 1, streamingCapRows: STREAMING_BLOCK_CAP_ROWS, messageTailCapRows: 1 })
+    // 预留吃满预算 → 消息区 0（不低于 0）；行级帽下限 1（可见性底线）
+    expect(computeViewportPlan(30, 40, 0)).toEqual({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 0, messageTailCapRows: 1 })
   })
 
   test('单帧总高恒 ≤ 视口（流式单帧超限不破钉底格的预算面）', () => {
@@ -78,27 +81,92 @@ describe('resolveRenderCap（plan → Messages 消费形）', () => {
     expect(resolveRenderCap({ mode: 'degraded' })).toBeUndefined()
   })
 
-  test('fallback 保底集 → capRows 0 + 流式块抑制', () => {
-    expect(resolveRenderCap({ mode: 'fallback' })).toEqual({ capRows: 0, streamingCapRows: 0, suppressStreaming: true })
+  test('fallback → capRows 1 恒渲染最新 1 条（可见性底线格，禁零渲染全盲）+ 流式块抑制', () => {
+    expect(resolveRenderCap({ mode: 'fallback', messageTailCapRows: 10 })).toEqual({
+      capRows: 1,
+      streamingCapRows: 0,
+      suppressStreaming: true,
+      messageTailCapRows: 10,
+    })
   })
 
-  test('compress → 预算 − 收缩量（不低于 0）+ 流式块放行', () => {
-    expect(resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24 }, 0)).toEqual({
+  test('compress → 预算 − 收缩量（不低于 0）+ 流式块放行 + 行级帽', () => {
+    expect(
+      resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24, messageTailCapRows: 12 }, 0),
+    ).toEqual({
       capRows: 12,
       streamingCapRows: 24,
       suppressStreaming: false,
+      messageTailCapRows: 12,
     })
-    expect(resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24 }, 5).capRows).toBe(7)
-    expect(resolveRenderCap({ mode: 'compress', messageBudgetRows: 3, streamingCapRows: 24 }, 100).capRows).toBe(0)
+    expect(
+      resolveRenderCap({ mode: 'compress', messageBudgetRows: 12, streamingCapRows: 24, messageTailCapRows: 12 }, 5)
+        .capRows,
+    ).toBe(7)
+    expect(
+      resolveRenderCap({ mode: 'compress', messageBudgetRows: 3, streamingCapRows: 24, messageTailCapRows: 3 }, 100)
+        .capRows,
+    ).toBe(0)
   })
 
   test('窄视口二次限高：流式帽让位于「输入框全保 + 视口本身」', () => {
     // 20 行视口、零预留、1000 行流式 → 帽被压到 20（不是 24），预算 0
     const plan = computeViewportPlan(20, 0, 1000)
-    expect(plan).toEqual({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 20 })
+    expect(plan).toEqual({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 20, messageTailCapRows: 1 })
     // 输入框全保优先：10 行视口走 fallback（不到 compress 域）；
     // 25 行视口预留 10 → 帽 = min(24, 15) = 15，预算 0
-    expect(computeViewportPlan(25, 10, 1000)).toEqual({ mode: 'compress', messageBudgetRows: 0, streamingCapRows: 15 })
+    expect(computeViewportPlan(25, 10, 1000)).toEqual({
+      mode: 'compress',
+      messageBudgetRows: 0,
+      streamingCapRows: 15,
+      messageTailCapRows: 1,
+    })
+  })
+})
+
+describe('行级尾保帽（t107 G5d 修形：f4 D 批复判据面）', () => {
+  test('fallbackTailCapRows：max(1, min(24, rows − reserved − 提示行))', () => {
+    expect(fallbackTailCapRows(19, 3)).toBe(15)
+    expect(fallbackTailCapRows(5, 4)).toBe(1)
+    expect(fallbackTailCapRows(40, 5)).toBe(24)
+    expect(fallbackTailCapRows(19, 100)).toBe(1)
+    expect(fallbackTailCapRows(Number.NaN, 0)).toBe(1)
+  })
+
+  test('compress 收敛格：单条超视口消息（1200 行）→ 行级帽有界 → 收缩步进必消除溢出', () => {
+    // G5d 场景预算面：40 行视口、预留 5 → 预算 35，行级帽 24
+    const plan = computeViewportPlan(40, 5, 0)
+    expect(plan.mode).toBe('compress')
+    expect(plan.messageTailCapRows).toBe(24)
+    // 单条 1200 行消息按帽渲染 ≤ 24 行 < 预算 35 → 帧不溢出 → hold（compress 保持，不 surrender）
+    const renderedRows = Math.min(1200, plan.messageTailCapRows)
+    expect(resolveShrinkDecision(renderedRows - plan.messageBudgetRows, 0).action).toBe('hold')
+  })
+
+  test('surrender → fallback 形最近内容可见格（重冻判据 2 直证）', () => {
+    // surrender → fallback plan（tail 帽 = 视口感知）→ capRows 1 →
+    // computeSliceStart 渲染恰最新 1 条（零渲染格废止）
+    const tailCap = fallbackTailCapRows(40, 5)
+    const cap = resolveRenderCap({ mode: 'fallback', messageTailCapRows: tailCap })
+    expect(cap?.capRows).toBe(1)
+    const collapsed = makeCollapsed(30)
+    const anchorRef = { current: null as SliceAnchor }
+    const start = computeSliceStart(collapsed, anchorRef, cap!.capRows, 1)
+    expect(start).toBe(29)
+    expect(collapsed.slice(start)).toHaveLength(1)
+    // 单条内容行级帽：1200 行 → 保尾 24 行 + 折叠 1176（措辞「N 行已折叠」）
+    const text = Array.from({ length: 1200 }, (_, i) => `L${i}`).join('\n')
+    const r = capStreamingText(text, tailCap)
+    expect(r.text.split('\n').length).toBe(24)
+    expect(r.overflowRows).toBe(1176)
+  })
+
+  test('窄视口 fallback（钉② <20 行保底集同形统一）：19 行终端最新 1 条 tail 15 行', () => {
+    const plan = computeViewportPlan(19, 3, 0)
+    expect(plan).toEqual({ mode: 'fallback', messageTailCapRows: 15 })
+    const cap = resolveRenderCap(plan)
+    expect(cap?.capRows).toBe(1)
+    expect(cap?.suppressStreaming).toBe(true)
   })
 })
 
@@ -194,7 +262,7 @@ describe('computeSliceStart 动态 cap（钉① 单源复用，UUID 锚不变式
     expect(anchorRef.current).toEqual({ uuid: 'uuid-95', idx: 95 })
   })
 
-  test('cap 0（保底集）：零消息渲染（start = length），锚存活不清', () => {
+  test('cap 0（函数面边界）：start = length 零渲染，锚存活不清', () => {
     const collapsed = makeCollapsed(30)
     const anchorRef = { current: { uuid: 'uuid-10', idx: 10 } as SliceAnchor }
     const start = computeSliceStart(collapsed, anchorRef, 0, 1)

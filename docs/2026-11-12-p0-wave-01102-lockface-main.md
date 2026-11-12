@@ -96,3 +96,12 @@
 **canon 净域**：`FORCE_COLOR=3 CI=true bun test --isolate ./tests/` = **5924 pass / 0 fail**（125.6s，2026-11-13；Δ 容许面 = 本波新格族 17 测 + 切片 1/2 新测）。首轮 canon 静默挂死 2h14m（主进程 100% CPU + git 僵尸子进程未 reap）定谳为 runner 环境偶发事件，非测试面缺陷——重跑即绿，附此存照。
 
 **R3-B 五场景 pty 探针**：归 e2e gate lane（标准链），Main 侧 = 纯判据面单测已覆盖（plan 边界 / 帽联动 / 锚不变式）。
+
+## ⑦ t107 G5d 修形——判据 2 重冻落码（f4 D 批复 2026-11-13 @9e293efe 后）
+
+- **判据 2 重冻（可见性底线格）**：任何 plan 形态（compress/fallback）下，视口内恒渲染最近回合内容（行级 tail）+ 提示行在场；「历史进滚动区」措辞 inline 车道废止（未渲染 ≠ 已入滚动区，t107 wire 直证）。
+- **主修（行级尾保帽）**：`MESSAGE_TAIL_CAP_ROWS = 24`（与流式帽同值）——compress 支每条消息内容渲染前 tail 保尾 ⇒ 帧高严格有界 ⇒ 收缩步进必消除溢出 ⇒ surrender 仅剩 bottom 槽超视口极端域。**与钉① 单源边界**：钉① = 条数 slice 面（computeSliceStart），本帽 = 单条内容行级面，两层不冲突禁混源。
+- **fallback 形重定义**：`capRows 1`（恒渲染最新 1 条 + `fallbackTailCapRows` 视口感知行级帽）+ 流式抑制 + 提示行——禁 cap 0 全盲；钉② <20 行保底集同 mode 同形自然统一（预期行为变化，判据重冻覆盖）。
+- **措辞分域**：行级头折 = 「… N 行已折叠」（未渲染不称滚动区）；条数真滚动区 = 「N 条已入滚动区，↑ 翻看」保留。⚠️ t107 G5a 断言的流式行级提示文本随之变更（「行已入滚动区」→「行已折叠」），t108 判读账面同步。
+- **生效域**：viewportRenderCap 在场车道；全屏支 / degraded / 缺省 200 路径零行为变更。
+- **验证面**：单测 26/26（+4 新格：compress 收敛格〔1200 行单条 → 帽 24 < 预算 → hold 不 surrender〕/ surrender → 最近内容可见格〔重冻判据 2 直证〕/ fallbackTailCapRows 边界 / 窄视口 fallback 同形统一）；canon 5933 pass 0 fail（144.1s，Δ = +4 新格恰合）。
