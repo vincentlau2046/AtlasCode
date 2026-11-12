@@ -73,3 +73,11 @@ f4 实锚核验：**真功能缺陷**（非文案级）——① Doctor.tsx:170 
 **裁定：并入本波登记修补**（非新工单）——理由：① 同为本次枚举清册扫描自然浮现的 configDir/路径域缺陷；② 修形 = 机械字符串复原（零设计面：字面量→函数调用 / bingetConfigDirName()→bin），非语义变更（§12 isTeamLead 禁顺手改先例针对语义面，不适用）；③ installer 真伤不值再压一个整波周期。修补面 = 4 处复原 + 判别格补 2 支（doctor 项目 agents 路径真值格 / installer bin 路径真值格，RED→GREEN）。体量口径修正：~4 文件 → ~8 文件（32 切换 + 4 复原），仍在步 2 中波内。
 
 段 I 补齐后 → 判别格 → 四件套 → gate 信号。
+
+## §10 f4 裁处：gate-099 v2 GATE-PASS 采认（2026-11-12，@6a9a3258）——段 L 解冻
+
+**GATE-PASS 采认**（报告 r-20261112-gate-099.md，t103 系列 14 腿）。f4 直证抽查：runner RC=0×14 + ALL LEGS DONE；rs1 TEAM-DELETE-OK + pending_requests reqlog 铁证；team=default 四腿零命中（面 3 销项 standing）。canon 5846/0 Δ 恰合 5838+6+2；步 2 新格 18/0（configdir-dims 6 含 env 四层次序 + product 层直判格 / artifact-restore 2 / product-definition 10）。
+
+**v1 作废定谳采信**：基面被 §9 修补取代（@bf09a74d → @6a9a3258）+ canon SIGABRT = 与 runner 并发调度面重叠（违反独占纪律）环境面非产品缺陷——v2 独占重跑 122.96s 全绿零崩溃；**派生双替换纪律兑现核**（gate-099v2/t103/research-pair-103 零残留——0.1.98 prodlane-096 事故纪律首次实战兑现）。
+
+**裁定**：段 L release 0.1.99 解冻 → Main 标准链（bump → tag → npm 本地通道/OIDC 视确认态 → **gitcode 双平台例行步** → SRI 留档 → f4 复核）。S1a 步 2 交付面 e2e 直证：产品维度激活在 atlascode 默认身份下零行为差（F6 行为中性）。
