@@ -121,3 +121,12 @@ export {
   type TeamMemberStateShape,
   type TeamContextShape,
 } from './teamServices'
+// 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 档门 + 支路原语
+// （engine/tools/team/teamDurable.ts = 单一事实源；TUI 双工具面同型消费）。
+export {
+  resolveTeamPersistenceMode,
+  writeTeamFileDurable,
+  checkDurableResidual,
+  persistSpawnedTeammateDurable,
+  logDurableWrite,
+} from './teamDurable'

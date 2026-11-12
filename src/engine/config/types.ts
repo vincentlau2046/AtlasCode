@@ -133,6 +133,16 @@ export const SettingsSchema = () => z.object({
       z.record(z.string(), autoCompactWindowSettingSchema),
     ])
     .optional(),
+  // --- team durable 持久化档（0.1.100 W-D-B-1 段 D 批复形 @bbe99518）：
+  //     teams.persistence 'memory'(缺省) | 'durable'。F1 分档形——Form A 门
+  //     ON/OFF 语义与零写盘 standing 判据不变，durable 面挂独立档；产品差异
+  //     经 ProductDefinition.teamPersistenceDefault 仅作缺省回落（禁 product
+  //     id 旁路）。消费缝 = engine/tools/team durable 支（本波）。
+  teams: z
+    .object({
+      persistence: z.enum(['memory', 'durable']).optional(),
+    })
+    .optional(),
   // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件，全仓现状 ∅ 新做）：
   //     skill 与用户命令/其它面同名冲突时的解析策略三档（卷 3 §5 settings key
   //     裁定）。数据契约先行（同 search.tavilyApiKey 先例）：schema 枚举声明 +

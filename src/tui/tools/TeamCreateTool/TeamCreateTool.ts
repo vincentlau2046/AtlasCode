@@ -21,6 +21,16 @@ import {
 } from '../../utils/tasks.js'
 import { generateWordSlug } from '../../utils/words.js'
 import { TEAM_CREATE_TOOL_NAME } from './constants.js'
+// 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 档门 + 支路原语
+// （engine/tools/team/teamDurable 单源；双副本同步纪律 = engine 车道
+// teamCreateTool.ts 同形支）。
+import {
+  checkDurableResidual,
+  logDurableWrite,
+  resolveTeamPersistenceMode,
+  writeTeamFileDurable,
+} from 'src/engine'
+import { registerTeamForSessionCleanup } from '../../utils/swarm/teamHelpers.js'
 import { getPrompt } from './prompt.js'
 import { renderToolUseMessage } from './UI.js'
 
@@ -76,6 +86,9 @@ export type Output = {
   team_name: string
   team_file_path: string
   lead_agent_id: string
+  // 0.1.100 W-D-B-1 加性：durable 门 OFF 支残留态 fail-visible 提示面
+  //（七条(f)；engine 车道 TeamCreateOutput 同形）。
+  durable_residual_warning?: string
 }
 
 export type Input = z.infer<InputSchema>
@@ -237,11 +250,49 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
     // 3. Setting it would cause isTeammate() to return true, breaking inbox polling
     // Team name is stored in AppState.teamContext, not process.env
 
+    // 0.1.100 W-D-B-1 F1 分档形：durable 档恢复两写入点（v2 team file 写 +
+    // session-end cleanup 登记）；OFF 支现行为逐字不变 + 残留 fail-visible
+    // 输出面（七条(f)；与 engine 车道 teamCreateTool.ts 同形）。
+    const persistenceMode = resolveTeamPersistenceMode()
+    if (persistenceMode === 'durable') {
+      await writeTeamFileDurable({
+        teamName: finalTeamName,
+        file: {
+          name: finalTeamName,
+          description: input.description,
+          createdAt: Date.now(),
+          leadAgentId,
+          roster,
+          members: [
+            {
+              agentId: leadAgentId,
+              name: TEAM_LEAD_NAME,
+              agentType: leadAgentType,
+              joinedAt: Date.now(),
+              tmuxPaneId: '',
+              cwd: getCwd(),
+              subscriptions: [],
+            },
+          ],
+        },
+      })
+      registerTeamForSessionCleanup(finalTeamName)
+      logDurableWrite(finalTeamName, 1)
+    }
+
+    // 七条(f)：durable 门 OFF 支残留态检测（只读；检测锚 = 提供名，残留
+    // 使 generateUniqueTeamName 改派 slug——engine 车道同判）。
+    const durable_residual_warning =
+      persistenceMode === 'memory'
+        ? await checkDurableResidual(team_name)
+        : undefined
+
     return {
       data: {
         team_name: finalTeamName,
         team_file_path: teamFilePath,
         lead_agent_id: leadAgentId,
+        ...(durable_residual_warning ? { durable_residual_warning } : {}),
       },
     }
   },

@@ -36,6 +36,13 @@ export interface ProductDefinition {
    * 槽惰性读（倒置 getter 形，shared 零 import 纯度）。
    */
   readonly configDirName?: string
+  /**
+   * team durable 持久化档部署期缺省回落（0.1.100 W-D-B-1 段 D 批复形
+   * @bbe99518）：settings teams.persistence 缺席时回落本值，再落 'memory'。
+   * **仅缺省回落**——读写点禁 product id 条件旁路（工单 §6 吸收①，§8 分档
+   * 门纪律）；undefined = 'memory'（现网行为字节级不变）。
+   */
+  readonly teamPersistenceDefault?: 'memory' | 'durable'
 }
 
 /** atlascode 缺省定义：全量装配（toolSubset/configDirName 均缺省 = 行为字节级不变）。 */

@@ -13,6 +13,14 @@ import {
 import { clearTeammateColors } from '../../utils/swarm/teammateLayoutManager.js'
 import { clearLeaderTeamName } from '../../utils/tasks.js'
 import { TEAM_DELETE_TOOL_NAME } from './constants.js'
+// 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 支 halfAttached 判据
+//（D-③；双副本同步纪律 = engine 车道 teamDeleteTool.ts 同形支）。
+import { resolveTeamPersistenceMode } from 'src/engine'
+import {
+  errorMessage,
+  getLeadInstanceId,
+  readTeamFileV2,
+} from 'src/shared'
 import { getPrompt } from './prompt.js'
 import { renderToolResultMessage, renderToolUseMessage } from './UI.js'
 
@@ -23,6 +31,9 @@ export type Output = {
   success: boolean
   message: string
   team_name?: string
+  // 0.1.100 W-D-B-1 加性：durable 支 halfAttached fail-visible 提示面
+  //（D-③ 禁静默；engine 车道 TeamDeleteOutput 同形）。
+  half_attached_warning?: string
 }
 
 export type Input = z.infer<InputSchema>
@@ -71,9 +82,48 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
     const appState = getAppState()
     const teamName = appState.teamContext?.teamName
 
+    // 0.1.100 W-D-B-1 durable 支（D-③）输出面载体（if 块外声明 = 成功
+    // 返回面 spread 可达；engine 车道同形）。
+    let half_attached_warning: string | undefined
     if (teamName) {
+      // 0.1.100 W-D-B-1 durable 支（D-③）：halfAttached 判据前置（与
+      // engine 车道 teamDeleteTool.ts 同形；禁静默 = 名单进输出面）。
+      let skipFileGuard = false
+      if (resolveTeamPersistenceMode() === 'durable') {
+        let v2File: Awaited<ReturnType<typeof readTeamFileV2>>
+        try {
+          v2File = await readTeamFileV2(teamName)
+        } catch (e) {
+          return {
+            data: {
+              success: false,
+              message:
+                `Cannot cleanup team "${teamName}": durable team file ` +
+                `rejected (${errorMessage(e)}). Resolve the file manually ` +
+                `(delete the team directory) and retry.`,
+              team_name: teamName,
+            },
+          }
+        }
+        if (v2File && v2File.leadInstanceId !== getLeadInstanceId()) {
+          const halfNames = v2File.members
+            .filter(m => m.name !== TEAM_LEAD_NAME)
+            .map(m => m.name)
+          skipFileGuard = true
+          half_attached_warning =
+            `Durable team file was written by a previous lead instance ` +
+            `(leadInstanceId mismatch) — ${halfNames.length} member(s) ` +
+            `half-attached: ${halfNames.join(', ') || '(none)'}. Their ` +
+            `processes may still be running; they were NOT treated as ` +
+            `active blockers, and the team directories will be removed.` +
+            (halfNames.length > 0
+              ? ' Verify orphan processes (tmux/ps) if needed.'
+              : '')
+        }
+      }
+
       // Read team config to check for active members
-      const teamFile = readTeamFile(teamName)
+      const teamFile = skipFileGuard ? null : readTeamFile(teamName)
       if (teamFile) {
         // Filter out the team lead - only count non-lead members
         const nonLeadMembers = teamFile.members.filter(
@@ -124,6 +174,7 @@ export const TeamDeleteTool: Tool<InputSchema, Output> = buildTool({
           ? `Cleaned up directories and worktrees for team "${teamName}"`
           : 'No team name found, nothing to clean up',
         team_name: teamName,
+        ...(half_attached_warning ? { half_attached_warning } : {}),
       },
     }
   },

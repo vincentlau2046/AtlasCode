@@ -967,6 +967,12 @@ export {
   requireTeamServices,
   createDefaultTeamContextStore,
   resetDefaultTeamContextStore,
+  // 0.1.100 W-D-B-1：durable 档门 + 支路原语（TUI 双工具面消费面）
+  resolveTeamPersistenceMode,
+  writeTeamFileDurable,
+  checkDurableResidual,
+  persistSpawnedTeammateDurable,
+  logDurableWrite,
   type SnipInput,
   type SnipOutput,
   type TeamCreateInput,

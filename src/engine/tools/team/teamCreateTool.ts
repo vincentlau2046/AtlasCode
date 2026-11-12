@@ -64,6 +64,13 @@ import {
   requireTeamServices,
   type TeamRosterEntry,
 } from './teamServices'
+// 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 档门 + 支路原语。
+import {
+  checkDurableResidual,
+  logDurableWrite,
+  resolveTeamPersistenceMode,
+  writeTeamFileDurable,
+} from './teamDurable'
 import { PROMPT } from './teamCreatePrompt'
 
 /** 输入面（旧 zod strictObject 3 字段转写，delta ①；0.1.93 W-D-A 加性
@@ -129,11 +136,13 @@ export type TeamCreateInput = {
   members?: TeamRosterEntry[]
 }
 
-/** 输出面（旧 Output 型转写）。 */
+/** 输出面（旧 Output 型转写 + 0.1.100 W-D-B-1 加性：durable 门 OFF 支残留
+ * 态 fail-visible 提示面——仅残留文件在场时出现，七条(f)）。 */
 export type TeamCreateOutput = {
   team_name: string
   team_file_path: string
   lead_agent_id: string
+  durable_residual_warning?: string
 }
 
 // Tool 契约非参数化（readTool face 先例）；mapToolResult 返回型收窄（web
@@ -273,6 +282,42 @@ export const TeamCreateTool: TeamCreateToolFace = {
     const roster: TeamRosterEntry[] | undefined =
       input.members && input.members.length > 0 ? input.members : undefined
 
+    // 0.1.100 W-D-B-1 F1 分档形：durable 档（teams.persistence='durable'）
+    // 恢复两写入点（v2 team file 写 + session-end cleanup 登记）；OFF 支
+    // （'memory' 缺省）现行为逐字不变 + 残留文件 fail-visible 输出面。
+    const persistenceMode = resolveTeamPersistenceMode()
+    if (persistenceMode === 'durable') {
+      // members 起始 = lead 条目（roster 仅组态名册，spawn 注册面经
+      // persistSpawnedTeammateDurable upsert 落盘）。
+      await writeTeamFileDurable({
+        teamName: finalTeamName,
+        file: {
+          name: finalTeamName,
+          description: input.description,
+          createdAt: Date.now(),
+          leadAgentId,
+          // leadSessionId 缺省（SessionSnapshot 无 sessionId 面；
+          // relink 锚 = leadInstanceId，非 session id）。
+          roster,
+          members: [
+            {
+              agentId: leadAgentId,
+              name: TEAM_LEAD_NAME,
+              agentType: leadAgentType,
+              joinedAt: Date.now(),
+              tmuxPaneId: '',
+              cwd: getCwd(),
+              subscriptions: [],
+            },
+          ],
+        },
+      })
+      // durable 写盘 → session-end cleanup 登记恢复（gh-32730，OFF 支
+      // 逐字行为在 durable 档下的对称面）。
+      services.registerTeamForSessionCleanup(finalTeamName)
+      logDurableWrite(finalTeamName, 1)
+    }
+
     // Reset and create the corresponding task list directory
     // (Team = Project = TaskList). This ensures task numbering starts
     // fresh at 1 for each new swarm.
@@ -311,11 +356,21 @@ export const TeamCreateTool: TeamCreateToolFace = {
     // 3. Setting it would cause isTeammate() to return true, breaking inbox polling
     // Team name is stored in the team context state, not process.env
 
+    // 七条(f)：durable 门 OFF 支残留态检测（只读；文件在场 = fail-visible
+    // 提示面进输出，禁静默）。检测锚 = 提供名（providedName）：v2 残留文件
+    // 会使 generateUniqueTeamName 改派 slug，残留归属在提供名路径而非
+    // finalTeamName。
+    const durable_residual_warning =
+      persistenceMode === 'memory'
+        ? await checkDurableResidual(input.team_name)
+        : undefined
+
     return {
       data: {
         team_name: finalTeamName,
         team_file_path: teamFilePath,
         lead_agent_id: leadAgentId,
+        ...(durable_residual_warning ? { durable_residual_warning } : {}),
       },
     }
   },

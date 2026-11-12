@@ -109,6 +109,14 @@ export const SettingsSchema = () => z.object({
       z.record(z.string(), autoCompactWindowSettingSchema),
     ])
     .optional(),
+  // --- team durable 持久化档（0.1.100 W-D-B-1 段 D 批复形 @bbe99518）：
+  //     双拷贝对齐 = engine/config/types.ts 同形键；'memory'(缺省) |
+  //     'durable'（F1 分档形，Form A 零写盘 standing 判据不变）。
+  teams: z
+    .object({
+      persistence: z.enum(['memory', 'durable']).optional(),
+    })
+    .optional(),
   // #260 P0（2026-10-03 斗兽棋 "Request timed out"）：LLM 请求超时持久化档
   // （ms，int ≥ 1；env ATLAS_LLM_TIMEOUT 恒胜此键；缺省 600s 在 resolver 层。
   // 形状校验在合并层 resolveLlmTimeoutMs：非 int / < 1 落缺省，越 30min cap）

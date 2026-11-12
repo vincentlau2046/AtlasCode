@@ -51,6 +51,14 @@ import { jsonStringify } from '../../session/json'
 import { isInProcessTeammateActiveOrUnknown } from '../../../task'
 import { TEAM_DELETE_TOOL_NAME } from '../toolNames'
 import { requireTeamServices } from './teamServices'
+// 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 支（D-③ halfAttached
+// 判据 + fail-visible 输出面，f4 硬要求② 禁 log-only 静默形）。
+import { resolveTeamPersistenceMode } from './teamDurable'
+import {
+  errorMessage,
+  getLeadInstanceId,
+  readTeamFileV2,
+} from '../../../shared'
 import { getSessionContextPort } from '../../session/sessionContextPort'
 import { PROMPT } from './teamDeletePrompt'
 
@@ -65,11 +73,13 @@ export const TEAM_DELETE_TOOL_INPUT_SCHEMA: ToolInputJSONSchema = {
 /** 输入 duck（旧 z.infer 转写 = 空对象）。 */
 export type TeamDeleteInput = Record<string, never>
 
-/** 输出面（旧 Output 型转写）。 */
+/** 输出面（旧 Output 型转写 + 0.1.100 W-D-B-1 加性：durable 支 halfAttached
+ * fail-visible 提示面——仅 halfAttached 成员在场时出现，D-③ 禁静默）。 */
 export type TeamDeleteOutput = {
   success: boolean
   message: string
   team_name?: string
+  half_attached_warning?: string
 }
 
 // Tool 契约非参数化（readTool face 先例）；mapToolResult 返回型收窄（web
@@ -139,9 +149,52 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
     const teamContext = services.getTeamContext()
     const teamName = teamContext?.teamName
 
+    // 0.1.100 W-D-B-1 durable 支（D-③）输出面载体（if 块外声明 = 成功
+    // 返回面 spread 可达）。
+    let half_attached_warning: string | undefined
     if (teamName) {
+      // 0.1.100 W-D-B-1 durable 支（D-③）：halfAttached 判据前置。durable
+      // 档下 v2 team file 的 leadInstanceId ≠ 本进程 instance（kill→resume）
+      // = 全员 halfAttached——旧 lead 进程已死，shutdown_request 链不可达，
+      // 按「不当活着」跳过 file 守卫（禁静默：成员名单进输出面）；同
+      // instance = 本进程写面，file 守卫照常。v2 拒读（foreign/legacy）=
+      // fail-visible 终止（禁半解析回落，演进策略判据）。
+      let skipFileGuard = false
+      if (resolveTeamPersistenceMode() === 'durable') {
+        let v2File: Awaited<ReturnType<typeof readTeamFileV2>>
+        try {
+          v2File = await readTeamFileV2(teamName)
+        } catch (e) {
+          return {
+            data: {
+              success: false,
+              message:
+                `Cannot cleanup team "${teamName}": durable team file ` +
+                `rejected (${errorMessage(e)}). Resolve the file manually ` +
+                `(delete the team directory) and retry.`,
+              team_name: teamName,
+            },
+          }
+        }
+        if (v2File && v2File.leadInstanceId !== getLeadInstanceId()) {
+          const halfNames = v2File.members
+            .filter(m => m.name !== TEAM_LEAD_NAME)
+            .map(m => m.name)
+          skipFileGuard = true
+          half_attached_warning =
+            `Durable team file was written by a previous lead instance ` +
+            `(leadInstanceId mismatch) — ${halfNames.length} member(s) ` +
+            `half-attached: ${halfNames.join(', ') || '(none)'}. Their ` +
+            `processes may still be running; they were NOT treated as ` +
+            `active blockers, and the team directories will be removed.` +
+            (halfNames.length > 0
+              ? ' Verify orphan processes (tmux/ps) if needed.'
+              : '')
+        }
+      }
+
       // Read team config to check for active members
-      const teamFile = services.readTeamFile(teamName)
+      const teamFile = skipFileGuard ? null : services.readTeamFile(teamName)
       if (teamFile) {
         // Filter out the team lead - only count non-lead members
         const nonLeadMembers = teamFile.members.filter(
@@ -230,6 +283,7 @@ export const TeamDeleteTool: TeamDeleteToolFace = {
           ? `Cleaned up directories and worktrees for team "${teamName}"`
           : 'No team name found, nothing to clean up',
         team_name: teamName,
+        ...(half_attached_warning ? { half_attached_warning } : {}),
       },
     }
   },

@@ -69,6 +69,10 @@ import {
   registerSpawnedTeammate,
   requireTeamServices,
 } from '../team/teamServices'
+// 0.1.100 W-D-B-1：spawn 成员 durable upsert（OFF 支 no-op；durable 支
+// fail-visible 错误传播——spawn 链 await 消费）。
+import { persistSpawnedTeammateDurable } from '../team/teamDurable'
+import { getCwd } from '../../../bootstrap'
 
 /**
  * 0.1.66 Q3-2 a1：逃生舱 env——ATLAS_AGENT_DEFAULT_FOREGROUND=1 时回退前景默认
@@ -241,6 +245,17 @@ async function spawnTeammateFromRoster(args: {
     agentType: rosterEntry?.role,
     // A7：taskId 留痕（TeamDelete active-member 守卫 task 态查表锚）。
     ...(result.taskId ? { taskId: result.taskId } : {}),
+  })
+  // 0.1.100 W-D-B-1：durable 档成员 upsert 落盘（OFF 支 no-op；durable 支
+  // 错误 fail-visible 传播 = spawn 失败可见，禁静默丢持久面）。
+  await persistSpawnedTeammateDurable({
+    teamName: args.teamName,
+    member: {
+      agentId: result.agentId,
+      name: args.name,
+      ...(rosterEntry?.role ? { agentType: rosterEntry.role } : {}),
+      cwd: getCwd(),
+    },
   })
   return result
 }

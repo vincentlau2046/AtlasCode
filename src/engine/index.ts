@@ -227,6 +227,12 @@ export {
   setTeamServices,
   resetTeamServices,
   createDefaultTeamContextStore,
+  // 0.1.100 W-D-B-1：durable 档门 + 支路原语（TUI 双工具面消费面）
+  resolveTeamPersistenceMode,
+  writeTeamFileDurable,
+  checkDurableResidual,
+  persistSpawnedTeammateDurable,
+  logDurableWrite,
   setTeamFileLoader,
   resetTeamFileLoader,
   // 0.1.94 C-2 名路由/自退 port 注入接缝（TUI 组合根消费面）
