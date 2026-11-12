@@ -145,6 +145,9 @@ describe('configDir 单源格（lock-face ⑤ 步 1 归一形）', () => {
       join(SRC_ROOT, 'atlascode', 'sandboxDeps.ts'),
       'utf8',
     )
-    expect(sandboxDeps).toContain("getConfigDirName } from '../shared'")
+    // 0.1.99 row F：sandbox denyWrite = 项目根锚 → ForProject 出口（b8a55c40 批复形）
+    expect(sandboxDeps).toContain(
+      "getConfigDirNameForProject } from '../shared'",
+    )
   })
 })
