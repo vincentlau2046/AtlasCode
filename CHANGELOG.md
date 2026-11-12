@@ -4,6 +4,44 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.100
+
+W-D-B-1 持久化面波（工单 `docs/2026-11-12-01100-wdb1-lockface-main.md`
+段 D lock-face 批复 @bbe99518；切片 S1–S5 落码 + 段 G gate 四件套全绿）。
+
+### team 文件面单源（S1）
+
+- `src/shared/teamFileSchema.ts`：team config.json 落盘 schema/原子写/
+  锁原语单源（engine 与 tui 车道双收敛，禁第三副本）。
+
+### durable 持久化门（S2+S3）
+
+- settings.json 新键 `teams.persistence`（`'memory'` 缺省 | `'durable'`）：
+  OFF 缺省全路径零写盘 standing 不变（Form A 判据格 1 = wave0193 B1 沿用）。
+- `relinkTeamFromDurable`：lead 重启后从 durable 文件重建 teamContext
+  （roster 全量回填 + 成员半挂接 `halfAttached: true` 标记 + leadInstanceId
+  二次验证 `instanceMismatch` 判别面，fail-visible 可判读 note）。
+- tmp 孤儿清扫 `sweepTmpOrphans`（写中崩溃残留 `.tmp-*` fail-visible 清扫）。
+
+### inbox 信封单源 + 硬化（S4）
+
+- `src/shared/teamInboxSchema.ts`：inbox 文件信封 `{ schemaVersion, messages }`
+  单源（engine `messaging/mailbox.ts` 与 tui `utils/teammateMailbox.ts`
+  tmux 车道双收敛）。读面兼容 pre-envelope 裸数组（显式 legacy 识别，
+  升级不 brick）；异 schemaVersion / 非法记录 fail-visible 拒读禁半解析。
+- **满载拒收**：inbox 200 条上界，写入面拒收 fail-visible（禁静默丢最旧），
+  SendMessageTool 呈 `success:false` + warning。
+- **ack 持久化**：mark-read 全走 tmp+rename 原子写（写中 kill 不撕 ack 态）。
+- **来源白名单**（七条(d)）：协议消息 `source` 字段（'lead' | 'teammate'）
+  方向性校验——shutdown 指令只认 lead 来源、汇报形只认 teammate 来源，
+  伪造来源在 4 个消费点（waitForTeammates / inProcessRunner /
+  useInboxPoller）前置拒收。
+- 判据格族 `tests/unit/wdb1-01100-persistence-criteria.test.ts`
+  （16 测试：门回落链 / durable 往返 / 半挂接 / 信封演进 / 原子写 /
+  双车道同源 / 满载+ack）。
+- gate 红三格修形：inbox `timestamp` 容忍缺省（`default('')`）——写面存在
+  不携带 timestamp 的调用形，必填判 = legacy in-flight 记录整体拒读 brick。
+
 ## v0.1.99
 
 S1a 步 2 维度激活波（工单 `docs/2026-11-12-p0-wave-0199-s1a-step2-ticket.md`；
