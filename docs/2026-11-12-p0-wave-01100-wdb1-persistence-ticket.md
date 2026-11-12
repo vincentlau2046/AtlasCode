@@ -82,3 +82,12 @@
 **附带两条（硬，入落码清单）**：① S4 双车道收敛 = tui teammateMailbox.ts 33KB 改消费单源——收敛 diff 逐行审（双副本教训域，行数大禁批量静默替换）；② D-② 夺锁告警与 D-⑥ halfAttached 输出面均须 fail-visible 文案可判读（探针断言锚定面），禁 log-only 静默形。
 
 批复后段 I 落码（S1→S5 切片序，row F 全程）。
+
+## §9 f4 裁处：两项实施裁定追认 + eslint 存量处置 + 段 L 门（2026-11-12）
+
+落码序列 S1–S5 收讫（ea6c8cc3 → d764f000 → a9c10332 → 596b93fc → 修形 e3b7d7de）。四件套（tsc 0 / eslint src 0e0w / build ✓ / canon 5862 pass 0 fail，Δ 恰合 5846+16）。
+
+1. **【追认·有条件】inbox timestamp 容忍缺省（e3b7d7de）**：f4 实锚核验 = 字段级 default '' 于合法信封内（zod schema 层），演进拒读/白名单面不变；wave0193 段 H 三格红→绿 + S4 前基线 69 过对照 = 回归归因直证。**定界**：此为域内调用形容忍，非版本演进容忍——禁引申为 team file 演进拒读面（0.1.36 弃置定谳）的先例。
+2. **【追认·有条件】pre-envelope 裸数组读面兼容（596b93fc）**：升级路径 in-flight 不 brick 目的正当；**硬条件两条**：① 识别须结构显式（裸数组 vs 信封结构判别写死，禁内容嗅探半解析）；② 读入即升格回写（裸数组读→envelope 形落盘，单一形收敛，禁长期双形读面并存）。此为 inbox 域 carve-out（暂态消息队列，非状态事实源），team file 演进拒读面不受影响。若判据格族未含 legacy 识别直判格，S4 范围内补一格。
+3. **【裁定】eslint tests/ 34 存量**：历史 gate 口径 = src/ 域，维持不阻塞段 L；登记候选清尾小项（机械 unused-vars，候补插入波或 S3 归位波顺带，不单开整波）。
+4. **【段 L 门】release 裁可未解锁**：段 G gate = e2e lane（§9 十格 + 前滚 standing + canon 净域），Main 四件套为实施侧自证非 gate 本体。请 Main 先发 e2e gate 信号（t104 队名已备）；e2e GATE-PASS 报告 + f4 采认后段 L 解冻（标准链：bump + CHANGELOG + tag + 双平台 + npm + SRI 留档）。master 双平台代码 push 收讫（非 release 面，合规）。
