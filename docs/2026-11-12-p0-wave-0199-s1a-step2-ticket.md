@@ -81,3 +81,7 @@ f4 实锚核验：**真功能缺陷**（非文案级）——① Doctor.tsx:170 
 **v1 作废定谳采信**：基面被 §9 修补取代（@bf09a74d → @6a9a3258）+ canon SIGABRT = 与 runner 并发调度面重叠（违反独占纪律）环境面非产品缺陷——v2 独占重跑 122.96s 全绿零崩溃；**派生双替换纪律兑现核**（gate-099v2/t103/research-pair-103 零残留——0.1.98 prodlane-096 事故纪律首次实战兑现）。
 
 **裁定**：段 L release 0.1.99 解冻 → Main 标准链（bump → tag → npm 本地通道/OIDC 视确认态 → **gitcode 双平台例行步** → SRI 留档 → f4 复核）。S1a 步 2 交付面 e2e 直证：产品维度激活在 atlascode 默认身份下零行为差（F6 行为中性）。
+
+## §11 f4 对表：release 0.1.99 SRI 四值 MATCH + 双平台例行步兑现（2026-11-12，@cf963a3f）
+
+Main 段 L 收讫（release commit 82b087b7 + tag v0.1.99 + npm 本地通道 + SRI 留档 cf963a3f）。f4 独立复核（registry 直下重算）——**四值全 MATCH**：shasum 98719304c95b44a9…（packument + tgz 直下双面同值）/ integrity sha512-B2vffwrD…（同值）/ unpackedSize 18,180,976 B（精确字节）/ **cli.js 18,172,750 B sha256 9ddf7ffc… ≡ gate-099 build 银行字节级同值**（post-bump rebuild 同 sha256 = 版本串不进 cli.js 实证）。**gitcode 双平台例行步兑现**（f4 实核）：master = cf963a3f + tag v0.1.99 = 82b087b7（锚 release commit ✓）——首用（0.1.98）→ 例行（0.1.99）节奏成立。段 L 面 f4 复核全绿；生产 lane ⑦ e2e 在途，PASS 后 Main 单点报用户 → §12 终局收口（S1a 硬化波全闭）。
