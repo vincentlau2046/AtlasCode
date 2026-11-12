@@ -49,7 +49,8 @@
 
 ## §6 task #154 状态核对（Atlas-reveiw ④）
 
-- 本 session task store 无 #154（TaskList 空——任务属 e2e session store）；已发 e2e 单信号核对「AtlasCode 全功能复刻审视优化」是否仍活/已完成，回执后补记本节。
+- e2e 回执（2026-11-12）：其 task store 查无 #154（TaskList 空，近期编号段 225-228 系 0.1.96 波临时项已收口）——「未在本 lane 登记」口径。
+- f4 侧 task store 同查无 #154。源头核对已发 Atlas-reveiw（登记出处侧），回执后本节终记；若三侧均无账面 = #154 登记失效定谳（office 激活前置以 charter 现行登记面为准，#154 不作阻塞项）。
 
 ## §7 portal 需求面 + engine web 交互缺口
 
