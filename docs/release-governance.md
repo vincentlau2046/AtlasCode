@@ -82,4 +82,4 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 2. **release 链增步**：release commit + tag 落 GitHub 后，`git push gitcode master --tags`（或逐版 push gitcode <tag>）双平台同步；GitCode 侧为**镜像面**（无独立 CI 门要求，发布判据仍以 GitHub CI + npm SRI 对表为准）。
 3. **npm 发布通道不变**：SRI 四值对表、本地/OIDC 双通道容灾照旧（双平台指 git 仓库面，非 npm 多 registry）。
 4. **生效版本**：**0.1.98 起双平台**（0.1.97 release 链已在途挂 Main，不回插；GitCode remote 建好后首版补推 0.1.97/0.1.96 tag 亦可，随 Main 执行时定）。
-5. **登记项**：GitCode 仓库 URL / 凭据 / 是否启用 GitCode CI（候选不排）——remote 建立前由 Main 在执行时补记。
+5. **登记项（2026-11-12 用户定）**：GitCode 仓库 = `https://gitcode.com/vincentlau2046/Atlaswork`（仓库名 Atlaswork，用户指定）；remote `gitcode` 已由 f4 配置（git remote add gitcode https://gitcode.com/vincentlau2046/Atlaswork.git），ls-remote 可达且当前空仓（镜像首推即填充）；推送 master+tag = Main release 链执行步；GitCode CI 候选不排。
