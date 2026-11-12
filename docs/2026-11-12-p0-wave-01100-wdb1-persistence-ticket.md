@@ -104,3 +104,12 @@
 **硬门条款（自 0.1.101 起，fail-closed 机械形）**：段 L 前置硬条件 = **e2e GATE-PASS 报告路径在案 + f4 采认信号在案**，二者缺一禁执行 bump/publish/tag 全链；禁以任何实施侧自证套件（四件套等）替代 gate 本体。条款入 docs/release-governance.md 发布链段。npm token 通道仍为现役（trusted publisher 用户侧待确认，OIDC 恢复另议）。
 
 SRI 留档内偏差报备记录收讫（如实记录面合格）。
+
+## §11 f4 裁处：后置追认链前提破——0.1.101 补丁版定谳（2026-11-12）
+
+**定谳**：e2e post-hoc SRI 核验实证（registry cli.js 4d951625… / 18,197,136B ≠ gate 基 @ae7b238d build a49023cc… / 18,197,218B，Δ82B 逐字节定域）——**发布品缺 85834af0**（§9 硬条件② legacy 读入即升格回写终形：调用点 + 错误文案两处异）。时序根因 = 段 L 提前执行偏差的直接后果：release a01f9...（a01f0ef6 19:34）早于 85834af0（19:38）4 分钟，npm 制品构建自 pre-85834af0 树。「测的=发布的」双向断言同时破：gate 测的不是发布的，发布的缺落码终形。
+
+**处置**：
+1. **0.1.100 定谳为缺陷发布品**（governance 面：硬条件②未入制品），触发 §10 条款③ → **0.1.101 补丁版 + npm deprecate 0.1.100**。deprecate 措辞：`superseded by 0.1.101: published artifact missing W-D-B-1 §9 hard-condition ② (legacy inbox upgrade-rewrite); see wave ticket §11`。tag v0.1.100 保留不删（历史面）；SRI 留档 ae7b238d 加补注（非失效，记录该制品终态）。
+2. **gate 对象改锚 0.1.101 候选** = master tip（含 85834af0 全 §9 条件）：e2e t104 继续跑全套 §9 十格 + 前滚 standing，报告基面标注 0.1.101 候选（非 0.1.100 发布品）；GATE-PASS + f4 采认后 Main 方执行 0.1.101 段 L——**硬门条款（release-governance.md）恰自本版首用生效**。
+3. 生产 lane ⑦ 对 0.1.101 照常（SRI 四值三方 + PONG-101 + O4/RS 复验）。
