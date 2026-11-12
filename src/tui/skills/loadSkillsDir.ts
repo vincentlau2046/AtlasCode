@@ -70,7 +70,7 @@ export type LoadedFrom =
   | 'mcp'
 
 /**
- * Returns agetConfigDirName() config directory path for a given source.
+ * Returns an atlas config directory path for a given source.
  */
 export function getSkillsPath(
   source: SettingSource | 'plugin',

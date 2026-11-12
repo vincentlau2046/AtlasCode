@@ -422,7 +422,7 @@ async function performVersionUpdate(
     logForDebugging(`Version ${version} already installed, updating symlink`)
   }
 
-  // Create direct symlink from ~/.local/bingetConfigDirName() to the version binary
+  // Create direct symlink from ~/.local/bin/atlas to the version binary
   await removeDirectoryIfEmpty(executablePath)
   await updateSymlink(executablePath, installPath)
 
@@ -775,7 +775,7 @@ export async function checkInstall(
     })
   }
 
-  // Check ifgetConfigDirName() executable exists and is valid.
+  // Check if atlas executable exists and is valid.
   // On non-Windows, call readlink directly and route errno — ENOENT means
   // the executable is missing, EINVAL means it exists but isn't a symlink.
   // This avoids an access()→readlink() TOCTOU where deletion between the
@@ -805,7 +805,7 @@ export async function checkInstall(
     } catch (e) {
       if (isENOENT(e)) {
         messages.push({
-          message: `installMethod is native, butgetConfigDirName() command not found at ${dirs.executable}`,
+          message: `installMethod is native, but atlas command not found at ${dirs.executable}`,
           userActionRequired: true,
           type: 'error',
         })
@@ -1347,7 +1347,7 @@ async function isNpmSymlink(executablePath: string): Promise<boolean> {
 }
 
 /**
- * Remove thegetConfigDirName() symlink from the executable directory
+ * Remove the atlas symlink from the executable directory
  * This is used when switching away from native installation
  * Will only remove if it's a native binary symlink, not npm-managed JS files
  */
@@ -1375,7 +1375,7 @@ export async function removeInstalledSymlink(): Promise<void> {
 }
 
 /**
- * Clean up oldgetConfigDirName() aliases from shell configuration files
+ * Clean up old atlas aliases from shell configuration files
  * Only handles alias removal, not PATH setup
  */
 export async function cleanupShellAliases(): Promise<SetupMessage[]> {

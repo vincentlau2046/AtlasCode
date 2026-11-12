@@ -322,13 +322,13 @@ export function getAtlasTempDirName(): string {
 /**
  * Returns the Claude temp directory path with symlinks resolved.
  * Uses TMPDIR env var if set, otherwise:
- * - On Unix: /tmpgetConfigDirName()-{uid}/ (resolved to /private/tmpgetConfigDirName()-{uid}/ on macOS)
- * - On Windows: {tmpdir}getConfigDirName()/ (e.g., C:\Users\{user}\AppData\Local\TempgetConfigDirName()\)
+ * - On Unix: /tmp/.atlas-{uid}/ (resolved to /private/tmp/.atlas-{uid}/ on macOS)
+ * - On Windows: {tmpdir}/.atlas/ (e.g., C:\Users\{user}\AppData\Local\Temp\.atlas\)
  * This is a per-user temporary directory used by Atlas for all temp files.
  *
  * NOTE: We resolve symlinks to ensure this path matches the resolved paths used
  * in permission checks. On macOS, /tmp is a symlink to /private/tmp, so without
- * resolution, paths like /tmpgetConfigDirName()-{uid}/... wouldn't match /private/tmpgetConfigDirName()-{uid}/...
+ * resolution, paths like /tmp/.atlas-{uid}/... wouldn't match /private/tmp/.atlas-{uid}/...
  */
 // Memoized: called per-tool from permission checks (yoloClassifier, sandbox-adapter)
 // and per-turn from BashTool prompt. Inputs (ATLAS_TMPDIR env + platform) are
@@ -376,7 +376,7 @@ export const getBundledSkillsRoot = memoize(
 
 /**
  * Returns the project temp directory path with trailing separator.
- * Path format: /tmpgetConfigDirName()-{uid}/{sanitized-cwd}/
+ * Path format: /tmp/.atlas-{uid}/{sanitized-cwd}/
  */
 export function getProjectTempDir(): string {
   return join(getAtlasTempDir(), sanitizePath(getOriginalCwd())) + sep
@@ -384,7 +384,7 @@ export function getProjectTempDir(): string {
 
 /**
  * Returns the scratchpad directory path for the current session.
- * Path format: /tmpgetConfigDirName()-{uid}/{sanitized-cwd}/{sessionId}/scratchpad/
+ * Path format: /tmp/.atlas-{uid}/{sanitized-cwd}/{sessionId}/scratchpad/
  */
 export function getScratchpadDir(): string {
   return join(getProjectTempDir(), getSessionId(), 'scratchpad')
@@ -419,7 +419,7 @@ function isScratchpadPath(absolutePath: string): boolean {
   const scratchpadDir = getScratchpadDir()
   // SECURITY: Normalize the path to resolve .. segments before checking
   // This prevents path traversal bypasses like:
-  //   echo "malicious" > /tmpgetConfigDirName()-0/proj/session/scratchpad/../../../etc/passwd
+  //   echo "malicious" > /tmp/.atlas-0/proj/session/scratchpad/../../../etc/passwd
   // Without normalization, the path would pass the startsWith check but write to /etc/passwd
   const normalizedPath = normalize(absolutePath)
   return (
@@ -1572,7 +1572,7 @@ export function checkEditableInternalPath(
       const jobsRootForms = getPathsForPermissionCheck(jobsRoot).map(normalize)
       // Hijack guard: every resolved form of the job dir must sit under
       // some resolved form of the jobs root. Resolving both sides handles
-      // the case where ~/getConfigDirName() is a symlink (e.g. to /datagetConfigDirName()-config).
+      // the case where ~/.atlas is a symlink (e.g. to /data/atlas-config).
       const isUnderJobsRoot = jobDirForms.every(jd =>
         jobsRootForms.some(jr => jd.startsWith(jr + sep)),
       )
@@ -1732,7 +1732,7 @@ export function checkReadableInternalPath(
     }
   }
 
-  // Project temp directory (/tmpgetConfigDirName()/{sanitized-cwd}/)
+  // Project temp directory (/tmp/.atlas/{sanitized-cwd}/)
   // Intentionally allows reading files from all sessions in this project, not just the current session.
   // This enables cross-session file access within the same project's temp space.
   const projectTempDir = getProjectTempDir()

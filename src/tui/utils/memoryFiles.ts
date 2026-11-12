@@ -624,7 +624,7 @@ export async function processMemoryFile(
     return []
   }
 
-  // Skip if path is excluded bygetConfigDirName()MdExcludes setting
+  // Skip if path is excluded by claudeMdExcludes setting
   if (isClaudeMdExcluded(filePath, type)) {
     return []
   }

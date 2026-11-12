@@ -1,4 +1,4 @@
-import { getConfigDirName } from '../utils/configDir.js'
+import { getConfigDirName, getConfigDirNameForProject } from '../utils/configDir.js'
 import { c as _c } from "react/compiler-runtime";
 import figures from 'figures';
 import { join } from 'path';
@@ -167,7 +167,7 @@ export function Doctor(t0) {
       getDoctorDiagnostic().then(setDiagnostic);
       (async () => {
         const userAgentsDir = join(getAtlasConfigHomeDir(), "agents");
-        const projectAgentsDir = join(getOriginalCwd(), "getConfigDirName()", "agents");
+        const projectAgentsDir = join(getOriginalCwd(), getConfigDirNameForProject(), "agents");
         const {
           activeAgents,
           allAgents,

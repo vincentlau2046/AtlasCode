@@ -174,8 +174,8 @@ async function getInstallationPath(): Promise<string> {
 
     // If we can't find it, check common locations
     try {
-      await getFsImplementation().stat(join(homedir(), '.local/bingetConfigDirName()'))
-      return join(homedir(), '.local/bingetConfigDirName()')
+      await getFsImplementation().stat(join(homedir(), '.local/bin/atlas'))
+      return join(homedir(), '.local/bin/atlas')
     } catch {
       // Not found
     }
@@ -248,7 +248,7 @@ async function detectMultipleInstallations(): Promise<
 
     if (globalBinExists) {
       // Check if this is actually a Homebrew cask installation, not npm-global
-      // When npm is installed via Homebrew, both can exist at /opt/homebrew/bingetConfigDirName()
+      // When npm is installed via Homebrew, both can exist at /opt/homebrew/bin/atlas
       // We need to resolve the symlink to see where it actually points
       let isCurrentHomebrewInstallation = false
 
@@ -269,7 +269,7 @@ async function detectMultipleInstallations(): Promise<
         installations.push({ type: 'npm-global', path: globalBinPath })
       }
     } else {
-      // If no bingetConfigDirName() exists, check for orphaned packages (no bingetConfigDirName() symlink)
+      // If no bin/atlas symlink exists, check for orphaned packages (no bin/atlas symlink)
       for (const packageName of packagesToCheck) {
         const globalPackagePath = isWindows
           ? join(npmPrefix, 'node_modules', packageName)
@@ -461,7 +461,7 @@ async function detectConfigurationIssues(
 
   // Check if running local installation but it's not in PATH
   if (type === 'npm-local') {
-    // Check ifgetConfigDirName() is already accessible via PATH
+    // Check if atlas is already accessible via PATH
     const whichResult = await which('atlas')
     const claudeInPath = !!whichResult
 
