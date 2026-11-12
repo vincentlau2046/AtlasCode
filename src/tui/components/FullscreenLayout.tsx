@@ -13,6 +13,7 @@ import { openBrowser, openPath } from '../utils/browser.js';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { plural } from '../utils/stringUtils.js';
 import { isNullRenderingAttachment } from './messages/nullRenderingAttachments.js';
+import { InlineViewportCompressor } from './InlineViewportCompressor.js';
 import PromptInputFooterSuggestions from './PromptInput/PromptInputFooterSuggestions.js';
 import type { StickyPrompt } from './VirtualMessageList.js';
 
@@ -451,7 +452,10 @@ export function FullscreenLayout(t0) {
   }
   let t8;
   if ($[42] !== bottom || $[43] !== modal || $[44] !== overlay || $[45] !== scrollable) {
-    t8 = <>{scrollable}{bottom}{overlay}{modal}</>;
+    // 0.1.102 P0 切片 3：非全屏支挂 InlineViewportCompressor（R3-A 默认
+    // inline 模式钉底——视口压缩器实测收缩环）。overlay/modal 留在外层，
+    // 不参与消息区预算测量。全屏支零变更（R3-B 只加探针）。
+    t8 = <><InlineViewportCompressor scrollable={scrollable} bottom={bottom} />{overlay}{modal}</>;
     $[42] = bottom;
     $[43] = modal;
     $[44] = overlay;

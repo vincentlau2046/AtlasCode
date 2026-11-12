@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import type { UUID } from 'crypto';
 import type { RefObject } from 'react';
 import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { every } from 'src/tui/utils/set.js';
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js';
 import type { Command } from '../commands.js';
@@ -33,6 +33,8 @@ import { plural } from '../utils/stringUtils.js';
 import { renderableSearchText } from '../utils/transcriptSearch.js';
 import { Divider } from './design-system/Divider.js';
 import type { UnseenDivider } from './FullscreenLayout.js';
+import { ViewportRenderCapContext } from './InlineViewportCompressor.js';
+import { capStreamingText, STREAMING_BLOCK_CAP_ROWS } from './viewportBudget.js';
 import { LogoV2 } from './LogoV2/LogoV2.js';
 import { StreamingMarkdown } from './Markdown.js';
 import { hasContentAfterIndex, MessageRow } from './MessageRow.js';
@@ -204,7 +206,10 @@ export function computeSliceStart(collapsed: ReadonlyArray<{
       uuid: msgAtStart.uuid,
       idx: start
     };
-  } else if (!msgAtStart && anchor) {
+  } else if (!collapsed.length && anchor) {
+    // 只在数组真空时清锚（cap=0 的保底集态 start=length 处 msgAtStart 也
+    // 为 undefined，但锚必须存活——恢复 compress 后零成本续位，避免重放
+    // 全量历史再收缩）。0.1.102 P0 切片 3 钉①。
     anchorRef.current = null;
   }
   return start;
@@ -335,6 +340,9 @@ const MessagesImpl = ({
   // so scrollRef's presence is the signal.
   const virtualScrollRuntimeGate = scrollRef != null && !disableVirtualScroll;
   const shouldTruncate = isTranscriptMode && !showAllInTranscript && !virtualScrollRuntimeGate;
+  // 0.1.102 P0 切片 3：inline 视口压缩器消费形（undefined = 不在场 → 缺省
+  // 200 消息帽零行为变更；fallback 保底集 capRows=0 + 流式块抑制）。
+  const viewportRenderCap = useContext(ViewportRenderCapContext);
 
   // Anchor for the first rendered message in the non-virtualized cap slice.
   // Monotonic advance only — mutation during render is idempotent (safe
@@ -389,7 +397,7 @@ const MessagesImpl = ({
   }, [verbose, normalizedMessages, isTranscriptMode, syntheticStreamingToolUseMessages, shouldTruncate, tools]);
 
   // Cheap slice — only runs when scroll range or slice config changes.
-  const renderableMessages = useMemo(() => {
+  const sliceResult = useMemo(() => {
     // Safety cap for the non-virtualized render path. Applied here (not at
     // the JSX site) so renderMessageRow's index-based lookups and
     // dividerBeforeIndex compute on the same array. VirtualMessageList
@@ -397,11 +405,32 @@ const MessagesImpl = ({
     // component's lifetime (scrollRef is either always passed or never).
     // renderRange is first: the chunked export path slices the
     // post-grouping array so each chunk gets correct tool-call grouping.
+    // 0.1.102 P0 切片 3 钉①：视口压缩器的剩余行数预算经
+    // ViewportRenderCapContext 注入（InlineViewportCompressor 实测收缩环
+    // 产出）——动态 cap 传 computeSliceStart 的 cap 参（签名已参数化，
+    // 零改复用 UUID 锚），禁第二截断实现。压缩器不在场（全屏/退化态）时
+    // viewportRenderCap undefined → 缺省 200/50 既有行为。动态 cap 用
+    // step=1（小预算下 50 消息步进会让帧高最多超预算 50 消息）。
     const capApplies = !virtualScrollRuntimeGate && !disableRenderCap;
-    const sliceStart = capApplies ? computeSliceStart(collapsed_0 as any, sliceAnchorRef) : 0;
-    return renderRange ? collapsed_0.slice(renderRange[0], renderRange[1]) : sliceStart > 0 ? collapsed_0.slice(sliceStart) : collapsed_0;
-  }, [collapsed_0, renderRange, virtualScrollRuntimeGate, disableRenderCap]);
+    const dynamicCap = viewportRenderCap ? Math.max(0, viewportRenderCap.capRows) : MAX_MESSAGES_WITHOUT_VIRTUALIZATION;
+    const sliceStart = capApplies ? computeSliceStart(collapsed_0 as any, sliceAnchorRef, dynamicCap, dynamicCap === MAX_MESSAGES_WITHOUT_VIRTUALIZATION ? MESSAGE_CAP_STEP : 1) : 0;
+    // 「N 条已入滚动区」提示行行数 = start 之前被截消息数（钉① 定形）。
+    const scrollbackHiddenCount = capApplies && !renderRange ? sliceStart : 0;
+    return {
+      renderableMessages: renderRange ? collapsed_0.slice(renderRange[0], renderRange[1]) : sliceStart > 0 ? collapsed_0.slice(sliceStart) : collapsed_0,
+      scrollbackHiddenCount
+    };
+  }, [collapsed_0, renderRange, virtualScrollRuntimeGate, disableRenderCap, viewportRenderCap]);
+  const scrollbackHiddenCount_0 = sliceResult.scrollbackHiddenCount;
+  const renderableMessages = sliceResult.renderableMessages;
   const streamingToolUseIDs = useMemo(() => new Set(streamingToolUses.map(__0 => __0.contentBlock.id)), [streamingToolUses]);
+  // 钉③ 流式块常数帽（STREAMING_BLOCK_CAP_ROWS）：流式 chunk 与预算器同帧
+  // 竞态的定形——块高有界 ⇒ 单帧总高恒 ≤ 视口预算 + 提示行。压缩器在场时
+  // 帽经 plan 二次限高（窄视口让位于输入框全保）；不在场用常数帽。
+  const streamingCapped = useMemo(
+    () => capStreamingText(streamingText ?? '', viewportRenderCap?.streamingCapRows ?? STREAMING_BLOCK_CAP_ROWS),
+    [streamingText, viewportRenderCap],
+  );
 
   // Divider insertion point: first renderableMessage whose uuid shares the
   // 24-char prefix with firstUnseenUuid (deriveUUID keeps the first 24
@@ -557,6 +586,10 @@ const MessagesImpl = ({
     // nothing is actually "hidden" to restore.
     !disableRenderCap && <Divider title={`${toggleShowAllShortcut} to hide ${chalk.bold(hiddenMessageCount_0)} previous messages`} width={columns} />}
 
+      {/* 视口压缩器截断提示（0.1.102 P0 切片 3 钉①）：行数 = start 之前被截
+          消息数；保底集（capRows=0）时 = 全部消息数。仅非虚拟化路径。 */}
+      {scrollbackHiddenCount_0 > 0 && <Divider title={`${scrollbackHiddenCount_0} 条已入滚动区，↑ 翻看`} width={columns} />}
+
       {/* Messages - rendered as memoized MessageRow components.
           flatMap inserts the unseen-divider as a separate keyed sibling so
           (a) non-fullscreen renders pay no per-message Fragment wrap, and
@@ -569,13 +602,16 @@ const MessagesImpl = ({
           <VirtualMessageList messages={renderableMessages} scrollRef={scrollRef} columns={columns} itemKey={messageKey} renderItem={renderMessageRow} onItemClick={onItemClick} isItemClickable={isItemClickable} isItemExpanded={isItemExpanded} trackStickyPrompt={trackStickyPrompt} selectedIndex={selectedIdx >= 0 ? selectedIdx : undefined} cursorNavRef={cursorNavRef} setCursor={setCursor} jumpRef={jumpRef} onSearchMatchesChange={onSearchMatchesChange} scanElement={scanElement} setPositions={setPositions} extractSearchText={extractSearchText} />
         </InVirtualListContext.Provider> : renderableMessages.flatMap(renderMessageRow)}
 
-      {streamingText && <Box alignItems="flex-start" flexDirection="row" marginTop={1} width="100%">
+      {streamingText && !viewportRenderCap?.suppressStreaming && <Box alignItems="flex-start" flexDirection="row" marginTop={1} width="100%">
           <Box flexDirection="row">
             <Box minWidth={2}>
               <Text color="text">{BLACK_CIRCLE}</Text>
             </Box>
             <Box flexDirection="column">
-              <StreamingMarkdown>{streamingText}</StreamingMarkdown>
+              {/* 钉③ 流式块常数帽：超出 STREAMING_BLOCK_CAP_ROWS 的早行折叠
+                  入「已入滚动区」计数（单帧总高恒 ≤ 预算 + 提示行）。 */}
+              {streamingCapped.overflowRows > 0 && <Text dimColor>{`… ${streamingCapped.overflowRows} 行已入滚动区`}</Text>}
+              <StreamingMarkdown>{streamingCapped.text}</StreamingMarkdown>
             </Box>
           </Box>
         </Box>}
