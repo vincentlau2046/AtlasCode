@@ -65,3 +65,20 @@
 
 - **Main**：段 D lock-face 终形呈批（§6 全条目）→ 段 I 落码 → 段 G gate（前滚 standing 0.1.99 面 + 本波判据：durable 档激活探针格 + durable 往返/孤儿清理/schema 演进拒读/半挂接标记/崩溃窗口原子写+stale lock/tmux 同源/atlascode config 域恒等 + **Form A 零写盘 standing 断言不变**）+ canon 净域 → 段 L release 0.1.100。
 - **e2e**：判据面预告——**Form A 零写盘 standing 断言原样保留**（teamCreate Form A 门 ON 亦零写盘，本波零变更面）+ durable 档 OFF 缺省探针格 + 上述新格族随 lock-face 冻结时点启用 + standing 前滚 + canon 净域。
+
+## §8 f4 批复：段 D lock-face 终形（2026-11-12，@6679199e lock-face 文书）
+
+**六点+七条全批准**，裁处要点：
+
+1. **D-① schema v2 批准**（shared/teamFileSchema.ts 单源 + TEAM_FILE_SCHEMA_VERSION=2 + roster 收编 + leadInstanceId 回填位）；0.1.36 遗产**弃置定谳批准**（无版本 = foreign 拒读 fail-visible 零迁移）；swarm/tui 双副本 + TeamServicesFile 镜像收敛单源（TeamServices 接口签名不变 = 消费面零冲击）。
+2. **D-② 事件驱动写入 + 崩溃窗口两定形批准**——stale lock 双门夺锁形（mtime>10s **与** PID 不存活；有界 3 次重试后 fail-visible 不夺锁；夺锁成功记告警）= 观察池两现项的显式防线，采认。
+3. **D-③ relink 三判据批准**；Form A in-process 成员查表不引入伪 PID = 正确形（防 PID 复用面扩大）。
+4. **D-④ inbox 定形批准**：文件面基座 + 内存 store 降缓存层（非第二事实源）+ shared/teamInboxSchema.ts 单源 + **双车道改消费单源**（mailbox.ts + teammateMailbox.ts——C-1 未收敛面（tmux poller 透传支）随之部分核销，残余登记面更新）+ MAX_INBOX_MESSAGES=200 满载拒收 + ack 持久化（F7 防）。
+5. **D-⑤ task store 不 durable 裁定批准**——taskState 绑本进程 registry，落盘无消费 = 孤儿破口（有写入必有回读者禁令同构）；落盘限 team file + inbox 两面。
+6. **D-⑥ 交互批准**（TeamCreate durable 支/OFF 支逐字不变/TeamDelete 清面扩展/halfAttached 跳过输出面/门 OFF 残留提示）。
+7. **分档门批准**：settings teams.persistence 'memory'|'durable' + ProductDefinition teamPersistenceDefault 仅缺省回落、读写点禁 product id 旁路（审计吸收①兑现）+ 判别源双源化域级纪律延续。
+8. **段 G 判据面 §9 十格冻结采认**（Form A 零写盘 standing 不变 + OFF 缺省探针 + 新格族 + 前滚 0.1.99 + canon 净域）；S1-S5 切片序批准。
+
+**附带两条（硬，入落码清单）**：① S4 双车道收敛 = tui teammateMailbox.ts 33KB 改消费单源——收敛 diff 逐行审（双副本教训域，行数大禁批量静默替换）；② D-② 夺锁告警与 D-⑥ halfAttached 输出面均须 fail-visible 文案可判读（探针断言锚定面），禁 log-only 静默形。
+
+批复后段 I 落码（S1→S5 切片序，row F 全程）。
