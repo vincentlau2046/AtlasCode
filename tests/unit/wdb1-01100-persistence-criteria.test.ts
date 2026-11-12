@@ -268,6 +268,30 @@ describe('格 5+7：inbox 信封演进拒读 + 原子写', () => {
     if (r2.ok) expect(r2.messages).toHaveLength(1)
   })
 
+  test('legacy 裸数组直判 + 读入即升格回写（f4 §9 硬条件②：单一形收敛）', async () => {
+    const shared = await import('../../src/shared')
+    const p = join(dir, 'legacy-upgrade.json')
+    writeFileSync(p, JSON.stringify([{ from: 'a', text: 'x', timestamp: 't', read: false }]))
+
+    // 直判格①：结构判别（裸数组 vs 信封形）——裸数组读面通过
+    const r1 = await shared.readInboxFile(p)
+    expect(r1.ok).toBe(true)
+    if (r1.ok) expect(r1.messages[0]!.from).toBe('a')
+
+    // 直判格②（硬条件②）：读入即升格回写——落盘已收敛为信封形
+    const afterUpgrade = JSON.parse(readFileSync(p, 'utf-8')) as {
+      schemaVersion: number
+      messages: unknown[]
+    }
+    expect(afterUpgrade.schemaVersion).toBe(shared.INBOX_SCHEMA_VERSION)
+    expect(Array.isArray(afterUpgrade.messages)).toBe(true)
+
+    // 收敛幂等：信封形复读零形变
+    const r2 = await shared.readInboxFile(p)
+    expect(r2.ok).toBe(true)
+    if (r2.ok) expect(r2.messages[0]!.from).toBe('a')
+  })
+
   test('异 schemaVersion / 非 JSON / 非法记录 → 拒读 fail-visible（禁半解析）', async () => {
     const shared = await import('../../src/shared')
     const p1 = join(dir, 'env-v99.json')

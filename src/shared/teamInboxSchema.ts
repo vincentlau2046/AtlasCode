@@ -136,7 +136,8 @@ export async function readInboxFile(
     return { ok: true, messages: result.data.messages }
   }
 
-  // pre-envelope 裸数组（legacy 显式识别：逐记录白名单校验）
+  // pre-envelope 裸数组（legacy 显式识别：逐记录白名单校验；结构判别写死
+  // = Array.isArray vs 信封形，禁内容嗅探半解析）。
   if (Array.isArray(parsed)) {
     const result = z.array(inboxMessageSchema).safeParse(parsed)
     if (!result.success) {
@@ -144,6 +145,14 @@ export async function readInboxFile(
         ok: false,
         error: `legacy inbox records failed schema validation — refusing half-parse: ${filePath} (${result.error.message})`,
       }
+    }
+    // 读入即升格回写（f4 §9 硬条件②：裸数组读 → envelope 形落盘，单一形
+    // 收敛禁长期双形读面并存；best-effort——升格失败不拒读，下次写面路径
+    // mark-read/writeToMailbox 仍会收敛到信封形）。
+    try {
+      await writeInboxFileAtomic(filePath, result.data)
+    } catch {
+      // 升格回写失败静默容忍（读面零副作用契约优先；幂等——下次读重试）
     }
     return { ok: true, messages: result.data }
   }
