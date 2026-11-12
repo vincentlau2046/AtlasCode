@@ -18,10 +18,13 @@
 
 // 裁定(2026-09-19): TRANSCRIPT_CLASSIFIER (auto-mode 整链) 翻转为默认开。
 // 裁定(2026-09-21): COORDINATOR_MODE 翻转为默认开。
+// 裁定(2026-11-12): AUTO_THEME (主题分层检测, P0 0.1.102 切片 1) 翻转为默认开
+//   —— macOS 浅色终端灰字不可见修复本意 (watcher 真实现 + OS 外观 fallback 同波)。
 // 生产 bundle 经本模块生效; 运行时仍受 env 门控 (FEATURE_X=false kill-switch)。
 const ON_BY_DEFAULT: ReadonlySet<string> = new Set([
   "TRANSCRIPT_CLASSIFIER",
   "COORDINATOR_MODE",
+  "AUTO_THEME",
 ])
 
 /**
