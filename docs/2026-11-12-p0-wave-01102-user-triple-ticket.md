@@ -81,3 +81,23 @@
 **canon 净域**：5924 pass / 0 fail（2026-11-13，125.6s；首轮挂死为 runner 环境偶发，重跑即绿，lock-face §⑥ 存照）。前滚 standing 0.1.101 面（O4 锚/Form A 零写盘/durable OFF 零写盘/team=default 零命中/TEAMS-TASKS-ZERO-DIFF/TypeError 0）由 canon 全量含测承接，全绿。
 
 **下一步**：signal e2e gate（t106，含 R3-B 五场景 pty 探针 + §4 判据格 e2e 侧）→ 硬门条款双在案后段 L。
+
+## §9 f4 终收口——0.1.102 五段闭环终态（2026-11-13）
+
+**gate 链四轮定谳**：gate-102（t106）RED = 切片 3 收缩环同步 setState 自激崩溃（Maximum update depth）→ t107 RED = surrender 形全盲（cap 0 零渲染，「不渲染≠进滚动区」判据形修正）→ t108 RED = compress capRows 无下限钳 race 空帧（2 跑 1 绿 1 红）→ **t109 GATE-PASS**（G5 ×3 稳定性格三绿、canon 5935/0、standing 抽查全绿；报告 `r-20261113-regate-109.md`）。修形三轮 `9e293efe`（崩溃有界化）→ `be84fb10`（MESSAGE_TAIL_CAP_ROWS=24 行级尾保帽 + 可见性底线 fallback 形）→ `9f88c44b`（compress capRows 下限钳 1 + 触底 surrender 边界），每轮 f4 判据面冻结先于 Main 落码。
+
+**段 L**（硬门双在案：GATE-PASS 路径 + f4 采认信号）：release `8a1440ba`（纯 bump，产品码零差）/ tag v0.1.102 / npm publish ✅（shasum 3a398fad…）/ build 紧贴 publish（tree 8a1440ba，cli.js f291e4e5…）/ SRI 留档 `docs/sri/v0.1.102.md` @2eefa5d7。
+
+**生产 lane ⑦ PASS**（报告 `r-20261113-prodlane-102.md`）：SRI 四值全 MATCH（cli.js 四点字节恒等 = 纯 bump 实证）+ PONG-102 GREEN + O4 名义形锚 GREEN + RequestShutdown 成员链 GREEN（均首试零残留，glm-5 逐腿标注）。
+
+**用户三问题目标达成对表**：
+
+| # | 用户问题 | 判定 | 交付面 |
+|---|---|---|---|
+| 1 | macOS 灰字几乎不可见（主题对比度） | ✅ 达成 | 切片 1：watcher 真实现（OSC 11 实测）+ AUTO_THEME 缺省开 + 三源优先序（显式 > OSC 11 > COLORFGBG > OS 外观 > dark）+ mac 无 COLORFGBG 判 light——浅色终端不再恒落 dark |
+| 2 | 主循环错误后长久停止无回应（应自恢复） | ✅ 达成 | 切片 2：A crash 可见化+强制复位可重入（恰一次）+ B 回合内 watchdog 120s 可见中止可重入 + C defer 挂起常驻提示行——三种循环死法全部有用户可见面 |
+| 3 | 输入框不钉底、整屏上滚丢失 | ✅ 达成 | 切片 3：inline 视口压缩器（钉底 + 行级尾保帽可见性底线「任何 plan 形态恒渲染最近回合内容」+ 降级规则），gate 稳定性格 ×3 结构性成立 |
+
+**登记债（随波终结面盘点）**：切片 2-A 升格 × Ink 渲染错误边界盲区（gate-102 §3 副观察，登记池候选小波）；per-tool timeoutMs 声明面（既有登记）；R3-C 全屏翻转缺省（独立评估挂用户终裁）。
+
+**下波**：0.1.103 S3a 归位（lock-face 冻结解，六项终裁 f4 起裁）→ 0.1.104 S3b → 0.1.105 ENV 专项（矩阵 v1 底稿在案）。
