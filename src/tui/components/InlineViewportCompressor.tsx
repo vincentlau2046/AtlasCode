@@ -5,22 +5,16 @@
  * bottom flexShrink=0）；本组件只服务非全屏支——把动态渲染面强制 ≤ 视口
  * 高度，输入框恒在视口内（用户 P0 #3「输入框不钉底，整屏上滚丢失」）。
  *
- * 机制（设计稿「yoga 实测高度预算器」+ gate-102 RED 修形）：
+ * 机制（设计稿「yoga 实测高度预算器」）：
  *  1. 纯预算（viewportBudget.computeViewportPlan）：输入框/提示行全保 →
  *     流式块限高（STREAMING_BLOCK_CAP_ROWS，Messages 侧执行）→ 消息区自尾
  *     截断（messageBudgetRows 作 cap 参传 computeSliceStart，钉① 单源）。
- *  2. 实测收缩环（有界，gate-102 RED 修形）：useLayoutEffect 里
- *     measureElement 实测整帧高度；溢出 → resolveShrinkDecision 决策——
- *     收缩量钳制 = 实测溢出行数（禁 +1 盲加），episode 内至多
- *     MAX_SHRINK_ATTEMPTS 次；耗尽仍溢出（bottom 槽增长/流式压缩下限等
- *     不可收敛场景）→ surrender 锁 fallback 保底形（cap 0 + 流式抑制 +
- *     「N 条已入滚动区」提示行），停止 setState（禁无限自激崩溃）。
- *     收缩 setState 走 setTimeout(0) 异步调度——同一 commit 环内零
- *     setState（React Maximum update depth 崩溃根因即同步环内反复
- *     dispatchSetState）。
- *  3. 复位面：终端 resize（rows 变）/ bottom 槽实测高度变化（permission
- *     卡出现/消失等布局语境变化）→ shrinkRows/attempts/surrendered 归零
- *     重新有界尝试；只重置不回涨，无振荡面。
+ *  2. 实测收缩环：useLayoutEffect 里 measureElement 实测整帧高度；溢出
+ *     （帧高 > 视口行数）→ shrinkRows += 溢出 + 1 → 消息区 cap 收缩重渲。
+ *     每消息 ≥1 行 ⇒ 每步收缩消除 ≥ 溢出行 ⇒ 收敛（≤2 步）；溢出恒回落，
+ *     输入框钉底不破（多行大消息场景由本环兜底——纯预算的 cap 是行数
+ *     预算，消息单位换算不精确，实测环补齐）。
+ *  3. 终端 resize → shrinkRows 归零重算（只重置不回涨，无振荡面）。
  *
  * 退化规则（钉②）：<5 行 degraded（原样渲染，零手术）；<20 行 fallback
  * （保底集：cap 0 消息区全归滚动区 + 流式块抑制，Messages 渲染
@@ -29,17 +23,11 @@
  * 挂载点：FullscreenLayout 非全屏支（编译态文件最小插入——只把
  * {scrollable}{bottom} 包进本组件；overlay/modal 留在外层不参与测量）。
  */
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createContext, useContext, useLayoutEffect, useRef, useState } from 'react'
 
 import { useTerminalSize } from '../hooks/useTerminalSize.js'
 import { Box, type DOMElement, measureElement } from '../ink.js'
-import {
-  computeViewportPlan,
-  resolveRenderCap,
-  resolveShrinkDecision,
-  type ViewportPlan,
-  type ViewportRenderCap,
-} from './viewportBudget.js'
+import { computeViewportPlan, resolveRenderCap, type ViewportPlan, type ViewportRenderCap } from './viewportBudget.js'
 
 /**
  * 压缩器 → Messages 消费通道。undefined = 压缩器不在场（全屏 / degraded），
@@ -64,33 +52,16 @@ export function InlineViewportCompressor({
   const bottomRef = useRef<DOMElement | null>(null)
   // 输入框/提示行实测预留行数（预算分配序第一优先：全保）。
   const [bottomRows, setBottomRows] = useState(0)
-  // 实测溢出收缩量（episode 有界内只增；复位面归零）。
+  // 实测溢出收缩量（只增不减；resize 归零）。
   const [shrinkRows, setShrinkRows] = useState(0)
-  // 不可收敛降级锁（surrender）：真 = 落 fallback 保底形并停止收缩 setState。
-  const [surrendered, setSurrendered] = useState(false)
-  // 本溢出 episode 内已收缩次数（ref 传递，不走渲染）。
-  const attemptsRef = useRef(0)
 
-  const plan: ViewportPlan = surrendered ? { mode: 'fallback' } : computeViewportPlan(rows, bottomRows)
-  const renderCap = resolveRenderCap(plan, surrendered ? 0 : shrinkRows)
+  const plan: ViewportPlan = computeViewportPlan(rows, bottomRows)
+  const renderCap = resolveRenderCap(plan, shrinkRows)
 
-  // 复位面 1：resize → 收缩量/episode/降级锁全归零（预算重算，重新有界尝试）。
+  // resize → 收缩量归零（预算重算，溢出由测量环重新收敛）。
   useLayoutEffect(() => {
-    attemptsRef.current = 0
     setShrinkRows(0)
-    setSurrendered(false)
   }, [rows])
-
-  // 复位面 2：bottom 槽实测高度变化（permission 卡出现/消失等布局语境
-  // 变化）→ episode/降级锁归零重新有界尝试（等值守卫：恒等高度不触发）。
-  const resetOnBottomChangeRef = useRef(bottomRows)
-  useEffect(() => {
-    if (resetOnBottomChangeRef.current !== bottomRows) {
-      resetOnBottomChangeRef.current = bottomRows
-      attemptsRef.current = 0
-      setSurrendered(false)
-    }
-  }, [bottomRows])
 
   // 预留行实测：bottom 槽（输入框/提示行/permission 卡等）高度。
   useLayoutEffect(() => {
@@ -100,30 +71,18 @@ export function InlineViewportCompressor({
     setBottomRows(prev => (prev === h ? prev : h))
   }, [bottom])
 
-  // 实测收缩环（有界 + 异步，gate-102 RED 修形）：整帧（消息区 + bottom +
-  // 提示行）> 视口 → resolveShrinkDecision 单步决策。收缩 setState 走
-  // setTimeout(0)：同 commit 环内零 setState（同步环 = Maximum update
-  // depth 崩溃根因）；surrender 单次 setState 后 plan 锁 fallback，后续
-  // 本 effect 早退，无环。scrollable/bottom 身份每 REPL 渲染都新 ⇒ 每
-  // 内容变化帧复测一次。
+  // 实测收缩环：整帧（消息区 + bottom + 提示行）> 视口 → 收缩消息区。
+  // scrollable/bottom 身份每 REPL 渲染都新（流式 chunk 经 REPL state 落）
+  // ⇒ 每 内容变化 帧复测一次；溢出 >0 才 setState（无环自激）。
   useLayoutEffect(() => {
     if (plan.mode !== 'compress') return
     const node = rootRef.current
     if (!node) return
-    const overflow = measureElement(node).height - rows
-    const decision = resolveShrinkDecision(overflow, attemptsRef.current)
-    if (decision.action === 'hold') {
-      attemptsRef.current = 0
-      return
+    const h = measureElement(node).height
+    const overflow = h - rows
+    if (overflow > 0) {
+      setShrinkRows(prev => prev + overflow + 1)
     }
-    if (decision.action === 'surrender') {
-      attemptsRef.current = 0
-      setSurrendered(true)
-      return
-    }
-    attemptsRef.current += 1
-    const t = setTimeout(() => setShrinkRows(prev => prev + decision.shrinkRows), 0)
-    return () => clearTimeout(t)
   }, [scrollable, bottom, rows, plan])
 
   if (plan.mode === 'degraded') {

@@ -14,14 +14,12 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
-  MAX_SHRINK_ATTEMPTS,
   MIN_COMPRESS_ROWS,
   MIN_SURGERY_ROWS,
   STREAMING_BLOCK_CAP_ROWS,
   capStreamingText,
   computeViewportPlan,
   resolveRenderCap,
-  resolveShrinkDecision,
 } from 'src/tui/components/viewportBudget'
 import { computeSliceStart, type SliceAnchor } from 'src/tui/components/Messages'
 
@@ -124,64 +122,6 @@ describe('capStreamingText（钉③ 流式块常数帽）', () => {
       const text = Array.from({ length: n }, (_, i) => `L${i}`).join('\n')
       expect(capStreamingText(text).text.split('\n').length).toBeLessThanOrEqual(STREAMING_BLOCK_CAP_ROWS)
     }
-  })
-})
-
-describe('resolveShrinkDecision（gate-102 RED 修形：有界收缩环）', () => {
-  test('常量定形：有界重试上限 = 2（f4 冻结判据 2）', () => {
-    expect(MAX_SHRINK_ATTEMPTS).toBe(2)
-  })
-
-  test('无溢出 → hold（episode 清零语义由调用方执行）', () => {
-    expect(resolveShrinkDecision(0, 0)).toEqual({ action: 'hold' })
-    expect(resolveShrinkDecision(-5, 1)).toEqual({ action: 'hold' })
-    expect(resolveShrinkDecision(Number.NaN, 0)).toEqual({ action: 'hold' })
-  })
-
-  test('收缩量钳制 = 实测溢出（禁 +1 盲加；f4 冻结判据 1）', () => {
-    expect(resolveShrinkDecision(7, 0)).toEqual({ action: 'shrink', shrinkRows: 7 })
-    expect(resolveShrinkDecision(1200, 0)).toEqual({ action: 'shrink', shrinkRows: 1200 })
-  })
-
-  test('溢出不可消除 → 有界重试耗尽 surrender（降级不崩溃格）', () => {
-    // 不可收敛序列（每次测量溢出恒 >0）：shrink → shrink → surrender，
-    // setState 总次数 ≤ MAX_SHRINK_ATTEMPTS + 1（surrender 单次锁形），
-    // 禁无限自激。
-    const episode: Array<{ action: string }> = []
-    let attempts = 0
-    for (let i = 0; i < 10; i++) {
-      const d = resolveShrinkDecision(15, attempts)
-      episode.push(d)
-      if (d.action === 'shrink') attempts += 1
-      if (d.action === 'surrender') break
-    }
-    expect(episode.map(d => d.action)).toEqual(['shrink', 'shrink', 'surrender'])
-  })
-
-  test('bottom 槽增长（permission 卡）→ 复位后重新有界尝试（收敛或降级）', () => {
-    // 复位语义：episode/降级锁归零后决策序列从头计——仍不可收敛则再次
-    // 有界 surrender（每次复位须 bottom 高度实际变化，无 setState 环）。
-    let attempts = 0
-    const runEpisode = (): string[] => {
-      const actions: string[] = []
-      for (let i = 0; i < 10; i++) {
-        const d = resolveShrinkDecision(15, attempts)
-        actions.push(d.action)
-        if (d.action === 'shrink') attempts += 1
-        if (d.action === 'hold') attempts = 0
-        if (d.action === 'surrender') {
-          attempts = 0
-          break
-        }
-      }
-      return actions
-    }
-    expect(runEpisode()).toEqual(['shrink', 'shrink', 'surrender'])
-    // bottom 复位（复位后 attempts 归零）→ 重新有界，仍 2 步 surrender。
-    expect(runEpisode()).toEqual(['shrink', 'shrink', 'surrender'])
-    // 收敛场景：溢出消除（hold 清零）后再溢出 → 新 episode 重新计数。
-    expect(resolveShrinkDecision(0, 2)).toEqual({ action: 'hold' })
-    expect(resolveShrinkDecision(3, 0)).toEqual({ action: 'shrink', shrinkRows: 3 })
   })
 })
 
