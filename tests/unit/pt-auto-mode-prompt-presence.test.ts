@@ -25,9 +25,9 @@ const PERM_BASE = 'src/permissions/autoMode/prompts/permissions_external.txt'
 const AUTO_BASE =
   'src/permissions/autoMode/prompts/auto_mode_system_prompt.txt'
 const PERM_TUI =
-  'src/tui/utils/permissions/yolo-classifier-prompts/permissions_external.txt'
+  'src/kernel/utils/permissions/yolo-classifier-prompts/permissions_external.txt'
 const AUTO_TUI =
-  'src/tui/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt'
+  'src/kernel/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt'
 
 /** 断言 text 含全部必需子串（缺失 = 规则面被裁/漂移，红）。 */
 function expectAllPresent(label: string, text: string, subs: string[]) {

@@ -54,9 +54,9 @@ const PREFLIGHT = 'src/tui/utils/preflightChecks.tsx'
 const AUTH = 'src/tui/utils/auth.ts'
 const OAUTH_PROFILE = 'src/tui/services/oauth/getOauthProfile.ts'
 const BETAS = 'src/tui/utils/betas.ts'
-const PDF_TUI = 'src/tui/utils/pdfUtils.ts'
+const PDF_TUI = 'src/kernel/utils/pdfUtils.ts'
 const PDF_ENGINE = 'src/engine/tools/files/pdfUtils.ts'
-const CONST_BETAS = 'src/tui/constants/betas.ts'
+const CONST_BETAS = 'src/kernel/constants/betas.ts'
 const MP_CONSTANTS = 'src/modelprovider/constants.ts'
 
 // C-2a 三活 1P anthropic/claude URL 基址字面（本波中性化面；OOS MCP 面除外）。

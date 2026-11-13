@@ -59,9 +59,9 @@ function countOf(haystack: string, needle: string): number {
 }
 
 const AUTH = 'src/tui/utils/auth.ts'
-const AUTH_PORTABLE = 'src/tui/utils/authPortable.ts'
+const AUTH_PORTABLE = 'src/kernel/utils/authPortable.ts'
 const KEYCHAIN_PREFETCH = 'src/tui/utils/secureStorage/keychainPrefetch.ts'
-const MACOS_HELPERS = 'src/tui/utils/secureStorage/macOsKeychainHelpers.ts'
+const MACOS_HELPERS = 'src/kernel/utils/secureStorage/macOsKeychainHelpers.ts'
 const SETTINGS_ADAPTER = 'src/tui/config/settings-adapter.ts'
 
 // anthropic keychain 读写子进程字面 + 函数族符号（本波清零面）。OOS macOsKeychain
@@ -132,7 +132,7 @@ describe('0.1.72 C-1c：keychainPrefetch import 面 + 死文件删除 + OOS help
     expect(src).toContain('export function clearKeychainCache')
     // auth.ts 仅保留 clearKeychainCache 一条 OOS 活消费（anthropic keychain 消费已清）
     const auth = srcOf(AUTH)
-    expect(auth).toContain("import { clearKeychainCache } from './secureStorage/macOsKeychainHelpers.js'")
+    expect(auth).toContain("import { clearKeychainCache } from '../../kernel/utils/secureStorage/macOsKeychainHelpers.js'")
     expect(auth).not.toContain('getMacOsKeychainStorageServiceName')
   })
 })

@@ -17,7 +17,7 @@
  */
 import { describe, expect, test } from 'bun:test'
 
-const TUI_SPEC = '../../src/tui/utils/settings/types.js'
+const TUI_SPEC = '../../src/kernel/settings/types.js'
 const ENGINE_SPEC = '../../src/engine/config/types.js'
 
 describe.each([

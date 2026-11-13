@@ -74,7 +74,7 @@ function liveTree(): string {
 
 const METADATA = 'src/tui/services/api/metadata.ts'
 const WITH_RETRY = 'src/tui/services/api/withRetry.ts'
-const CORE_SCHEMAS = 'src/tui/entrypoints/sdk/coreSchemas.ts'
+const CORE_SCHEMAS = 'src/kernel/entrypoints/sdk/coreSchemas.ts'
 const OUTPUTS_SCANNER = 'src/tui/utils/filePersistence/outputsScanner.ts'
 const MCP_UTILS = 'src/tui/services/mcp/utils.ts'
 const OFFICIAL_GCS = 'src/tui/utils/plugins/officialMarketplaceGcs.ts'

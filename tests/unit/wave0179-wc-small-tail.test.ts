@@ -74,7 +74,7 @@ describe('wave0179 #20 normalizeNameForMCP empty-after-fold guard', () => {
     for (const rel of [
       'src/permissions/mcpRuleNames.ts',
       'src/engine/tools/mcp.ts',
-      'src/tui/services/mcp/normalization.ts',
+      'src/kernel/services/mcp/normalization.ts',
     ]) {
       const live = srcOf(rel).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/gm, '$1')
       expect(live.includes("normalized === '' ? folded : normalized")).toBe(true)
@@ -666,7 +666,7 @@ describe('wave0179 C8-2 DirectoryAdded hook 事件', () => {
   })
 
   test('SDK schema 面：coreSchemas HOOK_EVENTS 镜像 + DirectoryAddedHookInputSchema', () => {
-    const src = srcOf('src/tui/entrypoints/sdk/coreSchemas.ts')
+    const src = srcOf('src/kernel/entrypoints/sdk/coreSchemas.ts')
     expect(src.includes("'DirectoryAdded',")).toBe(true)
     expect(src.includes('DirectoryAddedHookInputSchema')).toBe(true)
     expect(src.includes("hook_event_name: z.literal('DirectoryAdded')")).toBe(true)
@@ -718,7 +718,7 @@ describe('wave0179 C8-3 MessageDisplay hook 事件', () => {
   })
 
   test('SDK 双面：coreSchemas HOOK_EVENTS 镜像 + MessageDisplayHookInputSchema + agentSdkTypes 占位型', () => {
-    const schemasSrc = srcOf('src/tui/entrypoints/sdk/coreSchemas.ts')
+    const schemasSrc = srcOf('src/kernel/entrypoints/sdk/coreSchemas.ts')
     expect(schemasSrc.includes("'MessageDisplay',")).toBe(true)
     expect(schemasSrc.includes('MessageDisplayHookInputSchema')).toBe(true)
     expect(schemasSrc.includes("hook_event_name: z.literal('MessageDisplay')")).toBe(true)

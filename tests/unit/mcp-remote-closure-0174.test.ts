@@ -57,7 +57,7 @@ function srcTree(): string {
 const TYPES = 'src/tui/services/mcp/types.ts'
 const AUTH = 'src/tui/services/mcp/auth.ts'
 const CLIENT = 'src/tui/services/mcp/client.ts'
-const CORE_SCHEMAS = 'src/tui/entrypoints/sdk/coreSchemas.ts'
+const CORE_SCHEMAS = 'src/kernel/entrypoints/sdk/coreSchemas.ts'
 const OAUTH = 'src/tui/constants/oauth.ts'
 const CLI_HANDLER = 'src/tui/cli/handlers/mcp.tsx'
 const MANAGED_ENV = 'src/tui/utils/managedEnv.ts'

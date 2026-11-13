@@ -120,7 +120,7 @@ describe('C9-5 文档模板 + schema 声明源级锚', () => {
   })
   test('双拷贝 schema 声明面在场（engine + tui 同形键）', () => {
     const engineSrc = srcOf('src/engine/config/types.ts')
-    const tuiSrc = srcOf('src/tui/utils/settings/types.ts')
+    const tuiSrc = srcOf('src/kernel/settings/types.ts')
     for (const src of [engineSrc, tuiSrc]) {
       expect(src).toContain('skillOverrides:')
       expect(src).toContain("z.literal('user-invocable-only')")

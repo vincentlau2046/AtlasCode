@@ -19,7 +19,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 
 const GIT_PATH = '../../src/tui/utils/git.js'
-const CWD_PATH = '../../src/tui/utils/cwd.js'
+const CWD_PATH = '../../src/kernel/utils/cwd.js'
 const EXEC_PATH = '../../src/tui/utils/execFileNoThrow.js'
 const DIFF_PATH = '../../src/tui/utils/gitDiff.js'
 

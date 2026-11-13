@@ -8,7 +8,7 @@
  * 仅提示面（零行为变更：不改 403 throw 契约 / turnRecovery / 重试集，不加自动重试）；
  * 403 非配额签名 = 恒等锚（A-3 新增支不命中，落既有兜底路径，原始文案保留）。
  *
- * 注：TUI 宿主 auth 支的 `error instanceof APIError`（src/tui/types/atlas.ts 自有类）
+ * 注：TUI 宿主 auth 支的 `error instanceof APIError`（src/kernel/types/atlas.ts 自有类）
  * 与 modelprovider 域 APIError / openai SDK 错误类不同类（既有面，非本波范围）——
  * 本 A-3 新增支用 ModelPoolExhaustedError（单一事实源类）+ duck-type 403 配额签名，
  * 不依赖跨域 APIError 类恒等，故对实际抛出的错误类稳健命中。
