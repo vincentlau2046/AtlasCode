@@ -65,3 +65,16 @@ noteEvent 单源只计「已到达事件」。合法慢但**事件面断裂**形
 ## §6 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 D → 段 I → 段 G → 段 L → f4 收口。row F 全程。
+
+## §7 Atlas-reveiw 审计闭环（2026-11-13，通过 + 6 条吸收）+ f4 吸收
+
+审计结论：通过，附 6 条吸收建议（零码未动文件；§0 锚全实锚复核 ✓ 含 loop.ts:231 wrapPermissionGateWithWatchdog 既有交互点）。逐条吸收落 lock-face/判据面：
+
+1. **env 三态翻转句 + 负值语义钉死**：CHANGELOG 句式「未设/空/非法」三态并入同一翻转句（非法值现 fail-open 到开 → 新形关，同翻转面）；负值归「非法 → 关」，钉死禁「负值=无限期」新语义。
+2. **timeoutMs wrapper 三钉**：(a) arm 时点 = 权限门后实际执行开始（预执行权限等待不计预算）；(b) 执行中用户交互等待（ask 支/defer）→ deadline 暂停/重置，判定面与 watchdog 豁免**同源单源**（禁第二判定实现）；(c) AbortSignal 贯通走既有工具 abort 通道（Escape 同链，killWhen 先例）——禁新终止路径。
+3. **残余面精确定性**：主请求真挂起已有 #260 LLM_TIMEOUT 门覆盖；净残余 = 未声明工具真挂起 + 网关流挂死且 #260 未及形态。lock-face 首批清单**逐项附依据列**（#260 门值/心跳数据/工具内既有 timeout 实参），「禁拍头」落为数据要求。**timeoutMs 不出 LLM schema**（wrapper 层契约非工具描述字段——防 token manifest/wire 锚漂移；如欲入描述另立 token 新锚登记）。
+4. **格 1 短腿拆分**：GREEN 侧无须 120s 真时长——缺省关 = 无窗，5-10s 真腿 + **无 env 时 arm() 零调用 spy 断言**（loop.ts:825 链，毫秒级结构格）即证；RED 侧（0.1.103 缺省杀）120s 真形可选，同构替代 = 0.1.103 + env 短窗。**禁 120s 真时长做成 gate 硬成本**。
+5. **补 4 格**：格 2 扩（opt-in 下四豁免仍生效——permission/defer 等待不误杀回归）；到期零孤儿进程格；disarm/不二 firing 格；**无声明零 wire 差格**（timeoutMs 不入 schema → 工具描述 wire 字节零 diff + token manifest diffs=0）。
+6. 审计结论：吸收后直接发双信号，无需二审。
+
+段 D lock-face 必答清单更新：env 三态终形 / wrapper 三钉落点 / 首批清单（逐项依据列）/ TOOL_TIMEOUT 消息终形 / defer 判定同源单源挂点。
