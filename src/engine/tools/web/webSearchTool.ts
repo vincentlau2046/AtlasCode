@@ -139,6 +139,10 @@ export const WebSearchTool: WebSearchToolFace = {
   searchHint: 'search the web for current information',
   maxResultSizeChars: 100_000,
   shouldDefer: true,
+  // 0.1.104 切片 2 首批声明（lock-face 必答 3，依据列）：内部 SEARCH_TIMEOUT_MS=15_000
+  // （webSearchProvider.ts:49 per-request AbortSignal.timeout）——wrapper 30s = 内部
+  // 15s × 2 余量。wrapper 层契约，不入 LLM schema（wire 零 diff）。
+  timeoutMs: 30_000,
   // delta ①：旧 z.strictObject 面
   strict: true,
   isEnabled: () => {
