@@ -37,7 +37,7 @@
 |---|---|---|---|
 | C-1 | **KV-cache 保真摘要**（指令=最后 user 消息真前缀，同模型时 cache 复用） | **已核（print.ts:1190 + loopDeps.ts:267 双车道）：指令后置形已在**（`[...msgs, prompt]`）；真 delta = ① 路由 role:'small'（非同模型则 cache 池不同，复用前提破）；② system prompt/tools 线格式奇偶未证（DSH 明言「保留对话自身 system+tools 使真前缀成立」，AtlasCode 辅调用是否带同 tools 待 provider 面核） | 中→**待核**——单模型池（如现 glm-5 单面）下 small=main 时价值升高；核 ② 后定 |
 | C-2 | **tool-pairing 平衡边选择** | **已核（compact.ts:549）：`messages.slice(-keepRecent)` 无 pairing 平衡检查**——切点可落 tool_use/tool_result 中间（keepRecent>0 时） | **高**——孤儿 tool_result 边是 provider 拒绝/resume 兼容硬伤族（085 R-085-1 同族缝）；修法小（切点回退至平衡边，沿 DSH toolPairingBalancedBefore 语义） |
-| C-3 | **provider 确认 overflow 触发**（第二触发类） | 仅阈值判定 + 熔断；overflow 时每轮 hammer doomed 压缩靠熔断兜 | 中——overflow 确认码直触一次压缩，少 3 轮废轮 |
+| C-3 | **provider 确认 overflow 触发**（第二触发类） | **已实现（0.1.92 波前活码重核勘误 2026-11-07，初判口径作废）**：413/PTL 反应式压缩 0.1.37 D1 双车道在位（engine/query/loop.ts:875-935 消费点 + TUI contextHostWiring 全量体 + headless engine/loopDeps.ts:264 窄体；`reactiveRetried` 全 loop 一次性门，非每轮 hammer）；阈值路径三败熔断独立（autoCompact.ts:683）。残面 = `isReactiveCompactRecoverableError` 判形对现网错误形态覆盖小核（归 0.1.92 C-3 登记收口件） | 已核销——登记收口 |
 | C-4 | **durable 事务标记 + 不变式插件**（压缩锁落盘可恢复） | 内存熔断 + 内存 tracking（crash 即失） | 中——crash 后压缩中断可检测可续；体量较大 |
 | C-5 | 失败六码分类 + tool-result-pruner 伴生 | 失败面笼统 | 低（顺带） |
 
