@@ -31,7 +31,7 @@
 
 | # | 格 |
 |---|---|
-| 1 | **重落恰形格**：`git diff 367af220..HEAD -- src/` 恰 = 两件原 patch 复活（文件集 ⊆ {theme 4 + timeoutMs 5}，hunk 与原 patch 同构） |
+| 1 | **重落恰形格**：`git diff 367af220..HEAD -- src/` 恰 = 两件原 patch 复活（文件集 ⊆ {theme 4 + timeoutMs 5}，hunk 与原 patch 同构；§0.1 勘误后镜像面 = theme 5 文件 +408/−2 / timeoutMs 6 文件 +4/−404）；**格 1b 测试复活逐字节**：两测试文件对 `21199f14`/`da318752` 原版 cmp 恒等 |
 | 2 | **主题格**：watcher 真实现生效 + OS 外观第四源 + AUTO_THEME 缺省开（原 gate-102 切片 1 判据复活 + `p0-theme-layered-detection.test.ts` 回归） |
 | 3 | **timeoutMs 格**：十测全绿（wrapper arm/哨兵消歧/race 死线/disarm）+ **无声明零 wire 差格**（timeoutMs 不入 schema：工具描述 wire 字节零 diff + token manifest diffs=0）+ WebFetch 90s/WebSearch 30s 声明在场 |
 | 4 | canon 净域（Δ 恰 = 两测试文件复活面）+ standing 14 腿 + TUI smoke |
@@ -48,9 +48,14 @@
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → Main 段 I（revert-of-revert + 配套）→ 段 G → 段 L → 生产 lane → f4 收口。row F 全程。
 
-## §6 Atlas-reveiw 审计闭环
+## §6 Atlas-reveiw 审计闭环（2026-11-13，通过 + 1 勘误 + 3 建议）
 
-（待审）
+审计结论：**通过**（零触碰证明独立重扫穷尽成立——11 目标文件全程 git log 仅各自 patch 链触碰；base 处两目标集恰为原 patch 前状态 → revert-of-revert 逐字节复活；格 1 过 ancestor/descendant 教训关；watchdog 独立性补证：da318752 内 watchdog 提及仅注释级零 import，亡树上可编译）。吸收：
+
+1. **勘误（§0.1 账面）**：主题件镜像面实为 **5 文件 +408/−2**（原「+233/−2」= src 4 文件子集，175L 测试未计）——以 +408/−2 为段 G 对表锚。
+2. **补格 1b「测试复活逐字节格」**：`git show 21199f14:tests/unit/p0-theme-layered-detection.test.ts` 与 HEAD 同位 cmp 恒等 + `git show da318752:tests/unit/tool-timeout-wrapper.test.ts` 同理——封「借机改测试」缝。
+3. **CHANGELOG 互引两点**：① 条目明写「重落 0.1.104 所撤回之主题分层检测 / per-tool timeoutMs（原 0.1.102 切片 1 + 封存切片 2；与两实机 P0 事故无因果）」；② 对称句——0.1.104 声明 FEATURE_AUTO_THEME「回落关」→ 0.1.105 声明「重新缺省开（FEATURE_AUTO_THEME=false kill-switch 仍有效）」。
+4. **自理备案**：① e2e designation——p0-01102-gate.ts 中 theme 腿随本波复活重新激活（compressor/crash 腿维持除役），e2e lane 自理；② 复活码内 3 处「loop watchdog」陈旧注释**维持原形逐字复活不借机改**，登记后续波顺手清。
 
 ## §7 登记面
 
