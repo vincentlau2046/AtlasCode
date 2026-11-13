@@ -26,7 +26,7 @@
  * - Non-existent files are silently ignored
  */
 
-import { findMemoryFile, getConfigDirNameForProject } from './configDir.js'
+import { findMemoryFile, getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { feature } from 'src/shared'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
@@ -53,17 +53,17 @@ import {
   getMemoryPath,
   getUserClaudeRulesDir,
 } from './config.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { getErrnoCode } from './errors.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { normalizePathForComparison } from './file.js'
 import { cacheKeys, type FileStateCache } from './fileStateCache.js'
 import {
   parseFrontmatter,
   splitPathInFrontmatter,
 } from './frontmatterParser.js'
-import { getFsImplementation, safeResolvePath } from './fsOperations.js'
+import { getFsImplementation, safeResolvePath } from './fsOperations'
 import { findCanonicalGitRoot, findGitRoot } from './git.js'
 import {
   executeInstructionsLoadedHooks,
@@ -74,7 +74,7 @@ import {
 import type { MemoryType } from './memory/types.js'
 import { expandPath } from './path.js'
 import { pathInWorkingPath } from './permissions/filesystem.js'
-import { isSettingSourceEnabled } from './settings/constants.js'
+import { isSettingSourceEnabled } from './settings/constants'
 import { getInitialSettings } from './settings/settings.js'
 
 const teamMemPaths = feature('TEAMMEM')

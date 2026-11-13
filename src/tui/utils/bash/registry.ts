@@ -1,31 +1,10 @@
 import { memoizeWithLRU } from '../memoize.js'
-import specs from './specs/index.js'
+import specs from '../../../kernel/shell/bash/specs/index.js'
 
-export type CommandSpec = {
-  name: string
-  description?: string
-  subcommands?: CommandSpec[]
-  args?: Argument | Argument[]
-  options?: Option[]
-}
+import type { CommandSpec, Argument, Option } from '../../../kernel/shell/bash/types.js'
 
-export type Argument = {
-  name?: string
-  description?: string
-  isDangerous?: boolean
-  isVariadic?: boolean // repeats infinitely e.g. echo hello world
-  isOptional?: boolean
-  isCommand?: boolean // wrapper commands e.g. timeout, sudo
-  isModule?: string | boolean // for python -m and similar module args
-  isScript?: boolean // script files e.g. node script.js
-}
+export type { CommandSpec, Argument, Option }
 
-export type Option = {
-  name: string | string[]
-  description?: string
-  args?: Argument | Argument[]
-  isRequired?: boolean
-}
 
 export async function loadFigSpec(
   command: string,

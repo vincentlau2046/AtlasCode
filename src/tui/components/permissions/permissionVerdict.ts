@@ -31,13 +31,13 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import {
   getSettingSourceDisplayNameLowercase,
-} from '../../utils/settings/constants.js'
-import { permissionRuleValueToString } from '../../utils/permissions/permissionRuleParser.js'
+} from '../../utils/settings/constants'
+import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js'
 import { permissionModeTitle } from '../../utils/permissions/PermissionMode.js'
 import type {
   PermissionDecisionReason,
   PermissionMode,
-} from '../../types/permissions.js'
+} from '../../../kernel/types/permissions.js'
 
 /** verdict 行统一前缀（探针关键词族对齐用，文案原创）。 */
 export const VERDICT_PREFIX = 'Verdict'

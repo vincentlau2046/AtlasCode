@@ -1,10 +1,10 @@
 import { buildComputerUseTools } from '@ant/computer-use-mcp'
 import { join } from 'path'
 import { fileURLToPath } from 'url'
-import { buildMcpToolName } from '../../services/mcp/mcpStringUtils.js'
+import { buildMcpToolName } from '../../../kernel/services/mcp/mcpStringUtils.js'
 import type { ScopedMcpServerConfig } from '../../services/mcp/types.js'
 
-import { isInBundledMode } from '../bundledMode.js'
+import { isInBundledMode } from '../../../kernel/utils/bundledMode.js'
 import { CLI_CU_CAPABILITIES, COMPUTER_USE_MCP_SERVER_NAME } from './common.js'
 import { getChicagoCoordinateMode } from './gates.js'
 

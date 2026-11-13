@@ -1,11 +1,11 @@
 import { modelProvider, buildOpenAIParams, toResponseFormat } from 'src/modelprovider'
-import type { Message } from '../../types/message.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { errorMessage } from '../../utils/errors.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { logForDebugging } from '../../utils/debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { safeParseJSON } from '../../utils/json.js'
 import { createUserMessage, extractTextContent } from '../../utils/messages.js'
 import { extractConversationText } from '../../utils/sessionTitle.js'
-import { asSystemPrompt } from '../../utils/systemPromptType.js'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 
 export async function generateSessionName(
   messages: Message[],

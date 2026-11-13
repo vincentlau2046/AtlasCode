@@ -41,7 +41,7 @@ import type { ToolResult } from '../../Tool.js'
 import { bashToolHasPermission, BashTool as EngineBashTool } from 'src/engine'
 import { getSimplePrompt } from './prompt.js'
 import { renderToolUseMessage } from './UI.js'
-import { BASH_TOOL_NAME } from './toolName.js'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
 
 const inputSchema = z.object({
   command: z

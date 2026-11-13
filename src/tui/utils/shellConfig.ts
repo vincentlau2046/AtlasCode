@@ -6,7 +6,7 @@
 import { open, readFile, stat } from 'fs/promises'
 import { homedir as osHomedir } from 'os'
 import { join } from 'path'
-import { isFsInaccessible } from './errors.js'
+import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import { getLocalAtlasPath } from './localInstaller.js'
 
 export const ATLAS_ALIAS_REGEX = /^\s*alias\s+atlas\s*=/

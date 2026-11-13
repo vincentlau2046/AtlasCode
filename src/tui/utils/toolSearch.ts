@@ -20,19 +20,19 @@ import {
   isDeferredTool,
   TOOL_SEARCH_TOOL_NAME,
 } from '../tools/ToolSearchTool/prompt.js'
-import type { Message } from '../types/message.js'
+import type { Message } from '../../kernel/types/message.js'
 import {
   countToolDefinitionTokens,
   TOOL_TOKEN_COUNT_OVERHEAD,
 } from './analyzeContext.js'
-import { count } from './array.js'
+import { count } from '../../kernel/utils/array.js'
 import { getMergedBetas } from './betas.js'
-import { getContextWindowForModel } from './context.js'
-import { logForDebugging } from './debug.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
-import { isDefaultGateway } from './model/providers.js'
-import { jsonStringify } from './slowOperations.js'
-import { zodToJsonSchema } from './zodToJsonSchema.js'
+import { getContextWindowForModel } from '../../kernel/utils/context.js'
+import { logForDebugging } from './debug'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { isDefaultGateway } from '../../kernel/model/providers.js'
+import { jsonStringify } from './slowOperations'
+import { zodToJsonSchema } from '../../kernel/utils/zodToJsonSchema.js'
 
 /**
  * Default percentage of context window at which to auto-enable tool search.

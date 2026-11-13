@@ -12,20 +12,20 @@ import { buildTool, type ToolDef } from '../../Tool.js';
 import type { LocalAgentTaskState } from '../../tasks/LocalAgentTask/LocalAgentTask.js';
 import type { LocalShellTaskState } from '../../tasks/LocalShellTask/guards.js';
 import type { TaskState } from '../../tasks/types.js';
-import { AbortError } from '../../utils/errors.js';
-import { lazySchema } from '../../utils/lazySchema.js';
+import { AbortError } from '../../../kernel/utils/errors.js';
+import { lazySchema } from '../../../kernel/utils/lazySchema.js';
 import { extractTextContent } from '../../utils/messages.js';
 import { semanticBoolean } from '../../utils/semanticBoolean.js';
-import { sleep } from '../../utils/sleep.js';
-import { jsonParse } from '../../utils/slowOperations.js';
-import { countCharInString } from '../../utils/stringUtils.js';
+import { sleep } from '../../../kernel/utils/sleep.js';
+import { jsonParse } from '../../utils/slowOperations';
+import { countCharInString } from '../../../kernel/utils/stringUtils.js';
 import { getTaskOutput } from '../../utils/task/diskOutput.js';
 import { updateTaskState } from '../../utils/task/framework.js';
 import { formatTaskOutput } from '../../utils/task/outputFormatting.js';
 import type { ThemeName } from '../../utils/theme.js';
 import { AgentPromptDisplay, AgentResponseDisplay } from '../AgentTool/UI.js';
 import BashToolResultMessage from '../BashTool/BashToolResultMessage.js';
-import { TASK_OUTPUT_TOOL_NAME } from './constants.js';
+import { TASK_OUTPUT_TOOL_NAME } from '../../../kernel/tools/TaskOutputTool/constants.js';
 const inputSchema = lazySchema(() => z.strictObject({
   task_id: z.string().describe('The task ID to get output from'),
   block: semanticBoolean(z.boolean().default(true)).describe('Whether to wait for completion'),
@@ -53,7 +53,7 @@ type TaskOutputToolOutput = {
 };
 
 // Re-export Progress from centralized types to break import cycles
-export type { TaskOutputProgress as Progress } from '../../types/tools.js';
+export type { TaskOutputProgress as Progress } from '../../../kernel/types/tools.js';
 
 // Get output for any task type
 async function getTaskOutputData(task: TaskState): Promise<TaskOutput> {

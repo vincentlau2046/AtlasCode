@@ -25,7 +25,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { fetchGitDiff, fetchGitDiffHunks } from '../../src/tui/utils/gitDiff.js'
-import { runWithCwdOverride } from '../../src/tui/utils/cwd.js'
+import { runWithCwdOverride } from '../../src/kernel/utils/cwd.js'
 
 // ── 门控：git 可用性 + reftable 支持探针 ────────────────────────────────────
 function gitVersionOk(): boolean {

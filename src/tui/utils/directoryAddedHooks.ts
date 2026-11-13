@@ -10,7 +10,7 @@
  * 异常吞并（logForDebugging）：钩子执行失败不向 UI 冒泡（目录加入主路径
  * fail-safe，同 modelSwitchHooks 语义）。
  */
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import { executeDirectoryAddedHooks } from './hooks.js'
 
 /** 目录加入钩子专用超时（同 modelSwitchHooks 档——命令主路径不挂起）。 */

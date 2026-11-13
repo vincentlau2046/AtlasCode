@@ -512,7 +512,7 @@ export type UserPromptSubmitHookInput = any;
 // (e.g. security-guidance's SubagentStop hook → hook-load-failed).
 // This explicit re-export wins over the `export * from './sdk/coreTypes.js'`
 // star import above.
-export { HOOK_EVENTS } from './sdk/coreSchemas.js';
+export { HOOK_EVENTS } from '../../kernel/entrypoints/sdk/coreSchemas.js';
 export type PermissionUpdate = any;
 export type SDKAssistantMessageError = any;
 export type SDKPartialAssistantMessage = any;

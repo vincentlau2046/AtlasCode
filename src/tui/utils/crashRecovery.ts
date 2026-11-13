@@ -18,7 +18,7 @@
  * (cli 域不引 tui 域边界纪律) — its lane is crashBackstop.ts stderr + abort.
  */
 
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 
 export type CrashKind = 'uncaughtException' | 'unhandledRejection'
 

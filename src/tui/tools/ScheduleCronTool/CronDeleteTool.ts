@@ -6,7 +6,7 @@ import {
   listAllCronTasks,
   removeCronTasks,
 } from '../../utils/cronTasks.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { getTeammateContext } from 'src/shared'
 import {
   buildCronDeletePrompt,

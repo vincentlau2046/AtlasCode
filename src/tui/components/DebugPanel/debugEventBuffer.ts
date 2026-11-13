@@ -2,7 +2,7 @@
 // 17-TUI设计方案 §9.6：独立模块级 ring buffer（不走 AppState，避免高频写拖累订阅者）
 // 仿 SandboxEventBus 模式 + DevBar useInterval 轮询取数
 
-import { createSignal } from '../../utils/signal.js'
+import { createSignal } from '../../../kernel/utils/signal.js'
 
 export interface DebugEvent {
   type: 'tool_call' | 'tool_result' | 'error'

@@ -1,4 +1,4 @@
-import { getConfigDirNameForProject } from '../../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import type { SettingSource } from 'src/tui/utils/settings/constants.js'
 import type { AgentDefinition } from '../../tools/AgentTool/loadAgentsDir.js'
 

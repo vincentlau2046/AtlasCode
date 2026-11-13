@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { ATLAS_GUIDE_AGENT } from './built-in/atlasCodeGuideAgent.js'
 import { EXPLORE_AGENT } from './built-in/exploreAgent.js'
 import { GENERAL_PURPOSE_AGENT } from './built-in/generalPurposeAgent.js'

@@ -3,7 +3,7 @@ import { BLACK_CIRCLE } from 'src/tui/constants/figures.js';
 import { getModeColor } from 'src/tui/utils/permissions/PermissionMode.js';
 import { Box, Text } from '../../ink.js';
 import type { ToolProgressData } from '../../Tool.js';
-import type { ProgressMessage } from '../../types/message.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
 import type { ThemeName } from '../../utils/theme.js';
 import type { Output } from './EnterPlanModeTool.js';
 export function renderToolUseMessage(): React.ReactNode {

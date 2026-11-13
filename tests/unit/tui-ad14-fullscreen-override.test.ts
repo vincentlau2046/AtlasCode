@@ -28,7 +28,7 @@ import {
   _resetForTesting,
 } from '../../src/tui/utils/fullscreen.js'
 import { SettingsSchema as EngineSettingsSchema } from '../../src/engine/config/types.js'
-import { SettingsSchema as TuiSettingsSchema } from '../../src/tui/utils/settings/types.js'
+import { SettingsSchema as TuiSettingsSchema } from '../../src/kernel/settings/types.js'
 
 const ENV_KEYS = ['ATLAS_NO_FLICKER', 'TMUX', 'TERM_PROGRAM', 'TERM'] as const
 

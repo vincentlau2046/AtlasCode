@@ -1,8 +1,8 @@
 import { execaSync } from 'execa'
-import { getCwd } from '../cwd.js'
-import { logForDebugging } from '../debug.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../debug'
 import { execFileNoThrow } from '../execFileNoThrow.js'
-import { jsonParse, jsonStringify } from '../slowOperations.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
 import {
   CREDENTIALS_SERVICE_SUFFIX,
   clearKeychainCache,
@@ -10,8 +10,8 @@ import {
   getUsername,
   KEYCHAIN_CACHE_TTL_MS,
   keychainCacheState,
-} from './macOsKeychainHelpers.js'
-import type { SecureStorage, SecureStorageData } from './types.js'
+} from '../../../kernel/utils/secureStorage/macOsKeychainHelpers.js'
+import type { SecureStorage, SecureStorageData } from '../../../kernel/utils/secureStorage/types.js'
 
 // `security -i` reads stdin with a 4096-byte fgets() buffer (BUFSIZ on darwin).
 // A command line longer than this is truncated mid-argument: the first 4096

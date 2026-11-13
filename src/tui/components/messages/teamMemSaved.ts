@@ -1,4 +1,4 @@
-import type { SystemMemorySavedMessage } from '../../types/message.js'
+import type { SystemMemorySavedMessage } from '../../../kernel/types/message.js'
 
 /**
  * Returns the team-memory segment for the memory-saved UI, plus the count so

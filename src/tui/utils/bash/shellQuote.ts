@@ -9,7 +9,7 @@ import {
   quote as shellQuoteQuote,
 } from 'shell-quote'
 import { logError } from '../log.js'
-import { jsonStringify } from '../slowOperations.js'
+import { jsonStringify } from '../slowOperations'
 
 export type { ParseEntry } from 'shell-quote'
 

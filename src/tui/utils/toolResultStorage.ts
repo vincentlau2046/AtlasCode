@@ -2,7 +2,7 @@
  * Utility for persisting large tool results to disk instead of truncating them.
  */
 
-import type { ToolResultBlockParam } from '../types/atlas.js'
+import type { ToolResultBlockParam } from '../../kernel/types/atlas.js'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
@@ -14,13 +14,13 @@ import {
 } from '../constants/toolLimits.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { sanitizeToolNameForAnalytics } from '../services/analytics/metadata.js'
-import type { Message } from '../types/message.js'
-import { logForDebugging } from './debug.js'
-import { getErrnoCode, toError } from './errors.js'
+import type { Message } from '../../kernel/types/message.js'
+import { logForDebugging } from './debug'
+import { getErrnoCode, toError } from '../../kernel/utils/errors.js'
 import { formatFileSize } from './format.js'
 import { logError } from './log.js'
 import { getProjectDir } from './sessionStorage.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 // Subdirectory name for tool results within a session
 export const TOOL_RESULTS_SUBDIR = 'tool-results'

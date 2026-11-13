@@ -13,7 +13,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 import { useAppState, useAppStateStore, useSetAppState } from '../state/AppState.js';
 import { hasForegroundTasks } from '../tasks/LocalShellTask/LocalShellTask.js';
 import { useNotifications } from '../context/notifications.js';
-import { count } from '../utils/array.js';
+import { count } from '../../kernel/utils/array.js';
 import { getTerminalPanel } from '../utils/terminalPanel.js';
 import { toggleDensity } from '../components/StatusLine/segments/densityStore.js';
 type Props = {

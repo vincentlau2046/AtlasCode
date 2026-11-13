@@ -14,15 +14,15 @@ import ScrollBox, { type ScrollBoxHandle } from '../../ink/components/ScrollBox.
 import type { KeyboardEvent } from '../../ink/events/keyboard-event.js';
 import { Box, Text } from '../../ink.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
-import type { Message } from '../../types/message.js';
-import { createAbortController } from '../../utils/abortController.js';
+import type { Message } from '../../../kernel/types/message.js';
+import { createAbortController } from '../../../kernel/utils/abortController.js';
 import { saveGlobalConfig } from '../../utils/config.js';
-import { errorMessage } from '../../utils/errors.js';
+import { errorMessage } from '../../../kernel/utils/errors.js';
 import { type CacheSafeParams, getLastCacheSafeParams } from '../../utils/forkedAgent.js';
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js';
 import type { ProcessUserInputContext } from '../../utils/processUserInput/processUserInput.js';
 import { runSideQuestion } from '../../utils/sideQuestion.js';
-import { asSystemPrompt } from '../../utils/systemPromptType.js';
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js';
 type BtwComponentProps = {
   question: string;
   context: ProcessUserInputContext;

@@ -15,12 +15,12 @@
 import { z } from 'zod/v4'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { modelProvider, buildOpenAIParams, toResponseFormat } from 'src/modelprovider'
-import type { Message } from '../types/message.js'
-import { logForDebugging } from './debug.js'
+import type { Message } from '../../kernel/types/message.js'
+import { logForDebugging } from './debug'
 import { safeParseJSON } from './json.js'
-import { lazySchema } from './lazySchema.js'
+import { lazySchema } from '../../kernel/utils/lazySchema.js'
 import { createUserMessage, extractTextContent } from './messages.js'
-import { asSystemPrompt } from './systemPromptType.js'
+import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
 
 const MAX_CONVERSATION_TEXT = 1000
 

@@ -5,7 +5,7 @@
 import { getSessionBypassPermissionsMode } from 'src/bootstrap'
 import { getFlagSettingsPath, getInlinePlugins, getMainLoopModelOverride } from 'src/tui/bootstrapState.js'
 import { quote } from '../bash/shellQuote.js'
-import { isInBundledMode } from '../bundledMode.js'
+import { isInBundledMode } from '../../../kernel/utils/bundledMode.js'
 import type { PermissionMode } from '../permissions/PermissionMode.js'
 import { getTeammateModeFromSnapshot } from 'src/swarm'
 import { TEAMMATE_COMMAND_ENV_VAR } from './constants.js'

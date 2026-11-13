@@ -1,5 +1,5 @@
-import type { SdkWorkflowProgress } from '../../types/tools.js'
-import { enqueueSdkEvent } from '../sdkEventQueue.js'
+import type { SdkWorkflowProgress } from '../../../kernel/types/tools.js'
+import { enqueueSdkEvent } from '../../../kernel/utils/sdkEventQueue.js'
 
 /**
  * Emit a `task_progress` SDK event. Shared by background agents (per tool_use

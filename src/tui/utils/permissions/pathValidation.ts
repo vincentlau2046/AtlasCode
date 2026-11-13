@@ -7,7 +7,7 @@ import {
   getFsImplementation,
   getPathsForPermissionCheck,
   safeResolvePath,
-} from '../fsOperations.js'
+} from '../fsOperations'
 import { containsPathTraversal } from '../path.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import { containsVulnerableUncPath } from '../shell/readOnlyCommandValidation.js'
@@ -19,7 +19,7 @@ import {
   pathInAllowedWorkingPath,
   pathInWorkingPath,
 } from './filesystem.js'
-import type { PermissionDecisionReason } from './PermissionResult.js'
+import type { PermissionDecisionReason } from '../../../kernel/permissions/PermissionResult.js'
 
 const MAX_DIRS_TO_LIST = 5
 const GLOB_PATTERN_REGEX = /[*?[\]{}]/

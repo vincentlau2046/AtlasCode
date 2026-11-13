@@ -9,7 +9,7 @@
 // unit 层注内存 fake cache + fake fetch 即可驱动，零网络/零真盘。缺省（不注）
 // = 真盘缓存 + 真 `npm view`（生产路径）。
 
-import { createSignal } from '../../../utils/signal.js'
+import { createSignal } from '../../../../kernel/utils/signal.js'
 import { checkHasTrustDialogAccepted } from '../../../utils/config.js'
 import {
   diskUpdateCache,

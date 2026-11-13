@@ -1,20 +1,20 @@
 import { execa } from 'execa'
-import { getConfigDirName } from './configDir.js'
+import { getConfigDirName } from '../../kernel/utils/configDir.js'
 import { readFile, realpath } from 'fs/promises'
 import { homedir } from 'os'
 import { delimiter, join, posix, win32 } from 'path'
 import { checkGlobalInstallPermissions } from './autoUpdater.js'
-import { isInBundledMode } from './bundledMode.js'
+import { isInBundledMode } from '../../kernel/utils/bundledMode.js'
 import {
   formatAutoUpdaterDisabledReason,
   getAutoUpdaterDisabledReason,
   getGlobalConfig,
   type InstallMethod,
 } from './config.js'
-import { getCwd } from './cwd.js'
-import { isEnvTruthy } from './envUtils.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { execFileNoThrow } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import {
   getShellType,
   isRunningFromLocalInstallation,
@@ -35,13 +35,13 @@ import { getPlatform } from './platform.js'
 import { getRipgrepStatus } from 'src/tui/sandboxCompat'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import { getManagedFilePath } from './settings/managedPath.js'
-import { CUSTOMIZATION_SURFACES } from './settings/types.js'
+import { CUSTOMIZATION_SURFACES } from '../../kernel/settings/types.js'
 import {
   findAtlasAlias,
   findValidAtlasAlias,
   getShellConfigPaths,
 } from './shellConfig.js'
-import { jsonParse } from './slowOperations.js'
+import { jsonParse } from './slowOperations'
 import { which } from './which.js'
 
 export type InstallationType =

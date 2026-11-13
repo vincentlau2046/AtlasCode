@@ -17,7 +17,7 @@
  *
  * 零回归约束：skill 未调用 → 权限面零变更（写入只发生在显式调用支）。
  */
-import type { ContentBlockParam } from '../../types/atlas.js'
+import type { ContentBlockParam } from '../../../kernel/types/atlas.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 // 只读前缀族单一事实源经 engine 根门面取件（STR-1 entry-point 收口；
 // matchReadOnlyPrefix 与 bashToolHasPermission step 7 自动放行同源零漂移）
@@ -25,7 +25,7 @@ import { matchReadOnlyPrefix } from 'src/engine'
 import {
   addPermissionRulesToSettings,
 } from '../../utils/permissions/permissionsLoader.js'
-import type { PermissionRuleValue } from '../../utils/permissions/PermissionRule.js'
+import type { PermissionRuleValue } from '../../../kernel/permissions/PermissionRule.js'
 
 /** 内建只读类工具（裸工具名规则；engine 只读路径已自动放行，规则仅免弹框）。 */
 const READONLY_BUILTIN_TOOLS: ReadonlySet<string> = new Set([

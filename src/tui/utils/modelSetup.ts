@@ -11,7 +11,7 @@
 // R-mp-external 门禁：外域导入 modelprovider 域必须落根门面（C-8 闭环，
 // 白名单 0 外域允许）。roles.js 深导 → 门面（getRoleModels/MODEL_ROLES 均已经门面导出）。
 import { getRoleModels, MODEL_ROLES } from 'src/modelprovider'
-import type { SettingsJson } from './settings/types.js'
+import type { SettingsJson } from '../../kernel/settings/types.js'
 import { updateSettingsForSource } from './settings/settings.js'
 
 /**

@@ -5,11 +5,11 @@ import { useUpdateNotification } from '../hooks/useUpdateNotification.js';
 import { Box, Text } from '../ink.js';
 import { type AutoUpdaterResult, getLatestVersion, getMaxVersion, type InstallStatus, installGlobalPackage, shouldSkipVersion } from '../utils/autoUpdater.js';
 import { getGlobalConfig, isAutoUpdaterDisabled } from '../utils/config.js';
-import { logForDebugging } from '../utils/debug.js';
+import { logForDebugging } from '../utils/debug';
 import { getCurrentInstallationType } from '../utils/doctorDiagnostic.js';
 import { installOrUpdateClaudePackage, localInstallationExists } from '../utils/localInstaller.js';
 import { removeInstalledSymlink } from '../utils/nativeInstaller/index.js';
-import { gt, gte } from '../utils/semver.js';
+import { gt, gte } from '../../kernel/utils/semver.js';
 import { getInitialSettings } from '../utils/settings/settings.js';
 // 0.1.71 块 B-3：opt-in 自动升级门（默认=仅提示零自动）+ B-2 升级命令行（registry 段）
 import { isAutoUpdateOptedIn, buildUpdateUpgradeCommand } from '../utils/updateCheck.js';

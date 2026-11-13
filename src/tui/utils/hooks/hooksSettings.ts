@@ -2,14 +2,14 @@ import { resolve } from 'path'
 import type { HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js'
 import { getSessionId } from 'src/bootstrap'
 import type { AppState } from '../../state/AppState.js'
-import type { EditableSettingSource } from '../settings/constants.js'
-import { SOURCES } from '../settings/constants.js'
+import type { EditableSettingSource } from '../settings/constants'
+import { SOURCES } from '../settings/constants'
 import {
   getSettingsFilePathForSource,
   getSettingsForSource,
 } from '../settings/settings.js'
-import type { HookCommand, HookMatcher } from '../settings/types.js'
-import { DEFAULT_HOOK_SHELL } from '../shell/shellProvider.js'
+import type { HookCommand, HookMatcher } from '../../../kernel/settings/types.js'
+import { DEFAULT_HOOK_SHELL } from '../../../kernel/shell/provider/shellProvider.js'
 import { getSessionHooks } from './sessionHooks.js'
 
 export type HookSource =

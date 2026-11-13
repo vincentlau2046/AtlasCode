@@ -4,7 +4,7 @@
 import * as React from 'react'
 import { Text } from '../../../ink.js'
 import { homedir } from 'os'
-import { getCwd } from '../../../utils/cwd.js'
+import { getCwd } from '../../../../kernel/utils/cwd.js'
 import type { SegmentComponent } from './types.js'
 
 export const CwdSegment: SegmentComponent = () => {

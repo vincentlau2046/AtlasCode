@@ -8,7 +8,7 @@
 // (fail-closed), surfacing the expected version.
 
 import { join } from 'node:path'
-import { getFsImplementation } from '../fsOperations.js'
+import { getFsImplementation } from '../fsOperations'
 import { gitExe } from '../git.js'
 import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { loadInstalledPluginsV2 } from './installedPluginsManager.js'

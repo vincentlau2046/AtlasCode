@@ -8,10 +8,10 @@ import type { ToolPermissionContext, ToolUseContext } from '../../Tool.js'
 import type {
   PermissionDecisionReason,
   PermissionResult,
-} from '../../types/permissions.js'
-import { getCwd } from '../../utils/cwd.js'
+} from '../../../kernel/types/permissions.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 import { isCurrentDirectoryBareGitRepo } from '../../utils/git.js'
-import type { PermissionRule } from '../../utils/permissions/PermissionRule.js'
+import type { PermissionRule } from '../../../kernel/permissions/PermissionRule.js'
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
 import {
   createPermissionRequestMessage,
@@ -22,7 +22,7 @@ import {
   parsePermissionRule,
   type ShellPermissionRule,
   suggestionForExactCommand as sharedSuggestionForExactCommand,
-} from '../../utils/permissions/shellRuleMatching.js'
+} from '../../../kernel/permissions/shellRuleMatching.js'
 import {
   classifyCommandName,
   deriveSecurityFlags,
@@ -55,7 +55,7 @@ import {
   isSafeOutputCommand,
   resolveToCanonical,
 } from './readOnlyValidation.js'
-import { POWERSHELL_TOOL_NAME } from './toolName.js'
+import { POWERSHELL_TOOL_NAME } from '../../../kernel/tools/PowerShellTool/toolName.js'
 
 // Matches `$var = `, `$var += `, `$env:X = `, `$x ??= ` etc. Used to strip
 // nested assignment prefixes in the parse-failed fallback path.

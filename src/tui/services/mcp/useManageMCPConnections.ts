@@ -45,10 +45,10 @@ import {
   useAppStateStore,
   useSetAppState,
 } from '../../state/AppState.js'
-import { errorMessage } from '../../utils/errors.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
-import { getMcpPrefix } from './mcpStringUtils.js'
+import { getMcpPrefix } from '../../../kernel/services/mcp/mcpStringUtils.js'
 import { McpFailureReminderTracker } from './mcpFailureReminder.js'
 import { commandBelongsToServer, excludeStalePluginClients } from './utils.js'
 import { enqueuePendingNotification } from '../../utils/messageQueueManager.js'

@@ -31,22 +31,22 @@ import {
   updateAgentProgress as updateAsyncAgentProgress,
   updateProgressFromMessage,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
-import { asAgentId } from '../../types/ids.js'
-import type { Message as MessageType } from '../../types/message.js'
+import { asAgentId } from '../../../kernel/types/ids.js'
+import type { Message as MessageType } from '../../../kernel/types/message.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { AbortError, errorMessage } from '../../utils/errors.js'
+import { logForDebugging } from '../../utils/debug'
+import { AbortError, errorMessage } from '../../../kernel/utils/errors.js'
 import type { CacheSafeParams } from '../../utils/forkedAgent.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   extractTextContent,
   getLastAssistantMessage,
 } from '../../utils/messages.js'
 import type { PermissionMode } from '../../utils/permissions/PermissionMode.js'
-import { permissionRuleValueFromString } from '../../utils/permissions/permissionRuleParser.js'
+import { permissionRuleValueFromString } from '../../../kernel/permissions/permissionRuleParser.js'
 // 0.1.81 V3-2 K2 #10：server 级 MCP spec 取域（TUI 本地 twin mcpStringUtils，
 // 同域本地路径惯例——permissionRuleParser 亦 tui/utils/permissions 本地副本）
-import { getMcpPrefix, mcpInfoFromString } from '../../services/mcp/mcpStringUtils.js'
+import { getMcpPrefix, mcpInfoFromString } from '../../../kernel/services/mcp/mcpStringUtils.js'
 import {
   buildTranscriptForClassifier,
   classifyYoloAction,
@@ -54,8 +54,8 @@ import {
 import { emitTaskProgress as emitTaskProgressEvent } from '../../utils/task/sdkProgress.js'
 import { isInProcessTeammate } from 'src/shared'
 import { getTokenCountFromUsage } from '../../utils/tokens.js'
-import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../ExitPlanModeTool/constants.js'
-import { AGENT_TOOL_NAME } from './constants.js'
+import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../../../kernel/tools/ExitPlanModeTool/constants.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
 import type { AgentDefinition } from './loadAgentsDir.js'
 export type ResolvedAgentTools = {
   hasWildcard: boolean

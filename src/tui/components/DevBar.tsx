@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { getSlowOperations } from 'src/tui/bootstrapState.js';
 import { Text, useInterval } from '../ink.js';
-import { isAtlasDev } from '../utils/atlasDev.js';
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js';
 
 // de-ANT: DevBar is a domestic dev tool, gated on ATLAS_DEV=1 (replaces the
 // permanent-false ant / dev-build gate).

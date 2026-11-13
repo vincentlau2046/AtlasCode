@@ -14,12 +14,12 @@ import {
   type HeapSpaceInfo,
 } from 'v8'
 import { getSessionId } from 'src/bootstrap'
-import { logForDebugging } from './debug.js'
-import { toError } from './errors.js'
+import { logForDebugging } from './debug'
+import { toError } from '../../kernel/utils/errors.js'
 import { getDesktopPath } from './file.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { logError } from './log.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 export type HeapDumpResult = {
   success: boolean

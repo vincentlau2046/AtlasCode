@@ -1,4 +1,4 @@
-import type { AttachmentMessage, RenderableMessage } from '../types/message.js'
+import type { AttachmentMessage, RenderableMessage } from '../../kernel/types/message.js'
 
 function isTeammateShutdownAttachment(
   msg: RenderableMessage,

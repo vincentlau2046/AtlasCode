@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import { relative } from 'path';
 import * as React from 'react';
-import { getCwd } from 'src/tui/utils/cwd.js';
+import { getCwd } from 'src/kernel/utils/cwd';
 import { Box, Text } from '../ink.js';
 import { HighlightedCode } from './HighlightedCode.js';
 import { MessageResponse } from './MessageResponse.js';

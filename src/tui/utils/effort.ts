@@ -1,7 +1,7 @@
 import { isUltrathinkEnabled } from './thinking.js'
 import { getInitialSettings, getSettingsForSource } from './settings/settings.js'
 // (isProSubscriber / isMaxSubscriber / isTeamSubscriber removed with D1)
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import type { EffortLevel } from 'src/tui/entrypoints/sdk/runtimeTypes.js'
 // 0.1.80 K1-B①：前缀名归一单一事实源（modelprovider 门面，TUI 面既有依赖向）
 import { stripProviderPrefix } from 'src/modelprovider'

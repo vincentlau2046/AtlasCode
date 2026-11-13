@@ -9,17 +9,17 @@
 // probe, stale-lock recovery, cleanup-on-exit.
 
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
-import { getConfigDirNameForProject } from './configDir.js'
+import { getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { dirname, join } from 'path'
 import { z } from 'zod/v4'
 import { getProjectRoot, getSessionId } from 'src/bootstrap'
-import { registerCleanup } from './cleanupRegistry.js'
-import { logForDebugging } from './debug.js'
-import { getErrnoCode } from './errors.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from './debug'
+import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { isProcessRunning } from './genericProcessUtils.js'
 import { safeParseJSON } from './json.js'
-import { lazySchema } from './lazySchema.js'
-import { jsonStringify } from './slowOperations.js'
+import { lazySchema } from '../../kernel/utils/lazySchema.js'
+import { jsonStringify } from './slowOperations'
 
 const LOCK_FILE_REL = join(getConfigDirNameForProject(), 'scheduled_tasks.lock')
 

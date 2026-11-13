@@ -1,7 +1,7 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { dirname } from 'path'
-import { getFsImplementation } from './fsOperations.js'
-import { jsonStringify } from './slowOperations.js'
+import { getFsImplementation } from './fsOperations'
+import { jsonStringify } from './slowOperations'
 
 type DiagnosticLogLevel = 'debug' | 'info' | 'warn' | 'error'
 

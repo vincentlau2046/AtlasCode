@@ -1,13 +1,13 @@
-import { BASH_TOOL_NAME } from 'src/tui/tools/BashTool/toolName.js'
-import { FILE_READ_TOOL_NAME } from 'src/tui/tools/FileReadTool/prompt.js'
-import { GLOB_TOOL_NAME } from 'src/tui/tools/GlobTool/prompt.js'
-import { GREP_TOOL_NAME } from 'src/tui/tools/GrepTool/prompt.js'
-import { SEND_MESSAGE_TOOL_NAME } from 'src/tui/tools/SendMessageTool/constants.js'
+import { BASH_TOOL_NAME } from 'src/kernel/tools/BashTool/toolName'
+import { FILE_READ_TOOL_NAME } from 'src/kernel/tools/FileReadTool/prompt'
+import { GLOB_TOOL_NAME } from 'src/kernel/tools/GlobTool/prompt'
+import { GREP_TOOL_NAME } from 'src/kernel/tools/GrepTool/prompt'
+import { SEND_MESSAGE_TOOL_NAME } from 'src/kernel/tools/SendMessageTool/constants'
 import { WEB_FETCH_TOOL_NAME } from 'src/tui/tools/WebFetchTool/prompt.js'
 import { WEB_SEARCH_TOOL_NAME } from 'src/tui/tools/WebSearchTool/prompt.js'
-import { hasEmbeddedSearchTools } from 'src/tui/utils/embeddedTools.js'
+import { hasEmbeddedSearchTools } from 'src/kernel/utils/embeddedTools'
 import { getSettings_DEPRECATED } from 'src/tui/utils/settings/settings.js'
-import { jsonStringify } from '../../../utils/slowOperations.js'
+import { jsonStringify } from '../../../utils/slowOperations'
 import type {
   AgentDefinition,
   BuiltInAgentDefinition,

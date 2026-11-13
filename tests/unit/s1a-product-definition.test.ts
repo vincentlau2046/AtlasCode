@@ -22,7 +22,7 @@ import { join } from 'path'
 import { getAllBaseTools, AgentTool, AGENT_TOOL_NAME } from '../../src/engine'
 import { getActiveProductDefinition } from '../../src/shared/ProductDefinition'
 import { getConfigDirName as sharedGetConfigDirName } from '../../src/shared/configDir'
-import { getConfigDirName as tuiGetConfigDirName } from '../../src/tui/utils/configDir'
+import { getConfigDirName as tuiGetConfigDirName } from '../../src/kernel/utils/configDir'
 import type { Tool } from '../../src/shared'
 
 const SRC_ROOT = join(import.meta.dir, '..', '..', 'src')

@@ -18,7 +18,7 @@ import {
 } from '../../constants/outputStyles.js'
 import { clearSystemPromptSections } from '../../constants/systemPromptSections.js'
 import { updateSettingsForSource } from '../../utils/settings/settings.js'
-import { getCwd } from '../../utils/cwd.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 
 const USAGE = 'Usage: /output-style [name] (no argument = current + available)'
 

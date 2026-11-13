@@ -15,7 +15,7 @@ import { checkInstall } from './nativeInstaller/index.js';
 import { getProxyUrl } from './proxy.js';
 import { getSandboxManager } from 'src/tui/sandboxCompat';
 import { getSettingsWithAllErrors } from './settings/allErrors.js';
-import { getEnabledSettingSources, getSettingSourceDisplayNameCapitalized } from './settings/constants.js';
+import { getEnabledSettingSources, getSettingSourceDisplayNameCapitalized } from './settings/constants';
 import { getManagedFileSettingsPresence, getPolicySettingsOrigin, getSettingsForSource } from './settings/settings.js';
 import type { ThemeName } from './theme.js';
 export type Property = {

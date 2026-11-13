@@ -1,15 +1,15 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { getConfigDirNameForProject } from './configDir.js'
+import { getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { statSync } from 'fs'
 import { lstat, readdir, readFile, realpath, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import { dirname, join, resolve, sep } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
-import { logForDebugging } from './debug.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { isFsInaccessible } from './errors.js'
+import { logForDebugging } from './debug'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import { normalizePathForComparison } from './file.js'
 import type { FrontmatterData } from './frontmatterParser.js'
 import { parseFrontmatter } from './frontmatterParser.js'
@@ -19,7 +19,7 @@ import { ripGrep } from 'src/tui/sandboxCompat'
 import {
   isSettingSourceEnabled,
   type SettingSource,
-} from './settings/constants.js'
+} from './settings/constants'
 import { getManagedFilePath } from './settings/managedPath.js'
 import { isRestrictedToPluginOnly } from './settings/pluginOnlyPolicy.js'
 

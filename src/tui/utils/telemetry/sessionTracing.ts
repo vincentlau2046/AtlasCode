@@ -14,8 +14,8 @@ import { feature } from 'src/shared'
 import { context as otelContext, type Span, trace } from '@opentelemetry/api'
 import { AsyncLocalStorage } from 'async_hooks'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
-import type { AssistantMessage, UserMessage } from '../../types/message.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
+import type { AssistantMessage, UserMessage } from '../../../kernel/types/message.js'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { getTelemetryAttributes } from '../telemetryAttributes.js'
 import {
   addBetaInteractionAttributes,
@@ -37,7 +37,7 @@ import {
   startLLMRequestPerfettoSpan,
   startToolPerfettoSpan,
   startUserInputPerfettoSpan,
-} from './perfettoTracing.js'
+} from './perfettoTracing'
 
 // Re-export for callers
 export type { Span }

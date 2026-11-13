@@ -13,21 +13,21 @@ import {
   type ToolDef,
   toolMatchesName,
 } from '../../Tool.js'
-import { formatAgentId, generateRequestId } from '../../utils/agentId.js'
+import { formatAgentId, generateRequestId } from '../../../kernel/utils/agentId.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { logForDebugging } from '../../utils/debug'
 import {
   findInProcessTeammateTaskId,
   setAwaitingPlanApproval,
 } from '../../utils/inProcessTeammateHelpers.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import {
   getPlan,
   getPlanFilePath,
   persistFileSnapshotIfRemote,
 } from '../../utils/plans.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import {
   getAgentName,
   getTeamName,
@@ -35,9 +35,9 @@ import {
   isTeammate,
 } from 'src/engine'
 import { writeToMailbox } from '../../utils/teammateMailbox.js'
-import { AGENT_TOOL_NAME } from '../AgentTool/constants.js'
-import { TEAM_CREATE_TOOL_NAME } from '../TeamCreateTool/constants.js'
-import { EXIT_PLAN_MODE_V2_TOOL_NAME } from './constants.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
+import { TEAM_CREATE_TOOL_NAME } from '../../../kernel/tools/TeamCreateTool/constants.js'
+import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../../../kernel/tools/ExitPlanModeTool/constants.js'
 import { EXIT_PLAN_MODE_V2_TOOL_PROMPT } from './prompt.js'
 import {
   renderToolResultMessage,
@@ -46,7 +46,7 @@ import {
 } from './UI.js'
 
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
-  ? (require('../../utils/permissions/autoModeState.js') as typeof import('../../utils/permissions/autoModeState.js'))
+  ? (require('../../../kernel/permissions/autoModeState.js') as typeof import('../../../kernel/permissions/autoModeState.js'))
   : null
 const permissionSetupModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('../../utils/permissions/permissionSetup.js') as typeof import('../../utils/permissions/permissionSetup.js'))

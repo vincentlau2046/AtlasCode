@@ -1,5 +1,5 @@
 import type { Attachment } from 'src/tui/utils/attachments.js'
-import type { Message, NormalizedMessage } from '../../types/message.js'
+import type { Message, NormalizedMessage } from '../../../kernel/types/message.js'
 
 /**
  * Attachment types that AttachmentMessage renders as `null` unconditionally

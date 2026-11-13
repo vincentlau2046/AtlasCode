@@ -1,4 +1,4 @@
-import type { BetaUsage as Usage } from './types/atlas.js'
+import type { BetaUsage as Usage } from '../kernel/types/atlas.js'
 import chalk from 'chalk'
 import { addToTotalCostState, addToTotalLinesChanged, getModelUsage, getSessionId, getTotalAPIDuration, getTotalAPIDurationWithoutRetries, getTotalCacheCreationInputTokens, getTotalCacheReadInputTokens, getTotalDuration, getTotalInputTokens, getTotalLinesAdded, getTotalLinesRemoved, getTotalOutputTokens, getTotalToolDuration, getTotalWebSearchRequests, getUsageForModel, resetCostState, resetStateForTests, setCostStateForRestore } from 'src/bootstrap'
 import { getSdkBetas, getTokenCounter } from 'src/tui/bootstrapState.js'
@@ -11,7 +11,7 @@ import {
 import {
   getContextWindowForModel,
   getModelMaxOutputTokens,
-} from './utils/context.js'
+} from '../kernel/utils/context.js'
 import { formatDuration, formatNumber } from './utils/format.js'
 import type { FpsMetrics } from './utils/fpsTracker.js'
 import { getCanonicalName } from './utils/model/model.js'

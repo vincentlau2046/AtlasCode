@@ -2,11 +2,11 @@ import type { Dirent, Stats } from 'fs'
 import { readdir, readFile, stat } from 'fs/promises'
 import * as path from 'path'
 import { z } from 'zod/v4'
-import { errorMessage, getErrnoCode, isENOENT } from '../errors.js'
+import { errorMessage, getErrnoCode, isENOENT } from '../../../kernel/utils/errors.js'
 import { FRONTMATTER_REGEX } from '../frontmatterParser.js'
-import { jsonParse } from '../slowOperations.js'
+import { jsonParse } from '../slowOperations'
 import { parseYaml } from '../yaml.js'
-import { findManifestInDir, getPluginManifestDirs } from '../configDir.js'
+import { findManifestInDir, getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import {
   PluginHooksSchema,
   PluginManifestSchema,

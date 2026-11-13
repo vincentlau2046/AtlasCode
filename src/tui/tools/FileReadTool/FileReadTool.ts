@@ -1,4 +1,4 @@
-import type { Base64ImageSource } from '../../types/atlas.js'
+import type { Base64ImageSource } from '../../../kernel/types/atlas.js'
 import * as path from 'path'
 import { z } from 'zod/v4'
 import {
@@ -6,7 +6,7 @@ import {
   PDF_EXTRACT_SIZE_THRESHOLD,
   PDF_MAX_PAGES_PER_READ,
 } from '../../constants/apiLimits.js'
-import { hasBinaryExtension } from '../../constants/files.js'
+import { hasBinaryExtension } from '../../../kernel/constants/files.js'
 // 0.1.85-C（C85-C）：共享页图读取 helper（engine/TUI 双入口同一交付路径；
 // shared 层承载——tui 不 import engine/tools 层界）
 import {
@@ -28,9 +28,9 @@ import {
 } from '../../skills/loadSkillsDir.js'
 import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { getCwd } from '../../utils/cwd.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
-import { getErrnoCode, isENOENT } from '../../utils/errors.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { getErrnoCode, isENOENT } from '../../../kernel/utils/errors.js'
 import {
   addLineNumbers,
   FILE_NOT_FOUND_CWD_NOTE,
@@ -39,7 +39,7 @@ import {
   suggestPathUnderCwd,
 } from '../../utils/file.js'
 import { formatFileSize } from '../../utils/format.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import {
   compressImageBufferWithTokenLimit,
   createImageMetadataText,
@@ -48,7 +48,7 @@ import {
   ImageResizeError,
   maybeResizeAndDownsampleImageBuffer,
 } from '../../utils/imageResizer.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import { isAutoMemFile } from '../../utils/memoryFileDetection.js'
 import { createUserMessage } from '../../utils/messages.js'
@@ -63,17 +63,17 @@ import {
   isPDFExtension,
   isPDFSupported,
   parsePDFPageRange,
-} from '../../utils/pdfUtils.js'
+} from '../../../kernel/utils/pdfUtils.js'
 import {
   checkReadPermissionForTool,
   matchingRuleForInput,
 } from '../../utils/permissions/filesystem.js'
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
-import { matchWildcardPattern } from '../../utils/permissions/shellRuleMatching.js'
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
+import { matchWildcardPattern } from '../../../kernel/permissions/shellRuleMatching.js'
 import { readFileInRange } from '../../utils/readFileInRange.js'
 import { semanticNumber } from '../../utils/semanticNumber.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
-import { BASH_TOOL_NAME } from '../BashTool/toolName.js'
+import { jsonStringify } from '../../utils/slowOperations'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
 import {
   ALLOW_LARGE_MAX_BYTES,
   getDefaultFileReadingLimits,
@@ -86,7 +86,7 @@ import {
   OFFSET_INSTRUCTION_DEFAULT,
   OFFSET_INSTRUCTION_TARGETED,
   renderPromptTemplate,
-} from './prompt.js'
+} from '../../../kernel/tools/FileReadTool/prompt.js'
 import {
   getToolUseSummary,
   renderToolResultMessage,

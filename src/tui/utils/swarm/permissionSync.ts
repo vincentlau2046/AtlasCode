@@ -21,13 +21,13 @@
 import { mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod/v4'
-import { logForDebugging } from '../debug.js'
-import { getErrnoCode } from '../errors.js'
-import { lazySchema } from '../lazySchema.js'
-import * as lockfile from '../lockfile.js'
+import { logForDebugging } from '../debug'
+import { getErrnoCode } from '../../../kernel/utils/errors.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
+import * as lockfile from '../../../kernel/utils/lockfile.js'
 import { logError } from '../log.js'
 import type { PermissionUpdate } from '../permissions/PermissionUpdateSchema.js'
-import { jsonParse, jsonStringify } from '../slowOperations.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
 import {
   getAgentId,
   getAgentName,

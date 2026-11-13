@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { useCallback, useEffect, useRef } from 'react'
 import { useInterval } from 'usehooks-ts'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
-import { TEAMMATE_MESSAGE_TAG } from '../constants/xml.js'
+import { TEAMMATE_MESSAGE_TAG } from '../../kernel/constants/xml.js'
 import { useTerminalNotification } from '../ink/useTerminalNotification.js'
 import { sendNotification } from '../services/notifier.js'
 import {
@@ -12,10 +12,10 @@ import {
   useSetAppState,
 } from '../state/AppState.js'
 import { findToolByName } from '../Tool.js'
-import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js'
+import { isInProcessTeammateTask } from '../../kernel/tasks/InProcessTeammateTask/types.js'
 import { getAllBaseTools } from '../tools.js'
-import type { PermissionUpdate } from '../types/permissions.js'
-import { logForDebugging } from '../utils/debug.js'
+import type { PermissionUpdate } from '../../kernel/types/permissions.js'
+import { logForDebugging } from '../utils/debug'
 import {
   findInProcessTeammateTaskId,
   handlePlanApprovalResponse,
@@ -26,7 +26,7 @@ import {
   toExternalPermissionMode,
 } from '../utils/permissions/PermissionMode.js'
 import { applyPermissionUpdate } from '../utils/permissions/PermissionUpdate.js'
-import { jsonStringify } from '../utils/slowOperations.js'
+import { jsonStringify } from '../utils/slowOperations'
 // W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
 import {
   isInsideTmux,

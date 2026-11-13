@@ -10,7 +10,7 @@ import * as React from 'react'
 import { Text } from '../../../ink.js'
 import type { SegmentComponent, SegmentRenderContext } from './types.js'
 import { getTokenUsage } from '../../../utils/tokens.js'
-import type { Message } from '../../../types/message.js'
+import type { Message } from '../../../../kernel/types/message.js'
 
 // 扩展 SegmentRenderContext：StatusLine.tsx 集成时从 messagesRef 传入
 interface TokSRenderContext extends SegmentRenderContext {

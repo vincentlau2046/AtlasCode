@@ -1,7 +1,7 @@
 import { homedir } from 'os'
 import { dirname, isAbsolute, join, normalize, relative, resolve } from 'path'
-import { getCwd } from './cwd.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { getFsImplementation } from './fsOperations'
 import { getPlatform } from './platform.js'
 import { posixPathToWindowsPath } from './windowsPaths.js'
 

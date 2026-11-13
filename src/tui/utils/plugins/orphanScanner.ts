@@ -14,9 +14,9 @@
  */
 
 import { join, resolve, sep } from 'path'
-import { parseGitConfigValue } from '../git/gitConfigParser.js'
-import { getFsImplementation } from '../fsOperations.js'
-import { getPluginManifestDirs } from '../configDir.js'
+import { parseGitConfigValue } from '../../../kernel/git/gitConfigParser.js'
+import { getFsImplementation } from '../fsOperations'
+import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import { getPluginSeedDirs } from './pluginDirectories.js'
 import {
   getMarketplacesCacheDir,

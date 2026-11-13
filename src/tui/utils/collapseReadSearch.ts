@@ -2,10 +2,10 @@ import { feature } from 'src/shared'
 import type { UUID } from 'crypto'
 import { findToolByName, type Tools } from '../Tool.js'
 import { extractBashCommentLabel } from '../tools/BashTool/commentLabel.js'
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
-import { REPL_TOOL_NAME } from '../tools/REPLTool/constants.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
+import { FILE_EDIT_TOOL_NAME } from '../../kernel/tools/FileEditTool/constants.js'
+import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
+import { REPL_TOOL_NAME } from '../../kernel/tools/REPLTool/constants.js'
 import { getReplPrimitiveTools } from '../tools/REPLTool/primitiveTools.js'
 import {
   type BranchAction,
@@ -20,7 +20,7 @@ import type {
   RenderableMessage,
   StopHookInfo,
   SystemStopHookSummaryMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import { getDisplayPath } from './file.js'
 import { isFullscreenEnvEnabled } from './fullscreen.js'
 import {

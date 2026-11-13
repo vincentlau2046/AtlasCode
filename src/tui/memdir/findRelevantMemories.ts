@@ -1,8 +1,8 @@
-import { logForDebugging } from '../utils/debug.js'
-import { errorMessage } from '../utils/errors.js'
+import { logForDebugging } from '../utils/debug'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import { getDefaultSmallModel } from '../utils/model/model.js'
 import { sideQuery } from '../utils/sideQuery.js'
-import { jsonParse } from '../utils/slowOperations.js'
+import { jsonParse } from '../utils/slowOperations'
 import {
   formatMemoryManifest,
   type MemoryHeader,

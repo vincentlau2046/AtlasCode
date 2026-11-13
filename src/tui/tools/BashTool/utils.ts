@@ -2,17 +2,17 @@ import type {
   Base64ImageSource,
   ContentBlockParam,
   ToolResultBlockParam,
-} from '../../types/atlas.js'
+} from '../../../kernel/types/atlas.js'
 import { readFile, stat } from 'fs/promises'
 import { getOriginalCwd } from 'src/bootstrap'
 import type { ToolPermissionContext } from 'src/tui/Tool.js'
-import { getCwd } from 'src/tui/utils/cwd.js'
+import { getCwd } from 'src/kernel/utils/cwd'
 import { pathInAllowedWorkingPath } from 'src/tui/utils/permissions/filesystem.js'
 import { setCwd } from 'src/tui/utils/Shell.js'
-import { shouldMaintainProjectWorkingDir } from '../../utils/envUtils.js'
+import { shouldMaintainProjectWorkingDir } from '../../../kernel/utils/envUtils.js'
 import { maybeResizeAndDownsampleImageBuffer } from '../../utils/imageResizer.js'
 import { getMaxOutputLength } from '../../utils/shell/outputLimits.js'
-import { countCharInString, plural } from '../../utils/stringUtils.js'
+import { countCharInString, plural } from '../../../kernel/utils/stringUtils.js'
 /**
  * Strips leading and trailing lines that contain only whitespace/newlines.
  * Unlike trim(), this preserves whitespace within content lines and only removes

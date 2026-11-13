@@ -1,9 +1,9 @@
 import { createHash } from 'crypto'
 import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { logForDebugging } from './debug.js'
-import { getAtlasConfigHomeDir } from './envUtils.js'
-import { isENOENT } from './errors.js'
+import { logForDebugging } from './debug'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
+import { isENOENT } from '../../kernel/utils/errors.js'
 
 const PASTE_STORE_DIR = 'paste-cache'
 

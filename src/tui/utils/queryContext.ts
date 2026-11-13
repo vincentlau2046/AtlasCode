@@ -16,12 +16,12 @@ import type { MCPServerConnection } from '../services/mcp/types.js'
 import type { AppState } from '../state/AppStateStore.js'
 import type { Tools, ToolUseContext } from '../Tool.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import type { Message } from '../types/message.js'
-import { createAbortController } from './abortController.js'
+import type { Message } from '../../kernel/types/message.js'
+import { createAbortController } from '../../kernel/utils/abortController.js'
 import type { FileStateCache } from './fileStateCache.js'
 import type { CacheSafeParams } from './forkedAgent.js'
 import { getMainLoopModel } from './model/model.js'
-import { asSystemPrompt } from './systemPromptType.js'
+import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import {
   shouldEnableThinkingByDefault,
   type ThinkingConfig,

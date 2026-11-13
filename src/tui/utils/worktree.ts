@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import { getConfigDirNameForProject } from './configDir.js'
+import { getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import chalk from 'chalk'
 import { spawnSync } from 'child_process'
 import {
@@ -16,11 +16,11 @@ import {
 import ignore from 'ignore'
 import { basename, dirname, join, resolve } from 'path'
 import { saveCurrentProjectConfig } from './config.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
-import { errorMessage, getErrnoCode } from './errors.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
+import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { parseGitConfigValue } from './git/gitConfigParser.js'
+import { parseGitConfigValue } from '../../kernel/git/gitConfigParser.js'
 import {
   getCommonDir,
   readCheckoutHeadSha,
@@ -46,7 +46,7 @@ import {
   getInitialSettings,
   getRelativeSettingsFilePathForSource,
 } from './settings/settings.js'
-import { sleep } from './sleep.js'
+import { sleep } from '../../kernel/utils/sleep.js'
 import { isInITerm2 } from 'src/swarm'
 
 const VALID_WORKTREE_SLUG_SEGMENT = /^[a-zA-Z0-9._-]+$/
@@ -758,7 +758,7 @@ async function performPostCreationSetup(
   if (feature('COMMIT_ATTRIBUTION')) {
     const worktreeHooksDir =
       hooksPath === huskyPath ? join(worktreePath, '.husky') : undefined
-    void import('./postCommitAttribution.js')
+    void import('../../kernel/utils/postCommitAttribution.js')
       .then(m =>
         m
           .installPrepareCommitMsgHook(worktreePath, worktreeHooksDir)

@@ -1,6 +1,6 @@
 import type { PermissionMode } from '../permissions/PermissionMode.js'
-import { capitalize } from '../stringUtils.js'
-import { MODEL_ALIASES, type ModelAlias } from './aliases.js'
+import { capitalize } from '../../../kernel/utils/stringUtils.js'
+import { MODEL_ALIASES, type ModelAlias } from '../../../kernel/model/aliases.js'
 import {
   getCanonicalName,
   getRuntimeMainLoopModel,

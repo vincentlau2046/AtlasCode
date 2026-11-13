@@ -1,14 +1,14 @@
 import { appendFile, rename } from 'fs/promises'
 import { basename, dirname, join } from 'path'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
-import { isAtlasDev } from './atlasDev.js'
-import { createBufferedWriter } from './bufferedWriter.js'
-import { registerCleanup } from './cleanupRegistry.js'
-import { logForDebugging } from './debug.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { getFsImplementation } from './fsOperations.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
+import { createBufferedWriter } from '../../kernel/utils/bufferedWriter.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from './debug'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { getFsImplementation } from './fsOperations'
 import { sanitizePath } from './path.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 // Mutable recording state — filePath is updated when session ID changes (e.g., --resume)
 const recordingState: { filePath: string | null; timestamp: number } = {

@@ -1,11 +1,11 @@
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { registerCleanup } from '../../utils/cleanupRegistry.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { getAtlasConfigHomeDir } from '../../utils/envUtils.js'
-import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
-import { getErrnoCode } from '../errors.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../debug'
+import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
+import { getErrnoCode } from '../../../kernel/utils/errors.js'
 
 const LOCK_FILENAME = 'computer-use.lock'
 

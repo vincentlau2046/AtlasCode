@@ -7,9 +7,9 @@ import { Box, Text } from '../../ink.js';
 import { estimateSkillFrontmatterTokens, getSkillsPath } from '../../skills/loadSkillsDir.js';
 import { getDisplayPath } from '../../utils/file.js';
 import { formatTokens } from '../../utils/format.js';
-import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants.js';
-import { plural } from '../../utils/stringUtils.js';
-import { getConfigDirNameForProject } from '../../utils/configDir.js';
+import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants';
+import { plural } from '../../../kernel/utils/stringUtils.js';
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Dialog } from '../design-system/Dialog.js';
 

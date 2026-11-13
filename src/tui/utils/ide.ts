@@ -1,5 +1,5 @@
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { getConfigDirName } from './configDir.js'
+import { getConfigDirName } from '../../kernel/utils/configDir.js'
 import axios from 'axios'
 import { execa } from 'execa'
 import capitalize from 'lodash-es/capitalize.js'
@@ -16,34 +16,34 @@ import type {
 } from '../services/mcp/types.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { env } from './env.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import {
   execFileNoThrow,
   execFileNoThrowWithCwd,
   execSyncWithDefaults_DEPRECATED,
 } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { getAncestorPidsAsync } from './genericProcessUtils.js'
 import { isJetBrainsPluginInstalledCached } from './jetbrains.js'
 import { logError } from './log.js'
 import { getPlatform } from './platform.js'
-import { lt } from './semver.js'
+import { lt } from '../../kernel/utils/semver.js'
 
 // Lazy: IdeOnboardingDialog.tsx pulls React/ink; only needed in interactive onboarding path
 const ideOnboardingDialog =
   (): typeof import('src/tui/components/IdeOnboardingDialog.js') =>
     require('src/tui/components/IdeOnboardingDialog.js')
 
-import { createAbortController } from './abortController.js'
-import { logForDebugging } from './debug.js'
+import { createAbortController } from '../../kernel/utils/abortController.js'
+import { logForDebugging } from './debug'
 import { envDynamic } from './envDynamic.js'
-import { errorMessage, isFsInaccessible } from './errors.js'
+import { errorMessage, isFsInaccessible } from '../../kernel/utils/errors.js'
 import {
   checkWSLDistroMatch,
   WindowsToWSLConverter,
 } from './idePathConversion.js'
-import { sleep } from './sleep.js'
-import { jsonParse } from './slowOperations.js'
+import { sleep } from '../../kernel/utils/sleep.js'
+import { jsonParse } from './slowOperations'
 
 function isProcessRunning(pid: number): boolean {
   try {

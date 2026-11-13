@@ -5,7 +5,7 @@ import type { DiffFile } from '../../hooks/useDiffData.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text } from '../../ink.js';
 import { truncateStartToWidth } from '../../utils/format.js';
-import { plural } from '../../utils/stringUtils.js';
+import { plural } from '../../../kernel/utils/stringUtils.js';
 const MAX_VISIBLE_FILES = 5;
 type Props = {
   files: DiffFile[];

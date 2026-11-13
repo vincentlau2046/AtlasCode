@@ -1,9 +1,9 @@
 import { HOOK_EVENTS, type HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js'
 import type { AppState } from 'src/tui/state/AppState.js'
-import type { Message } from 'src/tui/types/message.js'
-import { logForDebugging } from '../debug.js'
+import type { Message } from 'src/kernel/types/message'
+import { logForDebugging } from '../debug'
 import type { AggregatedHookResult } from '../hooks.js'
-import type { HookCommand } from '../settings/types.js'
+import type { HookCommand } from '../../../kernel/settings/types.js'
 import { isHookEqual } from './hooksSettings.js'
 
 type OnHookSuccess = (

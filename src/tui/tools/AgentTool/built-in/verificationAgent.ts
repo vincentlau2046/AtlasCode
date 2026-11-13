@@ -1,10 +1,10 @@
-import { BASH_TOOL_NAME } from 'src/tui/tools/BashTool/toolName.js'
-import { EXIT_PLAN_MODE_TOOL_NAME } from 'src/tui/tools/ExitPlanModeTool/constants.js'
-import { FILE_EDIT_TOOL_NAME } from 'src/tui/tools/FileEditTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from 'src/tui/tools/FileWriteTool/prompt.js'
-import { NOTEBOOK_EDIT_TOOL_NAME } from 'src/tui/tools/NotebookEditTool/constants.js'
+import { BASH_TOOL_NAME } from 'src/kernel/tools/BashTool/toolName'
+import { EXIT_PLAN_MODE_TOOL_NAME } from 'src/kernel/tools/ExitPlanModeTool/constants'
+import { FILE_EDIT_TOOL_NAME } from 'src/kernel/tools/FileEditTool/constants'
+import { FILE_WRITE_TOOL_NAME } from 'src/kernel/tools/FileWriteTool/prompt'
+import { NOTEBOOK_EDIT_TOOL_NAME } from 'src/kernel/tools/NotebookEditTool/constants'
 import { WEB_FETCH_TOOL_NAME } from 'src/tui/tools/WebFetchTool/prompt.js'
-import { AGENT_TOOL_NAME } from '../constants.js'
+import { AGENT_TOOL_NAME } from '../../../../kernel/tools/AgentTool/constants.js'
 import type { BuiltInAgentDefinition } from '../loadAgentsDir.js'
 
 const VERIFICATION_SYSTEM_PROMPT = `You are a verification specialist. Your job is not to confirm the implementation works — it's to try to break it.

@@ -6,10 +6,10 @@ import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import type { ToolUseContext } from '../../Tool.js'
 import { registerAsyncAgent } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { assembleToolPool } from '../../tools.js'
-import { asAgentId } from '../../types/ids.js'
+import { asAgentId } from '../../../kernel/types/ids.js'
 import { runWithAgentContext } from '../../utils/agentContext.js'
-import { runWithCwdOverride } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { runWithCwdOverride } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
 import {
   createUserMessage,
   filterOrphanedThinkingOnlyMessages,
@@ -23,7 +23,7 @@ import {
   readAgentMetadata,
 } from '../../utils/sessionStorage.js'
 import { buildEffectiveSystemPrompt } from '../../utils/systemPrompt.js'
-import type { SystemPrompt } from '../../utils/systemPromptType.js'
+import type { SystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js'
 import { getParentSessionId } from 'src/engine'
 import { reconstructForSubagentResume } from '../../utils/toolResultStorage.js'

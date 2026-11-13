@@ -11,8 +11,8 @@
 //   解析/校验器（无排期）；此前 plugin mcpServers 面请用 JSON 文件（.mcp.json）
 //   或内联配置。
 import type { McpServerConfig } from '../../services/mcp/types.js'
-import { logForDebugging } from '../debug.js'
-import { toError } from '../errors.js'
+import { logForDebugging } from '../debug'
+import { toError } from '../../../kernel/utils/errors.js'
 import { logError } from '../log.js'
 import { getSecureStorage } from '../secureStorage/index.js'
 import {

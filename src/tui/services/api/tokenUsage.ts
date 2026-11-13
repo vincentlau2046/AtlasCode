@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import type { BetaMessageDeltaUsage, BetaUsage } from '../../types/atlas.js'
+import type { BetaMessageDeltaUsage, BetaUsage } from '../../../kernel/types/atlas.js'
 import { type NonNullableUsage } from './logging.js'
 
 /**

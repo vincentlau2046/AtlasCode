@@ -19,7 +19,7 @@
  */
 import { describe, test, expect } from 'bun:test'
 import { SPINNER_VERBS } from '../../src/tui/constants/spinnerVerbs'
-import { TURN_COMPLETION_VERBS } from '../../src/tui/constants/turnCompletionVerbs'
+import { TURN_COMPLETION_VERBS } from '../../src/kernel/constants/turnCompletionVerbs'
 
 describe('BR-9 spinner 动词池四轴重写（0.1.32）', () => {
   test('体量 ~130（186→四轴池）且零跨轴重复', () => {

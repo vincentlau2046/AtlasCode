@@ -1,29 +1,29 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { readFileSync } from '../fileRead.js'
-import { getFsImplementation, safeResolvePath } from '../fsOperations.js'
+import { getFsImplementation, safeResolvePath } from '../fsOperations'
 import { safeParseJSON } from '../json.js'
 import { logError } from '../log.js'
 import {
   type EditableSettingSource,
   getEnabledSettingSources,
   type SettingSource,
-} from '../settings/constants.js'
+} from '../settings/constants'
 import {
   getSettingsFilePathForSource,
   getSettingsForSource,
   updateSettingsForSource,
 } from '../settings/settings.js'
-import type { SettingsJson } from '../settings/types.js'
+import type { SettingsJson } from '../../../kernel/settings/types.js'
 import type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
   PermissionRuleValue,
-} from './PermissionRule.js'
+} from '../../../kernel/permissions/PermissionRule.js'
 import {
   permissionRuleValueFromString,
   permissionRuleValueToString,
-} from './permissionRuleParser.js'
+} from '../../../kernel/permissions/permissionRuleParser.js'
 
 /**
  * Returns true if allowManagedPermissionRulesOnly is enabled in managed settings (policySettings).

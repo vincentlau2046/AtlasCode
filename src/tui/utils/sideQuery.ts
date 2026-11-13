@@ -6,23 +6,23 @@ import type {
   BetaMessage as ABetaMessage,
   BetaJSONOutputFormat as ABetaJSONOutputFormat,
   BetaThinkingConfigParam as ABetaThinkingConfigParam,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import {
   getLastApiCompletionTimestamp,
   setLastApiCompletionTimestamp,
 } from 'src/tui/bootstrapState.js'
-import { STRUCTURED_OUTPUTS_BETA_HEADER } from '../constants/betas.js'
-import type { QuerySource } from '../constants/querySource.js'
+import { STRUCTURED_OUTPUTS_BETA_HEADER } from '../../kernel/constants/betas.js'
+import type { QuerySource } from '../../kernel/constants/querySource.js'
 import {
   getAttributionHeader,
   getCLISyspromptPrefix,
 } from '../constants/system.js'
 import { getAPIMetadata } from '../services/api/metadata.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
-import { asSystemPrompt } from './systemPromptType.js'
+import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { getModelBetas, modelSupportsStructuredOutputs } from './betas.js'
 import { computeFingerprint } from './fingerprint.js'
-import { errorMessage } from './errors.js'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import { normalizeModelStringForAPI, modelToRole } from 'src/modelprovider'
 import { logError } from './log.js'
 

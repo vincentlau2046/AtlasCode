@@ -1,8 +1,8 @@
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { roughTokenCountEstimation } from '../../services/tokenEstimation.js'
-import { getAtlasConfigHomeDir } from '../../utils/envUtils.js'
-import { getErrnoCode, toError } from '../../utils/errors.js'
+import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
+import { getErrnoCode, toError } from '../../../kernel/utils/errors.js'
 import { logError } from '../../utils/log.js'
 
 const MAX_SECTION_LENGTH = 2000

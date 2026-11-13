@@ -12,12 +12,12 @@
 
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { isAtlasDev } from './atlasDev.js'
-import { logForDebugging } from './debug.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { getFsImplementation } from './fsOperations.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
+import { logForDebugging } from './debug'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { getFsImplementation } from './fsOperations'
 import { formatMs, formatTimelineLine, getPerformance } from './profilerBase.js'
-import { writeFileSync_DEPRECATED } from './slowOperations.js'
+import { writeFileSync_DEPRECATED } from './slowOperations'
 
 // Module-level state - decided once at module load
 // eslint-disable-next-line custom-rules/no-process-env-top-level

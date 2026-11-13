@@ -1,4 +1,4 @@
-import type { ToolResultBlockParam } from '../../types/atlas.js'
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js'
 import memoize from 'lodash-es/memoize.js'
 import { z } from 'zod/v4'
 import {
@@ -8,9 +8,9 @@ import {
   type ToolDef,
   type Tools,
 } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { lazySchema } from '../../utils/lazySchema.js'
-import { escapeRegExp } from '../../utils/stringUtils.js'
+import { logForDebugging } from '../../utils/debug'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
+import { escapeRegExp } from '../../../kernel/utils/stringUtils.js'
 import { isToolSearchEnabledOptimistic } from '../../utils/toolSearch.js'
 import { getPrompt, isDeferredTool, TOOL_SEARCH_TOOL_NAME } from './prompt.js'
 

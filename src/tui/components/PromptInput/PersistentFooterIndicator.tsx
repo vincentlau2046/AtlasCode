@@ -12,7 +12,7 @@
 // - effortValue / mainLoopModel 直接从 AppState 读（与 ThinkingLevelSegment 同模式）。
 
 import { useEffect, useState } from 'react'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import { useAppState } from '../../state/AppState.js'
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js'
 import { Box, Text } from '../../ink.js'

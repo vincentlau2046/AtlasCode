@@ -1,5 +1,5 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import type { ContentBlockParam } from '../../../types/atlas.js'
+import type { ContentBlockParam } from '../../../../kernel/types/atlas.js'
 import { randomUUID } from 'crypto'
 import { logForDebugging } from 'src/tui/utils/debug.js'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge/bridgePermissionCallbacks 整裁；1P 远程权限委托回调类型
@@ -29,15 +29,15 @@ type BridgePermissionCallbacks = {
 }
 import { getTerminalFocused } from '../../../ink/terminal-focus-state.js'
 import { executeAsyncClassifierCheck } from '../../../tools/BashTool/bashPermissions.js'
-import { BASH_TOOL_NAME } from '../../../tools/BashTool/toolName.js'
+import { BASH_TOOL_NAME } from '../../../../kernel/tools/BashTool/toolName.js'
 import {
   clearClassifierChecking,
   setClassifierApproval,
   setClassifierChecking,
   setYoloClassifierApproval,
-} from '../../../utils/classifierApprovals.js'
-import { errorMessage } from '../../../utils/errors.js'
-import type { PermissionDecision } from '../../../utils/permissions/PermissionResult.js'
+} from '../../../../kernel/utils/classifierApprovals.js'
+import { errorMessage } from '../../../../kernel/utils/errors.js'
+import type { PermissionDecision } from '../../../../kernel/permissions/PermissionResult.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import { hasPermissionsToUseTool } from '../../../utils/permissions/permissions.js'
 import type { PermissionContext } from '../PermissionContext.js'

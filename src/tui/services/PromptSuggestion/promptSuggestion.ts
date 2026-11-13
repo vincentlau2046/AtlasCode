@@ -1,10 +1,10 @@
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import type { AppState } from '../../state/AppState.js'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { count } from '../../utils/array.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from '../../utils/envUtils.js'
-import { toError } from '../../utils/errors.js'
+import { count } from '../../../kernel/utils/array.js'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { toError } from '../../../kernel/utils/errors.js'
 import {
   type CacheSafeParams,
   createCacheSafeParams,

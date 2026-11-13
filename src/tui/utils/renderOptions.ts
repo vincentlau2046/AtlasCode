@@ -2,7 +2,7 @@
 import { openSync } from 'fs'
 import { ReadStream } from 'tty'
 import type { RenderOptions } from '../ink.js'
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { logError } from './log.js'
 
 // Cached stdin override - computed once per process

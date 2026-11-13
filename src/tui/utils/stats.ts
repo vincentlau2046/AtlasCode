@@ -3,14 +3,14 @@ import { open } from 'fs/promises'
 import { basename, dirname, join, sep } from 'path'
 import type { ModelUsage } from 'src/tui/entrypoints/agentSdkTypes.js'
 import type { Entry, TranscriptMessage } from '../types/logs.js'
-import { logForDebugging } from './debug.js'
-import { errorMessage, isENOENT } from './errors.js'
-import { getFsImplementation } from './fsOperations.js'
+import { logForDebugging } from './debug'
+import { errorMessage, isENOENT } from '../../kernel/utils/errors.js'
+import { getFsImplementation } from './fsOperations'
 import { readJSONLFile } from './json.js'
 import { SYNTHETIC_MODEL } from './messages.js'
 import { getProjectsDir, isTranscriptMessage } from './sessionStorage.js'
 import { SHELL_TOOL_NAMES } from './shell/shellToolUtils.js'
-import { jsonParse } from './slowOperations.js'
+import { jsonParse } from './slowOperations'
 import {
   getTodayDateString,
   getYesterdayDateString,

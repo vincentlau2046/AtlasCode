@@ -1,4 +1,4 @@
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import * as React from 'react';
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js';
 import { FallbackToolUseErrorMessage } from '../../components/FallbackToolUseErrorMessage.js';
@@ -8,8 +8,8 @@ import { ShellProgressMessage } from '../../components/shell/ShellProgressMessag
 import { ShellTimeDisplay } from '../../components/shell/ShellTimeDisplay.js';
 import { Box, Text } from '../../ink.js';
 import type { Tool } from '../../Tool.js';
-import type { ProgressMessage } from '../../types/message.js';
-import type { PowerShellProgress } from '../../types/tools.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
+import type { PowerShellProgress } from '../../../kernel/types/tools.js';
 import type { ThemeName } from '../../utils/theme.js';
 import type { Out, PowerShellToolInput } from './PowerShellTool.js';
 

@@ -1,17 +1,17 @@
 import { feature } from 'src/shared'
-import type { BetaToolUseBlock } from '../../types/atlas.js'
+import type { BetaToolUseBlock } from '../../../kernel/types/atlas.js'
 import { randomUUID } from 'crypto'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import {
   FORK_BOILERPLATE_TAG,
   FORK_DIRECTIVE_PREFIX,
-} from '../../constants/xml.js'
+} from '../../../kernel/constants/xml.js'
 import { isCoordinatorMode } from '../../coordinator/coordinatorMode.js'
 import type {
   AssistantMessage,
   Message as MessageType,
-} from '../../types/message.js'
-import { logForDebugging } from '../../utils/debug.js'
+} from '../../../kernel/types/message.js'
+import { logForDebugging } from '../../utils/debug'
 import { createUserMessage } from '../../utils/messages.js'
 import type { BuiltInAgentDefinition } from './loadAgentsDir.js'
 

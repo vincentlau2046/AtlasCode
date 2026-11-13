@@ -10,8 +10,8 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react'
-import { logForDebugging } from '../utils/debug.js'
-import { errorMessage } from '../utils/errors.js'
+import { logForDebugging } from '../utils/debug'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import {
   type PermissionUpdate,
   permissionUpdateSchema,

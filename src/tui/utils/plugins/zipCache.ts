@@ -42,10 +42,10 @@ import {
 } from 'fs/promises'
 import { tmpdir } from 'os'
 import { basename, dirname, join } from 'path'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { parseZipModes, unzipFile } from '../dxt/zip.js'
-import { isEnvTruthy } from '../envUtils.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { getFsImplementation } from '../fsOperations'
 import { expandTilde } from '../permissions/pathValidation.js'
 import type { MarketplaceSource } from './schemas.js'
 

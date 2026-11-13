@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import type { Tool } from '../../Tool.js'
-import { AGENT_TOOL_NAME } from '../AgentTool/constants.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
 
 export { TOOL_SEARCH_TOOL_NAME } from './constants.js'
 

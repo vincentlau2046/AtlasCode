@@ -121,8 +121,8 @@ const AscendBridge = feature('ASCEND_TOOLS')
   : null
 import type { ToolPermissionContext } from './Tool.js'
 import { getDenyRuleForTool } from './utils/permissions/permissions.js'
-import { hasEmbeddedSearchTools } from './utils/embeddedTools.js'
-import { isEnvTruthy } from './utils/envUtils.js'
+import { hasEmbeddedSearchTools } from '../kernel/utils/embeddedTools.js'
+import { isEnvTruthy } from '../kernel/utils/envUtils.js'
 import { isPowerShellToolEnabled } from './utils/shell/shellToolUtils.js'
 import { isAgentSwarmsEnabled } from './utils/agentSwarmsEnabled.js'
 import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js'
@@ -130,7 +130,7 @@ import {
   REPL_TOOL_NAME,
   REPL_ONLY_TOOLS,
   isReplModeEnabled,
-} from './tools/REPLTool/constants.js'
+} from '../kernel/tools/REPLTool/constants.js'
 export { REPL_ONLY_TOOLS }
 const getPowerShellTool = () => {
   if (!isPowerShellToolEnabled()) return null

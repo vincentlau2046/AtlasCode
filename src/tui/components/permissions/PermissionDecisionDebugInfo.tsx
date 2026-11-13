@@ -7,13 +7,13 @@ import { Ansi, Box, color, Text, useTheme } from '../../ink.js';
 import { useAppState } from '../../state/AppState.js';
 import type { PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { permissionModeTitle } from '../../utils/permissions/PermissionMode.js';
-import type { PermissionDecision, PermissionDecisionReason } from '../../utils/permissions/PermissionResult.js';
+import type { PermissionDecision, PermissionDecisionReason } from '../../../kernel/permissions/PermissionResult.js';
 import { extractRules } from '../../utils/permissions/PermissionUpdate.js';
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js';
-import { permissionRuleValueToString } from '../../utils/permissions/permissionRuleParser.js';
+import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js';
 import { detectUnreachableRules } from '../../utils/permissions/shadowedRuleDetection.js';
 import { getSandboxManager } from 'src/tui/sandboxCompat';
-import { getSettingSourceDisplayNameLowercase } from '../../utils/settings/constants.js';
+import { getSettingSourceDisplayNameLowercase } from '../../utils/settings/constants';
 type PermissionDecisionInfoItemProps = {
   title?: string;
   decisionReason: PermissionDecisionReason;

@@ -33,7 +33,7 @@ import {
   LINE_FORMAT_INSTRUCTION as TUI_LINE_FORMAT_INSTRUCTION,
   OFFSET_INSTRUCTION_DEFAULT as TUI_OFFSET_INSTRUCTION_DEFAULT,
   renderPromptTemplate as tuiRenderPromptTemplate,
-} from '../../src/tui/tools/FileReadTool/prompt'
+} from '../../src/kernel/tools/FileReadTool/prompt'
 
 // ── engine JSON schema 形状 ──────────────────────────────────────────────
 

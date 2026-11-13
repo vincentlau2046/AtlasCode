@@ -95,7 +95,7 @@ import { getManagedSettingsDropInDir } from './utils/settings/managedPath'
 import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { getPlatform } from './utils/platform'
-import { getConfigDirNameForProject } from './utils/configDir'
+import { getConfigDirNameForProject } from '../kernel/utils/configDir'
 import { getAtlasTempDir } from './utils/permissions/filesystem'
 
 // ============================================================================

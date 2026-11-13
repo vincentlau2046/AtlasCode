@@ -6,10 +6,10 @@
  */
 
 import type { AppState } from '../../state/AppState.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { addFunctionHook } from '../hooks/sessionHooks.js'
 import { applyPermissionUpdate } from '../permissions/PermissionUpdate.js'
-import { jsonStringify } from '../slowOperations.js'
+import { jsonStringify } from '../slowOperations'
 import { getTeammateColor } from 'src/engine'
 import {
   createIdleNotification,

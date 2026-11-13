@@ -3,12 +3,12 @@ import {
   feature,
   resolveMailboxPermissionDeadlineMs,
 } from 'src/shared'
-import type { ContentBlockParam } from '../../../types/atlas.js'
-import type { PendingClassifierCheck } from '../../../types/permissions.js'
+import type { ContentBlockParam } from '../../../../kernel/types/atlas.js'
+import type { PendingClassifierCheck } from '../../../../kernel/types/permissions.js'
 import { isAgentSwarmsEnabled } from '../../../utils/agentSwarmsEnabled.js'
-import { toError } from '../../../utils/errors.js'
+import { toError } from '../../../../kernel/utils/errors.js'
 import { logError } from '../../../utils/log.js'
-import type { PermissionDecision } from '../../../utils/permissions/PermissionResult.js'
+import type { PermissionDecision } from '../../../../kernel/permissions/PermissionResult.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import {
   createPermissionRequest,

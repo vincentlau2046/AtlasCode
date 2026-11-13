@@ -1,16 +1,16 @@
-import type { BetaContentBlock } from '../types/atlas.js'
+import type { BetaContentBlock } from '../../kernel/types/atlas.js'
 import type {
   ContentBlock,
   ContentBlockParam,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import { roughTokenCountEstimation as countTokens } from '../services/tokenEstimation.js'
 import type {
   AssistantMessage,
   Message,
   UserMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import { normalizeMessagesForAPI } from './messages.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 type TokenStats = {
   toolRequests: Map<string, number>

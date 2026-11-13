@@ -8,13 +8,13 @@
  */
 
 import chalk from 'chalk'
-import type { QuerySource } from '../../constants/querySource.js'
+import type { QuerySource } from '../../../kernel/constants/querySource.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { modelProvider, buildOpenAIParams, startsWithApiErrorPrefix } from 'src/modelprovider'
 import { memoizeWithLRU } from '../memoize.js'
 import { createUserMessage } from '../messages.js'
-import { jsonStringify } from '../slowOperations.js'
-import { asSystemPrompt } from '../systemPromptType.js'
+import { jsonStringify } from '../slowOperations'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 
 /**
  * Shell executables that must never be accepted as bare prefixes.

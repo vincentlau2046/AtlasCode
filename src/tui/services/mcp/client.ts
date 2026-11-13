@@ -7,7 +7,7 @@ import type {
   Base64ImageSource,
   ContentBlockParam,
   MessageParam,
-} from '../../types/atlas.js'
+} from '../../../kernel/types/atlas.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import {
   SSEClientTransport,
@@ -62,16 +62,16 @@ import { ListMcpResourcesTool } from '../../tools/ListMcpResourcesTool/ListMcpRe
 import { type MCPProgress, MCPTool } from '../../tools/MCPTool/MCPTool.js'
 import { createMcpAuthTool } from '../../tools/McpAuthTool/McpAuthTool.js'
 import { ReadMcpResourceTool } from '../../tools/ReadMcpResourceTool/ReadMcpResourceTool.js'
-import { createAbortController } from '../../utils/abortController.js'
-import { count } from '../../utils/array.js'
-import { registerCleanup } from '../../utils/cleanupRegistry.js'
+import { createAbortController } from '../../../kernel/utils/abortController.js'
+import { count } from '../../../kernel/utils/array.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
 import { detectCodeIndexingFromMcpServerName } from '../../utils/codeIndexing.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from '../../utils/envUtils.js'
+import { logForDebugging } from '../../utils/debug'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   errorMessage,
   TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-} from '../../utils/errors.js'
+} from '../../../kernel/utils/errors.js'
 import { getMCPUserAgent } from '../../utils/http.js'
 import { maybeNotifyIDEConnected } from '../../utils/ide.js'
 import { maybeResizeAndDownsampleImageBuffer } from '../../utils/imageResizer.js'
@@ -97,7 +97,7 @@ import {
   getWebSocketProxyUrl,
 } from '../../utils/proxy.js'
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js'
-import { subprocessEnv } from '../../utils/subprocessEnv.js'
+import { subprocessEnv } from '../../../kernel/utils/subprocessEnv.js'
 import {
   isPersistError,
   persistToolResult,
@@ -107,8 +107,8 @@ import {
   runElicitationHooks,
   runElicitationResultHooks,
 } from './elicitationHandler.js'
-import { buildMcpToolName } from './mcpStringUtils.js'
-import { normalizeNameForMCP } from './normalization.js'
+import { buildMcpToolName } from '../../../kernel/services/mcp/mcpStringUtils.js'
+import { normalizeNameForMCP } from '../../../kernel/services/mcp/normalization.js'
 
 const fetchMcpSkillsForClient = feature('MCP_SKILLS')
   ? (
@@ -117,10 +117,10 @@ const fetchMcpSkillsForClient = feature('MCP_SKILLS')
   : null
 
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js'
-import type { AssistantMessage } from 'src/tui/types/message.js'
+import type { AssistantMessage } from 'src/kernel/types/message'
 import { classifyMcpToolForCollapse } from '../../tools/MCPTool/classifyForCollapse.js'
-import { clearKeychainCache } from '../../utils/secureStorage/macOsKeychainHelpers.js'
-import { sleep } from '../../utils/sleep.js'
+import { clearKeychainCache } from '../../../kernel/utils/secureStorage/macOsKeychainHelpers.js'
+import { sleep } from '../../../kernel/utils/sleep.js'
 import {
   ClaudeAuthProvider,
   hasMcpDiscoveryButNoToken,
@@ -252,8 +252,8 @@ const isComputerUseMCPServer = feature('CHICAGO_MCP')
 
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
-import { getAtlasConfigHomeDir } from '../../utils/envUtils.js'
-import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
+import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
+import { jsonParse, jsonStringify } from '../../utils/slowOperations'
 
 const MCP_AUTH_CACHE_TTL_MS = 15 * 60 * 1000 // 15 min
 

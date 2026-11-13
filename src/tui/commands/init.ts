@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import type { Command } from '../commands.js'
 import { maybeMarkProjectOnboardingComplete } from '../projectOnboardingState.js'
-import { isEnvTruthy } from '../utils/envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 
 const OLD_INIT_PROMPT = `Please analyze this codebase and create an ATLAS.md file, which will be given to future instances of Atlas to operate in this repository.
 

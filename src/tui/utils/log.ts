@@ -1,14 +1,14 @@
 import { feature } from 'src/shared'
-import type { BetaMessageStreamParams } from '../types/atlas.js'
+import type { BetaMessageStreamParams } from '../../kernel/types/atlas.js'
 import { readdir, readFile, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
-import type { QuerySource } from 'src/tui/constants/querySource.js'
+import type { QuerySource } from 'src/kernel/constants/querySource'
 import {
   setLastAPIRequest,
   setLastAPIRequestMessages,
 } from 'src/tui/bootstrapState.js'
-import { TICK_TAG } from '../constants/xml.js'
+import { TICK_TAG } from '../../kernel/constants/xml.js'
 import {
   type LogOption,
   type SerializedMessage,
@@ -16,10 +16,10 @@ import {
 } from '../types/logs.js'
 import { CACHE_PATHS } from './cachePaths.js'
 import { stripDisplayTags, stripDisplayTagsAllowEmpty } from './displayTags.js'
-import { isEnvTruthy } from './envUtils.js'
-import { toError } from './errors.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { toError } from '../../kernel/utils/errors.js'
 import { isEssentialTrafficOnly } from './privacyLevel.js'
-import { jsonParse } from './slowOperations.js'
+import { jsonParse } from './slowOperations'
 
 /**
  * Gets the display title for a log/session with fallback logic.

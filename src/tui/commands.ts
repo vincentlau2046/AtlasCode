@@ -89,8 +89,8 @@ import version from './commands/version.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
 import stickers from './commands/stickers/index.js'
 import { logError } from './utils/log.js'
-import { toError } from './utils/errors.js'
-import { logForDebugging } from './utils/debug.js'
+import { toError } from '../kernel/utils/errors.js'
+import { logForDebugging } from './utils/debug'
 import {
   getSkillDirCommands,
   clearSkillCaches,
@@ -105,7 +105,7 @@ import {
   clearPluginSkillsCache,
 } from './utils/plugins/loadPluginCommands.js'
 import memoize from 'lodash-es/memoize.js'
-import { isDefaultGateway } from './utils/model/providers.js'
+import { isDefaultGateway } from '../kernel/model/providers.js'
 import exit from './commands/exit/index.js'
 import exportCommand from './commands/export/index.js'
 import model from './commands/model/index.js'
@@ -128,7 +128,7 @@ const usageReport: Command = {
     return real.getPromptForCommand(args, context)
   },
 }
-import { getSettingSourceName } from './utils/settings/constants.js'
+import { getSettingSourceName } from './utils/settings/constants'
 import {
   type Command,
   getCommandName,

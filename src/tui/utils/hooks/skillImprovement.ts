@@ -1,14 +1,14 @@
 import { feature } from 'src/shared'
-import { getConfigDirNameForProject } from '../configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import { getInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
 import { getEmptyToolPermissionContext } from '../../Tool.js'
-import type { Message } from '../../types/message.js'
-import { createAbortController } from '../abortController.js'
-import { count } from '../array.js'
-import { getCwd } from '../cwd.js'
-import { toError } from '../errors.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { createAbortController } from '../../../kernel/utils/abortController.js'
+import { count } from '../../../kernel/utils/array.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { toError } from '../../../kernel/utils/errors.js'
 import { logError } from '../log.js'
 import {
   createUserMessage,
@@ -16,8 +16,8 @@ import {
   extractTextContent,
 } from '../messages.js'
 import { getDefaultFastModel } from '../model/model.js'
-import { jsonParse } from '../slowOperations.js'
-import { asSystemPrompt } from '../systemPromptType.js'
+import { jsonParse } from '../slowOperations'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import {
   type ApiQueryHookConfig,
   createApiQueryHook,

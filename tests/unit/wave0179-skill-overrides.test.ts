@@ -25,7 +25,7 @@ import {
   resolveSkillOverrides,
   DEFAULT_SKILL_OVERRIDES_MODE,
 } from '../../src/engine/config'
-import { SettingsSchema as TuiSettingsSchema } from '../../src/tui/utils/settings/types'
+import { SettingsSchema as TuiSettingsSchema } from '../../src/kernel/settings/types'
 
 function srcOf(rel: string): string {
   return readFileSync(resolve(import.meta.dir, '../../', rel), 'utf8')

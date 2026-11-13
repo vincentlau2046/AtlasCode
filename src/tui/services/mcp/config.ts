@@ -13,15 +13,15 @@ import {
   saveCurrentProjectConfig,
   saveGlobalConfig,
 } from '../../utils/config.js'
-import { getCwd } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { getErrnoCode } from '../../utils/errors.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
+import { getErrnoCode } from '../../../kernel/utils/errors.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import { safeParseJSON } from '../../utils/json.js'
 import { logError } from '../../utils/log.js'
 import { getPluginMcpServers } from '../../utils/plugins/mcpPluginIntegration.js'
 import { loadAllPluginsCacheOnly } from '../../utils/plugins/pluginLoader.js'
-import { isSettingSourceEnabled } from '../../utils/settings/constants.js'
+import { isSettingSourceEnabled } from '../../utils/settings/constants'
 import { getManagedFilePath } from '../../utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from '../../utils/settings/pluginOnlyPolicy.js'
 import {
@@ -33,9 +33,9 @@ import {
   isMcpServerNameEntry,
   isMcpServerUrlEntry,
   type SettingsJson,
-} from '../../utils/settings/types.js'
-import type { ValidationError } from '../../utils/settings/validation.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+} from '../../../kernel/settings/types.js'
+import type { ValidationError } from '../../utils/settings/validation'
+import { jsonStringify } from '../../utils/slowOperations'
 import { expandEnvVarsInString } from './envExpansion.js'
 import { applyMcpOauthScopeGate } from './oauthScopeGate.js'
 import {

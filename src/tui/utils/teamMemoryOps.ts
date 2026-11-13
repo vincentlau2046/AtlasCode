@@ -1,6 +1,6 @@
 import { isTeamMemFile } from '../memdir/teamMemPaths.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
+import { FILE_EDIT_TOOL_NAME } from '../../kernel/tools/FileEditTool/constants.js'
+import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
 
 export { isTeamMemFile }
 

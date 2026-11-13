@@ -5,7 +5,7 @@ import type {
   TextBlockParam as ATextBlockParam,
   ImageBlockParam as AImageBlockParam,
   BetaMessage as ABetaMessage,
-} from '../../types/atlas.js'
+} from '../../../kernel/types/atlas.js'
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { z } from 'zod/v4'
@@ -16,28 +16,28 @@ import { getCacheControl } from '../../services/api/metadata.js'
 import { parsePromptTooLongTokenCounts } from '../../utils/apiErrors.js'
 import { getDefaultMaxRetries } from '../../services/api/withRetry.js'
 import type { Tool, ToolPermissionContext, Tools } from '../../Tool.js'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import type {
   ClassifierUsage,
   YoloClassifierResult,
-} from '../../types/permissions.js'
-import { isDebugMode, logForDebugging } from '../debug.js'
-import { errorMessage } from '../errors.js'
-import { lazySchema } from '../lazySchema.js'
+} from '../../../kernel/types/permissions.js'
+import { isDebugMode, logForDebugging } from '../debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { extractTextContent } from '../messages.js'
 import { getMainLoopModel } from '../model/model.js'
 import { getAutoModeConfig } from '../settings/settings.js'
 import { sideQuery } from '../sideQuery.js'
-import { jsonStringify } from '../slowOperations.js'
+import { jsonStringify } from '../slowOperations'
 import { tokenCountWithEstimation } from '../tokens.js'
 import {
   getBashPromptAllowDescriptions,
   getBashPromptDenyDescriptions,
-} from './bashClassifier.js'
+} from '../../../kernel/permissions/bashClassifier.js'
 import {
   extractToolUseBlock,
   parseClassifierResponse,
-} from './classifierShared.js'
+} from '../../../kernel/permissions/classifierShared.js'
 import { getAtlasTempDir } from './filesystem.js'
 
 // Dead code elimination: conditional imports for auto mode classifier prompts.
@@ -48,13 +48,13 @@ function txtRequire(mod: string | { default: string }): string {
 }
 
 const BASE_PROMPT: string = feature('TRANSCRIPT_CLASSIFIER')
-  ? txtRequire(require('./yolo-classifier-prompts/auto_mode_system_prompt.txt'))
+  ? txtRequire(require('../../../kernel/utils/permissions/yolo-classifier-prompts/auto_mode_system_prompt.txt'))
   : ''
 
 // External template is loaded separately so it's available for
 // `claude auto-mode defaults` even in non-interactive builds.
 const EXTERNAL_PERMISSIONS_TEMPLATE: string = feature('TRANSCRIPT_CLASSIFIER')
-  ? txtRequire(require('./yolo-classifier-prompts/permissions_external.txt'))
+  ? txtRequire(require('../../../kernel/utils/permissions/yolo-classifier-prompts/permissions_external.txt'))
   : ''
 
 function isUsingExternalPermissions(): boolean {

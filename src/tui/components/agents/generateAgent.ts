@@ -1,8 +1,8 @@
-import type { ContentBlock } from '../../types/atlas.js'
+import type { ContentBlock } from '../../../kernel/types/atlas.js'
 import { getUserContext } from 'src/tui/context.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
 import { getEmptyToolPermissionContext } from 'src/tui/Tool.js'
-import { AGENT_TOOL_NAME } from 'src/tui/tools/AgentTool/constants.js'
+import { AGENT_TOOL_NAME } from 'src/kernel/tools/AgentTool/constants'
 import { prependUserContext } from 'src/tui/utils/api.js'
 import {
   createUserMessage,
@@ -10,9 +10,9 @@ import {
 } from 'src/tui/utils/messages.js'
 import type { ModelName } from 'src/tui/utils/model/model.js'
 import { isAutoMemoryEnabled } from '../../memdir/paths.js'
-import { jsonParse } from '../../utils/slowOperations.js'
-import { asSystemPrompt } from '../../utils/systemPromptType.js'
-import { errorMessage } from 'src/tui/utils/errors.js'
+import { jsonParse } from '../../utils/slowOperations'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
+import { errorMessage } from 'src/kernel/utils/errors'
 import { logError } from 'src/tui/utils/log.js'
 
 type GeneratedAgent = {

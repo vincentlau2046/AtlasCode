@@ -4,8 +4,8 @@ import chalk from 'chalk';
 import React from 'react';
 import { Ansi, Box, Text } from '../../ink.js';
 import { useAppState } from '../../state/AppState.js';
-import type { PermissionDecision, PermissionDecisionReason } from '../../utils/permissions/PermissionResult.js';
-import { permissionRuleValueToString } from '../../utils/permissions/permissionRuleParser.js';
+import type { PermissionDecision, PermissionDecisionReason } from '../../../kernel/permissions/PermissionResult.js';
+import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js';
 import type { Theme } from '../../utils/theme.js';
 import ThemedText from '../design-system/ThemedText.js';
 export type PermissionRuleExplanationProps = {

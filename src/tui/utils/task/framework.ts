@@ -6,7 +6,7 @@ import {
   TASK_NOTIFICATION_TAG,
   TASK_TYPE_TAG,
   TOOL_USE_ID_TAG,
-} from '../../constants/xml.js'
+} from '../../../kernel/constants/xml.js'
 import type { AppState } from '../../state/AppState.js'
 import {
   isTerminalTaskStatus,
@@ -15,7 +15,7 @@ import {
 } from '../../Task.js'
 import type { TaskState } from '../../tasks/types.js'
 import { enqueuePendingNotification } from '../messageQueueManager.js'
-import { enqueueSdkEvent } from '../sdkEventQueue.js'
+import { enqueueSdkEvent } from '../../../kernel/utils/sdkEventQueue.js'
 import { getTaskOutputDelta, getTaskOutputPath } from './diskOutput.js'
 
 // Standard polling interval for all tasks

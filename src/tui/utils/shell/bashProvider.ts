@@ -12,17 +12,17 @@ import {
   rewriteWindowsNullRedirect,
   shouldAddStdinRedirect,
 } from '../bash/shellQuoting.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { getPlatform } from '../platform.js'
 import { getSessionEnvironmentScript } from '../sessionEnvironment.js'
-import { getSessionEnvVars } from '../sessionEnvVars.js'
+import { getSessionEnvVars } from '../../../kernel/utils/sessionEnvVars.js'
 import {
   ensureSocketInitialized,
   getClaudeTmuxEnv,
   hasTmuxToolBeenUsed,
 } from '../tmuxSocket.js'
 import { windowsPathToPosixPath } from '../windowsPaths.js'
-import type { ShellProvider } from './shellProvider.js'
+import type { ShellProvider } from '../../../kernel/shell/provider/shellProvider.js'
 
 /**
  * Returns a shell command to disable extended glob patterns for security.

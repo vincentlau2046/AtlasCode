@@ -7,11 +7,11 @@
  * For the core operations (without CLI side effects), see pluginOperations.ts
  */
 import figures from 'figures'
-import { errorMessage } from '../../utils/errors.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { gracefulShutdown } from '../../utils/gracefulShutdown.js'
 import { logError } from '../../utils/log.js'
 import type { PluginScope } from '../../utils/plugins/schemas.js'
-import { writeToStdout } from '../../utils/process.js'
+import { writeToStdout } from '../../../kernel/utils/process.js'
 import {
   disableAllPluginsOp,
   disablePluginOp,

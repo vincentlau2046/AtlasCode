@@ -20,12 +20,12 @@ import { trySessionMemoryCompaction } from 'src/tui/engineCompat'
 import { setLastSummarizedMessageId } from '../../services/SessionMemory/sessionMemoryUtils.js'
 import type { ToolUseContext } from '../../Tool.js'
 import type { LocalCommandCall } from '../../types/command.js'
-import type { Message } from '../../types/message.js'
-import { hasExactErrorMessage } from '../../utils/errors.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { hasExactErrorMessage } from '../../../kernel/utils/errors.js'
 import { executePreCompactHooks } from '../../utils/hooks.js'
 import { logError } from '../../utils/log.js'
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js'
-import { getUpgradeMessage } from '../../utils/model/contextWindowUpgradeCheck.js'
+import { getUpgradeMessage } from '../../../kernel/model/contextWindowUpgradeCheck.js'
 import {
   buildEffectiveSystemPrompt,
   type SystemPrompt,

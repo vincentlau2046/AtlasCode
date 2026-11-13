@@ -7,13 +7,13 @@
 // 不迁入 utils/messages.ts 的原因：r3/r4-errors 等 coverage-attack 测试以本模块为
 // 测试目标并 mock 掉 messages.js——若迁入 messages.ts，测试目标会被自身 mock 吞掉。
 
-import { APIError } from '../types/atlas.js'
-import type { BetaStopReason } from '../types/atlas.js'
+import { APIError } from '../../kernel/types/atlas.js'
+import type { BetaStopReason } from '../../kernel/types/atlas.js'
 import type {
   AssistantMessage,
   Message,
   UserMessage,
-} from 'src/tui/types/message.js'
+} from 'src/kernel/types/message'
 import {
   getAtlasApiKeyWithSource,
   getOAuthTokens,
@@ -23,7 +23,7 @@ import {
   NO_RESPONSE_REQUESTED,
 } from './messages.js'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { ImageResizeError } from './imageResizer.js'
 import { ImageSizeError } from './imageValidation.js'
 import {

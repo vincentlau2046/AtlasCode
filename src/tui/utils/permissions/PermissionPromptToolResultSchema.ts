@@ -1,11 +1,11 @@
 import type { Tool, ToolUseContext } from 'src/tui/Tool.js'
 import z from 'zod/v4'
-import { logForDebugging } from '../debug.js'
-import { lazySchema } from '../lazySchema.js'
+import { logForDebugging } from '../debug'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import type {
   PermissionDecision,
   PermissionDecisionReason,
-} from './PermissionResult.js'
+} from '../../../kernel/permissions/PermissionResult.js'
 import {
   applyPermissionUpdates,
   persistPermissionUpdates,

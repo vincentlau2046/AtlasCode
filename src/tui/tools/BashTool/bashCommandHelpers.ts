@@ -8,8 +8,8 @@ import {
   type IParsedCommand,
   ParsedCommand,
 } from '../../utils/bash/ParsedCommand.js'
-import { type Node, PARSE_ABORTED } from '../../utils/bash/parser.js'
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
+import { type Node, PARSE_ABORTED } from '../../utils/bash/parser'
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
 import { createPermissionRequestMessage } from '../../utils/permissions/permissions.js'
 import { BashTool } from './BashTool.js'

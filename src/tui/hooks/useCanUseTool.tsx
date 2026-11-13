@@ -1,6 +1,6 @@
 import { c as _c } from "react/compiler-runtime";
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import { APIUserAbortError } from '../types/atlas.js';
+import { APIUserAbortError } from '../../kernel/types/atlas.js';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadata.js';
@@ -8,16 +8,16 @@ import type { ToolUseConfirm } from '../components/permissions/PermissionRequest
 import { Text } from '../ink.js';
 import type { ToolPermissionContext, Tool as ToolType, ToolUseContext } from '../Tool.js';
 import { consumeSpeculativeClassifierCheck, peekSpeculativeClassifierCheck } from '../tools/BashTool/bashPermissions.js';
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js';
-import type { AssistantMessage } from '../types/message.js';
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js';
+import type { AssistantMessage } from '../../kernel/types/message.js';
 import { recordAutoModeDenial } from '../utils/autoModeDenials.js';
-import { clearClassifierChecking, setClassifierApproval, setYoloClassifierApproval } from '../utils/classifierApprovals.js';
-import { logForDebugging } from '../utils/debug.js';
-import { AbortError } from '../utils/errors.js';
+import { clearClassifierChecking, setClassifierApproval, setYoloClassifierApproval } from '../../kernel/utils/classifierApprovals.js';
+import { logForDebugging } from '../utils/debug';
+import { AbortError } from '../../kernel/utils/errors.js';
 import { logError } from '../utils/log.js';
-import type { PermissionDecision } from '../utils/permissions/PermissionResult.js';
+import type { PermissionDecision } from '../../kernel/permissions/PermissionResult.js';
 import { hasPermissionsToUseTool } from '../utils/permissions/permissions.js';
-import { jsonStringify } from '../utils/slowOperations.js';
+import { jsonStringify } from '../utils/slowOperations';
 import { handleCoordinatorPermission } from './toolPermission/handlers/coordinatorHandler.js';
 import { handleInteractivePermission } from './toolPermission/handlers/interactiveHandler.js';
 import { handleSwarmWorkerPermission } from './toolPermission/handlers/swarmWorkerHandler.js';

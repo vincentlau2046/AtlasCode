@@ -56,7 +56,7 @@ function makeAppState(callback: () => Promise<unknown>) {
 describe('K3-A8 纯函数矩阵（基线缺导出 → 红）', () => {
   test('① 身份键稳定：同 hook 对象两次取键同串', async () => {
     const { getHookReentrancyKey } = await import(
-      '../../src/tui/utils/hooks/hookReentrancy.js'
+      '../../src/kernel/agenthooks/hookReentrancy.js'
     )
     const hook = { type: 'command', command: 'echo hi' }
     expect(getHookReentrancyKey('PreToolUse', hook)).toBe(
@@ -66,7 +66,7 @@ describe('K3-A8 纯函数矩阵（基线缺导出 → 红）', () => {
 
   test('② 缺省非重入：无执行上下文时 false', async () => {
     const { isReentrantHook } = await import(
-      '../../src/tui/utils/hooks/hookReentrancy.js'
+      '../../src/kernel/agenthooks/hookReentrancy.js'
     )
     expect(isReentrantHook('PreToolUse', { type: 'command', command: 'x' })).toBe(
       false,
@@ -75,7 +75,7 @@ describe('K3-A8 纯函数矩阵（基线缺导出 → 红）', () => {
 
   test('③ runWith 内重入 true、退出后 false', async () => {
     const { isReentrantHook, runWithHookReentrancy } = await import(
-      '../../src/tui/utils/hooks/hookReentrancy.js'
+      '../../src/kernel/agenthooks/hookReentrancy.js'
     )
     const hook = { type: 'command', command: 'x' }
     let inside = false
@@ -88,7 +88,7 @@ describe('K3-A8 纯函数矩阵（基线缺导出 → 红）', () => {
 
   test('④ 并行兄弟不互斥：并发两个 runWith 各自只见自己', async () => {
     const { isReentrantHook, runWithHookReentrancy } = await import(
-      '../../src/tui/utils/hooks/hookReentrancy.js'
+      '../../src/kernel/agenthooks/hookReentrancy.js'
     )
     const hookA = { type: 'command', command: 'a' }
     const hookB = { type: 'command', command: 'b' }
@@ -114,7 +114,7 @@ describe('K3-A8 纯函数矩阵（基线缺导出 → 红）', () => {
 
   test('⑤ 不同 hook 不互斥：runWith(A) 内检查 B 非重入', async () => {
     const { isReentrantHook, runWithHookReentrancy } = await import(
-      '../../src/tui/utils/hooks/hookReentrancy.js'
+      '../../src/kernel/agenthooks/hookReentrancy.js'
     )
     const hookA = { type: 'command', command: 'a' }
     const hookB = { type: 'command', command: 'b' }

@@ -20,17 +20,17 @@ import {
 } from '../../services/lsp/manager.js'
 import type { ValidationResult } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { uniq } from '../../utils/array.js'
-import { getCwd } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { isENOENT, toError } from '../../utils/errors.js'
+import { uniq } from '../../../kernel/utils/array.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
+import { isENOENT, toError } from '../../../kernel/utils/errors.js'
 import { execFileNoThrowWithCwd } from '../../utils/execFileNoThrow.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { getFsImplementation } from '../../utils/fsOperations'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import { expandPath } from '../../utils/path.js'
 import { checkReadPermissionForTool } from '../../utils/permissions/filesystem.js'
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
 import {
   formatDocumentSymbolResult,
   formatFindReferencesResult,
@@ -41,7 +41,7 @@ import {
   formatPrepareCallHierarchyResult,
   formatWorkspaceSymbolResult,
 } from './formatters.js'
-import { DESCRIPTION, LSP_TOOL_NAME } from './prompt.js'
+import { DESCRIPTION, LSP_TOOL_NAME } from '../../../kernel/tools/LSPTool/prompt.js'
 import { lspToolInputSchema } from './schemas.js'
 import {
   renderToolResultMessage,

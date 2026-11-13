@@ -9,7 +9,7 @@ import { enterTeammateView, exitTeammateView } from 'src/tui/state/teammateViewH
 import type { ToolUseContext } from 'src/tui/Tool.js';
 import { DreamTask, type DreamTaskState } from 'src/tui/tasks/DreamTask/DreamTask.js';
 import { InProcessTeammateTask } from 'src/tui/tasks/InProcessTeammateTask/InProcessTeammateTask.js';
-import type { InProcessTeammateTaskState } from 'src/tui/tasks/InProcessTeammateTask/types.js';
+import type { InProcessTeammateTaskState } from 'src/kernel/tasks/InProcessTeammateTask/types';
 import type { LocalAgentTaskState } from 'src/tui/tasks/LocalAgentTask/LocalAgentTask.js';
 import { LocalAgentTask } from 'src/tui/tasks/LocalAgentTask/LocalAgentTask.js';
 import type { LocalShellTaskState } from 'src/tui/tasks/LocalShellTask/guards.js';
@@ -32,7 +32,7 @@ const RemoteAgentTask = {
 };
 import { type BackgroundTaskState, isBackgroundTask, type TaskState } from 'src/tui/tasks/types.js';
 import type { DeepImmutable } from 'src/tui/types/utils.js';
-import { intersperse } from 'src/tui/utils/array.js';
+import { intersperse } from 'src/kernel/utils/array';
 import { TEAM_LEAD_NAME } from 'src/tui/utils/swarm/constants.js';
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：stopUltraplan（ultraplan 1P CCR 命令）随 1P 簇裁除；no-op stub
 const stopUltraplan = async (_id: string, _sessionId: string, _setAppState: unknown): Promise<void> => {};
@@ -43,7 +43,7 @@ import type { KeyboardEvent } from '../../ink/events/keyboard-event.js';
 import { Box, Text } from '../../ink.js';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
-import { count } from '../../utils/array.js';
+import { count } from '../../../kernel/utils/array.js';
 import { Byline } from '../design-system/Byline.js';
 import { Dialog } from '../design-system/Dialog.js';
 import { KeyboardShortcutHint } from '../design-system/KeyboardShortcutHint.js';

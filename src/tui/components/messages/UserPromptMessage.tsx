@@ -1,8 +1,8 @@
-import type { TextBlockParam } from '../../types/atlas.js';
+import type { TextBlockParam } from '../../../kernel/types/atlas.js';
 import React, { useContext, useMemo } from 'react';
 import { Box } from '../../ink.js';
 import { logError } from '../../utils/log.js';
-import { countCharInString } from '../../utils/stringUtils.js';
+import { countCharInString } from '../../../kernel/utils/stringUtils.js';
 import { MessageActionsSelectedContext } from '../messageActions.js';
 import { HighlightedThinkingText } from './HighlightedThinkingText.js';
 type Props = {

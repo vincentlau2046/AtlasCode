@@ -1,11 +1,11 @@
 import { c as _c } from "react/compiler-runtime";
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import type { ToolResultBlockParam } from '../../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../../kernel/types/atlas.js';
 import * as React from 'react';
 import { BULLET_OPERATOR } from '../../../constants/figures.js';
 import { Text } from '../../../ink.js';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
-import type { ProgressMessage } from '../../../types/message.js';
+import type { ProgressMessage } from '../../../../kernel/types/message.js';
 import { INTERRUPT_MESSAGE_FOR_TOOL_USE, isClassifierDenial, PLAN_REJECTION_PREFIX, REJECT_MESSAGE_WITH_REASON_PREFIX } from '../../../utils/messages.js';
 import { FallbackToolUseErrorMessage } from '../../FallbackToolUseErrorMessage.js';
 import { InterruptedByUser } from '../../InterruptedByUser.js';

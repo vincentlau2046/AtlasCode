@@ -13,14 +13,14 @@
 import axios from 'axios'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { createBufferedWriter } from './bufferedWriter.js'
+import { createBufferedWriter } from '../../kernel/utils/bufferedWriter.js'
 import { CACHE_PATHS } from './cachePaths.js'
-import { registerCleanup } from './cleanupRegistry.js'
-import { isAtlasDev } from './atlasDev.js'
-import { logForDebugging } from './debug.js'
-import { getFsImplementation } from './fsOperations.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
+import { logForDebugging } from './debug'
+import { getFsImplementation } from './fsOperations'
 import { attachErrorLogSink, dateToFilename } from './log.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 const DATE = dateToFilename(new Date())
 

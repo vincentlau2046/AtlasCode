@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import * as React from 'react';
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js';
 import { FallbackToolUseErrorMessage } from '../../components/FallbackToolUseErrorMessage.js';
@@ -11,9 +11,9 @@ import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
 import { useAppStateStore, useSetAppState } from '../../state/AppState.js';
 import type { Tool } from '../../Tool.js';
 import { backgroundAll } from '../../tasks/LocalShellTask/LocalShellTask.js';
-import type { ProgressMessage } from '../../types/message.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
 import { env } from '../../utils/env.js';
-import { isEnvTruthy } from '../../utils/envUtils.js';
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js';
 import { getDisplayPath } from '../../utils/file.js';
 import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';
 import type { ThemeName } from '../../utils/theme.js';

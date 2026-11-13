@@ -9,15 +9,15 @@ import {
   McpServerConfigSchema,
 } from '../../services/mcp/types.js'
 import type { ToolUseContext } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { logForDebugging } from '../../utils/debug'
 import {
   EFFORT_LEVELS,
   type EffortValue,
   parseEffortValue,
 } from '../../utils/effort.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { parsePositiveIntFromFrontmatter } from '../../utils/frontmatterParser.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import {
   loadMarkdownFilesForSubdir,
@@ -33,11 +33,11 @@ import {
   loadPluginAgents,
 } from '../../utils/plugins/loadPluginAgents.js'
 import { HooksSchema } from '../../schemas/hooks.js'
-import type { HooksSettings } from '../../utils/settings/types.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
-import { FILE_EDIT_TOOL_NAME } from '../FileEditTool/constants.js'
-import { FILE_READ_TOOL_NAME } from '../FileReadTool/prompt.js'
-import { FILE_WRITE_TOOL_NAME } from '../FileWriteTool/prompt.js'
+import type { HooksSettings } from '../../../kernel/settings/types.js'
+import { jsonStringify } from '../../utils/slowOperations'
+import { FILE_EDIT_TOOL_NAME } from '../../../kernel/tools/FileEditTool/constants.js'
+import { FILE_READ_TOOL_NAME } from '../../../kernel/tools/FileReadTool/prompt.js'
+import { FILE_WRITE_TOOL_NAME } from '../../../kernel/tools/FileWriteTool/prompt.js'
 import {
   AGENT_COLORS,
   type AgentColorName,

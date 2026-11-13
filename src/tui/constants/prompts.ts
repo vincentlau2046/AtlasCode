@@ -2,7 +2,7 @@
 import { type as osType, version as osVersion, release as osRelease } from 'os'
 import { env } from '../utils/env.js'
 import { getIsGit } from '../utils/git.js'
-import { getCwd } from '../utils/cwd.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getSessionStartDate } from './common.js'
@@ -10,15 +10,15 @@ import { getInitialSettings } from '../utils/settings/settings.js'
 import {
   AGENT_TOOL_NAME,
   VERIFICATION_AGENT_TYPE,
-} from '../tools/AgentTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
-import { FILE_READ_TOOL_NAME } from '../tools/FileReadTool/prompt.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
-import { TODO_WRITE_TOOL_NAME } from '../tools/TodoWriteTool/constants.js'
-import { TASK_CREATE_TOOL_NAME } from '../tools/TaskCreateTool/constants.js'
+} from '../../kernel/tools/AgentTool/constants.js'
+import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
+import { FILE_READ_TOOL_NAME } from '../../kernel/tools/FileReadTool/prompt.js'
+import { FILE_EDIT_TOOL_NAME } from '../../kernel/tools/FileEditTool/constants.js'
+import { TODO_WRITE_TOOL_NAME } from '../../kernel/tools/TodoWriteTool/constants.js'
+import { TASK_CREATE_TOOL_NAME } from '../../kernel/tools/TaskCreateTool/constants.js'
 import type { Tools } from '../Tool.js'
 import type { Command } from '../types/command.js'
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
 import {
   getCanonicalName,
   getMarketingNameForModel,
@@ -31,10 +31,10 @@ import type {
   MCPServerConnection,
   ConnectedMCPServer,
 } from '../services/mcp/types.js'
-import { GLOB_TOOL_NAME } from 'src/tui/tools/GlobTool/prompt.js'
-import { GREP_TOOL_NAME } from 'src/tui/tools/GrepTool/prompt.js'
-import { hasEmbeddedSearchTools } from 'src/tui/utils/embeddedTools.js'
-import { ASK_USER_QUESTION_TOOL_NAME } from '../tools/AskUserQuestionTool/prompt.js'
+import { GLOB_TOOL_NAME } from 'src/kernel/tools/GlobTool/prompt'
+import { GREP_TOOL_NAME } from 'src/kernel/tools/GrepTool/prompt'
+import { hasEmbeddedSearchTools } from 'src/kernel/utils/embeddedTools'
+import { ASK_USER_QUESTION_TOOL_NAME } from '../../kernel/tools/AskUserQuestionTool/prompt.js'
 import {
   EXPLORE_AGENT,
   EXPLORE_AGENT_MIN_QUERIES,
@@ -44,8 +44,8 @@ import {
   isScratchpadEnabled,
   getScratchpadDir,
 } from '../utils/permissions/filesystem.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from '../utils/envUtils.js'
-import { isReplModeEnabled } from '../tools/REPLTool/constants.js'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { isReplModeEnabled } from '../../kernel/tools/REPLTool/constants.js'
 import { feature } from 'src/shared'
 import { getAscendSystemPromptSection } from '../plugins/ascend/plugin.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/tui/services/analytics/growthbook.js'
@@ -56,7 +56,7 @@ import {
   DANGEROUS_uncachedSystemPromptSection,
   resolveSystemPromptSections,
 } from './systemPromptSections.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 import { loadMemoryPrompt } from '../memdir/memdir.js'
 // D4 接线（13-总纲 2.2 子步 3）：注入通道走 factory 暴露（与 modelProvider 一致），
 // 不扩 ToolUseContext（D6 裁定）。

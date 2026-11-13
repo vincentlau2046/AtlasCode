@@ -3,7 +3,7 @@ import { isRestrictedToPluginOnly } from '../settings/pluginOnlyPolicy.js'
 // Import as module object so spyOn works in tests (direct imports bypass spies)
 import * as settingsModule from '../settings/settings.js'
 import { resetSettingsCache } from '../settings/settingsCache.js'
-import type { HooksSettings } from '../settings/types.js'
+import type { HooksSettings } from '../../../kernel/settings/types.js'
 
 let initialHooksConfig: HooksSettings | null = null
 

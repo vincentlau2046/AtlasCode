@@ -11,7 +11,7 @@ import { getTotalInputTokens } from 'src/bootstrap'
 import { snapshotOutputTokensForTurn, getCurrentTurnTokenBudget, getTurnOutputTokens, getBudgetContinuationCount } from 'src/tui/bootstrapState.js';
 import { parseTokenBudget } from '../utils/tokenBudget.js';
 import { shouldShowIdleReturnHint } from '../utils/idleReturnHint.js';
-import { count } from '../utils/array.js';
+import { count } from '../../kernel/utils/array.js';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import figures from 'figures';
@@ -36,11 +36,11 @@ import { hasCursorUpViewportYankBug } from '../ink/terminal.js';
 import { createFileStateCacheWithSizeLimit, mergeFileStateCaches, READ_FILE_STATE_CACHE_SIZE } from '../utils/fileStateCache.js';
 import { getOriginalCwd, getProjectRoot, getSessionId, switchSession, setCostStateForRestore } from 'src/bootstrap'
 import { updateLastInteractionTime, getLastInteractionTime, getTurnHookDurationMs, getTurnHookCount, resetTurnHookDuration, getTurnToolDurationMs, getTurnToolCount, resetTurnToolDuration, getTurnClassifierDurationMs, getTurnClassifierCount, resetTurnClassifierDuration } from 'src/tui/bootstrapState.js';
-import { asSessionId, asAgentId } from '../types/ids.js';
-import { logForDebugging } from '../utils/debug.js';
+import { asSessionId, asAgentId } from '../../kernel/types/ids.js';
+import { logForDebugging } from '../utils/debug';
 import { QueryGuard } from '../utils/QueryGuard.js';
-import { isEnvTruthy } from '../utils/envUtils.js';
-import { isAtlasDev } from '../utils/atlasDev.js';
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js';
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js';
 import { formatTokens, truncateToWidth } from '../utils/format.js';
 import { consumeEarlyInput } from '../utils/earlyInput.js';
 import { setMemberActive } from '../utils/swarm/teamHelpers.js';
@@ -117,7 +117,7 @@ import { CancelRequestHandler } from '../hooks/useCancelRequest.js';
 import { useBackgroundTaskNavigation } from '../hooks/useBackgroundTaskNavigation.js';
 import { useSwarmInitialization } from '../hooks/useSwarmInitialization.js';
 import { useTeammateViewAutoExit } from '../hooks/useTeammateViewAutoExit.js';
-import { errorMessage } from '../utils/errors.js';
+import { errorMessage } from '../../kernel/utils/errors.js';
 import { isHumanTurn } from '../utils/messagePredicates.js';
 import { logError } from '../utils/log.js';
 // Dead code elimination: conditional imports
@@ -150,7 +150,7 @@ import { getGlobalConfig, saveGlobalConfig, getGlobalConfigWriteCount } from '..
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/tui/services/analytics/growthbook.js';
 import { textForResubmit, handleMessageFromStream, type StreamingToolUse, type StreamingThinking, isCompactBoundaryMessage, getMessagesAfterCompactBoundary, getContentText, createUserMessage, createAssistantMessage, createTurnDurationMessage, createAgentsKilledMessage, createApiMetricsMessage, createSystemMessage, createCommandInputMessage, formatCommandInputTags } from '../utils/messages.js';
 import { generateSessionTitle } from '../utils/sessionTitle.js';
-import { BASH_INPUT_TAG, COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG, LOCAL_COMMAND_STDOUT_TAG } from '../constants/xml.js';
+import { BASH_INPUT_TAG, COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG, LOCAL_COMMAND_STDOUT_TAG } from '../../kernel/constants/xml.js';
 import { escapeXml } from '../utils/xml.js';
 import type { ThinkingConfig } from '../utils/thinking.js';
 import { gracefulShutdownSync } from '../utils/gracefulShutdown.js';
@@ -159,7 +159,7 @@ import { handlePromptSubmit, type PromptInputHelpers } from '../utils/handleProm
 import { useQueueProcessor } from '../hooks/useQueueProcessor.js';
 import { useMailboxBridge } from '../hooks/useMailboxBridge.js';
 import { queryCheckpoint, logQueryProfileReport } from '../utils/queryProfiler.js';
-import type { Message as MessageType, UserMessage, ProgressMessage, HookResultMessage, PartialCompactDirection } from '../types/message.js';
+import type { Message as MessageType, UserMessage, ProgressMessage, HookResultMessage, PartialCompactDirection } from '../../kernel/types/message.js';
 import { queryEngineLoopStream, type AgentLoopResult, type EngineLoopStreamEvent } from 'src/tui/loopEvents';
 import { buildReplLoopParams } from 'src/tui/replLoopDeps';
 import type { McpToolBackgroundedInfo } from 'src/tui/loopEvents';
@@ -187,7 +187,7 @@ import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js';
 import { resumeAgentBackground } from '../tools/AgentTool/resumeAgent.js';
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js';
 import { useAppState, useSetAppState, useAppStateStore } from '../state/AppState.js';
-import type { ContentBlockParam, ImageBlockParam } from '../types/atlas.js';
+import type { ContentBlockParam, ImageBlockParam } from '../../kernel/types/atlas.js';
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js';
 import type { PastedContent } from '../utils/config.js';
 import { copyPlanForFork, copyPlanForResume, getPlanSlug, setPlanSlug } from '../utils/plans.js';
@@ -205,7 +205,7 @@ import { type AttributionState, incrementPromptCount } from '../utils/commitAttr
 import { recordAttributionSnapshot } from '../utils/sessionStorage.js';
 import { computeStandaloneAgentContext, restoreAgentFromSession, restoreSessionStateFromLog, restoreWorktreeForResume, exitRestoredWorktree } from '../utils/sessionRestore.js';
 import { isBgSession, updateSessionName, updateSessionActivity } from '../utils/concurrentSessions.js';
-import { isInProcessTeammateTask, type InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js';
+import { isInProcessTeammateTask, type InProcessTeammateTaskState } from '../../kernel/tasks/InProcessTeammateTask/types.js';
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：restoreRemoteAgentTasks（1P 远程 agent 任务恢复面）裁除。
 import { useInboxPoller } from '../hooks/useInboxPoller.js';
 const SUGGEST_BG_PR_NOOP = (_p: string, _n: string): boolean => false;
@@ -232,7 +232,7 @@ import type { EffortValue } from '../utils/effort.js';
 // de-ANT: ant-only AntModelSwitchCallout / UndercoverAutoCallout conditional
 // requires removed (their render sites below were ant-gated and deleted).
 import { activityManager } from '../utils/activityManager.js';
-import { createAbortController } from '../utils/abortController.js';
+import { createAbortController } from '../../kernel/utils/abortController.js';
 import { MCPConnectionManager } from 'src/tui/services/mcp/MCPConnectionManager.js';
 import { useInstallMessages } from 'src/tui/hooks/notifs/useInstallMessages.js';
 import { useAwaySummary } from 'src/tui/hooks/useAwaySummary.js';

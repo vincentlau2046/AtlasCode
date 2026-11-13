@@ -1,6 +1,6 @@
-import { isInBundledMode } from 'src/tui/utils/bundledMode.js';
+import { isInBundledMode } from 'src/kernel/utils/bundledMode';
 import { getCurrentInstallationType } from 'src/tui/utils/doctorDiagnostic.js';
-import { isEnvTruthy } from 'src/tui/utils/envUtils.js';
+import { isEnvTruthy } from 'src/kernel/utils/envUtils';
 import { useStartupNotification } from './useStartupNotification.js';
 // G-3（§8.74.28 R4）：原「npm→native installer 切换」文案为旧产品叙事
 // （本仓无 native installer，`atlas install` 子命令亦未注册）→ 改述为真实

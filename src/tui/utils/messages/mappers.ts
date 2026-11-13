@@ -1,21 +1,21 @@
-import type { BetaContentBlock } from '../../types/atlas.js'
+import type { BetaContentBlock } from '../../../kernel/types/atlas.js'
 import { randomUUID, type UUID } from 'crypto'
 import { getSessionId } from 'src/bootstrap'
 import {
   LOCAL_COMMAND_STDERR_TAG,
   LOCAL_COMMAND_STDOUT_TAG,
-} from 'src/tui/constants/xml.js'
+} from 'src/kernel/constants/xml'
 import type {
   SDKAssistantMessage,
   SDKCompactBoundaryMessage,
   SDKMessage,
 } from 'src/tui/entrypoints/agentSdkTypes.js'
-import { EXIT_PLAN_MODE_V2_TOOL_NAME } from 'src/tui/tools/ExitPlanModeTool/constants.js'
+import { EXIT_PLAN_MODE_V2_TOOL_NAME } from 'src/kernel/tools/ExitPlanModeTool/constants'
 import type {
   AssistantMessage,
   CompactMetadata,
   Message,
-} from 'src/tui/types/message.js'
+} from 'src/kernel/types/message'
 import type { DeepImmutable } from 'src/tui/types/utils.js'
 import stripAnsi from 'strip-ansi'
 import { createAssistantMessage } from '../messages.js'

@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod/v4'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   AccountInfoSchema,
   AgentDefinitionSchema,
@@ -27,7 +27,7 @@ import {
   SDKStreamlinedToolUseSummaryMessageSchema,
   SDKUserMessageSchema,
   SlashCommandSchema,
-} from './coreSchemas.js'
+} from '../../../kernel/entrypoints/sdk/coreSchemas.js'
 
 // ============================================================================
 // External Type Placeholders

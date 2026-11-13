@@ -2,12 +2,12 @@
  * EXPERIMENT: Session memory compaction
  */
 
-import type { AgentId } from '../types/ids.js'
-import type { HookResultMessage, Message } from '../types/message.js'
-import { isAtlasDev } from '../utils/atlasDev.js'
-import { logForDebugging } from '../utils/debug.js'
-import { isEnvTruthy } from '../utils/envUtils.js'
-import { errorMessage } from '../utils/errors.js'
+import type { AgentId } from '../../kernel/types/ids.js'
+import type { HookResultMessage, Message } from '../../kernel/types/message.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
+import { logForDebugging } from '../utils/debug'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import {
   createCompactBoundaryMessage,
   createUserMessage,

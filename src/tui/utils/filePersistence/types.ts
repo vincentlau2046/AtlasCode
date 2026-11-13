@@ -1,4 +1,4 @@
-export * from '../../types/all-local-types.js';
+export * from '../../../kernel/types/all-local-types.js';
 export const DEFAULT_UPLOAD_CONCURRENCY: number = 5;
 // 上传失败的文件：记录文件名与错误信息（error 来自 UploadResult 的失败变体）
 export type FailedPersistence = { filename: string; error: string };

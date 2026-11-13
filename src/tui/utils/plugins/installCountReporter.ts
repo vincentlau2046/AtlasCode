@@ -9,7 +9,7 @@
  */
 
 import axios from 'axios'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { getStatsReportUrl } from './installCounts.js'
 
 /**

@@ -5,7 +5,7 @@ import {
   useNotifications,
 } from '../../context/notifications.js'
 import { useAppState } from '../../state/AppState.js'
-import { isInProcessTeammateTask } from '../../tasks/InProcessTeammateTask/types.js'
+import { isInProcessTeammateTask } from '../../../kernel/tasks/InProcessTeammateTask/types.js'
 
 function parseCount(notif: Notification): number {
   if (!('text' in notif)) {

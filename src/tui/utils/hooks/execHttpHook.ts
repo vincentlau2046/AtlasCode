@@ -1,13 +1,13 @@
 import axios from 'axios'
 import type { HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js'
-import { createCombinedAbortSignal } from '../combinedAbortSignal.js'
-import { logForDebugging } from '../debug.js'
-import { errorMessage } from '../errors.js'
+import { createCombinedAbortSignal } from '../../../kernel/utils/combinedAbortSignal.js'
+import { logForDebugging } from '../debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { getProxyUrl, shouldBypassProxy } from '../proxy.js'
 // Import as namespace so spyOn works in tests (direct imports bypass spies)
 import * as settingsModule from '../settings/settings.js'
-import type { HttpHook } from '../settings/types.js'
-import { ssrfGuardedLookup } from './ssrfGuard.js'
+import type { HttpHook } from '../../../kernel/settings/types.js'
+import { ssrfGuardedLookup } from '../../../kernel/agenthooks/ssrfGuard.js'
 
 const DEFAULT_HTTP_HOOK_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes (matches TOOL_HOOK_EXECUTION_TIMEOUT_MS)
 

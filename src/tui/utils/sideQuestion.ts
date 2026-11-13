@@ -8,7 +8,7 @@
 
 import { formatAPIError } from 'src/modelprovider'
 import type { NonNullableUsage } from '../services/api/logging.js'
-import type { Message, SystemAPIErrorMessage } from '../types/message.js'
+import type { Message, SystemAPIErrorMessage } from '../../kernel/types/message.js'
 import { type CacheSafeParams, runForkedAgent } from './forkedAgent.js'
 import { createUserMessage, extractTextContent } from './messages.js'
 

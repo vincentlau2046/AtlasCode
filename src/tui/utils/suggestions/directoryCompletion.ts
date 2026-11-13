@@ -1,7 +1,7 @@
 import { LRUCache } from 'lru-cache'
 import { basename, dirname, join, sep } from 'path'
 import type { SuggestionItem } from 'src/tui/components/PromptInput/PromptInputFooterSuggestions.js'
-import { getCwd } from 'src/tui/utils/cwd.js'
+import { getCwd } from 'src/kernel/utils/cwd'
 import { getFsImplementation } from 'src/tui/utils/fsOperations.js'
 import { logError } from 'src/tui/utils/log.js'
 import { expandPath } from 'src/tui/utils/path.js'

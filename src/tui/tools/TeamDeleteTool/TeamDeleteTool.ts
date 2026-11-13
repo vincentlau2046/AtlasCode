@@ -2,8 +2,8 @@ import { z } from 'zod/v4'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { lazySchema } from '../../utils/lazySchema.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
 import {
   cleanupTeamDirectories,
@@ -12,7 +12,7 @@ import {
 } from '../../utils/swarm/teamHelpers.js'
 import { clearTeammateColors } from '../../utils/swarm/teammateLayoutManager.js'
 import { clearLeaderTeamName } from '../../utils/tasks.js'
-import { TEAM_DELETE_TOOL_NAME } from './constants.js'
+import { TEAM_DELETE_TOOL_NAME } from '../../../kernel/tools/TeamDeleteTool/constants.js'
 // 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 支 halfAttached 判据
 //（D-③；双副本同步纪律 = engine 车道 teamDeleteTool.ts 同形支）。
 import { resolveTeamPersistenceMode } from 'src/engine'

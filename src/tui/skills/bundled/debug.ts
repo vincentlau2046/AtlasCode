@@ -1,8 +1,8 @@
 import { open, stat } from 'fs/promises'
 import { ATLAS_GUIDE_AGENT_TYPE } from 'src/tui/tools/AgentTool/built-in/atlasCodeGuideAgent.js'
 import { getSettingsFilePathForSource } from 'src/tui/utils/settings/settings.js'
-import { enableDebugLogging, getDebugLogPath } from '../../utils/debug.js'
-import { errorMessage, isENOENT } from '../../utils/errors.js'
+import { enableDebugLogging, getDebugLogPath } from '../../utils/debug'
+import { errorMessage, isENOENT } from '../../../kernel/utils/errors.js'
 import { formatFileSize } from '../../utils/format.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 

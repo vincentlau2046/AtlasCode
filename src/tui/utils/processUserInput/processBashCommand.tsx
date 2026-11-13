@@ -1,12 +1,12 @@
-import type { ContentBlockParam } from '../../types/atlas.js';
+import type { ContentBlockParam } from '../../../kernel/types/atlas.js';
 import { randomUUID } from 'crypto';
 import * as React from 'react';
 import { BashModeProgress } from 'src/tui/components/BashModeProgress.js';
 import type { SetToolJSXFn } from 'src/tui/Tool.js';
 import { BashTool } from 'src/tui/tools/BashTool/BashTool.js';
-import type { AttachmentMessage, SystemMessage, UserMessage } from 'src/tui/types/message.js';
-import type { ShellProgress } from 'src/tui/types/tools.js';
-import { errorMessage, ShellError } from '../errors.js';
+import type { AttachmentMessage, SystemMessage, UserMessage } from 'src/kernel/types/message';
+import type { ShellProgress } from 'src/kernel/types/tools';
+import { errorMessage, ShellError } from '../../../kernel/utils/errors.js';
 import { createSyntheticUserCaveatMessage, createUserInterruptionMessage, createUserMessage, prepareUserContent } from '../messages.js';
 import { resolveDefaultShell } from '../shell/resolveDefaultShell.js';
 import { isPowerShellToolEnabled } from '../shell/shellToolUtils.js';

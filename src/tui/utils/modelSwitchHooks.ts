@@ -10,7 +10,7 @@
  * 异常吞并（logForDebugging）：钩子执行失败不向 UI 冒泡（模型切换主路径
  * fail-safe，同 executeSessionStartHooks 消费面语义）。
  */
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import {
   executePostModelSwitchHooks,
   executePreModelSwitchHooks,

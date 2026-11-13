@@ -65,7 +65,7 @@ function getterToolInput() {
 describe('K3-A7 纯函数矩阵（基线缺导出/缺守卫 → 红）', () => {
   test('① 深度检查 getter 安全：枚举抛错容器不崩、不误报深嵌套', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     // 基线：Object.values 触发 getter → RangeError 穿透（红）
     expect(exceedsMaxNestingDepth(getterToolInput())).toBe(false)
@@ -73,7 +73,7 @@ describe('K3-A7 纯函数矩阵（基线缺导出/缺守卫 → 红）', () => {
 
   test('② materialize：抛错 getter 只丢该键，好键保留', async () => {
     const { materializeHookInput } = await import(
-      '../../src/tui/utils/hooks/hookInputMaterialize.js'
+      '../../src/tui/utils/hooks/hookInputMaterialize'
     )
     const r = materializeHookInput(getterToolInput())
     expect(r.ok).toBe(true)
@@ -84,7 +84,7 @@ describe('K3-A7 纯函数矩阵（基线缺导出/缺守卫 → 红）', () => {
 
   test('③ materialize：cyclic 输入以 [Circular] 占位终止', async () => {
     const { materializeHookInput } = await import(
-      '../../src/tui/utils/hooks/hookInputMaterialize.js'
+      '../../src/tui/utils/hooks/hookInputMaterialize'
     )
     const a: Record<string, unknown> = { name: 'a' }
     const b: Record<string, unknown> = { name: 'b', a }
@@ -99,7 +99,7 @@ describe('K3-A7 纯函数矩阵（基线缺导出/缺守卫 → 红）', () => {
 
   test('④ stringify 回退：getter 输入序列化成功、evil 键被丢并记名', async () => {
     const { stringifyWithGetterFallback } = await import(
-      '../../src/tui/utils/hooks/hookInputMaterialize.js'
+      '../../src/tui/utils/hooks/hookInputMaterialize'
     )
     const r = stringifyWithGetterFallback(getterToolInput())
     expect(r.ok).toBe(true)
@@ -111,7 +111,7 @@ describe('K3-A7 纯函数矩阵（基线缺导出/缺守卫 → 红）', () => {
 
   test('⑤ 恒等锚：plain 输入走快路径，JSON 恒等、零丢弃', async () => {
     const { stringifyWithGetterFallback } = await import(
-      '../../src/tui/utils/hooks/hookInputMaterialize.js'
+      '../../src/tui/utils/hooks/hookInputMaterialize'
     )
     const r = stringifyWithGetterFallback({ a: 1, b: ['x', { c: true }] })
     expect(r.ok).toBe(true)

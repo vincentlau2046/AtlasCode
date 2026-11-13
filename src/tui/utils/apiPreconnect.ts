@@ -24,7 +24,7 @@
  */
 
 import { getOauthConfig } from '../constants/oauth.js'
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 
 let fired = false
 

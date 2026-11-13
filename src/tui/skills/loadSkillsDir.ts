@@ -1,4 +1,4 @@
-import { getConfigDirNameForProject } from '../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { realpath } from 'fs/promises'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
@@ -19,7 +19,7 @@ import {
   substituteArguments,
 } from '../utils/argumentSubstitution.js'
 import { isUnsafeCommandName, sanitizeDisplayName } from '../utils/commandNameSafety.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 import {
   EFFORT_LEVELS,
   type EffortValue,
@@ -29,8 +29,8 @@ import {
   getAtlasConfigHomeDir,
   isBareMode,
   isEnvTruthy,
-} from '../utils/envUtils.js'
-import { isENOENT, isFsInaccessible } from '../utils/errors.js'
+} from '../../kernel/utils/envUtils.js'
+import { isENOENT, isFsInaccessible } from '../../kernel/utils/errors.js'
 import {
   coerceDescriptionToString,
   type FrontmatterData,
@@ -40,7 +40,7 @@ import {
   parseShellFrontmatter,
   splitPathInFrontmatter,
 } from '../utils/frontmatterParser.js'
-import { getFsImplementation } from '../utils/fsOperations.js'
+import { getFsImplementation } from '../utils/fsOperations'
 import { isPathGitignored } from '../utils/git/gitignore.js'
 import { logError } from '../utils/log.js'
 import {
@@ -52,13 +52,13 @@ import {
 } from '../utils/markdownConfigLoader.js'
 import { parseUserSpecifiedModel } from '../utils/model/model.js'
 import { executeShellCommandsInPrompt } from '../utils/promptShellExecution.js'
-import type { SettingSource } from '../utils/settings/constants.js'
-import { isSettingSourceEnabled } from '../utils/settings/constants.js'
+import type { SettingSource } from '../utils/settings/constants'
+import { isSettingSourceEnabled } from '../utils/settings/constants'
 import { getManagedFilePath } from '../utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from '../utils/settings/pluginOnlyPolicy.js'
 import { HooksSchema } from '../schemas/hooks.js'
-import type { HooksSettings } from '../utils/settings/types.js'
-import { createSignal } from '../utils/signal.js'
+import type { HooksSettings } from '../../kernel/settings/types.js'
+import { createSignal } from '../../kernel/utils/signal.js'
 import { registerMCPSkillBuilders } from './mcpSkillBuilders.js'
 
 export type LoadedFrom =

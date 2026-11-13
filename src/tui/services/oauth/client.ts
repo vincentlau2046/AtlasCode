@@ -9,7 +9,7 @@
 
 import type { AccountInfo } from '../../utils/config.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
-import type { BillingType } from './types.js'
+import type { BillingType } from '../../../kernel/services/oauth/types.js'
 
 /**
  * Populate the OAuth account info from env vars if not already cached in config.

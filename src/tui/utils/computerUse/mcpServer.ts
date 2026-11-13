@@ -7,7 +7,7 @@ import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { homedir } from 'os'
 
 import { enableConfigs } from '../config.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { filterAppsForDescription } from './appNames.js'
 import { getChicagoCoordinateMode } from './gates.js'
 import { getComputerUseHostAdapter } from './hostAdapter.js'

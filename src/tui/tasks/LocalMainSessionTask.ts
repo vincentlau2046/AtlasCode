@@ -18,7 +18,7 @@ import {
   TASK_ID_TAG,
   TASK_NOTIFICATION_TAG,
   TOOL_USE_ID_TAG,
-} from '../constants/xml.js'
+} from '../../kernel/constants/xml.js'
 import { queryEngineLoopStream } from 'src/tui/loopEvents'
 import {
   buildAgentLoopParams,
@@ -31,18 +31,18 @@ import type {
   AgentDefinition,
   CustomAgentDefinition,
 } from '../tools/AgentTool/loadAgentsDir.js'
-import { asAgentId } from '../types/ids.js'
-import type { Message } from '../types/message.js'
-import { createAbortController } from '../utils/abortController.js'
+import { asAgentId } from '../../kernel/types/ids.js'
+import type { Message } from '../../kernel/types/message.js'
+import { createAbortController } from '../../kernel/utils/abortController.js'
 import {
   runWithAgentContext,
   type SubagentContext,
 } from '../utils/agentContext.js'
-import { registerCleanup } from '../utils/cleanupRegistry.js'
-import { logForDebugging } from '../utils/debug.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../utils/debug'
 import { logError } from '../utils/log.js'
 import { enqueuePendingNotification } from '../utils/messageQueueManager.js'
-import { emitTaskTerminatedSdk } from '../utils/sdkEventQueue.js'
+import { emitTaskTerminatedSdk } from '../../kernel/utils/sdkEventQueue.js'
 import {
   getAgentTranscriptPath,
   recordSidechainTranscript,

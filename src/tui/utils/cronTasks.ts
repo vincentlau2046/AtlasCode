@@ -10,19 +10,19 @@
 //   { "tasks": [{ id, cron, prompt, createdAt, recurring?, permanent? }] }
 
 import { randomUUID } from 'crypto'
-import { getConfigDirNameForProject } from './configDir.js'
+import { getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { readFileSync } from 'fs'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
 import { addSessionCronTask, getSessionCronTasks, removeSessionCronTasks } from 'src/tui/bootstrapState.js'
 import { computeNextCronRun, parseCronExpression } from './cron.js'
-import { logForDebugging } from './debug.js'
-import { isFsInaccessible } from './errors.js'
-import { getFsImplementation } from './fsOperations.js'
+import { logForDebugging } from './debug'
+import { isFsInaccessible } from '../../kernel/utils/errors.js'
+import { getFsImplementation } from './fsOperations'
 import { safeParseJSON } from './json.js'
 import { logError } from './log.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 export type CronTask = {
   id: string

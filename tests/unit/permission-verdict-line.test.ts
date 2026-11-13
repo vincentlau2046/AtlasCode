@@ -23,7 +23,7 @@ import {
 import type {
   PermissionDecisionReason,
   PermissionRule,
-} from '../../src/tui/types/permissions.js'
+} from '../../src/kernel/types/permissions.js'
 import {
   deleteUserApproval,
   getUserApproval,

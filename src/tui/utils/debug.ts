@@ -3,18 +3,18 @@ import memoize from 'lodash-es/memoize.js'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
 
-import { isAtlasDev } from './atlasDev.js'
-import { type BufferedWriter, createBufferedWriter } from './bufferedWriter.js'
-import { registerCleanup } from './cleanupRegistry.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev'
+import { type BufferedWriter, createBufferedWriter } from '../../kernel/utils/bufferedWriter'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry'
 import {
   type DebugFilter,
   parseDebugFilter,
   shouldShowDebugMessage,
-} from './debugFilter.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { getFsImplementation } from './fsOperations.js'
-import { writeToStderr } from './process.js'
-import { jsonStringify } from './slowOperations.js'
+} from '../../kernel/utils/debugFilter'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils'
+import { getFsImplementation } from './fsOperations'
+import { writeToStderr } from '../../kernel/utils/process'
+import { jsonStringify } from './slowOperations'
 
 export type DebugLogLevel = 'verbose' | 'debug' | 'info' | 'warn' | 'error'
 

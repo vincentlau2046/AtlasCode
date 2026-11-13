@@ -1,4 +1,4 @@
-import type { SettingsJson } from '../../utils/settings/types.js'
+import type { SettingsJson } from '../../../kernel/settings/types.js'
 
 /**
  * Synchronous cache for remote managed settings.

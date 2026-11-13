@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
 import { buildTool } from '../../Tool.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { DIAGNOSER_TOOL_NAME } from './constants.js'
 
 const inputSchema = lazySchema(() =>

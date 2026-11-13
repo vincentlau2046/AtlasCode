@@ -7,10 +7,10 @@ import type {
   AttributionSnapshotMessage,
   FileAttributionState,
 } from '../types/logs.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
 import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { isGeneratedFile } from './generatedFiles.js'
 import { getRemoteUrlForDir, resolveGitDir } from './git/gitFilesystem.js'
 import { findGitRoot, gitExe } from './git.js'

@@ -27,10 +27,10 @@ const PERMS_PATH = '../../src/tui/utils/permissions/permissions.js'
 const { hasPermissionsToUseTool } = await import(PERMS_PATH)
 // 豁免名单一事实源 = TUI 工具常量（twin 域内可直 import，无 L2 叶约束）
 const { ENTER_PLAN_MODE_TOOL_NAME } = await import(
-  '../../src/tui/tools/EnterPlanModeTool/constants.js'
+  '../../src/kernel/tools/EnterPlanModeTool/constants.js'
 )
 const { EXIT_PLAN_MODE_V2_TOOL_NAME } = await import(
-  '../../src/tui/tools/ExitPlanModeTool/constants.js'
+  '../../src/kernel/tools/ExitPlanModeTool/constants.js'
 )
 
 function makePlanCtx(overrides: Record<string, unknown> = {}) {

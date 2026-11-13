@@ -3,16 +3,16 @@ import { microcompactMessages } from 'src/tui/engineCompat'
 import type { AppState } from '../../state/AppStateStore.js'
 import type { Tools, ToolUseContext } from '../../Tool.js'
 import type { AgentDefinitionsResult } from '../../tools/AgentTool/loadAgentsDir.js'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import {
   analyzeContextUsage,
   type ContextData,
 } from '../../utils/analyzeContext.js'
-import { isAtlasDev } from '../../utils/atlasDev.js'
+import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
 import { formatTokens } from '../../utils/format.js'
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js'
-import { getSourceDisplayName } from '../../utils/settings/constants.js'
-import { plural } from '../../utils/stringUtils.js'
+import { getSourceDisplayName } from '../../utils/settings/constants'
+import { plural } from '../../../kernel/utils/stringUtils.js'
 
 /**
  * Shared data-collection path for `/context` (slash command) and the SDK

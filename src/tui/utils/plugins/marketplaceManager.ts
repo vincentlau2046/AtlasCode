@@ -20,38 +20,38 @@
  */
 
 import axios from 'axios'
-import { findManifestInDir, getPluginManifestDirs, PLUGIN_MANIFEST_DIR } from '../configDir.js'
+import { findManifestInDir, getPluginManifestDirs, PLUGIN_MANIFEST_DIR } from '../../../kernel/utils/configDir.js'
 import { writeFile } from 'fs/promises'
 import isEqual from 'lodash-es/isEqual.js'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, isAbsolute, join, resolve, sep } from 'path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
-import { logForDebugging } from '../debug.js'
-import { isEnvTruthy } from '../envUtils.js'
+import { logForDebugging } from '../debug'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   ConfigParseError,
   errorMessage,
   getErrnoCode,
   isENOENT,
   toError,
-} from '../errors.js'
+} from '../../../kernel/utils/errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { getFsImplementation } from '../fsOperations'
 import { gitExe } from '../git.js'
 import { getHeadForDir } from '../git/gitFilesystem.js'
-import { parseGitConfigValue } from '../git/gitConfigParser.js'
+import { parseGitConfigValue } from '../../../kernel/git/gitConfigParser.js'
 import { logError } from '../log.js'
 import {
   getInitialSettings,
   getSettingsForSource,
   updateSettingsForSource,
 } from '../settings/settings.js'
-import type { SettingsJson } from '../settings/types.js'
+import type { SettingsJson } from '../../../kernel/settings/types.js'
 import {
   jsonParse,
   jsonStringify,
   writeFileSync_DEPRECATED,
-} from '../slowOperations.js'
+} from '../slowOperations'
 import {
   getAddDirEnabledPlugins,
   getAddDirExtraMarketplaces,

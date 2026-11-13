@@ -1,10 +1,10 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import { APIUserAbortError } from '../../types/atlas.js'
+import { APIUserAbortError } from '../../../kernel/types/atlas.js'
 import type { z } from 'zod/v4'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import type { ToolPermissionContext, ToolUseContext } from '../../Tool.js'
-import type { PendingClassifierCheck } from '../../types/permissions.js'
-import { count } from '../../utils/array.js'
+import type { PendingClassifierCheck } from '../../../kernel/types/permissions.js'
+import { count } from '../../../kernel/utils/array.js'
 import {
   checkSemantics,
   nodeTypeId,
@@ -12,41 +12,41 @@ import {
   parseForSecurityFromAst,
   type Redirect,
   type SimpleCommand,
-} from '../../utils/bash/ast.js'
+} from '../../utils/bash/ast'
 import {
   type CommandPrefixResult,
   extractOutputRedirections,
   getCommandSubcommandPrefix,
   splitCommand_DEPRECATED,
 } from '../../utils/bash/commands.js'
-import { parseCommandRaw } from '../../utils/bash/parser.js'
+import { parseCommandRaw } from '../../utils/bash/parser'
 import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
-import { getCwd } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
-import { AbortError } from '../../utils/errors.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { AbortError } from '../../../kernel/utils/errors.js'
 import type {
   ClassifierBehavior,
   ClassifierResult,
-} from '../../utils/permissions/bashClassifier.js'
+} from '../../../kernel/permissions/bashClassifier.js'
 import {
   classifyBashCommand,
   getBashPromptAllowDescriptions,
   getBashPromptAskDescriptions,
   getBashPromptDenyDescriptions,
   isClassifierPermissionsEnabled,
-} from '../../utils/permissions/bashClassifier.js'
+} from '../../../kernel/permissions/bashClassifier.js'
 import type {
   PermissionDecisionReason,
   PermissionResult,
-} from '../../utils/permissions/PermissionResult.js'
+} from '../../../kernel/permissions/PermissionResult.js'
 import type {
   PermissionRule,
   PermissionRuleValue,
-} from '../../utils/permissions/PermissionRule.js'
+} from '../../../kernel/permissions/PermissionRule.js'
 import { extractRules } from '../../utils/permissions/PermissionUpdate.js'
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
-import { permissionRuleValueToString } from '../../utils/permissions/permissionRuleParser.js'
+import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js'
 import {
   createPermissionRequestMessage,
   getRuleByContentsForTool,
@@ -58,7 +58,7 @@ import {
   permissionRuleExtractPrefix as sharedPermissionRuleExtractPrefix,
   suggestionForExactCommand as sharedSuggestionForExactCommand,
   suggestionForPrefix as sharedSuggestionForPrefix,
-} from '../../utils/permissions/shellRuleMatching.js'
+} from '../../../kernel/permissions/shellRuleMatching.js'
 import { getPlatform } from '../../utils/platform.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import { windowsPathToPosixPath } from '../../utils/windowsPaths.js'

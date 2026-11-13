@@ -15,7 +15,7 @@
  * `--recurse-submodules` so the cannbot submodule is pulled.
  */
 
-import { isEnvTruthy } from '../../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../../kernel/utils/envUtils.js'
 import {
   checkAndInstallMarketplacePreset,
   type MarketplacePresetCheckResult,

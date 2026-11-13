@@ -12,7 +12,7 @@ import {
   getInitialSettings,
   updateSettingsForSource,
 } from '../../utils/settings/settings.js'
-import type { SettingsJson } from '../../utils/settings/types.js'
+import type { SettingsJson } from '../../../kernel/settings/types.js'
 import {
   AUTOCOMPACT_PRESET_WINDOW_TIERS,
   lookupAutoCompactWindowSetting,

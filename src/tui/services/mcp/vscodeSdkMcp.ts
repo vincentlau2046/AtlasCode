@@ -1,7 +1,7 @@
-import { isAtlasDev } from 'src/tui/utils/atlasDev.js'
+import { isAtlasDev } from 'src/kernel/utils/atlasDev'
 import { logForDebugging } from 'src/tui/utils/debug.js'
 import { z } from 'zod/v4'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
   getFeatureValue_CACHED_MAY_BE_STALE,

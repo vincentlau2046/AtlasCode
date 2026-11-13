@@ -2,7 +2,7 @@ import type {
   BetaTool,
   BetaToolUnion,
   ToolInputSchema,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import { createHash } from 'crypto'
 import { SYSTEM_PROMPT_DYNAMIC_BOUNDARY } from 'src/tui/constants/prompts.js'
 import { getSystemContext, getUserContext } from 'src/tui/context.js'
@@ -21,25 +21,25 @@ import {
 } from 'src/tui/tools/FileEditTool/utils.js'
 import { FileWriteTool } from 'src/tui/tools/FileWriteTool/FileWriteTool.js'
 import { getTools } from 'src/tui/tools.js'
-import type { AgentId } from 'src/tui/types/ids.js'
+import type { AgentId } from 'src/kernel/types/ids'
 import type { z } from 'zod/v4'
 import { CLI_SYSPROMPT_PREFIXES } from '../constants/system.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { Tool, ToolPermissionContext, Tools } from '../Tool.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../tools/ExitPlanModeTool/constants.js'
-import { TASK_OUTPUT_TOOL_NAME } from '../tools/TaskOutputTool/constants.js'
-import type { Message } from '../types/message.js'
+import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../../kernel/tools/ExitPlanModeTool/constants.js'
+import { TASK_OUTPUT_TOOL_NAME } from '../../kernel/tools/TaskOutputTool/constants.js'
+import type { Message } from '../../kernel/types/message.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'
 import {
   modelSupportsStructuredOutputs,
   shouldUseGlobalCacheScope,
 } from './betas.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
-import { isEnvTruthy } from './envUtils.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { createUserMessage } from './messages.js'
-import { isDefaultGateway } from './model/providers.js'
+import { isDefaultGateway } from '../../kernel/model/providers.js'
 import {
   getFileReadIgnorePatterns,
   normalizePatternsToPath,
@@ -51,11 +51,11 @@ import {
 } from './plans.js'
 import { getPlatform } from './platform.js'
 import { countFilesRoundedRg } from 'src/tui/sandboxCompat'
-import { jsonStringify } from './slowOperations.js'
-import type { SystemPrompt } from './systemPromptType.js'
-import { getToolSchemaCache } from './toolSchemaCache.js'
+import { jsonStringify } from './slowOperations'
+import type { SystemPrompt } from '../../kernel/utils/systemPromptType.js'
+import { getToolSchemaCache } from '../../kernel/utils/toolSchemaCache.js'
 import { windowsPathToPosixPath } from './windowsPaths.js'
-import { zodToJsonSchema } from './zodToJsonSchema.js'
+import { zodToJsonSchema } from '../../kernel/utils/zodToJsonSchema.js'
 
 // Extended BetaTool type with strict mode and defer_loading support
 type BetaToolWithExtras = BetaTool & {

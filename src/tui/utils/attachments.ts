@@ -13,15 +13,15 @@ import {
 } from '../tools/FileReadTool/FileReadTool.js'
 import { FileTooLargeError, readFileInRange } from './readFileInRange.js'
 import { expandPath } from './path.js'
-import { countCharInString } from './stringUtils.js'
-import { count, uniq } from './array.js'
-import { getFsImplementation } from './fsOperations.js'
+import { countCharInString } from '../../kernel/utils/stringUtils.js'
+import { count, uniq } from '../../kernel/utils/array.js'
+import { getFsImplementation } from './fsOperations'
 import { readdir, stat } from 'fs/promises'
 import type { IDESelection } from '../hooks/useIdeSelection.js'
-import { TODO_WRITE_TOOL_NAME } from '../tools/TodoWriteTool/constants.js'
-import { TASK_CREATE_TOOL_NAME } from '../tools/TaskCreateTool/constants.js'
-import { TASK_UPDATE_TOOL_NAME } from '../tools/TaskUpdateTool/constants.js'
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
+import { TODO_WRITE_TOOL_NAME } from '../../kernel/tools/TodoWriteTool/constants.js'
+import { TASK_CREATE_TOOL_NAME } from '../../kernel/tools/TaskCreateTool/constants.js'
+import { TASK_UPDATE_TOOL_NAME } from '../../kernel/tools/TaskUpdateTool/constants.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
 import { SKILL_TOOL_NAME } from '../tools/SkillTool/constants.js'
 import type { TodoList } from './todo/types.js'
 import {
@@ -41,18 +41,18 @@ import {
   type MemoryFileInfo,
 } from './memoryFiles.js'
 import { dirname, parse, relative, resolve } from 'path'
-import { getCwd } from 'src/tui/utils/cwd.js'
+import { getCwd } from 'src/kernel/utils/cwd'
 import { getViewedTeammateTask } from '../state/selectors.js'
 import { logError } from './log.js'
-import { logAntError } from './debug.js'
-import { isENOENT, toError } from './errors.js'
+import { logAntError } from './debug'
+import { isENOENT, toError } from '../../kernel/utils/errors.js'
 import type { DiagnosticFile } from '../services/diagnosticTracking.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
 import type {
   AttachmentMessage,
   Message,
   MessageOrigin,
-} from 'src/tui/types/message.js'
+} from 'src/kernel/types/message'
 import {
   type QueuedCommand,
   getImagePasteIds,
@@ -65,7 +65,7 @@ import type {
   ContentBlockParam,
   ImageBlockParam,
   Base64ImageSource,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import { maybeResizeAndDownsampleImageBlock } from './imageResizer.js'
 import type { PastedContent } from './config.js'
 import { getGlobalConfig } from './config.js'
@@ -75,34 +75,34 @@ import type { Command } from '../types/command.js'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { getProjectRoot } from 'src/bootstrap'
 import { formatCommandsWithinBudget } from '../tools/SkillTool/prompt.js'
-import { getContextWindowForModel } from './context.js'
+import { getContextWindowForModel } from '../../kernel/utils/context.js'
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
-  ? (require('./permissions/autoModeState.js') as typeof import('./permissions/autoModeState.js'))
+  ? (require('../../kernel/permissions/autoModeState.js') as typeof import('../../kernel/permissions/autoModeState.js'))
   : null
 import {
   MAX_LINES_TO_READ,
   FILE_READ_TOOL_NAME,
-} from 'src/tui/tools/FileReadTool/prompt.js'
+} from 'src/kernel/tools/FileReadTool/prompt'
 import { getDefaultFileReadingLimits } from 'src/tui/tools/FileReadTool/limits.js'
 import { cacheKeys, type FileStateCache } from './fileStateCache.js'
 import {
   createAbortController,
   createChildAbortController,
-} from './abortController.js'
-import { isAbortError } from './errors.js'
+} from '../../kernel/utils/abortController.js'
+import { isAbortError } from '../../kernel/utils/errors.js'
 import {
   getFileModificationTimeAsync,
   isFileWithinReadSizeLimit,
 } from './file.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { filterAgentsByMcpRequirements } from '../tools/AgentTool/loadAgentsDir.js'
-import { AGENT_TOOL_NAME } from '../tools/AgentTool/constants.js'
+import { AGENT_TOOL_NAME } from '../../kernel/tools/AgentTool/constants.js'
 import {
   formatAgentLine,
   shouldInjectAgentListInMessages,
 } from '../tools/AgentTool/prompt.js'
 import { filterDeniedAgents } from './permissions/permissions.js'
-import { mcpInfoFromString } from '../services/mcp/mcpStringUtils.js'
+import { mcpInfoFromString } from '../../kernel/services/mcp/mcpStringUtils.js'
 import {
   matchingRuleForInput,
   pathInAllowedWorkingPath,
@@ -116,7 +116,7 @@ import { drainPendingMessages } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { TaskType, TaskStatus } from '../Task.js'
 import { getOriginalCwd, getSessionId, getTotalOutputTokens } from 'src/bootstrap'
 import { getSdkBetas, getCurrentTurnTokenBudget, getTurnOutputTokens, hasExitedPlanModeInSession, setHasExitedPlanMode, needsPlanModeExitAttachment, setNeedsPlanModeExitAttachment, needsAutoModeExitAttachment, setNeedsAutoModeExitAttachment, getLastEmittedDate, setLastEmittedDate } from 'src/tui/bootstrapState.js'
-import type { QuerySource } from '../constants/querySource.js'
+import type { QuerySource } from '../../kernel/constants/querySource.js'
 import {
   getDeferredToolsDelta,
   isDeferredToolsDeltaEnabled,
@@ -143,14 +143,14 @@ import {
   checkForLSPDiagnostics,
   clearAllLSPDiagnostics,
 } from '../services/lsp/LSPDiagnosticRegistry.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import {
   extractTextContent,
   getUserMessageText,
   isThinkingMessage,
 } from './messages.js'
 import { isHumanTurn } from './messagePredicates.js'
-import { isEnvTruthy, getAtlasConfigHomeDir } from './envUtils.js'
+import { isEnvTruthy, getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 // C85-C：FullPDFReadUnsupportedError = full-PDF 内联读整裁后的显式错误——
 // compact 模式特判回落 compact_file_reference（引用保底，不静默丢附件）
 import { feature, FullPDFReadUnsupportedError } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
@@ -171,8 +171,8 @@ import {
   type HookBlockingError,
   type InstructionsMemoryType,
 } from './hooks.js'
-import { jsonStringify } from './slowOperations.js'
-import { isPDFExtension } from './pdfUtils.js'
+import { jsonStringify } from './slowOperations'
+import { isPDFExtension } from '../../kernel/utils/pdfUtils.js'
 import { getLocalISODate } from '../constants/common.js'
 import { getPDFPageCount } from './pdf.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'

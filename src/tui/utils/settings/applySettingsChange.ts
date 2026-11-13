@@ -1,5 +1,5 @@
 import type { AppState } from '../../state/AppState.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { updateHooksConfigSnapshot } from '../hooks/hooksConfigSnapshot.js'
 import {
   createDisabledBypassPermissionsContext,
@@ -10,7 +10,7 @@ import {
 } from '../permissions/permissionSetup.js'
 import { syncPermissionRulesFromDisk } from '../permissions/permissions.js'
 import { loadAllPermissionRulesFromDisk } from '../permissions/permissionsLoader.js'
-import type { SettingSource } from './constants.js'
+import type { SettingSource } from './constants'
 import { getInitialSettings } from './settings.js'
 
 /**

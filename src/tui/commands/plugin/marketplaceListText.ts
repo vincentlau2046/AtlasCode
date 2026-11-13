@@ -6,7 +6,7 @@
  * "Unregistered marketplace directories" section with an adopt hint per
  * directory. Detection only: nothing is registered as a side effect.
  */
-import { errorMessage } from '../../utils/errors.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { loadKnownMarketplacesConfig } from '../../utils/plugins/marketplaceManager.js'
 import { scanOrphanedMarketplaces } from '../../utils/plugins/orphanScanner.js'
 

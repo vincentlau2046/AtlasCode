@@ -11,15 +11,15 @@ import {
   type SpeculationState,
 } from '../../state/AppStateStore.js'
 import { commandHasAnyCd } from '../../tools/BashTool/bashPermissions.js'
-import { isAtlasDev } from '../../utils/atlasDev.js'
+import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
 import { checkReadOnlyConstraints } from '../../tools/BashTool/readOnlyValidation.js'
 import type { SpeculationAcceptMessage } from '../../types/logs.js'
-import type { Message } from '../../types/message.js'
-import { createChildAbortController } from '../../utils/abortController.js'
-import { count } from '../../utils/array.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { createChildAbortController } from '../../../kernel/utils/abortController.js'
+import { count } from '../../../kernel/utils/array.js'
 import { getGlobalConfig } from '../../utils/config.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { errorMessage } from '../../utils/errors.js'
+import { logForDebugging } from '../../utils/debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import {
   type FileStateCache,
   mergeFileStateCaches,
@@ -43,7 +43,7 @@ import {
 import { getAtlasTempDir } from '../../utils/permissions/filesystem.js'
 import { extractReadFilesFromMessages } from '../../utils/queryHelpers.js'
 import { getTranscriptPath } from '../../utils/sessionStorage.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import {
   generateSuggestion,
   getPromptVariant,

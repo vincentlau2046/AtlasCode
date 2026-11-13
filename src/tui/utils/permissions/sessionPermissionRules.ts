@@ -20,7 +20,7 @@ import { mkdir, readFile, rename, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { getTranscriptPath } from '../sessionStorage.js'
 import { getSessionId } from 'src/bootstrap'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import type { PermissionUpdate } from './PermissionUpdateSchema.js'
 
 const SESSION_RULES_FILE_SUFFIX = '.session-rules.json'

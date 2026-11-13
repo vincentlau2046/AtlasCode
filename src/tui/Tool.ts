@@ -1,7 +1,7 @@
 import type {
   ToolResultBlockParam,
   ToolUseBlockParam,
-} from './types/atlas.js'
+} from '../kernel/types/atlas.js'
 import type {
   ElicitRequestURLParams,
   ElicitResult,
@@ -37,14 +37,14 @@ import type {
   SystemLocalCommandMessage,
   SystemMessage,
   UserMessage,
-} from './types/message.js'
+} from '../kernel/types/message.js'
 // Import permission types from centralized location to break import cycles
 // Import PermissionResult from centralized location to break import cycles
 import type {
   AdditionalWorkingDirectory,
   PermissionMode,
   PermissionResult,
-} from './types/permissions.js'
+} from '../kernel/types/permissions.js'
 // Import tool progress types from centralized location to break import cycles
 import type {
   AgentToolProgress,
@@ -55,10 +55,10 @@ import type {
   TaskOutputProgress,
   ToolProgressData,
   WebSearchProgress,
-} from './types/tools.js'
+} from '../kernel/types/tools.js'
 import type { FileStateCache } from './utils/fileStateCache.js'
-import type { DenialTrackingState } from './utils/permissions/denialTracking.js'
-import type { SystemPrompt } from './utils/systemPromptType.js'
+import type { DenialTrackingState } from '../kernel/permissions/denialTracking.js'
+import type { SystemPrompt } from '../kernel/utils/systemPromptType.js'
 import type { ContentReplacementState } from './utils/toolResultStorage.js'
 
 // Re-export progress types for backwards compatibility
@@ -73,7 +73,7 @@ export type {
 }
 
 import type { SpinnerMode } from './components/Spinner.js'
-import type { QuerySource } from './constants/querySource.js'
+import type { QuerySource } from '../kernel/constants/querySource.js'
 import type { SDKStatus } from './entrypoints/agentSdkTypes.js'
 import type { AppState } from './state/AppState.js'
 import type {
@@ -81,7 +81,7 @@ import type {
   PromptRequest,
   PromptResponse,
 } from './types/hooks.js'
-import type { AgentId } from './types/ids.js'
+import type { AgentId } from '../kernel/types/ids.js'
 import type { DeepImmutable } from './types/utils.js'
 import type { AttributionState } from './utils/commitAttribution.js'
 import type { FileHistoryState } from './utils/fileHistory.js'
@@ -114,7 +114,7 @@ export type SetToolJSXFn = (
 ) => void
 
 // Import tool permission types from centralized location to break import cycles
-import type { ToolPermissionRulesBySource } from './types/permissions.js'
+import type { ToolPermissionRulesBySource } from '../kernel/types/permissions.js'
 
 // Re-export for backwards compatibility
 export type { ToolPermissionRulesBySource }

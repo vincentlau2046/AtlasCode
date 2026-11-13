@@ -8,8 +8,8 @@
 // useSyncExternalStore 消费）；有界 append-only（cap 50 = Decisions 页「最近 N」）。
 // 零 engine/modelprovider 依赖（TUI leaf）。
 
-import { createSignal } from './signal.js'
-import type { PermissionDecisionReason } from '../types/permissions.js'
+import { createSignal } from '../../kernel/utils/signal.js'
+import type { PermissionDecisionReason } from '../../kernel/types/permissions.js'
 
 /** 判定结果（PermissionDecision.behavior 三态）。 */
 export type DecisionBehavior = 'allow' | 'ask' | 'deny'

@@ -5,11 +5,11 @@ import {
   getSkillToolCommands,
   getSlashCommandToolSkills,
 } from 'src/tui/commands.js'
-import { COMMAND_NAME_TAG } from '../../constants/xml.js'
+import { COMMAND_NAME_TAG } from '../../../kernel/constants/xml.js'
 import { stringWidth } from '../../ink/stringWidth.js'
-import { count } from '../../utils/array.js'
-import { logForDebugging } from '../../utils/debug.js'
-import { toError } from '../../utils/errors.js'
+import { count } from '../../../kernel/utils/array.js'
+import { logForDebugging } from '../../utils/debug'
+import { toError } from '../../../kernel/utils/errors.js'
 import { truncate } from '../../utils/format.js'
 import { logError } from '../../utils/log.js'
 

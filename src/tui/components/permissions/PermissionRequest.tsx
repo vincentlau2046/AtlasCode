@@ -17,8 +17,8 @@ import { NotebookEditTool } from '../../tools/NotebookEditTool/NotebookEditTool.
 import { PowerShellTool } from '../../tools/PowerShellTool/PowerShellTool.js';
 import { SkillTool } from '../../tools/SkillTool/SkillTool.js';
 import { WebFetchTool } from '../../tools/WebFetchTool/WebFetchTool.js';
-import type { AssistantMessage } from '../../types/message.js';
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js';
+import type { AssistantMessage } from '../../../kernel/types/message.js';
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js';
 import { AskUserQuestionPermissionRequest } from './AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.js';
 import { BashPermissionRequest } from './BashPermissionRequest/BashPermissionRequest.js';
 import { EnterPlanModePermissionRequest } from './EnterPlanModePermissionRequest/EnterPlanModePermissionRequest.js';
@@ -34,7 +34,7 @@ import { WebFetchPermissionRequest } from './WebFetchPermissionRequest/WebFetchP
 
 const ReviewArtifactTool = feature('REVIEW_ARTIFACT') ? (require('../../tools/ReviewArtifactTool/ReviewArtifactTool.js') as typeof import('../../tools/ReviewArtifactTool/ReviewArtifactTool.js')).ReviewArtifactTool : null;
 const ReviewArtifactPermissionRequest = feature('REVIEW_ARTIFACT') ? (require('./ReviewArtifactPermissionRequest/ReviewArtifactPermissionRequest.js') as typeof import('./ReviewArtifactPermissionRequest/ReviewArtifactPermissionRequest.js')).ReviewArtifactPermissionRequest : null;
-import type { ContentBlockParam } from '../../types/atlas.js';
+import type { ContentBlockParam } from '../../../kernel/types/atlas.js';
 import type { z } from 'zod/v4';
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js';
 import type { WorkerBadgeProps } from './WorkerBadge.js';

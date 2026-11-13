@@ -8,9 +8,9 @@
 import { randomBytes } from 'crypto'
 import { rename, rm } from 'fs/promises'
 import { dirname, join, resolve, sep } from 'path'
-import { getCwd } from '../cwd.js'
-import { toError } from '../errors.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { toError } from '../../../kernel/utils/errors.js'
+import { getFsImplementation } from '../fsOperations'
 import { logError } from '../log.js'
 import {
   getSettingsForSource,

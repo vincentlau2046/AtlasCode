@@ -5,7 +5,7 @@ import {
   type McpServerConfig,
   McpStdioServerConfigSchema,
 } from '../services/mcp/types.js'
-import { getErrnoCode } from './errors.js'
+import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { safeParseJSON } from './json.js'
 import { logError } from './log.js'
 import { getPlatform, SUPPORTED_PLATFORMS } from './platform.js'

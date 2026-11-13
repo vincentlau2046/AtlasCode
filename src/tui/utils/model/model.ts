@@ -5,8 +5,8 @@ import type { PermissionMode } from '../permissions/PermissionMode.js'
 // P4 (C3): resolveModel 与 getRoleModel 同源（roles.js），一并引入做能力元数据收口。
 import { getRoleModel, resolveModel, type ModelRole } from 'src/modelprovider'
 import { isModelAllowed } from './modelAllowlist.js'
-import { type ModelAlias, isModelAlias } from './aliases.js'
-import { capitalize } from '../stringUtils.js'
+import { type ModelAlias, isModelAlias } from '../../../kernel/model/aliases.js'
+import { capitalize } from '../../../kernel/utils/stringUtils.js'
 
 export type ModelShortName = string
 export type ModelName = string

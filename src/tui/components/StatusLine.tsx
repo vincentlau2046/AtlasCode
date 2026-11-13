@@ -10,13 +10,13 @@ import { getTotalAPIDuration, getTotalDuration, getTotalInputTokens, getTotalLin
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js';
 import { type ReadonlySettings, useSettings } from '../hooks/useSettings.js';
 import { Ansi, Box, Text } from '../ink.js';
-import type { Message } from '../types/message.js';
+import type { Message } from '../../kernel/types/message.js';
 import type { StatusLineCommandInput } from '../types/statusLine.js';
 import type { VimMode } from '../types/textInputTypes.js';
 import { checkHasTrustDialogAccepted } from '../utils/config.js';
-import { calculateContextPercentages, getContextWindowForModel } from '../utils/context.js';
-import { getCwd } from '../utils/cwd.js';
-import { logForDebugging } from '../utils/debug.js';
+import { calculateContextPercentages, getContextWindowForModel } from '../../kernel/utils/context.js';
+import { getCwd } from '../../kernel/utils/cwd.js';
+import { logForDebugging } from '../utils/debug';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { createBaseHookInput, executeStatusLineCommand } from '../utils/hooks.js';
 import { getLastAssistantMessage } from '../utils/messages.js';

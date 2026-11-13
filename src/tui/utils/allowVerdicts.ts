@@ -14,7 +14,7 @@
 import type {
   PermissionDecisionReason,
   PermissionMode,
-} from '../types/permissions.js'
+} from '../../kernel/types/permissions.js'
 
 /** auto-allow 判定面：为何自动放行（decisionReason + 当时 mode，verdictLine 消费）。 */
 export type AllowVerdict = {

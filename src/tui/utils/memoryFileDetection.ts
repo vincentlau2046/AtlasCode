@@ -7,7 +7,7 @@ import {
   isAutoMemPath,
 } from '../memdir/paths.js'
 import { isAgentMemoryPath } from '../tools/AgentTool/agentMemory.js'
-import { getAtlasConfigHomeDir } from './envUtils.js'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import {
   posixPathToWindowsPath,
   windowsPathToPosixPath,

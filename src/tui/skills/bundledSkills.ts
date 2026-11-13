@@ -1,12 +1,12 @@
-import type { ContentBlockParam } from '../types/atlas.js'
+import type { ContentBlockParam } from '../../kernel/types/atlas.js'
 import { constants as fsConstants } from 'fs'
 import { mkdir, open } from 'fs/promises'
 import { dirname, isAbsolute, join, normalize, sep as pathSep } from 'path'
 import type { ToolUseContext } from '../Tool.js'
 import type { Command } from '../types/command.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 import { getBundledSkillsRoot } from '../utils/permissions/filesystem.js'
-import type { HooksSettings } from '../utils/settings/types.js'
+import type { HooksSettings } from '../../kernel/settings/types.js'
 
 /**
  * Definition for a bundled skill that ships with the CLI.

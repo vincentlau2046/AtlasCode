@@ -1,9 +1,9 @@
 import { join } from 'path'
-import { getCwd } from './cwd.js'
-import { getAtlasConfigHomeDir } from './envUtils.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { getManagedFilePath } from './settings/managedPath.js'
-import { getFsImplementation, type FsOperations } from './fsOperations.js'
-import { logForDebugging } from './debug.js'
+import { getFsImplementation, type FsOperations } from './fsOperations'
+import { logForDebugging } from './debug'
 
 /**
  * One-shot startup migration (2026-09-18 ruling): instruction file names

@@ -1,8 +1,8 @@
 import type { UUID } from 'crypto'
 import type { FileHistorySnapshot } from 'src/tui/utils/fileHistory.js'
 import type { ContentReplacementRecord } from 'src/tui/utils/toolResultStorage.js'
-import type { AgentId } from './ids.js'
-import type { Message } from './message.js'
+import type { AgentId } from '../../kernel/types/ids.js'
+import type { Message } from '../../kernel/types/message.js'
 import type { QueueOperationMessage } from './messageQueueTypes.js'
 
 export type SerializedMessage = Message & {

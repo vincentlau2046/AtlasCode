@@ -5,7 +5,7 @@ import {
   clearApiKeyHelperCache,
 } from '../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
-import { toError } from '../utils/errors.js'
+import { toError } from '../../kernel/utils/errors.js'
 import { logError } from '../utils/log.js'
 import { applyConfigEnvironmentVariables } from '../utils/managedEnv.js'
 import {

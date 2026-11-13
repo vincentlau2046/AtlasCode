@@ -1,32 +1,32 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import { getConfigDirNameForProject } from '../configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import mergeWith from 'lodash-es/mergeWith.js'
 import { dirname, join, resolve } from 'path'
 import { z } from 'zod/v4'
 import { getOriginalCwd } from 'src/bootstrap'
 import { getFlagSettingsInline, getFlagSettingsPath, getUseCoworkPlugins } from 'src/tui/bootstrapState.js'
-import { uniq } from '../array.js'
+import { uniq } from '../../../kernel/utils/array.js'
 const remoteSettings: SettingsJson | null = null
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { logForDiagnosticsNoPII } from '../diagLogs.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from '../envUtils.js'
-import { getErrnoCode, isENOENT } from '../errors.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { getErrnoCode, isENOENT } from '../../../kernel/utils/errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from '../file.js'
 import { readFileSync } from '../fileRead.js'
-import { getFsImplementation, safeResolvePath } from '../fsOperations.js'
+import { getFsImplementation, safeResolvePath } from '../fsOperations'
 import { addFileGlobRuleToGitignore } from '../git/gitignore.js'
 import { safeParseJSON } from '../json.js'
 import { logError } from '../log.js'
 import { getPlatform } from '../platform.js'
-import { clone, jsonStringify } from '../slowOperations.js'
+import { clone, jsonStringify } from '../slowOperations'
 import { profileCheckpoint } from '../startupProfiler.js'
 import {
   type EditableSettingSource,
   getEnabledSettingSources,
   type SettingSource,
-} from './constants.js'
-import { markInternalWrite } from './internalWrites.js'
+} from './constants'
+import { markInternalWrite } from '../../../kernel/settings/internalWrites.js'
 import {
   getManagedFilePath,
   getManagedSettingsDropInDir,
@@ -42,13 +42,13 @@ import {
   setCachedSettingsForSource,
   setSessionSettingsCache,
 } from './settingsCache.js'
-import { type SettingsJson, SettingsSchema } from './types.js'
+import { type SettingsJson, SettingsSchema } from '../../../kernel/settings/types.js'
 import {
   filterInvalidPermissionRules,
   formatZodError,
   type SettingsWithErrors,
   type ValidationError,
-} from './validation.js'
+} from './validation'
 
 /**
  * Get the path to the managed settings file based on the current platform

@@ -31,7 +31,7 @@ import {
   releaseSchedulerLock,
   tryAcquireSchedulerLock,
 } from './cronTasksLock.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 
 const CHECK_INTERVAL_MS = 1000
 const FILE_STABILITY_MS = 300

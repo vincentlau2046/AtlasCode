@@ -2,7 +2,7 @@ import { type StructuredPatchHunk, structuredPatch } from 'diff'
 import { getLocCounter } from 'src/tui/bootstrapState.js'
 import { addToTotalLinesChanged } from '../cost-tracker.js'
 import type { FileEdit } from '../tools/FileEditTool/types.js'
-import { count } from './array.js'
+import { count } from '../../kernel/utils/array.js'
 import { convertLeadingTabsToSpaces } from './file.js'
 
 export const CONTEXT_LINES = 3

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Text } from '../../ink.js';
-import { errorMessage } from '../../utils/errors.js';
+import { errorMessage } from '../../../kernel/utils/errors.js';
 import { adoptOrphanMarketplace } from '../../utils/plugins/marketplaceManager.js';
 import { formatSourceForDisplay } from '../../utils/plugins/marketplaceHelpers.js';
 type Props = {

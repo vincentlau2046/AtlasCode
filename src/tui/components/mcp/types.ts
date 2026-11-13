@@ -1,4 +1,4 @@
-export * from '../../types/all-local-types.js';
+export * from '../../../kernel/types/all-local-types.js';
 export type ClaudeAIServerInfo = any;
 export type HTTPServerInfo = any;
 export type SSEServerInfo = any;

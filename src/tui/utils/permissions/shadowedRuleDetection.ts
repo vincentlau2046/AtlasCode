@@ -1,6 +1,6 @@
 import type { ToolPermissionContext } from '../../Tool.js'
-import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
-import type { PermissionRule, PermissionRuleSource } from './PermissionRule.js'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
+import type { PermissionRule, PermissionRuleSource } from '../../../kernel/permissions/PermissionRule.js'
 import {
   getAllowRules,
   getAskRules,

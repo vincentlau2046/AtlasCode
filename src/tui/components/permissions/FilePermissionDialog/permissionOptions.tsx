@@ -1,4 +1,4 @@
-import { getConfigDirName, getConfigDirNameForProject } from '../../../utils/configDir.js'
+import { getConfigDirName, getConfigDirNameForProject } from '../../../../kernel/utils/configDir.js'
 import { homedir } from 'os';
 import { basename, join, sep } from 'path';
 import React, { type ReactNode } from 'react';

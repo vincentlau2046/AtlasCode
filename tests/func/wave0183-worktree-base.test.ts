@@ -58,7 +58,7 @@ import {
 // TUI 面 cwd 源 = bootstrap state cwd（pwd()=覆盖??getCwdState()，非
 // process.cwd）——TUI 调用必须经 runWithCwdOverride 驱动，否则解析到
 // 测试进程原 cwd 的 canonical 根（首版教训：真仓误建 worktree）
-import { runWithCwdOverride } from '../../src/tui/utils/cwd.js'
+import { runWithCwdOverride } from '../../src/kernel/utils/cwd.js'
 
 // ── 门控：git 可用性（缺席整族 skip；环境记录 ≠ 判据通过）──────────────────
 let gitAvailable = false

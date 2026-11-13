@@ -37,7 +37,7 @@ const {
   getBuiltinSnapshotDir,
 } = await import('../../src/tui/utils/plugins/marketplaceSnapshotFallback.js')
 const { getPluginManifestDirs } = await import(
-  '../../src/tui/utils/configDir.js'
+  '../../src/kernel/utils/configDir.js'
 )
 const MANIFEST_DIR = getPluginManifestDirs()[0]
 

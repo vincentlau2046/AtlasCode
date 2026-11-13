@@ -13,7 +13,7 @@ import type { AppState } from '../state/AppState.js'
 import {
   type InProcessTeammateTaskState,
   isInProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/types.js'
+} from '../../kernel/tasks/InProcessTeammateTask/types.js'
 import { updateTaskState } from './task/framework.js'
 import {
   isPermissionResponse,

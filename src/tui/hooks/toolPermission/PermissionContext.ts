@@ -1,5 +1,5 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import type { ContentBlockParam } from '../../types/atlas.js'
+import type { ContentBlockParam } from '../../../kernel/types/atlas.js'
 import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadata.js'
 import type { ToolUseConfirm } from '../../components/permissions/PermissionRequest.js'
 import type {
@@ -8,16 +8,16 @@ import type {
   ToolUseContext,
 } from '../../Tool.js'
 import { awaitClassifierAutoApproval } from '../../tools/BashTool/bashPermissions.js'
-import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
-import type { AssistantMessage } from '../../types/message.js'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
+import type { AssistantMessage } from '../../../kernel/types/message.js'
 import type {
   PendingClassifierCheck,
   PermissionAllowDecision,
   PermissionDecisionReason,
   PermissionDenyDecision,
-} from '../../types/permissions.js'
-import { setClassifierApproval } from '../../utils/classifierApprovals.js'
-import { logForDebugging } from '../../utils/debug.js'
+} from '../../../kernel/types/permissions.js'
+import { setClassifierApproval } from '../../../kernel/utils/classifierApprovals.js'
+import { logForDebugging } from '../../utils/debug'
 import { logError } from '../../utils/log.js'
 import { mergeCurrentSessionPermissionRules } from '../../utils/permissions/sessionPermissionRules.js'
 import { checkRuleBasedPermissions } from '../../utils/permissions/permissions.js'
@@ -29,7 +29,7 @@ import {
   SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX,
   withMemoryCorrectionHint,
 } from '../../utils/messages.js'
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
 import {
   applyPermissionUpdates,
   persistPermissionUpdates,

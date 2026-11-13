@@ -6,11 +6,11 @@ import { BLOCKQUOTE_BAR } from '../constants/figures.js'
 import { stringWidth } from '../ink/stringWidth.js'
 import { supportsHyperlinks } from '../ink/supports-hyperlinks.js'
 import type { CliHighlight } from './cliHighlight.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import { createHyperlink } from './hyperlink.js'
 import { stripPromptXMLTags } from './messages.js'
 import type { ThemeName } from './theme.js'
-import { hashContent } from './hash.js'
+import { hashContent } from '../../kernel/utils/hash.js'
 
 // K6-6 (wave 0.1.86): module-level cache for cli-highlight results. formatToken's
 // code branch runs the highlighter on every call (no internal cache), which makes

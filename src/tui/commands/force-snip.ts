@@ -1,5 +1,5 @@
 import type { Command } from '../types/command.js'
-import type { ContentBlockParam } from '../types/atlas.js'
+import type { ContentBlockParam } from '../../kernel/types/atlas.js'
 import type { ToolUseContext } from '../Tool.js'
 
 /**

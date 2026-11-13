@@ -8,9 +8,9 @@ import { KeyboardShortcutHint } from '../../components/design-system/KeyboardSho
 import { Box, Text, useInput } from '../../ink.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { LoadedPlugin } from '../../types/plugin.js';
-import { count } from '../../utils/array.js';
+import { count } from '../../../kernel/utils/array.js';
 import { shouldSkipPluginAutoupdate } from '../../utils/config.js';
-import { errorMessage } from '../../utils/errors.js';
+import { errorMessage } from '../../../kernel/utils/errors.js';
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { createPluginId, formatMarketplaceLoadingErrors, getMarketplaceSourceDisplay, loadMarketplacesWithGracefulDegradation } from '../../utils/plugins/marketplaceHelpers.js';
 import { getMarketplaceDisplayName } from '../../utils/plugins/marketplaceDisplayName.js';
@@ -19,7 +19,7 @@ import { updatePluginsForMarketplaces } from '../../utils/plugins/pluginAutoupda
 import { loadAllPlugins } from '../../utils/plugins/pluginLoader.js';
 import { isMarketplaceAutoUpdate } from '../../utils/plugins/schemas.js';
 import { getSettingsForSource, updateSettingsForSource } from '../../utils/settings/settings.js';
-import { plural } from '../../utils/stringUtils.js';
+import { plural } from '../../../kernel/utils/stringUtils.js';
 import type { ViewState } from './types.js';
 import { useOrphanMarketplaceHint } from './orphanMarketplaceHint.js';
 type Props = {

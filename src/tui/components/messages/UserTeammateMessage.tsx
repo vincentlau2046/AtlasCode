@@ -1,11 +1,11 @@
 import { c as _c } from "react/compiler-runtime";
-import type { TextBlockParam } from '../../types/atlas.js';
+import type { TextBlockParam } from '../../../kernel/types/atlas.js';
 import figures from 'figures';
 import * as React from 'react';
-import { TEAMMATE_MESSAGE_TAG } from '../../constants/xml.js';
+import { TEAMMATE_MESSAGE_TAG } from '../../../kernel/constants/xml.js';
 import { Ansi, Box, Text, type TextProps } from '../../ink.js';
 import { toInkColor } from '../../utils/ink.js';
-import { jsonParse } from '../../utils/slowOperations.js';
+import { jsonParse } from '../../utils/slowOperations';
 import { isShutdownApproved } from '../../utils/teammateMailbox.js';
 import { MessageResponse } from '../MessageResponse.js';
 import { tryRenderPlanApprovalMessage } from './PlanApprovalMessage.js';

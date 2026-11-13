@@ -31,7 +31,7 @@
 // (U+202A-202E), narrow NBSP, medium mathematical space, word joiner +
 // isolates (U+2060-2069), BOM. The u flag makes the astral range match by
 // code point (2026-10-30 review hardening: default-ignorable + bidi).
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 
 const UNSAFE_NAME_CHARS_RE =
   /[\u0000-\u001F\u007F-\u00A0\u00AD\u034F\u061C\u070F\u1680\u180E\u2000-\u200F\u2028\u2029\u202A-\u202E\u202F\u205F\u2060-\u2069\u3000\uFE00-\uFE0F\uFEFF\u{E0100}-\u{E01EF}]/u

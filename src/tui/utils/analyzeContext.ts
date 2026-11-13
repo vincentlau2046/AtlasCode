@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import type { BetaMessageParam, BetaToolUnion } from '../types/atlas.js'
+import type { BetaMessageParam, BetaToolUnion } from '../../kernel/types/atlas.js'
 import {
   getSystemPrompt,
   SYSTEM_PROMPT_DYNAMIC_BOUNDARY,
@@ -46,20 +46,20 @@ import type {
   NormalizedAssistantMessage,
   NormalizedUserMessage,
   UserMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import { toolToAPISchema } from './api.js'
-import { isAtlasDev } from './atlasDev.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import { filterInjectedMemoryFiles, getMemoryFiles } from './memoryFiles.js'
-import { getContextWindowForModel } from './context.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
-import { isEnvTruthy } from './envUtils.js'
-import { errorMessage, toError } from './errors.js'
+import { getContextWindowForModel } from '../../kernel/utils/context.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { errorMessage, toError } from '../../kernel/utils/errors.js'
 import { logError } from './log.js'
 import { normalizeMessagesForAPI } from './messages.js'
 import { getRuntimeMainLoopModel } from './model/model.js'
-import type { SettingSource } from './settings/constants.js'
-import { jsonStringify } from './slowOperations.js'
+import type { SettingSource } from './settings/constants'
+import { jsonStringify } from './slowOperations'
 import { buildEffectiveSystemPrompt } from './systemPrompt.js'
 import type { Theme } from './theme.js'
 import { getCurrentUsage } from './tokens.js'

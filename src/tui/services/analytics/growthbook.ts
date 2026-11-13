@@ -8,11 +8,11 @@
  */
 
 import { isEqual } from 'lodash-es'
-import { isAtlasDev } from '../../utils/atlasDev.js'
+import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { logForDebugging } from '../../utils/debug'
 import { logError } from '../../utils/log.js'
-import { createSignal } from '../../utils/signal.js'
+import { createSignal } from '../../../kernel/utils/signal.js'
 
 // ---------------------------------------------------------------------------
 // Types (preserved from original)

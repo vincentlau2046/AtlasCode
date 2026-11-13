@@ -11,14 +11,14 @@ import { populateOAuthAccountInfoIfNeeded } from '../services/oauth/client.js'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：policyLimits 簇（initializePolicyLimitsLoadingPromise/isPolicyLimitsEligible）裁除
 import { preconnectAtlasApi } from '../utils/apiPreconnect.js'
 import { applyExtraCACertsFromConfig } from '../utils/caCertsConfig.js'
-import { registerCleanup } from '../utils/cleanupRegistry.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
 import { enableConfigs, recordFirstStartTime } from '../utils/config.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 import { detectCurrentRepository } from '../utils/detectRepository.js'
 import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
 import { initJetBrainsDetection } from '../utils/envDynamic.js'
-import { isEnvTruthy } from '../utils/envUtils.js'
-import { ConfigParseError, errorMessage } from '../utils/errors.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { ConfigParseError, errorMessage } from '../../kernel/utils/errors.js'
 // showInvalidConfigDialog is dynamically imported in the error path to avoid loading React at init
 import {
   gracefulShutdownSync,

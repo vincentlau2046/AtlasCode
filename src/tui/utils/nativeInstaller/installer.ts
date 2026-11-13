@@ -11,7 +11,7 @@
  */
 
 import { constants as fsConstants, type Stats } from 'fs'
-import { getConfigDirName } from '../configDir.js'
+import { getConfigDirName } from '../../../kernel/utils/configDir.js'
 import {
   access,
   chmod,
@@ -32,33 +32,33 @@ import {
 import { homedir } from 'os'
 import { basename, delimiter, dirname, join, resolve } from 'path'
 import { getMaxVersion, shouldSkipVersion } from '../autoUpdater.js'
-import { registerCleanup } from '../cleanupRegistry.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { getCurrentInstallationType } from '../doctorDiagnostic.js'
 import { env } from '../env.js'
 import { envDynamic } from '../envDynamic.js'
-import { isEnvTruthy } from '../envUtils.js'
-import { errorMessage, getErrnoCode, isENOENT, toError } from '../errors.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { errorMessage, getErrnoCode, isENOENT, toError } from '../../../kernel/utils/errors.js'
 import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { getShellType } from '../localInstaller.js'
-import * as lockfile from '../lockfile.js'
+import * as lockfile from '../../../kernel/utils/lockfile.js'
 import { logError } from '../log.js'
-import { gt, gte } from '../semver.js'
+import { gt, gte } from '../../../kernel/utils/semver.js'
 import {
   filterAtlasAliases,
   getShellConfigPaths,
   readFileLines,
   writeFileLines,
 } from '../shellConfig.js'
-import { sleep } from '../sleep.js'
+import { sleep } from '../../../kernel/utils/sleep.js'
 import {
   getUserBinDir,
   getXDGCacheHome,
   getXDGDataHome,
   getXDGStateHome,
-} from '../xdg.js'
-import { downloadVersion, getLatestVersion } from './download.js'
+} from '../../../kernel/utils/xdg.js'
+import { downloadVersion, getLatestVersion } from '../../../kernel/nativeInstaller/download.js'
 import {
   acquireProcessLifetimeLock,
   cleanupStaleLocks,

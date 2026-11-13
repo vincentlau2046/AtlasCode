@@ -2,18 +2,18 @@ import chokidar, { type FSWatcher } from 'chokidar'
 import { stat } from 'fs/promises'
 import * as platformPath from 'path'
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js'
-import { registerCleanup } from '../cleanupRegistry.js'
-import { logForDebugging } from '../debug.js'
-import { errorMessage } from '../errors.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import {
   type ConfigChangeSource,
   executeConfigChangeHooks,
   hasBlockingResult,
 } from '../hooks.js'
-import { createSignal } from '../signal.js'
-import { jsonStringify } from '../slowOperations.js'
-import { SETTING_SOURCES, type SettingSource } from './constants.js'
-import { clearInternalWrites, consumeInternalWrite } from './internalWrites.js'
+import { createSignal } from '../../../kernel/utils/signal.js'
+import { jsonStringify } from '../slowOperations'
+import { SETTING_SOURCES, type SettingSource } from './constants'
+import { clearInternalWrites, consumeInternalWrite } from '../../../kernel/settings/internalWrites.js'
 import { getManagedSettingsDropInDir } from './managedPath.js'
 import {
   getHkcuSettings,

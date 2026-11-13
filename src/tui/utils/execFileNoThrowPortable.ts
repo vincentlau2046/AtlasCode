@@ -1,6 +1,6 @@
 import { type Options as ExecaOptions, execaSync } from 'execa'
-import { getCwd } from '../utils/cwd.js'
-import { slowLogging } from './slowOperations.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { slowLogging } from './slowOperations'
 
 const MS_IN_SECOND = 1000
 const SECONDS_IN_MINUTE = 60

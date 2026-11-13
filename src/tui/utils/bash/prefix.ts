@@ -1,6 +1,6 @@
-import { buildPrefix } from '../shell/specPrefix.js'
+import { buildPrefix } from '../../../kernel/shell/provider/specPrefix.js'
 import { splitCommand_DEPRECATED } from './commands.js'
-import { extractCommandArguments, parseCommand } from './parser.js'
+import { extractCommandArguments, parseCommand } from './parser'
 import { getCommandSpec } from './registry.js'
 
 const NUMERIC = /^\d+$/

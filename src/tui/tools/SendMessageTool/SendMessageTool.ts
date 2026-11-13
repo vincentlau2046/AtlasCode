@@ -36,12 +36,12 @@ import {
   queuePendingMessage as queuePendingMessageTask,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { isMainSessionTask } from '../../tasks/LocalMainSessionTask.js'
-import { toAgentId } from '../../types/ids.js'
+import { toAgentId } from '../../../kernel/types/ids.js'
 import { gracefulShutdown } from '../../utils/gracefulShutdown.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { semanticBoolean } from '../../utils/semanticBoolean.js'
 import { resumeAgentBackground } from '../AgentTool/resumeAgent.js'
-import { SEND_MESSAGE_TOOL_NAME } from './constants.js'
+import { SEND_MESSAGE_TOOL_NAME } from '../../../kernel/tools/SendMessageTool/constants.js'
 import { renderToolResultMessage } from './UI.js'
 
 const DESCRIPTION = 'Send a message to another agent'

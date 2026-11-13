@@ -7,14 +7,14 @@ import { randomUUID, type UUID } from 'crypto'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getLastMainRequestId, regenerateSessionId } from 'src/tui/bootstrapState.js'
 import type { AppState } from '../../state/AppState.js'
-import { isInProcessTeammateTask } from '../../tasks/InProcessTeammateTask/types.js'
+import { isInProcessTeammateTask } from '../../../kernel/tasks/InProcessTeammateTask/types.js'
 import {
   isLocalAgentTask,
   type LocalAgentTaskState,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { isLocalShellTask } from '../../tasks/LocalShellTask/guards.js'
-import { asAgentId } from '../../types/ids.js'
-import type { Message } from '../../types/message.js'
+import { asAgentId } from '../../../kernel/types/ids.js'
+import type { Message } from '../../../kernel/types/message.js'
 import { createEmptyAttributionState } from '../../utils/commitAttribution.js'
 import type { FileStateCache } from '../../utils/fileStateCache.js'
 import {

@@ -2,7 +2,7 @@ import { getSessionId } from 'src/bootstrap'
 import { getDirectConnectServerUrl } from 'src/tui/bootstrapState.js'
 import { stringWidth } from '../ink/stringWidth.js'
 import type { LogOption } from '../types/logs.js'
-import { getCwd } from './cwd.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
 import { getDisplayPath } from './file.js'
 import {
   truncate,
@@ -10,7 +10,7 @@ import {
   truncateToWidthNoEllipsis,
 } from './format.js'
 import { getStoredChangelogFromMemory, parseChangelog } from './releaseNotes.js'
-import { gt } from './semver.js'
+import { gt } from '../../kernel/utils/semver.js'
 import { loadMessageLogs } from './sessionStorage.js'
 import { getInitialSettings } from './settings/settings.js'
 

@@ -5,9 +5,9 @@ import {
   splitCommand_DEPRECATED,
 } from '../../utils/bash/commands.js'
 import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
-import { getCwd } from '../../utils/cwd.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 import { isCurrentDirectoryBareGitRepo } from '../../utils/git.js'
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
 import { getPlatform } from '../../utils/platform.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import {

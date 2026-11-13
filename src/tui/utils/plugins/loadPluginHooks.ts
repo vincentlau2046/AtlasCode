@@ -6,14 +6,14 @@ import {
   registerHookCallbacks,
 } from 'src/tui/bootstrapState.js'
 import type { LoadedPlugin } from '../../types/plugin.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { settingsChangeDetector } from '../settings/changeDetector.js'
 import {
   getSettings_DEPRECATED,
   getSettingsForSource,
 } from '../settings/settings.js'
-import type { PluginHookMatcher } from '../settings/types.js'
-import { jsonStringify } from '../slowOperations.js'
+import type { PluginHookMatcher } from '../../../kernel/settings/types.js'
+import { jsonStringify } from '../slowOperations'
 import { clearPluginCache, loadAllPluginsCacheOnly } from './pluginLoader.js'
 
 // Track if hot reload subscription is set up

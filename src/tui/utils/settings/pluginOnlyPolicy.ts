@@ -1,5 +1,5 @@
 import { getSettingsForSource } from './settings.js'
-import type { CUSTOMIZATION_SURFACES } from './types.js'
+import type { CUSTOMIZATION_SURFACES } from '../../../kernel/settings/types.js'
 
 export type CustomizationSurface = (typeof CUSTOMIZATION_SURFACES)[number]
 

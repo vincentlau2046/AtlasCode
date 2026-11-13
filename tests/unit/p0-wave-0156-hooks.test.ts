@@ -36,7 +36,7 @@ import {
   type HookShellExecution,
   type HookShellPort,
 } from '../../src/hooks'
-import { HOOK_EVENTS as SDK_EVENTS } from '../../src/tui/entrypoints/sdk/coreSchemas.js'
+import { HOOK_EVENTS as SDK_EVENTS } from '../../src/kernel/entrypoints/sdk/coreSchemas.js'
 
 // ── 夹具（同 engine-hooks.test.ts 口径）─────────────────────────────────────
 const ASSISTANT = {

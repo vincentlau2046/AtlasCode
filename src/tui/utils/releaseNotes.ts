@@ -7,11 +7,11 @@ import { dirname, join } from 'path'
 import { coerce } from 'semver'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
-import { getAtlasConfigHomeDir } from './envUtils.js'
-import { toError } from './errors.js'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
+import { toError } from '../../kernel/utils/errors.js'
 import { logError } from './log.js'
 import { isEssentialTrafficOnly } from './privacyLevel.js'
-import { gt } from './semver.js'
+import { gt } from '../../kernel/utils/semver.js'
 
 const MAX_RELEASE_NOTES_SHOWN = 5
 

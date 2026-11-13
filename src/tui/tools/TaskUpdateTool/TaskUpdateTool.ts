@@ -7,7 +7,7 @@ import {
   executeTaskCompletedHooks,
   getTaskCompletedHookMessage,
 } from '../../utils/hooks.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   blockTask,
   deleteTask,
@@ -26,8 +26,8 @@ import {
   getTeamName,
 } from 'src/engine'
 import { writeToMailbox } from '../../utils/teammateMailbox.js'
-import { VERIFICATION_AGENT_TYPE } from '../AgentTool/constants.js'
-import { TASK_UPDATE_TOOL_NAME } from './constants.js'
+import { VERIFICATION_AGENT_TYPE } from '../../../kernel/tools/AgentTool/constants.js'
+import { TASK_UPDATE_TOOL_NAME } from '../../../kernel/tools/TaskUpdateTool/constants.js'
 import { DESCRIPTION, PROMPT } from './prompt.js'
 
 const inputSchema = lazySchema(() => {

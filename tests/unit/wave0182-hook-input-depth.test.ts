@@ -70,21 +70,21 @@ function preToolUseInput(toolInput: unknown) {
 describe('K3-A6 exceedsMaxNestingDepth 纯函数矩阵（基线无此导出 → 红）', () => {
   test('① 边界收纳：28000 层链不拒收', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     expect(exceedsMaxNestingDepth(deepChain(28000))).toBe(false)
   })
 
   test('② 边界拒收：28001 层链拒收', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     expect(exceedsMaxNestingDepth(deepChain(28001))).toBe(true)
   })
 
   test('③ 数组嵌套计入深度', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     let v: unknown = 'x'
     for (let i = 0; i < 28001; i++) v = [v]
@@ -93,7 +93,7 @@ describe('K3-A6 exceedsMaxNestingDepth 纯函数矩阵（基线无此导出 → 
 
   test('④ 环安全：cyclic 对象终止且不误报（circular 由 stringify 兜底）', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     const a: Record<string, unknown> = {}
     const b: Record<string, unknown> = { a }
@@ -103,7 +103,7 @@ describe('K3-A6 exceedsMaxNestingDepth 纯函数矩阵（基线无此导出 → 
 
   test('⑤ 平凡面：标量/null/浅对象不拒收', async () => {
     const { exceedsMaxNestingDepth } = await import(
-      '../../src/tui/utils/hooks/hookInputDepth.js'
+      '../../src/kernel/agenthooks/hookInputDepth.js'
     )
     expect(exceedsMaxNestingDepth('scalar')).toBe(false)
     expect(exceedsMaxNestingDepth(null)).toBe(false)

@@ -7,14 +7,14 @@
  */
 
 import { join } from 'path'
-import { getConfigDirNameForProject } from '../configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import type { z } from 'zod/v4'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import { parseSettingsFile } from '../settings/settings.js'
 import type {
   ExtraKnownMarketplaceSchema,
   SettingsJson,
-} from '../settings/types.js'
+} from '../../../kernel/settings/types.js'
 
 type ExtraKnownMarketplace = z.infer<
   ReturnType<typeof ExtraKnownMarketplaceSchema>

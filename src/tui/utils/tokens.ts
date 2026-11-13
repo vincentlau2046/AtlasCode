@@ -1,8 +1,8 @@
-import type { BetaUsage as Usage } from '../types/atlas.js'
+import type { BetaUsage as Usage } from '../../kernel/types/atlas.js'
 import { roughTokenCountEstimationForMessages } from '../services/tokenEstimation.js'
-import type { AssistantMessage, Message } from '../types/message.js'
+import type { AssistantMessage, Message } from '../../kernel/types/message.js'
 import { SYNTHETIC_MESSAGES, SYNTHETIC_MODEL } from './messages.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 export function getTokenUsage(message: Message): Usage | undefined {
   if (

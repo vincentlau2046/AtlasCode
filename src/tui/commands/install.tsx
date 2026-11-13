@@ -5,9 +5,9 @@ import React, { useEffect, useState } from 'react';
 import type { CommandResultDisplay } from 'src/tui/commands.js';
 import { StatusIcon } from '../components/design-system/StatusIcon.js';
 import { Box, render, Text } from '../ink.js';
-import { logForDebugging } from '../utils/debug.js';
+import { logForDebugging } from '../utils/debug';
 import { env } from '../utils/env.js';
-import { errorMessage } from '../utils/errors.js';
+import { errorMessage } from '../../kernel/utils/errors.js';
 import { checkInstall, cleanupNpmInstallations, cleanupShellAliases, installLatest } from '../utils/nativeInstaller/index.js';
 import { getInitialSettings, updateSettingsForSource } from '../utils/settings/settings.js';
 interface InstallProps {

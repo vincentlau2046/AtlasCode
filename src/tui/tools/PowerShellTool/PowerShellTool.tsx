@@ -1,5 +1,5 @@
 import { feature } from 'src/shared';
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import { copyFile, stat as fsStat, truncate as fsTruncate, link } from 'fs/promises';
 import * as React from 'react';
 import type { CanUseToolFn } from 'src/tui/hooks/useCanUseTool.js';
@@ -9,15 +9,15 @@ import { TOOL_SUMMARY_MAX_LENGTH } from '../../constants/toolLimits.js';
 import type { SetToolJSXFn, Tool, ToolCallProgress, ValidationResult } from '../../Tool.js';
 import { buildTool, type ToolDef } from '../../Tool.js';
 import { backgroundExistingForegroundTask, markTaskNotified, registerForeground, spawnShellTask, unregisterForeground } from '../../tasks/LocalShellTask/LocalShellTask.js';
-import type { AgentId } from '../../types/ids.js';
-import type { AssistantMessage } from '../../types/message.js';
+import type { AgentId } from '../../../kernel/types/ids.js';
+import type { AssistantMessage } from '../../../kernel/types/message.js';
 import { extractAtlasCodeHints } from '../../utils/atlasCodeHints.js';
-import { isEnvTruthy } from '../../utils/envUtils.js';
-import { errorMessage as getErrorMessage, ShellError } from '../../utils/errors.js';
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js';
+import { errorMessage as getErrorMessage, ShellError } from '../../../kernel/utils/errors.js';
 import { truncate } from '../../utils/format.js';
-import { lazySchema } from '../../utils/lazySchema.js';
+import { lazySchema } from '../../../kernel/utils/lazySchema.js';
 import { logError } from '../../utils/log.js';
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js';
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js';
 import { getPlatform } from '../../utils/platform.js';
 import { maybeRecordPluginHint } from '../../utils/plugins/hintRecommendation.js';
 import { exec } from '../../utils/Shell.js';
@@ -26,7 +26,7 @@ import { getSandboxManager } from 'src/tui/sandboxCompat';
 import { semanticBoolean } from '../../utils/semanticBoolean.js';
 import { semanticNumber } from '../../utils/semanticNumber.js';
 import { getCachedPowerShellPath } from '../../utils/shell/powershellDetection.js';
-import { EndTruncatingAccumulator } from '../../utils/stringUtils.js';
+import { EndTruncatingAccumulator } from '../../../kernel/utils/stringUtils.js';
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js';
 import { TaskOutput } from '../../utils/task/TaskOutput.js';
 import { isOutputLineTruncated } from '../../utils/terminal.js';
@@ -39,7 +39,7 @@ import { interpretCommandResult } from './commandSemantics.js';
 import { powershellToolHasPermission } from './powershellPermissions.js';
 import { getDefaultTimeoutMs, getMaxTimeoutMs, getPrompt } from './prompt.js';
 import { hasSyncSecurityConcerns, isReadOnlyCommand, resolveToCanonical } from './readOnlyValidation.js';
-import { POWERSHELL_TOOL_NAME } from './toolName.js';
+import { POWERSHELL_TOOL_NAME } from '../../../kernel/tools/PowerShellTool/toolName.js';
 import { renderToolResultMessage, renderToolUseErrorMessage, renderToolUseMessage, renderToolUseProgressMessage, renderToolUseQueuedMessage } from './UI.js';
 
 // Never use os.EOL for terminal output — \r\n on Windows breaks Ink rendering
@@ -254,8 +254,8 @@ const outputSchema = lazySchema(() => z.object({
 }));
 type OutputSchema = ReturnType<typeof outputSchema>;
 export type Out = z.infer<OutputSchema>;
-import type { PowerShellProgress } from '../../types/tools.js';
-export type { PowerShellProgress } from '../../types/tools.js';
+import type { PowerShellProgress } from '../../../kernel/types/tools.js';
+export type { PowerShellProgress } from '../../../kernel/types/tools.js';
 export const PowerShellTool = buildTool({
   name: POWERSHELL_TOOL_NAME,
   searchHint: 'execute Windows PowerShell commands',

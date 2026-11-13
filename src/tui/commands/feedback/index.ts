@@ -1,5 +1,5 @@
 import type { Command } from '../../commands.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
 
 const feedback = {

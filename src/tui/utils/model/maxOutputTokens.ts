@@ -9,7 +9,7 @@
 import {
   CAPPED_DEFAULT_MAX_TOKENS,
   getModelMaxOutputTokens,
-} from '../context.js'
+} from '../../../kernel/utils/context.js'
 import { validateBoundedIntEnvVar } from '../envValidation.js'
 
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'

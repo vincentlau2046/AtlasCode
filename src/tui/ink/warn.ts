@@ -1,4 +1,4 @@
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 
 export function ifNotInteger(value: number | undefined, name: string): void {
   if (value === undefined) return

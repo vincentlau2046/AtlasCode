@@ -11,7 +11,7 @@
 import type { UUID } from 'crypto'
 import { randomUUID } from 'crypto'
 import type { PromptCommand } from '../commands.js'
-import type { QuerySource } from '../constants/querySource.js'
+import type { QuerySource } from '../../kernel/constants/querySource.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import {
   queryEngineLoopStream,
@@ -21,10 +21,10 @@ import { buildAgentLoopParams } from 'src/tui/agentLoopDeps'
 import { EMPTY_USAGE, type NonNullableUsage } from '../services/api/logging.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import type { AgentId } from '../types/ids.js'
-import type { Message } from '../types/message.js'
-import { createChildAbortController } from './abortController.js'
-import { logForDebugging } from './debug.js'
+import type { AgentId } from '../../kernel/types/ids.js'
+import type { Message } from '../../kernel/types/message.js'
+import { createChildAbortController } from '../../kernel/utils/abortController.js'
+import { logForDebugging } from './debug'
 import { cloneFileStateCache } from './fileStateCache.js'
 import type { REPLHookContext } from './hooks/postSamplingHooks.js'
 import {
@@ -32,10 +32,10 @@ import {
   extractTextContent,
   getLastAssistantMessage,
 } from './messages.js'
-import { createDenialTrackingState } from './permissions/denialTracking.js'
+import { createDenialTrackingState } from '../../kernel/permissions/denialTracking.js'
 import { parseToolListFromCLI } from './permissions/permissionSetup.js'
 import { recordSidechainTranscript } from './sessionStorage.js'
-import type { SystemPrompt } from './systemPromptType.js'
+import type { SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import {
   type ContentReplacementState,
   cloneContentReplacementState,

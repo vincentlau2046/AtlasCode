@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '../types/atlas.js'
+import type { ContentBlockParam } from '../../kernel/types/atlas.js'
 import type { Command } from '../commands.js'
 
 const LOCAL_REVIEW_PROMPT = (args: string) => `

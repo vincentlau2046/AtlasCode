@@ -24,7 +24,7 @@
  */
 
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   getCoworkMemoryPathOverride,
   isAutoMemoryEnabled,

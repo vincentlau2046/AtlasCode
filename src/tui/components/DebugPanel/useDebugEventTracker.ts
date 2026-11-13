@@ -2,7 +2,7 @@
 // 架构红线 §9.9.1：不碰 core/QueryEngine，纯 TUI 层观察消息流
 
 import { useEffect, useRef } from 'react'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import {
   pushDebugEvent,
   truncateSummary,

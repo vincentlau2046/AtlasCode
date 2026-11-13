@@ -6,14 +6,14 @@ import {
   getGlobalConfig,
   saveGlobalConfig,
 } from '../../utils/config.js'
-import { errorMessage } from '../../utils/errors.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import {
   getInitialSettings,
   updateSettingsForSource,
 } from '../../utils/settings/settings.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { CONFIG_TOOL_NAME } from './constants.js'
 import { DESCRIPTION, generatePrompt } from './prompt.js'
 import {

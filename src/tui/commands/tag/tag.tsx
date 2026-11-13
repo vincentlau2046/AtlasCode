@@ -6,7 +6,7 @@ import { getSessionId } from 'src/bootstrap';
 import type { CommandResultDisplay } from '../../commands.js';
 import { Select } from '../../components/CustomSelect/select.js';
 import { Dialog } from '../../components/design-system/Dialog.js';
-import { COMMON_HELP_ARGS, COMMON_INFO_ARGS } from '../../constants/xml.js';
+import { COMMON_HELP_ARGS, COMMON_INFO_ARGS } from '../../../kernel/constants/xml.js';
 import { Box, Text } from '../../ink.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js';

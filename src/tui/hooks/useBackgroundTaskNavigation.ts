@@ -17,7 +17,7 @@ import {
 import {
   type InProcessTeammateTaskState,
   isInProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/types.js'
+} from '../../kernel/tasks/InProcessTeammateTask/types.js'
 import { isBackgroundTask } from '../tasks/types.js'
 
 // Step teammate selection by delta, wrapping across leader(-1)..teammates(0..n-1)..hide(n).

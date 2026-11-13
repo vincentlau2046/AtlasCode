@@ -27,10 +27,10 @@ import {
   wrapForMultiplexer,
 } from '../ink/termio/osc.js'
 import type { AppState } from '../state/AppState.js'
-import { runCleanupFunctions } from './cleanupRegistry.js'
-import { logForDebugging } from './debug.js'
+import { runCleanupFunctions } from '../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from './debug'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getCurrentSessionTitle, sessionIdExists } from './sessionStorage.js'
 import { profileReport } from './startupProfiler.js'
 

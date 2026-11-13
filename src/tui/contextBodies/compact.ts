@@ -12,20 +12,20 @@ import type { UUID } from 'crypto'
 // uniqBy / FileReadTool / ToolSearchTool / isToolSearchEnabled 摘要支消费随裁。
 import { appendSystemContext } from '../utils/api.js'
 
-import { APIUserAbortError } from '../types/atlas.js'
+import { APIUserAbortError } from '../../kernel/types/atlas.js'
 // 0.1.80 K1-C①：模型切换 previous-model 记录（压缩摘要先用大窗前模型）
 import { resolveSwitchedCompactModel } from './compactModelSwitch.js'
 import { markPostCompaction } from 'src/tui/bootstrapState.js'
 import { getInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
-import type { QuerySource } from '../constants/querySource.js'
+import type { QuerySource } from '../../kernel/constants/querySource.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { Tool, ToolUseContext } from '../Tool.js'
 import type { LocalAgentTaskState } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import {
   FILE_READ_TOOL_NAME,
   FILE_UNCHANGED_STUB,
-} from '../tools/FileReadTool/prompt.js'
-import type { AgentId } from '../types/ids.js'
+} from '../../kernel/tools/FileReadTool/prompt.js'
+import type { AgentId } from '../../kernel/types/ids.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
@@ -35,7 +35,7 @@ import type {
   SystemCompactBoundaryMessage,
   SystemMessage,
   UserMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import {
   createAttachmentMessage,
   generateFileAttachment,
@@ -44,7 +44,7 @@ import {
   getMcpInstructionsDeltaAttachment,
 } from '../utils/attachments.js'
 import { getMemoryPath } from '../utils/config.js'
-import { COMPACT_MAX_OUTPUT_TOKENS } from '../utils/context.js'
+import { COMPACT_MAX_OUTPUT_TOKENS } from '../../kernel/utils/context.js'
 // 0.1.69 D-5：git status session 起始基线 + 当前态 fresh 取态（tui 顶层 context）
 import {
   getGitStatusFresh,
@@ -54,8 +54,8 @@ import {
   analyzeContext,
   tokenStatsToStatsigMetrics,
 } from '../utils/contextAnalysis.js'
-import { logForDebugging } from '../utils/debug.js'
-import { hasExactErrorMessage } from '../utils/errors.js'
+import { logForDebugging } from '../utils/debug'
+import { hasExactErrorMessage } from '../../kernel/utils/errors.js'
 import { cacheToObject } from '../utils/fileStateCache.js'
 import {
   type CacheSafeParams,
@@ -87,10 +87,10 @@ import {
   getTranscriptPath,
   reAppendSessionMetadata,
 } from '../utils/sessionStorage.js'
-import { sleep } from '../utils/sleep.js'
-import { jsonStringify } from '../utils/slowOperations.js'
-import { asSystemPrompt } from '../utils/systemPromptType.js'
-import type { SystemPrompt } from '../utils/systemPromptType.js'
+import { sleep } from '../../kernel/utils/sleep.js'
+import { jsonStringify } from '../utils/slowOperations'
+import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
+import type { SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { getTaskOutputPath } from '../utils/task/diskOutput.js'
 import {
   getTokenUsage,

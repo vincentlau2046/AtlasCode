@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { pathToFileURL } from 'url'
-import { logForDebugging } from '../../utils/debug.js'
-import { errorMessage } from '../../utils/errors.js'
+import { logForDebugging } from '../../utils/debug'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { logError } from '../../utils/log.js'
 import { getAllLspServers } from './config.js'
 import {

@@ -31,7 +31,7 @@ import {
 import {
   getContextWindowForModel,
   MODEL_CONTEXT_WINDOW_DEFAULT,
-} from '../../src/tui/utils/context'
+} from '../../src/kernel/utils/context'
 import {
   HARD_DEFAULT_CONTEXT_WINDOW,
   resetEndpointConfigSource,

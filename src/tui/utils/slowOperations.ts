@@ -10,8 +10,8 @@ import {
 // biome-ignore lint: This file IS the cloneDeep wrapper - it must import the original
 import lodashCloneDeep from 'lodash-es/cloneDeep.js'
 import { addSlowOperation } from 'src/tui/bootstrapState.js'
-import { isAtlasDev } from './atlasDev.js'
-import { logForDebugging } from './debug.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev'
+import { logForDebugging } from './debug'
 
 // Extended WriteFileOptions to include 'flush' which is available in Node.js 20.1.0+
 // but not yet in @types/node
@@ -165,7 +165,7 @@ export const slowLogging: {
  * Use this instead of JSON.stringify directly to detect performance issues.
  *
  * @example
- * import { jsonStringify } from './slowOperations.js'
+ * import { jsonStringify } from './slowOperations'
  * const json = jsonStringify(data)
  * const prettyJson = jsonStringify(data, null, 2)
  */
@@ -200,7 +200,7 @@ export function jsonStringify(
  * Use this instead of JSON.parse directly to detect performance issues.
  *
  * @example
- * import { jsonParse } from './slowOperations.js'
+ * import { jsonParse } from './slowOperations'
  * const data = jsonParse(jsonString)
  */
 export const jsonParse: typeof JSON.parse = (text, reviver) => {
@@ -217,7 +217,7 @@ export const jsonParse: typeof JSON.parse = (text, reviver) => {
  * Use this instead of structuredClone directly to detect performance issues.
  *
  * @example
- * import { clone } from './slowOperations.js'
+ * import { clone } from './slowOperations'
  * const copy = clone(originalObject)
  */
 export function clone<T>(value: T, options?: StructuredSerializeOptions): T {
@@ -230,7 +230,7 @@ export function clone<T>(value: T, options?: StructuredSerializeOptions): T {
  * Use this instead of lodash cloneDeep directly to detect performance issues.
  *
  * @example
- * import { cloneDeep } from './slowOperations.js'
+ * import { cloneDeep } from './slowOperations'
  * const copy = cloneDeep(originalObject)
  */
 export function cloneDeep<T>(value: T): T {

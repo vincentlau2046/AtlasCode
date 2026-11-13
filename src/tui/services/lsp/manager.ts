@@ -1,6 +1,6 @@
-import { logForDebugging } from '../../utils/debug.js'
-import { isBareMode } from '../../utils/envUtils.js'
-import { errorMessage } from '../../utils/errors.js'
+import { logForDebugging } from '../../utils/debug'
+import { isBareMode } from '../../../kernel/utils/envUtils.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { logError } from '../../utils/log.js'
 import {
   createLSPServerManager,

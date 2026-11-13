@@ -1,7 +1,7 @@
 import { createFallbackStorage } from './fallbackStorage.js'
 import { macOsKeychainStorage } from './macOsKeychainStorage.js'
 import { plainTextStorage } from './plainTextStorage.js'
-import type { SecureStorage } from './types.js'
+import type { SecureStorage } from '../../../kernel/utils/secureStorage/types.js'
 
 /**
  * Get the appropriate secure storage implementation for the current platform

@@ -1,11 +1,11 @@
 import { z } from 'zod/v4'
 import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { formatAgentId } from '../../utils/agentId.js'
+import { formatAgentId } from '../../../kernel/utils/agentId.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { getCwd } from '../../utils/cwd.js'
-import { lazySchema } from '../../utils/lazySchema.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { getResolvedTeammateMode } from 'src/swarm'
 import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
 import {
@@ -20,7 +20,7 @@ import {
   setLeaderTeamName,
 } from '../../utils/tasks.js'
 import { generateWordSlug } from '../../utils/words.js'
-import { TEAM_CREATE_TOOL_NAME } from './constants.js'
+import { TEAM_CREATE_TOOL_NAME } from '../../../kernel/tools/TeamCreateTool/constants.js'
 // 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 档门 + 支路原语
 // （engine/tools/team/teamDurable 单源；双副本同步纪律 = engine 车道
 // teamCreateTool.ts 同形支）。

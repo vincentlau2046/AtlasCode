@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from './atlas.js'
+import type { ContentBlockParam } from '../../kernel/types/atlas.js'
 import type { UUID } from 'crypto'
 import type React from 'react'
 import type { PermissionResult } from '../entrypoints/agentSdkTypes.js'
@@ -6,8 +6,8 @@ import type { Key } from '../ink.js'
 import type { PastedContent } from '../utils/config.js'
 import type { ImageDimensions } from '../utils/imageResizer.js'
 import type { TextHighlight } from '../utils/textHighlighting.js'
-import type { AgentId } from './ids.js'
-import type { AssistantMessage, MessageOrigin } from './message.js'
+import type { AgentId } from '../../kernel/types/ids.js'
+import type { AssistantMessage, MessageOrigin } from '../../kernel/types/message.js'
 
 /**
  * Inline ghost text for mid-input command autocomplete

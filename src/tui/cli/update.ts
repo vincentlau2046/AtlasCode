@@ -22,8 +22,8 @@ import {
   removeInstalledSymlink,
 } from 'src/tui/utils/nativeInstaller/index.js'
 import { getPackageManager } from 'src/tui/utils/nativeInstaller/packageManagers.js'
-import { writeToStdout } from 'src/tui/utils/process.js'
-import { gte } from 'src/tui/utils/semver.js'
+import { writeToStdout } from 'src/kernel/utils/process'
+import { gte } from 'src/kernel/utils/semver'
 import { getInitialSettings } from 'src/tui/utils/settings/settings.js'
 
 export async function update() {

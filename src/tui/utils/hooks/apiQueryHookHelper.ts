@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto'
-import type { QuerySource } from '../../constants/querySource.js'
+import type { QuerySource } from '../../../kernel/constants/querySource.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
-import type { Message } from '../../types/message.js'
-import { createAbortController } from '../../utils/abortController.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { createAbortController } from '../../../kernel/utils/abortController.js'
 import { logError } from '../../utils/log.js'
-import { toError } from '../errors.js'
+import { toError } from '../../../kernel/utils/errors.js'
 import { extractTextContent } from '../messages.js'
-import { asSystemPrompt } from '../systemPromptType.js'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import type { REPLHookContext } from './postSamplingHooks.js'
 
 export type ApiQueryHookContext = REPLHookContext & {

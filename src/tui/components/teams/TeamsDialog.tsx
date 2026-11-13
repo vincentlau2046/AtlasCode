@@ -12,12 +12,12 @@ import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
 import { type AppState, useAppState, useSetAppState } from '../../state/AppState.js';
 import { getEmptyToolPermissionContext } from '../../Tool.js';
 import { AGENT_COLOR_TO_THEME_COLOR } from '../../tools/AgentTool/agentColorManager.js';
-import { logForDebugging } from '../../utils/debug.js';
+import { logForDebugging } from '../../utils/debug';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { truncateToWidth } from '../../utils/format.js';
 import { getNextPermissionMode } from '../../utils/permissions/getNextPermissionMode.js';
 import { getModeColor, type PermissionMode, permissionModeFromString, permissionModeSymbol } from '../../utils/permissions/PermissionMode.js';
-import { jsonStringify } from '../../utils/slowOperations.js';
+import { jsonStringify } from '../../utils/slowOperations';
 // W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
 import { IT2_COMMAND, isInsideTmuxSync, ensureBackendsRegistered, getBackendByType, getCachedBackend, type PaneBackendType } from 'src/swarm';
 import { getSwarmSocketName, TMUX_COMMAND } from '../../utils/swarm/constants.js';

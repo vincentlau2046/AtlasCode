@@ -19,7 +19,7 @@
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { asSystemPrompt } from '../../src/tui/utils/systemPromptType'
+import { asSystemPrompt } from '../../src/kernel/utils/systemPromptType'
 import { buildOpenAIParams } from '../../src/modelprovider'
 
 const read = (rel: string): string =>

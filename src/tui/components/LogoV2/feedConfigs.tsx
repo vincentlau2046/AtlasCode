@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Box, Text } from '../../ink.js';
 import type { Step } from '../../projectOnboardingState.js';
 import type { LogOption } from '../../types/logs.js';
-import { getCwd } from '../../utils/cwd.js';
+import { getCwd } from '../../../kernel/utils/cwd.js';
 import { formatRelativeTimeAgo } from '../../utils/format.js';
 import type { FeedConfig, FeedLine } from './Feed.js';
 export function createRecentActivityFeed(activities: LogOption[]): FeedConfig {

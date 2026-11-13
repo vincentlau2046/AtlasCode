@@ -6,7 +6,7 @@
 import figures from 'figures'
 import { basename, dirname, resolve } from 'path'
 import { setUseCoworkPlugins } from 'src/tui/bootstrapState.js'
-import { getPluginManifestDirs } from '../../utils/configDir.js'
+import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import {
   disableAllPlugins,
   disablePlugin,
@@ -18,7 +18,7 @@ import {
   VALID_UPDATE_SCOPES,
 } from '../../services/plugins/pluginCliCommands.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
-import { errorMessage } from '../../utils/errors.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import { logError } from '../../utils/log.js'
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js'
 import { getInstallCounts } from '../../utils/plugins/installCounts.js'
@@ -54,8 +54,8 @@ import {
   validateManifest,
   validatePluginContents,
 } from '../../utils/plugins/validatePlugin.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
-import { plural } from '../../utils/stringUtils.js'
+import { jsonStringify } from '../../utils/slowOperations'
+import { plural } from '../../../kernel/utils/stringUtils.js'
 import { cliError, cliOk } from '../exit.js'
 
 // Re-export for main.tsx to reference in option definitions

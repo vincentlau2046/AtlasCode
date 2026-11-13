@@ -8,7 +8,7 @@ import {
 // 'color-diff-napi' is a reserved-name stub whose ColorFile lacks
 // .render(), which crashed HighlightedCode. The port's API matches the
 // native d.ts exactly, so this import drop-in preserves all callers.
-import { isEnvDefinedFalsy } from '../../utils/envUtils.js'
+import { isEnvDefinedFalsy } from '../../../kernel/utils/envUtils.js'
 
 export type ColorModuleUnavailableReason = 'env'
 

@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '../types/atlas.js'
+import type { ContentBlockParam } from '../../kernel/types/atlas.js'
 import type { Permutations } from 'src/tui/types/utils.js'
 import { getSessionId } from 'src/bootstrap'
 import type { AppState } from '../state/AppState.js'
@@ -16,7 +16,7 @@ import type { PastedContent } from './config.js'
 import { extractTextContent } from './messages.js'
 import { objectGroupBy } from './objectGroupBy.js'
 import { recordQueueOperation } from './sessionStorage.js'
-import { createSignal } from './signal.js'
+import { createSignal } from '../../kernel/utils/signal.js'
 
 export type SetAppState = (f: (prev: AppState) => AppState) => void
 

@@ -1,5 +1,5 @@
-import type { BetaToolUseBlock } from '../types/atlas.js'
-import type { ToolResultBlockParam } from '../types/atlas.js'
+import type { BetaToolUseBlock } from '../../kernel/types/atlas.js'
+import type { ToolResultBlockParam } from '../../kernel/types/atlas.js'
 import type { Tools } from '../Tool.js'
 import type {
   GroupedToolUseMessage,
@@ -8,7 +8,7 @@ import type {
   NormalizedUserMessage,
   ProgressMessage,
   RenderableMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 
 export type MessageWithoutProgress = Exclude<NormalizedMessage, ProgressMessage>
 

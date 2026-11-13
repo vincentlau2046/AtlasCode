@@ -7,7 +7,7 @@ import { clearBetasCaches } from '../../utils/betas.js';
 import { saveGlobalConfig } from '../../utils/config.js';
 import { gracefulShutdownSync } from '../../utils/gracefulShutdown.js';
 import { getSecureStorage } from '../../utils/secureStorage/index.js';
-import { clearToolSchemaCache } from '../../utils/toolSchemaCache.js';
+import { clearToolSchemaCache } from '../../../kernel/utils/toolSchemaCache.js';
 import { resetUserCache } from '../../utils/user.js';
 export async function performLogout({
   clearOnboarding = false

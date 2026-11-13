@@ -2,21 +2,21 @@ import { z } from 'zod/v4'
 import { getSdkAgentProgressSummariesEnabled } from 'src/tui/bootstrapState.js'
 import type { ToolResult } from '../../Tool.js'
 import { buildTool } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { logForDebugging } from '../../utils/debug'
 import { logError } from '../../utils/log.js'
 import { createUserMessage } from '../../utils/messages.js'
 import { getAgentModel } from '../../utils/model/agent.js'
-import type { ModelAlias } from '../../utils/model/aliases.js'
+import type { ModelAlias } from '../../../kernel/model/aliases.js'
 import { createAgentId } from '../../utils/uuid.js'
 import { registerAsyncAgent } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js'
-import type { AgentToolProgress } from '../../types/tools.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import type { AgentToolProgress } from '../../../kernel/types/tools.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { isCoordinatorMode } from '../../coordinator/coordinatorMode.js'
 import { MAX_WORKER_SPAWN_DEPTH } from '../../constants/tools.js'
 import { getBuiltInAgents } from './builtInAgents.js'
 import { GENERAL_PURPOSE_AGENT } from './built-in/generalPurposeAgent.js'
-import { AGENT_TOOL_NAME } from './constants.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
 import {
   buildForkedMessages,
   FORK_AGENT,
@@ -32,7 +32,7 @@ import {
 import { getPrompt } from './prompt.js'
 import { runAgent } from './runAgent.js'
 import { renderToolUseMessage } from './UI.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 
 /**
  * 0.1.66 Q3-2 a1：逃生舱 env——ATLAS_AGENT_DEFAULT_FOREGROUND=1 时回退前景默认

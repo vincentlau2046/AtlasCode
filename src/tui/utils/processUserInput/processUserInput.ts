@@ -3,9 +3,9 @@ import type {
   Base64ImageSource,
   ContentBlockParam,
   ImageBlockParam,
-} from '../../types/atlas.js'
+} from '../../../kernel/types/atlas.js'
 import { randomUUID } from 'crypto'
-import type { QuerySource } from 'src/tui/constants/querySource.js'
+import type { QuerySource } from 'src/kernel/constants/querySource'
 import { getContentText } from 'src/tui/utils/messages.js'
 import {
   findCommand,
@@ -23,8 +23,8 @@ import type {
   ProgressMessage,
   SystemMessage,
   UserMessage,
-} from '../../types/message.js'
-import type { PermissionMode } from '../../types/permissions.js'
+} from '../../../kernel/types/message.js'
+import type { PermissionMode } from '../../../kernel/types/permissions.js'
 import {
   isValidImagePaste,
   type PromptInputMode,

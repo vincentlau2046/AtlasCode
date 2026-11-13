@@ -8,7 +8,7 @@
 
 import { HOOK_EVENTS } from 'src/tui/entrypoints/sdk/coreTypes.js'
 
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 
 /**
  * Hook events that are always emitted regardless of the includeHookEvents

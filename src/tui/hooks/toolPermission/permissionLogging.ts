@@ -6,7 +6,7 @@ import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadat
 import { getCodeEditToolDecisionCounter } from 'src/tui/bootstrapState.js'
 import type { Tool as ToolType, ToolUseContext } from '../../Tool.js'
 import { getLanguageName } from '../../utils/cliHighlight.js'
-import { logOTelEvent } from '../../utils/telemetry/events.js'
+import { logOTelEvent } from '../../../kernel/telemetry/events.js'
 import type {
   PermissionApprovalSource,
   PermissionRejectionSource,

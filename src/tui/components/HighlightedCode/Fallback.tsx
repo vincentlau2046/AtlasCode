@@ -3,9 +3,9 @@ import { extname } from 'path';
 import React, { Suspense, use, useMemo } from 'react';
 import { Ansi, Text } from '../../ink.js';
 import { getCliHighlightPromise } from '../../utils/cliHighlight.js';
-import { logForDebugging } from '../../utils/debug.js';
+import { logForDebugging } from '../../utils/debug';
 import { convertLeadingTabsToSpaces } from '../../utils/file.js';
-import { hashPair } from '../../utils/hash.js';
+import { hashPair } from '../../../kernel/utils/hash.js';
 type Props = {
   code: string;
   filePath: string;

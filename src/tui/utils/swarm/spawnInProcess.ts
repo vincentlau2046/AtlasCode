@@ -16,18 +16,18 @@
 import sample from 'lodash-es/sample.js'
 import { getSessionId } from 'src/bootstrap'
 import { getSpinnerVerbs } from '../../constants/spinnerVerbs.js'
-import { TURN_COMPLETION_VERBS } from '../../constants/turnCompletionVerbs.js'
+import { TURN_COMPLETION_VERBS } from '../../../kernel/constants/turnCompletionVerbs.js'
 import type { AppState } from '../../state/AppState.js'
 import { createTaskStateBase, generateTaskId } from '../../Task.js'
 import type {
   InProcessTeammateTaskState,
   TeammateIdentity,
-} from '../../tasks/InProcessTeammateTask/types.js'
-import { createAbortController } from '../abortController.js'
-import { formatAgentId } from '../agentId.js'
-import { registerCleanup } from '../cleanupRegistry.js'
-import { logForDebugging } from '../debug.js'
-import { emitTaskTerminatedSdk } from '../sdkEventQueue.js'
+} from '../../../kernel/tasks/InProcessTeammateTask/types.js'
+import { createAbortController } from '../../../kernel/utils/abortController.js'
+import { formatAgentId } from '../../../kernel/utils/agentId.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../debug'
+import { emitTaskTerminatedSdk } from '../../../kernel/utils/sdkEventQueue.js'
 import { evictTaskOutput } from '../task/diskOutput.js'
 import {
   evictTerminalTask,
@@ -39,7 +39,7 @@ import {
   isPerfettoTracingEnabled,
   registerAgent as registerPerfettoAgent,
   unregisterAgent as unregisterPerfettoAgent,
-} from '../telemetry/perfettoTracing.js'
+} from '../telemetry/perfettoTracing'
 import { removeMemberByAgentId } from './teamHelpers.js'
 
 type SetAppStateFn = (updater: (prev: AppState) => AppState) => void

@@ -1,11 +1,11 @@
 import { c as _c } from "react/compiler-runtime";
 import figures from 'figures';
 import React, { useCallback, useMemo, useState } from 'react';
-import { mcpInfoFromString } from 'src/tui/services/mcp/mcpStringUtils.js';
+import { mcpInfoFromString } from 'src/kernel/services/mcp/mcpStringUtils';
 import { isMcpTool } from 'src/tui/services/mcp/utils.js';
 import type { Tool, Tools } from 'src/tui/Tool.js';
 import { filterToolsForAgent } from 'src/tui/tools/AgentTool/agentToolUtils.js';
-import { AGENT_TOOL_NAME } from 'src/tui/tools/AgentTool/constants.js';
+import { AGENT_TOOL_NAME } from 'src/kernel/tools/AgentTool/constants';
 import { BashTool } from 'src/tui/tools/BashTool/BashTool.js';
 import { ExitPlanModeV2Tool } from 'src/tui/tools/ExitPlanModeTool/ExitPlanModeV2Tool.js';
 import { FileEditTool } from 'src/tui/tools/FileEditTool/FileEditTool.js';
@@ -24,8 +24,8 @@ import { WebSearchTool } from 'src/tui/tools/WebSearchTool/WebSearchTool.js';
 import type { KeyboardEvent } from '../../ink/events/keyboard-event.js';
 import { Box, Text } from '../../ink.js';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
-import { count } from '../../utils/array.js';
-import { plural } from '../../utils/stringUtils.js';
+import { count } from '../../../kernel/utils/array.js';
+import { plural } from '../../../kernel/utils/stringUtils.js';
 import { Divider } from '../design-system/Divider.js';
 type Props = {
   tools: Tools;

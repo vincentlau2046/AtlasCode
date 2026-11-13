@@ -1,5 +1,5 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
-import { MODEL_ALIASES } from './aliases.js'
+import { MODEL_ALIASES } from '../../../kernel/model/aliases.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import { sideQuery } from '../sideQuery.js'
 import {
@@ -7,7 +7,7 @@ import {
   APIError,
   APIConnectionError,
   AuthenticationError,
-} from '../../types/atlas.js'
+} from '../../../kernel/types/atlas.js'
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 import { getRoleModel } from 'src/modelprovider'
 

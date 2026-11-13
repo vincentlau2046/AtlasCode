@@ -2,7 +2,7 @@ import { homedir } from 'os'
 import { isAbsolute, resolve } from 'path'
 import type { z } from 'zod/v4'
 import type { ToolPermissionContext } from '../../Tool.js'
-import type { Redirect, SimpleCommand } from '../../utils/bash/ast.js'
+import type { Redirect, SimpleCommand } from '../../utils/bash/ast'
 import {
   extractOutputRedirections,
   splitCommand_DEPRECATED,
@@ -10,7 +10,7 @@ import {
 import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
 import { getDirectoryForPath } from '../../utils/path.js'
 import { allWorkingDirectories } from '../../utils/permissions/filesystem.js'
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
 import { createReadRuleSuggestion } from '../../utils/permissions/PermissionUpdate.js'
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
 import {

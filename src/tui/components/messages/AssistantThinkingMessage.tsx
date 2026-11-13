@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ThinkingBlock, ThinkingBlockParam } from '../../types/atlas.js';
+import type { ThinkingBlock, ThinkingBlockParam } from '../../../kernel/types/atlas.js';
 import React from 'react';
 import { Box, Text } from '../../ink.js';
 import { CtrlOToExpand } from '../CtrlOToExpand.js';

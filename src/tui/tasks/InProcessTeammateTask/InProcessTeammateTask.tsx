@@ -10,13 +10,13 @@
  */
 
 import { isTerminalTaskStatus, type SetAppState, type Task, type TaskStateBase } from '../../Task.js';
-import type { Message } from '../../types/message.js';
-import { logForDebugging } from '../../utils/debug.js';
+import type { Message } from '../../../kernel/types/message.js';
+import { logForDebugging } from '../../utils/debug';
 import { createUserMessage } from '../../utils/messages.js';
 import { killInProcessTeammate } from '../../utils/swarm/spawnInProcess.js';
 import { updateTaskState } from '../../utils/task/framework.js';
-import type { InProcessTeammateTaskState } from './types.js';
-import { appendCappedMessage, isInProcessTeammateTask } from './types.js';
+import type { InProcessTeammateTaskState } from '../../../kernel/tasks/InProcessTeammateTask/types.js';
+import { appendCappedMessage, isInProcessTeammateTask } from '../../../kernel/tasks/InProcessTeammateTask/types.js';
 
 /**
  * InProcessTeammateTask - Handles in-process teammate execution.

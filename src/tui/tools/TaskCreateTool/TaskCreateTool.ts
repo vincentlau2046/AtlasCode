@@ -4,7 +4,7 @@ import {
   executeTaskCreatedHooks,
   getTaskCreatedHookMessage,
 } from '../../utils/hooks.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   createTask,
   deleteTask,
@@ -12,7 +12,7 @@ import {
   isTodoV2Enabled,
 } from '../../utils/tasks.js'
 import { getAgentName, getTeamName } from 'src/engine'
-import { TASK_CREATE_TOOL_NAME } from './constants.js'
+import { TASK_CREATE_TOOL_NAME } from '../../../kernel/tools/TaskCreateTool/constants.js'
 import { DESCRIPTION, getPrompt } from './prompt.js'
 
 const inputSchema = lazySchema(() =>

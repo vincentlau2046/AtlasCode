@@ -1,6 +1,6 @@
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import * as React from 'react';
-import type { Message, ProgressMessage } from 'src/tui/types/message.js';
+import type { Message, ProgressMessage } from 'src/kernel/types/message';
 import { extractTag } from 'src/tui/utils/messages.js';
 import type { ThemeName } from 'src/tui/utils/theme.js';
 import type { z } from 'zod/v4';

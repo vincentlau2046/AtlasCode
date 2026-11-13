@@ -1,5 +1,5 @@
 import chokidar, { type FSWatcher } from 'chokidar'
-import { getConfigDirNameForProject } from '../configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import * as platformPath from 'path'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import {
@@ -12,11 +12,11 @@ import {
   onDynamicSkillsLoaded,
 } from '../../skills/loadSkillsDir.js'
 import { resetSentSkillNames } from '../attachments.js'
-import { registerCleanup } from '../cleanupRegistry.js'
-import { logForDebugging } from '../debug.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../debug'
+import { getFsImplementation } from '../fsOperations'
 import { executeConfigChangeHooks, hasBlockingResult } from '../hooks.js'
-import { createSignal } from '../signal.js'
+import { createSignal } from '../../../kernel/utils/signal.js'
 
 /**
  * Time in milliseconds to wait for file writes to stabilize before processing.

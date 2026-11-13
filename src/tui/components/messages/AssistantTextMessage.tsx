@@ -1,12 +1,12 @@
 import { c as _c } from "react/compiler-runtime";
-import type { TextBlockParam } from '../../types/atlas.js';
+import type { TextBlockParam } from '../../../kernel/types/atlas.js';
 import React, { useContext } from 'react';
 import { ERROR_MESSAGE_USER_ABORT } from 'src/tui/engineCompat';
 import { BLACK_CIRCLE } from '../../constants/figures.js';
 import { Box, NoSelect, Text } from '../../ink.js';
 import { API_ERROR_MESSAGE_PREFIX, API_TIMEOUT_ERROR_MESSAGE, CREDIT_BALANCE_TOO_LOW_ERROR_MESSAGE, PROMPT_TOO_LONG_ERROR_MESSAGE, startsWithApiErrorPrefix, INVALID_API_KEY_ERROR_MESSAGE, INVALID_API_KEY_ERROR_MESSAGE_EXTERNAL, ORG_DISABLED_ERROR_MESSAGE_ENV_KEY, ORG_DISABLED_ERROR_MESSAGE_ENV_KEY_WITH_OAUTH, TOKEN_REVOKED_ERROR_MESSAGE } from 'src/modelprovider';
 import { isEmptyMessageText, NO_RESPONSE_REQUESTED } from '../../utils/messages.js';
-import { getUpgradeMessage } from '../../utils/model/contextWindowUpgradeCheck.js';
+import { getUpgradeMessage } from '../../../kernel/model/contextWindowUpgradeCheck.js';
 import { isMacOsKeychainLocked } from '../../utils/secureStorage/macOsKeychainStorage.js';
 import { CtrlOToExpand } from '../CtrlOToExpand.js';
 import { InterruptedByUser } from '../InterruptedByUser.js';

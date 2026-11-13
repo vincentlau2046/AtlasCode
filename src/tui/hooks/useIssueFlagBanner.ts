@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
-import type { Message } from '../types/message.js'
-import { isAtlasDev } from '../utils/atlasDev.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
+import type { Message } from '../../kernel/types/message.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import { getUserMessageText } from '../utils/messages.js'
 
 const EXTERNAL_COMMAND_PATTERNS = [

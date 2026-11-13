@@ -20,32 +20,32 @@
  */
 
 import { join } from 'path'
-import { logForDebugging } from '../../debug.js'
+import { logForDebugging } from '../../debug'
 import { logForDiagnosticsNoPII } from '../../diagLogs.js'
 import { readFileSync } from '../../fileRead.js'
-import { getFsImplementation } from '../../fsOperations.js'
+import { getFsImplementation } from '../../fsOperations'
 import { safeParseJSON } from '../../json.js'
 import { profileCheckpoint } from '../../startupProfiler.js'
 import {
   getManagedFilePath,
   getManagedSettingsDropInDir,
 } from '../managedPath.js'
-import { type SettingsJson, SettingsSchema } from '../types.js'
+import { type SettingsJson, SettingsSchema } from '../../../../kernel/settings/types.js'
 import {
   filterInvalidPermissionRules,
   formatZodError,
   type ValidationError,
-} from '../validation.js'
+} from '../validation'
 import {
   WINDOWS_REGISTRY_KEY_PATH_HKCU,
   WINDOWS_REGISTRY_KEY_PATH_HKLM,
   WINDOWS_REGISTRY_VALUE_NAME,
-} from './constants.js'
+} from '../../../../kernel/settings/mdm/constants.js'
 import {
   fireRawRead,
   getMdmRawReadPromise,
   type RawReadResult,
-} from './rawRead.js'
+} from '../../../../kernel/settings/mdm/rawRead.js'
 
 // ---------------------------------------------------------------------------
 // Types and cache

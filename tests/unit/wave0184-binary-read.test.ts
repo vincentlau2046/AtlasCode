@@ -25,7 +25,7 @@ import {
 import {
   BINARY_EXTENSIONS as TUI_BINARY,
   hasBinaryExtension as tuiHasBinaryExtension,
-} from '../../src/tui/constants/files'
+} from '../../src/kernel/constants/files'
 import { ReadTool } from '../../src/engine/tools'
 import { FileReadTool } from '../../src/tui/tools/FileReadTool/FileReadTool'
 

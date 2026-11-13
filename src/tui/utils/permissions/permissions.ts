@@ -1,27 +1,27 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
-import { APIUserAbortError } from '../../types/atlas.js'
+import { APIUserAbortError } from '../../../kernel/types/atlas.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import {
   getToolNameForPermissionCheck,
   mcpInfoFromString,
-} from '../../services/mcp/mcpStringUtils.js'
+} from '../../../kernel/services/mcp/mcpStringUtils.js'
 import type { Tool, ToolPermissionContext, ToolUseContext } from '../../Tool.js'
-import { AGENT_TOOL_NAME } from '../../tools/AgentTool/constants.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
 import { shouldUseSandbox } from '../../tools/BashTool/shouldUseSandbox.js'
-import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
-import { POWERSHELL_TOOL_NAME } from '../../tools/PowerShellTool/toolName.js'
-import { REPL_TOOL_NAME } from '../../tools/REPLTool/constants.js'
-import type { AssistantMessage } from '../../types/message.js'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
+import { POWERSHELL_TOOL_NAME } from '../../../kernel/tools/PowerShellTool/toolName.js'
+import { REPL_TOOL_NAME } from '../../../kernel/tools/REPLTool/constants.js'
+import type { AssistantMessage } from '../../../kernel/types/message.js'
 import { extractOutputRedirections } from '../bash/commands.js'
-import { logForDebugging } from '../debug.js'
-import { AbortError, toError } from '../errors.js'
+import { logForDebugging } from '../debug'
+import { AbortError, toError } from '../../../kernel/utils/errors.js'
 import { logError } from '../log.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import {
   getSettingSourceDisplayNameLowercase,
   SETTING_SOURCES,
-} from '../settings/constants.js'
-import { plural } from '../stringUtils.js'
+} from '../settings/constants'
+import { plural } from '../../../kernel/utils/stringUtils.js'
 import { permissionModeTitle } from './PermissionMode.js'
 import type {
   PermissionAskDecision,
@@ -29,13 +29,13 @@ import type {
   PermissionDecisionReason,
   PermissionDenyDecision,
   PermissionResult,
-} from './PermissionResult.js'
+} from '../../../kernel/permissions/PermissionResult.js'
 import type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
   PermissionRuleValue,
-} from './PermissionRule.js'
+} from '../../../kernel/permissions/PermissionRule.js'
 import {
   applyPermissionUpdate,
   applyPermissionUpdates,
@@ -48,7 +48,7 @@ import type {
 import {
   permissionRuleValueFromString,
   permissionRuleValueToString,
-} from './permissionRuleParser.js'
+} from '../../../kernel/permissions/permissionRuleParser.js'
 import {
   deletePermissionRuleFromSettings,
   type PermissionRuleFromEditableSettings,
@@ -74,7 +74,7 @@ const classifierDecisionModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('./classifierDecision.js') as typeof import('./classifierDecision.js'))
   : null
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
-  ? (require('./autoModeState.js') as typeof import('./autoModeState.js'))
+  ? (require('../../../kernel/permissions/autoModeState.js') as typeof import('../../../kernel/permissions/autoModeState.js'))
   : null
 
 import { addToTurnClassifierDuration } from 'src/tui/bootstrapState.js'
@@ -82,7 +82,7 @@ import { getFeatureValue_CACHED_WITH_REFRESH } from '../../services/analytics/gr
 import {
   clearClassifierChecking,
   setClassifierChecking,
-} from '../classifierApprovals.js'
+} from '../../../kernel/utils/classifierApprovals.js'
 import {
   executePermissionDeniedHooks,
   executePermissionRequestHooks,
@@ -94,7 +94,7 @@ import {
   buildYoloRejectionMessageWithRetry,
   DONT_ASK_REJECT_MESSAGE,
 } from '../messages.js'
-import { jsonStringify } from '../slowOperations.js'
+import { jsonStringify } from '../slowOperations'
 import {
   createDenialTrackingState,
   DENIAL_LIMITS,
@@ -102,7 +102,7 @@ import {
   recordDenial,
   recordSuccess,
   shouldFallbackToPrompting,
-} from './denialTracking.js'
+} from '../../../kernel/permissions/denialTracking.js'
 import {
   classifyYoloAction,
   formatActionForClassifier,

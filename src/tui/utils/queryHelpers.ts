@@ -6,16 +6,16 @@
  * （REPL + PromptSuggestion 活消费）。runTools 依赖随 toolOrchestration
  * (a) 删净移除。
  */
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
+import { FILE_EDIT_TOOL_NAME } from '../../kernel/tools/FileEditTool/constants.js'
 import type { Input as FileReadInput } from '../tools/FileReadTool/FileReadTool.js'
 import {
   FILE_READ_TOOL_NAME,
   FILE_UNCHANGED_STUB,
-} from '../tools/FileReadTool/prompt.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
-import type { Message } from '../types/message.js'
-import { isFsInaccessible } from './errors.js'
+} from '../../kernel/tools/FileReadTool/prompt.js'
+import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
+import type { Message } from '../../kernel/types/message.js'
+import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import { getFileModificationTime, stripLineNumberPrefix } from './file.js'
 import { readFileSyncWithMetadata } from './fileRead.js'
 import {

@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { semanticBoolean } from '../../utils/semanticBoolean.js'
 
 // The input schema with optional replace_all

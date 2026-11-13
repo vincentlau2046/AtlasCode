@@ -41,4 +41,4 @@ export const SDKAssistantMessage: any = null
 // the full event list) — the old 7-event inline copy here missed events the
 // runtime emits (SubagentStop/Setup/SubagentStart/...), which made the hook
 // zod schemas (z.enum(HOOK_EVENTS)) reject valid plugin hooks.json files.
-export { HOOK_EVENTS } from './coreSchemas.js';
+export { HOOK_EVENTS } from '../../../kernel/entrypoints/sdk/coreSchemas.js';

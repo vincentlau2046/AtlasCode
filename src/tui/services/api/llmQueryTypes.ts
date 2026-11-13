@@ -10,15 +10,15 @@ import type {
   BetaToolChoiceTool,
   BetaToolUnion,
   ClientOptions,
-} from 'src/tui/types/atlas.js'
-import type { QuerySource } from 'src/tui/constants/querySource.js'
+} from 'src/kernel/types/atlas'
+import type { QuerySource } from 'src/kernel/constants/querySource'
 import type { AgentDefinition } from 'src/tui/tools/AgentTool/loadAgentsDir.js'
 import type {
   QueryChainTracking,
   ToolPermissionContext,
   Tools,
 } from 'src/tui/Tool.js'
-import type { AgentId } from 'src/tui/types/ids.js'
+import type { AgentId } from 'src/kernel/types/ids'
 import type { Notification } from 'src/tui/context/notifications.js'
 import type { EffortValue } from 'src/tui/utils/effort.js'
 

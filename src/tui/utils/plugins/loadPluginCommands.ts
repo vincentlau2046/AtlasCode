@@ -8,11 +8,11 @@ import {
   parseArgumentNames,
   substituteArguments,
 } from '../argumentSubstitution.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { isUnsafeCommandName, sanitizeDisplayName } from '../commandNameSafety.js'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
-import { isBareMode } from '../envUtils.js'
-import { isENOENT } from '../errors.js'
+import { isBareMode } from '../../../kernel/utils/envUtils.js'
+import { isENOENT } from '../../../kernel/utils/errors.js'
 import {
   coerceDescriptionToString,
   type FrontmatterData,
@@ -20,7 +20,7 @@ import {
   parseFrontmatter,
   parseShellFrontmatter,
 } from '../frontmatterParser.js'
-import { getFsImplementation, isDuplicatePath } from '../fsOperations.js'
+import { getFsImplementation, isDuplicatePath } from '../fsOperations'
 import {
   extractDescriptionFromMarkdown,
   parseSlashCommandToolsFromFrontmatter,

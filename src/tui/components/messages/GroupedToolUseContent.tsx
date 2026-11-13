@@ -1,7 +1,7 @@
-import type { ToolResultBlockParam, ToolUseBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam, ToolUseBlockParam } from '../../../kernel/types/atlas.js';
 import * as React from 'react';
 import { filterToolProgressMessages, findToolByName, type Tools } from '../../Tool.js';
-import type { GroupedToolUseMessage } from '../../types/message.js';
+import type { GroupedToolUseMessage } from '../../../kernel/types/message.js';
 import type { buildMessageLookups } from '../../utils/messages.js';
 type Props = {
   message: GroupedToolUseMessage;

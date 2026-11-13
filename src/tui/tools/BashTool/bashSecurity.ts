@@ -1,12 +1,12 @@
-import { extractHeredocs } from '../../utils/bash/heredoc.js'
+import { extractHeredocs } from '../../../kernel/shell/bash/heredoc.js'
 import { ParsedCommand } from '../../utils/bash/ParsedCommand.js'
 import {
   hasMalformedTokens,
   hasShellQuoteSingleQuoteBug,
   tryParseShellCommand,
 } from '../../utils/bash/shellQuote.js'
-import type { TreeSitterAnalysis } from '../../utils/bash/treeSitterAnalysis.js'
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
+import type { TreeSitterAnalysis } from '../../../kernel/shell/bash/treeSitterAnalysis.js'
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
 
 const HEREDOC_IN_SUBSTITUTION = /\$\(.*<</
 

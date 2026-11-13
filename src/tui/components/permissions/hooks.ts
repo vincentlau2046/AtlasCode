@@ -4,14 +4,14 @@ import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadat
 import type {
   PermissionDecisionReason,
   PermissionResult,
-} from 'src/tui/utils/permissions/PermissionResult.js'
+} from 'src/kernel/permissions/PermissionResult'
 import { extractRules } from 'src/tui/utils/permissions/PermissionUpdate.js'
-import { permissionRuleValueToString } from 'src/tui/utils/permissions/permissionRuleParser.js'
+import { permissionRuleValueToString } from 'src/kernel/permissions/permissionRuleParser'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import type { ToolUseConfirm } from '../../components/permissions/PermissionRequest.js'
 import { useSetAppState } from '../../state/AppState.js'
 import { env } from '../../utils/env.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { type CompletionType, logUnaryEvent } from '../../utils/unaryLogging.js'
 
 export type UnaryEvent = {

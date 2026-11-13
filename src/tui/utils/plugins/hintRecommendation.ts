@@ -17,7 +17,7 @@ import {
   setPendingHint,
 } from '../atlasCodeHints.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { isPluginInstalled } from './installedPluginsManager.js'
 import { getPluginById } from './marketplaceManager.js'
 import {

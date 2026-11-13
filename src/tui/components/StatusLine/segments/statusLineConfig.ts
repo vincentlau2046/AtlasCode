@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { readFileSync, existsSync, writeFileSync, renameSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
-import { getConfigDirName } from '../../../utils/configDir.js'
+import { getConfigDirName } from '../../../../kernel/utils/configDir.js'
 import {
   DEFAULT_SIMPLE_LINE1,
   DEFAULT_DETAILED_LINE1,

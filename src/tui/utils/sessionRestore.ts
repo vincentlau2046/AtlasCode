@@ -13,15 +13,15 @@ import {
   getActiveAgentsFromList,
   getAgentDefinitionsWithOverrides,
 } from '../tools/AgentTool/loadAgentsDir.js'
-import { TODO_WRITE_TOOL_NAME } from '../tools/TodoWriteTool/constants.js'
-import { asSessionId } from '../types/ids.js'
+import { TODO_WRITE_TOOL_NAME } from '../../kernel/tools/TodoWriteTool/constants.js'
+import { asSessionId } from '../../kernel/types/ids.js'
 import type {
   AttributionSnapshotMessage,
   ContextCollapseCommitEntry,
   ContextCollapseSnapshotEntry,
   PersistedWorktreeSession,
 } from '../types/logs.js'
-import type { Message } from '../types/message.js'
+import type { Message } from '../../kernel/types/message.js'
 import { renameRecordingForSession } from './asciicast.js'
 import { clearMemoryFileCaches } from './memoryFiles.js'
 import {
@@ -30,8 +30,8 @@ import {
   restoreAttributionStateFromSnapshots,
 } from './commitAttribution.js'
 import { updateSessionName } from './concurrentSessions.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
 import { applyPermissionUpdates } from './permissions/PermissionUpdate.js'
 import type { PermissionUpdate } from './permissions/PermissionUpdateSchema.js'
 import { readCurrentSessionPermissionRules } from './permissions/sessionPermissionRules.js'

@@ -30,7 +30,7 @@ import {
   clearDynamicTeamContext,
   setDynamicTeamContext,
 } from 'src/engine'
-import type { PermissionDecision } from '../../src/tui/utils/permissions/PermissionResult.js'
+import type { PermissionDecision } from '../../src/kernel/permissions/PermissionResult.js'
 import { writeTeamFileAsync } from '../../src/swarm'
 
 let dir = ''

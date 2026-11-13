@@ -1,6 +1,6 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { findMemoryFile, getConfigDirNameForProject } from './configDir.js'
+import { findMemoryFile, getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { randomBytes } from 'crypto'
 import { unwatchFile, watchFile } from 'fs'
 import memoize from 'lodash-es/memoize.js'
@@ -9,20 +9,20 @@ import { basename, dirname, join, resolve } from 'path'
 import { getOriginalCwd, hasTrustAccepted } from 'src/bootstrap'
 import { getAutoMemEntrypoint } from '../memdir/paths.js'
 import type { McpServerConfig } from '../services/mcp/types.js'
-import type { BillingType } from '../services/oauth/types.js'
-import { getCwd } from '../utils/cwd.js'
-import { registerCleanup } from './cleanupRegistry.js'
-import { logForDebugging } from './debug.js'
+import type { BillingType } from '../../kernel/services/oauth/types.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from './debug'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { getGlobalClaudeFile } from './env.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { ConfigParseError, getErrnoCode } from './errors.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { ConfigParseError, getErrnoCode } from '../../kernel/utils/errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from './file.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { findCanonicalGitRoot } from './git.js'
 import { safeParseJSON } from './json.js'
 import { stripBOM } from './jsonRead.js'
-import * as lockfile from './lockfile.js'
+import * as lockfile from '../../kernel/utils/lockfile.js'
 import { logError } from './log.js'
 import type { MemoryType } from './memory/types.js'
 import { normalizePathForConfigKey } from './path.js'
@@ -36,7 +36,7 @@ const teamMemPaths = feature('TEAMMEM')
 
 import type { ImageDimensions } from './imageResizer.js'
 import type { ModelOption } from './model/modelOptions.js'
-import { jsonParse, jsonStringify } from './slowOperations.js'
+import { jsonParse, jsonStringify } from './slowOperations'
 
 // Image dimension info for coordinate mapping (only set when image was resized)
 export type PastedContent = {
@@ -59,7 +59,9 @@ export interface HistoryEntry {
   pastedContents: Record<number, PastedContent>
 }
 
-export type ReleaseChannel = 'stable' | 'latest'
+import type { ReleaseChannel } from '../../kernel/nativeInstaller/releaseChannel.js'
+
+export type { ReleaseChannel }
 
 export type ProjectConfig = {
   allowedTools: string[]

@@ -12,11 +12,11 @@ import {
 } from '../../skills/loadSkillsDir.js'
 import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { getCwd } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
 import { countLinesChanged, getPatchForDisplay } from '../../utils/diff.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
-import { isENOENT } from '../../utils/errors.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { isENOENT } from '../../../kernel/utils/errors.js'
 import {
   getFileModificationTime,
   withSingleBomPrefix,
@@ -28,7 +28,7 @@ import {
 } from '../../utils/fileHistory.js'
 import { readFileSyncWithMetadata } from '../../utils/fileRead.js'
 import { UndecodableTextError } from 'src/shared'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import {
   fetchSingleFileGitDiff,
   type ToolUseDiff,
@@ -37,18 +37,18 @@ import {
   isUnderMemoryDir,
   validateMemoryFrontmatter,
 } from '../../memdir/validateMemoryFrontmatter.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import { expandPath } from '../../utils/path.js'
 import {
   checkWritePermissionForTool,
   matchingRuleForInput,
 } from '../../utils/permissions/filesystem.js'
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
-import { matchWildcardPattern } from '../../utils/permissions/shellRuleMatching.js'
-import { FILE_UNEXPECTEDLY_MODIFIED_ERROR } from '../FileEditTool/constants.js'
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
+import { matchWildcardPattern } from '../../../kernel/permissions/shellRuleMatching.js'
+import { FILE_UNEXPECTEDLY_MODIFIED_ERROR } from '../../../kernel/tools/FileEditTool/constants.js'
 import { gitDiffSchema, hunkSchema } from '../FileEditTool/types.js'
-import { FILE_WRITE_TOOL_NAME, getWriteToolDescription } from './prompt.js'
+import { FILE_WRITE_TOOL_NAME, getWriteToolDescription } from '../../../kernel/tools/FileWriteTool/prompt.js'
 import {
   getToolUseSummary,
   isResultTruncated,

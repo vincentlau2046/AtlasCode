@@ -13,9 +13,9 @@ import type { InputEvent } from '../ink/events/input-event.js';
 // ChordInterceptor intentionally uses useInput to intercept all keystrokes before
 // other handlers process them - this is required for chord sequence support
 import { type Key, useInput } from '../ink.js';
-import { count } from '../utils/array.js';
-import { logForDebugging } from '../utils/debug.js';
-import { plural } from '../utils/stringUtils.js';
+import { count } from '../../kernel/utils/array.js';
+import { logForDebugging } from '../utils/debug';
+import { plural } from '../../kernel/utils/stringUtils.js';
 import { KeybindingProvider } from './KeybindingContext.js';
 import { initializeKeybindingWatcher, type KeybindingsLoadResult, loadKeybindingsSyncWithWarnings, subscribeToKeybindingChanges } from './loadUserBindings.js';
 import { resolveKeyWithChordState } from './resolver.js';

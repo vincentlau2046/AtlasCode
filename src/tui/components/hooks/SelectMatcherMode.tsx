@@ -9,7 +9,7 @@ import * as React from 'react';
 import type { HookEvent } from 'src/tui/entrypoints/agentSdkTypes.js';
 import { Box, Text } from '../../ink.js';
 import { type HookSource, hookSourceInlineDisplayString, type IndividualHookConfig } from '../../utils/hooks/hooksSettings.js';
-import { plural } from '../../utils/stringUtils.js';
+import { plural } from '../../../kernel/utils/stringUtils.js';
 import { Select } from '../CustomSelect/select.js';
 import { Dialog } from '../design-system/Dialog.js';
 type MatcherWithSource = {

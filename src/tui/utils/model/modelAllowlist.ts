@@ -1,5 +1,5 @@
 import { getSettings_DEPRECATED } from '../settings/settings.js'
-import { isModelAlias, isModelFamilyAlias } from './aliases.js'
+import { isModelAlias, isModelFamilyAlias } from '../../../kernel/model/aliases.js'
 import {
   getDefaultMainLoopModel,
   getCanonicalName,

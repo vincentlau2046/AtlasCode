@@ -6,10 +6,10 @@ import type {
   ToolPermissionContext,
   ToolPermissionRulesBySource,
 } from '../../Tool.js'
-import { getCwd } from '../cwd.js'
-import { isEnvTruthy } from '../envUtils.js'
-import type { SettingSource } from '../settings/constants.js'
-import { SETTING_SOURCES } from '../settings/constants.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import type { SettingSource } from '../settings/constants'
+import { SETTING_SOURCES } from '../settings/constants'
 import {
   getSettings_DEPRECATED,
   getSettingsFilePathForSource,
@@ -24,7 +24,7 @@ import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
 
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
-  ? (require('./autoModeState.js') as typeof import('./autoModeState.js'))
+  ? (require('../../../kernel/permissions/autoModeState.js') as typeof import('../../../kernel/permissions/autoModeState.js'))
   : null
 
 import { resolve } from 'path'
@@ -40,27 +40,27 @@ import {
   addDirHelpMessage,
   validateDirectoryForWorkspace,
 } from '../../commands/add-dir/validation.js'
-import { AGENT_TOOL_NAME } from '../../tools/AgentTool/constants.js'
-import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
-import { POWERSHELL_TOOL_NAME } from '../../tools/PowerShellTool/toolName.js'
+import { AGENT_TOOL_NAME } from '../../../kernel/tools/AgentTool/constants.js'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
+import { POWERSHELL_TOOL_NAME } from '../../../kernel/tools/PowerShellTool/toolName.js'
 import { getToolsForDefaultPreset, parseToolPreset } from '../../tools.js'
 import {
   getFsImplementation,
   safeResolvePath,
-} from '../../utils/fsOperations.js'
+} from '../fsOperations'
 import { modelSupportsAutoMode } from '../betas.js'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import { gracefulShutdown } from '../gracefulShutdown.js'
 import { getMainLoopModel } from '../model/model.js'
 import {
   CROSS_PLATFORM_CODE_EXEC,
   DANGEROUS_BASH_PATTERNS,
-} from './dangerousPatterns.js'
+} from '../../../kernel/permissions/dangerousPatterns.js'
 import type {
   PermissionRule,
   PermissionRuleSource,
   PermissionRuleValue,
-} from './PermissionRule.js'
+} from '../../../kernel/permissions/PermissionRule.js'
 import {
   type AdditionalWorkingDirectory,
   applyPermissionUpdate,
@@ -70,7 +70,7 @@ import {
   normalizeLegacyToolName,
   permissionRuleValueFromString,
   permissionRuleValueToString,
-} from './permissionRuleParser.js'
+} from '../../../kernel/permissions/permissionRuleParser.js'
 
 /**
  * Checks if a Bash permission rule is dangerous for auto mode.

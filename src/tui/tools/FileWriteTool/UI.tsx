@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import type { StructuredPatchHunk } from 'diff';
 import { isAbsolute, relative, resolve } from 'path';
 import * as React from 'react';
@@ -15,8 +15,8 @@ import { HighlightedCode } from '../../components/HighlightedCode.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text } from '../../ink.js';
 import type { ToolProgressData } from '../../Tool.js';
-import type { ProgressMessage } from '../../types/message.js';
-import { getCwd } from '../../utils/cwd.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
+import { getCwd } from '../../../kernel/utils/cwd.js';
 import { getPatchForDisplay } from '../../utils/diff.js';
 import { getDisplayPath } from '../../utils/file.js';
 import { logError } from '../../utils/log.js';

@@ -3,7 +3,7 @@ import {
   ASYNC_AGENT_ALLOWED_TOOLS,
   MAX_WORKER_SPAWN_DEPTH,
 } from '../constants/tools.js'
-import { AGENT_TOOL_NAME } from '../tools/AgentTool/constants.js'
+import { AGENT_TOOL_NAME } from '../../kernel/tools/AgentTool/constants.js'
 import { SKILL_TOOL_NAME } from '../tools/SkillTool/constants.js'
 
 /**

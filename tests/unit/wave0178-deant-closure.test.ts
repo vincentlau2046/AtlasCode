@@ -26,7 +26,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { normalizeNameForMCP as engineNormalize } from '../../src/engine/tools/mcp'
-import { normalizeNameForMCP as tuiNormalize } from '../../src/tui/services/mcp/normalization'
+import { normalizeNameForMCP as tuiNormalize } from '../../src/kernel/services/mcp/normalization'
 import { normalizeNameForMCP as ruleNormalize } from '../../src/permissions/mcpRuleNames'
 
 function srcOf(rel: string): string {

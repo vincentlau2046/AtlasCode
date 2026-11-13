@@ -7,8 +7,8 @@ import { getRelativeMemoryPath } from '../../components/memory/MemoryUpdateNotif
 import { Box, Link, Text } from '../../ink.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import { clearMemoryFileCaches, getMemoryFiles } from '../../utils/memoryFiles.js';
-import { getAtlasConfigHomeDir } from '../../utils/envUtils.js';
-import { getErrnoCode } from '../../utils/errors.js';
+import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js';
+import { getErrnoCode } from '../../../kernel/utils/errors.js';
 import { logError } from '../../utils/log.js';
 import { editFileInEditor } from '../../utils/promptEditor.js';
 function MemoryCommand({

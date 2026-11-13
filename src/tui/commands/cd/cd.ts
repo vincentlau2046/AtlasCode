@@ -14,7 +14,7 @@
  * 触发 MCP effect 重跑，不做 process.chdir，不破上方 prompt 缓存裁定。
  */
 import type { LocalCommandCall } from '../../types/command.js'
-import { pwd } from '../../utils/cwd.js'
+import { pwd } from '../../../kernel/utils/cwd.js'
 import { setCwd } from '../../utils/Shell.js'
 
 const USAGE = 'Usage: /cd [path] (no argument = show current session cwd)'

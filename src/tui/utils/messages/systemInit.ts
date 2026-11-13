@@ -11,9 +11,9 @@ import type {
 import {
   AGENT_TOOL_NAME,
   LEGACY_AGENT_TOOL_NAME,
-} from 'src/tui/tools/AgentTool/constants.js'
+} from 'src/kernel/tools/AgentTool/constants'
 import { getAtlasApiKeyWithSource } from '../auth.js'
-import { getCwd } from '../cwd.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
 
 // TODO(next-minor): remove this translation once SDK consumers have migrated

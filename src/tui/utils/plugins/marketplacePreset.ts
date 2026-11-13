@@ -35,9 +35,9 @@
  * instead of a silent success).
  */
 
-import { logForDebugging } from '../debug.js'
-import { isEnvTruthy } from '../envUtils.js'
-import { toError } from '../errors.js'
+import { logForDebugging } from '../debug'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { toError } from '../../../kernel/utils/errors.js'
 import { logError } from '../log.js'
 import {
   checkGitAvailable,

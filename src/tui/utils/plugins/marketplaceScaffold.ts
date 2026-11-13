@@ -11,8 +11,8 @@ import { userInfo } from 'os'
 import { existsSync } from 'fs'
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join, resolve } from 'path'
-import { getPluginManifestDirs } from '../configDir.js'
-import { jsonStringify } from '../slowOperations.js'
+import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
+import { jsonStringify } from '../slowOperations'
 import {
   PluginManifestSchema,
   PluginMarketplaceSchema,

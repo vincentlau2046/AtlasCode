@@ -30,7 +30,7 @@ import { getVersion, restrictedBypassError, setRestrictedMode } from 'src/engine
 };
 
 profileCheckpoint('main_tsx_entry');
-// MDM // import { startMdmRawRead } from './utils/settings/mdm/rawRead.js';
+// MDM // import { startMdmRawRead } from '../kernel/settings/mdm/rawRead.js';
 
 // MDM // startMdmRawRead();
 // Keychain // import { ensureKeychainPrefetchCompleted, startKeychainPrefetch } from './utils/secureStorage/keychainPrefetch.js';
@@ -58,9 +58,9 @@ import type { ToolInputJSONSchema } from './Tool.js';
 import { createSyntheticOutputTool, isSyntheticOutputToolEnabled } from './tools/SyntheticOutputTool/SyntheticOutputTool.js';
 import { getTools } from './tools.js';
 import { isAgentSwarmsEnabled } from './utils/agentSwarmsEnabled.js';
-import { count, uniq } from './utils/array.js';
+import { count, uniq } from '../kernel/utils/array.js';
 import { installAsciicastRecorder } from './utils/asciicast.js';
-import { isAtlasDev } from './utils/atlasDev.js';
+import { isAtlasDev } from '../kernel/utils/atlasDev.js';
 import { validateForceLoginOrg } from './utils/auth.js';
 import { checkHasTrustDialogAccepted, getGlobalConfig, isAutoUpdaterDisabled, saveGlobalConfig } from './utils/config.js';
 import { seedEarlyInput, stopCapturingEarlyInput } from './utils/earlyInput.js';
@@ -71,7 +71,7 @@ import { getPlatform } from './utils/platform.js';
 import { getBaseRenderOptions } from './utils/renderOptions.js';
 import { settingsChangeDetector } from './utils/settings/changeDetector.js';
 import { skillChangeDetector } from './utils/skills/skillChangeDetector.js';
-import { jsonParse, writeFileSync_DEPRECATED } from './utils/slowOperations.js';
+import { jsonParse, writeFileSync_DEPRECATED } from './utils/slowOperations';
 import { computeInitialTeamContext } from './utils/swarm/reconnection.js';
 import { initializeWarningHandler } from './utils/warningHandler.js';
 import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js';
@@ -102,12 +102,12 @@ import { initBundledSkills } from './skills/bundled/index.js';
 import type { AgentColorName } from './tools/AgentTool/agentColorManager.js';
 import { getActiveAgentsFromList, getAgentDefinitionsWithOverrides, isBuiltInAgent, isCustomAgent, parseAgentsFromJson } from './tools/AgentTool/loadAgentsDir.js';
 import type { LogOption } from './types/logs.js';
-import type { Message as MessageType } from './types/message.js';
+import type { Message as MessageType } from '../kernel/types/message.js';
 import { assertMinVersion } from './utils/autoUpdater.js';
-import { getContextWindowForModel } from './utils/context.js';
+import { getContextWindowForModel } from '../kernel/utils/context.js';
 import { loadConversationForResume } from './utils/conversationRecovery.js';
 import { buildDeepLinkBanner } from './utils/deepLink/banner.js';
-import { hasNodeOption, isBareMode, isEnvTruthy, isInProtectedNamespace } from './utils/envUtils.js';
+import { hasNodeOption, isBareMode, isEnvTruthy, isInProtectedNamespace } from '../kernel/utils/envUtils.js';
 import { refreshExampleCommands } from './utils/exampleCommands.js';
 import type { FpsMetrics } from './utils/fpsTracker.js';
 import { getWorktreePaths } from './utils/getWorktreePaths.js';
@@ -131,7 +131,7 @@ import { cacheSessionTitle, getSessionIdFromLog, loadTranscriptFromFile, saveAge
 import { ensureMdmSettingsLoaded } from './utils/settings/mdm/settings.js';
 import { getInitialSettings, getManagedSettingsKeysForLogging, getSettingsForSource, getSettingsWithErrors } from './utils/settings/settings.js';
 import { resetSettingsCache } from './utils/settings/settingsCache.js';
-import type { ValidationError } from './utils/settings/validation.js';
+import type { ValidationError } from './utils/settings/validation';
 import { logSkillsLoaded } from './utils/telemetry/skillLoadedEvent.js';
 import { generateTempFilePath } from './utils/tempfile.js';
 import { validateUuid } from './utils/uuid.js';
@@ -144,26 +144,26 @@ import { areMcpConfigsAllowedWithEnterpriseMcpConfig, dedupManagedMcpServers, do
 import { excludeCommandsByServer, excludeResourcesByServer } from 'src/tui/services/mcp/utils.js';
 import { isXaaEnabled } from 'src/tui/services/mcp/xaaIdpLogin.js';
 import { logContextMetrics } from 'src/tui/utils/api.js';
-import { registerCleanup } from 'src/tui/utils/cleanupRegistry.js';
+import { registerCleanup } from 'src/kernel/utils/cleanupRegistry';
 import { eagerParseCliFlag } from 'src/tui/utils/cliArgs.js';
 import { createEmptyAttributionState } from 'src/tui/utils/commitAttribution.js';
 import { countConcurrentSessions, registerSession, updateSessionName } from 'src/tui/utils/concurrentSessions.js';
-import { getCwd } from 'src/tui/utils/cwd.js';
+import { getCwd } from 'src/kernel/utils/cwd';
 import { isDebugMode, logForDebugging, setHasFormattedOutput } from 'src/tui/utils/debug.js';
-import { errorMessage, getErrnoCode, isENOENT, TeleportOperationError, toError } from 'src/tui/utils/errors.js';
+import { errorMessage, getErrnoCode, isENOENT, TeleportOperationError, toError } from 'src/kernel/utils/errors';
 import { getFsImplementation, safeResolvePath } from 'src/tui/utils/fsOperations.js';
 import { gracefulShutdown, gracefulShutdownSync } from 'src/tui/utils/gracefulShutdown.js';
 import { migrateMemoryFiles } from 'src/tui/utils/memoryFileMigration.js';
 import { setAllHookEventsEnabled } from 'src/tui/utils/hooks/hookEvents.js';
-import { peekForStdinData, writeToStderr } from 'src/tui/utils/process.js';
+import { peekForStdinData, writeToStderr } from 'src/kernel/utils/process';
 import { setCwd } from 'src/tui/utils/Shell.js';
 import { type ProcessedResume, processResumedConversation } from 'src/tui/utils/sessionRestore.js';
 import { parseSettingSourcesFlag } from 'src/tui/utils/settings/constants.js';
-import { plural } from 'src/tui/utils/stringUtils.js';
+import { plural } from 'src/kernel/utils/stringUtils';
 import { getIsNonInteractiveSession, getSessionId, setClientType, setCwdState, setFlagSettingsPath, setIsInteractive, setOriginalCwd, setQuestionPreviewFormat, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, switchSession } from 'src/bootstrap'
 import { getInitialMainLoopModel, getSdkBetas, setAllowedSettingSources, setDirectConnectServerUrl, setInitialMainLoopModel, setInlinePlugins, setSdkBetas } from 'src/tui/bootstrapState.js';
 
-const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;
+const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('../kernel/permissions/autoModeState.js') as typeof import('../kernel/permissions/autoModeState.js') : null;
 
 // TeleportRepoMismatchDialog, TeleportResumeWrapper dynamically imported at call sites
 import { migrateAutoUpdatesToSettings } from './migrations/migrateAutoUpdatesToSettings.js';
@@ -177,9 +177,9 @@ import { shouldEnablePromptSuggestion } from './services/PromptSuggestion/prompt
 import { type AppState, getDefaultAppState, IDLE_SPECULATION_STATE } from './state/AppStateStore.js';
 import { onChangeAppState } from './state/onChangeAppState.js';
 import { createStore } from './state/store.js';
-import { asSessionId } from './types/ids.js';
+import { asSessionId } from '../kernel/types/ids.js';
 import { filterAllowedSdkBetas } from './utils/betas.js';
-import { isInBundledMode, isRunningWithBun } from './utils/bundledMode.js';
+import { isInBundledMode, isRunningWithBun } from '../kernel/utils/bundledMode.js';
 import { logForDiagnosticsNoPII } from './utils/diagLogs.js';
 import { filterExistingPaths, getKnownPathsForRepo } from './utils/githubRepoPathMapping.js';
 import { clearPluginCache, loadAllPluginsCacheOnly } from './utils/plugins/pluginLoader.js';

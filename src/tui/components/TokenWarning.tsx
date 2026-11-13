@@ -9,7 +9,7 @@ import { useCompactWarningSuppression } from 'src/tui/engineCompat';
 // D2（0.1.37 ③，P2 恢复层 C2 缺口）：断路器跳闸态订阅 + 跳闸判定（engine store
 // 单源；hook 留 tui 壳，isAutoCompactCircuitTripped 语义单源 engine 域）
 import { useAutoCompactCircuitFailures, isAutoCompactCircuitTripped } from 'src/tui/engineCompat';
-import { getUpgradeMessage } from '../utils/model/contextWindowUpgradeCheck.js';
+import { getUpgradeMessage } from '../../kernel/model/contextWindowUpgradeCheck.js';
 type Props = {
   tokenUsage: number;
   model: string;

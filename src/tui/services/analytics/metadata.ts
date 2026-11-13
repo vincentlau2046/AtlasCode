@@ -10,8 +10,8 @@
  */
 
 import { extname } from 'path'
-import { isEnvTruthy } from '../../utils/envUtils.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { feature } from 'src/shared'
 
 /**

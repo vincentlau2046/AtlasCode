@@ -3,7 +3,7 @@ import type {
   AttachmentMessage,
   SystemMessage,
   UserMessage,
-} from 'src/tui/types/message.js'
+} from 'src/kernel/types/message'
 
 /**
  * Tags user messages with a sourceToolUseID so they stay transient until the tool resolves.

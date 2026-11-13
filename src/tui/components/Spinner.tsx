@@ -20,7 +20,7 @@ import { getReducedMotionSpinnerGlyph, getSpinnerBeamFrames } from './design-sys
 import { resolveMarkTierFromEnv } from './LogoV2/markDegrade.js';
 import { SpinnerAnimationRow } from './Spinner/SpinnerAnimationRow.js';
 import { useSettings } from '../hooks/useSettings.js';
-import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js';
+import { isInProcessTeammateTask } from '../../kernel/tasks/InProcessTeammateTask/types.js';
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
 import { getEffortSuffix } from '../utils/effort.js';
 import { getMainLoopModel } from '../utils/model/model.js';

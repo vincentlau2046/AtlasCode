@@ -11,19 +11,19 @@ import { getSystemPrompt } from '../../constants/prompts.js'
 import { getSystemContext, getUserContext } from '../../context.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import type { Tool, ToolUseContext } from '../../Tool.js'
-import { FILE_EDIT_TOOL_NAME } from '../../tools/FileEditTool/constants.js'
+import { FILE_EDIT_TOOL_NAME } from '../../../kernel/tools/FileEditTool/constants.js'
 import {
   FileReadTool,
   type Output as FileReadToolOutput,
 } from '../../tools/FileReadTool/FileReadTool.js'
-import type { Message } from '../../types/message.js'
-import { count } from '../../utils/array.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { count } from '../../../kernel/utils/array.js'
 import {
   createCacheSafeParams,
   createSubagentContext,
   runForkedAgent,
 } from '../../utils/forkedAgent.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import {
   type REPLHookContext,
   registerPostSamplingHook,
@@ -37,7 +37,7 @@ import {
   getSessionMemoryPath,
 } from '../../utils/permissions/filesystem.js'
 import { sequential } from '../../utils/sequential.js'
-import { asSystemPrompt } from '../../utils/systemPromptType.js'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import { getTokenUsage, tokenCountWithEstimation } from '../../utils/tokens.js'
 import { isAutoCompactEnabled } from 'src/tui/engineCompat'
 import {
@@ -66,7 +66,7 @@ import {
 // These functions return cached values from disk immediately without blocking
 // on GrowthBook initialization. Values may be stale but are updated in background.
 
-import { errorMessage, getErrnoCode } from '../../utils/errors.js'
+import { errorMessage, getErrnoCode } from '../../../kernel/utils/errors.js'
 import {
   getDynamicConfig_CACHED_MAY_BE_STALE,
   getFeatureValue_CACHED_MAY_BE_STALE,

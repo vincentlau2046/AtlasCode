@@ -2,9 +2,9 @@ import { execa } from 'execa'
 import memoize from 'lodash-es/memoize.js'
 import { getSessionId } from 'src/bootstrap'
 import { getGlobalConfig, getOrCreateUserID } from './config.js'
-import { getCwd } from './cwd.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
 import { type env, getHostPlatformForAnalytics } from './env.js'
-import { isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 
 // Cache for email fetched asynchronously at startup
 let cachedEmail: string | undefined | null = null // null means not fetched yet

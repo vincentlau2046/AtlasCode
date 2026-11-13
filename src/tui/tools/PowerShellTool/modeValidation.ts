@@ -7,7 +7,7 @@
  */
 
 import type { ToolPermissionContext } from '../../Tool.js'
-import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
+import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
 import type { ParsedPowerShellCommand } from '../../utils/powershell/parser.js'
 import {
   deriveSecurityFlags,

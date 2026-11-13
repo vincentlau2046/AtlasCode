@@ -17,11 +17,11 @@ import { unwatchFile, watchFile } from 'fs'
 import { readdir, readFile, stat } from 'fs/promises'
 import { join, resolve } from 'path'
 import { waitForScrollIdle } from 'src/tui/bootstrapState.js'
-import { registerCleanup } from '../cleanupRegistry.js'
-import { getCwd } from '../cwd.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 import { execFileNoThrow } from '../execFileNoThrow.js'
 import { findGitRoot } from '../git.js'
-import { parseGitConfigValue } from './gitConfigParser.js'
+import { parseGitConfigValue } from '../../../kernel/git/gitConfigParser.js'
 
 // K4-4 (0.1.83, upstream 300): reftable plumbing constants. Mirrors engine
 // worktree/git.ts GIT_NO_PROMPT_ENV; the git executable is read from env on

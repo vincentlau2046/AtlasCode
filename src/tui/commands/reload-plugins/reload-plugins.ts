@@ -1,6 +1,6 @@
 import type { LocalCommandCall } from '../../types/command.js'
 import { refreshActivePlugins } from '../../utils/plugins/refresh.js'
-import { plural } from '../../utils/stringUtils.js'
+import { plural } from '../../../kernel/utils/stringUtils.js'
 
 export const call: LocalCommandCall = async (_args, context) => {
   // 前向缝登记（§8.74.29 1P 簇裁，#200）：CCR 远程用户配置重拉（redownloadUserSettings / settingsSync 簇）裁除；本地 /reload-plugins 仅刷新已装插件（refreshActivePlugins）

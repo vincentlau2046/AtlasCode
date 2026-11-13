@@ -15,7 +15,7 @@ function isFeatureOn(name: string): boolean {
   if (v !== undefined) return v === 'true'
   return false
 }
-import type { BetaUsage as Usage } from '../types/atlas.js'
+import type { BetaUsage as Usage } from '../../kernel/types/atlas.js'
 import type {
   ContentBlock,
   ContentBlockParam,
@@ -27,12 +27,12 @@ import type {
   ToolResultBlockParam,
   ToolUseBlock,
   ToolUseBlockParam,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import { randomUUID, type UUID } from 'crypto'
 import isObject from 'lodash-es/isObject.js'
 import last from 'lodash-es/last.js'
 import { sanitizeToolNameForAnalytics } from 'src/tui/services/analytics/metadata.js'
-import type { AgentId } from 'src/tui/types/ids.js'
+import type { AgentId } from 'src/kernel/types/ids'
 import { NO_CONTENT_MESSAGE } from '../constants/messages.js'
 import { OUTPUT_STYLE_CONFIG } from '../constants/outputStyles.js'
 // C8-3（0.1.79 W-C）· assistant 完整消息显示钩子（fire-and-forget，观察钩子）
@@ -84,10 +84,10 @@ import type {
   TombstoneMessage,
   ToolUseSummaryMessage,
   UserMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'
-import { count } from './array.js'
-import { isAtlasDev } from './atlasDev.js'
+import { count } from '../../kernel/utils/array.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import {
   type Attachment,
   type HookAttachment,
@@ -97,7 +97,7 @@ import {
 import { quote } from './bash/shellQuote.js'
 import { formatNumber, formatTokens } from './format.js'
 import { getPewterLedgerVariant } from './planModeV2.js'
-import { jsonStringify } from './slowOperations.js'
+import { jsonStringify } from './slowOperations'
 
 // Hook attachments that have a hookName field (excludes HookPermissionDecisionAttachment)
 type HookAttachmentWithName = Exclude<
@@ -105,14 +105,14 @@ type HookAttachmentWithName = Exclude<
   HookPermissionDecisionAttachment
 >
 
-import type { APIError } from '../types/atlas.js'
+import type { APIError } from '../../kernel/types/atlas.js'
 import type {
   BetaContentBlock,
   BetaMessage,
   BetaRedactedThinkingBlock,
   BetaThinkingBlock,
   BetaToolUseBlock,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import type {
   HookEvent,
   SDKAssistantMessageError,
@@ -120,18 +120,18 @@ import type {
 import { EXPLORE_AGENT } from 'src/tui/tools/AgentTool/built-in/exploreAgent.js'
 import { PLAN_AGENT } from 'src/tui/tools/AgentTool/built-in/planAgent.js'
 import { areExplorePlanAgentsEnabled } from 'src/tui/tools/AgentTool/builtInAgents.js'
-import { AGENT_TOOL_NAME } from 'src/tui/tools/AgentTool/constants.js'
-import { ASK_USER_QUESTION_TOOL_NAME } from 'src/tui/tools/AskUserQuestionTool/prompt.js'
+import { AGENT_TOOL_NAME } from 'src/kernel/tools/AgentTool/constants'
+import { ASK_USER_QUESTION_TOOL_NAME } from 'src/kernel/tools/AskUserQuestionTool/prompt'
 import { BashTool } from 'src/tui/tools/BashTool/BashTool.js'
 import { ExitPlanModeV2Tool } from 'src/tui/tools/ExitPlanModeTool/ExitPlanModeV2Tool.js'
 import { FileEditTool } from 'src/tui/tools/FileEditTool/FileEditTool.js'
 import {
   FILE_READ_TOOL_NAME,
   MAX_LINES_TO_READ,
-} from 'src/tui/tools/FileReadTool/prompt.js'
+} from 'src/kernel/tools/FileReadTool/prompt'
 import { FileWriteTool } from 'src/tui/tools/FileWriteTool/FileWriteTool.js'
-import { GLOB_TOOL_NAME } from 'src/tui/tools/GlobTool/prompt.js'
-import { GREP_TOOL_NAME } from 'src/tui/tools/GrepTool/prompt.js'
+import { GLOB_TOOL_NAME } from 'src/kernel/tools/GlobTool/prompt'
+import { GREP_TOOL_NAME } from 'src/kernel/tools/GrepTool/prompt'
 import type { DeepImmutable } from 'src/tui/types/utils.js'
 import { getStrictToolResultPairing } from 'src/tui/bootstrapState.js'
 import type { SpinnerMode } from '../components/Spinner.js'
@@ -141,7 +141,7 @@ import {
   COMMAND_NAME_TAG,
   LOCAL_COMMAND_CAVEAT_TAG,
   LOCAL_COMMAND_STDOUT_TAG,
-} from '../constants/xml.js'
+} from '../../kernel/constants/xml.js'
 import { DiagnosticTrackingService } from '../services/diagnosticTracking.js'
 import {
   findToolByName,
@@ -153,29 +153,29 @@ import {
   FileReadTool,
   type Output as FileReadToolOutput,
 } from '../tools/FileReadTool/FileReadTool.js'
-import { SEND_MESSAGE_TOOL_NAME } from '../tools/SendMessageTool/constants.js'
-import { TASK_CREATE_TOOL_NAME } from '../tools/TaskCreateTool/constants.js'
-import { TASK_OUTPUT_TOOL_NAME } from '../tools/TaskOutputTool/constants.js'
-import { TASK_UPDATE_TOOL_NAME } from '../tools/TaskUpdateTool/constants.js'
-import type { PermissionMode } from '../types/permissions.js'
+import { SEND_MESSAGE_TOOL_NAME } from '../../kernel/tools/SendMessageTool/constants.js'
+import { TASK_CREATE_TOOL_NAME } from '../../kernel/tools/TaskCreateTool/constants.js'
+import { TASK_OUTPUT_TOOL_NAME } from '../../kernel/tools/TaskOutputTool/constants.js'
+import { TASK_UPDATE_TOOL_NAME } from '../../kernel/tools/TaskUpdateTool/constants.js'
+import type { PermissionMode } from '../../kernel/types/permissions.js'
 import { normalizeToolInput, normalizeToolInputForAPI } from './api.js'
 import { getCurrentProjectConfig } from './config.js'
-import { logAntError, logForDebugging } from './debug.js'
+import { logAntError, logForDebugging } from './debug'
 import { stripIdeContextTags } from './displayTags.js'
-import { hasEmbeddedSearchTools } from './embeddedTools.js'
+import { hasEmbeddedSearchTools } from '../../kernel/utils/embeddedTools.js'
 // 0.1.85 Task A（C85-A）：@PDF 引用投影叶子（与 modelprovider params attachment
 // 支双面消费同一 shared 纯叶子，文本恒等；不引 tui 之外的面）
 import { formatPDFReferenceForModel } from '../../shared'
 import { validateImagesForAPI } from './imageValidation.js'
 import { safeParseJSON } from './json.js'
 import { logError, logMCPDebug } from './log.js'
-import { normalizeLegacyToolName } from './permissions/permissionRuleParser.js'
+import { normalizeLegacyToolName } from '../../kernel/permissions/permissionRuleParser.js'
 import {
   getPlanModeV2AgentCount,
   getPlanModeV2ExploreAgentCount,
   isPlanModeInterviewPhaseEnabled,
 } from './planModeV2.js'
-import { escapeRegExp } from './stringUtils.js'
+import { escapeRegExp } from '../../kernel/utils/stringUtils.js'
 import { isTodoV2Enabled } from './tasks.js'
 
 // Lazy import to avoid circular dependency (teammateMailbox -> teammate -> ... -> messages)

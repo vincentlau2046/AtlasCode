@@ -7,7 +7,7 @@
 // - trust 前置（§9.9.3 安全红线：git 子进程须在 trust 之后执行）
 // - 刷新节奏独立于消息防抖（切分支立即生效）
 
-import { createSignal } from '../../../utils/signal.js'
+import { createSignal } from '../../../../kernel/utils/signal.js'
 import { checkHasTrustDialogAccepted } from '../../../utils/config.js'
 import { getGitState, getChangedFiles, type GitRepoState } from '../../../utils/git.js'
 

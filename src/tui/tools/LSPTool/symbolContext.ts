@@ -1,6 +1,6 @@
-import { logForDebugging } from '../../utils/debug.js'
+import { logForDebugging } from '../../utils/debug'
 import { truncate } from '../../utils/format.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import { expandPath } from '../../utils/path.js'
 
 const MAX_READ_BYTES = 64 * 1024

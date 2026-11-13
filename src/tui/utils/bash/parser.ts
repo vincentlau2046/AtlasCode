@@ -1,10 +1,10 @@
 import { feature } from 'src/shared'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 import {
   ensureParserInitialized,
   getParserModule,
   type TsNode,
-} from './bashParser.js'
+} from '../../../kernel/shell/bash/bashParser'
 
 export type Node = TsNode
 

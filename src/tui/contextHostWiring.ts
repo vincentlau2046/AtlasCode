@@ -76,10 +76,10 @@ import {
   type CompactContext,
   type ReactiveCompactOutcome,
 } from 'src/engine'
-import type { AgentId } from './types/ids.js'
-import type { UserMessage } from './types/message.js'
+import type { AgentId } from '../kernel/types/ids.js'
+import type { UserMessage } from '../kernel/types/message.js'
 import type { ToolUseContext } from './Tool.js'
-import type { AttachmentMessage } from './types/message.js'
+import type { AttachmentMessage } from '../kernel/types/message.js'
 import { getGlobalConfig } from './utils/config.js'
 import { getInitialSettings } from './utils/settings/settings.js'
 import { getEffortByModel } from './utils/effort.js'
@@ -100,7 +100,7 @@ import {
 import { clearSystemPromptSections } from './constants/systemPromptSections.js'
 import { getUserContext } from './context.js'
 import { clearSpeculativeChecks } from './tools/BashTool/bashPermissions.js'
-import { clearClassifierApprovals } from './utils/classifierApprovals.js'
+import { clearClassifierApprovals } from '../kernel/utils/classifierApprovals.js'
 import { resetGetMemoryFilesCache } from './utils/memoryFiles.js'
 import { clearSessionMessagesCache } from './utils/sessionStorage.js'
 import { clearBetaTracingState } from './utils/telemetry/betaSessionTracing.js'

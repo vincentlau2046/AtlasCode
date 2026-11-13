@@ -18,7 +18,7 @@ import {
 } from '../tools/FileEditTool/utils.js'
 import { getGlobalConfig } from '../utils/config.js'
 import { getPatchFromContents } from '../utils/diff.js'
-import { isENOENT } from '../utils/errors.js'
+import { isENOENT } from '../../kernel/utils/errors.js'
 import {
   callIdeRpc,
   getConnectedIdeClient,

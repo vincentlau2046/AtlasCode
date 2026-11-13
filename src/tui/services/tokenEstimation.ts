@@ -5,8 +5,8 @@ import type {
   BetaToolResultBlockParam,
   ContentBlock,
   ContentBlockParam,
-} from '../types/atlas.js'
-import type { BetaMessageParam as MessageParam } from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
+import type { BetaMessageParam as MessageParam } from '../../kernel/types/atlas.js'
 import type { Attachment } from '../utils/attachments.js'
 import { logError } from '../utils/log.js'
 import { normalizeAttachmentForAPI } from '../utils/messages.js'
@@ -15,8 +15,8 @@ import {
   getDefaultFastModel,
 } from '../utils/model/model.js'
 import { normalizeModelStringForAPI, modelToRole } from 'src/modelprovider'
-import type { Message } from '../types/message.js'
-import { jsonStringify } from '../utils/slowOperations.js'
+import type { Message } from '../../kernel/types/message.js'
+import { jsonStringify } from '../utils/slowOperations'
 import { isToolReferenceBlock } from '../utils/toolSearch.js'
 import { modelProvider } from 'src/modelprovider'
 import { withTokenCountVCR } from './vcr.js'

@@ -14,7 +14,7 @@ import { KeybindingSetup } from './keybindings/KeybindingProviderSetup.js';
 import type { AppState } from './state/AppStateStore.js';
 import type { AgentMemoryScope } from './tools/AgentTool/agentMemory.js';
 import type { FpsMetrics } from './utils/fpsTracker.js';
-import type { ValidationError } from './utils/settings/validation.js';
+import type { ValidationError } from './utils/settings/validation';
 
 // Type-only access to ResumeConversation's Props via the module type.
 // No runtime cost - erased at compile time.

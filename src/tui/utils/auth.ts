@@ -7,41 +7,41 @@ const USER_PROFILE_SCOPE = 'user:profile' as const
 
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { preferThirdPartyAuthentication } from 'src/tui/bootstrapState.js'
-import type { OAuthTokens } from '../services/oauth/types.js'
+import type { OAuthTokens } from '../../kernel/services/oauth/types.js'
 import {
   getApiKeyFromFileDescriptor,
   getOAuthTokenFromFileDescriptor,
 } from './authFileDescriptor.js'
-import { normalizeApiKeyForConfig } from './authPortable.js'
-import { AwsAuthStatusManager } from './awsAuthStatusManager.js'
+import { normalizeApiKeyForConfig } from '../../kernel/utils/authPortable.js'
+import { AwsAuthStatusManager } from '../../kernel/utils/awsAuthStatusManager.js'
 import {
   type AccountInfo,
   checkHasTrustDialogAccepted,
   getGlobalConfig,
   saveGlobalConfig,
 } from './config.js'
-import { logAntError, logForDebugging } from './debug.js'
+import { logAntError, logForDebugging } from './debug'
 import {
   isBareMode,
   isEnvTruthy,
   isRunningOnHomespace,
-} from './envUtils.js'
-import { errorMessage } from './errors.js'
+} from '../../kernel/utils/envUtils.js'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import { execSyncWithDefaults_DEPRECATED } from './execFileNoThrow.js'
-import * as lockfile from './lockfile.js'
+import * as lockfile from '../../kernel/utils/lockfile.js'
 import { logError } from './log.js'
 import { memoizeWithTTLAsync } from './memoize.js'
 import { getSecureStorage } from './secureStorage/index.js'
 // 0.1.72 块 C-1（de-ant 收尾）：anthropic keychain import 面 + keychain 读写
 // 消费已清零；保留 clearKeychainCache（clearOAuthTokenCache 活消费，MCP 通用
 // secureStorage 面 OOS）
-import { clearKeychainCache } from './secureStorage/macOsKeychainHelpers.js'
+import { clearKeychainCache } from '../../kernel/utils/secureStorage/macOsKeychainHelpers.js'
 import {
   getSettings_DEPRECATED,
   getSettingsForSource,
 } from './settings/settings.js'
-import { sleep } from './sleep.js'
-import { jsonParse } from './slowOperations.js'
+import { sleep } from '../../kernel/utils/sleep.js'
+import { jsonParse } from './slowOperations'
 
 /** Default TTL for API key helper cache in milliseconds (5 minutes) */
 const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000

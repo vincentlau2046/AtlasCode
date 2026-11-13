@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { BLACK_CIRCLE, BULLET_OPERATOR } from '../constants/figures.js';
 import { Box, Text } from '../ink.js';
 import type { SkillUpdate } from '../utils/hooks/skillImprovement.js';
-import { normalizeFullWidthDigits } from '../utils/stringUtils.js';
+import { normalizeFullWidthDigits } from '../../kernel/utils/stringUtils.js';
 const RESPONSE_INPUTS = ['0', '1', '2', '3'] as const;
 type ResponseInput = (typeof RESPONSE_INPUTS)[number];
 const isValidResponseInput = (input: string): input is ResponseInput => (RESPONSE_INPUTS as readonly string[]).includes(input);

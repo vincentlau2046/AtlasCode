@@ -1,6 +1,6 @@
 /* eslint-disable custom-rules/no-sync-fs -- W4 全量 lint 复原（§8.74.21）：legacy-debt 豁免（sync→async 改写违行为零改动纪律，W-opt 波再议） */
 import { feature } from 'src/shared'
-import { getConfigDirNameForProject } from '../configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import { randomBytes } from 'crypto'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
@@ -12,18 +12,18 @@ import {
   ATLAS_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
   GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN,
-} from 'src/tui/tools/FileEditTool/constants.js'
+} from 'src/kernel/tools/FileEditTool/constants'
 import type { z } from 'zod/v4'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { checkStatsigFeatureGate_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import type { AnyObject, Tool, ToolPermissionContext } from '../../Tool.js'
-import { FILE_READ_TOOL_NAME } from '../../tools/FileReadTool/prompt.js'
-import { getCwd } from '../cwd.js'
-import { getAtlasConfigHomeDir } from '../envUtils.js'
+import { FILE_READ_TOOL_NAME } from '../../../kernel/tools/FileReadTool/prompt.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
 import {
   getFsImplementation,
   getPathsForPermissionCheck,
-} from '../fsOperations.js'
+} from '../fsOperations'
 import {
   containsPathTraversal,
   expandPath,
@@ -33,7 +33,7 @@ import {
 import { getPlanSlug, getPlansDirectory } from '../plans.js'
 import { getPlatform } from '../platform.js'
 import { getProjectDir } from '../sessionStorage.js'
-import { SETTING_SOURCES } from '../settings/constants.js'
+import { SETTING_SOURCES } from '../settings/constants'
 import {
   getSettingsFilePathForSource,
   getSettingsRootPathForSource,
@@ -44,8 +44,8 @@ import { windowsPathToPosixPath } from '../windowsPaths.js'
 import type {
   PermissionDecision,
   PermissionResult,
-} from './PermissionResult.js'
-import type { PermissionRule, PermissionRuleSource } from './PermissionRule.js'
+} from '../../../kernel/permissions/PermissionResult.js'
+import type { PermissionRule, PermissionRuleSource } from '../../../kernel/permissions/PermissionRule.js'
 import { createReadRuleSuggestion } from './PermissionUpdate.js'
 import type { PermissionUpdate } from './PermissionUpdateSchema.js'
 import { getRuleByContentsForToolName } from './permissions.js'

@@ -19,8 +19,8 @@ import {
   TOOL_SEARCH_BETA_HEADER_1P,
   TOOL_SEARCH_BETA_HEADER_3P,
   WEB_SEARCH_BETA_HEADER,
-} from '../constants/betas.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
+} from '../../kernel/constants/betas.js'
+import { isEnvDefinedFalsy, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getCanonicalName } from './model/model.js'
 import { isModelInLocalModelPools } from './model/modelAllowlist.js'
 import { getInitialSettings } from './settings/settings.js'

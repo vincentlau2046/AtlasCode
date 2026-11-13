@@ -19,8 +19,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
-import { gt } from './semver.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { gt } from '../../kernel/utils/semver.js'
 
 /** registry 恒 npmjs（0.1.43 npmmirror CN 只读坑教训固化；B-2 命令行 registry 段必在场）。 */
 export const UPDATE_NPM_REGISTRY = 'https://registry.npmjs.org'

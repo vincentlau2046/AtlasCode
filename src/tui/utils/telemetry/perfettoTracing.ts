@@ -27,16 +27,16 @@ import { mkdirSync, writeFileSync } from 'fs'
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { registerCleanup } from '../cleanupRegistry.js'
-import { logForDebugging } from '../debug.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry'
+import { logForDebugging } from '../debug'
 import {
   getAtlasConfigHomeDir,
   isEnvDefinedFalsy,
   isEnvTruthy,
-} from '../envUtils.js'
-import { errorMessage } from '../errors.js'
-import { djb2Hash } from '../hash.js'
-import { jsonStringify } from '../slowOperations.js'
+} from '../../../kernel/utils/envUtils'
+import { errorMessage } from '../../../kernel/utils/errors'
+import { djb2Hash } from '../../../kernel/utils/hash'
+import { jsonStringify } from '../slowOperations'
 import { getAgentId, getAgentName, getParentSessionId } from 'src/engine'
 
 /**

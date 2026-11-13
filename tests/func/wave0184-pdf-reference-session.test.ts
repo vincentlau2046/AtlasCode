@@ -59,7 +59,7 @@ import {
 } from '../../src/tui/utils/attachments'
 import { normalizeAttachmentForAPI } from '../../src/tui/utils/messages'
 import { FileReadTool } from '../../src/tui/tools/FileReadTool/FileReadTool'
-import { runWithCwdOverride } from '../../src/tui/utils/cwd'
+import { runWithCwdOverride } from '../../src/kernel/utils/cwd'
 import {
   recordTranscript,
   flushSessionStorage,

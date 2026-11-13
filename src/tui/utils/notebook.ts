@@ -2,8 +2,8 @@ import type {
   ImageBlockParam,
   TextBlockParam,
   ToolResultBlockParam,
-} from '../types/atlas.js'
-import { BASH_TOOL_NAME } from '../tools/BashTool/toolName.js'
+} from '../../kernel/types/atlas.js'
+import { BASH_TOOL_NAME } from '../../kernel/tools/BashTool/toolName.js'
 import { formatOutput } from '../tools/BashTool/utils.js'
 import type {
   NotebookCell,
@@ -13,9 +13,9 @@ import type {
   NotebookContent,
   NotebookOutputImage,
 } from '../types/notebook.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { expandPath } from './path.js'
-import { jsonParse } from './slowOperations.js'
+import { jsonParse } from './slowOperations'
 
 const LARGE_OUTPUT_THRESHOLD = 10000
 

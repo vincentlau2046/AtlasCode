@@ -1,24 +1,24 @@
-import type { BetaContentBlock } from '../types/atlas.js'
+import type { BetaContentBlock } from '../../kernel/types/atlas.js'
 import { createHash, randomUUID, type UUID } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import isPlainObject from 'lodash-es/isPlainObject.js'
 import mapValues from 'lodash-es/mapValues.js'
 import { dirname, join } from 'path'
 import { addToTotalSessionCost } from 'src/tui/cost-tracker.js'
-import { isAtlasDev } from '../utils/atlasDev.js'
+import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import type {
   AssistantMessage,
   Message,
   StreamEvent,
   SystemAPIErrorMessage,
   UserMessage,
-} from '../types/message.js'
-import { getCwd } from '../utils/cwd.js'
+} from '../../kernel/types/message.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
 import { env } from '../utils/env.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from '../utils/envUtils.js'
-import { getErrnoCode } from '../utils/errors.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { normalizeMessagesForAPI } from '../utils/messages.js'
-import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
+import { jsonParse, jsonStringify } from '../utils/slowOperations'
 
 function shouldUseVCR(): boolean {
   if (process.env.NODE_ENV === 'test') {

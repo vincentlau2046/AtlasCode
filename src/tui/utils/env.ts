@@ -3,10 +3,10 @@
 import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import { join } from 'path'
-import { isRunningWithBun } from './bundledMode.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { isRunningWithBun } from '../../kernel/utils/bundledMode.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { findExecutable } from './findExecutable.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { which } from './which.js'
 
 type Platform = 'win32' | 'darwin' | 'linux'

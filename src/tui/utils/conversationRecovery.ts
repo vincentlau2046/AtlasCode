@@ -1,9 +1,9 @@
 import { feature } from 'src/shared'
 import type { UUID } from 'crypto'
 import { relative } from 'path'
-import { getCwd } from 'src/tui/utils/cwd.js'
+import { getCwd } from 'src/kernel/utils/cwd'
 import { addInvokedSkill } from 'src/tui/bootstrapState.js'
-import { asSessionId } from '../types/ids.js'
+import { asSessionId } from '../../kernel/types/ids.js'
 import type {
   AttributionSnapshotMessage,
   ContextCollapseCommitEntry,
@@ -16,8 +16,8 @@ import type {
   Message,
   NormalizedMessage,
   NormalizedUserMessage,
-} from '../types/message.js'
-import { PERMISSION_MODES } from '../types/permissions.js'
+} from '../../kernel/types/message.js'
+import { PERMISSION_MODES } from '../../kernel/types/permissions.js'
 import { suppressNextSkillListing } from './attachments.js'
 import {
   copyFileHistoryForResume,

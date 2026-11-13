@@ -8,7 +8,7 @@
  * 分层纪律：纯字符串逻辑，零磁盘/零网络。
  */
 import { describe, test, expect } from 'bun:test'
-import { isDangerousShellPrefix } from '../../src/tui/utils/permissions/dangerousShellPrefix'
+import { isDangerousShellPrefix } from '../../src/kernel/permissions/dangerousShellPrefix'
 
 const DANGEROUS = [
   'rm',

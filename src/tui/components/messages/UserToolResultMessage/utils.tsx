@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolUseBlockParam } from '../../../types/atlas.js';
+import type { ToolUseBlockParam } from '../../../../kernel/types/atlas.js';
 import { useMemo } from 'react';
 import { findToolByName, type Tool, type Tools } from '../../../Tool.js';
 import type { buildMessageLookups } from '../../../utils/messages.js';

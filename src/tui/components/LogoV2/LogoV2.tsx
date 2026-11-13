@@ -22,13 +22,13 @@ import { CondensedLogo } from './CondensedLogo.js';
 import { OffscreenFreeze } from '../OffscreenFreeze.js';
 import { checkForReleaseNotesSync } from '../../utils/releaseNotes.js';
 import { getDumpPromptsPath } from 'src/tui/services/api/dumpPrompts.js';
-import { isEnvTruthy } from 'src/tui/utils/envUtils.js';
+import { isEnvTruthy } from 'src/kernel/utils/envUtils';
 import { getStartupPerfLogPath, isDetailedProfilingEnabled } from 'src/tui/utils/startupProfiler.js';
 import { EmergencyTip } from './EmergencyTip.js';
 import { VoiceModeNotice } from './VoiceModeNotice.js';
 
 import { getSandboxManager } from 'src/tui/sandboxCompat';
-import { plural } from '../../utils/stringUtils.js';
+import { plural } from '../../../kernel/utils/stringUtils.js';
 import { useAppState } from '../../state/AppState.js';
 import { getEffortSuffix } from '../../utils/effort.js';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';

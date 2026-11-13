@@ -4,7 +4,7 @@
 
 import figures from 'figures';
 import type { TaskStatus } from 'src/tui/Task.js';
-import type { InProcessTeammateTaskState } from 'src/tui/tasks/InProcessTeammateTask/types.js';
+import type { InProcessTeammateTaskState } from 'src/kernel/tasks/InProcessTeammateTask/types';
 import { isBackgroundTask, type TaskState } from 'src/tui/tasks/types.js';
 import type { DeepImmutable } from 'src/tui/types/utils.js';
 import { summarizeRecentActivities } from 'src/tui/utils/collapseReadSearch.js';

@@ -3,7 +3,7 @@
 // or cycles through common command hints when idle.
 
 import { useEffect, useRef, useState } from 'react'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import { getInitialSettings } from '../../utils/settings/settings.js'
 import { LIGHT_CORE } from '../design-system/beamTheme.js'
 

@@ -1,12 +1,12 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolResultBlockParam } from '../types/atlas.js';
+import type { ToolResultBlockParam } from '../../kernel/types/atlas.js';
 import * as React from 'react';
 import { stripUnderlineAnsi } from 'src/tui/components/shell/OutputLine.js';
 import { extractTag } from 'src/tui/utils/messages.js';
 import { removeSandboxViolationTags } from 'src/tui/sandboxCompat';
 import { Box, Text } from '../ink.js';
 import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
-import { countCharInString } from '../utils/stringUtils.js';
+import { countCharInString } from '../../kernel/utils/stringUtils.js';
 import { MessageResponse } from './MessageResponse.js';
 const MAX_RENDERED_LINES = 10;
 type Props = {

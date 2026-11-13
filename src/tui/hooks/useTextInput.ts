@@ -1,5 +1,5 @@
 import { isInputModeCharacter } from 'src/tui/components/PromptInput/inputModes.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 import { useNotifications } from 'src/tui/context/notifications.js'
 import stripAnsi from 'strip-ansi'
 import { markBackslashReturnUsed } from '../commands/terminalSetup/terminalSetup.js'

@@ -9,10 +9,10 @@
  * ZIP creation on install and extraction on load transparently.
  */
 
-import { registerCleanup } from '../cleanupRegistry.js'
-import { logForDebugging } from '../debug.js'
+import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
+import { logForDebugging } from '../debug'
 import { withDiagnosticsTiming } from '../diagLogs.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { getFsImplementation } from '../fsOperations'
 import { logError } from '../log.js'
 import {
   clearMarketplacesCache,

@@ -25,13 +25,13 @@ import {
 } from 'src/engine'
 import type { ToolPermissionContext } from 'src/shared'
 import type { Tool as TuiTool, ToolUseContext } from './Tool'
-import type { AssistantMessage } from './types/message'
+import type { AssistantMessage } from '../kernel/types/message'
 import type { CanUseToolFn } from './hooks/useCanUseTool'
 import { setAllowVerdict } from './utils/allowVerdicts'
 import type {
   PermissionDecisionReason as TuiPermissionDecisionReason,
   PermissionMode,
-} from './types/permissions'
+} from '../kernel/types/permissions'
 
 /**
  * 活 TPC 窄视图（入参面宽化 = unknown，装配体内部 cast 到 shared TPC）——

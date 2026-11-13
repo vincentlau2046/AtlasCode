@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'src/tui/context/notifications.js';
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js';
 import { getSettingsWithAllErrors } from '../../utils/settings/allErrors.js';
-import type { ValidationError } from '../../utils/settings/validation.js';
+import type { ValidationError } from '../../utils/settings/validation';
 import { useSettingsChange } from '../useSettingsChange.js';
 const SETTINGS_ERRORS_NOTIFICATION_KEY = 'settings-errors';
 export function useSettingsErrors() {

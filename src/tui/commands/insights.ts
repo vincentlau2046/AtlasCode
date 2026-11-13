@@ -12,10 +12,10 @@ import { queryWithRoleFallback } from 'src/modelprovider'
 import {
   AGENT_TOOL_NAME,
   LEGACY_AGENT_TOOL_NAME,
-} from '../tools/AgentTool/constants.js'
+} from '../../kernel/tools/AgentTool/constants.js'
 import type { LogOption } from '../types/logs.js'
-import { getAtlasConfigHomeDir } from '../utils/envUtils.js'
-import { toError } from '../utils/errors.js'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
+import { toError } from '../../kernel/utils/errors.js'
 import { logError } from '../utils/log.js'
 import { createUserMessage, extractTextContent } from '../utils/messages.js'
 import { getDefaultPremiumModel } from '../utils/model/model.js'
@@ -25,9 +25,9 @@ import {
   getSessionIdFromLog,
   loadAllLogsFromSessionFile,
 } from '../utils/sessionStorage.js'
-import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
-import { countCharInString } from '../utils/stringUtils.js'
-import { asSystemPrompt, type SystemPrompt } from '../utils/systemPromptType.js'
+import { jsonParse, jsonStringify } from '../utils/slowOperations'
+import { countCharInString } from '../../kernel/utils/stringUtils.js'
+import { asSystemPrompt, type SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { escapeXmlAttr as escapeHtml } from '../utils/xml.js'
 
 // Direct model call — delegated to queryWithRoleFallback (premium→small).

@@ -4,7 +4,7 @@ import {
   getSystemPromptSectionCache,
   setSystemPromptSectionCacheEntry,
 } from 'src/tui/bootstrapState.js'
-import { logForDebugging } from '../utils/debug.js'
+import { logForDebugging } from '../utils/debug'
 
 type ComputeFn = () => string | null | Promise<string | null>
 

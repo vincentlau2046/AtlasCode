@@ -13,7 +13,7 @@
  */
 import * as React from 'react'
 import type { LocalJSXCommandCall } from '../../types/command.js'
-import type { Message } from '../../types/message.js'
+import type { Message } from '../../../kernel/types/message.js'
 import { renderToAnsiString } from '../../utils/staticRender.js'
 import { GoalOverlay } from '../../components/GoalOverlay.js'
 import {

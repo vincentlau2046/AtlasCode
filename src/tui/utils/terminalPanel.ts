@@ -18,9 +18,9 @@
 import { spawn, spawnSync } from 'child_process'
 import { getSessionId } from 'src/bootstrap'
 import instances from '../ink/instances.js'
-import { registerCleanup } from './cleanupRegistry.js'
-import { pwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
+import { pwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
 
 const TMUX_SESSION = 'panel'
 

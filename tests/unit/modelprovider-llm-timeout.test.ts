@@ -31,7 +31,7 @@ import {
   llmTimeoutRemediationHint,
   APIConnectionTimeoutError,
 } from '../../src/modelprovider'
-import { SettingsSchema } from '../../src/tui/utils/settings/types'
+import { SettingsSchema } from '../../src/kernel/settings/types'
 
 describe('#260 resolveLlmTimeoutMs 纯 resolver（env 胜 settings 胜 缺省 900s，0.1.67）', () => {
   test('① 无 env + 无 settings → 缺省 900s（0.1.67 用户裁 15min；旧 600s 判别点）', () => {

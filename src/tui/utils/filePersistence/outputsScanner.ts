@@ -9,7 +9,7 @@
 
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { logForDebugging } from '../debug.js'
+import { logForDebugging } from '../debug'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：teleport/environments + constants/wire 整裁；
 // EnvironmentKind 联合类型 + WIRE_ENVIRONMENT_KIND_CLOUD 冻结字面量就地内联（行为保持）
 // 0.1.78 W-A (F-2 de-ANT)：kind 字面 'anthropic_cloud' → 'cloud'（零一方痕迹；

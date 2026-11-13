@@ -44,7 +44,7 @@ import {
   stat,
   symlink,
 } from 'fs/promises'
-import { findManifestInDir } from '../configDir.js'
+import { findManifestInDir } from '../../../kernel/utils/configDir.js'
 import { basename, dirname, join, relative, resolve, sep } from 'path'
 import { getInlinePlugins } from 'src/tui/bootstrapState.js'
 import {
@@ -58,20 +58,20 @@ import type {
   PluginLoadResult,
   PluginManifest,
 } from '../../types/plugin.js'
-import { logForDebugging } from '../debug.js'
-import { isEnvTruthy } from '../envUtils.js'
+import { logForDebugging } from '../debug'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   errorMessage,
   getErrnoPath,
   isENOENT,
   isFsInaccessible,
   toError,
-} from '../errors.js'
+} from '../../../kernel/utils/errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { pathExists } from '../file.js'
-import { getFsImplementation } from '../fsOperations.js'
+import { getFsImplementation } from '../fsOperations'
 import { gitExe } from '../git.js'
-import { lazySchema } from '../lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { logError } from '../log.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
 import {
@@ -80,9 +80,9 @@ import {
   resetSettingsCache,
   setPluginSettingsBase,
 } from '../settings/settingsCache.js'
-import type { HooksSettings } from '../settings/types.js'
-import { SettingsSchema } from '../settings/types.js'
-import { jsonParse, jsonStringify } from '../slowOperations.js'
+import type { HooksSettings } from '../../../kernel/settings/types.js'
+import { SettingsSchema } from '../../../kernel/settings/types.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
 import { getAddDirEnabledPlugins } from './addDirPluginSettings.js'
 import { verifyAndDemote } from './dependencyResolver.js'
 import { classifyFetchError, logPluginFetch } from './fetchTelemetry.js'

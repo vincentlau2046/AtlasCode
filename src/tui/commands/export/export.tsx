@@ -3,10 +3,10 @@ import React from 'react';
 import { ExportDialog } from '../../components/ExportDialog.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
-import type { Message } from '../../types/message.js';
-import { getCwd } from '../../utils/cwd.js';
+import type { Message } from '../../../kernel/types/message.js';
+import { getCwd } from '../../../kernel/utils/cwd.js';
 import { renderMessagesToPlainText } from '../../utils/exportRenderer.js';
-import { writeFileSync_DEPRECATED } from '../../utils/slowOperations.js';
+import { writeFileSync_DEPRECATED } from '../../utils/slowOperations';
 function formatTimestamp(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');

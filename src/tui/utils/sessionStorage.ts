@@ -27,15 +27,15 @@ import {
 } from 'src/engine'
 import { getPlanSlugCache, getPromptId, getSessionProjectDir } from 'src/tui/bootstrapState.js'
 import { builtInCommandNames } from '../commands.js'
-import { COMMAND_NAME_TAG } from '../constants/xml.js'
+import { COMMAND_NAME_TAG } from '../../kernel/constants/xml.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-import { REPL_TOOL_NAME } from '../tools/REPLTool/constants.js'
+import { REPL_TOOL_NAME } from '../../kernel/tools/REPLTool/constants.js'
 import {
   type AgentId,
   asAgentId,
   asSessionId,
   type SessionId,
-} from '../types/ids.js'
+} from '../../kernel/types/ids.js'
 import type { AttributionSnapshotMessage } from '../types/logs.js'
 import {
   type ContentReplacementEntry,
@@ -56,23 +56,23 @@ import type {
   SystemCompactBoundaryMessage,
   SystemMessage,
   UserMessage,
-} from '../types/message.js'
+} from '../../kernel/types/message.js'
 import type { QueueOperationMessage } from '../types/messageQueueTypes.js'
-import { uniq } from './array.js'
-import { registerCleanup } from './cleanupRegistry.js'
+import { uniq } from '../../kernel/utils/array.js'
+import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
 import { updateSessionName } from './concurrentSessions.js'
-import { getCwd } from './cwd.js'
-import { logForDebugging } from './debug.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
+import { logForDebugging } from './debug'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { getAtlasConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 // 0.1.85-D（C85-D）：pdf_reference 五字段白名单落盘投影（工单 §1-D「恢复/
 // 压缩仍保引用」）——与 engine 车道 session/record.ts 同源同款（shared
 // 单一事实源），isLoggableMessage 放行 + cleanMessagesForLogging 投影。
 import { projectPDFReferenceForRecord } from 'src/shared'
-import { isFsInaccessible } from './errors.js'
+import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { formatFileSize } from './format.js'
-import { getFsImplementation } from './fsOperations.js'
+import { getFsImplementation } from './fsOperations'
 import { getWorktreePaths } from './getWorktreePaths.js'
 import { getBranch } from './git.js'
 import { parseJSONL } from './json.js'
@@ -89,7 +89,7 @@ import {
   SKIP_PRECOMPACT_THRESHOLD,
 } from './sessionStoragePortable.js'
 import { getSettings_DEPRECATED } from './settings/settings.js'
-import { jsonParse, jsonStringify } from './slowOperations.js'
+import { jsonParse, jsonStringify } from './slowOperations'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
 import { validateUuid } from './uuid.js'
 

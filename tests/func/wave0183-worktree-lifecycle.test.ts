@@ -69,7 +69,7 @@ import {
   createAgentWorktree as tuiCreateAgentWorktree,
   removeAgentWorktree as tuiRemoveAgentWorktree,
 } from '../../src/tui/utils/worktree.js'
-import { runWithCwdOverride } from '../../src/tui/utils/cwd.js'
+import { runWithCwdOverride } from '../../src/kernel/utils/cwd.js'
 
 // ── 门控：git 可用性 + reftable 能力探针 ────────────────────────────────────
 let gitAvailable = false

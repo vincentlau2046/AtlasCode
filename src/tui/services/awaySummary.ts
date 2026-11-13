@@ -1,11 +1,11 @@
-import { APIUserAbortError } from '../types/atlas.js'
-import type { Message } from '../types/message.js'
-import { logForDebugging } from '../utils/debug.js'
+import { APIUserAbortError } from '../../kernel/types/atlas.js'
+import type { Message } from '../../kernel/types/message.js'
+import { logForDebugging } from '../utils/debug'
 import {
   createUserMessage,
   getAssistantMessageText,
 } from '../utils/messages.js'
-import { asSystemPrompt } from '../utils/systemPromptType.js'
+import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
 import { getSessionMemoryContent } from './SessionMemory/sessionMemoryUtils.js'
 

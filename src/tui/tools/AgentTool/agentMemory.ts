@@ -1,4 +1,4 @@
-import { getConfigDirNameForProject } from '../../utils/configDir.js'
+import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js'
 import { join, normalize, sep } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
 import {
@@ -6,7 +6,7 @@ import {
   ensureMemoryDirExists,
 } from '../../memdir/memdir.js'
 import { getMemoryBaseDir } from '../../memdir/paths.js'
-import { getCwd } from '../../utils/cwd.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
 import { findCanonicalGitRoot } from '../../utils/git.js'
 import { sanitizePath } from '../../utils/path.js'
 

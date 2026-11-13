@@ -7,7 +7,7 @@ import { Box, Text } from '../../ink.js';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { useAppState } from '../../state/AppState.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
-import { logForDebugging } from '../../utils/debug.js';
+import { logForDebugging } from '../../utils/debug';
 import { getSessionId, getCwdState } from 'src/bootstrap';
 type Props = {
   onDone: () => void;

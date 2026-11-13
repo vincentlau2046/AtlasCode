@@ -1,9 +1,9 @@
 import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { logForDebugging } from './debug.js'
-import { getAtlasConfigHomeDir } from './envUtils.js'
-import { errorMessage, getErrnoCode } from './errors.js'
+import { logForDebugging } from './debug'
+import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
+import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
 import { getPlatform } from './platform.js'
 
 // Cache states:

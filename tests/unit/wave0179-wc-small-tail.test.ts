@@ -27,7 +27,7 @@ import type {
   HookShellPort,
 } from '../../src/hooks/index.js'
 import { normalizeNameForMCP as engineNormalize } from '../../src/engine/tools/mcp'
-import { normalizeNameForMCP as tuiNormalize } from '../../src/tui/services/mcp/normalization'
+import { normalizeNameForMCP as tuiNormalize } from '../../src/kernel/services/mcp/normalization'
 import { normalizeNameForMCP as ruleNormalize } from '../../src/permissions/mcpRuleNames'
 import {
   buildMcpToolName,
@@ -132,7 +132,7 @@ import {
   APIConnectionError as TuiAPIConnectionError,
   APIConnectionTimeoutError as TuiAPIConnectionTimeoutError,
   APIUserAbortError as TuiAPIUserAbortError,
-} from '../../src/tui/types/atlas.js'
+} from '../../src/kernel/types/atlas.js'
 
 describe('wave0179 F-4 APIError 双族合并（单类 instanceof 判别）', () => {
   test('tui re-export = modelprovider 定义类（基线 569aed7 同面红：两独立类）', () => {

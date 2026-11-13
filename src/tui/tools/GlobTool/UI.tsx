@@ -1,4 +1,4 @@
-import type { ToolResultBlockParam } from '../../types/atlas.js';
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js';
 import React from 'react';
 import { MessageResponse } from 'src/tui/components/MessageResponse.js';
 import { extractTag } from 'src/tui/utils/messages.js';

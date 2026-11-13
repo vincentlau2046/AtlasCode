@@ -1,7 +1,7 @@
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
 import { logError } from '../log.js'
 import { createUserMessage, extractTextContent } from '../messages.js'
-import { asSystemPrompt } from '../systemPromptType.js'
+import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 
 export type DateTimeParseResult =
   | { success: true; value: string }

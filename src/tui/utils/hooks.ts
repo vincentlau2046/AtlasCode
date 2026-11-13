@@ -8,19 +8,19 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'child_process'
 import { pathExists } from './file.js'
 import { wrapSpawn } from './ShellCommand.js'
 import { TaskOutput } from './task/TaskOutput.js'
-import { getCwd } from './cwd.js'
+import { getCwd } from '../../kernel/utils/cwd.js'
 import { randomUUID } from 'crypto'
 import { formatShellPrefixCommand } from './bash/shellPrefix.js'
 import {
   getHookEnvFilePath,
   invalidateSessionEnvCache,
 } from './sessionEnvironment.js'
-import { subprocessEnv } from './subprocessEnv.js'
+import { subprocessEnv } from '../../kernel/utils/subprocessEnv.js'
 import { getPlatform } from './platform.js'
 import { findGitBashPath, windowsPathToPosixPath } from './windowsPaths.js'
 import { getCachedPowerShellPath } from './shell/powershellDetection.js'
-import { DEFAULT_HOOK_SHELL } from './shell/shellProvider.js'
-import { buildPowerShellArgs } from './shell/powershellProvider.js'
+import { DEFAULT_HOOK_SHELL } from '../../kernel/shell/provider/shellProvider.js'
+import { buildPowerShellArgs } from '../../kernel/shell/provider/powershellProvider.js'
 import {
   loadPluginOptions,
   substituteUserConfigVariables,
@@ -38,12 +38,12 @@ import {
   getTranscriptPathForSession,
   getAgentTranscriptPath,
 } from './sessionStorage.js'
-import type { AgentId } from '../types/ids.js'
+import type { AgentId } from '../../kernel/types/ids.js'
 import {
   getSettings_DEPRECATED,
   getSettingsForSource,
 } from './settings/settings.js'
-import { logOTelEvent } from './telemetry/events.js'
+import { logOTelEvent } from '../../kernel/telemetry/events.js'
 import { ALLOWED_OFFICIAL_MARKETPLACE_NAMES } from './plugins/schemas.js'
 import {
   startHookSpan,
@@ -104,33 +104,33 @@ import type {
 import type { StatusLineCommandInput } from '../types/statusLine.js'
 import type { ElicitResult } from '@modelcontextprotocol/sdk/types.js'
 import type { FileSuggestionCommandInput } from '../types/fileSuggestion.js'
-import type { HookResultMessage } from 'src/tui/types/message.js'
+import type { HookResultMessage } from 'src/kernel/types/message'
 import chalk from 'chalk'
 import type {
   HookMatcher,
   HookCommand,
   PluginHookMatcher,
   SkillHookMatcher,
-} from './settings/types.js'
+} from '../../kernel/settings/types.js'
 import { getHookDisplayText } from './hooks/hooksSettings.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { firstLineOf } from './stringUtils.js'
+import { firstLineOf } from '../../kernel/utils/stringUtils.js'
 import {
   normalizeLegacyToolName,
   getLegacyToolNames,
   permissionRuleValueFromString,
-} from './permissions/permissionRuleParser.js'
+} from '../../kernel/permissions/permissionRuleParser.js'
 import { logError } from './log.js'
-import { createCombinedAbortSignal } from './combinedAbortSignal.js'
+import { createCombinedAbortSignal } from '../../kernel/utils/combinedAbortSignal.js'
 import {
   MAX_HOOK_INPUT_NESTING_DEPTH,
   exceedsMaxNestingDepth,
-} from './hooks/hookInputDepth.js'
-import { stringifyWithGetterFallback } from './hooks/hookInputMaterialize.js'
-import { isReentrantHook, runWithHookReentrancy } from './hooks/hookReentrancy.js'
-import { shouldFailClosePluginHook } from './hooks/hookFailClosed.js'
-import type { PermissionResult } from './permissions/PermissionResult.js'
+} from '../../kernel/agenthooks/hookInputDepth.js'
+import { stringifyWithGetterFallback } from './hooks/hookInputMaterialize'
+import { isReentrantHook, runWithHookReentrancy } from '../../kernel/agenthooks/hookReentrancy.js'
+import { shouldFailClosePluginHook } from '../../kernel/agenthooks/hookFailClosed.js'
+import type { PermissionResult } from '../../kernel/permissions/PermissionResult.js'
 import { registerPendingAsyncHook } from './hooks/AsyncHookRegistry.js'
 import { enqueuePendingNotification } from './messageQueueManager.js'
 import {
@@ -142,13 +142,13 @@ import {
   emitHookStarted,
   emitHookResponse,
   startHookProgressInterval,
-} from './hooks/hookEvents.js'
+} from './hooks/hookEvents'
 import { createAttachmentMessage } from './attachments.js'
 import { all, runWithConcurrencyLimit } from './generators.js'
 import { MAX_HOOK_CONCURRENCY } from 'src/engine'
 import { findToolByName, type Tools, type ToolUseContext } from '../Tool.js'
 import { execPromptHook } from './hooks/execPromptHook.js'
-import type { Message, AssistantMessage } from '../types/message.js'
+import type { Message, AssistantMessage } from '../../kernel/types/message.js'
 import { execAgentHook } from './hooks/execAgentHook.js'
 import { execHttpHook } from './hooks/execHttpHook.js'
 import type { ShellCommand } from './ShellCommand.js'
@@ -161,9 +161,9 @@ import {
   type FunctionHook,
 } from './hooks/sessionHooks.js'
 import type { AppState } from '../state/AppState.js'
-import { jsonStringify, jsonParse } from './slowOperations.js'
-import { isEnvTruthy } from './envUtils.js'
-import { errorMessage, getErrnoCode } from './errors.js'
+import { jsonStringify, jsonParse } from './slowOperations'
+import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
+import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
 
 const TOOL_HOOK_EXECUTION_TIMEOUT_MS = 10 * 60 * 1000
 

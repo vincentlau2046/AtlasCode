@@ -8,7 +8,7 @@ import { Box, Text } from '../../ink.js';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { LocalShellTaskState } from '../../tasks/LocalShellTask/guards.js';
 import { formatDuration, formatFileSize, truncateToWidth } from '../../utils/format.js';
-import { tailFile } from '../../utils/fsOperations.js';
+import { tailFile } from '../../utils/fsOperations';
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js';
 import { Byline } from '../design-system/Byline.js';
 import { Dialog } from '../design-system/Dialog.js';

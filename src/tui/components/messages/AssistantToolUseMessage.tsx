@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolUseBlockParam } from '../../types/atlas.js';
+import type { ToolUseBlockParam } from '../../../kernel/types/atlas.js';
 import React, { useMemo } from 'react';
 import { useTerminalSize } from 'src/tui/hooks/useTerminalSize.js';
 import type { ThemeName } from 'src/tui/utils/theme.js';
@@ -9,7 +9,7 @@ import { stringWidth } from '../../ink/stringWidth.js';
 import { Box, Text, useTheme } from '../../ink.js';
 import { useAppStateMaybeOutsideOfProvider } from '../../state/AppState.js';
 import { findToolByName, type Tool, type ToolProgressData, type Tools } from '../../Tool.js';
-import type { ProgressMessage } from '../../types/message.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
 import { useIsClassifierChecking } from '../../utils/classifierApprovalsHook.js';
 import { logError } from '../../utils/log.js';
 import type { buildMessageLookups } from '../../utils/messages.js';

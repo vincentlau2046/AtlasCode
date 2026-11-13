@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import type { ToolResultBlockParam } from '../../types/atlas.js'
+import type { ToolResultBlockParam } from '../../../kernel/types/atlas.js'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { dirname } from 'path'
 import {
@@ -23,9 +23,9 @@ import type {
   Message,
   SystemMessage,
   UserMessage,
-} from 'src/tui/types/message.js'
+} from 'src/kernel/types/message'
 import { logForDebugging } from 'src/tui/utils/debug.js'
-import type { PermissionDecision } from 'src/tui/utils/permissions/PermissionResult.js'
+import type { PermissionDecision } from 'src/kernel/permissions/PermissionResult'
 import { getRuleByContentsForTool } from 'src/tui/utils/permissions/permissions.js'
 import {
   isOfficialMarketplaceName,
@@ -34,16 +34,16 @@ import {
 import { z } from 'zod/v4'
 import { getSessionId } from 'src/bootstrap'
 import { addInvokedSkill, clearInvokedSkillsForAgent } from 'src/tui/bootstrapState.js'
-import { COMMAND_MESSAGE_TAG } from '../../constants/xml.js'
+import { COMMAND_MESSAGE_TAG } from '../../../kernel/constants/xml.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import { getAgentContext } from '../../utils/agentContext.js'
-import { errorMessage } from '../../utils/errors.js'
+import { errorMessage } from '../../../kernel/utils/errors.js'
 import {
   extractResultText,
   prepareForkedCommandContext,
 } from '../../utils/forkedAgent.js'
 import { parseFrontmatter } from '../../utils/frontmatterParser.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {
   createUserMessage,
   normalizeAttachmentForAPI,
@@ -51,8 +51,8 @@ import {
 } from '../../utils/messages.js'
 import type { Attachment } from '../../utils/attachments.js'
 import type { Output as FileReadToolOutput } from '../FileReadTool/FileReadTool.js'
-import { FILE_READ_TOOL_NAME } from '../FileReadTool/prompt.js'
-import type { ModelAlias } from '../../utils/model/aliases.js'
+import { FILE_READ_TOOL_NAME } from '../../../kernel/tools/FileReadTool/prompt.js'
+import type { ModelAlias } from '../../../kernel/model/aliases.js'
 import { resolveSkillModelOverride } from '../../utils/model/model.js'
 import { recordSkillUsage } from '../../utils/suggestions/skillUsageTracking.js'
 import { createAgentId } from '../../utils/uuid.js'
@@ -96,9 +96,9 @@ async function getAllCommands(context: ToolUseContext): Promise<Command[]> {
 }
 
 // Re-export Progress from centralized types to break import cycles
-export type { SkillToolProgress as Progress } from '../../types/tools.js'
+export type { SkillToolProgress as Progress } from '../../../kernel/types/tools.js'
 
-import type { SkillToolProgress as Progress } from '../../types/tools.js'
+import type { SkillToolProgress as Progress } from '../../../kernel/types/tools.js'
 
 /**
  * Executes a skill in a forked sub-agent context.

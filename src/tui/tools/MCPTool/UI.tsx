@@ -9,12 +9,12 @@ import { linkifyUrlsInText, OutputLine } from '../../components/shell/OutputLine
 import { stringWidth } from '../../ink/stringWidth.js';
 import { Ansi, Box, Text } from '../../ink.js';
 import type { ToolProgressData } from '../../Tool.js';
-import type { ProgressMessage } from '../../types/message.js';
-import type { MCPProgress } from '../../types/tools.js';
+import type { ProgressMessage } from '../../../kernel/types/message.js';
+import type { MCPProgress } from '../../../kernel/types/tools.js';
 import { formatNumber } from '../../utils/format.js';
 import { createHyperlink } from '../../utils/hyperlink.js';
 import { getContentSizeEstimate, type MCPToolResult } from '../../utils/mcpValidation.js';
-import { jsonParse, jsonStringify } from '../../utils/slowOperations.js';
+import { jsonParse, jsonStringify } from '../../utils/slowOperations';
 import type { inputSchema } from './MCPTool.js';
 
 // Threshold for displaying warning about large MCP responses

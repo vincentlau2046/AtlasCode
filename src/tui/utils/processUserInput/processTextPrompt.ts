@@ -1,14 +1,14 @@
-import type { ContentBlockParam } from '../../types/atlas.js'
+import type { ContentBlockParam } from '../../../kernel/types/atlas.js'
 import { randomUUID } from 'crypto'
 import { setPromptId } from 'src/tui/bootstrapState.js'
 import type {
   AttachmentMessage,
   SystemMessage,
   UserMessage,
-} from 'src/tui/types/message.js'
-import type { PermissionMode } from '../../types/permissions.js'
+} from 'src/kernel/types/message'
+import type { PermissionMode } from '../../../kernel/types/permissions.js'
 import { createUserMessage } from '../messages.js'
-import { logOTelEvent, redactIfDisabled } from '../telemetry/events.js'
+import { logOTelEvent, redactIfDisabled } from '../../../kernel/telemetry/events.js'
 import { startInteractionSpan } from '../telemetry/sessionTracing.js'
 import {
   matchesKeepGoingKeyword,

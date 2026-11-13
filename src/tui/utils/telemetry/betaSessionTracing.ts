@@ -30,10 +30,10 @@ import { createHash } from 'crypto'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
-import type { AssistantMessage, UserMessage } from '../../types/message.js'
-import { isEnvTruthy } from '../envUtils.js'
-import { jsonParse, jsonStringify } from '../slowOperations.js'
-import { logOTelEvent } from './events.js'
+import type { AssistantMessage, UserMessage } from '../../../kernel/types/message.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
+import { logOTelEvent } from '../../../kernel/telemetry/events.js'
 
 // Message type for API calls (UserMessage or AssistantMessage)
 type APIMessage = UserMessage | AssistantMessage

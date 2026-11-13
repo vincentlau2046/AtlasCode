@@ -1,4 +1,4 @@
-import type { QuerySource } from 'src/tui/constants/querySource.js'
+import type { QuerySource } from 'src/kernel/constants/querySource'
 import {
   DEFAULT_OUTPUT_STYLE_NAME,
   OUTPUT_STYLE_CONFIG,

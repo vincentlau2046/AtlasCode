@@ -17,15 +17,15 @@ import type { ToolUseContext } from '../../Tool.js'
 // 0.1.94 C-3（f4 §13①）：onMessage 钩子消费面——progress tracker +
 // task.messages 逐消息镜像 + inProgressToolUseIDs 维护（旧 TUI 副本
 // for-await 体逐字消费形，随换道改由 engine 单源 onMessage 回调驱动）。
-import { appendCappedMessage } from '../../tasks/InProcessTeammateTask/types.js'
-import type { InProcessTeammateTaskState } from '../../tasks/InProcessTeammateTask/types.js'
+import { appendCappedMessage } from '../../../kernel/tasks/InProcessTeammateTask/types.js'
+import type { InProcessTeammateTaskState } from '../../../kernel/tasks/InProcessTeammateTask/types.js'
 import {
   createActivityDescriptionResolver,
   createProgressTracker,
   getProgressUpdate,
   updateProgressFromMessage,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
-import type { Message as TuiMessage } from '../../types/message.js'
+import type { Message as TuiMessage } from '../../../kernel/types/message.js'
 import { getSystemPrompt } from '../../constants/prompts.js'
 import type {
   InProcessSpawnHooks,

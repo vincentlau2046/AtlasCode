@@ -17,9 +17,9 @@ import {
   resolve,
   sep,
 } from 'path'
-import { findManifestInDir, getPluginManifestDirs } from '../configDir.js'
+import { findManifestInDir, getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
-import { jsonParse, jsonStringify } from '../slowOperations.js'
+import { jsonParse, jsonStringify } from '../slowOperations'
 import {
   validateMarketplaceManifest,
   validatePluginManifest,

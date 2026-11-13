@@ -14,8 +14,8 @@
  */
 
 import { decodeTextLosslessly } from 'src/shared'
-import { logForDebugging } from './debug.js'
-import { getFsImplementation, safeResolvePath } from './fsOperations.js'
+import { logForDebugging } from './debug'
+import { getFsImplementation, safeResolvePath } from './fsOperations'
 
 export type LineEndingType = 'CRLF' | 'LF'
 

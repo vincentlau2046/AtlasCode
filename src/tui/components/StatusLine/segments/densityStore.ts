@@ -2,7 +2,7 @@
 // 17-TUI设计方案 §9.1：ctrl+shift+b（app:toggleBrief）两态切换
 // 独立于 AppState（避免高频重渲），走 useSyncExternalStore（先例 atlasCodeHints）
 
-import { createSignal } from '../../../utils/signal.js'
+import { createSignal } from '../../../../kernel/utils/signal.js'
 
 export type StatusLineDensity = 'simple' | 'detailed'
 

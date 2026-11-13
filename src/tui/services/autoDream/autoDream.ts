@@ -19,8 +19,8 @@ import {
   createUserMessage,
   createMemorySavedMessage,
 } from '../../utils/messages.js'
-import type { Message } from '../../types/message.js'
-import { logForDebugging } from '../../utils/debug.js'
+import type { Message } from '../../../kernel/types/message.js'
+import { logForDebugging } from '../../utils/debug'
 import type { ToolUseContext } from '../../Tool.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { isAutoMemoryEnabled, getAutoMemPath } from '../../memdir/paths.js'
@@ -43,8 +43,8 @@ import {
   failDreamTask,
   isDreamTask,
 } from '../../tasks/DreamTask/DreamTask.js'
-import { FILE_EDIT_TOOL_NAME } from '../../tools/FileEditTool/constants.js'
-import { FILE_WRITE_TOOL_NAME } from '../../tools/FileWriteTool/prompt.js'
+import { FILE_EDIT_TOOL_NAME } from '../../../kernel/tools/FileEditTool/constants.js'
+import { FILE_WRITE_TOOL_NAME } from '../../../kernel/tools/FileWriteTool/prompt.js'
 
 // Scan throttle: when time-gate passes but session-gate doesn't, the lock
 // mtime doesn't advance, so the time-gate keeps passing every turn.

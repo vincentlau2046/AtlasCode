@@ -1,12 +1,12 @@
-import { getConfigDirName, getConfigDirNameForProject } from '../utils/configDir.js'
+import { getConfigDirName, getConfigDirNameForProject } from '../../kernel/utils/configDir.js'
 import { c as _c } from "react/compiler-runtime";
 import figures from 'figures';
 import { join } from 'path';
 import React, { Suspense, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { KeybindingWarnings } from 'src/tui/components/KeybindingWarnings.js';
 import { McpParsingWarnings } from 'src/tui/components/mcp/McpParsingWarnings.js';
-import { getModelMaxOutputTokens } from 'src/tui/utils/context.js';
-import { getAtlasConfigHomeDir } from 'src/tui/utils/envUtils.js';
+import { getModelMaxOutputTokens } from 'src/kernel/utils/context';
+import { getAtlasConfigHomeDir } from 'src/kernel/utils/envUtils';
 import type { SettingSource } from 'src/tui/utils/settings/constants.js';
 import { getOriginalCwd } from 'src/bootstrap';
 import type { CommandResultDisplay } from '../commands.js';
@@ -29,7 +29,7 @@ import { cleanupStaleLocks, getAllLockInfo, isPidBasedLockingEnabled, type LockI
 import { getInitialSettings } from '../utils/settings/settings.js';
 import { BASH_MAX_OUTPUT_DEFAULT, BASH_MAX_OUTPUT_UPPER_LIMIT } from '../utils/shell/outputLimits.js';
 import { TASK_MAX_OUTPUT_DEFAULT, TASK_MAX_OUTPUT_UPPER_LIMIT } from '../utils/task/outputFormatting.js';
-import { getXDGStateHome } from '../utils/xdg.js';
+import { getXDGStateHome } from '../../kernel/utils/xdg.js';
 type Props = {
   onDone: (result?: string, options?: {
     display?: CommandResultDisplay;

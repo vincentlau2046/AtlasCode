@@ -3,13 +3,13 @@
 // PRODUCT_URL 与 REPOSITORY_URL 同值，替换行为零改动，去字面双源漂移）。
 import { feature, PRODUCT_BRAND, REPOSITORY_URL } from 'src/shared'
 import { stat } from 'fs/promises'
-import { TERMINAL_OUTPUT_TAGS } from '../constants/xml.js'
+import { TERMINAL_OUTPUT_TAGS } from '../../kernel/constants/xml.js'
 import type { AppState } from '../state/AppState.js'
-import { FILE_EDIT_TOOL_NAME } from '../tools/FileEditTool/constants.js'
-import { FILE_READ_TOOL_NAME } from '../tools/FileReadTool/prompt.js'
-import { FILE_WRITE_TOOL_NAME } from '../tools/FileWriteTool/prompt.js'
-import { GLOB_TOOL_NAME } from '../tools/GlobTool/prompt.js'
-import { GREP_TOOL_NAME } from '../tools/GrepTool/prompt.js'
+import { FILE_EDIT_TOOL_NAME } from '../../kernel/tools/FileEditTool/constants.js'
+import { FILE_READ_TOOL_NAME } from '../../kernel/tools/FileReadTool/prompt.js'
+import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
+import { GLOB_TOOL_NAME } from '../../kernel/tools/GlobTool/prompt.js'
+import { GREP_TOOL_NAME } from '../../kernel/tools/GrepTool/prompt.js'
 import type { Entry } from '../types/logs.js'
 import {
   type AttributionData,
@@ -18,7 +18,7 @@ import {
   isInternalModelRepoCached,
   sanitizeModelName,
 } from './commitAttribution.js'
-import { logForDebugging } from './debug.js'
+import { logForDebugging } from './debug'
 import { parseJSONL } from './json.js'
 import { logError } from './log.js'
 import {

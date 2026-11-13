@@ -6,7 +6,7 @@ import {
   ATLAS_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
   GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN,
-} from '../../../tools/FileEditTool/constants.js'
+} from '../../../../kernel/tools/FileEditTool/constants.js'
 import { env } from '../../../utils/env.js'
 import { generateSuggestions } from '../../../utils/permissions/filesystem.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'

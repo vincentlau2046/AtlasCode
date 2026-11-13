@@ -1,7 +1,7 @@
-import type { PermissionRule } from 'src/tui/utils/permissions/PermissionRule.js'
+import type { PermissionRule } from 'src/kernel/permissions/PermissionRule'
 import { getSettingsForSource } from 'src/tui/utils/settings/settings.js'
-import type { SettingsJson } from 'src/tui/utils/settings/types.js'
-import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
+import type { SettingsJson } from 'src/kernel/settings/types'
+import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
 import { SAFE_ENV_VARS } from '../../utils/managedEnvConstants.js'
 import { getPermissionRulesForSource } from '../../utils/permissions/permissionsLoader.js'
 

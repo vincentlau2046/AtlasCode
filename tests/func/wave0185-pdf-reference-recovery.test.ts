@@ -62,7 +62,7 @@ import {
 } from '../../src/engine/session/record'
 import { cleanMessagesForLogging as tuiCleanMessagesForLogging } from '../../src/tui/utils/sessionStorage'
 import { collectPDFReferenceAttachmentsForCompact } from '../../src/tui/contextBodies/compact'
-import type { Message } from '../../src/tui/types/message'
+import type { Message } from '../../src/kernel/types/message'
 
 // ── 环境与夹具 ───────────────────────────────────────────────────────────
 

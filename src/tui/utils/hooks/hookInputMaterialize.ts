@@ -12,7 +12,7 @@
  * try/catch（抛错键丢弃并记名）+ WeakMap 环防护（cyclic 以 '[Circular]'
  * 占位终止，否则克隆不终止）。克隆再序列化成功则照常跑钩子。
  */
-import { jsonStringify } from '../slowOperations.js'
+import { jsonStringify } from '../slowOperations'
 
 export type MaterializeResult =
   | { ok: true; value: unknown; droppedKeys: string[] }

@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
 import { buildTool, type Tool } from '../../Tool.js'
-import { lazySchema } from '../../utils/lazySchema.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 
 export const SNIP_TOOL_NAME = 'Snip'
 

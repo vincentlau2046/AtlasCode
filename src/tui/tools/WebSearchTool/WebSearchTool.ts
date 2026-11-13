@@ -4,12 +4,12 @@
 // import 面：BetaContentBlock/BetaWebSearchTool20250305 型 / growthbook GB
 // 门 / modelprovider 双参 / logError / createUserMessage / getDefaultFastModel
 // / modelToRole / asSystemPrompt（H6 登记 = engine webSearchTool delta ⑩ 同批）。
-import type { PermissionResult } from 'src/tui/utils/permissions/PermissionResult.js'
+import type { PermissionResult } from 'src/kernel/permissions/PermissionResult'
 import { z } from 'zod/v4'
 import { runWebSearch } from 'src/engine'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { lazySchema } from '../../utils/lazySchema.js'
-import { jsonStringify } from '../../utils/slowOperations.js'
+import { lazySchema } from '../../../kernel/utils/lazySchema.js'
+import { jsonStringify } from '../../utils/slowOperations'
 import { getWebSearchPrompt, WEB_SEARCH_TOOL_NAME } from './prompt.js'
 import {
   getToolUseSummary,
@@ -65,9 +65,9 @@ type OutputSchema = ReturnType<typeof outputSchema>
 export type Output = z.infer<OutputSchema>
 
 // Re-export WebSearchProgress from centralized types to break import cycles
-export type { WebSearchProgress } from '../../types/tools.js'
+export type { WebSearchProgress } from '../../../kernel/types/tools.js'
 
-import type { WebSearchProgress } from '../../types/tools.js'
+import type { WebSearchProgress } from '../../../kernel/types/tools.js'
 
 // G-2（2026-09-30，§8.74.27）：makeToolSchema（web_search_20250305 wire 面）+
 // makeOutputFromSearchResponse（三块型流解析）随 Anthropic 服务端工具车道

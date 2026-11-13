@@ -29,10 +29,10 @@ import {
   writeFile,
 } from 'fs/promises'
 import { join, resolve, sep } from 'path'
-import { getPluginManifestDirs } from '../configDir.js'
-import { logForDebugging } from '../debug.js'
-import { toError } from '../errors.js'
-import { jsonStringify } from '../slowOperations.js'
+import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
+import { logForDebugging } from '../debug'
+import { toError } from '../../../kernel/utils/errors.js'
+import { jsonStringify } from '../slowOperations'
 import {
   getBuiltinMarketplaceSnapshot,
 } from './builtinMarketplaceSnapshots.js'

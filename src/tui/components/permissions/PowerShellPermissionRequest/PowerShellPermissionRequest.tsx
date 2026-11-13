@@ -8,7 +8,7 @@ import { PowerShellTool } from '../../../tools/PowerShellTool/PowerShellTool.js'
 import { isAllowlistedCommand } from '../../../tools/PowerShellTool/readOnlyValidation.js';
 import { applyAutoModePermissionOption, isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
-import { isDangerousShellPrefix } from '../../../utils/permissions/dangerousShellPrefix.js';
+import { isDangerousShellPrefix } from '../../../../kernel/permissions/dangerousShellPrefix.js';
 import { getCompoundCommandPrefixesStatic } from '../../../utils/powershell/staticPrefix.js';
 import { Select } from '../../CustomSelect/select.js';
 import { type UnaryEvent, usePermissionRequestLogging } from '../hooks.js';

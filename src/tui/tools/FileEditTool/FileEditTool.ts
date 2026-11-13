@@ -11,11 +11,11 @@ import {
 } from '../../skills/loadSkillsDir.js'
 import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
-import { getCwd } from '../../utils/cwd.js'
-import { logForDebugging } from '../../utils/debug.js'
+import { getCwd } from '../../../kernel/utils/cwd.js'
+import { logForDebugging } from '../../utils/debug'
 import { countLinesChanged } from '../../utils/diff.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
-import { isENOENT } from '../../utils/errors.js'
+import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
+import { isENOENT } from '../../../kernel/utils/errors.js'
 import {
   FILE_NOT_FOUND_CWD_NOTE,
   findSimilarFile,
@@ -34,7 +34,7 @@ import {
 } from '../../utils/fileRead.js'
 import { UndecodableTextError } from 'src/shared'
 import { formatFileSize } from '../../utils/format.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { getFsImplementation } from '../../utils/fsOperations'
 import {
   fetchSingleFileGitDiff,
   type ToolUseDiff,
@@ -45,14 +45,14 @@ import {
   checkWritePermissionForTool,
   matchingRuleForInput,
 } from '../../utils/permissions/filesystem.js'
-import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
-import { matchWildcardPattern } from '../../utils/permissions/shellRuleMatching.js'
+import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
+import { matchWildcardPattern } from '../../../kernel/permissions/shellRuleMatching.js'
 import { validateInputForSettingsFileEdit } from '../../utils/settings/validateEditTool.js'
-import { NOTEBOOK_EDIT_TOOL_NAME } from '../NotebookEditTool/constants.js'
+import { NOTEBOOK_EDIT_TOOL_NAME } from '../../../kernel/tools/NotebookEditTool/constants.js'
 import {
   FILE_EDIT_TOOL_NAME,
   FILE_UNEXPECTEDLY_MODIFIED_ERROR,
-} from './constants.js'
+} from '../../../kernel/tools/FileEditTool/constants.js'
 import { getEditToolDescription } from './prompt.js'
 import {
   type FileEditInput,

@@ -1,7 +1,7 @@
 import type {
   Base64ImageSource,
   ImageBlockParam,
-} from '../types/atlas.js'
+} from '../../kernel/types/atlas.js'
 import {
   API_IMAGE_MAX_BASE64_SIZE,
   IMAGE_MAX_HEIGHT,
@@ -13,8 +13,8 @@ import {
   type SharpFunction,
   type SharpInstance,
 } from '../tools/FileReadTool/imageProcessor.js'
-import { logForDebugging } from './debug.js'
-import { errorMessage } from './errors.js'
+import { logForDebugging } from './debug'
+import { errorMessage } from '../../kernel/utils/errors.js'
 import { formatFileSize } from './format.js'
 import { logError } from './log.js'
 
