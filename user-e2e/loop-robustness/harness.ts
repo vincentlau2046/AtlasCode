@@ -87,6 +87,14 @@ function setupWs(sc: string): string {
   const ws = join(ROOT, 'workspaces', sc)
   rmSync(ws, { recursive: true, force: true })
   mkdirSync(ws, { recursive: true })
+  // 0.1.89 判据面修正（工单 §6.3 择定 Option 2 治本，e2e lane 权属）：本工作区
+  // 位于 AtlasCode repo 链内，根 package.json "type":"module" 使 .js 按 ESM
+  // 解析 → TASK 本意是 CommonJS（require/module.exports），模型被逼走「改名
+  // .cjs」合法自适配 → diskCheck 精确文件名假阴（086 R1-delay RED×4 假阳性
+  // 定谳：transcript 同条 mv 命令 + ALL TESTS PASSED 实跑在场）。种 commonjs
+  // package.json 消除环境噪声 = 判据不稀释（精确名判别力保持，不采等价物容忍）。
+  // 同形姊妹探针 soak/stability-probe/tui-longtask setupWs 已同批种子。
+  writeFileSync(join(ws, 'package.json'), JSON.stringify({ name: 'looprob-ws', private: true, type: 'commonjs' }, null, 2))
   // R3 需 git（任务含 commit？本任务不含，但保留 init 便于后续）
   const r = spawnSync('git', ['init', '-q'], { cwd: ws, stdio: 'ignore' })
   return ws

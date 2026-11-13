@@ -45,6 +45,36 @@ export interface MainLoopScript {
   toolName: string
   arguments: Record<string, unknown>
   count?: number
+  /** 0.1.102 gate：序列脚本——逐 call 映射响应形（text = 长流式文本种子；tool = tool_use 完成体）。
+   *  在场时优先于 toolName/count 旧形。call i（1-based）> sequence.length → 落 fault-plan + 转发。 */
+  sequence?: Array<
+    | { kind: 'text'; lines: number; chunks: number }
+    | { kind: 'tool'; toolName: string; arguments: Record<string, unknown> }
+  >
+}
+
+/** 序列 text 条目正文：`row-NNNN` 唯一行（锚唯一性供截断断言，CC-941 域）。 */
+export function scriptedLongTextBody(lines: number): string {
+  const out: string[] = []
+  for (let i = 1; i <= lines; i++) out.push(`row-${String(i).padStart(4, '0')} stream-anchor-line`)
+  return out.join('\n')
+}
+
+/** OpenAI SSE 长流：chunks 个 delta 均分 lines 行，尾 finish_reason=stop + [DONE]。 */
+function scriptedLongTextStream(model: string, lines: number, chunks: number): string {
+  const body = scriptedLongTextBody(lines)
+  const all = body.split('\n')
+  const per = Math.ceil(all.length / Math.max(chunks, 1))
+  let sse = ''
+  let idx = 0
+  for (let c = 0; c < chunks && idx < all.length; c++) {
+    const part = all.slice(idx, idx + per).join('\n')
+    idx += per
+    sse += `data: ${JSON.stringify({ id: 'chatcmpl-longtext', object: 'chat.completion.chunk', created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: part + (idx < all.length ? '\n' : '') } }] })}\n\n`
+  }
+  sse += `data: ${JSON.stringify({ id: 'chatcmpl-longtext', object: 'chat.completion.chunk', created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] })}\n\n`
+  sse += 'data: [DONE]\n\n'
+  return sse
 }
 
 /**
@@ -387,7 +417,39 @@ export function startFaultProxy(opts: {
       if (isChat) call++
       // ② 主循环前 count 次 chat 脚本化（全确定性种子：固定 tool_use，消除 live 模型非确定性）。
       // call 已计入（非分类器），前 count 次命中 → 回脚本化完成体；超过 count 落 fault-plan + 转发。
-      if (isChat && mainLoop && call <= (mainLoop.count ?? 1)) {
+      if (isChat && mainLoop && mainLoop.sequence && call <= mainLoop.sequence.length) {
+        // 主循环门控：startup 背景调用（title-gen 等无 tools 体）不消费 sequence——
+        // 主循环请求体携带非空 tools 数组（81KB 量级）；gate-102 首轮定因。
+        let hasTools = false
+        try { hasTools = Array.isArray(JSON.parse(body.toString('utf8') || '{}')?.tools) && JSON.parse(body.toString('utf8')).tools.length > 0 } catch { /* 非 JSON 不视为主循环 */ }
+        if (!hasTools) {
+          log(`${req.method} ${req.url} mainloop=sequence-skip call=${call}（无 tools 体 = 背景/标题调用，转发 live）`)
+          // 落到下方 fault-plan + 转发逻辑
+        } else {
+        const entry = mainLoop.sequence[call - 1]
+        if (entry.kind === 'text') {
+          log(`${req.method} ${req.url} mainloop=sequence call=${call} text lines=${entry.lines} chunks=${entry.chunks}`)
+          res.writeHead(200, { 'Content-Type': 'text/event-stream' })
+          // 分 chunk 渐次下推（150ms/chunk）：让 TUI 流式渲染态可观测（瞬完则中间帧被 React 批处理吞掉）
+          const sseBody = scriptedLongTextStream('injected-mainloop', entry.lines, entry.chunks)
+          const frames = sseBody.split('\n\n').filter(f => f.trim())
+          let fi = 0
+          const pump = () => {
+            if (fi >= frames.length) { res.end(); return }
+            res.write(frames[fi] + '\n\n')
+            fi++
+            setTimeout(pump, 150)
+          }
+          pump()
+          return
+        }
+        const scripted = scriptedMainLoopCompletion({ toolName: entry.toolName, arguments: entry.arguments })
+        log(`${req.method} ${req.url} mainloop=sequence call=${call} tool=${entry.toolName}`)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(scripted)
+        return
+      } }
+      if (isChat && mainLoop && !mainLoop.sequence && call <= (mainLoop.count ?? 1)) {
         const scripted = scriptedMainLoopCompletion(mainLoop)
         log(`${req.method} ${req.url} mainloop=scripted call=${call} tool=${mainLoop.toolName}`)
         res.writeHead(200, { 'Content-Type': 'application/json' })

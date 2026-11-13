@@ -78,9 +78,16 @@ const P = {
   cardAllow: { id: 'P0-3-allow', gate: '审批卡片内联 why', desc: 'default 模式手动批准行（✓ Allowed · your decision；auto-mode classifier 行属 auto/plan 模式另测）', re: /Allowed.*your\s+decision/i, hard: true },
   cardDeny: { id: 'P0-3-deny', gate: '审批卡片内联 why', desc: 'deny 面（需 deny fixture；S-A 走批准面 → INCONCLUSIVE）', re: /(Denied|拦截|拒绝|\bdeny\b)/i, hard: false },
   // P0 门禁：网关不可达给方向不给 mood
-  gwDown: { id: 'P0-5-gw', gate: '网关不可达方向性', desc: 'IFF 不可达提示（不可达/无法连接/connection error 族；仅探测错误是否浮现，方向性由 manual+doctor 探针把关）', re: /(不可达|无法连接|unreachable|unavailable|连接失败|connection\s*error|连接错误)/i, hard: true },
-  gwManual: { id: 'P0-5-manual', gate: '网关不可达方向性', desc: '「已切人工确认」族', re: /(人工确认|手动确认|manual)/i, hard: true },
-  gwDoctor: { id: 'P0-5-doctor', gate: '网关不可达方向性', desc: '给排查方向 /doctor', re: /(\/doctor|排查)/, hard: true },
+  // 0.1.71 判据面同步勘误（探针侧，波体 A-1 聚合文案族 = f4 裁定意图）：旧 0.1.64 G4 文案族
+  // （「Connection error. LLM 端点 不可达：已切人工确认 —— /doctor 排查」）被 A-1 全败聚合消息
+  // 替代（「All N model(s) in pool for role 'X' failed: - ref: 分类 / Fix: Check provider
+  // credentials/quota, or switch to another provider/model (...) then retry」）。方向性意图
+  // 保持（错误浮现 + 可行动处置方向 + 逐模型诊断粒度），三分解重映射至 A-1 文案结构；
+  // 判据强度不变（3 探针 hard gate 保持）。同族 stale 登记：B3-gw-err-noregress（P024 面，
+  // 本 gate 判据③ 不执行，未扩面修改）。
+  gwDown: { id: 'P0-5-gw', gate: '网关不可达方向性', desc: '全败聚合错误浮现（A-1：N model(s) in pool for role failed 族；仅探测错误是否浮现，方向性由 manual+doctor 探针把关）', re: /(in pool for role .*failed:|不可达|无法连接|connection\s*error)/i, hard: true },
+  gwManual: { id: 'P0-5-manual', gate: '网关不可达方向性', desc: '可行动处置方向行（A-1 Fix 行族：Check provider credentials/quota 或 switch provider/model；旧面「已切人工确认」族随 A-1 离场）', re: /(Fix:\s*Check provider credentials|人工确认|手动确认)/i, hard: true },
+  gwDoctor: { id: 'P0-5-doctor', gate: '网关不可达方向性', desc: '逐模型失败诊断粒度（A-1 逐 ref 行：ref: 分类标签族；旧面 /doctor 排查命令族随 A-1 离场）', re: /-\s*[\w.-]+\/[\w.-]+\s*:\s*(auth_error|api_error_\d+|quota_exhausted|unknown_reference|error)\b/i, hard: true },
   // P1 门禁：计划/进度可见 + diff 可读性收口 + 非 git 项目 skill（G2 残余）
   plan: { id: 'P1-1-plan', gate: '规划期可见目标+还差几步', desc: '计划/进度标记（目标/计划/步骤/N-M/还剩 族；文案以落地为准，miss 时先对齐关键词）', re: /(目标|计划|步骤|还剩|\d+\s*[\/\-]\s*\d+\s*(步|项|个)|progress|todo)/i, hard: true },
   diffInline: { id: 'P1-2-diff', gate: '工具结果/diff 默认可读', desc: '改文件 diff 默认内联（Added/Removed N lines 族，G1 #258 延续）', re: /Added\s*\d+\s*lines?|Removed\s*\d+\s*lines?/i, hard: true },
@@ -184,6 +191,10 @@ async function seedHome(home: string, mode: SeedMode, extraSettings?: (s: Record
   const p = join(home, '.atlas', 'settings.json')
   const s: any = JSON.parse(readFileSync(p, 'utf8'))
   // 三角色 + 顶层 model 对齐 CMP_MODEL（S-C 例外：baseURL 指死端口；cls 例外：指 fault-proxy）
+  if (mode === 'live' && process.env.ATLAS_E2E_REQDIFF_URL) {
+    // gate-081 临时诊断（跑后恢复）：live baseURL 指日志反代（透传真网关，全请求体落盘）
+    s.providers = { iff: { ...(s.providers?.iff ?? {}), baseURL: process.env.ATLAS_E2E_REQDIFF_URL } }
+  }
   if (mode === 'deadgw') {
     s.providers = { iff: { ...(s.providers?.iff ?? {}), baseURL: DEAD_GW } }
   } else if (mode === 'cls') {
@@ -349,8 +360,23 @@ const S_A: ScenarioSpec = {
   steps: async pty => {
     // P0a：非 allowlist Bash（文件写入）→ default 模式弹「Do you want to proceed?」→ 数字 1 直选 Yes 批准
     pty.send(BASH_ASK_PROMPT)
-    const popup = await pty.waitAnySince(['Do you want to proceed', 'Bash command'], 90_000)
-    if (popup.ok) pty.sendRaw('1') // Main 钉死：1=Yes 数字直选（不依赖焦点；y/n 在 Bash 弹框是空操作勿用）
+    // 0.1.81 gate 硬化（有界多答案）：live 模型可在回合 2 追加验证调用（ls -l）→ 第二 ask 弹框；
+    // 单答案脚本下未答框阻塞 UI → /model fast 键入落框内 → whoRole/modelFast 假红（0.1.81 gate
+    // 请求级字节取证定谳：双面请求逐字节等价，verify/report = 模型采样方差非产品回归，探针脆性面）。
+    // 探针意图 = ask 弹框 verdict + /model fast statusline，不依赖「模型恰一次工具调用」→ 逐框作答。
+    // 新框判据 = 'Do you want to proceed' 计数（lib stripAnsi 口径每开一框恰 +1，append-only 单调；
+    // 7 工件普查：verify 分支=2、report 分支=1 无例外）。窗口按模型回合时延给足（首框 180s：
+    // ogr3 实测网关负载下回合 1 可 >90s，紧窗先超时 → 零答案 → 迟开框吞后续键入）；续框 60s。
+    let answered = 0
+    for (let i = 0; i < 4; i++) {
+      const got = await pty.waitCountSince(
+        'Do you want to proceed', answered + 1, i === 0 ? 180_000 : 60_000,
+      )
+      if (!got) break // 无新框 → 模型已报告完成（report 分支）
+      answered++
+      pty.sendRaw('1') // Main 钉死：1=Yes 数字直选（不依赖焦点；y/n 在 Bash 弹框是空操作勿用）
+      await pty.settle(8_000, 60_000)
+    }
     await pty.settle(15_000, 150_000) // 卡片结果态 + 内联 why（rule/classifier/mode）
     // 回归护底：/model fast（modelFast/whoRole）+ 读 note（ctxPct）
     pty.send('/model fast')

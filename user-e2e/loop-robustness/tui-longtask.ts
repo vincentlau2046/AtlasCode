@@ -72,6 +72,9 @@ function setupWs(sc: string): string {
   rmSync(ws, { recursive: true, force: true })
   mkdirSync(ws, { recursive: true })
   writeFileSync(join(ws, 'note.txt'), NOTE_TXT)
+  // 0.1.89 判据面修正（同 harness.ts setupWs：种 commonjs 消除 repo 链 ESM
+  // 解析噪声——086 R1-delay RED×4 假阳性定谳根因，diskCheck 精确名判别力保持）。
+  writeFileSync(join(ws, 'package.json'), JSON.stringify({ name: 'looprob-ws', private: true, type: 'commonjs' }, null, 2))
   return ws
 }
 

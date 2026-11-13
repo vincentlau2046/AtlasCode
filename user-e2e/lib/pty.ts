@@ -110,6 +110,19 @@ export class Pty {
     return countOcc(this.sinceText(), sub)
   }
 
+  /** 等子串累计出现次数（spawn 之后归一化文本）达 n；超时/进程退 → false。
+   *  0.1.81 gate S-A 硬化：live 模型可在回合 2 追加验证调用 → 第二 ask 弹框；
+   *  「每开一框 marker +1」单调（日志 append-only，关框不回退），供逐框作答循环判新框。 */
+  async waitCountSince(sub: string, n: number, timeoutMs: number): Promise<boolean> {
+    const t0 = Date.now()
+    for (;;) {
+      if (this.countSince(sub) >= n) return true
+      if (Date.now() - t0 > timeoutMs) return false
+      if (!this.alive()) return false
+      await sleep(800)
+    }
+  }
+
   send(text: string): void {
     this.child?.stdin?.write(text + '\n')
   }
