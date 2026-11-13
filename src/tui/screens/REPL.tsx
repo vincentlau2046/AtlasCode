@@ -91,7 +91,6 @@ function _useMoreRightStub(_args: {
   };
 }
 import { SpinnerWithVerb, type SpinnerMode } from '../components/Spinner.js';
-import { DeferSuspendHint, type DeferSuspension } from '../components/DeferSuspendHint.js';
 import { getSystemPrompt } from '../constants/prompts.js';
 import { buildEffectiveSystemPrompt } from '../utils/systemPrompt.js';
 import { getSystemContext, getUserContext } from '../context.js';
@@ -1585,11 +1584,6 @@ export function REPL({
     void mrOnTurnComplete(messagesRef.current, true);
   };
   useEffect(() => onCrashReport(info => crashRecoveryHandlerRef.current(info)), []);
-  // 0.1.102 P0 切片 2-C：AD-45 defer 挂起可视化——AgentLoopResult.deferred
-  // 单源消费（lock-face ①禁第二 defer 判定实现）。loop 以 deferred 终态
-  // settle → 挂起态置位（常驻提示行 + 超时注记，Esc 消行）；下一次 query
-  // 启动时清除（重评入口）。
-  const [deferSuspension, setDeferSuspension] = useState<DeferSuspension | null>(null);
   const showSpinner = (!toolJSX || toolJSX.showSpinner === true) && toolUseConfirmQueue.length === 0 && promptQueue.length === 0 && (
   // Show spinner during input processing, API call, while teammates are running,
   // or while pending task notifications are queued (prevents spinner bounce between consecutive notifications)
@@ -2699,8 +2693,6 @@ export function REPL({
       deps: { ...loopDeps, onMcpToolBackgrounded: handleMcpToolBackgrounded },
       args: loopArgs
     });
-    // 切片 2-C：新 query 启动 = 重评入口，清除上一挂起态（提示行随查随消）。
-    setDeferSuspension(null);
     let loopResult: AgentLoopResult | undefined;
     {
       let iter: IteratorResult<EngineLoopStreamEvent, AgentLoopResult> = await loopGen.next();
@@ -2712,17 +2704,6 @@ export function REPL({
     }
     if (loopResult?.emptyTerminated) {
       setMessages(prev => [...prev, createSystemMessage('本轮未产生任何响应（模型空输出，已重试仍为空）。请重试，或检查网关连接与模型配置。', 'warning')]);
-    }
-    // 0.1.102 P0 切片 2-C：defer 挂起终态 → 挂起态置位（常驻提示行）+ 落盘
-    // 一次性系统行（转写常驻）。deferred 单源 = AgentLoopResult.deferred。
-    if (loopResult?.deferred) {
-      setDeferSuspension({
-        toolName: loopResult.deferred.toolName,
-        reason: loopResult.deferred.deferReason ?? 'deferred by hook',
-        sinceMs: Date.now(),
-      });
-      setMessages(prev => [...prev, createSystemMessage(
-        `⏸ 已挂起：${loopResult.deferred!.toolName} 等待权限裁定（${loopResult.deferred!.deferReason ?? 'deferred by hook'}）。发送消息可重评。`, 'warning')]);
     }
     queryCheckpoint('query_end');
 
@@ -4405,8 +4386,6 @@ export function REPL({
                   </Box>}
               <Box flexGrow={1} />
               {showSpinner && <SpinnerWithVerb {...spinnerVerbProps} />}
-              {/* 0.1.102 P0 切片 2-C：defer 挂起常驻提示行（挂起态存活期间恒渲染；Esc 消行） */}
-              {deferSuspension && <DeferSuspendHint suspension={deferSuspension} onDismiss={() => setDeferSuspension(null)} />}
               {isFullscreenEnvEnabled() && <PromptInputQueuedCommands />}
             </>} bottom={<Box flexDirection="row" width="100%" alignItems="flex-end">
               <Box flexDirection="column" flexGrow={1}>
