@@ -73,6 +73,10 @@ is_error: true
 - 补格：到期零孤儿（abort reason 到达工具消费面断言）；不二 firing（二次 abort 幂等）；格 10 无声明零 wire 差（tools schema 快照 diff）。
 - canon 前滚：无声明工具链零行为变更 = 套件本体。
 
+## 钉 ⑥（f4 批复新增，2026-11-13）——C5-3 后台面 disarm
+
+工具转后台（toolExecution.ts:615-646 `callWithMcpAutoBackground` race，`raced.backgrounded === true` 分支）即 **disarm deadline**：后台 = 用户显式接管，脱离预算面，禁后台工具被到期 abort 杀死。实现形 = `runWithToolTimeout` 返回带 `disarm()` 的句柄，backgrounded 早返支（:635 前）先 disarm 再返；后台化后 race continuation 内的心跳包裹体不受 deadline 影响。落格：并入格 3 边界断言（转后台工具零 TOOL_TIMEOUT 块）。
+
 ## 段 I 落码序（预注册）
 
 1. 切片 1：loopWatchdog.ts 解析翻转 + DEFAULT 常量删 + 错误文案 + 单测三态表。
