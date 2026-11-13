@@ -30,32 +30,26 @@ function wait(ms: number): Promise<void> {
 }
 
 describe('resolveLoopWatchdogTimeoutMs', () => {
-  // 0.1.104 切片 1 fail-safe 翻转（lock-face 必答 1 三态表；历史锚：0.1.102–0.1.103
-  // 曾为缺省 120s 开启——DEFAULT_LOOP_WATCHDOG_MS=120_000，随翻转删除）。
-  test('缺省关三态：未设 / 空 / 纯空白 → 0（关）', () => {
-    expect(resolveLoopWatchdogTimeoutMs({})).toBe(0)
-    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '' })).toBe(0)
-    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '   ' })).toBe(0)
+  test('缺省 = DEFAULT_LOOP_WATCHDOG_MS（120s）', () => {
+    expect(DEFAULT_LOOP_WATCHDOG_MS).toBe(120_000)
+    expect(resolveLoopWatchdogTimeoutMs({})).toBe(DEFAULT_LOOP_WATCHDOG_MS)
+    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '' })).toBe(
+      DEFAULT_LOOP_WATCHDOG_MS,
+    )
   })
 
-  test('非法/负值归关（fail-safe 同向；负值禁「无限期」新语义）', () => {
-    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '-1' })).toBe(0)
-    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: 'abc' })).toBe(0)
-  })
-
-  test('显式 0 = 显式关；显式正值 = opt-in 透传', () => {
+  test('0 = 关（透传 0）；合法值透传', () => {
     expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '0' })).toBe(0)
     expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '5000' })).toBe(5000)
   })
 
-  test('格 1 spy 锚：缺省（无 env）零窗实例 armed 也不排 timer 不 fire（毫秒级结构格）', async () => {
-    const wd = createLoopWatchdogFromEnv({})
-    wd.noteEvent('round_start')
-    expect(wd.isArmed).toBe(true)
-    await wait(TICK * 3)
-    expect(wd.isFired).toBe(false)
-    expect(wd.abortSignal.aborted).toBe(false)
-    wd.dispose()
+  test('非法值回缺省（负数 / NaN / 非数字）', () => {
+    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: '-1' })).toBe(
+      DEFAULT_LOOP_WATCHDOG_MS,
+    )
+    expect(resolveLoopWatchdogTimeoutMs({ [LOOP_WATCHDOG_ENV_KEY]: 'abc' })).toBe(
+      DEFAULT_LOOP_WATCHDOG_MS,
+    )
   })
 })
 
