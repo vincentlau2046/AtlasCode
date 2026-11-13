@@ -28,8 +28,8 @@
 
 | # | 格 |
 |---|---|
-| 1 | **行为恒等格**：`git diff 9b79a635..HEAD -- src/` 恰 = S3a 已搬路径改名 + 零行为文件残留 diff（字节级对表，e2e reqlog body 法可用） |
-| 2 | **撤卸恰净格**：crashRecovery / loopWatchdog / viewportBudget / InlineViewportCompressor / theme watcher 三源检测 / defer 提示行 / TOOL_TIMEOUT 面全部零残留（码面 + 测试面 + literal-inventory 面） |
+| 1 | **行为恒等格**：`git diff 9b79a635..HEAD -- src/` **恰空（Δ=0）**（§6 吸收 1 必改形）；可选双面格 `git diff 4dac817b..HEAD -- src/` 恰 = S3a 移动集 rename-only |
+| 2 | **撤卸恰净格（限定 0.1.102 新增面）**：crashRecovery / loopWatchdog / viewportBudget / InlineViewportCompressor / theme watcher 三源检测 / defer 提示行 / TOOL_TIMEOUT 面全部零残留（码面 + 测试面 + literal-inventory 面）；**AUTO_THEME 裸字面 grep 禁用**（0.1.101 既存面，见 §6 吸收 3） |
 | 3 | canon 净域（Δ 恰 = 撤卸测试面）+ standing 14 腿 + TUI smoke |
 | 4 | **deprecate 验真格**：npm deprecate 0.1.102/0.1.103 生效 + 指向 0.1.104 文案 |
 | 5 | 前滚 standing 14 腿全套（O4 锚等） |
@@ -44,9 +44,13 @@
 
 本工单 → Atlas-reveiw 快审 → f4 双信号 → Main revert 段 I → 段 G → 段 L → 生产 lane → deprecate → f4 收口。row F 全程。
 
-## §6 Atlas-reveiw 快审闭环（2026-11-13）
+## §6 Atlas-reveiw 快审闭环（2026-11-13，通过 + 3 条吸收）
 
-（待审）
+审计结论：**通过**（§0/§0.5 全锚实核：10 commit 全存在连续、唯一插花 7e570d3e 为史面正确保留；交织面穷尽复核无漏——c0c8bb95 对 revert 集触碰恰为 §0.5.2 四文件；死链扫描全过，mcp/lsp 命中为标识符巧合非死链）。吸收后直接发双信号，无需二审。逐条吸收：
+
+1. **格 1 措辞精度（必改）**：9b79a635 基已含 S3a + 全部十 commit，其后触 src/ 者恰 `0373349c`+`da318752` 两件且均在 revert 集 → 全 revert 后 `git diff 9b79a635..HEAD -- src/` 应为**恰空（Δ=0）**（主断言，更强、纯机械）。可选双面格：`git diff 4dac817b..HEAD -- src/` 恰 = S3a 移动集 rename-only（「S3a 结构 + 0.1.101 行为」独立直证面）。
+2. **CHANGELOG 回退条目四要素**：① 三切片撤回 + 用户实机 P0 原因 ② 0.1.104 行为 = 0.1.101 + S3a 结构 ③ **ATLAS_LOOP_WATCHDOG_MS 已失效可移除**（按缓解指引设过 =0 者 env 无操作，防配置残留困惑）④ FEATURE_AUTO_THEME 回落关。deprecate 文案与条目互证；0.1.101 不标。
+3. **格 2 限定 0.1.102 新增面（防假 RED）**：'AUTO_THEME' 字面在 ThemeProvider/ThemePicker/supportedSettings 三处为 0.1.101 既存面（0.1.102 仅翻 feature.ts ON_BY_DEFAULT，feature() 未知键回落无 throw）——格 2 grep 禁按裸字面 AUTO_THEME=0 执行。同面：user-e2e/p0-01102-gate.ts + p0-01104-gate.ts designation 清单除役/封存标注 = **e2e 自理项，不入本波格**。
 
 ## §0.5 Main 段 D 探锚冲突面盘点（2026-11-13，工单引用）
 
