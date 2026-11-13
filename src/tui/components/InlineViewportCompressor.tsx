@@ -114,9 +114,7 @@ export function InlineViewportCompressor({
     const node = rootRef.current
     if (!node) return
     const overflow = measureElement(node).height - rows
-    // capHeadroom = budget − 已收缩量：本次收缩将使 capRows 跌破 1 →
-    // 决策面直接 surrender（f4 t108 修形指令 2，禁 <1 中间态）。
-    const decision = resolveShrinkDecision(overflow, attemptsRef.current, plan.messageBudgetRows - shrinkRows)
+    const decision = resolveShrinkDecision(overflow, attemptsRef.current)
     if (decision.action === 'hold') {
       attemptsRef.current = 0
       return
