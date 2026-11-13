@@ -69,3 +69,16 @@
 - 0.1.105 候位：主题分层检测独立重落（gate-102 全绿、与两事故无因果）/ timeoutMs 重落（已码 canon 绿封存）。**待用户点头**。
 - R3-C 全屏形态评估稿（钉底正解，虚拟滚动保全内容可查看）——0.1.104 稳定后呈用户终裁。
 - 登记池：crashRecovery 重设计（× Ink 错误边界同域）/ 长会话实机演化判据面候选。
+
+## §8 f4 终收口（2026-11-13）
+
+**0.1.104 回退波五段闭环终态**：
+
+- 段 I/G：Main 10-commit revert @52ed6b79（冲突 3 处机械解）+ bump + CHANGELOG 四要素；f4 活码复核恒合。
+- gate-104：**GATE-PASS**（r-20261113-gate-104.md，t111 系列）——格 1 双面终形 GREEN（4dac817b 主断言 982 文件 S3a 面 + 9b79a635 逆面 16 文件 +14/−1284）/ 格 2 净 / canon 5867/0 / standing 14/14 / TUI smoke 8/8 含撤卸负断言 T3/T4/T5；f4 采认在案。
+- 段 L：release 0.1.104（tag v0.1.104 双 remote；npm latest；build @7dbbd2f3 cli.js 18,197,430B / sha256 4011ac44…46ca = gate 银行三点字节恒等）；SRI 留档 @9043724c。
+- 生产 lane ⑦：**PASS**（r-20261113-prodlane-104.md）——SRI 四值全 MATCH + 翻号 + PONG-104 + O4 GREEN（104p TEAM-DELETE-OK 首试零残留）+ RS 成员链 GREEN（104q）+ 格 4 deprecate 验真 GREEN（0.1.102/103 标记指向 0.1.104，0.1.101/0.1.104 无标记）。
+- 波终定谳：**行为 = 0.1.101 + S3a 结构**（用户裁定「三切片整体废掉」兑现）；pty 长会话盲区存照随波闭账。
+- 勘误链存照：快审吸收 1「恰空」数学误 → Main 段 G 披露 + e2e 实测先证（77,608B 非空）→ f4 勘误双面终形 @7dbbd2f3——三方互证闭环。
+- 登记面：packument dist.size 字段缺席（tgz 直下实测 3,851,593B 记档）；gracefulShutdown `.js` 后缀（S3a 期既存形）。
+- 下波：0.1.105 = 主题分层检测重落 + timeoutMs 重落（用户路线图 OK 在案，f4 即起波前审视 + 工单）；R3-C 全屏评估稿随后呈用户终裁。
