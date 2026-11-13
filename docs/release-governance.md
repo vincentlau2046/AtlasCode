@@ -97,3 +97,5 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 **事故面**：Main S3a codemod 回滚 `reset --hard` 清掉 e2e lane 长期未提交的 harness/docs 修改（10 文件；S3a 码面零损失，恢复责任移交 e2e 自恢复）。
 
 **纪律（全 lane 适用，自登记起）**：共享 checkout 内执行破坏性 git 操作（`reset --hard`/`checkout -- .`/`clean`/`rebase` 落工作树面等）前，**必须**先 `git status` 全量排查他 lane 未提交改动并对该等改动 stash 保护（或逐文件备份），禁直接落破坏性操作。stash 前须注记归属 lane（stash message 带 lane 名），防误清他 lane 在途面。违反即事故报备链（责任 lane → 受损 lane → f4 备案）。
+
+**增补（2026-11-13，f4 自身事故定谳）**：共享 checkout 内 `git commit` **必须路径限定**（`git commit -- <paths>`）——裸 commit 提交整个 index，会扫入他 lane 已暂存的在途工作（实例：f4 docs 归档 commit 扫入 Main S3a 搬移 133 暂存改名；soft reset + 路径限定重做修复，未推送无外溢）。
