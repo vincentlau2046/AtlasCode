@@ -28,32 +28,6 @@ export function isCrashBackstopRegistered(): boolean {
 }
 
 /**
- * 0.1.102 P0 切片 2-A（lock-face ③ headless lane）：在途 query abort 注册面。
- * headless 无 queryGuard（无强制复位原语），abort 信号链中止 = headless 车道
- * 的复位形：崩溃时中止全部已注册 controller，在途工具/流随 signal 退出。
- * 返回去注册函数（query 结束时调用，防陈旧 controller 被误 abort）。
- */
-const crashAbortControllers = new Set<AbortController>()
-
-export function registerCrashAbortController(controller: AbortController): () => void {
-  crashAbortControllers.add(controller)
-  return () => {
-    crashAbortControllers.delete(controller)
-  }
-}
-
-function abortRegisteredOnCrash(): void {
-  for (const controller of crashAbortControllers) {
-    try {
-      if (!controller.signal.aborted) controller.abort('crash-backstop')
-    } catch {
-      // abort 面失败不升级——兜底主体（log + 存活）已达成。
-    }
-  }
-  crashAbortControllers.clear()
-}
-
-/**
  * 装全局崩溃兜底（幂等）。headless 支入口 binMain() 首段调用，早于任何命令
  * 执行，使 mount / 命令 / agent loop 全程的 uncaught / unhandledRejection 均
  * 被 log + 存活兜住（长跑不中断）。
@@ -66,12 +40,10 @@ export function registerGlobalCrashBackstop(): void {
 
   process.on('uncaughtException', error => {
     writeCrashDiag('uncaughtException', error)
-    abortRegisteredOnCrash()
   })
 
   process.on('unhandledRejection', reason => {
     writeCrashDiag('unhandledRejection', reason)
-    abortRegisteredOnCrash()
   })
 }
 
