@@ -92,6 +92,9 @@ const ENTRY_POINT_RULES = [
       // kernel (S3a)：直改全量深路径是冻结设计（f4 §10 批准「零 re-export」），
       // 无 index 门面——深路径 import 豁免 STR-1（src 消费方 tui + tests 同豁免）。
       { target: "kernel", allow: "**" },
+      // tui (S3b 0.1.106)：bootstrapStatePort.ts = kernel/state 缝适配器
+      // （组合根跨域装配专用薄包装，lock-face 必答④；非门面漂移，头注登记）。
+      { target: "tui", allow: ["index.ts", "bootstrapStatePort.ts"] },
     ],
   },
 ];
@@ -289,12 +292,14 @@ export default tseslint.config(
             // main 门面；launcher.ts 薄壳经 ui/main 间接消费，同边登记）
             // M3-S5: mount 边接线——atlascode/cli.ts 调 mountDomains() 注册域包
             //（mount.ts 仅导出 mountDomains() 不暴露 ascend 内部符号，安全）
+            // S3b（0.1.106）切片 1: compose.ts kernel/state 缝注入（lock-face
+            // 必答④ lane ②，与 setBootstrapStatePort 基项同点单源）
             {
               from: "atlascode",
               allow: [
                 "shared", "sandbox", "memory", "executor", "modelprovider",
                 "task", "bootstrap", "permissions", "hooks", "engine", "swarm",
-                "lsp", "mcp", "cli", "tui", "mount",
+                "lsp", "mcp", "cli", "tui", "mount", "kernel",
               ],
             },
             // DEP-5 白名单: mount 是唯一可 import ascend 的元素（挂载边）
