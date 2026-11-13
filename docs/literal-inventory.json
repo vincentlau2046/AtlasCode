@@ -225,7 +225,6 @@
     "envPrefixLiteral": {
       "engine/config/autoCompactOverrides.ts": 3,
       "engine/config/managedEnv.ts": 26,
-      "engine/query/loopWatchdog.ts": 1,
       "engine/tools/bash/destructiveCommandWarning.ts": 1,
       "kernel/utils/subprocessEnv.ts": 2,
       "modelprovider/index.ts": 1,

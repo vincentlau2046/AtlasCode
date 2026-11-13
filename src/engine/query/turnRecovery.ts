@@ -114,13 +114,6 @@ export interface WithTurnRecoveryOptions {
   signal?: AbortSignal
   /** 注入配置（测试面）；缺省 = resolveTurnRecoveryConfig()（读 process.env）。 */
   config?: TurnRecoveryConfig
-  /**
-   * 0.1.102 P0 切片 2-B（watchdog 豁免 (d)）：backoff 窗进出钩——退避 sleep
-   * 前后调，watchdog 据此计活（backoff 窗内不算「无事件」）。ms=0 无退避不调
-   * （无窗不豁免）。
-   */
-  onBackoffStart?: (ms: number) => void
-  onBackoffEnd?: (ms: number) => void
 }
 
 /**
@@ -159,12 +152,7 @@ export async function withTurnRecovery<T>(
       if (i < cfg.maxRetries && shouldRetryModelError(err, options.signal)) {
         const backoff = turnRecoveryBackoffMs(i, cfg.backoffBaseMs, cfg.backoffCapMs)
         if (backoff > 0) {
-          options.onBackoffStart?.(backoff)
-          try {
-            await sleepSignalAware(backoff, options.signal)
-          } finally {
-            options.onBackoffEnd?.(backoff)
-          }
+          await sleepSignalAware(backoff, options.signal)
         }
         continue
       }

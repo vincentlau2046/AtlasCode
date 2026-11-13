@@ -60,11 +60,6 @@ import {
 } from '../../modelprovider'
 import type { LoopHooks } from '../hooks'
 import { nextFallbackRef, withTurnRecovery } from './turnRecovery'
-import {
-  createLoopWatchdogFromEnv,
-  LoopWatchdog,
-  LoopWatchdogTimeoutError,
-} from './loopWatchdog'
 import { isCompactBoundaryMessage } from '../session'
 import {
   DEFAULT_MAX_GOAL_TURNS,
@@ -222,41 +217,6 @@ export type AgentLoopEvent =
       reason: string
     }
 
-/**
- * 0.1.102 P0 切片 2-B 豁免 wrapper 族（lock-face ① f4 批复 2026-11-12）。
- * 权限门：未决窗口 = 豁免 (b)（defer 单源 = mergeHookPermission defer 支
- * 挂在 checkPermission 未决上）。原型保真（Object.create）——getTimeoutMs
- * 等其余面原样穿透，wrapped 仍 instanceof 具体实现类。
- */
-function wrapPermissionGateWithWatchdog(
-  gate: PermissionGate | undefined,
-  wd: LoopWatchdog,
-): PermissionGate | undefined {
-  if (!gate) return undefined
-  return (tool, input, callContext) => {
-    wd.beginPermissionWait()
-    return Promise.resolve(gate(tool, input, callContext)).finally(() =>
-      wd.endPermissionWait(),
-    )
-  }
-}
-
-function wrapModelProviderWithWatchdog(
-  provider: ModelProvider,
-  wd: LoopWatchdog,
-): ModelProvider {
-  const wrapped = Object.create(provider) as ModelProvider
-  wrapped.chat = async (...args: Parameters<ModelProvider['chat']>) => {
-    wd.beginLlmCall()
-    try {
-      return await provider.chat(...args)
-    } finally {
-      wd.endLlmCall()
-    }
-  }
-  return wrapped
-}
-
 export interface AgentLoopDeps {
   modelProvider: ModelProvider
   role: ModelRole
@@ -269,13 +229,6 @@ export interface AgentLoopDeps {
    */
   sessionModel?: string
   signal?: AbortSignal
-  /**
-   * 0.1.102 P0 切片 2-B（lock-face ①）：回合内看门狗（per-run 实例，
-   * queryAgentLoop 创建并接线；queryOneRound 消费工具 batch 计活与 backoff
-   * 豁免面）。外部注入方无需传——未传 = 窄 spine 零行为（emit 未注入面
-   * 恒不 arm）。
-   */
-  loopWatchdog?: LoopWatchdog
   /**
    * W3-3a（§8.74.2）：loop 事件发射槽（未注入 = 不发射，headless 行为零改动，
    * 窄 spine 语义不变）。TUI 活链路接线（W3-3b）经 src/tui/loopEvents.ts
@@ -580,9 +533,6 @@ export async function queryOneRound(
   // #260 快速失败）。退避/预算 env 可调（见 turnRecovery.ts 头注）。
   let resp = await withTurnRecovery(() => deps.modelProvider.chat(chatArgs), {
     signal: deps.signal,
-    // 切片 2-B 豁免 (d)：backoff 窗计活（窗内模型重试不算「无事件」）。
-    onBackoffStart: () => deps.loopWatchdog?.beginBackoff(),
-    onBackoffEnd: () => deps.loopWatchdog?.endBackoff(),
   })
   let assistantContent: unknown[] = resp.message.content ?? []
   // 空内容判据：无非空 text 块且无 tool_use 块（仅 thinking / 全空 = 空响应）。
@@ -611,9 +561,6 @@ export async function queryOneRound(
     // 本次重发若撞网关抖动仍受 withTurnRecovery 兜底）。
     const retried = await withTurnRecovery(() => deps.modelProvider.chat(chatArgs), {
       signal: deps.signal,
-      // 切片 2-B 豁免 (d)：同首发支。
-      onBackoffStart: () => deps.loopWatchdog?.beginBackoff(),
-      onBackoffEnd: () => deps.loopWatchdog?.endBackoff(),
     })
     const retriedContent: unknown[] = retried.message.content ?? []
     if (!isEmptyContent(retriedContent)) {
@@ -637,7 +584,7 @@ export async function queryOneRound(
 
   // loop 内工具执行委托 pipeline（T-2）：find→权限门→validate→hooks→call→mapResult→result 追加
   // signal 透传（T-4c）：经 PipelineDeps.signal → tool.call 第 2 参 context。
-  const batchPromise = runToolBatch(toolUses, assistantMsg, {
+  const outcomes = await runToolBatch(toolUses, assistantMsg, {
     tools,
     signal: deps.signal,
     // E-4 S-4d：权限门透传（queryOneRound→runToolBatch 唯一点；F1 已落 S-E1
@@ -660,11 +607,6 @@ export async function queryOneRound(
     // AgentLoopDeps 槽注入；单轮直调未注入 = undefined = 零提醒恒等锚）
     repeatToolTracker: deps.repeatToolTracker,
   })
-  // 切片 2-B 豁免 (c)：工具 batch 级在途计活（batch 内任一工具在途 = 计活，
-  // hung 工具不归 watchdog 管——per-tool timeoutMs 是登记池后续项）。
-  const outcomes = await (deps.loopWatchdog
-    ? deps.loopWatchdog.trackToolBatch(batchPromise)
-    : batchPromise)
   // AD-45 0.1.52：defer 挂起 outcome 不产 tool_result（block 缺席）——
   // toolResults / resultMessages 均排除挂起支（批次已短路，挂起后无后续 outcome）。
   const deferredOutcome = outcomes.find((o) => o.deferred)
@@ -816,31 +758,6 @@ export async function queryAgentLoop(
   // 直调不经此处 = 无 tracker 零提醒 fail-safe。
   deps = { ...deps, repeatToolTracker: createRepeatToolCallTracker() }
 
-  // 0.1.102 P0 切片 2-B（lock-face ①，f4 批复 2026-11-12）：回合内看门狗。
-  // per-run 实例；活动单点 = emit 汇聚处（round_start arm / round_end|loop_end
-  // disarm / 其余事件 reset）；豁免面同点接线（permission / LLM / backoff，
-  // 工具 batch 在 queryOneRound 内计活）。fire = 自有 controller abort（禁用
-  // 用户 abort controller，语义污染）→ 下游经既有 abort 穿透 → REPL R1
-  // catch 错误行 + 复位可重入。emit 未注入面（headless / 单轮直调方）wrapper
-  // 链零行为 = 恒不 arm（lock-face 锚）。ATLAS_LOOP_WATCHDOG_MS=0 = 整面关。
-  const outerSignal = deps.signal
-  const loopWatchdog = createLoopWatchdogFromEnv()
-  loopWatchdog.attachOuterSignal(outerSignal)
-  const baseEmit = deps.emit
-  deps = {
-    ...deps,
-    signal: loopWatchdog.abortSignal,
-    emit: baseEmit
-      ? (event) => {
-          loopWatchdog.noteEvent(event.type)
-          baseEmit(event)
-        }
-      : undefined,
-    checkPermission: wrapPermissionGateWithWatchdog(deps.checkPermission, loopWatchdog),
-    modelProvider: wrapModelProviderWithWatchdog(deps.modelProvider, loopWatchdog),
-    loopWatchdog,
-  }
-
   // S-E3 A11（旧 L450 收敛）：进 loop 前 persist 入参序列——crash-resumable
   // （旧 L437 注释：进程在首个 API 响应前被杀，transcript 仍可 resume；
   // 非 bare await 语义，bare fire-and-forget 变体 = D 波/CLI 面裁面登记）。
@@ -989,14 +906,6 @@ export async function queryAgentLoop(
       try {
         lastRound = await queryOneRound(effectiveDeps, activeTools, messages)
       } catch (err) {
-        // 切片 2-B：看门狗 fire 换形——watchdog abort 引致的错误（outer signal
-        // 未 abort）上报 watchdog reason（清晰中文消息 + ATLAS_LOOP_WATCHDOG_MS
-        // 修复旋钮），防 provider 把 abort 泛化成无因 AbortError。fire 即终局：
-        // 不走 reactive/fallback/schema-strip 重试支（回合已判死），disarm 穿透。
-        if (loopWatchdog.isFired && !outerSignal?.aborted) {
-          loopWatchdog.disarm()
-          throw loopWatchdog.abortSignal.reason ?? new LoopWatchdogTimeoutError(0)
-        }
         if (
           !reactiveRetried &&
           deps.reactiveCompact !== undefined &&
@@ -1090,8 +999,6 @@ export async function queryAgentLoop(
             deps.emit?.({ type: 'goal_paused', condition: goalCondition, reason: errorReason })
           }
         }
-        // 切片 2-B：错误穿透 = 本 run 终局，disarm（防定时器滞留越回合界）。
-        loopWatchdog.disarm()
         throw err
       }
       messages = lastRound.messages
@@ -1239,10 +1146,6 @@ export async function queryAgentLoop(
       tracking = { ...tracking, turnCounter: tracking.turnCounter + 1 }
     }
   }
-
-  // 切片 2-B：run 终点（terminal/defer/maxTurns 各 break 汇合处）dispose——
-  // loop_end emit 已 disarm，dispose 再封锁后续 arm/fire（per-run 生命周期终点）。
-  loopWatchdog.dispose()
 
   // R1（P0 静默终止）：末轮空内容（terminal-break 或 maxTurns 截断于空）= 静默空回合
   // 信号。正常文本终止 lastRound.empty=false → 不触发。供 REPL 出用户可见提示。
