@@ -4,6 +4,27 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.106（2026-11-13）
+
+**S3b 内核态分层续波**（工单 `docs/2026-11-13-p0-wave-01106-s3b-ticket.md`；架构波，
+行为零改动——gate-106 七格全格采认在案）。
+
+- **切片 1 kernel/state 端口缝**：`KernelBootstrapStatePort` + `KernelBootstrapNoopSeam`
+  两接口落 `src/kernel/state/`（ports + injection 缺省 no-op + fail-fast）；两组合根
+  （tui/factory TUI 车道 + atlascode/compose headless 车道）经 `bootstrapStatePort.ts`
+  适配器注入；probe 车道以缺省 NoopSeam 运行。
+- **切片 2 出口首车 59 文件 tui→kernel**（f4 终定锚 = 种子 23 + 随迁 36，含
+  detectRepository scanner v6 动态 import 盲区补洞）：src 内 673 文件 1358 specifier
+  机械重写；4 条 type 边提取 `kernel/types/`（fileHistoryTypes /
+  toolResultStorageTypes / configScope / messageQueueTypes 整迁），源侧 re-export
+  兜底；3 缝消费者（log / slowOperations / gitFilesystem）bootstrapState 直调切
+  `getKernelBootstrapNoopSeam()`（接口签名按消费点原形保真，行为零改动）。
+- **首车守卫** `tests/unit/s3b-first-car-guard.test.ts` 格 3 五断言（59 恰合 / 提取
+  单元在场 / 逃逸格 / 缝消费者对表 / 源侧 re-export）；s3a 归位快照随波更新；
+  literal-inventory 四键重锚。
+- 对外行为不变：canon 5902 pass / 0 fail / 477 文件与 0.1.105 恒合（Δ = +13 测
+  +2 文件恰 = 本波新格族）；TUI/CLI 用户面零差。
+
 ## v0.1.105（2026-11-13）
 
 **重落波**（工单 `docs/2026-11-13-p0-wave-01105-reland-ticket.md`；机械重落 =
