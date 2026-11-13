@@ -18,23 +18,12 @@ export type SystemTheme = 'dark' | 'light'
 let cachedSystemTheme: SystemTheme | undefined
 
 /**
- * OS appearance layer (lock-face 0.1.102 第四源). Filled by the watcher's
- * one-shot OS read (`osAppearance.ts`); consulted only when COLORFGBG is
- * unavailable. Never polled — the watcher reads at most twice per session
- * (startup + OSC-failure fallback).
- */
-let cachedOsAppearance: SystemTheme | undefined
-
-/**
  * Get the current terminal theme. Cached after first detection; the watcher
  * updates the cache on live changes.
- *
- * Priority chain (lock-face 0.1.102 切片 1): OSC 11 measured value (written
- * via setCachedSystemTheme) > COLORFGBG > OS appearance > dark.
  */
 export function getSystemThemeName(): SystemTheme {
   if (cachedSystemTheme === undefined) {
-    cachedSystemTheme = detectFromColorFgBg() ?? cachedOsAppearance ?? 'dark'
+    cachedSystemTheme = detectFromColorFgBg() ?? 'dark'
   }
   return cachedSystemTheme
 }
@@ -45,20 +34,6 @@ export function getSystemThemeName(): SystemTheme {
  */
 export function setCachedSystemTheme(theme: SystemTheme): void {
   cachedSystemTheme = theme
-}
-
-/**
- * Update the OS appearance layer (watcher fallback path). `undefined`
- * clears it (platform has no source).
- */
-export function setCachedOsAppearance(theme: SystemTheme | undefined): void {
-  cachedOsAppearance = theme
-}
-
-/** Test-only: reset both caches (module-level memo defeats cross-test isolation). */
-export function __resetSystemThemeForTests(): void {
-  cachedSystemTheme = undefined
-  cachedOsAppearance = undefined
 }
 
 /**
