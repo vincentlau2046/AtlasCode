@@ -60,3 +60,15 @@
 ## §7 登记面
 
 - watchdog opt-in 诊断形重落（候选，需求面待观察）；R3-C 全屏评估稿（0.1.105 稳定后呈用户终裁）。
+
+## §8 f4 终收口（2026-11-13）
+
+**0.1.105 重落波五段闭环终态**：
+
+- 段 I：Main 三提交 @97a7e528（ed26b7e6 Reapply 主题分层 + bfac3727 Reapply timeoutMs + CHANGELOG 互引/对称句/bump）。
+- gate-105：**GATE-PASS**（r-20261113-gate-105.md，t112）——格 1 最强形（两 Reapply patch 对原 commit 字节级恒等）+ 格 1b 测试逐字节 + X1 wire 零差 92,958B + X2 声明在场 + canon 5889/0 + standing 14/14 + smoke 8/8；f4 采认在案。
+- 段 L：release 0.1.105（tag v0.1.105 双 remote；npm latest；cli.js 8ef37dcd…6593 三点字节恒等；SRI 留档 @d87b1585，tree commit 97a7e528）。本波无 deprecate 项。
+- 生产 lane ⑦：**PASS**（r-20261113-prodlane-105.md）——SRI 四值全 MATCH + PONG-105 + O4 GREEN（105p）+ RS 成员链 GREEN（105q）+ 专项 X1/X2 安装品级互证（契约在源不在 wire）。
+- 波终定谳：theme + timeoutMs 重落上生产；wire 面 92,958B 与 0.1.101–104 系恒等。
+- 注记链：X1 首轮 NO-TOOLS-BODY = 派生脚本 bug 非产品面（复跑 GREEN）；patch 同构比对须排除 Reapply/Reapply 自比（e2e 方法论注记）。
+- 下波：S3b（0.1.106 候位，task #38）；R3-C 全屏评估稿呈用户终裁排 0.1.105 稳定后。
