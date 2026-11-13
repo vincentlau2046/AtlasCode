@@ -4,6 +4,26 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.105（2026-11-13）
+
+**重落波**（工单 `docs/2026-11-13-p0-wave-01105-reland-ticket.md`；机械重落 =
+revert-of-revert 封存件原形复活，零新设计）。
+
+- **重落 0.1.104 所撤回之主题分层检测 / per-tool timeoutMs**（原 0.1.102
+  切片 1 + 封存切片 2；与 0.1.104 条目所载两实机 P0 事故无因果——两事故均属
+  切片 3 与 2-A 域，故单独复活，watchdog（2-B）/ crash-recovery / 切片 3
+  维持撤回不重落）。代码为 `git revert` 原形逐字节复活（含判据测试 22 测），
+  Atlas-reveiw 审计零触碰实证在案。
+- **`FEATURE_AUTO_THEME` 重新缺省开**（与 0.1.104「回落关」对称）：主题分层
+  检测复活后该 feature flag 恢复缺省开；`FEATURE_AUTO_THEME=false` kill-switch
+  仍有效。
+- **per-tool timeoutMs**：Tool 契约新增 `timeoutMs` 字段（wrapper 层契约，
+  **不入 LLM schema**、wire 零差），权限门后 arm、到期经既有 abort 通道中止。
+  首批声明：WebFetch 90s / WebSearch 30s（首批清单冻结不扩）；无声明工具
+  行为不变（无超时）。
+- 0.1.104 所撤回其余面（watchdog / crash-recovery / defer 挂起提示 / inline
+  视口钉底 / `ATLAS_LOOP_WATCHDOG_MS` 失效声明）维持不变。
+
 ## v0.1.104（2026-11-13）
 
 **机械 revert 波**（工单 `docs/2026-11-13-p0-wave-01104-revert-ticket.md`；用户实机 P0
