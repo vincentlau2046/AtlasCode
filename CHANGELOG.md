@@ -4,6 +4,27 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.103（2026-11-13）
+
+S3a 归位波（工单 `docs/2026-11-12-p0-wave-s3a-relocation-ticket.md`；f4 §10 六项终裁
++ lock-face §12 终态备案采认；纯搬移波，行为零改动定性）。
+
+- **kernel 新顶层域**：tui/utils 非 UI 基建 121 文件一次搬 `src/kernel/`
+  （shell/{bash,powershell,provider} 合并 + agenthooks/permissions/settings/
+  telemetry/nativeInstaller/git/model + A∪B 随迁按顶层段镜像）——bun bundle
+  单文件闭包无外部消费方，全仓 specifier 直改零 re-export。
+- **级联退出 12 文件**（终态移动集 133→121，f4 终裁 6 三分法 fixpoint）：
+  scanner src/ 别名支缺 .js→.ts 后缀解析盲点自曝修正后，slowOperations
+  级联闭包 + hookEvents/constants/validation/settingsCache 按 ①/③ 留壳
+  tui 原位；修正版闭包爆炸 979/161k 按终裁 2 降级不采纳。
+- **② type 重定位 3 簇**：CommandSpec 族→kernel/shell/bash/types.ts、
+  ReleaseChannel→kernel/nativeInstaller/releaseChannel.ts、
+  shellRuleMatching PermissionUpdate 边重定向。
+- **判据格五格落格** `tests/unit/s3a-kernel-relocation-criteria.test.ts`
+  （解析落点式逃逸格 0 逃逸 + 归位快照禁双本 + inventory 零漂移）+
+  eslint kernel 域 boundaries 登记 + literal-inventory 6 键重锚。
+- gate：r-20261113-gate-103 GATE-PASS + f4 §12 采认双在案。
+
 ## v0.1.102（2026-11-13）
 
 P0 三切片插入波（工单 `docs/2026-11-12-p0-wave-01102-user-triple-ticket.md` §7 f4 批复
