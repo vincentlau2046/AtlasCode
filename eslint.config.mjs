@@ -70,6 +70,13 @@ const ELEMENTS = [
   // （engine/permissions/modelprovider/bootstrap/…）随切片头注扩 allow 登记。
   { type: "tui", pattern: "src/tui", mode: "folder" },
   { type: "atlascode", pattern: "src/atlascode", mode: "folder" },
+  // 0.1.103 S3a 归位波（f4 六项终裁 §10）：kernel 新顶层域——tui/utils 非 UI
+  // 基础设施 133 文件一次搬（shell/permissions/agenthooks/settings/telemetry/
+  // nativeInstaller/git/model + A∪B 基建镜像）。逃逸格 = kernel 树 import 落点
+  // ∈ kernel∪shared∪现存顶层域 = 0 逃逸（实测出边仅 shared 1 边；src 内消费方
+  // 仅 tui 2404 边，随 tui allow 面登记）。entry-point 豁免见 ENTRY_POINT_RULES
+  // （S3a 冻结设计 = 直改全量深路径、无 index 门面）。
+  { type: "kernel", pattern: "src/kernel", mode: "folder" },
 ];
 
 // ── STR-1 entry-point 规则（src 域间 + tests→src 共用）──
@@ -82,6 +89,9 @@ const ENTRY_POINT_RULES = [
       { target: "*", allow: "index.ts" },
       // mount (file-mode): 单文件元素, 自身即入口, 允许被 import
       { target: "mount", allow: "mount.ts" },
+      // kernel (S3a)：直改全量深路径是冻结设计（f4 §10 批准「零 re-export」），
+      // 无 index 门面——深路径 import 豁免 STR-1（src 消费方 tui + tests 同豁免）。
+      { target: "kernel", allow: "**" },
     ],
   },
 ];
@@ -256,7 +266,22 @@ export default tseslint.config(
                 // 经 requireStartInProcessTeammate 端口消费 src/swarm 单源
                 // runner（双副本收敛；cli 域 S-C4 扩 allow 先例同型，头注登记）
                 "swarm",
+                // S3a（0.1.103）：tui→kernel 2404 边（一次搬直改 specifier，
+                // 实测 src 内 kernel 消费方仅 tui；kernel 域出边仅 shared 1 边）
+                "kernel",
               ],
+            },
+            // kernel (S3a 0.1.103): 归位基座域 — 逃逸格口径 = kernel∪shared∪
+            // 现存顶层域（f4 §10-1）。实测出边（修正版扫描器，级联退出后终态）：
+            // shared（1）+ bootstrap（sdkEventQueue/getSessionId 面）+
+            // modelprovider（context/HARD_DEFAULT_CONTEXT_WINDOW 面）+
+            // engine（1，BashTool/toolName.ts 的 BASH_TOOL_NAME 单源 re-export
+            // 经 'src/engine' tsconfig 别名——boundaries 解析器不追 paths 别名，
+            // lint 侧不拦但按逃逸格口径为现存顶层域合法落点，一并登记）。
+            // tui/atlascode 侧反向消费不经 kernel allow 面（方向相反）。
+            {
+              from: "kernel",
+              allow: ["shared", "bootstrap", "modelprovider", "engine"],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）
@@ -355,6 +380,20 @@ export default tseslint.config(
       "no-restricted-syntax": "off",
       "no-constant-condition": "off",
       "no-misleading-character-class": "off",
+    },
+  },
+
+  // ── kernel 桶（S3a 0.1.103）：tui 存量搬移豁免（W4 豁免纪律镜像）──
+  // kernel 133 文件自 tui/utils 原样搬入（行为零改动纪律），携带 tui 桶 legacy
+  // 形态：lazy require()（hash/lockfile/semver 4 处，转换即改加载行为）+ 未用
+  // 泛型参 T（types 3 处）。仅登记本波 lint 实测直方图触发的规则；其余 tui
+  // 桶 off 项若未来触发，随触发切片按 W4 纪律扩登记。
+  {
+    files: ["src/kernel/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-var-requires": "off",
     },
   },
 
