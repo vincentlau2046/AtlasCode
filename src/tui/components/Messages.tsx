@@ -184,43 +184,6 @@ export type SliceAnchor = {
   idx: number;
 } | null;
 
-/**
- * 单条消息行级尾保帽（0.1.102 t107 G5d 修形，f4 D 批复 2026-11-13）：
- * 渲染前对文本面（string content / text blocks）tail 保尾截断——帧高
- * 严格有界 ⇒ compress 收缩步进必消除溢出；surrender 形恒渲染最新 1 条
- * （可见性底线格，禁零渲染全盲）。与钉① 单源边界：钉① = 消息条数
- * slice 面（computeSliceStart），本帽 = 单条内容行级面，两层不冲突，
- * 禁混源。tool_result 块不在此帽域（工具输出自有截断面）。
- * markdown 渲染前截断为 f4 批准折衷（尾保 24 行可能截断代码块结构）。
- */
-function capMessageContentForViewport(msg: RenderableMessage, cap: number): {
-  message: RenderableMessage;
-  overflowRows: number;
-} | undefined {
-  if (!(cap > 0)) return undefined;
-  const content: unknown = msg.message?.content;
-  if (typeof content === 'string') {
-    const r = capStreamingText(content, cap);
-    if (r.overflowRows <= 0) return undefined;
-    return { message: { ...msg, message: { ...msg.message, content: r.text } }, overflowRows: r.overflowRows };
-  }
-  if (!Array.isArray(content)) return undefined;
-  let overflowRows = 0;
-  let changed = false;
-  const next = content.map(block => {
-    if (block && block.type === 'text' && typeof block.text === 'string') {
-      const r = capStreamingText(block.text, cap);
-      if (r.overflowRows > 0) {
-        overflowRows += r.overflowRows;
-        changed = true;
-        return { ...block, text: r.text };
-      }
-    }
-    return block;
-  });
-  return changed ? { message: { ...msg, message: { ...msg.message, content: next } }, overflowRows } : undefined;
-}
-
 /** Exported for testing. Mutates anchorRef when the window needs to advance. */
 export function computeSliceStart(collapsed: ReadonlyArray<{
   uuid: string;
@@ -555,17 +518,12 @@ const MessagesImpl = ({
     // in explicitly so the group flips to past tense as soon as text starts
     // streaming instead of waiting for the block to finalize.
     const hasContentAfter = msg_8.type === 'collapsed_read_search' && (!!streamingText || hasContentAfterIndex(renderableMessages, index, tools, streamingToolUseIDs));
-    // 单条消息行级尾保帽（t107 G5d 修形）：压缩器在场车道（compress/
-    // fallback）对文本面 tail 保尾——帧高有界 + 可见性底线（禁零渲染）。
-    // 压缩器不在场（全屏 / degraded / 缺省 200）零行为变更。
-    const tailCapped = viewportRenderCap ? capMessageContentForViewport(msg_8, viewportRenderCap.messageTailCapRows) : undefined;
     const k_0 = messageKey(msg_8);
-    const row = <MessageRow key={k_0} message={tailCapped?.message ?? msg_8} isUserContinuation={isUserContinuation} hasContentAfter={hasContentAfter} tools={tools} commands={commands} verbose={verbose || isItemExpanded(msg_8) || cursor?.expanded === true && index === selectedIdx} inProgressToolUseIDs={inProgressToolUseIDs} streamingToolUseIDs={streamingToolUseIDs} screen={screen} canAnimate={canAnimate} onOpenRateLimitOptions={onOpenRateLimitOptions} lastThinkingBlockId={lastThinkingBlockId} latestBashOutputUUID={latestBashOutputUUID} columns={columns} isLoading={isLoading} lookups={lookups_0} />;
+    const row = <MessageRow key={k_0} message={msg_8} isUserContinuation={isUserContinuation} hasContentAfter={hasContentAfter} tools={tools} commands={commands} verbose={verbose || isItemExpanded(msg_8) || cursor?.expanded === true && index === selectedIdx} inProgressToolUseIDs={inProgressToolUseIDs} streamingToolUseIDs={streamingToolUseIDs} screen={screen} canAnimate={canAnimate} onOpenRateLimitOptions={onOpenRateLimitOptions} lastThinkingBlockId={lastThinkingBlockId} latestBashOutputUUID={latestBashOutputUUID} columns={columns} isLoading={isLoading} lookups={lookups_0} />;
 
     // Per-row Provider — only 2 rows re-render on selection change.
     // Wrapped BEFORE divider branch so both return paths get it.
     const wrapped = <MessageActionsSelectedContext.Provider key={k_0} value={index === selectedIdx}>
-        {tailCapped && <Text dimColor>{`… ${tailCapped.overflowRows} 行已折叠`}</Text>}
         {row}
       </MessageActionsSelectedContext.Provider>;
     if (unseenDivider && index === dividerBeforeIndex) {
@@ -652,7 +610,7 @@ const MessagesImpl = ({
             <Box flexDirection="column">
               {/* 钉③ 流式块常数帽：超出 STREAMING_BLOCK_CAP_ROWS 的早行折叠
                   入「已入滚动区」计数（单帧总高恒 ≤ 预算 + 提示行）。 */}
-              {streamingCapped.overflowRows > 0 && <Text dimColor>{`… ${streamingCapped.overflowRows} 行已折叠`}</Text>}
+              {streamingCapped.overflowRows > 0 && <Text dimColor>{`… ${streamingCapped.overflowRows} 行已入滚动区`}</Text>}
               <StreamingMarkdown>{streamingCapped.text}</StreamingMarkdown>
             </Box>
           </Box>

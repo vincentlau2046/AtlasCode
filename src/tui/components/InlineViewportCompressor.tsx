@@ -35,7 +35,6 @@ import { useTerminalSize } from '../hooks/useTerminalSize.js'
 import { Box, type DOMElement, measureElement } from '../ink.js'
 import {
   computeViewportPlan,
-  fallbackTailCapRows,
   resolveRenderCap,
   resolveShrinkDecision,
   type ViewportPlan,
@@ -72,9 +71,7 @@ export function InlineViewportCompressor({
   // 本溢出 episode 内已收缩次数（ref 传递，不走渲染）。
   const attemptsRef = useRef(0)
 
-  const plan: ViewportPlan = surrendered
-    ? { mode: 'fallback', messageTailCapRows: fallbackTailCapRows(rows, bottomRows) }
-    : computeViewportPlan(rows, bottomRows)
+  const plan: ViewportPlan = surrendered ? { mode: 'fallback' } : computeViewportPlan(rows, bottomRows)
   const renderCap = resolveRenderCap(plan, surrendered ? 0 : shrinkRows)
 
   // 复位面 1：resize → 收缩量/episode/降级锁全归零（预算重算，重新有界尝试）。
