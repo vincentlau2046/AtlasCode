@@ -148,11 +148,6 @@ export const WebFetchTool: WebFetchToolFace = {
   // 100K chars - tool result persistence threshold
   maxResultSizeChars: 100_000,
   shouldDefer: true,
-  // 0.1.104 切片 2 首批声明（lock-face 必答 3，依据列）：内部 FETCH_TIMEOUT_MS=60_000
-  // （webFetchUtils.ts:218 per-fetch AbortSignal.timeout）+ redirect 链上限余量
-  // （:221 界）——wrapper 90s = 内部 timer 失效兜底 + 总执行界。wrapper 层契约，
-  // 不入 LLM schema（wire 零 diff）。
-  timeoutMs: 90_000,
   // delta ④：旧 z.strictObject 面
   strict: true,
   isEnabled: () => true,

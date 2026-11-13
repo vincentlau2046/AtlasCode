@@ -188,13 +188,6 @@ export interface Tool<
   readonly strict?: boolean
   readonly shouldDefer?: boolean
   readonly alwaysLoad?: boolean
-  /**
-   * 声明执行预算（毫秒；0.1.104 切片 2，lock-face 必答 3/5）。wrapper 层契约——
-   * toolExecution 在权限门后 arm deadline，到期经既有 abort 通道中止并以
-   * TOOL_TIMEOUT isError tool_result 替换（模型可路由）。**不出 LLM schema**
-   * （防 token manifest/wire 锚漂移）；无声明 = 无限期（cooperative）。
-   */
-  readonly timeoutMs?: number
   isMcp?: boolean
   isLsp?: boolean
   aliases?: string[]

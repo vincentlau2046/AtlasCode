@@ -61,13 +61,6 @@ import {
   runWithToolHeartbeat,
   type ToolHeartbeatInfo,
 } from './toolHeartbeat'
-// 0.1.104 切片 2：per-tool timeoutMs 声明预算 wrapper（lock-face 必答 2/4 + 钉⑥）。
-import {
-  createToolTimeoutGuard,
-  raceWithToolDeadline,
-  ToolTimeoutError,
-  type ToolTimeoutGuard,
-} from './toolTimeout'
 
 /**
  * E-4 接缝：权限门。窄 spine 默认放行；E-4 注入规则求值树后在此做
@@ -585,17 +578,6 @@ export async function executeToolUse(
   // 系未登记 delta；门 updatedInput 当前惰性（零非-passthrough 工具面实现），休眠期
   // 零行为差，工具本体波回填时与旧仓语义自动一致）。
   const callInput = verdict.updatedInput ?? effectiveInput
-  // 0.1.104 切片 2（lock-face 必答 2）：per-tool timeoutMs 声明预算 wrapper。
-  // 钉(a) arm 时点 = 此处（权限门后实际执行开始——浅校验/validateInput/pre-hook/
-  // gate/defer/ask 早退支全部已过，预执行等待零预算）。钉(c) 组合 signal
-  // （AbortSignal.any[deps.signal, 自身]）经既有 toolCallContext.signal 槽透传，
-  // 零新终止路径。timeoutMs 不入 LLM schema（wrapper 层契约，必答 5）。
-  // 无声明（undefined/0/负）= 不建 guard = 无限期（cooperative 零行为变更）。
-  const toolTimeout: ToolTimeoutGuard | undefined =
-    tool.timeoutMs !== undefined && tool.timeoutMs > 0
-      ? createToolTimeoutGuard({ timeoutMs: tool.timeoutMs, outerSignal: deps.signal })
-      : undefined
-  if (toolTimeout !== undefined) toolCallContext.signal = toolTimeout.signal
   let block: ToolResultBlockParam
   let isError = false
   // G1（#258）：toolUseResult 挂法（成功 = res.data / catch = 错误文本串，见
@@ -641,9 +623,6 @@ export async function executeToolUse(
         withHeartbeat,
       )
       if (raced.backgrounded === true) {
-        // 钉⑥（f4 批复，0.1.104 lock-face）：工具转后台即 disarm deadline——
-        // 后台 = 用户显式接管，脱离预算面，禁后台工具被到期 abort 杀死。
-        toolTimeout?.disarm()
         // 已转后台：不等真完成即早返。非 error 合成块（LLM 收到「已转后台 + 结果
         // 稍后送达 + 勿重调」回应，agent loop 继续推进）；真终态经 onMcpToolBackgrounded
         // 回调 → REPL task-notification → 回合间自动再注入。**跳过 post-hook**
@@ -665,16 +644,9 @@ export async function executeToolUse(
         }
       }
       res = raced.result
-    } else if (toolTimeout !== undefined) {
-      // race 死线：deadline 到期先返（工具侧继续经 signal 通道自清理——终止
-      // 路径不新增）；到期抛 ToolTimeoutError → 下方 catch 支 isTimeoutAbort
-      // 单点比对 → TOOL_TIMEOUT 块（格 3/格 5）。
-      res = await raceWithToolDeadline(toolTimeout, () => new ToolTimeoutError(tool.name, tool.timeoutMs ?? 0), withHeartbeat())
     } else {
       res = await withHeartbeat()
     }
-    // 正常完成：清 deadline timer（arm 后未到期即返防泄漏；backgrounded 支已 disarm）。
-    toolTimeout?.dispose()
     block = tool.mapToolResultToToolResultBlockParam(res.data, tu.id)
     // G1（#258）：挂工具原生 Output（res.data）——TUI 渲染面经 message.toolUseResult
     // 消费（UserToolSuccessMessage → tool.renderToolResultMessage）。
@@ -702,29 +674,8 @@ export async function executeToolUse(
       }
     }
   } catch (error) {
-    // 0.1.104 格 3/格 5（lock-face 必答 4）：仅 guard 自身哨兵 abort（deadline
-    // 到期）才替换为结构化 TOOL_TIMEOUT isError tool_result；外层 abort
-    // （deps.signal / loop watchdog / 用户 Escape）reason 原样透传走既有 catch
-    // ——嵌套消歧（外层 timer 读作普通上游 cancel 不误记内层超时）。wrapper 直构
-    // 不经 mapToolResult；形与门错误支同惯例（<tool_use_error>…</tool_use_error>），
-    // 机器可读路由标记 = content 前缀 `TOOL_TIMEOUT:`（ToolResultBlockParam 无
-    // error.code 字段，DSH error.code 落点）。
-    if (toolTimeout !== undefined && toolTimeout.isTimeoutAbort()) {
-      const timeoutText =
-        `<tool_use_error>TOOL_TIMEOUT: ${tool.name} exceeded its ${tool.timeoutMs}ms execution budget and was aborted. ` +
-        "The tool's own cleanup (subprocess kill / connection close) runs via its abort path. " +
-        'You may retry with adjusted parameters (e.g. a shorter command or explicit timeout_ms for Bash) or a different approach.</tool_use_error>'
-      block = {
-        type: 'tool_result',
-        tool_use_id: tu.id,
-        content: timeoutText,
-        is_error: true,
-      }
-      isError = true
-      toolUseResult = timeoutText
-    } else {
-      // 旧仓 detailedError 挂法（toolExecution.ts:423-441）：toolUseResult = block
-      // content 内文同串（错误面 UI 消费 block.content，此处保语义面一致，零渲染回归）。
+    // 旧仓 detailedError 挂法（toolExecution.ts:423-441）：toolUseResult = block
+    // content 内文同串（错误面 UI 消费 block.content，此处保语义面一致，零渲染回归）。
     const errorText = `tool error [${classifyToolError(
       error,
     )}]: ${String((error as Error)?.message ?? error)}`
@@ -734,9 +685,8 @@ export async function executeToolUse(
       content: `<tool_use_error>${errorText}</tool_use_error>`,
       is_error: true,
     }
-      isError = true
-      toolUseResult = errorText
-    }
+    isError = true
+    toolUseResult = errorText
   }
 
   // E-5 S-5a 接缝：post-hook（C-6 消费支：执行 + 捕获，非 fire-and-forget；
