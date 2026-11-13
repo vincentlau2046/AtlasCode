@@ -94,6 +94,14 @@ import { settingsChangeDetector } from './utils/settings/changeDetector'
 import { getManagedSettingsDropInDir } from './utils/settings/managedPath'
 import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
+import {
+  setKernelBootstrapNoopSeam,
+  setKernelBootstrapState,
+} from '../kernel/state/injection.js'
+import {
+  createKernelBootstrapNoopSeam,
+  createKernelBootstrapStatePort,
+} from './bootstrapStatePort.js'
 import { getPlatform } from './utils/platform'
 import { getConfigDirNameForProject } from '../kernel/utils/configDir'
 import { getAtlasTempDir } from './utils/permissions/filesystem'
@@ -248,6 +256,10 @@ export function createCoreDependencies(
     getOriginalCwd: () => getOriginalCwd(),
     setCwdState: (cwd: string) => setCwdState(cwd),
   })
+  // 0.1.106 S3b 切片 1（lock-face 必答④ lane ①）：kernel/state 缝注入——
+  // 真状态实现包装 bootstrapState（零行为变更），先于 REPL 首帧消费面。
+  setKernelBootstrapState(createKernelBootstrapStatePort())
+  setKernelBootstrapNoopSeam(createKernelBootstrapNoopSeam())
 
   return {
     modelProvider, // 单例，经注入窗口

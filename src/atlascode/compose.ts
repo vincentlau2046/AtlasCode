@@ -77,6 +77,14 @@ import {
 } from '../shared'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
+  setKernelBootstrapNoopSeam,
+  setKernelBootstrapState,
+} from '../kernel/state/injection.js'
+import {
+  createKernelBootstrapNoopSeam,
+  createKernelBootstrapStatePort,
+} from '../tui/bootstrapStatePort.js'
+import {
   setTaskOutputPort,
   setBootstrapStatePort,
   setExecutorSandboxPort,
@@ -218,6 +226,13 @@ export function createCoreDependencies(): CoreDependencies {
   setTaskOutputPort(adaptTaskOutputToExecutorPort())
   setBootstrapStatePort(adaptBootstrapToExecutorPort())
   setExecutorSandboxPort(adaptSandboxToExecutorPort(sandboxManager))
+
+  // ②' 0.1.106 S3b 切片 1（lock-face 必答④ lane ②）：kernel/state 缝注入——
+  //    与 setBootstrapStatePort 基项同点保持单源；真状态包装 tui/bootstrapState
+  //    （组合根 charter = 全仓唯一可跨 8 域 import 装配点，atlascode→tui 有
+  //    ui/main.tsx 先例），先于 createCoreDependencies() 消费面。
+  setKernelBootstrapState(createKernelBootstrapStatePort())
+  setKernelBootstrapNoopSeam(createKernelBootstrapNoopSeam())
 
   // ③ permissions ← bootstrap（§8.14 注入序首步：两 cwd 态）+
   //    permissions ← engine/config（S-3c settings 路径面，桩① 接真）

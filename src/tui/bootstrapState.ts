@@ -45,12 +45,10 @@ let _agentColorMap: Map<string, string> = new Map()
 // createSkillAttachmentIfNeeded（invoked_skills 附件 → post-compact System
 // Reminder）+ skillImprovement.ts:55；释放 = SkillTool.ts:204（fork 支
 // finally）。agentId null = 主会话。TUI 运行态 = 本文件层（M1 三分层裁定）。
-export interface InvokedSkillRecord {
-  skillName: string
-  skillPath: string
-  content: string
-  invokedAt: number
-}
+// 0.1.106 S3b 切片 1：InvokedSkillRecord 型随真状态域收编 kernel/state/ports.ts
+// （lock-face 必答① 真状态(类型)）；本文件 re-export 兜底，消费者零改动。
+import type { InvokedSkillRecord } from '../kernel/state/ports.js'
+export type { InvokedSkillRecord }
 const _invokedSkillsByAgent = new Map<string, Map<string, InvokedSkillRecord>>()
 const _invokedSkillAgentKey = (agentId: string | null | undefined): string =>
   agentId ?? '__main__'
