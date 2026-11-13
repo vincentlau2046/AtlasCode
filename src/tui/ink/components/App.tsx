@@ -1,10 +1,10 @@
 import React, { PureComponent, type ReactNode } from 'react';
 import { updateLastInteractionTime } from 'src/tui/bootstrapState.js';
-import { logForDebugging } from '../../utils/debug';
+import { logForDebugging } from '../../../kernel/utils/debug';
 import { stopCapturingEarlyInput } from '../../utils/earlyInput.js';
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js';
 import { isMouseClicksDisabled } from '../../utils/fullscreen.js';
-import { logError } from '../../utils/log.js';
+import { logError } from '../../../kernel/utils/log.js';
 import { EventEmitter } from '../events/emitter.js';
 import { InputEvent } from '../events/input-event.js';
 import { TerminalFocusEvent } from '../events/terminal-focus-event.js';

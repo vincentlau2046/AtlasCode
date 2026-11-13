@@ -5,7 +5,7 @@ import { useInterval } from 'usehooks-ts';
 import type { CommandResultDisplay } from '../../commands.js';
 import { Markdown } from '../../components/Markdown.js';
 import { SpinnerGlyph } from '../../components/Spinner/SpinnerGlyph.js';
-import { DOWN_ARROW, UP_ARROW } from '../../constants/figures.js';
+import { DOWN_ARROW, UP_ARROW } from '../../../kernel/constants/figures.js';
 import { getSystemPrompt } from '../../constants/prompts.js';
 import { useModalOrTerminalSize } from '../../context/modalContext.js';
 import { getSystemContext, getUserContext } from '../../context.js';

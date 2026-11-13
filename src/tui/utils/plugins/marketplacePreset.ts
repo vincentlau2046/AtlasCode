@@ -35,14 +35,14 @@
  * instead of a silent success).
  */
 
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   checkGitAvailable,
   markGitUnavailable,
-} from './gitAvailability.js'
+} from '../../../kernel/utils/plugins/gitAvailability.js'
 import { isSourceAllowedByPolicy } from './marketplaceHelpers.js'
 import {
   addMarketplaceSource,

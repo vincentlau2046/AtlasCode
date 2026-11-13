@@ -24,7 +24,7 @@ import {
   sortLogsBy,
   slotPrefix,
 } from '../../src/tui/screens/SessionTreeScreen.js'
-import type { LogOption } from '../../src/tui/types/logs.js'
+import type { LogOption } from '../../src/kernel/types/logs.js'
 import type { Theme } from '../../src/tui/utils/theme.js'
 
 /** 伪 theme：8 个代理色板槽位填可判别标记值（精确映射断言不依赖真实 ANSI 值） */

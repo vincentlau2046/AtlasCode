@@ -7,7 +7,7 @@ import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import { Text } from '../ink.js';
 import { getCwd } from '../../kernel/utils/cwd.js';
 import { openFileInExternalEditor } from '../utils/editor.js';
-import { truncatePathMiddle, truncateToWidth } from '../utils/format.js';
+import { truncatePathMiddle, truncateToWidth } from '../../kernel/utils/format.js';
 import { highlightMatch } from '../utils/highlightMatch.js';
 import { relativePath } from '../utils/permissions/filesystem.js';
 import { readFileInRange } from '../utils/readFileInRange.js';

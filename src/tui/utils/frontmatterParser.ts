@@ -3,7 +3,7 @@
  * Extracts and parses YAML frontmatter between --- delimiters
  */
 
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import type { HooksSettings } from '../../kernel/settings/types.js'
 import { parseYaml } from './yaml.js'
 

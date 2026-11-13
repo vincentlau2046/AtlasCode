@@ -37,7 +37,7 @@ import { join } from 'path'
 import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import React from 'react'
 
-const EXEC_PATH = '../../src/tui/utils/execFileNoThrow.js'
+const EXEC_PATH = '../../src/kernel/utils/execFileNoThrow.js'
 const WORKTREE_PATH = '../../src/tui/utils/worktree.js'
 const SESSION_STORAGE_PATH = '../../src/tui/utils/sessionStorage.js'
 const HELPER_PATH = '../../src/tui/utils/worktreeChangeSummary.js'

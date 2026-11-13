@@ -13,8 +13,8 @@ import {
 } from '../../skills/loadSkillsDir.js'
 import { resetSentSkillNames } from '../attachments.js'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from '../debug'
-import { getFsImplementation } from '../fsOperations'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import { executeConfigChangeHooks, hasBlockingResult } from '../hooks.js'
 import { createSignal } from '../../../kernel/utils/signal.js'
 

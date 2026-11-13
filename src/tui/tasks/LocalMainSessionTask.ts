@@ -39,8 +39,8 @@ import {
   type SubagentContext,
 } from '../utils/agentContext.js'
 import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from '../utils/debug'
-import { logError } from '../utils/log.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { logError } from '../../kernel/utils/log.js'
 import { enqueuePendingNotification } from '../utils/messageQueueManager.js'
 import { emitTaskTerminatedSdk } from '../../kernel/utils/sdkEventQueue.js'
 import {

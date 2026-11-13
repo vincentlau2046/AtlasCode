@@ -3,7 +3,7 @@ import type {
   Logger,
 } from '@ant/computer-use-mcp/types'
 import { format } from 'util'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { COMPUTER_USE_MCP_SERVER_NAME } from './common.js'
 import { createCliExecutor } from './executor.js'
 import { getChicagoEnabled, getChicagoSubGates } from './gates.js'

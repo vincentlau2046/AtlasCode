@@ -1,9 +1,9 @@
 import isEqual from 'lodash-es/isEqual.js'
 import { toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { getSettingsForSource } from '../settings/settings.js'
 import { plural } from '../../../kernel/utils/stringUtils.js'
-import { checkGitAvailable } from './gitAvailability.js'
+import { checkGitAvailable } from '../../../kernel/utils/plugins/gitAvailability.js'
 import { getMarketplace } from './marketplaceManager.js'
 import type { KnownMarketplace, MarketplaceSource } from './schemas.js'
 

@@ -9,7 +9,7 @@
 
 import { createSignal } from '../../../../kernel/utils/signal.js'
 import { checkHasTrustDialogAccepted } from '../../../utils/config.js'
-import { getGitState, getChangedFiles, type GitRepoState } from '../../../utils/git.js'
+import { getGitState, getChangedFiles, type GitRepoState } from '../../../../kernel/utils/git.js'
 
 export interface GitSegmentState {
   branch: string | null

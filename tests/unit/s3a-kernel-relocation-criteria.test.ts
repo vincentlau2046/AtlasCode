@@ -36,20 +36,18 @@ interface MovePlan {
 
 const plan = JSON.parse(readFileSync(PLAN_PATH, 'utf8')) as MovePlan
 
-/** 级联退出 12 文件（tui 原位；f4 终裁 6 三分法 ①/③ + settingsCache ③）。 */
+/** 级联退出 12 文件 → 0.1.106 S3b 切片 2 出口首车 5 件已迁 kernel
+ * （schemaOutput/validation/debug/fsOperations/slowOperations，f4 批复 59 锚
+ * 成员，新落点由 tests/unit/s3b-first-car-guard.test.ts 格 3① 恰合断言）；
+ * 留壳 7 件继续原位断言（f4 终裁 6 三分法 ①/③ + settingsCache ③）。 */
 const EXIT_TUI = [
   'tui/utils/hooks/hookEvents.ts',
   'tui/utils/hooks/hookInputMaterialize.ts',
   'tui/utils/settings/constants.ts',
-  'tui/utils/settings/schemaOutput.ts',
-  'tui/utils/settings/validation.ts',
   'tui/utils/settings/settingsCache.ts',
   'tui/utils/bash/ast.ts',
   'tui/utils/bash/parser.ts',
   'tui/utils/telemetry/perfettoTracing.ts',
-  'tui/utils/debug.ts',
-  'tui/utils/fsOperations.ts',
-  'tui/utils/slowOperations.ts',
 ]
 /** f4 终裁 5 排除 8 文件（原位留壳断言；execAgentHook 等 fixpoint ③ 退出
  * 文件已由 move-plan.json exited 集覆盖，不在此单列）。 */
@@ -64,9 +62,23 @@ const EXCLUDED_TUI = [
   'tui/utils/auth.ts',
 ]
 
-/** 终态移动集 = 冻结 133 − 退出 12。 */
+/** 级联退出 12 中 5 件已由 0.1.106 S3b 出口首车迁 kernel（f4 批复 59 锚成员；
+ * 实际落点 kernel/utils/<同构子树>，新落点由 tests/unit/s3b-first-car-guard.test.ts
+ * 格 3① 恰合断言。冻结 plan 中 settings 两件目的地 kernel/settings/* 与实际
+ * kernel/utils/settings/* 不同 subtree——本格 2a 保持 S3a 波口径，5 件不并入
+ * moved 快照）。 */
+const S3B_CAR_FROM_EXIT = new Set([
+  // 注意：集合成员 = moveMap 键（tui 旧路径），非 kernel 新路径。
+  'tui/utils/settings/schemaOutput.ts',
+  'tui/utils/settings/validation.ts',
+  'tui/utils/debug.ts',
+  'tui/utils/fsOperations.ts',
+  'tui/utils/slowOperations.ts',
+])
+
+/** 终态移动集 = 冻结 133 − 留壳 7 − S3b 车已迁 5（S3a 口径 121）。 */
 const moved = Object.entries(plan.moveMap)
-  .filter(([k]) => !EXIT_TUI.includes(k))
+  .filter(([k]) => !EXIT_TUI.includes(k) && !S3B_CAR_FROM_EXIT.has(k))
   .map(([k, v]) => [k, v.slice('src/'.length)] as const)
 
 function walkTs(dir: string): string[] {
@@ -147,7 +159,7 @@ describe('0.1.103 S3a 归位波判据格（f4 §10 + lock-face §7）', () => {
     expect(escapes).toEqual([])
   })
 
-  test('格 2a 归位快照：移动集 121 定义点全域恰 1（kernel 在场 + tui 旧位缺席）', () => {
+  test('格 2a 归位快照：移动集 121 定义点全域恰 1（kernel 在场 + tui 旧位缺席；S3a 口径，S3b 车 5 件另测）', () => {
     expect(moved.length).toBe(121)
     const doubleCopy: string[] = []
     for (const [oldRel, newRel] of moved) {

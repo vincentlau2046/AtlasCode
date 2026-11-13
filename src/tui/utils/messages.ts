@@ -94,10 +94,10 @@ import {
   type HookPermissionDecisionAttachment,
   memoryHeader,
 } from './attachments.js'
-import { quote } from './bash/shellQuote.js'
-import { formatNumber, formatTokens } from './format.js'
+import { quote } from '../../kernel/utils/bash/shellQuote.js'
+import { formatNumber, formatTokens } from '../../kernel/utils/format.js'
 import { getPewterLedgerVariant } from './planModeV2.js'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 // Hook attachments that have a hookName field (excludes HookPermissionDecisionAttachment)
 type HookAttachmentWithName = Exclude<
@@ -160,15 +160,15 @@ import { TASK_UPDATE_TOOL_NAME } from '../../kernel/tools/TaskUpdateTool/constan
 import type { PermissionMode } from '../../kernel/types/permissions.js'
 import { normalizeToolInput, normalizeToolInputForAPI } from './api.js'
 import { getCurrentProjectConfig } from './config.js'
-import { logAntError, logForDebugging } from './debug'
-import { stripIdeContextTags } from './displayTags.js'
+import { logAntError, logForDebugging } from '../../kernel/utils/debug'
+import { stripIdeContextTags } from '../../kernel/utils/displayTags.js'
 import { hasEmbeddedSearchTools } from '../../kernel/utils/embeddedTools.js'
 // 0.1.85 Task A（C85-A）：@PDF 引用投影叶子（与 modelprovider params attachment
 // 支双面消费同一 shared 纯叶子，文本恒等；不引 tui 之外的面）
 import { formatPDFReferenceForModel } from '../../shared'
 import { validateImagesForAPI } from './imageValidation.js'
-import { safeParseJSON } from './json.js'
-import { logError, logMCPDebug } from './log.js'
+import { safeParseJSON } from '../../kernel/utils/json.js'
+import { logError, logMCPDebug } from '../../kernel/utils/log.js'
 import { normalizeLegacyToolName } from '../../kernel/permissions/permissionRuleParser.js'
 import {
   getPlanModeV2AgentCount,
@@ -176,11 +176,12 @@ import {
   isPlanModeInterviewPhaseEnabled,
 } from './planModeV2.js'
 import { escapeRegExp } from '../../kernel/utils/stringUtils.js'
-import { isTodoV2Enabled } from './tasks.js'
+import { isTodoV2Enabled } from '../../kernel/utils/tasks.js'
 
 // Lazy import to avoid circular dependency (teammateMailbox -> teammate -> ... -> messages)
-function getTeammateMailbox(): typeof import('./teammateMailbox.js') {
-  return require('./teammateMailbox.js')
+// 0.1.106 S3b 切片 2：teammateMailbox 随迁 kernel/utils（出口首车 59 文件）。
+function getTeammateMailbox(): typeof import('../../kernel/utils/teammateMailbox.js') {
+  return require('../../kernel/utils/teammateMailbox.js')
 }
 
 import {

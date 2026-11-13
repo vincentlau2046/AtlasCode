@@ -60,8 +60,8 @@ import React from 'react'
 import {
   stringWidth,
   stringWidthJavaScript,
-} from '../../src/tui/ink/stringWidth.js'
-import { truncateToWidth } from '../../src/tui/utils/truncate.js'
+} from '../../src/kernel/ink/stringWidth.js'
+import { truncateToWidth } from '../../src/kernel/utils/truncate.js'
 import { useTextInput } from '../../src/tui/hooks/useTextInput.js'
 import type { Key } from '../../src/tui/ink.js'
 import {

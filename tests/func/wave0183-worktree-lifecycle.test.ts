@@ -64,7 +64,7 @@ import {
 import {
   clearResolveGitDirCache,
   resolveGitDir as tuiResolveGitDir,
-} from '../../src/tui/utils/git/gitFilesystem.js'
+} from '../../src/kernel/utils/git/gitFilesystem.js'
 import {
   createAgentWorktree as tuiCreateAgentWorktree,
   removeAgentWorktree as tuiRemoveAgentWorktree,

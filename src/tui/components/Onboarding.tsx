@@ -7,7 +7,7 @@ import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { isAnthropicAuthEnabled } from '../utils/auth.js';
 import { normalizeApiKeyForConfig } from '../../kernel/utils/authPortable.js';
 import { getCustomApiKeyStatus } from '../utils/config.js';
-import { env } from '../utils/env.js';
+import { env } from '../../kernel/utils/env.js';
 import { isRunningOnHomespace } from '../../kernel/utils/envUtils.js';
 import { PreflightStep } from '../utils/preflightChecks.js';
 import type { ThemeSetting } from '../utils/theme.js';

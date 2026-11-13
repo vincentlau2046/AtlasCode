@@ -1,7 +1,7 @@
 import { posix, win32 } from 'path'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 // Track warnings to avoid spam — bounded to prevent unbounded memory growth
 export const MAX_WARNING_KEYS = 1000

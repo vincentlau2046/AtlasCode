@@ -20,7 +20,7 @@ import {
   createMemorySavedMessage,
 } from '../../utils/messages.js'
 import type { Message } from '../../../kernel/types/message.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import type { ToolUseContext } from '../../Tool.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { isAutoMemoryEnabled, getAutoMemPath } from '../../memdir/paths.js'

@@ -10,7 +10,7 @@
  * 异常吞并（logForDebugging）：钩子执行失败不向 UI 冒泡（显示主路径
  * fail-safe，同 directoryAddedHooks / modelSwitchHooks 语义）。
  */
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { executeMessageDisplayHooks } from './hooks.js'
 
 /** 消息显示钩子专用超时（同 directoryAddedHooks 档——显示主路径不挂起）。 */

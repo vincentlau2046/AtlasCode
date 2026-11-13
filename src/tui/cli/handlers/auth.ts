@@ -3,7 +3,7 @@
 import { performLogout } from '../../commands/logout/logout.js'
 import { getAtlasApiKeyWithSource, getAuthTokenSource } from '../../utils/auth.js'
 import { isRunningOnHomespace } from '../../../kernel/utils/envUtils.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   buildAccountProperties,
   buildAPIProviderProperties,

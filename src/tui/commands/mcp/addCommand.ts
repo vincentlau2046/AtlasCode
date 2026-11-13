@@ -21,7 +21,7 @@ import {
   isXaaEnabled,
 } from '../../services/mcp/xaaIdpLogin.js'
 import { parseEnvVars } from '../../../kernel/utils/envUtils.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 
 /**
  * Registers the `mcp add` subcommand on the given Commander command.

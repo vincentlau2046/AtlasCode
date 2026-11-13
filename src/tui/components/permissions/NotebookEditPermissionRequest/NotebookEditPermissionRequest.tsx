@@ -4,7 +4,7 @@ import React from 'react';
 import type { z } from 'zod/v4';
 import { Text } from '../../../ink.js';
 import { NotebookEditTool } from '../../../tools/NotebookEditTool/NotebookEditTool.js';
-import { logError } from '../../../utils/log.js';
+import { logError } from '../../../../kernel/utils/log.js';
 import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDialog.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
 import { NotebookEditToolDiff } from './NotebookEditToolDiff.js';

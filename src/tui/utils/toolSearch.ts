@@ -28,10 +28,10 @@ import {
 import { count } from '../../kernel/utils/array.js'
 import { getMergedBetas } from './betas.js'
 import { getContextWindowForModel } from '../../kernel/utils/context.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isEnvDefinedFalsy, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { isDefaultGateway } from '../../kernel/model/providers.js'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import { zodToJsonSchema } from '../../kernel/utils/zodToJsonSchema.js'
 
 /**

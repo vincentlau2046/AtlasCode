@@ -15,7 +15,7 @@ import {
   onTasksUpdated,
   type Task,
   type TaskStatus,
-} from 'src/tui/utils/tasks.js'
+} from 'src/kernel/utils/tasks.js'
 import type { CommandResultDisplay } from '../../commands.js'
 import { useRegisterOverlay } from '../../context/overlayContext.js'
 import type { KeyboardEvent } from '../../ink/events/keyboard-event.js'

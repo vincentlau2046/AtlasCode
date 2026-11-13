@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import type { TextBlockParam } from '../../../kernel/types/atlas.js';
 import * as React from 'react';
-import { REFRESH_ARROW } from '../../constants/figures.js';
+import { REFRESH_ARROW } from '../../../kernel/constants/figures.js';
 import { Box, Text } from '../../ink.js';
 type Props = {
   addMargin: boolean;

@@ -23,8 +23,8 @@ import {
 import type { FetchLike } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { z } from 'zod/v4'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { logMCPDebug } from '../../utils/log.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { logMCPDebug } from '../../../kernel/utils/log.js'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 
 const XAA_REQUEST_TIMEOUT_MS = 30000
 

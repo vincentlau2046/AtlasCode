@@ -1,6 +1,6 @@
 import { basename } from 'path'
 import React from 'react'
-import { logError } from 'src/tui/utils/log.js'
+import { logError } from 'src/kernel/utils/log.js'
 import { useDebounceCallback } from 'usehooks-ts'
 import type { InputEvent, Key } from '../ink.js'
 import {
@@ -10,7 +10,7 @@ import {
   tryReadImageFromPath,
 } from '../utils/imagePaste.js'
 import type { ImageDimensions } from '../utils/imageResizer.js'
-import { getPlatform } from '../utils/platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 const CLIPBOARD_CHECK_DEBOUNCE_MS = 50
 const PASTE_COMPLETION_TIMEOUT_MS = 100

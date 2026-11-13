@@ -12,8 +12,8 @@
  * 均返回 null；调用方必须按「未知即不安全」处理（进询问，不得静默清理）。
  * 所有 git 调用经 `-C <worktreePath>` 绑定 worktreePath，不依赖进程 cwd。
  */
-import { execFileNoThrow } from './execFileNoThrow.js';
-import { gitExe } from './git.js';
+import { execFileNoThrow } from '../../kernel/utils/execFileNoThrow.js';
+import { gitExe } from '../../kernel/utils/git.js';
 
 export type WorktreeChangeSummary = {
   /** 未提交文件数（`git status --porcelain` 非空行数） */

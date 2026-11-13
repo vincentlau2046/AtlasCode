@@ -9,7 +9,7 @@ import {
   type ContextData,
 } from '../../utils/analyzeContext.js'
 import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
-import { formatTokens } from '../../utils/format.js'
+import { formatTokens } from '../../../kernel/utils/format.js'
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js'
 import { getSourceDisplayName } from '../../utils/settings/constants'
 import { plural } from '../../../kernel/utils/stringUtils.js'

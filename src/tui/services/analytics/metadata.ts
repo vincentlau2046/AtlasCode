@@ -11,7 +11,7 @@
 
 import { extname } from 'path'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { feature } from 'src/shared'
 
 /**

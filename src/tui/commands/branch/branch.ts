@@ -9,8 +9,8 @@ import type {
   LogOption,
   SerializedMessage,
   TranscriptMessage,
-} from '../../types/logs.js'
-import { parseJSONL } from '../../utils/json.js'
+} from '../../../kernel/types/logs.js'
+import { parseJSONL } from '../../../kernel/utils/json.js'
 import {
   getProjectDir,
   getTranscriptPath,
@@ -19,7 +19,7 @@ import {
   saveCustomTitle,
   searchSessionsByCustomTitle,
 } from '../../utils/sessionStorage.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { escapeRegExp } from '../../../kernel/utils/stringUtils.js'
 
 type TranscriptEntry = TranscriptMessage & {

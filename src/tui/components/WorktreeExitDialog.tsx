@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { CommandResultDisplay } from 'src/tui/commands.js';
-import { logForDebugging } from 'src/tui/utils/debug.js';
+import { logForDebugging } from 'src/kernel/utils/debug.js';
 import { Box, Text } from '../ink.js';
 import { getPlansDirectory } from '../utils/plans.js';
 import { setCwd } from '../utils/Shell.js';

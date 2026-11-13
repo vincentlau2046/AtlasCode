@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 
 /**
  * Get the Magic Docs update prompt template

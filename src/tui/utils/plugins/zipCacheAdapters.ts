@@ -12,9 +12,9 @@
 
 import { readFile } from 'fs/promises'
 import { join } from 'path'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { findManifestInDir } from '../../../kernel/utils/configDir.js'
-import { jsonParse, jsonStringify } from '../slowOperations'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 import { loadKnownMarketplacesConfigSafe } from './marketplaceManager.js'
 import {
   type KnownMarketplacesFile,

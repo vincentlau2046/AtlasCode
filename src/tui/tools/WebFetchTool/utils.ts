@@ -3,7 +3,7 @@ import { LRUCache } from 'lru-cache'
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
 import { AbortError } from '../../../kernel/utils/errors.js'
 import { getWebFetchUserAgent } from '../../utils/http.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { createUserMessage } from '../../utils/messages.js'
 import {
   isBinaryContentType,

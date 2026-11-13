@@ -10,7 +10,7 @@ import {
   deleteTask,
   getTaskListId,
   isTodoV2Enabled,
-} from '../../utils/tasks.js'
+} from '../../../kernel/utils/tasks.js'
 import { getAgentName, getTeamName } from 'src/engine'
 import { TASK_CREATE_TOOL_NAME } from '../../../kernel/tools/TaskCreateTool/constants.js'
 import { DESCRIPTION, getPrompt } from './prompt.js'

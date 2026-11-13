@@ -11,8 +11,8 @@ import {
   executeElicitationResultHooks,
   executeNotificationHooks,
 } from '../../utils/hooks.js'
-import { logMCPDebug, logMCPError } from '../../utils/log.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { logMCPDebug, logMCPError } from '../../../kernel/utils/log.js'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 
 /** Configuration for the waiting state shown after the user opens a URL. */
 export type ElicitationWaitingState = {

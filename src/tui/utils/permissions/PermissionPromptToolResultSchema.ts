@@ -1,6 +1,6 @@
 import type { Tool, ToolUseContext } from 'src/tui/Tool.js'
 import z from 'zod/v4'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import type {
   PermissionDecision,
@@ -10,7 +10,7 @@ import {
   applyPermissionUpdates,
   persistPermissionUpdates,
 } from './PermissionUpdate.js'
-import { permissionUpdateSchema } from './PermissionUpdateSchema.js'
+import { permissionUpdateSchema } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 
 export const inputSchema = lazySchema(() =>
   z.object({

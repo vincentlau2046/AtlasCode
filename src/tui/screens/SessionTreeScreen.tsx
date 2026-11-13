@@ -14,10 +14,10 @@
 import * as React from 'react'
 import { Box, Text, useInput } from '../ink.js'
 import { readFileSync, existsSync } from 'fs'
-import type { LogOption } from '../types/logs.js'
+import type { LogOption } from '../../kernel/types/logs.js'
 import type { UUID } from 'crypto'
 import { getGlobalConfig } from '../utils/config.js'
-import { formatFileSize } from '../utils/format.js'
+import { formatFileSize } from '../../kernel/utils/format.js'
 import { resolveThemeSetting } from '../utils/systemTheme.js'
 import { getTheme, type Theme } from '../utils/theme.js'
 import {
@@ -26,11 +26,11 @@ import {
   loadFullLog,
   countVisibleMessages,
 } from '../utils/sessionStorage.js'
-import type { TranscriptMessage } from '../types/logs.js'
+import type { TranscriptMessage } from '../../kernel/types/logs.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getOriginalCwd, getSessionId } from 'src/bootstrap'
-import { getLogDisplayTitle } from '../utils/log.js'
-import { stripDisplayTagsAllowEmpty } from '../utils/displayTags.js'
+import { getLogDisplayTitle } from '../../kernel/utils/log.js'
+import { stripDisplayTagsAllowEmpty } from '../../kernel/utils/displayTags.js'
 import { saveCustomTitle } from '../utils/sessionStorage.js'
 import {
   createFork,

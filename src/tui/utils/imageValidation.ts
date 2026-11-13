@@ -1,5 +1,5 @@
 import { API_IMAGE_MAX_BASE64_SIZE } from '../constants/apiLimits.js'
-import { formatFileSize } from './format.js'
+import { formatFileSize } from '../../kernel/utils/format.js'
 
 /**
  * Information about an oversized image.

@@ -13,16 +13,16 @@ import { POWERSHELL_TOOL_NAME } from '../../../kernel/tools/PowerShellTool/toolN
 import { REPL_TOOL_NAME } from '../../../kernel/tools/REPLTool/constants.js'
 import type { AssistantMessage } from '../../../kernel/types/message.js'
 import { extractOutputRedirections } from '../bash/commands.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { AbortError, toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import {
   getSettingSourceDisplayNameLowercase,
   SETTING_SOURCES,
 } from '../settings/constants'
 import { plural } from '../../../kernel/utils/stringUtils.js'
-import { permissionModeTitle } from './PermissionMode.js'
+import { permissionModeTitle } from '../../../kernel/utils/permissions/PermissionMode.js'
 import type {
   PermissionAskDecision,
   PermissionDecision,
@@ -44,7 +44,7 @@ import {
 import type {
   PermissionUpdate,
   PermissionUpdateDestination,
-} from './PermissionUpdateSchema.js'
+} from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   permissionRuleValueFromString,
   permissionRuleValueToString,
@@ -94,7 +94,7 @@ import {
   buildYoloRejectionMessageWithRetry,
   DONT_ASK_REJECT_MESSAGE,
 } from '../messages.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   createDenialTrackingState,
   DENIAL_LIMITS,

@@ -7,18 +7,14 @@ import { z } from 'zod/v4'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 
 // Configuration schemas and types
-export const ConfigScopeSchema = lazySchema(() =>
-  z.enum([
-    'local',
-    'user',
-    'project',
-    'dynamic',
-    'enterprise',
-    'claudeai',
-    'managed',
-  ]),
-)
-export type ConfigScope = z.infer<ReturnType<typeof ConfigScopeSchema>>
+// 0.1.106 S3b 切片 2：ConfigScopeSchema + ConfigScope 提取 kernel/types/
+// configScope.ts（首车随迁文件 kernel/utils/settings/validation.ts 的 type 边
+// 机械闭合，f4 批复单元 ④；lazySchema 复用 kernel/utils 单源）；本文件
+// re-export 兜底，既有消费方零改动。
+export { ConfigScopeSchema } from '../../../kernel/types/configScope.js'
+// 本文件后续行以局部名引用 ConfigScope（re-export 不建局部绑定）。
+import type { ConfigScope } from '../../../kernel/types/configScope.js'
+export type { ConfigScope }
 
 export const TransportSchema = lazySchema(() =>
   z.enum(['stdio', 'sse', 'sse-ide', 'http', 'ws', 'sdk']),

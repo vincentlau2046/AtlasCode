@@ -11,14 +11,14 @@ import { FILE_EDIT_TOOL_NAME } from '../../../kernel/tools/FileEditTool/constant
 import { FILE_READ_TOOL_NAME } from '../../../kernel/tools/FileReadTool/prompt.js'
 import { FILE_WRITE_TOOL_NAME } from '../../../kernel/tools/FileWriteTool/prompt.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import {
   coerceDescriptionToString,
   parseFrontmatter,
   parsePositiveIntFromFrontmatter,
 } from '../frontmatterParser.js'
-import { getFsImplementation, isDuplicatePath } from '../fsOperations'
+import { getFsImplementation, isDuplicatePath } from '../../../kernel/utils/fsOperations'
 import {
   parseAgentToolsFromFrontmatter,
   parseSlashCommandToolsFromFrontmatter,

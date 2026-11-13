@@ -12,7 +12,7 @@ import axios from 'axios'
 import { chmod, mkdir, readFile, rename, rm, writeFile } from 'fs/promises'
 import { dirname, join, resolve, sep } from 'path'
 import { waitForScrollIdle } from 'src/tui/bootstrapState.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { parseZipModes, unzipFile } from '../dxt/zip.js'
 import { errorMessage, getErrnoCode } from '../../../kernel/utils/errors.js'
 

@@ -9,7 +9,7 @@ import {
   McpServerConfigSchema,
 } from '../../services/mcp/types.js'
 import type { ToolUseContext } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   EFFORT_LEVELS,
   type EffortValue,
@@ -18,7 +18,7 @@ import {
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { parsePositiveIntFromFrontmatter } from '../../utils/frontmatterParser.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   loadMarkdownFilesForSubdir,
   parseAgentToolsFromFrontmatter,
@@ -27,14 +27,14 @@ import {
 import {
   PERMISSION_MODES,
   type PermissionMode,
-} from '../../utils/permissions/PermissionMode.js'
+} from '../../../kernel/utils/permissions/PermissionMode.js'
 import {
   clearPluginAgentCache,
   loadPluginAgents,
 } from '../../utils/plugins/loadPluginAgents.js'
 import { HooksSchema } from '../../schemas/hooks.js'
 import type { HooksSettings } from '../../../kernel/settings/types.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { FILE_EDIT_TOOL_NAME } from '../../../kernel/tools/FileEditTool/constants.js'
 import { FILE_READ_TOOL_NAME } from '../../../kernel/tools/FileReadTool/prompt.js'
 import { FILE_WRITE_TOOL_NAME } from '../../../kernel/tools/FileWriteTool/prompt.js'

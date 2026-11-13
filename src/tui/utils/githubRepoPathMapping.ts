@@ -1,14 +1,14 @@
 import { realpath } from 'fs/promises'
 import { getOriginalCwd } from 'src/bootstrap'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import {
   detectCurrentRepository,
   parseGitHubRepository,
-} from './detectRepository.js'
+} from '../../kernel/utils/detectRepository.js'
 import { pathExists } from './file.js'
-import { getRemoteUrlForDir } from './git/gitFilesystem.js'
-import { findGitRoot } from './git.js'
+import { getRemoteUrlForDir } from '../../kernel/utils/git/gitFilesystem.js'
+import { findGitRoot } from '../../kernel/utils/git.js'
 
 /**
  * Updates the GitHub repository path mapping in global config.

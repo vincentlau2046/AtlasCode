@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { getOriginalCwd } from 'src/bootstrap';
 import { Box, Text, useTheme } from '../../ink.js';
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js';
-import { env } from '../../utils/env.js';
+import { env } from '../../../kernel/utils/env.js';
 import { shouldShowAlwaysAllowOptions } from '../../utils/permissions/permissionsLoader.js';
 import { truncateToLines } from '../../../kernel/utils/stringUtils.js';
 import { logUnaryEvent } from '../../utils/unaryLogging.js';

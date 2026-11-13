@@ -1,11 +1,11 @@
 import figures from 'figures'
-import { logError } from 'src/tui/utils/log.js'
+import { logError } from 'src/kernel/utils/log.js'
 import { callIdeRpc } from '../services/mcp/client.js'
 import type { MCPServerConnection } from '../services/mcp/types.js'
 import { ClaudeError } from '../../kernel/utils/errors.js'
 import { normalizePathForComparison, pathsEqual } from '../utils/file.js'
 import { getConnectedIdeClient } from '../utils/ide.js'
-import { jsonParse } from '../utils/slowOperations'
+import { jsonParse } from '../../kernel/utils/slowOperations'
 
 class DiagnosticsTrackingError extends ClaudeError {}
 

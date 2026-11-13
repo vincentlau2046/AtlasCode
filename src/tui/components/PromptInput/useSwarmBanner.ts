@@ -17,7 +17,7 @@ import {
   getCachedDetectionResult,
   isInProcessEnabled,
 } from 'src/swarm'
-import { getSwarmSocketName } from '../../utils/swarm/constants.js'
+import { getSwarmSocketName } from '../../../kernel/utils/swarm/constants.js'
 import {
   getAgentName,
   getTeammateColor,

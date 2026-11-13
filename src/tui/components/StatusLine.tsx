@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { useAppState, useSetAppState } from 'src/tui/state/AppState.js';
-import type { PermissionMode } from 'src/tui/utils/permissions/PermissionMode.js';
+import type { PermissionMode } from 'src/kernel/utils/permissions/PermissionMode.js';
 import { getMainThreadAgentType, getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { getIsRemoteMode, getSdkBetas } from 'src/tui/bootstrapState.js';
 import { DEFAULT_OUTPUT_STYLE_NAME } from '../constants/outputStyles.js';
@@ -16,7 +16,7 @@ import type { VimMode } from '../types/textInputTypes.js';
 import { checkHasTrustDialogAccepted } from '../utils/config.js';
 import { calculateContextPercentages, getContextWindowForModel } from '../../kernel/utils/context.js';
 import { getCwd } from '../../kernel/utils/cwd.js';
-import { logForDebugging } from '../utils/debug';
+import { logForDebugging } from '../../kernel/utils/debug';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { createBaseHookInput, executeStatusLineCommand } from '../utils/hooks.js';
 import { getLastAssistantMessage } from '../utils/messages.js';

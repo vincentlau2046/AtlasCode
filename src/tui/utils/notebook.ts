@@ -13,9 +13,9 @@ import type {
   NotebookContent,
   NotebookOutputImage,
 } from '../types/notebook.js'
-import { getFsImplementation } from './fsOperations'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { expandPath } from './path.js'
-import { jsonParse } from './slowOperations'
+import { jsonParse } from '../../kernel/utils/slowOperations'
 
 const LARGE_OUTPUT_THRESHOLD = 10000
 

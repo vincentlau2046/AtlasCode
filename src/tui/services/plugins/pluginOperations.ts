@@ -17,8 +17,8 @@ import { isBuiltinPluginId } from '../../plugins/builtinPlugins.js'
 import type { LoadedPlugin, PluginManifest } from '../../types/plugin.js'
 import { findManifestInDir } from '../../../kernel/utils/configDir.js'
 import { isENOENT, toError } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../../utils/fsOperations'
-import { logError } from '../../utils/log.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   clearAllCaches,
   markPluginVersionOrphaned,

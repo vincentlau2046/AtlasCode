@@ -20,9 +20,9 @@ import {
   splitCommand_DEPRECATED,
 } from '../../utils/bash/commands.js'
 import { parseCommandRaw } from '../../utils/bash/parser'
-import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
+import { tryParseShellCommand } from '../../../kernel/utils/bash/shellQuote.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { AbortError } from '../../../kernel/utils/errors.js'
 import type {
@@ -45,7 +45,7 @@ import type {
   PermissionRuleValue,
 } from '../../../kernel/permissions/PermissionRule.js'
 import { extractRules } from '../../utils/permissions/PermissionUpdate.js'
-import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js'
 import {
   createPermissionRequestMessage,
@@ -59,7 +59,7 @@ import {
   suggestionForExactCommand as sharedSuggestionForExactCommand,
   suggestionForPrefix as sharedSuggestionForPrefix,
 } from '../../../kernel/permissions/shellRuleMatching.js'
-import { getPlatform } from '../../utils/platform.js'
+import { getPlatform } from '../../../kernel/utils/platform.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import { windowsPathToPosixPath } from '../../utils/windowsPaths.js'
 import { BashTool } from './BashTool.js'

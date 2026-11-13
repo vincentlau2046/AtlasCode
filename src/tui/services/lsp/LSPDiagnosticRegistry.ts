@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto'
 import { LRUCache } from 'lru-cache'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../../utils/log.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { logError } from '../../../kernel/utils/log.js'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import type { DiagnosticFile } from '../diagnosticTracking.js'
 
 /**

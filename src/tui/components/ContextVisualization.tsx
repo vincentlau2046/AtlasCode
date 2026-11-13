@@ -5,7 +5,7 @@ import { Box, Text } from '../ink.js';
 import type { ContextData } from '../utils/analyzeContext.js';
 import { generateContextSuggestions } from '../utils/contextSuggestions.js';
 import { getDisplayPath } from '../utils/file.js';
-import { formatTokens } from '../utils/format.js';
+import { formatTokens } from '../../kernel/utils/format.js';
 import { getSourceDisplayName, type SettingSource } from '../utils/settings/constants';
 import { plural } from '../../kernel/utils/stringUtils.js';
 import { ContextSuggestions } from './ContextSuggestions.js';

@@ -14,7 +14,7 @@ import type { Tools } from '../../Tool.js';
 import type { Message, ProgressMessage } from '../../../kernel/types/message.js';
 import { adjustHunkLineNumbers, CONTEXT_LINES } from '../../utils/diff.js';
 import { FILE_NOT_FOUND_CWD_NOTE, getDisplayPath } from '../../utils/file.js';
-import { logError } from '../../utils/log.js';
+import { logError } from '../../../kernel/utils/log.js';
 import { getPlansDirectory } from '../../utils/plans.js';
 import { readEditContext } from '../../utils/readEditContext.js';
 import { firstLineOf } from '../../../kernel/utils/stringUtils.js';

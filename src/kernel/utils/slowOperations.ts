@@ -9,7 +9,7 @@ import {
 } from 'fs'
 // biome-ignore lint: This file IS the cloneDeep wrapper - it must import the original
 import lodashCloneDeep from 'lodash-es/cloneDeep.js'
-import { addSlowOperation } from 'src/tui/bootstrapState.js'
+import { getKernelBootstrapNoopSeam } from '../state/injection.js'
 import { isAtlasDev } from '../../kernel/utils/atlasDev'
 import { logForDebugging } from './debug'
 
@@ -118,7 +118,8 @@ class AntSlowLogger {
         logForDebugging(
           `[SLOW OPERATION DETECTED] ${description} (${duration.toFixed(1)}ms)`,
         )
-        addSlowOperation(description, duration)
+        // 0.1.106 S3b 切片 2：no-op 缝消费（原 tui/bootstrapState 直调）。
+        getKernelBootstrapNoopSeam().addSlowOperation(description, duration)
       } finally {
         isLogging = false
       }

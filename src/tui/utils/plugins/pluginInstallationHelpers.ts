@@ -10,8 +10,8 @@ import { rename, rm } from 'fs/promises'
 import { dirname, join, resolve, sep } from 'path'
 import { getCwd } from '../../../kernel/utils/cwd.js'
 import { toError } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../fsOperations'
-import { logError } from '../log.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   getSettingsForSource,
   updateSettingsForSource,

@@ -1,7 +1,7 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import type { ContentBlockParam } from '../../../../kernel/types/atlas.js'
 import { randomUUID } from 'crypto'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：bridge/bridgePermissionCallbacks 整裁；1P 远程权限委托回调类型
 // 就地定义（domestic 下 bridgeCallbacks 恒 undefined，所有 gate 块 no-op，行为保持）
 type BridgePermissionResponse = {
@@ -38,7 +38,7 @@ import {
 } from '../../../../kernel/utils/classifierApprovals.js'
 import { errorMessage } from '../../../../kernel/utils/errors.js'
 import type { PermissionDecision } from '../../../../kernel/permissions/PermissionResult.js'
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import { hasPermissionsToUseTool } from '../../../utils/permissions/permissions.js'
 import type { PermissionContext } from '../PermissionContext.js'
 import { createResolveOnce } from '../PermissionContext.js'

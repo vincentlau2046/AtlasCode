@@ -2,7 +2,7 @@ import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { cronToHuman } from '../../utils/cron.js'
 import { listAllCronTasks } from '../../utils/cronTasks.js'
-import { truncate } from '../../utils/format.js'
+import { truncate } from '../../../kernel/utils/format.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { getTeammateContext } from 'src/shared'
 import {

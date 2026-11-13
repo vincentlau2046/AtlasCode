@@ -25,11 +25,11 @@
 
 import { posix } from 'path'
 import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { toError } from '../../kernel/utils/errors.js'
-import { execFileNoThrow } from './execFileNoThrow.js'
-import { logError } from './log.js'
-import { getPlatform } from './platform.js'
+import { execFileNoThrow } from '../../kernel/utils/execFileNoThrow.js'
+import { logError } from '../../kernel/utils/log.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 // Constants for tmux socket management
 const TMUX_COMMAND = 'tmux'

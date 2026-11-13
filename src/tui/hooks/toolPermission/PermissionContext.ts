@@ -17,8 +17,8 @@ import type {
   PermissionDenyDecision,
 } from '../../../kernel/types/permissions.js'
 import { setClassifierApproval } from '../../../kernel/utils/classifierApprovals.js'
-import { logForDebugging } from '../../utils/debug'
-import { logError } from '../../utils/log.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { logError } from '../../../kernel/utils/log.js'
 import { mergeCurrentSessionPermissionRules } from '../../utils/permissions/sessionPermissionRules.js'
 import { checkRuleBasedPermissions } from '../../utils/permissions/permissions.js'
 import { executePermissionRequestHooks } from '../../utils/hooks.js'
@@ -35,7 +35,7 @@ import {
   persistPermissionUpdates,
   supportsPersistence,
 } from '../../utils/permissions/PermissionUpdate.js'
-import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   logPermissionDecision,
   type PermissionDecisionArgs,

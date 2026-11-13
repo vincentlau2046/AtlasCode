@@ -17,12 +17,12 @@ import { join } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
 import { addSessionCronTask, getSessionCronTasks, removeSessionCronTasks } from 'src/tui/bootstrapState.js'
 import { computeNextCronRun, parseCronExpression } from './cron.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isFsInaccessible } from '../../kernel/utils/errors.js'
-import { getFsImplementation } from './fsOperations'
-import { safeParseJSON } from './json.js'
-import { logError } from './log.js'
-import { jsonStringify } from './slowOperations'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
+import { safeParseJSON } from '../../kernel/utils/json.js'
+import { logError } from '../../kernel/utils/log.js'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 export type CronTask = {
   id: string

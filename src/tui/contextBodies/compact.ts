@@ -54,7 +54,7 @@ import {
   analyzeContext,
   tokenStatsToStatsigMetrics,
 } from '../utils/contextAnalysis.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { hasExactErrorMessage } from '../../kernel/utils/errors.js'
 import { cacheToObject } from '../utils/fileStateCache.js'
 import {
@@ -65,7 +65,7 @@ import {
   executePostCompactHooks,
   executePreCompactHooks,
 } from '../utils/hooks.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { MEMORY_TYPE_VALUES } from '../utils/memory/types.js'
 import {
   createCompactBoundaryMessage,
@@ -88,7 +88,7 @@ import {
   reAppendSessionMetadata,
 } from '../utils/sessionStorage.js'
 import { sleep } from '../../kernel/utils/sleep.js'
-import { jsonStringify } from '../utils/slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import { asSystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import type { SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { getTaskOutputPath } from '../utils/task/diskOutput.js'

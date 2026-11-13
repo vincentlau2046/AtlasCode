@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppState, useSetAppState } from 'src/tui/state/AppState.js';
 import { applyPermissionUpdate, persistPermissionUpdate } from 'src/tui/utils/permissions/PermissionUpdate.js';
-import type { PermissionUpdateDestination } from 'src/tui/utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdateDestination } from 'src/kernel/utils/permissions/PermissionUpdateSchema.js';
 import type { CommandResultDisplay } from '../../../commands.js';
 import { Select } from '../../../components/CustomSelect/select.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../../hooks/useExitOnCtrlCDWithKeybindings.js';
@@ -18,7 +18,7 @@ import type { PermissionBehavior, PermissionRule, PermissionRuleValue } from '..
 import { permissionRuleValueToString } from '../../../../kernel/permissions/permissionRuleParser.js';
 import { deletePermissionRule, getAllowRules, getAskRules, getDenyRules, permissionRuleSourceDisplayString } from '../../../utils/permissions/permissions.js';
 import type { UnreachableRule } from '../../../utils/permissions/shadowedRuleDetection.js';
-import { jsonStringify } from '../../../utils/slowOperations';
+import { jsonStringify } from '../../../../kernel/utils/slowOperations';
 import { Pane } from '../../design-system/Pane.js';
 import { Tab, Tabs, useTabHeaderFocus, useTabsWidth } from '../../design-system/Tabs.js';
 import { SearchBox } from '../../SearchBox.js';

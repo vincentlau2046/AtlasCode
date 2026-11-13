@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Box, Text } from '../../ink.js'
-import { env } from '../../utils/env.js'
+import { env } from '../../../kernel/utils/env.js'
 import { PRODUCT_FAMILY, PRODUCT_BRAND } from 'src/shared'
 import { getBeamArt, resolveMarkTierFromEnv } from './markDegrade.js'
 

@@ -15,18 +15,18 @@ import {
 } from 'path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isENOENT, isFsInaccessible } from '../../kernel/utils/errors.js'
 import {
   detectEncodingForResolvedPath,
   detectLineEndingsForString,
   type LineEndingType,
-} from './fileRead.js'
+} from '../../kernel/utils/fileRead.js'
 import { fileReadCache } from './fileReadCache.js'
-import { getFsImplementation, safeResolvePath } from './fsOperations'
-import { logError } from './log.js'
+import { getFsImplementation, safeResolvePath } from '../../kernel/utils/fsOperations'
+import { logError } from '../../kernel/utils/log.js'
 import { expandPath } from './path.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 export type File = {
   filename: string

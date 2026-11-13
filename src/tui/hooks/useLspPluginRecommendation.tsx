@@ -17,8 +17,8 @@ import { hasShownLspRecommendationThisSession, setLspRecommendationShownThisSess
 import { useNotifications } from '../context/notifications.js';
 import { useAppState } from '../state/AppState.js';
 import { saveGlobalConfig } from '../utils/config.js';
-import { logForDebugging } from '../utils/debug';
-import { logError } from '../utils/log.js';
+import { logForDebugging } from '../../kernel/utils/debug';
+import { logError } from '../../kernel/utils/log.js';
 import { addToNeverSuggest, getMatchingLspPlugins, incrementIgnoredCount } from '../utils/plugins/lspRecommendation.js';
 import { cacheAndRegisterPlugin } from '../utils/plugins/pluginInstallationHelpers.js';
 import { getSettingsForSource, updateSettingsForSource } from '../utils/settings/settings.js';

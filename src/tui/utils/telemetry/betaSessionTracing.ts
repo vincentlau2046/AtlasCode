@@ -32,7 +32,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/gr
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
 import type { AssistantMessage, UserMessage } from '../../../kernel/types/message.js'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
-import { jsonParse, jsonStringify } from '../slowOperations'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 import { logOTelEvent } from '../../../kernel/telemetry/events.js'
 
 // Message type for API calls (UserMessage or AssistantMessage)

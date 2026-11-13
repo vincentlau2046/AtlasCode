@@ -1,5 +1,5 @@
 import { modelProvider } from 'src/modelprovider'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 
 /**
  * P5 降级组 #11：converged onto `modelProvider.verifyKey` (R1/R2).

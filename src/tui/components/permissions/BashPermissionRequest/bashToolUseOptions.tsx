@@ -1,7 +1,7 @@
 import { BASH_TOOL_NAME } from '../../../../kernel/tools/BashTool/toolName.js';
 import { extractOutputRedirections } from '../../../utils/bash/commands.js';
 import type { PermissionDecisionReason } from '../../../../kernel/permissions/PermissionResult.js';
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import { isDangerousShellPrefix } from '../../../../kernel/permissions/dangerousShellPrefix.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';

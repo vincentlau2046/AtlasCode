@@ -6,15 +6,15 @@ import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import type {
   AttributionSnapshotMessage,
   FileAttributionState,
-} from '../types/logs.js'
+} from '../../kernel/types/logs.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
-import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { isGeneratedFile } from './generatedFiles.js'
-import { getRemoteUrlForDir, resolveGitDir } from './git/gitFilesystem.js'
-import { findGitRoot, gitExe } from './git.js'
-import { logError } from './log.js'
+import { getRemoteUrlForDir, resolveGitDir } from '../../kernel/utils/git/gitFilesystem.js'
+import { findGitRoot, gitExe } from '../../kernel/utils/git.js'
+import { logError } from '../../kernel/utils/log.js'
 import { getCanonicalName, type ModelName } from './model/model.js'
 import { sequential } from './sequential.js'
 

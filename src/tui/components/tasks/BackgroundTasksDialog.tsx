@@ -33,7 +33,7 @@ const RemoteAgentTask = {
 import { type BackgroundTaskState, isBackgroundTask, type TaskState } from 'src/tui/tasks/types.js';
 import type { DeepImmutable } from 'src/tui/types/utils.js';
 import { intersperse } from 'src/kernel/utils/array';
-import { TEAM_LEAD_NAME } from 'src/tui/utils/swarm/constants.js';
+import { TEAM_LEAD_NAME } from 'src/kernel/utils/swarm/constants.js';
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：stopUltraplan（ultraplan 1P CCR 命令）随 1P 簇裁除；no-op stub
 const stopUltraplan = async (_id: string, _sessionId: string, _setAppState: unknown): Promise<void> => {};
 import type { CommandResultDisplay } from '../../commands.js';

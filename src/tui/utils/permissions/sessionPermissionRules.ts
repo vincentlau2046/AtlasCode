@@ -20,8 +20,8 @@ import { mkdir, readFile, rename, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { getTranscriptPath } from '../sessionStorage.js'
 import { getSessionId } from 'src/bootstrap'
-import { logForDebugging } from '../debug'
-import type { PermissionUpdate } from './PermissionUpdateSchema.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 
 const SESSION_RULES_FILE_SUFFIX = '.session-rules.json'
 /** 防御上限：sidecar 是小型便利层，超 1MB 视为损坏（不信任手写/损坏文件） */

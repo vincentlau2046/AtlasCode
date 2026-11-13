@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import React from 'react';
 import { Text } from '../ink.js';
-import type { ValidationError } from '../utils/settings/validation';
+import type { ValidationError } from '../../kernel/utils/settings/validation';
 import { Select } from './CustomSelect/index.js';
 import { Dialog } from './design-system/Dialog.js';
 import { ValidationErrorsList } from './ValidationErrorsList.js';

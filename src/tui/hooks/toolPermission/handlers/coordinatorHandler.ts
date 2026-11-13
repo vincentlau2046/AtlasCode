@@ -1,8 +1,8 @@
 import { feature } from 'src/shared'
 import type { PendingClassifierCheck } from '../../../../kernel/types/permissions.js'
-import { logError } from '../../../utils/log.js'
+import { logError } from '../../../../kernel/utils/log.js'
 import type { PermissionDecision } from '../../../../kernel/permissions/PermissionResult.js'
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import type { PermissionContext } from '../PermissionContext.js'
 
 type CoordinatorPermissionParams = {

@@ -1,5 +1,5 @@
 import { isAtlasDev } from 'src/kernel/utils/atlasDev'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 import { z } from 'zod/v4'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import {

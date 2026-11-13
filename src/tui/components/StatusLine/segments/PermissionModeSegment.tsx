@@ -8,7 +8,7 @@ import {
   permissionModeSymbol,
   permissionModeShortTitle,
   getModeColor,
-} from '../../../utils/permissions/PermissionMode.js'
+} from '../../../../kernel/utils/permissions/PermissionMode.js'
 import type { SegmentComponent } from './types.js'
 
 export const PermissionModeSegment: SegmentComponent = (ctx) => {

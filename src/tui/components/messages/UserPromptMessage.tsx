@@ -1,7 +1,7 @@
 import type { TextBlockParam } from '../../../kernel/types/atlas.js';
 import React, { useContext, useMemo } from 'react';
 import { Box } from '../../ink.js';
-import { logError } from '../../utils/log.js';
+import { logError } from '../../../kernel/utils/log.js';
 import { countCharInString } from '../../../kernel/utils/stringUtils.js';
 import { MessageActionsSelectedContext } from '../messageActions.js';
 import { HighlightedThinkingText } from './HighlightedThinkingText.js';

@@ -1,7 +1,7 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { type as osType, version as osVersion, release as osRelease } from 'os'
-import { env } from '../utils/env.js'
-import { getIsGit } from '../utils/git.js'
+import { env } from '../../kernel/utils/env.js'
+import { getIsGit } from '../../kernel/utils/git.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
@@ -56,7 +56,7 @@ import {
   DANGEROUS_uncachedSystemPromptSection,
   resolveSystemPromptSections,
 } from './systemPromptSections.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { loadMemoryPrompt } from '../memdir/memdir.js'
 // D4 接线（13-总纲 2.2 子步 3）：注入通道走 factory 暴露（与 modelProvider 一致），
 // 不扩 ToolUseContext（D6 裁定）。

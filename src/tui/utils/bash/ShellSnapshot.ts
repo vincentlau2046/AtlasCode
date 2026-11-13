@@ -5,19 +5,19 @@ import * as os from 'os'
 import { join } from 'path'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   embeddedSearchToolsBinaryPath,
   hasEmbeddedSearchTools,
 } from '../../../kernel/utils/embeddedTools.js'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
 import { pathExists } from '../file.js'
-import { getFsImplementation } from '../fsOperations'
-import { logError } from '../log.js'
-import { getPlatform } from '../platform.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
+import { getPlatform } from '../../../kernel/utils/platform.js'
 import { ripgrepCommand } from 'src/tui/sandboxCompat'
 import { subprocessEnv } from '../../../kernel/utils/subprocessEnv.js'
-import { quote } from './shellQuote.js'
+import { quote } from '../../../kernel/utils/bash/shellQuote.js'
 
 const LITERAL_BACKSLASH = '\\'
 const SNAPSHOT_CREATION_TIMEOUT = 10000 // 10 seconds

@@ -1,7 +1,7 @@
 import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import type { PermissionUpdate } from '../../../kernel/types/permissions.js'
-import { formatFileSize } from '../../utils/format.js'
+import { formatFileSize } from '../../../kernel/utils/format.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import type { PermissionDecision } from '../../../kernel/permissions/PermissionResult.js'
 import { getRuleByContentsForTool } from '../../utils/permissions/permissions.js'

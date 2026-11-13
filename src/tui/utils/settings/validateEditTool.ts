@@ -1,6 +1,6 @@
 import type { ValidationResult } from 'src/tui/Tool.js'
 import { isAtlasSettingsPath } from '../permissions/filesystem.js'
-import { validateSettingsFileContent } from './validation'
+import { validateSettingsFileContent } from '../../../kernel/utils/settings/validation'
 
 /**
  * Validates settings file edits to ensure the result conforms to SettingsSchema.

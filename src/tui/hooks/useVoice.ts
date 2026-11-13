@@ -19,10 +19,10 @@ import {
   isVoiceStreamAvailable,
   type VoiceStreamConnection,
 } from '../services/voiceStreamSTT.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { toError } from '../../kernel/utils/errors.js'
-import { getSystemLocaleLanguage } from '../utils/intl.js'
-import { logError } from '../utils/log.js'
+import { getSystemLocaleLanguage } from '../../kernel/utils/intl.js'
+import { logError } from '../../kernel/utils/log.js'
 import { getInitialSettings } from '../utils/settings/settings.js'
 import { sleep } from '../../kernel/utils/sleep.js'
 

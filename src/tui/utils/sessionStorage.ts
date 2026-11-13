@@ -36,7 +36,7 @@ import {
   asSessionId,
   type SessionId,
 } from '../../kernel/types/ids.js'
-import type { AttributionSnapshotMessage } from '../types/logs.js'
+import type { AttributionSnapshotMessage } from '../../kernel/types/logs.js'
 import {
   type ContentReplacementEntry,
   type ContextCollapseCommitEntry,
@@ -48,7 +48,7 @@ import {
   type SerializedMessage,
   sortLogs,
   type TranscriptMessage,
-} from '../types/logs.js'
+} from '../../kernel/types/logs.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
@@ -57,13 +57,13 @@ import type {
   SystemMessage,
   UserMessage,
 } from '../../kernel/types/message.js'
-import type { QueueOperationMessage } from '../types/messageQueueTypes.js'
+import type { QueueOperationMessage } from '../../kernel/types/messageQueueTypes.js'
 import { uniq } from '../../kernel/utils/array.js'
 import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
 import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
-import { logForDiagnosticsNoPII } from './diagLogs.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 // 0.1.85-D（C85-D）：pdf_reference 五字段白名单落盘投影（工单 §1-D「恢复/
 // 压缩仍保引用」）——与 engine 车道 session/record.ts 同源同款（shared
@@ -71,12 +71,12 @@ import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.
 import { projectPDFReferenceForRecord } from 'src/shared'
 import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
-import { formatFileSize } from './format.js'
-import { getFsImplementation } from './fsOperations'
+import { formatFileSize } from '../../kernel/utils/format.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { getWorktreePaths } from './getWorktreePaths.js'
-import { getBranch } from './git.js'
-import { parseJSONL } from './json.js'
-import { logError } from './log.js'
+import { getBranch } from '../../kernel/utils/git.js'
+import { parseJSONL } from '../../kernel/utils/json.js'
+import { logError } from '../../kernel/utils/log.js'
 import { extractTag, isCompactBoundaryMessage } from './messages.js'
 import { sanitizePath } from './path.js'
 import {
@@ -89,7 +89,7 @@ import {
   SKIP_PRECOMPACT_THRESHOLD,
 } from './sessionStoragePortable.js'
 import { getSettings_DEPRECATED } from './settings/settings.js'
-import { jsonParse, jsonStringify } from './slowOperations'
+import { jsonParse, jsonStringify } from '../../kernel/utils/slowOperations'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
 import { validateUuid } from './uuid.js'
 

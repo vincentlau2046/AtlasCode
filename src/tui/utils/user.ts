@@ -3,7 +3,7 @@ import memoize from 'lodash-es/memoize.js'
 import { getSessionId } from 'src/bootstrap'
 import { getGlobalConfig, getOrCreateUserID } from './config.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { type env, getHostPlatformForAnalytics } from './env.js'
+import { type env, getHostPlatformForAnalytics } from '../../kernel/utils/env.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 
 // Cache for email fetched asynchronously at startup

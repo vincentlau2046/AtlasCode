@@ -2,15 +2,15 @@ import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import { dirname, isAbsolute, resolve } from 'path'
 import type { ToolPermissionContext } from '../../Tool.js'
-import { getPlatform } from '../../utils/platform.js'
+import { getPlatform } from '../../../kernel/utils/platform.js'
 import {
   getFsImplementation,
   getPathsForPermissionCheck,
   safeResolvePath,
-} from '../fsOperations'
+} from '../../../kernel/utils/fsOperations'
 import { containsPathTraversal } from '../path.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
-import { containsVulnerableUncPath } from '../shell/readOnlyCommandValidation.js'
+import { containsVulnerableUncPath } from '../../../kernel/utils/shell/readOnlyCommandValidation.js'
 import {
   checkEditableInternalPath,
   checkPathSafetyForAutoEdit,

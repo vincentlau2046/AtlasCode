@@ -17,9 +17,9 @@ import ignore from 'ignore'
 import { basename, dirname, join, resolve } from 'path'
 import { saveCurrentProjectConfig } from './config.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
-import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
+import { execFileNoThrow, execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
 import { parseGitConfigValue } from '../../kernel/git/gitConfigParser.js'
 import {
   getCommonDir,
@@ -27,21 +27,21 @@ import {
   readWorktreeHeadSha,
   resolveGitDir,
   resolveRef,
-} from './git/gitFilesystem.js'
+} from '../../kernel/utils/git/gitFilesystem.js'
 import {
   findCanonicalGitRoot,
   findGitRoot,
   getBranch,
   getDefaultBranch,
   gitExe,
-} from './git.js'
+} from '../../kernel/utils/git.js'
 import {
   executeWorktreeCreateHook,
   executeWorktreeRemoveHook,
   hasWorktreeCreateHook,
 } from './hooks.js'
 import { containsPathTraversal } from './path.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import {
   getInitialSettings,
   getRelativeSettingsFilePathForSource,

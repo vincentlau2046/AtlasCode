@@ -11,7 +11,7 @@
 
 import { basename } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
-import { getBranch } from '../utils/git.js'
+import { getBranch } from '../../kernel/utils/git.js'
 
 // ─── Global keyterms ────────────────────────────────────────────────
 

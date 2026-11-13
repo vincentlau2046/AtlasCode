@@ -5,8 +5,8 @@ import { generateFileSuggestions } from 'src/tui/hooks/fileSuggestions.js'
 import type { ServerResource } from 'src/tui/services/mcp/types.js'
 import { getAgentColor } from 'src/tui/tools/AgentTool/agentColorManager.js'
 import type { AgentDefinition } from 'src/tui/tools/AgentTool/loadAgentsDir.js'
-import { truncateToWidth } from 'src/tui/utils/format.js'
-import { logError } from 'src/tui/utils/log.js'
+import { truncateToWidth } from 'src/kernel/utils/format.js'
+import { logError } from 'src/kernel/utils/log.js'
 import type { Theme } from 'src/tui/utils/theme.js'
 
 type FileSuggestionSource = {

@@ -7,7 +7,7 @@ import {
 import { getCwd } from '../kernel/utils/cwd.js'
 import { isDirEmpty } from './utils/file.js'
 import { findMemoryFile } from '../kernel/utils/configDir.js'
-import { getFsImplementation } from './utils/fsOperations'
+import { getFsImplementation } from '../kernel/utils/fsOperations'
 
 export type Step = {
   key: string

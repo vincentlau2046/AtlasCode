@@ -280,11 +280,13 @@ export default tseslint.config(
             // modelprovider（context/HARD_DEFAULT_CONTEXT_WINDOW 面）+
             // engine（1，BashTool/toolName.ts 的 BASH_TOOL_NAME 单源 re-export
             // 经 'src/engine' tsconfig 别名——boundaries 解析器不追 paths 别名，
-            // lint 侧不拦但按逃逸格口径为现存顶层域合法落点，一并登记）。
+            // lint 侧不拦但按逃逸格口径为现存顶层域合法落点，一并登记）+
+            // swarm（0.1.106 S3b 切片 2：teammateMailbox.ts BackendType
+            // type-only 窄边，随迁文件既有边，逃逸格现存顶层域合法落点）。
             // tui/atlascode 侧反向消费不经 kernel allow 面（方向相反）。
             {
               from: "kernel",
-              allow: ["shared", "bootstrap", "modelprovider", "engine"],
+              allow: ["shared", "bootstrap", "modelprovider", "engine", "swarm"],
             },
             // DEP-5: atlascode (壳) 不含 ascend — 仅 mount 白名单可 import ascend
             // v0.12: 壳组合根注入八域（compose.ts setTaskOutputPort/setBootstrapStatePort 等）

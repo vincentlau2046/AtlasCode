@@ -4,7 +4,7 @@ import { TOOL_SUMMARY_MAX_LENGTH } from '../../constants/toolLimits.js';
 import { Box, Text } from '../../ink.js';
 import type { ToolProgressData } from '../../Tool.js';
 import type { ProgressMessage } from '../../../kernel/types/message.js';
-import { formatFileSize, truncate } from '../../utils/format.js';
+import { formatFileSize, truncate } from '../../../kernel/utils/format.js';
 import type { Output } from './WebFetchTool.js';
 export function renderToolUseMessage({
   url,

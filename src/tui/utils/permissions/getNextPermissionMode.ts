@@ -1,7 +1,7 @@
 import { feature } from 'src/shared' // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import type { ToolPermissionContext } from '../../Tool.js'
-import { logForDebugging } from '../debug'
-import type { PermissionMode } from './PermissionMode.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import type { PermissionMode } from '../../../kernel/utils/permissions/PermissionMode.js'
 import {
   getAutoModeUnavailableReason,
   isAutoModeGateEnabled,

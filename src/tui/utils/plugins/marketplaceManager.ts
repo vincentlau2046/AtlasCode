@@ -26,7 +26,7 @@ import isEqual from 'lodash-es/isEqual.js'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, isAbsolute, join, resolve, sep } from 'path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   ConfigParseError,
@@ -35,12 +35,12 @@ import {
   isENOENT,
   toError,
 } from '../../../kernel/utils/errors.js'
-import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
-import { getFsImplementation } from '../fsOperations'
-import { gitExe } from '../git.js'
-import { getHeadForDir } from '../git/gitFilesystem.js'
+import { execFileNoThrow, execFileNoThrowWithCwd } from '../../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { gitExe } from '../../../kernel/utils/git.js'
+import { getHeadForDir } from '../../../kernel/utils/git/gitFilesystem.js'
 import { parseGitConfigValue } from '../../../kernel/git/gitConfigParser.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   getInitialSettings,
   getSettingsForSource,
@@ -51,7 +51,7 @@ import {
   jsonParse,
   jsonStringify,
   writeFileSync_DEPRECATED,
-} from '../slowOperations'
+} from '../../../kernel/utils/slowOperations'
 import {
   getAddDirEnabledPlugins,
   getAddDirExtraMarketplaces,

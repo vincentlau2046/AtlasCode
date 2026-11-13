@@ -1,5 +1,5 @@
 import { isInputModeCharacter } from 'src/tui/components/PromptInput/inputModes.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { useNotifications } from 'src/tui/context/notifications.js'
 import stripAnsi from 'strip-ansi'
 import { markBackslashReturnUsed } from '../commands/terminalSetup/terminalSetup.js'
@@ -19,7 +19,7 @@ import {
   updateYankLength,
   yankPop,
 } from '../utils/Cursor.js'
-import { env } from '../utils/env.js'
+import { env } from '../../kernel/utils/env.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
 import type { ImageDimensions } from '../utils/imageResizer.js'
 import { isModifierPressed, prewarmModifiers } from '../utils/modifiers.js'

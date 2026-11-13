@@ -10,7 +10,7 @@ import { FILE_READ_TOOL_NAME } from '../../kernel/tools/FileReadTool/prompt.js'
 import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js'
 import { GLOB_TOOL_NAME } from '../../kernel/tools/GlobTool/prompt.js'
 import { GREP_TOOL_NAME } from '../../kernel/tools/GrepTool/prompt.js'
-import type { Entry } from '../types/logs.js'
+import type { Entry } from '../../kernel/types/logs.js'
 import {
   type AttributionData,
   calculateCommitAttribution,
@@ -18,9 +18,9 @@ import {
   isInternalModelRepoCached,
   sanitizeModelName,
 } from './commitAttribution.js'
-import { logForDebugging } from './debug'
-import { parseJSONL } from './json.js'
-import { logError } from './log.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { parseJSONL } from '../../kernel/utils/json.js'
+import { logError } from '../../kernel/utils/log.js'
 import {
   getCanonicalName,
   getMainLoopModel,

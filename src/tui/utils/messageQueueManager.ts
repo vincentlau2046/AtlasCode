@@ -5,7 +5,7 @@ import type { AppState } from '../state/AppState.js'
 import type {
   QueueOperation,
   QueueOperationMessage,
-} from '../types/messageQueueTypes.js'
+} from '../../kernel/types/messageQueueTypes.js'
 import type {
   EditablePromptInputMode,
   PromptInputMode,

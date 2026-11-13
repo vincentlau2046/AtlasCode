@@ -33,7 +33,7 @@ import {
   getSettingSourceDisplayNameLowercase,
 } from '../../utils/settings/constants'
 import { permissionRuleValueToString } from '../../../kernel/permissions/permissionRuleParser.js'
-import { permissionModeTitle } from '../../utils/permissions/PermissionMode.js'
+import { permissionModeTitle } from '../../../kernel/utils/permissions/PermissionMode.js'
 import type {
   PermissionDecisionReason,
   PermissionMode,

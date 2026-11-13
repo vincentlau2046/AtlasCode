@@ -3,7 +3,7 @@
 
 import { feature } from 'src/shared'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isEnvDefinedFalsy } from '../../kernel/utils/envUtils.js'
 import { getWorkload } from '../utils/workloadContext.js'
 

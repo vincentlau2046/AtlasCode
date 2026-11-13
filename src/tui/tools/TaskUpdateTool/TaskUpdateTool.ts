@@ -18,14 +18,14 @@ import {
   type TaskStatus,
   TaskStatusSchema,
   updateTask,
-} from '../../utils/tasks.js'
+} from '../../../kernel/utils/tasks.js'
 import {
   getAgentId,
   getAgentName,
   getTeammateColor,
   getTeamName,
 } from 'src/engine'
-import { writeToMailbox } from '../../utils/teammateMailbox.js'
+import { writeToMailbox } from '../../../kernel/utils/teammateMailbox.js'
 import { VERIFICATION_AGENT_TYPE } from '../../../kernel/tools/AgentTool/constants.js'
 import { TASK_UPDATE_TOOL_NAME } from '../../../kernel/tools/TaskUpdateTool/constants.js'
 import { DESCRIPTION, PROMPT } from './prompt.js'

@@ -1,5 +1,5 @@
 import { POWERSHELL_TOOL_NAME } from '../../../../kernel/tools/PowerShellTool/toolName.js';
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import { isDangerousShellPrefix } from '../../../../kernel/permissions/dangerousShellPrefix.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';

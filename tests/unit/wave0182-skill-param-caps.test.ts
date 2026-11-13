@@ -22,7 +22,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import * as engine from '../../src/engine/skill'
-import * as tui from '../../src/tui/utils/argumentSubstitution.js'
+import * as tui from '../../src/kernel/utils/argumentSubstitution.js'
 
 const COPIES = [
   { label: 'engine', mod: engine },

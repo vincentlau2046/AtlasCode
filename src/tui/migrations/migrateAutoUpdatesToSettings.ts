@@ -1,5 +1,5 @@
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import {
   getSettingsForSource,
   updateSettingsForSource,

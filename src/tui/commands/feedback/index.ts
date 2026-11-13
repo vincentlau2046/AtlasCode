@@ -1,6 +1,6 @@
 import type { Command } from '../../commands.js'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
-import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
+import { isEssentialTrafficOnly } from '../../../kernel/utils/privacyLevel.js'
 
 const feedback = {
   aliases: ['bug'],

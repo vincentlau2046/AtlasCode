@@ -19,7 +19,7 @@ import type { Message, ProgressMessage } from '../../../kernel/types/message.js'
 import type { AgentToolProgress } from '../../../kernel/types/tools.js';
 import { count } from '../../../kernel/utils/array.js';
 import { getSearchOrReadFromContent, getSearchReadSummaryText } from '../../utils/collapseReadSearch.js';
-import { formatDuration, formatNumber } from '../../utils/format.js';
+import { formatDuration, formatNumber } from '../../../kernel/utils/format.js';
 import { buildSubagentLookups, createAssistantMessage, EMPTY_LOOKUPS } from '../../utils/messages.js';
 import type { ModelAlias } from '../../../kernel/model/aliases.js';
 import { getMainLoopModel, parseUserSpecifiedModel, renderModelName } from '../../utils/model/model.js';

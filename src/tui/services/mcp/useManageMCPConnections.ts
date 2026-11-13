@@ -39,14 +39,14 @@ import {
 } from 'src/tui/services/mcp/config.js'
 import type { AppState } from 'src/tui/state/AppState.js'
 import type { PluginError } from 'src/tui/types/plugin.js'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 import {
   useAppState,
   useAppStateStore,
   useSetAppState,
 } from '../../state/AppState.js'
 import { errorMessage } from '../../../kernel/utils/errors.js'
-import { logMCPDebug, logMCPError } from '../../utils/log.js'
+import { logMCPDebug, logMCPError } from '../../../kernel/utils/log.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
 import { getMcpPrefix } from '../../../kernel/services/mcp/mcpStringUtils.js'
 import { McpFailureReminderTracker } from './mcpFailureReminder.js'

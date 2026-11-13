@@ -8,7 +8,7 @@ import {
   type ToolDef,
   type Tools,
 } from '../../Tool.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { escapeRegExp } from '../../../kernel/utils/stringUtils.js'
 import { isToolSearchEnabledOptimistic } from '../../utils/toolSearch.js'

@@ -15,7 +15,7 @@ import {
   clearGitAvailabilityCache,
   resolveWindowsGitBinary,
   windowsGitCandidates,
-} from '../../src/tui/utils/plugins/gitAvailability.js'
+} from '../../src/kernel/utils/plugins/gitAvailability.js'
 
 /** env 恢复助手（原值 undefined 时删除键，还原 install 前状态）。 */
 function restoreEnv(key: string, value: string | undefined): void {

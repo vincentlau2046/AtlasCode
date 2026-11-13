@@ -1,9 +1,9 @@
 import type { TerminalNotification } from '../ink/useTerminalNotification.js'
 import { getGlobalConfig } from '../utils/config.js'
-import { env } from '../utils/env.js'
-import { execFileNoThrow } from '../utils/execFileNoThrow.js'
+import { env } from '../../kernel/utils/env.js'
+import { execFileNoThrow } from '../../kernel/utils/execFileNoThrow.js'
 import { executeNotificationHooks } from '../utils/hooks.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 
 export type NotificationOptions = {
   message: string

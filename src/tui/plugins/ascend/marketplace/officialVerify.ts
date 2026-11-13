@@ -34,9 +34,9 @@
 
 import { existsSync, readFileSync } from 'fs'
 import { dirname, join } from 'path'
-import { execFileNoThrowWithCwd } from '../../../utils/execFileNoThrow.js'
-import { gitExe } from '../../../utils/git.js'
-import { getHeadForDir } from '../../../utils/git/gitFilesystem.js'
+import { execFileNoThrowWithCwd } from '../../../../kernel/utils/execFileNoThrow.js'
+import { gitExe } from '../../../../kernel/utils/git.js'
+import { getHeadForDir } from '../../../../kernel/utils/git/gitFilesystem.js'
 import { getPluginsDirectory } from '../../../utils/plugins/pluginDirectories.js'
 import { parseYaml } from '../../../utils/yaml.js'
 import {

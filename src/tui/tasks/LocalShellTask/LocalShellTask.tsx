@@ -7,8 +7,8 @@ import type { LocalShellSpawnInput, SetAppState, Task, TaskContext, TaskHandle }
 import { createTaskStateBase } from '../../Task.js';
 import type { AgentId } from '../../../kernel/types/ids.js';
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js';
-import { tailFile } from '../../utils/fsOperations';
-import { logError } from '../../utils/log.js';
+import { tailFile } from '../../../kernel/utils/fsOperations';
+import { logError } from '../../../kernel/utils/log.js';
 import { enqueuePendingNotification } from '../../utils/messageQueueManager.js';
 import type { ShellCommand } from '../../utils/ShellCommand.js';
 import { evictTaskOutput, getTaskOutputPath } from '../../utils/task/diskOutput.js';

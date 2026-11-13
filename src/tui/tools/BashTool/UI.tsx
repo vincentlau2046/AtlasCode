@@ -12,7 +12,7 @@ import { useAppStateStore, useSetAppState } from '../../state/AppState.js';
 import type { Tool } from '../../Tool.js';
 import { backgroundAll } from '../../tasks/LocalShellTask/LocalShellTask.js';
 import type { ProgressMessage } from '../../../kernel/types/message.js';
-import { env } from '../../utils/env.js';
+import { env } from '../../../kernel/utils/env.js';
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js';
 import { getDisplayPath } from '../../utils/file.js';
 import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';

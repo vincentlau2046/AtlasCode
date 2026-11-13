@@ -1,9 +1,9 @@
 import memoize from 'lodash-es/memoize.js'
 import { basename } from 'path'
 import type { OutputStyleConfig } from '../constants/outputStyles.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { coerceDescriptionToString } from '../utils/frontmatterParser.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import {
   extractDescriptionFromMarkdown,
   loadMarkdownFilesForSubdir,

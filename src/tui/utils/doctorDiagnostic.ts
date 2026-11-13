@@ -13,8 +13,8 @@ import {
 } from './config.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
-import { execFileNoThrow } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
+import { execFileNoThrow } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import {
   getShellType,
   isRunningFromLocalInstallation,
@@ -30,19 +30,19 @@ import {
   detectRpm,
   detectWinget,
   getPackageManager,
-} from './nativeInstaller/packageManagers.js'
-import { getPlatform } from './platform.js'
+} from '../../kernel/utils/nativeInstaller/packageManagers.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import { getRipgrepStatus } from 'src/tui/sandboxCompat'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
-import { getManagedFilePath } from './settings/managedPath.js'
+import { getManagedFilePath } from '../../kernel/utils/settings/managedPath.js'
 import { CUSTOMIZATION_SURFACES } from '../../kernel/settings/types.js'
 import {
   findAtlasAlias,
   findValidAtlasAlias,
   getShellConfigPaths,
 } from './shellConfig.js'
-import { jsonParse } from './slowOperations'
-import { which } from './which.js'
+import { jsonParse } from '../../kernel/utils/slowOperations'
+import { which } from '../../kernel/utils/which.js'
 
 export type InstallationType =
   | 'npm-global'

@@ -9,7 +9,7 @@ import { assembleToolPool } from '../../tools.js'
 import { asAgentId } from '../../../kernel/types/ids.js'
 import { runWithAgentContext } from '../../utils/agentContext.js'
 import { runWithCwdOverride } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   createUserMessage,
   filterOrphanedThinkingOnlyMessages,

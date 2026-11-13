@@ -8,10 +8,10 @@ import type { ReleaseChannel } from '../../kernel/nativeInstaller/releaseChannel
 import { saveGlobalConfig } from './config.js'
 import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { getErrnoCode } from '../../kernel/utils/errors.js'
-import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
-import { logError } from './log.js'
-import { jsonStringify } from './slowOperations'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
+import { logError } from '../../kernel/utils/log.js'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 // Lazy getters: getAtlasConfigHomeDir() is memoized and reads process.env.
 // Evaluating at module scope would capture the value before entrypoints like

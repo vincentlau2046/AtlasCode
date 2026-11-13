@@ -1,10 +1,10 @@
 import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getSessionId } from 'src/bootstrap'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 // Cache states:
 // undefined = not yet loaded (need to check disk)

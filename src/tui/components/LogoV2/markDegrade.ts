@@ -18,7 +18,7 @@
  *   ① BR-7 矩阵 blocklist 命中的 terminal(+font) 组合（静态，随矩阵结论滚动加项）
  *   ② 运行时探针 DSR-6 读回列 advance（`ATLAS_MARK_PROBE` opt-in，I/O 为前向缝，见版本规划登记）
  */
-import { env } from '../../utils/env.js'
+import { env } from '../../../kernel/utils/env.js'
 
 export type MarkTier = 0 | 1 | 2
 

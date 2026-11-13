@@ -15,7 +15,7 @@ import { findToolByName } from '../Tool.js'
 import { isInProcessTeammateTask } from '../../kernel/tasks/InProcessTeammateTask/types.js'
 import { getAllBaseTools } from '../tools.js'
 import type { PermissionUpdate } from '../../kernel/types/permissions.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import {
   findInProcessTeammateTaskId,
   handlePlanApprovalResponse,
@@ -24,9 +24,9 @@ import { createAssistantMessage } from '../utils/messages.js'
 import {
   permissionModeFromString,
   toExternalPermissionMode,
-} from '../utils/permissions/PermissionMode.js'
+} from '../../kernel/utils/permissions/PermissionMode.js'
 import { applyPermissionUpdate } from '../utils/permissions/PermissionUpdate.js'
-import { jsonStringify } from '../utils/slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 // W-D-C 段 R1 改道：tui backends 副本删除，消费 src/swarm 单源门面。
 import {
   isInsideTmux,
@@ -34,14 +34,14 @@ import {
   getBackendByType,
   type PaneBackendType,
 } from 'src/swarm'
-import { TEAM_LEAD_NAME } from '../utils/swarm/constants.js'
+import { TEAM_LEAD_NAME } from '../../kernel/utils/swarm/constants.js'
 import { getLeaderToolUseConfirmQueue } from '../utils/swarm/leaderPermissionBridge.js'
 import { sendPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js'
 import {
   removeTeammateFromTeamFile,
   setMemberMode,
 } from '../utils/swarm/teamHelpers.js'
-import { unassignTeammateTasks } from '../utils/tasks.js'
+import { unassignTeammateTasks } from '../../kernel/utils/tasks.js'
 import {
   getAgentName,
   isPlanModeRequired,
@@ -65,7 +65,7 @@ import {
   readUnreadMessages,
   type TeammateMessage,
   writeToMailbox,
-} from '../utils/teammateMailbox.js'
+} from '../../kernel/utils/teammateMailbox.js'
 import {
   hasPermissionCallback,
   hasSandboxPermissionCallback,

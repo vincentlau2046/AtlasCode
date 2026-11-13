@@ -88,9 +88,9 @@ import heapDump from './commands/heapdump/index.js'
 import version from './commands/version.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
 import stickers from './commands/stickers/index.js'
-import { logError } from './utils/log.js'
+import { logError } from '../kernel/utils/log.js'
 import { toError } from '../kernel/utils/errors.js'
-import { logForDebugging } from './utils/debug'
+import { logForDebugging } from '../kernel/utils/debug'
 import {
   getSkillDirCommands,
   clearSkillCaches,

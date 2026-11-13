@@ -7,7 +7,7 @@ import { Text } from '../../../ink.js';
 import { FileWriteTool } from '../../../tools/FileWriteTool/FileWriteTool.js';
 import { getCwd } from '../../../../kernel/utils/cwd.js';
 import { isENOENT } from '../../../../kernel/utils/errors.js';
-import { readFileSync } from '../../../utils/fileRead.js';
+import { readFileSync } from '../../../../kernel/utils/fileRead.js';
 import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDialog.js';
 import { createSingleEditDiffConfig, type FileEdit, type IDEDiffSupport } from '../FilePermissionDialog/ideDiffConfig.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';

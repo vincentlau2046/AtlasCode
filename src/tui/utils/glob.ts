@@ -5,7 +5,7 @@ import {
   getFileReadIgnorePatterns,
   normalizePatternsToPath,
 } from './permissions/filesystem.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import { getGlobExclusionsForPluginCache } from './plugins/orphanedPluginFilter.js'
 import { ripGrep } from 'src/tui/sandboxCompat'
 

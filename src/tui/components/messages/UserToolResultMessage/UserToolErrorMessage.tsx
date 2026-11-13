@@ -2,7 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import { feature } from 'src/shared'; // F5: stub import — dev source-direct can flip TRANSCRIPT_CLASSIFIER (see src/native-ts/bunBundle.ts)
 import type { ToolResultBlockParam } from '../../../../kernel/types/atlas.js';
 import * as React from 'react';
-import { BULLET_OPERATOR } from '../../../constants/figures.js';
+import { BULLET_OPERATOR } from '../../../../kernel/constants/figures.js';
 import { Text } from '../../../ink.js';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
 import type { ProgressMessage } from '../../../../kernel/types/message.js';

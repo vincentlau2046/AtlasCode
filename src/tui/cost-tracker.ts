@@ -12,7 +12,7 @@ import {
   getContextWindowForModel,
   getModelMaxOutputTokens,
 } from '../kernel/utils/context.js'
-import { formatDuration, formatNumber } from './utils/format.js'
+import { formatDuration, formatNumber } from '../kernel/utils/format.js'
 import type { FpsMetrics } from './utils/fpsTracker.js'
 import { getCanonicalName } from './utils/model/model.js'
 export {

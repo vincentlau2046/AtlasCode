@@ -1,7 +1,7 @@
 import { isAbsolute, normalize } from 'path'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isENOENT } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import { containsPathTraversal } from '../path.js'
 
 const LIMITS = {

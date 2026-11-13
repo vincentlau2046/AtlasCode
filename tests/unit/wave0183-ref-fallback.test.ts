@@ -17,7 +17,7 @@ import {
 import {
   isSafeRefName as tuiIsSafeRefName,
   isValidGitSha as tuiIsValidGitSha,
-} from '../../src/tui/utils/git/gitFilesystem.js'
+} from '../../src/kernel/utils/git/gitFilesystem.js'
 
 const twins: Array<[string, typeof engineIsSafeRefName]> = [
   ['engine', engineIsSafeRefName],

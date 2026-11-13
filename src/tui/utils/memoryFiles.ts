@@ -53,8 +53,8 @@ import {
   getMemoryPath,
   getUserClaudeRulesDir,
 } from './config.js'
-import { logForDebugging } from './debug'
-import { logForDiagnosticsNoPII } from './diagLogs.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { normalizePathForComparison } from './file.js'
@@ -63,8 +63,8 @@ import {
   parseFrontmatter,
   splitPathInFrontmatter,
 } from './frontmatterParser.js'
-import { getFsImplementation, safeResolvePath } from './fsOperations'
-import { findCanonicalGitRoot, findGitRoot } from './git.js'
+import { getFsImplementation, safeResolvePath } from '../../kernel/utils/fsOperations'
+import { findCanonicalGitRoot, findGitRoot } from '../../kernel/utils/git.js'
 import {
   executeInstructionsLoadedHooks,
   hasInstructionsLoadedHook,

@@ -4,11 +4,11 @@ import { getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import { createBufferedWriter } from '../../kernel/utils/bufferedWriter.js'
 import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
-import { getFsImplementation } from './fsOperations'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { sanitizePath } from './path.js'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 // Mutable recording state — filePath is updated when session ID changes (e.g., --resume)
 const recordingState: { filePath: string | null; timestamp: number } = {

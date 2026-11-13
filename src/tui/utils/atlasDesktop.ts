@@ -6,9 +6,9 @@ import {
   McpStdioServerConfigSchema,
 } from '../services/mcp/types.js'
 import { getErrnoCode } from '../../kernel/utils/errors.js'
-import { safeParseJSON } from './json.js'
-import { logError } from './log.js'
-import { getPlatform, SUPPORTED_PLATFORMS } from './platform.js'
+import { safeParseJSON } from '../../kernel/utils/json.js'
+import { logError } from '../../kernel/utils/log.js'
+import { getPlatform, SUPPORTED_PLATFORMS } from '../../kernel/utils/platform.js'
 
 export async function getDesktopConfigPath(): Promise<string> {
   const platform = getPlatform()

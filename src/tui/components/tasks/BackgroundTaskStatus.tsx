@@ -3,7 +3,7 @@ import figures from 'figures';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { useTerminalSize } from 'src/tui/hooks/useTerminalSize.js';
-import { stringWidth } from 'src/tui/ink/stringWidth.js';
+import { stringWidth } from 'src/kernel/ink/stringWidth.js';
 import { useAppState, useSetAppState } from 'src/tui/state/AppState.js';
 import { enterTeammateView, exitTeammateView } from 'src/tui/state/teammateViewHelpers.js';
 import { isPanelAgentTask } from 'src/tui/tasks/LocalAgentTask/LocalAgentTask.js';

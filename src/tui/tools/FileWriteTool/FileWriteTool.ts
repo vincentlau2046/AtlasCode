@@ -13,7 +13,7 @@ import {
 import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { countLinesChanged, getPatchForDisplay } from '../../utils/diff.js'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { isENOENT } from '../../../kernel/utils/errors.js'
@@ -26,9 +26,9 @@ import {
   fileHistoryEnabled,
   fileHistoryTrackEdit,
 } from '../../utils/fileHistory.js'
-import { readFileSyncWithMetadata } from '../../utils/fileRead.js'
+import { readFileSyncWithMetadata } from '../../../kernel/utils/fileRead.js'
 import { UndecodableTextError } from 'src/shared'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import {
   fetchSingleFileGitDiff,
   type ToolUseDiff,
@@ -38,7 +38,7 @@ import {
   validateMemoryFrontmatter,
 } from '../../memdir/validateMemoryFrontmatter.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { expandPath } from '../../utils/path.js'
 import {
   checkWritePermissionForTool,

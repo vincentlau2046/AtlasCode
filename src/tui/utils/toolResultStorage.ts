@@ -15,12 +15,12 @@ import {
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { sanitizeToolNameForAnalytics } from '../services/analytics/metadata.js'
 import type { Message } from '../../kernel/types/message.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getErrnoCode, toError } from '../../kernel/utils/errors.js'
-import { formatFileSize } from './format.js'
-import { logError } from './log.js'
+import { formatFileSize } from '../../kernel/utils/format.js'
+import { logError } from '../../kernel/utils/log.js'
 import { getProjectDir } from './sessionStorage.js'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 // Subdirectory name for tool results within a session
 export const TOOL_RESULTS_SUBDIR = 'tool-results'
@@ -526,21 +526,11 @@ export function provisionContentReplacementState(
   return createContentReplacementState()
 }
 
-/**
- * Serializable record of one content-replacement decision. Written to the
- * transcript as a ContentReplacementEntry so decisions survive resume.
- * Discriminated by `kind` so future replacement mechanisms (user text,
- * offloaded images) can share the same transcript entry type.
- *
- * `replacement` is the exact string the model saw — stored rather than
- * derived on resume so code changes to the preview template, size formatting,
- * or path layout can't silently break prompt cache.
- */
-export type ContentReplacementRecord = {
-  kind: 'tool-result'
-  toolUseId: string
-  replacement: string
-}
+// 0.1.106 S3b 切片 2：ContentReplacementRecord 提取 kernel/types/
+// toolResultStorageTypes.ts（首车随迁文件 kernel/types/logs.ts 的 type 边机械
+// 闭合，f4 批复单元 ③）；本文件 re-export 兜底，既有消费方零改动。
+import type { ContentReplacementRecord } from '../../kernel/types/toolResultStorageTypes.js'
+export type { ContentReplacementRecord } from '../../kernel/types/toolResultStorageTypes.js'
 
 export type ToolResultReplacementRecord = Extract<
   ContentReplacementRecord,

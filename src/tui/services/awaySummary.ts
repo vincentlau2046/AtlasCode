@@ -1,6 +1,6 @@
 import { APIUserAbortError } from '../../kernel/types/atlas.js'
 import type { Message } from '../../kernel/types/message.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import {
   createUserMessage,
   getAssistantMessageText,

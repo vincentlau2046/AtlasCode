@@ -7,9 +7,9 @@ import { getDestructiveCommandWarning } from '../../../tools/PowerShellTool/dest
 import { PowerShellTool } from '../../../tools/PowerShellTool/PowerShellTool.js';
 import { isAllowlistedCommand } from '../../../tools/PowerShellTool/readOnlyValidation.js';
 import { applyAutoModePermissionOption, isAutoModeOptionVisible } from '../../../utils/permissions/autoModePermissionOption.js';
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import { isDangerousShellPrefix } from '../../../../kernel/permissions/dangerousShellPrefix.js';
-import { getCompoundCommandPrefixesStatic } from '../../../utils/powershell/staticPrefix.js';
+import { getCompoundCommandPrefixesStatic } from '../../../../kernel/utils/powershell/staticPrefix.js';
 import { Select } from '../../CustomSelect/select.js';
 import { type UnaryEvent, usePermissionRequestLogging } from '../hooks.js';
 import { PermissionDecisionDebugInfo } from '../PermissionDecisionDebugInfo.js';

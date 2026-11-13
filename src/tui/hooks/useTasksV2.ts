@@ -2,7 +2,7 @@ import { type FSWatcher, watch } from 'fs'
 import { useEffect, useSyncExternalStore } from 'react'
 import { useAppState, useSetAppState } from '../state/AppState.js'
 import { createSignal } from '../../kernel/utils/signal.js'
-import type { Task } from '../utils/tasks.js'
+import type { Task } from '../../kernel/utils/tasks.js'
 import {
   getTaskListId,
   getTasksDir,
@@ -10,7 +10,7 @@ import {
   listTasks,
   onTasksUpdated,
   resetTaskList,
-} from '../utils/tasks.js'
+} from '../../kernel/utils/tasks.js'
 import { isTeamLead } from 'src/engine'
 
 const HIDE_DELAY_MS = 5000

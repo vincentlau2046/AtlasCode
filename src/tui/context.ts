@@ -10,12 +10,12 @@ import {
   getClaudeMds,
   getMemoryFiles,
 } from './utils/memoryFiles.js'
-import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
+import { logForDiagnosticsNoPII } from '../kernel/utils/diagLogs.js'
 import { isBareMode, isEnvTruthy } from '../kernel/utils/envUtils.js'
-import { execFileNoThrow } from './utils/execFileNoThrow.js'
-import { getBranch, getDefaultBranch, getIsGit, gitExe } from './utils/git.js'
+import { execFileNoThrow } from '../kernel/utils/execFileNoThrow.js'
+import { getBranch, getDefaultBranch, getIsGit, gitExe } from '../kernel/utils/git.js'
 import { shouldIncludeGitInstructions } from './utils/gitSettings.js'
-import { logError } from './utils/log.js'
+import { logError } from '../kernel/utils/log.js'
 
 const MAX_STATUS_CHARS = 2000
 

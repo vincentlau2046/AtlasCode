@@ -7,8 +7,8 @@ import { getPluginErrorMessage } from '../../types/plugin.js'
 import {
   parseArgumentNames,
   substituteArguments,
-} from '../argumentSubstitution.js'
-import { logForDebugging } from '../debug'
+} from '../../../kernel/utils/argumentSubstitution.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isUnsafeCommandName, sanitizeDisplayName } from '../commandNameSafety.js'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import { isBareMode } from '../../../kernel/utils/envUtils.js'
@@ -20,7 +20,7 @@ import {
   parseFrontmatter,
   parseShellFrontmatter,
 } from '../frontmatterParser.js'
-import { getFsImplementation, isDuplicatePath } from '../fsOperations'
+import { getFsImplementation, isDuplicatePath } from '../../../kernel/utils/fsOperations'
 import {
   extractDescriptionFromMarkdown,
   parseSlashCommandToolsFromFrontmatter,

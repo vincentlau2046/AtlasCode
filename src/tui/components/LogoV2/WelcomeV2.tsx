@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import React from 'react';
 import { Box, Text, useTheme } from 'src/tui/ink.js';
-import { env } from '../../utils/env.js';
+import { env } from '../../../kernel/utils/env.js';
 import { PRODUCT_BRAND } from 'src/shared';
 const WELCOME_V2_WIDTH = 58;
 export function WelcomeV2() {

@@ -43,7 +43,7 @@ import {
   readWorktreeHeadSha as tuiReadWorktreeHeadSha,
   resetGitFileWatcher,
   resolveRef as tuiResolveRef,
-} from '../../src/tui/utils/git/gitFilesystem.js'
+} from '../../src/kernel/utils/git/gitFilesystem.js'
 import { runWithCwdOverride } from '../../src/kernel/utils/cwd.js'
 
 // ── 门控：git 可用性 + reftable 能力探针 ────────────────────────────────────

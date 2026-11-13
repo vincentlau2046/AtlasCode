@@ -1,4 +1,4 @@
-import type { ConfigScope } from 'src/tui/services/mcp/types.js'
+import type { ConfigScope } from '../../types/configScope.js'
 import type { ZodError, ZodIssue } from 'zod/v4'
 import { jsonParse } from '../slowOperations'
 import { plural } from '../../../kernel/utils/stringUtils'

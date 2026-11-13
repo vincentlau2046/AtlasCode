@@ -10,7 +10,7 @@ import {
   type InstallMethod,
   saveGlobalConfig,
 } from 'src/tui/utils/config.js'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 import { getDoctorDiagnostic } from 'src/tui/utils/doctorDiagnostic.js'
 import { gracefulShutdown } from 'src/tui/utils/gracefulShutdown.js'
 import {
@@ -21,7 +21,7 @@ import {
   installLatest as installLatestNative,
   removeInstalledSymlink,
 } from 'src/tui/utils/nativeInstaller/index.js'
-import { getPackageManager } from 'src/tui/utils/nativeInstaller/packageManagers.js'
+import { getPackageManager } from 'src/kernel/utils/nativeInstaller/packageManagers.js'
 import { writeToStdout } from 'src/kernel/utils/process'
 import { gte } from 'src/kernel/utils/semver'
 import { getInitialSettings } from 'src/tui/utils/settings/settings.js'

@@ -9,7 +9,7 @@ import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
 import type { SettingSource } from '../utils/settings/constants'
 import type { HooksSettings } from '../../kernel/settings/types.js'
 import type { ThemeName } from '../utils/theme.js'
-import type { LogOption } from './logs.js'
+import type { LogOption } from '../../kernel/types/logs.js'
 import type { Message } from '../../kernel/types/message.js'
 import type { PluginManifest } from './plugin.js'
 

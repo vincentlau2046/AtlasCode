@@ -3,7 +3,7 @@ import { join } from 'path'
 import { roughTokenCountEstimation } from '../../services/tokenEstimation.js'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
 import { getErrnoCode, toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 
 const MAX_SECTION_LENGTH = 2000
 const MAX_TOTAL_SESSION_MEMORY_TOKENS = 12000

@@ -4,8 +4,8 @@ import {
   styledCharsFromTokens,
   tokenize,
 } from '@alcalzone/ansi-tokenize'
-import { logForDebugging } from '../utils/debug'
-import { getGraphemeSegmenter } from '../utils/intl.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { getGraphemeSegmenter } from '../../kernel/utils/intl.js'
 import sliceAnsi from '../utils/sliceAnsi.js'
 import { reorderBidi } from './bidi.js'
 import { type Rectangle, unionRect } from './layout/geometry.js'
@@ -22,7 +22,7 @@ import {
   setCellAt,
   shiftRows,
 } from './screen.js'
-import { stringWidth } from './stringWidth.js'
+import { stringWidth } from '../../kernel/ink/stringWidth.js'
 import { widestLine } from './widest-line.js'
 
 /**

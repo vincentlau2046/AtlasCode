@@ -24,7 +24,7 @@ import type {
   SystemMessage,
   UserMessage,
 } from 'src/kernel/types/message'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 import type { PermissionDecision } from 'src/kernel/permissions/PermissionResult'
 import { getRuleByContentsForTool } from 'src/tui/utils/permissions/permissions.js'
 import {

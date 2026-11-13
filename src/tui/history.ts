@@ -3,10 +3,10 @@ import { join } from 'path'
 import { getProjectRoot, getSessionId } from 'src/bootstrap'
 import { registerCleanup } from '../kernel/utils/cleanupRegistry.js'
 import type { HistoryEntry, PastedContent } from './utils/config.js'
-import { logForDebugging } from './utils/debug'
+import { logForDebugging } from '../kernel/utils/debug'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../kernel/utils/envUtils.js'
 import { getErrnoCode } from '../kernel/utils/errors.js'
-import { readLinesReverse } from './utils/fsOperations'
+import { readLinesReverse } from '../kernel/utils/fsOperations'
 import { lock } from '../kernel/utils/lockfile.js'
 import {
   hashPastedText,
@@ -14,7 +14,7 @@ import {
   storePastedText,
 } from './utils/pasteStore.js'
 import { sleep } from '../kernel/utils/sleep.js'
-import { jsonParse, jsonStringify } from './utils/slowOperations'
+import { jsonParse, jsonStringify } from '../kernel/utils/slowOperations'
 
 const MAX_HISTORY_ITEMS = 100
 const MAX_PASTED_CONTENT_LENGTH = 1024

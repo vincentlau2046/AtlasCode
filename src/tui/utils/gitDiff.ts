@@ -2,8 +2,8 @@ import type { StructuredPatchHunk } from 'diff'
 import { access, readFile } from 'fs/promises'
 import { dirname, join, relative, sep } from 'path'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { getCachedRepository } from './detectRepository.js'
-import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
+import { getCachedRepository } from '../../kernel/utils/detectRepository.js'
+import { execFileNoThrow, execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
 import { isFileWithinReadSizeLimit } from './file.js'
 import {
   findGitRoot,
@@ -11,7 +11,7 @@ import {
   getGitDir,
   getIsGit,
   gitExe,
-} from './git.js'
+} from '../../kernel/utils/git.js'
 
 export type GitDiffStats = {
   filesCount: number

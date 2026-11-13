@@ -14,16 +14,16 @@ import {
 import type { FileSuggestionCommandInput } from '../types/fileSuggestion.js'
 import { getGlobalConfig } from '../utils/config.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { errorMessage } from '../../kernel/utils/errors.js'
-import { execFileNoThrowWithCwd } from '../utils/execFileNoThrow.js'
-import { getFsImplementation } from '../utils/fsOperations'
-import { findGitRoot, gitExe } from '../utils/git.js'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
+import { findGitRoot, gitExe } from '../../kernel/utils/git.js'
 import {
   createBaseHookInput,
   executeFileSuggestionCommand,
 } from '../utils/hooks.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { expandPath } from '../utils/path.js'
 import { ripGrep } from 'src/tui/sandboxCompat'
 import { getInitialSettings } from '../utils/settings/settings.js'

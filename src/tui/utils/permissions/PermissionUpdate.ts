@@ -5,19 +5,19 @@ import type {
   AdditionalWorkingDirectory,
   WorkingDirectorySource,
 } from '../../../kernel/types/permissions.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import type { EditableSettingSource } from '../settings/constants'
 import {
   getSettingsForSource,
   updateSettingsForSource,
 } from '../settings/settings.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { toPosixPath } from './filesystem.js'
 import type { PermissionRuleValue } from '../../../kernel/permissions/PermissionRule.js'
 import type {
   PermissionUpdate,
   PermissionUpdateDestination,
-} from './PermissionUpdateSchema.js'
+} from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   permissionRuleValueFromString,
   permissionRuleValueToString,

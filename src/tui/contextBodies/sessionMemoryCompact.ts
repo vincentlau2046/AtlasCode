@@ -5,7 +5,7 @@
 import type { AgentId } from '../../kernel/types/ids.js'
 import type { HookResultMessage, Message } from '../../kernel/types/message.js'
 import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { errorMessage } from '../../kernel/utils/errors.js'
 import {

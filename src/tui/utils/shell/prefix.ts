@@ -11,9 +11,9 @@ import chalk from 'chalk'
 import type { QuerySource } from '../../../kernel/constants/querySource.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { modelProvider, buildOpenAIParams, startsWithApiErrorPrefix } from 'src/modelprovider'
-import { memoizeWithLRU } from '../memoize.js'
+import { memoizeWithLRU } from '../../../kernel/utils/memoize.js'
 import { createUserMessage } from '../messages.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 
 /**

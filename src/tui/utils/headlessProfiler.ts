@@ -13,11 +13,11 @@
  */
 
 import { getIsNonInteractiveSession } from 'src/bootstrap'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isAtlasDev } from '../../kernel/utils/atlasDev.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
-import { getPerformance } from './profilerBase.js'
-import { jsonStringify } from './slowOperations'
+import { getPerformance } from '../../kernel/utils/profilerBase.js'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 
 // Detailed profiling mode - same env var as startupProfiler
 // eslint-disable-next-line custom-rules/no-process-env-top-level

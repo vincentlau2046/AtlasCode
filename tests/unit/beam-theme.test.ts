@@ -11,7 +11,7 @@
  * 分层纪律：纯函数断言（无网络 / 无真实终端 / 无 settings 读取）。
  */
 import { describe, expect, test } from 'bun:test'
-import { stringWidth } from '../../src/tui/ink/stringWidth.js'
+import { stringWidth } from '../../src/kernel/ink/stringWidth.js'
 import {
   BEAM_CORNER,
   EMPTY_TEXTURE,

@@ -1,5 +1,5 @@
 import { getHistory } from '../../history.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 
 /**
  * Result of shell history completion lookup

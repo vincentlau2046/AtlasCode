@@ -7,7 +7,7 @@ import {
 } from '../../memdir/memdir.js'
 import { getMemoryBaseDir } from '../../memdir/paths.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { findCanonicalGitRoot } from '../../utils/git.js'
+import { findCanonicalGitRoot } from '../../../kernel/utils/git.js'
 import { sanitizePath } from '../../utils/path.js'
 
 // Persistent agent memory scope: 'user' (~/getConfigDirName()/agent-memory/), 'project' (getConfigDirName()/agent-memory/), or 'local' (getConfigDirName()/agent-memory-local/)

@@ -6,7 +6,7 @@ import { setClipboard } from '../ink/termio/osc.js';
 import { Box, Text } from '../ink.js';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { getCwd } from '../../kernel/utils/cwd.js';
-import { writeFileSync_DEPRECATED } from '../utils/slowOperations';
+import { writeFileSync_DEPRECATED } from '../../kernel/utils/slowOperations';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/select.js';
 import { Byline } from './design-system/Byline.js';

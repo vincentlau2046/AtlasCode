@@ -10,7 +10,7 @@ import { getMcpConfigsByScope } from '../../services/mcp/config.js';
 import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js';
 import { checkHasTrustDialogAccepted, saveCurrentProjectConfig } from '../../utils/config.js';
 import { getCwd } from '../../../kernel/utils/cwd.js';
-import { getFsImplementation } from '../../utils/fsOperations';
+import { getFsImplementation } from '../../../kernel/utils/fsOperations';
 import { gracefulShutdownSync } from '../../utils/gracefulShutdown.js';
 import { Select } from '../CustomSelect/index.js';
 import { PermissionDialog } from '../permissions/PermissionDialog.js';

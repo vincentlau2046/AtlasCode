@@ -20,14 +20,14 @@ import { checkAndRestoreTerminalBackup } from './utils/appleTerminalBackup.js'
 import { prefetchApiKeyFromApiKeyHelperIfSafe } from './utils/auth.js'
 import { clearMemoryFileCaches } from './utils/memoryFiles.js'
 import { getCurrentProjectConfig, getGlobalConfig } from './utils/config.js'
-import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
-import { env } from './utils/env.js'
+import { logForDiagnosticsNoPII } from '../kernel/utils/diagLogs.js'
+import { env } from '../kernel/utils/env.js'
 import { envDynamic } from './utils/envDynamic.js'
 import { isBareMode, isEnvTruthy } from '../kernel/utils/envUtils.js'
 import { errorMessage } from '../kernel/utils/errors.js'
-import { findCanonicalGitRoot, findGitRoot, getIsGit } from './utils/git.js'
+import { findCanonicalGitRoot, findGitRoot, getIsGit } from '../kernel/utils/git.js'
 // K4-6（0.1.83）：任意 checkout HEAD 读取（fs-only 泛化面，chdir 前捕获用）
-import { readCheckoutHeadSha } from './utils/git/gitFilesystem.js'
+import { readCheckoutHeadSha } from '../kernel/utils/git/gitFilesystem.js'
 import { initializeFileChangedWatcher } from './utils/hooks/fileChangedWatcher.js'
 import {
   captureHooksConfigSnapshot,
@@ -35,13 +35,13 @@ import {
 } from './utils/hooks/hooksConfigSnapshot.js'
 import { hasWorktreeCreateHook } from './utils/hooks.js'
 import { checkAndRestoreITerm2Backup } from './utils/iTermBackup.js'
-import { logError } from './utils/log.js'
+import { logError } from '../kernel/utils/log.js'
 import { getRecentActivity } from './utils/logoV2Utils.js'
 import { lockCurrentVersion } from './utils/nativeInstaller/index.js'
-import type { PermissionMode } from './utils/permissions/PermissionMode.js'
+import type { PermissionMode } from '../kernel/utils/permissions/PermissionMode.js'
 import { getPlanSlug } from './utils/plans.js'
 import { saveWorktreeState } from './utils/sessionStorage.js'
-import { profileCheckpoint } from './utils/startupProfiler.js'
+import { profileCheckpoint } from '../kernel/utils/startupProfiler.js'
 import {
   createTmuxSessionForWorktree,
   createWorktreeForSession,

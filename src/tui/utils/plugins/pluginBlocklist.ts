@@ -9,7 +9,7 @@
  */
 
 import { uninstallPluginOp } from '../../services/plugins/pluginOperations.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
 import { loadInstalledPluginsV2 } from './installedPluginsManager.js'
 import {

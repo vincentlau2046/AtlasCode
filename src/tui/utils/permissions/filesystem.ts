@@ -23,7 +23,7 @@ import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
 import {
   getFsImplementation,
   getPathsForPermissionCheck,
-} from '../fsOperations'
+} from '../../../kernel/utils/fsOperations'
 import {
   containsPathTraversal,
   expandPath,
@@ -31,14 +31,14 @@ import {
   sanitizePath,
 } from '../path.js'
 import { getPlanSlug, getPlansDirectory } from '../plans.js'
-import { getPlatform } from '../platform.js'
+import { getPlatform } from '../../../kernel/utils/platform.js'
 import { getProjectDir } from '../sessionStorage.js'
 import { SETTING_SOURCES } from '../settings/constants'
 import {
   getSettingsFilePathForSource,
   getSettingsRootPathForSource,
 } from '../settings/settings.js'
-import { containsVulnerableUncPath } from '../shell/readOnlyCommandValidation.js'
+import { containsVulnerableUncPath } from '../../../kernel/utils/shell/readOnlyCommandValidation.js'
 import { getToolResultsDir } from '../toolResultStorage.js'
 import { windowsPathToPosixPath } from '../windowsPaths.js'
 import type {
@@ -47,7 +47,7 @@ import type {
 } from '../../../kernel/permissions/PermissionResult.js'
 import type { PermissionRule, PermissionRuleSource } from '../../../kernel/permissions/PermissionRule.js'
 import { createReadRuleSuggestion } from './PermissionUpdate.js'
-import type { PermissionUpdate } from './PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import { getRuleByContentsForToolName } from './permissions.js'
 
 declare const MACRO: { VERSION: string }

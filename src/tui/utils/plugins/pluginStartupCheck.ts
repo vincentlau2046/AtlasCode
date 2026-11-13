@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../debug'
-import { logError } from '../log.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { logError } from '../../../kernel/utils/log.js'
 import type { SettingSource } from '../settings/constants'
 import {
   getInitialSettings,

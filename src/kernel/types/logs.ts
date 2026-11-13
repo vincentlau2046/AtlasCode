@@ -1,6 +1,8 @@
 import type { UUID } from 'crypto'
-import type { FileHistorySnapshot } from 'src/tui/utils/fileHistory.js'
-import type { ContentReplacementRecord } from 'src/tui/utils/toolResultStorage.js'
+// 0.1.106 S3b 切片 2：3 型自包含提取 kernel/types（原 tui/utils/fileHistory 与
+// toolResultStorage 的 type 边，f4 批复机械闭合形；源侧 re-export 兜底零消费方改动）。
+import type { ContentReplacementRecord } from './toolResultStorageTypes.js'
+import type { FileHistorySnapshot } from './fileHistoryTypes.js'
 import type { AgentId } from '../../kernel/types/ids.js'
 import type { Message } from '../../kernel/types/message.js'
 import type { QueueOperationMessage } from './messageQueueTypes.js'

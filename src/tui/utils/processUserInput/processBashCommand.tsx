@@ -9,7 +9,7 @@ import type { ShellProgress } from 'src/kernel/types/tools';
 import { errorMessage, ShellError } from '../../../kernel/utils/errors.js';
 import { createSyntheticUserCaveatMessage, createUserInterruptionMessage, createUserMessage, prepareUserContent } from '../messages.js';
 import { resolveDefaultShell } from '../shell/resolveDefaultShell.js';
-import { isPowerShellToolEnabled } from '../shell/shellToolUtils.js';
+import { isPowerShellToolEnabled } from '../../../kernel/utils/shell/shellToolUtils.js';
 import { processToolResultBlock } from '../toolResultStorage.js';
 import { escapeXml } from '../xml.js';
 import type { ProcessUserInputContext } from './processUserInput.js';

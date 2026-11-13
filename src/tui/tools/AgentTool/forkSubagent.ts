@@ -11,7 +11,7 @@ import type {
   AssistantMessage,
   Message as MessageType,
 } from '../../../kernel/types/message.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { createUserMessage } from '../../utils/messages.js'
 import type { BuiltInAgentDefinition } from './loadAgentsDir.js'
 

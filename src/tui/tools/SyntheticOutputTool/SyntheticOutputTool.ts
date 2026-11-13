@@ -5,7 +5,7 @@ import { buildTool, type ToolDef } from '../../Tool.js'
 import { TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from '../../../kernel/utils/errors.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import type { PermissionResult } from '../../../kernel/permissions/PermissionResult.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 
 // Allow any input object since the schema is provided dynamically
 const inputSchema = lazySchema(() => z.object({}).passthrough())

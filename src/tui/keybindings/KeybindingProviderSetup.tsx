@@ -14,7 +14,7 @@ import type { InputEvent } from '../ink/events/input-event.js';
 // other handlers process them - this is required for chord sequence support
 import { type Key, useInput } from '../ink.js';
 import { count } from '../../kernel/utils/array.js';
-import { logForDebugging } from '../utils/debug';
+import { logForDebugging } from '../../kernel/utils/debug';
 import { plural } from '../../kernel/utils/stringUtils.js';
 import { KeybindingProvider } from './KeybindingContext.js';
 import { initializeKeybindingWatcher, type KeybindingsLoadResult, loadKeybindingsSyncWithWarnings, subscribeToKeybindingChanges } from './loadUserBindings.js';

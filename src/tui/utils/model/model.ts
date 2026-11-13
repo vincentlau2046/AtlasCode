@@ -1,6 +1,6 @@
 import { getMainLoopModelOverride } from 'src/tui/bootstrapState.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
-import type { PermissionMode } from '../permissions/PermissionMode.js'
+import type { PermissionMode } from '../../../kernel/utils/permissions/PermissionMode.js'
 // M2 (docs/06): 角色注册表已迁入 core/modelprovider/roles.js
 // P4 (C3): resolveModel 与 getRoleModel 同源（roles.js），一并引入做能力元数据收口。
 import { getRoleModel, resolveModel, type ModelRole } from 'src/modelprovider'

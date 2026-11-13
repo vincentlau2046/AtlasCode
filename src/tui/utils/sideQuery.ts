@@ -24,7 +24,7 @@ import { getModelBetas, modelSupportsStructuredOutputs } from './betas.js'
 import { computeFingerprint } from './fingerprint.js'
 import { errorMessage } from '../../kernel/utils/errors.js'
 import { normalizeModelStringForAPI, modelToRole } from 'src/modelprovider'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 
 type MessageParam = AMessageParam
 type TextBlockParam = ATextBlockParam

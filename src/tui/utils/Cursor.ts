@@ -1,10 +1,10 @@
-import { stringWidth } from '../ink/stringWidth.js'
+import { stringWidth } from '../../kernel/ink/stringWidth.js'
 import { wrapAnsi } from '../ink/wrapAnsi.js'
 import {
   firstGrapheme,
   getGraphemeSegmenter,
   getWordSegmenter,
-} from './intl.js'
+} from '../../kernel/utils/intl.js'
 
 /**
  * Kill ring for storing killed (cut) text that can be yanked (pasted) with Ctrl+Y.

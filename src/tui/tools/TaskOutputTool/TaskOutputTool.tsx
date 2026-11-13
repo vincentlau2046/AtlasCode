@@ -17,7 +17,7 @@ import { lazySchema } from '../../../kernel/utils/lazySchema.js';
 import { extractTextContent } from '../../utils/messages.js';
 import { semanticBoolean } from '../../utils/semanticBoolean.js';
 import { sleep } from '../../../kernel/utils/sleep.js';
-import { jsonParse } from '../../utils/slowOperations';
+import { jsonParse } from '../../../kernel/utils/slowOperations';
 import { countCharInString } from '../../../kernel/utils/stringUtils.js';
 import { getTaskOutput } from '../../utils/task/diskOutput.js';
 import { updateTaskState } from '../../utils/task/framework.js';

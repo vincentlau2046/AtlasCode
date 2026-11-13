@@ -13,10 +13,10 @@ import {
   AGENT_TOOL_NAME,
   LEGACY_AGENT_TOOL_NAME,
 } from '../../kernel/tools/AgentTool/constants.js'
-import type { LogOption } from '../types/logs.js'
+import type { LogOption } from '../../kernel/types/logs.js'
 import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { toError } from '../../kernel/utils/errors.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { createUserMessage, extractTextContent } from '../utils/messages.js'
 import { getDefaultPremiumModel } from '../utils/model/model.js'
 import {
@@ -25,7 +25,7 @@ import {
   getSessionIdFromLog,
   loadAllLogsFromSessionFile,
 } from '../utils/sessionStorage.js'
-import { jsonParse, jsonStringify } from '../utils/slowOperations'
+import { jsonParse, jsonStringify } from '../../kernel/utils/slowOperations'
 import { countCharInString } from '../../kernel/utils/stringUtils.js'
 import { asSystemPrompt, type SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { escapeXmlAttr as escapeHtml } from '../utils/xml.js'

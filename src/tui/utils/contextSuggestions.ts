@@ -4,7 +4,7 @@ import { GREP_TOOL_NAME } from '../../kernel/tools/GrepTool/prompt.js'
 import { WEB_FETCH_TOOL_NAME } from '../tools/WebFetchTool/prompt.js'
 import type { ContextData } from './analyzeContext.js'
 import { getDisplayPath } from './file.js'
-import { formatTokens } from './format.js'
+import { formatTokens } from '../../kernel/utils/format.js'
 
 // --
 

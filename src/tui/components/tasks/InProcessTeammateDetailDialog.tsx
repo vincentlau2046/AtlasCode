@@ -8,7 +8,7 @@ import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { getEmptyToolPermissionContext } from '../../Tool.js';
 import type { InProcessTeammateTaskState } from '../../../kernel/tasks/InProcessTeammateTask/types.js';
 import { getTools } from '../../tools.js';
-import { formatNumber, truncateToWidth } from '../../utils/format.js';
+import { formatNumber, truncateToWidth } from '../../../kernel/utils/format.js';
 import { toInkColor } from '../../utils/ink.js';
 import { Byline } from '../design-system/Byline.js';
 import { Dialog } from '../design-system/Dialog.js';

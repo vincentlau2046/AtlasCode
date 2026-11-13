@@ -25,7 +25,7 @@ import { describe, expect, test, beforeAll, afterAll } from 'bun:test'
 import { PassThrough } from 'node:stream'
 import React from 'react'
 import { wrapAnsi } from '../../src/tui/ink/wrapAnsi.js'
-import { stringWidth } from '../../src/tui/ink/stringWidth.js'
+import { stringWidth } from '../../src/kernel/ink/stringWidth.js'
 import stripAnsi from 'strip-ansi'
 
 const HARD: { hard: boolean; trim: false; wordWrap: true } = {
@@ -155,7 +155,7 @@ import { render } from '../../src/tui/ink.js'
 import { MarkdownTable } from '../../src/tui/components/MarkdownTable.js'
 import { marked } from 'marked'
 import sliceAnsi from '../../src/tui/utils/sliceAnsi.js'
-import { truncateToWidth } from '../../src/tui/utils/truncate.js'
+import { truncateToWidth } from '../../src/kernel/utils/truncate.js'
 
 async function renderTable(md: string, forceWidth: number): Promise<string> {
   const chunks: string[] = []

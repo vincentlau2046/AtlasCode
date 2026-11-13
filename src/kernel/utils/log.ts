@@ -4,10 +4,7 @@ import { readdir, readFile, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
 import type { QuerySource } from 'src/kernel/constants/querySource'
-import {
-  setLastAPIRequest,
-  setLastAPIRequestMessages,
-} from 'src/tui/bootstrapState.js'
+import { getKernelBootstrapNoopSeam } from '../state/injection.js'
 import { TICK_TAG } from '../../kernel/constants/xml.js'
 import {
   type LogOption,
@@ -338,10 +335,12 @@ export function captureAPIRequest(
   // for all users. Messages are already persisted to the transcript file and
   // available via React state.
   const { messages, ...paramsWithoutMessages } = params
-  setLastAPIRequest(paramsWithoutMessages)
+  // 0.1.106 S3b 切片 2：bootstrapState no-op 4 名改经 kernel/state 缝消费
+  // （组合根注入 TUI 包装；未注入 = DEFAULT_NOOP_SEAM 空实现，headless 语义不变）。
+  getKernelBootstrapNoopSeam().setLastAPIRequest(paramsWithoutMessages)
   // de-ANT: the ant-only post-compaction message retention for /share was removed;
   // the reference stays null for all users.
-  setLastAPIRequestMessages(null)
+  getKernelBootstrapNoopSeam().setLastAPIRequestMessages(null)
 }
 
 /**

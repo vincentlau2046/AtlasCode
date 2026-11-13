@@ -14,11 +14,11 @@ import type {
   UserMessage,
 } from '../../kernel/types/message.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { env } from '../utils/env.js'
+import { env } from '../../kernel/utils/env.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getErrnoCode } from '../../kernel/utils/errors.js'
 import { normalizeMessagesForAPI } from '../utils/messages.js'
-import { jsonParse, jsonStringify } from '../utils/slowOperations'
+import { jsonParse, jsonStringify } from '../../kernel/utils/slowOperations'
 
 function shouldUseVCR(): boolean {
   if (process.env.NODE_ENV === 'test') {

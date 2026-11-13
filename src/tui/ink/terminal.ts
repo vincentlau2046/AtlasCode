@@ -1,6 +1,6 @@
 import { coerce } from 'semver'
 import type { Writable } from 'stream'
-import { env } from '../utils/env.js'
+import { env } from '../../kernel/utils/env.js'
 import { gte } from '../../kernel/utils/semver.js'
 import { getClearTerminalSequence } from './clearTerminal.js'
 import type { Diff } from './frame.js'

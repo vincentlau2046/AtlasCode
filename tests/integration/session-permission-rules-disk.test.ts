@@ -29,7 +29,7 @@ import {
   readCurrentSessionPermissionRules,
   readSessionPermissionRules,
 } from '../../src/tui/utils/permissions/sessionPermissionRules'
-import type { PermissionUpdate } from '../../src/tui/utils/permissions/PermissionUpdateSchema'
+import type { PermissionUpdate } from '../../src/kernel/utils/permissions/PermissionUpdateSchema'
 
 const SESSION_RULE: PermissionUpdate = {
   type: 'addRules',

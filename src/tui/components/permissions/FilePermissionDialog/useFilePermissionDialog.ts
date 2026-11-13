@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useAppState, useSetAppState } from 'src/tui/state/AppState.js'
 import { useKeybindings } from '../../../keybindings/useKeybinding.js'
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import type { CompletionType } from '../../../utils/unaryLogging.js'
 import type { ToolUseConfirm } from '../PermissionRequest.js'
 import {

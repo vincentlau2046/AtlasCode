@@ -1,5 +1,5 @@
 import { modelProvider, buildOpenAIParams } from 'src/modelprovider'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { createUserMessage, extractTextContent } from '../messages.js'
 import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 

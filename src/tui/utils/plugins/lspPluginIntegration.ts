@@ -7,10 +7,10 @@ import type {
 } from '../../services/lsp/types.js'
 import { expandEnvVarsInString } from '../../services/mcp/envExpansion.js'
 import type { LoadedPlugin, PluginError } from '../../types/plugin.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isENOENT, toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
-import { jsonParse } from '../slowOperations'
+import { logError } from '../../../kernel/utils/log.js'
+import { jsonParse } from '../../../kernel/utils/slowOperations'
 import { getPluginDataDir } from './pluginDirectories.js'
 import {
   getPluginStorageId,

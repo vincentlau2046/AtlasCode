@@ -3,7 +3,7 @@
  * Generates a well-documented template file for ~/.atlas/keybindings.json
  */
 
-import { jsonStringify } from '../utils/slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import { DEFAULT_BINDINGS } from './defaultBindings.js'
 import {
   NON_REBINDABLE,

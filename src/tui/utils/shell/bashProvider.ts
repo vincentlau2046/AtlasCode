@@ -3,17 +3,17 @@ import { access } from 'fs/promises'
 import { tmpdir as osTmpdir } from 'os'
 import { join as nativeJoin } from 'path'
 import { join as posixJoin } from 'path/posix'
-import { rearrangePipeCommand } from '../bash/bashPipeCommand.js'
+import { rearrangePipeCommand } from '../../../kernel/utils/bash/bashPipeCommand.js'
 import { createAndSaveSnapshot } from '../bash/ShellSnapshot.js'
-import { formatShellPrefixCommand } from '../bash/shellPrefix.js'
-import { quote } from '../bash/shellQuote.js'
+import { formatShellPrefixCommand } from '../../../kernel/utils/bash/shellPrefix.js'
+import { quote } from '../../../kernel/utils/bash/shellQuote.js'
 import {
   quoteShellCommand,
   rewriteWindowsNullRedirect,
   shouldAddStdinRedirect,
-} from '../bash/shellQuoting.js'
-import { logForDebugging } from '../debug'
-import { getPlatform } from '../platform.js'
+} from '../../../kernel/utils/bash/shellQuoting.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { getPlatform } from '../../../kernel/utils/platform.js'
 import { getSessionEnvironmentScript } from '../sessionEnvironment.js'
 import { getSessionEnvVars } from '../../../kernel/utils/sessionEnvVars.js'
 import {

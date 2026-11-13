@@ -1,7 +1,7 @@
 {
   "_meta": {
     "generated": "2026-11-13",
-    "wave": "0.1.98 S1a 硬化波（lock-face 批复：字面清单制 fail-visible）；0.1.103 S3a 归位波路径面重锚（6 键 tui→kernel 恰合搬移映射表，零漂移格 §7-3）",
+    "wave": "0.1.98 S1a 硬化波（lock-face 批复：字面清单制 fail-visible）；0.1.103 S3a 归位波路径面重锚（6 键 tui→kernel 恰合搬移映射表，零漂移格 §7-3）；0.1.106 S3b 出口首车 59 文件重锚（brandName git.ts / configDirLiteral env.ts / envPrefixLiteral privacyLevel.ts+swarm/constants.ts 四键恰合搬移，逐条对表实测呈现）",
     "commentStrip": "行首/^\\s*(\\/\\/|\\*|\\/\\*)/ 剥离 + 空行跳过",
     "domain": "src/**/*.{ts,tsx}",
     "classes": [
@@ -96,6 +96,7 @@
       "engine/tools/team/sendMessageTool.ts": 1,
       "engine/tools/web/preapproved.ts": 1,
       "executor/shell/Shell.ts": 2,
+      "kernel/utils/git.ts": 1,
       "kernel/settings/validationTips.ts": 1,
       "permissions/filesystem.ts": 11,
       "shared/identity.ts": 4,
@@ -149,7 +150,6 @@
       "tui/utils/commitAttribution.ts": 2,
       "tui/utils/completionCache.ts": 1,
       "tui/utils/computerUse/wrapper.tsx": 1,
-      "tui/utils/git.ts": 1,
       "tui/utils/localInstaller.ts": 1,
       "tui/utils/model/model.ts": 2,
       "tui/utils/nativeInstaller/installer.ts": 2,
@@ -170,6 +170,7 @@
       "engine/tools/team/teamCreatePrompt.ts": 4,
       "engine/tools/team/teamDeletePrompt.ts": 2,
       "engine/tools/worktree/worktreePrompt.ts": 1,
+      "kernel/utils/env.ts": 1,
       "kernel/entrypoints/sdk/coreSchemas.ts": 4,
       "kernel/settings/mdm/constants.ts": 1,
       "modelprovider/modelprovider.ts": 3,
@@ -209,7 +210,6 @@
       "tui/utils/cronScheduler.ts": 1,
       "tui/utils/deepLink/registerProtocol.ts": 1,
       "tui/utils/doctorDiagnostic.ts": 2,
-      "tui/utils/env.ts": 1,
       "tui/utils/hooks/hooksSettings.ts": 2,
       "tui/utils/permissions/filesystem.ts": 1,
       "tui/utils/plugins/builtinMarketplaceSnapshots.ts": 1,
@@ -226,6 +226,8 @@
       "engine/config/autoCompactOverrides.ts": 3,
       "engine/config/managedEnv.ts": 26,
       "engine/tools/bash/destructiveCommandWarning.ts": 1,
+      "kernel/utils/privacyLevel.ts": 1,
+      "kernel/utils/swarm/constants.ts": 3,
       "kernel/utils/subprocessEnv.ts": 2,
       "modelprovider/index.ts": 1,
       "sandbox/config.ts": 1,
@@ -244,8 +246,6 @@
       "tui/utils/plugins/lspPluginIntegration.ts": 2,
       "tui/utils/plugins/mcpPluginIntegration.ts": 2,
       "tui/utils/plugins/officialMarketplaceGcs.ts": 1,
-      "tui/utils/privacyLevel.ts": 1,
-      "tui/utils/swarm/constants.ts": 3,
       "tui/utils/swarm/spawnUtils.ts": 3,
       "tui/utils/tmuxSocket.ts": 1
     },

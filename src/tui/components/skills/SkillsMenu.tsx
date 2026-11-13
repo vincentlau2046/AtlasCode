@@ -6,7 +6,7 @@ import { type Command, type CommandBase, type CommandResultDisplay, getCommandNa
 import { Box, Text } from '../../ink.js';
 import { estimateSkillFrontmatterTokens, getSkillsPath } from '../../skills/loadSkillsDir.js';
 import { getDisplayPath } from '../../utils/file.js';
-import { formatTokens } from '../../utils/format.js';
+import { formatTokens } from '../../../kernel/utils/format.js';
 import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants';
 import { plural } from '../../../kernel/utils/stringUtils.js';
 import { getConfigDirNameForProject } from '../../../kernel/utils/configDir.js';

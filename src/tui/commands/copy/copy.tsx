@@ -11,7 +11,7 @@ import { Byline } from '../../components/design-system/Byline.js';
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js';
 import { Pane } from '../../components/design-system/Pane.js';
 import type { KeyboardEvent } from '../../ink/events/keyboard-event.js';
-import { stringWidth } from '../../ink/stringWidth.js';
+import { stringWidth } from '../../../kernel/ink/stringWidth.js';
 import { setClipboard } from '../../ink/termio/osc.js';
 import { Box, Text } from '../../ink.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';

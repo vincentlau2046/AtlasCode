@@ -10,11 +10,11 @@
 import isEqual from 'lodash-es/isEqual.js'
 import { isAbsolute, resolve } from 'path'
 import { getOriginalCwd } from 'src/bootstrap'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
 import { pathExists } from '../file.js'
-import { findCanonicalGitRoot } from '../git.js'
-import { logError } from '../log.js'
+import { findCanonicalGitRoot } from '../../../kernel/utils/git.js'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   addMarketplaceSource,
   type DeclaredMarketplace,

@@ -66,7 +66,7 @@ import { createAbortController } from '../../../kernel/utils/abortController.js'
 import { count } from '../../../kernel/utils/array.js'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
 import { detectCodeIndexingFromMcpServerName } from '../../utils/codeIndexing.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvDefinedFalsy, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   errorMessage,
@@ -75,7 +75,7 @@ import {
 import { getMCPUserAgent } from '../../utils/http.js'
 import { maybeNotifyIDEConnected } from '../../utils/ide.js'
 import { maybeResizeAndDownsampleImageBuffer } from '../../utils/imageResizer.js'
-import { logMCPDebug, logMCPError } from '../../utils/log.js'
+import { logMCPDebug, logMCPError } from '../../../kernel/utils/log.js'
 import {
   getBinaryBlobSavedMessage,
   getFormatDescription,
@@ -89,13 +89,13 @@ import {
   truncateMcpContentIfNeeded,
 } from '../../utils/mcpValidation.js'
 import { WebSocketTransport } from '../../utils/mcpWebSocketTransport.js'
-import { memoizeWithLRU } from '../../utils/memoize.js'
-import { getWebSocketTLSOptions } from '../../utils/mtls.js'
+import { memoizeWithLRU } from '../../../kernel/utils/memoize.js'
+import { getWebSocketTLSOptions } from '../../../kernel/utils/mtls.js'
 import {
   getProxyFetchOptions,
   getWebSocketProxyAgent,
   getWebSocketProxyUrl,
-} from '../../utils/proxy.js'
+} from '../../../kernel/utils/proxy.js'
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js'
 import { subprocessEnv } from '../../../kernel/utils/subprocessEnv.js'
 import {
@@ -253,7 +253,7 @@ const isComputerUseMCPServer = feature('CHICAGO_MCP')
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
-import { jsonParse, jsonStringify } from '../../utils/slowOperations'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 
 const MCP_AUTH_CACHE_TTL_MS = 15 * 60 * 1000 // 15 min
 

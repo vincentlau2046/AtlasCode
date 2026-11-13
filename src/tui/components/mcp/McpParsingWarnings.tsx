@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { getMcpConfigsByScope } from 'src/tui/services/mcp/config.js';
 import type { ConfigScope } from 'src/tui/services/mcp/types.js';
 import { describeMcpConfigFilePath, getScopeLabel } from 'src/tui/services/mcp/utils.js';
-import type { ValidationError } from 'src/tui/utils/settings/validation.js';
+import type { ValidationError } from 'src/kernel/utils/settings/validation.js';
 import { Box, Link, Text } from '../../ink.js';
 function McpConfigErrorSection(t0) {
   const $ = _c(26);

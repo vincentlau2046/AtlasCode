@@ -20,7 +20,7 @@ import { mkdtemp, rm } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-const GIT_AVAILABILITY_PATH = '../../src/tui/utils/plugins/gitAvailability.js'
+const GIT_AVAILABILITY_PATH = '../../src/kernel/utils/plugins/gitAvailability.js'
 const ATLAS_PRESET_PATH = '../../src/tui/utils/plugins/atlasMarketplace.js'
 const FALLBACK_PATH =
   '../../src/tui/utils/plugins/marketplaceSnapshotFallback.js'

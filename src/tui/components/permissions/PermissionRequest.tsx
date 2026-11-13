@@ -36,7 +36,7 @@ const ReviewArtifactTool = feature('REVIEW_ARTIFACT') ? (require('../../tools/Re
 const ReviewArtifactPermissionRequest = feature('REVIEW_ARTIFACT') ? (require('./ReviewArtifactPermissionRequest/ReviewArtifactPermissionRequest.js') as typeof import('./ReviewArtifactPermissionRequest/ReviewArtifactPermissionRequest.js')).ReviewArtifactPermissionRequest : null;
 import type { ContentBlockParam } from '../../../kernel/types/atlas.js';
 import type { z } from 'zod/v4';
-import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import type { WorkerBadgeProps } from './WorkerBadge.js';
 function permissionComponentForTool(tool: Tool): React.ComponentType<PermissionRequestProps> {
   switch (tool) {

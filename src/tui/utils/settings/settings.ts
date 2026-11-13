@@ -8,19 +8,19 @@ import { getOriginalCwd } from 'src/bootstrap'
 import { getFlagSettingsInline, getFlagSettingsPath, getUseCoworkPlugins } from 'src/tui/bootstrapState.js'
 import { uniq } from '../../../kernel/utils/array.js'
 const remoteSettings: SettingsJson | null = null
-import { logForDebugging } from '../debug'
-import { logForDiagnosticsNoPII } from '../diagLogs.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { logForDiagnosticsNoPII } from '../../../kernel/utils/diagLogs.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { getErrnoCode, isENOENT } from '../../../kernel/utils/errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from '../file.js'
-import { readFileSync } from '../fileRead.js'
-import { getFsImplementation, safeResolvePath } from '../fsOperations'
-import { addFileGlobRuleToGitignore } from '../git/gitignore.js'
-import { safeParseJSON } from '../json.js'
-import { logError } from '../log.js'
-import { getPlatform } from '../platform.js'
-import { clone, jsonStringify } from '../slowOperations'
-import { profileCheckpoint } from '../startupProfiler.js'
+import { readFileSync } from '../../../kernel/utils/fileRead.js'
+import { getFsImplementation, safeResolvePath } from '../../../kernel/utils/fsOperations'
+import { addFileGlobRuleToGitignore } from '../../../kernel/utils/git/gitignore.js'
+import { safeParseJSON } from '../../../kernel/utils/json.js'
+import { logError } from '../../../kernel/utils/log.js'
+import { getPlatform } from '../../../kernel/utils/platform.js'
+import { clone, jsonStringify } from '../../../kernel/utils/slowOperations'
+import { profileCheckpoint } from '../../../kernel/utils/startupProfiler.js'
 import {
   type EditableSettingSource,
   getEnabledSettingSources,
@@ -30,8 +30,8 @@ import { markInternalWrite } from '../../../kernel/settings/internalWrites.js'
 import {
   getManagedFilePath,
   getManagedSettingsDropInDir,
-} from './managedPath.js'
-import { getHkcuSettings, getMdmSettings } from './mdm/settings.js'
+} from '../../../kernel/utils/settings/managedPath.js'
+import { getHkcuSettings, getMdmSettings } from '../../../kernel/utils/settings/mdm/settings.js'
 import {
   getCachedParsedFile,
   getCachedSettingsForSource,
@@ -48,7 +48,7 @@ import {
   formatZodError,
   type SettingsWithErrors,
   type ValidationError,
-} from './validation'
+} from '../../../kernel/utils/settings/validation'
 
 /**
  * Get the path to the managed settings file based on the current platform

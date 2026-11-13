@@ -15,18 +15,18 @@ import type {
   MCPServerConnection,
 } from '../services/mcp/types.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
-import { env } from './env.js'
+import { env } from '../../kernel/utils/env.js'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import {
   execFileNoThrow,
   execFileNoThrowWithCwd,
   execSyncWithDefaults_DEPRECATED,
-} from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
+} from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { getAncestorPidsAsync } from './genericProcessUtils.js'
 import { isJetBrainsPluginInstalledCached } from './jetbrains.js'
-import { logError } from './log.js'
-import { getPlatform } from './platform.js'
+import { logError } from '../../kernel/utils/log.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import { lt } from '../../kernel/utils/semver.js'
 
 // Lazy: IdeOnboardingDialog.tsx pulls React/ink; only needed in interactive onboarding path
@@ -35,7 +35,7 @@ const ideOnboardingDialog =
     require('src/tui/components/IdeOnboardingDialog.js')
 
 import { createAbortController } from '../../kernel/utils/abortController.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { envDynamic } from './envDynamic.js'
 import { errorMessage, isFsInaccessible } from '../../kernel/utils/errors.js'
 import {
@@ -43,7 +43,7 @@ import {
   WindowsToWSLConverter,
 } from './idePathConversion.js'
 import { sleep } from '../../kernel/utils/sleep.js'
-import { jsonParse } from './slowOperations'
+import { jsonParse } from '../../kernel/utils/slowOperations'
 
 function isProcessRunning(pid: number): boolean {
   try {

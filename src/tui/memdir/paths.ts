@@ -8,7 +8,7 @@ import {
   isEnvDefinedFalsy,
   isEnvTruthy,
 } from '../../kernel/utils/envUtils.js'
-import { findCanonicalGitRoot } from '../utils/git.js'
+import { findCanonicalGitRoot } from '../../kernel/utils/git.js'
 import { sanitizePath } from '../utils/path.js'
 import {
   getInitialSettings,

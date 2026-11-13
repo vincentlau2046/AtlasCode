@@ -11,7 +11,7 @@ import { pathInAllowedWorkingPath } from 'src/tui/utils/permissions/filesystem.j
 import { setCwd } from 'src/tui/utils/Shell.js'
 import { shouldMaintainProjectWorkingDir } from '../../../kernel/utils/envUtils.js'
 import { maybeResizeAndDownsampleImageBuffer } from '../../utils/imageResizer.js'
-import { getMaxOutputLength } from '../../utils/shell/outputLimits.js'
+import { getMaxOutputLength } from '../../../kernel/utils/shell/outputLimits.js'
 import { countCharInString, plural } from '../../../kernel/utils/stringUtils.js'
 /**
  * Strips leading and trailing lines that contain only whitespace/newlines.

@@ -9,7 +9,7 @@ import { z } from 'zod/v4'
 import { runWebSearch } from 'src/engine'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { getWebSearchPrompt, WEB_SEARCH_TOOL_NAME } from './prompt.js'
 import {
   getToolUseSummary,

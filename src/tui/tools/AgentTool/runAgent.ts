@@ -3,7 +3,7 @@ import type { UUID } from 'crypto'
 import { randomUUID } from 'crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { isAtlasDev } from 'src/kernel/utils/atlasDev'
-import { logForDebugging } from 'src/tui/utils/debug.js'
+import { logForDebugging } from 'src/kernel/utils/debug.js'
 import { getSessionId } from 'src/bootstrap'
 import { getCommand, getSkillToolCommands, hasCommand } from '../../commands.js'
 import {

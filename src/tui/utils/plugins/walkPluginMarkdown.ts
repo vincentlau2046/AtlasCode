@@ -1,6 +1,6 @@
 import { join } from 'path'
-import { logForDebugging } from '../debug'
-import { getFsImplementation } from '../fsOperations'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 
 const SKILL_MD_RE = /^skill\.md$/i
 

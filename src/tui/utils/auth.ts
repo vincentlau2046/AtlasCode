@@ -20,17 +20,17 @@ import {
   getGlobalConfig,
   saveGlobalConfig,
 } from './config.js'
-import { logAntError, logForDebugging } from './debug'
+import { logAntError, logForDebugging } from '../../kernel/utils/debug'
 import {
   isBareMode,
   isEnvTruthy,
   isRunningOnHomespace,
 } from '../../kernel/utils/envUtils.js'
 import { errorMessage } from '../../kernel/utils/errors.js'
-import { execSyncWithDefaults_DEPRECATED } from './execFileNoThrow.js'
+import { execSyncWithDefaults_DEPRECATED } from '../../kernel/utils/execFileNoThrow.js'
 import * as lockfile from '../../kernel/utils/lockfile.js'
-import { logError } from './log.js'
-import { memoizeWithTTLAsync } from './memoize.js'
+import { logError } from '../../kernel/utils/log.js'
+import { memoizeWithTTLAsync } from '../../kernel/utils/memoize.js'
 import { getSecureStorage } from './secureStorage/index.js'
 // 0.1.72 块 C-1（de-ant 收尾）：anthropic keychain import 面 + keychain 读写
 // 消费已清零；保留 clearKeychainCache（clearOAuthTokenCache 活消费，MCP 通用
@@ -41,7 +41,7 @@ import {
   getSettingsForSource,
 } from './settings/settings.js'
 import { sleep } from '../../kernel/utils/sleep.js'
-import { jsonParse } from './slowOperations'
+import { jsonParse } from '../../kernel/utils/slowOperations'
 
 /** Default TTL for API key helper cache in milliseconds (5 minutes) */
 const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000

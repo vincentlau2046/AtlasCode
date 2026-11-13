@@ -30,9 +30,9 @@ import {
 } from 'fs/promises'
 import { join, resolve, sep } from 'path'
 import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { toError } from '../../../kernel/utils/errors.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   getBuiltinMarketplaceSnapshot,
 } from './builtinMarketplaceSnapshots.js'

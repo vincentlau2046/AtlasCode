@@ -4,11 +4,11 @@
 
 import { getSessionBypassPermissionsMode } from 'src/bootstrap'
 import { getFlagSettingsPath, getInlinePlugins, getMainLoopModelOverride } from 'src/tui/bootstrapState.js'
-import { quote } from '../bash/shellQuote.js'
+import { quote } from '../../../kernel/utils/bash/shellQuote.js'
 import { isInBundledMode } from '../../../kernel/utils/bundledMode.js'
-import type { PermissionMode } from '../permissions/PermissionMode.js'
+import type { PermissionMode } from '../../../kernel/utils/permissions/PermissionMode.js'
 import { getTeammateModeFromSnapshot } from 'src/swarm'
-import { TEAMMATE_COMMAND_ENV_VAR } from './constants.js'
+import { TEAMMATE_COMMAND_ENV_VAR } from '../../../kernel/utils/swarm/constants.js'
 
 /**
  * Gets the command to use for spawning teammate processes.

@@ -12,7 +12,7 @@ import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.j
 import type { LoadedPlugin } from '../../types/plugin.js';
 import { count } from '../../../kernel/utils/array.js';
 import { openBrowser } from '../../utils/browser.js';
-import { logForDebugging } from '../../utils/debug';
+import { logForDebugging } from '../../../kernel/utils/debug';
 import { errorMessage } from '../../../kernel/utils/errors.js';
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { formatInstallCount, getInstallCounts } from '../../utils/plugins/installCounts.js';
@@ -22,7 +22,7 @@ import { loadKnownMarketplacesConfig } from '../../utils/plugins/marketplaceMana
 import { installPluginFromMarketplace } from '../../utils/plugins/pluginInstallationHelpers.js';
 import { isPluginBlockedByPolicy } from '../../utils/plugins/pluginPolicy.js';
 import { plural } from '../../../kernel/utils/stringUtils.js';
-import { truncateToWidth } from '../../utils/truncate.js';
+import { truncateToWidth } from '../../../kernel/utils/truncate.js';
 import { findPluginOptionsTarget, PluginOptionsFlow } from './PluginOptionsFlow.js';
 import { PluginTrustWarning } from './PluginTrustWarning.js';
 import { buildPluginDetailsMenuOptions, extractGitHubRepo, type InstallablePlugin } from './pluginDetailsHelpers.js';

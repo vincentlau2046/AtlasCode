@@ -7,20 +7,20 @@ import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import { dirname, join, resolve, sep } from 'path'
 import { getProjectRoot } from 'src/bootstrap'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import { normalizePathForComparison } from './file.js'
 import type { FrontmatterData } from './frontmatterParser.js'
 import { parseFrontmatter } from './frontmatterParser.js'
-import { findCanonicalGitRoot, findGitRoot } from './git.js'
+import { findCanonicalGitRoot, findGitRoot } from '../../kernel/utils/git.js'
 import { parseToolListFromCLI } from './permissions/permissionSetup.js'
 import { ripGrep } from 'src/tui/sandboxCompat'
 import {
   isSettingSourceEnabled,
   type SettingSource,
 } from './settings/constants'
-import { getManagedFilePath } from './settings/managedPath.js'
+import { getManagedFilePath } from '../../kernel/utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from './settings/pluginOnlyPolicy.js'
 
 // Claude configuration directory names

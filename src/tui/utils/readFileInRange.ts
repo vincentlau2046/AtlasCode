@@ -54,7 +54,7 @@
 import { createReadStream, fstat } from 'fs'
 import { open as fsOpen, stat as fsStat, readFile } from 'fs/promises'
 import { decodeTextLosslessly, hasUtf16LeBom } from 'src/shared'
-import { formatFileSize } from './format.js'
+import { formatFileSize } from '../../kernel/utils/format.js'
 
 const FAST_PATH_MAX_SIZE = 10 * 1024 * 1024 // 10 MB
 

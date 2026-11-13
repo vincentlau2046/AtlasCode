@@ -8,7 +8,7 @@ import type {
 } from '../../kernel/types/atlas.js'
 import type { BetaMessageParam as MessageParam } from '../../kernel/types/atlas.js'
 import type { Attachment } from '../utils/attachments.js'
-import { logError } from '../utils/log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { normalizeAttachmentForAPI } from '../utils/messages.js'
 import {
   getMainLoopModel,
@@ -16,7 +16,7 @@ import {
 } from '../utils/model/model.js'
 import { normalizeModelStringForAPI, modelToRole } from 'src/modelprovider'
 import type { Message } from '../../kernel/types/message.js'
-import { jsonStringify } from '../utils/slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import { isToolReferenceBlock } from '../utils/toolSearch.js'
 import { modelProvider } from 'src/modelprovider'
 import { withTokenCountVCR } from './vcr.js'

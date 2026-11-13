@@ -7,7 +7,7 @@ import { WEB_FETCH_TOOL_NAME } from 'src/tui/tools/WebFetchTool/prompt.js'
 import { WEB_SEARCH_TOOL_NAME } from 'src/tui/tools/WebSearchTool/prompt.js'
 import { hasEmbeddedSearchTools } from 'src/kernel/utils/embeddedTools'
 import { getSettings_DEPRECATED } from 'src/tui/utils/settings/settings.js'
-import { jsonStringify } from '../../../utils/slowOperations'
+import { jsonStringify } from '../../../../kernel/utils/slowOperations'
 import type {
   AgentDefinition,
   BuiltInAgentDefinition,

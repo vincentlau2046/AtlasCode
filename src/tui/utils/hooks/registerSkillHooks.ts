@@ -1,6 +1,6 @@
 import { HOOK_EVENTS } from 'src/tui/entrypoints/agentSdkTypes.js'
 import type { AppState } from 'src/tui/state/AppState.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import type { HooksSettings } from '../../../kernel/settings/types.js'
 import { addSessionHook, removeSessionHook } from './sessionHooks.js'
 

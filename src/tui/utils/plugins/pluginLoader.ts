@@ -58,7 +58,7 @@ import type {
   PluginLoadResult,
   PluginManifest,
 } from '../../types/plugin.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import {
   errorMessage,
@@ -67,12 +67,12 @@ import {
   isFsInaccessible,
   toError,
 } from '../../../kernel/utils/errors.js'
-import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
+import { execFileNoThrow, execFileNoThrowWithCwd } from '../../../kernel/utils/execFileNoThrow.js'
 import { pathExists } from '../file.js'
-import { getFsImplementation } from '../fsOperations'
-import { gitExe } from '../git.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { gitExe } from '../../../kernel/utils/git.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
 import {
   clearPluginSettingsBase,
@@ -82,11 +82,11 @@ import {
 } from '../settings/settingsCache.js'
 import type { HooksSettings } from '../../../kernel/settings/types.js'
 import { SettingsSchema } from '../../../kernel/settings/types.js'
-import { jsonParse, jsonStringify } from '../slowOperations'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 import { getAddDirEnabledPlugins } from './addDirPluginSettings.js'
 import { verifyAndDemote } from './dependencyResolver.js'
 import { classifyFetchError, logPluginFetch } from './fetchTelemetry.js'
-import { checkGitAvailable } from './gitAvailability.js'
+import { checkGitAvailable } from '../../../kernel/utils/plugins/gitAvailability.js'
 import {
   getInMemoryInstalledPlugins,
   getInstalledPluginsFilePath,

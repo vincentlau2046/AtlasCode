@@ -10,10 +10,10 @@
  */
 
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from '../debug'
-import { withDiagnosticsTiming } from '../diagLogs.js'
-import { getFsImplementation } from '../fsOperations'
-import { logError } from '../log.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { withDiagnosticsTiming } from '../../../kernel/utils/diagLogs.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   clearMarketplacesCache,
   getDeclaredMarketplaces,

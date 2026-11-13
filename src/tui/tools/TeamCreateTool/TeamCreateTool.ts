@@ -5,9 +5,9 @@ import { formatAgentId } from '../../../kernel/utils/agentId.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { getResolvedTeammateMode } from 'src/swarm'
-import { TEAM_LEAD_NAME } from '../../utils/swarm/constants.js'
+import { TEAM_LEAD_NAME } from '../../../kernel/utils/swarm/constants.js'
 import {
   getTeamFilePath,
   readTeamFile,
@@ -18,7 +18,7 @@ import {
   ensureTasksDir,
   resetTaskList,
   setLeaderTeamName,
-} from '../../utils/tasks.js'
+} from '../../../kernel/utils/tasks.js'
 import { generateWordSlug } from '../../utils/words.js'
 import { TEAM_CREATE_TOOL_NAME } from '../../../kernel/tools/TeamCreateTool/constants.js'
 // 0.1.100 W-D-B-1（段 D 批复形 @bbe99518）：durable 档门 + 支路原语

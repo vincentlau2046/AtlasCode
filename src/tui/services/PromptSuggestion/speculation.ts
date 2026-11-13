@@ -13,12 +13,12 @@ import {
 import { commandHasAnyCd } from '../../tools/BashTool/bashPermissions.js'
 import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
 import { checkReadOnlyConstraints } from '../../tools/BashTool/readOnlyValidation.js'
-import type { SpeculationAcceptMessage } from '../../types/logs.js'
+import type { SpeculationAcceptMessage } from '../../../kernel/types/logs.js'
 import type { Message } from '../../../kernel/types/message.js'
 import { createChildAbortController } from '../../../kernel/utils/abortController.js'
 import { count } from '../../../kernel/utils/array.js'
 import { getGlobalConfig } from '../../utils/config.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
 import {
   type FileStateCache,
@@ -30,9 +30,9 @@ import {
   createCacheSafeParams,
   runForkedAgent,
 } from '../../utils/forkedAgent.js'
-import { formatDuration, formatNumber } from '../../utils/format.js'
+import { formatDuration, formatNumber } from '../../../kernel/utils/format.js'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import type { SetAppState } from '../../utils/messageQueueManager.js'
 import {
   createSystemMessage,
@@ -43,7 +43,7 @@ import {
 import { getAtlasTempDir } from '../../utils/permissions/filesystem.js'
 import { extractReadFilesFromMessages } from '../../utils/queryHelpers.js'
 import { getTranscriptPath } from '../../utils/sessionStorage.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   generateSuggestion,
   getPromptVariant,

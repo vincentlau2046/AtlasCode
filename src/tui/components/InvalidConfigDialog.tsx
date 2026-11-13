@@ -6,7 +6,7 @@ import { KeybindingSetup } from '../keybindings/KeybindingProviderSetup.js';
 import { AppStateProvider } from '../state/AppState.js';
 import type { ConfigParseError } from '../../kernel/utils/errors.js';
 import { getBaseRenderOptions } from '../utils/renderOptions.js';
-import { jsonStringify, writeFileSync_DEPRECATED } from '../utils/slowOperations';
+import { jsonStringify, writeFileSync_DEPRECATED } from '../../kernel/utils/slowOperations';
 import type { ThemeName } from '../utils/theme.js';
 import { Select } from './CustomSelect/index.js';
 import { Dialog } from './design-system/Dialog.js';

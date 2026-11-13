@@ -19,7 +19,7 @@ import { getMemoryFiles, type MemoryFileInfo } from '../../utils/memoryFiles.js'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js';
 import { findMemoryFile } from '../../../kernel/utils/configDir.js';
 import { getDisplayPath } from '../../utils/file.js';
-import { formatRelativeTimeAgo } from '../../utils/format.js';
+import { formatRelativeTimeAgo } from '../../../kernel/utils/format.js';
 import { projectIsInGitRepo } from '../../utils/memory/versions.js';
 import { updateSettingsForSource } from '../../utils/settings/settings.js';
 import { Select } from '../CustomSelect/index.js';

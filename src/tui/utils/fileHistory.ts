@@ -13,29 +13,29 @@ import {
 import { dirname, isAbsolute, join, relative } from 'path'
 import { getIsNonInteractiveSession, getOriginalCwd, getSessionId } from 'src/bootstrap'
 import { notifyVscodeFileUpdated } from 'src/tui/services/mcp/vscodeSdkMcp.js'
-import type { LogOption } from 'src/tui/types/logs.js'
+import type { LogOption } from 'src/kernel/types/logs.js'
 import { inspect } from 'util'
 import { getGlobalConfig } from './config.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAtlasConfigHomeDir, isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getErrnoCode, isENOENT } from '../../kernel/utils/errors.js'
 import { pathExists } from './file.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { recordFileHistorySnapshot } from './sessionStorage.js'
 
-type BackupFileName = string | null // The null value means the file does not exist in this version
-
-export type FileHistoryBackup = {
-  backupFileName: BackupFileName
-  version: number
-  backupTime: Date
-}
-
-export type FileHistorySnapshot = {
-  messageId: UUID // The associated message ID for this snapshot
-  trackedFileBackups: Record<string, FileHistoryBackup> // Map of file paths to backup versions
-  timestamp: Date
-}
+// 0.1.106 S3b 切片 2：3 型（BackupFileName/FileHistoryBackup/FileHistorySnapshot）
+// 提取 kernel/types/fileHistoryTypes.ts（首车随迁文件 kernel/types/logs.ts 的
+// type 边机械闭合，f4 批复单元 ②）；本文件 re-export 兜底，既有消费方零改动。
+import {
+  type BackupFileName,
+  type FileHistoryBackup,
+  type FileHistorySnapshot,
+} from '../../kernel/types/fileHistoryTypes.js'
+export type {
+  BackupFileName,
+  FileHistoryBackup,
+  FileHistorySnapshot,
+} from '../../kernel/types/fileHistoryTypes.js'
 
 export type FileHistoryState = {
   snapshots: FileHistorySnapshot[]

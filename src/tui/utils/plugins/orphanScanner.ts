@@ -15,7 +15,7 @@
 
 import { join, resolve, sep } from 'path'
 import { parseGitConfigValue } from '../../../kernel/git/gitConfigParser.js'
-import { getFsImplementation } from '../fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import { getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import { getPluginSeedDirs } from './pluginDirectories.js'
 import {

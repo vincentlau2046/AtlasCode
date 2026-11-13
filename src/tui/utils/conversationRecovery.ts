@@ -11,7 +11,7 @@ import type {
   LogOption,
   PersistedWorktreeSession,
   SerializedMessage,
-} from '../types/logs.js'
+} from '../../kernel/types/logs.js'
 import type {
   Message,
   NormalizedMessage,
@@ -23,7 +23,7 @@ import {
   copyFileHistoryForResume,
   type FileHistorySnapshot,
 } from './fileHistory.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 import {
   createAssistantMessage,
   createUserMessage,

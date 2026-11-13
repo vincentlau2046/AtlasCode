@@ -15,7 +15,7 @@ import {
   type MarketSkill,
   searchSkillsAcrossMarketplaces,
 } from '../../utils/plugins/skillSearch.js'
-import { truncateToWidth } from '../../utils/truncate.js'
+import { truncateToWidth } from '../../../kernel/utils/truncate.js'
 import type { ViewState as ParentViewState } from './types.js'
 
 type Props = {

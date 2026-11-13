@@ -17,7 +17,7 @@ import { FILE_WRITE_TOOL_NAME } from '../../kernel/tools/FileWriteTool/prompt.js
 import type { Message } from '../../kernel/types/message.js'
 import { isFsInaccessible } from '../../kernel/utils/errors.js'
 import { getFileModificationTime, stripLineNumberPrefix } from './file.js'
-import { readFileSyncWithMetadata } from './fileRead.js'
+import { readFileSyncWithMetadata } from '../../kernel/utils/fileRead.js'
 import {
   createFileStateCacheWithSizeLimit,
   type FileStateCache,

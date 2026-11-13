@@ -11,7 +11,7 @@
 
 import * as React from 'react'
 import { Box, Text } from '../ink.js'
-import { formatDuration, formatTokens } from '../utils/format.js'
+import { formatDuration, formatTokens } from '../../kernel/utils/format.js'
 
 export type GoalOverlayProps = {
   /** goal 是否 armed（C0-1 状态机读面）。 */

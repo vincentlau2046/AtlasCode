@@ -1,5 +1,5 @@
 import { type StructuredPatchHunk, structuredPatch } from 'diff'
-import { logError } from 'src/tui/utils/log.js'
+import { logError } from 'src/kernel/utils/log.js'
 import { expandPath } from 'src/tui/utils/path.js'
 import { countCharInString } from 'src/kernel/utils/stringUtils'
 import {

@@ -5,7 +5,7 @@
  */
 
 import { Cursor } from '../utils/Cursor.js'
-import { firstGrapheme, lastGrapheme } from '../utils/intl.js'
+import { firstGrapheme, lastGrapheme } from '../../kernel/utils/intl.js'
 import { countCharInString } from '../../kernel/utils/stringUtils.js'
 import {
   isInclusiveMotion,

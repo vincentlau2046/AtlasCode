@@ -15,16 +15,16 @@
  */
 
 import { dirname, join } from 'path'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { findManifestInDir, PLUGIN_MANIFEST_DIR } from '../../../kernel/utils/configDir.js'
 import { errorMessage, isENOENT, toError } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../fsOperations'
-import { logError } from '../log.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   jsonParse,
   jsonStringify,
   writeFileSync_DEPRECATED,
-} from '../slowOperations'
+} from '../../../kernel/utils/slowOperations'
 import { getPluginsDirectory } from './pluginDirectories.js'
 import {
   type InstalledPlugin,
@@ -44,7 +44,7 @@ export type PersistableScope = Exclude<PluginScope, never> // All scopes are per
 
 import { getOriginalCwd } from 'src/bootstrap'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { getHeadForDir } from '../git/gitFilesystem.js'
+import { getHeadForDir } from '../../../kernel/utils/git/gitFilesystem.js'
 import type { EditableSettingSource } from '../settings/constants'
 import {
   getSettings_DEPRECATED,

@@ -4,7 +4,7 @@ import { chmod, open, rename, stat, unlink } from 'fs/promises'
 import mapValues from 'lodash-es/mapValues.js'
 import memoize from 'lodash-es/memoize.js'
 import { dirname, join, parse } from 'path'
-import { getPlatform } from 'src/tui/utils/platform.js'
+import { getPlatform } from 'src/kernel/utils/platform.js'
 import type { PluginError } from '../../types/plugin.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
 import {
@@ -14,15 +14,15 @@ import {
   saveGlobalConfig,
 } from '../../utils/config.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { getErrnoCode } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../../utils/fsOperations'
-import { safeParseJSON } from '../../utils/json.js'
-import { logError } from '../../utils/log.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
+import { safeParseJSON } from '../../../kernel/utils/json.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { getPluginMcpServers } from '../../utils/plugins/mcpPluginIntegration.js'
 import { loadAllPluginsCacheOnly } from '../../utils/plugins/pluginLoader.js'
 import { isSettingSourceEnabled } from '../../utils/settings/constants'
-import { getManagedFilePath } from '../../utils/settings/managedPath.js'
+import { getManagedFilePath } from '../../../kernel/utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from '../../utils/settings/pluginOnlyPolicy.js'
 import {
   getInitialSettings,
@@ -34,8 +34,8 @@ import {
   isMcpServerUrlEntry,
   type SettingsJson,
 } from '../../../kernel/settings/types.js'
-import type { ValidationError } from '../../utils/settings/validation'
-import { jsonStringify } from '../../utils/slowOperations'
+import type { ValidationError } from '../../../kernel/utils/settings/validation'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { expandEnvVarsInString } from './envExpansion.js'
 import { applyMcpOauthScopeGate } from './oauthScopeGate.js'
 import {

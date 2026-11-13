@@ -29,7 +29,7 @@ function srcOf(rel: string): string {
 
 describe('0.1.71 修波 r2 D-1 execa cancelSignal 选项名源级锁', () => {
   test('execFileNoThrow wrapper：cancelSignal: abortSignal 在场 + 旧名行级缺席', () => {
-    const src = srcOf('src/tui/utils/execFileNoThrow.ts')
+    const src = srcOf('src/kernel/utils/execFileNoThrow.ts')
     expect(src).toContain('cancelSignal: abortSignal')
     // 旧名缺席按行断言（`^\s*signal:` 精确锚定 execa 选项位，避免误伤
     // getErrorMessage 的 result.signal / ExecaResultWithError.signal 合法用法）

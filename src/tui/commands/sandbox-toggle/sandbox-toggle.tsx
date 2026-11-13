@@ -3,7 +3,7 @@ import React from 'react';
 import { getCwdState } from 'src/bootstrap';
 import { SandboxSettings } from '../../components/sandbox/SandboxSettings.js';
 import { color } from '../../ink.js';
-import { getPlatform } from '../../utils/platform.js';
+import { getPlatform } from '../../../kernel/utils/platform.js';
 import { addToExcludedCommands, getSandboxManager } from 'src/tui/sandboxCompat';
 import { getSettings_DEPRECATED, getSettingsFilePathForSource } from '../../utils/settings/settings.js';
 import type { ThemeName } from '../../utils/theme.js';

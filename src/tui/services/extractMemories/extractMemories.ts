@@ -50,7 +50,7 @@ import type {
 } from '../../../kernel/types/message.js'
 import { createAbortController } from '../../../kernel/utils/abortController.js'
 import { count, uniq } from '../../../kernel/utils/array.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   createCacheSafeParams,
   runForkedAgent,

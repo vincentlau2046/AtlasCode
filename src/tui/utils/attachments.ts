@@ -15,7 +15,7 @@ import { FileTooLargeError, readFileInRange } from './readFileInRange.js'
 import { expandPath } from './path.js'
 import { countCharInString } from '../../kernel/utils/stringUtils.js'
 import { count, uniq } from '../../kernel/utils/array.js'
-import { getFsImplementation } from './fsOperations'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { readdir, stat } from 'fs/promises'
 import type { IDESelection } from '../hooks/useIdeSelection.js'
 import { TODO_WRITE_TOOL_NAME } from '../../kernel/tools/TodoWriteTool/constants.js'
@@ -29,7 +29,7 @@ import {
   listTasks,
   getTaskListId,
   isTodoV2Enabled,
-} from './tasks.js'
+} from '../../kernel/utils/tasks.js'
 import { getPlanFilePath, getPlan } from './plans.js'
 import { getConnectedIdeName } from './ide.js'
 import {
@@ -43,8 +43,8 @@ import {
 import { dirname, parse, relative, resolve } from 'path'
 import { getCwd } from 'src/kernel/utils/cwd'
 import { getViewedTeammateTask } from '../state/selectors.js'
-import { logError } from './log.js'
-import { logAntError } from './debug'
+import { logError } from '../../kernel/utils/log.js'
+import { logAntError } from '../../kernel/utils/debug'
 import { isENOENT, toError } from '../../kernel/utils/errors.js'
 import type { DiagnosticFile } from '../services/diagnosticTracking.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
@@ -143,7 +143,7 @@ import {
   checkForLSPDiagnostics,
   clearAllLSPDiagnostics,
 } from '../services/lsp/LSPDiagnosticRegistry.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import {
   extractTextContent,
   getUserMessageText,
@@ -171,7 +171,7 @@ import {
   type HookBlockingError,
   type InstructionsMemoryType,
 } from './hooks.js'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import { isPDFExtension } from '../../kernel/utils/pdfUtils.js'
 import { getLocalISODate } from '../constants/common.js'
 import { getPDFPageCount } from './pdf.js'
@@ -193,7 +193,7 @@ import {
   isShutdownApproved,
   isStructuredProtocolMessage,
   isIdleNotification,
-} from './teammateMailbox.js'
+} from '../../kernel/utils/teammateMailbox.js'
 import {
   getAgentName,
   getAgentId,
@@ -202,7 +202,7 @@ import {
 } from 'src/engine'
 import { isInProcessTeammate } from 'src/shared'
 import { removeTeammateFromTeamFile } from './swarm/teamHelpers.js'
-import { unassignTeammateTasks } from './tasks.js'
+import { unassignTeammateTasks } from '../../kernel/utils/tasks.js'
 
 export const TODO_REMINDER_CONFIG = {
   TURNS_SINCE_WRITE: 10,

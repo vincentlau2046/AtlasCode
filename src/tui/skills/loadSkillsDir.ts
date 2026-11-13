@@ -17,9 +17,9 @@ import type { Command, PromptCommand } from '../types/command.js'
 import {
   parseArgumentNames,
   substituteArguments,
-} from '../utils/argumentSubstitution.js'
+} from '../../kernel/utils/argumentSubstitution.js'
 import { isUnsafeCommandName, sanitizeDisplayName } from '../utils/commandNameSafety.js'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import {
   EFFORT_LEVELS,
   type EffortValue,
@@ -40,9 +40,9 @@ import {
   parseShellFrontmatter,
   splitPathInFrontmatter,
 } from '../utils/frontmatterParser.js'
-import { getFsImplementation } from '../utils/fsOperations'
-import { isPathGitignored } from '../utils/git/gitignore.js'
-import { logError } from '../utils/log.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
+import { isPathGitignored } from '../../kernel/utils/git/gitignore.js'
+import { logError } from '../../kernel/utils/log.js'
 import {
   extractDescriptionFromMarkdown,
   getProjectDirsUpToHome,
@@ -54,7 +54,7 @@ import { parseUserSpecifiedModel } from '../utils/model/model.js'
 import { executeShellCommandsInPrompt } from '../utils/promptShellExecution.js'
 import type { SettingSource } from '../utils/settings/constants'
 import { isSettingSourceEnabled } from '../utils/settings/constants'
-import { getManagedFilePath } from '../utils/settings/managedPath.js'
+import { getManagedFilePath } from '../../kernel/utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from '../utils/settings/pluginOnlyPolicy.js'
 import { HooksSchema } from '../schemas/hooks.js'
 import type { HooksSettings } from '../../kernel/settings/types.js'

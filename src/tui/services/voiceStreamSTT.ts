@@ -20,7 +20,7 @@
 // 仅 feature('VOICE_MODE') 构建可达（useVoice.ts import 面门控）。
 
 import { modelProvider } from 'src/modelprovider'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAsrModel } from '../utils/model/model.js'
 
 // ─── Types ──────────────────────────────────────────────────────────

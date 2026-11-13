@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { logForDebugging } from 'src/tui/utils/debug.js';
-import { logError } from 'src/tui/utils/log.js';
+import { logForDebugging } from 'src/kernel/utils/debug.js';
+import { logError } from 'src/kernel/utils/log.js';
 import { useInterval } from 'usehooks-ts';
 import { useUpdateNotification } from '../hooks/useUpdateNotification.js';
 import { Box, Text } from '../ink.js';

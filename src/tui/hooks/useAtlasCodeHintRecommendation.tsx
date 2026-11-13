@@ -12,7 +12,7 @@ import { c as _c } from "react/compiler-runtime";
 import * as React from 'react';
 import { useNotifications } from '../context/notifications.js';
 import { clearPendingHint, getPendingHintSnapshot, markShownThisSession, subscribeToPendingHint } from '../utils/atlasCodeHints.js';
-import { logForDebugging } from '../utils/debug';
+import { logForDebugging } from '../../kernel/utils/debug';
 import { disableHintRecommendations, markHintPluginShown, type PluginHintRecommendation, resolvePluginHint } from '../utils/plugins/hintRecommendation.js';
 import { installPluginFromMarketplace } from '../utils/plugins/pluginInstallationHelpers.js';
 import { installPluginAndNotify, usePluginRecommendationBase } from './usePluginRecommendationBase.js';

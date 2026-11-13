@@ -36,7 +36,7 @@ import {
   shouldUseGlobalCacheScope,
 } from './betas.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { createUserMessage } from './messages.js'
 import { isDefaultGateway } from '../../kernel/model/providers.js'
@@ -49,9 +49,9 @@ import {
   getPlanFilePath,
   persistFileSnapshotIfRemote,
 } from './plans.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import { countFilesRoundedRg } from 'src/tui/sandboxCompat'
-import { jsonStringify } from './slowOperations'
+import { jsonStringify } from '../../kernel/utils/slowOperations'
 import type { SystemPrompt } from '../../kernel/utils/systemPromptType.js'
 import { getToolSchemaCache } from '../../kernel/utils/toolSchemaCache.js'
 import { windowsPathToPosixPath } from './windowsPaths.js'

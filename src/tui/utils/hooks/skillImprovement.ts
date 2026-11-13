@@ -9,14 +9,14 @@ import { createAbortController } from '../../../kernel/utils/abortController.js'
 import { count } from '../../../kernel/utils/array.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
 import { toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import {
   createUserMessage,
   extractTag,
   extractTextContent,
 } from '../messages.js'
 import { getDefaultFastModel } from '../model/model.js'
-import { jsonParse } from '../slowOperations'
+import { jsonParse } from '../../../kernel/utils/slowOperations'
 import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import {
   type ApiQueryHookConfig,

@@ -4,7 +4,7 @@
  */
 
 import { isFsInaccessible } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import { getSessionMemoryPath } from '../../utils/permissions/filesystem.js'
 import { sleep } from '../../../kernel/utils/sleep.js'
 

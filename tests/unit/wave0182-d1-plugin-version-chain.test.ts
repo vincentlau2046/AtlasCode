@@ -30,7 +30,7 @@ import type {
   PluginSource,
 } from '../../src/tui/utils/plugins/schemas.js'
 
-const GIT_FS_PATH = '../../src/tui/utils/git/gitFilesystem.js'
+const GIT_FS_PATH = '../../src/kernel/utils/git/gitFilesystem.js'
 
 const realGitFs = await import(GIT_FS_PATH)
 

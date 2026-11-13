@@ -1,7 +1,7 @@
 import { c as _c } from "react/compiler-runtime";
 import React from 'react';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-import { stringWidth } from '../../ink/stringWidth.js';
+import { stringWidth } from '../../../kernel/ink/stringWidth.js';
 import { Ansi, Text } from '../../ink.js';
 import type { Theme } from '../../utils/theme.js';
 import { dividerLine } from './beamTheme.js';

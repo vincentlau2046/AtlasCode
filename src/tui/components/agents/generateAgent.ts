@@ -10,10 +10,10 @@ import {
 } from 'src/tui/utils/messages.js'
 import type { ModelName } from 'src/tui/utils/model/model.js'
 import { isAutoMemoryEnabled } from '../../memdir/paths.js'
-import { jsonParse } from '../../utils/slowOperations'
+import { jsonParse } from '../../../kernel/utils/slowOperations'
 import { asSystemPrompt } from '../../../kernel/utils/systemPromptType.js'
 import { errorMessage } from 'src/kernel/utils/errors'
-import { logError } from 'src/tui/utils/log.js'
+import { logError } from 'src/kernel/utils/log.js'
 
 type GeneratedAgent = {
   identifier: string

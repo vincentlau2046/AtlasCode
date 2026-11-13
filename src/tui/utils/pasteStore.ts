@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { isENOENT } from '../../kernel/utils/errors.js'
 

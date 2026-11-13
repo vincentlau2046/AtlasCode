@@ -3,7 +3,7 @@ import { openSync } from 'fs'
 import { ReadStream } from 'tty'
 import type { RenderOptions } from '../ink.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 
 // Cached stdin override - computed once per process
 let cachedStdinOverride: ReadStream | undefined | null = null

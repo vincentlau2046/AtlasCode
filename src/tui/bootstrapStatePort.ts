@@ -81,17 +81,16 @@ export function createKernelBootstrapStatePort(): KernelBootstrapStatePort {
 
 export function createKernelBootstrapNoopSeam(): KernelBootstrapNoopSeam {
   return {
-    addSlowOperation: () => {
-      addSlowOperation()
+    // 切片 2：签名保真透传（参 + 返回值原样 forward，调用面零改动）。
+    addSlowOperation: (description, durationMs) => {
+      ;(addSlowOperation as (d: string, ms: number) => void)(description, durationMs)
     },
-    waitForScrollIdle: () => {
-      void waitForScrollIdle()
+    waitForScrollIdle: () => waitForScrollIdle(),
+    setLastAPIRequest: params => {
+      ;(setLastAPIRequest as (p: unknown) => void)(params)
     },
-    setLastAPIRequest: () => {
-      setLastAPIRequest()
-    },
-    setLastAPIRequestMessages: () => {
-      setLastAPIRequestMessages()
+    setLastAPIRequestMessages: messages => {
+      ;(setLastAPIRequestMessages as (m: unknown) => void)(messages)
     },
   }
 }

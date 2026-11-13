@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import { useNotifications } from 'src/tui/context/notifications.js'
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js'
 import { useAppState } from '../../state/AppState.js'
-import type { PermissionMode } from '../../utils/permissions/PermissionMode.js'
+import type { PermissionMode } from '../../../kernel/utils/permissions/PermissionMode.js'
 import {
   getAutoModeUnavailableNotification,
   getAutoModeUnavailableReason,

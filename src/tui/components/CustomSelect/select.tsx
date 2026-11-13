@@ -2,7 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import figures from 'figures';
 import React, { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useDeclaredCursor } from '../../ink/hooks/use-declared-cursor.js';
-import { stringWidth } from '../../ink/stringWidth.js';
+import { stringWidth } from '../../../kernel/ink/stringWidth.js';
 import { Ansi, Box, Text } from '../../ink.js';
 import { count } from '../../../kernel/utils/array.js';
 import type { PastedContent } from '../../utils/config.js';

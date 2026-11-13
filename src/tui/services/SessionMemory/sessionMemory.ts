@@ -23,7 +23,7 @@ import {
   createSubagentContext,
   runForkedAgent,
 } from '../../utils/forkedAgent.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import {
   type REPLHookContext,
   registerPostSamplingHook,

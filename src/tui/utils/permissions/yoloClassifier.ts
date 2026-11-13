@@ -21,14 +21,14 @@ import type {
   ClassifierUsage,
   YoloClassifierResult,
 } from '../../../kernel/types/permissions.js'
-import { isDebugMode, logForDebugging } from '../debug'
+import { isDebugMode, logForDebugging } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { extractTextContent } from '../messages.js'
 import { getMainLoopModel } from '../model/model.js'
 import { getAutoModeConfig } from '../settings/settings.js'
 import { sideQuery } from '../sideQuery.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { tokenCountWithEstimation } from '../tokens.js'
 import {
   getBashPromptAllowDescriptions,

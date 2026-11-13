@@ -41,8 +41,8 @@ function hljs(): HLJSApi {
   return cachedHljs!
 }
 
-import { stringWidth } from '../../ink/stringWidth.js'
-import { logError } from '../../utils/log.js'
+import { stringWidth } from '../../../kernel/ink/stringWidth.js'
+import { logError } from '../../../kernel/utils/log.js'
 
 // ---------------------------------------------------------------------------
 // Public API types (match vendor/color-diff-src/index.d.ts)

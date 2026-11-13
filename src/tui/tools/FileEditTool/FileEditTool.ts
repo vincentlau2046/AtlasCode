@@ -12,7 +12,7 @@ import {
 import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { countLinesChanged } from '../../utils/diff.js'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { isENOENT } from '../../../kernel/utils/errors.js'
@@ -31,15 +31,15 @@ import {
 import {
   type LineEndingType,
   readFileSyncWithMetadata,
-} from '../../utils/fileRead.js'
+} from '../../../kernel/utils/fileRead.js'
 import { UndecodableTextError } from 'src/shared'
-import { formatFileSize } from '../../utils/format.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { formatFileSize } from '../../../kernel/utils/format.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import {
   fetchSingleFileGitDiff,
   type ToolUseDiff,
 } from '../../utils/gitDiff.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { expandPath } from '../../utils/path.js'
 import {
   checkWritePermissionForTool,

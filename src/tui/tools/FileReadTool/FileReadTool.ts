@@ -38,8 +38,8 @@ import {
   getFileModificationTimeAsync,
   suggestPathUnderCwd,
 } from '../../utils/file.js'
-import { formatFileSize } from '../../utils/format.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { formatFileSize } from '../../../kernel/utils/format.js'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import {
   compressImageBufferWithTokenLimit,
   createImageMetadataText,
@@ -49,7 +49,7 @@ import {
   maybeResizeAndDownsampleImageBuffer,
 } from '../../utils/imageResizer.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { isAutoMemFile } from '../../utils/memoryFileDetection.js'
 import { createUserMessage } from '../../utils/messages.js'
 import { getCanonicalName, getMainLoopModel } from '../../utils/model/model.js'
@@ -72,7 +72,7 @@ import type { PermissionDecision } from '../../../kernel/permissions/PermissionR
 import { matchWildcardPattern } from '../../../kernel/permissions/shellRuleMatching.js'
 import { readFileInRange } from '../../utils/readFileInRange.js'
 import { semanticNumber } from '../../utils/semanticNumber.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { BASH_TOOL_NAME } from '../../../kernel/tools/BashTool/toolName.js'
 import {
   ALLOW_LARGE_MAX_BYTES,

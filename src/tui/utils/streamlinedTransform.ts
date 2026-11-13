@@ -21,7 +21,7 @@ import { NOTEBOOK_EDIT_TOOL_NAME } from 'src/kernel/tools/NotebookEditTool/const
 import { TASK_STOP_TOOL_NAME } from 'src/kernel/tools/TaskStopTool/prompt'
 import { WEB_SEARCH_TOOL_NAME } from 'src/tui/tools/WebSearchTool/prompt.js'
 import { extractTextContent } from 'src/tui/utils/messages.js'
-import { SHELL_TOOL_NAMES } from 'src/tui/utils/shell/shellToolUtils.js'
+import { SHELL_TOOL_NAMES } from 'src/kernel/utils/shell/shellToolUtils.js'
 import { capitalize } from 'src/kernel/utils/stringUtils'
 
 type ToolCounts = {

@@ -4,9 +4,9 @@ import {
   JSONRPCMessageSchema,
 } from '@modelcontextprotocol/sdk/types.js'
 import type WsWebSocket from 'ws'
-import { logForDiagnosticsNoPII } from './diagLogs.js'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { toError } from '../../kernel/utils/errors.js'
-import { jsonParse, jsonStringify } from './slowOperations'
+import { jsonParse, jsonStringify } from '../../kernel/utils/slowOperations'
 
 // WebSocket readyState constants (same for both native and ws)
 const WS_CONNECTING = 0

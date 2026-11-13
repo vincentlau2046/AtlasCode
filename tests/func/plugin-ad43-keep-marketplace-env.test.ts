@@ -27,7 +27,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const EXEC_PATH = '../../src/tui/utils/execFileNoThrow.js'
+const EXEC_PATH = '../../src/kernel/utils/execFileNoThrow.js'
 const MANAGER_PATH = '../../src/tui/utils/plugins/marketplaceManager.js'
 const ENV_KEY = 'ATLAS_PLUGIN_CACHE_DIR'
 const KEEP_ENV = 'ATLAS_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE'

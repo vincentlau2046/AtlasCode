@@ -2,12 +2,12 @@ import { chmodSync } from 'fs'
 import { join } from 'path'
 import { getAtlasConfigHomeDir } from '../../../kernel/utils/envUtils.js'
 import { getErrnoCode } from '../../../kernel/utils/errors.js'
-import { getFsImplementation } from '../fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import {
   jsonParse,
   jsonStringify,
   writeFileSync_DEPRECATED,
-} from '../slowOperations'
+} from '../../../kernel/utils/slowOperations'
 import type { SecureStorage, SecureStorageData } from '../../../kernel/utils/secureStorage/types.js'
 
 function getStoragePath(): { storageDir: string; storagePath: string } {

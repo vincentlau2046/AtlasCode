@@ -2,7 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import { feature } from 'src/shared';
 import * as React from 'react';
 import { Box, Text } from 'src/tui/ink.js';
-import { getPlatform } from 'src/tui/utils/platform.js';
+import { getPlatform } from 'src/kernel/utils/platform.js';
 import { isKeybindingCustomizationEnabled } from '../../keybindings/loadUserBindings.js';
 import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js';

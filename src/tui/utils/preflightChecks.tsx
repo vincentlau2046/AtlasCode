@@ -8,7 +8,7 @@ import { useTimeout } from '../hooks/useTimeout.js';
 import { Box, Text } from '../ink.js';
 import { getSSLErrorHint } from 'src/modelprovider';
 import { getUserAgent } from './http.js';
-import { logError } from './log.js';
+import { logError } from '../../kernel/utils/log.js';
 export interface PreflightCheckResult {
   success: boolean;
   error?: string;

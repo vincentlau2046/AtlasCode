@@ -6,7 +6,7 @@ import { FilePathLink } from '../../components/FilePathLink.js';
 import { MessageResponse } from '../../components/MessageResponse.js';
 import { Text } from '../../ink.js';
 import { FILE_NOT_FOUND_CWD_NOTE, getDisplayPath } from '../../utils/file.js';
-import { formatFileSize } from '../../utils/format.js';
+import { formatFileSize } from '../../../kernel/utils/format.js';
 import { getPlansDirectory } from '../../utils/plans.js';
 import { getTaskOutputDir } from '../../utils/task/diskOutput.js';
 import type { Input, Output } from './FileReadTool.js';

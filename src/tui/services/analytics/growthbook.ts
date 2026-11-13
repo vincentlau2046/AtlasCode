@@ -10,8 +10,8 @@
 import { isEqual } from 'lodash-es'
 import { isAtlasDev } from '../../../kernel/utils/atlasDev.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
-import { logForDebugging } from '../../utils/debug'
-import { logError } from '../../utils/log.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { logError } from '../../../kernel/utils/log.js'
 import { createSignal } from '../../../kernel/utils/signal.js'
 
 // ---------------------------------------------------------------------------

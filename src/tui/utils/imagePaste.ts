@@ -9,15 +9,15 @@ import {
 } from '../constants/apiLimits.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getImageProcessor } from '../tools/FileReadTool/imageProcessor.js'
-import { logForDebugging } from './debug'
-import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import {
   detectImageFormatFromBase64,
   type ImageDimensions,
   maybeResizeAndDownsampleImageBuffer,
 } from './imageResizer.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 
 // Native NSPasteboard reader. GrowthBook gate atlas_collage_kaleidoscope is
 // a kill switch (default on). Falls through to osascript when off.

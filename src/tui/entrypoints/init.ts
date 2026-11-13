@@ -1,4 +1,4 @@
-import { profileCheckpoint } from '../utils/startupProfiler.js'
+import { profileCheckpoint } from '../../kernel/utils/startupProfiler.js'
 import 'src/tui/bootstrapState.js'
 import '../utils/config.js'
 import type { Attributes, MetricOptions } from '@opentelemetry/api'
@@ -13,9 +13,9 @@ import { preconnectAtlasApi } from '../utils/apiPreconnect.js'
 import { applyExtraCACertsFromConfig } from '../utils/caCertsConfig.js'
 import { registerCleanup } from '../../kernel/utils/cleanupRegistry.js'
 import { enableConfigs, recordFirstStartTime } from '../utils/config.js'
-import { logForDebugging } from '../utils/debug'
-import { detectCurrentRepository } from '../utils/detectRepository.js'
-import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { detectCurrentRepository } from '../../kernel/utils/detectRepository.js'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { initJetBrainsDetection } from '../utils/envDynamic.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { ConfigParseError, errorMessage } from '../../kernel/utils/errors.js'
@@ -28,7 +28,7 @@ import {
   applyConfigEnvironmentVariables,
   applySafeConfigEnvironmentVariables,
 } from '../utils/managedEnv.js'
-import { configureGlobalMTLS } from '../utils/mtls.js'
+import { configureGlobalMTLS } from '../../kernel/utils/mtls.js'
 import {
   ensureScratchpadDir,
   isScratchpadEnabled,
@@ -36,7 +36,7 @@ import {
 // initializeTelemetry is loaded lazily via import() in setMeterState() to defer
 // ~400KB of OpenTelemetry + protobuf modules until telemetry is actually initialized.
 // gRPC exporters (~700KB via @grpc/grpc-js) are further lazy-loaded within instrumentation.ts.
-import { configureGlobalAgents } from '../utils/proxy.js'
+import { configureGlobalAgents } from '../../kernel/utils/proxy.js'
 import { isBetaTracingEnabled } from '../utils/telemetry/betaSessionTracing.js'
 import { getTelemetryAttributes } from '../utils/telemetryAttributes.js'
 import { setShellIfWindows } from '../utils/windowsPaths.js'

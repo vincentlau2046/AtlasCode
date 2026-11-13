@@ -4,7 +4,7 @@ import {
   EFFORT_MAX,
   EFFORT_MEDIUM,
   EFFORT_XHIGH,
-} from '../constants/figures.js'
+} from '../../kernel/constants/figures.js'
 import {
   type EffortLevel,
   type EffortValue,

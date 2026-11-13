@@ -6,7 +6,7 @@ import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { shouldIncludeGitInstructions } from '../../utils/gitSettings.js'
 import { getAtlasTempDir } from '../../utils/permissions/filesystem.js'
 import { getSandboxManager } from 'src/tui/sandboxCompat'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   getDefaultBashTimeoutMs,
   getMaxBashTimeoutMs,

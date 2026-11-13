@@ -10,8 +10,8 @@ import {
 import { join } from 'path'
 import { getSessionId } from 'src/bootstrap'
 import { getErrnoCode } from '../../../kernel/utils/errors.js'
-import { readFileRange, tailFile } from '../fsOperations'
-import { logError } from '../log.js'
+import { readFileRange, tailFile } from '../../../kernel/utils/fsOperations'
+import { logError } from '../../../kernel/utils/log.js'
 import { getProjectTempDir } from '../permissions/filesystem.js'
 
 // SECURITY: O_NOFOLLOW prevents following symlinks when opening task output files.

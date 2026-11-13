@@ -34,7 +34,7 @@ import {
 import { asAgentId } from '../../../kernel/types/ids.js'
 import type { Message as MessageType } from '../../../kernel/types/message.js'
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { AbortError, errorMessage } from '../../../kernel/utils/errors.js'
 import type { CacheSafeParams } from '../../utils/forkedAgent.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
@@ -42,7 +42,7 @@ import {
   extractTextContent,
   getLastAssistantMessage,
 } from '../../utils/messages.js'
-import type { PermissionMode } from '../../utils/permissions/PermissionMode.js'
+import type { PermissionMode } from '../../../kernel/utils/permissions/PermissionMode.js'
 import { permissionRuleValueFromString } from '../../../kernel/permissions/permissionRuleParser.js'
 // 0.1.81 V3-2 K2 #10：server 级 MCP spec 取域（TUI 本地 twin mcpStringUtils，
 // 同域本地路径惯例——permissionRuleParser 亦 tui/utils/permissions 本地副本）

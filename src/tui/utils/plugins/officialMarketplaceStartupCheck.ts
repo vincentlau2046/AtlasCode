@@ -11,11 +11,11 @@
 import { join } from 'path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { isEnvTruthy } from '../../../kernel/utils/envUtils.js'
 import { toError } from '../../../kernel/utils/errors.js'
-import { logError } from '../log.js'
-import { checkGitAvailable, markGitUnavailable } from './gitAvailability.js'
+import { logError } from '../../../kernel/utils/log.js'
+import { checkGitAvailable, markGitUnavailable } from '../../../kernel/utils/plugins/gitAvailability.js'
 import { isSourceAllowedByPolicy } from './marketplaceHelpers.js'
 import {
   addMarketplaceSource,

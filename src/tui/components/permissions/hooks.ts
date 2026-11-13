@@ -10,8 +10,8 @@ import { permissionRuleValueToString } from 'src/kernel/permissions/permissionRu
 import { getSandboxManager } from 'src/tui/sandboxCompat'
 import type { ToolUseConfirm } from '../../components/permissions/PermissionRequest.js'
 import { useSetAppState } from '../../state/AppState.js'
-import { env } from '../../utils/env.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { env } from '../../../kernel/utils/env.js'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { type CompletionType, logUnaryEvent } from '../../utils/unaryLogging.js'
 
 export type UnaryEvent = {

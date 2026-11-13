@@ -1,6 +1,6 @@
 import { homedir, platform } from 'os'
 import { join } from 'path'
-import { getFsImplementation } from './fsOperations'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import type { IdeType } from './ide.js'
 
 const PLUGIN_PREFIX = 'atlas-jetbrains-plugin'

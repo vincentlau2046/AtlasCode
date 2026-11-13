@@ -37,11 +37,11 @@ import { createFileStateCacheWithSizeLimit, mergeFileStateCaches, READ_FILE_STAT
 import { getOriginalCwd, getProjectRoot, getSessionId, switchSession, setCostStateForRestore } from 'src/bootstrap'
 import { updateLastInteractionTime, getLastInteractionTime, getTurnHookDurationMs, getTurnHookCount, resetTurnHookDuration, getTurnToolDurationMs, getTurnToolCount, resetTurnToolDuration, getTurnClassifierDurationMs, getTurnClassifierCount, resetTurnClassifierDuration } from 'src/tui/bootstrapState.js';
 import { asSessionId, asAgentId } from '../../kernel/types/ids.js';
-import { logForDebugging } from '../utils/debug';
+import { logForDebugging } from '../../kernel/utils/debug';
 import { QueryGuard } from '../utils/QueryGuard.js';
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js';
 import { isAtlasDev } from '../../kernel/utils/atlasDev.js';
-import { formatTokens, truncateToWidth } from '../utils/format.js';
+import { formatTokens, truncateToWidth } from '../../kernel/utils/format.js';
 import { consumeEarlyInput } from '../utils/earlyInput.js';
 import { setMemberActive } from '../utils/swarm/teamHelpers.js';
 import { isSwarmWorker, generateSandboxRequestId, sendSandboxPermissionRequestViaMailbox, sendSandboxPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js';
@@ -118,7 +118,7 @@ import { useSwarmInitialization } from '../hooks/useSwarmInitialization.js';
 import { useTeammateViewAutoExit } from '../hooks/useTeammateViewAutoExit.js';
 import { errorMessage } from '../../kernel/utils/errors.js';
 import { isHumanTurn } from '../utils/messagePredicates.js';
-import { logError } from '../utils/log.js';
+import { logError } from '../../kernel/utils/log.js';
 // Dead code elimination: conditional imports
 const useVoiceIntegration: typeof import('../hooks/useVoiceIntegration.js').useVoiceIntegration = feature('VOICE_MODE') ? require('../hooks/useVoiceIntegration.js').useVoiceIntegration : () => ({
   stripTrailing: () => 0,
@@ -196,7 +196,7 @@ import { resetMicrocompactState } from 'src/tui/engineCompat';
 import { runPostCompactCleanup } from 'src/tui/engineCompat';
 import { provisionContentReplacementState, reconstructContentReplacementState, type ContentReplacementRecord } from '../utils/toolResultStorage.js';
 import { partialCompactConversation } from 'src/tui/engineCompat';
-import type { LogOption } from '../types/logs.js';
+import type { LogOption } from '../../kernel/types/logs.js';
 import type { AgentColorName } from '../tools/AgentTool/agentColorManager.js';
 import { fileHistoryMakeSnapshot, type FileHistoryState, fileHistoryRewind, type FileHistorySnapshot, copyFileHistoryForResume, fileHistoryEnabled, fileHistoryHasAnyChanges } from '../utils/fileHistory.js';
 import { type AttributionState, incrementPromptCount } from '../utils/commitAttribution.js';

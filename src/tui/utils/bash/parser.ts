@@ -1,5 +1,5 @@
 import { feature } from 'src/shared'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   ensureParserInitialized,
   getParserModule,

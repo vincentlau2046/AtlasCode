@@ -20,7 +20,7 @@ import type {
   ContextCollapseCommitEntry,
   ContextCollapseSnapshotEntry,
   PersistedWorktreeSession,
-} from '../types/logs.js'
+} from '../../kernel/types/logs.js'
 import type { Message } from '../../kernel/types/message.js'
 import { renameRecordingForSession } from './asciicast.js'
 import { clearMemoryFileCaches } from './memoryFiles.js'
@@ -31,9 +31,9 @@ import {
 } from './commitAttribution.js'
 import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { applyPermissionUpdates } from './permissions/PermissionUpdate.js'
-import type { PermissionUpdate } from './permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import { readCurrentSessionPermissionRules } from './permissions/sessionPermissionRules.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { fileHistoryRestoreStateFromLog } from './fileHistory.js'
@@ -49,7 +49,7 @@ import {
   saveMode,
   saveWorktreeState,
 } from './sessionStorage.js'
-import { isTodoV2Enabled } from './tasks.js'
+import { isTodoV2Enabled } from '../../kernel/utils/tasks.js'
 import type { TodoList } from './todo/types.js'
 import { TodoListSchema } from './todo/types.js'
 import type { ContentReplacementRecord } from './toolResultStorage.js'

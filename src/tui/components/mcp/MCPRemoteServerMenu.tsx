@@ -21,7 +21,7 @@ import {
 import { describeMcpConfigFilePath, excludeCommandsByServer, excludeResourcesByServer, excludeToolsByServer, filterMcpPromptsByServer } from '../../services/mcp/utils.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import { errorMessage } from '../../../kernel/utils/errors.js';
-import { logMCPDebug } from '../../utils/log.js';
+import { logMCPDebug } from '../../../kernel/utils/log.js';
 import { capitalize } from '../../../kernel/utils/stringUtils.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Select } from '../CustomSelect/index.js';

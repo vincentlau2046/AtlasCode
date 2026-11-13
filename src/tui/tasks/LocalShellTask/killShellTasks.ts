@@ -4,8 +4,8 @@
 
 import type { AppState } from '../../state/AppState.js'
 import type { AgentId } from '../../../kernel/types/ids.js'
-import { logForDebugging } from '../../utils/debug'
-import { logError } from '../../utils/log.js'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { logError } from '../../../kernel/utils/log.js'
 import { dequeueAllMatching } from '../../utils/messageQueueManager.js'
 import { evictTaskOutput } from '../../utils/task/diskOutput.js'
 import { updateTaskState } from '../../utils/task/framework.js'

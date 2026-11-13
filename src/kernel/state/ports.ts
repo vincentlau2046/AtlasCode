@@ -72,11 +72,13 @@ export interface KernelBootstrapStatePort {
   setSystemPromptSectionCacheEntry(name: string, value: string | null): void
 }
 
-/** no-op 占位缝：首车（切片 2 出口 63 文件）直接消费的 4 名 bootstrapState
- * no-op 占位（bs-export-triage.csv 判形全 no-op）。缺省空实现合法。 */
+/** no-op 占位缝：首车（切片 2 出口 59 文件）直接消费的 4 名 bootstrapState
+ * no-op 占位（bs-export-triage.csv 判形全 no-op）。缺省空实现合法。
+ * 切片 2：签名按消费点原形保真（tui stub 为 any 吞参，透传参 = 调用面
+ * 零改动；适配器 forward 原函数返回值）。 */
 export interface KernelBootstrapNoopSeam {
-  addSlowOperation(): void
-  waitForScrollIdle(): void
-  setLastAPIRequest(): void
-  setLastAPIRequestMessages(): void
+  addSlowOperation(description: string, durationMs: number): void
+  waitForScrollIdle(): Promise<void> | void
+  setLastAPIRequest(params: unknown): void
+  setLastAPIRequestMessages(messages: unknown): void
 }

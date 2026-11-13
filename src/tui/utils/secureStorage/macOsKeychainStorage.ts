@@ -1,8 +1,8 @@
 import { execaSync } from 'execa'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { logForDebugging } from '../debug'
-import { execFileNoThrow } from '../execFileNoThrow.js'
-import { jsonParse, jsonStringify } from '../slowOperations'
+import { logForDebugging } from '../../../kernel/utils/debug'
+import { execFileNoThrow } from '../../../kernel/utils/execFileNoThrow.js'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   CREDENTIALS_SERVICE_SUFFIX,
   clearKeychainCache,

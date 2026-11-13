@@ -5,10 +5,10 @@ import type { Tool } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { clearMemoryFileCaches } from '../../utils/memoryFiles.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { findCanonicalGitRoot } from '../../utils/git.js'
+import { findCanonicalGitRoot } from '../../../kernel/utils/git.js'
 // K4-6（0.1.83）：任意 checkout HEAD 读取（fs-only 泛化面；worktree.js 门面未
 // 导出，TUI 无 STR-1 等效限制，本文件与 utils/worktree.ts 同走内部文件）
-import { readCheckoutHeadSha } from '../../utils/git/gitFilesystem.js'
+import { readCheckoutHeadSha } from '../../../kernel/utils/git/gitFilesystem.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { getPlanSlug, getPlansDirectory } from '../../utils/plans.js'
 import { setCwd } from '../../utils/Shell.js'

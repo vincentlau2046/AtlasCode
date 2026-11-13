@@ -1,6 +1,6 @@
 import { sep } from 'path'
-import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { gitExe } from './git.js'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { gitExe } from '../../kernel/utils/git.js'
 
 /**
  * Returns the paths of all worktrees for the current git repository.

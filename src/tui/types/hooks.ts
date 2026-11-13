@@ -15,7 +15,7 @@ import type {
 import type { Message } from 'src/kernel/types/message'
 import type { PermissionResult } from 'src/kernel/permissions/PermissionResult'
 import { preToolUsePermissionDecisionSchema } from 'src/kernel/permissions/PermissionRule'
-import { permissionUpdateSchema } from 'src/tui/utils/permissions/PermissionUpdateSchema.js'
+import { permissionUpdateSchema } from 'src/kernel/utils/permissions/PermissionUpdateSchema.js'
 import type { AppState } from '../state/AppState.js'
 import type { AttributionState } from '../utils/commitAttribution.js'
 

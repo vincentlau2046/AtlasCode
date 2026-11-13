@@ -5,8 +5,8 @@ import { useInterval } from 'usehooks-ts';
 import { Text } from '../ink.js';
 import { type AutoUpdaterResult, getLatestVersionFromGcs, getMaxVersion, shouldSkipVersion } from '../utils/autoUpdater.js';
 import { isAutoUpdaterDisabled } from '../utils/config.js';
-import { logForDebugging } from '../utils/debug';
-import { getPackageManager, type PackageManager } from '../utils/nativeInstaller/packageManagers.js';
+import { logForDebugging } from '../../kernel/utils/debug';
+import { getPackageManager, type PackageManager } from '../../kernel/utils/nativeInstaller/packageManagers.js';
 import { gt, gte } from '../../kernel/utils/semver.js';
 import { getInitialSettings } from '../utils/settings/settings.js';
 type Props = {

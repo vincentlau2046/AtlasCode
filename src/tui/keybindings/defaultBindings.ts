@@ -1,7 +1,7 @@
 import { feature } from 'src/shared'
 import { satisfies } from 'src/kernel/utils/semver'
 import { isRunningWithBun } from '../../kernel/utils/bundledMode.js'
-import { getPlatform } from '../utils/platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import type { KeybindingBlock } from './types.js'
 
 /**

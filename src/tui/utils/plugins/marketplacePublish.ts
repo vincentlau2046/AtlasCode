@@ -18,8 +18,8 @@ import {
   sep,
 } from 'path'
 import { findManifestInDir, getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
-import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
-import { jsonParse, jsonStringify } from '../slowOperations'
+import { execFileNoThrowWithCwd } from '../../../kernel/utils/execFileNoThrow.js'
+import { jsonParse, jsonStringify } from '../../../kernel/utils/slowOperations'
 import {
   validateMarketplaceManifest,
   validatePluginManifest,

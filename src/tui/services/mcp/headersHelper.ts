@@ -1,10 +1,10 @@
 import { getIsNonInteractiveSession } from 'src/bootstrap'
 import { checkHasTrustDialogAccepted } from '../../utils/config.js'
-import { logAntError } from '../../utils/debug'
+import { logAntError } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
-import { execFileNoThrowWithCwd } from '../../utils/execFileNoThrow.js'
-import { logError, logMCPDebug, logMCPError } from '../../utils/log.js'
-import { jsonParse } from '../../utils/slowOperations'
+import { execFileNoThrowWithCwd } from '../../../kernel/utils/execFileNoThrow.js'
+import { logError, logMCPDebug, logMCPError } from '../../../kernel/utils/log.js'
+import { jsonParse } from '../../../kernel/utils/slowOperations'
 import type {
   McpHTTPServerConfig,
   McpSSEServerConfig,

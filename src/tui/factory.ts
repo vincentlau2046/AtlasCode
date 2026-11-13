@@ -91,7 +91,7 @@ import {
 } from './utils/settings/settings'
 import { SETTING_SOURCES } from './utils/settings/constants'
 import { settingsChangeDetector } from './utils/settings/changeDetector'
-import { getManagedSettingsDropInDir } from './utils/settings/managedPath'
+import { getManagedSettingsDropInDir } from '../kernel/utils/settings/managedPath'
 import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import {
@@ -102,7 +102,7 @@ import {
   createKernelBootstrapNoopSeam,
   createKernelBootstrapStatePort,
 } from './bootstrapStatePort.js'
-import { getPlatform } from './utils/platform'
+import { getPlatform } from '../kernel/utils/platform'
 import { getConfigDirNameForProject } from '../kernel/utils/configDir'
 import { getAtlasTempDir } from './utils/permissions/filesystem'
 

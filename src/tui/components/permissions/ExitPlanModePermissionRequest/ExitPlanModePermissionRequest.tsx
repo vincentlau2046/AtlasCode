@@ -28,13 +28,13 @@ import { calculateContextPercentages, getContextWindowForModel } from '../../../
 import { getExternalEditor } from '../../../utils/editor.js';
 import { getDisplayPath } from '../../../utils/file.js';
 import { toIDEDisplayName } from '../../../utils/ide.js';
-import { logError } from '../../../utils/log.js';
+import { logError } from '../../../../kernel/utils/log.js';
 import { enqueuePendingNotification } from '../../../utils/messageQueueManager.js';
 import { createUserMessage } from '../../../utils/messages.js';
 import { getMainLoopModel, getRuntimeMainLoopModel } from '../../../utils/model/model.js';
 import { createPromptRuleContent, isClassifierPermissionsEnabled, PROMPT_PREFIX } from '../../../../kernel/permissions/bashClassifier.js';
-import { type PermissionMode, toExternalPermissionMode } from '../../../utils/permissions/PermissionMode.js';
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
+import { type PermissionMode, toExternalPermissionMode } from '../../../../kernel/utils/permissions/PermissionMode.js';
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import { isAutoModeGateEnabled, restoreDangerousPermissions, stripDangerousPermissionsForAutoMode } from '../../../utils/permissions/permissionSetup.js';
 import { isPlanModeInterviewPhaseEnabled } from '../../../utils/planModeV2.js';
 import { getPlan, getPlanFilePath } from '../../../utils/plans.js';

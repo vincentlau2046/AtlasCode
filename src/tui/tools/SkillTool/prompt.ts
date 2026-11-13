@@ -6,12 +6,12 @@ import {
   getSlashCommandToolSkills,
 } from 'src/tui/commands.js'
 import { COMMAND_NAME_TAG } from '../../../kernel/constants/xml.js'
-import { stringWidth } from '../../ink/stringWidth.js'
+import { stringWidth } from '../../../kernel/ink/stringWidth.js'
 import { count } from '../../../kernel/utils/array.js'
-import { logForDebugging } from '../../utils/debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { toError } from '../../../kernel/utils/errors.js'
-import { truncate } from '../../utils/format.js'
-import { logError } from '../../utils/log.js'
+import { truncate } from '../../../kernel/utils/format.js'
+import { logError } from '../../../kernel/utils/log.js'
 
 // Skill listing gets 1% of the context window (in characters)
 export const SKILL_BUDGET_CONTEXT_PERCENT = 0.01

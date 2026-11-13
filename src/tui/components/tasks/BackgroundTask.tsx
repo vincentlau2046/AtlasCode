@@ -3,10 +3,10 @@ import * as React from 'react';
 import { Text } from 'src/tui/ink.js';
 import type { BackgroundTaskState } from 'src/tui/tasks/types.js';
 import type { DeepImmutable } from 'src/tui/types/utils.js';
-import { truncate } from 'src/tui/utils/format.js';
+import { truncate } from 'src/kernel/utils/format.js';
 import { toInkColor } from 'src/tui/utils/ink.js';
 import { plural } from 'src/kernel/utils/stringUtils';
-import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../constants/figures.js';
+import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../../kernel/constants/figures.js';
 // 前向缝登记（§8.74.29 1P 簇裁，#200）：RemoteSessionProgress（1P 远程会话进度组件）随 1P 簇裁除；
 // remote_agent 任务类型已不存在，就地 no-op stub 承载原引用（编译态文件，保 $[] 缓存索引不动，H6 不造假绿）
 const RemoteSessionProgress = (_p: {

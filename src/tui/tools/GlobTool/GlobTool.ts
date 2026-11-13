@@ -7,7 +7,7 @@ import {
   FILE_NOT_FOUND_CWD_NOTE,
   suggestPathUnderCwd,
 } from '../../utils/file.js'
-import { getFsImplementation } from '../../utils/fsOperations'
+import { getFsImplementation } from '../../../kernel/utils/fsOperations'
 import { glob } from '../../utils/glob.js'
 import { lazySchema } from '../../../kernel/utils/lazySchema.js'
 import { expandPath, toRelativePath } from '../../utils/path.js'

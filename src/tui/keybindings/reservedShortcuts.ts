@@ -1,4 +1,4 @@
-import { getPlatform } from '../utils/platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 /**
  * Shortcuts that are typically intercepted by the OS, terminal, or shell

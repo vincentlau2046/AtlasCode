@@ -347,14 +347,15 @@ describe('格 5+7：inbox 信封演进拒读 + 原子写', () => {
 // ── 格 8：tmux 双车道同源格（import 面断言，禁第三副本）─────────────────
 
 describe('格 8：双车道同源（import 面断言）', () => {
-  test('engine mailbox + tui teammateMailbox 均消费 shared/teamInboxSchema', () => {
+  test('engine mailbox + kernel teammateMailbox 均消费 shared/teamInboxSchema', () => {
     const repoRoot = join(import.meta.dir, '..', '..')
     const engine = readFileSync(
       join(repoRoot, 'src', 'engine', 'messaging', 'mailbox.ts'),
       'utf-8',
     )
+    // 0.1.106 S3b 切片 2：teammateMailbox 随出口首车迁 kernel/utils/（f4 批复 59 锚）。
     const tui = readFileSync(
-      join(repoRoot, 'src', 'tui', 'utils', 'teammateMailbox.ts'),
+      join(repoRoot, 'src', 'kernel', 'utils', 'teammateMailbox.ts'),
       'utf-8',
     )
     // 车道经 src/shared 门面 import（无模块名字面），锚读/写原语名断言
@@ -379,9 +380,9 @@ describe('格 8：双车道同源（import 面断言）', () => {
       .sort()
     expect(hits).toEqual([
       'src/engine/messaging/mailbox.ts',
+      'src/kernel/utils/teammateMailbox.ts',
       'src/shared/index.ts',
       'src/shared/teamInboxSchema.ts',
-      'src/tui/utils/teammateMailbox.ts',
     ])
   })
 })

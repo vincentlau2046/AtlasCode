@@ -1,4 +1,4 @@
-import { logForDebugging } from './debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 
 export type ModifierKey = 'shift' | 'command' | 'control' | 'option'
 

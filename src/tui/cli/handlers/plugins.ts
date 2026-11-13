@@ -19,7 +19,7 @@ import {
 } from '../../services/plugins/pluginCliCommands.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
 import { errorMessage } from '../../../kernel/utils/errors.js'
-import { logError } from '../../utils/log.js'
+import { logError } from '../../../kernel/utils/log.js'
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js'
 import { getInstallCounts } from '../../utils/plugins/installCounts.js'
 import {
@@ -54,7 +54,7 @@ import {
   validateManifest,
   validatePluginContents,
 } from '../../utils/plugins/validatePlugin.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { plural } from '../../../kernel/utils/stringUtils.js'
 import { cliError, cliOk } from '../exit.js'
 

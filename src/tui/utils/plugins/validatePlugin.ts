@@ -4,7 +4,7 @@ import * as path from 'path'
 import { z } from 'zod/v4'
 import { errorMessage, getErrnoCode, isENOENT } from '../../../kernel/utils/errors.js'
 import { FRONTMATTER_REGEX } from '../frontmatterParser.js'
-import { jsonParse } from '../slowOperations'
+import { jsonParse } from '../../../kernel/utils/slowOperations'
 import { parseYaml } from '../yaml.js'
 import { findManifestInDir, getPluginManifestDirs } from '../../../kernel/utils/configDir.js'
 import {

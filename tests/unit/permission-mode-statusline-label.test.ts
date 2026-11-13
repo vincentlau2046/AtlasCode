@@ -12,7 +12,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   permissionModeShortTitle,
   permissionModeTitle,
-} from '../../src/tui/utils/permissions/PermissionMode.js';
+} from '../../src/kernel/utils/permissions/PermissionMode.js';
 
 describe('A5 statusline 授权模式标签（shortTitle 三态）', () => {
   test('default → "default"', () => {

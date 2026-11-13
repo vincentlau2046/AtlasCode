@@ -1,4 +1,4 @@
-import { clearCACertsCache } from './caCerts.js'
+import { clearCACertsCache } from '../../kernel/utils/caCerts.js'
 import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import {
@@ -6,8 +6,8 @@ import {
   SAFE_ENV_VARS,
 } from './managedEnvConstants.js'
 import { MCP_OAUTH_TRUSTED_SERVERS_ENV } from '../services/mcp/oauthScopeGate.js'
-import { clearMTLSCache } from './mtls.js'
-import { clearProxyCache, configureGlobalAgents } from './proxy.js'
+import { clearMTLSCache } from '../../kernel/utils/mtls.js'
+import { clearProxyCache, configureGlobalAgents } from '../../kernel/utils/proxy.js'
 import { isSettingSourceEnabled } from './settings/constants'
 import {
   getSettings_DEPRECATED,

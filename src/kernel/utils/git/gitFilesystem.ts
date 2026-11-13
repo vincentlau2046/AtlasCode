@@ -16,7 +16,7 @@
 import { unwatchFile, watchFile } from 'fs'
 import { readdir, readFile, stat } from 'fs/promises'
 import { join, resolve } from 'path'
-import { waitForScrollIdle } from 'src/tui/bootstrapState.js'
+import { getKernelBootstrapNoopSeam } from '../../state/injection.js'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
 import { execFileNoThrow } from '../execFileNoThrow.js'
@@ -605,7 +605,8 @@ class GitFileWatcher {
     // loop. invalidate() is cheap (just marks dirty) so do it first — the
     // cache correctly serves stale-marked values until the watcher updates.
     this.invalidate()
-    await waitForScrollIdle()
+    // 0.1.106 S3b 切片 2：no-op 缝消费（原 tui/bootstrapState 直调）。
+    await getKernelBootstrapNoopSeam().waitForScrollIdle()
     await this.watchCurrentBranchRef()
   }
 

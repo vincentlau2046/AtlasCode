@@ -7,7 +7,7 @@ import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { MCP_OAUTH_TRUSTED_SERVERS_ENV } from '../../services/mcp/oauthScopeGate.js';
 import type { ConfigScope } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath } from '../../services/mcp/utils.js';
-import { isDebugMode } from '../../utils/debug';
+import { isDebugMode } from '../../../kernel/utils/debug';
 import { plural } from '../../../kernel/utils/stringUtils.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline } from '../design-system/Byline.js';

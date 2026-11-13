@@ -2,7 +2,7 @@
 import { randomUUID } from 'crypto'
 import { basename } from 'path'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { readFileSync } from 'src/tui/utils/fileRead.js'
+import { readFileSync } from 'src/kernel/utils/fileRead.js'
 import { expandPath } from 'src/tui/utils/path.js'
 import type { PermissionOption } from '../components/permissions/FilePermissionDialog/permissionOptions.js'
 import type {
@@ -26,8 +26,8 @@ import {
   hasAccessToIDEExtensionDiffFeature,
 } from '../utils/ide.js'
 import { WindowsToWSLConverter } from '../utils/idePathConversion.js'
-import { logError } from '../utils/log.js'
-import { getPlatform } from '../utils/platform.js'
+import { logError } from '../../kernel/utils/log.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 
 type Props = {
   onChange(

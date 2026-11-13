@@ -3,7 +3,7 @@ import {
   getAttributionTexts,
   getEnhancedPRAttribution,
 } from '../utils/attribution.js'
-import { getDefaultBranch } from '../utils/git.js'
+import { getDefaultBranch } from '../../kernel/utils/git.js'
 import { executeShellCommandsInPrompt } from '../utils/promptShellExecution.js'
 
 const ALLOWED_TOOLS = [

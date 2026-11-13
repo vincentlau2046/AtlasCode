@@ -5,14 +5,14 @@ import { join } from 'path'
 import { getDynamicConfig_BLOCKS_ON_INIT } from 'src/tui/services/analytics/growthbook.js'
 import type { ReleaseChannel } from '../../kernel/nativeInstaller/releaseChannel.js'
 import { saveGlobalConfig } from './config.js'
-import { logForDebugging } from './debug'
-import { env } from './env.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { env } from '../../kernel/utils/env.js'
 import { getAtlasConfigHomeDir } from '../../kernel/utils/envUtils.js'
 import { ClaudeError, getErrnoCode, isENOENT } from '../../kernel/utils/errors.js'
-import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
-import { getFsImplementation } from './fsOperations'
+import { execFileNoThrowWithCwd } from '../../kernel/utils/execFileNoThrow.js'
+import { getFsImplementation } from '../../kernel/utils/fsOperations'
 import { gracefulShutdownSync } from './gracefulShutdown.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { gte, lt } from '../../kernel/utils/semver.js'
 import { getInitialSettings } from './settings/settings.js'
 import {
@@ -21,7 +21,7 @@ import {
   readFileLines,
   writeFileLines,
 } from './shellConfig.js'
-import { jsonParse } from './slowOperations'
+import { jsonParse } from '../../kernel/utils/slowOperations'
 
 // §8.74.23（旧仓 GCS 残留裁）：旧仓 native 二进制发布走 1P GCS 桶（域外
 // CLAUDE_AI 残留；桶 URL 随 W-opt 可信波 S2（#299）下载体裁除，不 vendor、

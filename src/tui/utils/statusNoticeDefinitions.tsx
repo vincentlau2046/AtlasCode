@@ -5,7 +5,7 @@ import { getLargeMemoryFiles, MAX_MEMORY_CHARACTER_COUNT, type MemoryFileInfo } 
 import figures from 'figures';
 import { getCwd } from '../../kernel/utils/cwd.js';
 import { relative } from 'path';
-import { formatNumber } from './format.js';
+import { formatNumber } from '../../kernel/utils/format.js';
 import type { getGlobalConfig } from './config.js';
 import { getAtlasApiKeyWithSource, getApiKeyFromConfigOrMacOSKeychain, getAuthTokenSource } from './auth.js';
 import type { AgentDefinitionsResult } from '../tools/AgentTool/loadAgentsDir.js';

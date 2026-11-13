@@ -10,12 +10,12 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react'
-import { logForDebugging } from '../utils/debug'
+import { logForDebugging } from '../../kernel/utils/debug'
 import { errorMessage } from '../../kernel/utils/errors.js'
 import {
   type PermissionUpdate,
   permissionUpdateSchema,
-} from '../utils/permissions/PermissionUpdateSchema.js'
+} from '../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   isSwarmWorker,
   type PermissionResponse,

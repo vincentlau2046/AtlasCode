@@ -28,7 +28,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import {
   getAtlasConfigHomeDir,
   isEnvDefinedFalsy,
@@ -36,7 +36,7 @@ import {
 } from '../../../kernel/utils/envUtils'
 import { errorMessage } from '../../../kernel/utils/errors'
 import { djb2Hash } from '../../../kernel/utils/hash'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { getAgentId, getAgentName, getParentSessionId } from 'src/engine'
 
 /**

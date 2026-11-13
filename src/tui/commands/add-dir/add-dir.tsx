@@ -9,7 +9,7 @@ import { AddWorkspaceDirectory } from '../../components/permissions/rules/AddWor
 import { Box, Text } from '../../ink.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { applyPermissionUpdate, persistPermissionUpdate } from '../../utils/permissions/PermissionUpdate.js';
-import type { PermissionUpdateDestination } from '../../utils/permissions/PermissionUpdateSchema.js';
+import type { PermissionUpdateDestination } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js';
 import { getSandboxManager } from 'src/tui/sandboxCompat';
 import { addDirHelpMessage, validateDirectoryForWorkspace } from './validation.js';
 // C8-2（0.1.79 W-C）· /add-dir 后置钩子（fire-and-forget，异常吞并不阻塞命令面）

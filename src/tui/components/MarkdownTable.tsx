@@ -2,7 +2,7 @@ import type { Token, Tokens } from 'marked';
 import React from 'react';
 import stripAnsi from 'strip-ansi';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { stringWidth } from '../ink/stringWidth.js';
+import { stringWidth } from '../../kernel/ink/stringWidth.js';
 import { wrapAnsi } from '../ink/wrapAnsi.js';
 import { Ansi, useTheme } from '../ink.js';
 import type { CliHighlight } from '../utils/cliHighlight.js';

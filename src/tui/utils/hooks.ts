@@ -10,15 +10,15 @@ import { wrapSpawn } from './ShellCommand.js'
 import { TaskOutput } from './task/TaskOutput.js'
 import { getCwd } from '../../kernel/utils/cwd.js'
 import { randomUUID } from 'crypto'
-import { formatShellPrefixCommand } from './bash/shellPrefix.js'
+import { formatShellPrefixCommand } from '../../kernel/utils/bash/shellPrefix.js'
 import {
   getHookEnvFilePath,
   invalidateSessionEnvCache,
 } from './sessionEnvironment.js'
 import { subprocessEnv } from '../../kernel/utils/subprocessEnv.js'
-import { getPlatform } from './platform.js'
+import { getPlatform } from '../../kernel/utils/platform.js'
 import { findGitBashPath, windowsPathToPosixPath } from './windowsPaths.js'
-import { getCachedPowerShellPath } from './shell/powershellDetection.js'
+import { getCachedPowerShellPath } from '../../kernel/utils/shell/powershellDetection.js'
 import { DEFAULT_HOOK_SHELL } from '../../kernel/shell/provider/shellProvider.js'
 import { buildPowerShellArgs } from '../../kernel/shell/provider/powershellProvider.js'
 import {
@@ -113,15 +113,15 @@ import type {
   SkillHookMatcher,
 } from '../../kernel/settings/types.js'
 import { getHookDisplayText } from './hooks/hooksSettings.js'
-import { logForDebugging } from './debug'
-import { logForDiagnosticsNoPII } from './diagLogs.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { firstLineOf } from '../../kernel/utils/stringUtils.js'
 import {
   normalizeLegacyToolName,
   getLegacyToolNames,
   permissionRuleValueFromString,
 } from '../../kernel/permissions/permissionRuleParser.js'
-import { logError } from './log.js'
+import { logError } from '../../kernel/utils/log.js'
 import { createCombinedAbortSignal } from '../../kernel/utils/combinedAbortSignal.js'
 import {
   MAX_HOOK_INPUT_NESTING_DEPTH,
@@ -161,7 +161,7 @@ import {
   type FunctionHook,
 } from './hooks/sessionHooks.js'
 import type { AppState } from '../state/AppState.js'
-import { jsonStringify, jsonParse } from './slowOperations'
+import { jsonStringify, jsonParse } from '../../kernel/utils/slowOperations'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { errorMessage, getErrnoCode } from '../../kernel/utils/errors.js'
 

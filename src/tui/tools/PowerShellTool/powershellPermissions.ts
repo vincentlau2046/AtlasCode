@@ -10,9 +10,9 @@ import type {
   PermissionResult,
 } from '../../../kernel/types/permissions.js'
 import { getCwd } from '../../../kernel/utils/cwd.js'
-import { isCurrentDirectoryBareGitRepo } from '../../utils/git.js'
+import { isCurrentDirectoryBareGitRepo } from '../../../kernel/utils/git.js'
 import type { PermissionRule } from '../../../kernel/permissions/PermissionRule.js'
-import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   createPermissionRequestMessage,
   getRuleByContentsForToolName,
@@ -33,8 +33,8 @@ import {
   PS_TOKENIZER_DASH_CHARS,
   parsePowerShellCommand,
   stripModulePrefix,
-} from '../../utils/powershell/parser.js'
-import { containsVulnerableUncPath } from '../../utils/shell/readOnlyCommandValidation.js'
+} from '../../../kernel/utils/powershell/parser.js'
+import { containsVulnerableUncPath } from '../../../kernel/utils/shell/readOnlyCommandValidation.js'
 import { isDotGitPathPS, isGitInternalPathPS } from './gitSafety.js'
 import {
   checkPermissionMode,

@@ -27,11 +27,11 @@ import {
 } from '../ink/termio/osc.js'
 import type { AppState } from '../state/AppState.js'
 import { runCleanupFunctions } from '../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from './debug'
-import { logForDiagnosticsNoPII } from './diagLogs.js'
+import { logForDebugging } from '../../kernel/utils/debug'
+import { logForDiagnosticsNoPII } from '../../kernel/utils/diagLogs.js'
 import { isEnvTruthy } from '../../kernel/utils/envUtils.js'
 import { getCurrentSessionTitle, sessionIdExists } from './sessionStorage.js'
-import { profileReport } from './startupProfiler.js'
+import { profileReport } from '../../kernel/utils/startupProfiler.js'
 
 /**
  * Clean up terminal modes synchronously before process exit.

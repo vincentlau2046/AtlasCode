@@ -7,9 +7,9 @@ import {
   FILE_EDIT_TOOL_NAME,
   GLOBAL_ATLAS_FOLDER_PERMISSION_PATTERN,
 } from '../../../../kernel/tools/FileEditTool/constants.js'
-import { env } from '../../../utils/env.js'
+import { env } from '../../../../kernel/utils/env.js'
 import { generateSuggestions } from '../../../utils/permissions/filesystem.js'
-import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
+import type { PermissionUpdate } from '../../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   type CompletionType,
   logUnaryEvent,

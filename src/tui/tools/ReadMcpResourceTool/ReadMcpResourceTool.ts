@@ -10,7 +10,7 @@ import {
   getBinaryBlobSavedMessage,
   persistBinaryContent,
 } from '../../utils/mcpOutputStorage.js'
-import { jsonStringify } from '../../utils/slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { isOutputLineTruncated } from '../../utils/terminal.js'
 import { DESCRIPTION, PROMPT } from './prompt.js'
 import {

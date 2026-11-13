@@ -19,7 +19,7 @@ import {
 import {
   type PermissionMode,
   permissionModeFromString,
-} from './PermissionMode.js'
+} from '../../../kernel/utils/permissions/PermissionMode.js'
 import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
 
@@ -47,9 +47,9 @@ import { getToolsForDefaultPreset, parseToolPreset } from '../../tools.js'
 import {
   getFsImplementation,
   safeResolvePath,
-} from '../fsOperations'
+} from '../../../kernel/utils/fsOperations'
 import { modelSupportsAutoMode } from '../betas.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { gracefulShutdown } from '../gracefulShutdown.js'
 import { getMainLoopModel } from '../model/model.js'
 import {
@@ -65,7 +65,7 @@ import {
   type AdditionalWorkingDirectory,
   applyPermissionUpdate,
 } from './PermissionUpdate.js'
-import type { PermissionUpdateDestination } from './PermissionUpdateSchema.js'
+import type { PermissionUpdateDestination } from '../../../kernel/utils/permissions/PermissionUpdateSchema.js'
 import {
   normalizeLegacyToolName,
   permissionRuleValueFromString,

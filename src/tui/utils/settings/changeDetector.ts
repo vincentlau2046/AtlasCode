@@ -3,7 +3,7 @@ import { stat } from 'fs/promises'
 import * as platformPath from 'path'
 import { getIsRemoteMode } from 'src/tui/bootstrapState.js'
 import { registerCleanup } from '../../../kernel/utils/cleanupRegistry.js'
-import { logForDebugging } from '../debug'
+import { logForDebugging } from '../../../kernel/utils/debug'
 import { errorMessage } from '../../../kernel/utils/errors.js'
 import {
   type ConfigChangeSource,
@@ -11,16 +11,16 @@ import {
   hasBlockingResult,
 } from '../hooks.js'
 import { createSignal } from '../../../kernel/utils/signal.js'
-import { jsonStringify } from '../slowOperations'
+import { jsonStringify } from '../../../kernel/utils/slowOperations'
 import { SETTING_SOURCES, type SettingSource } from './constants'
 import { clearInternalWrites, consumeInternalWrite } from '../../../kernel/settings/internalWrites.js'
-import { getManagedSettingsDropInDir } from './managedPath.js'
+import { getManagedSettingsDropInDir } from '../../../kernel/utils/settings/managedPath.js'
 import {
   getHkcuSettings,
   getMdmSettings,
   refreshMdmSettings,
   setMdmSettingsCache,
-} from './mdm/settings.js'
+} from '../../../kernel/utils/settings/mdm/settings.js'
 import { getSettingsFilePathForSource } from './settings.js'
 import { resetSettingsCache } from './settingsCache.js'
 

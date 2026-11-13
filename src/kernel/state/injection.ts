@@ -41,6 +41,7 @@ const DEFAULT_NOOP_SEAM: KernelBootstrapNoopSeam = {
   waitForScrollIdle() {},
   setLastAPIRequest() {},
   setLastAPIRequestMessages() {},
+  // 切片 2：接口签名按消费点原形保真；缺省空实现吞参（无消费者）。
 }
 
 /** no-op 缝读取门：缺省空实现合法（与真状态缺省语义相反，逐件写死）。 */
