@@ -1,8 +1,10 @@
 /**
  * Loop watchdog (0.1.102 P0 切片 2-B, lock-face ① / f4 批复 2026-11-12).
  *
- * 主循环「错误后长久停止无自恢复」P0 的自恢复面：回合内 armed
- * （round_start→round_end），若 120s 缺省窗口内无任何事件且无任何豁免
+ * 主循环「错误后长久停止无自恢复」P0 的自恢复面（0.1.104 起 opt-in 诊断工具：
+ * 「loop 级猜挂起」误杀面系统性大，缺省关闭；主力 = per-tool timeoutMs 声明预算）：
+ * 回合内 armed
+ * （round_start→round_end），若 opt-in 窗口内无任何事件且无任何豁免
  * 活动在途，fire = abort 自有 AbortController → 下游经既有 abort 穿透
  * （withTurnRecovery 不重试 abort → loop catch → REPL R1 catch → 错误行
  * + 复位可重入）。禁用用户 abort controller（语义污染）——watchdog 自有
@@ -23,32 +25,36 @@
  * round_start/round_end/loop_end 另承担 arm/disarm。轮间（loop 不在
  * while 内时）disarmed = REPL 空闲不触发格。
  *
- * env：ATLAS_LOOP_WATCHDOG_MS（毫秒；0=关；非法值回缺省 120000）。
+ * env：ATLAS_LOOP_WATCHDOG_MS（毫秒）。0.1.104 缺省改关（fail-safe）：未设/空/
+ * 非法/负值 → 0（关）；显式正值 = opt-in；显式 0 = 显式关。0.1.102–0.1.103
+ * 曾为缺省 120s 开启（fail-open），因误杀合法慢（非流式整包缓冲 >120s 零事件、
+ * reasoning 长静默、心跳枚举外长操作）回翻——用户 2026-11-13 P0 报告。
  * React-free engine leaf（cli 域不引 tui 域边界纪律不破——本模块只被
  * loop.ts / 单测消费）。
  */
 
-/** 回合内无事件判定窗缺省（毫秒）。f4 批复三常数之一。 */
-export const DEFAULT_LOOP_WATCHDOG_MS = 120_000
-
 export const LOOP_WATCHDOG_ENV_KEY = 'ATLAS_LOOP_WATCHDOG_MS'
 
-/** 解析看门狗窗口毫秒：env 数字（0=关）→ 缺省；非法值回缺省（fail-open 到保守缺省）。 */
+/**
+ * 解析看门狗窗口毫秒（0.1.104 fail-safe 形）：未设/空/非数字/NaN/负值 → 0（关）；
+ * 显式 0 = 显式关；显式正整数 = opt-in 生效。负值归非法（禁「负值=无限期」新语义）。
+ */
 export function resolveLoopWatchdogTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
   const raw = env[LOOP_WATCHDOG_ENV_KEY]
-  if (raw === undefined || raw === '') return DEFAULT_LOOP_WATCHDOG_MS
+  if (raw === undefined || raw.trim() === '') return 0
   const parsed = Number(raw)
-  if (!Number.isFinite(parsed) || parsed < 0) return DEFAULT_LOOP_WATCHDOG_MS
+  if (!Number.isFinite(parsed) || parsed <= 0) return 0
   return parsed
 }
 
-/** fire 后 abort 的 reason（REPL 错误行可见，给出修复旋钮）。 */
+/** fire 后 abort 的 reason（REPL 错误行可见；缺省已关，触发者 = 显式 opt-in 用户）。 */
 export class LoopWatchdogTimeoutError extends Error {
   constructor(idleMs: number) {
     super(
       `主循环无响应中止：回合内 ${Math.round(idleMs / 1000)}s 无任何事件且无在途活动` +
         `（模型流式/工具执行/权限裁定均无）——本回合已中止，可重试；` +
-        `如持续出现请调大 ${LOOP_WATCHDOG_ENV_KEY}（0=关）`,
+        `本看门狗缺省已关闭，当前为显式开启（${LOOP_WATCHDOG_ENV_KEY}）；` +
+        `如属误开启请移除该 env，如确需可调大窗口值`,
     )
     this.name = 'LoopWatchdogTimeoutError'
   }
