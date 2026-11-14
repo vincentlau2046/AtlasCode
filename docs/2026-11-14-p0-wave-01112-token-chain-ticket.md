@@ -56,3 +56,10 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 7. 排序面确认（P1 > 件 F 让位条款）。
 
 **审计结论：通过——吸收后发双信号。**
+
+## §6 root-cause 链图采认（2026-11-14，Main b6c33846 docs/2026-11-14-wrc1-rootcause-chainmap.md）
+
+1. **四环定谳采认**：环 1 活（usage 终值双路 yield modelprovider.ts:1129/:1095 + 非流式 :664）；**环 2 = 断点**（engine loop 消费 usage 零接线，provider yield 落地即弃；面 A 实喂 chars/4 估算 SpinnerAnimationRow:154；面 B 门恒 false feature.ts:24-28 复核）；环 3/4 从未存在（与审计考古互证）；回合边界锚订正 = query() 入口（loop.ts:887 round_start 为 round 非用户回合）。
+2. **勘误 1 采认（工单 §0 订正）**：「面 A 修链后自然恢复」不成立——面 A 值源 = currentResponseLength chars/4 与死链零共享 wire，**修链后数值不变**；面 A 恢复真实量级 = 一次换源小落码（chars/4 → usage 权威源），且为 gate-off 下唯一行为变面（常显无门控）——lock-face 按此单独呈批。
+3. lock-face 材料预览收讫（α 形 engine 权威链/压缩续命不重置建议呈裁/容差 Δ≤2% 且 Δ≤50 tokens/面 B 基座）；候 e2e usage 样本容差预演后正式 lock-face 一并呈批。
+4. f4 预注记：面 A 换源面回归格 = 注记值 vs reqlog usage 同容差带对表 + 值域合理面（0 静默回合恒 0）；换源致屏显数值变化属用户件 C 意图内（真实量级），呈批时注明。
