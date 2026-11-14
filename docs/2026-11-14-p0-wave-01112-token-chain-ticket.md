@@ -44,3 +44,15 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 ## §4 流程
 
 本工单 → Atlas-reveiw 审计 → f4 双信号 → root-cause 腿（e2e + Main 协同）→ lock-face（修形形态 + 面 B 裁定呈用户）→ 落码 → gate → 段 L 0.1.112（若段 L 时件 F 未起）。件 F 顺延 0.1.113 候。
+
+## §5 Atlas-reveiw 审计闭环（2026-11-14，通过 + git 考古决定性证据 + 1 勘误 + 4 吸收，@507e6c3f 全锚实核）
+
+1. **焦点① git 考古定谳（呈报义务升级）**：stub 引入 = `78624e4e`「UI 闭包 C-7 原样搬」；`git log -S 'setTurnOutputTokens' --all` 全码史仅 docs 命中——**setter 本仓从未存在，面 B（TOKEN_BUDGET 预算 UI）从未活过 = 「壳波 import 即死链」**，非「有意保守」亦非「0.1.70 弄断」。**lock-face 呈用户时须写明「从未上过生产」基座**（防以「既有功能坏了」心智裁点亮）——面 B 点亮 = 新能力首次启用非修复恢复。门面语义：feature('TOKEN_BUDGET') 未知键回落 false，修链后不点亮则消费点行为零变自洽。
+2. **勘误 1**：TOKEN_BUDGET 消费面 = **7 文件**（漏 REPL.tsx + constants/prompts.ts）——格 3/4/6 回归与销项对表按 7 文件口径（prompts.ts 文案面亦核）。
+3. **吸收 2（生命周期）**：重置点单源钉死 = query turn 边界（禁多重重置点散布）；压缩续命回合计数归属 lock-face 定谳（预判「压缩 = 上下文操作非回合边界 → 不重置」禁预答，链图裁决）；teammateTokens 聚合与主回合计数器**分账禁合并**。
+4. **吸收 3（口径单源）**：输出 token 唯一权威源 = **API usage 字段**（reqlog 直证先例）；聚合链优先消费 usage 终值事件（message_delta usage 形）非 stream_delta 逐 chunk 估算累加；KV 摘要三车道（0.1.92）= 输入估算面**分账禁混用**（禁第二输出计数实现——W-D-B 副本教训族）。
+5. **吸收 4（量级数值化）**：格 2 钉死 = 逐回合（turn id 对齐）计数器终值 vs reqlog usage.output_tokens，**容差带双上界（Δ≤X% 且 Δ≤N tokens）lock-face 数值冻结**；CC 形态对表 = 次级参照，主判据 = 本仓 usage 直证。
+6. **焦点③分档覆盖**：gate-off 档（7 消费点行为零变断言，面 A 格 2 唯一活面）vs gate-on 档（预算 UI 全回归格 + 五消费点逐点亮行为核）——lock-face 裁定书显式二选一生效禁混档。
+7. 排序面确认（P1 > 件 F 让位条款）。
+
+**审计结论：通过——吸收后发双信号。**
