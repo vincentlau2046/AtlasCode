@@ -4,6 +4,30 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.109（2026-11-14）
+
+**W-AB3 件 B：headless Edit 权限面修形**（工单
+`docs/2026-11-14-p0-wave-01109-wab3-edit-permission-ticket.md`；bug 修波——
+P0 用户主诉 root-cause 定谳 + gate 全格 PASS 在案）。
+
+- **根因（候选②定谳）**：headless lane `makeCtx()` 窄视图缺 `readFileState`
+  槽（makeCtx 家族第五例，0.1.93 RED-F 同族）→ engine 四文件工具
+  （Read/Edit/Write/NotebookEdit）可选链静默降级——Read `?.set` no-op 落键
+  蒸发 + Edit/Write 恒「未读」支（errorCode 6 死循环，T01 wire 直证：
+  Edit 拒→Read→Edit 再拒死环）。TUI 车道不受影响（REPL useRef 自持）。
+- **修形**：headless lane 装配补槽——`src/cli/headlessFileStateCache.ts`
+  cli 域 bounded duck cache（Map 插入序 LRU 上限 100，TUI FileStateCache
+  同参先例）+ `SdkToolUseContext` 扩可选 `readFileState` 成员 + `print.ts`
+  run 级单实例注入（makeCtx 工厂两调用点共享）。门体/mode 语义零触碰；
+  f4 §8 批复 @8ab690ca + §8b 改形批复 @feced92a（cli→tui 依赖被
+  boundaries 拦截 DEP-3 → 消费 engine ReadFileState duck 契约）。
+- **波及面（TUI 已有行为 headless 对齐）**：Read dedup 激活（二次同 range
+  未变 → file_unchanged；killswitch `ATLAS_DISABLE_READ_DEDUP` 保底）+
+  Write 既有文件 stale 门复活 + NotebookEdit 同族。
+- **判别测试**：unit 组合根注入格 5 腿 + func 真盘链修格 6 腿；e2e gate
+  格 1-6 + dedup 负腿全 GREEN（恢复链 wire 直证：Edit 拒 6 恰 1 → Read →
+  Edit 成，零绕行；TUI 双腿零回归）。
+
 ## v0.1.106（2026-11-13）
 
 **S3b 内核态分层续波**（工单 `docs/2026-11-13-p0-wave-01106-s3b-ticket.md`；架构波，
