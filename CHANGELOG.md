@@ -4,6 +4,30 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.110（2026-11-14）
+
+**W-AB4 渲染增量化首车：env 门控渲染仪表化**（工单
+`docs/2026-11-14-p0-wave-01110-wab4-render-incremental-ticket.md`；
+零行为波——UX-4 重绘 6.5× 根因定谳采证面，f4 lock-face 批复
+@273cf8ed + GATE-PASS（e2e 定谳报告 §1 判据格）+ 采认 @a2728d6f 双在案）。
+
+- **仪表化首车**：`ATLAS_RENDER_INSTRUMENTATION_LOG` env 门控（值 = JSONL
+  落盘路径）帧级单点采样——`src/tui/ink/renderInstrumentation.ts` 新建
+  （模块顶层一次性 env 读，关闭支零分配零 IO；FrameEvent 发射点旁采样 +
+  unmount seq:-1 终帧；ATLAS_FRAME_TIMING_LOG bench 通道独立不混采）。
+- **diffRegion 单源提取**：`screen.ts` diffEach 内联 region 块逐字提取为
+  导出函数——仪表化 dmg 指标与实际 diff 扫描面结构性零漂移（批复注记 1）。
+- **六指标 schema**：{seq, tMs, frameMs/diffMs/writeMs/commitMs, patches,
+  bytes(仅 stdout 载荷，同语料相对比较面), dmg{x,y,w,h,area,full},
+  prevScreenH/screenH/viewportH, staticRowsTouched, fullReset}。
+- **定谳（e2e 17 腿采集 11,660 帧，贡献度分解复合形）**：② 重渲染节律
+  未按变更门控 = 帧数主因（0-patch 空帧 26–47%，帧间隔恒 63–64ms
+  ≈15.6fps）；① damage 单矩形过宽 = 扫描 CPU 非写入放大（bytes 中位
+  18B）；③ 静态区重入 = 非独立缺陷源；④ diff 旁路 = 0.2% 可忽略。
+  二期抓手 = 变更门控（0.1.113 候 W-AB4b）。
+- **零行为实证**：canon 5923 pass / 0 fail / 481 files（Δ = +10 测
+  +2 文件恰合）；产品零默认写（env unset = 关闭支零 IO 判别直证）。
+
 ## v0.1.109（2026-11-14）
 
 **W-AB3 件 B：headless Edit 权限面修形**（工单
