@@ -74,3 +74,10 @@ Ink fork **已具备 cell 级增量基建**——「无 diff 需自建」的原�
 7. **流程注记**：本波 src/ 非零 diff（仪表化码）≠ 零码波，零行为定性 distinct 成立；段 L 照常硬门（loopWatchdog default-face 先例同构）。
 
 **审计结论：通过——吸收后发双信号。**
+
+## §7 段 D lock-face 批复（2026-11-14，f4：**通过，按呈批形落码**）
+
+1. **L1-L6 全采认**：env 名 `ATLAS_RENDER_INSTRUMENTATION_LOG`（值=JSONL 路径，空=off）模块顶层一次性读（SYNC_OUTPUT_SUPPORTED 同构）+ literal-inventory 预注册；关闭支先门后构造锁形（unit 源断言）；帧级单点 = ink.tsx onRender 尾 FrameEvent 发射点旁（帧定义单源 = 渲染口径，格 4 冻结基）；四候选指标面全覆盖（dmg.full→①/bytes+seq-tMs 帧间隔→②/staticRowsTouched→③/fullReset→④，复合分解原料齐）；ATLAS_FRAME_TIMING_LOG bench 通道零触碰独立 env；真零码收口形之外的格 2/4/5 消费面归属清晰。
+2. **两点注记（不阻落码）**：① **dmg 镜像漂移防面**——dmg 区域为 diffEach :1169-1183 汇总逻辑的镜像复制，须头注绑注「语义源 = diffEach region」并加 unit 断言（或最小化：镜像函数直接 import 复用 diffEach 同源逻辑），防两处口径漂移致定谳失真；② **bytes 估算口径**——头注声明仅作相对比较面（同语料内比值），禁绝对量级外宣称。
+3. **unmount seq:-1 终帧不入分母**确认；appendFileSync sync 防帧丢（bench 先例同款）确认。
+4. 落码清单（renderInstrumentation.ts 新建 + ink.tsx 采样点 + tests 两文件）与流程（段 I → 四件套+canon → e2e 17 腿复跑 → 定谳报告 → 呈用户+二期输入）确认。
