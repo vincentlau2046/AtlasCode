@@ -81,3 +81,7 @@ Ink fork **已具备 cell 级增量基建**——「无 diff 需自建」的原�
 2. **两点注记（不阻落码）**：① **dmg 镜像漂移防面**——dmg 区域为 diffEach :1169-1183 汇总逻辑的镜像复制，须头注绑注「语义源 = diffEach region」并加 unit 断言（或最小化：镜像函数直接 import 复用 diffEach 同源逻辑），防两处口径漂移致定谳失真；② **bytes 估算口径**——头注声明仅作相对比较面（同语料内比值），禁绝对量级外宣称。
 3. **unmount seq:-1 终帧不入分母**确认；appendFileSync sync 防帧丢（bench 先例同款）确认。
 4. 落码清单（renderInstrumentation.ts 新建 + ink.tsx 采样点 + tests 两文件）与流程（段 I → 四件套+canon → e2e 17 腿复跑 → 定谳报告 → 呈用户+二期输入）确认。
+
+## §8 段 I 终态采认（2026-11-14，Main 知会；落码 3b8ee7a0 双 remote 对齐）
+
+6 文件（renderInstrumentation.ts 新建 + ink.tsx 三处接线 + screen.ts **diffRegion 单源提取** + literal-inventory 预注册 + 判别格两文件）。批复形兑现确认：格 1 四点全落；**注记 1 超额兑现**（diffEach region 块逐字提取为导出 diffRegion，两处共用同源——漂移结构性不可能；drift 守卫 func 腿含候选①机制直证：两不相邻 damage 并集=跨全高单矩形）；注记 2 兑现（bytes 仅 stdout 载荷 + 头注相对口径声明）；零行为（canon 5923/0/481，Δ=+10 测 +2 文件恰合）；bench 通道零触碰在场。e2e 17 腿复跑采集已启动，候定谳报告 → 段 G gate → 段 L release 0.1.110。
