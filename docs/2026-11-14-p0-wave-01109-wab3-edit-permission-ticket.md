@@ -103,3 +103,7 @@ eslint boundaries DEP-3 拦截 cli→tui（4 error）——预注册形 type imp
 2. **实例面**：cli 域内 bounded duck cache（Map 插入序 LRU，READ_FILE_STATE_CACHE_SIZE=100 同容量语义，~15 行无依赖）替代 tui FileStateCache 实体。语义等价论证采认：引擎四工具消费契约 = get/set duck；键 = expandPath 归一双侧同源；headless lane 无 normalize 可观察差；容量语义保留。
 3. **§8 注记 2 就此消解**：cli→tui type import 不存在，S3 re-home 候选撤销（改形后零跨域依赖，优于原形）。
 4. tui FileStateCache 实体不动（TUI/MCP lane 零触碰不变）；判别单测同步改形（unit 源断言 + func 链腿 cache 构造 cli 域实例）。当前 src 旧形两文件回退至新形批准。
+
+## §9 段 I 终态采认（2026-11-14，Main 知会；落码 7ca5c8e0 双 remote 对齐）
+
+终态形态 = §8b 新形全兑现：src/cli/headlessFileStateCache.ts（cli 域 bounded duck cache）+ engine/index.ts FileState/ReadFileState re-export + sdkTypes readFileState?: ReadFileState + print.ts run 级单实例注入；旧形 tui import 清零（print.ts/sdkTypes.ts 零引用）。四件套全绿：tsc 0 / eslint 0w（boundaries 4 error 清零实证）/ build 18.21MB / canon 5913 pass 0 fail 479 files（基线 5902 + 本波 11 测 +2 文件恰合）。判别测试 11/11 GREEN（unit 5 腿含 §8b 形态断言+cli→tui 清零负断言；func 6 腿含格 2(a)/3(b)+dedup 三腿+Write stale 门）。e2e gate 在途，候 GATE-PASS 后段 L 0.1.109。
