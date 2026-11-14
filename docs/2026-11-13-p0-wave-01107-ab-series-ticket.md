@@ -84,3 +84,7 @@ CC 走 Anthropic provider，AtlasCode 现网走 IFF gateway glm-5——A/B 差�
 ## §7 登记面
 
 - AtlasWeb 入列裁定（用户侧待裁，§9）；office S2 只读推演（独立轨）；R3-C 评估稿（并行）；ENV 专项（顺延 W-AB 系列后）。
+
+## §8 W-AB1 收口（2026-11-14）
+
+**W-AB1 观测采集波终态（e2e 侧全收口，f4 采认在案）**：A 组 24 腿（格 1/2/3/4/7/8 全绿）+ T12 TUI 交互双相 + B 组 17/17 腿 GREEN（B1–B7 长程任务，B6 记忆存活 KEY13=13 双侧直证）→ ledger-v1 44 行 + ux-gap-v1 11 维。形面定谳：AtlasCode TUI 腿 = npm 安装品 dist（根因腿证伪「dist 输入面死」，四因子=驱动器未成熟期误判）；模型纪律双侧 glm-5 同模型对（直证级基础）；零产品面 src/ 恰空全程。事故链 6 起全闭环入 README（方法论：交互腿 ready 门 = match+输出静默联合判定）。**W-AB2 已落：docs/2026-11-14-wab2-gap-analysis.md（f4 三分型终判 + 输出 UX gap 专章 + 改进计划表 A-F 呈用户逐件裁定）。**
