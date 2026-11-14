@@ -94,3 +94,12 @@
 5. **格 3 两面界定批准**：(a) TUI 双模式零变 diff 直证 + (b) headless 未 Read errorCode 6 拒链字节级判别单测；已 Read 场景门过 = 格 2(a) 预期效果非回归；errorCode 5/6/7/8 全保留；stale-edit 门 content-compare fallback 零触碰照落。
 6. **swarm/inProcessRunner.ts:1567 同族缺口登记本波外**确认（防波膨胀；候后续小波，makeCtx 家族第五例域级注记已入档）。
 7. 落码清单（print.ts + sdkTypes.ts + 判别单测）与流程（段 I → 四件套+canon → e2e gate 格 1-6 → 段 L 0.1.109）确认。
+
+## §8b 段 I 改形批复（2026-11-14，f4：**通过，语义等价成立**）
+
+eslint boundaries DEP-3 拦截 cli→tui（4 error）——预注册形 type import 违反域洁净。改形两处替代批准：
+
+1. **型面**：`SdkToolUseContext.readFileState?: ReadFileState`（engine duck 型，engine 根门面 re-export，TodoWriteTodosPort 同通道先例）——f4 活码验证：filesToolInput.ts:116 接口 + :131 引擎消费面即此型 + :28 头注「Map 即满足 duck」自证。cli→engine allow 在场零配置变更。
+2. **实例面**：cli 域内 bounded duck cache（Map 插入序 LRU，READ_FILE_STATE_CACHE_SIZE=100 同容量语义，~15 行无依赖）替代 tui FileStateCache 实体。语义等价论证采认：引擎四工具消费契约 = get/set duck；键 = expandPath 归一双侧同源；headless lane 无 normalize 可观察差；容量语义保留。
+3. **§8 注记 2 就此消解**：cli→tui type import 不存在，S3 re-home 候选撤销（改形后零跨域依赖，优于原形）。
+4. tui FileStateCache 实体不动（TUI/MCP lane 零触碰不变）；判别单测同步改形（unit 源断言 + func 链腿 cache 构造 cli 域实例）。当前 src 旧形两文件回退至新形批准。
