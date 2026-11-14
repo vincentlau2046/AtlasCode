@@ -73,3 +73,14 @@
 6. **定谳②分支附加**：readFileState/isPartialView 语义若动 → :286-304 content-compare fallback 联动回归入格 3 处置表（两门共读同一 readFileState）。
 
 **审计结论：通过——吸收后发双信号。**
+
+## §7 root-cause 定谳（2026-11-14，e2e 报告 r-20261114-wab3-rootcause.md，f4 采认）
+
+**总定谳：候选 ② 成立 = Read→Edit readFileState 装配链断（headless 专有）**；①③ 排除式证伪闭合。
+
+1. **格 1 闭合**：① 证伪（拒链 = InputValidationError 普通 tool 错误形非 deny 信封——toolExecution.ts:502；模型两度照指引 Read 重试，未视作硬墙）；② 成立（运行时实体检查 `READSTATE-EDITGATE ctxHasField=false val=undefined` → fix 腿 `ctxHasField=true val=Map`）；③ 证伪（文案与 CC 同源逐字，死因在照做后仍被拒）。
+2. **最小重放双 outcome**：A 现状 dist 形 Read×3→拒×3 死循环；B 修形模拟（makeCtx 注入共享单例 Map）Glob→Read→Edit 一次通过零拒环。
+3. **旗标车道实录（lock-face 必答闭合）**：T01 双腿 `--permission-mode acceptEdits --permission-prompts none` 双旗标同传，parse.ts:269-272 ?? 链 explicit acceptEdits 胜出、dontAsk 未生效。
+4. **修形形态裁定（f4，随定谳）**：走 §0.3 **②分支 = readFileState 链修**（makeCtx 注入 + type 扩面）；门语义/mode 语义零动——**acceptEdits 门降级直通形（①/③支修形）本定谳下不需要**。审计必改 1 窄义 (a)（已 Read 零阻 + 未 Read 指引性可恢复错误）仍为语义框——②支修形恰兑现该框（ Outcome B 零拒环一次通过，未触 M 面出口条款）。
+5. **登记两面向 lock-face**：① dedup 回归面 +1——链修后 readTool dedup 恢复激活（file_unchanged stub），gate 加 dedup 行为回归格（K5-5 allow_large 禁 dedup 对表）；② 格 2 复验腿判读修正——修形后主形 = 零拒环一次通过（优于「恰 1」），「未读降级指引」路径另行判。
+6. harness 事故三起自愈（bun --cwd/env -i/TDZ）已记报告 §6。
