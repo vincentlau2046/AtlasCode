@@ -42,3 +42,13 @@
 ## §4 判据格（落码工单预注册素材，随定谳面定形）
 
 wakeup 注入形：完成→注入→下回合可见直证 + T7 长静默腿回归 + watchdog 误杀负断言 + canon 恰合。引导修形形：T07 复验腿（atlas 改走 background 形）+ 文案 diff 面 + 回归零触碰面。
+
+## §5 定谳收口——件 E 封存（2026-11-14，e2e 定谳 r-20261114-wopt-e-longnoop-verdict.md，按预授权②）
+
+**双缺口均不成立 → M 面 → 件 E 封存，不收计划**（用户预授权 2026-11-14 兑现，无需再呈）：
+
+1. 缺口 A（wakeup 注入面）不成立：后台完成→回合注入机制链 TUI 车道源码级全链闭合（enqueuePendingNotification → command queue store → useQueueProcessor 双 useSyncExternalStore 闲时注入 REPL.tsx:3673）；notified 旗标 = 原子 check-and-set 去重闩 + GC 标记，非注入触发器本体。headless 窄 spine 不 drain（loop.ts:332）与 CC 对称非缺口。
+2. 缺口 B（编排引导面）不成立：wire 直证 Bash.description 10,761 字符六要素全在（run_in_background 说明/getBackgroundUsageNote/"long running→run_in_background. No sleep needed"/"will be notified — do not poll"/sleep 约束族），与 CC 同构。
+3. **归因：T07 atlas 直发 = 模型自择 100%（M 面）；引导 0%、机制 0%**——同模型对直证纪律下双侧同权。
+4. 语料注记：B7/T07 atlas wire 零 task-notification 注入回合（唤醒面未被行使非被证伪）；e2e 正证缺席已登记，后续可立 background+idle 验证腿补 wire 直证（本波禁扩腿）。
+5. 同域价值沉淀：timeoutMs/钉⑥/mcpAutoBackground/任务通知机制链盘点面（§0 五件表）作为资产留档。

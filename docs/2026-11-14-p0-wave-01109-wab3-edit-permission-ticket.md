@@ -107,3 +107,10 @@ eslint boundaries DEP-3 拦截 cli→tui（4 error）——预注册形 type imp
 ## §9 段 I 终态采认（2026-11-14，Main 知会；落码 7ca5c8e0 双 remote 对齐）
 
 终态形态 = §8b 新形全兑现：src/cli/headlessFileStateCache.ts（cli 域 bounded duck cache）+ engine/index.ts FileState/ReadFileState re-export + sdkTypes readFileState?: ReadFileState + print.ts run 级单实例注入；旧形 tui import 清零（print.ts/sdkTypes.ts 零引用）。四件套全绿：tsc 0 / eslint 0w（boundaries 4 error 清零实证）/ build 18.21MB / canon 5913 pass 0 fail 479 files（基线 5902 + 本波 11 测 +2 文件恰合）。判别测试 11/11 GREEN（unit 5 腿含 §8b 形态断言+cli→tui 清零负断言；func 6 腿含格 2(a)/3(b)+dedup 三腿+Write stale 门）。e2e gate 在途，候 GATE-PASS 后段 L 0.1.109。
+
+## §10 gate GATE-PASS + 段 L release（2026-11-14；报告 r-20261114-wab3-gate.md）
+
+1. **GATE-PASS 采认**：格 1-6 + dedup 负腿全 GREEN——格 2a 零拒环直通；格 2b g2b-hard 硬化腿（Edit-first 荣誉→拒6 恰 1→Read→Edit 成，恢复对恰 1，零绕行；方法论：强制序判据腿须内建硬化措辞）；格 3 触面直证（cli 域 3 文件 + engine/index.ts re-export +5，门体字节级零触碰）；格 4 T12 回归 GREEN（g4w Write 形重落，首跑 echo 形被 auto-approve 腿形偏差已录）；格 4b TUI acceptEdits 全链上屏零回归；格 5 canon 5913/0/479 双侧恰合 Δ=0；格 6 语义保持形 + **e2e 勘误采认**（isPartialView 全 src 仅 TUI memory-attachment 缓存面写入 attachments.ts:1620/REPL.tsx:3600，「截断读→Edit 必拒」非产品语义，任一 lane 皆然）；dedup 负腿 GREEN（allow_large 禁 dedup 面 code 实锚 :532 注记）。
+2. **方法论入册**：① reqlog body 含全量历史回放，朴素遍历重计假象——body-diff 逐轮去重为唯一可信实序源；② 强制序判据腿硬化措辞。
+3. **段 L 硬门合规（f4 确认）**：GATE-PASS 报告 + f4 采认 §9 双在案齐备 → release 47e02730（bump+CHANGELOG）/ tag v0.1.109 / 双 remote ALIGNED / npm publish 成功 / SRI 四值留档 docs/sri/v0.1.109.md @0848395f（cli.js 18,208,274 B / sha256 ea1ba503… registry tgz 与本地 build 字节级同值）。build-publish 时序附则照例。
+4. 生产 lane T01 复验腿在途（对表 g2b-hard 恢复链形）；候回执后五段闭环终态。
