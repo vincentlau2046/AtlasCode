@@ -63,3 +63,12 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 2. **勘误 1 采认（工单 §0 订正）**：「面 A 修链后自然恢复」不成立——面 A 值源 = currentResponseLength chars/4 与死链零共享 wire，**修链后数值不变**；面 A 恢复真实量级 = 一次换源小落码（chars/4 → usage 权威源），且为 gate-off 下唯一行为变面（常显无门控）——lock-face 按此单独呈批。
 3. lock-face 材料预览收讫（α 形 engine 权威链/压缩续命不重置建议呈裁/容差 Δ≤2% 且 Δ≤50 tokens/面 B 基座）；候 e2e usage 样本容差预演后正式 lock-face 一并呈批。
 4. f4 预注记：面 A 换源面回归格 = 注记值 vs reqlog usage 同容差带对表 + 值域合理面（0 静默回合恒 0）；换源致屏显数值变化属用户件 C 意图内（真实量级），呈批时注明。
+
+## §7 root-cause 双源闭合采认（2026-11-14，e2e 定谳 r-20261114-wrc1-token-chain.md × Main 链图 b6c33846 互证）
+
+1. **总判采认（排除式）**：主断点 = **环 3 写链从未存在**（setTurnOutputTokens all-time 零命中/snapshotOutputTokensForTurn no-op stub :208/getTurnOutputTokens ()=>0 :174）；provider usage 权威源已产出被下游首环丢弃（message_stop/round_end assistantMessage.usage，include_usage 已开）——断点在产品消费链首环，非网关/流层。face B 死因 = gate 关 + 写链缺双重（gate 开也恒 0）。
+2. **勘 2 采认（7→6 文件）**：compact.ts = 常量名撞车零 feature('TOKEN_BUDGET') 假成员——消费面实 6 文件（格 3/4/6 对表口径同步）。
+3. **face A 偏差直证采认**：us-tui2 注记 1 vs wire usage 52-83（欠计 ~50-80×，方向恒向下漏 reasoning+tool-JSON）；纯文本流式回合注记带整带替换零 ↓N = 渲染条件数据面分支——**face A 换源 usage 字段 = 唯一正解**（§6 勘误 1 换源小落码定性成立）。
+4. **容差双上界预演采认**：round_end 逐回合累加对权威源天然 Δ=0（落账候选）；face A 路线工具回合 Δ 逾百倍必出界——容差数值 lock-face 冻结数据面齐备（采样账本 13 请求/12 回合/4 型 Σoutput=2466）。
+5. **修形形态预览采认**：主修 = 环 3 round_end 消费 assistantMessage.usage.output_tokens 逐回合累加（零新增 wire 面）+ face B 点亮呈用户（「从未上生产」基座）+ gate 两档腿形（usage↔落账 Δ 双上界腿 + 注记渲染条件腿）。候 Main 正式 lock-face 一并呈批——届时 **face B 点亮 + face A 换源两裁定呈用户**。
+6. 事故链三条全记录（v2 regex 嵌套/端口红鲱鱼/瞬态挂起 T1-T4 排除）。
