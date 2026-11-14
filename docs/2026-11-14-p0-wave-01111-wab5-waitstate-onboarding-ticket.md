@@ -62,3 +62,15 @@
 7. **波序注记**：0.1.110 段 L 完结后起（或在途并行则 gate 基锚分列标注）；切片 2 零产品码 → 0.1.111 跳号入 W-AB3+ 序列账面。
 
 **审计结论：通过——吸收后发双信号，改形知悉随双信号附。**
+
+## §7 切片 1 定谳采认 + 切片 2 裁定（2026-11-14，f4；报告 r-20261114-wab5-slice1.md）
+
+1. **件 D 格 1 双面 GREEN 采认**：配置面 = $ATLAS_CONFIG_DIR/.atlas.json（kernel env.ts:15，CC .claude.json 同构）；b-runner 预置 theme+hasCompletedOnboarding（v2 默认 + SYMMETRY_NEGATIVE 旋钮）；NEG 腿拦截直证 + V2 腿零触发直通。v2 标注/17 腿基线不混源确认。
+2. **两处证据面勘误采认（已升 W-AB2 §7 续表）**：① W-AB1 v1 语料 onboarding 从未触发（IS_DEMO=1 全腿抑制 + ux-extract "theme" 词假阳性）——UX-7 证据面再换形 = 预置缺失真实首启拦截成本（NEG 腿直证）；② 件 C「braille 无注记」**翻转**——atlas 注记 `(43s · ↓14 tokens)` 与 CC 同构已在（timer 10/11 腿恒现），W-AB1 摘要 = 提取器 dim 色盲区。
+3. **格 2 矩阵采认**：S1-S9 全量；timer/TTFT/stalled/压缩显形/teammate 聚合/leader-idle/defer 通知 = 链活；token 注记 = 链活+数据条件分支。0.1.70 断链三步直证采认：loopEvents stream_delta 转发已修活；**现行死链三重断**（bootstrapState.ts:174 stub 恒 0 + setTurnOutputTokens 全 src 零命中 + TOKEN_BUDGET 门 → budgetText 永不渲染）——挂起不修链（§2.2），修链波候选登记（0.1.70 遗留账更新）。
+4. **切片 2 裁定（f4）：产品侧落码面 = 零，0.1.111 以切片 1 收口即全波收口**——
+   - token 计数值量级语义（↓14 vs ↓1.1k）根因 = 计数链三重断 → **归修链波挂起账**（用户拆步裁定「断则挂起」分支兑现，禁本波修链）；
+   - CC 动词池广度 → **归件 F 过程叙事独立工单**（同域）；
+   - 数据条件分支（工具密集回合 token 位 ↑ 替位）→ cosmetic 小件随件 F 一并评估或封存；
+   - 矩阵无「分支缺失」新缺口 → 无补缺落码对象。
+   0.1.111 零产品码 → **跳号预注册兑现**（无 npm 发布）；interactiveHelpers:114 死表达式录档不排。
