@@ -51,3 +51,13 @@
 5. **格 1 补注**：stalled 静态红 spinner/defer 挂起态 0-patch 帧合法被杀（无写入面）= 预期行为非误杀，lock-face 判别清单列入防 gate 误判。
 
 **审计结论：通过——吸收后发双信号（排队 0.1.110 段 L / 0.1.112 W-RC1 后）。**
+
+## §6 lock-face 裁定①——「skip commit」语义边界与门控真实落点（2026-11-14，f4；Main 勘锚 terminal.ts:176-179 既有早退触发）
+
+1. **张力采认**：writeDiffToTerminal 零字节早退已在（0-patch 帧 pty IO 本就为零）——审计「省 IO」面已被既有早退覆盖；门控真实增量 = 指标/下游面（committed 分类 + cursor preamble/park 分支 + 下游 commit 侧），CPU 扫描链构造须先走省不掉。
+2. **裁定：本波 = 形 I（窄）+ 抓手 2(b)，形 II 不立项**：
+   - **形 I**：FrameEvent committed 口径分列（扩型 committed 标志，两通道消费者仪表化+bench 兼容面小）+ 空帧判据 preamble 后评估（cursor preamble 可把空流变非空——构造层定义含 preamble patches，Main 勘锚①兑现）+ cursor preamble/park 空流分支 elision（增量 CPU 面）。格 1「0-patch 占比→~0」= **committed 口径成立**。
+   - **形 II（damage 预测门跳 render+diffEach CPU 链）= 新机制超审计钉死形，不立项**——定谳已判 diffMs 0.07-0.25ms 绝对值小，收益不值新机制风险；登记池。
+   - **主收益面 = 抓手 2(b) 动画降频/数据即提交**：真变更帧变更到达即提交（不等 63ms tick）= 唯一延迟/观感改善形，结构安全无第二写入路径——lock-face 主推定形。
+3. **状态推进禁跳清单采认**（Main 勘锚②：backFrame/frontFrame swap/prevFrameContaminated/displayCursor/scrollDrainPending drain timer）；resize prepend 不入门控（③与审计⑤一致）；格 4 committed 分列两通道兼容面核（④）。
+4. 呈裁书按形 I / 形 II / 2(b) 三面分列收益与风险，2(b) 定形后并入格 6 延迟实证主判据。
