@@ -114,3 +114,7 @@ eslint boundaries DEP-3 拦截 cli→tui（4 error）——预注册形 type imp
 2. **方法论入册**：① reqlog body 含全量历史回放，朴素遍历重计假象——body-diff 逐轮去重为唯一可信实序源；② 强制序判据腿硬化措辞。
 3. **段 L 硬门合规（f4 确认）**：GATE-PASS 报告 + f4 采认 §9 双在案齐备 → release 47e02730（bump+CHANGELOG）/ tag v0.1.109 / 双 remote ALIGNED / npm publish 成功 / SRI 四值留档 docs/sri/v0.1.109.md @0848395f（cli.js 18,208,274 B / sha256 ea1ba503… registry tgz 与本地 build 字节级同值）。build-publish 时序附则照例。
 4. 生产 lane T01 复验腿在途（对表 g2b-hard 恢复链形）；候回执后五段闭环终态。
+
+## §11 生产 lane ⑦ PASS = W-AB3 五段闭环终态（2026-11-14，e2e 回执）
+
+npm --registry npmjs.org 装 0.1.109 至 seeded prefix——cli.js sha256 ea1ba503…06a0397 与 SRI 留档 registry tgz 解包值**字节恒等**；g2b-hard 同形腿生产 bin 复验逐环同构（Edit→拒6 恰 1→Read→Edit 成，零 node 绕行）。**五段闭环终态：root-cause（候选② readFileState 装配链断）→ lock-face §8/§8b → 段 I 7ca5c8e0 → gate GATE-PASS → 段 L 47e02730 → 生产 lane PASS**。W-AB3 = W-AB2 改进计划首件落码波闭环（件 B 修形①以②支链修兑现：零权限语义触碰）。
