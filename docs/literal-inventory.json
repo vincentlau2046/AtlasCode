@@ -247,7 +247,8 @@
       "tui/utils/plugins/mcpPluginIntegration.ts": 2,
       "tui/utils/plugins/officialMarketplaceGcs.ts": 1,
       "tui/utils/swarm/spawnUtils.ts": 3,
-      "tui/utils/tmuxSocket.ts": 1
+      "tui/utils/tmuxSocket.ts": 1,
+      "tui/ink/renderInstrumentation.ts": 1
     },
     "packageNameLiteral": {
       "shared/identity.ts": 1,

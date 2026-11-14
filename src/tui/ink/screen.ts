@@ -1147,17 +1147,14 @@ type DiffCallback = (
 ) => boolean | void
 
 /**
- * Like diff(), but calls a callback for each change instead of building an array.
- * Reuses two Cell objects to avoid per-change allocations. The callback must not
- * retain references to the Cell objects — their contents are overwritten each call.
- *
- * Returns true if the callback ever returned true (early exit signal).
+ * Compute the region diffEach() will scan, from damage rects and resize
+ * compensation. Extracted verbatim from diffEach's inline region block
+ * (0.1.110 W-AB4, f4 lock-face 批复注记 1): the render instrumentation
+ * (renderInstrumentation.ts) consumes this same-source function so its dmg
+ * metric cannot drift from the actual diff scan region. Behavior-identical
+ * refactor — diffEach calls this at the same point.
  */
-export function diffEach(
-  prev: Screen,
-  next: Screen,
-  cb: DiffCallback,
-): boolean {
+export function diffRegion(prev: Screen, next: Screen): Rectangle {
   const prevWidth = prev.width
   const nextWidth = next.width
   const prevHeight = prev.height
@@ -1193,6 +1190,27 @@ export function diffEach(
       height: prevHeight,
     })
   }
+  return region
+}
+
+/**
+ * Like diff(), but calls a callback for each change instead of building an array.
+ * Reuses two Cell objects to avoid per-change allocations. The callback must not
+ * retain references to the Cell objects — their contents are overwritten each call.
+ *
+ * Returns true if the callback ever returned true (early exit signal).
+ */
+export function diffEach(
+  prev: Screen,
+  next: Screen,
+  cb: DiffCallback,
+): boolean {
+  const prevWidth = prev.width
+  const nextWidth = next.width
+  const prevHeight = prev.height
+  const nextHeight = next.height
+
+  const region = diffRegion(prev, next)
 
   const maxHeight = Math.max(prevHeight, nextHeight)
   const maxWidth = Math.max(prevWidth, nextWidth)

@@ -39,6 +39,7 @@ import { CURSOR_HOME, cursorMove, cursorPosition, DISABLE_KITTY_KEYBOARD, DISABL
 import { DBP, DFE, DISABLE_MOUSE_TRACKING, ENABLE_MOUSE_TRACKING, ENTER_ALT_SCREEN, EXIT_ALT_SCREEN, SHOW_CURSOR } from './termio/dec.js';
 import { CLEAR_ITERM2_PROGRESS, CLEAR_TAB_STATUS, setClipboard, supportsTabStatus, wrapForMultiplexer } from './termio/osc.js';
 import { TerminalWriteProvider } from './useTerminalNotification.js';
+import { renderInstrumentationEnabled, recordRenderFrame, recordUnmountFrame } from './renderInstrumentation.js';
 
 // Alt-screen: renderer.ts sets cursor.visible = !isTTY || screen.height===0,
 // which is always false in alt-screen (TTY + content fills screen).
@@ -770,6 +771,21 @@ export default class Ink {
       cacheHits: 0,
       live: 0
     };
+    // W-AB4（0.1.110）帧级单点采样（f4 lock-face 批复 工单 §7 @273cf8ed）：
+    // 先门后构造——关闭路径仅一次模块级布尔读，零分配零 IO（格 1）。帧定义
+    // 单源 = 渲染层 onRender 完成（FrameEvent 发射点同源，格 4 渲染口径）。
+    if (renderInstrumentationEnabled) {
+      recordRenderFrame({
+        nextScreen: frame.screen,
+        prevScreen: prevFrame.screen,
+        viewportH: frame.viewport.height,
+        patches: optimized,
+        frameMs: performance.now() - renderStart,
+        diffMs,
+        writeMs,
+        commitMs,
+      });
+    }
     this.options.onFrame?.({
       durationMs: performance.now() - renderStart,
       phases: {
@@ -1469,6 +1485,11 @@ export default class Ink {
     // only render last frame of non-static output
     const diff = this.log.renderPreviousOutput_DEPRECATED(this.frontFrame);
     writeDiffToTerminal(this.terminal, optimize(diff));
+    // W-AB4（0.1.110）：unmount 终帧（第二 writeDiffToTerminal 调用点）——
+    // seq:-1 单独一行，不入帧率分母（lock-face L3 批复形）。
+    if (renderInstrumentationEnabled) {
+      recordUnmountFrame();
+    }
 
     // Clean up terminal modes synchronously before process exit.
     // React's componentWillUnmount won't run in time when process.exit() is called,
