@@ -31,6 +31,15 @@ import type { HookJSONOutput } from '../hooks'
 // 0.1.94 W-D-B 段 M（f4 §14 硬条件 1）：todos port 型面（cli→engine allow
 // 在场；经 engine 根门面 re-export，STR-1 门面收口）。
 import type { TodoWriteTodosPort } from '../engine'
+// 0.1.109 W-AB3 ②支（f4 §8 批复 @8ab690ca + §8b 改形批复 @feced92a）：
+// headless 文件态域链修——SdkToolUseContext 扩可选 readFileState 成员。
+// 根因 = makeCtx 窄视图缺槽（0.1.93 RED-F 同族第五例）→ engine 四文件工具
+// 可选链静默降级（Read 落键 no-op + Edit/Write 恒「未读」支）。改形裁定：
+// cli→tui 依赖被 boundaries 拦截（DEP-3）→ 消费 engine ReadFileState duck
+// （经 engine 根门面 re-export，TodoWriteTodosPort 同通道；filesToolInput
+// 头注「Map 即满足 duck」自证）。型面 additive（TUI/MCP lane 零消费本型，
+// 拓扑核对在 lock-face 点 4）。
+import type { ReadFileState } from '../engine'
 
 // ── SDK wire 消息（旧仓 coreTypes any-stub 最小面）──────────────────────
 
@@ -255,6 +264,15 @@ export interface SdkToolUseContext {
   ): void
   options?: { isNonInteractiveSession?: boolean }
   todosPort: TodoWriteTodosPort
+  /**
+   * W-AB3 ②支（0.1.109）：headless 文件态域链修注入位。print.ts makeCtx
+   * 注入 run 级单实例 ReadFileState duck cache（跨工具调用共享，cli 域
+   * headlessFileStateCache bounded LRU）——engine 四文件工具
+   * （Read/Edit/Write/NotebookEdit）的 readFileState 可选链由此复活（Read
+   * 落键生效 + Edit read-first 门可过 + Write stale 门/Read dedup 对齐
+   * TUI 形）。缺省 = 旧行为（可选链降级面，零破坏 additive）。
+   */
+  readFileState?: ReadFileState
 }
 
 /**

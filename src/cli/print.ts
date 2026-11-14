@@ -185,6 +185,10 @@ import {
   type SdkUserMessage,
   type StdoutMessage,
 } from './sdkTypes'
+// W-AB3 ②支（0.1.109，f4 §8b 改形批复 @feced92a）：headless 文件态域链修
+// 注入源（cli 域内 bounded duck cache——cli→tui 依赖被 boundaries 拦截
+// DEP-3，消费 engine ReadFileState duck 契约）。
+import { createHeadlessFileStateCache } from './headlessFileStateCache.js'
 import { findLatestSessionId } from './sessionList'
 import { installStreamJsonStdoutGuard } from './streamJsonStdoutGuard'
 import { resolveHeadlessSystemPrompt } from './headlessPrompt'
@@ -1142,6 +1146,14 @@ export async function runHeadless(
         'assembly above this guard in makeCtx.',
     )
   }
+  // W-AB3 ②支（0.1.109，f4 §8 批复 @8ab690ca + §8b 改形批复 @feced92a）：
+  // headless 文件态域链修——run 级单实例 bounded duck cache（cli 域
+  // headlessFileStateCache，插入序 LRU 上限 100 条，TUI FileStateCache
+  // 同参先例）。关键细节（lock-face §1）：makeCtx 是工厂（canUseTool 内
+  // 与 loopDeps.toolContext 各调一次），cache 必须外提为 run 级常量——两处
+  // context 对象引用同一实例，Read 落键 → Edit/Write/NotebookEdit 取键链活
+  // （engine 四文件工具 readFileState 可选链复活；门体零触碰）。
+  const readFileStateCache = createHeadlessFileStateCache()
   const makeCtx = (): SdkToolUseContext => ({
     abortController,
     getAppState: () => ({ toolPermissionContext: tpcRef.current }),
@@ -1151,6 +1163,7 @@ export async function runHeadless(
     },
     options: { isNonInteractiveSession: true },
     todosPort,
+    readFileState: readFileStateCache,
   })
   const canUseTool = getCanUseToolFn(
     options.permissionPromptToolName,

@@ -1211,6 +1211,11 @@ export { isAgentSwarmsEnabled } from './messaging'
 // 门面收口，禁深路径直取）。
 export type { TodoWriteTodosPort } from './tools/tasks/taskToolInput'
 
+// 0.1.109 W-AB3 ②支（f4 §8b 改形批复 @feced92a）：readFileState duck 型面
+// re-export——cli 域 SdkToolUseContext.readFileState 消费（headless 文件态域
+// 链修注入面；tools 根门面 :623-624 同源，STR-1 门面收口禁深路径直取）。
+export type { FileState, ReadFileState } from './tools/files/filesToolInput'
+
 // 0.1.62 /goal 核心+持久化波（CC 2.1.139）+ 0.1.63 /goal 演化波 P2/P3
 // （CC 演化 2.1.173→2.1.295：paused 状态机 + 不可恢复自清除分类器）。
 // 引擎内建条件化 Stop hook——loop.ts terminal 支消费。
