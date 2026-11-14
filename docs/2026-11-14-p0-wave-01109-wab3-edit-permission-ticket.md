@@ -84,3 +84,13 @@
 4. **修形形态裁定（f4，随定谳）**：走 §0.3 **②分支 = readFileState 链修**（makeCtx 注入 + type 扩面）；门语义/mode 语义零动——**acceptEdits 门降级直通形（①/③支修形）本定谳下不需要**。审计必改 1 窄义 (a)（已 Read 零阻 + 未 Read 指引性可恢复错误）仍为语义框——②支修形恰兑现该框（ Outcome B 零拒环一次通过，未触 M 面出口条款）。
 5. **登记两面向 lock-face**：① dedup 回归面 +1——链修后 readTool dedup 恢复激活（file_unchanged stub），gate 加 dedup 行为回归格（K5-5 allow_large 禁 dedup 对表）；② 格 2 复验腿判读修正——修形后主形 = 零拒环一次通过（优于「恰 1」），「未读降级指引」路径另行判。
 6. harness 事故三起自愈（bun --cwd/env -i/TDZ）已记报告 §6。
+
+## §8 段 D lock-face 批复（2026-11-14，f4：**通过，按呈批形落码**）
+
+1. **②支主修形三件套批准**：print.ts run 级单例 `createFileStateCacheWithSizeLimit(100)`（mcp.ts:43 先例同参）+ makeCtx 工厂双调共享实例（run 级外提 = 落码关键细节确认）+ sdkTypes SdkToolUseContext 可选成员扩面。零门体触碰确认。
+2. **cli→tui type import 注记**：type-only 面可接受（壳→壳非 kernel 边界）；S3 归位波 re-home 候选登记（若 FileStateCache 型面日后入 kernel/shared 单源，随波迁移）。
+3. **①/③支销项条款确认**：②支链修后门存在性 = CC 形（可恢复错误非无门）；格 2 复验主断言恰 1 达成 → ①支销项；>2 则按格 2 但书呈用户另裁。resume 边界（进程内 map，--resume 后首 Edit 须 Read = CC 同形）不修确认。
+4. **波及面采认**：dedup 激活（killswitch 在场）+ Write stale 门复活 + NotebookEdit 同族复活 = headless 对齐 TUI 已有行为 = CC parity 方向；**gate 判据增负腿：ATLAS_DISABLE_READ_DEDUP=1 时 dedup 关闭直证**（killswitch 活性防退化）。三工具未 Read 首犯拒链形态不变确认。
+5. **格 3 两面界定批准**：(a) TUI 双模式零变 diff 直证 + (b) headless 未 Read errorCode 6 拒链字节级判别单测；已 Read 场景门过 = 格 2(a) 预期效果非回归；errorCode 5/6/7/8 全保留；stale-edit 门 content-compare fallback 零触碰照落。
+6. **swarm/inProcessRunner.ts:1567 同族缺口登记本波外**确认（防波膨胀；候后续小波，makeCtx 家族第五例域级注记已入档）。
+7. 落码清单（print.ts + sdkTypes.ts + 判别单测）与流程（段 I → 四件套+canon → e2e gate 格 1-6 → 段 L 0.1.109）确认。
