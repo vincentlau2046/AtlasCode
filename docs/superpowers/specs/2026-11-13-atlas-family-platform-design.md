@@ -132,6 +132,23 @@ feature 包禁止 runtime import 其他 feature 包的实现；跨包行为使�
 
 HTTP/WS、认证和 controllers 不进入 kernel，也不归 AtlasCode 专属产品壳；它们属于统一 Atlas host / AtlasWeb web-host 层。Kernel 只提供 UI/transport-neutral 的 headless/domain contract，Web host 将其映射为 RPC/WS，未来 Office/Comic host adapter 复用同一合同，避免二次提取。
 
+### 进程拓扑（foundation 默认）
+
+Foundation 采用**浏览器与产品服务分进程、产品 host 与 kernel 实例同进程**的拓扑：
+
+```text
+Browser / Desktop WebView
+          │ HTTP + WS + auth
+          ▼
+Atlas host process
+  ├── HTTP/WS/auth/controllers
+  └── product kernel instance (in-process adapter)
+          │
+          └── headless contract / shared protocol v0
+```
+
+这不是让 host 旁路 kernel。Host 的所有 session、审批、workspace 和产品状态访问都经过产品 kernel 实例的 headless contract；host 禁止直接读取产品数据目录或配置目录。`schemaVersion`、`generation`、envelope 和错误语义从 foundation 起按 protocol v0 定义，即使 foundation 默认走 in-process adapter，也必须保持 transport-neutral，未来可替换为 cross-process transport，不改变 UI/client contract。Office/Comic compose 在 foundation 阶段只需装配同一合同；只有选择独立产品进程时才增加 protocol endpoint/transport adapter，不把 cross-process 复杂度提前塞入首个 cut。
+
 ### Headless 合同与 UI 交互分账
 
 为避免 kernel 与产品 registry 对审批、diff、终端等能力各自漂移，首期消费面采用以下硬分账：
@@ -174,10 +191,94 @@ Kernel protocol        v0
 3. TUI 逃逸扫描为零；
 4. AtlasWeb compatibility scanner 证明只消费 `src/kernel` UI 无关导出；
 5. protocol/schema v0 在 kernel/shared 既有域内单源可生成；
-6. 只读 session list/replay/follow 具备稳定 controller 面；
-7. designated-only、零写真实环境和 release governance 检查通过。
+6. protocol v0 shared schema 通过 Code-neutral 审查，禁止把 terminal/bash、Code 专属工具或其他 Code-only 语义焊死进公共面；这些能力只能进入 Code bundle 专属面，并由 scanner/schema review 证明；
+7. 只读 session list/replay/follow 具备稳定 controller 面；
+8. designated-only、零写真实环境和 release governance 检查通过。
 
 0.1.106 PASS 前的工作只能是准备工作；不产生正式 AtlasWeb foundation release。
+
+## 6A. Atlas 系列 Git 总体管理
+
+### 当前阶段（0.1.106 之前）
+
+当前只有一个产品源码仓：`AtlasCode`。它同时承担：
+
+- `src/kernel` 与 shared/headless contract 的权威源；
+- AtlasCode CLI/TUI/engine；
+- 当前多产品纲要和 AtlasWeb 准备期文档。
+
+当前仓库的 `origin` 是 GitHub `vincentlau2046/AtlasCode`，`gitcode` 是 GitCode `vincentlau2046/Atlaswork` 镜像面；GitCode 不作为独立开发分叉，不承担独立版本裁定。当前 `master` 是主线，波次 worktree/feature branch 是短期实施载体，不是产品永久分支。
+
+0.1.106 S3b 生产 lane PASS 前：不创建正式 AtlasWeb 源码分支，不在 AtlasCode 中落 `apps/atlasweb` 或 Web 专用 kernel 代码；只读准备、scanner、设计和 roadmap 可以提交到主线文档（不污染行为与 gate）。
+
+### Foundation cut 之后
+
+```text
+AtlasCode repo（kernel owner）
+  ├── src/kernel
+  ├── packages/kernel-contract      # protocol/schema/types，源头仍由 kernel owner 管
+  ├── packages/kernel-runtime       # 可复用 headless runtime（按实际拆分）
+  ├── src/atlascode / src/tui       # Code 产品
+  └── CLI / release workflow
+          │ published package + compatibility matrix
+          ▼
+AtlasWeb repo（platform owner）
+  ├── apps/atlasweb
+  ├── packages/web-shell
+  ├── packages/web-host
+  ├── packages/web-mode / web-brand
+  ├── packages/web-code
+  ├── packages/web-office
+  └── packages/web-comic
+```
+
+AtlasWeb 是**独立 Git 仓库 + 多个可发布 package + 一个可运行 app**，不是 AtlasCode 里长期保留的 Web 目录，也不是一个“大而全”的单 npm 包。AtlasCode 不复制 Web shell；AtlasWeb 不复制 kernel。AtlasWeb 通过 AtlasCode 发布的 `kernel-contract`（以及需要时的 `kernel-runtime` / product adapter）消费稳定接口。
+
+`kernel-contract` 的语义源仍在 AtlasCode kernel/shared 域，独立仓库不意味着 schema 复制。只有在未来出现独立协议发布频率、独立 owner 和独立兼容治理需求时，才评估把 contract 拆成第三个小仓；foundation 阶段不提前引入第三仓。
+
+### Office / Comic 的 Git 归属
+
+AtlasOffice 与 AtlasComic 是产品身份和 bundle，不自动等于两个 Git 仓库：
+
+- 首期放在 AtlasWeb repo 的 `packages/web-office` / `packages/web-comic`，作为独立 package、bundle、controller/renderer lane；
+- 当某个产品需要独立 release cadence、独立权限 owner、独立 CI/repository size 或外部贡献治理时，才从 AtlasWeb 拆出 `AtlasOffice` / `AtlasComic` repo；
+- 拆出后仍依赖 `kernel-contract` 和 `web-shell` 的发布包，不复制平台和内核。
+
+因此产品 lane 与仓库边界是两个概念：产品可以先是 AtlasWeb 内的独立 package/lane，成熟后再独立仓库。
+
+### 分支、worktree 和 session 规则
+
+禁止长期使用 `atlasoffice`、`atlascomic`、`atlasweb` Git 分支承载产品源码。推荐结构是：
+
+```text
+每个仓库自己的 main/master
+  ├── 短期 feature/wave branch
+  ├── 独立 session worktree
+  └── release tag
+```
+
+- AtlasCode Main session 管 kernel、协议、主线 release；
+- AtlasWeb session 管平台 shell/host/mode，foundation 后在 AtlasWeb repo 工作；
+- Office/Comic session 管各自 package/lane，不直接改平台 shell；
+- f4/审查 session 只出方案、scanner 和 verdict，不跨 lane 直接落码；
+- 跨仓共享 kernel 变化走 AtlasCode 的正式 release/package + compatibility gate，不靠复制文件或手工 cherry-pick 私有改动。
+
+### 家族版本总账
+
+总账在准备期位于 AtlasCode 的 `docs/products/atlas-family-roadmap.md`；AtlasWeb 建仓后继续作为家族治理入口，或在跨仓发布频率足够高时迁入专门 governance repo（不提前创建）。总账同时维护机器可读 family manifest，记录各仓 commit/package，而不是制造跨仓 Git merge：
+
+```yaml
+schemaVersion: 1
+kernel: { repo: AtlasCode, commit: <sha>, package: <version> }
+web: { repo: AtlasWeb, commit: <sha>, platform: <version> }
+products:
+  code: { package: <version>, configDirName: ~/.atlas }
+  office: { package: <version>, configDirName: ~/.atlas-office }
+  comic: { package: <version>, configDirName: ~/.atlas-comic }
+protocol: { name: atlas-headless, version: v0 }
+```
+
+每个仓库有自己的 tag、CI、release gate；家族总账只锁定一组已验证的 commit/package 组合。不存在一个跨仓库的“总 Git 分支”或一个强行绑定所有产品的版本号。
 
 ## 7. 并行开发与文档协同
 
@@ -200,6 +301,8 @@ lane 可以使用独立 session/worktree，但产品代码不通过永久 Git �
 | P1 foundation | 0.1.106 PASS 后 | 根据单点切入裁定建立 AtlasWeb 仓库与首个 platform cut | 未通过准入即拆库 |
 | P2 Code Web | foundation 后 | 只读面、真实会话、审批、Code bundle | Office/Comic 伪实现 |
 | P3 产品 dogfood | P2 或纲要指定顺序后 | Office/Comic 真实 controller、renderer、bundle | 复制平台 shell |
+
+Office 的 kernel-side S2 compose（包括 kernel 导出面与缝端口的只读推演）不被 AtlasWeb foundation 排期绑死；它作为 foundation 前的第三消费者输入并行推进。AtlasWeb P1/P2 与 Office S2 的达标分别记录，只有共享 headless 合同和 scanner 证据需要汇合。
 
 ### 文档结构
 
@@ -228,6 +331,7 @@ docs/products/atlascomic/
 - 当前 gate/verdict；
 - 上游/下游阻塞；
 - 可回滚版本；
+- 产品 `configDirName`（例如 `~/.atlas-office`）及其 host 复用/隔离判据；
 - 对应报告和证据路径。
 
 ## 8. 风险与门禁
@@ -236,6 +340,8 @@ docs/products/atlascomic/
 |---|---|---|
 | kernel 逃逸 | Web 依赖 TUI/engine/private UI | scanner 负断言；fail closed |
 | schema 分叉 | 同一事件出现第二份定义 | kernel/shared 单源；生成 types |
+| host 状态旁路 | host 直读 `~/.atlas-*` 数据或配置，形成第二状态源 | 所有状态经产品 kernel headless contract；host 直读 scanner；fail closed |
+| Code-first protocol | shared schema 焊入 terminal/bash 或其他 Code-only 语义 | Code-neutral schema review + scanner；Code-only 面进入 Code bundle |
 | gate 污染 | 0.1.106 期间主线被 Web 写入 | P0 全部只读；独立 worktree；拒绝正式 merge |
 | 产品复制 | Office/Comic 自带 shell | bundle + domain controller + renderer 评审拦截 |
 | 长期分支漂移 | 产品分支保留独立 kernel | lane/package 取代永久产品分支 |

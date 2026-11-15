@@ -1,0 +1,55 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://atlaswork.cn/schemas/atlas-family-manifest.schema.yaml
+title: Atlas Family Manifest
+name: atlas-family-manifest
+version: 1
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - kernel
+  - web
+  - products
+  - protocol
+properties:
+  schemaVersion:
+    const: 1
+  kernel:
+    type: object
+    additionalProperties: false
+    required: [repo, commit, package]
+    properties:
+      repo: { type: string, const: AtlasCode }
+      commit: { type: string, pattern: '^[0-9a-f]{7,40}$' }
+      package: { type: string, minLength: 1 }
+  web:
+    type: object
+    additionalProperties: false
+    required: [repo, commit, platform]
+    properties:
+      repo: { type: string, const: AtlasWeb }
+      commit: { type: string, pattern: '^[0-9a-f]{7,40}$' }
+      platform: { type: string, minLength: 1 }
+  products:
+    type: object
+    additionalProperties: false
+    required: [code, office, comic]
+    properties:
+      code: { $ref: '#/$defs/product' }
+      office: { $ref: '#/$defs/product' }
+      comic: { $ref: '#/$defs/product' }
+  protocol:
+    type: object
+    additionalProperties: false
+    required: [name, version]
+    properties:
+      name: { type: string, const: atlas-headless }
+      version: { type: string, pattern: '^v[0-9]+$' }
+$defs:
+  product:
+    type: object
+    additionalProperties: false
+    required: [package, configDirName]
+    properties:
+      package: { type: string, minLength: 1 }
+      configDirName: { type: string, pattern: '^~/.+' }

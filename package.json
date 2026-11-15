@@ -24,6 +24,7 @@
     "dev": "bun run --watch src/atlascode/launcher.ts",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "atlasweb:boundary-scan": "bun scripts/atlasweb-kernel-boundary-scan.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
