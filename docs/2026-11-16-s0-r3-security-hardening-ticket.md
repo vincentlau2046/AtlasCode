@@ -57,3 +57,11 @@
 3. **双采样守卫关系 = 叠加保留（b）终裁**：fd 链闭合 loadTranscriptFile **函数内**四点窗；但 **adapter 校验 → loader open 之间的交接窗**仍为路径面——adapter/replay 层双采样三元组守卫正覆盖该窗，两者互补非冗余（结构性互补，非可选）。缓解描述真形：pairing 记录更新为「fd 链（函数内四点）+ 交接窗双采样守卫（叠加纵深）」，消费侧 pairing 同步义务在单信号通知体列明。
 4. **resolve() 环修采认（§6-2 方向定形）**：visited Set + 环判 gap 返 null（头注 gap 语义闭合，最小修形）；格 1 恶意 fixture = A/B 互环 + 存活 C.parentUuid=A 触发 resolve 形（段 0 三步链直译）。
 5. 呈批书按本节预裁 + §6 必改钉成稿（fd 四点统一单 fd 签名收形由 Main 呈批细化）；批复后落码。
+
+## §8 fd 链签名收形定形（2026-11-16，f4；Main §2-前置交付件裁定）
+
+1. **总形采认 + 一处作用域钉死（关键）**：四点收形（:1061 fd.stat / :1066 scanner 加性 fd 参所有权归 caller / :1074 私有签名直改 + **autoClose:false 必钉采认** / :1081 fd.readFile）技术形全准——但「opts/env 门后唯一 fd 开点」**无条件开 fd 与 §7-2 分账 A 冲突**：默认臂若走 fd 链，rename-during-read 场景失败模式由「半旧半新静默交付」变「ino 复核报错」= 默认臂行为变，违反审计必改级 (a)「fd 分态仅授权面生效、恒等格严格成立」。**钉死：fd 链作用域 = opts 在场支**——任何 opts 传入（precompactSkip/maxBytes）即走 fd 链（open→fstat→四点全 fd→读毕 ino/size 复核）；**零 opts 默认臂保持既有 stat+readFile 路径形逐字节恒等含失败模式**（CLI 车道 = 用户自有文件威胁面，A 分账理由 (b)）。TUI 零 opts 调用恒走默认臂 = 恒等域；web readonly.ts:34 恒传 opts = fd 链域。`fs.open` 计数断言随作用域修正：opts 支 ==1 / 默认臂 ==0（路径形）。
+2. **maxBytes 加性 opts 采认**：undefined = 不设界；检查点 = fstat 后立即、scanner 分叉前（授权支内 force-full 与分块两臂同受界，与发现③「载入前预解析尺寸界」定位一致）；超界抛 `TranscriptTooLargeError` 域内定型错，sessionStoreAdapter catch 映射 resourceLimit（消费回归腿①接口缝）——**映射层 message 安全化钉死（无盘路径/stack 入 web 错误，contract 错误面纪律）**。
+3. **异常面采认**：fd.open 失败（ENOENT 等）原样上抛与现语义等价；close 仅 caller 所权支 finally；scanner 缺省臂自开自关形保留（attribution.ts/SDK 消费面零适配恒等）。
+4. **格面外登记采认**：load.ts:521 readFile 属 loadTranscriptFromFile .json 旧格式 fallback 支（:471 .jsonl 恒委托 loadTranscriptFile，web replay 不触）——登记不动，f4 实锚 :471/:521 吻合。
+5. **格面修正式**：格 2 fd 单开断言 = 授权支 fs.open 计数 ==1；格 4 恒等域断言 = 零 opts 默认臂既有 fixture 全量输出+失败模式恒等（fd 链零触碰默认臂）；格 3 maxBytes 腿 = opts-in 授权支。呈批书按本节成稿即批复落码。
