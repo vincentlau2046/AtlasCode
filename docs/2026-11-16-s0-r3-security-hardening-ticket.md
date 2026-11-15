@@ -49,3 +49,11 @@
 4. **必改钉 1——fd 链覆盖完备性（格 2 扩）**：函数内**全部**路径型读取统一单 fd（open→fstat→全 fd 读→读毕 ino/size 复核），禁逐点零散替换——只闭 readFile 一点则 metadata 扫描支（:1074 独立重开）窗口仍在（预压缩跳过分支正是元数据面）。
 5. **必改钉 2——R-3 双采样守卫与 fd 链关系定谳（lock-face 二选一，禁默换）**：(a) 守卫等价重形（双采样三元组改由 fd fstat 序列承载，语义等价断言）；(b) 叠加保留（fd 链 + 原双采样纵深并存）。消费者 pairing 记录的安全缓解描述须同步真形。
 6. **格框架采记**：格 2 扩四点覆盖 + 守卫关系定谳；格 3 作用域分账 + 数值单源；格 4 恒等精确化（异常分态面归属）；消费侧三腿对表 ✓；「零半旧半新交付」关键断言在格；pairing Security findings 节由消费侧复核销项 ✓。**双信号②即发 Main（lock-face 呈批，本节在案）**。
+
+## §7 f4 预裁（2026-11-16，Main 证据补报 + f4 活码实核；约束 lock-face 呈批书内容）
+
+1. **调用点清点采认**：loadTranscriptFile src 内真消费点恰 2——readonly.ts:34（web 载体车道，force-full → 直落 :1081 无界整读 = 发现③真目标路径，f4 实读吻合）+ conversationRecovery.ts:355（TUI 默认臂零 opts，f4 实读吻合）；scanner.ts:7 头注 151MB session 工程事实实锚 ✓。
+2. **缺省臂作用域分账 = A 采认（终裁）**：默认臂行为逐字节恒等，界经 opts 加性传入，web 适配层（sessionStoreAdapter）显式 opts-in；界值单源 src/atlascode/web/limits.ts，opts 缺省 = 不设界（undefined 语义）。理由采认：(a) 默认臂硬界破 TUI 107-151MB 合法 session resume = 不可接受回归面；(b) 威胁模型分账——发现③暴露面 = web 载体不可信路径经 replay API，TUI 本地车道文件为用户自有 transcript；(c) 与 §2 预钉 opts 加性/缺省臂恒等守卫一致。格 4 恒等格严格域 = 默认臂；格 2/3 新行为域 = opts-in 授权面。
+3. **双采样守卫关系 = 叠加保留（b）终裁**：fd 链闭合 loadTranscriptFile **函数内**四点窗；但 **adapter 校验 → loader open 之间的交接窗**仍为路径面——adapter/replay 层双采样三元组守卫正覆盖该窗，两者互补非冗余（结构性互补，非可选）。缓解描述真形：pairing 记录更新为「fd 链（函数内四点）+ 交接窗双采样守卫（叠加纵深）」，消费侧 pairing 同步义务在单信号通知体列明。
+4. **resolve() 环修采认（§6-2 方向定形）**：visited Set + 环判 gap 返 null（头注 gap 语义闭合，最小修形）；格 1 恶意 fixture = A/B 互环 + 存活 C.parentUuid=A 触发 resolve 形（段 0 三步链直译）。
+5. 呈批书按本节预裁 + §6 必改钉成稿（fd 四点统一单 fd 签名收形由 Main 呈批细化）；批复后落码。
