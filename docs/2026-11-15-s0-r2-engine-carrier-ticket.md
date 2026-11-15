@@ -40,3 +40,12 @@
 
 - 缺口登记属实、排程本波；**G1 门内作业不等待**（host/adapter 骨架 + fake engine + seeded fixture 继续）——fake engine 集成腿未来可复用为格 1 对照列。
 - 配对记录 docs/upstream-pairing.md 为格 6 基线锚。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-15，通过——1 必改级 + 3 必改钉 + 预钉不变量/判定判据；@ff386b1d 全锚实核）
+
+1. **焦点① 缺口定性成立**：注入缝/runtimeDefault 头注自证「消费方自备 engine」系 S0-R 交付波**显式设计选择**，后果 = G2 真实四面结构性不可达——「交付波设计面遗留缺口」定性准确；消费侧拒手抄正确面。**方法论沉淀（登记，全波适用候选）**：「零 engine 泄漏」纯度不变量与「真实四面验真」交付目标在 S0-R 锁面未做**可达性对撞**——gate 全绿但终局目标不可达 = 可达性盲区（假绿的镜像形）；锁面纪律候选 = 交付波 lock-face 增「终局验收目标可达性推演」必答项（下次 release-governance 矩阵修订时落档）。
+2. **预答不变量（两形同守）**：`createReadonlySessionRuntime(options.engine)` 注入缝**保留不动**——禁「factory 内置 engine 移除注入参」重形（消费侧 fake 集成腿/格 1 对照列/测试注入形全系于此）。
+3. **形 A/B f4 机械裁定（审计四判据）**：① 消费 DX——形 A 单导入优；② pairing 治理成本——形 A 同出口扩形无新 subpath，配对清单/通知体增量小，形 B 双出口分账成本高；③ bundle 增量——「只需 runtime 不需 engine」消费者不存在（runtime 本身即需 engine），形 A 增量论据弱（如实入表）；④ 语义清晰度——形 A 具名导出 `createDefaultReadonlySessionRuntime` 清晰，与形 B 相当。**裁定 = 形 A**（①②③ 占优，④ 中性）；审计自决注记（若 B 则 `./web-session-runtime/default` 命名）随之不触发。
+4. **必改级（格 2 豁免面收窄）**：「Node 模块装载必需读取除外」钉死 = ① 载入必需白名单唯二（模块解析/源读取）；② paths.ts 顶层 VERSION fs 探测 + env.ts 默认 HOME 合并等顶层 IO/env 进程面 = **惰性化修复**（首次调用求值/显式注入）非豁免——豁免形 = import-time HOME 合并复活 = R-1 隔离经模块装载面回归（假隔离比无隔离更危险）；③ 格 2 判据升级 = 受控 HOME 下导入前后**全局对象逐字段零差** + fs 调用探针零命中（读面也零，不只写 hash）。
+5. **必改钉 3**：① sessionMessagesCache（load.ts:1274 模块级 Map）双实例同 sessionId 零串扰须**直接断言**机制面（非仅行为间接推）；② 格 4 扩 **d.ts 泄漏面**——内部 TranscriptMessage/engine 内型不得现于两出口 .d.ts，公开类型面（ReadonlySessionEngine/ProjectionSourceMessage 现已在公共 options 面）lock-face 逐型对表定公开面；③ cli.js 字节锚（282b0085…）引用为格 4 联动断言（engine 入 pack 图不得改 CLI bundle——两 build 零共享 chunk 纪律）。
+6. **流程确认**：格框架成立（7 格 + fake 对照列 + pairing 锚）；lock-face → 落码 → gate → 段 L 0.1.117 候 → 生产 lane → 单信号附配对增量 + G2 解阻；0.1.114 件 F/队列不抢。**双信号②即发 Main（lock-face 呈批开工，本节在案）**。
