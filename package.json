@@ -10,6 +10,14 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./web-contract": {
+      "types": "./dist/web-contract/index.d.ts",
+      "import": "./dist/web-contract/index.js",
+      "default": "./dist/web-contract/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +33,8 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "atlasweb:boundary-scan": "bun scripts/atlasweb-kernel-boundary-scan.ts",
-    "prepublishOnly": "bun run build"
+    "build:web-contract": "bun build src/kernel/protocol/webSessionV0.ts --outfile dist/web-contract/index.js --target browser --external zod && tsc -p tsconfig.web-contract.json && mv dist/web-contract/webSessionV0.d.ts dist/web-contract/index.d.ts",
+    "prepublishOnly": "bun run build && bun run build:web-contract"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",
