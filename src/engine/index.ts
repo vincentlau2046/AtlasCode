@@ -934,6 +934,8 @@ export {
   processResumedConversation,
   type SessionSnapshot,
   type SessionContextPort,
+  // S0-R 只读子门面（web 只读 runtime 专用 force-full 加载；零写面）
+  loadTranscriptFull,
 } from './session'
 export {
   parseBaseToolsFromCLI,

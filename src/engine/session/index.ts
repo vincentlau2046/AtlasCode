@@ -138,6 +138,8 @@ export {
   hasSessionMessagesCache,
   doesMessageExistInSession,
 } from './load'
+// S0-R 只读子门面（web 只读 runtime 专用 force-full 加载；零写面）
+export { loadTranscriptFull, type ReadonlyTranscriptLoad } from './readonly'
 
 // session memory 阈值状态机 + Port 5 注入窗口
 export type { SessionMemoryConfig } from './sessionMemory'

@@ -1001,7 +1001,16 @@ function walkChainBeforeParse(buf: Buffer): Buffer {
  */
 export async function loadTranscriptFile(
   filePath: string,
-  opts?: { keepAllLeaves?: boolean },
+  opts?: {
+    keepAllLeaves?: boolean
+    /**
+     * S0-R 只读 runtime 加性修形（呈批书 §7.3，f4 批复 @f1f1099d）：
+     * 'force-full' 跳过 >5MB precompact 两段剔除（尺寸门 + walkChainBeforeParse）
+     * 全量读；缺省/'auto' = 逐字节现状恒等。不 mutate env
+     * （ATLAS_DISABLE_PRECOMPACT_SKIP 进程级全局，禁触）。
+     */
+    precompactSkip?: 'auto' | 'force-full'
+  },
 ): Promise<{
   messages: Map<string, TranscriptMessage>
   summaries: Map<string, string>
@@ -1040,7 +1049,11 @@ export async function loadTranscriptFile(
     let buf: Buffer | null = null
     let metadataLines: string[] | null = null
     let hasPreservedSegment = false
-    if (!isEnvTruthy(process.env.ATLAS_DISABLE_PRECOMPACT_SKIP)) {
+    const forceFull = opts?.precompactSkip === 'force-full'
+    if (
+      !forceFull &&
+      !isEnvTruthy(process.env.ATLAS_DISABLE_PRECOMPACT_SKIP)
+    ) {
       const { size } = await stat(filePath)
       if (size > SKIP_PRECOMPACT_THRESHOLD) {
         const scan = await readTranscriptForLoad(filePath, size)
@@ -1077,6 +1090,7 @@ export async function loadTranscriptFile(
     // hasPreservedSegment did not run).
     if (
       !opts?.keepAllLeaves &&
+      !forceFull &&
       !hasPreservedSegment &&
       !isEnvTruthy(process.env.ATLAS_DISABLE_PRECOMPACT_SKIP) &&
       buf.length > SKIP_PRECOMPACT_THRESHOLD
