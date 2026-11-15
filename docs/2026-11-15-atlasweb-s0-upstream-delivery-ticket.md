@@ -205,6 +205,13 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 3. **事项 A 裁定（自动安全审查 8 findings，#391）**：findings 全落 prep 必改面（fail-open readiness 授权判定/host-state-scan 缺 root 静默 continue/boundary-scan bare import+symlink 未 canonicalize/manifest commit 正则 provenance/configDirName pattern 过宽）= 工单 §2.1 计划内 prep 切片②，**R-1/R-2/R-3 按原序先行批准**——R 码面不消费 prep scanner/评估器，时序耦合不成立。**硬条件钉死：G1 判定与『可以并行实施』通知的前置 = #391 prep 切片② 修形落地且 prep gate（G1 六证据键 + 真值表）在 f4 采认在案**——findings 未修前 G1 不得判 true、通知不得发。
 4. 下一步批准：R-1（readonlyReader + adapter 安全读，隔离反例先红）→ R-2（poll/follow/资源界/终态唯一）→ R-3（./web-session-runtime 出口）→ e2e gate（判据格按切片分列）→ 段 L 0.1.115/0.1.116（候 f4 采认 hash 方走，时序纪律遵行）。
 
+### 5.6 R-1 采认（2026-11-15，f4；251d08c2）
+
+1. **码面采认**：src/atlascode/web/ 四件（errors/limits/sessionStoreAdapter/readonlyRuntime）+ engine/session/readonly.ts 只读子门面 + load.ts 加性 `precompactSkip:'auto'|'force-full'`（缺省逐字节恒等/不 mutate env）——与 §5.3 批复形逐项吻合。
+2. **判据兑现采认**：双实例隔离反例（同 sessionId 不同 scope + env 污染）先红后绿；adapter §7.4 同 fd 校验链全落（O_NOFOLLOW/S_ISREG/ino TOCTOU/读毕复核/containment/错误映射）；factory 生命周期（start/close/epoch/不可重启/closed('not started')）；scopeId↔storageDir 显式映射 + productId 静态校验。
+3. **Δ 采认**：canon 5999/0/492，Δ+18 测试/+1 文件——预注册「~10」为估计形，实数超出方向 = **加严非放宽**（恰合锚 = 文件数与码面，非测试数下界）；adapter 真实 fs 测试（tmpdir seeded）收进预注册 unit 文件 = 本仓 unit 层 tmpdir 先例（atlas-host-state-access 同族）批准，R-3 func 文件仍按预注册开。cli.js 字节变化（18,211,980B）= R 码面入 CLI 图预期面，SRI 对照留段 L。
+4. R-2 继续批准（预注册 +2 文件 ~16 测试——**本切片起实数落账时如偏离预注册须随披露给理由**，方向加严仍须声明防口径松弛惯例化）。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
