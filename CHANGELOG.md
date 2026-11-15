@@ -4,6 +4,31 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.112（2026-11-15）
+
+**W-RC1 输出 token 计数链根修**（lock-face 批复 @eee0f324 + GATE-RED 修形
+呈批/批复 @f61963c9 + 复gate GATE-PASS 判定单 r-20261115-gate-112 §6）。
+
+- **engine 权威链（形 α）**：`queryAgentLoop` 入口单源聚合
+  `turnOutputTokens`（嵌套 `message.usage` 为主、顶层 fallback），逐轮
+  加性字段随 `round_end` 事件发射；重置点 = query 入口单源——「压缩续命
+  不重置」f4 终裁获 e2e tap 活链正证兑现（主查询 4 次 pre-turn 压缩 cum
+  38→166→218→261 零重置）。
+- **转写主车道 opt-in 守卫（GATE-RED 修形项 A）**：`queryEngineLoopStream`
+  加性可选 `transcribeTurnTokens`（缺省 false = fail-closed），全仓唯一
+  置真点 = REPL 主链——compact 摘要 fork / 后台任务 / hook 车道缺省不
+  转写，摘要计数器不再覆写用户可见输出 token 累计（GATE-RED 双面根因 =
+  fork 与主查询交叉写同一 bootstrapState 单例，tap 三重证据链定谳；
+  RED-1「续命重置」整条撤销）。headless 转写 = 日后 lane 级 opt-in
+  独立 lock-face（登记池，禁默开）。
+- **面 A 换源**：spinner 两锚（↓N 注记 / leaderTokenCount）值源从
+  Σtext_chars/4 换 engine usage 终值链（欠计 50–80× 消失）；stalled
+  检测保留 chars 源（双源分离）；teammate 合计分账零触碰。面 B 预算档
+  维持 off（消费点行为零变，点亮需独立 lock-face）。
+- **四件套**：tsc 0 / eslint 0 / build ok / canon 5937/0/483。
+  复gate：g3f 压缩腿三判据 GREEN（摘要转写 SKIPPED fail-closed ×4 /
+  主查询 opt-in 累计跨压缩零重置 / loop 定界清晰）+ g1f 回归腿 GREEN。
+
 ## v0.1.110（2026-11-14）
 
 **W-AB4 渲染增量化首车：env 门控渲染仪表化**（工单
