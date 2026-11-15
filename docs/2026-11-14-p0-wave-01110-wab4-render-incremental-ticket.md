@@ -102,3 +102,7 @@ Ink fork **已具备 cell 级增量基建**——「无 diff 需自建」的原�
 ## §10 段 L release 收口采认（2026-11-14，Main 知会）
 
 release 8c30495d + SRI 三点恒等 bb40ecc9 + npm 已发 + 生产 lane 信号已发 e2e（候回执五段闭环终态）。**W-AB4 首车（零行为仪表化波）发布完成**——二期定谳输入面（11,660 帧语料 + 四候选归因）随之固定。波序遵令：0.1.112 W-RC1 在先、0.1.113 候 W-AB4b 随后（Main 呈批书起草中）。
+
+## §11 生产 lane ⑦ PASS = W-AB4 首车五段闭环终态（2026-11-14，报告 r-20261114-prodlane-110.md）
+
+SRI 四点全 MATCH（registry tgz sha1 2acdbee2…/解包 cli.js 18,211,023 B sha1 9b64b65a…/安装树第三点/tgz integrity sha512 hZwEyWXx…）+ **仪表化 env 开/关双腿 GREEN**（安装品 pty TUI 直跑：on = render.jsonl 118 行全 schema + dmgFull=1.0 与采集形态合 + PONG ×5；off = JSONL 零产生负断言 + pty 正常）。事故 1 起入档（首腿误用 -p headless 形——ink 渲染面 print 模式不走，模式面非 env 面）。**W-AB4 首车五段闭环：工单→审计→段 I 3b8ee7a0→轻形 GATE-PASS→段 L 8c30495d→生产 lane PASS**。二期（W-AB4b 0.1.113 候）输入面固定，lock-face 已批复 N=100ms。
