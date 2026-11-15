@@ -171,7 +171,16 @@ export const getTurnClassifierCount : any = () => _turnClassifierCount;
 export const getTurnClassifierDurationMs : any = () => _turnClassifierDurationMs;
 export const getTurnHookCount : any = () => _turnHookCount;
 export const getTurnHookDurationMs : any = () => _turnHookDurationMs;
-export const getTurnOutputTokens : any = () => 0; // TOKEN_BUDGET feature off by default
+// W-RC1（0.1.112）：回合输出 token 计数真状态。单源 = engine queryAgentLoop
+// （重置点 query() 入口 + round 逐轮累加，压缩续命不重置 = f4 终裁）——本模块
+// 仅持有 TUI 转写值（loopEvents round_end → setTurnOutputTokens），零第二聚合。
+// 读出面（attachments/Spinner/REPL）全在 feature('TOKEN_BUDGET') 门后：
+// gate-off 档行为零变（链图定谳「从未上生产」基座）；gate-on 点亮独立 lock-face。
+let _turnOutputTokens = 0
+export const getTurnOutputTokens : any = () => _turnOutputTokens;
+export const setTurnOutputTokens : any = (total: number) => {
+  _turnOutputTokens = total
+};
 export const getTurnToolCount : any = () => _turnToolCount;
 export const getTurnToolDurationMs : any = () => _turnToolDurationMs;
 export const getUseCoworkPlugins: any = () => false;
@@ -205,11 +214,18 @@ export const setSdkBetas: any = (_v: any) => {};
 export const setStatsStore : any = (() => ({})) as any;
 export const setTeleportedSessionInfo : any = (() => ({})) as any;
 export const setUseCoworkPlugins : any = (() => ({})) as any;
-export const snapshotOutputTokensForTurn : any = (_budget: number | null) => {
-  // TOKEN_BUDGET feature is off by default; turn output token tracking is a
-  // no-op snapshot until that feature lands. Keeping the signature so the
-  // REPL call sites stay valid.
+// W-RC1（0.1.112）：snapshot 替真实现——记录当刻回合累计读数 + 预算额
+// （快照存储半边；REPL 调用点签名占位保留零触碰）。注意：snapshot 不重置
+// 计数器（重置点单源 = engine query() 入口，呈批②）——budget 消费面属
+// 面 B TOKEN_BUDGET gate-on 档，独立 lock-face 后接（禁混档裁定）。
+let _turnTokenBudgetSnapshot: number | null = null
+let _turnOutputTokensAtSnapshot = 0
+export const snapshotOutputTokensForTurn : any = (budget: number | null) => {
+  _turnTokenBudgetSnapshot = budget
+  _turnOutputTokensAtSnapshot = _turnOutputTokens
 };
+export const getTurnTokenBudgetSnapshot : any = () => _turnTokenBudgetSnapshot;
+export const getTurnOutputTokensAtSnapshot : any = () => _turnOutputTokensAtSnapshot;
 export const updateLastInteractionTime : any = (force?: boolean) => {
   if (force) {
     _lastInteractionTime = Date.now()

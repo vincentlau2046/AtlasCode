@@ -31,6 +31,7 @@ import {
 } from 'src/engine'
 import type { StreamDelta } from 'src/modelprovider'
 import type { Message } from 'src/shared'
+import { setTurnOutputTokens } from 'src/tui/bootstrapState.js'
 
 /**
  * TUI 流事件族（onQueryEvent 期望面子集：request 启动 + Message 族）。
@@ -89,6 +90,11 @@ export async function* queryEngineLoopStream(
       ...params.deps,
       emit: (event: AgentLoopEvent) => {
         if (event.type === 'round_end') {
+          // W-RC1（0.1.112）：usage 计数链 TUI 转写——engine 侧回合累计值
+          // （event.turnOutputTokens，engine 单源聚合）入 bootstrapState；
+          // UI 层零第二实现。读出面 = getTurnOutputTokens（面 B gate-off
+          // 下不可见，gate-on 消费面独立 lock-face）。
+          setTurnOutputTokens(event.turnOutputTokens)
           pending.push(event.assistantMessage, ...event.toolResultMessages)
         } else if (event.type === 'compacted') {
           pending.push(event.messages[0])

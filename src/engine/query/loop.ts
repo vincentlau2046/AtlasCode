@@ -172,6 +172,13 @@ export type AgentLoopEvent =
       assistantMessage: AssistantMessage
       /** 本轮 tool_result 消息族（顺序 = toolResults 顺序；terminal 轮 = 空族）。 */
       toolResultMessages: Message[]
+      /**
+       * W-RC1（0.1.112）：本 query()（用户可见回合）截至目前累计输出 tokens
+       * （engine 侧单源聚合——每轮 round 消费 assistant message.usage.output_tokens
+       * 终值累加；重置点 = queryAgentLoop 入口单源，压缩续命不重置 = f4 终裁）。
+       * 消费 = tui loopEvents 转写 bootstrapState（headless 消费方同字段直读）。
+       */
+      turnOutputTokens: number
     }
   | {
       /**
@@ -735,6 +742,12 @@ export async function queryAgentLoop(
   }
   let messages: Message[] = args.messages
   let turns = 0
+  // W-RC1（0.1.112）：回合输出 token 计数器（形 α engine 权威链——链图
+  // b6c33846 定谳「环 2 engine 支零消费 + 环 3 生命周期从未存在」的接通点）。
+  // 重置点 = queryAgentLoop 入口单源（用户可见回合 = 一次 query() 调用，
+  // 跨多 round；round 累加不重置）；压缩续命不重置（f4 终裁：autoCompact
+  // 为 query 内部上下文操作非回合边界——压缩后生成 tokens 仍属同用户回合）。
+  let turnOutputTokens = 0
   let terminated = false
   let lastRound: AgentRoundResult | undefined
   // 0.1.81 V3-2 K2 #12：schema 被拒工具剥除面——网关 400 拒某工具 input
@@ -1010,12 +1023,23 @@ export async function queryAgentLoop(
       // 追加协议 tool_result 之后、defer 标记之前）。补充不计入 toolResults
       // （仍只计实际工具回应）；消费方按消息形判别（isMeta + sourceToolUseId
       // 关联面）区别于 tool_result 回应族。
+      const roundAssistantMessage = lastRound.messages[roundInputLen] as AssistantMessage
+      // W-RC1（0.1.112）：usage 终值消费断点接通——本轮 output_tokens 入回
+      // 合计数器（modelprovider 双路 yield 的终值，终值非 chunk 累加，零第二
+      // 实现）。取用形 = 嵌套 message.usage 为主（modelprovider.ts:1125/:1075
+      // yield 形）、顶层 usage fallback（engine 侧 localAgentTask.ts:140 同形
+      // 先例）；interrupted / usage 缺失 = ?? 0 恒等锚，计数链不炸。
+      const roundUsage =
+        (roundAssistantMessage as { message?: { usage?: { output_tokens?: number } } })
+          .message?.usage ?? roundAssistantMessage.usage
+      turnOutputTokens += roundUsage?.output_tokens ?? 0
       deps.emit?.({
         type: 'round_end',
         turn: turns,
         result: lastRound,
-        assistantMessage: lastRound.messages[roundInputLen] as AssistantMessage,
+        assistantMessage: roundAssistantMessage,
         toolResultMessages: lastRound.messages.slice(roundInputLen + 1),
+        turnOutputTokens,
       })
       // 0.1.93b RF-T2：站点⑤ per-round flush——轮末 awaited 钩子（f4 §11/§12
       // 批复）。回合 N 内入队的 SDK 事件（task_notification bookend 族）在此
