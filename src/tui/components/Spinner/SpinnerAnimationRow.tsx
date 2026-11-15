@@ -16,6 +16,7 @@ import { useStalledAnimation } from './useStalledAnimation.js';
 import { interpolateColor, toRGBColor } from './utils.js';
 import { getSpinnerDisplayGates } from './spinnerGates.js';
 import { getTurnOutputTokens } from '../../bootstrapState.js';
+import { SPINNER_ANIMATION_INTERVAL_MS } from '../../constants/spinnerAnimation.js';
 const SEP_WIDTH = stringWidth(' · ');
 const THINKING_BARE_WIDTH = stringWidth('thinking');
 // #250 concern 3：timer/tokens 时间门抽 spinnerGates.ts 纯函数面（1s/5s 双门）。
@@ -102,7 +103,10 @@ export function SpinnerAnimationRow({
   thinkingStatus,
   effortSuffix
 }: SpinnerAnimationRowProps): React.ReactNode {
-  const [viewportRef, time] = useAnimationFrame(reducedMotion ? null : 50);
+  // W-AB4b 切片 2（f4 批复 @7d9cbea3）：动画时钟降频 50→SPINNER_ANIMATION_
+  // INTERVAL_MS(100)——15.6→10fps，committed 帧直减；thinking shimmer 共享
+  // 源同降频。数据即提交维持 16ms leading-edge（零新机制）。
+  const [viewportRef, time] = useAnimationFrame(reducedMotion ? null : SPINNER_ANIMATION_INTERVAL_MS);
 
   // === Elapsed time (wall-clock, derived from refs each frame) ===
   const now = Date.now();

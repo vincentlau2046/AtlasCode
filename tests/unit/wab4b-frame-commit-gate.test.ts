@@ -193,3 +193,39 @@ describe('W-AB4b 切片 1 · 修形四点锁形（源级）', () => {
     expect(helpers).toContain('...event.phases,')
   })
 })
+
+// ── 切片 2：面 2 动画降频 N=100ms（f4 UX 裁定 @7d9cbea3）───────────────────
+describe('W-AB4b 切片 2 · 动画时钟降频锁形（源级）', () => {
+  const animRow = readSrc('tui/components/Spinner/SpinnerAnimationRow.tsx')
+
+  test('① 降频常量单源：SPINNER_ANIMATION_INTERVAL_MS = 100（落 constants）', () => {
+    const constants = readSrc('tui/constants/spinnerAnimation.ts')
+    expect(constants).toContain('export const SPINNER_ANIMATION_INTERVAL_MS = 100')
+    // 归因纪律：数据即提交维持既有 16ms leading-edge（零新机制）口径在案
+    expect(constants).toContain('leading-edge')
+  })
+
+  test('② 消费面单点：SpinnerAnimationRow 动画时钟换常量；reducedMotion null 门保留', () => {
+    expect(animRow).toContain(
+      'import { SPINNER_ANIMATION_INTERVAL_MS } from \'../../constants/spinnerAnimation.js\'',
+    )
+    expect(animRow).toContain(
+      'useAnimationFrame(reducedMotion ? null : SPINNER_ANIMATION_INTERVAL_MS)',
+    )
+    // 旧 50 字面量锚清零（该文件唯一 useAnimationFrame 调用点）
+    expect(animRow).not.toContain('useAnimationFrame(reducedMotion ? null : 50)')
+  })
+
+  test('③ 范围外消费者零触碰：光标闪烁/语音/shimmer/动词轮维持原值', () => {
+    expect(readSrc('tui/components/TextInput.tsx')).toContain('useAnimationFrame(needsAnimation ? 50 : null)')
+    expect(readSrc('tui/components/PromptInput/VoiceIndicator.tsx')).toContain('useAnimationFrame(reducedMotion ? null : 50)')
+    expect(readSrc('tui/components/PromptInput/ShimmeredInput.tsx')).toContain('useAnimationFrame(hasShimmer_0 ? 50 : null)')
+    expect(readSrc('tui/components/Spinner.tsx')).toContain('useAnimationFrame(reducedMotion ? null : 120)')
+  })
+
+  test('④ 数据即提交零新机制：16ms 节流结构在场（FRAME_INTERVAL_MS throttle）', () => {
+    const inkSrc = readSrc('tui/ink/ink.tsx')
+    expect(inkSrc).toContain('scheduleRender = throttle(')
+    expect(inkSrc).toContain('FRAME_INTERVAL_MS')
+  })
+})
