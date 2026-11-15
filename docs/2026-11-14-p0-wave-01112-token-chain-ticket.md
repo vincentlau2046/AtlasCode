@@ -87,3 +87,13 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 ## §9 段 I 终态采认（2026-11-15，Main 知会；切片 1 e7a20896 + 切片 2 27fe66f2）
 
 批复七项逐项落位采认：① 形 α 落位 + **取用形勘锚补强采认**（实 wire = 嵌套 message.usage 形，modelprovider.ts:1125/:1075 yield；落码取嵌套为主/顶层 fallback，engine localAgentTask.ts:140 同形先例——链图语义直证）；② 重置点 queryAgentLoop 入口单源 + 压缩续命不重置终裁落地；③ 分账零触碰；④ 面 A 双锚换源（SpinnerAnimationRow leaderTokens + Spinner leaderTokenCount → getTurnOutputTokens）+ 回归格三件落位；⑤ **gate-off 档面 B 采认**（6 消费点零变；snapshot 真实现 = 快照存储半边不重置计数器——与重置点单源裁定自洽，reset 权归 query() 入口；budget 消费面留 gate-on 独立 lock-face；新增 getTurnTokenBudgetSnapshot/getTurnOutputTokensAtSnapshot 两内部 getter 在「替真实现」纬度内）；⑥ 容差双上界落地（判别格 + e2e 采集口径同步）；⑦ 6 文件改账在案。canon 5934/0/483（Δ=+11 测 +2 文件恰合）。e2e gate 采集已请求（容差账本回放 + 面 A 验证 + gate-off 零变 + 压缩续命腿）。候段 G gate → 段 L；W-AB4b 排后遵令。
+
+## §10 GATE-RED 修形批复（2026-11-15，f4：**两项批准**；呈批书 docs/2026-11-15-wrc1-gatered-remediation-brief.md）
+
+判定单 r-20261115-gate-112.md 格4 双面 RED（判定单详档 e2e 侧）。
+
+1. **修形项 A（RED-2 真缺陷）批准**：`queryEngineLoopStream` 加性可选字段 `transcribeTurnTokens?: boolean`，缺省 **false = fail-closed**（0.1.92 C-6 先例同族）；loopEvents round_end 分支 `setTurnOutputTokens` 门控；**唯一置真点 = REPL.tsx:2666 主链**；引擎零改动（round_end.turnOutputTokens 照发，消费面收敛主车道）；面 A 两锚读出面不变（fork 期间 spinner 保持主查询最后累计值 = 覆写缺陷消除后的正确行为）。已批 lock-face 主体（形α/面A换源/面B off/容差双上界）零触碰，仅切片 1「loopEvents 无条件转写」子形修订——批复纬度内。
+2. **项 A 三注记（入判别格/登记）**：① LocalMainSessionTask/hook 车道缺省不转写 = 预期（非前台 spinner 消费面）；② 批复①「headless 同面受益」收窄为「headless 消费面缺席故缺省 false 零损失」——日后 headless 需要转写 = lane 级 opt-in 独立 lock-face，**禁默开**（登记池）；③ runAgent.ts 直调不经 loopEvents 天然不转写，确认零回归。
+3. **改判项 B（RED-1 整条撤销）批准采认**：g3e loop 账本 + Main 源图终判双源——全程 ONE 主查询 + 4 个 turn-1…4 摘要 fork（时序/messageCount 算术 8→9→10→10/maxTurns=1 纯文本形状三重证据）；「cum=788→38 清零」现象本体 = fork 与主查询交叉写同一 bootstrapState 单例（RED-2 普遍形）；**f4 终裁「压缩续命不重置」获正证兑现**（主查询内 4 次 pre-turn 压缩 cum 38→166→218→261 零重置）。零落码；e2e 判据补「query 身份 = loop_start/loop_end 事件定界」条款（g3e 基建已在），判定单由 e2e 补改判附注。
+4. **复gate 判据批准**：同形压缩腿（window=30k）+ g1 无压缩回归腿；格4 = fork 前后 bootstrapState 读数不变（摘要不覆写）+ loop 定界 query 身份 + 主查询内压缩零重置；格1/2/3 回归零变。修形落码 → 四件套 → e2e 复gate → 段 L release 0.1.112。
+5. 呈批书编号勘误级注记：§1.3 缺号（1.2 直跳 1.4），不阻批复。
