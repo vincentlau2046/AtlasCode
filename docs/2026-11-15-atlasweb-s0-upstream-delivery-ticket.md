@@ -229,6 +229,7 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 5. **Δ 披露采认**：+3 文件 +12 件 vs 预注册 +2 文件 ~10（加严向已披露：follow 两安全回归件独立成件 + contract-pack 断言改形随扩链连带非新增）——批准。canon 6032/0/496 恰合（Δ+12/+2 与披露逐件对账吻合）。zod-external 偏差修正采认：contract shim 纯 type re-export → bundle 零 zod 依赖（强于预期形），--external 保留防御性。
 6. **R 波码面收口**：U-1/U-2/R-1/R-2/R-3 五切片全落。下一步 = U+R 合流 e2e gate（判据格 A-J 按切片分列，prep 测试不冒充生产 gate）→ 段 L 0.1.115/0.1.116（候本节采认 commit hash 方走）→ 发布后安装品生产复验 → #391 prep 切片② 修形 + prep gate（G1 六证据键 + 真值表）f4 采认 → 硬条件解锁。
 7. **登记（Main 转呈，非阻塞）**：e2e gate 运行面 bun 测试进程段错误 ×2（运行时崩非产品码红，与 node 24 tsc flaky 段错误同族）→ **「bun 升级评估」入 f4 评估池**：bun 1.4.2（现役）→ 最新 stable 收益/风险（段错误频率随版本消长、对 canon 口径 `--isolate ./tests/` runner 与 CI 环境同步面影响）。属环境面非产品码；f4 有裁方排工单，Main 不先行。
+8. **采认后修形追认（2026-11-15，f82c3967，f4 抽验）**：push 触发安全审查 [HIGH] follow run() 无 catch——issueBaseline 双采样 stat 拒绝逃逸 void run() = unhandled rejection 且违反 §5.7 终态对钉死形。修形 = run() catch-all 统一翻译 error→closed 成对（非形变，对齐既有钉死形；锁面不动），finally 释放序保持。f4 抽验码面吻合（catch-all + WebSessionError code 翻译 + 未知异常 ioUnavailable retryable 兜底）。TDD RED→GREEN 在案（statTranscript 拒绝注入：RED 静默挂死 → GREEN error{ioUnavailable}+closed 成对紧邻）；canon 6033/0/496 Δ+1 恰合回归件。**gate 候选锚更新 f82c3967**（e2e 另行知会）。
 
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
