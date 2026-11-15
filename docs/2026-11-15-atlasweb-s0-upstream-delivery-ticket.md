@@ -192,6 +192,12 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 4. **呈批④（§7.7）批准**：S0-U = **0.1.115** / S0-R = **0.1.116** 确认；五切片 U-1/U-2/R-1/R-2/R-3 Δ 预注册表在案（判据格按切片分列 gate 报告、段 L 一次）；S0-P prep 提交窗 = 0.1.113 段 L 收口后立即执行、gate 等待期只读预研零提交。§7.4 同 fd 校验链（O_NOFOLLOW+fstat 双核+S_ISREG 白名单+hardlink 面逃逸测试）与 §7.6 资源表零修订（两知会项：poll 1000ms 时延基线非性能承诺、pageToken 与 cursor 同账本家族 TTL 600s）一并采认。
 5. **§7.1 P0 整合形批准**：逐文件 diff 应用（不 cherry-pick 整提交）+ G1 六证据键 + manifest v1/v2 pairingRef 绑定形。**本批复 = 双信号②在案——Main 开工 U-1（webSessionV0 单源 + unit 格）**；0.1.113 W-AB4b 链照常不阻。
 
+### 5.4 U-1 落位采认 + U-2 退避裁定（2026-11-15，f4）
+
+1. **U-1 采认（0293cb06，原地不退）**：纯加性零既有文件 diff（src/kernel/protocol/ + tests/unit/ 各一新文件），canon 5962/0/485 Δ=+13+1 恰合预注册表，tsc/eslint/build 0——对 0.1.113 W-AB4b 判据面零影响，**无需 revert**。U-1 先行披露形与呈批书 §9「独立可 revert」一致。
+2. **U-2 退避裁定：批准 Main 提案**——U-2 触 package.json exports/build 面正属 §7.7 prep 窗纪律防的候选污染面（func 测试亦入 gate canon 扫描域），**U-2 开工门 = 0.1.113 段 L 收口（与 S0-P prep 同窗）**。R-1/R-2/R-3 顺延同门（R 切片同触 build/出口面）；R-1 域内 readonly.ts 纯码是否提前由 Main 按 §7.7 prep 纪律自判（触面即退避，不触可预研零提交）。
+3. **S0-P 预研采认**：P0 净资产 19 文件 +1402/-2 盘点在案；两注意面采认——① 三文档 hash 源在 P0 worktree 工作树（未提交态），整合时以 §0.1 三 hash 逐一复核工作树内容为准，AtlasWeb-F4 侧不另行 commit；② P0 四提交含 package.json +1 行，整合时逐行核、build face 遵 prep 窗。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
