@@ -72,3 +72,14 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 4. **容差双上界预演采认**：round_end 逐回合累加对权威源天然 Δ=0（落账候选）；face A 路线工具回合 Δ 逾百倍必出界——容差数值 lock-face 冻结数据面齐备（采样账本 13 请求/12 回合/4 型 Σoutput=2466）。
 5. **修形形态预览采认**：主修 = 环 3 round_end 消费 assistantMessage.usage.output_tokens 逐回合累加（零新增 wire 面）+ face B 点亮呈用户（「从未上生产」基座）+ gate 两档腿形（usage↔落账 Δ 双上界腿 + 注记渲染条件腿）。候 Main 正式 lock-face 一并呈批——届时 **face B 点亮 + face A 换源两裁定呈用户**。
 6. 事故链三条全记录（v2 regex 嵌套/端口红鲱鱼/瞬态挂起 T1-T4 排除）。
+
+## §8 段 D lock-face 批复（2026-11-15，f4：**通过，按批复形入段 I**；呈批书 docs/2026-11-15-wrc1-lockface-brief.md）
+
+1. **呈批① 形 α 批准**：engine loop round_end 消费 assistant `message.usage.output_tokens` 终值（流式读 final message.usage / 非流式读 acc 聚合，零第二实现）→ 回合计数器逐回合累加 → round_end 加性字段 `outputTokens` → TUI loopEvents 转写新落 setter → bootstrapState :174/:209 双 stub 替真实现（REPL 调用点占位零触碰）。headless 同面受益；形 β 否决理由维持（headless 零受益 + 聚合面违单源）。
+2. **呈批② 重置点批准 + 压缩续命不重置 = f4 终裁批准**：query() 入口单源（round 累加不重置）；autoCompact 在 query 内部 = 上下文操作非回合边界 → 续累加（压缩后生成 tokens 仍属同用户回合——链图裁决采认，禁预答条款闭环）。
+3. **呈批③ 分账两项批准**：teammateTokens 分账禁合并（SpinnerAnimationRow:170 teammate 段零触碰，换源只替 leaderTokens）；KV 摘要三车道输入估算面禁混用（0.1.92 C-1 面不相通，落码不得借道）。
+4. **呈批④ 面 A 换源 = 用户裁定批准（2026-11-15）**：leaderTokens 换读真计数器 getter，弃 Σchars/4。回归格三件采认：① stalled 检测/动画节律保留 chars 源双源分离（chars 专供 stalled/节律，token 专供数值注记）② teammate 合计零变 ③ ↓N 注记出现频率/时点变化为预期（e2e §3 直证在案）。屏显数值变真实量级 = 用户件 C 意图内。
+5. **面 B = 用户裁定维持 off（2026-11-15）**：TOKEN_BUDGET 预算机制**不随本波点亮**（输入解析+模型注入+续命 backstop 三子系统从未上生产，点亮=新能力首发另行立项）——gate-off 档落码：6 消费点行为零变断言；gate-on 档 e2e wire 断言腿备用（e2e §7 已承诺）；**禁混档**。日后点亮 = 独立 lock-face 呈用户（「从未上生产」基座入档防误心智）。
+6. **容差带冻结批准**：逐回合（turn-id 对齐）计数器终值 vs reqlog `usage.output_tokens`，Δ≤2% 且 Δ≤50 tokens 双上界同时满足（12 回合账本 Σ2466 落账候选面天然 Δ=0；face A 反例逾百倍必出界——数值即此冻结）。
+7. **消费面改账批准**：7→6 文件（compact.ts 常量名撞车非消费点，e2e §4 直证）；0.1.70 遗留账 composing token 项由本链销项，403 fallback 项独立核不顺带。
+8. **落码形批准**：两切片独立可验可 revert——切片 1 = 形 α 主链 + 判别格（格 2 终值单调非零/容差双上界 12 回合账本回放/gate-off 面 B 零变）；切片 2 = 面 A 换源（回归格三件逐格落测）。格 5 canon 逐切片恰合。**段 I 放行**（W-AB4b 两切片遵令排后）。
