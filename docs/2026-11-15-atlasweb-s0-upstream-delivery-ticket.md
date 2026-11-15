@@ -244,6 +244,22 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 3. **Δ 采认**：canon 6070/0/497（基线 6034/0/496，Δ+36/+1 恰合）；TDD RED(21/11/4err)→GREEN + 定向 46/0 + tsc/eslint 0。8 findings（#391）逐条修形在案——**审计硬条件第一前置（#391 落地）兑现**。
 4. **prep gate 批准执行**：Main 跑 G1 六证据键真值表 + evaluateImplementationAdmission 判定（缺一拒形），结果呈 f4 采认在案方算 prep gate 闭环。**硬条件全局账**：G1=true 判定 + 『可以并行实施』单信号前置 = ①#391 落地✅（本节）+ ②prep gate f4 采认（候）+ ③R 生产验证（0.1.115/116 生产复验腿，候 e2e）——三者在案方发单信号，缺一不发。
 
+### 5.13 prep gate 语义层裁定（2026-11-15，f4）
+
+1. **缺口采认**：六证据键为 string 引用面，机械层只查非空——PENDING 占位串可过机械判定但语义=缺席。Main 如实呈报不擅改形 = 纪律正确面。
+2. **裁定 = 甲（判定层负责），预注册形不动**：机械层（非空/格式）与语义满足性分账——**引用是否真实满足键义，由 f4 采认层对可查证据裁定，机械 true 不当 admission**。乙形（satisfied 布尔谓词）拒绝：同一调用方供给的布尔不增真实判别力，反添假精确；锁面不动。此分账注记入 §2.2 判定面（登记，非改形）。
+3. **两 PENDING 键实引供给（Main 回填重跑用）**：
+   - `ticketAuditPass` = `docs/2026-11-15-atlasweb-s0-upstream-delivery-ticket.md §5.2 Atlas-reveiw 审计闭环 @7abc7b92（审计结论：通过）`（master 在案可查；后续 §5.3–§5.13 逐切片/lock-face 采认链同文件可查）。
+   - `userAuthorization` = f4 session 2026-11-15 用户原话：**「OK，你整体排期，完成后只会atlasweb f4可以并实施的通知就可以了。」**（transcript `~/.claude/projects/-home-vince-projects-AtlasCode/9d1c80df-674b-4213-9264-37a1934c722b.jsonl` 在案；授权 f4 统筹 S0 排期 + 单信号通知模式，即本工单 §8 授权链）。
+4. **本轮 G1=false 在案**（PENDING 不计；回填实引重跑 + f4 满足性采认后方判 true）。G1=true 终判仍受硬条件全局账约束（§5.12-4：+ ③R 生产验证在案方发单信号）。
+
+### 5.14 prep gate 闭环采认 + R 生产验证核验（2026-11-15，f4）
+
+1. **prep gate 判定面采认**：真值表 7 件全绿（六键集合冻结/逐键缺失+空+空白拒/G1 不需 controller/G1≠G0/G1=true+G2=false 合法中间态）+ 实代入判定 G1=**false**（两 PENDING 键不计满足，甲形直读）——**判 false 正确**，机械 true 不当 admission 兑现；prep gate 判定面（§5.12-4 前置②的判定件）f4 采认在案。
+2. **R 生产验证核验（前置③兑现）**：e2e r-20261115-prodlane-115-116 生产复验 **PASS**（f4 调阅实证：registry shasum 双版 MATCH + tgz integrity npm dist.integrity 逐字 + 解包/装树 cli.js 282b0085… 双版恒等 + 双出口 7,975B/38,652B + bin --version 0.1.116 + headless PONG）——**S0-P→U→R 全链五段闭环终态在案**。
+3. **两 PENDING 键满足性初裁（f4，§5.13-3 实引为准）**：`ticketAuditPass` = 工单 §5.2 审计闭环 @7abc7b92 可查 → **满足**；`userAuthorization` = 用户 2026-11-15 原话授权（transcript 在案）→ **满足**。待 Main 回填实引重跑呈报，f4 即记 **G1=true 终判**。
+4. **硬条件全局账（终态前）**：① #391 落地✅（§5.12）② prep gate 真值表+判定采认✅（本节-1）+ G1=true 终判（候重跑呈报）③ R 生产验证✅（本节-2）——**仅余 G1=true 终判一件**；在案后即发『可以并行实施』单信号（通知体按工单 §8 全项列明）。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
