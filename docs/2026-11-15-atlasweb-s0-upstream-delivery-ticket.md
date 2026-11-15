@@ -184,6 +184,14 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 
 **审计结论：通过——本审计 = §8/§2.2 G1 前置之一在案。**必改 1/3/4/7 落 §6 格 E/F 判据面；必改 2/5/6 落 §7 lock-face 必答面（②③扩项）。§7 七必答面 + 本节 7 必改 = Main lock-face 呈批书完整输入。
 
+### 5.3 段 D lock-face 批复（2026-11-15，f4：**通过，四组全钉死放行**；呈批书 docs/2026-11-15-s0-ur-lockface-brief.md @91b8324f）
+
+1. **呈批①（§7.2/必改6）批准**：单源 fresh 定义成立——工单 §3.1「coreSchemas 能逐义匹配可复用」前提由呈批书 §0 证据修正（消息块 z.unknown 占位 + 类型生成脚本死链 = 不可复用实证），按证据收窄为全新定义；import 面 = zod/v4 唯一零仓库内 import；exports 条件序 types→import→default；`build:web-contract --target browser --external zod`；`tsconfig.web-contract.json` emitDeclarationOnly 文件名在此列明。CLI build 命令字节不动；prepublishOnly 串入第二 build = build 紧贴 publish 纪律延伸。
+2. **呈批②（§7.3/必改5）批准**：load.ts 唯一修形 = 加性 opts `precompactSkip:'auto'|'force-full'`（缺省逐字节恒等、不 mutate env kill-switch）；**persisted-effective-conversation 定义采认** = 全量读 + terminal leaf 链（CLI 同规则）+ preserved 段并入 + 元数据行不投影；>5MB 域 readonly 全量 vs CLI 截断 = **故意修形**（工单禁隐式截断的正面兑现），fixture 对表 <5MB 域恒等 + >5MB 域各自如实断言。注记：'force-full' 跳过 walkChainBeforeParse 后死 fork 分支由 buildConversationChain 链重建排除——<5MB 对表零差即补偿逻辑实证，**fixture diff 非零 = RED 打回 lock-face 禁静默语义漂移**。renderableSearchText WeakMap 缓存键 = 调用方自有对象，无跨实例泄漏面，知悉复用。scopeId↔storageDir 显式映射、禁全 projectsDir 扫描反查批准。
+3. **呈批③（§7.5/必改1/4/7）批准**：终态优先序 `closed > cancelled > resourceLimit/error > 数据` 钉死；LRU 淘非活跃先、活跃被挤满淘最旧 = 显式 resetRequired 禁静默；lease 句柄签名 `{[Symbol.asyncIterator], renewLease(): Promise<boolean>, close(): Promise<void>}`；close 2000ms 超时拒 ioUnavailable 保持 open 可重试禁半关闭；三方同窗归属表（closed(lease) > cancelled(deadline) > resourceLimit(pending)）预注册 RED→GREEN。
+4. **呈批④（§7.7）批准**：S0-U = **0.1.115** / S0-R = **0.1.116** 确认；五切片 U-1/U-2/R-1/R-2/R-3 Δ 预注册表在案（判据格按切片分列 gate 报告、段 L 一次）；S0-P prep 提交窗 = 0.1.113 段 L 收口后立即执行、gate 等待期只读预研零提交。§7.4 同 fd 校验链（O_NOFOLLOW+fstat 双核+S_ISREG 白名单+hardlink 面逃逸测试）与 §7.6 资源表零修订（两知会项：poll 1000ms 时延基线非性能承诺、pageToken 与 cursor 同账本家族 TTL 600s）一并采认。
+5. **§7.1 P0 整合形批准**：逐文件 diff 应用（不 cherry-pick 整提交）+ G1 六证据键 + manifest v1/v2 pairingRef 绑定形。**本批复 = 双信号②在案——Main 开工 U-1（webSessionV0 单源 + unit 格）**；0.1.113 W-AB4b 链照常不阻。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
