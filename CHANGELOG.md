@@ -4,6 +4,32 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.117（2026-11-16）
+
+**S0-R2 受支持 engine 载体出口波**（工单
+docs/2026-11-15-s0-r2-engine-carrier-ticket.md §6-3/§7 + 呈批书
+docs/2026-11-15-s0-r2-lockface-brief.md @25cb7454，f4 批复工单 §7
+@351c74c4 + §8 @8ef0d74e 采认 + §9 @dfda805c 注 A 勘误采认；GATE-PASS
+判定单 r-20261116-gate-s0r2 七格全绿）。落码 ca761a91（19 文件
++552/−123）。
+
+- **形 A 同出口扩具名导出**：`./web-session-runtime` 新增
+  `createDefaultReadonlySessionRuntime(options)` +
+  `AtlasWebSessionRuntimeOptions`（旧名 `createAtlasWebSessionRuntime`
+  零调用点直接改名）；engine 真体随 bundle（entry 可达公开类型面
+  code-form 口径，禁现面零内部型）；`options.engine` 注入缝保留。
+- **修形四件**：paths.ts VERSION 惰性化；env.ts 顶层进程面首调捕获
+  （语义披露在案；resetSessionEnv 同步清捕获态）；session 消息去重缓存
+  整迁 `sessionMessagesCache`（载体图结构性缺席 = 格 5 双实例构造保证）；
+  runtimeDefault 窄化只读子门面 `src/engine/session/readonly` + 闭内
+  shared barrel 值导入直连（feature/bun:bundle 出图）。
+- **格 6 锚披露首例**（补充钉①「修形入 CLI 图 → 锚变更」预注册纪律）：
+  cli.js 18,211,980B → 18,212,217B（Δ+237B，sha256 `8abf44dd…355855c`）。
+- pack 判据重形（R-3）：engine/session 只读闭包允许 + 禁面零现
+  （tui/private-ui/ui-private/engine 非 session 子域/process.on/env 写/
+  globalThis）；d.ts rewrite 支持 index barrel + tsconfig 补 bun 类型
+  （build 链配套，零 src 行为变化）。
+
 ## v0.1.115（2026-11-15）
 
 **S0-U 上游交付波**（工单 docs/2026-11-15-atlasweb-s0-upstream-delivery-ticket.md
