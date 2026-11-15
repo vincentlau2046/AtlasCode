@@ -16,8 +16,7 @@
 
 import { randomUUID } from 'node:crypto'
 
-import { loadTranscriptFull } from 'src/engine'
-import type { WebSessionProjection } from 'src/kernel/protocol/webSessionV0'
+import type { WebSessionProjection } from './contract'
 
 import { CursorLedger } from './cursorLedger'
 import { WebSessionError } from './errors'
@@ -65,7 +64,12 @@ import {
   HARD_MAX_LEDGER_PAYLOAD_BYTES,
   validateBoundedInt,
 } from './limits'
-import { projectConversation } from './projection'
+import {
+  projectConversation,
+  serializedProjectionBytes,
+  type ProjectionEngineDeps,
+  type ProjectionSourceMessage,
+} from './projection'
 import type { SessionFileEntry, SessionStoreAdapter } from './sessionStoreAdapter'
 import { createNodeFsSessionStoreAdapter } from './sessionStoreAdapter'
 
@@ -94,11 +98,28 @@ export interface ReadonlySessionLimits {
   ledgerPayloadBytes?: number
 }
 
+/**
+ * engine 注入缝（R-3：本域零 'src/engine' 直接导入——§4.5 pack 加载图
+ * 审计面）。CLI 真体经 src/atlascode/web/runtimeDefault.ts cast 焊接
+ * （引擎适配边界，不进 pack 图）；测试注入 fake。
+ */
+export interface ReadonlySessionEngine {
+  /** 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。 */
+  loadTranscriptFull: (filePath: string) => Promise<{
+    messages: Map<string, ProjectionSourceMessage>
+    leafUuids: Set<string>
+  }>
+  /** CLI 同规则链重建（projection 头注镜像义务）。 */
+  buildConversationChain: ProjectionEngineDeps['buildConversationChain']
+}
+
 export interface ReadonlySessionRuntimeOptions {
   /** 静态产品标识（ProductDefinition 单源，'atlascode'）。 */
   productId: string
   /** 授权 scopes（scopeId ↔ storageDir 显式映射；不可缺省）。 */
   scopes: ReadonlySessionScopes
+  /** engine 注入（loader + 链重建）；CLI 真体见 runtimeDefault.ts。 */
+  engine: ReadonlySessionEngine
   /** 只读 storage adapter；缺省 = Node fs adapter（host 可注入 fake）。 */
   adapter?: SessionStoreAdapter
   limits?: ReadonlySessionLimits
@@ -356,6 +377,12 @@ export function createReadonlySessionRuntime(
     return adapter.resolveTranscriptPath(scopeId, sessionId)
   }
 
+  /**
+   * replay 投影加载（§4.3 一致 snapshot）：尺寸资源界先于 loadFull；
+   * 前后双采样三元组全等方采纳（loader 车道 TOCTOU 守卫——validated fd
+   * 关闭后按路径重开窗口内文件不得替换），不配有界重试 → ioUnavailable
+   * retryable。投影序列化字节 ≤ maxProjectionBytes 交付界（零半投影）。
+   */
   async function loadProjection(
     scopeId: string,
     sessionId: string,
@@ -367,24 +394,48 @@ export function createReadonlySessionRuntime(
         throw new WebSessionError('cancelled', 'operation aborted')
       }
       // 尺寸资源界先于 loadFull（adapter stat O(1) 通道；零隐式截断）
-      const st = await adapter.statTranscript(scopeId, sessionId)
-      if (!st) {
+      const stPre = await adapter.statTranscript(scopeId, sessionId)
+      if (!stPre) {
         throw new WebSessionError('notFound', `session not found: ${sessionId}`)
       }
-      if (st.sizeBytes > L.maxTranscriptBytes) {
+      if (stPre.sizeBytes > L.maxTranscriptBytes) {
         throw new WebSessionError(
           'resourceLimit',
-          `transcript exceeds limit (${st.sizeBytes} > ${L.maxTranscriptBytes} bytes)`,
+          `transcript exceeds limit (${stPre.sizeBytes} > ${L.maxTranscriptBytes} bytes)`,
         )
       }
       const filePath = await resolvePath(scopeId, sessionId)
       // 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)
-      const loaded = await loadTranscriptFull(filePath)
-      return projectConversation(loaded, {
-        sessionId,
-        productId: options.productId,
-        scopeId,
-      })
+      const loaded = await options.engine.loadTranscriptFull(filePath)
+      if (signal?.aborted) {
+        throw new WebSessionError('cancelled', 'operation aborted')
+      }
+      const stPost = await adapter.statTranscript(scopeId, sessionId)
+      if (
+        !stPost ||
+        stPost.ino !== stPre.ino ||
+        stPost.sizeBytes !== stPre.sizeBytes ||
+        stPost.mtimeMs !== stPre.mtimeMs
+      ) {
+        throw new WebSessionError(
+          'ioUnavailable',
+          'transcript changed during replay load (snapshot inconsistency)',
+          true,
+        )
+      }
+      const projection = projectConversation(
+        loaded,
+        { sessionId, productId: options.productId, scopeId },
+        { buildConversationChain: options.engine.buildConversationChain },
+      )
+      const bytes = serializedProjectionBytes(projection)
+      if (bytes > L.maxProjectionBytes) {
+        throw new WebSessionError(
+          'resourceLimit',
+          `projection exceeds limit (${bytes} > ${L.maxProjectionBytes} bytes)`,
+        )
+      }
+      return projection
     } finally {
       releaseRead()
     }
@@ -489,7 +540,8 @@ export function createReadonlySessionRuntime(
         },
         signal,
         ledger: cursorLedger,
-        loadFull: loadTranscriptFull,
+        loadFull: options.engine.loadTranscriptFull,
+        buildConversationChain: options.engine.buildConversationChain,
         resolvePath,
         onRelease: () => subscriptions.delete(handle),
       })

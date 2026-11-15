@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { createReadonlySessionRuntime } from '../../src/atlascode/web/readonlyRuntime'
+import { atlasWebSessionEngine } from '../../src/atlascode/web/runtimeDefault'
 import {
   createNodeFsSessionStoreAdapter,
   type SessionStoreAdapter,
@@ -69,6 +70,7 @@ function makeRuntime(limits?: Record<string, number>) {
   const rt = createReadonlySessionRuntime({
     productId: 'atlascode',
     scopes: [{ scopeId: 'proj-a', storageDir: dir }],
+    engine: atlasWebSessionEngine(),
     adapter,
     ...(limits ? { limits: limits as never } : {}),
   })
@@ -111,6 +113,11 @@ async function nextEvent(
   return r.value as WebSessionEvent
 }
 
+/**
+ * 消费至 closed（f4 §5.7 钉死形：closed 恒为唯一 terminal kind——error
+ * 终态路径 = error → closed 成对送达）。断言面：终态对完整 + 终态后零
+ * 数据事件（closed 之后 iter 返回 done）。
+ */
 async function untilTerminal(
   iter: AsyncIterator<WebSessionEvent>,
 ): Promise<{ events: WebSessionEvent[]; terminal: WebSessionEvent }> {
@@ -118,7 +125,12 @@ async function untilTerminal(
   for (;;) {
     const ev = await nextEvent(iter)
     events.push(ev)
-    if (ev.kind === 'closed' || ev.kind === 'error') return { events, terminal: ev }
+    if (ev.kind === 'closed') {
+      // 终态后零数据事件：closed 后 iter 必 done
+      const after = await iter.next()
+      expect(after.done).toBe(true)
+      return { events, terminal: ev }
+    }
   }
 }
 
@@ -223,6 +235,7 @@ describe('followSession 增量链', () => {
     const rt = createReadonlySessionRuntime({
       productId: 'atlascode',
       scopes: [{ scopeId: 'proj-a', storageDir: dir }],
+      engine: atlasWebSessionEngine(),
       adapter: spy,
       limits: { pollingIntervalMs: 100 } as never,
     })
@@ -272,9 +285,15 @@ describe('follow 恢复与终态', () => {
     const sub = await rt.followSession({ scopeId: 'proj-a', sessionId: 'sess-1' })
     await nextEvent(sub[Symbol.asyncIterator]()) // baseline
     appendFileSync(join(dir, 'sess-1.jsonl'), '{definitely-not-json\n')
-    const { terminal } = await untilTerminal(sub[Symbol.asyncIterator]())
-    expect(terminal.kind).toBe('error')
-    if (terminal.kind === 'error') expect(terminal.error.code).toBe('corruptData')
+    const { terminal, events } = await untilTerminal(sub[Symbol.asyncIterator]())
+    // f4 §5.7 终态对：error{corruptData} → closed 成对，closed 唯一 terminal kind
+    expect(terminal.kind).toBe('closed')
+    const errIdx = events.findIndex(e => e.kind === 'error')
+    expect(errIdx).toBeGreaterThanOrEqual(0)
+    const errEv = events[errIdx]!
+    if (errEv.kind === 'error') expect(errEv.error.code).toBe('corruptData')
+    expect(events[events.length - 1]).toBe(terminal)
+    expect(events.slice(errIdx + 1, -1).every(e => e.kind !== 'baseline' && e.kind !== 'replacement')).toBe(true)
     await rt.close()
   })
 
@@ -307,7 +326,7 @@ describe('follow 恢复与终态', () => {
     await rt.close()
   })
 
-  test('abort → 终态 error code=cancelled（closed 优先序外）', async () => {
+  test('abort → error{cancelled} → closed 成对（f4 §5.7 终态对）', async () => {
     writeFileSync(join(dir, 'sess-1.jsonl'), `${userLine('u1', null, 'hi')}\n`)
     const rt = makeRuntime({ pollingIntervalMs: 100 })
     await rt.start()
@@ -318,9 +337,14 @@ describe('follow 恢复与终态', () => {
     )
     await nextEvent(sub[Symbol.asyncIterator]()) // baseline
     ac.abort()
-    const { terminal } = await untilTerminal(sub[Symbol.asyncIterator]())
-    expect(terminal.kind).toBe('error')
-    if (terminal.kind === 'error') expect(terminal.error.code).toBe('cancelled')
+    const { terminal, events } = await untilTerminal(sub[Symbol.asyncIterator]())
+    expect(terminal.kind).toBe('closed')
+    const errIdx = events.findIndex(e => e.kind === 'error')
+    expect(errIdx).toBeGreaterThanOrEqual(0)
+    const errEv = events[errIdx]!
+    if (errEv.kind === 'error') expect(errEv.error.code).toBe('cancelled')
+    // error → closed 成对且紧邻；终态后零数据事件（untilTerminal 内已断言 done）
+    expect(events[errIdx + 1]).toBe(terminal)
     await rt.close()
   })
 
@@ -369,6 +393,32 @@ describe('follow 恢复与终态', () => {
     await sub.close() // 幂等
     const { terminal } = await untilTerminal(sub[Symbol.asyncIterator]())
     expect(terminal.kind).toBe('closed')
+    await rt.close()
+  })
+
+  test('close 于 worker 运行期：join 后订阅槽实放（安全审查 HIGH③ 回归——限额不可绕过）', async () => {
+    writeFileSync(join(dir, 'sess-1.jsonl'), `${userLine('u1', null, 'hi')}\n`)
+    const rt = makeRuntime({ pollingIntervalMs: 100, maxSubscriptions: 1 })
+    await rt.start()
+    const s1 = await rt.followSession({ scopeId: 'proj-a', sessionId: 'sess-1' })
+    // close 加盟 worker 实停（finally releaseOnce）；返回后槽必已释放
+    await s1.close()
+    const s2 = await rt.followSession({ scopeId: 'proj-a', sessionId: 'sess-1' })
+    expect(s2).toBeDefined()
+    await s2.close()
+    await rt.close()
+  })
+
+  test('replay 投影超 maxProjectionBytes → resourceLimit（零半投影交付界）', async () => {
+    writeFileSync(
+      join(dir, 'sess-1.jsonl'),
+      `${userLine('u1', null, 'hello')}\n${assistantLine('a1', 'u1', 'world')}\n`,
+    )
+    const rt = makeRuntime({ maxProjectionBytes: 100 })
+    await rt.start()
+    await expect(
+      rt.replaySession({ scopeId: 'proj-a', sessionId: 'sess-1' }),
+    ).rejects.toMatchObject({ code: 'resourceLimit' })
     await rt.close()
   })
 })

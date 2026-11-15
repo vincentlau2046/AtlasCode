@@ -41,6 +41,7 @@ import {
 } from '../../src/atlascode/web/limits'
 import { WebSessionError } from '../../src/atlascode/web/errors'
 import { createReadonlySessionRuntime } from '../../src/atlascode/web/readonlyRuntime'
+import { atlasWebSessionEngine } from '../../src/atlascode/web/runtimeDefault'
 import type { SessionStoreAdapter } from '../../src/atlascode/web/sessionStoreAdapter'
 
 function fakeAdapter(): SessionStoreAdapter {
@@ -106,6 +107,7 @@ describe('§4.4 资源常量冻结值', () => {
     const rt = createReadonlySessionRuntime({
       productId: 'atlascode',
       scopes: [{ scopeId: 'p', storageDir: '/fake/p' }],
+      engine: atlasWebSessionEngine(),
       adapter: fakeAdapter(),
     })
     await rt.start()
@@ -156,6 +158,7 @@ describe('runtime limits 配置面', () => {
     return createReadonlySessionRuntime({
       productId: 'atlascode',
       scopes: [{ scopeId: 'p', storageDir: '/fake/p' }],
+      engine: atlasWebSessionEngine(),
       adapter: fakeAdapter(),
       limits: limits as never,
     })

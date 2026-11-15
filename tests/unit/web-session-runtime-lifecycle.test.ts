@@ -17,6 +17,7 @@ import {
   createReadonlySessionRuntime,
   type ReadonlySessionRuntime,
 } from '../../src/atlascode/web/readonlyRuntime'
+import { atlasWebSessionEngine } from '../../src/atlascode/web/runtimeDefault'
 import {
   createNodeFsSessionStoreAdapter,
   type SessionFileEntry,
@@ -88,6 +89,7 @@ function makeRuntime(
   return createReadonlySessionRuntime({
     productId: 'atlascode',
     scopes: scopes.map(scopeId => ({ scopeId, storageDir: `/fake/${scopeId}` })),
+    engine: atlasWebSessionEngine(),
     ...(adapter ? { adapter } : {}),
   })
 }
@@ -200,6 +202,7 @@ describe('生命周期', () => {
     const rt = createReadonlySessionRuntime({
       productId: 'other-product',
       scopes: [{ scopeId: 'proj-a', storageDir: '/fake/a' }],
+      engine: atlasWebSessionEngine(),
       adapter: fakeAdapter({}, calls),
     })
     await expect(rt.start()).rejects.toMatchObject({
@@ -213,6 +216,7 @@ describe('生命周期', () => {
       createReadonlySessionRuntime({
         productId: 'atlascode',
         scopes,
+        engine: atlasWebSessionEngine(),
         adapter: fakeAdapter({}),
       })
     await expect(mk([]).start()).rejects.toMatchObject({ code: 'invalidRequest' })
