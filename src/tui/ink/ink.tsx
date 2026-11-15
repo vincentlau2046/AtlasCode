@@ -670,6 +670,12 @@ export default class Ink {
     // Preserve the empty-diff zero-write fast path: skip all cursor writes
     // when nothing rendered AND the park target is unchanged.
     const targetMoved = target !== null && (parked === null || parked.x !== target.x || parked.y !== target.y);
+    // W-AB4b（0.1.113 候）面 1 修形②（f4 批复 2026-11-14 @7d9cbea3）：空帧判据
+    // = preamble 构造层后 optimized 仍为空。构造层两个 push 面（altScreen
+    // CURSOR_HOME/park prepend+append、main-screen parked preamble）均以
+    // hasDiff 为门（:626-652/:678），故此处 optimized.length === 0 ⇔ !hasDiff。
+    // committed 口径单源（FrameEvent.committed 在 emit 点按终值重估）。
+    const emptyStream = optimized.length === 0;
     if (hasDiff || targetMoved || target === null && parked !== null) {
       // Main-screen preamble: log-update's relative moves assume the
       // physical cursor is at prevFrame.cursor. If last frame parked it
@@ -714,24 +720,25 @@ export default class Ink {
         }
         this.displayCursor = target;
       } else {
-        // Declaration cleared (input blur, unmount). Restore physical cursor
-        // to frame.cursor before forgetting the park position — otherwise
-        // displayCursor=null lies about where the cursor is, and the NEXT
-        // frame's preamble (or log-update's relative moves) computes from a
-        // wrong spot. The preamble above handles hasDiff; this handles
-        // !hasDiff (e.g. accessibility mode where blur doesn't change
-        // renderedValue since invert is identity).
-        if (parked !== null && !this.altScreenActive && !hasDiff) {
-          const rdx = frame.cursor.x - parked.x;
-          const rdy = frame.cursor.y - parked.y;
-          if (rdx !== 0 || rdy !== 0) {
-            optimized.push({
-              type: 'stdout',
-              content: cursorMove(rdx, rdy)
-            });
-          }
+        // Declaration cleared (input blur, unmount).
+        //
+        // W-AB4b 面 1 修形③：空流帧 park restore 分支 elision（f4 批复
+        // 2026-11-14 @7d9cbea3）。原形在 !hasDiff 帧 push 恢复 cursorMove 并置
+        // displayCursor=null——把一个 0 内容帧变成 1 patch 纯光标帧。elision
+        // 后：restore push + 置 null 一并缓行到下一个内容帧。正确性依据：空流
+        // 帧物理光标未动（log-update 零写入），保持 displayCursor = parked 恰
+        // 与物理位置一致；若只删 push 仍置 null，则 displayCursor 谎报物理位
+        // 置，下一内容帧 preamble（parked→prevFrame.cursor）从错位起算——正是
+        // 原注释警告形。缓行兑现路径：下一内容帧 parked preamble 把物理光标
+        // 从 parked 送回 prevFrame.cursor，然后本臂照常置 null（此时如实）。
+        // 终态恒等（格 3）：恢复位移在原形帧 N / 缓行帧 N+1 preamble 发生，
+        // 净轨迹相同；空闲期物理光标暂留 parked（声明失焦位置）为已批预期。
+        // 状态推进不跳（四锚）：displayCursor 不产生谎报值；其余三锚
+        // （backFrame/frontFrame swap、prevFrameContaminated、drain timer）
+        // 均在本分支层之外无条件推进。
+        if (!emptyStream) {
+          this.displayCursor = null;
         }
-        this.displayCursor = null;
       }
     }
     const tWrite = performance.now();
@@ -788,6 +795,9 @@ export default class Ink {
     }
     this.options.onFrame?.({
       durationMs: performance.now() - renderStart,
+      // W-AB4b 面 1 修形①：committed 口径在 emit 点按终值重估（optimized
+      // 已定形——本帧全部 push 面已发生）；空帧（0-patch）= false。
+      committed: optimized.length > 0,
       phases: {
         renderer: rendererMs,
         diff: diffMs,

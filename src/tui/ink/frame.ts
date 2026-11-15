@@ -37,6 +37,12 @@ export type FlickerReason = 'resize' | 'offscreen' | 'clear'
 
 export type FrameEvent = {
   durationMs: number
+  /** W-AB4b（0.1.113 候）面 1 修形①（f4 批复 2026-11-14 @7d9cbea3）：本帧是否
+   *  实际提交了内容——preamble 构造层后 optimized 非空（写入 patch ≥1）为
+   *  true；空帧（0-patch，如动画 tick 无变更帧）为 false。加性扩型：双通道
+   *  （仪表化 recordRenderFrame / bench interactiveHelpers onFrame）既有消
+   *  费字段语义零变（格 4）。 */
+  committed: boolean
   /** Phase breakdown in ms + patch count. Populated when the ink instance
    *  has frame-timing instrumentation enabled (via onFrame wiring). */
   phases?: {
