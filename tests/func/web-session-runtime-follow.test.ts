@@ -409,6 +409,40 @@ describe('follow 恢复与终态', () => {
     await rt.close()
   })
 
+  test('worker 逃逸 rejection 翻译终态对：baseline stat 拒绝 → error{ioUnavailable} → closed（安全审查回归——零 unhandled rejection）', async () => {
+    writeFileSync(join(dir, 'sess-1.jsonl'), `${userLine('u1', null, 'hi')}\n`)
+    const ad = createNodeFsSessionStoreAdapter({
+      productId: 'atlascode',
+      scopes: [{ scopeId: 'proj-a', storageDir: dir }],
+    })
+    const failing: SessionStoreAdapter = {
+      ...ad,
+      statTranscript: async () => {
+        throw new Error('EIO injected')
+      },
+    }
+    const rt = createReadonlySessionRuntime({
+      productId: 'atlascode',
+      scopes: [{ scopeId: 'proj-a', storageDir: dir }],
+      engine: atlasWebSessionEngine(),
+      adapter: failing,
+      limits: { pollingIntervalMs: 100 } as never,
+    })
+    await rt.start()
+    const sub = await rt.followSession({ scopeId: 'proj-a', sessionId: 'sess-1' })
+    // worker 内任何逃逸异常必须翻译为 error → closed 成对（f4 §5.7 终态对），
+    // 不得成为 void run() 的 unhandled rejection（否则本断言挂死超时 = RED）
+    const { events, terminal } = await untilTerminal(sub[Symbol.asyncIterator]())
+    const err = events.find(e => e.kind === 'error')
+    expect(err).toBeDefined()
+    expect(
+      err?.kind === 'error' &&
+        (err as { error?: { code?: string } }).error?.code,
+    ).toBe('ioUnavailable')
+    expect(terminal.kind).toBe('closed')
+    await rt.close()
+  })
+
   test('replay 投影超 maxProjectionBytes → resourceLimit（零半投影交付界）', async () => {
     writeFileSync(
       join(dir, 'sess-1.jsonl'),

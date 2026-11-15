@@ -519,6 +519,18 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
           break
         }
       }
+    } catch (e) {
+      // worker 逃逸异常统一翻译终态对（f4 §5.7 钉死形：任何失败路径 =
+      // error → closed 成对送达；void run() 零 unhandled rejection——
+      // 安全审查 HIGH 修复。baseline stat 双采样不在 issueBaseline 内层
+      // catch 的路径由此兜底）。
+      if (e instanceof WebSessionError) {
+        setTerminal(errorEvent(e.code as 'ioUnavailable', e.message, e.retryable))
+      } else {
+        setTerminal(
+          errorEvent('ioUnavailable', `follow worker failed: ${String(e)}`, true),
+        )
+      }
     } finally {
       // worker 实停才释放订阅槽（close 加盟本停止点）
       disarmLease()
