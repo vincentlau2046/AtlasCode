@@ -23,6 +23,35 @@
   5 件（零 Node 内建 import / d.ts 单文件自足闭包 / Node≥20 真实 ESM
   消费 / exports 条件序钉死 / CLI bin 不变）。
 
+## v0.1.116（2026-11-15）
+
+**S0-R 窄只读 session runtime 波**（工单 §4.2-4.5 + 呈批书 §7.3-7.5，
+f4 §5.7 钉死形 + §5.8 @fb35cac2 全采认 + 腿 6 修形 §5.9 @544caa07 +
+§5.10 @ca88dba7 采认；同上 GATE-PASS）。
+
+- **R-1**（251d08c2）：`createReadonlySessionRuntime` factory 生命周期面
+  （start/close/epoch/不可重启 + listSessions adapter 注入缝，实例状态
+  全自持零全局槽）+ R-2（c03f8b60）：replaySession/followSession 增量链
+  （follow 订阅机 + limits 全表 17 项 bounded 解析 + 订阅槽/并发读计数
+  + cursor ledger；终态优先序高优先覆写）。
+- **R-3**（4427df15 + 33989459）：**engine 解耦**（projection 零
+  'src/engine' 导入——`ProjectionSourceMessage` 结构面 + engine 注入缝
+  必填 options + `runtimeDefault.ts` cast 焊接不进 pack 图；contract
+  类型闭包经相对路径 shim）+ **f4 §5.7 终态对钉死**（closed 恒唯一
+  terminal kind：error→error+closed 成对送达、终态后零数据事件）+
+  **安全审查三 findings 处置**（HIGH TOCTOU 前后双采样三元组守卫 /
+  MEDIUM maxProjectionBytes 交付界零半投影 / HIGH follow 生命周期竞态
+  releaseOnce 移 run() finally）+ `./web-session-runtime` 库出口
+  （node ESM bundle + d.ts contract 相对闭包 + exports 条件序）+
+  fs/pack 判别格 10 件。
+- **随车修形**（gate/安全审查双触发，TDD RED→GREEN）：follow worker
+  逃逸 rejection catch-all 翻译终态对（f82c3967，安全审查 HIGH）；
+  R 出口 d.ts 相对 specifier post-emit 扩展名重写（22949a84，gate 腿 6
+  ——node16/nodenext 严格 ESM 消费 TS2834，fail-closed+幂等重写步 +
+  node16 消费编译 smoke 判据）。
+- **loader 级 bounded parser 本波不加严**（f4 §5.8 裁定：两防线=
+  transcript 尺寸门 + 投影交付界采认充分；残余面登记 G2 格 D/E 观测项）。
+
 ## v0.1.113（2026-11-15）
 
 **W-AB4b 帧提交节律门控**（lock-face 呈批 docs/2026-11-14-wab4b-lockface-brief.md
