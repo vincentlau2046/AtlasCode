@@ -52,3 +52,25 @@ S0-P/U/R 五段全链收口（含 e2e 生产复验 r-20261115-prodlane-115-116 P
    完全覆盖、dirty 面为 master 已落内容的重复）删除被权限 classifier 拒——
    留置待用户裁定；bun test 以 `./tests/` 前缀过滤规避其旧测试副本。
    `user-e2e/k5-bridge-proxy-v2.py` 未提交改动为 e2e lane 工作面，本波不触碰。
+
+## prep gate 判定记录（G1 实施准入）
+
+判定形 = f4 §5.13-2 甲形采认：机械层（evaluateImplementationAdmission 非空/格式，
+单测 7 件真值表锁定）与语义满足性（f4 采认层对可查证据裁定）分账。
+
+- 第一轮（PENDING 占位）：implementationAdmitted=true（机械）/ **G1=false（语义）**
+  ——userAuthorization/ticketAuditPass 两键 PENDING，按工单 §2.2「失败均拒绝」
+  不计满足；f4 §5.14-1 采认本轮判定正确。
+- 第二轮（实引回填，f4 §5.13-3 供给 + §5.14-3 初裁满足）：
+
+| 键 | 实引 |
+|---|---|
+| userAuthorization | 用户原话「OK，你整体排期，完成后只会atlasweb f4可以并实施的通知就可以了。」（f4 session 2026-11-15，transcript 9d1c80df jsonl 在案） |
+| ticketAuditPass | 工单 §5.2 Atlas-reveiw 审计闭环 @7abc7b92（master 可查，git log 核验在案） |
+| s3bProductionEvidence | user-e2e/reports/r-20261113-prodlane-106.md + r-20261115-prodlane-115-116.md |
+| isolationPlan | docs/products/atlasweb/foundation-readiness.md + manifest v2 configDirName 收窄 + host-state scan fail-closed |
+| contractReview | docs/products/atlasweb/2026-11-15-s0-agreement.md 差异审阅（difference review passed） |
+| upstreamDependencyPlan | docs/products/atlas-family-roadmap.md#protocol-version-and-package-versions + docs/sri/v0.1.115.md, v0.1.116.md |
+
+- 重跑结果：**implementationAdmitted=true，reasons=[]（六键全实引）**。
+- G1=true 终判候 f4 §5.14 采认记录；『可以并行实施』单信号由 f4 依工单 §8 发出。
