@@ -4,7 +4,7 @@
  * 全离线（zod external 解析自仓内 node_modules）。
  */
 import { describe, test, expect, beforeAll } from 'bun:test'
-import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -59,6 +59,19 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
     expect(files.some(f => f.endsWith('kernel/protocol/webSessionV0.d.ts'))).toBe(
       true,
     )
+    // 相对 specifier 必带 .js 扩展名（工单 §5.9：node16/nodenext 消费者
+    // TS2834 判别——bundler 风格发射的无扩展名形被严格 ESM 拒编译）
+    const rel = /(from\s*|import\s*\(\s*)(["'])((?:\.\.?\/)[^"']*)(["'])/g
+    for (const f of files) {
+      const dts = readFileSync(f, 'utf8')
+      for (const m of dts.matchAll(rel)) {
+        const spec = m[3]
+        expect(
+          spec.endsWith('.js'),
+          `${f}: relative specifier '${spec}' lacks .js extension`,
+        ).toBe(true)
+      }
+    }
     for (const f of files) {
       const dts = readFileSync(f, 'utf8')
       // 加载图审计：零 engine/内部树 specifier 泄漏（头注文本不计——只查 import 面）
@@ -109,6 +122,57 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
     })
     expect(r.status, `node spawn failed: ${r.stderr?.slice(-500)}`).toBe(0)
     expect(r.stdout).toContain('NODE_ESM_OK')
+  })
+
+  test('node16/nodenext 严格 ESM 消费编译 smoke：d.ts 零 TS2834（工单 §5.9 GREEN 判据）+ 重写幂等', () => {
+    const smokeDir = join(REPO, 'dist', '.wsr-node16-smoke')
+    mkdirSync(smokeDir, { recursive: true })
+    try {
+      writeFileSync(
+        join(smokeDir, 'consumer.ts'),
+        [
+          "import { createReadonlySessionRuntime, WebSessionError } from '../web-session-runtime/index.js'",
+          "import type { ReadonlySessionRuntime, WebSessionErrorCode } from '../web-session-runtime/index.js'",
+          'export type Runtime = ReadonlySessionRuntime',
+          'export type Code = WebSessionErrorCode',
+          'export const mk = createReadonlySessionRuntime',
+          'export const err = WebSessionError',
+        ].join('\n'),
+      )
+      writeFileSync(
+        join(smokeDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            module: 'node16',
+            moduleResolution: 'nodenext',
+            target: 'es2022',
+            strict: true,
+            noEmit: true,
+            types: [],
+          },
+        }),
+      )
+      // skipLibCheck 刻意缺省（false）：TS2834 发生在 .d.ts 内，开了会被跳过失去判别力
+      const r = spawnSync('npx', ['tsc', '-p', join(smokeDir, 'tsconfig.json')], {
+        cwd: REPO,
+        encoding: 'utf8',
+        timeout: 180_000,
+      })
+      expect(
+        r.status,
+        `tsc node16 smoke failed:\n${(r.stdout + r.stderr).slice(-1500)}`,
+      ).toBe(0)
+      // 幂等（工单 §5.9-②）：重写步重跑零差
+      const again = spawnSync(
+        'bun',
+        ['scripts/rewrite-web-session-runtime-dts.ts'],
+        { cwd: REPO, encoding: 'utf8', timeout: 30_000 },
+      )
+      expect(again.status).toBe(0)
+      expect(again.stdout).toContain('rewrote 0')
+    } finally {
+      rmSync(smokeDir, { recursive: true, force: true })
+    }
   })
 
   test('exports 条件序钉死：./web-session-runtime types→import→default；prepublishOnly 扩链', () => {

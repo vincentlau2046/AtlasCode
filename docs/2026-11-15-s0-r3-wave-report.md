@@ -70,3 +70,19 @@
    语义即生效）。披露为偏差修正非口径松弛。
 3. **安全审查处置**：上表三 findings，①② 交付侧修复落地，② 的 loader
    级 bounded parser 呈报待裁（预注册纪律）。
+
+## 腿 6 修形（gate RED 单红面 → §5.9 @544caa07 批复后落码）
+
+- **红面**：e2e 合流 gate 腿 6——R 出口 d.ts 树相对 specifier 无扩展名
+  （emitDeclarationOnly 沿 bundler resolution 风格发射），node16/nodenext
+  严格 ESM 消费者 TS2834 拒编译（5 处）；bundler 消费全净。
+- **修形**（f4 §5.9 四条钉死）：`scripts/rewrite-web-session-runtime-dts.ts`
+  post-emit 重写 dist 树 .d.ts——仅相对且无扩展名 specifier 加 `.js`；
+  bare/已带 .js 零触碰；fail-closed（歧义形/目标 .d.ts 不在 → 报错退出）；
+  幂等（重跑零差）；零源码触碰。挂 `build:web-session-runtime` 链尾
+  （第四段）；prepublishOnly 面不变。
+- **测试**：pack leg 2 加相对 specifier 必带 .js 断言（RED 先行）+
+  node16/nodenext 消费编译 smoke（skipLibCheck 刻意 false——TS2834 在
+  .d.ts 内，开了失去判别力；GREEN 判据）+ 重写幂等断言（`rewrote 0`）。
+- **采认面**：安全审查 follow worker 逃逸 rejection 修复（run() catch-all
+  翻译终态对）f4 §5.8-8 @18c07542 追认在案。
