@@ -260,6 +260,12 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 3. **两 PENDING 键满足性初裁（f4，§5.13-3 实引为准）**：`ticketAuditPass` = 工单 §5.2 审计闭环 @7abc7b92 可查 → **满足**；`userAuthorization` = 用户 2026-11-15 原话授权（transcript 在案）→ **满足**。待 Main 回填实引重跑呈报，f4 即记 **G1=true 终判**。
 4. **硬条件全局账（终态前）**：① #391 落地✅（§5.12）② prep gate 真值表+判定采认✅（本节-1）+ G1=true 终判（候重跑呈报）③ R 生产验证✅（本节-2）——**仅余 G1=true 终判一件**；在案后即发『可以并行实施』单信号（通知体按工单 §8 全项列明）。
 
+### 5.15 G1=true 终判 + 硬条件解锁（2026-11-15，f4）
+
+1. **重跑判定记录核验（1eff0ed4）**：prep gate 判定记录节两轮全账在案（第一轮 PENDING→G1=false 语义判定 + 第二轮实引回填→implementationAdmitted=true，reasons=[]）；六键实引逐条可查（f4 §5.13-3 供给串照录 + git log 核验 ticketAuditPass）。
+2. **G1=true 终判（f4 满足性裁定）**：两 PENDING 键实引与 §5.14-3 初裁一致均满足；四键实引经 §5.5/§5.12 采认链在案——**evaluateImplementationAdmission=true 语义成立，G1=true 终判在案**。G1=true/G2=false 合法中间态（真值表锁定）——G2 保持 false 候真实 Web controller 集成。
+3. **硬条件全局账终态**：① #391 落地✅（§5.12）② prep gate 全件采认✅（§5.14-1 + 本节）③ R 生产验证✅（§5.14-2）——**三前置全齐，硬条件解锁**；『可以并行实施』单信号即日发 AtlasWeb-F4（通知体按 §8 全项：包/版本/subpath/integrity、source 锚、G1 证据、消费者范围、G2 剩余硬门、责任窗口）。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
