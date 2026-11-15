@@ -54,7 +54,7 @@
 2. **R-3 pack 判据重形**（漏改 Δ 项，canon 定谳产物）：旧「零 engine 泄漏」不变量被形 A 推翻——按 lock-face §1 重形文本改写：允许面 = engine/session 只读闭包真体随 bundle + 新导出在位；禁面 = tui/private-ui/ui-private/engine 非 session 子域 specifier + process.on + env 写面 + globalThis 槽。timer 断言注明管辖范围：载体先存面 cursorLedger TTL setTimeout 为 S0-R 既有形态，非形 A 增量，不在格面。
 3. **doesMessageExistInSession 随迁**：load.ts 内唯一缓存读取边，随钉①整迁 sessionMessagesCache.ts（保持载体图零缓存引用的结构性保证）。
 4. **STR-1/eslint 具名豁免三处同步登记**：eslint files 作用域桶（2）+ arch-reorg-closure STR1_DEEP_IMPORT_EXEMPT（唯一合法域深 import = runtimeDefault → session/readonly）+ boundary scan allowedTargetSubroots（钉死 `['src/engine/session']`）。
-5. **master canon 基线漂移（本波豁免实证）**：干净 HEAD @351c74c4 canon = 6070 tests / 497 files / **121 fail**（与 #391 记录的 6070/0/497 基线相比，失败为 #391 之后 master 漂移/环境面引入，非本波）。本波 canon4 fail 集（118）为该池真子集。建议 f4 立项：基线重锚 + 失败池 triage（抽样 5 文件单独复跑全绿 → 单进程全量跑内跨文件态泄漏形态，与 #294 flaky 隔离缺陷同族）。
+5. **canon 漂疑定谳（f4 采认 @8ef0d74e 工单 §8 裁定）**：~~master canon 基线漂移~~ **主张撤回**——f4 本机独立跑 ca761a91 = 6084 pass / 0 fail / 498 files（125.18s）全绿；#391 基线→351c74c4 间 master 仅 docs 提交，121 fail 解读不成立为 master 状态事实，定性 = 本 lane 测量环境态污染（lane-local）。**定因 triage 项（登记，下次 canon 报数前执行）**：三 lane 共享同一 working checkout + `~/.atlas` 配置面——嫌疑① canon 内 pack 测试 beforeAll rebuild `dist/web-session-runtime`，与并发 lane 的 gate/build 互踩；嫌疑② 共享配置面污染（known_marketplaces 重复条目断言即此证据）；嫌疑③ 并发负载（f4 125s vs 本 lane 420s 吻合）。裁定遵行：格 7 以 e2e 受控环境独立跑为判定基准；fail 子集纪律（118⊂121）不采认为判定基准。
 6. **格 2 探针待 e2e**：导入纯度探针（载体车道零 env 写/进程钩子实测）按判据格在 e2e gate 件执行。
 7. **worktree 旧副本噪声**：`worktrees/atlas-family-p0` 内旧测试副本会被 bun test 相对路径过滤误命中（canon 用 `./tests/` 前缀不受影响）；该 worktree 删除候裁定在案（待用户）。
 
