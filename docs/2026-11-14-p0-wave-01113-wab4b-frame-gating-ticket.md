@@ -77,3 +77,4 @@
 3. **注 B 采认（格2 口径注记）**：cc-09 裸值 545 对 cc 侧结构失明（cc 主重绘不走 [2K/[1A 控制序，B 组恒 50-62 与时长无关），跨列对表 = 首车冻结已禁形——合法判定形两读均过：**committed 同列 0.49× / pty-09 同口径 1.11×，均 ≤1.5× GREEN**。analyzer 09 口径勘误（首版漏 [1A 主分量，回溯 ux-extract.py:80 + wab1 B1 复算 606 恰合后修正）入资产。
 4. 误杀判别可证伪形采认（committed=false ⇔ optimized.length==0 ⇔ bytes=0，结构上带视觉变更帧必 committed）；格6 N=100 直证采认（动画主导腿 gapMed 106-113ms ≈ 100ms 时钟+13ms 管线预期形；流式腿 leading-edge ≤16ms 结构在）；FrameEvent 14 键零变双通道兼容采认。
 5. **段 L 硬门双在案成立（GATE-PASS 判定单 + 本节 f4 采认）——Main 走段 L release 0.1.113**；段 L 收口后同窗启动 S0-P prep + U-2（S0 工单 §5.4 退避门兑现）。
+6. **时序面注记（段 L 主体先于 f4 采认 commit，登记不追责）**：本波 Main 段 L 主体（release b7195388 + tag + npm publish）在 f4 采认 commit（e2ad637e）落盘前已启动——段 L 硬门纪律 = 「双在案**方** bump/publish」（0.1.100 先例字面），本波实质零险（采认全 GREEN 无异议面），但时序上双在案应含 f4 采认**已 commit**在案；后续波 Main 候 f4 采认 commit hash 到手再走段 L（e2e gate 信号与 f4 采认并行请求时，Main 以 f4 批复 hash 为段 L 前置）。
