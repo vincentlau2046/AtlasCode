@@ -237,6 +237,13 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
     - **车 1 = 0.1.115**（release c8d8be47/tag v0.1.115/npm publish；shasum 005bdbc1…；cli.js 18,211,980B sha256 282b0085… 与 gate-s0ur 恒等；0.1.114 跳号留件 F 预注册兑现）；**车 2 = 0.1.116**（release 59324b86/tag v0.1.116/npm publish；shasum 02184aed…；cli.js 与 115 恒等；双出口 web-contract 7,975B / web-session-runtime 38,652B 与 e2e hash 复核恒等）；SRI v0.1.115.md/v0.1.116.md 留档（055a4b13），master=055a4b13 双平台齐平。
     - **候 e2e 生产复验腿**（双出口安装品 contract/runtime 消费 + SRI 四点）呈报后方记本波五段全链收口；硬条件（G1 判定 + 『可以并行实施』单信号）前置仍含 #391 prep 切片② + prep gate 采认。
 
+### 5.12 #391 prep 切片② 采认（2026-11-15，f4；9953388d + 0c4e5771，f4 抽验）
+
+1. **码面采认（f4 抽验）**：① readiness G1/G2 拆分——evaluateImplementationAdmission（scripts/atlas-family-foundation-readiness.ts:81-92）六证据键缺/空/空白均拒（fail-closed，implementationAdmitted = reasons.length===0），不要求 controller；G2 原谓词零动——两输出分离 = 审计必改形兑现；② host-state 缺 root → 显式 candidate-root-missing violation（never silently skipped 注记在案）；③ boundary scanner（.js→.ts 映射/@atlas alias 仓库边/bare 包闭包证据三态/symlink canonicalize+源扫描）；④ manifest **v1/v2 双文件分账实证**（v1 兼容保留旧 configDirName pattern；v2 收窄 `^~/\.[A-Za-z0-9][A-Za-z0-9._-]*$` + pairingRef sha256 + 40-hex provenance）+ docs/products/atlas-family-pairing.schema.yaml 独立 v1（placeholder 不得 accepted/runtimeEntry null 不得 ready/verified-pair 须 pairDigest）；⑤ 总约 §8 五文档修订（317f4845 原文定位，『立即可启动』『零内核改动即可』授权措辞撤回）。
+2. **披露 4 项裁定**：① §2.2 外加 ready/placeholder 两 optional 字段（支撑两条 if/then 加严规则）——加严向批准；② bare 包未证即 violation（较「记录不拦」更严 fail-closed 直读）——批准；③ v1 schema 移除 ajv-strict 非标 name/version 元键（验证面无损）——批准；④ **worktrees/atlas-family-p0 处置登记待用户裁定**——删除被 classifier 拒属共享 checkout 纪律正常面，P0 内容已被 master 覆盖（prep 提交入位），留置零风险；日后处置走 `git worktree remove` 正径，**f4 不代裁，登记候用户**。
+3. **Δ 采认**：canon 6070/0/497（基线 6034/0/496，Δ+36/+1 恰合）；TDD RED(21/11/4err)→GREEN + 定向 46/0 + tsc/eslint 0。8 findings（#391）逐条修形在案——**审计硬条件第一前置（#391 落地）兑现**。
+4. **prep gate 批准执行**：Main 跑 G1 六证据键真值表 + evaluateImplementationAdmission 判定（缺一拒形），结果呈 f4 采认在案方算 prep gate 闭环。**硬条件全局账**：G1=true 判定 + 『可以并行实施』单信号前置 = ①#391 落地✅（本节）+ ②prep gate f4 采认（候）+ ③R 生产验证（0.1.115/116 生产复验腿，候 e2e）——三者在案方发单信号，缺一不发。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
