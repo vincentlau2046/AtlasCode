@@ -26,6 +26,8 @@ The host must not read product data or config directories directly. It obtains s
 
 ## Releasability rule
 
+> **Revision (2026-11-15, S0 agreement §8)**: the rule below is split into two independent gates. **G1 — implementation admission** (`evaluateImplementationAdmission`, six evidence keys: user authorization, work-order audit pass, accurate S3b production evidence, isolation plan, single-source contract and gap review, upstream dependency/version plan) governs repository creation and the start of parallel development. **G2 — release readiness** (`evaluateFoundationReadiness`, unchanged, including the read-only controller predicate) keeps every release hard gate. `G1=true / G2=false` is a legal intermediate state; neither gate accepts missing evidence as a pass.
+
 `releasable: true` is permitted only when every predicate is positive and every evidence reference is present. Missing evidence is not interpreted as a pass. A failed predicate blocks repository creation and the AtlasWeb foundation tag.
 
 ## Cut record

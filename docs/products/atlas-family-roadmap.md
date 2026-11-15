@@ -8,6 +8,8 @@ This is the family-level index for AtlasCode, AtlasWeb, AtlasOffice, and AtlasCo
 
 - [AtlasWeb S0 agreement proposal](atlasweb/2026-11-15-s0-agreement.md) — durable upstream/consumer findings, proposed staged gates, separate read-only/full-Code milestones, and pending amendments. The historical phase and assumptions below are not fresh implementation-readiness evidence; the proposal itself is not authorization.
 
+> **Revision (2026-11-15, S0 agreement §8)**: the historical phases/anchors and the package-form/blocker statements below are the historical base and are accounted separately from the future bridge. Effective rule: cuts are recorded as actual commit/artifact pairings (see `atlas-family-pairing.schema.yaml` + manifest v2 `pairingRef`), and the staged G1 (implementation admission) / G2 (release readiness) gates of the S0 agreement §6 govern — the historical phase table alone authorizes nothing.
+
 ## Current phase
 
 - **Current phase:** AtlasCode 0.1.106 S3b kernel-boundary closeout and read-only AtlasWeb preparation.
@@ -53,6 +55,8 @@ AtlasComic lane  → AtlasWeb/packages/web-comic: canvas/storyboard controller/r
 
 Products use short-lived feature/wave branches and isolated worktrees. There are no permanent `atlasweb`, `atlasoffice`, or `atlascomic` Git branches.
 
+<!-- Revision (2026-11-15, S0 agreement §8): the package/version statements below are historical base; effective cuts are recorded as actual commit/artifact pairings (pairing evidence + manifest v2 pairingRef). -->
+
 ## Protocol version and package versions
 
 The kernel semantic source remains in AtlasCode's existing kernel/shared domain. AtlasCode publishes the stable contract package consumed by AtlasWeb; AtlasWeb does not copy kernel schemas.
@@ -84,6 +88,8 @@ protocol: { name: atlas-headless, version: v0 }
 `configDirName` is part of the product compatibility cut because host reuse/isolation depends on it.
 
 ## Blockers and dependencies
+
+<!-- Revision (2026-11-15, S0 agreement §8): blocker states below are the historical base; the effective gate set is the staged G1/G2 pair (S0 agreement §6) plus real artifact/runtime evidence, not this table alone. -->
 
 | Item | State | Dependency / next evidence |
 |---|---|---|

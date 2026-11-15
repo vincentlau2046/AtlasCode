@@ -231,6 +231,8 @@ Commit the evaluator, tests, readiness template, and manifest schema without cre
 
 ### Task 5: Execute the foundation cut after 0.1.106 PASS
 
+> **Revision (2026-11-15, S0 agreement §8)**: this task previously required full controller readiness before repository creation. Effective rule: the plan is re-staged with acyclic dependencies — **G1 implementation admission** (six evidence keys, no controller predicate) gates repository creation and development start; **G2** (including the read-only controller evidence) gates delivery/release. Until this plan is formally revised, it is not executed under the old gate text.
+
 **Files:**
 - Create in a new repository after the gate: `AtlasWeb/apps/atlasweb/`
 - Create in the new repository: `AtlasWeb/packages/web-shell/`, `AtlasWeb/packages/web-host/`, `AtlasWeb/packages/web-brand/`, `AtlasWeb/packages/web-mode/`, `AtlasWeb/packages/web-code/`
@@ -334,6 +336,7 @@ Record package/repository commits, protocol version, `configDirName`, gate verdi
 
 - **Gate P0:** Tasks 1–4 complete; no AtlasWeb source repository; current AtlasCode runtime and S3b gate untouched.
 - **Gate Foundation:** exact 0.1.106 S3b production PASS plus Task 4 `releasable: true`; only then execute Task 5.
+  - **Revision (2026-11-15, S0 agreement §8):** split into G1 (implementation admission — repository creation/development start; controller evidence not required) and G2 (release readiness — `releasable: true` with all predicates including the controller evidence). This plan's Task 5 executes only after G1; the family tag ships only after G2.
 - **Gate Code Web:** AtlasWeb shell and Code read-only surface pass boundary, state-source, protocol, and TUI standing checks before interactive work.
 - **Gate Product:** Office/Comic consumes the shared contract and proves its own main-workspace renderer before any product repository split.
 
