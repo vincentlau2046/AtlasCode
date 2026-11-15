@@ -99,6 +99,9 @@ describe('S0-U U-2 · 格 B 出口/安装', () => {
       '--outfile dist/web-contract/index.js --target browser',
     )
     expect(scripts['build:web-contract']).toContain('--external zod')
-    expect(scripts['prepublishOnly']).toBe('bun run build && bun run build:web-contract')
+    // R-3 扩链：web-session-runtime 出口加入 publish 前置构建
+    expect(scripts['prepublishOnly']).toBe(
+      'bun run build && bun run build:web-contract && bun run build:web-session-runtime',
+    )
   })
 })

@@ -16,6 +16,11 @@
       "types": "./dist/web-contract/index.d.ts",
       "import": "./dist/web-contract/index.js",
       "default": "./dist/web-contract/index.js"
+    },
+    "./web-session-runtime": {
+      "types": "./dist/web-session-runtime/index.d.ts",
+      "import": "./dist/web-session-runtime/index.js",
+      "default": "./dist/web-session-runtime/index.js"
     }
   },
   "publishConfig": {
@@ -34,7 +39,8 @@
     "typecheck": "tsc --noEmit",
     "atlasweb:boundary-scan": "bun scripts/atlasweb-kernel-boundary-scan.ts",
     "build:web-contract": "bun build src/kernel/protocol/webSessionV0.ts --outfile dist/web-contract/index.js --target browser --external zod && tsc -p tsconfig.web-contract.json && mv dist/web-contract/webSessionV0.d.ts dist/web-contract/index.d.ts",
-    "prepublishOnly": "bun run build && bun run build:web-contract"
+    "build:web-session-runtime": "bun build src/atlascode/web/entry.ts --outfile dist/web-session-runtime/index.js --target node --external zod && tsc -p tsconfig.web-session-runtime.json && printf 'export * from \"./atlascode/web/entry.js\"\\n' > dist/web-session-runtime/index.d.ts",
+    "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",
