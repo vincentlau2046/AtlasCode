@@ -49,3 +49,12 @@
 4. **必改级（格 2 豁免面收窄）**：「Node 模块装载必需读取除外」钉死 = ① 载入必需白名单唯二（模块解析/源读取）；② paths.ts 顶层 VERSION fs 探测 + env.ts 默认 HOME 合并等顶层 IO/env 进程面 = **惰性化修复**（首次调用求值/显式注入）非豁免——豁免形 = import-time HOME 合并复活 = R-1 隔离经模块装载面回归（假隔离比无隔离更危险）；③ 格 2 判据升级 = 受控 HOME 下导入前后**全局对象逐字段零差** + fs 调用探针零命中（读面也零，不只写 hash）。
 5. **必改钉 3**：① sessionMessagesCache（load.ts:1274 模块级 Map）双实例同 sessionId 零串扰须**直接断言**机制面（非仅行为间接推）；② 格 4 扩 **d.ts 泄漏面**——内部 TranscriptMessage/engine 内型不得现于两出口 .d.ts，公开类型面（ReadonlySessionEngine/ProjectionSourceMessage 现已在公共 options 面）lock-face 逐型对表定公开面；③ cli.js 字节锚（282b0085…）引用为格 4 联动断言（engine 入 pack 图不得改 CLI bundle——两 build 零共享 chunk 纪律）。
 6. **流程确认**：格框架成立（7 格 + fake 对照列 + pairing 锚）；lock-face → 落码 → gate → 段 L 0.1.117 候 → 生产 lane → 单信号附配对增量 + G2 解阻；0.1.114 件 F/队列不抢。**双信号②即发 Main（lock-face 呈批开工，本节在案）**。
+
+## §7 lock-face 批复（2026-11-15，f4：**通过五点，落码放行**；呈批书 docs/2026-11-15-s0-r2-lockface-brief.md @25cb7454，五点活码实锚 f4 逐一复核吻合）
+
+1. **§6-1 形 A 终形批准**：改名 `createDefaultReadonlySessionRuntime`（零别名，grep 实证零调用点）+ entry 扩具名导出 + `AtlasWebSessionRuntimeOptions` 型；零新 subpath；注入缝 `options.engine` 保留（预答不变量）；pack 格重形文本采认（engine/session 只读闭包允许；TUI/engine 非 session 子域/private-ui/CLI·TUI 执行入口/进程钩子/timer/env 写/globalThis 挂载仍禁）。
+2. **§6-2 修形四件批准**：① paths.ts VERSION IIFE 惰性化（getVersion 首调求值 + 模块级 memo 语义保留——CLI 消费点调用时求值零行为差）；② env.ts:42-43 首访问捕获（语义披露采认：CLI 车道 import≈startup 等价、载体车道首调在 runtime 使用期，进程启动 cwd 不变式由 R-1 隔离测试复跑守卫）；③ 必改钉① 缓存整迁 sessionMessagesCache.ts（零行为搬家 + 载体图结构性缺席 = 机制直断言三件 + CLI 四接缝共享实例不变）；④ runtimeDefault 窄化到 readonly 子门面（+buildConversationChain re-export）+ shared barrel 值导入 3 处直连（feature/`bun:bundle` 出图）。
+3. **§6-3 勘正采认**：工单「env.ts 默认 HOME 合并」按现码勘正（getProjectsDir per-call 已惰性，f4 复核 :55-63 属实）不修；import-time 面实为 :42-43 两行——审计引用面以活码为准的勘误纪律兑现。
+4. **§6-4 公开类型面对表批准**：现有 25 面 zero-add/del + 新增恰 2；内部型禁现两出口 .d.ts（gate 断言件）；`atlasWebSessionEngine` 不入 entry 面，cast 全走 `as unknown`。
+5. **§6-5 格 6 锚披露形批准**：三修形文件在 CLI 图内 → cli.js 282b0085… 锚**必然变更**（行为零变，canon+四件套守卫）——预注册变更源唯一性断言（`git diff --stat` 恰为 §5 清单）+ 新锚值 + SRI v0.1.117.md 记新值 + docs/upstream-pairing.md 配对增量（7,975B/38,652B 尺寸锚同步更新实测）。**注记：本波为「修形入 CLI 图 → 锚变更」预注册披露首例，后续波同形照此办理，禁事后追认**。
+6. **Δ 预注册采认**：src 12 文件 +1 新建；unit 新 carrier 件 ~8 + scan 扩形 2-3；canon 6070→≈6082；0.1.117 候；段 L 前置 = e2e GATE-PASS + f4 采认双在案。boundary scan `allowedTargetSubroots` 传 `['src/engine/session']` 豁免面钉死——**豁免外 src/engine 其余子域/src/tui 仍禁**（单测扩形含负腿）。
