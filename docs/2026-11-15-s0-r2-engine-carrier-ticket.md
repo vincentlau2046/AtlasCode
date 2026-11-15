@@ -58,3 +58,10 @@
 4. **§6-4 公开类型面对表批准**：现有 25 面 zero-add/del + 新增恰 2；内部型禁现两出口 .d.ts（gate 断言件）；`atlasWebSessionEngine` 不入 entry 面，cast 全走 `as unknown`。
 5. **§6-5 格 6 锚披露形批准**：三修形文件在 CLI 图内 → cli.js 282b0085… 锚**必然变更**（行为零变，canon+四件套守卫）——预注册变更源唯一性断言（`git diff --stat` 恰为 §5 清单）+ 新锚值 + SRI v0.1.117.md 记新值 + docs/upstream-pairing.md 配对增量（7,975B/38,652B 尺寸锚同步更新实测）。**注记：本波为「修形入 CLI 图 → 锚变更」预注册披露首例，后续波同形照此办理，禁事后追认**。
 6. **Δ 预注册采认**：src 12 文件 +1 新建；unit 新 carrier 件 ~8 + scan 扩形 2-3；canon 6070→≈6082；0.1.117 候；段 L 前置 = e2e GATE-PASS + f4 采认双在案。boundary scan `allowedTargetSubroots` 传 `['src/engine/session']` 豁免面钉死——**豁免外 src/engine 其余子域/src/tui 仍禁**（单测扩形含负腿）。
+
+## §8 段 I 采认（2026-11-16，f4；ca761a91，f4 独立 canon 复核）
+
+1. **码面采认**：Δ 预注册对账吻合（src 12+1 / carrier 单测 10 / boundary 正 1 负 3 / STR-1 具名豁免 / scan 豁免缝钉死）；载体 bundle 结构断言直证（缓存模块缺席 + 新导出在场 + 旧名清零 + process.on/exit/globalThis 零 + env 写面零 + import 面 node builtins only）；改名零别名；注入缝保留。
+2. **披露 4 件裁定**：① `resetSessionEnv` 补清惰性捕获——**真缺陷修采认**（惰性化引入的跨 reset 脏值穿越，canon 定谳揪出 = 验证链正向运作；teardown-only 导出，CLI 零消费）；② R-3 pack 判据按 §7-1 重形文本改写——实质批复在案，**漏列 Δ 记账面**（canon 定谳补改，披露纪律兑现）；③ doesMessageExistInSession 随迁（结构性保证一致性）+ STR-1/eslint 具名豁免三处登记——采认；④ build 链 3 件（tsconfig bun types 纯类型层 / d.ts rewrite index barrel = §3-4 窄化范围内 build 链缺口 / eslint files 作用域桶等价形）——采认，零 src 行为。
+3. **canon 漂疑定谳（f4 独立复核，关键裁定）**：f4 本机独立跑当前 master（ca761a91）canon = **6084 pass / 0 fail / 498 files（125.18s）全绿**。#391 基线（6070/0/497）→ 351c74c4 之间 master 仅 docs 提交，**「master 基线漂移 121 fail」解读不成立为 master 状态事实**——121 fail 观测 = Main lane 测量环境态污染嫌疑（lane-local，非产品码非基线漂移）。裁定三条：① **格 7 以 e2e 受控环境独立跑为判定基准**——e2e 绿则 gate 照常；e2e 红则先定因后 re-gate，GATE-PASS 不绕行；② **fail 子集纪律（118 ⊂ 121 池）不采认为判定基准**——被污染的测量不得升格为基线（反松弛Normalization禁令）；③ Main lane **定因项登记**：下次 canon 报数前须 triage 本 lane 环境态差（残留 dist/state/并行进程/HOME 面），干净态复现或撤回漂移主张。
+4. **段 I 采认完毕**；e2e gate（格 1-7 按 lock-face §4 表 + 本节格 7 基准）进行中；段 L 前置 = GATE-PASS + f4 采认双在案（时序纪律遵行）。
