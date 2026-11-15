@@ -184,7 +184,10 @@ function SpinnerWithVerbInner({
   // Leader token count for TeammateSpinnerTree — read raw (non-animated) from
   // the ref. The tree is only shown when teammates are running; teammate
   // progress updates to s.tasks trigger re-renders that keep this fresh.
-  const leaderTokenCount = Math.round(responseLengthRef.current / 4);
+  // W-RC1（0.1.112 切片 2，面 A 换源第二锚）：弃 Σchars/4 估算，值源 =
+  // engine usage 终值链（bootstrapState.getTurnOutputTokens）；teammate
+  // 段（progress.tokenCount）分账零触碰。
+  const leaderTokenCount = getTurnOutputTokens();
   const defaultColor: keyof Theme = 'brand';
   const defaultShimmerColor = 'brandShimmer';
   const messageColor = overrideColor ?? defaultColor;

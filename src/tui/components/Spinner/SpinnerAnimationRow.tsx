@@ -15,6 +15,7 @@ import type { SpinnerMode } from './types.js';
 import { useStalledAnimation } from './useStalledAnimation.js';
 import { interpolateColor, toRGBColor } from './utils.js';
 import { getSpinnerDisplayGates } from './spinnerGates.js';
+import { getTurnOutputTokens } from '../../bootstrapState.js';
 const SEP_WIDTH = stringWidth(' · ');
 const THINKING_BARE_WIDTH = stringWidth('thinking');
 // #250 concern 3：timer/tokens 时间门抽 spinnerGates.ts 纯函数面（1s/5s 双门）。
@@ -143,11 +144,20 @@ export function SpinnerAnimationRow({
   const flashOpacity = reducedMotion ? 0 : mode === 'tool-use' ? (Math.sin(time / 1000 * Math.PI) + 1) / 2 : 0;
 
   // === Token counter animation (smooth increment, driven by 50ms clock) ===
-  const tokenCounterRef = useRef(currentResponseLength);
+  // W-RC1（0.1.112 切片 2，面 A 换源，lock-face 呈批④批准）：↓N 数值源 =
+  // engine usage 终值链（bootstrapState.getTurnOutputTokens，round_end 转写
+  // 单源）——弃 Σtext_chars/4 估算（偏差实证 ↓1 vs wire 52-83，欠计 50-80×，
+  // e2e r-20261114-wrc1-token-chain §3）。双源分离（回归格①）：stalled 检测
+  // 仍走 responseLengthRef chars 源（上方 useStalledAnimation 不动）；增量
+  // 动画参数（gap<70→3 族）原样保留、目标换 token 源。↓N 注记频率/时点变化
+  // = 预期行为（回归格③——wire usage 仅 round_end 落账）。teammateTokens
+  // 分账零触碰（回归格②，下方合计式不动）。
+  const wireTurnTokens = getTurnOutputTokens();
+  const tokenCounterRef = useRef(wireTurnTokens);
   if (reducedMotion) {
-    tokenCounterRef.current = currentResponseLength;
+    tokenCounterRef.current = wireTurnTokens;
   } else {
-    const gap = currentResponseLength - tokenCounterRef.current;
+    const gap = wireTurnTokens - tokenCounterRef.current;
     if (gap > 0) {
       let increment;
       if (gap < 70) {
@@ -157,11 +167,10 @@ export function SpinnerAnimationRow({
       } else {
         increment = 50;
       }
-      tokenCounterRef.current = Math.min(tokenCounterRef.current + increment, currentResponseLength);
+      tokenCounterRef.current = Math.min(tokenCounterRef.current + increment, wireTurnTokens);
     }
   }
-  const displayedResponseLength = tokenCounterRef.current;
-  const leaderTokens = Math.round(displayedResponseLength / 4);
+  const leaderTokens = tokenCounterRef.current;
   const effectiveElapsedMs = hasRunningTeammates ? Math.max(elapsedTimeMs, now - turnStartRef.current) : elapsedTimeMs;
   const timerText = formatDuration(effectiveElapsedMs);
   const timerWidth = stringWidth(timerText);
