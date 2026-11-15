@@ -15,7 +15,9 @@
 import { randomUUID } from 'crypto'
 import { homedir } from 'os'
 import { join } from 'path'
-import { getConfigDirName } from '../../shared'
+// S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
+// （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
+import { getConfigDirName } from '../../shared/configDir'
 
 export type SessionEnv = {
   /** 当前 session id（旧 bootstrap getSessionId）。 */
@@ -39,16 +41,21 @@ export type SessionEnv = {
 }
 
 // ── 缺省实现（域自包含）──────────────────────────────────────────────────────
-let _sessionId: string = randomUUID()
-const _originalCwd: string = process.cwd()
+// S0-R2（lock-face @25cb7454 §3-2，f4 批复工单 §7 @351c74c4）：顶层进程面
+// 惰性化（格 2 导入纯度必改级②）——_sessionId/_originalCwd 由模块装载时求值
+// 改首访问捕获（`??=` memo，冻结语义不变）。语义披露：捕获点从「模块装载时」
+// 后移至「首次调用时」——CLI 车道 import≈startup 等价；web 载体车道首调发生在
+// runtime 使用期，进程启动 cwd 面不变式由 R-1 隔离测试复跑守卫。
+let _sessionId: string | undefined
+let _originalCwd: string | undefined
 const _cleanupHandlers: Array<() => Promise<void>> = []
 
 const defaultEnv: SessionEnv = {
-  getSessionId: () => _sessionId,
+  getSessionId: () => (_sessionId ??= randomUUID()),
   switchSession: id => {
     if (id) _sessionId = id
   },
-  getOriginalCwd: () => _originalCwd,
+  getOriginalCwd: () => (_originalCwd ??= process.cwd()),
   // 活态 cwd 域缺省（A12）：process.cwd() 活读——同 getOriginalCwd 捕获点
   // 语义（模块加载 = 进程启动 cwd），但每次调用重读（活态面）。
   getCwd: () => process.cwd(),
@@ -86,5 +93,12 @@ export function getSessionEnv(): SessionEnv {
  * 合并走 spread 新对象，defaultEnv 本体不被写，复位安全）。
  */
 export function resetSessionEnv(): void {
+  // S0-R2 惰性捕获配套：捕获变量一并复位（首调捕获语义 = 复位后下一次访问
+  // 重新捕获）。旧形模块装载冻结常量天然跨 reset 存活（import 时已捕获 =
+  // 进程启动值）；新形捕获点后移，不复位则先跑文件捕获的脏值（chdir 后的
+  // cwd / 旧 session id）会穿越 resetSessionEnv 泄漏给后续测试——单进程连跑
+  // 跨文件隔离守卫因此必须清捕获态。
+  _sessionId = undefined
+  _originalCwd = undefined
   _env = defaultEnv
 }

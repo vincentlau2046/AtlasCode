@@ -49,13 +49,22 @@ for (const f of files) {
           `ambiguous relative specifier '${spec}' in ${f} — fail-closed`,
         )
       }
-      // fail-closed：重写目标必须真实可解析（emit 树内为 <spec>.d.ts）
-      const target = join(dirname(f), `${spec}.d.ts`)
-      if (!existsSync(target)) {
+      // fail-closed：重写目标必须真实可解析。两形态：
+      // ① <spec>.d.ts（普通子模块）→ 重写为 <spec>.js；
+      // ② <spec>/index.d.ts（bundler resolution 目录 barrel，S0-R2 实锚：
+      //    闭内 type-only `from '../../shared'` 擦除前不入 bundle 图，但
+      //    d.ts emit 面解析到 shared/index.d.ts）→ 重写为 <spec>/index.js。
+      //    两者皆无 → 报错退出（fail-closed 语义不变）。
+      const directTarget = join(dirname(f), `${spec}.d.ts`)
+      const indexTarget = join(dirname(f), spec, 'index.d.ts')
+      if (!existsSync(directTarget) && !existsSync(indexTarget)) {
         throw new Error(
-          `rewrite target missing for '${spec}' in ${f}: ${target} — fail-closed`,
+          `rewrite target missing for '${spec}' in ${f}: neither ${directTarget} nor ${indexTarget} — fail-closed`,
         )
       }
+      const resolved = existsSync(directTarget)
+        ? `${spec}.js`
+        : `${spec}/index.js`
       touched = true
       changed++
       return `${pre}${q1}${spec}.js${q2}`

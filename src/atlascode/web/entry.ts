@@ -1,11 +1,15 @@
 /**
  * AtlasWeb S0-R `./web-session-runtime` pack 出口（工单 §4.5）。
  *
- * 纯 re-export 面：零副作用（禁入口导入就跑 CLI）、零 'src/engine'/TUI/
- * private TSX 泄漏（§4.5 加载图审计）；声明只依赖 contract 公开类型
- * （经 ./contract 相对 shim）。engine 注入缝（ReadonlySessionEngine）由
- * 消费方提供——CLI 真体装配在本仓 src/atlascode/web/runtimeDefault.ts
- * （不进 pack 图）。
+ * 纯 re-export 面：零副作用（禁入口导入就跑 CLI）、零 TUI/private TSX
+ * 泄漏（加载图审计）；声明只依赖 contract 公开类型（经 ./contract 相对
+ * shim）。
+ * S0-R2 形 A（lock-face @25cb7454 §1/§2，f4 批复工单 §7 @351c74c4）：本出口
+ * 扩具名导出 `createDefaultReadonlySessionRuntime`（engine 真体随 bundle，
+ * pack 格重形 = engine/session 只读闭包允许）；注入缝
+ * （createReadonlySessionRuntime options.engine）保留不动（预答不变量）。
+ * 内部面不入出口：atlasWebSessionEngine / buildConversationChain /
+ * TranscriptMessage（d.ts 泄漏面钉②）。
  */
 
 // runtime factory + 生命周期面
@@ -24,6 +28,12 @@ export {
   type FollowSessionRequest,
   type FollowSubscription,
 } from './readonlyRuntime'
+
+// S0-R2 形 A 默认装配（engine 真体随 bundle）
+export {
+  createDefaultReadonlySessionRuntime,
+  type AtlasWebSessionRuntimeOptions,
+} from './runtimeDefault'
 
 // follow 订阅机句柄
 export type { FollowHandle } from './follow'

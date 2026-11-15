@@ -88,20 +88,33 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
       'ReadonlySessionEngine',
       'WebSessionError',
       'NeutralProjection',
+      // S0-R2 形 A 钉②：entry 面新增仅 2（lock-face §2 公开类型面对表）
+      'createDefaultReadonlySessionRuntime',
+      'AtlasWebSessionRuntimeOptions',
     ]) {
       expect(entry).toContain(sym)
     }
   })
 
-  test('bundle 加载图：零 engine 泄漏（import specifier 面 grep）', () => {
+  test('bundle 加载图：形 A 只读闭包允许 + 禁面零现（lock-face @25cb7454 §1 重形）', () => {
     const js = readFileSync(OUT_JS, 'utf8')
-    // engine 域符号与模块面零命中（loadTranscriptFile/buildConversationChain
-    // 为 engine 专属符号；'src/engine' 为模块 specifier）
-    expect(js).not.toMatch(/["']src\/engine["']/)
-    expect(js).not.toContain('loadTranscriptFile')
-    expect(js).not.toContain('recoverOrphanedParallelToolResults')
-    // contract 协议被内联（schema 值在 bundle）
+    // S0-R2 形 A（工单 §6-3 / f4 批复工单 §7 @351c74c4）：旧「零 engine 泄漏」
+    // 不变量由形 A 推翻——engine/session 只读闭包真体随 bundle = 允许面（本形
+    // 目的）；新导出 + contract 协议内联在位。
+    expect(js).toContain('createDefaultReadonlySessionRuntime')
     expect(js).toContain('persisted-effective-conversation')
+    // 仍禁面（重形文本）：src/tui / src/private-ui / src/ui-private / engine
+    // 非 session 子域 specifier 零现（bundler 内联后仅未解析 import 残留）；
+    // 进程钩子（process.on）/ timer 连接 / env 写面 / 应用级全局槽零现。
+    expect(js).not.toMatch(/["']src\/tui[/"']/)
+    expect(js).not.toMatch(/["']src\/(private-ui|ui-private)[/"']/)
+    expect(js).not.toMatch(/["']src\/engine\/(?!session)/)
+    expect(js).not.toContain('process.on(')
+    // timer 面管辖范围注记：重形文本的「timer 连接仍禁」针对形 A 增量闭包
+    // （engine/session）；载体先存面 cursorLedger TTL 清理 setTimeout 为 S0-R
+    // 既有形态（旧格未禁），不在本格断言面。
+    expect(js).not.toMatch(/process\.env\.\w+\s*=[^=]/)
+    expect(js).not.toContain('globalThis.')
   })
 
   test('Node >=20 真实 ESM 消费：node 直接 import 产物且 factory 可用', () => {

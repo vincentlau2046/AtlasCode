@@ -25,7 +25,9 @@
 import { execFile } from 'child_process'
 import { existsSync, readFileSync, realpathSync } from 'fs'
 import { dirname, join } from 'path'
-import { sanitizePath } from '../../shared'
+// S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
+// （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
+import { sanitizePath } from '../../shared/path'
 import { getSessionEnv } from './env'
 
 // Memoized: called 12+ times per turn via hooks createBaseHookInput
@@ -158,7 +160,12 @@ export function getGitBranch(): Promise<string | undefined> {
 // 同款，dev 源树 / npm 安装两态一致）；旧 import.meta.url+相对级数算法在 dist
 // bundle 后 import.meta.url 落 dist/cli.js，上走级数错位 → 安装态返 'unknown'
 // 的 latent bug，本收口修正。
-const VERSION: string = (() => {
+// S0-R2（lock-face @25cb7454 §3-1，f4 批复工单 §7 @351c74c4）：求值惰性化——
+// import 时零 fs 探测（web 只读载体导入纯度格 2 必改级②），getVersion() 首调
+// 求值 + 模块级 memo（缓存语义保留，仅求值点后移；CLI 消费点调用时求值零差）。
+let _version: string | undefined
+
+function resolvePackageVersion(): string {
   try {
     let d = dirname(realpathSync(process.argv[1] ?? ''))
     for (;;) {
@@ -177,8 +184,11 @@ const VERSION: string = (() => {
     // 落空回落明示未知
   }
   return '0.0.0'
-})()
+}
 
 export function getVersion(): string {
-  return VERSION
+  if (_version === undefined) {
+    _version = resolvePackageVersion()
+  }
+  return _version
 }

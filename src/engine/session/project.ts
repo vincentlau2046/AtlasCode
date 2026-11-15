@@ -90,7 +90,7 @@ import type {
 } from './types'
 import { isChainParticipant, isCompactBoundaryMessage } from './predicates'
 import { getFirstMeaningfulUserMessageTextContent } from './firstPrompt'
-import { getSessionMessages } from './load'
+import { getSessionMessages } from './sessionMessagesCache'
 
 /** Size of the head/tail buffer for lite metadata reads.（旧 portable L17 逐字） */
 export const LITE_READ_BUF_SIZE = 65536

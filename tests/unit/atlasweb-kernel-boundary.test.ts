@@ -292,4 +292,74 @@ describe('AtlasWeb kernel boundary scanner', () => {
     expect(parsed.violations).toEqual([])
     expect(parsed.externalImports).toEqual([])
   })
+
+  // S0-R2（lock-face @25cb7454 §3-5，f4 批复工单 §7 @351c74c4 补充钉 2）：
+  // allowedTargetSubroots 目标侧豁免子域——web-session-runtime 形传
+  // ['src/engine/session']；豁免外 src/engine 其余子域 / src/tui 仍禁（负腿必含）。
+  test('allowedTargetSubroots：engine/session 豁免内目标过（形 A 重形）', async () => {
+    const root = fixture({
+      'src/engine/session/readonly.ts': 'export const readonlyFace = true\n',
+      'web/entry.ts': "import '../src/engine/session/readonly'\n",
+    })
+
+    const result = await scanAtlasWebKernelBoundary({
+      repositoryRoot: root,
+      sourceRoots: ['web'],
+      allowedTargetSubroots: ['src/engine/session'],
+    })
+
+    expect(result.allowed).toBe(true)
+    expect(result.violations).toEqual([])
+  })
+
+  test('allowedTargetSubroots 负腿：engine 其余子域（query）仍禁', async () => {
+    const root = fixture({
+      'src/engine/session/readonly.ts': 'export const readonlyFace = true\n',
+      'src/engine/query/loop.ts': 'export const loop = true\n',
+      'web/entry.ts': "import '../src/engine/session/readonly'\nimport '../src/engine/query/loop'\n",
+    })
+
+    const result = await scanAtlasWebKernelBoundary({
+      repositoryRoot: root,
+      sourceRoots: ['web'],
+      allowedTargetSubroots: ['src/engine/session'],
+    })
+
+    expect(result.allowed).toBe(false)
+    expect(result.violations).toHaveLength(1)
+    expect(result.violations[0]?.reason).toBe('forbidden-ui-boundary')
+    expect(result.violations[0]?.resolved).toBe('src/engine/query/loop.ts')
+  })
+
+  test('allowedTargetSubroots 负腿：src/tui 仍禁（豁免不外溢）', async () => {
+    const root = fixture({
+      'src/tui/private.ts': 'export const tui = true\n',
+      'web/entry.ts': "import '../src/tui/private'\n",
+    })
+
+    const result = await scanAtlasWebKernelBoundary({
+      repositoryRoot: root,
+      sourceRoots: ['web'],
+      allowedTargetSubroots: ['src/engine/session'],
+    })
+
+    expect(result.allowed).toBe(false)
+    expect(result.violations[0]?.reason).toBe('forbidden-ui-boundary')
+  })
+
+  test('allowedTargetSubroots 负腿：子域外逃逸（src/foo）仍 outside-approved', async () => {
+    const root = fixture({
+      'src/foo/bar.ts': 'export const bar = true\n',
+      'web/entry.ts': "import '../src/foo/bar'\n",
+    })
+
+    const result = await scanAtlasWebKernelBoundary({
+      repositoryRoot: root,
+      sourceRoots: ['web'],
+      allowedTargetSubroots: ['src/engine/session'],
+    })
+
+    expect(result.allowed).toBe(false)
+    expect(result.violations[0]?.reason).toBe('outside-approved-kernel-boundary')
+  })
 })

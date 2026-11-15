@@ -14,8 +14,9 @@
  * pickDepthOneUuidCandidate + walkChainBeforeParse（50% 字节门死分支
  * 预剔除）/ loadTranscriptFile（>5MB pre-compact 分块读 + 元数据首过 +
  * progressBridge legacy 链桥 + entry 分发 + leaf 计算）/ loadSessionFile
- * （env 解耦）/ getSessionMessages 域本地 memoize + clearSessionMessages
- * Cache + doesMessageExistInSession。
+ * （env 解耦）。会话去重缓存（getSessionMessages/clear/prime/has +
+ * doesMessageExistInSession）已整迁 sessionMessagesCache.ts（S0-R2 必改钉①，
+ * 载体加载图零缓存引用的构造面），本模块仅域内导出 loadSessionFile 供其读盘。
  *
  * 裁面登记（H6 前向接缝，复审勿当遗漏重提）：
  *   - ①fileHistory / ②attribution 快照面（buildFileHistorySnapshotChain /
@@ -41,7 +42,10 @@
  */
 import { readFile, stat } from 'fs/promises'
 import { join } from 'path'
-import { isEnvTruthy, logForDebugging } from '../../shared'
+// S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
+// （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
+import { isEnvTruthy } from '../../shared/env'
+import { logForDebugging } from '../../shared/debug'
 import { getSessionEnv } from './env'
 import { extractFirstPrompt } from './firstPrompt'
 import { jsonParse, parseJSONL } from './json'
@@ -1254,8 +1258,11 @@ export async function loadTranscriptFile(
 /**
  * Loads a transcript from a specific session file.（旧 L3788 逐字解耦：
  * sessionProjectDir CC-34 原子对裁）
+ * S0-R2（lock-face @25cb7454 §3-3）：改域内导出——会话去重缓存模块
+ * （sessionMessagesCache.ts，必改钉① 整体迁移）经本函数读盘；本模块对
+ * 缓存零引用（载体加载图结构性缺席的构造面）。
  */
-async function loadSessionFile(sessionId: string): Promise<
+export async function loadSessionFile(sessionId: string): Promise<
   Awaited<ReturnType<typeof loadTranscriptFile>>
 > {
   const sessionFile = join(
@@ -1263,67 +1270,5 @@ async function loadSessionFile(sessionId: string): Promise<
     `${sessionId}.jsonl`,
   )
   return loadTranscriptFile(sessionFile)
-}
-
-/**
- * Gets message UUIDs for a specific session without loading all sessions.
- * Memoized to avoid re-reading the same session file multiple times.
- * （旧 lodash memoize(Promise) → 域本地 Map 缓存 in-flight Promise，语义
- * 逐字：并发调用共享同一 load；clearSessionMessagesCache = Map.clear。）
- */
-const _sessionMessagesCache = new Map<string, Promise<Set<string>>>()
-
-export function getSessionMessages(sessionId: string): Promise<Set<string>> {
-  let cached = _sessionMessagesCache.get(sessionId)
-  if (!cached) {
-    cached = (async () => {
-      const { messages } = await loadSessionFile(sessionId)
-      return new Set(messages.keys())
-    })()
-    _sessionMessagesCache.set(sessionId, cached)
-  }
-  return cached
-}
-
-/**
- * Clear the memoized session messages cache.
- * Call after compaction when old message UUIDs are no longer valid.
- * R7（jsonl 双写收敛）：本缓存是会话去重 Set 的**单一事实源**（TUI
- * sessionStorage 的旧本地 memoize 实例已裁，改经 engine 门面委托本缓存——
- * 两写者四接缝共享同一 Set，docs/r3-jsonl-double-write-root-cause.md
- * 修复方向 ①）。
- */
-export function clearSessionMessagesCache(): void {
-  _sessionMessagesCache.clear()
-}
-
-/**
- * R7（jsonl 双写收敛）：预置会话去重 Set 缓存（--resume 挂载面性能优化：
- * getLastSessionLog 已全量读盘，预置避免 recordTranscript 二次全读，
- * 旧 tui lodash memoize `.cache.set` 逐字语义）。调用方契约：仅在缓存
- * 为空时预置（先经 hasSessionMessagesCache 判）——覆写活缓存会用陈旧
- * 盘快照丢掉未 flush 的 UUID，破坏写层 dedup。
- */
-export function primeSessionMessages(
-  sessionId: string,
-  uuids: Set<string>,
-): void {
-  _sessionMessagesCache.set(sessionId, Promise.resolve(uuids))
-}
-
-/** 缓存是否已有该会话的去重 Set（R7：预置前守卫，见 primeSessionMessages 契约）。 */
-export function hasSessionMessagesCache(sessionId: string): boolean {
-  return _sessionMessagesCache.has(sessionId)
-}
-
-/**
- * Check if a message UUID exists in the session storage（旧 L3832 逐字）
- */
-export async function doesMessageExistInSession(
-  sessionId: string,
-  messageUuid: string,
-): Promise<boolean> {
-  const messageSet = await getSessionMessages(sessionId)
-  return messageSet.has(messageUuid)
 }
 

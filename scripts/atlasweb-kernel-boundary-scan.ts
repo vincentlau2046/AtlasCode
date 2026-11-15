@@ -12,6 +12,14 @@ export interface AtlasWebKernelBoundaryInput {
    * closure), and one outside the declared set is `undeclared-external-import`.
    */
   externalDependencies?: readonly string[]
+  /**
+   * S0-R2（lock-face @25cb7454 §3-5，f4 批复工单 §7 @351c74c4 补充钉 2）：
+   * 目标侧豁免子域（pack 格重形）——形 A 下 web-session-runtime 出口允许
+   * `src/engine/session` 只读闭包目标；豁免外 src/engine 其余子域 /
+   * src/tui / private-ui 目标仍禁（负腿必含，单测锁定）。辅助信号定位
+   * （头注钉）：真正判据在 e2e gate 判据件。
+   */
+  allowedTargetSubroots?: readonly string[]
 }
 
 export interface AtlasWebKernelBoundaryViolation {
@@ -145,8 +153,19 @@ export function scanAtlasWebKernelBoundary(
   const repositoryRoot = resolve(input.repositoryRoot)
   const sourceRoots = input.sourceRoots.map(root => resolve(repositoryRoot, root))
   const externalDependencies = input.externalDependencies
+  const allowedTargetSubroots = (input.allowedTargetSubroots ?? []).map(root =>
+    relative(repositoryRoot, resolve(repositoryRoot, root)).split('/').join('/'),
+  )
   const violations: AtlasWebKernelBoundaryViolation[] = []
   const externalImports: string[] = []
+
+  /** 目标是否落在豁免子域内（S0-R2 形 A 重形：engine/session 只读闭包）。 */
+  const isAllowedTargetSubroot = (target: string): boolean => {
+    const targetRelative = relative(repositoryRoot, target).split('/').join('/')
+    return allowedTargetSubroots.some(
+      sub => targetRelative === sub || targetRelative.startsWith(`${sub}/`),
+    )
+  }
 
   for (const sourceRoot of sourceRoots) {
     if (!existsSync(sourceRoot) || !statSync(sourceRoot).isDirectory()) {
@@ -217,7 +236,10 @@ export function scanAtlasWebKernelBoundary(
           specifier,
           resolved: relative(repositoryRoot, resolved),
         }
-        if (isForbiddenResolvedPath(repositoryRoot, canonical)) {
+        if (isAllowedTargetSubroot(canonical)) {
+          // S0-R2 形 A 豁免子域（engine/session 只读闭包）：禁面与 approved
+          // 面双豁免；子域外目标照常判（负腿单测锁定不外溢）。
+        } else if (isForbiddenResolvedPath(repositoryRoot, canonical)) {
           violations.push({ ...violation, reason: 'forbidden-ui-boundary' })
         } else if (!isAllowedResolvedPath(repositoryRoot, sourceRoots, canonical)) {
           violations.push({ ...violation, reason: 'outside-approved-kernel-boundary' })

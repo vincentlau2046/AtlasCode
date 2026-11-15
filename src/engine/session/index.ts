@@ -132,12 +132,18 @@ export {
   buildConversationChain,
   loadTranscriptFromFile,
   loadTranscriptFile,
+} from './load'
+// S0-R2 必改钉①（lock-face @25cb7454 §3-3，f4 批复工单 §7 @351c74c4）：
+// 会话去重缓存四函数 + doesMessageExistInSession 自 load.ts 整迁
+// sessionMessagesCache.ts（载体加载图零缓存引用的构造面）；re-export 面
+// 消费者（engine 门面 / tui）零改动。
+export {
   getSessionMessages,
   clearSessionMessagesCache,
   primeSessionMessages,
   hasSessionMessagesCache,
   doesMessageExistInSession,
-} from './load'
+} from './sessionMessagesCache'
 // S0-R 只读子门面（web 只读 runtime 专用 force-full 加载；零写面）
 export { loadTranscriptFull, type ReadonlyTranscriptLoad } from './readonly'
 

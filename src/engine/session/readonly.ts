@@ -14,6 +14,15 @@
 
 import { loadTranscriptFile } from './load'
 
+// S0-R2 形 A（lock-face @25cb7454 §3-4，f4 批复工单 §7 @351c74c4）：只读
+// 子门面扩形——runtimeDefault 窄化导入的唯一点（全门面不入载体加载图）。
+// buildConversationChain = load.ts:317 纯函数（链重建 + 孤儿并行 tool result
+// 回收，零写面）合本门面「load 族纯函数复用」章程；TranscriptMessage 仅
+// 供 cast 焊接面（runtimeDefault `as unknown` 边界一次完成），不入 pack
+// 出口 entry.ts 面（钉② d.ts 泄漏面零内部型）。
+export { buildConversationChain } from './load'
+export type { TranscriptMessage } from './types'
+
 export type ReadonlyTranscriptLoad = Awaited<
   ReturnType<typeof loadTranscriptFile>
 >

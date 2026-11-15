@@ -80,24 +80,28 @@ const ELEMENTS = [
 ];
 
 // ── STR-1 entry-point 规则（src 域间 + tests→src 共用）──
-const ENTRY_POINT_RULES = [
-  "error",
-  {
-    default: "disallow",
-    rules: [
-      // folder-mode 元素: 只 index.ts 是公共出口
-      { target: "*", allow: "index.ts" },
-      // mount (file-mode): 单文件元素, 自身即入口, 允许被 import
-      { target: "mount", allow: "mount.ts" },
-      // kernel (S3a)：直改全量深路径是冻结设计（f4 §10 批准「零 re-export」），
-      // 无 index 门面——深路径 import 豁免 STR-1（src 消费方 tui + tests 同豁免）。
-      { target: "kernel", allow: "**" },
-      // tui (S3b 0.1.106)：bootstrapStatePort.ts = kernel/state 缝适配器
-      // （组合根跨域装配专用薄包装，lock-face 必答④；非门面漂移，头注登记）。
-      { target: "tui", allow: ["index.ts", "bootstrapStatePort.ts"] },
-    ],
-  },
+// S0-R2 豁免（lock-face @25cb7454 §3-4，f4 批复工单 §7 @351c74c4）：基座规则 +
+// per-importer 附加面。boundaries/entry-point 选项面无 from 过滤（仅 target/
+// allow/disallow/importKind/message），故 per-importer 豁免以 files 作用域
+// 块表达（见下方两个 S0-R2 桶）——仅被 lint 的 importer 文件生效，语义等价
+// from 过滤。
+const BASE_ENTRY_POINT_RULES = [
+  // folder-mode 元素: 只 index.ts 是公共出口
+  { target: "*", allow: "index.ts" },
+  // mount (file-mode): 单文件元素, 自身即入口, 允许被 import
+  { target: "mount", allow: "mount.ts" },
+  // kernel (S3a)：直改全量深路径是冻结设计（f4 §10 批准「零 re-export」），
+  // 无 index 门面——深路径 import 豁免 STR-1（src 消费方 tui + tests 同豁免）。
+  { target: "kernel", allow: "**" },
+  // tui (S3b 0.1.106)：bootstrapStatePort.ts = kernel/state 缝适配器
+  // （组合根跨域装配专用薄包装，lock-face 必答④；非门面漂移，头注登记）。
+  { target: "tui", allow: ["index.ts", "bootstrapStatePort.ts"] },
 ];
+const scopedEntryPoint = (extraRules) => [
+  "error",
+  { default: "disallow", rules: [...BASE_ENTRY_POINT_RULES, ...extraRules] },
+];
+const ENTRY_POINT_RULES = scopedEntryPoint([]);
 
 export default tseslint.config(
   // ── 全局忽略 ──
@@ -401,6 +405,34 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-var-requires": "off",
+    },
+  },
+
+  // ── S0-R2 载体缝豁免桶（lock-face @25cb7454 §3-4，f4 批复工单 §7 @351c74c4）──
+  // boundaries/entry-point 无 from 过滤 → 以 files 作用域表达 per-importer 豁免。
+  // ① engine 域内文件直连 shared 四子模块（web 只读载体加载图 shared barrel
+  //   窄化——feature/bun:bundle 出图；isEnvTruthy/debug/configDir/sanitizePath
+  //   四点，消费面仅 engine 域内）。
+  // ② runtimeDefault（atlascode 域）import 只读子门面 src/engine/session/
+  //   readonly（S0-R f4 批复 @f1f1099d 专用面；与 arch-reorg-closure gate
+  //   STR1_DEEP_IMPORT_EXEMPT 同步登记）。
+  {
+    files: ["src/engine/**/*.ts", "src/engine/**/*.tsx"],
+    rules: {
+      "boundaries/entry-point": scopedEntryPoint([
+        {
+          target: "shared",
+          allow: ["index.ts", "env.ts", "debug.ts", "configDir.ts", "path.ts"],
+        },
+      ]),
+    },
+  },
+  {
+    files: ["src/atlascode/web/runtimeDefault.ts"],
+    rules: {
+      "boundaries/entry-point": scopedEntryPoint([
+        { target: "engine", allow: ["index.ts", "session/readonly.ts"] },
+      ]),
     },
   },
 
