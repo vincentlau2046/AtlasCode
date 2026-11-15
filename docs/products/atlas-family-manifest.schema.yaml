@@ -1,8 +1,6 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: https://atlaswork.cn/schemas/atlas-family-manifest.schema.yaml
 title: Atlas Family Manifest
-name: atlas-family-manifest
-version: 1
 type: object
 additionalProperties: false
 required:

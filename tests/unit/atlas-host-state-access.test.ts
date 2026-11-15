@@ -42,4 +42,32 @@ describe('Atlas host state source guard', () => {
 
     expect(result).toEqual({ allowed: true, violations: [] })
   })
+
+  test('fails closed when a candidate root is missing (no silent skip)', () => {
+    const root = fixture("return kernelContract.session.follow(sessionId)\n")
+    const missing = `${root}/does-not-exist`
+
+    const result = scanAtlasHostStateAccess({ candidateRoots: [root, missing] })
+
+    expect(result.allowed).toBe(false)
+    expect(result.violations).toContainEqual({
+      file: missing,
+      match: '',
+      reason: 'candidate-root-missing',
+    })
+  })
+
+  test('fails closed when a candidate root is a file, not a directory', () => {
+    const root = fixture("return kernelContract.session.follow(sessionId)\n")
+    const filePath = `${root}/host.ts`
+
+    const result = scanAtlasHostStateAccess({ candidateRoots: [filePath] })
+
+    expect(result.allowed).toBe(false)
+    expect(result.violations).toContainEqual({
+      file: filePath,
+      match: '',
+      reason: 'candidate-root-missing',
+    })
+  })
 })

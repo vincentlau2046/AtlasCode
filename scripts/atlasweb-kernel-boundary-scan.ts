@@ -1,9 +1,17 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { extname, join, relative, resolve } from 'node:path'
 
 export interface AtlasWebKernelBoundaryInput {
   repositoryRoot: string
   sourceRoots: readonly string[]
+  /**
+   * Declared external dependency names (e.g. from package.json). Bare
+   * imports are only accepted against this closure evidence: a bare import
+   * with no declared-dependency list supplied is `external-import-unverified`
+   * (fail closed — an unexamined external edge must not silently pass as
+   * closure), and one outside the declared set is `undeclared-external-import`.
+   */
+  externalDependencies?: readonly string[]
 }
 
 export interface AtlasWebKernelBoundaryViolation {
@@ -16,6 +24,8 @@ export interface AtlasWebKernelBoundaryViolation {
 export interface AtlasWebKernelBoundaryResult {
   allowed: boolean
   violations: AtlasWebKernelBoundaryViolation[]
+  /** Bare external edges that passed the declared-dependency check (auditable surface, not closure proof). */
+  externalImports: string[]
 }
 
 const IMPORT_RE = /(?:from\s*|import\s*\(\s*|import\s+|require\s*\(\s*)['"]([^'"]+)['"]/g
@@ -32,7 +42,16 @@ function walkSourceFiles(directory: string): string[] {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
     const path = join(directory, entry.name)
-    if (entry.isDirectory()) {
+    // statSync follows symlinks: linked source files/directories are scanned
+    // like real ones instead of being silently skipped; dangling links are
+    // skipped (they cannot contain scannable source).
+    let stat
+    try {
+      stat = statSync(path)
+    } catch {
+      continue
+    }
+    if (stat.isDirectory()) {
       files.push(...walkSourceFiles(path))
     } else if (SOURCE_EXTENSIONS.has(extname(entry.name))) {
       files.push(path)
@@ -41,12 +60,22 @@ function walkSourceFiles(directory: string): string[] {
   return files.sort()
 }
 
+function existingFile(candidate: string): string | null {
+  return existsSync(candidate) && statSync(candidate).isFile() ? candidate : null
+}
+
 function resolveLocalImport(repositoryRoot: string, importer: string, specifier: string): string | null {
-  const base = specifier.startsWith('.')
-    ? resolve(importer, '..', specifier)
-    : specifier.startsWith('src/')
-      ? resolve(repositoryRoot, specifier)
-      : null
+  let base: string | null = null
+  if (specifier.startsWith('.')) {
+    base = resolve(importer, '..', specifier)
+  } else if (specifier.startsWith('src/')) {
+    base = resolve(repositoryRoot, specifier)
+  } else if (specifier.startsWith('@atlas/')) {
+    // Repository-internal alias edge: @atlas/<path> resolves into src/<path>
+    // and is boundary-checked like any local edge (private aliases are
+    // rejected earlier; the rest must resolve or fail closed).
+    base = resolve(repositoryRoot, 'src', specifier.slice('@atlas/'.length))
+  }
   if (base === null) return null
 
   const candidates = [
@@ -59,7 +88,23 @@ function resolveLocalImport(repositoryRoot: string, importer: string, specifier:
     join(base, 'index.tsx'),
     join(base, 'index.js'),
   ]
-  return candidates.find(candidate => existsSync(candidate) && statSync(candidate).isFile()) ?? null
+  // node16-style edge: an explicit `.js` specifier may map onto a `.ts`/`.tsx` source.
+  if (base.endsWith('.js')) {
+    candidates.push(`${base.slice(0, -3)}.ts`, `${base.slice(0, -3)}.tsx`)
+  }
+  for (const candidate of candidates) {
+    const found = existingFile(candidate)
+    if (found !== null) return found
+  }
+  return null
+}
+
+function barePackageName(specifier: string): string {
+  if (specifier.startsWith('@')) {
+    const [scope, name] = specifier.split('/')
+    return scope !== undefined && name !== undefined ? `${scope}/${name}` : specifier
+  }
+  return specifier.split('/')[0] ?? specifier
 }
 
 function isForbiddenPrivateAlias(specifier: string): boolean {
@@ -87,15 +132,21 @@ function isAllowedResolvedPath(repositoryRoot: string, sourceRoots: readonly str
 
 /**
  * Scan candidate Web sources without writing to the checkout.
- * Local imports fail closed when they cannot be resolved or leave the approved
- * candidate/kernel/shared boundary. External packages are not resolved here.
+ * Local (and @atlas alias) imports fail closed when they cannot be resolved,
+ * leave the approved candidate/kernel/shared boundary, or escape through a
+ * symlink — targets are canonicalized before the boundary check. Bare
+ * external imports require declared-dependency closure evidence; they are
+ * never silently skipped, and recording them is an audit surface, not proof
+ * that the upstream runtime bundle is free of UI code.
  */
 export function scanAtlasWebKernelBoundary(
   input: AtlasWebKernelBoundaryInput,
 ): AtlasWebKernelBoundaryResult {
   const repositoryRoot = resolve(input.repositoryRoot)
   const sourceRoots = input.sourceRoots.map(root => resolve(repositoryRoot, root))
+  const externalDependencies = input.externalDependencies
   const violations: AtlasWebKernelBoundaryViolation[] = []
+  const externalImports: string[] = []
 
   for (const sourceRoot of sourceRoots) {
     if (!existsSync(sourceRoot) || !statSync(sourceRoot).isDirectory()) {
@@ -120,8 +171,27 @@ export function scanAtlasWebKernelBoundary(
           continue
         }
 
-        const isLocal = specifier.startsWith('.') || specifier.startsWith('src/')
-        if (!isLocal) continue
+        const isLocal = specifier.startsWith('.') || specifier.startsWith('src/') || specifier.startsWith('@atlas/')
+        if (!isLocal) {
+          // Bare external edge: accepted only against declared-dependency
+          // closure evidence, and always recorded.
+          if (externalDependencies === undefined) {
+            violations.push({
+              importer: relative(repositoryRoot, importerPath),
+              specifier,
+              reason: 'external-import-unverified',
+            })
+          } else if (!externalDependencies.includes(barePackageName(specifier))) {
+            violations.push({
+              importer: relative(repositoryRoot, importerPath),
+              specifier,
+              reason: 'undeclared-external-import',
+            })
+          } else {
+            externalImports.push(specifier)
+          }
+          continue
+        }
 
         const resolved = resolveLocalImport(repositoryRoot, importerPath, specifier)
         if (resolved === null) {
@@ -133,14 +203,23 @@ export function scanAtlasWebKernelBoundary(
           continue
         }
 
+        // Canonicalize before the boundary check so a symlink cannot wash a
+        // forbidden target into an approved path.
+        let canonical = resolved
+        try {
+          canonical = realpathSync(resolved)
+        } catch {
+          // keep the resolved path if it cannot be canonicalized
+        }
+
         const violation = {
           importer: relative(repositoryRoot, importerPath),
           specifier,
           resolved: relative(repositoryRoot, resolved),
         }
-        if (isForbiddenResolvedPath(repositoryRoot, resolved)) {
+        if (isForbiddenResolvedPath(repositoryRoot, canonical)) {
           violations.push({ ...violation, reason: 'forbidden-ui-boundary' })
-        } else if (!isAllowedResolvedPath(repositoryRoot, sourceRoots, resolved)) {
+        } else if (!isAllowedResolvedPath(repositoryRoot, sourceRoots, canonical)) {
           violations.push({ ...violation, reason: 'outside-approved-kernel-boundary' })
         }
       }
@@ -152,7 +231,8 @@ export function scanAtlasWebKernelBoundary(
       `${right.importer}\0${right.specifier}\0${right.reason}`,
     ),
   )
-  return { allowed: violations.length === 0, violations }
+  externalImports.sort()
+  return { allowed: violations.length === 0, violations, externalImports }
 }
 
 function cliArgs(args: readonly string[]): { root: string; sourceRoots: string[] } {

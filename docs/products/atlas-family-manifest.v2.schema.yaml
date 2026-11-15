@@ -1,0 +1,67 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://atlaswork.cn/schemas/atlas-family-manifest.v2.schema.yaml
+title: Atlas Family Manifest v2
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - kernel
+  - web
+  - products
+  - protocol
+  - pairingRef
+properties:
+  schemaVersion:
+    const: 2
+  kernel:
+    type: object
+    additionalProperties: false
+    required: [repo, commit, package]
+    properties:
+      repo: { type: string, const: AtlasCode }
+      # v2 provenance requires the full 40-hex commit (no abbreviated provenance).
+      commit: { type: string, pattern: '^[0-9a-f]{40}$' }
+      package: { type: string, minLength: 1 }
+  web:
+    type: object
+    additionalProperties: false
+    required: [repo, commit, platform]
+    properties:
+      repo: { type: string, const: AtlasWeb }
+      commit: { type: string, pattern: '^[0-9a-f]{40}$' }
+      platform: { type: string, minLength: 1 }
+  products:
+    type: object
+    additionalProperties: false
+    required: [code, office, comic]
+    properties:
+      code: { $ref: '#/$defs/product' }
+      office: { $ref: '#/$defs/product' }
+      comic: { $ref: '#/$defs/product' }
+  protocol:
+    type: object
+    additionalProperties: false
+    required: [name, version]
+    properties:
+      name: { type: string, const: atlas-headless }
+      version: { type: string, pattern: '^v[0-9]+$' }
+  pairingRef:
+    type: object
+    additionalProperties: false
+    required: [path, sha256]
+    properties:
+      # Immutable binding: the manifest records the sha256 of the independent
+      # pairing-evidence JSON it refers to (validated against
+      # atlas-family-pairing.schema.yaml).
+      path: { type: string, minLength: 1 }
+      sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+$defs:
+  product:
+    type: object
+    additionalProperties: false
+    required: [package, configDirName]
+    properties:
+      package: { type: string, minLength: 1 }
+      # Narrowed: a single dot-directory directly under the home directory —
+      # no nested paths, no traversal surface.
+      configDirName: { type: string, pattern: '^~/\.[A-Za-z0-9][A-Za-z0-9._-]*$' }

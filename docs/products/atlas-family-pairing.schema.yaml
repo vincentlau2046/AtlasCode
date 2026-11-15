@@ -1,0 +1,85 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://atlaswork.cn/schemas/atlas-family-pairing.schema.yaml
+title: Atlas Family Pairing Evidence
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - upstream
+  - packageName
+  - version
+  - contractEntry
+  - runtimeEntry
+  - artifact
+  - protocolVersion
+  - envelopeVersion
+  - evidenceDigest
+  - products
+  - rollback
+properties:
+  schemaVersion:
+    const: 1
+  upstream:
+    type: object
+    additionalProperties: false
+    required: [repo, commit]
+    properties:
+      repo: { type: string, minLength: 1 }
+      commit: { type: string, pattern: '^[0-9a-f]{40}$' }
+  packageName: { type: string, minLength: 1 }
+  version: { type: string, minLength: 1 }
+  # Contract package entry (e.g. ./web-contract). Always required.
+  contractEntry: { type: string, minLength: 1 }
+  # Runtime package entry (e.g. ./web-session-runtime). May be null only in
+  # the S0-U stage; a null runtimeEntry must not be marked ready.
+  runtimeEntry: { type: [string, 'null'], minLength: 1 }
+  artifact:
+    type: object
+    additionalProperties: false
+    required: [integrity]
+    properties:
+      integrity: { type: string, pattern: '^sha512-[A-Za-z0-9+/]+={0,2}$' }
+  protocolVersion: { const: v0 }
+  envelopeVersion: { type: integer, const: 0 }
+  consumerCommit: { type: [string, 'null'], pattern: '^[0-9a-f]{40}$' }
+  consumerLockDigest: { type: [string, 'null'], pattern: '^[0-9a-f]{64}$' }
+  evidenceDigest: { type: string, pattern: '^[0-9a-f]{64}$' }
+  products:
+    type: array
+    items: { $ref: '#/$defs/productStatus' }
+  rollback:
+    type: object
+    additionalProperties: false
+    required: [kind]
+    properties:
+      kind: { enum: [disabled, verified-pair] }
+      pairDigest: { type: string, pattern: '^[0-9a-f]{64}$' }
+    if:
+      properties: { kind: { const: verified-pair } }
+      required: [kind]
+    then:
+      required: [pairDigest]
+  ready: { type: boolean }
+if:
+  properties: { runtimeEntry: { type: 'null' } }
+  required: [runtimeEntry]
+then:
+  properties: { ready: { const: false } }
+$defs:
+  productStatus:
+    type: object
+    additionalProperties: false
+    required: [id, registered, enabled, accepted]
+    properties:
+      id: { type: string, minLength: 1 }
+      # registered / enabled / accepted are independent states; one does not
+      # imply another.
+      registered: { type: boolean }
+      enabled: { type: boolean }
+      accepted: { type: boolean }
+      placeholder: { type: boolean }
+    if:
+      properties: { placeholder: { const: true } }
+      required: [placeholder]
+    then:
+      properties: { accepted: { const: false } }

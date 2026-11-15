@@ -8,7 +8,7 @@ export interface AtlasHostStateAccessInput {
 export interface AtlasHostStateAccessViolation {
   file: string
   match: string
-  reason: 'direct-product-state-access'
+  reason: 'direct-product-state-access' | 'candidate-root-missing'
 }
 
 export interface AtlasHostStateAccessResult {
@@ -30,13 +30,27 @@ function walk(directory: string): string[] {
   return files.sort()
 }
 
-/** Scan host/controller sources for direct product state-directory access. */
+/**
+ * Scan host/controller sources for direct product state-directory access.
+ *
+ * This is an auxiliary static signal only: a regex hit proves a suspicious
+ * source pattern, and a clean result never proves runtime isolation or
+ * authorized read/write behavior. Runtime isolation evidence must come from
+ * real authorization/read-write probes (G2), not from this scan going green.
+ *
+ * Fail closed: a candidate root that does not exist or is not a directory is
+ * reported as `candidate-root-missing` (never silently skipped — a missing
+ * scan target must not count as a pass).
+ */
 export function scanAtlasHostStateAccess(
   input: AtlasHostStateAccessInput,
 ): AtlasHostStateAccessResult {
   const violations: AtlasHostStateAccessViolation[] = []
   for (const root of input.candidateRoots.map(candidateRoot => resolve(candidateRoot))) {
-    if (!existsSync(root) || !statSync(root).isDirectory()) continue
+    if (!existsSync(root) || !statSync(root).isDirectory()) {
+      violations.push({ file: root, match: '', reason: 'candidate-root-missing' })
+      continue
+    }
     for (const file of walk(root)) {
       const source = readFileSync(file, 'utf8')
       for (const match of source.matchAll(DIRECT_PRODUCT_PATH_RE)) {

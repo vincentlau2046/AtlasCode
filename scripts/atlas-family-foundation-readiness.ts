@@ -24,8 +24,8 @@ const REQUIRED_EVIDENCE = [
 ] as const
 
 /**
- * Evaluate the AtlasWeb foundation gate without writing product data or
- * inferring a positive result from absent evidence.
+ * Evaluate the AtlasWeb foundation gate (G2, release) without writing product
+ * data or inferring a positive result from absent evidence.
  */
 export function evaluateFoundationReadiness(
   input: FoundationReadinessInput,
@@ -44,6 +44,52 @@ export function evaluateFoundationReadiness(
   }
   return {
     releasable: reasons.length === 0,
+    reasons,
+    evidence: input.evidence,
+  }
+}
+
+/**
+ * G1 — implementation admission (repository creation / parallel development
+ * start). Separate output and separate gate from the G2 release predicate
+ * above (S0 agreement §6/§8): G1=true / G2=false is a legal intermediate
+ * state. G1 never requires read-only controller evidence — that predicate
+ * belongs to G2 only. Fails closed: every evidence key must be a non-blank
+ * reference; missing, empty, or blank means refused.
+ */
+export const IMPLEMENTATION_ADMISSION_EVIDENCE = [
+  'userAuthorization',
+  'ticketAuditPass',
+  's3bProductionEvidence',
+  'isolationPlan',
+  'contractReview',
+  'upstreamDependencyPlan',
+] as const
+
+export type ImplementationAdmissionKey = (typeof IMPLEMENTATION_ADMISSION_EVIDENCE)[number]
+
+export interface ImplementationAdmissionInput {
+  evidence: Readonly<Record<ImplementationAdmissionKey, string>>
+}
+
+export interface ImplementationAdmissionResult {
+  implementationAdmitted: boolean
+  reasons: string[]
+  evidence: Readonly<Record<string, string>>
+}
+
+export function evaluateImplementationAdmission(
+  input: ImplementationAdmissionInput,
+): ImplementationAdmissionResult {
+  const reasons: string[] = []
+  for (const key of IMPLEMENTATION_ADMISSION_EVIDENCE) {
+    const reference = input.evidence[key]
+    if (reference === undefined || reference.trim().length === 0) {
+      reasons.push(`implementation admission evidence missing: ${key}`)
+    }
+  }
+  return {
+    implementationAdmitted: reasons.length === 0,
     reasons,
     evidence: input.evidence,
   }
