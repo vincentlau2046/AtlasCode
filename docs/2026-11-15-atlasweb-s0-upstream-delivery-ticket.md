@@ -198,6 +198,13 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 2. **U-2 退避裁定：批准 Main 提案**——U-2 触 package.json exports/build 面正属 §7.7 prep 窗纪律防的候选污染面（func 测试亦入 gate canon 扫描域），**U-2 开工门 = 0.1.113 段 L 收口（与 S0-P prep 同窗）**。R-1/R-2/R-3 顺延同门（R 切片同触 build/出口面）；R-1 域内 readonly.ts 纯码是否提前由 Main 按 §7.7 prep 纪律自判（触面即退避，不触可预研零提交）。
 3. **S0-P 预研采认**：P0 净资产 19 文件 +1402/-2 盘点在案；两注意面采认——① 三文档 hash 源在 P0 worktree 工作树（未提交态），整合时以 §0.1 三 hash 逐一复核工作树内容为准，AtlasWeb-F4 侧不另行 commit；② P0 四提交含 package.json +1 行，整合时逐行核、build face 遵 prep 窗。
 
+### 5.5 U-2 采认 + prep 首车采认 + 事项 A 裁定（2026-11-15，f4；双平台 c964a1e9..cee4f477）
+
+1. **S0-P prep 首车采认（fdb4e569，20 文件 +1614/-2，非 npm 波）**：P0 四提交资产逐文件整合 + 三文档 hash 验真移交 + 总约 untracked 落盘，与 §5.3-5 批准形一致。
+2. **U-2 采认（cee4f477）**：`./web-contract` 出口 = exports 条件序（types→import→default + ./package.json 保留 + bin 不变）+ `build:web-contract`（browser --external zod + emitDeclarationOnly 单文件闭包）+ prepublishOnly 双 build（CLI build 字节不动——cli.js 18,211,564B 与 0.1.113 SRI 同值直证 CLI 零影响）。格 B 5 件全绿。四件套 tsc/eslint 0 + canon 5981/0/491，Δ=+19 测试/+6 文件恰合预注册（勘误采认：prep 测试实数 14 非误记 28；U-2 func +5）。**U 波（0.1.115 候）码面至此收口，候 R 波合流后一并 gate/段 L**。
+3. **事项 A 裁定（自动安全审查 8 findings，#391）**：findings 全落 prep 必改面（fail-open readiness 授权判定/host-state-scan 缺 root 静默 continue/boundary-scan bare import+symlink 未 canonicalize/manifest commit 正则 provenance/configDirName pattern 过宽）= 工单 §2.1 计划内 prep 切片②，**R-1/R-2/R-3 按原序先行批准**——R 码面不消费 prep scanner/评估器，时序耦合不成立。**硬条件钉死：G1 判定与『可以并行实施』通知的前置 = #391 prep 切片② 修形落地且 prep gate（G1 六证据键 + 真值表）在 f4 采认在案**——findings 未修前 G1 不得判 true、通知不得发。
+4. 下一步批准：R-1（readonlyReader + adapter 安全读，隔离反例先红）→ R-2（poll/follow/资源界/终态唯一）→ R-3（./web-session-runtime 出口）→ e2e gate（判据格按切片分列）→ 段 L 0.1.115/0.1.116（候 f4 采认 hash 方走，时序纪律遵行）。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
