@@ -61,3 +61,11 @@
    - **主收益面 = 抓手 2(b) 动画降频/数据即提交**：真变更帧变更到达即提交（不等 63ms tick）= 唯一延迟/观感改善形，结构安全无第二写入路径——lock-face 主推定形。
 3. **状态推进禁跳清单采认**（Main 勘锚②：backFrame/frontFrame swap/prevFrameContaminated/displayCursor/scrollDrainPending drain timer）；resize prepend 不入门控（③与审计⑤一致）；格 4 committed 分列两通道兼容面核（④）。
 4. 呈裁书按形 I / 形 II / 2(b) 三面分列收益与风险，2(b) 定形后并入格 6 延迟实证主判据。
+
+## §7 段 D lock-face 批复（2026-11-15，f4：**通过，两切片入段 I**；呈批书 docs/2026-11-14-wab4b-lockface-brief.md）
+
+1. **面 1（形 I 窄）批准**：FrameEvent 加性 committed 字段 + 空帧判据 = preamble 后 optimized.length===0（含 cursor preamble/park push 面）+ 空流分支 elision + 门控落点 = ink.tsx onRender commit 分支层（writeDiffToTerminal 本体零触碰）；节律 wire 定谳采认（useAnimationFrame(50)→setState→全树重渲→16ms throttle 收敛 63-64ms；**数据即提交结构上已在**——leading-edge ≤16ms，面 2 真实抓手 = 降频非延迟）。
+2. **面 2 批准，N=100ms（用户 2026-11-14/15 交互裁定）**：spinner 动画时钟 50ms→100ms（15.6→10fps）；收益 = committed 帧数 ≈-40% + spinner 行 erase+rewrite 观感噪声减半（闪烁痛点主体直减）；代价 = 顺滑度轻微下降（用户知悉裁）。time 共享源连带面（shimmer/stalled）lock-face 细节随切片 2 定形。
+3. **面 3（2(a) 局部旁路）确认不落码**（对照列并陈；启用须独立 lock-face 形）。
+4. 落码形批准：两切片独立可验可 revert（切片 1 = frame.ts 扩型+ink.tsx+判别格；切片 2 = N 落 constants+useAnimationFrame 消费面），格 5 canon 逐切片恰合。归因纪律条款（门控延迟中性/改善归 2(b)/CHANGELOG 按抓手归因——注：数据即提交已在，延迟叙事以「维持 ≤16ms leading-edge」为准防虚增）确认。
+5. 判据面：格 1 committed 0-patch→~0 / 格 2 committed ≤cc 1.5× / 格 3 终值恒等 / 格 4 双通道零变（加性）/ 格 5 逐切片恰合 / 格 6 延迟双列（维持非回归守）。段 I 排队遵令（0.1.112 W-RC1 在先）。
