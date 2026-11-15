@@ -212,6 +212,14 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 3. **Δ 采认**：canon 5999/0/492，Δ+18 测试/+1 文件——预注册「~10」为估计形，实数超出方向 = **加严非放宽**（恰合锚 = 文件数与码面，非测试数下界）；adapter 真实 fs 测试（tmpdir seeded）收进预注册 unit 文件 = 本仓 unit 层 tmpdir 先例（atlas-host-state-access 同族）批准，R-3 func 文件仍按预注册开。cli.js 字节变化（18,211,980B）= R 码面入 CLI 图预期面，SRI 对照留段 L。
 4. R-2 继续批准（预注册 +2 文件 ~16 测试——**本切片起实数落账时如偏离预注册须随披露给理由**，方向加严仍须声明防口径松弛惯例化）。
 
+### 5.7 R-2 采认（2026-11-15，f4；c03f8b60，11 文件 +1982/−52）
+
+1. **码面采认**：follow.ts（poll 订阅机：stat 三元组锚定 + 增量尾读 + 半行 pendingPartial 不当完整记录 + corruptData 终态 + 不连续 resetRequired 换 generation/baseline + 终态恰一 rank 制）/ cursorLedger.ts（verify 三态拒 + LRU 未 pin 先淘 + onActiveEvict 显式 resetRequired 禁静默失效 = §5.3 必改1 形兑现 + payload 界）/ projection.ts 中立投影 + computeLeafUuids 按 load.ts:1187-1226 同规则 / limits.ts §4.4 全表 DEFAULT/HARD 逐值对 / adapter 扩 statTranscript/readTranscriptTail/resolveTranscriptPath 三方法（安全链同 §7.4）/ readonlyRuntime replay 尺寸界先于 loadFull + 订阅槽 + closeDeadline——与 §5.3/呈批书 §7.5 判定形逐项吻合。
+2. **裁定 2 条采认**：① abort 终态 = `error{code:'cancelled'}`（contract 事件 kind 无独立 cancelled；rank 3 语义保留）——**补充钉死：closed 恒为唯一 terminal 事件 kind，cancel/abort 路径 = error{code:'cancelled'} → closed 且终态后零数据事件；三方同窗归属表判读以终态 kind（closed）+ 伴随 error code 定归属，测试断言覆盖该映射**；② limits 跨参校验时点 = factory 构造时（纯内存一致性，R-1 fs adapter 先例），start 面验授权/scope 配置（§4.2 原义指 scope 面）——两分界采认，与 §7.6「跨参数 start 核」字面以 face 分账解读在案。
+3. **Δ 披露采认（§5.6-4 纪律首例兑现）**：+21 测试/+2 文件 vs 预注册 ~16，+5 加严向已披露理由（lease 超时/订阅槽释放/close 幂等独立成件 + limits 逐值断言，非拆分虚胖）——批准。canon 6020/0/494 恰合（基线 5999/0/492，Δ+21+2 恰合实数）；R-1 全量回归绿。
+4. **登记 2 条**：① projection.computeLeafUuids 为 load.ts:1187-1226 同规则镜像——漂移守卫 = 必改5a fixture 对表 standing，load.ts 链/leaf 规则日后变更时镜像同步义务在案（W-AB4 diffRegion 单源化先例为更优形，届时可置换登记）；② `bun run check` 无 stdin exit 1 = 旧已知形态，非本波 RED，零处置。
+5. **R-3 继续批准**：./web-session-runtime 出口 + fs/pack 双测试文件按预注册开；R 波码面收口后合流 U 波一并 e2e gate（判据格 A-J 按切片分列）→ 段 L 0.1.115/0.1.116（候本节采认 commit hash 方走，时序纪律遵行）。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
