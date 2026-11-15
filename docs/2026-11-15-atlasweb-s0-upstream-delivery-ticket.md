@@ -220,6 +220,15 @@ S0-R gate按 §6逐格；发布后fresh install同形复验contract/runtime导�
 4. **登记 2 条**：① projection.computeLeafUuids 为 load.ts:1187-1226 同规则镜像——漂移守卫 = 必改5a fixture 对表 standing，load.ts 链/leaf 规则日后变更时镜像同步义务在案（W-AB4 diffRegion 单源化先例为更优形，届时可置换登记）；② `bun run check` 无 stdin exit 1 = 旧已知形态，非本波 RED，零处置。
 5. **R-3 继续批准**：./web-session-runtime 出口 + fs/pack 双测试文件按预注册开；R 波码面收口后合流 U 波一并 e2e gate（判据格 A-J 按切片分列）→ 段 L 0.1.115/0.1.116（候本节采认 commit hash 方走，时序纪律遵行）。
 
+### 5.8 R-3 采认（2026-11-15，f4；33989459 + 4427df15，f4 抽验码面）
+
+1. **码面采认（f4 抽验）**：engine 解耦注入缝兑现——projection.ts 零 engine 导入（ProjectionSourceMessage 结构面 + ProjectionEngineDeps 注入缝），engine 真体 cast 焊接边界收在 runtimeDefault.ts 不进 pack 图；entry.ts 纯 re-export 零副作用零 engine/TUI/TSX 泄漏；exports `./web-session-runtime` 条件序 types→import→default 正确；contract.ts 相对闭包 shim；prepublishOnly 扩链同步。pack 判别格 5 件（零 zod/contract 依赖 + 零 src/ specifier + bundle 加载图零 engine 泄漏 + node ESM 真导入）= 格 B/C e2e 前置证据在案。
+2. **§5.7-2① 终态对钉死兑现采认**：error → error+closed 成对、stripTerminalFromQueue 高优先覆写、终态后零数据事件，follow 测试 untilTerminal 改形消费到 closed 断言该映射——本节钉死形落码直证。
+3. **安全审查处置表全采认**：① TOCTOU 交付侧修（replay/follow 前后双采样三元组全等 + 3 次有界重试 → ioUnavailable retryable；validated-fd 单次打开链不动 = 呈批书 §7.4 钉死形保持）；② 投影交付界（serializedProjectionBytes ≤ maxProjectionBytes 超界 resourceLimit 零半投影）；③ 生命周期竞态全修（releaseOnce 移 run() finally worker 实停才释 + close() 加盟 workerDone 2s + interrupted() 每 await 复检 + maxSubscriptions:1 回归件）。
+4. **呈报裁定（loader 级 bounded parser）：本波不加严，现状两防线采认为 S0 充分**——loader 逐行字节界不在预注册形内，落入即 load.ts 第二修形点违反 §7.3 钉死形；transcript 尺寸门（64/256MiB）先于 loadFull + 投影字节交付界两道防线构成 defense-in-depth。**§4.4 record 行判定面分账注记：adapter/tail 车道 = 累积时拦截（已实现）+ loader 全量车道 = 尺寸门 + 交付界两防线**，按此分账兑现。残余面（≤64MiB 文件内单行全量驻留内存）登记为 G2 格 D/E 观测项——若观测/消费实测暴露风险，届时以独立 lock-face 扩预注册形（readonly.ts 侧 post-parse 校验形，不动 load.ts）再裁，禁本波先行。
+5. **Δ 披露采认**：+3 文件 +12 件 vs 预注册 +2 文件 ~10（加严向已披露：follow 两安全回归件独立成件 + contract-pack 断言改形随扩链连带非新增）——批准。canon 6032/0/496 恰合（Δ+12/+2 与披露逐件对账吻合）。zod-external 偏差修正采认：contract shim 纯 type re-export → bundle 零 zod 依赖（强于预期形），--external 保留防御性。
+6. **R 波码面收口**：U-1/U-2/R-1/R-2/R-3 五切片全落。下一步 = U+R 合流 e2e gate（判据格 A-J 按切片分列，prep 测试不冒充生产 gate）→ 段 L 0.1.115/0.1.116（候本节采认 commit hash 方走）→ 发布后安装品生产复验 → #391 prep 切片② 修形 + prep gate（G1 六证据键 + 真值表）f4 采认 → 硬条件解锁。
+
 ## §6 总判据（每波分格生效，禁止互相冒充）
 
 | 格 | P | U | R | 证据 |
