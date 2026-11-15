@@ -4,6 +4,25 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.115（2026-11-15）
+
+**S0-U 上游交付波**（工单 docs/2026-11-15-atlasweb-s0-upstream-delivery-ticket.md
++ 呈批书 docs/2026-11-15-s0-ur-lockface-brief.md，f4 批复 @f1f1099d +
+§5.6/§5.7/§5.8 采认链；GATE-PASS 判定单 r-20261115-gate-s0ur）。0.1.114
+跳号（预留给排队件 F，未发布）。
+
+- **S0-P prep**（fdb4e569）：web session 上游交付面 prep（隔离反例先行
+  判别格基线）。
+- **U-1**（0293cb06）：`loadTranscriptFull` 复用形——engine session loader
+  加 `precompactSkip: 'force-full'` 修形点（呈批书 §7.3 钉死：readonly
+  投影车道全量读取，precompact 跳过语义显式化）。
+- **U-2**（cee4f477）：`./web-contract` 库出口首车——browser ESM 单文件
+  闭包 bundle（zod external）+ emitDeclarationOnly d.ts + package.json
+  exports 条件序（types→import→default）+ `build:web-contract` +
+  prepublishOnly 接链；判别格 `tests/func/web-contract-pack.test.ts`
+  5 件（零 Node 内建 import / d.ts 单文件自足闭包 / Node≥20 真实 ESM
+  消费 / exports 条件序钉死 / CLI bin 不变）。
+
 ## v0.1.113（2026-11-15）
 
 **W-AB4b 帧提交节律门控**（lock-face 呈批 docs/2026-11-14-wab4b-lockface-brief.md
