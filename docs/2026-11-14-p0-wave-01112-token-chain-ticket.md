@@ -83,3 +83,7 @@ root-cause 腿先行（聚合计数链图：stream_delta 事件 → 各消费点
 6. **容差带冻结批准**：逐回合（turn-id 对齐）计数器终值 vs reqlog `usage.output_tokens`，Δ≤2% 且 Δ≤50 tokens 双上界同时满足（12 回合账本 Σ2466 落账候选面天然 Δ=0；face A 反例逾百倍必出界——数值即此冻结）。
 7. **消费面改账批准**：7→6 文件（compact.ts 常量名撞车非消费点，e2e §4 直证）；0.1.70 遗留账 composing token 项由本链销项，403 fallback 项独立核不顺带。
 8. **落码形批准**：两切片独立可验可 revert——切片 1 = 形 α 主链 + 判别格（格 2 终值单调非零/容差双上界 12 回合账本回放/gate-off 面 B 零变）；切片 2 = 面 A 换源（回归格三件逐格落测）。格 5 canon 逐切片恰合。**段 I 放行**（W-AB4b 两切片遵令排后）。
+
+## §9 段 I 终态采认（2026-11-15，Main 知会；切片 1 e7a20896 + 切片 2 27fe66f2）
+
+批复七项逐项落位采认：① 形 α 落位 + **取用形勘锚补强采认**（实 wire = 嵌套 message.usage 形，modelprovider.ts:1125/:1075 yield；落码取嵌套为主/顶层 fallback，engine localAgentTask.ts:140 同形先例——链图语义直证）；② 重置点 queryAgentLoop 入口单源 + 压缩续命不重置终裁落地；③ 分账零触碰；④ 面 A 双锚换源（SpinnerAnimationRow leaderTokens + Spinner leaderTokenCount → getTurnOutputTokens）+ 回归格三件落位；⑤ **gate-off 档面 B 采认**（6 消费点零变；snapshot 真实现 = 快照存储半边不重置计数器——与重置点单源裁定自洽，reset 权归 query() 入口；budget 消费面留 gate-on 独立 lock-face；新增 getTurnTokenBudgetSnapshot/getTurnOutputTokensAtSnapshot 两内部 getter 在「替真实现」纬度内）；⑥ 容差双上界落地（判别格 + e2e 采集口径同步）；⑦ 6 文件改账在案。canon 5934/0/483（Δ=+11 测 +2 文件恰合）。e2e gate 采集已请求（容差账本回放 + 面 A 验证 + gate-off 零变 + 压缩续命腿）。候段 G gate → 段 L；W-AB4b 排后遵令。
