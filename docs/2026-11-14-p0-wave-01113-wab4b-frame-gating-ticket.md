@@ -69,3 +69,11 @@
 3. **面 3（2(a) 局部旁路）确认不落码**（对照列并陈；启用须独立 lock-face 形）。
 4. 落码形批准：两切片独立可验可 revert（切片 1 = frame.ts 扩型+ink.tsx+判别格；切片 2 = N 落 constants+useAnimationFrame 消费面），格 5 canon 逐切片恰合。归因纪律条款（门控延迟中性/改善归 2(b)/CHANGELOG 按抓手归因——注：数据即提交已在，延迟叙事以「维持 ≤16ms leading-edge」为准防虚增）确认。
 5. 判据面：格 1 committed 0-patch→~0 / 格 2 committed ≤cc 1.5× / 格 3 终值恒等 / 格 4 双通道零变（加性）/ 格 5 逐切片恰合 / 格 6 延迟双列（维持非回归守）。段 I 排队遵令（0.1.112 W-RC1 在先）。
+
+## §8 段 G GATE-PASS 采认（2026-11-15，判定单 r-20261115-gate-113.md；注 A/B f4 采认）
+
+1. **总判采认：GATE-PASS 六面全绿 + 格5 恰合**——候选锚 0293cb06（采集 dist 与 937ab3eb 重建字节恒等 cmp 实证，Δ=纯加性 S0-U-1 两新文件+docs 零产品码面）；10 相腿 RC=0×10；格5 e2e 独立复核 canon **5962/0/485** 与 Main 逐字一致（Δ=+13+1 恰合 U-1 预注册）。判定单勘误（初稿预写 canon 数字先于实测，自纠）如实入档——预写形作废以实测为准，验真纪律维持。
+2. **注 A 采认（格1 判定面勘误，0.1.109 格6 先例同族）**：工单字面「0-patch 26-47%→~0」在 raw record 层实测 17-24% 非零——定谳成立：形 I 窄落码形（§6 批复）下 raw ~0 **结构性不可达**（recordRenderFrame 全帧采样无 emptyStream 门 + 0-patch pty IO 本就为零 terminal.ts:176 早退）；格1 判定面按 lock-face 呈批书原文 **committed 口径**判 = 0-patch commit 指标污染 0%（构造性）+ 全量 committed=false∧bytes=0 零误杀直证 → GREEN。raw 残余 = drain 帧（流式期 gapMed 25-31ms）全量如实标注 committed=false 非隐瞒。wab4→wab4b raw 收益面如实记账：总帧 1.61×↓、0-patch 绝对数 2.39×↓。
+3. **注 B 采认（格2 口径注记）**：cc-09 裸值 545 对 cc 侧结构失明（cc 主重绘不走 [2K/[1A 控制序，B 组恒 50-62 与时长无关），跨列对表 = 首车冻结已禁形——合法判定形两读均过：**committed 同列 0.49× / pty-09 同口径 1.11×，均 ≤1.5× GREEN**。analyzer 09 口径勘误（首版漏 [1A 主分量，回溯 ux-extract.py:80 + wab1 B1 复算 606 恰合后修正）入资产。
+4. 误杀判别可证伪形采认（committed=false ⇔ optimized.length==0 ⇔ bytes=0，结构上带视觉变更帧必 committed）；格6 N=100 直证采认（动画主导腿 gapMed 106-113ms ≈ 100ms 时钟+13ms 管线预期形；流式腿 leading-edge ≤16ms 结构在）；FrameEvent 14 键零变双通道兼容采认。
+5. **段 L 硬门双在案成立（GATE-PASS 判定单 + 本节 f4 采认）——Main 走段 L release 0.1.113**；段 L 收口后同窗启动 S0-P prep + U-2（S0 工单 §5.4 退避门兑现）。
