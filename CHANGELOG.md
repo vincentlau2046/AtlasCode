@@ -4,6 +4,31 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.113（2026-11-15）
+
+**W-AB4b 帧提交节律门控**（lock-face 呈批 docs/2026-11-14-wab4b-lockface-brief.md
++ f4 批复 2026-11-14 @7d9cbea3 + GATE-PASS 判定单 r-20261115-gate-113 六面 GREEN）。
+
+- **面 1 · 形 I 窄（帧 committed 分列 + 空帧 park restore 门控）**：
+  `FrameEvent` 加性 `committed: boolean`（preamble 构造层后 optimized 非空
+  为 true；空帧 false——0-patch 空帧 26-47% 的提交指标污染构造性归零）；
+  空帧判据单源 `emptyStream = optimized.length === 0`；parked restore 分支
+  elision（restore push + displayCursor 置 null 一并缓行到下一内容帧，防
+  「displayCursor 谎报物理位置 → 下帧 preamble 错位起算」）；writeDiffToTerminal
+  本体零触碰、调用无条件。gate：真变更零误杀（committed=false ⇔ bytes=0
+  结构性）、FrameEvent 兼容（既有字段零变，双通道消费面零触）。
+- **面 2 · 动画时钟降频 N=100ms**（用户 UX 裁定）：SpinnerAnimationRow
+  useAnimationFrame 50→100（15.6→10fps），committed 帧直减；thinking
+  shimmer 共享源同降频；数据即提交维持 16ms leading-edge 零新机制；
+  范围外消费者（光标闪烁/语音/动词轮等）零触碰。gate：动画腿 gapMed
+  106-113ms 节律生效；格 2 committed 同列 0.49×（≤cc 1.5× 判据）。
+- **随车**：S0-U-1 web session contract v0 单源（`src/kernel/protocol/
+  webSessionV0.ts`，纯加性零既有文件 diff，0.1.115 候首切片，呈批书
+  docs/2026-11-15-s0-ur-lockface-brief.md §7.2 f4 批复 @f1f1099d）。
+- **四件套**：tsc 0 / eslint 0 / build ok / canon 5962/0/485
+  （W-AB4b Δ=+12 切片恰合 + S0-U-1 Δ=+13+1）；gate 采集 dist
+  BYTE-IDENTICAL 18,211,564B。
+
 ## v0.1.112（2026-11-15）
 
 **W-RC1 输出 token 计数链根修**（lock-face 批复 @eee0f324 + GATE-RED 修形
