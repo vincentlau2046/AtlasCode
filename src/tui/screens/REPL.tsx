@@ -2665,7 +2665,12 @@ export function REPL({
     // 用户可见警告行（原空回合 = spinner 停、无产出、无提示 = 主诉「无响应」）。
     const loopGen = queryEngineLoopStream({
       deps: { ...loopDeps, onMcpToolBackgrounded: handleMcpToolBackgrounded },
-      args: loopArgs
+      args: loopArgs,
+      // W-RC1 GATE-RED 修形项 A：主查询车道 = 转写唯一置真点（f4 批复
+      // 2026-11-15 工单 §10 @f61963c9）。fork/后台任务/hook 车道缺省
+      // false 不转写——摘要计数器（compact fork maxTurns:1）不再覆写
+      // 用户可见输出 token 累计（g3e tap 直证的交叉写根因）。
+      transcribeTurnTokens: true
     });
     let loopResult: AgentLoopResult | undefined;
     {

@@ -49,3 +49,25 @@ describe('W-RC1 切片 2 面 A 换源（源级守卫）', () => {
     expect(animRow).toContain('leaderTokens + teammateTokens')
   })
 })
+
+describe('W-RC1 GATE-RED 修形项 A：转写守卫源级（f4 批复 2026-11-15 工单 §10）', () => {
+  const readSrc2 = (p: string) => readFileSync(join(srcRoot, p), 'utf8')
+
+  test('⑤a loopEvents 守卫在位：opt-in 字段 + fail-closed 门（缺省不转写）', () => {
+    const loopEvents = readSrc2('tui/loopEvents.ts')
+    expect(loopEvents).toContain('transcribeTurnTokens?: boolean')
+    expect(loopEvents).toContain('if (params.transcribeTurnTokens === true)')
+  })
+
+  test('⑤b 全仓唯一置真点 = REPL 主链；fork/后台任务/hook 车道零置真', () => {
+    const repl = readSrc2('tui/screens/REPL.tsx')
+    expect(repl).toContain('transcribeTurnTokens: true')
+    for (const lane of [
+      'tui/utils/forkedAgent.ts',
+      'tui/tasks/LocalMainSessionTask.ts',
+      'tui/utils/hooks/execAgentHook.ts',
+    ]) {
+      expect(readSrc2(lane)).not.toContain('transcribeTurnTokens')
+    }
+  })
+})

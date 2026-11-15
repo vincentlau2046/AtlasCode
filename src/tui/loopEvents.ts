@@ -64,6 +64,18 @@ export type { McpToolBackgroundedInfo } from 'src/engine'
 export interface EngineLoopParams {
   deps: AgentLoopDeps
   args: AgentLoopArgs
+  /**
+   * W-RC1 GATE-RED 修形项 A（f4 批复 2026-11-15，工单 §10 @f61963c9）：
+   * round_end turnOutputTokens → bootstrapState 转写的车道 opt-in 门——
+   * 缺省 **false = fail-closed**（0.1.92 C-6 同族）。本生成器被 5 类车道
+   * 共用（REPL 主链 / forkedAgent 全 fork 族 / LocalMainSessionTask /
+   * execAgentHook），fork 计数器（compact 摘要 maxTurns:1 等）与主查询
+   * 计数器交叉写同一 bootstrapState 单例 = GATE-RED 双面根因；转写收敛
+   * 到唯一置真点 REPL.tsx 主链。引擎零改动（round_end.turnOutputTokens
+   * 照发）；LocalMainSessionTask/hook 缺省不转写 = 预期（f4 批复注记）；
+   * 日后 headless 转写 = lane 级 opt-in 独立 lock-face，禁默开（登记池）。
+   */
+  transcribeTurnTokens?: boolean
 }
 
 /**
@@ -94,7 +106,11 @@ export async function* queryEngineLoopStream(
           // （event.turnOutputTokens，engine 单源聚合）入 bootstrapState；
           // UI 层零第二实现。读出面 = getTurnOutputTokens（面 B gate-off
           // 下不可见，gate-on 消费面独立 lock-face）。
-          setTurnOutputTokens(event.turnOutputTokens)
+          // GATE-RED 修形项 A：主车道 opt-in 守卫（缺省 false）——fork/
+          // 后台任务/hook 车道不转写，摘要计数器不再覆写用户可见累计。
+          if (params.transcribeTurnTokens === true) {
+            setTurnOutputTokens(event.turnOutputTokens)
+          }
           pending.push(event.assistantMessage, ...event.toolResultMessages)
         } else if (event.type === 'compacted') {
           pending.push(event.messages[0])

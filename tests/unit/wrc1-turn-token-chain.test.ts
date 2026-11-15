@@ -185,7 +185,7 @@ describe('W-RC1 形 α engine 权威链（round_end 累计 + 重置单源）', (
 })
 
 describe('W-RC1 TUI 转写 + bootstrapState 读出面', () => {
-  test('④ loopEvents 转写：queryEngineLoopStream 消费后 getTurnOutputTokens = 累计值', async () => {
+  test('④a 转写守卫缺省 fail-closed：queryEngineLoopStream 不带 opt-in 不转写（GATE-RED 修形项 A）', async () => {
     setTurnOutputTokens(0)
     const provider = scriptedProvider([
       toolStep('tu-1', 'a', 31),
@@ -196,7 +196,24 @@ describe('W-RC1 TUI 转写 + bootstrapState 读出面', () => {
       args: { messages: [{ role: 'user', content: 'go' }], tools: [makeEchoTool()] },
     })
     for await (const _ev of gen) {
-      // 排空流族（转写在 emit 回调侧发生）
+      // 排空流族（fork/后台任务/hook 车道缺省形：round_end 不入 bootstrapState）
+    }
+    expect(getTurnOutputTokens()).toBe(0)
+  })
+
+  test('④b 主车道 opt-in 转写：transcribeTurnTokens=true 消费后 getTurnOutputTokens = 累计值', async () => {
+    setTurnOutputTokens(0)
+    const provider = scriptedProvider([
+      toolStep('tu-1', 'a', 31),
+      textStep('done', 15),
+    ])
+    const gen = queryEngineLoopStream({
+      deps: { modelProvider: provider, role: 'small' as ModelRole },
+      args: { messages: [{ role: 'user', content: 'go' }], tools: [makeEchoTool()] },
+      transcribeTurnTokens: true,
+    })
+    for await (const _ev of gen) {
+      // 排空流族（REPL.tsx 主链置真形：转写在 emit 回调侧发生）
     }
     expect(getTurnOutputTokens()).toBe(46)
   })
