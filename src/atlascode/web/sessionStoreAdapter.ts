@@ -37,6 +37,19 @@ export interface SessionFileEntry {
   createdAt: string | null
 }
 
+export interface TranscriptStat {
+  sizeBytes: number
+  mtimeMs: number
+  ino: number
+}
+
+export interface TranscriptTail {
+  /** offset 起的新增字节（增量尾读，零重解析判据的读取面）。 */
+  bytes: Uint8Array
+  sizeBytes: number
+  ino: number
+}
+
 export interface SessionStoreAdapter {
   start(): Promise<void>
   listSessionFiles(scopeId: string): Promise<SessionFileEntry[]>
@@ -45,6 +58,20 @@ export interface SessionStoreAdapter {
     sessionId: string,
     signal?: AbortSignal,
   ): Promise<Uint8Array>
+  /** O(1) 采样通道（mtime+size+ino 三元组守卫；未存在 → null）。 */
+  statTranscript(scopeId: string, sessionId: string): Promise<TranscriptStat | null>
+  /** 增量尾读：offset 起步只取新增字节（§7.5 零重解析判据）。 */
+  readTranscriptTail(
+    scopeId: string,
+    sessionId: string,
+    offset: number,
+    signal?: AbortSignal,
+  ): Promise<TranscriptTail>
+  /**
+   * 显式路径解析（baseline loadFull 的 filePath 源；呈批书 §7.3 scopeId ↔
+   * storageDir 显式映射）：经同一校验链后返回文件路径。
+   */
+  resolveTranscriptPath(scopeId: string, sessionId: string): Promise<string>
   close(): Promise<void>
 }
 
@@ -117,11 +144,18 @@ export function createNodeFsSessionStoreAdapter(
     return root
   }
 
-  async function readTranscript(
+  /**
+   * 共安全链：containment 复核 → lstat 身份锚（拒 symlink/非 regular）→
+   * O_NOFOLLOW open → fstat S_ISREG + ino TOCTOU 对比 → size 资源界。
+   * 返回打开的 fd 句柄与开读时 stat 快照（调用方负责 close 与读毕复核）。
+   */
+  async function openValidated(
     scopeId: string,
     sessionId: string,
-    signal?: AbortSignal,
-  ): Promise<Uint8Array> {
+  ): Promise<{
+    fh: Awaited<ReturnType<typeof open>>
+    st: import('node:fs').Stats
+  }> {
     assertStarted()
     const root = assertScope(scopeId)
     assertSessionIdShape(sessionId)
@@ -130,13 +164,9 @@ export function createNodeFsSessionStoreAdapter(
     // containment 防御性复核（shape 已拒路径形；双保险）
     const resolved = resolve(filePath)
     if (!resolved.startsWith(root.canonical + sep)) {
-      throw new WebSessionError(
-        'scopeDenied',
-        'path escapes authorized root',
-      )
+      throw new WebSessionError('scopeDenied', 'path escapes authorized root')
     }
 
-    // 开读前身份锚：lstat 末段（拒 symlink / 非 regular），锚 ino 收 TOCTOU 窗
     let pre: Awaited<ReturnType<typeof lstat>>
     try {
       pre = await lstat(filePath)
@@ -157,44 +187,70 @@ export function createNodeFsSessionStoreAdapter(
     } catch (e) {
       mapFsError(e, 'transcript open')
     }
+    const st = await fh.stat()
+    if (!st.isFile()) {
+      await fh.close()
+      throw new WebSessionError(
+        'ioUnavailable',
+        'opened fd is not a regular file',
+        false,
+      )
+    }
+    if (st.ino !== pre.ino) {
+      await fh.close()
+      throw new WebSessionError(
+        'ioUnavailable',
+        'file identity changed between lstat and open',
+        true,
+      )
+    }
+    if (st.size > maxTranscriptBytes) {
+      await fh.close()
+      throw new WebSessionError(
+        'resourceLimit',
+        `transcript exceeds limit (${st.size} > ${maxTranscriptBytes} bytes)`,
+      )
+    }
+    return { fh, st }
+  }
+
+  /** 同一 fd 流式读：chunk ≤64KiB，每 chunk 边界查 abort。 */
+  async function readFromFd(
+    fh: Awaited<ReturnType<typeof open>>,
+    size: number,
+    from: number,
+    signal?: AbortSignal,
+  ): Promise<Buffer[]> {
+    const chunks: Buffer[] = []
+    let read = from
+    while (read < size) {
+      if (signal?.aborted) {
+        throw new WebSessionError('cancelled', 'read aborted')
+      }
+      const want = Math.min(READ_CHUNK_SIZE, size - read)
+      const buf = Buffer.alloc(want)
+      const { bytesRead } = await fh.read(buf, 0, want, read)
+      if (bytesRead <= 0) break
+      chunks.push(buf.subarray(0, bytesRead))
+      read += bytesRead
+    }
+    return chunks
+  }
+
+  async function readTranscript(
+    scopeId: string,
+    sessionId: string,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array> {
+    const { fh, st } = await openValidated(scopeId, sessionId)
     try {
-      const st = await fh.stat()
-      if (!st.isFile()) {
-        throw new WebSessionError(
-          'ioUnavailable',
-          'opened fd is not a regular file',
-          false,
-        )
-      }
-      if (st.ino !== pre.ino) {
-        throw new WebSessionError(
-          'ioUnavailable',
-          'file identity changed between lstat and open',
-          true,
-        )
-      }
       if (st.size > maxTranscriptBytes) {
         throw new WebSessionError(
           'resourceLimit',
           `transcript exceeds limit (${st.size} > ${maxTranscriptBytes} bytes)`,
         )
       }
-
-      // 同一 fd 流式读：chunk ≤64KiB，每 chunk 边界查 abort
-      const chunks: Buffer[] = []
-      let read = 0
-      while (read < st.size) {
-        if (signal?.aborted) {
-          throw new WebSessionError('cancelled', 'read aborted')
-        }
-        const want = Math.min(READ_CHUNK_SIZE, st.size - read)
-        const buf = Buffer.alloc(want)
-        const { bytesRead } = await fh.read(buf, 0, want, read)
-        if (bytesRead <= 0) break
-        chunks.push(buf.subarray(0, bytesRead))
-        read += bytesRead
-      }
-
+      const chunks = await readFromFd(fh, st.size, 0, signal)
       // 读毕身份复核：ino/size 任一变 → 不连续（禁静默交付半旧半新）
       const st2 = await fh.stat()
       if (st2.ino !== st.ino || st2.size !== st.size) {
@@ -205,6 +261,70 @@ export function createNodeFsSessionStoreAdapter(
         )
       }
       return new Uint8Array(Buffer.concat(chunks))
+    } finally {
+      await fh.close()
+    }
+  }
+
+  /** O(1) 采样：lstat 三元组（mtime+size+ino），不打开 fd、不读内容。 */
+  async function statTranscript(
+    scopeId: string,
+    sessionId: string,
+  ): Promise<TranscriptStat | null> {
+    assertStarted()
+    const root = assertScope(scopeId)
+    assertSessionIdShape(sessionId)
+    try {
+      const st = await lstat(join(root.dir, `${sessionId}.jsonl`))
+      if (st.isSymbolicLink() || !st.isFile()) return null
+      return { sizeBytes: st.size, mtimeMs: st.mtimeMs, ino: st.ino }
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException | null)?.code
+      if (code === 'ENOENT') return null
+      mapFsError(e, 'transcript stat')
+    }
+  }
+
+  /** 增量尾读：同一安全链，offset 起步只取新增字节。 */
+  async function readTranscriptTail(
+    scopeId: string,
+    sessionId: string,
+    offset: number,
+    signal?: AbortSignal,
+  ): Promise<TranscriptTail> {
+    if (!Number.isInteger(offset) || offset < 0) {
+      throw new WebSessionError('invalidRequest', 'offset must be a non-negative integer')
+    }
+    const { fh, st } = await openValidated(scopeId, sessionId)
+    try {
+      if (st.size > maxTranscriptBytes) {
+        throw new WebSessionError(
+          'resourceLimit',
+          `transcript exceeds limit (${st.size} > ${maxTranscriptBytes} bytes)`,
+        )
+      }
+      if (offset > st.size) {
+        // 收缩/替换：调用方按不连续处置（resetRequired）
+        throw new WebSessionError(
+          'ioUnavailable',
+          `file shrank below offset (${offset} > ${st.size})`,
+          true,
+        )
+      }
+      const chunks = await readFromFd(fh, st.size, offset, signal)
+      const st2 = await fh.stat()
+      if (st2.ino !== st.ino || st2.size !== st.size) {
+        throw new WebSessionError(
+          'ioUnavailable',
+          'file changed during tail read (not a stable snapshot)',
+          true,
+        )
+      }
+      return {
+        bytes: new Uint8Array(Buffer.concat(chunks)),
+        sizeBytes: st.size,
+        ino: st.ino,
+      }
     } finally {
       await fh.close()
     }
@@ -287,6 +407,15 @@ export function createNodeFsSessionStoreAdapter(
     },
 
     readTranscript,
+    statTranscript,
+    readTranscriptTail,
+
+    async resolveTranscriptPath(scopeId: string, sessionId: string): Promise<string> {
+      const { fh } = await openValidated(scopeId, sessionId)
+      await fh.close()
+      const root = roots.get(scopeId)!
+      return join(root.dir, `${sessionId}.jsonl`)
+    },
 
     async close(): Promise<void> {
       started = false

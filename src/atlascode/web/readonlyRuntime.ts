@@ -3,8 +3,10 @@
  * 呈批书 §7.3 scopeId 钉死）。
  *
  * R-1 首车：factory + 生命周期（start/close/epoch/不可重启）+ listSessions
- * （adapter 注入缝，隔离反例先红后绿）。replay/follow/search/poll 恢复 =
- * R-2；./web-session-runtime 出口 = R-3。
+ * （adapter 注入缝，隔离反例先红后绿）。R-2：replaySession/followSession
+ * （follow 订阅机 src/atlascode/web/follow.ts）+ limits 全表解析 + 订阅槽/
+ * 并发读计数 + cursor ledger。search/poll 恢复与 ./web-session-runtime 出口
+ * = R-3。
  *
  * 纪律（工单 §4.2）：创建/import 零应用配置探测/零写盘/零 timer；start 才
  * 验授权配置；未 start 调用拒 closed('not started')；close 幂等可 await；
@@ -14,13 +16,56 @@
 
 import { randomUUID } from 'node:crypto'
 
+import { loadTranscriptFull } from 'src/engine'
+import type { WebSessionProjection } from 'src/kernel/protocol/webSessionV0'
+
+import { CursorLedger } from './cursorLedger'
 import { WebSessionError } from './errors'
+import { createFollowSubscription, type FollowHandle } from './follow'
 import {
   HARD_MAX_SCOPES_PER_RUNTIME,
   DEFAULT_MAX_SCAN_SESSIONS,
   HARD_MAX_SCAN_SESSIONS,
+  DEFAULT_MAX_TRANSCRIPT_BYTES,
+  HARD_MAX_TRANSCRIPT_BYTES,
+  DEFAULT_PAGE_SIZE,
+  HARD_MAX_PAGE_SIZE,
+  DEFAULT_MAX_RECORD_BYTES,
+  HARD_MAX_RECORD_BYTES,
+  DEFAULT_MAX_PARSE_RECORDS,
+  HARD_MAX_PARSE_RECORDS,
+  DEFAULT_MAX_PROJECTION_BYTES,
+  HARD_MAX_PROJECTION_BYTES,
+  DEFAULT_MAX_SUBSCRIPTIONS,
+  HARD_MAX_SUBSCRIPTIONS,
+  DEFAULT_MAX_CONCURRENT_READS,
+  HARD_MAX_CONCURRENT_READS,
+  DEFAULT_MAX_PENDING_EVENTS,
+  HARD_MAX_PENDING_EVENTS,
+  DEFAULT_MAX_PENDING_BYTES,
+  HARD_MAX_PENDING_BYTES,
+  DEFAULT_POLLING_INTERVAL_MS,
+  HARD_MIN_POLLING_INTERVAL_MS,
+  HARD_MAX_POLLING_INTERVAL_MS,
+  DEFAULT_REQUEST_DEADLINE_MS,
+  HARD_MIN_REQUEST_DEADLINE_MS,
+  HARD_MAX_REQUEST_DEADLINE_MS,
+  DEFAULT_IDLE_LEASE_MS,
+  HARD_MIN_IDLE_LEASE_MS,
+  HARD_MAX_IDLE_LEASE_MS,
+  DEFAULT_CURSOR_TTL_MS,
+  HARD_MIN_CURSOR_TTL_MS,
+  HARD_MAX_CURSOR_TTL_MS,
+  DEFAULT_CLOSE_DEADLINE_MS,
+  HARD_MIN_CLOSE_DEADLINE_MS,
+  HARD_MAX_CLOSE_DEADLINE_MS,
+  DEFAULT_LEDGER_CAPACITY,
+  HARD_MAX_LEDGER_CAPACITY,
+  DEFAULT_LEDGER_PAYLOAD_BYTES,
+  HARD_MAX_LEDGER_PAYLOAD_BYTES,
   validateBoundedInt,
 } from './limits'
+import { projectConversation } from './projection'
 import type { SessionFileEntry, SessionStoreAdapter } from './sessionStoreAdapter'
 import { createNodeFsSessionStoreAdapter } from './sessionStoreAdapter'
 
@@ -29,6 +74,26 @@ export type ReadonlySessionScopes = ReadonlyArray<{
   storageDir: string
 }>
 
+export interface ReadonlySessionLimits {
+  maxTranscriptBytes?: number
+  maxScanSessions?: number
+  pageSize?: number
+  maxRecordBytes?: number
+  maxParseRecords?: number
+  maxProjectionBytes?: number
+  maxSubscriptions?: number
+  maxConcurrentReads?: number
+  maxPendingEvents?: number
+  maxPendingBytes?: number
+  pollingIntervalMs?: number
+  requestDeadlineMs?: number
+  idleLeaseMs?: number
+  cursorTtlMs?: number
+  closeDeadlineMs?: number
+  ledgerCapacity?: number
+  ledgerPayloadBytes?: number
+}
+
 export interface ReadonlySessionRuntimeOptions {
   /** 静态产品标识（ProductDefinition 单源，'atlascode'）。 */
   productId: string
@@ -36,9 +101,7 @@ export interface ReadonlySessionRuntimeOptions {
   scopes: ReadonlySessionScopes
   /** 只读 storage adapter；缺省 = Node fs adapter（host 可注入 fake）。 */
   adapter?: SessionStoreAdapter
-  limits?: {
-    maxScanSessions?: number
-  }
+  limits?: ReadonlySessionLimits
 }
 
 export interface ListSessionsRequest {
@@ -57,14 +120,62 @@ export interface ListSessionsResult {
   }>
 }
 
+export interface ReplaySessionRequest {
+  scopeId: string
+  sessionId: string
+}
+
+export interface ReplaySessionResult {
+  of: 'replaySession'
+  projection: WebSessionProjection
+}
+
+export interface FollowSessionRequest {
+  scopeId: string
+  sessionId: string
+  requestId?: string
+}
+
+export type FollowSubscription = FollowHandle
+
+/** §4.4 全表解析值（start 时经 validateBoundedInt 钉死，host 不可越硬上限）。 */
+export interface ResolvedLimits {
+  maxTranscriptBytes: number
+  maxScanSessions: number
+  pageSize: number
+  maxRecordBytes: number
+  maxParseRecords: number
+  maxProjectionBytes: number
+  maxSubscriptions: number
+  maxConcurrentReads: number
+  maxPendingEvents: number
+  maxPendingBytes: number
+  pollingIntervalMs: number
+  requestDeadlineMs: number
+  idleLeaseMs: number
+  cursorTtlMs: number
+  closeDeadlineMs: number
+  ledgerCapacity: number
+  ledgerPayloadBytes: number
+}
+
 export interface ReadonlySessionRuntime {
   /** 实例纪元（重建新实例换 epoch；close 后旧 epoch 永不复用）。 */
   readonly epoch: string
+  readonly limits: ResolvedLimits
   start(): Promise<void>
   listSessions(
     req: ListSessionsRequest,
     signal?: AbortSignal,
   ): Promise<ListSessionsResult>
+  replaySession(
+    req: ReplaySessionRequest,
+    signal?: AbortSignal,
+  ): Promise<ReplaySessionResult>
+  followSession(
+    req: FollowSessionRequest,
+    signal?: AbortSignal,
+  ): Promise<FollowSubscription>
   close(): Promise<void>
 }
 
@@ -89,15 +200,126 @@ export function createReadonlySessionRuntime(
     createNodeFsSessionStoreAdapter({
       productId: options.productId,
       scopes: options.scopes,
+      limits: { maxTranscriptBytes: options.limits?.maxTranscriptBytes },
     })
-  const maxScanSessions = validateBoundedInt(
-    'maxScanSessions',
-    options.limits?.maxScanSessions,
-    DEFAULT_MAX_SCAN_SESSIONS,
-    HARD_MAX_SCAN_SESSIONS,
-  )
+  const L: ResolvedLimits = {
+    maxTranscriptBytes: validateBoundedInt(
+      'maxTranscriptBytes',
+      options.limits?.maxTranscriptBytes,
+      DEFAULT_MAX_TRANSCRIPT_BYTES,
+      HARD_MAX_TRANSCRIPT_BYTES,
+    ),
+    maxScanSessions: validateBoundedInt(
+      'maxScanSessions',
+      options.limits?.maxScanSessions,
+      DEFAULT_MAX_SCAN_SESSIONS,
+      HARD_MAX_SCAN_SESSIONS,
+    ),
+    pageSize: validateBoundedInt(
+      'pageSize',
+      options.limits?.pageSize,
+      DEFAULT_PAGE_SIZE,
+      HARD_MAX_PAGE_SIZE,
+    ),
+    maxRecordBytes: validateBoundedInt(
+      'maxRecordBytes',
+      options.limits?.maxRecordBytes,
+      DEFAULT_MAX_RECORD_BYTES,
+      HARD_MAX_RECORD_BYTES,
+    ),
+    maxParseRecords: validateBoundedInt(
+      'maxParseRecords',
+      options.limits?.maxParseRecords,
+      DEFAULT_MAX_PARSE_RECORDS,
+      HARD_MAX_PARSE_RECORDS,
+    ),
+    maxProjectionBytes: validateBoundedInt(
+      'maxProjectionBytes',
+      options.limits?.maxProjectionBytes,
+      DEFAULT_MAX_PROJECTION_BYTES,
+      HARD_MAX_PROJECTION_BYTES,
+    ),
+    maxSubscriptions: validateBoundedInt(
+      'maxSubscriptions',
+      options.limits?.maxSubscriptions,
+      DEFAULT_MAX_SUBSCRIPTIONS,
+      HARD_MAX_SUBSCRIPTIONS,
+    ),
+    maxConcurrentReads: validateBoundedInt(
+      'maxConcurrentReads',
+      options.limits?.maxConcurrentReads,
+      DEFAULT_MAX_CONCURRENT_READS,
+      HARD_MAX_CONCURRENT_READS,
+    ),
+    maxPendingEvents: validateBoundedInt(
+      'maxPendingEvents',
+      options.limits?.maxPendingEvents,
+      DEFAULT_MAX_PENDING_EVENTS,
+      HARD_MAX_PENDING_EVENTS,
+    ),
+    maxPendingBytes: validateBoundedInt(
+      'maxPendingBytes',
+      options.limits?.maxPendingBytes,
+      DEFAULT_MAX_PENDING_BYTES,
+      HARD_MAX_PENDING_BYTES,
+    ),
+    pollingIntervalMs: validateBoundedInt(
+      'pollingIntervalMs',
+      options.limits?.pollingIntervalMs,
+      DEFAULT_POLLING_INTERVAL_MS,
+      HARD_MAX_POLLING_INTERVAL_MS,
+      HARD_MIN_POLLING_INTERVAL_MS,
+    ),
+    requestDeadlineMs: validateBoundedInt(
+      'requestDeadlineMs',
+      options.limits?.requestDeadlineMs,
+      DEFAULT_REQUEST_DEADLINE_MS,
+      HARD_MAX_REQUEST_DEADLINE_MS,
+      HARD_MIN_REQUEST_DEADLINE_MS,
+    ),
+    idleLeaseMs: validateBoundedInt(
+      'idleLeaseMs',
+      options.limits?.idleLeaseMs,
+      DEFAULT_IDLE_LEASE_MS,
+      HARD_MAX_IDLE_LEASE_MS,
+      HARD_MIN_IDLE_LEASE_MS,
+    ),
+    cursorTtlMs: validateBoundedInt(
+      'cursorTtlMs',
+      options.limits?.cursorTtlMs,
+      DEFAULT_CURSOR_TTL_MS,
+      HARD_MAX_CURSOR_TTL_MS,
+      HARD_MIN_CURSOR_TTL_MS,
+    ),
+    closeDeadlineMs: validateBoundedInt(
+      'closeDeadlineMs',
+      options.limits?.closeDeadlineMs,
+      DEFAULT_CLOSE_DEADLINE_MS,
+      HARD_MAX_CLOSE_DEADLINE_MS,
+      HARD_MIN_CLOSE_DEADLINE_MS,
+    ),
+    ledgerCapacity: validateBoundedInt(
+      'ledgerCapacity',
+      options.limits?.ledgerCapacity,
+      DEFAULT_LEDGER_CAPACITY,
+      HARD_MAX_LEDGER_CAPACITY,
+    ),
+    ledgerPayloadBytes: validateBoundedInt(
+      'ledgerPayloadBytes',
+      options.limits?.ledgerPayloadBytes,
+      DEFAULT_LEDGER_PAYLOAD_BYTES,
+      HARD_MAX_LEDGER_PAYLOAD_BYTES,
+    ),
+  }
   const authorizedScopes = new Set(options.scopes.map(s => s.scopeId))
   let state: 'idle' | 'started' | 'closed' = 'idle'
+  const subscriptions = new Set<FollowSubscription>()
+  let activeReads = 0
+  const cursorLedger = new CursorLedger(
+    L.ledgerCapacity,
+    L.cursorTtlMs,
+    L.ledgerPayloadBytes,
+  )
 
   function assertStarted(operation: string): void {
     if (state === 'idle') {
@@ -108,8 +330,69 @@ export function createReadonlySessionRuntime(
     }
   }
 
+  function assertScope(scopeId: string): void {
+    if (!authorizedScopes.has(scopeId)) {
+      throw new WebSessionError('scopeDenied', `scope not authorized: ${scopeId}`)
+    }
+  }
+
+  /** 并发读槽（§4.4 maxConcurrentReads；超界 resourceLimit，不排队）。 */
+  function acquireRead(): void {
+    if (activeReads >= L.maxConcurrentReads) {
+      throw new WebSessionError(
+        'resourceLimit',
+        `concurrent read limit exceeded (${activeReads} >= ${L.maxConcurrentReads})`,
+      )
+    }
+    activeReads++
+  }
+
+  function releaseRead(): void {
+    activeReads--
+  }
+
+  async function resolvePath(scopeId: string, sessionId: string): Promise<string> {
+    assertScope(scopeId)
+    return adapter.resolveTranscriptPath(scopeId, sessionId)
+  }
+
+  async function loadProjection(
+    scopeId: string,
+    sessionId: string,
+    signal?: AbortSignal,
+  ): Promise<WebSessionProjection> {
+    acquireRead()
+    try {
+      if (signal?.aborted) {
+        throw new WebSessionError('cancelled', 'operation aborted')
+      }
+      // 尺寸资源界先于 loadFull（adapter stat O(1) 通道；零隐式截断）
+      const st = await adapter.statTranscript(scopeId, sessionId)
+      if (!st) {
+        throw new WebSessionError('notFound', `session not found: ${sessionId}`)
+      }
+      if (st.sizeBytes > L.maxTranscriptBytes) {
+        throw new WebSessionError(
+          'resourceLimit',
+          `transcript exceeds limit (${st.sizeBytes} > ${L.maxTranscriptBytes} bytes)`,
+        )
+      }
+      const filePath = await resolvePath(scopeId, sessionId)
+      // 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)
+      const loaded = await loadTranscriptFull(filePath)
+      return projectConversation(loaded, {
+        sessionId,
+        productId: options.productId,
+        scopeId,
+      })
+    } finally {
+      releaseRead()
+    }
+  }
+
   return {
     epoch,
+    limits: L,
 
     async start(): Promise<void> {
       if (state === 'closed') {
@@ -153,17 +436,12 @@ export function createReadonlySessionRuntime(
       signal?: AbortSignal,
     ): Promise<ListSessionsResult> {
       assertStarted('list sessions')
-      if (!authorizedScopes.has(req.scopeId)) {
-        throw new WebSessionError(
-          'scopeDenied',
-          `scope not authorized: ${req.scopeId}`,
-        )
-      }
+      assertScope(req.scopeId)
       const entries = await adapter.listSessionFiles(req.scopeId)
-      if (entries.length > maxScanSessions) {
+      if (entries.length > L.maxScanSessions) {
         throw new WebSessionError(
           'resourceLimit',
-          `scope ${req.scopeId} exceeds scan limit (${entries.length} > ${maxScanSessions})`,
+          `scope ${req.scopeId} exceeds scan limit (${entries.length} > ${L.maxScanSessions})`,
         )
       }
       void signal
@@ -172,9 +450,73 @@ export function createReadonlySessionRuntime(
       }
     },
 
+    async replaySession(
+      req: ReplaySessionRequest,
+      signal?: AbortSignal,
+    ): Promise<ReplaySessionResult> {
+      assertStarted('replay session')
+      assertScope(req.scopeId)
+      const projection = await loadProjection(req.scopeId, req.sessionId, signal)
+      return { of: 'replaySession', projection }
+    },
+
+    async followSession(
+      req: FollowSessionRequest,
+      signal?: AbortSignal,
+    ): Promise<FollowSubscription> {
+      assertStarted('follow session')
+      assertScope(req.scopeId)
+      if (subscriptions.size >= L.maxSubscriptions) {
+        throw new WebSessionError(
+          'resourceLimit',
+          `subscription limit exceeded (${subscriptions.size} >= ${L.maxSubscriptions})`,
+        )
+      }
+      const handle = createFollowSubscription({
+        adapter,
+        productId: options.productId,
+        scopeId: req.scopeId,
+        sessionId: req.sessionId,
+        subscriptionId: randomUUID(),
+        ...(req.requestId ? { requestId: req.requestId } : {}),
+        limits: {
+          pollingIntervalMs: L.pollingIntervalMs,
+          idleLeaseMs: L.idleLeaseMs,
+          pendingEvents: L.maxPendingEvents,
+          pendingBytes: L.maxPendingBytes,
+          maxProjectionBytes: L.maxProjectionBytes,
+          maxRecordBytes: L.maxRecordBytes,
+        },
+        signal,
+        ledger: cursorLedger,
+        loadFull: loadTranscriptFull,
+        resolvePath,
+        onRelease: () => subscriptions.delete(handle),
+      })
+      subscriptions.add(handle)
+      return handle
+    },
+
     async close(): Promise<void> {
       if (state === 'closed') return
       state = 'closed'
+      // 关停全部活跃订阅（close deadline 界；closed 终态高优先可覆一切）
+      const deadline = new Promise<void>(resolve =>
+        setTimeout(resolve, L.closeDeadlineMs),
+      )
+      await Promise.race([
+        Promise.all(
+          [...subscriptions].map(async sub => {
+            try {
+              await sub.close()
+            } catch {
+              // 关停面不抛：close deadline 兜底
+            }
+          }),
+        ),
+        deadline,
+      ])
+      subscriptions.clear()
       await adapter.close()
     },
   }

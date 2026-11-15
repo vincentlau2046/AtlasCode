@@ -66,6 +66,15 @@ function fakeAdapter(
     async readTranscript() {
       throw new WebSessionError('notFound', 'fake adapter: no bytes')
     },
+    async statTranscript() {
+      return null
+    },
+    async readTranscriptTail() {
+      throw new WebSessionError('notFound', 'fake adapter: no tail')
+    },
+    async resolveTranscriptPath() {
+      throw new WebSessionError('notFound', 'fake adapter: no path')
+    },
     async close() {
       calls.close++
     },
