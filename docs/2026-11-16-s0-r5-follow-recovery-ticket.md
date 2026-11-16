@@ -38,3 +38,12 @@
 
 - 登记池「message 级复合 cursor」（S0-R4 ⑨）与 ③ 分页形同域——**候本波 lock-face 一并裁定**（并入或维持独立登记，呈批书表态）。
 - 消费侧 G2 格 D 四面 + P0/P1 全绿不受本波影响（修形为分态收敛非面变更）；格 I 待用户授权独立推进。
+
+## §12 Atlas-reveiw 审计闭环（2026-11-16，通过——(c) 成立附 3 定形钉 + ② 机制钉必答 + 假阴残余登记 1 + 格补腿 6 条；@9758ebd1+@2ef06607 全锚实核）
+
+1. **焦点① 采认 + (c) 终裁**：(b) 结构性不足直证（stat 三面全同不可判 append vs rewrite）/(a) 仍需兜底且 O(file) 逐轮询——(c) = 最小完备形终裁。**3 定形钉采认钉死**：钉 1 = 重采样后 3-way 分类（prefix 异→resetRequired / 全量可解析且 prefix 同→续接瞬态自愈 / 仍 unparseable→corruptData 真损坏；禁重采样循环单次即终态）；钉 2 = 触发面唯一（unparseable complete record；oversize 走既有 resourceLimit）；钉 3 = 成本上界单次重采样 ≤ maxTranscriptBytes。
+2. **假阴残余裁定（f4 终裁 = 登记不叠加）**：rewrite 产出合法 JSONL → 静默错流不设防——(c) 已把误判后果从「不可恢复硬终流」收敛为「可恢复分态」，残余触发面工程概率极低；内容锚叠加逐轮询 O(file) 成本不值。呈批书表态登记，候消费侧实测反弹再议。
+3. **焦点② 机制钉采认（必答，lock-face 核心新增）**：cursor token 绑 **字节 offset + ino 锚**（binding 加性面）——续接 = 该 offset 起尾读且过 ② 同一判定面（断连窗事件从 transcript 文件本身恢复 = 零丢段零重放机制源）；**三分态钉** = ledger verify 三因 unknown/expired/mismatch 统一 → resetRequired 显式分态（message 分因可辨），禁静默 fresh baseline；capacity/TTL 淘汰 = cursorExpired 语义（bounded 机械已在）；token opaque + 内部版本化。
+4. **焦点③ 裁定（f4 终裁 = 维持独立登记）**：message 级 cursor 改粒度语义（token 键位/恢复源），并入 = 单波双语义扩形；③ 落地预留 token 内部版本化字段 + binding 可扩展位，升级 wire 不 breaking。呈批书表态「独立登记 + 扩展位预留」。
+5. **格补腿采认**：格 1 +腿 6（瞬态撕裂行自愈零终态）/腿 7（重采样分类两腿直证 = 假阳归零可证伪形）/腿 8（重采样撞 maxTranscriptBytes → resourceLimit 归属，禁 corruptData 冒名）；格 2 + 三因各一腿 + 零丢段腿（断连窗 append N 条 → 携 cursor 重入 N 条全达）。
+6. **流程推进**：审计通过 + 本节在案 → **双信号②发 Main**（lock-face 呈批书按 §12 成文）→ 落码 → gate → 段 L 0.1.121 → 生产 lane → 单信号 Atlasweb-F4。0.1.122 docs-only 另案不审 ✓。
