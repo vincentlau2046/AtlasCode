@@ -166,6 +166,14 @@ export interface FollowSessionRequest {
   scopeId: string
   sessionId: string
   requestId?: string
+  /**
+   * S0-R5 ③（呈批书 §3 @6e772c02，f4 §13 批复）：opaque resume cursor
+   * （账本 token）。在场 → 续接支（零 baseline 事件，断连窗 append 从
+   * 文件本身恢复）；verify 三因（unknown/expired/mismatch）→ resetRequired
+   * 显式分态。协议形 webSessionV0 FollowSessionRequestSchema.resumeCursor
+   * optional（本域信任上层已验，运行面 opaque string）。
+   */
+  resumeCursor?: string
 }
 
 /** S0-R4 件 A（工单 §3/呈批书 L1，f4 §10 @7ecf0fa4 批复）：query 界（1-256 code points）= 契约面钉死（webSessionV0），runtime 信任上层已验。 */
@@ -725,6 +733,8 @@ export function createReadonlySessionRuntime(
         sessionId: req.sessionId,
         subscriptionId: randomUUID(),
         ...(req.requestId ? { requestId: req.requestId } : {}),
+        // S0-R5 ③：resumeCursor 透传（缺省臂既有形恒等）
+        ...(req.resumeCursor ? { resumeCursor: req.resumeCursor } : {}),
         limits: {
           pollingIntervalMs: L.pollingIntervalMs,
           idleLeaseMs: L.idleLeaseMs,
@@ -732,6 +742,9 @@ export function createReadonlySessionRuntime(
           pendingBytes: L.maxPendingBytes,
           maxProjectionBytes: L.maxProjectionBytes,
           maxRecordBytes: L.maxRecordBytes,
+          // S0-R5 ②：重采样/续接全量读成本上界（钉 3；adapter readTranscript
+          // 同源同界——单一事实源 L.maxTranscriptBytes）
+          maxTranscriptBytes: L.maxTranscriptBytes,
         },
         signal,
         ledger: cursorLedger,

@@ -11,6 +11,19 @@
  * 稳定文件 repeat poll 走 O(1) stat 通道（零 read/零 parse/零事件）。
  * 不连续（truncate/replace/compact，ino 变或 size < offset）→
  * resetRequired + 新 generation/baseline，旧消息不再采纳。
+ * S0-R5 重采样兜底（呈批书 §2 @6e772c02，f4 §13 批复）：同 inode
+ * size > offset 的 rewrite 漏过单向守卫 → 旧 offset 尾读 unparseable
+ * complete record 时不再硬终流，先做单次身份重采样复核（成本上界
+ * ≤ maxTranscriptBytes，禁循环）→ 3-way 分类：prefix 异 →
+ * resetRequired + 新 baseline；全量可解析且 prefix 同（瞬态撕裂/半行
+ * 竞态）→ 静默自愈零终态；仍 unparseable → corruptData 真损坏
+ * （终态收窄至此）。
+ * S0-R5 resumeCursor 续接（呈批书 §3）：verify ok → 内部 parse
+ * [0, byteOffset) 重建投影态（不发 baseline 事件——零重放）→
+ * offset/ino 锚定进既有轮询（断连窗 append 从文件本身恢复）；verify
+ * 三因（unknown/expired/mismatch）统一 → resetRequired 显式分态 +
+ * 新 baseline（分因 message 透传，禁静默 fresh）；resume 起点过 ②
+ * 同一判定面（offset 越界/ino 错配 → resetRequired 同形）。
  *
  * 终态恰一（优先序 §7.5）：closed(4) > error(cancelled)(3) > 其余
  * error(2)，高可覆低（替换队内未消费终态对）；resetRequired 非终态。
@@ -48,6 +61,8 @@ export interface FollowLimits {
   pendingBytes: number
   maxProjectionBytes: number
   maxRecordBytes: number
+  /** S0-R5：重采样/续接全量读的字节上界（钉 3 成本界；超界 resourceLimit）。 */
+  maxTranscriptBytes: number
 }
 
 export interface FollowDeps {
@@ -57,6 +72,12 @@ export interface FollowDeps {
   sessionId: string
   subscriptionId: string
   requestId?: string
+  /**
+   * S0-R5 ③：opaque resume cursor（账本 token）。在场 → verify 续接支
+   * （零 baseline 事件）；缺席 → 既有 fresh baseline。协议形
+   * webSessionV0 FollowSessionRequestSchema.resumeCursor optional。
+   */
+  resumeCursor?: string
   limits: FollowLimits
   signal?: AbortSignal
   ledger: CursorLedger
@@ -354,12 +375,15 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
     }
     const cursor = ledger.issue(
       {
+        v: 1,
         productId: deps.productId,
         scopeId: deps.scopeId,
         sessionId: deps.sessionId,
         baselineId,
         generation,
         revision,
+        byteOffset: offset,
+        ino: anchorIno,
       },
       bytes,
     )
@@ -381,18 +405,23 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
     lines: Buffer[],
   ): { changed: boolean; corrupt: string | null; oversize: boolean } {
     if (!state) return { changed: false, corrupt: null, oversize: false }
-    let changed = false
+    // S0-R5 两段式（先全量校验后应用）：禁半批污染——重采样 prefix 判据
+    // 以「已交付投影态」为基准，corrupt/oversize 批次零 mutation。
+    const parsed: Record<string, unknown>[] = []
     for (const line of lines) {
       if (line.length > limits.maxRecordBytes) {
-        return { changed, corrupt: null, oversize: true }
+        return { changed: false, corrupt: null, oversize: true }
       }
       let entry: unknown
       try {
         entry = JSON.parse(line.toString('utf8'))
       } catch {
-        return { changed, corrupt: 'unparseable complete record', oversize: false }
+        return { changed: false, corrupt: 'unparseable complete record', oversize: false }
       }
-      const rec = entry as Record<string, unknown>
+      parsed.push(entry as Record<string, unknown>)
+    }
+    let changed = false
+    for (const rec of parsed) {
       if (
         rec &&
         typeof rec.uuid === 'string' &&
@@ -459,11 +488,22 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
         return
       }
       if (r.corrupt) {
-        // 非法完整行 corruptData，不无限静默等待
-        setTerminal(errorEvent('corruptData', r.corrupt))
+        // S0-R5 裁 (c)：unparseable complete record 触发面唯一 → 单次
+        // 身份重采样复核 3-way 分类（瞬态撕裂自愈 / prefix 异 reset /
+        // 真损坏 corruptData 收窄），禁硬终流直落。
+        await resampleAfterCorrupt()
         return
       }
     }
+    await emitReplacement()
+  }
+
+  /**
+   * 增量交付（revision++ + 新 cursor + replacement 事件）。S0-R5 抽出：
+   * pollOnce 增量支 / 重采样自愈支 / 续接 gap 支三站点同形。cursor
+   * binding 携字节锚（byteOffset = 当前读取账面、ino = 当前身份锚）。
+   */
+  async function emitReplacement(): Promise<void> {
     if (!state || interrupted()) return
     const projection = buildProjection(state, deps)
     const bytes = serializedProjectionBytes(projection)
@@ -474,12 +514,15 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
     revision++
     const cursor = ledger.issue(
       {
+        v: 1,
         productId: deps.productId,
         scopeId: deps.scopeId,
         sessionId: deps.sessionId,
         baselineId,
         generation,
         revision,
+        byteOffset: offset,
+        ino: anchorIno,
       },
       bytes,
     )
@@ -496,10 +539,228 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
     } as WebSessionEvent)
   }
 
+  /**
+   * S0-R5 重采样复核（呈批书 §2 裁 (c)，钉 1/2/3）：单次全量重读 +
+   * 3-way 分类，禁循环。成本上界 = maxTranscriptBytes（钉 3，超界
+   * resourceLimit——腿 8，禁 corruptData 冒名）。
+   */
+  async function resampleAfterCorrupt(): Promise<void> {
+    if (interrupted() || deps.signal?.aborted) return
+    // 双采样守卫（竞态窗口零终态：下一轮 poll 判定面重评，禁循环重采样）
+    const st = await adapter.statTranscript(deps.scopeId, deps.sessionId)
+    if (!st) {
+      setTerminal(errorEvent('notFound', 'session file removed during resample'))
+      return
+    }
+    if (interrupted()) return
+    if (st.sizeBytes > limits.maxTranscriptBytes) {
+      setTerminal(
+        errorEvent(
+          'resourceLimit',
+          `resample transcript exceeds limit (${st.sizeBytes} > ${limits.maxTranscriptBytes} bytes)`,
+        ),
+      )
+      return
+    }
+    let raw: Uint8Array
+    try {
+      raw = await adapter.readTranscript(deps.scopeId, deps.sessionId, deps.signal)
+    } catch (e) {
+      if (e instanceof WebSessionError) {
+        setTerminal(errorEvent(e.code as 'ioUnavailable', e.message, e.retryable))
+      } else {
+        setTerminal(errorEvent('ioUnavailable', `resample read failed: ${String(e)}`, true))
+      }
+      return
+    }
+    if (interrupted()) return
+    const stPost = await adapter.statTranscript(deps.scopeId, deps.sessionId)
+    if (!stPost) {
+      setTerminal(errorEvent('notFound', 'session file removed during resample'))
+      return
+    }
+    if (
+      stPost.ino !== st.ino ||
+      stPost.sizeBytes !== st.sizeBytes ||
+      stPost.mtimeMs !== st.mtimeMs
+    ) {
+      return
+    }
+    // 真损坏判据（腿 4 收窄不误吞）：严格逐行解析自证——engine loader 的
+    // parseJSONL 静默跳过残行，不能作 corrupt 证据；任一完整行仍不可解析
+    // = 垃圾仍在盘 = 真损坏（终态收窄至此）。
+    const text = Buffer.from(raw).toString('utf8')
+    const endsWithNewline = text.endsWith('\n')
+    const allLines = text.split('\n').filter(l => l.length > 0)
+    const completeLines = endsWithNewline ? allLines : allLines.slice(0, -1)
+    for (const line of completeLines) {
+      if (Buffer.byteLength(line, 'utf8') > limits.maxRecordBytes) {
+        setTerminal(errorEvent('resourceLimit', 'record exceeds max record bytes'))
+        return
+      }
+      try {
+        JSON.parse(line)
+      } catch {
+        setTerminal(errorEvent('corruptData', 'unparseable complete record (resample confirmed)'))
+        return
+      }
+    }
+    // 全量可解析 → prefix 判据（既有交付态每条消息在重采样集内且内容恒等）
+    let filePath: string
+    try {
+      filePath = await deps.resolvePath(deps.scopeId, deps.sessionId)
+    } catch (e) {
+      setTerminal(errorEvent('ioUnavailable', `resample resolve failed: ${String(e)}`, true))
+      return
+    }
+    if (interrupted()) return
+    let loaded: {
+      messages: Map<string, ProjectionSourceMessage>
+      leafUuids: Set<string>
+    }
+    try {
+      loaded = await deps.loadFull(filePath)
+    } catch (e) {
+      if (e instanceof TranscriptTooLargeError) {
+        setTerminal(
+          errorEvent(
+            'resourceLimit',
+            `transcript exceeds limit (${e.size} > ${e.maxBytes} bytes)`,
+            false,
+          ),
+        )
+        return
+      }
+      if (e instanceof WebSessionError) {
+        setTerminal(errorEvent(e.code as 'notFound', e.message, e.retryable))
+      } else {
+        setTerminal(errorEvent('ioUnavailable', `resample load failed: ${String(e)}`, true))
+      }
+      return
+    }
+    if (interrupted() || !state) return
+    let prefixSame = true
+    for (const [uuid, msg] of state.messages) {
+      const again = loaded.messages.get(uuid)
+      if (!again || JSON.stringify(again) !== JSON.stringify(msg)) {
+        prefixSame = false
+        break
+      }
+    }
+    if (!prefixSame) {
+      // 臂 1：prefix 异（消息集不连续）→ resetRequired + 新 baseline（既有分态）
+      await issueBaseline('transcript rewritten (resample prefix mismatch)')
+      return
+    }
+    // 臂 2：瞬态自愈（零终态）——采纳重采样态，gap 内新记录经 replacement
+    // 全达（零丢段）；无新记录则静默续接。
+    const grew = loaded.messages.size > state.messages.size
+    state = { messages: loaded.messages, leafUuids: loaded.leafUuids }
+    offset = stPost.sizeBytes
+    anchorIno = stPost.ino
+    lastMtimeMs = stPost.mtimeMs
+    pendingPartial = Buffer.alloc(0)
+    if (grew) await emitReplacement()
+  }
+
+  /**
+   * S0-R5 ③ 续接支（呈批书 §3）：verify ok → 内部 parse [0, byteOffset)
+   * 重建投影态（不发 baseline 事件——零重放）→ offset/ino 锚定进既有轮询；
+   * verify 三因统一 → resetRequired 显式分态 + 新 baseline（分因 message
+   * 透传，禁静默 fresh）；resume 起点过 ② 同一判定面。
+   */
+  async function resumeFromCursor(token: string): Promise<boolean> {
+    const verdict = ledger.verify(token, {
+      productId: deps.productId,
+      scopeId: deps.scopeId,
+      sessionId: deps.sessionId,
+    })
+    if (verdict.ok === false) {
+      return issueBaseline(`resume cursor rejected (${verdict.why}): ${verdict.message}`)
+    }
+    const binding = verdict.binding
+    // 版本面守卫：无字节锚的 cursor（legacy payload）不可续接 → 显式分态
+    if (
+      binding.v !== 1 ||
+      typeof binding.byteOffset !== 'number' ||
+      typeof binding.ino !== 'number'
+    ) {
+      return issueBaseline('resume cursor lacks byte anchor (unsupported payload version)')
+    }
+    if (interrupted()) return false
+    if (deps.signal?.aborted) {
+      setTerminal(errorEvent('cancelled', 'follow aborted'))
+      return false
+    }
+    try {
+      const st = await adapter.statTranscript(deps.scopeId, deps.sessionId)
+      if (!st) {
+        setTerminal(errorEvent('notFound', 'session file missing before resume'))
+        return false
+      }
+      if (interrupted()) return false
+      // ② 同一判定面：offset 越界 / ino 错配 → resetRequired 同形
+      if (st.ino !== binding.ino || st.sizeBytes < binding.byteOffset) {
+        return issueBaseline('resumed cursor identity mismatch (file replaced or truncated)')
+      }
+      const raw = await adapter.readTranscript(deps.scopeId, deps.sessionId, deps.signal)
+      if (interrupted()) return false
+      const stPost = await adapter.statTranscript(deps.scopeId, deps.sessionId)
+      if (!stPost) {
+        setTerminal(errorEvent('notFound', 'session file disappeared during resume'))
+        return false
+      }
+      if (stPost.ino !== st.ino || stPost.sizeBytes < binding.byteOffset) {
+        return issueBaseline('resumed cursor identity mismatch (file replaced or truncated)')
+      }
+      // 投影态重建：严格 parse [0, byteOffset)（既有交付前缀）——尾行无换行
+      // = 既有 pendingPartial 形，原样入 partial 槽（身份逐字节复现）。
+      const prefixText = Buffer.from(raw.subarray(0, binding.byteOffset)).toString('utf8')
+      const lastNewline = prefixText.lastIndexOf('\n')
+      const completePart = lastNewline >= 0 ? prefixText.slice(0, lastNewline + 1) : ''
+      const partialPart = lastNewline >= 0 ? prefixText.slice(lastNewline + 1) : prefixText
+      state = { messages: new Map(), leafUuids: new Set() }
+      const lines = completePart.split('\n').filter(l => l.length > 0)
+      for (let i = 0; i < lines.length; i += PARSE_BATCH_SIZE) {
+        if (interrupted()) return false
+        const batch = lines.slice(i, i + PARSE_BATCH_SIZE).map(l => Buffer.from(l, 'utf8'))
+        const r = ingestLines(batch)
+        if (r.oversize) {
+          setTerminal(errorEvent('resourceLimit', 'record exceeds max record bytes'))
+          return false
+        }
+        if (r.corrupt) {
+          return issueBaseline('resumed prefix contains unparseable record (identity mismatch)')
+        }
+      }
+      if (!state || interrupted()) return false
+      // 锚定 + 续接既有轮询（generation/baselineId/revision 从 binding 续；
+      // binding 面 string → 账本只发行 UUID 形，cast 收窄）
+      generation = binding.generation as `${string}-${string}-${string}-${string}-${string}`
+      baselineId = binding.baselineId as `${string}-${string}-${string}-${string}-${string}`
+      revision = binding.revision
+      offset = binding.byteOffset
+      anchorIno = stPost.ino
+      lastMtimeMs = stPost.mtimeMs
+      pendingPartial = Buffer.from(partialPart, 'utf8')
+      return true
+    } catch (e) {
+      if (e instanceof WebSessionError) {
+        setTerminal(errorEvent(e.code as 'ioUnavailable', e.message, e.retryable))
+      } else {
+        setTerminal(errorEvent('ioUnavailable', `resume failed: ${String(e)}`, true))
+      }
+      return false
+    }
+  }
+
   async function run(): Promise<void> {
     try {
       armLease()
-      const ok = await issueBaseline()
+      // S0-R5 ③：resumeCursor 在场 → 续接支（零 baseline 事件）；否则 fresh baseline
+      const ok = deps.resumeCursor
+        ? await resumeFromCursor(deps.resumeCursor)
+        : await issueBaseline()
       // baseline 期间 close/cancel/终态 → 不启用 poll 循环（不可复活）
       if (!ok || interrupted()) return
       running = true

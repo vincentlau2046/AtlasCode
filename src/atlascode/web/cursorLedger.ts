@@ -18,12 +18,25 @@ export type CursorVerifyResult =
   | { ok: false; why: 'unknown' | 'expired' | 'mismatch'; message: string }
 
 export interface CursorBinding {
+  /**
+   * token 内部版本化（S0-R5 呈批书 §3 @6e772c02）：opaque token 不变，
+   * payload 结构版本字段在册（v1 = 首个携字节锚的版本；升级 wire 不
+   * breaking——消费侧只持 opaque token）。
+   */
+  v: 1
   productId: string
   scopeId: string
   sessionId: string
   baselineId: string
   generation: string
   revision: number
+  /**
+   * S0-R5 加性字节锚（§12-3 机制钉）：resume 续接的读取起点（完整记录
+   * 边界或含 pendingPartial 的 EOF）与文件身份锚。加性面，既有五字段
+   * 不动。
+   */
+  byteOffset: number
+  ino: number
 }
 
 interface Entry {
