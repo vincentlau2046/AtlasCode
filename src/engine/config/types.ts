@@ -143,6 +143,16 @@ export const SettingsSchema = () => z.object({
       persistence: z.enum(['memory', 'durable']).optional(),
     })
     .optional(),
+  // --- USD 计费面（0.1.120 件 2，L7；src/cost/pricing.ts 消费）：
+  //     cost.pricingOverrides = 模型 → 双价表 override（优先序 内置表 <
+  //     override；半字段 override fail-closed → total_cost_usd 缺席；
+  //     显式 0 = 合法 0）。数据契约先行，消费缝 = headless result 装配
+  //     （src/cli/print.ts aggregateResultUsage）。
+  cost: z
+    .object({
+      pricingOverrides: z.record(z.string(), z.any()).optional(),
+    })
+    .optional(),
   // --- Skill 名称解析档位（C9-5，0.1.79 W-C；CC 2.1.129 对齐件，全仓现状 ∅ 新做）：
   //     skill 与用户命令/其它面同名冲突时的解析策略三档（卷 3 §5 settings key
   //     裁定）。数据契约先行（同 search.tavilyApiKey 先例）：schema 枚举声明 +

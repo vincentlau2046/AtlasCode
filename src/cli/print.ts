@@ -81,6 +81,9 @@
 import { randomUUID } from 'crypto'
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'path'
+// 0.1.120 件 2：USD 计费面首建（D1 解除）——src/cost 独立域（钉 i），
+// 模型名归一强复用 K1-B① stripProviderPrefix（在 pricing.ts 内）。
+import { computeCostUsd, resolvePricing, type PricingOverrides } from '../cost'
 import {
   type AssistantMessage,
   type Message,
@@ -683,6 +686,94 @@ export function extractFinalAssistantText(loopResult: AgentLoopResult): string {
   return ''
 }
 
+// ── 0.1.120 件 1：headless result usage 纯聚合 + 件 2 total_cost_usd ──
+// 落点终裁 (a)（工单 §7-2 + 呈批书 L6，f4 §10 @7ecf0fa4 批复）：
+// buildResultMessage / deferred 站点处从 loopResult.messages 内 assistant
+// message.usage 聚合（API 权威字段，W-RC1 §7 同源直证）；零 engine 触碰。
+// 三站点一致性断言锚 = 本单一 helper（禁三处各算）；error_during_execution
+// 站点 usage/total_cost_usd 双缺席（钉 iv：执行失败无消耗 = 无事件）。
+
+/** result 事件 usage wire 形（Claude 形 snake_case 四 token 字段）。 */
+export interface ResultUsageWire {
+  input_tokens: number
+  output_tokens: number
+  cache_read_input_tokens: number
+  cache_creation_input_tokens: number
+}
+
+/**
+ * 单一聚合 helper（件 1 + 件 2 共源）：
+ * - 件 1 usage：单谓词 `type === 'assistant' && usage 在场` 才累加——
+ *   synthetic/压缩边界/进度/attachment 消息天然无 usage 字段即自然跳过
+ *   （零类型枚举外推）。usage 取用形 = 嵌套 message.usage 为主、顶层
+ *   usage fallback（loop.ts roundUsage 同形先例）；缺失字段 ?? 0。usage
+ *   wire 恒在（零 usage 消息 = 全 0，件 1 恒在矩阵）。
+ * - 件 2 total_cost_usd（条件在）：usage×pricing 累计——per-message 模型
+ *   名（message.model）经 src/cost/pricing.ts resolvePricing（内置表 <
+ *   settings cost.pricingOverrides；K1-B① 归一）。任一 usage 消息模型
+ *   unknown/半字段 override → totalCostUsd 缺席（禁伪造 0，fail-closed）；
+ *   零 usage 消息 → 缺席（无消耗 = 无事件，与 error 站点双缺席同族）；
+ *   显式 0 = 合法 0。cache token 零计入（两价表低估面，L7 终裁）。
+ */
+export function aggregateResultUsage(
+  messages: ReadonlyArray<unknown>,
+  pricingOverrides?: PricingOverrides,
+): { usage: ResultUsageWire; totalCostUsd?: number } {
+  const usage: ResultUsageWire = {
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_read_input_tokens: 0,
+    cache_creation_input_tokens: 0,
+  }
+  let costKnown = true
+  let costEvents = 0
+  let totalCostUsd = 0
+  for (const raw of messages) {
+    const m = raw as {
+      type?: string
+      usage?: Record<string, unknown>
+      model?: unknown
+      message?: { usage?: Record<string, unknown>; model?: unknown }
+    }
+    if (m?.type !== 'assistant') continue
+    // 取用形 = 嵌套 message.usage 为主、顶层 usage fallback（loop.ts 同形）
+    const u = m.message?.usage ?? m.usage
+    if (!u) continue
+    const inTok = (u.input_tokens as number | undefined) ?? 0
+    const outTok = (u.output_tokens as number | undefined) ?? 0
+    const cacheRead = (u.cache_read_input_tokens as number | undefined) ?? 0
+    const cacheCreation = (u.cache_creation_input_tokens as number | undefined) ?? 0
+    usage.input_tokens += inTok
+    usage.output_tokens += outTok
+    usage.cache_read_input_tokens += cacheRead
+    usage.cache_creation_input_tokens += cacheCreation
+    // 件 2：per-message 模型计价（fail-closed：任一 unknown → 整体缺席）
+    const model = m.message?.model ?? m.model
+    const pricing =
+      typeof model === 'string' ? resolvePricing(model, pricingOverrides) : undefined
+    if (!pricing) {
+      costKnown = false
+      continue
+    }
+    costEvents++
+    totalCostUsd += computeCostUsd(
+      {
+        input_tokens: inTok,
+        output_tokens: outTok,
+        cache_read_input_tokens: cacheRead,
+        cache_creation_input_tokens: cacheCreation,
+      },
+      pricing,
+    )
+  }
+  return {
+    usage,
+    // 无事件（零 usage 消息）或缺席事件（unknown）→ 字段缺席；显式 0 价
+    // 路径 costEvents > 0 → 在场（合法 0 与缺席异质）。
+    ...(costKnown && costEvents > 0 ? { totalCostUsd } : {}),
+  }
+}
+
 // ── AD-45 0.1.52 ②③：headless 挂起协议可测顶层面（零磁盘纯函数 + 单
 // executeToolUse 调用；extractFinalAssistantText 同型可测顶层面先例）──
 
@@ -1013,6 +1104,11 @@ export async function runHeadless(
   // ── MCP 启动消费（组合根 initMcpConnections ①②③ 无壳形态）──
   const mcpManager = getMcpConnectionManager()
   const settings = getSettingsWithErrors()
+  // 0.1.120 件 2：settings cost.pricingOverrides → USD 计费 override 源
+  // （L7 优先序 内置表 < override；schema 定义面见 engine/config/types.ts）。
+  const pricingOverrides = (
+    settings.settings as { cost?: { pricingOverrides?: PricingOverrides } }
+  ).cost?.pricingOverrides
   const discoveryInput =
     getMcpDiscoveryInput() ??
     ({
@@ -1371,6 +1467,13 @@ export async function runHeadless(
     isError: boolean,
   ): SDKMessage => {
     const resultText = extractFinalAssistantText(loopResult)
+    // 0.1.120 件 1/件 2：usage 恒在 + total_cost_usd 条件在（缺席 = 字段
+    // 不出现非 null）。overrides 源 = settings cost.pricingOverrides（L7
+    // 呈批放置位，顶层新键 additive）。
+    const aggregated = aggregateResultUsage(
+      loopResult.messages,
+      pricingOverrides,
+    )
     return {
       type: 'result',
       subtype: loopResult.terminated ? 'success' : 'error_max_turns',
@@ -1378,6 +1481,10 @@ export async function runHeadless(
       is_error: isError || !loopResult.terminated,
       num_turns: loopResult.turns,
       result: resultText,
+      usage: aggregated.usage,
+      ...(aggregated.totalCostUsd !== undefined
+        ? { total_cost_usd: aggregated.totalCostUsd }
+        : {}),
       uuid: randomUUID(),
     } as SDKMessage
   }
@@ -1447,6 +1554,11 @@ export async function runHeadless(
       } as unknown as StdoutMessage)
     }
     await drainToOutput()
+    // 0.1.120 件 1/件 2：deferred 站点同 helper 同形（usage 恒在 + cost 条件在）。
+    const aggregatedDeferred = aggregateResultUsage(
+      conversationMessages,
+      pricingOverrides,
+    )
     const resultMessage = {
       type: 'result',
       subtype: 'deferred',
@@ -1457,6 +1569,10 @@ export async function runHeadless(
         `Deferred tool call ${p.toolName} (${p.toolUseId}) by PreToolUse hook` +
         (p.deferReason ? `: ${p.deferReason}` : '') +
         `. Session suspended — resume with: atlas -p --resume ${sessionId}`,
+      usage: aggregatedDeferred.usage,
+      ...(aggregatedDeferred.totalCostUsd !== undefined
+        ? { total_cost_usd: aggregatedDeferred.totalCostUsd }
+        : {}),
       uuid: randomUUID(),
     } as SDKMessage
     await writeMessage(resultMessage)

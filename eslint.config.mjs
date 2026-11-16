@@ -77,6 +77,12 @@ const ELEMENTS = [
   // 仅 tui 2404 边，随 tui allow 面登记）。entry-point 豁免见 ENTRY_POINT_RULES
   // （S3a 冻结设计 = 直改全量深路径、无 index 门面）。
   { type: "kernel", pattern: "src/kernel", mode: "folder" },
+  // 0.1.120 件 2（L7，工单 §7-3 钉 i）：cost 新顶层域——USD 计费面首建
+  // 单文件域（pricing.ts 双价表 + resolvePricing/computeCostUsd 纯函数）。
+  // 出边仅 modelprovider（stripProviderPrefix K1-B① 归一单源复用，钉 ii）；
+  // 消费方仅 cli（print headless result 装配）。禁入 modelprovider/
+  // capabilities 域（modelCost 其余面禁顺手复活）。
+  { type: "cost", pattern: "src/cost", mode: "folder" },
 ];
 
 // ── STR-1 entry-point 规则（src 域间 + tests→src 共用）──
@@ -194,6 +200,14 @@ export default tseslint.config(
                 "task", "engine", "memory",
               ],
             },
+            // cost (0.1.120 件 2 L7): USD 计费面单文件域 — shared + modelprovider
+            // （stripProviderPrefix K1-B① 归一单源复用，钉 ii 禁第二归一实现）；
+            // 零 services/api 依赖（D1 首建实质理由不破）。消费方 = cli
+            // （print aggregateResultUsage），反向边随 cli allow 面登记。
+            {
+              from: "cost",
+              allow: ["shared", "modelprovider"],
+            },
             // lsp (§8.67 D 波 S-E2c): LSP client 域 — shared(日志/错误/类型
             // 单一事实源) + bootstrap(cwd 状态, server 工作根面); 不依赖
             // engine/ascend/atlascode/swarm（engine 侧反向接线:
@@ -242,6 +256,9 @@ export default tseslint.config(
                 "shared", "bootstrap", "engine", "permissions",
                 "remote", "mcp", "hooks", "modelprovider", "swarm",
                 "executor",
+                // 0.1.120 件 2：cost 域消费边（print headless result 装配
+                // aggregateResultUsage → pricing.ts resolvePricing）
+                "cost",
               ],
             },
             // tui (§8.72 TUI 壳波 Slice A→B): TUI 域 — 旧仓 UI 闭包 C-7 原样搬
