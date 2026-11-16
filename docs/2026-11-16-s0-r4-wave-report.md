@@ -64,11 +64,11 @@
 ## 6. 格 6 锚变更预注册披露（补充钉①）
 
 - `dist/web-session-runtime/index.js`：69,863B（0.1.118）→ **78,031B**（sha256 `58bbe3c3`…）——search 域真体随形 A 载体 + F1/F2 load.ts 修形入闭包（L5 预记「双锚必然变更」兑现前半）。
-- `dist/web-contract/index.js`：**7,975B 恒等**（0.1.115 起六版恒等）。
-- cli.js 锚：段 L build 时实测（L5 预记披露）。
+- `dist/web-contract/index.js`：**7,975B 恒等**（0.1.115 起七版恒等）。
+- cli.js 锚（e2e lane 独立实测）：**18,215,220B / sha256 `f4b1e4d0`…`f3bee8`**（段 L 对表值）。
 
 ## 7. 后续
 
-- e2e gate：格 1（含中止腿）/ 格 2 四面回归 / 格 3 F1 / 格 4 F2 / 格 5 载体回归+pack 扩形+双实例 / 格 6 锚 / 消费三腿
-- 段 L 0.1.119 候（GATE-PASS + f4 采认双在案）
-- 0.1.120（L6-L8）同呈批书串行在后
+- ✅ e2e gate：**GATE-PASS @944fc3e5**（判定单 `user-e2e/reports/r-20261116-gate-s0r4.md`，格 1-6 + 消费三腿 + canon 独占 6108 tests / 501 files / bun_exit=0 / 148.81s 全绿零 fail——干净形态强于 fail 池口径；格 1 P2=2 命中单会话整交付 = §3-⑨ 超发披露形实证）。
+- 段 L 0.1.119 候：候 f4 §3 复核采认（⑧⑨ 一并）双在案后走 bump + release。
+- 0.1.120（L6-L8）同呈批书串行在后。
