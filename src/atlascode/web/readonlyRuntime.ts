@@ -17,6 +17,10 @@
 import { randomUUID } from 'node:crypto'
 
 import type { WebSessionProjection } from './contract'
+import {
+  TranscriptChangedDuringReadError,
+  TranscriptTooLargeError,
+} from '../../engine/session/readonly'
 
 import { CursorLedger } from './cursorLedger'
 import { WebSessionError } from './errors'
@@ -104,8 +108,8 @@ export interface ReadonlySessionLimits {
  * （引擎适配边界，不进 pack 图）；测试注入 fake。
  */
 export interface ReadonlySessionEngine {
-  /** 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。 */
-  loadTranscriptFull: (filePath: string) => Promise<{
+  /** 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。S0-R3 加性 maxBytes（工单 §8-2；undefined = 不设界）。 */
+  loadTranscriptFull: (filePath: string, opts?: { maxBytes?: number }) => Promise<{
     messages: Map<string, ProjectionSourceMessage>
     leafUuids: Set<string>
   }>
@@ -405,8 +409,32 @@ export function createReadonlySessionRuntime(
         )
       }
       const filePath = await resolvePath(scopeId, sessionId)
-      // 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)
-      const loaded = await options.engine.loadTranscriptFull(filePath)
+      // 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。
+      // S0-R3（工单 §8-2）：maxBytes 单源自 L.maxTranscriptBytes（limits 表
+      // 禁第二常量）——loader fstat 后检查点闭合 交接窗→load 之间的超界窗
+      // （预解析拦截，零全量驻留）；定型错映射 resourceLimit（message 安全化，
+      // 消费回归腿①接口缝）。
+      let loaded
+      try {
+        loaded = await options.engine.loadTranscriptFull(filePath, {
+          maxBytes: L.maxTranscriptBytes,
+        })
+      } catch (e) {
+        if (e instanceof TranscriptTooLargeError) {
+          throw new WebSessionError(
+            'resourceLimit',
+            `transcript exceeds limit (${e.size} > ${e.maxBytes} bytes)`,
+          )
+        }
+        if (e instanceof TranscriptChangedDuringReadError) {
+          throw new WebSessionError(
+            'ioUnavailable',
+            e.message,
+            true,
+          )
+        }
+        throw e
+      }
       if (signal?.aborted) {
         throw new WebSessionError('cancelled', 'operation aborted')
       }

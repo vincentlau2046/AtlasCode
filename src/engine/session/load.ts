@@ -40,7 +40,7 @@
  *    getOriginalCwd())` CC-34 原子对裁（stub 恒 null）→ 纯
  *    getProjectDir(getSessionEnv().getOriginalCwd())。
  */
-import { readFile, stat } from 'fs/promises'
+import { open, readFile, stat } from 'fs/promises'
 import { join } from 'path'
 // S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
 // （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
@@ -264,8 +264,17 @@ function applySnipRemovals(messages: Map<string, TranscriptMessage>): void {
   // subsequent survivors sharing the same chain segment don't re-walk.
   const resolve = (start: UUID): UUID | null => {
     const path: UUID[] = []
+    // S0-R3 环修（工单 §7-4 定形）：deletedParent 链可含环（恶意/损坏
+    // metadata 行互引）。visited Set + 环判 → gap null（链根语义），有界
+    // 拒绝零失控内存；头注 gap 语义由此闭合。
+    const visited = new Set<UUID>()
     let cur: UUID | null | undefined = start
     while (cur && toDelete.has(cur)) {
+      if (visited.has(cur)) {
+        cur = null
+        break
+      }
+      visited.add(cur)
       path.push(cur)
       cur = deletedParent.get(cur)
       if (cur === undefined) {
@@ -732,11 +741,17 @@ function resolveMetadataBuf(
 async function scanPreBoundaryMetadata(
   filePath: string,
   endOffset: number,
+  opts?: { fd?: Awaited<ReturnType<typeof open>> },
 ): Promise<string[]> {
   const { createReadStream } = await import('fs')
   const NEWLINE = 0x0a
 
-  const stream = createReadStream(filePath, { end: endOffset - 1 })
+  // S0-R3 fd 链四点之三（工单 §8-1，:1074 私有签名直改 + autoClose:false
+  // 必钉）：fd 在场 = fd 流读 [0, endOffset)，autoClose:false（fd 所有权
+  // 归 caller，仅 caller finally 关）；缺省臂自开自关形保留恒等。
+  const stream = opts?.fd
+    ? opts.fd.createReadStream({ end: endOffset - 1, autoClose: false })
+    : createReadStream(filePath, { end: endOffset - 1 })
   const metadataLines: string[] = []
   let carry: Buffer | null = null
 
@@ -1003,6 +1018,34 @@ function walkChainBeforeParse(buf: Buffer): Buffer {
  * Loads all messages, summaries, and metadata from a transcript file.
  * （旧 L3443 逐字裁剪，返回面按头注裁面登记收缩）
  */
+/**
+ * S0-R3 定型错（工单 §8-2）：transcript 超出调用方声明的 maxBytes 界。
+ * message 安全化钉死——零盘路径、零 stack（web 错误面 contract 纪律）。
+ * 尺寸/界数值单源在调用方（web 域 = limits.ts；loader 经 opts 接收禁第二常量）。
+ */
+export class TranscriptTooLargeError extends Error {
+  override readonly name = 'TranscriptTooLargeError'
+  readonly size: number
+  readonly maxBytes: number
+  constructor(size: number, maxBytes: number) {
+    super(`transcript exceeds maxBytes (${size} > ${maxBytes} bytes)`)
+    this.size = size
+    this.maxBytes = maxBytes
+  }
+}
+
+/**
+ * S0-R3 格 2 定型错：持 fd 读期间文件身份变化（ino/size 读毕复核不等）。
+ * 不连续分态——replay 映射 ioUnavailable retryable / follow resetRequired；
+ * 零半旧半新交付。message 安全化：零盘路径。
+ */
+export class TranscriptChangedDuringReadError extends Error {
+  override readonly name = 'TranscriptChangedDuringReadError'
+  constructor() {
+    super('file changed during transcript read (not a stable snapshot)')
+  }
+}
+
 export async function loadTranscriptFile(
   filePath: string,
   opts?: {
@@ -1014,6 +1057,13 @@ export async function loadTranscriptFile(
      * （ATLAS_DISABLE_PRECOMPACT_SKIP 进程级全局，禁触）。
      */
     precompactSkip?: 'auto' | 'force-full'
+    /**
+     * S0-R3 加性 opts（工单 §8-2）：transcript 预解析字节界；undefined =
+     * 不设界（缺省臂语义，TUI 107-151MB 合法 session 不受影响——分账 A）。
+     * 传入本 opt 即进 fd 链作用域（§8-1 opts 在场支）。界值单源 = 调用方
+     * （web 域 limits.ts），loader 不持第二常量。
+     */
+    maxBytes?: number
   },
 ): Promise<{
   messages: Map<string, TranscriptMessage>
@@ -1054,7 +1104,50 @@ export async function loadTranscriptFile(
     let metadataLines: string[] | null = null
     let hasPreservedSegment = false
     const forceFull = opts?.precompactSkip === 'force-full'
-    if (
+    // S0-R3 fd 链作用域（工单 §8-1 钉死形）：opts 在场支（precompactSkip/
+    // maxBytes 任一传入）= 单 fd 四点读链（open→fstat→scanner 加性 fd→
+    // metadata 流 autoClose:false→fd.readFile→读毕 ino/size 复核）；零 opts
+    // 默认臂保持既有 stat+readFile 路径形逐字节恒等含失败模式（fs.open
+    // 计数 ==0；CLI 车道 = 用户自有文件威胁面，分账 A）。
+    const useFdChain =
+      opts !== undefined &&
+      (opts.precompactSkip !== undefined || opts.maxBytes !== undefined)
+    if (useFdChain) {
+      const fd = await open(filePath, 'r')
+      try {
+        const fst = await fd.stat()
+        // maxBytes 检查点（§8-2）：fstat 后立即、scanner 分叉前；undefined
+        // = 不设界。超界 TranscriptTooLargeError（message 安全化：零盘路径）。
+        if (opts?.maxBytes !== undefined && fst.size > opts.maxBytes) {
+          throw new TranscriptTooLargeError(fst.size, opts.maxBytes)
+        }
+        const skipEnabled =
+          !forceFull && !isEnvTruthy(process.env.ATLAS_DISABLE_PRECOMPACT_SKIP)
+        if (skipEnabled && fst.size > SKIP_PRECOMPACT_THRESHOLD) {
+          const scan = await readTranscriptForLoad(filePath, fst.size, { fd })
+          buf = scan.postBoundaryBuf
+          hasPreservedSegment = scan.hasPreservedSegment
+          if (scan.boundaryStartOffset > 0) {
+            metadataLines = await scanPreBoundaryMetadata(
+              filePath,
+              scan.boundaryStartOffset,
+              { fd },
+            )
+          }
+        }
+        // 仅在无流读取发生时触达（scan 支已置 buf）；FileHandle.readFile
+        // 全文件读取，位置语义无歧义。
+        buf ??= await fd.readFile()
+        // 读毕复核（格 2）：持 fd 期间 rename/替换 → 不连续分态，零半旧
+        // 半新交付（replay=ioUnavailable retryable / follow=resetRequired）。
+        const fst2 = await fd.stat()
+        if (fst2.ino !== fst.ino || fst2.size !== fst.size) {
+          throw new TranscriptChangedDuringReadError()
+        }
+      } finally {
+        await fd.close()
+      }
+    } else if (
       !forceFull &&
       !isEnvTruthy(process.env.ATLAS_DISABLE_PRECOMPACT_SKIP)
     ) {
@@ -1077,8 +1170,10 @@ export async function loadTranscriptFile(
           )
         }
       }
+      buf ??= await readFile(filePath)
+    } else {
+      buf = await readFile(filePath)
     }
-    buf ??= await readFile(filePath)
     // For large buffers (which here means readTranscriptForLoad output with
     // attr-snaps already stripped at the fd level — the <5MB readFile path
     // falls through the size gate below), the dominant cost is parsing dead
@@ -1186,7 +1281,16 @@ export async function loadTranscriptFile(
       // marble-origami-*）落尽 else-if 链 = 未知 type 容错跳过（旧 AtlasHarness
       // 磁盘 JSONL 兼容，头注裁面登记）。
     }
-  } catch {
+  } catch (e) {
+    // S0-R3（工单 §8-2/§8-3）：域定型错不吞——超界/读中身份变化必须上抛
+    // （web 映射缝 = resourceLimit / ioUnavailable 分态）；既有语义保持 =
+    // 其余读取失败吞为空载（ENOENT 等）。
+    if (
+      e instanceof TranscriptTooLargeError ||
+      e instanceof TranscriptChangedDuringReadError
+    ) {
+      throw e
+    }
     // File doesn't exist or can't be read
   }
 

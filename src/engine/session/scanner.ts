@@ -266,6 +266,13 @@ function finalizeOutput(s: LoadState): void {
 export async function readTranscriptForLoad(
   filePath: string,
   fileSize: number,
+  /**
+   * S0-R3 加性 fd 参（工单 §8-1，:1066 scanner 点——所有权归 caller）：
+   * fd 在场 = 全程该 fd 位置读（positional read，零 seek 依赖）、不关
+   * （caller finally 关）；缺省 = 自开自关形逐字节恒等（attribution.ts/
+   * SDK 消费面零适配）。
+   */
+  opts?: { fd?: Awaited<ReturnType<typeof import('fs/promises').open>> },
 ): Promise<{
   boundaryStartOffset: number
   postBoundaryBuf: Buffer
@@ -299,7 +306,7 @@ export async function readTranscriptForLoad(
   }
 
   const chunk = Buffer.allocUnsafe(CHUNK_SIZE)
-  const fd = await fsOpen(filePath, 'r')
+  const fd = opts?.fd ?? (await fsOpen(filePath, 'r'))
   try {
     let filePos = 0
     while (filePos < fileSize) {
@@ -331,7 +338,7 @@ export async function readTranscriptForLoad(
     }
     finalizeOutput(s)
   } finally {
-    await fd.close()
+    if (!opts?.fd) await fd.close() // fd 所有权归 caller 时仅 caller 关（§8-1）
   }
 
   return {

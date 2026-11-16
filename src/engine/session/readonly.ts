@@ -20,7 +20,11 @@ import { loadTranscriptFile } from './load'
 // 回收，零写面）合本门面「load 族纯函数复用」章程；TranscriptMessage 仅
 // 供 cast 焊接面（runtimeDefault `as unknown` 边界一次完成），不入 pack
 // 出口 entry.ts 面（钉② d.ts 泄漏面零内部型）。
-export { buildConversationChain } from './load'
+export {
+  buildConversationChain,
+  TranscriptChangedDuringReadError,
+  TranscriptTooLargeError,
+} from './load'
 export type { TranscriptMessage } from './types'
 
 export type ReadonlyTranscriptLoad = Awaited<
@@ -30,6 +34,14 @@ export type ReadonlyTranscriptLoad = Awaited<
 /** 全量只读加载（force-full，零截断；只读 runtime 专用）。 */
 export async function loadTranscriptFull(
   filePath: string,
+  /**
+   * S0-R3 加性透传（工单 §8-2）：maxBytes 预解析界（undefined = 不设界）；
+   * force-full 恒传 → loader fd 链作用域（§8-1 opts 在场支）。
+   */
+  opts?: { maxBytes?: number },
 ): Promise<ReadonlyTranscriptLoad> {
-  return loadTranscriptFile(filePath, { precompactSkip: 'force-full' })
+  return loadTranscriptFile(filePath, {
+    precompactSkip: 'force-full',
+    maxBytes: opts?.maxBytes,
+  })
 }

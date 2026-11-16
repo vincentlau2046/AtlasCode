@@ -24,6 +24,7 @@ import type {
 } from './contract'
 
 import { WebSessionError } from './errors'
+import { TranscriptTooLargeError } from '../../engine/session/readonly'
 import { PARSE_BATCH_SIZE } from './limits'
 import type { CursorLedger } from './cursorLedger'
 import type { SessionStoreAdapter, TranscriptStat } from './sessionStoreAdapter'
@@ -293,6 +294,19 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
         if (interrupted()) return false
         loaded = await deps.loadFull(filePath)
       } catch (e) {
+        // S0-R3（工单 §8-2）：baseline 超界定型错 → resourceLimit（message
+        // 安全化；同 replay 映射形）；持 fd 读身份变化 → ioUnavailable
+        // retryable（既有 generic 分态 = resetRequired 语义）。
+        if (e instanceof TranscriptTooLargeError) {
+          setTerminal(
+            errorEvent(
+              'resourceLimit',
+              `transcript exceeds limit (${e.size} > ${e.maxBytes} bytes)`,
+              false,
+            ),
+          )
+          return false
+        }
         if (e instanceof WebSessionError) {
           setTerminal(errorEvent(e.code as 'notFound', e.message, e.retryable))
         } else {

@@ -35,8 +35,8 @@ export type AtlasWebSessionRuntimeOptions = Omit<
 /** 引擎真体（cast 焊接：engine 类型 → 投影源结构面，边界一次完成）。 */
 export function atlasWebSessionEngine(): ReadonlySessionRuntimeOptions['engine'] {
   return {
-    loadTranscriptFull: async filePath => {
-      const loaded = await loadTranscriptFull(filePath)
+    loadTranscriptFull: async (filePath, opts) => {
+      const loaded = await loadTranscriptFull(filePath, opts)
       return {
         messages: loaded.messages as unknown as Map<string, ProjectionSourceMessage>,
         leafUuids: loaded.leafUuids,
