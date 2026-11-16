@@ -44,3 +44,13 @@
 - 消费侧格 D search 腿：落地后 Atlasweb-F4 按配对纪律升级锚 + 补腿（§3 格 6 先以三腿回归对表不阻塞）。
 - missing session 流内 error{notFound}→closed 契约形（消费侧格 D+H 裁定采记）为 search 面 not-found 语义对表基线。
 - 消费侧格 F/D+H GREEN 采记（registration 档 §4）在案；0.1.118 生产 lane PASS 后 G2 三面已闭环，本波补第四面即四面完整。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-16，通过——1 必改级勘误 + 1 必改级 lock-face 必答项 + 2 预注册判据钉；@f0c4d19a 全锚实核）
+
+1. **§0 锚核验 ✓**（schema :68/:105、query code points 计数、runtime 三面零 search、search.ts 真体单 type-only import）；「webSessionV0.ts:68 缺路径前缀」勘注不阻。
+2. **必改级勘误①（工单 §2 事实错，f4 活码实核吻合）**：「TUI 消费点 = transcriptSearch.ts re-export shim」**改为「全量副本（登记债）」**——transcriptSearch.ts 自有 WeakMap(:17)/自有哨兵 Set/`INTERRUPT_MESSAGE` 自 './messages.js' 导入，202L 独立体；engine/session/search.ts 头注自证「跨波重复，UI 波登记」。lock-face 呈批书按副本实形写，防按 shim 前提误判 TUI 面或做统一动作。本波「纯加性零涉 TUI」结论不受影响。
+3. **必改级 lock-face 必答②（symlink 拒绝面定形）**：授权支 O_NOFOLLOW 拒绝（ELOOP）若经外层 catch 吞为空载 = **静默空投影假绿**（违「错误优于静默」）。**f4 预裁（终裁于 lock-face）：(a)+(b) 叠加**——(a) adapter/resolvePath 授权层 lstat 先验拒绝（notFound/corruptData，loader 前置，语义干净）；(b) loader 授权支 O_NOFOLLOW ELOOP 兜底 typed 域错→ioUnavailable（防 lstat→open 残窗，纵深防御同 §7-3 先例）。**禁吞为空载**。expectIno 错配分态已定形 ✓（adapter statTranscript 已返 ino 锚可传）。
+4. **取消语义判据 3 钉采认（焦点①，lock-face 三选一呈批约束）**：(i) 禁新错误码，复用既有 'cancelled' 分态（replay :424 先例）；(ii) 取消后零半交付——partial 须显式标志否则弃；(iii) 断开映射 = transport 层职责，runtime 只认 AbortSignal。审计倾向注记采记（查询中止 (a) 成本最低；分页终止与 cursor 状态机纠缠不建议）——f4 同倾向，lock-face 终裁。
+5. **F2 判据钉采认（焦点②）**：复用 TranscriptChangedDuringReadError 恰当（0.1.118 fst2 复核对 append-during-read 本就抛同错，F2 仅前移检测点+有界分配，终态错误面恒等零扩形）；格 4 峰值内存断言**数值预注册 = ≤ maxBytes + O(chunk) 常数上界**（禁定性词不带数）；位置化读只读 [0, fst.size)，fst2 复核留任检测器。
+6. **装配路径钉采认（焦点③）**：search 导出**必经 readonly 子门面显式加入**（runtimeDefault 窄化形，S0-R2 §7-2 批复），禁经 engine/session/index.ts 全 barrel（barrel 导出≠载体可达）；WeakMap 双实例无跨实例态（键=消息对象身份）+ 格 5 断言形三件（闭包断言/双实例搜索结果全等腿/载体 bundle 无会话集级模块态）。
+7. **流程推进**：审计通过 + 本节两必改级在案 → **双信号②发 Main**（lock-face 呈批含勘误① 实形 + 必答② 定形）→ 落码 → gate 六格 → 段 L 0.1.119 → 生产 lane → 单信号 Atlasweb-F4。
