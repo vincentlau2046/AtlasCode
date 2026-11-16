@@ -103,6 +103,10 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
     // 目的）；新导出 + contract 协议内联在位。
     expect(js).toContain('createDefaultReadonlySessionRuntime')
     expect(js).toContain('persisted-effective-conversation')
+    // S0-R4 格 5 正腿（呈批书 L5，f4 §10 @7ecf0fa4 批复）：search 域入只读
+    // 闭包——搜索文本面真体（RENDERED_AS_SENTINEL 防虚影 + WeakMap 缓存）
+    // 随 bundle；非 session 子域负腿由上方 not.toMatch 维持。
+    expect(js).toContain('RENDERED_AS_SENTINEL')
     // 仍禁面（重形文本）：src/tui / src/private-ui / src/ui-private / engine
     // 非 session 子域 specifier 零现（bundler 内联后仅未解析 import 残留）；
     // 进程钩子（process.on）/ timer 连接 / env 写面 / 应用级全局槽零现。

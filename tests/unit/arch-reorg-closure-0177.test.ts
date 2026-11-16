@@ -42,11 +42,16 @@ type Domain = (typeof DOMAINS)[number]
  * STR-1 具名豁免（S0-R2 lock-face @25cb7454 §3-4，f4 批复工单 §7 @351c74c4）：
  * readonly 只读子门面（src/engine/session/readonly，S0-R f4 批复 @f1f1099d
  * 为 web 只读 runtime 设立的专用消费面）——runtimeDefault 形 A 入 pack 图后
- * 唯一合法的域深 import 点。豁免窄至该单文件；engine 其余域深文件照禁。
+ * 的域深 import 点。豁免窄至该单文件；engine 其余域深文件照禁。
+ * S0-R4 扩形（呈批书 L1/L5，f4 §10 @7ecf0fa4 批复）：session/search（搜索
+ * 文本面真体复用）入只读闭包允许面——readonlyRuntime searchSessions 装配
+ * 专用消费点（engine/session 子域内，载体闭包允许面同族）。
  */
 const STR1_DEEP_IMPORT_EXEMPT = new Set([
   'src/engine/session/readonly',
   'src/engine/session/readonly.ts',
+  'src/engine/session/search',
+  'src/engine/session/search.ts',
 ])
 
 // ── 仓库快照（模块级单次装载；--isolate 隔离进程 = 无跨文件泄漏）──

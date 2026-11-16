@@ -18,8 +18,12 @@
  * + scanPreBoundaryMetadata 前界元数据恢复）。
  */
 import { open as fsOpen } from 'fs/promises'
-/** Chunk size for the forward transcript reader. 1 MB balances I/O calls vs buffer growth. */
-const TRANSCRIPT_READ_CHUNK_SIZE = 1024 * 1024
+/**
+ * Chunk size for the forward transcript reader. 1 MB balances I/O calls vs buffer growth.
+ * S0-R4（工单 §11-2 F2 / f4 §10 补钉）：改导出单源——load.ts 授权支位置化
+ * 分块读复用本常量，禁第二常量（loader 域界值单源纪律）。
+ */
+export const TRANSCRIPT_READ_CHUNK_SIZE = 1024 * 1024
 
 /**
  * File size below which precompact filtering is skipped.

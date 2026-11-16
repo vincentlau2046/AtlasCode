@@ -435,6 +435,24 @@ export default tseslint.config(
       ]),
     },
   },
+  // S0-R4 件 A（呈批书 L1/L5，f4 §10 @7ecf0fa4 批复）：readonlyRuntime 搜索
+  // 装配 import engine/session/search（搜索文本面真体复用，载体闭包允许面）。
+  // follow.ts/readonlyRuntime.ts 的 session/readonly.ts 允许为既有缺漏补登记
+  // （grep 实证 HEAD 基线已红 2 处——S0-R2 波 scoped 桶漏列两 importer）。
+  {
+    files: [
+      "src/atlascode/web/readonlyRuntime.ts",
+      "src/atlascode/web/follow.ts",
+    ],
+    rules: {
+      "boundaries/entry-point": scopedEntryPoint([
+        {
+          target: "engine",
+          allow: ["index.ts", "session/readonly.ts", "session/search.ts"],
+        },
+      ]),
+    },
+  },
 
   // ── tests 门面收口（#2: tests import src 必须走域根 index.ts）──
   // tests/ 不受 DEP/element-types/no-unknown 约束（tests 间 import + fixtures/helpers 不管），

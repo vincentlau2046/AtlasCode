@@ -41,6 +41,10 @@
  *    getProjectDir(getSessionEnv().getOriginalCwd())。
  */
 import { open, readFile, stat } from 'fs/promises'
+// S0-R4 F1（工单 §11-1/呈批书 L3）：授权支 open 旗标加 O_NOFOLLOW。
+// 平台注记：POSIX 旗标，Windows fs.constants.O_NOFOLLOW === undefined →
+// 守卫跳过旗标（授权支仍有 expectIno 锚兜底；平台差如实登记非静默）。
+import { constants as fsConstants } from 'node:fs'
 import { join } from 'path'
 // S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
 // （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
@@ -56,7 +60,11 @@ import {
   type LegacyProgressEntry,
 } from './predicates'
 import { getProjectDir } from './paths'
-import { SKIP_PRECOMPACT_THRESHOLD, readTranscriptForLoad } from './scanner'
+import {
+  SKIP_PRECOMPACT_THRESHOLD,
+  TRANSCRIPT_READ_CHUNK_SIZE,
+  readTranscriptForLoad,
+} from './scanner'
 import type {
   ContentReplacementRecord,
   Entry,
@@ -1064,6 +1072,14 @@ export async function loadTranscriptFile(
      * （web 域 limits.ts），loader 不持第二常量。
      */
     maxBytes?: number
+    /**
+     * S0-R4 F1 加性 opts（工单 §11-1/呈批书 L3，f4 §10 批复）：授权身份锚
+     * ——授权支 open 后 fd.stat().ino !== expectIno → 复用
+     * TranscriptChangedDuringReadError（开的文件 ≠ 授权身份 ≈ 非稳定快照
+     * 同族；零新错误类型）。undefined = 不锚定（默认臂与未传授权支恒等）。
+     * 锚来源 = 调用方既有采样（web adapter 双采样 pre-stat，零新采样点）。
+     */
+    expectIno?: number
   },
 ): Promise<{
   messages: Map<string, TranscriptMessage>
@@ -1113,9 +1129,18 @@ export async function loadTranscriptFile(
       opts !== undefined &&
       (opts.precompactSkip !== undefined || opts.maxBytes !== undefined)
     if (useFdChain) {
-      const fd = await open(filePath, 'r')
+      // S0-R4 F1（工单 §11-1）：授权支 flags 加 O_NOFOLLOW（POSIX 旗标；
+      // Windows undefined 守卫跳过，expectIno 锚兜底）。默认臂 open 形不动。
+      const noFollow =
+        (fsConstants as { O_NOFOLLOW?: number }).O_NOFOLLOW ?? 0
+      const fd = await open(filePath, fsConstants.O_RDONLY | noFollow)
       try {
         const fst = await fd.stat()
+        // F1 expectIno 检查点：open 后立即（身份锚先于尺寸界——开的文件
+        // ≠ 授权身份即非稳定快照同族，复用定型错，零新错误类型）。
+        if (opts?.expectIno !== undefined && fst.ino !== opts.expectIno) {
+          throw new TranscriptChangedDuringReadError()
+        }
         // maxBytes 检查点（§8-2）：fstat 后立即、scanner 分叉前；undefined
         // = 不设界。超界 TranscriptTooLargeError（message 安全化：零盘路径）。
         if (opts?.maxBytes !== undefined && fst.size > opts.maxBytes) {
@@ -1135,9 +1160,26 @@ export async function loadTranscriptFile(
             )
           }
         }
-        // 仅在无流读取发生时触达（scan 支已置 buf）；FileHandle.readFile
-        // 全文件读取，位置语义无歧义。
-        buf ??= await fd.readFile()
+        // 仅在无流读取发生时触达（scan 支已置 buf）。
+        // S0-R4 F2（工单 §11-2/呈批书 L4，f4 §10 批复）：fd.readFile 整读
+        // → 位置化分块读——目标长 = fst.size（恒定快照），块长单源
+        // TRANSCRIPT_READ_CHUNK_SIZE（scanner.ts 导出，禁第二常量）；累计
+        // 分配 = fst.size ≤ maxBytes（fstat 检查点已保证）。增长即断：循环
+        // 只读 [0, fst.size)，读毕既有 fst2 复核面不变（size 增长 → 复核
+        // 不等 → 既有定型错，禁新错误类型）；读不满（并发截断/收缩）= 非
+        // 稳定快照，同定型错。默认臂 fd.readFile 形逐字节恒等不动。
+        if (buf === null) {
+          buf = Buffer.allocUnsafe(fst.size)
+          let filled = 0
+          while (filled < fst.size) {
+            const len = Math.min(TRANSCRIPT_READ_CHUNK_SIZE, fst.size - filled)
+            const { bytesRead } = await fd.read(buf, filled, len, filled)
+            if (bytesRead <= 0) {
+              throw new TranscriptChangedDuringReadError()
+            }
+            filled += bytesRead
+          }
+        }
         // 读毕复核（格 2）：持 fd 期间 rename/替换 → 不连续分态，零半旧
         // 半新交付（replay=ioUnavailable retryable / follow=resetRequired）。
         const fst2 = await fd.stat()

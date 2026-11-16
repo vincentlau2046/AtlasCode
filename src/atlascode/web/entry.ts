@@ -27,6 +27,9 @@ export {
   type ReplaySessionResult,
   type FollowSessionRequest,
   type FollowSubscription,
+  // S0-R4 件 A（呈批书 L5 公开类型面：searchSessions 新增型逐型随契约）
+  type SearchSessionsRequest,
+  type SearchSessionsResult,
 } from './readonlyRuntime'
 
 // S0-R2 形 A 默认装配（engine 真体随 bundle）

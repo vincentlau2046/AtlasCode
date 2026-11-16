@@ -112,7 +112,9 @@ function computeSearchText(msg: RenderableMessage): string {
       // (AttachmentMessage.tsx <Ansi>{m.content}</Ansi>). Visible but
       // unsearchable without this — [ dump finds it, / doesn't.
       if (msg.attachment.type === 'relevant_memories') {
-        raw = msg.attachment.memories.map(m => m.content).join('\n')
+        // pack 严格 tsconfig（noUncheckedIndexedAccess 域）窄化：memories 可
+        // 缺席 → 空串（搜索面无内容可索引，与渲染面守卫同族）
+        raw = (msg.attachment.memories ?? []).map(m => m.content).join('\n')
       } else if (
         // Mid-turn prompts — queued while an agent is running. Render via
         // UserTextMessage (AttachmentMessage.tsx:~348). stickyPromptText
@@ -125,7 +127,7 @@ function computeSearchText(msg: RenderableMessage): string {
         raw =
           typeof p === 'string'
             ? p
-            : p
+            : (p ?? [])
                 .flatMap(b =>
                   // 类型面 delta：旧 any → 新 unknown（shared/types.ts:20），见文件头登记
                   b.type === 'text' ? [b.text as string] : [],

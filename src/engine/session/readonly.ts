@@ -37,11 +37,14 @@ export async function loadTranscriptFull(
   /**
    * S0-R3 加性透传（工单 §8-2）：maxBytes 预解析界（undefined = 不设界）；
    * force-full 恒传 → loader fd 链作用域（§8-1 opts 在场支）。
+   * S0-R4 加性透传（工单 §11-1 F1）：expectIno 授权身份锚（undefined =
+   * 不锚定），loader open 后 fd.stat().ino 比对臂。
    */
-  opts?: { maxBytes?: number },
+  opts?: { maxBytes?: number; expectIno?: number },
 ): Promise<ReadonlyTranscriptLoad> {
   return loadTranscriptFile(filePath, {
     precompactSkip: 'force-full',
     maxBytes: opts?.maxBytes,
+    expectIno: opts?.expectIno,
   })
 }

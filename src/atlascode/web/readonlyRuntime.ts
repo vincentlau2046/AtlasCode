@@ -76,6 +76,10 @@ import {
 } from './projection'
 import type { SessionFileEntry, SessionStoreAdapter } from './sessionStoreAdapter'
 import { createNodeFsSessionStoreAdapter } from './sessionStoreAdapter'
+// S0-R4 件 A（呈批书 L1）：搜索文本面真体复用（含 WeakMap 缓存 +
+// RENDERED_AS_SENTINEL 防虚影；缓存键 = 消息对象实例——跨请求零共享可变
+// 会话态，双实例隔离机制面）。engine/session 子域内 import（载体闭包允许面）。
+import { renderableSearchText } from '../../engine/session/search'
 
 export type ReadonlySessionScopes = ReadonlyArray<{
   scopeId: string
@@ -108,8 +112,11 @@ export interface ReadonlySessionLimits {
  * （引擎适配边界，不进 pack 图）；测试注入 fake。
  */
 export interface ReadonlySessionEngine {
-  /** 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。S0-R3 加性 maxBytes（工单 §8-2；undefined = 不设界）。 */
-  loadTranscriptFull: (filePath: string, opts?: { maxBytes?: number }) => Promise<{
+  /** 呈批书 §7.3 钉死复用形：loadTranscriptFull(precompactSkip force-full)。S0-R3 加性 maxBytes（工单 §8-2；undefined = 不设界）。S0-R4 加性 expectIno（工单 §11-1 F1 授权身份锚；undefined = 不锚定）。 */
+  loadTranscriptFull: (
+    filePath: string,
+    opts?: { maxBytes?: number; expectIno?: number },
+  ) => Promise<{
     messages: Map<string, ProjectionSourceMessage>
     leafUuids: Set<string>
   }>
@@ -161,6 +168,25 @@ export interface FollowSessionRequest {
   requestId?: string
 }
 
+/** S0-R4 件 A（工单 §3/呈批书 L1，f4 §10 @7ecf0fa4 批复）：query 界（1-256 code points）= 契约面钉死（webSessionV0），runtime 信任上层已验。 */
+export interface SearchSessionsRequest {
+  scopeId: string
+  query: string
+  pageSize?: number
+  /** opaque offset cursor（会话列表序内偏移编码；不跨进程有效、mtime 漂移容忍=越界空页）。 */
+  pageToken?: string
+}
+
+export interface SearchSessionsResult {
+  results: Array<{
+    sessionId: string
+    messageId: string
+    /** ≤512 Unicode code points（契约 SearchResultSchema）；命中起点起切片。 */
+    snippet: string
+  }>
+  nextPageToken?: string
+}
+
 export type FollowSubscription = FollowHandle
 
 /** §4.4 全表解析值（start 时经 validateBoundedInt 钉死，host 不可越硬上限）。 */
@@ -201,6 +227,11 @@ export interface ReadonlySessionRuntime {
     req: FollowSessionRequest,
     signal?: AbortSignal,
   ): Promise<FollowSubscription>
+  /** S0-R4 件 A 第四面：会话级搜索（AbortSignal A 形，'cancelled' 零 partial payload）。 */
+  searchSessions(
+    req: SearchSessionsRequest,
+    signal?: AbortSignal,
+  ): Promise<SearchSessionsResult>
   close(): Promise<void>
 }
 
@@ -418,6 +449,11 @@ export function createReadonlySessionRuntime(
       try {
         loaded = await options.engine.loadTranscriptFull(filePath, {
           maxBytes: L.maxTranscriptBytes,
+          // S0-R4 F1（工单 §11-1/呈批书 L3）：授权锚 = 既有双采样三元组之
+          // pre-stat（stPre.ino）传入——零新采样点。错配 → loader 复用
+          // TranscriptChangedDuringReadError → 下方既有 ioUnavailable
+          // retryable 映射面不变。
+          expectIno: stPre.ino,
         })
       } catch (e) {
         if (e instanceof TranscriptTooLargeError) {
@@ -526,6 +562,137 @@ export function createReadonlySessionRuntime(
       void signal
       return {
         sessions: entries.map(e => toSummary(e, options.productId, req.scopeId)),
+      }
+    },
+
+    /**
+     * S0-R4 件 A searchSessions（工单 §3 格 1-2 + §9 取消语义 A；呈批书
+     * L1/L2，f4 §10 @7ecf0fa4 批复）：
+     * - 会话集与 listSessions 同源（同一 adapter.listSessionFiles，mtime desc）。
+     * - 每会话经 engine 注入缝 loadTranscriptFull（opts 在场支 = fd 链域；
+     *   expectIno = adapter statTranscript ino 采样，F1 授权锚同形）取全量
+     *   加载后按有效会话投影链（terminal leaf 同规则镜像）逐消息
+     *   renderableSearchText 匹配（大小写码点折叠；死分支不搜索防虚影）。
+     * - 取消语义 A：per-session × per-record 检查点轮询；中止 → 'cancelled'
+     *   分态，零 partial payload（弃半扫，不携带部分结果）。
+     * - 扫描界双界单源 limits.ts：maxScanSessions（会话集）×
+     *   maxParseRecords（单会话加载后核验）→ resourceLimit 既有映射面。
+     * - 分页：pageToken = opaque offset cursor（会话列表序内偏移；非法
+     *   token → invalidRequest 契约形拒绝；mtime 漂移容忍 = 越界空页）。
+     *   分页粒度 = 会话边界（同会话命中整会话交付，token 指向次会话）。
+     */
+    async searchSessions(
+      req: SearchSessionsRequest,
+      signal?: AbortSignal,
+    ): Promise<SearchSessionsResult> {
+      assertStarted('search sessions')
+      assertScope(req.scopeId)
+      const needle = req.query.toLowerCase()
+      const pageSize = Math.max(1, Math.min(req.pageSize ?? L.pageSize, L.pageSize))
+      let offset = 0
+      if (req.pageToken !== undefined) {
+        if (!/^\d+$/.test(req.pageToken)) {
+          throw new WebSessionError('invalidRequest', 'malformed pageToken')
+        }
+        offset = Number.parseInt(req.pageToken, 10)
+      }
+      acquireRead()
+      try {
+        if (signal?.aborted) {
+          throw new WebSessionError('cancelled', 'operation aborted')
+        }
+        const entries = await adapter.listSessionFiles(req.scopeId)
+        if (entries.length > L.maxScanSessions) {
+          throw new WebSessionError(
+            'resourceLimit',
+            `scope ${req.scopeId} exceeds scan limit (${entries.length} > ${L.maxScanSessions})`,
+          )
+        }
+        const results: SearchSessionsResult['results'] = []
+        for (let i = offset; i < entries.length; i++) {
+          const entry = entries[i]
+          // per-session 检查点（§9 取消语义 A）
+          if (signal?.aborted) {
+            throw new WebSessionError('cancelled', 'operation aborted')
+          }
+          // F1 授权锚采样（adapter O(1) stat 通道）：ino 传入 loader
+          // expectIno 臂。null = mid-scan 删除（授权集已不含，诚实跳过）。
+          const st = await adapter.statTranscript(req.scopeId, entry.sessionId)
+          if (!st) continue
+          if (st.sizeBytes > L.maxTranscriptBytes) {
+            throw new WebSessionError(
+              'resourceLimit',
+              `transcript exceeds limit (${st.sizeBytes} > ${L.maxTranscriptBytes} bytes)`,
+            )
+          }
+          let loaded
+          try {
+            loaded = await options.engine.loadTranscriptFull(entry.filePath, {
+              maxBytes: L.maxTranscriptBytes,
+              expectIno: st.ino,
+            })
+          } catch (e) {
+            if (e instanceof TranscriptTooLargeError) {
+              throw new WebSessionError(
+                'resourceLimit',
+                `transcript exceeds limit (${e.size} > ${e.maxBytes} bytes)`,
+              )
+            }
+            if (e instanceof TranscriptChangedDuringReadError) {
+              throw new WebSessionError('ioUnavailable', e.message, true)
+            }
+            throw e
+          }
+          // 单会话解析记录界（双界之二；字节界 maxBytes 已预解析拦截）
+          if (loaded.messages.size > L.maxParseRecords) {
+            throw new WebSessionError(
+              'resourceLimit',
+              `transcript exceeds parse record limit (${loaded.messages.size} > ${L.maxParseRecords})`,
+            )
+          }
+          // 有效会话投影链（projection.ts projectConversation leaf 选取同
+          // 规则镜像：terminal leaf 中 timestamp 最新者，并列取先见者）；
+          // 死分支不搜索（防虚影，呈批书 L1「有效会话投影内」）。
+          let leaf: ProjectionSourceMessage | undefined
+          for (const uuid of loaded.leafUuids) {
+            const m = loaded.messages.get(uuid)
+            if (!m) continue
+            if (!leaf || (m.timestamp ?? '') >= (leaf.timestamp ?? '')) {
+              leaf = m
+            }
+          }
+          const chain = leaf
+            ? options.engine.buildConversationChain(loaded.messages, leaf)
+            : []
+          for (const m of chain) {
+            // per-record 检查点（§9 取消语义 A）
+            if (signal?.aborted) {
+              throw new WebSessionError('cancelled', 'operation aborted')
+            }
+            if (m.type !== 'user' && m.type !== 'assistant') continue
+            const text = renderableSearchText(
+              m as unknown as Parameters<typeof renderableSearchText>[0],
+            )
+            const idx = text.indexOf(needle)
+            if (idx === -1) continue
+            // snippet：命中起点起 ≤512 code points（Array.from 保 surrogate
+            // pair 完整；1024 UTF-16 units ≥ 512 code points 恒成立）
+            const snippet = Array.from(text.slice(idx, idx + 1024))
+              .slice(0, 512)
+              .join('')
+            results.push({
+              sessionId: entry.sessionId,
+              messageId: m.uuid,
+              snippet,
+            })
+          }
+          if (results.length >= pageSize) {
+            return { results, nextPageToken: String(i + 1) }
+          }
+        }
+        return { results }
+      } finally {
+        releaseRead()
       }
     },
 
