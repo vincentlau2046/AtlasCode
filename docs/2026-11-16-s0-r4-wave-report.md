@@ -70,5 +70,5 @@
 ## 7. 后续
 
 - ✅ e2e gate：**GATE-PASS @944fc3e5**（判定单 `user-e2e/reports/r-20261116-gate-s0r4.md`，格 1-6 + 消费三腿 + canon 独占 6108 tests / 501 files / bun_exit=0 / 148.81s 全绿零 fail——干净形态强于 fail 池口径；格 1 P2=2 命中单会话整交付 = §3-⑨ 超发披露形实证）。
-- 段 L 0.1.119 候：候 f4 §3 复核采认（⑧⑨ 一并）双在案后走 bump + release。
+- 段 L 0.1.119：**双在案成立**（GATE-PASS @944fc3e5 + f4 §11 采认 @97f52c6f——判读披露 1-7 全采认，⑧⑨ 终裁「有界非无界」，两件入登记池候下波 load.ts lock-face）→ bump + release 全链。
 - 0.1.120（L6-L8）同呈批书串行在后。

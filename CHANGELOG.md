@@ -4,6 +4,33 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.119（2026-11-16）
+
+**S0-R4 searchSessions 出口扩形 + F1/F2 loader defense-in-depth 合并单波**
+（工单 docs/2026-11-16-s0-r4-searchsessions-ticket.md @f0c4d19a + lock-face
+呈批书 @f16b838d + f4 §10 统一批复 @7ecf0fa4 L1-L8 全批；GATE-PASS 判定单
+r-20261116-gate-s0r4 格 1-6 + 消费三腿 + canon 独占全绿 @944fc3e5；f4 §11
+采认 @97f52c6f 判读披露 1-7 全采认）。波报告
+docs/2026-11-16-s0-r4-wave-report.md（§3 判读披露 9 项）。
+
+- **A searchSessions（readonlyRuntime 第四面）**：会话集与 listSessions
+  同源（mtime desc）→ per-session statTranscript ino 采样（F1 锚）→
+  `loadTranscriptFull({maxBytes, expectIno})` → terminal leaf 有效会话投影链
+  （死分支不搜索防虚影）→ `renderableSearchText` 码点折叠匹配；取消语义 A
+  三级检查点零 partial；分页 = opaque offset cursor 会话边界粒度；双界
+  maxScanSessions × maxParseRecords 单源 limits.ts；snippet ≤512 code points
+  （Array.from 保 surrogate 完整）。
+- **F1 授权锚定（CWE-367 纵深）**：load.ts 授权支 O_NOFOLLOW（Windows
+  平台注记）+ opts 加性 `expectIno`，错配复用 `TranscriptChangedDuringReadError`
+  （零新错误类型）；锚 = 调用方既有采样，零新 TOCTOU 点。
+- **F2 有界分配（CWE-400 纵深）**：授权支 `fd.readFile()` → 位置化分块读
+  （目标长 fst.size 恒定快照，块长 `TRANSCRIPT_READ_CHUNK_SIZE` 单源
+  export，累计分配 = fst.size ≤ maxBytes；读不满 → 同定型错）。
+- 默认臂逐字节恒等（分账 A，TUI 车道零触碰）。
+- 公开类型面 +2（SearchSessionsRequest/Result）；web-session-runtime
+  78,031B（0.1.118 69,863B，search 域真体随形 A 载体入闭包）、
+  web-contract 7,975B 七版恒等、cli.js 18,215,220B。
+
 ## v0.1.118（2026-11-16）
 
 **S0-R3 engine 载体安全硬化波**（工单
