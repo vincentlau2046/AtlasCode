@@ -54,3 +54,13 @@
 5. **F2 判据钉采认（焦点②）**：复用 TranscriptChangedDuringReadError 恰当（0.1.118 fst2 复核对 append-during-read 本就抛同错，F2 仅前移检测点+有界分配，终态错误面恒等零扩形）；格 4 峰值内存断言**数值预注册 = ≤ maxBytes + O(chunk) 常数上界**（禁定性词不带数）；位置化读只读 [0, fst.size)，fst2 复核留任检测器。
 6. **装配路径钉采认（焦点③）**：search 导出**必经 readonly 子门面显式加入**（runtimeDefault 窄化形，S0-R2 §7-2 批复），禁经 engine/session/index.ts 全 barrel（barrel 导出≠载体可达）；WeakMap 双实例无跨实例态（键=消息对象身份）+ 格 5 断言形三件（闭包断言/双实例搜索结果全等腿/载体 bundle 无会话集级模块态）。
 7. **流程推进**：审计通过 + 本节两必改级在案 → **双信号②发 Main**（lock-face 呈批含勘误① 实形 + 必答② 定形）→ 落码 → gate 六格 → 段 L 0.1.119 → 生产 lane → 单信号 Atlasweb-F4。
+
+## §8 取消语义三选一具名文本（2026-11-16，f4；应 Main 呈批前置请求——段 0 实锚 search.ts 零异步编排可继承，三选一实质分量 = 大 transcript 跨 session 扫描慢面）
+
+**共同约束（审计 §6-4 三钉，三选项同守）**：(i) 禁新错误码，复用既有 'cancelled' 分态（replay :424 'operation aborted' 先例）；(ii) 取消后零半交付——已扫部分禁伪装完整页交付，partial 须显式标志否则弃；(iii) 断开映射 = transport 层职责，runtime 只认 AbortSignal，禁把断开混入 runtime 语义。
+
+- **选项 A（查询中止——f4 推荐）**：searchSessions options 加性 AbortSignal；扫描装配（readonlyRuntime 缝，扫描界 = maxScanSessions×maxParseRecords 有界，scanner 分块读 151MB 先例同域）逐检查点轮询 signal；中止 → 已扫部分弃（钉 ii）→ 'cancelled' 分态（钉 i）。同构 replay/follow AbortSignal 既有形；装配点与 §10 映射缝同域（engine 零触碰）。唯一同时满足三钉且成本最低的形。
+- **选项 B（分页终止——不建议）**：扫描推进至 pageToken 边界即停，后续页凭 token 续扫，「取消」= 停止取页。与 pageToken/cursor 状态机纠缠，跨页一致性面大；无中止语义（慢扫描会话仍占资源直至页界）。审计不建议同采。
+- **选项 C（客户端断开映射——不采）**：runtime 感知 SSE 断开自行中止。直接违钉 iii（断开 = transport 职责），且把传输面故障混入 runtime 语义。否决。
+
+**f4 推荐 = A**（Main 依段 0 证据出推荐形后 lock-face 呈批，f4 终裁）；两波 lock-face 可一并呈批按序落码（0.1.119 在前）。
