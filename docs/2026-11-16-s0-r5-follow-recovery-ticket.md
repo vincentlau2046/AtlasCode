@@ -55,3 +55,10 @@
 3. **§3 ③ 接线形批准**：binding 加性 {byteOffset, ino} + token v1 版本化；**ok 臂 = 内部 parse 至 byteOffset 重建投影态不发 baseline（零重放，消费侧已持 projection）→ offset/ino 锚定进既有轮询，resume 起点过 ② 同一判定面**（成本上界 = 单次全量 parse ≤ maxTranscriptBytes 既有界，与重采样钉 3 同族）；fail 臂 = 三因统一 resetRequired 显式分态 + 分因 message 可辨 + 禁静默 fresh baseline；capacity/TTL = cursorExpired 既有机械零新机制。message 级 cursor 独立登记 + 扩展位预留（§12-4 终裁采纳）✓。
 4. **§4 判据格 + §5 三切片批准**（S1 ② 判定面 / S2 ③ 接线 / S3 桥映射+回归；格含 §12 补腿 6 条）。
 5. **锚披露预注册义务**：follow.ts/readonlyRuntime.ts/cursorLedger.ts 均 CLI 图内 → cli.js 锚必然变更，段 L 预记披露（补充钉①纪律）；零 opts 默认臂/读链锁面（fd 链）零触碰确认随段 I 披露。
+
+## §14 段 I 采认（2026-11-16，f4；落码 @4cd3b7e9/rebase 9a0df02f，波报告 @fd56e2b6）
+
+1. **码面抽核采认**：resampleAfterCorrupt 3-way 分类（钉 1）+ 触发面唯一（oversize 既有 resourceLimit 未动，钉 2）+ stat 尺寸先行（钉 3，腿 8 禁 corruptData 冒名）+ 两段式 ingest 禁半批污染 + binding v1/byteOffset/ino 加性 + resume ok 臂零重放内部重建 + 缺省臂既有形恒等（:736-737 条件透传）+ **engine/session 域空 diff（fd 链锁面零触碰义务兑现）**。真损坏判据自证（resample confirmed 锁形）采认——loader 静默跳残行不作 corrupt 证据的自证形合理。
+2. **§3 判读披露 1-7 采认**：① cli.js 锚预记披露兑现 ✓；② fd 链零触碰 ✓；③ web 桥契约零触碰（:87 既有形即本波兑现）✓；④ cursorTtlMs 硬下界 1000ms 限制面自身行为 ✓；⑤ requestId UUID 形按 schema 校准 ✓；⑥ binding cast 收窄（账本只发行 randomUUID 形）✓；⑦ 格 3 兼容 31 测试零触碰 ✓。
+3. **canon 定谳（f4 独立复核）**：**6145 pass / 0 fail / 504 files（125.65s）**——Δ+17 = 新判据件恰合；Main lane fail 池连续第四波证伪 lane-local。TDD RED 14→GREEN 实证在案。
+4. **段链放行**：本节采认在案 → e2e gate（格 1-4 + 消费侧探针矩阵五腿复跑）→ 段 L 0.1.121（发布完成→e2e 信号必发条款）→ 生产 lane → 单信号 Atlasweb-F4（透传缝接线验证）。
