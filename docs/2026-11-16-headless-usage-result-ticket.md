@@ -53,3 +53,10 @@
 4. **判据钉采认**：(i) pricing 模块独立新面（禁入 modelprovider/capabilities 域半复活面）；(ii) 模型名匹配复用 0.1.80 K1-B① prefix/model 归一单源，禁第二归一实现；(iii) 优先序内置表 < settings override；override 半字段（缺 outputPerMTok 等）→ 该模型 total_cost_usd 缺席（半价禁算）；**显式 0 = 合法 0**（与缺席异质，gate 判据写明）；(iv) error_during_execution 站点 usage 面**终裁 = 缺席字段**（执行失败无消耗，诚实语义一致；audit 推荐采认）——三站点一致性断言 = 同一聚合函数 + 四 subtype wire 加性 diff（error 站点断言 usage 缺席）。
 5. **缺席矩阵独立判定采认（焦点④）**：usage 恒在（件 1）/total_cost_usd 条件在（件 2）两字段独立矩阵；unknown pricing 省略禁伪造 0 ✓。
 6. **流程推进**：审计通过 + 本节定形在案 → 双信号②发 Main（lock-face 呈批含件 1 (a) 落点细则 + 件 2 首建呈批书）；0.1.119 串行在前 ✓。issue #2 公开 triage 补正注记随发（「data already tracked」结论修正为真源 = assistant message.usage，cost state 写链死链披露）。
+
+## §8 段 I 采认（2026-11-16，f4；落码 @193d1fe3，波报告 @3aa9c839）
+
+1. **码面抽核采认**：print.ts `aggregateResultUsage` 单一 helper（导出禁三处各算）+ buildResultMessage/deferred 站点装配 + error 站点双缺席（源级断言锁形）；src/cost/pricing.ts 新域——BUILTIN_PRICING 双价表 / resolvePricing（stripProviderPrefix K1-B① 单源 import，钉 ii）/ 半字段 fail-closed 不回落内置表（钉 iii）/ unknown 缺席禁伪造 0 + 显式 0 = 合法 0（钉 iv）/ cache 零计入低估注记 + schema 扩展位预留（L7 终裁兑现）。判据钉全核销。
+2. **§3 判读披露 1-7 采认**：① 零 engine 触碰（(a) 终裁兑现）；② usage 取用嵌套主+顶层 fallback（loop.ts:1034 roundUsage 同形先例）✓；③ usage 恒在——零 usage 消息 = 全 0（空集真和，与伪造 0 异质：0 token 是真值）✓；④ 格 1 对账 Δ=0 toEqual 全等 ✓；⑤ **boundaries 注册面采认**——ELEMENTS +1 + element-types 2 面 = 钉 i「独立单文件域」机械推论（lsp/mcp/remote 同型先例），非 lock-face 偏离 ✓；⑥ import 门面收口 STR-1 合规 ✓；⑦ 格 3 兼容零触碰 ✓。
+3. **canon 定谳（f4 独立复核）**：**6128 pass / 0 fail / 503 files（121.27s）**——Δ+20 = 两新测试件恰合（6108+20）；Main lane 118-fail 池连续第三波被 f4 独立跑证伪 lane-local（定因项持续在案）。本波触碰测试面零 fail。
+4. **段链放行**：本节采认在案 → e2e gate（格 1-4 + reqlog 对账腿）→ 段 L 0.1.120（发布完成 → e2e 信号必发——0.1.119 滞点订正条款兑现义务）→ 生产 lane → issue #2 回执销项（含 cache 低估面注记义务）。
