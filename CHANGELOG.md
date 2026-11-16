@@ -4,6 +4,32 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.118（2026-11-16）
+
+**S0-R3 engine 载体安全硬化波**（工单
+docs/2026-11-16-s0-r3-security-hardening-ticket.md §6-§10：Atlas-reveiw
+审计闭环 @b00b7cf9 + f4 预裁 §7 @dd246098 + fd 收形定形 §8 @740cf406 +
+复核采认 §9 + 勘误 §10 @62f69948；GATE-PASS 判定单
+r-20261116-gate-s0r3 七格全绿 @720e2b95）。落码归 Atlasweb-F4 直接
+PR #1（用户裁定变更；head 720e2b95 fast-forward 合入 master）。
+
+- **环式 metadata DoS 修（HIGH）**：`applySnipRemovals` `resolve()`
+  visited Set + 环判 gap 返 null（有界拒形——段 0 侦查定谳全域唯一无界
+  环走，恶意 snipMetadata 互引 crafted 文件 90s 挂死 → 8ms 有界拒绝；
+  正常链零触碰）。
+- **TOCTOU/CWE-367 fd 链（HIGH）**：opts 在场支单 fd 四点读链
+  （fd.stat → scanner 加性 fd 参 → metadata 流 autoClose:false →
+  fd.readFile）+ 读毕 ino/size 复核（`TranscriptChangedDuringReadError`，
+  零半旧半新交付）；零 opts 默认臂 stat+readFile 路径形逐字节恒等含
+  失败模式（分账 A：TUI 107-151MB 合法负载零回归）。
+- **预解析资源界（MEDIUM）**：加性 `maxBytes` opts（undefined=不设界），
+  fstat 后检查点在 scanner 分叉前；超界 `TranscriptTooLargeError`
+  （message 安全化零盘路径）；web 映射 replay→`resourceLimit` /
+  follow baseline→`resourceLimit`（界值单源 `web/limits.ts`）。
+- §7-3 双采样守卫叠加保留（fd 链函数内四点 + 交接窗互补纵深）；
+  `.json` fallback 支登记不动；格 1 有界拒形冻结（§9-7），
+  corruptData 非上游格面。
+
 ## v0.1.117（2026-11-16）
 
 **S0-R2 受支持 engine 载体出口波**（工单
