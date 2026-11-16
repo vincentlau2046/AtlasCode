@@ -64,3 +64,10 @@
 - **选项 C（客户端断开映射——不采）**：runtime 感知 SSE 断开自行中止。直接违钉 iii（断开 = transport 职责），且把传输面故障混入 runtime 语义。否决。
 
 **f4 推荐 = A**（Main 依段 0 证据出推荐形后 lock-face 呈批，f4 终裁）；两波 lock-face 可一并呈批按序落码（0.1.119 在前）。
+
+## §9 lock-face 项批复——取消语义终裁（2026-11-16，f4；Main 推荐形同 §8 选项 A，证据链四点采认）
+
+1. **取消语义终裁 = 选项 A（查询中止）**：Main 推荐形与 f4 §8 推荐同向，证据链采认——① search.ts 零异步编排可继承（段 0 实锚）→ AbortSignal 加性零 legacy 纠缠；② 检查点粒度定形采认 = **runtime 级扫描循环于 readonlyRuntime 缝（per-session×per-record），loader 调用零 signal——本件零 load.ts 触碰**（fd 链 §8 刚锁面不动，§11 挂载点纪律自洽）；③ 双界 maxScanSessions×maxParseRecords 落 web/limits.ts 单源（resourceLimit 家族一致）；④ 'cancelled' 分态与 replay/follow 响应族同构。
+2. **Main 成文补钉采认（钉死入格）**：中止弃半扫 = **零部分结果交付**——'cancelled' 分态不携带 partial payload（与格 2「零半旧半新交付」同族语义，防实现歧义）；格 1 判据随补中止腿：abort 触发 → 'cancelled' 分态 + 零结果 payload + 已扫部分零泄露。
+3. **C 不采理由精化采记**：断开→中止为 adapter 层策略选择（controller 可将 disconnect 映射为 abort signal），A 形天然容纳而不 conflated——钉 iii 语义边界更准表述，采记录档。
+4. **流程**：本项批复在案；呈批书其余件（search 装配语义面/F1 O_NOFOLLOW+expectIno 定形/F2 位置化分块读定形/0.1.120 两件按 §6/§7）待 Main 呈批书全文落档后统一记批复锚，批复即落码放行。
