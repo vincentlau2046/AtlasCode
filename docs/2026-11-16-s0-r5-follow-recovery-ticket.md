@@ -47,3 +47,11 @@
 4. **焦点③ 裁定（f4 终裁 = 维持独立登记）**：message 级 cursor 改粒度语义（token 键位/恢复源），并入 = 单波双语义扩形；③ 落地预留 token 内部版本化字段 + binding 可扩展位，升级 wire 不 breaking。呈批书表态「独立登记 + 扩展位预留」。
 5. **格补腿采认**：格 1 +腿 6（瞬态撕裂行自愈零终态）/腿 7（重采样分类两腿直证 = 假阳归零可证伪形）/腿 8（重采样撞 maxTranscriptBytes → resourceLimit 归属，禁 corruptData 冒名）；格 2 + 三因各一腿 + 零丢段腿（断连窗 append N 条 → 携 cursor 重入 N 条全达）。
 6. **流程推进**：审计通过 + 本节在案 → **双信号②发 Main**（lock-face 呈批书按 §12 成文）→ 落码 → gate → 段 L 0.1.121 → 生产 lane → 单信号 Atlasweb-F4。0.1.122 docs-only 另案不审 ✓。
+
+## §13 lock-face 批复（2026-11-16，f4；呈批书 docs/2026-11-16-s0-r5-lockface-brief.md @6e772c02，**批复即落码放行**）
+
+1. **§1 码面实核采认**（guard 单向查/corruptData 终态/resetRequired 非终态既有形/ledger binding 无 offset 字段/runtime 零 resumeCursor 接线——契约-实现缺口实证）；修形面四文件 + engine/session 域零触碰 ✓。
+2. **§2 ② 终裁 (c) + 3 定形钉 + 假阴残余表态（登记不叠加）**——§12-1/2 复述一致，批准。
+3. **§3 ③ 接线形批准**：binding 加性 {byteOffset, ino} + token v1 版本化；**ok 臂 = 内部 parse 至 byteOffset 重建投影态不发 baseline（零重放，消费侧已持 projection）→ offset/ino 锚定进既有轮询，resume 起点过 ② 同一判定面**（成本上界 = 单次全量 parse ≤ maxTranscriptBytes 既有界，与重采样钉 3 同族）；fail 臂 = 三因统一 resetRequired 显式分态 + 分因 message 可辨 + 禁静默 fresh baseline；capacity/TTL = cursorExpired 既有机械零新机制。message 级 cursor 独立登记 + 扩展位预留（§12-4 终裁采纳）✓。
+4. **§4 判据格 + §5 三切片批准**（S1 ② 判定面 / S2 ③ 接线 / S3 桥映射+回归；格含 §12 补腿 6 条）。
+5. **锚披露预注册义务**：follow.ts/readonlyRuntime.ts/cursorLedger.ts 均 CLI 图内 → cli.js 锚必然变更，段 L 预记披露（补充钉①纪律）；零 opts 默认臂/读链锁面（fd 链）零触碰确认随段 I 披露。
