@@ -75,3 +75,10 @@
 5. **披露偏差采认**：web 错误映射落点 = runtime loadProjection 缝 + follow baseline 缝（sessionStoreAdapter 不在 loader 调用路径）——呈批书申报形，映射语义（resourceLimit / ioUnavailable retryable）吻合格面，采认。
 6. **流程推进**：本节在案 → Atlas-reveiw PR 复核 → e2e gate（格 1-5 + 消费侧三腿接口对表）→ 段 L 0.1.118 候（前置 = GATE-PASS + f4 采认双在案）→ 生产 lane → 单信号回 Atlasweb-F4（G2 真实数据解阻）。角色注记：PR 由 AtlasWeb-F4 直接落码（用户裁定），gate/merge/release 归 Main 链。
 7. **环链腿判定形预裁定（2026-11-16，f4；消费侧 §9-7 问询定谳，判据面 gate 前冻结）**：格 1 环链腿 = **有界拒形**——修形落点即 resolve() 环→gap null 传播（头注 gap 语义既定形），格面判据 = 零 hang / 零 OOM / 零失控内存 + 正常链回归零触碰；**corruptData 非上游格面要求**（工单 §3 格 1 原文「corruptData/有界拒」二选一形，本修形兑现者为后者）——投影面若需显式 corruptData 分态属消费侧映射自由，不在 0.1.118 gate 判据面。消费侧三腿对表以此形为准。
+
+## §10 Atlas-reveiw PR 复核审计采记（2026-11-16，f4；**总判通过**，四焦点全吻合，可进 e2e gate；1 必改级记录勘误 + 3 登记注记）
+
+1. **记账面勘注采认**：§9 所写 base bb759d6d 为工单链起点，PR merge-base 实为 master tip 740cf406——记账勘误，§9 判据面结论不受影响。
+2. **焦点③勘误采认（必改级·记录面，f4 实核吻合）**：格 2 单测**缺席**但 test 文件头注（s0-r3-security-hardening.test.ts:8）与 §9-3 两处声称已断言——实况 4 新测试 = 格1×1+格3×2+格4×1，`TranscriptChangedDuringReadError`/open 计数全测试树零命中。**定形：格 2 判定全归 e2e gate**（§8-5 格面修正式本就钉 gate 面，与旗标 b 同位）；§9-3 勘误 = 「单测已断言 ino/size 复核存在性」改为「格 2 断言留 e2e gate 判定，单测无格 2 件」；test 文件头注格 2 行改写义务转 Atlasweb-F4（**非 gate 前置**，随 gate 波次顺手改）；可选补强（非前置）= bun mock.module fs.open 计数腿（opts 支==1/默认臂==0）登记候采。
+3. **登记注记采记**：(a) fst2.size 严格等式——活跃 session append-during-read 亦触发 TranscriptChangedDuringReadError→ioUnavailable retryable，与既有 R-3 双采样 stPost 守卫同语义（变更面本就 resetRequired），非回归，**gate 判读防误判在案**；(b) §8-3「fd.open 失败原样上抛」措辞勘误——实现为外层 catch 吞为空载（与默认臂失败模式等价，loader 内码注为权威），§8-3 措辞以本条为准；(c) resolve() 环修与 §7-4 定形全吻合（visited Set + path compression + gap null + 格 1 fixture 直译）✓。
+4. **流程推进**：审计通过 + 本节勘误在案 → Main 进 e2e gate（格 1-5 + 消费侧三腿；格 1 按 §9-7 有界拒形冻结判据）→ 段 L 0.1.118 候（GATE-PASS + §9/§10 采认双在案）。
