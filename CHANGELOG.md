@@ -4,6 +4,30 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.121（2026-11-16）
+
+**S0-R5 follow 恢复协议两缺口**（登记档 @2ef06607 消费侧 e2e P1 实测 +
+工单 §3/呈批书 @6e772c02 + f4 §13 批复 @84c21b34 + §14 段 I 采认
+@24e8f6c0；GATE-PASS r-20261116-gate-s0r5 格 1-4 全绿）。波报告
+docs/2026-11-16-0121-s0-r5-wave-report.md。
+
+- **② 重采样兜底**：同 inode size>offset rewrite（truncate/compact 族
+  反向）不再漏过单向守卫直落 corruptData 硬终流——unparseable complete
+  record 触发单次身份重采样（≤maxTranscriptBytes，禁循环）→ 3-way 分
+  类：prefix 异 → resetRequired+新 baseline / 全量可解析且 prefix 同
+  （瞬态撕裂/半行竞态）→ 静默自愈零终态 / 仍 unparseable → corruptData
+  真损坏（终态收窄至此）；ingestLines 两段式禁半批污染；重采样撞
+  maxTranscriptBytes → resourceLimit（禁冒名）。
+- **③ resumeCursor 续接**：CursorBinding 加性 `{v:1, byteOffset, ino}`
+  （opaque token 内部版本化）；`followSession` 扩 `resumeCursor` 透传；
+  verify ok → parse [0,byteOffset) 重建投影态**不发 baseline 事件**
+  （零重放，断连窗 append 从文件本身恢复全达）；verify 三因
+  （unknown/expired/mismatch）统一 → resetRequired 显式分态（分因
+  message 可辨，禁静默 fresh）；resume 起点过 ② 同一判定面。
+- engine/session 零触碰（fd 链锁面保持）；cli.js 锚 Δ=0（web 域
+  tree-shake 出 CLI 图，e2e 实测强于预注册保守面）；web-session-runtime
+  pack 85,213B（+7,182B 本波实量）。
+
 ## v0.1.120（2026-11-16）
 
 **headless result usage 聚合 + USD 计费面首建**（工单
