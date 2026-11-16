@@ -40,6 +40,8 @@
 5. **maxParseRecords 核验点 = 加载后**（messages.size 计数）：字节界 maxBytes 已预解析拦截（loader fstat 检查点）；零 load.ts 触碰前提下的诚实核验位。
 6. **eslint 桶补登记**：follow.ts/readonlyRuntime.ts 的 `session/readonly.ts` deep-import 在 HEAD 基线已红 2 处（S0-R2 波 scoped 桶漏列两 importer，其波四件套以缓存态漏检）——本波补入同桶。
 7. **search.ts 两处窄化**（`?? []`）：pack 严格 tsconfig 新入图暴露 TS18048；缺席字段在有效载荷恒在场，零行为变化。
+8. **[自动安全审查 CWE-400/HIGH 复核] maxParseRecords 核验点 = 加载后**（§3-5 同点）：审查建议 pre-parse 逐 record 计数需 load.ts 加 maxRecords loader 参数——**新 lock-face 项**，超出本波 F1/F2 预注册修形面（「零 load.ts 触碰前提」是 L3 修形边界的一部分），按预注册纪律不擅改，候 f4 裁定。有界性分析：load 分配已由 maxBytes 预解析 stat 检查拦截（loader fstat 检查点），解析 CPU 功上界 = maxTranscriptBytes 字节量——不存在无界分配或无界解析；record 计数滞后仅影响「解析完成后的计数拒绝时点」，非资源无界。
+9. **[自动安全审查 CWE-770/MEDIUM 复核] 分页粒度 = 会话边界**（§3-4 同点）：审查建议 message 级复合 cursor（session+message 双位）——pageToken 形状变更 = L1 预注册形变更，同上候 f4 裁定不擅改。有界性分析：页超 pageSize 仅发生在「单会话命中数 > 剩余页容量」时，超发上界 = 单会话命中数 ≤ maxParseRecords × snippet ≤512 code points——超发有常数上界（双界已核验后），非资源无界；同会话整会话交付是 L1「会话列表序内偏移」的批复读法。另审查建议 3「resource-limit 错误不得被泛 catch 吞」已核实不适用：runtime 层 try 仅映射 TranscriptTooLargeError/TranscriptChangedDuringReadError 两定型错并 rethrow 其余（readonlyRuntime.ts:629-645），resourceLimit/ioUnavailable 以 WebSessionError 分态直达 wire 契约映射面。
 
 ## 4. 验证证据
 
