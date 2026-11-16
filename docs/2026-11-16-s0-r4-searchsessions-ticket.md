@@ -80,3 +80,12 @@
 4. **L6 批准**：跳过单谓词（type==='assistant' && usage 在场，零白名单维护面）+ error_during_execution 站点 usage/total_cost_usd **双缺席**终裁（无消耗 = 无事件，与显式 0 = 合法 0 异质——呈批理由采认）+ 单 helper 禁三处各算。
 5. **L7 批准 + cache 计价改判裁定（f4 终裁）**：**维持两价表 + cache token 零计入 + 低估注记（Main 原形，不改判「并入 input 价」）**——理由：折入形对 cache_read 高估至 ~10×（Claude 族 cache 读 ≈0.1× input 价）、cache write 低估，方向性误差大于零计入的一致下估；两价表下伪造 cache 单价违诚实缺席家族。**预登记：pricing 表 schema 预留 cache 单价加性扩展位**（语义 = 覆盖默认零计入，表升级不破格）。销项义务：issue #2 回执注明低估面。src/cost/pricing.ts 新独立域 + settings `cost.pricingOverrides` 键 + K1-B① 归一单源复用（capabilities.ts:18 实锚）+ 优先序/半字段缺席/显式 0 判据——全批准。
 6. **流程**：L5 载体图/格面/锚披露预注册沿承；两波落码放行（0.1.119 段 I 起，0.1.120 串行在后）；批复核锚 = 本节 + 呈批书 @f16b838d。
+
+## §11 段 I 采认（2026-11-16，f4；落码 @d00cc534，波报告 @27e0c628，GATE-PASS @944fc3e5）
+
+1. **码面采认（f4 抽核）**：load.ts O_NOFOLLOW（Windows `?? 0` 守卫 + 平台注记）/ expectIno 检查点（open 后立即，身份锚先于尺寸界）/ 位置化分块读（chunk 常量单源 import，§10-3 钉兑现）/ 默认臂恒等；readonlyRuntime searchSessions 第四面（'cancelled' 零 partial / 定型错映射 + rethrow 其余 :629-645 与 §3-⑨ 自证一致）；limits.ts 双界单源。Δ 对账吻合（2 新测试件 20 测试 + 载体/契约/公开类型面 +2 型）。
+2. **§3 判读披露 1-7 采认**：① search 面 expectIno 锚 = per-session adapter.statTranscript（F1 授权锚 search 面闭合，O(1) 通道非新采样点）✓；② mid-scan 删除跳过 = 授权集真值变化非 partial 泄露 ✓；③ TCDRE→ioUnavailable retryable 同族映射 fail-closed ✓；④ 分页粒度 = 会话边界（L1「会话列表序内偏移」诚实读法）✓；⑤ maxParseRecords 加载后核验（零 load.ts 触碰前提下诚实核验位）✓；⑥ eslint 桶补登记（HEAD 基线既有 2 红如实披露，S0-R2 波漏检追溯）✓；⑦ search.ts 窄化零行为 ✓。
+3. **§3-⑧⑨ 自动审查 findings 裁定（f4 终裁：有界非无界，判据面不翻）**：⑧ CWE-400——分配已被 maxBytes 预解析 stat 检查拦截（loader fstat 检查点），解析功上界 = maxTranscriptBytes 字节量，record 计数滞后仅延后拒绝时点非资源无界——**本波不采新修形**（pre-parse 逐 record 计数需 load.ts 加参，出 L3「零 load.ts 触碰」预注册边界）；**登记池**（与 S0-R3 §11 同池：pre-parse record 计数 loader 参数，下波触 load.ts lock-face 必列）。⑨ CWE-770——页超发上界 = 单会话命中数 ≤ maxParseRecords × snippet ≤512 code points（双界核验后常数上界）；message 级复合 cursor = L1 预注册形变更，**登记池**（消费侧若需严格 pageSize 再启波）。resourceLimit 泛吞建议经 :629-645 实核不适用 ✓。e2e 判读「有界非无界」与 f4 终裁一致。
+4. **canon 定谳（f4 独立复核）**：**6108 pass / 0 fail / 501 files（138.33s）**——与 e2e gate 干净形态逐字一致（Δ +20 = 本波两新测试件恰合；6108 = 0.1.118 基线 6088 + 20）；Main lane 118-fail 池再定谳 lane-local 环境污染（定因项在案）。本波触碰测试面零 fail。
+5. **格 6 锚披露采认**：web-session-runtime 78,031B/58bbe3c3（独立重建恒等）+ web-contract 7,975B 七版恒等 + cli.js 18,215,220B/f4b1e4d0…（段 L 对表值）——L5 预注册「双锚必然变更」兑现 ✓。
+6. **段 L 放行**：GATE-PASS 判定单 + 本节采认双在案——Main 走段 L 0.1.119（bump + cli.js/f4b1e4d0 锚实测对表 + docs/sri/v0.1.119.md）→ 生产 lane（e2e 候命）→ 单信号 Atlasweb-F4（四面闭环 + 格 D search 腿解阻）。
