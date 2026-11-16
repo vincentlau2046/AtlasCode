@@ -71,3 +71,12 @@
 2. **Main 成文补钉采认（钉死入格）**：中止弃半扫 = **零部分结果交付**——'cancelled' 分态不携带 partial payload（与格 2「零半旧半新交付」同族语义，防实现歧义）；格 1 判据随补中止腿：abort 触发 → 'cancelled' 分态 + 零结果 payload + 已扫部分零泄露。
 3. **C 不采理由精化采记**：断开→中止为 adapter 层策略选择（controller 可将 disconnect 映射为 abort signal），A 形天然容纳而不 conflated——钉 iii 语义边界更准表述，采记录档。
 4. **流程**：本项批复在案；呈批书其余件（search 装配语义面/F1 O_NOFOLLOW+expectIno 定形/F2 位置化分块读定形/0.1.120 两件按 §6/§7）待 Main 呈批书全文落档后统一记批复锚，批复即落码放行。
+
+## §10 lock-face 统一批复（2026-11-16，f4；呈批书 docs/2026-11-16-s0r4-0120-lockface-brief.md @f16b838d L1-L8 五处候批细则逐一裁定——**批复即两波落码放行，0.1.119 在前**）
+
+1. **L1 批准**：query 匹配语义（双侧 toLowerCase 码点折叠子串、无 NFD 归一诚实最小形、CJK 无损）+ pageToken = opaque offset cursor（无持久化状态机/不跨进程/非法拒）+ 分页与取消正交（每页独立 AbortSignal）。实现注记（不阻）：cursor offset 以会话列表快照序为准，列表与扫描间 mtime 漂移容忍面由 gate 格 1 分页腿覆盖。
+2. **L3 批准**：O_NOFOLLOW 平台守卫（Windows undefined → 跳过旗标，expectIno 兜底，平台差如实登记）+ expectIno 错配复用 TranscriptChangedDuringReadError（身份不连续域同族，零新错误类型，契约错误面零扩形）+ adapter 锚 = 既有双采样 stPre.ino（零新采样点）。
+3. **L4 批准 + 一钉**：位置化分块读只读 [0, fst.size) + 增长即断复用既有域错。**TRANSCRIPT_READ_CHUNK_SIZE 复用须自 scanner.ts:22 导出单源**（现域内私有 const），禁第二常量（副本教训族）。
+4. **L6 批准**：跳过单谓词（type==='assistant' && usage 在场，零白名单维护面）+ error_during_execution 站点 usage/total_cost_usd **双缺席**终裁（无消耗 = 无事件，与显式 0 = 合法 0 异质——呈批理由采认）+ 单 helper 禁三处各算。
+5. **L7 批准 + cache 计价改判裁定（f4 终裁）**：**维持两价表 + cache token 零计入 + 低估注记（Main 原形，不改判「并入 input 价」）**——理由：折入形对 cache_read 高估至 ~10×（Claude 族 cache 读 ≈0.1× input 价）、cache write 低估，方向性误差大于零计入的一致下估；两价表下伪造 cache 单价违诚实缺席家族。**预登记：pricing 表 schema 预留 cache 单价加性扩展位**（语义 = 覆盖默认零计入，表升级不破格）。销项义务：issue #2 回执注明低估面。src/cost/pricing.ts 新独立域 + settings `cost.pricingOverrides` 键 + K1-B① 归一单源复用（capabilities.ts:18 实锚）+ 优先序/半字段缺席/显式 0 判据——全批准。
+6. **流程**：L5 载体图/格面/锚披露预注册沿承；两波落码放行（0.1.119 段 I 起，0.1.120 串行在后）；批复核锚 = 本节 + 呈批书 @f16b838d。
