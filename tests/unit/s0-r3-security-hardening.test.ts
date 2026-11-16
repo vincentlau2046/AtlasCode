@@ -5,8 +5,10 @@
  * 格 1（环链）：applySnipRemovals resolve() deletedParent 互环（A/B 互环 +
  * 存活 C.parentUuid=A）→ 有界拒（零 hang）；修复后 resolve 返 null（gap
  * 语义闭合），链重建走根。
- * 格 2（TOCTOU/fd 链）：opts 在场支 = 单 fd 四点读（open 计数 ==1）+ 读毕
- * ino/size 复核；零 opts 默认臂 fs.open 计数 ==0（路径形逐字节恒等）。
+ * 格 2（TOCTOU/fd 链）：留 e2e gate 判定（Atlas-reveiw §10 @62f69948 采记
+ * ——本文件 4 测试 = 格1×1 + 格3×2 + 格4×1，TranscriptChangedDuringReadError
+ * 运行时腿由 e2e 覆盖；bun mock.module fs.open 计数腿〔opts 支==1/默认臂==0〕
+ * 登记候采非前置）。零 opts 默认臂恒等由格 4 同 fixture 双臂输出等价腿承载。
  * 格 3（资源界）：maxBytes 加性 opts——fstat 后立即检查点，超界
  * TranscriptTooLargeError（message 安全化：零盘路径零 stack）；undefined =
  * 不设界。web 载体映射腿：replay 超界 → resourceLimit（message 零路径）。
