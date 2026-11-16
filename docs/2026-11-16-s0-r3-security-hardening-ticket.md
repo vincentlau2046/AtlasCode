@@ -65,3 +65,12 @@
 3. **异常面采认**：fd.open 失败（ENOENT 等）原样上抛与现语义等价；close 仅 caller 所权支 finally；scanner 缺省臂自开自关形保留（attribution.ts/SDK 消费面零适配恒等）。
 4. **格面外登记采认**：load.ts:521 readFile 属 loadTranscriptFromFile .json 旧格式 fallback 支（:471 .jsonl 恒委托 loadTranscriptFile，web replay 不触）——登记不动，f4 实锚 :471/:521 吻合。
 5. **格面修正式**：格 2 fd 单开断言 = 授权支 fs.open 计数 ==1；格 4 恒等域断言 = 零 opts 默认臂既有 fixture 全量输出+失败模式恒等（fd 链零触碰默认臂）；格 3 maxBytes 腿 = opts-in 授权支。呈批书按本节成稿即批复落码。
+
+## §9 PR #1 复核采认（2026-11-16，f4；PR head 197ce4f2，base master @bb759d6d，MERGEABLE）
+
+1. **总判采认：PR 技术面符合 §7/§8 锁面判据**——全量 diff 逐项对表：fd 链作用域 = opts 在场支（`useFdChain = precompactSkip ?? maxBytes` 判据形吻合 §8-1 钉死形）；四点单 fd（stat→fd.stat / readTranscriptForLoad 加性 fd 参 caller 所权 / scanPreBoundaryMetadata 签名 + autoClose:false / readFile→fd.readFile）✓；maxBytes 检查点 = fstat 后 scanner 分叉前 ✓；`TranscriptTooLargeError`（message 安全化零盘路径/stack）+ `TranscriptChangedDuringReadError` 双域错贯穿 swallow-catch ✓；读毕 ino/size 复核 + finally close ✓；零 opts 默认臂 stat+readFile 路径形恒等（含失败模式，格 4 恒等域）✓；resolve() visited Set + 环→gap null ✓（格 1 测试 A/B 互环 + 存活 C 直译 §7-4 形）；.json fallback 零触碰 ✓；双采样守卫 = 叠加保留（b）✓。
+2. **旗标 a 消除**：Bun `FileHandle.createReadStream` + `autoClose:false` 兼容性 f4 直证（fd 读面正确且调用后保持开放）——e2e gate 仍按 Main 建议补 node PTY 侧运行时腿实证。
+3. **旗标 b 留 gate 对表**：格 2 单测已断言 ino/size 复核存在性；真实 rename-race 交付分态（replay=ioUnavailable retryable / follow=resetRequired）覆盖在 e2e gate 格 2 判定。
+4. **canon 判读（f4 独立）**：PR 分支主 checkout 跑 = **6088 pass / 0 fail / 499 files 全绿零 skip**（= ca761a91 基线 6084 + 本波 4 新测试恰合）；tmp worktree 同 commit = 6080 pass / 8 skip / 0 fail——8 skip 定谳 = **位置依赖**（cwd 门控测试在 tmp worktree 触发跳过），非代码诱发（同 commit 两跑 0 fail、总数恰合）。消费侧所报 23,382/1 fail = `bun test tests/` 相对过滤扫 worktrees/ 旧副本（#294 族既有噪声，worktrees/atlas-family-p0 删除候裁在案），**非 canon 口径，不作为判定基准**。
+5. **披露偏差采认**：web 错误映射落点 = runtime loadProjection 缝 + follow baseline 缝（sessionStoreAdapter 不在 loader 调用路径）——呈批书申报形，映射语义（resourceLimit / ioUnavailable retryable）吻合格面，采认。
+6. **流程推进**：本节在案 → Atlas-reveiw PR 复核 → e2e gate（格 1-5 + 消费侧三腿接口对表）→ 段 L 0.1.118 候（前置 = GATE-PASS + f4 采认双在案）→ 生产 lane → 单信号回 Atlasweb-F4（G2 真实数据解阻）。角色注记：PR 由 AtlasWeb-F4 直接落码（用户裁定），gate/merge/release 归 Main 链。
