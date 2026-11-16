@@ -4,6 +4,29 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.120（2026-11-16）
+
+**headless result usage 聚合 + USD 计费面首建**（工单
+docs/2026-11-16-headless-usage-result-ticket.md §7 + 呈批书 L6-L8，f4 §10
+@7ecf0fa4 批复；GATE-PASS r-20261116-gate-0120 格 1-4 全绿 @3aa9c839；f4 §8
+采认 @9e684110 判读披露 1-7 全采认）。波报告
+docs/2026-11-16-0120-usage-result-wave-report.md。
+
+- **件 1 headless result usage 纯聚合**：`-p` 结果事件加性 `usage` 四
+  token 字段（input/output/cache_read/cache_creation，snake_case），
+  usage 恒在（零 usage 消息 = 全 0，非缺席）；单一 helper
+  `aggregateResultUsage`（常路径 buildResultMessage + deferred 挂起站点
+  同形装配，禁三处各算）；error_during_execution 站点双缺席（执行失败
+  无消耗 = 无事件）。
+- **件 2 total_cost_usd USD 计费面首建**：新顶层 `src/cost` 单文件域
+  （内置静态双价表随版本发 + settings `cost.pricingOverrides` override
+  通道）；模型归一复用 K1-B① `stripProviderPrefix` 单源；unknown 模型
+  字段缺席禁伪造 0（fail-closed）、显式 0 = 合法 0、半字段 override
+  缺席不回落内置表；cache token 零计入（两价表低估面注记，schema 预留
+  扩展位）。
+- 零 engine 触碰（聚合全在 print 域内）；TUI/print 文本零变化（wire
+  加性 diff）。
+
 ## v0.1.119（2026-11-16）
 
 **S0-R4 searchSessions 出口扩形 + F1/F2 loader defense-in-depth 合并单波**
