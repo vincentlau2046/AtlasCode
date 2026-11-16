@@ -82,3 +82,10 @@
 2. **焦点③勘误采认（必改级·记录面，f4 实核吻合）**：格 2 单测**缺席**但 test 文件头注（s0-r3-security-hardening.test.ts:8）与 §9-3 两处声称已断言——实况 4 新测试 = 格1×1+格3×2+格4×1，`TranscriptChangedDuringReadError`/open 计数全测试树零命中。**定形：格 2 判定全归 e2e gate**（§8-5 格面修正式本就钉 gate 面，与旗标 b 同位）；§9-3 勘误 = 「单测已断言 ino/size 复核存在性」改为「格 2 断言留 e2e gate 判定，单测无格 2 件」；test 文件头注格 2 行改写义务转 Atlasweb-F4（**非 gate 前置**，随 gate 波次顺手改）；可选补强（非前置）= bun mock.module fs.open 计数腿（opts 支==1/默认臂==0）登记候采。
 3. **登记注记采记**：(a) fst2.size 严格等式——活跃 session append-during-read 亦触发 TranscriptChangedDuringReadError→ioUnavailable retryable，与既有 R-3 双采样 stPost 守卫同语义（变更面本就 resetRequired），非回归，**gate 判读防误判在案**；(b) §8-3「fd.open 失败原样上抛」措辞勘误——实现为外层 catch 吞为空载（与默认臂失败模式等价，loader 内码注为权威），§8-3 措辞以本条为准；(c) resolve() 环修与 §7-4 定形全吻合（visited Set + path compression + gap null + 格 1 fixture 直译）✓。
 4. **流程推进**：审计通过 + 本节勘误在案 → Main 进 e2e gate（格 1-5 + 消费侧三腿；格 1 按 §9-7 有界拒形冻结判据）→ 段 L 0.1.118 候（GATE-PASS + §9/§10 采认双在案）。
+
+## §11 0.1.118 push 自动复核两 findings 定谳（2026-11-16，f4；Main triage 转裁定；f4 活码实核吻合）
+
+1. **F1 symlink TOCTOU/授权锚定缺环 = 采认登记（defense-in-depth 候，不改 0.1.118）**：实核吻合——load.ts:1116 `open(filePath, 'r')` 无 O_NOFOLLOW；fd 自洽复核（fst2 vs fst 同 fd）证「读中未换」不证「开的是授权文件」；adapter 授权→loader open 交接窗 + R-3 双采样守卫均为路径采样 = 身份锚定缺环**形式上成立**。威胁模型评估采认（与 §7-2 分账 A 同源）：web 载体 = loopback + HMAC cookie + session-id 映射，能植 symlink 入 `~/.atlas/projects/` 者已同用户本地权限——实用可乘性低。**修形候选形预钉**：adapter 侧授权 ino 锚 + loader opts 加性 `expectIno` 比对臂（缺省臂恒等不破，opts 加性纪律同 §7-2）+ O_NOFOLLOW 授权支。优先级低，随下次触 load.ts 波 lock-face 扩形，不立插入波。
+2. **F2 授权支整读瞬时分配超界 = 采认登记（同池）**：实核吻合——:1140 `fd.readFile()` 在 :1143 读毕复核前整读，fstat 检查点后并发 append 可致瞬时分配超 maxBytes（解析不受影响，复核在 parse 前；暴露面=内存尖峰，上界=并发写者速率）。gate 格 2(d) 已直证「读毕拒绝」语义（§10-3(a)），「有界分配」未闭合如实登记。修形候选形预钉：位置化分块读 + 累计分配上限（fst.size 恒定快照长，增长即断）。优先级低-中，同池同波。
+3. **裁定**：两件均**不入 0.1.118**——无活跃事故、暴露面有界、生产 lane 在飞、修形均触 §8 刚锁面的 fd 链形（现改即 churn 违判据面冻结纪律）；均属「授权支新行为域」（格 2/3），默认臂零影响。pairing 同步义务：Atlasweb-F4 Security findings 节复核销项时注记「授权锚定/有界分配两 defense-in-depth 候已登记下波」。
+4. **挂载点**：下波触 load.ts 工单的 lock-face 呈批书必列两件（含本节预钉修形候选形），判据面届时预注册；e2e 生产复验腿不受影响照跑。
