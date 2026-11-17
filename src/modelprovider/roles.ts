@@ -150,10 +150,6 @@ export function getRoleModels(
   const envModel = process.env['ATLAS_' + roleKey + '_MODEL']
   const providers: any = getEndpointConfigSource().getProviders()
   const roleSetting: any = getEndpointConfigSource().getRoleSetting(role)
-  const rolePool: string[] = (Array.isArray(roleSetting.models) ? roleSetting.models : []).map((m: any): string => {
-    if (typeof m === 'string') return m
-    return (m && typeof m === 'object' && m.model) ? String(m.model) : ''
-  }).filter((r: string) => r.length > 0)
 
   // 0.1.70 H-2（de-ant 核验守卫，零行为变更）：normalizeRef = 纯 settings
   // providers 表前缀查（裸 model id → 持该 id 的 providers 表项加前缀；未知 ref
@@ -167,6 +163,16 @@ export function getRoleModels(
     }
     return ref
   }
+
+  // issue #3-1（0.1.122）：pool arm 同样过 normalizeRef —— 0.1.70 H-2 只覆盖了
+  // sessionModel / env / fallbackModel 三个 arm，池条目原样透传导致裸 id 命中
+  // resolveModel 的 provider 名支 → unknown_reference。判据（f4 triage）：
+  // (a) 池条目命中 providers 表 model id → 加前缀；(b) 未知裸 id 原样透传
+  // （失败语义不变）；(c) 其余三个 arm 与全部既有行为不变。
+  const rolePool: string[] = (Array.isArray(roleSetting.models) ? roleSetting.models : []).map((m: any): string => {
+    if (typeof m === 'string') return m
+    return (m && typeof m === 'object' && m.model) ? String(m.model) : ''
+  }).filter((r: string) => r.length > 0).map(normalizeRef)
 
   let refs: string[]
   if (sessionModel) {
