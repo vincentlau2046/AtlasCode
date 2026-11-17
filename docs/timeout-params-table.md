@@ -27,7 +27,7 @@
 | `MCP_TOOL_TIMEOUT` | ms | ~27.8h（100000000ms） | — | MCP 工具调用超时 | `src/tui/services/mcp/client.ts`（`DEFAULT_MCP_TOOL_TIMEOUT_MS`） |
 | `ATLAS_SESSIONEND_HOOKS_TIMEOUT_MS` | ms | 1.5s（1500ms） | — | SessionEnd hooks 超时 | `src/tui/utils/hooks.ts` + `src/hooks/runHooks.ts` |
 | `ATLAS_PLUGIN_GIT_TIMEOUT_MS` | ms | 120s（120000ms） | — | 插件 git clone/pull 超时 | `src/tui/utils/plugins/marketplaceManager.ts` |
-| `ATLAS_PWSH_PARSE_TIMEOUT_MS` | ms | 5s（5000ms） | — | PowerShell 命令解析超时 | `src/tui/utils/powershell/parser.ts`（`DEFAULT_PARSE_TIMEOUT_MS`） |
+| `ATLAS_PWSH_PARSE_TIMEOUT_MS` | ms | 5s（5000ms） | — | PowerShell 命令解析超时 | `src/kernel/utils/powershell/parser.ts`（`DEFAULT_PARSE_TIMEOUT_MS`） |
 | `ATLAS_STREAM_CLOSE_TIMEOUT` | s | 60s | — | SDK MCP 流关闭超时 | `src/tui/entrypoints/agentSdkTypes.ts`（SDK 提示） |
 
 ## 模型超时族（本波变更面 + 用户配置指引）

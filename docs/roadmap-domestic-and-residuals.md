@@ -66,7 +66,7 @@
 ### R2 — D-3 Ascend 独立实施波
 - **范围**：C-7 执行器六件套**实挂载** + DomainPackage 注册面 + `mount.ts` 实挂载（现 DEP-5 前向接缝）+ gelu S5 探针；`ascend` 域 9 占位填真实现。
 - **国产替代钩子**：Ascend 域包对齐 DSH"一切皆插件"范式（§1 插件/市场面）；CANN 工具链（bisheng/atc/msame/msprof）国产执行沙箱对齐 §1 沙箱。
-- **验收**：`bun run src/cli.ts --e2e`（`ATLAS_ASCEND_MOCK=1`）16 工具 L1 活探 + 六件套挂载后四件套全绿。
+- **验收**：`bun run src/atlascode/cli.ts --e2e`（`ATLAS_ASCEND_MOCK=1`）16 工具 L1 活探 + 六件套挂载后四件套全绿。
 
 ### R3 — D-9 换值（IFF 网关波，可与 R1/R2 并行）
 - **范围**：`[ATLAS-HOLD]` **56 行/31 文件** URL 族（`ATLAS_API_BASE_URL` / `ATLAS_WEB_DOMAIN_CHECK_URL` / remote trigger 端点）逐行换真值；RemoteTrigger ⑫ 端口真供给方 + bundled skill 复活。

@@ -29,6 +29,7 @@
 | 2026-10-15-p0-wave-0173-ticket.md | 同名 | 2026-10-15 | 收口 |
 | 2026-10-18-mcp-remote-wave-0174-ticket.md | 同名 | 2026-10-15 | 收口 |
 | 2026-10-18-p0-wave-0176-ticket.md | 同名 | 2026-10-18 | 收口 |
+| atlas-config-reference-and-template.md | 同名 | 2026-10-19 | 已并入（0.1.122 A3：原路径留 stub 指向 reference/settings.md） |
 
 ## 引用面处置判读披露（格 4）
 

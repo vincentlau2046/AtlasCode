@@ -2,7 +2,7 @@
 
 > 内容事实源：`src/permissions/permissionMode.ts`（权限模式常量）、
 > `src/permissions/filesystem.ts`（敏感文件/路径保护）、`src/tui/components/BypassPermissionsModeDialog.tsx`、
-> `src/cli/handlers/autoMode.ts`（auto-mode 分类器 CLI）、`src/permissions/autoMode.ts`。
+> `src/cli/handlers/autoMode.ts`（auto-mode 分类器 CLI）、`src/permissions/autoMode/`（分类器实现包）。
 
 ## 权限模式
 

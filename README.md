@@ -64,12 +64,18 @@ atlascode --help   # 别名 `atlas` 同效
   `defaultRole` 选主循环默认角色（缺省 `small`）。
 - **Provider 表**：`providers.<name>` =
   `{ baseURL, apiKey, api, models: [{ id, name?, contextWindow?, maxTokens? }],
-  defaultContextWindow?, defaultMaxTokens? }`；模型引用 `"<provider>/<modelId>"`
-  （池内裸 id 按 provider 表归一化）。
+  defaultContextWindow?, defaultMaxTokens? }`；模型引用 `"<provider>/<modelId>"`。
+  > ⚠️ 池内请写**全 ref 形**：裸 id（如 `"Qwen38-27B-TXT"` 不带 `provider/` 前缀）
+  > 当前**不会**被 provider 表归一化、解析会失败（issue #3-1；归一化修形走代码版）。
+  > ⚠️ `baseURL` 按**原样**使用：OpenAI 兼容网关通常要求 `/v1` 后缀——裸 host
+  > `http://host:8999` 会 404，须写 `http://host:8999/v1`（issue #3-2）。
 - **鉴权**（OpenAI-protocol 静态键，优先级 env > settings 角色级 > settings 全局）：
   全局 `OPENAI_AUTH_TOKEN` / `OPENAI_API_KEY`；per-role
   `ATLAS_<ROLE>_MODEL` / `_PROVIDER` / `_BASE_URL` / `_API_KEY`
   （`<ROLE>` ∈ `PREMIUM` / `FAST` / `SMALL`）。
+  > ⚠️ settings **先经链**（issue #3-3）：settings.json 一旦命中任何 provider 条目，
+  > `OPENAI_BASE_URL` 等 env 即被忽略（即使该条目未覆盖当前角色）；env 仅在
+  > 字段缺省时生效。headless 排障时 env 不生效先查 settings.json 是否命中。
 
 示例（IFF 网关，本机 IFF 侧配置）：
 

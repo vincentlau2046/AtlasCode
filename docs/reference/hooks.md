@@ -1,28 +1,40 @@
 # Hooks
 
-> 内容事实源：`src/hooks/`（hookEvents.ts 事件面 / types.ts 钩子形 / config-provider.ts /
-> bootstrap-env.ts）、settings.json `hooks` 字段（`z.any()` 透传）、
-> `--include-hook-events`（cli/parse.ts，stream-json 输出面）。
+> 内容事实源：事件面 = `src/hooks/hookEvents.ts`（`HOOK_EVENTS` 单一事实源，
+> 0.1.122 实核 31 事件 = 27 基础 + PreModelSwitch/PostModelSwitch/DirectoryAdded/
+> MessageDisplay 4 增补）；数据契约 = `src/engine/config/hooksSchema.ts`
+> （`HooksSchema`，四类判别联合，各变体 `.passthrough()`）；执行面 =
+> `src/engine/config/hooksConfig.ts`（运行时仅执行 command 变体）。
+> 刷新：0.1.122（A1）。
 
 ## 是什么
 
 Hooks = 在会话生命周期关键节点执行外部命令的机制：settings.json `hooks` 配置
-`事件 → 命令列表`，事件触发时按配置跑命令（`HookCommand`：`command` / `shell` /
-`timeoutMs`），命令 stdout/exit code 参与会话行为（拦截/注入上下文/通知）。
+`事件 → matcher 列表 → 命令列表`，事件触发时按配置跑命令，命令 stdout/exit code
+参与会话行为（拦截/注入上下文/通知）。
 
-## 事件面（`src/hooks/hookEvents.ts` 单一事实源）
+配置结构（`hooks[event] → ConfigHookMatcher[]`，matcher = `{matcher?, hooks: ConfigHookCommand[], source?}`）。
+命令四类（`type` 判别）：`command`（`{command, shell?∈[bash|powershell], timeoutMs?,
+statusMessage?, once?, async?, asyncRewake?, continueOnBlock?, if?}`）、`prompt` /
+`agent`（`{prompt, timeoutMs?, model?, statusMessage?, once?, if?}`）、`http`
+（`{url, timeoutMs?, headers?, allowedEnvVars?, ...}`）。**运行时仅执行 command 变体**
+（prompt/agent/http 契约在案，执行面留缝）。
 
-| 事件 | 触发点 |
-|---|---|
-| `SessionStart` | 会话启动（source 区分 startup/resume/clear） |
-| `UserPromptSubmit` | 用户提交 prompt 后 |
-| `PreToolUse` | 工具调用前（可拦截，tool_name/tool_input 入参） |
-| `PostToolUse` | 工具调用后（tool 结果入参） |
-| `PreCompact` | 上下文压缩前 |
-| `Stop` | 助手回合结束 |
-| `TeammateIdle` | 队友 agent 空闲（多智能体场景） |
-| `Notification` | 通知类事件 |
-| `SessionEnd` | 会话结束（reason 入参） |
+## 事件面（31 事件全列，`HOOK_EVENTS` 实形）
+
+工具/权限：`PreToolUse` / `PostToolUse` / `PostToolUseFailure` / `PermissionRequest` / `PermissionDenied`
+生命周期：`SessionStart`（source 区分 startup/resume/clear）/ `SessionEnd`（reason 入参）/ `Setup` / `Stop` / `StopFailure` / `UserPromptSubmit` / `Notification`
+压缩：`PreCompact` / `PostCompact`
+子代理/团队：`SubagentStart` / `SubagentStop` / `TeammateIdle` / `TaskCreated` / `TaskCompleted`
+交互：`Elicitation` / `ElicitationResult` / `MessageDisplay` / `InstructionsLoaded`
+环境：`ConfigChange` / `WorktreeCreate` / `WorktreeRemove` / `CwdChanged` / `DirectoryAdded` / `FileChanged`
+模型：`PreModelSwitch` / `PostModelSwitch`
+
+## 门控链（`getHooksFromAllowedSources` 四态）
+
+`policy disableAllHooks` → 无 hooks；`policy allowManagedHooksOnly` → 仅 policy hooks；
+非 managed 源 `disableAllHooks` → 仅 policy hooks；否则全源合并。
+**非 managed 源不能禁 managed hooks**。settings 键：`disableAllHooks` / `allowManagedHooksOnly`。
 
 ## 配置示例（settings.json）
 
@@ -31,9 +43,10 @@ Hooks = 在会话生命周期关键节点执行外部命令的机制：settings.
   "hooks": {
     "PreToolUse": [
       {
-        "type": "command",
-        "command": "bash ./scripts/pre-tool-check.sh",
-        "timeoutMs": 30000
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash ./scripts/pre-tool-check.sh", "timeoutMs": 30000 }
+        ]
       }
     ]
   }

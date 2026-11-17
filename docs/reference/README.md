@@ -10,6 +10,8 @@
 | 主题 | 文件 | 何时看 |
 |---|---|---|
 | CLI 全量参考（选项/子命令/示例） | [cli-reference.md](cli-reference.md) | 查任何命令行选项、headless 用法、mcp/auto-mode/update 子命令 |
+| Slash 命令全清单 | [slash-commands.md](slash-commands.md) | 查任何 `/命令`、别名、feature 门控、headless 可用性 |
+| Settings 全字段参考 | [settings.md](settings.md) | 查 settings.json 字段、模板、五源优先级链、配置目录、env vs settings |
 | 产品概览与快速上手 | [overview.md](overview.md) | 首次使用、安装、第一会话 |
 | 安全模型与权限 | [security.md](security.md) | 权限模式、敏感文件保护、bypass 语义、auto 模式 |
 | MCP 服务器 | [mcp.md](mcp.md) | 配置/管理 MCP 服务器、传输类型、OAuth |

@@ -27,9 +27,9 @@ AtlasCode 的模型车道 = **OpenAI 协议静态键**（无账号/订阅/refres
 两种配法（任选其一，详见 [network-config.md](network-config.md)）：
 
 1. **settings.json（推荐）**：`~/.atlas/settings.json` 写 `providers` +
-   `modelRoles`（角色池：`main` / `small` / `fast` / `premium`…，角色内水平 fallback）。
+   `modelRoles`（三角色池：`premium` / `fast` / `small`，角色内水平 fallback）。
 2. **环境变量**：`OPENAI_AUTH_TOKEN`（或 `OPENAI_API_KEY`）+ 按角色
-   `ATLAS_<ROLE>_MODEL`（如 `ATLAS_MAIN_MODEL=provider/model`）。
+   `ATLAS_<ROLE>_MODEL`（`<ROLE>` ∈ `PREMIUM`/`FAST`/`SMALL`，如 `ATLAS_SMALL_MODEL=provider/model`）。
 
 ```bash
 atlas        # 启动交互式 TUI（v0.1.2+ 三命令面：atlas / atlascode / atlas code）

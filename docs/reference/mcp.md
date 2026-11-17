@@ -57,3 +57,5 @@ atlas mcp add --transport http corridor https://app.corridor.dev/api/mcp --heade
 - **stdio**（默认）：AtlasCode 直接 spawn 子进程，经 stdin/stdout JSON-RPC 通信。
 - **sse / http**：远程 MCP 端点（URL + 可选 OAuth / 请求头）。
 - 服务器连接失败不会阻塞会话：单服务器故障按 fail-soft 跳过（其余服务器照常）。
+  0.1.57 起（`AD-49 MCP_CONNECTION_NONBLOCKING`）：连接为 **5 秒有界**，超时按故障处理；
+  连接失败会以 reminder 形式注入会话（C5-2），不再静默。

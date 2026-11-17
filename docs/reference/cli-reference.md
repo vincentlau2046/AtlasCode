@@ -45,6 +45,15 @@ atlas [prompt] [选项]
 | `--fallback-model <model>` | 主模型过载时自动回落到指定模型（仅 `-p`） |
 | `--no-session-persistence` | 不落盘会话（不可 resume；仅 `-p`） |
 | `--permission-prompt-tool <tool>` | 用 MCP 工具做权限询问（仅 `-p`） |
+| `--thinking <enabled\|adaptive\|disabled>` | 思考模式（仅 `-p`；hidden） |
+| `--fallback-models <m...>` | 回合级有序回落表（≤3；变长选项，贪吃尾随位置参数） |
+| `--enable-auth-status` | 输出流含 SDK auth status 消息（hidden） |
+
+**headless 约束**（`src/cli/parse.ts` 校验 + `src/cli/print.ts` 断言）：
+`--input-format stream-json` 要求 `--output-format stream-json`；`--replay-user-messages`
+要求双 stream-json；`--output-format stream-json` 要求 `--verbose`。`-p` 模式下
+子命令（update/mcp/auto-mode）不注册。stdout 走 NDJSON，运行时守卫把非 JSON
+输出改道 stderr（sentinel `[stdout-guard]`，见 [ide-integration.md](ide-integration.md)）。
 
 **headless 陷阱（变长选项贪吃位置参数）**：`--allowedTools` / `--tools` /
 `--disallowedTools` / `--mcp-config` 是变长选项（`<tools...>`），会贪吃其后的位置参数
@@ -89,6 +98,8 @@ echo "fix the bug" | atlas -p --output-format stream-json --allowedTools Read
 | `--disallowedTools <tools...>` | 拒绝工具黑名单 |
 | `--tools <tools...>` | 基础工具池（`""`=全禁 / `default`=全量 / 具名列表） |
 | `--add-dir <dirs...>` | 追加允许工具访问的目录 |
+| `--restricted` | 受限模式：剥 Bash/WebFetch/Agent 工具、拒 bypass、忽略 user/project/local settings（env 等价 `ATLAS_RESTRICTED`） |
+| `--permission-prompts none` | ask 类权限全自动 deny（折入 dontAsk 语义） |
 
 ### 上下文 / 系统提示
 
@@ -156,4 +167,17 @@ atlas auto-mode critique    # AI 反馈你的自定义规则（--model 可换模
 模型车道 = OpenAI 协议静态键（无账号/订阅面）。配置来源优先级：
 `settings.json`（`providers` + `modelRoles.<role>.models`）→ 环境变量
 `ATLAS_<ROLE>_MODEL` / `OPENAI_AUTH_TOKEN` / `OPENAI_API_KEY`。
-详见 [network-config.md](network-config.md)。
+
+- **settings 先经链**：settings.json 一旦命中任何 provider 条目，env 变量即被忽略
+  （即使该条目未覆盖当前角色）；env 仅在字段缺省时生效（issue #3-3）。
+- **`baseURL` 按原样使用**：自定义 provider 的 baseURL 必须写全（OpenAI 兼容网关
+  通常要求 `/v1` 后缀；`http://host:8999` 会 404，`http://host:8999/v1` 才通）。
+- **池内模型 id 建议全 ref 形**（`provider/model`）：裸 id 不做 providers 表归一。
+详见 [network-config.md](network-config.md) 与 [settings.md](settings.md)。
+
+## 开发面入口（非安装 CLI）
+
+仓库内另有开发/验真入口（`src/cli/dev.ts`，`DEV_FLAGS` 五件：`--tools` / `--skills` /
+`--check` / `--e2e` / `--auth-help`），经主入口调用（如 `bun run src/atlascode/cli.ts --e2e`，
+配 `ATLAS_ASCEND_MOCK=1`）。这些 flag 属开发验真面，**不在** npm 安装版
+`atlas`/`atlascode` 主命令上（`src/cli/parse.ts` 无注册）。

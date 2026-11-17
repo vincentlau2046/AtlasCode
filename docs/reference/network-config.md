@@ -1,8 +1,8 @@
 # 网络与模型配置
 
 > 内容事实源：`src/modelprovider/`（roles.ts 角色池 / modelprovider.ts 车道 /
-> errorMessaging.ts 错误面）、`src/tui/utils/settings/types.ts`（providers/modelRoles
-> 字段）、`src/engine/tools/web/webSearchProvider.ts`（G-2 WebSearch 客户端面）、
+> errorMessaging.ts 错误面）、`src/kernel/settings/types.ts`（TUI 车道 providers/modelRoles
+> 字段；engine 车道 = `src/engine/config/types.ts` `SettingsSchema`）、`src/engine/tools/web/webSearchProvider.ts`（G-2 WebSearch 客户端面）、
 > `docs/env-defaults-decision.md`（env 面决策记录）。
 
 ## 模型车道（OpenAI 协议静态键）
@@ -18,13 +18,12 @@ AtlasCode 无账号/订阅/refresh-token 面：模型调用一律走 **OpenAI �
 {
   "providers": {
     "bailian": {
-      "baseUrl": "https://<your-openai-compatible-endpoint>/v1",
+      "baseURL": "https://<your-openai-compatible-endpoint>/v1",
       "apiKey": "sk-...",
       "models": ["qwen38-27b"]
     }
   },
   "modelRoles": {
-    "main":    { "models": ["bailian/qwen38-27b"] },
     "small":   { "models": ["bailian/qwen38-27b"] },
     "fast":    { "models": ["bailian/qwen38-27b"] },
     "premium": { "models": ["bailian/qwen38-27b"] }
@@ -32,8 +31,9 @@ AtlasCode 无账号/订阅/refresh-token 面：模型调用一律走 **OpenAI �
 }
 ```
 
-- 角色池（modelRoles）= 核心功能：main/small/fast/premium 等角色各持一列模型，
-  角色内水平 fallback（roles.ts）。
+- 角色池（modelRoles）= 核心功能：三角色枚举 `premium` / `fast` / `small`（`MODEL_ROLES`）
+  各持一列模型，角色内水平 fallback（`roles.ts` `getRoleModels`）。池内写全 ref 形
+  `provider/model`（裸 id 不归一，见 issue #3-1）。
 - 未配角色池时报错文案会指路：`Add modelRoles/providers to ~/.atlas/settings.json,
   or set ATLAS_<ROLE>_MODEL`（modelprovider.ts）。
 - `--model` 选项可用角色别名（`small`）或 `provider/model` 引用。
@@ -45,7 +45,7 @@ AtlasCode 无账号/订阅/refresh-token 面：模型调用一律走 **OpenAI �
 |---|---|
 | `OPENAI_AUTH_TOKEN` | OpenAI 协议 Bearer 静态键（主） |
 | `OPENAI_API_KEY` | 同上（兼容名） |
-| `ATLAS_<ROLE>_MODEL` | 按角色指定模型（如 `ATLAS_MAIN_MODEL=provider/model`） |
+| `ATLAS_<ROLE>_MODEL` | 按角色指定模型（`<ROLE>` ∈ `PREMIUM` / `FAST` / `SMALL`，如 `ATLAS_SMALL_MODEL=provider/model`） |
 
 ## 搜索（WebSearch 工具）
 

@@ -2,7 +2,7 @@
 
 > 内容事实源：`src/sandbox/`（config.ts / createSandboxManager.ts / sandbox-backend.ts /
 > sandbox-events.ts / violationText.ts / types.ts / runtime.ts）、
-> `src/permissions/sandboxAccess.ts`、`src/tui/utils/settings/types.ts`（`sandbox` 字段）。
+> `src/permissions/sandboxAccess.ts`、`src/kernel/settings/types.ts`（TUI 车道 `sandbox` 字段，嵌套键含 enabled/failIfUnavailable/allowUnsandboxedCommands/network/filesystem/ignoreViolations/excludedCommands/autoAllowBashIfSandboxed/enableWeakerNestedSandbox/enableWeakerNetworkIsolation/ripgrep）。
 
 ## 是什么
 
