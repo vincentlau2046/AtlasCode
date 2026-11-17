@@ -65,3 +65,10 @@
 4. **fixup 范围扩 2 条（顺带订正，同 fixup commit）**：① (c3) fallback 注释「glm 不在池内 → 追加」与断言矛盾（正因归一后去重命中才不追加）；② (c3) 标题「三 arm 行为不变」对 fallback 腿字面不成立（可观测输出 3→2 条，变的是池归一连带非 arm 码面）——措辞订正防后人误读。
 5. **合并次序钉（新增，Main 必读）**：Main 工作树在途未提交 hoist 形修形与 PR 源头形同域冲突——normalizeRef 恒等幂等但**禁双落**：merge 时二选一（**PR 优先进**，Main 弃在途形或以 PR 为基 rebase），记账按实际落形；gate 判据两形同格。
 6. **流程**：fixup 到达 → 记账面并入 → Main gate → 段 L 0.1.123。
+
+## §8 f4 §7-3 勘误 + 去重钉覆盖裁定（2026-11-17；Main 技术观察触发，f4 差分推演复核成立）
+
+1. **§7-3 勘误（连带 Atlas-reveiw 补证一）**：(c3) fallback 腿 = 池 `['Qwen38-27B-TXT']` 裸 + fallback `'glm'`（∉池）——修形前后均 2 条（首元素形变非条数变），「去重命中数可升」钉（池裸 X + fallback 裸 X → [X, provider/X]→[provider/X]，2→1）**未由 (c3) 落地**。Atlas-reveiw 补证一与 f4 §7-3 采认均误，勘误在案（双复核失准定因 = 判读时未做修形前后条数差分推演，凭断言形直觉认定——方法论注记：判据钉落地主张须差分推演背书）。
+2. **裁定（Main 二选一呈裁）：A 扩形采认**——PR fixup 增**一个最小去重钉测试**（池含裸 id + fallback 同名裸 id → 修形后归一单条去重命中，约 4 行，同测试文件内），(c3) 既有腿保留（∉池追加路径覆盖有效）；**Main 补钉测试文件不落**（与 PR 件重叠面大：④≈(c3) session 腿/⑤=新增件/②≈(c2)，双文件重叠维护成本 > 增量价值；⑤ 内容 = A 扩形新增件）。fixup 总范围 = §7-4 版本归属四处 + 2 条措辞订正 + 本条 1 测试。
+3. **Main 在途保留面（并入件 C 扩形）全部采认**：README 示例 JSON 全 ref 形 ×3 / settings.md+network-config.md+cli-reference.md 三处 #3-1 注记改形 / engine-config-endpoint-adapter.test.ts 头注 ground truth 订正——均 PR 文件面之外，PR 合入后落。
+4. **记账勘误同步**：§7-3 条以本节为准；gate 判据格 1 去重钉 = A 扩形新增件承载。
