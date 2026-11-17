@@ -172,7 +172,8 @@ atlas auto-mode critique    # AI 反馈你的自定义规则（--model 可换模
   （即使该条目未覆盖当前角色）；env 仅在字段缺省时生效（issue #3-3）。
 - **`baseURL` 按原样使用**：自定义 provider 的 baseURL 必须写全（OpenAI 兼容网关
   通常要求 `/v1` 后缀；`http://host:8999` 会 404，`http://host:8999/v1` 才通）。
-- **池内模型 id 建议全 ref 形**（`provider/model`）：裸 id 不做 providers 表归一。
+- **池内模型 id 建议全 ref 形**（`provider/model`）：池内裸 id 0.1.123 起命中
+  providers 表自动归一（issue #3-1）；未命中的裸 id 仍解析失败。
 详见 [network-config.md](network-config.md) 与 [settings.md](settings.md)。
 
 ## 开发面入口（非安装 CLI）

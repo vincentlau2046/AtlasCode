@@ -33,7 +33,8 @@ AtlasCode 无账号/订阅/refresh-token 面：模型调用一律走 **OpenAI �
 
 - 角色池（modelRoles）= 核心功能：三角色枚举 `premium` / `fast` / `small`（`MODEL_ROLES`）
   各持一列模型，角色内水平 fallback（`roles.ts` `getRoleModels`）。池内写全 ref 形
-  `provider/model`（裸 id 不归一，见 issue #3-1）。
+  `provider/model`（池内裸 id 0.1.123 起命中 providers 表自动归一；未命中的裸
+  id 仍解析失败，见 issue #3-1）。
 - 未配角色池时报错文案会指路：`Add modelRoles/providers to ~/.atlas/settings.json,
   or set ATLAS_<ROLE>_MODEL`（modelprovider.ts）。
 - `--model` 选项可用角色别名（`small`）或 `provider/model` 引用。

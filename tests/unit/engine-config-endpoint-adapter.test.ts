@@ -13,10 +13,10 @@
  *     resolveModel → modelId；旧仓 e2e banner 动态断言的 modelprovider 侧——
  *     provider 前缀剥离 = TUI 展示面，新仓无 TUI，残留守）
  *
- * 语义注（§8.29 实施期勘误，旧仓 ground truth）：getRoleModels 的池 bare ref
- * 不经 normalizeRef（仅 env/sessionModel 支归一化，旧仓 roles.ts:167-173 逐字
- * 可验真）→ 池头须为全 ref（'provider/model-id'）才经 providers 解析；池 bare
- * id 在旧仓同样不可解析（resolveModel provider 查无 → undefined，不假完成）。
+ * 语义注（§8.29 实施期勘误；0.1.123 起订正）：0.1.123 起 getRoleModels 池臂
+ * 统一经 normalizeRef（issue #3-1 根修）——池 bare ref 命中 providers 表 →
+ * 归一 provider/id；未命中表（如下方 'ghost'）仍原样透传 → resolveModel
+ * provider 查无 → undefined，不假完成（失败语义不变，本文件断言不受影响）。
  *   - resetEndpointConfigSource 跨 case 回归（注入 settings 面后 reset →
  *     裸空 stub：池头不可解析 → undefined；无 reset 则模块态泄漏跨 case）
  * mock fs + ATLAS_CONFIG_DIR 指向 /mock-home（unit 层无真实磁盘）。
@@ -113,7 +113,7 @@ const MOCK_HOME = '/mock-home'
 const USER_SETTINGS = join(MOCK_HOME, 'settings.json')
 
 /** settings 面角色池 fixture（池头解析链：全 ref 'iff/gelu' 经 providers
- * resolveModel → modelId 'gelu'；池 bare ref 不归一化，见头注语义注）。 */
+ * resolveModel → modelId 'gelu'）。 */
 const ROLE_POOL_SETTINGS = JSON.stringify({
   modelRoles: { small: { models: ['iff/gelu'] } },
   providers: {
@@ -300,7 +300,7 @@ describe('compose 装配 settings 面（§8.29 替换 env-only 版）', () => {
     })
     setFsImplementation(m.ops)
     createCoreDependencies()
-    // 池头 'ghost'（bare，池 bare ref 不归一化，见头注语义注）→
+    // 池头 'ghost'（bare，未命中 providers 表 → 透传，见头注语义注 0.1.123 订正）→
     // resolveModel provider 查无 → undefined（不假完成）
     expect(getRoleModel('small')).toBeUndefined()
   })

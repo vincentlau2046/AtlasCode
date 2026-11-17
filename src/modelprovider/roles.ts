@@ -164,7 +164,7 @@ export function getRoleModels(
     return ref
   }
 
-  // issue #3-1（0.1.122）：pool arm 同样过 normalizeRef —— 0.1.70 H-2 只覆盖了
+  // issue #3-1（0.1.123）：pool arm 同样过 normalizeRef —— 0.1.70 H-2 只覆盖了
   // sessionModel / env / fallbackModel 三个 arm，池条目原样透传导致裸 id 命中
   // resolveModel 的 provider 名支 → unknown_reference。判据（f4 triage）：
   // (a) 池条目命中 providers 表 model id → 加前缀；(b) 未知裸 id 原样透传

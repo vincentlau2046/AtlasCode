@@ -31,10 +31,10 @@
 | `alwaysThinkingEnabled` | boolean | — | thinking 常开 |
 | `ttsModel` / `asrModel` / `advisorModel` | string | — | 语音/ASR/顾问模型 |
 
-> 池内模型 id 形态（issue #3-1）：`resolveModel` 按条目原样解析——裸 id
-> （如 `"fabric-small"`）**不**会自动对 `providers` 表归一；可解析形态是全 ref
-> `"provider/model"`（如 `"maas/fabric-small"`）。建议池内一律写全 ref 形
-> （裸 id 归一化修形走 0.1.123 代码版，登记 issue #3-1）。
+> 池内模型 id 形态（issue #3-1，0.1.123 起已归一）：**0.1.123 起**裸 id
+> （如 `"fabric-small"`）命中 `providers` 表条目时自动归一为全 ref
+> `"maas/fabric-small"`；**未命中 providers 表的裸 id 仍原样透传、解析失败
+> （`unknown_reference`）**。全 ref 形（`"provider/model"`）始终合法，仍建议优先写全 ref。
 
 ## 环境变量
 
@@ -143,7 +143,7 @@ providers/modelRoles 命中。同形适用于 `OPENAI_API_KEY`/`OPENAI_AUTH_TOKE
 
 ```jsonc
 {
-  // 模型：provider/model 全 ref 或角色别名（裸 id 不归一，建议全 ref）
+  // 模型：provider/model 全 ref（池内裸 id 0.1.123 起命中 providers 表自动归一）
   "model": "maas/fabric-small",
   "defaultRole": "small",
   "modelRoles": {
