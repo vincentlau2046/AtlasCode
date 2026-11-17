@@ -81,3 +81,8 @@
 4. **f4 独立实跑**：判别单测 + adapter 回归 `bun test --isolate`（bun 1.4.4）= 33 pass / 0 fail。归一臂核心链（PR diff 复核 §6-1）此前已直证：两装配点同源吃归一后池。
 5. **PR #4 吸收收据**：对端修形 + Main fixup 全部并入 master；issue #3-1 代码面闭环（issue 回执销项候段 L 后）。
 6. **放行**：段 I 在案 → e2e gate（格 1-4 + TDD RED 直证 + canon 基线 6145/0/504 @bun 1.4.4）→ 段 L 0.1.123（SRI 记实测新锚，预注册在案）→ 生产 lane。
+
+## §10 gate 采认（f4 侧，2026-11-17；e2e 报告 r-20261117-gate-0123.md，gate @95b4f746 = GATE-PASS）
+
+1. **格 1-4 + 格 6 全 GREEN 采认**（e2e 独立实跑）：格 1 判别件 33/0 与 f4 §9-4 独立实跑逐字一致；格 2 roles 相关回归 261/0（28 文件两批）；格 3 TDD RED→GREEN e2e 独立复演（摘除 `.map(normalizeRef)` → 2/4 RED → 还原 → 6/0 GREEN）；格 4 canon 独占 6151/0/505，Δ vs 基线 6145/0/504 = 恰 +6/+1（判别件 master 侧首落）零超集恰合；格 6 四直证（merge commit 双亲保 authorship / PR diff 恰 3 files 预授权面 / fixup 恰 §8-3 面 / 两臂同源单点归一）。
+2. **段 L 放行**：GATE-PASS + f4 采认双在案 → Main 走段 L 0.1.123（bump + CHANGELOG + SRI 记 bun 1.4.4 实测新锚，锚变更源唯一性预注册在案）→ 生产 lane → issue #3 回执销项。
