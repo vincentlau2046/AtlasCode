@@ -86,3 +86,12 @@
 
 1. **格 1-4 + 格 6 全 GREEN 采认**（e2e 独立实跑）：格 1 判别件 33/0 与 f4 §9-4 独立实跑逐字一致；格 2 roles 相关回归 261/0（28 文件两批）；格 3 TDD RED→GREEN e2e 独立复演（摘除 `.map(normalizeRef)` → 2/4 RED → 还原 → 6/0 GREEN）；格 4 canon 独占 6151/0/505，Δ vs 基线 6145/0/504 = 恰 +6/+1（判别件 master 侧首落）零超集恰合；格 6 四直证（merge commit 双亲保 authorship / PR diff 恰 3 files 预授权面 / fixup 恰 §8-3 面 / 两臂同源单点归一）。
 2. **段 L 放行**：GATE-PASS + f4 采认双在案 → Main 走段 L 0.1.123（bump + CHANGELOG + SRI 记 bun 1.4.4 实测新锚，锚变更源唯一性预注册在案）→ 生产 lane → issue #3 回执销项。
+
+## §11 五段闭环终态（2026-11-17，全链一日收口）
+
+1. **段 L 发布验真（f4 轻核）**：release `88e343b8` + tag `v0.1.123` 双远端 + npm latest = 0.1.123（dist-tags 实查）+ SRI `docs/sri/v0.1.123.md` @`78759740`。
+2. **生产 lane PASS（e2e 报告 r-20261117-prodlane-123.md）**：SRI 四点全 MATCH——cli.js 18,219,983B `a960bb5f…` = bun 1.4.4 预注册新锚实测逐字（Δ+1,375B，**锚披露预注册首例全链兑现**）；web-contract 7,975B / runtime 85,213B 恒等；normalizeRef 判据面安装品真跑双腿 GREEN（裸 id 池命中 PONG 根修直证 + 严格隔离负腿 unknown_reference 逐字零伪造）+ bin 锚 GREEN。
+3. **issue #3-1 闭环**：对端 PR #4 as-is 合入（aa572f2b）+ Main fixup（572562d7）+ 判据面 gate/生产双验真；issue #3 公开回执由 f4 落（销项）。
+4. **波终定谳**：池内裸 id 命中 providers 表自动归一 `provider/id`；未命中裸 id 透传 `unknown_reference` 失败语义不变；去重命中数可升为预期行为（(c4) 钉）；bun 工具链 1.4.2→1.4.4 锚变更随本波披露（预注册-实测-SRI 三点链首例）。
+5. **方法论沉淀**：C 形（对端 PR as-is + master fixup + master tip gate）首例全链走通；权限分类器 peer-merge 拦截 → 用户亲手 merge 为唯一合规通路（反 permission-laundering 实证）；判据钉落地主张须差分推演背书（§8）。
+6. **后续**：PR #5（theme 灰阶 WCAG，0.1.124 候）窗口开启——同形链（用户 merge → Main fixup → gate → 段 L → 生产 lane），工单 `docs/2026-11-17-0124-theme-grayscale-ticket.md` 审计已在案。
