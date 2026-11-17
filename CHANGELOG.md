@@ -4,6 +4,14 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.122（2026-11-17）
+
+**docs-only 版本**（零产品码；gate 豁免 = 格 1 零 src/tests/构建链实证，f4 抽核格 1-5 全 PASS @eb892576）。波报告 docs/2026-11-17-0122-docs-normalization-wave-report.md。
+
+- docs 归一化：reference 12 件活码复核刷新（勘误 11 处）；新增 slash-commands.md（61 名全清单）与 settings.md（全字段 + configDir 链）；ide-integration.md 重写；hooks.md 事件面 31 事件全列。
+- issue #3 三注记并入（裸 id 不归一 / baseURL /v1 / settings 先经链）。
+- B 面：命名归一 2 改名、状态头注 122 件、过期归档 21 件（INDEX 路由表）、release-governance 四纪律落档、B5 漂移清单（机械修 4 + 登记裁定 2）。
+
 ## v0.1.121（2026-11-16）
 
 **S0-R5 follow 恢复协议两缺口**（登记档 @2ef06607 消费侧 e2e P1 实测 +
