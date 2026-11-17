@@ -4,6 +4,15 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.123（2026-11-17）
+
+**modelRoles 池臂 normalizeRef 根修**（issue #3-1；代码修形由 Atlas-reveiw PR #4 交付，用户 as-is merge aa572f2b + Main master fixup 572562d7）。波报告 docs/2026-11-17-0123-model-role-pool-wave-report.md；gate r-20261117-gate-0123 GATE-PASS。
+
+- 修复：角色池（`modelRoles.<role>.models`）内裸 model id 命中 `providers` 表时自动归一为 `provider/id` 全 ref 形——0.1.70 H-2 归一守卫此前只覆盖 sessionModel/env/fallbackModel 三臂，池臂透传导致解析失败（unknown_reference）。未知裸 id 仍原样透传、失败语义不变。
+- 行为变化（预期钉）：池内裸 id 与 `--fallback-model` 同名场景，refs 由 3 条缩为 2 条（归一后去重命中）。
+- 文档：README 示例池改全 ref 形 ×3；settings/network-config/cli-reference 三处 #3-1 注记改形（归一已落 + 未命中仍失败防误读）。
+- 工具链：CI bun pin 1.4.4（并入件 1f4ea599）；dist 锚随 bun 1.4.4 工具链预期变更（SRI 记实测新锚）。
+
 ## v0.1.122（2026-11-17）
 
 **docs-only 版本**（零产品码；gate 豁免 = 格 1 零 src/tests/构建链实证，f4 抽核格 1-5 全 PASS @eb892576）。波报告 docs/2026-11-17-0122-docs-normalization-wave-report.md。
