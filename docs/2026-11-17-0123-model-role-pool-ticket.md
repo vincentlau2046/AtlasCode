@@ -72,3 +72,12 @@
 2. **裁定（Main 二选一呈裁）：A 扩形采认**——PR fixup 增**一个最小去重钉测试**（池含裸 id + fallback 同名裸 id → 修形后归一单条去重命中，约 4 行，同测试文件内），(c3) 既有腿保留（∉池追加路径覆盖有效）；**Main 补钉测试文件不落**（与 PR 件重叠面大：④≈(c3) session 腿/⑤=新增件/②≈(c2)，双文件重叠维护成本 > 增量价值；⑤ 内容 = A 扩形新增件）。fixup 总范围 = §7-4 版本归属四处 + 2 条措辞订正 + 本条 1 测试。
 3. **Main 在途保留面（并入件 C 扩形）全部采认**：README 示例 JSON 全 ref 形 ×3 / settings.md+network-config.md+cli-reference.md 三处 #3-1 注记改形 / engine-config-endpoint-adapter.test.ts 头注 ground truth 订正——均 PR 文件面之外，PR 合入后落。
 4. **记账勘误同步**：§7-3 条以本节为准；gate 判据格 1 去重钉 = A 扩形新增件承载。
+
+## §9 段 I 采认（f4 活码实核 2026-11-17，PASS）
+
+1. **C 形序列验真**：aa572f2b（用户亲手 `gh pr merge 4 --merge`，MERGED 2026-11-17T13:59:08Z，merge commit 保对端 authorship）→ 572562d7（Main fixup，7 files +42/−24）→ 943c9e7c（波报告）；双远端 push 对齐。
+2. **fixup 对表（§7-4 + §8-2 逐项）PASS**：① 版本归属 0.1.122→0.1.123 ×4 + 文件改名 `-0123`（grep 归属面残留 = 零，f4 独立实证）；② (c3) 措辞 ×2 订正吻合（标题改「fallback 腿输出随池归一连带，arm 码面不变」+ 注释改「归一形比对未命中追加/命中去重」）；③ (c4) 去重钉测试落 PR 测试文件内（A 扩形定形：池裸 `glm`+`Qwen38-27B-TXT` + fallback 裸 `glm` → 修形前 3 条/修形后 2 条差分背书在注记，断言 2 条恰合）；④ 并入件 C 四件全落（README 示例 ×3 全 ref 形 + settings/network-config/cli-reference 三注记含正向归一面 + 负向透传防误读面双要素 + adapter 头注 0.1.123 订正且既有断言面零改——'ghost' 透传语义注记对表吻合）。
+3. **diff 边界（格 6 扩及 fixup）PASS**：7 files 全在工单预授权面（roles.ts 注释单行 / 测试件改名+扩 / README / 三 docs / adapter 头注+注释）——零产品行为码超出。
+4. **f4 独立实跑**：判别单测 + adapter 回归 `bun test --isolate`（bun 1.4.4）= 33 pass / 0 fail。归一臂核心链（PR diff 复核 §6-1）此前已直证：两装配点同源吃归一后池。
+5. **PR #4 吸收收据**：对端修形 + Main fixup 全部并入 master；issue #3-1 代码面闭环（issue 回执销项候段 L 后）。
+6. **放行**：段 I 在案 → e2e gate（格 1-4 + TDD RED 直证 + canon 基线 6145/0/504 @bun 1.4.4）→ 段 L 0.1.123（SRI 记实测新锚，预注册在案）→ 生产 lane。
