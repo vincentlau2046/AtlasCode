@@ -1,6 +1,8 @@
 # AtlasCode 品牌串预分类表（Tier 3 第4项）
 
 > 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+>
+> **快照档标注（0.1.122 B5 f4 裁定）**：本件为品牌串预分类 = 分类决策记录（落盘时点快照），内容不随活码刷新——文中 src 引用反映落盘时点，时效性以活码为准（0.1.122 B5 抽查存量缺引用面即此性质，不修）。
 
 > **目的**：旧仓 AtlasHarness → 新仓 AtlasCode 迁移时，品牌串机械化替换的参照表。F 波执行前完成预分类，F 波按本表机械替换。
 > **扫描日期**：2026-09-21 · **扫描范围**：旧仓 `/home/vince/projects/AtlasHarness/AtlasHarness` 全仓（排除 node_modules/dist/.git/ascend-official/tests/fixtures）

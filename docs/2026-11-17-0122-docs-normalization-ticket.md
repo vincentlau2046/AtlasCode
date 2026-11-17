@@ -72,3 +72,14 @@
 5. **焦点④ 维持自决 + 评估池登记（已入 §4）**。
 6. **补注 3 条采记**：(a) 格 1 扩对端 PR diff 同检（已入）；(b) B4 落档逐条对实际先例工单写法（格 5 已含）；(c) 判据面先于落码声明（§3 已含）。
 7. **总判：通过**——本节在案即双信号放行。
+
+## §6 f4 抽核采认 + 格 1 豁免批复（2026-11-17，@9a1aabd1 活码独立复跑）
+
+1. **格 1 独立实证 PASS（豁免批复）**：`git diff --stat 2c94f90f..9a1aabd1 -- src tests package.json bun.lock bunfig.toml scripts tsconfig.json` f4 独立复跑 = 空；160 文件全 docs/README/CHANGELOG 面（Main 报 159，差 1 = 波报告自身，记账注记）。**gate 豁免成立，段 L 放行**。
+2. **格 2 机器核 PASS**：docs/reference+README 41 条 src 路径引用逐条实存零缺失；零行号引用（审计焦点②钉兑现）；cli-reference 31 flag 抽样全可解（8 件 parse.ts 外源 flag 落 subcommand/handler 文件逐一实锚）；ide-integration `getIdeLockfilesPaths()` 实锚 src/tui/utils/ide.ts:461。
+3. **格 3 PASS**：A2 = 61 默认名 + 条件注册（fork/peers/workflows/voice）+ INTERNAL_ONLY 五件 + install 未注册注记，对源码注册表零缺漏零多余（"suggestions" = insights 内部 prompt 子项，排除正确）；A3 = settings.md 字段面覆盖 types.ts 顶层 key 全集（多键行格式实核：ttsModel/asrModel/advisorModel、allowed/deniedMcpServers、teams.persistence 均在档）。
+4. **格 4 PASS（判读注记 1）**：归档 21 件三条件合取式抽查吻合（B2 状态补记 + git 龄 + 白名单全在）；stub 指向形使既有引用全解析（atlas-config-reference-and-template.md 原路径 stub）；CHANGELOG 反引号路径提及 = 历史记录面非活链接，不作断链判。注记：归档本件头注残留归档前「活文档/豁免」状态行——非阻断，下波 B2 顺手改。
+5. **格 5 PASS + f4 批复订正 1 件（Main 落档注记邀约形兑现）**：纪律 2 原文仅覆盖 Main→消费侧确认窗，**缺 f4 侧 docs 直推挂起窗**（0.1.119/0.1.120 两次 master fork 事故定形：Main 段 L 进行中→生产 lane 信号止，f4-staged-docs 暂存）——f4 已补钉「条款 2b」入 release-governance.md（本 commit）。纪律 1/3/4 逐字对先例吻合。
+6. **判读披露 1-6 裁定**：①工单口径订正两处（32→61 / ATLAS_CONFIG_DIR_NAME）采认，记 f4 工单勘误（f4 活码核前口径失准，Main 订正正确）；②B3 历史冻结零回写采认；③README 示例裸 id 语境保留 + 0.1.123 代码版后统一改全 ref 形采认；④纪律 2/3 ——纪律 3 采认、纪律 2 按本节 5 补钉；⑤A5 README 旧断言订正采认；⑥B5 两项裁定 = **快照标注豁免**（brand-string-classification.md / architecture-charter.md 均为决策记录快照档，头注已加标注，缺引用面不修）。
+7. **执行面披露核毕**：终态 commit 零 user-e2e/wab1 扫入（格 1 独立 diff 全 docs 面即证）；`git commit -- <pathspec>` 工作树内容坑记录采记。
+8. **段 L 放行**：格 1-5 全 PASS + 本节在案 → Main 走段 L（bump 0.1.122 + CHANGELOG docs-only 注记）→ 生产 lane 轻形。
