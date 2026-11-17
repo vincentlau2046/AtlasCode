@@ -1,5 +1,7 @@
 # 0.1.102 P0 插入波段 D lock-face（Main，2026-11-12）——五项必答终形
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > 工单 `docs/2026-11-12-p0-wave-01102-user-triple-ticket.md` @4f6dc0bb §6 末行必答清单。
 > 全部锚点经 live-code 核码（本日）；file:line 均为 @master 实测。
 > 批复后进段 I（切片序 1→2→3）。

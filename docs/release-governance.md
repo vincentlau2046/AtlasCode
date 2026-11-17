@@ -1,5 +1,7 @@
 # 发布规则（f4 规划/管理 lane 定，2026-10-06 用户裁定）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > **3 条规则定稿**（用户 2026-10-06 原话复述），**取代**早期复杂「3 支柱」草案——不新增文件、不改判据，只把发布规则收成 3 条 + 全绿闭环。
 > **跨 lane**：Main 实施发布 / e2e 验收 / f4 gate + 版本梯队。f4 = 本规则 owner（规划/管理 lane）。
 
@@ -50,7 +52,7 @@ sha1sum t.tgz   # = packument dist.shasum 即 MATCH
 
 **0.1.27**：#3 渲染缺口（`FilePermissionDialog` 缺 verdict 行）在 gate lane 发现但已随 0.1.27 发出去（历史原因：当时 #3 判据软、INCONCLUSIVE-tolerant，未硬门禁）→ 按**规则 3** 顺延 **0.1.27.1** 闭环 + 发（生产 lane 对 0.1.27.1 跑，**不跑 0.1.27**）。**从 0.1.27.1 起规则 1–3 严格套。**
 
-> 判据事实源：`docs/2026-10-05-p0-closure-status.md` §2.4/§2.5；实例 `docs/2026-10-05-live-gateway-classifier-e2e-wave.md`。
+> 判据事实源：`docs/archive/2026-10/2026-10-05-p0-closure-status.md` §2.4/§2.5；实例 `docs/2026-10-05-live-gateway-classifier-e2e-wave.md`。
 
 ## 跨 session 沟通矩阵（用户 2026-11-03 追问后固化；2026-11-02「方案给 review 审计」指令泛化为每波必审）
 

@@ -4,7 +4,7 @@
 > **用户拍板（2026-10-05，两条）**：① **#3 危险句经「分类器拦截→ASK 产品路径」强制**（非 e2e 拒绝上限回退口径）→ 需开**产品波**；② **live-gateway e2e 基建波现在开**（e2e 侧实施）。
 > 性质拆分：**波 A = e2e 测试基建（零 src/，不占产品版本号，类 0.1.17，现在开）** + **波 C = 产品波（src/，占一个 0.1.x 号，Main 实施）**。P0 封口（Option B 全 6 句绿）= 波 A（#4 绿）+ 波 C（#3 可达）+ e2e 复验 #3 现形后达成。
 > **用户裁定 #5（2026-10-05 根因定因后，本 spec §4 据此重构）**：0.1.27 = **metadata 崩修 + 波 C 合并**（同一列车）。根因 = `getPromptCache1h*` dev stub 返 `{}` → `should1hCacheTTL` `allowlist.some` 崩 → 分类器 `unavailable:true` 恒 deny → **#3+#4 两句共同被挡**（非仅 #3；**非 engine 门路由，架构波已证伪**）。崩修 = `src/tui/services/api/metadata.ts` 1 处防御（Main lane）；合 `d64467c`（波 C 拦截→ASK）同 0.1.27。崩修后 e2e 复验 S-024N/O 全 6 句绿 → 封 P0。**BR-8 品牌波仍 0.1.28（不动）**。
-> 判据事实源：`docs/2026-10-05-p0-closure-status.md` §2.4/§3（Option B 裁定链）；本文件给机制 + 白盒 + 两波分工 + 时序；**根因一手 = `user-e2e/reports/r-20261005-2330-a4f-278-classifier-rootcause-definitive.md` + f4 白盒 + `dist/cli.js:123455`（prod 证）**。
+> 判据事实源：`docs/archive/2026-10/2026-10-05-p0-closure-status.md` §2.4/§3（Option B 裁定链）；本文件给机制 + 白盒 + 两波分工 + 时序；**根因一手 = `user-e2e/reports/r-20261005-2330-a4f-278-classifier-rootcause-definitive.md` + f4 白盒 + `dist/cli.js:123455`（prod 证）**。
 
 ---
 
@@ -169,4 +169,4 @@ export interface FaultPlan { /* …既有 */ classifier?: ClassifierScript; main
 - 判定产出处：`src/tui/utils/permissions/permissions.ts`（`:505` 门 / `:649` classifyYoloAction / `:755-778` 产 `decisionReason:{type:'classifier'}`（deny）/ `:836` 拒绝上限回退）；`denialTracking.ts:12`（maxConsecutive=3）。
 - UI 渲染：`permissionVerdict.ts:50`；`BashPermissionRequest.tsx:427` / `PowerShellPermissionRequest.tsx:203`（ASK verdict 行）；`UserToolSuccessMessage.tsx:123`（自动放行句）；`useCanUseTool.tsx:47`（`setYoloClassifierApproval`）；`messages.ts:277 buildYoloRejectionMessage`（deny 面文案）。
 - 基建：`user-e2e/loop-robustness/fault-proxy.ts`（已缓冲 body）；`user-e2e/tui-diff/accept.ts`（A4F S-024N/O，当前 softTriggers=false→INCONCLUSIVE）。
-- 裁定链：`docs/2026-10-05-p0-closure-status.md` §2.4/§3（Option B + 本次拍板）。
+- 裁定链：`docs/archive/2026-10/2026-10-05-p0-closure-status.md` §2.4/§3（Option B + 本次拍板）。

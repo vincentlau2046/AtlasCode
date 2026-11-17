@@ -1,5 +1,7 @@
 # 0.1.104 lock-face（Main 段 D）——watchdog 缺省纠偏 + per-tool timeoutMs
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > 工单：`docs/2026-11-13-p0-wave-01104-watchdog-default-off-ticket.md`（§7 审计 e76aaabe）。
 > 码面基：master 9b79a635 之后（S3a 收口 4c27a8e6 + f4 工单 2 commit）。探锚全实锚，行号 @ 探锚时树。
 

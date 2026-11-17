@@ -1,5 +1,7 @@
 # AtlasCode 品牌串预分类表（Tier 3 第4项）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > **目的**：旧仓 AtlasHarness → 新仓 AtlasCode 迁移时，品牌串机械化替换的参照表。F 波执行前完成预分类，F 波按本表机械替换。
 > **扫描日期**：2026-09-21 · **扫描范围**：旧仓 `/home/vince/projects/AtlasHarness/AtlasHarness` 全仓（排除 node_modules/dist/.git/ascend-official/tests/fixtures）
 > **规则基线**：charter L7 命名三层（repo `atlascode` / 对外品牌 `AtlasCode` / 内部 `atlas`）+ L8 规则（旧「规则 6/7」= L8 STR-3 组合根 / AUT-1 状态自治，v0.8 起统一 ID）+ b 裁定 + 本文五特判裁定。

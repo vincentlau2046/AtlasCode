@@ -1,5 +1,7 @@
 # W-D-C 段 R3 lock-face 文书（agentNameRegistry 死态裁除）@ R1 后 a3edd4e3
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > row F 预注册纪律：本文书 = 段 R3 落码前的判据面冻结，先于落码报 f4 批复。
 > 勘察对象：`agentNameRegistry` 全仓引用面，R1 后 a3edd4e3 实测。
 > 段 R2 评估否决实码归档见 §0（工单 §6.3 要求，随本文书一并留档）。

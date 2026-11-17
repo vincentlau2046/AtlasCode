@@ -1,5 +1,7 @@
 # S0-R R-3 波报告（engine 解耦 + ./web-session-runtime 出口 + 安全审查修复）
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 日期：2026-11-15。工单 `docs/2026-11-15-atlasweb-s0-upstream-delivery-ticket.md` §4.5
 + f4 §5.7 @98c51bd6（R-3 继续批准 + 终态对钉死）。序列：R-2（c03f8b60）→
 **本波 R-3** → U+R 合流段 G/段 L。

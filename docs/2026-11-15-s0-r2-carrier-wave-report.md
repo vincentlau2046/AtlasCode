@@ -1,5 +1,7 @@
 # S0-R2 受支持 engine 载体出口波 — 段 I 落码波报告
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 - 日期：2026-11-15（canon 定谳跨至 11-16）
 - 工单：`docs/2026-11-15-s0-r2-engine-carrier-ticket.md` §6-3 / §7
 - lock-face：`docs/2026-11-15-s0-r2-lockface-brief.md` @25cb7454（f4 批复 @351c74c4 工单 §7，通过五点 + 2 补充钉）

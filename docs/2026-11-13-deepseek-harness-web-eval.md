@@ -1,5 +1,7 @@
 # DeepSeek Harness Web 方案调研 — atlasweb 参考评估
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 日期：2026-11-13
 对象：`deepseek-ai/deepseek-harness` @ tag `dsh-v0.2.2-rc.2`（本地只读 worktree `/tmp/dsh-022rc2`；用户既有克隆 `~/projects/deepseek-harness` 未动）
 许可证：MIT（`LICENSE`，Copyright (c) 2026 DeepSeek）

@@ -1,5 +1,7 @@
 # W-opt 国产轨 · DSH rc.8 模块研读笔记（f4 零码）— 2026-11-06 起
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 事实源：本机 `~/projects/deepseek-harness` @ `09d38feb8a`（= dsh-v0.1.0-rc.8 + 1 examples）。逐模块追加；替代方案落点 = AtlasCode port/deps 注入架构内（禁 engine→TUI import），非 vendor 照搬。
 
 ## ① compaction（研读完成 2026-11-06）

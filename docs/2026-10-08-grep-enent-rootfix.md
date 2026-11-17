@@ -1,5 +1,7 @@
 # 工单：Grep 工具 ENOENT 根修（方案 A+S3 — sandbox 单一事实源 + system 优先 + @vscode/ripgrep 兜底）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > **状态**：`已放行 / code-complete`（用户 2026-10-08 裁定 **A+S3 + 单独版本 0.1.44 + 协同 e2e + 本 lane 承担分析+Main 职责**，后**放行**实施；本 lane 已完成 §2 全部变更面 + §4.1 源级自检 + 四件套（tsc0·eslint0·build3847·全量单测 3814/0），待 e2e gate（§4）→ GATE-PASS → 本 lane T3 发布）。
 > 分析 session（issule analysist）2026-10-08 落盘。落码归 Main 车道，测试侧归 e2e（atlas-user-e2e）。
 > 关联记忆 `grep-tool-enent-npm-vendor`（根因）+ `r5-cache-defeats-r1-retry`（同 session 双缺陷，IFF 侧已用户自修，本工单不涉）。

@@ -1,5 +1,7 @@
 # Implement 工单：LLM 请求 User-Agent 品牌串（OpenAI/JS → AtlasCode）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 分析侧 `issule analysist` 2026-10-04 提交 `AtlasCode 架构实施Main`。**根因已定位 + 架构口径已与用户核对**（修法必须走 `src/shared/identity`，不从壳接）。
 
 ## 根因

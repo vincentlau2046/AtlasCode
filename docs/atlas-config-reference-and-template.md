@@ -1,5 +1,7 @@
 # AtlasCode 配置参考 + 详细模板 — 2026-10-19 f4 零码
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 - 触发：用户 2026-10-19「需要一个比较详细的模板，模板中对配置做一个比较详细说明；当前 atlas 配置是否有 help？」
 - 角色：f4 零码规划产物（规划/判据，不落码）
 - 事实源：`src/tui/utils/settings/types.ts`（schema 权威 key 面）+ `src/tui/utils/settings/constants.ts`（5 源）+ `src/tui/utils/configDir.ts`（目录解析）+ `docs/env-defaults-triage.md` / `docs/env-defaults-decision.md`（env 三档既有底）@ master 413ea12（v0.1.77 后 docs 面）

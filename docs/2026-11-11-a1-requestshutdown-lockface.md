@@ -1,5 +1,7 @@
 # A1 requestShutdown 段 D 契约设计 lock-face（Main → f4 报批）
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > 工单 docs/2026-11-11-p0-wave-a1-requestshutdown-ticket.md §3 段 D 七点必答（§7 审计修订后）。
 > 码面锚点全实锚 @ a1-0.1.96 worktree（HEAD eb9997ae）。零落码；批复后依序落码段 I。
 > 勘码基座：成员 poll 循环 waitForNextPromptOrShutdown（inProcessRunner.ts:1002，500ms poll）；

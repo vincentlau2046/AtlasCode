@@ -1,5 +1,7 @@
 # W-D-C 段 R1 lock-face 文书（backends 双目录全收敛）@ master d318ec25
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > row F 预注册纪律：本文书 = 段 R1 落码前的判据面/修形冻结，先于落码报 f4 批复；偏离预注册形须先回本改预注册。
 > 勘察对象：`src/swarm/backends/`（12 文件）vs `src/tui/utils/swarm/backends/`（9 文件），master d318ec25 实测。
 

@@ -1,5 +1,7 @@
 # AtlasCode 现状完整诊断（f4 零码全貌审计）— 2026-11-06
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 - 触发：用户 2026-11-06「先分析清楚，决策后才可以实施。我想对当前 atlascode 的现状做一次完整而全面的诊断。再考虑继续实施的事情。」——0.1.90 W-opt-1 工单已出稿（58f37586）但**双信号未发、实施冻结**，随本诊断交用户决策。
 - 被测锚定：master `16b0d68e`（= v0.1.89 五段闭环终态 + W-opt 研读 docs；f4 三证：master=tag v0.1.89^{commit}=origin ALIGNED + npm live 0.1.89 + SRI 直算三方同值）。
 - 事实源：本审计代码实查 + `docs/2026-10-14-p0-closure-audit.md`（P0 收官盘）+ 0.1.67–0.1.89 逐波工单/双报告（user-e2e/reports/ 187 份）+ `docs/2026-10-19-full-picture-wave-plan.md` + `docs/2026-11-06-dsh-study-notes.md`（8 模块研读）+ `docs/release-governance.md` + CHANGELOG。

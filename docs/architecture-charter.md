@@ -1,5 +1,7 @@
 # AtlasCode 顶层架构纲领 v0.12（草案）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > **状态：草案，架构层定稿（L0–L6）+ 全部 open question 裁定完毕（含 Tier 2 双跑/测试迁移），未实施。**
 > 本文件记录截至 2026-09-21 的架构讨论结论（v0.7）。在细节讨论完成、用户明确点头前，**不 init git、不写任何代码**。
 > 后续深化直接在本文件修订，版本号递增。
@@ -24,7 +26,7 @@
 > 6. **C-6 rollback（审视后修正：reset 非 revert）**：波次 = 回滚点（checkpoint tag `wave-a`/`wave-b`/…），回滚 = `git reset` 到上一波 tag（range revert 易冲突，单人本地仓 reset 干净）；旧仓 `a8af45b` 全绿基线 = 终极兜底。
 > 7. **C-7 .tsx 491 编译产物**：原样搬不重编译三原则（原样搬/最小插入/新逻辑落干净文件）；C 波风险低（88 丝几乎全 .ts），主战场 D 波 UI。
 > 8. **C-8 市场克隆依赖**：三层不变——E gate（gelu L1）纯 fixture 零市场克隆依赖；L4 evals 保留克隆门控（`ATLAS_ASCEND_KNOWLEDGE_DIR`，未物化 SKIP）；市场预装/验真链归 D 波壳层。
-> 9. **开工前复审勘误 pass（2026-09-22，三路 agent 复审 + 全文自读，零决策风险纯机械修正，明细见 `docs/review-2026-09-22.md`）**：① feature() 调用点 586 复现不了（代码行 575/原始 598/含双引号 622，75 flag ✓）→ 不写死、迁移时重新推导；②「全从 bun:bundle import」错（127 内建 + 45 F5 shim）→ 换 import 覆盖两种形态；③ ON_BY_DEFAULT 2 项 {TRANSCRIPT_CLASSIFIER, COORDINATOR_MODE}（F 波行/附录 1 项系 73631df 前旧值）；④ 规则数 14→15（v0.9 增 STR-4，L2 指针/L8 头注未同步）；⑤ v0.6 摘要 30 目标 12/13 互换（L4.7 明细 13/12 权威）；⑥ 双跑「每波次」修正为「engine 在场波次 C/E/D」；⑦ B14「三柱」标题修正为「承重 5 规则」（三柱 ⊂ 5 规则）；⑧ [ATLAS-HOLD] ~10 处修正为 18/14（L8.1 权威）；⑨ NpuToolchain 5→7 成员（补 isAvailable/availableCommands）；⑩ L972 行号 :34→:35 + fileHistory curried 外层注。
+> 9. **开工前复审勘误 pass（2026-09-22，三路 agent 复审 + 全文自读，零决策风险纯机械修正，明细见 `docs/2026-09-22-review.md`）**：① feature() 调用点 586 复现不了（代码行 575/原始 598/含双引号 622，75 flag ✓）→ 不写死、迁移时重新推导；②「全从 bun:bundle import」错（127 内建 + 45 F5 shim）→ 换 import 覆盖两种形态；③ ON_BY_DEFAULT 2 项 {TRANSCRIPT_CLASSIFIER, COORDINATOR_MODE}（F 波行/附录 1 项系 73631df 前旧值）；④ 规则数 14→15（v0.9 增 STR-4，L2 指针/L8 头注未同步）；⑤ v0.6 摘要 30 目标 12/13 互换（L4.7 明细 13/12 权威）；⑥ 双跑「每波次」修正为「engine 在场波次 C/E/D」；⑦ B14「三柱」标题修正为「承重 5 规则」（三柱 ⊂ 5 规则）；⑧ [ATLAS-HOLD] ~10 处修正为 18/14（L8.1 权威）；⑨ NpuToolchain 5→7 成员（补 isAvailable/availableCommands）；⑩ L972 行号 :34→:35 + fileHistory curried 外层注。
 >
 > **v0.10 变更摘要（2026-09-22，执行弹性 + 双跑脱耦——不改架构裁定，改执行策略与验证接线）**：① **双跑等价基线脱耦 IFF 网关**（L5.1 新节）：14 种子测试分两层——层 1 确定性等价（fixture replay，**不依赖 IFF**，等价性必要条件/基线）+ 层 2 增量置信（live gateway，nice-to-have）；等价性以层 1 为准，解掉「验证机制循环依赖待定案网关」。② **执行弹性三件套**（L5 新节 + 独立文档 `docs/execution-strategy.md`）：并行地图（B 波可并行 2 session × 2 域，判据=**可检测 + 机械可恢复**；C 波纯串行=设计耦合不可机械恢复；A/E/D/F 串行）+ 共存路径（每波定义「最小可交付 + 暂停边界」，旧仓 a8af45b 始终全绿可共存）+ 可暂停协议（波次 tag checkpoint + 恢复重跑 test gate + C 波 >20 天超阈值评估拆波/缩范围）。③ **C 波前 spike**（L5 新节）：开 C 波前挑 memory 域（反向依赖最少）做 1-2 天单域 spike 校准 225/88 估算 + EngineState 并发模型，把最大不确定性从估算变实测。④ **工作量粗估**（独立文档）：A 2-3 天 / B 5-8 天（并行 3-5）/ C 10-20 天 / E 3-5 / D 8-15 / F 3-5，总 30-60 连续天，含精力周期实际 2-4 月。
 >

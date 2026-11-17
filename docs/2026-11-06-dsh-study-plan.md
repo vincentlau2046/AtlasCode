@@ -1,5 +1,7 @@
 # W-opt 国产轨 · DSH 模块研读计划（f4 零码分析步）— 2026-11-06
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 - 触发：0.1.89 收口后按用户 2026-10-23/11-05 持续授权自动推进（P0 对齐轨 0.1.80–0.1.89 全闭环 → P1 W-opt 开波）
 - 事实源：本机 `~/projects/deepseek-harness`（**HEAD 09d38feb8a = dsh-v0.1.0-rc.8 + 1 examples 提交 @ 2026-08-25**，55 包；工作树仅 1 处 notes 修改非本轨）；路线图 `docs/roadmap-domestic-and-residuals.md` §1（2026-09-29）
 - 角色：f4 = 研读/映射/工单（零码）；落码 = Main；gate = e2e。不委派 subagent，全主线程。

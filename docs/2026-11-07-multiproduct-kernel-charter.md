@@ -1,5 +1,7 @@
 # 统一内核多产品纲要（atlascode → atlasoffice/atlascomic 并行）— 2026-11-07 f4 纲要稿 v1
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 - 定性：**纲要性方向文档**（用户 2026-11-07 裁定「后面的动作沿着这个主线」）——统领后续排期与架构决策；细部设计归各激活波工单，本稿不预付实现细节
 - 用户原语：统一内核 + 多产品（当前 atlascode；接下来 atlasoffice、atlascomic 等）；内核一样，品牌/系统提示词/WebUI 性态/甚至 app 形态不同；**atlascode 完成既定改造达到「可启动第二产品标准」时，并行开发两个甚至三个产品**
 - 事实源：`architecture-charter.md`（L1 单包+目录边界+拆包触发器〔独立发版/外部消费〕/ L3 端口自治 / L4.7 组合根 / IDN-1 构建配方裁定）+ `src/atlasoffice/index.ts` 占位三面相（2026-09-28 裁定）+ `atlascode/compose.ts` 唯一组合根实查 + `docs/2026-11-06-full-diagnosis.md`（风险 #5 tui 体量）+ `docs/2026-11-07-wd-team-orchestration-design.md`（W-D 队列）

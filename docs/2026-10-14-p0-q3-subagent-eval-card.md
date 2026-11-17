@@ -1,5 +1,7 @@
 # Q3 subagent 独占波（0.1.61+ 波池末位）· 决策前分析卡（f4 规划面）
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > **2026-10-14 f4 出卡**（用户裁定「Q3 详细分析核心诉求 + 会增加什么功能」= 界① 决策前输入；Q3 已裁 2026-10-13 = 排到最后版本作为独立波（池末位独占，不与他波混载，AD-45 先例 = 大波需用户界①，Main 不放宽启动门））。
 > **PAC 依据**：`docs/2026-10-12-p0-pac-0155.md` V2-10（C3-1 subagent background-by-default，★★ 大·独占波）+ §3 C3 簇（C3-1…C3-6）+ `docs/2026-10-10-p0-pac-0148.md` C3 面。
 > **live 锚定**（@0.1.63 c6c947d，grep/Read 只核 2026-10-14）：TUI 侧 `src/tui/tools/AgentTool/`（run_in_background 参数 L45 + isAsync 支 L160 + runAgent isAsync 异步执行 + finalizeAgentTool）+ 任务面板 `src/tui/tasks/LocalAgentTask/LocalAgentTask.tsx` 696 行（running/completed/failed + 进度 + failed: 通知构造 L252 + completeAgentTask L425）+ **组合根通知链已接线**（`src/atlascode/compose.ts` ⑪ S-E2 A9 L305：`setTaskNotificationHandler` → `enqueuePendingNotification` messaging 真队列）+ 引擎侧 `src/engine/tools/agent/AgentTool.ts` L17 **同步-only 残留守**（「本版仅同步路径，input schema 去掉 run_in_background」）+ `runAgent.ts` L26 异步生命周期残留守（∅）+ fork `forkSubagent.ts`（feature-gated 默认关）。
@@ -103,7 +105,7 @@
 
 ### 8.1 版本事实核（@2026-10-14）
 
-- **0.1.64 = 临时双 PR 合一波已占用**（用户 10-13 晚 22:18 提交）：`c9c3133` feat(spinner+modelprovider) 慢模型流式显示对齐（G1 TTFT 状态指示 + G2 stall 守卫 + G3 省略号）+ 去 IFF 硬编码（describeEndpointFailure 复合三路分类 + gatewayUnreachableRemediationHint 参数化，IFF 字面量移除）→ release **26d989e** + tag v0.1.64 + npm live 0.1.64（工单 `docs/2026-10-13-p0-wave-0164-ticket.md` + gate `r-20261013-gate-064.md` + 生产 lane `r-20261014-prodlane-064.md` 全五段在场）。
+- **0.1.64 = 临时双 PR 合一波已占用**（用户 10-13 晚 22:18 提交）：`c9c3133` feat(spinner+modelprovider) 慢模型流式显示对齐（G1 TTFT 状态指示 + G2 stall 守卫 + G3 省略号）+ 去 IFF 硬编码（describeEndpointFailure 复合三路分类 + gatewayUnreachableRemediationHint 参数化，IFF 字面量移除）→ release **26d989e** + tag v0.1.64 + npm live 0.1.64（工单 `docs/archive/2026-10/2026-10-13-p0-wave-0164-ticket.md` + gate `r-20261013-gate-064.md` + 生产 lane `r-20261014-prodlane-064.md` 全五段在场）。
 - **→ 版本重排**：**0.1.65 = Q3 地基波 / 0.1.66 = Q3 默认翻转波**（两波均 = 0.1.61+ 波池末位 Q3 独占波，不与他波混载裁定不变）。
 - **基线链**：0.1.65 落码基线 = **26d989e（v0.1.64，master HEAD，无在途波）**；0.1.66 落码基线 = 0.1.65 release。
 - **零回归基线延长**：前波特性面精确同值清单 **0.1.56–0.1.63（既有 7 波累积）→ +0.1.64**（spinner-gates 面 computeStallState/wantsStatusIndicator + modelprovider 面 describeEndpointFailure/gatewayUnreachableRemediationHint token 族，e2e 生产 lane 面由 e2e 定 token 集）。

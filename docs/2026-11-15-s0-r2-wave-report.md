@@ -1,5 +1,7 @@
 # S0-R R-2 波报告（replay/follow 订阅机 + limits 全表 + cursor ledger）
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 日期：2026-11-15。工单 `docs/2026-11-15-atlasweb-s0-upstream-delivery-ticket.md` §4
 + 呈批书 `docs/2026-11-15-s0-ur-lockface-brief.md` §7.3-§7.5（f4 批复 @f1f1099d；
 f4 §5.6 R-2 继续批准候披露）。序列：R-1（251d08c2）→ **本波 R-2** → R-3。

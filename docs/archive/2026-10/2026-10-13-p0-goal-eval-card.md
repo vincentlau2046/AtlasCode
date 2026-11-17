@@ -1,5 +1,7 @@
 # /goal（CC 2.1.139）全面演化方案 · 深度分析（f4 规划面，决策前输入）
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > **2026-10-13 f4 出卡**（0.1.61+ 波池排程面：0.1.61 首车已收口，/goal = 池内次项；用户裁定「全面演化方案是否成熟，做详细推演，不能大概了是」→ 本卡 = 全量深度版）。
 > **素材三面全核**：① 上游双源全量（源 B `claude-code-upstream` CHANGELOG /goal 12 条演化条目 + 核心条目原文 / 源 A `claude-code-system-prompts` 3 份 prompt 资产全文：ProposeGoal 工具描述 2.1.227 + Session stop hook active 2.1.173 + Autonomous loop check 2.1.246）② live 码面 12 锚点锚定（@0.1.61 7ad450d，grep/Read 只核）③ harness 工程全量盘点（user-e2e 探针资产映射）。
 

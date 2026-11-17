@@ -1,5 +1,7 @@
 # 0.1.120 段 I 波报告 — headless result usage 聚合 + USD 计费面首建
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 落码 commit `193d1fe3`（master 直落；lock-face = 工单
 docs/2026-11-16-headless-usage-result-ticket.md §7 + 呈批书 L6-L8，f4 §10
 @7ecf0fa4 批复）。

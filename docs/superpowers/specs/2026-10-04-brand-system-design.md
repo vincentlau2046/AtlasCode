@@ -1,7 +1,7 @@
 # AtlasCode 品牌系统设计 spec
 
 > **状态**：设计 spec，待审批 · **不落地代码** · 实施在 TUI 优化专项完成后以**多个干净 0.1.x 版本**逐一落地（不升 0.2.x）
-> **日期**：2026-10-04 · **作者**：品牌标志专项 · **关联**：`docs/2026-10-04-brand-assets-audit.md`（现状审计）、`docs/brand-string-classification.md`（串分类）、`docs/architecture-charter.md` L7/IDN-1/IDN-2
+> **日期**：2026-10-04 · **作者**：品牌标志专项 · **关联**：`docs/archive/2026-10/2026-10-04-brand-assets-audit.md`（现状审计）、`docs/brand-string-classification.md`（串分类）、`docs/architecture-charter.md` L7/IDN-1/IDN-2
 
 ---
 

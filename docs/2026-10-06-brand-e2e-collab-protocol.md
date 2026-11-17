@@ -1,7 +1,9 @@
 # 品牌序列（0.1.29~0.1.32）× e2e 协同闭环协议
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > 触发：2026-10-06 用户指示「从 main session 继承闭环逻辑，协同 e2e 完成闭环严谨性，明确协同协议」。
-> 继承源：`docs/2026-10-05-p0-closure-status.md`（协议增量 ①②③ + 3-round + packument 验真）/ `docs/wave-b-s1-blocker.md`（CI 四件套定义）/ `docs/dev-loop.md` §3（四件套命令）/ 记忆 `3-round-closed-loop`。
+> 继承源：`docs/archive/2026-10/2026-10-05-p0-closure-status.md`（协议增量 ①②③ + 3-round + packument 验真）/ `docs/wave-b-s1-blocker.md`（CI 四件套定义）/ `docs/dev-loop.md` §3（四件套命令）/ 记忆 `3-round-closed-loop`。
 > 性质：操作协议（非设计 spec）。版本梯队判据事实源 = spec `docs/superpowers/specs/2026-10-04-brand-system-design.md` §14 + 四份 writing-plans。
 
 ---
@@ -74,7 +76,7 @@ BR-8 代码改动已由 brand 预研并导出 WIP patch（`docs/superpowers/plan
 
 - 记忆 `brand-assets-audit.md` 更新版本行（发布 hash/tag/shasum + verdict + 报告路径）
 - `CHANGELOG.md` 版本段（发布提交内）
-- 异常/定因 → `user-e2e/reports/` 归档路径登记进 `docs/2026-10-05-p0-closure-status.md` 式状态文档（品牌序列状态记本文件 §7）
+- 异常/定因 → `user-e2e/reports/` 归档路径登记进 `docs/archive/2026-10/2026-10-05-p0-closure-status.md` 式状态文档（品牌序列状态记本文件 §7）
 
 ## 6a. 发布通道备记（housekeeping 事实，后续版本发布须知）
 

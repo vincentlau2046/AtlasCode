@@ -1,5 +1,7 @@
 # 0.1.99 S1a 步 2 — getConfigDirName 消费点锚定分型全量清册（row F 批复条件②）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 f4 批复 @§8 b8a55c40（2026-11-12）：双出口拆分 `getConfigDirName()`（homedir 锚，四层全序）/
 `getConfigDirNameForProject()`（项目根锚/名字标签，剥 L1 三层）。本清册 = `join(…getConfigDirName)`
 域级扫描逐点分型归档（anchored 正则 + 逐点人工复核），随波收尾归档。

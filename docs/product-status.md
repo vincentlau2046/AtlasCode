@@ -1,5 +1,7 @@
 # AtlasCode 产品状态与功能实现描述（2026-09-29）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > 权威快照。配套：`docs/execution-strategy.md`（逐波执行记录 §8.53–§8.73）、
 > memory `atlascode-wave-c-progress.md`（波进度权威）。
 > 旧仓 ground truth = `AtlasHarness/AtlasHarness @ a8af45b`（只读，tag `atlascode-baseline-2026-09-21`）。

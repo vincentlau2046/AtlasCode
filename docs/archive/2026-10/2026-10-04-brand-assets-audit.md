@@ -1,5 +1,7 @@
 # AtlasCode 品牌标志现状与优化专项分析
 
+> 状态：收口（0.1.122 B2 批量补记：所属波已完结并发布）
+
 > **扫描日期**：2026-10-04 · **范围**：master @ 0.1.22 全仓 `src/` + `package.json` + `docs/`（排除 node_modules / .git / worktrees）
 > **方法**：一手源码逐文件审计，每条结论附 `file:line` 证据
 > **关联文档**：`docs/brand-string-classification.md`（2026-09-21 品牌串预分类表）、`docs/architecture-charter.md` L7 命名三层

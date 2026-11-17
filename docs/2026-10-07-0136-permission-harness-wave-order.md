@@ -1,5 +1,7 @@
 # 2026-10-07 0.1.36 权限/harness 硬化波 工单（f4 → Main，单信号）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > **Lane 分工**：f4（atlascode-f4 session）= 规划/管理/同步（本工单 + 分析归档）；**Main = 实施 + 全部版本/master 操作**；**e2e = 原有定位**（gate/生产 lane/回归/报告/verdict，不碰版本/master）。
 > **事实源**：`docs/2026-10-06-permission-harness-trace-analysis.md`（P1–P13 + §8 plan 状态机 + §9 全 loop 矩阵 + **§10 裁定记录 R1–R4（用户 2026-10-07 拍板）**）+ `docs/release-governance.md`（三支柱）。
 > **Main ACK = 接手 + 开 `worktree-0.1.36` 启动切片①**。

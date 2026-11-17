@@ -1,5 +1,7 @@
 # Slash 命令精简 + 补全 工单（2026-10-07）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 > 来源：2026-10-07 f4 全量命令普查（~60 活跃命令 + 14 tombstone），用户逐轮裁定。
 > 上游对照源：`claude-code-sourcemap/restored-src`（Claude Code v2.1.88 还原源码）。
 > 分工：f4 出工单+判据 / Main 落码+发布 / e2e 逐波 gate（守 lane 边界：e2e 不动 master）。

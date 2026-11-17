@@ -20,7 +20,7 @@
 ## 2. 品牌 mark 现状（过渡态记录）
 
 - **现状 mark = "AH" 块字 monogram**（`Clawd.tsx:99,125` 两处 `AH_ART`，5 行块字
-  A+H 首字母）——**旧项目 AtlasHarness 残留**（审计 `2026-10-04-brand-assets-audit.md`
+  A+H 首字母）——**旧项目 AtlasHarness 残留**（审计 `docs/archive/2026-10/2026-10-04-brand-assets-audit.md`
   §1.2 P0 判定），既非 Anthropic Clawd 也非 AtlasCode 目标 mark。
 - **目标 mark = 光锥（Beam）**（spec §8：`Clawd.tsx`→`Beam.tsx` + `AnimatedClawd.tsx`→
   `AnimatedBeam.tsx` + theme 键 `clawd_body/clawd_background`→`brand_mark/brand_mark_bg`

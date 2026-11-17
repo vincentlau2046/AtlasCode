@@ -1,5 +1,7 @@
 # G-α 冒烟清单（roadmap §4 W5-5b）
 
+> 状态：活文档（0.1.122 B2 豁免：设计/研究/制度面，非工单状态机）
+
 发布门禁 G-α v0.1.0 全绿前置（`docs/roadmap-domestic-and-residuals.md` L172）：
 以下各项全过方可切 `v0.1.0` 注解 tag + push + GitHub Release（alpha，内部）。
 需 P-1（远端仓库建立，解除 no-push）后方可执行 push/Release 环节。
