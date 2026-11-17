@@ -19,7 +19,7 @@
  *    修 = Ansi.tsx dim 注入门加 `!span.props.bold`（bold 优先于 dim，强调不弱化）。
  *  - 件 2 真 RED（300 号件）：dark-ansi 主题 inactive/subtle = 'ansi:white'（SGR 37）
  *    ——在 16 色终端上 SGR 37 与默认前景几乎同色，dim 文本与正常文本不可区分；
- *    对照 truecolor dark 主题同层为 rgb(153,153,153)（16 色降级 ≈ SGR 90 blackBright）。
+ *    对照 truecolor dark 主题同层为 rgb(170,170,170)（16 色降级 ≈ SGR 90 blackBright）。
  *    修 = darkAnsiTheme inactive/subtle → 'ansi:blackBright'（与 light-ansi 的
  *    blackBright 车道对称）。
  *  - 已知不修（登记）：ThemedText precedence（dimColor 压过显式 color）使
@@ -196,12 +196,12 @@ describe('K6-14件2 · dim 与正常文本 escape 序列可区分（300 号件�
     expect(darkAnsi.inactive).not.toBe(darkAnsi.text)
   })
 
-  test('锚（修前即真）：truecolor dark 主题 dimColor 输出 153 灰真彩码（与默认前景可区分）', async () => {
+  test('锚：truecolor dark 主题 dimColor 输出 170 灰真彩码（与默认前景可区分；0.1.94 对比度 7.4→9.0:1）', async () => {
     const { Text } = await import('../../src/tui/ink.js')
     const out = await renderToText(
       withProviders(React.createElement(Text, { dimColor: true }, 'dimdesc'), 'dark'),
     )
-    expect(out).toContain('\x1b[38;2;153;153;153m')
+    expect(out).toContain('\x1b[38;2;170;170;170m')
   })
 
   // soft 登记（Review Focus 5）：16 色档下 SGR 90（blackBright 灰）与默认前景的人眼
