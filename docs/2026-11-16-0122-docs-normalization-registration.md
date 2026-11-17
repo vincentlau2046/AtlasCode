@@ -21,3 +21,9 @@
 - docs-only diff 断言 = `git diff --stat` 零 src/ 零 tests/ 零 package.json 版本外字段（gate 豁免判据）；
 - 归档移动（git mv）不删内容；删除面（若有）逐件呈批；
 - 版本号翻号 + CHANGELOG 注记「docs-only」。
+
+## Scope 定稿（2026-11-17，用户 OK）
+
+- 定性升级：对齐业界的规范性补齐版（用户增补需求 = reference 业界对表 / IDE 接入说明 / slash command 说明 / settings 模板；下游 issue #3 反馈「错误」直接触发）。
+- A+B 合一版 0.1.122；③过期归档/⑤一致性抽查并入 B 段；语言面 = 中文为主 + A2/A3 英文速查节。
+- 工单：`docs/2026-11-17-0122-docs-normalization-ticket.md`（本登记 doc 由其承接）。
