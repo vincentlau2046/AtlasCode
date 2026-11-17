@@ -65,8 +65,10 @@ atlascode --help   # 别名 `atlas` 同效
 - **Provider 表**：`providers.<name>` =
   `{ baseURL, apiKey, api, models: [{ id, name?, contextWindow?, maxTokens? }],
   defaultContextWindow?, defaultMaxTokens? }`；模型引用 `"<provider>/<modelId>"`。
-  > ⚠️ 池内请写**全 ref 形**：裸 id（如 `"Qwen38-27B-TXT"` 不带 `provider/` 前缀）
-  > 当前**不会**被 provider 表归一化、解析会失败（issue #3-1；归一化修形走代码版）。
+  > ℹ️ 池内裸 id（如 `"Qwen38-27B-TXT"` 不带 `provider/` 前缀）会按 providers 表
+  > 归一化：命中某 provider 表项的 model id → 自动加 `provider/` 前缀；未知裸 id
+  > 原样透传、解析失败（issue #3-1，0.1.122 修形）。仍推荐写**全 ref 形**，语义
+  > 显式且不受表项变动影响。
   > ⚠️ `baseURL` 按**原样**使用：OpenAI 兼容网关通常要求 `/v1` 后缀——裸 host
   > `http://host:8999` 会 404，须写 `http://host:8999/v1`（issue #3-2）。
 - **鉴权**（OpenAI-protocol 静态键，优先级 env > settings 角色级 > settings 全局）：
