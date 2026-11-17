@@ -111,9 +111,9 @@ describe('C9-5 resolveSkillOverrides 纯解析面', () => {
 // 文档模板 + 消费缝登记锚（源级锁）
 // ════════════════════════════════════════════════════════════════
 describe('C9-5 文档模板 + schema 声明源级锚', () => {
-  test('配置参考模板含三档说明（docs/atlas-config-reference-and-template.md）', () => {
-    const doc = srcOf('docs/atlas-config-reference-and-template.md')
-    expect(doc).toContain('"skillOverrides"')
+  test('配置参考含三档说明（docs/reference/settings.md；0.1.122 A3 并入后新权威面）', () => {
+    const doc = srcOf('docs/reference/settings.md')
+    expect(doc).toContain('skillOverrides')
     for (const tier of TIERS) {
       expect(doc).toContain(tier)
     }
