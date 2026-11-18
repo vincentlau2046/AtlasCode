@@ -196,7 +196,7 @@ describe('K6-14件2 · dim 与正常文本 escape 序列可区分（300 号件�
     expect(darkAnsi.inactive).not.toBe(darkAnsi.text)
   })
 
-  test('锚：truecolor dark 主题 dimColor 输出 170 灰真彩码（与默认前景可区分；0.1.94 对比度 7.4→9.0:1）', async () => {
+  test('锚：truecolor dark 主题 dimColor 输出 170 灰真彩码（与默认前景可区分；0.1.124 对比度 7.4→9.0:1）', async () => {
     const { Text } = await import('../../src/tui/ink.js')
     const out = await renderToText(
       withProviders(React.createElement(Text, { dimColor: true }, 'dimdesc'), 'dark'),
