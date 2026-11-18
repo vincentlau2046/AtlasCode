@@ -126,13 +126,13 @@ const lightTheme: Theme = {
   permissionShimmer: 'rgb(137,155,255)', // Lighter blue for shimmer effect
   planMode: 'rgb(0,102,102)', // Muted teal
   ide: 'rgb(71,130,200)', // Muted blue
-  promptBorder: 'rgb(153,153,153)', // Medium gray
+  promptBorder: 'rgb(130,130,130)', // Medium gray (3.8:1 on white, WCAG non-text 3:1)
   promptBorderShimmer: 'rgb(183,183,183)', // Lighter gray for shimmer effect
   text: 'rgb(0,0,0)', // Black
   inverseText: 'rgb(255,255,255)', // White
-  inactive: 'rgb(102,102,102)', // Dark gray
+  inactive: 'rgb(80,80,80)', // Dark gray (8.1:1 on white)
   inactiveShimmer: 'rgb(142,142,142)', // Lighter gray for shimmer effect
-  subtle: 'rgb(175,175,175)', // Light gray
+  subtle: 'rgb(110,110,110)', // Light gray (5.1:1 on white, WCAG AA 4.5:1)
   suggestion: 'rgb(87,105,247)', // Medium blue
   remember: 'rgb(0,0,255)', // Blue
   background: 'rgb(0,153,153)', // Cyan
@@ -306,7 +306,7 @@ const darkAnsiTheme: Theme = {
   // terminal default foreground on 16-color dark palettes — dim text was
   // indistinguishable from normal text. ansi:blackBright (SGR 90, gray) is
   // the standard dim color and matches the 16-color downgrade of the
-  // truecolor dark theme's inactive rgb(153,153,153).
+  // truecolor dark theme's inactive rgb(170,170,170).
   inactive: 'ansi:blackBright',
   inactiveShimmer: 'ansi:whiteBright',
   subtle: 'ansi:blackBright',
@@ -387,13 +387,13 @@ const lightDaltonizedTheme: Theme = {
   permissionShimmer: 'rgb(101,152,255)', // Lighter bright blue for shimmer
   planMode: 'rgb(51,102,102)', // Muted blue-gray (works for color-blind)
   ide: 'rgb(71,130,200)', // Muted blue
-  promptBorder: 'rgb(153,153,153)', // Medium gray
+  promptBorder: 'rgb(130,130,130)', // Medium gray (3.8:1 on white, WCAG non-text 3:1)
   promptBorderShimmer: 'rgb(183,183,183)', // Lighter gray for shimmer
   text: 'rgb(0,0,0)', // Black
   inverseText: 'rgb(255,255,255)', // White
-  inactive: 'rgb(102,102,102)', // Dark gray
+  inactive: 'rgb(80,80,80)', // Dark gray (8.1:1 on white)
   inactiveShimmer: 'rgb(142,142,142)', // Lighter gray for shimmer effect
-  subtle: 'rgb(175,175,175)', // Light gray
+  subtle: 'rgb(110,110,110)', // Light gray (5.1:1 on white, WCAG AA 4.5:1)
   suggestion: 'rgb(51,102,255)', // Bright blue
   remember: 'rgb(51,102,255)', // Bright blue
   background: 'rgb(0,153,153)', // Cyan (color-blind friendly)
@@ -476,9 +476,9 @@ const darkTheme: Theme = {
   promptBorderShimmer: 'rgb(166,166,166)', // Lighter gray for shimmer
   text: 'rgb(255,255,255)', // White
   inverseText: 'rgb(0,0,0)', // Black
-  inactive: 'rgb(153,153,153)', // Light gray
+  inactive: 'rgb(170,170,170)', // Light gray (9.0:1 on black)
   inactiveShimmer: 'rgb(193,193,193)', // Lighter gray for shimmer effect
-  subtle: 'rgb(80,80,80)', // Dark gray
+  subtle: 'rgb(120,120,120)', // Dark gray (4.7:1 on black, WCAG AA 4.5:1)
   suggestion: 'rgb(177,185,249)', // Light blue-purple
   remember: 'rgb(177,185,249)', // Light blue-purple
   background: 'rgb(0,204,204)', // Bright cyan
@@ -560,9 +560,9 @@ const darkDaltonizedTheme: Theme = {
   promptBorderShimmer: 'rgb(166,166,166)', // Lighter gray for shimmer
   text: 'rgb(255,255,255)', // White
   inverseText: 'rgb(0,0,0)', // Black
-  inactive: 'rgb(153,153,153)', // Light gray
+  inactive: 'rgb(170,170,170)', // Light gray (9.0:1 on black)
   inactiveShimmer: 'rgb(193,193,193)', // Lighter gray for shimmer effect
-  subtle: 'rgb(80,80,80)', // Dark gray
+  subtle: 'rgb(120,120,120)', // Dark gray (4.7:1 on black, WCAG AA 4.5:1)
   suggestion: 'rgb(153,204,255)', // Light blue
   remember: 'rgb(153,204,255)', // Light blue
   background: 'rgb(0,204,204)', // Bright cyan (color-blind friendly)
