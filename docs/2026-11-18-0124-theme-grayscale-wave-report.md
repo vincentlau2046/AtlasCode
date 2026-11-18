@@ -45,3 +45,11 @@
 ## 7. 后续链
 
 gate @ master tip（工单 §2 五格）→ 段 L 0.1.124（SRI 对照 0.1.123 新锚 a960bb5f 预注册：本波锚预期恒等 Δ=0——纯测试文件 + 注释变更不入 bundle，theme.ts 为模块常量但 bundle 内字面值变化极小；如漂移即 RED 判据面回 f4）→ 生产 lane → 收口。
+
+## 8. 五段闭环终态（2026-11-18）
+
+- **gate**：r-20261118-gate-0124 **GATE-PASS（改判形）@eb02baad**——预注册 Δ=0 前提勘误（「零 src/ 面」误推，PR #5 主件即 theme.ts 产品码）→ GATE-RED → f4 工单 §7 @fb44c75c 裁定① 改锚重注册（e2e 四重纯度直证）→ 格 1-4 既有证据复用零码面免重跑（0.1.112 先例同形）；canon 6154/0/506 Δ+3/+1 恰合护栏件首落。
+- **段 I**：f4 采认 @20dfe991 PASS + 必改微修 1 件（头注 light 旧值 2.0:1→2.19:1，本报告 §6 观察项实算成立）→ **eb02baad**。
+- **段 L**：release **e2ae5598** + tag v0.1.124 双远端 + npm publish（integrity `sha512-bVZI3OVsg+7tO…1YY0RaZGD0VIA==` 三源 MATCH）+ SRI docs/sri/v0.1.124.md @5e1049fe（cli.js 18,219,983B · 4f75289b… = 重注册锚逐字；**预注册-实测-SRI 三点链第二例，源 = 产品码面**）。
+- **生产 lane**：r-20261118-prodlane-124 **PASS**——SRI 四点 MATCH（含解包 cli.js/web-contract/runtime 三锚 + 装树同 hash）+ theme 新值生产直证 GREEN（promptBorder 130×2 / subtle 110×2 / inactive 80×2 在品，旧值 153/175/102 字节级零残留）+ bin 锚 0.1.124 PONG。
+- **方法论入册**（f4）：信号面预注册前须回查全波 diff 含 merged PR 本体——本波 RED 即漏查 theme.ts 所致。
