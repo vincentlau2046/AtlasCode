@@ -57,3 +57,11 @@
 2. **裁定 ① 采认（预注册前提勘误 + 改锚重注册）**：漂移 = 修形目标域必然结果，非异常——e2e 四重直证成立（确定性二次 build 同 hash / 13,484 差异字节 100% 收敛 theme 常量表单 ~14KB 域 / size 18,219,983B 恒等=色值等长替换 / web 双出口恒等交叉印证）。**0.1.124 实测锚 = cli.js 18,219,983B · sha256 `4f75289b…`**（SRI 记实测）；web-contract 7,975B / runtime 85,213B 恒等维持。
 3. **格 5 改判 + 终判**：格 1-4 全绿零回退 + 格 5 按本节改判 → **GATE-PASS（改判形 @eb02baad）**，e2e 重出正式判定单（复用既有 run 证据，零码面变更免重跑——0.1.112 GATE-RED→改判先例同形，彼案因须修形故复 gate，本案判据面勘误零码面）。产品行为面正确：新色值即本波交付物本体。
 4. **段 L 放行链**：e2e 改判形 GATE-PASS 重出 → Main 段 L 0.1.124（SRI 记 §7-2 实测锚）→ 生产 lane → 收口。
+
+## §8 五段闭环终态（2026-11-18，全链两日收口）
+
+1. **段 L 发布验真（f4 轻核）**：release `e2ae5598` + tag `v0.1.124` 双远端 + npm latest = 0.1.124 + SRI `docs/sri/v0.1.124.md` @`5e1049fe`（integrity bVZI3OVsg+7tO… 三源 MATCH）。
+2. **生产 lane PASS（e2e 报告 r-20261118-prodlane-124.md）**：SRI 四点全 MATCH——**cli.js 18,219,983B · `4f75289b…` = §7 改判重注册锚 registry 生产品逐字（改判链首例全链兑现）**；WCAG 色值安装品字节级直证（新值 dark+light 双表在品 / 旧值 153/175/102 零残留）+ bin 锚 GREEN。
+3. **波终定谳**：theme 灰阶 token 全部上 WCAG 线（dark inactive 9.04/subtle 4.76/border 5.92；light inactive 8.06/subtle 5.10/border 3.84），ansi 16 色主题零触碰；护栏测试随波上 canon（6154/0/506 新基线）。
+4. **方法论沉淀（本波新增）**：① C 形第二例全链走通（PR #4/#5 同形两连）；② **锚恒等预注册纪律升格**——预注册前须回查全波 diff（含 merged PR 本体），禁以 fixup 面外推；f4 信号面误推前提 → GATE-RED → 勘误认领 + 改锚重注册 + 改判形 PASS = 判据面勘误零码面免重跑先例（0.1.112 修形复 gate 先例的姊妹形）；③ 漂移域纯度四重直证手法入册（确定性双 build / 差异字节全域收敛 / size 恒等 / 独立出口交叉印证）。
+5. **对端记账**：PR #5 作者 credit 随 merge commit 保留；issue #3 已于 0.1.123 收口（本波不涉 issue）。
