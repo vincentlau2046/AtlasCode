@@ -4,6 +4,14 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.124（2026-11-18）
+
+**theme 灰阶 WCAG 对比度硬化**（外部巡检 PR #5 交付；用户 as-is merge 9130ed03 + Main master fixup 09796e1c/eb02baad，C 形第二例）。波报告 docs/2026-11-18-0124-theme-grayscale-wave-report.md；gate r-20261118-gate-0124 GATE-PASS（改判形，§4 改判记录在案）。
+
+- 修复（macOS 低对比度可读性）：truecolor 四主题灰阶 token 提到 WCAG 线——dark inactive 153→170（9.0:1 黑底）/ dark subtle 80→120（4.7:1）/ light inactive 102→80（8.1:1 白底）/ light subtle 175→110（5.1:1）/ light promptBorder 153→130（3.8:1 非文本线）；dark promptBorder 136 不动（5.9:1）；ansi 16 色道豁免零触碰。
+- 护栏：新增 theme-grayscale-contrast.test.ts（WCAG sRGB 实算：正文 ≥4.5:1 AA / 边框 ≥3:1 / 三层不塌）+ wave0186 dim 渲染锚 153→170 同步；修前值 RED 2 fail 自证。
+- 锚：cli.js 实测锚重注册（预注册「Δ=0」前提勘误——本波含 theme.ts 产品码面；SRI 记实测 4f75289b…，web 双出口恒等维持）。
+
 ## v0.1.123（2026-11-17）
 
 **modelRoles 池臂 normalizeRef 根修**（issue #3-1；代码修形由 Atlas-reveiw PR #4 交付，用户 as-is merge aa572f2b + Main master fixup 572562d7）。波报告 docs/2026-11-17-0123-model-role-pool-wave-report.md；gate r-20261117-gate-0123 GATE-PASS。
