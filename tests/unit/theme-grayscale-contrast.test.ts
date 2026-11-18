@@ -5,7 +5,7 @@
  * truecolor 主题的灰阶 token 承载大量
  * 真实文本（dimColor → theme.inactive、color="subtle"、promptBorder 边框），
  * 旧值在对应底色上低于 WCAG 线——dark 系 subtle rgb(80,80,80) 黑底 2.6:1、
- * light 系 subtle rgb(175,175,175) 白底 2.0:1——肉眼不可读。本测试锚定
+ * light 系 subtle rgb(175,175,175) 白底 2.19:1——肉眼不可读。本测试锚定
  * 修正后的下限：正文类（text/inactive/subtle）≥ 4.5:1（AA），边框类
  * （promptBorder）≥ 3:1（非文本线）。ansi 主题走 16 标准色，不在此约束。
  *
