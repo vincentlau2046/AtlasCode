@@ -75,3 +75,12 @@ Atlasweb-F4 第二遍审视刷新方案稿 v2 并落可执行计划 `AtlasWeb:do
 4. **注记四条（随 fixup 顺手，不阻）**：① F6 ui-theme 40→39 勘误；② 自决 12 勘误 = AtlasWeb 全仓现零 zod（含 lockfile），本波随移植引入 4.6.x（结论不变）；③ dist grep 负腿**词表预注册化**——Task 9 Step 1 逐词列明红线标识符形（prompt/queue/cancel/composer/approval）+ 豁免理由入表（replay 投影合法含 prompt 字样的排除面）；④ 边界扫描器路径勘误 = AtlasCode `scripts/atlasweb-kernel-boundary-scan.ts`。
 5. **放行**：本节在案 = 修形入档完成 → 回执 Atlasweb-F4（其 plan fixup 落上述 2/3/4 定形）→ **双信号开工**。
 
+## §D 白名单增补呈批采认（2026-11-19，Task 2 停片呈批；候 Atlas-reveiw 补环确认后放行）
+
+1. **呈批事由**：Task 2 开工盘点出白名单缺口——dsh store 引擎实建在 zustand + immer 之上，F4/F9 npm 运行时闭包按**包级 manifest** 采信 → 根 hoist 面 deps 不可见 → 漏计。
+2. **f4 独立直证 PASS**：dsh tag `packages/client/store/src/index.ts:10-13` 恰 4 条 import（`zustand/vanilla` createStore+StoreApi / `zustand/middleware` subscribeWithSelector / `zustand/shallow` shallow / `immer` freeze+produce）；pnpm-lock resolved `zustand@4.5.7` / `immer@10.2.0`；store 包级 manifest deps=None（peer 仅 cordis）——盲区定因成立。
+3. **采认增补**：判据 (c) 白名单 +2 条 = `zustand ~4.5.7` + `immer ^10.1.1`（dsh@tag 实测 pin，lock resolved 10.2.0 在 ^10.1.1 域内；对齐自决 4「对齐 tag 版本不追新」）。
+4. **影响面核可**：仅 `packages/web-store/package.json` 两条依赖行；web-host 运行时零触碰 → (b) 不触发；modules 源码级盘点纯 node: 内建 + cordis peer 零 npm 依赖。
+5. **链路裁定**：白名单 = 审计必改①定形的判据面 → **须 Atlas-reveiw 单信号补环确认**（非重审；§C 文字级修形回执示下先例同形），确认后 Atlasweb-F4 两腿（Task 2 store+modules）继续。
+6. **方法论注记（入册）**：依赖盘点禁按包级 manifest 采信——workspace hoist 面使包级 deps 失真；**npm 运行时闭包唯一权威 = 源码 import 实扫**（F9 对跨包引用面已用源码级，本条补齐 npm 依赖面同口径）。
+
