@@ -83,4 +83,5 @@ Atlasweb-F4 第二遍审视刷新方案稿 v2 并落可执行计划 `AtlasWeb:do
 4. **影响面核可**：仅 `packages/web-store/package.json` 两条依赖行；web-host 运行时零触碰 → (b) 不触发；modules 源码级盘点纯 node: 内建 + cordis peer 零 npm 依赖。
 5. **链路裁定**：白名单 = 审计必改①定形的判据面 → **须 Atlas-reveiw 单信号补环确认**（非重审；§C 文字级修形回执示下先例同形），确认后 Atlasweb-F4 两腿（Task 2 store+modules）继续。
 6. **方法论注记（入册）**：依赖盘点禁按包级 manifest 采信——workspace hoist 面使包级 deps 失真；**npm 运行时闭包唯一权威 = 源码 import 实扫**（F9 对跨包引用面已用源码级，本条补齐 npm 依赖面同口径）。
+7. **补环闭环（同日）**：Atlas-reveiw **确认增补无异议**——独立直证四点与我 §D-2 吻合（4 import / manifest 零 deps / range 恰覆盖 / 影响面成立）；程序面裁定 = 此呈批正是 §C-2 分域机制设计行为（白名单外缺口→呈批→三方确认），非破例。**§D 闭环，Atlasweb-F4 Task 2 两腿放行继续**。
 
