@@ -363,3 +363,46 @@ describe('AtlasWeb kernel boundary scanner', () => {
     expect(result.violations[0]?.reason).toBe('outside-approved-kernel-boundary')
   })
 })
+
+// T6-A Task 10（2026-11-20）：vite 构建形接入后的扫描器语义补全——
+// ① bundler query 后缀（?inline 等）剥离后再解析（styles.css?inline 是真实
+//    本地边，CSS 资产在 vite 形下合法）；② 模块标识符字符集门：捕获串不构成
+//    静态导入目标者（模板插值 ${…}、纯标点串——字符串数据中的 from/require
+//    假影）不判违规。两者均以负腿锁定（假影不得返回）。
+describe('AtlasWeb kernel boundary scanner — vite query suffix + string-data charset gate', () => {
+  test('allows bundler query-suffix local imports when the target file exists', () => {
+    const root = fixture({
+      'web/client/entry.ts': "import '../styles/base.css?inline'\n",
+      'web/styles/base.css': '.base { color: red }\n',
+    })
+    const result = scanAtlasWebKernelBoundary({ repositoryRoot: root, sourceRoots: ['web'] })
+    expect(result.allowed).toBe(true)
+    expect(result.violations).toEqual([])
+  })
+
+  test('does not treat string-data captures (template interpolation / punctuation) as import edges', () => {
+    const root = fixture({
+      'web/entry.ts': [
+        "const gitHeaders = ['rename from ', 'rename to ', 'copy from ']",
+        'const message = `require("${spec}") missed the module table`',
+        'const override = `theme override "${name}" from "${source}" is a bare string`',
+        'export const ok = true',
+      ].join('\n'),
+    })
+    const result = scanAtlasWebKernelBoundary({ repositoryRoot: root, sourceRoots: ['web'] })
+    expect(result.allowed).toBe(true)
+    expect(result.violations).toEqual([])
+  })
+
+  test('still rejects real undeclared externals with query-free specifiers', () => {
+    const root = fixture({
+      'web/entry.ts': "import 'zod'\n",
+    })
+    const result = scanAtlasWebKernelBoundary({
+      repositoryRoot: root, sourceRoots: ['web'], externalDependencies: ['react'],
+    })
+    expect(result.allowed).toBe(false)
+    expect(result.violations).toHaveLength(1)
+    expect(result.violations[0]!.reason).toBe('undeclared-external-import')
+  })
+})

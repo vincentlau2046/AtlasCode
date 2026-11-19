@@ -180,7 +180,17 @@ export function scanAtlasWebKernelBoundary(
     for (const importerPath of walkSourceFiles(sourceRoot)) {
       const source = readFileSync(importerPath, 'utf8')
       for (const match of source.matchAll(IMPORT_RE)) {
-        const specifier = match[1]
+        // T6-A Task 10: bundler query suffixes (?inline 等) belong to the
+        // bundler, not the module path — strip before every check below.
+        const rawSpecifier = match[1] ?? ''
+        const queryAt = rawSpecifier.indexOf('?')
+        const specifier = queryAt === -1 ? rawSpecifier : rawSpecifier.slice(0, queryAt)
+        // String-data charset gate: a capture that cannot be a module
+        // specifier (template interpolation `${…}`, punctuation-only runs —
+        // shadows of from/require inside string literals) is not a static
+        // import edge and must not be judged.
+        if (!/^[\w@./:-]+$/u.test(specifier)) continue
+        if (specifier.length === 0) continue
         if (isForbiddenPrivateAlias(specifier)) {
           violations.push({
             importer: relative(repositoryRoot, importerPath),
