@@ -12,11 +12,13 @@ This is the family-level index for AtlasCode, AtlasWeb, AtlasOffice, and AtlasCo
 
 ## Current phase
 
-- **Current phase:** AtlasCode 0.1.106 S3b kernel-boundary closeout and read-only AtlasWeb preparation.
-- **Current source repository:** `AtlasCode` (`origin` = GitHub development source; `gitcode` = GitCode mirror/publishing surface).
+> **Revision (2026-11-19, S0 consumption closeout)**: the "Current phase" bullets below were the 0.1.106-era preparation stance and are retained as historical base. The effective phase is the S0 bridge state recorded in the replacement bullets; effective admission authority remains the S0 agreement §6 G1/G2 gates.
+
+- **Current phase (effective):** S0 bridge fully admitted — G1 (implementation admission) true verdict closed 2026-11-15; G2 (release readiness) admitted 2026-11-16 with consumer-side re-endorsement and audit verdict closed 2026-11-17. Consumer-side adoption chain complete: 0.1.121 (first consumer cut, contract seam on production), 0.1.122 (docs-only), 0.1.123/0.1.124 (product-code adoptions), zero drift across all four.
+- **Current foundation carrier:** AtlasCode `0.1.124` — S0 seam contract packages `./web-contract` (0.1.115) and `./web-session-runtime` (0.1.116) published to npm with production-lane PASS.
+- **Current source repositories:** `AtlasCode` (`origin` = GitHub development source; `gitcode` = GitCode mirror/publishing surface); the AtlasWeb source repository now exists and carries the S0 delivery chain (historical note "no AtlasWeb source repository" is superseded).
 - **Current mainline:** `master`.
-- **Current foundation candidate:** AtlasCode `0.1.106` after S3b production lane PASS.
-- **Preparation rule:** before that PASS, only docs, compatibility scans, protocol inventory, and readiness evidence may be added; no AtlasWeb runtime source or Web-specific kernel behavior.
+- **Historical phase (base):** AtlasCode `0.1.106` S3b kernel-boundary closeout and read-only AtlasWeb preparation — superseded by the S0 agreement §8 revision above.
 
 ## Foundation cut
 
