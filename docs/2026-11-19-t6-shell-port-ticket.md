@@ -98,3 +98,10 @@ Atlasweb-F4 第二遍审视刷新方案稿 v2 并落可执行计划 `AtlasWeb:do
 3. **方法论入册**：GREEN 报送前最后一跑必须落在 **commit 后干净树**——先跑后写记录的顺序倒置 = 本次缺口（GREEN 声明与可复现状态须同一树状态）。
 4. f4 侧注记：该条与本工单 §E 同链路（直呈直裁 + f4 落档）；补环回执由 Atlasweb-F4 直呈审计侧，波收口信号照常过 f4。
 
+## §G Task 10 波终抽验采记（2026-11-20，Atlas-reveiw 直呈直裁知会；f4 落档）
+
+1. **verdict：有条件采认**——全门格独立复现 PASS（382/0 fail + web-host 43/0 + 边界扫描自建 runner 复跑 allowed=true/violations=0 + scanner 补丁 23/0 + **carrier pin 恒等** + 波档六面）。
+2. **定形采认**：use-sync-external-store = phantom-dep 补声明非新增依赖 → 不触发 §C-2 (a) 载体重验。
+3. **结波条件 1 件**：**programmatic runner + closure evidence 装配落仓**——现 ad hoc（第三方复现须逆向重建；审计两轮插曲 230→6→0 已证 fail-closed 真实但可复现性不足）。runner 落仓回执后 T6-A 审计侧结波 → e2e lane 回执 + 发布链候用户。
+4. f4 侧注记：runner 落仓为**波收口硬前置**，f4 收口信号核对该件在案；其属测试基建非产品码，落 AtlasWeb 仓测试域。
+
