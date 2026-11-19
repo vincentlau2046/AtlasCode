@@ -67,3 +67,11 @@ Atlasweb-F4 第二遍审视刷新方案稿 v2 并落可执行计划 `AtlasWeb:do
 5. **可执行计划采认**：Global Constraints 钉死载体 pin 0.1.124 + bump 判定形（审计焦点③）+ 只读/边界/禁入三红线 + tag 恒定 + MIT 头注/适配头注纪律；Review Focus 5 输入类（SSE resetRequired 收敛 / 空仓态 / 畸形事件 fail-closed / 切换竞态 abort / 虚拟化有界）各落判据腿；审计焦点①冻结清单时点 = Task 5 Step 1；审计焦点② = Task 6 四面 + 重连 + 竞态逐腿独立断言。**审计焦点①-④全数闭合。**
 6. **审计基准更替**：本工单 §0-§5（v1 基）保留为演进记录；**Atlas-reveiw 审计以 v2 方案稿 + 可执行计划为判据基准**，v1→v2 增量以上述 1-5 为采认面。
 
+## §C Atlas-reveiw 审计 verdict 采记 + 必改修形定形（2026-11-19，**有修改通过**；两必改均判据面文字级，修形入档回执示下即双信号开工，无需二轮技术审计）
+
+1. **独立核验面采记**（审计活码实测）：F1/F6 全数对账（ui-theme 实测 39，表载 40 ±1 勘误注记）/ F9 边抽验逐字合（theme→settings 恰 5、layout→session 恰 1 纯类型、web→dockkit 恰 3=platform.ts 字符串+seed.ts 实引×2）/ vendor 上游表 9 行恰合（loader/include 同 cordis commit，§B 引文系摘录）/ 上位锚 + 格 5「候选 0.1.0 不自发 tag」恰合 / zod 双仓 pin 实测吻合 / f4 预钉焦点①-④闭合 + Review Focus 5 腿落点（1/4→Task 6，2/3/5→Task 8）+ 红线负腿三层在位——全 GREEN。
+2. **必改①（采认定形）：格 4 bump 触发面分域**——原「任一依赖行变更即触发」与本波自身引入 toolchain（Task 3 react / Task 9 vite）自相矛盾（开工即自触发→规则被静默 ignore）。定形：(a) 载体 `@atlasharness/atlascode` 依赖行**任何**变更 → 完整重验 + 升级呈批；(b) web-host 运行时依赖行变更 → 同 (a)；(c) 波内 UI 链/toolchain 新增依赖 → **白名单预注册**：react ^18.2.0 / react-dom ^18.2.0 / vite ^6.4.3 / @vitejs/plugin-react ^4.7.0 / @tanstack/react-virtual / zod 4.6.x——白名单内不触发，白名单外按 (a)。焦点③原意（拦载体静默 bump）保住且不自锁。
+3. **必改②（采认定形）：Task 5 冻结清单时序悖论修形**——原基准「Task 7/8 视图源 import 闭包」在 Task 5 时点不存在（S6 视图为新写）。定形：(a) Task 5 Step 1 扫描基准改写 = **dsh@tag `client/web` + `client/ui-layout` 对 ui-primitives 实引闭包 + S6 计划视图设计稿**；(b) Task 8 增**停腿**：实现引入冻结清单外原子 → 停片走 R1 回审，禁静默增补。
+4. **注记四条（随 fixup 顺手，不阻）**：① F6 ui-theme 40→39 勘误；② 自决 12 勘误 = AtlasWeb 全仓现零 zod（含 lockfile），本波随移植引入 4.6.x（结论不变）；③ dist grep 负腿**词表预注册化**——Task 9 Step 1 逐词列明红线标识符形（prompt/queue/cancel/composer/approval）+ 豁免理由入表（replay 投影合法含 prompt 字样的排除面）；④ 边界扫描器路径勘误 = AtlasCode `scripts/atlasweb-kernel-boundary-scan.ts`。
+5. **放行**：本节在案 = 修形入档完成 → 回执 Atlasweb-F4（其 plan fixup 落上述 2/3/4 定形）→ **双信号开工**。
+
