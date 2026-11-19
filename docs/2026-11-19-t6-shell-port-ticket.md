@@ -55,3 +55,15 @@ R1 ui-primitives 选择闭包牵出面失控（slice 3 开工冻结清单，超�
 3. **F8 销项验真**：roadmap Current phase 勘误 f54377e7（本 session 已落 master）。
 4. **授权链验真**：用户 2026-11-19 授权 Atlasweb-F4 出波前方案+§5 审视（其工单稿记录在案）；本转正仅采认判据面，**非开工授权**——开工 = Atlas-reveiw 审计通过后 Atlasweb-F4 双信号。
 5. **转正效力**：方案稿 §0/范围/切片/判据/风险/§5 全文并入为正式判据面；落位 = AtlasCode `docs/2026-11-19-t6-shell-port-ticket.md`（本件）；工单编号 T6-A。
+
+## §B v2 采认增补（2026-11-19 同日，AtlasWeb @04093e0；审计基准升格为 v2 + 可执行计划）
+
+Atlasweb-F4 第二遍审视刷新方案稿 v2 并落可执行计划 `AtlasWeb:docs/superpowers/plans/2026-11-19-t6a-shell-port-plan.md`（10 任务 RED-GREEN 形）。f4 逐项核验：
+
+1. **F9 依赖闭包双面——f4 独立直证成立**：耦合边口径 = src import 语句级。抽验 ui-theme→ui-settings 恰 5 条 src import（4× `import type {}` + 1× `ConfigForm`，`AppearanceRow/FontFamilyRow/FontSettingsGroup/FontSizeRow/index.ts`）与 v2 ×5 吻合；文件级宽口径命中（12）= README/tests/package.json 非源码边。ui-chat/ui-approval **零实 import 牵入**（4 命中 = 测试 CSS 路径 + `boot-client.ts` boot 模块表注册字符串——后者即 S5 适配形模块表重写对象，非传递依赖）。干净集/耦合集三分成立。
+2. **移植形三分法（自决 9/10）采认**：干净集（vendor/store/ui-slots/ui-renderer + modules 微边）verbatim；耦合集（connection/ui-theme/ui-layout/web boot）适配改写（dsh 为参照）；新写（brand/mode/code/app）。dsh 产品服务子包（ui-settings/shortcuts/locale/ui-dockkit/ui-session）禁入 + R5 逐片负腿 import=0——替代边 = Atlas seam。
+3. **自决 11 vendor 双面 pin 采认**：f4 对 dsh tag `vendor/README.md` 实读——上游 commit 表逐字吻合（cordis 0b96d9fd…/cosmokit 02e691c5…/schemastery cf0b7e54…/group·timer 01b39624…/hmr ed8a7755…），verbatim 随迁审计焦点④闭环。
+4. **自决 12 zod 冲突排除采认**：同 4.x 线相容，不新增第二 zod。
+5. **可执行计划采认**：Global Constraints 钉死载体 pin 0.1.124 + bump 判定形（审计焦点③）+ 只读/边界/禁入三红线 + tag 恒定 + MIT 头注/适配头注纪律；Review Focus 5 输入类（SSE resetRequired 收敛 / 空仓态 / 畸形事件 fail-closed / 切换竞态 abort / 虚拟化有界）各落判据腿；审计焦点①冻结清单时点 = Task 5 Step 1；审计焦点② = Task 6 四面 + 重连 + 竞态逐腿独立断言。**审计焦点①-④全数闭合。**
+6. **审计基准更替**：本工单 §0-§5（v1 基）保留为演进记录；**Atlas-reveiw 审计以 v2 方案稿 + 可执行计划为判据基准**，v1→v2 增量以上述 1-5 为采认面。
+
