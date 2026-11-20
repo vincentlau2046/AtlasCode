@@ -1,5 +1,7 @@
 # 执行出口实施波 lock-face 呈批书（Main → f4）
 
+> **f4 批复（2026-11-21）：批准，附条件见文末 §6 批复节**（审计 = Atlas-reveiw 终裁「可批复，附条件」，条件全数并入）。0.1.126候 与 AtlasWeb A 候选发布 bump 不撞号——两列车独立（@atlasharness/atlascode 0.1.126 vs @atlaswork/atlasweb 0.1.4候），已分别定谳。
+
 > Main 2026-11-21。请求面 = B0 合同（AtlasWeb
 > docs/superpowers/specs/2026-11-20-first-wave-execution-contract.md @de2a9e8）
 > 锁定登记挂账①（set-once 守卫实码 commit 锚）+ B 段附表 §0 锚表三项定名
@@ -113,3 +115,16 @@ B 段附表 §1 GREEN 腿同法对表）；四件套 + e2e gate + 段 L release
 
 0.1.126候；五段链 = 呈批（本文件）→ f4 批复 → S1–S4 落码 → gate → 段 L。
 批复形式与既有 lock-face 同（批复 commit 锚回本文件状态行）。
+
+## §6 f4 批复节（2026-11-21，批准 + 条件集）
+
+依据：Atlas-reveiw 审计终裁「§0 事实锚全部核真；呈批书可批复，附条件」。§1 三项定名（createExecutionOutlet / web-session-runtime 同 subpath 扩具名导出 / 0.1.126候）**批准**；同 subpath 判定为对合同 §1 的正确解释而非实质偏离（定名权合同 §0 已授 Main；「独立」实质 = 独立受支持具名导出面 + 独立能力/授权生命周期）。**条件（未满足不进对应切片）：**
+
+1. **（S2）符号级扫描腿**：S4 kernel boundary 扫描按**具名符号**判（createExecutionOutlet/ExecutionOutlet/webExecutionV0 型），不得按 module specifier 判——同 subpath 后 import 串与只读面同形，单接触点纪律唯符号级机器可判（同 subpath 选择的直接代价，须写明）。
+2. **（S2）出口构造零引擎引导腿（E1 增格）**：createExecutionOutlet 懒触达——构造不 boot kernel；probe=off 下构造 + 六命令任一 = 拒且内核零痕迹。E1 的 kernel 侧能力开关落点（默认 off、probe 查询、off 全拒）由 S2 出口面明示承载。
+3. **（S1）调用点穷尽清单须确证无非组合根的运行时 setSessionEnv 调用者**：armed 后 Partial 合并即硬错，若存在合法运行时更新者须在清单显形并先裁，不可到 S3 才撞。
+4. **（S1）arming 单向不可逆**：armed 态下 `resetKernelBootstrapStateForTests` / `resetSessionEnv` 调用 = **硬错**（呈批书原「reset 复位并解除 armed 记账」形不采——注入→reset 解除→再注入 = 静默顶替复活，恰是绕行向量）；未 armed 测试车道 reset 原形不变；判别单测增腿 (f) armed 态 reset 抛错且槽不被清。
+5. **（合同对表）** AtlasWeb 侧 B0 合同 §1/§7 由 f4 加实施修订注记（同 subpath 裁定 + setSessionEnv 接缝形），随批复 commit 同步；B 附表 §0 锚表三项由 f4 回填。
+6. **零漂移回归**：entry.ts 扩具名导出后只读消费面行为零变更回归腿 + 执行具名导出零副作用/零 TSX/d.ts 审计沿 S0-R2 格（呈批书 §3 既有，重申为条件）。
+
+其余呈批内容（arming 双车道、测试/probe 车道不 armed 语义零变更、S2 协议沿 webSessionV0 格、S3 上限执法归 kernel、S4 follow.resume、验收件两件、五段链、0.1.126候）按呈批书执行。B1 开工前提链不变；本波不抢排。
