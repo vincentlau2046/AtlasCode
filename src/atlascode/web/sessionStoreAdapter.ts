@@ -50,6 +50,13 @@ export interface TranscriptTail {
   ino: number
 }
 
+/** 有界头读结果（G-D）：bytes.length ≤ maxBytes；sizeBytes = 文件全尺寸。 */
+export interface TranscriptHead {
+  bytes: Uint8Array
+  sizeBytes: number
+  ino: number
+}
+
 export interface SessionStoreAdapter {
   start(): Promise<void>
   listSessionFiles(scopeId: string): Promise<SessionFileEntry[]>
@@ -67,6 +74,17 @@ export interface SessionStoreAdapter {
     offset: number,
     signal?: AbortSignal,
   ): Promise<TranscriptTail>
+  /**
+   * 有界头读（G-D，2026-11-20）：[0, maxBytes) 窗读取（list 面 title
+   * 提取源）。可选缝——缺省 adapter 不实现时 runtime 诚实降级 title
+   * null；Node fs 默认载体实有。同一安全读链（openValidated + 读毕复核）。
+   */
+  readTranscriptHead?(
+    scopeId: string,
+    sessionId: string,
+    maxBytes: number,
+    signal?: AbortSignal,
+  ): Promise<TranscriptHead>
   /**
    * 显式路径解析（baseline loadFull 的 filePath 源；呈批书 §7.3 scopeId ↔
    * storageDir 显式映射）：经同一校验链后返回文件路径。
@@ -330,6 +348,38 @@ export function createNodeFsSessionStoreAdapter(
     }
   }
 
+  /** 有界头读（G-D）：同安全链，[0, min(size, maxBytes)) 窗读 + 读毕复核。 */
+  async function readTranscriptHead(
+    scopeId: string,
+    sessionId: string,
+    maxBytes: number,
+    signal?: AbortSignal,
+  ): Promise<TranscriptHead> {
+    if (!Number.isInteger(maxBytes) || maxBytes <= 0) {
+      throw new WebSessionError('invalidRequest', 'maxBytes must be a positive integer')
+    }
+    const { fh, st } = await openValidated(scopeId, sessionId)
+    try {
+      const want = Math.min(st.size, maxBytes)
+      const chunks = await readFromFd(fh, want, 0, signal)
+      const st2 = await fh.stat()
+      if (st2.ino !== st.ino || st2.size !== st.size) {
+        throw new WebSessionError(
+          'ioUnavailable',
+          'file changed during head read (not a stable snapshot)',
+          true,
+        )
+      }
+      return {
+        bytes: new Uint8Array(Buffer.concat(chunks)),
+        sizeBytes: st.size,
+        ino: st.ino,
+      }
+    } finally {
+      await fh.close()
+    }
+  }
+
   return {
     async start(): Promise<void> {
       if (options.productId !== 'atlascode') {
@@ -409,6 +459,7 @@ export function createNodeFsSessionStoreAdapter(
     readTranscript,
     statTranscript,
     readTranscriptTail,
+    readTranscriptHead,
 
     async resolveTranscriptPath(scopeId: string, sessionId: string): Promise<string> {
       const { fh } = await openValidated(scopeId, sessionId)

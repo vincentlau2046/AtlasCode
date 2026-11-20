@@ -42,6 +42,16 @@ export const HARD_MAX_PARSE_RECORDS = 500_000
 export const DEFAULT_MAX_PROJECTION_BYTES = 4 * MIB
 export const HARD_MAX_PROJECTION_BYTES = 16 * MIB
 
+// ── list 面 title 头读界（G-D，2026-11-20）：单会话头读字节窗。窗内可容
+//    custom-title/summary/首 user 行 → 提取 title；文件 ≤ 窗 = 全读尽 →
+//    messageCount 精确；超界 → null（诚实不精确面）。常量非 knob：
+//    提取失败降级 null，不构成资源面攻点。
+export const TITLE_HEAD_BYTES = 64 * 1024
+/** wire 契约 title ≤512 code points（SessionSummarySchema）——钳制上限。 */
+export const TITLE_MAX_CODE_POINTS = 512
+/** 首条 user 消息派生标题的展示截断点（≤契约 512）。 */
+export const TITLE_USER_MESSAGE_CODE_POINTS = 120
+
 // ── 每 runtime subscriptions / 并发读操作 ─────────────────────────────────────
 export const DEFAULT_MAX_SUBSCRIPTIONS = 16
 export const HARD_MAX_SUBSCRIPTIONS = 64

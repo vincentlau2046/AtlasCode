@@ -39,6 +39,9 @@ import {
   HARD_MAX_PARSE_RECORDS,
   DEFAULT_MAX_PROJECTION_BYTES,
   HARD_MAX_PROJECTION_BYTES,
+  TITLE_HEAD_BYTES,
+  TITLE_MAX_CODE_POINTS,
+  TITLE_USER_MESSAGE_CODE_POINTS,
   DEFAULT_MAX_SUBSCRIPTIONS,
   HARD_MAX_SUBSCRIPTIONS,
   DEFAULT_MAX_CONCURRENT_READS,
@@ -246,13 +249,98 @@ export interface ReadonlySessionRuntime {
 function toSummary(entry: SessionFileEntry, productId: string, scopeId: string) {
   return {
     sessionId: entry.sessionId,
-    title: null,
+    title: null as string | null,
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
-    messageCount: null,
+    messageCount: null as number | null,
     productId,
     scopeId,
   }
+}
+
+/** user message content → 可标题化文本（string 直用；块数组取 text 块拼接）。 */
+function userMessageText(message: unknown): string | null {
+  if (typeof message !== 'object' || message === null) return null
+  const content = (message as { content?: unknown }).content
+  if (typeof content === 'string') return content
+  if (!Array.isArray(content)) return null
+  const parts: string[] = []
+  for (const block of content) {
+    if (typeof block === 'object' && block !== null
+      && (block as { type?: unknown }).type === 'text'
+      && typeof (block as { text?: unknown }).text === 'string') {
+      parts.push((block as { text: string }).text)
+    }
+  }
+  return parts.length > 0 ? parts.join(' ') : null
+}
+
+/** code point 安全截断（wire 契约 title ≤512；代理对面 TS 长度失真）。
+ *  加省略号时总长仍 ≤max（省略号占一个码点窗位）。 */
+function clampCodePoints(text: string, max: number, ellipsis = false): string {
+  const points = Array.from(text)
+  if (points.length <= max) return text
+  const keep = ellipsis ? max - 1 : max
+  return `${points.slice(0, keep).join('')}…`
+}
+
+/**
+ * G-D（2026-11-20 用户裁「载体根修 0.1.125」）：list 面 title 提取——
+ * 头读窗内完整行解析（尾截半行不解析不崩），优先序
+ * custom-title → summary → 首条 user 消息（空白折叠 + 展示截断）。
+ * messageCount：文件全读尽（sizeBytes ≤ 头读窗）→ user+assistant 精确
+ * 计数；超界 → null（诚实不精确面，宁缺勿伪）。
+ */
+function extractListFace(
+  bytes: Uint8Array,
+  fullRead: boolean,
+): { title: string | null; messageCount: number | null } {
+  const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes)
+  const lines = text.split('\n')
+  // 尾行：文件以 \n 结尾 → ''（丢弃空尾）；否则半行（不解析，丢弃）
+  lines.pop()
+  let customTitle: string | null = null
+  let summaryText: string | null = null
+  let firstUserText: string | null = null
+  let messageCount: number | null = fullRead ? 0 : null
+  for (const line of lines) {
+    if (line.length === 0) continue
+    let entry: Record<string, unknown>
+    try {
+      entry = JSON.parse(line) as Record<string, unknown>
+    } catch {
+      continue // 坏行跳过（半行已在窗尾丢弃；窗内坏行不毒化）
+    }
+    const type = entry.type
+    if (type === 'custom-title' && typeof entry.customTitle === 'string'
+      && customTitle === null) {
+      customTitle = entry.customTitle
+    } else if (type === 'summary' && typeof entry.summary === 'string'
+      && summaryText === null) {
+      summaryText = entry.summary
+    } else if ((type === 'user' || type === 'assistant')) {
+      if (messageCount !== null) messageCount++
+      if (type === 'user' && firstUserText === null) {
+        const text2 = userMessageText(entry.message)
+        if (text2 !== null && text2.trim().length > 0) firstUserText = text2
+      }
+    }
+  }
+  const raw = customTitle ?? summaryText ?? firstUserText
+  let title: string | null = null
+  if (raw !== null) {
+    const collapsed = raw.replace(/\s+/gu, ' ').trim()
+    if (collapsed.length > 0) {
+      title = clampCodePoints(
+        collapsed,
+        raw === firstUserText && customTitle === null && summaryText === null
+          ? TITLE_USER_MESSAGE_CODE_POINTS
+          : TITLE_MAX_CODE_POINTS,
+        true,
+      )
+    }
+  }
+  return { title, messageCount }
 }
 
 export function createReadonlySessionRuntime(
@@ -568,9 +656,28 @@ export function createReadonlySessionRuntime(
         )
       }
       void signal
-      return {
-        sessions: entries.map(e => toSummary(e, options.productId, req.scopeId)),
-      }
+      // G-D（2026-11-20）：title/messageCount 头读提取。per-session 容错——
+      // 单会话头读失败（竞态删/身份变化）→ 该行诚实 null，不毒化整列。
+      const sessions = await Promise.all(entries.map(async e => {
+        const summary = toSummary(e, options.productId, req.scopeId)
+        try {
+          const head = await adapter.readTranscriptHead?.(
+            req.scopeId,
+            e.sessionId,
+            TITLE_HEAD_BYTES,
+            signal,
+          )
+          if (head !== undefined) {
+            const face = extractListFace(head.bytes, head.sizeBytes <= TITLE_HEAD_BYTES)
+            summary.title = face.title
+            summary.messageCount = face.messageCount
+          }
+        } catch {
+          // 提取降级：title/messageCount 保持 null（诚实缺省）
+        }
+        return summary
+      }))
+      return { sessions }
     },
 
     /**

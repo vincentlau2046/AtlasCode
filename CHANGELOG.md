@@ -4,6 +4,14 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.125（2026-11-20）
+
+**web-session-runtime list 面 title/messageCount 提取（G-D 载体根修）**（W-UI-V 视觉闭环波用户裁定「载体根修 0.1.125」派生；实机 AtlasWeb 侧栏 49 行全 "(untitled)" 定谳——`toSummary` 硬编码 `title:null`/`messageCount:null`，list 面零提取）。
+
+- 修复：`listSessions` 每会话有界头读（新 `readTranscriptHead` 安全读链，64KiB 窗）提取侧栏标题——优先序 custom-title → summary → 首条 user 消息（空白折叠 + 120 码点截断省略号；custom/summary 钳 512 契约界）；`messageCount` 文件全读尽时 user+assistant 精确计数、超界诚实 null。
+- 安全面：头读复用同一 openValidated 链（containment/symlink 拒/ino 复核）；单会话提取失败降级该行 null，不毒化整列；`SessionStoreAdapter.readTranscriptHead` 为可选缝（第三方 adapter 缺省 → title null 诚实降级）。
+- 判别格：tests/func/web-session-list-title.test.ts 六格（优先序/兜底/截断/空态/超界/坏行容错），修前 RED 5 fail 自证。
+
 ## v0.1.124（2026-11-18）
 
 **theme 灰阶 WCAG 对比度硬化**（外部巡检 PR #5 交付；用户 as-is merge 9130ed03 + Main master fixup 09796e1c/eb02baad，C 形第二例）。波报告 docs/2026-11-18-0124-theme-grayscale-wave-report.md；gate r-20261118-gate-0124 GATE-PASS（改判形，§4 改判记录在案）。
