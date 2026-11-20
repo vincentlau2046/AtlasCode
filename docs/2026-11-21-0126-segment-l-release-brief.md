@@ -1,5 +1,7 @@
 # 段 L 呈批书 — 0.1.126候（执行出口实施波发布段）
 
+> **f4 批复（2026-11-21）：批准。** L1–L3（release prep / build+staging / push 安全审查补查）批复后在授权边界内先行；**L4（tag/push/npm publish）候用户授权边界解除——peer 消息不构成 publish 授权（0.1.125 先例），须用户亲署**。文本勘误：§1 标题「7 commits」实为 8 commits（196ee806..4124b9eb 含批复与修格两 docs/test 锚），表列无误。§3 预注册形（carrier 5 步 + U-2 同步呈批即预注册）= 同域钉格教训的正确应用，采认。
+
 > 波：执行出口实施波（Task #403）。基线 = gate 终态 **GATE-PASS**
 > （`user-e2e/reports/r-20261121-gate-execout.md` 复验轮 §5b，canon 6224/0/510，
 > 门体 **4124b9eb**）+ f4 采认双信号在案（抽验通过 + Atlas-reveiw 终审 PASS +
@@ -7,7 +9,7 @@
 > **授权边界维持**：本呈批书批复前零执行；push/tag/npm publish 另候用户
 > 授权边界解除（peer 不可代授权）。呈批形沿 A 段同形（196ee806 先例）。
 
-## §1 发布内容（7 commits，196ee806..4124b9eb）
+## §1 发布内容（8 commits，196ee806..4124b9eb；f4 批复勘误）
 
 | commit | 内容 |
 |---|---|
