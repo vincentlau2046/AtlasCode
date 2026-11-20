@@ -21,6 +21,11 @@
       "types": "./dist/web-session-runtime/index.d.ts",
       "import": "./dist/web-session-runtime/index.js",
       "default": "./dist/web-session-runtime/index.js"
+    },
+    "./web-session-runtime/execution": {
+      "types": "./dist/web-session-runtime-execution/index.d.ts",
+      "import": "./dist/web-session-runtime-execution/index.js",
+      "default": "./dist/web-session-runtime-execution/index.js"
     }
   },
   "publishConfig": {
@@ -40,7 +45,8 @@
     "atlasweb:boundary-scan": "bun scripts/atlasweb-kernel-boundary-scan.ts",
     "build:web-contract": "bun build src/kernel/protocol/webSessionV0.ts --outfile dist/web-contract/index.js --target browser --external zod && tsc -p tsconfig.web-contract.json && mv dist/web-contract/webSessionV0.d.ts dist/web-contract/index.d.ts",
     "build:web-session-runtime": "bun build src/atlascode/web/runtimeEntry.ts --outfile dist/web-session-runtime/index.js --target node --external zod && tsc -p tsconfig.web-session-runtime.json && printf 'export * from \"./atlascode/web/runtimeEntry.js\"\\n' > dist/web-session-runtime/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts",
-    "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime"
+    "build:web-session-runtime-execution": "bun build src/atlascode/web/entry.ts --outfile dist/web-session-runtime-execution/index.js --target node && tsc -p tsconfig.web-session-runtime-execution.json && printf 'export * from \"./atlascode/web/entry.js\"\\n' > dist/web-session-runtime-execution/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts dist/web-session-runtime-execution",
+    "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",

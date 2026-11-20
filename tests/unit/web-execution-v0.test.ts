@@ -352,6 +352,39 @@ describe('S2 · 格 B 出口（createExecutionOutlet · E1 增格）', () => {
     expect(expired).toMatchObject({ code: 'cursorExpired' })
   })
 
+  test('S4 修正锚（f4 裁定）：wire follow.resume 命令响应 = 完整三态 ExecutionReplay（与原语同形归一，不截断）', async () => {
+    const baselineReplay = { kind: 'baseline', events: [], headCursor: '0000000000000001' } as const
+    const deltaReplay = {
+      kind: 'delta',
+      events: [{
+        ...baseEnvelope,
+        bind: { ...baseEnvelope.bind, turnId: 'turn-1' },
+        type: 'turn.accepted',
+        cursor: '0000000000000002',
+        payload: { submitId: UUID_B },
+      }],
+      headCursor: '0000000000000002',
+    } as const
+    let mode: 'baseline' | 'delta' = 'baseline'
+    const outlet = createExecutionOutlet({
+      isExecutionEnabled: () => true,
+      resumeExecution: () => (mode === 'baseline' ? baselineReplay : deltaReplay),
+      dispatchCommand: async () => ({ code: 'unreachable', message: 'spy', retryable: false }),
+    })
+    // baseline：原样全量返回（events 可空 = 执行流基线为空，内容基线经只读
+    // replay 面重读；不因空而落 cursorExpired 兜底）
+    const base = await outlet.handle({
+      ...baseEnvelope, type: 'follow.resume', payload: {},
+    } as never)
+    expect(base).toBe(baselineReplay)
+    // delta：增量事件序列 + headCursor 原样全量返回（恰一次补齐，不截断 events[0]）
+    mode = 'delta'
+    const delta = await outlet.handle({
+      ...baseEnvelope, type: 'follow.resume', payload: { cursor: '0000000000000001' },
+    } as never)
+    expect(delta).toBe(deltaReplay)
+  })
+
   test('probe=on 经出口面：capability.probe 返回 on/off + 受支持 v（不经 dispatch）', async () => {
     const calls: unknown[] = []
     const outlet = mkOutlet({

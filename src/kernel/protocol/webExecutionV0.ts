@@ -210,6 +210,11 @@ export const WebExecutionEventSchema = z.discriminatedUnion('type', [
  * 替换信号（不合并旧事件）。baseline = 初始跟随（投影走持久化回读，SSE 仅
  * 视图）；delta = cursor 后增量（不重不漏）；expired = cursor 不在缓冲/
  * 溢出丢弃/外来未来 cursor（fail-closed）。型归协议文件以保出口 import 闭包。
+ *
+ * f4 S4 修正裁定（wire 形）：follow.resume 命令响应与本原语同形归一（完整
+ * 三态，不并存两形）。baseline 语义明示：**执行流基线为空**（events=[] +
+ * headCursor）——内容基线经只读 replay 面重读；基线替换 = 重读持久态 +
+ * 自 headCursor 收增量（B1 adapter 按此消费）。
  */
 export type ExecutionReplay =
   | { kind: 'baseline'; events: []; headCursor: string }

@@ -7,6 +7,7 @@ import { describe, test, expect, beforeAll } from 'bun:test'
 import { readFileSync, existsSync, readdirSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { builtinModules } from 'node:module'
 
 const REPO = join(import.meta.dir, '..', '..')
 const PKG = JSON.parse(readFileSync(join(REPO, 'package.json'), 'utf8')) as {
@@ -206,7 +207,69 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
     )
     expect(scripts['build:web-session-runtime']).toContain('--external zod')
     expect(scripts['prepublishOnly']).toBe(
-      'bun run build && bun run build:web-contract && bun run build:web-session-runtime',
+      'bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution',
     )
+  })
+})
+
+/**
+ * S4 修正锚（f4 裁定）：`./web-session-runtime/execution` subpath pack 腿。
+ * 背景：S0-R R-3 「零 zod」合同 × S2 entry.ts 执行出口面冲突 → pack 构建
+ * 入口分离（runtimeEntry.ts）+ 同包第二 subpath 承载执行出口（自 entry.ts
+ * 构建，zod 内联不 external，自包含零 npm runtime dependencies——§9 安装
+ * 面 B1 upstream 导入 createExecutionOutlet 可达）。
+ */
+const EXEC_JS = join(REPO, 'dist', 'web-session-runtime-execution', 'index.js')
+const EXEC_DTS = join(REPO, 'dist', 'web-session-runtime-execution', 'index.d.ts')
+
+describe('S4 修正锚 · ./web-session-runtime/execution pack 腿', () => {
+  beforeAll(() => {
+    const r = spawnSync('bun', ['run', 'build:web-session-runtime-execution'], {
+      cwd: REPO,
+      encoding: 'utf8',
+      timeout: 180_000,
+    })
+    if (r.status !== 0) {
+      throw new Error(
+        `build:web-session-runtime-execution failed (${r.status}):\n${r.stderr?.slice(-2000)}`,
+      )
+    }
+  })
+
+  test('存在 + 导出 createExecutionOutlet（B1 upstream §9 安装面可达）', () => {
+    expect(existsSync(EXEC_JS)).toBe(true)
+    expect(existsSync(EXEC_DTS)).toBe(true)
+    const js = readFileSync(EXEC_JS, 'utf8')
+    expect(js).toContain('createExecutionOutlet')
+    expect(js).toContain('createReadonlySessionRuntime')
+    const dts = readFileSync(EXEC_DTS, 'utf8')
+    expect(dts).toContain('./atlascode/web/entry.js')
+  })
+
+  test('自包含：zod 内联（零 zod import 语句）+ 外部 import 仅 node 内建', () => {
+    const js = readFileSync(EXEC_JS, 'utf8')
+    expect(js).not.toMatch(/import\s+[^;]*from\s*["']zod/)
+    // 外部 import 面 ⊆ node 内建（bun build 保留 bare 形 fs/promises 等，
+    // node: 前缀与 builtinModules 裸名均算内建）
+    const builtins = new Set(builtinModules)
+    for (const m of js.matchAll(/^import\s+[^'"]*['"]([^'"]+)['"]/gm)) {
+      const spec = m[1].startsWith('node:')
+        ? m[1].slice(5)
+        : m[1]
+      expect(builtins.has(spec)).toBe(true)
+    }
+  })
+
+  test('exports 表 subpath 形 + 构建脚本零 --external zod', () => {
+    const exp = PKG.exports as Record<string, Record<string, string>>
+    const sub = exp['./web-session-runtime/execution']
+    expect(sub).toBeDefined()
+    expect(Object.keys(sub)).toEqual(['types', 'import', 'default'])
+    expect(sub.import).toBe('./dist/web-session-runtime-execution/index.js')
+    const scripts = (PKG as unknown as { scripts: Record<string, string> }).scripts
+    expect(scripts['build:web-session-runtime-execution']).toContain(
+      '--outfile dist/web-session-runtime-execution/index.js --target node',
+    )
+    expect(scripts['build:web-session-runtime-execution']).not.toContain('--external zod')
   })
 })

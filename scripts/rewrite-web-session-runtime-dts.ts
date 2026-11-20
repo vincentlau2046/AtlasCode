@@ -12,7 +12,14 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 
-const ROOT = resolve(import.meta.dir, '..', 'dist', 'web-session-runtime')
+// S4 修正锚（f4 裁定）：pack 构建入口分离后同参数化复用——argv[2] = dist
+// 子树根（默认 dist/web-session-runtime；execution bundle 传
+// dist/web-session-runtime-execution），重写语义逐字不变。
+const ROOT = resolve(
+  import.meta.dir,
+  '..',
+  process.argv[2] ?? join('dist', 'web-session-runtime'),
+)
 
 function dtsFiles(dir: string): string[] {
   const out: string[] = []

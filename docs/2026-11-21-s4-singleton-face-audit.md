@@ -48,10 +48,18 @@
 
 ## 残余登记
 
-1. **wire follow.resume 有效路径响应形**：合同 §2 未定义（error 通道 +
-   cursorExpired 基线替换信号已落；baseline/delta 增量交付走
-   `followResume` 出口原语 + 事件流）。v0 形候 f4 裁定（B1 adapter 消费
-   原语不受阻）。
+1. ~~wire follow.resume 有效路径响应形~~ **已销（f4 S4 修正裁定落码）**：
+   命令响应 = 完整三态 `ExecutionReplay`（与 `followResume` 原语同形归一，
+   不并存两形）；baseline 空语义（执行流基线为空，内容基线经只读 replay
+   面重读）已明示于协议文件 d.ts/comment + 格 B 判别腿。
 2. **runTurn 引擎真体**：session 回合执行 → runner 缝映射 = 后续切片
    （B 波前须落，产品能力开启前置条件）。
-3. **bridge 车道**：远端连接身份（actorId 真源）随 bridge 实装切片。
+3. **bridge 车道**：远端连接身份（actorId 真源）随 bridge 实装切片——
+   f4 裁定加 B1 门：`'atlas-local-ambient'` 占位可留 S4，B1 候选验收前
+   须落真源（绑定打开链接/连接身份，§5 服务端产纪律），占位不进 B1
+   验收腿。
+4. **S4 修正锚（f4 裁定）pack 面**：`./web-session-runtime/execution`
+   subpath（自 entry.ts 构建、zod 内联自包含零 npm runtime dependencies）
+   + pack 契约 execution bundle 三腿（存在/自包含/导出
+   createExecutionOutlet）+ prepublishOnly 扩链；atlaswebCarrier 元数据 +
+   SRI 增记 execution bundle 输入摘要归段 L 发布序列（镜像纪律不受影响）。

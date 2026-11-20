@@ -50,7 +50,10 @@ export type ExecutionOutletOptions = {
   ) => ExecutionReplay
 }
 
-export type ExecutionHandleResult = ExecutionDispatchResult | WebExecutionProbeResult
+export type ExecutionHandleResult =
+  | ExecutionDispatchResult
+  | WebExecutionProbeResult
+  | ExecutionReplay
 
 export type ExecutionOutlet = {
   /** 能力探针：不经 dispatch（kernel 零痕迹），仅读门求值。 */
@@ -100,8 +103,13 @@ export function createExecutionOutlet(options: ExecutionOutletOptions): Executio
         return capabilityDisabledError(command.type)
       }
       if (command.type === 'follow.resume') {
-        // §6 wire 面：expired cursor → cursorExpired（基线替换信号）。
-        // baseline/delta 增量交付走 followResume 原语 + 事件流（v0 形附注候 f4）。
+        // §6 wire 面（f4 S4 修正裁定）：命令响应 = 完整三态 ExecutionReplay，
+        // 与 followResume 原语同形归一（不并存两形，恰一次补齐不破）。
+        //  - baseline：执行流基线为空（events=[]）+ headCursor——内容基线经
+        //    只读 replay 面重读；基线替换 = 重读持久态 + 自 headCursor 收增量
+        //    （B1 adapter 按此消费）。
+        //  - delta：增量事件 + headCursor。
+        //  - expired：cursorExpired 错误（retryable=false，基线替换信号）。
         const replay = options.resumeExecution?.(
           { workspaceId: command.bind.workspaceId, sessionId: command.bind.sessionId },
           command.payload.cursor,
@@ -109,13 +117,7 @@ export function createExecutionOutlet(options: ExecutionOutletOptions): Executio
         if (!replay || replay.kind === 'expired') {
           return { code: 'cursorExpired', message: '游标过期/溢出丢弃：按基线替换恢复（合同 §6）', retryable: false }
         }
-        return (
-          replay.events[0] ?? {
-            code: 'cursorExpired',
-            message: '无增量可交付（合同 §6 基线替换）',
-            retryable: false,
-          }
-        )
+        return replay
       }
       return options.dispatchCommand(command)
     },
