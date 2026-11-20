@@ -62,3 +62,27 @@ export type {
 
 // 错误面（10 code + retryable 语义位）
 export { WebSessionError, type WebSessionErrorCode } from './errors'
+
+// 执行出口（B0 执行出口合同 §2；S2，呈批书 @196ee806 + f4 批复 @a62925c0）：
+// 懒触达 factory + 型面；协议 schema/常量自 kernel/protocol/webExecutionV0
+// （zod/v4 唯一闭包，加载图审计格沿用）。
+export {
+  createExecutionOutlet,
+  type ExecutionOutlet,
+  type ExecutionOutletOptions,
+  type ExecutionDispatchResult,
+  type WebExecutionProbeResult,
+} from './executionOutlet'
+export {
+  EXECUTION_SCHEMA_VERSION,
+  EXECUTION_PROTOCOL_VERSION,
+  EXECUTION_CAPABILITY_DISABLED_CODE,
+  WebExecutionCommandSchema,
+  WebExecutionEventSchema,
+  WebExecutionErrorSchema,
+  ExecutionBindSchema,
+  type ExecutionBind,
+  type WebExecutionCommand,
+  type WebExecutionEvent,
+  type WebExecutionError,
+} from '../../kernel/protocol/webExecutionV0'
