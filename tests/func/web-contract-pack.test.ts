@@ -99,10 +99,11 @@ describe('S0-U U-2 · 格 B 出口/安装', () => {
       '--outfile dist/web-contract/index.js --target browser',
     )
     expect(scripts['build:web-contract']).toContain('--external zod')
-    // R-3 扩链（3 步）→ S4 修正锚扩链（4 步，c810994f）：execution subpath
-    // 加入 publish 前置构建
+    // R-3 扩链（3 步）→ S4 修正锚扩链（4 步，c810994f）→ 段 L 扩链（5 步，
+    // 呈批书 §3-1 预注册 @f89048a5，f4 批复 @63fc4615）：execution subpath +
+    // atlasweb-carrier 载体元数据加入 publish 前置构建
     expect(scripts['prepublishOnly']).toBe(
-      'bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution',
+      'bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution && bun run build:atlasweb-carrier',
     )
   })
 })

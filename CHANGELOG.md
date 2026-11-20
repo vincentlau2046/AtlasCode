@@ -4,6 +4,16 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.126（2026-11-21）
+
+**B0 执行出口地基**（执行出口实施波；呈批书 @196ee806 + f4 批复六条件 @a62925c0 + S4 修正锚 f4 裁定改形 @c810994f；gate r-20261121-gate-execout GATE-PASS 终态）。
+
+- 新增 `@atlasharness/atlascode/web-session-runtime/execution` subpath：`createExecutionOutlet` 懒触达执行出口（构造零副作用）+ `webExecutionV0` 协议（六命令 codec / 幂等键 / 终态恰一个 / 审批证据服务端产）。pack 产物自包含（zod 内联零 npm runtime dependencies）。
+- kernel 执行域状态机：§3 幂等账本 / §4 状态机 / §5 审批 / §8 上限（队列 16/300s/2MiB/10 000/并发 1）/ `replaySince` 三态恢复重放（baseline 空语义 / delta 恰一次 / expired）。
+- S1 set-once 注入守卫（armed 三槽恰一次 + reset 缝硬错）+ 双车道组合根恰一次装配（headless compose.ts / TUI factory.ts）。
+- **默认 fail-closed off**：`ATLAS_WEB_EXECUTION_ENABLED=1` 显式 opt-in；off 下六命令任一 = `capabilityDisabled` 拒且内核零痕迹。`runTurn` 真体未接线（显式抛错，绝不静默假执行）。
+- 载体元数据：`dist/atlasweb-carrier.json`（product/version/runtimeSha256/executionSha256），prepublishOnly 链第 5 步产出。
+
 ## v0.1.125（2026-11-20）
 
 **web-session-runtime list 面 title/messageCount 提取（G-D 载体根修）**（W-UI-V 视觉闭环波用户裁定「载体根修 0.1.125」派生；实机 AtlasWeb 侧栏 49 行全 "(untitled)" 定谳——`toSummary` 硬编码 `title:null`/`messageCount:null`，list 面零提取）。
