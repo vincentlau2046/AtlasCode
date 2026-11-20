@@ -29,7 +29,7 @@ import {
   resetBootstrapStatePort,
   resetExecutorSandboxPort,
 } from '../../src/executor'
-import { getCoreDependencies, resetCoreDependencies } from '../../src/atlascode'
+import { createCoreDependencies, getCoreDependencies, resetCoreDependencies } from '../../src/atlascode'
 import {
   getModelProvider,
   setModelProviderForTesting,
@@ -108,7 +108,7 @@ beforeAll(() => {
   _resetAtlasTempDirForTest()
   process.env.ATLAS_TMPDIR = testTmp
   // 唯一跨 8 域装配点：注入 4+7 前置清单（§8.14 注入序 permissions→task→hooks）
-  core = getCoreDependencies()
+  core = createCoreDependencies()
 })
 
 afterAll(() => {

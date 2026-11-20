@@ -12,7 +12,7 @@
  * 破坏断言（不假「无钩子」内容断言）。
  */
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { getCoreDependencies, resetCoreDependencies } from '../../src/atlascode'
+import { createCoreDependencies, getCoreDependencies, resetCoreDependencies } from '../../src/atlascode'
 import {
   getHooksBootstrapEnv,
   resetHooksBootstrapEnv,
@@ -45,7 +45,7 @@ import {
 
 describe('E-5 S-5a 组合根 hooks bootstrap-env 接线（三层断之第三断）', () => {
   beforeAll(() => {
-    getCoreDependencies()
+    createCoreDependencies()
   })
   afterAll(() => {
     resetCoreDependencies()

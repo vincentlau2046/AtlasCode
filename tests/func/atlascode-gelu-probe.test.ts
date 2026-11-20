@@ -121,7 +121,7 @@ import {
   type Message,
 } from '../../src/engine'
 import {
-  getCoreDependencies,
+  createCoreDependencies,
   createAgentLoopDeps,
   initMcpConnections,
   resetCoreDependencies,
@@ -356,7 +356,7 @@ beforeAll(async () => {
   // ① provider fake 先于装配（compose 缓存 getModelProvider 单例）
   setModelProviderForTesting(createScriptedProvider())
   // ② 组合根装配（8 域真链，func 层真 I/O）
-  getCoreDependencies()
+  createCoreDependencies()
   // ③ 构建器（注册表 + 权限门 + hooks 真接线）
   bundle = await createAgentLoopDeps({
     toolRegistryDeps: { baseTools: ALL_BODIES },

@@ -18,6 +18,10 @@ import { join } from 'path'
 // S0-R2（lock-face @25cb7454 §3-4）：barrel 值导入窄化——shared 全 barrel
 // （含 feature/bun:bundle）不得入 web 只读载体加载图，直连子模块。
 import { getConfigDirName } from '../../shared/configDir'
+// S1 set-once 守卫接缝（执行出口实施波；守卫逻辑单文件收敛于
+// kernel/state/injection.ts，本文件仅消费认领原语与 armed 查询——B0 合同
+// §7「产品模式 setSessionEnv 恰注入一次，二次注入 = 硬错」）。
+import { claimKernelInjectionSlot, isKernelInjectionArmed } from '../../kernel/state/injection'
 
 export type SessionEnv = {
   /** 当前 session id（旧 bootstrap getSessionId）。 */
@@ -80,6 +84,7 @@ let _env: SessionEnv = defaultEnv
  * getProjectsDir → tmpdir 真盘面）。Partial 合并：未注成员沿用缺省。
  */
 export function setSessionEnv(partial: Partial<SessionEnv>): void {
+  claimKernelInjectionSlot('sessionEnv')
   _env = { ..._env, ...partial }
 }
 
@@ -93,6 +98,12 @@ export function getSessionEnv(): SessionEnv {
  * 合并走 spread 新对象，defaultEnv 本体不被写，复位安全）。
  */
 export function resetSessionEnv(): void {
+  // S1 set-once 守卫（f4 批复条件④单向不可逆）：armed 态 reset = 硬错。
+  if (isKernelInjectionArmed()) {
+    throw new Error(
+      'set-once 守卫：armed 态 resetSessionEnv = 硬错（单向不可逆；注入→reset 解除→再注入 = 静默顶替绕行向量）',
+    )
+  }
   // S0-R2 惰性捕获配套：捕获变量一并复位（首调捕获语义 = 复位后下一次访问
   // 重新捕获）。旧形模块装载冻结常量天然跨 reset 存活（import 时已捕获 =
   // 进程启动值）；新形捕获点后移，不复位则先跑文件捕获的脏值（chdir 后的

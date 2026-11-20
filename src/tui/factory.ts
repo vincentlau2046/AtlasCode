@@ -96,6 +96,7 @@ import { getCwdState, getOriginalCwd, setCwdState } from 'src/bootstrap'
 import { getAdditionalDirectoriesForClaudeMd } from 'src/tui/bootstrapState.js'
 import {
   setKernelBootstrapNoopSeam,
+  armKernelInjectionGuard,
   setKernelBootstrapState,
 } from '../kernel/state/injection.js'
 import {
@@ -283,5 +284,9 @@ export function createCoreDependencies(
 let _coreDeps: CoreDependencies | undefined
 
 export function getCoreDependencies(): CoreDependencies {
+  // S1 set-once 守卫 arming（TUI 车道组合根单例门，装配期恰一次；幂等——
+  // armed 后二次访问走缓存不重注）：产品模式对三注入槽恰一次，二次注入 =
+  // 硬错（B0 合同 §7；与 compose.ts headless 门同形）。
+  armKernelInjectionGuard()
   return (_coreDeps ??= createCoreDependencies())
 }

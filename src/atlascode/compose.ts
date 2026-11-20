@@ -77,6 +77,7 @@ import {
 } from '../shared'
 import { FileSystemMemoryStore, type MemoryStore } from '../memory'
 import {
+  armKernelInjectionGuard,
   setKernelBootstrapNoopSeam,
   setKernelBootstrapState,
 } from '../kernel/state/injection.js'
@@ -578,6 +579,10 @@ let _core: CoreDependencies | undefined
 
 /** lazy 单例（旧仓 factory.ts 同款 idiom）：首访问装配，其后复用。 */
 export function getCoreDependencies(): CoreDependencies {
+  // S1 set-once 守卫 arming（headless 车道组合根单例门，装配期恰一次；
+  // 幂等——armed 后二次访问走缓存不重注）：产品模式对三注入槽恰一次，
+  // 二次注入 = 硬错（B0 合同 §7）。
+  armKernelInjectionGuard()
   return (_core ??= createCoreDependencies())
 }
 

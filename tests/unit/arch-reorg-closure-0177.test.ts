@@ -29,8 +29,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, normalize, relative } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import {
+  createCoreDependencies,
   getCoreDependencies,
-  resetCoreDependencies,
 } from '../../src/atlascode/compose.js'
 
 const ROOT = join(import.meta.dir, '..', '..')
@@ -320,20 +320,18 @@ describe('G-3 组合根唯一（P-3）', () => {
       expect(called.has(n), `compose.ts 缺 ${n}`).toBe(true)
     }
   })
-  test('运行时单实例不变式：getCoreDependencies 连调同实例 → resetCoreDependencies → 新实例（env 快照/复原）', () => {
+  test('运行时单实例不变式：getCoreDependencies 连调同实例 + 直装配新实例（S1 set-once 守卫重排形）', () => {
     // 组合根 4 槽面（6ca23aa 实测 = sandboxManager / modelProvider /
     // memoryStore / appState；只记不锁，工单裁定② = 同一性不变式）。
-    const envSnapshot = { ...process.env }
-    try {
-      const a = getCoreDependencies()
-      expect(getCoreDependencies()).toBe(a)
-      resetCoreDependencies()
-      const c = getCoreDependencies()
-      expect(c).not.toBe(a)
-    } finally {
-      resetCoreDependencies()
-      process.env = envSnapshot
-    }
+    // S1 set-once 守卫（armed 单向不可逆）后，原「reset → 再装配 = 新实例」
+    // 腿在产品模式 = 二次注入硬错（恰是守卫目标行为）；同一性腿留 armed
+    // 单例门，新实例腿改直装配（未 armed 测试车道，守卫不涉）。
+    // 未 armed 直装配先行（armed 无退路——gate 一经触达，槽消费位即终态）：
+    const c1 = createCoreDependencies()
+    const c2 = createCoreDependencies()
+    expect(c2).not.toBe(c1)
+    const a = getCoreDependencies()
+    expect(getCoreDependencies()).toBe(a)
   })
 })
 

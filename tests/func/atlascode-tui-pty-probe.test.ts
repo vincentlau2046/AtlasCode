@@ -46,7 +46,7 @@ import { readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { getModelProvider } from '../../src/modelprovider'
-import { getCoreDependencies } from '../../src/atlascode'
+import { createCoreDependencies } from '../../src/atlascode'
 
 const LOG = join(tmpdir(), `atlascode-pty-probe-${process.pid}.log`)
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -64,7 +64,7 @@ const isCi =
 const gatewayUp = isCi
   ? false
   : (async () => {
-      getCoreDependencies()
+      createCoreDependencies()
       return await getModelProvider()
         .healthCheck('small')
         .then(h => h.ok)

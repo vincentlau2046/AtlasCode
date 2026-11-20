@@ -27,7 +27,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { queryAgentLoop, type Message } from '../../src/engine'
 import {
   createAgentLoopDeps,
-  getCoreDependencies,
+  createCoreDependencies,
   resetCoreDependencies,
   type AgentLoopDepsBundle,
 } from '../../src/atlascode'
@@ -42,7 +42,7 @@ const DISTRACTOR_SKILL = 'slowquery'
 // 门控语义同 live-gelu：healthCheck 走 roles lane = 组合根注册的 settings-based
 // endpoint source，裸测试进程（未 compose）池为空恒 false。故先 compose（离线确定，
 // CI 可跑）再 healthCheck 门控。
-getCoreDependencies()
+createCoreDependencies()
 const gatewayUp = await getModelProvider()
   .healthCheck(GATE_ROLE)
   .then(h => h.ok)
@@ -115,7 +115,7 @@ suite(
     let bundle: AgentLoopDepsBundle
 
     beforeAll(async () => {
-      getCoreDependencies()
+      createCoreDependencies()
       // role = 门控角色；baseTools 空（本探针最小活面：模型可见工具 = args.tools 的
       // stand-in Skill，非全量本体）；catalog 经 user 面注入。
       bundle = await createAgentLoopDeps({

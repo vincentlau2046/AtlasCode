@@ -24,7 +24,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { queryAgentLoop, type Message } from '../../src/engine'
 import {
   createAgentLoopDeps,
-  getCoreDependencies,
+  createCoreDependencies,
   resetCoreDependencies,
   type AgentLoopDepsBundle,
 } from '../../src/atlascode'
@@ -35,7 +35,7 @@ const GATE_ROLE = 'small'
 // 门控语义（§8.74.20 裁定）：healthCheck 走 roles lane = 组合根 D18 注册的
 // settings-based endpoint source——裸测试进程（未 compose）池为空恒 false。
 // 故先 compose（func 层真装配，离线确定，CI 可跑）再 healthCheck 门控。
-getCoreDependencies()
+createCoreDependencies()
 const gatewayUp = await getModelProvider()
   .healthCheck(GATE_ROLE)
   .then(h => h.ok)
@@ -90,7 +90,7 @@ suite(
 
     beforeAll(async () => {
       // 组合根装配（8 域真链）→ 构建器（注册表 + 权限门 + hooks 真接线）
-      getCoreDependencies()
+      createCoreDependencies()
       // role = 门控角色（池头 = iff/Qwen38-27B-TXT）；baseTools 空注入
       // （本探针最小活面：模型可见工具 = args.tools 的 echo，非全量 49 本体）
       bundle = await createAgentLoopDeps({
