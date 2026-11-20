@@ -19,7 +19,7 @@ import {
 import {
   createExecutionOutlet,
   type ExecutionOutletOptions,
-} from '../../src/atlascode/web/executionOutlet'
+} from '../../src/kernel/execution/executionOutlet'
 
 const ROOT = resolve(import.meta.dir, '../..')
 const src = (rel: string) => readFileSync(join(ROOT, rel), 'utf8')
@@ -302,6 +302,56 @@ describe('S2 · 格 B 出口（createExecutionOutlet · E1 增格）', () => {
     expect(seen).toEqual([{ type: 'turn.submit' }])
   })
 
+  test('S4 followResume：off = capabilityDisabled 拒且内核零痕迹；on = §6 replay 透传', async () => {
+    const calls: unknown[] = []
+    const offOutlet = createExecutionOutlet({
+      dispatchCommand: async (cmd) => {
+        calls.push(cmd)
+        return { code: 'unreachable', message: 'spy', retryable: false }
+      },
+    })
+    const off = offOutlet.followResume({ workspaceId: 'ws', sessionId: 's1' })
+    expect('kind' in off ? off.kind : (off as { code: string }).code).toBe('capabilityDisabled')
+    expect(calls.length).toBe(0)
+
+    const onOutlet = createExecutionOutlet({
+      isExecutionEnabled: () => true,
+      resumeExecution: (_bind, cursor) =>
+        cursor === 'dead'
+          ? { kind: 'expired', events: [], headCursor: 'x' }
+          : { kind: 'baseline', events: [], headCursor: 'y' },
+      dispatchCommand: async (cmd) => {
+        calls.push(cmd)
+        return { code: 'unreachable', message: 'spy', retryable: false }
+      },
+    })
+    const base = onOutlet.followResume({ workspaceId: 'ws', sessionId: 's1' })
+    expect(base).toEqual({ kind: 'baseline', events: [], headCursor: 'y' })
+    const expired = onOutlet.followResume({ workspaceId: 'ws', sessionId: 's1' }, 'dead')
+    expect(expired).toEqual({ kind: 'expired', events: [], headCursor: 'x' })
+    expect(calls.length).toBe(0) // replay 原语不经 dispatch（kernel 缝独立）
+  })
+
+  test('wire follow.resume：off = capabilityDisabled；on + 过期 cursor = cursorExpired（§6 基线替换信号）', async () => {
+    const offOutlet = createExecutionOutlet({
+      dispatchCommand: async () => ({ code: 'unreachable', message: 'spy', retryable: false }),
+    })
+    const off = await offOutlet.handle({
+      ...baseEnvelope, type: 'follow.resume', payload: {},
+    } as never)
+    expect(off).toMatchObject({ code: 'capabilityDisabled' })
+
+    const onOutlet = createExecutionOutlet({
+      isExecutionEnabled: () => true,
+      resumeExecution: () => ({ kind: 'expired', events: [], headCursor: 'x' }),
+      dispatchCommand: async () => ({ code: 'unreachable', message: 'spy', retryable: false }),
+    })
+    const expired = await onOutlet.handle({
+      ...baseEnvelope, type: 'follow.resume', payload: { cursor: 'gone' },
+    } as never)
+    expect(expired).toMatchObject({ code: 'cursorExpired' })
+  })
+
   test('probe=on 经出口面：capability.probe 返回 on/off + 受支持 v（不经 dispatch）', async () => {
     const calls: unknown[] = []
     const outlet = mkOutlet({
@@ -329,7 +379,7 @@ describe('S2 · 格 C 源级（条件①符号级扫描 + 审计格沿用）', (
   })
 
   test('import 闭包：executionOutlet.ts 唯一依赖 = webExecutionV0（懒触达·零 engine 导入）', () => {
-    const s = src('src/atlascode/web/executionOutlet.ts')
+    const s = src('src/kernel/execution/executionOutlet.ts')
     const froms = s.match(/from\s+'([^']+)'/g) ?? []
     expect(froms.length).toBeGreaterThan(0)
     for (const f of froms) {
@@ -352,7 +402,7 @@ describe('S2 · 格 C 源级（条件①符号级扫描 + 审计格沿用）', (
     ]
     for (const rel of [
       'src/kernel/protocol/webExecutionV0.ts',
-      'src/atlascode/web/executionOutlet.ts',
+      'src/kernel/execution/executionOutlet.ts',
     ]) {
       const s = src(rel)
       for (const w of forbidden) {
@@ -361,7 +411,7 @@ describe('S2 · 格 C 源级（条件①符号级扫描 + 审计格沿用）', (
     }
   })
 
-  test('条件①符号级扫描：createExecutionOutlet 单接触点（src 面 = 出口本体 + entry.ts）', () => {
+  test('条件①符号级扫描：createExecutionOutlet 单接触点（src 面 = 出口本体 + entry.ts + 组合根助手）', () => {
     const hits = execFileSync(
       'grep',
       ['-rlE', 'createExecutionOutlet|ExecutionOutletOptions', 'src/'],
@@ -374,8 +424,51 @@ describe('S2 · 格 C 源级（条件①符号级扫描 + 审计格沿用）', (
       .sort()
     expect(hits).toEqual([
       'src/atlascode/web/entry.ts',
-      'src/atlascode/web/executionOutlet.ts',
+      'src/kernel/execution/executionComposition.ts',
+      'src/kernel/execution/executionOutlet.ts',
     ])
+  })
+
+  test('条件①扩腿：createExecutionKernel src 面 = 内核本体 + 壳侧组合根助手（零旁路消费）', () => {
+    const hits = execFileSync('grep', ['-rlE', 'createExecutionKernel', 'src/'], {
+      cwd: ROOT,
+    })
+      .toString()
+      .trim()
+      .split('\n')
+      .filter((l) => l.length > 0)
+      .sort()
+    expect(hits).toEqual([
+      'src/kernel/execution/executionComposition.ts',
+      'src/kernel/execution/executionKernel.ts',
+    ])
+  })
+
+  test('条件①扩腿：webExecutionV0 协议消费面 = 出口 + 内核三件（零 module-specifier 旁路）', () => {
+    const hits = execFileSync('grep', ['-rlE', "webExecutionV0|WebExecutionCommandSchema", 'src/'], {
+      cwd: ROOT,
+    })
+      .toString()
+      .trim()
+      .split('\n')
+      .filter((l) => l.length > 0)
+      .sort()
+    expect(hits).toEqual([
+      'src/atlascode/web/entry.ts',
+      'src/kernel/execution/executionKernel.ts',
+      'src/kernel/execution/executionOutlet.ts',
+      'src/kernel/protocol/webExecutionV0.ts',
+    ])
+  })
+
+  test('§5 纪律：客户端自报 actorId/timestamp 即拒（decide payload strictObject）', () => {
+    const parsed = WebExecutionCommandSchema.safeParse({
+      ...baseEnvelope,
+      bind: { workspaceId: 'ws-1', sessionId: 'sess-1', turnId: 'turn-1' },
+      type: 'approval.decide',
+      payload: { approvalId: UUID_C, decision: 'approved', actorId: 'spoofed' },
+    })
+    expect(parsed.success).toBe(false)
   })
 
   test('entry.ts 扩具名导出（§1 定名）：出口 factory + 型 + 协议常量/schema', () => {
@@ -392,5 +485,23 @@ describe('S2 · 格 C 源级（条件①符号级扫描 + 审计格沿用）', (
     ]) {
       expect(s.includes(name)).toBe(true)
     }
+  })
+
+  test('S4 pack 面隔离：runtimeEntry 导出名 ⊆ entry 导出名（漂移守卫·零 zod pack 合同）', () => {
+    const re = src('src/atlascode/web/runtimeEntry.ts')
+    const en = src('src/atlascode/web/entry.ts')
+    // runtimeEntry 每个 from './x' 相对 specifier 必须也被 entry 同样消费
+    // （面漂移 = pack 产物与公开出口分叉）
+    const specifiers = [...re.matchAll(/from\s+'(\.\.?\/[^']+)'/g)].map((m) => m[1])
+    expect(specifiers.length).toBeGreaterThan(0)
+    for (const sp of specifiers) {
+      expect(en.includes(`from '${sp}'`)).toBe(true)
+    }
+    // pack 入口零执行面（webExecutionV0 / executionOutlet 不入 pack 加载图）
+    expect(re.includes('webExecutionV0')).toBe(false)
+    expect(re.includes('executionOutlet')).toBe(false)
+    // package.json pack 构建入口指向 runtimeEntry（零 zod 契约载体）
+    const pkg = src('package.json')
+    expect(pkg.includes('build src/atlascode/web/runtimeEntry.ts')).toBe(true)
   })
 })

@@ -79,6 +79,11 @@ import {
   DefaultAscendFreshnessPort,
   type AscendFreshnessPort,
 } from './core/executor/AscendFreshnessPort'
+// B0 执行出口波 S4（f4 五件清单④）：kernel 执行域组合根接线（单源助手）
+import {
+  createExecutionComposition,
+  type ExecutionComposition,
+} from 'src/kernel/execution/executionComposition'
 
 import { createSettingsAdapter } from './config/settings-adapter'
 import {
@@ -128,6 +133,9 @@ export interface CoreDependencies {
    * getPromptForCommand 追加非阻塞漂移提醒（vault 23 §5bis，仿 AscendMockPort）。
    */
   ascendFreshnessPort: AscendFreshnessPort
+  /** B0 执行出口波 S4：kernel 执行域组合根接线（能力开关 fail-closed off，
+   * ATLAS_WEB_EXECUTION_ENABLED=1 显式开；合同 §7 实例隔离）。 */
+  execution: ExecutionComposition
   /**
    * W3-3b（§8.74.15）：engine loop 依赖活态装配前向接缝（取代 Phase A
    * orchestrator?: unknown 占位——旧仓 orchestrator 运行体 3c 删净后本接缝
@@ -274,6 +282,8 @@ export function createCoreDependencies(
     ascendExecutor: new AscendExecutor(ascendConfig),
     ascendConfig,
     ascendFreshnessPort: new DefaultAscendFreshnessPort(),
+    // B0 执行出口波 S4（f4 五件清单④）：执行出口组合根接线（默认 off）
+    execution: createExecutionComposition(),
   }
 }
 

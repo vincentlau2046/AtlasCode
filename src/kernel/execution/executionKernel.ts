@@ -17,6 +17,7 @@
  *  - 审计读门（turnStates / bufferState）公开为测试与运维只读面。
  */
 import type {
+  ExecutionReplay,
   WebExecutionCommand,
   WebExecutionError,
   WebExecutionEvent,
@@ -86,8 +87,14 @@ type Stream = {
   idempotency: Map<string, ExecutionKernelHandleResult>
 }
 
+/**
+ * §6 follow 恢复原语（S4）——结果型 ExecutionReplay 归协议文件
+ * （webExecutionV0），本域只执语义。
+ */
 export type ExecutionKernel = {
   handleCommand: (command: WebExecutionCommand) => Promise<ExecutionKernelHandleResult>
+  /** §6 恢复原语：follow.resume 的 kernel 侧真体（增量恰一次/过期基线替换）。 */
+  replaySince: (workspaceId: string, sessionId: string, cursor?: string) => ExecutionReplay
   onEvent: (cb: (e: WebExecutionEvent) => void) => () => void
   /** 审计读门：turnId → 状态（queued/running/终态恰一个）。 */
   turnStates: Map<string, TurnState>
@@ -362,6 +369,15 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
 
   return {
     handleCommand,
+    replaySince: (workspaceId, sessionId, cursor) => {
+      const st = streams.get(streamKey(workspaceId, sessionId))
+      const headCursor = String((st?.cursor ?? 0)).padStart(16, '0')
+      if (!st || !cursor) return { kind: 'baseline', events: [], headCursor }
+      if (st.overflowed) return { kind: 'expired', events: [], headCursor }
+      const idx = st.buffer.findIndex((e) => e.cursor === cursor)
+      if (idx < 0) return { kind: 'expired', events: [], headCursor }
+      return { kind: 'delta', events: st.buffer.slice(idx + 1), headCursor }
+    },
     onEvent: (cb) => {
       subscribers.add(cb)
       return () => subscribers.delete(cb)

@@ -39,7 +39,7 @@
     "typecheck": "tsc --noEmit",
     "atlasweb:boundary-scan": "bun scripts/atlasweb-kernel-boundary-scan.ts",
     "build:web-contract": "bun build src/kernel/protocol/webSessionV0.ts --outfile dist/web-contract/index.js --target browser --external zod && tsc -p tsconfig.web-contract.json && mv dist/web-contract/webSessionV0.d.ts dist/web-contract/index.d.ts",
-    "build:web-session-runtime": "bun build src/atlascode/web/entry.ts --outfile dist/web-session-runtime/index.js --target node --external zod && tsc -p tsconfig.web-session-runtime.json && printf 'export * from \"./atlascode/web/entry.js\"\\n' > dist/web-session-runtime/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts",
+    "build:web-session-runtime": "bun build src/atlascode/web/runtimeEntry.ts --outfile dist/web-session-runtime/index.js --target node --external zod && tsc -p tsconfig.web-session-runtime.json && printf 'export * from \"./atlascode/web/runtimeEntry.js\"\\n' > dist/web-session-runtime/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts",
     "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime"
   },
   "dependencies": {

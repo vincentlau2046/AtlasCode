@@ -176,8 +176,14 @@ export default tseslint.config(
             // DEP-1/4: engine 依赖八域+shared 向下合法; 不依赖 atlascode/ascend（DEP-4）
             // v0.12: 四域→八域（engine 波接线 hooks-runner/permissions-engine/task 消费）
             {
+              // 0.1.126候 执行出口波 S1（f4 批复条件⑤接缝形）：engine→kernel
+              // 窄边——set-once 注入守卫原语（claimKernelInjectionSlot /
+              // isKernelInjectionArmed 两名，kernel/state/injection 单文件收敛
+              // 锚定形）在 session/env.ts setSessionEnv 接缝一行消费。kernel =
+              // 基座域，方向向下；守卫逻辑不复制不搬（f4 锚 kernel/state/
+              // injection.ts 单文件收敛）。
               from: "engine",
-              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks", "lsp", "remote", "mcp"],
+              allow: ["shared", "sandbox", "memory", "executor", "modelprovider", "task", "bootstrap", "permissions", "hooks", "lsp", "remote", "mcp", "kernel"],
             },
             // ascend (域包): DIP — 依赖 shared + engine(port 接口) + executor(NpuToolchain 接口)
             {

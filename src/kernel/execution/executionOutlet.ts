@@ -20,10 +20,11 @@
 import {
   EXECUTION_CAPABILITY_DISABLED_CODE,
   EXECUTION_PROTOCOL_VERSION,
+  type ExecutionReplay,
   type WebExecutionCommand,
   type WebExecutionError,
   type WebExecutionEvent,
-} from '../../kernel/protocol/webExecutionV0'
+} from '../protocol/webExecutionV0'
 
 /** capability.probe 应答：泄露面仅 on/off + 受支持 v（合同 §2 审计登记 b）。 */
 export type WebExecutionProbeResult = {
@@ -39,6 +40,14 @@ export type ExecutionOutletOptions = {
   isExecutionEnabled?: () => boolean
   /** kernel 命令面薄适配（唯一 kernel 触达缝；事件/错误原样上抛）。 */
   dispatchCommand: (command: WebExecutionCommand) => Promise<ExecutionDispatchResult>
+  /**
+   * §6 follow 恢复缝（S4）：kernel.replaySince 直通（不经 dispatch）。
+   * 缺省 = off 车道恒拒。
+   */
+  resumeExecution?: (
+    bind: { workspaceId: string; sessionId: string },
+    cursor?: string,
+  ) => ExecutionReplay
 }
 
 export type ExecutionHandleResult = ExecutionDispatchResult | WebExecutionProbeResult
@@ -51,6 +60,14 @@ export type ExecutionOutlet = {
    * 且 dispatch 零触达；on 下薄适配透传。
    */
   handle: (command: WebExecutionCommand) => Promise<ExecutionHandleResult>
+  /**
+   * §6 follow 恢复（S4）：off = capabilityDisabled 拒且内核零痕迹；on =
+   * kernel.replaySince 透传（baseline/delta/expired 三态，增量恰一次）。
+   */
+  followResume: (
+    bind: { workspaceId: string; sessionId: string },
+    cursor?: string,
+  ) => ExecutionReplay | WebExecutionError
 }
 
 const capabilityDisabledError = (type: string): WebExecutionError => ({
@@ -82,7 +99,32 @@ export function createExecutionOutlet(options: ExecutionOutletOptions): Executio
       if (!isEnabled()) {
         return capabilityDisabledError(command.type)
       }
+      if (command.type === 'follow.resume') {
+        // §6 wire 面：expired cursor → cursorExpired（基线替换信号）。
+        // baseline/delta 增量交付走 followResume 原语 + 事件流（v0 形附注候 f4）。
+        const replay = options.resumeExecution?.(
+          { workspaceId: command.bind.workspaceId, sessionId: command.bind.sessionId },
+          command.payload.cursor,
+        )
+        if (!replay || replay.kind === 'expired') {
+          return { code: 'cursorExpired', message: '游标过期/溢出丢弃：按基线替换恢复（合同 §6）', retryable: false }
+        }
+        return (
+          replay.events[0] ?? {
+            code: 'cursorExpired',
+            message: '无增量可交付（合同 §6 基线替换）',
+            retryable: false,
+          }
+        )
+      }
       return options.dispatchCommand(command)
+    },
+
+    followResume: (bind, cursor) => {
+      if (!isEnabled() || !options.resumeExecution) {
+        return capabilityDisabledError('follow.resume')
+      }
+      return options.resumeExecution(bind, cursor)
     },
   }
 }

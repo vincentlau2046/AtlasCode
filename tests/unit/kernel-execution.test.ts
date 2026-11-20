@@ -299,6 +299,45 @@ describe('S3 · 格 D §5 审批证据（E5）', () => {
 })
 
 describe('S3 · 格 E 事件流（E2 bind 权威 + cursor 单调 + 缓冲上限）', () => {
+  test('S4 前置原语 replaySince：无 cursor = baseline + headCursor', () => {
+    const { runner } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const r = k.replaySince('ws', 's1')
+    expect(r.kind).toBe('baseline')
+    expect(r.headCursor).toBeDefined()
+  })
+
+  test('replaySince 增量恰一次：cursor 后事件严格递增且不重不漏', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const events: WebExecutionEvent[] = []
+    k.onEvent((e) => events.push(e))
+    await k.handleCommand(submitCmd())
+    calls[0].done.resolve('completed')
+    await waitFor(() => events.some((e) => e.type === 'turn.completed'))
+    const mid = events[1]!.cursor
+    const r = k.replaySince('ws', 's1', mid)
+    expect(r.kind).toBe('delta')
+    if (r.kind === 'delta') {
+      // 恰为 mid 之后的事件（不重）
+      expect(r.events.map((e) => e.cursor)).toEqual(events.slice(2).map((e) => e.cursor))
+      const nums = r.events.map((e) => Number(e.cursor))
+      for (let i = 1; i < nums.length; i++) expect(nums[i]).toBeGreaterThan(nums[i - 1])
+    }
+  })
+
+  test('replaySince 过期游标（不在缓冲/溢出丢弃）= expired（基线替换信号，§6）', async () => {
+    const { runner } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner, followBufferLimit: 2 })
+    for (let i = 0; i < 4; i++) {
+      await k.handleCommand(submitCmd({ payload: { submitId: `x-${i}` as never, text: 'hi' } }))
+    }
+    const r = k.replaySince('ws', 's1', String(1).padStart(16, '0'))
+    expect(r.kind).toBe('expired') // 溢出已丢弃 cursor=1
+    const foreign = k.replaySince('ws', 's1', 'deadbeef')
+    expect(foreign.kind).toBe('expired') // 外来/未来 cursor fail-closed
+  })
+
   test('事件携权威 bind 三元组（含 turnId）+ cursor 逐件严格递增', async () => {
     const { runner, calls } = blockingRunner()
     const k = createExecutionKernel({ runTurn: runner })

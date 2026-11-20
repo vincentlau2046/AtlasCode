@@ -205,6 +205,17 @@ export const WebExecutionEventSchema = z.discriminatedUnion('type', [
   ErrorEventSchema,
 ])
 
+/**
+ * §6 follow 恢复原语结果（S4）：按当前订阅代采信、增量恰一次、过期 → 基线
+ * 替换信号（不合并旧事件）。baseline = 初始跟随（投影走持久化回读，SSE 仅
+ * 视图）；delta = cursor 后增量（不重不漏）；expired = cursor 不在缓冲/
+ * 溢出丢弃/外来未来 cursor（fail-closed）。型归协议文件以保出口 import 闭包。
+ */
+export type ExecutionReplay =
+  | { kind: 'baseline'; events: []; headCursor: string }
+  | { kind: 'delta'; events: WebExecutionEvent[]; headCursor: string }
+  | { kind: 'expired'; events: []; headCursor: string }
+
 // ── 推断类型（公开消费面）─────────────────────────────────────────────────────
 
 export type ExecutionBind = z.infer<typeof ExecutionBindSchema>

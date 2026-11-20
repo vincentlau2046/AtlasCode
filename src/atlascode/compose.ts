@@ -81,6 +81,7 @@ import {
   setKernelBootstrapNoopSeam,
   setKernelBootstrapState,
 } from '../kernel/state/injection.js'
+import { createExecutionComposition, type ExecutionComposition } from '../kernel/execution/executionComposition'
 import {
   createKernelBootstrapNoopSeam,
   createKernelBootstrapStatePort,
@@ -212,6 +213,9 @@ export interface CoreDependencies {
    * apply 队列置换 React 批处理；Port 1 替换面，旧 QueryEngineConfig
    * getAppState/setAppState；注入窗 = setSessionContextPort(appState.port)）。 */
   appState: AppState
+  /** B0 执行出口波 S4：kernel 执行域组合根接线（能力开关 fail-closed off，
+   * ATLAS_WEB_EXECUTION_ENABLED=1 显式开；合同 §7 实例隔离）。 */
+  execution: ExecutionComposition
 }
 
 /**
@@ -499,6 +503,8 @@ export function createCoreDependencies(): CoreDependencies {
     modelProvider: getModelProvider(),
     memoryStore: new FileSystemMemoryStore(),
     appState,
+    // B0 执行出口波 S4（f4 五件清单④）：执行出口组合根接线（默认 off）
+    execution: createExecutionComposition(),
   }
 }
 
