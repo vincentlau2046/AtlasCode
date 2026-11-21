@@ -1,5 +1,7 @@
 # 段 L 呈批书 — 0.1.127候（B1 前置件 + 安全硬化波发布段）
 
+> **f4 批复（2026-11-21）：批准。** L1–L3 在授权边界内先行；**L4（tag/push/npm 双 org publish）候用户亲署**（0.1.127 新版本号，0.1.126 授权不延及——呈报用户时明确列候用户项）。§3 Δ 账预估（executionSha256 变/runtimeSha256 恒等/cli.js 零触碰）与 gate artifact 级实况互洽；§1 gate 判别要点（composition 在品 machine 判）为 0.1.126 型时序缺口的正确封法，采认。
+
 > **状态：终稿候 f4 批复**。gate 终态 **GATE-PASS**（判定单
 > `user-e2e/reports/r-20261121-gate-0127.md`，锚 9a83e7ec HEAD=origin
 > ALIGNED 独立 fetch 证；canon **6233/0/511 exit 0**；Δ账 +9/+1 恰合零
