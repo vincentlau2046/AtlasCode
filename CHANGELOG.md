@@ -4,6 +4,15 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.127（2026-11-21）
+
+**执行出口 kernel 硬化 + B1 注入形组合根**（B1 前置件 + 安全硬化波；段 L 呈批书 @5deca899 + f4 批复 @3de8103c；gate r-20261121-gate-0127 GATE-PASS；0.1.127 为 B1 upstream 前置载体——已发布 0.1.126 execution bundle 无 createExecutionComposition，发布时序事实非缺陷，f4 定谳无需回补）。
+
+- `createExecutionComposition` 注入形组合根入 execution subpath（形 2，f4 附条件采认）：零参默认行为零变更（CLI 车道占位 fail-closed + ambient actorId）；host 侧 upstream 注入 `runTurn` 真体 + `actorId` 真源。**发布时序缺口防线**：pack 面 `createExecutionComposition` 判别腿在格（gate artifact 级闭环）。
+- 安全硬化四件（推送安全审查闭环）：decide 全三元组绑定校验（跨 workspace/session 拒且零副作用）；流键 NUL fail-closed（跨流碰撞面）；终态/中止后迟到 delta 零发射；单 delta 块 ≤ 256KiB kernel 入口执法（越界拒发 + turn failed，禁静默截断，f4 归属裁定 @2f8a716）。
+- 附带修：`turnStates` 审计读门 running 段同步缺写（F4 边界腿暴露）。
+- 载体：runtimeSha256 恒等（7e7e6f38 连续第三版）；executionSha256 变（组合根 + 硬化入包）；cli.js 零触碰。
+
 ## v0.1.126（2026-11-21）
 
 **B0 执行出口地基**（执行出口实施波；呈批书 @196ee806 + f4 批复六条件 @a62925c0 + S4 修正锚 f4 裁定改形 @c810994f；gate r-20261121-gate-execout GATE-PASS 终态）。
