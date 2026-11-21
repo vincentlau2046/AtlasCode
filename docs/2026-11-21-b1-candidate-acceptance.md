@@ -1,6 +1,8 @@
 # B1 候选验收判词 — AtlasWeb 第一波执行出口（授权工作区、真实回合、回读）
 
 > **f4 判（2026-11-21）：B1 候选验收通过（条件形）。** gate 双前置（GATE-PASS + f4 采认）达成；9 红环境修复回执经 f4 独立复跑核实；关节登记三项（§3）不阻 B1，随 B2/B3 与总验收跟踪。B1 验收通过即 B2 开工资格成立（B 附表 §3，f4 已增补开工活码重核对表，见 §4）。本文只作判词，未改产品代码、未跑真实回合。
+>
+> **审计闭环（2026-11-21）：Atlas-reveiw PASS，0 必改**（独立实跑 468/1/0/1664 expect/63 files 逐字一致 + 登记三裁 + 锚面独立复核）。登记增补 1 条（执法腿符号集补 capability-entry 两符号，随 B2 首落码折入）+ 注记 2 条（送审笔误 20/20→以判词 +21/21 为准；follow.resume 落点补行）。**B1 终态归档，B2 按附表 §3 推进。**详见 §6。
 
 ## §0 判词锚
 
@@ -55,3 +57,14 @@ B1 通过 → B2（排队、取消、审批）按 B 附表 §3 开工，f4 开�
 ## §5 审计移交
 
 本判词 + gate 判定单 + 9 红修复回执送 Atlas-reveiw 审计（跨 session 沟通矩阵，每波必送）。审计意见回后：无必改 → B1 采认终态归档、B2 落码照附表推进；有必改 → 改形后复判。
+
+## §6 Atlas-reveiw 审计闭环（2026-11-21）
+
+**终判：PASS，0 必改 → B1 采认终态归档。**
+
+- **锚面独立复核**：AtlasWeb HEAD=origin/main=3aba08d 双 rev-parse 相等；3aba08d 仅 bun.lock 11+/11−；88de352 = 6 文件 +756/−1 与回执逐字一致；上游 0.1.127 SRI 四值在档（cli.js b4dfd8a4… 与 gateTruthTable EXPECTED 前缀吻合）；基线血统 82945c7+3d0e26d 均为 88de352 祖先。
+- **独立实跑（非采信性）**：468 pass / 1 skip / 0 fail / 1664 expect / 63 files / 29.10s——与 f4 复跑逐字一致；B1 两文件 21/21。
+- **登记三裁**：① type-only import **无需收紧**（编译期类型引用非运行时接触面；执法面本不及测试目录；双证）；② RED→GREEN 证据格降格**可接受**（判词已诚实标注不冒称；行为判据经 e2e 真 server 9/9 + gate + 审计方复跑三层成立）；③ **登记增补（新，不阻 B1）**：自动执法腿符号集现为 {specifier, `createExecutionComposition`}，须补 `createExecutionOutlet`/`ExecutionOutlet` 两 capability-entry 符号——**WebExecution\* 数据类型不入禁集**（executionRoutes.ts:20-21 经 './upstream' type re-export 为合法通道实证）；现活面零命中故不设复判门，**随 B2 首落码折入**。
+- **注记 2 条**：① 送审消息「20/20」为笔误，判词 +21 与实测 21/21 咬合，以判词为准；② `follow.resume` 三态 replay 落点自呈批书预注册的 `src/atlascode/web/` 移至 **`src/kernel/execution/executionOutlet.ts:105-127`**——内容核真，补落点行（本行即为补记）。
+- **B2 预警（审计转达，f4 采认并入开工纪律）**：B1 测试形 3 红根因（makeEnv 工厂复用撞 §7 WeakSet 守卫 / replaySince 未传 cursor）在 B2 approvals/queue 测试会再遇——**沿 bareUpstream 工厂形，勿产品面让路**。
+- **强口径点**：actorId 真源腿三面（launchCli.ts:88-92 fail-closed 双向 / upstream.ts:169 非 function 构造即硬错 / 验收腿全 `() => 'conn-1'`；ambient 字串仅注释声明不回落）；B2 上游四格重核复核成立。范围声明三项挂账（Node 20 / F6-PAGE / 单例面穷尽清单）确认不变。
