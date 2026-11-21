@@ -27,6 +27,8 @@ export const EXECUTION_QUEUE_DEPTH = 16
 export const EXECUTION_APPROVAL_TIMEOUT_MS = 300_000
 export const EXECUTION_MAX_TEXT_BYTES = 2 * 1024 * 1024
 export const EXECUTION_FOLLOW_BUFFER_LIMIT = 10_000
+/** 单 delta 块字节上限（合同 §8，f4 归属裁定 @2f8a716：kernel 入口执法，禁静默截断）。 */
+export const EXECUTION_MAX_DELTA_BYTES = 256 * 1024
 
 export type ExecutionTurnOutcome = 'completed' | 'failed' | 'cancelled'
 export type ExecutionApprovalDecision = 'approved' | 'denied' | 'expired' | 'voidedByCancel'
@@ -117,6 +119,7 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
   const approvalTimeoutMs = options.approvalTimeoutMs ?? EXECUTION_APPROVAL_TIMEOUT_MS
   const maxTextBytes = options.maxTextBytes ?? EXECUTION_MAX_TEXT_BYTES
   const followBufferLimit = options.followBufferLimit ?? EXECUTION_FOLLOW_BUFFER_LIMIT
+  const maxDeltaBytes = EXECUTION_MAX_DELTA_BYTES
 
   const streams = new Map<string, Stream>()
   const approvals = new Map<string, PendingApproval>()
@@ -240,6 +243,7 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
     if (st.running || st.queue.length === 0) return
     const turn = st.queue.shift()!
     turn.state = 'running'
+    turnStates.set(turn.turnId, 'running') // 审计读门同步（queued/running/终态恰一个）
     turn.controller = new AbortController()
     st.running = turn
     emit(st, { workspaceId: ws, sessionId: s, turnId: turn.turnId }, 'turn.started', {})
@@ -254,6 +258,13 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
             // 安全硬化 F5：终态/中止后迟到增量零发射（cursor 不进、订阅不见、
             // replay 不含——turn 生命周期门外溢面归零）。
             if (turn.state !== 'running' || turn.controller?.signal.aborted) return
+            // 安全硬化 F4（f4 归属裁定 @2f8a716）：单 delta 块 ≤ 256KiB kernel
+            // 入口执法——越界拒发不进 cursor 流，turn 按 failed 收口（错误边界
+            // 可测；禁静默截断——截断会腐蚀回合记录）。
+            if (Buffer.byteLength(text, 'utf8') > maxDeltaBytes) {
+              settleTurn(st, turn, 'failed', `turn.delta 超 ${maxDeltaBytes} 字节上限（合同 §8）`)
+              return
+            }
             emit(st, { workspaceId: ws, sessionId: s, turnId: turn.turnId }, 'turn.delta', { text })
           },
           requestApproval: () => {

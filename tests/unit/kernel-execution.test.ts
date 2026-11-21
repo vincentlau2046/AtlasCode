@@ -527,4 +527,39 @@ describe('安全硬化 · decide 全绑定 / 流键碰撞 / 终态后 delta', ()
     const replay = k.replaySince('ws', 's1', cursorAtCancel)
     expect(replay.events.some((e) => e.type === 'turn.delta')).toBe(false)
   })
+
+  test('F4：单 delta 超 256KiB → 拒发（零 cursor 流残留）+ turn failed 收口', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    await k.handleCommand(submitCmd())
+    await waitFor(() => calls.length === 1)
+    // 字节语义判别腿：131073 个双字节字符 = 262146 字节 > 262144，而 .length 语义下不越界
+    calls[0].deps.emitDelta('é'.repeat(131_073))
+    await new Promise((r) => setTimeout(r, 20))
+    expect(seen.some((e) => e.type === 'turn.delta')).toBe(false)
+    await waitFor(() => k.turnStates.get(seen.find((e) => e.type === 'turn.started')!.bind.turnId) === 'failed')
+    const failedEvent = seen.find((e) => e.type === 'turn.failed')
+    expect(failedEvent).toBeDefined()
+    expect((failedEvent!.payload as { message: string }).message).toContain('262144')
+  })
+
+  test('F4：恰 256KiB 边界 delta 合法发射（不越界不 failed）', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    await k.handleCommand(submitCmd())
+    await waitFor(() => calls.length === 1)
+    calls[0].deps.emitDelta('a'.repeat(262_144))
+    calls[0].deps.emitDelta('é'.repeat(131_072)) // 262144 字节恰边界（双字节字符）
+    await new Promise((r) => setTimeout(r, 20))
+    const deltas = seen.filter((e) => e.type === 'turn.delta')
+    expect(deltas.length).toBe(2)
+    expect(k.turnStates.get(seen.find((e) => e.type === 'turn.started')!.bind.turnId)).toBe('running')
+    calls[0].done.resolve('completed')
+    await new Promise((r) => setTimeout(r, 20))
+    expect(k.turnStates.get(seen.find((e) => e.type === 'turn.started')!.bind.turnId)).toBe('completed')
+  })
 })
