@@ -251,6 +251,9 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
           text: turn.text,
           signal: turn.controller!.signal,
           emitDelta: (text) => {
+            // 安全硬化 F5：终态/中止后迟到增量零发射（cursor 不进、订阅不见、
+            // replay 不含——turn 生命周期门外溢面归零）。
+            if (turn.state !== 'running' || turn.controller?.signal.aborted) return
             emit(st, { workspaceId: ws, sessionId: s, turnId: turn.turnId }, 'turn.delta', { text })
           },
           requestApproval: () => {
@@ -296,6 +299,11 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
   const handleCommand = async (command: WebExecutionCommand): Promise<ExecutionKernelHandleResult> => {
     const ws = command.bind.workspaceId
     const s = command.bind.sessionId
+    // 安全硬化 F3：流键 streamKey 以 NUL 连接 (ws,s)——标识含 NUL 可构造跨流
+    // 碰撞面（'a\0b'+'c' ≡ 'a'+'b\0c'）。fail-closed：含 NUL 一律 invalidBind。
+    if (ws.includes('\u0000') || s.includes('\u0000')) {
+      return err('invalidBind', 'workspaceId/sessionId 不得含 NUL 分隔符（流键碰撞面）')
+    }
 
     if (command.type === 'turn.submit') {
       const st = streamOfTracked(ws, s)
@@ -361,9 +369,14 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
     if (command.type === 'approval.decide') {
       const a = approvals.get(command.payload.approvalId)
       if (!a) return err('notFound', `待批操作不存在或已结算：${command.payload.approvalId}`)
-      // decide 归属绑定（审计必改 2）：bind.turnId ≡ approval 归属 turn，跨 turn 拒且零副作用。
-      if (command.bind.turnId !== a.turnId) {
-        return err('approvalBindMismatch', `decide bind.turnId 与审批归属 turn 不一致（合同 §5）`)
+      // decide 归属绑定（审计必改 2 + 安全硬化 F1）：全三元组 ≡ approval 归属
+      // （turnId/workspaceId/sessionId 任一不一致拒且零副作用——E5 跨工作区腿）。
+      if (
+        command.bind.turnId !== a.turnId ||
+        command.bind.workspaceId !== a.workspaceId ||
+        command.bind.sessionId !== a.sessionId
+      ) {
+        return err('approvalBindMismatch', `decide bind 三元组与审批归属不一致（合同 §5）`)
       }
       if (a.settled || now() - a.requestedAt >= approvalTimeoutMs) {
         if (!a.settled) settleApproval(a, 'expired')

@@ -437,3 +437,94 @@ describe('形 1 · emitDelta 通道（B1 前置件，f4 批复附条件）', () 
     }
   })
 })
+
+/**
+ * 推送安全审查硬化（34437b0f 审查 findings 1/3/5；2/4 登记 f4 候定谳）。
+ * F1 decide 全三元组绑定（E5 跨工作区）；F3 流键 NUL 碰撞 fail-closed；
+ * F5 终态/中止后 delta 零发射（cursor 不进、订阅者不见、replay 不含）。
+ */
+describe('安全硬化 · decide 全绑定 / 流键碰撞 / 终态后 delta', () => {
+  test('F1：decide bind ws/session 与审批归属不一致 → 拒且审批保持 pending', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    const accepted = (await k.handleCommand(submitCmd())) as WebExecutionEvent
+    await waitFor(() => calls.length === 1)
+    const approvalPromise = calls[0].deps.requestApproval()
+    await waitFor(() => seen.some((e) => e.type === 'approval.requested'))
+    const approvalId = (seen.find((e) => e.type === 'approval.requested')!.payload as { approvalId: string }).approvalId
+    // 正确 approvalId + 正确 turnId，但 workspace 错 → 拒
+    const cross = await k.handleCommand({
+      v: 0,
+      id: UUID_C,
+      ts: 2,
+      bind: { workspaceId: 'other-ws', sessionId: 's1', turnId: accepted.bind.turnId },
+      type: 'approval.decide',
+      payload: { approvalId, decision: 'approved' },
+    } as never)
+    expect(isErr(cross) && cross.code).toBe('approvalBindMismatch')
+    // sessionId 错同理
+    const crossSess = await k.handleCommand({
+      v: 0,
+      id: UUID_C,
+      ts: 2,
+      bind: { workspaceId: 'ws', sessionId: 'other-sess', turnId: accepted.bind.turnId },
+      type: 'approval.decide',
+      payload: { approvalId, decision: 'approved' },
+    } as never)
+    expect(isErr(crossSess) && crossSess.code).toBe('approvalBindMismatch')
+    // 审批保持 pending：runner promise 未 settle（40ms 内无结算）
+    const raced = await Promise.race([approvalPromise.then(() => 'settled' as const), new Promise<'pending'>((r) => setTimeout(() => r('pending'), 40))])
+    expect(raced).toBe('pending')
+    // 正确三元组 decide 仍可达
+    const ok = await k.handleCommand({
+      v: 0,
+      id: UUID_D,
+      ts: 3,
+      bind: { workspaceId: 'ws', sessionId: 's1', turnId: accepted.bind.turnId },
+      type: 'approval.decide',
+      payload: { approvalId, decision: 'approved' },
+    } as never)
+    expect(isErr(ok)).toBe(false)
+    expect(await approvalPromise).toBe('approved')
+  })
+
+  test('F3：workspaceId/sessionId 含 NUL 分隔符 → invalidBind（流键碰撞面 fail-closed）', async () => {
+    const { runner } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const r1 = await k.handleCommand(submitCmd({ bind: { workspaceId: 'a\u0000b', sessionId: 'c' } }))
+    expect(isErr(r1)).toBe(true)
+    const r2 = await k.handleCommand(submitCmd({ bind: { workspaceId: 'a', sessionId: 'b\u0000c' } }))
+    expect(isErr(r2)).toBe(true)
+    // 合法名不受影响
+    const ok = await k.handleCommand(submitCmd())
+    expect(isErr(ok)).toBe(false)
+  })
+
+  test('F5：cancel(running) 后 emitDelta 零发射（cursor 不动/订阅不见/replay 不含）', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    const accepted = (await k.handleCommand(submitCmd())) as WebExecutionEvent
+    await waitFor(() => calls.length === 1)
+    await k.handleCommand({
+      v: 0,
+      id: UUID_C,
+      ts: 2,
+      bind: { workspaceId: 'ws', sessionId: 's1' },
+      type: 'turn.cancel',
+      payload: { targetTurnId: accepted.bind.turnId },
+    } as never)
+    const cursorAtCancel = (seen[seen.length - 1]!.cursor)
+    calls[0].deps.emitDelta('after-cancel')  // 迟到增量：零发射
+    calls[0].done.resolve('cancelled')
+    await new Promise((r) => setTimeout(r, 20))
+    const lateDeltas = seen.filter((e) => e.type === 'turn.delta')
+    expect(lateDeltas.length).toBe(0)
+    expect(seen[seen.length - 1]!.cursor).toBe(cursorAtCancel)
+    const replay = k.replaySince('ws', 's1', cursorAtCancel)
+    expect(replay.events.some((e) => e.type === 'turn.delta')).toBe(false)
+  })
+})
