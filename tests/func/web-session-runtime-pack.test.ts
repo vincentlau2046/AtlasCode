@@ -207,7 +207,7 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
     )
     expect(scripts['build:web-session-runtime']).toContain('--external zod')
     expect(scripts['prepublishOnly']).toBe(
-      'bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution',
+      'bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution && bun run build:atlasweb-carrier',
     )
   })
 })
@@ -242,8 +242,18 @@ describe('S4 修正锚 · ./web-session-runtime/execution pack 腿', () => {
     const js = readFileSync(EXEC_JS, 'utf8')
     expect(js).toContain('createExecutionOutlet')
     expect(js).toContain('createReadonlySessionRuntime')
+    // B1 前置件形 2（f4 附条件采认 @2026-11-21）：注入形组合根随出口面
+    expect(js).toContain('createExecutionComposition')
     const dts = readFileSync(EXEC_DTS, 'utf8')
     expect(dts).toContain('./atlascode/web/entry.js')
+    // 形 2 d.ts 发射树：runner 型面随 emitDeclarationOnly 树在位
+    // （index.d.ts 为 printf shim，真型面在域内 .d.ts）
+    expect(
+      readFileSync(
+        join(REPO, 'dist', 'web-session-runtime-execution', 'kernel', 'execution', 'executionKernel.d.ts'),
+        'utf8',
+      ),
+    ).toContain('ExecutionTurnRunnerDeps')
   })
 
   test('自包含：zod 内联（零 zod import 语句）+ 外部 import 仅 node 内建', () => {

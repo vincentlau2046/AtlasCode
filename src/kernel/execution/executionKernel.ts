@@ -37,6 +37,12 @@ export type ExecutionTurnRunnerDeps = {
   signal: AbortSignal
   /** 注册待批操作：resolve 于 decide / 300s expired / turn 取消（voidedByCancel）。 */
   requestApproval: () => Promise<ExecutionApprovalDecision>
+  /**
+   * 回合流增量发射（B1 前置件形 1，f4 附条件采认 @2026-11-21）：经 kernel
+   * 既有 emit 权威落 `turn.delta`（cursor 单调/bind 三元组/缓冲上限同执法，
+   * 零新执法面）。text = 回合流内容，不进审批证据记录（合同 §5 不含正文）。
+   */
+  emitDelta: (text: string) => void
 }
 
 export type ExecutionTurnRunner = (deps: ExecutionTurnRunnerDeps) => Promise<ExecutionTurnOutcome>
@@ -244,6 +250,9 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
           bind: { workspaceId: ws, sessionId: s, turnId: turn.turnId },
           text: turn.text,
           signal: turn.controller!.signal,
+          emitDelta: (text) => {
+            emit(st, { workspaceId: ws, sessionId: s, turnId: turn.turnId }, 'turn.delta', { text })
+          },
           requestApproval: () => {
             const approvalId = `appr-${++approvalCounter}`
             return new Promise<ExecutionApprovalDecision>((resolve) => {

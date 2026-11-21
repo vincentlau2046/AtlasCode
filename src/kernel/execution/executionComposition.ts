@@ -19,16 +19,32 @@
  *    kernel/execution，装配语义不变）。
  */
 import { createExecutionOutlet } from './executionOutlet'
-import { createExecutionKernel } from './executionKernel'
+import { createExecutionKernel, type ExecutionTurnRunner } from './executionKernel'
 
-export function createExecutionComposition() {
+/**
+ * B1 前置件形 2（f4 附条件采认 @2026-11-21）：注入形转正。
+ *  - 零参默认行为零变更（CLI 双车道回归腿）：runTurn 占位 fail-closed 抛错
+ *    + actorId ambient——CLI 车道自身不服务 web 执行，占位语义保留。
+ *  - host 侧（AtlasWeb upstream.ts，单接触点）经注入面传 runTurn 真体 +
+ *    actorId 真源（已认证连接身份）。
+ */
+export type ExecutionCompositionOptions = {
+  runTurn?: ExecutionTurnRunner
+  actorId?: () => string
+  now?: () => number
+}
+
+export function createExecutionComposition(options: ExecutionCompositionOptions = {}) {
   const kernel = createExecutionKernel({
-    runTurn: async () => {
-      throw new Error(
-        '执行能力 runTurn 真体未接线（B0 执行出口波 S4 落地细化附注：引擎深缝候后续切片；能力开关 fail-closed off 时不可达）',
-      )
-    },
-    actorId: () => 'atlas-local-ambient',
+    runTurn:
+      options.runTurn ??
+      (async () => {
+        throw new Error(
+          '执行能力 runTurn 真体未接线（B0 执行出口波 S4 落地细化附注：引擎深缝候后续切片；能力开关 fail-closed off 时不可达）',
+        )
+      }),
+    actorId: options.actorId ?? (() => 'atlas-local-ambient'),
+    ...(options.now !== undefined ? { now: options.now } : {}),
   })
 
   const outlet = createExecutionOutlet({

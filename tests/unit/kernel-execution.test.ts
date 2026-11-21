@@ -368,3 +368,72 @@ describe('S3 · 格 E 事件流（E2 bind 权威 + cursor 单调 + 缓冲上限�
     void calls
   })
 })
+
+/**
+ * B1 前置件形 1（f4 附条件采认 @2026-11-21）—— emitDelta 判别腿。
+ * 条件①：delta 经 kernel 既有 emit 权威（cursor 单调/bind 三元组/缓冲上限
+ * 同执法，零新执法面）；条件②：delta text 不进审批证据记录（§5 不含正文）。
+ */
+describe('形 1 · emitDelta 通道（B1 前置件，f4 批复附条件）', () => {
+  test('emitDelta → turn.delta 事件：payload {text} + bind 三元组精确 + cursor 单调', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    const accepted = (await k.handleCommand(submitCmd())) as WebExecutionEvent
+    await waitFor(() => calls.length === 1)
+    calls[0].deps.emitDelta('he')
+    calls[0].deps.emitDelta('llo')
+    const deltas = seen.filter((e) => e.type === 'turn.delta')
+    expect(deltas.length).toBe(2)
+    for (const d of deltas) {
+      expect(d.bind).toEqual({ workspaceId: 'ws', sessionId: 's1', turnId: accepted.bind.turnId })
+      expect((d.payload as { text: string }).text).toMatch(/^(he|llo)$/)
+    }
+    // cursor 单调：started < delta1 < delta2
+    const cursors = seen.map((e) => e.cursor)
+    const sorted = [...cursors].sort()
+    expect(cursors).toEqual(sorted)
+    const startedIdx = seen.findIndex((e) => e.type === 'turn.started')
+    const d0 = seen.indexOf(deltas[0]!)
+    expect(d0).toBeGreaterThan(startedIdx)
+    // 缓冲执法同面：replaySince 自 accepted cursor 起的增量含 delta（零新执法面的正证）
+    const replay = k.replaySince('ws', 's1', accepted.cursor)
+    expect(replay.events.some((e) => e.type === 'turn.delta')).toBe(true)
+  })
+
+  test('delta text 不进审批证据：emitDelta 后 decide，settled payload 零正文字段', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    await k.handleCommand(submitCmd())
+    await waitFor(() => calls.length === 1)
+    calls[0].deps.emitDelta('SECRET-DELTA-TEXT')
+    // 触发审批并批准
+    const approvalPromise = calls[0].deps.requestApproval()
+    await waitFor(() => seen.some((e) => e.type === 'approval.requested'))
+    const requested = seen.find((e) => e.type === 'approval.requested')!
+    const approvalId = (requested.payload as { approvalId: string }).approvalId
+    const decided = await k.handleCommand({
+      v: 0,
+      id: UUID_D,
+      ts: 2,
+      bind: { workspaceId: 'ws', sessionId: 's1', turnId: (seen[0]!.bind.turnId) },
+      type: 'approval.decide',
+      payload: { approvalId, decision: 'approved' },
+    } as never)
+    expect(isErr(decided)).toBe(false)
+    expect(await approvalPromise).toBe('approved')
+    const settled = seen.find((e) => e.type === 'approval.settled')!
+    const keys = Object.keys(settled.payload as Record<string, unknown>).sort()
+    expect(keys).toEqual(['actorId', 'approvalId', 'decision', 'timestamp'])
+    // 全事件流零 SECRET 正文残留（delta 事件除外——delta 本身是回合流内容面）
+    const deltaEvents = seen.filter((e) => e.type === 'turn.delta')
+    for (const e of seen) {
+      if (!deltaEvents.includes(e)) {
+        expect(JSON.stringify(e.payload)).not.toContain('SECRET-DELTA-TEXT')
+      }
+    }
+  })
+})

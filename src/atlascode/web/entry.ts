@@ -69,6 +69,9 @@ export { WebSessionError, type WebSessionErrorCode } from './errors'
 // 执行出口（B0 执行出口合同 §2；S2，呈批书 @196ee806 + f4 批复 @a62925c0）：
 // 懒触达 factory + 型面；协议 schema/常量自 kernel/protocol/webExecutionV0
 // （zod/v4 唯一闭包，加载图审计格沿用）。
+// B1 前置件形 2（f4 附条件采认 @2026-11-21）：增 createExecutionComposition
+// 注入形组合根（零参默认行为零变更；host 侧 upstream.ts 单接触点注入
+// runTurn 真体 + actorId 真源）。
 export {
   createExecutionOutlet,
   type ExecutionOutlet,
@@ -76,6 +79,17 @@ export {
   type ExecutionDispatchResult,
   type WebExecutionProbeResult,
 } from '../../kernel/execution/executionOutlet'
+export {
+  createExecutionComposition,
+  type ExecutionComposition,
+  type ExecutionCompositionOptions,
+} from '../../kernel/execution/executionComposition'
+export type {
+  ExecutionTurnRunner,
+  ExecutionTurnRunnerDeps,
+  ExecutionTurnOutcome,
+  ExecutionApprovalDecision,
+} from '../../kernel/execution/executionKernel'
 export {
   EXECUTION_SCHEMA_VERSION,
   EXECUTION_PROTOCOL_VERSION,
