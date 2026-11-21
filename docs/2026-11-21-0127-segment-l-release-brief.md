@@ -2,7 +2,7 @@
 
 > **f4 批复（2026-11-21）：批准。** L1–L3 在授权边界内先行；**L4（tag/push/npm 双 org publish）候用户亲署**（0.1.127 新版本号，0.1.126 授权不延及——呈报用户时明确列候用户项）。§3 Δ 账预估（executionSha256 变/runtimeSha256 恒等/cli.js 零触碰）与 gate artifact 级实况互洽；§1 gate 判别要点（composition 在品 machine 判）为 0.1.126 型时序缺口的正确封法，采认。
 
-> **状态：终稿候 f4 批复**。gate 终态 **GATE-PASS**（判定单
+> **状态：L1–L3 完，候 L4 用户亲署**。gate 终态 **GATE-PASS**（判定单
 > `user-e2e/reports/r-20261121-gate-0127.md`，锚 9a83e7ec HEAD=origin
 > ALIGNED 独立 fetch 证；canon **6233/0/511 exit 0**；Δ账 +9/+1 恰合零
 > 超集；wire A/B 段与 0.1.126 逐格同形零默认行为变更 + C 段注入形 wire
@@ -74,3 +74,21 @@ createExecutionComposition——pack 面 machine 判
 
 gate 判定单终态路径 + f4 采认记录 + SRI v0.1.127.md（executionSha256 变值
 + tree commit）+ packument 双 org 验真输出 + 生产 lane 收口单。
+
+## §5 L1–L3 执行回执（2026-11-21，Main）
+
+- **L1**：release commit 52206519（package.json bump 0.1.127 + CHANGELOG
+  v0.1.127 节）。
+- **L2**：prepublishOnly 5 步链 exit 0；`dist/atlasweb-carrier.json` =
+  runtimeSha256 **7e7e6f38…（恒等第四版，§3 预注册兑现）** /
+  executionSha256 **95dac0da…（变，含组合根 + 硬化）**；execution bundle
+  grep createExecutionComposition = 2 处在品；staging tgz
+  `atlasharness-atlascode-0.1.127.tgz` sha256
+  `f19d2ecae9e6571d6619d64b553db5e053faf9860a0505a3b9b4ff1c2cb7b173`
+  （/home/vince/.claude/jobs/1b9594d7/tmp/）。
+- **L3 回执（无 finding）**：34437b0f/9a5e2075/9a83e7ec 全量 diff 安全补查
+  （503 残留覆盖）——src 面零敏感命中（零密钥/零 exec·eval/零网络面；
+  硬化三件均为攻击面收窄形）；tests 中 `SECRET-DELTA-TEXT` 为证据面排除
+  判别的探针 fixture（非真实密钥）。推送审查 503 未覆盖的两笔（9a5e2075 /
+  9a83e7ec）本补查闭环。34437b0f 原审 5 findings 闭环链：F1/F3/F5→
+  9a5e2075、F2→f4 upstream 裁定、F4→f4 归属裁定→9a83e7ec。
