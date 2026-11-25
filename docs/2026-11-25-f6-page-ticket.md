@@ -65,3 +65,7 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 5. **勘正两条（f4 实核后采记）**：① 50/200 = **已冻值复用**非新常量（limits.ts:28-29 `DEFAULT_PAGE_SIZE=50`/`HARD_MAX_PAGE_SIZE=200`，S0-R limits 表在档）；clamp 形写明 = 至 `L.pageSize` 配置值（≤HARD 200，search :706 同形——默认 50 下请求 100 → 50，非 100 非 200）。② §0 F1 帽归因勘正：`maxParseRecords=100k` = search 面单会话核验（:762），replay/loadProjection 不施加；replay 实帽 = 64MiB 字节（:527-531 stat 预检）+ 4MiB 投影序列化。样本设计依此。
 6. **登记三条采记**：① 自决 2 保持（list 分页 = 登记候选不并入）；② 自决 4 销项措辞钉死——F6-PAGE 销项呈报须写明「**接口格 + e2e fetch 腿达成；UI 消费登记未销**」，防冒销；③ 页粒度同异性成立（内容页=记录序 vs search 页=会话边界，各自判据独立），S1 契约随 RED 冻结分页结果形（envelope 保留 + 窗口 messages 恰一无重无漏）。
 7. **复判程序**：本节落档 @ master → 回执示下送复判 → 复判 PASS 即双信号 Main（S1 开工）。
+
+## §C 复判采记 + 双信号开工（2026-11-25）
+
+复判（Atlas-reveiw）= **PASS**：必改①②③定形逐项核验落足、勘正两条实核值准确、登记三条无偏差。执行面注记采记：落码对照 §B 定形（判据格 3 第 6 腿 / §3 R1 分态腿以 §B 为准）；S1 RED 时随片显性化结果形与锚具体形（前缀指纹/代际摘要二选一冻结）；S1/S2/S3 按片送审计。**双信号已发：Main S1 开工 + e2e lane 预登记。**
