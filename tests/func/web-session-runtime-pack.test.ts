@@ -80,8 +80,10 @@ describe('S0-R R-3 · ./web-session-runtime 出口/安装', () => {
       expect(dts).not.toMatch(/import\s*\(\s*["']src\//)
     }
     // 公开符号在 d.ts 面
+    // S4 pack 构建入口分离（entry.ts → runtimeEntry.ts，零 zod pack 合同）：
+    // d.ts 公开符号面钉在 pack 入口的发射产物上。
     const entry = readFileSync(
-      join(OUT_DIR, 'atlascode', 'web', 'entry.d.ts'),
+      join(OUT_DIR, 'atlascode', 'web', 'runtimeEntry.d.ts'),
       'utf8',
     )
     for (const sym of [
