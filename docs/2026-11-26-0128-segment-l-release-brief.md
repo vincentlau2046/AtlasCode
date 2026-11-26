@@ -155,3 +155,32 @@ executionSha256 实况对 §3 预注册）+ packument 双 org 验真输出 + 生
    后续：L6 候 e2e 单信号（生产 lane + §K 登记 registry 实发制品重跑 S3
    腿）；L7 归 Main（AtlasWeb pin bump 0.1.127→0.1.128 + 格 I 三元同步，
    sha 取 registry 实发制品）。
+
+## §7 L7 执行回执（2026-11-27，Main）——段 L 全链终态
+
+- **前置核**：L6 生产 lane PASS（user-e2e 判定单
+  `user-e2e/reports/r-20261126-prodlane-128.md`：双 org registry 直下
+  sha256 双 MATCH + SRI 四值即验锚全 MATCH + §K registry 实发 0.1.128
+  重跑 S3 腿 39/39 GREEN + 安装车道 bin 真跑 0.1.128）。
+- **真实配对链实测（registry 直下沙箱三腿逐字节）**：upgrade 腿
+  `npm install @atlaswork/atlascode@0.1.128` → cli.js sha256
+  `45259d7d…`（SRI 逐字，runtime `85e9b293…` / execution `5c8c095e…`
+  同验）→ downgrade 腿装 0.1.127 → cli.js `b4dfd8a4…`（在案锚逐字）
+  → 升回 0.1.128 恒等。
+- **格 I 三元同步一 commit**：AtlasWeb `4f892ab`——双 package.json +
+  lockfile pin 0.1.127→0.1.128 + gateTruthTable EXPECTED 重锚
+  （upgrade `45259d7d0d1e1e2b` / downgrade `b4dfd8a415687936`）+
+  `gezi-i.json` 重出证（date 2026-11-26 / reportCommit `6b75219` =
+  F6-PAGE S2 消费波 commit / suites host 113 · e2e 54 双 0 fail，e2e
+  +1 skip 为 lane 门控支）+ gateTruthTable.test.ts pin 断言同步。
+- **旧锚销项负腿**：bump 前套件 2 fail = pin 对表行预期形（§5A 实录
+  npmPackage 两腿），bump+commit 后自愈 GREEN——f4 先例形（0.1.127
+  3 fail）本波 2 fail 同族。
+- **终验**：AtlasWeb 全仓 `FORCE_COLOR=3 bun test` = **517 pass /
+  1 skip / 0 fail**（68 files；唯一 pre-commit 红 = 格 J clean-candidate
+  行按设计，commit 后自愈）；push origin main `3aba08d..4f892ab`
+  ALIGNED（含 S2 6b75219 等 13 提交一并出清）。
+- **段 L 终态**：L1–L7 全闭环——呈批 f44749d1 → 批复 6a0407c9 → 勘正
+  81f6276c → L1 05e5dd76 → L4/L5 @985957fb（双 org published）→ L6
+  prodlane PASS → L7 4f892ab。F6-PAGE 销项呈报候 f4（措辞 §B 登记②：
+  接口格 + e2e fetch 腿达成、UI 消费登记未销）。
