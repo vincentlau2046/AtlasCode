@@ -74,7 +74,7 @@ for (const f of files) {
         : `${spec}/index.js`
       touched = true
       changed++
-      return `${pre}${q1}${spec}.js${q2}`
+      return `${pre}${q1}${resolved}${q2}`
     },
   )
   if (touched) writeFileSync(f, out)

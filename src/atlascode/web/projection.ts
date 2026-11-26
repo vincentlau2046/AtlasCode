@@ -60,7 +60,12 @@ export function serializedProjectionBytes(p: unknown): number {
   return Buffer.byteLength(JSON.stringify(p))
 }
 
-function projectBlocks(msg: ProjectionSourceMessage): NeutralBlock[] {
+/**
+ * F6-PAGE S1 加性导出：分页装窗路径（replayPaging.ts）对 skeleton（内容
+ * 剥除面）与 pass2 全量记录（原文面）复用同一块投影判定——可渲染性单源。
+ * 全量路径零行为变更（纯 export 添加）。
+ */
+export function projectBlocks(msg: ProjectionSourceMessage): NeutralBlock[] {
   const blocks: NeutralBlock[] = []
   const content = msg.message?.content
   const pushText = (text: unknown): void => {

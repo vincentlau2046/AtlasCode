@@ -144,7 +144,10 @@ export {
   hasSessionMessagesCache,
   doesMessageExistInSession,
 } from './sessionMessagesCache'
-// S0-R 只读子门面（web 只读 runtime 专用 force-full 加载；零写面）
+// S0-R 只读子门面（web 只读 runtime 专用 force-full 加载；零写面）。
+// F6-PAGE S1 replay 分页扫描亦挂此处——web 只读车道经 readonly 子门面
+// 消费（全门面会把 modelprovider 纵切拉进 pack 载体闭包，见 readonly.ts
+// 头注）；STR-1 G-1 深文件豁免集具名覆盖该子门面。
 export { loadTranscriptFull, type ReadonlyTranscriptLoad } from './readonly'
 
 // session memory 阈值状态机 + Port 5 注入窗口

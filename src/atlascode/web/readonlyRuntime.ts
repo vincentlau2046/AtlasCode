@@ -21,6 +21,7 @@ import {
   TranscriptChangedDuringReadError,
   TranscriptTooLargeError,
 } from '../../engine/session/readonly'
+import type { ReplayPageReader } from '../../engine/session/readonly'
 
 import { CursorLedger } from './cursorLedger'
 import { WebSessionError } from './errors'
@@ -39,6 +40,8 @@ import {
   HARD_MAX_PARSE_RECORDS,
   DEFAULT_MAX_PROJECTION_BYTES,
   HARD_MAX_PROJECTION_BYTES,
+  DEFAULT_MAX_REPLAY_PAGE_BYTES,
+  HARD_MAX_REPLAY_PAGE_BYTES,
   TITLE_HEAD_BYTES,
   TITLE_MAX_CODE_POINTS,
   TITLE_USER_MESSAGE_CODE_POINTS,
@@ -77,6 +80,7 @@ import {
   type ProjectionEngineDeps,
   type ProjectionSourceMessage,
 } from './projection'
+import { loadReplayPage } from './replayPaging'
 import type { SessionFileEntry, SessionStoreAdapter } from './sessionStoreAdapter'
 import { createNodeFsSessionStoreAdapter } from './sessionStoreAdapter'
 // S0-R4 件 A（呈批书 L1）：搜索文本面真体复用（含 WeakMap 缓存 +
@@ -96,6 +100,8 @@ export interface ReadonlySessionLimits {
   maxRecordBytes?: number
   maxParseRecords?: number
   maxProjectionBytes?: number
+  /** F6-PAGE 必改③：replay 分页单页序列化字节界（DEFAULT 4MiB / HARD 16MiB）。 */
+  maxReplayPageBytes?: number
   maxSubscriptions?: number
   maxConcurrentReads?: number
   maxPendingEvents?: number
@@ -125,6 +131,15 @@ export interface ReadonlySessionEngine {
   }>
   /** CLI 同规则链重建（projection 头注镜像义务）。 */
   buildConversationChain: ProjectionEngineDeps['buildConversationChain']
+  /**
+   * F6-PAGE S1 加性缝：replay 分页 skeleton 扫描（真体 =
+   * engine/session/replayScan.ts，runtimeDefault 焊接；测试 fake 可缺席
+   * ——分页请求遇缺席 → invalidRequest fail-closed）。
+   */
+  openReplayPageReader?: (
+    filePath: string,
+    opts?: { maxBytes?: number; expectIno?: number },
+  ) => Promise<ReplayPageReader>
 }
 
 export interface ReadonlySessionRuntimeOptions {
@@ -158,11 +173,22 @@ export interface ListSessionsResult {
 export interface ReplaySessionRequest {
   scopeId: string
   sessionId: string
+  /**
+   * F6-PAGE S1 加性分页参（wire 契约 PageFields 同形；schemaVersion=0
+   * optional 不破版）。任一在场 → 分页装窗路径；双缺省 = 旧全量 replay
+   * 逐字节不变（A1 对表腿）。
+   */
+  pageSize?: number
+  pageToken?: string
 }
 
 export interface ReplaySessionResult {
   of: 'replaySession'
   projection: WebSessionProjection
+  /** F6-PAGE S1 加性（分页请求恒发；全量请求零新键）。 */
+  hasMore?: boolean
+  /** 仅 hasMore=true 时在场（opaque token，replayPaging.ts 编解码单源）。 */
+  nextPageToken?: string
 }
 
 export interface FollowSessionRequest {
@@ -208,6 +234,7 @@ export interface ResolvedLimits {
   maxRecordBytes: number
   maxParseRecords: number
   maxProjectionBytes: number
+  maxReplayPageBytes: number
   maxSubscriptions: number
   maxConcurrentReads: number
   maxPendingEvents: number
@@ -390,6 +417,12 @@ export function createReadonlySessionRuntime(
       options.limits?.maxProjectionBytes,
       DEFAULT_MAX_PROJECTION_BYTES,
       HARD_MAX_PROJECTION_BYTES,
+    ),
+    maxReplayPageBytes: validateBoundedInt(
+      'maxReplayPageBytes',
+      options.limits?.maxReplayPageBytes,
+      DEFAULT_MAX_REPLAY_PAGE_BYTES,
+      HARD_MAX_REPLAY_PAGE_BYTES,
     ),
     maxSubscriptions: validateBoundedInt(
       'maxSubscriptions',
@@ -817,6 +850,45 @@ export function createReadonlySessionRuntime(
     ): Promise<ReplaySessionResult> {
       assertStarted('replay session')
       assertScope(req.scopeId)
+      // F6-PAGE S1：分页参任一在场（含显式 undefined 键）→ 分页装窗路径
+      // （replayPaging.ts；零全量驻留）；双缺省 = 旧全量 replay 零变更。
+      if ('pageSize' in req || 'pageToken' in req) {
+        const open = options.engine.openReplayPageReader
+        if (!open) {
+          throw new WebSessionError(
+            'invalidRequest',
+            'replay paging not supported by injected engine',
+          )
+        }
+        acquireRead()
+        try {
+          const paged = await loadReplayPage(
+            {
+              adapter,
+              engine: {
+                openReplayPageReader: open,
+                buildConversationChain: options.engine.buildConversationChain,
+              },
+              limits: L,
+              productId: options.productId,
+            },
+            req.scopeId,
+            req.sessionId,
+            req,
+            signal,
+          )
+          return {
+            of: 'replaySession',
+            projection: paged.projection,
+            hasMore: paged.hasMore,
+            ...(paged.nextPageToken !== undefined
+              ? { nextPageToken: paged.nextPageToken }
+              : {}),
+          }
+        } finally {
+          releaseRead()
+        }
+      }
       const projection = await loadProjection(req.scopeId, req.sessionId, signal)
       return { of: 'replaySession', projection }
     },

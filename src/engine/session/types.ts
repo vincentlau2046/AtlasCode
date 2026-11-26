@@ -33,11 +33,15 @@
  *     sourceToolAssistantUUID/attachment）：旧仓 `(m as any).message.id` 类
  *     cast 在域扩展型下直接可访，逐字块内按需去 cast（语义逐字不变）。
  */
+// F6-PAGE S1：specifier 自 shared barrel 窄化为具体模块——符号零变化，
+// 但 pack d.ts 消费闭包（types.d.ts → shared/index.js barrel）会把带
+// Buffer 公共面的 shared 全桶拖进 web-session-runtime 消费编译（R-3
+// smoke types:[] 判别）；shared/types 零依赖零 Buffer，闭包收窄到单文件。
 import type {
   ContentBlock,
   Message as BaseMessage,
   Usage,
-} from '../../shared'
+} from '../../shared/types'
 
 // 旧仓 crypto UUID 品牌串 → string（新仓无品牌，cast 保留为 no-op）
 export type UUID = string

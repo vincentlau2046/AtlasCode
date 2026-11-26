@@ -101,8 +101,12 @@ export function removeExtraFields(
  * without special-casing.
  *
  * Mutates the Map in place.
+ *
+ * F6-PAGE S1 加性导出：replay 分页装窗读路径（engine/session/replayScan.ts）
+ * 在 skeleton Map 上复用本变换——零逻辑复刻（链图语义单源），全量路径
+ * 零行为变更（纯 export 添加）。
  */
-function applyPreservedSegmentRelinks(
+export function applyPreservedSegmentRelinks(
   messages: Map<string, TranscriptMessage>,
 ): void {
   type Seg = NonNullable<
@@ -238,7 +242,7 @@ function applyPreservedSegmentRelinks(
  *
  * Mutates the Map in place.
  */
-function applySnipRemovals(messages: Map<string, TranscriptMessage>): void {
+export function applySnipRemovals(messages: Map<string, TranscriptMessage>): void {
   // Structural check — snipMetadata only exists on the boundary subtype.
   // Avoids the subtype literal which is in excluded-strings.txt
   // (HISTORY_SNIP is ant-only; the literal must not leak into external builds).

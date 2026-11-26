@@ -27,6 +27,13 @@ export {
 } from './load'
 export type { TranscriptMessage } from './types'
 
+// F6-PAGE S1（工单 docs/2026-11-25-f6-page-ticket.md）：replay 分页 skeleton
+// 扫描——与 loadTranscriptFull 同车道（只读 fd 链 + expectIno 授权锚，零写
+// 面），故挂本只读子门面而非全门面（全门面会把 query/tools/modelprovider
+// 纵切拉进 web 载体加载图，pack tsc 闭包不可承受）。
+export { openReplayPageReader } from './replayScan'
+export type { ReplayPageReader, ReplayByteRange } from './replayScan'
+
 export type ReadonlyTranscriptLoad = Awaited<
   ReturnType<typeof loadTranscriptFile>
 >

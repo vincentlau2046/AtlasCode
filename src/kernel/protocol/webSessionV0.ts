@@ -78,6 +78,9 @@ export const ReplaySessionRequestSchema = z.strictObject({
   ...EnvelopeFields,
   kind: z.literal('replaySession'),
   sessionId: OpaqueIdSchema,
+  // F6-PAGE S1 加性分页参（schemaVersion=0 optional 不破版；双缺省 =
+  // 旧全量 replay 逐字节不变）
+  ...PageFields,
 })
 
 export const FollowSessionRequestSchema = z.strictObject({
@@ -220,6 +223,9 @@ export const ReplaySessionSuccessSchema = z.strictObject({
   ...ResponseEnvelopeFields,
   of: z.literal('replaySession'),
   projection: ProjectionSchema,
+  // F6-PAGE S1 加性（分页请求恒发 hasMore；nextPageToken 仅 hasMore=true）
+  hasMore: z.boolean().optional(),
+  nextPageToken: OpaqueTokenSchema.optional(),
 })
 
 export const FollowSessionSuccessSchema = z.strictObject({

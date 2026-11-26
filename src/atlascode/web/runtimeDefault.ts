@@ -16,6 +16,7 @@
 import {
   buildConversationChain,
   loadTranscriptFull,
+  openReplayPageReader,
   type TranscriptMessage,
 } from '../../engine/session/readonly'
 
@@ -47,6 +48,8 @@ export function atlasWebSessionEngine(): ReadonlySessionRuntimeOptions['engine']
         messages as unknown as Map<string, TranscriptMessage>,
         leaf as unknown as TranscriptMessage,
       ) as unknown as ProjectionSourceMessage[],
+    // F6-PAGE S1：replay 分页 skeleton 扫描（类型同源直通，零 cast）
+    openReplayPageReader: (filePath, opts) => openReplayPageReader(filePath, opts),
   }
 }
 

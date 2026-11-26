@@ -26,6 +26,13 @@ export const HARD_MAX_SCOPES_PER_RUNTIME = 128
 export const DEFAULT_PAGE_SIZE = 50
 export const HARD_MAX_PAGE_SIZE = 200
 
+// ── replay 分页单页序列化字节界（F6-PAGE 必改③：records × bytes 页级双界）────
+// 页响应 = 窗口 messages 的 JSON 序列化字节；单记录独超页界 → resourceLimit
+// （零隐式截断）。全量 replay 的 maxProjectionBytes 逐项不变（加性兼容），
+// 本对常量只约束分页路径。
+export const DEFAULT_MAX_REPLAY_PAGE_BYTES = 4 * MIB
+export const HARD_MAX_REPLAY_PAGE_BYTES = 16 * MIB
+
 // ── search query（Unicode code points；literal 无 regex）──────────────────────
 export const SEARCH_QUERY_MIN_CODE_POINTS = 1
 export const SEARCH_QUERY_MAX_CODE_POINTS = 256
