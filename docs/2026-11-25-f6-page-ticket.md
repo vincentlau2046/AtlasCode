@@ -104,3 +104,9 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **修形②三腿在格并 GREEN**：H1 A2-Compact（preservedSegment 绝对末边界剪枝/重链 ≡ paged 拼接，phantom 历史不在场）/ H2 A2-Snip（removedUuids 中段删除+跨 gap relink ≡ 拼接）/ H3 compacted 链 C 态（compact 后旧 token → cursorExpired，anchor 于剪枝链含界内序数）。f4 独立实跑分页套件 **25/25（22+3）0 fail**；typecheck 0（tsc --noEmit 静默）；变换/装载域相关三套件 **50/50 0 fail**（paging+lifecycle+s0-r4-load-hardening，Main 报称 49/49 为三件套取集口径差，零红事实一致）。
 - **RED 先行采记**：commit 报称修形前分页侧含 phantom m2 / compact 后假续页合法——机制与 §E 审计活码实证闭合（剥除态下 relink/snip 恒空转 ⇒ H1/H2 拼接恒等断言必败、H3 cursorExpired 断言必败），RED 由审计实证 + 断言构造共同保证；复判如需 mutation 直证可按 §E 同法。
 - **复核结论**：**S1 必改正形采认成立，无新增登记**。按 §E 程序送 Atlas-reveiw 复判，PASS 即 S1 收口采认（随后 S3 e2e fetch 腿 + 0.1.128 段 L）。S2 并行状态候 Main 回执（AtlasWeb main 自 11-25 后零新提交，S2 开工令在案）。
+
+## §G S1 复判 PASS + 收口采认（2026-11-26，Atlas-reveiw；本节落档 = S1 终态）
+
+- **复判终判：PASS → S1 收口采认**。逐项核验：修形①逐字成立（subtype/snipMetadata 保留形、真体复用零复刻、内容剥除/空性守恒/驻留形未动）；三腿 fixture 设计与断言逐行核真（H1 全量剪枝直断 ['m3','m4','m5']、H2 removedUuids 中段删除跨 gap 重链 ['m1','m3','m4']、H3 旧 token offset 界内 anchor 漂移 → cursorExpired）；**H1/H2 含 phantom 守卫直断全文（非仅双侧比对）防 fixture 双侧同错假绿——设计采记表彰**；独立实跑 25/25 + 三套件 50/50 与呈报逐字一致；RED 采记可接受（mutation 直证可选不另设门）；2 文件限域零波及。
+- **S1 终态锚**：worktree-f6-page-s1 @ea3b3ea8（判据链 §D PASS + §E 必改正形 + §F 采认复核 + §G 复判 PASS 四环闭合）；合并 master 与后续 master 操作归 Main（角色边界既定）。
+- **后链**：S2 并行在途（候 Main 回执）→ S3 e2e fetch 六腿 + gate + 段 L 0.1.128 双 org（L4 候用户亲署）→ F6-PAGE 销项呈报（措辞 §B 登记②钉死）→ a5 挂账行翻转落档 → 产品总放行阻格清零。
