@@ -75,3 +75,17 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 2026-11-25 双信号送达后，主机磁盘满事件后全 peer session 重启（Main [8cbbd2]/审计 [2de2a7]/e2e [ed2cad] 均为新实例，2026-11-26 起），原消息未达新实例；共享任务列表亦清空（e2e #274 预登记随之失效）。实核：AtlasCode master tip 仍 @c268698b、零 carrier 改动（S1 未开工坐实）；AtlasWeb 两条 2026-11-25 晚 docs(e2e) 归档提交与本波无关。2026-11-26 f4 补达双信号：**Main S1 开工令**（§A-§C 判据面/修形/勘正原文重申，零裁定变化）+ **e2e S3 预登记**（格 3 六腿 + 勘正②样本设计注意）。判据面仍以 §B/§C 为准。
 
 **勘正（2026-11-26，e2e 事实核对回执采记）**：本节两条前提有误——① e2e 侧 2026-11-25 原预登记**已达原实例并已处理**（收讫回执 msg_id 73cf4fa3 @ 11-25 在案，工单全档核读），#274 现仍在列（pending，八腿全档），预登记从未失效；e2e 侧重发为冗余（判据比对零偏差，其登记为 §B 全形超集，以 #274 为准，无双登记）。② 「共享任务列表清空」系 f4 误判——f4 本 session TaskList 视图为空 = 本 session 零自建任务，非共享库清空（教训采记：session 视图空 ≠ 库空）。**Main 侧开工令达否无回执证实、master 零 S1 动静——S1 补达令（msg_id 0482a981）维持有效必要。**
+
+## §D S1 采认判词（f4 独立活码复核，2026-11-26，**PASS**）
+
+- **对象**：worktree-f6-page-s1 @ff55d2e9（基座 c268698b 正确；13 文件 +1225/−6；分支未推 origin，审计走本地 worktree 路径）。
+- **五点判据逐点实核成立**：
+  1. **契约加性**：webSessionV0 `ReplaySessionRequest` += `PageFields`（复用 search 面同族定义 ：52，pageSize wire 校验 0/201 拒）、`Success` += optional hasMore/nextPageToken（nextPageToken 仅 hasMore=true 条件在场）；schemaVersion=0 不破版；readonlyRuntime 派发 `'pageSize' in req || 'pageToken' in req`（显式 undefined 键亦入分页路径，fail-closed），双缺省 = 旧全量 `loadProjection` 零触碰。
+  2. **装窗读路径零全量驻留（必改①）**：replayScan pass1 流式逐行 skeleton（内容剥除空性守恒 `'\u0000'`，峰值驻留 ∝ 记录数与内容体量无关）+ uuid→字节范围 side map（last-wins 镜像 loadTranscriptFile 语义）+ legacy progress 链桥镜像；relink/snip 装载期变换复用 load.ts 真体（加性导出零复刻）；replayPaging pass2 仅页内记录按字节范围随机读渲染。全量路径帽逐项不变；分页路径扫描界 = HARD_MAX_TRANSCRIPT_BYTES 256MiB 单源复用（limits.ts:15 既有常量）、`L.maxTranscriptBytes` 帽分态不施加（E2 直证：全量 resourceLimit / 分页可达）；路径解析不经 openValidated（避 adapter 侧帽静默施加，expectIno 授权锚闭环）。
+  3. **token（必改②）**：opaque base64url `{v:1,scopeId,sessionId,offset,anchor}` 三层校验（b64url→JSON→字段域）；锚 = 链 uuid 前缀 SHA-256 截断 16 hex（§C 二选一冻结 = **前缀指纹**）；域绑定校验先于 stat（域外与文件存在性正交）；三分态独立判定：malformed/域外 → invalidRequest（C1 七形/C2 跨 session+跨 scope）、rewrite 漂移含界内序数/越新链界 → cursorExpired（C3/C4，禁错页静默）、append 前缀稳定 → 合法续页（C5）。
+  4. **页双界（必改③）**：records ≤ clamp(pageSize, L.pageSize)（B1：请求 100 → 50 直证；B2 下界 1；B3 缺省 50）× bytes ≤ L.maxReplayPageBytes（新对常量 DEFAULT 4MiB/HARD 16MiB 单源入 limits.ts；精确增量口径 `2+bytesSum+b+count`）；单记录独超 → resourceLimit 零隐式截断（F2）；超界收页下一页（F1，序列化字节断言 ≤ 界）。
+  5. **RED 先行 22 测**：A 加性对表 2（A1 零新键/A2 分页拼接 ≡ 全量投影逐元素相等）/ B clamp 3 / C 三分态 5 / D 边界 ±1 4（含 D3 零渲染性空窗、D4 notFound 同形）/ E 帽分态+超旧帽样本 3（E3 投影 >4MiB 样本直证格 3 第 6 腿）/ F 双界 3 / G wire 2（strictObject 未知键仍拒）——判据格 1/2/3 全腿预演。
+- **独立复跑证据**：全量 512 文件 **6246 pass / 8 skip / 1 fail** 逐字吻合呈报；唯一红身份坐实 = `tests/func/atlascode-tui-pty-probe.test.ts` live 腿（marker 'pty-live-alpha' 1<2 = live LLM 网关未 seed，环境期基线红；S1 diff 零 TUI 触碰 + 既有测试零改动 → 非本波引入）；typecheck 0；既有套件零改动（tests/ diff 仅新文件）。
+- **修形 A/B 采认定形（不需回改预注册形）**：A = 真 latent（ca761a91 引入 directTarget/indexTarget/resolved fail-closed 判定但 return 恒写 `'${spec}.js'`，barrel 案形同虚设；修 = return 改用 resolved，barrel 重写 `<spec>/index.js`，fail-closed 语义不变）；B = pack d.ts 消费闭包 557→61（`'../../shared'`→`'../../shared/types'`；ContentBlock :20/Usage :30/Message :71 同源零变化）。两件非行为变更、S1 闭环必要，**批复通过**。
+- **不动面核验**：follow/list/search 三面零 diff；search 先例面只读未动；STR-1 豁免集零改动（`session/readonly.ts` = S0-R @f1f1099d 既有具名允许项，eslint.config.mjs 零 diff）；readonly 子门面挂载 = S0-R2 形（全门面试挂回退记采：modelprovider 纵切实证拉入 pack 闭包）。
+- **采认结论**：**S1 PASS**。按片送 Atlas-reveiw 审计（进行中）；S2 开工令已另发。
