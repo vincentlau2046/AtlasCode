@@ -4,6 +4,16 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.128（2026-11-26）
+
+**web-session-runtime replay 内容分页公开接口**（F6-PAGE S1；工单 `docs/2026-11-25-f6-page-ticket.md`，段 L 呈批书 @f44749d1 + f4 批复 §L @6a0407c9；S1 合并采记 §J @477709a1；三环采认-复核-复判 @570f7491）。
+
+- wire 契约**加性**扩面：`replaySession` 可选 `pageSize`（host 预验 `/^\d{1,9}$/` fail-closed，畸形 → 400 invalidRequest 零 runtime 触达）+ `pageToken`（opaque 原样透传）；响应加性 `hasMore` / `nextPageToken`。**键在场语义**：无分页参 = request 零分页键，旧客户端逐字节零行为变更。
+- 装窗读路径：>帽转录 replay 分页读取零全量驻留；装载期 relink/snip 变换分页路径与全量路径同体复用，A2 拼接恒等（含 compact/snip 会话）；审计必改①修形——replay skeleton 保留 `subtype` + `snipMetadata` 两字段（compact/snip 剪枝变换修复）。
+- 错误映射五态：invalidRequest→400 / cursorExpired→400（body.error.code 区分）/ resourceLimit→429 / scopeDenied→403 / notFound→404。
+- 附带：pack d.ts symbol-face test 读 runtimeEntry.d.ts（entry split 后续，test-only 随车）。
+- 载体：runtimeSha256 变（replayScan 新模块入包 + wire 加性）；executionSha256 预计恒等（§3 预注册，L2 实况对账）。
+
 ## v0.1.127（2026-11-21）
 
 **执行出口 kernel 硬化 + B1 注入形组合根**（B1 前置件 + 安全硬化波；段 L 呈批书 @5deca899 + f4 批复 @3de8103c；gate r-20261121-gate-0127 GATE-PASS；0.1.127 为 B1 upstream 前置载体——已发布 0.1.126 execution bundle 无 createExecutionComposition，发布时序事实非缺陷，f4 定谳无需回补）。
