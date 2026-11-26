@@ -81,3 +81,14 @@ push origin ALIGNED。
 gate 判定单终态路径 + f4 批复记录 + SRI v0.1.128.md（runtimeSha256 变值 +
 executionSha256 实况对 §3 预注册）+ packument 双 org 验真输出 + 生产 lane
 收口单 + AtlasWeb pin bump / 格 I 三元同步回执（L7）。
+
+## §5 L4 发布亲署（用户提前授权，2026-11-26 落档）
+
+- **授权原文**：用户于 2026-11-26 在 atlas-mainline-f4 session（job 9d1c80df）亲键「**L4 发布亲署，我提前授权。**」——§2 L4 全范围（tag `v0.1.128` → push origin master+tag → gitcode 镜像双推 → npm publish `--registry https://registry.npmjs.org` → @atlaswork 镜像双发同 tgz 仅改 name → packument 验真）亲署在案。0.1.125 先例通路：用户亲键 = 有效亲署，peer 转达不构成——本节为原文落档，非转达。
+- **条件面（授权非跳门）**：L4 执行仍以 **GATE-PASS + 呈批书批复双在案**为前置（§2 硬门条款照旧）；本亲署仅消除「候用户亲署」等待支。
+- **执行单点**：L4 由 **atlas-mainline-f4（job 9d1c80df，持授权原文 session）亲执**——0.1.125 先例（Main 分类器面对 peer 转达不构成 publish 授权，f4 亲执通路成立）。段 L 现执行 session（L1 已落 05e5dd76）于 L2/L3 完成后**单信号移交 staging tgz + 验真链（§3 Δ账预注册）予执行单点**，不再自执 L4；并存 f4 角色 session 以本记录为执行单点指定，不得重复执行。
+- L4 执行记录（tag/push/publish 回执/双 org 对表/round-trip 锚）随执行落档本档 §6。
+
+## §6 L4 执行记录（执行时落档）
+
+（候 GATE-PASS + L2/L3 移交）
