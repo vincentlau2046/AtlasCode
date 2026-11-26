@@ -130,3 +130,9 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **逐点核真**：键在场语义（httpHost:492-503 `!== null` 判、零默认注入、与 carrier fail-closed 面精确咬合）/ host 预验早退零触达（值域 clamp 留 carrier 分层正确；**登记备注**：pageToken 不预判形（空串/畸形→carrier invalidRequest→400）、前导零形 ∈ 声明域无处置——均分层正确）/ opaque 透传+编码 / 错误映射五码+body code 断言+500 兜底保持 / 加性全 optional 扩面 / 联调自决 + web-code 零动 + 12 提交段 L 集中 push 治理相容。
 - **独立实跑**：六腿 6/6 + 全量 517/1/0/1873/68 files/28.98s 与 §H 呈报逐字一致。
 - **终判：S2 收口采认。** S1 §G + S2 §I 双终态；余 S3（e2e fetch 腿+gate+段 L，L4 候用户亲署）。**当前关键路径 = Main 真连前提链（S1 合并 master → carrier pin bump 0.1.128 → 段 L 呈批候选制品）**。
+
+## §J S1 合并采记 + 序修形批复（f4，2026-11-26）
+
+- **S1 合并采记**：cherry-pick 落 master = 2a353f7e（S1 feat）+ b5a2dfd7（修形①）；f4 实核 master 链序（§H → 2a353f7e → b5a2dfd7 → §I cfee67eb）+ `merge-base --is-ancestor` origin ALIGNED + worktree-f6-page-s1 已撤；Main 侧复验三件套 128/128 + typecheck 0 采记。
+- **序修形批复：采认**（预注册形偏离，域内实证强制）。工单 §1 F3 原序「pin bump → 段 L 呈批」不可行——格 I 背书为三元版本硬耦合（f4 实核：AtlasWeb `gateTruthTable.ts:94` `upgradeVersion: '0.1.127'` 硬编码 + `:102` `upgradeSha256Prefix` + `docs/attestations/gezi-i.json:9-10` 同值；verifier 三方对表 pin ↔ attestation ↔ EXPECTED），且 sha 前缀须取 **registry 实发制品**（registry gzip-repack 致本地 pack sha ≠ 直下 tarball，SRI 为准——0.1.127 先例在档）；0.1.128 未发布则 sha 不可知，pin 先行必 3 红（真值表 pin 断言 + 格 I verifier + G2 级联）。**定形序 = 段 L 0.1.128 发布（GATE-PASS → release commit → tag → push → npm 双 org）→ sha 回填 → AtlasWeb pin bump + 格 I 背书三元同步一 commit**——与 #404 波（0.1.127）实际执行序相同（cf4ec4d 先例）。Main 已 reset 越序 commit（f665b1f 未推），AtlasWeb main 复绿 @6b75219 0 fail 采记。
+- **S3 制品锚转发（③）**：AtlasCode master **cfee67eb**（含 S1 分页契约，origin ALIGNED）+ AtlasWeb main **6b75219**（S2 透传，本地领先 origin 12 提交，push 归段 L）——e2e 局部 build/pack/install 真连双锚；版本串非 fetch 腿依赖，npm 0.1.128 正式制品候段 L 发布后替换。
