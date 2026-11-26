@@ -154,3 +154,9 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
   - zod 零消费面 f4 独立证实：`WebSessionRequestSchema` src 全仓仅 webSessionV0.ts :106（声明）+ :307（infer）两点，零消费点。
 - **采认结论**：**S3 fetch 级判据腿 PASS**。判据格 1（冻结数值/clamp/三分态/域绑定）、格 2（加性零键零破坏）、格 3 六腿 + §B 第 6 腿（超旧帽窗口形钉格：同会话全量 429 resourceLimit / 分页 4 页全链可达、页字节和 5.73MiB > 4MiB = L 帽不施加直证）+ 必改① e2e 复证（真 jsonl 真变换链 phantom 不在场：compact=[m3,m4,m5] / snip=[m1,m3,m4]）+ 必改②三分态三腿（compact 界内序数/rewrite 越界/snip 锚漂移全 cursorExpired 禁错页静默）+ 必改③双界（F1 字节界先收页 n=41<50、F2 单记录 4.5MiB → 429 零隐式截断）+ G3 append 前缀稳定（token 形恰合 §D 冻结）+ 快照一致性面（stat 三元组 + expectIno 对合法并发写零误杀）——全数 e2e 直证成立。
 - **后链**：本节落档 → 按片送 Atlas-reveiw 审计 → 审计 PASS 后 S3 gate 采认链闭合（硬门条款 GATE-PASS 支达成，Main 补录呈批书）→ f4 段 L 呈批复另节落档（F3 重验计数厘清中）→ Main L1-L3 → L4 候用户亲署 → 生产 lane → F6-PAGE 销项呈报（措辞 §B 登记②钉死）。
+
+### §K 审计闭环补记（2026-11-26，Atlas-reveiw：**PASS，0 必改，注记 1 采记**；本节落档 = S3 采认链终态）
+
+- **终判：PASS → S3 采认链闭合**。e2e 首跑 → f4 复跑 → 审计第三独立复跑，三方 39/39 GREEN 逐腿 diff 零；四焦点（判据层零注入形/九面覆盖完备/值域裁定一致性/三重直证可复现）全数独立实核成立（merge-base 直验双锚、sha 逐字节、×11/×2 子路径计数、公式 :180≡:739 逐字节同形、域校验先于 statPre 实读）。审计确认 Main 可补录呈批书 GATE-PASS 支。
+- **注记 1（G7 帽名口径勘正，采记不阻链）**：G7 样本判别帽 = **maxProjectionBytes**（4MiB 全量投影序列化帽，全量 429 由它触发）；transcript ~6.3MiB < 64MiB 从未在扣——maxTranscriptBytes 不施加面为**代码面事实**（replayPaging.ts:185-186 注释 + HARD 256MiB 扫描界，S1 §D/§E 在案），本样本不可直证（>64MiB 直证腿 = §B「视 e2e 资源可做」，非格义务）。页帽与投影帽同值 4MiB，措辞须以帽名区分：G7「页字节和 5.73MiB > 4MiB」实际直证 = **全量投影帽（4MiB）不施加于分页路径 + 页帽按页计不跨页累计**。§K 正文「L 帽不施加直证」句依此勘正（帽名精度修正，判读不变）；校正句随 Main 补录呈批书/GATE-PASS 文本触碰折入。
+- **登记（审计/e2e 同认）**：正式 0.1.128 gate = 以 **registry 实发制品**重跑 S3 腿（判定单 §4 自述判据腿层），随 L6 生产 lane 链执行。
