@@ -184,3 +184,18 @@ executionSha256 实况对 §3 预注册）+ packument 双 org 验真输出 + 生
   81f6276c → L1 05e5dd76 → L4/L5 @985957fb（双 org published）→ L6
   prodlane PASS → L7 4f892ab。F6-PAGE 销项呈报候 f4（措辞 §B 登记②：
   接口格 + e2e fetch 腿达成、UI 消费登记未销）。
+
+## §8 段 L 终态节 + F6-PAGE 波收口（2026-11-27）
+
+- **§N 终采认 PASS @c58952ea**（Atlasweb-F4 本库落档 + f4 补推双远端
+  origin+gitcode ALIGNED）：§M 四面独立复核（L6 registry 重跑 39/39 +
+  L7 三元同步 + cli.js 勘正采记 + worktree 清理核真）。
+- **a5 挂账行翻转 @ AtlasWeb 9e55e5d**（已推 origin main
+  4f892ab..9e55e5d）：F6-PAGE 行「未通过（挂账维持）」→「已销
+  （2026-11-27）」，原格文本保留 + 翻转采记节——**产品总放行 F6-PAGE
+  阻格清零**。
+- **worktree 登记行销项**：双陈旧 worktree 已清（cherry 12/12 补丁
+  等价 + 零脏面实证 @1ce14062 注记），bun test 发现面 tests/ 纯面归一。
+- **工单 §0–§N 全链在档**（`docs/2026-11-25-f6-page-ticket.md`）。
+- **未销面去向**：UI 消费 + list 分页 = 登记 UI 波候选，后续另立。
+- 本呈批书至此终态封卷。
