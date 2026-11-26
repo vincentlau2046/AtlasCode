@@ -197,3 +197,13 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 **登记销项照应（上文登记行）**：两陈旧 worktree 已清理（2026-11-27，f4 执）——`git cherry` 12/12 全 `-`（补丁等价内容全数在 master）+ 双 worktree 零脏面实证后 `git worktree remove`，分支保留（`0.1.90-w-opt-1` / `wdb-0.1.94`）；bun test 全项目发现面污染源除（17635→tests/ 纯面口径归一）。
 
 **后链**：本 §M → Atlasweb-F4 终采认 + a5 挂账行翻转落档（AtlasWeb a5 verdict doc）→ 报 Main → 用户。
+
+## §N 销项终采认 + a5 挂账行翻转落档（f4，2026-11-27；本节落档 = F6-PAGE 波终态）
+
+- **§M 终采认：PASS**（f4 独立复核，非采信性）：
+  1. **措辞核真**：§M 钉死句逐字 = §B 登记②原文「接口格 + e2e fetch 腿达成；UI 消费登记未销」✓；未销面（UI 消费 = 登记 UI 波 / list 分页 = 登记候选）显性维持不冒销 ✓。
+  2. **证据链独立核真**：release `05e5dd76` 三 commits（§L 已核）+ S3 39/39×3（f4 本方即第二跑 @§K）+ **L6 生产 lane 判定单 `r-20261126-prodlane-128.md` 通读核真**——registry 实发双 org 直下双 MATCH（主 `ebde147c…` / 镜像 `e6914537…`）、SRI 四值安装品实算逐字 MATCH、carrier 四字段互证闭环、Δ账三条成立（**cli.js +152B 勘正在档**：§3 预注册「预计零触碰」不兑现——0.1.127 同形先例「勿以源码级推 bundle 字节恒等」采记）、**§K 登记腿 registry 实发制品重跑 39/39**（第四跑，首次正式制品面，runtime `85e9b293…` 入位直证）、安装车道 bin 真跑 `0.1.128 (AtlasCode)` ✓。
+  3. **L7 三元同步独立核真 @4f892ab**：双 package.json pin `0.1.128` + gateTruthTable upgrade `0.1.128`/`45259d7d…`（= registry 实发 cli.js sha 前缀）+ downgrade `0.1.127`/`b4dfd8a4…` + gezi-i.json 同值——三方对表吻合，§J 定形序兑现 ✓；d.ts 127 vs 126 差 1 归属 web-contract（非 wsrt 域）口径闭合采记。
+  4. **登记销项照应核真**：两陈旧 worktree 已除（f4 `git worktree list` 复核仅存主树）——bun test 发现面污染源清零，tests/ 纯面口径自此为全项目实测面 ✓。
+- **a5 挂账行翻转落档**：AtlasWeb `docs/2026-11-21-first-wave-a5-verdict.md` F6-PAGE 行「未通过（挂账维持）」→ **已销（2026-11-27 翻转）** @ AtlasWeb main **`9e55e5d`**（原格文本保留 + 翻转采记节：钉死措辞逐字 + 证据链 + 未销面维持）——**产品总放行 F6-PAGE 阻格清零**。
+- **波终态**：F6-PAGE 工单格 1–5 全表满足；S1（§D-§G 四环）+ S2（§H-§I）+ S3（§K 双节）+ 段 L 0.1.128（§L 批复 → L1-L7 全链）+ 销项（§M-§N）全链闭环。第一波余面（Node 20 最低边界腿 / B3 / F8-F9 对表 / 总验收链）按既定各表推进，非本波格。
