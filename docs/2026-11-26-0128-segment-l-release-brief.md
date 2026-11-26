@@ -119,6 +119,39 @@ executionSha256 实况对 §3 预注册）+ packument 双 org 验真输出 + 生
 - **执行单点**：L4 由 **atlas-mainline-f4（job 9d1c80df，持授权原文 session）亲执**——0.1.125 先例（Main 分类器面对 peer 转达不构成 publish 授权，f4 亲执通路成立）。段 L 现执行 session（L1 已落 05e5dd76）于 L2/L3 完成后**单信号移交 staging tgz + 验真链（§3 Δ账预注册）予执行单点**，不再自执 L4；并存 f4 角色 session 以本记录为执行单点指定，不得重复执行。
 - L4 执行记录（tag/push/publish 回执/双 org 对表/round-trip 锚）随执行落档本档 §6。
 
-## §6 L4 执行记录（执行时落档）
+## §6 L4 执行记录（2026-11-26，atlas-mainline-f4 job 9d1c80df 亲执）
 
-（候 GATE-PASS + L2/L3 移交）
+1. **执行前全项验真**：staging tgz sha256 `ebde147c…` 复算字节全等；解包
+   134 entries；package.json name/version/尾换行 ✓；carrier json 四值与
+   §5A 移交逐字吻合；cli.js 18,239,436 B sha256 `45259d7d…`（**变** vs
+   0.1.127 `b4dfd8a4`/18,239,284——§3 预注册「预计零触碰」不兑现，勘正
+   归因 = S1 wire 契约 kernel/protocol 加性 + engine/session 共享 chunk
+   入 cli bundle 面；源面已 L3 全量 956 行审查无 finding；0.1.127 同形
+   先例）；token 通道 npm whoami = `vincentlau2026` ✓。
+2. **tag + 双远端**：`v0.1.128` @ `21d53370`（release `05e5dd76` 之上
+   docs-only 回执链，零产品码）；origin master `f44749d1..21d53370` +
+   tag 新推；gitcode master `07c74122..21d53370` + tag（hooks PASSED）。
+3. **npm 主面**：staging tgz 同源直发（复制后 sha 复核 `ebde147c…` 再
+   publish）→ `+ @atlasharness/atlascode@0.1.128`，shasum `f3c4b22a…` ·
+   integrity `sha512-ZEneX6s…` · 134 files · unpacked 19.1MB。
+4. **镜像双发**：staging 解包 → package.json 字节外科仅改 name（str.replace
+   断言 count==1、尾换行保留、非 json.dump）→ repack
+   `atlaswork-atlascode-0.1.128.tgz`（134 files）→ 发布前复验：name/
+   version/尾换行 ✓ + cli.js sha256 `45259d7d…` 与 staging 字节恒等 ✓ +
+   全树 diff 唯一 package.json ✓ → publish `+ @atlaswork/atlascode@0.1.128`，
+   shasum `ede314c5…` · integrity `sha512-Bo9MNthf…`。
+5. **packument 验真三步**：主面即时可见 latest=0.1.128 + 四值落档（SRI
+   v0.1.128.md）；镜像面 12 polls×15s（~3min 传播延迟，0.1.125/127 同形）
+   后可见 latest=0.1.128 + 四值（unpackedSize 19,087,349 = Δ3B name 行差）；
+   round-trip 直下 sha256 双 MATCH——主面 `ebde147c…` = staging 字节全等，
+   镜像 `e6914537…` = mirror repack 字节全等。
+6. **通道注记**：publish = `npm publish ./<tgz> --registry
+   https://registry.npmjs.org --userconfig <temp .npmrc chmod 600> --access
+   public`（未走 0.1.127 pin-npmjs-dns.js 封装形态；通道 https 证书锚定 +
+   packument round-trip sha 复核兜底，实况记录）；temp .npmrc 发布验真后
+   即清，token 未入仓未打印。
+7. **L5**：SRI `docs/sri/v0.1.128.md` 落档（四值 + 镜像节 + Δ账按实况
+   含 executionSha256/cli.js 双偏离归因 + carrier↔bundle 字节互证）。
+   后续：L6 候 e2e 单信号（生产 lane + §K 登记 registry 实发制品重跑 S3
+   腿）；L7 归 Main（AtlasWeb pin bump 0.1.127→0.1.128 + 格 I 三元同步，
+   sha 取 registry 实发制品）。
