@@ -110,3 +110,17 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **复判终判：PASS → S1 收口采认**。逐项核验：修形①逐字成立（subtype/snipMetadata 保留形、真体复用零复刻、内容剥除/空性守恒/驻留形未动）；三腿 fixture 设计与断言逐行核真（H1 全量剪枝直断 ['m3','m4','m5']、H2 removedUuids 中段删除跨 gap 重链 ['m1','m3','m4']、H3 旧 token offset 界内 anchor 漂移 → cursorExpired）；**H1/H2 含 phantom 守卫直断全文（非仅双侧比对）防 fixture 双侧同错假绿——设计采记表彰**；独立实跑 25/25 + 三套件 50/50 与呈报逐字一致；RED 采记可接受（mutation 直证可选不另设门）；2 文件限域零波及。
 - **S1 终态锚**：worktree-f6-page-s1 @ea3b3ea8（判据链 §D PASS + §E 必改正形 + §F 采认复核 + §G 复判 PASS 四环闭合）；合并 master 与后续 master 操作归 Main（角色边界既定）。
 - **后链**：S2 并行在途（候 Main 回执）→ S3 e2e fetch 六腿 + gate + 段 L 0.1.128 双 org（L4 候用户亲署）→ F6-PAGE 销项呈报（措辞 §B 登记②钉死）→ a5 挂账行翻转落档 → 产品总放行阻格清零。
+
+## §H S2 采认判词（f4 独立活码复核，2026-11-26，**PASS**）
+
+- **对象**：AtlasWeb main @**6b75219**（本地领先 origin/main 12 提交，push 归段 L 惯例；4 文件 +239/−4：httpHost +27 / replayPaging.test +204 / web-connection +8 / sessionHost +4；web-code 零动 = 格 4 自决 4 保持）。
+- **判据逐点实核成立**：
+  1. **键在场语义（加性核心）**：无分页参时 request 构造仅 `{scopeId, sessionId}` 零分页键（A 腿直断 `'pageSize' in req === false`）——与 carrier S1「`'pageSize' in req || 'pageToken' in req` 显式 undefined 键亦入分页路径」的 fail-closed 判定面精确咬合，host 不注入默认值（sessionHost 注释钉死）。
+  2. **host 预验 fail-closed**：`?pageSize=` `/^\d{1,9}$/` 畸形即 400 invalidRequest 且零 runtime 触达（D 腿八形逐个 + `calls` 长度直断）；值域 clamp 留 carrier 域（分层正确）。
+  3. **opaque 透传**：pageToken 原样透传含特殊字符（C 腿）；URL 拼接 `encodeURIComponent`（web-connection listSessions 先例形）。
+  4. **错误映射对表**：invalidRequest→400 / cursorExpired→400（body.error.code 区分双态，禁错页静默的显性 400 面）/ resourceLimit→429（沿 search/list 先例）/ scopeDenied→403 / notFound→404（E 腿逐一实射）。
+  5. **加性兼容**：envelope 旧形零破坏（A）+ hasMore/nextPageToken 加性透传零剥离（F）。
+  6. **联调机制自决采认**（开工令⑤域内）：runtimeOverride 注入缝过 pin 0.1.127 无分页契约（真连候 S3/段 L pin bump）；ephemeral 端口 listen(0)。
+- **独立复跑证据**：S2 六腿 **6/6 / 0 fail**（55 expect）；AtlasWeb 全量 **517 pass / 1 skip / 0 fail**（68 files，1873 expect，exit 0）——与呈报逐字一致；格 J gate truth table clean-candidate 行 commit 后自愈全绿（树净实证采记）。
+- **采认结论**：**S2 PASS**。按片送 Atlas-reveiw 审计（与 S1 复判同链惯例）；**S3 开工令随发 e2e**（判据面以 §B/§C + 勘正②样本设计为准，#274 预登记为 e2e 侧权威档；S3 真连前提 = S1 合并 master + carrier pin bump 0.1.128 + 段 L 呈批候选制品，Main 链内衔接）。
+- **附记**：Main 补达 S1 修形后 AtlasCode 全量复跑 6248/8/2——两红均 live 环境探针（pty-live-alpha TUI live / S5-4 NL live 网关未 seed），与分页改动无涉，采记与 §D 唯一红判读同法。
