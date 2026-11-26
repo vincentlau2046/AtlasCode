@@ -82,6 +82,36 @@ gate 判定单终态路径 + f4 批复记录 + SRI v0.1.128.md（runtimeSha256 �
 executionSha256 实况对 §3 预注册）+ packument 双 org 验真输出 + 生产 lane
 收口单 + AtlasWeb pin bump / 格 I 三元同步回执（L7）。
 
+## §5A L1–L3 执行回执（2026-11-26，Main）
+
+- **前置**：勘正令折入 commit 81f6276c（§L 批复条件两件：F3 扫描面口径
+  注记 + G7 判别帽校正句）。
+- **L1**：release commit 05e5dd76（package.json bump 0.1.128 + CHANGELOG
+  v0.1.128 节）。
+- **L2**：prepublishOnly 5 步链 exit 0；`dist/atlasweb-carrier.json` =
+  runtimeSha256 **85e9b293…（变，§3 预注册兑现——7e7e6f38 三版恒等打破）** /
+  executionSha256 **5c8c095e…（变，§3 预注册「预计恒等」偏离）**。
+  **偏离归因（已闭合）**：S1 计划外修形①②（已随 §J 采记）——d.ts barrel
+  分支修形 + types.ts specifier 窄化（pack d.ts 消费闭包 557→61）改变两
+  bundle 编译输出；且 engine/session 共享 chunk 使 replayScan 入 execution
+  bundle（grep replayScan 1 处在品）；版本串注入排除（127/128 两 bundle
+  均零版本串）。d.ts 树 Δ = +4/−4：replayPaging.d.ts + replayScan.d.ts
+  各入两 bundle；execution 面 entry/executionOutlet/webExecutionV0.d.ts
+  重复份修形②后只留 execution bundle（公共类型面完好——execution subpath
+  types → web-session-runtime-execution/index.d.ts；wsrt runtimeEntry.d.ts
+  在格 = becf0458 测试锚）。wsrt d.ts 总数 126 恒等。exports 面 4 subpath
+  零新增 ✓。staging tgz `atlasharness-atlascode-0.1.128.tgz` sha256
+  `ebde147cb77e4240a4b74d1aa2798f2edb821946e3e41f68212b36b916411b4f`
+  （/home/vince/.claude/jobs/1b9594d7/tmp/；carrier json 在包内已验）。
+- **L3 回执（无 finding）**：v0.1.127..b5a2dfd7 src+scripts 全量 diff
+  956 行补查——敏感命中全部为分页协议 `pageToken` 命名字面（opaque replay
+  游标编解码，非凭据）；新增行零密钥 / 零 exec·eval / 零网络端点 /
+  零 child_process。becf0458 test-only 已随 PR #6 审计。
+
+> **状态：L1–L3 完；L4 用户亲署已在案（§5，atlas-mainline-f4 session 亲键
+> 2026-11-26）**——L4 执行单点 = atlas-mainline-f4（job 9d1c80df），本
+> session（L1–L3 执行方）单信号移交 staging tgz + 验真链后不自执 L4。
+
 ## §5 L4 发布亲署（用户提前授权，2026-11-26 落档）
 
 - **授权原文**：用户于 2026-11-26 在 atlas-mainline-f4 session（job 9d1c80df）亲键「**L4 发布亲署，我提前授权。**」——§2 L4 全范围（tag `v0.1.128` → push origin master+tag → gitcode 镜像双推 → npm publish `--registry https://registry.npmjs.org` → @atlaswork 镜像双发同 tgz 仅改 name → packument 验真）亲署在案。0.1.125 先例通路：用户亲键 = 有效亲署，peer 转达不构成——本节为原文落档，非转达。
