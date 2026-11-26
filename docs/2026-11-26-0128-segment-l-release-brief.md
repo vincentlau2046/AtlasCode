@@ -25,8 +25,18 @@ relink/snip 变换分页路径与全量路径同体复用，A2 拼接恒等含 c
 **完整重验（F3 判据）**：master @cfee67eb 全量 `FORCE_COLOR=3 bun test
 --isolate tests/` = **17635 pass / 1 fail**（唯一红 =
 `tests/func/atlascode-tui-pty-probe.test.ts` pty-live-alpha——TUI 真 LLM
-live 环境基线，与分页改动无涉，§D 判词已坐实同基线）；三件套 128/128 +
-`bun run typecheck` 0 + push origin ALIGNED。
+live 环境基线，与分页改动无涉，§D 判词已坐实同基线；f4 独立复跑逐字吻合
++ 单跑直证 322s 内部超时）；三件套 128/128 + `bun run typecheck` 0 +
+push origin ALIGNED。
+
+> **F3 扫描面口径注记（f4 §L 勘正令 @6a0407c9，2026-11-26）**：bun 1.4.4
+> test 位置参数 = **子串过滤器非路径根**（f4 判别探针直证），上行命令有效
+> 扫描面 = tests/ 512 文件 + 两枚陈旧 worktree（worktree-0.1.94-wdb 459 /
+> worktree-0.1.90-w-opt-1 447）+ 零星 = 1426 文件（含 `wdb/` 等子串命中）；
+> §D/§H 判词 6246–6248 = tests/ 纯面。两计数均真实、无套件回归、非矛盾。
+> **全量判定准绳 = tests/ 纯面（合并后态 §H 附记 6248/8/2）**。
+> **G7 判别帽勘正（§K 注记 1 折入）**：G7 判别帽 = `maxProjectionBytes`，
+> 校正句——全量投影帽（4MiB）不施加于分页路径；页帽按页计。
 
 ## §2 执行序列（GATE-PASS + f4 批复双在案后）
 
