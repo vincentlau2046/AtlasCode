@@ -160,3 +160,19 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **终判：PASS → S3 采认链闭合**。e2e 首跑 → f4 复跑 → 审计第三独立复跑，三方 39/39 GREEN 逐腿 diff 零；四焦点（判据层零注入形/九面覆盖完备/值域裁定一致性/三重直证可复现）全数独立实核成立（merge-base 直验双锚、sha 逐字节、×11/×2 子路径计数、公式 :180≡:739 逐字节同形、域校验先于 statPre 实读）。审计确认 Main 可补录呈批书 GATE-PASS 支。
 - **注记 1（G7 帽名口径勘正，采记不阻链）**：G7 样本判别帽 = **maxProjectionBytes**（4MiB 全量投影序列化帽，全量 429 由它触发）；transcript ~6.3MiB < 64MiB 从未在扣——maxTranscriptBytes 不施加面为**代码面事实**（replayPaging.ts:185-186 注释 + HARD 256MiB 扫描界，S1 §D/§E 在案），本样本不可直证（>64MiB 直证腿 = §B「视 e2e 资源可做」，非格义务）。页帽与投影帽同值 4MiB，措辞须以帽名区分：G7「页字节和 5.73MiB > 4MiB」实际直证 = **全量投影帽（4MiB）不施加于分页路径 + 页帽按页计不跨页累计**。§K 正文「L 帽不施加直证」句依此勘正（帽名精度修正，判读不变）；校正句随 Main 补录呈批书/GATE-PASS 文本触碰折入。
 - **登记（审计/e2e 同认）**：正式 0.1.128 gate = 以 **registry 实发制品**重跑 S3 腿（判定单 §4 自述判据腿层），随 L6 生产 lane 链执行。
+
+## §L F3 扫描面口径定谳 + 段 L 呈批复（f4，2026-11-26；本节落档 = 段 L 批复终态）
+
+- **F3 计数差定谳（f4 独立探针直证，非推测）**：
+  1. **根因**：bun 1.4.4 `bun test` 位置参数 = **子串过滤器，非路径根**（判别探针：`bun test --isolate "wdb/tests/unit/adapter-sandbox-delegation.test.ts"` 实跑命中 `worktrees/worktree-0.1.94-wdb/...` 下 1 file / 4 tests——该路径前缀非 cwd 所存，唯子串匹配语义可解释）。
+  2. **有效扫描面**：呈批 F3 命令 `bun test --isolate tests/` 实扫 = tests/ 512 文件 + 陈旧 worktree 两枚（worktree-0.1.94-wdb 459 + worktree-0.1.90-w-opt-1 447，路径均含 `tests/` 子串命中）+ 零星（user-e2e fixture 树多在 `.` 隐式目录组件下不被 bun 发现）= **1426 文件 / 17636 tests**。
+  3. **f4 独立复跑与呈批逐字吻合**：17635 pass / 1 fail / 56801 expect / 1322.40s；唯一红身份 f4 单跑直证 = `(fail) TUI PTY 活链路…（live）` marker 'pty-live-alpha' 1<2（322s 内部超时）——§D 判词同基线环境红，非本波引入；`bun run typecheck` 0 f4 复证。
+  4. **两计数均为真实记录**：17635 = 全项目扫描面（含两陈旧 worktree 自版套件——各自 import 自版 src，非跨版污染断言面）；6246–6248（§D/§H）= tests/ 纯面。差 = 扫描口径，无数据矛盾、无套件回归。
+- **批复条件（勘正令，呈批书 §1 F3 行补录）**：F3 行补注扫描面口径；**全量判定准绳 = tests/ 纯面**（master 合并后态 = §H附记 6248/8/2，两红均 live 环境探针在案）。
+- **段 L 批复**：
+  - **L1–L3 准**（硬门双前置达成：GATE-PASS 支 = §K 采认 + §K 审计闭环 PASS；f4 批复 = 本节）。L3 push 安全审查补查按呈批 §2 执行，有 finding 即停呈批改形。
+  - **L4 候用户亲署**（tag / push origin / gitcode 镜像双推 / npm 双 org——发布治理 L4 边界，f4/peer 无权代签）。
+  - **L6 生产 lane**：单信号 e2e；**正式 0.1.128 gate = registry 实发制品重跑 S3 腿**（§K 审计登记）随链执行。
+  - **L7 按 §J 三元序**（publish → sha 回填 → pin bump + 格 I 三元同步一 commit）。
+  - **Δ 账按呈批 §3 预注册逐格核对**（runtimeSha256 变 / executionSha256 预计恒等——共享 chunk 致变按实况报并注明归因 / cli.js 零触碰 / exports 零新增）。
+- **登记（卫生，非阻格，候 Main 裁定）**：`worktrees/worktree-0.1.94-wdb` / `worktrees/worktree-0.1.90-w-opt-1` = 陈旧 wave worktree 残留（0.1.90/0.1.94 波），污染 bun test 全项目发现面——建议收口清理（worktree 用毕即撤先例）；清理前不阻段 L。
