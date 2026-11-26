@@ -136,3 +136,21 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **S1 合并采记**：cherry-pick 落 master = 2a353f7e（S1 feat）+ b5a2dfd7（修形①）；f4 实核 master 链序（§H → 2a353f7e → b5a2dfd7 → §I cfee67eb）+ `merge-base --is-ancestor` origin ALIGNED + worktree-f6-page-s1 已撤；Main 侧复验三件套 128/128 + typecheck 0 采记。
 - **序修形批复：采认**（预注册形偏离，域内实证强制）。工单 §1 F3 原序「pin bump → 段 L 呈批」不可行——格 I 背书为三元版本硬耦合（f4 实核：AtlasWeb `gateTruthTable.ts:94` `upgradeVersion: '0.1.127'` 硬编码 + `:102` `upgradeSha256Prefix` + `docs/attestations/gezi-i.json:9-10` 同值；verifier 三方对表 pin ↔ attestation ↔ EXPECTED），且 sha 前缀须取 **registry 实发制品**（registry gzip-repack 致本地 pack sha ≠ 直下 tarball，SRI 为准——0.1.127 先例在档）；0.1.128 未发布则 sha 不可知，pin 先行必 3 红（真值表 pin 断言 + 格 I verifier + G2 级联）。**定形序 = 段 L 0.1.128 发布（GATE-PASS → release commit → tag → push → npm 双 org）→ sha 回填 → AtlasWeb pin bump + 格 I 背书三元同步一 commit**——与 #404 波（0.1.127）实际执行序相同（cf4ec4d 先例）。Main 已 reset 越序 commit（f665b1f 未推），AtlasWeb main 复绿 @6b75219 0 fail 采记。
 - **S3 制品锚转发（③）**：AtlasCode master **cfee67eb**（含 S1 分页契约，origin ALIGNED）+ AtlasWeb main **6b75219**（S2 透传，本地领先 origin 12 提交，push 归段 L）——e2e 局部 build/pack/install 真连双锚；版本串非 fetch 腿依赖，npm 0.1.128 正式制品候段 L 发布后替换。
+
+## §K S3 e2e fetch 腿采认判词（f4 独立活码复核，2026-11-26，**PASS**）+ 值域登记裁定
+
+- **对象**：e2e 判定单 `user-e2e/reports/r-20261126-f6page-s3-gate.md`（#274 九面预注册执行；真连双锚 AtlasCode cfee67eb × AtlasWeb 6b75219，零注入真 carrier 局部 pack 覆 pin @§J 授权）。
+- **独立核真（f4 实测，非采信性）**：
+  1. **双锚实核**：AtlasCode master @f44749d1（cfee67eb + S1 双 commit 2a353f7e/b5a2dfd7 在史）× AtlasWeb @6b75219 树净——与 §J 转发一致。
+  2. **制品覆 pin 直证**：tgz sha256 `6ff7040f…571e` f4 重算**逐字节吻合**（4,030,169 B）；AtlasWeb `node_modules/@atlaswork/atlascode/dist/web-session-runtime/index.js` **pageToken×11 + cursorExpired×2 f4 逐计数吻合**（呈报口径 = S1 触及子路径面；f4 另核全 dist .js 计 23/7 含 execution/contract/cli 同 token 面，不冲突）；包名 @atlaswork/atlascode 0.1.127 镜像改名形核实。
+  3. **探针形读码**：零注入（真 createSessionHost/createHttpHost 直 import AtlasWeb 源 + 真 jsonl 种子每跑自再生 + listen(0) ephemeral；真实 `~/.atlas`/`~/.claude` 零触碰）与判定单 §1 一致。
+  4. **钳制公式同形直读**：`replayPaging.ts:180` ≡ `readonlyRuntime.ts:739`（`Math.max(1, Math.min(req.pageSize ?? L.pageSize, L.pageSize))` 逐字节同形）——G8 wire0/wire201 钳制断言代码面成立。
+  5. **域绑定先于 stat 直读**：replayPaging.ts:172-184 域校验抛 invalidRequest 先于 statPre notFound——G5「域外打不存在 session 仍 400 非 404」腿代码面成立。
+  6. **f4 独立复跑 = 39/39 GREEN / 0 RED**（bun probe-f6.ts 直跑，与 run-final.log 逐腿一致）。
+- **值域两路径语义差——登记裁定（判定单 §3-2 呈裁件，f4 裁）**：
+  - **e2e 校准采认**：首轮按 §D「pageSize wire 校验 0/201 拒」判 400 系过判（该句 = webSessionV0 zod schema 声明属性描述，非真实路径行为）；按 B2 复验校准先例校准为钳制断言，透明注记在案——采认。
+  - **候选 (a) 采认**：webSessionV0 schema 注释钉明「zod min(1)/max(200) = 声明域属性；真实路径消费面 = carrier 钳制（replayPaging:180 ≡ search readonlyRuntime:739 同形公式）」——纯注释零行为变更，**折入下次 carrier 触碰自然带入**（纯文本零行为变更跳 gate 先例），本波零改动、不阻段 L、不设复判门。
+  - **候选 (b) 否决**：AtlasWeb host 补值域 400 与判据格 1 冻结「超帽 = clamp 至帽」直接抵触、破 S2 §H/§I「值域 clamp 留 carrier 域」分层裁定，且属行为变更需重判——零收益不为。
+  - zod 零消费面 f4 独立证实：`WebSessionRequestSchema` src 全仓仅 webSessionV0.ts :106（声明）+ :307（infer）两点，零消费点。
+- **采认结论**：**S3 fetch 级判据腿 PASS**。判据格 1（冻结数值/clamp/三分态/域绑定）、格 2（加性零键零破坏）、格 3 六腿 + §B 第 6 腿（超旧帽窗口形钉格：同会话全量 429 resourceLimit / 分页 4 页全链可达、页字节和 5.73MiB > 4MiB = L 帽不施加直证）+ 必改① e2e 复证（真 jsonl 真变换链 phantom 不在场：compact=[m3,m4,m5] / snip=[m1,m3,m4]）+ 必改②三分态三腿（compact 界内序数/rewrite 越界/snip 锚漂移全 cursorExpired 禁错页静默）+ 必改③双界（F1 字节界先收页 n=41<50、F2 单记录 4.5MiB → 429 零隐式截断）+ G3 append 前缀稳定（token 形恰合 §D 冻结）+ 快照一致性面（stat 三元组 + expectIno 对合法并发写零误杀）——全数 e2e 直证成立。
+- **后链**：本节落档 → 按片送 Atlas-reveiw 审计 → 审计 PASS 后 S3 gate 采认链闭合（硬门条款 GATE-PASS 支达成，Main 补录呈批书）→ f4 段 L 呈批复另节落档（F3 重验计数厘清中）→ Main L1-L3 → L4 候用户亲署 → 生产 lane → F6-PAGE 销项呈报（措辞 §B 登记②钉死）。
