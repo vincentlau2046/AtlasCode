@@ -176,3 +176,24 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
   - **L7 按 §J 三元序**（publish → sha 回填 → pin bump + 格 I 三元同步一 commit）。
   - **Δ 账按呈批 §3 预注册逐格核对**（runtimeSha256 变 / executionSha256 预计恒等——共享 chunk 致变按实况报并注明归因 / cli.js 零触碰 / exports 零新增）。
 - **登记（卫生，非阻格，候 Main 裁定）**：`worktrees/worktree-0.1.94-wdb` / `worktrees/worktree-0.1.90-w-opt-1` = 陈旧 wave worktree 残留（0.1.90/0.1.94 波），污染 bun test 全项目发现面——建议收口清理（worktree 用毕即撤先例）；清理前不阻段 L。
+
+## §M F6-PAGE 销项呈报（2026-11-27，atlas-mainline-f4 起草 → Atlasweb-F4 终采认 + a5 翻转落档）
+
+**呈报裁定（§B 登记②钉死措辞逐字）**：「**接口格 + e2e fetch 腿达成；UI 消费登记未销**」。
+
+**格原文（a5 verdict 钉格）**：「F6-PAGE 缺接口格：无内容分页公开接口；阻产品总放行」（`AtlasWeb:docs/2026-11-21-first-wave-a5-verdict.md`）。本波 = 履行原义务（S0 §3.2 保留面），非替代案。
+
+**达成面（证据链）**：
+1. **接口格**：内容分页公开接口随 0.1.128 双 org 发布（段 L L4/L5 @985957fb；release 05e5dd76 = 2a353f7e S1 feat + b5a2dfd7 skeleton 修形 + becf0458 test-only）——pass1 流式 skeleton 扫描（residency ∝ record 数）+ uuid→byte-range side map + opaque token 三态（append / cursorExpired / invalidRequest，域绑定先于 stat）+ 页双帽（records clamp × bytes maxReplayPageBytes 4MiB/HARD 16MiB）+ 精确 increment 公式；wire 契约加性（ReplaySessionRequest/Result 分页键 + hasMore/nextPageToken），契约 v0 冻结面零破坏（R2 预判兑现）；S1 计划外修形①②（subtype/snipMetadata 保留）经审计 1-必改闭环（§E→§J）。
+2. **e2e fetch 腿**：S3 gate GATE-PASS 39/39 ×3 独立跑（判定单 `user-e2e/reports/r-20261126-f6page-s3-gate.md`，§K 采认 @632268ca）+ **L6 生产 lane registry 实发制品重跑 39/39 全绿**（`user-e2e/reports/r-20261126-prodlane-128.md` §4：@atlaswork registry 直下换装，runtime `85e9b293…` 入位直证；跨版本 0.1.127 本地 pack → 0.1.128 registry 实发恒绿 = §J「版本串非 fetch 腿依赖」再证）+ 生产 lane 终判 **PASS**（§5 安装车道 bin 真跑 `0.1.128 (AtlasCode)`）。
+3. **消费侧同步**：AtlasWeb pin bump 0.1.127→0.1.128 + 格 I 三元同步一 commit（Main L7 `4f892ab`：配对链 0.1.128→0.1.127→0.1.128 registry 直下沙箱逐字节回测；gateTruthTable EXPECTED 重锚 upgrade `45259d7d…` / downgrade `b4dfd8a4…`；AtlasWeb 全仓 517 pass / 0 fail）；S2 消费波 commit `6b75219` 在案（gezi-i.json reportCommit）。
+
+**未销面（防冒销，显性登记维持）**：UI 消费未入本格——分页 UI 消费面仍为登记项（§5 自决 2 同族：list 面分页 = 登记候选），不阻本接口格销项；后续 UI 波另立工单。
+
+**值域登记维持**：两路径语义差候选 (a) schema 注释钉明（折入下次 carrier 触碰）采认 / (b) 否决——L6 registry 重跑同形复现（0→1、201→50 钳制），登记不变。
+
+**a5 挂账行翻转**：按工单格 5 + §G 后链，翻转落档归判词侧 f4（**Atlasweb-F4**）——本呈报为翻转输入；翻转后**产品总放行阻格清零**。
+
+**登记销项照应（上文登记行）**：两陈旧 worktree 已清理（2026-11-27，f4 执）——`git cherry` 12/12 全 `-`（补丁等价内容全数在 master）+ 双 worktree 零脏面实证后 `git worktree remove`，分支保留（`0.1.90-w-opt-1` / `wdb-0.1.94`）；bun test 全项目发现面污染源除（17635→tests/ 纯面口径归一）。
+
+**后链**：本 §M → Atlasweb-F4 终采认 + a5 挂账行翻转落档（AtlasWeb a5 verdict doc）→ 报 Main → 用户。
