@@ -23,7 +23,7 @@
  *  - maxParseRecords 不施加（勘正②：search 面专用帽）。
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, appendFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -491,5 +491,103 @@ describe('G. wire 契约加性面', () => {
       ReplaySessionSuccessSchema.parse({ ...base, hasMore: true, nextPageToken: 'tok' }),
     ).not.toThrow()
     expect(() => ReplaySessionSuccessSchema.parse({ ...base, hasMore: 'yes' })).toThrow()
+  })
+})
+
+// ── H. compact/snip 链域（S1 修形②，审计必改：工单 §E 采记 @3d20e9c5）────────
+// stripToSkeleton 须保留 subtype + snipMetadata，否则分页路径
+// applyPreservedSegmentRelinks / applySnipRemovals 恒空转 → compact/snip
+// 会话分页有效链 = 未剪枝未重连历史（phantom 历史外泄，A2 拼接恒等在这些
+// 会话不成立）。三腿：A2-Compact / A2-Snip / compacted 链 C 态。
+
+const tsOf = (i: number) => new Date(Date.UTC(2026, 10, 25, 0, 0, i)).toISOString()
+
+/** compact_boundary 系统行（preservedSegment / snipMetadata 二选一或俱无）。 */
+const boundaryLine = (
+  uuid: string,
+  parentUuid: string | null,
+  ts: string,
+  preserved?: { headUuid: string; tailUuid: string; anchorUuid: string },
+  snip?: { removedUuids: string[] },
+) =>
+  JSON.stringify({
+    type: 'system',
+    subtype: 'compact_boundary',
+    uuid,
+    parentUuid,
+    sessionId: 'sess-1',
+    timestamp: ts,
+    cwd: dir,
+    userType: 'atlas',
+    version: '0.0.0',
+    isSidechain: false,
+    message: { role: 'system', content: [{ type: 'text', text: 'boundary' }] },
+    ...(preserved ? { compactMetadata: { preservedSegment: preserved } } : {}),
+    ...(snip ? { snipMetadata: snip } : {}),
+  }) + '\n'
+
+describe('H. compact/snip 链域（S1 修形②）', () => {
+  test('H1 A2-Compact：preservedSegment 绝对末边界剪枝/重链 ≡ paged 拼接（phantom 历史不在场）', async () => {
+    // 盘面（append-only 真形）：m1,m2 前压缩历史 → m3,m4（保留段，原始
+    // parentUuid 指向 m2/m3）→ 边界 B（anchorUuid=B，prefix-preserving，
+    // parent=null）→ 压缩后新消息 m5（parent=B，tail-splice 重链至 m4）。
+    const parts = [
+      userLine('m1', null, 'hello m1 ' + 'x'.repeat(16), tsOf(0)),
+      asstLine('m2', 'm1', 'reply m2 ' + 'y'.repeat(16), tsOf(1), 'msg_1'),
+      userLine('m3', 'm2', 'hello m3 ' + 'x'.repeat(16), tsOf(2)),
+      asstLine('m4', 'm3', 'reply m4 ' + 'y'.repeat(16), tsOf(3), 'msg_3'),
+      boundaryLine('B', null, tsOf(4), { headUuid: 'm3', tailUuid: 'm4', anchorUuid: 'B' }),
+      userLine('m5', 'B', 'hello m5 ' + 'x'.repeat(16), tsOf(5)),
+    ]
+    writeFileSync(join(dir, 'sess-1.jsonl'), parts.join(''))
+    const rt = makeRuntime()
+    await rt.start()
+    const full = await replayFull(rt)
+    // 全量路径剪枝生效（phantom 守卫直断，防 fixture 双侧同错假绿）
+    expect(msgIds(full)).toEqual(['m3', 'm4', 'm5'])
+    const { windows } = await pageThrough(rt, 2)
+    expect(windows.flat().map(m => m.id)).toEqual(msgIds(full))
+    expect(windows.flat()).toEqual(full.projection.messages)
+    await rt.close()
+  })
+
+  test('H2 A2-Snip：removedUuids 中段删除 + 跨 gap relink ≡ paged 拼接', async () => {
+    // 盘面：m1 → m2（将被 snip 移除）→ m3（parent 悬挂于 m2，relink 至
+    // m1）→ 边界 B 记 snipMetadata.removedUuids=[m2] → m4。
+    const parts = [
+      userLine('m1', null, 'hello m1 ' + 'x'.repeat(16), tsOf(0)),
+      userLine('m2', 'm1', 'snipped m2 ' + 'x'.repeat(16), tsOf(1)),
+      asstLine('m3', 'm2', 'reply m3 ' + 'y'.repeat(16), tsOf(2), 'msg_2'),
+      boundaryLine('B', 'm3', tsOf(3), undefined, { removedUuids: ['m2'] }),
+      userLine('m4', 'B', 'hello m4 ' + 'x'.repeat(16), tsOf(4)),
+    ]
+    writeFileSync(join(dir, 'sess-1.jsonl'), parts.join(''))
+    const rt = makeRuntime()
+    await rt.start()
+    const full = await replayFull(rt)
+    // snip 删除生效：m2 不在场，m3 跨 gap 重链至 m1
+    expect(msgIds(full)).toEqual(['m1', 'm3', 'm4'])
+    const { windows } = await pageThrough(rt, 2)
+    expect(windows.flat().map(m => m.id)).toEqual(msgIds(full))
+    expect(windows.flat()).toEqual(full.projection.messages)
+    await rt.close()
+  })
+
+  test('H3 compacted 链 C 态：compact 后旧 token → cursorExpired（anchor 于剪枝链，含界内序数）', async () => {
+    const p = join(dir, 'sess-1.jsonl')
+    writeFileSync(p, linearTranscript(6))
+    const rt = makeRuntime()
+    await rt.start()
+    const p1 = await rt.replaySession({ scopeId: SCOPE, sessionId: 'sess-1', pageSize: 2 })
+    const token = p1.nextPageToken!
+    // compact（append-only 真形）：只追加边界行（preservedSegment = m3..m6，
+    // anchorUuid=B，parent=null）——m1,m2 由剪枝变换移出有效链，旧 token 的
+    // anchor（链前缀 m1,m2 指纹）随之漂移；offset 2 落剪枝后链（m3..m6，
+    // 长 4）界内 → cursorExpired（禁错页静默，C3 同形）
+    appendFileSync(p, boundaryLine('B', null, tsOf(6), { headUuid: 'm3', tailUuid: 'm6', anchorUuid: 'B' }))
+    await expect(
+      rt.replaySession({ scopeId: SCOPE, sessionId: 'sess-1', pageSize: 2, pageToken: token }),
+    ).rejects.toMatchObject({ code: 'cursorExpired' })
+    await rt.close()
   })
 })

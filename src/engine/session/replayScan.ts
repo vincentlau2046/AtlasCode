@@ -6,7 +6,7 @@
  * 字节超 L.maxTranscriptBytes）的内容可分页可达，且零全量驻留——
  *  - pass1（本模块）：流式逐行扫描 JSONL，每行建 **skeleton**（链字段
  *    uuid/parentUuid/type/timestamp + message.id + content 剥除为块型/标记
- *    + compactMetadata），并记 uuid → 行字节范围 side map（last-wins，镜像
+ *    + compactMetadata + subtype/snipMetadata），并记 uuid → 行字节范围 side map（last-wins，镜像
  *    loadTranscriptFile 的 messages.set 语义）。内容字节不入驻留——峰值
  *    分配 ∝ 记录数（骨架 ~百字节/条），与内容体量无关。
  *  - 装载期图变换复用真体（零逻辑复刻）：legacy progressBridge（镜像
@@ -42,6 +42,12 @@ export interface ReplaySkeletonRecord {
   timestamp?: string | null
   isSidechain?: boolean
   compactMetadata?: unknown
+  // S1 修形①（审计必改，工单 §E 采记 @3d20e9c5）：boundary 判别与 snip
+  // 重放所需——subtype 缺失 → isCompactBoundaryMessage 恒 false →
+  // applyPreservedSegmentRelinks 空转；snipMetadata 缺失 →
+  // applySnipRemovals 空转（phantom 历史外泄）。
+  subtype?: string
+  snipMetadata?: unknown
   message?: { id?: string; content?: unknown }
 }
 
@@ -113,6 +119,11 @@ function stripToSkeleton(entry: Record<string, unknown>): ReplaySkeletonRecord |
   }
   if (typeof entry.isSidechain === 'boolean') skeleton.isSidechain = entry.isSidechain
   if (entry.compactMetadata !== undefined) skeleton.compactMetadata = entry.compactMetadata
+  // S1 修形①：subtype（string 在场才留）+ snipMetadata（存在才留）——
+  // 装载期两变换（applyPreservedSegmentRelinks 边界判别 /
+  // applySnipRemovals removedUuids 重放）的判别字段，缺一则恒空转。
+  if (typeof entry.subtype === 'string') skeleton.subtype = entry.subtype
+  if (entry.snipMetadata !== undefined) skeleton.snipMetadata = entry.snipMetadata
   if (message && typeof message === 'object') {
     const m = message as Record<string, unknown>
     const out: { id?: string; content?: unknown } = {}
