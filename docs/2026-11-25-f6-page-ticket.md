@@ -124,3 +124,9 @@ R1 漂移语义复杂度（compact/replace 中间态 token 指向错页）→ S1
 - **独立复跑证据**：S2 六腿 **6/6 / 0 fail**（55 expect）；AtlasWeb 全量 **517 pass / 1 skip / 0 fail**（68 files，1873 expect，exit 0）——与呈报逐字一致；格 J gate truth table clean-candidate 行 commit 后自愈全绿（树净实证采记）。
 - **采认结论**：**S2 PASS**。按片送 Atlas-reveiw 审计（与 S1 复判同链惯例）；**S3 开工令随发 e2e**（判据面以 §B/§C + 勘正②样本设计为准，#274 预登记为 e2e 侧权威档；S3 真连前提 = S1 合并 master + carrier pin bump 0.1.128 + 段 L 呈批候选制品，Main 链内衔接）。
 - **附记**：Main 补达 S1 修形后 AtlasCode 全量复跑 6248/8/2——两红均 live 环境探针（pty-live-alpha TUI live / S5-4 NL live 网关未 seed），与分页改动无涉，采记与 §D 唯一红判读同法。
+
+## §I S2 按片审计收口（2026-11-26，Atlas-reveiw：**PASS，0 必改**；本节落档 = S2 终态）
+
+- **逐点核真**：键在场语义（httpHost:492-503 `!== null` 判、零默认注入、与 carrier fail-closed 面精确咬合）/ host 预验早退零触达（值域 clamp 留 carrier 分层正确；**登记备注**：pageToken 不预判形（空串/畸形→carrier invalidRequest→400）、前导零形 ∈ 声明域无处置——均分层正确）/ opaque 透传+编码 / 错误映射五码+body code 断言+500 兜底保持 / 加性全 optional 扩面 / 联调自决 + web-code 零动 + 12 提交段 L 集中 push 治理相容。
+- **独立实跑**：六腿 6/6 + 全量 517/1/0/1873/68 files/28.98s 与 §H 呈报逐字一致。
+- **终判：S2 收口采认。** S1 §G + S2 §I 双终态；余 S3（e2e fetch 腿+gate+段 L，L4 候用户亲署）。**当前关键路径 = Main 真连前提链（S1 合并 master → carrier pin bump 0.1.128 → 段 L 呈批候选制品）**。
