@@ -1,0 +1,166 @@
+# 锁面呈批书 — 0.1.129候（审批接线切片 形 A：carrier 结构化审批事件增补 + AtlasWeb runner requestApproval 接线）
+
+> **状态：候 f4 批复**（锁面预注册纪律——批复前零落码）。本档为预注册形，
+> 采证三源：工单 `AtlasWeb docs/2026-11-27-first-wave-closure-ticket.md`
+> @42c5251 行 77/79/83/88（形 A 裁定 + 七字段纪律 + carrier 增补支定谳）；
+> AtlasCode `src/cli/print.ts:1271-1298`（ask 支路由点）+
+> `src/kernel/execution/executionKernel.ts:270-294/:380`（requestApproval
+> 供给面 + approval.decide 结算面）；AtlasWeb
+> `packages/web-host/src/execution/upstream.ts`（spawnCliTurnRunner 现状：
+> 零 requestApproval 消费、stdin 'ignore'）。
+>
+> **L4 预授权在案**：用户 2026-11-27 于 atlas-mainline-f4 session 亲键
+> 「版本候 0.1.129，L4 届时候你亲署，我已经授权过了，直接干就可诶」（f4
+> 落档 @AtlasWeb 66549f9）——§6 折入授权记录（归 f4 落档），条件面照旧
+> （授权非跳门：GATE-PASS + 本呈批书批复双门先达）。
+
+## §0 波定位
+
+收尾工单行 88 carrier 分支定谳：0.1.128 stdout stream-json 事件类型面
+（assistant/connected/control_response/deferred/error/error_during_execution/
+json_schema/pending/result/success/tool_use/user）**无审批请求事件形**；审批
+现形仅 = `control_request`/`can_use_tool`（SDK 控制协议 = 禁复用面）+ mailbox
+`permission_request`（非 stdout 面）→ **增补支成立**：carrier 契约增补结构化
+审批事件 → 新 carrier 版本（候 0.1.129）走段 L 形发布链 → AtlasWeb runner
+接线（形 A）→ pw 审批正腿补齐（工单行 55「pw 审批腿补齐入总验收全形跑」，
+受阻登记 R2 翻转为销项）。
+
+**形 A 权威路径（工单行 77，钉死）**：「runner 收 requestApproval」实义 =
+runner 调用 **kernel 供给的 `requestApproval`** → host approvals 仅**证据
+落档**（七字段纪律）→ UI ApprovalCard → decide **经 kernel** 结算 → runner
+消费 kernel 判决继续/终止。**实现不得绕 kernel 直通 host（零 host 直通
+旁路）**。
+
+## §1 carrier 预注册形（AtlasCode，C1 + C2）
+
+### C1 — `-p` 审批通道（cli 域）
+
+- **C1-a opt-in flag**：`--approval-channel=stream-json`（parse.ts 注册 +
+  print.ts 透传）。**flag 缺席 = 零行为变更**（既有 -p 消费面/单测/E2E/回归
+  逐字节不动；ask 决断现形不变）。
+- **C1-b ask 支路由**（print.ts:1278 `verdict.ask` 支）：flag 在场 → 不进
+  structuredIO.createCanUseTool SDK 协议（禁复用面，文件头纪律句原文保留），
+  改发 stdout `approval_request` 事件 + await stdin 决策行；flag 缺席 →
+  现行路径原样。
+- **C1-c wire 形（两事件，stream-json 面加性）**：
+  - stdout：`{"type":"approval_request","approval_id":"<uuid>","tool_name":
+    "<name>","input_digest":{...},"session_id":"<sid>"}`
+  - stdin：`{"type":"approval_response","approval_id":"<uuid>","decision":
+    "approved"|"denied"|"expired"}`
+  - `input_digest` = 受控摘要键白名单（file_path / command / description /
+    url / pattern），值截断 200 字符。**正文/令牌/待批内容禁入**（七字段纪律
+    carrier 侧子集；UI 展示面同源同界——kernel 侧七字段全形见 C2-b）。
+- **C1-d 决策读取 pending-gated**：引擎仅在 `approval_request` 已发出且未决
+  时打开一次 stdin 行读取；**无审批回合零 stdin 读取**（r-20261122
+  atlasweb-b2-gate 防悬挂定谳兼容面——stdin 不再必然闭，但读取仅 pending
+  窗口内发生，零窗口 = 零读取 = 零悬挂）。未知 approval_id / 无 pending 的
+  决策行 → log warn + 丢弃（fail-closed，不崩溃不悬挂）。
+- **C1-e 超时唯一权威 = kernel**：carrier 零独立超时。引擎侧 Promise 终态
+  完备性由 runner↔kernel 契约保证（§2 W1-a 四终态映射）——approved/denied/
+  expired 经 wire 行回写；voidedByCancel 不走 wire（runner abort→kill，
+  引擎 AbortError 路径既有）。malformed 决策行 → warn + 继续等待（kernel
+  权威；引擎永不因坏行悬挂或误判）。
+- **C1-f carrier 单测腿**：① flag 缺席 ask → 零 approval_request 事件
+  （回归腿）；② flag 在场 ask → 事件形断言（字段面 + 白名单摘要）；
+  ③ 决策行 approved→allow / denied→deny / expired 行→deny(reason=expired)；
+  ④ malformed 行 → warn + 等待；⑤ abort → AbortError。
+
+### C2 — kernel 扩形（kernel 域，同版加性）
+
+- **C2-a deps 扩形**：`ExecutionTurnRunnerDeps.requestApproval(req:
+  { toolName: string; actionDigest: Record<string, unknown> })`（现无参调用
+  点零破坏——参数加性，JS 运行时旧调用兼容）。
+- **C2-b approval.requested 载荷七字段全形**：现 `{approvalId}` 扩为
+  `{approvalId, toolName, actionDigest, workspaceId, turnId, requestedAt,
+  sourceLane: 'execution-upstream'}`（加性；现消费面兼容）。工具名/动作摘要/
+  工作区 id/turnId/approvalId/请求时点/来源车道——**事件字段，非正文/令牌/
+  待批内容**（工单行 79 原文）；UI 展示面同源同界。
+
+## §2 AtlasWeb runner 接线预注册形（形 A，W1）
+
+- **W1-a spawnCliTurnRunner**：spawn args 追加 `--approval-channel=stream-json`；
+  stdio 由 `['ignore','pipe','pipe']` 改 `['pipe','pipe','pipe']`（仅本 lane）。
+  stdout 行泵新增 `approval_request` 支：解析 approval_id/tool_name/
+  input_digest → 调 `deps.requestApproval({ toolName, actionDigest })`
+  （kernel 供给）→ 终态映射：approved→写 `approved` 行 / denied→写 `denied`
+  行 / expired→写 `expired` 行 / **voidedByCancel→零写入**（turn 取消 →
+  abort handler kill 路径既有，进程随终止）。决策写入 = child.stdin 单行
+  JSON + `\n`；**写入仅在响应已发出的 approval_request 时发生**（无审批回合
+  stdin 零字节——防悬挂定谳兼容）。
+- **W1-b 形 A 纪律**：host approvals 仅证据落档（approval.requested 七字段
+  入证据）；decide 经 kernel（既有 `approval.decide` 路由 + E5 三元组归属
+  绑定不变）；**零 host 直通旁路**（防滑点，工单行 77）。
+- **W1-c web-host 单测腿**：① approval_request → requestApproval 调用 +
+  决策回写形断言；② denied → 引擎收 deny、回合继续至 completed；③ expired
+  行回写；④ voidedByCancel 零写入；⑤ 无审批回合 stdin 零字节。
+
+## §3 pw 审批正腿预注册形（E1，first-wave-execution.pw.ts 第 7/8 腿）
+
+前置事实（采证）：`launchInstalledBinExecution` spawn **零 permission flag**
+（installedApp.ts:75-80 实证）→ 引擎 default 权限模式 → Write 工具 = ask →
+审批腿可达。
+
+- **腿 7 `approve grants the pending tool and records kernel evidence`**：
+  prompt 要求在工作区创建文件（Write → ask）→ pending 审批卡在场
+  （ApprovalCard data 面）→ 批准 → **隔离文件实际创建**（fs 证据）+ 回合
+  终态 + JSONL 落盘 + host 审批证据（approved）。
+- **腿 8 `deny leaves the workspace untouched`**：同 prompt → 拒绝 →
+  **文件零出现** + 回合终态（deny 后引擎以拒答文本继续收口 → 预注册
+  completed；若实现为 failed 按实况报并注明归因）+ host 审批证据（denied）。
+- 文件头受阻登记段（:28-32 R2）翻转为销项注记（审批正腿入总验收全形跑）。
+
+## §4 发布序（两仓耦合序，预注册）
+
+carrier↔consumer 版本耦合（AtlasWeb gate 跑 pin @atlaswork/atlascode 制品）
+→ **carrier 先行发布，consumer 随后**：
+
+1. **AtlasCode 落码**（本批复后）：C1（cli 域 1 commit）+ C2（kernel 域
+   1 commit，单测随车）→ AtlasCode 全量 gate → merge master。
+2. **段 L 0.1.129**：L1 release prep（bump 0.1.128→0.1.129 + CHANGELOG）→
+   L2 build 紧贴 publish（staging tgz）→ L3 push 安全审查补查 → **L4 发布
+   动作（预授权在案，执行单点 = atlas-mainline-f4）**：tag v0.1.129 → push
+   origin master+tag → gitcode 镜像双推 → npm publish（D-8 SOP，
+   `--registry https://registry.npmjs.org`）→ @atlaswork 镜像双发（同一
+   staging tgz 仅改 name，禁独立重建）→ packument 验真三步 → L5 SRI 留档 →
+   L6 生产 lane（单信号 → e2e）。
+3. **AtlasWeb 落码**（0.1.129 published 后）：W1（web-host 接线 + 单测
+   1 commit）+ pin bump 0.1.128→0.1.129 + **E1 pw 腿（1 commit）** →
+   AtlasWeb 全仓 gate（现基线 538 pass/1 skip/0 fail 之上新绿）+ pw 全腿。
+4. **格 I 三元同步**（L7 等价件，一 commit）：gateTruthTable EXPECTED 重锚
+   （registry 实发制品 sha）+ gezi-i.json 重出证 + pin 断言同步。
+
+## §5 预注册形（Δ 账 + 回退）
+
+1. **Δ 账预估**：cli.js **变**（print.ts/structuredIO/parse.ts 增补）；
+   executionSha256 **变**（kernel deps 扩形入 execution bundle）；
+   runtimeSha256 **变**（kernel approval.requested 载荷扩面）。三值全变
+   （诚实预估；0.1.128 executionSha256 偏离先例——按实况报并注明归因）。
+   d.ts 树：kernel/execution 类型面扩形 +1 预计。
+2. **exports 面**：零新增 subpath（wire 加性在既有 -p stdout 面内；
+   `--approval-channel` 为 CLI flag 非 API 面）。
+3. **回退形**：publish 后 gate/生产 lane RED → 硬门条款补丁版 + npm
+   deprecate 标注，无豁免面。
+
+## §6 L4 预授权记录（f4 开卷后折入落档）
+
+- **授权原文**：用户于 2026-11-27 在 atlas-mainline-f4 session 亲键「版本候
+  0.1.129，L4 届时候你亲署，我已经授权过了，直接干就可诶」——段 L 形链
+  （carrier 增补版候 0.1.129）L4 全范围预授权（f4 落档 @AtlasWeb 66549f9）。
+- **条件面（授权非跳门）**：L4 执行仍以 **GATE-PASS + 本呈批书 f4 批复双在
+  案**为前置；亲署仅消除「候亲署」等待支（0.1.128 呈批书 §5 同形）。
+- **执行单点**：atlas-mainline-f4（0.1.128 L4 亲执同形）；本 session（落码
+  方）L3 完成后单信号移交 staging tgz + 验真链予执行单点，不自执 L4。
+
+## §7 Gate 判据（预注册）
+
+- AtlasCode：`FORCE_COLOR=3 bun test --isolate tests/` 全量（**tests/ 纯面
+  准绳**；bun 位置参数 = 子串过滤器注记）0 fail + `bun run typecheck` 0。
+- AtlasWeb：`FORCE_COLOR=3 bun test` 全仓 ≥538 pass / 0 fail + pw 全腿
+  （8 腿，含新 2 审批腿）GREEN。
+- 生产 lane（L6）：e2e 同套判据（0.1.129 registry 实发制品重跑）。
+
+## §8 验收件（发布后）
+
+gate 判定单终态 + f4 批复记录 + SRI v0.1.129.md（三值实况对 §5 预注册）+
+packument 双 org 验真输出 + 生产 lane 收口单 + AtlasWeb pin bump / 格 I
+三元同步回执 + pw 审批腿 GREEN 判定单（受阻登记销项）+ 工单 §6 切片核销。
