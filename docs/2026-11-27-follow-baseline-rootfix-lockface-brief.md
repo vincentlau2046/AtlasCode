@@ -39,6 +39,10 @@
   ≈ **288 MiB 级**；跨 runtime 无全局界；且 host **可配回落亦可配抬高**
   （subscriptions hard 64 → 配置面理论界 1 GiB 级），两面并记入锁面注记。
 - hard 16 MiB 仍为最终界：超 16 MiB 会话仍 resourceLimit（诚实不伪，零隐式截断）。
+- **A1 显式配置优先序（判词侧非阻注记 3 采认，落码钉死）**：host 显式
+  `maxProjectionBytes` → 两面同用（follow 不越显式值）；缺省 → follow 16 /
+  replay 4 分面解析。显式值已过 `validateBoundedInt` hard 界校验（≤16 MiB），
+  follow 缺省臂 = `DEFAULT_MAX_FOLLOW_PROJECTION_BYTES` 不再经二次校验。
 
 ### 候选 B：baseline 分页化（架构语义级 → 触发升级条件，呈用户敲定）
 
@@ -59,9 +63,13 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
 2. **GREEN（双 fixture，审计必改 1 连带）**：fixture A ≤ 8 MiB（旧带内）与
    fixture B ∈ (8 MiB, 16 MiB]（旧带外、A2 才解锁的带）各一件 → baseline +
    增量正常交付（cursor / revision 链完整）——fixture B 锁 A2 必要性正向面。
-3. **诚实界（边界精确钉，审计建议②）**：fixture 投影 = 16 MiB 恰过（`>` 谓词
-   放行）与 **16 MiB + 1**（精确拒）两值 → 前者交付、后者仍 `resourceLimit`，
-   断言不伪完整。
+3. **诚实界（两腿拆分，判词侧非阻注记 2 采认）**：语义腿 = 注入低帽（runtime
+   options 显式小 `maxProjectionBytes`）+ 小 fixture → 超帽面 **terminal 非截断**
+  （「零隐式截断」语义由本腿承）；值腿 = 常量 assert
+   `DEFAULT_MAX_FOLLOW_PROJECTION_BYTES === HARD_MAX_PROJECTION_BYTES`（16/16，
+   A1 default=hard 显性取舍钉死）——免 ~17 MiB 巨 fixture 成本，精确界语义由
+   语义腿注入帽位承（注入帽 = 界值本身，`>` 谓词放行/精确拒由小 fixture
+   两值钉）。
 4. **A2/A3 耦合判别（审计必改 1 修正）**：仅 A1 单落（pending 仍 8 MiB）→
    **fixture 须 ∈ (8 MiB, 16 MiB]（钉 ~9–10 MiB，禁沿用 §2-1 的 5–6 MiB——
    该带 A1 单落时 bytes < pending 8 不触发，判别假绿）** → 复现终流；断言
@@ -85,6 +93,8 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
 7. **三件同落常量关系断言（判词侧建议 1，Main 采认）**：零 fixture unit
    assert `DEFAULT_MAX_PENDING_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`
    ∧ `DEFAULT_LEDGER_PAYLOAD_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`
+   ∧ `DEFAULT_MAX_FOLLOW_PROJECTION_BYTES ≤ HARD_MAX_PROJECTION_BYTES`
+  （末腿 = 审计回执残余建议：防未来 hard/default 单动时关系面留缝）
    ——T4 行为腿之外最廉价机械守，防未来单常量改动复活缺陷。
 8. **A3 必要性专判（判词侧建议 2，Main 采认，observable 形）**：注入态
    A1+A2 落 / A3 缺（ledger 仍 16 MiB）→ 双 revision 连发后前驱 cursor
@@ -210,7 +220,7 @@ bun 561/1/0 + 格 5 机判）采认为 #282 侧实证。
 > 核真 → 必改 1 判据面实勘（queueData 路径 + fixture 界数学）→ §5-2 裁定 →
 > 本节。双门：判词侧批复 PASS（本节）；候 Atlas-reveiw 审计。
 
-## §6 修订记录
+## §7 修订记录
 
 - **修订 r1（2026-11-27，Atlas-reveiw 审计回执折入）**：必改 3（A1 接线 fork
   约束显文禁改 DEFAULT 本体 / T4 fixture 钉 (8,16] 带防假绿 + T2 双 fixture /
@@ -224,11 +234,38 @@ bun 561/1/0 + 格 5 机判）采认为 #282 侧实证。
   另附注登记：引言 9b28206→main 610ecc9 为 cherry 形重落（9b28206 非
   610ecc9 祖先，内容恒等以 `git diff 9b28206 610ecc9 -- e2e/` 空为直证），
   按 ancestry 判「已合」的旁证文会误报。审计门点核 PASS @ 本修订前形。
+  **补记（r4，审计回执残余 2）**：本修订提交 e5803a4e 的 diff 内含判词侧
+  Atlasweb-F4 session 直接写盘折入之 §6 批复全录（非 Main 撰写，提交信息未
+  显文——已推提交不重写，以本补记为登记面）；内容经 Atlas-reveiw 读文核真
+  （审计回执 2026-11-27 ①）。
 
 - **修订 r3（2026-11-27，判词侧 §6-1 对表收口折入 + 建议 1/2 采认自决）**：
   §2-5 终裁登记（判词让位 = 随件仅 characterization，行为修立项挂账，callback
   接线不属本切片）；新增 §2-7 常量关系断言 + §2-8 A3 observable 专判（禁
   callback 断言形）；§3 口径 1–6 + §2-7/§2-8；§5 批复登记（双门齐，落码开工）。
+
+- **修订 r4（2026-11-27，审计回执残余 2–5 折入）**：§2-3 两腿拆分 + §1-A1
+  显式配置优先序（判词侧注记 2/3 采认登记，残余 5 销）；§2-7 末腿补
+  `DEFAULT_MAX_FOLLOW_PROJECTION_BYTES ≤ HARD_MAX_PROJECTION_BYTES`（残余
+  建议）；新增 §8 挂账登记（残余 3 销——ledger 行为修 + onActiveEvict 悬空
+  承诺背离注记）；「§6 修订记录」改「§7」（残余 4 销——双 §6 结构歧义）；
+  r2 行补记他 lane 写盘折入 provenance（残余 2 销）。
+
+## §8 挂账登记（本切片产出，工单化前登记面）
+
+1. **ledger 行为修（独立立项）**：`CursorLedger.issue` 前置拒绝 oversized
+   single payload（> maxPayloadBytes → 显性 `resourceLimit`，零静默 overshoot）
+   + follow 两调用点（`follow.ts:377/:514`）catch→setTerminal 映射面预注册
+  （防 500 险面）。本件承 fail-closed 支柱③「禁静默丢弃」诉求——随件仅
+   characterization 锁现行为（§2-5），行为修不在本切片。
+2. **onActiveEvict 悬空承诺（独立登记）**：`cursorLedger.ts:57` 可选回调
+   定义在场、`:143` 调用点在场，但 `readonlyRuntime.ts:503-507` 构造零传参
+  （全仓 src/ grep 除定义/调用点/注释外零命中）→ 活码 pinned 逐出 = 无回调
+   静默（下游 resume 'unknown' → resetRequired 受控失败）。**背离注记**：
+   S0-R2/S0-R5 历史交件文档声称「onActiveEvict 显式 resetRequired 禁静默
+   失效 = 已兑现」，与活码不符——接线路（构造传参 + resetRequired 处置）
+   随上件或独立工单裁定；教训入册「定义在场 ≠ 接线在场」（2026-11-27
+   判词侧 §6-1 实勘自纠）。
 
 ## §6-1 判词侧 r1/r2 对表收口（Atlasweb-F4，2026-11-27，@e5803a4e 态）
 
