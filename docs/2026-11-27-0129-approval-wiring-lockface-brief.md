@@ -164,3 +164,49 @@ carrier↔consumer 版本耦合（AtlasWeb gate 跑 pin @atlaswork/atlascode 制
 gate 判定单终态 + f4 批复记录 + SRI v0.1.129.md（三值实况对 §5 预注册）+
 packument 双 org 验真输出 + 生产 lane 收口单 + AtlasWeb pin bump / 格 I
 三元同步回执 + pw 审批腿 GREEN 判定单（受阻登记销项）+ 工单 §6 切片核销。
+
+## §9 f4 批复（2026-11-27，atlas-mainline-f4，job 9d1c80df）
+
+**终判：批复 PASS——零必改，非阻注记 3 条。Main 即开 C1 落码（预注册纪律确认：偏离形先回本档改注册再实现）。**
+
+**活码核真四锚（f4 独立实勘 @ b5d8cde8 时点 master）**：
+
+1. **print.ts ask 支**：实勘 `if (verdict.ask && hasPromptRoute)` @
+   **:1277**（呈批书载 :1278，±1 行，零影响）——ask → structuredIO
+   can_use_tool control_request 路由 + 「禁复用面」文件头纪律句在场，
+   C1-b flag 在场绕行改道设计与之咬合；
+2. **executionKernel.ts**：`requestApproval` 现零参调用点 + `approval.requested`
+   现载荷 `{approvalId}` + 300s timer kernel 侧（settleApproval expired）+
+   `approval.decide` E5 三元组归属绑定——C2-a 参数加性（旧调用零破坏）与
+   C2-b 七字段扩形（{approvalId} → 全形）预注册与活码相符；
+3. **upstream.ts:106**：`stdio: ['ignore','pipe','pipe']` 实勘逐字 + 全文件
+   零 approval 消费（grep 实证）——W1-a stdio 改形仅本 lane + 行泵加支
+   前提成立；
+4. **installedApp.ts:394-400**：`launchInstalledBinExecution` spawn argv
+   （port/scope/execution/workspace/actor-id）**零 permission flag** 实勘
+   ——default 模式 Write=ask，§3 腿 7/8 可达预判成立。
+
+**形 A 对表七点全合**（对 收尾工单 @42c5251 §6 钉死节）：runner 调 kernel
+供给 requestApproval ✓ / host approvals 仅证据落档 ✓ / decide 经 kernel（E5
+不变）✓ / 零 host 直通旁路 ✓ / 300s 超时唯一权威 = kernel ✓ / 禁复用
+control-request 面 ✓ / 七字段纪律（C1-c 白名单摘要 + C2-b 全形，正文/令牌/
+待批内容禁入）✓。r-20261122 防悬挂定谳兼容（C1-d pending-gated 零窗口零
+读取 + W1-a 无审批零写入）+ voidedByCancel 零写入 + 回退形照硬门条款 +
+发布序合 §J 定形序（carrier 先行，pin bump 在 publish 后、格 I 取 registry
+实发 sha）——逐项核可。
+
+**非阻注记 3 条**：
+
+1. §1 C1-b 锚点实勘 :1277（呈批书 :1278，±1 行，落码以实码为准）；
+2. §3 腿 8 deny 终态 completed/failed 「按实况报并注明归因」预注册维持
+   （两形均 GREEN 可采，判定单如实记录）；
+3. 审计覆盖注记：本呈批书执行面 = 收尾工单 @42c5251 审计 PASS 形之机械
+   细化（0.1.128 段 L 呈批书同形先例，无独立审计轮）；Atlas-reveiw 知会
+   单信号发出备核。
+
+**§6 授权记录激活**：核真 ≡ AtlasWeb 66549f9 §7-5 逐字一致（原文/条件面/
+执行单点三点），随本批复生效；0.1.129 段 L L3 完成后 Main 单信号移交
+staging tgz + 验真链，L4 由本 session（执行单点）亲执。
+
+> 呈批 b5d8cde8 → 批复（本节）。L1–L3 候 Main；L4–L6 候双门达成
+> （GATE-PASS + 本批复——本批复即第二门落定）。
