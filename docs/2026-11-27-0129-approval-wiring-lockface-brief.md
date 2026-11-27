@@ -92,7 +92,10 @@ runner 调用 **kernel 供给的 `requestApproval`** → host approvals 仅**证
   绑定不变）；**零 host 直通旁路**（防滑点，工单行 77）。
 - **W1-c web-host 单测腿**：① approval_request → requestApproval 调用 +
   决策回写形断言；② denied → 引擎收 deny、回合继续至 completed；③ expired
-  行回写；④ voidedByCancel 零写入；⑤ 无审批回合 stdin 零字节。
+  行回写；④ voidedByCancel 零写入；⑤ **无审批回合 stdin 零字节 + 回合
+  settle（completed）+ 子进程正常退出**（flag 在场、零审批回合下引擎不得
+  挂起等输入——r-20261122 悬挂定谳 pipe 车道机械复跑腿，close/settle 必达；
+  Atlas-reveiw 备核补钉 2026-11-27 折入）。
 
 ## §3 pw 审批正腿预注册形（E1，first-wave-execution.pw.ts 第 7/8 腿）
 
@@ -210,3 +213,12 @@ staging tgz + 验真链，L4 由本 session（执行单点）亲执。
 
 > 呈批 b5d8cde8 → 批复（本节）。L1–L3 候 Main；L4–L6 候双门达成
 > （GATE-PASS + 本批复——本批复即第二门落定）。
+
+**补钉折入（Atlas-reveiw 备核回执 2026-11-27，落码前生效，非阻批复）**：
+r-20261122 悬挂定谳 pipe 车道机械复跑——① §2 W1-c 腿 ⑤ 扩形（flag 在场 +
+无审批回合 → stdin 零写入 **+ 回合 settle completed + 子进程正常退出**，
+已折入正文）；② **C1 落码前置 grep 项**：引擎 stdin 读取面全量枚举（启动期
+input/structuredIO 探测面在内），确认 flag 在场下仅 pending 窗口读取——若
+存在审批窗口外读取路径需改动，**回本档补注册再实现**（预注册纪律自文首
+条款）。L4 执行后回执含发布事实链（tag/push 双远端/npm 双 org/镜像
+name-only/SRI 三值）供 Atlas-reveiw 事后核。
