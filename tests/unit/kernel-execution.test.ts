@@ -439,6 +439,68 @@ describe('形 1 · emitDelta 通道（B1 前置件，f4 批复附条件）', () 
 })
 
 /**
+ * 0.1.129 C2（呈批书 §1，批复 @af5684e9）：approval.requested 载荷七字段
+ * 全形 + requestApproval optional 参数（C2-a 参数加性旧调用零破坏 / C2-b
+ * 七字段 = 工具名/动作摘要/工作区 id/turnId/approvalId/请求时点/来源车道
+ * ——事件字段非正文/令牌/待批内容）。
+ */
+describe('C2 approval.requested 七字段载荷', () => {
+  test('requestApproval({toolName, actionDigest}) → 七字段全形 + decide 流程不变', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    const accepted = (await k.handleCommand(submitCmd())) as WebExecutionEvent
+    await waitFor(() => calls.length === 1)
+    const approvalPromise = calls[0].deps.requestApproval({
+      toolName: 'Write',
+      actionDigest: { file_path: '/tmp/a.ts' },
+    })
+    await waitFor(() => seen.some((e) => e.type === 'approval.requested'))
+    const requested = seen.find((e) => e.type === 'approval.requested')!
+    const payload = requested.payload as Record<string, unknown>
+    expect(Object.keys(payload).sort()).toEqual(
+      ['actionDigest', 'approvalId', 'requestedAt', 'sourceLane', 'toolName', 'turnId', 'workspaceId'],
+    )
+    expect(payload.toolName).toBe('Write')
+    expect(payload.actionDigest).toEqual({ file_path: '/tmp/a.ts' })
+    expect(payload.workspaceId).toBe('ws')
+    expect(payload.turnId).toBe(accepted.bind.turnId)
+    expect(payload.sourceLane).toBe('execution-upstream')
+    expect(typeof payload.requestedAt).toBe('number')
+    // decide 经 kernel（E5 三元组不变）照常结算
+    const decided = await k.handleCommand({
+      v: 0,
+      id: UUID_D,
+      ts: 2,
+      bind: { workspaceId: 'ws', sessionId: 's1', turnId: accepted.bind.turnId },
+      type: 'approval.decide',
+      payload: { approvalId: payload.approvalId, decision: 'approved' },
+    } as never)
+    expect(isErr(decided)).toBe(false)
+    expect(await approvalPromise).toBe('approved')
+  })
+
+  test('零参 requestApproval() 兼容：toolName=unknown / actionDigest 空（C2-a 加性）', async () => {
+    const { runner, calls } = blockingRunner()
+    const k = createExecutionKernel({ runTurn: runner })
+    const seen: WebExecutionEvent[] = []
+    k.onEvent((e) => seen.push(e))
+    await k.handleCommand(submitCmd())
+    await waitFor(() => calls.length === 1)
+    const approvalPromise = calls[0].deps.requestApproval()
+    await waitFor(() => seen.some((e) => e.type === 'approval.requested'))
+    const payload = seen.find((e) => e.type === 'approval.requested')!
+      .payload as Record<string, unknown>
+    expect(payload.toolName).toBe('unknown')
+    expect(payload.actionDigest).toEqual({})
+    expect(Object.keys(payload)).toContain('approvalId')
+    // 不结算持有（零参兼容腿只验载荷形；300s timer unref'd，进程自然退出）
+    void approvalPromise
+  })
+})
+
+/**
  * 推送安全审查硬化（34437b0f 审查 findings 1/3/5；2/4 登记 f4 候定谳）。
  * F1 decide 全三元组绑定（E5 跨工作区）；F3 流键 NUL 碰撞 fail-closed；
  * F5 终态/中止后 delta 零发射（cursor 不进、订阅者不见、replay 不含）。

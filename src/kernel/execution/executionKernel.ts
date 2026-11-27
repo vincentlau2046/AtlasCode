@@ -37,8 +37,15 @@ export type ExecutionTurnRunnerDeps = {
   bind: { workspaceId: string; sessionId: string; turnId: string }
   text: string
   signal: AbortSignal
-  /** 注册待批操作：resolve 于 decide / 300s expired / turn 取消（voidedByCancel）。 */
-  requestApproval: () => Promise<ExecutionApprovalDecision>
+  /**
+   * 注册待批操作：resolve 于 decide / 300s expired / turn 取消（voidedByCancel）。
+   * 0.1.129 C2-a（呈批书 §1，批复 @af5684e9）：参数加性 optional（既有零参
+   * 调用点零破坏）——req 载入 approval.requested 七字段事件（C2-b）。
+   */
+  requestApproval: (req?: {
+    toolName?: string
+    actionDigest?: Record<string, unknown>
+  }) => Promise<ExecutionApprovalDecision>
   /**
    * 回合流增量发射（B1 前置件形 1，f4 附条件采认 @2026-11-21）：经 kernel
    * 既有 emit 权威落 `turn.delta`（cursor 单调/bind 三元组/缓冲上限同执法，
@@ -267,7 +274,10 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
             }
             emit(st, { workspaceId: ws, sessionId: s, turnId: turn.turnId }, 'turn.delta', { text })
           },
-          requestApproval: () => {
+          requestApproval: (req?: {
+            toolName?: string
+            actionDigest?: Record<string, unknown>
+          }) => {
             const approvalId = `appr-${++approvalCounter}`
             return new Promise<ExecutionApprovalDecision>((resolve) => {
               const approval: PendingApproval = {
@@ -285,7 +295,19 @@ export function createExecutionKernel(options: ExecutionKernelOptions): Executio
                 st,
                 { workspaceId: ws, sessionId: s, turnId: turn.turnId },
                 'approval.requested',
-                { approvalId },
+                // 0.1.129 C2-b（呈批书 §1）：载荷 {approvalId} 扩七字段全形
+                //（工具名/动作摘要/工作区 id/turnId/approvalId/请求时点/来源
+                // 车道）——事件字段非正文/令牌/待批内容（工单行 79 纪律）；
+                // 加性，既有 {approvalId} 消费面兼容。
+                {
+                  approvalId,
+                  toolName: req?.toolName ?? 'unknown',
+                  actionDigest: req?.actionDigest ?? {},
+                  workspaceId: ws,
+                  turnId: turn.turnId,
+                  requestedAt: approval.requestedAt,
+                  sourceLane: 'execution-upstream' as const,
+                },
               )
               approval.timer = setTimeout(() => {
                 settleApproval(approval, 'expired')
