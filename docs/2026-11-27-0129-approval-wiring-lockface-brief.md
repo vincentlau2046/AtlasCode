@@ -235,3 +235,45 @@ input/structuredIO 探测面在内），确认 flag 在场下仅 pending 窗口�
 存在审批窗口外读取路径需改动，**回本档补注册再实现**（预注册纪律自文首
 条款）。L4 执行后回执含发布事实链（tag/push 双远端/npm 双 org/镜像
 name-only/SRI 三值）供 Atlas-reveiw 事后核。
+
+## §10 判词侧复证（Atlasweb-F4，2026-11-27）
+
+**终判：复证 PASS——§9 批复维持；四锚/形 A 七点/§6 预授权记录经判词侧独立
+实勘全部成立；折入件 2（复证必改 1 = §4 序修形，W1/step 3 执行前折入，
+不阻 C1/C2 AtlasCode 落码；复证注记 2 = §3 引用勘误，非阻）。**
+
+**四锚独立实勘（@ af5684e9 committed state，`git show` 锚定，判词侧活码直证）**：
+
+| 锚 | 实勘 | 结果 |
+|---|---|---|
+| 1 print.ts ask 支 | :1278 `if (verdict.ask && hasPromptRoute)`（±1 同 §9 注 1）+ :567 `structuredIO.createCanUseTool` SDK 协议路由在位（禁复用面现形） | 成立 |
+| 2 executionKernel | :27 `EXECUTION_APPROVAL_TIMEOUT_MS=300_000`；:40-41 deps `requestApproval: () => Promise<…>` **零参现形**（C2-a 参数加性前提）；:270-294 `approval.requested` 载荷 `{approvalId}` + setTimeout expired + turn 三元组绑定；:380-396 `approval.decide` notFound + E5 归属绑定 | 成立（C2-b 七字段扩形以 :288 `{approvalId}` 为基线，加性） |
+| 3 upstream.ts | :106 `stdio: ['ignore','pipe','pipe']` 逐字 + 全文件零 approval 消费（grep 实证）+ :99-105 注释直证 r-20261122 悬挂定谳（stdin 必闭纪律现形来源） | 成立 |
+| 4 installedApp spawn | `e2e/fixtures/installedApp.ts` :352 `launchInstalledBinExecution`、:394-400 argv（`--port 0/--scope/--execution/--workspace/--actor-id`）**零 permission flag** | 成立（§3 前言引 :75-80 系错行，见注记 2；§9 锚 4 引用正确） |
+
+**对表**：§0 事件类型 11 型枚举 ≡ 判词侧独立枚举（增补支 ≡ @670f931）✓；
+形 A 七点 ✓；C1-c 载体子集 + C2-b 七字段全形两层面纪律 ✓（事件字段非正文/
+令牌/待批内容）；§6 预授权 ≡ AtlasWeb 66549f9 §7-5 三点逐字 ✓；§5 Δ 账诚实
+预估（三值全变）✓；§7 gate 判据合 tests/ 纯面口径 ✓；**9506a312 补钉采认**
+（W1-c 腿⑤扩形「无审批回合 stdin 零字节 + settle completed + 子进程正常
+退出」+ C1 落码前置 grep 项）——恰覆盖 stdio pipe 化后无审批回合悬挂回归
+险面（r-20261122 定谳车道机械复跑），折叠形合格。
+
+**复证必改 1（§4 序修形——W1/step 3 执行前折入本档，不阻 C1/C2）**：step 3
+「pin bump → AtlasWeb 全仓 gate」与 step 4「格 I 三元同步」顺序倒置。格 I =
+机器硬耦合（`packages/web-host/test/gateTruthTable.test.ts` :41-43
+`table.carrierVersion` ≡ pin；:55-70 attestation 负腿 pin-mismatch/
+anchor-mismatch → gap 即红）——pin bump 0.1.129 后全仓 gate 必红
+（EXPECTED/attestation 仍 0.1.128），step 3 之 gate 判据在该序下不可达。
+修形 = 0.1.128 先例 4f892ab 同形：**pin bump + 格 I 三元同步合一 commit，
+全仓 gate 判据移其后**（step 4 并入 step 3 尾；registry 实发 sha 依 §J
+不变；§9「发布序合 §J 定形序」判词按修形后序成立）。
+
+**复证注记 2（引勘误，非阻）**：§3 前言「installedApp.ts:75-80 实证」错行
+（该域 = mkdtemp/cleanup 辅助面）；正址 = `e2e/fixtures/installedApp.ts`
+:352/:394-400。以 :394-400 为准（§9 锚 4 已正）。
+
+> 复证链：af5684e9 全文读毕 → 9506a312 补钉核读 → 四锚活码实勘（git show
+> 锚定 committed state）→ 格 I 硬耦合实勘（gateTruthTable.test.ts）→ 本节。
+> 双门状态：第二门（§9 批复）已落定；第一门（AtlasCode gate）候 C1/C2 落码；
+> 复证必改 1 折入后 §4 即为 W1 执行准绳。
