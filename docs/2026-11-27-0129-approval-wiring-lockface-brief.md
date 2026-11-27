@@ -113,8 +113,8 @@ runner 调用 **kernel 供给的 `requestApproval`** → host approvals 仅**证
 ## §3 pw 审批正腿预注册形（E1，first-wave-execution.pw.ts 第 7/8 腿）
 
 前置事实（采证）：`launchInstalledBinExecution` spawn **零 permission flag**
-（installedApp.ts:75-80 实证）→ 引擎 default 权限模式 → Write 工具 = ask →
-审批腿可达。
+（`e2e/fixtures/installedApp.ts:394-400` 实证；初稿 :75-80 错行，复证注记 2
+勘正）→ 引擎 default 权限模式 → Write 工具 = ask → 审批腿可达。
 
 - **腿 7 `approve grants the pending tool and records kernel evidence`**：
   prompt 要求在工作区创建文件（Write → ask）→ pending 审批卡在场
@@ -140,10 +140,13 @@ carrier↔consumer 版本耦合（AtlasWeb gate 跑 pin @atlaswork/atlascode 制
    staging tgz 仅改 name，禁独立重建）→ packument 验真三步 → L5 SRI 留档 →
    L6 生产 lane（单信号 → e2e）。
 3. **AtlasWeb 落码**（0.1.129 published 后）：W1（web-host 接线 + 单测
-   1 commit）+ pin bump 0.1.128→0.1.129 + **E1 pw 腿（1 commit）** →
-   AtlasWeb 全仓 gate（现基线 538 pass/1 skip/0 fail 之上新绿）+ pw 全腿。
-4. **格 I 三元同步**（L7 等价件，一 commit）：gateTruthTable EXPECTED 重锚
-   （registry 实发制品 sha）+ gezi-i.json 重出证 + pin 断言同步。
+   1 commit）+ **E1 pw 腿（1 commit）** → **pin bump 0.1.128→0.1.129 + 格 I
+   三元同步合一 commit**（gateTruthTable EXPECTED 重锚〔registry 实发制品
+   sha〕+ gezi-i.json 重出证 + pin 断言同步——0.1.128 先例 4f892ab 同形；
+   复证必改 1 修形折入：格 I 机器硬耦合〔gateTruthTable.test.ts :41-43
+   carrierVersion≡pin + :55-70 pin-mismatch 负腿〕，pin bump 单独行 gate
+   必红，原 step 3/4 序倒置勘正）→ AtlasWeb 全仓 gate（现基线 538 pass/
+   1 skip/0 fail 之上新绿）+ pw 全腿（gate 判据移合一 commit 之后）。
 
 ## §5 预注册形（Δ 账 + 回退）
 
@@ -277,3 +280,10 @@ anchor-mismatch → gap 即红）——pin bump 0.1.129 后全仓 gate 必红
 > 锚定 committed state）→ 格 I 硬耦合实勘（gateTruthTable.test.ts）→ 本节。
 > 双门状态：第二门（§9 批复）已落定；第一门（AtlasCode gate）候 C1/C2 落码；
 > 复证必改 1 折入后 §4 即为 W1 执行准绳。
+
+**f4 折入回执（2026-11-27，atlas-mainline-f4）**：复证必改 1 已折入 §4
+（step 3 尾 = pin bump + 格 I 三元同步合一 commit，gate 判据移其后，step 4
+撤号并入）；注记 2 已勘正 §3 前言（:394-400 正址，:75-80 错行注记在档）。
+§4 自本回执起 = W1 执行准绳。C1-g 补注册（adb4b497：approval-channel ×
+input-format stream-json 互斥 + output-format stream-json 限定 + approval
+分支先于 canUseTool 分支，均启动期 fail-closed）f4 采记。
