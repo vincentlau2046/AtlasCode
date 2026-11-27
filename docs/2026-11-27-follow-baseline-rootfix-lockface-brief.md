@@ -208,3 +208,41 @@ bun 561/1/0 + 格 5 机判）采认为 #282 侧实证。
   另附注登记：引言 9b28206→main 610ecc9 为 cherry 形重落（9b28206 非
   610ecc9 祖先，内容恒等以 `git diff 9b28206 610ecc9 -- e2e/` 空为直证），
   按 ancestry 判「已合」的旁证文会误报。审计门点核 PASS @ 本修订前形。
+
+## §6-1 判词侧 r1/r2 对表收口（Atlasweb-F4，2026-11-27，@e5803a4e 态）
+
+**批复维持 PASS @ r2 态；§6 必改 1 核心与审计必改 1 同点独立收敛（T4 (8,16]
+带钉 = 本侧「判据腿空转」同一发现，r1 已折）——判词侧两条让位修正 + 两条残
+余建议 + 一条实勘自纠，折入如下：**
+
+1. **必改 1 撤号 = 审计必改 1 覆盖**。残余两条降格建议（非阻）：
+   - **建议 1（常量关系断言）**：零 fixture unit assert
+     （`DEFAULT_MAX_PENDING_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES` ∧
+     `DEFAULT_LEDGER_PAYLOAD_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`）
+     ——T4 行为腿之外最廉价机械守（防未来单常量改动复活缺陷）。
+   - **建议 2（A3 必要性专判）**：r1/r2 判别腿集 A2 面齐（T4 + §2-2 fixture B
+     正向锁），A3 专判缺——建议 observable 形（A1+A2 无 A3 注入态 → 双
+     revision 后前驱 cursor resume 'unknown' → resetRequired fail-closed 面
+     断言），**禁 callback 断言形**（见 3 悬空定性）。
+2. **§5-2 裁定修正：让位于审计 r1 形（随件仅 characterization，行为修立项
+   挂账）**。让位理由（自承原裁两点欠权）：① issue 抛出后 follow 侧终态映射
+   面未预注册（500 险面）——行为修验收面比原裁估计大；② 修形涉通用 ledger
+   语义 + onActiveEvict 接线三问，混入根修切片扩域。本侧 fail-closed 支柱③
+   诉求由挂账池登记承（非静默丢弃）。**批复对象改 = §2-5 characterization 形
+   + 行为修挂账立项。**
+3. **§6 六站表行 6 + 注记 1 撤回修正（审计必改 3 采认，本侧独立复核成立）**：
+   本侧实勘见 cursorLedger.ts:143 调用点即记「显式回调」——**漏勘接线面**：
+   `onActiveEvict?` 三参可选构造在 readonlyRuntime.ts:503-507 零传参，全仓
+   grep（src/ 非 test）除定义 :57/调用点 :143/注释 :9 外零命中 → 活码 pinned
+   逐出 = 无回调静默（下游 resume 'unknown' → resetRequired 受控失败）；
+   cursorLedger.ts:9 类注释 = 悬空承诺。**教训入册：可选回调「定义在场 ≠
+   接线在场」，实勘须双向（定义面 + 构造接线面）。**
+4. **审计必改 2（§2-6 replay 非泄漏双向判别）+ A1 fork 约束
+   （readonlyRuntime.ts:919-922 解析点）采认**——本侧独立复核接线点在位；
+   「误改 DEFAULT 本体」回归险面（配置面测试 :446 锁不住默认解析）定性成立。
+5. **内存账 288 MiB 级并记 + 配置面理论界两面并记采认**——比本侧 §6 行 3
+   补强（ledgerPayload 32 MiB 共享实例 + 读面瞬态 + subscriptions 可抬高面）。
+
+**双门态：审计门（方向 PASS + 必改 3 折 r1/r2 + r2 点核 PASS）+ 判词侧
+（§6 批复 PASS + §6-1 对表收口）→ 双门齐，Main 开落码（判别单测 1–6 形 +
+建议 1/2 采否自决）。** L4 纪律不变（0.1.130 用户亲署候件，届时呈请）。
