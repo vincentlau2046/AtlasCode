@@ -4,12 +4,15 @@
 // approval_id warn + 丢弃；⑥ EOF → ApprovalStreamClosedError（fail-closed）；
 // ⑦ 跨请求持久缓冲（多行单块）。
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   ApprovalStreamClosedError,
   DIGEST_VALUE_MAX_CHARS,
   StreamJsonApprovalChannel,
   buildInputDigest,
 } from '../../src/cli/approvalChannel'
+import { buildHeadlessOptions } from '../../src/cli/parse'
 
 /** 可编程 stdin 替身：push 行 / end 触发 EOF。 */
 class QueueInput implements AsyncIterable<string> {
@@ -207,5 +210,50 @@ describe('StreamJsonApprovalChannel 决策流（C1-b/C1-d/C1-e）', () => {
     // 第二请求收到的是缓冲中 stale 行（unknown id → 丢弃）后 EOF → closed
     input.end()
     await expect(second).rejects.toBeInstanceOf(ApprovalStreamClosedError)
+  })
+})
+
+// ── C1-f 补腿件（0.1.129 呈批书 §11 注记 1，f4 裁定；tests-only 零制品影响）──
+describe('C1-f 补腿：flag 缺席回归 + 决策→verdict 映射契约', () => {
+  test('① flag 缺席 → HeadlessOptions.approvalChannel = undefined（通道不构造 ⇒ 零 approval_request 写出面）', () => {
+    // opt-in 门：buildHeadlessOptions 不补默认值，flag 缺席即 undefined
+    expect(buildHeadlessOptions({}).approvalChannel).toBeUndefined()
+    // 显式 opt-in 透传
+    expect(buildHeadlessOptions({ approvalChannel: 'stream-json' }).approvalChannel).toBe(
+      'stream-json',
+    )
+    // 通道创建 gate 形契约钉：print.ts 仅在 flag === 'stream-json' 时构造
+    // StreamJsonApprovalChannel（否则 undefined——非 stream-json 值同样不构造）
+    const printSrc = readFileSync(
+      join(import.meta.dir, '..', '..', 'src', 'cli', 'print.ts'),
+      'utf8',
+    )
+    expect(printSrc).toContain("options.approvalChannel === 'stream-json'")
+  })
+
+  test('③ 决策→verdict 映射契约（print.ts checkPermission 审批分支）：approved→allow / denied→deny / expired→deny(reason=expired) / closed→deny(fail-closed)', () => {
+    // 映射 inline 于 print.ts checkPermission（~1301-1330）——tests-only
+    // 约束下采契约钉形（锁文本先例）：四支 reason 字面 + fail-closed 分支
+    // 逐字在场。行为面由 channel 层三决策值腿（上 describe）+ pw 审批腿
+    //（AtlasWeb e2e 20 approve / 21 deny）端到端覆盖采认（⑤ 免单测）。
+    const printSrc = readFileSync(
+      join(import.meta.dir, '..', '..', 'src', 'cli', 'print.ts'),
+      'utf8',
+    )
+    // approved → allow
+    expect(printSrc).toContain("if (decision === 'approved')")
+    expect(printSrc).toContain('{ allowed: true }')
+    // denied / expired → deny + reason 区分（expired 独立 reason）
+    expect(printSrc).toContain("'approval expired'")
+    expect(printSrc).toContain("'approval denied'")
+    expect(printSrc).toContain("decision === 'expired'")
+    // closed（EOF）→ ApprovalStreamClosedError → deny reason（fail-closed 零悬挂）
+    expect(printSrc).toContain('error instanceof ApprovalStreamClosedError')
+    expect(printSrc).toContain("'approval stream closed before decision'")
+    // C1-g 优先序：审批通道分支先于 SDK prompt 路由（hasPromptRoute）
+    const approvalIdx = printSrc.indexOf('if (verdict.ask && approvalChannel)')
+    const promptIdx = printSrc.indexOf('if (verdict.ask && hasPromptRoute)')
+    expect(approvalIdx).toBeGreaterThan(-1)
+    expect(promptIdx).toBeGreaterThan(approvalIdx)
   })
 })
