@@ -49,6 +49,16 @@ export const HARD_MAX_PARSE_RECORDS = 500_000
 export const DEFAULT_MAX_PROJECTION_BYTES = 4 * MIB
 export const HARD_MAX_PROJECTION_BYTES = 16 * MIB
 
+// ── follow 面单独投影帽（#277 格 1 根修 A1，呈批书 §1-A1 @92bc4445）───────────
+// 单事件 min 门（follow.ts:254 bytes > pendingBytes || bytes > maxProjectionBytes）
+// 使 follow 有效帽 = min(projection, pending)——缺省面 follow 用本值，replay
+// 全量面仍用 DEFAULT_MAX_PROJECTION_BYTES（分面解析，禁改本体：§2-6 非泄漏
+// 判别锁）。显性取舍：= hard 16 MiB（观测最大 6 MiB 之 2.7×；超 16 MiB =
+// 候选 B 后继，零新增 hard 上限）。host 显式 maxProjectionBytes → 两面同用
+// （不越显式值，已过 validateBoundedInt hard 校验）。非独立 knob：无常量外
+// 可配项。
+export const DEFAULT_MAX_FOLLOW_PROJECTION_BYTES = 16 * MIB
+
 // ── list 面 title 头读界（G-D，2026-11-20）：单会话头读字节窗。窗内可容
 //    custom-title/summary/首 user 行 → 提取 title；文件 ≤ 窗 = 全读尽 →
 //    messageCount 精确；超界 → null（诚实不精确面）。常量非 knob：
@@ -68,7 +78,7 @@ export const HARD_MAX_CONCURRENT_READS = 16
 // ── 每 subscription pending 事件 / 序列化字节（终态控制槽独立保留 1 条）───────
 export const DEFAULT_MAX_PENDING_EVENTS = 8
 export const HARD_MAX_PENDING_EVENTS = 32
-export const DEFAULT_MAX_PENDING_BYTES = 8 * MIB
+export const DEFAULT_MAX_PENDING_BYTES = 16 * MIB
 export const HARD_MAX_PENDING_BYTES = 32 * MIB
 
 // ── 时序类 ────────────────────────────────────────────────────────────────────
@@ -91,7 +101,7 @@ export const HARD_MAX_CLOSE_DEADLINE_MS = 10_000
 // ── cursor/result snapshot ledger ─────────────────────────────────────────────
 export const DEFAULT_LEDGER_CAPACITY = 128
 export const HARD_MAX_LEDGER_CAPACITY = 1024
-export const DEFAULT_LEDGER_PAYLOAD_BYTES = 16 * MIB
+export const DEFAULT_LEDGER_PAYLOAD_BYTES = 32 * MIB
 export const HARD_MAX_LEDGER_PAYLOAD_BYTES = 64 * MIB
 
 // ── 读取/解析批次 ─────────────────────────────────────────────────────────────

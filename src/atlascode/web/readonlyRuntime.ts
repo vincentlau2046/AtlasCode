@@ -39,6 +39,7 @@ import {
   DEFAULT_MAX_PARSE_RECORDS,
   HARD_MAX_PARSE_RECORDS,
   DEFAULT_MAX_PROJECTION_BYTES,
+  DEFAULT_MAX_FOLLOW_PROJECTION_BYTES,
   HARD_MAX_PROJECTION_BYTES,
   DEFAULT_MAX_REPLAY_PAGE_BYTES,
   HARD_MAX_REPLAY_PAGE_BYTES,
@@ -919,7 +920,14 @@ export function createReadonlySessionRuntime(
           idleLeaseMs: L.idleLeaseMs,
           pendingEvents: L.maxPendingEvents,
           pendingBytes: L.maxPendingBytes,
-          maxProjectionBytes: L.maxProjectionBytes,
+          // #277 格 1 根修 A1（呈批书 §1-A1 显式配置优先序）：host 显式
+          // maxProjectionBytes → 两面同用（不越显式值）；缺省 → follow 16 MiB
+          // （DEFAULT_MAX_FOLLOW_PROJECTION_BYTES）/ replay 4 MiB 分面解析。
+          // 禁改 DEFAULT_MAX_PROJECTION_BYTES 本体（replay 全量面 :625 泄漏
+          // 险——§2-6 非泄漏判别锁）。
+          maxProjectionBytes:
+            options.limits?.maxProjectionBytes ??
+            DEFAULT_MAX_FOLLOW_PROJECTION_BYTES,
           maxRecordBytes: L.maxRecordBytes,
           // S0-R5 ②：重采样/续接全量读成本上界（钉 3；adapter readTranscript
           // 同源同界——单一事实源 L.maxTranscriptBytes）

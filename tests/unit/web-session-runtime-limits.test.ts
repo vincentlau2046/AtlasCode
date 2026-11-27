@@ -16,6 +16,7 @@ import {
   DEFAULT_MAX_PARSE_RECORDS,
   HARD_MAX_PARSE_RECORDS,
   DEFAULT_MAX_PROJECTION_BYTES,
+  DEFAULT_MAX_FOLLOW_PROJECTION_BYTES,
   HARD_MAX_PROJECTION_BYTES,
   DEFAULT_MAX_SUBSCRIPTIONS,
   HARD_MAX_SUBSCRIPTIONS,
@@ -87,7 +88,7 @@ describe('§4.4 资源常量冻结值', () => {
     expect(HARD_MAX_CONCURRENT_READS).toBe(16)
     expect(DEFAULT_MAX_PENDING_EVENTS).toBe(8)
     expect(HARD_MAX_PENDING_EVENTS).toBe(32)
-    expect(DEFAULT_MAX_PENDING_BYTES).toBe(8 * MIB)
+    expect(DEFAULT_MAX_PENDING_BYTES).toBe(16 * MIB)
     expect(HARD_MAX_PENDING_BYTES).toBe(32 * MIB)
     expect(DEFAULT_POLLING_INTERVAL_MS).toBe(1000)
     expect(HARD_MIN_POLLING_INTERVAL_MS).toBe(100)
@@ -99,8 +100,27 @@ describe('§4.4 资源常量冻结值', () => {
     expect(HARD_MAX_CLOSE_DEADLINE_MS).toBe(10_000)
     expect(DEFAULT_LEDGER_CAPACITY).toBe(128)
     expect(HARD_MAX_LEDGER_CAPACITY).toBe(1024)
-    expect(DEFAULT_LEDGER_PAYLOAD_BYTES).toBe(16 * MIB)
+    expect(DEFAULT_LEDGER_PAYLOAD_BYTES).toBe(32 * MIB)
     expect(HARD_MAX_LEDGER_PAYLOAD_BYTES).toBe(64 * MIB)
+    // #277 格 1 根修 A1（呈批书 §1-A1 @92bc4445）：follow 面单独投影帽，
+    // 显性取舍 default=hard（16/16，§2-3 值腿）。
+    expect(DEFAULT_MAX_FOLLOW_PROJECTION_BYTES).toBe(16 * MIB)
+  })
+
+  // 呈批书 §2-7（判词侧建议 1 采认，r4 末腿补）：三件同落常量关系断言——
+  // 零 fixture 机械锁，防未来单常量改动复活 min 门缺陷（follow.ts:254）。
+  describe('§2-7 三件同落常量关系（#277 根修）', () => {
+    test('pending ≥ follow ∧ ledger ≥ follow ∧ follow ≤ hard projection', () => {
+      expect(DEFAULT_MAX_PENDING_BYTES).toBeGreaterThanOrEqual(
+        DEFAULT_MAX_FOLLOW_PROJECTION_BYTES,
+      )
+      expect(DEFAULT_LEDGER_PAYLOAD_BYTES).toBeGreaterThanOrEqual(
+        DEFAULT_MAX_FOLLOW_PROJECTION_BYTES,
+      )
+      expect(DEFAULT_MAX_FOLLOW_PROJECTION_BYTES).toBeLessThanOrEqual(
+        HARD_MAX_PROJECTION_BYTES,
+      )
+    })
   })
 
   test('runtime.limits 缺省全表解析（start 后可见）', async () => {
