@@ -194,6 +194,10 @@ import {
 import { createHeadlessFileStateCache } from './headlessFileStateCache.js'
 import { findLatestSessionId } from './sessionList'
 import { installStreamJsonStdoutGuard } from './streamJsonStdoutGuard'
+// 0.1.129 C1（呈批书 §1，批复 @af5684e9）：-p stream-json 审批通道
+//（approval_request stdout 事件 + approval_response stdin 决策行；
+// pending-gated / kernel 权威超时 / 禁复用 SDK control_request 面）
+import { ApprovalStreamClosedError, StreamJsonApprovalChannel } from './approvalChannel'
 import { resolveHeadlessSystemPrompt } from './headlessPrompt'
 // N9-debug（user-e2e 1606 §7 项 6）：headless debug 面真 sink（shared no-op
 // 换绑 cli 域 writer；charter C-4 不动）
@@ -259,6 +263,10 @@ export interface HeadlessOptions {
   // 源走 5s 连接预算；strict = 仅用 --mcp-config 源（忽略 settings/.mcp.json）。
   mcpConfig?: string[]
   strictMcpConfig?: boolean
+  // 0.1.129 C1-a（呈批书 §1，批复 @af5684e9）：--approval-channel=stream-json
+  // opt-in——ask 权限决断改走 stdout approval_request + stdin 决策行（形 A）。
+  // flag 缺席 = 零行为变更；C1-g 互斥/限定校验在 parse.ts 启动期（fail-closed）。
+  approvalChannel?: 'stream-json'
 }
 
 // 本地窄型（result wire 消息读面；writer 支类型自明，避免与 sdkTypes 循环）
@@ -1101,6 +1109,21 @@ export async function runHeadless(
     installStreamJsonStdoutGuard()
   }
 
+  // 0.1.129 C1（呈批书 §1，批复 @af5684e9）：stream-json 审批通道（opt-in）。
+  // write 面 = structuredIO.write（单写者出队泵，ndjson 行直出 stdout——
+  // wire 面恒写，不经 writeMessage 的 verbose 门）；决策行源 = process.stdin
+  //（C1-d pending-gated：仅 approval_request 已发未决窗口内读取，-p string
+  // prompt 模式 structuredIO.input = 空数组、stdin 零消费 → 通道独占无冲突；
+  // C1-g 互斥/限定校验在 parse.ts 启动期 fail-closed）。
+  const approvalChannel =
+    options.approvalChannel === 'stream-json'
+      ? new StreamJsonApprovalChannel({
+          write: message =>
+            structuredIO.write(message as unknown as StdoutMessage),
+          input: process.stdin,
+        })
+      : undefined
+
   // ── MCP 启动消费（组合根 initMcpConnections ①②③ 无壳形态）──
   const mcpManager = getMcpConnectionManager()
   const settings = getSettingsWithErrors()
@@ -1275,6 +1298,39 @@ export async function runHeadless(
       getAppState: () => ({ toolPermissionContext: tpcRef.current }),
     })
     const verdict = await gate(tool, input)
+    if (verdict.ask && approvalChannel) {
+      // 0.1.129 C1-b（呈批书 §1）：审批通道分支先于 SDK prompt 路由（C1-g
+      // 补注册分支优先序——flag 显式 opt-in 优先）。决策映射：approved→allow
+      // / denied→deny / expired→deny(reason=expired) / EOF(closed)→deny
+      //（fail-closed 零悬挂——C1-e 超时唯一权威 = kernel，本通道零独立超时）。
+      const toolName = (tool as { name: string }).name
+      try {
+        const decision = await approvalChannel.requestApproval({
+          toolName,
+          input: (input ?? {}) as Record<string, unknown>,
+          // 惰性取（sessionId 常量声明在下游；审批事件在回合内必然已初始化）
+          sessionId: getSessionEnv().getSessionId(),
+        })
+        if (decision === 'approved') {
+          return { allowed: true }
+        }
+        return {
+          allowed: false,
+          reason:
+            decision === 'expired'
+              ? 'approval expired'
+              : 'approval denied',
+        }
+      } catch (error) {
+        if (error instanceof ApprovalStreamClosedError) {
+          return {
+            allowed: false,
+            reason: 'approval stream closed before decision',
+          }
+        }
+        throw error
+      }
+    }
     if (verdict.ask && hasPromptRoute) {
       // SDK prompt 路由：ask 决断 → structuredIO can_use_tool control_request
       // （PermissionGate 签名 gap：tool_use_id / agent_id wire 字段缺席，

@@ -272,6 +272,8 @@ export function buildHeadlessOptions(
     ),
     permissionPromptToolName: options
       .permissionPromptTool as HeadlessOptions['permissionPromptToolName'],
+    approvalChannel: options
+      .approvalChannel as HeadlessOptions['approvalChannel'],
     maxTurns: options.maxTurns as HeadlessOptions['maxTurns'],
     model: options.model as HeadlessOptions['model'],
     dangerouslySkipPermissions:
@@ -411,6 +413,24 @@ async function mainActionSeam(
         'Error: --replay-user-messages requires both --input-format=stream-json and --output-format=stream-json.\n',
       )
       process.exit(1)
+    }
+    // 0.1.129 C1-g 补注册（呈批书 §1，先于落码落档 @adb4b497）：--approval-channel
+    // 启动期 fail-closed 双校验——① 仅支持 --output-format stream-json 组合
+    //（text 输出写 JSON 行污染 stdout）；② 与 --input-format stream-json 互斥
+    //（stdin 决策行读取面与 structuredIO.input 持续消费冲突）。
+    if (options.approvalChannel) {
+      if (outputFormat !== 'stream-json') {
+        process.stderr.write(
+          'Error: --approval-channel requires --output-format=stream-json.\n',
+        )
+        process.exit(1)
+      }
+      if (inputFormat === 'stream-json') {
+        process.stderr.write(
+          'Error: --approval-channel is mutually exclusive with --input-format=stream-json.\n',
+        )
+        process.exit(1)
+      }
     }
     // 惰性接线（handler 族同型）：dispatch.getInputPrompt（stdin 3s peek
     // 面）+ print.runHeadless（S-C3 headless 本体；await = 自然退出码面，
@@ -628,6 +648,19 @@ export function buildProgram(): CommanderCommand {
         'MCP tool to use for permission prompts (only works with --print)',
       )
         .argParser(String)
+        .hideHelp(),
+    )
+    .addOption(
+      // 0.1.129 C1-a（呈批书 §1，批复 @af5684e9）：-p 审批通道 opt-in flag。
+      // stream-json = stdout approval_request + stdin 决策行（禁复用 SDK
+      // control_request 面）；flag 缺席 = 零行为变更。互斥/组合校验在
+      // -p action 内（C1-g 补注册：仅 --output-format stream-json 组合 +
+      // --input-format stream-json 互斥）。
+      new Option(
+        '--approval-channel <channel>',
+        'Structured approval channel for -p (stream-json: approval_request on stdout, approval_response on stdin)',
+      )
+        .choices(['stream-json'])
         .hideHelp(),
     )
     .addOption(
