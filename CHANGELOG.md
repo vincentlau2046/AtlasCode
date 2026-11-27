@@ -4,6 +4,14 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.129（2026-11-27）
+
+**headless -p 审批通道 + kernel 审批事件七字段**（审批接线切片·形 A；呈批书 `docs/2026-11-27-0129-approval-wiring-lockface-brief.md` @b5d8cde8 + f4 批复 PASS @af5684e9 + C1-g 补注册 @adb4b497 + 判词侧复证 @d9748886）。
+
+- **C1 `--approval-channel=stream-json`**（opt-in，缺席零行为变更）：headless `-p` 下 ask 类工具审批经结构化通道——stdout `approval_request` 事件（`approval_id`/`tool_name`/`input_digest`/`session_id`，digest 白名单 file_path/command/description/url/pattern 截 200 字符）+ stdin `approval_response` 决策行（approved/denied/expired）；pending-gated stdin 消费，malformed/未知 approval_id warn 继续等待；EOF fail-closed deny；超时唯一权威 = kernel 300s。启动期 fail-closed（C1-g）：限定 `--output-format=stream-json` 且与 `--input-format=stream-json` 互斥。
+- **C2 kernel 审批事件扩形**（加性）：`approval.requested` 载荷 `{approvalId}` 扩七字段全形（toolName/actionDigest/workspaceId/turnId/approvalId/requestedAt/sourceLane='execution-upstream'）——事件字段非正文/令牌/待批内容；`requestApproval` 参数 optional，既有零参调用点零破坏。
+- 载体 Δ 账预估：三值全变（cli.js：parse/print 增补；executionSha256：kernel deps 扩形；runtimeSha256：kernel 载荷扩面——§5 预注册，L2 实况对账）。exports 面零新增 subpath。
+
 ## v0.1.128（2026-11-26）
 
 **web-session-runtime replay 内容分页公开接口**（F6-PAGE S1；工单 `docs/2026-11-25-f6-page-ticket.md`，段 L 呈批书 @f44749d1 + f4 批复 §L @6a0407c9；S1 合并采记 §J @477709a1；三环采认-复核-复判 @570f7491）。
