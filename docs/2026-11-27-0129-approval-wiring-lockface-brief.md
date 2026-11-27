@@ -64,6 +64,19 @@ runner 调用 **kernel 供给的 `requestApproval`** → host approvals 仅**证
   （回归腿）；② flag 在场 ask → 事件形断言（字段面 + 白名单摘要）；
   ③ 决策行 approved→allow / denied→deny / expired 行→deny(reason=expired)；
   ④ malformed 行 → warn + 等待；⑤ abort → AbortError。
+- **C1-g 补注册（f4 补钉② 前置枚举结论，2026-11-27 折入，先于落码）**：
+  引擎 stdin 读取面全量枚举（grep process.stdin src/ 全量）——① 启动期
+  探测面 = `dispatch.ts getInputPrompt`（非 TTY text 模式收集管道数据至
+  prompt 解析完成、listener 即移除；与 channel pending-gated 读取**零并发
+  窗口冲突**——probe 结束先于 runHeadless）；② TUI 面（earlyInput/
+  gracefulShutdown/mcp auth/ink）-p print 车道不可达；③ LSP process.stdin
+  = 写向 LSP 子进程（writer 非读）。**唯一窗口外并发面 = `--input-format
+  stream-json`**（structuredIO.input = process.stdin 持续消费）→ 补注册
+  **互斥**：`--approval-channel` 与 `--input-format stream-json` 同给 →
+  启动期 fail-closed error exit。同批补注册：flag 仅支持 `--output-format
+  stream-json` 组合（text 输出写 JSON 行会污染 stdout——同给 → 启动期
+  fail-closed error）；approval 分支先于 SDK prompt 路由（canUseTool）分支
+  （flag 显式 opt-in 优先序）。
 
 ### C2 — kernel 扩形（kernel 域，同版加性）
 
