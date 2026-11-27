@@ -287,3 +287,43 @@ anchor-mismatch → gap 即红）——pin bump 0.1.129 后全仓 gate 必红
 §4 自本回执起 = W1 执行准绳。C1-g 补注册（adb4b497：approval-channel ×
 input-format stream-json 互斥 + output-format stream-json 限定 + approval
 分支先于 canUseTool 分支，均启动期 fail-closed）f4 采记。
+
+## §11 事后核折入（Atlas-reveiw L4 事后核 PASS 2026-11-27，f4 落档）
+
+事后核终判 **PASS**：发布事实链 10/10 独立直算 MATCH（tag 三面一致 /
+release vs gate 对象零产品码 diff / 双 org 直下复算 / 镜像 name-only 直证 /
+bundle 实字节 / 四节点同字节链 / packument 双面 / Δ账逐字 / 双门链 +
+测试计数对账 +13 腿自洽）；C1-a–g / C2-a–b 注册形活码对表全合（含 EOF→
+deny fail-closed 加分保护、C1-g 先于落码序直证）。以下注记 4 折入：
+
+1. **C1-f 腿列偏离——登记 + f4 裁定（登记偏离，非追认豁免）**：注册
+   §1 C1-f 5 腿 vs 实现 11 腿全在 channel 级（②④ 覆盖 + digest/EOF/
+   未知 id/跨请求缓冲）；① flag 缺席零 approval_request 回归腿、③ 决策→
+   allow/deny/expired verdict 映射腿、⑤ abort→AbortError 腿未落单测且
+   commit message 腿列重组未回档改注册——实质风险低（分支纯加性 + 映射
+   8 行 + typecheck/全量绿 + 端到端映射由 W1-c ①-③ + pw 腿 7/8 实覆）。
+   **裁定**：① + ③ 补腿 = **tests-only commit 归 W1 波 carrier 侧**
+   （AtlasCode 单测两腿：flag 缺席零事件回归 + 决策映射含 expired reason；
+   零制品影响，随 W1 落码同步，免 0.1.130 补丁版）；⑤ **采认端到端覆盖
+   面**（C1-e 自身表述：abort = runner kill 路径既有 + W1-c ④ +
+   pw 全形兜底）免独立单测。归 W1 工单增量件（Main）。
+2. **C2-a 注册字面勘正（注记 3）**：注册形 `req: {toolName: string;
+   actionDigest: Record<...>}`（必参）与「零参调用零破坏」互斥——实现取
+   **optional 全形（`req?` + 字段 optional）兑现意图，方向正确**；注册
+   字面以实现为准勘正（C2-a 读作 optional 全形）。
+3. **SRI Δ账 cli.js 归因词勘正（注记 2）**：structuredIO 零触碰（print
+   用既有 structuredIO.write）；正归因 = approvalChannel.ts（新 165 行）+
+   parse.ts（+33）+ print.ts（+56）——SRI @651a9cba 随勘正 commit 修订。
+4. **W1/E1 预算显性面（注记 4，传递 Main）**：`dispatch.getInputPrompt`
+   非 TTY stdin 下**恒**探测 3s（不论 prompt 是否已给）→ W1 pipe 车道
+   每次 spawn +3s 启动延迟 + stderr 一行 warning（无数据超时继续）；
+   探测 listener 于 runHeadless 前移除、与 channel 零并发、不吞决策行
+   （决策行仅在 approval_request 后写，晚于探测窗）——C1-g 零冲突结论
+   成立；3s 效果面显性入 W1/E1 预算（**warning 非 error，勿误判红**）。
+
+> 段 L 终态：L6 生产 lane **PASS**（r-20261127-prodlane-129.md：双 org
+> 直下双 MATCH + SRI 四值即验锚全 MATCH〔runtime 恒等第五版 125→129〕+
+> Δ账三条成立 + §K/39 腿裁量不重跑〔runtime bundle 字节恒等 → fetch 腿
+> 面字节级同一〕+ 安装车道 bin 真跑 0.1.129）——**0.1.129 段 L 全链
+> 闭环，呈批书封卷**。后链：AtlasWeb W1+E1（§4 修形序 + 本节注记 1/4）→
+> pin bump 0.1.129 + 格 I 三元同步合一 commit → 全仓 gate + pw 全腿。
