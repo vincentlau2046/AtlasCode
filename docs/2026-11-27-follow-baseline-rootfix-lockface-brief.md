@@ -72,17 +72,28 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
    全淘含 pinned）；**行为修（issue 前置拒绝 oversized single payload）
    单独立项挂账**——修形涉通用 ledger 语义 + 错误映射面（issue 抛出后 follow
    侧终态形须预注册防 500）+ `onActiveEvict` 接线三问，不混入根修切片；A3
-   落默认面后该分支默认不可达。双门若裁随件行为修，须同时裁 callback 接线。
+   落默认面后该分支默认不可达。**双门终裁（判词侧 §6-1 让位修正）：随件仅
+   characterization 形维持，行为修立项挂账**（挂账池登记承 fail-closed 支柱③
+  「禁静默丢弃」诉求）；callback 接线不属本切片（§4-1 定性收敛：无回调静默，
+   悬空承诺独立登记）。
 6. **replay 非泄漏双向判别（审计必改 2）**：默认配置（不传 `options.limits`）
    下 5–6 MiB 会话 → replay 全量面（`readonlyRuntime.ts:625`）**仍
    resourceLimit**（4 MiB 帽未泄漏）；同 fixture follow 面正常交付（16 MiB
    帽生效）——双向锁 A1 接线 fork 约束，防「误改 DEFAULT 本体」回归
    （既有 `tests/func/web-session-runtime-follow.test.ts:446` 为配置面形，
    锁不住默认解析面）。
+7. **三件同落常量关系断言（判词侧建议 1，Main 采认）**：零 fixture unit
+   assert `DEFAULT_MAX_PENDING_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`
+   ∧ `DEFAULT_LEDGER_PAYLOAD_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`
+   ——T4 行为腿之外最廉价机械守，防未来单常量改动复活缺陷。
+8. **A3 必要性专判（判词侧建议 2，Main 采认，observable 形）**：注入态
+   A1+A2 落 / A3 缺（ledger 仍 16 MiB）→ 双 revision 连发后前驱 cursor
+   resume 'unknown' → resetRequired fail-closed 面断言；**禁 callback 断言
+   形**（§6-1 悬空定性：`onActiveEvict` 零接线，定义在场 ≠ 接线在场）。
 
 ## §3 验收面
 
-- AtlasCode 四件套全绿 + 本切片判别单测 1–6（含 §2-6 replay 非泄漏判别；形按双门批复）。
+- AtlasCode 四件套全绿 + 本切片判别单测 1–6（含 §2-6 replay 非泄漏判别；形按双门批复）+ §2-7/§2-8（判词侧建议 1/2 采认件）。
 - 发布链：carrier 候 **0.1.130** 段 L 形发布链（**L4 用户亲署候件——0.1.129
   预授权不外溢新版本号，f4 届时向用户呈请**）→ AtlasWeb pin bump + upstream.ts →
   重建 → SRI 锚 #3 重出 → e2e GREEN 复判（#277 六格 + viewport 根修波合并判）→
@@ -108,6 +119,11 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
    敲定」条款，本呈批书撤回重拟。
 
 ## §5 呈请事项
+
+> **批复登记（2026-11-27）**：双门齐——审计门 Atlas-reveiw 点核 PASS @ r2；
+> 判词门 Atlasweb-F4 §6 批复 PASS（随 r2 折入）+ §6-1 对表收口 @ f8fd5515
+> （必改 1 撤号 / §5-2 让位 = 随件仅 characterization + 行为修挂账 / 建议
+> 1·2 采否自决）。Main 裁定：建议 1/2 **采认**（§2-7/§2-8）。呈请③落码开工。
 
 1. 双门对候选 A 形（A1/A2/A3 同落 + 判别单测 1–6（含 §2-6））批复或修订；
 2. §2-5 ledger 潜伏缺陷处置裁（随件 vs 立项）；
@@ -208,6 +224,11 @@ bun 561/1/0 + 格 5 机判）采认为 #282 侧实证。
   另附注登记：引言 9b28206→main 610ecc9 为 cherry 形重落（9b28206 非
   610ecc9 祖先，内容恒等以 `git diff 9b28206 610ecc9 -- e2e/` 空为直证），
   按 ancestry 判「已合」的旁证文会误报。审计门点核 PASS @ 本修订前形。
+
+- **修订 r3（2026-11-27，判词侧 §6-1 对表收口折入 + 建议 1/2 采认自决）**：
+  §2-5 终裁登记（判词让位 = 随件仅 characterization，行为修立项挂账，callback
+  接线不属本切片）；新增 §2-7 常量关系断言 + §2-8 A3 observable 专判（禁
+  callback 断言形）；§3 口径 1–6 + §2-7/§2-8；§5 批复登记（双门齐，落码开工）。
 
 ## §6-1 判词侧 r1/r2 对表收口（Atlasweb-F4，2026-11-27，@e5803a4e 态）
 
