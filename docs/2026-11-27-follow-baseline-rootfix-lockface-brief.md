@@ -82,7 +82,7 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
 
 ## §3 验收面
 
-- AtlasCode 四件套全绿 + 本切片判别单测 1–5（形按双门批复）。
+- AtlasCode 四件套全绿 + 本切片判别单测 1–6（含 §2-6 replay 非泄漏判别；形按双门批复）。
 - 发布链：carrier 候 **0.1.130** 段 L 形发布链（**L4 用户亲署候件——0.1.129
   预授权不外溢新版本号，f4 届时向用户呈请**）→ AtlasWeb pin bump + upstream.ts →
   重建 → SRI 锚 #3 重出 → e2e GREEN 复判（#277 六格 + viewport 根修波合并判）→
@@ -109,10 +109,90 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
 
 ## §5 呈请事项
 
-1. 双门对候选 A 形（A1/A2/A3 同落 + 判别单测 1–5）批复或修订；
+1. 双门对候选 A 形（A1/A2/A3 同落 + 判别单测 1–6（含 §2-6））批复或修订；
 2. §2-5 ledger 潜伏缺陷处置裁（随件 vs 立项）；
 3. 批复后 Main 按 AtlasCode worktree 纪律（worktrees/ 下）落码 → 四件套 →
    gate → 段 L（0.1.130，L4 亲署候件）。
+
+## §6 判词侧审视与批复（Atlasweb-F4，2026-11-27）
+
+**终判：批复 PASS——候选 A 形采纳（A1/A2/A3 同落，零 wire 契约变化核实）；§2
+判别单测 1/2/3/5 采认 + 必改 1（§2-4 耦合判别腿修正形，落码前折入本档）；
+§5-2 裁定 = ledger 潜伏缺陷随件核销（判别单测 + 前置拒绝修形同落）。非阻注记
+4 条。Main 即开落码（必改 1 折入后）。**
+
+### 六站活码独立实勘（@ f71672ba，git 锚定）
+
+| 站 | 实勘 | 结果 |
+|---|---|---|
+| 1 min 门 | follow.ts:254 `bytes > limits.pendingBytes \|\| bytes > limits.maxProjectionBytes` 逐字 → 单事件有效帽 = min(4,8) = 4 MiB | 成立 |
+| 2 baseline 终形 | :371-375 issueBaseline 投影超帽 setTerminal resourceLimit | 成立 |
+| 3 增量终形 | :510-514 emitReplacement 同错形；:514-528 每 revision `issue`+`pin` | 成立 |
+| 4 帽源三常量 | limits.ts :49-50 4/16 MiB、:71-72 8/32 MiB、:94-95 16/64 MiB；:63 `DEFAULT_MAX_SUBSCRIPTIONS=16`（内存账基数直证） | 成立 |
+| 5 可配面 | readonlyRuntime.ts :415-420/:445-446/:492-495 `validateBoundedInt` DEFAULT↔HARD | 成立 |
+| 6 ledger 计量 | cursorLedger.ts :60-61 issue→evictForInsert；:125-146 淘汰环——单 payload > max 淘空（pinned 走 onActiveEvict **显式回调**）→ 空账 break → **超帽插账本体静默**（无前置拒绝） | 成立 |
+
+**耦合机理双直证**：baseline 事件经 :392 `queueData` 过 :254 双门（投影帽
+:372 + 单事件门 :254）——A2 耦合实级；A3 churn 实级（每 revision issue+pin，
+前驱 cursor 保持 pinned → ledger 压力逐 revision 累积）。
+
+### 候选 A 裁定（呈请①）：采纳
+
+1. 三件同落机械必要性 = min 门语义锁定（A1 单落 → :254 pending 8 MiB 二次
+   终流；A3 缺 → 双 cursor 共存压力触发 pinned 淘汰 churn）——§2-4 判别腿恰锁此；
+2. 零 wire 契约变化核实：三件均 limits 常量域，事件形状/字段/协议零触；
+3. 内存账核实：DEFAULT 层 16×16 MiB = 256 MiB（原 128 MiB）；**A1/A2/A3 全
+   DEFAULT 层，hard 层零变 → hard 层理论峰值账（64×32 MiB）不变**（登记面补强）；
+4. A1 default=hard（16=16）零上配余量 = 显性取舍采认：(a) 观测最大 6 MiB 之
+   2.7×；(b) 超 16 MiB = 候选 B 登记后继（升级条件条款在案）；(c) 零新增 hard
+   上限 = 帽面纪律。候选 B/C 登记维持。
+
+### 必改 1（§2-4 耦合判别腿——落码前折入，不阻 §1 落码开工）
+
+**判据腿空转风险（假绿）**：5–6 MiB fixture 在 A1-单落世界（pending 仍
+8 MiB）不触发 :254（5–6 < 8）→「复现终流」不可达。修形：
+
+- fixture 升 (8,16) MiB（如 ~10 MiB）；**或**注入形（runtime options
+  `maxProjectionBytes=16 MiB` + `maxPendingBytes=4 MiB` 模拟 A1-单落世界，
+  5–6 MiB fixture 即触发 :254）；
+- **增补第三腿 = 常量关系断言**（零 fixture 机械锁「三件同落」）：
+  `DEFAULT_MAX_PENDING_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES` ∧
+  `DEFAULT_LEDGER_PAYLOAD_BYTES ≥ DEFAULT_MAX_FOLLOW_PROJECTION_BYTES`
+  unit assert——防未来单常量改动复活缺陷；
+- A2/A3 拆两判别：A2 = pending 拆落 → :254 终流复现；A3 = ledger 拆落 →
+  双 revision pinned churn（onActiveEvict 回调断言）。
+
+### §5-2 裁定（ledger 潜伏缺陷）：随件核销形
+
+判别单测（RED 锁现行为 = 淘空含 pinned + 静默 overshoot）+ 候选修形（issue
+前置拒绝 oversized single payload，显性 resourceLimit）**同件落**。理由：
+① A3 后默认面不可达，但 host 可配面仍可达（ledgerPayloadBytes 可配低值）——
+缺陷本体非死码；② fail-closed 门禁支柱③（禁静默超账）对齐；③ 独立波不成
+比例。拒绝形细面（throw vs result + follow 两调用点 :377/:514 catch→
+setTerminal 映射）随件落码注册，判据 = 零静默 overshoot + 显性 resourceLimit 面。
+
+### 非阻注记 4
+
+1. §4-1 精化：pinned 淘汰有 onActiveEvict 显式回调（头部注释「禁静默失效」
+   自证）——静默面 = 超帽插账本体，非 pinned 失效；§2-5 断言按此对准。
+2. §2-3 成本形建议：语义腿（注入低帽 + 小 fixture → terminal 非截断）+ 值腿
+   （常量 assert 16/16）两腿拆分，免 ~17 MiB 巨 fixture；「诚实界」意图
+   （零隐式截断）由语义腿承。
+3. A1 显式配置优先序落码钉死：host 显式 `maxProjectionBytes` → 两面同用
+   （follow 不越显式值）；缺省 → follow 16 / replay 4 分面解析。
+4. 措辞精化：行 4「已由 viewport 根修销」——e2e 验收判定单
+   （r-20261127-viewport-rootfix-accept.md，22/22 ×3 全绿）已到件，销面实证
+   成立；本呈批判定不依赖该面（格 1 follow 面独立成立）。
+
+### 验收链对表
+
+§3 = f4 裁定逐项一致（0.1.130 L4 亲署候件不外溢 / pin bump / 锚 #3 / GREEN
+复判 / #277 收口）。轨 A 收口件（22/22×3 + 对照 3/3 145cec04 同值 +
+bun 561/1/0 + 格 5 机判）采认为 #282 侧实证。
+
+> 审视链：呈批书全文读毕 → 六站活码实勘（git 锚定 f71672ba）→ 候选 A 三点
+> 核真 → 必改 1 判据面实勘（queueData 路径 + fixture 界数学）→ §5-2 裁定 →
+> 本节。双门：判词侧批复 PASS（本节）；候 Atlas-reveiw 审计。
 
 ## §6 修订记录
 
@@ -122,3 +202,9 @@ AtlasWeb host 侧 start `options.limits` 传 `{maxProjectionBytes: 16 MiB, …}`
   （T6 replay 非泄漏双向判别新增 / 内存登记 per runtime ≈288 MiB + 可配抬高面
   并记 / T3 边界钉 16 MiB 与 16 MiB+1 精确值）+ §2-5 处置改形（随件仅
   characterization，行为修立项挂账，双门终裁）。本文件正文已按 r1 为准。
+
+- **修订 r2（2026-11-27，Atlas-reveiw 点核回执残余 1 勘正）**：§3 / §5-1
+  「判别单测 1–5」→「1–6（含 §2-6）」——防 gate 按旧口径跳锁非泄漏判别件。
+  另附注登记：引言 9b28206→main 610ecc9 为 cherry 形重落（9b28206 非
+  610ecc9 祖先，内容恒等以 `git diff 9b28206 610ecc9 -- e2e/` 空为直证），
+  按 ancestry 判「已合」的旁证文会误报。审计门点核 PASS @ 本修订前形。
