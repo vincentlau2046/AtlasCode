@@ -68,7 +68,7 @@
 | W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | ✅ **收口** @2026-11-28（全链终态：双门齐→a4552457→gate GATE-PASS→0.1.131 段 L→pin bump 9e2b0aa→锚 #4 实勘 PASS→T6+carrier 复判 GATE-PASS；收口文书 `docs/2026-11-28-wfc1-closure.md`；挂账 ④⑤ 销） |
 | W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @4b5d65e（终版=折入版+审计 §7+判词 §8；⑦ 已改归 W-FC-4 波前） | ✅ **收口** @2026-11-29（全链终态：双门齐→落码 a714dfd→gate GATE-PASS `r-20261129-wfc2-gate.md`（判词侧采认 6b999109）→0.1.4 段 L（双 org 直发 + SRI c9f6489 + pin micro 3391e6b）→锚 #5 实勘 PASS→格 8 载体对账 GATE-PASS `r-20261129-wfc2-carrier-014.md`（pw 8/8 artifact 级）；收口文书 `docs/2026-11-29-wfc2-closure.md`；挂账 ①② 销） |
 | W-FC-3 | `docs/2026-11-29-wfc3-g1-discriminator-ticket.md` @4438e18f（折入版+判词 §8 @0b7ca471） | ✅ **收口** @2026-11-29（双门齐→lane 落盘三件 sha256 回执→Main 代 path-limited 19538207 双远端→四钉独立终判全 PASS（f4+判词侧双源合流）；落件 `user-e2e/atlasweb-g-legs/`；收口文书 `docs/2026-11-29-wfc3-closure.md`；挂账 ⑥ 销） |
-| W-FC-4 | `docs/2026-11-29-wfc4-carrier-regen-ticket.md`（波前根因复现在案） | 排程定（双门在途） |
+| W-FC-4 | `docs/2026-11-29-wfc4-carrier-regen-ticket.md` @28ab3f32（折入版 + 审计点核 PASS @01589353 + 判词 §8 PASS @28ab3f32 = **双门齐**） | 双信号已发（Main 落码格 2 / e2e 判据 §2 四格）→ gate → 0.1.132 段 L |
 | W-FC-5 | 未出（③ 域勘正后 AtlasWeb 域；波前备料：2080 件现值 + 类型分布 + 版本钉判据形） | 排程定（W-FC-4 后） |
 
 挂账池滚动（W-FC-3 收口后 + W-FC-4 波前勘正）：①② 销（W-FC-2 全链终态
