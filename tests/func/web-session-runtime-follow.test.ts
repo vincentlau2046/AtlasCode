@@ -599,9 +599,12 @@ describe('#277 格 1 根修判别单测', () => {
   })
 
   // §2-8（判词侧建议 2 采认，observable 形禁 callback 断言）：注入态
-  // A1+A2 落 / A3 缺（ledger 16 MiB）→ 三事件 16.8 > 16 → r2 issue 时
-  // pinned baseline cursor 被静默淘 → resume cursor0 → resetRequired('unknown')。
-  test('§2-8 A3-缺: ledger 16 MiB 注入态 → r2 后 baseline cursor resume → resetRequired', async () => {
+  // A1+A2 落 / A3 缺（ledger 16 MiB）→ 三事件 16.8 > 16 → r3 issue 时
+  // pinned cursor0 被淘。W-FC-1 修形 2 后淘汰不再静默（防 churn 面）：
+  // 被 pin 的 victim 淘汰即向原订阅显性投递 resetRequired('active cursor
+  // evicted (ledger pressure)')（issue 栈内入队，先于该次 replacement）；
+  // 恢复链不变——resume cursor0 → resetRequired('unknown') → rebase。
+  test('§2-8 A3-缺: ledger 16 MiB 注入态 → pinned victim 淘汰显性 resetRequired（防 churn）+ 恢复链不变', async () => {
     const path = join(dir, 'sess-1.jsonl')
     writePairs(path, PAIRS_A)
     const rt = makeRuntime({
@@ -617,8 +620,16 @@ describe('#277 格 1 根修判别单测', () => {
     appendPair(path, PAIRS_A + 1)
     expect((await nextEvent(iter1)).kind).toBe('replacement')
     appendPair(path, PAIRS_A + 2)
+    // r3 issue（11.2+5.6=16.8 > 16）：pinned cursor0 被淘 → 修形 2 显性事件
+    // （issue 栈内入队，先于本次 replacement）——非静默。
+    const evictReset = await nextEvent(iter1)
+    expect(evictReset.kind).toBe('resetRequired')
+    if (evictReset.kind === 'resetRequired') {
+      expect(evictReset.reason).toBe('active cursor evicted (ledger pressure)')
+      expect(evictReset.generation).toBe(baseline.generation)
+    }
     expect((await nextEvent(iter1)).kind).toBe('replacement')
-    // r2 issue：5.6×3 = 16.8 > 16 → pinned cursor0（及 cursor1）被静默淘
+    // 恢复链不变：resume cursor0（已被淘）→ resetRequired('unknown') → rebase
     const sub2 = await rt.followSession({
       scopeId: 'proj-a',
       sessionId: 'sess-1',
