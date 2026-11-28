@@ -18,7 +18,7 @@
 
 ## 强制分工（谁核什么）
 
-- **e2e**：gate + 生产 lane 跑**同一套**探针（`accept.ts` 共享判据）；`--release-gate` 出 `result.json.releasable`（全绿 PASS 才 releasable）。
+- **e2e**：gate + 生产 lane 跑**同一套**探针；`--release-gate` 出 `result.json.releasable`（全绿 PASS 才 releasable）。gate 对象面按域分形（2026-11-28 勘语，措辞分歧消解）：**TUI/CLI 域版本** = `accept.ts` 共享判据全形（TUI regression 面）；**web 域版本**（触面全在 web-session-runtime/网页消费域、TUI/protocol 零触碰）= 源码级 gate（域判据 + 零 wire 机判 + RED/GREEN 判别件，0.1.126 起十版实践）——载体域归属以波 diff 域论证为准，accept.ts 面非 web 域版本必需；如载体账发现 cli.js 恒等破（TUI bundle 面）则升级补跑 accept.ts 全形。
 - **Main**：发布段核 banner 对齐 + dev stub 打包体取值；四件套绿；版本 bump（一 wave 一版）。
 - **f4**：gate 权 + 版本梯队（一版本一收口）+ 发布 checklist（规则 1–3 + 全绿闭环）+ deferred 显式命名。
 
