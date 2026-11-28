@@ -67,7 +67,7 @@
 ## §3 修形定形（落码归 Main）
 
 - **候选 A（采）**：`prepack` 接线 emitter（格 2 原文）——结构保证，
-  pack/publish 双路径覆盖，零源码触面。**自洽边界显文（审计建议 2）**：
+  pack 全路径 + publish 源形覆盖，零源码触面。**自洽边界显文（审计建议 2）**：
   prepack 自洽 = 制品**内部**自洽，非 vs 源码新鲜性保障——dist 新鲜性
   仍由段 L staging build 时序 + T6 build-vs-rebuild 对账承载
   （prepublishOnly 全建链不变；pack 前不强制 build 为既有面，0.1.130
