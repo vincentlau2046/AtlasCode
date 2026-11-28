@@ -21,33 +21,57 @@
 - **格 1（根因定谳对表）**：Main 0.1.131 段 L 执行记录核——发布命令形
   （pack → publish tgz 直证或等效）与 §0-2 复现机制对表，登记形落判定单
   （不溯及，勘定即可）。
-- **格 2（修形）**：`prepack` 钩子接线 emitter——`"prepack": "bun run
-  build:atlasweb-carrier"`——pack/publish 全路径再生成（prepack 在 pack 与
-  publish 两生命周期均触发）；emitter 既有 fail-closed 语义保持。
+- **格 2（修形，审计必改 1 覆盖链显文形）**：`prepack` 钩子接线
+  emitter——`"prepack": "bun run build:atlasweb-carrier"`；emitter 既有
+  fail-closed 语义保持。**覆盖链显文（防「publish 也会再生成」误读）**：
+  prepack 覆盖 = `npm pack` 全部 + `npm publish` 源形（审计 npm 11.19.1
+  实测：pack 触发 prepack→prepare→postpack 且 **prepublishOnly 不触发**，
+  publish 源形触发 prepublishOnly→prepack→prepare→postpack）；**本仓段 L
+  实发 = `npm publish <tgz>`——tgz 直发形 npm 不执行包内钩子**（发布物已
+  封装，再生成唯一时机 = pack 步）→ 覆盖链 = **所有 tgz 由 `npm pack`
+  产出**（工具钉 npm、scripts on、禁 `--ignore-scripts`；bun pm pack
+  语义未验证不采）→ prepack 再生成烘入；tgz 直发零钩子但物已新鲜；残余
+  路径（工具变更/手工 tar）由格 3 + §2-4 registry 自洽腿 fail-closed
+  兜底（路径无关）。
 - **格 3（判据）**：pack 产物 carrier json 自洽 = `version` == package.json
   版本 ∧ 两 sha256 == dist bundles 实算逐字；0.1.132 段 L 后 registry tgz
   同判（e2e 载体对账新增**自洽腿**，常态化登记）。
-- **格 4（零回归）**：src/packages 零触（修形仅 package.json scripts）→
-  cli/runtime/execution sha 恒等预期（SRI 对照）；0.1.132 tgz Δ 账预注册 =
-  manifest 版本行 + `dist/atlasweb-carrier.json` 一件（0.1.131 对照）。
+- **格 4（零回归，审计必改 2 Δ 账完备形）**：src/packages 零触（修形仅
+  package.json scripts）→ cli/runtime/execution sha 恒等预期（SRI 对照：
+  cli `62bbc6cf…` 恒等 + runtime/execution = SRI v0.1.131 值 `9bbb766a…`/
+  `b14e2ea5…` 恒等）。0.1.132 tgz vs 0.1.131 Δ 账预注册（完备五面）：
+  ① manifest **两处**变 = version 行 + scripts 新增 prepack 行；
+  ② carrier json **三值**变 = version + runtimeSha256 `5710d056→9bbb766a`
+  + executionSha256 `0fd96bfa→b14e2ea5`（product 恒等；即自洽修复观测
+  签名；两 hex 与版本串等长 → json 文件字节数恒等）；
+  ③ fileCount 134 恒等；④ exports 4 subpath 零新增；⑤ unpackedSize Δ =
+  manifest 增量 ~+58B 量级。镜像 name-only 纪律不变。
 - **非目标（防扩格）**：emitter 语义重写（fail-closed 已足）；publish 流程
   文书化约定（人约定非结构保证）；AtlasWeb 侧任何变更；⑧ 重连面。
 
 ## §2 判据格（RED 先行）
 
-1. **RED**：现行码 `npm pack` 产物 json 陈旧（§0-2 已复现 = RED 基线在案，
-   e2e 独立复跑确认即可）；盘面 dist/ json ≠ bundles 实算 sha。
+1. **RED（审计建议 1 谓词形 + 对象树钉）**：判别谓词 = json 存在 ∧
+   `version` == package.json 版本 ∧ 两 sha256 == dist bundles 实算。
+   RED 基线在案（§0-2 复现），独立复跑 admit 两形：① 陈旧形（现值盘面）；
+   ② 缺失形（干净树重建 bundle 后未跑 emitter）。**对象树钉** = 折入版树
+   + dist 状态/重建序列说明随 e2e 判定单登记，防「先跑 emitter 再复跑」
+   基线蒸发（W-FC-2 双树 archive 教训同族）。
 2. **GREEN**：修形后 `npm pack` 产物 json 自洽（格 3 两断言全真）；
    `npm publish --dry-run` 同判。
-3. **载体 Δ**：0.1.132 tgz vs 0.1.131 tgz = 恰 manifest 版本行 + carrier
-   json 一件，零他变（格 4 预注册账）。
+3. **载体 Δ**：0.1.132 tgz vs 0.1.131 tgz = 恰格 4 五面预注册账（manifest
+   两处 + json 三值 + fileCount/exports/unpackedSize 三钉），零他变。
 4. **段 L 自洽腿**：registry 直拉 0.1.132 tgz → json version/sha 与包内
    bundles 实算逐字（格 3 常态化首跑）。
 
 ## §3 修形定形（落码归 Main）
 
 - **候选 A（采）**：`prepack` 接线 emitter（格 2 原文）——结构保证，
-  pack/publish 双路径覆盖，零源码触面。
+  pack/publish 双路径覆盖，零源码触面。**自洽边界显文（审计建议 2）**：
+  prepack 自洽 = 制品**内部**自洽，非 vs 源码新鲜性保障——dist 新鲜性
+  仍由段 L staging build 时序 + T6 build-vs-rebuild 对账承载
+  （prepublishOnly 全建链不变；pack 前不强制 build 为既有面，0.1.130
+  build-publish 时序教训在案）。
 - **候选 B（弃）**：emitter 折入 `build` 族——`bun run build` 单跑可覆盖
   盘面，但 pack 直 tar 路径（不 build 先）仍裸奔；非全路径。
 - **候选 C（弃）**：段 L 流程约定补 emitter 步——人约定非结构保证，
@@ -86,3 +110,35 @@
 RED 确认 + GREEN 判定单（e2e，四格）+ 0.1.132 段 L 全链（bump/tag/直发/
 round-trip/SRI）+ 锚实勘（f4）+ T6 载体对账（Δ 账 + 自洽腿）+ 排程单 §5
 翻转 + 挂账 ⑦ 销项注记。
+
+## §7 审计采记（Atlas-reveiw 回票 @38a89c81，2026-11-29 折入）
+
+- **总判**：方向 PASS + 必改 2 + 建议 2 + 注记 3；活码七面复证全过：
+  ① registry 0.1.131 制品分裂 EXACT（本机 tgz sha256 `ef1a63ba…` = SRI
+  主面逐字；包内 json 陈旧 ∥ `ledger pressure` ×1 在场、134 members）；
+  ② **根因实证**（npm 11.19.1 实测：pack 触发 prepack→prepare→postpack
+  且 prepublishOnly 不触发；publish 源形触发
+  prepublishOnly→prepack→prepare→postpack）；③ 盘面不一致 EXACT（cli
+  `62bbc6cf…` 新增直证）；④ 658f55cd 接线出处逐字（0.1.126 release
+  commit，prepublishOnly 第 5 步）；⑤ 消费面零引用维持；⑥ files=["dist"]
+  + dist/ 在 .gitignore:2（untracked fail-open 成立）+ emitter
+  fail-closed 源码直证；⑦ 仓内工具面 pack/publish 零使用 = prepack
+  fail-closed（无 dist 树 pack 即 exit 1）无在仓消费者可破（零回归
+  佐证新增）。
+- **必改 1（已折 §1 格 2）**：覆盖链显文——prepack 覆盖 = npm pack 全部
+  + publish 源形；**段 L 实发 tgz 直发零钩子** → 覆盖链 = 所有 tgz 由
+  npm pack 产出（工具钉 npm/scripts on/禁 --ignore-scripts；bun pm pack
+  不采）+ registry 自洽腿路径无关兜底。
+- **必改 2（已折 §1 格 4/§2-3）**：Δ 账完备化五面（manifest 两处/json
+  三值〔三值变即自洽修复观测签名，字节数恒等〕/fileCount 134/exports
+  4 subpath/unpackedSize ~+58B）。
+- **建议 1（已折 §2-1）**：RED 谓词形 + 两形 admit（陈旧形/缺失形）+
+  对象树钉（折入版树 + dist 状态/重建序列说明）防基线蒸发（W-FC-2 双树
+  archive 教训同族）。
+- **建议 2（已折 §3 候选 A）**：自洽边界显文——内部自洽 ≠ 源码新鲜性，
+  新鲜性由段 L staging build 时序 + T6 build-vs-rebuild 对账承载。
+- **注记**：① 排程单 §2/§3/§4 拆波扫全——本折入版随件先行（条件形→
+  确定形 + W-FC-5 入并行面/预注记）；② §0 锚 @19538207 = code 面锚
+  （HEAD 前两 docs commits），面等效非阻；③ gate 形归 e2e 判定单记录
+  （0.1.130 先例），自决 6 提案面无异议。
+- 处置留痕毕 → 审计点核候；判词侧另线在途，双门齐才双信号。
