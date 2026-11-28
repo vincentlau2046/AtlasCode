@@ -53,7 +53,12 @@
 
 | 波 | 工单 | 状态 |
 |---|---|---|
-| W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | **已出稿，双门审视/审计候件** |
-| W-FC-2 | 未出（W-FC-1 收口后按 §0 重核出稿） | 排程定 |
+| W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | ✅ **收口** @2026-11-28（全链终态：双门齐→a4552457→gate GATE-PASS→0.1.131 段 L→pin bump 9e2b0aa→锚 #4 实勘 PASS→T6+carrier 复判 GATE-PASS；收口文书 `docs/2026-11-28-wfc1-closure.md`；挂账 ④⑤ 销） |
+| W-FC-2 | 未出（按 §0 重核出稿；波前增 ⑦ 构建面再生核检查项） | **排程定，起波** |
 | W-FC-3 | 未出（可随时出，判别件口径单点） | 排程定 |
 | W-FC-4 | 未出（波前重核 2072 件现值） | 排程定 |
+
+挂账池滚动（W-FC-1 收口后）：④⑤ 销；**⑦ 新增** = AtlasCode 包内
+`dist/atlasweb-carrier.json` 陈旧一代（prepublishOnly 链未再生，零运行时消费，
+0.1.126 fileCount 注记先例同形）→ W-FC-2 波前构建面再生核检查项；①②③⑥
+维持原排程。带内余量 0.1.132–134 三版。
