@@ -58,7 +58,7 @@
 | 波 | 工单 | 状态 |
 |---|---|---|
 | W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | ✅ **收口** @2026-11-28（全链终态：双门齐→a4552457→gate GATE-PASS→0.1.131 段 L→pin bump 9e2b0aa→锚 #4 实勘 PASS→T6+carrier 复判 GATE-PASS；收口文书 `docs/2026-11-28-wfc1-closure.md`；挂账 ④⑤ 销） |
-| W-FC-2 | 未出（按 §0 重核出稿；波前增 ⑦ 构建面再生核检查项） | **排程定，起波** |
+| W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @e4afb2d（§7 审计采记随件；⑦ 已改归 W-FC-4 波前，本行陈注随本 commit 折平） | **工单出稿，审计门关（点核 PASS @e4afb2d/4c06b6ed），判词侧审视在途——双门齐双信号** |
 | W-FC-3 | 未出（可随时出，判别件口径单点） | 排程定 |
 | W-FC-4 | 未出（波前重核 2072 件现值） | 排程定 |
 
