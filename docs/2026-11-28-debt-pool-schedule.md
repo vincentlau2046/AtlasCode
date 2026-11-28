@@ -52,13 +52,16 @@
   链教训在案（readonlyRuntime/limits 依赖链入 126-module 超集，Δ 账预注册
   不得凭直觉，按 0.1.130 段 L 实测法）。
 - **W-FC-4** type-only 修复预期零字节变，若触面据实占版号并走对应重锚链。
+- **W-FC-2 判词侧 §8-4 登记（2026-11-28）**：AtlasCode `server --workspace`
+  （main.tsx:2872）现挂一行 stub（server.ts:1）零消费——server lane 实装时
+  波前须补目录校验定性（归本预注记池，非 W-FC-2 本波）。
 
 ## §5 工单状态
 
 | 波 | 工单 | 状态 |
 |---|---|---|
 | W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | ✅ **收口** @2026-11-28（全链终态：双门齐→a4552457→gate GATE-PASS→0.1.131 段 L→pin bump 9e2b0aa→锚 #4 实勘 PASS→T6+carrier 复判 GATE-PASS；收口文书 `docs/2026-11-28-wfc1-closure.md`；挂账 ④⑤ 销） |
-| W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @e4afb2d（§7 审计采记随件；⑦ 已改归 W-FC-4 波前，本行陈注随本 commit 折平） | **工单出稿，审计门关（点核 PASS @e4afb2d/4c06b6ed），判词侧审视在途——双门齐双信号** |
+| W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @4b5d65e（终版=折入版+审计 §7+判词 §8；⑦ 已改归 W-FC-4 波前） | ✅ **双门齐 → 双信号已发** @2026-11-28（审计门关点核 PASS @e4afb2d/4c06b6ed + 判词 §8 PASS @4b5d65e；Main 落码 + e2e 八格判据在途；载体候 AtlasWeb 0.1.4，AtlasCode 零版号） |
 | W-FC-3 | 未出（可随时出，判别件口径单点） | 排程定 |
 | W-FC-4 | 未出（波前重核 2072 件现值） | 排程定 |
 
