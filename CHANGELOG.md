@@ -4,6 +4,15 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
+## v0.1.130（2026-11-28）
+
+**follow baseline 投影限根修**（#277 格 1 前件；呈批书 `docs/2026-11-27-follow-baseline-rootfix-lockface-brief.md` @92bc4445 双门齐 + gate PASS `user-e2e/reports/r-20261127-gate-0130.md` + 落码 8d32182a）。
+
+- **候选 A 三件同落**（min 门语义锁定，缺一复现同缺陷）：A1 `DEFAULT_MAX_FOLLOW_PROJECTION_BYTES = 16 MiB` 新增（hard 复用 `HARD_MAX_PROJECTION_BYTES`，零新增 hard 上限；fork 接线 readonlyRuntime follow limits 构造点，`DEFAULT_MAX_PROJECTION_BYTES` 本体未动——replay 全量面 4 MiB 帽不变，T6 双向锁判别件在格）；A2 `DEFAULT_MAX_PENDING_BYTES` 8→16 MiB（hard 32 不动）；A3 `DEFAULT_LEDGER_PAYLOAD_BYTES` 16→32 MiB（hard 64 不动）。
+- 效果：长会话（投影序列化 > 旧 4 MiB 单事件有效帽）follow 面不再 `resourceLimit` 终流；超 16 MiB hard 界仍诚实 resourceLimit（零隐式截断语义不变）。显式配置优先序：host 显式 `maxProjectionBytes` 两面同用，缺省 follow 16 / replay 4 分面解析。
+- 判别单测 1–6 + §2-7 常量关系断言 + §2-8 A3 observable 专判（TDD 旧码 RED 7 红先证，gate 复现）；零 wire 契约变化、follow.ts 零触。
+- 载体 Δ 账预估：runtimeSha256 变（limits 常量 + readonlyRuntime 接线入 runtime bundle）；executionSha256 / cli.js 预计恒等（web limits 域不入两 bundle）——L2 实况对账。exports 面零新增 subpath。
+
 ## v0.1.129（2026-11-27）
 
 **headless -p 审批通道 + kernel 审批事件七字段**（审批接线切片·形 A；呈批书 `docs/2026-11-27-0129-approval-wiring-lockface-brief.md` @b5d8cde8 + f4 批复 PASS @af5684e9 + C1-g 补注册 @adb4b497 + 判词侧复证 @d9748886）。
