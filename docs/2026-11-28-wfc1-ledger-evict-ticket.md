@@ -32,7 +32,7 @@
 
 ## §2 判据格（预注册，RED 先行）
 
-1. **T1 oversized 显性拒绝 + 零副作用锁**：直 ledger 层——`issue(binding, payloadBytes > maxPayloadBytes)` → throw `WebSessionError('resourceLimit')`；**拒绝零副作用断言（审计必改 2，锁 throw-before-evict 放置）**：rejected issue 后 `entries.size`/`totalPayloadBytes()` 判前判后恒等 + onActiveEvict 回调零触发——若实现把 throw 置于 `evictForInsert` 之后，本断言 RED（淘汰已发生）；runtime 层——显式配置（ledgerPayloadBytes < 投影字节）→ follow 基线 issue 失败 → `setTerminal(errorEvent('resourceLimit', …))` 终态（不半投影、不静默截断）。RED 基线：现行码同构造 → 静默入账成功（entries 零 + total > cap）。
+1. **T1 oversized 显性拒绝 + 零副作用锁**：直 ledger 层——`issue(binding, payloadBytes > maxPayloadBytes)` → throw `WebSessionError('resourceLimit')`；**拒绝零副作用断言（审计必改 2，锁 throw-before-evict 放置）**：rejected issue 后 `entries.size`/`totalPayloadBytes()` 判前判后恒等 + onActiveEvict 回调零触发——若实现把 throw 置于 `evictForInsert` 之后，本断言 RED（淘汰已发生）；runtime 层——显式配置构造（判词侧精化注记 1：**双 knob 对表显文化**——投影须先过 follow.ts:372-375 预检门，故构造须满足**投影 ∈ (ledgerPayloadBytes, maxProjectionBytes) 带内**，如显式 ledgerPayloadBytes 低值 + 投影 < follow 帽；单 knob 表述有构造歧义面禁用）→ follow 基线 issue 失败 → `setTerminal(errorEvent('resourceLimit', …))` 终态（不半投影、不静默截断）。RED 基线：现行码同构造 → 静默入账成功（entries 零 + total > cap）。
 2. **T2 守恒不变量**：任一成功 issue 返回后 `totalPayloadBytes() ≤ maxPayloadBytes` 且 `entries.size ≤ capacity`（属性化断言，含连续 issue 淘汰序列；显式前置 capacity≥1/max≥0——审计建议 3：runtime 面 validateBoundedInt 已保证，直构造面免踩）。
 3. **T3 pinned 淘汰回调（unit 直 ledger）**：压力构造 → pinned victim 淘汰 → `onActiveEvict(token, binding)` 恰一调用、形参逐字 = victim；未 pin victim 淘汰**零回调**；多 pinned 连淘 → 回调数 = 连淘数。
 4. **T4 接线 runtime observable（跨属主判别钉序，审计必改 1）**：显式小容量配置（capacity=2）双 subscription 压力构造，**序列钉死 A1→B1→B2**（B 的 revision issue 淘他属主 A1 pinned victim——自淘汰路径不证路由面，禁由其满足判据）→ **A 流**收到 `resetRequired` 事件（reason 显性含「active cursor evicted」）非终态；A 以被淘 A1 token resume → 既有 `unknown → issueBaseline` 恢复链生效（resetRequired + 新 baseline）。自淘汰面（A2 淘 A1）如需覆盖另立腿非本格判据。零新 wire 形（机判：carrier 导出面 diff 零新增 kind/code）。
@@ -41,7 +41,7 @@
 
 ## §3 修形定形（落码归 Main，候选对表）
 
-- **修形 1（格 1）——候选 A（采）：ledger 层 throw**。`issue()` 入口（`evictForInsert` 之前——T1 零副作用断言锁此放置）`payloadBytes > maxPayloadBytes → throw WebSessionError('resourceLimit', 'ledger payload exceeds cap (… bytes)')`；`follow.ts:376/:515` 两调用点 catch **须窄**（WebSessionError code=resourceLimit → `setTerminal(errorEvent('resourceLimit', e.message))` 终态；其余 code rethrow——审计硬约束）。**候选 B（弃）：result union**——改 issue 返回契约涉全部调用方 + 两调用点仍需逐点判形，且与 assertLedgerConfig throw 先例异形；弃。
+- **修形 1（格 1）——候选 A（采）：ledger 层 throw**。`issue()` 入口（`evictForInsert` 之前——T1 零副作用断言锁此放置）`payloadBytes > maxPayloadBytes → throw WebSessionError('resourceLimit', 'ledger payload exceeds cap (… bytes)')`；`follow.ts:376/:515` 两调用点 catch **须窄形钉（审计 + 判词侧精化注记 2）**：`instanceof WebSessionError ∧ code === 'resourceLimit'` → `setTerminal(errorEvent('resourceLimit', e.message))` 终态；他类错误/他 code 禁映射 resourceLimit 终态（防吞真缺陷），rethrow 上抛；与既有 follow.ts:332 `e.code` 分态 catch 不混用、不吞并。**候选 B（弃）：result union**——改 issue 返回契约涉全部调用方 + 两调用点仍需逐点判形，且与 assertLedgerConfig throw 先例异形；弃。
 - **修形 2（格 2）——候选 A（采）：构造 router + token→sink 注册**。readonlyRuntime :504 传第 4 参 router；router 查 token→sink 注册表分发；follow.ts issue 时以 token 在手注册 sink、setTerminal/close 注销。**注册表生命周期钉死（审计建议 1）**：分发后即删项（token 一次性消费，防 token→sink 随 revisions 无界增长）+ setTerminal/close 兜底注销。**sink 零 throw 合同（审计建议 2）**：sink 仅 queueData（纯 push 现状写成契约行），router 分发路径不得抛出。**sink 形 = queue-only**：仅 queueData(resetRequired, reason『active cursor evicted (ledger pressure)』)，**禁同步 re-baseline**——onActiveEvict 触发于 `evictForInsert` 内、即 issue() 调用栈中（:61→:136-143 代码级直证），自属主自我淘汰（本 subscription 新 issue 淘掉自己旧 pinned cursor）场景同步 issueBaseline = 重入递归险；恢复走既有 unknown→issueBaseline 链（follow.ts:679）+ 客户端 resetRequired 显性处理（#277 波在产）。**候选 B（弃）：构造闭包直连 worker**——ledger 运行时共享、属主关系仅 follow.ts 知，直连需 worker 先于 ledger 存在，构造序不合；弃。
 - **边界复核**：修形 2 的 sink 注册/注销全在 follow.ts worker 生命周期内（issue/terminal/close），runtime 层零新状态机面；resetRequired 事件形与 follow.ts:293-298 既有形逐字同构（kind/generation/reason 三键），零新 wire 形达成。
 
@@ -92,7 +92,7 @@ RED→GREEN 判定单（e2e，T1-T6）+ 审计 PASS + T4 零新 wire 形机判�
   双门齐后才双信号。
 
 
-## §7 判词侧审视（Atlasweb-F4，2026-11-28 @ master ca97c5c4）
+## §8 判词侧审视（Atlasweb-F4，2026-11-28 @ master ca97c5c4；f4 撞号修整 §7→§8 + 折入采记 @本 commit）
 
 **终判：审视 PASS——格 1/格 2 范围与防扩格红线采认；判据格 T1-T6 预注册面
 全数采认（附精化注记 2 条非阻）；修形 1/2 候选取舍采认（弃 B 理由双方核
@@ -149,3 +149,10 @@ RED→GREEN 判定单（e2e，T1-T6）+ 审计 PASS + T4 零新 wire 形机判�
 > 判据面核 → 修形两候选弃取独立核真（重入险 + 死 sink 面直证）→ 自决 1-6
 > 核 → 排程带状账核 → 本节。双门状态：判词侧 PASS（本节）；候 Atlas-reveiw
 > 审计——双 PASS 后双信号（Main 落码 §3 / e2e 判据 §2）。
+>
+> **f4 折入采记（@本 commit）**：精化注记 1 → T1 双 knob 对表显文化（带内构造
+> 形落格）；精化注记 2 → §3 修形 1 catch 窄形钉（instanceof ∧ code 逐字 +
+> :332 不混用行）。行引对齐注记：pin 实址以 f4 grep 直证 = **:390/:529**（本节
+> 原文 :528 为 ±1 微差，非阻，随本注记对齐不改节文）——§0 勘正行同值。死 sink
+> 面直证（全终止路径汇 setTerminal :247 unpin all → pinned 无死属主）采认为
+> §3 边界复核补强，落码期随 §3 修形 2 一并兑现。
