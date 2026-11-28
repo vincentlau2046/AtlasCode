@@ -122,3 +122,42 @@ lane 落件回执（目录名 + **三件 sha256**——审计建议 2）+ Main �
   （bfrzg962o 随后 exit 0 落地），d125c9aa 现双远端在案。
 - 处置留痕毕 → 审计点核候；判词侧另线在途，双门齐才单信号（按必改 1
   修形后执行链）。
+
+## §8 判词侧审视（Atlasweb-F4，2026-11-29 @折入版 4438e18f）
+
+**审视 PASS——双门齐**（审计方向 PASS 全折 + 本 §8，含折入保真点核 §8-3）。
+
+### §8-1 独立实勘（九锚，判词侧 job/活码直证）
+
+| # | 锚 | 实勘 | 判 |
+|---|---|---|---|
+| 1 | 登记本义 | 绿复判单 `user-e2e/reports/r-20261128-f6page-green-rejudge.md:35` 登记①逐字（「12/40 RED = 虚拟滚动渲染窗 artifact 第三例登记（RED-face 判别专用，GREEN 计测以 g3 union 为准）」+ g3 scrollUnion 40/40 + errFaces=0 权威面同句在案） | ✓ |
+| 2 | 两仓零落码（建议 3 收窄形） | 代码面四扫描零命中：`toHaveCount(40)`/`scrollUnion` × AtlasCode（src+packages+user-e2e+e2e）× AtlasWeb（src+packages+e2e），ts/tsx/mjs/js 面——与折入版「tracked 代码面零代码命中」措辞合 | ✓ |
+| 3 | lane 原物在盘 | `jobs/09264df0/tmp/f6/green/legs/` 8 件实存（g1-g5 + lib.mjs + probe×2）——候选 A 可执行、应急注记不触发（与审计实勘同径独立复核） | ✓ |
+| 4 | 权威口径代码级 | lib.mjs :20 `step = Math.max(400, Math.ceil(el.scrollHeight / 50))` + :24 护栏 200 轮——v3 式逐字（比判定单文字更硬的代码级直证） | ✓ |
+| 5 | 活码钉 1（命令形活值） | AtlasWeb `rev-parse HEAD` = `3391e6bd944e397ad00dec4ab4d6fe99cad7c776` 全 sha 等式 ∧ porcelain 空 ∧ e2e/ 自 610ecc9 零 diff——§2-3 钉 1 判词侧实跑 PASS | ✓ |
+| 6 | AtlasCode 零触面 | `git log 918c53e0..4438e18f -- src packages` 空（波窗零 commit 实跑） | ✓ |
+| 7 | 排程链 | `docs/2026-11-28-debt-pool-schedule.md:14` W-FC-3=挂账⑥ 逐字 + :28 零打包面定性 + :37 并行面 + :65 状态行「未出」= 收口翻转件（§6 在案，非缺陷） | ✓ |
+| 8 | 三例链防悬空（三源全解） | ui-green = `user-e2e/reports/r-20261127-f6page-ui-green.md` §1 项 1-3（:15-17，步长伪影/单点 DOM count/toHaveCount 结构性不可达——三例逐一对应）+ rejudge 登记①（:87-88）+ F6-PAGE 工单 = **AtlasWeb** `docs/2026-11-27-f6page-ui-consumption-ticket.md:84` §8 挂账池 ⑥——引用集实存非悬空 | ✓ |
+| 9 | db0e1a3d 先例实存 | `db0e1a3d` chore(user-e2e)：ownership atlas-user-e2e + Main 代为 path-limited 落盘——必改 1 引证非悬空且逐点对题 | ✓ |
+
+### §8-2 裁定
+
+1. **必改 1 成立**：commit/push 层归 Main（「master 操作归 Main」边界 + db0e1a3d 先例）——原稿自决 2 将「lane 持原物」延展至 commit 层确系越界，修形执行链（lane 落盘+sha256 回执 → Main 代 path-limited commit/push 双远端 → f4 收口）为正形。自决 2 以修形后文本为准（内容 ownership = lane / commit 层 = Main 二分成立）。
+2. **必改 2 成立**：钉命令形可执行——AtlasWeb 钉判词侧已活值跑通（锚 5）；AtlasCode 三钉基线 B = 折入版 4438e18f 形良定，落件 commit 后按命令复跑。
+3. **建议 1-3 成立**：口径核真机械形（`toHaveCount(40)` 命中仅限 RED-face 标注块）/ 三件 sha256 回执 / 「零命中」收窄——收窄形与判词侧扫描方法一致。
+4. **注记 ①②③ 成立**：count ≠ 40 不钉观测值（判别件卫生，artifact 依存计数不得冻结入 README 定义）；排程域述口径统一随收口；push 时点注记与判词侧 fetch 时点观察合（判词侧首试 fetch 时 4438e18f 未达，重试双远端齐）。
+5. **自决 1/3/4/5/6 维持成立**；格 1-4 判据格 + §6 验收件可执行；验收 = 口径核真适当（gate 形不适用定性成立——落件型波）。
+
+### §8-3 折入保真点核（吸收审计「点核候」）
+
+逐项对表：必改 1 → §3 候选 A 修形/§4 信号链/自决 2 修形 ✓；必改 2 → §2-3 钉命令形 ✓；建议 1 → §2-2/§6 ✓；建议 2 → §3/§6 sha256 ✓；建议 3 → §0 措辞收窄 ✓；注记 ① → 格 1 ✓。**折入版与审计回票意图逐项保真，无余项无漂移**——该点核由判词侧独立完成，审计「点核候」自此吸收闭环。
+
+### §8-4 精化注记（2，README 落件时随件）
+
+1. **三例链引用实径钉值**（防歧义强化）：ui-green = AtlasCode `user-e2e/reports/r-20261127-f6page-ui-green.md` **§1 项 1-3**（数字列表非子节头，引用形建议「§1 项 1/2/3」）+ rejudge = `user-e2e/reports/r-20261128-f6page-green-rejudge.md` §6 登记① + F6-PAGE 工单 = **AtlasWeb 仓** `docs/2026-11-27-f6page-ui-consumption-ticket.md` §8 ⑥（AtlasCode docs/ 同名件并存——引用须带仓限定）。
+2. **三钉基线对齐**：lane 落盘时工作树基线 = 4438e18f（判词侧已 ff 至折入版，双远端齐）；Main 代 commit 同基线，`B..<落件 commit>` 区间钉可干净执行。
+
+### §8-5 判定
+
+**双门齐 → §4 信号链候发**：单信号 atlas-user-e2e（落件候选 A，附 §8-4 实径钉值）→ lane 回执（目录名 + 三件 sha256）→ 单信号 Main（代 path-limited commit/push 双远端）→ f4 收口（排程单 §5 翻转 + 销项登记）。零版号定性维持（L4 余量 0.1.132-134 不消耗）。
