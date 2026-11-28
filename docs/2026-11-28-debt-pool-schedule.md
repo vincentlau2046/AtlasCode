@@ -61,14 +61,14 @@
 | 波 | 工单 | 状态 |
 |---|---|---|
 | W-FC-1 | `docs/2026-11-28-wfc1-ledger-evict-ticket.md` | ✅ **收口** @2026-11-28（全链终态：双门齐→a4552457→gate GATE-PASS→0.1.131 段 L→pin bump 9e2b0aa→锚 #4 实勘 PASS→T6+carrier 复判 GATE-PASS；收口文书 `docs/2026-11-28-wfc1-closure.md`；挂账 ④⑤ 销） |
-| W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @4b5d65e（终版=折入版+审计 §7+判词 §8；⑦ 已改归 W-FC-4 波前） | ✅ **双门齐 → 双信号已发** @2026-11-28（审计门关点核 PASS @e4afb2d/4c06b6ed + 判词 §8 PASS @4b5d65e；Main 落码 + e2e 八格判据在途；载体候 AtlasWeb 0.1.4，AtlasCode 零版号） |
+| W-FC-2 | `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` @4b5d65e（终版=折入版+审计 §7+判词 §8；⑦ 已改归 W-FC-4 波前） | ✅ **收口** @2026-11-29（全链终态：双门齐→落码 a714dfd→gate GATE-PASS `r-20261129-wfc2-gate.md`（判词侧采认 6b999109）→0.1.4 段 L（双 org 直发 + SRI c9f6489 + pin micro 3391e6b）→锚 #5 实勘 PASS→格 8 载体对账 GATE-PASS `r-20261129-wfc2-carrier-014.md`（pw 8/8 artifact 级）；收口文书 `docs/2026-11-29-wfc2-closure.md`；挂账 ①② 销） |
 | W-FC-3 | 未出（可随时出，判别件口径单点） | 排程定 |
 | W-FC-4 | 未出（波前重核 2072 件现值） | 排程定 |
 
-挂账池滚动（W-FC-1 收口后；W-FC-2 波前勘正版）：④⑤ 销；**⑦** = AtlasCode 包内
-`dist/atlasweb-carrier.json` 陈旧一代（prepublishOnly 链未再生，零运行时消费，
-0.1.126 fileCount 注记先例同形）→ **W-FC-4 波前**构建面再生核检查项（域勘正
-后改归——W-FC-2 已无 AtlasCode 构建触面）；①②③⑥ 维持原排程；**⑧ 新增**
-（W-FC-2 审计建议 3 落面）= 适配器终态自动重连候选（S1 三态语义变更险面，
-W-FC-2 工单 §5 自决 2 弃采登记）——待独立波另议不排程。带内余量 0.1.132–134
-三版。
+挂账池滚动（W-FC-2 收口后）：①② 销（W-FC-2 全链终态 @2026-11-29）；④⑤ 销
+（W-FC-1）；**⑦** = AtlasCode 包内 `dist/atlasweb-carrier.json` 陈旧一代
+（prepublishOnly 链未再生，零运行时消费，0.1.126 fileCount 注记先例同形）→
+**W-FC-4 波前**构建面再生核检查项（域勘正后改归）；**③**（tsc 清零，W-FC-4）
+**⑥**（g1 判别件口径，W-FC-3 零版号）维持排程；**⑧**（适配器终态自动重连
+候选，S1 三态语义变更险面，W-FC-2 审计建议 3 落面）——待独立波另议不排程。
+带内余量 0.1.132–134 三版。
