@@ -91,3 +91,61 @@ RED→GREEN 判定单（e2e，T1-T6）+ 审计 PASS + T4 零新 wire 形机判�
 - **闸状态**：折入后候点核（Atlas-reveiw）；判词侧（Atlasweb-F4）审视另线，
   双门齐后才双信号。
 
+
+## §7 判词侧审视（Atlasweb-F4，2026-11-28 @ master ca97c5c4）
+
+**终判：审视 PASS——格 1/格 2 范围与防扩格红线采认；判据格 T1-T6 预注册面
+全数采认（附精化注记 2 条非阻）；修形 1/2 候选取舍采认（弃 B 理由双方核
+真成立）；自决 1-6 全部成立；排程单带状账一致性核真。无报裁项，无异见。**
+
+### 活码独立实勘（判词侧直证，@ ca97c5c4）
+
+| 锚 | 实勘 | 结果 |
+|---|---|---|
+| 1 静默 overshoot 本体 | cursorLedger.ts issue(:60-71) 先 `evictForInsert(payloadBytes)` 后插入；while 双界条件（capacity ∨ total+incoming > max）；淘尽后 `if (!victim) break`(:139) → **单 payload > max 时循环不可满足仍照插**——entries 清空 + total > cap 静默态成立 | 成立 |
+| 2 悬空接线 | :57 可选第 4 参 `onActiveEvict?`；readonlyRuntime.ts:504-508 `new CursorLedger(L.ledgerCapacity, L.cursorTtlMs, L.ledgerPayloadBytes)` 三参零传参；类注释契约「全 pinned 淘最旧 pinned 并回调 onActiveEvict（显式 resetRequired，禁静默失效）」= **仅承诺显式 resetRequired，无 re-baseline 承诺**（verify 拒面「resetRequired+新 baseline 或 closed」为「或」形） | 成立 |
+| 3 follow 调用点 | :376（issueBaseline）/ :515（emitReplacement）issue 实址逐字；两处均先过 :372-375 / :511-514 投影预检门；pin :390/:528；setTerminal :247 `unpin` 全部 issuedTokens；resetRequired 事件形 :293-298 三键（kind/generation/reason）；恢复链 :679 `issueBaseline('resume cursor rejected …')` | 成立 |
+| 4 默认不可达 | limits.ts :49 replay 4 MiB / :60 follow 16 MiB / :104-105 ledger 32/64 MiB——默认 32 ≥ follow 16 → oversized 默认面不可达；显式 ledgerPayloadBytes 低值可配置出 | 成立 |
+| 5 拒绝形先例 | errors.ts:23 WebSessionError（code+retryable 位）；cursorLedger.ts assertLedgerConfig throw 形（invalidRequest）同文件先例 | 成立 |
+
+### 裁定
+
+1. **判据格 T1-T6 采认**。T1 双层形（unit throw + runtime 显式配置 → setTerminal）
+   与 RED 基线（现行码静默入账）判别力成立；T2 守恒不变量属性化形；T3 回调
+   三断言（恰一/形参逐字/unpinned 零回调）与活码 pinned-only 回调分支一致；
+   T4 observable 双 subscription + 零新 wire 机判腿齐；T6 Δ 账按 0.1.130 段 L
+   实测法不凭直觉——排程单 §4 预注记同法吻合。
+2. **修形 1 采认（候选 A throw）**。关键设计点核真：throw 落点 = `issue()` 入口
+   **evictForInsert 之前** → 拒绝零副作用（entries/payloadBytes 未触）——T2/T3
+   RED-GREEN 对比面依赖此前提，工单已显文，维持。候选 B（result union）弃理
+   由成立（契约成本 + assertLedgerConfig 同形先例）。
+3. **修形 2 采认（候选 A router + token→sink，queue-only）**。重入递归险独立
+   核真：onActiveEvict 触发于 evictForInsert 内 = issue() 调用栈中，同步
+   re-baseline → 同 ledger 重入 issue + while 活迭代中 entries 突变——险面
+   真实非理论；queueData(:251) 入队 + notify 泵送非递归。**死 sink 面直证为
+   零**：全 worker 终止路径（lease expiry :200 / consumer stopped :843 /
+   closed by caller :857 / 终态 error）均汇 setTerminal → :247 unpin all →
+   pinned token 无死属主 → sink 注册/注销随 issue/unpin 生命周期闭合（§3
+   边界复核补强直证）。候选 B（闭包直连）构造序理由成立。
+4. **自决 1-6 全部成立**（自决 2 契约「或」形读法经类注释原文核真；自决 6
+   与 W-FC-2 边界正确——本波新 resourceLimit 终态与既有流内错形同族，
+   ①UI 区分度面不动 follow 终态语义，并池维持无误）。
+5. **排程单带状账一致性核真**：0.1.130 已执行、带内余量 0.1.131-134 四版 ↔
+   W-FC-1/2/4 载体需求恰好覆盖；0.1.134 后新鲜亲署条款与 §9 收口记录一致；
+   载体串行 + W-FC-3 零版号并行面成立。
+
+### 精化注记（非阻，落码时折入）
+
+1. **T1 runtime 腿构造双条件显文化**：baseline 须先过 :372-375 投影预检门 →
+   显式配置构造须满足 **投影 ∈ (ledgerPayloadBytes, maxProjectionBytes) 带内**
+   （如显式 ledgerPayloadBytes 低值 + 投影 < follow 帽）——单 knob 表述有构造
+   歧义面，判据腿写作时双 knob 对表显文化（RED 基线同构造不变）。
+2. **修形 1 catch 窄形钉**：:376/:515 两调用点 catch 须窄
+   （`instanceof WebSessionError ∧ code === 'resourceLimit'`），他类错误禁映射
+   resourceLimit 终态（防吞真缺陷）；与既有 :332 `e.code` 分态 catch 不混用、
+   不吞并。
+
+> 审视链：排程单+工单全文读毕 → 五锚活码实勘（git 锚定 ca97c5c4）→ T1-T6
+> 判据面核 → 修形两候选弃取独立核真（重入险 + 死 sink 面直证）→ 自决 1-6
+> 核 → 排程带状账核 → 本节。双门状态：判词侧 PASS（本节）；候 Atlas-reveiw
+> 审计——双 PASS 后双信号（Main 落码 §3 / e2e 判据 §2）。
