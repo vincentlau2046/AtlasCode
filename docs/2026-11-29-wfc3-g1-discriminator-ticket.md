@@ -2,7 +2,9 @@
 
 > 出处：排程单 `docs/2026-11-28-debt-pool-schedule.md` §1 W-FC-3 = 挂账池 ⑥
 > （F6-PAGE 绿复判单 `user-e2e/reports/r-20261128-f6page-green-rejudge.md`
-> 登记面①）。执行归 atlas-user-e2e（判别件 = lane 自有仪器）；零版号、零
+> 登记面①）。执行（内容/ownership）归 atlas-user-e2e（判别件 = lane 自有
+> 仪器），commit/push 归 Main 代行（必改 1 修形分层，db0e1a3d 先例）；
+> 零版号、零
 > 载体链、零锚。工单出稿 f4；双门 = Atlasweb-F4 审视 + Atlas-reveiw 审计。
 
 ## §0 活码重核（2026-11-29 @ AtlasWeb `3391e6b` / AtlasCode `1f633dff`）
@@ -49,7 +51,7 @@
 4. **零版号定性**：触面非 `src/packages` → 不入打包面、零锚、零段 L、
    L4 带不消耗（余量 0.1.132-134 三版维持）。
 
-## §3 落件定形（执行归 lane）
+## §3 落件定形（执行〔内容/ownership〕归 lane；commit/push 归 Main 代行）
 
 - **候选 A（采，审计必改 1 执行链修形）**：lane 从其 job tmp 现存腿码修正
   g1 → 工作树落 durable copy `user-e2e/atlasweb-g-legs/` → 回执（附三件
