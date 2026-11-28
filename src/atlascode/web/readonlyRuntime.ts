@@ -23,7 +23,7 @@ import {
 } from '../../engine/session/readonly'
 import type { ReplayPageReader } from '../../engine/session/readonly'
 
-import { CursorLedger } from './cursorLedger'
+import { CursorLedger, type CursorBinding } from './cursorLedger'
 import { WebSessionError } from './errors'
 import { createFollowSubscription, type FollowHandle } from './follow'
 import {
@@ -501,10 +501,20 @@ export function createReadonlySessionRuntime(
   let state: 'idle' | 'started' | 'closed' = 'idle'
   const subscriptions = new Set<FollowSubscription>()
   let activeReads = 0
+  // W-FC-1 修形 2（工单 docs/2026-11-28-wfc1-ledger-evict-ticket.md §3 格 2）：
+  // onActiveEvict 接线。runtime 持 token→sink 注册表，ledger 第 4 参回调 =
+  // get→delete（分发后即删，token 一次性消费防无界增长）→sink。sink 零
+  // throw 合同由 follow 侧 queue-only 实现兑现（queueData 无 throw 面）。
+  const evictSinks = new Map<string, (token: string, binding: CursorBinding) => void>()
   const cursorLedger = new CursorLedger(
     L.ledgerCapacity,
     L.cursorTtlMs,
     L.ledgerPayloadBytes,
+    (token, binding) => {
+      const sink = evictSinks.get(token)
+      evictSinks.delete(token)
+      sink?.(token, binding)
+    },
   )
 
   function assertStarted(operation: string): void {
@@ -935,6 +945,16 @@ export function createReadonlySessionRuntime(
         },
         signal,
         ledger: cursorLedger,
+        // W-FC-1 修形 2：evict sink 注册/注销面（follow 侧 issue 后注册、
+        // setTerminal 兜底注销、分发后即删一次性消费）。
+        evictRouter: {
+          register: (token, sink) => {
+            evictSinks.set(token, sink)
+          },
+          unregister: token => {
+            evictSinks.delete(token)
+          },
+        },
         loadFull: options.engine.loadTranscriptFull,
         buildConversationChain: options.engine.buildConversationChain,
         resolvePath,

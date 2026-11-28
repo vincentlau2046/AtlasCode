@@ -39,7 +39,7 @@ import type {
 import { WebSessionError } from './errors'
 import { TranscriptTooLargeError } from '../../engine/session/readonly'
 import { PARSE_BATCH_SIZE } from './limits'
-import type { CursorLedger } from './cursorLedger'
+import type { CursorLedger, CursorBinding } from './cursorLedger'
 import type { SessionStoreAdapter, TranscriptStat } from './sessionStoreAdapter'
 import {
   computeLeafUuids,
@@ -81,6 +81,19 @@ export interface FollowDeps {
   limits: FollowLimits
   signal?: AbortSignal
   ledger: CursorLedger
+  /**
+   * W-FC-1 修形 2（工单 docs/2026-11-28-wfc1-ledger-evict-ticket.md §3 格 2）：
+   * 活跃 cursor 被账本压力淘汰的 sink 注册/注销面（runtime 持注册表，
+   * ledger onActiveEvict 分发后即删）。issue 成功后注册、setTerminal 兜底
+   * 注销。inline 类型——零新 export（红线：零新 wire 形/export）。
+   */
+  evictRouter: {
+    register: (
+      token: string,
+      sink: (token: string, binding: CursorBinding) => void,
+    ) => void
+    unregister: (token: string) => void
+  }
   /** 引擎 loader 全量基线面（显式 filePath；呈批书 §7.3 钉死形，注入缝）。 */
   loadFull: (filePath: string) => Promise<{
     messages: Map<string, ProjectionSourceMessage>
@@ -244,8 +257,31 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
     terminalRank = rank
     running = false
     disarmLease()
-    for (const t of issuedTokens) ledger.unpin(t)
+    for (const t of issuedTokens) {
+      ledger.unpin(t)
+      // W-FC-1 修形 2：终态兜底注销 evict sink（worker 全部终止路径汇
+      // setTerminal；被淘 token 已由 router 分发后即删，此处幂等）。
+      deps.evictRouter.unregister(t)
+    }
     notify()
+  }
+
+  /**
+   * W-FC-1 修形 2（工单 §3 格 2）：活跃 cursor 被账本压力淘汰 → queue-only
+   * resetRequired（reason 显性；generation 携被淘 cursor 的
+   * binding.generation——同 issueBaseline resetRequired 携旧 generation 的
+   * 语义形）。禁同步 re-baseline：回调在 ledger.issue 栈内触发，重入
+   * issueBaseline 有递归险；恢复走消费端 unknown→issueBaseline 既有链。
+   * sink 零 throw 合同：queueData 无 throw 面（超界内联终态化，纯 push）。
+   */
+  function handleActiveEvict(token: string, binding: CursorBinding): void {
+    void token
+    queueData({
+      ...envelope(deps),
+      kind: 'resetRequired',
+      generation: binding.generation,
+      reason: 'active cursor evicted (ledger pressure)',
+    } as WebSessionEvent)
   }
 
   function queueData(ev: WebSessionEvent): void {
@@ -373,22 +409,36 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
       setTerminal(errorEvent('resourceLimit', `projection exceeds limit (${bytes} bytes)`))
       return false
     }
-    const cursor = ledger.issue(
-      {
-        v: 1,
-        productId: deps.productId,
-        scopeId: deps.scopeId,
-        sessionId: deps.sessionId,
-        baselineId,
-        generation,
-        revision,
-        byteOffset: offset,
-        ino: anchorIno,
-      },
-      bytes,
-    )
+    let cursor: string
+    try {
+      cursor = ledger.issue(
+        {
+          v: 1,
+          productId: deps.productId,
+          scopeId: deps.scopeId,
+          sessionId: deps.sessionId,
+          baselineId,
+          generation,
+          revision,
+          byteOffset: offset,
+          ino: anchorIno,
+        },
+        bytes,
+      )
+    } catch (e) {
+      // W-FC-1 修形 1（工单 §3 格 1）：账本 oversized 显性拒绝 → resourceLimit
+      // 终态（不与上方 TranscriptTooLargeError/既有分态 catch 混用不吞并；
+      // 他类/他 code rethrow）。禁静默吞掉——issueBaseline 返 false。
+      if (e instanceof WebSessionError && e.code === 'resourceLimit') {
+        setTerminal(errorEvent('resourceLimit', e.message))
+        return false
+      }
+      throw e
+    }
     ledger.pin(cursor)
     issuedTokens.push(cursor)
+    // W-FC-1 修形 2：issue 成功即注册 evict sink（一次性消费）。
+    deps.evictRouter.register(cursor, handleActiveEvict)
     queueData({
       ...envelope(deps),
       kind: 'baseline',
@@ -512,22 +562,35 @@ export function createFollowSubscription(deps: FollowDeps): FollowHandle {
       return
     }
     revision++
-    const cursor = ledger.issue(
-      {
-        v: 1,
-        productId: deps.productId,
-        scopeId: deps.scopeId,
-        sessionId: deps.sessionId,
-        baselineId,
-        generation,
-        revision,
-        byteOffset: offset,
-        ino: anchorIno,
-      },
-      bytes,
-    )
+    let cursor: string
+    try {
+      cursor = ledger.issue(
+        {
+          v: 1,
+          productId: deps.productId,
+          scopeId: deps.scopeId,
+          sessionId: deps.sessionId,
+          baselineId,
+          generation,
+          revision,
+          byteOffset: offset,
+          ino: anchorIno,
+        },
+        bytes,
+      )
+    } catch (e) {
+      // W-FC-1 修形 1（工单 §3 格 1）：同 issueBaseline 窄形钉——
+      // instanceof ∧ code==='resourceLimit' → 终态；他类 rethrow。
+      if (e instanceof WebSessionError && e.code === 'resourceLimit') {
+        setTerminal(errorEvent('resourceLimit', e.message))
+        return
+      }
+      throw e
+    }
     ledger.pin(cursor)
     issuedTokens.push(cursor)
+    // W-FC-1 修形 2：issue 成功即注册 evict sink（一次性消费）。
+    deps.evictRouter.register(cursor, handleActiveEvict)
     queueData({
       ...envelope(deps),
       kind: 'replacement',

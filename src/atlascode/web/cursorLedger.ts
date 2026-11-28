@@ -58,6 +58,19 @@ export class CursorLedger {
   ) {}
 
   issue(binding: CursorBinding, payloadBytes = 0): string {
+    // W-FC-1 修形 1（工单 docs/2026-11-28-wfc1-ledger-evict-ticket.md §3，
+    // 候选 A 采）：单 payload 本身超账本字节上界 → 显性拒绝（resourceLimit），
+    // 禁静默 overshoot。落点 = evictForInsert 之前：拒绝零副作用（entries/
+    // payloadBytes 未触、pinned victim 零误淘、onActiveEvict 零误触发——
+    // T1 零副作用断言锁此放置）。守恒不变量（成功 issue 后
+    // totalPayloadBytes() ≤ maxPayloadBytes）由此闭合。先例 = 同文件
+    // assertLedgerConfig throw 形（候选 B result union 弃，工单 §5 自决 1）。
+    if (payloadBytes > this.maxPayloadBytes) {
+      throw new WebSessionError(
+        'resourceLimit',
+        `ledger payload exceeds cap (${payloadBytes} > ${this.maxPayloadBytes} bytes)`,
+      )
+    }
     this.evictForInsert(payloadBytes)
     const token = randomUUID()
     this.entries.set(token, {
