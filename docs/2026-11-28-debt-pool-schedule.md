@@ -42,10 +42,12 @@
 
 ## §4 预注记（开工波前重核项）
 
-- **W-FC-2 ②** 触 CLI 侧 → **cli.js 字节变**（0.1.129 以来连续恒等面首次破）→
-  AtlasWeb gateTruthTable EXPECTED upgrade 前缀重锚链预登记（0.1.130 pin bump
-  同法）；① AtlasWeb UI 半涉 web-code 消费面（error 呈现区分度），届时与
-  AtlasWeb 侧工单协调双链。
+- **W-FC-2**（域勘正版随件改写）：② 触 AtlasWeb web-host launchCli →
+  **AtlasWeb server bundle 变**（非 AtlasCode cli.js——cli 恒等三连面不受扰）；
+  ① 触 web-code 消费/呈现面 → AtlasWeb client bundle 变 → 两修形均入
+  AtlasWeb 0.1.4 候载体 → **锚 #5 重出链**（确定性重建 + f4 实勘，工单
+  `AtlasWeb/docs/2026-11-28-wfc2-failclosed-ticket.md` §2 格 8）；原 CLI 侧
+  预注记（gateTruthTable 重锚链）随域勘正作废。
 - **W-FC-1** 预期 runtime/execution sha 变 + cli.js 恒等（三连）；execution
   链教训在案（readonlyRuntime/limits 依赖链入 126-module 超集，Δ 账预注册
   不得凭直觉，按 0.1.130 段 L 实测法）。
