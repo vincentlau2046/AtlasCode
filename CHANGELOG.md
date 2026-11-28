@@ -4,7 +4,17 @@
 启动时抓取本文件缓存展示，见 `src/tui/utils/releaseNotes.ts`）。
 版本纪律：`0.1.x` 内自主递进，跨 `0.2`/`1.0` 需产品裁定。
 
-## v0.1.130（2026-11-28）
+## v0.1.131（2026-11-28）
+
+**W-FC-1 cursorLedger 行为修**（挂账池 ④⑤；工单 `docs/2026-11-28-wfc1-ledger-evict-ticket.md` @c8d4b156 双门齐——判词侧审视 PASS §8 @c8a42b59 + 审计点核 PASS；gate GATE-PASS `user-e2e/reports/r-20261128-wfc1-gate.md`；落码 a4552457）。
+
+- **修形 1（issue 前置拒绝）**：`CursorLedger.issue()` 入口（`evictForInsert` 之前）单 payload 超账本字节上界 → 显性 throw `WebSessionError('resourceLimit')`（禁静默 overshoot——旧码淘尽仍插入，entries 清空 + total > cap 违约态）；follow.ts issueBaseline/emitReplacement 两调用点窄形 catch（`instanceof ∧ code==='resourceLimit'` → resourceLimit 终态，他类 rethrow 防吞真缺陷）。拒绝零副作用（entries/payloadBytes 未触、pinned victim 零误淘、回调零误触发）。
+- **修形 2（onActiveEvict 接线）**：readonlyRuntime 持 token→sink 注册表（分发后即删一次性消费）传 ledger 第 4 参——类注释契约「pinned 并回调 onActiveEvict（显式 resetRequired，禁静默失效）」兑现；follow 侧 issue 后注册 + setTerminal 兜底注销；sink queue-only resetRequired（reason `active cursor evicted (ledger pressure)`，generation 携被淘 binding 值），禁同步 re-baseline（issue 栈内重入递归险），恢复走既有 unknown→issueBaseline 链。死 sink 面零（全 worker 终止路径汇 setTerminal unpin all）。
+- 判别单测重写：T1 零副作用 throw-before-evict 锁 + ==max 边界 + T2 守恒不变量属性化 + T3 回调三断言 + 三参缺省臂对照（取代 0.1.130 §8-1 挂账旧 characterization——stale-face 销）。
+- 红线：零新 wire 形（kind/code/export 零新增，e2e 机判双树恒等）；容量/LRU 淘序/verify 三因/limits 默认值零变更；client（AtlasWeb web-code）零触碰。
+- 载体 Δ 账预估：runtimeSha256 / executionSha256 变（cursorLedger/follow/readonlyRuntime 三文件入 web-session-runtime 域 + 0.1.130 execution 126-module 超集教训）；**cli.js 预计恒等（0.1.129 起三连，web-session-runtime 域不入 cli bundle）**——L2 实况对账。exports 面零新增 subpath。
+
+
 
 **follow baseline 投影限根修**（#277 格 1 前件；呈批书 `docs/2026-11-27-follow-baseline-rootfix-lockface-brief.md` @92bc4445 双门齐 + gate PASS `user-e2e/reports/r-20261127-gate-0130.md` + 落码 8d32182a）。
 
