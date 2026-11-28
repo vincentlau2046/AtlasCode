@@ -47,7 +47,8 @@
     "build:web-session-runtime": "bun build src/atlascode/web/runtimeEntry.ts --outfile dist/web-session-runtime/index.js --target node --external zod && tsc -p tsconfig.web-session-runtime.json && printf 'export * from \"./atlascode/web/runtimeEntry.js\"\\n' > dist/web-session-runtime/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts",
     "build:web-session-runtime-execution": "bun build src/atlascode/web/entry.ts --outfile dist/web-session-runtime-execution/index.js --target node && tsc -p tsconfig.web-session-runtime-execution.json && printf 'export * from \"./atlascode/web/entry.js\"\\n' > dist/web-session-runtime-execution/index.d.ts && bun scripts/rewrite-web-session-runtime-dts.ts dist/web-session-runtime-execution",
     "build:atlasweb-carrier": "bun scripts/emit-atlasweb-carrier.ts",
-    "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution && bun run build:atlasweb-carrier"
+    "prepublishOnly": "bun run build && bun run build:web-contract && bun run build:web-session-runtime && bun run build:web-session-runtime-execution && bun run build:atlasweb-carrier",
+    "prepack": "bun run build:atlasweb-carrier"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",
