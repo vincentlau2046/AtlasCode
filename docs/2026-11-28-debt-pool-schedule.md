@@ -10,9 +10,9 @@
 | 波 | 内容（挂账池原编号） | 版号候 | 域 |
 |---|---|---|---|
 | **W-FC-1** | ④ ledger 行为修（issue 前置拒绝 oversized 单 payload）+ ⑤ onActiveEvict 悬空接线 | **0.1.131** 候 | AtlasCode web-session-runtime（同文件族：cursorLedger.ts + follow.ts + readonlyRuntime.ts） |
-| **W-FC-2** | ① follow 200 流内错形 UI 区分度 + ② `--workspace` 目录缺席静默接受加固（fail-closed 家族并池，§8-1 判词侧建议） | **0.1.132** 候 | 跨域：① AtlasCode 侧 + AtlasWeb web-code UI 侧（UI 半走 AtlasWeb 波链不占 AtlasCode 版号）；② AtlasCode CLI 侧 |
+| **W-FC-2** | ① follow 200 流内错形 UI 区分度 + ② `--workspace` 目录缺席静默接受加固（fail-closed 家族并池，§8-1 判词侧建议） | **零 AtlasCode 版号**（AtlasWeb 0.1.4 候走 AtlasWeb 发布链） | **域勘正（W-FC-1 收口后波前活码重核定谳，2026-11-28）**：①② 均 AtlasWeb 全域——① web-code 消费侧（controller 单一泛 error 面 + follow 订阅零区分消费）+ ② web-host `launchCli.ts:63-67`（`--workspace` 实址在 AtlasWeb 非 AtlasCode；对照 `--static` httpHost.ts:223 校验先例）；AtlasCode 侧零触碰 → L4 带不消耗 |
 | **W-FC-3** | ⑥ g1 `toHaveCount` RED-face artifact 第三例（判别件口径修正——判别专用断言改 scrollUnion 权威口径落件） | **零版号** | AtlasWeb e2e 判别件（test-side-only） |
-| **W-FC-4** | ③ tsc 清零（2072 件） | **0.1.133/134** 候 | AtlasCode 全仓类型硬化（独立波；carrier 触面开工波前重核） |
+| **W-FC-4** | ③ tsc 清零（2072 件） | **0.1.132 候（若触打包面）；纯 type-only 零字节变则零版号收口** | AtlasCode 全仓类型硬化（独立波；波前重核 2072 件现值 + carrier 触面定性）；**挂账 ⑦ 构建面再生核检查项随域勘正改归本波波前**（原归 W-FC-2，W-FC-2 已无 AtlasCode 构建触面） |
 
 并池依据：④⑤ 同文件族（cursorLedger.ts 一处收口）+ ①② 审视期已裁定同族
 记账（fail-closed 张力面）；⑥ 独立于产品码（纯判别件）；③ 体量大且独立。
@@ -20,18 +20,20 @@
 ## §2 载体账与带内约束（L4 带状授权）
 
 - L4 带状授权（用户 2026-11-28 亲署）= 0.1.130–134 五版发布步预授权；
-  0.1.130 已执行闭环，**带内余量 = 0.1.131–134 四版**。
-- 本排程载体版需求 = 0.1.131（W-FC-1）+ 0.1.132（W-FC-2）+ 0.1.133 或
-  0.1.134（W-FC-4 若触打包面）→ 带内恰好覆盖；**0.1.134 之后若仍有新版需求
-  需新鲜亲署**（带不外溢）。
+  0.1.130/0.1.131 已执行闭环（W-FC-1），**带内余量 = 0.1.132–134 三版**。
+- 本排程 AtlasCode 载体版需求（域勘正后）= 仅 W-FC-4 若触打包面（0.1.132 候）
+  → 带内覆盖充裕；**0.1.134 之后若仍有新版需求需新鲜亲署**（带不外溢）。
+  W-FC-2 走 AtlasWeb 发布链（AtlasWeb 0.1.4 候，段 L 形 + 镜像纪律），不消耗
+  AtlasCode 带。
 - W-FC-3 test-side-only 零打包面 → 锚不重出、不占版号（viewport 根修
   @9b28206 先例：重建核验字节恒等即直证）。
 - 各版仍各自 gate PASS + 双门 + 常规段 L 链（授权非跳门）。
 
 ## §3 波序与并行面
 
-- **串行链（载体互斥）**：W-FC-1 → W-FC-2 → W-FC-4。每版一 gate 一发布链，
-  载体版不并行（0.1.130 段 L 时序教训）。
+- **串行/并行面（域勘正后修订）**：AtlasCode 载体链内串行（每版一 gate 一发布
+  链，0.1.130 段 L 时序教训）；W-FC-2 已勘正为 AtlasWeb 域 → 与 W-FC-4
+  （AtlasCode 候）跨仓无载体互斥，可并行推进（各自工单/双门/发布链独立）。
 - **并行面**：W-FC-3（零版号）可随时插入，不阻串行链。
 - **既定版本自动推进**（用户 2026-10-23 裁定）：各波收口后 f4 直接起下波，
   不逐波要触发；每波开工前波前方案环节照旧（§0 活码重核 @ 届时 master +
