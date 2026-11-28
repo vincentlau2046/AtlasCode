@@ -142,3 +142,44 @@ round-trip/SRI）+ 锚实勘（f4）+ T6 载体对账（Δ 账 + 自洽腿）+ �
   （HEAD 前两 docs commits），面等效非阻；③ gate 形归 e2e 判定单记录
   （0.1.130 先例），自决 6 提案面无异议。
 - 处置留痕毕 → 审计点核候；判词侧另线在途，双门齐才双信号。
+
+## §8 判词侧审视（Atlasweb-F4，2026-11-29 @折入版 01589353）
+
+**审视 PASS——双门齐**（审计方向 PASS 全折 + 本 §8，含折入保真点核 §8-3）。
+
+### §8-1 独立实勘（十锚，判词侧 job/活码直证）
+
+| # | 锚 | 实勘 | 判 |
+|---|---|---|---|
+| 1 | registry 制品分裂直证 | root 冻结件 `atlasharness-atlascode-0.1.131.tgz`（sha256 `ef1a63ba0926e88b…` 起首）判词侧拆验（job `wfc4/un131`）：包内 json = `0.1.130/5710d056/0fd96bfa` 陈旧一代 ∥ `dist/web-session-runtime/index.js` 含 W-FC-1 修形标记 `ledger pressure` ×1 = bundles 新鲜——同制品分裂我方直证 | ✓ |
+| 2 | 根因复现（RED 腿） | **判词侧独立 `npm pack` 复现**（job `wfc4/`，`--pack-destination` 重定向防覆盖冻结件）：产物 tgz 包内 json = 陈旧 `0.1.130` 三值，与盘面 `dist/atlasweb-carrier.json` `diff` = **IDENTICAL**——§0-2 由承认形升级为判词侧直证（emitter 未随 pack 触发） | ✓ |
+| 3 | 盘面内部不一致现值 | dist bundles `9bbb766a…`/`b14e2ea5…`（= SRI v0.1.131 申报值）∥ json `0.1.130/5710d056/0fd96bfa`——判词侧直算 | ✓ |
+| 4 | 接线静态直证 | package.json `:50` prepublishOnly 五步含 `build:atlasweb-carrier` ∥ **零 `prepack` 键**；`:49` `build:atlasweb-carrier` script 在场——候选 A「引用既有 script」前提成立 | ✓ |
+| 5 | 658f55cd 接线出处 | 0.1.126 release commit（prepublishOnly 第 5 步接线）——前期波档核对在案 | ✓ |
+| 6 | emitter 语义 | `scripts/emit-atlasweb-carrier.ts` 头注 §3-1 预注册形（f4 批复 @63fc4615）+ fail-closed（bundle 缺失 exit 1）+ 四字段 `{product, version, runtimeSha256, executionSha256}`——与格 3 判据形逐字合 | ✓ |
+| 7 | 2072 出处域勘正（自决 1） | **AtlasWeb 仓** `docs/2026-11-27-viewport-rootfix-ticket.md:109` = §6-4 AtlasWeb 预验 @020f3cb `2072 pre-existing errors`（TS7026×774/TS5097×396/TS2307×234…）逐字 + `:110` tsc 清零立项——排程原划「AtlasCode 全仓」系转写勘误成立；**AtlasCode 本仓 tsc 判词侧独立实跑 = exit 0（零错）直证** | ✓ |
+| 8 | 排程单拆波随件 | `docs/2026-11-28-debt-pool-schedule.md:15` W-FC-4=⑦ 逐字 + `:16` W-FC-5=③（AtlasWeb 2080 件 @3391e6b）+ `:25` 域勘正后 AtlasCode 载体版需求 = 仅 W-FC-4 | ✓ |
+| 9 | 段 L tgz 直发形（格 2 关键新增事实） | 「`npm publish <tgz>` 直发形 npm 不执行包内钩子」= Main 执行程序面陈述——判词侧以 npm 生命周期语义侧面合（tarball publish 无源树 lifecycle）；**格 1 执行记录对表候 gate 登记**（§8-4-2） | ✓（承认形，格 1 候） |
+| 10 | untracked fail-open 面 | `.gitignore:2` = `dist/`——dist 不入库，prepack 缺位下无 dist 树 pack 产物裸奔面成立（审计 ⑥ 同径） | ✓ |
+
+### §8-2 裁定
+
+1. **必改 1 成立**：覆盖链显文正形——段 L tgz 直发零钩子 → 覆盖链 = 所有 tgz 由 `npm pack` 产出（工具钉 npm/scripts on）+ registry 自洽腿路径无关兜底（fail-closed 家族同形：终判不依赖执行纪律）。
+2. **必改 2 成立**：Δ 账五面完备（manifest 两处/json 三值/fileCount 134/exports 4/unpackedSize ~+58B）；「json 字节数恒等」推断成立（两 hex 等长 + 版本串 0.1.130→0.1.132 等长 → 文件定长）。
+3. **建议 1/2 成立**：RED 谓词形 + 两形 admit + 对象树钉（W-FC-2 双树 archive 教训同族）；自洽边界显文（内部自洽 ≠ 源码新鲜性，新鲜性 = 段 L staging build 时序 + T6 build-vs-rebuild 对账——0.1.130 build-publish 时序教训在案）。
+4. **注记 ①②③ 成立**：排程随件扫全 / §0 锚 @19538207 = code 面锚等效（38a89c81→01589353 零 code 触面，docs only）/ gate 形记录面。
+5. **六自决维持成立**；格 3 判据与 emitter 输出形逐字合（锚 6）；候选 A 前提直证（锚 4）。
+6. **补充裁定（正面副作用显文，登记）**：prepack 接线后 i) 无 dist 树 pack = emitter fail-closed exit 1 → **pack 路径 fail-closed 化**（与审计 ⑦「仓内 pack 零消费者」合向，零回归）；ii) publish 源形 prepublishOnly→prepack 双跑 emitter = 幂等（同输入同输出），非阻。
+
+### §8-3 折入保真点核（吸收审计「点核候」）
+
+逐项对表：必改 1 → §1 格 2 覆盖链显文 ✓；必改 2 → §1 格 4 五面 Δ 账 + §2-3 ✓；建议 1 → §2-1 谓词形/两形 admit/对象树钉 ✓；建议 2 → §3 候选 A 自洽边界显文 ✓；注记 ① → 排程单随件 ✓；注记 ② → §0 锚等效 ✓；注记 ③ → gate 形记录面 ✓。**折入版与审计回票意图逐项保真，无余项无漂移。**
+
+### §8-4 精化注记（2，gate/对账时随件）
+
+1. **载体 Δ 对账基线指名形**（W-FC-2 格 8 方法论自用）：格 4/§2-3 的 Δ 账基线 = **registry 实发 0.1.131 tgz**（判词侧在盘冻结件，sha256 `ef1a63ba…`）；build/ 同版隔离件若入账须注明 post-落码 属性——多代基线先立定性表，防基线歧义。
+2. **格 1 对表范围显文**：执行记录对表对象 = 0.1.131 段 L 实际发布命令形（pack 与 publish 两条命令或等效单命令，含 `--pack-destination`/工作目录），登记形落 gate 判定单即可，不溯及历史版本。
+
+### §8-5 判定
+
+**双门齐 → §4 信号链候发**：双信号（Main 落码格 2 / e2e 判据 §2 四格）→ gate → 0.1.132 段 L（L4 带内第 1 版；授权非跳门）→ 锚实勘（f4，确定性重建含 prepack 再生核）→ T6 载体对账（Δ 账五面 + 格 3 自洽腿）→ 收口（排程 §5 翻转 + 挂账 ⑦ 销项）。W-FC-5 后链维持（工单候出稿照旧双门）。
